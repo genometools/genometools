@@ -34,64 +34,62 @@ typedef struct {
 } FilterArgumentss;
 
 static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   OutputFileInfo *ofi;
   Option *option;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
 
   /* init */
-  op = option_parser_new("[option ...] [GFF3_file ...]", "Filter GFF3 files.",
-                         env);
-  ofi = outputfileinfo_new(env);
+  op = option_parser_new("[option ...] [GFF3_file ...]", "Filter GFF3 files.");
+  ofi = outputfileinfo_new();
 
   /* -seqid */
   option = option_new_string("seqid", "seqid a feature must have to pass the "
                              "filter (excluding comments)", arguments->seqid,
-                             NULL, env);
-  option_parser_add_option(op, option, env);
+                             NULL);
+  option_parser_add_option(op, option);
 
   /* -typefilter */
   option = option_new_string("typefilter", "filter out all features of the "
-                             "given type", arguments->typefilter, NULL, env);
+                             "given type", arguments->typefilter, NULL);
   /* XXX */
   option_is_development_option(option);
-  option_parser_add_option(op, option, env);
+  option_parser_add_option(op, option);
 
   /* -maxgenelength */
   option = option_new_ulong_min("maxgenelength", "the maximum length a gene "
                                 "can have to pass the filter",
-                                &arguments->max_gene_length, UNDEF_ULONG, 1,
-                                env);
-  option_parser_add_option(op, option, env);
+                                &arguments->max_gene_length, UNDEF_ULONG, 1);
+  option_parser_add_option(op, option);
 
   /* -maxgenenum */
   option = option_new_ulong("maxgenenum", "the maximum number of genes which "
                             "can pass the filter", &arguments->max_gene_num,
-                            UNDEF_ULONG, env);
-  option_parser_add_option(op, option, env);
+                            UNDEF_ULONG);
+  option_parser_add_option(op, option);
 
   /* -mingenescore */
   option = option_new_double("mingenescore", "the minimum score a gene must "
                              "have to pass the filter",
-                             &arguments->min_gene_score, UNDEF_DOUBLE, env);
-  option_parser_add_option(op, option, env);
+                             &arguments->min_gene_score, UNDEF_DOUBLE);
+  option_parser_add_option(op, option);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose, env);
-  option_parser_add_option(op, option, env);
+  option = option_new_verbose(&arguments->verbose);
+  option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi, env);
+  outputfile_register_options(op, &arguments->outfp, ofi);
 
   /* parse options */
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
 
   /* free */
-  outputfileinfo_delete(ofi, env);
-  option_parser_delete(op, env);
+  outputfileinfo_delete(ofi);
+  option_parser_delete(op);
 
   return oprval;
 }
@@ -106,7 +104,7 @@ int gt_filter(int argc, const char **argv, Env *env)
   /* option parsing */
   arguments.seqid = str_new();
   arguments.typefilter = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.seqid);

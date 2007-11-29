@@ -75,66 +75,63 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                             int *parsed_args,
                             int argc,
                             const char **argv,
-                            Env *env)
+                            Error *err)
 {
   OptionParser *op;
   Option *option, *queryoption, *scanoption, *sampleoption;
   OPrval oprval;
 
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[options] -ii indexname",
-                         "Perform Substring matches with or without query.",
-                         env);
+                         "Perform Substring matches with or without query.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
   option = option_new_uint_min("l","Specify minimum length",
                                &maxpairsoptions->userdefinedleastlength,
                                (unsigned int) 20,
-                               (unsigned int) 1,env);
-  option_parser_add_option(op, option, env);
+                               (unsigned int) 1);
+  option_parser_add_option(op, option);
 
   sampleoption = option_new_ulong_min("samples","Specify number of samples",
                                  &maxpairsoptions->samples,
                                  (unsigned long) 0,
-                                 (unsigned long) 1,
-                                 env);
-  option_parser_add_option(op, sampleoption, env);
+                                 (unsigned long) 1);
+  option_parser_add_option(op, sampleoption);
 
   scanoption = option_new_bool("scan","scan index",
                                &maxpairsoptions->scanfile,
-                               false,
-                               env);
-  option_parser_add_option(op, scanoption, env);
+                               false);
+  option_parser_add_option(op, scanoption);
 
   option = option_new_string("ii",
                              "Specify input index",
-                             maxpairsoptions->indexname, NULL, env);
-  option_parser_add_option(op, option, env);
+                             maxpairsoptions->indexname, NULL);
+  option_parser_add_option(op, option);
   option_is_mandatory(option);
 
   queryoption = option_new_filenamearray("q",
                              "Specify query files",
-                             maxpairsoptions->queryfiles, env);
-  option_parser_add_option(op, queryoption, env);
+                             maxpairsoptions->queryfiles);
+  option_parser_add_option(op, queryoption);
 
   oprval = option_parser_parse(op, parsed_args, argc, argv,
-                               versionfunc, env);
+                               versionfunc, err);
   if (option_is_set(queryoption))
   {
     if (option_is_set(sampleoption))
     {
-      env_error_set(env,"option -samples cannot be combined with option -q");
+      error_set(err, "option -samples cannot be combined with option -q");
       oprval = OPTIONPARSER_ERROR;
     } else
     {
       if (option_is_set(scanoption))
       {
-        env_error_set(env,"option -scan cannot be combined with option -q");
+        error_set(err, "option -scan cannot be combined with option -q");
         oprval = OPTIONPARSER_ERROR;
       }
     }
   }
-  option_parser_delete(op, env);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -149,7 +146,8 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
 
   maxpairsoptions.indexname = str_new();
   maxpairsoptions.queryfiles = strarray_new();
-  oprval = parse_options(&maxpairsoptions,&parsed_args, argc, argv, env);
+  oprval = parse_options(&maxpairsoptions,&parsed_args, argc, argv,
+                         env_error(env));
   if (oprval == OPTIONPARSER_OK)
   {
     Verboseinfo *verboseinfo = newverboseinfo(false,env);

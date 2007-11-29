@@ -227,46 +227,47 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   op = option_parser_new("indexname",
                          "Load (or build if necessary) BWT index for project"
                          " <indexname> and perform verification of search"
-                         " results.", env);
+                         " results.");
 
   registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
-                             projectName, env);
+                             projectName);
 
   option = option_new_long("minpatlen",
                            "minimum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
-                           "properties", &params->minPatLen, -1, env);
-  option_parser_add_option(op, option, env);
+                           "properties", &params->minPatLen, -1);
+  option_parser_add_option(op, option);
 
   option = option_new_long("maxpatlen",
                            "maximum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
-                           "properties", &params->maxPatLen, -1, env);
-  option_parser_add_option(op, option, env);
+                           "properties", &params->maxPatLen, -1);
+  option_parser_add_option(op, option);
 
   option = option_new_ulong("nsamples",
                             "number of sequences to search for",
-                            &params->numOfSamples, 1000, env);
-  option_parser_add_option(op, option, env);
+                            &params->numOfSamples, 1000);
+  option_parser_add_option(op, option);
 
   option = option_new_bool("chksfxarray",
                            "verify integrity of stored suffix array positions",
-                           &params->checkSuffixArrayValues, false, env);
-  option_parser_add_option(op, option, env);
+                           &params->checkSuffixArrayValues, false);
+  option_parser_add_option(op, option);
 
   option = option_new_ulong("ticks", "print dot after this many symbols"
                             " tested okay", &params->progressInterval,
-                            DEFAULT_PROGRESS_INTERVAL, env);
-  option_parser_add_option(op, option, env);
+                            DEFAULT_PROGRESS_INTERVAL);
+  option_parser_add_option(op, option);
 
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc,
-                                            argv, versionfunc, 1, 1, env);
+                                            argv, versionfunc, 1, 1,
+                                            env_error(env));
   /* compute parameters currently not set from command-line or
    * determined indirectly */
   computePackedIndexDefaults(&params->idx,
                              BWTBaseFeatures & ~BWTProperlySorted, env);
 
-  option_parser_delete(op, env);
+  option_parser_delete(op);
 
   return oprval;
 }

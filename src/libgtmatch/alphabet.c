@@ -467,7 +467,7 @@ void freeAlphabet(Alphabet **alpha,Env *env)
           prog = str_new();
           str_append_cstr_nt(prog, progname,
                              cstr_length_up_to_char(progname, ' '));
-          transpath = gtdata_get_path(str_get(prog), env);
+          transpath = gtdata_get_path(str_get(prog), env_error(env));
           str_delete(prog);
           str_append_cstr(transpath, "/trans/");
           str_append_cstr(transpath, str_get(smapfile));

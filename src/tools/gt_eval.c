@@ -30,53 +30,53 @@ typedef struct {
 } EvalArguments;
 
 static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *option, *ltroption, *ltrdeltaoption;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("reality_file prediction_file ",
                          "Evaluate a gene prediction against a given "
-                         "``reality'' file (both in GFF3).", env);
+                         "``reality'' file (both in GFF3).");
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose, env);
-  option_parser_add_option(op, option, env);
+  option = option_new_verbose(&arguments->verbose);
+  option_parser_add_option(op, option);
 
   /* -exondiff */
   option = option_new_bool("exondiff", "show a diff for the exons",
-                           &arguments->exondiff, false, env);
+                           &arguments->exondiff, false);
   option_is_development_option(option);
-  option_parser_add_option(op, option, env);
+  option_parser_add_option(op, option);
 
   /* -nuc */
   option = option_new_bool("nuc", "evaluate nucleotide level (memory intense)",
-                           &arguments->nuceval, true, env);
-  option_parser_add_option(op, option, env);
+                           &arguments->nuceval, true);
+  option_parser_add_option(op, option);
 
   /* -ltr */
   ltroption = option_new_bool("ltr", "evaluate a LTR retrotransposon "
                               "prediction instead of a gene prediction\n"
                               "(all LTR_retrotransposon elements are "
                               "considered to have an undetermined strand)",
-                              &arguments->evalLTR, false, env);
-  option_parser_add_option(op, ltroption, env);
+                              &arguments->evalLTR, false);
+  option_parser_add_option(op, ltroption);
 
   /* -ltrdelta */
   ltrdeltaoption = option_new_ulong("ltrdelta", "set allowed delta for LTR "
                                     "borders to be considered equal",
-                                    &arguments->LTRdelta, 20, env);
-  option_parser_add_option(op, ltrdeltaoption, env);
+                                    &arguments->LTRdelta, 20);
+  option_parser_add_option(op, ltrdeltaoption);
 
   /* option implications */
-  option_imply(ltrdeltaoption, ltroption, env);
+  option_imply(ltrdeltaoption, ltroption);
 
   /* parse */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 2, 2, env);
-  option_parser_delete(op, env);
+                                            versionfunc, 2, 2, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -90,7 +90,7 @@ int gt_eval(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

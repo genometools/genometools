@@ -27,31 +27,31 @@ typedef struct {
 } MSAparse_arguments;
 
 static OPrval parse_options(int *parsed_args, MSAparse_arguments *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] MSA_file",
                          "Parse multiple sequence alignment (MSA) file and "
-                         "optionally show score(s).", env);
+                         "optionally show score(s).");
   /* -show */
   o = option_new_bool("show", "show the parsed MSA on stdout", &arguments->show,
-                      false, env);
-  option_parser_add_option(op, o, env);
+                      false);
+  option_parser_add_option(op, o);
   /* -consensus */
   o = option_new_bool("consensus", "show consensus distance",
-                      &arguments->consensus, false, env);
-  option_parser_add_option(op, o, env);
+                      &arguments->consensus, false);
+  option_parser_add_option(op, o);
   /* -sumofpairs */
   o = option_new_bool("sumofpairs", "show optimal sum of pairwise scores",
-                      &arguments->sumofpairs, false, env);
-  option_parser_add_option(op, o, env);
+                      &arguments->sumofpairs, false);
+  option_parser_add_option(op, o);
   /* parse */
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 1, env);
-  option_parser_delete(op, env);
+                                            versionfunc, 1, 1, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -63,7 +63,7 @@ int gt_msaparse(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

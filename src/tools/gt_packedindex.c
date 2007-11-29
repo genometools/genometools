@@ -29,7 +29,7 @@ register_packedindextools(Toolbox *packedindex_toolbox, Env *env);
 
 static OPrval
 parse_subtool_options(int *parsed_args, int argc, const char **argv,
-                      Toolbox *index_toolbox, Env *env);
+                      Toolbox *index_toolbox, Error *err);
 
 int
 gt_packedindex(int argc, const char **argv, Env *env)
@@ -44,7 +44,8 @@ gt_packedindex(int argc, const char **argv, Env *env)
   index_toolbox = toolbox_new();
   register_packedindextools(index_toolbox, env);
 
-  switch (parse_subtool_options(&parsed_args, argc, argv, index_toolbox, env))
+  switch (parse_subtool_options(&parsed_args, argc, argv, index_toolbox,
+                                env_error(env)))
   {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
@@ -77,18 +78,18 @@ gt_packedindex(int argc, const char **argv, Env *env)
 
 static OPrval
 parse_subtool_options(int *parsed_args, int argc, const char **argv,
-                      Toolbox *index_toolbox, Env *env)
+                      Toolbox *index_toolbox, Error *err)
 {
   OptionParser *op;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] index_tool [argument ...]",
                          "Call packed index tool with name index_tool and "
-                         "pass argument(s) to it.", env);
+                         "pass argument(s) to it.");
   option_parser_set_comment_func(op, toolbox_show, index_toolbox);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, env);
-  option_parser_delete(op, env);
+                                        versionfunc, 1, err);
+  option_parser_delete(op);
   return oprval;
 }
 

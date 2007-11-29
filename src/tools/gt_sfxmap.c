@@ -43,61 +43,59 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                             int *parsed_args,
                             int argc,
                             const char **argv,
-                            Env *env)
+                            Error *err)
 {
   OptionParser *op;
   Option *optionstream, *optionverbose, *optiontrials,
          *optiontis, *optionsuf, *optiondes, *optionbwt, *optionlcp;
   OPrval oprval;
 
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[options] indexname",
-                         "Map or Stream <indexname> and check consistency.",
-                         env);
+                         "Map or Stream <indexname> and check consistency.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optionstream = option_new_bool("stream","stream the index",
-                                 &sfxmapoptions->usestream,false,env);
-  option_parser_add_option(op, optionstream, env);
+                                 &sfxmapoptions->usestream,false);
+  option_parser_add_option(op, optionstream);
 
   optiontrials = option_new_ulong("trials",
                                   "specify number of sequential trials",
-                                  &sfxmapoptions->trials,0,
-                                  env);
-  option_parser_add_option(op, optiontrials, env);
+                                  &sfxmapoptions->trials,0);
+  option_parser_add_option(op, optiontrials);
 
   optiontis = option_new_bool("tis","input the encoded sequence",
                               &sfxmapoptions->inputtis,
-                              false,env);
-  option_parser_add_option(op, optiontis, env);
+                              false);
+  option_parser_add_option(op, optiontis);
 
   optiondes = option_new_bool("des","input the descriptions",
                               &sfxmapoptions->inputdes,
-                              false,env);
-  option_parser_add_option(op, optiondes, env);
+                              false);
+  option_parser_add_option(op, optiondes);
 
   optionsuf = option_new_bool("suf","input the suffix array",
                               &sfxmapoptions->inputsuf,
-                              false,env);
-  option_parser_add_option(op, optionsuf, env);
+                              false);
+  option_parser_add_option(op, optionsuf);
 
   optionlcp = option_new_bool("lcp","input the lcp-table",
                               &sfxmapoptions->inputlcp,
-                              false,env);
-  option_parser_add_option(op, optionlcp, env);
+                              false);
+  option_parser_add_option(op, optionlcp);
 
   optionbwt = option_new_bool("bwt","input the Burrows-Wheeler Transformation",
                               &sfxmapoptions->inputbwt,
-                              false,env);
-  option_parser_add_option(op, optionbwt, env);
+                              false);
+  option_parser_add_option(op, optionbwt);
 
   optionverbose = option_new_bool("v","be verbose",&sfxmapoptions->verbose,
-                                  false,env);
-  option_parser_add_option(op, optionverbose, env);
+                                  false);
+  option_parser_add_option(op, optionverbose);
 
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, (unsigned int) 1,
-                                            (unsigned int) 2, env);
-  option_parser_delete(op, env);
+                                            (unsigned int) 2, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -114,7 +112,8 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
 
   env_error_check(env);
 
-  switch (parse_options(&sfxmapoptions,&parsed_args, argc, argv, env))
+  switch (parse_options(&sfxmapoptions,&parsed_args, argc, argv,
+                        env_error(env)))
   {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;

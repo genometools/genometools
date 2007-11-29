@@ -98,48 +98,45 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
 
 static OPrval parse_options(Pmatchoptions *pmopt,
                             int *parsed_args,
-                            int argc, const char **argv,Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
 
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[options] -ii indexname",
-                         "Perform pattern matches.",
-                         env);
+                         "Perform pattern matches.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
   option = option_new_ulong("minpl","Specify minimum length of pattern",
                            &pmopt->minpatternlen,
-                           (unsigned long) 20,env);
-  option_parser_add_option(op, option, env);
+                           (unsigned long) 20);
+  option_parser_add_option(op, option);
   option = option_new_ulong("maxpl","Specify maximum length of pattern",
                             &pmopt->maxpatternlen,
-                            (unsigned long) 30,
-                            env);
-  option_parser_add_option(op, option, env);
+                            (unsigned long) 30);
+  option_parser_add_option(op, option);
 
   option = option_new_ulong("samples","Specify number of samples",
                             &pmopt->numofsamples,
-                           (unsigned long) 100000,
-                           env);
-  option_parser_add_option(op, option, env);
+                           (unsigned long) 100000);
+  option_parser_add_option(op, option);
 
   option = option_new_bool("s","Show generated pattern",
                             &pmopt->showpatt,
-                            false,env);
-  option_parser_add_option(op, option, env);
+                            false);
+  option_parser_add_option(op, option);
 
   option = option_new_string("ii",
                              "Specify input index",
-                             pmopt->indexname, NULL, env);
-  option_parser_add_option(op, option, env);
+                             pmopt->indexname, NULL);
+  option_parser_add_option(op, option);
   option_is_mandatory(option);
 
   oprval = option_parser_parse(op, parsed_args, argc, argv,
-                               versionfunc, env);
-  option_parser_delete(op, env);
+                               versionfunc, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -153,7 +150,7 @@ int gt_patternmatch(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   pmopt.indexname = str_new();
-  oprval = parse_options(&pmopt,&parsed_args, argc, argv, env);
+  oprval = parse_options(&pmopt,&parsed_args, argc, argv, env_error(env));
   if (oprval == OPTIONPARSER_OK)
   {
     assert(parsed_args == argc);

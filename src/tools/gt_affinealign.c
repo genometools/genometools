@@ -29,27 +29,27 @@ typedef struct {
 } Costs;
 
 static OPrval parse_options(int *parsed_args, Costs *costs, int argc,
-                            const char **argv, Env *env)
+                            const char **argv, Error *err)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
-                         "sequence in seq_file_2 (affine gap costs).", env);
+                         "sequence in seq_file_2 (affine gap costs).");
   option = option_new_int("rep", "set replacement cost",
-                          &costs->replacement_cost, 1, env);
-  option_parser_add_option(op, option, env);
+                          &costs->replacement_cost, 1);
+  option_parser_add_option(op, option);
   option = option_new_int("gapopen", "set gap opening cost",
-                          &costs->gap_opening_cost, 3, env);
-  option_parser_add_option(op, option, env);
+                          &costs->gap_opening_cost, 3);
+  option_parser_add_option(op, option);
   option = option_new_int("gapext", "set gap extension cost",
-                          &costs->gap_extension_cost, 1, env);
-  option_parser_add_option(op, option, env);
+                          &costs->gap_extension_cost, 1);
+  option_parser_add_option(op, option);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 2, 2, env);
-  option_parser_delete(op, env);
+                                            versionfunc, 2, 2, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -63,7 +63,7 @@ int gt_affinealign(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &costs, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &costs, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

@@ -18,14 +18,13 @@
 #ifndef OUTPUTFILE_H
 #define OUTPUTFILE_H
 
-#include "libgtcore/env.h"
 #include "libgtcore/option.h"
 
 typedef struct OutputFileInfo OutputFileInfo;
 
-OutputFileInfo* outputfileinfo_new(Env*);
+OutputFileInfo* outputfileinfo_new(void);
 void            outputfile_register_options(OptionParser*, GenFile **outfp,
-                                            OutputFileInfo*, Env*);
-void            outputfileinfo_delete(OutputFileInfo*, Env*);
+                                            OutputFileInfo*);
+void            outputfileinfo_delete(OutputFileInfo*);
 
 #endif

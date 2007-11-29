@@ -20,23 +20,22 @@
 #include "libgtmatch/test-trieins.pr"
 
 static OPrval parse_options(bool *onlyins,int *parsed_args,
-                            int argc, const char **argv,Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
 
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[options] indexname",
-                         "Perfrom trie insertions and check consistency.",
-                         env);
+                         "Perform trie insertions and check consistency.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option= option_new_bool("ins","perform only insertions",onlyins,false,env);
-  option_parser_add_option(op, option, env);
+  option= option_new_bool("ins","perform only insertions",onlyins,false);
+  option_parser_add_option(op, option);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, (unsigned int) 1,
-                                            (unsigned int) 2, env);
-  option_parser_delete(op, env);
+                                            (unsigned int) 2, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -49,7 +48,7 @@ int gt_trieins(int argc, const char **argv, Env *env)
 
   env_error_check(env);
 
-  switch (parse_options(&onlyins,&parsed_args, argc, argv, env)) {
+  switch (parse_options(&onlyins,&parsed_args, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

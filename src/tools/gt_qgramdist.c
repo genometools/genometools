@@ -24,20 +24,20 @@
 #include "libgtext/qgramdist.h"
 
 static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
-                            const char **argv, Env *env)
+                            const char **argv, Error *err)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Compute q-gram distance for each sequence "
-                         "combination.", env);
-  o = option_new_uint_min("q", "set q", q, 3, 1, env);
-  option_parser_add_option(op, o, env);
+                         "combination.");
+  o = option_new_uint_min("q", "set q", q, 3, 1);
+  option_parser_add_option(op, o);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 2, 2, env);
-  option_parser_delete(op, env);
+                                            versionfunc, 2, 2, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -51,7 +51,7 @@ int gt_qgramdist(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &q, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &q, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

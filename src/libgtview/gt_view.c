@@ -54,67 +54,63 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   env_error_check(env);
 
   /* init */
-  op = option_parser_new("[option ...] PNG_file [GFF3_file ...]",
-                         "Create PNG representations of GFF3 annotation files.",
-                         env);
+  op = option_parser_new("[option ...] PNG_file [GFF3_file ...]", "Create PNG "
+                         "representations of GFF3 annotation files.");
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose, env);
-  option_parser_add_option(op, option, env);
+  option = option_new_verbose(&arguments->verbose);
+  option_parser_add_option(op, option);
 
   /* -pipe */
   option = option_new_bool("pipe", "use pipe mode (i.e., show all gff3 "
-                           "features on stdout)", &arguments->pipe, false, env);
-  option_parser_add_option(op, option, env);
+                           "features on stdout)", &arguments->pipe, false);
+  option_parser_add_option(op, option);
 
   /* -force */
   option = option_new_bool("force", "force writing to output file", &force,
-                           false, env);
-  option_parser_add_option(op, option, env);
+                           false);
+  option_parser_add_option(op, option);
 
   /* -seqid */
   option = option_new_string("seqid", "sequence region identifier\n"
                                       "default: first one in file",
-                            arguments->seqid,
-                            NULL, env);
-  option_parser_add_option(op, option, env);
+                            arguments->seqid, NULL);
+  option_parser_add_option(op, option);
   option_hide_default(option);
 
   /* -start */
   option = option_new_ulong_min("start", "start position\n"
                                          "default: first region start",
-                            &arguments->start,
-                            UNDEF_ULONG, 1, env);
-  option_parser_add_option(op, option, env);
+                            &arguments->start, UNDEF_ULONG, 1);
+  option_parser_add_option(op, option);
   option_hide_default(option);
 
   /* -end */
   option2 = option_new_ulong("end", "end position\ndefault: last region end",
-                            &arguments->end,
-                            UNDEF_ULONG, env);
-  option_parser_add_option(op, option2, env);
+                            &arguments->end, UNDEF_ULONG);
+  option_parser_add_option(op, option2);
   /* -start and -end must be given together */
-  option_imply(option, option2 ,env);
-  option_imply(option2, option ,env);
+  option_imply(option, option2);
+  option_imply(option2, option);
   option_hide_default(option2);
 
   /* -width */
   option = option_new_uint_min("width", "target image width", &arguments->width,
-                               DEFAULT_RENDER_WIDTH, 1, env);
-  option_parser_add_option(op, option, env);
+                               DEFAULT_RENDER_WIDTH, 1);
+  option_parser_add_option(op, option);
 
   /* -addintrons */
   option = option_new_bool("addintrons", "add intron features between "
                            "existing exon features (before drawing)",
-                           &arguments->addintrons, false, env);
-  option_parser_add_option(op, option, env);
+                           &arguments->addintrons, false);
+  option_parser_add_option(op, option);
 
   /* set contact mailaddress */
   option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
 
   /* parse options */
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, env);
+                                        versionfunc, 1, env_error(env));
 
   if (oprval == OPTIONPARSER_OK && !force && file_exists(argv[*parsed_args])) {
     env_error_set(env, "file \"%s\" exists already. use option -force to "
@@ -123,7 +119,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   }
 
   /* free */
-  option_parser_delete(op, env);
+  option_parser_delete(op);
 
   return oprval;
 }
@@ -253,7 +249,7 @@ int gt_view(int argc, const char **argv, Env *env)
     /* find and load configuration file */
     prog = str_new();
     str_append_cstr_nt(prog, argv[0], cstr_length_up_to_char(argv[0], ' '));
-    config_file = gtdata_get_path(str_get(prog), env);
+    config_file = gtdata_get_path(str_get(prog), env_error(env));
     str_delete(prog);
     str_append_cstr(config_file, "/config/view.lua");
     cfg = config_new(arguments.verbose, env);

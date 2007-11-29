@@ -27,25 +27,25 @@ typedef struct {
 } MutateArguments;
 
 static OPrval parse_options(int *parsed_args, MutateArguments *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] sequence_file [...]",
                          "Mutate the sequences of the given sequence_file(s) "
-                         "and show them on stdout.", env);
+                         "and show them on stdout.");
   /* -rate */
   o = option_new_uint_max("rate", "set the mutation rate", &arguments->rate, 1,
-                          100, env);
-  option_parser_add_option(op, o, env);
+                          100);
+  option_parser_add_option(op, o);
 
   /* parse */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, env);
-  option_parser_delete(op, env);
+                                        versionfunc, 1, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -59,7 +59,7 @@ int gt_mutate(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

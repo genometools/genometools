@@ -32,27 +32,27 @@ typedef struct {
 } CDS_arguments;
 
 static OPrval parse_options(int *parsed_args, CDS_arguments *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] GFF3_file", "Add CDS features to exon "
-                         "features given in GFF3_file.", env);
+                         "features given in GFF3_file.");
 
   /* -seqfile and -regionmapping */
-  seqid2file_options(op, arguments->seqfile, arguments->regionmapping, env);
+  seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose, env);
-  option_parser_add_option(op, option, env);
+  option = option_new_verbose(&arguments->verbose);
+  option_parser_add_option(op, option);
 
   /* parse */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 1, env);
-  option_parser_delete(op, env);
+                                            versionfunc, 1, 1, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -69,7 +69,7 @@ int gt_cds(int argc, const char **argv, Env *env)
   arguments.seqfile = str_new();
   arguments.regionmapping = str_new();
 
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.regionmapping);

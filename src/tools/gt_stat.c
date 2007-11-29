@@ -30,52 +30,52 @@ typedef struct {
 } StatArguments;
 
 static OPrval parse_options(int *parsed_args, StatArguments *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Show statistics about features contained in GFF3 "
-                         "files.", env);
+                         "files.");
 
   /* -genelengthdistri */
   option = option_new_bool("genelengthdistri",
                            "show gene length distribution",
-                           &arguments->gene_length_distribution, false, env);
-  option_parser_add_option(op, option, env);
+                           &arguments->gene_length_distribution, false);
+  option_parser_add_option(op, option);
 
   /* -genescoresdistri */
   option = option_new_bool("genescoredistri", "show gene score distribution",
-                           &arguments->gene_score_distribution, false, env);
-  option_parser_add_option(op, option, env);
+                           &arguments->gene_score_distribution, false);
+  option_parser_add_option(op, option);
 
   /* -exonlengthdistri */
   option = option_new_bool("exonlengthdistri",
                            "show exon length distribution",
-                           &arguments->exon_length_distribution, false, env);
-  option_parser_add_option(op, option, env);
+                           &arguments->exon_length_distribution, false);
+  option_parser_add_option(op, option);
 
   /* -exonnumberdistri */
   option = option_new_bool("exonnumberdistri",
                            "show exon number distribution",
-                           &arguments->exon_number_distribution, false, env);
-  option_parser_add_option(op, option, env);
+                           &arguments->exon_number_distribution, false);
+  option_parser_add_option(op, option);
 
   /* -intronlengthdistri */
   option = option_new_bool("intronlengthdistri",
                            "show intron length distribution",
-                           &arguments->intron_length_distribution, false, env);
-  option_parser_add_option(op, option, env);
+                           &arguments->intron_length_distribution, false);
+  option_parser_add_option(op, option);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose, env);
-  option_parser_add_option(op, option, env);
+  option = option_new_verbose(&arguments->verbose);
+  option_parser_add_option(op, option);
 
   /* parse */
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
-  option_parser_delete(op, env);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -88,7 +88,7 @@ int gt_stat(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

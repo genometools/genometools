@@ -28,7 +28,7 @@
 #include "libgtcore/splitter.h"
 #include "libgtext/gtdatahelp.h"
 
-int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
+int gtdata_show_help(const char *progname, void *unused, Error *err)
 {
   Splitter *splitter;
   Str *doc_file;
@@ -36,13 +36,13 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
   char *prog, *bn;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(err);
   assert(progname);
 
   prog = cstr_dup(progname); /* create modifiable copy for splitter */
   splitter = splitter_new();
   splitter_split(splitter, prog, strlen(prog), ' ');
-  doc_file = gtdata_get_path(splitter_get_token(splitter, 0), env);
+  doc_file = gtdata_get_path(splitter_get_token(splitter, 0), err);
   if (!doc_file)
     had_err = -1;
 
@@ -51,7 +51,7 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
     /* create Lua & push gtdata_doc_dir to Lua */
     L = luaL_newstate();
     if (!L) {
-      env_error_set(env, "out of memory (cannot create new lua state)");
+      error_set(err, "out of memory (cannot create new lua state)");
       had_err = -1;
     }
   }
@@ -63,7 +63,7 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
     /* finish creating doc_file */
     if (splitter_size(splitter) == 1) {
       /* special case for `gt` */
-      bn = getbasename(progname, env);
+      bn = getbasename(progname);
       str_append_cstr(doc_file, bn);
       ma_free(bn);
     }
@@ -76,7 +76,7 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
     str_append_cstr(doc_file, ".lua");
     /* execute doc_file */
     if (luaL_loadfile(L, str_get(doc_file)) || lua_pcall(L, 0, 0, 0)) {
-      env_error_set(env, "cannot run doc file: %s", lua_tostring(L, -1));
+      error_set(err, "cannot run doc file: %s", lua_tostring(L, -1));
       had_err = -1;
     }
   }

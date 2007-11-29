@@ -63,7 +63,7 @@ unsigned long file_number_of_lines(const char *path)
   return number_of_lines;
 }
 
-void file_dirname(Str *path, const char *file, Env *env)
+void file_dirname(Str *path, const char *file, Error *err)
 {
   long i;
   str_reset(path);
@@ -75,18 +75,18 @@ void file_dirname(Str *path, const char *file, Env *env)
     str_append_cstr_nt(path, file, i);
 }
 
-int file_find_in_path(Str *path, const char *file, Env *env)
+int file_find_in_path(Str *path, const char *file, Error *err)
 {
   char *pathvariable, *pathcomponent = NULL;
   Splitter *splitter = NULL;
   unsigned long i;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(err);
   assert(file);
 
   /* check if 'file' has dirname */
-  file_dirname(path, file, env);
+  file_dirname(path, file, err);
   if (str_length(path))
     return had_err;
   /* 'file' has no dirname -> scan $PATH */
@@ -94,7 +94,7 @@ int file_find_in_path(Str *path, const char *file, Env *env)
   if (pathvariable)
     pathvariable = cstr_dup(pathvariable); /* make writeable copy */
   else {
-    env_error_set(env, "environment variable $PATH is not defined");
+    error_set(err, "environment variable $PATH is not defined");
     had_err = -1;
   }
 

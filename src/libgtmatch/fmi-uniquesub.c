@@ -139,40 +139,41 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   flagsoutputoption = strarray_new();
 
   op = option_parser_new("[option ...] -fm fmindex -query queryfile [...]",
-                         "Compute length of minumum unique prefixes.", env);
+                         "Compute length of minumum unique prefixes.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optionmin = option_new_ulong_min("min",
                                    "only output length "
                                    "if >= given minimum length",
                                    &uniquesubcallinfo->minlength.
                                           valueunsignedlong,
-                                   0,(unsigned long) 1,env);
-  option_parser_add_option(op, optionmin, env);
+                                   0,(unsigned long) 1);
+  option_parser_add_option(op, optionmin);
 
   optionmax = option_new_ulong_min("max",
                                    "only output length "
                                    "if <= given maximum length",
                                    &uniquesubcallinfo->maxlength.
                                           valueunsignedlong,
-                                   0,(unsigned long) 1,env);
-  option_parser_add_option(op, optionmax, env);
+                                   0,(unsigned long) 1);
+  option_parser_add_option(op, optionmax);
 
   optionoutput = option_new_stringarray("output",
                           "set output flags (sequence, querypos)",
-                          flagsoutputoption,env);
-  option_parser_add_option(op, optionoutput, env);
+                          flagsoutputoption);
+  option_parser_add_option(op, optionoutput);
 
   optionfmindex = option_new_string("fmi", "specify fmindex",
-                                    uniquesubcallinfo->fmindexname,NULL,env);
+                                    uniquesubcallinfo->fmindexname,NULL);
   option_is_mandatory(optionfmindex);
-  option_parser_add_option(op, optionfmindex, env);
+  option_parser_add_option(op, optionfmindex);
 
   optionquery = option_new_filenamearray("query", "specify queryfiles",
-                                         uniquesubcallinfo->queryfilenames,env);
+                                         uniquesubcallinfo->queryfilenames);
   option_is_mandatory(optionquery);
-  option_parser_add_option(op, optionquery, env);
+  option_parser_add_option(op, optionquery);
 
-  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc, env);
+  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc,
+                               env_error(env));
   if (oprval == OPTIONPARSER_OK)
   {
     if (option_is_set(optionmin))
@@ -229,7 +230,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
     }
   }
   strarray_delete(flagsoutputoption);
-  option_parser_delete(op, env);
+  option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && parsed_args != argc)
   {
     env_error_set(env,"superfluous program parameters");

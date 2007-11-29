@@ -26,22 +26,21 @@
 #define DEFAULT_INDELSCORE  -3
 
 static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
-                            const char **argv, Env *env)
+                            const char **argv, Error *err)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] scorematrix seq_file_1 seq_file_2",
                          "Locally align each sequence in seq_file_1 "
-                         "with each sequence in seq_file_2.", env);
+                         "with each sequence in seq_file_2.");
   o = option_new_int("indelscore", "set the score used for "
-                     "insertions/deletions", indelscore, DEFAULT_INDELSCORE,
-                     env);
-  option_parser_add_option(op, o, env);
+                     "insertions/deletions", indelscore, DEFAULT_INDELSCORE);
+  option_parser_add_option(op, o);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 3, 3, env);
-  option_parser_delete(op, env);
+                                            versionfunc, 3, 3, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -56,7 +55,8 @@ int gt_swalign(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &indelscore, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &indelscore, argc, argv,
+                        env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

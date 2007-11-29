@@ -38,7 +38,7 @@ struct chkIndexOptions
 
 static OPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
-                     struct chkIndexOptions *param, Env *env);
+                     struct chkIndexOptions *param, Error *err);
 
 extern int
 gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
@@ -50,7 +50,8 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
   int had_err = 0;
   env_error_check(env);
 
-  switch (parseChkIndexOptions(&parsedArgs, argc, argv, &options, env))
+  switch (parseChkIndexOptions(&parsedArgs, argc, argv, &options,
+                               env_error(env)))
   {
     case OPTIONPARSER_OK:
       break;
@@ -96,38 +97,35 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
 
 static OPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
-                     struct chkIndexOptions *param,
-                     Env *env)
+                     struct chkIndexOptions *param, Error *err)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
   bool extRankCheck;
 
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("indexname",
                          "Map <indexname> block composition index"
-                         "and bwt and check index integrity.",
-                         env);
+                         "and bwt and check index integrity.");
   option = option_new_ulong("skip", "number of symbols to skip",
-                            &param->skipCount, 0,
-                            env);
-  option_parser_add_option(op, option, env);
+                            &param->skipCount, 0);
+  option_parser_add_option(op, option);
 
   option = option_new_ulong("ticks", "print dot after this many symbols"
                             " tested okay", &param->progressInterval,
-                            DEFAULT_PROGRESS_INTERVAL, env);
-  option_parser_add_option(op, option, env);
+                            DEFAULT_PROGRESS_INTERVAL);
+  option_parser_add_option(op, option);
 
   option = option_new_bool("ext-rank-check",
                            "do additional checks of rank query results",
-                           &extRankCheck, false, env);
-  option_parser_add_option(op, option, env);
+                           &extRankCheck, false);
+  option_parser_add_option(op, option);
 
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc,
                                             (const char **)argv,
-                                            versionfunc, 1, 1, env);
-  option_parser_delete(op, env);
+                                            versionfunc, 1, 1, err);
+  option_parser_delete(op);
   param->checkFlags = EIS_VERIFY_BASIC
     | (extRankCheck?EIS_VERIFY_EXT_RANK:0);
   return oprval;

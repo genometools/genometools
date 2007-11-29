@@ -66,32 +66,33 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   mkfmcallinfo->outfmindex = str_new();
   mkfmcallinfo->leveldesc = str_new();
   op = option_parser_new("[option ...] -ii indexfile [...]",
-                         "Compute FMindex.", env);
+                         "Compute FMindex.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optionfmout = option_new_string("fmout",
                              "specify name of FMindex to be generated\n"
                              "(mandatory if more than one input index "
                              "is specified)",
-                             mkfmcallinfo->outfmindex, NULL, env);
-  option_parser_add_option(op, optionfmout, env);
+                             mkfmcallinfo->outfmindex, NULL);
+  option_parser_add_option(op, optionfmout);
 
   option = option_new_filenamearray("ii", "specify indices to be used",
-                                    mkfmcallinfo->indexnametab,env);
+                                    mkfmcallinfo->indexnametab);
   option_is_mandatory(option);
-  option_parser_add_option(op, option, env);
+  option_parser_add_option(op, option);
 
   option = option_new_string("size",
                              "specify size (tiny, small, medium, big)",
-                             mkfmcallinfo->leveldesc, "medium", env);
-  option_parser_add_option(op, option, env);
+                             mkfmcallinfo->leveldesc, "medium");
+  option_parser_add_option(op, option);
 
   option = option_new_bool("noindexpos",
                            "store no index positions (hence the positions of\n"
                            "matches in the index cannot be retrieved)",
-                           &mkfmcallinfo->noindexpos,false,env);
-  option_parser_add_option(op, option, env);
+                           &mkfmcallinfo->noindexpos,false);
+  option_parser_add_option(op, option);
 
-  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc, env);
+  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc,
+                               env_error(env));
   if (oprval == OPTIONPARSER_OK)
   {
     if (!option_is_set(optionfmout))
@@ -105,14 +106,13 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
       {
         char *basenameptr;
 
-        basenameptr = getbasename(strarray_get(mkfmcallinfo->indexnametab,0),
-                                  env);
+        basenameptr = getbasename(strarray_get(mkfmcallinfo->indexnametab,0));
         str_set(mkfmcallinfo->outfmindex,basenameptr);
         ma_free(basenameptr);
       }
     }
   }
-  option_parser_delete(op, env);
+  option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && parsed_args != argc)
   {
     env_error_set(env,"superfluous program parameters");

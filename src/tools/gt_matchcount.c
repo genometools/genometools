@@ -21,17 +21,17 @@
 #include "libgtext/matchcount.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Env *env)
+                            Error *err)
 {
   OptionParser *op;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] k seq1 seq2",
                          "Compute the match-count for each substring pair of "
-                         "length k from seq1 and seq2.", env);
+                         "length k from seq1 and seq2.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 3, 3, env);
-  option_parser_delete(op, env);
+                                            versionfunc, 3, 3, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -47,7 +47,7 @@ int gt_matchcount(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env)) {
+  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

@@ -41,7 +41,7 @@ struct bwtOptions
 extern void
 registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
                            int defaultOptimizationFlags,
-                           const Str *projectName, Env *env);
+                           const Str *projectName);
 
 extern void
 computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles,

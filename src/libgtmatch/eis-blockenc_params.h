@@ -16,12 +16,10 @@
 #ifndef EIS_BLOCKENC_PARAMS_H
 #define EIS_BLOCKENC_PARAMS_H
 
-#include "libgtcore/env.h"
 #include "libgtcore/option.h"
 #include "libgtmatch/eis-encidxseq.h"
 
 extern void
-registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput,
-                        Env *env);
+registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput);
 
 #endif

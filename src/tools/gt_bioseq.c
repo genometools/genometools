@@ -31,70 +31,68 @@ typedef struct {
 } BioseqArguments;
 
 static OPrval parse_options(int *parsed_args, BioseqArguments *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   Option *option, *option_showfasta, *option_showseqnum, *option_width,
          *option_stat;
   OptionParser *op;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] sequence_file [...]",
                          "Construct the Biosequence files for the given "
-                         "sequence_file(s) (if necessary).", env);
+                         "sequence_file(s) (if necessary).");
 
   /* -recreate */
   option = option_new_bool("recreate", "recreate Biosequence files, even if "
-                           "they exist already", &arguments->recreate, false,
-                           env);
-  option_parser_add_option(op, option, env);
+                           "they exist already", &arguments->recreate, false);
+  option_parser_add_option(op, option);
 
   /* -showfasta */
   option_showfasta = option_new_bool("showfasta", "show sequences on stdout "
                                      "(in fasta format)", &arguments->showfasta,
-                                     false, env);
-  option_parser_add_option(op, option_showfasta, env);
+                                     false);
+  option_parser_add_option(op, option_showfasta);
 
   /* -showseqnum */
   option_showseqnum = option_new_ulong_min("showseqnum", "show sequence with "
                                            "given number on stdout (in fasta "
                                            "format)", &arguments->showseqnum,
-                                           UNDEF_ULONG, 1, env);
-  option_parser_add_option(op, option_showseqnum, env);
+                                           UNDEF_ULONG, 1);
+  option_parser_add_option(op, option_showseqnum);
 
   /* -gc-content */
   option = option_new_bool("gc-content", "show GC-content on stdout (for DNA "
-                           "files)", &arguments->gc_content, false, env);
-  option_parser_add_option(op, option, env);
+                           "files)", &arguments->gc_content, false);
+  option_parser_add_option(op, option);
 
   /* -stat */
   option_stat = option_new_bool("stat", "show sequence statistics",
-                                &arguments->stat, false, env);
-  option_parser_add_option(op, option_stat, env);
+                                &arguments->stat, false);
+  option_parser_add_option(op, option_stat);
 
   /* -seqlengthdistri */
   option = option_new_bool("seqlengthdistri", "show sequence length "
-                           "distribution", &arguments->seqlengthdistri, false,
-                           env);
-  option_parser_add_option(op, option, env);
+                           "distribution", &arguments->seqlengthdistri, false);
+  option_parser_add_option(op, option);
 
   /* -width */
   option_width = option_new_ulong("width", "set output width for showing of "
                                   "sequences (0 disables formatting)",
-                                  &arguments->width, 0, env);
-  option_parser_add_option(op, option_width, env);
+                                  &arguments->width, 0);
+  option_parser_add_option(op, option_width);
 
   /* option implications */
-  option_imply_either_2(option_width, option_showfasta, option_showseqnum, env);
+  option_imply_either_2(option_width, option_showfasta, option_showseqnum);
 
   /* option exclusions */
-  option_exclude(option_showfasta, option_stat, env);
-  option_exclude(option_showfasta, option_showseqnum, env);
-  option_exclude(option_showseqnum, option_stat, env);
+  option_exclude(option_showfasta, option_stat);
+  option_exclude(option_showfasta, option_showseqnum);
+  option_exclude(option_showseqnum, option_stat);
 
   /* parse */
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, env);
-  option_parser_delete(op, env);
+                                        versionfunc, 1, err);
+  option_parser_delete(op);
 
   return oprval;
 }
@@ -107,7 +105,7 @@ int gt_bioseq(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

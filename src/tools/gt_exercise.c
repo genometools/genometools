@@ -37,18 +37,18 @@
 #include "gt_upgma.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Toolbox *exercise_toolbox, Env *env)
+                            Toolbox *exercise_toolbox, Error *err)
 {
   OptionParser *op;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] exercise_tool_name [argument ...]",
                          "Call exercise tool with name exercise_tool_name and "
-                         "pass argument(s) to it.", env);
+                         "pass argument(s) to it.");
   option_parser_set_comment_func(op, toolbox_show, exercise_toolbox);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, env);
-  option_parser_delete(op, env);
+                                        versionfunc, 1, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -84,7 +84,8 @@ int gt_exercise(int argc, const char **argv, Env *env)
   /* option parsing */
   exercise_toolbox = toolbox_new();
   register_exercises(exercise_toolbox, env);
-  switch (parse_options(&parsed_args, argc, argv, exercise_toolbox, env)) {
+  switch (parse_options(&parsed_args, argc, argv, exercise_toolbox,
+                        env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       toolbox_delete(exercise_toolbox);

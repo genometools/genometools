@@ -108,7 +108,7 @@ struct Option {
 };
 
 static Option *option_new(const char *option_str, const char *description,
-                          void *value, Env *env)
+                          void *value)
 {
   Option *o = ma_calloc(1, sizeof (Option));
   assert(option_str && strlen(option_str));
@@ -120,49 +120,46 @@ static Option *option_new(const char *option_str, const char *description,
   return o;
 }
 
-static Option* option_new_help(bool has_extended_options, Env *env)
+static Option* option_new_help(bool has_extended_options)
 {
   Option *o;
-  if (has_extended_options) {
-    o = option_new("help", "display help for basic options and exit", NULL,
-                   env);
-  }
+  if (has_extended_options)
+    o = option_new("help", "display help for basic options and exit", NULL);
   else
-    o = option_new("help", "display help and exit", NULL, env);
+    o = option_new("help", "display help and exit", NULL);
   o->option_type = OPTION_HELP;
   o->default_value.b = false;
   return o;
 }
 
-static Option* option_new_helpplus(Env *env)
+static Option* option_new_helpplus(void)
 {
-  Option *o = option_new("help+", "display help for all options and exit", NULL,
-                         env);
+  Option *o = option_new("help+", "display help for all options and exit",
+                         NULL);
   o->option_type = OPTION_HELPPLUS;
   o->default_value.b = false;
   return o;
 }
 
-static Option* option_new_helpdev(Env *env)
+static Option* option_new_helpdev(void)
 {
   Option *o = option_new("helpdev", "display help for development options and "
-                         "exit", NULL, env);
+                         "exit", NULL);
   o->option_type = OPTION_HELPDEV;
   o->default_value.b = false;
   o->is_development_option = true;
   return o;
 }
 
-static Option* option_new_version(ShowVersionFunc versionfunc, Env *env)
+static Option* option_new_version(ShowVersionFunc versionfunc)
 {
   Option *o = option_new("version", "display version information and exit",
-                         versionfunc, env);
+                         versionfunc);
   o->option_type = OPTION_VERSION;
   return o;
 }
 
-OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
-                                Env *env)
+OptionParser* option_parser_new(const char *synopsis, const char *one_liner)
 {
   OptionParser *op = ma_malloc(sizeof (OptionParser));
   assert(synopsis && one_liner);
@@ -181,7 +178,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
   return op;
 }
 
-void option_parser_add_option(OptionParser *op, Option *o, Env *env)
+void option_parser_add_option(OptionParser *op, Option *o)
 {
   assert(op && o);
   array_add(op->options, o);
@@ -196,10 +193,9 @@ void option_parser_set_comment_func(OptionParser *op,
 }
 
 void option_parser_register_hook(OptionParser *op, OptionParserHookFunc hook,
-                                 void *data, Env *env)
+                                 void *data)
 {
   HookInfo hookinfo;
-  env_error_check(env);
   assert(op && hook);
   if (!op->hooks)
     op->hooks = array_new(sizeof (HookInfo));
@@ -274,12 +270,12 @@ static void show_description(unsigned long initial_space, const char *desc,
   xputchar('\n');
 }
 
-static int show_help(OptionParser *op, OptionType optiontype, Env *env)
+static int show_help(OptionParser *op, OptionType optiontype, Error *err)
 {
   unsigned long i, max_option_length = 0;
   Option *option;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
   assert(optiontype == OPTION_HELP || optiontype == OPTION_HELPPLUS ||
          optiontype == OPTION_HELPDEV);
 
@@ -371,7 +367,7 @@ static int show_help(OptionParser *op, OptionType optiontype, Env *env)
     }
   }
   if (op->comment_func)
-    had_err = op->comment_func(op->progname, op->comment_func_data, env);
+    had_err = op->comment_func(op->progname, op->comment_func_data, err);
   if (!had_err) {
     printf("\nReport bugs to %s.\n",
            op->mailaddress ? op->mailaddress : MAILADDRESS);
@@ -390,40 +386,40 @@ static bool optional_arg(Option *o, int argnum, int argc, const char **argv)
   return false;
 }
 
-static int check_missing_argument(int argnum, int argc, Str *option, Env *env)
+static int check_missing_argument(int argnum, int argc, Str *option, Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   if (argnum + 1 >= argc) {
-    env_error_set(env, "missing argument to option \"-%s\"", str_get(option));
+    error_set(err, "missing argument to option \"-%s\"", str_get(option));
     return -1;
   }
   return 0;
 }
 
-static int check_mandatory_options(OptionParser *op, Env *env)
+static int check_mandatory_options(OptionParser *op, Error *err)
 {
   unsigned long i;
   Option *o;
-  env_error_check(env);
+  error_check(err);
   assert(op);
   for (i = 0; i < array_size(op->options); i++) {
     o = *(Option**) array_get(op->options, i);
     if (o->is_mandatory && !o->is_set) {
-      env_error_set(env, "option \"-%s\" is mandatory", str_get(o->option_str));
+      error_set(err, "option \"-%s\" is mandatory", str_get(o->option_str));
       return -1;
     }
   }
   return 0;
 }
 
-static int check_option_implications(OptionParser *op, Env *env)
+static int check_option_implications(OptionParser *op, Error *err)
 {
   unsigned long i, j, k, l;
   Array *implied_option_array;
   Option *o, *implied_option;
   unsigned int option_set;
   Str *error_str;
-  env_error_check(env);
+  error_check(err);
 
   for (i = 0; i < array_size(op->options); i++) {
     o = *(Option**) array_get(op->options, i);
@@ -435,9 +431,9 @@ static int check_option_implications(OptionParser *op, Env *env)
           /* special case: option implies exactly one option */
           implied_option = *(Option**) array_get(implied_option_array, 0);
           if (!implied_option->is_set) {
-            env_error_set(env, "option \"-%s\" requires option \"-%s\"",
-                          str_get(o->option_str),
-                          str_get(implied_option->option_str));
+            error_set(err, "option \"-%s\" requires option \"-%s\"",
+                      str_get(o->option_str),
+                      str_get(implied_option->option_str));
             return -1;
           }
         }
@@ -470,7 +466,7 @@ static int check_option_implications(OptionParser *op, Env *env)
                                      array_size(implied_option_array) - 1))
                                      ->option_str);
             str_append_cstr(error_str, "\"");
-            env_error_set(env, "%s", str_get(error_str));
+            error_set(err, "%s", str_get(error_str));
             str_delete(error_str);
             return -1;
           }
@@ -481,11 +477,11 @@ static int check_option_implications(OptionParser *op, Env *env)
   return 0;
 }
 
-static int check_option_exclusions(OptionParser *op, Env *env)
+static int check_option_exclusions(OptionParser *op, Error *err)
 {
   unsigned long i, j;
   Option *o, *excluded_option;
-  env_error_check(env);
+  error_check(err);
 
   for (i = 0; i < array_size(op->options); i++) {
     o = *(Option**) array_get(op->options, i);
@@ -493,10 +489,9 @@ static int check_option_exclusions(OptionParser *op, Env *env)
       for (j = 0; j < array_size(o->exclusions); j++) {
         excluded_option = *(Option**) array_get(o->exclusions, j);
         if (excluded_option->is_set) {
-          env_error_set(env,
-                        "option \"-%s\" and option \"-%s\" exclude each other",
-                        str_get(o->option_str),
-                        str_get(excluded_option->option_str));
+          error_set(err, "option \"-%s\" and option \"-%s\" exclude each other",
+                    str_get(o->option_str),
+                    str_get(excluded_option->option_str));
           return -1;
         }
       }
@@ -505,20 +500,19 @@ static int check_option_exclusions(OptionParser *op, Env *env)
   return 0;
 }
 
-static int check_mandatory_either_options(OptionParser *op, Env *env)
+static int check_mandatory_either_options(OptionParser *op, Error *err)
 {
   unsigned long i;
   Option *o;
-  env_error_check(env);
+  error_check(err);
 
   for (i = 0; i < array_size(op->options); i++) {
     o = *(Option**) array_get(op->options, i);
     if (o->mandatory_either_option) {
       if (!o->is_set && !o->mandatory_either_option->is_set) {
-        env_error_set(env,
-                      "either option \"-%s\" or option \"-%s\" is mandatory",
-                      str_get(o->option_str),
-                      str_get(o->mandatory_either_option->option_str));
+        error_set(err, "either option \"-%s\" or option \"-%s\" is mandatory",
+                  str_get(o->option_str),
+                  str_get(o->mandatory_either_option->option_str));
         return -1;
       }
     }
@@ -543,7 +537,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                     const char **argv,
                     ShowVersionFunc versionfunc,
                     unsigned int min_additional_arguments,
-                    unsigned int max_additional_arguments, Env *env)
+                    unsigned int max_additional_arguments, Error *err)
 {
   int argnum, int_value;
   unsigned long i;
@@ -555,7 +549,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   int had_err = 0;
   Str *error_str;
 
-  env_error_check(env);
+  error_check(err);
   assert(op);
   assert(!op->parser_called); /* to avoid multiple adding of common options */
 
@@ -563,16 +557,16 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
 
   /* add common options */
   has_extended_options = has_extended_option(op->options);
-  option = option_new_help(has_extended_options, env);
-  option_parser_add_option(op, option, env);
+  option = option_new_help(has_extended_options);
+  option_parser_add_option(op, option);
   if (has_extended_options) {
-    option = option_new_helpplus(env);
-    option_parser_add_option(op, option, env);
+    option = option_new_helpplus();
+    option_parser_add_option(op, option);
   }
-  option = option_new_helpdev(env);
-  option_parser_add_option(op, option, env);
-  option = option_new_version(versionfunc, env);
-  option_parser_add_option(op, option, env);
+  option = option_new_helpdev();
+  option_parser_add_option(op, option);
+  option = option_new_version(versionfunc);
+  option_parser_add_option(op, option);
 
   for (argnum = 1; argnum < argc; argnum++) {
     if (!(argv[argnum] && argv[argnum][0] == '-' && strlen(argv[argnum]) > 1) ||
@@ -588,8 +582,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
       if (strcmp(argv[argnum]+1, str_get(option->option_str)) == 0) {
         /* make sure option has not been used before */
         if (option->is_set) {
-          env_error_set(env, "option \"%s\" already set",
-                        str_get(option->option_str));
+          error_set(err, "option \"%s\" already set",
+                    str_get(option->option_str));
           had_err = -1;
         }
         else
@@ -623,7 +617,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               }
               assert(option->domain[0]);
               had_err = check_missing_argument(argnum, argc, option->option_str,
-                        env);
+                                               err);
               if (!had_err) {
                 argnum++;
                 if (strcmp(argv[argnum], option->domain[0])) {
@@ -639,9 +633,9 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                     i++;
                   }
                   if (option->domain[i] == NULL) {
-                    env_error_set(env, "argument to option \"-%s\" must be one "
-                                  "of: %s", str_get(option->option_str),
-                                  str_get(error_str));
+                    error_set(err, "argument to option \"-%s\" must be one "
+                                   "of: %s", str_get(option->option_str),
+                              str_get(error_str));
                     had_err = -1;
                   }
                   str_delete(error_str);
@@ -660,13 +654,13 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 break;
               }
               had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               env);
+                                               err);
               if (!had_err) {
                 argnum++;
                 if (parse_double(&double_value, argv[argnum])) {
-                  env_error_set(env, "argument to option \"-%s\" must be "
-                                     "floating-point number",
-                                str_get(option->option_str));
+                  error_set(err, "argument to option \"-%s\" must be "
+                                 "floating-point number",
+                            str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -674,9 +668,9 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 /* minimum value check */
                 if (option->min_value_set &&
                     double_value < option->min_value.d) {
-                  env_error_set(env, "argument to option \"-%s\" must be a "
-                                     "floating point value >= %f",
-                                str_get(option->option_str),
+                  error_set(err, "argument to option \"-%s\" must be a "
+                                 "floating point value >= %f",
+                            str_get(option->option_str),
                                 option->min_value.d);
                   had_err = -1;
                 }
@@ -685,10 +679,10 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 /* maximum value check */
                 if (option->max_value_set &&
                     double_value > option->max_value.d) {
-                  env_error_set(env, "argument to option \"-%s\" must be a "
-                                     "floating point value <= %f",
-                                str_get(option->option_str),
-                                option->max_value.d);
+                  error_set(err, "argument to option \"-%s\" must be a "
+                                 "floating point value <= %f",
+                            str_get(option->option_str),
+                            option->max_value.d);
                   had_err = -1;
                 }
               }
@@ -698,20 +692,20 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               }
               break;
             case OPTION_HELP:
-              if (show_help(op, OPTION_HELP, env))
+              if (show_help(op, OPTION_HELP, err))
                 return OPTIONPARSER_ERROR;
               return OPTIONPARSER_REQUESTS_EXIT;
             case OPTION_HELPPLUS:
-              if (show_help(op, OPTION_HELPPLUS, env))
+              if (show_help(op, OPTION_HELPPLUS, err))
                 return OPTIONPARSER_ERROR;
               return OPTIONPARSER_REQUESTS_EXIT;
             case OPTION_HELPDEV:
-              if (show_help(op, OPTION_HELPDEV, env))
+              if (show_help(op, OPTION_HELPDEV, err))
                 return OPTIONPARSER_ERROR;
               return OPTIONPARSER_REQUESTS_EXIT;
             case OPTION_OUTPUTFILE:
               had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               env);
+                                               err);
               if (!had_err) {
                 argnum++;
                 *(FILE**) option->value = fa_xfopen(argv[argnum], "w");
@@ -721,30 +715,30 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
             case OPTION_INT:
               assert(!option->argument_is_optional);
               had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               env);
+                                               err);
               if (!had_err) {
                 argnum++;
                 if (parse_int(&int_value, argv[argnum])) {
-                  env_error_set(env, "argument to option \"-%s\" must be an "
-                                "integer", str_get(option->option_str));
+                  error_set(err, "argument to option \"-%s\" must be an "
+                                 "integer", str_get(option->option_str));
                   had_err = -1;
                 }
               }
               if (!had_err) {
                 /* minimum value check */
                 if (option->min_value_set && int_value < option->min_value.i) {
-                  env_error_set(env, "argument to option \"-%s\" must be an "
-                                "integer >= %d", str_get(option->option_str),
-                                option->min_value.i);
+                  error_set(err, "argument to option \"-%s\" must be an "
+                                 "integer >= %d", str_get(option->option_str),
+                            option->min_value.i);
                   had_err = -1;
                 }
               }
               if (!had_err) {
                 /* maximum value check */
                 if (option->max_value_set && int_value > option->max_value.i) {
-                  env_error_set(env, "argument to option \"-%s\" must be an "
-                                "integer <= %d", str_get(option->option_str),
-                                option->max_value.i);
+                  error_set(err, "argument to option \"-%s\" must be an "
+                                 "integer <= %d", str_get(option->option_str),
+                            option->max_value.i);
                   had_err = -1;
                 }
               }
@@ -759,31 +753,31 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 break;
               }
               had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               env);
+                                               err);
               if (!had_err) {
                 argnum++;
                 if (parse_int(&int_value, argv[argnum]) || int_value < 0) {
-                  env_error_set(env, "argument to option \"-%s\" must be a "
-                                "non-negative integer",
-                                str_get(option->option_str));
+                  error_set(err, "argument to option \"-%s\" must be a "
+                                 "non-negative integer",
+                            str_get(option->option_str));
                   had_err = -1;
                 }
               }
               if (!had_err) {
                 /* minimum value check */
                 if (option->min_value_set && int_value < option->min_value.ui) {
-                  env_error_set(env, "argument to option \"-%s\" must be an "
-                                "integer >= %u", str_get(option->option_str),
-                                option->min_value.ui);
+                  error_set(err, "argument to option \"-%s\" must be an "
+                                 "integer >= %u", str_get(option->option_str),
+                            option->min_value.ui);
                   had_err = -1;
                 }
               }
               if (!had_err) {
                 /* maximum value check */
                 if (option->max_value_set && int_value > option->max_value.ui) {
-                  env_error_set(env, "argument to option \"-%s\" must be an "
-                                "integer <= %u", str_get(option->option_str),
-                                option->max_value.ui);
+                  error_set(err, "argument to option \"-%s\" must be an "
+                                 "integer <= %u", str_get(option->option_str),
+                            option->max_value.ui);
                   had_err = -1;
                 }
               }
@@ -795,12 +789,12 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
             case OPTION_LONG:
               assert(!option->argument_is_optional);
               had_err = check_missing_argument(argnum, argc, option->option_str,
-                        env);
+                                               err);
               if (!had_err) {
                 argnum++;
                 if (parse_long(&long_value, argv[argnum])) {
-                  env_error_set(env, "argument to option \"-%s\" must be an "
-                                "integer", str_get(option->option_str));
+                  error_set(err, "argument to option \"-%s\" must be an "
+                                 "integer", str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -815,13 +809,13 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 break;
               }
               had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               env);
+                                               err);
               if (!had_err) {
                 argnum++;
                 if (parse_long(&long_value, argv[argnum]) || long_value < 0) {
-                  env_error_set(env, "argument to option \"-%s\" must be a "
-                                "non-negative integer",
-                                str_get(option->option_str));
+                  error_set(err, "argument to option \"-%s\" must be a "
+                                 "non-negative integer",
+                            str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -829,9 +823,9 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 /* minimum value check */
                 if (option->min_value_set &&
                     long_value < option->min_value.ul) {
-                  env_error_set(env, "argument to option \"-%s\" must be an "
-                                "integer >= %lu", str_get(option->option_str),
-                                option->min_value.ul);
+                  error_set(err, "argument to option \"-%s\" must be an "
+                                 "integer >= %lu", str_get(option->option_str),
+                            option->min_value.ul);
                   had_err = -1;
                 }
               }
@@ -839,9 +833,9 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 /* maximum value check */
                 if (option->max_value_set &&
                     long_value > option->max_value.ul) {
-                  env_error_set(env, "argument to option \"-%s\" must be an "
-                                "integer <= %lu", str_get(option->option_str),
-                                option->max_value.ul);
+                  error_set(err, "argument to option \"-%s\" must be an "
+                                 "integer <= %lu", str_get(option->option_str),
+                            option->max_value.ul);
                   had_err = -1;
                 }
               }
@@ -856,7 +850,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 break;
               }
               had_err = check_missing_argument(argnum, argc, option->option_str,
-                        env);
+                                               err);
               if (!had_err) {
                 argnum++;
                 str_set(option->value, argv[argnum]);
@@ -869,7 +863,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 break;
               }
               had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               env);
+                                               err);
               while (!had_err) {
                 if (argnum + 1 < argc && argv[argnum+1][0] != '-') {
                   argnum++;
@@ -898,8 +892,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
 
     /* no matching option found -> error */
     assert(!had_err);
-    env_error_set(env, "unknown option: %s (-help shows possible options)",
-                  argv[argnum]);
+    error_set(err, "unknown option: %s (-help shows possible options)",
+              argv[argnum]);
     had_err = -1;
     break;
   }
@@ -911,33 +905,33 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   /* check for minimum number of additional arguments, if necessary */
   if (!had_err && min_additional_arguments != UNDEF_UINT &&
       argc - argnum < min_additional_arguments) {
-    env_error_set(env, "missing argument\nUsage: %s %s", op->progname,
-                  op->synopsis);
+    error_set(err, "missing argument\nUsage: %s %s", op->progname,
+              op->synopsis);
     had_err = -1;
   }
 
   /* check for maximal number of additional arguments, if necessary */
   if (!had_err && max_additional_arguments != UNDEF_UINT &&
       argc - argnum > max_additional_arguments) {
-    env_error_set(env, "superfluous argument \"%s\"\nUsage: %s %s",
-                  argv[argnum + max_additional_arguments], op->progname,
-                  op->synopsis);
+    error_set(err, "superfluous argument \"%s\"\nUsage: %s %s",
+              argv[argnum + max_additional_arguments], op->progname,
+              op->synopsis);
     had_err = -1;
   }
 
   if (!had_err)
-    had_err = check_mandatory_options(op, env);
+    had_err = check_mandatory_options(op, err);
   if (!had_err)
-    had_err = check_option_implications(op, env);
+    had_err = check_option_implications(op, err);
   if (!had_err)
-    had_err = check_option_exclusions(op, env);
+    had_err = check_option_exclusions(op, err);
   if (!had_err)
-    had_err = check_mandatory_either_options(op, env);
+    had_err = check_mandatory_either_options(op, err);
 
   /* call hooks */
   for (i = 0; !had_err && i < array_size(op->hooks); i++) {
     hookinfo = array_get(op->hooks, i);
-    had_err = hookinfo->hook(hookinfo->data, env);
+    had_err = hookinfo->hook(hookinfo->data, err);
   }
 
   op->parser_called = true;
@@ -951,33 +945,33 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
 
 OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                            const char **argv, ShowVersionFunc versionfunc,
-                           Env *env)
+                           Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   return parse(op, parsed_args, argc, argv, versionfunc, UNDEF_UINT, UNDEF_UINT,
-               env);
+               err);
 }
 
 OPrval option_parser_parse_min_args(OptionParser *op, int *parsed_args,
                                     int argc, const char **argv,
                                     ShowVersionFunc versionfunc,
                                     unsigned int min_additional_arguments,
-                                    Env *env)
+                                    Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   return parse(op, parsed_args, argc, argv, versionfunc,
-               min_additional_arguments, UNDEF_UINT, env);
+               min_additional_arguments, UNDEF_UINT, err);
 }
 
 OPrval option_parser_parse_max_args(OptionParser *op, int *parsed_args,
                                     int argc, const char **argv,
                                     ShowVersionFunc versionfunc,
                                     unsigned int max_additional_arguments,
-                                    Env *env)
+                                    Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   return parse(op, parsed_args, argc, argv, versionfunc, UNDEF_UINT,
-               max_additional_arguments, env);
+               max_additional_arguments, err);
 }
 
 OPrval option_parser_parse_min_max_args(OptionParser *op, int *parsed_args,
@@ -985,14 +979,14 @@ OPrval option_parser_parse_min_max_args(OptionParser *op, int *parsed_args,
                                         ShowVersionFunc versionfunc,
                                         unsigned int min_additional_arguments,
                                         unsigned int max_additional_arguments,
-                                        Env *env)
+                                        Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   return parse(op, parsed_args, argc, argv, versionfunc,
-               min_additional_arguments, max_additional_arguments, env);
+               min_additional_arguments, max_additional_arguments, err);
 }
 
-void option_parser_delete(OptionParser *op, Env *env)
+void option_parser_delete(OptionParser *op)
 {
   unsigned long i;
   if (!op) return;
@@ -1000,39 +994,38 @@ void option_parser_delete(OptionParser *op, Env *env)
   ma_free(op->synopsis);
   ma_free(op->one_liner);
   for (i = 0; i < array_size(op->options); i++)
-    option_delete(*(Option**) array_get(op->options, i), env);
+    option_delete(*(Option**) array_get(op->options, i));
   array_delete(op->options);
   array_delete(op->hooks);
   ma_free(op);
 }
 
-Option* option_new_outputfile(FILE **outfp, Env *env)
+Option* option_new_outputfile(FILE **outfp)
 {
   Option *o = option_new("o", "redirect output to specified file (will "
-                         "overwrite existing file!)", outfp, env);
+                         "overwrite existing file!)", outfp);
   o->option_type = OPTION_OUTPUTFILE;
   o->default_value.fp = stdout;
   *outfp = stdout;
   return o;
 }
 
-Option* option_new_verbose(bool *value, Env *env)
+Option* option_new_verbose(bool *value)
 {
-  return option_new_bool("v", "be verbose", value, false, env);
+  return option_new_bool("v", "be verbose", value, false);
 }
 
-Option* option_new_debug(bool *value, Env *env)
+Option* option_new_debug(bool *value)
 {
-  Option *o = option_new_bool("debug", "enable debugging output", value, false,
-                              env);
+  Option *o = option_new_bool("debug", "enable debugging output", value, false);
   o->is_development_option = true;
   return o;
 }
 
 Option* option_new_bool(const char *option_str, const char *description,
-                        bool *value, bool default_value, Env *env)
+                        bool *value, bool default_value)
 {
-  Option *o = option_new(option_str, description, value, env);
+  Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_BOOL;
   o->default_value.b = default_value;
   *value = default_value;
@@ -1040,9 +1033,9 @@ Option* option_new_bool(const char *option_str, const char *description,
 }
 
 Option* option_new_double(const char *option_str, const char *description,
-                          double *value, double default_value, Env *env)
+                          double *value, double default_value)
 {
-  Option *o = option_new(option_str, description, value, env);
+  Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_DOUBLE;
   o->default_value.d = default_value;
   *value = default_value;
@@ -1051,10 +1044,9 @@ Option* option_new_double(const char *option_str, const char *description,
 
 Option *option_new_double_min(const char *option_str, const char *description,
                               double *value, double default_value,
-                              double min_value, Env *env)
+                              double min_value)
 {
-  Option *o = option_new_double(option_str, description, value, default_value,
-                                env);
+  Option *o = option_new_double(option_str, description, value, default_value);
   o->min_value_set = true;
   o->min_value.d = min_value;
   return o;
@@ -1063,10 +1055,9 @@ Option *option_new_double_min(const char *option_str, const char *description,
 Option *option_new_double_min_max(const char *option_str,
                                   const char *description, double *value,
                                   double default_value, double min_value,
-                                  double max_value, Env *env)
+                                  double max_value)
 {
-  Option *o = option_new_double(option_str, description, value, default_value,
-                                env);
+  Option *o = option_new_double(option_str, description, value, default_value);
   o->min_value_set = true;
   o->min_value.d = min_value;
   o->max_value_set = true;
@@ -1075,16 +1066,16 @@ Option *option_new_double_min_max(const char *option_str,
 }
 
 Option* option_new_probability(const char *option_str, const char *description,
-                               double *value, double default_value, Env *env)
+                               double *value, double default_value)
 {
   return option_new_double_min_max(option_str, description, value,
-                                   default_value, 0.0, 1.0, env);
+                                   default_value, 0.0, 1.0);
 }
 
 Option* option_new_int(const char *option_str, const char *description,
-                       int *value, int default_value, Env *env)
+                       int *value, int default_value)
 {
-  Option *o = option_new(option_str, description, value, env);
+  Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_INT;
   o->default_value.i = default_value;
   *value = default_value;
@@ -1092,32 +1083,27 @@ Option* option_new_int(const char *option_str, const char *description,
 }
 
 Option* option_new_int_min(const char *option_str, const char *description,
-                           int *value, int default_value, int min_value,
-                           Env *env)
+                           int *value, int default_value, int min_value)
 {
-  Option *o = option_new_int(option_str, description, value, default_value,
-                             env);
+  Option *o = option_new_int(option_str, description, value, default_value);
   o->min_value_set = true;
   o->min_value.i = min_value;
   return o;
 }
 
 Option* option_new_int_max(const char *option_str, const char *description,
-                           int *value, int default_value, int max_value,
-                           Env *env)
+                           int *value, int default_value, int max_value)
 {
-  Option *o = option_new_int(option_str, description, value, default_value,
-                              env);
+  Option *o = option_new_int(option_str, description, value, default_value);
   o->max_value_set = true;
   o->max_value.i = max_value;
   return o;
 }
 
 Option* option_new_uint(const char *option_str, const char *description,
-                        unsigned int *value, unsigned int default_value,
-                        Env *env)
+                        unsigned int *value, unsigned int default_value)
 {
-  Option *o = option_new(option_str, description, value, env);
+  Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_UINT;
   o->default_value.ui = default_value;
   *value = default_value;
@@ -1126,10 +1112,9 @@ Option* option_new_uint(const char *option_str, const char *description,
 
 Option* option_new_uint_min(const char *option_str, const char *description,
                             unsigned int *value, unsigned int default_value,
-                            unsigned int min_value, Env *env)
+                            unsigned int min_value)
 {
-  Option *o = option_new_uint(option_str, description, value, default_value,
-                              env);
+  Option *o = option_new_uint(option_str, description, value, default_value);
   o->min_value_set = true;
   o->min_value.ui = min_value;
   return o;
@@ -1137,10 +1122,9 @@ Option* option_new_uint_min(const char *option_str, const char *description,
 
 Option* option_new_uint_max(const char *option_str, const char *description,
                             unsigned int *value, unsigned int default_value,
-                            unsigned int max_value, Env *env)
+                            unsigned int max_value)
 {
-  Option *o = option_new_uint(option_str, description, value, default_value,
-                              env);
+  Option *o = option_new_uint(option_str, description, value, default_value);
   o->max_value_set = true;
   o->max_value.ui = max_value;
   return o;
@@ -1148,11 +1132,9 @@ Option* option_new_uint_max(const char *option_str, const char *description,
 
 Option *option_new_uint_min_max(const char *option_str, const char *description,
                                 unsigned int *value, unsigned int default_value,
-                                unsigned int min_value, unsigned int max_value,
-                                Env *env)
+                                unsigned int min_value, unsigned int max_value)
 {
-  Option *o = option_new_uint(option_str, description, value, default_value,
-                               env);
+  Option *o = option_new_uint(option_str, description, value, default_value);
   o->min_value_set = true;
   o->min_value.i = min_value;
   o->max_value_set = true;
@@ -1161,9 +1143,9 @@ Option *option_new_uint_min_max(const char *option_str, const char *description,
 }
 
 Option* option_new_long(const char *option_str, const char *description,
-                        long *value, long default_value, Env *env)
+                        long *value, long default_value)
 {
-  Option *o = option_new(option_str, description, value, env);
+  Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_LONG;
   o->default_value.l = default_value;
   *value = default_value;
@@ -1171,10 +1153,9 @@ Option* option_new_long(const char *option_str, const char *description,
 }
 
 Option* option_new_ulong(const char *option_str, const char *description,
-                         unsigned long *value, unsigned long default_value,
-                         Env *env)
+                         unsigned long *value, unsigned long default_value)
 {
-  Option *o = option_new(option_str, description, value, env);
+  Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_ULONG;
   o->default_value.ul = default_value;
   *value = default_value;
@@ -1183,10 +1164,9 @@ Option* option_new_ulong(const char *option_str, const char *description,
 
 Option* option_new_ulong_min(const char *option_str, const char *description,
                              unsigned long *value, unsigned long default_value,
-                             unsigned long min_value, Env *env)
+                             unsigned long min_value)
 {
-  Option *o = option_new_ulong(option_str, description, value, default_value,
-                               env);
+  Option *o = option_new_ulong(option_str, description, value, default_value);
   o->min_value_set = true;
   o->min_value.ul = min_value;
   return o;
@@ -1196,10 +1176,9 @@ Option *option_new_ulong_min_max(const char *option_str,
                                  const char *description, unsigned long *value,
                                  unsigned long default_value,
                                  unsigned long min_value,
-                                 unsigned long max_value, Env *env)
+                                 unsigned long max_value)
 {
-  Option *o = option_new_ulong(option_str, description, value, default_value,
-                               env);
+  Option *o = option_new_ulong(option_str, description, value, default_value);
   o->min_value_set = true;
   o->min_value.ul = min_value;
   o->max_value_set = true;
@@ -1208,9 +1187,9 @@ Option *option_new_ulong_min_max(const char *option_str,
 }
 
 Option* option_new_string(const char *option_str, const char *description,
-                          Str *value, const char *default_value, Env *env)
+                          Str *value, const char *default_value)
 {
-  Option *o = option_new(option_str, description, value, env);
+  Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_STRING;
   o->default_value.s = default_value;
   str_set(value, default_value);
@@ -1218,10 +1197,9 @@ Option* option_new_string(const char *option_str, const char *description,
 }
 
 Option* option_new_stringarray(const char *option_str,
-                               const char *description, StrArray *value,
-                               Env *env)
+                               const char *description, StrArray *value)
 {
-  Option *o = option_new(option_str, description, value, env);
+  Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_STRINGARRAY;
   return o;
 }
@@ -1230,24 +1208,23 @@ Option* option_new_stringarray(const char *option_str,
    later on (e.g., for CGI scripts), but for now the are implemented in the same
    way */
 Option* option_new_filename(const char *option_str, const char *description,
-                            Str*filename, Env *env)
+                            Str *filename)
 {
-  return option_new_string(option_str, description, filename, NULL, env);
+  return option_new_string(option_str, description, filename, NULL);
 }
 
 /* the following function would allow to handle file arrays differently from
    string arrays later on (e.g., for CGI scripts) , but for now the are
    implemented in the same way */
 Option* option_new_filenamearray(const char *option_str,
-                                 const char *description, StrArray *filenames,
-                                 Env *env)
+                                 const char *description, StrArray *filenames)
 {
-  return option_new_stringarray(option_str, description, filenames, env);
+  return option_new_stringarray(option_str, description, filenames);
 }
 
 Option* option_new_choice(const char *option_str, const char *description,
-                          Str *value, const char* default_value,
-                          const char** domain, Env *env)
+                          Str *value, const char *default_value,
+                          const char **domain)
 {
   Option *o;
 #ifndef NDEBUG
@@ -1266,7 +1243,7 @@ Option* option_new_choice(const char *option_str, const char *description,
   assert(!in_domain);
 #endif
 
-  o = option_new_string(option_str, description, value, default_value, env);
+  o = option_new_string(option_str, description, value, default_value);
   o->option_type = OPTION_CHOICE;
   o->domain = domain;
 
@@ -1298,7 +1275,7 @@ void option_is_development_option(Option *o)
   o->is_development_option = true;
 }
 
-void option_imply(Option *o, const Option *implied_option, Env *env)
+void option_imply(Option *o, const Option *implied_option)
 {
   Array *option_array;
   assert(o && implied_option);
@@ -1309,8 +1286,7 @@ void option_imply(Option *o, const Option *implied_option, Env *env)
   array_add(o->implications, option_array);
 }
 
-void option_imply_either_2(Option *o, const Option *io1, const Option *io2,
-                           Env *env)
+void option_imply_either_2(Option *o, const Option *io1, const Option *io2)
 {
   Array *option_array;
   assert(o && io1 && io2);
@@ -1322,7 +1298,7 @@ void option_imply_either_2(Option *o, const Option *io1, const Option *io2,
   array_add(o->implications, option_array);
 }
 
-void option_exclude(Option *o_a, Option *o_b, Env *env)
+void option_exclude(Option *o_a, Option *o_b)
 {
   assert(o_a && o_b);
   if (!o_a->exclusions)
@@ -1351,7 +1327,7 @@ bool option_is_set(const Option *o)
   return o->is_set;
 }
 
-void option_delete(Option *o, Env *env)
+void option_delete(Option *o)
 {
   unsigned long i;
   if (!o) return;

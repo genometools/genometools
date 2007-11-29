@@ -23,7 +23,7 @@
 
 /* add the options -seqfile and -regionmapping to the given option parser */
 void           seqid2file_options(OptionParser*, Str *seqfile,
-                                  Str *regionmapping, Env*);
+                                  Str *regionmapping);
 
 RegionMapping* seqid2file_regionmapping_new(Str *seqfile, Str *regionmapping,
                                             Error*);

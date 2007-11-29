@@ -29,42 +29,42 @@ typedef struct {
 } ExtractSeqArguments;
 
 static OPrval parse_options(int *parsed_args, ExtractSeqArguments *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   OutputFileInfo *ofi;
   Option *option;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
 
   /* init */
   op = option_parser_new("[option ...] [sequence_file ...]",
-                         "Extract sequences from given sequence file(s).", env);
-  ofi = outputfileinfo_new(env);
+                         "Extract sequences from given sequence file(s).");
+  ofi = outputfileinfo_new();
 
   /* -match */
   option = option_new_string("match", "extract all sequences whose description "
                              "matches the given pattern.\nThe given pattern "
                              "must be a valid extended regular expression.",
-                             arguments->pattern, NULL, env);
+                             arguments->pattern, NULL);
   option_is_mandatory(option);
-  option_parser_add_option(op, option, env);
+  option_parser_add_option(op, option);
 
   /* -width */
   option = option_new_ulong("width", "set output width for showing of "
                             "sequences (0 disables formatting)",
-                            &arguments->width, 0, env);
-  option_parser_add_option(op, option, env);
+                            &arguments->width, 0);
+  option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi, env);
+  outputfile_register_options(op, &arguments->outfp, ofi);
 
   /* parse */
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
 
   /* free */
-  outputfileinfo_delete(ofi, env);
-  option_parser_delete(op, env);
+  outputfileinfo_delete(ofi);
+  option_parser_delete(op);
 
   return oprval;
 }
@@ -102,7 +102,7 @@ int gt_extractseq(int argc, const char **argv, Env *env)
 
   /* option parsing */
   arguments.pattern = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.pattern);

@@ -31,40 +31,40 @@ typedef struct {
 } CSAArguments;
 
 static OPrval parse_options(int *parsed_args, CSAArguments *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   OutputFileInfo *ofi;
   Option *option;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
 
   /* init */
   op = option_parser_new("[option ...] [GFF3_file]",
                          "Replace spliced alignments with computed consensus "
-                         "spliced alignments.", env);
-  ofi = outputfileinfo_new(env);
+                         "spliced alignments.");
+  ofi = outputfileinfo_new();
 
   /* -join-length */
   option = option_new_ulong("join-length", "set join length for the spliced "
                             "alignment clustering", &arguments->join_length,
-                            DEFAULT_JOINLENGTH, env);
-  option_parser_add_option(op, option, env);
+                            DEFAULT_JOINLENGTH);
+  option_parser_add_option(op, option);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose, env);
-  option_parser_add_option(op, option, env);
+  option = option_new_verbose(&arguments->verbose);
+  option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi, env);
+  outputfile_register_options(op, &arguments->outfp, ofi);
 
   /* parse options */
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, env);
+                                        versionfunc, 1, err);
 
   /* free */
-  outputfileinfo_delete(ofi, env);
-  option_parser_delete(op, env);
+  outputfileinfo_delete(ofi);
+  option_parser_delete(op);
 
   return oprval;
 }
@@ -80,7 +80,7 @@ int gt_csa(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

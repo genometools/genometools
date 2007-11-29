@@ -21,21 +21,21 @@
 #include "libgtext/gff3_out_stream.h"
 
 static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
-                            const char **argv, Env *env)
+                            const char **argv, Error *err)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
-  op = option_parser_new("[gtf_file]", "Parse GTF2.2 file and show it as GFF3.",
-                         env);
+  op = option_parser_new("[gtf_file]",
+                         "Parse GTF2.2 file and show it as GFF3.");
   /* -tolerant */
   option = option_new_bool("tolerant", "be tolerant when parsing the GTF file",
-                           be_tolerant, false, env);
-  option_parser_add_option(op, option, env);
+                           be_tolerant, false);
+  option_parser_add_option(op, option);
   /* parse */
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, env);
-  option_parser_delete(op, env);
+                                        versionfunc, 1, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -48,7 +48,8 @@ int gt_gtf2gff3(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &be_tolerant, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &be_tolerant, argc, argv,
+                        env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

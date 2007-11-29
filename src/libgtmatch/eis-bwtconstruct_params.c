@@ -24,14 +24,11 @@
 extern void
 registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
                            int defaultOptimizationFlags,
-                           const Str *projectName, Env *env)
+                           const Str *projectName)
 {
   Option *option;
 
-  env_error_check(env);
-
-  registerBlockEncOptions(op, &paramOutput->final.seqParams.blockEnc,
-                          env);
+  registerBlockEncOptions(op, &paramOutput->final.seqParams.blockEnc);
 
   paramOutput->final.baseType = BWT_ON_BLOCK_ENC;
 
@@ -40,14 +37,14 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
   option = option_new_uint(
     "locfreq", "specify the locate frequency\n"
     "parameter i means that each i-th position of input string is stored\n"
-    "0 => no locate information", &paramOutput->final.locateInterval, 16U, env);
-  option_parser_add_option(op, option, env);
+    "0 => no locate information", &paramOutput->final.locateInterval, 16U);
+  option_parser_add_option(op, option);
 
   option = option_new_bool(
     "locbitmap", "marked/unmarked positions for locate are stored as bitmaps\n"
     "this gives faster location of hits but increases the index by 1 bit per"
-    " symbol", &paramOutput->useLocateBitmap, true, env);
-  option_parser_add_option(op, option, env);
+    " symbol", &paramOutput->useLocateBitmap, true);
+  option_parser_add_option(op, option);
   paramOutput->useLocateBitmapOption = option;
 
   paramOutput->final.projectName = projectName;

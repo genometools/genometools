@@ -28,14 +28,14 @@
 #define GTDATADIR "/gtdata"
 #define UPDIR     "/.."
 
-Str* gtdata_get_path(const char *prog, Env *env)
+Str* gtdata_get_path(const char *prog, Error *err)
 {
   Str *path;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
   assert(prog);
   path = str_new();
-  had_err = file_find_in_path(path, prog, env);
+  had_err = file_find_in_path(path, prog, err);
   if (!had_err) {
     assert(str_length(path));
     str_append_cstr(path, GTDATADIR);
@@ -45,7 +45,7 @@ Str* gtdata_get_path(const char *prog, Env *env)
     str_append_cstr(path, UPDIR);
     str_append_cstr(path, GTDATADIR);
     if (!file_exists(str_get(path))) {
-      env_error_set(env, "could not find gtdata/ directory");
+      error_set(err, "could not find gtdata/ directory");
       had_err = -1;
     }
   }

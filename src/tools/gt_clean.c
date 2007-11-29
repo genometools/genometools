@@ -21,16 +21,16 @@
 #include "libgtcore/xposix.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Env *env)
+                            Error *err)
 {
   OptionParser *op;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("", "Remove all files in the current directory which "
-                         "are automatically created by gt.", env);
+                         "are automatically created by gt.");
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
-                                        versionfunc, 0, env);
-  option_parser_delete(op, env);
+                                        versionfunc, 0, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -66,7 +66,7 @@ int gt_clean(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env)) {
+  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

@@ -31,18 +31,18 @@
 #include "gt_skproto.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Toolbox *dev_toolbox, Env *env)
+                            Toolbox *dev_toolbox, Error *err)
 {
   OptionParser *op;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] dev_tool_name [argument ...]",
                          "Call development tool with name dev_tool_name and "
-                         "pass argument(s) to it.", env);
+                         "pass argument(s) to it.");
   option_parser_set_comment_func(op, toolbox_show, dev_toolbox);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, env);
-  option_parser_delete(op, env);
+                                        versionfunc, 1, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -74,7 +74,8 @@ int gt_dev(int argc, const char **argv, Env *env)
   /* option parsing */
   dev_toolbox = toolbox_new();
   register_devtools(dev_toolbox, env);
-  switch (parse_options(&parsed_args, argc, argv, dev_toolbox, env)) {
+  switch (parse_options(&parsed_args, argc, argv, dev_toolbox,
+                        env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       toolbox_delete(dev_toolbox);

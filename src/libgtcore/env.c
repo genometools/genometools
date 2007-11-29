@@ -38,13 +38,13 @@ static OPrval parse_env_options(int argc, const char **argv, Env *env)
   assert(env);
   op = option_parser_new("GT_ENV_OPTIONS='[option ...]' ...",
                          "Parse the options contained in the "
-                         "environment variable GT_ENV_OPTIONS.", env);
+                         "environment variable GT_ENV_OPTIONS.");
   o = option_new_bool("spacepeak", "show space peak on stdout upon deletion",
-                      &env->spacepeak, false, env);
-  option_parser_add_option(op, o, env);
+                      &env->spacepeak, false);
+  option_parser_add_option(op, o);
   oprval = option_parser_parse_max_args(op, NULL, argc, argv, versionfunc, 0,
-                                        env);
-  option_parser_delete(op, env);
+                                        env_error(env));
+  option_parser_delete(op);
   return oprval;
 }
 

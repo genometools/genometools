@@ -31,21 +31,20 @@ struct OutputFileInfo {
   GenFile **outfp;
 };
 
-OutputFileInfo* outputfileinfo_new(Env *env)
+OutputFileInfo* outputfileinfo_new(void)
 {
   OutputFileInfo *ofi;
-  env_error_check(env);
   ofi = ma_malloc(sizeof (OutputFileInfo));
   ofi->output_filename = str_new();
   return ofi;
 }
 
-static int determine_outfp(void *data, Env *env)
+static int determine_outfp(void *data, Error *err)
 {
   OutputFileInfo *ofi = (OutputFileInfo*) data;
   GenFileMode genfilemode;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
   assert(ofi);
   if (!str_length(ofi->output_filename)) /* no output file given -> use stdin */
     *ofi->outfp = NULL;
@@ -68,9 +67,8 @@ static int determine_outfp(void *data, Env *env)
       str_append_cstr(ofi->output_filename, genfilemode_suffix(genfilemode));
     }
     if (!ofi->force && file_exists(str_get(ofi->output_filename))) {
-        env_error_set(env, "file \"%s\" exists already, use option -%s to "
-                      "overwrite", str_get(ofi->output_filename),
-                      FORCE_OPT_CSTR);
+        error_set(err, "file \"%s\" exists already, use option -%s to "
+                  "overwrite", str_get(ofi->output_filename), FORCE_OPT_CSTR);
         had_err = -1;
     }
     if (!had_err) {
@@ -83,39 +81,38 @@ static int determine_outfp(void *data, Env *env)
 }
 
 void outputfile_register_options(OptionParser *op, GenFile **outfp,
-                                 OutputFileInfo *ofi, Env *env)
+                                 OutputFileInfo *ofi)
 {
   Option *opto, *optgzip, *optbzip2, *optforce;
-  env_error_check(env);
   assert(outfp && ofi);
   ofi->outfp = outfp;
   /* register option -o */
   opto = option_new_string("o", "redirect output to specified file",
-                           ofi->output_filename, NULL, env);
-  option_parser_add_option(op, opto, env);
+                           ofi->output_filename, NULL);
+  option_parser_add_option(op, opto);
   /* register option -gzip */
   optgzip = option_new_bool("gzip", "write gzip compressed output file",
-                            &ofi->gzip, false, env);
-  option_parser_add_option(op, optgzip, env);
+                            &ofi->gzip, false);
+  option_parser_add_option(op, optgzip);
   /* register option -bzip2 */
   optbzip2 = option_new_bool("bzip2", "write bzip2 compressed output file",
-                             &ofi->bzip2, false, env);
-  option_parser_add_option(op, optbzip2, env);
+                             &ofi->bzip2, false);
+  option_parser_add_option(op, optbzip2);
   /* register option -force */
   optforce = option_new_bool(FORCE_OPT_CSTR, "force writing to output file",
-                             &ofi->force, false, env);
-  option_parser_add_option(op, optforce, env);
+                             &ofi->force, false);
+  option_parser_add_option(op, optforce);
   /* options -gzip and -bzip2 exclude each other */
-  option_exclude(optgzip, optbzip2, env);
+  option_exclude(optgzip, optbzip2);
   /* option implications */
-  option_imply(optgzip, opto, env);
-  option_imply(optbzip2, opto, env);
-  option_imply(optforce, opto, env);
+  option_imply(optgzip, opto);
+  option_imply(optbzip2, opto);
+  option_imply(optforce, opto);
   /* set hook function to determine <outfp> */
-  option_parser_register_hook(op, determine_outfp, ofi, env);
+  option_parser_register_hook(op, determine_outfp, ofi);
 }
 
-void outputfileinfo_delete(OutputFileInfo *ofi, Env *env)
+void outputfileinfo_delete(OutputFileInfo *ofi)
 {
   if (!ofi) return;
   str_delete(ofi->output_filename);

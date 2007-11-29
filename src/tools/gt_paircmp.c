@@ -69,7 +69,7 @@ static void showsimpleoptions(const Cmppairwiseopt *opt)
 
 static OPrval parse_options(int *parsed_args,
                             Cmppairwiseopt *pw,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *optionstrings,
@@ -79,46 +79,46 @@ static OPrval parse_options(int *parsed_args,
   StrArray *charlistlen;
   OPrval oprval;
 
-  env_error_check(env);
+  error_check(err);
   charlistlen = strarray_new();
   pw->strings = strarray_new();
   pw->files = strarray_new();
   pw->text = str_new();
   pw->charlistlen = NULL;
-  op = option_parser_new("options","Apply function to pairs of strings.",env);
+  op = option_parser_new("options","Apply function to pairs of strings.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
   optionstrings = option_new_stringarray("ss","use two strings",
-                                         pw->strings,env);
-  option_parser_add_option(op, optionstrings, env);
+                                         pw->strings);
+  option_parser_add_option(op, optionstrings);
 
   optionfiles = option_new_filenamearray("ff","use two files",
-                                         pw->files,env);
-  option_parser_add_option(op, optionfiles, env);
+                                         pw->files);
+  option_parser_add_option(op, optionfiles);
 
   optioncharlistlen = option_new_stringarray("a",
                                              "use character list and length",
-                                             charlistlen,env);
-  option_parser_add_option(op, optioncharlistlen, env);
+                                             charlistlen);
+  option_parser_add_option(op, optioncharlistlen);
 
-  optiontext = option_new_string("t","use text",pw->text, NULL, env);
-  option_parser_add_option(op, optiontext, env);
+  optiontext = option_new_string("t","use text",pw->text, NULL);
+  option_parser_add_option(op, optiontext);
 
-  option_exclude(optionstrings, optionfiles, env);
-  option_exclude(optionstrings, optioncharlistlen, env);
-  option_exclude(optionstrings, optiontext, env);
-  option_exclude(optionfiles, optioncharlistlen, env);
-  option_exclude(optionfiles, optiontext, env);
-  option_exclude(optioncharlistlen, optiontext, env);
+  option_exclude(optionstrings, optionfiles);
+  option_exclude(optionstrings, optioncharlistlen);
+  option_exclude(optionstrings, optiontext);
+  option_exclude(optionfiles, optioncharlistlen);
+  option_exclude(optionfiles, optiontext);
+  option_exclude(optioncharlistlen, optiontext);
 
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   if (oprval == OPTIONPARSER_OK)
   {
     if (option_is_set(optionstrings))
     {
       if (strarray_size(pw->strings) != 2UL)
       {
-        env_error_set(env,"option -ss requires two string arguments");
+        error_set(err, "option -ss requires two string arguments");
         oprval = OPTIONPARSER_ERROR;
       }
     } else
@@ -127,7 +127,7 @@ static OPrval parse_options(int *parsed_args,
       {
         if (strarray_size(pw->files) != 2UL)
         {
-          env_error_set(env,"option -ff requires two filename arguments");
+          error_set(err, "option -ff requires two filename arguments");
           oprval = OPTIONPARSER_ERROR;
         }
       } else
@@ -138,17 +138,15 @@ static OPrval parse_options(int *parsed_args,
 
           if (strarray_size(charlistlen) != 2UL)
           {
-            env_error_set(env,
-                          "option -a requires charlist and length argument");
+            error_set(err, "option -a requires charlist and length argument");
             oprval = OPTIONPARSER_ERROR;
           }
           ALLOCASSIGNSPACE(pw->charlistlen,NULL,Charlistlen,1);
           pw->charlistlen->charlist = str_ref(strarray_get_str(charlistlen,0));
           if (sscanf(strarray_get(charlistlen,1UL),"%ld",&readint) != 1 ||
-             readint < 1L)
+              readint < 1L)
           {
-            env_error_set(env,
-                          "option -a requires charlist and length argument");
+            error_set(err, "option -a requires charlist and length argument");
             oprval = OPTIONPARSER_ERROR;
           }
           pw->charlistlen->len = (unsigned long) readint;
@@ -156,18 +154,17 @@ static OPrval parse_options(int *parsed_args,
         {
           if (!option_is_set(optiontext))
           {
-            env_error_set(env,
-                          "use exactly one of the options -ss, -ff, -a, -t");
+            error_set(err, "use exactly one of the options -ss, -ff, -a, -t");
             oprval = OPTIONPARSER_ERROR;
           }
         }
       }
     }
   }
-  option_parser_delete(op, env);
+  option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
   {
-    env_error_set(env,"superfluous program parameters");
+    error_set(err, "superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
   strarray_delete(charlistlen);
@@ -241,7 +238,7 @@ int gt_paircmp(int argc, const char **argv, Env *env)
 
   env_error_check(env);
 
-  oprval = parse_options(&parsed_args,&cmppairwise,argc, argv, env);
+  oprval = parse_options(&parsed_args,&cmppairwise,argc, argv, env_error(env));
   if (oprval == OPTIONPARSER_OK)
   {
     unsigned long testcases;

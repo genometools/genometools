@@ -33,41 +33,41 @@ typedef struct {
 } ChseqidsArguments;
 
 static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   OutputFileInfo *ofi;
   Option *option;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
 
   /* init */
   op = option_parser_new("[option ...] mapping_file [GFF3_file]",
                          "Change sequence ids by the mapping given in "
-                         "mapping_file.", env);
-  ofi = outputfileinfo_new(env);
+                         "mapping_file.");
+  ofi = outputfileinfo_new();
 
   /* -sort */
   option = option_new_bool("sort", "sort the GFF3 features after changing the "
                            "sequence ids\n(memory consumption is O(file_size))",
-                           &arguments->sort, false, env);
-  option_parser_add_option(op, option, env);
+                           &arguments->sort, false);
+  option_parser_add_option(op, option);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose, env);
-  option_parser_add_option(op, option, env);
+  option = option_new_verbose(&arguments->verbose);
+  option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi, env);
+  outputfile_register_options(op, &arguments->outfp, ofi);
 
   /* parse options */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 2, env);
+                                            versionfunc, 1, 2, err);
 
   /* free */
-  outputfileinfo_delete(ofi, env);
-  option_parser_delete(op, env);
+  outputfileinfo_delete(ofi);
+  option_parser_delete(op);
 
   return oprval;
 }
@@ -84,7 +84,7 @@ int gt_chseqids(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

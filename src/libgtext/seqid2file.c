@@ -17,8 +17,7 @@
 
 #include "libgtext/seqid2file.h"
 
-void seqid2file_options(OptionParser *op, Str *seqfile, Str *regionmapping,
-                        Env *env)
+void seqid2file_options(OptionParser *op, Str *seqfile, Str *regionmapping)
 {
   Option *seqfile_option, *regionmapping_option;
   assert(op && seqfile && regionmapping);
@@ -26,21 +25,21 @@ void seqid2file_options(OptionParser *op, Str *seqfile, Str *regionmapping,
   /* -seqfile */
   seqfile_option = option_new_string("seqfile", "set the sequence file from "
                                      "which to extract the features", seqfile,
-                                     NULL, env);
-  option_parser_add_option(op, seqfile_option, env);
+                                     NULL);
+  option_parser_add_option(op, seqfile_option);
 
   /* -regionmapping */
   regionmapping_option = option_new_string("regionmapping", "set file "
                                            "containing sequence-region to "
                                            "sequence file mapping",
-                                           regionmapping, NULL, env);
-  option_parser_add_option(op, regionmapping_option, env);
+                                           regionmapping, NULL);
+  option_parser_add_option(op, regionmapping_option);
 
   /* either option -seqfile or -regionmapping is mandatory */
   option_is_mandatory_either(seqfile_option, regionmapping_option);
 
   /* the options -seqfile and -regionmapping exclude each other */
-  option_exclude(seqfile_option, regionmapping_option, env);
+  option_exclude(seqfile_option, regionmapping_option);
 }
 
 RegionMapping* seqid2file_regionmapping_new(Str *seqfile, Str *regionmapping,

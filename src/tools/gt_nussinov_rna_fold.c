@@ -186,17 +186,17 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
 }
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Env *env)
+                            Error *err)
 {
   OptionParser *op;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("l_min alpha(G,C) alpha(A,U) alpha(G,U) RNA_sequence",
                          "Fold the supplied RNA sequence with the Nussinov "
-                         "algorithm.", env);
+                         "algorithm.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 5, 5, env);
-  option_parser_delete(op, env);
+                                            versionfunc, 5, 5, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -211,7 +211,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env)) {
+  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

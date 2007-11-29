@@ -51,39 +51,39 @@ static OPrval parse_options(int *parsed_args,
   env_error_check(env);
   op = option_parser_new("[option ...] -db file [...]",
                          doesa ? "Compute enhanced suffix array."
-                               : "Compute packed index.", env);
+                               : "Compute packed index.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optiondb = option_new_filenamearray("db","specify database files",
-                                      so->filenametab,env);
+                                      so->filenametab);
   option_is_mandatory(optiondb);
-  option_parser_add_option(op, optiondb, env);
+  option_parser_add_option(op, optiondb);
 
   optionsmap = option_new_string("smap",
                                  "specify file containing a symbol mapping",
-                                 so->str_smap, NULL, env);
-  option_parser_add_option(op, optionsmap, env);
+                                 so->str_smap, NULL);
+  option_parser_add_option(op, optionsmap);
 
   optiondna = option_new_bool("dna","input is DNA sequence",
-                              &so->isdna,false,env);
-  option_parser_add_option(op, optiondna, env);
+                              &so->isdna,false);
+  option_parser_add_option(op, optiondna);
 
   optionprotein = option_new_bool("protein","input is Protein sequence",
-                                  &so->isprotein,false,env);
-  option_parser_add_option(op, optionprotein, env);
+                                  &so->isprotein,false);
+  option_parser_add_option(op, optionprotein);
   optionplain = option_new_bool("plain","process as plain text",
-                                &so->isplain,false,env);
-  option_parser_add_option(op, optionplain, env);
+                                &so->isplain,false);
+  option_parser_add_option(op, optionplain);
 
   optiondir = option_new_string("dir",
                                 "specify reading direction "
                                 "(fwd, cpl, rev, rcl)",
-                                 dirarg, "fwd", env);
-  option_parser_add_option(op, optiondir, env);
+                                 dirarg, "fwd");
+  option_parser_add_option(op, optiondir);
 
   optionindexname = option_new_string("indexname",
                                       "specify name for index to be generated",
-                                      so->str_indexname, NULL, env);
-  option_parser_add_option(op, optionindexname, env);
+                                      so->str_indexname, NULL);
+  option_parser_add_option(op, optionindexname);
 
   optionpl = option_new_uint_min("pl",
                                  "specify prefix length for bucket sort\n"
@@ -92,74 +92,73 @@ static OPrval parse_options(int *parsed_args,
                                  "automatically determined",
                                  &so->prefixlength,
                                  PREFIXLENGTH_AUTOMATIC,
-                                 (unsigned int) 1,
-                                 env);
+                                 (unsigned int) 1);
   option_argument_is_optional(optionpl);
-  option_parser_add_option(op, optionpl, env);
+  option_parser_add_option(op, optionpl);
 
   option = option_new_uint_min("parts",
                                "specify number of parts in which the "
                                "sequence is processed",
                                &so->numofparts,
                                (unsigned int) 1,
-                               (unsigned int) 1,
-                               env);
-  option_parser_add_option(op, option, env);
+                               (unsigned int) 1);
+  option_parser_add_option(op, option);
 
   option = option_new_string("sat",
                              "dev-opt: specify kind of sequence representation",
-                             so->str_sat, NULL, env);
-  option_parser_add_option(op, option, env);
+                             so->str_sat, NULL);
+  option_parser_add_option(op, option);
 
   option = option_new_bool("tis",
                            "output transformed and encoded input "
                            "sequence to file",
                            &so->outtistab,
-                           false,env);
-  option_parser_add_option(op, option, env);
+                           false);
+  option_parser_add_option(op, option);
 
   optiondes = option_new_bool("des",
                               "output sequence descriptions to file ",
                               &so->outdestab,
-                              false,env);
-  option_parser_add_option(op, optiondes, env);
+                              false);
+  option_parser_add_option(op, optiondes);
 
   if (doesa)
   {
     option = option_new_bool("suf",
                              "output suffix array (suftab) to file",
                              &so->outsuftab,
-                             false,env);
-    option_parser_add_option(op, option, env);
+                             false);
+    option_parser_add_option(op, option);
 
     option = option_new_bool("lcp",
                              "output lcp table (lcptab) to file",
                              &so->outlcptab,
-                             false,env);
-    option_parser_add_option(op, option, env);
+                             false);
+    option_parser_add_option(op, option);
     option = option_new_bool("bwt",
                              "output Burrows-Wheeler Transformation "
                              "(bwttab) to file",
                              &so->outbwttab,
-                             false,env);
-    option_parser_add_option(op, option, env);
+                             false);
+    option_parser_add_option(op, option);
 
   } else
   {
     registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
-                               so->str_indexname, env);
+                               so->str_indexname);
   }
 
   option = option_new_bool("v",
                            "be verbose ",
                            &so->beverbose,
-                           false,env);
-  option_parser_add_option(op, option, env);
+                           false);
+  option_parser_add_option(op, option);
 
-  option_exclude(optionsmap, optiondna, env);
-  option_exclude(optionsmap, optionprotein, env);
-  option_exclude(optiondna, optionprotein, env);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+  option_exclude(optionsmap, optiondna);
+  option_exclude(optionsmap, optionprotein);
+  option_exclude(optiondna, optionprotein);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                               env_error(env));
   if (oprval == OPTIONPARSER_OK)
   {
     if (!option_is_set(optionindexname))
@@ -173,7 +172,7 @@ static OPrval parse_options(int *parsed_args,
       {
         char *basenameptr;
 
-        basenameptr = getbasename(strarray_get(so->filenametab,0),env);
+        basenameptr = getbasename(strarray_get(so->filenametab,0));
         str_set(so->str_indexname,basenameptr);
         ma_free(basenameptr);
       }
@@ -203,7 +202,7 @@ static OPrval parse_options(int *parsed_args,
     computePackedIndexDefaults(&so->bwtIdxParams,
                                BWTBaseFeatures & ~BWTProperlySorted, env);
   }
-  option_parser_delete(op, env);
+  option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
   {
     env_error_set(env,"superfluous program parameters");

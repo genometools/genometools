@@ -55,11 +55,11 @@ static int show_tool_name(void *key, void *value, void *data, Error *e)
   return 0;
 }
 
-int toolbox_show(const char *progname, void *toolbox, Env *env)
+int toolbox_show(const char *progname, void *toolbox, Error *err)
 {
   Toolbox *tb;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
   assert(toolbox);
   tb = (Toolbox*) toolbox;
   printf("\nTools:\n\n");

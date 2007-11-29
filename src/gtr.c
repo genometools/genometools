@@ -122,7 +122,7 @@ GTR* gtr_new(Env *env)
   luaopen_lfs(gtr->L); /* open Lua filesystem */
 #ifdef LIBGTVIEW
   gtr->config = config_new_with_state(gtr->L, env);
-  config_file = gtdata_get_path(env_error_get_progname(env), env);
+  config_file = gtdata_get_path(env_error_get_progname(env), env_error(env));
   str_append_cstr(config_file, "/config/view.lua");
   if (file_exists(str_get(config_file))) {
     if (config_load_file(gtr->config, config_file, env)) {
@@ -139,12 +139,12 @@ GTR* gtr_new(Env *env)
   return gtr;
 }
 
-static int show_gtr_help(const char *progname, void *data, Env *env)
+static int show_gtr_help(const char *progname, void *data, Error *err)
 {
   int had_err;
-  had_err = toolbox_show(progname, data, env);
+  had_err = toolbox_show(progname, data, err);
   if (!had_err)
-    had_err = gtdata_show_help(progname, NULL, env);
+    had_err = gtdata_show_help(progname, NULL, err);
   return had_err;
 }
 
@@ -159,24 +159,24 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   assert(gtr);
   op = option_parser_new("[option ...] [tool | script] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
-                          "(http://genometools.org).", env);
+                          "(http://genometools.org).");
   option_parser_set_comment_func(op, show_gtr_help, gtr->toolbox);
   o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
-                      "'script'", &gtr->interactive, false, env);
+                      "'script'", &gtr->interactive, false);
   option_hide_default(o);
-  option_parser_add_option(op, o, env);
-  o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false,
-                      env);
+  option_parser_add_option(op, o);
+  o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
   option_hide_default(o);
-  option_parser_add_option(op, o, env);
-  o = option_new_debug(&gtr->debug, env);
-  option_parser_add_option(op, o, env);
+  option_parser_add_option(op, o);
+  o = option_new_debug(&gtr->debug);
+  option_parser_add_option(op, o);
   o = option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
-                          "file", gtr->testspacepeak, env);
+                          "file", gtr->testspacepeak);
   option_is_development_option(o);
-  option_parser_add_option(op, o, env);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
-  option_parser_delete(op, env);
+  option_parser_add_option(op, o);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                               env_error(env));
+  option_parser_delete(op);
   return oprval;
 }
 

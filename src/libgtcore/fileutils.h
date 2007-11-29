@@ -32,11 +32,11 @@ bool           file_is_newer(const char *a, const char *b);
 unsigned long  file_number_of_lines(const char*);
 
 /* set <path> to the dirname of <file>, if it has one, to "" otherwise */
-void           file_dirname(Str *path, const char *file, Env*);
+void           file_dirname(Str *path, const char *file, Error*);
 
 /* find 'file' in $PATH, if it has no dirname; set 'path' to dirname otherwise.
    sets 'path' to the empty string if 'file' could not be found in $PATH. */
-int            file_find_in_path(Str *path, const char *file, Env*);
+int            file_find_in_path(Str *path, const char *file, Error*);
 
 off_t          files_estimate_total_size(const StrArray *filenames);
 

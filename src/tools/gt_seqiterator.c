@@ -28,23 +28,21 @@
 #include "libgtmatch/format64.h"
 
 static OPrval parse_options(bool *verbose,int *parsed_args,
-                            int argc, const char **argv,Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
 
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[options] file [...]",
-                         "Parse the supplied Fasta files.",
-                         env);
+                         "Parse the supplied Fasta files.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option= option_new_bool("v","be verbose",verbose,false,env);
-  option_parser_add_option(op, option, env);
+  option= option_new_bool("v","be verbose",verbose,false);
+  option_parser_add_option(op, option);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, (unsigned int) 1,
-                                        env);
-  option_parser_delete(op, env);
+                                        versionfunc, (unsigned int) 1, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -62,7 +60,7 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&verbose,&parsed_args, argc, argv, env)) {
+  switch (parse_options(&verbose,&parsed_args, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

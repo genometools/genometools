@@ -26,27 +26,27 @@ typedef struct {
 } RegionCovArguments;
 
 static OPrval parse_options(int *parsed_args, RegionCovArguments *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] GFF3_file",
                          "Show which parts of the given sequence regions are "
-                         "covered by features.", env);
+                         "covered by features.");
   /* -maxfeaturedist */
   o = option_new_ulong("maxfeaturedist", "set the maximum distance two "
                        "features can have while still being in the same "
-                       "``cluster''", &arguments->max_feature_dist, 0, env);
-  option_parser_add_option(op, o, env);
+                       "``cluster''", &arguments->max_feature_dist, 0);
+  option_parser_add_option(op, o);
   /* -v */
-  o = option_new_verbose(&arguments->verbose, env);
-  option_parser_add_option(op, o, env);
+  o = option_new_verbose(&arguments->verbose);
+  option_parser_add_option(op, o);
   /* parse */
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 1, env);
-  option_parser_delete(op, env);
+                                            versionfunc, 1, 1, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -60,7 +60,7 @@ int gt_regioncov(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       return -1;

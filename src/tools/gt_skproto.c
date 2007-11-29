@@ -27,14 +27,13 @@
 #define MAX_LINE_LENGTH  80
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Env *env)
+                            Error *err)
 {
   OptionParser *op;
   OPrval oprval;
-  op = option_parser_new("[C-file ...]", "Extract Header-File from C-file(s).",
-                         env);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
-  option_parser_delete(op, env);
+  op = option_parser_new("[C-file ...]", "Extract Header-File from C-file(s).");
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -166,7 +165,7 @@ int gt_skproto(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env)) {
+  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

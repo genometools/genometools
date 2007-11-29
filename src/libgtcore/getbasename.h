@@ -46,7 +46,7 @@
 
 #include "libgtcore/env.h"
 
-char* getbasename(const char *path, Env*);
+char* getbasename(const char *path);
 int   getbasename_unit_test(Env*);
 
 #endif

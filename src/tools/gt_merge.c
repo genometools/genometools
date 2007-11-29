@@ -23,19 +23,19 @@
 #include "libgtext/merge_stream.h"
 
 static OPrval parse_options(int *parsed_args, GenFile **outfp, int argc,
-                            const char **argv, Env *env)
+                            const char **argv, Error *err)
 {
   OptionParser *op;
   OutputFileInfo *ofi;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] [GFF3_file ...]",
-                         "Merge sorted GFF3 files in sorted fashion.", env);
-  ofi = outputfileinfo_new(env);
-  outputfile_register_options(op, outfp, ofi, env);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
-  outputfileinfo_delete(ofi, env);
-  option_parser_delete(op, env);
+                         "Merge sorted GFF3 files in sorted fashion.");
+  ofi = outputfileinfo_new();
+  outputfile_register_options(op, outfp, ofi);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  outputfileinfo_delete(ofi);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -51,7 +51,7 @@ int gt_merge(int argc, const char **argv, Env *env)
   GenFile *outfp;
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &outfp, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &outfp, argc, argv, env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

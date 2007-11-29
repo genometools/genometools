@@ -29,7 +29,7 @@ Toolbox* toolbox_new(void);
 void     toolbox_add(Toolbox*, const char *toolname, Tool);
 Tool     toolbox_get(const Toolbox*, const char *toolname);
 /* shows all tools except tools with toolname ``dev'' */
-int      toolbox_show(/*@unused@*/ const char *progname, void *toolbox, Env*);
+int      toolbox_show(/*@unused@*/ const char *progname, void *toolbox, Error*);
 void     toolbox_delete(Toolbox*);
 
 #endif

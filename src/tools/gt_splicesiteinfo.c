@@ -32,28 +32,28 @@ typedef struct {
 
 static OPrval parse_options(int *parsed_args,
                             SpliceSiteInfoArguments *arguments, int argc,
-                            const char **argv, Env *env)
+                            const char **argv, Error *err)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] [GFF3_file ...]", "Show information "
-                         "about splice sites given in GFF3 files.", env);
+                         "about splice sites given in GFF3 files.");
 
   /* -seqfile and -regionmapping */
-  seqid2file_options(op, arguments->seqfile, arguments->regionmapping, env);
+  seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
 
   /* -addintrons */
   option = option_new_bool("addintrons", "add intron features between existing "
                            "exon features\n(before computing the information "
-                           "to be shown)", &arguments->addintrons, false, env);
-  option_parser_add_option(op, option, env);
+                           "to be shown)", &arguments->addintrons, false);
+  option_parser_add_option(op, option);
 
   /* parse */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
-  option_parser_delete(op, env);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -71,7 +71,8 @@ int gt_splicesiteinfo(int argc, const char **argv, Env *env)
   /* option parsing */
   arguments.seqfile = str_new();
   arguments.regionmapping = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv,
+                        env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.regionmapping);

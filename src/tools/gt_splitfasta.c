@@ -21,20 +21,20 @@
 #include "libgtcore/xansi.h"
 
 static OPrval parse_options(int *parsed_args, unsigned long *max_filesize_in_MB,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] fastafile","Split the supplied fasta "
-                         "file.", env);
+                         "file.");
   o = option_new_ulong_min("targetsize", "set the target file size in MB",
-                           max_filesize_in_MB, 50, 1, env);
-  option_parser_add_option(op, o, env);
+                           max_filesize_in_MB, 50, 1);
+  option_parser_add_option(op, o);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 1, env);
-  option_parser_delete(op, env);
+                                            versionfunc, 1, 1, err);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -58,9 +58,11 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
                 max_filesize_in_MB, separator_pos;
   int read_bytes, parsed_args, had_err = 0;
   char buf[BUFSIZ];
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &max_filesize_in_MB, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &max_filesize_in_MB, argc, argv,
+                        env_error(env))) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
