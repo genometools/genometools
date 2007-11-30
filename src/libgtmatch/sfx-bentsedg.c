@@ -25,6 +25,8 @@
 #include "sfx-codespec.h"
 #include "intcode-def.h"
 #include "lcpinterval.h"
+#include "sfx-lcpsub.h"
+#include "spacedef.h"
 #include "encseq-def.h"
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
@@ -161,7 +163,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Seqpos totallength,
                              ArrayMKVstack *mkvauxstack,
                              Suffixptr *l,Suffixptr *r,Seqpos d,
-                             Seqpos *lcpsubtab,
+                             Lcpsubtab *lcpsubtab,
                              Env *env)
 {
   Suffixptr *left, *right, *leftplusw;
@@ -284,7 +286,6 @@ static unsigned int bucketboundaries(Lcpinterval *lcpitv,
                                      Seqpos totalwidth,
                                      unsigned int rightchar,
                                      unsigned int numofchars)
-                             
 {
   lcpitv->left = leftborder[code];
   if (code == maxcode)
@@ -304,7 +305,7 @@ static unsigned int bucketboundaries(Lcpinterval *lcpitv,
   assert(rightchar == code % numofchars);
   if (rightchar == numofchars - 1)
   {
-    Seqpos specialcodes 
+    Seqpos specialcodes
       = countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
     if (lcpitv->right >= specialcodes)
     {
@@ -321,12 +322,12 @@ static unsigned int bucketboundaries(Lcpinterval *lcpitv,
    return rightchar;
 }
 
-Seqpos determinemaxbucketsize(const Seqpos *leftborder,
-                              const Seqpos *countspecialcodes,
-                              const Codetype mincode,
-                              const Codetype maxcode,
-                              Seqpos totalwidth,
-                              unsigned int numofchars)
+static Seqpos determinemaxbucketsize(const Seqpos *leftborder,
+                                     const Seqpos *countspecialcodes,
+                                     const Codetype mincode,
+                                     const Codetype maxcode,
+                                     Seqpos totalwidth,
+                                     unsigned int numofchars)
 {
   Seqpos maxbucketsize = (Seqpos) 1, bsize;
   unsigned int rightchar = mincode % numofchars;
@@ -355,6 +356,28 @@ Seqpos determinemaxbucketsize(const Seqpos *leftborder,
   return maxbucketsize;
 }
 
+ struct Lcpsubtab
+{
+  Seqpos *spaceSeqpos;
+  unsigned long nextfreeSeqpos, allocatedSeqpos;
+};
+
+void freelcpsubtab(Lcpsubtab **lcpsubtab,Env *env)
+{
+  FREEARRAY(*lcpsubtab,Seqpos);
+  FREESPACE(*lcpsubtab);
+  return;
+}
+
+Lcpsubtab *newlcpsubtab(Env *env)
+{
+  Lcpsubtab *lcpsubtab;
+
+  ALLOCASSIGNSPACE(lcpsubtab,NULL,Lcpsubtab,1);
+  INITARRAY(lcpsubtab,Seqpos);
+  return lcpsubtab;
+}
+
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
                     Readmode readmode,
@@ -365,7 +388,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos totalwidth,
-                    Seqpos *lcpsubtab,
+                    Lcpsubtab *lcpsubtab,
                     Env *env)
 {
   Codetype code;
@@ -373,8 +396,21 @@ void sortallbuckets(Seqpos *suftabptr,
   Seqpos totallength = getencseqtotallength(encseq);
   ArrayMKVstack mkvauxstack;
   Lcpinterval lcpitv;
+  Seqpos maxbucketsize;
 
   env_error_check(env);
+  maxbucketsize = determinemaxbucketsize(leftborder,
+                                         countspecialcodes,
+                                         mincode,
+                                         maxcode,
+                                         totalwidth,
+                                         numofchars);
+  if (maxbucketsize > lcpsubtab->allocatedSeqpos)
+  {
+    lcpsubtab->allocatedSeqpos = maxbucketsize;
+    ALLOCASSIGNSPACE(lcpsubtab->spaceSeqpos,lcpsubtab->spaceSeqpos,Seqpos,
+                     lcpsubtab->allocatedSeqpos);
+  }
   INITARRAY(&mkvauxstack,MKVstack);
   for (code = mincode; code <= maxcode; code++)
   {

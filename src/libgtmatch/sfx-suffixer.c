@@ -31,6 +31,7 @@
 #include "sfx-codespec.h"
 #include "sfx-partssuf-def.h"
 #include "sfx-suffixer.h"
+#include "sfx-lcpsub.h"
 #include "stamp.h"
 
 #include "sfx-mappedstr.pr"
@@ -72,8 +73,8 @@ DECLAREARRAYSTRUCT(Seqpos);
   const Encodedsequence *encseq;
   Readmode readmode;
   Seqpos widthofpart,
-         totallength,
-         *lcpsubtab;
+         totallength;
+  Lcpsubtab *lcpsubtab;
   unsigned int part,
                numofchars,
                prefixlength;
@@ -300,7 +301,10 @@ void freeSfxiterator(Sfxiterator **sfi,Env *env)
   FREESPACE((*sfi)->leftborder);
   FREESPACE((*sfi)->countspecialcodes);
   FREESPACE((*sfi)->suftab);
-  FREESPACE((*sfi)->lcpsubtab);
+  if ((*sfi)->lcpsubtab != NULL)
+  {
+    freelcpsubtab(&(*sfi)->lcpsubtab,env);
+  }
   freesuftabparts((*sfi)->suftabparts,env);
   FREESPACE(*sfi);
 }
@@ -348,7 +352,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->prefixlength = prefixlength;
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
-    sfi->lcpsubtab = NULL;
+    sfi->lcpsubtab = newlcpsubtab(env);
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
@@ -452,8 +456,6 @@ static void preparethispart(Sfxiterator *sfi,
                             Measuretime *mtime,
                             Env *env)
 {
-  Seqpos maxbucketsize;
-
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
@@ -479,14 +481,6 @@ static void preparethispart(Sfxiterator *sfi,
   {
     deliverthetime(stdout,mtime,"sorting the buckets",env);
   }
-  maxbucketsize 
-    = determinemaxbucketsize(sfi->leftborder,
-                             sfi->countspecialcodes,
-                             sfi->currentmincode,
-                             sfi->currentmaxcode,
-                             stpgetcurrentsumofwdith(sfi->part,
-                                                     sfi->suftabparts),
-                             sfi->numofchars);
   sortallbuckets(sfi->suftabptr,
                  sfi->encseq,
                  sfi->readmode,
