@@ -352,7 +352,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->prefixlength = prefixlength;
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
-    sfi->lcpsubtab = newlcpsubtab(env);
+    sfi->lcpsubtab = newlcpsubtab(prefixlength,numofchars,env);
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
@@ -456,6 +456,7 @@ static void preparethispart(Sfxiterator *sfi,
                             Measuretime *mtime,
                             Env *env)
 {
+  Seqpos totalwidth;
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
@@ -481,6 +482,7 @@ static void preparethispart(Sfxiterator *sfi,
   {
     deliverthetime(stdout,mtime,"sorting the buckets",env);
   }
+  totalwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
   sortallbuckets(sfi->suftabptr,
                  sfi->encseq,
                  sfi->readmode,
@@ -490,9 +492,10 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->prefixlength,
                  sfi->currentmincode,
                  sfi->currentmaxcode,
-                 stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts),
+                 totalwidth,
                  sfi->lcpsubtab,
                  env);
+  assert(totalwidth > 0);
   sfi->part++;
 }
 

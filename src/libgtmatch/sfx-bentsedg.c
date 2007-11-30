@@ -28,6 +28,7 @@
 #include "sfx-lcpsub.h"
 #include "spacedef.h"
 #include "encseq-def.h"
+#include "turnwheels.h"
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
@@ -41,7 +42,20 @@
 
 #define PTR2INT(VAR,I) DEREF(VAR,cptr = *(I)+depth,cptr)
 
-#define STRINGCOMPARE(S,T,OFFSET)\
+#define WITHLCP
+
+#ifdef WITHLCP
+#define LCPINDEX(I)        ((I) - lcpsubtab->suftabbase)
+#define SETLCP(I,V)        lcpsubtab->spaceSeqpos[I] = V
+#define EVALLCPLEN(LL,T)   LL = (Seqpos) (tptr - (T))
+#else
+#define SETLCP(I,V)        /* Nothing */
+#define EVALLCPLEN(LL,T)   /* Nothing */
+#endif
+
+#define UNDEFLCP(TLEN) ((TLEN)+1)
+
+#define STRINGCOMPARE(S,T,OFFSET,LL)\
         for (sptr = (S)+(OFFSET), tptr = (T)+(OFFSET); /* Nothing */;\
              sptr++, tptr++)\
         {\
@@ -49,6 +63,7 @@
           cct = DEREF(tmptvar,tptr,tptr);\
           if (ccs != cct)\
           {\
+            EVALLCPLEN(LL,T);\
             break;\
           }\
         }
@@ -76,7 +91,8 @@
 #define SUBSORT(WIDTH,BORDER,LEFT,RIGHT,DEPTH)\
         if ((WIDTH) <= (BORDER))\
         {\
-          insertionsort(encseq,readmode,totallength,DEPTH,LEFT,RIGHT);\
+          insertionsort(encseq,lcpsubtab,readmode,totallength,\
+                        DEPTH,LEFT,RIGHT);\
         } else\
         {\
           PUSHMKVSTACK(LEFT,RIGHT,DEPTH);\
@@ -95,6 +111,14 @@
         width = (Seqpos) ((R) - (L) + 1)
 
 typedef Seqpos Suffixptr;
+
+ struct Lcpsubtab
+{
+  Seqpos *spaceSeqpos;
+  unsigned long nextfreeSeqpos, allocatedSeqpos;
+  const Seqpos *suftabbase;
+  Turningwheel *tw;
+};
 
 static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Readmode readmode,
@@ -124,22 +148,33 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
 }
 
 static void insertionsort(const Encodedsequence *encseq,
+                          Lcpsubtab *lcpsubtab,
                           Readmode readmode,
                           Seqpos totallength,
                           Seqpos depth,
-                          Suffixptr *left,
-                          Suffixptr *right)
+                          Suffixptr *leftptr,
+                          Suffixptr *rightptr)
 {
-  Suffixptr sptr, tptr;
-  Suffixptr *pi, *pj, temp;
+  Suffixptr sptr, tptr, *pi, *pj, temp;
   Seqpos ccs, cct;
   Uchar tmpsvar, tmptvar;
+#ifdef WITHLCP
+  Seqpos lcpindex, lcplen;
+#endif
 
-  for (pi = left + 1; pi <= right; pi++)
+  for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
-    for (pj = pi; pj > left; pj--)
+    for (pj = pi; pj > leftptr; pj--)
     {
-      STRINGCOMPARE(*(pj-1),*pj,depth);
+      STRINGCOMPARE(*(pj-1),*pj,depth,lcplen);
+#ifdef WITHLCP
+      lcpindex = LCPINDEX(pj);
+      if(ccs > cct && pj < pi)
+      {
+        SETLCP(lcpindex+1,lcpsubtab->spaceSeqpos[lcpindex]);
+      }
+      SETLCP(lcpindex,lcplen);
+#endif
       if (ccs < cct)
       {
         break;
@@ -175,7 +210,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
   {
-    insertionsort(encseq,readmode,totallength,d,l,r);
+    insertionsort(encseq,lcpsubtab,readmode,totallength,d,l,r);
     return;
   }
   left = l;
@@ -254,6 +289,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     assert(pd >= pc);
     if ((w = (Seqpos) (pd-pc)) > 0)
     {
+      SETLCP(LCPINDEX(right-w+1),depth);
       SUBSORT(w,SMALLSIZE,right-w+1,right,depth);
     }
     assert(pb >= pa);
@@ -268,6 +304,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     }
     if (w > 0)
     {
+      SETLCP(LCPINDEX(leftplusw),depth);
       SUBSORT(w,SMALLSIZE,left,leftplusw-1,depth);
     }
     if (mkvauxstack->nextfreeMKVstack == 0)
@@ -356,26 +393,34 @@ static Seqpos determinemaxbucketsize(const Seqpos *leftborder,
   return maxbucketsize;
 }
 
- struct Lcpsubtab
-{
-  Seqpos *spaceSeqpos;
-  unsigned long nextfreeSeqpos, allocatedSeqpos;
-};
-
 void freelcpsubtab(Lcpsubtab **lcpsubtab,Env *env)
 {
   FREEARRAY(*lcpsubtab,Seqpos);
+  freeTurningwheel(&(*lcpsubtab)->tw,env);
   FREESPACE(*lcpsubtab);
   return;
 }
 
-Lcpsubtab *newlcpsubtab(Env *env)
+Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars,
+                        Env *env)
 {
   Lcpsubtab *lcpsubtab;
 
   ALLOCASSIGNSPACE(lcpsubtab,NULL,Lcpsubtab,1);
   INITARRAY(lcpsubtab,Seqpos);
+  lcpsubtab->tw = newTurningwheel(prefixlength,numofchars,env);
   return lcpsubtab;
+}
+
+static void setlcpundef(Lcpsubtab *lcpsubtab,Seqpos maxbucketsize,
+                        Seqpos totallength)
+{
+  Seqpos i;
+
+  for(i=0; i<maxbucketsize; i++)
+  {
+    lcpsubtab->spaceSeqpos[i] = UNDEFLCP(totallength);
+  }
 }
 
 void sortallbuckets(Seqpos *suftabptr,
@@ -411,6 +456,7 @@ void sortallbuckets(Seqpos *suftabptr,
     ALLOCASSIGNSPACE(lcpsubtab->spaceSeqpos,lcpsubtab->spaceSeqpos,Seqpos,
                      lcpsubtab->allocatedSeqpos);
   }
+  setlcpundef(lcpsubtab,maxbucketsize,totallength);
   INITARRAY(&mkvauxstack,MKVstack);
   for (code = mincode; code <= maxcode; code++)
   {
@@ -422,8 +468,14 @@ void sortallbuckets(Seqpos *suftabptr,
                                  totalwidth,
                                  rightchar,
                                  numofchars);
+    if(code > 0)
+    {
+      (void) nextTurningwheel(lcpsubtab->tw);
+    }
     if (lcpitv.left < lcpitv.right)
     {
+      SETLCP(0,minchangedTurningwheel(lcpsubtab->tw));
+      lcpsubtab->suftabbase = suftabptr + lcpitv.left;
       bentleysedgewick(encseq,
                        readmode,
                        totallength,

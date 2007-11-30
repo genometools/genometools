@@ -1,12 +1,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-Seqpos determinemaxbucketsize(const Seqpos *leftborder,
-                              const Seqpos *countspecialcodes,
-                              const Codetype mincode,
-                              const Codetype maxcode,
-                              Seqpos totalwidth,
-                              unsigned int numofchars);
+void freelcpsubtab(Lcpsubtab **lcpsubtab,Env *env);
+
+Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars,
+                        Env *env);
 
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,

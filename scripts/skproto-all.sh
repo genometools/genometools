@@ -47,6 +47,7 @@ sfx-partssuf.c
 sfx-readint.c
 sfx-suffixer.c
 test-pairwise.c
+turnwheels.c
 verbose.c
 END_OF_TEXT
 

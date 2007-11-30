@@ -15,15 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LCPSUBTAB_H
-#define LCPSUBTAB_H
+#ifndef TURNWHEELS_H
+#define TURNWHEELS_H
 
 #include "libgtcore/env.h"
 
-typedef struct Lcpsubtab Lcpsubtab;
+typedef struct Turningwheel Turningwheel;
+  
+Turningwheel *newTurningwheel(unsigned int numofwheels,
+                              unsigned int asize,
+                              Env *env);
 
-void freelcpsubtab(Lcpsubtab **lcpsubtab,Env *env);
-Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars,
-                        Env *env);
+bool nextTurningwheel(Turningwheel *tw);
+
+unsigned int minchangedTurningwheel(Turningwheel *tw);
+
+void freeTurningwheel(Turningwheel **tw,Env *env);
 
 #endif
