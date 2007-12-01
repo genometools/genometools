@@ -33,6 +33,8 @@ enum {
   SPECIAL_RANGE = 1,
 };
 
+/** The constructor for the base index must conform to this
+ * signature. */
 typedef struct encIdxSeq *(*indexCreateFunc)
   (void *src, Seqpos totalLen, const Str *projectName,
    const union seqBaseEncParam *params, size_t numExtHeaders,
@@ -41,8 +43,31 @@ typedef struct encIdxSeq *(*indexCreateFunc)
    void **headerCBData, bitInsertFunc biFunc, BitOffset cwBitsPerPos,
    BitOffset maxBitsPerPos, void *cbState, Env *env);
 
+/** There must be a function to report the position of the
+ * null-rotation in the suffix array. */
 typedef DefinedSeqpos (*reportLongest)(void *state);
 
+/**
+ * To enrich a base index with the information required for a BWT
+ * index, wrap the base index constructor in a call to createBWTSeqGeneric.
+ * @param params holds all parameters for both, the BWT sequence
+ * object and the base index
+ * @param createIndex wrapped constructor
+ * @param baseSrc passed to createIndex
+ * @param totalLen length of the sorted sequence plus terminator symbol
+ * @param alphabet encoding to use for symbols of the input sequence
+ * @param specialRanges one value describing for each range of
+ * alphabet how symbols in this range are sorted
+ * @param readOrigSeq makes the original sequence available
+ * @param origSeqState opaque sequence object to pass to readOrigSeq
+ * @param readNextSeqpos stream reader for the values of the suffix
+ * array
+ * @param spReadState opaque suffix array source object to pass to
+ * readNextSeqpos
+ * @param lrepFunc reports the position of the null-rotation
+ * @param lrepState passed to lrepFunc
+ * @param env
+ */
 extern EISeq *
 createBWTSeqGeneric(const struct bwtParam *params,
                     indexCreateFunc createIndex, void *baseSrc, Seqpos totalLen,

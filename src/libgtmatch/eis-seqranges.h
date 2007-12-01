@@ -17,6 +17,17 @@
 #ifndef EIS_SEQRANGES_H
 #define EIS_SEQRANGES_H
 
+/**
+ * @file eis-seqranges.h
+ * @brief Store lists of ranges of symbols.
+ *
+ * This is intended to reduce the storage overhead introduced by the
+ * presence of a special class of symbols in a sequence. These symbols
+ * are generally expected to:
+ * - be underrepresented in the sequence
+ * - often form contiguous ranges
+ * - require special treatment by algorithms
+ */
 #include <stdlib.h>
 
 #include "libgtcore/env.h"
@@ -24,64 +35,181 @@
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 
+/**
+ * Select wether certain internal data structures are constructed with
+ * these flags.
+ */
 enum SRLFeatures {
-  SRL_NO_FEATURES = 0,
-  SRL_PARTIAL_SYMBOL_SUMS = 1 << 0,
+  SRL_NO_FEATURES = 0,              /**< build no special structures */
+  SRL_PARTIAL_SYMBOL_SUMS = 1 << 0, /**< for every range also keep
+                                     * sums of other special symbols
+                                     * encountered up to the
+                                     * beginning of the range */
 };
 
+/**
+ * Used to remember previous queries.
+ */
 typedef size_t seqRangeListSearchHint;
 
+/**
+ * @brief Constructor for list of sequence ranges.
+ * @param rangesStartNum allocate space for this many ranges
+ * @param alphabet map stored symbols according to this alphabet
+ * @param features see enum SRLFeatures for a description
+ * @param env
+ * @return newly constructed list
+ */
 extern struct seqRangeList *
 newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
                 enum SRLFeatures features, Env *env);
-
+/**
+ * @brief Shrink the list according to the exact number of ranges stored.
+ * @param rangeList
+ * @param env
+ */
 extern void
 SRLCompact(struct seqRangeList *rangeList, Env *env);
 
+/**
+ * @brief Destructor for sequence range lists.
+ * @param rangeList
+ * @param env
+ */
 extern void
 deleteSeqRangeList(struct seqRangeList *rangeList, Env *env);
 
+/**
+ * @brief Add a new range at the end of the current list.
+ * @param rangeList
+ * @param pos start of new range
+ * @param len length of new range
+ * @param sym the range is a contiguous sequence of this symbol
+ * @param env
+ */
 extern void
 SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
                   Symbol sym, Env *env);
 
+/**
+ * @brief Add a new range of length one
+ * @param rangeList
+ * @param pos at this position
+ * @param sym this symbol occurs
+ * @param env
+ */
 extern void
 SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos,
                Symbol sym, Env *env);
 
+/**
+ * @brief Initialize a search hint by this function.
+ * @param rangeList
+ * @param hint points to storage
+ */
 extern void
 SRLInitListSearchHint(struct seqRangeList *rangeList,
                       seqRangeListSearchHint *hint);
 
+/**
+ * @brief Find the range overlapping or if no such range exists
+ * follows pos.
+ * @param rangeList
+ * @param pos
+ * @param hint
+ * @return NULL if no range overlaps or succeeds pos
+ */
 struct seqRange *
 SRLFindPositionNext(struct seqRangeList *rangeList, Seqpos pos,
                     seqRangeListSearchHint *hint);
 
+/**
+ * @brief This predicate is true if position is within one of the
+ * ranges of the range list.
+ * @param rangeList
+ * @param pos
+ * @param hint
+ * @param symAtPos if not NULL, the symbol of the range overlapping
+ * pos is written to this address, if such a range exists
+ * @return true if an overlap exits, false if not
+ */
 extern int
 SRLOverlapsPosition(struct seqRangeList *rangeList, Seqpos pos,
                     seqRangeListSearchHint *hint, Symbol *symAtPos);
 
+/**
+ * @brief For the sequence region [start..end-1] count the number of
+ * occurrences for each symbol represented in the overlapping ranges.
+ * @param rangeList
+ * @param start
+ * @param end
+ * @param occStore for each symbol occStore[MRAEncMapSymbol(alphabet,
+ * sym)] is set to the number of occurrences of sym, where alphabet is
+ * the alphabet originally used in the constructor
+ * @param hint
+ */
 extern void
 SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
                       Seqpos end, Seqpos *occStore,
                       seqRangeListSearchHint *hint);
 
+/**
+ * @brief Compute the occurrence count for one symbol in a given region.
+ * @param rangeList
+ * @param start
+ * @param end
+ * @param sym only account for ranges matching this symbol
+ * @param hint
+ */
 extern Seqpos
 SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
                           Seqpos end, Symbol sym, seqRangeListSearchHint *hint);
 
+/**
+ * @brief Sum over the occurrence counts for all symbols in a given region.
+ * @param rangeList
+ * @param start
+ * @param end
+ * @param hint
+ */
 extern Seqpos
 SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
                               Seqpos end, seqRangeListSearchHint *hint);
 
+/**
+ * @brief Overwrite all positions in a string that coincide with
+ * ranges in the list with the symbol for that range.
+ *
+ * @param rangeList
+ * @param alphabet
+ * @param subString write symbols in ranges at subStringOffset+i to subString[i]
+ * @param start start only use ranges overlapping [start..end-1]
+ * @param len
+ * @param subStringOffset offset of subString relative to the
+ * underlying sequence
+ * @param hint
+ */
 extern void
 SRLapplyRangesToSubString(struct seqRangeList *rangeList, MRAEnc *alphabet,
                           Symbol *subString, Seqpos start, Seqpos len,
                           Seqpos subStringOffset, seqRangeListSearchHint *hint);
 
+/**
+ * @brief Save a range list structure to file.
+ * @param rangeList
+ * @param fp file to save rangeList to
+ * @return <0 if an error occurred
+ */
 extern int
 SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp);
 
+/**
+ * @brief Restore a sequence range list from file.
+ * @param fp read from this file
+ * @param alphabet symbols are interpreted under this alphabet
+ * @param features see enum SRLFeatures
+ * @param env
+ */
 extern struct seqRangeList *
 SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
                   enum SRLFeatures features, Env *env);

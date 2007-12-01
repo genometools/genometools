@@ -25,14 +25,22 @@
 #include "libgtmatch/seqpos-def.h"
 
 #ifdef Seqposequalsunsignedint
+/** retrieve Seqpos from BitString */
 #define bsGetSeqpos bsGetUInt32
+/** store Seqpos in BitString */
 #define bsStoreSeqpos bsStoreUInt32
+/** store array of Seqpos values in BitString  */
 #define bsStoreUniformSeqposArray bsStoreUniformUInt32Array
+/** how many bits are required to store given Seqpos value */
 #define requiredSeqposBits requiredUInt32Bits
 #else
+/** retrieve Seqpos from BitString */
 #define bsGetSeqpos bsGetUInt64
+/** store Seqpos in BitString */
 #define bsStoreSeqpos bsStoreUInt64
+/** store array of Seqpos values in BitString  */
 #define bsStoreUniformSeqposArray bsStoreUniformUInt64Array
+/** how many bits are required to store given Seqpos value */
 #define requiredSeqposBits requiredUInt64Bits
 #endif
 

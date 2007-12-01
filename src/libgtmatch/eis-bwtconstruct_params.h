@@ -24,6 +24,10 @@
 #include "libgtcore/option.h"
 #include "libgtmatch/eis-bwtseqparam.h"
 
+/**
+ * Describes features to tune the constructed BWT sequence index
+ * object for different applications.
+ */
 enum BWTOptionDefaultsOptimizationFlags
 {
   BWTDEFOPT_LOW_RAM_OVERHEAD = 1 << 0, /**< try to minimize ram used */
@@ -61,11 +65,13 @@ struct bwtOptions
 /**
  * @brief Add the options for BWT seqence index construction to an
  * option parser.
+ * @param op
  * @param paramOutput used to hold options set by the user
  * @param defaultOptimizationFlags used to tune structures for
  * construction or matching
  * @param projectName reference to string which will hold the base
  * name (i.e. without extension) of the project once index creation begins
+ * @param env
  */
 extern void
 registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
@@ -78,6 +84,7 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
  * @param paramOutput used to hold options set by the user
  * @param extraToggles add flags here which only become apparent at
  * after option processing is finished
+ * @param env
  */
 extern void
 computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles,

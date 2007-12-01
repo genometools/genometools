@@ -25,6 +25,13 @@
 #include "libgtcore/option.h"
 #include "libgtmatch/eis-encidxseq.h"
 
+/**
+ * @brief Add options for construction of a block-compressed index to
+ * the option parser.
+ * @param op
+ * @param paramOutput user provided values will be stored here
+ * @param env
+ */
 extern void
 registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput,
                         Env *env);
