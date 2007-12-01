@@ -59,3 +59,18 @@ Keywords "gt_extractseq"
 Test do
   run_test("#{$bin}gt extractseq -match '(foo' #{$testdata}foo.fas", :retval => 1)
 end
+
+Name "gt extractseq test corrupt"
+Keywords "gt_extractseq"
+Test do
+  run_test("#{$bin}gt extractseq -match foo #{$testdata}corrupt.fas", :retval => 1)
+  grep $last_stderr, "first character"
+end
+
+Name "gt extractseq test corrupt (stdin)"
+Keywords "gt_extractseq"
+Test do
+  run("cat #{$testdata}corrupt.fas | #{$memcheck} #{$bin}gt extractseq -match foo",
+      :retval => 1)
+  grep $last_stderr, "first character"
+end
