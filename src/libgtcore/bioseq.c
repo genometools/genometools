@@ -224,6 +224,10 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
   if (!bs->use_stdin) {
     fa_xfclose(bioseq_files_info.bioseq_index);
     fa_xfclose(bioseq_files_info.bioseq_raw);
+    if (had_err) {
+      xunlink(bioseq_index_filename);
+      xunlink(bioseq_raw_filename);
+    }
   }
 
   return had_err;
