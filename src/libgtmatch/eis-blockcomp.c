@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 /**
- * \file blockcomp.c
+ * \file eis-blockcomp.c
  * \brief Methods to build block-compressed representation of indexed
  * sequence and answer queries on said representation.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
@@ -111,7 +111,7 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                         BitOffset maxVarExtBitsPerPos, void *cbState, Env *env)
 {
   struct encIdxSeq *newSeqIdx;
-  struct fileReadState state;
+  struct suffixarrayReadState state;
   assert(sa && projectName && env);
   if (!sa->bwttabstream.fp)
   {
@@ -119,7 +119,7 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
             str_get(projectName));
     return NULL;
   }
-  state.fp = sa->bwttabstream.fp;
+  state.sa = sa;
   state.alphabet = newMRAEncFromSA(sa, env);
   newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName, state.alphabet,
                                    NULL, saReadBWT, &state, params,

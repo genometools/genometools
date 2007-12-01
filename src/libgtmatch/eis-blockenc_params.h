@@ -16,9 +16,21 @@
 #ifndef EIS_BLOCKENC_PARAMS_H
 #define EIS_BLOCKENC_PARAMS_H
 
+/**
+ * @file eis-blockenc_params.h
+ * @brief Call registerBlockEncOptions to add options for construction
+ * of a block-compressed index to the option parser.
+ */
 #include "libgtcore/option.h"
 #include "libgtmatch/eis-encidxseq.h"
 
+/**
+ * @brief Add options for construction of a block-compressed index to
+ * the option parser.
+ * @param op
+ * @param paramOutput user provided values will be stored here
+ * @param env
+ */
 extern void
 registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput);
 

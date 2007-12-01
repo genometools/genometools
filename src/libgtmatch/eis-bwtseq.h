@@ -43,10 +43,14 @@
  */
 struct matchBound
 {
-  Seqpos upper, lower;
+  Seqpos upper,                 /**< index of first boundary row */
+    lower;                      /**< index of second boundary row */
 };
 
+/** Object holding a BWT sequence index */
 typedef struct BWTSeq BWTSeq;
+/** Iterator of Matches produced by a search query from a BWT
+ * sequence index */
 typedef struct BWTSeqExactMatchesIterator BWTSeqExactMatchesIterator;
 
 /**
@@ -62,6 +66,10 @@ availBWTSeq(const struct bwtParam *params, Env *env);
 /**
  * \brief Loads an encoded indexed sequence object of the
  * BWT transform.
+ * @param params construction parameters (only evaluated as far as
+ * in-memory structures are concerned, most parameters are defined by
+ * on-disk data loaded)
+ * @param EISFeatures in-memory features of basic sequence index to use.
  * @param env genometools reference for core functions
  * @return reference to new BWT sequence object
  */
@@ -103,11 +111,11 @@ BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq);
 
 /**
  * \brief Query length of stored sequence.
- * @param bwtseq reference of object to query
+ * @param bwtSeq reference of object to query
  * @return length of sequence
  */
 static inline Seqpos
-BWTSeqLength(const BWTSeq *seq);
+BWTSeqLength(const BWTSeq *bwtSeq);
 
 /**
  * \brief Query BWT sequence for the number of occurences of a symbol in a
@@ -120,19 +128,20 @@ BWTSeqLength(const BWTSeq *seq);
  * @return number of occurrences of symbol up to but not including pos
  */
 static inline Seqpos
-BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env);
+BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tSym, Seqpos pos, Env *env);
 
 /**
  * \brief Query BWT sequence for the number of occurences of a symbol in a
  * given prefix.
  * @param bwtSeq reference of object to query
- * @param Sym symbol
+ * @param tSym transformed symbol (as obtained by
+ * MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), origSym)
  * @param pos right bound of BWT prefix queried
  * @param env genometools reference for core functions
  * @return number of occurrences of symbol up to but not including pos
  */
 static inline Seqpos
-BWTSeqOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env);
+BWTSeqOcc(const BWTSeq *bwtSeq, Symbol tSym, Seqpos pos, Env *env);
 
 /**
  * \brief Given a position in the L-column of the matrix of rotations,
@@ -159,11 +168,16 @@ BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym, Env *env);
 
 /**
  * \brief Given a symbol, query the aggregate count of symbols with
- * lower index, this corresponds to the first row in the C-column of
+ * lower index.
+ *
+ * This corresponds to the first row in the C-column of
  * standard literature on the BWT on which the given symbol is found,
  * this function takes a symbol already transformed into the stored
- * alphabet as argument.  @param bwtSeq reference of object to query
- * @param sym symbol to query counts sum for @param env genometools
+ * alphabet as argument.
+ *
+ * @param bwtSeq reference of object to query
+ * @param tSym symbol to query counts sum for
+ * @param env genometools
  * reference for core functions @return aggregate count
  */
 static inline Seqpos
@@ -172,31 +186,35 @@ BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym, Env *env);
 /**
  * \brief Given a query string find number of matches in original
  * sequence (of which the sequence object is a BWT).
- * @param bwtseq reference of object to query
+ * @param bwtSeq reference of object to query
  * @param query symbol string to search matches for
  * @param queryLen length of query string
  * @param env genometools reference for core functions
  * @return number of matches
  */
 extern Seqpos
-BWTSeqMatchCount(const BWTSeq *bwtseq, const Symbol *query, size_t queryLen,
+BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
                  Env *env);
 
 /**
- * \brief Given a pair of limiting .
- * @param bwtseq reference of object to query
- * @param query symbol string to search matches for
- * @param queryLen length of query string
+ * \brief Given a pair of limiting positions in the suffix array and a
+ * symbol, compute the interval reached by matching one symbol further.
+ * @param bwtSeq reference of sequence index to query
+ * @param nextSym symbol by which to further restrict match
+ * @param limits current restriction of match interval
  * @param env genometools reference for core functions
- * @return number of matches
+ * @return limits, with bounds adjusted
  */
 static inline struct matchBound *
 BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
                 Symbol nextSym, Env *env);
 
+/**
+ * Error conditions encountered upon integrity check.
+ */
 enum verifyBWTSeqErrCode
 {
-  VERIFY_BWTSEQ_NO_ERROR = 0,
+  VERIFY_BWTSEQ_NO_ERROR = 0,       /**< every check completed okay */
   VERIFY_BWTSEQ_REFLOAD_ERROR = -1, /**< failed to load suffix array for
                                      *   reference comparisons */
   VERIFY_BWTSEQ_LENCOMPARE_ERROR = -2, /* lengths of bwt sequence
@@ -213,7 +231,6 @@ enum verifyBWTSeqErrCode
                                        * corresponding symbol in the
                                        * encoded sequence */
 };
-
 /**
  * \brief Perform various checks on the burrows wheeler transform
  *
@@ -221,6 +238,10 @@ enum verifyBWTSeqErrCode
  *   corresponding value of mapped reference suffix array
  * - check wether the last-to-first traversal of the BWT sequence
  *   index delivers the reversed encoded sequence
+ *
+ * @param bwtSeq index to check
+ * @param projectName suffix array to load as reference
+ * @param env
  * @param tickPrint print a dot every time tickPrint many symbols have
  *                  been processed
  * @param fp dots printed to this file
@@ -235,7 +256,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
  *
  * Warning: the iterator object will become invalid once the
  * corresponding bwt sequence object has been deleted.
- * @param bwtseq reference of bwt sequence object to use for matching
+ * @param bwtSeq reference of bwt sequence object to use for matching
  * @param query symbol string to search matches for
  * @param queryLen length of query string
  * @param env genometools reference for core functions

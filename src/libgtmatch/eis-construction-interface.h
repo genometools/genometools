@@ -16,6 +16,15 @@
 #ifndef EIS_CONSTRUCTION_INTERFACE_H
 #define EIS_CONSTRUCTION_INTERFACE_H
 
+/**
+ * @file eis-construction-interface.h
+ * @brief Abstract interface for suffix array sources.
+ *
+ * The function pointer types defined here are essentially the
+ * interface used for index construction: a source for suffix array
+ * and BWT sequence entries is characterized by an interface
+ * conforming to these functions.
+ */
 #include <stdlib.h>
 #include "libgtcore/env.h"
 

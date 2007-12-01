@@ -33,6 +33,7 @@
  * object of the BWT transform.
  * @param params a struct holding parameter information for index construction
  * @param sa Suffixarray data structure to build BWT index from
+ * @param totalLen length of sorted sequence (including terminator)
  * @param env genometools reference for core functions
  * @return reference to new BWT sequence object
  */
@@ -45,6 +46,7 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
  * BWT transform.
  * @param params a struct holding parameter information for index construction
  * @param sa Suffixarray data structure to build BWT index from
+ * @param totalLen length of BWT sequence (including terminator symbol)
  * @param env genometools reference for core functions
  * @return reference to new BWT sequence object
  */
@@ -53,12 +55,10 @@ loadBWTSeqForSA(const struct bwtParam *params, Suffixarray *sa,
                 Seqpos totalLen, Env *env);
 
 /**
- * \brief Creates or loads an encoded indexed sequence object of the
- * BWT transform.
+ * \brief Creates an encoded indexed sequence object of the BWT transform.
  * @param params a struct holding parameter information for index construction
  * @param si Suffixerator interface to read data for BWT index from
- * @param projectName base file name for index written (should be the
- * same as the one sa was read from
+ * @param totalLen length of BWT sequence (including terminator symbol)
  * @param env genometools reference for core functions
  * @return reference to new BWT sequence object
  */
@@ -66,6 +66,15 @@ extern BWTSeq *
 createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
                      Seqpos totalLen, Env *env);
 
+/**
+ * \brief Creates or loads an encoded indexed sequence object of the
+ * BWT transform.
+ * @param params a struct holding parameter information for index construction
+ * @param sa suffix array to read data for BWT index from
+ * @param totalLen length of BWT sequence (including terminator symbol)
+ * @param env genometools reference for core functions
+ * @return reference to new BWT sequence object
+ */
 extern BWTSeq *
 createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                    Seqpos totalLen, Env *env);

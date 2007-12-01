@@ -17,26 +17,73 @@
 #ifndef EIS_SUFFIXARRAY_INTERFACE_H
 #define EIS_SUFFIXARRAY_INTERFACE_H
 
+/**
+ * \file eis-suffixarray-interface.h
+ * Defines functions conforming to the signatures defined in
+ * eis-construction-interface.h for suffix array objects.
+ */
 #include "libgtmatch/eis-mrangealphabet.h"
 
-struct fileReadState
+/**
+ * Used to pass suffixarray to read from and alphabet to encode with
+ * to readers.
+ */
+struct suffixarrayReadState
 {
-  FILE *fp;
-  MRAEnc *alphabet;
+  Suffixarray *sa;              /**< the suffix array to read from */
+  MRAEnc *alphabet;             /**< the alphabet to use for transformation */
 };
 
+/**
+ * @brief Read given length of symbols from the BWT, starting after last
+ * position read.
+ * @param state reference of a struct suffixarrayReadState
+ * @param dest write symbols here
+ * @param len length of string to read
+ * @param env
+ */
 extern int
-saReadBWT(void *state, Symbol *dest, size_t readLen, Env *env);
+saReadBWT(void *state, Symbol *dest, size_t len, Env *env);
 
+/**
+ * @brief Gets symbols of original sequence at given position.
+ * @param state reference of a struct suffixarrayReadState
+ * @param dest write symbols here
+ * @param pos get symbols starting at this position in original sequence
+ * @param len length of string to read
+ */
 extern int
 saGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len);
 
+/**
+ * @brief Read part of the suffix array starting from position after
+ * last read.
+ * @param src reference of a Suffixarray object
+ * @param dest write suffix array values here
+ * @param len length of part to read
+ * @param env
+ * @return number of entries read, less than len if end of sequence
+ * reached
+ */
 extern int
 saReadSeqpos(void *src, Seqpos *dest, size_t len, Env *env);
 
+/**
+ * @brief Query position of suffix starting at position 0, can be
+ * undefined if not yet encountered.
+ *
+ * @param state reference of Suffixarray object
+ * @return
+ */
 extern DefinedSeqpos
 reportSALongest(void *state);
 
+/**
+ * @brief Query appropriate alphabet encoding for suffix array.
+ * @param state reference of Suffixarray object
+ * @param env
+ * @return alphabet
+ */
 extern MRAEnc *
 newMRAEncFromSA(void *state, Env *env);
 

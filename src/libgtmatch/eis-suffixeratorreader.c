@@ -193,19 +193,14 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
   return iface;
 }
 
-extern int
+extern void
 deleteSfxInterface(sfxInterface *iface, Env *env)
 {
-  int had_err = 0;
-
   ma_free(iface->prevGeneratedSufTabSegments);
-
   freeSfxiterator(&iface->sfi, env);
-
   deleteSeqStats(iface->stats, env);
   ma_free(iface->readers);
   ma_free(iface);
-  return !had_err;
 }
 
 const Uchar *

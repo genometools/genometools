@@ -132,6 +132,12 @@ printComposition(FILE *fp, const unsigned *composition, Symbol numSyms,
 #define SIZE_MAX ~(size_t)0
 #endif
 
+static inline BitOffset
+compListPermStartOffset(struct compList *list, unsigned numSyms)
+{
+  return list->numCompositions * list->bitsPerCount * numSyms;
+}
+
 #define initCompositionListErrRet()                                     \
   do {                                                                  \
     if (newList->permutations)                                          \
@@ -225,7 +231,6 @@ initCompositionList(struct compList *newList, unsigned blockSize,
 #endif
     assert(permSum == pow(alphabetSize, blockSize));
   }
-  newList->maxPermCount = maxNumPermutations;
   newList->maxPermIdxBits = requiredUInt64Bits(maxNumPermutations - 1);
   ma_free(composition);
   return 1;
