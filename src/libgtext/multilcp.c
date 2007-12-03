@@ -25,7 +25,7 @@ int** multilcp_compute(const char *u, int m, const char *v, int n)
 {
   int i, j, **prefix;
 
-  array2dim_malloc(prefix, m, n, int);
+  array2dim_malloc(prefix, m, n);
   for (i = 0; i < m; i++) {
     if (u[m-1-i] == v[n-1])
       prefix[m-1-i][n-1] = 1;

@@ -93,7 +93,7 @@ Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
   DPentry **dptable;
   Alignment *a = NULL;
   assert(u && v && sf);
-  array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1, DPentry);
+  array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1);
   fillDPtable(dptable, seq_get_encoded(u), seq_length(u), seq_get_encoded(v),
               seq_length(v), sf, &alignment_end);
   assert(alignment_end.x != UNDEF_ULONG);

@@ -57,8 +57,8 @@ HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
   /* alloc */
   hmm = ma_malloc(sizeof (HMM));
   hmm->initial_state_prob = ma_malloc(sizeof (double) * num_of_states);
-  array2dim_malloc(hmm->transition_prob, num_of_states, num_of_states, double);
-  array2dim_malloc(hmm->emission_prob, num_of_states, num_of_symbols, double);
+  array2dim_malloc(hmm->transition_prob, num_of_states, num_of_states);
+  array2dim_malloc(hmm->emission_prob, num_of_states, num_of_symbols);
 
   /* init */
   hmm->num_of_states = num_of_states;
@@ -308,8 +308,8 @@ void hmm_decode(const HMM *hmm,
   /* alloc tables */
   num_of_rows = hmm->num_of_states;
   num_of_columns = num_of_emissions;
-  array2dim_malloc(max_probabilities, num_of_rows, 2, double);
-  array2dim_malloc(backtrace, num_of_rows, num_of_columns, unsigned int);
+  array2dim_malloc(max_probabilities, num_of_rows, 2);
+  array2dim_malloc(backtrace, num_of_rows, num_of_columns);
 
   /* fill DP table */
   for (row = 0; row < num_of_rows; row++) { /* first column */
@@ -399,7 +399,7 @@ double hmm_forward(const HMM* hmm, const unsigned int *emissions,
   double **f, P;
 
   assert(hmm && emissions && num_of_emissions);
-  array2dim_malloc(f, hmm->num_of_states, num_of_emissions, double);
+  array2dim_malloc(f, hmm->num_of_states, num_of_emissions);
 
   /* XXX: we do not need the full table here, the last column would suffice */
   compute_forward_table(f, hmm, emissions, num_of_emissions);
@@ -455,7 +455,7 @@ double hmm_backward(const HMM* hmm, const unsigned int *emissions,
   double **b, P;
 
   assert(hmm && emissions && num_of_emissions);
-  array2dim_malloc(b, hmm->num_of_states, num_of_emissions, double);
+  array2dim_malloc(b, hmm->num_of_states, num_of_emissions);
 
   /* XXX: we do not need the full table here, the last column would suffice */
   compute_backward_table(b, hmm, emissions, num_of_emissions);

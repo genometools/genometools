@@ -120,7 +120,7 @@ Alignment* align(const char *u, unsigned long ulen,
   DPentry **dptable;
   Alignment *a;
   assert(u && ulen && v && vlen);
-  array2dim_calloc(dptable, ulen+1, vlen+1, DPentry);
+  array2dim_calloc(dptable, ulen+1, vlen+1);
   a = alignment_new_with_seqs(u, ulen, v, vlen);
   fillDPtable(dptable, u, ulen, v, vlen);
   traceback(a, dptable, ulen, vlen);
@@ -138,7 +138,7 @@ void align_all(const char *u, unsigned long ulen,
   DPentry **dptable;
   Alignment *a;
   assert(u && ulen && v && vlen);
-  array2dim_calloc(dptable, ulen+1, vlen+1, DPentry);
+  array2dim_calloc(dptable, ulen+1, vlen+1);
   a = alignment_new_with_seqs(u, ulen, v, vlen);
   fillDPtable(dptable, u, ulen, v, vlen);
   aligns = traceback_all(a, dptable, ulen, vlen, dptable[ulen][vlen].distvalue,

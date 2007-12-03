@@ -38,7 +38,7 @@ ScoreMatrix* scorematrix_new(Alpha *alpha)
   s = ma_malloc(sizeof (ScoreMatrix));
   s->alpha = alpha_ref(alpha);
   s->dimension = alpha_size(alpha);
-  array2dim_calloc(s->scores, s->dimension, s->dimension, int);
+  array2dim_calloc(s->scores, s->dimension, s->dimension);
   return s;
 }
 
