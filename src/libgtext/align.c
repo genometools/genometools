@@ -85,22 +85,22 @@ static unsigned long traceback_all(Alignment *a, DPentry **dptable,
                                    void *data)
 {
   unsigned long aligns = 0;
-  unsigned int backtrace = 0;
+  bool backtrace = false;
   assert(a && dptable);
   if (dptable[i][j].min_replacement) {
-    backtrace = 1;
+    backtrace = true;
     alignment_add_replacement(a);
     aligns += traceback_all(a, dptable, i-1, j-1, dist, proc_alignment, data);
     alignment_remove_last(a);
   }
   if (dptable[i][j].min_deletion) {
-    backtrace = 1;
+    backtrace = true;
     alignment_add_deletion(a);
     aligns += traceback_all(a, dptable, i-1, j, dist, proc_alignment, data);
     alignment_remove_last(a);
   }
   if (dptable[i][j].min_insertion) {
-    backtrace = 1;
+    backtrace = true;
     alignment_add_insertion(a);
     aligns += traceback_all(a, dptable, i, j-1, dist, proc_alignment, data);
     alignment_remove_last(a);
