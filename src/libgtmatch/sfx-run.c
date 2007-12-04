@@ -29,11 +29,12 @@
 #include "encseq-def.h"
 #include "measure-time-if.h"
 #include "esafileend.h"
+#include "readmode-def.h"
+#include "verbose-def.h"
 #include "intcode-def.h"
 #include "sfx-suffixer.h"
 #include "sfx-lcpval.h"
-#include "readmode-def.h"
-#include "verbose-def.h"
+#include "sfx-outlcp.h"
 #include "stamp.h"
 
 #include "opensfxfile.pr"
@@ -47,13 +48,15 @@
 #include "eis-suffixerator-interface.h"
 #include "eis-bwtconstruct_params.h"
 
-typedef struct
-{
-  FILE *outfplcptab,
-       *outfpllvtab;
-  Seqpos numoflargelcpvalues,
-         maxbranchdepth;
-} Outlcpinfo;
+#define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
+        if (!haserr && (FLAG))\
+        {\
+          PTR = opensfxfile(so->str_indexname,SUFFIX,"wb",env);\
+          if ((PTR) == NULL)\
+          {\
+            haserr = true;\
+          }\
+        }
 
 typedef struct
 {
@@ -66,60 +69,41 @@ typedef struct
   Lcpvalueiterator *lvi;
 } Outfileinfo;
 
-static void initoutfileinfo(Outfileinfo *outfileinfo)
+static int initoutfileinfo(Outfileinfo *outfileinfo,
+                           const Encodedsequence *encseq,
+                           const Suffixeratoroptions *so,
+                           Env *env)
 {
-  outfileinfo->outfpsuftab = NULL;
-  outfileinfo->outlcpinfo.outfplcptab = NULL;
-  outfileinfo->outlcpinfo.outfpllvtab = NULL;
-  outfileinfo->outfpbwttab = NULL;
-  outfileinfo->pageoffset = 0;
-  outfileinfo->outlcpinfo.numoflargelcpvalues = 0;
-  outfileinfo->outlcpinfo.maxbranchdepth = 0;
-  outfileinfo->longest.defined = false;
-  outfileinfo->longest.valueseqpos = 0;
-}
-
-static int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
-                       Outlcpinfo *outlcpinfo,Env *env)
-{
-  Uchar outvalue;
   bool haserr = false;
 
-  if (lcpvalue >= (Seqpos) UCHAR_MAX)
+  outfileinfo->outfpsuftab = NULL;
+  outfileinfo->outfpbwttab = NULL;
+  outfileinfo->pageoffset = 0;
+  outfileinfo->longest.defined = false;
+  outfileinfo->longest.valueseqpos = 0;
+  if (so->outlcptab)
   {
-    Largelcpvalue largelcpvalue;
-
-    outlcpinfo->numoflargelcpvalues++;
-    largelcpvalue.position = pageoffset + pos;
-    largelcpvalue.value = lcpvalue;
-    if (fwrite(&largelcpvalue,sizeof (Largelcpvalue),(size_t) 1,
-               outlcpinfo->outfpllvtab) != (size_t) 1)
-    {
-      env_error_set(env,"cannot write 1 item of size %lu: "
-                        "errormsg=\"%s\"",
-                        (unsigned long) sizeof (Largelcpvalue),
-                        strerror(errno));
-      haserr = true;
-    }
-    outvalue = (Uchar) UCHAR_MAX;
+    outfileinfo->lvi = newLcpvalueiterator(encseq,so->readmode,env);
   } else
   {
-    outvalue = (Uchar) lcpvalue;
+    outfileinfo->lvi = NULL;
   }
-  if (!haserr && fwrite(&outvalue,sizeof (Uchar),(size_t) 1,
-                        outlcpinfo->outfplcptab) != (size_t) 1)
+  if (initlcpoutfileinfo(&outfileinfo->outlcpinfo,
+                         so->outlcptab ? so->str_indexname : NULL,env,
+                         true) != 0)
   {
-    env_error_set(env,"cannot write 1 item of size %lu: "
-                      "errormsg=\"%s\"",
-                      (unsigned long) sizeof (Uchar),
-                      strerror(errno));
     haserr = true;
   }
-  if (outlcpinfo->maxbranchdepth < lcpvalue)
+  INITOUTFILEPTR(outfileinfo->outfpsuftab,so->outsuftab,SUFTABSUFFIX);
+  INITOUTFILEPTR(outfileinfo->outfpbwttab,so->outbwttab,BWTTABSUFFIX);
+  if (so->outsuftab || so->outbwttab || so->outlcptab)
   {
-    outlcpinfo->maxbranchdepth = lcpvalue;
+    outfileinfo->encseq = encseq;
+  } else
+  {
+    outfileinfo->encseq = NULL;
   }
-  return haserr ? -1 : 0;
+  return haserr  ? -1 : 0;
 }
 
 static int suftab2file(Outfileinfo *outfileinfo,
@@ -226,17 +210,6 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
   }
   return haserr ? -1 : 0;
 }
-
-#define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
-        if (!haserr && (FLAG))\
-        {\
-          outfileinfo.encseq = encseq;\
-          PTR = opensfxfile(so->str_indexname,SUFFIX,"wb",env);\
-          if ((PTR) == NULL)\
-          {\
-            haserr = true;\
-          }\
-        }
 
 static int suffixeratorwithoutput(
                  Outfileinfo *outfileinfo,
@@ -432,24 +405,14 @@ static int runsuffixerator(bool doesa,
       }
     }
   }
-  initoutfileinfo(&outfileinfo);
+  if (initoutfileinfo(&outfileinfo,encseq,so,env) != 0)
+  {
+    haserr = true;
+  }
   if (!haserr)
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || !doesa)
     {
-      if (so->outlcptab)
-      {
-        outfileinfo.lvi = newLcpvalueiterator(encseq,so->readmode,env);
-      } else
-      {
-        outfileinfo.lvi = NULL;
-      }
-      INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,SUFTABSUFFIX);
-      INITOUTFILEPTR(outfileinfo.outlcpinfo.outfplcptab,so->outlcptab,
-                     LCPTABSUFFIX);
-      INITOUTFILEPTR(outfileinfo.outlcpinfo.outfpllvtab,so->outlcptab,
-                     LARGELCPTABSUFFIX);
-      INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,BWTTABSUFFIX);
       if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
       {
         so->prefixlength = recommendedprefixlength(numofchars,totallength);
@@ -484,13 +447,13 @@ static int runsuffixerator(bool doesa,
                              specialcharinfo.specialcharacters,
                              specialcharinfo.specialranges,
                              encseq,
-                           so->readmode,
-                           numofchars,
-                           so->prefixlength,
-                           so->numofparts,
-                           mtime,
-                           verboseinfo,
-                           env) != 0)
+                             so->readmode,
+                             numofchars,
+                             so->prefixlength,
+                             so->numofparts,
+                             mtime,
+                             verboseinfo,
+                             env) != 0)
           {
             haserr = true;
           }
@@ -522,18 +485,11 @@ static int runsuffixerator(bool doesa,
           else
             deleteBWTSeq(bwtSeq, env); /**< the actual object is not
                                         * used here */
-          outfileinfo.longest = getSfxILongestPos(si);
+          outfileinfo.longest = getSfxILongestPos(si); /* XXX Thomas, is 
+                                                          this necessary */
 
           deleteSfxInterface(si, env);
         }
-      }
-      fa_fclose(outfileinfo.outfpsuftab);
-      fa_fclose(outfileinfo.outlcpinfo.outfplcptab);
-      fa_fclose(outfileinfo.outlcpinfo.outfpllvtab);
-      fa_fclose(outfileinfo.outfpbwttab);
-      if (outfileinfo.lvi != NULL)
-      {
-        freeLcpvalueiterator(&outfileinfo.lvi,env);
       }
     } else
     {
@@ -546,6 +502,12 @@ static int runsuffixerator(bool doesa,
         haserr = true;
       }
     }
+  }
+  fa_fclose(outfileinfo.outfpsuftab);
+  fa_fclose(outfileinfo.outfpbwttab);
+  if (outfileinfo.lvi != NULL)
+  {
+    freeLcpvalueiterator(&outfileinfo.lvi,env);
   }
   if (!haserr)
   {
@@ -565,6 +527,7 @@ static int runsuffixerator(bool doesa,
       haserr = true;
     }
   }
+  freeoutlcptab(&outfileinfo.outlcpinfo,env);
   FREESPACE(filelengthtab);
   if (alpha != NULL)
   {
