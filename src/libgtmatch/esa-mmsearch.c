@@ -27,12 +27,18 @@
 #include "sfx-suffixer.h"
 #include "measure-time-if.h"
 #include "format64.h"
-#include "lcpinterval.h"
 #include "stamp.h"
 
 #include "sfx-apfxlen.pr"
 #include "esa-map.pr"
 #include "echoseq.pr"
+
+typedef struct
+{
+  Seqpos offset,
+         left,
+         right;
+} Lcpinterval;
 
 #define COMPARE(OFFSET,LCPLEN)\
         sidx = (OFFSET) + (LCPLEN);\

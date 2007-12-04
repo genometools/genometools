@@ -24,7 +24,6 @@
 #include "divmodmul.h"
 #include "sfx-codespec.h"
 #include "intcode-def.h"
-#include "lcpinterval.h"
 #include "sfx-lcpsub.h"
 #include "spacedef.h"
 #include "encseq-def.h"
@@ -315,28 +314,34 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   }
 }
 
-static unsigned int bucketboundaries(Lcpinterval *lcpitv,
-                                     const Seqpos *leftborder,
-                                     const Seqpos *countspecialcodes,
-                                     Codetype code,
-                                     Codetype maxcode,
-                                     Seqpos totalwidth,
-                                     unsigned int rightchar,
-                                     unsigned int numofchars)
+typedef struct
 {
-  lcpitv->left = leftborder[code];
+  Seqpos left, 
+         right;
+} Bucketboundaries;
+
+static unsigned int calcbucketboundaries(Bucketboundaries *bbound,
+                                         const Seqpos *leftborder,
+                                         const Seqpos *countspecialcodes,
+                                         Codetype code,
+                                         Codetype maxcode,
+                                         Seqpos totalwidth,
+                                         unsigned int rightchar,
+                                         unsigned int numofchars)
+{
+  bbound->left = leftborder[code];
   if (code == maxcode)
   {
     assert(totalwidth > 0);
-    lcpitv->right = totalwidth - 1;
+    bbound->right = totalwidth - 1;
   } else
   {
     if (leftborder[code+1] > 0)
     {
-      lcpitv->right = leftborder[code+1] - 1;
+      bbound->right = leftborder[code+1] - 1;
     } else
     {
-      lcpitv->right = 0;
+      bbound->right = 0;
     }
   }
   assert(rightchar == code % numofchars);
@@ -344,12 +349,12 @@ static unsigned int bucketboundaries(Lcpinterval *lcpitv,
   {
     Seqpos specialcodes
       = countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
-    if (lcpitv->right >= specialcodes)
+    if (bbound->right >= specialcodes)
     {
-      lcpitv->right -= specialcodes;
+      bbound->right -= specialcodes;
     } else
     {
-      lcpitv->right = 0;
+      bbound->right = 0;
     }
      rightchar = 0;
    } else
@@ -368,22 +373,22 @@ static Seqpos determinemaxbucketsize(const Seqpos *leftborder,
 {
   Seqpos maxbucketsize = (Seqpos) 1, bsize;
   unsigned int rightchar = mincode % numofchars;
-  Lcpinterval lcpitv;
+  Bucketboundaries bbound;
   Codetype code;
 
   for (code = mincode; code <= maxcode; code++)
   {
-    rightchar = bucketboundaries(&lcpitv,
-                                 leftborder,
-                                 countspecialcodes,
-                                 code,
-                                 maxcode,
-                                 totalwidth,
-                                 rightchar,
-                                 numofchars);
-    if (lcpitv.left < lcpitv.right)
+    rightchar = calcbucketboundaries(&bbound,
+                                     leftborder,
+                                     countspecialcodes,
+                                     code,
+                                     maxcode,
+                                     totalwidth,
+                                     rightchar,
+                                     numofchars);
+    if (bbound.left < bbound.right)
     {
-      bsize = lcpitv.right - lcpitv.left + 1;
+      bsize = bbound.right - bbound.left + 1;
       if (bsize > maxbucketsize)
       {
         maxbucketsize = bsize;
@@ -440,7 +445,7 @@ void sortallbuckets(Seqpos *suftabptr,
   unsigned int rightchar = mincode % numofchars;
   Seqpos totallength = getencseqtotallength(encseq);
   ArrayMKVstack mkvauxstack;
-  Lcpinterval lcpitv;
+  Bucketboundaries bbound;
   Seqpos maxbucketsize;
 
   env_error_check(env);
@@ -460,28 +465,28 @@ void sortallbuckets(Seqpos *suftabptr,
   INITARRAY(&mkvauxstack,MKVstack);
   for (code = mincode; code <= maxcode; code++)
   {
-    rightchar = bucketboundaries(&lcpitv,
-                                 leftborder,
-                                 countspecialcodes,
-                                 code,
-                                 maxcode,
-                                 totalwidth,
-                                 rightchar,
-                                 numofchars);
+    rightchar = calcbucketboundaries(&bbound,
+                                     leftborder,
+                                     countspecialcodes,
+                                     code,
+                                     maxcode,
+                                     totalwidth,
+                                     rightchar,
+                                     numofchars);
     if(code > 0)
     {
       (void) nextTurningwheel(lcpsubtab->tw);
     }
-    if (lcpitv.left < lcpitv.right)
+    if (bbound.left < bbound.right)
     {
       SETLCP(0,minchangedTurningwheel(lcpsubtab->tw));
-      lcpsubtab->suftabbase = suftabptr + lcpitv.left;
+      lcpsubtab->suftabbase = suftabptr + bbound.left;
       bentleysedgewick(encseq,
                        readmode,
                        totallength,
                        &mkvauxstack,
-                       suftabptr + lcpitv.left,
-                       suftabptr + lcpitv.right,
+                       suftabptr + bbound.left,
+                       suftabptr + bbound.right,
                        (Seqpos) prefixlength,
                        lcpsubtab,
                        env);
