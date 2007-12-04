@@ -505,11 +505,6 @@ static void insertfullspecialrange(Sfxiterator *sfi,
 {
   Seqpos pos;
 
-  if (leftpos >= rightpos)
-  {
-    printf("leftpos = %lu >= %lu = rightpos\n",
-            (unsigned long) leftpos,(unsigned long) rightpos);
-  }
   assert(leftpos < rightpos);
   if (ISDIRREVERSE(sfi->readmode))
   {
@@ -626,7 +621,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
   }
 }
 
-const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
+const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
                               Measuretime *mtime,Sfxiterator *sfi,Env *env)
 {
   env_error_check(env);
@@ -634,7 +629,7 @@ const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
     preparethispart(sfi,mtime,env);
-    *len = sfi->widthofpart;
+    *numberofsuffixes = sfi->widthofpart;
     *specialsuffixes = false;
     return sfi->suftab;
   }
@@ -645,7 +640,7 @@ const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
   sfi->fusp.nextfreeSeqpos = 0;
   fillspecialnextpage(sfi);
   assert(sfi->fusp.nextfreeSeqpos > 0);
-  *len = (Seqpos) sfi->fusp.nextfreeSeqpos;
+  *numberofsuffixes = (Seqpos) sfi->fusp.nextfreeSeqpos;
   *specialsuffixes = true;
   return sfi->suftab;
 }

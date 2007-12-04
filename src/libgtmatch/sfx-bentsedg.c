@@ -317,7 +317,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
 typedef struct
 {
   Seqpos left, 
-         right;
+         right,
+         specialsinbucket;
 } Bucketboundaries;
 
 static unsigned int calcbucketboundaries(Bucketboundaries *bbound,
@@ -347,21 +348,22 @@ static unsigned int calcbucketboundaries(Bucketboundaries *bbound,
   assert(rightchar == code % numofchars);
   if (rightchar == numofchars - 1)
   {
-    Seqpos specialcodes
+    bbound->specialsinbucket
       = countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
-    if (bbound->right >= specialcodes)
+    if (bbound->right >= bbound->specialsinbucket)
     {
-      bbound->right -= specialcodes;
+      bbound->right -= bbound->specialsinbucket;
     } else
     {
       bbound->right = 0;
     }
-     rightchar = 0;
-   } else
-   {
-     rightchar++;
-   }
-   return rightchar;
+    rightchar = 0;
+  } else
+  {
+    bbound->specialsinbucket = 0;
+    rightchar++;
+  }
+  return rightchar;
 }
 
 static Seqpos determinemaxbucketsize(const Seqpos *leftborder,
