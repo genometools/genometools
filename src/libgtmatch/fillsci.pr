@@ -13,13 +13,13 @@ int fasta2sequencekeyvalues(
         bool withdestab,
         unsigned long *characterdistribution,
         Verboseinfo *verboseinfo,
-        Env *env);
+        Error *err);
 
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
                               const Uchar *seq,
                               const Seqpos len,
                               Verboseinfo *verboseinfo,
-                              Env *env);
+                              Error *err);
 
 #ifdef __cplusplus
 }

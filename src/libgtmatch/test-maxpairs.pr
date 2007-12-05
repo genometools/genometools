@@ -6,14 +6,14 @@ int testmaxpairs(/*@unused@*/ const Str *indexname,
                  /*@unused@*/ unsigned int minlength,
                  /*@unused@*/ Seqpos substringlength,
                  /*@unused@*/ Verboseinfo *verboseinfo,
-                 /*@unused@*/ Env *env);
+                 /*@unused@*/ Error *err);
 
 int testmaxpairs(const Str *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  Seqpos substringlength,
                  Verboseinfo *verboseinfo,
-                 Env *env);
+                 Error *err);
 
 #ifdef __cplusplus
 }

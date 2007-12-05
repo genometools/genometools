@@ -18,12 +18,12 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <inttypes.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/str.h"
 #include "stamp.h"
 
-int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
+int guessifproteinsequencestream(const StrArray *filenametab,Error *err)
 {
   unsigned int countnonbases = 0,
                currentposition;
@@ -31,7 +31,7 @@ int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
   FastaBuffer *fb;
   int retval;
 
-  env_error_check(env);
+  error_check(err);
   fb = fastabuffer_new(filenametab,
                        NULL,
                        false,
@@ -41,7 +41,7 @@ int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
   for (currentposition = 0; currentposition < (unsigned int) 1000;
        currentposition++)
   {
-    retval = fastabuffer_next(fb,&currentchar,env_error(env));
+    retval = fastabuffer_next(fb,&currentchar,err);
     if (retval < 0)
     {
       fastabuffer_delete(fb);

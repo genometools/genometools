@@ -35,9 +35,9 @@
 
  DECLAREREADFUNCTION(Seqpos);
 
-static void allocatefmtables(Fmindex *fm,bool storeindexpos,Env *env)
+static void allocatefmtables(Fmindex *fm,bool storeindexpos,Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   ALLOCASSIGNSPACE (fm->tfreq, NULL, Seqpos,TFREQSIZE(fm->mapsize));
   ALLOCASSIGNSPACE (fm->superbfreq, NULL, Seqpos ,
                     SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks));
@@ -130,18 +130,18 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
                                         Emissionmergedesa *emmesa,
                                         const Seqpos *sequenceoffsettable,
                                         Seqpos bwtpos,
-                                        Env *env)
+                                        Error *err)
 {
   Indexedsuffix indexedsuffix;
 
-  env_error_check(env);
+  error_check(err);
   if (emmesa->buf.nextaccessidx >= emmesa->buf.nextstoreidx)
   {
     if (emmesa->numofentries == 0)
     {
       return 0;
     }
-    if (stepdeleteandinsertothersuffixes(emmesa,env) != 0)
+    if (stepdeleteandinsertothersuffixes(emmesa,err) != 0)
     {
       return -1;
     }
@@ -160,7 +160,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
     {
       if (longest->defined)
       {
-        env_error_set(env,"longest is already defined as " FormatSeqpos,
+        error_set(err,"longest is already defined as " FormatSeqpos,
                       longest->valueseqpos);
         return -2;
       }
@@ -190,7 +190,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                    const StrArray *indexnametab,
                    bool storeindexpos,
                    Verboseinfo *verboseinfo,
-                   Env *env)
+                   Error *err)
 {
   Suffixarray suffixarray;
   Emissionmergedesa emmesa;
@@ -216,7 +216,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   Specialcharinfo specialcharinfo;
   bool haserr = false;
 
-  env_error_check(env);
+  error_check(err);
   longest.defined = false;
   longest.valueseqpos = 0;
   numofindexes = (unsigned int) strarray_size(indexnametab);
@@ -229,7 +229,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                          SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
                          indexname,
                          verboseinfo,
-                         env) != 0)
+                         err) != 0)
     {
       haserr = true;
     }
@@ -239,7 +239,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
       specialcharinfo = suffixarray.specialcharinfo;
       firstignorespecial = totallength - specialcharinfo.specialcharacters;
       /*
-      if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,env) != 0)
+      if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {
         haserr = true;
       }
@@ -252,7 +252,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                            indexname,
                            BWTTABSUFFIX,
                            firstignorespecial,
-                           env) != 0)
+                           err) != 0)
       {
         haserr = true;
       }
@@ -264,7 +264,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                              indexnametab,
                              SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
                              verboseinfo,
-                             env) != 0)
+                             err) != 0)
     {
       haserr = true;
     }
@@ -272,7 +272,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       Str *indexname = strarray_get_str(indexnametab,0);
       suffixlength = 0;
-      if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,env) != 0)
+      if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {
         haserr = true;
       }
@@ -283,7 +283,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                                                    &specialcharinfo,
                                                    emmesa.suffixarraytable,
                                                    numofindexes,
-                                                   env);
+                                                   err);
       if (sequenceoffsettable == NULL)
       {
         haserr = true;
@@ -293,7 +293,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       longest.defined = false;
       longest.valueseqpos = 0;
-      outbwt = opensfxfile(outfmindex,BWTTABSUFFIX,"wb",env);
+      outbwt = opensfxfile(outfmindex,BWTTABSUFFIX,"wb",err);
       if (outbwt == NULL)
       {
         haserr = true;
@@ -323,7 +323,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                             log2bsize,
                             log2markdist,
                             mapsize);
-    allocatefmtables(fmindex,storeindexpos,env);
+    allocatefmtables(fmindex,storeindexpos,err);
     set0frequencies(fmindex);
     if (storeindexpos)
     {
@@ -341,7 +341,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
         {
           retval = readnextSeqposfromstream(&tmpsuftabvalue,
                                             &suffixarray.suftabstream,
-                                            env);
+                                            err);
           if (retval < 0)
           {
             haserr = true;
@@ -353,7 +353,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
           }
           suftabvalue = (Seqpos) tmpsuftabvalue;
         }
-        retval = readnextUcharfromstream(&cc,&suffixarray.bwttabstream,env);
+        retval = readnextUcharfromstream(&cc,&suffixarray.bwttabstream,err);
         if (retval < 0)
         {
           haserr = true;
@@ -371,7 +371,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                                               &emmesa,
                                               sequenceoffsettable,
                                               bwtpos,
-                                              env);
+                                              err);
         if (retval < 0)
         {
           haserr = true;
@@ -414,7 +414,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
           if (pairptr >= fmindex->specpos.spacePairBwtidx +
                         fmindex->specpos.allocatedPairBwtidx)
           {
-            env_error_set(env,"program error: not enough space for specpos");
+            error_set(err,"program error: not enough space for specpos");
             haserr = true;
             break;
           }
@@ -437,7 +437,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
        fmindex->specpos.allocatedPairBwtidx !=
        fmindex->specpos.nextfreePairBwtidx)
     {
-      env_error_set(env,"program error: too much space for specpos: "
+      error_set(err,"program error: too much space for specpos: "
              "allocated = %lu != %lu = used",
              fmindex->specpos.allocatedPairBwtidx,
              fmindex->specpos.nextfreePairBwtidx);
@@ -455,12 +455,12 @@ int sufbwt2fmindex(Fmindex *fmindex,
     if (numofindexes == (unsigned int) 1)
     {
       fmindex->longestsuffixpos = suffixarray.longest.valueseqpos;
-      freesuffixarray(&suffixarray,env);
+      freesuffixarray(&suffixarray);
     } else
     {
       if (!longest.defined)
       {
-        env_error_set(env,"longest is not defined after merging");
+        error_set(err,"longest is not defined after merging");
         haserr = true;
       }
       if (!haserr)
@@ -468,7 +468,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
         fmindex->longestsuffixpos = longest.valueseqpos;
       }
       fa_xfclose(outbwt);
-      wraptEmissionmergedesa(&emmesa,env);
+      wraptEmissionmergedesa(&emmesa,err);
     }
   }
   FREESPACE(sequenceoffsettable);

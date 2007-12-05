@@ -65,13 +65,13 @@ typedef struct
               *poslist;
   const Encodedsequence *encseq;
   Readmode readmode;
-  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *);
+  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Error *);
   void *processmaxpairsinfo;
 } Dfsstate;
 
 #include "esa-dfs.pr"
 
-static Dfsinfo *allocateDfsinfo(Dfsstate *state,Env *env)
+static Dfsinfo *allocateDfsinfo(Dfsstate *state)
 {
   Dfsinfo *dfsinfo;
 
@@ -80,14 +80,14 @@ static Dfsinfo *allocateDfsinfo(Dfsstate *state,Env *env)
   return dfsinfo;
 }
 
-static void freeDfsinfo(Dfsinfo *dfsinfo,/*@unused@*/ Dfsstate *state,Env *env)
+static void freeDfsinfo(Dfsinfo *dfsinfo,/*@unused@*/ Dfsstate *state)
 {
   FREESPACE(dfsinfo->nodeposlist);
   FREESPACE(dfsinfo);
 }
 
 static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,unsigned int base,
-                        Seqpos leafnumber,Env *env)
+                        Seqpos leafnumber)
 {
   ArraySeqpos *ptr;
 
@@ -115,7 +115,7 @@ static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
 }
 
 static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
-                        Seqpos leafnumber,Env *env)
+                        Seqpos leafnumber,Error *err)
 {
   Listtype *pl;
   Seqpos *spptr, *start;
@@ -125,7 +125,7 @@ static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
   for (spptr = start; spptr < start + pl->length; spptr++)
   {
     if (state->processmaxpairs(state->processmaxpairsinfo,
-                               state->depth,leafnumber,*spptr,env) != 0)
+                               state->depth,leafnumber,*spptr,err) != 0)
     {
       return -1;
     }
@@ -136,7 +136,7 @@ static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
 static int cartproduct2(Dfsstate *state,
                         const Dfsinfo *ninfo1, unsigned int base1,
                         const Dfsinfo *ninfo2, unsigned int base2,
-                        Env *env)
+                        Error *err)
 {
   Listtype *pl1, *pl2;
   Seqpos *start1, *start2, *spptr1, *spptr2;
@@ -150,7 +150,7 @@ static int cartproduct2(Dfsstate *state,
     for (spptr2 = start2; spptr2 < start2 + pl2->length; spptr2++)
     {
       if (state->processmaxpairs(state->processmaxpairsinfo,
-                                 state->depth,*spptr1,*spptr2,env) != 0)
+                                 state->depth,*spptr1,*spptr2,err) != 0)
       {
         return -1;
       }
@@ -179,7 +179,7 @@ static int processleafedge(bool firstsucc,
                            Dfsinfo *father,
                            Seqpos leafnumber,
                            Dfsstate *state,
-                           Env *env)
+                           Error *err)
 {
   unsigned int base;
   Seqpos *start, *spptr;
@@ -221,7 +221,7 @@ static int processleafedge(bool firstsucc,
       NODEPOSLISTSTART(father,base) = state->poslist[base].nextfreeSeqpos;
       NODEPOSLISTLENGTH(father,base) = 0;
     }
-    add2poslist(state,father,(unsigned int) leftchar,leafnumber,env);
+    add2poslist(state,father,(unsigned int) leftchar,leafnumber);
     return 0;
   }
   if (father->commonchar != ISLEFTDIVERSE)
@@ -234,7 +234,7 @@ static int processleafedge(bool firstsucc,
     {
       if (leftchar != (Uchar) base)
       {
-        if (cartproduct1(state,father,base,leafnumber,env) != 0)
+        if (cartproduct1(state,father,base,leafnumber,err) != 0)
         {
           return -1;
         }
@@ -245,13 +245,13 @@ static int processleafedge(bool firstsucc,
     for (spptr = start; spptr < start + father->uniquecharposlength; spptr++)
     {
       if (state->processmaxpairs(state->processmaxpairsinfo,
-                                 state->depth,leafnumber,*spptr,env) != 0)
+                                 state->depth,leafnumber,*spptr,err) != 0)
       {
         return -2;
       }
     }
   }
-  add2poslist(state,father,(unsigned int) leftchar,leafnumber,env);
+  add2poslist(state,father,(unsigned int) leftchar,leafnumber);
   return 0;
 }
 
@@ -260,7 +260,7 @@ static int processbranchedge(bool firstsucc,
                              Dfsinfo *father,
                              Dfsinfo *son,
                              Dfsstate *state,
-                             /*@unused@*/ Env *env)
+                             /*@unused@*/ Error *err)
 {
   unsigned int chfather, chson;
   Seqpos *start, *spptr, *fptr, *fstart;
@@ -305,7 +305,7 @@ static int processbranchedge(bool firstsucc,
       {
         if (chson != chfather)
         {
-          if (cartproduct2(state,father,chfather,son,chson,env) != 0)
+          if (cartproduct2(state,father,chfather,son,chson,err) != 0)
           {
             return -1;
           }
@@ -313,7 +313,7 @@ static int processbranchedge(bool firstsucc,
       }
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
-        if (cartproduct1(state,father,chfather,*spptr,env) != 0)
+        if (cartproduct1(state,father,chfather,*spptr,err) != 0)
         {
           return -2;
         }
@@ -325,7 +325,7 @@ static int processbranchedge(bool firstsucc,
     {
       for (chson = 0; chson < state->alphabetsize; chson++)
       {
-        if (cartproduct1(state,son,chson,*fptr,env) != 0)
+        if (cartproduct1(state,son,chson,*fptr,err) != 0)
         {
           return -3;
         }
@@ -333,7 +333,7 @@ static int processbranchedge(bool firstsucc,
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
         if (state->processmaxpairs(state->processmaxpairsinfo,
-                                   state->depth,*fptr,*spptr,env) != 0)
+                                   state->depth,*fptr,*spptr,err) != 0)
         {
           return -4;
         }
@@ -349,10 +349,11 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       const Encodedsequence *encseq,
                       Readmode readmode,
                       unsigned int searchlength,
-                      int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
+                      int(*processmaxpairs)(void *,Seqpos,Seqpos,
+                                            Seqpos,Error *),
                       void *processmaxpairsinfo,
                       Verboseinfo *verboseinfo,
-                      Env *env)
+                      Error *err)
 {
   unsigned int base;
   ArraySeqpos *ptr;
@@ -386,7 +387,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                     */
                     &state,
                     verboseinfo,
-                    env) != 0)
+                    err) != 0)
   {
     haserr = true;
   }
@@ -403,22 +404,23 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
 int callenummaxpairs(const Str *indexname,
                      unsigned int userdefinedleastlength,
                      bool scanfile,
-                     int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
+                     int(*processmaxpairs)(void *,Seqpos,Seqpos,
+                                           Seqpos,Error *),
                      void *processmaxpairsinfo,
                      Verboseinfo *verboseinfo,
-                     Env *env)
+                     Error *err)
 {
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
 
-  env_error_check(env);
+  error_check(err);
   ssar = newSequentialsuffixarrayreaderfromfile(indexname,
                                                 SARR_LCPTAB |
                                                 SARR_SUFTAB |
                                                 SARR_ESQTAB,
                                                 scanfile
                                                   ? SEQ_scan : SEQ_mappedboth,
-                                                env);
+                                                err);
   if (ssar == NULL)
   {
     haserr = true;
@@ -433,13 +435,13 @@ int callenummaxpairs(const Str *indexname,
                         processmaxpairs,
                         processmaxpairsinfo,
                         verboseinfo,
-                        env) != 0)
+                        err) != 0)
   {
     haserr = true;
   }
   if (ssar != NULL)
   {
-    freeSequentialsuffixarrayreader(&ssar,env);
+    freeSequentialsuffixarrayreader(&ssar,err);
   }
   return haserr ? -1 : 0;
 }

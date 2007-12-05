@@ -26,7 +26,7 @@
 #include <inttypes.h>
 
 #include "libgtcore/bitpackstring.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/eis-mrangealphabet.h"
@@ -44,14 +44,14 @@
  * @param len see parameter start for description
  * @param cbState is passed on every call back of bitInsertFunc to
  * pass information that is kept across individual calls
- * @param env genometools state, passes information about allocator etc
+ * @param err genometools state, passes information about allocator etc
  * @return number of bits actually written, or (BitOffset)-1 if an
  * error occured
  */
 typedef BitOffset (*bitInsertFunc)(BitString cwDest, BitOffset cwOffset,
                                    BitString varDest, BitOffset varOffset,
                                    Seqpos start, Seqpos len, void *cbState,
-                                   Env *env);
+                                   Error *err);
 
 /**
  * Callback to insert one header field. The data written can later be
@@ -136,7 +136,7 @@ typedef union EISHint *EISHint;
  * @param maxBitsPerPos at most this many bits will be appended to the
  * variable width part of the data
  * @param cbState will be passed on each call of biFunc
- * @param env genometools reference for core functions
+ * @param err genometools reference for core functions
  */
 extern EISeq *
 newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
@@ -144,25 +144,25 @@ newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
                   uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
                   void **headerCBData,
                   bitInsertFunc biFunc, BitOffset cwBitsPerPos,
-                  BitOffset maxBitsPerPos, void *cbState, Env *env);
+                  BitOffset maxBitsPerPos, void *cbState, Error *err);
 
 /**
  * \brief Load previously written block encoded sequence
  * representation.
  * @param projectName base name of corresponding suffixerator project
  * @param features select optional in-memory data structures for speed-up
- * @param env genometools reference for core functions
+ * @param err genometools reference for core functions
  */
 extern EISeq *
-loadBlockEncIdxSeq(const Str *projectName, int features, Env *env);
+loadBlockEncIdxSeq(const Str *projectName, int features, Error *err);
 
 /**
  * \brief Deallocate a previously loaded/created sequence object.
  * @param seq reference of object to delete
- * @param env genometools reference for core functions
+ * @param err genometools reference for core functions
  */
 extern void
-deleteEncIdxSeq(EISeq *seq, Env *env);
+deleteEncIdxSeq(EISeq *seq, Error *err);
 
 /**
  * \brief Retrieve alphabet transformation from sequence object
@@ -180,11 +180,11 @@ EISGetAlphabet(const EISeq *seq);
  * @param pos occurences are counted up to this position
  * @param hint provides cache and direction information for queries
  * based on previous queries
- * @param env genometools state, passes information about allocator etc
+ * @param err genometools state, passes information about allocator etc
  */
 static inline Seqpos
 EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
-        Env *env);
+        Error *err);
 
 /**
  * \brief Return number of occurrences of symbol sym in index up to
@@ -195,11 +195,11 @@ EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
  * @param pos occurences are counted up to this position
  * @param hint provides cache and direction information for queries
  * based on previous queries
- * @param env genometools state, passes information about allocator etc
+ * @param err genometools state, passes information about allocator etc
  */
 static inline Seqpos
 EISSymTransformedRank(EISeq *seq, Symbol tSym, Seqpos pos,
-                      union EISHint *hint, Env *env);
+                      union EISHint *hint, Error *err);
 
 /**
  * Presents the bits previously stored by a bitInsertFunc callback.
@@ -209,48 +209,48 @@ EISSymTransformedRank(EISeq *seq, Symbol tSym, Seqpos pos,
  * @param flags select which part of the extension bits to query
  * @param retval store information of retrieved bits here
  * @param hint provides cache and direction information for queries
- * @param env genometools state, passes information about allocator etc
+ * @param err genometools state, passes information about allocator etc
  */
 static inline void
 EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint,
-                     Env *env);
+                     Error *err);
 
 /**
  * \brief Initialize empty structure to hold retrieval results later.
  * @param r struct to initialize
- * @param env genometools state, passes information about allocator etc
+ * @param err genometools state, passes information about allocator etc
  */
 static inline void
-initExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
+initExtBitsRetrieval(struct extBitsRetrieval *r, Error *err);
 
 /**
  * \brief Allocate and initialize empty structure to hold retrieval
  * results later.
- * @param env genometools state, passes information about allocator
+ * @param err genometools state, passes information about allocator
  * etc.
  * @return reference of new retrieval object
  */
 static inline struct extBitsRetrieval *
-newExtBitsRetrieval(Env *env);
+newExtBitsRetrieval(Error *err);
 
 /**
  * \brief Destruct structure holding retrieval data, deallocates
  * referenced data as necessary.
  * @param r struct to destruct
- * @param env genometools state, passes information about allocator etc.
+ * @param err genometools state, passes information about allocator etc.
  */
 static inline void
-destructExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
+destructExtBitsRetrieval(struct extBitsRetrieval *r, Error *err);
 
 /**
  * \brief Destruct structure holding retrieval data, deallocates
  * referenced data as necessary and the structure itself.
  * @param r struct to delete
- * @param env genometools state, passes information about allocator etc.
+ * @param err genometools state, passes information about allocator etc.
  */
 static inline void
-deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
+deleteExtBitsRetrieval(struct extBitsRetrieval *r, Error *err);
 
 /**
  * \brief Find positions of nth symbol occurrence. TODO: NOT IMPLEMENTED
@@ -273,11 +273,11 @@ EISLength(const EISeq *seq);
  * @param pos position to retrieve symbol for
  * @param hint optional caching/hinting structure (improves average
  * retrieval time)
- * @param env genometools state, passes information about allocator etc
+ * @param err genometools state, passes information about allocator etc
  * @return value of symbol as encoded in original alphabet
  */
 static inline Symbol
-EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env);
+EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Error *err);
 
 /**
  * \brief Return symbol at specified position. Comparable to c[pos] if the
@@ -287,29 +287,29 @@ EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env);
  * @param pos position to retrieve symbol for
  * @param hint optional caching/hinting structure (improves average
  * retrieval time)
- * @param env genometools state, passes information about allocator etc
+ * @param err genometools state, passes information about allocator etc
  * @return value of symbol as processed by encoding alphabet
  */
 static inline Symbol
-EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env);
+EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Error *err);
 
 /**
  * \brief Construct new hinting structure to accelerate operations on
  * related positions.
  * @param seq reference of sequence object to use
- * @param env genometools state, passes information about allocator etc
+ * @param err genometools state, passes information about allocator etc
  */
 static inline EISHint
-newEISHint(EISeq *seq, Env *env);
+newEISHint(EISeq *seq, Error *err);
 
 /**
  * Deallocate hinting data.
  * @param seq sequence associated
  * @param hint hint to free
- * @param env
+ * @param err
  */
 static inline void
-deleteEISHint(EISeq *seq, EISHint hint, Env *env);
+deleteEISHint(EISeq *seq, EISHint hint, Error *err);
 
 /**
  * Possible outcome of index integrity check.
@@ -357,11 +357,11 @@ enum EISIntegrityCheckFlags
  * @param tickPrint print a dot every tickPrint symbols processed
  * @param fp print dots to this file pointer
  * @param chkFlags select additional tests (see enum EISIntegrityCheckFlags)
- * @param env
+ * @param err
  */
 extern enum EISIntegrityCheckResults
 EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
-                   unsigned long tickPrint, FILE *fp, int chkFlags, Env *env);
+                   unsigned long tickPrint, FILE *fp, int chkFlags, Error *err);
 
 /**
  * @brief Position file pointer at header written by upper layer.
@@ -380,12 +380,12 @@ EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
  * @param pos position for which to print context
  * @param fp print diagnostics to this file pointer
  * @param hint use this structure for hinting
- * @param env
+ * @param err
  * @return 0 if an I/O error occured wrt fp
  */
 static inline int
 EISPrintDiagsForPos(const EISeq *seqIdx, Seqpos pos, FILE *fp, EISHint hint,
-                    Env *env);
+                    Error *err);
 
 #include "libgtmatch/eis-encidxseqsimpleop.h"
 

@@ -3,28 +3,28 @@ extern "C" {
 #endif
 Seqpos *encseq2markpositions(const Encodedsequence *encseq,
                              unsigned long numofsequences,
-                             Env *env);
+                             Error *err);
 
 unsigned long *sequence2markpositions(unsigned long *numofsequences,
                                       const Uchar *seq,
                                       unsigned long seqlen,
-                                      Env *env);
+                                      Error *err);
 
 unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
                                  unsigned long numofrecords,
                                  Seqpos totalwidth,
                                  Seqpos position,
-                                 Env *env);
+                                 Error *err);
 
 unsigned long getrecordnumulong(const unsigned long *recordseps,
                                 unsigned long numofrecords,
                                 unsigned long totalwidth,
                                 unsigned long position,
-                                Env *env);
+                                Error *err);
 
 int checkmarkpos(const Encodedsequence *encseq,
                  unsigned long numofdbsequences,
-                 Env *env);
+                 Error *err);
 
 #ifdef __cplusplus
 }

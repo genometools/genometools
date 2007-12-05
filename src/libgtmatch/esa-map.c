@@ -22,7 +22,7 @@
 #include <string.h>
 #include "libgtcore/array.h"
 #include "libgtcore/endianess.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/fa.h"
 #include "format64.h"
 #include "sarr-def.h"
@@ -37,7 +37,7 @@
 #define DBFILEKEY "dbfile="
 
 #define INITBufferedfile(INDEXNAME,STREAM,SUFFIX)\
-        (STREAM)->fp = opensfxfile(INDEXNAME,SUFFIX,"rb",env);\
+        (STREAM)->fp = opensfxfile(INDEXNAME,SUFFIX,"rb",err);\
         if ((STREAM)->fp == NULL)\
         {\
           haserr = true;\
@@ -52,7 +52,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  const Str *indexname,
                                  Verboseinfo *verboseinfo,
                                  FILE *fpin,
-                                 Env *env)
+                                 Error *err)
 {
   uint32_t integersize, littleendian, readmodeint;
   unsigned int linenum;
@@ -64,7 +64,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   Array *riktab;
   Str *currentline;
 
-  env_error_check(env);
+  error_check(err);
   riktab = array_new(sizeofReadintkeys());
   SETREADINTKEYS("totallength",totallength,NULL);
   SETREADINTKEYS("specialcharacters",
@@ -78,7 +78,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("numofsequences",&numofsequences,NULL);
   SETREADINTKEYS("numofdbsequences",&suffixarray->numofdbsequences,NULL);
   setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,
-                 0,NULL,env);
+                 0,NULL,err);
   SETREADINTKEYS("longest",&suffixarray->longest.valueseqpos,
                            &suffixarray->longest.defined);
   SETREADINTKEYS("prefixlength",&suffixarray->prefixlength,NULL);
@@ -115,7 +115,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                    Scanuint64_tcast(&readint1),
                    Scanuint64_tcast(&readint2)) != 3)
       {
-        env_error_set(env,"cannot parse line %*.*s",
+        error_set(err,"cannot parse line %*.*s",
                           (int) currentlinelength,
                           (int) currentlinelength,
                           (const char *) str_get(currentline));
@@ -126,7 +126,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
       if (readint1 < (int64_t) 1 || readint2 < (int64_t) 1)
       {
-        env_error_set(env,"need positive integers in line %*.*s",
+        error_set(err,"need positive integers in line %*.*s",
                           (int) currentlinelength,
                           (int) currentlinelength,
                           (const char *) str_get(currentline));
@@ -161,7 +161,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                          str_get(currentline),
                          currentlinelength,
                          riktab,
-                         env) != 0)
+                         err) != 0)
       {
         haserr = true;
         break;
@@ -171,7 +171,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   }
   str_delete(currentline);
   if (!haserr && allkeysdefined(indexname,PROJECTFILESUFFIX,riktab,
-                                verboseinfo,env) != 0)
+                                verboseinfo,err) != 0)
   {
     haserr = true;
   }
@@ -179,13 +179,13 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       integersize != (uint32_t) 32 &&
       integersize != (uint32_t) 64)
   {
-    env_error_set(env,"%s%s contains illegal line defining the integer size",
+    error_set(err,"%s%s contains illegal line defining the integer size",
                   str_get(indexname),PROJECTFILESUFFIX);
     haserr = true;
   }
   if (!haserr && integersize != (uint32_t) (sizeof (Seqpos) * CHAR_BIT))
   {
-    env_error_set(env,"index was generated for %u-bit integers while "
+    error_set(err,"index was generated for %u-bit integers while "
                       "this program uses %u-bit integers",
                       (unsigned int) integersize,
                       (unsigned int) (sizeof (Seqpos) * CHAR_BIT));
@@ -197,7 +197,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     {
       if (littleendian != (uint32_t) 1)
       {
-        env_error_set(env,"computer has little endian byte order, while index "
+        error_set(err,"computer has little endian byte order, while index "
                           "was build on computer with big endian byte order");
         haserr = true;
       }
@@ -205,7 +205,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     {
       if (littleendian == (uint32_t) 1)
       {
-        env_error_set(env,"computer has big endian byte order, while index "
+        error_set(err,"computer has big endian byte order, while index "
                           "was build on computer with little endian byte "
                           "order");
         haserr = true;
@@ -216,7 +216,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   {
     if (readmodeint > (uint32_t) 3)
     {
-      env_error_set(env,"illegal readmode %u",(unsigned int) readmodeint);
+      error_set(err,"illegal readmode %u",(unsigned int) readmodeint);
       haserr = true;
     }
     suffixarray->readmode = (Readmode) readmodeint;
@@ -226,19 +226,19 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
 }
 
 static void *genericmaponlytable(const Str *indexname,const char *suffix,
-                                 size_t *numofbytes,Env *env)
+                                 size_t *numofbytes,Error *err)
 {
   Str *tmpfilename;
   void *ptr;
   bool haserr = false;
 
-  env_error_check(env);
+  error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,suffix);
   ptr = fa_mmap_read(str_get(tmpfilename),numofbytes);
   if (ptr == NULL)
   {
-    env_error_set(env,"cannot map file \"%s\": %s",str_get(tmpfilename),
+    error_set(err,"cannot map file \"%s\": %s",str_get(tmpfilename),
                   strerror(errno));
     haserr = true;
   }
@@ -247,12 +247,12 @@ static void *genericmaponlytable(const Str *indexname,const char *suffix,
 }
 
 static int checkmappedfilesize(size_t numofbytes,Seqpos expectedunits,
-                               size_t sizeofunit,Env *env)
+                               size_t sizeofunit,Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   if (expectedunits != (Seqpos) (numofbytes/sizeofunit))
   {
-    env_error_set(env,"number of mapped units = %lu != " FormatSeqpos
+    error_set(err,"number of mapped units = %lu != " FormatSeqpos
                       " = expected number of integers",
                       (unsigned long) (numofbytes/sizeofunit),
                       PRINTSeqposcast(expectedunits));
@@ -264,16 +264,16 @@ static int checkmappedfilesize(size_t numofbytes,Seqpos expectedunits,
 static void *genericmaptable(const Str *indexname,
                              const char *suffix,
                              Seqpos expectedunits,size_t sizeofunit,
-                             Env *env)
+                             Error *err)
 {
   size_t numofbytes;
 
-  void *ptr = genericmaponlytable(indexname,suffix,&numofbytes,env);
+  void *ptr = genericmaponlytable(indexname,suffix,&numofbytes,err);
   if (ptr == NULL)
   {
     return NULL;
   }
-  if (checkmappedfilesize(numofbytes,expectedunits,sizeofunit,env) != 0)
+  if (checkmappedfilesize(numofbytes,expectedunits,sizeofunit,err) != 0)
   {
     fa_xmunmap(ptr);
     return NULL;
@@ -302,20 +302,20 @@ static void initsuffixarray(Suffixarray *suffixarray)
 
 static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
                         const Str *indexname,Verboseinfo *verboseinfo,
-                        Env *env)
+                        Error *err)
 {
   bool haserr = false;
   FILE *fp;
 
-  env_error_check(env);
-  fp = opensfxfile(indexname,PROJECTFILESUFFIX,"rb",env);
+  error_check(err);
+  fp = opensfxfile(indexname,PROJECTFILESUFFIX,"rb",err);
   if (fp == NULL)
   {
     haserr = true;
   }
   if (!haserr && scanprjfileviafileptr(suffixarray,totallength,
                                        indexname,verboseinfo,
-                                       fp,env) != 0)
+                                       fp,err) != 0)
   {
     haserr = true;
   }
@@ -323,19 +323,20 @@ static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
   return haserr;
 }
 
-static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,Env *env)
+static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,
+                        Error *err)
 {
   Str *tmpfilename;
   bool haserr = false;
 
-  env_error_check(env);
+  error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
   suffixarray->alpha = assigninputalphabet(false,
                                            false,
                                            tmpfilename,
                                            NULL,
-                                           env);
+                                           err);
   if (suffixarray->alpha == NULL)
   {
     haserr = true;
@@ -344,7 +345,7 @@ static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,Env *env)
   return haserr;
 }
 
-void freesuffixarray(Suffixarray *suffixarray,Env *env)
+void freesuffixarray(Suffixarray *suffixarray)
 {
   fa_xmunmap((void *) suffixarray->suftab);
   suffixarray->suftab = NULL;
@@ -366,9 +367,9 @@ void freesuffixarray(Suffixarray *suffixarray,Env *env)
   suffixarray->bwttabstream.fp = NULL;
   if (suffixarray->alpha != NULL)
   {
-    freeAlphabet(&suffixarray->alpha,env);
+    freeAlphabet(&suffixarray->alpha);
   }
-  freeEncodedsequence(&suffixarray->encseq,env);
+  freeEncodedsequence(&suffixarray->encseq);
   strarray_delete(suffixarray->filenametab);
   suffixarray->filenametab = NULL;
   FREESPACE(suffixarray->filelengthtab);
@@ -380,16 +381,16 @@ static int inputsuffixarray(bool map,
                             unsigned int demand,
                             const Str *indexname,
                             Verboseinfo *verboseinfo,
-                            Env *env)
+                            Error *err)
 {
   bool haserr = false;
 
-  env_error_check(env);
+  error_check(err);
   initsuffixarray(suffixarray);
-  haserr = scanprjfile(suffixarray,totallength,indexname,verboseinfo,env);
+  haserr = scanprjfile(suffixarray,totallength,indexname,verboseinfo,err);
   if (!haserr)
   {
-    haserr = scanal1file(suffixarray,indexname,env);
+    haserr = scanal1file(suffixarray,indexname,err);
   }
   if (!haserr && (demand & SARR_ESQTAB))
   {
@@ -401,7 +402,7 @@ static int inputsuffixarray(bool map,
                                              getmapsizeAlphabet(suffixarray->
                                                                 alpha),
                                              verboseinfo,
-                                             env);
+                                             err);
     if (suffixarray->encseq == NULL)
     {
       haserr = true;
@@ -414,7 +415,7 @@ static int inputsuffixarray(bool map,
     suffixarray->destab = genericmaponlytable(indexname,
                                               DESTABSUFFIX,
                                               &numofbytes,
-                                              env);
+                                              err);
     suffixarray->destablength = (unsigned long) numofbytes;
     if (suffixarray->destab == NULL)
     {
@@ -429,7 +430,7 @@ static int inputsuffixarray(bool map,
                                             SUFTABSUFFIX,
                                             (*totallength)+1,
                                             sizeof (Seqpos),
-                                            env);
+                                            err);
       if (suffixarray->suftab == NULL)
       {
         haserr = true;
@@ -440,7 +441,7 @@ static int inputsuffixarray(bool map,
     }
     if (!haserr && !suffixarray->longest.defined)
     {
-      env_error_set(env,"longest not defined");
+      error_set(err,"longest not defined");
       haserr = true;
     }
   }
@@ -452,7 +453,7 @@ static int inputsuffixarray(bool map,
                                             LCPTABSUFFIX,
                                             (*totallength)+1,
                                             sizeof (Uchar),
-                                            env);
+                                            err);
       if (suffixarray->lcptab == NULL)
       {
         haserr = true;
@@ -463,13 +464,13 @@ static int inputsuffixarray(bool map,
       if (!haserr &&
           fseek(suffixarray->lcptabstream.fp,(long) sizeof (Uchar),SEEK_SET))
       {
-        env_error_set(env,"fseek(esastream) failed: %s",strerror(errno));
+        error_set(err,"fseek(esastream) failed: %s",strerror(errno));
         haserr = true;
       }
     }
     if (!haserr && !suffixarray->numoflargelcpvalues.defined)
     {
-      env_error_set(env,"numoflargelcpvalues not defined");
+      error_set(err,"numoflargelcpvalues not defined");
       haserr = true;
     }
     if (!haserr && suffixarray->numoflargelcpvalues.valueseqpos > 0)
@@ -481,7 +482,7 @@ static int inputsuffixarray(bool map,
                                               suffixarray->numoflargelcpvalues.
                                               valueseqpos,
                                               sizeof (Largelcpvalue),
-                                              env);
+                                              err);
         if (suffixarray->llvtab == NULL)
         {
           haserr = true;
@@ -501,7 +502,7 @@ static int inputsuffixarray(bool map,
                                             BWTTABSUFFIX,
                                             (*totallength)+1,
                                             sizeof (Uchar),
-                                            env);
+                                            err);
       if (suffixarray->bwttab == NULL)
       {
         haserr = true;
@@ -513,7 +514,7 @@ static int inputsuffixarray(bool map,
   }
   if (haserr)
   {
-    freesuffixarray(suffixarray,env);
+    freesuffixarray(suffixarray);
   }
   return haserr ? -1 : 0;
 }
@@ -523,16 +524,16 @@ int streamsuffixarray(Suffixarray *suffixarray,
                       unsigned int demand,
                       const Str *indexname,
                       Verboseinfo *verboseinfo,
-                      Env *env)
+                      Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   return inputsuffixarray(false,
                           suffixarray,
                           totallength,
                           demand,
                           indexname,
                           verboseinfo,
-                          env);
+                          err);
 }
 
 int mapsuffixarray(Suffixarray *suffixarray,
@@ -540,14 +541,14 @@ int mapsuffixarray(Suffixarray *suffixarray,
                    unsigned int demand,
                    const Str *indexname,
                    Verboseinfo *verboseinfo,
-                   Env *env)
+                   Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   return inputsuffixarray(true,
                           suffixarray,
                           totallength,
                           demand,
                           indexname,
                           verboseinfo,
-                          env);
+                          err);
 }

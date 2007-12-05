@@ -17,7 +17,7 @@
 
 #ifndef READMODE_DEF_H
 #define READMODE_DEF_H
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 typedef enum
 {
@@ -31,6 +31,6 @@ typedef enum
 
 const char *showreadmode(Readmode readmode);
 
-int parsereadmode(const char *dirargstring,Env *env);
+int parsereadmode(const char *dirargstring,Error *err);
 
 #endif

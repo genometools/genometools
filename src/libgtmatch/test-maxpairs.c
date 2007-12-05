@@ -17,7 +17,7 @@
 
 #ifdef INLINEDSequentialsuffixarrayreader
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "verbose-def.h"
 #include "seqpos-def.h"
@@ -27,7 +27,7 @@ int testmaxpairs(/*@unused@*/ const Str *indexname,
                  /*@unused@*/ unsigned int minlength,
                  /*@unused@*/ Seqpos substringlength,
                  /*@unused@*/ Verboseinfo *verboseinfo,
-                 /*@unused@*/ Env *env)
+                 /*@unused@*/ Error *err)
 {
   return 0;
 }
@@ -51,7 +51,7 @@ int testmaxpairs(/*@unused@*/ const Str *indexname,
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,
                               Seqpos substringlength,
-                              Env *env)
+                              Error *err)
 {
   Seqpos start, totallength;
 
@@ -62,7 +62,7 @@ static Seqpos samplesubstring(Uchar *seqspace,
     substringlength = totallength - start;
   }
   assert(substringlength > 0);
-  encseqextract(seqspace,encseq,start,start+substringlength-1,env);
+  encseqextract(seqspace,encseq,start,start+substringlength-1);
   return substringlength;
 }
 
@@ -78,7 +78,7 @@ static int storemaxmatchquery(void *info,
                               Seqpos dbstart,
                               uint64_t queryseqnum,
                               unsigned long querystart,
-                              Env *env)
+                              Error *err)
 {
   Array *tab = (Array *) info;
   Substringmatch subm;
@@ -104,7 +104,7 @@ static int storemaxmatchself(void *info,
                              Seqpos len,
                              Seqpos pos1,
                              Seqpos pos2,
-                             Env *env)
+                             Error *err)
 {
   Maxmatchselfinfo *maxmatchselfinfo = (Maxmatchselfinfo *) info;
   Seqpos dbstart, querystart;
@@ -138,7 +138,7 @@ static int storemaxmatchself(void *info,
                             maxmatchselfinfo->numofquerysequences,
                             maxmatchselfinfo->querylen,
                             pos,
-                            env);
+                            err);
       if (queryseqnum == maxmatchselfinfo->numofquerysequences)
       {
         return -1;
@@ -215,7 +215,7 @@ int testmaxpairs(const Str *indexname,
                  unsigned int minlength,
                  Seqpos substringlength,
                  Verboseinfo *verboseinfo,
-                 Env *env)
+                 Error *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength, dblen, querylen;
@@ -231,7 +231,7 @@ int testmaxpairs(const Str *indexname,
                      SARR_ESQTAB,
                      indexname,
                      verboseinfo,
-                     env) != 0)
+                     err) != 0)
   {
     haserr = true;
   }
@@ -244,8 +244,8 @@ int testmaxpairs(const Str *indexname,
   ALLOCASSIGNSPACE(query,NULL,Uchar,substringlength);
   for (s=0; s<samples && !haserr; s++)
   {
-    dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength,env);
-    querylen = samplesubstring(query,suffixarray.encseq,substringlength,env);
+    dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength,err);
+    querylen = samplesubstring(query,suffixarray.encseq,substringlength,err);
     showverbose(verboseinfo,"run query match for dblen=" FormatSeqpos
                             ",querylen= " FormatSeqpos ", minlength=%u",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
@@ -259,7 +259,7 @@ int testmaxpairs(const Str *indexname,
                                 storemaxmatchquery,
                                 tabmaxquerymatches,
                                 verboseinfo,
-                                env) != 0)
+                                err) != 0)
     {
       haserr = true;
       break;
@@ -272,7 +272,7 @@ int testmaxpairs(const Str *indexname,
     maxmatchselfinfo.querylen = (unsigned long) querylen;
     maxmatchselfinfo.markpos
       = sequence2markpositions(&maxmatchselfinfo.numofquerysequences,
-                               query,(unsigned long) querylen,env);
+                               query,(unsigned long) querylen,err);
     if (sarrselfsubstringmatch(dbseq,
                                dblen,
                                query,
@@ -282,7 +282,7 @@ int testmaxpairs(const Str *indexname,
                                storemaxmatchself,
                                &maxmatchselfinfo,
                                verboseinfo,
-                               env) != 0)
+                               err) != 0)
     {
       haserr = true;
       break;
@@ -295,10 +295,10 @@ int testmaxpairs(const Str *indexname,
       const unsigned long width = 60UL;
       printf("querymatches\n");
       (void) array_iterate(tabmaxquerymatches,showSubstringmatch,NULL,
-                           env_error(env));
+                           err);
       printf("dbmatches\n");
       (void) array_iterate(maxmatchselfinfo.results,showSubstringmatch,
-                           NULL,env_error(env));
+                           NULL,err);
       symbolstring2fasta(stdout,"dbseq",
                          suffixarray.alpha,
                          dbseq,
@@ -318,7 +318,7 @@ int testmaxpairs(const Str *indexname,
   }
   FREESPACE(dbseq);
   FREESPACE(query);
-  freesuffixarray(&suffixarray,env);
+  freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }
 

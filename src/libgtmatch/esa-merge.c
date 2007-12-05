@@ -54,13 +54,13 @@ static int inputthesequences(Alphabet **alpha,
                              const StrArray *indexnametab,
                              unsigned int demand,
                              Verboseinfo *verboseinfo,
-                             Env *env)
+                             Error *err)
 {
   unsigned long idx;
   Str *indexname;
   Seqpos totallength;
 
-  env_error_check(env);
+  error_check(err);
   for (idx=0; idx<strarray_size(indexnametab); idx++)
   {
     indexname = strarray_get_str(indexnametab,idx);
@@ -69,7 +69,7 @@ static int inputthesequences(Alphabet **alpha,
                           demand,
                           indexname,
                           verboseinfo,
-                          env) != 0)
+                          err) != 0)
     {
       str_delete(indexname);
       return -1;
@@ -87,25 +87,25 @@ static int insertfirstsuffixes(Trierep *trierep,
                                Seqpos *nextpostable,
                                Suffixarray *suffixarraytable,
                                unsigned int numofindexes,
-                               Env *env)
+                               Error *err)
 {
   unsigned int idx;
   Seqpos suftabvalue;
   int retval;
 
-  env_error_check(env);
+  error_check(err);
   for (idx=0; idx<numofindexes; idx++)
   {
     retval = readnextSeqposfromstream(&suftabvalue,
                                       &suffixarraytable[idx].suftabstream,
-                                      env);
+                                      err);
     if (retval < 0)
     {
       return -1;
     }
     if (retval == 0)
     {
-      env_error_set(env,"file %s: line %d: unexpected end of file when "
+      error_set(err,"file %s: line %d: unexpected end of file when "
                         "reading suftab",__FILE__,__LINE__);
       return -2;
     }
@@ -121,11 +121,11 @@ static int insertfirstsuffixes(Trierep *trierep,
 
 /*@null@*/ static Trienode *findlargestnodeleqlcpvalue(Trienode *smallest,
                                                        Seqpos lcpvalue,
-                                                       Env *env)
+                                                       Error *err)
 {
   Trienode *tmp;
 
-  env_error_check(env);
+  error_check(err);
   for (tmp = smallest->parent; tmp != NULL; tmp = tmp->parent)
   {
     if (tmp->depth <= lcpvalue)
@@ -133,12 +133,12 @@ static int insertfirstsuffixes(Trierep *trierep,
       return tmp;
     }
   }
-  env_error_set(env,"path does not contain a node of depth <= " FormatSeqpos,
+  error_set(err,"path does not contain a node of depth <= " FormatSeqpos,
                 PRINTSeqposcast(lcpvalue));
   return NULL;
 }
 
-int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
+int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Error *err)
 {
   Trienode *tmpsmallestleaf, *tmplcpnode;
   Largelcpvalue tmpexception;
@@ -149,7 +149,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
          tmplastbranchdepth;
   unsigned int tmpidx;
 
-  env_error_check(env);
+  error_check(err);
   for (emmesa->buf.nextstoreidx = 0;
       emmesa->numofentries > 0 &&
       emmesa->buf.nextstoreidx < (unsigned int) SIZEOFMERGERESULTBUFFER;
@@ -170,14 +170,14 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
     {
       retval = readnextUcharfromstream(&tmpsmalllcpvalue,
                                        &emmesa->suffixarraytable[tmpidx].
-                                                lcptabstream,env);
+                                                lcptabstream,err);
       if (retval < 0)
       {
         return -1;
       }
       if (retval == 0)
       {
-        env_error_set(env,"file %s: line %d: unexpected end of file when "
+        error_set(err,"file %s: line %d: unexpected end of file when "
                         "reading lcptab",__FILE__,__LINE__);
         return -2;
       }
@@ -186,14 +186,14 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
         retval = readnextLargelcpvaluefromstream(
                                &tmpexception,
                                &emmesa->suffixarraytable[tmpidx].llvtabstream,
-                               env);
+                               err);
         if (retval < 0)
         {
           return -3;
         }
         if (retval == 0)
         {
-          env_error_set(env,"file %s: line %d: unexpected end of file when "
+          error_set(err,"file %s: line %d: unexpected end of file when "
                         "reading llvtab",__FILE__,__LINE__);
           return -4;
         }
@@ -206,18 +206,18 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
       {
         tmplastbranchdepth = tmplcpvalue;
       }
-      tmplcpnode = findlargestnodeleqlcpvalue(tmpsmallestleaf,tmplcpvalue,env);
+      tmplcpnode = findlargestnodeleqlcpvalue(tmpsmallestleaf,tmplcpvalue,err);
       retval = readnextSeqposfromstream(&tmpsuftabvalue,
                                         &emmesa->suffixarraytable[tmpidx].
                                         suftabstream,
-                                        env);
+                                        err);
       if (retval < 0)
       {
         return -5;
       }
       if (retval == 0)
       {
-        env_error_set(env,"file %s: line %d: unexpected end of file when "
+        error_set(err,"file %s: line %d: unexpected end of file when "
                       "reading suftab",__FILE__,__LINE__);
         return -6;
       }
@@ -247,7 +247,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
                           const StrArray *indexnametab,
                           unsigned int demand,
                           Verboseinfo *verboseinfo,
-                          Env *env)
+                          Error *err)
 {
   unsigned int numofindexes;
   bool haserr = false;
@@ -266,7 +266,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
                        indexnametab,
                        demand,
                        verboseinfo,
-                       env) != 0)
+                       err) != 0)
   {
     haserr = true;
     return -1;
@@ -284,12 +284,12 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
       emmesa->trierep.encseqreadinfo[idx].readmode
         = emmesa->suffixarraytable[idx].readmode;
     }
-    inittrienodetable(&emmesa->trierep,(Seqpos) numofindexes,numofindexes,env);
+    inittrienodetable(&emmesa->trierep,(Seqpos) numofindexes,numofindexes,err);
     if (insertfirstsuffixes(&emmesa->trierep,
                            emmesa->nextpostable,
                            emmesa->suffixarraytable,
                            numofindexes,
-                           env) != 0)
+                           err) != 0)
     {
       FREESPACE(emmesa->trierep.encseqreadinfo);
       haserr = true;
@@ -303,19 +303,19 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
   return haserr ? -1 : 0;
 }
 
-void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Env *env)
+void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Error *err)
 {
   unsigned int idx;
 
   for (idx = 0; idx < emmesa->numofindexes; idx++)
   {
-    freesuffixarray(emmesa->suffixarraytable + idx,env);
+    freesuffixarray(emmesa->suffixarraytable + idx);
   }
   FREESPACE(emmesa->suffixarraytable);
   FREESPACE(emmesa->trierep.encseqreadinfo);
   if (emmesa->numofindexes > (unsigned int) 1)
   {
-    freetrierep(&emmesa->trierep,env);
+    freetrierep(&emmesa->trierep,err);
   }
   FREESPACE(emmesa->nextpostable);
 }

@@ -18,7 +18,7 @@
 #ifndef VERBOSE_DEF_H
 #define VERBOSE_DEF_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 typedef struct Verboseinfo Verboseinfo;
 
@@ -28,8 +28,8 @@ void showverbose(Verboseinfo *verboseinfo,
                  const char *format, ...)
                  __attribute__ ((format (printf, 2, 3)));
 
-Verboseinfo *newverboseinfo(bool verbose,Env *env);
+Verboseinfo *newverboseinfo(bool verbose,Error *err);
 
-void freeverboseinfo(Verboseinfo **v,Env *env);
+void freeverboseinfo(Verboseinfo **v,Error *err);
 
 #endif

@@ -676,8 +676,8 @@ static int searchforTSDandorMotifoutside(
     ALLOCASSIGNSPACE(dbseq,NULL,Uchar,leftlen);
     ALLOCASSIGNSPACE(query,NULL,Uchar,rightlen);
 
-    encseqextract(dbseq,encseq,startleftLTR,endleftLTR,env);
-    encseqextract(query,encseq,startrightLTR,endrightLTR,env);
+    encseqextract(dbseq,encseq,startleftLTR,endleftLTR);
+    encseqextract(query,encseq,startrightLTR,endrightLTR);
     INITARRAY(&subrepeatinfo.repeats, Repeat);
     subrepeatinfo.lmin = (unsigned long) lo->minlengthTSD;
     subrepeatinfo.lmax = (unsigned long) lo->maxlengthTSD;

@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include <inttypes.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/str.h"
 
@@ -27,21 +27,21 @@ int makeindexfilecopy(const Str *destindex,
                       const Str *sourceindex,
                       const char *suffix,
                       uint64_t maxlength,
-                      Env *env)
+                      Error *err)
 {
   FILE *fpdest = NULL, *fpsource = NULL;
   int cc;
   bool haserr = false;
 
-  env_error_check(env);
-  fpdest = opensfxfile(destindex,suffix,"wb",env);
+  error_check(err);
+  fpdest = opensfxfile(destindex,suffix,"wb",err);
   if (fpdest == NULL)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    fpsource = opensfxfile(sourceindex,suffix,"rb",env);
+    fpsource = opensfxfile(sourceindex,suffix,"rb",err);
     if (fpsource == NULL)
     {
       haserr = true;

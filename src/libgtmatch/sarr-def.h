@@ -56,7 +56,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
 #define DECLAREREADFUNCTION(TYPE)\
         static int readnext ## TYPE ## fromstream(TYPE *val,\
                                                   TYPE ## Bufferedfile *buf,\
-                                                  Env *env)\
+                                                  Error *err)\
         {\
           if (buf->nextread >= buf->nextfree)\
           {\
@@ -66,7 +66,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
                                                  buf->fp);\
             if (ferror(buf->fp))\
             {\
-              env_error_set(env,"error when trying to read next %s",#TYPE);\
+              error_set(err,"error when trying to read next %s",#TYPE);\
               return -2;\
             }\
             buf->nextread = 0;\

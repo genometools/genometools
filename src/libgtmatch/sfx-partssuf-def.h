@@ -18,12 +18,7 @@
 #ifndef SFX_PARTSSUF_DEF_H
 #define SFX_PARTSSUF_DEF_H
 
-#include "libgtcore/env.h"
-#include "seqpos-def.h"
-#include "verbose-def.h"
-#include "intcode-def.h"
-
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "seqpos-def.h"
 #include "verbose-def.h"
 #include "intcode-def.h"
@@ -36,7 +31,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
                             Seqpos numofsuffixestoinsert,
                             Seqpos fullspecials,
                             Verboseinfo *verboseinfo,
-                            Env *env);
+                            Error *err);
 
 Codetype stpgetcurrentmincode(unsigned int part,
                               const Suftabparts *suftabparts);
@@ -57,6 +52,6 @@ Seqpos stpgetlargestwidth(const Suftabparts *suftabparts);
 
 unsigned int stpgetnumofparts(const Suftabparts *suftabparts);
 
-void freesuftabparts(Suftabparts *suftabparts,Env *env);
+void freesuftabparts(Suftabparts *suftabparts,Error *err);
 
 #endif

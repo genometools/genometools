@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int verifymappedstr(const Suffixarray *suffixarray,Env *env);
+int verifymappedstr(const Suffixarray *suffixarray,Error *err);
 
 #ifdef __cplusplus
 }

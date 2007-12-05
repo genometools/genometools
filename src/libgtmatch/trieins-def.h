@@ -68,7 +68,7 @@ void showtrie(const Trierep *trierep,
               const Uchar *characters);
 
 void checktrie(Trierep *trierep,unsigned int numberofleaves,
-               unsigned int maxleafnum,Env *env);
+               unsigned int maxleafnum,Error *err);
 
 void showallnoderelations(const Trienode *node);
 
@@ -81,8 +81,8 @@ Trienode *findsmallestnodeintrie(const Trierep *trierep);
 void deletesmallestpath(Trienode *smallest,Trierep *trierep);
 
 void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
-                       unsigned int numofindexes,Env *env);
+                       unsigned int numofindexes,Error *err);
 
-void freetrierep(Trierep *trierep,Env *env);
+void freetrierep(Trierep *trierep,Error *err);
 
 #endif

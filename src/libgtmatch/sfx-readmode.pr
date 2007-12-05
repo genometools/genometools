@@ -3,7 +3,7 @@ extern "C" {
 #endif
 const char *showreadmode(Readmode readmode);
 
-int parsereadmode(const char *dirargstring,Env *env);
+int parsereadmode(const char *dirargstring,Error *err);
 
 #ifdef __cplusplus
 }

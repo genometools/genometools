@@ -18,7 +18,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdbool.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/symboldef.h"
 #include "spacedef.h"
@@ -30,7 +30,7 @@
 void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
                                 const char *file1,
                                 const char *file2,
-                                Env *env)
+                                Error *err)
 {
   const Uchar *useq = NULL, *vseq = NULL;
   size_t ulen, vlen;
@@ -51,7 +51,7 @@ void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
   while (true)
   {
     checkfunction(forward,useq,(unsigned long) ulen,
-                          vseq,(unsigned long) vlen,env);
+                          vseq,(unsigned long) vlen,err);
     if (!forward)
     {
       break;
@@ -64,7 +64,7 @@ void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
 
 unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,
                                      const char *text,
-                                     Env *env)
+                                     Error *err)
 {
   unsigned long i, len;
 
@@ -76,7 +76,7 @@ unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,
                   i,
                   (const Uchar *) (text+i),
                   len-i,
-                  env);
+                  err);
   }
   return len/2;
 }
@@ -84,7 +84,7 @@ unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,
 unsigned long applycheckfunctiontotext(const Uchar *text,
                                        unsigned long textlen,
                                        void *info,
-                                       Env *env)
+                                       Error *err)
 {
   unsigned long i;
   Checkcmppairfuntype checkfunction = (Checkcmppairfuntype) info;
@@ -94,7 +94,7 @@ unsigned long applycheckfunctiontotext(const Uchar *text,
 #endif
   for (i=0; i<=textlen/2; i++)
   {
-    checkfunction(true,text,i,text+i,textlen-i,env);
+    checkfunction(true,text,i,text+i,textlen-i,err);
   }
   return textlen/2+1;
 }
@@ -103,8 +103,8 @@ static unsigned long applyall(const char *alpha,
                               unsigned long textlen,void *info,
                               unsigned long (*apply)(const Uchar *,
                                                      unsigned long,
-                                                     void *,Env *),
-                              Env *env)
+                                                     void *,Error *),
+                              Error *err)
 {
   unsigned long i, *w, z = textlen-1,
                 testcases = 0,
@@ -125,7 +125,7 @@ static unsigned long applyall(const char *alpha,
     {
       text[i] = (Uchar) alpha[w[i]];
     }
-    testcases += apply(text,textlen,info,env);
+    testcases += apply(text,textlen,info,err);
     while (true)
     {
       w[z]++;
@@ -153,13 +153,13 @@ static unsigned long applyall(const char *alpha,
 unsigned long runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                                          const char *charlist,
                                          unsigned long len,
-                                         Env *env)
+                                         Error *err)
 {
   return applyall(charlist,
                   len,
                   (void *) checkfunction,
                   applycheckfunctiontotext,
-                  env);
+                  err);
 }
 
 void checkgreedyunitedist(/*@unused@*/ bool forward,
@@ -167,12 +167,12 @@ void checkgreedyunitedist(/*@unused@*/ bool forward,
                           unsigned long ulen,
                           const Uchar *vseq,
                           unsigned long vlen,
-                          Env *env)
+                          Error *err)
 {
   unsigned long edist1, edist2;
 
-  edist1 = greedyunitedist(useq,ulen,vseq,vlen,env);
-  edist2 = squarededistunit (useq,ulen,vseq,vlen,env);
+  edist1 = greedyunitedist(useq,ulen,vseq,vlen,err);
+  edist2 = squarededistunit (useq,ulen,vseq,vlen,err);
 #ifdef DEBUG
   printf("edist = %lu\n",edist1);
 #endif

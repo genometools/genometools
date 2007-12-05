@@ -1,10 +1,10 @@
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/symboldef.h"
 #include "spacedef.h"
 
 static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,
                                         const Uchar *v, unsigned long n,
-                                        Env *env)
+                                        Error *err)
 {
   unsigned long val, we, nw, *ecol, *ecolptr;
   const Uchar *uptr, *vptr;
@@ -47,11 +47,11 @@ static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,
 
 unsigned long squarededistunit (const Uchar *u, unsigned long m,
                                 const Uchar *v, unsigned long n,
-                                Env *env)
+                                Error *err)
 {
   if (m < n)
   {
-    return squarededistunit2(u,m,v,n,env);
+    return squarededistunit2(u,m,v,n,err);
   }
-  return squarededistunit2(v,n,u,m,env);
+  return squarededistunit2(v,n,u,m,err);
 }

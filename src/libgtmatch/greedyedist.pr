@@ -5,7 +5,7 @@ unsigned long greedyunitedist(const Uchar *useq,
                               unsigned long ulenvalue,
                               const Uchar *vseq,
                               unsigned long vlenvalue,
-                              Env *env);
+                              Error *err);
 
 #ifdef __cplusplus
 }

@@ -46,15 +46,15 @@ typedef struct
 static int initNameandFILE(NameandFILE *nf,
                             const Str *outindex,
                             const char *suffix,
-                            Env *env)
+                            Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   nf->outfilename = str_clone(outindex);
   str_append_cstr(nf->outfilename,suffix);
   nf->fp = fa_fopen(str_get(nf->outfilename),"wb");
   if (nf->fp == NULL)
   {
-    env_error_set(env,"env_fa_open: cannot open file \"%s\": %s",
+    error_set(err,"fa_open: cannot open file \"%s\": %s",
                   str_get(nf->outfilename),
                   strerror(errno));
     return -1;
@@ -62,7 +62,7 @@ static int initNameandFILE(NameandFILE *nf,
   return 0;
 }
 
-static void freeNameandFILE(NameandFILE *nf,Env *env)
+static void freeNameandFILE(NameandFILE *nf,Error *err)
 {
   fa_xfclose(nf->fp);
   str_delete(nf->outfilename);
@@ -71,7 +71,7 @@ static void freeNameandFILE(NameandFILE *nf,Env *env)
 static int outputsuflcpllv(void *processinfo,
                            const Seqpos *sequenceoffsettable,
                            const Suflcpbuffer *buf,
-                           Env *env)
+                           Error *err)
 {
   Mergeoutinfo *mergeoutinfo = (Mergeoutinfo *) processinfo;
 
@@ -81,7 +81,7 @@ static int outputsuflcpllv(void *processinfo,
   Uchar smallvalue;
   bool haserr = false;
 
-  env_error_check(env);
+  error_check(err);
   for (i=0; i<buf->nextstoreidx; i++)
   {
     mergeoutinfo->absstartpostable[i]
@@ -94,7 +94,7 @@ static int outputsuflcpllv(void *processinfo,
             mergeoutinfo->outsuf.fp)
          != (size_t) buf->nextstoreidx)
   {
-    env_error_set(env,"fwrite(%s) of %u Seqpos-value failed: %s",
+    error_set(err,"fwrite(%s) of %u Seqpos-value failed: %s",
                   str_get(mergeoutinfo->outsuf.outfilename),
                   buf->nextstoreidx,strerror(errno));
     haserr = true;
@@ -121,7 +121,7 @@ static int outputsuflcpllv(void *processinfo,
         if (fwrite(&currentexception,sizeof (Largelcpvalue),
                  (size_t) 1,mergeoutinfo->outllv.fp) != (size_t) 1)
         {
-          env_error_set(env,"fwrite(%s) of Largelcpvalue failed: %s",
+          error_set(err,"fwrite(%s) of Largelcpvalue failed: %s",
                         str_get(mergeoutinfo->outllv.outfilename),
                         strerror(errno));
           haserr = true;
@@ -132,7 +132,7 @@ static int outputsuflcpllv(void *processinfo,
       if (fwrite(&smallvalue,sizeof (Uchar),(size_t) 1,
                 mergeoutinfo->outlcp.fp) != (size_t) 1)
       {
-        env_error_set(env,"fwrite(%s) of Uchar failed: %s",
+        error_set(err,"fwrite(%s) of Uchar failed: %s",
                        str_get(mergeoutinfo->outlcp.outfilename),
                        strerror(errno));
         haserr = true;
@@ -146,7 +146,7 @@ static int outputsuflcpllv(void *processinfo,
 
 static int mergeandstoreindex(const Str *storeindex,
                               Emissionmergedesa *emmesa,
-                              Env *env)
+                              Error *err)
 {
   Mergeoutinfo mergeoutinfo;
   Uchar smalllcpvalue;
@@ -154,14 +154,14 @@ static int mergeandstoreindex(const Str *storeindex,
   Seqpos *sequenceoffsettable, totallength;
   bool haserr = false;
 
-  env_error_check(env);
-  if (initNameandFILE(&mergeoutinfo.outsuf,storeindex,SUFTABSUFFIX,env) != 0)
+  error_check(err);
+  if (initNameandFILE(&mergeoutinfo.outsuf,storeindex,SUFTABSUFFIX,err) != 0)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    if (initNameandFILE(&mergeoutinfo.outlcp,storeindex,LCPTABSUFFIX,env) != 0)
+    if (initNameandFILE(&mergeoutinfo.outlcp,storeindex,LCPTABSUFFIX,err) != 0)
     {
       haserr = true;
     }
@@ -169,7 +169,7 @@ static int mergeandstoreindex(const Str *storeindex,
   if (!haserr)
   {
     if (initNameandFILE(&mergeoutinfo.outllv,storeindex,LARGELCPTABSUFFIX,
-                       env) != 0)
+                       err) != 0)
     {
       haserr = true;
     }
@@ -178,7 +178,7 @@ static int mergeandstoreindex(const Str *storeindex,
   if (!haserr && fwrite(&smalllcpvalue,sizeof (Uchar),(size_t) 1,
                 mergeoutinfo.outlcp.fp) != (size_t) 1)
   {
-    env_error_set(env,"fwrite(%s) failed: %s",
+    error_set(err,"fwrite(%s) failed: %s",
                   str_get(mergeoutinfo.outlcp.outfilename),
                   strerror(errno));
     haserr = true;
@@ -190,11 +190,11 @@ static int mergeandstoreindex(const Str *storeindex,
                                                  &specialcharinfo,
                                                  emmesa->suffixarraytable,
                                                  emmesa->numofindexes,
-                                                 env);
+                                                 err);
     assert(sequenceoffsettable != NULL);
     while (emmesa->numofentries > 0)
     {
-      if (stepdeleteandinsertothersuffixes(emmesa,env) != 0)
+      if (stepdeleteandinsertothersuffixes(emmesa,err) != 0)
       {
         haserr = true;
         break;
@@ -202,7 +202,7 @@ static int mergeandstoreindex(const Str *storeindex,
       if (outputsuflcpllv(&mergeoutinfo,
                          sequenceoffsettable,
                          &emmesa->buf,
-                         env) != 0)
+                         err) != 0)
       {
         haserr = true;
         break;
@@ -210,27 +210,27 @@ static int mergeandstoreindex(const Str *storeindex,
     }
     FREESPACE(sequenceoffsettable);
   }
-  freeNameandFILE(&mergeoutinfo.outsuf,env);
-  freeNameandFILE(&mergeoutinfo.outlcp,env);
-  freeNameandFILE(&mergeoutinfo.outllv,env);
+  freeNameandFILE(&mergeoutinfo.outsuf,err);
+  freeNameandFILE(&mergeoutinfo.outlcp,err);
+  freeNameandFILE(&mergeoutinfo.outllv,err);
   return haserr ? -1 : 0;
 }
 
 int performtheindexmerging(const Str *storeindex,
                            const StrArray *indexnametab,
                            Verboseinfo *verboseinfo,
-                           Env *env)
+                           Error *err)
 {
   Emissionmergedesa emmesa;
   unsigned int demand = SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB;
   bool haserr = false;
 
-  env_error_check(env);
+  error_check(err);
   if (initEmissionmergedesa(&emmesa,
                             indexnametab,
                             demand,
                             verboseinfo,
-                            env) != 0)
+                            err) != 0)
   {
     haserr = true;
   }
@@ -238,16 +238,16 @@ int performtheindexmerging(const Str *storeindex,
   {
     if (strarray_size(indexnametab) > (unsigned long) 1)
     {
-      if (mergeandstoreindex(storeindex,&emmesa,env) != 0)
+      if (mergeandstoreindex(storeindex,&emmesa,err) != 0)
       {
         haserr = true;
       }
     } else
     {
-      env_error_set(env,"merging requires more than one index");
+      error_set(err,"merging requires more than one index");
       haserr = true;
     }
   }
-  wraptEmissionmergedesa(&emmesa,env);
+  wraptEmissionmergedesa(&emmesa,err);
   return haserr ? -1 : 0;
 }

@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/symboldef.h"
 #include "spacedef.h"
 
@@ -283,7 +283,7 @@ unsigned long greedyunitedist(const Uchar *useq,
                               unsigned long ulenvalue,
                               const Uchar *vseq,
                               unsigned long vlenvalue,
-                              Env *env)
+                              Error *err)
 {
   unsigned long currentallocated, realdistance;
   FrontResource gl;

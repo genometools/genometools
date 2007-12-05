@@ -19,38 +19,38 @@
 #define TEST_PAIRWISE_H
 
 #include <stdbool.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/symboldef.h"
 
 typedef void (*Checkcmppairfuntype)(bool,
                                     const Uchar *,unsigned long,
                                     const Uchar *,unsigned long,
-                                    Env *env);
+                                    Error *err);
 
 void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
                                const char *file1,
                                const char *file2,
-                               Env *env);
+                               Error *err);
 
 unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,
                                      const char *text,
-                                     Env *env);
+                                     Error *err);
 
 unsigned long applycheckfunctiontotext(const Uchar *text,
                                        unsigned long textlen,
                                        void *info,
-                                       Env *env);
+                                       Error *err);
 
 unsigned long runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                                          const char *charlist,
                                          unsigned long len,
-                                         Env *env);
+                                         Error *err);
 
 void checkgreedyunitedist(/*@unused@*/ bool forward,
                           const Uchar *useq,
                           unsigned long ulen,
                           const Uchar *vseq,
                           unsigned long vlen,
-                          Env *env);
+                          Error *err);
 
 #endif

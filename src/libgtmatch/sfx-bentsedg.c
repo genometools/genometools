@@ -19,7 +19,7 @@
 #include <assert.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/minmax.h"
 #include "divmodmul.h"
 #include "sfx-codespec.h"
@@ -198,14 +198,14 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              ArrayMKVstack *mkvauxstack,
                              Suffixptr *l,Suffixptr *r,Seqpos d,
                              Lcpsubtab *lcpsubtab,
-                             Env *env)
+                             Error *err)
 {
   Suffixptr *left, *right, *leftplusw;
   Seqpos w, val, partval, depth, offset, doubleoffset, width;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
   Uchar tmpsvar;
 
-  env_error_check(env);
+  error_check(err);
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
   {
@@ -400,22 +400,22 @@ static Seqpos determinemaxbucketsize(const Seqpos *leftborder,
   return maxbucketsize;
 }
 
-void freelcpsubtab(Lcpsubtab **lcpsubtab,Env *env)
+void freelcpsubtab(Lcpsubtab **lcpsubtab,Error *err)
 {
   FREEARRAY(*lcpsubtab,Seqpos);
-  freeTurningwheel(&(*lcpsubtab)->tw,env);
+  freeTurningwheel(&(*lcpsubtab)->tw,err);
   FREESPACE(*lcpsubtab);
   return;
 }
 
 Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars,
-                        Env *env)
+                        Error *err)
 {
   Lcpsubtab *lcpsubtab;
 
   ALLOCASSIGNSPACE(lcpsubtab,NULL,Lcpsubtab,1);
   INITARRAY(lcpsubtab,Seqpos);
-  lcpsubtab->tw = newTurningwheel(prefixlength,numofchars,env);
+  lcpsubtab->tw = newTurningwheel(prefixlength,numofchars,err);
   return lcpsubtab;
 }
 
@@ -441,7 +441,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype maxcode,
                     Seqpos totalwidth,
                     Lcpsubtab *lcpsubtab,
-                    Env *env)
+                    Error *err)
 {
   Codetype code;
   unsigned int rightchar = mincode % numofchars;
@@ -450,7 +450,7 @@ void sortallbuckets(Seqpos *suftabptr,
   Bucketboundaries bbound;
   Seqpos maxbucketsize;
 
-  env_error_check(env);
+  error_check(err);
   maxbucketsize = determinemaxbucketsize(leftborder,
                                          countspecialcodes,
                                          mincode,
@@ -491,7 +491,7 @@ void sortallbuckets(Seqpos *suftabptr,
                        suftabptr + bbound.right,
                        (Seqpos) prefixlength,
                        lcpsubtab,
-                       env);
+                       err);
     }
   }
   FREEARRAY(&mkvauxstack,MKVstack);

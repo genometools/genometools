@@ -17,7 +17,7 @@
 
 #ifndef ESA_MMSEARCH_DEF_H
 #define ESA_MMSEARCH_DEF_H
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "encseq-def.h"
 
 typedef struct MMsearchiterator MMsearchiterator;
@@ -29,12 +29,11 @@ MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
                                       Seqpos offset,
                                       Readmode readmode,
                                       const Uchar *pattern,
-                                      unsigned long patternlen,
-                                      Env *env);
+                                      unsigned long patternlen);
 
 bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi);
 
-void freemmsearchiterator(MMsearchiterator **mmsi,Env *env);
+void freemmsearchiterator(MMsearchiterator **mmsi);
 
 int runquerysubstringmatch(const Encodedsequence *dbencseq,
                            const Seqpos *suftabpart,
@@ -46,19 +45,19 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                            unsigned int minlength,
                            int (*processmaxmatch)(void *,unsigned long,
                                                   Seqpos,uint64_t,
-                                                  unsigned long,Env *),
+                                                  unsigned long,Error *),
                            void *processmaxmatchinfo,
-                           Env *env);
+                           Error *err);
 
 int callenumquerymatches(const Str *indexname,
                          const StrArray *queryfiles,
                          bool echoquery,
                          unsigned int userdefinedleastlength,
                          int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                uint64_t,unsigned long,Env *),
+                                                uint64_t,unsigned long,Error *),
                          void *processmaxmatchinfo,
                          Verboseinfo *verboseinfo,
-                         Env *env);
+                         Error *err);
 
 int sarrquerysubstringmatch(const Uchar *dbseq,
                             Seqpos dblen,
@@ -68,10 +67,10 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                             const Alphabet *alpha,
                             int (*processmaxmatch)(void *,unsigned long,Seqpos,
                                                    uint64_t,unsigned long,
-                                                   Env *),
+                                                   Error *),
                             void *processmaxmatchinfo,
                             Verboseinfo *verboseinfo,
-                            Env *env);
+                            Error *err);
 
 Seqpos countmmsearchiterator(const MMsearchiterator *mmsi);
 

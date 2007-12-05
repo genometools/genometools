@@ -117,18 +117,18 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
 /* the functions with exactly the same interface for both implementation of
    encodedsequences */
 
-int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
+int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Error *err);
 
-Encodedsequencescanstate *newEncodedsequencescanstate(Env *env);
+Encodedsequencescanstate *newEncodedsequencescanstate(void);
 
-void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
+void freeEncodedsequence(Encodedsequence **encseqptr);
 
 void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
                                   const Encodedsequence *encseq,
                                   Readmode readmode,
                                   Seqpos startpos);
 
-void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
+void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
 
 /*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
                                                   const StrArray *filenametab,
@@ -138,7 +138,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
                                                   const Alphabet *alphabet,
                                                   const char *str_sat,
                                                   Verboseinfo *verboseinfo,
-                                                  Env *env);
+                                                  Error *err);
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const Str *indexname,
@@ -146,7 +146,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
                                                Seqpos specialranges,
                                                unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
-                                               Env *env);
+                                               Error *err);
 
 Encodedsequence *plain2encodedsequence(bool withrange,
                                        Specialcharinfo *specialcharinfo,
@@ -156,24 +156,22 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        unsigned long len2,
                                        unsigned int mapsize,
                                        Verboseinfo *verboseinfo,
-                                       Env *env);
+                                       Error *err);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
-                                              bool moveforward,
-                                              Env *env);
+                                              bool moveforward);
 
 bool hasspecialranges(const Encodedsequence *encseq);
 
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
 
-void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
+void freespecialrangeiterator(Specialrangeiterator **sri);
 
 /*@null@*/ const char *encseqaccessname(const Encodedsequence *encseq);
 
 void encseqextract(Uchar *buffer,
                    const Encodedsequence *encseq,
                    Seqpos frompos,
-                   Seqpos topos,
-                   Env *env);
+                   Seqpos topos);
 
 #endif

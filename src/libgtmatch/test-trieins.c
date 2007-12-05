@@ -50,7 +50,7 @@ static void maketrie(Trierep *trierep,
 static void successivelydeletesmallest(Trierep *trierep,
                                        /*@unused@*/ Seqpos seqlen,
                                        /*@unused@*/ const Uchar *characters,
-                                       /*@unused@*/ Env *env)
+                                       /*@unused@*/ Error *err)
 {
   Trienode *smallest;
 #ifdef WITHTRIEIDENT
@@ -67,24 +67,24 @@ static void successivelydeletesmallest(Trierep *trierep,
     showtrie(trierep,characters);
 #endif
     numberofleaves--;
-    checktrie(trierep,numberofleaves,maxleafnum,env);
+    checktrie(trierep,numberofleaves,maxleafnum,err);
 #endif
   }
 }
 
-int test_trieins(bool onlyins,const Str *indexname,Env *env)
+int test_trieins(bool onlyins,const Str *indexname,Error *err)
 {
   Suffixarray suffixarray;
   bool haserr = false;
   Seqpos totallength;
 
-  env_error_check(env);
+  error_check(err);
   if (streamsuffixarray(&suffixarray,
                         &totallength,
                         SARR_ESQTAB,
                         indexname,
                         NULL,
-                        env) != 0)
+                        err) != 0)
   {
     haserr = true;
   }
@@ -97,7 +97,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
     trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
     trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
     characters = getcharactersAlphabet(suffixarray.alpha);
-    inittrienodetable(&trierep,totallength,(unsigned int) 1,env);
+    inittrienodetable(&trierep,totallength,(unsigned int) 1,err);
     maketrie(&trierep,characters,totallength);
     if (onlyins)
     {
@@ -105,7 +105,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
 #ifdef WITHTRIESHOW
       showtrie(&trierep,characters);
 #endif
-      checktrie(&trierep,totallength+1,totallength,env);
+      checktrie(&trierep,totallength+1,totallength,err);
 #endif
     } else
     {
@@ -114,10 +114,10 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
       showallnoderelations(trierep.root);
 #endif
 #endif
-      successivelydeletesmallest(&trierep,totallength,characters,env);
+      successivelydeletesmallest(&trierep,totallength,characters,err);
     }
-    freetrierep(&trierep,env);
+    freetrierep(&trierep,err);
   }
-  freesuffixarray(&suffixarray,env);
+  freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }

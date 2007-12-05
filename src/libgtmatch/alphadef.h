@@ -32,7 +32,7 @@ typedef struct Alphabet Alphabet;
                                          bool isprotein,
                                          const Str *smapfile,
                                          const StrArray *filenametab,
-                                         Env *env);
+                                         Error *err);
 
 const Uchar *getsymbolmapAlphabet(const Alphabet *alpha);
 
@@ -42,7 +42,7 @@ unsigned int getmapsizeAlphabet(const Alphabet *alpha);
 
 const Uchar *getcharactersAlphabet(const Alphabet *alpha);
 
-void freeAlphabet(Alphabet **alpha,Env *env);
+void freeAlphabet(Alphabet **alpha);
 
 void outputalphabet(FILE *fpout,const Alphabet *alpha);
 
@@ -55,8 +55,8 @@ void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar);
 
 Uchar getprettysymbol(const Alphabet *alpha,unsigned int currentchar);
 
-bool isproteinalphabet(const Alphabet *alpha,Env *env);
+bool isproteinalphabet(const Alphabet *alpha);
 
-bool isdnaalphabet(const Alphabet *alpha,Env *env);
+bool isdnaalphabet(const Alphabet *alpha);
 
 #endif

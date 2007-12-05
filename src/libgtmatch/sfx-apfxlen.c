@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
 
@@ -104,12 +104,12 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
 }
 
 int checkprefixlength(unsigned int maxprefixlen,
-                      unsigned int prefixlength,Env *env)
+                      unsigned int prefixlength,Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   if (maxprefixlen < prefixlength)
   {
-    env_error_set(env,"prefix length %u is too large, maximal prefix length "
+    error_set(err,"prefix length %u is too large, maximal prefix length "
                       "for this input size and alphabet size is %u",
                       prefixlength,
                       maxprefixlen);

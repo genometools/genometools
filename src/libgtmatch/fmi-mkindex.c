@@ -54,14 +54,14 @@ static Indexleveldesc indexlevel[] =
 static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
                              int argc,
                              const char **argv,
-                             Env *env)
+                             Error *err)
 {
   OptionParser *op;
   Option *option, *optionfmout;
   OPrval oprval;
   int parsed_args;
 
-  env_error_check(env);
+  error_check(err);
   mkfmcallinfo->indexnametab = strarray_new();
   mkfmcallinfo->outfmindex = str_new();
   mkfmcallinfo->leveldesc = str_new();
@@ -91,15 +91,14 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
                            &mkfmcallinfo->noindexpos,false);
   option_parser_add_option(op, option);
 
-  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc,
-                               env_error(env));
+  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc,err);
   if (oprval == OPTIONPARSER_OK)
   {
     if (!option_is_set(optionfmout))
     {
       if (strarray_size(mkfmcallinfo->indexnametab) > (unsigned long) 1)
       {
-        env_error_set(env,"if more than one index is given, then "
+        error_set(err,"if more than one index is given, then "
                           "option -fmout is mandatory");
         oprval = OPTIONPARSER_ERROR;
       } else
@@ -115,13 +114,13 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && parsed_args != argc)
   {
-    env_error_set(env,"superfluous program parameters");
+    error_set(err,"superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
   return oprval;
 }
 
-static void freemkfmcallinfo(Mkfmcallinfo *mkfmcallinfo,Env *env)
+static void freemkfmcallinfo(Mkfmcallinfo *mkfmcallinfo,Error *err)
 {
   strarray_delete(mkfmcallinfo->indexnametab);
   str_delete(mkfmcallinfo->outfmindex);
@@ -147,7 +146,7 @@ static int levedescl2levelnum(const char *name,
   return -1;
 }
 
-static void freeconstructedfmindex(Fmindex *fm,Env *env)
+static void freeconstructedfmindex(Fmindex *fm,Error *err)
 {
   FREEARRAY (&fm->specpos, PairBwtidx);
   FREESPACE (fm->bfreq);
@@ -161,13 +160,13 @@ static void freeconstructedfmindex(Fmindex *fm,Env *env)
 }
 
 static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
-                            int argc,const char **argv,Env *env)
+                            int argc,const char **argv,Error *err)
 {
   OPrval rval;
   int retval = 0;
 
-  env_error_check(env);
-  rval = parsemkfmindex(mkfmcallinfo,argc,argv,env);
+  error_check(err);
+  rval = parsemkfmindex(mkfmcallinfo,argc,argv,err);
   if (rval == OPTIONPARSER_ERROR)
   {
     retval = -1;
@@ -182,14 +181,14 @@ static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
 }
 
 static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
-                        Env *env)
+                        Error *err)
 {
   Fmindex fm;
   unsigned int log2bsize,
                log2markdist;
   bool haserr = false;
 
-  env_error_check(env);
+  error_check(err);
   INITARRAY(&fm.specpos, PairBwtidx);
   fm.bfreq = NULL;
   fm.superbfreq = NULL;
@@ -202,7 +201,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
                         &log2bsize,
                         &log2markdist) != 0)
   {
-    env_error_set(env,"undefined level \"%s\"",
+    error_set(err,"undefined level \"%s\"",
                       str_get(mkfmcallinfo->leveldesc));
     haserr = true;
   }
@@ -213,36 +212,36 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
                                 mkfmcallinfo->indexnametab,
                                 mkfmcallinfo->noindexpos ? false : true,
                                 verboseinfo,
-                                env) != 0)
+                                err) != 0)
   {
     haserr = true;
   }
   if (!haserr && saveFmindex(mkfmcallinfo->outfmindex,
                             &fm,
                             mkfmcallinfo->noindexpos ? false : true,
-                            env) < 0)
+                            err) < 0)
   {
     haserr = true;
   }
-  freeconstructedfmindex(&fm,env);
+  freeconstructedfmindex(&fm,err);
   return haserr ? -1 : 0;
 }
 
-int parseargsandcallmkfmindex(int argc,const char **argv,Env *env)
+int parseargsandcallmkfmindex(int argc,const char **argv,Error *err)
 {
   Mkfmcallinfo mkfmcallinfo;
   int retval;
   bool haserr = false;
 
-  retval = mkfmindexoptions(&mkfmcallinfo,argc,argv,env);
+  retval = mkfmindexoptions(&mkfmcallinfo,argc,argv,err);
   if (retval == 0)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(false,env);
-    if (runmkfmindex(&mkfmcallinfo,verboseinfo,env) < 0)
+    Verboseinfo *verboseinfo = newverboseinfo(false,err);
+    if (runmkfmindex(&mkfmcallinfo,verboseinfo,err) < 0)
     {
       haserr = true;
     }
-    freeverboseinfo(&verboseinfo,env);
+    freeverboseinfo(&verboseinfo,err);
   } else
   {
     if (retval < 0)
@@ -250,7 +249,7 @@ int parseargsandcallmkfmindex(int argc,const char **argv,Env *env)
       haserr = true;
     }
   }
-  freemkfmcallinfo(&mkfmcallinfo,env);
+  freemkfmcallinfo(&mkfmcallinfo,err);
   return haserr ? -1 : 0;
 }
 

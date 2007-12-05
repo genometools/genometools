@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "spacedef.h"
 #include "alphadef.h"
 #include "encseq-def.h"
@@ -97,11 +97,10 @@ static void outkmeroccurrence(void *processinfo,
                               /*@unused@*/ Seqpos position,
                               /*@unused@*/ const Firstspecialpos
                                                  *firstspecialposition,
-                              Env *env)
+                              Error *err)
 {
   ArrayCodetype *codelist = (ArrayCodetype *) processinfo;
 
-  env_error_check(env);
   STOREINARRAY(codelist,Codetype,1024,code);
 }
 
@@ -111,12 +110,12 @@ static void collectkmercode(ArrayCodetype *codelist,
                             unsigned int kmersize,
                             unsigned int numofchars,
                             Seqpos stringtotallength,
-                            Env *env)
+                            Error *err)
 {
   Seqpos offset;
   Codetype code;
 
-  env_error_check(env);
+  error_check(err);
   for (offset=0; offset<=stringtotallength; offset++)
   {
     code = qgram2codefillspecial(numofchars,
@@ -134,15 +133,15 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
                             unsigned int kmersize,
                             unsigned int numofchars,
                             const char *characters,
-                            Env *env)
+                            Error *err)
 {
   unsigned long i;
   char buffer1[64+1], buffer2[64+1];
 
-  env_error_check(env);
+  error_check(err);
   if (codeliststream->nextfreeCodetype != codeliststring->nextfreeCodetype)
   {
-    env_error_set(env,
+    error_set(err,
                   "length codeliststream= %lu != %lu =length codeliststring",
                   (unsigned long) codeliststream->nextfreeCodetype,
                   (unsigned long) codeliststring->nextfreeCodetype);
@@ -162,7 +161,7 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
                       numofchars,
                       kmersize,
                       characters);
-      env_error_set(env,
+      error_set(err,
                     "codeliststream[%lu] = %u != %u = "
                     "codeliststring[%lu]\n%s != %s",
                     i,
@@ -184,12 +183,12 @@ static int verifycodelists(const Encodedsequence *encseq,
                            unsigned int numofchars,
                            Seqpos stringtotallength,
                            const ArrayCodetype *codeliststream,
-                           Env *env)
+                           Error *err)
 {
   bool haserr = false;
   ArrayCodetype codeliststring;
 
-  env_error_check(env);
+  error_check(err);
   INITARRAY(&codeliststring,Codetype);
   collectkmercode(&codeliststring,
                   encseq,
@@ -197,13 +196,13 @@ static int verifycodelists(const Encodedsequence *encseq,
                   kmersize,
                   numofchars,
                   stringtotallength,
-                  env);
+                  err);
   if (comparecodelists(codeliststream,
                        &codeliststring,
                        kmersize,
                        numofchars,
                        (const char *) characters,
-                       env) != 0)
+                       err) != 0)
   {
     haserr = true;
   }
@@ -211,13 +210,13 @@ static int verifycodelists(const Encodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
-int verifymappedstr(const Suffixarray *suffixarray,Env *env)
+int verifymappedstr(const Suffixarray *suffixarray,Error *err)
 {
   unsigned int numofchars;
   ArrayCodetype codeliststream;
   bool haserr = false;
 
-  env_error_check(env);
+  error_check(err);
   numofchars = getnumofcharsAlphabet(suffixarray->alpha);
   INITARRAY(&codeliststream,Codetype);
   if (getfastastreamkmers(suffixarray->filenametab,
@@ -227,7 +226,7 @@ int verifymappedstr(const Suffixarray *suffixarray,Env *env)
                           suffixarray->prefixlength,
                           getsymbolmapAlphabet(suffixarray->alpha),
                           false,
-                          env) != 0)
+                          err) != 0)
   {
     haserr = true;
   }
@@ -240,7 +239,7 @@ int verifymappedstr(const Suffixarray *suffixarray,Env *env)
                         numofchars,
                         getencseqtotallength(suffixarray->encseq),
                         &codeliststream,
-                        env) != 0)
+                        err) != 0)
     {
       haserr = true;
     }

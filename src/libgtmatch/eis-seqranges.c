@@ -17,7 +17,7 @@
 #include <string.h>
 
 #include "libgtcore/bsearch.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/xansi.h"
@@ -27,9 +27,9 @@
 
 struct seqRangeList *
 newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
-                enum SRLFeatures features, Env *env)
+                enum SRLFeatures features, Error *err)
 {
-  assert(env);
+  assert(err);
   struct seqRangeList *newList;
   newList = ma_malloc(sizeof (struct seqRangeList));
   newList->numRanges = 0;
@@ -52,9 +52,9 @@ newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
 }
 
 void
-SRLCompact(struct seqRangeList *rangeList, Env *env)
+SRLCompact(struct seqRangeList *rangeList, Error *err)
 {
-  assert(rangeList && env);
+  assert(rangeList && err);
   rangeList->ranges = ma_realloc(rangeList->ranges,
                                  sizeof (rangeList->ranges[0])
                                  * rangeList->numRanges);
@@ -67,9 +67,9 @@ SRLCompact(struct seqRangeList *rangeList, Env *env)
 }
 
 void
-deleteSeqRangeList(struct seqRangeList *rangeList, Env *env)
+deleteSeqRangeList(struct seqRangeList *rangeList, Error *err)
 {
-  assert(rangeList && env);
+  assert(rangeList && err);
   if (rangeList->ranges)
     ma_free(rangeList->ranges);
   if (rangeList->partialSymSums)
@@ -79,9 +79,9 @@ deleteSeqRangeList(struct seqRangeList *rangeList, Env *env)
 
 void
 SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
-                  Symbol esym, Env *env)
+                  Symbol esym, Error *err)
 {
-  assert(rangeList && env);
+  assert(rangeList && err);
   if (len)
   {
     Symbol sym = MRAEncMapSymbol(rangeList->alphabet, esym);
@@ -164,9 +164,9 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
 
 void
 SRLinsertNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
-                  Symbol esym, Env *env)
+                  Symbol esym, Error *err)
 {
-  assert(rangeList && env);
+  assert(rangeList && err);
   abort();
 /*   { */
 /*     Symbol sym = MRAEncMapSymbol(rangeList->alphabet, esym); */
@@ -177,14 +177,14 @@ SRLinsertNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
 
 void
 SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos,
-               Symbol esym, Env *env)
+               Symbol esym, Error *err)
 {
   size_t numRanges;
   struct seqRange *lastRange;
   Seqpos lastRangeLen;
   unsigned symBits;
   Symbol sym;
-  assert(rangeList && env);
+  assert(rangeList && err);
   sym = MRAEncMapSymbol(rangeList->alphabet, esym);
   numRanges = rangeList->numRanges;
   lastRange = rangeList->ranges + numRanges - 1;
@@ -195,7 +195,7 @@ SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos,
   if (numRanges && lastRange->startPos + lastRangeLen > pos)
   {
     /* TODO: search for range */
-    SRLinsertNewRange(rangeList, pos, 1, esym, env);
+    SRLinsertNewRange(rangeList, pos, 1, esym, err);
   }
   else if (numRanges
            && (seqRangeSym(lastRange, symBits) == sym)
@@ -203,7 +203,7 @@ SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos,
            && (lastRangeLen < rangeList->maxRangeLen))
     seqRangeSetLen(lastRange, ++lastRangeLen, symBits);
   else
-    SRLAppendNewRange(rangeList, pos, 1, esym, env);
+    SRLAppendNewRange(rangeList, pos, 1, esym, err);
 }
 
 void
@@ -466,11 +466,11 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp)
 /* FIXME: convert to platform-independent variant */
 struct seqRangeList *
 SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
-                  enum SRLFeatures features, Env *env)
+                  enum SRLFeatures features, Error *err)
 {
   struct seqRangeList *newRangeList;
   size_t numRanges;
-  assert(fp && env);
+  assert(fp && err);
   newRangeList = ma_malloc(sizeof (struct seqRangeList));
   newRangeList->alphabet = alphabet;
   newRangeList->symBits = requiredSymbolBits(MRAEncGetSize(alphabet) - 1);

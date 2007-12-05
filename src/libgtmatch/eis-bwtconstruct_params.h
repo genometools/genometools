@@ -71,7 +71,7 @@ struct bwtOptions
  * construction or matching
  * @param projectName reference to string which will hold the base
  * name (i.e. without extension) of the project once index creation begins
- * @param env
+ * @param err
  */
 extern void
 registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
@@ -84,10 +84,10 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
  * @param paramOutput used to hold options set by the user
  * @param extraToggles add flags here which only become apparent at
  * after option processing is finished
- * @param env
+ * @param err
  */
 extern void
 computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles,
-                           Env *env);
+                           Error *err);
 
 #endif

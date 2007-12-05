@@ -174,8 +174,7 @@ MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
                                       Seqpos offset,
                                       Readmode readmode,
                                       const Uchar *pattern,
-                                      unsigned long patternlen,
-                                      Env *env)
+                                      unsigned long patternlen)
 {
   MMsearchiterator *mmsi;
 
@@ -184,7 +183,7 @@ MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
   mmsi->lcpitv.right = rightbound;
   mmsi->lcpitv.offset = offset;
   mmsi->suftab = suftab;
-  mmsi->esr = newEncodedsequencescanstate(env);
+  mmsi->esr = newEncodedsequencescanstate();
   if (!mmsearch(dbencseq,mmsi->esr,suftab,readmode,&mmsi->lcpitv,
                 pattern,patternlen))
   {
@@ -214,9 +213,9 @@ bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi)
   return false;
 }
 
-void freemmsearchiterator(MMsearchiterator **mmsi,Env *env)
+void freemmsearchiterator(MMsearchiterator **mmsi)
 {
-  freeEncodedsequencescanstate(&(*mmsi)->esr,env);
+  freeEncodedsequencescanstate(&(*mmsi)->esr);
   FREESPACE(*mmsi);
 }
 
@@ -284,9 +283,9 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                            unsigned int minlength,
                            int (*processmaxmatch)(void *,unsigned long,
                                                   Seqpos,uint64_t,
-                                                  unsigned long,Env *),
+                                                  unsigned long,Error *),
                            void *processmaxmatchinfo,
-                           Env *env)
+                           Error *err)
 {
   MMsearchiterator *mmsi;
   Seqpos dbstart, totallength;
@@ -307,8 +306,7 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                                0, /* offset */
                                readmode,
                                query + currentquerystart,
-                               (unsigned long) minlength,
-                               env);
+                               (unsigned long) minlength);
     while (nextmmsearchiterator(&dbstart,mmsi))
     {
       if (isleftmaximal(dbencseq,
@@ -330,13 +328,13 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                             dbstart,
                             localunitnum,
                             localqueryoffset,
-                            env) != 0)
+                            err) != 0)
         {
           return -1;
         }
       }
     }
-    freemmsearchiterator(&mmsi,env);
+    freemmsearchiterator(&mmsi);
     if (query[currentquerystart] == (Uchar) SEPARATOR)
     {
       localunitnum++;
@@ -354,10 +352,10 @@ int callenumquerymatches(const Str *indexname,
                          bool echoquery,
                          unsigned int userdefinedleastlength,
                          int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                uint64_t,unsigned long,Env *),
+                                                uint64_t,unsigned long,Error *),
                          void *processmaxmatchinfo,
                          Verboseinfo *verboseinfo,
-                         Env *env)
+                         Error *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength;
@@ -368,13 +366,13 @@ int callenumquerymatches(const Str *indexname,
                      SARR_ESQTAB | SARR_SUFTAB,
                      indexname,
                      verboseinfo,
-                     env) != 0)
+                     err) != 0)
   {
     haserr = true;
   }
   if (!haserr && echoquery)
   {
-    if (echodescriptionandsequence(queryfiles,env_error(env)) != 0)
+    if (echodescriptionandsequence(queryfiles,err) != 0)
     {
       haserr = true;
     }
@@ -397,7 +395,7 @@ int callenumquerymatches(const Str *indexname,
                                 &query,
                                 &querylen,
                                 &desc,
-                                env_error(env));
+                                err);
       if (retval < 0)
       {
         haserr = true;
@@ -417,7 +415,7 @@ int callenumquerymatches(const Str *indexname,
                                  userdefinedleastlength,
                                  processmaxmatch,
                                  processmaxmatchinfo,
-                                 env) != 0)
+                                 err) != 0)
       {
         haserr = true;
         break;
@@ -426,7 +424,7 @@ int callenumquerymatches(const Str *indexname,
     }
     seqiterator_delete(seqit);
   }
-  freesuffixarray(&suffixarray,env);
+  freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }
 
@@ -442,10 +440,10 @@ static int constructsarrandrunmmsearch(
                  unsigned long querylen,
                  unsigned int minlength,
                  int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                        uint64_t,unsigned long,Env *),
+                                        uint64_t,unsigned long,Error *),
                  void *processmaxmatchinfo,
                  Measuretime *mtime,
-                 Env *env)
+                 Error *err)
 {
   const Seqpos *suftabptr;
   Seqpos numofsuffixes;
@@ -461,7 +459,7 @@ static int constructsarrandrunmmsearch(
                        numofparts,
                        mtime,
                        NULL,
-                       env);
+                       err);
   if (sfi == NULL)
   {
     haserr = true;
@@ -470,7 +468,7 @@ static int constructsarrandrunmmsearch(
     while (true)
     {
       suftabptr = nextSfxiterator(&numofsuffixes,&specialsuffixes,
-                                  mtime,sfi,env);
+                                  mtime,sfi,err);
       if (suftabptr == NULL)
       {
         break;
@@ -485,7 +483,7 @@ static int constructsarrandrunmmsearch(
                                 minlength,
                                 processmaxmatch,
                                 processmaxmatchinfo,
-                                env) != 0)
+                                err) != 0)
       {
         haserr = true;
         break;
@@ -494,7 +492,7 @@ static int constructsarrandrunmmsearch(
   }
   if (sfi != NULL)
   {
-    freeSfxiterator(&sfi,env);
+    freeSfxiterator(&sfi,err);
   }
   return haserr ? -1 : 0;
 }
@@ -507,10 +505,10 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                             const Alphabet *alpha,
                             int (*processmaxmatch)(void *,unsigned long,Seqpos,
                                                    uint64_t,unsigned long,
-                                                   Env *),
+                                                   Error *),
                             void *processmaxmatchinfo,
                             Verboseinfo *verboseinfo,
-                            Env *env)
+                            Error *err)
 {
   Specialcharinfo samplespecialcharinfo;
   unsigned int numofchars;
@@ -525,7 +523,7 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                                    0,
                                    getmapsizeAlphabet(alpha),
                                    verboseinfo,
-                                   env);
+                                   err);
   numofchars = getnumofcharsAlphabet(alpha);
   if (constructsarrandrunmmsearch(samplespecialcharinfo.specialcharacters,
                                   samplespecialcharinfo.specialranges,
@@ -540,10 +538,10 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                                   processmaxmatch,
                                   processmaxmatchinfo,
                                   NULL,
-                                  env) != 0)
+                                  err) != 0)
   {
     haserr = true;
   }
-  freeEncodedsequence(&dbencseq,env);
+  freeEncodedsequence(&dbencseq);
   return haserr ? -1 : 0;
 }

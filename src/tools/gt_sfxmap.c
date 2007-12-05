@@ -161,7 +161,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
 
     for (readmode = 0; readmode < 4; readmode++)
     {
-      if (isdnaalphabet(suffixarray.alpha,env) ||
+      if (isdnaalphabet(suffixarray.alpha) ||
          ((Readmode) readmode) == Forwardmode ||
          ((Readmode) readmode) == Reversemode)
       {
@@ -233,6 +233,6 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                          suffixarray.numofdbsequences,env);
   }
   str_delete(indexname);
-  freesuffixarray(&suffixarray,env);
+  freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }

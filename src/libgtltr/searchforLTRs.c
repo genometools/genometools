@@ -327,9 +327,8 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     ALLOCASSIGNSPACE(useq, NULL, Uchar, ulen);
     ALLOCASSIGNSPACE(vseq, NULL, Uchar, vlen);
 
-    encseqextract(useq,encseq,boundaries->leftLTR_5,boundaries->leftLTR_3,env);
-    encseqextract(vseq,encseq,boundaries->rightLTR_5,boundaries->rightLTR_3,
-                  env);
+    encseqextract(useq,encseq,boundaries->leftLTR_5,boundaries->leftLTR_3);
+    encseqextract(vseq,encseq,boundaries->rightLTR_5,boundaries->rightLTR_3);
     edist = greedyunitedist(useq,(unsigned long) ulen, /*Implement for encseq */
                             vseq,(unsigned long) vlen,
                             env);

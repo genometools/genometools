@@ -4,23 +4,23 @@ extern "C" {
 int getfastastreamkmers(
         const StrArray *filenametab,
         void(*processkmercode)(void *,Codetype,Seqpos,
-                               const Firstspecialpos *,Env *),
+                               const Firstspecialpos *,Error *),
         void *processkmercodeinfo,
         unsigned int numofchars,
         unsigned int kmersize,
         const Uchar *symbolmap,
         bool plainformat,
-        Env *env);
+        Error *err);
 
 void getencseqkmers(
         const Encodedsequence *encseq,
         Readmode readmode,
         void(*processkmercode)(void *,Codetype,Seqpos,
-                               const Firstspecialpos *,Env *),
+                               const Firstspecialpos *,Error *),
         void *processkmercodeinfo,
         unsigned int numofchars,
         unsigned int kmersize,
-        Env *env);
+        Error *err);
 
 #ifdef __cplusplus
 }

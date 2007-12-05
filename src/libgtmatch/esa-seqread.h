@@ -19,7 +19,7 @@
 #define ESA_SEQREAD_H
 #include <stdbool.h>
 #include "libgtcore/str.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "sarr-def.h"
@@ -72,7 +72,7 @@ typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
                                         const Encodedsequence *encseq,
                                         Readmode readmode,
-                                        Env *env);
+                                        Error *err);
 
 /* The following can only be used for this case */
 
@@ -84,11 +84,11 @@ void updateSequentialsuffixarrayreaderfromRAM(
 
 int nextSequentiallcpvalue(Seqpos *currentlcp,
                            Sequentialsuffixarrayreader *ssar,
-                           Env *env);
+                           Error *err);
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
-                              Env *env);
+                              Error *err);
 
 #endif
 
@@ -96,10 +96,10 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                         const Str *indexname,
                                         unsigned int demand,
                                         Sequentialaccesstype seqactype,
-                                        Env *env);
+                                        Error *err);
 
 void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
-                                     Env *env);
+                                     Error *err);
 
 const Encodedsequence *encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr);

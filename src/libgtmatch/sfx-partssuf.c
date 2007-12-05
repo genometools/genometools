@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "seqpos-def.h"
 #include "divmodmul.h"
 #include "spacedef.h"
@@ -101,11 +101,11 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
                             Seqpos numofsuffixestoinsert,
                             Seqpos fullspecials,
                             Verboseinfo *verboseinfo,
-                            Env *env)
+                            Error *err)
 {
   Suftabparts *suftabparts;
 
-  env_error_check(env);
+  error_check(err);
   ALLOCASSIGNSPACE(suftabparts,NULL,Suftabparts,(size_t) 1);
   assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
@@ -231,7 +231,7 @@ unsigned int stpgetnumofparts(const Suftabparts *suftabparts)
   return suftabparts->numofparts;
 }
 
-void freesuftabparts(Suftabparts *suftabparts,Env *env)
+void freesuftabparts(Suftabparts *suftabparts,Error *err)
 {
   if (suftabparts != NULL)
   {

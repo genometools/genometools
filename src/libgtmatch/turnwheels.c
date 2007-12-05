@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "spacedef.h"
 #include "turnwheels.h"
 
@@ -32,7 +32,7 @@
 
 Turningwheel *newTurningwheel(unsigned int numofwheels,
                               unsigned int asize,
-                              Env *env)
+                              Error *err)
 {
   unsigned int i;
   Turningwheel *tw;
@@ -80,7 +80,7 @@ unsigned int minchangedTurningwheel(Turningwheel *tw)
   return tw->minchanged;
 }
 
-void freeTurningwheel(Turningwheel **tw,Env *env)
+void freeTurningwheel(Turningwheel **tw,Error *err)
 {
   FREESPACE(*tw);
 }

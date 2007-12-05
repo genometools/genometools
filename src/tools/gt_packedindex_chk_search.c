@@ -155,8 +155,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
                               0, /* offset */
                               suffixarray.readmode,
                               pptr,
-                              patternLen,
-                              env);
+                              patternLen);
         BWTSeqExactMatchesIterator *EMIter =
           newEMIterator(bwtSeq, pptr, patternLen, env);
         Seqpos numMatches = EMINumMatchesTotal(EMIter);
@@ -201,14 +200,14 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
           }
         }
         deleteEMIterator(EMIter,env);
-        freemmsearchiterator(&mmsi,env);
+        freemmsearchiterator(&mmsi);
       }
       fprintf(stderr, "Finished %lu of %lu matchings successfully.\n",
               trial, params.numOfSamples);
     }
   } while (0);
-  if (saIsLoaded) freesuffixarray(&suffixarray, env);
-  if (epi) freeEnumpatterniterator(&epi,env);
+  if (saIsLoaded) freesuffixarray(&suffixarray);
+  if (epi) freeEnumpatterniterator(&epi);
   if (bwtSeq) deleteBWTSeq(bwtSeq, env);
   if (inputProject) str_delete(inputProject);
   return had_err?-1:0;

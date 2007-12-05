@@ -20,7 +20,7 @@
 
 #include "libgtcore/arraydef.h"
 #include "libgtcore/str.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 #define NEWMAPSPEC(PTR,TYPE,ELEMS)\
         GETNEXTFREEINARRAY(mapspecptr,mapspectable,Mapspecification,10);\
@@ -56,19 +56,19 @@ typedef struct
 
 DECLAREARRAYSTRUCT(Mapspecification);
 
-typedef void(*Assignmapspec)(ArrayMapspecification *,void *,bool,Env *);
+typedef void(*Assignmapspec)(ArrayMapspecification *,void *,bool);
 
 int fillmapspecstartptr(Assignmapspec assignmapspec,
                         void **mappeduserptr,
                         void *assignmapinfo,
                         const Str *tmpfilename,
                         unsigned long expectedsize,
-                        Env *env);
+                        Error *err);
 
 int flushtheindex2file(FILE *fp,
                        Assignmapspec assignmapspec,
                        void *assignmapinfo,
                        unsigned long expectedsize,
-                       Env *env);
+                       Error *err);
 
 #endif

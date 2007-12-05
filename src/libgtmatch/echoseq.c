@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/chardef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/seqiterator.h"
 #include "spacedef.h"
 #include "alphadef.h"
@@ -25,8 +25,7 @@
 
 unsigned long *calcdescendpositions(const char *destab,
                                     unsigned long destablength,
-                                    unsigned long numofsequences,
-                                    Env *env)
+                                    unsigned long numofsequences)
 {
   unsigned long *descendtab, i, idx = 0;
 
@@ -60,7 +59,7 @@ const char *retriesequencedescription(unsigned long *desclen,
 }
 
 void checkalldescriptions(const char *destab,unsigned long destablength,
-                          unsigned long numofsequences,Env *env)
+                          unsigned long numofsequences)
 {
   unsigned long *descendtab, desclen, seqnum, totaldesclength, offset = 0;
   const char *desptr;
@@ -68,8 +67,7 @@ void checkalldescriptions(const char *destab,unsigned long destablength,
 
   descendtab = calcdescendpositions(destab,
                                     destablength,
-                                    numofsequences,
-                                    env);
+                                    numofsequences);
   totaldesclength = numofsequences; /* for each new line */
   for (seqnum = 0; seqnum < numofsequences; seqnum++)
   {
@@ -93,7 +91,7 @@ void checkalldescriptions(const char *destab,unsigned long destablength,
   if (strncmp(copydestab,destab,(size_t) totaldesclength) != 0)
   {
     fprintf(stderr,"different descriptions\n");
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* Programm error */
   }
   FREESPACE(copydestab);
   FREESPACE(descendtab);
@@ -151,15 +149,14 @@ void encseq2symbolstring(FILE *fpout,
                          Readmode readmode,
                          Seqpos start,
                          unsigned long wlen,
-                         unsigned long width,
-                         Env *env)
+                         unsigned long width)
 {
   unsigned long j;
   Seqpos idx, lastpos;
   Uchar currentchar;
   Encodedsequencescanstate *esr;
 
-  esr = newEncodedsequencescanstate(env);
+  esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,readmode,start);
   assert(width > 0);
   lastpos = start + wlen - 1;
@@ -189,7 +186,7 @@ void encseq2symbolstring(FILE *fpout,
       }
     }
   }
-  freeEncodedsequencescanstate(&esr,env);
+  freeEncodedsequencescanstate(&esr);
 }
 
 void encseq2fastaoutput(FILE *fpout,
@@ -199,8 +196,7 @@ void encseq2fastaoutput(FILE *fpout,
                         Readmode readmode,
                         Seqpos start,
                         unsigned long wlen,
-                        unsigned long width,
-                        Env *env)
+                        unsigned long width)
 {
   assert(width > 0);
   if (desc == NULL)
@@ -216,8 +212,7 @@ void encseq2fastaoutput(FILE *fpout,
                       readmode,
                       start,
                       wlen,
-                      width,
-                      env);
+                      width);
 }
 
 int echodescriptionandsequence(const StrArray *filenametab,Error *e)

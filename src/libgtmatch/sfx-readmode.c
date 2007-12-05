@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "readmode-def.h"
 
 static char *readmodes[] = {"fwd",
@@ -29,11 +29,11 @@ const char *showreadmode(Readmode readmode)
   return readmodes[(int) readmode];
 }
 
-int parsereadmode(const char *dirargstring,Env *env)
+int parsereadmode(const char *dirargstring,Error *err)
 {
   size_t i;
 
-  env_error_check(env);
+  error_check(err);
   for (i=0; i<sizeof (readmodes)/sizeof (readmodes[0]); i++)
   {
     if (strcmp(dirargstring,readmodes[i]) == 0)
@@ -41,6 +41,6 @@ int parsereadmode(const char *dirargstring,Env *env)
       return (int) i;
     }
   }
-  env_error_set(env,"argument to option -dir must be fwd or rev or cpl or rcl");
+  error_set(err,"argument to option -dir must be fwd or rev or cpl or rcl");
   return -1;
 }

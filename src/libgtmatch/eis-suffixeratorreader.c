@@ -78,7 +78,7 @@ struct sfxInterface
 static Seqpos
 sfxIReadAdvance(sfxInterface *iface,
                 Seqpos requestMaxPos,
-                Env *env);
+                Error *err);
 
 extern sfxInterface *
 newSfxInterface(Suffixeratoroptions *so,
@@ -90,17 +90,17 @@ newSfxInterface(Suffixeratoroptions *so,
                 const Alphabet *alpha,
                 const unsigned long *characterdistribution,
                 Verboseinfo *verbosity,
-                Env *env)
+                Error *err)
 {
   return newSfxInterfaceWithReaders(so, 0, NULL, NULL, encseq,
                                     specialcharinfo, numofsequences, mtime,
                                     length, alpha, characterdistribution,
-                                    verbosity, env);
+                                    verbosity, err);
 }
 
 static struct seqStats *
 newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
-                        const unsigned long *characterdistribution, Env *env)
+                        const unsigned long *characterdistribution, Error *err)
 {
   struct seqStats *stats = NULL;
   unsigned i, mapSize;
@@ -122,18 +122,18 @@ newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
 }
 
 static void
-deleteSeqStats(struct seqStats *stats, Env *env)
+deleteSeqStats(struct seqStats *stats, Error *err)
 {
   ma_free(stats);
 }
 
 #define INITOUTFILEPTR(PTR,FLAG,SUFFIX)                                 \
-  ((FLAG)?(PTR = opensfxfile(so->str_indexname,SUFFIX,"wb",env)):((void*)1))
+  ((FLAG)?(PTR = opensfxfile(so->str_indexname,SUFFIX,"wb",err)):((void*)1))
 
 #define newSfxInterfaceWithReadersErrRet()        \
   do {                                            \
     if (iface->stats)                             \
-      deleteSeqStats(iface->stats, env);          \
+      deleteSeqStats(iface->stats, err);          \
     if (iface->readers)                           \
       ma_free(iface->readers);                    \
     if (iface) ma_free(iface);                    \
@@ -151,11 +151,11 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                            Seqpos length,
                            const Alphabet *alpha,
                            const unsigned long *characterdistribution,
-                           Verboseinfo *verbosity, Env *env)
+                           Verboseinfo *verbosity, Error *err)
 {
   sfxInterface *iface = NULL;
 
-  env_error_check(env);
+  error_check(err);
 
   iface = ma_calloc(1, sizeof (*iface));
   memcpy(&iface->so, so, sizeof (*so));
@@ -165,14 +165,14 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
   iface->encseq = encseq;
   iface->stats = newSeqStatsFromCharDist(iface->alpha, iface->length,
                                          numofsequences,
-                                         characterdistribution, env);
+                                         characterdistribution, err);
   if (!(iface->sfi = newSfxiterator(specialcharinfo->specialcharacters,
                                     specialcharinfo->specialranges,
                                     encseq, so->readmode,
                                     getnumofcharsAlphabet(alpha),
                                     so->prefixlength,
                                     so->numofparts, iface->mtime,
-                                    verbosity, env)))
+                                    verbosity, err)))
     newSfxInterfaceWithReadersErrRet();
   iface->longest.defined = false;
   iface->specialsuffixes = false;
@@ -187,18 +187,18 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
     iface->numReaders = 0;
     iface->readers = NULL;
     for (i = 0; i < numReaders; ++i)
-      if (!SfxIRegisterReader(iface, ids + i, requests[i], env))
+      if (!SfxIRegisterReader(iface, ids + i, requests[i], err))
         newSfxInterfaceWithReadersErrRet();
   }
   return iface;
 }
 
 extern void
-deleteSfxInterface(sfxInterface *iface, Env *env)
+deleteSfxInterface(sfxInterface *iface, Error *err)
 {
   ma_free(iface->prevGeneratedSufTabSegments);
-  freeSfxiterator(&iface->sfi, env);
-  deleteSeqStats(iface->stats, env);
+  freeSfxiterator(&iface->sfi, err);
+  deleteSeqStats(iface->stats, err);
   ma_free(iface->readers);
   ma_free(iface);
 }
@@ -223,11 +223,11 @@ getSfxIAlphabet(const sfxInterface *si)
 }
 
 extern MRAEnc *
-newMRAEncFromSfxI(const sfxInterface *si, Env *env)
+newMRAEncFromSfxI(const sfxInterface *si, Error *err)
 {
   MRAEnc *alphabet;
-  assert(si && env);
-  alphabet = MRAEncGTAlphaNew(getSfxIAlphabet(si), env);
+  assert(si && err);
+  alphabet = MRAEncGTAlphaNew(getSfxIAlphabet(si), err);
   MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
 }
@@ -259,7 +259,7 @@ getSfxIEncSeq(const sfxInterface *si)
 
 int
 SfxIRegisterReader(sfxInterface *iface, listenerID *id,
-                   enum sfxDataRequest request, Env *env)
+                   enum sfxDataRequest request, Error *err)
 {
   size_t availId = iface->numReaders++;
   iface->readers = ma_realloc(iface->readers,
@@ -272,7 +272,7 @@ SfxIRegisterReader(sfxInterface *iface, listenerID *id,
 }
 
 static Seqpos
-getSufTabVal(sfxInterface *iface, Seqpos pos, Env *env)
+getSufTabVal(sfxInterface *iface, Seqpos pos, Error *err)
 {
   assert(iface && pos < iface->length);
   while (1)
@@ -294,7 +294,7 @@ getSufTabVal(sfxInterface *iface, Seqpos pos, Env *env)
     else
     {
       while (pos >= iface->lastGeneratedStart + iface->lastGeneratedLen)
-        if (!sfxIReadAdvance(iface, pos, env))
+        if (!sfxIReadAdvance(iface, pos, err))
           break;
     }
   }
@@ -314,7 +314,7 @@ SfxIGetOrigSeq(void *state, Symbol *dest, Seqpos pos, size_t len)
 
 extern size_t
 readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,
-                 Uchar *dest, Env *env)
+                 Uchar *dest, Error *err)
 {
   size_t i, effLen;
   Seqpos start;
@@ -324,7 +324,7 @@ readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,
   effLen = MIN((size_t)len, (size_t)(iface->length - start));
   for (i = 0; i < (size_t)effLen; ++i)
   {
-    Seqpos sufTabVal = getSufTabVal(iface, start + i, env);
+    Seqpos sufTabVal = getSufTabVal(iface, start + i, err);
     if (sufTabVal != 0)
       dest[i] = getencodedchar(iface->encseq, sufTabVal - 1,
                                iface->so.readmode);
@@ -337,7 +337,7 @@ readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,
 
 extern size_t
 readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
-                 Seqpos *dest, Env *env)
+                 Seqpos *dest, Error *err)
 {
   size_t i, effLen;
   Seqpos start;
@@ -360,8 +360,8 @@ readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
                          false,
                          false,
                          0,
-                         getSufTabVal(iface, start + i - 1, env),
-                         getSufTabVal(iface, start + i, env),
+                         getSufTabVal(iface, start + i - 1, err),
+                         getSufTabVal(iface, start + i, err),
                          NULL,  /* XXX FIXME */
                          NULL);  /* XXX FIXME */
 #ifndef NDEBUG
@@ -372,7 +372,7 @@ readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
               " " FormatSeqpos " = %d",
               PRINTSeqposcast(start + (Seqpos)i - 1),
               PRINTSeqposcast(start + (Seqpos)i),
-              PRINTSeqposcast(getSufTabVal(iface, start + (Seqpos)i, env)),
+              PRINTSeqposcast(getSufTabVal(iface, start + (Seqpos)i, err)),
               cmp);
       exit(EXIT_FAILURE);
     }
@@ -384,7 +384,7 @@ readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
 
 size_t
 readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
-                    Seqpos *dest, Env *env)
+                    Seqpos *dest, Error *err)
 {
   Seqpos start;
   assert(iface && id < iface->numReaders && dest);
@@ -432,7 +432,7 @@ readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
     else
     {
       while (start + len > iface->prevGeneratedStart + iface->prevGeneratedLen)
-        if (!sfxIReadAdvance(iface, start + len, env))
+        if (!sfxIReadAdvance(iface, start + len, err))
         {
           /* Caution: sneakily updates the length parameter to obtain a
            * request we can fulfill */
@@ -459,10 +459,10 @@ findMinOpenRequest(sfxInterface *iface, int reqType)
 static Seqpos
 sfxIReadAdvance(sfxInterface *iface,
                 Seqpos requestMaxPos,
-                Env *env)
+                Error *err)
 {
   Seqpos requestMinPos, lengthOfExtension = 0;
-  assert(iface && env);
+  assert(iface && err);
   /* 1. find first position that still needs to be read */
   requestMinPos = findMinOpenRequest(iface, SFX_REQUEST_ANY);
   /* 2. move still unread old values as far as possible to head of copy */
@@ -513,7 +513,7 @@ sfxIReadAdvance(sfxInterface *iface,
     iface->lastGeneratedStart += iface->lastGeneratedLen;
     if ((iface->lastGeneratedSufTabSegment =
         nextSfxiterator(&iface->lastGeneratedLen, &iface->specialsuffixes,
-                        iface->mtime, iface->sfi, env)))
+                        iface->mtime, iface->sfi, err)))
     {
       size_t pos;
       /* size_t because the current approach cannot generate more
@@ -533,7 +533,7 @@ sfxIReadAdvance(sfxInterface *iface,
     /* uncomment this to reenable synchronous writing of tables */
 /*if (iface->lastGeneratedSufTabSegment == NULL */
 /*    || suftab2file(&iface->outfileinfo, iface->lastGeneratedSufTabSegment, */
-/*                   iface->so.readmode, iface->lastGeneratedLen, env) != 0) */
+/*                   iface->so.readmode, iface->lastGeneratedLen, err) != 0) */
 /*       break; */
     }
     /* 5. if positions in region don't suffice go back to step 3. */

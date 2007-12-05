@@ -24,7 +24,7 @@
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-suffixerator-interface.h"
@@ -57,7 +57,7 @@
  * @param maxVarExtBitsPerPos at most this many bits will be appended to the
  * variable width part of the data
  * @param cbState will be passed on each call of biFunc
- * @param env genometools reference for core functions
+ * @param err genometools reference for core functions
  */
 extern EISeq *
 newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
@@ -69,7 +69,7 @@ newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
                           void **headerCBData, bitInsertFunc biFunc,
                           BitOffset cwExtBitsPerPos,
                           BitOffset maxVarExtBitsPerPos, void *cbState,
-                          Env *env);
+                          Error *err);
 
 /**
  * \brief Construct block-encoded indexed sequence object and write
@@ -97,7 +97,7 @@ newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
  * @param maxVarExtBitsPerPos at most this many bits will be appended to the
  * variable width part of the data
  * @param cbState will be passed on each call of biFunc
- * @param env genometools reference for core functions
+ * @param err genometools reference for core functions
  */
 extern EISeq *
 newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
@@ -108,7 +108,8 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                         headerWriteFunc *extHeaderCallbacks,
                         void **headerCBData,
                         bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                        BitOffset maxVarExtBitsPerPos, void *cbState, Env *env);
+                        BitOffset maxVarExtBitsPerPos, void *cbState, 
+                        Error *err);
 
 /**
  * \brief Load previously written block encoded sequence
@@ -119,10 +120,10 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
  * and separators)
  * @param features select optional in-memory structures
  * @param projectName base name of corresponding suffixerator project
- * @param env genometools reference for core functions
+ * @param err genometools reference for core functions
  */
 struct encIdxSeq *
 loadBlockEncIdxSeqForSA(Suffixarray *sa, Seqpos totalLen,
-                        const Str *projectName, int features, Env *env);
+                        const Str *projectName, int features, Error *err);
 
 #endif

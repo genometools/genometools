@@ -26,18 +26,18 @@
  * conforming to these functions.
  */
 #include <stdlib.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /**
  * generic method to aquire next readLen symbols of e.g. BWT string
  */
 typedef int (*SymReadFunc)(void *state, Symbol *dest, size_t readLen,
-                           Env *env);
+                           Error *err);
 
 /**
  * generic method to aquire next Seqpos value from suffix array
  */
-typedef int (*SeqposReadFunc)(void *src, Seqpos *dest, size_t len, Env *env);
+typedef int (*SeqposReadFunc)(void *src, Seqpos *dest, size_t len, Error *err);
 
 /**
  * \brief generic method to access the original encoded sequence

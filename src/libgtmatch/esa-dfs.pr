@@ -2,20 +2,20 @@
 extern "C" {
 #endif
 int depthfirstesa(Sequentialsuffixarrayreader *ssar,
-                  Dfsinfo *(*allocateDfsinfo)(Dfsstate *,Env *),
-                  void(*freeDfsinfo)(Dfsinfo *,Dfsstate *,Env *),
+                  Dfsinfo *(*allocateDfsinfo)(Dfsstate *),
+                  void(*freeDfsinfo)(Dfsinfo *,Dfsstate *),
                   int(*processleafedge)(bool,Seqpos,Dfsinfo *,
                                         Seqpos,Dfsstate *,
-                                        Env *),
+                                        Error *),
                   int(*processbranchedge)(bool,
                                           Seqpos,
                                           Dfsinfo *,
                                           Dfsinfo *,
                                           Dfsstate *,
-                                          Env *),
+                                          Error *),
                   Dfsstate *state,
                   /*@unused@*/ Verboseinfo *verboseinfo,
-                  Env *env);
+                  Error *err);
 
 #ifdef __cplusplus
 }

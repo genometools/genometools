@@ -3,8 +3,7 @@ extern "C" {
 #endif
 unsigned long *calcdescendpositions(const char *destab,
                                     unsigned long destablength,
-                                    unsigned long numofsequences,
-                                    Env *env);
+                                    unsigned long numofsequences);
 
 const char *retriesequencedescription(unsigned long *desclen,
                                       const char *destab,
@@ -12,7 +11,7 @@ const char *retriesequencedescription(unsigned long *desclen,
                                       unsigned long seqnum);
 
 void checkalldescriptions(const char *destab,unsigned long destablength,
-                          unsigned long numofsequences,Env *env);
+                          unsigned long numofsequences);
 
 void symbolstring2fasta(FILE *fpout,
                         const char *desc,
@@ -27,8 +26,7 @@ void encseq2symbolstring(FILE *fpout,
                          Readmode readmode,
                          Seqpos start,
                          unsigned long wlen,
-                         unsigned long width,
-                         Env *env);
+                         unsigned long width);
 
 void encseq2fastaoutput(FILE *fpout,
                         const char *desc,
@@ -37,8 +35,7 @@ void encseq2fastaoutput(FILE *fpout,
                         Readmode readmode,
                         Seqpos start,
                         unsigned long wlen,
-                        unsigned long width,
-                        Env *env);
+                        unsigned long width);
 
 int echodescriptionandsequence(const StrArray *filenametab,Error *e);
 

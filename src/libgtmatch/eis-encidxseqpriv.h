@@ -24,23 +24,23 @@
 
 struct encIdxSeqClass
 {
-  void (*delete)(EISeq *seq, Env *env);
+  void (*delete)(EISeq *seq, Error *err);
   Seqpos (*rank)(EISeq *seq, Symbol sym, Seqpos pos,
-                 union EISHint *hint, Env *env);
+                 union EISHint *hint, Error *err);
   Seqpos (*select)(EISeq *seq, Symbol sym, Seqpos count,
-                   union EISHint *hint, Env *env);
+                   union EISHint *hint, Error *err);
   Symbol (*get)(EISeq *seq, Seqpos pos, EISHint hint,
-                Env *env);
-  union EISHint *(*newHint)(EISeq *seq, Env *env);
-  void (*deleteHint)(EISeq *seq, EISHint hint, Env *env);
+                Error *err);
+  union EISHint *(*newHint)(EISeq *seq, Error *err);
+  void (*deleteHint)(EISeq *seq, EISHint hint, Error *err);
   const MRAEnc *(*getAlphabet)(const EISeq *seq);
   void (*expose)(EISeq *seq, Seqpos pos, int persistent,
                  struct extBitsRetrieval *retval, union EISHint *hint,
-                 Env *env);
+                 Error *err);
   FILE *(*seekToHeader)(const EISeq *seq, uint16_t headerID,
                         uint32_t *lenRet);
   int (*printPosDiags)(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
-                       Env *env);
+                       Error *err);
 };
 
 struct encIdxSeq
@@ -70,6 +70,6 @@ union EISHint
 };
 
 extern unsigned
-blockEncIdxSeqSegmentLen(const struct blockEncParams *params, Env *env);
+blockEncIdxSeqSegmentLen(const struct blockEncParams *params, Error *err);
 
 #endif

@@ -40,14 +40,14 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
                                             unsigned long maxpatternlen,
                                             const Encodedsequence *encseq,
                                             unsigned int alphasize,
-                                            Env *env)
+                                            Error *err)
 {
   Enumpatterniterator *epi = NULL;
   unsigned long i;
 
   if (maxpatternlen < minpatternlen)
   {
-    env_error_set(env,"maxpatternlen=%lu < %lu\n",
+    error_set(err,"maxpatternlen=%lu < %lu\n",
                     maxpatternlen,
                     minpatternlen);
     return NULL;
@@ -56,7 +56,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   epi->totallength = getencseqtotallength(encseq);
   if (epi->totallength <= (Seqpos) maxpatternlen)
   {
-    env_error_set(env,"totallength=" FormatSeqpos " <= maxpatternlen = %lu\n",
+    error_set(err,"totallength=" FormatSeqpos " <= maxpatternlen = %lu\n",
                     PRINTSeqposcast(epi->totallength),
                     maxpatternlen);
     FREESPACE(epi);
@@ -73,7 +73,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   epi->sampleencseq = encseq;
   epi->samplecount = 0;
   epi->alphasize = alphasize;
-  epi->esr = newEncodedsequencescanstate(env);
+  epi->esr = newEncodedsequencescanstate();
   srand48(42349421);
   return epi;
 }
@@ -151,11 +151,11 @@ void showPatterndistribution(const Enumpatterniterator *epi)
   }
 }
 
-void freeEnumpatterniterator(Enumpatterniterator **epi,Env *env)
+void freeEnumpatterniterator(Enumpatterniterator **epi)
 {
   if (!(*epi)) return;
   FREESPACE((*epi)->patternspace);
   FREESPACE((*epi)->patternstat);
-  freeEncodedsequencescanstate(&((*epi)->esr),env);
+  freeEncodedsequencescanstate(&((*epi)->esr));
   FREESPACE(*epi);
 }

@@ -20,7 +20,7 @@
 #include <assert.h>
 #include <limits.h>
 #include "libgtcore/arraydef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "spacedef.h"
 #include "intbits.h"
 #include "divmodmul.h"
@@ -88,12 +88,12 @@ static int initbasepower(unsigned int **basepower,
                          unsigned int **filltable,
                          unsigned int base,
                          unsigned int len,
-                         Env *env)
+                         Error *err)
 {
   unsigned int thepower = (unsigned int) 1, i, minfailure;
   bool haserr = false;
 
-  env_error_check(env);
+  error_check(err);
   ALLOCASSIGNSPACE(*basepower,NULL,unsigned int,len+1);
   ALLOCASSIGNSPACE(*filltable,NULL,unsigned int,len);
   minfailure = UINT_MAX/base;
@@ -106,7 +106,7 @@ static int initbasepower(unsigned int **basepower,
     }
     if (thepower >= minfailure)
     {
-      env_error_set(env,"overflow when computing %u * %u",thepower,base);
+      error_set(err,"overflow when computing %u * %u",thepower,base);
       haserr = true;
       break;
     }
@@ -132,7 +132,7 @@ static void updatekmercount(void *processinfo,
                             Codetype code,
                             Seqpos position,
                             const Firstspecialpos *firstspecial,
-                            Env *env)
+                            Error *err)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
@@ -140,7 +140,7 @@ static void updatekmercount(void *processinfo,
   {
     if (sfi->storespecials)
     {
-      env_error_check(env);
+      error_check(err);
 
       if (firstspecial->specialpos > 0)
       {
@@ -173,7 +173,7 @@ static void insertwithoutspecial(void *processinfo,
                                  Codetype code,
                                  Seqpos position,
                                  const Firstspecialpos *firstspecial,
-                                 /*@unused@*/ Env *env)
+                                 /*@unused@*/ Error *err)
 {
   if (!firstspecial->defined)
   {
@@ -228,7 +228,7 @@ static Codetype codedownscale(const unsigned int *filltable,
 static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
                                Sfxiterator *sfi,
                                bool deletevalues,
-                               /*@unused@*/ Env *env)
+                               /*@unused@*/ Error *err)
 {
   Codetype code;
   unsigned int prefixindex;
@@ -284,7 +284,7 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
   }
 }
 
-void freeSfxiterator(Sfxiterator **sfi,Env *env)
+void freeSfxiterator(Sfxiterator **sfi,Error *err)
 {
   Codetype specialcode;
 
@@ -293,7 +293,7 @@ void freeSfxiterator(Sfxiterator **sfi,Env *env)
   (*sfi)->countspecialcodes[specialcode] += ((*sfi)->specialcharacters + 1);
   if ((*sfi)->sri != NULL)
   {
-    freespecialrangeiterator(&(*sfi)->sri,env);
+    freespecialrangeiterator(&(*sfi)->sri);
   }
   FREESPACE((*sfi)->spaceCodeatposition);
   FREESPACE((*sfi)->filltable);
@@ -303,9 +303,9 @@ void freeSfxiterator(Sfxiterator **sfi,Env *env)
   FREESPACE((*sfi)->suftab);
   if ((*sfi)->lcpsubtab != NULL)
   {
-    freelcpsubtab(&(*sfi)->lcpsubtab,env);
+    freelcpsubtab(&(*sfi)->lcpsubtab,err);
   }
-  freesuftabparts((*sfi)->suftabparts,env);
+  freesuftabparts((*sfi)->suftabparts,err);
   FREESPACE(*sfi);
 }
 
@@ -320,17 +320,17 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int numofparts,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
-                            Env *env)
+                            Error *err)
 {
   Sfxiterator *sfi = NULL;
   unsigned int numofallcodes = 0, numofspecialcodes;
   Seqpos *optr;
   bool haserr = false;
 
-  env_error_check(env);
+  error_check(err);
   if (prefixlength == 0 || prefixlength > MAXPREFIXLENGTH)
   {
-    env_error_set(env,"argument for option -pl must be in the range [1,%u]",
+    error_set(err,"argument for option -pl must be in the range [1,%u]",
                   MAXPREFIXLENGTH);
     haserr = true;
   } else
@@ -352,7 +352,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->prefixlength = prefixlength;
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
-    sfi->lcpsubtab = newlcpsubtab(prefixlength,numofchars,env);
+    sfi->lcpsubtab = newlcpsubtab(prefixlength,numofchars,err);
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
@@ -361,7 +361,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                                &sfi->filltable,
                                numofchars,
                                prefixlength,
-                               env) != 0)
+                               err) != 0)
   {
     haserr = true;
   }
@@ -371,7 +371,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     numofallcodes = sfi->basepower[prefixlength];
     if (numofallcodes-1 > MAXCODEVALUE)
     {
-      env_error_set(env,
+      error_set(err,
                     "alphasize^prefixlength-1 = %u does not fit into "
                     " %u bits: choose smaller value for prefixlength",
                     numofallcodes-1,
@@ -393,7 +393,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->storespecials = true;
     if (mtime != NULL)
     {
-      deliverthetime(stdout,mtime,"counting prefix distribution",env);
+      deliverthetime(stdout,mtime,"counting prefix distribution",err);
     }
     getencseqkmers(encseq,
                    readmode,
@@ -401,7 +401,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                    sfi,
                    numofchars,
                    prefixlength,
-                   env);
+                   err);
     assert(specialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
     assert(sfi->filltable != NULL);
     assert(sfi->leftborder != NULL);
@@ -420,7 +420,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                                       sfi->totallength - specialcharacters,
                                       specialcharacters + 1,
                                       verboseinfo,
-                                      env);
+                                      err);
     assert(sfi->suftabparts != NULL);
     ALLOCASSIGNSPACE(sfi->suftab,NULL,Seqpos,
                      stpgetlargestwidth(sfi->suftabparts));
@@ -429,8 +429,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     {
       sfi->sri = newspecialrangeiterator(sfi->encseq,
                                          ISDIRREVERSE(sfi->readmode)
-                                           ? false : true,
-                                          env);
+                                           ? false : true);
     } else
     {
       sfi->sri = NULL;
@@ -445,7 +444,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   {
     if (sfi != NULL)
     {
-      freeSfxiterator(&sfi,env);
+      freeSfxiterator(&sfi,err);
     }
     return NULL;
   }
@@ -454,7 +453,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
 
 static void preparethispart(Sfxiterator *sfi,
                             Measuretime *mtime,
-                            Env *env)
+                            Error *err)
 {
   Seqpos totalwidth;
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
@@ -466,10 +465,10 @@ static void preparethispart(Sfxiterator *sfi,
                      sfi,
                      (stpgetnumofparts(sfi->suftabparts) == (unsigned int) 1)
                        ? true : false,
-                     env);
+                     err);
   if (mtime != NULL)
   {
-    deliverthetime(stdout,mtime,"inserting suffixes into buckets",env);
+    deliverthetime(stdout,mtime,"inserting suffixes into buckets",err);
   }
   getencseqkmers(sfi->encseq,
                  sfi->readmode,
@@ -477,10 +476,10 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi,
                  sfi->numofchars,
                  sfi->prefixlength,
-                 env);
+                 err);
   if (mtime != NULL)
   {
-    deliverthetime(stdout,mtime,"sorting the buckets",env);
+    deliverthetime(stdout,mtime,"sorting the buckets",err);
   }
   totalwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
   sortallbuckets(sfi->suftabptr,
@@ -494,7 +493,7 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->currentmaxcode,
                  totalwidth,
                  sfi->lcpsubtab,
-                 env);
+                 err);
   assert(totalwidth > 0);
   sfi->part++;
 }
@@ -622,13 +621,12 @@ static void fillspecialnextpage(Sfxiterator *sfi)
 }
 
 const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
-                              Measuretime *mtime,Sfxiterator *sfi,Env *env)
+                              Measuretime *mtime,Sfxiterator *sfi,Error *err)
 {
-  env_error_check(env);
-
+  error_check(err);
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
-    preparethispart(sfi,mtime,env);
+    preparethispart(sfi,mtime,err);
     *numberofsuffixes = sfi->widthofpart;
     *specialsuffixes = false;
     return sfi->suftab;

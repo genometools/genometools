@@ -78,21 +78,20 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
                                  0, /* offset */
                                  suffixarray.readmode,
                                  pptr,
-                                 patternlen,
-                                 env);
+                                 patternlen);
       while (nextmmsearchiterator(&dbstart,mmsi))
       {
         /* Nothing */;
       }
-      freemmsearchiterator(&mmsi,env);
+      freemmsearchiterator(&mmsi);
     }
     if (pmopt->showpatt)
     {
       showPatterndistribution(epi);
     }
-    freeEnumpatterniterator(&epi,env);
+    freeEnumpatterniterator(&epi);
   }
-  freesuffixarray(&suffixarray,env);
+  freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }
 

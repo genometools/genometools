@@ -25,7 +25,7 @@
 #endif
 #include <assert.h>
 #include "libgtcore/chardef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
 #include "spacedef.h"
@@ -194,9 +194,9 @@ typedef struct
 } Streamstate;
 
 static void specialemptyqueue(Specialpositions *spos,unsigned int queuesize,
-                              Env *env)
+                              Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   ALLOCASSIGNSPACE(spos->queuespace,NULL,Queueelem,queuesize);
   spos->noofelements = 0;
   spos->queuesize = queuesize;
@@ -238,9 +238,9 @@ static void specialenqueue(Specialpositions *spos,Queueelem elem)
   }
 }
 
-static void specialwrapqueue(Specialpositions *spos,Env *env)
+static void specialwrapqueue(Specialpositions *spos,Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   FREESPACE(spos->queuespace);
 }
 
@@ -314,18 +314,18 @@ static void updatespecialpositions(Streamstate *spwp,
 
 static void shiftrightwithchar(
                void(*processkmercode)(void *,Codetype,Seqpos,
-                                      const Firstspecialpos *,Env *),
+                                      const Firstspecialpos *,Error *),
                void *processkmercodeinfo,
                Streamstate *spwp,
                Seqpos currentposition,
                Uchar charcode,
-               Env *env)
+               Error *err)
 {
 #ifndef NDEBUG
   Firstspecialpos firstspecialposbrute;
 #endif
 
-  env_error_check(env);
+  error_check(err);
   if (spwp->windowwidth < spwp->kmersize)
   {
     spwp->windowwidth++;
@@ -399,19 +399,19 @@ static void shiftrightwithchar(
                     code,
                     currentposition + 1 - spwp->kmersize,
                     &localfirstspecial,
-                    env);
+                    err);
   }
 }
 
 static void initmultimappower(unsigned int ***multimappower,
                               unsigned int numofchars,
                               unsigned int kmersize,
-                              Env *env)
+                              Error *err)
 {
   int offset;
   unsigned int thepower, mapindex, *mmptr;
 
-  env_error_check(env);
+  error_check(err);
   ARRAY2DIMMALLOC(*multimappower,kmersize,numofchars,unsigned int);
   thepower = (unsigned int) 1;
   for (offset=(int) (kmersize - 1); offset>=0; offset--)
@@ -429,12 +429,12 @@ static void initmultimappower(unsigned int ***multimappower,
 static void filllargestchartable(unsigned int **filltable,
                                  unsigned int numofchars,
                                  unsigned int kmersize,
-                                 Env *env)
+                                 Error *err)
 {
   unsigned int *ptr;
   Codetype code;
 
-  env_error_check(env);
+  error_check(err);
   ALLOCASSIGNSPACE(*filltable,NULL,unsigned int,kmersize);
   code = numofchars;
   for (ptr = *filltable + kmersize - 1; ptr >= *filltable; ptr--)
@@ -449,13 +449,13 @@ static int getencseqkmersgeneric(
                       Readmode readmode,
                       const StrArray *filenametab,
                       void(*processkmercode)(void *,Codetype,Seqpos,
-                                             const Firstspecialpos *,Env *),
+                                             const Firstspecialpos *,Error *),
                       void *processkmercodeinfo,
                       unsigned int numofchars,
                       unsigned int kmersize,
                       const Uchar *symbolmap,
                       bool plainformat,
-                      Env *env)
+                      Error *err)
 {
   unsigned int overshoot;
   Seqpos currentposition = 0;
@@ -463,8 +463,8 @@ static int getencseqkmersgeneric(
   Uchar charcode;
   bool haserr = false;
 
-  env_error_check(env);
-  initmultimappower(&spwp.multimappower,numofchars,kmersize,env);
+  error_check(err);
+  initmultimappower(&spwp.multimappower,numofchars,kmersize,err);
   spwp.lengthwithoutspecial = 0;
   spwp.codewithoutspecial = 0;
   spwp.kmersize = kmersize;
@@ -472,25 +472,25 @@ static int getencseqkmersgeneric(
   spwp.windowwidth = 0;
   spwp.firstindex = 0;
   ALLOCASSIGNSPACE(spwp.cyclicwindow,NULL,Uchar,kmersize);
-  specialemptyqueue(&spwp.spos,kmersize,env);
-  filllargestchartable(&spwp.filltable,numofchars,kmersize,env);
+  specialemptyqueue(&spwp.spos,kmersize,err);
+  filllargestchartable(&spwp.filltable,numofchars,kmersize,err);
   if (encseq != NULL)
   {
     Seqpos totallength = getencseqtotallength(encseq);
     Encodedsequencescanstate *esr;
 
-    esr = newEncodedsequencescanstate(env);
+    esr = newEncodedsequencescanstate();
     initEncodedsequencescanstate(esr,encseq,readmode,0);
     for (currentposition = 0; currentposition<totallength; currentposition++)
     {
       charcode = sequentialgetencodedchar(encseq,esr,currentposition);
       CHECKENCCHAR(charcode,encseq,currentposition,readmode);
       shiftrightwithchar(processkmercode,processkmercodeinfo,
-                         &spwp,currentposition,charcode,env);
+                         &spwp,currentposition,charcode,err);
     }
     if (esr != NULL)
     {
-      freeEncodedsequencescanstate(&esr,env);
+      freeEncodedsequencescanstate(&esr);
     }
   } else
   {
@@ -499,7 +499,7 @@ static int getencseqkmersgeneric(
 
     if (readmode != Forwardmode)
     {
-      env_error_set(env,"readmode = %u not possible when reading symbols "
+      error_set(err,"readmode = %u not possible when reading symbols "
                         "from file",(unsigned int) readmode);
       haserr = true;
     }
@@ -513,7 +513,7 @@ static int getencseqkmersgeneric(
                            NULL);
       for (currentposition = 0; /* Nothing */; currentposition++)
       {
-        retval = fastabuffer_next(fb,&charcode,env_error(env));
+        retval = fastabuffer_next(fb,&charcode,err);
         if (retval < 0)
         {
           haserr = true;
@@ -524,7 +524,7 @@ static int getencseqkmersgeneric(
           break;
         }
         shiftrightwithchar(processkmercode,processkmercodeinfo,
-                           &spwp,currentposition,charcode,env);
+                           &spwp,currentposition,charcode,err);
       }
       fastabuffer_delete(fb);
     }
@@ -534,26 +534,26 @@ static int getencseqkmersgeneric(
     for (overshoot=0; overshoot<kmersize; overshoot++)
     {
       shiftrightwithchar(processkmercode,processkmercodeinfo,&spwp,
-                         currentposition + overshoot,(Uchar) WILDCARD,env);
+                         currentposition + overshoot,(Uchar) WILDCARD,err);
     }
   }
   FREESPACE(spwp.cyclicwindow);
   FREESPACE(spwp.filltable);
   ARRAY2DIMFREE(spwp.multimappower);
-  specialwrapqueue(&spwp.spos,env);
+  specialwrapqueue(&spwp.spos,err);
   return haserr ? -1 : 0;
 }
 
 int getfastastreamkmers(
         const StrArray *filenametab,
         void(*processkmercode)(void *,Codetype,Seqpos,
-                               const Firstspecialpos *,Env *),
+                               const Firstspecialpos *,Error *),
         void *processkmercodeinfo,
         unsigned int numofchars,
         unsigned int kmersize,
         const Uchar *symbolmap,
         bool plainformat,
-        Env *env)
+        Error *err)
 {
   return getencseqkmersgeneric(NULL,
                                Forwardmode,
@@ -564,18 +564,18 @@ int getfastastreamkmers(
                                kmersize,
                                symbolmap,
                                plainformat,
-                               env);
+                               err);
 }
 
 void getencseqkmers(
         const Encodedsequence *encseq,
         Readmode readmode,
         void(*processkmercode)(void *,Codetype,Seqpos,
-                               const Firstspecialpos *,Env *),
+                               const Firstspecialpos *,Error *),
         void *processkmercodeinfo,
         unsigned int numofchars,
         unsigned int kmersize,
-        Env *env)
+        Error *err)
 {
   (void) getencseqkmersgeneric(encseq, /* not NULL */
                                readmode,
@@ -586,5 +586,5 @@ void getencseqkmers(
                                kmersize,
                                NULL,
                                false,
-                               env);
+                               err);
 }
