@@ -16,11 +16,11 @@
 */
 
 #include <assert.h>
+#include "libgtcore/codon.h"
 #include "libgtcore/orf.h"
 #include "libgtcore/range.h"
 #include "libgtcore/undef.h"
 
-#define CODONLENGTH 3
 #define START_AMINO 'M'
 #define STOP_AMINO  '*'
 

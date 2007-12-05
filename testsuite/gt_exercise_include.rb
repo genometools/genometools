@@ -348,6 +348,20 @@ Test do
            :retval => 1)
 end
 
+Name "gt exercise translate"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise translate `cat #{$testdata}gt_translate.in`"
+  run "diff #{$last_stdout} #{$testdata}gt_translate.out"
+end
+
+Name "gt exercise translate (too short)"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise translate gg"
+  run "diff #{$last_stdout} #{$testdata}empty_file"
+end
+
 Name "gt exercise upgma test example"
 Keywords "gt_exercise"
 Test do

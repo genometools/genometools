@@ -20,15 +20,11 @@
 #include <assert.h>
 #include "libgtcore/codon.h"
 
-#define T_CODE 0
-#define C_CODE 1
-#define A_CODE 2
-#define G_CODE 3
+const char aminos[] = "FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRR"
+                      "IIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG";
 
 char codon2amino(char n0, char n1, char n2)
 {
-  static char aminos[] = "FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRR"
-                         "IIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG";
   unsigned int code = 0;
 
   switch (n0) {
@@ -70,7 +66,7 @@ char codon2amino(char n0, char n1, char n2)
     case 't':
     case 'U':
     case 'u':
-      /* code += T_CODE << 2; */
+      code += T_CODE << 2;
       break;
     default: assert(0); /* XXX */
   }

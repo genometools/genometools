@@ -34,6 +34,7 @@
 #include "gt_qgramdist.h"
 #include "gt_scorematrix.h"
 #include "gt_swalign.h"
+#include "gt_translate.h"
 #include "gt_upgma.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
@@ -70,6 +71,7 @@ void register_exercises(Toolbox *exercise_toolbox, Env *env)
   toolbox_add(exercise_toolbox, "qgramdist", gt_qgramdist);
   toolbox_add(exercise_toolbox, "scorematrix", gt_scorematrix);
   toolbox_add(exercise_toolbox, "swalign", gt_swalign);
+  toolbox_add(exercise_toolbox, "translate", gt_translate);
   toolbox_add(exercise_toolbox, "upgma", gt_upgma);
 }
 

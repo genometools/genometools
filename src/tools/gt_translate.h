@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,18 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CODON_H
-#define CODON_H
+#ifndef GT_TRANSLATE_H
+#define GT_TRANSLATE_H
 
-#define CODONLENGTH  3
-
-#define T_CODE  0
-#define C_CODE  1
-#define A_CODE  2
-#define G_CODE  3
-
-extern const char aminos[];
-
-char codon2amino(char, char, char);
+/* the translate tool */
+int gt_translate(int argc, const char **argv, Env*);
 
 #endif

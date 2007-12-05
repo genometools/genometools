@@ -22,4 +22,13 @@
 
 void translate_dna(Str*, const char*, unsigned long, unsigned int frame);
 
+/* Translate <dna_sequence> of length <seqlen> in all three reading frames.
+   The translations are stored in <frame1>, <frame2>, and <frame3>.
+   The necessary space for the frames is allocated by translate_all_frames(),
+   it is the responsibility of the caller to free it.
+   All characters different from 'acgtu' (in lower and upper case) are mapped to
+   't' before the translation is performed. */
+void translate_all_frames(char **frame1, char **frame2, char **frame3,
+                          const char *dna_sequence, unsigned long seqlen);
+
 #endif
