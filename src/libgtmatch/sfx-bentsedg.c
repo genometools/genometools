@@ -27,6 +27,7 @@
 #include "spacedef.h"
 #include "encseq-def.h"
 #include "turnwheels.h"
+#include "sfx-outlcp.h"
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
@@ -436,7 +437,8 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos totalwidth,
-                    Lcpsubtab *lcpsubtab)
+                    Lcpsubtab *lcpsubtab,
+                    Outlcpinfo *outlcpinfo)
 {
   Codetype code;
   unsigned int rightchar = mincode % numofchars;

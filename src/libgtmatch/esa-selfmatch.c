@@ -59,6 +59,7 @@ static int constructsarrandrunmaxpairs(
                        numofchars,
                        prefixlength,
                        numofparts,
+                       NULL,
                        mtime,
                        NULL,
                        err);

@@ -457,6 +457,7 @@ static int constructsarrandrunmmsearch(
                        numofchars,
                        prefixlength,
                        numofparts,
+                       NULL,
                        mtime,
                        NULL,
                        err);

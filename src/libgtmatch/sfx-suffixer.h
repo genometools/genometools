@@ -35,6 +35,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int numofchars,
                             unsigned int prefixlength,
                             unsigned int numofparts,
+                            const Str *indexname,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
                             Error *err);

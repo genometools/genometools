@@ -171,7 +171,9 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                                     encseq, so->readmode,
                                     getnumofcharsAlphabet(alpha),
                                     so->prefixlength,
-                                    so->numofparts, iface->mtime,
+                                    so->numofparts, 
+                                    NULL,
+                                    iface->mtime,
                                     verbosity, err)))
     newSfxInterfaceWithReadersErrRet();
   iface->longest.defined = false;

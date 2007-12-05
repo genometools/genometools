@@ -32,6 +32,7 @@
 #include "sfx-partssuf-def.h"
 #include "sfx-suffixer.h"
 #include "sfx-lcpsub.h"
+#include "sfx-outlcp.h"
 #include "stamp.h"
 
 #include "sfx-mappedstr.pr"
@@ -75,6 +76,7 @@ DECLAREARRAYSTRUCT(Seqpos);
   Seqpos widthofpart,
          totallength;
   Lcpsubtab *lcpsubtab;
+  Outlcpinfo *outlcpinfo;
   unsigned int part,
                numofchars,
                prefixlength;
@@ -221,10 +223,7 @@ static Codetype codedownscale(const unsigned int *filltable,
   return code;
 }
 
-static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
-                               Sfxiterator *sfi,
-                               bool deletevalues,
-                               /*@unused@*/ Error *err)
+static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
 {
   Codetype code;
   unsigned int prefixindex;
@@ -302,6 +301,10 @@ void freeSfxiterator(Sfxiterator **sfi)
     freelcpsubtab(&(*sfi)->lcpsubtab);
   }
   freesuftabparts((*sfi)->suftabparts);
+  if ((*sfi)->outlcpinfo != NULL)
+  {
+    freeoutlcptab(&(*sfi)->outlcpinfo);
+  }
   FREESPACE(*sfi);
 }
 
@@ -314,6 +317,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int numofchars,
                             unsigned int prefixlength,
                             unsigned int numofparts,
+                            const Str *indexname,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
                             Error *err)
@@ -349,6 +353,17 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
     sfi->lcpsubtab = newlcpsubtab(prefixlength,numofchars);
+    if (indexname == NULL)
+    {
+      sfi->outlcpinfo = NULL;
+    } else
+    {
+      sfi->outlcpinfo = newlcpoutfileinfo(indexname,err,false);
+      if (sfi->outlcpinfo == NULL)
+      {
+        haserr = true;
+      }
+    }
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
@@ -457,16 +472,15 @@ static void preparethispart(Sfxiterator *sfi,
                             Error *err)
 {
   Seqpos totalwidth;
+
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
   sfi->suftabptr = sfi->suftab -
                    stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
-  derivespecialcodes(NULL, /* not needed her */
-                     sfi,
+  derivespecialcodes(sfi,
                      (stpgetnumofparts(sfi->suftabparts) == 1U)
-                       ? true : false,
-                     err);
+                       ? true : false);
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,"inserting suffixes into buckets");
@@ -493,7 +507,8 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->currentmincode,
                  sfi->currentmaxcode,
                  totalwidth,
-                 sfi->lcpsubtab);
+                 sfi->lcpsubtab,
+                 sfi->outlcpinfo);
   assert(totalwidth > 0);
   sfi->part++;
 }

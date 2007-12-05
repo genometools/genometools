@@ -425,7 +425,6 @@ static void filllargestchartable(unsigned int **filltable,
   unsigned int *ptr;
   Codetype code;
 
-  error_check(err);
   ALLOCASSIGNSPACE(*filltable,NULL,unsigned int,kmersize);
   code = numofchars;
   for (ptr = *filltable + kmersize - 1; ptr >= *filltable; ptr--)
@@ -488,12 +487,7 @@ static int getencseqkmersgeneric(
     FastaBuffer *fb;
     int retval;
 
-    if (readmode != Forwardmode)
-    {
-      error_set(err,"readmode = %u not possible when reading symbols "
-                        "from file",(unsigned int) readmode);
-      haserr = true;
-    }
+    assert(readmode == Forwardmode);
     if (!haserr)
     {
       fb = fastabuffer_new(filenametab,

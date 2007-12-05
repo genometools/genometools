@@ -221,6 +221,7 @@ static int suffixeratorwithoutput(
                  unsigned int numofchars,
                  unsigned int prefixlength,
                  unsigned int numofparts,
+                 const Str *indexname,
                  Measuretime *mtime,
                  Verboseinfo *verboseinfo,
                  Error *err)
@@ -237,6 +238,7 @@ static int suffixeratorwithoutput(
                        numofchars,
                        prefixlength,
                        numofparts,
+                       indexname,
                        mtime,
                        verboseinfo,
                        err);
@@ -452,6 +454,7 @@ static int runsuffixerator(bool doesa,
                              numofchars,
                              so->prefixlength,
                              so->numofparts,
+                             so->outlcptab ? so->str_indexname : NULL,
                              mtime,
                              verboseinfo,
                              err) != 0)
