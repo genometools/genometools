@@ -22,7 +22,7 @@
 #include "libgtcore/mmap.h"
 #include "libgtcore/xposix.h"
 
-static void *mmap_generic(const char *path, size_t *len, int prot)
+static void* mmap_generic(const char *path, size_t *len, int prot)
 {
   int fd;
   struct stat sb;
@@ -32,7 +32,8 @@ static void *mmap_generic(const char *path, size_t *len, int prot)
   if (fd == -1)
     return NULL;
   xfstat(fd, &sb);
-  map = mmap(0, sb.st_size, prot, MAP_PRIVATE, fd, 0);
+  if ((map = mmap(0, sb.st_size, prot, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+    map = NULL;
   if (map)
     *len = sb.st_size;
   xclose(fd);
@@ -51,7 +52,7 @@ void* mmap_write(const char *path, size_t *len)
   return mmap_generic(path, len, PROT_WRITE);
 }
 
-static void *xmmap_generic(const char *path, size_t *len, int prot)
+static void* xmmap_generic(const char *path, size_t *len, int prot)
 {
   int fd;
   struct stat sb;

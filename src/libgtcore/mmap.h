@@ -22,8 +22,8 @@
 
 /* This module contains hight level mmap(2) interfaces. */
 
-void* mmap_read(const char *path, size_t *len);
-void* mmap_write(const char *path, size_t *len);
+void* mmap_read(const char *path, size_t *len); /* returns NULL on failure */
+void* mmap_write(const char *path, size_t *len); /* returns NULL on failure */
 void* xmmap_read(const char *path, size_t *len);
 void* xmmap_write(const char *path, size_t *len);
 
