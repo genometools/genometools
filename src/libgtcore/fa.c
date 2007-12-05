@@ -61,7 +61,7 @@ static void free_FAMapInfo(FAMapInfo *mapinfo)
   ma_free(mapinfo);
 }
 
-void fa_init(void)
+static void fa_init(void)
 {
   assert(!fa);
   fa = ma_calloc(1, sizeof (FA));

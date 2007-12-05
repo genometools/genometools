@@ -26,8 +26,6 @@
 
 /* the file allocator module */
 
-void    fa_init(void);
-
 /* functions for normal file pointer */
 #define fa_fopen(path, mode)\
         fa_fopen_func(path, mode, __FILE__, __LINE__)

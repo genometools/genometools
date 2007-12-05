@@ -86,7 +86,6 @@ Env* env_new(void)
   Env *env = xcalloc(1, sizeof (Env));
   bookkeeping = getenv("GT_MEM_BOOKKEEPING");
   ma_init(bookkeeping && !strcmp(bookkeeping, "on"));
-  fa_init();
   env->error = error_new();
   proc_gt_env_options(env);
   if (env->spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
