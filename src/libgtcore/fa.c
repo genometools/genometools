@@ -63,7 +63,7 @@ static void free_FAMapInfo(FAMapInfo *mapinfo)
 
 void fa_init(void)
 {
-  if (fa) return;
+  assert(!fa);
   fa = ma_calloc(1, sizeof (FA));
   fa->file_pointer = hashtable_new(HASH_DIRECT, NULL,
                                    (FreeFunc) free_FAFileInfo);
@@ -145,7 +145,9 @@ static void xfclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
 FILE* fa_fopen_func(const char *path, const char *mode,
                     const char *filename, int line)
 {
-  assert(fa && path && mode);
+  assert(path && mode);
+  if (!fa) fa_init();
+  assert(fa);
   return fileopen_generic(fa, path, mode, GFM_UNCOMPRESSED, false, filename,
                           line);
 }
@@ -153,13 +155,16 @@ FILE* fa_fopen_func(const char *path, const char *mode,
 FILE* fa_xfopen_func(const char *path, const char *mode,
                      const char *filename, int line)
 {
-  assert(fa && path && mode);
+  assert(path && mode);
+  if (!fa) fa_init();
+  assert(fa);
   return fileopen_generic(fa, path, mode, GFM_UNCOMPRESSED, true, filename,
                           line);
 }
 
 void fa_fclose(FILE *stream)
 {
+  if (!fa) fa_init();
   assert(fa);
   if (!stream) return;
   fclose_generic(stream, GFM_UNCOMPRESSED, fa);
@@ -167,6 +172,7 @@ void fa_fclose(FILE *stream)
 
 void fa_xfclose(FILE *stream)
 {
+  if (!fa) fa_init();
   assert(fa);
   if (!stream) return;
   xfclose_generic(stream, GFM_UNCOMPRESSED, fa);
@@ -175,19 +181,24 @@ void fa_xfclose(FILE *stream)
 gzFile fa_gzopen_func(const char *path, const char *mode,
                       const char *filename, int line)
 {
-  assert(fa && path && mode);
+  assert(path && mode);
+  if (!fa) fa_init();
+  assert(fa);
   return fileopen_generic(fa, path, mode, GFM_GZIP, false, filename, line);
 }
 
 gzFile fa_xgzopen_func(const char *path, const char *mode,
                        const char *filename, int line)
 {
-  assert(fa && path && mode);
+  assert(path && mode);
+  if (!fa) fa_init();
+  assert(fa);
   return fileopen_generic(fa, path, mode, GFM_GZIP, true, filename, line);
 }
 
 void fa_gzclose(gzFile stream)
 {
+  if (!fa) fa_init();
   assert(fa);
   if (!stream) return;
   fclose_generic(stream, GFM_GZIP, fa);
@@ -195,6 +206,7 @@ void fa_gzclose(gzFile stream)
 
 void fa_xgzclose(gzFile stream)
 {
+  if (!fa) fa_init();
   assert(fa);
   if (!stream) return;
   xfclose_generic(stream, GFM_GZIP, fa);
@@ -203,7 +215,9 @@ void fa_xgzclose(gzFile stream)
 BZFILE* fa_bzopen_func(const char *path, const char *mode,
                        const char *filename, int line)
 {
-  assert(fa && path && mode);
+  assert(path && mode);
+  if (!fa) fa_init();
+  assert(fa);
   return fileopen_generic(fa, path, mode, GFM_BZIP2, false, filename, line);
 
 }
@@ -211,12 +225,15 @@ BZFILE* fa_bzopen_func(const char *path, const char *mode,
 BZFILE* fa_xbzopen_func(const char *path, const char *mode,
                         const char *filename, int line)
 {
-  assert(fa && path && mode);
+  assert(path && mode);
+  if (!fa) fa_init();
+  assert(fa);
   return fileopen_generic(fa, path, mode, GFM_BZIP2, true, filename, line);
 }
 
 void fa_bzclose(BZFILE *stream)
 {
+  if (!fa) fa_init();
   assert(fa);
   if (!stream) return;
   fclose_generic(stream, GFM_BZIP2, fa);
@@ -224,6 +241,7 @@ void fa_bzclose(BZFILE *stream)
 
 void fa_xbzclose(BZFILE *stream)
 {
+  if (!fa) fa_init();
   assert(fa);
   if (!stream) return;
   xfclose_generic(stream, GFM_BZIP2, fa);
@@ -233,7 +251,9 @@ FILE* fa_xtmpfile_func(char *temp, const char *filename, int line)
 {
   FAFileInfo *fileinfo;
   FILE *fp;
-  assert(fa && temp);
+  assert(temp);
+  if (!fa) fa_init();
+  assert(fa);
   fileinfo = ma_malloc(sizeof (FAFileInfo));
   fileinfo->filename = filename;
   fileinfo->line = line;
@@ -274,34 +294,43 @@ static void* mmap_generic(const char *path, size_t *len, bool write,
 void* fa_mmap_read_func(const char *path, size_t *len,
                         const char *filename, int line)
 {
-  assert(fa && path);
+  assert(path);
+  if (!fa) fa_init();
+  assert(fa);
   return mmap_generic(path, len, false, false, filename, line);
 }
 
 void* fa_mmap_write_func(const char *path, size_t *len,
                          const char *filename, int line)
 {
-  assert(fa && path);
+  assert(path);
+  if (!fa) fa_init();
+  assert(fa);
   return mmap_generic(path, len, true, false, filename, line);
 }
 
 void* fa_xmmap_read_func(const char *path, size_t *len,
                          const char *filename, int line)
 {
-  assert(fa && path);
+  assert(path);
+  if (!fa) fa_init();
+  assert(fa);
   return mmap_generic(path, len, false, true, filename, line);
 }
 
 void* fa_xmmap_write_func(const char *path, size_t *len,
                           const char *filename, int line)
 {
-  assert(fa && path);
+  assert(path);
+  if (!fa) fa_init();
+  assert(fa);
   return mmap_generic(path, len, true, true, filename, line);
 }
 
 void fa_xmunmap(void *addr)
 {
   FAMapInfo *mapinfo;
+  if (!fa) fa_init();
   assert(fa);
   if (!addr) return;
   mapinfo = hashtable_get(fa->memory_maps, addr);
@@ -345,6 +374,7 @@ int fa_check_fptr_leak(void)
 {
   CheckLeakInfo info;
   int had_err;
+  if (!fa) fa_init();
   assert(fa);
   info.has_leak = false;
   had_err = hashtable_foreach(fa->file_pointer, check_fptr_leak, &info, NULL);
@@ -358,6 +388,7 @@ int fa_check_mmap_leak(void)
 {
   CheckLeakInfo info;
   int had_err;
+  if (!fa) fa_init();
   assert(fa);
   info.has_leak = false;
   had_err = hashtable_foreach(fa->memory_maps, check_mmap_leak, &info, NULL);
@@ -369,6 +400,7 @@ int fa_check_mmap_leak(void)
 
 void fa_show_space_peak(FILE *fp)
 {
+  if (!fa) fa_init();
   assert(fa);
   fprintf(fp, "# mmap space peak in megabytes: %.2f\n",
           (double) fa->max_size / (1 << 20));
