@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
 #include "seqpos-def.h"
 #include "divmodmul.h"
 #include "spacedef.h"

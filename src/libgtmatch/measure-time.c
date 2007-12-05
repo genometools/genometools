@@ -17,7 +17,6 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "libgtcore/error.h"
 #include "libgtcore/ma.h"
 #include "measure-time-if.h"
 

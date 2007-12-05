@@ -69,7 +69,7 @@ void printargsline(const char **argv, int argc);
 
 int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Error *);
 
-int ltrharvestoptions(LTRharvestoptions *lo, int argc,const char **argv, 
+int ltrharvestoptions(LTRharvestoptions *lo, int argc,const char **argv,
                       Error *);
 
 void wrapltrharvestoptions(LTRharvestoptions *lo);

@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
-#include "libgtcore/error.h"
 #include "libgtcore/symboldef.h"
 #include "spacedef.h"
 

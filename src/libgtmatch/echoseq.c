@@ -215,7 +215,7 @@ void encseq2fastaoutput(FILE *fpout,
                       width);
 }
 
-int echodescriptionandsequence(const StrArray *filenametab,Error *e)
+int echodescriptionandsequence(const StrArray *filenametab,Error *err)
 {
   SeqIterator *seqit;
   char *desc = NULL;
@@ -231,7 +231,7 @@ int echodescriptionandsequence(const StrArray *filenametab,Error *e)
                               &sequence,
                               &seqlen,
                               &desc,
-                              e);
+                              err);
     if (retval < 0)
     {
       haserr = true;

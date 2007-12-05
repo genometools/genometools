@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/esa-seqread.h"

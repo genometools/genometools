@@ -225,7 +225,6 @@ EVALXDROPARBITSCORES
       currentMININFINITYINTgeneration = 0;
       alwaysMININFINITYINT = true;
     }
-    
     /*@ignore@*/
     STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
     /*@end@*/

@@ -18,7 +18,6 @@
 #ifndef SFX_PARTSSUF_DEF_H
 #define SFX_PARTSSUF_DEF_H
 
-#include "libgtcore/error.h"
 #include "seqpos-def.h"
 #include "verbose-def.h"
 #include "intcode-def.h"

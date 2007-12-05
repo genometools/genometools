@@ -17,7 +17,6 @@
 
 #include <assert.h>
 #include <string.h>
-#include "libgtcore/error.h"
 #include "spacedef.h"
 
 char *dynamicstrdup(const char *file,int linenum,const char *source)

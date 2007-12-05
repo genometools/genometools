@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
 #include "libgtcore/symboldef.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"

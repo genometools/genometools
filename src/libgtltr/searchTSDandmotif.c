@@ -216,8 +216,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
     Seqpos startrightLTR,
     Seqpos endrightLTR,
     unsigned int *motifmismatchesleftLTR,
-    unsigned int *motifmismatchesrightLTR,
-    Error *err
+    unsigned int *motifmismatchesrightLTR
     )
 {
   Seqpos offset = 0,
@@ -231,8 +230,6 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   Seqpos oldleftLTR_5  = boundaries->leftLTR_5,
          oldrightLTR_3 = boundaries->rightLTR_3,
          difffromoldboundary = 0;
-
-  error_check(err);
 
   if ( boundaries->contignumber == 0)
   {
@@ -368,8 +365,8 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
     Sequentialsuffixarrayreader *ssar,
     Seqpos *markpos,
     unsigned int *motifmismatchesleftLTR,
-    unsigned int *motifmismatchesrightLTR,
-    Error *err)
+    unsigned int *motifmismatchesrightLTR
+    )
 {
   bool motif1 = false,
        motif2 = false;
@@ -386,8 +383,6 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
                tmp_motifmismatchesrightLTR,
                motifmismatches_frombestmatch = 0;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
-
-  error_check(err);
 
   if ( boundaries->contignumber == 0)
   {
@@ -684,7 +679,6 @@ static int searchforTSDandorMotifoutside(
     assert(startleftLTR < startrightLTR);
     subrepeatinfo.offset1 = startleftLTR;
     subrepeatinfo.offset2 = startrightLTR;
-    subrepeatinfo.errptr = err;
 
     if (sarrquerysubstringmatch(dbseq,
           leftlen,
@@ -697,7 +691,7 @@ static int searchforTSDandorMotifoutside(
           NULL,
           err) != 0)
     {
-       return -1;
+       return -1; /* XXX Fix me */
     }
 
     FREESPACE(dbseq);
@@ -724,8 +718,7 @@ static int searchforTSDandorMotifoutside(
                               startrightLTR,
                               endrightLTR,
                               motifmismatchesleftLTR,
-                              motifmismatchesrightLTR,
-                              err);
+                              motifmismatchesrightLTR);
   }
   return 0;
 }
@@ -770,8 +763,7 @@ int findcorrectboundaries(
         ssar,
         markpos,
         &motifmismatchesleftLTR,
-        &motifmismatchesrightLTR,
-        err);
+        &motifmismatchesrightLTR);
   }
 
   return 0;

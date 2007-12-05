@@ -19,7 +19,6 @@
 #include <assert.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
-#include "libgtcore/error.h"
 #include "libgtcore/minmax.h"
 #include "divmodmul.h"
 #include "sfx-codespec.h"
