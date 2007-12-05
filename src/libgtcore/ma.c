@@ -47,7 +47,7 @@ static void free_MAInfo(MAInfo *mainfo)
 
 void ma_init(bool bookkeeping)
 {
-  if (ma) return;
+  assert(!ma);
   ma = xcalloc(1, sizeof (MA));
   assert(!ma->bookkeeping);
   ma->allocated_pointer = hashtable_new(HASH_DIRECT, NULL,
@@ -75,6 +75,7 @@ void* ma_malloc_mem(size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
+  if (!ma) ma_init(false);
   assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
@@ -95,6 +96,7 @@ void* ma_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
+  if (!ma) ma_init(false);
   assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
@@ -115,6 +117,7 @@ void* ma_realloc_mem(void *ptr, size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
+  if (!ma) ma_init(false);
   assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
