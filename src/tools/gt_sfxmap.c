@@ -203,7 +203,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   {
     Sequentialsuffixarrayreader *ssar;
 
-    if(sfxmapoptions.inputlcp)
+    if (sfxmapoptions.inputlcp)
     {
       ssar = newSequentialsuffixarrayreaderfromfile(indexname,
                                                     SARR_LCPTAB,
