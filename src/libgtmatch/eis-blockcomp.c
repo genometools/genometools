@@ -1270,7 +1270,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
         &seqIdx->compositionTable, seqIdx->blockEncNumSyms, compIndex, bSym);,
       varDataMemOffset);
     {
-      Seqpos inBlockPos;
+      unsigned inBlockPos;
       if ((inBlockPos = pos % blockSize)
           && symCountFromComposition(
             &seqIdx->compositionTable, seqIdx->blockEncNumSyms,
@@ -2131,7 +2131,7 @@ tryMMapOfIndex(struct onDiskBlockCompIdx *idxData)
   assert(idxData && idxData->idxFP);
   if ((indexMMap = mmap((void *)0, idxData->rangeEncPos - idxData->cwDataPos,
                         PROT_READ, MAP_SHARED, fileno(idxData->idxFP),
-                        idxData->cwDataPos)))
+                        idxData->cwDataPos)) != (void *)-1)
   {
     idxData->idxMMap = indexMMap;
   }
