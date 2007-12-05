@@ -35,14 +35,13 @@
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
-bool fmindexexists(const Str *indexname,Error *err)
+bool fmindexexists(const Str *indexname)
 {
-  error_check(err);
-  if (!indexfilealreadyexists(indexname,FMASCIIFILESUFFIX,err))
+  if (!indexfilealreadyexists(indexname,FMASCIIFILESUFFIX))
   {
     return false;
   }
-  if (!indexfilealreadyexists(indexname,FMDATAFILESUFFIX,err))
+  if (!indexfilealreadyexists(indexname,FMDATAFILESUFFIX))
   {
     return false;
   }

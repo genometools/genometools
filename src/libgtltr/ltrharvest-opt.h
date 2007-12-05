@@ -19,7 +19,7 @@
 #define LTRHARVEST_OPT_H
 
 #include <stdbool.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
@@ -67,10 +67,11 @@ void showuserdefinedoptionsandvalues(LTRharvestoptions *lo);
 
 void printargsline(const char **argv, int argc);
 
-int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Env*);
+int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Error *);
 
-int ltrharvestoptions(LTRharvestoptions *lo, int argc,const char **argv, Env*);
+int ltrharvestoptions(LTRharvestoptions *lo, int argc,const char **argv, 
+                      Error *);
 
-void wrapltrharvestoptions(LTRharvestoptions *lo, Env*);
+void wrapltrharvestoptions(LTRharvestoptions *lo);
 
 #endif

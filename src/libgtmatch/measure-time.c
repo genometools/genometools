@@ -27,16 +27,15 @@
   const char *eventdescription;
 };
 
-void inittheclock(Measuretime **mtime,const char *event,Error *err)
+void inittheclock(Measuretime **mtime,const char *event)
 {
-  error_check(err);
   *mtime = ma_malloc(sizeof (Measuretime));
   (*mtime)->startclock = clock();
   (*mtime)->overalltime = 0;
   (*mtime)->eventdescription = event;
 }
 
-void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent,Error *err)
+void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent)
 {
   clock_t stopclock;
 

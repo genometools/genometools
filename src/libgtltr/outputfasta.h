@@ -24,6 +24,6 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
                        unsigned int linewidth,
                        Sequentialsuffixarrayreader *ssar,
                        bool showseqnum,
-                       Env *env);
+                       Error *err);
 
 #endif

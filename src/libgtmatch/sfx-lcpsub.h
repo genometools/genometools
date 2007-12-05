@@ -18,12 +18,9 @@
 #ifndef SFX_LCPSUB_H
 #define SFX_LCPSUB_H
 
-#include "libgtcore/error.h"
-
 typedef struct Lcpsubtab Lcpsubtab;
 
-void freelcpsubtab(Lcpsubtab **lcpsubtab,Error *err);
-Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars,
-                        Error *err);
+void freelcpsubtab(Lcpsubtab **lcpsubtab);
+Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars);
 
 #endif

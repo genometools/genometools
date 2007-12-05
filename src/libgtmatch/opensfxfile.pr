@@ -6,7 +6,7 @@ extern "C" {
                              const char *mode,
                              Error *err);
 
-bool indexfilealreadyexists(const Str *indexname,const char *suffix,Error *err);
+bool indexfilealreadyexists(const Str *indexname,const char *suffix);
 
 #ifdef __cplusplus
 }

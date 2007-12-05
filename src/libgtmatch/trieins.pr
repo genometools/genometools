@@ -18,9 +18,9 @@ Trienode *findsmallestnodeintrie(const Trierep *trierep);
 void deletesmallestpath(Trienode *smallest,Trierep *trierep);
 
 void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
-                       unsigned int numofindexes,Error *err);
+                       unsigned int numofindexes);
 
-void freetrierep(Trierep *trierep,Error *err);
+void freetrierep(Trierep *trierep);
 
 #ifdef __cplusplus
 }

@@ -47,8 +47,7 @@ static int addmarkpos(ArraySeqpos *asp,
 }
 
 Seqpos *encseq2markpositions(const Encodedsequence *encseq,
-                             unsigned long numofsequences,
-                             Error *err)
+                             unsigned long numofsequences)
 {
   ArraySeqpos asp;
   Specialrangeiterator *sri;
@@ -82,8 +81,7 @@ Seqpos *encseq2markpositions(const Encodedsequence *encseq,
 
 unsigned long *sequence2markpositions(unsigned long *numofsequences,
                                       const Uchar *seq,
-                                      unsigned long seqlen,
-                                      Error *err)
+                                      unsigned long seqlen)
 {
   unsigned long *spacemarkpos, i, allocatedmarkpos, nextfreemarkpos;
 
@@ -230,9 +228,7 @@ int checkmarkpos(const Encodedsequence *encseq,
     Uchar currentchar;
     Encodedsequencescanstate *esr;
 
-    markpos = encseq2markpositions(encseq,
-                                   numofdbsequences,
-                                   err);
+    markpos = encseq2markpositions(encseq,numofdbsequences);
     if (markpos == NULL)
     {
       return -1;

@@ -68,11 +68,11 @@ newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
   assert(projectName);
   /* map and interpret index project file */
   /* FIXME: handle verbosity in a more sane fashion */
-  verbosity = newverboseinfo(false, err);
+  verbosity = newverboseinfo(false);
   if (streamsuffixarray(&suffixArray, &length,
                        SARR_SUFTAB | SARR_BWTTAB, projectName, verbosity, err))
   {
-    freeverboseinfo(&verbosity, err);
+    freeverboseinfo(&verbosity);
     return NULL;
   }
   ++length;
@@ -83,7 +83,7 @@ newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
                                       headerCBData, biFunc, cwExtBitsPerPos,
                                       maxVarExtBitsPerPos, cbState, err);
   freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity, err);
+  freeverboseinfo(&verbosity);
   return newSeqIdx;
 }
 
@@ -108,7 +108,7 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                         headerWriteFunc *extHeaderCallbacks,
                         void **headerCBData,
                         bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                        BitOffset maxVarExtBitsPerPos, void *cbState, 
+                        BitOffset maxVarExtBitsPerPos, void *cbState,
                         Error *err)
 {
   struct encIdxSeq *newSeqIdx;
@@ -314,7 +314,8 @@ static BitOffset
 appendCallBackOutput(struct appendState *state,
                      const struct blockCompositionSeq *seqIdx,
                      bitInsertFunc biFunc, Seqpos start, Seqpos len,
-                     unsigned callBackDataOffsetBits, void *cbState, Error *err);
+                     unsigned callBackDataOffsetBits, void *cbState,
+                     Error *err);
 
 typedef Seqpos *partialSymSums;
 
@@ -1863,18 +1864,18 @@ loadBlockEncIdxSeq(const Str *projectName, int features, Error *err)
   Seqpos len;
   Verboseinfo *verbosity;
   /* FIXME: handle verbosity in a saner fashion */
-  verbosity = newverboseinfo(false, err);
+  verbosity = newverboseinfo(false);
   if (streamsuffixarray(&suffixArray, &len,
                         0, projectName, verbosity, err))
   {
-    freeverboseinfo(&verbosity, err);
+    freeverboseinfo(&verbosity);
     return NULL;
   }
   ++len;
   newSeqIdx = loadBlockEncIdxSeqForSA(&suffixArray, len, projectName,
                                       features, err);
   freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity, err);
+  freeverboseinfo(&verbosity);
   return newSeqIdx;
 }
 

@@ -2,15 +2,14 @@
 extern "C" {
 #endif
 Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
-                                      Readmode readmode,
-                                      Error *err);
+                                      Readmode readmode);
 
 Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
                             bool firstpage,
                             const Seqpos *suftabptr,
                             Seqpos numberofsuffixes);
 
-void freeLcpvalueiterator(Lcpvalueiterator **lvi,Error *err);
+void freeLcpvalueiterator(Lcpvalueiterator **lvi);
 
 #ifdef __cplusplus
 }

@@ -17,7 +17,7 @@
 
 #include <stdbool.h>
 #include "libgtcore/arraydef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/log.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/symboldef.h"
@@ -217,7 +217,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
     Seqpos endrightLTR,
     unsigned int *motifmismatchesleftLTR,
     unsigned int *motifmismatchesrightLTR,
-    Env *env
+    Error *err
     )
 {
   Seqpos offset = 0,
@@ -232,7 +232,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
          oldrightLTR_3 = boundaries->rightLTR_3,
          difffromoldboundary = 0;
 
-  env_error_check(env);
+  error_check(err);
 
   if ( boundaries->contignumber == 0)
   {
@@ -369,7 +369,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
     Seqpos *markpos,
     unsigned int *motifmismatchesleftLTR,
     unsigned int *motifmismatchesrightLTR,
-    Env *env)
+    Error *err)
 {
   bool motif1 = false,
        motif2 = false;
@@ -387,7 +387,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
                motifmismatches_frombestmatch = 0;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
 
-  env_error_check(env);
+  error_check(err);
 
   if ( boundaries->contignumber == 0)
   {
@@ -554,7 +554,7 @@ static int searchforTSDandorMotifoutside(
   Seqpos *markpos,
   unsigned int *motifmismatchesleftLTR,
   unsigned int *motifmismatchesrightLTR,
-  Env *env)
+  Error *err)
 {
   Seqpos startleftLTR,
          endleftLTR,
@@ -571,7 +571,7 @@ static int searchforTSDandorMotifoutside(
   SubRepeatInfo subrepeatinfo;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
 
-  env_error_check(env);
+  error_check(err);
 
   if ( contignumber == 0)
   {
@@ -684,7 +684,7 @@ static int searchforTSDandorMotifoutside(
     assert(startleftLTR < startrightLTR);
     subrepeatinfo.offset1 = startleftLTR;
     subrepeatinfo.offset2 = startrightLTR;
-    subrepeatinfo.envptr = env;
+    subrepeatinfo.errptr = err;
 
     if (sarrquerysubstringmatch(dbseq,
           leftlen,
@@ -695,7 +695,7 @@ static int searchforTSDandorMotifoutside(
           subsimpleexactselfmatchstore,
           &subrepeatinfo,
           NULL,
-          env) != 0)
+          err) != 0)
     {
        return -1;
     }
@@ -725,7 +725,7 @@ static int searchforTSDandorMotifoutside(
                               endrightLTR,
                               motifmismatchesleftLTR,
                               motifmismatchesrightLTR,
-                              env);
+                              err);
   }
   return 0;
 }
@@ -739,12 +739,12 @@ int findcorrectboundaries(
     LTRboundaries *boundaries,
     Sequentialsuffixarrayreader *ssar,
     Seqpos *markpos,
-    Env *env)
+    Error *err)
 {
   unsigned int motifmismatchesleftLTR = 0,
                motifmismatchesrightLTR = 0;
 
-  env_error_check(env);
+  error_check(err);
 
   log_log("searching for correct boundaries in vicinity...\n");
   /* first: 5'-border of left LTR and 3'-border of right LTR */
@@ -755,7 +755,7 @@ int findcorrectboundaries(
                                     markpos,
                                     &motifmismatchesleftLTR,
                                     &motifmismatchesrightLTR,
-                                    env) != 0 )
+                                    err) != 0 )
   {
     return -1;
   }
@@ -771,7 +771,7 @@ int findcorrectboundaries(
         markpos,
         &motifmismatchesleftLTR,
         &motifmismatchesrightLTR,
-        env);
+        err);
   }
 
   return 0;

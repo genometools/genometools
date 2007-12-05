@@ -19,7 +19,6 @@
 #include <string.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
-#include "libgtcore/env.h"
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
@@ -115,7 +114,7 @@ void printargsline(const char **argv, int argc)
 }
 
 /* test the motif and encode the characters by using alpha */
-int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Env *env)
+int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Error *err)
 {
   const Uchar *symbolmap;
   Uchar c_tab[UCHAR_MAX+1];
@@ -124,25 +123,25 @@ int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Env *env)
   symbolmap = getsymbolmapAlphabet(alpha);
   if ( symbolmap[(unsigned int)motif->firstleft] == (Uchar) UNDEFCHAR)
   {
-    env_error_set(env,"Illegal nucleotide character %c "
+    error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->firstleft);
     return -1;
   }
   if ( symbolmap[(unsigned int)motif->secondleft] == (Uchar) UNDEFCHAR )
   {
-    env_error_set(env,"Illegal nucleotide character %c "
+    error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->secondleft);
     return -1;
   }
   if ( symbolmap[(unsigned int)motif->firstright] == (Uchar) UNDEFCHAR )
   {
-    env_error_set(env,"Illegal nucleotide character %c "
+    error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->firstright);
     return -1;
   }
   if ( symbolmap[(unsigned int)motif->secondright] == (Uchar) UNDEFCHAR )
   {
-    env_error_set(env,"Illegal nucleotide character %c "
+    error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->secondright);
     return -1;
   }
@@ -164,7 +163,7 @@ int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Env *env)
       (c_tab[symbolmap[(unsigned int)motif->secondleft]] !=
        c_tab[c_tab[symbolmap[(unsigned int)motif->firstright]]]) )
   {
-    env_error_set(env, "Illegal motif, motif not palindromic");
+    error_set(err, "Illegal motif, motif not palindromic");
     return -1;
   }
 
@@ -179,7 +178,7 @@ int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Env *env)
 
 static OPrval parse_options(int *parsed_args,
                             LTRharvestoptions *lo,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *optionindex,
@@ -215,7 +214,7 @@ static OPrval parse_options(int *parsed_args,
     NULL
   };
 
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] -index filenameindex",
                          "Predict LTR retrotransposons.");
   option_parser_set_mailaddress(op,"<dellinghaus@zbh.uni-hamburg.de>");
@@ -436,25 +435,25 @@ static OPrval parse_options(int *parsed_args,
   option_imply_either_2(optionlongoutput, optionmintsd, optionmotif);
 
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc,
-                               env_error(env));
+                               err);
   lo->vicinityforcorrectboundaries = (Seqpos) vicinityforcorrectboundaries;
   if (oprval == OPTIONPARSER_OK)
   {
     if (lo->repeatinfo.lmin > lo->repeatinfo.lmax)
     {
-      env_error_set(env,"argument of -minlenltr is greater than argument of"
+      error_set(err,"argument of -minlenltr is greater than argument of"
           " -maxlenltr");
       oprval = OPTIONPARSER_ERROR;
     }
     if (lo->repeatinfo.dmin > lo->repeatinfo.dmax)
     {
-      env_error_set(env,
+      error_set(err,
           "argument of -mindistltr is greater than argument of -maxdistltr");
       oprval = OPTIONPARSER_ERROR;
     }
     if (lo->minlengthTSD > lo->maxlengthTSD)
     {
-      env_error_set(env,
+      error_set(err,
           "argument of -mintsd is greater than argument of -maxtsd");
       oprval = OPTIONPARSER_ERROR;
     }
@@ -465,7 +464,7 @@ static OPrval parse_options(int *parsed_args,
     {
       if (str_length(lo->motif.str_motif) != (unsigned long) 4)
       {
-        env_error_set(env,
+        error_set(err,
             "argument of -motif has not exactly 4 characters");
         oprval = OPTIONPARSER_ERROR;
       }
@@ -502,7 +501,7 @@ static OPrval parse_options(int *parsed_args,
           }
           else
           {
-            env_error_set(env,
+            error_set(err,
                "argument of -overlaps is not valid. Choose best|all|no");
             oprval = OPTIONPARSER_ERROR;
           }
@@ -545,7 +544,7 @@ static OPrval parse_options(int *parsed_args,
   return oprval;
 }
 
-void wrapltrharvestoptions(LTRharvestoptions *lo,Env *env)
+void wrapltrharvestoptions(LTRharvestoptions *lo)
 {
   /* no checking if error occurs, since errors have been output before */
   str_delete(lo->str_indexname);
@@ -557,20 +556,20 @@ void wrapltrharvestoptions(LTRharvestoptions *lo,Env *env)
 }
 
 int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
-                      Env *env)
+                      Error *err)
 {
   int parsed_args;
   OPrval rval;
 
-  env_error_check(env);
+  error_check(err);
 
   /** init LTRharvestoptions lo **/
-  rval = parse_options(&parsed_args, lo, argc, argv, env);
+  rval = parse_options(&parsed_args, lo, argc, argv, err);
   if (rval == OPTIONPARSER_OK)
   {
     if (parsed_args != argc)
     {
-      env_error_set(env, "Listing of options and arguments is not correct.");
+      error_set(err, "Listing of options and arguments is not correct.");
       rval = OPTIONPARSER_ERROR;
     }
   }

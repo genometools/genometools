@@ -62,7 +62,7 @@ static int initNameandFILE(NameandFILE *nf,
   return 0;
 }
 
-static void freeNameandFILE(NameandFILE *nf,Error *err)
+static void freeNameandFILE(NameandFILE *nf)
 {
   fa_xfclose(nf->fp);
   str_delete(nf->outfilename);
@@ -189,8 +189,7 @@ static int mergeandstoreindex(const Str *storeindex,
     sequenceoffsettable = encseqtable2seqoffsets(&totallength,
                                                  &specialcharinfo,
                                                  emmesa->suffixarraytable,
-                                                 emmesa->numofindexes,
-                                                 err);
+                                                 emmesa->numofindexes);
     assert(sequenceoffsettable != NULL);
     while (emmesa->numofentries > 0)
     {
@@ -210,9 +209,9 @@ static int mergeandstoreindex(const Str *storeindex,
     }
     FREESPACE(sequenceoffsettable);
   }
-  freeNameandFILE(&mergeoutinfo.outsuf,err);
-  freeNameandFILE(&mergeoutinfo.outlcp,err);
-  freeNameandFILE(&mergeoutinfo.outllv,err);
+  freeNameandFILE(&mergeoutinfo.outsuf);
+  freeNameandFILE(&mergeoutinfo.outlcp);
+  freeNameandFILE(&mergeoutinfo.outllv);
   return haserr ? -1 : 0;
 }
 
@@ -248,6 +247,6 @@ int performtheindexmerging(const Str *storeindex,
       haserr = true;
     }
   }
-  wraptEmissionmergedesa(&emmesa,err);
+  wraptEmissionmergedesa(&emmesa);
   return haserr ? -1 : 0;
 }

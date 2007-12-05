@@ -46,12 +46,11 @@
   return fp;
 }
 
-bool indexfilealreadyexists(const Str *indexname,const char *suffix,Error *err)
+bool indexfilealreadyexists(const Str *indexname,const char *suffix)
 {
   struct stat statbuf;
   Str *tmpfilename;
 
-  error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,suffix);
 

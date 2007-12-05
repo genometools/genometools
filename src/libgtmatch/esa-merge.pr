@@ -9,7 +9,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
                           Verboseinfo *verboseinfo,
                           Error *err);
 
-void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Error *err);
+void wraptEmissionmergedesa(Emissionmergedesa *emmesa);
 
 #ifdef __cplusplus
 }

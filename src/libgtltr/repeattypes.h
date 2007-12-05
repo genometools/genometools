@@ -21,7 +21,7 @@
 #include <stdbool.h>
 
 #include "libgtcore/arraydef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/sarr-def.h"
 
@@ -60,7 +60,7 @@ typedef struct
   Seqpos offset1;      /* offset1 for absolute position 1 in sequence */
   Seqpos offset2;      /* offset2 for absolute position 2 in sequence */
                        /* pos1 < pos2 */
-  Env *envptr;
+  Error *errptr;
 } SubRepeatInfo;
 
 /* The datatype LTRboundaries stores all information of one predicted */

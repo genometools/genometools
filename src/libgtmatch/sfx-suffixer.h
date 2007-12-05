@@ -26,7 +26,7 @@
 
 typedef struct Sfxiterator Sfxiterator;
 
-void freeSfxiterator(Sfxiterator **sfi,Error *err);
+void freeSfxiterator(Sfxiterator **sfi);
 
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Seqpos specialranges,
@@ -39,7 +39,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Verboseinfo *verboseinfo,
                             Error *err);
 
-const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
+const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
                               Measuretime *mtime,
                               Sfxiterator *sfi,Error *err);
 

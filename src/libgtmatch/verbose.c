@@ -52,7 +52,7 @@ void showverbose(Verboseinfo *verboseinfo,const char *format, ...)
   }
 }
 
-Verboseinfo *newverboseinfo(bool verbose,Error *err)
+Verboseinfo *newverboseinfo(bool verbose)
 {
   Verboseinfo *v;
 
@@ -61,7 +61,7 @@ Verboseinfo *newverboseinfo(bool verbose,Error *err)
   return v;
 }
 
-void freeverboseinfo(Verboseinfo **v,Error *err)
+void freeverboseinfo(Verboseinfo **v)
 {
   ma_free(*v);
   *v = NULL;

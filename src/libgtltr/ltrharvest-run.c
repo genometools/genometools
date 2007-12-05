@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/spacedef.h"
@@ -37,20 +37,20 @@
 #include "libgtmatch/esa-maxpairs.pr"
 #include "libgtmatch/pos2seqnum.pr"
 
-static int runltrharvest(LTRharvestoptions *lo, Env *env)
+static int runltrharvest(LTRharvestoptions *lo, Error *err)
 {
   Sequentialsuffixarrayreader *ssar; /* suffix array */
   Seqpos *markpos = NULL;
   unsigned long numofdbsequences;
   bool had_err = false;
 
-  env_error_check(env);
+  error_check(err);
 
   ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
                                   SARR_LCPTAB | SARR_SUFTAB |
                                   SARR_ESQTAB | SARR_DESTAB,
                                   SEQ_mappedboth,
-                                  env);
+                                  err);
   if (ssar == NULL)
   {
     return -1;
@@ -59,7 +59,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* test if motif is valid and encode motif */
   if (testmotifandencodemotif (&lo->motif,
                              alphabetSequentialsuffixarrayreader(ssar),
-                             env) != 0)
+                             err) != 0)
   {
     had_err = true;
   }
@@ -74,10 +74,8 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* calculate markpos array for sequences offset */
   if (!had_err && numofdbsequences > 1UL)
   {
-    markpos = encseq2markpositions(
-        encseqSequentialsuffixarrayreader(ssar),
-        numofdbsequencesSequentialsuffixarrayreader(ssar),
-        env);
+    markpos = encseq2markpositions(encseqSequentialsuffixarrayreader(ssar),
+                            numofdbsequencesSequentialsuffixarrayreader(ssar));
     lo->markpos = markpos;
     if (markpos == NULL)
     {
@@ -99,7 +97,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
                        (void*)simpleexactselfmatchstore,
                        lo,
                        NULL,
-                       env) != 0)
+                       err) != 0)
   {
     had_err = true;
   }
@@ -108,7 +106,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   INITARRAY(&lo->arrayLTRboundaries, LTRboundaries);
 
   /* apply the filter algorithms */
-  if (!had_err && searchforLTRs (ssar, lo, markpos, env) != 0)
+  if (!had_err && searchforLTRs (ssar, lo, markpos, err) != 0)
   {
     had_err = true;
   }
@@ -138,7 +136,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
           60U,
           ssar,
           true,
-          env) != 0)
+          err) != 0)
     {
       had_err = true;
     }
@@ -153,7 +151,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
           60U,
           ssar,
           true,
-          env) != 0)
+          err) != 0)
     {
       had_err = true;
     }
@@ -162,7 +160,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* print GFF3 format file of predictions */
   if (!had_err && lo->gff3output)
   {
-    printgff3format(lo, ssar, markpos, env);
+    printgff3format(lo, ssar, markpos);
   }
 
   if (!had_err && numofdbsequences > 1UL)
@@ -173,7 +171,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* print predictions to stdout */
   if (!had_err)
   {
-    if (showinfoiffoundfullLTRs(lo, ssar, env) != 0)
+    if (showinfoiffoundfullLTRs(lo, ssar) != 0)
     {
       had_err = true;
     }
@@ -182,24 +180,24 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* free prediction array */
   FREEARRAY(&lo->arrayLTRboundaries, LTRboundaries);
   /* free suffixarray */
-  freeSequentialsuffixarrayreader(&ssar, env);
+  freeSequentialsuffixarrayreader(&ssar);
 
   return had_err ? -1 : 0;
 }
 
-int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)
+int parseargsandcallltrharvest(int argc,const char *argv[],Error *err)
 {
   LTRharvestoptions lo;
   int had_err = 0;
 
-  if (ltrharvestoptions(&lo,argc,argv,env) != 0)
+  if (ltrharvestoptions(&lo,argc,argv,err) != 0)
   {
     had_err = -1;
   } else
   {
     printargsline(argv,argc);
-    had_err = runltrharvest(&lo,env);
+    had_err = runltrharvest(&lo,err);
   }
-  wrapltrharvestoptions(&lo,env);
+  wrapltrharvestoptions(&lo);
   return had_err;
 }

@@ -121,7 +121,7 @@ int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
   return haserr ? -1 : 0;
 }
 
-void freeoutlcptab(Outlcpinfo **outlcpinfo,Error *err)
+void freeoutlcptab(Outlcpinfo **outlcpinfo)
 {
   fa_fclose((*outlcpinfo)->outfplcptab);
   fa_fclose((*outlcpinfo)->outfpllvtab);

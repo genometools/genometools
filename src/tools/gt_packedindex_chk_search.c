@@ -83,7 +83,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
     }
     str_set(inputProject, argv[parsedArgs]);
     {
-      bwtSeq = availBWTSeq(&params.idx.final, env);
+      bwtSeq = availBWTSeq(&params.idx.final, env_error(env));
     }
     ensure(had_err, bwtSeq);
     if (had_err)
@@ -92,7 +92,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
     {
       enum verifyBWTSeqErrCode retval =
         BWTSeqVerifyIntegrity(bwtSeq, inputProject, params.progressInterval,
-                              stderr, env);
+                              stderr, env_error(env));
       if (retval != VERIFY_BWTSEQ_NO_ERROR)
       {
         fprintf(stderr, "index integrity check failed: %s\n",
@@ -107,7 +107,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       ensure(had_err,
              mapsuffixarray(&suffixarray, &totalLen,
                             SARR_SUFTAB | SARR_ESQTAB,
-                            inputProject, NULL, env) == 0);
+                            inputProject, NULL, env_error(env)) == 0);
       if (had_err)
       {
         env_error_set(env, "Can't load suffix array project with"
@@ -138,7 +138,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
                                            suffixarray.encseq,
                                            getnumofcharsAlphabet(
                                               suffixarray.alpha),
-                                           env)));
+                                           env_error(env))));
       if (had_err)
       {
         fputs("Creation of pattern iterator failed!\n", stderr);
@@ -157,12 +157,13 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
                               pptr,
                               patternLen);
         BWTSeqExactMatchesIterator *EMIter =
-          newEMIterator(bwtSeq, pptr, patternLen, env);
+          newEMIterator(bwtSeq, pptr, patternLen, env_error(env));
         Seqpos numMatches = EMINumMatchesTotal(EMIter);
         ensure(had_err, EMIter);
         if (had_err)
           break;
-        assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen, env));
+        assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, 
+                                              patternLen, env_error(env)));
         assert(EMINumMatchesTotal(EMIter) == countmmsearchiterator(mmsi));
         fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n"
                 "pattern: ", trial,
@@ -172,7 +173,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
         while (nextmmsearchiterator(&dbstart,mmsi))
         {
           struct MatchData *match =
-            EMIGetNextMatch(EMIter, bwtSeq, env);
+            EMIGetNextMatch(EMIter, bwtSeq, env_error(env));
           ensure(had_err, match);
           if (had_err)
           {
@@ -191,7 +192,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
         if (!had_err)
         {
           struct MatchData *trailingMatch =
-            EMIGetNextMatch(EMIter, bwtSeq, env);
+            EMIGetNextMatch(EMIter, bwtSeq, env_error(env));
           ensure(had_err, !trailingMatch);
           if (had_err)
           {
@@ -199,7 +200,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
             break;
           }
         }
-        deleteEMIterator(EMIter,env);
+        deleteEMIterator(EMIter,env_error(env));
         freemmsearchiterator(&mmsi);
       }
       fprintf(stderr, "Finished %lu of %lu matchings successfully.\n",
@@ -208,7 +209,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
   } while (0);
   if (saIsLoaded) freesuffixarray(&suffixarray);
   if (epi) freeEnumpatterniterator(&epi);
-  if (bwtSeq) deleteBWTSeq(bwtSeq, env);
+  if (bwtSeq) deleteBWTSeq(bwtSeq, env_error(env));
   if (inputProject) str_delete(inputProject);
   return had_err?-1:0;
 }
@@ -264,7 +265,8 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   /* compute parameters currently not set from command-line or
    * determined indirectly */
   computePackedIndexDefaults(&params->idx,
-                             BWTBaseFeatures & ~BWTProperlySorted, env);
+                             BWTBaseFeatures & ~BWTProperlySorted, 
+                             env_error(env));
 
   option_parser_delete(op);
 

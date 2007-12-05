@@ -8,8 +8,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                                  unsigned int prefixlength,
                                  Seqpos depth,
                                  Seqpos left,
-                                 Seqpos right,
-                                 Error *err);
+                                 Seqpos right);
 
 void showentiresuftab(const Encodedsequence *encseq,
                       Readmode readmode,

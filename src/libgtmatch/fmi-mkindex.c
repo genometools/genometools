@@ -120,7 +120,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   return oprval;
 }
 
-static void freemkfmcallinfo(Mkfmcallinfo *mkfmcallinfo,Error *err)
+static void freemkfmcallinfo(Mkfmcallinfo *mkfmcallinfo)
 {
   strarray_delete(mkfmcallinfo->indexnametab);
   str_delete(mkfmcallinfo->outfmindex);
@@ -146,7 +146,7 @@ static int levedescl2levelnum(const char *name,
   return -1;
 }
 
-static void freeconstructedfmindex(Fmindex *fm,Error *err)
+static void freeconstructedfmindex(Fmindex *fm)
 {
   FREEARRAY (&fm->specpos, PairBwtidx);
   FREESPACE (fm->bfreq);
@@ -223,7 +223,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
   {
     haserr = true;
   }
-  freeconstructedfmindex(&fm,err);
+  freeconstructedfmindex(&fm);
   return haserr ? -1 : 0;
 }
 
@@ -236,12 +236,12 @@ int parseargsandcallmkfmindex(int argc,const char **argv,Error *err)
   retval = mkfmindexoptions(&mkfmcallinfo,argc,argv,err);
   if (retval == 0)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(false,err);
+    Verboseinfo *verboseinfo = newverboseinfo(false);
     if (runmkfmindex(&mkfmcallinfo,verboseinfo,err) < 0)
     {
       haserr = true;
     }
-    freeverboseinfo(&verboseinfo,err);
+    freeverboseinfo(&verboseinfo);
   } else
   {
     if (retval < 0)
@@ -249,7 +249,7 @@ int parseargsandcallmkfmindex(int argc,const char **argv,Error *err)
       haserr = true;
     }
   }
-  freemkfmcallinfo(&mkfmcallinfo,err);
+  freemkfmcallinfo(&mkfmcallinfo);
   return haserr ? -1 : 0;
 }
 

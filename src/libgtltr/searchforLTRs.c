@@ -16,7 +16,7 @@
 */
 
 #include "libgtcore/arraydef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/minmax.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
@@ -117,7 +117,7 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
  to all candidate pairs.
 */
 int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
-                  const Seqpos *markpos, Env *env)
+                  const Seqpos *markpos, Error *err)
 {
   unsigned long repeatcounter;
   ArrayMyfrontvalue fronts;
@@ -136,7 +136,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
   const Encodedsequence *encseq =
           encseqSequentialsuffixarrayreader(ssar);
 
-  env_error_check(env);
+  error_check(err);
 
   /*
   printf("xdropbelowscore = %d\n", lo->xdropbelowscore);
@@ -169,7 +169,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
                                (int) alilen,
                                (int) alilen,
                                (Xdropscore)lo->xdropbelowscore,
-                               env);
+                               err);
     }
     else /* do not align over left sequence boundary */
     {
@@ -183,7 +183,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
                                (int) repeatptr->pos1,
                                (int) (repeatptr->pos1 + repeatptr->offset),
                                (Xdropscore)lo->xdropbelowscore,
-                               env);
+                               err);
     }
     FREEARRAY (&fronts, Myfrontvalue);
 
@@ -204,7 +204,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
                                  (int) alilen,
                                  (int) alilen,
                                  lo->xdropbelowscore,
-                                 env);
+                                 err);
     }
     else /* do not align over right sequence boundary */
     {
@@ -222,7 +222,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
                                 (repeatptr->pos1 + repeatptr->offset +
                                  repeatptr->len)),
                                 lo->xdropbelowscore,
-                                env);
+                                err);
     }
     FREEARRAY (&fronts, Myfrontvalue);
 
@@ -283,7 +283,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     if ( lo->motif.allowedmismatches < 4U || lo->minlengthTSD > 1U)
     {
       if ( findcorrectboundaries(lo, boundaries, ssar,
-                                markpos, env) != 0 )
+                                markpos, err) != 0 )
       {
         return -1;
       }
@@ -330,8 +330,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     encseqextract(useq,encseq,boundaries->leftLTR_5,boundaries->leftLTR_3);
     encseqextract(vseq,encseq,boundaries->rightLTR_5,boundaries->rightLTR_3);
     edist = greedyunitedist(useq,(unsigned long) ulen, /*Implement for encseq */
-                            vseq,(unsigned long) vlen,
-                            env);
+                            vseq,(unsigned long) vlen);
 
     /* determine similarity */
     boundaries->similarity = 100.0 *

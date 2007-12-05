@@ -33,14 +33,14 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_guessprot(int argc, const char **argv, Env *env)
+int gt_guessprot(int argc, const char **argv, Error *err)
 {
   int i, parsed_args, retval;
   StrArray *filenametab;
 
-  env_error_check(env);
+  error_check(err);
 
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -51,7 +51,7 @@ int gt_guessprot(int argc, const char **argv, Env *env)
   {
     strarray_add_cstr(filenametab,argv[i]);
   }
-  retval = guessifproteinsequencestream(filenametab,env);
+  retval = guessifproteinsequencestream(filenametab,err);
   strarray_delete(filenametab);
   if (retval < 0)
   {

@@ -41,7 +41,7 @@ initBWTSeqFromEncSeqIdx(struct BWTSeq *bwtSeq, struct encIdxSeq *baseSeqIdx,
                         Error *err);
 
 static BWTSeq *
-newBWTSeq(struct encIdxSeq *seqIdx, MRAEnc *alphabet, Seqpos longest, 
+newBWTSeq(struct encIdxSeq *seqIdx, MRAEnc *alphabet, Seqpos longest,
           Error *err);
 
 extern BWTSeq *
@@ -54,17 +54,17 @@ availBWTSeq(const struct bwtParam *params, Error *err)
   assert(params && err);
   error_check(err);
   /* FIXME: handle verbosity in a more sane fashion */
-  verbosity = newverboseinfo(false, err);
+  verbosity = newverboseinfo(false);
   if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB,
                         params->projectName, verbosity, err))
   {
-    freeverboseinfo(&verbosity, err);
+    freeverboseinfo(&verbosity);
     return NULL;
   }
   ++len;
   bwtSeq = availBWTSeqFromSA(params, &suffixArray, len, err);
   freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity, err);
+  freeverboseinfo(&verbosity);
   return bwtSeq;
 }
 
@@ -435,7 +435,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
     assert(bwtSeq && projectName && err);
     error_check(err);
 
-    verbosity = newverboseinfo(true, err);
+    verbosity = newverboseinfo(true);
     initExtBitsRetrieval(&extBits, err);
     if (mapsuffixarray(&suffixArray, &len,
                        SARR_SUFTAB | SARR_ESQTAB, projectName, verbosity, err))
@@ -443,7 +443,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       error_set(err, "Cannot load reference suffix array project with"
                     " demand for suffix table file and encoded sequence"
                     " for project: %s", str_get(projectName));
-      freeverboseinfo(&verbosity, err);
+      freeverboseinfo(&verbosity);
       retval = VERIFY_BWTSEQ_REFLOAD_ERROR;
       break;
     }
@@ -522,7 +522,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
   if (suffixArrayIsInitialized)
     freesuffixarray(&suffixArray);
   if (verbosity)
-    freeverboseinfo(&verbosity, err);
+    freeverboseinfo(&verbosity);
   if (extBitsAreInitialized)
     destructExtBitsRetrieval(&extBits, err);
   return retval;

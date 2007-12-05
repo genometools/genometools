@@ -18,8 +18,7 @@ int fasta2sequencekeyvalues(
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
                               const Uchar *seq,
                               const Seqpos len,
-                              Verboseinfo *verboseinfo,
-                              Error *err);
+                              Verboseinfo *verboseinfo);
 
 #ifdef __cplusplus
 }

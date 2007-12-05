@@ -39,6 +39,7 @@ void        error_delete(Error*);
 
 /* make sure that the error is not set, should be used at the beginning of
    every routine which has an Error* argument */
+
 #define error_check(e)\
         assert(!e|| !error_is_set(e))
 

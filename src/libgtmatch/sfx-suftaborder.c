@@ -94,8 +94,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                                  unsigned int prefixlength,
                                  Seqpos depth,
                                  Seqpos left,
-                                 Seqpos right,
-                                 Error *err)
+                                 Seqpos right)
 {
   const Seqpos *ptr;
   Seqpos maxlcp;
@@ -245,9 +244,9 @@ void checkentiresuftab(const Encodedsequence *encseq,
                 FormatSeqpos "=%u",
                 (unsigned long) (ptr - suftab),
                 PRINTSeqposcast(*(ptr-1)),
-                getencodedchar(encseq,*(ptr-1),readmode),
+                (unsigned int) getencodedchar(encseq,*(ptr-1),readmode),
                 PRINTSeqposcast(*(ptr)),
-                getencodedchar(encseq,*ptr,readmode));
+                (unsigned int) getencodedchar(encseq,*ptr,readmode));
         fprintf(stderr,", maxlcp = " FormatSeqpos " != " FormatSeqpos "\n",
                     PRINTSeqposcast(maxlcp),
                     PRINTSeqposcast(currentlcp));

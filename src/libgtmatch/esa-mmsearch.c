@@ -492,7 +492,7 @@ static int constructsarrandrunmmsearch(
   }
   if (sfi != NULL)
   {
-    freeSfxiterator(&sfi,err);
+    freeSfxiterator(&sfi);
   }
   return haserr ? -1 : 0;
 }
@@ -522,8 +522,7 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                                    NULL,
                                    0,
                                    getmapsizeAlphabet(alpha),
-                                   verboseinfo,
-                                   err);
+                                   verboseinfo);
   numofchars = getnumofcharsAlphabet(alpha);
   if (constructsarrandrunmmsearch(samplespecialcharinfo.specialcharacters,
                                   samplespecialcharinfo.specialranges,

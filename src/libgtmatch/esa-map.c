@@ -77,8 +77,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                  &suffixarray->specialcharinfo.lengthofspecialsuffix,NULL);
   SETREADINTKEYS("numofsequences",&numofsequences,NULL);
   SETREADINTKEYS("numofdbsequences",&suffixarray->numofdbsequences,NULL);
-  setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,
-                 0,NULL,err);
+  setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,0,NULL);
   SETREADINTKEYS("longest",&suffixarray->longest.valueseqpos,
                            &suffixarray->longest.defined);
   SETREADINTKEYS("prefixlength",&suffixarray->prefixlength,NULL);

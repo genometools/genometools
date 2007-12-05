@@ -214,8 +214,7 @@ int fasta2sequencekeyvalues(
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
                               const Uchar *seq,
                               const Seqpos len,
-                              Verboseinfo *verboseinfo,
-                              Error *err)
+                              Verboseinfo *verboseinfo)
 {
   Uchar charcode;
   Seqpos pos;
@@ -225,7 +224,6 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   unsigned long idx;
   Updatesumrangeinfo updatesumrangeinfo;
 
-  error_check(err);
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;

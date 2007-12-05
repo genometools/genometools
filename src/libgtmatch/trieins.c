@@ -631,9 +631,8 @@ void deletesmallestpath(Trienode *smallest,Trierep *trierep)
 }
 
 void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
-                       unsigned int numofindexes,Error *err)
+                       unsigned int numofindexes)
 {
-  error_check(err);
   trierep->numofindexes = numofindexes;
   trierep->allocatedTrienode = (unsigned int) MULT2(numofsuffixes + 1) + 1;
   ALLOCASSIGNSPACE(trierep->nodetable,NULL,Trienode,trierep->allocatedTrienode);
@@ -644,7 +643,7 @@ void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
                    trierep->allocatedTrienode);
 }
 
-void freetrierep(Trierep *trierep,Error *err)
+void freetrierep(Trierep *trierep)
 {
   FREESPACE(trierep->nodetable);
   FREESPACE(trierep->unusedTrienodes);

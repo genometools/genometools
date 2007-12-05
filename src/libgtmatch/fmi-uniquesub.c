@@ -415,7 +415,7 @@ int findminuniquesubstrings(int argc,const char **argv,Error *err)
       strarray_delete(uniquesubcallinfo.queryfilenames);
       return 0;
   }
-  verboseinfo = newverboseinfo(false,err);
+  verboseinfo = newverboseinfo(false);
   if (mapfmindex (&fmindex, uniquesubcallinfo.fmindexname,
                   verboseinfo,err) != 0)
   {
@@ -433,7 +433,7 @@ int findminuniquesubstrings(int argc,const char **argv,Error *err)
     }
     freefmindex(&fmindex);
   }
-  freeverboseinfo(&verboseinfo,err);
+  freeverboseinfo(&verboseinfo);
   str_delete(uniquesubcallinfo.fmindexname);
   strarray_delete(uniquesubcallinfo.queryfilenames);
   return had_err;

@@ -50,8 +50,7 @@ int testmaxpairs(/*@unused@*/ const Str *indexname,
 
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,
-                              Seqpos substringlength,
-                              Error *err)
+                              Seqpos substringlength)
 {
   Seqpos start, totallength;
 
@@ -78,7 +77,7 @@ static int storemaxmatchquery(void *info,
                               Seqpos dbstart,
                               uint64_t queryseqnum,
                               unsigned long querystart,
-                              Error *err)
+                              /*@unused@*/ Error *err)
 {
   Array *tab = (Array *) info;
   Substringmatch subm;
@@ -244,8 +243,8 @@ int testmaxpairs(const Str *indexname,
   ALLOCASSIGNSPACE(query,NULL,Uchar,substringlength);
   for (s=0; s<samples && !haserr; s++)
   {
-    dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength,err);
-    querylen = samplesubstring(query,suffixarray.encseq,substringlength,err);
+    dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength);
+    querylen = samplesubstring(query,suffixarray.encseq,substringlength);
     showverbose(verboseinfo,"run query match for dblen=" FormatSeqpos
                             ",querylen= " FormatSeqpos ", minlength=%u",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
@@ -272,7 +271,7 @@ int testmaxpairs(const Str *indexname,
     maxmatchselfinfo.querylen = (unsigned long) querylen;
     maxmatchselfinfo.markpos
       = sequence2markpositions(&maxmatchselfinfo.numofquerysequences,
-                               query,(unsigned long) querylen,err);
+                               query,(unsigned long) querylen);
     if (sarrselfsubstringmatch(dbseq,
                                dblen,
                                query,

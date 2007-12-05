@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/symboldef.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
@@ -35,8 +35,7 @@
  *          is position 1 instead of 0.
  */
 int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
-    const Sequentialsuffixarrayreader *ssar,
-    Env *env)
+    const Sequentialsuffixarrayreader *ssar)
 {
   LTRboundaries *boundaries;
   unsigned long h,
@@ -59,8 +58,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
   {
     markpos = encseq2markpositions(
         encseqSequentialsuffixarrayreader(ssar),
-        numofdbsequencesSequentialsuffixarrayreader(ssar),
-        env);
+        numofdbsequencesSequentialsuffixarrayreader(ssar));
     if (markpos == NULL)
     {
       return -1;

@@ -174,8 +174,7 @@ Encodedsequence *plain2encodedsequence(
                          Seqpos len1,
                          const Uchar *seq2,
                          unsigned long len2,
-                         /*@unused@*/ unsigned int mapsize,
-                                       Error *err)
+                         /*@unused@*/ unsigned int mapsize)
 {
   Encodedsequence *encseq;
   Uchar *seqptr;
@@ -196,8 +195,8 @@ Encodedsequence *plain2encodedsequence(
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,err);
-  ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
+  sequence2specialcharinfo(specialcharinfo,seqptr,len);
+  ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,1);
   encseq->plainseq = seqptr;
   encseq->mappedfile = false;
   encseq->hasownmemory = (seq2 == NULL) ? false : true;

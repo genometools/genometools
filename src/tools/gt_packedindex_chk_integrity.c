@@ -63,7 +63,8 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
 
   inputProject = str_new_cstr(argv[parsedArgs]);
   env_error_check(env);
-  seq = loadBlockEncIdxSeq(inputProject, EIS_FEATURE_REGION_SUMS, env);
+  seq = loadBlockEncIdxSeq(inputProject, EIS_FEATURE_REGION_SUMS, 
+                           env_error(env));
   ensure(had_err, seq);
   if (had_err)
   {
@@ -79,7 +80,8 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
         had_err,
         !(corrupt = EISVerifyIntegrity(seq, inputProject, options.skipCount,
                                        options.progressInterval, stderr,
-                                       options.checkFlags, env)));
+                                       options.checkFlags, 
+                                       env_error(env))));
       if (corrupt)
       {
         fputs("Integrity check failed for index.\n", stderr);
@@ -89,7 +91,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
     }
   }
   if (seq)
-    deleteEncIdxSeq(seq, env);
+    deleteEncIdxSeq(seq, env_error(env));
   if (inputProject)
     str_delete(inputProject);
   return had_err?-1:0;

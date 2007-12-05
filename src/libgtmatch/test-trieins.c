@@ -97,7 +97,7 @@ int test_trieins(bool onlyins,const Str *indexname,Error *err)
     trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
     trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
     characters = getcharactersAlphabet(suffixarray.alpha);
-    inittrienodetable(&trierep,totallength,(unsigned int) 1,err);
+    inittrienodetable(&trierep,totallength,1U);
     maketrie(&trierep,characters,totallength);
     if (onlyins)
     {
@@ -116,7 +116,7 @@ int test_trieins(bool onlyins,const Str *indexname,Error *err)
 #endif
       successivelydeletesmallest(&trierep,totallength,characters,err);
     }
-    freetrierep(&trierep,err);
+    freetrierep(&trierep);
   }
   freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;

@@ -30,8 +30,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
                             Codetype numofallcodes,
                             Seqpos numofsuffixestoinsert,
                             Seqpos fullspecials,
-                            Verboseinfo *verboseinfo,
-                            Error *err);
+                            Verboseinfo *verboseinfo);
 
 Codetype stpgetcurrentmincode(unsigned int part,
                               const Suftabparts *suftabparts);
@@ -52,6 +51,6 @@ Seqpos stpgetlargestwidth(const Suftabparts *suftabparts);
 
 unsigned int stpgetnumofparts(const Suftabparts *suftabparts);
 
-void freesuftabparts(Suftabparts *suftabparts,Error *err);
+void freesuftabparts(Suftabparts *suftabparts);
 
 #endif

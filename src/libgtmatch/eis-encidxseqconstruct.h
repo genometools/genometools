@@ -108,7 +108,7 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                         headerWriteFunc *extHeaderCallbacks,
                         void **headerCBData,
                         bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                        BitOffset maxVarExtBitsPerPos, void *cbState, 
+                        BitOffset maxVarExtBitsPerPos, void *cbState,
                         Error *err);
 
 /**

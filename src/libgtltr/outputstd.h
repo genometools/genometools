@@ -19,9 +19,6 @@
 #define OUTPUTSTD_H
 
 int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
-                            const Sequentialsuffixarrayreader *ssar,
-                            Env *env);
-//int printgff3format(LTRharvestoptions *lo, Suffixarray *suffixarray,
-//                    Seqpos *markpos);
+                            const Sequentialsuffixarrayreader *ssar);
 
 #endif

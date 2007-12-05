@@ -441,7 +441,7 @@ int callenummaxpairs(const Str *indexname,
   }
   if (ssar != NULL)
   {
-    freeSequentialsuffixarrayreader(&ssar,err);
+    freeSequentialsuffixarrayreader(&ssar);
   }
   return haserr ? -1 : 0;
 }

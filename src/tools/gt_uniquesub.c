@@ -21,5 +21,5 @@
 int gt_uniquesub(int argc, const char **argv, Env *env)
 {
   env_error_check(env);
-  return findminuniquesubstrings(argc, argv, env);
+  return findminuniquesubstrings(argc, argv, env_error(env));
 }

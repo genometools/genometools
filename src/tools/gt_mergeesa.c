@@ -79,15 +79,15 @@ int gt_mergeesa(int argc, const char **argv, Env *env)
     {
       printf("# input=%s\n",strarray_get(indexnametab,i));
     }
-    verboseinfo = newverboseinfo(false,env);
+    verboseinfo = newverboseinfo(false);
     if (performtheindexmerging(storeindex,
                               indexnametab,
                               verboseinfo,
-                              env) != 0)
+                              env_error(env)) != 0)
     {
       haserr = true;
     }
-    freeverboseinfo(&verboseinfo,env);
+    freeverboseinfo(&verboseinfo);
   }
   str_delete(storeindex);
   strarray_delete(indexnametab);

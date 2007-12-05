@@ -83,7 +83,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   outfileinfo->longest.valueseqpos = 0;
   if (so->outlcptab)
   {
-    outfileinfo->lvi = newLcpvalueiterator(encseq,so->readmode,err);
+    outfileinfo->lvi = newLcpvalueiterator(encseq,so->readmode);
     outfileinfo->outlcpinfo
       = newlcpoutfileinfo(so->outlcptab ? so->str_indexname : NULL,err,true);
     if (outfileinfo->outlcpinfo == NULL)
@@ -262,7 +262,7 @@ static int suffixeratorwithoutput(
   }
   if (sfi != NULL)
   {
-    freeSfxiterator(&sfi,err);
+    freeSfxiterator(&sfi);
   }
   return haserr ? -1 : 0;
 }
@@ -318,8 +318,7 @@ static int runsuffixerator(bool doesa,
 
   error_check(err);
   inittheclock(&mtime,
-               "determining sequence length and number of special symbols",
-               err);
+               "determining sequence length and number of special symbols");
   alpha = assigninputalphabet(so->isdna,
                               so->isprotein,
                               so->str_smap,
@@ -361,7 +360,7 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    deliverthetime(stdout,mtime,"computing sequence encoding",err);
+    deliverthetime(stdout,mtime,"computing sequence encoding");
     encseq = files2encodedsequence(true,
                                    so->filenametab,
                                    so->isplain,
@@ -509,7 +508,7 @@ static int runsuffixerator(bool doesa,
   fa_fclose(outfileinfo.outfpbwttab);
   if (outfileinfo.lvi != NULL)
   {
-    freeLcpvalueiterator(&outfileinfo.lvi,err);
+    freeLcpvalueiterator(&outfileinfo.lvi);
   }
   if (!haserr)
   {
@@ -542,7 +541,7 @@ static int runsuffixerator(bool doesa,
   }
   if (outfileinfo.outlcpinfo != NULL)
   {
-    freeoutlcptab(&outfileinfo.outlcpinfo,err);
+    freeoutlcptab(&outfileinfo.outlcpinfo);
   }
   FREESPACE(filelengthtab);
   if (alpha != NULL)
@@ -551,7 +550,7 @@ static int runsuffixerator(bool doesa,
   }
   freeEncodedsequence(&encseq);
   FREESPACE(characterdistribution);
-  deliverthetime(stdout,mtime,NULL,err);
+  deliverthetime(stdout,mtime,NULL);
   return haserr ? -1 : 0;
 }
 
@@ -566,23 +565,23 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
   retval = suffixeratoroptions(&so,doesa,argc,argv,err);
   if (retval == 0)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(so.beverbose,err);
+    Verboseinfo *verboseinfo = newverboseinfo(so.beverbose);
 
     showverbose(verboseinfo,"sizeof (Seqpos)=%lu",
                 (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
 #ifdef INLINEDENCSEQ
     showverbose(verboseinfo,"inlined encodeded sequence");
 #endif
-    freeverboseinfo(&verboseinfo,err);
+    freeverboseinfo(&verboseinfo);
   }
   if (retval == 0)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(so.beverbose,err);
+    Verboseinfo *verboseinfo = newverboseinfo(so.beverbose);
     if (runsuffixerator(doesa,&so,verboseinfo,err) < 0)
     {
       haserr = true;
     }
-    freeverboseinfo(&verboseinfo,err);
+    freeverboseinfo(&verboseinfo);
   } else
   {
     if (retval < 0)

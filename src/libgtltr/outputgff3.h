@@ -19,6 +19,6 @@
 #define OUTPUTGFF3_H
 
 void printgff3format(LTRharvestoptions*, Sequentialsuffixarrayreader*,
-                     const Seqpos *markpos, Env*);
+                     const Seqpos *markpos);
 
 #endif

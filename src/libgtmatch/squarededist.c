@@ -3,8 +3,7 @@
 #include "spacedef.h"
 
 static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,
-                                        const Uchar *v, unsigned long n,
-                                        Error *err)
+                                        const Uchar *v, unsigned long n)
 {
   unsigned long val, we, nw, *ecol, *ecolptr;
   const Uchar *uptr, *vptr;
@@ -46,12 +45,11 @@ static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,
 }
 
 unsigned long squarededistunit (const Uchar *u, unsigned long m,
-                                const Uchar *v, unsigned long n,
-                                Error *err)
+                                const Uchar *v, unsigned long n)
 {
   if (m < n)
   {
-    return squarededistunit2(u,m,v,n,err);
+    return squarededistunit2(u,m,v,n);
   }
-  return squarededistunit2(v,n,u,m,err);
+  return squarededistunit2(v,n,u,m);
 }

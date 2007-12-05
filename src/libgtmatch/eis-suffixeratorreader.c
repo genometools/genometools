@@ -197,7 +197,7 @@ extern void
 deleteSfxInterface(sfxInterface *iface, Error *err)
 {
   ma_free(iface->prevGeneratedSufTabSegments);
-  freeSfxiterator(&iface->sfi, err);
+  freeSfxiterator(&iface->sfi);
   deleteSeqStats(iface->stats, err);
   ma_free(iface->readers);
   ma_free(iface);

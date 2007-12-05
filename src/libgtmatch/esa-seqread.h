@@ -71,8 +71,7 @@ typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
                                         const Encodedsequence *encseq,
-                                        Readmode readmode,
-                                        Error *err);
+                                        Readmode readmode);
 
 /* The following can only be used for this case */
 
@@ -98,8 +97,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                         Sequentialaccesstype seqactype,
                                         Error *err);
 
-void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
-                                     Error *err);
+void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar);
 
 const Encodedsequence *encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr);

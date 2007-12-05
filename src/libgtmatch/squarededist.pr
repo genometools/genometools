@@ -2,8 +2,7 @@
 extern "C" {
 #endif
 unsigned long squarededistunit (const Uchar *u, unsigned long m,
-                                const Uchar *v, unsigned long n,
-                                Error *err);
+                                const Uchar *v, unsigned long n);
 
 #ifdef __cplusplus
 }

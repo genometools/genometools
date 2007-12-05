@@ -71,8 +71,7 @@ static int constructsarrandrunmaxpairs(
     bool firstpage = true;
 
     ssar = newSequentialsuffixarrayreaderfromRAM(ssi->encseq,
-                                                 readmode,
-                                                 err);
+                                                 readmode);
     while (true)
     {
       suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
@@ -101,12 +100,12 @@ static int constructsarrandrunmaxpairs(
     }
     if (ssar != NULL)
     {
-      freeSequentialsuffixarrayreader(&ssar,err);
+      freeSequentialsuffixarrayreader(&ssar);
     }
   }
   if (sfi != NULL)
   {
-    freeSfxiterator(&sfi,err);
+    freeSfxiterator(&sfi);
   }
   return haserr ? -1 : 0;
 }
@@ -135,8 +134,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                                      query,
                                      querylen,
                                      getmapsizeAlphabet(alpha),
-                                     verboseinfo,
-                                     err);
+                                     verboseinfo);
   ssi.minlength = minlength;
   ssi.processmaxmatch = processmaxmatch;
   ssi.processmaxmatchinfo = processmaxmatchinfo;

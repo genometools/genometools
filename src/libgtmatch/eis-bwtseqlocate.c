@@ -115,7 +115,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
                        GetOrigSeqSym readOrigSeq, void *origSeqState,
                        SeqposReadFunc readSeqpos, void *spReadState,
                        const MRAEnc *alphabet, int *specialRanges,
-                       Seqpos srcLen, const struct bwtParam *params, 
+                       Seqpos srcLen, const struct bwtParam *params,
                        Error *err)
 {
   Seqpos lastPos;
@@ -275,7 +275,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
 
 extern EISeq *
 createBWTSeqGeneric(const struct bwtParam *params,
-                    indexCreateFunc createIndex, void *baseSrc, 
+                    indexCreateFunc createIndex, void *baseSrc,
                     Seqpos totalLen,
                     const MRAEnc *alphabet, int *specialRanges,
                     GetOrigSeqSym readOrigSeq, void *origSeqState,

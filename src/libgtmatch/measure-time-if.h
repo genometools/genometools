@@ -18,13 +18,11 @@
 #ifndef MEASURE_TIME_IF_H
 #define MEASURE_TIME_IF_H
 #include <stdio.h>
-#include "libgtcore/error.h"
 
 typedef struct Measuretime Measuretime;
 
-void inittheclock(Measuretime **mtime,const char *event,Error *err);
+void inittheclock(Measuretime **mtime,const char *event);
 
-void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent,
-                    Error *err);
+void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent);
 
 #endif

@@ -100,12 +100,10 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
                             Codetype numofallcodes,
                             Seqpos numofsuffixestoinsert,
                             Seqpos fullspecials,
-                            Verboseinfo *verboseinfo,
-                            Error *err)
+                            Verboseinfo *verboseinfo)
 {
   Suftabparts *suftabparts;
 
-  error_check(err);
   ALLOCASSIGNSPACE(suftabparts,NULL,Suftabparts,(size_t) 1);
   assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
@@ -231,7 +229,7 @@ unsigned int stpgetnumofparts(const Suftabparts *suftabparts)
   return suftabparts->numofparts;
 }
 
-void freesuftabparts(Suftabparts *suftabparts,Error *err)
+void freesuftabparts(Suftabparts *suftabparts)
 {
   if (suftabparts != NULL)
   {

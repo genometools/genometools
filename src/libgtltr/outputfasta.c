@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/alphadef.h"
@@ -66,8 +66,7 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                          Readmode readmode,
                          Seqpos start,
                          unsigned long wlen,
-                         unsigned long width,
-                         Env *env)
+                         unsigned long width)
 {
   Seqpos offset;
 
@@ -104,19 +103,18 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                       readmode,
                       start,
                       wlen,
-                      width,
-                      env);
+                      width);
 }
 
 static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
-                    Seqpos len, /*@unused@*/Str *str_indexfilename, Env *env)
+                    Seqpos len, /*@unused@*/Str *str_indexfilename, Error *err)
 {
   unsigned long i, desclen;
   const char *desptr;
   char *destab_seqnum;
   unsigned long seqnum =
                   getrecordnumSeqpos(info->markpos, info->numofdbsequences,
-                                     info->totallength, startpos, env);
+                                     info->totallength, startpos, err);
 
   /* if there are sequence descriptions */
   desptr = retriesequencedescription(&desclen,
@@ -135,8 +133,7 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                       info->alpha, info->encseq,
                       Forwardmode, startpos,
                       (unsigned long)len,
-                      60UL,
-                      env);
+                      60UL);
   FREESPACE(destab_seqnum);
   return 0;
 }
@@ -148,8 +145,8 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
 static int overallpredictionsequences(const LTRharvestoptions *lo,
     bool innerregion,
     void *applyinfo,
-    int(*apply)(Fastaoutinfo *,Seqpos, Seqpos, Str*, Env *env),
-    Env *env)
+    int(*apply)(Fastaoutinfo *,Seqpos, Seqpos, Str*, Error *err),
+    Error *err)
 {
   unsigned long i;
   Seqpos start,
@@ -173,7 +170,7 @@ static int overallpredictionsequences(const LTRharvestoptions *lo,
       }
       if (apply(applyinfo,
                innerregion ? boundaries->leftLTR_3 + 1: boundaries->leftLTR_5,
-               end - start + 1, lo->str_indexname, env) != 0)
+               end - start + 1, lo->str_indexname, err) != 0)
       {
         return -1;
       }
@@ -192,7 +189,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
                                  unsigned int linewidth,
                                  Sequentialsuffixarrayreader *ssar,
                                  bool showseqnum,
-                                 Env *env)
+                                 Error *err)
 {
   Fastaoutinfo fastaoutinfo;
   FILE *formatout = NULL;
@@ -223,13 +220,12 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   destab = destabSequentialsuffixarrayreader(ssar);
   descendtab = calcdescendpositions(destab,
                                     destablength,
-                                    fastaoutinfo.numofdbsequences,
-                                    env);
+                                    fastaoutinfo.numofdbsequences);
   fastaoutinfo.destab = destab;
   fastaoutinfo.descendtab = descendtab;
 
   had_err = overallpredictionsequences(lo, innerregion, &fastaoutinfo,
-                                       showpredictionfastasequence, env);
+                                       showpredictionfastasequence, err);
 
   ma_free(descendtab);
   fa_xfclose(formatout);

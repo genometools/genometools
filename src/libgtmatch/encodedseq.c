@@ -1621,13 +1621,11 @@ static Encodedsequence *determineencseqkeyvalues(
                                      Seqpos totallength,
                                      Seqpos specialranges,
                                      unsigned int mapsize,
-                                     Verboseinfo *verboseinfo,
-                                     Error *err)
+                                     Verboseinfo *verboseinfo)
 {
   double spaceinbitsperchar;
   Encodedsequence *encseq;
 
-  error_check(err);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->sat = sat;
   encseq->mapsize = mapsize;
@@ -1851,8 +1849,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                       totallength,
                                       specialranges,
                                       getmapsizeAlphabet(alphabet),
-                                      verboseinfo,
-                                      err);
+                                      verboseinfo);
     ALLASSIGNAPPENDFUNC;
     showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
     encseq->mappedptr = NULL;
@@ -1915,8 +1912,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                       totallength,
                                       specialranges,
                                       mapsize,
-                                      verboseinfo,
-                                      err);
+                                      verboseinfo);
     ALLASSIGNAPPENDFUNC;
     showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
     if (fillencseqmapspecstartptr(encseq,indexname,verboseinfo,err) != 0)
@@ -1941,15 +1937,13 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        const Uchar *seq2,
                                        unsigned long len2,
                                        unsigned int mapsize,
-                                       Verboseinfo *verboseinfo,
-                                       Error *err)
+                                       Verboseinfo *verboseinfo)
 {
   Encodedsequence *encseq;
   Uchar *seqptr;
   Seqpos len;
   const Positionaccesstype sat = Viadirectaccess;
 
-  error_check(err);
   assert(seq1 != NULL);
   assert(len1 > 0);
   if (seq2 == NULL)
@@ -1964,13 +1958,12 @@ Encodedsequence *plain2encodedsequence(bool withrange,
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,verboseinfo,err);
+  sequence2specialcharinfo(specialcharinfo,seqptr,len,verboseinfo);
   encseq = determineencseqkeyvalues(sat,
                                     len,
                                     specialcharinfo->specialranges,
                                     mapsize,
-                                    verboseinfo,
-                                    err);
+                                    verboseinfo);
   encseq->plainseq = seqptr;
   encseq->plainseqptr = (seq2 == NULL) ? true : false;
   ALLASSIGNAPPENDFUNC;

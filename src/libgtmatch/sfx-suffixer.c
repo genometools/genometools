@@ -131,8 +131,7 @@ static int initbasepower(unsigned int **basepower,
 static void updatekmercount(void *processinfo,
                             Codetype code,
                             Seqpos position,
-                            const Firstspecialpos *firstspecial,
-                            Error *err)
+                            const Firstspecialpos *firstspecial)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
@@ -140,8 +139,6 @@ static void updatekmercount(void *processinfo,
   {
     if (sfi->storespecials)
     {
-      error_check(err);
-
       if (firstspecial->specialpos > 0)
       {
         Codeatposition cp;
@@ -172,8 +169,7 @@ static void updatekmercount(void *processinfo,
 static void insertwithoutspecial(void *processinfo,
                                  Codetype code,
                                  Seqpos position,
-                                 const Firstspecialpos *firstspecial,
-                                 /*@unused@*/ Error *err)
+                                 const Firstspecialpos *firstspecial)
 {
   if (!firstspecial->defined)
   {
@@ -284,7 +280,7 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
   }
 }
 
-void freeSfxiterator(Sfxiterator **sfi,Error *err)
+void freeSfxiterator(Sfxiterator **sfi)
 {
   Codetype specialcode;
 
@@ -303,9 +299,9 @@ void freeSfxiterator(Sfxiterator **sfi,Error *err)
   FREESPACE((*sfi)->suftab);
   if ((*sfi)->lcpsubtab != NULL)
   {
-    freelcpsubtab(&(*sfi)->lcpsubtab,err);
+    freelcpsubtab(&(*sfi)->lcpsubtab);
   }
-  freesuftabparts((*sfi)->suftabparts,err);
+  freesuftabparts((*sfi)->suftabparts);
   FREESPACE(*sfi);
 }
 
@@ -352,21 +348,26 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->prefixlength = prefixlength;
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
-    sfi->lcpsubtab = newlcpsubtab(prefixlength,numofchars,err);
+    sfi->lcpsubtab = newlcpsubtab(prefixlength,numofchars);
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
   }
-  if (!haserr && initbasepower(&sfi->basepower,
-                               &sfi->filltable,
-                               numofchars,
-                               prefixlength,
-                               err) != 0)
+  if (!haserr)
   {
-    haserr = true;
+    assert(sfi != NULL);
+    if (initbasepower(&sfi->basepower,
+                      &sfi->filltable,
+                      numofchars,
+                      prefixlength,
+                      err) != 0)
+    {
+      haserr = true;
+    }
   }
   if (!haserr)
   {
+    assert(sfi != NULL);
     assert(sfi->basepower != NULL);
     numofallcodes = sfi->basepower[prefixlength];
     if (numofallcodes-1 > MAXCODEVALUE)
@@ -381,6 +382,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   }
   if (!haserr)
   {
+    assert(sfi != NULL);
     assert(sfi->basepower != NULL);
     numofspecialcodes = sfi->basepower[prefixlength-1];
     ALLOCASSIGNSPACE(sfi->leftborder,NULL,Seqpos,numofallcodes+1);
@@ -393,7 +395,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->storespecials = true;
     if (mtime != NULL)
     {
-      deliverthetime(stdout,mtime,"counting prefix distribution",err);
+      deliverthetime(stdout,mtime,"counting prefix distribution");
     }
     getencseqkmers(encseq,
                    readmode,
@@ -419,8 +421,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                                       numofallcodes,
                                       sfi->totallength - specialcharacters,
                                       specialcharacters + 1,
-                                      verboseinfo,
-                                      err);
+                                      verboseinfo);
     assert(sfi->suftabparts != NULL);
     ALLOCASSIGNSPACE(sfi->suftab,NULL,Seqpos,
                      stpgetlargestwidth(sfi->suftabparts));
@@ -444,7 +445,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   {
     if (sfi != NULL)
     {
-      freeSfxiterator(&sfi,err);
+      freeSfxiterator(&sfi);
     }
     return NULL;
   }
@@ -463,12 +464,12 @@ static void preparethispart(Sfxiterator *sfi,
                    stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
   derivespecialcodes(NULL, /* not needed her */
                      sfi,
-                     (stpgetnumofparts(sfi->suftabparts) == (unsigned int) 1)
+                     (stpgetnumofparts(sfi->suftabparts) == 1U)
                        ? true : false,
                      err);
   if (mtime != NULL)
   {
-    deliverthetime(stdout,mtime,"inserting suffixes into buckets",err);
+    deliverthetime(stdout,mtime,"inserting suffixes into buckets");
   }
   getencseqkmers(sfi->encseq,
                  sfi->readmode,
@@ -479,7 +480,7 @@ static void preparethispart(Sfxiterator *sfi,
                  err);
   if (mtime != NULL)
   {
-    deliverthetime(stdout,mtime,"sorting the buckets",err);
+    deliverthetime(stdout,mtime,"sorting the buckets");
   }
   totalwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
   sortallbuckets(sfi->suftabptr,
@@ -492,8 +493,7 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->currentmincode,
                  sfi->currentmaxcode,
                  totalwidth,
-                 sfi->lcpsubtab,
-                 err);
+                 sfi->lcpsubtab);
   assert(totalwidth > 0);
   sfi->part++;
 }

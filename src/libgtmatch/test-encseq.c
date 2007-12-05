@@ -232,14 +232,13 @@ static int compareSequencerange(const void *a,const void *b)
   return 0;
 }
 
-int checkspecialrangesfast(const Encodedsequence *encseq,Error *err)
+int checkspecialrangesfast(const Encodedsequence *encseq)
 {
   Array *rangesforward, *rangesbackward;
   bool haserr = false;
   Specialrangeiterator *sri;
   Sequencerange range;
 
-  error_check(err);
   if (!hasspecialranges(encseq))
   {
     return 0;

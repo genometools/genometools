@@ -282,8 +282,7 @@ static void firstfrontforward(FrontResource *gl,Frontspec *fspec)
 unsigned long greedyunitedist(const Uchar *useq,
                               unsigned long ulenvalue,
                               const Uchar *vseq,
-                              unsigned long vlenvalue,
-                              Error *err)
+                              unsigned long vlenvalue)
 {
   unsigned long currentallocated, realdistance;
   FrontResource gl;

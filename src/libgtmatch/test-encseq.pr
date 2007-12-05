@@ -8,7 +8,7 @@ int testencodedsequence(const StrArray *filenametab,
                         unsigned long trials,
                         Error *err);
 
-int checkspecialrangesfast(const Encodedsequence *encseq,Error *err);
+int checkspecialrangesfast(const Encodedsequence *encseq);
 
 #ifdef __cplusplus
 }

@@ -18,18 +18,15 @@
 #ifndef TURNWHEELS_H
 #define TURNWHEELS_H
 
-#include "libgtcore/error.h"
-
 typedef struct Turningwheel Turningwheel;
 
 Turningwheel *newTurningwheel(unsigned int numofwheels,
-                              unsigned int asize,
-                              Error *err);
+                              unsigned int asize);
 
 bool nextTurningwheel(Turningwheel *tw);
 
 unsigned int minchangedTurningwheel(Turningwheel *tw);
 
-void freeTurningwheel(Turningwheel **tw,Error *err);
+void freeTurningwheel(Turningwheel **tw);
 
 #endif

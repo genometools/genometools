@@ -30,6 +30,6 @@ int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
 Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Error *err,bool origin);
 Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
-void freeoutlcptab(Outlcpinfo **outlcpinfo,Error *err);
+void freeoutlcptab(Outlcpinfo **outlcpinfo);
 
 #endif

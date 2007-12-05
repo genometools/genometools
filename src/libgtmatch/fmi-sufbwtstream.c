@@ -35,9 +35,8 @@
 
  DECLAREREADFUNCTION(Seqpos);
 
-static void allocatefmtables(Fmindex *fm,bool storeindexpos,Error *err)
+static void allocatefmtables(Fmindex *fm,bool storeindexpos)
 {
-  error_check(err);
   ALLOCASSIGNSPACE (fm->tfreq, NULL, Seqpos,TFREQSIZE(fm->mapsize));
   ALLOCASSIGNSPACE (fm->superbfreq, NULL, Seqpos ,
                     SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks));
@@ -282,8 +281,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
       sequenceoffsettable = encseqtable2seqoffsets(&totallength,
                                                    &specialcharinfo,
                                                    emmesa.suffixarraytable,
-                                                   numofindexes,
-                                                   err);
+                                                   numofindexes);
       if (sequenceoffsettable == NULL)
       {
         haserr = true;
@@ -323,7 +321,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                             log2bsize,
                             log2markdist,
                             mapsize);
-    allocatefmtables(fmindex,storeindexpos,err);
+    allocatefmtables(fmindex,storeindexpos);
     set0frequencies(fmindex);
     if (storeindexpos)
     {
@@ -468,7 +466,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
         fmindex->longestsuffixpos = longest.valueseqpos;
       }
       fa_xfclose(outbwt);
-      wraptEmissionmergedesa(&emmesa,err);
+      wraptEmissionmergedesa(&emmesa);
     }
   }
   FREESPACE(sequenceoffsettable);

@@ -18,7 +18,7 @@
 #ifndef LTRHARVEST_RUN_H
 #define LTRHARVEST_RUN_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
-int parseargsandcallltrharvest(int argc,const char *argv[],Env *env);
+int parseargsandcallltrharvest(int argc,const char *argv[],Error *err);
 #endif

@@ -155,8 +155,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        const Uchar *seq2,
                                        unsigned long len2,
                                        unsigned int mapsize,
-                                       Verboseinfo *verboseinfo,
-                                       Error *err);
+                                       Verboseinfo *verboseinfo);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
                                               bool moveforward);

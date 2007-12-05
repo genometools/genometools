@@ -171,7 +171,7 @@ static OPrval parse_options(int *parsed_args,
   return oprval;
 }
 
-static void freesimpleoption(Cmppairwiseopt *cmppairwise,Env *env)
+static void freesimpleoption(Cmppairwiseopt *cmppairwise)
 {
   strarray_delete(cmppairwise->strings);
   strarray_delete(cmppairwise->files);
@@ -185,8 +185,7 @@ static void freesimpleoption(Cmppairwiseopt *cmppairwise,Env *env)
 
 static unsigned long applycheckfunctiontosimpleoptions(
                                   Checkcmppairfuntype checkfunction,
-                                  const Cmppairwiseopt *opt,
-                                  Env *env)
+                                  const Cmppairwiseopt *opt)
 {
   if (strarray_size(opt->strings) > 0)
   {
@@ -197,8 +196,7 @@ static unsigned long applycheckfunctiontosimpleoptions(
                     (const Uchar *) strarray_get(opt->strings,0),
                     (unsigned long) strlen(strarray_get(opt->strings,0)),
                     (const Uchar *) strarray_get(opt->strings,1UL),
-                    (unsigned long) strlen(strarray_get(opt->strings,1UL)),
-                    env);
+                    (unsigned long) strlen(strarray_get(opt->strings,1UL)));
       if (!forward)
       {
         break;
@@ -211,20 +209,18 @@ static unsigned long applycheckfunctiontosimpleoptions(
   {
     runcheckfunctionontwofiles(checkfunction,
                                strarray_get(opt->files,0),
-                               strarray_get(opt->files,1UL),
-                               env);
+                               strarray_get(opt->files,1UL));
     return 2UL;
   }
   if (opt->charlistlen != NULL)
   {
     return runcheckfunctiononalphalen(checkfunction,
                                       str_get(opt->charlistlen->charlist),
-                                      opt->charlistlen->len,
-                                      env);
+                                      opt->charlistlen->len);
   }
   if (str_length(opt->text) > 0)
   {
-    return runcheckfunctionontext(checkfunction,str_get(opt->text),env);
+    return runcheckfunctionontext(checkfunction,str_get(opt->text));
   }
   assert(false);
   return 0;
@@ -246,10 +242,10 @@ int gt_paircmp(int argc, const char **argv, Env *env)
     assert(parsed_args == argc);
     showsimpleoptions(&cmppairwise);
     testcases = applycheckfunctiontosimpleoptions(checkgreedyunitedist,
-                                                  &cmppairwise,env);
+                                                  &cmppairwise);
     printf("# number of testcases: %lu\n",testcases);
   }
-  freesimpleoption(&cmppairwise,env);
+  freesimpleoption(&cmppairwise);
   if (oprval == OPTIONPARSER_REQUESTS_EXIT)
   {
     return 0;

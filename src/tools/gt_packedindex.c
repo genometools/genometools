@@ -113,6 +113,6 @@ register_packedindextools(Toolbox *packedindex_toolbox, Env *env)
 static int
 gt_packedindex_make(int argc, const char *argv[], Env *env)
 {
-  return parseargsandcallsuffixerator(false, argc, argv, env);
+  return parseargsandcallsuffixerator(false, argc, argv, env_error(env));
 }
 

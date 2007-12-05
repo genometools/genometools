@@ -96,8 +96,7 @@ static void outkmeroccurrence(void *processinfo,
                               Codetype code,
                               /*@unused@*/ Seqpos position,
                               /*@unused@*/ const Firstspecialpos
-                                                 *firstspecialposition,
-                              Error *err)
+                                                 *firstspecialposition)
 {
   ArrayCodetype *codelist = (ArrayCodetype *) processinfo;
 
@@ -109,13 +108,11 @@ static void collectkmercode(ArrayCodetype *codelist,
                             Readmode readmode,
                             unsigned int kmersize,
                             unsigned int numofchars,
-                            Seqpos stringtotallength,
-                            Error *err)
+                            Seqpos stringtotallength)
 {
   Seqpos offset;
   Codetype code;
 
-  error_check(err);
   for (offset=0; offset<=stringtotallength; offset++)
   {
     code = qgram2codefillspecial(numofchars,
@@ -195,8 +192,7 @@ static int verifycodelists(const Encodedsequence *encseq,
                   readmode,
                   kmersize,
                   numofchars,
-                  stringtotallength,
-                  err);
+                  stringtotallength);
   if (comparecodelists(codeliststream,
                        &codeliststring,
                        kmersize,

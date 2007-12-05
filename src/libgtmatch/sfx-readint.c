@@ -51,12 +51,10 @@ void setreadintkeys(Array *riktab,
                     const char *keystring,
                     void *valueptr,
                     size_t sizeval,
-                    bool *readflag,
-                    Error *err)
+                    bool *readflag)
 {
   Readintkeys rikvalue;
 
-  error_check(err);
   rikvalue.keystring = keystring;
   rikvalue.readflag = readflag;
   assert(sizeval == 0 || sizeval == (size_t) 4 || sizeval == (size_t) 8);

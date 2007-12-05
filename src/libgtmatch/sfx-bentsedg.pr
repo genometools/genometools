@@ -1,10 +1,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void freelcpsubtab(Lcpsubtab **lcpsubtab,Error *err);
+void freelcpsubtab(Lcpsubtab **lcpsubtab);
 
-Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars,
-                        Error *err);
+Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars);
 
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
@@ -16,8 +15,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos totalwidth,
-                    Lcpsubtab *lcpsubtab,
-                    Error *err);
+                    Lcpsubtab *lcpsubtab);
 
 #ifdef __cplusplus
 }

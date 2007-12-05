@@ -61,7 +61,7 @@ const char *EISIntegrityCheckResultStrings[] =
     EISPrintDiagsForPos(seqIdx, pos, stderr, hint, err);                \
     deleteEISHint(seqIdx, hint, err);                                   \
     freesuffixarray(&suffixArray);                                 \
-    freeverboseinfo(&verbosity, err);                                   \
+    freeverboseinfo(&verbosity);                                   \
     return retval;                                                      \
   } while (0)
 
@@ -86,7 +86,7 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
   Verboseinfo *verbosity;
   const MRAEnc *alphabet;
   int symRead;
-  verbosity = newverboseinfo(true, err);
+  verbosity = newverboseinfo(true);
   /* two part process: enumerate all positions of original sequence
    * and verify that the query functions return correct values */
   if (streamsuffixarray(&suffixArray, &seqLastPos,
@@ -94,7 +94,7 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
   {
     error_set(err, "Cannot load suffix array project with"
                   " demand for BWT file\n");
-    freeverboseinfo(&verbosity, err);
+    freeverboseinfo(&verbosity);
     return EIS_INTEGRITY_CHECK_SA_LOAD_ERROR;
   }
   memset(rankTable, 0, sizeof (rankTable));
@@ -110,7 +110,7 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
       showverbose(verbosity, "Invalid skip request: %lld,"
                   " too large for sequence length: "FormatSeqpos,
                   (long long)skip, len);
-      freeverboseinfo(&verbosity, err);
+      freeverboseinfo(&verbosity);
       return -1;
     }
     fseeko(bwtFP, skip, SEEK_SET);
@@ -155,7 +155,7 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
     verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
   deleteEISHint(seqIdx, hint, err);
   freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity, err);
+  freeverboseinfo(&verbosity);
   return EIS_INTEGRITY_CHECK_NO_ERROR;
 }
 

@@ -284,7 +284,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
       emmesa->trierep.encseqreadinfo[idx].readmode
         = emmesa->suffixarraytable[idx].readmode;
     }
-    inittrienodetable(&emmesa->trierep,(Seqpos) numofindexes,numofindexes,err);
+    inittrienodetable(&emmesa->trierep,(Seqpos) numofindexes,numofindexes);
     if (insertfirstsuffixes(&emmesa->trierep,
                            emmesa->nextpostable,
                            emmesa->suffixarraytable,
@@ -303,7 +303,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
   return haserr ? -1 : 0;
 }
 
-void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Error *err)
+void wraptEmissionmergedesa(Emissionmergedesa *emmesa)
 {
   unsigned int idx;
 
@@ -315,7 +315,7 @@ void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Error *err)
   FREESPACE(emmesa->trierep.encseqreadinfo);
   if (emmesa->numofindexes > (unsigned int) 1)
   {
-    freetrierep(&emmesa->trierep,err);
+    freetrierep(&emmesa->trierep);
   }
   FREESPACE(emmesa->nextpostable);
 }

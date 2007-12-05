@@ -23,7 +23,7 @@
 #include "verbose-def.h"
 
 #define SETREADINTKEYS(VALNAME,VAL,FORCEREAD)\
-        setreadintkeys(riktab,VALNAME,VAL,sizeof (*(VAL)),FORCEREAD,err)
+        setreadintkeys(riktab,VALNAME,VAL,sizeof (*(VAL)),FORCEREAD)
 
 typedef struct Readintkeys Readintkeys;
 
@@ -33,8 +33,7 @@ void setreadintkeys(Array *riktab,
                     const char *keystring,
                     void *valueptr,
                     size_t sizeval,
-                    bool *readflag,
-                    Error *err);
+                    bool *readflag);
 
 int allkeysdefined(const Str *indexname,const char *suffix,
                    const Array *riktab,Verboseinfo *verboseinfo,

@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-bool fmindexexists(const Str *indexname,Error *err);
+bool fmindexexists(const Str *indexname);
 
 void freefmindex(Fmindex *fmindex);
 

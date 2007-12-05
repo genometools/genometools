@@ -54,8 +54,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
   return ssar;
 }
 
-void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
-                                     Error *err)
+void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
 {
   if ((*ssar)->suffixarray != NULL)
   {
@@ -145,13 +144,12 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
                                         const Encodedsequence *encseq,
-                                        Readmode readmode,
-                                        Error *err)
+                                        Readmode readmode)
 {
   Sequentialsuffixarrayreader *ssar;
 
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
-  ssar->lvi = newLcpvalueiterator(encseq,readmode,err);
+  ssar->lvi = newLcpvalueiterator(encseq,readmode);
   ssar->suffixarray = NULL;
   ssar->nextlcptabindex = (Seqpos) 1; /* not required here */
   ssar->largelcpindex = 0; /* not required here */
@@ -179,8 +177,7 @@ void updateSequentialsuffixarrayreaderfromRAM(
   }
 }
 
-void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
-                                     Error *err)
+void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
 {
   if ((*ssar)->suffixarray != NULL)
   {
@@ -189,7 +186,7 @@ void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
   }
   if ((*ssar)->lvi != NULL)
   {
-    freeLcpvalueiterator(&(*ssar)->lvi,err);
+    freeLcpvalueiterator(&(*ssar)->lvi);
   }
   FREESPACE(*ssar);
 }

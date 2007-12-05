@@ -32,8 +32,7 @@
 };
 
 Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
-                                      Readmode readmode,
-                                      Error *err)
+                                      Readmode readmode)
 {
   Lcpvalueiterator *lvi;
 
@@ -96,7 +95,7 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
   return lcpvalue;
 }
 
-void freeLcpvalueiterator(Lcpvalueiterator **lvi,Error *err)
+void freeLcpvalueiterator(Lcpvalueiterator **lvi)
 {
   freeEncodedsequencescanstate(&(*lvi)->esr1);
   freeEncodedsequencescanstate(&(*lvi)->esr2);
