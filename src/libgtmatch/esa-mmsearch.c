@@ -33,6 +33,13 @@
 #include "esa-map.pr"
 #include "echoseq.pr"
 
+typedef struct
+{
+  Seqpos offset,
+         left,
+         right;
+} Lcpinterval;
+
 #define COMPARE(OFFSET,LCPLEN)\
         sidx = (OFFSET) + (LCPLEN);\
         if (sidx < totallength)\
@@ -65,13 +72,6 @@
             break;\
           }\
         }
-
-typedef struct
-{
-  Seqpos offset,
-         left,
-         right;
-} Lcpinterval;
 
 static bool mmsearch(const Encodedsequence *dbencseq,
                      Encodedsequencescanstate *esr,

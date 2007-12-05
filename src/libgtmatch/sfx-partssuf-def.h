@@ -41,14 +41,14 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
 Codetype stpgetcurrentmincode(unsigned int part,
                               const Suftabparts *suftabparts);
 
-uint64_t stpgetcurrentsuftaboffset(unsigned int part,
-                                   const Suftabparts *suftabparts);
+Seqpos stpgetcurrentsuftaboffset(unsigned int part,
+                                 const Suftabparts *suftabparts);
 
 Codetype stpgetcurrentmaxcode(unsigned int part,
                               const Suftabparts *suftabparts);
 
-uint64_t stpgetcurrentsumofwdith(unsigned int part,
-                                 const Suftabparts *suftabparts);
+Seqpos stpgetcurrentsumofwdith(unsigned int part,
+                               const Suftabparts *suftabparts);
 
 Seqpos stpgetcurrentwidthofpart(unsigned int part,
                                 const Suftabparts *suftabparts);

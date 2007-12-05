@@ -27,11 +27,14 @@ TMPFILE=`mktemp /tmp/skproto-all.XXXXXX` || exit 1
 cat << END_OF_TEXT > ${TMPFILE}
 alphabet.c
 eis-blockcomp.c
+eis-blockenc_params.c
+eis-bwtconstruct_params.c
 eis-bwtseq.c
 eis-bwtseqcreate.c
 eis-encidxseq.c
 eis-seqblocktranslate.c
 eis-seqranges.c
+eis-suffixarray-interface.c
 eis-suffixeratorreader.c
 encodedseq.c
 enum-patt.c
@@ -44,8 +47,17 @@ sfx-partssuf.c
 sfx-readint.c
 sfx-suffixer.c
 test-pairwise.c
+turnwheels.c
 verbose.c
 END_OF_TEXT
+
+SKPROTO=./bin/skproto
+
+if test ! -f ${SKPROTO}
+then
+  echo "$0: ${SKPROTO} does not exist"
+  exit 1
+fi
 
 for filename in `ls ${localpath}/*.c | grep -v -f ${TMPFILE}`
 do
@@ -55,7 +67,7 @@ do
      test ${filename} -nt ${prfile}
   then
     echo "create ${prfile}"
-    bin/skproto ${filename} > ${prfile}
+    ${SKPROTO} ${filename} > ${prfile}
   fi
 done
 

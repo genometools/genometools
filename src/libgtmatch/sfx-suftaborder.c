@@ -22,6 +22,7 @@
 #include "libgtcore/minmax.h"
 #include "intbits-tab.h"
 #include "encseq-def.h"
+#include "esa-seqread.h"
 
 #include "sfx-cmpsuf.pr"
 
@@ -160,6 +161,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
                        Readmode readmode,
                        const Uchar *characters,
                        const Seqpos *suftab,
+                       Sequentialsuffixarrayreader *ssar,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
                        Seqpos depth,
@@ -167,10 +169,12 @@ void checkentiresuftab(const Encodedsequence *encseq,
 {
   const Seqpos *ptr;
   Bitstring *startposoccurs;
-  Seqpos maxlcp, countbitsset = 0, totallength = getencseqtotallength(encseq);
+  Seqpos maxlcp, countbitsset = 0, currentlcp = 0,
+         totallength = getencseqtotallength(encseq);
   int cmp;
   Encodedsequencescanstate *esr1, *esr2;
   bool haserr = false;
+  int retval;
 
   printf("check entire suftab\n");
   env_error_check(env);
@@ -196,7 +200,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   FREESPACE(startposoccurs);
   esr1 = newEncodedsequencescanstate(env);
   esr2 = newEncodedsequencescanstate(env);
-  for (ptr = suftab + 1; ptr <= suftab + totallength; ptr++)
+  for (ptr = suftab + 1; !haserr && ptr <= suftab + totallength; ptr++)
   {
     cmp = comparetwosuffixes(encseq,
                              readmode,
@@ -222,6 +226,33 @@ void checkentiresuftab(const Encodedsequence *encseq,
                             maxlcp);
       haserr = true;
       break;
+    }
+    if (ssar != NULL)
+    {
+      retval = nextSequentiallcpvalue(&currentlcp,ssar,env);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+      if (maxlcp != currentlcp)
+      {
+        fprintf(stderr,"%lu: startpos=" FormatSeqpos "firstchar=%u, startpos="
+                FormatSeqpos "=%u",
+                (unsigned long) (ptr - suftab),
+                PRINTSeqposcast(*(ptr-1)),
+                getencodedchar(encseq,*(ptr-1),readmode),
+                PRINTSeqposcast(*(ptr)),
+                getencodedchar(encseq,*ptr,readmode));
+        fprintf(stderr,", maxlcp = " FormatSeqpos " != " FormatSeqpos "\n",
+                    PRINTSeqposcast(maxlcp),
+                    PRINTSeqposcast(currentlcp));
+        exit(EXIT_FAILURE); /* Programming error */
+      }
     }
   }
   freeEncodedsequencescanstate(&esr1,env);

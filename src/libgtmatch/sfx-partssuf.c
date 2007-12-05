@@ -25,9 +25,9 @@
 typedef struct
 {
   Codetype nextcode;
-  Seqpos widthofpart;
-  uint64_t suftaboffset,
-           sumofwidth;
+  Seqpos widthofpart,
+         suftaboffset,
+         sumofwidth;
 } Suftabpartcomponent;
 
  struct Suftabparts
@@ -128,12 +128,12 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
   } else
   {
     unsigned int part, remainder;
-    uint64_t widthofsuftabpart,
-             suftaboffset = 0,
-             sumofwidth = 0;
+    Seqpos widthofsuftabpart,
+           suftaboffset = 0,
+           sumofwidth = 0;
     ALLOCASSIGNSPACE(suftabparts->components,NULL,Suftabpartcomponent,
                      numofparts);
-    widthofsuftabpart = (uint64_t) numofsuffixestoinsert/numofparts;
+    widthofsuftabpart = numofsuffixestoinsert/numofparts;
     remainder = (unsigned int) (numofsuffixestoinsert % (Seqpos) numofparts);
     suftabparts->largestwidth = 0;
     for (part=0; part < numofparts; part++)
@@ -166,7 +166,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
           = leftborder[suftabparts->components[part].nextcode] -
             leftborder[suftabparts->components[part-1].nextcode];
         suftabparts->components[part].suftaboffset
-          = (uint64_t) leftborder[suftabparts->components[part-1].nextcode];
+          = leftborder[suftabparts->components[part-1].nextcode];
       }
       if (suftabparts->largestwidth <
          suftabparts->components[part].widthofpart)
@@ -174,7 +174,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
         suftabparts->largestwidth
           = suftabparts->components[part].widthofpart;
       }
-      sumofwidth += (uint64_t) suftabparts->components[part].widthofpart;
+      sumofwidth += suftabparts->components[part].widthofpart;
       suftabparts->components[part].sumofwidth = sumofwidth;
     }
     assert(sumofwidth == numofsuffixestoinsert);
@@ -193,7 +193,7 @@ Codetype stpgetcurrentmincode(unsigned int part,
   return suftabparts->components[part-1].nextcode + 1;
 }
 
-uint64_t stpgetcurrentsuftaboffset(unsigned int part,
+Seqpos stpgetcurrentsuftaboffset(unsigned int part,
                                    const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].suftaboffset;
@@ -209,7 +209,7 @@ Codetype stpgetcurrentmaxcode(unsigned int part,
   return suftabparts->components[part].nextcode;
 }
 
-uint64_t stpgetcurrentsumofwdith(unsigned int part,
+Seqpos stpgetcurrentsumofwdith(unsigned int part,
                                  const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].sumofwidth;

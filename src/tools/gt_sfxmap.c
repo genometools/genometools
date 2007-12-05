@@ -20,6 +20,7 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/verbose-def.h"
 #include "libgtmatch/stamp.h"
+#include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/test-encseq.pr"
 #include "libgtmatch/pos2seqnum.pr"
@@ -154,7 +155,6 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
     haserr = true;
   }
   freeverboseinfo(&verboseinfo,env);
-  str_delete(indexname);
   if (!haserr)
   {
     int readmode;
@@ -201,20 +201,38 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   }
   if (!haserr && sfxmapoptions.inputsuf && !sfxmapoptions.usestream)
   {
+    Sequentialsuffixarrayreader *ssar;
+
+    if(sfxmapoptions.inputlcp)
+    {
+      ssar = newSequentialsuffixarrayreaderfromfile(indexname,
+                                                    SARR_LCPTAB,
+                                                    SEQ_scan,
+                                                    env);
+    } else
+    {
+      ssar = NULL;
+    }
     checkentiresuftab(suffixarray.encseq,
                       suffixarray.readmode,
                       getcharactersAlphabet(suffixarray.alpha),
                       suffixarray.suftab,
+                      ssar,
                       false, /* specialsareequal  */
-                      true,  /* specialsareequalatdepth0 */
+                      false,  /* specialsareequalatdepth0 */
                       0,
                       env);
+    if (ssar != NULL)
+    {
+      freeSequentialsuffixarrayreader(&ssar,env);
+    }
   }
   if (sfxmapoptions.inputdes && !haserr)
   {
     checkalldescriptions(suffixarray.destab,suffixarray.destablength,
                          suffixarray.numofdbsequences,env);
   }
+  str_delete(indexname);
   freesuffixarray(&suffixarray,env);
   return haserr ? -1 : 0;
 }

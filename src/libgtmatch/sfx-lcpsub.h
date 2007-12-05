@@ -15,23 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef SFX_LCPSUB_H
+#define SFX_LCPSUB_H
+
 #include "libgtcore/env.h"
-#include "esa-seqread.h"
 
-int testlcptab(const Str *indexname,Env *env)
-{
-  Sequentialsuffixarrayreader *ssar;
+typedef struct Lcpsubtab Lcpsubtab;
 
-  env_error_check(env);
-  ssar = newSequentialsuffixarrayreaderfromfile(indexname,
-                                                SARR_LCPTAB |
-                                                SARR_SUFTAB |
-                                                SARR_ESQTAB,
-                                                SEQ_scan,
-                                                env);
-  if (ssar != NULL)
-  {
-    freeSequentialsuffixarrayreader(&ssar,env);
-  }
-  return 0;
-}
+void freelcpsubtab(Lcpsubtab **lcpsubtab,Env *env);
+Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars,
+                        Env *env);
+
+#endif
