@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LCPSUBTAB_H
-#define LCPSUBTAB_H
+#ifndef SFX_LCPSUB_H
+#define SFX_LCPSUB_H
 
 #include "libgtcore/env.h"
 

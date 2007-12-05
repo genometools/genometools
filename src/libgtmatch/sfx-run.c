@@ -65,7 +65,7 @@ typedef struct
   Seqpos pageoffset;
   const Encodedsequence *encseq;
   DefinedSeqpos longest;
-  Outlcpinfo outlcpinfo;
+  Outlcpinfo *outlcpinfo;
   Lcpvalueiterator *lvi;
 } Outfileinfo;
 
@@ -84,15 +84,16 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   if (so->outlcptab)
   {
     outfileinfo->lvi = newLcpvalueiterator(encseq,so->readmode,env);
+    outfileinfo->outlcpinfo
+      = newlcpoutfileinfo(so->outlcptab ? so->str_indexname : NULL,env,true);
+    if (outfileinfo->outlcpinfo == NULL)
+    {
+      haserr = true;
+    }
   } else
   {
     outfileinfo->lvi = NULL;
-  }
-  if (initlcpoutfileinfo(&outfileinfo->outlcpinfo,
-                         so->outlcptab ? so->str_indexname : NULL,env,
-                         true) != 0)
-  {
-    haserr = true;
+    outfileinfo->outlcpinfo = NULL;
   }
   INITOUTFILEPTR(outfileinfo->outfpsuftab,so->outsuftab,SUFTABSUFFIX);
   INITOUTFILEPTR(outfileinfo->outfpbwttab,so->outbwttab,BWTTABSUFFIX);
@@ -172,7 +173,7 @@ static int suftab2file(Outfileinfo *outfileinfo,
           break;
         }
       }
-      if (outfileinfo->outlcpinfo.outfplcptab != NULL)
+      if (outfileinfo->outlcpinfo != NULL)
       {
         lcpvalue = nextLcpvalueiterator(outfileinfo->lvi,
                                         (outfileinfo->pageoffset == 0)
@@ -180,7 +181,7 @@ static int suftab2file(Outfileinfo *outfileinfo,
                                         suftab,
                                         numberofsuffixes);
         if (outlcpvalue(lcpvalue,pos,outfileinfo->pageoffset,
-                        &outfileinfo->outlcpinfo,env) != 0)
+                        outfileinfo->outlcpinfo,env) != 0)
         {
           haserr = true;
           break;
@@ -485,7 +486,7 @@ static int runsuffixerator(bool doesa,
           else
             deleteBWTSeq(bwtSeq, env); /**< the actual object is not
                                         * used here */
-          outfileinfo.longest = getSfxILongestPos(si); /* XXX Thomas, is 
+          outfileinfo.longest = getSfxILongestPos(si); /* XXX Thomas, is
                                                           this necessary */
 
           deleteSfxInterface(si, env);
@@ -511,6 +512,17 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
+    Seqpos numoflargelcpvalues,
+           maxbranchdepth;
+
+    if (outfileinfo.outlcpinfo == NULL)
+    {
+      numoflargelcpvalues = maxbranchdepth = 0;
+    } else
+    {
+      numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
+      maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
+    }
     if (outprjfile(so->str_indexname,
                    so->filenametab,
                    so->readmode,
@@ -519,15 +531,18 @@ static int runsuffixerator(bool doesa,
                    numofsequences,
                    &specialcharinfo,
                    so->prefixlength,
-                   outfileinfo.outlcpinfo.numoflargelcpvalues,
-                   outfileinfo.outlcpinfo.maxbranchdepth,
+                   numoflargelcpvalues,
+                   maxbranchdepth,
                    &outfileinfo.longest,
                    env) != 0)
     {
       haserr = true;
     }
   }
-  freeoutlcptab(&outfileinfo.outlcpinfo,env);
+  if (outfileinfo.outlcpinfo != NULL)
+  {
+    freeoutlcptab(&outfileinfo.outlcpinfo,env);
+  }
   FREESPACE(filelengthtab);
   if (alpha != NULL)
   {

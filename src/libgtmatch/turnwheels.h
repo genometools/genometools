@@ -21,7 +21,7 @@
 #include "libgtcore/env.h"
 
 typedef struct Turningwheel Turningwheel;
-  
+
 Turningwheel *newTurningwheel(unsigned int numofwheels,
                               unsigned int asize,
                               Env *env);

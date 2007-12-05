@@ -1,3 +1,20 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -5,25 +22,26 @@
 #include <errno.h>
 #include <stdbool.h>
 #include "libgtcore/symboldef.h"
+#include "spacedef.h"
 #include "esafileend.h"
 #include "sfx-outlcp.h"
 
 #include "opensfxfile.pr"
 
-#define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
-        if (!haserr && (FLAG))\
-        {\
-          PTR = opensfxfile(so->str_indexname,SUFFIX,"wb",env);\
-          if ((PTR) == NULL)\
-          {\
-            haserr = true;\
-          }\
+ struct Outlcpinfo
+{
+  FILE *outfplcptab,
+       *outfpllvtab;
+  Seqpos numoflargelcpvalues,
+         maxbranchdepth;
+};
 
-int initlcpoutfileinfo(Outlcpinfo *outlcpinfo,const Str *indexname,Env *env,
-                       bool origin)
+Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Env *env,bool origin)
 {
   bool haserr = false;
+  Outlcpinfo *outlcpinfo;
 
+  ALLOCASSIGNSPACE(outlcpinfo,NULL,Outlcpinfo,1);
   if (indexname == NULL)
   {
     outlcpinfo->outfplcptab = NULL;
@@ -40,7 +58,7 @@ int initlcpoutfileinfo(Outlcpinfo *outlcpinfo,const Str *indexname,Env *env,
     }
     if (!haserr)
     {
-      outlcpinfo->outfpllvtab 
+      outlcpinfo->outfpllvtab
         = opensfxfile(indexname,origin ? LARGELCPTABSUFFIX
                                        : LARGELCPTABSUFFIX "2",
                                        "wb",env);
@@ -52,7 +70,12 @@ int initlcpoutfileinfo(Outlcpinfo *outlcpinfo,const Str *indexname,Env *env,
   }
   outlcpinfo->numoflargelcpvalues = 0;
   outlcpinfo->maxbranchdepth = 0;
-  return haserr ? -1 : 0;
+  if (haserr)
+  {
+    FREESPACE(outlcpinfo);
+    return NULL;
+  }
+  return outlcpinfo;
 }
 
 int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
@@ -98,8 +121,19 @@ int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
   return haserr ? -1 : 0;
 }
 
-void freeoutlcptab(Outlcpinfo *outlcpinfo,Env *env)
+void freeoutlcptab(Outlcpinfo **outlcpinfo,Env *env)
 {
-  fa_fclose(outlcpinfo->outfplcptab);
-  fa_fclose(outlcpinfo->outfpllvtab);
+  fa_fclose((*outlcpinfo)->outfplcptab);
+  fa_fclose((*outlcpinfo)->outfpllvtab);
+  FREESPACE(*outlcpinfo);
+}
+
+Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo)
+{
+  return outlcpinfo->numoflargelcpvalues;
+}
+
+Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
+{
+  return outlcpinfo->maxbranchdepth;
 }

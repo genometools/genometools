@@ -168,7 +168,7 @@ static void insertionsort(const Encodedsequence *encseq,
       STRINGCOMPARE(*(pj-1),*pj,depth,lcplen);
 #ifdef WITHLCP
       lcpindex = LCPINDEX(pj);
-      if(ccs > cct && pj < pi)
+      if (ccs > cct && pj < pi)
       {
         SETLCP(lcpindex+1,lcpsubtab->spaceSeqpos[lcpindex]);
       }
@@ -316,7 +316,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
 
 typedef struct
 {
-  Seqpos left, 
+  Seqpos left,
          right,
          specialsinbucket;
 } Bucketboundaries;
@@ -424,7 +424,7 @@ static void setlcpundef(Lcpsubtab *lcpsubtab,Seqpos maxbucketsize,
 {
   Seqpos i;
 
-  for(i=0; i<maxbucketsize; i++)
+  for (i=0; i<maxbucketsize; i++)
   {
     lcpsubtab->spaceSeqpos[i] = UNDEFLCP(totallength);
   }
@@ -475,7 +475,7 @@ void sortallbuckets(Seqpos *suftabptr,
                                      totalwidth,
                                      rightchar,
                                      numofchars);
-    if(code > 0)
+    if (code > 0)
     {
       (void) nextTurningwheel(lcpsubtab->tw);
     }

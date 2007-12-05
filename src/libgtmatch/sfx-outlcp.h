@@ -15,26 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFXOUTLCP_H
-#define SFXOUTLCP_H
+#ifndef SFX_OUTLCP_H
+#define SFX_OUTLCP_H
 #include <stdio.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/fa.h"
 #include "seqpos-def.h"
 
-typedef struct
-{
-  FILE *outfplcptab,
-       *outfpllvtab;
-  Seqpos numoflargelcpvalues,
-         maxbranchdepth;
-} Outlcpinfo;
+typedef struct Outlcpinfo Outlcpinfo;
 
 int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
                 Outlcpinfo *outlcpinfo,Env *env);
-int initlcpoutfileinfo(Outlcpinfo *outlcpinfo,const Str *indexname,Env *env,
-                       bool origin);
-void freeoutlcptab(Outlcpinfo *outlcpinfo,Env *env);
+Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Env *env,bool origin);
+Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
+Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
+void freeoutlcptab(Outlcpinfo **outlcpinfo,Env *env);
 
 #endif

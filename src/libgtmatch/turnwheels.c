@@ -23,7 +23,7 @@
 
  struct Turningwheel
 {
-  unsigned int wheelspace[MAXNUMOFWHEELS], 
+  unsigned int wheelspace[MAXNUMOFWHEELS],
                numofwheels,
                asize,
                idx,
@@ -41,7 +41,7 @@ Turningwheel *newTurningwheel(unsigned int numofwheels,
   assert(numofwheels < MAXNUMOFWHEELS);
   assert(numofwheels > 0);
   assert(asize > 0);
-  for(i=0; i<numofwheels; i++)
+  for (i=0; i<numofwheels; i++)
   {
     tw->wheelspace[i] = 0;
   }
@@ -54,19 +54,19 @@ Turningwheel *newTurningwheel(unsigned int numofwheels,
 
 bool nextTurningwheel(Turningwheel *tw)
 {
-  while(true)
+  while (true)
   {
     tw->wheelspace[tw->idx]++;
     tw->minchanged = tw->idx;
-    if(tw->wheelspace[tw->idx] == tw->asize) 
+    if (tw->wheelspace[tw->idx] == tw->asize)
     {
       tw->wheelspace[tw->idx] = 0;
-      if(tw->idx == 0)
+      if (tw->idx == 0)
       {
-	return false;
+        return false;
       }
       tw->idx--;
-    } else 
+    } else
     {
       tw->idx = tw->numofwheels-1;
       break;
