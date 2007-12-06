@@ -440,6 +440,17 @@ static void multilcpvalue(Lcpsubtab *lcpsubtab,
   }
 }
 
+static void bucketends(Outlcpinfo *outlcpinfo,
+                       unsigned long specialsinbucket)
+{
+  Seqpos i;
+
+  for(i=0; i<specialsinbucket; i++)
+  {
+    outlcpvalue(0,0,outlcpinfo);
+  }
+}
+
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
                     Readmode readmode,
@@ -508,6 +519,7 @@ void sortallbuckets(Seqpos *suftabptr,
                       bbound.left);
       }
     }
+    bucketends(outlcpinfo,bbound.specialsinbucket);
   }
   FREEARRAY(&mkvauxstack,MKVstack);
 }
