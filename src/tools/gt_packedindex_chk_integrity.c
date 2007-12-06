@@ -21,7 +21,7 @@
 
 #include "gt_packedindex_chk_integrity.h"
 #include "libgtcore/ensure.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/eis-encidxseq.h"

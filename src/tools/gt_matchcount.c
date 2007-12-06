@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/matchcount.h"

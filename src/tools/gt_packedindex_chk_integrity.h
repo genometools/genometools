@@ -16,9 +16,9 @@
 #ifndef GT_PACKEDINDEX_CHK_INTEGRITY_H
 #define GT_PACKEDINDEX_CHK_INTEGRITY_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 extern int
-gt_packedindex_chk_integrity(int argc, const char *argv[], Error *env);
+gt_packedindex_chk_integrity(int argc, const char *argv[], Error *err);
 
 #endif

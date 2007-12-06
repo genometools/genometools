@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/sarr-def.h"
@@ -28,7 +28,7 @@
 #include "libgtmatch/test-mappedstr.pr"
 #include "libgtmatch/sfx-suftaborder.pr"
 #include "libgtmatch/echoseq.pr"
-#include "tools/gt_seqiterator.h"
+#include "tools/gt_sfxmap.h"
 
 typedef struct
 {
@@ -102,7 +102,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
   return oprval;
 }
 
-int gt_sfxmap(int argc, const char **argv, Env *env)
+int gt_sfxmap(int argc, const char **argv, Error *err)
 {
   Str *indexname;
   bool haserr = false;
@@ -113,10 +113,10 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   Sfxmapoptions sfxmapoptions;
   unsigned int demand = 0;
 
-  env_error_check(env);
+  error_check(err);
 
   switch (parse_options(&sfxmapoptions,&parsed_args, argc, argv,
-                        env_error(env)))
+                        err))
   {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
@@ -152,7 +152,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                                                  demand,
                                                  indexname,
                                                  verboseinfo,
-                                                 env_error(env)) != 0)
+                                                 err) != 0)
   {
     haserr = true;
   }
@@ -172,7 +172,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                                 (Readmode) readmode,
                                 getsymbolmapAlphabet(suffixarray.alpha),
                                 sfxmapoptions.trials,
-                                env_error(env)) != 0)
+                                err) != 0)
         {
           haserr = true;
           break;
@@ -190,14 +190,14 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   if (!haserr)
   {
     if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,
-                     env_error(env)) != 0)
+                     err) != 0)
     {
       haserr = true;
     }
   }
   if (suffixarray.prefixlength > 0 && !haserr)
   {
-    if (verifymappedstr(&suffixarray,env_error(env)) != 0)
+    if (verifymappedstr(&suffixarray,err) != 0)
     {
       haserr = true;
     }
@@ -211,7 +211,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
       ssar = newSequentialsuffixarrayreaderfromfile(indexname,
                                                     SARR_LCPTAB,
                                                     SEQ_scan,
-                                                    env_error(env));
+                                                    err);
     } else
     {
       ssar = NULL;
@@ -224,7 +224,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                       false, /* specialsareequal  */
                       false,  /* specialsareequalatdepth0 */
                       0,
-                      env_error(env));
+                      err);
     if (ssar != NULL)
     {
       freeSequentialsuffixarrayreader(&ssar);

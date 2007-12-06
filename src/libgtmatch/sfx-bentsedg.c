@@ -41,9 +41,9 @@
 
 #define PTR2INT(VAR,I) DEREF(VAR,cptr = *(I)+depth,cptr)
 
-#define WITHLCP
+#define WITHLCPNEW
 
-#ifdef WITHLCP
+#ifdef WITHLCPNEW
 #define LCPINDEX(I)        (Seqpos) ((I) - lcpsubtab->suftabbase)
 #define SETLCP(I,V)        lcpsubtab->spaceSeqpos[I] = V
 #define EVALLCPLEN(LL,T)   LL = (Seqpos) (tptr - (T))
@@ -157,7 +157,7 @@ static void insertionsort(const Encodedsequence *encseq,
   Suffixptr sptr, tptr, *pi, *pj, temp;
   Seqpos ccs, cct;
   Uchar tmpsvar, tmptvar;
-#ifdef WITHLCP
+#ifdef WITHLCPNEW
   Seqpos lcpindex, lcplen;
 #endif
 
@@ -166,7 +166,7 @@ static void insertionsort(const Encodedsequence *encseq,
     for (pj = pi; pj > leftptr; pj--)
     {
       STRINGCOMPARE(*(pj-1),*pj,depth,lcplen);
-#ifdef WITHLCP
+#ifdef WITHLCPNEW
       lcpindex = LCPINDEX(pj);
       if (ccs > cct && pj < pi)
       {
@@ -427,6 +427,19 @@ static void setlcpundef(Lcpsubtab *lcpsubtab,unsigned long maxbucketsize,
   }
 }
 
+static void multilcpvalue(Lcpsubtab *lcpsubtab,
+                          Outlcpinfo *outlcpinfo,
+                          unsigned long bucketsize,
+                          Seqpos posoffset)
+{
+  unsigned long i;
+
+  for (i=0; i<bucketsize; i++)
+  {
+    outlcpvalue(lcpsubtab->spaceSeqpos[i],posoffset+i,outlcpinfo);
+  }
+}
+
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
                     Readmode readmode,
@@ -487,6 +500,13 @@ void sortallbuckets(Seqpos *suftabptr,
                        suftabptr + bbound.right,
                        (Seqpos) prefixlength,
                        lcpsubtab);
+      if (outlcpinfo != NULL)
+      {
+        multilcpvalue(lcpsubtab,
+                      outlcpinfo,
+                      (unsigned long) (bbound.right - bbound.left + 1),
+                      bbound.left);
+      }
     }
   }
   FREEARRAY(&mkvauxstack,MKVstack);

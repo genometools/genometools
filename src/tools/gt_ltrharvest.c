@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtltr/ltrharvest-run.h"
 #include "tools/gt_ltrharvest.h"
 
