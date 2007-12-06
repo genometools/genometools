@@ -17,9 +17,10 @@
 
 #include "libgtcore/env.h"
 #include "libgtmatch/fmi-uniquesub.pr"
+#include "tools/gt_uniquesub.h"
 
-int gt_uniquesub(int argc, const char **argv, Env *env)
+int gt_uniquesub(int argc, const char **argv, Error *err)
 {
-  env_error_check(env);
-  return findminuniquesubstrings(argc, argv, env_error(env));
+  error_check(err);
+  return findminuniquesubstrings(argc, argv, err);
 }

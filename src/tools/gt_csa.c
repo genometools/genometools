@@ -21,6 +21,7 @@
 #include "libgtext/csa_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
+#include "tools/gt_csa.h"
 
 #define DEFAULT_JOINLENGTH 300
 
@@ -69,7 +70,7 @@ static OPrval parse_options(int *parsed_args, CSAArguments *arguments,
   return oprval;
 }
 
-int gt_csa(int argc, const char **argv, Env *env)
+int gt_csa(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream,
                *csa_stream,
@@ -77,10 +78,10 @@ int gt_csa(int argc, const char **argv, Env *env)
   GenomeNode *gn;
   CSAArguments arguments;
   int parsed_args, had_err;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -94,8 +95,8 @@ int gt_csa(int argc, const char **argv, Env *env)
   gff3_out_stream = gff3_out_stream_new(csa_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
-                                             env_error(env))) && gn) {
+  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+         gn) {
     genome_node_rec_delete(gn);
   }
 

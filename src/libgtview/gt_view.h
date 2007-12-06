@@ -21,6 +21,6 @@
 #define GT_VIEW_H
 
 /* the GFF3 viewer tool */
-int gt_view(int argc, const char **argv, Env*);
+int gt_view(int argc, const char **argv, Error*);
 
 #endif

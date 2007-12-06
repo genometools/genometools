@@ -20,6 +20,7 @@
 #include "libgtcore/progressbar.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xposix.h"
+#include "tools/gt_mmapandread.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Error *err)
@@ -35,17 +36,17 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_mmapandread(int argc, const char **argv, Env *env)
+int gt_mmapandread(int argc, const char **argv, Error *err)
 {
   int i, fd, parsed_args;
   void *map;
   struct stat sb;
   unsigned long long j;
   unsigned int byte = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

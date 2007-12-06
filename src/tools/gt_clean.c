@@ -19,6 +19,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xposix.h"
+#include "tools/gt_clean.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Error *err)
@@ -34,7 +35,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-static void remove_pattern_in_current_dir(const char *pattern, Env *env)
+static void remove_pattern_in_current_dir(const char *pattern)
 {
   char **files_to_remove;
   Str *path;
@@ -60,13 +61,13 @@ static void remove_pattern_in_current_dir(const char *pattern, Env *env)
   str_delete(path);
 }
 
-int gt_clean(int argc, const char **argv, Env *env)
+int gt_clean(int argc, const char **argv, Error *err)
 {
   int parsed_args;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -74,10 +75,10 @@ int gt_clean(int argc, const char **argv, Env *env)
   assert(parsed_args == 1);
 
   /* remove GT_BIOSEQ_INDEX files */
-  remove_pattern_in_current_dir(GT_BIOSEQ_INDEX, env);
+  remove_pattern_in_current_dir(GT_BIOSEQ_INDEX);
 
   /* remove GT_BIOSEQ_RAW files */
-  remove_pattern_in_current_dir(GT_BIOSEQ_RAW, env);
+  remove_pattern_in_current_dir(GT_BIOSEQ_RAW);
 
   return 0;
 }

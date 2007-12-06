@@ -19,16 +19,17 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/toolbox.h"
-#include "gt_guessprot.h"
-#include "gt_regioncov.h"
-#include "gt_seqiterator.h"
-#include "gt_sfxmap.h"
-#include "gt_trieins.h"
-#include "gt_mergeesa.h"
-#include "gt_maxpairs.h"
-#include "gt_paircmp.h"
-#include "gt_patternmatch.h"
-#include "gt_skproto.h"
+#include "tools/gt_dev.h"
+#include "tools/gt_guessprot.h"
+#include "tools/gt_regioncov.h"
+#include "tools/gt_seqiterator.h"
+#include "tools/gt_sfxmap.h"
+#include "tools/gt_trieins.h"
+#include "tools/gt_mergeesa.h"
+#include "tools/gt_maxpairs.h"
+#include "tools/gt_paircmp.h"
+#include "tools/gt_patternmatch.h"
+#include "tools/gt_skproto.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Toolbox *dev_toolbox, Error *err)
@@ -46,11 +47,11 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-void register_devtools(Toolbox *dev_toolbox, Env *env)
+void register_devtools(Toolbox *dev_toolbox)
 {
   assert(dev_toolbox);
   /* add development tools here with a function call like this:
-     toolbox_add(dev_toolbox, "devtool", gt_devtool, env); */
+     toolbox_add(dev_toolbox, "devtool", gt_devtool); */
   toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
   toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
   toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
@@ -63,19 +64,18 @@ void register_devtools(Toolbox *dev_toolbox, Env *env)
   toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
 }
 
-int gt_dev(int argc, const char **argv, Env *env)
+int gt_dev(int argc, const char **argv, Error *err)
 {
   Toolbox *dev_toolbox;
   Tool devtool;
   int parsed_args, had_err = 0;
   char **nargv = NULL;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
   dev_toolbox = toolbox_new();
-  register_devtools(dev_toolbox, env);
-  switch (parse_options(&parsed_args, argc, argv, dev_toolbox,
-                        env_error(env))) {
+  register_devtools(dev_toolbox);
+  switch (parse_options(&parsed_args, argc, argv, dev_toolbox, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       toolbox_delete(dev_toolbox);
@@ -88,16 +88,16 @@ int gt_dev(int argc, const char **argv, Env *env)
 
   /* get development tools */
   if (!(devtool = toolbox_get(dev_toolbox, argv[1]))) {
-    env_error_set(env, "development tool '%s' not found; option -help lists "
-                  "possible tools", argv[1]);
+    error_set(err, "development tool '%s' not found; option -help lists "
+                   "possible tools", argv[1]);
     had_err = -1;
   }
 
   /* call development tool */
   if (!had_err) {
     nargv = cstr_array_prefix_first(argv+parsed_args, argv[0]);
-    env_error_set_progname(env, nargv[0]);
-    had_err = devtool(argc-parsed_args, (const char**) nargv, env);
+    error_set_progname(err, nargv[0]);
+    had_err = devtool(argc-parsed_args, (const char**) nargv, err);
   }
 
   /* free */

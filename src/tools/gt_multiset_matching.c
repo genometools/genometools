@@ -20,6 +20,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/multiset_matching.h"
+#include "tools/gt_multiset_matching.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Error *err)
@@ -41,13 +42,13 @@ static void show_match(unsigned long pos, void *data)
   printf("%lu\n", pos + 1);
 }
 
-int gt_multiset_matching(int argc, const char **argv, Env *env)
+int gt_multiset_matching(int argc, const char **argv, Error *err)
 {
   int parsed_args;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

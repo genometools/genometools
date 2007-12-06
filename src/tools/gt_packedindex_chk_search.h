@@ -20,6 +20,6 @@
 #include "libgtcore/env.h"
 
 extern int
-gt_packedindex_chk_search(int argc, const char *argv[], Env *env);
+gt_packedindex_chk_search(int argc, const char *argv[], Error *env);
 
 #endif

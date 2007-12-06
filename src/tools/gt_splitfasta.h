@@ -19,6 +19,6 @@
 #define GT_SPLITFASTA_H
 
 /* the splitfasta tool */
-int gt_splitfasta(int argc, const char **argv, Env*);
+int gt_splitfasta(int argc, const char **argv, Error*);
 
 #endif

@@ -6,9 +6,10 @@
 
 #include "libgtcore/env.h"
 #include "libgtltr/ltrharvest-run.h"
+#include "tools/gt_ltrharvest.h"
 
-int gt_ltrharvest(int argc, const char **argv, Env *env)
+int gt_ltrharvest(int argc, const char **argv, Error *err)
 {
-  env_error_check(env);
-  return parseargsandcallltrharvest(argc, argv, env_error(env));
+  error_check(err);
+  return parseargsandcallltrharvest(argc, argv, err);
 }

@@ -22,6 +22,7 @@
 #include "libgtcore/xansi.h"
 #include "libgtext/alignment.h"
 #include "libgtext/swalign.h"
+#include "tools/gt_swalign.h"
 
 #define DEFAULT_INDELSCORE  -3
 
@@ -44,7 +45,7 @@ static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
   return oprval;
 }
 
-int gt_swalign(int argc, const char **argv, Env *env)
+int gt_swalign(int argc, const char **argv, Error *err)
 {
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
   ScoreFunction *scorefunction = NULL;
@@ -52,11 +53,10 @@ int gt_swalign(int argc, const char **argv, Env *env)
   unsigned long i, j;
   int parsed_args, indelscore, had_err = 0;
   Alignment *a;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &indelscore, argc, argv,
-                        env_error(env))) {
+  switch (parse_options(&parsed_args, &indelscore, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -65,14 +65,14 @@ int gt_swalign(int argc, const char **argv, Env *env)
 
   /* init */
   /* XXX: make this more flexible */
-  scorematrix  = scorematrix_read_protein(argv[parsed_args], env_error(env));
+  scorematrix  = scorematrix_read_protein(argv[parsed_args], err);
   if (scorematrix) {
     scorefunction = scorefunction_new(scorematrix, indelscore, indelscore);
-    bioseq_1 = bioseq_new(argv[parsed_args+1], env_error(env));
+    bioseq_1 = bioseq_new(argv[parsed_args+1], err);
     if (!bioseq_1)
       had_err = -1;
     if (!had_err) {
-      bioseq_2 = bioseq_new(argv[parsed_args+2], env_error(env));
+      bioseq_2 = bioseq_new(argv[parsed_args+2], err);
       if (!bioseq_2)
         had_err = -1;
     }

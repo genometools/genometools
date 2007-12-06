@@ -17,9 +17,10 @@
 
 #include "libgtcore/env.h"
 #include "libgtmatch/sfx-run.pr"
+#include "tools/gt_suffixerator.h"
 
-int gt_suffixerator(int argc, const char **argv, Env *env)
+int gt_suffixerator(int argc, const char **argv, Error *err)
 {
-  env_error_check(env);
-  return parseargsandcallsuffixerator(true,argc, argv, env_error(env));
+  error_check(err);
+  return parseargsandcallsuffixerator(true,argc, argv, err);
 }

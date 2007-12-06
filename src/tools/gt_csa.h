@@ -19,6 +19,6 @@
 #define GT_CSA_H
 
 /* the consensus spliced alignment (csa) tool */
-int gt_csa(int argc, const char **argv, Env*);
+int gt_csa(int argc, const char **argv, Error*);
 
 #endif

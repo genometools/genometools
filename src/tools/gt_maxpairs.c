@@ -28,6 +28,8 @@
 #include "libgtmatch/esa-maxpairs.pr"
 #include "libgtmatch/test-maxpairs.pr"
 
+#include "tools/gt_maxpairs.h"
+
 typedef struct
 {
   unsigned int userdefinedleastlength;

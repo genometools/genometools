@@ -18,6 +18,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/option.h"
 #include "libgtmatch/guessprot.pr"
+#include "tools/gt_guessprot.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Error *err)

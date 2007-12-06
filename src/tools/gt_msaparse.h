@@ -19,6 +19,6 @@
 #define GT_MSAPARSE_H
 
 /* the multiple sequence alignment (MSA) parsing tool */
-int gt_msaparse(int argc, const char **argv, Env*);
+int gt_msaparse(int argc, const char **argv, Error*);
 
 #endif

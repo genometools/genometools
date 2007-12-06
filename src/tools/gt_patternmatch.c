@@ -27,6 +27,8 @@
 
 #include "libgtmatch/esa-map.pr"
 
+#include "tools/gt_patternmatch.h"
+
 typedef struct
 {
   unsigned long minpatternlen, maxpatternlen, numofsamples;
@@ -34,7 +36,7 @@ typedef struct
   Str *indexname;
 } Pmatchoptions;
 
-static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
+static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength;
@@ -48,7 +50,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
                      SARR_SUFTAB | SARR_ESQTAB,
                      pmopt->indexname,
                      NULL,
-                     env_error(env)) != 0)
+                     err) != 0)
   {
     haserr = true;
   }
@@ -62,7 +64,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
                                  getnumofcharsAlphabet(suffixarray.alpha),
-                                 env_error(env));
+                                 err);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
       pptr = nextEnumpatterniterator(&patternlen,epi);
@@ -139,21 +141,21 @@ static OPrval parse_options(Pmatchoptions *pmopt,
   return oprval;
 }
 
-int gt_patternmatch(int argc, const char **argv, Env *env)
+int gt_patternmatch(int argc, const char **argv, Error *err)
 {
   bool haserr = false;
   int parsed_args;
   Pmatchoptions pmopt;
   OPrval oprval;
 
-  env_error_check(env);
+  error_check(err);
 
   pmopt.indexname = str_new();
-  oprval = parse_options(&pmopt,&parsed_args, argc, argv, env_error(env));
+  oprval = parse_options(&pmopt,&parsed_args, argc, argv, err);
   if (oprval == OPTIONPARSER_OK)
   {
     assert(parsed_args == argc);
-    if (callpatternmatcher(&pmopt,env) != 0)
+    if (callpatternmatcher(&pmopt,err) != 0)
     {
       haserr = true;
     }

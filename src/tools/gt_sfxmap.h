@@ -19,6 +19,6 @@
 #define GT_SFXMAP_H
 
 /* the sfxmap tool */
-int gt_sfxmap(int argc, const char **argv, Env*);
+int gt_sfxmap(int argc, const char **argv, Error*);
 
 #endif

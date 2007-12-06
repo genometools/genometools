@@ -19,6 +19,6 @@
 #define GT_DEV_H
 
 /* the development tool */
-int gt_dev(int argc, const char **argv, Env*);
+int gt_dev(int argc, const char **argv, Error*);
 
 #endif

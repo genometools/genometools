@@ -19,6 +19,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtext/gtf_in_stream.h"
+#include "tools/gt_gtf_to_gff3.h"
 
 static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
                             const char **argv, Error *err)
@@ -39,25 +40,23 @@ static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
   return oprval;
 }
 
-int gt_gtf_to_gff3(int argc, const char **argv, Env *env)
+int gt_gtf_to_gff3(int argc, const char **argv, Error *err)
 {
   GenomeStream *gtf_in_stream = NULL, *gff3_out_stream = NULL;
   GenomeNode *gn;
   int parsed_args, had_err = 0;
   bool be_tolerant;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &be_tolerant, argc, argv,
-                        env_error(env))) {
+  switch (parse_options(&parsed_args, &be_tolerant, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
 
   /* create a gtf input stream */
-  gtf_in_stream = gtf_in_stream_new(argv[parsed_args], be_tolerant,
-                                    env_error(env));
+  gtf_in_stream = gtf_in_stream_new(argv[parsed_args], be_tolerant, err);
   if (!gtf_in_stream)
     had_err = -1;
 
@@ -67,8 +66,8 @@ int gt_gtf_to_gff3(int argc, const char **argv, Env *env)
     gff3_out_stream = gff3_out_stream_new(gtf_in_stream, NULL);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
-                                               env_error(env))) && gn) {
+    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+           gn) {
       genome_node_rec_delete(gn);
     }
   }

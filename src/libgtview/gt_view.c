@@ -32,6 +32,7 @@
 #include "libgtview/diagram.h"
 #include "libgtview/feature_index.h"
 #include "libgtview/feature_stream.h"
+#include "libgtview/gt_view.h"
 #include "libgtview/render.h"
 
 typedef struct {
@@ -45,13 +46,13 @@ typedef struct {
 } Gff3_view_arguments;
 
 static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option  *option, *option2;
   OPrval oprval;
   bool force;
-  env_error_check(env);
+  error_check(err);
 
   /* init */
   op = option_parser_new("[option ...] PNG_file [GFF3_file ...]", "Create PNG "
@@ -110,11 +111,11 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
 
   /* parse options */
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, env_error(env));
+                                        versionfunc, 1, err);
 
   if (oprval == OPTIONPARSER_OK && !force && file_exists(argv[*parsed_args])) {
-    env_error_set(env, "file \"%s\" exists already. use option -force to "
-                  "overwrite", argv[*parsed_args]);
+    error_set(err, "file \"%s\" exists already. use option -force to "
+                   "overwrite", argv[*parsed_args]);
     oprval = OPTIONPARSER_ERROR;
   }
 
@@ -124,7 +125,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   return oprval;
 }
 
-int gt_view(int argc, const char **argv, Env *env)
+int gt_view(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream = NULL,
                *addintrons_stream = NULL,
@@ -144,11 +145,11 @@ int gt_view(int argc, const char **argv, Env *env)
   Diagram *d = NULL;
   Render *r = NULL;
 
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
   arguments.seqid = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.seqid);
@@ -166,9 +167,9 @@ int gt_view(int argc, const char **argv, Env *env)
       arguments.start != UNDEF_ULONG &&
       arguments.end != UNDEF_ULONG &&
       !(arguments.start < arguments.end)) {
-    env_error_set(env, "start of query range (%lu) must be before "
-                       "end of query range (%lu)",
-                       arguments.start, arguments.end);
+    error_set(err, "start of query range (%lu) must be before "
+                   "end of query range (%lu)",
+              arguments.start, arguments.end);
     had_err = -1;
   }
 
@@ -198,8 +199,8 @@ int gt_view(int argc, const char **argv, Env *env)
       feature_stream = feature_stream_new(last_stream, features);
 
       /* pull the features through the stream and free them afterwards */
-      while (!(had_err = genome_stream_next_tree(feature_stream, &gn,
-                                                 env_error(env))) && gn) {
+      while (!(had_err = genome_stream_next_tree(feature_stream, &gn, err)) &&
+             gn) {
         genome_node_rec_delete(gn);
       }
 
@@ -218,14 +219,14 @@ int gt_view(int argc, const char **argv, Env *env)
   if (!had_err && strcmp(str_get(arguments.seqid),"") == 0) {
     seqid = feature_index_get_first_seqid(features);
     if (seqid == NULL) {
-      env_error_set(env, "GFF input file must contain a sequence region!");
+      error_set(err, "GFF input file must contain a sequence region!");
       had_err = -1;
     }
   }
   else if (!had_err && !feature_index_has_seqid(features,
                                                 str_get(arguments.seqid))) {
-    env_error_set(env, "sequence region '%s' does not exist in GFF input file",
-                  str_get(arguments.seqid));
+    error_set(err, "sequence region '%s' does not exist in GFF input file",
+              str_get(arguments.seqid));
     had_err = -1;
   }
   else if (!had_err)
@@ -249,20 +250,20 @@ int gt_view(int argc, const char **argv, Env *env)
     /* find and load configuration file */
     prog = str_new();
     str_append_cstr_nt(prog, argv[0], cstr_length_up_to_char(argv[0], ' '));
-    config_file = gtdata_get_path(str_get(prog), env_error(env));
+    config_file = gtdata_get_path(str_get(prog), err);
     str_delete(prog);
     str_append_cstr(config_file, "/config/view.lua");
-    if (!(cfg = config_new(arguments.verbose, env_error(env))))
+    if (!(cfg = config_new(arguments.verbose, err)))
       had_err = -1;
     if (!had_err && file_exists(str_get(config_file)))
-      had_err = config_load_file(cfg, config_file, env_error(env));
+      had_err = config_load_file(cfg, config_file, err);
   }
 
   if (!had_err) {
     /* create and write image file */
     d = diagram_new(features, qry_range, seqid, cfg);
     r = render_new(cfg);
-    had_err = render_to_png(r, d, png_file, arguments.width, env_error(env));
+    had_err = render_to_png(r, d, png_file, arguments.width, err);
   }
 
   render_delete(r);

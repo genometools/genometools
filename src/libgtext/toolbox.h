@@ -18,12 +18,12 @@
 #ifndef TOOLBOX_H
 #define TOOLBOX_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* the toolbox class */
 typedef struct Toolbox Toolbox;
 
-typedef int (*Tool)(int argc, const char **argv, Env*);
+typedef int (*Tool)(int argc, const char **argv, Error*);
 
 Toolbox* toolbox_new(void);
 void     toolbox_add(Toolbox*, const char *toolname, Tool);

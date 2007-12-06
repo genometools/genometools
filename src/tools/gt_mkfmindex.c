@@ -17,9 +17,10 @@
 
 #include "libgtcore/env.h"
 #include "libgtmatch/fmi-mkindex.pr"
+#include "tools/gt_mkfmindex.h"
 
-int gt_mkfmindex(int argc, const char **argv, Env *env)
+int gt_mkfmindex(int argc, const char **argv, Error *err)
 {
-  env_error_check(env);
-  return parseargsandcallmkfmindex(argc, argv, env_error(env));
+  error_check(err);
+  return parseargsandcallmkfmindex(argc, argv, err);
 }

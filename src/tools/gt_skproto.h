@@ -20,6 +20,6 @@
 #define GT_SKPROTO_H
 
 /* the skproto tool */
-int gt_skproto(int argc, const char **argv, Env*);
+int gt_skproto(int argc, const char **argv, Error*);
 
 #endif

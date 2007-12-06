@@ -19,6 +19,6 @@
 #define GT_SWALIGN_H
 
 /* the Smith-Waterman alignment tool */
-int gt_swalign(int argc, const char **argv, Env*);
+int gt_swalign(int argc, const char **argv, Error*);
 
 #endif

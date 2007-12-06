@@ -24,8 +24,8 @@
 #include "libgtcore/env.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
-
 #include "libgtmatch/eis-encidxseq.h"
+#include "tools/gt_packedindex_chk_integrity.h"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL
 
@@ -41,18 +41,16 @@ parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
                      struct chkIndexOptions *param, Error *err);
 
 extern int
-gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
+gt_packedindex_chk_integrity(int argc, const char *argv[], Error *err)
 {
   struct encIdxSeq *seq;
   struct chkIndexOptions options;
   Str *inputProject;
   int parsedArgs;
   int had_err = 0;
-  env_error_check(env);
-  Error *err = env_error(env); /* XXX: remove */
+  error_check(err);
 
-  switch (parseChkIndexOptions(&parsedArgs, argc, argv, &options,
-                               env_error(env)))
+  switch (parseChkIndexOptions(&parsedArgs, argc, argv, &options, err))
   {
     case OPTIONPARSER_OK:
       break;
@@ -63,13 +61,11 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
   }
 
   inputProject = str_new_cstr(argv[parsedArgs]);
-  env_error_check(env);
-  seq = loadBlockEncIdxSeq(inputProject, EIS_FEATURE_REGION_SUMS,
-                           env_error(env));
+  seq = loadBlockEncIdxSeq(inputProject, EIS_FEATURE_REGION_SUMS, err);
   ensure(had_err, seq);
   if (had_err)
   {
-    env_error_set(env, "Failed to load index: %s", str_get(inputProject));
+    error_set(err, "Failed to load index: %s", str_get(inputProject));
   }
   else
   {
@@ -81,8 +77,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
         had_err,
         !(corrupt = EISVerifyIntegrity(seq, inputProject, options.skipCount,
                                        options.progressInterval, stderr,
-                                       options.checkFlags,
-                                       env_error(env))));
+                                       options.checkFlags, err)));
       if (corrupt)
       {
         fputs("Integrity check failed for index.\n", stderr);
@@ -92,7 +87,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
     }
   }
   if (seq)
-    deleteEncIdxSeq(seq, env_error(env));
+    deleteEncIdxSeq(seq, err);
   if (inputProject)
     str_delete(inputProject);
   return had_err?-1:0;

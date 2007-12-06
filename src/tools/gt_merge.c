@@ -21,6 +21,7 @@
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtext/merge_stream.h"
+#include "tools/gt_merge.h"
 
 static OPrval parse_options(int *parsed_args, GenFile **outfp, int argc,
                             const char **argv, Error *err)
@@ -39,7 +40,7 @@ static OPrval parse_options(int *parsed_args, GenFile **outfp, int argc,
   return oprval;
 }
 
-int gt_merge(int argc, const char **argv, Env *env)
+int gt_merge(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream,
                 *merge_stream,
@@ -51,7 +52,7 @@ int gt_merge(int argc, const char **argv, Env *env)
   GenFile *outfp;
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &outfp, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &outfp, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -83,8 +84,8 @@ int gt_merge(int argc, const char **argv, Env *env)
   gff3_out_stream = gff3_out_stream_new(merge_stream, outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
-                                             env_error(env))) && gn) {
+  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+         gn) {
     genome_node_rec_delete(gn);
   }
 

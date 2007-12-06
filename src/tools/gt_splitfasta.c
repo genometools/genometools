@@ -19,6 +19,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
+#include "tools/gt_splitfasta.h"
 
 static OPrval parse_options(int *parsed_args, unsigned long *max_filesize_in_MB,
                             int argc, const char **argv, Error *err)
@@ -49,7 +50,7 @@ static unsigned long buf_contains_separator(char *buf)
   return 0;
 }
 
-int gt_splitfasta(int argc, const char **argv, Env *env)
+int gt_splitfasta(int argc, const char **argv, Error *err)
 {
   GenFile *srcfp = NULL;
   FILE *destfp = NULL;
@@ -58,11 +59,10 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
                 max_filesize_in_MB, separator_pos;
   int read_bytes, parsed_args, had_err = 0;
   char buf[BUFSIZ];
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &max_filesize_in_MB, argc, argv,
-                        env_error(env))) {
+  switch (parse_options(&parsed_args, &max_filesize_in_MB, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -76,14 +76,14 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
 
   /* read start characters */
   if ((read_bytes = genfile_xread(srcfp, buf, BUFSIZ)) == 0) {
-    env_error_set(env, "file \"%s\" is empty", argv[parsed_args]);
+    error_set(err, "file \"%s\" is empty", argv[parsed_args]);
     had_err = -1;
   }
   bytecount += read_bytes;
 
   /* make sure the file is in fasta format */
   if (!had_err && buf[0] != '>') {
-    env_error_set(env, "file is not in FASTA format");
+    error_set(err, "file is not in FASTA format");
     had_err = -1;
   }
 

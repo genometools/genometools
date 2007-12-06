@@ -21,6 +21,7 @@
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtext/uniq_stream.h"
+#include "tools/gt_uniq.h"
 
 typedef struct {
   bool verbose;
@@ -59,7 +60,7 @@ static OPrval parse_options(int *parsed_args, UniqArguments *arguments,
   return oprval;
 }
 
-int gt_uniq(int argc, const char **argv, Env *env)
+int gt_uniq(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream,
                *uniq_stream = NULL,
@@ -67,10 +68,10 @@ int gt_uniq(int argc, const char **argv, Env *env)
   UniqArguments arguments;
   GenomeNode *gn;
   int parsed_args, had_err;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -88,8 +89,7 @@ int gt_uniq(int argc, const char **argv, Env *env)
   gff3_out_stream = gff3_out_stream_new(uniq_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
-                                             env_error(env))) && gn)
+  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) && gn)
     genome_node_rec_delete(gn);
 
   /* free */

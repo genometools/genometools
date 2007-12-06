@@ -19,6 +19,6 @@
 #define GT_LINEARALIGN_H
 
 /* the linear align tool */
-int gt_linearalign(int argc, const char **argv, Env*);
+int gt_linearalign(int argc, const char **argv, Error*);
 
 #endif

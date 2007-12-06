@@ -21,6 +21,7 @@
 #include "libgtcore/xansi.h"
 #include "libgtext/alignment.h"
 #include "libgtext/linearalign.h"
+#include "tools/gt_linearalign.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Error *err)
@@ -38,16 +39,16 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_linearalign(int argc, const char **argv, Env *env)
+int gt_linearalign(int argc, const char **argv, Error *err)
 {
   Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;
   int parsed_args, had_err = 0;
   Alignment *a;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -55,11 +56,11 @@ int gt_linearalign(int argc, const char **argv, Env *env)
   assert(parsed_args+1 < argc);
 
   /* init */
-  bioseq_1 = bioseq_new(argv[parsed_args], env_error(env));
+  bioseq_1 = bioseq_new(argv[parsed_args], err);
   if (!bioseq_1)
     had_err = -1;
   if (!had_err) {
-    bioseq_2 = bioseq_new(argv[parsed_args+1], env_error(env));
+    bioseq_2 = bioseq_new(argv[parsed_args+1], err);
     if (!bioseq_2)
       had_err = -1;
   }

@@ -8,6 +8,6 @@
 #define GT_LTRHARVEST_H
 
 /* the LTRharvest tool */
-int gt_ltrharvest(int argc, const char **argv, Env*);
+int gt_ltrharvest(int argc, const char **argv, Error*);
 
 #endif

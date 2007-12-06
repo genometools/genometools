@@ -361,7 +361,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
       /* run tool */
       nargv = cstr_array_prefix_first(argv, env_error_get_progname(env));
       env_error_set_progname(env, nargv[0]);
-      had_err = tool(argc, (const char**) nargv, env);
+      had_err = tool(argc, (const char**) nargv, env_error(env));
     }
   }
   cstr_array_delete(nargv);

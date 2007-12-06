@@ -21,6 +21,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/outputfile.h"
 #include "libgtcore/versionfunc.h"
+#include "tools/gt_extractseq.h"
 
 typedef struct {
   Str *pattern;
@@ -93,16 +94,16 @@ static int extractseq(GenFile *outfp, Bioseq *bs, const char *pattern,
   return had_err;
 }
 
-int gt_extractseq(int argc, const char **argv, Env *env)
+int gt_extractseq(int argc, const char **argv, Error *err)
 {
   ExtractSeqArguments arguments;
   Bioseq *bs;
   int parsed_args, had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
   arguments.pattern = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.pattern);
@@ -113,22 +114,22 @@ int gt_extractseq(int argc, const char **argv, Env *env)
   }
 
   if (parsed_args == argc) { /* no file given, use stdin */
-    if (!(bs = bioseq_new("-", env_error(env))))
+    if (!(bs = bioseq_new("-", err)))
       had_err = -1;
     if (!had_err) {
       had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
-                           arguments.width, env_error(env));
+                           arguments.width, err);
     }
     bioseq_delete(bs);
   }
 
   /* process all files */
   while (!had_err && parsed_args < argc) {
-    if (!(bs = bioseq_new(argv[parsed_args], env_error(env))))
+    if (!(bs = bioseq_new(argv[parsed_args], err)))
       had_err = -1;
     if (!had_err) {
       had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
-                           arguments.width, env_error(env));
+                           arguments.width, err);
     }
     bioseq_delete(bs);
     parsed_args++;

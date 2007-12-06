@@ -20,6 +20,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/verbose-def.h"
 #include "libgtmatch/test-mergeesa.pr"
+#include "tools/gt_mergeesa.h"
 
 static OPrval parse_options(Str *indexname,StrArray *indexnametab,
                             int *parsed_args, int argc,
@@ -51,20 +52,19 @@ static OPrval parse_options(Str *indexname,StrArray *indexnametab,
   return oprval;
 }
 
-int gt_mergeesa(int argc, const char **argv, Env *env)
+int gt_mergeesa(int argc, const char **argv, Error *err)
 {
   Str *storeindex;
   StrArray *indexnametab;
   bool haserr = false;
   int parsed_args;
 
-  env_error_check(env);
+  error_check(err);
 
   storeindex = str_new();
   indexnametab = strarray_new();
-  switch (parse_options(storeindex, indexnametab, &parsed_args,
-                        argc, argv, env_error(env)))
-  {
+  switch (parse_options(storeindex, indexnametab, &parsed_args, argc, argv,
+                        err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
          haserr = true; break;
@@ -84,7 +84,7 @@ int gt_mergeesa(int argc, const char **argv, Env *env)
     if (performtheindexmerging(storeindex,
                               indexnametab,
                               verboseinfo,
-                              env_error(env)) != 0)
+                              err) != 0)
     {
       haserr = true;
     }

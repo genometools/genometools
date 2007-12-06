@@ -21,6 +21,7 @@
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/seqid2file.h"
+#include "tools/gt_extractfeat.h"
 
 typedef struct {
   bool join,
@@ -75,7 +76,7 @@ static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
   return oprval;
 }
 
-int gt_extractfeat(int argc, const char **argv, Env *env)
+int gt_extractfeat(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream = NULL, *extractfeat_stream = NULL;
   GenomeNode *gn;
@@ -83,13 +84,13 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
   ExtractFeatArguments arguments;
   RegionMapping *regionmapping;
   int parsed_args, had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
   arguments.type = str_new();
   arguments.seqfile = str_new();
   arguments.regionmapping = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.regionmapping);
@@ -105,8 +106,8 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
 
   /* determine type and make sure it is a valid one */
   if (genome_feature_type_get(&type, str_get(arguments.type)) == -1) {
-    env_error_set(env, "\"%s\" is not a valid feature type",
-                  str_get(arguments.type));
+    error_set(err, "\"%s\" is not a valid feature type",
+              str_get(arguments.type));
     had_err = -1;
   }
 
@@ -118,8 +119,7 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
 
     /* create region mapping */
     regionmapping = seqid2file_regionmapping_new(arguments.seqfile,
-                                                 arguments.regionmapping,
-                                                 env_error(env));
+                                                 arguments.regionmapping, err);
     if (!regionmapping)
       had_err = -1;
   }
@@ -131,8 +131,8 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
                                                 arguments.translate);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(extractfeat_stream, &gn,
-                                               env_error(env))) && gn) {
+    while (!(had_err = genome_stream_next_tree(extractfeat_stream, &gn, err)) &&
+           gn) {
       genome_node_rec_delete(gn);
     }
   }

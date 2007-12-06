@@ -19,6 +19,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/test-trieins.pr"
+#include "tools/gt_trieins.h"
 
 static OPrval parse_options(bool *onlyins,int *parsed_args,
                             int argc, const char **argv, Error *err)
@@ -40,16 +41,16 @@ static OPrval parse_options(bool *onlyins,int *parsed_args,
   return oprval;
 }
 
-int gt_trieins(int argc, const char **argv, Env *env)
+int gt_trieins(int argc, const char **argv, Error *err)
 {
   Str *indexname;
   bool haserr = false;
   int parsed_args;
   bool onlyins = false;
 
-  env_error_check(env);
+  error_check(err);
 
-  switch (parse_options(&onlyins,&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&onlyins,&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -57,7 +58,7 @@ int gt_trieins(int argc, const char **argv, Env *env)
   assert(parsed_args == 1 || parsed_args == 2);
 
   indexname = str_new_cstr(argv[parsed_args]);
-  if (test_trieins(onlyins,indexname,env_error(env)) != 0)
+  if (test_trieins(onlyins,indexname,err) != 0)
   {
     haserr = true;
   }

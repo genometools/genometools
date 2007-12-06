@@ -19,6 +19,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/msa.h"
+#include "tools/gt_msaparse.h"
 
 typedef struct {
   bool show,
@@ -55,15 +56,15 @@ static OPrval parse_options(int *parsed_args, MSAparse_arguments *arguments,
   return oprval;
 }
 
-int gt_msaparse(int argc, const char **argv, Env *env)
+int gt_msaparse(int argc, const char **argv, Error *err)
 {
   MSAparse_arguments arguments;
   int parsed_args, had_err = 0;
   MSA *msa = NULL;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -72,13 +73,13 @@ int gt_msaparse(int argc, const char **argv, Env *env)
   /* make sure sequence_file exists */
   assert(parsed_args < argc);
   if (!file_exists(argv[parsed_args])) {
-    env_error_set(env, "MSA_file '%s' does not exist", argv[parsed_args]);
+    error_set(err, "MSA_file '%s' does not exist", argv[parsed_args]);
     had_err = -1;
   }
 
   if (!had_err) {
     /* multiple sequence alignment construction */
-    msa = msa_new(argv[parsed_args], env_error(env));
+    msa = msa_new(argv[parsed_args], err);
     if (!msa)
       had_err = -1;
   }

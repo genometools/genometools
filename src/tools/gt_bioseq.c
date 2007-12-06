@@ -19,6 +19,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/versionfunc.h"
+#include "tools/gt_bioseq.h"
 
 typedef struct {
   bool recreate,
@@ -97,15 +98,15 @@ static OPrval parse_options(int *parsed_args, BioseqArguments *arguments,
   return oprval;
 }
 
-int gt_bioseq(int argc, const char **argv, Env *env)
+int gt_bioseq(int argc, const char **argv, Error *err)
 {
   BioseqArguments arguments;
   Bioseq *bioseq;
   int parsed_args, had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -114,7 +115,7 @@ int gt_bioseq(int argc, const char **argv, Env *env)
 
   /* option -showseqnum makes only sense if we got a single sequence file */
   if (arguments.showseqnum != UNDEF_ULONG && parsed_args + 1 != argc) {
-    env_error_set(env, "option '-showseqnum' makes only sense with a single "
+    error_set(err, "option '-showseqnum' makes only sense with a single "
                    "sequence_file");
     had_err = -1;
   }
@@ -122,9 +123,9 @@ int gt_bioseq(int argc, const char **argv, Env *env)
   while (!had_err && parsed_args < argc) {
     /* bioseq construction */
     if (arguments.recreate)
-      bioseq = bioseq_new_recreate(argv[parsed_args], env_error(env));
+      bioseq = bioseq_new_recreate(argv[parsed_args], err);
     else
-      bioseq = bioseq_new(argv[parsed_args], env_error(env));
+      bioseq = bioseq_new(argv[parsed_args], err);
     if (!bioseq)
       had_err = -1;
 
@@ -134,9 +135,9 @@ int gt_bioseq(int argc, const char **argv, Env *env)
 
     if (!had_err && arguments.showseqnum != UNDEF_ULONG) {
       if (arguments.showseqnum > bioseq_number_of_sequences(bioseq)) {
-        env_error_set(env, "argument '%lu' to option '-showseqnum' is too "
-                      "large. The Biosequence contains only '%lu' sequences.",
-                      arguments.showseqnum, bioseq_number_of_sequences(bioseq));
+        error_set(err, "argument '%lu' to option '-showseqnum' is too "
+                       "large. The Biosequence contains only '%lu' sequences.",
+                  arguments.showseqnum, bioseq_number_of_sequences(bioseq));
         had_err = -1;
       }
       if (!had_err) {

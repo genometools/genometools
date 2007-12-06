@@ -23,6 +23,7 @@
 #include "libgtext/gff3_out_stream.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/sort_stream.h"
+#include "tools/gt_chseqids.h"
 
 #define DEFAULT_JOINLENGTH 300
 
@@ -72,7 +73,7 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
   return oprval;
 }
 
-int gt_chseqids(int argc, const char **argv, Env *env)
+int gt_chseqids(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream, *chseqids_stream, *sort_stream = NULL,
                *gff3_out_stream = NULL;
@@ -81,10 +82,10 @@ int gt_chseqids(int argc, const char **argv, Env *env)
   Str *chseqids;
   int parsed_args, had_err = 0;
 
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -95,10 +96,8 @@ int gt_chseqids(int argc, const char **argv, Env *env)
                                              arguments.verbose &&
                                              arguments.outfp);
   chseqids = str_new_cstr(argv[parsed_args]);
-  if (!(chseqids_stream = chseqids_stream_new(gff3_in_stream, chseqids,
-                                              env_error(env)))) {
+  if (!(chseqids_stream = chseqids_stream_new(gff3_in_stream, chseqids, err)))
     had_err = -1;
-  }
   str_delete(chseqids);
   if (!had_err) {
     if (arguments.sort) {
@@ -111,8 +110,8 @@ int gt_chseqids(int argc, const char **argv, Env *env)
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
-                                               env_error(env))) && gn) {
+    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+           gn) {
       genome_node_rec_delete(gn);
     }
   }

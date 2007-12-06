@@ -21,6 +21,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/coin_hmm.h"
+#include "tools/gt_coin.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Error *err)
@@ -37,15 +38,15 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_coin(int argc, const char **argv, Env *env)
+int gt_coin(int argc, const char **argv, Error *err)
 {
   unsigned int i, *emissions, *state_sequence = NULL, num_of_emissions;
   int parsed_args, had_err = 0;
   HMM *hmm = NULL;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -65,8 +66,8 @@ int gt_coin(int argc, const char **argv, Env *env)
         emissions[i] = TAIL;
         break;
       default:
-        env_error_set(env, "emissions[%u]=%c is not a valid character (only "
-                      "`H' and `T' allowed)", i, (char) emissions[i]);
+        error_set(err, "emissions[%u]=%c is not a valid character (only "
+                       "`H' and `T' allowed)", i, (char) emissions[i]);
         had_err = -1;
     }
   }

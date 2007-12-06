@@ -19,6 +19,6 @@
 #define GT_MATCHCOUNT_H
 
 /* the matchcount tool */
-int gt_matchcount(int argc, const char **argv, Env*);
+int gt_matchcount(int argc, const char **argv, Error*);
 
 #endif

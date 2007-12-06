@@ -20,6 +20,7 @@
 #include "libgtcore/ma.h"
 #include "libgtcore/translate.h"
 #include "libgtcore/versionfunc.h"
+#include "tools/gt_translate.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Error *err)
@@ -35,7 +36,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_translate(int argc, const char **argv, Env *env)
+int gt_translate(int argc, const char **argv, Error *err)
 {
   char *frame1 = NULL,
        *frame2 = NULL,
@@ -43,10 +44,10 @@ int gt_translate(int argc, const char **argv, Env *env)
   unsigned long seqlen;
   const char *seq;
   int parsed_args;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

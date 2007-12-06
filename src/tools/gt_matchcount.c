@@ -20,6 +20,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/matchcount.h"
+#include "tools/gt_matchcount.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Error *err)
@@ -41,14 +42,14 @@ static void proc_match_count(int u_pos, int v_pos, int match_count)
   printf("mc(%2d, %2d)=%2d\n", u_pos, v_pos, match_count);
 }
 
-int gt_matchcount(int argc, const char **argv, Env *env)
+int gt_matchcount(int argc, const char **argv, Error *err)
 {
   const char *seq1, *seq2;
   int k, len1, len2, parsed_args, had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -56,7 +57,7 @@ int gt_matchcount(int argc, const char **argv, Env *env)
   assert(parsed_args + 2 < argc);
 
   if (sscanf(argv[parsed_args], "%d", &k) != 1 || k <= 0) {
-    env_error_set(env, "first argument <k> must be positive integer");
+    error_set(err, "first argument <k> must be positive integer");
     had_err = -1;
   }
 

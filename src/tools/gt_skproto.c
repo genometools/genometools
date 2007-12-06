@@ -23,6 +23,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/warning.h"
+#include "tools/gt_skproto.h"
 
 #define MAX_LINE_LENGTH  80
 
@@ -59,12 +60,10 @@ static unsigned char forbiddenstring(Str *line)
   return 0;
 }
 
-static void removecomments(Str *line, int *incomment, Env *env)
+static void removecomments(Str *line, int *incomment)
 {
   unsigned char *buffer;
   unsigned long pos=0, bufpos=0;
-
-  env_error_check(env);
 
   if (!line || !str_length(line))
     return;
@@ -108,19 +107,18 @@ static void removecomments(Str *line, int *incomment, Env *env)
   ma_free(buffer);
 }
 
-static void skproto(const char *filename, FILE *fpin, Env *env)
+static void skproto(const char *filename, FILE *fpin)
 {
   int linenum = 0, startfunction = 1, incomment = 0;
   Str *line;
 
-  env_error_check(env);
   assert(filename && fpin);
 
   line = str_new();
 
   while (str_read_next_line(line, fpin) != EOF) {
     linenum++;
-    removecomments(line, &incomment, env);
+    removecomments(line, &incomment);
     if (str_length(line)) {
       if (startfunction) {
         if (isalpha((int) (str_get(line)[0])) ||
@@ -158,14 +156,14 @@ static void skproto(const char *filename, FILE *fpin, Env *env)
   str_delete(line);
 }
 
-int gt_skproto(int argc, const char **argv, Env *env)
+int gt_skproto(int argc, const char **argv, Error *err)
 {
   FILE *fpin;
-  int i, parsed_args, had_err = 0;
-  env_error_check(env);
+  int i, parsed_args;
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -176,11 +174,11 @@ int gt_skproto(int argc, const char **argv, Env *env)
   printf("#endif\n");
 
   if (parsed_args == argc)
-    skproto("(stdout)", stdin, env);
+    skproto("(stdout)", stdin);
   else {
     for (i = parsed_args; i < argc; i++) {
       fpin = fa_xfopen(argv[i], "r");
-      skproto(argv[i], fpin, env);
+      skproto(argv[i], fpin);
       fa_xfclose(fpin);
     }
   }
@@ -189,5 +187,5 @@ int gt_skproto(int argc, const char **argv, Env *env)
   printf("}\n");
   printf("#endif\n");
 
-  return had_err;
+  return 0;
 }

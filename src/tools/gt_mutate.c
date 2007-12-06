@@ -21,6 +21,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/mutate.h"
+#include "tools/gt_mutate.h"
 
 typedef struct {
   unsigned int rate; /* the mutate rate */
@@ -49,17 +50,17 @@ static OPrval parse_options(int *parsed_args, MutateArguments *arguments,
   return oprval;
 }
 
-int gt_mutate(int argc, const char **argv, Env *env)
+int gt_mutate(int argc, const char **argv, Error *err)
 {
   MutateArguments arguments;
   Bioseq *bioseq;
   unsigned long i;
   Seq *mutated_seq;
   int parsed_args, had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -67,7 +68,7 @@ int gt_mutate(int argc, const char **argv, Env *env)
   assert(parsed_args < argc);
 
   while (!had_err && parsed_args < argc) {
-    bioseq = bioseq_new(argv[parsed_args], env_error(env));
+    bioseq = bioseq_new(argv[parsed_args], err);
     if (!bioseq)
       had_err = -1;
     if (!had_err) {

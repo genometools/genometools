@@ -22,6 +22,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/qgramdist.h"
+#include "tools/gt_qgramdist.h"
 
 static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
                             const char **argv, Error *err)
@@ -41,17 +42,17 @@ static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
   return oprval;
 }
 
-int gt_qgramdist(int argc, const char **argv, Env *env)
+int gt_qgramdist(int argc, const char **argv, Error *err)
 {
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
   unsigned long i, j, dist;
   Seq *seq_1, *seq_2;
   int parsed_args, had_err = 0;
   unsigned int q;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &q, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &q, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -60,23 +61,23 @@ int gt_qgramdist(int argc, const char **argv, Env *env)
 
   /* make sure seq_file_1 exists */
   if (!file_exists(argv[parsed_args])) {
-    env_error_set(env, "seq_file_1 \"%s\" does not exist", argv[parsed_args]);
+    error_set(err, "seq_file_1 \"%s\" does not exist", argv[parsed_args]);
     had_err = -1;
   }
 
   /* make sure seq_file_2 exists */
   if (!had_err && !file_exists(argv[parsed_args+1])) {
-    env_error_set(env, "seq_file_2 \"%s\" does not exist", argv[parsed_args+1]);
+    error_set(err, "seq_file_2 \"%s\" does not exist", argv[parsed_args+1]);
     had_err = -1;
   }
 
   /* init */
   if (!had_err) {
-    bioseq_1 = bioseq_new(argv[parsed_args], env_error(env));
+    bioseq_1 = bioseq_new(argv[parsed_args], err);
     if (!bioseq_1)
       had_err = -1;
     if (!had_err) {
-      bioseq_2 = bioseq_new(argv[parsed_args+1], env_error(env));
+      bioseq_2 = bioseq_new(argv[parsed_args+1], err);
       if (!bioseq_2)
         had_err = -1;
     }

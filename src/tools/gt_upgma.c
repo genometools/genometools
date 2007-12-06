@@ -21,6 +21,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtext/linearedist.h"
 #include "libgtext/upgma.h"
+#include "tools/gt_upgma.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Error *err)
@@ -60,16 +61,16 @@ static double exampledistfunc(unsigned long i, unsigned long j,
   return exampledistances[i][j];
 }
 
-int gt_upgma(int argc, const char **argv, Env *env)
+int gt_upgma(int argc, const char **argv, Error *err)
 {
   bool use_hard_coded_example = false;
   int parsed_args, had_err = 0;
   Bioseq *bioseq = NULL;
   UPGMA *upgma = NULL;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -82,7 +83,7 @@ int gt_upgma(int argc, const char **argv, Env *env)
   if (use_hard_coded_example)
     upgma = upgma_new(5, NULL, exampledistfunc);
   else {
-    bioseq = bioseq_new(argv[parsed_args], env_error(env));
+    bioseq = bioseq_new(argv[parsed_args], err);
     if (!bioseq)
       had_err = -1;
     if (!had_err)

@@ -26,7 +26,7 @@
    See below for example code to create a separate binary for the eval tool.
    XXX: change example to reflect the real gth application
 */
-int tooldriver(int(*tool)(int argc, const char **argv, Env*),
+int tooldriver(int(*tool)(int argc, const char **argv, Error*),
                int argc, char *argv[]);
 
 #if 0

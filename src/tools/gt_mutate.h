@@ -19,6 +19,6 @@
 #define GT_MUTATE_H
 
 /* the mutate tool */
-int gt_mutate(int argc, const char **argv, Env*);
+int gt_mutate(int argc, const char **argv, Error*);
 
 #endif

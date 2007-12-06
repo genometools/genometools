@@ -25,6 +25,7 @@
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/mergefeat_stream_sorted.h"
 #include "libgtext/sort_stream.h"
+#include "tools/gt_gff3.h"
 
 typedef struct {
   bool sort,
@@ -111,7 +112,7 @@ static OPrval parse_options(int *parsed_args, GFF3Arguments *arguments,
   return oprval;
 }
 
-int gt_gff3(int argc, const char **argv, Env *env)
+int gt_gff3(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream,
                *sort_stream = NULL,
@@ -122,11 +123,11 @@ int gt_gff3(int argc, const char **argv, Env *env)
   GFF3Arguments arguments;
   GenomeNode *gn;
   int parsed_args, had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
   arguments.offsetfile = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.offsetfile);
@@ -151,8 +152,7 @@ int gt_gff3(int argc, const char **argv, Env *env)
   /* set offsetfile (if necessary) */
   if (str_length(arguments.offsetfile)) {
     had_err = gff3_in_stream_set_offsetfile(gff3_in_stream,
-                                            arguments.offsetfile,
-                                            env_error(env));
+                                            arguments.offsetfile, err);
   }
 
   /* create sort stream (if necessary) */
@@ -181,8 +181,8 @@ int gt_gff3(int argc, const char **argv, Env *env)
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
-                                               env_error(env))) && gn) {
+    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+           gn) {
       genome_node_rec_delete(gn);
     }
   }

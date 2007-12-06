@@ -20,6 +20,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/multilcp.h"
+#include "tools/gt_multilcp.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Error *err)
@@ -36,14 +37,14 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_multilcp(int argc, const char **argv, Env *env)
+int gt_multilcp(int argc, const char **argv, Error *err)
 {
   const char *seq1, *seq2;
   int parsed_args, len1, len2, **multilcptab;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -55,7 +56,7 @@ int gt_multilcp(int argc, const char **argv, Env *env)
   len1 = strlen(seq1);
   len2 = strlen(seq2);
   if (len1 == 0 || len2 == 0) {
-    env_error_set(env, "sequence of length 0 not allowed");
+    error_set(err, "sequence of length 0 not allowed");
     return -1;
   }
   multilcptab = multilcp_compute(seq1, len1, seq2, len2);

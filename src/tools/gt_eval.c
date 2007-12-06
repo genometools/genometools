@@ -20,6 +20,7 @@
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/stream_evaluator.h"
+#include "tools/gt_eval.h"
 
 typedef struct {
   bool verbose,
@@ -80,17 +81,17 @@ static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
   return oprval;
 }
 
-int gt_eval(int argc, const char **argv, Env *env)
+int gt_eval(int argc, const char **argv, Error *err)
 {
   GenomeStream *reality_stream,
                *prediction_stream;
   StreamEvaluator *evaluator;
   EvalArguments arguments;
   int had_err, parsed_args;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -111,7 +112,7 @@ int gt_eval(int argc, const char **argv, Env *env)
 
   /* compute the evaluation */
   had_err = stream_evaluator_evaluate(evaluator, arguments.verbose,
-                                      arguments.exondiff, NULL, env_error(env));
+                                      arguments.exondiff, NULL, err);
 
   /* show the evaluation */
   if (!had_err)

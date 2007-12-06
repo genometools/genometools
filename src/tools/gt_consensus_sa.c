@@ -24,6 +24,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/consensus_sa.h"
+#include "tools/gt_consensus_sa.h"
 
 #define DELIMITER         ','
 #define FORWARDSTRANDCHAR '+'
@@ -232,16 +233,16 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_consensus_sa(int argc, const char **argv, Env *env)
+int gt_consensus_sa(int argc, const char **argv, Error *err)
 {
   Array *spliced_alignments;
   SimpleSplicedAlignment *sa;
   unsigned long i;
   int parsed_args, had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -250,7 +251,7 @@ int gt_consensus_sa(int argc, const char **argv, Env *env)
 
   /* parse input file and store resuilts in the spliced alignment array */
   spliced_alignments = array_new(sizeof (SimpleSplicedAlignment));
-  had_err = parse_input_file(spliced_alignments, argv[1], env_error(env));
+  had_err = parse_input_file(spliced_alignments, argv[1], err);
 
   if (!had_err) {
     /* sort spliced alignments */

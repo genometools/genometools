@@ -19,6 +19,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/regioncov_visitor.h"
+#include "tools/gt_regioncov.h"
 
 typedef struct {
   unsigned long max_feature_dist;
@@ -50,17 +51,17 @@ static OPrval parse_options(int *parsed_args, RegionCovArguments *arguments,
   return oprval;
 }
 
-int gt_regioncov(int argc, const char **argv, Env *env)
+int gt_regioncov(int argc, const char **argv, Error *err)
 {
   GenomeVisitor *regioncov_visitor;
   GenomeStream *gff3_in_stream;
   GenomeNode *gn;
   RegionCovArguments arguments;
   int parsed_args, had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       return -1;
@@ -77,9 +78,8 @@ int gt_regioncov(int argc, const char **argv, Env *env)
   regioncov_visitor = regioncov_visitor_new(arguments.max_feature_dist);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn,
-                                             env_error(env))) && gn) {
-      had_err = genome_node_accept(gn, regioncov_visitor, env_error(env));
+  while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, err)) && gn) {
+      had_err = genome_node_accept(gn, regioncov_visitor, err);
       genome_node_rec_delete(gn);
   }
 

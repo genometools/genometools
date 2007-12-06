@@ -22,10 +22,11 @@
 #include "libgtcore/scorematrix.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
+#include "tools/gt_nussinov_rna_fold.h"
 
 #define SCAN_ALPHA_VALUE(NUM, CHAR_1, CHAR_2)                                  \
         if (!had_err && (sscanf(argv[NUM], "%d", &rval) != 1 || rval > 0)) {   \
-          env_error_set(env, "argument for alpha(%c,%c) must be non-positive " \
+          error_set(err, "argument for alpha(%c,%c) must be non-positive "     \
                          "integer", CHAR_1, CHAR_2);                           \
           had_err = -1;                                                        \
         }                                                                      \
@@ -138,7 +139,7 @@ static void traceback(unsigned long i, unsigned long j, int **E,
 static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
                               unsigned int l_min, unsigned int verbose,
                               ScoreMatrix *energy_function,
-                              Alpha *dna_alpha, FILE *fp, Env *env)
+                              Alpha *dna_alpha, FILE *fp)
 {
   unsigned long i;
   int **E;
@@ -200,7 +201,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
+int gt_nussinov_rna_fold(int argc, const char **argv, Error *err)
 {
   unsigned long i, j, rna_length;
   unsigned int l_min;
@@ -208,10 +209,10 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
   int parsed_args, rval, had_err = 0;
   Alpha *dna_alpha;
   ScoreMatrix *energy_function; /* alpha */
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -231,7 +232,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
 
   /* save l_min value */
   if (sscanf(argv[1], "%d", &rval) != 1 || rval <= 0) {
-    env_error_set(env, "argument for l_min must be positive integer");
+    error_set(err, "argument for l_min must be positive integer");
     had_err = -1;
   }
   else
@@ -250,7 +251,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
 
     /* fold RNA sequence with Nussinov algorithm */
     nussinov_rna_fold(rna_sequence, rna_length, l_min, 1, energy_function,
-                      dna_alpha, stdout, env);
+                      dna_alpha, stdout);
   }
 
   /* free */

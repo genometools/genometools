@@ -19,6 +19,6 @@
 #define GT_MKFMINDEX_H
 
 /* the mkfmindex tool */
-int gt_mkfmindex(int argc, const char **argv, Env*);
+int gt_mkfmindex(int argc, const char **argv, Error*);
 
 #endif

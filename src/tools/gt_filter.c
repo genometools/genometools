@@ -22,6 +22,7 @@
 #include "libgtext/filter_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
+#include "tools/gt_filter.h"
 
 typedef struct {
   bool verbose;
@@ -94,7 +95,7 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
   return oprval;
 }
 
-int gt_filter(int argc, const char **argv, Env *env)
+int gt_filter(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream, *filter_stream, *gff3_out_stream;
   GenomeNode *gn;
@@ -104,7 +105,7 @@ int gt_filter(int argc, const char **argv, Env *env)
   /* option parsing */
   arguments.seqid = str_new();
   arguments.typefilter = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, env_error(env))) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.seqid);
@@ -133,8 +134,8 @@ int gt_filter(int argc, const char **argv, Env *env)
   gff3_out_stream = gff3_out_stream_new(filter_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
-                                             env_error(env))) && gn) {
+  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+         gn) {
     genome_node_rec_delete(gn);
   }
 

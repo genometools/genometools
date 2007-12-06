@@ -26,6 +26,7 @@
 #include "libgtcore/xposix.h"
 #include "libgtcore/progressbar.h"
 #include "libgtmatch/format64.h"
+#include "tools/gt_seqiterator.h"
 
 static OPrval parse_options(bool *verbose,int *parsed_args,
                             int argc, const char **argv, Error *err)
@@ -46,7 +47,7 @@ static OPrval parse_options(bool *verbose,int *parsed_args,
   return oprval;
 }
 
-int gt_seqiterator(int argc, const char **argv, Env *env)
+int gt_seqiterator(int argc, const char **argv, Error *err)
 {
   StrArray *files;
   SeqIterator *seqit;
@@ -57,10 +58,10 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
   off_t totalsize;
   bool verbose = false;
 
-  env_error_check(env);
+  error_check(err);
 
   /* option parsing */
-  switch (parse_options(&verbose,&parsed_args, argc, argv, env_error(env))) {
+  switch (parse_options(&verbose,&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -85,7 +86,7 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
   }
   while (true)
   {
-    had_err = seqiterator_next(seqit, &sequence, &len, &desc, env_error(env));
+    had_err = seqiterator_next(seqit, &sequence, &len, &desc, err);
     if (had_err != 1)
     {
       break;

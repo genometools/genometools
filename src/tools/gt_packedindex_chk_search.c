@@ -13,10 +13,9 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #include <stdio.h>
 #include <string.h>
-
-#include "gt_packedindex_chk_search.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/env.h"
 #include "libgtcore/minmax.h"
@@ -31,6 +30,7 @@
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/sfx-apfxlen.pr"
 #include "libgtmatch/eis-bwtconstruct_params.h"
+#include "tools/gt_packedindex_chk_search.h"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL
 
@@ -45,10 +45,10 @@ struct chkSearchOptions
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                    struct chkSearchOptions *params, const Str *projectName,
-                   Env *env);
+                   Error *err);
 
 extern int
-gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
+gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
 {
   struct chkSearchOptions params;
   Suffixarray suffixarray;
@@ -58,16 +58,15 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
   Str *inputProject = NULL;
   int parsedArgs;
   bool had_err = false;
-  Error *err = env_error(env); /* XXX: remove */
 
   inputProject = str_new();
 
   do {
-    env_error_check(env);
+    error_check(err);
     {
       bool exitNow = false;
       switch (parseChkBWTOptions(&parsedArgs, argc, argv, &params,
-                                 inputProject, env))
+                                 inputProject, err))
       {
       case OPTIONPARSER_OK:
         break;
@@ -84,7 +83,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
     }
     str_set(inputProject, argv[parsedArgs]);
     {
-      bwtSeq = availBWTSeq(&params.idx.final, env_error(env));
+      bwtSeq = availBWTSeq(&params.idx.final, err);
     }
     ensure(had_err, bwtSeq);
     if (had_err)
@@ -93,12 +92,12 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
     {
       enum verifyBWTSeqErrCode retval =
         BWTSeqVerifyIntegrity(bwtSeq, inputProject, params.progressInterval,
-                              stderr, env_error(env));
+                              stderr, err);
       if (retval != VERIFY_BWTSEQ_NO_ERROR)
       {
         fprintf(stderr, "index integrity check failed: %s\n",
-                error_get(env_error(env)));
-        env_error_set(env, "aborted because of index integrity check fail");
+                error_get(err));
+        error_set(err, "aborted because of index integrity check fail");
         break;
       }
     }
@@ -108,11 +107,11 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       ensure(had_err,
              mapsuffixarray(&suffixarray, &totalLen,
                             SARR_SUFTAB | SARR_ESQTAB,
-                            inputProject, NULL, env_error(env)) == 0);
+                            inputProject, NULL, err) == 0);
       if (had_err)
       {
-        env_error_set(env, "Can't load suffix array project with"
-                      " demand for encoded sequence and suffix table files\n");
+        error_set(err, "Can't load suffix array project with"
+                       " demand for encoded sequence and suffix table files\n");
         break;
       }
       saIsLoaded = true;
@@ -139,7 +138,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
                                            suffixarray.encseq,
                                            getnumofcharsAlphabet(
                                               suffixarray.alpha),
-                                           env_error(env))));
+                                           err)));
       if (had_err)
       {
         fputs("Creation of pattern iterator failed!\n", stderr);
@@ -158,13 +157,13 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
                               pptr,
                               patternLen);
         BWTSeqExactMatchesIterator *EMIter =
-          newEMIterator(bwtSeq, pptr, patternLen, env_error(env));
+          newEMIterator(bwtSeq, pptr, patternLen, err);
         Seqpos numMatches = EMINumMatchesTotal(EMIter);
         ensure(had_err, EMIter);
         if (had_err)
           break;
         assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr,
-                                              patternLen, env_error(env)));
+                                              patternLen, err));
         assert(EMINumMatchesTotal(EMIter) == countmmsearchiterator(mmsi));
         fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n"
                 "pattern: ", trial,
@@ -174,7 +173,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
         while (nextmmsearchiterator(&dbstart,mmsi))
         {
           struct MatchData *match =
-            EMIGetNextMatch(EMIter, bwtSeq, env_error(env));
+            EMIGetNextMatch(EMIter, bwtSeq, err);
           ensure(had_err, match);
           if (had_err)
           {
@@ -193,7 +192,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
         if (!had_err)
         {
           struct MatchData *trailingMatch =
-            EMIGetNextMatch(EMIter, bwtSeq, env_error(env));
+            EMIGetNextMatch(EMIter, bwtSeq, err);
           ensure(had_err, !trailingMatch);
           if (had_err)
           {
@@ -201,7 +200,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
             break;
           }
         }
-        deleteEMIterator(EMIter,env_error(env));
+        deleteEMIterator(EMIter,err);
         freemmsearchiterator(&mmsi);
       }
       fprintf(stderr, "Finished %lu of %lu matchings successfully.\n",
@@ -210,7 +209,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
   } while (0);
   if (saIsLoaded) freesuffixarray(&suffixarray);
   if (epi) freeEnumpatterniterator(&epi);
-  if (bwtSeq) deleteBWTSeq(bwtSeq, env_error(env));
+  if (bwtSeq) deleteBWTSeq(bwtSeq, err);
   if (inputProject) str_delete(inputProject);
   return had_err?-1:0;
 }
@@ -218,13 +217,13 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                    struct chkSearchOptions *params, const Str *projectName,
-                   Env *env)
+                   Error *err)
 {
   OptionParser *op;
   OPrval oprval;
   Option *option;
 
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("indexname",
                          "Load (or build if necessary) BWT index for project"
                          " <indexname> and perform verification of search"
@@ -261,13 +260,11 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   option_parser_add_option(op, option);
 
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc,
-                                            argv, versionfunc, 1, 1,
-                                            env_error(env));
+                                            argv, versionfunc, 1, 1, err);
   /* compute parameters currently not set from command-line or
    * determined indirectly */
   computePackedIndexDefaults(&params->idx,
-                             BWTBaseFeatures & ~BWTProperlySorted,
-                             env_error(env));
+                             BWTBaseFeatures & ~BWTProperlySorted, err);
 
   option_parser_delete(op);
 

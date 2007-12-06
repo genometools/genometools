@@ -24,6 +24,7 @@
 #include "libgtcore/symboldef.h"
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/test-pairwise.h"
+#include "tools/gt_paircmp.h"
 
 typedef struct
 {
@@ -226,15 +227,15 @@ static unsigned long applycheckfunctiontosimpleoptions(
   return 0;
 }
 
-int gt_paircmp(int argc, const char **argv, Env *env)
+int gt_paircmp(int argc, const char **argv, Error *err)
 {
   int parsed_args;
   Cmppairwiseopt cmppairwise;
   OPrval oprval;
 
-  env_error_check(env);
+  error_check(err);
 
-  oprval = parse_options(&parsed_args,&cmppairwise,argc, argv, env_error(env));
+  oprval = parse_options(&parsed_args,&cmppairwise,argc, argv, err);
   if (oprval == OPTIONPARSER_OK)
   {
     unsigned long testcases;

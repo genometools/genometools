@@ -19,6 +19,6 @@
 #define GT_PACKEDINDEX_H
 
 /* the packedindex tool */
-int gt_packedindex(int argc, const char **argv, Env*);
+int gt_packedindex(int argc, const char **argv, Error*);
 
 #endif

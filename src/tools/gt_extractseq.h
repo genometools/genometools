@@ -19,6 +19,6 @@
 #define GT_EXTRACTSEQ_H
 
 /* the extract sequence tool */
-int gt_extractseq(int argc, const char **argv, Env*);
+int gt_extractseq(int argc, const char **argv, Error*);
 
 #endif

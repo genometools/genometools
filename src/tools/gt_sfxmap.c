@@ -28,6 +28,7 @@
 #include "libgtmatch/test-mappedstr.pr"
 #include "libgtmatch/sfx-suftaborder.pr"
 #include "libgtmatch/echoseq.pr"
+#include "tools/gt_seqiterator.h"
 
 typedef struct
 {
