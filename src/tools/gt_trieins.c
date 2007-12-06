@@ -15,8 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/versionfunc.h"
+#include "libgtcore/env.h"
 #include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
 #include "libgtmatch/test-trieins.pr"
 
 static OPrval parse_options(bool *onlyins,int *parsed_args,

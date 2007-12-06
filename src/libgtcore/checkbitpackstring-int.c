@@ -27,7 +27,7 @@
 #include <sys/time.h>
 
 #include "libgtcore/bitpackstring.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
@@ -71,7 +71,7 @@ genBitCount(unsigned v)
   } while (0)
 
 int
-bitPackStringInt_unit_test(Env *env)
+bitPackStringInt_unit_test(Error *err)
 {
   BitString bitStore = NULL;
   BitString bitStoreCopy = NULL;

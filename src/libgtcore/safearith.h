@@ -21,7 +21,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/safearith_imp.h"
 
 /*
@@ -69,7 +69,7 @@ uint64_t      safe_mult_u64(uint64_t, uint64_t);
 unsigned long safe_mult_ulong(unsigned long, unsigned long);
 long          safe_cast2long(unsigned long);
 unsigned long safe_cast2ulong(long);
-int           safearith_example(Env*);
-int           safearith_unit_test(Env*);
+int           safearith_example(Error*);
+int           safearith_unit_test(Error*);
 
 #endif

@@ -256,12 +256,12 @@ int str_read_next_line_generic(Str *s, GenFile *fpin)
   }
 }
 
-int str_unit_test(Env *env)
+int str_unit_test(Error *err)
 {
   Str *s, *s1, *s2;
   static char cstring_1[] = "test_string"; /* l=11 */
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* the empty string */
   s1 = str_new();

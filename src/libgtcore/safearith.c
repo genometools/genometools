@@ -87,14 +87,13 @@ unsigned long safe_cast2ulong(long value)
   return value;
 }
 
-int safearith_example(Env *env)
+int safearith_example(Error *err)
 {
   unsigned long ulong;
   long slong;
   unsigned int a, b, c;
   int dest, src;
-
-  env_error_check(env);
+  error_check(err);
 
   /* safe assignments */
   slong = 256;
@@ -121,10 +120,10 @@ int safearith_example(Env *env)
   return 0;
 }
 
-int safearith_unit_test(Env *env)
+int safearith_unit_test(Error *err)
 {
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   {
     ensure(had_err, __MIN(char) == -128);

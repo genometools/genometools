@@ -78,7 +78,7 @@ bool           config_get_verbose(const Config*);
    If a type dominates, it will be drawn on top of the other in the image. */
 DominateStatus config_dominates(Config*, GenomeFeatureType gft1,
                                 GenomeFeatureType gft2);
-int            config_unit_test(Env*);
+int            config_unit_test(Error*);
 /* Deletes a Config object but leaves the internal Lua state intact. */
 void           config_delete_without_state(Config*);
 void           config_delete(Config*);

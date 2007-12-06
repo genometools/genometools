@@ -94,11 +94,11 @@ void evaluator_reset(Evaluator *evaluator)
   memset(evaluator, 0, sizeof *evaluator);
 }
 
-int evaluator_unit_test(Env *env)
+int evaluator_unit_test(Error *err)
 {
   Evaluator *evaluator = evaluator_new();
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   ensure(had_err, evaluator_get_sensitivity(evaluator) == 1.0);
   ensure(had_err, evaluator_get_specificity(evaluator) == 1.0);

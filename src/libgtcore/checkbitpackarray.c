@@ -29,7 +29,7 @@ enum {
   MAX_RND_NUMS = 100000,
 };
 
-int bitPackArray_unit_test(Env *env)
+int bitPackArray_unit_test(Error *err)
 {
   struct BitPackArray *bitStore = NULL;
   unsigned long seedval;

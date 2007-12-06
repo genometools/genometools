@@ -40,6 +40,6 @@ void  bsearch_all(Array *members, const void *key, const void *base,
 void  bsearch_all_mark(Array *members, const void *key, const void *base,
                        size_t nmemb, size_t size, Compar, void *data, Bittab*);
 
-int   bsearch_unit_test(Env*);
+int   bsearch_unit_test(Error*);
 
 #endif

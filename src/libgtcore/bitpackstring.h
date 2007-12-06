@@ -25,11 +25,11 @@
  * user-requested number of bits.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
+
 #include <limits.h>
 #include <inttypes.h>
 #include <stdlib.h>
-
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /** basic unit of addressing BitStrings */
 /* Caution: sizeof (BitElem) <= sizeof (unsigned long) must be met */
@@ -627,37 +627,37 @@ bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits);
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackString_unit_test(Env *env);
+bitPackString_unit_test(Error*);
 /**
  * \brief Unit test function for bitPackString, integer functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackStringInt_unit_test(Env *env);
+bitPackStringInt_unit_test(Error*);
 /**
  * \brief Unit test function for bitPackString, 8-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackStringInt8_unit_test(Env *env);
+bitPackStringInt8_unit_test(Error*);
 /**
  * \brief Unit test function for bitPackString, 16-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackStringInt16_unit_test(Env *env);
+bitPackStringInt16_unit_test(Error*);
 /**
  * \brief Unit test function for bitPackString, 32-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackStringInt32_unit_test(Env *env);
+bitPackStringInt32_unit_test(Error*);
 /**
  * \brief Unit test function for bitPackString, 64-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackStringInt64_unit_test(Env *env);
+bitPackStringInt64_unit_test(Error*);
 
 #include "bitpackstringsimpleop.h"
 

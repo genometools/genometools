@@ -50,7 +50,7 @@ void              block_set_type(Block*, GenomeFeatureType);
 GenomeFeatureType block_get_type(const Block*);
 /* Returns Dlist with Pointer to Element objects. */
 Dlist*            block_get_elements(const Block*);
-int               block_unit_test(Env*);
+int               block_unit_test(Error*);
 void              block_delete(Block*);
 
 #endif

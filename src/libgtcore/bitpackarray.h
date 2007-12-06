@@ -140,6 +140,6 @@ bpaGetUInt64(const BitPackArray *array, BitOffset index)
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackArray_unit_test(Env *env);
+bitPackArray_unit_test(Error*);
 
 #endif

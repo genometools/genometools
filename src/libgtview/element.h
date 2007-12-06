@@ -36,7 +36,7 @@ GenomeFeatureType element_get_type(const Element*);
 void              element_set_type(Element*, GenomeFeatureType);
 bool              element_is_marked(const Element*);
 bool              elements_are_equal(const Element*, const Element*);
-int               element_unit_test(Env*);
+int               element_unit_test(Error*);
 void              element_delete(Element* element);
 
 #endif

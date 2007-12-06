@@ -31,7 +31,7 @@ void   line_insert_block(Line*, Block*); /* takes ownership */
 bool   line_is_occupied(const Line*, Range);
 /* Returns Array containing Pointers to Block objects. */
 Array* line_get_blocks(Line*);
-int    line_unit_test(Env*);
+int    line_unit_test(Error*);
 void   line_delete(Line*);
 
 #endif

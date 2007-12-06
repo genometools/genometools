@@ -120,14 +120,14 @@ const char* tokenizer_get_filename(const Tokenizer *t)
   return io_get_filename(t->io);
 }
 
-int tokenizer_unit_test(Env *env)
+int tokenizer_unit_test(Error *err)
 {
   Str *tmpfilename;
   Tokenizer *t;
   FILE *tmpfp;
   Str *token;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* empty file (except comment line) */
   tmpfilename = str_new_cstr(XTMPFILE_TEMPLATE);

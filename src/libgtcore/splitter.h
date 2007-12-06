@@ -18,7 +18,7 @@
 #ifndef SPLITTER_H
 #define SPLITTER_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 typedef struct Splitter Splitter;
 
@@ -41,7 +41,7 @@ void          splitter_reset(Splitter*);
 /* returns the number of tokens */
 unsigned long splitter_size(Splitter*);
 
-int           splitter_unit_test(Env*);
+int           splitter_unit_test(Error*);
 void          splitter_delete(Splitter*);
 
 #endif

@@ -375,7 +375,7 @@ DominateStatus config_dominates(Config* cfg, GenomeFeatureType gft1,
   }
 }
 
-int config_unit_test(Env *env)
+int config_unit_test(Error *err)
 {
   int had_err = 0;
   Config *cfg;
@@ -384,6 +384,7 @@ int config_unit_test(Env *env)
   Str *luafile = str_new_cstr("config.lua");
   Color col1, col2, col, defcol, tmpcol;
   double num;
+  error_check(err);
 
   /* example colors */
   col1.red=.1;col1.green=.2;col1.blue=.3;
@@ -392,7 +393,7 @@ int config_unit_test(Env *env)
   defcol.red=.8;defcol.green=.8;defcol.blue=.8;
 
   /* instantiate new config object */
-  if (!(cfg = config_new(false, env_error(env))))
+  if (!(cfg = config_new(false, err)))
     had_err = -1;
 
   /* at the beginning, all values are defaults, since nothing is defined */

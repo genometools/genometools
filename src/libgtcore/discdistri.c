@@ -147,12 +147,12 @@ void discdistri_foreach(const DiscDistri *d, DiscDistriIterFunc func,
   }
 }
 
-int discdistri_unit_test(Env *env)
+int discdistri_unit_test(Error *err)
 {
   DiscDistri *d;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(err);
 
   d = discdistri_new();
 

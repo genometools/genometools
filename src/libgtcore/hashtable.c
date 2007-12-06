@@ -207,12 +207,12 @@ void hashtable_reset(Hashtable *ht)
   (void) st_foreach(ht->st_table, remove_key_value_pair, (st_data_t) ht, NULL);
 }
 
-static int hashtable_test(HashType hash_type, Env *env)
+static int hashtable_test(HashType hash_type, Error *err)
 {
   char *s1 = "foo", *s2 = "bar";
   Hashtable *ht;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* empty hash */
   ht = hashtable_new(hash_type, NULL, NULL);
@@ -241,17 +241,17 @@ static int hashtable_test(HashType hash_type, Env *env)
   return had_err;
 }
 
-int hashtable_unit_test(Env *env)
+int hashtable_unit_test(Error *err)
 {
   int had_err;
-  env_error_check(env);
+  error_check(err);
 
   /* direct hash */
-  had_err = hashtable_test(HASH_DIRECT, env);
+  had_err = hashtable_test(HASH_DIRECT, err);
 
   /* string hash */
   if (!had_err)
-    had_err = hashtable_test(HASH_STRING, env);
+    had_err = hashtable_test(HASH_STRING, err);
 
   return had_err;
 }

@@ -202,12 +202,12 @@ static int iterate_fail_func(void *info, const void *value, Error *err)
   return -1;
 }
 
-int array_example(Env *env)
+int array_example(Error *err)
 {
   unsigned long i;
   Array *a;
 
-  env_error_check(env);
+  error_check(err);
 
   /* an example array use case */
 
@@ -224,7 +224,7 @@ int array_example(Env *env)
   return 0;
 }
 
-int array_unit_test(Env *env)
+int array_unit_test(Error *err)
 {
   Array *char_array, *int_array, *a = NULL;
   char cc, *char_array_test;
@@ -232,7 +232,7 @@ int array_unit_test(Env *env)
   unsigned long i, j, size;
   Range range;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* testing an empty array */
   char_array = array_new(sizeof (char));
@@ -310,8 +310,8 @@ int array_unit_test(Env *env)
   if (!had_err) {
     array_reverse(a);
     i = 0;
-    ensure(had_err, !array_iterate(a, iterate_test_func, &i, env_error(env)));
-    ensure(had_err, array_iterate(a, iterate_fail_func, NULL, env_error(env)));
+    ensure(had_err, !array_iterate(a, iterate_test_func, &i, err));
+    ensure(had_err, array_iterate(a, iterate_fail_func, NULL, err));
   }
   if (!had_err) {
     array_rem(a, 13);

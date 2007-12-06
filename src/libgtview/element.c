@@ -77,7 +77,7 @@ bool element_is_marked(const Element *element)
   return element->mark;
 }
 
-bool elements_are_equal(const Element* e1, const Element* e2)
+bool elements_are_equal(const Element *e1, const Element *e2)
 {
   assert(e1 && e2);
   if (e1->type == e2->type && !range_compare(e1->range, e2->range))
@@ -85,12 +85,13 @@ bool elements_are_equal(const Element* e1, const Element* e2)
   return false;
 }
 
-int element_unit_test(Env* env)
+int element_unit_test(Error *err)
 {
   Range r1, r2, r_temp;
   GenomeNode *gn, *gn2;
   Element *e, *e2, *e3;
   int had_err = 0;
+  error_check(err);
 
   r1.start = 10UL;
   r1.end = 50UL;

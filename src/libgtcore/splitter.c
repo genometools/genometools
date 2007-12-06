@@ -90,7 +90,7 @@ unsigned long splitter_size(Splitter *s)
   return s->num_of_tokens;
 }
 
-int splitter_unit_test(Env *env)
+int splitter_unit_test(Error *err)
 {
   static char string_1[]  = "a bb ccc dddd eeeee",
               string_2[]  = "a\tbb\tccc\tdddd\teeeee",
@@ -100,7 +100,7 @@ int splitter_unit_test(Env *env)
               string_6[]  = "test";
   Splitter *s;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
   s = splitter_new();
 
   /* string_1 */

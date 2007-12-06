@@ -39,7 +39,7 @@ void        diagram_set_config(Diagram*, Config*);
 Hashtable*  diagram_get_tracks(const Diagram*);
 int         diagram_get_total_lines(const Diagram*);
 int         diagram_get_number_of_tracks(const Diagram*);
-int         diagram_unit_test(Env*);
+int         diagram_unit_test(Error*);
 void        diagram_delete(Diagram*);
 
 #endif

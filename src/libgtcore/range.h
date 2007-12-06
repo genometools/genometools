@@ -35,7 +35,7 @@ bool          range_within(Range, unsigned long);
 Range         range_join(Range, Range);
 Range         range_offset(Range, long offset);
 unsigned long range_length(Range);
-int           range_unit_test(Env*);
+int           range_unit_test(Error*);
 
 void          ranges_sort(Array*);
 void          ranges_sort_by_length_stable(Array*);

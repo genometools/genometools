@@ -456,7 +456,7 @@ int diagram_get_number_of_tracks(const Diagram *diagram)
   return diagram->nof_tracks;
 }
 
-int diagram_unit_test(Env *env)
+int diagram_unit_test(Error *err)
 {
   GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   FeatureIndex *fi;
@@ -466,6 +466,7 @@ int diagram_unit_test(Env *env)
   int had_err=0;
   Config *cfg = NULL;
   Diagram *dia = NULL, *dia2 = NULL;
+  error_check(err);
 
   /* generating some ranges */
   r1.start=100UL; r1.end=1000UL;
@@ -524,7 +525,7 @@ int diagram_unit_test(Env *env)
 
   /* create a config object */
   if (!had_err) {
-    if (!(cfg = config_new(false, env_error(env))))
+    if (!(cfg = config_new(false, err)))
       had_err = -1;
   }
 

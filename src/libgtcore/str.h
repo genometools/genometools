@@ -19,7 +19,7 @@
 #define STR_H
 
 #include <stdio.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/genfile.h"
 
 /* the string class, string objects are strings which grow on demand */
@@ -44,7 +44,7 @@ int           str_cmp(const Str*, const Str*);
 int           str_read_next_line(Str*, FILE*);
 int           str_read_next_line_generic(Str*, GenFile*);
 unsigned long str_length(const Str*);
-int           str_unit_test(Env*);
+int           str_unit_test(Error*);
 void          str_delete(Str*);
 
 #endif

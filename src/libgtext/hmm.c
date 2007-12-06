@@ -572,7 +572,7 @@ void hmm_show(const HMM *hmm, FILE *fp)
   }
 }
 
-int hmm_unit_test(Env *env)
+int hmm_unit_test(Error *err)
 {
   /* the last coin string must be the longest */
   static char *coin_tosses[] = { "H", "T", "HH", "HT", "TH", "TT", "HTHT",
@@ -598,7 +598,7 @@ int hmm_unit_test(Env *env)
   size_t i, j, len, size;
   HMM *fair_hmm, *loaded_hmm;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   /* test the HMM class with the coin HMMs */
   fair_hmm = coin_hmm_fair();

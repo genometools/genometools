@@ -194,7 +194,7 @@ bool feature_index_has_seqid(const FeatureIndex *fi, const char *seqid)
   return (hashtable_get(fi->regions, seqid));
 }
 
-int feature_index_unit_test(Env* env)
+int feature_index_unit_test(Error *err)
 {
   /* first we have to create some objects that we can use for testing */
   GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
@@ -204,6 +204,7 @@ int feature_index_unit_test(Env* env)
   StrArray *seqids = NULL;
   SequenceRegion *sr1, *sr2;
   int had_err = 0;
+  error_check(err);
 
   /* generating some ranges */
   r1.start=100UL; r1.end=1000UL;

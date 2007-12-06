@@ -49,6 +49,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
   int parsedArgs;
   int had_err = 0;
   env_error_check(env);
+  Error *err = env_error(env); /* XXX: remove */
 
   switch (parseChkIndexOptions(&parsedArgs, argc, argv, &options,
                                env_error(env)))

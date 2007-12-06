@@ -47,6 +47,6 @@ unsigned long countingsort_get_max(const void *in, size_t elem_size,
                                                  (const void *elem,
                                                   void *data));
 
-int           countingsort_unit_test(Env*);
+int           countingsort_unit_test(Error*);
 
 #endif

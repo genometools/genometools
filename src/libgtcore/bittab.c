@@ -306,13 +306,13 @@ void bittab_show(const Bittab *b, FILE *outfp)
   (void) putc('\n', outfp);
 }
 
-int bittab_unit_test(Env *env)
+int bittab_unit_test(Error *err)
 {
   unsigned long i, j, size, bit, counter;
   Bittab *b, *tmp, *and;
   FILE *fp;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
     size = ((double) rand() / RAND_MAX) * MAX_SIZE + 1;

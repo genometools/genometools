@@ -300,7 +300,7 @@ Dlist* block_get_elements(const Block *block)
   return block->elements;
 }
 
-int block_unit_test(Env* env)
+int block_unit_test(Error *err)
 {
   Range r1, r2, r_temp, b_range;
   Dlist* elements;
@@ -312,8 +312,9 @@ int block_unit_test(Env* env)
   Str *caption1 = str_new_cstr("foo");
   Str *caption2 = str_new_cstr("bar");
   Config *cfg;
+  error_check(err);
 
-  if (!(cfg = config_new(false, env_error(env))))
+  if (!(cfg = config_new(false, err)))
     had_err = -1;
 
   r1.start = 10UL;

@@ -120,7 +120,7 @@ deleteCompositionList(struct compList *clist, Error *err);
  * index, idxOutput[1] the permutation index.
  * @param bitsOfPermIdx if non-NULL, the number of significant bits
  * for the permutation index is stored here.
- * @param err Environment to use for memory allocation etc.
+ * @param err Error object.
  * @param permCompPA if not NULL must point to a memory region of
  * sufficient size to hold the concatenated bistring representations
  * of composition and permutation, composition at offset 0,

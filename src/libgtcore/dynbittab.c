@@ -78,7 +78,7 @@ bool dynbittab_bit_is_set(const DynBittab *b, unsigned long bit)
   return false;
 }
 
-int dynbittab_unit_test(Env *env)
+int dynbittab_unit_test(Error *err)
 {
   unsigned long i;
   DynBittab *b;

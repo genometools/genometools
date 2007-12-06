@@ -33,7 +33,7 @@ Str*   track_get_title(const Track*);
 /* Returns Array containing Pointers to Line objects. */
 Array* track_get_lines(const Track*);
 int    track_get_number_of_lines(const Track*);
-int    track_unit_test(Env*);
+int    track_unit_test(Error*);
 void   track_delete(Track*);
 
 #endif

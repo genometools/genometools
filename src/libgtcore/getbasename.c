@@ -55,10 +55,11 @@ char *getbasename(const char *path)
   return sbuf;
 }
 
-int getbasename_unit_test(Env *env)
+int getbasename_unit_test(Error *err)
 {
   char *bn;
   int had_err = 0;
+  error_check(err);
 
   bn = getbasename("/usr/lib");
   ensure(had_err, !strcmp(bn, "lib"));

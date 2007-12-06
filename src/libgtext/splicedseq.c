@@ -109,11 +109,11 @@ void splicedseq_reset(Splicedseq *ss)
   ss->forward = true;
 }
 
-static int check_splicedseq(Splicedseq *ss, Env *env)
+static int check_splicedseq(Splicedseq *ss, Error *err)
 {                       /*0123456789*/
   static char *origseq = "aaccaagtga", *splicedseq = "ccgtg";
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
   splicedseq_add(ss, 2, 3, origseq);
   splicedseq_add(ss, 6, 8, origseq);
   ensure(had_err, strcmp(splicedseq_get(ss), splicedseq) == 0);
@@ -125,16 +125,16 @@ static int check_splicedseq(Splicedseq *ss, Env *env)
   return had_err;
 }
 
-int splicedseq_unit_test(Env *env)
+int splicedseq_unit_test(Error *err)
 {
   Splicedseq *ss;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
   ss = splicedseq_new();
-  had_err = check_splicedseq(ss, env);
+  had_err = check_splicedseq(ss, err);
   if (!had_err) {
     splicedseq_reset(ss);
-    had_err = check_splicedseq(ss, env);
+    had_err = check_splicedseq(ss, err);
   }
   splicedseq_delete(ss);
   return had_err;

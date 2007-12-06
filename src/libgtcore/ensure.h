@@ -18,15 +18,15 @@
 #ifndef ENSURE_H
 #define ENSURE_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* the ensure macro used for unit tests */
 #define ensure(had_err, e)                                                     \
         do {                                                                   \
           if (!had_err) {                                                      \
             if (!(e)) {                                                        \
-              env_error_set(env, "ensure \"%s\" failed: file \"%s\", line %d", \
-                            #e, __FILE__, __LINE__);                           \
+              error_set(err, "ensure \"%s\" failed: file \"%s\", line %d", #e, \
+                        __FILE__, __LINE__);                                   \
               had_err = -1;                                                    \
             }                                                                  \
           }                                                                    \

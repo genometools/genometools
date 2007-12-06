@@ -89,13 +89,16 @@ int track_get_number_of_lines(const Track *track)
   return nof_tracks;
 }
 
-int track_unit_test(Env *env)
+int track_unit_test(Error *err)
 {
   int had_err = 0;
   Block *b1, *b2, *b3, *b4;
   Range r1, r2, r3, r4;
   Track *track;
-  Str *title = str_new_cstr("test");
+  Str *title;
+  error_check(err);
+
+  title = str_new_cstr("test");
 
   r1.start=100UL;  r1.end=1000UL;
   r2.start=1001UL; r2.end=1500UL;

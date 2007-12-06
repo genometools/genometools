@@ -282,10 +282,10 @@ int run_test(void *key, void *value, void *data, Error *e)
   return 0;
 }
 
-static int run_tests(GTR *gtr, Env *env)
+static int run_tests(GTR *gtr, Error *err)
 {
   int test_err = 0, had_err = 0;
-  env_error_check(env);
+  error_check(err);
   assert(gtr);
 
   /* The following type assumptions are made in the GenomeTools library. */
@@ -302,8 +302,7 @@ static int run_tests(GTR *gtr, Env *env)
   ensure(had_err, sizeof (unsigned long long) == 8);
 
   if (gtr->unit_tests) {
-    had_err = hashtable_foreach_ao(gtr->unit_tests, run_test, &test_err,
-                                   env_error(env));
+    had_err = hashtable_foreach_ao(gtr->unit_tests, run_test, &test_err, err);
     assert(!had_err); /* cannot happen, run_test() is sane */
   }
   if (test_err)
@@ -322,7 +321,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   if (gtr->debug)
     log_enable();
   if (gtr->test) {
-    return run_tests(gtr, env);
+    return run_tests(gtr, env_error(env));
   }
   if (str_length(gtr->testspacepeak)) {
     mem = ma_malloc(1 << 26); /* alloc 64 MB */;

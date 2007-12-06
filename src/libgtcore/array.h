@@ -45,8 +45,8 @@ int           array_iterate(const Array*,
                             int(*iterfunc)(void *info, const void *value,
                                            Error*),
                             void *info, Error*);
-int           array_example(Env*);
-int           array_unit_test(Env*);
+int           array_example(Error*);
+int           array_unit_test(Error*);
 void          array_delete(Array*);
 
 #endif

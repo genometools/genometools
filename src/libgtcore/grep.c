@@ -63,11 +63,11 @@ int grep(bool *match, const char *pattern, const char *line, Error *err)
   return had_err;
 }
 
-int grep_unit_test(Env *env)
+int grep_unit_test(Error *err)
 {
   bool match;
   int grep_err, had_err = 0;
-  env_error_check(env);
+  error_check(err);
 
   grep_err = grep(&match, "a", "a", NULL);
   ensure(had_err, !grep_err);

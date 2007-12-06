@@ -58,7 +58,7 @@ Array* line_get_blocks(Line* line)
   return line->blocks;
 }
 
-int line_unit_test(Env* env)
+int line_unit_test(Error *err)
 {
   Range r1, r2, r3, r4, r_parent;
   Array* blocks;
@@ -68,12 +68,13 @@ int line_unit_test(Env* env)
   GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
   Line *l1, *l2;
   Block *b1, *b2;
+  error_check(err);
 
   const char* foo = "foo";
   const char* bar = "bar";
   const char* blub = "blub";
 
-  if (!(cfg = config_new(false, env_error(env))))
+  if (!(cfg = config_new(false, err)))
     had_err = -1;
 
   r_parent.start = 10UL;

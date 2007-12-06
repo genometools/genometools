@@ -50,7 +50,7 @@ const char*   feature_index_get_first_seqid(const FeatureIndex*);
 StrArray*     feature_index_get_seqids(const FeatureIndex*);
 Range         feature_index_get_range_for_seqid(FeatureIndex*, const char*);
 bool          feature_index_has_seqid(const FeatureIndex*, const char*);
-int           feature_index_unit_test(Env*);
+int           feature_index_unit_test(Error*);
 void          feature_index_delete(FeatureIndex*);
 
 #endif

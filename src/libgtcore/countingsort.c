@@ -73,12 +73,12 @@ static unsigned long get_int(const void *elem, /*@unused@*/ void *data)
   return *(unsigned int*) elem;
 }
 
-int countingsort_unit_test(Env *env)
+int countingsort_unit_test(Error *err)
 {
   unsigned int numbers[]        = { 1, 2, 1, 2, 0 }, numbers_out[5],
                sorted_numbers[] = { 0, 1, 1, 2, 2 };
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
   countingsort(numbers_out, numbers, sizeof (unsigned int), 5,
                countingsort_get_max(numbers, sizeof (unsigned int), 5, NULL,
                                     get_int), NULL,  get_int);

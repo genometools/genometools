@@ -31,11 +31,11 @@ Dlistelem*    dlist_first(const Dlist*);
 Dlistelem*    dlist_last(const Dlist*);
 Dlistelem*    dlist_find(const Dlist*, void*); /* O(n) */
 unsigned long dlist_size(const Dlist*);
- /* usually: O(n) (O(1) if data is added in sorted order) */
+/* usually: O(n) (O(1) if data is added in sorted order) */
 void          dlist_add(Dlist*, void *data);
 /* frees the elem */
 void          dlist_remove(Dlist*, Dlistelem*);
-int           dlist_unit_test(Env*);
+int           dlist_unit_test(Error*);
 void          dlist_delete(Dlist*);
 
 Dlistelem*    dlistelem_next(const Dlistelem*);

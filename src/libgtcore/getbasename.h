@@ -44,9 +44,9 @@
   The caller is responsible for freeing the received pointer!
 */
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 char* getbasename(const char *path);
-int   getbasename_unit_test(Env*);
+int   getbasename_unit_test(Error*);
 
 #endif

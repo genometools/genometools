@@ -58,6 +58,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
   Str *inputProject = NULL;
   int parsedArgs;
   bool had_err = false;
+  Error *err = env_error(env); /* XXX: remove */
 
   inputProject = str_new();
 

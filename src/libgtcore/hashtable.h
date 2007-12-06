@@ -41,7 +41,7 @@ int        hashtable_foreach_ao(Hashtable*, Hashiteratorfunc, void*, Error*);
    has the HashType HASH_DIRECT and unsigned longs have been used as keys. */
 int        hashtable_foreach_no(Hashtable*, Hashiteratorfunc, void*, Error*);
 void       hashtable_reset(Hashtable*);
-int        hashtable_unit_test(Env*);
+int        hashtable_unit_test(Error*);
 void       hashtable_delete(Hashtable*);
 
 #endif
