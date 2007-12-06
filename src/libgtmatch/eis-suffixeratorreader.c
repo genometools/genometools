@@ -171,7 +171,7 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                                     encseq, so->readmode,
                                     getnumofcharsAlphabet(alpha),
                                     so->prefixlength,
-                                    so->numofparts, 
+                                    so->numofparts,
                                     NULL,
                                     iface->mtime,
                                     verbosity, err)))

@@ -64,7 +64,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
 
   inputProject = str_new_cstr(argv[parsedArgs]);
   env_error_check(env);
-  seq = loadBlockEncIdxSeq(inputProject, EIS_FEATURE_REGION_SUMS, 
+  seq = loadBlockEncIdxSeq(inputProject, EIS_FEATURE_REGION_SUMS,
                            env_error(env));
   ensure(had_err, seq);
   if (had_err)
@@ -81,7 +81,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
         had_err,
         !(corrupt = EISVerifyIntegrity(seq, inputProject, options.skipCount,
                                        options.progressInterval, stderr,
-                                       options.checkFlags, 
+                                       options.checkFlags,
                                        env_error(env))));
       if (corrupt)
       {

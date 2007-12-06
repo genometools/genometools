@@ -163,7 +163,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
         ensure(had_err, EMIter);
         if (had_err)
           break;
-        assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, 
+        assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr,
                                               patternLen, env_error(env)));
         assert(EMINumMatchesTotal(EMIter) == countmmsearchiterator(mmsi));
         fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n"
@@ -266,7 +266,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   /* compute parameters currently not set from command-line or
    * determined indirectly */
   computePackedIndexDefaults(&params->idx,
-                             BWTBaseFeatures & ~BWTProperlySorted, 
+                             BWTBaseFeatures & ~BWTProperlySorted,
                              env_error(env));
 
   option_parser_delete(op);
