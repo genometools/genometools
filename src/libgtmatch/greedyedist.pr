@@ -4,8 +4,7 @@ extern "C" {
 unsigned long greedyunitedist(const Uchar *useq,
                               unsigned long ulenvalue,
                               const Uchar *vseq,
-                              unsigned long vlenvalue,
-                              Env *env);
+                              unsigned long vlenvalue);
 
 #ifdef __cplusplus
 }

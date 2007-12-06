@@ -36,7 +36,7 @@
          maxbranchdepth;
 };
 
-Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Env *env,bool origin)
+Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Error *err,bool origin)
 {
   bool haserr = false;
   Outlcpinfo *outlcpinfo;
@@ -51,7 +51,7 @@ Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Env *env,bool origin)
     outlcpinfo->outfplcptab = opensfxfile(indexname,
                                           origin ? LCPTABSUFFIX
                                                  : LCPTABSUFFIX "2",
-                                          "wb",env);
+                                          "wb",err);
     if (outlcpinfo->outfplcptab == NULL)
     {
       haserr = true;
@@ -61,7 +61,7 @@ Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Env *env,bool origin)
       outlcpinfo->outfpllvtab
         = opensfxfile(indexname,origin ? LARGELCPTABSUFFIX
                                        : LARGELCPTABSUFFIX "2",
-                                       "wb",env);
+                                       "wb",err);
       if (outlcpinfo->outfpllvtab == NULL)
       {
         haserr = true;
@@ -79,7 +79,7 @@ Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Env *env,bool origin)
 }
 
 int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
-                Outlcpinfo *outlcpinfo,Env *env)
+                Outlcpinfo *outlcpinfo,Error *err)
 {
   Uchar outvalue;
   bool haserr = false;
@@ -94,7 +94,7 @@ int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
     if (fwrite(&largelcpvalue,sizeof (Largelcpvalue),(size_t) 1,
                outlcpinfo->outfpllvtab) != (size_t) 1)
     {
-      env_error_set(env,"cannot write 1 item of size %lu: "
+      error_set(err,"cannot write 1 item of size %lu: "
                         "errormsg=\"%s\"",
                         (unsigned long) sizeof (Largelcpvalue),
                         strerror(errno));
@@ -108,7 +108,7 @@ int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
   if (!haserr && fwrite(&outvalue,sizeof (Uchar),(size_t) 1,
                         outlcpinfo->outfplcptab) != (size_t) 1)
   {
-    env_error_set(env,"cannot write 1 item of size %lu: "
+    error_set(err,"cannot write 1 item of size %lu: "
                       "errormsg=\"%s\"",
                       (unsigned long) sizeof (Uchar),
                       strerror(errno));
@@ -121,7 +121,7 @@ int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
   return haserr ? -1 : 0;
 }
 
-void freeoutlcptab(Outlcpinfo **outlcpinfo,Env *env)
+void freeoutlcptab(Outlcpinfo **outlcpinfo)
 {
   fa_fclose((*outlcpinfo)->outfplcptab);
   fa_fclose((*outlcpinfo)->outfpllvtab);

@@ -32,14 +32,13 @@
 };
 
 Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
-                                      Readmode readmode,
-                                      Env *env)
+                                      Readmode readmode)
 {
   Lcpvalueiterator *lvi;
 
   ALLOCASSIGNSPACE(lvi,NULL,Lcpvalueiterator,1);
-  lvi->esr1 = newEncodedsequencescanstate(env);
-  lvi->esr2 = newEncodedsequencescanstate(env);
+  lvi->esr1 = newEncodedsequencescanstate();
+  lvi->esr2 = newEncodedsequencescanstate();
   lvi->encseq = encseq;
   lvi->relpos = 0;
   lvi->readmode = readmode;
@@ -96,9 +95,9 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
   return lcpvalue;
 }
 
-void freeLcpvalueiterator(Lcpvalueiterator **lvi,Env *env)
+void freeLcpvalueiterator(Lcpvalueiterator **lvi)
 {
-  freeEncodedsequencescanstate(&(*lvi)->esr1,env);
-  freeEncodedsequencescanstate(&(*lvi)->esr2,env);
+  freeEncodedsequencescanstate(&(*lvi)->esr1);
+  freeEncodedsequencescanstate(&(*lvi)->esr2);
   FREESPACE(*lvi);
 }

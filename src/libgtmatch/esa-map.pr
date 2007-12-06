@@ -1,21 +1,21 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void freesuffixarray(Suffixarray *suffixarray,Env *env);
+void freesuffixarray(Suffixarray *suffixarray);
 
 int streamsuffixarray(Suffixarray *suffixarray,
                       Seqpos *totallength,
                       unsigned int demand,
                       const Str *indexname,
                       Verboseinfo *verboseinfo,
-                      Env *env);
+                      Error *err);
 
 int mapsuffixarray(Suffixarray *suffixarray,
                    Seqpos *totallength,
                    unsigned int demand,
                    const Str *indexname,
                    Verboseinfo *verboseinfo,
-                   Env *env);
+                   Error *err);
 
 #ifdef __cplusplus
 }

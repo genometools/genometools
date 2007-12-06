@@ -22,7 +22,7 @@
 #include <ctype.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/str.h"
@@ -338,21 +338,20 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
 void encseqextract(Uchar *buffer,
                    const Encodedsequence *encseq,
                    Seqpos frompos,
-                   Seqpos topos,
-                   Env *env)
+                   Seqpos topos)
 {
   Encodedsequencescanstate *esr;
   unsigned long idx;
   Seqpos pos;
 
   assert(frompos < topos && topos < encseq->totallength);
-  esr = newEncodedsequencescanstate(env);
+  esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,Forwardmode,frompos);
   for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
   {
     buffer[idx] = sequentialgetencodedchar(encseq,esr,pos);
   }
-  freeEncodedsequencescanstate(&esr,env);
+  freeEncodedsequencescanstate(&esr);
 }
 
 typedef struct
@@ -411,14 +410,12 @@ static unsigned long detsizeoffourcharsinonebyte(Seqpos totallength)
 
 static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
                                          void *voidinfo,
-                                         bool writemode,
-                                         Env *env)
+                                         bool writemode)
 {
   Encodedsequence *encseq = (Encodedsequence *) voidinfo;
   Mapspecification *mapspecptr;
   unsigned long fourcharssize, numofunits;
 
-  env_error_check(env);
   fourcharssize = detsizeoffourcharsinonebyte(encseq->totallength);
   if (writemode)
   {
@@ -484,13 +481,13 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   }
 }
 
-int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
+int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Error *err)
 {
   FILE *fp;
   bool haserr = false;
 
-  env_error_check(env);
-  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"wb",env);
+  error_check(err);
+  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"wb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -501,7 +498,7 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
                            assignencseqmapspecification,
                            encseq,
                            encseq->sizeofrep,
-                           env) != 0)
+                           err) != 0)
     {
       haserr = true;
     }
@@ -514,12 +511,12 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
 static int fillencseqmapspecstartptr(Encodedsequence *encseq,
                                      const Str *indexname,
                                      Verboseinfo *verboseinfo,
-                                     Env *env)
+                                     Error *err)
 {
   bool haserr = false;
   Str *tmpfilename;
 
-  env_error_check(env);
+  error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,ENCSEQFILESUFFIX);
   if (fillmapspecstartptr(assignencseqmapspecification,
@@ -527,7 +524,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
                           encseq,
                           tmpfilename,
                           encseq->sizeofrep,
-                          env) != 0)
+                          err) != 0)
   {
     haserr = true;
   }
@@ -607,7 +604,7 @@ static Positionaccesstype determinesmallestrep(Seqpos totallength,
   return cret;
 }
 
-void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
+void freeEncodedsequence(Encodedsequence **encseqptr)
 {
   Encodedsequence *encseq = *encseqptr;
 
@@ -1332,11 +1329,10 @@ static void binpreparenextrange(const Encodedsequence *encseq,
   }
 }
 
-Encodedsequencescanstate *newEncodedsequencescanstate(Env *env)
+Encodedsequencescanstate *newEncodedsequencescanstate(void)
 {
   Encodedsequencescanstate *esr;
 
-  env_error_check(env);
   ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,1);
   return esr;
 }
@@ -1379,7 +1375,7 @@ void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
   }
 }
 
-void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env)
+void freeEncodedsequencescanstate(Encodedsequencescanstate **esr)
 {
   FREESPACE(*esr);
 }
@@ -1486,8 +1482,7 @@ bool hasspecialranges(const Encodedsequence *encseq)
 };
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
-                                              bool moveforward,
-                                              Env *env)
+                                              bool moveforward)
 {
   Specialrangeiterator *sri;
 
@@ -1512,7 +1507,7 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
   {
     sri->pos = 0;
     sri->direct = false;
-    sri->esr = newEncodedsequencescanstate(env);
+    sri->esr = newEncodedsequencescanstate();
     initEncodedsequencescanstate(sri->esr,encseq,
                                  moveforward ? Forwardmode
                                              : Reversemode,
@@ -1612,11 +1607,11 @@ bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
   return true;
 }
 
-void freespecialrangeiterator(Specialrangeiterator **sri,Env *env)
+void freespecialrangeiterator(Specialrangeiterator **sri)
 {
   if ((*sri)->esr != NULL)
   {
-    freeEncodedsequencescanstate(&(*sri)->esr,env);
+    freeEncodedsequencescanstate(&(*sri)->esr);
   }
   FREESPACE(*sri);
 }
@@ -1626,13 +1621,11 @@ static Encodedsequence *determineencseqkeyvalues(
                                      Seqpos totallength,
                                      Seqpos specialranges,
                                      unsigned int mapsize,
-                                     Verboseinfo *verboseinfo,
-                                     Env *env)
+                                     Verboseinfo *verboseinfo)
 {
   double spaceinbitsperchar;
   Encodedsequence *encseq;
 
-  env_error_check(env);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->sat = sat;
   encseq->mapsize = mapsize;
@@ -1666,14 +1659,14 @@ static Encodedsequence *determineencseqkeyvalues(
   return encseq;
 }
 
-static int readsatfromfile(const Str *indexname,Env *env)
+static int readsatfromfile(const Str *indexname,Error *err)
 {
   FILE *fp;
   int cc = 0;
   bool haserr = false;
 
-  env_error_check(env);
-  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"rb",env);
+  error_check(err);
+  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"rb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -1683,8 +1676,8 @@ static int readsatfromfile(const Str *indexname,Env *env)
     cc = fgetc(fp);
     if (cc == EOF)
     {
-      env_error_set(env,"illegal EOF symbol in \"%s%s\"",
-                     str_get(indexname),ENCSEQFILESUFFIX);
+      error_set(err,"illegal EOF symbol in \"%s%s\"",
+                    str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
   }
@@ -1692,8 +1685,8 @@ static int readsatfromfile(const Str *indexname,Env *env)
   {
     if (cc < 0 || cc >= (int) Undefpositionaccesstype)
     {
-      env_error_set(env,"illegal type %d in \"%s%s\"",cc,
-                         str_get(indexname),ENCSEQFILESUFFIX);
+      error_set(err,"illegal type %d in \"%s%s\"",cc,
+                    str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
   }
@@ -1706,7 +1699,7 @@ static int determinesattype(const Str *indexname,
                             Seqpos specialranges,
                             unsigned int mapsize,
                             const char *str_sat,
-                            Env *env)
+                            Error *err)
 {
   Positionaccesstype sat;
   bool haserr = false;
@@ -1717,7 +1710,7 @@ static int determinesattype(const Str *indexname,
     {
       if (indexname != NULL)
       {
-        int retcode = readsatfromfile(indexname,env);
+        int retcode = readsatfromfile(indexname,err);
         if (retcode < 0)
         {
           haserr = true;
@@ -1732,8 +1725,7 @@ static int determinesattype(const Str *indexname,
       sat = str2positionaccesstype(str_sat);
       if (sat == Undefpositionaccesstype)
       {
-        env_error_set(env,"illegal argument \"%s\" to option -sat",
-                      str_sat);
+        error_set(err,"illegal argument \"%s\" to option -sat",str_sat);
         haserr = true;
       }
     }
@@ -1830,7 +1822,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                                   const Alphabet *alphabet,
                                                   const char *str_sat,
                                                   Verboseinfo *verboseinfo,
-                                                  Env *env)
+                                                  Error *err)
 {
   Encodedsequence *encseq;
   Positionaccesstype sat = Undefpositionaccesstype;
@@ -1838,12 +1830,12 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   int retcode;
   FastaBuffer *fb = NULL;
 
-  env_error_check(env);
+  error_check(err);
   retcode = determinesattype(NULL,totallength,
                              specialranges,
                              getmapsizeAlphabet(alphabet),
                              str_sat,
-                             env);
+                             err);
   if (retcode < 0)
   {
     haserr = true;
@@ -1857,8 +1849,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                       totallength,
                                       specialranges,
                                       getmapsizeAlphabet(alphabet),
-                                      verboseinfo,
-                                      env);
+                                      verboseinfo);
     ALLASSIGNAPPENDFUNC;
     showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
     encseq->mappedptr = NULL;
@@ -1869,8 +1860,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                          NULL,
                          NULL,
                          NULL);
-    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fb,
-                                                      env_error(env)) != 0)
+    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fb,err) != 0)
     {
       haserr = true;
     }
@@ -1883,7 +1873,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 #endif
   if (haserr)
   {
-    freeEncodedsequence(&encseq,env);
+    freeEncodedsequence(&encseq);
   }
   fastabuffer_delete(fb);
   return haserr ? NULL : encseq;
@@ -1895,20 +1885,20 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                                Seqpos specialranges,
                                                unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
-                                               Env *env)
+                                               Error *err)
 {
   Encodedsequence *encseq;
   Positionaccesstype sat = Undefpositionaccesstype;
   bool haserr = false;
   int retcode;
 
-  env_error_check(env);
+  error_check(err);
   retcode = determinesattype(indexname,
                              totallength,
                              specialranges,
                              mapsize,
                              NULL,
-                             env);
+                             err);
   if (retcode < 0)
   {
     haserr = true;
@@ -1922,14 +1912,13 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                       totallength,
                                       specialranges,
                                       mapsize,
-                                      verboseinfo,
-                                      env);
+                                      verboseinfo);
     ALLASSIGNAPPENDFUNC;
     showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
-    if (fillencseqmapspecstartptr(encseq,indexname,verboseinfo,env) != 0)
+    if (fillencseqmapspecstartptr(encseq,indexname,verboseinfo,err) != 0)
     {
       haserr = true;
-      freeEncodedsequence(&encseq,env);
+      freeEncodedsequence(&encseq);
     }
   }
 #ifdef DEBUG
@@ -1948,15 +1937,13 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        const Uchar *seq2,
                                        unsigned long len2,
                                        unsigned int mapsize,
-                                       Verboseinfo *verboseinfo,
-                                       Env *env)
+                                       Verboseinfo *verboseinfo)
 {
   Encodedsequence *encseq;
   Uchar *seqptr;
   Seqpos len;
   const Positionaccesstype sat = Viadirectaccess;
 
-  env_error_check(env);
   assert(seq1 != NULL);
   assert(len1 > 0);
   if (seq2 == NULL)
@@ -1971,13 +1958,12 @@ Encodedsequence *plain2encodedsequence(bool withrange,
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,verboseinfo,env);
+  sequence2specialcharinfo(specialcharinfo,seqptr,len,verboseinfo);
   encseq = determineencseqkeyvalues(sat,
                                     len,
                                     specialcharinfo->specialranges,
                                     mapsize,
-                                    verboseinfo,
-                                    env);
+                                    verboseinfo);
   encseq->plainseq = seqptr;
   encseq->plainseqptr = (seq2 == NULL) ? true : false;
   ALLASSIGNAPPENDFUNC;

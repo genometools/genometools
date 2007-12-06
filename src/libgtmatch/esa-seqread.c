@@ -29,7 +29,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                   const Str *indexname,
                                   unsigned int demand,
                                   /*@unused@*/ Sequentialaccesstype seqactype,
-                                  Env *env)
+                                  Error *err)
 {
   Sequentialsuffixarrayreader *ssar;
   Seqpos totallength;
@@ -41,7 +41,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                       demand,
                       indexname,
                       NULL,
-                      env) != 0)
+                      err) != 0)
   {
     FREESPACE(ssar->suffixarray);
     FREESPACE(ssar);
@@ -54,12 +54,11 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
   return ssar;
 }
 
-void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
-                                     Env *env)
+void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
 {
   if ((*ssar)->suffixarray != NULL)
   {
-    freesuffixarray((*ssar)->suffixarray,env);
+    freesuffixarray((*ssar)->suffixarray);
     FREESPACE((*ssar)->suffixarray);
   }
   FREESPACE(*ssar);
@@ -67,7 +66,7 @@ void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
-                              /*@unused@*/ Env *env)
+                              /*@unused@*/ Error *err)
 {
   *currentsuffix = ssar->suffixarray->suftab[ssar->nextsuftabindex++];
   return 1;
@@ -111,7 +110,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                         const Str *indexname,
                                         unsigned int demand,
                                         Sequentialaccesstype seqactype,
-                                        Env *env)
+                                        Error *err)
 {
   Sequentialsuffixarrayreader *ssar;
   Seqpos totallength;
@@ -125,7 +124,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                                demand,
                                                indexname,
                                                NULL,
-                                               env) != 0)
+                                               err) != 0)
   {
     FREESPACE(ssar->suffixarray);
     FREESPACE(ssar);
@@ -145,13 +144,12 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
                                         const Encodedsequence *encseq,
-                                        Readmode readmode,
-                                        Env *env)
+                                        Readmode readmode)
 {
   Sequentialsuffixarrayreader *ssar;
 
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
-  ssar->lvi = newLcpvalueiterator(encseq,readmode,env);
+  ssar->lvi = newLcpvalueiterator(encseq,readmode);
   ssar->suffixarray = NULL;
   ssar->nextlcptabindex = (Seqpos) 1; /* not required here */
   ssar->largelcpindex = 0; /* not required here */
@@ -179,24 +177,23 @@ void updateSequentialsuffixarrayreaderfromRAM(
   }
 }
 
-void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
-                                     Env *env)
+void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
 {
   if ((*ssar)->suffixarray != NULL)
   {
-    freesuffixarray((*ssar)->suffixarray,env);
+    freesuffixarray((*ssar)->suffixarray);
     FREESPACE((*ssar)->suffixarray);
   }
   if ((*ssar)->lvi != NULL)
   {
-    freeLcpvalueiterator(&(*ssar)->lvi,env);
+    freeLcpvalueiterator(&(*ssar)->lvi);
   }
   FREESPACE(*ssar);
 }
 
 int nextSequentiallcpvalue(Seqpos *currentlcp,
                            Sequentialsuffixarrayreader *ssar,
-                           Env *env)
+                           Error *err)
 {
   Uchar tmpsmalllcpvalue;
   int retval;
@@ -225,7 +222,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
     {
       retval = readnextUcharfromstream(&tmpsmalllcpvalue,
                                        &ssar->suffixarray->lcptabstream,
-                                       env);
+                                       err);
       if (retval < 0)
       {
         return -1;
@@ -249,14 +246,14 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
         retval = readnextLargelcpvaluefromstream(
                                           &tmpexception,
                                           &ssar->suffixarray->llvtabstream,
-                                          env);
+                                          err);
         if (retval < 0)
         {
           return -1;
         }
         if (retval == 0)
         {
-          env_error_set(env,"file %s: line %d: unexpected end of file when "
+          error_set(err,"file %s: line %d: unexpected end of file when "
                         "reading llvtab",__FILE__,__LINE__);
           return -1;
         }
@@ -272,13 +269,13 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
-                              Env *env)
+                              Error *err)
 {
   if (ssar->seqactype == SEQ_scan)
   {
     return readnextSeqposfromstream(currentsuffix,
                                     &ssar->suffixarray->suftabstream,
-                                    env);
+                                    err);
   }
   if (ssar->seqactype == SEQ_mappedboth)
   {

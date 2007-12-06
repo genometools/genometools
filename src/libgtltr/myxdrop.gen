@@ -38,7 +38,7 @@ EVALXDROPARBITSCORES
   int allowedMININFINITYINTgenerations = 0,
       currentMININFINITYINTgeneration = 0;
 
-  env_error_check(env);
+  error_check(err);
 
   calculatedistancesfromscores(arbitscores, &arbitdistances);
   calculateallowedMININFINITYINTgenerations(
@@ -225,7 +225,6 @@ EVALXDROPARBITSCORES
       currentMININFINITYINTgeneration = 0;
       alwaysMININFINITYINT = true;
     }
-    
     /*@ignore@*/
     STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
     /*@end@*/

@@ -20,7 +20,7 @@
 #include "libgtmatch/eis-suffixarray-interface.h"
 
 extern int
-saReadBWT(void *state, Symbol *dest, size_t len, Env *env)
+saReadBWT(void *state, Symbol *dest, size_t len, Error *err)
 {
   struct suffixarrayReadState *saRState;
   assert(state);
@@ -45,14 +45,14 @@ saGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len)
 DECLAREREADFUNCTION(Seqpos)
 
 extern int
-saReadSeqpos(void *src, Seqpos *dest, size_t len, Env *env)
+saReadSeqpos(void *src, Seqpos *dest, size_t len, Error *err)
 {
   int rv = 1;
   size_t i;
   Suffixarray *sa = src;
   assert(sa);
   for (i = 0; i  < len; ++i)
-    if ((rv = readnextSeqposfromstream(dest + i, &sa->suftabstream, env)) != 1)
+    if ((rv = readnextSeqposfromstream(dest + i, &sa->suftabstream, err)) != 1)
       break;
   return ((rv == 1)? i : 0);
 }
@@ -66,12 +66,12 @@ reportSALongest(void *state)
 }
 
 extern MRAEnc *
-newMRAEncFromSA(void *state, Env *env)
+newMRAEncFromSA(void *state, Error *err)
 {
   MRAEnc *alphabet;
   Suffixarray *sa = state;
-  assert(state && env);
-  alphabet = MRAEncGTAlphaNew(sa->alpha, env);
+  assert(state && err);
+  alphabet = MRAEncGTAlphaNew(sa->alpha, err);
   MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
 }

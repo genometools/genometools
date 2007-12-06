@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/env.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/esa-seqread.h"
@@ -24,7 +23,7 @@
 #include "libgtltr/repeattypes.h"
 
 void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
-                     const Seqpos *markpos, Env *env)
+                     const Seqpos *markpos)
 {
   LTRboundaries *boundaries;
   Seqpos contiglen,
@@ -56,8 +55,7 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
   destab = destabSequentialsuffixarrayreader(ssar);
   descendtab = calcdescendpositions(destab,
                                     destablength,
-                                    numofdbsequences,
-                                    env);
+                                    numofdbsequences);
 
   if (lo->arrayLTRboundaries.nextfreeLTRboundaries == 0)
   {

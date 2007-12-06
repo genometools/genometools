@@ -37,53 +37,53 @@ EISGetAlphabet(const EISeq *seq)
 }
 
 static inline Symbol
-EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env)
+EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Error *err)
 {
-  assert(seq && hint && env);
+  assert(seq && hint && err);
   return MRAEncRevMapSymbol(seq->alphabet,
-                            seq->classInfo->get(seq, pos, hint, env));
+                            seq->classInfo->get(seq, pos, hint, err));
 }
 
 static inline Symbol
-EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env)
+EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Error *err)
 {
-  assert(seq && hint && env);
-  return seq->classInfo->get(seq, pos, hint, env);
+  assert(seq && hint && err);
+  return seq->classInfo->get(seq, pos, hint, err);
 }
 
 static inline Seqpos
 EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
-        Env *env)
+        Error *err)
 {
   Symbol mSym;
   mSym = MRAEncMapSymbol(seq->alphabet, sym);
-  return seq->classInfo->rank(seq, mSym, pos, hint, env);
+  return seq->classInfo->rank(seq, mSym, pos, hint, err);
 }
 
 static inline void
 EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint,
-                     Env *env)
+                     Error *err)
 {
-  return seq->classInfo->expose(seq, pos, flags, retval, hint, env);
+  return seq->classInfo->expose(seq, pos, flags, retval, hint, err);
 }
 
 static inline void
-initExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
+initExtBitsRetrieval(struct extBitsRetrieval *r, Error *err)
 {
   memset(r, 0, sizeof (struct extBitsRetrieval));
 }
 
 static inline struct extBitsRetrieval *
-newExtBitsRetrieval(Env *env)
+newExtBitsRetrieval(Error *err)
 {
   struct extBitsRetrieval *retval = ma_malloc(sizeof (struct extBitsRetrieval));
-  initExtBitsRetrieval(retval, env);
+  initExtBitsRetrieval(retval, err);
   return retval;
 }
 
 static inline void
-destructExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
+destructExtBitsRetrieval(struct extBitsRetrieval *r, Error *err)
 {
   if ((r->flags & EBRF_PERSISTENT_CWBITS) && r->cwPart)
     ma_free(r->cwPart);
@@ -92,18 +92,18 @@ destructExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
 }
 
 static inline void
-deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
+deleteExtBitsRetrieval(struct extBitsRetrieval *r, Error *err)
 {
-  destructExtBitsRetrieval(r, env);
+  destructExtBitsRetrieval(r, err);
   ma_free(r);
 }
 
 static inline Seqpos
 EISSymTransformedRank(EISeq *seq, Symbol msym, Seqpos pos,
-                      union EISHint *hint, Env *env)
+                      union EISHint *hint, Error *err)
 {
   assert(msym < MRAEncGetSize(EISGetAlphabet(seq)));
-  return seq->classInfo->rank(seq, msym, pos, hint, env);
+  return seq->classInfo->rank(seq, msym, pos, hint, err);
 }
 
 static inline FILE *
@@ -115,23 +115,23 @@ EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
 }
 
 static inline EISHint
-newEISHint(EISeq *seq, Env *env)
+newEISHint(EISeq *seq, Error *err)
 {
-  return seq->classInfo->newHint(seq, env);
+  return seq->classInfo->newHint(seq, err);
 }
 
 static inline void
-deleteEISHint(EISeq *seq, EISHint hint, Env *env)
+deleteEISHint(EISeq *seq, EISHint hint, Error *err)
 {
-  return seq->classInfo->deleteHint(seq, hint, env);
+  return seq->classInfo->deleteHint(seq, hint, err);
 }
 
 extern int
 EISPrintDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
-                    Env *env)
+                    Error *err)
 {
   if (seq->classInfo->printPosDiags)
-    return seq->classInfo->printPosDiags(seq, pos, fp, hint, env);
+    return seq->classInfo->printPosDiags(seq, pos, fp, hint, err);
   else
     return 0;
 }

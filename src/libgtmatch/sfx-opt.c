@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include <inttypes.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/getbasename.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
@@ -32,7 +32,7 @@
 static OPrval parse_options(int *parsed_args,
                             bool doesa,
                             Suffixeratoroptions *so,
-                            int argc, const char **argv, Env *env)
+                            int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *option,
@@ -48,7 +48,7 @@ static OPrval parse_options(int *parsed_args,
   OPrval oprval;
   Str *dirarg = str_new();
 
-  env_error_check(env);
+  error_check(err);
   op = option_parser_new("[option ...] -db file [...]",
                          doesa ? "Compute enhanced suffix array."
                                : "Compute packed index.");
@@ -158,14 +158,14 @@ static OPrval parse_options(int *parsed_args,
   option_exclude(optionsmap, optionprotein);
   option_exclude(optiondna, optionprotein);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc,
-                               env_error(env));
+                               err);
   if (oprval == OPTIONPARSER_OK)
   {
     if (!option_is_set(optionindexname))
     {
       if (strarray_size(so->filenametab) > (unsigned long) 1)
       {
-        env_error_set(env,"if more than one input file is given, then "
+        error_set(err,"if more than one input file is given, then "
                           "option -indexname is mandatory");
         oprval = OPTIONPARSER_ERROR;
       } else
@@ -179,7 +179,7 @@ static OPrval parse_options(int *parsed_args,
     }
     if (strarray_size(so->filenametab) == 0)
     {
-      env_error_set(env,"missing argument to option -db");
+      error_set(err,"missing argument to option -db");
       oprval = OPTIONPARSER_ERROR;
     }
   }
@@ -191,7 +191,7 @@ static OPrval parse_options(int *parsed_args,
          !option_is_set(optionprotein) &&
          !option_is_set(optionsmap))
       {
-        env_error_set(env,"if option -plain is used, then any of the options "
+        error_set(err,"if option -plain is used, then any of the options "
                           "-dna, -protein, or -smap is mandatory");
         oprval = OPTIONPARSER_ERROR;
       }
@@ -200,17 +200,17 @@ static OPrval parse_options(int *parsed_args,
   if (oprval == OPTIONPARSER_OK && !doesa)
   {
     computePackedIndexDefaults(&so->bwtIdxParams,
-                               BWTBaseFeatures & ~BWTProperlySorted, env);
+                               BWTBaseFeatures & ~BWTProperlySorted, err);
   }
   option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
   {
-    env_error_set(env,"superfluous program parameters");
+    error_set(err,"superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
   if (oprval == OPTIONPARSER_OK)
   {
-    int retval = parsereadmode(str_get(dirarg),env);
+    int retval = parsereadmode(str_get(dirarg),err);
 
     if (retval < 0)
     {
@@ -267,7 +267,7 @@ static void showoptions(const Suffixeratoroptions *so)
           so->outdestab ? "true" : "false");
 }
 
-void wrapsfxoptions(Suffixeratoroptions *so,Env *env)
+void wrapsfxoptions(Suffixeratoroptions *so,Error *err)
 {
   /* no checking if error occurs, since errors have been output before */
   str_delete(so->str_indexname);
@@ -280,12 +280,12 @@ int suffixeratoroptions(Suffixeratoroptions *so,
                         bool doesa,
                         int argc,
                         const char **argv,
-                        Env *env)
+                        Error *err)
 {
   int parsed_args, retval = 0;
   OPrval rval;
 
-  env_error_check(env);
+  error_check(err);
   so->isdna = false;
   so->isprotein = false;
   so->str_indexname = str_new();
@@ -296,7 +296,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->outsuftab = false;
   so->outlcptab = false;
   so->outbwttab = false;
-  rval = parse_options(&parsed_args, doesa, so, argc, argv, env);
+  rval = parse_options(&parsed_args, doesa, so, argc, argv, err);
   if (rval == OPTIONPARSER_ERROR)
   {
     retval = -1;

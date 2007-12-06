@@ -20,25 +20,25 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/str.h"
 
 /*@null@*/ FILE *opensfxfile(const Str *indexname,
                              const char *suffix,
                              const char *mode,
-                             Env *env)
+                             Error *err)
 {
   Str *tmpfilename;
   FILE *fp;
 
-  env_error_check(env);
+  error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,suffix);
   fp = fa_fopen(str_get(tmpfilename),mode);
   if (fp == NULL)
   {
-    env_error_set(env,"env_fa_open: cannot open file \"%s\": %s",
+    error_set(err,"fa_open: cannot open file \"%s\": %s",
                   str_get(tmpfilename),
                   strerror(errno));
   }
@@ -46,12 +46,11 @@
   return fp;
 }
 
-bool indexfilealreadyexists(const Str *indexname,const char *suffix,Env *env)
+bool indexfilealreadyexists(const Str *indexname,const char *suffix)
 {
   struct stat statbuf;
   Str *tmpfilename;
 
-  env_error_check(env);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,suffix);
 

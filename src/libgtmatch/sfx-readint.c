@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/array.h"
 #include "libgtcore/symboldef.h"
@@ -51,12 +51,10 @@ void setreadintkeys(Array *riktab,
                     const char *keystring,
                     void *valueptr,
                     size_t sizeval,
-                    bool *readflag,
-                    Env *env)
+                    bool *readflag)
 {
   Readintkeys rikvalue;
 
-  env_error_check(env);
   rikvalue.keystring = keystring;
   rikvalue.readflag = readflag;
   assert(sizeval == 0 || sizeval == (size_t) 4 || sizeval == (size_t) 8);
@@ -85,14 +83,14 @@ static int scanuintintline(uint32_t *lengthofkey,
                            Smallorbigint *smallorbigint,
                            const char *linebuffer,
                            unsigned long linelength,
-                           Env *env)
+                           Error *err)
 {
   int64_t readint;
   unsigned long i;
   bool found = false;
   int retval = 0;
 
-  env_error_check(env);
+  error_check(err);
   for (i=0; i<linelength; i++)
   {
     if (linebuffer[i] == '=')
@@ -105,7 +103,7 @@ static int scanuintintline(uint32_t *lengthofkey,
                  Scanuint64_tcast(&readint)) != 1 ||
          readint < (int64_t) 0)
       {
-        env_error_set(env,"cannot find non-negative integer in \"%*.*s\"",
+        error_set(err,"cannot find non-negative integer in \"%*.*s\"",
                            (int) (linelength - (i+1)),
                            (int) (linelength - (i+1)),
                            linebuffer + i + 1);
@@ -125,7 +123,7 @@ static int scanuintintline(uint32_t *lengthofkey,
   }
   if (!found)
   {
-    env_error_set(env,"missing equality symbol in \"%*.*s\"",
+    error_set(err,"missing equality symbol in \"%*.*s\"",
                        (int) linelength,
                        (int) linelength,
                        linebuffer);
@@ -136,12 +134,12 @@ static int scanuintintline(uint32_t *lengthofkey,
 
 int allkeysdefined(const Str *indexname,const char *suffix,
                    const Array *riktab,Verboseinfo *verboseinfo,
-                   Env *env)
+                   Error *err)
 {
   unsigned long i;
   Readintkeys *rikptr;
 
-  env_error_check(env);
+  error_check(err);
   for (i=0; i<array_size(riktab); i++)
   {
     rikptr = (Readintkeys *) array_get(riktab,i);
@@ -178,7 +176,7 @@ int allkeysdefined(const Str *indexname,const char *suffix,
     {
       if (rikptr->readflag == NULL)
       {
-        env_error_set(env,"file %s%s: missing line beginning with \"%s=\"",
+        error_set(err,"file %s%s: missing line beginning with \"%s=\"",
                            str_get(indexname),
                            suffix,
                            rikptr->keystring);
@@ -196,7 +194,7 @@ int analyzeuintline(const Str *indexname,
                     const char *linebuffer,
                     unsigned long linelength,
                     Array *riktab,
-                    Env *env)
+                    Error *err)
 {
   Readintkeys *rikptr;
   bool found = false, haserr = false;
@@ -205,12 +203,12 @@ int analyzeuintline(const Str *indexname,
   Smallorbigint smallorbigint;
   uint32_t lengthofkey;
 
-  env_error_check(env);
+  error_check(err);
   retval = scanuintintline(&lengthofkey,
                            &smallorbigint,
                            linebuffer,
                            linelength,
-                           env);
+                           err);
   if (retval < 0)
   {
     haserr = true;
@@ -239,8 +237,7 @@ int analyzeuintline(const Str *indexname,
           {
             if (retval == 1)
             {
-              env_error_set(env,"bigvalue " Formatuint64_t
-                                " does not fit into %s",
+              error_set(err,"bigvalue " Formatuint64_t " does not fit into %s",
                             PRINTuint64_tcast(smallorbigint.bigvalue),
                             rikptr->keystring);
               haserr = true;
@@ -255,13 +252,13 @@ int analyzeuintline(const Str *indexname,
     }
     if (!found)
     {
-      env_error_set(env,"file %s%s, line %u: cannot find key for \"%*.*s\"",
-                         str_get(indexname),
-                         suffix,
-                         linenum,
-                         (int) lengthofkey,
-                         (int) lengthofkey,
-                         linebuffer);
+      error_set(err,"file %s%s, line %u: cannot find key for \"%*.*s\"",
+                    str_get(indexname),
+                    suffix,
+                    linenum,
+                    (int) lengthofkey,
+                    (int) lengthofkey,
+                    linebuffer);
       haserr = true;
     }
   }

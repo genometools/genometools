@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/array.h"
 #include "libgtcore/fastabuffer.h"
 #include "spacedef.h"
@@ -28,7 +28,7 @@
 static int testscanatpos(const Encodedsequence *encseq,
                          Readmode readmode,
                          unsigned long trials,
-                         Env *env)
+                         Error *err)
 {
   Encodedsequencescanstate *esr = NULL;
   Seqpos pos, startpos, totallength;
@@ -36,14 +36,14 @@ static int testscanatpos(const Encodedsequence *encseq,
   Uchar ccra, ccsr;
   bool haserr = false;
 
-  env_error_check(env);
+  error_check(err);
   totallength = getencseqtotallength(encseq);
   srand48(42349421);
   for (trial = 0; !haserr && trial < trials; trial++)
   {
     startpos = (Seqpos) (drand48() * (double) totallength);
     printf("trial %lu at " FormatSeqpos "\n",trial,PRINTSeqposcast(startpos));
-    esr = newEncodedsequencescanstate(env);
+    esr = newEncodedsequencescanstate();
     initEncodedsequencescanstate(esr,encseq,readmode,startpos);
     for (pos=startpos; !haserr && pos < totallength; pos++)
     {
@@ -51,7 +51,7 @@ static int testscanatpos(const Encodedsequence *encseq,
       ccsr = sequentialgetencodedchar(encseq,esr,pos);
       if (ccra != ccsr)
       {
-        env_error_set(env,"startpos = " FormatSeqpos
+        error_set(err,"startpos = " FormatSeqpos
                           " access=%s, mode=%s: position=" FormatSeqpos
                           ": random access (correct) = %u != %u = "
                           " sequential read (wrong)",
@@ -64,7 +64,7 @@ static int testscanatpos(const Encodedsequence *encseq,
         haserr = true;
       }
     }
-    freeEncodedsequencescanstate(&esr,env);
+    freeEncodedsequencescanstate(&esr);
   }
   return haserr ? -1 : 0;
 }
@@ -73,7 +73,7 @@ static int testfullscan(const StrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         const Uchar *symbolmap,
-                        Env *env)
+                        Error *err)
 {
   Seqpos pos, totallength;
   Uchar ccscan = 0, ccra, ccsr;
@@ -82,7 +82,7 @@ static int testfullscan(const StrArray *filenametab,
   bool haserr = false;
   Encodedsequencescanstate *esr;
 
-  env_error_check(env);
+  error_check(err);
   totallength = getencseqtotallength(encseq);
   if (filenametab != NULL)
   {
@@ -93,13 +93,13 @@ static int testfullscan(const StrArray *filenametab,
                          NULL,
                          NULL);
   }
-  esr = newEncodedsequencescanstate(env);
+  esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,readmode,0);
   for (pos=0; /* Nothing */; pos++)
   {
     if (filenametab != NULL && readmode == Forwardmode)
     {
-      retval = fastabuffer_next(fb,&ccscan,env_error(env));
+      retval = fastabuffer_next(fb,&ccscan,err);
       if (retval < 0)
       {
         haserr = true;
@@ -121,7 +121,7 @@ static int testfullscan(const StrArray *filenametab,
     {
       if (ccscan != ccra)
       {
-        env_error_set(env,"access=%s, position=" FormatSeqpos
+        error_set(err,"access=%s, position=" FormatSeqpos
                           ": scan (readnextchar) = %u != "
                           "%u = random access",
                           encseqaccessname(encseq),
@@ -135,7 +135,7 @@ static int testfullscan(const StrArray *filenametab,
     ccsr = sequentialgetencodedchar(encseq,esr,pos);
     if (ccra != ccsr)
     {
-      env_error_set(env,"access=%s, mode=%s: position=" FormatSeqpos
+      error_set(err,"access=%s, mode=%s: position=" FormatSeqpos
                         ": random access = %u != %u = sequential read",
                         encseqaccessname(encseq),
                         showreadmode(readmode),
@@ -150,12 +150,12 @@ static int testfullscan(const StrArray *filenametab,
   {
     if (pos != totallength)
     {
-      env_error_set(env,"sequence length must be " FormatSeqpos " but is "
+      error_set(err,"sequence length must be " FormatSeqpos " but is "
                          FormatSeqpos,totallength,pos);
       haserr = true;
     }
   }
-  freeEncodedsequencescanstate(&esr,env);
+  freeEncodedsequencescanstate(&esr);
   fastabuffer_delete(fb);
   return haserr ? -1 : 0;
 }
@@ -165,7 +165,7 @@ int testencodedsequence(const StrArray *filenametab,
                         Readmode readmode,
                         const Uchar *symbolmap,
                         unsigned long trials,
-                        Env *env)
+                        Error *err)
 {
   bool haserr = false;
 
@@ -174,14 +174,14 @@ int testencodedsequence(const StrArray *filenametab,
     if (testscanatpos(encseq,
                       readmode,
                       trials,
-                      env) != 0)
+                      err) != 0)
     {
       haserr = true;
     }
   }
   if (!haserr)
   {
-    if (testfullscan(filenametab,encseq,readmode,symbolmap,env) != 0)
+    if (testfullscan(filenametab,encseq,readmode,symbolmap,err) != 0)
     {
       haserr = true;
     }
@@ -232,14 +232,13 @@ static int compareSequencerange(const void *a,const void *b)
   return 0;
 }
 
-int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
+int checkspecialrangesfast(const Encodedsequence *encseq)
 {
   Array *rangesforward, *rangesbackward;
   bool haserr = false;
   Specialrangeiterator *sri;
   Sequencerange range;
 
-  env_error_check(env);
   if (!hasspecialranges(encseq))
   {
     return 0;
@@ -247,18 +246,18 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   rangesforward = array_new(sizeof (Sequencerange));
   rangesbackward = array_new(sizeof (Sequencerange));
 
-  sri = newspecialrangeiterator(encseq,true,env);
+  sri = newspecialrangeiterator(encseq,true);
   while (nextspecialrangeiterator(&range,sri))
   {
     array_add(rangesforward,range);
   }
-  freespecialrangeiterator(&sri,env);
-  sri = newspecialrangeiterator(encseq,false,env);
+  freespecialrangeiterator(&sri);
+  sri = newspecialrangeiterator(encseq,false);
   while (nextspecialrangeiterator(&range,sri))
   {
     array_add(rangesbackward,range);
   }
-  freespecialrangeiterator(&sri,env);
+  freespecialrangeiterator(&sri);
   array_reverse(rangesbackward);
   if (!haserr)
   {

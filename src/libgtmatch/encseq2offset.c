@@ -25,8 +25,7 @@
 Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
                                Specialcharinfo *specialcharinfo,
                                const Suffixarray *suffixarraytable,
-                               unsigned int numofindexes,
-                               Env *env)
+                               unsigned int numofindexes)
 {
   unsigned int idx;
   Uchar lastofprevious, firstofcurrent;
@@ -35,7 +34,6 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
            tmpspecialranges,
            tmplarge;
 
-  env_error_check(env);
   assert(numofindexes > 0);
   ALLOCASSIGNSPACE(sequenceoffsettable,NULL,Seqpos,numofindexes);
   tmpspecialcharacters = (uint64_t) (numofindexes-1);

@@ -4,10 +4,11 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include "libgtcore/env.h"
 #include "libgtltr/ltrharvest-run.h"
 
 int gt_ltrharvest(int argc, const char **argv, Env *env)
 {
   env_error_check(env);
-  return parseargsandcallltrharvest(argc, argv, env);
+  return parseargsandcallltrharvest(argc, argv, env_error(env));
 }

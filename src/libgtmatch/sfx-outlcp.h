@@ -18,7 +18,7 @@
 #ifndef SFX_OUTLCP_H
 #define SFX_OUTLCP_H
 #include <stdio.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/fa.h"
 #include "seqpos-def.h"
@@ -26,10 +26,10 @@
 typedef struct Outlcpinfo Outlcpinfo;
 
 int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
-                Outlcpinfo *outlcpinfo,Env *env);
-Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Env *env,bool origin);
+                Outlcpinfo *outlcpinfo,Error *err);
+Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Error *err,bool origin);
 Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
-void freeoutlcptab(Outlcpinfo **outlcpinfo,Env *env);
+void freeoutlcptab(Outlcpinfo **outlcpinfo);
 
 #endif

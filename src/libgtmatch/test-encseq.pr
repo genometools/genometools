@@ -6,9 +6,9 @@ int testencodedsequence(const StrArray *filenametab,
                         Readmode readmode,
                         const Uchar *symbolmap,
                         unsigned long trials,
-                        Env *env);
+                        Error *err);
 
-int checkspecialrangesfast(const Encodedsequence *encseq,Env *env);
+int checkspecialrangesfast(const Encodedsequence *encseq);
 
 #ifdef __cplusplus
 }

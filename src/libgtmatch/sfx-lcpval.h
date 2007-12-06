@@ -18,7 +18,6 @@
 #ifndef SFX_LCPVAL_H
 #define SFX_LCPVAL_H
 
-#include "libgtcore/env.h"
 #include "seqpos-def.h"
 #include "readmode-def.h"
 #include "encseq-def.h"
@@ -26,14 +25,13 @@
 typedef struct Lcpvalueiterator Lcpvalueiterator;
 
 Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
-                                      Readmode readmode,
-                                      Env *env);
+                                      Readmode readmode);
 
 Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
                             bool firstpage,
                             const Seqpos *suftabptr,
                             Seqpos numberofsuffixes);
 
-void freeLcpvalueiterator(Lcpvalueiterator **lvi,Env *env);
+void freeLcpvalueiterator(Lcpvalueiterator **lvi);
 
 #endif

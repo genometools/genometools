@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/option.h"
 #include "libgtmatch/eis-bwtseq.h"
 
@@ -53,12 +53,12 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
 }
 
 static int
-estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput, Env *env)
+estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput, Error *err)
 {
   /* two cases: we store 1 bit per position or log(segmentlen) for
    * each marked position plus one to note the number of marked positions */
   unsigned segmentLen = estimateSegmentSize(&paramOutput->final.seqParams,
-                                            paramOutput->final.baseType, env);
+                                            paramOutput->final.baseType, err);
   if (segmentLen > (segmentLen + 1) * requiredUIntBits(segmentLen)
       / paramOutput->final.locateInterval)
     return BWTLocateCount;
@@ -68,14 +68,14 @@ estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput, Env *env)
 
 extern void
 computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles,
-                           Env *env)
+                           Error *err)
 {
   if (option_is_set(paramOutput->useLocateBitmapOption))
     paramOutput->final.featureToggles
       |= (paramOutput->useLocateBitmap?BWTLocateBitmap:BWTLocateCount);
   else
     paramOutput->final.featureToggles
-      |= estimateBestLocateTypeFeature(paramOutput, env);
+      |= estimateBestLocateTypeFeature(paramOutput, err);
   paramOutput->final.featureToggles |= extraToggles;
   switch (paramOutput->final.baseType)
   {

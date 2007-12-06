@@ -18,18 +18,15 @@
 #ifndef TURNWHEELS_H
 #define TURNWHEELS_H
 
-#include "libgtcore/env.h"
-
 typedef struct Turningwheel Turningwheel;
 
 Turningwheel *newTurningwheel(unsigned int numofwheels,
-                              unsigned int asize,
-                              Env *env);
+                              unsigned int asize);
 
 bool nextTurningwheel(Turningwheel *tw);
 
 unsigned int minchangedTurningwheel(Turningwheel *tw);
 
-void freeTurningwheel(Turningwheel **tw,Env *env);
+void freeTurningwheel(Turningwheel **tw);
 
 #endif

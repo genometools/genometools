@@ -20,14 +20,12 @@
 
 static void assignfmmapspecification(ArrayMapspecification *mapspectable,
                                      void *voidinfo,
-                                     /*@unused@*/ bool writemode,
-                                     Env *env)
+                                     /*@unused@*/ bool writemode)
 {
   Fmindexwithoptions *fmwithoptions = (Fmindexwithoptions *) voidinfo;
   Fmindex *fmindex;
   Mapspecification *mapspecptr;
 
-  env_error_check(env);
   fmindex = fmwithoptions->fmptr;
   NEWMAPSPEC(fmindex->tfreq,Seqpos,(unsigned long) TFREQSIZE(fmindex->mapsize));
   NEWMAPSPEC(fmindex->superbfreq,Seqpos,
@@ -50,25 +48,25 @@ static void assignfmmapspecification(ArrayMapspecification *mapspectable,
 int flushfmindex2file(FILE *fp,
                       Fmindex *fmindex,
                       bool storeindexpos,
-                      Env *env)
+                      Error *err)
 {
   Fmindexwithoptions fmwithoptions;
 
-  env_error_check(env);
+  error_check(err);
   fmwithoptions.fmptr = fmindex;
   fmwithoptions.storeindexpos = storeindexpos;
   return flushtheindex2file(fp,assignfmmapspecification,
-                            (void *) &fmwithoptions,fmindex->sizeofindex,env);
+                            (void *) &fmwithoptions,fmindex->sizeofindex,err);
 }
 
 int fillfmmapspecstartptr(Fmindex *fmindex,
                           bool storeindexpos,
                           const Str *tmpfilename,
-                          Env *env)
+                          Error *err)
 {
   Fmindexwithoptions fmwithoptions;
 
-  env_error_check(env);
+  error_check(err);
   fmwithoptions.fmptr = fmindex;
   fmwithoptions.storeindexpos = storeindexpos;
   return fillmapspecstartptr(assignfmmapspecification,
@@ -76,5 +74,5 @@ int fillfmmapspecstartptr(Fmindex *fmindex,
                              (void *) &fmwithoptions,
                              tmpfilename,
                              fmindex->sizeofindex,
-                             env);
+                             err);
 }

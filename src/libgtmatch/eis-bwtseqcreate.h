@@ -41,7 +41,7 @@ typedef struct encIdxSeq *(*indexCreateFunc)
    uint16_t *headerIDs, uint32_t *extHeaderSizes,
    headerWriteFunc *extHeaderCallbacks,
    void **headerCBData, bitInsertFunc biFunc, BitOffset cwBitsPerPos,
-   BitOffset maxBitsPerPos, void *cbState, Env *env);
+   BitOffset maxBitsPerPos, void *cbState, Error *err);
 
 /** There must be a function to report the position of the
  * null-rotation in the suffix array. */
@@ -66,7 +66,7 @@ typedef DefinedSeqpos (*reportLongest)(void *state);
  * readNextSeqpos
  * @param lrepFunc reports the position of the null-rotation
  * @param lrepState passed to lrepFunc
- * @param env
+ * @param err
  */
 extern EISeq *
 createBWTSeqGeneric(const struct bwtParam *params,
@@ -74,6 +74,6 @@ createBWTSeqGeneric(const struct bwtParam *params,
                     const MRAEnc *alphabet, int *specialRanges,
                     GetOrigSeqSym readOrigSeq, void *origSeqState,
                     SeqposReadFunc readNextSeqpos, void *spReadState,
-                    reportLongest lrepFunc, void *lrepState, Env *env);
+                    reportLongest lrepFunc, void *lrepState, Error *err);
 
 #endif

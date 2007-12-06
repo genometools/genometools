@@ -30,7 +30,7 @@ typedef struct
 {
   unsigned int minlength;
   Encodedsequence *encseq;
-  int (*processmaxmatch)(void *,Seqpos,Seqpos,Seqpos,Env *);
+  int (*processmaxmatch)(void *,Seqpos,Seqpos,Seqpos,Error *);
   void *processmaxmatchinfo;
 } Substringmatchinfo;
 
@@ -44,7 +44,7 @@ static int constructsarrandrunmaxpairs(
                  unsigned int numofparts,
                  Measuretime *mtime,
                  Verboseinfo *verboseinfo,
-                 Env *env)
+                 Error *err)
 {
   const Seqpos *suftabptr;
   Seqpos numberofsuffixes;
@@ -59,9 +59,10 @@ static int constructsarrandrunmaxpairs(
                        numofchars,
                        prefixlength,
                        numofparts,
+                       NULL,
                        mtime,
                        NULL,
-                       env);
+                       err);
   if (sfi == NULL)
   {
     haserr = true;
@@ -71,12 +72,11 @@ static int constructsarrandrunmaxpairs(
     bool firstpage = true;
 
     ssar = newSequentialsuffixarrayreaderfromRAM(ssi->encseq,
-                                                 readmode,
-                                                 env);
+                                                 readmode);
     while (true)
     {
       suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
-                                  mtime,sfi,env);
+                                  mtime,sfi,err);
       if (suftabptr == NULL || specialsuffixes)
       {
         break;
@@ -94,19 +94,19 @@ static int constructsarrandrunmaxpairs(
                             ssi->processmaxmatch,
                             ssi->processmaxmatchinfo,
                             verboseinfo,
-                            env) != 0)
+                            err) != 0)
       {
         haserr = true;
       }
     }
     if (ssar != NULL)
     {
-      freeSequentialsuffixarrayreader(&ssar,env);
+      freeSequentialsuffixarrayreader(&ssar);
     }
   }
   if (sfi != NULL)
   {
-    freeSfxiterator(&sfi,env);
+    freeSfxiterator(&sfi);
   }
   return haserr ? -1 : 0;
 }
@@ -118,10 +118,10 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                            unsigned int minlength,
                            const Alphabet *alpha,
                            int (*processmaxmatch)(void *,Seqpos,
-                                                  Seqpos,Seqpos,Env *),
+                                                  Seqpos,Seqpos,Error *),
                            void *processmaxmatchinfo,
                            Verboseinfo *verboseinfo,
-                           Env *env)
+                           Error *err)
 {
   Specialcharinfo samplespecialcharinfo;
   Substringmatchinfo ssi;
@@ -135,8 +135,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                                      query,
                                      querylen,
                                      getmapsizeAlphabet(alpha),
-                                     verboseinfo,
-                                     env);
+                                     verboseinfo);
   ssi.minlength = minlength;
   ssi.processmaxmatch = processmaxmatch;
   ssi.processmaxmatchinfo = processmaxmatchinfo;
@@ -151,11 +150,11 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                                   (unsigned int) 1, /* parts */
                                   NULL,
                                   verboseinfo,
-                                  env) != 0)
+                                  err) != 0)
   {
     haserr = true;
   }
-  freeEncodedsequence(&ssi.encseq,env);
+  freeEncodedsequence(&ssi.encseq);
   return haserr ? -1 : 0;
 }
 #endif /* ifndef INLINEDSequentialsuffixarrayreader */

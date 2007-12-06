@@ -21,5 +21,5 @@
 int gt_mkfmindex(int argc, const char **argv, Env *env)
 {
   env_error_check(env);
-  return parseargsandcallmkfmindex(argc, argv, env);
+  return parseargsandcallmkfmindex(argc, argv, env_error(env));
 }

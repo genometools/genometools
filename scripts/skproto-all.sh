@@ -31,6 +31,7 @@ eis-blockenc_params.c
 eis-bwtconstruct_params.c
 eis-bwtseq.c
 eis-bwtseqcreate.c
+eis-bwtseqlocate.c
 eis-encidxseq.c
 eis-seqblocktranslate.c
 eis-seqranges.c
@@ -40,9 +41,11 @@ encodedseq.c
 enum-patt.c
 esa-mmsearch.c
 esa-seqread.c
+inl-encseq.c
 mapspec-gen.c
 measure-time.c
 overallseq.c
+sfx-outlcp.c
 sfx-partssuf.c
 sfx-readint.c
 sfx-suffixer.c

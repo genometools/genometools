@@ -30,7 +30,7 @@
  */
 #include <stdlib.h>
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/bitpackstring.h"
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/eis-mrangealphabet.h"
@@ -57,27 +57,27 @@ typedef size_t seqRangeListSearchHint;
  * @param rangesStartNum allocate space for this many ranges
  * @param alphabet map stored symbols according to this alphabet
  * @param features see enum SRLFeatures for a description
- * @param env
+ * @param err
  * @return newly constructed list
  */
 extern struct seqRangeList *
 newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
-                enum SRLFeatures features, Env *env);
+                enum SRLFeatures features, Error *err);
 /**
  * @brief Shrink the list according to the exact number of ranges stored.
  * @param rangeList
- * @param env
+ * @param err
  */
 extern void
-SRLCompact(struct seqRangeList *rangeList, Env *env);
+SRLCompact(struct seqRangeList *rangeList, Error *err);
 
 /**
  * @brief Destructor for sequence range lists.
  * @param rangeList
- * @param env
+ * @param err
  */
 extern void
-deleteSeqRangeList(struct seqRangeList *rangeList, Env *env);
+deleteSeqRangeList(struct seqRangeList *rangeList, Error *err);
 
 /**
  * @brief Add a new range at the end of the current list.
@@ -85,22 +85,22 @@ deleteSeqRangeList(struct seqRangeList *rangeList, Env *env);
  * @param pos start of new range
  * @param len length of new range
  * @param sym the range is a contiguous sequence of this symbol
- * @param env
+ * @param err
  */
 extern void
 SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
-                  Symbol sym, Env *env);
+                  Symbol sym, Error *err);
 
 /**
  * @brief Add a new range of length one
  * @param rangeList
  * @param pos at this position
  * @param sym this symbol occurs
- * @param env
+ * @param err
  */
 extern void
 SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos,
-               Symbol sym, Env *env);
+               Symbol sym, Error *err);
 
 /**
  * @brief Initialize a search hint by this function.
@@ -208,11 +208,11 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp);
  * @param fp read from this file
  * @param alphabet symbols are interpreted under this alphabet
  * @param features see enum SRLFeatures
- * @param env
+ * @param err
  */
 extern struct seqRangeList *
 SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
-                  enum SRLFeatures features, Env *env);
+                  enum SRLFeatures features, Error *err);
 
 #include "libgtmatch/eis-seqrangespriv.h"
 

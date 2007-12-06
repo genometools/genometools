@@ -18,7 +18,7 @@
 #ifndef SPACEDEF_H
 #define SPACEDEF_H
 #include <string.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/ma.h"
 
 #ifdef NOSPACEBOOKKEEPING
@@ -73,6 +73,6 @@
 */
 
 #define ASSIGNDYNAMICSTRDUP(V,S)\
-        V = dynamicstrdup(__FILE__,__LINE__,S,env)
+        V = dynamicstrdup(__FILE__,__LINE__,S,err)
 
 #endif

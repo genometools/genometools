@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/env.h"
 #include "spacedef.h"
 #include "turnwheels.h"
 
@@ -31,14 +30,13 @@
 };
 
 Turningwheel *newTurningwheel(unsigned int numofwheels,
-                              unsigned int asize,
-                              Env *env)
+                              unsigned int asize)
 {
   unsigned int i;
   Turningwheel *tw;
 
   ALLOCASSIGNSPACE(tw,NULL,Turningwheel,1);
-  assert(numofwheels < MAXNUMOFWHEELS);
+  assert(numofwheels < (unsigned int) MAXNUMOFWHEELS);
   assert(numofwheels > 0);
   assert(asize > 0);
   for (i=0; i<numofwheels; i++)
@@ -80,7 +78,7 @@ unsigned int minchangedTurningwheel(Turningwheel *tw)
   return tw->minchanged;
 }
 
-void freeTurningwheel(Turningwheel **tw,Env *env)
+void freeTurningwheel(Turningwheel **tw)
 {
   FREESPACE(*tw);
 }

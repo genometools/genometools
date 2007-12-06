@@ -61,20 +61,20 @@ typedef struct
 typedef int (*Preprocessuniquelength)(uint64_t,
                                       const char *,
                                       void *,
-                                      Env *env);
+                                      Error *err);
 typedef int (*Processuniquelength)(const Alphabet *,
                                    const Uchar *,
                                    unsigned long,
                                    unsigned long,
                                    void *,
-                                   Env *env);
+                                   Error *err);
 typedef int (*Postprocessuniquelength)(const Alphabet *,
                                        uint64_t,
                                        const char *,
                                        const Uchar *,
                                        unsigned long,
                                        void *,
-                                       Env *env);
+                                       Error *err);
 
 typedef struct
 {
@@ -90,18 +90,18 @@ static int optionaddbitmask(Optionargmodedesc *modedesc,
                             unsigned int *mode,
                             const char *optname,
                             const char *optionargument,
-                            Env *env)
+                            Error *err)
 {
   size_t modecount;
 
-  env_error_check(env);
+  error_check(err);
   for (modecount=0; modecount < numberofentries; modecount++)
   {
     if (strcmp(optionargument,modedesc[modecount].name) == 0)
     {
       if (*mode & modedesc[modecount].bitmask)
       {
-        env_error_set(env,"argument \"%s\" to option %s already specified",
+        error_set(err,"argument \"%s\" to option %s already specified",
                       modedesc[modecount].name,optname);
         return -1;
       }
@@ -109,7 +109,7 @@ static int optionaddbitmask(Optionargmodedesc *modedesc,
       return 0;
     }
   }
-  env_error_set(env,"illegal argument \"%s\" to option %s",
+  error_set(err,"illegal argument \"%s\" to option %s",
                 optionargument,optname);
   return -2;
 }
@@ -117,7 +117,7 @@ static int optionaddbitmask(Optionargmodedesc *modedesc,
 static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
                              int argc,
                              const char **argv,
-                             Env *env)
+                             Error *err)
 {
   OptionParser *op;
   Option *optionmin, *optionmax, *optionoutput, *optionfmindex, *optionquery;
@@ -130,7 +130,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
       {"querypos",SHOWQUERYPOS}
   };
 
-  env_error_check(env);
+  error_check(err);
   uniquesubcallinfo->minlength.defined = false;
   uniquesubcallinfo->maxlength.defined = false;
   uniquesubcallinfo->showmode = 0;
@@ -173,7 +173,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   option_parser_add_option(op, optionquery);
 
   oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc,
-                               env_error(env));
+                               err);
   if (oprval == OPTIONPARSER_OK)
   {
     if (option_is_set(optionmin))
@@ -186,7 +186,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
     }
     if (!option_is_set(optionmin) && !option_is_set(optionmax))
     {
-      env_error_set(env,"one of the options -min or -max must be set");
+      error_set(err,"one of the options -min or -max must be set");
       oprval = OPTIONPARSER_ERROR;
     }
     if (oprval != OPTIONPARSER_ERROR)
@@ -197,7 +197,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
         if (uniquesubcallinfo->maxlength.valueunsignedlong <
            uniquesubcallinfo->minlength.valueunsignedlong)
         {
-          env_error_set(env,"minvalue must be smaller or equal than maxvalue");
+          error_set(err,"minvalue must be smaller or equal than maxvalue");
           oprval = OPTIONPARSER_ERROR;
         }
       }
@@ -206,7 +206,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
     {
       if (strarray_size(flagsoutputoption) == 0)
       {
-        env_error_set(env,"missing arguments to option -output");
+        error_set(err,"missing arguments to option -output");
         oprval = OPTIONPARSER_ERROR;
       } else
       {
@@ -220,7 +220,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
                               &uniquesubcallinfo->showmode,
                               "-output",
                               strarray_get(flagsoutputoption,i),
-                              env) != 0)
+                              err) != 0)
           {
             oprval = OPTIONPARSER_ERROR;
             break;
@@ -233,7 +233,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && parsed_args != argc)
   {
-    env_error_set(env,"superfluous program parameters");
+    error_set(err,"superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
   return oprval;
@@ -244,17 +244,17 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
                                      const Uchar *query,
                                      unsigned long querylen,
                                      const char *desc,
-                                     Env *env)
+                                     Error *err)
 {
   const Uchar *qptr;
   unsigned long uniquelength, remaining;
 
-  env_error_check(env);
+  error_check(err);
   if (substringinfo->preprocessuniquelength != NULL &&
       substringinfo->preprocessuniquelength(unitnum,
                                             desc,
                                             substringinfo->processinfo,
-                                            env) != 0)
+                                            err) != 0)
   {
     return -1;
   }
@@ -269,7 +269,7 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
                                              uniquelength,
                                              (unsigned long) (qptr-query),
                                              substringinfo->processinfo,
-                                             env) != 0)
+                                             err) != 0)
       {
         return -2;
       }
@@ -282,7 +282,7 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
                                              query,
                                              querylen,
                                              substringinfo->processinfo,
-                                             env) != 0)
+                                             err) != 0)
   {
     return -3;
   }
@@ -292,7 +292,7 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
 static int showunitnum(uint64_t unitnum,
                        const char *desc,
                        /*@unused@*/ void *info,
-                       /*@unused@*/ Env *env)
+                       /*@unused@*/ Error *err)
 {
   printf("unit " Formatuint64_t, PRINTuint64_tcast(unitnum));
   if (desc != NULL && desc[0] != '\0')
@@ -308,7 +308,7 @@ static int showifinlengthrange(const Alphabet *alphabet,
                                unsigned long uniquelength,
                                unsigned long querystart,
                                void *info,
-                                /*@unused@*/ Env *env)
+                                /*@unused@*/ Error *err)
 {
   Rangespecinfo *rangespecinfo = (Rangespecinfo *) info;
 
@@ -339,7 +339,7 @@ static int findsubquerymatch(Fmindex *fmindex,
                              Definedunsignedlong minlength,
                              Definedunsignedlong maxlength,
                              unsigned int showmode,
-                             Env *env)
+                             Error *err)
 {
   Substringinfo substringinfo;
   Rangespecinfo rangespecinfo;
@@ -351,7 +351,7 @@ static int findsubquerymatch(Fmindex *fmindex,
   int retval;
   uint64_t unitnum;
 
-  env_error_check(env);
+  error_check(err);
   substringinfo.fmindex = fmindex;
   rangespecinfo.minlength = minlength;
   rangespecinfo.maxlength = maxlength;
@@ -369,7 +369,7 @@ static int findsubquerymatch(Fmindex *fmindex,
                               &query,
                               &querylen,
                               &desc,
-                              env_error(env));
+                              err);
     if (retval < 0)
     {
       haserr = true;
@@ -384,7 +384,7 @@ static int findsubquerymatch(Fmindex *fmindex,
                                   query,
                                   querylen,
                                   desc,
-                                  env) != 0)
+                                  err) != 0)
     {
       haserr = true;
       break;
@@ -395,16 +395,16 @@ static int findsubquerymatch(Fmindex *fmindex,
   return haserr ? -1 : 0;
 }
 
-int findminuniquesubstrings(int argc,const char **argv,Env *env)
+int findminuniquesubstrings(int argc,const char **argv,Error *err)
 {
   Uniquesubcallinfo uniquesubcallinfo;
   Fmindex fmindex;
   Verboseinfo *verboseinfo;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(err);
 
-  switch (parseuniquesub(&uniquesubcallinfo, argc, argv, env)) {
+  switch (parseuniquesub(&uniquesubcallinfo, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(uniquesubcallinfo.fmindexname);
@@ -415,9 +415,9 @@ int findminuniquesubstrings(int argc,const char **argv,Env *env)
       strarray_delete(uniquesubcallinfo.queryfilenames);
       return 0;
   }
-  verboseinfo = newverboseinfo(false,env);
+  verboseinfo = newverboseinfo(false);
   if (mapfmindex (&fmindex, uniquesubcallinfo.fmindexname,
-                  verboseinfo,env) != 0)
+                  verboseinfo,err) != 0)
   {
     had_err = -1;
   } else
@@ -427,13 +427,13 @@ int findminuniquesubstrings(int argc,const char **argv,Env *env)
                           uniquesubcallinfo.minlength,
                           uniquesubcallinfo.maxlength,
                           uniquesubcallinfo.showmode,
-                          env) != 0)
+                          err) != 0)
     {
       had_err = -1;
     }
-    freefmindex(&fmindex,env);
+    freefmindex(&fmindex);
   }
-  freeverboseinfo(&verboseinfo,env);
+  freeverboseinfo(&verboseinfo);
   str_delete(uniquesubcallinfo.fmindexname);
   strarray_delete(uniquesubcallinfo.queryfilenames);
   return had_err;

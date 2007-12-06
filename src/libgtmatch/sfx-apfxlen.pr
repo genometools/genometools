@@ -9,7 +9,7 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
                                           unsigned int prefixlenbits);
 
 int checkprefixlength(unsigned int maxprefixlen,
-                      unsigned int prefixlength,Env *env);
+                      unsigned int prefixlength,Error *err);
 
 void showmaximalprefixlength(unsigned int maxprefixlen,
                              unsigned int recommended);

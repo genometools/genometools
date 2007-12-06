@@ -17,16 +17,13 @@
 
 #include <assert.h>
 #include <string.h>
-#include "libgtcore/env.h"
 #include "spacedef.h"
 
-char *dynamicstrdup(const char *file,int linenum,
-                    const char *source,Env *env)
+char *dynamicstrdup(const char *file,int linenum,const char *source)
 {
   size_t sourcelength;
   char *dest;
 
-  env_error_check(env);
   assert(source != NULL);
   sourcelength = strlen(source);
   ALLOCASSIGNSPACEGENERIC(file,linenum,dest,NULL,char,sourcelength+1);

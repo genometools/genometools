@@ -95,13 +95,13 @@ int outprjfile(const Str *indexname,
                Seqpos numoflargelcpvalues,
                Seqpos maxbranchdepth,
                const DefinedSeqpos *longest,
-               Env *env)
+               Error *err)
 {
   FILE *prjfp;
   bool haserr = false;
 
-  env_error_check(env);
-  prjfp = opensfxfile(indexname,PROJECTFILESUFFIX,"wb",env);
+  error_check(err);
+  prjfp = opensfxfile(indexname,PROJECTFILESUFFIX,"wb",err);
   if (prjfp == NULL)
   {
     haserr = true;

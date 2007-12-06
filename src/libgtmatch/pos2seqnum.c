@@ -17,7 +17,7 @@
 
 #include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "encseq-def.h"
 #include "divmodmul.h"
 #include "spacedef.h"
@@ -47,8 +47,7 @@ static int addmarkpos(ArraySeqpos *asp,
 }
 
 Seqpos *encseq2markpositions(const Encodedsequence *encseq,
-                             unsigned long numofsequences,
-                             Env *env)
+                             unsigned long numofsequences)
 {
   ArraySeqpos asp;
   Specialrangeiterator *sri;
@@ -60,8 +59,8 @@ Seqpos *encseq2markpositions(const Encodedsequence *encseq,
   asp.allocatedSeqpos = numofsequences-1;
   asp.nextfreeSeqpos = 0;
   ALLOCASSIGNSPACE(asp.spaceSeqpos,NULL,Seqpos,asp.allocatedSeqpos);
-  sri = newspecialrangeiterator(encseq,true,env);
-  esr = newEncodedsequencescanstate(env);
+  sri = newspecialrangeiterator(encseq,true);
+  esr = newEncodedsequencescanstate();
   while (nextspecialrangeiterator(&range,sri))
   {
     if (addmarkpos(&asp,encseq,esr,&range) != 0)
@@ -70,8 +69,8 @@ Seqpos *encseq2markpositions(const Encodedsequence *encseq,
       break;
     }
   }
-  freespecialrangeiterator(&sri,env);
-  freeEncodedsequencescanstate(&esr,env);
+  freespecialrangeiterator(&sri);
+  freeEncodedsequencescanstate(&esr);
   if (haserr)
   {
     FREEARRAY(&asp,Seqpos);
@@ -82,8 +81,7 @@ Seqpos *encseq2markpositions(const Encodedsequence *encseq,
 
 unsigned long *sequence2markpositions(unsigned long *numofsequences,
                                       const Uchar *seq,
-                                      unsigned long seqlen,
-                                      Env *env)
+                                      unsigned long seqlen)
 {
   unsigned long *spacemarkpos, i, allocatedmarkpos, nextfreemarkpos;
 
@@ -115,7 +113,7 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
                                  unsigned long numofrecords,
                                  Seqpos totalwidth,
                                  Seqpos position,
-                                 Env *env)
+                                 Error *err)
 {
   unsigned long left, mid, right, len;
 
@@ -130,7 +128,7 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
     {
       return numofrecords - 1;
     }
-    env_error_set(env,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
+    error_set(err,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
                   PRINTSeqposcast(position));
     return numofrecords; /* failure */
   }
@@ -160,7 +158,7 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
       right = mid-1;
     }
   }
-  env_error_set(env,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
+  error_set(err,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
                 PRINTSeqposcast(position));
   return numofrecords; /* failure */
 }
@@ -169,7 +167,7 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
                                 unsigned long numofrecords,
                                 unsigned long totalwidth,
                                 unsigned long position,
-                                Env *env)
+                                Error *err)
 {
   unsigned long left, mid, right, len;
 
@@ -184,7 +182,7 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
     {
       return numofrecords - 1;
     }
-    env_error_set(env,"getrecordnumulong: cannot find position %lu",position);
+    error_set(err,"getrecordnumulong: cannot find position %lu",position);
     return numofrecords; /* failure */
   }
   left = 0;
@@ -213,13 +211,13 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
       right = mid-1;
     }
   }
-  env_error_set(env,"getrecordnumulong: cannot find position %lu",position);
+  error_set(err,"getrecordnumulong: cannot find position %lu",position);
   return numofrecords; /* failure */
 }
 
 int checkmarkpos(const Encodedsequence *encseq,
                  unsigned long numofdbsequences,
-                 Env *env)
+                 Error *err)
 {
   bool haserr = false;
 
@@ -230,15 +228,13 @@ int checkmarkpos(const Encodedsequence *encseq,
     Uchar currentchar;
     Encodedsequencescanstate *esr;
 
-    markpos = encseq2markpositions(encseq,
-                                   numofdbsequences,
-                                   env);
+    markpos = encseq2markpositions(encseq,numofdbsequences);
     if (markpos == NULL)
     {
       return -1;
     }
     totallength = getencseqtotallength(encseq);
-    esr = newEncodedsequencescanstate(env);
+    esr = newEncodedsequencescanstate();
     initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
     for (pos=0; pos<totallength; pos++)
     {
@@ -252,7 +248,7 @@ int checkmarkpos(const Encodedsequence *encseq,
                                     numofdbsequences,
                                     totallength,
                                     pos,
-                                    env);
+                                    err);
         if (seqnum == numofdbsequences)
         {
           haserr = true;
@@ -267,7 +263,7 @@ int checkmarkpos(const Encodedsequence *encseq,
         }
       }
     }
-    freeEncodedsequencescanstate(&esr,env);
+    freeEncodedsequencescanstate(&esr);
     FREESPACE(markpos);
   }
   return haserr ? -1 : 0;

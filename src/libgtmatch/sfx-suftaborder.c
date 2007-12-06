@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "libgtcore/chardef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/minmax.h"
 #include "intbits-tab.h"
 #include "encseq-def.h"
@@ -94,8 +94,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                                  unsigned int prefixlength,
                                  Seqpos depth,
                                  Seqpos left,
-                                 Seqpos right,
-                                 Env *env)
+                                 Seqpos right)
 {
   const Seqpos *ptr;
   Seqpos maxlcp;
@@ -103,8 +102,8 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
   Encodedsequencescanstate *esr1, *esr2;
   bool haserr = false;
 
-  esr1 = newEncodedsequencescanstate(env);
-  esr2 = newEncodedsequencescanstate(env);
+  esr1 = newEncodedsequencescanstate();
+  esr2 = newEncodedsequencescanstate();
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
   {
     cmp = comparetwosuffixes(encseq,
@@ -130,8 +129,8 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
       break;
     }
   }
-  freeEncodedsequencescanstate(&esr1,env);
-  freeEncodedsequencescanstate(&esr2,env);
+  freeEncodedsequencescanstate(&esr1);
+  freeEncodedsequencescanstate(&esr2);
   if (haserr)
   {
     exit(EXIT_FAILURE); /* programming error */
@@ -165,7 +164,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
                        Seqpos depth,
-                       Env *env)
+                       Error *err)
 {
   const Seqpos *ptr;
   Bitstring *startposoccurs;
@@ -177,7 +176,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   int retval;
 
   printf("check entire suftab\n");
-  env_error_check(env);
+  error_check(err);
   assert(!specialsareequal || specialsareequalatdepth0);
   INITBITTAB(startposoccurs,totallength+1);
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)
@@ -198,8 +197,8 @@ void checkentiresuftab(const Encodedsequence *encseq,
     exit(EXIT_FAILURE); /* programming error */
   }
   FREESPACE(startposoccurs);
-  esr1 = newEncodedsequencescanstate(env);
-  esr2 = newEncodedsequencescanstate(env);
+  esr1 = newEncodedsequencescanstate();
+  esr2 = newEncodedsequencescanstate();
   for (ptr = suftab + 1; !haserr && ptr <= suftab + totallength; ptr++)
   {
     cmp = comparetwosuffixes(encseq,
@@ -229,7 +228,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
     }
     if (ssar != NULL)
     {
-      retval = nextSequentiallcpvalue(&currentlcp,ssar,env);
+      retval = nextSequentiallcpvalue(&currentlcp,ssar,err);
       if (retval < 0)
       {
         haserr = true;
@@ -245,9 +244,9 @@ void checkentiresuftab(const Encodedsequence *encseq,
                 FormatSeqpos "=%u",
                 (unsigned long) (ptr - suftab),
                 PRINTSeqposcast(*(ptr-1)),
-                getencodedchar(encseq,*(ptr-1),readmode),
+                (unsigned int) getencodedchar(encseq,*(ptr-1),readmode),
                 PRINTSeqposcast(*(ptr)),
-                getencodedchar(encseq,*ptr,readmode));
+                (unsigned int) getencodedchar(encseq,*ptr,readmode));
         fprintf(stderr,", maxlcp = " FormatSeqpos " != " FormatSeqpos "\n",
                     PRINTSeqposcast(maxlcp),
                     PRINTSeqposcast(currentlcp));
@@ -255,8 +254,8 @@ void checkentiresuftab(const Encodedsequence *encseq,
       }
     }
   }
-  freeEncodedsequencescanstate(&esr1,env);
-  freeEncodedsequencescanstate(&esr2,env);
+  freeEncodedsequencescanstate(&esr1);
+  freeEncodedsequencescanstate(&esr2);
   if (haserr)
   {
     exit(EXIT_FAILURE); /* programming error */

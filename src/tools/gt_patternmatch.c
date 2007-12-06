@@ -48,7 +48,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
                      SARR_SUFTAB | SARR_ESQTAB,
                      pmopt->indexname,
                      NULL,
-                     env) != 0)
+                     env_error(env)) != 0)
   {
     haserr = true;
   }
@@ -62,7 +62,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
                                  getnumofcharsAlphabet(suffixarray.alpha),
-                                 env);
+                                 env_error(env));
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
       pptr = nextEnumpatterniterator(&patternlen,epi);
@@ -78,21 +78,20 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
                                  0, /* offset */
                                  suffixarray.readmode,
                                  pptr,
-                                 patternlen,
-                                 env);
+                                 patternlen);
       while (nextmmsearchiterator(&dbstart,mmsi))
       {
         /* Nothing */;
       }
-      freemmsearchiterator(&mmsi,env);
+      freemmsearchiterator(&mmsi);
     }
     if (pmopt->showpatt)
     {
       showPatterndistribution(epi);
     }
-    freeEnumpatterniterator(&epi,env);
+    freeEnumpatterniterator(&epi);
   }
-  freesuffixarray(&suffixarray,env);
+  freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }
 

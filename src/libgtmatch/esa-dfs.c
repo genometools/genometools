@@ -35,8 +35,7 @@
                                     allocatedItvinfo,\
                                     allocatedItvinfo+INCSTACKSIZE,\
                                     allocateDfsinfo,\
-                                    state,\
-                                    env);\
+                                    state);\
           allocatedItvinfo += INCSTACKSIZE;\
         }\
         stackspace[nextfreeItvinfo].depth = D;\
@@ -56,9 +55,8 @@ typedef struct
 static Itvinfo *allocItvinfo(Itvinfo *ptr,
                              unsigned long currentallocated,
                              unsigned long allocated,
-                             Dfsinfo *(*allocateDfsinfo)(Dfsstate *,Env *),
-                             Dfsstate *state,
-                             Env *env)
+                             Dfsinfo *(*allocateDfsinfo)(Dfsstate *),
+                             Dfsstate *state)
 {
   unsigned long i;
   Itvinfo *itvinfo;
@@ -69,7 +67,7 @@ static Itvinfo *allocItvinfo(Itvinfo *ptr,
     assert(allocated > currentallocated);
     for (i=currentallocated; i<allocated; i++)
     {
-      itvinfo[i].dfsinfo = allocateDfsinfo(state,env);
+      itvinfo[i].dfsinfo = allocateDfsinfo(state);
     }
   }
   assert(itvinfo != NULL);
@@ -78,41 +76,40 @@ static Itvinfo *allocItvinfo(Itvinfo *ptr,
 
 static void freeItvinfo(Itvinfo *ptr,
                         unsigned long allocated,
-                        void (*freeDfsinfo)(Dfsinfo *,Dfsstate *,Env *),
-                        Dfsstate *state,
-                        Env *env)
+                        void (*freeDfsinfo)(Dfsinfo *,Dfsstate *),
+                        Dfsstate *state)
 {
   unsigned long i;
 
   for (i=0; i<allocated; i++)
   {
-    freeDfsinfo(ptr[i].dfsinfo,state,env);
+    freeDfsinfo(ptr[i].dfsinfo,state);
   }
   FREESPACE(ptr);
 }
 
 int depthfirstesa(Sequentialsuffixarrayreader *ssar,
-                  Dfsinfo *(*allocateDfsinfo)(Dfsstate *,Env *),
-                  void(*freeDfsinfo)(Dfsinfo *,Dfsstate *,Env *),
+                  Dfsinfo *(*allocateDfsinfo)(Dfsstate *),
+                  void(*freeDfsinfo)(Dfsinfo *,Dfsstate *),
                   int(*processleafedge)(bool,Seqpos,Dfsinfo *,
                                         Seqpos,Dfsstate *,
-                                        Env *),
+                                        Error *),
                   int(*processbranchedge)(bool,
                                           Seqpos,
                                           Dfsinfo *,
                                           Dfsinfo *,
                                           Dfsstate *,
-                                          Env *),
+                                          Error *),
                   /*
                   Integrate these functions later:
-                  int(*processcompletenode)(Dfsinfo *,Dfsstate *,Env *),
-                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,Env *),
+                  int(*processcompletenode)(Dfsinfo *,Dfsstate *,Error *),
+                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,Error *),
                   int(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
-                                            Seqpos,Dfsstate *,Env *),
+                                            Seqpos,Dfsstate *,Error *),
                   */
                   Dfsstate *state,
                   /*@unused@*/ Verboseinfo *verboseinfo,
-                  Env *env)
+                  Error *err)
 {
   bool firstedge,
        firstrootedge;
@@ -136,7 +133,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
   PUSHDFS(0,true,NULL);
   /*
   if (assignleftmostleaf != NULL &&
-      assignleftmostleaf(TOP.dfsinfo,0,state,env) != 0)
+      assignleftmostleaf(TOP.dfsinfo,0,state,err) != 0)
   {
     haserr = true;
   }
@@ -147,7 +144,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
     NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
 #else
-    retval = nextSequentiallcpvalue(&currentlcp,ssar,env);
+    retval = nextSequentiallcpvalue(&currentlcp,ssar,err);
     if (retval < 0)
     {
       haserr = true;
@@ -157,7 +154,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
     {
       break;
     }
-    retval = nextSequentialsuftabvalue(&previoussuffix,ssar,env);
+    retval = nextSequentialsuftabvalue(&previoussuffix,ssar,err);
     if (retval < 0)
     {
       haserr = true;
@@ -175,7 +172,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
       {
         if (processleafedge != NULL &&
             processleafedge(false,TOP.depth,TOP.dfsinfo,
-                            previoussuffix,state,env) != 0)
+                            previoussuffix,state,err) != 0)
         {
           haserr = true;
           break;
@@ -189,7 +186,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                               TOP.dfsinfo,
                               ABOVETOP.dfsinfo,
                               state,
-                              env) != 0)
+                              err) != 0)
         {
           haserr = true;
           break;
@@ -202,13 +199,13 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                               previoussuffix,
                               currentlcp,
                               state,
-                              env) != 0)
+                              err) != 0)
       {
         haserr = true;
         break;
       }
       if (processcompletenode != NULL &&
-          processcompletenode(TOP.dfsinfo,state,env) != 0)
+          processcompletenode(TOP.dfsinfo,state,err) != 0)
       {
         haserr = true;
         break;
@@ -235,7 +232,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
       {
         if (processleafedge != NULL &&
             processleafedge(firstedge,TOP.depth,TOP.dfsinfo,
-                            previoussuffix,state,env) != 0)
+                            previoussuffix,state,err) != 0)
         {
           haserr = true;
           break;
@@ -252,7 +249,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                               TOP.dfsinfo,
                               firstedge ? NULL : ABOVETOP.dfsinfo,
                               state,
-                              env) != 0)
+                              err) != 0)
         {
           haserr = true;
           break;
@@ -266,7 +263,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
       {
        /*
        if (assignleftmostleaf != NULL &&
-           assignleftmostleaf(TOP.dfsinfo,currentindex,state,env) != 0)
+           assignleftmostleaf(TOP.dfsinfo,currentindex,state,err) != 0)
         {
           haserr = true;
           break;
@@ -278,7 +275,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                             TOP.dfsinfo,
                             previoussuffix,
                             state,
-                            env) != 0)
+                            err) != 0)
         {
           haserr = true;
           break;
@@ -293,7 +290,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                               TOP.dfsinfo,
                               NULL, /* not used since firstsucc = true */
                               state,
-                              env) != 0)
+                              err) != 0)
         {
           haserr = true;
           break;
@@ -306,7 +303,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
 #ifdef INLINEDSequentialsuffixarrayreader
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
 #else
-    retval = nextSequentialsuftabvalue(&previoussuffix,ssar,env);
+    retval = nextSequentialsuftabvalue(&previoussuffix,ssar,err);
     if (retval < 0)
     {
       haserr = true;
@@ -326,7 +323,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                           TOP.dfsinfo,
                           previoussuffix,
                           state,
-                          env) != 0)
+                          err) != 0)
       {
         haserr = true;
       }
@@ -340,7 +337,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                               previoussuffix,
                               currentlcp,
                               state,
-                              env) != 0)
+                              err) != 0)
       {
         haserr = true;
       }
@@ -348,7 +345,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
     if (!haserr)
     {
       if (processcompletenode != NULL &&
-          processcompletenode(TOP.dfsinfo,state,env) != 0)
+          processcompletenode(TOP.dfsinfo,state,err) != 0)
       {
         haserr = true;
       }
@@ -358,7 +355,6 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
   freeItvinfo(stackspace,
               allocatedItvinfo,
               freeDfsinfo,
-              state,
-              env);
+              state);
   return haserr ? -1 : 0;
 }

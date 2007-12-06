@@ -29,7 +29,7 @@
 
 #include <inttypes.h>
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtmatch/alphadef.h"
 
 /** symbols are stored in this scalar type */
@@ -71,36 +71,36 @@ enum sourceEncType {
  * @param mapping maps all uint8_t input symbols to values in the
  * range 0..sum(symbolsPerRange) or the input alphabet specific
  * value UNDEF_UCHAR
- * @param env
+ * @param err
  */
 static inline MRAEnc *
 MRAEncUInt8New(int numRanges, int symbolsPerRange[],
-               const uint8_t *mapping, Env *env);
+               const uint8_t *mapping, Error *err);
 
 /**
  * \brief Creates a mapping to two ranges (regular and special
  * symbols) from a given genometools alphabet.
  * @param alpha original alphabet
- * @param env
+ * @param err
  */
 extern MRAEnc *
-MRAEncGTAlphaNew(const Alphabet *alpha, Env *env);
+MRAEncGTAlphaNew(const Alphabet *alpha, Error *err);
 
 /**
  * \brief alias of MRAEncUInt8New
  */
 extern MRAEnc *
 newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
-                                   const uint8_t *mappings, Env *env);
+                                   const uint8_t *mappings, Error *err);
 
 /**
  * @brief Copy constructor for multi-range alphabets
  * @param alpha alphabet to copy
- * @param env
+ * @param err
  * @return new alphabet object
  */
 extern MRAEnc *
-MRAEncCopy(const MRAEnc *alpha, Env *env);
+MRAEncCopy(const MRAEnc *alpha, Error *err);
 
 /**
  * \brief remap multirange alphabet by excluding some ranges
@@ -114,11 +114,11 @@ MRAEncCopy(const MRAEnc *alpha, Env *env);
  * range => maps all symbols in range to fallback, otherwise append to
  * already mapped symbols
  * @param fallback symbol to map not-included ranges to
- * @param env
+ * @param err
  */
 extern MRAEnc *
 MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
-                       const int *rangeSel, Symbol fallback, Env *env);
+                       const int *rangeSel, Symbol fallback, Error *err);
 
 /**
  * \brief Inserts a previously unmapped symbol into a range.
@@ -240,10 +240,10 @@ MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
 /**
  * @brief Delete alphabet object.
  * @param mralpha
- * @param env
+ * @param err
  */
 extern void
-MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha, Env *env);
+MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha, Error *err);
 
 #include "libgtmatch/eis-mrangealphabetsimpleop.h"
 

@@ -1,3 +1,20 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
 #ifdef INLINEDENCSEQ
 #include "encseq-def.h"
 #include "spacedef.h"
@@ -12,13 +29,13 @@
 
 #define TISTABFILESUFFIX ".tis"
 
-int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
+int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Error *err)
 {
   FILE *fp;
   bool haserr = false;
 
-  env_error_check(env);
-  fp = opensfxfile(indexname,TISTABFILESUFFIX,"wb",env);
+  error_check(err);
+  fp = opensfxfile(indexname,TISTABFILESUFFIX,"wb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -32,11 +49,11 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
       haserr = true;
     }
   }
-  env_fa_xfclose(fp,env);
+  fa_xfclose(fp,err);
   return haserr ? -1 : 0;
 }
 
-void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
+void freeEncodedsequence(Encodedsequence **encseqptr)
 {
   Encodedsequence *encseq = *encseqptr;
 
@@ -50,7 +67,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
   }
   if (encseq->mappedfile)
   {
-    env_fa_xmunmap((void *) encseq->plainseq,env);
+    fa_xmunmap((void *) encseq->plainseq);
   }
   FREESPACE(*encseqptr);
 }
@@ -59,36 +76,36 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
                                /*@unused@*/ const Encodedsequence *encseq,
                                Readmode readmode,
                                Startpos startpos,
-                               Env *env)
+                               Error *err)
 {
   Encodedsequencescanstate *esr;
 
-  env_error_check(env);
+  error_check(err);
   ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,(size_t) 1);
   esr->readmode = readmode;
   assert(esr != NULL);
   return esr;
 }
 
-void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env)
+void freeEncodedsequencescanstate(Encodedsequencescanstate **esr)
 {
   FREESPACE(*esr);
 }
 
-static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Env *env)
+static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
 {
   Seqpos pos;
   int retval;
   Uchar cc;
 
-  env_error_check(env);
+  error_check(err);
   ALLOCASSIGNSPACE(encseq->plainseq,NULL,Uchar,encseq->totallength);
   encseq->hasownmemory = true;
   encseq->mappedfile = false;
   encseq->hasspecialcharacters = false;
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = readnextUchar(&cc,fbs,env);
+    retval = readnextUchar(&cc,fbs,err);
     if (retval < 0)
     {
       FREESPACE(encseq->plainseq);
@@ -118,12 +135,12 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Env *env)
                                  /*@unused@*/ Seqpos specialranges,
                                  const Alphabet *alphabet,
                                  /*@unused@*/ const char *str_sat,
-                                 Env *env)
+                                 Error *err)
 {
   Encodedsequence *encseq;
   FastaBuffer fbs;
 
-  env_error_check(env);
+  error_check(err);
   initformatbufferstate(&fbs,
                         filenametab,
                         plainformat ? NULL : getsymbolmapAlphabet(alphabet),
@@ -131,12 +148,12 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Env *env)
                         NULL,
                         NULL,
                         NULL,
-                        env);
+                        err);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->totallength = totallength;
-  if (fillplainseq(encseq,&fbs,env) != 0)
+  if (fillplainseq(encseq,&fbs,err) != 0)
   {
-    freeEncodedsequence(&encseq,env);
+    freeEncodedsequence(&encseq);
     return NULL;
   }
   return encseq;
@@ -149,18 +166,18 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Env *env)
                                    Seqpos specialranges,
                                    /*@unused@*/ unsigned int mapsize,
                                    /*@unused@*/ Verboseinfo *verboseinfo,
-                                   Env *env)
+                                   Error *err)
 {
   Encodedsequence *encseq;
   Str *tmpfilename;
 
-  env_error_check(env);
+  error_check(err);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
-  tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,TISTABFILESUFFIX,env);
+  tmpfilename = str_clone(indexname,err);
+  str_append_cstr(tmpfilename,TISTABFILESUFFIX,err);
   encseq->plainseq
-    = env_fa_mmap_read(env,str_get(tmpfilename),&encseq->totallength);
-  str_delete(tmpfilename,env);
+    = fa_mmap_read(err,str_get(tmpfilename),&encseq->totallength);
+  str_delete(tmpfilename,err);
   encseq->hasownmemory = false;
   encseq->mappedfile = true;
   encseq->hasspecialcharacters = (specialranges > 0) ?  true : false;
@@ -174,14 +191,13 @@ Encodedsequence *plain2encodedsequence(
                          Seqpos len1,
                          const Uchar *seq2,
                          unsigned long len2,
-                         /*@unused@*/ unsigned int mapsize,
-                                       Env *env)
+                         /*@unused@*/ unsigned int mapsize)
 {
   Encodedsequence *encseq;
   Uchar *seqptr;
   Seqpos pos, len;
 
-  env_error_check(env);
+  error_check(err);
   assert(seq1 != NULL);
   assert(len1 > 0);
   if (seq2 == NULL)
@@ -196,8 +212,8 @@ Encodedsequence *plain2encodedsequence(
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,env);
-  ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
+  sequence2specialcharinfo(specialcharinfo,seqptr,len);
+  ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,1);
   encseq->plainseq = seqptr;
   encseq->mappedfile = false;
   encseq->hasownmemory = (seq2 == NULL) ? false : true;
@@ -215,8 +231,7 @@ Encodedsequence *plain2encodedsequence(
 }
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
-                                              bool moveforward,
-                                              Env *env)
+                                              bool moveforward)
 {
   Specialrangeiterator *sri;
 
@@ -310,7 +325,7 @@ bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
   return bitanddirectnextspecialrangeiterator(range,sri);
 }
 
-void freespecialrangeiterator(Specialrangeiterator **sri,Env *env)
+void freespecialrangeiterator(Specialrangeiterator **sri)
 {
   FREESPACE(*sri);
 }

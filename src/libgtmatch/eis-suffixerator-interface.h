@@ -22,7 +22,7 @@
 #ifndef EIS_SUFFIXERATOR_INTERFACE_H
 #define EIS_SUFFIXERATOR_INTERFACE_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtmatch/sfx-suffixer.h"
 #include "libgtmatch/sfx-optdef.h"
 #include "libgtmatch/eis-mrangealphabet.h"
@@ -64,7 +64,7 @@ enum sfxDataRequest {
  * @param characterdistribution counts for all characters, used to
  * generate statistics
  * @param verbosity used as argument of showverbose
- * @param env
+ * @param err
  * @return interface object reference
  */
 extern sfxInterface *
@@ -77,7 +77,7 @@ newSfxInterface(Suffixeratoroptions *so,
                 const Alphabet *alpha,
                 const unsigned long *characterdistribution,
                 Verboseinfo *verbosity,
-                Env *env);
+                Error *err);
 
 /**
  * @brief Create suffixerator interface object with requestors already
@@ -100,7 +100,7 @@ newSfxInterface(Suffixeratoroptions *so,
  * @param characterdistribution counts for all characters, used to
  * generate statistics
  * @param verbosity used as argument of showverbose
- * @param env
+ * @param err
  * @return interface object reference
  */
 extern sfxInterface *
@@ -116,27 +116,27 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                            const Alphabet *alpha,
                            const unsigned long *characterdistribution,
                            Verboseinfo *verbosity,
-                           Env *env);
+                           Error *err);
 
 /**
  * @brief Deallocate resources of suffixerator interface object.
  *
  * @param iface object to delete
- * @param env
+ * @param err
  */
 extern void
-deleteSfxInterface(sfxInterface *iface, Env *env);
+deleteSfxInterface(sfxInterface *iface, Error *err);
 
 /**
  * \brief Constructs multiple range alphabet for sequence sorted by
  * suffixerator (i.e. alphabet includes separator and terminator symbols).
  *
  * @param si reference of interface to suffixerator
- * @param env
+ * @param err
  * @return reference of newly created alphabet object
  */
 extern MRAEnc *
-newMRAEncFromSfxI(const sfxInterface *si, Env *env);
+newMRAEncFromSfxI(const sfxInterface *si, Error *err);
 
 /**
  * \brief Get reference for alphabet used to encode original sequence
@@ -206,7 +206,7 @@ getSfxILongestPos(const struct sfxInterface *si);
  */
 extern int
 SfxIRegisterReader(sfxInterface *iface, listenerID *id,
-                   enum sfxDataRequest request, Env *env);
+                   enum sfxDataRequest request, Error *err);
 
 /**
  * \brief Reads portion of the BWT string produced by suffixerator.
@@ -215,25 +215,25 @@ SfxIRegisterReader(sfxInterface *iface, listenerID *id,
  * @param id value returned by corresponding SfxIRegisterReader call
  * @param len number of symbols to read
  * @param dest store read symbols here
- * @param env
+ * @param err
  * @return number of symbols read (less than len implies end of file)
  */
 extern size_t
 readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,
-                 Uchar *dest, Env *env);
+                 Uchar *dest, Error *err);
 
 /**
  * @return actual number of symbols read
  */
 extern size_t
 readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
-                 Seqpos *dest, Env *env);
+                 Seqpos *dest, Error *err);
 
 /**
  * @return actual number of symbols read
  */
 extern size_t
 readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
-                    Seqpos *dest, Env *env);
+                    Seqpos *dest, Error *err);
 
 #endif

@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 #include "libgtcore/arraydef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/log.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
@@ -62,7 +62,7 @@ int simpleexactselfmatchstore (
   Seqpos len,
   Seqpos pos1,
   Seqpos pos2,
-  Env *env)
+  Error *err)
 {
   Seqpos tmp,
          totallength;
@@ -77,7 +77,7 @@ int simpleexactselfmatchstore (
                 seqnum2;
   bool samecontig = false;
 
-  env_error_check(env);
+  error_check(err);
 
   if (pos1 > pos2)
   {
@@ -103,14 +103,14 @@ int simpleexactselfmatchstore (
     for ( i = 0; i < numofdbsequences - 1; i++)
     {
       seqnum1 = getrecordnumSeqpos(markpos, numofdbsequences,
-                        totallength, pos1, env);
+                        totallength, pos1, err);
       if ( seqnum1 == numofdbsequences)
       {
         return -1;
       }
 
       seqnum2 = getrecordnumSeqpos(markpos, numofdbsequences,
-                        totallength, pos2, env);
+                        totallength, pos2, err);
       if ( seqnum2 == numofdbsequences)
       {
         return -1;
@@ -157,7 +157,7 @@ int subsimpleexactselfmatchstore (
   Seqpos dbstart,
    /*@unused@*/ uint64_t queryoffset,
   unsigned long querystart,
-  /*@unused@*/ Env *env)
+  /*@unused@*/ Error *err)
 {
   Repeat *nextfreerepeatptr;
   SubRepeatInfo *sri = (SubRepeatInfo *) info;

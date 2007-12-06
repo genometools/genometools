@@ -75,38 +75,38 @@ struct compList
  * @param compList
  * @param blockSize length of q-words to encode
  * @param numSyms size of alphabet
- * @param env
+ * @param err
  * @return 0 on error, !0 otherwise
  */
 extern int
 initCompositionList(struct compList *compList, unsigned blockSize,
-                    unsigned numSyms, Env *env);
+                    unsigned numSyms, Error *err);
 /**
  * Deallocate resources of composition list object, storage struct is not freed.
  * @param clist
- * @param env
+ * @param err
  */
 extern void
-destructCompositionList(struct compList *clist, Env *env);
+destructCompositionList(struct compList *clist, Error *err);
 
 /**
  * @brief create new object to map q-words to composition/permutation
  * index tuples
  * @param blockSize length of q-words to map
  * @param alphabetSize
- * @param env
+ * @param err
  * @return NULL on error
  */
 extern struct compList *
-newCompositionList(unsigned blockSize, unsigned alphabetSize, Env *env);
+newCompositionList(unsigned blockSize, unsigned alphabetSize, Error *err);
 
 /**
  * Delete composition list object.
  * @param clist
- * @param env
+ * @param err
  */
 extern void
-deleteCompositionList(struct compList *clist, Env *env);
+deleteCompositionList(struct compList *clist, Error *err);
 
 /**
  * \brief Transforms a block-sized sequence of symbols to corresponding
@@ -120,7 +120,7 @@ deleteCompositionList(struct compList *clist, Env *env);
  * index, idxOutput[1] the permutation index.
  * @param bitsOfPermIdx if non-NULL, the number of significant bits
  * for the permutation index is stored here.
- * @param env Environment to use for memory allocation etc.
+ * @param err Environment to use for memory allocation etc.
  * @param permCompPA if not NULL must point to a memory region of
  * sufficient size to hold the concatenated bistring representations
  * of composition and permutation, composition at offset 0,
@@ -136,7 +136,7 @@ extern int
 block2IndexPair(const struct compList *compositionTable,
                 unsigned blockSize, unsigned alphabetSize,
                 const Symbol *block, PermCompIndex idxOutput[2],
-                unsigned *bitsOfPermIdx, Env *env,
+                unsigned *bitsOfPermIdx, Error *err,
                 BitString permCompPA, unsigned *compPA);
 
 /**

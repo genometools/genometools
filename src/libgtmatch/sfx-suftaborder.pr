@@ -8,8 +8,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                                  unsigned int prefixlength,
                                  Seqpos depth,
                                  Seqpos left,
-                                 Seqpos right,
-                                 Env *env);
+                                 Seqpos right);
 
 void showentiresuftab(const Encodedsequence *encseq,
                       Readmode readmode,
@@ -25,7 +24,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
                        Seqpos depth,
-                       Env *env);
+                       Error *err);
 
 #ifdef __cplusplus
 }

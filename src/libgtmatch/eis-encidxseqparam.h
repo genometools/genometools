@@ -92,11 +92,11 @@ union seqBaseEncParam
  * corresponding to the return value of this function.
  * @param params paramters for sequence index construction
  * @param encType select which type of index will be constructed
- * @param env
+ * @param err
  * @return number of symbols stored consecutively
  */
 extern unsigned
 estimateSegmentSize(const union seqBaseEncParam *params,
-                    enum seqBaseEncoding encType, Env *env);
+                    enum seqBaseEncoding encType, Error *err);
 
 #endif

@@ -123,7 +123,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   assert(argc >= 2 && parsed_args == argc - 1);
 
   indexname = str_new_cstr(argv[parsed_args]);
-  verboseinfo = newverboseinfo(sfxmapoptions.verbose,env);
+  verboseinfo = newverboseinfo(sfxmapoptions.verbose);
   if (sfxmapoptions.inputtis)
   {
     demand |= SARR_ESQTAB;
@@ -150,18 +150,18 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                                                  demand,
                                                  indexname,
                                                  verboseinfo,
-                                                 env) != 0)
+                                                 env_error(env)) != 0)
   {
     haserr = true;
   }
-  freeverboseinfo(&verboseinfo,env);
+  freeverboseinfo(&verboseinfo);
   if (!haserr)
   {
     int readmode;
 
     for (readmode = 0; readmode < 4; readmode++)
     {
-      if (isdnaalphabet(suffixarray.alpha,env) ||
+      if (isdnaalphabet(suffixarray.alpha) ||
          ((Readmode) readmode) == Forwardmode ||
          ((Readmode) readmode) == Reversemode)
       {
@@ -170,7 +170,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                                 (Readmode) readmode,
                                 getsymbolmapAlphabet(suffixarray.alpha),
                                 sfxmapoptions.trials,
-                                env) != 0)
+                                env_error(env)) != 0)
         {
           haserr = true;
           break;
@@ -180,21 +180,22 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   }
   if (!haserr)
   {
-    if (checkspecialrangesfast(suffixarray.encseq,env) != 0)
+    if (checkspecialrangesfast(suffixarray.encseq) != 0)
     {
       haserr = true;
     }
   }
   if (!haserr)
   {
-    if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,env) != 0)
+    if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,
+                     env_error(env)) != 0)
     {
       haserr = true;
     }
   }
   if (suffixarray.prefixlength > 0 && !haserr)
   {
-    if (verifymappedstr(&suffixarray,env) != 0)
+    if (verifymappedstr(&suffixarray,env_error(env)) != 0)
     {
       haserr = true;
     }
@@ -208,7 +209,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
       ssar = newSequentialsuffixarrayreaderfromfile(indexname,
                                                     SARR_LCPTAB,
                                                     SEQ_scan,
-                                                    env);
+                                                    env_error(env));
     } else
     {
       ssar = NULL;
@@ -221,18 +222,18 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                       false, /* specialsareequal  */
                       false,  /* specialsareequalatdepth0 */
                       0,
-                      env);
+                      env_error(env));
     if (ssar != NULL)
     {
-      freeSequentialsuffixarrayreader(&ssar,env);
+      freeSequentialsuffixarrayreader(&ssar);
     }
   }
   if (sfxmapoptions.inputdes && !haserr)
   {
     checkalldescriptions(suffixarray.destab,suffixarray.destablength,
-                         suffixarray.numofdbsequences,env);
+                         suffixarray.numofdbsequences);
   }
   str_delete(indexname);
-  freesuffixarray(&suffixarray,env);
+  freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }

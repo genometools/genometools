@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
-#include "libgtcore/env.h"
 #include "libgtcore/symboldef.h"
 #include "spacedef.h"
 
@@ -282,8 +281,7 @@ static void firstfrontforward(FrontResource *gl,Frontspec *fspec)
 unsigned long greedyunitedist(const Uchar *useq,
                               unsigned long ulenvalue,
                               const Uchar *vseq,
-                              unsigned long vlenvalue,
-                              Env *env)
+                              unsigned long vlenvalue)
 {
   unsigned long currentallocated, realdistance;
   FrontResource gl;

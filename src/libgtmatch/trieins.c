@@ -243,9 +243,9 @@ static void checktrie2(Trierep *trierep,
 }
 
 void checktrie(Trierep *trierep,unsigned int numberofleaves,
-               unsigned int maxleafnum,Env *env)
+               unsigned int maxleafnum,Error *err)
 {
-  env_error_check(env);
+  error_check(err);
   if (trierep->root != NULL)
   {
     Bitstring *leafused;
@@ -631,9 +631,8 @@ void deletesmallestpath(Trienode *smallest,Trierep *trierep)
 }
 
 void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
-                       unsigned int numofindexes,Env *env)
+                       unsigned int numofindexes)
 {
-  env_error_check(env);
   trierep->numofindexes = numofindexes;
   trierep->allocatedTrienode = (unsigned int) MULT2(numofsuffixes + 1) + 1;
   ALLOCASSIGNSPACE(trierep->nodetable,NULL,Trienode,trierep->allocatedTrienode);
@@ -644,7 +643,7 @@ void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
                    trierep->allocatedTrienode);
 }
 
-void freetrierep(Trierep *trierep,Env *env)
+void freetrierep(Trierep *trierep)
 {
   FREESPACE(trierep->nodetable);
   FREESPACE(trierep->unusedTrienodes);

@@ -29,7 +29,7 @@
  * the option parser.
  * @param op
  * @param paramOutput user provided values will be stored here
- * @param env
+ * @param err
  */
 extern void
 registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput);

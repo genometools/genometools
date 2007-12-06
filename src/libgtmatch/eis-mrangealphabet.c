@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "libgtcore/chardef.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/str.h"
 #include "libgtcore/symboldef.h"
@@ -33,7 +33,7 @@
 
 MRAEnc *
 newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
-                                   const uint8_t *mappings, Env *env)
+                                   const uint8_t *mappings, Error *err)
 {
   MRAEncUInt8 *newAlpha = NULL;
   size_t i;
@@ -78,7 +78,7 @@ newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
 }
 
 MRAEnc *
-MRAEncGTAlphaNew(const Alphabet *alpha, Env *env)
+MRAEncGTAlphaNew(const Alphabet *alpha, Error *err)
 {
   int symsPerRange[2];
   uint8_t *mappings;
@@ -94,13 +94,13 @@ MRAEncGTAlphaNew(const Alphabet *alpha, Env *env)
   }
   symsPerRange[0] = numSyms - 1;
   symsPerRange[1] = 1;
-  result = newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings, env);
+  result = newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings, err);
   ma_free(mappings);
   return result;
 }
 
 extern MRAEnc *
-MRAEncCopy(const MRAEnc *alpha, Env *env)
+MRAEncCopy(const MRAEnc *alpha, Error *err)
 {
   assert(alpha);
   switch (alpha->encType)
@@ -168,7 +168,7 @@ MRAEncGetSize(const MRAEnc *mralpha)
 
 extern MRAEnc *
 MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
-                       const int *rangeSel, Symbol fallback, Env *env)
+                       const int *rangeSel, Symbol fallback, Error *err)
 {
   MRAEnc *newAlpha;
   switch (srcAlpha->encType)
@@ -201,7 +201,7 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
         }
       }
       newAlpha = newMultiRangeAlphabetEncodingUInt8(numRanges, newRanges,
-                                                    mappings, env);
+                                                    mappings, err);
       ma_free(mappings);
       ma_free(newRanges);
     }
@@ -365,9 +365,9 @@ MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
 }
 
 void
-MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha, Env *env)
+MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha, Error *err)
 {
-  assert(mralpha && env);
+  assert(mralpha && err);
   ma_free(mralpha->symbolsPerRange);
   ma_free(mralpha->rangeEndIndices);
   switch (mralpha->encType)

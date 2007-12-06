@@ -1,13 +1,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void wrapsfxoptions(Suffixeratoroptions *so,Env *env);
+void wrapsfxoptions(Suffixeratoroptions *so,Error *err);
 
 int suffixeratoroptions(Suffixeratoroptions *so,
                         bool doesa,
                         int argc,
                         const char **argv,
-                        Env *env);
+                        Error *err);
 
 #ifdef __cplusplus
 }

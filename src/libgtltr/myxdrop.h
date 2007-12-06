@@ -107,7 +107,7 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                      int ulen,
                                      int vlen,
                                      Xdropscore xdropbelowscore,
-                                     Env *env);
+                                     Error *err);
 
 #define EVALXDROPARBITSCORESRIGHT\
       void evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
@@ -120,7 +120,7 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                      int ulen,\
                                      int vlen,\
                                      Xdropscore xdropbelowscore,\
-                                     Env *env)
+                                     Error *err)
 
 void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                                     Myxdropbest * xdropbest,
@@ -132,7 +132,7 @@ void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                                     int ulen,
                                     int vlen,
                                     Xdropscore xdropbelowscore,
-                                    Env *env);
+                                    Error *err);
 
 #define EVALXDROPARBITSCORESLEFT\
        void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,\
@@ -145,5 +145,5 @@ void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                                     int ulen,\
                                     int vlen,\
                                     Xdropscore xdropbelowscore,\
-                                    Env *env)
+                                    Error *err)
 #endif

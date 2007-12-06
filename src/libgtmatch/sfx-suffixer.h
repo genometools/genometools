@@ -17,7 +17,7 @@
 
 #ifndef SFX_SUFFIXER_H
 #define SFX_SUFFIXER_H
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "encseq-def.h"
 #include "readmode-def.h"
 #include "measure-time-if.h"
@@ -26,7 +26,7 @@
 
 typedef struct Sfxiterator Sfxiterator;
 
-void freeSfxiterator(Sfxiterator **sfi,Env *env);
+void freeSfxiterator(Sfxiterator **sfi);
 
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Seqpos specialranges,
@@ -35,12 +35,13 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int numofchars,
                             unsigned int prefixlength,
                             unsigned int numofparts,
+                            const Str *indexname,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
-                            Env *env);
+                            Error *err);
 
-const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
+const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
                               Measuretime *mtime,
-                              Sfxiterator *sfi,Env *env);
+                              Sfxiterator *sfi,Error *err);
 
 #endif

@@ -19,7 +19,7 @@
 #include <ctype.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/discdistri.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
@@ -77,7 +77,7 @@ int fasta2sequencekeyvalues(
         bool withdestab,
         unsigned long *characterdistribution,
         Verboseinfo *verboseinfo,
-        Env *env)
+        Error *err)
 {
   FastaBuffer *fb = NULL;
   Uchar charcode;
@@ -92,7 +92,7 @@ int fasta2sequencekeyvalues(
   char *desc;
   FILE *desfp = NULL;
 
-  env_error_check(env);
+  error_check(err);
   *numofsequences = 0;
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
@@ -101,7 +101,7 @@ int fasta2sequencekeyvalues(
   if (withdestab)
   {
     descqueue = queue_new();
-    desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",env);
+    desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",err);
     if (desfp == NULL)
     {
       haserr = true;
@@ -118,7 +118,7 @@ int fasta2sequencekeyvalues(
     distspralen = discdistri_new();
     for (pos = 0; /* Nothing */; pos++)
     {
-      retval = fastabuffer_next(fb,&charcode,env_error(env));
+      retval = fastabuffer_next(fb,&charcode,err);
       if (retval < 0)
       {
         haserr = true;
@@ -140,7 +140,7 @@ int fasta2sequencekeyvalues(
           desc = queue_get(descqueue);
           if (fputs(desc,desfp) == EOF)
           {
-            env_error_set(env,"cannot write description to file %s.%s",
+            error_set(err,"cannot write description to file %s.%s",
                               str_get(indexname),DESTABSUFFIX);
             haserr = true;
             break;
@@ -188,7 +188,7 @@ int fasta2sequencekeyvalues(
       desc = queue_get(descqueue);
       if (fputs(desc,desfp) == EOF)
       {
-        env_error_set(env,"cannot write description to file %s.%s",
+        error_set(err,"cannot write description to file %s.%s",
                           str_get(indexname),DESTABSUFFIX);
         haserr = true;
       }
@@ -214,8 +214,7 @@ int fasta2sequencekeyvalues(
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
                               const Uchar *seq,
                               const Seqpos len,
-                              Verboseinfo *verboseinfo,
-                              Env *env)
+                              Verboseinfo *verboseinfo)
 {
   Uchar charcode;
   Seqpos pos;
@@ -225,7 +224,6 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   unsigned long idx;
   Updatesumrangeinfo updatesumrangeinfo;
 
-  env_error_check(env);
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;

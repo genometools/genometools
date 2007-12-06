@@ -17,7 +17,6 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "libgtcore/env.h"
 #include "libgtcore/ma.h"
 #include "measure-time-if.h"
 
@@ -27,16 +26,15 @@
   const char *eventdescription;
 };
 
-void inittheclock(Measuretime **mtime,const char *event,Env *env)
+void inittheclock(Measuretime **mtime,const char *event)
 {
-  env_error_check(env);
   *mtime = ma_malloc(sizeof (Measuretime));
   (*mtime)->startclock = clock();
   (*mtime)->overalltime = 0;
   (*mtime)->eventdescription = event;
 }
 
-void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent,Env *env)
+void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent)
 {
   clock_t stopclock;
 

@@ -16,7 +16,7 @@
 */
 
 #include <inttypes.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
@@ -41,7 +41,7 @@ static int simpleexactselfmatchoutput(/*@unused@*/ void *info,
                                       Seqpos len,
                                       Seqpos pos1,
                                       Seqpos pos2,
-                                      /*@unused@*/ Env *env)
+                                      /*@unused@*/ Error *err)
 {
   if (pos1 > pos2)
   {
@@ -61,7 +61,7 @@ static int simpleexactquerymatchoutput(/*@unused@*/ void *info,
                                        Seqpos dbstart,
                                        uint64_t unitnum,
                                        unsigned long querystart,
-                                       /*@unused@*/ Env *env)
+                                       /*@unused@*/ Error *err)
 {
   printf("%lu " FormatSeqpos " " Formatuint64_t " %lu\n",
            len,
@@ -135,22 +135,21 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   return oprval;
 }
 
-int gt_maxpairs(int argc, const char **argv, Env *env)
+int gt_maxpairs(int argc, const char **argv, Error *err)
 {
   bool haserr = false;
   int parsed_args;
   Maxpairsoptions maxpairsoptions;
   OPrval oprval;
 
-  env_error_check(env);
+  error_check(err);
 
   maxpairsoptions.indexname = str_new();
   maxpairsoptions.queryfiles = strarray_new();
-  oprval = parse_options(&maxpairsoptions,&parsed_args, argc, argv,
-                         env_error(env));
+  oprval = parse_options(&maxpairsoptions,&parsed_args, argc, argv,err);
   if (oprval == OPTIONPARSER_OK)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(false,env);
+    Verboseinfo *verboseinfo = newverboseinfo(false);
     assert(parsed_args == argc);
     if (strarray_size(maxpairsoptions.queryfiles) == 0)
     {
@@ -162,7 +161,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
                              simpleexactselfmatchoutput,
                              NULL,
                              verboseinfo,
-                             env) != 0)
+                             err) != 0)
         {
           haserr = true;
         }
@@ -174,7 +173,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
                          (Seqpos) (100 *
                                    maxpairsoptions.userdefinedleastlength),
                          verboseinfo,
-                         env) != 0)
+                         err) != 0)
         {
           haserr = true;
         }
@@ -188,12 +187,12 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
                                simpleexactquerymatchoutput,
                                NULL,
                                verboseinfo,
-                               env) != 0)
+                               err) != 0)
       {
         haserr = true;
       }
     }
-    freeverboseinfo(&verboseinfo,env);
+    freeverboseinfo(&verboseinfo);
   }
   str_delete(maxpairsoptions.indexname);
   strarray_delete(maxpairsoptions.queryfiles);

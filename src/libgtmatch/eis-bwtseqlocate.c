@@ -115,7 +115,8 @@ initAddLocateInfoState(struct addLocateInfoState *state,
                        GetOrigSeqSym readOrigSeq, void *origSeqState,
                        SeqposReadFunc readSeqpos, void *spReadState,
                        const MRAEnc *alphabet, int *specialRanges,
-                       Seqpos srcLen, const struct bwtParam *params, Env *env)
+                       Seqpos srcLen, const struct bwtParam *params,
+                       Error *err)
 {
   Seqpos lastPos;
   unsigned aggregationExpVal;
@@ -130,7 +131,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
   state->origSeqState = origSeqState;
   state->featureToggles = params->featureToggles;
   aggregationExpVal = estimateSegmentSize(&params->seqParams,
-                                          params->baseType, env);
+                                          params->baseType, err);
   locateInterval = params->locateInterval;
   lastPos = srcLen - 1;
   state->locateInterval = locateInterval;
@@ -154,7 +155,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
 }
 
 static void
-destructAddLocateInfoState(struct addLocateInfoState *state, Env *env)
+destructAddLocateInfoState(struct addLocateInfoState *state, Error *err)
 {
   ma_free(state->revMapCache);
 }
@@ -163,7 +164,7 @@ static BitOffset
 addLocateInfo(BitString cwDest, BitOffset cwOffset,
               BitString varDest, BitOffset varOffset,
               Seqpos start, Seqpos len, void *cbState,
-              Env *env)
+              Error *err)
 {
   BitOffset bitsWritten = 0;
   struct addLocateInfoState *state = cbState;
@@ -189,7 +190,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
     {
       int specialRegularSymTransition = 0;
       /* 1.a read array index*/
-      if ((retcode = state->readSeqpos(state->spReadState, &mapVal, 1, env))
+      if ((retcode = state->readSeqpos(state->spReadState, &mapVal, 1, err))
           != 1)
         return (BitOffset)-1;
       /* 1.b find current symbol and compare to special ranges */
@@ -274,18 +275,19 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
 
 extern EISeq *
 createBWTSeqGeneric(const struct bwtParam *params,
-                    indexCreateFunc createIndex, void *baseSrc, Seqpos totalLen,
+                    indexCreateFunc createIndex, void *baseSrc,
+                    Seqpos totalLen,
                     const MRAEnc *alphabet, int *specialRanges,
                     GetOrigSeqSym readOrigSeq, void *origSeqState,
                     SeqposReadFunc readNextSeqpos, void *spReadState,
-                    reportLongest lrepFunc, void *lrepState, Env *env)
+                    reportLongest lrepFunc, void *lrepState, Error *err)
 {
   struct encIdxSeq *baseSeqIdx = NULL;
   struct addLocateInfoState varState;
   bool varStateIsInitialized = false;
   unsigned locateInterval;
-  assert(baseSrc && params && env);
-  env_error_check(env);
+  assert(baseSrc && params && err);
+  error_check(err);
   locateInterval = params->locateInterval;
   do
   {
@@ -295,12 +297,12 @@ createBWTSeqGeneric(const struct bwtParam *params,
     uint16_t headerIDs[] = { LOCATE_INFO_IN_INDEX_HEADERID };
     uint32_t headerSizes[] = { LOCATE_HEADER_SIZE };
     headerWriteFunc headerFuncs[] = { writeLocateInfoHeader };
-    env_error_unset(env);
+    error_unset(err);
     initAddLocateInfoState(&varState,
                            readOrigSeq, origSeqState,
                            readNextSeqpos, spReadState,
                            alphabet, specialRanges,
-                           totalLen, params, env);
+                           totalLen, params, err);
     varStateIsInitialized = true;
     if (locateInterval)
     {
@@ -312,7 +314,7 @@ createBWTSeqGeneric(const struct bwtParam *params,
                           /* one bit per position if using bitmap */
                           (params->featureToggles & BWTLocateBitmap)?1:0,
                           bitsPerPosUpperBound(&varState),
-                          &varState, env)))
+                          &varState, err)))
         break;
     }
     else
@@ -320,23 +322,23 @@ createBWTSeqGeneric(const struct bwtParam *params,
       if (!(baseSeqIdx
             = createIndex(baseSrc, totalLen, params->projectName,
                           &params->seqParams, 0, NULL, NULL, NULL,
-                          NULL, NULL, 0, 0, &varState, env)))
+                          NULL, NULL, 0, 0, &varState, err)))
         break;
     }
   } while (0);
   if (varStateIsInitialized)
-    destructAddLocateInfoState(&varState, env);
+    destructAddLocateInfoState(&varState, err);
   return baseSeqIdx;
 }
 
 static inline BitOffset
 searchLocateCountMark(const BWTSeq *bwtSeq, Seqpos pos,
-                      struct extBitsRetrieval *extBits, Env *env)
+                      struct extBitsRetrieval *extBits, Error *err)
 {
   unsigned i, numMarks, bitsPerCount;
   BitOffset markOffset;
   EISRetrieveExtraBits(bwtSeq->seqIdx, pos, EBRF_RETRIEVE_CWBITS
-                       | EBRF_RETRIEVE_VARBITS, extBits, bwtSeq->hint, env);
+                       | EBRF_RETRIEVE_VARBITS, extBits, bwtSeq->hint, err);
   markOffset = extBits->varOffset;
   bitsPerCount = requiredSeqposBits(extBits->len);
   numMarks = bsGetSeqpos(extBits->varPart, markOffset, bitsPerCount);
@@ -363,17 +365,17 @@ searchLocateCountMark(const BWTSeq *bwtSeq, Seqpos pos,
 
 extern int
 BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
-                       struct extBitsRetrieval *extBits, Env *env)
+                       struct extBitsRetrieval *extBits, Error *err)
 {
   if (bwtSeq->featureToggles & BWTLocateBitmap)
   {
     EISRetrieveExtraBits(bwtSeq->seqIdx, pos, EBRF_RETRIEVE_CWBITS, extBits,
-                         bwtSeq->hint, env);
+                         bwtSeq->hint, err);
     return bsGetBit(extBits->cwPart, extBits->cwOffset + pos - extBits->start);
   }
   else if (bwtSeq->featureToggles & BWTLocateCount)
   {
-    BitOffset markOffset = searchLocateCountMark(bwtSeq, pos, extBits, env);
+    BitOffset markOffset = searchLocateCountMark(bwtSeq, pos, extBits, err);
     return markOffset != 0;
   }
 #ifndef NDEBUG
@@ -389,17 +391,17 @@ BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
 
 extern Seqpos
 BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
-                  struct extBitsRetrieval *extBits, Env *env)
+                  struct extBitsRetrieval *extBits, Error *err)
 {
   if (bwtSeq->featureToggles & BWTLocateBitmap)
   {
     Seqpos nextLocate = pos;
     unsigned locateOffset = 0;
-    while (!BWTSeqPosHasLocateInfo(bwtSeq, nextLocate, extBits, env))
-      nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, env), ++locateOffset;
+    while (!BWTSeqPosHasLocateInfo(bwtSeq, nextLocate, extBits, err))
+      nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, err), ++locateOffset;
     EISRetrieveExtraBits(bwtSeq->seqIdx, nextLocate,
                          EBRF_RETRIEVE_CWBITS | EBRF_RETRIEVE_VARBITS,
-                         extBits, bwtSeq->hint, env);
+                         extBits, bwtSeq->hint, err);
     {
       Seqpos maxPosVal = ((bwtSeq->featureToggles & BWTProperlySorted)?
                           (BWTSeqLength(bwtSeq) - 1)
@@ -440,8 +442,8 @@ BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
     unsigned bitsPerOrigPos
       = requiredSeqposBits(BWTSeqLength(bwtSeq) - 1);
     while ((markOffset = searchLocateCountMark(bwtSeq, nextLocate,
-                                               extBits, env)) == 0)
-      nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, env), ++locateOffset;
+                                               extBits, err)) == 0)
+      nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, err), ++locateOffset;
     matchPos = bsGetSeqpos(extBits->varPart, markOffset, bitsPerOrigPos)
       + locateOffset;
     return matchPos;

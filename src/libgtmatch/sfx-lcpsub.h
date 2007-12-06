@@ -18,12 +18,9 @@
 #ifndef SFX_LCPSUB_H
 #define SFX_LCPSUB_H
 
-#include "libgtcore/env.h"
-
 typedef struct Lcpsubtab Lcpsubtab;
 
-void freelcpsubtab(Lcpsubtab **lcpsubtab,Env *env);
-Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars,
-                        Env *env);
+void freelcpsubtab(Lcpsubtab **lcpsubtab);
+Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars);
 
 #endif

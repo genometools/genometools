@@ -24,13 +24,13 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
                                             unsigned long maxpatternlen,
                                             const Encodedsequence *encseq,
                                             unsigned int alphasize,
-                                            Env *env);
+                                            Error *err);
 
 const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
                                      Enumpatterniterator *epi);
 
 void showPatterndistribution(const Enumpatterniterator *epi);
 
-void freeEnumpatterniterator(Enumpatterniterator **epi,Env *env);
+void freeEnumpatterniterator(Enumpatterniterator **epi);
 
 #endif

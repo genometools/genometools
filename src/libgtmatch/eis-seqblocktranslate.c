@@ -20,7 +20,7 @@
 
 #include "libgtcore/bitpackstring.h"
 #include "libgtcore/combinatorics.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
 #include "libgtmatch/eis-seqblocktranslate.h"
@@ -117,10 +117,10 @@ static int
 initPermutationsList(const unsigned *composition, struct permList *permutation,
                      BitString permStore, BitOffset permOffset,
                      unsigned blockSize, unsigned alphabetSize,
-                     unsigned bitsPerSymbol, Env *env);
+                     unsigned bitsPerSymbol, Error *err);
 
 static void
-destructPermutationsList(struct permList *permutation, Env *env);
+destructPermutationsList(struct permList *permutation, Error *err);
 
 #if DEBUG > 1
 static void
@@ -144,7 +144,7 @@ compListPermStartOffset(struct compList *list, unsigned numSyms)
     {                                                                   \
       unsigned i;                                                       \
       for (i = 0; i < cmpIdx; ++i)                                      \
-        destructPermutationsList(newList->permutations + i, env);       \
+        destructPermutationsList(newList->permutations + i, err);       \
       ma_free(newList->permutations);                                   \
     }                                                                   \
     if (newList->catCompsPerms)                                         \
@@ -155,14 +155,14 @@ compListPermStartOffset(struct compList *list, unsigned numSyms)
 
 extern int
 initCompositionList(struct compList *newList, unsigned blockSize,
-                    unsigned alphabetSize, Env *env)
+                    unsigned alphabetSize, Error *err)
 {
   unsigned *composition = NULL;
   Symbol maxSym = alphabetSize - 1;
   BitOffset bitsPerComp, bitsPerCount, bitsPerPerm;
   size_t numCompositions, cmpIdx = 0;
   size_t maxNumPermutations = 0, numTotalPermutations;
-  assert(env && newList);
+  assert(err && newList);
   newList->permutations = NULL;
   newList->catCompsPerms = NULL;
   if (!(composition = ma_malloc(sizeof (composition[0]) * blockSize)))
@@ -204,7 +204,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
                               bitsPerComp)>0):1);
       if (initPermutationsList(composition, newList->permutations + cmpIdx,
                               newList->catCompsPerms, permOffset, blockSize,
-                               alphabetSize, newList->bitsPerSymbol, env))
+                               alphabetSize, newList->bitsPerSymbol, err))
         initCompositionListErrRet();
 #ifndef NDEBUG
       log_log("%lu",
@@ -237,24 +237,24 @@ initCompositionList(struct compList *newList, unsigned blockSize,
 }
 
 extern void
-destructCompositionList(struct compList *clist, Env *env)
+destructCompositionList(struct compList *clist, Error *err)
 {
   {
     unsigned i;
     for (i = 0; i < clist->numCompositions; ++i)
-      destructPermutationsList(clist->permutations + i, env);
+      destructPermutationsList(clist->permutations + i, err);
   }
   ma_free(clist->permutations);
   ma_free(clist->catCompsPerms);
 }
 
 extern struct compList *
-newCompositionList(unsigned blockSize, unsigned alphabetSize, Env *env)
+newCompositionList(unsigned blockSize, unsigned alphabetSize, Error *err)
 {
   struct compList *newList = NULL;
   if (!(newList = ma_calloc(1, sizeof (struct compList))))
     return NULL;
-  if (!initCompositionList(newList, blockSize, alphabetSize, env))
+  if (!initCompositionList(newList, blockSize, alphabetSize, err))
   {
     ma_free(newList);
     return NULL;
@@ -263,9 +263,9 @@ newCompositionList(unsigned blockSize, unsigned alphabetSize, Env *env)
 }
 
 extern void
-deleteCompositionList(struct compList *clist, Env *env)
+deleteCompositionList(struct compList *clist, Error *err)
 {
-  destructCompositionList(clist, env);
+  destructCompositionList(clist, err);
   ma_free(clist);
 }
 
@@ -315,7 +315,7 @@ static int
 initPermutationsList(const unsigned *composition, struct permList *permutation,
                      BitString permStore, BitOffset permOffset,
                      unsigned blockSize, unsigned alphabetSize,
-                     unsigned bitsPerSymbol, Env *env)
+                     unsigned bitsPerSymbol, Error *err)
 {
   size_t numPermutations = permutation->numPermutations =
     multinomialCoeff(blockSize, alphabetSize, composition);
@@ -356,7 +356,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
 }
 
 static void
-destructPermutationsList(struct permList *permutation, Env *env)
+destructPermutationsList(struct permList *permutation, Error *err)
 {
 /*   ma_free(permutation->catPerms); */
 }
@@ -439,13 +439,13 @@ extern int
 block2IndexPair(const struct compList *compositionTable,
                 unsigned blockSize, unsigned alphabetSize,
                 const Symbol *block, PermCompIndex idxOutput[2],
-                unsigned *bitsOfPermIdx, Env *env,
+                unsigned *bitsOfPermIdx, Error *err,
                 BitString permCompPA, unsigned *compPA)
 {
   unsigned bitsPerCount;
   BitOffset bitsPerComposition, bitsPerPermutation;
   BitString permCompBitString;
-  assert(compositionTable && idxOutput && block && env);
+  assert(compositionTable && idxOutput && block && err);
   assert(blockSize > 0);
   bitsPerComposition = (bitsPerCount = compositionTable->bitsPerCount)
     * alphabetSize;

@@ -18,12 +18,12 @@
 #ifndef SEARCHFORLTRS_H
 #define SEARCHFORLTRS_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtmatch/sarr-def.h"
 
 #include "ltrharvest-opt.h"
 
 int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
-                  const Seqpos *markpos, Env *env);
+                  const Seqpos *markpos, Error *err);
 
 #endif
