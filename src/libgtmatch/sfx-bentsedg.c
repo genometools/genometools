@@ -41,9 +41,16 @@
 
 #define PTR2INT(VAR,I) DEREF(VAR,cptr = *(I)+depth,cptr)
 
+#define WITHLCP
+
+#ifdef WITHLCP
 #define LCPINDEX(I)        (Seqpos) ((I) - lcpsubtab->suftabbase)
 #define SETLCP(I,V)        lcpsubtab->spaceSeqpos[I] = V
 #define EVALLCPLEN(LL,T)   LL = (Seqpos) (tptr - (T))
+#else
+#define SETLCP(I,V)        /* Nothing */
+#define EVALLCPLEN(LL,T)   /* Nothing */
+#endif
 
 #define UNDEFLCP(TLEN) ((TLEN)+1)
 
@@ -150,19 +157,23 @@ static void insertionsort(const Encodedsequence *encseq,
   Suffixptr sptr, tptr, *pi, *pj, temp;
   Seqpos ccs, cct;
   Uchar tmpsvar, tmptvar;
+#ifdef WITHLCP
   Seqpos lcpindex, lcplen;
+#endif
 
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
     for (pj = pi; pj > leftptr; pj--)
     {
       STRINGCOMPARE(*(pj-1),*pj,depth,lcplen);
+#ifdef WITHLCP
       lcpindex = LCPINDEX(pj);
       if (ccs > cct && pj < pi)
       {
         SETLCP(lcpindex+1,lcpsubtab->spaceSeqpos[lcpindex]);
       }
       SETLCP(lcpindex,lcplen);
+#endif
       if (ccs < cct)
       {
         break;
