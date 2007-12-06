@@ -306,6 +306,29 @@ void bittab_show(const Bittab *b, FILE *outfp)
   (void) putc('\n', outfp);
 }
 
+int bittab_example(Error *err)
+{
+  unsigned long bit;
+  Bittab *b;
+  error_check(err);
+
+  b = bittab_new(32);
+  bittab_set_bit(b, 8);
+  bittab_set_bit(b, 16);
+  bittab_set_bit(b, 24);
+
+  /* a typical iterator loop */
+  for (bit  = bittab_get_first_bitnum(b);
+       bit != bittab_get_last_bitnum(b);
+       bit  = bittab_get_next_bitnum(b, bit)) {
+    /* ... */
+  }
+
+  bittab_delete(b);
+
+  return 0;
+}
+
 int bittab_unit_test(Error *err)
 {
   unsigned long i, j, size, bit, counter;

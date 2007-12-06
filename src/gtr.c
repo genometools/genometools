@@ -225,6 +225,7 @@ void gtr_register_components(GTR *gtr)
   hashtable_add(gtr->unit_tests, "bit pack string module",
                 bitPackString_unit_test);
   hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test);
+  hashtable_add(gtr->unit_tests, "bittab example", bittab_example);
   hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test);
   hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test);
   hashtable_add(gtr->unit_tests, "disc distri class", discdistri_unit_test);
