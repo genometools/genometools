@@ -74,10 +74,9 @@ SRLCompact(struct seqRangeList *rangeList, Error *err);
 /**
  * @brief Destructor for sequence range lists.
  * @param rangeList
- * @param err
  */
 extern void
-deleteSeqRangeList(struct seqRangeList *rangeList, Error *err);
+deleteSeqRangeList(struct seqRangeList *rangeList);
 
 /**
  * @brief Add a new range at the end of the current list.

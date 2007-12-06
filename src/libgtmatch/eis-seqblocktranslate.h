@@ -87,7 +87,7 @@ initCompositionList(struct compList *compList, unsigned blockSize,
  * @param err
  */
 extern void
-destructCompositionList(struct compList *clist, Error *err);
+destructCompositionList(struct compList *clist);
 
 /**
  * @brief create new object to map q-words to composition/permutation
@@ -103,10 +103,9 @@ newCompositionList(unsigned blockSize, unsigned alphabetSize, Error *err);
 /**
  * Delete composition list object.
  * @param clist
- * @param err
  */
 extern void
-deleteCompositionList(struct compList *clist, Error *err);
+deleteCompositionList(struct compList *clist);
 
 /**
  * \brief Transforms a block-sized sequence of symbols to corresponding

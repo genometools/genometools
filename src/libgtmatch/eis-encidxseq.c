@@ -23,9 +23,9 @@
 #include "libgtmatch/eis-encidxseqpriv.h"
 
 void
-deleteEncIdxSeq(EISeq *seq, Error *err)
+deleteEncIdxSeq(EISeq *seq)
 {
-  seq->classInfo->delete(seq, err);
+  seq->classInfo->delete(seq);
 }
 
 const char *EISIntegrityCheckResultStrings[] =
@@ -59,9 +59,9 @@ const char *EISIntegrityCheckResultStrings[] =
       break;                                                            \
     }                                                                   \
     EISPrintDiagsForPos(seqIdx, pos, stderr, hint, err);                \
-    deleteEISHint(seqIdx, hint, err);                                   \
-    freesuffixarray(&suffixArray);                                 \
-    freeverboseinfo(&verbosity);                                   \
+    deleteEISHint(seqIdx, hint);                                        \
+    freesuffixarray(&suffixArray);                                      \
+    freeverboseinfo(&verbosity);                                        \
     return retval;                                                      \
   } while (0)
 
@@ -153,7 +153,7 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
     putc('\n', fp);
   if (ferror(bwtFP))
     verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
-  deleteEISHint(seqIdx, hint, err);
+  deleteEISHint(seqIdx, hint);
   freesuffixarray(&suffixArray);
   freeverboseinfo(&verbosity);
   return EIS_INTEGRITY_CHECK_NO_ERROR;

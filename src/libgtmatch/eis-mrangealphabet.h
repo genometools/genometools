@@ -243,7 +243,7 @@ MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
  * @param err
  */
 extern void
-MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha, Error *err);
+MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha);
 
 #include "libgtmatch/eis-mrangealphabetsimpleop.h"
 

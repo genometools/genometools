@@ -122,10 +122,9 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
  * @brief Deallocate resources of suffixerator interface object.
  *
  * @param iface object to delete
- * @param err
  */
 extern void
-deleteSfxInterface(sfxInterface *iface, Error *err);
+deleteSfxInterface(sfxInterface *iface);
 
 /**
  * \brief Constructs multiple range alphabet for sequence sorted by

@@ -159,10 +159,9 @@ loadBlockEncIdxSeq(const Str *projectName, int features, Error *err);
 /**
  * \brief Deallocate a previously loaded/created sequence object.
  * @param seq reference of object to delete
- * @param err genometools reference for core functions
  */
 extern void
-deleteEncIdxSeq(EISeq *seq, Error *err);
+deleteEncIdxSeq(EISeq *seq);
 
 /**
  * \brief Retrieve alphabet transformation from sequence object
@@ -238,19 +237,17 @@ newExtBitsRetrieval(Error *err);
  * \brief Destruct structure holding retrieval data, deallocates
  * referenced data as necessary.
  * @param r struct to destruct
- * @param err genometools state, passes information about allocator etc.
  */
 static inline void
-destructExtBitsRetrieval(struct extBitsRetrieval *r, Error *err);
+destructExtBitsRetrieval(struct extBitsRetrieval *r);
 
 /**
  * \brief Destruct structure holding retrieval data, deallocates
  * referenced data as necessary and the structure itself.
  * @param r struct to delete
- * @param err genometools state, passes information about allocator etc.
  */
 static inline void
-deleteExtBitsRetrieval(struct extBitsRetrieval *r, Error *err);
+deleteExtBitsRetrieval(struct extBitsRetrieval *r);
 
 /**
  * \brief Find positions of nth symbol occurrence. TODO: NOT IMPLEMENTED
@@ -306,10 +303,9 @@ newEISHint(EISeq *seq, Error *err);
  * Deallocate hinting data.
  * @param seq sequence associated
  * @param hint hint to free
- * @param err
  */
 static inline void
-deleteEISHint(EISeq *seq, EISHint hint, Error *err);
+deleteEISHint(EISeq *seq, EISHint hint);
 
 /**
  * Possible outcome of index integrity check.

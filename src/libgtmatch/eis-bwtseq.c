@@ -116,7 +116,7 @@ loadBWTSeqForSA(const struct bwtParam *params, Suffixarray *sa,
     break;
   }
   if (!bwtSeq && seqIdx)
-    deleteEncIdxSeq(seqIdx, err);
+    deleteEncIdxSeq(seqIdx);
   return bwtSeq;
 }
 
@@ -154,9 +154,9 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
     if (!bwtSeq)
     {
       if (seqIdx)
-        deleteEncIdxSeq(seqIdx, err);
+        deleteEncIdxSeq(seqIdx);
       if (alphabet)
-        MRAEncDelete(alphabet, err);
+        MRAEncDelete(alphabet);
     }
   }
   return bwtSeq;
@@ -217,7 +217,7 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
       error_set(err, "Position of terminator in BWT not found!");
   }
   if (!bwtSeq && seqIdx)
-    deleteEncIdxSeq(seqIdx, err);
+    deleteEncIdxSeq(seqIdx);
   return bwtSeq;
 }
 
@@ -326,11 +326,11 @@ newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet, Seqpos longest, Error *err)
 }
 
 void
-deleteBWTSeq(BWTSeq *bwtSeq, Error *err)
+deleteBWTSeq(BWTSeq *bwtSeq)
 {
-  MRAEncDelete(bwtSeq->alphabet, err);
-  deleteEISHint(bwtSeq->seqIdx, bwtSeq->hint, err);
-  deleteEncIdxSeq(bwtSeq->seqIdx, err);
+  MRAEncDelete(bwtSeq->alphabet);
+  deleteEISHint(bwtSeq->seqIdx, bwtSeq->hint);
+  deleteEncIdxSeq(bwtSeq->seqIdx);
   ma_free(bwtSeq);
 }
 
@@ -394,9 +394,9 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 }
 
 void
-deleteEMIterator(struct BWTSeqExactMatchesIterator *iter, Error *err)
+deleteEMIterator(struct BWTSeqExactMatchesIterator *iter)
 {
-  destructExtBitsRetrieval(&iter->extBits, err);
+  destructExtBitsRetrieval(&iter->extBits);
   ma_free(iter);
 }
 
@@ -524,6 +524,6 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
   if (verbosity)
     freeverboseinfo(&verbosity);
   if (extBitsAreInitialized)
-    destructExtBitsRetrieval(&extBits, err);
+    destructExtBitsRetrieval(&extBits);
   return retval;
 }

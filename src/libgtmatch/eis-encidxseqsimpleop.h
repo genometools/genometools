@@ -83,7 +83,7 @@ newExtBitsRetrieval(Error *err)
 }
 
 static inline void
-destructExtBitsRetrieval(struct extBitsRetrieval *r, Error *err)
+destructExtBitsRetrieval(struct extBitsRetrieval *r)
 {
   if ((r->flags & EBRF_PERSISTENT_CWBITS) && r->cwPart)
     ma_free(r->cwPart);
@@ -92,9 +92,9 @@ destructExtBitsRetrieval(struct extBitsRetrieval *r, Error *err)
 }
 
 static inline void
-deleteExtBitsRetrieval(struct extBitsRetrieval *r, Error *err)
+deleteExtBitsRetrieval(struct extBitsRetrieval *r)
 {
-  destructExtBitsRetrieval(r, err);
+  destructExtBitsRetrieval(r);
   ma_free(r);
 }
 
@@ -121,9 +121,9 @@ newEISHint(EISeq *seq, Error *err)
 }
 
 static inline void
-deleteEISHint(EISeq *seq, EISHint hint, Error *err)
+deleteEISHint(EISeq *seq, EISHint hint)
 {
-  return seq->classInfo->deleteHint(seq, hint, err);
+  return seq->classInfo->deleteHint(seq, hint);
 }
 
 extern int

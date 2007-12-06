@@ -79,10 +79,9 @@ loadBWTSeq(const struct bwtParam *params, int EISFeatures, Error *err);
 /**
  * \brief Deallocate a previously loaded/created BWT sequence object.
  * @param bwtseq reference of object to delete
- * @param err genometools reference for core functions
  */
 extern void
-deleteBWTSeq(BWTSeq *bwtseq, Error *err);
+deleteBWTSeq(BWTSeq *bwtseq);
 
 /**
  * \brief Query BWT sequence object for availability of added
@@ -269,10 +268,9 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 /**
  * \brief Deallocate an iterator object.
  * @param iter reference of iterator object
- * @param err genometools reference for core functions
  */
 extern void
-deleteEMIterator(BWTSeqExactMatchesIterator *iter, Error *err);
+deleteEMIterator(BWTSeqExactMatchesIterator *iter);
 
 /**
  * location data corresponding to a match

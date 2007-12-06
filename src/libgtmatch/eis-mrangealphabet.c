@@ -365,9 +365,9 @@ MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
 }
 
 void
-MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha, Error *err)
+MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha)
 {
-  assert(mralpha && err);
+  assert(mralpha);
   ma_free(mralpha->symbolsPerRange);
   ma_free(mralpha->rangeEndIndices);
   switch (mralpha->encType)

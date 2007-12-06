@@ -24,7 +24,7 @@
 
 struct encIdxSeqClass
 {
-  void (*delete)(EISeq *seq, Error *err);
+  void (*delete)(EISeq *seq);
   Seqpos (*rank)(EISeq *seq, Symbol sym, Seqpos pos,
                  union EISHint *hint, Error *err);
   Seqpos (*select)(EISeq *seq, Symbol sym, Seqpos count,
@@ -32,7 +32,7 @@ struct encIdxSeqClass
   Symbol (*get)(EISeq *seq, Seqpos pos, EISHint hint,
                 Error *err);
   union EISHint *(*newHint)(EISeq *seq, Error *err);
-  void (*deleteHint)(EISeq *seq, EISHint hint, Error *err);
+  void (*deleteHint)(EISeq *seq, EISHint hint);
   const MRAEnc *(*getAlphabet)(const EISeq *seq);
   void (*expose)(EISeq *seq, Seqpos pos, int persistent,
                  struct extBitsRetrieval *retval, union EISHint *hint,

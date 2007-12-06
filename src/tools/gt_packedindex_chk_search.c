@@ -200,7 +200,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
             break;
           }
         }
-        deleteEMIterator(EMIter,err);
+        deleteEMIterator(EMIter);
         freemmsearchiterator(&mmsi);
       }
       fprintf(stderr, "Finished %lu of %lu matchings successfully.\n",
@@ -209,7 +209,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
   } while (0);
   if (saIsLoaded) freesuffixarray(&suffixarray);
   if (epi) freeEnumpatterniterator(&epi);
-  if (bwtSeq) deleteBWTSeq(bwtSeq, err);
+  if (bwtSeq) deleteBWTSeq(bwtSeq);
   if (inputProject) str_delete(inputProject);
   return had_err?-1:0;
 }

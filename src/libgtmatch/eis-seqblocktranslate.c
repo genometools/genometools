@@ -120,7 +120,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
                      unsigned bitsPerSymbol, Error *err);
 
 static void
-destructPermutationsList(struct permList *permutation, Error *err);
+destructPermutationsList(struct permList *permutation);
 
 #if DEBUG > 1
 static void
@@ -144,7 +144,7 @@ compListPermStartOffset(struct compList *list, unsigned numSyms)
     {                                                                   \
       unsigned i;                                                       \
       for (i = 0; i < cmpIdx; ++i)                                      \
-        destructPermutationsList(newList->permutations + i, err);       \
+        destructPermutationsList(newList->permutations + i );           \
       ma_free(newList->permutations);                                   \
     }                                                                   \
     if (newList->catCompsPerms)                                         \
@@ -237,12 +237,12 @@ initCompositionList(struct compList *newList, unsigned blockSize,
 }
 
 extern void
-destructCompositionList(struct compList *clist, Error *err)
+destructCompositionList(struct compList *clist)
 {
   {
     unsigned i;
     for (i = 0; i < clist->numCompositions; ++i)
-      destructPermutationsList(clist->permutations + i, err);
+      destructPermutationsList(clist->permutations + i);
   }
   ma_free(clist->permutations);
   ma_free(clist->catCompsPerms);
@@ -263,9 +263,9 @@ newCompositionList(unsigned blockSize, unsigned alphabetSize, Error *err)
 }
 
 extern void
-deleteCompositionList(struct compList *clist, Error *err)
+deleteCompositionList(struct compList *clist)
 {
-  destructCompositionList(clist, err);
+  destructCompositionList(clist);
   ma_free(clist);
 }
 
@@ -356,7 +356,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
 }
 
 static void
-destructPermutationsList(struct permList *permutation, Error *err)
+destructPermutationsList(struct permList *permutation)
 {
 /*   ma_free(permutation->catPerms); */
 }

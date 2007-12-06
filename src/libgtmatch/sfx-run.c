@@ -483,16 +483,15 @@ static int runsuffixerator(bool doesa,
                                             getSfxILength(si), err)))
           {
             fputs("Index creation failed.\n", stderr);
-            deleteSfxInterface(si, err);
+            deleteSfxInterface(si);
             haserr = true;
           }
           else
-            deleteBWTSeq(bwtSeq, err); /**< the actual object is not
-                                        * used here */
+            deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
           outfileinfo.longest = getSfxILongestPos(si); /* XXX Thomas, is
                                                           this necessary */
 
-          deleteSfxInterface(si, err);
+          deleteSfxInterface(si);
         }
       }
     } else

@@ -67,9 +67,9 @@ SRLCompact(struct seqRangeList *rangeList, Error *err)
 }
 
 void
-deleteSeqRangeList(struct seqRangeList *rangeList, Error *err)
+deleteSeqRangeList(struct seqRangeList *rangeList)
 {
-  assert(rangeList && err);
+  assert(rangeList);
   if (rangeList->ranges)
     ma_free(rangeList->ranges);
   if (rangeList->partialSymSums)

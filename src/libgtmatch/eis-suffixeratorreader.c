@@ -122,7 +122,7 @@ newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
 }
 
 static void
-deleteSeqStats(struct seqStats *stats, Error *err)
+deleteSeqStats(struct seqStats *stats)
 {
   ma_free(stats);
 }
@@ -133,7 +133,7 @@ deleteSeqStats(struct seqStats *stats, Error *err)
 #define newSfxInterfaceWithReadersErrRet()        \
   do {                                            \
     if (iface->stats)                             \
-      deleteSeqStats(iface->stats, err);          \
+      deleteSeqStats(iface->stats);               \
     if (iface->readers)                           \
       ma_free(iface->readers);                    \
     if (iface) ma_free(iface);                    \
@@ -196,11 +196,11 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
 }
 
 extern void
-deleteSfxInterface(sfxInterface *iface, Error *err)
+deleteSfxInterface(sfxInterface *iface)
 {
   ma_free(iface->prevGeneratedSufTabSegments);
   freeSfxiterator(&iface->sfi);
-  deleteSeqStats(iface->stats, err);
+  deleteSeqStats(iface->stats);
   ma_free(iface->readers);
   ma_free(iface);
 }

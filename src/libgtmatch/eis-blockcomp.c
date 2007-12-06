@@ -129,7 +129,7 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                                    cwExtBitsPerPos, maxVarExtBitsPerPos,
                                    cbState, err);
   if (!newSeqIdx)
-    MRAEncDelete(state.alphabet, err);
+    MRAEncDelete(state.alphabet);
   return newSeqIdx;
 }
 
@@ -181,7 +181,7 @@ newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
                                    cwExtBitsPerPos, maxVarExtBitsPerPos,
                                    cbState, err);
   if (!newSeqIdx)
-    MRAEncDelete(state.alphabet, err);
+    MRAEncDelete(state.alphabet);
   return newSeqIdx;
 }
 
@@ -246,7 +246,7 @@ initOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx,
                        size_t headerLen, off_t cwLen);
 
 static void
-destructOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx, Error *err);
+destructOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx);
 
 static size_t
 writeIdxHeader(struct blockCompositionSeq *seqIdx,
@@ -302,7 +302,7 @@ static inline void
 initAppendState(struct appendState *aState,
                 const struct blockCompositionSeq *seqIdx, Error *err);
 static void
-destructAppendState(struct appendState *aState, Error *err);
+destructAppendState(struct appendState *aState);
 
 static inline void
 append2IdxOutput(struct blockCompositionSeq *newSeqIdx,
@@ -320,10 +320,10 @@ appendCallBackOutput(struct appendState *state,
 typedef Seqpos *partialSymSums;
 
 static inline partialSymSums
-newPartialSymSums(unsigned alphabetSize, Error *err);
+newPartialSymSums(unsigned alphabetSize);
 
 static inline void
-deletePartialSymSums(partialSymSums sums, Error *err);
+deletePartialSymSums(partialSymSums sums);
 
 static inline void
 addBlock2PartialSymSums(partialSymSums sums, Symbol *block, unsigned blockSize);
@@ -363,11 +363,11 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx);
 #define newBlockEncIdxSeqErrRet()                                       \
   do {                                                                  \
     if (newSeqIdx->externalData.idxFP)                                  \
-      destructOnDiskBlockCompIdx(&newSeqIdx->externalData, err);        \
+      destructOnDiskBlockCompIdx(&newSeqIdx->externalData);             \
     if (newSeqIdx->compositionTable.bitsPerCount)                       \
-      destructCompositionList(&newSeqIdx->compositionTable, err);       \
+      destructCompositionList(&newSeqIdx->compositionTable);            \
     if (newSeqIdx->rangeEncs)                                           \
-      deleteSeqRangeList(newSeqIdx->rangeEncs, err);                    \
+      deleteSeqRangeList(newSeqIdx->rangeEncs);                         \
     if (newSeqIdx->extHeaderPos)                                        \
       ma_free(newSeqIdx->extHeaderPos);                                 \
     if (newSeqIdx->partialSymSumBits)                                   \
@@ -377,15 +377,15 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx);
     if (newSeqIdx) ma_free(newSeqIdx);                                  \
     if (modesCopy)                                                      \
       ma_free(modesCopy);                                               \
-    if (blockMapAlphabet) MRAEncDelete(blockMapAlphabet, err);          \
-    if (rangeMapAlphabet) MRAEncDelete(rangeMapAlphabet, err);          \
+    if (blockMapAlphabet) MRAEncDelete(blockMapAlphabet);               \
+    if (rangeMapAlphabet) MRAEncDelete(rangeMapAlphabet);               \
     return NULL;                                                        \
   } while (0)
 
 #define newBlockEncIdxSeqLoopErr()                      \
-  destructAppendState(&aState, err);                    \
-  deletePartialSymSums(buck, err);                      \
-  deletePartialSymSums(buckLast, err);                  \
+  destructAppendState(&aState);                         \
+  deletePartialSymSums(buck);                           \
+  deletePartialSymSums(buckLast);                       \
   ma_free(compositionPreAlloc);                         \
   ma_free(permCompBSPreAlloc);                          \
   ma_free(block);                                       \
@@ -610,8 +610,8 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
         permCompBSPreAlloc =
           ma_malloc(bitElemsAllocSize(bitsPerComposition + bitsPerPermutation)
                     * sizeof (BitElem));
-        buck = newPartialSymSums(totalAlphabetSize, err);
-        buckLast = newPartialSymSums(totalAlphabetSize, err);
+        buck = newPartialSymSums(totalAlphabetSize);
+        buckLast = newPartialSymSums(totalAlphabetSize);
         /* 2. read block sized chunks from bwttab and suffix array */
         {
           Seqpos numFullBlocks = totalLen / blockSize, blockNum,
@@ -757,9 +757,9 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             newBlockEncIdxSeqLoopErr();
           }
           /* 4. dealloc resources no longer required */
-          destructAppendState(&aState, err);
-          deletePartialSymSums(buck, err);
-          deletePartialSymSums(buckLast, err);
+          destructAppendState(&aState);
+          deletePartialSymSums(buck);
+          deletePartialSymSums(buckLast);
         }
         /* 4. dealloc resources no longer required */
         ma_free(compositionPreAlloc);
@@ -775,19 +775,19 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
 }
 
 static void
-deleteBlockEncIdxSeq(struct encIdxSeq *seq, Error *err)
+deleteBlockEncIdxSeq(struct encIdxSeq *seq)
 {
   struct blockCompositionSeq *bseq;
   assert(seq && seq->classInfo == &blockCompositionSeqClass);
   bseq = encIdxSeq2blockCompositionSeq(seq);
   ma_free(bseq->extHeaderPos);
   ma_free(bseq->partialSymSumBits);
-  destructOnDiskBlockCompIdx(&bseq->externalData, err);
-  destructCompositionList(&bseq->compositionTable, err);
-  MRAEncDelete(bseq->baseClass.alphabet, err);
-  MRAEncDelete(bseq->rangeMapAlphabet, err);
-  MRAEncDelete(bseq->blockMapAlphabet, err);
-  deleteSeqRangeList(bseq->rangeEncs, err);
+  destructOnDiskBlockCompIdx(&bseq->externalData);
+  destructCompositionList(&bseq->compositionTable);
+  MRAEncDelete(bseq->baseClass.alphabet);
+  MRAEncDelete(bseq->rangeMapAlphabet);
+  MRAEncDelete(bseq->blockMapAlphabet);
+  deleteSeqRangeList(bseq->rangeEncs);
   ma_free(bseq->modes);
   ma_free(bseq);
 }
@@ -860,7 +860,7 @@ initEmptySuperBlock(struct superBlock *sBlock,
 }
 
 static struct superBlock *
-newEmptySuperBlock(const struct blockCompositionSeq *seqIdx, Error *err)
+newEmptySuperBlock(const struct blockCompositionSeq *seqIdx)
 {
   struct superBlock *sBlock;
   sBlock = ma_malloc(superBlockMemSize(seqIdx));
@@ -869,7 +869,7 @@ newEmptySuperBlock(const struct blockCompositionSeq *seqIdx, Error *err)
 }
 
 static void
-deleteSuperBlock(struct superBlock *sBlock, Error *err)
+deleteSuperBlock(struct superBlock *sBlock)
 {
   ma_free(sBlock);
 }
@@ -1004,15 +1004,15 @@ bucketNumFromBlockNum(struct blockCompositionSeq *seqIdx, Seqpos blockNum)
   return blockNum / seqIdx->bucketBlocks;
 }
 
-#define fetchSuperBlockErrRet()                         \
-  do {                                                  \
-    if (!sBlockPreAlloc) deleteSuperBlock(retval, err); \
-    return NULL;                                        \
+#define fetchSuperBlockErrRet()                    \
+  do {                                             \
+    if (!sBlockPreAlloc) deleteSuperBlock(retval); \
+    return NULL;                                   \
   } while (0)
 
 static struct superBlock *
 fetchSuperBlock(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
-                struct superBlock *sBlockPreAlloc, Error *err)
+                struct superBlock *sBlockPreAlloc)
 {
   struct superBlock *retval = NULL;
   assert(seqIdx);
@@ -1021,7 +1021,7 @@ fetchSuperBlock(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
   if (sBlockPreAlloc)
     retval = sBlockPreAlloc;
   else
-    retval = newEmptySuperBlock(seqIdx, err);
+    retval = newEmptySuperBlock(seqIdx);
   if (seqIdxUsesMMap(seqIdx))
   {
     BitOffset bucketOffset = bucketNum * superBlockCWBits(seqIdx);
@@ -1118,7 +1118,7 @@ initSuperBlockSeqCache(struct seqCache *sBlockCache,
 }
 
 static void
-destructSuperBlockSeqCache(struct seqCache *sBlockCache, Error *err)
+destructSuperBlockSeqCache(struct seqCache *sBlockCache)
 {
   ma_free(sBlockCache->cachedPos);
 }
@@ -1132,8 +1132,7 @@ inSeqCache(struct seqCache *sCache, Seqpos pos)
 #ifdef USE_SBLOCK_CACHE
 static struct superBlock *
 cacheFetchSuperBlock(const struct blockCompositionSeq *seqIdx,
-                     Seqpos superBlockNum, struct seqCache *sBlockCache,
-                     Error *err)
+                     Seqpos superBlockNum, struct seqCache *sBlockCache)
 {
   size_t cachePos = pos2CachePos(sBlockCache, superBlockNum);
   if (inSeqCache(sBlockCache, superBlockNum))
@@ -1142,7 +1141,7 @@ cacheFetchSuperBlock(const struct blockCompositionSeq *seqIdx,
   {
     struct superBlock *sb =
       (struct superBlock *)sBlockCache->entriesPtr[cachePos];
-    return fetchSuperBlock(seqIdx, superBlockNum, sb, err);
+    return fetchSuperBlock(seqIdx, superBlockNum, sb);
   }
 }
 #endif /* USE_SBLOCK_CACHE */
@@ -1210,7 +1209,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
     Seqpos bucketNum = bucketNumFromBlockNum(seqIdx, blockNum);
 #ifdef USE_SBLOCK_CACHE
     sBlock = cacheFetchSuperBlock(seqIdx, bucketNum,
-                                  &hint->sBlockCache, err);
+                                  &hint->sBlockCache);
 #else
     sBlock = fetchSuperBlock(seqIdx, bucketNum, NULL, err);
 #endif
@@ -1260,7 +1259,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
     bucketNum = bucketNumFromPos(seqIdx, pos);
 #ifdef USE_SBLOCK_CACHE
     sBlock = cacheFetchSuperBlock(seqIdx, bucketNum,
-                                  &hint->bcHint.sBlockCache, err);
+                                  &hint->bcHint.sBlockCache);
 #else
     sBlock = fetchSuperBlock(seqIdx, bucketNum, NULL, err);
 #endif
@@ -1328,7 +1327,7 @@ blockCompSeqExpose(struct encIdxSeq *eSeqIdx, Seqpos pos, int flags,
     retval->len = end - retval->start;
 #ifdef USE_SBLOCK_CACHE
     sBlock = cacheFetchSuperBlock(seqIdx, bucketNum,
-                                  &hint->bcHint.sBlockCache, err);
+                                  &hint->bcHint.sBlockCache);
 #else
     sBlock = fetchSuperBlock(seqIdx, bucketNum, NULL, err);
 #endif
@@ -1404,13 +1403,13 @@ blockCompSeqGet(struct encIdxSeq *seq, Seqpos pos, union EISHint *hint,
 }
 
 static inline partialSymSums
-newPartialSymSums(unsigned alphabetSize, Error *err)
+newPartialSymSums(unsigned alphabetSize)
 {
   return ma_calloc(alphabetSize, sizeof (Seqpos));
 }
 
 static inline void
-deletePartialSymSums(partialSymSums sums, Error *err)
+deletePartialSymSums(partialSymSums sums)
 {
   ma_free(sums);
 }
@@ -1518,7 +1517,7 @@ initOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx,
 }
 
 static void
-destructOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx, Error *err)
+destructOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx)
 {
   if (idx->idxMMap)
     munmap(idx->idxMMap, idx->rangeEncPos - idx->cwDataPos);
@@ -1544,7 +1543,7 @@ initAppendState(struct appendState *aState,
 }
 
 static void
-destructAppendState(struct appendState *aState, Error *err)
+destructAppendState(struct appendState *aState)
 {
   ma_free(aState->permCache);
   ma_free(aState->compCache);
@@ -1882,15 +1881,15 @@ loadBlockEncIdxSeq(const Str *projectName, int features, Error *err)
 #define loadBlockEncIdxSeqErrRet()                                      \
   do {                                                                  \
     if (newSeqIdx->externalData.idxFP)                                  \
-      destructOnDiskBlockCompIdx(&newSeqIdx->externalData, err);        \
+      destructOnDiskBlockCompIdx(&newSeqIdx->externalData);             \
     if (newSeqIdx->compositionTable.bitsPerCount)                       \
-      destructCompositionList(&newSeqIdx->compositionTable, err);       \
+      destructCompositionList(&newSeqIdx->compositionTable);            \
     if (newSeqIdx->rangeEncs)                                           \
-      deleteSeqRangeList(newSeqIdx->rangeEncs, err);                    \
+      deleteSeqRangeList(newSeqIdx->rangeEncs);                         \
     if (newSeqIdx->extHeaderPos)                                        \
       ma_free(newSeqIdx->extHeaderPos);                                 \
     if (buf) ma_free(buf);                                              \
-    if (alphabet) MRAEncDelete(alphabet, err);                          \
+    if (alphabet) MRAEncDelete(alphabet);                               \
     if (modesCopy)                                                      \
       ma_free(modesCopy);                                               \
     if (blockMapAlphabet) ma_free(blockMapAlphabet);                    \
@@ -2265,12 +2264,12 @@ newBlockCompSeqHint(struct encIdxSeq *seq, Error *err)
 }
 
 static void
-deleteBlockCompSeqHint(struct encIdxSeq *seq, union EISHint *hint, Error *err)
+deleteBlockCompSeqHint(struct encIdxSeq *seq, union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
   assert(seq && seq->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(seq);
-  destructSuperBlockSeqCache(&hint->bcHint.sBlockCache, err);
+  destructSuperBlockSeqCache(&hint->bcHint.sBlockCache);
   ma_free(hint);
 }
 
@@ -2315,7 +2314,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
     unsigned blockSize = seqIdx->blockSize;
 #ifdef USE_SBLOCK_CACHE
     sBlock = cacheFetchSuperBlock(seqIdx, bucketNum,
-                                  &hint->bcHint.sBlockCache, err);
+                                  &hint->bcHint.sBlockCache);
 #else
     sBlock = fetchSuperBlock(seqIdx, bucketNum, NULL, err);
 #endif
