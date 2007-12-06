@@ -230,6 +230,7 @@ void gtr_register_components(GTR *gtr)
   hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test);
   hashtable_add(gtr->unit_tests, "disc distri class", discdistri_unit_test);
   hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test);
+  hashtable_add(gtr->unit_tests, "dlist example", dlist_example);
   hashtable_add(gtr->unit_tests, "dynamic bittab class", dynbittab_unit_test);
   hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test);
   hashtable_add(gtr->unit_tests, "genome node iterator example",
