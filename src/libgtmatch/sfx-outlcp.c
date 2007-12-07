@@ -89,7 +89,7 @@ void outmany0lcpvalues(Seqpos many,Outlcpinfo *outlcpinfo)
   Seqpos i;
   Uchar outvalue = 0;
 
-  for(i=0; i<many; i++)
+  for (i=0; i<many; i++)
   {
     xfwrite(&outvalue,sizeof (Uchar),(size_t) 1,outlcpinfo->outfplcptab);
   }
@@ -126,7 +126,7 @@ void freeoutlcptab(Outlcpinfo **outlcpinfo)
 {
   if ((*outlcpinfo)->countoutputlcpvalues < (*outlcpinfo)->totallength + 1)
   {
-    outmany0lcpvalues((*outlcpinfo)->totallength + 1 - 
+    outmany0lcpvalues((*outlcpinfo)->totallength + 1 -
                       (*outlcpinfo)->countoutputlcpvalues,
                       *outlcpinfo);
   }

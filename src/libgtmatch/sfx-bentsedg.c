@@ -314,9 +314,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
 
 typedef struct
 {
-  Seqpos left,
-         right,
-         specialsinbucket;
+  Seqpos left;
+  unsigned long nonspecialsinbucket,
+                specialsinbucket;
 } Bucketboundaries;
 
 static unsigned int calcbucketboundaries(Bucketboundaries *bbound,
@@ -331,29 +331,31 @@ static unsigned int calcbucketboundaries(Bucketboundaries *bbound,
   bbound->left = leftborder[code];
   if (code == maxcode)
   {
-    assert(totalwidth > 0);
-    bbound->right = totalwidth - 1;
+    assert(totalwidth >= bbound->left);
+    bbound->nonspecialsinbucket = (unsigned long) (totalwidth - bbound->left);
   } else
   {
     if (leftborder[code+1] > 0)
     {
-      bbound->right = leftborder[code+1] - 1;
+      bbound->nonspecialsinbucket
+        = (unsigned long) (leftborder[code+1] - bbound->left);
     } else
     {
-      bbound->right = 0;
+      bbound->nonspecialsinbucket = 0;
     }
   }
   assert(rightchar == code % numofchars);
   if (rightchar == numofchars - 1)
   {
     bbound->specialsinbucket
-      = countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
-    if (bbound->right >= bbound->specialsinbucket)
+      = (unsigned long)
+        countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
+    if (bbound->nonspecialsinbucket >= bbound->specialsinbucket)
     {
-      bbound->right -= bbound->specialsinbucket;
+      bbound->nonspecialsinbucket -= bbound->specialsinbucket;
     } else
     {
-      bbound->right = 0;
+      bbound->nonspecialsinbucket = 0;
     }
     rightchar = 0;
   } else
@@ -371,7 +373,7 @@ static unsigned long determinemaxbucketsize(const Seqpos *leftborder,
                                             Seqpos totalwidth,
                                             unsigned int numofchars)
 {
-  unsigned long maxbucketsize = 1UL, bsize;
+  unsigned long maxbucketsize = 1UL;
   unsigned int rightchar = mincode % numofchars;
   Bucketboundaries bbound;
   Codetype code;
@@ -386,13 +388,9 @@ static unsigned long determinemaxbucketsize(const Seqpos *leftborder,
                                      totalwidth,
                                      rightchar,
                                      numofchars);
-    if (bbound.left < bbound.right)
+    if (bbound.nonspecialsinbucket > maxbucketsize)
     {
-      bsize = (unsigned long) (bbound.right - bbound.left + 1);
-      if (bsize > maxbucketsize)
-      {
-        maxbucketsize = bsize;
-      }
+      maxbucketsize = bbound.nonspecialsinbucket;
     }
   }
   return maxbucketsize;
@@ -441,11 +439,11 @@ static void multilcpvalue(Lcpsubtab *lcpsubtab,
 }
 
 static void bucketends(Outlcpinfo *outlcpinfo,
-                       Seqpos specialsinbucket)
+                       unsigned long specialsinbucket)
 {
-  Seqpos i;
+  unsigned long i;
 
-  for(i=0; i<specialsinbucket; i++)
+  for (i=0; i<specialsinbucket; i++)
   {
     outlcpvalue(0,0,outlcpinfo);
   }
@@ -461,6 +459,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos totalwidth,
+                    Seqpos previoussuffix,
                     Lcpsubtab *lcpsubtab,
                     Outlcpinfo *outlcpinfo)
 {
@@ -499,29 +498,47 @@ void sortallbuckets(Seqpos *suftabptr,
     {
       (void) nextTurningwheel(lcpsubtab->tw);
     }
-    if (bbound.left < bbound.right)
+    if (bbound.nonspecialsinbucket > 0)
     {
-      SETLCP(0,(Seqpos) minchangedTurningwheel(lcpsubtab->tw));
-      lcpsubtab->suftabbase = suftabptr + bbound.left;
-      bentleysedgewick(encseq,
-                       readmode,
-                       totallength,
-                       &mkvauxstack,
-                       suftabptr + bbound.left,
-                       suftabptr + bbound.right,
-                       (Seqpos) prefixlength,
-                       lcpsubtab);
+      if (bbound.nonspecialsinbucket > 1UL)
+      {
+        lcpsubtab->suftabbase = suftabptr + bbound.left;
+        bentleysedgewick(encseq,
+                         readmode,
+                         totallength,
+                         &mkvauxstack,
+                         suftabptr + bbound.left,
+                         suftabptr + bbound.left + 
+                                     bbound.nonspecialsinbucket - 1,
+                         (Seqpos) prefixlength,
+                         lcpsubtab);
+      }
       if (outlcpinfo != NULL)
       {
+        if (code == 0)
+        {
+          SETLCP(0,(Seqpos) 0);
+        } else
+        {
+          SETLCP(0,(Seqpos) minchangedTurningwheel(lcpsubtab->tw));
+        }
         multilcpvalue(lcpsubtab,
                       outlcpinfo,
-                      (unsigned long) (bbound.right - bbound.left + 1),
+                      bbound.nonspecialsinbucket,
                       bbound.left);
       }
     }
     if (outlcpinfo != NULL)
     {
-      bucketends(outlcpinfo,bbound.specialsinbucket);
+      if (bbound.specialsinbucket > 0)
+      {
+        bucketends(outlcpinfo,bbound.specialsinbucket);
+      }
+    }
+    if (bbound.nonspecialsinbucket + bbound.specialsinbucket > 0)
+    {
+      previoussuffix = suftabptr[bbound.left + bbound.nonspecialsinbucket +
+                                 bbound.specialsinbucket - 1];
     }
   }
   FREEARRAY(&mkvauxstack,MKVstack);

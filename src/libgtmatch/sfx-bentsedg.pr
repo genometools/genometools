@@ -15,6 +15,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos totalwidth,
+                    Seqpos previoussuffix,
                     Lcpsubtab *lcpsubtab,
                     Outlcpinfo *outlcpinfo);
 

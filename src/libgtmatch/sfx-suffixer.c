@@ -83,6 +83,7 @@ DECLAREARRAYSTRUCT(Seqpos);
   ArraySeqpos fusp;
   Specialrangeiterator *sri;
   Sequencerange overhang;
+  Seqpos previoussuffix;
   bool exhausted;
 };
 
@@ -353,6 +354,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
     sfi->lcpsubtab = newlcpsubtab(prefixlength,numofchars);
+    sfi->previoussuffix = 0;
     if (indexname == NULL)
     {
       sfi->outlcpinfo = NULL;
@@ -507,9 +509,11 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->currentmincode,
                  sfi->currentmaxcode,
                  totalwidth,
+                 sfi->previoussuffix,
                  sfi->lcpsubtab,
                  sfi->outlcpinfo);
   assert(totalwidth > 0);
+  sfi->previoussuffix = sfi->suftab[sfi->widthofpart-1];
   sfi->part++;
 }
 
