@@ -109,8 +109,8 @@ GTR* gtr_new(Error *err)
   GTR *gtr;
 #ifdef LIBGTVIEW
   Str *config_file = NULL;
-#endif
   int had_err = 0;
+#endif
   gtr = ma_calloc(1, sizeof (GTR));
   gtr->testspacepeak = str_new();
   gtr->L = luaL_newstate();
