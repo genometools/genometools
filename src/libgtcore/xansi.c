@@ -17,6 +17,14 @@
 
 #include "libgtcore/xansi.h"
 
+void xatexit(void (*function)(void))
+{
+  if (atexit(function)) {
+    perror("cannot register exit function");
+    exit(EXIT_FAILURE);
+  }
+}
+
 void* xcalloc(size_t nmemb, size_t size)
 {
   void *p;

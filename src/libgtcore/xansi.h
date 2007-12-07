@@ -30,6 +30,7 @@
   That is, one can use this functions without the need to check for errors.
 */
 
+void   xatexit(void (*function)(void));
 void*  xcalloc(size_t nmemb, size_t size);
 void   xfclose(FILE*);
 void   xfflush(FILE*);

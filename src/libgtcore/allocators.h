@@ -21,6 +21,8 @@
 /* high level wrapper module for the allocators (memory & files) */
 
 void allocators_init(void);
+/* registers exit function which calls allocators_clean() */
+void allocators_reg_atexit_func(void);
 /* returns 0 if no memory map, file pointer, or memory has been leaked and a
    value != 0 otherwise */
 int  allocators_clean(void);

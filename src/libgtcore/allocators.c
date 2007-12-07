@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/allocators.h"
 #include "libgtcore/cstr.h"
-#include "libgtcore/error.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
@@ -85,6 +85,16 @@ void allocators_init(void)
   proc_gt_env_options();
   if (spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
     warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
+}
+
+static void allocators_atexit_func(void)
+{
+  (void) allocators_clean();
+}
+
+void allocators_reg_atexit_func(void)
+{
+  xatexit(allocators_atexit_func);
 }
 
 int allocators_clean(void)
