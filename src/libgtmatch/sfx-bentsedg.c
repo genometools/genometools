@@ -519,7 +519,10 @@ void sortallbuckets(Seqpos *suftabptr,
                       bbound.left);
       }
     }
-    bucketends(outlcpinfo,bbound.specialsinbucket);
+    if (outlcpinfo != NULL)
+    {
+      bucketends(outlcpinfo,bbound.specialsinbucket);
+    }
   }
   FREEARRAY(&mkvauxstack,MKVstack);
 }
