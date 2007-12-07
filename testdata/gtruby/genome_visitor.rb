@@ -15,27 +15,22 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'dl/import'
-require 'helper'
-require 'libgtext/genome_node'
+# testing the Ruby bindings for the GFF3 GenomeVisitor (similar to gff3 tool)
 
-module GT
-  extend DL::Importable
-  dlload "libgtext.so"
-  extern "int genome_stream_next_tree(GenomeStream*, GenomeNode**, Env*)"
+require 'gtruby'
 
-  module GenomeStream
-    def next_tree
-      err = GT::Error.new()
-      genome_node = DL::PtrData.new(0)
-      genome_node.free = DL::FREE
-      rval = GT.genome_stream_next_tree(self.genome_stream, genome_node.ref,
-                                        err.to_ptr)
-      if rval != 0
-        gterror(err)
-      end
-      if genome_node.null? then return nil end
-      GT::GenomeNode.new(genome_node)
-    end
-  end
+if ARGV.size != 1
+  STDERR.puts "Usage: #{$0} GFF3_file"
+  STDERR.puts "Parse and output the given GFF3_file."
+  exit(1)
+end
+
+gff3file = ARGV[0]
+
+gs = GT::GFF3InStream.new(gff3file)
+gv = GT::GFF3Visitor.new()
+gn = gs.next_tree()
+while gn do
+  gn.accept(gv)
+  gn = gs.next_tree()
 end

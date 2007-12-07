@@ -52,6 +52,12 @@ end
 
 $transdir=File.join(Dir.pwd, "..", "gtdata" , "trans", "")
 
+if $arguments["gtruby"] then
+  $gtruby=File.join($arguments["gtruby"], "")
+else
+  $gtruby=File.join(Dir.pwd, "..", "gtruby", "")
+end
+
 if $arguments["gttestdata"] then
   $gttestdata=File.join($arguments["gttestdata"], "")
 end
@@ -75,6 +81,10 @@ def run_test(str, opts = {})
   run("#{$memcheck} #{$path}#{str}", opts)
 end
 
+def run_ruby(str, opts = {})
+  run("env LD_LIBRARY_PATH=#{$cur}/lib ruby -I #{$gtruby} #{$path}#{str}", opts)
+end
+
 # include the actual test modules
 require 'gt_include'
 require 'gt_bioseq_include'
@@ -94,6 +104,7 @@ require 'gt_mmapandread_include'
 require 'gt_mutate_include'
 require 'gt_packedindex_include'
 require 'gt_regioncov_include'
+require 'gt_ruby_include'
 require 'gt_scripts_include'
 require 'gt_splicesiteinfo_include'
 require 'gt_stat_include'
