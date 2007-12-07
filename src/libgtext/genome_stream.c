@@ -47,7 +47,7 @@ void genome_stream_delete(GenomeStream *gs)
   }
   assert(gs->c_class);
   if (gs->c_class->free) gs->c_class->free(gs);
-  genome_node_delete(gs->buffer);
+  genome_node_rec_delete(gs->buffer);
   ma_free(gs);
 }
 
