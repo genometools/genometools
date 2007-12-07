@@ -302,10 +302,6 @@ void freeSfxiterator(Sfxiterator **sfi)
     freelcpsubtab(&(*sfi)->lcpsubtab);
   }
   freesuftabparts((*sfi)->suftabparts);
-  if ((*sfi)->outlcpinfo != NULL)
-  {
-    freeoutlcptab(&(*sfi)->outlcpinfo);
-  }
   FREESPACE(*sfi);
 }
 
@@ -318,7 +314,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int numofchars,
                             unsigned int prefixlength,
                             unsigned int numofparts,
-                            const Str *indexname,
+                            Outlcpinfo *outlcpinfo,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
                             Error *err)
@@ -355,17 +351,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->specialcharacters = specialcharacters;
     sfi->lcpsubtab = newlcpsubtab(prefixlength,numofchars);
     sfi->previoussuffix = 0;
-    if (indexname == NULL)
-    {
-      sfi->outlcpinfo = NULL;
-    } else
-    {
-      sfi->outlcpinfo = newlcpoutfileinfo(indexname,sfi->totallength,err,false);
-      if (sfi->outlcpinfo == NULL)
-      {
-        haserr = true;
-      }
-    }
+    sfi->outlcpinfo = outlcpinfo;
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
@@ -389,8 +375,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     numofallcodes = sfi->basepower[prefixlength];
     if (numofallcodes-1 > MAXCODEVALUE)
     {
-      error_set(err,
-                    "alphasize^prefixlength-1 = %u does not fit into "
+      error_set(err,"alphasize^prefixlength-1 = %u does not fit into "
                     " %u bits: choose smaller value for prefixlength",
                     numofallcodes-1,
                     (unsigned int) CODEBITS);

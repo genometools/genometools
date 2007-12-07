@@ -29,6 +29,8 @@
 #include "turnwheels.h"
 #include "sfx-outlcp.h"
 
+#include "sfx-cmpsuf.pr"
+
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
 #define ACCESSCHAR(POS) getencodedchar(encseq,POS,readmode) /* XXX */
@@ -196,7 +198,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Readmode readmode,
                              Seqpos totallength,
                              ArrayMKVstack *mkvauxstack,
-                             Suffixptr *l,Suffixptr *r,Seqpos d,
+                             Suffixptr *l,
+                             Suffixptr *r,
+                             Seqpos d,
                              Lcpsubtab *lcpsubtab)
 {
   Suffixptr *left, *right, *leftplusw;
@@ -438,14 +442,62 @@ static void multilcpvalue(Lcpsubtab *lcpsubtab,
   }
 }
 
-static void bucketends(Outlcpinfo *outlcpinfo,
+static Seqpos computelocallcpvalue(const const Encodedsequence *encseq,
+                                   Readmode readmode,
+                                   Seqpos suffixpos1,
+                                   Seqpos suffixpos2,
+                                   Encodedsequencescanstate *esr1,
+                                   Encodedsequencescanstate *esr2)
+{
+  Seqpos lcpvalue;
+  int cmp;
+
+  cmp = comparetwosuffixes(encseq,
+                           readmode,
+                           &lcpvalue,
+                           false,
+                           false,
+                           0,
+                           suffixpos1,
+                           suffixpos2,
+                           esr1,
+                           esr2);
+  if (cmp > 0)
+  {
+    fprintf(stderr,"cmp " FormatSeqpos
+            " " FormatSeqpos " = %d, lcpval=" FormatSeqpos "\n",
+            PRINTSeqposcast(suffixpos1),
+            PRINTSeqposcast(suffixpos2),
+            cmp,
+            PRINTSeqposcast(lcpvalue));
+  }
+  return lcpvalue;
+}
+
+static void bucketends(const Encodedsequence *encseq,
+                       Readmode readmode,
+                       Encodedsequencescanstate *esr1,
+                       Encodedsequencescanstate *esr2,
+                       Outlcpinfo *outlcpinfo,
+                       Seqpos previoussuffix,
+                       const Seqpos *specialsection,
                        unsigned long specialsinbucket)
 {
   unsigned long i;
+  Seqpos lcpvalue;
 
   for (i=0; i<specialsinbucket; i++)
   {
-    outlcpvalue(0,0,outlcpinfo);
+    lcpvalue = computelocallcpvalue(encseq,
+                                    readmode,
+                                    i == 0 ? previoussuffix
+                                           : specialsection[i-1],
+                                    specialsection[i],
+                                    esr1,
+                                    esr2);
+    assert(lcpvalue < (Seqpos) UCHAR_MAX);
+    assert(lcpvalue > 0);
+    outlcpvalue(lcpvalue,0,outlcpinfo);
   }
 }
 
@@ -469,7 +521,11 @@ void sortallbuckets(Seqpos *suftabptr,
   ArrayMKVstack mkvauxstack;
   Bucketboundaries bbound;
   unsigned long maxbucketsize;
+  Seqpos lcpvalue;
+  Encodedsequencescanstate *esr1, *esr2;
 
+  esr1 = newEncodedsequencescanstate();
+  esr2 = newEncodedsequencescanstate();
   maxbucketsize = determinemaxbucketsize(leftborder,
                                          countspecialcodes,
                                          mincode,
@@ -508,7 +564,7 @@ void sortallbuckets(Seqpos *suftabptr,
                          totallength,
                          &mkvauxstack,
                          suftabptr + bbound.left,
-                         suftabptr + bbound.left + 
+                         suftabptr + bbound.left +
                                      bbound.nonspecialsinbucket - 1,
                          (Seqpos) prefixlength,
                          lcpsubtab);
@@ -517,29 +573,45 @@ void sortallbuckets(Seqpos *suftabptr,
       {
         if (code == 0)
         {
-          SETLCP(0,(Seqpos) 0);
+          lcpvalue = 0;
         } else
         {
-          SETLCP(0,(Seqpos) minchangedTurningwheel(lcpsubtab->tw));
+          lcpvalue = computelocallcpvalue(encseq,
+                                          readmode,
+                                          previoussuffix,
+                                          suftabptr[bbound.left],
+                                          esr1,
+                                          esr2);
         }
+        SETLCP(0,lcpvalue);
         multilcpvalue(lcpsubtab,
                       outlcpinfo,
                       bbound.nonspecialsinbucket,
                       bbound.left);
+        previoussuffix = suftabptr[bbound.left+bbound.nonspecialsinbucket-1];
       }
     }
     if (outlcpinfo != NULL)
     {
       if (bbound.specialsinbucket > 0)
       {
-        bucketends(outlcpinfo,bbound.specialsinbucket);
+        bucketends(encseq,
+                   readmode,
+                   esr1,
+                   esr2,
+                   outlcpinfo,
+                   previoussuffix,
+                   suftabptr + bbound.left + bbound.nonspecialsinbucket,
+                   bbound.specialsinbucket);
+      }
+      if (bbound.nonspecialsinbucket + bbound.specialsinbucket > 0)
+      {
+        previoussuffix = suftabptr[bbound.left + bbound.nonspecialsinbucket +
+                                   bbound.specialsinbucket - 1];
       }
     }
-    if (bbound.nonspecialsinbucket + bbound.specialsinbucket > 0)
-    {
-      previoussuffix = suftabptr[bbound.left + bbound.nonspecialsinbucket +
-                                 bbound.specialsinbucket - 1];
-    }
   }
+  freeEncodedsequencescanstate(&esr1);
+  freeEncodedsequencescanstate(&esr2);
   FREEARRAY(&mkvauxstack,MKVstack);
 }

@@ -18,9 +18,9 @@
 #ifndef SFX_SUFFIXER_H
 #define SFX_SUFFIXER_H
 #include "libgtcore/error.h"
-#include "encseq-def.h"
 #include "readmode-def.h"
 #include "measure-time-if.h"
+#include "sfx-outlcp.h"
 #include "verbose-def.h"
 #include "seqpos-def.h"
 
@@ -35,13 +35,15 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int numofchars,
                             unsigned int prefixlength,
                             unsigned int numofparts,
-                            const Str *indexname,
+                            Outlcpinfo *outlcpinfo,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
                             Error *err);
 
-const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
+const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,
+                              bool *specialsuffixes,
                               Measuretime *mtime,
-                              Sfxiterator *sfi,Error *err);
+                              Sfxiterator *sfi,
+                              Error *err);
 
 #endif

@@ -65,8 +65,11 @@ typedef struct
   Seqpos pageoffset;
   const Encodedsequence *encseq;
   DefinedSeqpos longest;
+  Outlcpinfo *outlcpinfo2;
+#ifdef OLDLCP
   Outlcpinfo *outlcpinfo;
   Lcpvalueiterator *lvi;
+#endif
 } Outfileinfo;
 
 static int initoutfileinfo(Outfileinfo *outfileinfo,
@@ -83,6 +86,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   outfileinfo->longest.valueseqpos = 0;
   if (so->outlcptab)
   {
+#ifdef OLDLCP
     outfileinfo->lvi = newLcpvalueiterator(encseq,so->readmode);
     outfileinfo->outlcpinfo
       = newlcpoutfileinfo(so->outlcptab ? so->str_indexname : NULL,
@@ -91,10 +95,21 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
     {
       haserr = true;
     }
+#endif
+    outfileinfo->outlcpinfo2
+      = newlcpoutfileinfo(so->outlcptab ? so->str_indexname : NULL,
+                          getencseqtotallength(encseq),err,true);
+    if (outfileinfo->outlcpinfo2 == NULL)
+    {
+      haserr = true;
+    }
   } else
   {
+    outfileinfo->outlcpinfo2 = NULL;
+#ifdef OLDLCP
     outfileinfo->lvi = NULL;
     outfileinfo->outlcpinfo = NULL;
+#endif
   }
   INITOUTFILEPTR(outfileinfo->outfpsuftab,so->outsuftab,SUFTABSUFFIX);
   INITOUTFILEPTR(outfileinfo->outfpbwttab,so->outbwttab,BWTTABSUFFIX);
@@ -135,7 +150,10 @@ static int suftab2file(Outfileinfo *outfileinfo,
   }
   if (!haserr)
   {
-    Seqpos startpos, lcpvalue, pos;
+#ifdef OLDLCP
+    Seqpos lcpvalue;
+#endif
+    Seqpos startpos, pos;
     Uchar cc = 0;
 
     for (pos=0; pos < numberofsuffixes; pos++)
@@ -174,6 +192,7 @@ static int suftab2file(Outfileinfo *outfileinfo,
           break;
         }
       }
+#ifdef OLDLCP
       if (outfileinfo->outlcpinfo != NULL)
       {
         lcpvalue = nextLcpvalueiterator(outfileinfo->lvi,
@@ -184,6 +203,7 @@ static int suftab2file(Outfileinfo *outfileinfo,
         outlcpvalue(lcpvalue,outfileinfo->pageoffset+pos,
                     outfileinfo->outlcpinfo);
       }
+#endif
     }
   }
   outfileinfo->pageoffset += numberofsuffixes;
@@ -235,7 +255,7 @@ static int suffixeratorwithoutput(
                        numofchars,
                        prefixlength,
                        numofparts,
-                       indexname,
+                       outfileinfo->outlcpinfo2,
                        mtime,
                        verboseinfo,
                        err);
@@ -505,15 +525,18 @@ static int runsuffixerator(bool doesa,
   }
   fa_fclose(outfileinfo.outfpsuftab);
   fa_fclose(outfileinfo.outfpbwttab);
+#ifdef OLDLCP
   if (outfileinfo.lvi != NULL)
   {
     freeLcpvalueiterator(&outfileinfo.lvi);
   }
+#endif
   if (!haserr)
   {
     Seqpos numoflargelcpvalues,
            maxbranchdepth;
 
+#ifdef OLDLCP
     if (outfileinfo.outlcpinfo == NULL)
     {
       numoflargelcpvalues = maxbranchdepth = 0;
@@ -522,6 +545,16 @@ static int runsuffixerator(bool doesa,
       numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
       maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
     }
+#else
+    if (outfileinfo.outlcpinfo2 == NULL)
+    {
+      numoflargelcpvalues = maxbranchdepth = 0;
+    } else
+    {
+      numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo2);
+      maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo2);
+    }
+#endif
     if (outprjfile(so->str_indexname,
                    so->filenametab,
                    so->readmode,
@@ -538,10 +571,17 @@ static int runsuffixerator(bool doesa,
       haserr = true;
     }
   }
+#ifdef OLDLCP
   if (outfileinfo.outlcpinfo != NULL)
   {
     freeoutlcptab(&outfileinfo.outlcpinfo);
   }
+#else
+  if (outfileinfo.outlcpinfo2 != NULL)
+  {
+    freeoutlcptab(&outfileinfo.outlcpinfo2);
+  }
+#endif
   FREESPACE(filelengthtab);
   if (alpha != NULL)
   {

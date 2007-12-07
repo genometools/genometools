@@ -44,6 +44,7 @@ makecompilerflags()
     printf " CC='ccache gcc'"
   fi
   printf " CFLAGS='-O3 -m$1"
+  # printf " -DINLINEDENCSEQ"
   if test $2 -eq 1
   then
     printf " -DBIGSEQPOS"
@@ -60,7 +61,6 @@ makecompilerflags()
   fi
   # printf " -DWITHTRIEIDENT"
   # printf " -DINLINEDENCSEQ -DINLINEDSequentialsuffixarrayreader"
-  # printf " -DINLINEDENCSEQ"
   printf "\n"
 }
 

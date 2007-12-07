@@ -16,10 +16,10 @@
 */
 
 #ifdef INLINEDENCSEQ
+#include "libgtcore/chardef.h"
 #include "encseq-def.h"
 #include "spacedef.h"
-#include "chardef.h"
-#include "fbs-def.h"
+/* #include "fbs-def.h" */
 
 #include "opensfxfile.pr"
 #include "fillsci.pr"
