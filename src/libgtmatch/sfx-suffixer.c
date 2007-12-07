@@ -358,7 +358,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
       sfi->outlcpinfo = NULL;
     } else
     {
-      sfi->outlcpinfo = newlcpoutfileinfo(indexname,err,false);
+      sfi->outlcpinfo = newlcpoutfileinfo(indexname,sfi->totallength,err,false);
       if (sfi->outlcpinfo == NULL)
       {
         haserr = true;

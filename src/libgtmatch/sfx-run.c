@@ -85,7 +85,8 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   {
     outfileinfo->lvi = newLcpvalueiterator(encseq,so->readmode);
     outfileinfo->outlcpinfo
-      = newlcpoutfileinfo(so->outlcptab ? so->str_indexname : NULL,err,true);
+      = newlcpoutfileinfo(so->outlcptab ? so->str_indexname : NULL,
+                          getencseqtotallength(encseq),err,true);
     if (outfileinfo->outlcpinfo == NULL)
     {
       haserr = true;

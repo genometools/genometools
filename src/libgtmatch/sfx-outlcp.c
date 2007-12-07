@@ -33,11 +33,14 @@
 {
   FILE *outfplcptab,
        *outfpllvtab;
-  Seqpos numoflargelcpvalues,
+  Seqpos totallength,
+         countoutputlcpvalues,
+         numoflargelcpvalues,
          maxbranchdepth;
 };
 
-Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Error *err,bool origin)
+Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Seqpos totallength,
+                              Error *err,bool origin)
 {
   bool haserr = false;
   Outlcpinfo *outlcpinfo;
@@ -71,12 +74,26 @@ Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Error *err,bool origin)
   }
   outlcpinfo->numoflargelcpvalues = 0;
   outlcpinfo->maxbranchdepth = 0;
+  outlcpinfo->countoutputlcpvalues = 0;
+  outlcpinfo->totallength = totallength;
   if (haserr)
   {
     FREESPACE(outlcpinfo);
     return NULL;
   }
   return outlcpinfo;
+}
+
+void outmany0lcpvalues(Seqpos many,Outlcpinfo *outlcpinfo)
+{
+  Seqpos i;
+  Uchar outvalue = 0;
+
+  for(i=0; i<many; i++)
+  {
+    xfwrite(&outvalue,sizeof (Uchar),(size_t) 1,outlcpinfo->outfplcptab);
+  }
+  outlcpinfo->countoutputlcpvalues += many;
 }
 
 void outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outlcpinfo *outlcpinfo)
@@ -102,10 +119,18 @@ void outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outlcpinfo *outlcpinfo)
   {
     outlcpinfo->maxbranchdepth = lcpvalue;
   }
+  outlcpinfo->countoutputlcpvalues++;
 }
 
 void freeoutlcptab(Outlcpinfo **outlcpinfo)
 {
+  if ((*outlcpinfo)->countoutputlcpvalues < (*outlcpinfo)->totallength + 1)
+  {
+    outmany0lcpvalues((*outlcpinfo)->totallength + 1 - 
+                      (*outlcpinfo)->countoutputlcpvalues,
+                      *outlcpinfo);
+  }
+  assert((*outlcpinfo)->countoutputlcpvalues == (*outlcpinfo)->totallength + 1);
   fa_fclose((*outlcpinfo)->outfplcptab);
   fa_fclose((*outlcpinfo)->outfpllvtab);
   FREESPACE(*outlcpinfo);

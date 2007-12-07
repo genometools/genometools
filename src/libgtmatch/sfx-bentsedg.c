@@ -441,7 +441,7 @@ static void multilcpvalue(Lcpsubtab *lcpsubtab,
 }
 
 static void bucketends(Outlcpinfo *outlcpinfo,
-                       unsigned long specialsinbucket)
+                       Seqpos specialsinbucket)
 {
   Seqpos i;
 

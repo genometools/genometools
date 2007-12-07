@@ -25,7 +25,9 @@
 typedef struct Outlcpinfo Outlcpinfo;
 
 void outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outlcpinfo *outlcpinfo);
-Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Error *err,bool origin);
+void outmany0lcpvalues(Seqpos many,Outlcpinfo *outlcpinfo);
+Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Seqpos totallength,
+                              Error *err,bool origin);
 Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 void freeoutlcptab(Outlcpinfo **outlcpinfo);
