@@ -15,35 +15,33 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'dl/import'
-require 'libgtcore/array'
+# testing the Ruby bindings for FeatureIndex and FeatureStream classes
 
-module GT
-  extend DL::Importable
-  dlload "libgtview.so"
-  extern "FeatureIndex* feature_index_new()"
-  extern "void feature_index_delete(FeatureIndex*)"
-  extern "Array* feature_index_get_features_for_seqid(FeatureIndex*, const " +
-                                                     "char*)"
+require 'gtruby'
 
-  class FeatureIndex
-    attr_reader :feature_index
-    def initialize
-      @feature_index = GT.feature_index_new()
-    end
+if ARGV.size != 1 then
+  STDERR.puts "Usage: #{$0} testdata_dir"
+  STDERR.puts "Test the FeatureIndex and FeatureStream bindings."
+  exit(1)
+end
 
-    def get_features_for_seqid(seqid)
-      rval = GT.feature_index_get_features_for_seqid(self.feature_index, seqid)
-      if rval then
-        a = GT::Array.new(rval)
-        result = []
-        1.upto(a.size) do |i|
-          result.push(GT::GenomeNode.new(a.get(i-1)))
-        end
-        result
-      else
-        nil
-      end
-    end
-  end
+
+testdata = ARGV[0]
+
+# set up the feature stream
+genome_stream = GT::GFF3InStream.new(testdata+"/gff3_file_1_short.txt")
+feature_index = GT::FeatureIndex.new()
+genome_stream = GT::FeatureStream.new(genome_stream, feature_index)
+
+feature = genome_stream.next_tree()
+while (feature) do
+  feature = genome_stream.next_tree()
+end
+
+features = feature_index.get_features_for_seqid("ctg123");
+raise if not features
+gff3_visitor = GT::GFF3Visitor.new()
+
+features.each do |feature|
+  feature.accept(gff3_visitor)
 end

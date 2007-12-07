@@ -25,7 +25,7 @@ module GT
   extern "GenomeStream* gff3_in_stream_new_sorted(const char *, bool)"
 
   class GFF3InStream
-    include GT::GenomeStream
+    include GenomeStream
     attr_reader :genome_stream
     def initialize(filename)
       @genome_stream = GT.gff3_in_stream_new_sorted(filename, false)

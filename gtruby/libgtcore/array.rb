@@ -16,34 +16,26 @@
 #
 
 require 'dl/import'
-require 'libgtcore/array'
 
 module GT
   extend DL::Importable
-  dlload "libgtview.so"
-  extern "FeatureIndex* feature_index_new()"
-  extern "void feature_index_delete(FeatureIndex*)"
-  extern "Array* feature_index_get_features_for_seqid(FeatureIndex*, const " +
-                                                     "char*)"
+  dlload "libgtcore.so"
+  extern "unsigned long array_size(const Array*)"
+  extern "void* array_get(const Array*, unsigned long)"
+  extern "void array_delete(Array*)"
 
-  class FeatureIndex
-    attr_reader :feature_index
-    def initialize
-      @feature_index = GT.feature_index_new()
+  class Array
+    def initialize(array_ptr)
+      @array = array_ptr
+      @array.free = GT::symbol("array_delete", "0P")
     end
 
-    def get_features_for_seqid(seqid)
-      rval = GT.feature_index_get_features_for_seqid(self.feature_index, seqid)
-      if rval then
-        a = GT::Array.new(rval)
-        result = []
-        1.upto(a.size) do |i|
-          result.push(GT::GenomeNode.new(a.get(i-1)))
-        end
-        result
-      else
-        nil
-      end
+    def get(idx)
+      GT.array_get(@array, idx).ptr
+    end
+
+    def size
+      GT.array_size(@array)
     end
   end
 end

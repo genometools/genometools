@@ -19,7 +19,7 @@
 
 require 'gtruby'
 
-if ARGV.size != 1
+if ARGV.size != 1 then
   STDERR.puts "Usage: #{$0} GFF3_file"
   STDERR.puts "Parse and output the given GFF3_file."
   exit(1)

@@ -16,6 +16,7 @@
 #
 
 require 'dl/import'
+require 'libgtext/genome_stream'
 
 module GT
   extend DL::Importable
