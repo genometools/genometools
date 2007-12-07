@@ -18,7 +18,7 @@
 #ifndef TOOLDRIVER_H
 #define TOOLDRIVER_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* The tool driver module allows to compile a tool into a separate binary. This
    is mostly useful for legacy applications like GenomeThreader.

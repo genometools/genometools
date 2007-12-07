@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* the I/O class */
 typedef struct IO IO;

@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* the memory allocator module */
 

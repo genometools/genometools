@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,26 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/array2dim.h"
+#ifndef ALLOCATORS_H
+#define ALLOCATORS_H
 
-/* example usage of the array2dim macros */
-int array2dim_example(Error *err)
-{
-  double **a2dim;
-  int i, j;
-  error_check(err);
+/* high level wrapper module for the allocators (memory & files) */
 
-  /* create a 10 x 20 double array */
-  array2dim_malloc(a2dim, 10, 20);
+void allocators_init(void);
+/* returns 0 if no memory map, file pointer, or memory has been leaked and a
+   value != 0 otherwise */
+int  allocators_clean(void);
 
-  /* ... (use array a2dim in conventional way via a2dim[row][column]) */
-  for (i = 1; i < 10; i++) {
-    for (j = 1; j < 20; j++)
-      a2dim[i][j] = i + j;
-  }
-
-  /* free */
-  array2dim_delete(a2dim);
-
-  return 0;
-}
+#endif

@@ -17,7 +17,7 @@
 
 #include "lauxlib.h"
 #include "libgtcore/bittab.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtlua/bittab_lua.h"
 #include "libgtlua/gtcore_lua.h"
 #include "libgtlua/helper.h"

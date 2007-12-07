@@ -19,7 +19,7 @@
 #define DYNBITTAB_H
 
 #include <stdbool.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* a bittab which grows on demand */
 typedef struct DynBittab DynBittab;

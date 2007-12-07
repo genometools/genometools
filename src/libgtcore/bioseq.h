@@ -18,7 +18,7 @@
 #ifndef BIOSEQ_H
 #define BIOSEQ_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/seq.h"
 #include "libgtcore/str.h"
 

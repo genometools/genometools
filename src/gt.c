@@ -20,18 +20,22 @@
 /* The GenomeTools (gt) genome analysis system */
 int main(int argc, char *argv[])
 {
-  Env *env;
+  Error *err;
   GTR *gtr;
   int rval;
-  env = env_new();
-  env_error_set_progname(env, argv[0]);
-  gtr = gtr_new(env);
+  allocators_init();
+  err = error_new();
+  error_set_progname(err, argv[0]);
+  if (!(gtr = gtr_new(err))) {
+    fprintf(stderr, "%s: error: %s\n", error_get_progname(err), error_get(err));
+    return EXIT_FAILURE;
+  }
   gtr_register_components(gtr);
-  switch (gtr_parse(gtr, &rval, argc, (const char**) argv, env)) {
+  switch (gtr_parse(gtr, &rval, argc, (const char**) argv, err)) {
     case OPTIONPARSER_OK:
       argc -= rval;
       argv += rval;
-      rval = gtr_run(gtr, argc, (const char**) argv, env);
+      rval = gtr_run(gtr, argc, (const char**) argv, err);
       break;
     case OPTIONPARSER_ERROR:
       rval = 1; /* user error */
@@ -39,13 +43,13 @@ int main(int argc, char *argv[])
     case OPTIONPARSER_REQUESTS_EXIT:
       rval = 0; /* everything went fine */
   }
-  if (env_error_is_set(env)) {
-    fprintf(stderr, "%s: error: %s\n", env_error_get_progname(env),
-            env_error_get(env));
+  if (error_is_set(err)) {
+    fprintf(stderr, "%s: error: %s\n", error_get_progname(err), error_get(err));
     assert(rval);
   }
-  gtr_delete(gtr, env);
-  if (env_delete(env))
+  gtr_delete(gtr);
+  error_delete(err);
+  if (allocators_clean())
     return 2; /* programmer error */
   return rval;
 }

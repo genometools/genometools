@@ -18,7 +18,7 @@
 #ifndef DLIST_H
 #define DLIST_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/fptr.h"
 
 /* a double-linked list which is sorted according to a qsort(3)-like compare

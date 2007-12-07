@@ -18,7 +18,7 @@
 #ifndef PARSEUTILS_H
 #define PARSEUTILS_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/range.h"
 #include "libgtcore/phase.h"
 #include "libgtcore/strand.h"

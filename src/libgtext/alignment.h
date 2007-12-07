@@ -19,7 +19,7 @@
 #define ALIGNMENT_H
 
 #include <stdio.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* the Alignment class (an Alignment object has to be contructed backwards) */
 typedef struct Alignment Alignment;

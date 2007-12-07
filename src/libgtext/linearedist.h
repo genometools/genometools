@@ -18,7 +18,7 @@
 #ifndef LINEAREDIST_H
 #define LINEAREDIST_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* Compute the edit distance of sequences u and v in O(max{|u|,|v|}) space */
 unsigned long linearedist(const char *u, unsigned long n,

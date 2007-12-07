@@ -6,7 +6,7 @@
 #ifndef ST_H
 #define ST_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 typedef unsigned long st_data_t;
 #define ST_DATA_T_DEFINED

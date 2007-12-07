@@ -20,7 +20,7 @@
 
 #include "libgtcore/str.h"
 
-/* get the path to the gtdata/ directory (including it) for the given 'prog' */
+/* get the path to the gtdata/ directory (including it) for the given <prog> */
 Str* gtdata_get_path(const char *prog, Error*);
 
 #endif

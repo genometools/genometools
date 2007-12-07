@@ -18,7 +18,7 @@
 #ifndef COMMENT_H
 #define COMMENT_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* implements the ``genome node'' interface */
 typedef struct Comment Comment;

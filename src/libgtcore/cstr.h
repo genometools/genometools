@@ -19,7 +19,7 @@
 #define CSTR_H
 
 #include <stdio.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/genfile.h"
 
 char*         cstr_dup(const char*);

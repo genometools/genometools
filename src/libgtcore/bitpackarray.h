@@ -28,7 +28,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "libgtcore/bitpackstring.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/ma.h"
 
 struct BitPackArray
