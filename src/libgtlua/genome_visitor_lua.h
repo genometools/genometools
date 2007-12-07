@@ -22,7 +22,7 @@
 
 /* exports the GenomeVisitor interface and its implementors to Lua:
 
-   genome_visitor = gt.gff3_visitor()
+   genome_visitor = gt.gff3_visitor_new()
 */
 int luaopen_genome_visitor(lua_State*);
 
