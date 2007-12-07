@@ -445,7 +445,7 @@ static void bucketends(Outlcpinfo *outlcpinfo,
 {
   Seqpos i;
 
-  for(i=0; i<specialsinbucket; i++)
+  for (i=0; i<specialsinbucket; i++)
   {
     outlcpvalue(0,0,outlcpinfo);
   }
