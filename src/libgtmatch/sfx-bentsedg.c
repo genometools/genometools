@@ -442,7 +442,7 @@ static void multilcpvalue(Lcpsubtab *lcpsubtab,
   }
 }
 
-static Seqpos computelocallcpvalue(const const Encodedsequence *encseq,
+static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
                                    Readmode readmode,
                                    Seqpos suffixpos1,
                                    Seqpos suffixpos2,
