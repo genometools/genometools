@@ -34,6 +34,7 @@ int tooldriver(int(*tool)(int argc, const char **argv, Error*),
     fprintf(stderr, "%s: error: %s\n", error_get_progname(err), error_get(err));
     assert(had_err);
   }
+  error_delete(err);
   if (allocators_clean())
     return 2; /* programmer error */
   if (had_err)
