@@ -56,7 +56,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
 
   /* init */
   op = option_parser_new("[option ...] PNG_file [GFF3_file ...]", "Create PNG "
-                         "representations of GFF3 annotation files.");
+                         "representation of GFF3 annotation files.");
 
   /* -v */
   option = option_new_verbose(&arguments->verbose);
