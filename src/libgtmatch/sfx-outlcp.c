@@ -82,6 +82,7 @@ Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Error *err,bool origin)
 void outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outlcpinfo *outlcpinfo)
 {
   Uchar outvalue;
+  assert(outlcpinfo);
 
   if (lcpvalue >= (Seqpos) UCHAR_MAX)
   {
@@ -97,6 +98,7 @@ void outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outlcpinfo *outlcpinfo)
   {
     outvalue = (Uchar) lcpvalue;
   }
+  assert(outlcpinfo->outfplcptab);
   xfwrite(&outvalue,sizeof (Uchar),(size_t) 1,outlcpinfo->outfplcptab);
   if (outlcpinfo->maxbranchdepth < lcpvalue)
   {
