@@ -19,7 +19,7 @@
 
 function usage()
   io.stderr:write(string.format("Usage: %s PNG_file GFF3_file\n", arg[0]))
-  io.stderr:write("Parse and output the given GFF3_file.\n")
+  io.stderr:write("Create PNG representation of GFF3 annotation file.\n")
   os.exit(1)
 end
 
