@@ -19,7 +19,7 @@
 #define HELPER_H
 
 #include "lua.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 #ifdef LIBGTVIEW
 #include "libgtview/config.h"
@@ -30,8 +30,8 @@ Config* get_config_from_registry(lua_State*);
 
 void set_arg_in_lua_interpreter(lua_State*, const char *argv_0,
                                 const char **argv);
-/* Propagate the error given in <env> (which must be set) to <L>.
+/* Propagate the error given in <err> (which must be set) to <L>.
    Takes ownership of the error and deletes it. */
-int  luagt_error(lua_State *L, Error*);
+int  luagt_error(lua_State *L, Error *err);
 
 #endif

@@ -43,7 +43,7 @@ end
 
 features = feature_index:get_features_for_seqid("ctg123");
 assert(features)
-gff3_visitor = gt.gff3_visitor()
+gff3_visitor = gt.gff3_visitor_new()
 
 for i,feature in ipairs(features) do
   feature:accept(gff3_visitor)

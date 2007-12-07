@@ -31,7 +31,7 @@ else
 end
 
 gs = gt.gff3_in_stream_new_sorted(gff3file)
-gv = gt.gff3_visitor()
+gv = gt.gff3_visitor_new()
 gn = gs:next_tree()
 while (gn) do
   gn:accept(gv)

@@ -19,7 +19,7 @@
 #define UPGMA_H
 
 #include <stdio.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 typedef struct UPGMA UPGMA;
 

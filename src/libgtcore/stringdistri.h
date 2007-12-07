@@ -18,7 +18,7 @@
 #ifndef STRINGDISTRI_H
 #define STRINGDISTRI_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/genfile.h"
 
 /* A discrete distribution */

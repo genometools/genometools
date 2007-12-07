@@ -41,7 +41,7 @@ static int genome_visitor_lua_delete(lua_State *L)
 }
 
 static const struct luaL_Reg genome_visitor_lib_f [] = {
-  { "gff3_visitor", gff3_visitor_lua_new },
+  { "gff3_visitor_new", gff3_visitor_lua_new },
   { NULL, NULL }
 };
 

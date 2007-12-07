@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/allocators.h"
 #include "libgtcore/cstr.h"
-#include "libgtcore/env.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
@@ -25,35 +25,31 @@
 #include "libgtcore/warning.h"
 #include "libgtcore/xansi.h"
 
-struct Env {
-  Error *error;
-  bool spacepeak;
-};
+static bool spacepeak = false;
 
-static OPrval parse_env_options(int argc, const char **argv, Env *env)
+static OPrval parse_env_options(int argc, const char **argv, Error *err)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  assert(env);
   op = option_parser_new("GT_ENV_OPTIONS='[option ...]' ...",
                          "Parse the options contained in the "
                          "environment variable GT_ENV_OPTIONS.");
   o = option_new_bool("spacepeak", "show space peak on stdout upon deletion",
-                      &env->spacepeak, false);
+                      &spacepeak, false);
   option_parser_add_option(op, o);
   oprval = option_parser_parse_max_args(op, NULL, argc, argv, versionfunc, 0,
-                                        env_error(env));
+                                        err);
   option_parser_delete(op);
   return oprval;
 }
 
-static void proc_gt_env_options(Env *env)
+static void proc_gt_env_options(void)
 {
   int argc;
   char *env_options, **argv;
   Splitter *splitter;
-  assert(env);
+  Error *err;
   /* construct argument vector from $GT_ENV_OPTIONS */
   env_options = getenv("GT_ENV_OPTIONS");
   if (!env_options)
@@ -66,52 +62,45 @@ static void proc_gt_env_options(Env *env)
                              "env");
   argc++;
   /* parse options contained in $GT_ENV_OPTIONS */
-  switch (parse_env_options(argc, (const char**) argv, env)) {
+  err = error_new();
+  switch (parse_env_options(argc, (const char**) argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      fprintf(stderr, "error parsing $GT_ENV_OPTIONS: %s\n",
-              env_error_get(env));
-      env_error_unset(env);
+      fprintf(stderr, "error parsing $GT_ENV_OPTIONS: %s\n", error_get(err));
+      error_unset(err);
       break;
     case OPTIONPARSER_REQUESTS_EXIT: break;
   }
+  error_delete(err);
   ma_free(env_options);
   splitter_delete(splitter);
   cstr_array_delete(argv);
 }
 
-Env* env_new(void)
+void allocators_init(void)
 {
   const char *bookkeeping;
-  Env *env = xcalloc(1, sizeof (Env));
   bookkeeping = getenv("GT_MEM_BOOKKEEPING");
   ma_init(bookkeeping && !strcmp(bookkeeping, "on"));
-  env->error = error_new();
-  proc_gt_env_options(env);
-  if (env->spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
+  proc_gt_env_options();
+  if (spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
     warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
-  return env;
 }
 
-Error* env_error(const Env *env)
+static void allocators_atexit_func(void)
 {
-  assert(env);
-  return env->error;
+  (void) allocators_clean();
 }
 
-void env_set_spacepeak(Env *env, bool spacepeak)
+void allocators_reg_atexit_func(void)
 {
-  assert(env);
-  env->spacepeak = spacepeak;
+  xatexit(allocators_atexit_func);
 }
 
-int env_delete(Env *env)
+int allocators_clean(void)
 {
   int fa_fptr_rval, fa_mmap_rval, ma_rval;
-  assert(env);
-  error_delete(env->error);
-  env->error = NULL;
-  if (env->spacepeak) {
+  if (spacepeak) {
     ma_show_space_peak(stdout);
     fa_show_space_peak(stdout);
   }
@@ -120,22 +109,5 @@ int env_delete(Env *env)
   fa_clean();
   ma_rval = ma_check_space_leak();
   ma_clean();
-  free(env);
   return fa_fptr_rval || fa_mmap_rval || ma_rval;
-}
-
-void env_fa_fclose(FILE *stream, Env *env)
-{
-  assert(env);
-  if (!stream) return;
-  fa_fclose(stream);
-}
-
-void env_error_set(Env *env, const char *format, ...)
-{
-  va_list ap;
-  assert(env && format);
-  va_start(ap, format);
-  error_vset(env_error(env), format, ap);
-  va_end(ap);
 }

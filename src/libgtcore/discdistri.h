@@ -19,7 +19,7 @@
 #ifndef DISCDISTRI_H
 #define DISCDISTRI_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/genfile.h"
 
 /* A discrete distribution */

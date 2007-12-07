@@ -1,5 +1,5 @@
-/*
-  Copyright (c) 2007 David Ellinghaus <dellinghaus@zbh.uni-hamburg.de>
+--[[
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -13,14 +13,20 @@
   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-*/
+]]
 
-#include "libgtcore/error.h"
-#include "libgtltr/ltrharvest-run.h"
-#include "tools/gt_ltrharvest.h"
+function usage()
+  io.stderr:write(string.format("Usage: %s GFF3_file\n", arg[0]))
+  os.exit(1)
+end
 
-int gt_ltrharvest(int argc, const char **argv, Error *err)
-{
-  error_check(err);
-  return parseargsandcallltrharvest(argc, argv, err);
-}
+if #arg == 1 then
+  gff3file = arg[1]
+else
+  usage()
+end
+
+in_stream = gt.gff3_in_stream_new_sorted(gff3file)
+gff3_visitor = gt.gff3_visitor_new()
+gn = in_stream:next_tree()
+gn:accept(gff3_visitor)

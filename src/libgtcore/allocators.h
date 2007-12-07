@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 David Ellinghaus <dellinghaus@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,12 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
-#include "libgtltr/ltrharvest-run.h"
-#include "tools/gt_ltrharvest.h"
+#ifndef ALLOCATORS_H
+#define ALLOCATORS_H
 
-int gt_ltrharvest(int argc, const char **argv, Error *err)
-{
-  error_check(err);
-  return parseargsandcallltrharvest(argc, argv, err);
-}
+/* high level wrapper module for the allocators (memory & files) */
+
+void allocators_init(void);
+/* registers exit function which calls allocators_clean() */
+void allocators_reg_atexit_func(void);
+/* returns 0 if no memory map, file pointer, or memory has been leaked and a
+   value != 0 otherwise */
+int  allocators_clean(void);
+
+#endif

@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/cstr.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/fastabuffer.h"
 

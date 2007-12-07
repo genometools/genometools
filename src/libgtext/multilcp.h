@@ -18,7 +18,7 @@
 #ifndef MULTILCP_H
 #define MULTILCP_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* computes a <m> x <n> table containing the lcp lengths of <u> and <v> in O(mn)
    time and returns it */

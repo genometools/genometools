@@ -47,17 +47,8 @@ unsigned long bittab_get_last_bitnum(const Bittab*);
 unsigned long bittab_get_next_bitnum(const Bittab*, unsigned long);
 unsigned long bittab_count_set_bits(Bittab*);
 unsigned long bittab_size(Bittab*);
+int           bittab_example(Error*);
 int           bittab_unit_test(Error*);
 void          bittab_delete(Bittab*);
-
-#if 0
-  a typical iterator loop:
-
-  for (bit  = bittab_get_first_bitnum(b);
-       bit != bittab_get_last_bitnum(b);
-       bit  = bittab_get_next_bitnum(b, bit)) {
-    /* ... */
-  }
-#endif
 
 #endif

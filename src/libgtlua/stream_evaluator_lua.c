@@ -16,7 +16,7 @@
 */
 
 #include "lauxlib.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtext/stream_evaluator.h"
 #include "libgtlua/genome_stream_lua.h"
 #include "libgtlua/genome_visitor_lua.h"

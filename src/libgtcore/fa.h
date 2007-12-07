@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <zlib.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* the file allocator module */
 

@@ -18,7 +18,7 @@
 #ifndef HMM_H
 #define HMM_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 /* The Hidden Markov Model (HMM) class */
 typedef struct HMM HMM;

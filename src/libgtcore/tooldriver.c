@@ -17,23 +17,25 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "libgtcore/env.h"
+#include "libgtcore/allocators.h"
+#include "libgtcore/error.h"
 #include "libgtcore/tooldriver.h"
 
 int tooldriver(int(*tool)(int argc, const char **argv, Error*),
                int argc, char *argv[])
 {
-  Env *env;
+  Error *err;
   int had_err;
-  env = env_new();
-  env_error_set_progname(env, argv[0]);
-  had_err = tool(argc, (const char**) argv, env_error(env));
-  if (env_error_is_set(env)) {
-    fprintf(stderr, "%s: error: %s\n", env_error_get_progname(env),
-            env_error_get(env));
+  allocators_init();
+  err = error_new();
+  error_set_progname(err, argv[0]);
+  had_err = tool(argc, (const char**) argv, err);
+  if (error_is_set(err)) {
+    fprintf(stderr, "%s: error: %s\n", error_get_progname(err), error_get(err));
     assert(had_err);
   }
-  if (env_delete(env))
+  error_delete(err);
+  if (allocators_clean())
     return 2; /* programmer error */
   if (had_err)
     return EXIT_FAILURE;

@@ -19,8 +19,8 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include "libgtcore/env.h"
 #include "libgtview/color.h"
+#include "libgtcore/error.h"
 
 typedef enum
 {

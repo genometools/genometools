@@ -18,7 +18,7 @@
 #ifndef DLIST_H
 #define DLIST_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/fptr.h"
 
 /* a double-linked list which is sorted according to a qsort(3)-like compare
@@ -35,21 +35,12 @@ unsigned long dlist_size(const Dlist*);
 void          dlist_add(Dlist*, void *data);
 /* frees the elem */
 void          dlist_remove(Dlist*, Dlistelem*);
+int           dlist_example(Error*);
 int           dlist_unit_test(Error*);
 void          dlist_delete(Dlist*);
 
 Dlistelem*    dlistelem_next(const Dlistelem*);
 Dlistelem*    dlistelem_previous(const Dlistelem*);
 void*         dlistelem_get_data(const Dlistelem*);
-
-#if 0
-  a typical iterator loop:
-
-  for (dlistelem = dlist_first(dlist); dlistelem != NULL;
-       dlistelem = dlistelem_next(dlistelem)) {
-    data = dlistelem_get_data(dlistelem);
-    /* do something with data */
-  }
-#endif
 
 #endif

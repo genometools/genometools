@@ -161,6 +161,31 @@ static int intcompare(const void *a, const void *b)
   return *(int*) a - *(int*) b;
 }
 
+int dlist_example(Error *err)
+{
+  Dlistelem *dlistelem;
+  Dlist *dlist;
+  void *data;
+  int elem = 1984;
+  error_check(err);
+
+  dlist = dlist_new(NULL);
+  dlist_add(dlist, &elem);
+  dlist_add(dlist, &elem);
+  dlist_add(dlist, &elem);
+
+  /* a typical iterator loop */
+  for (dlistelem = dlist_first(dlist); dlistelem != NULL;
+       dlistelem = dlistelem_next(dlistelem)) {
+    data = dlistelem_get_data(dlistelem);
+    /* do something with data */
+  }
+
+  dlist_delete(dlist);
+
+  return 0;
+}
+
 int dlist_unit_test(Error *err)
 {
   Dlist *dlist;

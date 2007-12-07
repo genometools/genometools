@@ -32,7 +32,6 @@
 #include "libgtcore/dlist.h"
 #include "libgtcore/dynbittab.h"
 #include "libgtcore/ensure.h"
-#include "libgtcore/env.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/getbasename.h"
@@ -105,12 +104,14 @@ struct GTR {
 #endif
 };
 
-GTR* gtr_new(Env *env)
+GTR* gtr_new(Error *err)
 {
-  GTR *gtr = ma_calloc(1, sizeof (GTR));
+  GTR *gtr;
 #ifdef LIBGTVIEW
-  Str *config_file;
+  Str *config_file = NULL;
+  int had_err = 0;
 #endif
+  gtr = ma_calloc(1, sizeof (GTR));
   gtr->testspacepeak = str_new();
   gtr->L = luaL_newstate();
   assert(gtr->L); /* XXX: proper error message  */
@@ -118,21 +119,26 @@ GTR* gtr_new(Env *env)
   luaopen_gt(gtr->L); /* open all GenomeTools libraries */
   luaopen_lfs(gtr->L); /* open Lua filesystem */
 #ifdef LIBGTVIEW
-  gtr->config = config_new_with_state(gtr->L, env_error(env));
-  assert(gtr->config); /* XXX */
-  config_file = gtdata_get_path(env_error_get_progname(env), env_error(env));
-  str_append_cstr(config_file, "/config/view.lua");
-  if (file_exists(str_get(config_file))) {
-    if (config_load_file(gtr->config, config_file, env_error(env))) {
-      /* XXX: hack... */
-      fprintf(stderr, "%s: error: %s\n", env_error_get_progname(env),
-              env_error_get(env));
-      exit(EXIT_FAILURE);
+  if (!(gtr->config = config_new_with_state(gtr->L, err)))
+    had_err = -1;
+  if (!had_err) {
+    if (!(config_file = gtdata_get_path(error_get_progname(err), err)))
+      had_err = -1;
+  }
+  if (!had_err) {
+    str_append_cstr(config_file, "/config/view.lua");
+    if (file_exists(str_get(config_file))) {
+      if (config_load_file(gtr->config, config_file, err))
+        had_err = -1;
+      else
+        put_config_in_registry(gtr->L, gtr->config);
     }
-    else
-      put_config_in_registry(gtr->L, gtr->config);
   }
   str_delete(config_file);
+  if (had_err) {
+    ma_free(gtr);
+    return NULL;
+  }
 #endif
   return gtr;
 }
@@ -147,13 +153,13 @@ static int show_gtr_help(const char *progname, void *data, Error *err)
 }
 
 OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
-                 Env *env)
+                 Error *err)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
 
-  env_error_check(env);
+  error_check(err);
   assert(gtr);
   op = option_parser_new("[option ...] [tool | script] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
@@ -172,8 +178,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                           "file", gtr->testspacepeak);
   option_is_development_option(o);
   option_parser_add_option(op, o);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc,
-                               env_error(env));
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;
 }
@@ -225,10 +230,12 @@ void gtr_register_components(GTR *gtr)
   hashtable_add(gtr->unit_tests, "bit pack string module",
                 bitPackString_unit_test);
   hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test);
+  hashtable_add(gtr->unit_tests, "bittab example", bittab_example);
   hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test);
   hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test);
   hashtable_add(gtr->unit_tests, "disc distri class", discdistri_unit_test);
   hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test);
+  hashtable_add(gtr->unit_tests, "dlist example", dlist_example);
   hashtable_add(gtr->unit_tests, "dynamic bittab class", dynbittab_unit_test);
   hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test);
   hashtable_add(gtr->unit_tests, "genome node iterator example",
@@ -310,18 +317,18 @@ static int run_tests(GTR *gtr, Error *err)
   return EXIT_SUCCESS;
 }
 
-int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
+int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
 {
   Tool tool = NULL;
   char **nargv = NULL;
   void *mem, *map;
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
   assert(gtr);
   if (gtr->debug)
     log_enable();
   if (gtr->test) {
-    return run_tests(gtr, env_error(env));
+    return run_tests(gtr, err);
   }
   if (str_length(gtr->testspacepeak)) {
     mem = ma_malloc(1 << 26); /* alloc 64 MB */;
@@ -330,8 +337,8 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
     ma_free(mem);
   }
   if (argc == 0 && !gtr->interactive) {
-    env_error_set(env, "neither tool nor script specified; option -help lists "
-                       "possible tools");
+    error_set(err, "neither tool nor script specified; option -help lists "
+                   "possible tools");
     had_err = -1;
   }
   if (!had_err && argc) {
@@ -339,35 +346,35 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
       /* no tool found -> try to open script */
       if (file_exists(argv[0])) {
         /* run script */
-        nargv = cstr_array_prefix_first(argv, env_error_get_progname(env));
+        nargv = cstr_array_prefix_first(argv, error_get_progname(err));
         set_arg_in_lua_interpreter(gtr->L, nargv[0], (const char**) nargv+1);
         if (luaL_dofile(gtr->L, argv[0])) {
           /* error */
           assert(lua_isstring(gtr->L, -1)); /* error message on top */
-          env_error_set(env, "could not execute script %s",
-                        lua_tostring(gtr->L, -1));
+          error_set(err, "could not execute script %s",
+                    lua_tostring(gtr->L, -1));
           had_err = -1;
           lua_pop(gtr->L, 1); /* pop error message */
         }
       }
       else {
         /* neither tool nor script found */
-        env_error_set(env, "neither tool nor script '%s' found; option -help "
-                           "lists possible tools", argv[0]);
+        error_set(err, "neither tool nor script '%s' found; option -help lists "
+                       "possible tools", argv[0]);
         had_err = -1;
       }
     }
     else {
       /* run tool */
-      nargv = cstr_array_prefix_first(argv, env_error_get_progname(env));
-      env_error_set_progname(env, nargv[0]);
-      had_err = tool(argc, (const char**) nargv, env_error(env));
+      nargv = cstr_array_prefix_first(argv, error_get_progname(err));
+      error_set_progname(err, nargv[0]);
+      had_err = tool(argc, (const char**) nargv, err);
     }
   }
   cstr_array_delete(nargv);
   if (!had_err && gtr->interactive) {
-    showshortversion(env_error_get_progname(env));
-    set_arg_in_lua_interpreter(gtr->L, env_error_get_progname(env), argv);
+    showshortversion(error_get_progname(err));
+    set_arg_in_lua_interpreter(gtr->L, error_get_progname(err), argv);
     run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)
@@ -375,7 +382,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   return EXIT_SUCCESS;
 }
 
-void gtr_delete(GTR *gtr, Env *env)
+void gtr_delete(GTR *gtr)
 {
   if (!gtr) return;
   str_delete(gtr->testspacepeak);

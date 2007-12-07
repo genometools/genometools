@@ -53,6 +53,12 @@ Test do
   run_test "#{$bin}gt #{$testdata}/gtscripts/range.lua"
 end
 
+Name "memleak.lua"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}gtscripts/memleak.lua #{$testdata}standard_gene_as_tree.gff3"
+end
+
 if $arguments["libgtview"] then
   Name "feature_index and feature_stream bindings"
   Keywords "gt_scripts"

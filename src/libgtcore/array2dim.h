@@ -18,7 +18,7 @@
 #ifndef ARRAY2DIM_H
 #define ARRAY2DIM_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/ma.h"
 
 #define array2dim_malloc(ARRAY2DIM, ROWS, COLUMNS)                             \
@@ -39,7 +39,7 @@
             (ARRAY2DIM)[a2d_i] = (ARRAY2DIM)[a2d_i-1] + (COLUMNS);            \
         }
 
-int     array2dim_example(Env*);
+int     array2dim_example(Error*);
 
 #define array2dim_delete(ARRAY2DIM)                                       \
         ma_free((ARRAY2DIM)[0]);                                          \

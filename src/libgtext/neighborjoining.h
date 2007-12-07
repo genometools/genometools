@@ -19,7 +19,7 @@
 #define NEIGHBORJOINING_H
 
 #include <stdio.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 typedef struct NeighborJoining NeighborJoining;
 

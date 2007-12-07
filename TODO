@@ -29,7 +29,6 @@ feature requests:
 - establish naming conventions and use them throughout entire codebase
 - implement simpler solution for multiset_matching
 - implement cleanup stack exeception handling
-- get rid of env class
 - compute correlation coefficient and average in `gt eval`
 
 

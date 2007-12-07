@@ -18,10 +18,11 @@
 #include "libgtcore/array2dim.h"
 
 /* example usage of the array2dim macros */
-int array2dim_example(Env *env)
+int array2dim_example(Error *err)
 {
   double **a2dim;
   int i, j;
+  error_check(err);
 
   /* create a 10 x 20 double array */
   array2dim_malloc(a2dim, 10, 20);
