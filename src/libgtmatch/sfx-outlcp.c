@@ -21,6 +21,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdbool.h>
+#include "libgtcore/xansi.h"
 #include "libgtcore/symboldef.h"
 #include "spacedef.h"
 #include "esafileend.h"
@@ -78,47 +79,29 @@ Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Error *err,bool origin)
   return outlcpinfo;
 }
 
-int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Seqpos pageoffset,
-                Outlcpinfo *outlcpinfo,Error *err)
+void outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outlcpinfo *outlcpinfo)
 {
   Uchar outvalue;
-  bool haserr = false;
 
   if (lcpvalue >= (Seqpos) UCHAR_MAX)
   {
     Largelcpvalue largelcpvalue;
 
     outlcpinfo->numoflargelcpvalues++;
-    largelcpvalue.position = pageoffset + pos;
+    largelcpvalue.position = pos;
     largelcpvalue.value = lcpvalue;
-    if (fwrite(&largelcpvalue,sizeof (Largelcpvalue),(size_t) 1,
-               outlcpinfo->outfpllvtab) != (size_t) 1)
-    {
-      error_set(err,"cannot write 1 item of size %lu: "
-                        "errormsg=\"%s\"",
-                        (unsigned long) sizeof (Largelcpvalue),
-                        strerror(errno));
-      haserr = true;
-    }
+    xfwrite(&largelcpvalue,sizeof (Largelcpvalue),(size_t) 1,
+            outlcpinfo->outfpllvtab);
     outvalue = (Uchar) UCHAR_MAX;
   } else
   {
     outvalue = (Uchar) lcpvalue;
   }
-  if (!haserr && fwrite(&outvalue,sizeof (Uchar),(size_t) 1,
-                        outlcpinfo->outfplcptab) != (size_t) 1)
-  {
-    error_set(err,"cannot write 1 item of size %lu: "
-                      "errormsg=\"%s\"",
-                      (unsigned long) sizeof (Uchar),
-                      strerror(errno));
-    haserr = true;
-  }
+  xfwrite(&outvalue,sizeof (Uchar),(size_t) 1,outlcpinfo->outfplcptab);
   if (outlcpinfo->maxbranchdepth < lcpvalue)
   {
     outlcpinfo->maxbranchdepth = lcpvalue;
   }
-  return haserr ? -1 : 0;
 }
 
 void freeoutlcptab(Outlcpinfo **outlcpinfo)

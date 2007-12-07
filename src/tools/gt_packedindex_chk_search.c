@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "libgtcore/ensure.h"
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/option.h"
 #include "libgtcore/str.h"

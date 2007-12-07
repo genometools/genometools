@@ -31,7 +31,7 @@
 #include "libgtcore/disc_distri.h"   /* discrete distribution class */
 #include "libgtcore/dlist.h"         /* double-linked list class */
 #include "libgtcore/ensure.h"        /* defines the ensure macro */
-#include "libgtcore/env.h"           /* environment class */
+#include "libgtcore/error.h"           /* environment class */
 #include "libgtcore/fasta.h"         /* fasta module */
 #include "libgtcore/fileutils.h"     /* file utilities module */
 #include "libgtcore/gc_content.h"    /* GC-content module */

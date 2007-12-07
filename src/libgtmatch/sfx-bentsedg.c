@@ -41,9 +41,16 @@
 
 #define PTR2INT(VAR,I) DEREF(VAR,cptr = *(I)+depth,cptr)
 
+#define WITHLCPNEW
+
+#ifdef WITHLCPNEW
 #define LCPINDEX(I)        (Seqpos) ((I) - lcpsubtab->suftabbase)
 #define SETLCP(I,V)        lcpsubtab->spaceSeqpos[I] = V
 #define EVALLCPLEN(LL,T)   LL = (Seqpos) (tptr - (T))
+#else
+#define SETLCP(I,V)        /* Nothing */
+#define EVALLCPLEN(LL,T)   /* Nothing */
+#endif
 
 #define UNDEFLCP(TLEN) ((TLEN)+1)
 
@@ -150,19 +157,23 @@ static void insertionsort(const Encodedsequence *encseq,
   Suffixptr sptr, tptr, *pi, *pj, temp;
   Seqpos ccs, cct;
   Uchar tmpsvar, tmptvar;
+#ifdef WITHLCPNEW
   Seqpos lcpindex, lcplen;
+#endif
 
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
     for (pj = pi; pj > leftptr; pj--)
     {
       STRINGCOMPARE(*(pj-1),*pj,depth,lcplen);
+#ifdef WITHLCPNEW
       lcpindex = LCPINDEX(pj);
       if (ccs > cct && pj < pi)
       {
         SETLCP(lcpindex+1,lcpsubtab->spaceSeqpos[lcpindex]);
       }
       SETLCP(lcpindex,lcplen);
+#endif
       if (ccs < cct)
       {
         break;
@@ -416,6 +427,30 @@ static void setlcpundef(Lcpsubtab *lcpsubtab,unsigned long maxbucketsize,
   }
 }
 
+static void multilcpvalue(Lcpsubtab *lcpsubtab,
+                          Outlcpinfo *outlcpinfo,
+                          unsigned long bucketsize,
+                          Seqpos posoffset)
+{
+  unsigned long i;
+
+  for (i=0; i<bucketsize; i++)
+  {
+    outlcpvalue(lcpsubtab->spaceSeqpos[i],posoffset+i,outlcpinfo);
+  }
+}
+
+static void bucketends(Outlcpinfo *outlcpinfo,
+                       unsigned long specialsinbucket)
+{
+  Seqpos i;
+
+  for(i=0; i<specialsinbucket; i++)
+  {
+    outlcpvalue(0,0,outlcpinfo);
+  }
+}
+
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
                     Readmode readmode,
@@ -476,7 +511,15 @@ void sortallbuckets(Seqpos *suftabptr,
                        suftabptr + bbound.right,
                        (Seqpos) prefixlength,
                        lcpsubtab);
+      if (outlcpinfo != NULL)
+      {
+        multilcpvalue(lcpsubtab,
+                      outlcpinfo,
+                      (unsigned long) (bbound.right - bbound.left + 1),
+                      bbound.left);
+      }
     }
+    bucketends(outlcpinfo,bbound.specialsinbucket);
   }
   FREEARRAY(&mkvauxstack,MKVstack);
 }

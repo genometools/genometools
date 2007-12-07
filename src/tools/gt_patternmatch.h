@@ -19,6 +19,6 @@
 #define GT_PATTERNMATCH_H
 
 /* the patternmatch tool */
-int gt_patternmatch(int argc, const char **argv, Error *env);
+int gt_patternmatch(int argc, const char **argv, Error *err);
 
 #endif

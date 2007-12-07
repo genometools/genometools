@@ -180,12 +180,8 @@ static int suftab2file(Outfileinfo *outfileinfo,
                                           ? true : false,
                                         suftab,
                                         numberofsuffixes);
-        if (outlcpvalue(lcpvalue,pos,outfileinfo->pageoffset,
-                        outfileinfo->outlcpinfo,err) != 0)
-        {
-          haserr = true;
-          break;
-        }
+        outlcpvalue(lcpvalue,outfileinfo->pageoffset+pos,
+                    outfileinfo->outlcpinfo);
       }
     }
   }
