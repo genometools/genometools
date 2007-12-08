@@ -626,7 +626,7 @@ test: all
 	bin/gt -test
 	cd testsuite && env -i GT_MEM_BOOKKEEPING=on ruby -I. testsuite.rb \
           -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin -cur $(CURDIR) \
-          -gttestdata $(CURDIR)/gtruby $(STEST_FLAGS)
+          -gtruby $(CURDIR)/gtruby $(STEST_FLAGS)
 
 clean:
 	rm -rf obj
