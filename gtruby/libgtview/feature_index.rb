@@ -17,6 +17,7 @@
 
 require 'dl/import'
 require 'libgtcore/array'
+require 'libgtcore/range'
 
 module GT
   extend DL::Importable
@@ -25,15 +26,20 @@ module GT
   extern "void feature_index_delete(FeatureIndex*)"
   extern "Array* feature_index_get_features_for_seqid(FeatureIndex*, const " +
                                                      "char*)"
+  extern "const char* feature_index_get_first_seqid(const FeatureIndex*)"
+  extern "void feature_index_get_rangeptr_for_seqid(FeatureIndex*, Range*, " +
+                                                   "const char*)"
+  extern "void feature_index_delete(FeatureIndex*)"
 
   class FeatureIndex
     attr_reader :feature_index
     def initialize
       @feature_index = GT.feature_index_new()
+      @feature_index.free = GT::symbol("feature_index_delete", "0P")
     end
 
     def get_features_for_seqid(seqid)
-      rval = GT.feature_index_get_features_for_seqid(self.feature_index, seqid)
+      rval = GT.feature_index_get_features_for_seqid(@feature_index, seqid)
       if rval then
         a = GT::Array.new(rval)
         result = []
@@ -44,6 +50,16 @@ module GT
       else
         nil
       end
+    end
+
+    def get_first_seqid
+      GT.feature_index_get_first_seqid(@feature_index)
+    end
+
+    def get_range_for_seqid(seqid)
+      range = GT::Range.malloc
+      GT.feature_index_get_rangeptr_for_seqid(@feature_index, range, seqid)
+      range
     end
   end
 end

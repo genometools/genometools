@@ -33,7 +33,8 @@ typedef struct Diagram Diagram;
 
 /* Create a new diagram object representing the genome nodes in
    FeatureIndex in region <seqid> overlapping with <range>. */
-Diagram*    diagram_new(FeatureIndex*, Range range, const char *seqid, Config*);
+Diagram*    diagram_new(FeatureIndex*, const Range*, const char *seqid,
+                        Config*);
 Range       diagram_get_range(Diagram*);
 void        diagram_set_config(Diagram*, Config*);
 Hashtable*  diagram_get_tracks(const Diagram*);

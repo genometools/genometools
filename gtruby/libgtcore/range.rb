@@ -15,8 +15,11 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'libgtview/config'
-require 'libgtview/diagram'
-require 'libgtview/feature_index'
-require 'libgtview/feature_stream'
-require 'libgtview/render'
+require 'dl/struct'
+
+module GT
+  Range = struct [
+    "ulong start",
+    "ulong end"
+  ]
+end

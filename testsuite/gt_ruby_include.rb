@@ -22,4 +22,10 @@ if $arguments["libgtview"] then
     run "env LC_ALL=C sort #{$last_stdout}"
     run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{$last_stdout} -"
   end
+
+  Name "libgtview bindings"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}/gtruby/view.rb test.png #{$testdata}gff3_file_1_short.txt"
+  end
 end

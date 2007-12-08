@@ -402,7 +402,7 @@ static void diagram_build(Diagram *diagram, Array *features)
   assert(!had_err); /* collect_blocks() is sane */
 }
 
-Diagram* diagram_new(FeatureIndex *fi, Range range, const char *seqid,
+Diagram* diagram_new(FeatureIndex *fi, const Range *range, const char *seqid,
                      Config *config)
 {
   Diagram *diagram;
@@ -413,8 +413,8 @@ Diagram* diagram_new(FeatureIndex *fi, Range range, const char *seqid,
   diagram->nodeinfo = hashtable_new(HASH_DIRECT, NULL, NULL);
   diagram->nof_tracks = 0;
   diagram->config = config;
-  diagram->range = range;
-  had_err = feature_index_get_features_for_range(fi, features, seqid, range,
+  diagram->range = *range;
+  had_err = feature_index_get_features_for_range(fi, features, seqid, *range,
                                                  NULL);
   assert(!had_err); /* <fi> must contain <seqid> */
   diagram_build(diagram, features);
@@ -531,7 +531,7 @@ int diagram_unit_test(Error *err)
 
   /* create a diagram object and test it */
   if (!had_err)
-    dia = diagram_new(fi, dr1, "test1", cfg);
+    dia = diagram_new(fi, &dr1, "test1", cfg);
 
   ensure(had_err, dia->config);
   ensure(had_err, dia->range.start == 400UL);
@@ -553,7 +553,7 @@ int diagram_unit_test(Error *err)
 
   /* create a diagram object and test it */
   if (!had_err) {
-    dia2 = diagram_new(fi, dr1, "test2", cfg);
+    dia2 = diagram_new(fi, &dr1, "test2", cfg);
     ensure(had_err, dia->range.start == 400UL);
     ensure(had_err, dia->range.end == 900UL);
   }

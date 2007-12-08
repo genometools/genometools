@@ -15,8 +15,22 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'libgtview/config'
-require 'libgtview/diagram'
-require 'libgtview/feature_index'
-require 'libgtview/feature_stream'
-require 'libgtview/render'
+require 'dl/import'
+require 'libgtcore/error'
+
+module GT
+  extend DL::Importable
+  dlload "libgtview.so"
+  extern "Config* config_new(bool, Error*)"
+  extern "void config_delete(Config*)"
+
+  class Config
+    attr_reader :config
+    def initialize
+      err = GT::Error.new()
+      @config = GT.config_new(false, err.to_ptr)
+      if not @config then gterror(err) end
+      @config.free = GT::symbol("config_delete", "0P")
+    end
+  end
+end

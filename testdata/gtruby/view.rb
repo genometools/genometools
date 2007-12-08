@@ -15,8 +15,33 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'libgtview/config'
-require 'libgtview/diagram'
-require 'libgtview/feature_index'
-require 'libgtview/feature_stream'
-require 'libgtview/render'
+# testing the Ruby bindings for libgtview (similar to the view tool)
+
+require 'gtruby'
+
+if ARGV.size != 2 then
+  STDERR.puts "Usage: #{$0} PNG_file GFF3_file"
+  STDERR.puts "Create PNG representation of GFF3 annotation file."
+  exit(1)
+end
+
+
+pngfile  = ARGV[0]
+gff3file = ARGV[1]
+
+in_stream = GT::GFF3InStream.new(gff3file)
+feature_index = GT::FeatureIndex.new()
+feature_stream = GT::FeatureStream.new(in_stream, feature_index)
+gn = feature_stream.next_tree()
+# fill feature index
+while (gn) do
+  gn = feature_stream.next_tree()
+end
+
+seqid = feature_index.get_first_seqid()
+range = feature_index.get_range_for_seqid(seqid)
+
+config = GT::Config.new()
+diagram = GT::Diagram.new(feature_index, range, seqid, config)
+render = GT::Render.new(config)
+render.to_png(diagram, pngfile)

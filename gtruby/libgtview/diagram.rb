@@ -15,8 +15,21 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'libgtview/config'
-require 'libgtview/diagram'
-require 'libgtview/feature_index'
-require 'libgtview/feature_stream'
-require 'libgtview/render'
+require 'dl/import'
+require 'libgtcore/range'
+
+module GT
+  extend DL::Importable
+  dlload "libgtview.so"
+  extern "Diagram* diagram_new(FeatureIndex*, const Range*, const char*, Config*)"
+  extern "void diagram_delete(Diagram*)"
+
+  class Diagram
+    attr_reader :diagram
+    def initialize(feature_index, range, seqid, config)
+      @diagram = GT.diagram_new(feature_index.feature_index, range, seqid,
+                                config.config)
+      @diagram.free = GT::symbol("diagram_delete", "0P")
+    end
+  end
+end

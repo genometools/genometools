@@ -188,6 +188,13 @@ Range feature_index_get_range_for_seqid(FeatureIndex *fi, const char *seqid)
   return ret;
 }
 
+void feature_index_get_rangeptr_for_seqid(FeatureIndex *fi, Range *range,
+                                          const char *seqid)
+{
+  assert(fi && range);
+  *range = feature_index_get_range_for_seqid(fi, seqid);
+}
+
 bool feature_index_has_seqid(const FeatureIndex *fi, const char *seqid)
 {
   assert(fi);

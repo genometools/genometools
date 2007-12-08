@@ -15,8 +15,30 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'libgtview/config'
-require 'libgtview/diagram'
-require 'libgtview/feature_index'
-require 'libgtview/feature_stream'
-require 'libgtview/render'
+require 'dl/import'
+require 'libgtcore/range'
+
+module GT
+  extend DL::Importable
+  dlload "libcairo.so"
+  dlload "libgtview.so"
+  extern "Render* render_new(Config*)"
+  extern "int render_to_png(Render*, Diagram*, const char*, unsigned int, " +
+                           "Error*)"
+  extern "void render_delete(Render*)"
+
+  class Render
+    attr_reader :render
+    def initialize(config)
+      @render = GT.render_new(config.config)
+      @render.free = GT::symbol("render_delete", "0P")
+    end
+
+    def to_png(diagram, filename, width = 800)
+      err = GT::Error.new()
+      rval = GT.render_to_png(@render, diagram.diagram, filename, width,
+                              err.to_ptr)
+      if rval != 0 then gterror(err) end
+    end
+  end
+end

@@ -31,9 +31,7 @@ module GT
       genome_node.free = DL::FREE
       rval = GT.genome_stream_next_tree(self.genome_stream, genome_node.ref,
                                         err.to_ptr)
-      if rval != 0
-        gterror(err)
-      end
+      if rval != 0 then gterror(err) end
       if genome_node.null? then return nil end
       GT::GenomeNode.new(genome_node)
     end

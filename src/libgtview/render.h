@@ -29,7 +29,7 @@ typedef struct Render Render;
 /* <cfg> is used to determine drawing options. */
 Render* render_new(Config*);
 /* Render <diagram> to PNG file <filename> (relative to working directory) */
-int     render_to_png(Render*, Diagram *diagram, const char *filename,
+int     render_to_png(Render*, Diagram*, const char *filename,
                       unsigned int width, Error*);
 void    render_delete(Render*);
 

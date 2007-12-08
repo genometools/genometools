@@ -45,7 +45,7 @@ static int diagram_lua_new(lua_State *L)
   config = get_config_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (Diagram*));
   assert(diagram);
-  *diagram = diagram_new(*feature_index, *range, seqid, config);
+  *diagram = diagram_new(*feature_index, range, seqid, config);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
