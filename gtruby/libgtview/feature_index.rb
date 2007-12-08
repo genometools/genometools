@@ -18,6 +18,7 @@
 require 'dl/import'
 require 'libgtcore/array'
 require 'libgtcore/range'
+require 'libgtcore/strarray'
 
 module GT
   extend DL::Importable
@@ -27,6 +28,7 @@ module GT
   extern "Array* feature_index_get_features_for_seqid(FeatureIndex*, const " +
                                                      "char*)"
   extern "const char* feature_index_get_first_seqid(const FeatureIndex*)"
+  extern "StrArray* feature_index_get_seqids(const FeatureIndex*)"
   extern "void feature_index_get_rangeptr_for_seqid(FeatureIndex*, Range*, " +
                                                    "const char*)"
   extern "void feature_index_delete(FeatureIndex*)"
@@ -54,6 +56,10 @@ module GT
 
     def get_first_seqid
       GT.feature_index_get_first_seqid(@feature_index)
+    end
+
+    def get_seqids
+      GT::StrArray.new(GT.feature_index_get_seqids(@feature_index)).to_a
     end
 
     def get_range_for_seqid(seqid)
