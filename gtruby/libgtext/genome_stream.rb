@@ -17,6 +17,7 @@
 
 require 'dl/import'
 require 'helper'
+require 'libgtcore/error'
 require 'libgtext/genome_node'
 
 module GT
