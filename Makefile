@@ -54,6 +54,7 @@ BUILDSTAMP:=$(shell date +'"%Y-%m-%d %H:%M:%S"')
 
 # try to set RANLIB automatically
 SYSTEM:=$(shell uname -s)
+MACHINE:=$(shell uname -m)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
   SHARED:=-dynamic -bundle
@@ -219,6 +220,13 @@ ifeq ($(cov),yes)
   GT_CFLAGS += -fprofile-arcs -ftest-coverage
   STEST_FLAGS += -gcov
   opt=no
+  # hacks to link shared libs with cov=yes
+  ifeq ($(SYSTEM),Linux)
+    GT_LDFLAGS += -fprofile-arcs -ftest-coverage
+  endif
+  ifeq ($(MACHINE),amd64)
+    GT_LDFLAGS += -fPIC
+  endif
 endif
 
 ifneq ($(opt),no)
