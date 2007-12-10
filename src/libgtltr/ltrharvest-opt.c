@@ -451,12 +451,19 @@ static OPrval parse_options(int *parsed_args,
           "argument of -mindistltr is greater than argument of -maxdistltr");
       oprval = OPTIONPARSER_ERROR;
     }
+    if (lo->repeatinfo.lmax > lo->repeatinfo.dmin)
+    {
+      error_set(err,"argument of -maxlenltr is greater than argument of"
+                    " -mindistltr");
+      oprval = OPTIONPARSER_ERROR;
+    }
     if (lo->minlengthTSD > lo->maxlengthTSD)
     {
       error_set(err,
           "argument of -mintsd is greater than argument of -maxtsd");
       oprval = OPTIONPARSER_ERROR;
     }
+    
 
     /* If option motif is set,
        store characters, transform them later */
