@@ -3,7 +3,7 @@ gremme@zbh.uni-hamburg.de if I left someone out or missed something.
 
 - Stefan Bienert (patches)
 - David Ellinghaus (libgtltr)
-- Thomas Jahns (BitPackArray and BitPackString class, patches)
+- Thomas Jahns (BitPackArray and BitPackString class, block-compressed fm-index)
 - Malte Mader (libgtview)
 - Christin Schaerfer (libgtview)
 - Sascha Steinbiss (libgtview)
