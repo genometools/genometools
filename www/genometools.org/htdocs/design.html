@@ -116,7 +116,7 @@ class in <code>str.h</code>:
 typedef struct Str Str;
 </pre>
 <p>
-This seldomly known feature of C introduces a new data type named
+This seldomly used feature of C introduces a new data type named
 <code>Str</code> which is a synonym for the <code>struct Str</code> data type,
 <b>which needs not to be known at this point</b>. In the scope of the header
 file, the new data type <code>Str</code> cannot be used, since it's size is
@@ -367,7 +367,7 @@ href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/t
 and the <code>gt_*.c</code> files include only the <code>gt.h</code> header file
 (see <a
 href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/tools/gt_eval.c;hb=HEAD"><code>gt_eval.c</code></a>).
-For coolness reasons all tools are linked into the single <code>gt</code> binary,
+All tools are linked into the single <code>gt</code> binary,
 though. They are also loaded into the runtime via the <a
 href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/tools/gtr.c;hb=HEAD"><code>gtr_register_components()</code></a>
 function. All tools can be called like the eval tool in the following example:
@@ -404,7 +404,7 @@ described in this document.
 
 <div id="footer">
 Copyright &copy; 2007 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a> Last
-update: 2007-10-16
+update: 2007-12-10
 </div>
 </div>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
