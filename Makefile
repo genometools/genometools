@@ -45,6 +45,7 @@ EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DUNISTD_H="<unistd.h>" \
 EXP_CPPFLAGS+=-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(EXT_FLAGS)
 GT_CPPFLAGS:=$(INCLUDEOPT)
 GT_CXXFLAGS:=-g -pipe
+GT_LDFLAGS:=-Llib
 STEST_FLAGS:=
 EXP_LDFLAGS+=$(foreach dir, \
 	$(shell test -d /usr/local/lib && echo /usr/local/lib ; \
@@ -88,6 +89,7 @@ SKPROTO_DEP:=$(SKPROTO_SRC:%.c=obj/%.d)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
 LIBGTCORE_OBJ:=$(LIBGTCORE_SRC:%.c=obj/%.o)
 LIBGTCORE_DEP:=$(LIBGTCORE_SRC:%.c=obj/%.d)
+LIBGTCORE_LIBDEP=-lbz2 -lz
 
 # the extended GenomeTools library (e.g., depends on Lua)
 LIBGTEXT_C_SRC:=$(wildcard src/libgtext/*.c)
@@ -96,6 +98,7 @@ LIBGTEXT_C_DEP:=$(LIBGTEXT_C_SRC:%.c=obj/%.d)
 LIBGTEXT_CXX_SRC:=$(wildcard src/libgtext/*.cxx)
 LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
 LIBGTEXT_CXX_DEP:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.d)
+LIBGTEXT_LIBDEP=-lgtcore -lbz2 -lz
 
 # the GenomeTools matching library
 LIBGTMATCH_SRC:=$(wildcard src/libgtmatch/*.c)
@@ -305,7 +308,8 @@ endif
 lib/libgtcore.so: obj/gt_config.h $(LIBGTCORE_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTCORE_OBJ) -o $@
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTCORE_OBJ) \
+	-o $@ $(LIBGTCORE_LIBDEP)
 
 lib/libgtext.a: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
@@ -319,7 +323,7 @@ lib/libgtext.so: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTEXT_C_OBJ) \
-          $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ) -o $@
+          $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ) -o $@ $(LIBGTEXT_LIBDEP)
 
 lib/libgtmatch.a: $(LIBGTMATCH_OBJ)
 	@echo "[link $(@F)]"
