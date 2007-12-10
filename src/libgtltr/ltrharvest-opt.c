@@ -233,16 +233,16 @@ static OPrval parse_options(int *parsed_args,
                                "specify minimum seed length for"
                                " exact repeats",
                                &lo->minseedlength,
-                               (unsigned long) 30,
-                               (unsigned long) 1);
+                               30UL,
+                               1UL);
   option_parser_add_option(op, optionseed);
 
   /* -minlenltr */
   optionminlenltr = option_new_ulong_min_max("minlenltr",
                                "specify minimum length for each LTR",
                                &lo->repeatinfo.lmin,
-                               (unsigned long) 100,
-                               (unsigned long) 1,
+                               100UL,
+                               1UL,
                                UNDEF_ULONG);
   option_parser_add_option(op, optionminlenltr);
 
@@ -250,8 +250,8 @@ static OPrval parse_options(int *parsed_args,
   optionmaxlenltr = option_new_ulong_min_max("maxlenltr",
                                "specify maximum length for each LTR",
                                &lo->repeatinfo.lmax,
-                               (unsigned long) 1000,
-                               (unsigned long) 1,
+                               1000UL,
+                               1UL,
                                UNDEF_ULONG);
   option_parser_add_option(op, optionmaxlenltr);
 
@@ -260,8 +260,8 @@ static OPrval parse_options(int *parsed_args,
                                "specify minimum distance of "
                                "LTR startpositions",
                                &lo->repeatinfo.dmin,
-                               (unsigned long) 1000,
-                               (unsigned long) 1,
+                               1000UL,
+                               1UL,
                                UNDEF_ULONG);
   option_parser_add_option(op, optionmindistltr);
 
@@ -270,8 +270,8 @@ static OPrval parse_options(int *parsed_args,
                                "specify maximum distance of "
                                "LTR startpositions",
                                &lo->repeatinfo.dmax,
-                               (unsigned long) 15000,
-                               (unsigned long) 1,
+                               15000UL,
+                               1UL,
                                UNDEF_ULONG);
   option_parser_add_option(op, optionmaxdistltr);
 
@@ -289,7 +289,7 @@ static OPrval parse_options(int *parsed_args,
   optionmintsd = option_new_uint_min_max("mintsd",
                               "specify minimum length for each TSD",
                                &lo->minlengthTSD,
-                               0,
+                               4U,
                                0,
                                UNDEF_UINT);
   option_parser_add_option(op, optionmintsd);
@@ -300,7 +300,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->maxlengthTSD,
                                20U,
                                0,
-                               (unsigned int) UNDEF_INT);
+                               UNDEF_UINT);
   option_parser_add_option(op, optionmaxtsd);
 
   /* -motif */
@@ -322,9 +322,9 @@ static OPrval parse_options(int *parsed_args,
                              "specify maximum number of "
                              "mismatches in motif [0,3]",
                              &lo->motif.allowedmismatches,
-                             (unsigned int)4,
-                             (unsigned int)0,
-                             (unsigned int)3);
+                             4U,
+                             0,
+                             3U);
   option_parser_add_option(op, optionmotifmis);
 
   /* -vic */
@@ -462,7 +462,7 @@ static OPrval parse_options(int *parsed_args,
        store characters, transform them later */
     if (option_is_set(optionmotif))
     {
-      if (str_length(lo->motif.str_motif) != (unsigned long) 4)
+      if (str_length(lo->motif.str_motif) != 4UL)
       {
         error_set(err,
             "argument of -motif has not exactly 4 characters");
@@ -475,7 +475,7 @@ static OPrval parse_options(int *parsed_args,
       /* default if motif specified */
       if (!option_is_set(optionmotifmis))
       {
-        lo->motif.allowedmismatches = (unsigned int)0;
+        lo->motif.allowedmismatches = 0;
       }
     }
 

@@ -682,6 +682,7 @@ void sortallbuckets(Seqpos *suftabptr,
                                           esr1,
                                           esr2);
         }
+        assert(lcpsubtab != NULL);
         SETLCP(0,lcpvalue);
         multilcpvalue(outlcpinfo,
                       bbound.nonspecialsinbucket,
