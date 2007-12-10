@@ -18,18 +18,34 @@
 #ifndef SFX_OUTLCP_H
 #define SFX_OUTLCP_H
 #include <stdio.h>
+#include "libgtcore/error.h"
 #include "libgtcore/str.h"
-#include "libgtcore/fa.h"
+#include "encseq-def.h"
+#include "intcode-def.h"
 #include "seqpos-def.h"
 
 typedef struct Outlcpinfo Outlcpinfo;
 
-void outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outlcpinfo *outlcpinfo);
-void outmany0lcpvalues(Seqpos many,Outlcpinfo *outlcpinfo);
-Outlcpinfo *newlcpoutfileinfo(const Str *indexname,Seqpos totallength,
-                              Error *err,bool origin);
+Outlcpinfo *newlcpoutfileinfo(const Str *indexname,
+                              unsigned int prefixlength,
+                              unsigned int numofchars,
+                              Seqpos totallength,
+                              Error *err);
 Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 void freeoutlcptab(Outlcpinfo **outlcpinfo);
+
+void sortallbuckets(Seqpos *suftabptr,
+                    const Encodedsequence *encseq,
+                    Readmode readmode,
+                    const Seqpos *leftborder,
+                    const Seqpos *countspecialcodes,
+                    unsigned int numofchars,
+                    unsigned int prefixlength,
+                    Codetype mincode,
+                    Codetype maxcode,
+                    Seqpos totalwidth,
+                    Seqpos previoussuffix,
+                    Outlcpinfo *outlcpinfo);
 
 #endif

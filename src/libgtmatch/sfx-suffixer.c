@@ -31,12 +31,10 @@
 #include "sfx-codespec.h"
 #include "sfx-partssuf-def.h"
 #include "sfx-suffixer.h"
-#include "sfx-lcpsub.h"
 #include "sfx-outlcp.h"
 #include "stamp.h"
 
 #include "sfx-mappedstr.pr"
-#include "sfx-bentsedg.pr"
 
 #define CODEBITS        (32-PREFIXLENBITS)
 #define MAXPREFIXLENGTH ((((unsigned int) 1) << PREFIXLENBITS) - 1)
@@ -75,7 +73,6 @@ DECLAREARRAYSTRUCT(Seqpos);
   Readmode readmode;
   Seqpos widthofpart,
          totallength;
-  Lcpsubtab *lcpsubtab;
   Outlcpinfo *outlcpinfo;
   unsigned int part,
                numofchars,
@@ -297,10 +294,6 @@ void freeSfxiterator(Sfxiterator **sfi)
   FREESPACE((*sfi)->leftborder);
   FREESPACE((*sfi)->countspecialcodes);
   FREESPACE((*sfi)->suftab);
-  if ((*sfi)->lcpsubtab != NULL)
-  {
-    freelcpsubtab(&(*sfi)->lcpsubtab);
-  }
   freesuftabparts((*sfi)->suftabparts);
   FREESPACE(*sfi);
 }
@@ -349,7 +342,6 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->prefixlength = prefixlength;
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
-    sfi->lcpsubtab = newlcpsubtab(prefixlength,numofchars);
     sfi->previoussuffix = 0;
     sfi->outlcpinfo = outlcpinfo;
     sfi->sri = NULL;
@@ -495,7 +487,6 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->currentmaxcode,
                  totalwidth,
                  sfi->previoussuffix,
-                 sfi->lcpsubtab,
                  sfi->outlcpinfo);
   assert(totalwidth > 0);
   sfi->previoussuffix = sfi->suftab[sfi->widthofpart-1];

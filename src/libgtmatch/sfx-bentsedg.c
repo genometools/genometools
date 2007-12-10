@@ -20,16 +20,19 @@
 #include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
+#include "libgtcore/xansi.h"
+#include "libgtcore/fa.h"
 #include "divmodmul.h"
-#include "sfx-codespec.h"
 #include "intcode-def.h"
-#include "sfx-lcpsub.h"
 #include "spacedef.h"
 #include "encseq-def.h"
 #include "turnwheels.h"
+#include "esafileend.h"
+#include "sfx-codespec.h"
 #include "sfx-outlcp.h"
 
 #include "sfx-cmpsuf.pr"
+#include "opensfxfile.pr"
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
@@ -43,18 +46,8 @@
 
 #define PTR2INT(VAR,I) DEREF(VAR,cptr = *(I)+depth,cptr)
 
-#define WITHLCPNEW
-
-#ifdef WITHLCPNEW
-#define LCPINDEX(I)        (Seqpos) ((I) - lcpsubtab->suftabbase)
-#define SETLCP(I,V)        lcpsubtab->spaceSeqpos[I] = V
-#define EVALLCPLEN(LL,T)   LL = (Seqpos) (tptr - (T))
-#else
-#define SETLCP(I,V)        /* Nothing */
-#define EVALLCPLEN(LL,T)   /* Nothing */
-#endif
-
-#define UNDEFLCP(TLEN) ((TLEN)+1)
+#define LCPINDEX(I)       (Seqpos) ((I) - lcpsubtab->suftabbase)
+#define SETLCP(I,V)       lcpsubtab->spaceSeqpos[I] = V
 
 #define STRINGCOMPARE(S,T,OFFSET,LL)\
         for (sptr = (S)+(OFFSET), tptr = (T)+(OFFSET); /* Nothing */;\
@@ -64,7 +57,7 @@
           cct = DEREF(tmptvar,tptr,tptr);\
           if (ccs != cct)\
           {\
-            EVALLCPLEN(LL,T);\
+            LL = (Seqpos) (tptr - (T));\
             break;\
           }\
         }
@@ -113,12 +106,23 @@
 
 typedef Seqpos Suffixptr;
 
- struct Lcpsubtab
+typedef struct
 {
   Seqpos *spaceSeqpos;
   unsigned long nextfreeSeqpos, allocatedSeqpos;
   const Seqpos *suftabbase;
+} Lcpsubtab;
+
+ struct Outlcpinfo
+{
+  FILE *outfplcptab,
+       *outfpllvtab;
+  Seqpos totallength,
+         countoutputlcpvalues,
+         numoflargelcpvalues,
+         maxbranchdepth;
   Turningwheel *tw;
+  Lcpsubtab lcpsubtab;
 };
 
 static Suffixptr *medianof3(const Encodedsequence *encseq,
@@ -157,25 +161,23 @@ static void insertionsort(const Encodedsequence *encseq,
                           Suffixptr *rightptr)
 {
   Suffixptr sptr, tptr, *pi, *pj, temp;
-  Seqpos ccs, cct;
+  Seqpos ccs, cct, lcpindex, lcplen;
   Uchar tmpsvar, tmptvar;
-#ifdef WITHLCPNEW
-  Seqpos lcpindex, lcplen;
-#endif
 
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
     for (pj = pi; pj > leftptr; pj--)
     {
       STRINGCOMPARE(*(pj-1),*pj,depth,lcplen);
-#ifdef WITHLCPNEW
-      lcpindex = LCPINDEX(pj);
-      if (ccs > cct && pj < pi)
+      if (lcpsubtab != NULL)
       {
-        SETLCP(lcpindex+1,lcpsubtab->spaceSeqpos[lcpindex]);
+        lcpindex = LCPINDEX(pj);
+        if (ccs > cct && pj < pi)
+        {
+          SETLCP(lcpindex+1,lcpsubtab->spaceSeqpos[lcpindex]);
+        }
+        SETLCP(lcpindex,lcplen);
       }
-      SETLCP(lcpindex,lcplen);
-#endif
       if (ccs < cct)
       {
         break;
@@ -290,7 +292,10 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     assert(pd >= pc);
     if ((w = (Seqpos) (pd-pc)) > 0)
     {
-      SETLCP(LCPINDEX(right-w+1),depth);
+      if (lcpsubtab != NULL)
+      {
+        SETLCP(LCPINDEX(right-w+1),depth);
+      }
       SUBSORT(w,SMALLSIZE,right-w+1,right,depth);
     }
     assert(pb >= pa);
@@ -305,7 +310,10 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     }
     if (w > 0)
     {
-      SETLCP(LCPINDEX(leftplusw),depth);
+      if (lcpsubtab != NULL)
+      {
+        SETLCP(LCPINDEX(leftplusw),depth);
+      }
       SUBSORT(w,SMALLSIZE,left,leftplusw-1,depth);
     }
     if (mkvauxstack->nextfreeMKVstack == 0)
@@ -314,6 +322,46 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     }
     POPMKVstack(left,right,depth);
   }
+}
+
+static void outmany0lcpvalues(Seqpos many,Outlcpinfo *outlcpinfo)
+{
+  Seqpos i;
+  Uchar outvalue = 0;
+
+  for (i=0; i<many; i++)
+  {
+    xfwrite(&outvalue,sizeof (Uchar),(size_t) 1,outlcpinfo->outfplcptab);
+  }
+  outlcpinfo->countoutputlcpvalues += many;
+}
+
+static void outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outlcpinfo *outlcpinfo)
+{
+  Uchar outvalue;
+
+  assert(outlcpinfo != NULL);
+  if (lcpvalue >= (Seqpos) UCHAR_MAX)
+  {
+    Largelcpvalue largelcpvalue;
+
+    outlcpinfo->numoflargelcpvalues++;
+    largelcpvalue.position = pos;
+    largelcpvalue.value = lcpvalue;
+    xfwrite(&largelcpvalue,sizeof (Largelcpvalue),(size_t) 1,
+            outlcpinfo->outfpllvtab);
+    outvalue = (Uchar) UCHAR_MAX;
+  } else
+  {
+    outvalue = (Uchar) lcpvalue;
+  }
+  assert(outlcpinfo->outfplcptab != NULL);
+  xfwrite(&outvalue,sizeof (Uchar),(size_t) 1,outlcpinfo->outfplcptab);
+  if (outlcpinfo->maxbranchdepth < lcpvalue)
+  {
+    outlcpinfo->maxbranchdepth = lcpvalue;
+  }
+  outlcpinfo->countoutputlcpvalues++;
 }
 
 typedef struct
@@ -400,37 +448,7 @@ static unsigned long determinemaxbucketsize(const Seqpos *leftborder,
   return maxbucketsize;
 }
 
-void freelcpsubtab(Lcpsubtab **lcpsubtab)
-{
-  FREEARRAY(*lcpsubtab,Seqpos);
-  freeTurningwheel(&(*lcpsubtab)->tw);
-  FREESPACE(*lcpsubtab);
-  return;
-}
-
-Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars)
-{
-  Lcpsubtab *lcpsubtab;
-
-  ALLOCASSIGNSPACE(lcpsubtab,NULL,Lcpsubtab,1);
-  INITARRAY(lcpsubtab,Seqpos);
-  lcpsubtab->tw = newTurningwheel(prefixlength,numofchars);
-  return lcpsubtab;
-}
-
-static void setlcpundef(Lcpsubtab *lcpsubtab,unsigned long maxbucketsize,
-                        Seqpos totallength)
-{
-  unsigned long i;
-
-  for (i=0; i<maxbucketsize; i++)
-  {
-    lcpsubtab->spaceSeqpos[i] = UNDEFLCP(totallength);
-  }
-}
-
-static void multilcpvalue(Lcpsubtab *lcpsubtab,
-                          Outlcpinfo *outlcpinfo,
+static void multilcpvalue(Outlcpinfo *outlcpinfo,
                           unsigned long bucketsize,
                           Seqpos posoffset)
 {
@@ -438,7 +456,7 @@ static void multilcpvalue(Lcpsubtab *lcpsubtab,
 
   for (i=0; i<bucketsize; i++)
   {
-    outlcpvalue(lcpsubtab->spaceSeqpos[i],posoffset+i,outlcpinfo);
+    outlcpvalue(outlcpinfo->lcpsubtab.spaceSeqpos[i],posoffset+i,outlcpinfo);
   }
 }
 
@@ -501,6 +519,77 @@ static void bucketends(const Encodedsequence *encseq,
   }
 }
 
+Outlcpinfo *newlcpoutfileinfo(const Str *indexname,
+                              unsigned int prefixlength,
+                              unsigned int numofchars,
+                              Seqpos totallength,
+                              Error *err)
+{
+  bool haserr = false;
+  Outlcpinfo *outlcpinfo;
+
+  ALLOCASSIGNSPACE(outlcpinfo,NULL,Outlcpinfo,1);
+  if (indexname == NULL)
+  {
+    outlcpinfo->outfplcptab = NULL;
+    outlcpinfo->outfpllvtab = NULL;
+  } else
+  {
+    outlcpinfo->outfplcptab = opensfxfile(indexname,LCPTABSUFFIX,"wb",err);
+    if (outlcpinfo->outfplcptab == NULL)
+    {
+      haserr = true;
+    }
+    if (!haserr)
+    {
+      outlcpinfo->outfpllvtab
+        = opensfxfile(indexname,LARGELCPTABSUFFIX,"wb",err);
+      if (outlcpinfo->outfpllvtab == NULL)
+      {
+        haserr = true;
+      }
+    }
+  }
+  outlcpinfo->numoflargelcpvalues = 0;
+  outlcpinfo->maxbranchdepth = 0;
+  outlcpinfo->countoutputlcpvalues = 0;
+  outlcpinfo->totallength = totallength;
+  INITARRAY(&outlcpinfo->lcpsubtab,Seqpos);
+  outlcpinfo->tw = newTurningwheel(prefixlength,numofchars);
+  if (haserr)
+  {
+    FREESPACE(outlcpinfo);
+    return NULL;
+  }
+  return outlcpinfo;
+}
+
+void freeoutlcptab(Outlcpinfo **outlcpinfo)
+{
+  if ((*outlcpinfo)->countoutputlcpvalues < (*outlcpinfo)->totallength + 1)
+  {
+    outmany0lcpvalues((*outlcpinfo)->totallength + 1 -
+                      (*outlcpinfo)->countoutputlcpvalues,
+                      *outlcpinfo);
+  }
+  assert((*outlcpinfo)->countoutputlcpvalues == (*outlcpinfo)->totallength + 1);
+  fa_fclose((*outlcpinfo)->outfplcptab);
+  fa_fclose((*outlcpinfo)->outfpllvtab);
+  FREEARRAY(&(*outlcpinfo)->lcpsubtab,Seqpos);
+  freeTurningwheel(&(*outlcpinfo)->tw);
+  FREESPACE(*outlcpinfo);
+}
+
+Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo)
+{
+  return outlcpinfo->numoflargelcpvalues;
+}
+
+Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
+{
+  return outlcpinfo->maxbranchdepth;
+}
+
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
                     Readmode readmode,
@@ -512,7 +601,6 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype maxcode,
                     Seqpos totalwidth,
                     Seqpos previoussuffix,
-                    Lcpsubtab *lcpsubtab,
                     Outlcpinfo *outlcpinfo)
 {
   Codetype code;
@@ -523,7 +611,15 @@ void sortallbuckets(Seqpos *suftabptr,
   unsigned long maxbucketsize;
   Seqpos lcpvalue;
   Encodedsequencescanstate *esr1, *esr2;
+  Lcpsubtab *lcpsubtab;
 
+  if (outlcpinfo == NULL)
+  {
+    lcpsubtab = NULL;
+  } else
+  {
+    lcpsubtab = &outlcpinfo->lcpsubtab;
+  }
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
   maxbucketsize = determinemaxbucketsize(leftborder,
@@ -532,13 +628,13 @@ void sortallbuckets(Seqpos *suftabptr,
                                          maxcode,
                                          totalwidth,
                                          numofchars);
-  if (maxbucketsize > lcpsubtab->allocatedSeqpos)
+  if (lcpsubtab != NULL && maxbucketsize > lcpsubtab->allocatedSeqpos)
   {
     lcpsubtab->allocatedSeqpos = maxbucketsize;
-    ALLOCASSIGNSPACE(lcpsubtab->spaceSeqpos,lcpsubtab->spaceSeqpos,Seqpos,
+    ALLOCASSIGNSPACE(lcpsubtab->spaceSeqpos,
+                     lcpsubtab->spaceSeqpos,Seqpos,
                      lcpsubtab->allocatedSeqpos);
   }
-  setlcpundef(lcpsubtab,maxbucketsize,totallength);
   INITARRAY(&mkvauxstack,MKVstack);
   for (code = mincode; code <= maxcode; code++)
   {
@@ -550,15 +646,18 @@ void sortallbuckets(Seqpos *suftabptr,
                                      totalwidth,
                                      rightchar,
                                      numofchars);
-    if (code > 0)
+    if (outlcpinfo != NULL && code > 0)
     {
-      (void) nextTurningwheel(lcpsubtab->tw);
+      (void) nextTurningwheel(outlcpinfo->tw);
     }
     if (bbound.nonspecialsinbucket > 0)
     {
       if (bbound.nonspecialsinbucket > 1UL)
       {
-        lcpsubtab->suftabbase = suftabptr + bbound.left;
+        if (lcpsubtab != NULL)
+        {
+          lcpsubtab->suftabbase = suftabptr + bbound.left;
+        }
         bentleysedgewick(encseq,
                          readmode,
                          totallength,
@@ -584,8 +683,7 @@ void sortallbuckets(Seqpos *suftabptr,
                                           esr2);
         }
         SETLCP(0,lcpvalue);
-        multilcpvalue(lcpsubtab,
-                      outlcpinfo,
+        multilcpvalue(outlcpinfo,
                       bbound.nonspecialsinbucket,
                       bbound.left);
         previoussuffix = suftabptr[bbound.left+bbound.nonspecialsinbucket-1];

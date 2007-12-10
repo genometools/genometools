@@ -33,9 +33,7 @@
 #include "verbose-def.h"
 #include "intcode-def.h"
 #include "sfx-suffixer.h"
-#include "sfx-lcpval.h"
 #include "sfx-outlcp.h"
-#include "stamp.h"
 
 #include "opensfxfile.pr"
 #include "fillsci.pr"
@@ -65,14 +63,12 @@ typedef struct
   Seqpos pageoffset;
   const Encodedsequence *encseq;
   DefinedSeqpos longest;
-  Outlcpinfo *outlcpinfo2;
-#ifdef OLDLCP
   Outlcpinfo *outlcpinfo;
-  Lcpvalueiterator *lvi;
-#endif
 } Outfileinfo;
 
 static int initoutfileinfo(Outfileinfo *outfileinfo,
+                           unsigned int prefixlength,
+                           unsigned int numofchars,
                            const Encodedsequence *encseq,
                            const Suffixeratoroptions *so,
                            Error *err)
@@ -86,30 +82,18 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   outfileinfo->longest.valueseqpos = 0;
   if (so->outlcptab)
   {
-#ifdef OLDLCP
-    outfileinfo->lvi = newLcpvalueiterator(encseq,so->readmode);
     outfileinfo->outlcpinfo
       = newlcpoutfileinfo(so->outlcptab ? so->str_indexname : NULL,
-                          getencseqtotallength(encseq),err,true);
+                          prefixlength,
+                          numofchars,
+                          getencseqtotallength(encseq),err);
     if (outfileinfo->outlcpinfo == NULL)
-    {
-      haserr = true;
-    }
-#endif
-    outfileinfo->outlcpinfo2
-      = newlcpoutfileinfo(so->outlcptab ? so->str_indexname : NULL,
-                          getencseqtotallength(encseq),err,true);
-    if (outfileinfo->outlcpinfo2 == NULL)
     {
       haserr = true;
     }
   } else
   {
-    outfileinfo->outlcpinfo2 = NULL;
-#ifdef OLDLCP
-    outfileinfo->lvi = NULL;
     outfileinfo->outlcpinfo = NULL;
-#endif
   }
   INITOUTFILEPTR(outfileinfo->outfpsuftab,so->outsuftab,SUFTABSUFFIX);
   INITOUTFILEPTR(outfileinfo->outfpbwttab,so->outbwttab,BWTTABSUFFIX);
@@ -150,9 +134,6 @@ static int suftab2file(Outfileinfo *outfileinfo,
   }
   if (!haserr)
   {
-#ifdef OLDLCP
-    Seqpos lcpvalue;
-#endif
     Seqpos startpos, pos;
     Uchar cc = 0;
 
@@ -192,18 +173,6 @@ static int suftab2file(Outfileinfo *outfileinfo,
           break;
         }
       }
-#ifdef OLDLCP
-      if (outfileinfo->outlcpinfo != NULL)
-      {
-        lcpvalue = nextLcpvalueiterator(outfileinfo->lvi,
-                                        (outfileinfo->pageoffset == 0)
-                                          ? true : false,
-                                        suftab,
-                                        numberofsuffixes);
-        outlcpvalue(lcpvalue,outfileinfo->pageoffset+pos,
-                    outfileinfo->outlcpinfo);
-      }
-#endif
     }
   }
   outfileinfo->pageoffset += numberofsuffixes;
@@ -255,7 +224,7 @@ static int suffixeratorwithoutput(
                        numofchars,
                        prefixlength,
                        numofparts,
-                       outfileinfo->outlcpinfo2,
+                       outfileinfo->outlcpinfo,
                        mtime,
                        verboseinfo,
                        err);
@@ -425,10 +394,6 @@ static int runsuffixerator(bool doesa,
       }
     }
   }
-  if (initoutfileinfo(&outfileinfo,encseq,so,err) != 0)
-  {
-    haserr = true;
-  }
   if (!haserr)
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || !doesa)
@@ -458,59 +423,6 @@ static int runsuffixerator(bool doesa,
                                   totallength));
         }
       }
-      if (!haserr)
-      {
-        if (doesa)
-        {
-          if (suffixeratorwithoutput(
-                             &outfileinfo,
-                             specialcharinfo.specialcharacters,
-                             specialcharinfo.specialranges,
-                             encseq,
-                             so->readmode,
-                             numofchars,
-                             so->prefixlength,
-                             so->numofparts,
-                             so->outlcptab ? so->str_indexname : NULL,
-                             mtime,
-                             verboseinfo,
-                             err) != 0)
-          {
-            haserr = true;
-          }
-        } else
-        {
-          sfxInterface *si;
-          BWTSeq *bwtSeq;
-          showverbose(verboseinfo, "run construction of packed index for:\n"
-                      "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
-                      so->bwtIdxParams.final.seqParams.blockEnc.blockSize,
-                      so->bwtIdxParams.final.seqParams.blockEnc.bucketBlocks,
-                      so->bwtIdxParams.final.locateInterval);
-          if (!(si = newSfxInterface(so, encseq, &specialcharinfo,
-                                     numofsequences, mtime, totallength + 1,
-                                     alpha, characterdistribution,
-                                     verboseinfo, err)))
-          {
-            fputs("Index creation failed.\n", stderr);
-            haserr = true;
-          }
-          else if (
-            !(bwtSeq = createBWTSeqFromSfxI(&so->bwtIdxParams.final, si,
-                                            getSfxILength(si), err)))
-          {
-            fputs("Index creation failed.\n", stderr);
-            deleteSfxInterface(si);
-            haserr = true;
-          }
-          else
-            deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
-          outfileinfo.longest = getSfxILongestPos(si); /* XXX Thomas, is
-                                                          this necessary */
-
-          deleteSfxInterface(si);
-        }
-      }
     } else
     {
       if (so->readmode != Forwardmode)
@@ -523,20 +435,82 @@ static int runsuffixerator(bool doesa,
       }
     }
   }
+  outfileinfo.outfpsuftab = NULL;
+  outfileinfo.outfpbwttab = NULL;
+  outfileinfo.outlcpinfo = NULL;
+  if (!haserr)
+  {
+    if (initoutfileinfo(&outfileinfo,so->prefixlength,
+                        numofchars,encseq,so,err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    if (so->outsuftab || so->outbwttab || so->outlcptab || !doesa)
+    {
+      if (doesa)
+      {
+        if (suffixeratorwithoutput(
+                           &outfileinfo,
+                           specialcharinfo.specialcharacters,
+                           specialcharinfo.specialranges,
+                           encseq,
+                           so->readmode,
+                           numofchars,
+                           so->prefixlength,
+                           so->numofparts,
+                           so->outlcptab ? so->str_indexname : NULL,
+                           mtime,
+                           verboseinfo,
+                           err) != 0)
+        {
+          haserr = true;
+        }
+      } else
+      {
+        sfxInterface *si;
+        BWTSeq *bwtSeq;
+        showverbose(verboseinfo, "run construction of packed index for:\n"
+                    "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
+                    so->bwtIdxParams.final.seqParams.blockEnc.blockSize,
+                    so->bwtIdxParams.final.seqParams.blockEnc.bucketBlocks,
+                    so->bwtIdxParams.final.locateInterval);
+        if (!(si = newSfxInterface(so, encseq, &specialcharinfo,
+                                   numofsequences, mtime, totallength + 1,
+                                   alpha, characterdistribution,
+                                   verboseinfo, err)))
+        {
+          fputs("Index creation failed.\n", stderr);
+          haserr = true;
+        }
+        else if (
+          !(bwtSeq = createBWTSeqFromSfxI(&so->bwtIdxParams.final, si,
+                                          getSfxILength(si), err)))
+        {
+          fputs("Index creation failed.\n", stderr);
+          deleteSfxInterface(si);
+          haserr = true;
+        }
+        else
+        {
+          deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
+        }
+        /*
+        outfileinfo.longest = getSfxILongestPos(si);
+        */
+        deleteSfxInterface(si);
+      }
+    }
+  }
   fa_fclose(outfileinfo.outfpsuftab);
   fa_fclose(outfileinfo.outfpbwttab);
-#ifdef OLDLCP
-  if (outfileinfo.lvi != NULL)
-  {
-    freeLcpvalueiterator(&outfileinfo.lvi);
-  }
-#endif
   if (!haserr)
   {
     Seqpos numoflargelcpvalues,
            maxbranchdepth;
 
-#ifdef OLDLCP
     if (outfileinfo.outlcpinfo == NULL)
     {
       numoflargelcpvalues = maxbranchdepth = 0;
@@ -545,16 +519,6 @@ static int runsuffixerator(bool doesa,
       numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
       maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
     }
-#else
-    if (outfileinfo.outlcpinfo2 == NULL)
-    {
-      numoflargelcpvalues = maxbranchdepth = 0;
-    } else
-    {
-      numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo2);
-      maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo2);
-    }
-#endif
     if (outprjfile(so->str_indexname,
                    so->filenametab,
                    so->readmode,
@@ -571,17 +535,10 @@ static int runsuffixerator(bool doesa,
       haserr = true;
     }
   }
-#ifdef OLDLCP
   if (outfileinfo.outlcpinfo != NULL)
   {
     freeoutlcptab(&outfileinfo.outlcpinfo);
   }
-#else
-  if (outfileinfo.outlcpinfo2 != NULL)
-  {
-    freeoutlcptab(&outfileinfo.outlcpinfo2);
-  }
-#endif
   FREESPACE(filelengthtab);
   if (alpha != NULL)
   {
