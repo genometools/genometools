@@ -45,6 +45,7 @@ inl-encseq.c
 mapspec-gen.c
 measure-time.c
 overallseq.c
+sfx-bentsedg.c
 sfx-outlcp.c
 sfx-partssuf.c
 sfx-readint.c

@@ -17,15 +17,16 @@
 
 #ifdef INLINEDENCSEQ
 #include "libgtcore/chardef.h"
+#include "libgtcore/filelengthvalues.h"
+#include "libgtcore/fa.h"
+#include "libgtcore/error.h"
+#include "libgtcore/fastabuffer.h"
 #include "encseq-def.h"
 #include "spacedef.h"
 /* #include "fbs-def.h" */
 
 #include "opensfxfile.pr"
 #include "fillsci.pr"
-#include "fbsadv.pr"
-
-#include "readnextUchar.gen"
 
 #define TISTABFILESUFFIX ".tis"
 
@@ -49,7 +50,7 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Error *err)
       haserr = true;
     }
   }
-  fa_xfclose(fp,err);
+  fa_xfclose(fp);
   return haserr ? -1 : 0;
 }
 
@@ -72,19 +73,20 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   FREESPACE(*encseqptr);
 }
 
-Encodedsequencescanstate *initEncodedsequencescanstate(
-                               /*@unused@*/ const Encodedsequence *encseq,
-                               Readmode readmode,
-                               Startpos startpos,
-                               Error *err)
+Encodedsequencescanstate *newEncodedsequencescanstate(void)
 {
   Encodedsequencescanstate *esr;
 
-  error_check(err);
-  ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,(size_t) 1);
-  esr->readmode = readmode;
-  assert(esr != NULL);
+  ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,1);
   return esr;
+}
+
+void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
+                                  /*@unused@*/ const Encodedsequence *encseq,
+                                  Readmode readmode,
+                                  Seqpos startpos)
+{
+  esr->readmode = readmode;
 }
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr)
@@ -105,7 +107,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
   encseq->hasspecialcharacters = false;
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = readnextUchar(&cc,fbs,err);
+    retval = fastabuffer_next(fbs,&cc,err);
     if (retval < 0)
     {
       FREESPACE(encseq->plainseq);
@@ -127,31 +129,29 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
   return 0;
 }
 
-/*@null@*/ Encodedsequence *files2encodedsequence(
-                                 /*@unused@*/ bool withrange,
-                                 const StrArray *filenametab,
-                                 bool plainformat,
-                                 Seqpos totallength,
-                                 /*@unused@*/ Seqpos specialranges,
-                                 const Alphabet *alphabet,
-                                 /*@unused@*/ const char *str_sat,
-                                 Error *err)
+/*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
+                                                  const StrArray *filenametab,
+                                                  bool plainformat,
+                                                  Seqpos totallength,
+                                                  Seqpos specialranges,
+                                                  const Alphabet *alphabet,
+                                                  const char *str_sat,
+                                                  Verboseinfo *verboseinfo,
+                                                  Error *err)
 {
   Encodedsequence *encseq;
-  FastaBuffer fbs;
+  FastaBuffer *fb = NULL;
 
   error_check(err);
-  initformatbufferstate(&fbs,
-                        filenametab,
-                        plainformat ? NULL : getsymbolmapAlphabet(alphabet),
-                        plainformat,
-                        NULL,
-                        NULL,
-                        NULL,
-                        err);
+  fb = fastabuffer_new(filenametab,
+                       plainformat ? NULL : getsymbolmapAlphabet(alphabet),
+                       plainformat,
+                       NULL,
+                       NULL,
+                       NULL);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->totallength = totallength;
-  if (fillplainseq(encseq,&fbs,err) != 0)
+  if (fillplainseq(encseq,fb,err) != 0)
   {
     freeEncodedsequence(&encseq);
     return NULL;
@@ -171,13 +171,12 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
   Encodedsequence *encseq;
   Str *tmpfilename;
 
-  error_check(err);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
-  tmpfilename = str_clone(indexname,err);
-  str_append_cstr(tmpfilename,TISTABFILESUFFIX,err);
-  encseq->plainseq
-    = fa_mmap_read(err,str_get(tmpfilename),&encseq->totallength);
-  str_delete(tmpfilename,err);
+  tmpfilename = str_clone(indexname);
+  str_append_cstr(tmpfilename,TISTABFILESUFFIX);
+  encseq->plainseq = fa_mmap_read(str_get(tmpfilename),
+                                  (size_t *) &encseq->totallength);
+  str_delete(tmpfilename);
   encseq->hasownmemory = false;
   encseq->mappedfile = true;
   encseq->hasspecialcharacters = (specialranges > 0) ?  true : false;
@@ -191,13 +190,13 @@ Encodedsequence *plain2encodedsequence(
                          Seqpos len1,
                          const Uchar *seq2,
                          unsigned long len2,
-                         /*@unused@*/ unsigned int mapsize)
+                         /*@unused@*/ unsigned int mapsize,
+                         Verboseinfo *verboseinfo)
 {
   Encodedsequence *encseq;
   Uchar *seqptr;
   Seqpos pos, len;
 
-  error_check(err);
   assert(seq1 != NULL);
   assert(len1 > 0);
   if (seq2 == NULL)
@@ -212,7 +211,7 @@ Encodedsequence *plain2encodedsequence(
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len);
+  sequence2specialcharinfo(specialcharinfo,seqptr,len,verboseinfo);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,1);
   encseq->plainseq = seqptr;
   encseq->mappedfile = false;
@@ -333,5 +332,20 @@ void freespecialrangeiterator(Specialrangeiterator **sri)
 const char *encseqaccessname(/*@unused@*/ const Encodedsequence *encseq)
 {
   return "direct";
+}
+
+void encseqextract(Uchar *buffer,
+                   const Encodedsequence *encseq,
+                   Seqpos frompos,
+                   Seqpos topos)
+{
+  unsigned long idx;
+  Seqpos pos;
+
+  assert(frompos < topos && topos < encseq->totallength);
+  for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
+  {
+    buffer[idx] = getencodedchar(encseq,pos,Forwardmode);
+  }
 }
 #endif /* ifdef INLINEDENCSEQ */

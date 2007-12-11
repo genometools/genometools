@@ -87,7 +87,7 @@ int simpleexactselfmatchstore (
   }
 
   tmp = (pos2 - pos1);
-  if ( numofdbsequences < (unsigned long) 2 )
+  if ( numofdbsequences < 2UL )
   {
     samecontig = true;
     contignumber = (unsigned long)0;

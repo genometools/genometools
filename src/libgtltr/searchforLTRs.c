@@ -232,7 +232,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
                        5);
     INITBOUNDARIES(boundaries);
 
-    if ( boundaries->contignumber == (unsigned long)0)
+    if ( boundaries->contignumber == 0)
     {
       offset = 0;
     }
