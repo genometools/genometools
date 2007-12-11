@@ -48,7 +48,13 @@ filenumber = 1
 while (true) do
   local filename = png_dir .. "/" .. filenumber .. ".png"
   if file_exists(filename) then
-    os.execute("display " .. filename)
+    if os.execute("display " .. filename) ~= 0 then
+      io.stdout:write("\nexit (type 'y' to confirm)? ")
+      if io.stdin:read() == "y" then
+        print("bye")
+        os.exit(0)
+      end
+    end
     filenumber = filenumber + 1
   else
     break
