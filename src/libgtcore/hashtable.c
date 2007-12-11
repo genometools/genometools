@@ -150,8 +150,7 @@ int compare_hash_entries_numerically(const void *a, const void *b)
 }
 
 int hashtable_foreach_ordered(Hashtable *ht, Hashiteratorfunc iterfunc,
-                              void *data, int(*cmp)(const void*, const void*),
-                              Error *e)
+                              void *data, Compare cmp, Error *e)
 {
   Array *hash_entries;
   HashEntry *he;
