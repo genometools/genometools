@@ -51,13 +51,15 @@ else
   usage()
 end
 
-function render_to_png(png_file)
+function render_to_png(png_file, seqid)
+  assert(seqid)
   local diagram = gt.diagram_new(feature_index, range, seqid)
   local render =  gt.render_new()
   render:to_png(diagram, png_file, width)
 end
 
-function get_coverage(maxdist)
+function get_coverage(seqid, maxdist)
+  assert(seqid)
   local maxdist = maxdist or 0
   local features = feature_index:get_features_for_seqid(seqid)
   local starpos, endpos
@@ -106,19 +108,20 @@ function contains_marked_feature(features)
   return false
 end
 
-function write_marked_regions(maxdist)
-  local coverage = get_coverage(maxdist)
-  local filenumber = 1
+function write_marked_regions(seqid, filenumber, maxdist)
+  assert(seqid)
+  local coverage = get_coverage(seqid, maxdist)
   for i, r in ipairs(coverage) do
     local features = feature_index:get_features_for_range(seqid, r)
     if contains_marked_feature(features) then
       range = r
       local filename = png_dir .. "/" .. filenumber .. ".png"
       io.write(string.format("writing file '%s'\n", filename))
-      render_to_png(filename)
+      render_to_png(filename, seqid)
       filenumber = filenumber + 1
     end
   end
+  return filenumber
 end
 
 -- process input files
@@ -133,7 +136,9 @@ stream_evaluator:evaluate(feature_visitor)
 stream_evaluator:show()
 
 -- write results
-seqid = feature_index:get_first_seqid()
-range = feature_index:get_range_for_seqid(seqid)
+filenumber = 1
 width = 1600
-write_marked_regions()
+for _, seqid in ipairs(feature_index:get_seqids()) do
+  range = feature_index:get_range_for_seqid(seqid)
+  filenumber = write_marked_regions(seqid, filenumber)
+end
