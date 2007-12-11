@@ -463,7 +463,6 @@ static OPrval parse_options(int *parsed_args,
           "argument of -mintsd is greater than argument of -maxtsd");
       oprval = OPTIONPARSER_ERROR;
     }
-    
 
     /* If option motif is set,
        store characters, transform them later */
