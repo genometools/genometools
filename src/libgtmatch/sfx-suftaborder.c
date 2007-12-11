@@ -173,7 +173,11 @@ void checkentiresuftab(const Encodedsequence *encseq,
   int cmp;
   Encodedsequencescanstate *esr1, *esr2;
   bool haserr = false;
+#ifdef INLINEDSequentialsuffixarrayreader
+  Uchar tmpsmalllcpvalue;
+#else
   int retval;
+#endif
 
   printf("check entire suftab\n");
   error_check(err);
@@ -228,6 +232,9 @@ void checkentiresuftab(const Encodedsequence *encseq,
     }
     if (ssar != NULL)
     {
+#ifdef INLINEDSequentialsuffixarrayreader
+      NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
+#else
       retval = nextSequentiallcpvalue(&currentlcp,ssar,err);
       if (retval < 0)
       {
@@ -238,6 +245,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
       {
         break;
       }
+#endif
       if (maxlcp != currentlcp)
       {
         fprintf(stderr,"%lu: startpos=" FormatSeqpos "firstchar=%u, startpos="

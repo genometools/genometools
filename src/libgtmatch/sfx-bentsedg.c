@@ -599,7 +599,9 @@ void freeoutlcptab(Outlcpinfo **outlcpinfo)
   fa_fclose((*outlcpinfo)->outfpllvtab);
   FREEARRAY(&(*outlcpinfo)->lcpsubtab,Seqpos);
   freeTurningwheel(&(*outlcpinfo)->tw);
+  /*
   FREESPACE((*outlcpinfo)->lcpsubtab.smalllcpvalues);
+  */
   FREEARRAY(&(*outlcpinfo)->lcpsubtab.largelcpvalues,Largelcpvalue);
   FREESPACE(*outlcpinfo);
 }
@@ -658,9 +660,12 @@ void sortallbuckets(Seqpos *suftabptr,
     ALLOCASSIGNSPACE(lcpsubtab->spaceSeqpos,
                      lcpsubtab->spaceSeqpos,Seqpos,
                      lcpsubtab->allocatedSeqpos);
+    lcpsubtab->smalllcpvalues = (Uchar *) lcpsubtab->spaceSeqpos;
+    /*
     ALLOCASSIGNSPACE(lcpsubtab->smalllcpvalues,
                      lcpsubtab->smalllcpvalues,Uchar,
                      lcpsubtab->allocatedSeqpos);
+    */
   }
   INITARRAY(&mkvauxstack,MKVstack);
   for (code = mincode; code <= maxcode; code++)
