@@ -15,17 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
-#include "libgtlua/bittab_lua.h"
-#include "libgtlua/gtcore_lua.h"
-#include "libgtlua/range_lua.h"
-#include "libgtlua/scorematrix_lua.h"
+#ifndef SCOREMATRIX_LUA_H
+#define SCOREMATRIX_LUA_H
 
-int luaopen_gtcore(lua_State *L)
-{
-  assert(L);
-  luaopen_bittab(L);
-  luaopen_range(L);
-  luaopen_scorematrix(L);
-  return 1;
-}
+#include "lua.h"
+
+/* exports the ScoreMatrix class to Lua:
+
+          scorematrix = gt.scorematrix_read_protein(path)
+   number scorematrix:get_dimension()
+   number scorematrix:get_score(idx1, idx2)
+*/
+int luaopen_scorematrix(lua_State*);
+
+#endif
