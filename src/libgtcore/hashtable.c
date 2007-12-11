@@ -131,14 +131,14 @@ static int save_hash_entry(void *key, void *value, void *data, Error *e)
   return 0;
 }
 
-int compare_hash_entries_alphabetically(const void *a, const void *b)
+static int compare_hash_entries_alphabetically(const void *a, const void *b)
 {
   HashEntry *he_a = (HashEntry*) a, *he_b = (HashEntry*) b;
   assert(he_a && he_b);
   return strcmp(he_a->key, he_b->key);
 }
 
-int compare_hash_entries_numerically(const void *a, const void *b)
+static int compare_hash_entries_numerically(const void *a, const void *b)
 {
   HashEntry *he_a = (HashEntry*) a, *he_b = (HashEntry*) b;
   assert(he_a && he_b);
