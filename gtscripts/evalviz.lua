@@ -139,6 +139,7 @@ stream_evaluator:show()
 filenumber = 1
 width = 1600
 for _, seqid in ipairs(feature_index:get_seqids()) do
+  print(string.format("seqid '%s'", seqid))
   range = feature_index:get_range_for_seqid(seqid)
   filenumber = write_marked_regions(seqid, filenumber)
 end
