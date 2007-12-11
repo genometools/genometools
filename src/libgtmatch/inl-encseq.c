@@ -23,7 +23,6 @@
 #include "libgtcore/fastabuffer.h"
 #include "encseq-def.h"
 #include "spacedef.h"
-/* #include "fbs-def.h" */
 
 #include "opensfxfile.pr"
 #include "fillsci.pr"
@@ -141,6 +140,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
 {
   Encodedsequence *encseq;
   FastaBuffer *fb = NULL;
+  bool haserr = false;
 
   error_check(err);
   fb = fastabuffer_new(filenametab,
@@ -154,9 +154,10 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
   if (fillplainseq(encseq,fb,err) != 0)
   {
     freeEncodedsequence(&encseq);
-    return NULL;
+    haserr = true;
   }
-  return encseq;
+  fastabuffer_delete(fb);
+  return haserr ? NULL : encseq;
 }
 
 /*@null@*/ Encodedsequence *mapencodedsequence(
