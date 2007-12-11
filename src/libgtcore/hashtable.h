@@ -33,6 +33,9 @@ Hashtable* hashtable_new(HashType, FreeFunc keyfree, FreeFunc valuefree);
 void*      hashtable_get(Hashtable*, const void*);
 void       hashtable_add(Hashtable*, void*, void*);
 void       hashtable_remove(Hashtable*, void*);
+/* iterate over the hashtable in key order given by compare function <cmp> */
+int        hashtable_foreach_ordered(Hashtable*, Hashiteratorfunc, void *data,
+                                     Compare cmp, Error*);
 int        hashtable_foreach(Hashtable*, Hashiteratorfunc, void*, Error*);
 /* iterate over the hashtable in alphabetical order. Requires that the hashtable
    has the HashType HASH_STRING. */

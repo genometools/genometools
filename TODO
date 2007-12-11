@@ -30,6 +30,7 @@ feature requests:
 - implement simpler solution for multiset_matching
 - implement cleanup stack exeception handling
 - compute correlation coefficient and average in `gt eval`
+- write qsort_r
 
 
 merge libgtcore and libgtmatch:

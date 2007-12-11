@@ -131,22 +131,23 @@ static int save_hash_entry(void *key, void *value, void *data, Error *e)
   return 0;
 }
 
-static int compare_hash_entries_alphabetically(const void *a, const void *b)
+static int ulongcmp(const void *a, const void *b)
 {
-  HashEntry *he_a = (HashEntry*) a, *he_b = (HashEntry*) b;
-  assert(he_a && he_b);
-  return strcmp(he_a->key, he_b->key);
-}
-
-static int compare_hash_entries_numerically(const void *a, const void *b)
-{
-  HashEntry *he_a = (HashEntry*) a, *he_b = (HashEntry*) b;
-  assert(he_a && he_b);
-  if ((unsigned long) he_a->key < (unsigned long) he_b->key)
+  if ((unsigned long) a < (unsigned long) b)
     return -1;
-  if ((unsigned long) he_a->key == (unsigned long) he_b->key)
+  if ((unsigned long) a == (unsigned long) b)
     return 0;
   return 1;
+}
+
+/* XXX: remove this global variable, when qsort_r() has been written */
+static Compare global_cmp = NULL;
+
+static int compare_hash_entries(const void *a, const void *b)
+{
+  HashEntry *he_a = (HashEntry*) a, *he_b = (HashEntry*) b;
+  assert(he_a && he_b && global_cmp);
+  return global_cmp(he_a->key, he_b->key);
 }
 
 int hashtable_foreach_ordered(Hashtable *ht, Hashiteratorfunc iterfunc,
@@ -160,8 +161,10 @@ int hashtable_foreach_ordered(Hashtable *ht, Hashiteratorfunc iterfunc,
   hash_entries = array_new(sizeof (HashEntry));
   had_err = hashtable_foreach(ht, save_hash_entry, hash_entries, e);
   if (!had_err) {
+    global_cmp = cmp;
     qsort(array_get_space(hash_entries), array_size(hash_entries),
-          array_elem_size(hash_entries), cmp);
+          array_elem_size(hash_entries), compare_hash_entries);
+    global_cmp = NULL;
     for (i = 0; !had_err && i < array_size(hash_entries); i++) {
       he = array_get(hash_entries, i);
       had_err = iterfunc(he->key, he->value, data, e);
@@ -176,8 +179,7 @@ int hashtable_foreach_ao(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
 {
   assert(ht && iterfunc);
   assert(ht->hash_type == HASH_STRING);
-  return hashtable_foreach_ordered(ht, iterfunc, data,
-                                   compare_hash_entries_alphabetically, e);
+  return hashtable_foreach_ordered(ht, iterfunc, data, (Compare) strcmp, e);
 }
 
 int hashtable_foreach_no(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
@@ -185,8 +187,7 @@ int hashtable_foreach_no(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
 {
   assert(ht && iterfunc);
   assert(ht->hash_type == HASH_DIRECT);
-  return hashtable_foreach_ordered(ht, iterfunc, data,
-                                   compare_hash_entries_numerically, e);
+  return hashtable_foreach_ordered(ht, iterfunc, data, ulongcmp, e);
 }
 
 static int remove_key_value_pair(void *key, void *value, void *data, Error *e)
