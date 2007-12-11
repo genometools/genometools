@@ -15,19 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
-#include "libgtlua/alpha_lua.h"
-#include "libgtlua/bittab_lua.h"
-#include "libgtlua/gtcore_lua.h"
-#include "libgtlua/range_lua.h"
-#include "libgtlua/scorematrix_lua.h"
+#ifndef ALPHA_LUA_H
+#define ALPHA_LUA_H
 
-int luaopen_gtcore(lua_State *L)
-{
-  assert(L);
-  luaopen_alpha(L);
-  luaopen_bittab(L);
-  luaopen_range(L);
-  luaopen_scorematrix(L);
-  return 1;
-}
+#include "lua.h"
+
+/* exports the Alpha class to Lua:
+
+          alpha = gt.alpha_new_protein()
+   string alpha:decode(code)
+   number alpha:size()
+*/
+int luaopen_alpha(lua_State*);
+
+#endif
