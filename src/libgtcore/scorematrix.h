@@ -27,6 +27,7 @@ typedef struct ScoreMatrix ScoreMatrix;
 ScoreMatrix* scorematrix_new(Alpha*);
 /* reads in a protein scorematrix from the given <path> and returns it */
 ScoreMatrix* scorematrix_read_protein(const char *path, Error*);
+unsigned int scorematrix_get_dimension(const ScoreMatrix*);
 int          scorematrix_get_score(const ScoreMatrix*,
                                    unsigned int, unsigned int);
 void         scorematrix_set_score(ScoreMatrix*,

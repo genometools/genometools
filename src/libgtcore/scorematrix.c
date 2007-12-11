@@ -215,6 +215,12 @@ ScoreMatrix* scorematrix_read_protein(const char *path, Error *e)
   return s;
 }
 
+unsigned int scorematrix_get_dimension(const ScoreMatrix *s)
+{
+  assert(s);
+  return s->dimension;
+}
+
 int scorematrix_get_score(const ScoreMatrix *s,
                           unsigned int idx1, unsigned int idx2)
 {
