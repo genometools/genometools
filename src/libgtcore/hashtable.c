@@ -34,7 +34,7 @@ struct Hashtable
 typedef struct {
   Hashiteratorfunc iterfunc;
   void *data;
-  Error *e;
+  Error *err;
   int had_err;
 } St_iterfunc_info;
 
@@ -90,26 +90,26 @@ void hashtable_remove(Hashtable *ht, void *key)
 }
 
 static int st_iterfunc(void *key, void *value, void *data,
-                       /*@unused@*/ Error *e)
+                       /*@unused@*/ Error *err)
 {
   St_iterfunc_info *info = (St_iterfunc_info*) data;
   assert(info->iterfunc);
-  info->had_err = info->iterfunc(key, value, info->data, info->e);
+  info->had_err = info->iterfunc(key, value, info->data, info->err);
   if (info->had_err)
     return ST_STOP;
   return ST_CONTINUE;
 }
 
 int hashtable_foreach(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
-                      Error *e)
+                      Error *err)
 {
   St_iterfunc_info info;
   assert(ht && iterfunc);
   info.iterfunc = iterfunc;
   info.data = data;
-  info.e = e;
+  info.err = err;
   info.had_err = 0;
-  (void) st_foreach(ht->st_table, st_iterfunc, (st_data_t) &info, e);
+  (void) st_foreach(ht->st_table, st_iterfunc, (st_data_t) &info, err);
   return info.had_err;
 }
 
@@ -118,11 +118,11 @@ typedef struct {
        *value;
 } HashEntry;
 
-static int save_hash_entry(void *key, void *value, void *data, Error *e)
+static int save_hash_entry(void *key, void *value, void *data, Error *err)
 {
   Array *hash_entries;
   HashEntry he;
-  error_check(e);
+  error_check(err);
   assert(key && value && data);
   hash_entries = (Array*) data;
   he.key = key;
@@ -151,7 +151,7 @@ static int compare_hash_entries(const void *a, const void *b)
 }
 
 int hashtable_foreach_ordered(Hashtable *ht, Hashiteratorfunc iterfunc,
-                              void *data, Compare cmp, Error *e)
+                              void *data, Compare cmp, Error *err)
 {
   Array *hash_entries;
   HashEntry *he;
@@ -159,7 +159,7 @@ int hashtable_foreach_ordered(Hashtable *ht, Hashiteratorfunc iterfunc,
   int had_err;
   assert(ht && iterfunc && cmp);
   hash_entries = array_new(sizeof (HashEntry));
-  had_err = hashtable_foreach(ht, save_hash_entry, hash_entries, e);
+  had_err = hashtable_foreach(ht, save_hash_entry, hash_entries, err);
   if (!had_err) {
     global_cmp = cmp;
     qsort(array_get_space(hash_entries), array_size(hash_entries),
@@ -167,7 +167,7 @@ int hashtable_foreach_ordered(Hashtable *ht, Hashiteratorfunc iterfunc,
     global_cmp = NULL;
     for (i = 0; !had_err && i < array_size(hash_entries); i++) {
       he = array_get(hash_entries, i);
-      had_err = iterfunc(he->key, he->value, data, e);
+      had_err = iterfunc(he->key, he->value, data, err);
     }
   }
   array_delete(hash_entries);
@@ -175,22 +175,22 @@ int hashtable_foreach_ordered(Hashtable *ht, Hashiteratorfunc iterfunc,
 }
 
 int hashtable_foreach_ao(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
-                         Error *e)
+                         Error *err)
 {
   assert(ht && iterfunc);
   assert(ht->hash_type == HASH_STRING);
-  return hashtable_foreach_ordered(ht, iterfunc, data, (Compare) strcmp, e);
+  return hashtable_foreach_ordered(ht, iterfunc, data, (Compare) strcmp, err);
 }
 
 int hashtable_foreach_no(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
-                         Error *e)
+                         Error *err)
 {
   assert(ht && iterfunc);
   assert(ht->hash_type == HASH_DIRECT);
-  return hashtable_foreach_ordered(ht, iterfunc, data, ulongcmp, e);
+  return hashtable_foreach_ordered(ht, iterfunc, data, ulongcmp, err);
 }
 
-static int remove_key_value_pair(void *key, void *value, void *data, Error *e)
+static int remove_key_value_pair(void *key, void *value, void *data, Error *err)
 {
   Hashtable *ht= (Hashtable*) data;
   assert(ht);
