@@ -82,6 +82,7 @@ bool          genome_node_overlaps_nodes(GenomeNode*, Array*);
    is given (which must have the same size as the array), the bits corresponding
    to overlapped nodes are marked (i.e., set) */
 bool          genome_node_overlaps_nodes_mark(GenomeNode*, Array*, Bittab*);
+int           genome_node_cmp(GenomeNode*, GenomeNode*);
 int           genome_node_compare(GenomeNode**, GenomeNode**);
 int           genome_node_compare_with_data(GenomeNode**, GenomeNode**,
                                             void *unused);

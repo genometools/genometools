@@ -42,7 +42,7 @@ static int compare_genome_node_type(GenomeNode *gn_a, GenomeNode *gn_b)
   return 0;
 }
 
-static int compare_genome_nodes(GenomeNode *gn_a, GenomeNode *gn_b)
+int genome_node_cmp(GenomeNode *gn_a, GenomeNode *gn_b)
 {
   int rval;
   assert(gn_a && gn_b);
@@ -363,7 +363,7 @@ void genome_node_is_part_of_genome_node(GenomeNode *parent, GenomeNode *child)
   assert(parent && child);
   /* create children list on demand */
   if (!parent->children)
-    parent->children = dlist_new((Compare) compare_genome_nodes);
+    parent->children = dlist_new((Compare) genome_node_cmp);
   dlist_add(parent->children, child); /* XXX: check for circles */
   /* update tree status of <parent> */
   genome_node_info_set_tree_status(&parent->info,
@@ -545,13 +545,13 @@ bool genome_node_overlaps_nodes_mark(GenomeNode *gn, Array *nodes,
 
 int genome_node_compare(GenomeNode **gn_a, GenomeNode **gn_b)
 {
-  return compare_genome_nodes(*gn_a, *gn_b);
+  return genome_node_cmp(*gn_a, *gn_b);
 }
 
 int genome_node_compare_with_data(GenomeNode **gn_a, GenomeNode **gn_b,
                                   void *unused)
 {
-  return compare_genome_nodes(*gn_a, *gn_b);
+  return genome_node_cmp(*gn_a, *gn_b);
 }
 
 int genome_node_compare_delta(GenomeNode **gn_a, GenomeNode **gn_b,
