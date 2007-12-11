@@ -1824,7 +1824,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                                   Verboseinfo *verboseinfo,
                                                   Error *err)
 {
-  Encodedsequence *encseq;
+  Encodedsequence *encseq = NULL;
   Positionaccesstype sat = Undefpositionaccesstype;
   bool haserr = false;
   int retcode;
@@ -1871,7 +1871,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     showallspecialpositions(encseq);
   }
 #endif
-  if (haserr)
+  if (haserr && encseq != NULL)
   {
     freeEncodedsequence(&encseq);
   }
