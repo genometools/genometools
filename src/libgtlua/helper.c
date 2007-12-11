@@ -73,13 +73,13 @@ void set_arg_in_lua_interpreter(lua_State *L, const char *argv_0,
   lua_setglobal(L, "arg");
 }
 
-int luagt_error(lua_State *L, Error *e)
+int luagt_error(lua_State *L, Error *err)
 {
-  assert(L && e);
-  assert(error_is_set(e));
+  assert(L && err);
+  assert(error_is_set(err));
   luaL_where(L, 1);
-  lua_pushstring(L, error_get(e));
-  error_delete(e);
+  lua_pushstring(L, error_get(err));
+  error_delete(err);
   lua_concat(L, 2);
   return lua_error(L);
 }
