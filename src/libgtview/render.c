@@ -142,8 +142,7 @@ static void render_line(Render *r, Line *line)
 
   blocks = line_get_blocks(line);
   /* begin drawing block */
-  for (i=0; i<array_size(blocks); i++)
-  {
+  for (i = 0; i < array_size(blocks); i++) {
     Dlistelem *delem;
     Block *block = *(Block**) array_get(blocks, i);
     Dlist *elems = block_get_elements(block);
@@ -154,8 +153,7 @@ static void render_line(Render *r, Line *line)
 
     /* draw block caption */
     draw_range = render_convert_coords(r, block_range);
-    if (block_caption_is_visible(block))
-    {
+    if (block_caption_is_visible(block)) {
       caption = str_get(block_get_caption(block));
       if (!caption) caption = "";
       graphics_draw_text(r->g,
@@ -320,11 +318,9 @@ static void mark_caption_collisions(Render *r, Line *line)
   assert(r && line);
 
   blocks = line_get_blocks(line);
-  for (i=0; i<array_size(blocks)-1; i++)
-  {
+  for (i = 0; i < array_size(blocks)-1; i++) {
     Block *this_block = *(Block**) array_get(blocks, i);
-    if (block_caption_is_visible(this_block))
-    {
+    if (block_caption_is_visible(this_block)) {
       Range block_range = block_get_range(this_block);
       const char *caption;
       Range cur_range;
@@ -334,8 +330,7 @@ static void mark_caption_collisions(Render *r, Line *line)
                             render_convert_point(r, block_range.start));
       cur_range.end   = cur_range.start
                           + graphics_get_text_width(r->g, caption);
-      for (j = i-1; j >=0;j--)
-      {
+      for (j = i-1; j >= 0; j--) {
         Block *left_block = *(Block**) array_get(blocks, j);
         Range chk_range = block_get_range(left_block);
         caption = str_get(block_get_caption(left_block));
@@ -346,8 +341,7 @@ static void mark_caption_collisions(Render *r, Line *line)
         if (range_overlap(chk_range, cur_range))
           block_set_caption_visibility(left_block, false);
       }
-      for (j = i+1; j < array_size(blocks);j++)
-      {
+      for (j = i+1; j < array_size(blocks); j++) {
         Block *right_block = *(Block**) array_get(blocks, j);
         Range chk_range = block_get_range(right_block);
         caption = str_get(block_get_caption(right_block));
@@ -383,8 +377,7 @@ static int render_track(void *key, void *value, void *data, Error *e)
   r->y += 15;
 
   /* render each line */
-  for (i=0; i<array_size(lines); i++)
-  {
+  for (i = 0; i < array_size(lines); i++) {
     Line* line = *(Line**) array_get(lines, i);
     mark_caption_collisions(r, line);
     render_line(r, line);

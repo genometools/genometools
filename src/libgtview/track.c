@@ -43,13 +43,10 @@ static Line* get_next_free_line(Track *track, Range r)
 
   assert(track);
 
-  for (i=0; i<array_size(track->lines); i++)
-  {
+  for (i = 0; i < array_size(track->lines); i++) {
     line = *(Line**) array_get(track->lines, i);
     if (!line_is_occupied(line, r))
-    {
       return line;
-    }
   }
   line = line_new();
   array_add(track->lines, line);
