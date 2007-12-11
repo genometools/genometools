@@ -63,7 +63,7 @@ Name "scorematrix2c"
 Keywords "gt_scripts"
 Test do
   run_test "#{$bin}gt #{$testdata}/gtscripts/scorematrix2c.lua #{$testdata}/BLOSUM62"
-  run "diff #{$last_stdout} #{$testdata}scorematrix.c"
+  run "diff #{$last_stdout} #{$testdata}blosum62.c"
 end
 
 if $arguments["libgtview"] then
