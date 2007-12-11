@@ -22,6 +22,7 @@
 #include "libgtcore/minmax.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/fa.h"
+#include "libgtcore/arraydef.h"
 #include "divmodmul.h"
 #include "intcode-def.h"
 #include "spacedef.h"
@@ -106,9 +107,13 @@
 
 typedef Seqpos Suffixptr;
 
+DECLAREARRAYSTRUCT(Largelcpvalue);
+
 typedef struct
 {
   Seqpos *spaceSeqpos;
+  Uchar *smalllcpvalues;
+  ArrayLargelcpvalue largelcpvalues;
   unsigned long nextfreeSeqpos, allocatedSeqpos;
   const Seqpos *suftabbase;
 } Lcpsubtab;
@@ -324,44 +329,22 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   }
 }
 
+#define NUMBEROFZEROS 1024
+
 static void outmany0lcpvalues(Seqpos many,Outlcpinfo *outlcpinfo)
 {
-  Seqpos i;
-  Uchar outvalue = 0;
+  Seqpos i, countout;
+  Uchar outvalues[NUMBEROFZEROS] = {0};
 
-  for (i=0; i<many; i++)
+  countout = many/NUMBEROFZEROS;
+  for (i=0; i<countout; i++)
   {
-    xfwrite(&outvalue,sizeof (Uchar),(size_t) 1,outlcpinfo->outfplcptab);
+    xfwrite(outvalues,sizeof (Uchar),(size_t) NUMBEROFZEROS,
+            outlcpinfo->outfplcptab);
   }
+  xfwrite(outvalues,sizeof (Uchar),(size_t) many % NUMBEROFZEROS,
+          outlcpinfo->outfplcptab);
   outlcpinfo->countoutputlcpvalues += many;
-}
-
-static void outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outlcpinfo *outlcpinfo)
-{
-  Uchar outvalue;
-
-  assert(outlcpinfo != NULL);
-  if (lcpvalue >= (Seqpos) UCHAR_MAX)
-  {
-    Largelcpvalue largelcpvalue;
-
-    outlcpinfo->numoflargelcpvalues++;
-    largelcpvalue.position = pos;
-    largelcpvalue.value = lcpvalue;
-    xfwrite(&largelcpvalue,sizeof (Largelcpvalue),(size_t) 1,
-            outlcpinfo->outfpllvtab);
-    outvalue = (Uchar) UCHAR_MAX;
-  } else
-  {
-    outvalue = (Uchar) lcpvalue;
-  }
-  assert(outlcpinfo->outfplcptab != NULL);
-  xfwrite(&outvalue,sizeof (Uchar),(size_t) 1,outlcpinfo->outfplcptab);
-  if (outlcpinfo->maxbranchdepth < lcpvalue)
-  {
-    outlcpinfo->maxbranchdepth = lcpvalue;
-  }
-  outlcpinfo->countoutputlcpvalues++;
 }
 
 typedef struct
@@ -444,6 +427,10 @@ static unsigned long determinemaxbucketsize(const Seqpos *leftborder,
     {
       maxbucketsize = bbound.nonspecialsinbucket;
     }
+    if (bbound.specialsinbucket > maxbucketsize)
+    {
+      maxbucketsize = bbound.specialsinbucket;
+    }
   }
   return maxbucketsize;
 }
@@ -453,11 +440,37 @@ static void multilcpvalue(Outlcpinfo *outlcpinfo,
                           Seqpos posoffset)
 {
   unsigned long i;
+  Seqpos lcpvalue;
+  Largelcpvalue *largelcpvalueptr;
 
+  outlcpinfo->lcpsubtab.largelcpvalues.nextfreeLargelcpvalue = 0;
   for (i=0; i<bucketsize; i++)
   {
-    outlcpvalue(outlcpinfo->lcpsubtab.spaceSeqpos[i],posoffset+i,outlcpinfo);
+    lcpvalue = outlcpinfo->lcpsubtab.spaceSeqpos[i];
+    if (outlcpinfo->maxbranchdepth < lcpvalue)
+    {
+      outlcpinfo->maxbranchdepth = lcpvalue;
+    }
+    if (lcpvalue >= (Seqpos) UCHAR_MAX)
+    {
+      outlcpinfo->numoflargelcpvalues++;
+      GETNEXTFREEINARRAY(largelcpvalueptr,&outlcpinfo->lcpsubtab.largelcpvalues,
+                         Largelcpvalue,32);
+      largelcpvalueptr->position = posoffset+i;
+      largelcpvalueptr->value = lcpvalue;
+      outlcpinfo->lcpsubtab.smalllcpvalues[i] = (Uchar) UCHAR_MAX;
+    } else
+    {
+      outlcpinfo->lcpsubtab.smalllcpvalues[i] = (Uchar) lcpvalue;
+    }
   }
+  outlcpinfo->countoutputlcpvalues += bucketsize;
+  xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
+          sizeof (Uchar),(size_t) bucketsize,outlcpinfo->outfplcptab);
+  xfwrite(outlcpinfo->lcpsubtab.largelcpvalues.spaceLargelcpvalue,
+          sizeof (Largelcpvalue),
+          (size_t) outlcpinfo->lcpsubtab.largelcpvalues.nextfreeLargelcpvalue,
+          outlcpinfo->outfpllvtab);
 }
 
 static Seqpos computelocallcpvalue(const const Encodedsequence *encseq,
@@ -513,10 +526,17 @@ static void bucketends(const Encodedsequence *encseq,
                                     specialsection[i],
                                     esr1,
                                     esr2);
+    if (outlcpinfo->maxbranchdepth < lcpvalue)
+    {
+      outlcpinfo->maxbranchdepth = lcpvalue;
+    }
     assert(lcpvalue < (Seqpos) UCHAR_MAX);
     assert(lcpvalue > 0);
-    outlcpvalue(lcpvalue,0,outlcpinfo);
+    outlcpinfo->lcpsubtab.smalllcpvalues[i] = (Uchar) lcpvalue;
   }
+  outlcpinfo->countoutputlcpvalues += specialsinbucket;
+  xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
+          sizeof (Uchar),(size_t) specialsinbucket,outlcpinfo->outfplcptab);
 }
 
 Outlcpinfo *newlcpoutfileinfo(const Str *indexname,
@@ -555,6 +575,8 @@ Outlcpinfo *newlcpoutfileinfo(const Str *indexname,
   outlcpinfo->countoutputlcpvalues = 0;
   outlcpinfo->totallength = totallength;
   INITARRAY(&outlcpinfo->lcpsubtab,Seqpos);
+  INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
+  outlcpinfo->lcpsubtab.smalllcpvalues = NULL;
   outlcpinfo->tw = newTurningwheel(prefixlength,numofchars);
   if (haserr)
   {
@@ -577,6 +599,8 @@ void freeoutlcptab(Outlcpinfo **outlcpinfo)
   fa_fclose((*outlcpinfo)->outfpllvtab);
   FREEARRAY(&(*outlcpinfo)->lcpsubtab,Seqpos);
   freeTurningwheel(&(*outlcpinfo)->tw);
+  FREESPACE((*outlcpinfo)->lcpsubtab.smalllcpvalues);
+  FREEARRAY(&(*outlcpinfo)->lcpsubtab.largelcpvalues,Largelcpvalue);
   FREESPACE(*outlcpinfo);
 }
 
@@ -633,6 +657,9 @@ void sortallbuckets(Seqpos *suftabptr,
     lcpsubtab->allocatedSeqpos = maxbucketsize;
     ALLOCASSIGNSPACE(lcpsubtab->spaceSeqpos,
                      lcpsubtab->spaceSeqpos,Seqpos,
+                     lcpsubtab->allocatedSeqpos);
+    ALLOCASSIGNSPACE(lcpsubtab->smalllcpvalues,
+                     lcpsubtab->smalllcpvalues,Uchar,
                      lcpsubtab->allocatedSeqpos);
   }
   INITARRAY(&mkvauxstack,MKVstack);
