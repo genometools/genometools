@@ -97,6 +97,25 @@ static int feature_index_lua_get_first_seqid(lua_State *L)
   return 1;
 }
 
+static int feature_index_lua_get_seqids(lua_State *L)
+{
+  FeatureIndex **feature_index;
+  StrArray *seqids;
+  unsigned long i;
+  feature_index = check_feature_index(L, 1);
+  seqids = feature_index_get_seqids(*feature_index);
+  assert(seqids);
+  /* push table containing sequence ids onto the stack */
+  lua_newtable(L);
+  for (i = 0; i < strarray_size(seqids); i++) {
+    lua_pushinteger(L, i+1); /* in Lua we index from 1 on */
+    lua_pushstring(L, strarray_get(seqids, i));
+    lua_rawset(L, -3);
+  }
+  strarray_delete(seqids);
+  return 1;
+}
+
 static int feature_index_lua_get_range_for_seqid(lua_State *L)
 {
   FeatureIndex **feature_index;
@@ -125,6 +144,7 @@ static const struct luaL_Reg feature_index_lib_m [] = {
   { "get_features_for_seqid", feature_index_lua_get_features_for_seqid },
   { "get_features_for_range", feature_index_lua_get_features_for_range },
   { "get_first_seqid", feature_index_lua_get_first_seqid },
+  { "get_seqids", feature_index_lua_get_seqids },
   { "get_range_for_seqid", feature_index_lua_get_range_for_seqid },
   { NULL, NULL }
 };

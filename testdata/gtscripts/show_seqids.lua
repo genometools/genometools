@@ -1,4 +1,4 @@
-/*
+--[[
   Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
@@ -13,27 +13,33 @@
   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-*/
+]]
 
-#ifndef FEATURE_INDEX_LUA_H
-#define FEATURE_INDEX_LUA_H
+-- testing some Lua bindings for FeatureIndex
 
-#include "lua.h"
+function usage()
+io.stderr:write(string.format("Usage: %s GFF3_file\n", arg[0]))
+  io.stderr:write("Show sequence ids contained in GFF3 annotation file.\n")
+  os.exit(1)
+end
 
-/* exports the FeatureIndex class to Lua:
 
-   feature_index = gt.feature_index_new()
-   -- returns the genome features (of type genome_node) in a table
-   table         = feature_index:get_features_for_seqid(string)
-   table         = feature_index:get_features_for_range(seqid, range)
-   seqid         = feature_index:get_first_seqid()
-   table         = feature_index:get_seqids()
-   range         = feature_index:get_range_for_seqid(seqid)
-*/
-int luaopen_feature_index(lua_State*);
+if #arg == 1 then
+  gff3file = arg[1]
+else
+  usage()
+end
 
-#define FEATURE_INDEX_METATABLE  "GenomeTools.feature_index"
-#define check_feature_index(L, POS) \
-          (FeatureIndex**) luaL_checkudata(L, POS, FEATURE_INDEX_METATABLE)
+in_stream = gt.gff3_in_stream_new_sorted(gff3file)
+feature_index = gt.feature_index_new()
+feature_stream = gt.feature_stream_new(in_stream, feature_index)
+gn = feature_stream:next_tree()
+-- fill feature index
+while (gn) do
+  gn = feature_stream:next_tree()
+end
 
-#endif
+seqids = feature_index:get_seqids()
+for _, v in ipairs(seqids) do
+  print(v)
+end
