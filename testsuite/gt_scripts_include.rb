@@ -59,6 +59,13 @@ Test do
   run_test "#{$bin}gt #{$testdata}gtscripts/memleak.lua #{$testdata}standard_gene_as_tree.gff3"
 end
 
+Name "scorematrix2c"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}/gtscripts/scorematrix2c.lua #{$testdata}/BLOSUM62"
+  run "diff #{$last_stdout} #{$testdata}scorematrix.c"
+end
+
 if $arguments["libgtview"] then
   Name "feature_index and feature_stream bindings"
   Keywords "gt_scripts"
