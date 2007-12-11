@@ -398,7 +398,8 @@ static void diagram_build(Diagram *diagram, Array *features)
     traverse_genome_nodes(current_root, &genome_node_children);
   }
   /* collect blocks from nodeinfo structures and create the tracks */
-  had_err = hashtable_foreach(diagram->nodeinfo, collect_blocks, diagram, NULL);
+  had_err = hashtable_foreach_ordered(diagram->nodeinfo, collect_blocks,
+                                      diagram, (Compare) genome_node_cmp, NULL);
   assert(!had_err); /* collect_blocks() is sane */
 }
 
