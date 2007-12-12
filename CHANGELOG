@@ -1,3 +1,8 @@
+changes in version 1.0.8 (2007-12-12):
+
+- the GenomeTools Ruby bindings (see gtruby/README) have been added
+
+
 changes in version 1.0.7 (2007-11-27):
 
 - `gt view` has new option -addintrons
