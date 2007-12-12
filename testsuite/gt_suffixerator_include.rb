@@ -96,6 +96,7 @@ runsfxfail "-dna -db #{$testdata}sw100K1.fna"
 runsfxfail "-protein -dir cpl -db #{$testdata}sw100K1.fna"
 runsfxfail "-dna -db #{$testdata}Random.fna RandomN.fna"
 runsfxfail "-dna -suf -pl 10 -db #{$testdata}Random.fna"
+runsfxfail "-dna -tis -sat plain -db #{$testdata}TTT-small.fna"
 
 Name "gt suffixerator failure"
 Keywords "gt_suffixerator"
