@@ -46,4 +46,3 @@ nucleotide sensitivity (mRNA level): 100.00% (TP=15373/(TP=15373 + FN=0))
 nucleotide specificity (mRNA level): 100.00% (TP=15373/(TP=15373 + FP=0))
 nucleotide sensitivity (CDS level): 100.00% (TP=0/(TP=0 + FN=0))
 nucleotide specificity (CDS level): 100.00% (TP=0/(TP=0 + FP=0))
-seqid 'ENm001'

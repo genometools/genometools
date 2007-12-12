@@ -92,6 +92,7 @@ if $arguments["libgtview"] then
   Keywords "gt_scripts"
   Test do
     run_test "#{$bin}gt #{$testdata}../gtscripts/evalviz.lua png_files #{$testdata}/gt_eval_test_1.in #{$testdata}/gt_eval_test_1.in"
+    run "grep -v seqid #{$last_stdout}"
     run "diff #{$last_stdout} #{$testdata}/gt_eval_test_1.out"
   end
 
