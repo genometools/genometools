@@ -38,7 +38,8 @@ while (feature) do
   feature = genome_stream.next_tree()
 end
 
-features = feature_index.get_features_for_seqid("ctg123");
+seqid = feature_index.get_first_seqid()
+features = feature_index.get_features_for_seqid(seqid)
 raise if not features
 gff3_visitor = GT::GFF3Visitor.new()
 
