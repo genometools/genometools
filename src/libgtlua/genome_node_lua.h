@@ -31,6 +31,7 @@
                  genome_node:mark()
    boolean     = genome_node:is_marked()
    boolean     = genome_node:contains_marked()
+                 genome_feature:output_leading()
 */
 int luaopen_genome_node(lua_State*);
 

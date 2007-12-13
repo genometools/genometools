@@ -17,6 +17,7 @@
 
 #include "lauxlib.h"
 #include "libgtext/genome_node.h"
+#include "libgtext/gff3_output.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/genome_visitor_lua.h"
 #include "libgtlua/helper.h"
@@ -110,6 +111,18 @@ static int genome_node_lua_contains_marked(lua_State *L)
   return 1;
 }
 
+static int genome_feature_lua_output_leading(lua_State *L)
+{
+  GenomeNode **gn;
+  GenomeFeature *gf;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a genome feature */
+  gf = genome_node_cast(genome_feature_class(), *gn);
+  luaL_argcheck(L, gf, 1, "not a genome feature");
+  gff3_output_leading(gf, NULL);
+  return 0;
+}
+
 static int genome_node_lua_delete(lua_State *L)
 {
   GenomeNode **gn;
@@ -131,6 +144,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "mark", genome_node_lua_mark },
   { "is_marked", genome_node_lua_is_marked },
   { "contains_marked", genome_node_lua_contains_marked },
+  { "output_leading", genome_feature_lua_output_leading },
   { NULL, NULL }
 };
 
