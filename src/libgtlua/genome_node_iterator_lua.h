@@ -15,30 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOME_NODE_LUA_H
-#define GENOME_NODE_LUA_H
+#ifndef GENOME_NODE_ITERATOR_LUA_H
+#define GENOME_NODE_ITERATOR_LUA_H
 
 #include "lua.h"
-#include "libgtext/genome_node.h"
 
-/* exports the GenomeNode interface and its implementors to Lua:
+/* exports the GenomeNodeIterator class to Lua:
 
-   genome_node = gt.genome_feature_new(type, range, strand)
-   string      = genome_node:get_filename()
-   range       = genome_node:get_range()
-                 genome_node:accept(genome_visitor)
-                 parent_node:is_part_of_genome_node(child_node)
-                 genome_node:mark()
-   boolean     = genome_node:is_marked()
-   boolean     = genome_node:contains_marked()
+              genome_node_iterator = gt.genome_node_iterator_new(genome_node)
+  genome_node genome_node_iterator:next()
 */
-int luaopen_genome_node(lua_State*);
-
-/* push a GenomeNode to Lua, takes ownership! */
-void genome_node_lua_push(lua_State*, GenomeNode*);
-
-#define GENOME_NODE_METATABLE  "GenomeTools.genome_node"
-#define check_genome_node(L, POS) \
-                (GenomeNode**) luaL_checkudata(L, POS, GENOME_NODE_METATABLE)
+int luaopen_genome_node_iterator(lua_State*);
 
 #endif

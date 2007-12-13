@@ -22,9 +22,6 @@
 #include "libgtlua/helper.h"
 #include "libgtlua/range_lua.h"
 
-#define check_genome_node(L, POS) \
-              (GenomeNode**) luaL_checkudata(L, POS, GENOME_NODE_METATABLE)
-
 static int genome_feature_lua_new(lua_State *L)
 {
   GenomeNode **gf;

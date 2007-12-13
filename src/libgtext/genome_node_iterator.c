@@ -20,6 +20,7 @@
 #include "libgtext/genome_node_rep.h"
 
 struct GenomeNodeIterator {
+  GenomeNode *gn;
   Array *node_stack;
 };
 
@@ -28,8 +29,9 @@ GenomeNodeIterator* genome_node_iterator_new(GenomeNode *gn)
   GenomeNodeIterator *gni;
   assert(gn);
   gni = ma_malloc(sizeof *gni);
+  gni->gn = genome_node_rec_ref(gn);
   gni->node_stack = array_new(sizeof (GenomeNode*));
-  array_add(gni->node_stack, gn);
+  array_add(gni->node_stack, gni->gn);
   return gni;
 }
 
@@ -74,6 +76,7 @@ int genome_node_iterator_example(void)
 void genome_node_iterator_delete(GenomeNodeIterator *gni)
 {
   if (!gni) return;
+  genome_node_rec_delete(gni->gn);
   array_delete(gni->node_stack);
   ma_free(gni);
 }

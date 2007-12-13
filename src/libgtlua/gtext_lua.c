@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "libgtlua/genome_node_lua.h"
+#include "libgtlua/genome_node_iterator_lua.h"
 #include "libgtlua/genome_stream_lua.h"
 #include "libgtlua/genome_visitor_lua.h"
 #include "libgtlua/gtext_lua.h"
@@ -26,6 +27,7 @@ int luaopen_gtext(lua_State *L)
 {
   assert(L);
   luaopen_genome_node(L);
+  luaopen_genome_node_iterator(L);
   luaopen_genome_stream(L);
   luaopen_genome_visitor(L);
   luaopen_stream_evaluator(L);
