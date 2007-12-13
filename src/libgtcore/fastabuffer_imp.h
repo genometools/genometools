@@ -20,8 +20,8 @@
 
 #include <sys/types.h>
 
-#define OUTPUTFILEBUFFERSIZE 4066
-#define INPUTFILEBUFFERSIZE  4066
+#define OUTPUTFILEBUFFERSIZE 4096
+#define INPUTFILEBUFFERSIZE  4096
 
 struct FastaBuffer
 {
