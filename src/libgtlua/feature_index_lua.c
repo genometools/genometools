@@ -59,6 +59,7 @@ static int feature_index_lua_get_features_for_seqid(lua_State *L)
   seqid = luaL_checkstring(L, 2);
   features = feature_index_get_features_for_seqid(*feature_index, seqid);
   push_features_as_table(L, features);
+  array_delete(features);
   return 1;
 }
 

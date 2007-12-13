@@ -114,7 +114,7 @@ Array* feature_index_get_features_for_seqid(FeatureIndex *fi, const char *seqid)
   RegionInfo *res;
   assert(fi);
   res = (RegionInfo*) hashtable_get(fi->regions, seqid);
-  return (res ? res->features : NULL);
+  return (res ? array_ref(res->features) : NULL);
 }
 
 int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
@@ -143,6 +143,7 @@ int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
       array_add(results, gn);
   }
   genome_node_delete(key);
+  array_delete(base);
   return 0;
 }
 
@@ -210,6 +211,7 @@ int feature_index_unit_test(Error *err)
   Str *seqid1, *seqid2;
   StrArray *seqids = NULL;
   SequenceRegion *sr1, *sr2;
+  Array *features = NULL;
   int had_err = 0;
   error_check(err);
 
@@ -271,24 +273,38 @@ int feature_index_unit_test(Error *err)
   ensure(had_err, feature_index_has_seqid(fi, "test2"));
 
   /* tests if we get a empty data structure for every added sequence region*/
-  ensure(had_err, feature_index_get_features_for_seqid(fi, "test1"));
-  ensure(had_err, feature_index_get_features_for_seqid(fi, "test2"));
-  ensure(had_err,
-         array_size(feature_index_get_features_for_seqid(fi, "test1")) == 0);
-  ensure(had_err,
-         array_size(feature_index_get_features_for_seqid(fi, "test2")) == 0);
+  if (!had_err)
+    features = feature_index_get_features_for_seqid(fi, "test1");
+  ensure(had_err, features);
+  ensure(had_err, array_size(features) == 0);
+  array_delete(features);
+  features = NULL;
+
+  if (!had_err)
+    features = feature_index_get_features_for_seqid(fi, "test2");
+  ensure(had_err, features);
+  ensure(had_err, array_size(features) == 0);
+  array_delete(features);
+  features = NULL;
 
   /* add features to every sequence region and test if the according
      datastructures are not empty anymore. As we have added one genome_feature
      to every sequence region the size has to be one. */
-  feature_index_add_genome_feature(fi, (GenomeFeature*) gn1);
-  ensure(had_err,
-         array_size(feature_index_get_features_for_seqid(fi, "test1")) == 1UL);
+  if (!had_err) {
+    feature_index_add_genome_feature(fi, (GenomeFeature*) gn1);
+    features = feature_index_get_features_for_seqid(fi, "test1");
+  }
+  ensure(had_err, array_size(features) == 1UL);
+  array_delete(features);
+  features = NULL;
 
-  feature_index_add_genome_feature(fi, (GenomeFeature*) gn2);
-
-  ensure(had_err,
-         array_size(feature_index_get_features_for_seqid(fi, "test2")) == 1UL);
+  if (!had_err) {
+    feature_index_add_genome_feature(fi, (GenomeFeature*) gn2);
+    features = feature_index_get_features_for_seqid(fi, "test2");
+  }
+  ensure(had_err, array_size(features) == 1UL);
+  array_delete(features);
+  features = NULL;
 
   /* test feature_index_get_first_seqid() */
   ensure(had_err, feature_index_get_first_seqid(fi));
@@ -304,7 +320,10 @@ int feature_index_unit_test(Error *err)
   check_range = feature_index_get_range_for_seqid(fi, "test1");
   ensure(had_err, check_range.start == 100UL && check_range.end == 1000UL);
 
-  ensure(had_err, feature_index_get_features_for_seqid(fi, "test1"));
+  if (!had_err)
+    features = feature_index_get_features_for_seqid(fi, "test1");
+  ensure(had_err, features);
+  array_delete(features);
   ensure(had_err, feature_index_get_features_for_seqid(fi, "noexist") == NULL);
 
   /* delete all generated objects */
