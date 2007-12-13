@@ -44,6 +44,20 @@ Array* array_new(size_t size_of_elem)
   return a;
 }
 
+Array* array_clone(const Array *a)
+{
+  Array *a_copy;
+  assert(a);
+  a_copy = ma_malloc(sizeof (Array));
+  /* XXX: overflow checks -> safemult(next_free, size_of_elem) */
+  a_copy->space = ma_malloc(a->next_free * a->size_of_elem);
+  memcpy(a_copy->space, a->space, a->next_free * a->size_of_elem);
+  a_copy->next_free = a_copy->allocated = a->next_free;
+  a_copy->size_of_elem = a->size_of_elem;
+  a_copy->reference_count = 0;
+  return a_copy;
+}
+
 Array* array_ref(Array *a)
 {
   if (!a) return NULL;
@@ -153,20 +167,6 @@ void array_reset(Array *a)
 {
   assert(a);
   a->next_free = 0;
-}
-
-Array* array_clone(const Array *a)
-{
-  Array *a_copy;
-  assert(a);
-  a_copy = ma_malloc(sizeof (Array));
-  /* XXX: overflow checks -> safemult(next_free, size_of_elem) */
-  a_copy->space = ma_malloc(a->next_free * a->size_of_elem);
-  memcpy(a_copy->space, a->space, a->next_free * a->size_of_elem);
-  a_copy->next_free = a_copy->allocated = a->next_free;
-  a_copy->size_of_elem = a->size_of_elem;
-  a_copy->reference_count = 0;
-  return a_copy;
 }
 
 void array_sort(Array *a, int(*compar)(const void*, const void*))
