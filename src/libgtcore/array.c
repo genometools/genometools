@@ -33,6 +33,7 @@ struct Array {
   unsigned long next_free;
   size_t allocated,
          size_of_elem;
+  unsigned int reference_count;
 };
 
 Array* array_new(size_t size_of_elem)
@@ -40,6 +41,13 @@ Array* array_new(size_t size_of_elem)
   Array *a = ma_calloc(1, sizeof (Array));
   assert(size_of_elem);
   a->size_of_elem = size_of_elem;
+  return a;
+}
+
+Array* array_ref(Array *a)
+{
+  if (!a) return NULL;
+  a->reference_count++;
   return a;
 }
 
@@ -157,6 +165,7 @@ Array* array_clone(const Array *a)
   memcpy(a_copy->space, a->space, a->next_free * a->size_of_elem);
   a_copy->next_free = a_copy->allocated = a->next_free;
   a_copy->size_of_elem = a->size_of_elem;
+  a_copy->reference_count = 0;
   return a_copy;
 }
 
@@ -226,7 +235,7 @@ int array_example(Error *err)
 
 int array_unit_test(Error *err)
 {
-  Array *char_array, *int_array, *a = NULL;
+  Array *char_array, *int_array, *a = NULL, *aref;
   char cc, *char_array_test;
   int ci, *int_array_test;
   unsigned long i, j, size;
@@ -292,7 +301,7 @@ int array_unit_test(Error *err)
     }
   }
 
-  /* test array_reverse(), array_iterate(), and array_rem() */
+  /* test array_reverse(), array_iterate(), array_rem(), and array_ref() */
   if (!had_err) {
     a = array_new(sizeof (Range));
     for (i = 0; i < 24; i++) {
@@ -306,6 +315,8 @@ int array_unit_test(Error *err)
       range.end   = i + 101;
       ensure(had_err, !range_compare(range, *(Range*) array_get(a, 23 - i)));
     }
+    aref = array_ref(a);
+    array_delete(aref);
   }
   if (!had_err) {
     array_reverse(a);
@@ -343,6 +354,10 @@ int array_unit_test(Error *err)
 void array_delete(Array *a)
 {
   if (!a) return;
+  if (a->reference_count) {
+    a->reference_count--;
+    return;
+  }
   ma_free(a->space);
   ma_free(a);
 }
