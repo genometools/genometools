@@ -18,7 +18,7 @@ if $arguments["libgtview"] then
   Name "gtruby: feature_index and feature_stream bindings"
   Keywords "gt_ruby"
   Test do
-    run_ruby "#{$testdata}/gtruby/feature_stuff.rb #{$testdata}"
+    run_ruby "#{$testdata}/gtruby/feature_stuff.rb #{$testdata}gff3_file_1_short.txt"
     run "env LC_ALL=C sort #{$last_stdout}"
     run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{$last_stdout} -"
   end

@@ -20,16 +20,16 @@
 require 'gtruby'
 
 if ARGV.size != 1 then
-  STDERR.puts "Usage: #{$0} testdata_dir"
-  STDERR.puts "Test the FeatureIndex and FeatureStream bindings."
+  STDERR.puts "Usage: #{$0} GFF3_file"
+  STDERR.puts "Test the FeatureIndex and FeatureStream bindings on GFF3 file."
   exit(1)
 end
 
 
-testdata = ARGV[0]
+gff3file = ARGV[0]
 
 # set up the feature stream
-genome_stream = GT::GFF3InStream.new(testdata+"/gff3_file_1_short.txt")
+genome_stream = GT::GFF3InStream.new(gff3file)
 feature_index = GT::FeatureIndex.new()
 genome_stream = GT::FeatureStream.new(genome_stream, feature_index)
 
