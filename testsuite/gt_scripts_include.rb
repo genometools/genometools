@@ -84,7 +84,7 @@ if $arguments["libgtview"] then
   Name "show_seqids"
   Keywords "gt_scripts"
   Test do
-    run_test("#{$bin}gt #{$testdata}/gtscripts/show_seqids.lua #{$testdata}encode_known_genes_Mar07.gff3", :maxtime => 50)
+    run_test("#{$bin}gt #{$testdata}/gtscripts/show_seqids.lua #{$testdata}encode_known_genes_Mar07.gff3", :maxtime => 100)
     run "diff #{$last_stdout} #{$testdata}encode_known_genes_Mar07.seqids"
   end
 
