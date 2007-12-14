@@ -22,6 +22,7 @@ require 'gt'
 
 -- all GenomeTools modules which should be loaded
 local gtmodules = { "feature_index",
+                    "helper",
                     "genome_features" }
 
 -- everything that will be exported to the gt table
