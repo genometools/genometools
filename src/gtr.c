@@ -16,79 +16,27 @@
 */
 
 #include "gtr.h"
+#include "gtt.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
 #include "lfs.h"
-#include "libgtcore/array.h"
-#include "libgtcore/array2dim.h"
-#include "libgtcore/bitpackarray.h"
-#include "libgtcore/bitpackstring.h"
-#include "libgtcore/bittab.h"
-#include "libgtcore/bsearch.h"
-#include "libgtcore/countingsort.h"
 #include "libgtcore/cstr.h"
-#include "libgtcore/discdistri.h"
-#include "libgtcore/dlist.h"
-#include "libgtcore/dynbittab.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/fileutils.h"
-#include "libgtcore/getbasename.h"
 #include "libgtcore/gtdatapath.h"
-#include "libgtcore/grep.h"
-#include "libgtcore/hashtable.h"
 #include "libgtcore/log.h"
-#include "libgtcore/range.h"
-#include "libgtcore/safearith.h"
-#include "libgtcore/splitter.h"
-#include "libgtcore/tokenizer.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
-#include "libgtext/alignment.h"
-#include "libgtext/evaluator.h"
-#include "libgtext/genome_node_iterator.h"
 #include "libgtext/gtdatahelp.h"
-#include "libgtext/hmm.h"
-#include "libgtext/splicedseq.h"
-#include "libgtext/toolbox.h"
 #include "libgtlua/gt_lua.h"
 #include "libgtlua/helper.h"
 #include "libgtlua/interactive.h"
-#include "tools/gt_bioseq.h"
-#include "tools/gt_cds.h"
-#include "tools/gt_chseqids.h"
-#include "tools/gt_clean.h"
-#include "tools/gt_csa.h"
-#include "tools/gt_dev.h"
-#include "tools/gt_eval.h"
-#include "tools/gt_exercise.h"
-#include "tools/gt_extractfeat.h"
-#include "tools/gt_extractseq.h"
-#include "tools/gt_filter.h"
-#include "tools/gt_gff3.h"
-#include "tools/gt_gff3_to_gtf.h"
-#include "tools/gt_gtf_to_gff3.h"
-#include "tools/gt_ltrharvest.h"
-#include "tools/gt_merge.h"
-#include "tools/gt_mkfmindex.h"
-#include "tools/gt_mmapandread.h"
-#include "tools/gt_mutate.h"
-#include "tools/gt_splitfasta.h"
-#include "tools/gt_splicesiteinfo.h"
-#include "tools/gt_stat.h"
-#include "tools/gt_suffixerator.h"
-#include "tools/gt_packedindex.h"
-#include "tools/gt_uniq.h"
-#include "tools/gt_uniquesub.h"
 
 #ifdef LIBGTVIEW
-#include "libgtview/block.h"
 #include "libgtview/config.h"
-#include "libgtview/diagram.h"
-#include "libgtview/feature_index.h"
-#include "libgtview/gt_view.h"
-#include "libgtview/track.h"
 #endif
 
 struct GTR {
@@ -188,79 +136,10 @@ void gtr_register_components(GTR *gtr)
   assert(gtr);
   /* add tools */
   toolbox_delete(gtr->tools);
-  gtr->tools = toolbox_new();
-  toolbox_add(gtr->tools, "bioseq", gt_bioseq);
-  toolbox_add(gtr->tools, "cds", gt_cds);
-  toolbox_add(gtr->tools, "chseqids", gt_chseqids);
-  toolbox_add(gtr->tools, "clean", gt_clean);
-  toolbox_add(gtr->tools, "csa", gt_csa);
-  toolbox_add(gtr->tools, "dev", gt_dev);
-  toolbox_add(gtr->tools, "eval", gt_eval);
-  toolbox_add(gtr->tools, "exercise", gt_exercise);
-  toolbox_add(gtr->tools, "extractfeat", gt_extractfeat);
-  toolbox_add(gtr->tools, "extractseq", gt_extractseq);
-  toolbox_add(gtr->tools, "filter", gt_filter);
-  toolbox_add(gtr->tools, "gff3", gt_gff3);
-  toolbox_add(gtr->tools, "gff3_to_gtf", gt_gff3_to_gtf);
-  toolbox_add(gtr->tools, "gtf_to_gff3", gt_gtf_to_gff3);
-  toolbox_add(gtr->tools, "ltrharvest", gt_ltrharvest);
-  toolbox_add(gtr->tools, "merge", gt_merge);
-  toolbox_add(gtr->tools, "mmapandread", gt_mmapandread);
-  toolbox_add(gtr->tools, "mutate", gt_mutate);
-  toolbox_add(gtr->tools, "splitfasta", gt_splitfasta);
-  toolbox_add(gtr->tools, "splicesiteinfo", gt_splicesiteinfo);
-  toolbox_add(gtr->tools, "stat", gt_stat);
-  toolbox_add(gtr->tools, "suffixerator", gt_suffixerator);
-  toolbox_add(gtr->tools, "packedindex", gt_packedindex);
-  toolbox_add(gtr->tools, "mkfmindex", gt_mkfmindex);
-  toolbox_add(gtr->tools, "uniq", gt_uniq);
-  toolbox_add(gtr->tools, "uniquesub", gt_uniquesub);
-#ifdef LIBGTVIEW
-  toolbox_add(gtr->tools, "view", gt_view);
-#endif
+  gtr->tools = gtt_tools();
   /* add unit tests */
   hashtable_delete(gtr->unit_tests);
-  gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL);
-  hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test);
-  hashtable_add(gtr->unit_tests, "array class", array_unit_test);
-  hashtable_add(gtr->unit_tests, "array example", array_example);
-  hashtable_add(gtr->unit_tests, "array2dim example", array2dim_example);
-  hashtable_add(gtr->unit_tests, "bit pack array class",
-                bitPackArray_unit_test);
-  hashtable_add(gtr->unit_tests, "bit pack string module",
-                bitPackString_unit_test);
-  hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test);
-  hashtable_add(gtr->unit_tests, "bittab example", bittab_example);
-  hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test);
-  hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test);
-  hashtable_add(gtr->unit_tests, "disc distri class", discdistri_unit_test);
-  hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test);
-  hashtable_add(gtr->unit_tests, "dlist example", dlist_example);
-  hashtable_add(gtr->unit_tests, "dynamic bittab class", dynbittab_unit_test);
-  hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test);
-  hashtable_add(gtr->unit_tests, "genome node iterator example",
-                genome_node_iterator_example);
-  hashtable_add(gtr->unit_tests, "getbasename module", getbasename_unit_test);
-  hashtable_add(gtr->unit_tests, "grep module", grep_unit_test);
-  hashtable_add(gtr->unit_tests, "hashtable class", hashtable_unit_test);
-  hashtable_add(gtr->unit_tests, "hmm class", hmm_unit_test);
-  hashtable_add(gtr->unit_tests, "range class", range_unit_test);
-  hashtable_add(gtr->unit_tests, "safearith module", safearith_unit_test);
-  hashtable_add(gtr->unit_tests, "safearith example", safearith_example);
-  hashtable_add(gtr->unit_tests, "splicedseq class", splicedseq_unit_test);
-  hashtable_add(gtr->unit_tests, "splitter class", splitter_unit_test);
-  hashtable_add(gtr->unit_tests, "string class", str_unit_test);
-  hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test);
-#ifdef LIBGTVIEW
-  hashtable_add(gtr->unit_tests, "block class", block_unit_test);
-  hashtable_add(gtr->unit_tests, "config class", config_unit_test);
-  hashtable_add(gtr->unit_tests, "diagram class", diagram_unit_test);
-  hashtable_add(gtr->unit_tests, "element class", element_unit_test);
-  hashtable_add(gtr->unit_tests, "feature index class",
-                feature_index_unit_test);
-  hashtable_add(gtr->unit_tests, "line class", line_unit_test);
-  hashtable_add(gtr->unit_tests, "track class", track_unit_test);
-#endif
+  gtr->unit_tests = gtt_unit_tests();
 }
 
 int run_test(void *key, void *value, void *data, Error *e)

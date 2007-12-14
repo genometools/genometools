@@ -77,7 +77,7 @@ EXP_LDLIBS+=-lz -lbz2
 OVERRIDELIBS:=lib/libbz2.a
 
 # compiled executables
-GTMAIN_SRC:=src/gt.c src/gtr.c
+GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c
 GTMAIN_OBJ:=$(GTMAIN_SRC:%.c=obj/%.o)
 GTMAIN_DEP:=$(GTMAIN_SRC:%.c=obj/%.d)
 
