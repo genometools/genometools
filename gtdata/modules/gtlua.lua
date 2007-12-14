@@ -15,6 +15,56 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ]]
 
-module(..., package.seeall)
+local modname = ...
+module(modname, package.seeall)
 
 require 'gt'
+
+-- all GenomeTools modules which should be loaded
+local gtmodules = { "genome_features" }
+
+-- everything that will be exported to the gt table
+local gtexport = {}
+
+local function load_module(mod)
+  assert(mod)
+  local t = require(mod)
+  for k, v in pairs(t) do
+    if k ~= "_M" and k ~= "_NAME" and k~= "_PACKAGE" then
+      assert(not gtexport[k]) -- symbol is undefined
+      gtexport[k] = v -- record symbol for export
+    end
+  end
+end
+
+local function load_modules(modules)
+  assert(modules)
+  -- load all modules
+  for _, mod in ipairs(modules) do
+    load_module(mod)
+  end
+  -- export all symbols
+  for k, v in pairs(gtexport) do
+    assert(not gt[k]) -- symbol is undefined
+    gt[k] = v -- export symbol
+  end
+end
+
+local function reload()
+  -- remove all exported symbols from gt table
+  for k, _ in pairs(gtexport) do
+    gt[k] = nil
+  end
+  -- mark all packages as unloaded
+  for _, mod in ipairs(gtmodules) do
+    package.loaded[mod] = nil
+  end
+  package.loaded[modname] = nil
+  -- reload
+  require(modname)
+end
+
+-- register reload() function in gt table
+gt.reload = reload
+
+load_modules(gtmodules)

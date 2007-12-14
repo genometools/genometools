@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ]]
 
-require 'gt'
+require 'gtlua'
 require 'lfs'
 
 function usage()
@@ -99,21 +99,12 @@ function get_coverage(seqid, maxdist)
   return coverage
 end
 
-function contains_marked_feature(features)
-  for i, feature in ipairs(features) do
-    if feature:contains_marked() then
-      return true
-    end
-  end
-  return false
-end
-
 function write_marked_regions(seqid, filenumber, maxdist)
   assert(seqid)
   local coverage = get_coverage(seqid, maxdist)
   for i, r in ipairs(coverage) do
     local features = feature_index:get_features_for_range(seqid, r)
-    if contains_marked_feature(features) then
+    if gt.features_contain_marked(features) then
       range = r
       local filename = png_dir .. "/" .. filenumber .. ".png"
       io.write(string.format("writing file '%s'\n", filename))
