@@ -546,7 +546,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   Option *option;
   bool has_extended_options, option_parsed;
   long long_value;
-  int had_err = 0;
+  int minus_offset, had_err = 0;
   Str *error_str;
 
   error_check(err);
@@ -579,7 +579,9 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
     for (i = 0; i < array_size(op->options); i++) {
       option = *(Option**) array_get(op->options, i);
 
-      if (strcmp(argv[argnum]+1, str_get(option->option_str)) == 0) {
+      /* allow options to start with '--', too */
+      minus_offset = argv[argnum][1] == '-' ? 1 : 0;
+      if (!strcmp(argv[argnum]+1+minus_offset, str_get(option->option_str))) {
         /* make sure option has not been used before */
         if (option->is_set) {
           error_set(err, "option \"%s\" already set",
