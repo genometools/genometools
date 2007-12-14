@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "lauxlib.h"
+#include "libgtcore/gtdatapath.h"
 #include "libgtlua/helper.h"
 
 #ifdef LIBGTVIEW
@@ -50,6 +51,33 @@ Config* get_config_from_registry(lua_State *L)
   return config;
 }
 #endif
+
+int luaset_modules_path(lua_State *L, Error *err)
+{
+  Str *modules_path = NULL, *package_path = NULL;
+  int had_err = 0;
+  error_check(err);
+  assert(L);
+  if (!(modules_path = gtdata_get_path(error_get_progname(err), err)))
+    had_err = -1;
+  if (!had_err) {
+    str_append_cstr(modules_path, "/modules/?.lua");
+    lua_getglobal(L, "package");
+    assert(lua_istable(L, -1));
+    lua_getfield(L, -1, "path");
+    assert(lua_isstring(L, -1));
+    package_path = str_new_cstr(lua_tostring(L, -1));
+    lua_pop(L, 1);
+    str_append_char(package_path, ';');
+    str_append_str(package_path, modules_path);
+    lua_pushstring(L, str_get(package_path));
+    lua_setfield(L, -2, "path");
+    lua_pop(L, 1);
+  }
+  str_delete(package_path);
+  str_delete(modules_path);
+  return had_err;
+}
 
 void set_arg_in_lua_interpreter(lua_State *L, const char *argv_0,
                                 const char **argv)

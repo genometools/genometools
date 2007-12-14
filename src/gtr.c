@@ -70,6 +70,7 @@ GTR* gtr_new(Error *err)
     luaL_openlibs(gtr->L); /* open the standard libraries */
     luaopen_gt(gtr->L);    /* open all GenomeTools libraries */
     luaopen_lfs(gtr->L);   /* open Lua filesystem */
+    had_err = luaset_modules_path(gtr->L, err);
   }
 #ifdef LIBGTVIEW
   if (!had_err) {

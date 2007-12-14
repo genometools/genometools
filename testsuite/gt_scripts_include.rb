@@ -66,6 +66,12 @@ Test do
   run "diff #{$last_stdout} #{$testdata}blosum62.c"
 end
 
+Name "require 'gtlua'"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}/gtscripts/require_gtlua.lua"
+end
+
 if $arguments["libgtview"] then
   Name "feature_index and feature_stream bindings"
   Keywords "gt_scripts"

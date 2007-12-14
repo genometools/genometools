@@ -1,4 +1,4 @@
-/*
+--[[
   Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
@@ -13,28 +13,8 @@
   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-*/
+]]
 
-#ifndef HELPER_H
-#define HELPER_H
+module(..., package.seeall)
 
-#include "lua.h"
-#include "libgtcore/error.h"
-
-#ifdef LIBGTVIEW
-#include "libgtview/config.h"
-
-void put_config_in_registry(lua_State*, Config*);
-Config* get_config_from_registry(lua_State*);
-#endif
-
-int  luaset_modules_path(lua_State*, Error*);
-
-void set_arg_in_lua_interpreter(lua_State*, const char *argv_0,
-                                const char **argv);
-
-/* Propagate the error given in <err> (which must be set) to <L>.
-   Takes ownership of the error and deletes it. */
-int  luagt_error(lua_State *L, Error *err);
-
-#endif
+require 'gt'
