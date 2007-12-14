@@ -55,20 +55,27 @@ struct GTR {
 GTR* gtr_new(Error *err)
 {
   GTR *gtr;
+  int had_err = 0;
 #ifdef LIBGTVIEW
   Str *config_file = NULL;
-  int had_err = 0;
 #endif
   gtr = ma_calloc(1, sizeof (GTR));
   gtr->testspacepeak = str_new();
   gtr->L = luaL_newstate();
-  assert(gtr->L); /* XXX: proper error message  */
-  luaL_openlibs(gtr->L); /* open the standard libraries */
-  luaopen_gt(gtr->L); /* open all GenomeTools libraries */
-  luaopen_lfs(gtr->L); /* open Lua filesystem */
-#ifdef LIBGTVIEW
-  if (!(gtr->config = config_new_with_state(gtr->L, err)))
+  if (!gtr->L) {
+    error_set(err, "out of memory (cannot create new lua state)");
     had_err = -1;
+  }
+  if (!had_err) {
+    luaL_openlibs(gtr->L); /* open the standard libraries */
+    luaopen_gt(gtr->L);    /* open all GenomeTools libraries */
+    luaopen_lfs(gtr->L);   /* open Lua filesystem */
+  }
+#ifdef LIBGTVIEW
+  if (!had_err) {
+    if (!(gtr->config = config_new_with_state(gtr->L, err)))
+      had_err = -1;
+  }
   if (!had_err) {
     if (!(config_file = gtdata_get_path(error_get_progname(err), err)))
       had_err = -1;
@@ -83,11 +90,11 @@ GTR* gtr_new(Error *err)
     }
   }
   str_delete(config_file);
+#endif
   if (had_err) {
     ma_free(gtr);
     return NULL;
   }
-#endif
   return gtr;
 }
 
