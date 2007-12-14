@@ -234,7 +234,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
       if (file_exists(argv[0])) {
         /* run script */
         nargv = cstr_array_prefix_first(argv, error_get_progname(err));
-        set_arg_in_lua_interpreter(gtr->L, nargv[0], (const char**) nargv+1);
+        luaset_arg(gtr->L, nargv[0], (const char**) nargv+1);
         if (luaL_dofile(gtr->L, argv[0])) {
           /* error */
           assert(lua_isstring(gtr->L, -1)); /* error message on top */
@@ -261,7 +261,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
   cstr_array_delete(nargv);
   if (!had_err && gtr->interactive) {
     showshortversion(error_get_progname(err));
-    set_arg_in_lua_interpreter(gtr->L, error_get_progname(err), argv);
+    luaset_arg(gtr->L, error_get_progname(err), argv);
     run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)

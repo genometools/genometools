@@ -79,8 +79,7 @@ int luaset_modules_path(lua_State *L, Error *err)
   return had_err;
 }
 
-void set_arg_in_lua_interpreter(lua_State *L, const char *argv_0,
-                                const char **argv)
+void luaset_arg(lua_State *L, const char *argv_0, const char **argv)
 {
   lua_Integer n = 0;
   assert(L && argv_0);

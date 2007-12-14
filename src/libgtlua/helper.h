@@ -30,8 +30,7 @@ Config* get_config_from_registry(lua_State*);
 
 int  luaset_modules_path(lua_State*, Error*);
 
-void set_arg_in_lua_interpreter(lua_State*, const char *argv_0,
-                                const char **argv);
+void luaset_arg(lua_State*, const char *argv_0, const char **argv);
 
 /* Propagate the error given in <err> (which must be set) to <L>.
    Takes ownership of the error and deletes it. */
