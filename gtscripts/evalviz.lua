@@ -51,8 +51,9 @@ else
   usage()
 end
 
-function render_to_png(png_file, seqid)
-  assert(seqid)
+function render_to_png(feature_index, png_file, seqid, width)
+  assert(feature_index and png_file and seqid)
+  if not width then width = 1600 end
   local diagram = gt.diagram_new(feature_index, seqid, range)
   local render =  gt.render_new()
   render:to_png(diagram, png_file, width)
@@ -108,7 +109,7 @@ function write_marked_regions(seqid, filenumber, maxdist)
       range = r
       local filename = png_dir .. "/" .. filenumber .. ".png"
       io.write(string.format("writing file '%s'\n", filename))
-      render_to_png(filename, seqid)
+      render_to_png(feature_index, filename, seqid, width)
       filenumber = filenumber + 1
     end
   end
