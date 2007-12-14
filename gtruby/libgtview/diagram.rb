@@ -21,13 +21,13 @@ require 'libgtcore/range'
 module GT
   extend DL::Importable
   dlload "libgtview.so"
-  extern "Diagram* diagram_new(FeatureIndex*, const Range*, const char*, Config*)"
+  extern "Diagram* diagram_new(FeatureIndex*, const char*, const Range*, Config*)"
   extern "void diagram_delete(Diagram*)"
 
   class Diagram
     attr_reader :diagram
-    def initialize(feature_index, range, seqid, config)
-      @diagram = GT.diagram_new(feature_index.feature_index, range, seqid,
+    def initialize(feature_index, seqid, range, config)
+      @diagram = GT.diagram_new(feature_index.feature_index, seqid, range,
                                 config.config)
       @diagram.free = GT::symbol("diagram_delete", "0P")
     end

@@ -53,7 +53,7 @@ end
 
 function render_to_png(png_file, seqid)
   assert(seqid)
-  local diagram = gt.diagram_new(feature_index, range, seqid)
+  local diagram = gt.diagram_new(feature_index, seqid, range)
   local render =  gt.render_new()
   render:to_png(diagram, png_file, width)
 end

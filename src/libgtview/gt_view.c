@@ -261,7 +261,7 @@ int gt_view(int argc, const char **argv, Error *err)
 
   if (!had_err) {
     /* create and write image file */
-    d = diagram_new(features, &qry_range, seqid, cfg);
+    d = diagram_new(features, seqid, &qry_range, cfg);
     r = render_new(cfg);
     had_err = render_to_png(r, d, png_file, arguments.width, err);
   }

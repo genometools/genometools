@@ -403,7 +403,7 @@ static void diagram_build(Diagram *diagram, Array *features)
   assert(!had_err); /* collect_blocks() is sane */
 }
 
-Diagram* diagram_new(FeatureIndex *fi, const Range *range, const char *seqid,
+Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
                      Config *config)
 {
   Diagram *diagram;
@@ -532,7 +532,7 @@ int diagram_unit_test(Error *err)
 
   /* create a diagram object and test it */
   if (!had_err)
-    dia = diagram_new(fi, &dr1, "test1", cfg);
+    dia = diagram_new(fi, "test1", &dr1, cfg);
 
   ensure(had_err, dia->config);
   ensure(had_err, dia->range.start == 400UL);
@@ -554,7 +554,7 @@ int diagram_unit_test(Error *err)
 
   /* create a diagram object and test it */
   if (!had_err) {
-    dia2 = diagram_new(fi, &dr1, "test2", cfg);
+    dia2 = diagram_new(fi, "test2", &dr1, cfg);
     ensure(had_err, dia->range.start == 400UL);
     ensure(had_err, dia->range.end == 900UL);
   }

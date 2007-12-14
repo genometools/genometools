@@ -42,6 +42,6 @@ seqid = feature_index.get_first_seqid()
 range = feature_index.get_range_for_seqid(seqid)
 
 config = GT::Config.new()
-diagram = GT::Diagram.new(feature_index, range, seqid, config)
+diagram = GT::Diagram.new(feature_index, seqid, range, config)
 render = GT::Render.new(config)
 render.to_png(diagram, pngfile)

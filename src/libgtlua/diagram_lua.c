@@ -35,17 +35,17 @@ static int diagram_lua_new(lua_State *L)
   Config *config;
   /* get feature index */
   feature_index = check_feature_index(L, 1);
-  /* get range */
-  range = check_range(L, 2);
   /* get seqid */
-  seqid       = luaL_checkstring(L, 3);
+  seqid       = luaL_checkstring(L, 2);
   luaL_argcheck(L, feature_index_has_seqid(*feature_index, seqid),
-                3, "feature index does not contain the given sequence id");
+                2, "feature index does not contain the given sequence id");
+  /* get range */
+  range = check_range(L, 3);
   /* create diagram */
   config = get_config_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (Diagram*));
   assert(diagram);
-  *diagram = diagram_new(*feature_index, range, seqid, config);
+  *diagram = diagram_new(*feature_index, seqid, range, config);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
