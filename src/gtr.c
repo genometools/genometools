@@ -96,7 +96,7 @@ struct GTR {
        interactive,
        debug;
   Str *testspacepeak;
-  Toolbox *toolbox;
+  Toolbox *tools;
   Hashtable *unit_tests;
   lua_State *L;
 #ifdef LIBGTVIEW
@@ -164,7 +164,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   op = option_parser_new("[option ...] [tool | script] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).");
-  option_parser_set_comment_func(op, show_gtr_help, gtr->toolbox);
+  option_parser_set_comment_func(op, show_gtr_help, gtr->tools);
   o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
                       "'script'", &gtr->interactive, false);
   option_hide_default(o);
@@ -187,36 +187,36 @@ void gtr_register_components(GTR *gtr)
 {
   assert(gtr);
   /* add tools */
-  toolbox_delete(gtr->toolbox);
-  gtr->toolbox = toolbox_new();
-  toolbox_add(gtr->toolbox, "bioseq", gt_bioseq);
-  toolbox_add(gtr->toolbox, "cds", gt_cds);
-  toolbox_add(gtr->toolbox, "chseqids", gt_chseqids);
-  toolbox_add(gtr->toolbox, "clean", gt_clean);
-  toolbox_add(gtr->toolbox, "csa", gt_csa);
-  toolbox_add(gtr->toolbox, "dev", gt_dev);
-  toolbox_add(gtr->toolbox, "eval", gt_eval);
-  toolbox_add(gtr->toolbox, "exercise", gt_exercise);
-  toolbox_add(gtr->toolbox, "extractfeat", gt_extractfeat);
-  toolbox_add(gtr->toolbox, "extractseq", gt_extractseq);
-  toolbox_add(gtr->toolbox, "filter", gt_filter);
-  toolbox_add(gtr->toolbox, "gff3", gt_gff3);
-  toolbox_add(gtr->toolbox, "gff3_to_gtf", gt_gff3_to_gtf);
-  toolbox_add(gtr->toolbox, "gtf_to_gff3", gt_gtf_to_gff3);
-  toolbox_add(gtr->toolbox, "ltrharvest", gt_ltrharvest);
-  toolbox_add(gtr->toolbox, "merge", gt_merge);
-  toolbox_add(gtr->toolbox, "mmapandread", gt_mmapandread);
-  toolbox_add(gtr->toolbox, "mutate", gt_mutate);
-  toolbox_add(gtr->toolbox, "splitfasta", gt_splitfasta);
-  toolbox_add(gtr->toolbox, "splicesiteinfo", gt_splicesiteinfo);
-  toolbox_add(gtr->toolbox, "stat", gt_stat);
-  toolbox_add(gtr->toolbox, "suffixerator", gt_suffixerator);
-  toolbox_add(gtr->toolbox, "packedindex", gt_packedindex);
-  toolbox_add(gtr->toolbox, "mkfmindex", gt_mkfmindex);
-  toolbox_add(gtr->toolbox, "uniq", gt_uniq);
-  toolbox_add(gtr->toolbox, "uniquesub", gt_uniquesub);
+  toolbox_delete(gtr->tools);
+  gtr->tools = toolbox_new();
+  toolbox_add(gtr->tools, "bioseq", gt_bioseq);
+  toolbox_add(gtr->tools, "cds", gt_cds);
+  toolbox_add(gtr->tools, "chseqids", gt_chseqids);
+  toolbox_add(gtr->tools, "clean", gt_clean);
+  toolbox_add(gtr->tools, "csa", gt_csa);
+  toolbox_add(gtr->tools, "dev", gt_dev);
+  toolbox_add(gtr->tools, "eval", gt_eval);
+  toolbox_add(gtr->tools, "exercise", gt_exercise);
+  toolbox_add(gtr->tools, "extractfeat", gt_extractfeat);
+  toolbox_add(gtr->tools, "extractseq", gt_extractseq);
+  toolbox_add(gtr->tools, "filter", gt_filter);
+  toolbox_add(gtr->tools, "gff3", gt_gff3);
+  toolbox_add(gtr->tools, "gff3_to_gtf", gt_gff3_to_gtf);
+  toolbox_add(gtr->tools, "gtf_to_gff3", gt_gtf_to_gff3);
+  toolbox_add(gtr->tools, "ltrharvest", gt_ltrharvest);
+  toolbox_add(gtr->tools, "merge", gt_merge);
+  toolbox_add(gtr->tools, "mmapandread", gt_mmapandread);
+  toolbox_add(gtr->tools, "mutate", gt_mutate);
+  toolbox_add(gtr->tools, "splitfasta", gt_splitfasta);
+  toolbox_add(gtr->tools, "splicesiteinfo", gt_splicesiteinfo);
+  toolbox_add(gtr->tools, "stat", gt_stat);
+  toolbox_add(gtr->tools, "suffixerator", gt_suffixerator);
+  toolbox_add(gtr->tools, "packedindex", gt_packedindex);
+  toolbox_add(gtr->tools, "mkfmindex", gt_mkfmindex);
+  toolbox_add(gtr->tools, "uniq", gt_uniq);
+  toolbox_add(gtr->tools, "uniquesub", gt_uniquesub);
 #ifdef LIBGTVIEW
-  toolbox_add(gtr->toolbox, "view", gt_view);
+  toolbox_add(gtr->tools, "view", gt_view);
 #endif
   /* add unit tests */
   hashtable_delete(gtr->unit_tests);
@@ -342,7 +342,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
     had_err = -1;
   }
   if (!had_err && argc) {
-    if (!gtr->toolbox || !(tool = toolbox_get(gtr->toolbox, argv[0]))) {
+    if (!gtr->tools || !(tool = toolbox_get(gtr->tools, argv[0]))) {
       /* no tool found -> try to open script */
       if (file_exists(argv[0])) {
         /* run script */
@@ -386,7 +386,7 @@ void gtr_delete(GTR *gtr)
 {
   if (!gtr) return;
   str_delete(gtr->testspacepeak);
-  toolbox_delete(gtr->toolbox);
+  toolbox_delete(gtr->tools);
   hashtable_delete(gtr->unit_tests);
   if (gtr->L) lua_close(gtr->L);
 #ifdef LIBGTVIEW
