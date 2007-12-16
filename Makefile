@@ -114,6 +114,7 @@ LIBGTLTR_DEP:=$(LIBGTLTR_SRC:%.c=obj/%.d)
 LIBGTVIEW_C_SRC:=$(wildcard src/libgtview/*.c)
 LIBGTVIEW_C_OBJ:=$(LIBGTVIEW_C_SRC:%.c=obj/%.o)
 LIBGTVIEW_C_DEP:=$(LIBGTVIEW_C_SRC:%.c=obj/%.d)
+LIBGTVIEW_LIBDEP=-lcairo -lgtext -lgtcore -lbz2 -lz
 
 # the GenomeTools Lua library
 LIBGTLUA_C_SRC:=$(wildcard src/libgtlua/*.c)
@@ -326,7 +327,8 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtext.so: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
+lib/libgtext.so: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ) \
+  lib/libgtcore.so
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTEXT_C_OBJ) \
@@ -357,10 +359,12 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtview.so: obj/gt_config.h $(LIBGTVIEW_C_OBJ)
+lib/libgtview.so: obj/gt_config.h $(LIBGTVIEW_C_OBJ) lib/libgtcore.so \
+  lib/libgtext.so	
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTVIEW_C_OBJ) -o $@
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTVIEW_C_OBJ) \
+	-o $@ $(LIBGTVIEW_LIBDEP)
 
 lib/libgtlua.a: $(LIBGTLUA_C_OBJ)
 	@echo "[link $(@F)]"
