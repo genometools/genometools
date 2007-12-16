@@ -16,8 +16,202 @@
 */
 
 #include "libgtcore/error.h"
-#include "libgtmatch/fmi-uniquesub.pr"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtmatch/fmindex.h"
+#include "libgtmatch/defined-types.h"
+#include "libgtmatch/optionargmode.h"
+#include "libgtmatch/fmi-uniquesub.h"
+
 #include "tools/gt_uniquesub.h"
+#include "libgtmatch/fmi-fwduni.pr"
+#include "libgtmatch/fmi-map.pr"
+
+#define SHOWSEQUENCE   1U
+#define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
+
+typedef struct
+{
+  Definedunsignedlong minlength,
+                      maxlength;
+  unsigned int showmode;
+  Str *fmindexname;
+  StrArray *queryfilenames;
+} Uniquesubcallinfo;
+
+static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
+                             int argc,
+                             const char **argv,
+                             Error *err)
+{
+  OptionParser *op;
+  Option *optionmin, *optionmax, *optionoutput, *optionfmindex, *optionquery;
+  OPrval oprval;
+  StrArray *flagsoutputoption;
+  int parsed_args;
+  Optionargmodedesc uniquesubmodedesctable[]
+    = {
+      {"sequence",SHOWSEQUENCE},
+      {"querypos",SHOWQUERYPOS}
+  };
+
+  error_check(err);
+  uniquesubcallinfo->minlength.defined = false;
+  uniquesubcallinfo->maxlength.defined = false;
+  uniquesubcallinfo->showmode = 0;
+  uniquesubcallinfo->fmindexname = str_new();
+  uniquesubcallinfo->queryfilenames = strarray_new();
+  flagsoutputoption = strarray_new();
+
+  op = option_parser_new("[option ...] -fm fmindex -query queryfile [...]",
+                         "Compute length of minumum unique prefixes.");
+  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  optionmin = option_new_ulong_min("min",
+                                   "only output length "
+                                   "if >= given minimum length",
+                                   &uniquesubcallinfo->minlength.
+                                          valueunsignedlong,
+                                   0,(unsigned long) 1);
+  option_parser_add_option(op, optionmin);
+
+  optionmax = option_new_ulong_min("max",
+                                   "only output length "
+                                   "if <= given maximum length",
+                                   &uniquesubcallinfo->maxlength.
+                                          valueunsignedlong,
+                                   0,(unsigned long) 1);
+  option_parser_add_option(op, optionmax);
+
+  optionoutput = option_new_stringarray("output",
+                          "set output flags (sequence, querypos)",
+                          flagsoutputoption);
+  option_parser_add_option(op, optionoutput);
+
+  optionfmindex = option_new_string("fmi", "specify fmindex",
+                                    uniquesubcallinfo->fmindexname,NULL);
+  option_is_mandatory(optionfmindex);
+  option_parser_add_option(op, optionfmindex);
+
+  optionquery = option_new_filenamearray("query", "specify queryfiles",
+                                         uniquesubcallinfo->queryfilenames);
+  option_is_mandatory(optionquery);
+  option_parser_add_option(op, optionquery);
+
+  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc,
+                               err);
+  if (oprval == OPTIONPARSER_OK)
+  {
+    if (option_is_set(optionmin))
+    {
+       uniquesubcallinfo->minlength.defined = true;
+    }
+    if (option_is_set(optionmax))
+    {
+       uniquesubcallinfo->maxlength.defined = true;
+    }
+    if (!option_is_set(optionmin) && !option_is_set(optionmax))
+    {
+      error_set(err,"one of the options -min or -max must be set");
+      oprval = OPTIONPARSER_ERROR;
+    }
+    if (oprval != OPTIONPARSER_ERROR)
+    {
+      if (uniquesubcallinfo->minlength.defined &&
+         uniquesubcallinfo->maxlength.defined)
+      {
+        if (uniquesubcallinfo->maxlength.valueunsignedlong <
+           uniquesubcallinfo->minlength.valueunsignedlong)
+        {
+          error_set(err,"minvalue must be smaller or equal than maxvalue");
+          oprval = OPTIONPARSER_ERROR;
+        }
+      }
+    }
+    if (oprval != OPTIONPARSER_ERROR && option_is_set(optionoutput))
+    {
+      if (strarray_size(flagsoutputoption) == 0)
+      {
+        error_set(err,"missing arguments to option -output");
+        oprval = OPTIONPARSER_ERROR;
+      } else
+      {
+        unsigned long i;
+
+        for (i=0; i<strarray_size(flagsoutputoption); i++)
+        {
+          if (optionaddbitmask(uniquesubmodedesctable,
+                              sizeof (uniquesubmodedesctable)/
+                              sizeof (uniquesubmodedesctable[0]),
+                              &uniquesubcallinfo->showmode,
+                              "-output",
+                              strarray_get(flagsoutputoption,i),
+                              err) != 0)
+          {
+            oprval = OPTIONPARSER_ERROR;
+            break;
+          }
+        }
+      }
+    }
+  }
+  strarray_delete(flagsoutputoption);
+  option_parser_delete(op);
+  if (oprval == OPTIONPARSER_OK && parsed_args != argc)
+  {
+    error_set(err,"superfluous program parameters");
+    oprval = OPTIONPARSER_ERROR;
+  }
+  return oprval;
+}
+
+
+static int findminuniquesubstrings(int argc,const char **argv,Error *err)
+{
+  Uniquesubcallinfo uniquesubcallinfo;
+  Fmindex fmindex;
+  Verboseinfo *verboseinfo;
+  int had_err = 0;
+
+  error_check(err);
+  switch (parseuniquesub(&uniquesubcallinfo, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR:
+      str_delete(uniquesubcallinfo.fmindexname);
+      strarray_delete(uniquesubcallinfo.queryfilenames);
+      return -1;
+    case OPTIONPARSER_REQUESTS_EXIT:
+      str_delete(uniquesubcallinfo.fmindexname);
+      strarray_delete(uniquesubcallinfo.queryfilenames);
+      return 0;
+  }
+  verboseinfo = newverboseinfo(false);
+  if (mapfmindex (&fmindex, uniquesubcallinfo.fmindexname,
+                  verboseinfo,err) != 0)
+  {
+    had_err = -1;
+  } else
+  {
+    if (findsubqueryuniqueforward((void *) &fmindex,
+                                  skfmuniqueforward,
+                                  fmindex.alphabet,
+                                  uniquesubcallinfo.queryfilenames,
+                                  uniquesubcallinfo.minlength,
+                                  uniquesubcallinfo.maxlength,
+                                  (uniquesubcallinfo.showmode & SHOWSEQUENCE)
+                                     ? true : false,
+                                  (uniquesubcallinfo.showmode & SHOWQUERYPOS)
+                                     ? true : false,
+                                  err) != 0)
+    {
+      had_err = -1;
+    }
+    freefmindex(&fmindex);
+  }
+  freeverboseinfo(&verboseinfo);
+  str_delete(uniquesubcallinfo.fmindexname);
+  strarray_delete(uniquesubcallinfo.queryfilenames);
+  return had_err;
+}
 
 int gt_uniquesub(int argc, const char **argv, Error *err)
 {
