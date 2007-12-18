@@ -19,13 +19,22 @@ module(..., package.seeall)
 
 require "extractor.file"
 
-Program = extractor.File:new()
-
-Program.filename = "prog.c"
-Program.basename = "prog.c"
-Program.filecontent = [[
+local program_template = [[
 int main(int argc, char *argv[])
 {
   return 0;
 }
 ]]
+
+Program = {}
+
+function Program:new(progname)
+  if progname then
+    o = extractor.File:new(progname .. ".c", true)
+  else
+    o = extractor.File:new("prog.c", true)
+  end
+  o.filecontent = program_template
+  return o
+end
+

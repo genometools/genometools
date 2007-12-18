@@ -30,7 +30,7 @@ name = "swalign"
 p = Project:new(gt_home)
 p:set_name(name)
 
-prog = Program:new()
+prog = Program:new(name)
 p:add(prog)
 
 m = Module:new("src/libgtcore/xansi")
