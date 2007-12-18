@@ -19,11 +19,7 @@ module(..., package.seeall)
 
 require "extractor.file"
 
-Makefile = extractor.File:new()
-
-Makefile.filename = "Makefile"
-Makefile.basename = "Makefile"
-Makefile.filecontent = [[
+local makefile_template = [[
 CC:=gcc
 CFLAGS:=-Wall -Werror -Os -pipe
 LD:=$(CC)
@@ -48,3 +44,15 @@ prog: $(OBJ)
 clean:
 	rm -f *.o
 ]]
+
+Makefile = {}
+
+function Makefile:new(progname)
+  o = extractor.File:new("Makefile", true)
+  if progname then
+    o.filecontent = makefile_template:gsub("prog", progname)
+  else
+    o.filecontent = makefile_template
+  end
+  return o
+end

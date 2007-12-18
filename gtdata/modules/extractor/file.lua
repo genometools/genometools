@@ -19,15 +19,17 @@ module(..., package.seeall)
 
 File = {}
 
-function File:new(filename)
+function File:new(filename, do_not_read)
   o = {}
   if filename then
     o.filename = filename
-    o.basename = filename:match("^.*/(.+)$")
-    local infile, err = io.open(filename, "r")
-    assert(infile, err)
-    o.filecontent = infile:read("*a")
-    infile:close()
+    o.basename = filename:match("^.*/(.+)$") or filename
+    if not do_not_read then
+      local infile, err = io.open(filename, "r")
+      assert(infile, err)
+      o.filecontent = infile:read("*a")
+      infile:close()
+    end
   end
   setmetatable(o, self)
   self.__index = self

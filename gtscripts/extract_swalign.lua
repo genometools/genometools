@@ -26,8 +26,9 @@ else
   os.exit(1)
 end
 
+name = "swalign"
 p = Project:new(gt_home)
-p:set_name("swalign")
+p:set_name(name)
 
 prog = Program:new()
 p:add(prog)
@@ -36,7 +37,7 @@ m = Module:new("src/libgtcore/xansi")
 m:bare_includes()
 p:add(m)
 
-mf = Makefile:new()
+mf = Makefile:new(name)
 p:set_makefile(mf)
 
 
