@@ -54,7 +54,7 @@ end
 
 local function reload()
   -- remove all exported symbols from gt table
-  for k, _ in pairs(gtexport) do
+  for k in pairs(gtexport) do
     gt[k] = nil
   end
   -- mark all packages as unloaded
