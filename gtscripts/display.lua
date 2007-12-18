@@ -29,7 +29,7 @@ if #arg == 1 then
   rval, err = lfs.attributes(png_dir, "mode")
   if rval ~= "directory" then
     io.stderr:write(string.format("PNG_dir '%s' is not a directory\n", png_dir))
-     os.exit(1)
+    os.exit(1)
   end
 else
   usage()
