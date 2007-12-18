@@ -33,6 +33,13 @@ p:set_name(name)
 prog = Program:new(name)
 p:add(prog)
 
+f = File:new("src/libgtcore/array2dim.h")
+f:bare_includes()
+f:remove_include("error.h")
+f:remove_example()
+f:ma2xansi()
+p:add(f)
+
 m = Module:new("src/libgtcore/xansi")
 m:bare_includes()
 p:add(m)

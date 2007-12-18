@@ -37,8 +37,28 @@ function File:new(filename, do_not_read)
 end
 
 function File:bare_includes()
-  print("match")
-  self.filecontent = self.filecontent:gsub('(\n#include ").-/(.-"\n)', '%1%2')
+  self.filecontent = self.filecontent:gsub('(\n#include ").-/(.-")', '%1%2')
+end
+
+function File:remove_include(header)
+  assert(header)
+  self.filecontent = self.filecontent:gsub('#include "' .. header .. '"\n', '')
+end
+
+function File:remove_example()
+  local prefix = self.basename:gsub("\.[ch]", "_")
+  print(prefix)
+  self.filecontent = self.filecontent:gsub('\n%S+%s+' .. prefix .. 'example\(.-\);',
+                                           '')
+  self.filecontent = self.filecontent:gsub('\n\n\n', '\n\n')
+end
+
+function File:ma2xansi()
+  self.filecontent = self.filecontent:gsub('#include "ma.h"',
+                                           '#include "xansi.h"')
+  self.filecontent = self.filecontent:gsub('ma_malloc', 'xmalloc')
+  self.filecontent = self.filecontent:gsub('ma_calloc', 'xcalloc')
+  self.filecontent = self.filecontent:gsub('ma_realloc', 'xrealloc')
 end
 
 function File:write(dir)
