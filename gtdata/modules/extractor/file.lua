@@ -45,12 +45,26 @@ function File:remove_include(header)
   self.filecontent = self.filecontent:gsub('#include "' .. header .. '"\n', '')
 end
 
-function File:remove_example()
-  local prefix = self.basename:gsub("\.[ch]", "_")
-  print(prefix)
-  self.filecontent = self.filecontent:gsub('\n%S+%s+' .. prefix .. 'example\(.-\);',
-                                           '')
+function File:remove_function(func)
+  assert(func)
+  if self.basename:match("%.h$") then -- header file
+    self.filecontent = self.filecontent:gsub('\n%S*%s?%S+%s+' .. func ..
+                                             '%(.-%);', '')
+  else -- C file
+    self.filecontent = self.filecontent:gsub('\n%S*%s?%S+%s+' .. func ..
+                                             '%(.-%)\n{.-\n}', '')
+  end
   self.filecontent = self.filecontent:gsub('\n\n\n', '\n\n')
+end
+
+function File:remove_example()
+  local prefix = self.basename:gsub("%.[ch]", "_")
+  self:remove_function(prefix .. "example")
+end
+
+function File:remove_unit_test()
+  local prefix = self.basename:gsub("%.[ch]", "_")
+  self:remove_function(prefix .. "unit_test")
 end
 
 function File:ma2xansi()
@@ -59,6 +73,7 @@ function File:ma2xansi()
   self.filecontent = self.filecontent:gsub('ma_malloc', 'xmalloc')
   self.filecontent = self.filecontent:gsub('ma_calloc', 'xcalloc')
   self.filecontent = self.filecontent:gsub('ma_realloc', 'xrealloc')
+  self.filecontent = self.filecontent:gsub('ma_free', 'free')
 end
 
 function File:write(dir)

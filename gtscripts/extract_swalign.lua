@@ -40,12 +40,32 @@ f:remove_example()
 f:ma2xansi()
 p:add(f)
 
+f = File:new("src/libgtcore/minmax.h")
+p:add(f)
+
 m = Module:new("src/libgtcore/xansi")
 m:bare_includes()
 p:add(m)
 
+m = Module:new("src/libgtcore/dynalloc")
+m:bare_includes()
+m:ma2xansi()
+p:add(m)
+
+m = Module:new("src/libgtcore/array")
+m:bare_includes()
+m:remove_include("ensure.h")
+m:remove_include("error.h")
+m:remove_include("range.h")
+m:remove_example()
+m:remove_unit_test()
+m:remove_function("array_iterate")
+m:remove_function("iterate_test_func")
+m:remove_function("iterate_fail_func")
+m:ma2xansi()
+p:add(m)
+
 mf = Makefile:new(name)
 p:set_makefile(mf)
-
 
 p:write_tar_file()

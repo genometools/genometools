@@ -36,6 +36,32 @@ function Module:bare_includes()
   self.h_file:bare_includes()
 end
 
+function Module:remove_include(header)
+  self.c_file:remove_include(header)
+  self.h_file:remove_include(header)
+end
+
+function Module:remove_function(func)
+  assert(func)
+  self.c_file:remove_function(func)
+  self.h_file:remove_function(func)
+end
+
+function Module:remove_example()
+  self.c_file:remove_example()
+  self.h_file:remove_example()
+end
+
+function Module:remove_unit_test()
+  self.c_file:remove_unit_test()
+  self.h_file:remove_unit_test()
+end
+
+function Module:ma2xansi()
+  self.c_file:ma2xansi()
+  self.h_file:ma2xansi()
+end
+
 function Module:write(dir)
   assert(dir)
   self.c_file:write(dir)
