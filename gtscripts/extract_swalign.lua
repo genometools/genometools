@@ -17,13 +17,36 @@
 
 require 'extractor' -- contains all the classes necessary for the extracting
 
-if #arg == 1 then
+if #arg == 2 then
   gt_home = arg[1]
+  scorematrix_file = arg[2]
 else
-  io.stderr:write(string.format("Usage: %s gt_home\n", arg[0]))
+  io.stderr:write(string.format("Usage: %s gt_home scorematrix_file\n", arg[0]))
   io.stderr:write("Extract swalign program from GenomeTools home directory " ..
                   "gt_home.\n")
   os.exit(1)
+end
+
+-- returns C-function scorematrix_init() as string
+local function generate_scorematrix_init()
+  local sminit = {}
+  local protein_alpha = gt.alpha_new_protein()
+  local scorematrix = gt.scorematrix_read_protein(scorematrix_file)
+  assert(protein_alpha:size() == scorematrix:get_dimension())
+  sminit[#sminit + 1] = "static void scorematrix_init(int **scorematrix)"
+  sminit[#sminit + 1] = "{"
+  sminit[#sminit + 1] = "  assert(scorematrix);"
+  for idx1 = 0, scorematrix:get_dimension()-1 do
+    for idx2 = 0, scorematrix:get_dimension()-1 do
+      sminit[#sminit + 1] = string.format("  scorematrix['%s']['%s'] = %d;",
+                                          protein_alpha:decode(idx1),
+                                          protein_alpha:decode(idx2),
+                                          scorematrix:get_score(idx1, idx2))
+    end
+  end
+  sminit[#sminit + 1] = "}"
+  sminit[#sminit + 1] = ""
+  return table.concat(sminit, "\n")
 end
 
 -- set up new project
@@ -82,6 +105,18 @@ p:set_makefile(mf)
 
 -- add example program
 prog = Program:new(name)
+prog:add_include('<assert.h>')
+prog:add_include('<limits.h>')
+prog:add_include('"array2dim.h"')
+prog:add_function(generate_scorematrix_init())
+prog:set_content([[
+  int **scorematrix;
+
+  array2dim_calloc(scorematrix, CHAR_MAX, CHAR_MAX);
+  scorematrix_init(scorematrix);
+  array2dim_delete(scorematrix);
+
+]])
 p:add(prog)
 
 -- write tar
