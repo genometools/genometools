@@ -25,6 +25,8 @@ function Project:new(home)
   assert(home)
   o = {}
   o.home = home
+  -- store home in global environment
+  _G.Extractor_project_home = home
   setmetatable(o, self)
   self.__index = self
   return o

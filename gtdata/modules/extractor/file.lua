@@ -25,7 +25,12 @@ function File:new(filename, do_not_read)
     o.filename = filename
     o.basename = filename:match("^.*/(.+)$") or filename
     if not do_not_read then
-      local infile, err = io.open(filename, "r")
+      local infile, err
+      if _G.Extractor_project_home then
+        infile, err = io.open(_G.Extractor_project_home .. "/" .. filename, "r")
+      else
+        infile, err = io.open(filename, "r")
+      end
       assert(infile, err)
       o.filecontent = infile:read("*a")
       infile:close()

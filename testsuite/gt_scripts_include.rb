@@ -72,6 +72,17 @@ Test do
   run_test "#{$bin}gt #{$testdata}/gtscripts/require_gtlua.lua"
 end
 
+Name "extract_swalign"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}../gtscripts/extract_swalign.lua #{$cur} " +
+           "#{$testdata}BLOSUM62"
+  run "cd swalign && gmake"
+  if not File.exists?("swalign.tar.gz") then
+    raise TestFailed, "file 'swalign.tar.gz' does not exist"
+  end
+end
+
 if $arguments["libgtview"] then
   Name "feature_index and feature_stream bindings"
   Keywords "gt_scripts"
