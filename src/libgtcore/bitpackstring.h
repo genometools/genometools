@@ -26,9 +26,11 @@
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
 
-#include <limits.h>
 #include <inttypes.h>
+#include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
+
 #include "libgtcore/error.h"
 
 /** basic unit of addressing BitStrings */
@@ -620,6 +622,18 @@ bsGetBit(constBitString str, BitOffset pos);
  */
 extern BitOffset
 bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits);
+
+/**
+ * \brief Print sequence of 0s and 1s to stream to display BitString
+ * contents.
+ * @param fp
+ * @param str
+ * @param offset start reading at this position
+ * @param numBits print 0,1 chars for this many bits
+ * @return -1 in case of error, 0 otherwise
+ */
+extern int
+bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits);
 
 /**
  * \brief Meta-Unit test function for bitPackString, calls all functions
