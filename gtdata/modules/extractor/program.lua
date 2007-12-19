@@ -31,28 +31,22 @@ function Program:new(progname)
   return o
 end
 
-function Program:add_include(inc)
-  assert(inc)
-  self.includes = self.includes or {}
-  self.includes[#self.includes + 1] = inc
+local function generate_add_function(name)
+  Program["add_" .. name] = function(self, arg)
+    assert(arg)
+    self[name .. "s"] = self[name .. "s"] or {}
+    self[name .. "s"][#self[name .. "s"] + 1] = arg
+  end
 end
+
+generate_add_function("include")
+generate_add_function("typedef")
+generate_add_function("function")
 
 function Program:add_define(defname, defcontent)
   assert(defname and defcontent)
   self.defines = self.defines or {}
   self.defines[#self.defines + 1] = defname .. "  " .. defcontent
-end
-
-function Program:add_typedef(typedef)
-  assert(typedef)
-  self.typedefs = self.typedefs or {}
-  self.typedefs[#self.typedefs + 1] = typedef
-end
-
-function Program:add_function(func)
-  assert(func)
-  self.functions = self.functions or {}
-  self.functions[#self.functions + 1] = func
 end
 
 function Program:set_content(content)
