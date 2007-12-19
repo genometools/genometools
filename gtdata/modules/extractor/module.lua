@@ -31,39 +31,17 @@ function Module:new(modulename)
   return o
 end
 
-function Module:bare_includes()
-  self.c_file:bare_includes()
-  self.h_file:bare_includes()
+local function generate_method(name)
+  Module[name] = function(self, ...)
+    self.c_file[name](self.c_file, ...)
+    self.h_file[name](self.h_file, ...)
+  end
 end
 
-function Module:remove_include(header)
-  self.c_file:remove_include(header)
-  self.h_file:remove_include(header)
-end
-
-function Module:remove_function(func)
-  assert(func)
-  self.c_file:remove_function(func)
-  self.h_file:remove_function(func)
-end
-
-function Module:remove_example()
-  self.c_file:remove_example()
-  self.h_file:remove_example()
-end
-
-function Module:remove_unit_test()
-  self.c_file:remove_unit_test()
-  self.h_file:remove_unit_test()
-end
-
-function Module:ma2xansi()
-  self.c_file:ma2xansi()
-  self.h_file:ma2xansi()
-end
-
-function Module:write(dir)
-  assert(dir)
-  self.c_file:write(dir)
-  self.h_file:write(dir)
-end
+generate_method("bare_includes")
+generate_method("remove_include")
+generate_method("remove_function")
+generate_method("remove_example")
+generate_method("remove_unit_test")
+generate_method("ma2xansi")
+generate_method("write")
