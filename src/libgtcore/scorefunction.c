@@ -45,6 +45,12 @@ int scorefunction_get_score(const ScoreFunction *s,
   return scorematrix_get_score(s->sm, idx1, idx2);
 }
 
+const int** scorefunction_get_scores(const ScoreFunction *s)
+{
+  assert(s);
+  return scorematrix_get_scores(s->sm);
+}
+
 int scorefunction_get_deletion_score(const ScoreFunction *s)
 {
   assert(s);

@@ -32,6 +32,7 @@ int          scorematrix_get_score(const ScoreMatrix*,
                                    unsigned int, unsigned int);
 void         scorematrix_set_score(ScoreMatrix*,
                                    unsigned int, unsigned int, int);
+const int**  scorematrix_get_scores(const ScoreMatrix*);
 void         scorematrix_show(const ScoreMatrix*, FILE*);
 void         scorematrix_delete(ScoreMatrix*);
 

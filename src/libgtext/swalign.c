@@ -33,7 +33,8 @@ typedef struct {
 static void fillDPtable(DPentry **dptable,
                         const char *u, unsigned long ulen,
                         const char *v, unsigned long vlen,
-                        const ScoreFunction *sf,
+                        const int **scores,
+                        int deletion_score, int insertion_score,
                         Coordinate *max_coordinate)
 {
   unsigned long i, j;
@@ -41,10 +42,9 @@ static void fillDPtable(DPentry **dptable,
   assert(dptable && u && ulen && v && vlen && max_coordinate);
   for (j = 1; j <= vlen; j++) {
     for (i = 1; i <= ulen; i++) {
-      repscore = dptable[i-1][j-1].score +
-                 scorefunction_get_score(sf, u[i-1], v[j-1]);
-      delscore = dptable[i-1][j].score + scorefunction_get_deletion_score(sf);
-      insscore = dptable[i][j-1].score + scorefunction_get_insertion_score(sf);
+      repscore = dptable[i-1][j-1].score + scores[(int) u[i-1]][(int) v[j-1]];
+      delscore = dptable[i-1][j].score + deletion_score;
+      insscore = dptable[i][j-1].score + insertion_score;
       maxscore = MAX(MAX(MAX(repscore, delscore), insscore), 0);
       dptable[i][j].score = maxscore;
       dptable[i][j].max_replacement = (maxscore == repscore) ? true : false;
@@ -95,7 +95,9 @@ Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
   assert(u && v && sf);
   array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1);
   fillDPtable(dptable, seq_get_encoded(u), seq_length(u), seq_get_encoded(v),
-              seq_length(v), sf, &alignment_end);
+              seq_length(v), scorefunction_get_scores(sf),
+              scorefunction_get_deletion_score(sf),
+              scorefunction_get_insertion_score(sf), &alignment_end);
   assert(alignment_end.x != UNDEF_ULONG);
   assert(alignment_end.y != UNDEF_ULONG);
   if (dptable[alignment_end.x][alignment_end.y].score) {

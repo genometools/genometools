@@ -237,6 +237,12 @@ void scorematrix_set_score(ScoreMatrix *s,
   s->scores[idx1][idx2] = score;
 }
 
+const int** scorematrix_get_scores(const ScoreMatrix *s)
+{
+  assert(s);
+  return (const int**) s->scores;
+}
+
 void scorematrix_show(const ScoreMatrix *s, FILE *fp)
 {
   unsigned i, j;
