@@ -66,15 +66,14 @@ availBWTSeq(const struct bwtParam *params, Error *err);
 /**
  * \brief Loads an encoded indexed sequence object of the
  * BWT transform.
- * @param params construction parameters (only evaluated as far as
- * in-memory structures are concerned, most parameters are defined by
- * on-disk data loaded)
- * @param EISFeatures in-memory features of basic sequence index to use.
+ * @param projectName
+ * @param BWTOptFlags Selects in-memory features of sequence index to
+ * use, see enum BWTOptionDefaultsOptimizationFlags for possible settings.
  * @param err genometools reference for core functions
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-loadBWTSeq(const struct bwtParam *params, int EISFeatures, Error *err);
+loadBWTSeq(const Str *projectName, int BWTOptFlags, Error *err);
 
 /**
  * \brief Deallocate a previously loaded/created BWT sequence object.

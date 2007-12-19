@@ -1085,7 +1085,7 @@ pos2CachePos(struct seqCache *sCache, Seqpos pos)
 
 static void
 initSuperBlockSeqCache(struct seqCache *sBlockCache,
-                       struct blockCompositionSeq *seqIdx,
+                       const struct blockCompositionSeq *seqIdx,
                        size_t numEntries, Error *err)
 {
   unsigned bucketBlocks, bucketLen, blockSize;
@@ -2250,12 +2250,12 @@ addRangeEncodedSyms(struct seqRangeList *rangeList, Symbol *block,
 }
 
 static union EISHint *
-newBlockCompSeqHint(struct encIdxSeq *seq, Error *err)
+newBlockCompSeqHint(const struct encIdxSeq *seq, Error *err)
 {
   union EISHint *hintret;
-  struct blockCompositionSeq *seqIdx;
+  const struct blockCompositionSeq *seqIdx;
   assert(seq && seq->classInfo == &blockCompositionSeqClass);
-  seqIdx = encIdxSeq2blockCompositionSeq(seq);
+  seqIdx = constEncIdxSeq2blockCompositionSeq(seq);
   hintret = ma_malloc(sizeof (union EISHint));
   SRLInitListSearchHint(seqIdx->rangeEncs, &hintret->bcHint.rangeHint);
   /* FIXME: make cache size user-configurable */
@@ -2283,9 +2283,16 @@ printBlock(Symbol *block, unsigned blockSize, FILE *fp)
   return outCount;
 }
 
+enum {
+  BUCKET_PLAIN                     = 0,
+  BUCKET_PRINT_BITSTRING           = 1 <<  0,
+  BUCKET_PRINT_BITSTRING_SEPARATOR = 1 <<  1,
+  BUCKET_PRINT_BITSIZES            = 1 <<  2,
+};
+
 static int
 printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
-            FILE *fp, union EISHint *hint, Error *err)
+            int flags, FILE *fp, union EISHint *hint, Error *err)
 {
   Seqpos lastBucket = blockNumFromPos(seqIdx, EISLength(&seqIdx->baseClass)),
     start, end;
@@ -2309,9 +2316,10 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
             bucketNum, start, end - 1);
   {
     struct superBlock *sBlock;
-    BitOffset varDataMemOffset, cwIdxMemOffset;
+    BitOffset varDataMemOffset, cwIdxMemOffset, varIdxOffset;
     Symbol *block;
-    unsigned blockSize = seqIdx->blockSize;
+    unsigned blockSize = seqIdx->blockSize,
+      idxBits = seqIdx->compositionTable.compositionIdxBits;
 #ifdef USE_SBLOCK_CACHE
     sBlock = cacheFetchSuperBlock(seqIdx, bucketNum,
                                   &hint->bcHint.sBlockCache);
@@ -2321,16 +2329,31 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
     block = ma_malloc(sizeof (block[0]) * seqIdx->blockSize);
     for (i = 0; i < blockMapAlphabetSize; ++i)
     {
+      if (flags & BUCKET_PRINT_BITSIZES)
+      {
+        outCount += fprintf(fp, "# partial sum[%u] bits: %u\n", i,
+                            seqIdx->partialSymSumBits[i]);
+      }
       outCount +=
         fprintf(fp, "# partial sum[%u]="FormatSeqpos"\n", i,
                 sBlockGetPartialSymSum(sBlock, i, seqIdx));
     }
+    if (flags & BUCKET_PRINT_BITSIZES)
+    {
+      fprintf(fp, "# bit size of sBlockVarIdxOffset: %u\n",
+              seqIdx->bitsPerVarDiskOffset);
+    }
     fprintf(fp, "# sBlockVarIdxOffset=%llu\n",
-            sBlockGetVarIdxOffset(sBlock, seqIdx));
+            (varIdxOffset = sBlockGetVarIdxOffset(sBlock, seqIdx)));
     if (seqIdx->callBackDataOffsetBits)
       fprintf(fp, "# sBlockGetcbOffset=%llu\n",
               sBlockGetcbOffset(sBlock, seqIdx));
     i = 0;
+    if (flags & BUCKET_PRINT_BITSIZES)
+    {
+      fprintf(fp, "# bits of constant width extension data: %llu\n",
+              (unsigned long long)seqIdx->cwExtBitsPerBucket);
+    }
     walkCompIndices(
       seqIdx, sBlock, seqIdx->bucketBlocks, cwIdxMemOffset,
       outCount +=
@@ -2347,6 +2370,59 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
       fputs("\n", fp);
       i++; , varDataMemOffset);
     ma_free(block);
+    if (flags & BUCKET_PRINT_BITSTRING)
+    {
+      for (i = 0; i < blockMapAlphabetSize; ++i)
+      {
+        if (bsPrint(fp, sBlock->cwData, seqIdx->partialSymSumBitsSums[i]
+                    + sBlock->cwIdxMemBase, seqIdx->partialSymSumBits[i]))
+          outCount += seqIdx->partialSymSumBits[i];
+        if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
+          outCount += fputs("&", fp);
+      }
+      bsPrint(fp, sBlock->cwData,
+              cwPreVarIdxBits(seqIdx) + sBlock->cwIdxMemBase,
+              seqIdx->bitsPerVarDiskOffset);
+      if (seqIdx->callBackDataOffsetBits)
+      {
+        bsPrint(fp, sBlock->cwData, sBlockGetcbOffsetOffset(sBlock, seqIdx),
+                seqIdx->callBackDataOffsetBits);
+        if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
+          outCount += fputs("&", fp);
+      }
+      walkCompIndices(
+        seqIdx, sBlock, seqIdx->bucketBlocks, cwIdxMemOffset,
+        bsPrint(fp, sBlock->cwData, cwIdxMemOffset, idxBits);
+        if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
+          outCount += fputs("&", fp);, varDataMemOffset);
+      bsPrint(fp, sBlock->cwData, sBlockCWExtBitsOffset(sBlock, seqIdx),
+              seqIdx->cwExtBitsPerBucket);
+      fputs("\n# variable width string: \n", fp);
+      walkCompIndices(
+        seqIdx, sBlock, seqIdx->bucketBlocks, cwIdxMemOffset,
+        idxBits =
+        seqIdx->compositionTable.permutations[compIndex].permIdxBits;
+        bsPrint(fp, sBlock->varData, varDataMemOffset, idxBits);
+        if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
+          outCount += fputs("&", fp);, varDataMemOffset);
+      if (bucketNum != lastBucket)
+      {
+        struct superBlock *nextSBlock;
+        BitOffset nextVarIdxOffset;
+#ifdef USE_SBLOCK_CACHE
+        nextSBlock = cacheFetchSuperBlock(seqIdx, bucketNum + 1,
+                                          &hint->bcHint.sBlockCache);
+#else
+        nextSBlock = fetchSuperBlock(seqIdx, bucketNum + 1, NULL, err);
+#endif
+        nextVarIdxOffset = sBlockGetVarIdxOffset(nextSBlock, seqIdx);
+        bsPrint(fp, sBlock->varData, varDataMemOffset,
+                nextVarIdxOffset - varIdxOffset);
+        fprintf(fp, "\n# varIdxOffset for next block: %llu",
+                (unsigned long long)nextVarIdxOffset);
+      }
+      fputs("\n", fp);
+    }
   }
   return outCount;
 }
@@ -2370,21 +2446,39 @@ printBlockEncPosDiags(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
   fputs("##################################################\n"
         "# This bucket:\n"
         "##################################################\n", fp);
-  outCount += printBucket(seqIdx, bucketNum, fp, hint, err);
+  outCount += printBucket(seqIdx, bucketNum, BUCKET_PLAIN, fp, hint, err);
   if (bucketNum)
   {
     fputs("##################################################\n"
           "# Previous bucket:\n"
           "##################################################\n", fp);
-    outCount += printBucket(seqIdx, bucketNum - 1, fp, hint, err);
+    outCount += printBucket(seqIdx, bucketNum - 1, BUCKET_PLAIN,
+                            fp, hint, err);
   }
   if (bucketNum < bucketNumFromPos(seqIdx, EISLength(seq)))
   {
     fputs("##################################################\n"
           "# Next bucket:\n"
           "##################################################\n", fp);
-    outCount += printBucket(seqIdx, bucketNum + 1, fp, hint, err);
+    outCount += printBucket(seqIdx, bucketNum + 1, BUCKET_PLAIN,
+                            fp, hint, err);
   }
+  return outCount;
+}
+
+static int
+displayBlockEncBlock(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
+                     Error *err)
+{
+  const struct blockCompositionSeq *seqIdx;
+  int outCount;
+  Seqpos bucketNum;
+  assert(seq && seq->classInfo == &blockCompositionSeqClass);
+  seqIdx = constEncIdxSeq2blockCompositionSeq(seq);
+  bucketNum = bucketNumFromPos(seqIdx, pos);
+  outCount = printBucket(seqIdx, bucketNum, BUCKET_PRINT_BITSTRING_SEPARATOR
+                         | BUCKET_PRINT_BITSTRING | BUCKET_PRINT_BITSIZES,
+                         fp, hint, err);
   return outCount;
 }
 
@@ -2399,4 +2493,5 @@ static const struct encIdxSeqClass blockCompositionSeqClass =
   .expose = blockCompSeqExpose,
   .seekToHeader = seekToHeader,
   .printPosDiags = printBlockEncPosDiags,
+  .printExtPosDiags = displayBlockEncBlock,
 };

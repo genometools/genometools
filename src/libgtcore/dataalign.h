@@ -17,6 +17,7 @@
 #ifndef DATAALIGN_H
 #define DATAALIGN_H
 
+#include <stdlib.h>
 #include "minmax.h"
 
 /*

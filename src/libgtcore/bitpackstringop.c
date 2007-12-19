@@ -17,6 +17,7 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "libgtcore/bitpackstring.h"
@@ -481,3 +482,72 @@ bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits)
   }
   return weight;
 }
+
+static inline void
+bits2buf(char *buf, uint32_t v, unsigned numBits)
+{
+  unsigned i = numBits;
+  uint32_t mask = 1;
+  buf[i] = '\0';
+  while (i)
+  {
+    --i;
+    buf[i] = ((v & mask)?'1':'0');
+    mask <<= 1;
+  }
+}
+
+#define ACCUM2FP(accum, bitCount)               \
+  bits2buf(buf, (accum), bitCount);             \
+  if (fputs(buf, fp) == EOF)                    \
+  {                                             \
+    ioError = 1;                                \
+    break;                                      \
+  }
+
+extern int
+bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits)
+{
+  uint32_t accum = 0;
+  unsigned bitsLeft = numBits, bitTop = offset%bitElemBits, bitsInAccum = 0;
+  size_t elemStart = offset/bitElemBits;
+  const BitElem *p = str + elemStart;
+  char buf[sizeof(accum) * CHAR_BIT];
+  int ioError = 0;
+  assert(str);
+  do {
+    if (bitTop)
+    {
+      uint32_t mask;
+      unsigned bits2Read = MIN(bitElemBits - bitTop, bitsLeft);
+      unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
+      mask = (~((~(uint32_t)0) << bits2Read)) << unreadRightBits;
+      ACCUM2FP(((*p++) & mask) >> unreadRightBits, bits2Read);
+      bitsLeft -= bits2Read;
+    }
+    /* get bits from intervening elems */
+    while (bitsLeft >= bitElemBits && !ioError)
+    {
+      while (bitsLeft >= bitElemBits
+             && sizeof (accum) * CHAR_BIT - bitElemBits >= bitsInAccum)
+      {
+        accum = accum << bitElemBits | (*p++);
+        bitsLeft -= bitElemBits;
+        bitsInAccum += bitElemBits;
+      }
+      ACCUM2FP(accum, bitsInAccum);
+      accum = 0; bitsInAccum = 0;
+    }
+    if (ioError)
+      break;
+    /* get bits from last elem */
+    if (bitsLeft)
+    {
+      accum = ((*p) & ((~(uint32_t)0)<<(bitElemBits - bitsLeft)))
+        >> (bitElemBits - bitsLeft);
+      ACCUM2FP(accum, bitsLeft);
+    }
+  } while (0);
+  return ioError?-1:0;
+}
+

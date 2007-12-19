@@ -115,7 +115,7 @@ EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
 }
 
 static inline EISHint
-newEISHint(EISeq *seq, Error *err)
+newEISHint(const EISeq *seq, Error *err)
 {
   return seq->classInfo->newHint(seq, err);
 }
@@ -126,12 +126,22 @@ deleteEISHint(EISeq *seq, EISHint hint)
   return seq->classInfo->deleteHint(seq, hint);
 }
 
-extern int
+static inline int
 EISPrintDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
                     Error *err)
 {
   if (seq->classInfo->printPosDiags)
     return seq->classInfo->printPosDiags(seq, pos, fp, hint, err);
+  else
+    return 0;
+}
+
+static inline int
+EISPrintExtDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
+                       Error *err)
+{
+  if (seq->classInfo->printExtPosDiags)
+    return seq->classInfo->printExtPosDiags(seq, pos, fp, hint, err);
   else
     return 0;
 }

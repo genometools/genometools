@@ -27,6 +27,7 @@
 #include "libgtmatch/eis-bitpackseqpos.h"
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqconstruct.h"
+#include "libgtmatch/eis-bwtconstruct_params.h"
 #include "libgtmatch/eis-bwtseqpriv.h"
 #include "libgtmatch/eis-bwtseqcreate.h"
 #include "libgtmatch/eis-encidxseq.h"
@@ -87,6 +88,34 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
 }
 
 static int GTAlphabetRangeHandling[] = { NORMAL_RANGE, SPECIAL_RANGE };
+
+extern BWTSeq *
+loadBWTSeq(const Str *projectName, int BWTOptFlags, Error *err)
+{
+  struct BWTSeq *bwtSeq = NULL;
+  Suffixarray suffixArray;
+  Seqpos len;
+  Verboseinfo *verbosity;
+  struct bwtParam params;
+  assert(projectName && err);
+  error_check(err);
+  /* FIXME: handle verbosity in a more sane fashion */
+  verbosity = newverboseinfo(false);
+  if (mapsuffixarray(&suffixArray, &len, 0, projectName, verbosity, err))
+  {
+    freeverboseinfo(&verbosity);
+    return NULL;
+  }
+  ++len;
+  params.projectName = projectName;
+  params.baseType = BWT_ON_BLOCK_ENC;
+  params.seqParams.blockEnc.EISFeatureSet
+    = convertBWTOptFlags2EISFeatures(BWTOptFlags);
+  bwtSeq = loadBWTSeqForSA(&params, &suffixArray, len, err);
+  freesuffixarray(&suffixArray);
+  freeverboseinfo(&verbosity);
+  return bwtSeq;
+}
 
 extern BWTSeq *
 loadBWTSeqForSA(const struct bwtParam *params, Suffixarray *sa,
