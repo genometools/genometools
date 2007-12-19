@@ -36,6 +36,17 @@ function File:new(filename, do_not_read)
   return o
 end
 
+function File:get_typedef(typedef)
+  assert(typedef)
+  return self.filecontent:match("typedef struct .-" .. typedef .. ";")
+end
+
+function File:get_function(func)
+  assert(func)
+  return(self.filecontent:match('\n(%S*%s?%S+%s+' .. func ..
+                                '%(.-%)\n{.-\n})'))
+end
+
 function File:bare_includes()
   self.filecontent = self.filecontent:gsub('(\n#include ").-/(.-")', '%1%2')
 end

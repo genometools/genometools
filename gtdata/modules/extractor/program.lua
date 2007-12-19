@@ -37,6 +37,18 @@ function Program:add_include(inc)
   self.includes[#self.includes + 1] = inc
 end
 
+function Program:add_define(defname, defcontent)
+  assert(defname and defcontent)
+  self.defines = self.defines or {}
+  self.defines[#self.defines + 1] = defname .. "  " .. defcontent
+end
+
+function Program:add_typedef(typedef)
+  assert(typedef)
+  self.typedefs = self.typedefs or {}
+  self.typedefs[#self.typedefs + 1] = typedef
+end
+
 function Program:add_function(func)
   assert(func)
   self.functions = self.functions or {}
@@ -54,6 +66,19 @@ function Program:write(dir)
   if self.includes then
     for _, inc in ipairs(self.includes) do
       outfile:write("#include " .. inc .. "\n")
+    end
+    outfile:write("\n")
+  end
+  if self.defines then
+    for _, def in ipairs(self.defines) do
+      outfile:write("#define " .. def .. "\n")
+    end
+    outfile:write("\n")
+  end
+  if self.typedefs then
+    for _, typedef in ipairs(self.typedefs) do
+      outfile:write(typedef)
+      outfile:write("\n")
     end
     outfile:write("\n")
   end
