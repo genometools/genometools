@@ -33,13 +33,13 @@ struct ScoreMatrix {
 
 ScoreMatrix* scorematrix_new(Alpha *alpha)
 {
-  ScoreMatrix *s;
+  ScoreMatrix *sm;
   assert(alpha);
-  s = ma_malloc(sizeof (ScoreMatrix));
-  s->alpha = alpha_ref(alpha);
-  s->dimension = alpha_size(alpha);
-  array2dim_calloc(s->scores, s->dimension, s->dimension);
-  return s;
+  sm = ma_malloc(sizeof (ScoreMatrix));
+  sm->alpha = alpha_ref(alpha);
+  sm->dimension = alpha_size(alpha);
+  array2dim_calloc(sm->scores, sm->dimension, sm->dimension);
+  return sm;
 }
 
 static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
@@ -104,7 +104,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
   return had_err;
 }
 
-static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
+static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
                             Array *index_to_alpha_char_mapping,
                             char *parsed_characters, Error *e)
 {
@@ -112,7 +112,7 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
   char amino_acid;
   int score, had_err = 0;
   Str *token;
-  assert(s && tz && index_to_alpha_char_mapping);
+  assert(sm && tz && index_to_alpha_char_mapping);
   error_check(e);
   token = tokenizer_get_token(tz);
   assert(token);
@@ -140,9 +140,9 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
                                tokenizer_get_filename(tz), e);
       if (had_err)
         break;
-      scorematrix_set_score(s,
-                            alpha_encode(s->alpha, amino_acid),
-                            alpha_encode(s->alpha, *(char*)
+      scorematrix_set_score(sm,
+                            alpha_encode(sm->alpha, amino_acid),
+                            alpha_encode(sm->alpha, *(char*)
                             array_get(index_to_alpha_char_mapping, i)), score);
       i++;
       str_delete(token);
@@ -155,7 +155,7 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
 }
 
 /* the score matrix parser */
-static int parse_scorematrix(ScoreMatrix *s, const char *path, Error *e)
+static int parse_scorematrix(ScoreMatrix *sm, const char *path, Error *e)
 {
   Tokenizer *tz;
   Array *index_to_alpha_char_mapping;
@@ -163,14 +163,14 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Error *e)
   char parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;
   error_check(e);
-  assert(s && path && s->alpha);
+  assert(sm && path && sm->alpha);
   tz = tokenizer_new(io_new(path, "r"));
   index_to_alpha_char_mapping = array_new(sizeof (char));
   tokenizer_skip_comment_lines(tz);
   had_err = parse_alphabet_line(index_to_alpha_char_mapping, tz, e);
   if (!had_err) {
     while (tokenizer_has_token(tz)) {
-      had_err = parse_score_line(s, tz, index_to_alpha_char_mapping,
+      had_err = parse_score_line(sm, tz, index_to_alpha_char_mapping,
                                  parsed_characters, e);
       if (had_err)
         break;
@@ -194,7 +194,7 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Error *e)
 ScoreMatrix* scorematrix_read_protein(const char *path, Error *e)
 {
   Alpha *protein_alpha;
-  ScoreMatrix *s;
+  ScoreMatrix *sm;
   int had_err;
 
   error_check(e);
@@ -202,69 +202,69 @@ ScoreMatrix* scorematrix_read_protein(const char *path, Error *e)
 
   /* create score matrix */
   protein_alpha = alpha_new_protein();
-  s = scorematrix_new(protein_alpha);
+  sm = scorematrix_new(protein_alpha);
   alpha_delete(protein_alpha);
 
   /* parse matrix file */
-  had_err = parse_scorematrix(s, path, e);
+  had_err = parse_scorematrix(sm, path, e);
 
   if (had_err) {
-    scorematrix_delete(s);
+    scorematrix_delete(sm);
     return NULL;
   }
-  return s;
+  return sm;
 }
 
-unsigned int scorematrix_get_dimension(const ScoreMatrix *s)
+unsigned int scorematrix_get_dimension(const ScoreMatrix *sm)
 {
-  assert(s);
-  return s->dimension;
+  assert(sm);
+  return sm->dimension;
 }
 
-int scorematrix_get_score(const ScoreMatrix *s,
+int scorematrix_get_score(const ScoreMatrix *sm,
                           unsigned int idx1, unsigned int idx2)
 {
-  assert(s);
-  assert(idx1 < s->dimension && idx2 < s->dimension); /* indices are valid */
-  return s->scores[idx1][idx2];
+  assert(sm);
+  assert(idx1 < sm->dimension && idx2 < sm->dimension); /* indices are valid */
+  return sm->scores[idx1][idx2];
 }
 
-void scorematrix_set_score(ScoreMatrix *s,
+void scorematrix_set_score(ScoreMatrix *sm,
                            unsigned int idx1, unsigned int idx2, int score)
 {
-  assert(s);
-  assert(idx1 < s->dimension && idx2 < s->dimension); /* indices are valid */
-  s->scores[idx1][idx2] = score;
+  assert(sm);
+  assert(idx1 < sm->dimension && idx2 < sm->dimension); /* indices are valid */
+  sm->scores[idx1][idx2] = score;
 }
 
-const int** scorematrix_get_scores(const ScoreMatrix *s)
+const int** scorematrix_get_scores(const ScoreMatrix *sm)
 {
-  assert(s);
-  return (const int**) s->scores;
+  assert(sm);
+  return (const int**) sm->scores;
 }
 
-void scorematrix_show(const ScoreMatrix *s, FILE *fp)
+void scorematrix_show(const ScoreMatrix *sm, FILE *fp)
 {
   unsigned i, j;
-  assert(s && fp);
+  assert(sm && fp);
   /* show alphabet line */
   xfputc(' ', fp);
-  for (i = 0; i < alpha_size(s->alpha); i++)
-    fprintf(fp, "  %c", alpha_decode(s->alpha, i));
+  for (i = 0; i < alpha_size(sm->alpha); i++)
+    fprintf(fp, "  %c", alpha_decode(sm->alpha, i));
   xfputc('\n', fp);
   /* show score lines */
-  for (i = 0; i < alpha_size(s->alpha); i++) {
-    xfputc(alpha_decode(s->alpha, i), fp);
-    for (j = 0; j < alpha_size(s->alpha); j++)
-      fprintf(fp, " %2d", scorematrix_get_score(s, i, j));
+  for (i = 0; i < alpha_size(sm->alpha); i++) {
+    xfputc(alpha_decode(sm->alpha, i), fp);
+    for (j = 0; j < alpha_size(sm->alpha); j++)
+      fprintf(fp, " %2d", scorematrix_get_score(sm, i, j));
     xfputc('\n', fp);
   }
 }
 
-void scorematrix_delete(ScoreMatrix *s)
+void scorematrix_delete(ScoreMatrix *sm)
 {
-  if (!s) return;
-  alpha_delete(s->alpha);
-  array2dim_delete(s->scores);
-  ma_free(s);
+  if (!sm) return;
+  alpha_delete(sm->alpha);
+  array2dim_delete(sm->scores);
+  ma_free(sm);
 }

@@ -38,29 +38,29 @@ ScoreFunction* scorefunction_new(ScoreMatrix *sm, int deletion_score,
   return sf;
 }
 
-int scorefunction_get_score(const ScoreFunction *s,
+int scorefunction_get_score(const ScoreFunction *sf,
                             unsigned int idx1, unsigned int idx2)
 {
-  assert(s);
-  return scorematrix_get_score(s->sm, idx1, idx2);
+  assert(sf);
+  return scorematrix_get_score(sf->sm, idx1, idx2);
 }
 
-const int** scorefunction_get_scores(const ScoreFunction *s)
+const int** scorefunction_get_scores(const ScoreFunction *sf)
 {
-  assert(s);
-  return scorematrix_get_scores(s->sm);
+  assert(sf);
+  return scorematrix_get_scores(sf->sm);
 }
 
-int scorefunction_get_deletion_score(const ScoreFunction *s)
+int scorefunction_get_deletion_score(const ScoreFunction *sf)
 {
-  assert(s);
-  return s->deletion_score;
+  assert(sf);
+  return sf->deletion_score;
 }
 
-int scorefunction_get_insertion_score(const ScoreFunction *s)
+int scorefunction_get_insertion_score(const ScoreFunction *sf)
 {
-  assert(s);
-  return s->insertion_score;
+  assert(sf);
+  return sf->insertion_score;
 }
 
 void scorefunction_delete(ScoreFunction *sf)
