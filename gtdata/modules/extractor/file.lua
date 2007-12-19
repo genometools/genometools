@@ -63,6 +63,7 @@ function File:remove_example()
 end
 
 function File:remove_unit_test()
+  self:remove_include("ensure.h")
   local prefix = self.basename:gsub("%.[ch]", "_")
   self:remove_function(prefix .. "unit_test")
 end
