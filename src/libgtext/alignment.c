@@ -183,7 +183,7 @@ unsigned long alignment_eval(const Alignment *a)
   return sumcost;
 }
 
-  /* XXX: add width parameter and format the Alignment accordingly */
+/* XXX: add width parameter and format the Alignment accordingly */
 void alignment_show(const Alignment *a, FILE *fp)
 {
   unsigned long i, j, uctr, vctr;
