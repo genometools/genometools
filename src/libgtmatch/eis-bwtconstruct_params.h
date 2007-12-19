@@ -90,4 +90,13 @@ extern void
 computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles,
                            Error *err);
 
+/**
+ * @brief Computes feature set of base index of type EISeq from
+ * optimization flags set for BWT index.
+ * @param BWTOptFlags
+ * @return set of enum EISFeatureBits toggles
+ */
+extern int
+convertBWTOptFlags2EISFeatures(int BWTOptFlags);
+
 #endif

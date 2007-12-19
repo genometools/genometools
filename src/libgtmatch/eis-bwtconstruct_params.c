@@ -77,23 +77,31 @@ computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles,
     paramOutput->final.featureToggles
       |= estimateBestLocateTypeFeature(paramOutput, err);
   paramOutput->final.featureToggles |= extraToggles;
-  switch (paramOutput->final.baseType)
   {
-  case BWT_ON_BLOCK_ENC:
+    int EISFeatureSet
+      = convertBWTOptFlags2EISFeatures(paramOutput->defaultOptimizationFlags);
+    switch (paramOutput->final.baseType)
     {
-      int *EISFeatureSet = &paramOutput->final.seqParams.blockEnc.EISFeatureSet;
-      *EISFeatureSet = EIS_FEATURE_NONE;
-      if (paramOutput->defaultOptimizationFlags & BWTDEFOPT_LOW_RAM_OVERHEAD)
-      {
-        *EISFeatureSet &= ~EIS_FEATURE_REGION_SUMS;
-      }
-      if (paramOutput->defaultOptimizationFlags & BWTDEFOPT_FAST_RANK)
-      {
-        *EISFeatureSet |= EIS_FEATURE_REGION_SUMS;
-      }
+    case BWT_ON_BLOCK_ENC:
+      paramOutput->final.seqParams.blockEnc.EISFeatureSet = EISFeatureSet;
+      break;
+    default:
+      break;
     }
-    break;
-  default:
-    break;
   }
+}
+
+extern int
+convertBWTOptFlags2EISFeatures(int BWTOptFlags)
+{
+  int EISFeatureSet = EIS_FEATURE_NONE;
+  if (BWTOptFlags & BWTDEFOPT_LOW_RAM_OVERHEAD)
+  {
+    EISFeatureSet &= ~EIS_FEATURE_REGION_SUMS;
+  }
+  if (BWTOptFlags & BWTDEFOPT_FAST_RANK)
+  {
+    EISFeatureSet |= EIS_FEATURE_REGION_SUMS;
+  }
+  return EISFeatureSet;
 }
