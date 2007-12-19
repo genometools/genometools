@@ -294,10 +294,11 @@ EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Error *err);
  * \brief Construct new hinting structure to accelerate operations on
  * related positions.
  * @param seq reference of sequence object to use
- * @param err genometools state, passes information about allocator etc
+ * @param err genometools error object
+ * @return new EISHint handle
  */
 static inline EISHint
-newEISHint(EISeq *seq, Error *err);
+newEISHint(const EISeq *seq, Error *err);
 
 /**
  * Deallocate hinting data.

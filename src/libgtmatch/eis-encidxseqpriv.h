@@ -31,7 +31,7 @@ struct encIdxSeqClass
                    union EISHint *hint, Error *err);
   Symbol (*get)(EISeq *seq, Seqpos pos, EISHint hint,
                 Error *err);
-  union EISHint *(*newHint)(EISeq *seq, Error *err);
+  union EISHint *(*newHint)(const EISeq *seq, Error *err);
   void (*deleteHint)(EISeq *seq, EISHint hint);
   const MRAEnc *(*getAlphabet)(const EISeq *seq);
   void (*expose)(EISeq *seq, Seqpos pos, int persistent,
@@ -41,6 +41,8 @@ struct encIdxSeqClass
                         uint32_t *lenRet);
   int (*printPosDiags)(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
                        Error *err);
+  int (*printExtPosDiags)(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
+                          Error *err);
 };
 
 struct encIdxSeq
