@@ -48,6 +48,14 @@ function display(filename)
   end
 end
 
+-- show all keys and values of table <tbl>
+function show_table(tbl)
+  assert(tbl)
+  for k,v in pairs(tbl) do
+    print(string.format("k=%s, v=%s", k, type(v)))
+  end
+end
+
 -- show content of gt table
 function show(all)
   local a = {}
@@ -62,4 +70,10 @@ function show(all)
       print(v)
     end
   end
+end
+
+-- reload and export
+function re()
+  reload()
+  export()
 end

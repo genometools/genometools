@@ -17,6 +17,8 @@
 
 module(..., package.seeall)
 
+require "gtlua.genome_features"
+
 function GenomeTools_feature_index_mt:get_coverage(seqid, maxdist)
   assert(seqid)
   local maxdist = maxdist or 0
@@ -56,6 +58,19 @@ function GenomeTools_feature_index_mt:get_coverage(seqid, maxdist)
   -- add last region
   coverage[#coverage+1] = gt.range_new(minstartpos, maxendpos)
   return coverage
+end
+
+function GenomeTools_feature_index_mt:get_marked_regions(seqid, maxdist)
+  assert(seqid, "missing seqid argument")
+  local coverage = self:get_coverage(seqid, maxdist)
+  local marked = {}
+  for _,range in ipairs(coverage) do
+    local features = feature_index:get_features_for_range(seqid, range)
+    if gt.features_contain_marked(features) then
+      marked[#marked+1] = range
+    end
+  end
+  return marked
 end
 
 -- render PNG file <png_file> for <seqid> in <range> with optional <width>
