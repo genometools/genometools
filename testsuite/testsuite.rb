@@ -115,6 +115,7 @@ if $arguments["libgtview"] then
   require 'gt_view_include'
 end
 require 'gt_env_options_include'
+require 'scripts_include'
 
 if $arguments["gcov"] then
   require 'gcov_include' # must be last

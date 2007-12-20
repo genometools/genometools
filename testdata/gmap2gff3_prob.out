@@ -1,0 +1,20 @@
+##gff-version   3
+##sequence-region ENr213 20563762 20789928
+ENr213	gmap	gene	20563762	20789928	.	-	.	ID=gene1
+ENr213	gmap	exon	20789754	20789928	.	-	.	Parent=gene1
+ENr213	gmap	exon	20760464	20760575	.	-	.	Parent=gene1
+ENr213	gmap	exon	20626474	20626700	.	-	.	Parent=gene1
+ENr213	gmap	exon	20624637	20624783	.	-	.	Parent=gene1
+ENr213	gmap	exon	20622508	20622663	.	-	.	Parent=gene1
+ENr213	gmap	exon	20618640	20618784	.	-	.	Parent=gene1
+ENr213	gmap	exon	20615788	20615960	.	-	.	Parent=gene1
+ENr213	gmap	exon	20606291	20606428	.	-	.	Parent=gene1
+ENr213	gmap	exon	20605446	20605631	.	-	.	Parent=gene1
+ENr213	gmap	exon	20602888	20603141	.	-	.	Parent=gene1
+ENr213	gmap	exon	20601315	20601457	.	-	.	Parent=gene1
+ENr213	gmap	exon	20598319	20598552	.	-	.	Parent=gene1
+ENr213	gmap	exon	20597791	20598024	.	-	.	Parent=gene1
+ENr213	gmap	exon	20595735	20595874	.	-	.	Parent=gene1
+ENr213	gmap	exon	20576148	20576312	.	-	.	Parent=gene1
+ENr213	gmap	exon	20563762	20565150	.	-	.	Parent=gene1
+###

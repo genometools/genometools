@@ -114,6 +114,8 @@ class GMAPParser
         # construct gene
         exon_border = []
         exon_border.push(exons.first.begin)
+        exon_border.push(exons.first.end)
+        exon_border.push(exons.last.begin)
         exon_border.push(exons.last.end)
         gene_range = Range.new(exon_border.min, exon_border.max)
         raise if gene_range.begin > gene_range.end
