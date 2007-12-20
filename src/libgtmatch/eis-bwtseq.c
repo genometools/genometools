@@ -38,12 +38,11 @@
 
 static int
 initBWTSeqFromEncSeqIdx(struct BWTSeq *bwtSeq, struct encIdxSeq *baseSeqIdx,
-                        MRAEnc *alphabet, Seqpos longest, Seqpos *counts,
+                        MRAEnc *alphabet, Seqpos *counts,
                         Error *err);
 
 static BWTSeq *
-newBWTSeq(struct encIdxSeq *seqIdx, MRAEnc *alphabet, Seqpos longest,
-          Error *err);
+newBWTSeq(struct encIdxSeq *seqIdx, MRAEnc *alphabet, Error *err);
 
 extern BWTSeq *
 availBWTSeq(const struct bwtParam *params, Error *err)
@@ -125,8 +124,6 @@ loadBWTSeqForSA(const struct bwtParam *params, Suffixarray *sa,
   EISeq *seqIdx = NULL;
   MRAEnc *alphabet = NULL;
   assert(params && sa && err);
-  if (!sa->longest.defined)
-    return NULL;
   alphabet = newMRAEncFromSA(sa, err);
   switch (params->baseType)
   {
@@ -135,7 +132,7 @@ loadBWTSeqForSA(const struct bwtParam *params, Suffixarray *sa,
            sa, totalLen, params->projectName,
            params->seqParams.blockEnc.EISFeatureSet, err)))
     {
-      if (!(bwtSeq = newBWTSeq(seqIdx, alphabet, sa->longest.valueseqpos, err)))
+      if (!(bwtSeq = newBWTSeq(seqIdx, alphabet, err)))
         break;
       fputs("Using pre-computed sequence index.\n", stderr);
     }
@@ -155,10 +152,15 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
 {
   BWTSeq *bwtSeq = NULL;
   MRAEnc *alphabet = NULL;
-  if (params->locateInterval &&
-      (!sa->suftabstream.fp || !sa->longest.defined))
+  if (params->locateInterval && !sa->suftabstream.fp)
   {
     fprintf(stderr, "error: locate sampling requested but not available"
+            " for project %s\n", str_get(params->projectName));
+  }
+  else if (!sa->longest.defined)
+  {
+    fprintf(stderr,
+            "error: position of null-rotation/longest suffix not available"
             " for project %s\n", str_get(params->projectName));
   }
   else
@@ -179,7 +181,7 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
       break;
     }
     if (seqIdx)
-      bwtSeq = newBWTSeq(seqIdx, alphabet, sa->longest.valueseqpos, err);
+      bwtSeq = newBWTSeq(seqIdx, alphabet, err);
     if (!bwtSeq)
     {
       if (seqIdx)
@@ -239,11 +241,7 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
     (reportLongest)getSfxILongestPos, si, err);
   if (seqIdx)
   {
-    DefinedSeqpos longest = getSfxILongestPos(si);
-    if (longest.defined)
-      bwtSeq = newBWTSeq(seqIdx, alphabet, longest.valueseqpos, err);
-    else
-      error_set(err, "Position of terminator in BWT not found!");
+    bwtSeq = newBWTSeq(seqIdx, alphabet, err);
   }
   if (!bwtSeq && seqIdx)
     deleteEncIdxSeq(seqIdx);
@@ -256,7 +254,7 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
  */
 static int
 initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
-                        MRAEnc *alphabet, Seqpos longest, Seqpos *counts,
+                        MRAEnc *alphabet, Seqpos *counts,
                         Error *err)
 {
   size_t alphabetSize;
@@ -331,7 +329,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
  * sequence object if return value is non-NULL
  */
 static BWTSeq *
-newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet, Seqpos longest, Error *err)
+newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet, Error *err)
 {
   BWTSeq *bwtSeq;
   Seqpos *counts;
@@ -346,7 +344,7 @@ newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet, Seqpos longest, Error *err)
   counts = (Seqpos *)((char  *)bwtSeq
                       + offsetAlign(sizeof (struct BWTSeq),
                                     sizeof (Seqpos)));
-  if (!initBWTSeqFromEncSeqIdx(bwtSeq, seqIdx, alphabet, longest, counts, err))
+  if (!initBWTSeqFromEncSeqIdx(bwtSeq, seqIdx, alphabet, counts, err))
   {
     ma_free(bwtSeq);
     bwtSeq = NULL;
