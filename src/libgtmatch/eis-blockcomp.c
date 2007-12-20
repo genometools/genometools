@@ -1224,7 +1224,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
   unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
               blockSize);
   if (queryRangeEnc)
-    SRLapplyRangesToSubString(seqIdx->rangeEncs, seqIdx->rangeMapAlphabet,
+    SRLApplyRangesToSubString(seqIdx->rangeEncs,
                               block, blockNum * blockSize, blockSize,
                               blockNum * blockSize, &hint->rangeHint);
 #ifndef USE_SBLOCK_CACHE
@@ -2288,6 +2288,7 @@ enum {
   BUCKET_PRINT_BITSTRING           = 1 <<  0,
   BUCKET_PRINT_BITSTRING_SEPARATOR = 1 <<  1,
   BUCKET_PRINT_BITSIZES            = 1 <<  2,
+  BUCKET_PRINT_RANGES_OVERLAY      = 1 <<  3,
 };
 
 static int
@@ -2383,6 +2384,8 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
       bsPrint(fp, sBlock->cwData,
               cwPreVarIdxBits(seqIdx) + sBlock->cwIdxMemBase,
               seqIdx->bitsPerVarDiskOffset);
+      if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
+        outCount += fputs("&", fp);
       if (seqIdx->callBackDataOffsetBits)
       {
         bsPrint(fp, sBlock->cwData, sBlockGetcbOffsetOffset(sBlock, seqIdx),
@@ -2420,8 +2423,17 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
                 nextVarIdxOffset - varIdxOffset);
         fprintf(fp, "\n# varIdxOffset for next block: %llu",
                 (unsigned long long)nextVarIdxOffset);
+#ifndef USE_SBLOCK_CACHE
+        deleteSuperBlock(sBlock, err);
+#endif
       }
       fputs("\n", fp);
+    }
+    if (flags & BUCKET_PRINT_RANGES_OVERLAY)
+    {
+      fputs("# overlapping symbol ranges:\n", fp);
+      SRLPrintRangesInfo(seqIdx->rangeEncs, fp, start, end - start,
+                         &hint->bcHint.rangeHint);
     }
   }
   return outCount;
@@ -2477,7 +2489,8 @@ displayBlockEncBlock(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
   seqIdx = constEncIdxSeq2blockCompositionSeq(seq);
   bucketNum = bucketNumFromPos(seqIdx, pos);
   outCount = printBucket(seqIdx, bucketNum, BUCKET_PRINT_BITSTRING_SEPARATOR
-                         | BUCKET_PRINT_BITSTRING | BUCKET_PRINT_BITSIZES,
+                         | BUCKET_PRINT_BITSTRING | BUCKET_PRINT_BITSIZES
+                         | BUCKET_PRINT_RANGES_OVERLAY,
                          fp, hint, err);
   return outCount;
 }

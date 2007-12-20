@@ -180,7 +180,6 @@ SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
  * ranges in the list with the symbol for that range.
  *
  * @param rangeList
- * @param alphabet
  * @param subString write symbols in ranges at subStringOffset+i to subString[i]
  * @param start start only use ranges overlapping [start..end-1]
  * @param len
@@ -189,10 +188,24 @@ SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
  * @param hint
  */
 extern void
-SRLapplyRangesToSubString(struct seqRangeList *rangeList, MRAEnc *alphabet,
+SRLApplyRangesToSubString(struct seqRangeList *rangeList,
                           Symbol *subString, Seqpos start, Seqpos len,
                           Seqpos subStringOffset, seqRangeListSearchHint *hint);
 
+/**
+ * @brief Print text description of ranges overlapping the given
+ * region.
+ *
+ * @param rangeList
+ * @param fp print description to this file
+ * @param start
+ * @param len
+ * @param hint
+ * @return <0 in case of I/O error, >=0 otherwise.
+ */
+extern int
+SRLPrintRangesInfo(struct seqRangeList *rangeList, FILE *fp, Seqpos start,
+                   Seqpos len, seqRangeListSearchHint *hint);
 /**
  * @brief Save a range list structure to file.
  * @param rangeList

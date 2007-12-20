@@ -679,7 +679,7 @@ SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
 }
 
 void
-SRLapplyRangesToSubString(struct seqRangeList *rangeList, MRAEnc *alphabet,
+SRLApplyRangesToSubString(struct seqRangeList *rangeList,
                           Symbol *subString, Seqpos start, Seqpos len,
                           Seqpos subStringOffset, seqRangeListSearchHint *hint)
 {
@@ -699,7 +699,7 @@ SRLapplyRangesToSubString(struct seqRangeList *rangeList, MRAEnc *alphabet,
       unsigned maxSubstPos =
         MIN(nextRange->startPos + seqRangeLen(nextRange, symBits),
             start + len) - subStringOffset;
-      Symbol sym = MRAEncRevMapSymbol(alphabet,
+      Symbol sym = MRAEncRevMapSymbol(rangeList->alphabet,
                                       seqRangeSym(nextRange, symBits));
       for (i = inSeqPos - subStringOffset; i < maxSubstPos; ++i)
         subString[i] = sym;
@@ -709,3 +709,41 @@ SRLapplyRangesToSubString(struct seqRangeList *rangeList, MRAEnc *alphabet,
   } while (inSeqPos < start + len);
 }
 
+extern int
+SRLPrintRangesInfo(struct seqRangeList *rangeList, FILE *fp, Seqpos start,
+                   Seqpos len, seqRangeListSearchHint *hint)
+{
+  struct seqRange *nextRange;
+  Seqpos end = start + len;
+  unsigned symBits = rangeList->symBits;
+  int result = 0;
+  assert(rangeList);
+  nextRange = SRLFindPositionNext(rangeList, start, hint);
+  while (nextRange->startPos < end)
+  {
+    if (rangeList->partialSymSums)
+    {
+      size_t numSyms = MRAEncGetSize(rangeList->alphabet);
+      size_t pOff = nextRange - rangeList->ranges;
+      Symbol sym;
+      fputs("# range partial sums:", fp);
+      for (sym = 0; sym < numSyms; ++sym)
+        fprintf(fp, " sum[%u]="FormatSeqpos,
+                MRAEncRevMapSymbol(rangeList->alphabet, sym),
+                rangeList->partialSymSums[pOff * numSyms + sym]);
+      fputs("\n", fp);
+    }
+    if (result +=
+        fprintf(fp, "# range overlap: symbol %u, start="FormatSeqpos", length="
+                FormatSeqpos"\n",
+                MRAEncRevMapSymbol(rangeList->alphabet,
+                                   seqRangeSym(nextRange, symBits)),
+                nextRange->startPos, seqRangeLen(nextRange, symBits)) < 0)
+    {
+      result = -1;
+      break;
+    }
+    ++nextRange;
+  }
+  return result;
+}
