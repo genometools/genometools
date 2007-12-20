@@ -163,6 +163,7 @@ int luaopen_feature_index(lua_State *L)
   lua_settable(L, -3);
   /* register functions */
   luaL_register(L, NULL, feature_index_lib_m);
+  lua_setglobal(L, FEATURE_INDEX_METATABLE); /* export metatable */
   luaL_register(L, "gt", feature_index_lib_f);
   return 1;
 }

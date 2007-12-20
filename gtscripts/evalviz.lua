@@ -101,7 +101,7 @@ function write_marked_regions(seqid, filenumber, maxdist)
       range = r
       local filename = png_dir .. "/" .. filenumber .. ".png"
       io.write(string.format("writing file '%s'\n", filename))
-      gt.render_to_png(feature_index, filename, seqid, width)
+      feature_index:render_to_png(filename, seqid, width)
       filenumber = filenumber + 1
     end
   end
