@@ -54,10 +54,9 @@ end
 function write_marked_regions(seqid, filenumber, maxdist)
   assert(seqid)
   local coverage = feature_index:get_coverage(seqid, maxdist)
-  for i, r in ipairs(coverage) do
-    local features = feature_index:get_features_for_range(seqid, r)
+  for _,range in ipairs(coverage) do
+    local features = feature_index:get_features_for_range(seqid, range)
     if gt.features_contain_marked(features) then
-      range = r
       local filename = png_dir .. "/" .. filenumber .. ".png"
       io.write(string.format("writing file '%s'\n", filename))
       feature_index:render_to_png(filename, seqid, range, width)
@@ -83,6 +82,5 @@ filenumber = 1
 width = 1600
 for _, seqid in ipairs(feature_index:get_seqids()) do
   print(string.format("seqid '%s'", seqid))
-  range = feature_index:get_range_for_seqid(seqid)
   filenumber = write_marked_regions(seqid, filenumber)
 end
