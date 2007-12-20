@@ -23,7 +23,7 @@
 #include "libgtlua/render_lua.h"
 #include "libgtview/render.h"
 
-#define RENDER_METATABLE  "GenomeTools_render_mt"
+#define RENDER_METATABLE  "GenomeTools.render"
 #define check_render(L) \
         (Render**) luaL_checkudata(L, 1, RENDER_METATABLE)
 

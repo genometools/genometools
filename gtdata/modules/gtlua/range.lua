@@ -17,6 +17,6 @@
 
 module(..., package.seeall)
 
-function GenomeTools_range_mt:show()
+function GenomeTools_range:show()
   print(string.format("%u, %u", self:get_start(), self:get_end()))
 end

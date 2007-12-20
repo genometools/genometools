@@ -16,8 +16,11 @@
 */
 
 #include <assert.h>
+#include <string.h>
 #include "lauxlib.h"
+#include "libgtcore/cstr.h"
 #include "libgtcore/gtdatapath.h"
+#include "libgtcore/ma.h"
 #include "libgtlua/helper.h"
 
 #ifdef LIBGTVIEW
@@ -98,6 +101,18 @@ void luaset_arg(lua_State *L, const char *argv_0, const char **argv)
   }
   /* register table globally */
   lua_setglobal(L, "arg");
+}
+
+void lua_export_metatable(lua_State *L, const char *metatable_desc)
+{
+  char *dot, *mt;
+  assert(L && metatable_desc);
+  mt = cstr_dup(metatable_desc);
+  dot = strchr(mt, '.');
+  assert(dot);
+  *dot = '_';
+  lua_setglobal(L, mt);
+  ma_free(mt);
 }
 
 int luagt_error(lua_State *L, Error *err)

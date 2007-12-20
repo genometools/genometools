@@ -20,7 +20,7 @@
 #include "libgtlua/helper.h"
 #include "libgtlua/scorematrix_lua.h"
 
-#define SCOREMATRIX_METATABLE  "GenomeTools_scorematrix_mt"
+#define SCOREMATRIX_METATABLE  "GenomeTools.scorematrix"
 #define check_scorematrix(L, POS) \
         (ScoreMatrix**) luaL_checkudata(L, POS, SCOREMATRIX_METATABLE)
 

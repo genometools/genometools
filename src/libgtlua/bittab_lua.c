@@ -22,7 +22,7 @@
 #include "libgtlua/gtcore_lua.h"
 #include "libgtlua/helper.h"
 
-#define BITTAB_METATABLE  "GenomeTools_bittab_mt"
+#define BITTAB_METATABLE  "GenomeTools.bittab"
 #define check_bittab(L, POS) \
         (Bittab**) luaL_checkudata(L, POS, BITTAB_METATABLE)
 

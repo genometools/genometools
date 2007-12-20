@@ -19,7 +19,7 @@ module(..., package.seeall)
 
 require "gtlua.genome_features"
 
-function GenomeTools_feature_index_mt:get_coverage(seqid, maxdist)
+function GenomeTools_feature_index:get_coverage(seqid, maxdist)
   assert(seqid)
   local maxdist = maxdist or 0
   local features = self:get_features_for_seqid(seqid)
@@ -60,7 +60,7 @@ function GenomeTools_feature_index_mt:get_coverage(seqid, maxdist)
   return coverage
 end
 
-function GenomeTools_feature_index_mt:get_marked_regions(seqid, maxdist)
+function GenomeTools_feature_index:get_marked_regions(seqid, maxdist)
   assert(seqid, "missing seqid argument")
   local coverage = self:get_coverage(seqid, maxdist)
   local marked = {}
@@ -74,7 +74,7 @@ function GenomeTools_feature_index_mt:get_marked_regions(seqid, maxdist)
 end
 
 -- render PNG file <png_file> for <seqid> in <range> with optional <width>
-function GenomeTools_feature_index_mt:render_to_png(png_file, seqid, range, width)
+function GenomeTools_feature_index:render_to_png(png_file, seqid, range, width)
   assert(self and png_file and seqid and range)
   if not width then width = 1600 end
   local diagram = gt.diagram_new(self, seqid, range)
@@ -83,7 +83,7 @@ function GenomeTools_feature_index_mt:render_to_png(png_file, seqid, range, widt
 end
 
 -- show all sequence ids
-function GenomeTools_feature_index_mt:show_seqids()
+function GenomeTools_feature_index:show_seqids()
   for _,seqid in ipairs(feature_index:get_seqids()) do
     print(seqid)
   end

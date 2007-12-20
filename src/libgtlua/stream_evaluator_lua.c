@@ -24,7 +24,7 @@
 #include "libgtlua/helper.h"
 #include "libgtlua/stream_evaluator_lua.h"
 
-#define STREAM_EVALUATOR_METATABLE  "GenomeTools_stream_evaluator_mt"
+#define STREAM_EVALUATOR_METATABLE  "GenomeTools.stream_evaluator"
 #define check_stream_evaluator(L) \
         (StreamEvaluator**) luaL_checkudata(L, 1, STREAM_EVALUATOR_METATABLE)
 

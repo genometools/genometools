@@ -38,7 +38,7 @@ int luaopen_genome_node(lua_State*);
 /* push a GenomeNode to Lua, takes ownership! */
 void genome_node_lua_push(lua_State*, GenomeNode*);
 
-#define GENOME_NODE_METATABLE  "GenomeTools_genome_node_mt"
+#define GENOME_NODE_METATABLE  "GenomeTools.genome_node"
 #define check_genome_node(L, POS) \
                 (GenomeNode**) luaL_checkudata(L, POS, GENOME_NODE_METATABLE)
 
