@@ -56,8 +56,10 @@ SYSTEM:=$(shell uname -s)
 MACHINE:=$(shell uname -m)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
-  SHARED:=-dynamic -bundle
+  SHARED:=-dynamiclib
+  SHARED_OBJ_NAME_EXT:=.dylib
 else
+  SHARED_OBJ_NAME_EXT:=.so
   SHARED:=-shared
 endif
 
@@ -69,8 +71,8 @@ GTLIBS:=lib/libgtext.a\
         lib/libgtlua.a
 
 # the default GenomeThreader shared libraries which are build
-GTSHAREDLIBS:=lib/libgtcore.so\
-              lib/libgtext.so
+GTSHAREDLIBS:=lib/libgtcore$(SHARED_OBJ_NAME_EXT)\
+              lib/libgtext$(SHARED_OBJ_NAME_EXT)
 
 # libraries for which we build replacements (that also appear in dependencies)
 EXP_LDLIBS+=-lz -lbz2
@@ -259,7 +261,7 @@ endif
 
 ifeq ($(libgtview),yes)
   GTLIBS := $(GTLIBS) lib/libgtview.a
-  GTSHAREDLIBS := $(GTSHAREDLIBS) lib/libgtview.so
+  GTSHAREDLIBS := $(GTSHAREDLIBS) lib/libgtview$(SHARED_OBJ_NAME_EXT)
   EXP_CPPFLAGS += -DLIBGTVIEW
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
@@ -313,7 +315,7 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtcore.so: obj/gt_config.h $(LIBGTCORE_OBJ)
+lib/libgtcore$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(LIBGTCORE_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTCORE_OBJ) \
@@ -327,11 +329,11 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtext.so: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ) \
-  lib/libgtcore.so
+lib/libgtext$(SHARED_OBJ_NAME_EXT): $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) \
+  $(LIBLUA_OBJ) lib/libgtcore$(SHARED_OBJ_NAME_EXT)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTEXT_C_OBJ) \
+	$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTEXT_C_OBJ) \
           $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ) -o $@ $(LIBGTEXT_LIBDEP)
 
 lib/libgtmatch.a: $(LIBGTMATCH_OBJ)
@@ -359,8 +361,8 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtview.so: obj/gt_config.h $(LIBGTVIEW_C_OBJ) lib/libgtcore.so \
-  lib/libgtext.so	
+lib/libgtview$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(LIBGTVIEW_C_OBJ) \
+  lib/libgtcore$(SHARED_OBJ_NAME_EXT) lib/libgtext$(SHARED_OBJ_NAME_EXT)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTVIEW_C_OBJ) \
