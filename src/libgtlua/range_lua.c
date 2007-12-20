@@ -148,6 +148,7 @@ int luaopen_range(lua_State *L)
   lua_setfield(L, -2, "__index");
   /* register functions */
   luaL_register(L, NULL, range_lib_m);
+  lua_setglobal(L, RANGE_METATABLE); /* export metatable */
   luaL_register(L, "gt", range_lib_f);
   return 1;
 }
