@@ -59,8 +59,8 @@ function GenomeTools_feature_index_mt:get_coverage(seqid, maxdist)
 end
 
 -- render
-function GenomeTools_feature_index_mt:render_to_png(png_file, seqid, width)
-  assert(self and png_file and seqid)
+function GenomeTools_feature_index_mt:render_to_png(png_file, seqid, range, width)
+  assert(self and png_file and seqid and range)
   if not width then width = 1600 end
   local diagram = gt.diagram_new(self, seqid, range)
   local render =  gt.render_new()
