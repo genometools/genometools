@@ -54,7 +54,7 @@ function GenomeTools_feature_index_mt:get_coverage(seqid, maxdist)
     end
   end
   -- add last region
-  table.insert(coverage, gt.range_new(minstartpos, maxendpos))
+  coverage[#coverage+1] = gt.range_new(minstartpos, maxendpos)
   return coverage
 end
 
