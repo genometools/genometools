@@ -24,6 +24,7 @@ function export()
   end
 end
 
+-- show content of gt table
 function show(all)
   local a = {}
   for k in pairs(gt) do
