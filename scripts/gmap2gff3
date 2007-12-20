@@ -19,10 +19,6 @@
 $:.push(File.dirname($0))
 require 'gff3'
 
-if ARGV.size == 0
-  raise "Usage: #{$0} contig_file [file ...]"
-end
-
 class Scanner
   def initialize(input)
     @input = input
@@ -51,9 +47,8 @@ class Scanner
 end
 
 class GMAPParser
-  def initialize(sequences, coordinate_mapping = nil)
+  def initialize(sequences)
     @sequences = sequences
-    @coordinate_mapping = coordinate_mapping
     @current_accession = nil
     @current_strand = nil
   end
@@ -110,13 +105,6 @@ class GMAPParser
           if exon.begin > exon.end then
             exon = Range.new(exon.end, exon.begin)
           end
-          if @coordinate_mapping and
-             @coordinate_mapping[@current_accession] then
-            exon = Range.new(exon.begin - \
-                             @coordinate_mapping[@current_accession] + 1,
-                             exon.end - \
-                             @coordinate_mapping[@current_accession] + 1)
-          end
           exons.push(exon)
         end
         if exons.size == 0 then
@@ -147,19 +135,8 @@ class GMAPParser
   end
 end
 
-def compute_coordinate_mapping(filename)
-  mapping = {}
-  File.open(filename).each do |line|
-    if line =~ /^(\S+)\s+(\d+)/ then
-      mapping[$1] = $2.to_i
-    end
-  end
-  mapping
-end
-
 # read input
 sequences = {}
-#gmap_parser = GMAPParser.new(sequences, compute_coordinate_mapping(contig_file))
 gmap_parser = GMAPParser.new(sequences)
 gmap_parser.parse(Scanner.new(ARGF))
 
