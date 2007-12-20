@@ -81,3 +81,7 @@ for _, seqid in ipairs(feature_index:get_seqids()) do
   print(string.format("seqid '%s'", seqid))
   filenumber = write_marked_regions(seqid, filenumber)
 end
+
+-- get ready for interactive mode
+fi = feature_index
+gt.export()
