@@ -17,6 +17,13 @@
 
 module(..., package.seeall)
 
+-- export the content of gt table to the global environment
+function export()
+  for k,v in pairs(gt) do
+    _G[k] = v
+  end
+end
+
 function show(all)
   local a = {}
   for k in pairs(gt) do
