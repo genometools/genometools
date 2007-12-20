@@ -17,10 +17,34 @@
 
 module(..., package.seeall)
 
+require 'lfs'
+
 -- export the content of gt table to the global environment
 function export()
   for k,v in pairs(gt) do
     _G[k] = v
+  end
+end
+
+-- returns true if file with <filename> exists, false otherwise
+function file_exists(filename)
+  assert(filename)
+  if lfs.attributes(filename, "mode") then
+    return true
+  else
+    return false
+  end
+end
+
+-- call external 'display' program for file <filename>
+function display(filename)
+  assert(filename and file_exists(filename))
+  if os.execute("display " .. filename) ~= 0 then
+    io.stdout:write("\nexit (type 'y' to confirm)? ")
+    if io.stdin:read() == "y" then
+      print("bye")
+      os.exit(0)
+    end
   end
 end
 

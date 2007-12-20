@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ]]
 
-require 'lfs'
+require 'gtlua'
 
 function usage()
   io.stderr:write(string.format("Usage: %s PNG_dir\n", arg[0]))
@@ -35,26 +35,11 @@ else
   usage()
 end
 
-function file_exists(filename)
-  assert(filename)
-  if lfs.attributes(filename, "mode") then
-    return true
-  else
-    return false
-  end
-end
-
 filenumber = 1
 while (true) do
   local filename = png_dir .. "/" .. filenumber .. ".png"
-  if file_exists(filename) then
-    if os.execute("display " .. filename) ~= 0 then
-      io.stdout:write("\nexit (type 'y' to confirm)? ")
-      if io.stdin:read() == "y" then
-        print("bye")
-        os.exit(0)
-      end
-    end
+  if gt.file_exists(filename) then
+    gt.display(filename)
     filenumber = filenumber + 1
   else
     break
