@@ -20,7 +20,7 @@
 #include "libgtlua/helper.h"
 #include "libgtlua/alpha_lua.h"
 
-#define ALPHA_METATABLE  "GenomeTools.alpha"
+#define ALPHA_METATABLE  "GenomeTools_alpha_mt"
 #define check_alpha(L, POS) \
         (Alpha**) luaL_checkudata(L, POS, ALPHA_METATABLE)
 

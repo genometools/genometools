@@ -20,7 +20,7 @@
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/genome_node_iterator_lua.h"
 
-#define GENOME_NODE_ITERATOR_METATABLE  "GenomeTools.genome_node_iterator"
+#define GENOME_NODE_ITERATOR_METATABLE  "GenomeTools_genome_node_iterator_mt"
 #define check_genome_node_iterator(L, POS) \
         (GenomeNodeIterator**) \
         luaL_checkudata(L, POS, GENOME_NODE_ITERATOR_METATABLE)
