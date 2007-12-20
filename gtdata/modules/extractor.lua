@@ -18,11 +18,11 @@
 module(..., package.seeall)
 
 -- all extractor modules which should be loaded
-local extractormodules = { "extractor/file",
-                           "extractor/makefile",
-                           "extractor/module",
-                           "extractor/program",
-                           "extractor/project" }
+local extractormodules = { "extractor.file",
+                           "extractor.makefile",
+                           "extractor.module",
+                           "extractor.program",
+                           "extractor.project" }
 
 local function load_modules(modules)
   assert(modules)

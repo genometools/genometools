@@ -21,10 +21,10 @@ module(modname, package.seeall)
 require 'gt'
 
 -- all GenomeTools modules which should be loaded
-local gtmodules = { "gtlua/feature_index",
-                    "gtlua/genome_features",
-                    "gtlua/helper",
-                    "gtlua/range" }
+local gtmodules = { "gtlua.feature_index",
+                    "gtlua.genome_features",
+                    "gtlua.helper",
+                    "gtlua.range" }
 
 -- everything that will be exported to the gt table
 local gtexport = {}
