@@ -66,3 +66,10 @@ function GenomeTools_feature_index_mt:render_to_png(png_file, seqid, range, widt
   local render =  gt.render_new()
   render:to_png(diagram, png_file, width)
 end
+
+-- show all sequence ids
+function GenomeTools_feature_index_mt:show_seqids()
+  for _,seqid in ipairs(feature_index:get_seqids()) do
+    print(seqid)
+  end
+end
