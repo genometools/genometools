@@ -72,8 +72,8 @@ class GMAPParser
             if line =~ /^.*\(([+-])/ then
               @current_strand = $1
             else
-              raise "could not parse strand on line #{scanner.lineno} of file \
-                     #{scanner.filename}"
+              raise "could not parse strand on line #{scanner.lineno} of " +
+                    "file #{scanner.filename}"
             end
           elsif line =~ /Accessions:/ then
             accession_parts = line.split(':')
@@ -82,13 +82,13 @@ class GMAPParser
           end
         end
       elsif line !~ /^Paths \(0\):/
-        STDERR.puts "warning: skipping multiple path alignment on line \
-                     #{scanner.lineno} of file #{scanner.filename}"
+        STDERR.puts "warning: skipping multiple path alignment on line " +
+                    "#{scanner.lineno} of file #{scanner.filename}"
         return false
       end
     else
-      raise "expecting 'Paths' on line #{scanner.lineno} of file \
-             #{scanner.filename}"
+      raise "expecting 'Paths' on line #{scanner.lineno} of file " +
+            "#{scanner.filename}"
     end
   end
   def parse_alignment(scanner)
@@ -108,8 +108,8 @@ class GMAPParser
           exons.push(exon)
         end
         if exons.size == 0 then
-          raise "could not parse exon up to line #{scanner.lineno} in file \
-                 #{scanner.filename}"
+          raise "could not parse exon up to line #{scanner.lineno} in file " +
+                "#{scanner.filename}"
         end
         # construct gene
         exon_border = []
@@ -122,7 +122,7 @@ class GMAPParser
           current_sequence.update_range(gene_range.begin, gene_range.end)
         else
           # the current sequence does not exist -> add it
-          @sequences[@current_accession] = Sequence.new(gene_range.begin, \
+          @sequences[@current_accession] = Sequence.new(gene_range.begin,
                                                         gene_range.end)
         end
         current_sequence =  @sequences[@current_accession]
