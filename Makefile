@@ -333,7 +333,7 @@ lib/libgtext$(SHARED_OBJ_NAME_EXT): $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) \
   $(LIBLUA_OBJ) lib/libgtcore$(SHARED_OBJ_NAME_EXT)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTEXT_C_OBJ) \
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTEXT_C_OBJ) \
           $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ) -o $@ $(LIBGTEXT_LIBDEP)
 
 lib/libgtmatch.a: $(LIBGTMATCH_OBJ)
