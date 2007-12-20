@@ -73,13 +73,17 @@ function GenomeTools_feature_index:get_marked_regions(seqid, maxdist)
   return marked
 end
 
--- render PNG file <png_file> for <seqid> in <range> with optional <width>
-function GenomeTools_feature_index:render_to_png(png_file, seqid, range, width)
-  assert(self and png_file and seqid and range)
+-- render to PNG file <png_file> for <seqid> in <range> with optional <width>
+-- if no <png_file> is given os.tmpname() is called to create one
+-- returns name of written PNG file
+function GenomeTools_feature_index:render_to_png(seqid, range, png_file, width)
+  assert(seqid and range)
+  png_file = png_file or os.tmpname()
   if not width then width = 1600 end
   local diagram = gt.diagram_new(self, seqid, range)
   local render =  gt.render_new()
   render:to_png(diagram, png_file, width)
+  return png_file
 end
 
 -- show all sequence ids

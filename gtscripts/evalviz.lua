@@ -57,7 +57,7 @@ function write_marked_regions(seqid, filenumber, maxdist)
   for _,range in ipairs(marked) do
     local filename = png_dir .. "/" .. filenumber .. ".png"
     io.write(string.format("writing file '%s'\n", filename))
-    feature_index:render_to_png(filename, seqid, range, width)
+    feature_index:render_to_png(seqid, range, filename, width)
     filenumber = filenumber + 1
   end
   return filenumber
