@@ -17,6 +17,48 @@
 
 module(..., package.seeall)
 
+function GenomeTools_feature_index_mt:get_coverage(seqid, maxdist)
+  assert(seqid)
+  local maxdist = maxdist or 0
+  local features = self:get_features_for_seqid(seqid)
+  local starpos, endpos
+  local minstartpos = nil
+  local maxendpos = nil
+  local ranges = {}
+  local coverage = {}
+
+  -- collect all feature ranges
+  for i, feature in ipairs(features) do
+    table.insert(ranges, feature:get_range())
+  end
+  -- sort feature ranges
+  ranges = gt.ranges_sort(ranges)
+
+  -- compute and store coverage
+  for i, range in ipairs(ranges) do
+    startpos, endpos = range:get_start(), range:get_end()
+    if i == 1 then
+      minstartpos = startpos
+      maxendpos   = endpos
+    else
+      -- assert(startpos >= minstartpos)
+      if (startpos > maxendpos + maxdist) then
+        -- new region started
+        table.insert(coverage, gt.range_new(minstartpos, maxendpos))
+        minstartpos = startpos
+        maxendpos   = endpos
+      else
+        -- continue old region
+        maxendpos = (endpos > maxendpos) and endpos or maxendpos
+      end
+    end
+  end
+  -- add last region
+  table.insert(coverage, gt.range_new(minstartpos, maxendpos))
+  return coverage
+end
+
+-- render
 function GenomeTools_feature_index_mt:render_to_png(png_file, seqid, width)
   assert(self and png_file and seqid)
   if not width then width = 1600 end

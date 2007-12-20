@@ -51,50 +51,9 @@ else
   usage()
 end
 
-function get_coverage(seqid, maxdist)
-  assert(seqid)
-  local maxdist = maxdist or 0
-  local features = feature_index:get_features_for_seqid(seqid)
-  local starpos, endpos
-  local minstartpos = nil
-  local maxendpos = nil
-  local ranges = {}
-  local coverage = {}
-
-  -- collect all feature ranges
-  for i, feature in ipairs(features) do
-    table.insert(ranges, feature:get_range())
-  end
-  -- sort feature ranges
-  ranges = gt.ranges_sort(ranges)
-
-  -- compute and store coverage
-  for i, range in ipairs(ranges) do
-    startpos, endpos = range:get_start(), range:get_end()
-    if i == 1 then
-      minstartpos = startpos
-      maxendpos   = endpos
-    else
-      -- assert(startpos >= minstartpos)
-      if (startpos > maxendpos + maxdist) then
-        -- new region started
-        table.insert(coverage, gt.range_new(minstartpos, maxendpos))
-        minstartpos = startpos
-        maxendpos   = endpos
-      else
-        -- continue old region
-        maxendpos = (endpos > maxendpos) and endpos or maxendpos
-      end
-    end
-  end
-  -- add last region
-  table.insert(coverage, gt.range_new(minstartpos, maxendpos))
-  return coverage
-end
-
 function write_marked_regions(seqid, filenumber, maxdist)
   assert(seqid)
-  local coverage = get_coverage(seqid, maxdist)
+  local coverage = feature_index:get_coverage(seqid, maxdist)
   for i, r in ipairs(coverage) do
     local features = feature_index:get_features_for_range(seqid, r)
     if gt.features_contain_marked(features) then
