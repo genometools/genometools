@@ -23,6 +23,7 @@ require 'gt'
 -- all GenomeTools modules which should be loaded
 local gtmodules = { "gtlua.feature_index",
                     "gtlua.genome_features",
+                    "gtlua.genome_node",
                     "gtlua.helper",
                     "gtlua.range" }
 

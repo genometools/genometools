@@ -17,29 +17,21 @@
 
 module(..., package.seeall)
 
-function features_contain_marked(features)
-  assert(features)
-  for _, feature in ipairs(features) do
-    if feature:contains_marked() then
-      return true
-    end
-  end
-  return false
+function GenomeTools_genome_node:show(gff3_visitor)
+  local gff3_visitor = gff3_visitor or gt.gff3_visitor_new()
+  self:accept(gff3_visitor)
 end
 
-function features_show(features)
-  assert(features)
-  local gff3_visitor = gt.gff3_visitor_new()
-  for _, features in ipairs(features) do
-    features:show(gff3_visitor)
-  end
-end
-
-function features_show_marked(features)
-  assert(features)
-  if features_contain_marked(features) then
-    for _, feature in ipairs(features) do
-      feature:show_marked()
+function GenomeTools_genome_node:show_marked()
+  if self:contains_marked() then
+    local gni = gt.genome_node_iterator_new(self)
+    local gn = gni:next()
+    while gn do
+      if gn:is_marked() then
+        gn:output_leading()
+        print("")
+      end
+      gn = gni:next()
     end
   end
 end

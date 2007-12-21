@@ -161,6 +161,7 @@ int luaopen_genome_node(lua_State *L)
   lua_settable(L, -3);
   /* register functions */
   luaL_register(L, NULL, genome_node_lib_m);
+  lua_export_metatable(L, GENOME_NODE_METATABLE);
   luaL_register(L, "gt", genome_node_lib_f);
   return 1;
 }
