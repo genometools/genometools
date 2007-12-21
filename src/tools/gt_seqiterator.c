@@ -25,10 +25,13 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xposix.h"
 #include "libgtcore/progressbar.h"
+#include "libgtcore/discdistri.h"
 #include "libgtmatch/format64.h"
 #include "tools/gt_seqiterator.h"
 
-static OPrval parse_options(bool *verbose,int *parsed_args,
+#define BUCKETSIZE 100
+
+static OPrval parse_options(bool *verbose,bool *dodistlen,int *parsed_args,
                             int argc, const char **argv, Error *err)
 {
   OptionParser *op;
@@ -41,10 +44,25 @@ static OPrval parse_options(bool *verbose,int *parsed_args,
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   option= option_new_bool("v","be verbose",verbose,false);
   option_parser_add_option(op, option);
+  option= option_new_bool("distlen","show distribution of sequence length",
+                           dodistlen,false);
+  option_parser_add_option(op, option);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
                                         versionfunc, (unsigned int) 1, err);
   option_parser_delete(op);
   return oprval;
+}
+
+static void showdistseqlen(unsigned long key, unsigned long long value,
+                           /*@unused@*/ void *data)
+{
+  unsigned long distvalue;
+
+  distvalue = (unsigned long) value; /* XXX: is this cast always OK? */
+  printf("%lu--%lu %lu\n",
+         BUCKETSIZE * key,
+         BUCKETSIZE * (key+1) - 1,
+         distvalue);
 }
 
 int gt_seqiterator(int argc, const char **argv, Error *err)
@@ -56,12 +74,16 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   unsigned long len;
   int i, parsed_args, had_err;
   off_t totalsize;
-  bool verbose = false;
+  DiscDistri *distseqlen = NULL;
+  bool verbose = false, dodistlen = false;
+  uint64_t numofseq = 0, sumlength = 0;
+  unsigned long minlength = 0, maxlength = 0;
+  bool minlengthdefined = false;
 
   error_check(err);
 
   /* option parsing */
-  switch (parse_options(&verbose,&parsed_args, argc, argv, err)) {
+  switch (parse_options(&verbose,&dodistlen,&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -77,6 +99,10 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
   seqit = seqiterator_new(files, NULL, true);
+  if (dodistlen)
+  {
+    distseqlen = discdistri_new();
+  }
   if (verbose)
   {
     progressbar_start(seqiterator_getcurrentcounter(seqit, (unsigned long long)
@@ -87,6 +113,21 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   while (true)
   {
     had_err = seqiterator_next(seqit, &sequence, &len, &desc, err);
+    if (dodistlen)
+    {
+      if (!minlengthdefined || minlength > len)
+      {
+        minlength = len;
+        minlengthdefined = true;
+      }
+      if (maxlength < len)
+      {
+        maxlength = len;
+      }
+      sumlength += (uint64_t) len;
+      numofseq++;
+      discdistri_add(distseqlen,len/BUCKETSIZE);
+    }
     if (had_err != 1)
     {
       break;
@@ -99,5 +140,16 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
     progressbar_stop();
   }
   strarray_delete(files);
+  if (dodistlen)
+  {
+    printf("# " Formatuint64_t " sequences of average length %.2f\n",
+             PRINTuint64_tcast(numofseq),(double) sumlength/numofseq);
+    printf("# minimum length %lu\n",minlength);
+    printf("# maximum length %lu\n",maxlength);
+    printf("# distribution of sequence length in buckets of size %d\n",
+           BUCKETSIZE);
+    discdistri_foreach(distseqlen,showdistseqlen,NULL);
+    discdistri_delete(distseqlen);
+  }
   return had_err;
 }
