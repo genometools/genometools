@@ -1,0 +1,24 @@
+# $Id: Makefile.win,v 1.5 2007/08/30 14:38:07 tomas Exp $
+
+T= lfs
+V= 1.3.0
+
+include config.win
+
+SRCS= src\$T.c
+OBJS= src\$T.obj
+
+lib: src\$(LIBNAME)
+
+.c.obj:
+	$(CC) /c /Fo$@ $(CFLAGS) $<
+
+src\$(LIBNAME): $(OBJS)
+	link /dll /def:src\$T.def /out:src\$(LIBNAME) $(OBJS) $(LUA_LIB)
+
+install: src\$(LIBNAME)
+	IF NOT EXIST $(LUA_LIBDIR) mkdir $(LUA_LIBDIR)
+	copy src\$(LIBNAME) $(LUA_LIBDIR)
+
+clean:
+	del src\$(LIBNAME) $(OBJS) src\$T.lib src\$T.exp
