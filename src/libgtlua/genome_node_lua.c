@@ -53,6 +53,29 @@ static int genome_feature_lua_new(lua_State *L)
   return 1;
 }
 
+static int sequence_region_lua_new(lua_State *L)
+{
+  GenomeNode **sr;
+  const char *seqid;
+  Str *seqid_str, *filename;
+  Range *range;
+  assert(L);
+  /* get_check parameters */
+  seqid = luaL_checkstring(L, 1);
+  range = check_range(L, 2);
+  /* construct object */
+  sr = lua_newuserdata(L, sizeof (GenomeNode*));
+  seqid_str = str_new_cstr(seqid);
+  filename = str_new_cstr("Lua");
+  *sr = sequence_region_new(seqid_str, *range, filename, 0);
+  str_delete(filename);
+  str_delete(seqid_str);
+  assert(*sr);
+  luaL_getmetatable(L, GENOME_NODE_METATABLE);
+  lua_setmetatable(L, -2);
+  return 1;
+}
+
 static int genome_node_lua_get_filename(lua_State *L)
 {
   GenomeNode **gn = check_genome_node(L, 1);
@@ -133,6 +156,7 @@ static int genome_node_lua_delete(lua_State *L)
 
 static const struct luaL_Reg genome_node_lib_f [] = {
   { "genome_feature_new", genome_feature_lua_new },
+  { "sequence_region_new", sequence_region_lua_new },
   { NULL, NULL }
 };
 

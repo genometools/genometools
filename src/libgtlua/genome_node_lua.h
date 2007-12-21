@@ -23,15 +23,16 @@
 
 /* exports the GenomeNode interface and its implementors to Lua:
 
-   genome_node = gt.genome_feature_new(type, range, strand)
-   string      = genome_node:get_filename()
-   range       = genome_node:get_range()
-                 genome_node:accept(genome_visitor)
-                 parent_node:is_part_of_genome_node(child_node)
-                 genome_node:mark()
-   boolean     = genome_node:is_marked()
-   boolean     = genome_node:contains_marked()
-                 genome_feature:output_leading()
+   genome_node     = gt.genome_feature_new(type, range, strand)
+   sequence_region = gt.sequence_region_new(seqid, range)
+   string          = genome_node:get_filename()
+   range           = genome_node:get_range()
+                     genome_node:accept(genome_visitor)
+                     parent_node:is_part_of_genome_node(child_node)
+                     genome_node:mark()
+   boolean         = genome_node:is_marked()
+   boolean         = genome_node:contains_marked()
+                     genome_feature:output_leading()
 */
 int luaopen_genome_node(lua_State*);
 

@@ -52,3 +52,12 @@ assert(parent:contains_marked(parent))
 rval, fn = pcall(gn.get_filename, gn)
 assert(rval)
 assert(string.find(fn, "^Lua$"))
+
+-- testing gt.sequence_region_new
+range = gt.range_new(1, 100)
+rval, err = pcall(gt.sequence_region_new, nil, range)
+assert(not rval)
+rval, err = pcall(gt.sequence_region_new, "chr1", "test")
+assert(not rval)
+assert(string.find(err, "range expected"))
+gn = gt.sequence_region_new("chr1", range)
