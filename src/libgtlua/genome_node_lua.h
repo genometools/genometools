@@ -27,6 +27,8 @@
    sequence_region = gt.sequence_region_new(seqid, range)
    string          = genome_node:get_filename()
    range           = genome_node:get_range()
+   string          = genome_node:get_seqid()
+                     genome_node:set_seqid(seqid)
                      genome_node:accept(genome_visitor)
                      parent_node:is_part_of_genome_node(child_node)
                      genome_node:mark()

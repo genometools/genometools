@@ -89,6 +89,29 @@ static int genome_node_lua_get_range(lua_State *L)
   return range_lua_push(L, genome_node_get_range(*gn));
 }
 
+static int genome_node_lua_get_seqid(lua_State *L)
+{
+  Str *seqid;
+  GenomeNode **gn = check_genome_node(L, 1);
+  if ((seqid = genome_node_get_seqid(*gn)))
+    lua_pushstring(L, str_get(seqid));
+  else
+    lua_pushnil(L);
+  return 1;
+}
+
+static int genome_node_lua_set_seqid(lua_State *L)
+{
+  const char *seqid;
+  Str *seqid_str;
+  GenomeNode **gn = check_genome_node(L, 1);
+  seqid = luaL_checkstring(L, 2);
+  seqid_str = str_new_cstr(seqid);
+  genome_node_set_seqid(*gn, seqid_str);
+  str_delete(seqid_str);
+  return 0;
+}
+
 static int genome_node_lua_accept(lua_State *L)
 {
   GenomeNode **gn;
@@ -163,6 +186,8 @@ static const struct luaL_Reg genome_node_lib_f [] = {
 static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_filename", genome_node_lua_get_filename },
   { "get_range", genome_node_lua_get_range },
+  { "get_seqid", genome_node_lua_get_seqid },
+  { "set_seqid", genome_node_lua_set_seqid },
   { "accept", genome_node_lua_accept },
   { "is_part_of_genome_node", genome_node_lua_is_part_of_genome_node },
   { "mark", genome_node_lua_mark },

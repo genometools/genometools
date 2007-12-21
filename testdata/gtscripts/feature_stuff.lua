@@ -41,10 +41,34 @@ while (feature) do
   feature = genome_stream:next_tree()
 end
 
-features = feature_index:get_features_for_seqid("ctg123");
+features = feature_index:get_features_for_seqid("ctg123")
 assert(features)
 gff3_visitor = gt.gff3_visitor_new()
 
 for i,feature in ipairs(features) do
   feature:accept(gff3_visitor)
 end
+
+-- more tests
+fi    = gt.feature_index_new()
+range = gt.range_new(1, 100)
+sr    = gt.sequence_region_new("chr1", range)
+gf    = gt.genome_feature_new("gene", range, "+")
+rval, err = pcall(GenomeTools_feature_index.add_genome_feature, fi, nil)
+assert(not rval)
+assert(string.find(err, "genome_node expected"))
+rval, err = pcall(GenomeTools_feature_index.add_genome_feature, fi, gf)
+assert(not rval)
+assert(string.find(err, "does not have a sequence id"))
+gf:set_seqid("chr1")
+rval, err = pcall(GenomeTools_feature_index.add_genome_feature, fi, gf)
+assert(not rval)
+assert(string.find(err, "does not contain corresponding sequence region"))
+rval, err = pcall(GenomeTools_feature_index.add_sequence_region, fi, nil)
+assert(not rval)
+assert(string.find(err, "genome_node expected"))
+rval, err = pcall(GenomeTools_feature_index.add_sequence_region, fi, gf)
+assert(not rval)
+assert(string.find(err, "not a sequence region"))
+fi:add_sequence_region(sr)
+fi:add_genome_feature(gf)

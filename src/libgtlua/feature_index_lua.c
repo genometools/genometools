@@ -33,6 +33,39 @@ static int feature_index_lua_new(lua_State *L)
   return 1;
 }
 
+static int feature_index_lua_add_sequence_region(lua_State *L)
+{
+  FeatureIndex **fi;
+  GenomeNode **gn;
+  SequenceRegion *sr;
+  assert(L);
+  fi = check_feature_index(L, 1);
+  gn = check_genome_node(L, 2);
+  sr = genome_node_cast(sequence_region_class(), *gn);
+  luaL_argcheck(L, sr, 2, "not a sequence region");
+  feature_index_add_sequence_region(*fi, sr);
+  return 0;
+}
+
+static int feature_index_lua_add_genome_feature(lua_State *L)
+{
+  FeatureIndex **fi;
+  GenomeNode **gn;
+  GenomeFeature *gf;
+  Str *seqid;
+  assert(L);
+  fi = check_feature_index(L, 1);
+  gn = check_genome_node(L, 2);
+  gf = genome_node_cast(genome_feature_class(), *gn);
+  luaL_argcheck(L, gf, 2, "not a genome feature");
+  seqid = genome_node_get_seqid(*gn);
+  luaL_argcheck(L, seqid, 2, "genome_feature does not have a sequence id");
+  luaL_argcheck(L, feature_index_has_seqid(*fi, str_get(seqid)), 2,
+                "feature index does not contain corresponding sequence region");
+  feature_index_add_genome_feature(*fi, gf);
+  return 0;
+}
+
 static void push_features_as_table(lua_State *L, Array *features)
 {
   unsigned long i;
@@ -142,6 +175,8 @@ static const struct luaL_Reg feature_index_lib_f [] = {
 };
 
 static const struct luaL_Reg feature_index_lib_m [] = {
+  { "add_sequence_region", feature_index_lua_add_sequence_region },
+  { "add_genome_feature", feature_index_lua_add_genome_feature },
   { "get_features_for_seqid", feature_index_lua_get_features_for_seqid },
   { "get_features_for_range", feature_index_lua_get_features_for_range },
   { "get_first_seqid", feature_index_lua_get_first_seqid },

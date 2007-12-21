@@ -23,6 +23,8 @@
 /* exports the FeatureIndex class to Lua:
 
    feature_index = gt.feature_index_new()
+                   feature_index:add_sequence_region(sequence_region)
+                   feature_index:add_genome_feature(genome_feature)
    -- returns the genome features (of type genome_node) in a table
    table         = feature_index:get_features_for_seqid(string)
    table         = feature_index:get_features_for_range(seqid, range)
