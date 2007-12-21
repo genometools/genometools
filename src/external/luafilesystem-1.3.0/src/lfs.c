@@ -90,8 +90,8 @@ static int change_dir (lua_State *L) {
 **  and a string describing the error
 */
 static int get_dir (lua_State *L) {
-	char path[255+2];
-	if (getcwd(path, 255) == NULL) {
+	char path[PATH_MAX+2];
+	if (getcwd(path, PATH_MAX) == NULL) {
 		lua_pushnil(L);
 		lua_pushstring(L, getcwd_error);
 		return 2;

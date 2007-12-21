@@ -18,7 +18,7 @@
 INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/zlib-1.2.3 \
             -I$(CURDIR)/src/external/lua-5.1.2/src \
-            -I$(CURDIR)/src/external/luafilesystem-1.2.1/src \
+            -I$(CURDIR)/src/external/luafilesystem-1.3.0/src \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
             -I$(CURDIR)/src/external/bzip2-1.0.4 \
             -I$(CURDIR)/src/external/agg-2.4/include \
@@ -148,7 +148,7 @@ LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
            $(LUA_DIR)/ldblib.c $(LUA_DIR)/liolib.c $(LUA_DIR)/lmathlib.c \
            $(LUA_DIR)/loslib.c $(LUA_DIR)/ltablib.c $(LUA_DIR)/lstrlib.c \
            $(LUA_DIR)/loadlib.c $(LUA_DIR)/linit.c \
-           src/external/luafilesystem-1.2.1/src/lfs.c
+           src/external/luafilesystem-1.3.0/src/lfs.c
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)
 LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 
