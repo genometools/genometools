@@ -19,76 +19,79 @@ module(..., package.seeall)
 
 require "gtlua.genome_features"
 
-function GenomeTools_feature_index:get_coverage(seqid, maxdist)
-  assert(seqid)
-  local maxdist = maxdist or 0
-  local features = self:get_features_for_seqid(seqid)
-  local starpos, endpos
-  local minstartpos = nil
-  local maxendpos = nil
-  local ranges = {}
-  local coverage = {}
+-- XXX: remove if statement if libgtview is always compiled in
+if GenomeTools_feature_index then
+  function GenomeTools_feature_index:get_coverage(seqid, maxdist)
+    assert(seqid)
+    local maxdist = maxdist or 0
+    local features = self:get_features_for_seqid(seqid)
+    local starpos, endpos
+    local minstartpos = nil
+    local maxendpos = nil
+    local ranges = {}
+    local coverage = {}
 
-  -- collect all feature ranges
-  for i, feature in ipairs(features) do
-    table.insert(ranges, feature:get_range())
-  end
-  -- sort feature ranges
-  ranges = gt.ranges_sort(ranges)
+    -- collect all feature ranges
+    for i, feature in ipairs(features) do
+      table.insert(ranges, feature:get_range())
+    end
+    -- sort feature ranges
+    ranges = gt.ranges_sort(ranges)
 
-  -- compute and store coverage
-  for i, range in ipairs(ranges) do
-    startpos, endpos = range:get_start(), range:get_end()
-    if i == 1 then
-      minstartpos = startpos
-      maxendpos   = endpos
-    else
-      -- assert(startpos >= minstartpos)
-      if (startpos > maxendpos + maxdist) then
-        -- new region started
-        table.insert(coverage, gt.range_new(minstartpos, maxendpos))
+    -- compute and store coverage
+    for i, range in ipairs(ranges) do
+      startpos, endpos = range:get_start(), range:get_end()
+      if i == 1 then
         minstartpos = startpos
         maxendpos   = endpos
       else
-        -- continue old region
-        maxendpos = (endpos > maxendpos) and endpos or maxendpos
+        -- assert(startpos >= minstartpos)
+        if (startpos > maxendpos + maxdist) then
+          -- new region started
+          table.insert(coverage, gt.range_new(minstartpos, maxendpos))
+          minstartpos = startpos
+          maxendpos   = endpos
+        else
+          -- continue old region
+          maxendpos = (endpos > maxendpos) and endpos or maxendpos
+        end
       end
     end
+    -- add last region
+    coverage[#coverage+1] = gt.range_new(minstartpos, maxendpos)
+    return coverage
   end
-  -- add last region
-  coverage[#coverage+1] = gt.range_new(minstartpos, maxendpos)
-  return coverage
-end
 
-function GenomeTools_feature_index:get_marked_regions(seqid, maxdist)
-  assert(seqid, "missing seqid argument")
-  local coverage = self:get_coverage(seqid, maxdist)
-  local marked = {}
-  for _,range in ipairs(coverage) do
-    local features = feature_index:get_features_for_range(seqid, range)
-    if gt.features_contain_marked(features) then
-      marked[#marked+1] = range
+  function GenomeTools_feature_index:get_marked_regions(seqid, maxdist)
+    assert(seqid, "missing seqid argument")
+    local coverage = self:get_coverage(seqid, maxdist)
+    local marked = {}
+    for _,range in ipairs(coverage) do
+      local features = feature_index:get_features_for_range(seqid, range)
+      if gt.features_contain_marked(features) then
+        marked[#marked+1] = range
+      end
     end
+    return marked
   end
-  return marked
-end
 
--- render to PNG file <png_file> for <seqid> in <range> with optional <width>
--- if no <png_file> is given os.tmpname() is called to create one
--- returns name of written PNG file
-function GenomeTools_feature_index:render_to_png(seqid, range, png_file, width)
-  assert(seqid and range)
-  png_file = png_file or os.tmpname()
-  if not width then width = 1600 end
-  local diagram = gt.diagram_new(self, seqid, range)
-  local render =  gt.render_new()
-  render:to_png(diagram, png_file, width)
-  return png_file
-end
+  -- render to PNG file <png_file> for <seqid> in <range> with optional <width>
+  -- if no <png_file> is given os.tmpname() is called to create one
+  -- returns name of written PNG file
+  function GenomeTools_feature_index:render_to_png(seqid, range, png_file, width)
+    assert(seqid and range)
+    png_file = png_file or os.tmpname()
+    if not width then width = 1600 end
+    local diagram = gt.diagram_new(self, seqid, range)
+    local render =  gt.render_new()
+    render:to_png(diagram, png_file, width)
+    return png_file
+  end
 
--- show all sequence ids
-function GenomeTools_feature_index:show_seqids()
-  for _,seqid in ipairs(feature_index:get_seqids()) do
-    print(seqid)
+  -- show all sequence ids
+  function GenomeTools_feature_index:show_seqids()
+    for _,seqid in ipairs(feature_index:get_seqids()) do
+      print(seqid)
+    end
   end
 end
