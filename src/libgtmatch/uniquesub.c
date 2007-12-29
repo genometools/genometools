@@ -24,7 +24,7 @@
 #include "spacedef.h"
 #include "optionargmode.h"
 #include "format64.h"
-#include "fmi-uniquesub.h"
+#include "uniquesub.h"
 
 typedef struct
 {
@@ -54,7 +54,7 @@ typedef int (*Postprocessuniquelength)(const Alphabet *,
 
 typedef struct
 {
-  void *genericindex;
+  const void *genericindex;
   const Alphabet *alphabet;
   Uniqueforwardfunction uniqueforward;
   Preprocessuniquelength preprocessuniquelength;
@@ -62,7 +62,6 @@ typedef struct
   Postprocessuniquelength postprocessuniquelength;
   void *processinfo;
 } Substringinfo;
-
 
 static int uniqueposinsinglesequence(Substringinfo *substringinfo,
                                      uint64_t unitnum,
@@ -159,7 +158,7 @@ static int showifinlengthrange(const Alphabet *alphabet,
   return 0;
 }
 
-int findsubqueryuniqueforward(void *genericindex,
+int findsubqueryuniqueforward(const void *genericindex,
                               Uniqueforwardfunction uniqueforward,
                               const Alphabet *alphabet,
                               const StrArray *queryfilenames,

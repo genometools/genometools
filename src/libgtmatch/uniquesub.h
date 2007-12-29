@@ -29,7 +29,7 @@ typedef unsigned long (*Uniqueforwardfunction) (const void *,
                                                 const Uchar *,
                                                 const Uchar *);
 
-int findsubqueryuniqueforward(void *genericindex,
+int findsubqueryuniqueforward(const void *genericindex,
                               Uniqueforwardfunction uniqueforward,
                               const Alphabet *alphabet,
                               const StrArray *queryfilenames,

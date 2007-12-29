@@ -21,7 +21,7 @@
 #include "libgtmatch/fmindex.h"
 #include "libgtmatch/defined-types.h"
 #include "libgtmatch/optionargmode.h"
-#include "libgtmatch/fmi-uniquesub.h"
+#include "libgtmatch/uniquesub.h"
 
 #include "tools/gt_uniquesub.h"
 #include "libgtmatch/fmi-fwduni.pr"
@@ -191,7 +191,7 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
     had_err = -1;
   } else
   {
-    if (findsubqueryuniqueforward((void *) &fmindex,
+    if (findsubqueryuniqueforward((const void *) &fmindex,
                                   skfmuniqueforward,
                                   fmindex.alphabet,
                                   uniquesubcallinfo.queryfilenames,
