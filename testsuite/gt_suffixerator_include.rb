@@ -165,7 +165,8 @@ def checkmapped(args)
 end
 
 if $gttestdata then
-  checkmapped("-db #{$gttestdata}Iowa/at100K1 #{$gttestdata}Iowa/at100K1 " +
+  checkmapped("-db " +
+              "#{$gttestdata}Iowa/at100K1 " +
               "#{$gttestdata}DNA-mix/Grumbach.fna/Wildcards.fna " +
               "#{$gttestdata}DNA-mix/Grumbach.fna/chntxx.fna " +
               "#{$gttestdata}DNA-mix/Grumbach.fna/hs5hcmvcg.fna " +
@@ -191,4 +192,5 @@ if $gttestdata then
 
   checkmapped("-db #{$gttestdata}swissprot/swiss10K -parts 1 -pl -smap " +
               "TransProt11")
+
 end

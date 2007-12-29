@@ -1,35 +1,33 @@
 #!/bin/sh
 
-if [ $# -lt 4 ]
+if [ $# -lt 3 ]
 then
-  echo "Usage: $0 <gtpath> <idir> <fmindex> <file1> [file2 file3 ..]"
+  echo "Usage: $0 <idir> <fmindex> <file1> [file2 file3 ..]"
   exit 1
 fi
 
-gtpath=$1
-idir=$2
-fmindex=${idir}/$3
-shift
+idir=$1
+fmindex=${idir}/$2
 shift
 shift
 rfiles=$*
 
 cerr() 
 {
-  $1
+  $*
   if [ $? -ne 0 ]
   then
-    echo "failure: ${1}"
+    echo "failure: $*"
     exit 1
   fi
 }
 
-suffixerator
+suffixerator()
 {
-  cerr "${gtpath} suffixerator $*"
+  cerr "../bin/gt suffixerator $*"
 }
 
-makesuftab
+makesuftab()
 {
   if [ $1 = 'rev' ]
   then
@@ -41,7 +39,7 @@ makesuftab
 
 plain() 
 {
-  cerr "${gtpath} suffixerator -plain -tis -indexname $1 -smap $1.al1 -db $1.bwt"
+  cerr "../bin/gt suffixerator -plain -tis -indexname $1 -smap $1.al1 -db $1.bwt"
 }
 
 mkfmindex() 
@@ -49,7 +47,7 @@ mkfmindex()
   indexname=$1
   shift
   iiargs=$*
-  cerr "${gtpath} mkfmindex -size small -noindexpos -fmout ${indexname} -ii ${iiargs}"
+  cerr "../bin/gt mkfmindex -size small -noindexpos -fmout ${indexname} -ii ${iiargs}"
 }
 
 needsrebuild=0
