@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef UNIQUEFORWARD_h
-#define UNIQUEFORWARD_h
+#ifndef UNIQUESUB_H
+#define UNIQUESUB_H
 
 #include <stdbool.h>
 #include "libgtcore/strarray.h"
