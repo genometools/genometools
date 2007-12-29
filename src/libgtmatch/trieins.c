@@ -123,8 +123,8 @@ static void showtrie2(const Trierep *trierep,
   Trienode *current;
 
   for (current = node->firstchild;
-      current != NULL;
-      current = current->rightsibling)
+       current != NULL;
+       current = current->rightsibling)
   {
     printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
     if (ISLEAF(current))
