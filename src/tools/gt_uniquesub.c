@@ -30,13 +30,20 @@
 #define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
 
+typedef enum
+{
+  Fmindextype,
+  Saindextype
+} Indextype;
+
 typedef struct
 {
   Definedunsignedlong minlength,
                       maxlength;
   unsigned int showmode;
-  Str *fmindexname;
+  Str *indexname;
   StrArray *queryfilenames;
+  Indextype indextype;
 } Uniquesubcallinfo;
 
 static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
@@ -45,7 +52,8 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
                              Error *err)
 {
   OptionParser *op;
-  Option *optionmin, *optionmax, *optionoutput, *optionfmindex, *optionquery;
+  Option *optionmin, *optionmax, *optionoutput, *optionfmindex, 
+         *optionsaindex, *optionquery;
   OPrval oprval;
   StrArray *flagsoutputoption;
   int parsed_args;
@@ -59,11 +67,11 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   uniquesubcallinfo->minlength.defined = false;
   uniquesubcallinfo->maxlength.defined = false;
   uniquesubcallinfo->showmode = 0;
-  uniquesubcallinfo->fmindexname = str_new();
+  uniquesubcallinfo->indexname = str_new();
   uniquesubcallinfo->queryfilenames = strarray_new();
   flagsoutputoption = strarray_new();
 
-  op = option_parser_new("[option ...] -fm fmindex -query queryfile [...]",
+  op = option_parser_new("[option ...] -query queryfile [...]",
                          "Compute length of minumum unique prefixes.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optionmin = option_new_ulong_min("min",
@@ -88,9 +96,14 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   option_parser_add_option(op, optionoutput);
 
   optionfmindex = option_new_string("fmi", "specify fmindex",
-                                    uniquesubcallinfo->fmindexname,NULL);
-  option_is_mandatory(optionfmindex);
+                                    uniquesubcallinfo->indexname,NULL);
   option_parser_add_option(op, optionfmindex);
+  
+  optionsaindex = option_new_string("sa", "specify suffix array",
+                                    uniquesubcallinfo->indexname,NULL);
+  option_parser_add_option(op, optionsaindex);
+
+  option_exclude(optionfmindex,optionsaindex);
 
   optionquery = option_new_filenamearray("query", "specify queryfiles",
                                          uniquesubcallinfo->queryfilenames);
@@ -101,6 +114,20 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
                                err);
   if (oprval == OPTIONPARSER_OK)
   {
+    if (option_is_set(optionfmindex))
+    {
+      assert(!option_is_set(optionsaindex));
+      uniquesubcallinfo->indextype = Fmindextype;
+    } else
+    {
+      if (option_is_set(optionsaindex))
+      {
+        uniquesubcallinfo->indextype = Saindextype;
+      } else
+      {
+        assert("unexpected case" == NULL);
+      }
+    }
     if (option_is_set(optionmin))
     {
        uniquesubcallinfo->minlength.defined = true;
@@ -164,53 +191,64 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   return oprval;
 }
 
-
 static int findminuniquesubstrings(int argc,const char **argv,Error *err)
 {
   Uniquesubcallinfo uniquesubcallinfo;
   Fmindex fmindex;
   Verboseinfo *verboseinfo;
-  int had_err = 0;
+  bool haserr = false;
 
   error_check(err);
   switch (parseuniquesub(&uniquesubcallinfo, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_delete(uniquesubcallinfo.fmindexname);
+      str_delete(uniquesubcallinfo.indexname);
       strarray_delete(uniquesubcallinfo.queryfilenames);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(uniquesubcallinfo.fmindexname);
+      str_delete(uniquesubcallinfo.indexname);
       strarray_delete(uniquesubcallinfo.queryfilenames);
       return 0;
   }
   verboseinfo = newverboseinfo(false);
-  if (mapfmindex (&fmindex, uniquesubcallinfo.fmindexname,
-                  verboseinfo,err) != 0)
+  if (uniquesubcallinfo.indextype == Fmindextype)
   {
-    had_err = -1;
+    if (mapfmindex (&fmindex, uniquesubcallinfo.indexname,
+                    verboseinfo,err) != 0)
+    {
+      haserr = true;
+    }
   } else
   {
-    if (findsubqueryuniqueforward((const void *) &fmindex,
-                                  skfmuniqueforward,
-                                  fmindex.alphabet,
-                                  uniquesubcallinfo.queryfilenames,
-                                  uniquesubcallinfo.minlength,
-                                  uniquesubcallinfo.maxlength,
-                                  (uniquesubcallinfo.showmode & SHOWSEQUENCE)
-                                     ? true : false,
-                                  (uniquesubcallinfo.showmode & SHOWQUERYPOS)
-                                     ? true : false,
-                                  err) != 0)
+  }
+  if (!haserr)
+  {
+    if (uniquesubcallinfo.indextype == Fmindextype)
     {
-      had_err = -1;
+      if (findsubqueryuniqueforward((const void *) &fmindex,
+                                    skfmuniqueforward,
+                                    fmindex.alphabet,
+                                    uniquesubcallinfo.queryfilenames,
+                                    uniquesubcallinfo.minlength,
+                                    uniquesubcallinfo.maxlength,
+                                    (uniquesubcallinfo.showmode & SHOWSEQUENCE)
+                                       ? true : false,
+                                    (uniquesubcallinfo.showmode & SHOWQUERYPOS)
+                                       ? true : false,
+                                    err) != 0)
+      {
+        haserr = true;
+      }
     }
+  }
+  if (uniquesubcallinfo.indextype == Fmindextype)
+  {
     freefmindex(&fmindex);
   }
   freeverboseinfo(&verboseinfo);
-  str_delete(uniquesubcallinfo.fmindexname);
+  str_delete(uniquesubcallinfo.indexname);
   strarray_delete(uniquesubcallinfo.queryfilenames);
-  return had_err;
+  return haserr ? -1 : 0;
 }
 
 int gt_uniquesub(int argc, const char **argv, Error *err)

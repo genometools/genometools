@@ -41,11 +41,10 @@ encodedseq.c
 enum-patt.c
 esa-mmsearch.c
 esa-seqread.c
-fmi-uniquesub.c
 inl-encseq.c
 mapspec-gen.c
 measure-time.c
-optionagmode.c
+optionargmode.c
 overallseq.c
 sfx-bentsedg.c
 sfx-outlcp.c
@@ -54,6 +53,7 @@ sfx-readint.c
 sfx-suffixer.c
 test-pairwise.c
 turnwheels.c
+uniquesub.c
 verbose.c
 END_OF_TEXT
 
