@@ -19,6 +19,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/fmindex.h"
+#include "libgtmatch/sarr-def.h"
 #include "libgtmatch/defined-types.h"
 #include "libgtmatch/optionargmode.h"
 #include "libgtmatch/uniquesub.h"
@@ -26,6 +27,8 @@
 #include "tools/gt_uniquesub.h"
 #include "libgtmatch/fmi-fwduni.pr"
 #include "libgtmatch/fmi-map.pr"
+#include "libgtmatch/esa-map.pr"
+#include "libgtmatch/esa-minunique.pr"
 
 #define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
@@ -53,7 +56,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
 {
   OptionParser *op;
   Option *optionmin, *optionmax, *optionoutput, *optionfmindex, 
-         *optionsaindex, *optionquery;
+         *optionesaindex, *optionquery;
   OPrval oprval;
   StrArray *flagsoutputoption;
   int parsed_args;
@@ -99,11 +102,11 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
                                     uniquesubcallinfo->indexname,NULL);
   option_parser_add_option(op, optionfmindex);
   
-  optionsaindex = option_new_string("sa", "specify suffix array",
-                                    uniquesubcallinfo->indexname,NULL);
-  option_parser_add_option(op, optionsaindex);
+  optionesaindex = option_new_string("esa", "specify suffix array",
+                                     uniquesubcallinfo->indexname,NULL);
+  option_parser_add_option(op, optionesaindex);
 
-  option_exclude(optionfmindex,optionsaindex);
+  option_exclude(optionfmindex,optionesaindex);
 
   optionquery = option_new_filenamearray("query", "specify queryfiles",
                                          uniquesubcallinfo->queryfilenames);
@@ -116,11 +119,11 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   {
     if (option_is_set(optionfmindex))
     {
-      assert(!option_is_set(optionsaindex));
+      assert(!option_is_set(optionesaindex));
       uniquesubcallinfo->indextype = Fmindextype;
     } else
     {
-      if (option_is_set(optionsaindex))
+      if (option_is_set(optionesaindex))
       {
         uniquesubcallinfo->indextype = Saindextype;
       } else
@@ -195,6 +198,7 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
 {
   Uniquesubcallinfo uniquesubcallinfo;
   Fmindex fmindex;
+  Suffixarray suffixarray;
   Verboseinfo *verboseinfo;
   bool haserr = false;
 
@@ -213,13 +217,21 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
   verboseinfo = newverboseinfo(false);
   if (uniquesubcallinfo.indextype == Fmindextype)
   {
-    if (mapfmindex (&fmindex, uniquesubcallinfo.indexname,
-                    verboseinfo,err) != 0)
+    if (mapfmindex (&fmindex,uniquesubcallinfo.indexname,verboseinfo,err) != 0)
     {
       haserr = true;
     }
   } else
   {
+    Seqpos totallength;
+
+    if (mapsuffixarray(&suffixarray,
+                       &totallength,
+                       SARR_ESQTAB | SARR_SUFTAB,
+                       uniquesubcallinfo.indexname,verboseinfo,err) != 0)
+    {
+      haserr = true;
+    }
   }
   if (!haserr)
   {
@@ -239,11 +251,30 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
       {
         haserr = true;
       }
+    } else
+    {
+      if (findsubqueryuniqueforward((const void *) &suffixarray,
+                                    suffixarrayuniqueforward,
+                                    suffixarray.alpha,
+                                    uniquesubcallinfo.queryfilenames,
+                                    uniquesubcallinfo.minlength,
+                                    uniquesubcallinfo.maxlength,
+                                    (uniquesubcallinfo.showmode & SHOWSEQUENCE)
+                                       ? true : false,
+                                    (uniquesubcallinfo.showmode & SHOWQUERYPOS)
+                                       ? true : false,
+                                    err) != 0)
+      {
+        haserr = true;
+      }
     }
   }
   if (uniquesubcallinfo.indextype == Fmindextype)
   {
     freefmindex(&fmindex);
+  } else
+  { 
+    freesuffixarray(&suffixarray);
   }
   freeverboseinfo(&verboseinfo);
   str_delete(uniquesubcallinfo.indexname);
