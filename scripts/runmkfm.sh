@@ -2,12 +2,14 @@
 
 if [ $# -lt 3 ]
 then
-  echo "Usage: $0 <idir> <fmindex> <file1> [file2 file3 ..]"
+  echo "Usage: $0 <bothdirections> <idir> <fmindex> <file1> [file2 file3 ..]"
   exit 1
 fi
 
-idir=$1
-fmindex=${idir}/$2
+bothdirections=$1
+idir=$2
+fmindex=${idir}/$3
+shift
 shift
 shift
 rfiles=$*
@@ -74,10 +76,13 @@ do
                     "${indexname}.rev.prj" \
                     "makesuftab rev ${indexname} ${rfile}"
   indexlist="${indexlist} ${idir}/${indexname}.rev"
-  needconstruction1 ${rfile} \
-                    "${indexname}.cpl.prj" \
-                    "makesuftab cpl ${indexname} ${rfile}"
-  indexlist="${indexlist} ${idir}/${indexname}.cpl"
+  if [ $bothdirections -eq 1 ]
+  then
+    needconstruction1 ${rfile} \
+                      "${indexname}.cpl.prj" \
+                      "makesuftab cpl ${indexname} ${rfile}"
+    indexlist="${indexlist} ${idir}/${indexname}.cpl"
+  fi
 done
 
 if [ $needsrebuild -eq 1 ] ||

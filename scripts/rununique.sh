@@ -36,6 +36,6 @@ uniquesub()
 idir=../indexdir
 fmindex=Combined.fm
 
-cerr "../scripts/runmkfm.sh ${idir} ${fmindex} ${rfiles}"
+cerr "../scripts/runmkfm.sh 1 ${idir} ${fmindex} ${rfiles}"
 
 cerr "uniquesub -min ${minval} -max ${maxval} -fmi ${idir}/${fmindex} -query ${queryfile}"
