@@ -2,15 +2,17 @@
 
 # set -e -x
 
-if [ $# -lt 4 ]
+if [ $# -lt 5 ]
 then
-  echo "Usage: $0 <min> <max> <queryfile> <file1> <file2> ..."
+  echo "Usage: $0 <gtbin> <min> <max> <queryfile> <file1> <file2> ..."
   exit 1
 fi
 
-minval=$1
-maxval=$2
-queryfile=$3
+gtbin=$1
+minval=$2
+maxval=$3
+queryfile=$4
+shift
 shift
 shift
 shift
@@ -30,12 +32,12 @@ cerr()
 
 uniquesub()
 {
-  cerr "../bin/gt uniquesub -output sequence querypos $*"
+  cerr "${gtbin} uniquesub -output sequence querypos $*"
 }
 
 idir=../indexdir
 fmindex=Combined.fm
 
-cerr "../scripts/runmkfm.sh 1 ${idir} ${fmindex} ${rfiles}"
+cerr "runmkfm.sh 1 ${idir} ${fmindex} ${rfiles}"
 
 cerr "uniquesub -min ${minval} -max ${maxval} -fmi ${idir}/${fmindex} -query ${queryfile}"

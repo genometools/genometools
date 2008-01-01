@@ -28,22 +28,26 @@ typedef struct
          right;
 } Simplelcpinterval;
 
+#define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \
+                             ? SEPARATOR\
+                             : getencodedchar(ENCSEQ,POS,Forwardmode))
+
 static Seqpos findright(const Encodedsequence *encseq,
                         const Seqpos *suftab,
-                        Seqpos offset,
                         Uchar cc,
+                        Seqpos offset,
                         Seqpos l,
                         Seqpos r)
 {
-  Seqpos pos, mid;
+  Seqpos pos, mid, totallength = getencseqtotallength(encseq);
   Uchar midcc;
 
   while (r > l+1)
   {
     mid = DIV2(l+r);
     pos = suftab[mid] + offset;
-    midcc = getencodedchar(encseq,pos,Forwardmode);
-    if (midcc > cc)
+    midcc = SEQUENCE(encseq,pos);
+    if (cc < midcc)
     {
       r = mid;
     } else
@@ -63,19 +67,20 @@ static bool findcharintervalbin(const Encodedsequence *encseq,
                                 Seqpos j)
 {
   Uchar leftcc, rightcc;
-  Seqpos pos, rightbound, leftbound = i;
+  Seqpos pos, rightbound, leftbound = i, 
+         totallength = getencseqtotallength(encseq);
 
   pos = suftab[j] + lcpvalue;
-  rightcc = getencodedchar(encseq,pos,Forwardmode);
+  rightcc = SEQUENCE(encseq,pos);
   while (true)
   {
     pos = suftab[leftbound] + lcpvalue;
-    leftcc = getencodedchar(encseq,pos,Forwardmode);
+    leftcc = SEQUENCE(encseq,pos);
     if (leftcc == rightcc)
     {
       break;
     }
-    rightbound = findright(encseq,suftab,lcpvalue,leftcc,leftbound,j);
+    rightbound = findright(encseq,suftab,leftcc,lcpvalue,leftbound,j);
     if (leftcc == cc)
     {
       itv->left = leftbound;

@@ -25,6 +25,7 @@
 #include "libgtmatch/uniquesub.h"
 
 #include "tools/gt_uniquesub.h"
+#include "libgtmatch/stamp.h"
 #include "libgtmatch/fmi-fwduni.pr"
 #include "libgtmatch/fmi-map.pr"
 #include "libgtmatch/esa-map.pr"
