@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 
-/* This module contains hight level mmap(2) interfaces. */
+/* This module contains high level mmap(2) interfaces. */
 
 void* mmap_read(const char *path, size_t *len); /* returns NULL on failure */
 void* mmap_write(const char *path, size_t *len); /* returns NULL on failure */
