@@ -37,6 +37,14 @@ if $arguments["libgtview"] then
     grep $last_stderr, "GenomeTools error"
   end
 
+  Name "gtruby: libgtview bindings (nonexistent gff3 file)"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby("#{$testdata}/gtruby/view.rb test.png #{$testdata}nonexistent_file",
+             :retval => 1)
+    grep $last_stderr, "GenomeTools error"
+  end
+
   Name "gtruby: show_seqids"
   Keywords "gt_ruby"
   Test do

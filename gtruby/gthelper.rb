@@ -22,6 +22,10 @@ module GT
   end
 
   def GT.gterror(err)
-    raise GTError, "GenomeTools error: #{err.get}"
+    if err.class == GT::Error then
+      raise GTError, "GenomeTools error: #{err.get}"
+    else
+      raise GTError, "GenomeTools error: " + err
+    end
   end
 end

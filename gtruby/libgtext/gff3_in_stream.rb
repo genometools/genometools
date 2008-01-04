@@ -16,6 +16,7 @@
 #
 
 require 'dl/import'
+require 'gthelper'
 require 'libgtext/genome_stream'
 
 module GT
@@ -28,6 +29,9 @@ module GT
     include GenomeStream
     attr_reader :genome_stream
     def initialize(filename)
+      if not File.readable?(filename)
+        GT.gterror("file '#{filename}' not readable")
+      end
       @genome_stream = GT.gff3_in_stream_new_sorted(filename, false)
       @genome_stream.free = GT::symbol("genome_stream_delete", "0P")
     end
