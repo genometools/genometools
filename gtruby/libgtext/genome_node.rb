@@ -16,6 +16,7 @@
 #
 
 require 'dl/import'
+require 'gthelper'
 
 module GT
   extend DL::Importable
@@ -36,7 +37,7 @@ module GT
       rval = GT.genome_node_accept(self.genome_node, visitor.genome_visitor,
                                    err.to_ptr)
       if rval != 0
-        gterror(err)
+        GT.gterror(err)
       end
     end
   end

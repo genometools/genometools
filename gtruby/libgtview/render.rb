@@ -16,6 +16,7 @@
 #
 
 require 'dl/import'
+require 'gthelper'
 require 'libgtcore/range'
 
 module GT
@@ -38,7 +39,7 @@ module GT
       err = GT::Error.new()
       rval = GT.render_to_png(@render, diagram.diagram, filename, width,
                               err.to_ptr)
-      if rval != 0 then gterror(err) end
+      if rval != 0 then GT.gterror(err) end
     end
   end
 end

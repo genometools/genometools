@@ -23,10 +23,18 @@ if $arguments["libgtview"] then
     run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{$last_stdout} -"
   end
 
-  Name "gtruby: libgtview bindings"
+  Name "gtruby: libgtview bindings (valid gff3 file)"
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}/gtruby/view.rb test.png #{$testdata}gff3_file_1_short.txt"
+  end
+
+  Name "gtruby: libgtview bindings (corrupt gff3 file)"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby("#{$testdata}/gtruby/view.rb test.png #{$testdata}corrupt.gff3",
+             :retval => 1)
+    grep $last_stderr, "GenomeTools error"
   end
 
   Name "gtruby: show_seqids"

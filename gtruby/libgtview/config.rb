@@ -16,6 +16,7 @@
 #
 
 require 'dl/import'
+require 'gthelper'
 require 'libgtcore/error'
 
 module GT
@@ -29,7 +30,7 @@ module GT
     def initialize
       err = GT::Error.new()
       @config = GT.config_new(false, err.to_ptr)
-      if not @config then gterror(err) end
+      if not @config then GT.gterror(err) end
       @config.free = GT::symbol("config_delete", "0P")
     end
   end

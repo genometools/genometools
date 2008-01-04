@@ -21,12 +21,17 @@ module GT
   extend DL::Importable
   dlload "libgtcore.so"
   extern "Error* error_new()"
+  extern "const char* error_get(const Error*)"
   extern "void error_delete(Error*)"
 
   class Error
     def initialize
       @error = GT.error_new()
       @error.free = GT::symbol("error_delete", "0P")
+    end
+
+    def get
+      GT.error_get(@error)
     end
 
     def to_ptr

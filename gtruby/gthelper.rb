@@ -15,11 +15,13 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+require 'libgtcore/error'
+
 module GT
   class GTError < RuntimeError
   end
 
-  def gterror(err)
-    raise GTError, "GenomeTools error: #{error_get(e.to_ptr)}"
+  def GT.gterror(err)
+    raise GTError, "GenomeTools error: #{err.get}"
   end
 end

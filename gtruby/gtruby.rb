@@ -17,7 +17,7 @@
 
 # the GenomeTools Ruby bindings
 
-require 'helper'
+require 'gthelper'
 require 'libgtcore'
 require 'libgtext'
 require 'libgtview'
