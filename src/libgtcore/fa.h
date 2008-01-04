@@ -75,7 +75,12 @@ void*   fa_xmmap_read_func(const char *path, size_t *len, const char*, int);
         fa_xmmap_write_func(path, len, __FILE__, __LINE__)
 void*   fa_xmmap_write_func(const char *path, size_t *len, const char*, int);
 void    fa_xmunmap(void *addr);
-
+#define fa_mmap_generic_fd(fd, len, offset, mapwritable, hard_fail) \
+  fa_mmap_generic_fd_func(fd, len, offset, mapwritable, hard_fail,  \
+                          __FILE__, __LINE__)
+void*   fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
+                                bool mapwritable, bool hard_fail,
+                                const char *filename, int line);
 /* check if all allocated file pointer have been released, prints to stderr */
 int     fa_check_fptr_leak(void);
 /* check if all allocated memory maps have been freed, prints to stderr */

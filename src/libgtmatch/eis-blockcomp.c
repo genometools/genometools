@@ -1520,7 +1520,7 @@ static void
 destructOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx)
 {
   if (idx->idxMMap)
-    munmap(idx->idxMMap, idx->rangeEncPos - idx->cwDataPos);
+    fa_xmunmap(idx->idxMMap);
   if (idx->idxFP)
     fa_xfclose(idx->idxFP);
 }
@@ -2128,14 +2128,10 @@ loadBlockEncIdxSeqForSA(Suffixarray *sa, Seqpos totalLen,
 static inline int
 tryMMapOfIndex(struct onDiskBlockCompIdx *idxData)
 {
-  void *indexMMap;
-  assert(idxData && idxData->idxFP);
-  if ((indexMMap = mmap((void *)0, idxData->rangeEncPos - idxData->cwDataPos,
-                        PROT_READ, MAP_SHARED, fileno(idxData->idxFP),
-                        idxData->cwDataPos)) != (void *)-1)
-  {
-    idxData->idxMMap = indexMMap;
-  }
+  size_t len = idxData->rangeEncPos - idxData->cwDataPos;
+  assert(idxData && idxData->idxFP && idxData->idxMMap == NULL);
+  idxData->idxMMap = fa_mmap_generic_fd(fileno(idxData->idxFP), len,
+                                        idxData->cwDataPos, false, false);
   return idxData->idxMMap != NULL;
 }
 

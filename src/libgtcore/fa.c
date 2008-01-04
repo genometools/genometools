@@ -19,7 +19,6 @@
 #include "libgtcore/hashtable.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
-#include "libgtcore/mmap.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/xbzlib.h"
 #include "libgtcore/xposix.h"
@@ -263,31 +262,67 @@ FILE* fa_xtmpfile_func(char *temp, const char *filename, int line)
   return fp;
 }
 
-static void* mmap_generic(const char *path, size_t *len, bool write,
-                          bool x, const char *filename, int line)
+void* fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
+                              bool mapwritable, bool hard_fail,
+                              const char *filename, int line)
 {
   FAMapInfo *mapinfo;
   void *map;
-  assert(fa && path);
+  assert(fa);
   mapinfo = ma_malloc(sizeof (FAMapInfo));
   mapinfo->filename = filename;
   mapinfo->line = line;
-  if (write) {
-    map = x ? xmmap_write(path, &mapinfo->len)
-            : mmap_write(path, &mapinfo->len);
+  mapinfo->len = len;
+  if (hard_fail)
+  {
+    map = xmmap(0, len, mapwritable?PROT_WRITE:PROT_READ,
+                MAP_PRIVATE, fd, offset);
   }
   else
-    map = x ? xmmap_read(path, &mapinfo->len) : mmap_read(path, &mapinfo->len);
+  {
+    if ((map = mmap(0, len, mapwritable?PROT_WRITE:PROT_READ,
+                    MAP_PRIVATE, fd, offset)) == MAP_FAILED)
+      map = NULL;
+  }
+
   if (map) {
     hashtable_add(fa->memory_maps, map, mapinfo);
     fa->current_size += mapinfo->len;
     if (fa->current_size > fa->max_size)
       fa->max_size = fa->current_size;
-    if (len)
-      *len = mapinfo->len;
   }
   else
     ma_free(mapinfo);
+  return map;
+}
+
+#ifndef SIZE_MAX
+#define SIZE_MAX ~(size_t)0
+#endif
+
+static void* fa_mmap_generic_path_func(const char *path, size_t *len,
+                                       bool mapwritable, bool hard_fail,
+                                       const char *filename, int line)
+{
+  int fd;
+  struct stat sb;
+  void *map;
+  assert(fa && path);
+  fd = open(path, mapwritable?O_RDWR:O_RDONLY, 0);
+  if (fd == -1)
+    return NULL;
+  if (hard_fail)
+    xfstat(fd, &sb);
+  else if (fstat(fd, &sb))
+    return NULL;
+  if (sizeof(off_t) > sizeof (size_t)
+      && sb.st_size > SIZE_MAX)
+    return NULL;
+  map = fa_mmap_generic_fd_func(fd, sb.st_size, 0, mapwritable, hard_fail,
+                                filename, line);
+  if (map && len)
+    *len = sb.st_size;
+  xclose(fd);
   return map;
 }
 
@@ -297,7 +332,7 @@ void* fa_mmap_read_func(const char *path, size_t *len,
   assert(path);
   if (!fa) fa_init();
   assert(fa);
-  return mmap_generic(path, len, false, false, filename, line);
+  return fa_mmap_generic_path_func(path, len, false, false, filename, line);
 }
 
 void* fa_mmap_write_func(const char *path, size_t *len,
@@ -306,7 +341,7 @@ void* fa_mmap_write_func(const char *path, size_t *len,
   assert(path);
   if (!fa) fa_init();
   assert(fa);
-  return mmap_generic(path, len, true, false, filename, line);
+  return fa_mmap_generic_path_func(path, len, true, false, filename, line);
 }
 
 void* fa_xmmap_read_func(const char *path, size_t *len,
@@ -315,7 +350,7 @@ void* fa_xmmap_read_func(const char *path, size_t *len,
   assert(path);
   if (!fa) fa_init();
   assert(fa);
-  return mmap_generic(path, len, false, true, filename, line);
+  return fa_mmap_generic_path_func(path, len, false, true, filename, line);
 }
 
 void* fa_xmmap_write_func(const char *path, size_t *len,
@@ -324,7 +359,7 @@ void* fa_xmmap_write_func(const char *path, size_t *len,
   assert(path);
   if (!fa) fa_init();
   assert(fa);
-  return mmap_generic(path, len, true, true, filename, line);
+  return fa_mmap_generic_path_func(path, len, true, true, filename, line);
 }
 
 void fa_xmunmap(void *addr)
