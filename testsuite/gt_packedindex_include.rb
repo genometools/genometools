@@ -17,7 +17,7 @@ Test do
   run_test "#{$bin}gt suffixerator  -indexname miniindex -bwt -suf -db " +
     flattenfilelist(allfiles), :maxtime => 100
   run_test "#{$bin}gt packedindex chkintegrity -ticks 1000 miniindex", :maxtime => 100
-  run_test "#{$bin}gt packedindex chksearch -chksfxarray -nsamples 100 miniindex", :maxtime => 100
+  run_test "#{$bin}gt packedindex chksearch -chksfxarray -nsamples 100 miniindex", :maxtime => 300
 end
 
 if $gttestdata then
@@ -26,7 +26,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt packedindex mkindex -indexname chr01.19960731 -db #{$gttestdata}ltrharvest/s_cer/chr01.19960731.fsa.gz -dna -tis -des", :maxtime => 100
     run_test "#{$bin}gt suffixerator -indexname chr01.19960731 -db #{$gttestdata}ltrharvest/s_cer/chr01.19960731.fsa.gz -bwt -suf"
-    run_test "#{$bin}gt packedindex chkintegrity -ticks 100000 chr01.19960731", :maxtime => 100
-    run_test "#{$bin}gt packedindex chksearch -chksfxarray -nsamples 1000 chr01.19960731", :maxtime => 100
+    run_test "#{$bin}gt packedindex chkintegrity -ticks 100000 chr01.19960731", :maxtime => 400
+    run_test "#{$bin}gt packedindex chksearch -chksfxarray -nsamples 1000 chr01.19960731", :maxtime => 400
   end
 end
