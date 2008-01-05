@@ -237,25 +237,21 @@ int sufbwt2fmindex(Fmindex *fmindex,
       mapsize = getmapsizeAlphabet(suffixarray.alpha);
       specialcharinfo = suffixarray.specialcharinfo;
       firstignorespecial = totallength - specialcharinfo.specialcharacters;
-      /*
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {
         haserr = true;
       }
-      */
     }
     if (!haserr)
     {
-      /*
       if (makeindexfilecopy(outfmindex,
-                           indexname,
-                           BWTTABSUFFIX,
-                           firstignorespecial,
-                           err) != 0)
+                            indexname,
+                            BWTTABSUFFIX,
+                            firstignorespecial,
+                            err) != 0)
       {
         haserr = true;
       }
-      */
     }
   } else
   {
