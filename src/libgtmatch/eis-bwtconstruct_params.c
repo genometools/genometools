@@ -55,15 +55,19 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
 static int
 estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput, Error *err)
 {
-  /* two cases: we store 1 bit per position or log(segmentlen) for
-   * each marked position plus one to note the number of marked positions */
-  unsigned segmentLen = estimateSegmentSize(&paramOutput->final.seqParams,
-                                            paramOutput->final.baseType, err);
-  if (segmentLen > (segmentLen + 1) * requiredUIntBits(segmentLen)
-      / paramOutput->final.locateInterval)
-    return BWTLocateCount;
-  else
-    return BWTLocateBitmap;
+  if (!paramOutput->final.locateInterval)
+    return BWTBaseFeatures;
+  {
+    /* two cases: we store 1 bit per position or log(segmentlen) for
+     * each marked position plus one to note the number of marked positions */
+    unsigned segmentLen = estimateSegmentSize(&paramOutput->final.seqParams,
+                                              paramOutput->final.baseType, err);
+    if (segmentLen > (segmentLen + 1) * requiredUIntBits(segmentLen)
+        / paramOutput->final.locateInterval)
+      return BWTLocateCount;
+    else
+      return BWTLocateBitmap;
+  }
 }
 
 extern void
