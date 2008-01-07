@@ -56,7 +56,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
                              Error *err)
 {
   OptionParser *op;
-  Option *optionmin, *optionmax, *optionoutput, *optionfmindex, 
+  Option *optionmin, *optionmax, *optionoutput, *optionfmindex,
          *optionesaindex, *optionquery;
   OPrval oprval;
   StrArray *flagsoutputoption;
@@ -102,7 +102,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   optionfmindex = option_new_string("fmi", "specify fmindex",
                                     uniquesubcallinfo->indexname,NULL);
   option_parser_add_option(op, optionfmindex);
-  
+
   optionesaindex = option_new_string("esa", "specify suffix array",
                                      uniquesubcallinfo->indexname,NULL);
   option_parser_add_option(op, optionesaindex);
@@ -274,7 +274,7 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
   {
     freefmindex(&fmindex);
   } else
-  { 
+  {
     freesuffixarray(&suffixarray);
   }
   freeverboseinfo(&verboseinfo);

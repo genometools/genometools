@@ -67,7 +67,7 @@ static bool findcharintervalbin(const Encodedsequence *encseq,
                                 Seqpos j)
 {
   Uchar leftcc, rightcc;
-  Seqpos pos, rightbound, leftbound = i, 
+  Seqpos pos, rightbound, leftbound = i,
          totallength = getencseqtotallength(encseq);
 
   pos = suftab[j] + lcpvalue;
