@@ -57,7 +57,7 @@ then
   U8=${GTTESTDATA}/Iowa/U89959.fna
   ATK=${GTTESTDATA}/Iowa/at100K1
   GRUMBACH=${GTTESTDATA}/DNA-mix/Grumbach.fna
-  ../scripts/rununique.sh 10 20 ${U8} ${AT}
+  ../scripts/rununique.sh ../bin/gt 10 20 ${U8} ${AT}
   for options in `${ALLOUTPUTOPTS}`
   do
     ../scripts/cmpdbfile.sh ${options} -pl -db ${ATK}
