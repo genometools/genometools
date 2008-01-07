@@ -52,6 +52,8 @@ end
 
 $transdir=File.join(Dir.pwd, "..", "gtdata" , "trans", "")
 
+$scriptsdir=File.join(Dir.pwd, "..", "scripts", "")
+
 if $arguments["gtruby"] then
   $gtruby=File.join($arguments["gtruby"], "")
 else

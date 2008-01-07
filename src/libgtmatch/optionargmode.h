@@ -15,21 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTMATCH_H
-#define GTMATCH_H
+#ifndef OPTIONARGMODE_H
+#define OPTIONARGMODE_H
 
-/* The GenomeTools matching library (libgtmatch) header */
-#include "libgtmatch/sarr-def.h"
+typedef struct
+{
+  const char *name;
+  unsigned int bitmask;
+} Optionargmodedesc;
 
-#include "libgtmatch/guessprot.pr"
-#include "libgtmatch/sfx-run.pr"
-#include "libgtmatch/fmi-mkindex.pr"
-#include "libgtmatch/esa-map.pr"
-#include "libgtmatch/sfx-suftaborder.pr"
-#include "libgtmatch/test-encseq.pr"
-#include "libgtmatch/test-mappedstr.pr"
-#include "libgtmatch/test-trieins.pr"
-#include "libgtmatch/test-mergeesa.pr"
-#include "libgtmatch/pos2seqnum.pr"
+int optionaddbitmask(Optionargmodedesc *modedesc,
+                     size_t numberofentries,
+                     unsigned int *mode,
+                     const char *optname,
+                     const char *optionargument,
+                     Error *err);
 
 #endif

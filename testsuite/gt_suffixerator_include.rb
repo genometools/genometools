@@ -50,6 +50,8 @@ allfiles = ["RandomN.fna","Random.fna","Atinsert.fna",
 
 alldir = ["fwd","cpl","rev","rcl"]
 
+# put the tests with paircmp, maxpair, patternmatch, into a file gt_idxmatch
+
 Name "gt suffixerator paircmp"
 Keywords "gt_suffixerator"
 Test do
@@ -164,21 +166,49 @@ def checkmapped(args)
   end
 end
 
+def checkuniquesub(reffile,queryfile)
+  run_test("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}")
+  run_test("#{$bin}gt uniquesub -min 10 -max 20 -output querypos -query #{queryfile} -fmi fmi")
+  run "mv #{$last_stdout} tmp.fmi"
+  run_test("#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v -db #{reffile}")
+  run_test("#{$bin}gt uniquesub -min 10 -max 20 -output querypos -query #{queryfile} -esa sfx")
+  run "mv #{$last_stdout} tmp.esa"
+  run "diff tmp.esa tmp.fmi"
+  run "rm -rf sfx.* fmi.*"
+end
+
+def grumbach()
+  return "#{$gttestdata}DNA-mix/Grumbach.fna/"
+end
+
+allfiles.each do |reffile|
+  allfiles.each do |queryfile|
+    if queryfile != reffile then
+      Name "gt uniquesub #{reffile} #{queryfile}"
+      Keywords "gt_uniquesub small"
+      Test do
+        checkuniquesub("#{$testdata}/#{reffile}","#{$testdata}/#{queryfile}")
+      end 
+    end
+  end
+end
+
 if $gttestdata then
-  checkmapped("-db #{$gttestdata}Iowa/at100K1 #{$gttestdata}Iowa/at100K1 " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/Wildcards.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/chntxx.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/hs5hcmvcg.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/humdystrop.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/humghcsa.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/humhbb.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/humhdabcd.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/humhprtb.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/mipacga.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/mpocpcg.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/mpomtcg.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/vaccg.fna " +
-              "#{$gttestdata}DNA-mix/Grumbach.fna/ychrIII.fna " +
+  checkmapped("-db " +
+              "#{$gttestdata}Iowa/at100K1 " +
+              "#{grumbach()}Wildcards.fna " +
+              "#{grumbach()}chntxx.fna " +
+              "#{grumbach()}hs5hcmvcg.fna " +
+              "#{grumbach()}humdystrop.fna " +
+              "#{grumbach()}humghcsa.fna " +
+              "#{grumbach()}humhbb.fna " +
+              "#{grumbach()}humhdabcd.fna " +
+              "#{grumbach()}humhprtb.fna " +
+              "#{grumbach()}mipacga.fna " +
+              "#{grumbach()}mpocpcg.fna " +
+              "#{grumbach()}mpomtcg.fna " +
+              "#{grumbach()}vaccg.fna " +
+              "#{grumbach()}ychrIII.fna " +
               "-parts 3 -pl")
 
   checkmapped("-parts 1 -pl -db #{$gttestdata}swissprot/swiss10K " +
@@ -191,4 +221,9 @@ if $gttestdata then
 
   checkmapped("-db #{$gttestdata}swissprot/swiss10K -parts 1 -pl -smap " +
               "TransProt11")
+  Name "gt uniquesub at1MB U8"
+  Keywords "gt_uniquesub gttestdata"
+  Test do
+    checkuniquesub("#{$gttestdata}Iowa/at1MB","#{$gttestdata}Iowa/U89959.fna")
+  end
 end

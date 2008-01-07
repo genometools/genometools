@@ -1,39 +1,41 @@
 #!/bin/sh
 
-if [ $# -lt 4 ]
+if [ $# -lt 5 ]
 then
-  echo "Usage: $0 <gtpath> <idir> <fmindex> <file1> [file2 file3 ..]"
+  echo "Usage: $0 <gt-bin> <bothdirections> <idir> <fmindex> <file1> [file2 file3 ..]"
   exit 1
 fi
 
-gtpath=$1
-idir=$2
-fmindex=${idir}/$3
+gtbin=$1
+bothdirections=$2
+idir=$3
+fmindex=${idir}/$4
+shift
 shift
 shift
 shift
 rfiles=$*
 
-cerr() 
+cerr()
 {
-  $1
+  $*
   if [ $? -ne 0 ]
   then
-    echo "failure: ${1}"
+    echo "failure: $*"
     exit 1
   fi
 }
 
-suffixerator
+suffixerator()
 {
-  cerr "${gtpath} suffixerator $*"
+  cerr "${gtbin} suffixerator $*"
 }
 
-makesuftab
+makesuftab()
 {
   if [ $1 = 'rev' ]
   then
-    suffixerator -dna -lcp -tis -suf -pl -dir rev -indexname ${idir}/$2.rev -db $3
+    suffixerator -dna -bwt -lcp -tis -suf -pl -dir rev -indexname ${idir}/$2.rev -db $3
   else
     suffixerator -dna -lcp -tis -suf -pl -dir cpl -indexname ${idir}/$2.cpl -db $3
   fi
@@ -41,7 +43,7 @@ makesuftab
 
 plain() 
 {
-  cerr "${gtpath} suffixerator -plain -tis -indexname $1 -smap $1.al1 -db $1.bwt"
+  cerr "${gtbin} suffixerator -plain -tis -indexname $1 -smap $1.al1 -db $1.bwt"
 }
 
 mkfmindex() 
@@ -49,7 +51,7 @@ mkfmindex()
   indexname=$1
   shift
   iiargs=$*
-  cerr "${gtpath} mkfmindex -size small -noindexpos -fmout ${indexname} -ii ${iiargs}"
+  cerr "${gtbin} mkfmindex -size small -noindexpos -fmout ${indexname} -ii ${iiargs}"
 }
 
 needsrebuild=0
@@ -76,11 +78,16 @@ do
                     "${indexname}.rev.prj" \
                     "makesuftab rev ${indexname} ${rfile}"
   indexlist="${indexlist} ${idir}/${indexname}.rev"
-  needconstruction1 ${rfile} \
-                    "${indexname}.cpl.prj" \
-                    "makesuftab cpl ${indexname} ${rfile}"
-  indexlist="${indexlist} ${idir}/${indexname}.cpl"
+  if [ $bothdirections -eq 1 ]
+  then
+    needconstruction1 ${rfile} \
+                      "${indexname}.cpl.prj" \
+                      "makesuftab cpl ${indexname} ${rfile}"
+    indexlist="${indexlist} ${idir}/${indexname}.cpl"
+  fi
 done
+
+echo "here 0"
 
 if [ $needsrebuild -eq 1 ] ||
    [ ! -f ${fmindex}.fma ] ||
@@ -94,6 +101,8 @@ else
   echo "# ${fmindex}.fmd is up to date"
   echo "# ${fmindex}.bwt is up to date"
 fi
+
+echo "here 1"
 
 if [ $needsrebuild -eq 1 ]
 then

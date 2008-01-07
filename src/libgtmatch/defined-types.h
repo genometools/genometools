@@ -15,21 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTMATCH_H
-#define GTMATCH_H
+#ifndef DEFINED_TYPES_H
+#define DEFINED_TYPES_H
 
-/* The GenomeTools matching library (libgtmatch) header */
-#include "libgtmatch/sarr-def.h"
+#include <stdbool.h>
 
-#include "libgtmatch/guessprot.pr"
-#include "libgtmatch/sfx-run.pr"
-#include "libgtmatch/fmi-mkindex.pr"
-#include "libgtmatch/esa-map.pr"
-#include "libgtmatch/sfx-suftaborder.pr"
-#include "libgtmatch/test-encseq.pr"
-#include "libgtmatch/test-mappedstr.pr"
-#include "libgtmatch/test-trieins.pr"
-#include "libgtmatch/test-mergeesa.pr"
-#include "libgtmatch/pos2seqnum.pr"
+typedef struct
+{
+  bool defined;
+  unsigned long valueunsignedlong;
+} Definedunsignedlong;
 
 #endif

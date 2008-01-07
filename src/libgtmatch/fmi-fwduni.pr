@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned long skfmuniqueforward (const Fmindex *fmindex,
+unsigned long skfmuniqueforward (const void *genericindex,
                                  const Uchar *qstart,
                                  const Uchar *qend);
 

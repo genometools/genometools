@@ -22,13 +22,14 @@
 
 #include "fmi-occ.gen"
 
-unsigned long skfmuniqueforward (const Fmindex *fmindex,
+unsigned long skfmuniqueforward (const void *genericindex,
                                  const Uchar *qstart,
                                  const Uchar *qend)
 {
   Uchar cc;
   const Uchar *qptr;
   Bwtbound bwtbound;
+  const Fmindex *fmindex = (Fmindex *) genericindex;
 
   qptr = qstart;
   cc = *qptr++;

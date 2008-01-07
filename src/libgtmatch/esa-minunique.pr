@@ -1,0 +1,10 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+unsigned long suffixarrayuniqueforward (const void *genericindex,
+                                        const Uchar *qstart,
+                                        const Uchar *qend);
+
+#ifdef __cplusplus
+}
+#endif

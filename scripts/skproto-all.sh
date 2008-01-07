@@ -44,6 +44,7 @@ esa-seqread.c
 inl-encseq.c
 mapspec-gen.c
 measure-time.c
+optionargmode.c
 overallseq.c
 sfx-bentsedg.c
 sfx-outlcp.c
@@ -51,7 +52,9 @@ sfx-partssuf.c
 sfx-readint.c
 sfx-suffixer.c
 test-pairwise.c
+trieins.c
 turnwheels.c
+uniquesub.c
 verbose.c
 END_OF_TEXT
 

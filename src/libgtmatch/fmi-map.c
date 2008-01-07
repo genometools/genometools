@@ -174,6 +174,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,
   error_check(err);
   fmindex->mappedptr = NULL;
   fmindex->bwtformatching = NULL;
+  fmindex->alphabet = NULL;
   fpin = opensfxfile(indexname,FMASCIIFILESUFFIX,"rb",err);
   if (fpin == NULL)
   {

@@ -24,12 +24,13 @@ set -e -x
 outoptions="-tis -lcp -suf -bwt"
 ALLOUTPUTOPTS="../scripts/alloutputoptions.rb"
 
-# the make call normally used for development
 cd testsuite
+
+# the make call normally used for development
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_suffixerator'
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_trieins'
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_ltrharvest'
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_suffixerator and gttestdata' -gttestdata ${GTTESTDATA}
+env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb -keywords 'gt_suffixerator and gttestdata' -gttestdata ${GTTESTDATA}
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
 # the following depends on vmatch-mini.x and mkvtree.x
@@ -53,8 +54,10 @@ fi
 if test ! "X${GTTESTDATA}" = "X"
 then
   AT=${GTTESTDATA}/Iowa/at1MB
+  U8=${GTTESTDATA}/Iowa/U89959.fna
   ATK=${GTTESTDATA}/Iowa/at100K1
   GRUMBACH=${GTTESTDATA}/DNA-mix/Grumbach.fna
+  ../scripts/rununique.sh ../bin/gt 10 20 ${U8} ${AT}
   for options in `${ALLOUTPUTOPTS}`
   do
     ../scripts/cmpdbfile.sh ${options} -pl -db ${ATK}

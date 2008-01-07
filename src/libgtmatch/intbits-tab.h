@@ -17,6 +17,7 @@
 
 #ifndef INTBITS_TAB_H
 #define INTBITS_TAB_H
+#include <string.h>
 #include "intbits.h"
 #include "spacedef.h"
 
@@ -36,13 +37,9 @@
 
 #define INITBITTABGENERIC(TAB,OLDTAB,NUMOFBITS)\
         {\
-          Bitstring *tabptr;\
           size_t tabsize = NUMOFINTSFORBITS(NUMOFBITS);\
           ALLOCASSIGNSPACE(TAB,OLDTAB,Bitstring,tabsize);\
-          for (tabptr = TAB; tabptr < (TAB) + tabsize; tabptr++)\
-          {\
-            *tabptr = 0;\
-          }\
+          (void) memset(TAB,0,sizeof(Bitstring) * tabsize);\
         }
 
 #define INITBITTAB(TAB,N) INITBITTABGENERIC(TAB,NULL,N)
@@ -53,14 +50,7 @@
 */
 
 #define CLEARBITTAB(TAB,N)\
-        {\
-          Bitstring *tabptr;\
-          size_t tabsize = NUMOFINTSFORBITS(N);\
-          for (tabptr = TAB; tabptr < TAB + tabsize; tabptr++)\
-          {\
-            *tabptr = 0;\
-          }\
-        }
+        (void) memset(TAB,0,sizeof(Bitstring) * NUMOFINTSFORBITS(N))
 
 /*
   \texttt{SETIBIT(TAB,I)} sets the \texttt{I}-th bit in bitarray

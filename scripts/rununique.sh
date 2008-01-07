@@ -4,11 +4,11 @@
 
 if [ $# -lt 5 ]
 then
-  echo "Usage: $0 <gtpath> <min> <max> <queryfile> <file1> <file2> ..."
+  echo "Usage: $0 <gtbin> <min> <max> <queryfile> <file1> <file2> ..."
   exit 1
 fi
 
-gtpath=$1
+gtbin=$1
 minval=$2
 maxval=$3
 queryfile=$4
@@ -30,14 +30,14 @@ cerr()
   fi
 }
 
-uniquesub
+uniquesub()
 {
-  cerr "${gtpath} uniquesub -output sequence querypos $*"
+  cerr "${gtbin} uniquesub -output sequence querypos $*"
 }
 
 idir=../indexdir
 fmindex=Combined.fm
 
-cerr "runmkfm.sh ${gtpath} ${idir} ${fmindex} ${rfiles}"
+cerr "runmkfm.sh 1 ${idir} ${fmindex} ${rfiles}"
 
 cerr "uniquesub -min ${minval} -max ${maxval} -fmi ${idir}/${fmindex} -query ${queryfile}"
