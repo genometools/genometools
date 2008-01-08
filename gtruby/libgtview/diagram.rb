@@ -27,6 +27,9 @@ module GT
   class Diagram
     attr_reader :diagram
     def initialize(feature_index, seqid, range, config)
+      if range.start > range.end
+        GT.gterror("range.start > range.end")
+      end
       @diagram = GT.diagram_new(feature_index.feature_index, seqid, range,
                                 config.config)
       @diagram.free = GT::symbol("diagram_delete", "0P")
