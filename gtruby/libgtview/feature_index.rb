@@ -23,6 +23,7 @@ require 'libgtcore/strarray'
 module GT
   extend DL::Importable
   dlload "libgtview.so"
+  typealias "bool", "ibool"
   extern "FeatureIndex* feature_index_new()"
   extern "void feature_index_delete(FeatureIndex*)"
   extern "Array* feature_index_get_features_for_seqid(FeatureIndex*, const " +
@@ -31,6 +32,7 @@ module GT
   extern "StrArray* feature_index_get_seqids(const FeatureIndex*)"
   extern "void feature_index_get_rangeptr_for_seqid(FeatureIndex*, Range*, " +
                                                    "const char*)"
+  extern "bool feature_index_has_seqid(const FeatureIndex*, const char*)"
   extern "void feature_index_delete(FeatureIndex*)"
 
   class FeatureIndex
@@ -63,6 +65,9 @@ module GT
     end
 
     def get_range_for_seqid(seqid)
+      if not GT.feature_index_has_seqid(@feature_index, seqid)
+        GT.gterror("feature_index does not contain seqid")
+      end
       range = GT::Range.malloc
       GT.feature_index_get_rangeptr_for_seqid(@feature_index, range, seqid)
       range
