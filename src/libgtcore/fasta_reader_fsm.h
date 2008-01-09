@@ -20,7 +20,7 @@
 
 #include "libgtcore/fasta_reader.h"
 
-/* implements the ``fasta reader'' interface */
+/* implements the ``fasta reader'' interface with a finite state machine */
 typedef struct FastaReaderFSM FastaReaderFSM;
 
 const FastaReaderClass* fasta_reader_fsm_class(void);
