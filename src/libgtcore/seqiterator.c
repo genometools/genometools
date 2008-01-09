@@ -44,11 +44,11 @@ SeqIterator* seqiterator_new(const StrArray *filenametab,
   INITARRAY(&seqit->sequencebuffer, Uchar);
   seqit->descptr = queue_new();
   seqit->fb = fastabuffer_new(filenametab,
-                               symbolmap,
-                               false,
-                               NULL,
-                               seqit->descptr,
-                               NULL);
+                              symbolmap,
+                              false,
+                              NULL,
+                              seqit->descptr,
+                              NULL);
   seqit->exhausted = false;
   seqit->unitnum = 0;
   seqit->withsequence = withsequence;
