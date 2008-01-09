@@ -50,7 +50,7 @@ int fasta_reader_run(FastaReader *fr,
                      FastaReaderProcDescription proc_description,
                      FastaReaderProcSequencePart proc_sequence_part,
                      FastaReaderProcSequenceLength proc_sequence_length,
-                     void *data, Error *e)
+                     void *data, Error *err)
 {
   unsigned char cc;
   FastaReader_state state = EXPECTING_SEPARATOR;
@@ -58,7 +58,7 @@ int fasta_reader_run(FastaReader *fr,
   Str *description, *sequence;
   int had_err = 0;
 
-  error_check(e);
+  error_check(err);
   assert(fr);
 
   /* init */
@@ -77,7 +77,7 @@ int fasta_reader_run(FastaReader *fr,
     switch (state) {
       case EXPECTING_SEPARATOR:
         if (cc != FASTA_SEPARATOR) {
-          error_set(e,
+          error_set(err,
                     "the first character of fasta file \"%s\" has to be '%c'",
                     str_get(fr->sequence_filename), FASTA_SEPARATOR);
           had_err = -1;
@@ -88,7 +88,7 @@ int fasta_reader_run(FastaReader *fr,
       case READING_DESCRIPTION:
         if (cc == '\n') {
           if (proc_description) {
-            had_err = proc_description(description, data, e);
+            had_err = proc_description(description, data, err);
             if (!had_err)
               str_reset(description);
           }
@@ -105,7 +105,7 @@ int fasta_reader_run(FastaReader *fr,
         if (cc == FASTA_SEPARATOR) {
           if (!sequence_length) {
             assert(line_counter);
-            error_set(e, "empty sequence after description given in line %lu",
+            error_set(err, "empty sequence after description given in line %lu",
                       line_counter - 1);
             had_err = -1;
             break;
@@ -113,13 +113,13 @@ int fasta_reader_run(FastaReader *fr,
           else {
             if (proc_sequence_part) {
               assert(str_length(sequence));
-              had_err = proc_sequence_part(sequence, data, e);
+              had_err = proc_sequence_part(sequence, data, err);
             }
             if (had_err)
               break;
             str_reset(sequence);
             if (proc_sequence_length)
-              had_err = proc_sequence_length(sequence_length, data, e);
+              had_err = proc_sequence_length(sequence_length, data, err);
             if (had_err)
               break;
             state = READING_DESCRIPTION;
@@ -136,7 +136,7 @@ int fasta_reader_run(FastaReader *fr,
           sequence_length++;
           if (proc_sequence_part) {
             if (str_length(sequence) == BUFSIZ) {
-              had_err = proc_sequence_part(sequence, data, e);
+              had_err = proc_sequence_part(sequence, data, err);
               if (had_err)
                 break;
               str_reset(sequence);
@@ -152,12 +152,12 @@ int fasta_reader_run(FastaReader *fr,
     /* checks after reading */
     switch (state) {
       case EXPECTING_SEPARATOR:
-        error_set(e, "sequence file \"%s\" is empty",
+        error_set(err, "sequence file \"%s\" is empty",
                   str_get(fr->sequence_filename));
         had_err = -1;
         break;
       case READING_DESCRIPTION:
-        error_set(e, "unfinished fasta entry in line %lu of sequence file "
+        error_set(err, "unfinished fasta entry in line %lu of sequence file "
                   "\"%s\"", line_counter, str_get(fr->sequence_filename));
         had_err = -1;
         break;
@@ -165,17 +165,17 @@ int fasta_reader_run(FastaReader *fr,
       case READING_SEQUENCE:
         if (!sequence_length) {
           assert(line_counter);
-          error_set(e, "empty sequence after description given in line %lu",
+          error_set(err, "empty sequence after description given in line %lu",
                     line_counter - 1);
           had_err = -1;
         }
         else {
           if (proc_sequence_part) {
             assert(str_length(sequence));
-            had_err = proc_sequence_part(sequence, data, e);
+            had_err = proc_sequence_part(sequence, data, err);
           }
           if (!had_err && proc_sequence_length)
-            had_err = proc_sequence_length(sequence_length, data, e);
+            had_err = proc_sequence_length(sequence_length, data, err);
         }
     }
   }
