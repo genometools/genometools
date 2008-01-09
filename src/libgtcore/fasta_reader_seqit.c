@@ -58,8 +58,10 @@ static int fasta_reader_seqit_run(FastaReader *fasta_reader,
 
     if (proc_description)
       had_err = proc_description(desc, strlen(desc), data, err);
-    if (!had_err && proc_sequence_part)
-      had_err = proc_sequence_part(sequence, strlen(sequence), data, err);
+    if (!had_err && proc_sequence_part) {
+      had_err = proc_sequence_part((char*) sequence, strlen((char*) sequence),
+                                   data, err);
+    }
     if (!had_err && proc_sequence_length)
       had_err = proc_sequence_length(len, data, err);
 
