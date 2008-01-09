@@ -36,7 +36,7 @@ feature requests:
 merge libgtcore and libgtmatch:
 -------------------------------
 
-- replace (fasta_reader with SeqIterator
+- replace FastaReader with SeqIterator
 - move alphabet to core
 - Alphabet (Stefan: ersetze alphabet.pr durch alphadef.h, Gordon: evtl. mergen
   mit Alpha)
