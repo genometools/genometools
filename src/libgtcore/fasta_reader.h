@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,10 +18,12 @@
 #ifndef FASTA_READER_H
 #define FASTA_READER_H
 
-/* this class is deprecated, use the SeqIterator class instead! */
+#include <stdbool.h>
 
-#include "libgtcore/str.h"
+#include "libgtext/genome_node.h"
 
+/* the ``fasta reader'' interface */
+typedef struct FastaReaderClass FastaReaderClass;
 typedef struct FastaReader FastaReader;
 
 /* gets called for each description (the start of a fasta entry) */
@@ -37,7 +39,6 @@ typedef int (*FastaReaderProcSequenceLength)(unsigned long, void *data, Error*);
 
 /* construct a new fasta reader for the file named <sequence_filename>, pass
    NULL to read from stdin */
-FastaReader* fasta_reader_new(Str *sequence_filename);
 int          fasta_reader_run(FastaReader*, FastaReaderProcDescription,
                               FastaReaderProcSequencePart,
                               FastaReaderProcSequenceLength, void *data,
