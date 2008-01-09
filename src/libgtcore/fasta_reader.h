@@ -25,9 +25,13 @@
 typedef struct FastaReader FastaReader;
 
 /* gets called for each description (the start of a fasta entry) */
-typedef int (*FastaReaderProcDescription)(Str*, void *data, Error*);
+typedef int (*FastaReaderProcDescription)(const char *description,
+                                          unsigned long length, void *data,
+                                          Error*);
 /* gets called for each sequence part of a fasta entry */
-typedef int (*FastaReaderProcSequencePart)(Str*, void *data, Error*);
+typedef int (*FastaReaderProcSequencePart)(const char *seqpart,
+                                           unsigned long length, void *data,
+                                           Error*);
 /* gets called after a fasta entry has been read */
 typedef int (*FastaReaderProcSequenceLength)(unsigned long, void *data, Error*);
 

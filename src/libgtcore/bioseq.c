@@ -56,39 +56,40 @@ typedef struct {
   Bioseq *bs;
 } Construct_bioseq_files_info;
 
-static int proc_description(Str *description, void *data, Error *e)
+static int proc_description(const char *description, unsigned long length,
+                            void *data, Error *e)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   char *description_cstr;
   error_check(e);
   if (info->bs->use_stdin) {
-    description_cstr = cstr_dup(str_get(description));
+    description_cstr = cstr_dup(description);
     array_add(info->bs->descriptions, description_cstr);
   }
   else {
-    if (str_length(description))
-      xfputs(str_get(description), info->bioseq_index);
+    if (length)
+      xfputs(description, info->bioseq_index);
     xfputc('\n', info->bioseq_index);
   }
   return 0;
 }
 
-static int proc_sequence_part(Str *sequence, void *data, Error *e)
+static int proc_sequence_part(const char *seqpart, unsigned long length,
+                              void *data, Error *e)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   error_check(e);
-  assert(str_length(sequence));
+  assert(seqpart);
   if (info->bs->use_stdin) {
     info->bs->raw_sequence = dynalloc(info->bs->raw_sequence,
                                       &info->bs->allocated,
-                                      info->bs->raw_sequence_length +
-                                      str_length(sequence));
-    memcpy(info->bs->raw_sequence + info->bs->raw_sequence_length,
-           str_get(sequence), str_length(sequence));
-    info->bs->raw_sequence_length += str_length(sequence);
+                                      info->bs->raw_sequence_length + length);
+    memcpy(info->bs->raw_sequence + info->bs->raw_sequence_length, seqpart,
+           length);
+    info->bs->raw_sequence_length += length;
   }
   else
-    xfputs(str_get(sequence), info->bioseq_raw);
+    xfputs(seqpart, info->bioseq_raw);
   return 0;
 }
 

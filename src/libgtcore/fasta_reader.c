@@ -88,7 +88,8 @@ int fasta_reader_run(FastaReader *fr,
       case READING_DESCRIPTION:
         if (cc == '\n') {
           if (proc_description) {
-            had_err = proc_description(description, data, err);
+            had_err = proc_description(str_get(description),
+                                       str_length(description), data, err);
             if (!had_err)
               str_reset(description);
           }
@@ -113,7 +114,8 @@ int fasta_reader_run(FastaReader *fr,
           else {
             if (proc_sequence_part) {
               assert(str_length(sequence));
-              had_err = proc_sequence_part(sequence, data, err);
+              had_err = proc_sequence_part(str_get(sequence),
+                                           str_length(sequence), data, err);
             }
             if (had_err)
               break;
@@ -136,7 +138,8 @@ int fasta_reader_run(FastaReader *fr,
           sequence_length++;
           if (proc_sequence_part) {
             if (str_length(sequence) == BUFSIZ) {
-              had_err = proc_sequence_part(sequence, data, err);
+              had_err = proc_sequence_part(str_get(sequence),
+                                           str_length(sequence), data, err);
               if (had_err)
                 break;
               str_reset(sequence);
@@ -172,7 +175,8 @@ int fasta_reader_run(FastaReader *fr,
         else {
           if (proc_sequence_part) {
             assert(str_length(sequence));
-            had_err = proc_sequence_part(sequence, data, err);
+            had_err = proc_sequence_part(str_get(sequence),
+                                         str_length(sequence), data, err);
           }
           if (!had_err && proc_sequence_length)
             had_err = proc_sequence_length(sequence_length, data, err);
