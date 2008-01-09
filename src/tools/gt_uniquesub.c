@@ -233,6 +233,11 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
     {
       haserr = true;
     }
+    /* 
+       gt packedindex mkindex -db ${AT} -dna -pl -bsize 10 -locfreq 0 -locbitmap no
+       loadBWTSeq(const Str *projectName, 
+       BWTDEFOPT_MULTI_QUERY, Error *err);
+    */
   }
   if (!haserr)
   {
@@ -268,6 +273,11 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
       {
         haserr = true;
       }
+      /*
+         getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+              struct matchBound *match, Error *err)
+         
+      */
     }
   }
   if (uniquesubcallinfo.indextype == Fmindextype)
@@ -276,6 +286,7 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
   } else
   {
     freesuffixarray(&suffixarray);
+    /* deleteBWTSeq(BWTSeq *bwtSeq) */
   }
   freeverboseinfo(&verboseinfo);
   str_delete(uniquesubcallinfo.indexname);
