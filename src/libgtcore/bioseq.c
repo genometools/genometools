@@ -73,18 +73,22 @@ static int proc_description(Str *description, void *data, Error *e)
   return 0;
 }
 
-static int proc_character(char character, void *data, Error *e)
+static int proc_sequence_part(Str *sequence, void *data, Error *e)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   error_check(e);
+  assert(str_length(sequence));
   if (info->bs->use_stdin) {
     info->bs->raw_sequence = dynalloc(info->bs->raw_sequence,
                                       &info->bs->allocated,
-                                      info->bs->raw_sequence_length + 1);
-    info->bs->raw_sequence[info->bs->raw_sequence_length++] = character;
+                                      info->bs->raw_sequence_length +
+                                      str_length(sequence));
+    memcpy(info->bs->raw_sequence + info->bs->raw_sequence_length,
+           str_get(sequence), str_length(sequence));
+    info->bs->raw_sequence_length += str_length(sequence);
   }
   else
-    xfputc(character, info->bioseq_raw);
+    xfputs(str_get(sequence), info->bioseq_raw);
   return 0;
 }
 
@@ -212,7 +216,7 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
 
   /* read fasta file */
   fasta_reader = fasta_reader_new(bs->use_stdin ? NULL : bs->sequence_file);
-  had_err = fasta_reader_run(fasta_reader, proc_description, proc_character,
+  had_err = fasta_reader_run(fasta_reader, proc_description, proc_sequence_part,
                              proc_sequence_length, &bioseq_files_info, e);
   fasta_reader_delete(fasta_reader);
 

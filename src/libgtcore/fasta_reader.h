@@ -26,8 +26,8 @@ typedef struct FastaReader FastaReader;
 
 /* gets called for each description (the start of a fasta entry) */
 typedef int (*FastaReaderProcDescription)(Str*, void *data, Error*);
-/* gets called for each character of a fasta entry */
-typedef int (*FastaReaderProcCharacter)(char, void *data, Error*);
+/* gets called for each sequence part of a fasta entry */
+typedef int (*FastaReaderProcSequencePart)(Str*, void *data, Error*);
 /* gets called after a fasta entry has been read */
 typedef int (*FastaReaderProcSequenceLength)(unsigned long, void *data, Error*);
 
@@ -35,7 +35,7 @@ typedef int (*FastaReaderProcSequenceLength)(unsigned long, void *data, Error*);
    NULL to read from stdin */
 FastaReader* fasta_reader_new(Str *sequence_filename);
 int          fasta_reader_run(FastaReader*, FastaReaderProcDescription,
-                              FastaReaderProcCharacter,
+                              FastaReaderProcSequencePart,
                               FastaReaderProcSequenceLength, void *data,
                               Error*);
 void         fasta_reader_delete(FastaReader*);

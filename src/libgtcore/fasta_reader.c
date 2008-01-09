@@ -48,14 +48,14 @@ FastaReader* fasta_reader_new(Str *sequence_filename)
 
 int fasta_reader_run(FastaReader *fr,
                      FastaReaderProcDescription proc_description,
-                     FastaReaderProcCharacter proc_character,
+                     FastaReaderProcSequencePart proc_sequence_part,
                      FastaReaderProcSequenceLength proc_sequence_length,
                      void *data, Error *e)
 {
   unsigned char cc;
   FastaReader_state state = EXPECTING_SEPARATOR;
   unsigned long sequence_length = 0, line_counter = 1;
-  Str *description;
+  Str *description, *sequence;
   int had_err = 0;
 
   error_check(e);
@@ -63,9 +63,10 @@ int fasta_reader_run(FastaReader *fr,
 
   /* init */
   description = str_new();
+  sequence    = str_new();
 
   /* at least one function has to be defined */
-  assert(proc_description || proc_character || proc_sequence_length);
+  assert(proc_description || proc_sequence_part || proc_sequence_length);
 
   /* rewind sequence file (to allow multiple calls) */
   if (fr->sequence_file)
@@ -110,6 +111,13 @@ int fasta_reader_run(FastaReader *fr,
             break;
           }
           else {
+            if (proc_sequence_part) {
+              assert(str_length(sequence));
+              had_err = proc_sequence_part(sequence, data, e);
+            }
+            if (had_err)
+              break;
+            str_reset(sequence);
             if (proc_sequence_length)
               had_err = proc_sequence_length(sequence_length, data, e);
             if (had_err)
@@ -126,8 +134,15 @@ int fasta_reader_run(FastaReader *fr,
         }
         else {
           sequence_length++;
-          if (proc_character)
-            had_err = proc_character(cc, data, e);
+          if (proc_sequence_part) {
+            if (str_length(sequence) == BUFSIZ) {
+              had_err = proc_sequence_part(sequence, data, e);
+              if (had_err)
+                break;
+              str_reset(sequence);
+            }
+            str_append_char(sequence, cc);
+          }
         }
         break;
     }
@@ -154,12 +169,19 @@ int fasta_reader_run(FastaReader *fr,
                     line_counter - 1);
           had_err = -1;
         }
-        else if (proc_sequence_length)
-          had_err = proc_sequence_length(sequence_length, data, e);
+        else {
+          if (proc_sequence_part) {
+            assert(str_length(sequence));
+            had_err = proc_sequence_part(sequence, data, e);
+          }
+          if (!had_err && proc_sequence_length)
+            had_err = proc_sequence_length(sequence_length, data, e);
+        }
     }
   }
 
   /* free */
+  str_delete(sequence);
   str_delete(description);
 
   return had_err;
