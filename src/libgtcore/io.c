@@ -23,7 +23,7 @@
 #include "libgtcore/xansi.h"
 
 struct IO {
-  FILE *fp;
+  GenFile *fp;
   char unget_char, *path;
   unsigned long line_number;
   bool unget_used, line_start;
@@ -35,7 +35,7 @@ IO* io_new(const char *path, const char *mode)
   assert(path && mode);
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
   io = ma_malloc(sizeof (IO));
-  io->fp = fa_xfopen(path, mode);
+  io->fp = genfile_xopen(path, mode);
   io->path = cstr_dup(path);
   io->line_number = 1;
   io->unget_used = false;
@@ -52,7 +52,7 @@ int io_get_char(IO *io, char *c)
     io->unget_used = false;
     return 0;
   }
-  cc = xfgetc(io->fp);
+  cc = genfile_getc(io->fp);
   if (cc == '\n') {
     io->line_number++;
     io->line_start = true;
@@ -94,7 +94,7 @@ const char* io_get_filename(const IO *io)
 void io_delete(IO *io)
 {
   if (!io) return;
-  fa_xfclose(io->fp);
+  genfile_close(io->fp);
   ma_free(io->path);
   ma_free(io);
 }
