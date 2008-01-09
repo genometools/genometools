@@ -42,7 +42,6 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
                                 proc_sequence_length,
                                 void *data, Error *err)
 {
-  /* XXX: rename fr */
   FastaReaderFSM *fr = fasta_reader_fsm_cast(fasta_reader);
   unsigned char cc;
   FastaReader_state state = EXPECTING_SEPARATOR;
