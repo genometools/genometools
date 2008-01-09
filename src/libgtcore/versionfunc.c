@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,9 +21,9 @@
 void versionfunc(const char *progname)
 {
   printf("%s (GenomeTools) %s (%s)\n", progname, GT_VERSION, GT_BUILT);
-  printf("Copyright (c) 2003-2007 Gordon Gremme, Stefan Kurtz, and "
+  printf("Copyright (c) 2003-2008 Gordon Gremme, Stefan Kurtz, and "
          "CONTRIBUTORS\n");
-  printf("Copyright (c) 2003-2007 Center for Bioinformatics, University of "
+  printf("Copyright (c) 2003-2008 Center for Bioinformatics, University of "
          "Hamburg\n");
   printf("See LICENSE file or http://genometools.org/license.html for license "
          "details.\n\n");
