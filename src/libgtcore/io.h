@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -27,7 +27,7 @@ typedef struct IO IO;
 
 IO*           io_new(const char *path, const char *mode);
 int           io_get_char(IO*, char*); /* returns -1 if no char is left */
-void          io_unget_char(IO*, char);
+void          io_unget_char(IO*, char); /* can only be used once at a time */
 bool          io_line_start(const IO*);
 unsigned long io_get_line_number(const IO*);
 const char*   io_get_filename(const IO*);

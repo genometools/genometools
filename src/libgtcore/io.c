@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,9 +24,9 @@
 
 struct IO {
   FILE *fp;
-  char *path;
+  char unget_char, *path;
   unsigned long line_number;
-  bool line_start;
+  bool unget_used, line_start;
 };
 
 IO* io_new(const char *path, const char *mode)
@@ -38,6 +38,7 @@ IO* io_new(const char *path, const char *mode)
   io->fp = fa_xfopen(path, mode);
   io->path = cstr_dup(path);
   io->line_number = 1;
+  io->unget_used = false;
   io->line_start = true;
   return io;
 }
@@ -46,6 +47,11 @@ int io_get_char(IO *io, char *c)
 {
   int cc;
   assert(io && c);
+  if (io->unget_used) {
+    *c = io->unget_char;
+    io->unget_used = false;
+    return 0;
+  }
   cc = xfgetc(io->fp);
   if (cc == '\n') {
     io->line_number++;
@@ -62,7 +68,9 @@ int io_get_char(IO *io, char *c)
 void io_unget_char(IO *io, char c)
 {
   assert(io);
-  xungetc(c, io->fp);
+  assert(!io->unget_used); /* only one char can be unget at a time */
+  io->unget_char = c;
+  io->unget_used = true;
 }
 
 bool io_line_start(const IO *io)
