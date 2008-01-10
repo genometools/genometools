@@ -32,11 +32,17 @@ struct IO {
 IO* io_new(const char *path, const char *mode)
 {
   IO *io;
-  assert(path && mode);
+  assert(mode);
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
   io = ma_malloc(sizeof (IO));
-  io->fp = genfile_xopen(path, mode);
-  io->path = cstr_dup(path);
+  if (path) {
+    io->fp = genfile_xopen(path, mode);
+    io->path = cstr_dup(path);
+  }
+  else {
+    io->fp = NULL;
+    io->path = cstr_dup("stdin");
+  }
   io->line_number = 1;
   io->unget_used = false;
   io->line_start = true;
@@ -77,6 +83,16 @@ bool io_line_start(const IO *io)
 {
   assert(io);
   return io->line_start;
+}
+
+bool io_has_char(IO *io)
+{
+  int rval;
+  char c;
+  assert(io);
+  rval = io_get_char(io, &c);
+  io_unget_char(io, c);
+  return rval ? false : true;
 }
 
 unsigned long io_get_line_number(const IO *io)
