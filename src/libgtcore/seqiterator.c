@@ -129,6 +129,9 @@ int seqiterator_next(SeqIterator *seqit,
     *desc = queue_get(seqit->descptr);
     if (seqit->withsequence)
     {
+      /* make sure the outgoing sequence is '\0' terminated */
+      seqit->sequencebuffer.spaceUchar
+        [seqit->sequencebuffer.nextfreeUchar] = '\0';
       *sequence = seqit->sequencebuffer.spaceUchar;
     }
     *len = seqit->sequencebuffer.nextfreeUchar;
