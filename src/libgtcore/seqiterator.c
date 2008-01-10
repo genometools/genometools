@@ -18,6 +18,7 @@
 #include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "libgtcore/fastabuffer.h"
+#include "libgtcore/minmax.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
 #include "libgtcore/seqiterator.h"
@@ -115,7 +116,9 @@ int seqiterator_next(SeqIterator *seqit,
     }
     if (seqit->withsequence)
     {
-      STOREINARRAY(&seqit->sequencebuffer, Uchar, 1024, charcode);
+      STOREINARRAY(&seqit->sequencebuffer, Uchar,
+                   MAX(1024, seqit->sequencebuffer.nextfreeUchar * 0.5),
+                   charcode);
     } else
     {
       seqit->sequencebuffer.nextfreeUchar++;
