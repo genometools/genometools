@@ -26,6 +26,7 @@
 #include "libgtcore/fasta.h"
 #include "libgtcore/fasta_reader.h"
 #include "libgtcore/fasta_reader_fsm.h"
+#include "libgtcore/fasta_reader_seqit.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/gc_content.h"
 #include "libgtcore/grep.h"
@@ -218,7 +219,12 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
   }
 
   /* read fasta file */
-  fasta_reader = fasta_reader_fsm_new(bs->use_stdin ? NULL : bs->sequence_file);
+  if (bs->use_stdin)
+    fasta_reader = fasta_reader_fsm_new(NULL);
+  else {
+    /* cannot handle stdin */
+    fasta_reader = fasta_reader_seqit_new(bs->sequence_file);
+  }
   had_err = fasta_reader_run(fasta_reader, proc_description, proc_sequence_part,
                              proc_sequence_length, &bioseq_files_info, err);
   fasta_reader_delete(fasta_reader);
