@@ -64,6 +64,8 @@ Graphics* graphics_new_png(const char *filename, unsigned int width,
   return g;
 }
 
+/* XXX: remove or enable the following code */
+#if 0
 Graphics* graphics_new_pdf(const char *filename, unsigned int width,
                            unsigned int height)
 {
@@ -83,6 +85,7 @@ Graphics* graphics_new_ps(const char *filename, unsigned int width,
   graphics_initialize(g, filename, width, height);
   return g;
 }
+#endif
 
 void graphics_draw_text(Graphics *g, double x, double y, const char *text)
 {
