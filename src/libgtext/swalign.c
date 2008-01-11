@@ -87,17 +87,19 @@ static Coordinate traceback(Alignment *a, DPentry **dptable,
   return start_coordinate;
 }
 
-Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
+static Alignment* smith_waterman_align(const char *u_orig, const char *v_orig,
+                                       const char *u_enc, const char *v_enc,
+                                       unsigned long u_len, unsigned long v_len,
+                                       const int **scores,
+                                       int deletion_score, int insertion_score)
 {
+  assert(u_orig && v_orig && u_enc && v_enc && u_len && v_len && scores);
   Coordinate alignment_start, alignment_end = { UNDEF_ULONG, UNDEF_ULONG };
   DPentry **dptable;
   Alignment *a = NULL;
-  assert(u && v && sf);
-  array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1);
-  fillDPtable(dptable, seq_get_encoded(u), seq_length(u), seq_get_encoded(v),
-              seq_length(v), scorefunction_get_scores(sf),
-              scorefunction_get_deletion_score(sf),
-              scorefunction_get_insertion_score(sf), &alignment_end);
+  array2dim_calloc(dptable, u_len+1, v_len+1);
+  fillDPtable(dptable, u_enc, u_len, v_enc, v_len, scores, deletion_score,
+              insertion_score, &alignment_end);
   assert(alignment_end.x != UNDEF_ULONG);
   assert(alignment_end.y != UNDEF_ULONG);
   if (dptable[alignment_end.x][alignment_end.y].score) {
@@ -111,11 +113,22 @@ Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
     alignment_end.y--;
     /* employ sequence positions to set alignment sequences */
     alignment_set_seqs(a,
-                       seq_get_orig(u) + alignment_start.x,
+                       u_orig + alignment_start.x,
                        alignment_end.x - alignment_start.x + 1,
-                       seq_get_orig(v) + alignment_start.y,
+                       v_orig + alignment_start.y,
                        alignment_end.y - alignment_start.y + 1);
   }
   array2dim_delete(dptable);
   return a;
+}
+
+Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
+{
+  assert(u && v && sf);
+  return smith_waterman_align(seq_get_orig(u), seq_get_orig(v),
+                              seq_get_encoded(u), seq_get_encoded(v),
+                              seq_length(u), seq_length(v),
+                              scorefunction_get_scores(sf),
+                              scorefunction_get_deletion_score(sf),
+                              scorefunction_get_insertion_score(sf));
 }
