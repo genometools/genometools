@@ -259,7 +259,7 @@ static void printinst (const Instruction *op, const Instruction *p) {
      "func", "Luafunc",
      "fullcapture", "emptycapture", "opencapture", "closecapture"
   };
-  printf("%02d: %s ", p - op, names[p->i.code]);
+  printf("%02ld: %s ", p - op, names[p->i.code]);
   switch ((Opcode)p->i.code) {
     case IChar: {
       printf("'%c'", p->i.aux);
@@ -267,7 +267,7 @@ static void printinst (const Instruction *op, const Instruction *p) {
     }
     case ITestChar: {
       printf("'%c'", p->i.aux);
-      printf("-> %d", dest(0, p) - op);
+      printf("-> %ld", dest(0, p) - op);
       break;
     }
     case IAny: {
@@ -276,7 +276,7 @@ static void printinst (const Instruction *op, const Instruction *p) {
     }
     case ITestAny: {
       printf("* %d", p->i.aux);
-      printf("-> %d", dest(0, p) - op);
+      printf("-> %ld", dest(0, p) - op);
       break;
     }
     case IFullCapture: case IOpenCapture:
@@ -295,7 +295,7 @@ static void printinst (const Instruction *op, const Instruction *p) {
     }
     case ITestSet: case ITestZSet: {
       printcharset((p+1)->buff);
-      printf("-> %d", dest(0, p) - op);
+      printf("-> %ld", dest(0, p) - op);
       break;
     }
     case IOpenCall: {
@@ -303,12 +303,12 @@ static void printinst (const Instruction *op, const Instruction *p) {
       break;
     }
     case IChoice: {
-      printf("-> %d (%d)", dest(0, p) - op, p->i.aux);
+      printf("-> %ld (%d)", dest(0, p) - op, p->i.aux);
       break;
     }
     case IJmp: case ICall: case ICommit:
     case IPartialCommit: case IBackCommit: {
-      printf("-> %d", dest(0, p) - op);
+      printf("-> %ld", dest(0, p) - op);
       break;
     }
     default: break;
@@ -326,13 +326,14 @@ static void printpatt (Instruction *p) {
   }
 }
 
-
+#if 0
 static void printcap (Capture *cap) {
   for (; cap->s; cap++) {
     printcapkind(cap->kind);
     printf(" (idx: %d - size: %d) -> %p\n", cap->idx, cap->siz, cap->s);
   }
 }
+#endif
 
 /* }====================================================== */
 
