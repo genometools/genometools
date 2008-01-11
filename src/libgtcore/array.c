@@ -128,9 +128,10 @@ void array_add_elem(Array *a, void *elem, size_t size_of_elem)
   assert(a->size_of_elem == size_of_elem);
   assert(a->next_free <= a->allocated);
   /* make sure we have enough space */
-  if ((a->next_free + 1) * a->size_of_elem > a->allocated)
+  if ((a->next_free + 1) * a->size_of_elem > a->allocated) {
     a->space = dynalloc(a->space, &a->allocated,
                         (a->next_free + 1) * a->size_of_elem);
+  }
   /* add */
   memcpy(a->space + a->next_free * a->size_of_elem, elem, a->size_of_elem);
   a->next_free++;
