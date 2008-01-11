@@ -220,12 +220,7 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
   }
 
   /* read fasta file */
-  if (bs->use_stdin)
-    fasta_reader = fasta_reader_rec_new(NULL);
-  else {
-    /* cannot handle stdin */
-    fasta_reader = fasta_reader_rec_new(bs->sequence_file);
-  }
+  fasta_reader = fasta_reader_rec_new(bs->use_stdin ? NULL : bs->sequence_file);
   had_err = fasta_reader_run(fasta_reader, proc_description, proc_sequence_part,
                              proc_sequence_length, &bioseq_files_info, err);
   fasta_reader_delete(fasta_reader);
