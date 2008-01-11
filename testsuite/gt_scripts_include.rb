@@ -104,6 +104,12 @@ Test do
   end
 end
 
+Name "LPeg library"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$cur}/src/external/lpeg-0.7/test.lua"
+end
+
 if $arguments["libgtview"] then
   Name "feature_index and feature_stream bindings"
   Keywords "gt_scripts"
