@@ -131,8 +131,10 @@ void str_append_ulong(Str *dest, unsigned long u)
 void str_append_char(Str *dest, char c)
 {
   assert(dest);
-  dest->cstr = dynalloc(dest->cstr, &dest->allocated,
-                        (dest->length + 2) * sizeof (char));
+  if (dest->length + 2 > dest->allocated) {
+    dest->cstr = dynalloc(dest->cstr, &dest->allocated,
+                          (dest->length + 2) * sizeof (char));
+  }
   dest->cstr[dest->length++] = c;
 }
 
