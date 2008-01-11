@@ -1978,7 +1978,8 @@ static struct luaL_reg metapattreg[] = {
 int luaopen_lpeg (lua_State *L);
 int luaopen_lpeg (lua_State *L) {
   lua_newtable(L);
-  lua_replace(L, LUA_ENVIRONINDEX);  /* empty env for new patterns */
+  // XXX: no environment given if linked statically
+  // lua_replace(L, LUA_ENVIRONINDEX);  /* empty env for new patterns */
   luaL_newmetatable(L, "pattern");
   luaL_register(L, NULL, metapattreg);
   luaL_register(L, "lpeg", pattreg);
