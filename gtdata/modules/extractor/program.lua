@@ -76,8 +76,11 @@ function Program:write(dir)
     end
     outfile:write("\n")
   end
-  for _, func in ipairs(self.functions) do
-    outfile:write(func)
+  if self.functions then
+    for _, func in ipairs(self.functions) do
+      outfile:write(func)
+      outfile:write("\n")
+    end
     outfile:write("\n")
   end
   outfile:write("int main(int argc, char *argv[])\n")

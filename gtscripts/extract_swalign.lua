@@ -17,14 +17,29 @@
 
 require 'extractor' -- contains all the classes necessary for the extracting
 
-if #arg == 2 then
-  gt_home = arg[1]
-  scorematrix_file = arg[2]
-else
-  io.stderr:write(string.format("Usage: %s gt_home scorematrix_file\n", arg[0]))
+function usage()
+  io.stderr:write(string.format("Usage: %s [-sol] gt_home scorematrix_file\n",
+                                arg[0]))
   io.stderr:write("Extract swalign program from GenomeTools home directory " ..
                   "gt_home.\n")
   os.exit(1)
+end
+
+if #arg >= 2 then
+  if string.match(arg[1], "^-sol") then
+    solution = true
+    table.remove(arg, 1)
+  else
+    solution = false
+  end
+  if #arg == 2 then
+    gt_home = arg[1]
+    scorematrix_file = arg[2]
+  else
+    usage()
+  end
+else
+  usage()
 end
 
 -- returns C-function scorematrix_init() as string
@@ -108,6 +123,7 @@ prog = Program:new(name)
 prog:add_include('<assert.h>')
 prog:add_include('<limits.h>')
 prog:add_include('<stdbool.h>')
+prog:add_include('"alignment.h"')
 prog:add_include('"array2dim.h"')
 prog:add_include('"coordinate.h"')
 prog:add_include('"minmax.h"')
@@ -116,12 +132,19 @@ swtemp = File:new("src/libgtext/swalign.c")
 prog:add_define("INDEL_SCORE", "-3")
 prog:add_typedef(swtemp:get_typedef("DPentry"))
 prog:add_function(swtemp:get_function("fillDPtable"))
-prog:set_content([[
+
+if solution then
+  prog:add_include('"undef.h"')
+  prog:add_function(swtemp:get_function("traceback"))
+  prog:add_function(swtemp:get_function("smith_waterman_align"))
+end
+
+swalign_start = [[
   int **scorematrix;
   DPentry **dptable;
-  Coordinate alignment_end;
   const char *u, *v;
   unsigned long ulen, vlen;
+  Alignment *alignment = NULL;
 
   if (argc != 3) {
     fprintf(stderr, "Usage: %s protein_seq protein_seq\n", argv[0]);
@@ -137,16 +160,37 @@ prog:set_content([[
   array2dim_calloc(scorematrix, CHAR_MAX, CHAR_MAX);
   array2dim_calloc(dptable, ulen+1, vlen+1);
   scorematrix_init(scorematrix);
+  alignment = alignment_new();
 
-  fillDPtable(dptable, u, ulen, v, vlen, (const int**) scorematrix,
-              INDEL_SCORE, INDEL_SCORE, &alignment_end);
+]]
 
-  /* XXX: include your code here... */
+swalign_end = [[
 
+  alignment_delete(alignment);
   array2dim_delete(dptable);
   array2dim_delete(scorematrix);
 
-]])
+]]
+
+if solution then
+prog:set_content(swalign_start .. [[
+  alignment = smith_waterman_align(u, v, u, v, ulen, vlen,
+                                   (const int**) scorematrix,
+                                   INDEL_SCORE, INDEL_SCORE);
+  alignment_show(alignment, stdout);
+]] .. swalign_end)
+else
+prog:set_content(swalign_start .. [[
+  {
+    Coordinate alignment_end;
+    fillDPtable(dptable, u, ulen, v, vlen, (const int**) scorematrix,
+                INDEL_SCORE, INDEL_SCORE, &alignment_end);
+
+    /* XXX: include your code here... */
+  }
+]] .. swalign_end)
+end
+
 p:add(prog)
 
 -- write tar
