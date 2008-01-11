@@ -121,7 +121,7 @@ p:add(f)
 -- add makefile
 mf = Makefile:new(name)
 mf:add_test([[
-  swalign QSEIQANT SEQAN | diff - gt_swalign_simple.out
+  ./swalign QSEIQANT SEQAN | diff - gt_swalign_simple.out
 ]])
 p:set_makefile(mf)
 
