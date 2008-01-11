@@ -24,7 +24,8 @@
 
 unsigned long skfmuniqueforward (const void *genericindex,
                                  const Uchar *qstart,
-                                 const Uchar *qend)
+                                 const Uchar *qend,
+                                 /*@unused@*/ Error *err)
 {
   Uchar cc;
   const Uchar *qptr;

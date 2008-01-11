@@ -24,12 +24,14 @@
 #include "libgtmatch/optionargmode.h"
 #include "libgtmatch/uniquesub.h"
 
-#include "tools/gt_uniquesub.h"
 #include "libgtmatch/stamp.h"
 #include "libgtmatch/fmi-fwduni.pr"
 #include "libgtmatch/fmi-map.pr"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/esa-minunique.pr"
+#include "libgtmatch/eis-bwtconstruct_params.h"
+#include "libgtmatch/eis-bwtseq.h"
+#include "tools/gt_uniquesub.h"
 
 #define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
@@ -37,7 +39,8 @@
 typedef enum
 {
   Fmindextype,
-  Saindextype
+  Esaindextype,
+  Packedindextype
 } Indextype;
 
 typedef struct
@@ -57,7 +60,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
 {
   OptionParser *op;
   Option *optionmin, *optionmax, *optionoutput, *optionfmindex,
-         *optionesaindex, *optionquery;
+         *optionesaindex, *optionpckindex, *optionquery;
   OPrval oprval;
   StrArray *flagsoutputoption;
   int parsed_args;
@@ -107,7 +110,13 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
                                      uniquesubcallinfo->indexname,NULL);
   option_parser_add_option(op, optionesaindex);
 
+  optionpckindex = option_new_string("pck", "specify packed index",
+                                     uniquesubcallinfo->indexname,NULL);
+  option_parser_add_option(op, optionpckindex);
+
   option_exclude(optionfmindex,optionesaindex);
+  option_exclude(optionpckindex,optionesaindex);
+  option_exclude(optionpckindex,optionfmindex);
 
   optionquery = option_new_filenamearray("query", "specify queryfiles",
                                          uniquesubcallinfo->queryfilenames);
@@ -120,30 +129,39 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   {
     if (option_is_set(optionfmindex))
     {
-      assert(!option_is_set(optionesaindex));
       uniquesubcallinfo->indextype = Fmindextype;
     } else
     {
       if (option_is_set(optionesaindex))
       {
-        uniquesubcallinfo->indextype = Saindextype;
+        uniquesubcallinfo->indextype = Esaindextype;
       } else
       {
-        assert("unexpected case" == NULL);
+        if (option_is_set(optionpckindex))
+        {
+          uniquesubcallinfo->indextype = Packedindextype;
+        } else
+        {
+          error_set(err,"one of the options -fmi, -esa, -pck must be used");
+          oprval = OPTIONPARSER_ERROR;
+        }
       }
     }
-    if (option_is_set(optionmin))
+    if (oprval != OPTIONPARSER_ERROR)
     {
-       uniquesubcallinfo->minlength.defined = true;
-    }
-    if (option_is_set(optionmax))
-    {
-       uniquesubcallinfo->maxlength.defined = true;
-    }
-    if (!option_is_set(optionmin) && !option_is_set(optionmax))
-    {
-      error_set(err,"one of the options -min or -max must be set");
-      oprval = OPTIONPARSER_ERROR;
+      if (option_is_set(optionmin))
+      {
+         uniquesubcallinfo->minlength.defined = true;
+      }
+      if (option_is_set(optionmax))
+      {
+         uniquesubcallinfo->maxlength.defined = true;
+      }
+      if (!option_is_set(optionmin) && !option_is_set(optionmax))
+      {
+        error_set(err,"one of the options -min or -max must be set");
+        oprval = OPTIONPARSER_ERROR;
+      }
     }
     if (oprval != OPTIONPARSER_ERROR)
     {
@@ -200,8 +218,10 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
   Uniquesubcallinfo uniquesubcallinfo;
   Fmindex fmindex;
   Suffixarray suffixarray;
+  BWTSeq *packedindex = NULL;
   Verboseinfo *verboseinfo;
   bool haserr = false;
+  Alphabet *alphabet = NULL;
 
   error_check(err);
   switch (parseuniquesub(&uniquesubcallinfo, argc, argv, err)) {
@@ -224,69 +244,102 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
     }
   } else
   {
-    Seqpos totallength;
+    if (uniquesubcallinfo.indextype == Esaindextype)
+    {
+      Seqpos totallength;
 
-    if (mapsuffixarray(&suffixarray,
-                       &totallength,
-                       SARR_ESQTAB | SARR_SUFTAB,
-                       uniquesubcallinfo.indexname,verboseinfo,err) != 0)
-    {
-      haserr = true;
-    }
-    /* 
-       gt packedindex mkindex -db ${AT} -dna -pl -bsize 10 -locfreq 0 -locbitmap no
-       loadBWTSeq(const Str *projectName, 
-       BWTDEFOPT_MULTI_QUERY, Error *err);
-    */
-  }
-  if (!haserr)
-  {
-    if (uniquesubcallinfo.indextype == Fmindextype)
-    {
-      if (findsubqueryuniqueforward((const void *) &fmindex,
-                                    skfmuniqueforward,
-                                    fmindex.alphabet,
-                                    uniquesubcallinfo.queryfilenames,
-                                    uniquesubcallinfo.minlength,
-                                    uniquesubcallinfo.maxlength,
-                                    (uniquesubcallinfo.showmode & SHOWSEQUENCE)
-                                       ? true : false,
-                                    (uniquesubcallinfo.showmode & SHOWQUERYPOS)
-                                       ? true : false,
-                                    err) != 0)
+      if (mapsuffixarray(&suffixarray,
+                         &totallength,
+                         SARR_ESQTAB | SARR_SUFTAB,
+                         uniquesubcallinfo.indexname,verboseinfo,err) != 0)
       {
         haserr = true;
       }
     } else
     {
-      if (findsubqueryuniqueforward((const void *) &suffixarray,
-                                    suffixarrayuniqueforward,
-                                    suffixarray.alpha,
+      assert(uniquesubcallinfo.indextype == Packedindextype);
+    /*
+       gt packedindex mkindex -db ${AT} -dna -pl -bsize 10
+                              -locfreq 0 -locbitmap no
+    */
+      packedindex = loadBWTSeq(uniquesubcallinfo.indexname,
+                               BWTDEFOPT_MULTI_QUERY,err);
+      if (packedindex == NULL)
+      {
+        haserr = true;
+      }
+    }
+  }
+  if (!haserr)
+  {
+    const void *theindex;
+    Uniqueforwardfunction uniqueforwardfunction;
+
+    if (uniquesubcallinfo.indextype == Fmindextype)
+    {
+      theindex = (const void *) &fmindex;
+      uniqueforwardfunction = skfmuniqueforward;
+      alphabet = fmindex.alphabet;
+    } else
+    {
+      if (uniquesubcallinfo.indextype == Esaindextype)
+      {
+        theindex = (const void *) &suffixarray;
+        uniqueforwardfunction = suffixarrayuniqueforward;
+        alphabet = suffixarray.alpha;
+      } else
+      {
+        assert(uniquesubcallinfo.indextype == Packedindextype);
+        theindex = (const void *) packedindex;
+        uniqueforwardfunction = packedindexuniqueforward;
+        alphabet = assigninputalphabet(true,
+                                       false,
+                                       NULL,
+                                       NULL,
+                                       err);
+        if (alphabet == NULL)
+        {
+          haserr = true;
+        }
+      }
+    }
+    if (!haserr)
+    {
+      if (findsubqueryuniqueforward(theindex,
+                                    uniqueforwardfunction,
+                                    alphabet,
                                     uniquesubcallinfo.queryfilenames,
                                     uniquesubcallinfo.minlength,
                                     uniquesubcallinfo.maxlength,
                                     (uniquesubcallinfo.showmode & SHOWSEQUENCE)
-                                       ? true : false,
+                                      ? true : false,
                                     (uniquesubcallinfo.showmode & SHOWQUERYPOS)
-                                       ? true : false,
+                                      ? true : false,
                                     err) != 0)
       {
         haserr = true;
       }
-      /*
-         getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
-              struct matchBound *match, Error *err)
-         
-      */
     }
+    /*
+       getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+              struct matchBound *match, Error *err)
+      */
   }
   if (uniquesubcallinfo.indextype == Fmindextype)
   {
     freefmindex(&fmindex);
   } else
   {
-    freesuffixarray(&suffixarray);
-    /* deleteBWTSeq(BWTSeq *bwtSeq) */
+    if (uniquesubcallinfo.indextype == Esaindextype)
+    {
+      freesuffixarray(&suffixarray);
+    } else
+    {
+      assert(uniquesubcallinfo.indextype == Packedindextype);
+      deleteBWTSeq(packedindex);
+      assert(alphabet != NULL);
+      freeAlphabet(&alphabet);
+    }
   }
   freeverboseinfo(&verboseinfo);
   str_delete(uniquesubcallinfo.indexname);

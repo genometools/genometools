@@ -3,7 +3,8 @@ extern "C" {
 #endif
 unsigned long suffixarrayuniqueforward (const void *genericindex,
                                         const Uchar *qstart,
-                                        const Uchar *qend);
+                                        const Uchar *qend,
+                                        /*@unused@*/ Error *err);
 
 #ifdef __cplusplus
 }

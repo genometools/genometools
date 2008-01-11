@@ -27,7 +27,8 @@
 
 typedef unsigned long (*Uniqueforwardfunction) (const void *,
                                                 const Uchar *,
-                                                const Uchar *);
+                                                const Uchar *,
+                                                Error *err);
 
 int findsubqueryuniqueforward(const void *genericindex,
                               Uniqueforwardfunction uniqueforward,

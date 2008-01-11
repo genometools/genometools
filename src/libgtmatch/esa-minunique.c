@@ -29,7 +29,7 @@ typedef struct
 } Simplelcpinterval;
 
 #define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \
-                             ? SEPARATOR\
+                             ? (Uchar) SEPARATOR\
                              : getencodedchar(ENCSEQ,POS,Forwardmode))
 
 static Seqpos findright(const Encodedsequence *encseq,
@@ -104,7 +104,8 @@ static bool findcharintervalbin(const Encodedsequence *encseq,
 
 unsigned long suffixarrayuniqueforward (const void *genericindex,
                                         const Uchar *qstart,
-                                        const Uchar *qend)
+                                        const Uchar *qend,
+                                        /*@unused@*/ Error *err)
 {
   Simplelcpinterval itv;
   const Uchar *qptr;
