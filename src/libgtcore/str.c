@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -62,7 +62,6 @@ void str_set(Str *s, const char *cstr)
     sptr = s->cstr;
     while (*cstr != '\0') *sptr++ = *cstr++;
     s->length = cstrlen;
-    s->cstr[s->length] = '\0';
   }
 }
 
@@ -75,7 +74,6 @@ void str_append_str(Str *dest, const Str* src)
   for (i = 0; i < src->length; i++)
     dest->cstr[dest->length + i] = src->cstr[i];
   dest->length += src->length;
-  dest->cstr[dest->length] = '\0';
 }
 
 void str_append_cstr(Str *dest, const char *cstr)
@@ -90,7 +88,6 @@ void str_append_cstr(Str *dest, const char *cstr)
   while (*cstr != '\0')
     *destptr++ = *cstr++;
   dest->length += cstrlen;
-  dest->cstr[dest->length] = '\0';
 }
 
 void str_append_cstr_nt(Str *dest, const char *cstr, unsigned long length)
@@ -104,7 +101,6 @@ void str_append_cstr_nt(Str *dest, const char *cstr, unsigned long length)
   for (i = 0; i < length; i++)
     *destptr++ = *cstr++;
   dest->length += length;
-  dest->cstr[dest->length] = '\0';
 }
 
 /* inspired by D. J. Bernstein's fmt_ulong() */
@@ -130,7 +126,6 @@ void str_append_ulong(Str *dest, unsigned long u)
   }
   while (u); /* handles u == 0 */
   dest->length += ulength;
-  dest->cstr[dest->length] = '\0';
 }
 
 void str_append_char(Str *dest, char c)
@@ -139,7 +134,6 @@ void str_append_char(Str *dest, char c)
   dest->cstr = dynalloc(dest->cstr, &dest->allocated,
                         (dest->length + 2) * sizeof (char));
   dest->cstr[dest->length++] = c;
-  dest->cstr[dest->length] = '\0';
 }
 
 void str_append_double(Str *dest, double d, int precision)
@@ -155,6 +149,7 @@ void str_append_double(Str *dest, double d, int precision)
 char* str_get(const Str *s)
 {
   assert(s);
+  s->cstr[s->length] = '\0';
   return s->cstr;
 }
 
@@ -167,14 +162,12 @@ void str_set_length(Str *s, unsigned long length)
 {
   assert(s && length <= s->length);
   s->length = length;
-  s->cstr[length] = '\0';
 }
 
 void str_reset(Str *s)
 {
   assert(s);
   s->length = 0;
-  s->cstr[0] = '\0';
 }
 
 /* does not handle embedded \0's */
@@ -184,6 +177,8 @@ int str_cmp(const Str *s1, const Str *s2)
   if (s1 == s2)
     return 0; /* a string is equal to itself */
   assert(s1->cstr && s2->cstr);
+  s1->cstr[s1->length] = '\0';
+  s2->cstr[s2->length] = '\0';
   return strcmp(s1->cstr, s2->cstr);
 }
 
@@ -192,6 +187,7 @@ Str* str_clone(const Str *s)
   Str *s_copy;
   assert(s);
   s_copy = ma_malloc(sizeof (Str));
+  s->cstr[s->length] = '\0';
   s_copy->cstr = cstr_dup(s->cstr);
   s_copy->length = s_copy->allocated = s->length;
   s_copy->reference_count = 0;
