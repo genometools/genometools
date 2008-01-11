@@ -1,6 +1,6 @@
 --[[
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,15 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ]]
 
-module(..., package.seeall)
+require 'gtdoclib'
 
-require 'gtmodulehelper'
+function usage()
+  io.stderr:write(string.format("Usage: %s gt_home\n", arg[0]))
+  io.stderr:write("Generate documentation for the GenomeTools home directory " ..
+                  "gt_home.\n")
+  os.exit(1)
+end
 
--- all extractor modules which should be loaded
-local extractormodules = { "extractor.file",
-                           "extractor.makefile",
-                           "extractor.module",
-                           "extractor.program",
-                           "extractor.project" }
-
-gtmodulehelper.load_modules(extractormodules);
+if #arg == 1 then
+  gt_home = arg[1]
+else
+  usage()
+end

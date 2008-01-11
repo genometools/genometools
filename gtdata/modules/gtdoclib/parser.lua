@@ -1,6 +1,6 @@
 --[[
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,13 +17,13 @@
 
 module(..., package.seeall)
 
-require 'gtmodulehelper'
+require 'lpeg'
 
--- all extractor modules which should be loaded
-local extractormodules = { "extractor.file",
-                           "extractor.makefile",
-                           "extractor.module",
-                           "extractor.program",
-                           "extractor.project" }
+Parser = {}
 
-gtmodulehelper.load_modules(extractormodules);
+function Parser:new()
+  o = {}
+  setmetatable(o, self)
+  self.__index = self
+  return o
+end

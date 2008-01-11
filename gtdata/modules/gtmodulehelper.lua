@@ -17,13 +17,14 @@
 
 module(..., package.seeall)
 
-require 'gtmodulehelper'
-
--- all extractor modules which should be loaded
-local extractormodules = { "extractor.file",
-                           "extractor.makefile",
-                           "extractor.module",
-                           "extractor.program",
-                           "extractor.project" }
-
-gtmodulehelper.load_modules(extractormodules);
+function load_modules(modules)
+  assert(modules)
+  for _, mod in ipairs(modules) do
+    local t = require(mod)
+    for k, v in pairs(t) do
+      if k ~= "_M" and k ~= "_NAME" and k~= "_PACKAGE" then
+        _G[k] = v
+      end
+    end
+  end
+end
