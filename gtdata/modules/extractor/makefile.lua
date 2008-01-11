@@ -50,9 +50,12 @@ Makefile = {}
 function Makefile:new(progname)
   o = extractor.File:new("Makefile", true)
   if progname then
+    o.progname = progname
     o.filecontent = makefile_template:gsub("prog", progname)
   else
+    o.progname = "prog"
     o.filecontent = makefile_template
   end
   return o
 end
+

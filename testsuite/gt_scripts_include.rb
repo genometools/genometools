@@ -88,7 +88,7 @@ Keywords "gt_scripts"
 Test do
   run_test "#{$bin}gt #{$testdata}../gtscripts/extract_swalign.lua -sol " + 
            "#{$cur} #{$testdata}BLOSUM62"
-  run "cd swalign && gmake"
+  run "cd swalign && gmake test"
   if not File.exists?("swalign.tar.gz") then
     raise TestFailed, "file 'swalign.tar.gz' does not exist"
   end

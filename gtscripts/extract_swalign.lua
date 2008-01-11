@@ -114,8 +114,15 @@ m:remove_unit_test()
 m:ma2xansi()
 p:add(m)
 
+-- add test files
+f = File:new("testdata/gt_swalign_simple.out")
+p:add(f)
+
 -- add makefile
 mf = Makefile:new(name)
+mf:add_test([[
+  swalign QSEIQANT SEQAN | diff - gt_swalign_simple.out
+]])
 p:set_makefile(mf)
 
 -- add example program
@@ -178,6 +185,7 @@ prog:set_content(swalign_start .. [[
                                    (const int**) scorematrix,
                                    INDEL_SCORE, INDEL_SCORE);
   alignment_show(alignment, stdout);
+  printf("\n");
 ]] .. swalign_end)
 else
 prog:set_content(swalign_start .. [[

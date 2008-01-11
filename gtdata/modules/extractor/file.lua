@@ -93,6 +93,13 @@ function File:ma2xansi()
   self.filecontent = self.filecontent:gsub('ma_free', 'free')
 end
 
+function File:add_test(test)
+  assert(test)
+  self.filecontent = self.filecontent ..
+                     string.format("\n\n.PHONY: test\ntest: %s\n\t%s",
+                                   self.progname, test)
+end
+
 function File:write(dir)
   assert(dir)
   local outfile = io.open(dir .. "/" .. self.basename, "w")
