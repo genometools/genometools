@@ -20,7 +20,8 @@
 
 #include "libgtcore/fasta_reader.h"
 
-/* implements the ``fasta reader'' interface with a finite state machine */
+/* implements the ``fasta reader'' interface with a finite state machine
+   (for educational purposes, the recursive descent parser is much faster) */
 typedef struct FastaReaderFSM FastaReaderFSM;
 
 const FastaReaderClass* fasta_reader_fsm_class(void);
