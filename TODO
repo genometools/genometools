@@ -31,6 +31,8 @@ feature requests:
 - implement cleanup stack exeception handling
 - compute correlation coefficient and average in `gt eval`
 - write qsort_r
+- try to write dynalloc() as static inline function (without always setting the
+  return pointer)
 
 
 merge libgtcore and libgtmatch:
