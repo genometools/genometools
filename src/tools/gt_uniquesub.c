@@ -35,6 +35,7 @@
 
 #define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
+#define SHOWREFPOS     (SHOWSEQUENCE << 2)
 
 typedef enum
 {
@@ -48,6 +49,7 @@ typedef struct
   Definedunsignedlong minlength,
                       maxlength;
   unsigned int showmode;
+  bool domatchingstatistics;
   Str *indexname;
   StrArray *queryfilenames;
   Indextype indextype;
@@ -60,14 +62,15 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
 {
   OptionParser *op;
   Option *optionmin, *optionmax, *optionoutput, *optionfmindex,
-         *optionesaindex, *optionpckindex, *optionquery;
+         *optionesaindex, *optionpckindex, *optionquery, *optionmstats;
   OPrval oprval;
   StrArray *flagsoutputoption;
   int parsed_args;
   Optionargmodedesc uniquesubmodedesctable[]
     = {
       {"sequence",SHOWSEQUENCE},
-      {"querypos",SHOWQUERYPOS}
+      {"querypos",SHOWQUERYPOS},
+      {"refpos",SHOWREFPOS}
   };
 
   error_check(err);
@@ -117,6 +120,11 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   option_exclude(optionfmindex,optionesaindex);
   option_exclude(optionpckindex,optionesaindex);
   option_exclude(optionpckindex,optionfmindex);
+
+  optionmstats = option_new_bool("ms", "compute matching statistics",
+                                 &uniquesubcallinfo->domatchingstatistics,
+                                 false);
+  option_parser_add_option(op, optionmstats);
 
   optionquery = option_new_filenamearray("query", "specify queryfiles",
                                          uniquesubcallinfo->queryfilenames);
@@ -258,10 +266,6 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
     } else
     {
       assert(uniquesubcallinfo.indextype == Packedindextype);
-    /*
-       gt packedindex mkindex -db ${AT} -dna -pl -bsize 10
-                              -locfreq 0 -locbitmap no
-    */
       packedindex = loadBWTSeq(uniquesubcallinfo.indexname,
                                BWTDEFOPT_MULTI_QUERY,err);
       if (packedindex == NULL)
@@ -278,21 +282,40 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
     if (uniquesubcallinfo.indextype == Fmindextype)
     {
       theindex = (const void *) &fmindex;
-      uniqueforwardfunction = skfmuniqueforward;
+      if (uniquesubcallinfo.domatchingstatistics)
+      {
+        assert(!"domatchingstatistics for FMindex");
+      } else
+      {
+        uniqueforwardfunction = skfmuniqueforward;
+      }
       alphabet = fmindex.alphabet;
     } else
     {
       if (uniquesubcallinfo.indextype == Esaindextype)
       {
         theindex = (const void *) &suffixarray;
-        uniqueforwardfunction = suffixarrayuniqueforward;
+        if (uniquesubcallinfo.domatchingstatistics)
+        {
+          uniqueforwardfunction = suffixarraymstats;
+        } else
+        {
+          uniqueforwardfunction = suffixarrayuniqueforward;
+        }
         alphabet = suffixarray.alpha;
       } else
       {
         assert(uniquesubcallinfo.indextype == Packedindextype);
         theindex = (const void *) packedindex;
-        uniqueforwardfunction = packedindexuniqueforward;
-        alphabet = assigninputalphabet(true,
+        if (uniquesubcallinfo.domatchingstatistics)
+        {
+          assert(!"domatchingstatistics for packed index");
+        } else
+        {
+          uniqueforwardfunction = packedindexuniqueforward;
+        }
+        /* currently, only DNA is supported */
+        alphabet = assigninputalphabet(true, /* XXX Fix me and read alphabet */
                                        false,
                                        NULL,
                                        NULL,
@@ -314,6 +337,8 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
                                     (uniquesubcallinfo.showmode & SHOWSEQUENCE)
                                       ? true : false,
                                     (uniquesubcallinfo.showmode & SHOWQUERYPOS)
+                                      ? true : false,
+                                    (uniquesubcallinfo.showmode & SHOWREFPOS)
                                       ? true : false,
                                     err) != 0)
       {

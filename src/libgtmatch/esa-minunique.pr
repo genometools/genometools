@@ -2,9 +2,16 @@
 extern "C" {
 #endif
 unsigned long suffixarrayuniqueforward (const void *genericindex,
+                                        /*@unused@*/ Seqpos *witnessposition,
                                         const Uchar *qstart,
                                         const Uchar *qend,
                                         /*@unused@*/ Error *err);
+
+unsigned long suffixarraymstats (const void *genericindex,
+                                 Seqpos *witnessposition,
+                                 const Uchar *qstart,
+                                 const Uchar *qend,
+                                 /*@unused@*/ Error *err);
 
 #ifdef __cplusplus
 }

@@ -167,7 +167,7 @@ def checkmapped(args)
 end
 
 def makeuniquesubcall(queryfile,indexarg)
-  return "#{$bin}gt uniquesub -min 10 -max 20 -output querypos -query #{queryfile} #{indexarg}"
+  return "#{$bin}gt uniquesub -min 1 -max 20 -output querypos -query #{queryfile} #{indexarg}"
 end
 
 def checkuniquesub(reffile,queryfile)
@@ -182,7 +182,7 @@ def checkuniquesub(reffile,queryfile)
   run_test(makeuniquesubcall(queryfile,"-pck pck"))
   run "mv #{$last_stdout} tmp.pck"
   run "diff tmp.pck tmp.fmi"
-  run "rm -rf sfx.* fmi.* rm -rf pck.*"
+  # run "rm -f sfx.* fmi.* pck.*"
 end
 
 def grumbach()

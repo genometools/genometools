@@ -387,6 +387,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 }
 
 unsigned long packedindexuniqueforward(const void *genericindex,
+                                       /*@unused@*/ Seqpos *witnessposition,
                                        const Uchar *qstart,
                                        const Uchar *qend,
                                        Error *err)

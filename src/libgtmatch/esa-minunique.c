@@ -103,6 +103,7 @@ static bool findcharintervalbin(const Encodedsequence *encseq,
 }
 
 unsigned long suffixarrayuniqueforward (const void *genericindex,
+                                        /*@unused@*/ Seqpos *witnessposition,
                                         const Uchar *qstart,
                                         const Uchar *qend,
                                         /*@unused@*/ Error *err)
@@ -117,15 +118,8 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
   {
     if (itv.left < itv.right)
     {
-      if (qptr >= qend)
-      {
-        break;
-      }
-      if (ISSPECIAL(*qptr))
-      {
-        break;
-      }
-      if (!findcharintervalbin(suffixarray->encseq,
+      if (qptr >= qend || ISSPECIAL(*qptr) ||
+          !findcharintervalbin(suffixarray->encseq,
                                suffixarray->suftab,
                                &itv,
                                *qptr,
@@ -140,4 +134,34 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
     }
   }
   return 0;
+}
+
+unsigned long suffixarraymstats (const void *genericindex,
+                                 Seqpos *witnessposition,
+                                 const Uchar *qstart,
+                                 const Uchar *qend,
+                                 /*@unused@*/ Error *err)
+{
+  Simplelcpinterval itv;
+  const Uchar *qptr;
+  const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
+
+  itv.left = 0;
+  itv.right = getencseqtotallength(suffixarray->encseq);
+  for (qptr = qstart; /* Nothing */; qptr++)
+  {
+    assert(itv.left <= itv.right);
+    if (qptr >= qend || ISSPECIAL(*qptr) ||
+        !findcharintervalbin(suffixarray->encseq,
+                             suffixarray->suftab,
+                             &itv,
+                             *qptr,
+                             (Seqpos) (qptr - qstart),
+                             itv.left,itv.right))
+    {
+      *witnessposition = suffixarray->suftab[itv.left];
+      break;
+    }
+  }
+  return (unsigned long) (qptr - qstart);
 }

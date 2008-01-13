@@ -72,6 +72,7 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
 {
   const Uchar *qptr;
   unsigned long uniquelength, remaining;
+  Seqpos witnessposition;
 
   error_check(err);
   if (substringinfo->preprocessuniquelength != NULL &&
@@ -85,6 +86,7 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
   for (qptr = query, remaining = querylen; remaining > 0; qptr++, remaining--)
   {
     uniquelength = substringinfo->uniqueforward(substringinfo->genericindex,
+                                                &witnessposition,
                                                 qptr,query+querylen,err);
     if (uniquelength > 0)
     {
@@ -166,6 +168,7 @@ int findsubqueryuniqueforward(const void *genericindex,
                               Definedunsignedlong maxlength,
                               bool showsequence,
                               bool showquerypos,
+                              bool showrefpos,
                               Error *err)
 {
   Substringinfo substringinfo;
