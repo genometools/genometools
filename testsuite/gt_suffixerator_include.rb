@@ -166,15 +166,23 @@ def checkmapped(args)
   end
 end
 
+def makeuniquesubcall(queryfile,indexarg)
+  return "#{$bin}gt uniquesub -min 10 -max 20 -output querypos -query #{queryfile} #{indexarg}"
+end
+
 def checkuniquesub(reffile,queryfile)
   run_test("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}")
-  run_test("#{$bin}gt uniquesub -min 10 -max 20 -output querypos -query #{queryfile} -fmi fmi")
+  run_test(makeuniquesubcall(queryfile,"-fmi fmi"))
   run "mv #{$last_stdout} tmp.fmi"
   run_test("#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v -db #{reffile}")
-  run_test("#{$bin}gt uniquesub -min 10 -max 20 -output querypos -query #{queryfile} -esa sfx")
+  run_test(makeuniquesubcall(queryfile,"-esa sfx"))
   run "mv #{$last_stdout} tmp.esa"
   run "diff tmp.esa tmp.fmi"
-  run "rm -rf sfx.* fmi.*"
+  run_test("#{$bin}gt packedindex mkindex -indexname pck -db #{reffile} -dna -pl -bsize 10 -locfreq 0 -locbitmap no -dir rev")
+  run_test(makeuniquesubcall(queryfile,"-pck pck"))
+  run "mv #{$last_stdout} tmp.pck"
+  run "diff tmp.pck tmp.fmi"
+  run "rm -rf sfx.* fmi.* rm -rf pck.*"
 end
 
 def grumbach()

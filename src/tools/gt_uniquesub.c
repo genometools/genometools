@@ -213,7 +213,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   return oprval;
 }
 
-static int findminuniquesubstrings(int argc,const char **argv,Error *err)
+int gt_uniquesub(int argc, const char **argv, Error *err)
 {
   Uniquesubcallinfo uniquesubcallinfo;
   Fmindex fmindex;
@@ -320,10 +320,6 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
         haserr = true;
       }
     }
-    /*
-       getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
-              struct matchBound *match, Error *err)
-      */
   }
   if (uniquesubcallinfo.indextype == Fmindextype)
   {
@@ -345,10 +341,4 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
   str_delete(uniquesubcallinfo.indexname);
   strarray_delete(uniquesubcallinfo.queryfilenames);
   return haserr ? -1 : 0;
-}
-
-int gt_uniquesub(int argc, const char **argv, Error *err)
-{
-  error_check(err);
-  return findminuniquesubstrings(argc, argv, err);
 }
