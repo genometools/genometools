@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -36,12 +36,7 @@ typedef struct Graphics Graphics;
    which several relevant primitives can be drawn.
    This constructor creates a Graphics that can be written out as an image file
    <filename>. */
-Graphics* graphics_new_png(const char *filename, unsigned int width,
-                           unsigned int height);
-Graphics* graphics_new_pdf(const char *filename, unsigned int width,
-                           unsigned int height);
-Graphics* graphics_new_ps(const char *filename, unsigned int width,
-                          unsigned int height);
+Graphics* graphics_new(unsigned int width, unsigned int height);
 void      graphics_draw_text(Graphics*, double x, double y, const char*);
 #define   graphics_draw_text_left(g,x,y,t) \
           graphics_draw_text(g,x,y,t);
@@ -81,8 +76,8 @@ void      graphics_draw_rectangle(Graphics*, double x, double y,
                                   double width, double height);
 void      graphics_draw_arrowhead(Graphics*, double x, double y, Color,
                                   ArrowStatus);
-/* Write out the Graphic to the chosen source. */
-int       graphics_save(const Graphics*, Error*);
+/* Write out the Graphic as PNG to the given file with <filename>. */
+int       graphics_save_to_file(const Graphics*, const char *filename, Error*);
 
 void      graphics_delete(Graphics*);
 

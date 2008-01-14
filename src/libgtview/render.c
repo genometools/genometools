@@ -491,7 +491,7 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
      fprintf(stderr, "scaling factor is %f\n",r->factor);
 
   /* create new Graphics backend */
-  r->g = graphics_new_png(filename, width, height);
+  r->g = graphics_new(width, height);
   graphics_set_margins(r->g, r->margins, 0);
 
   /* Add ruler/scale to the image */
@@ -511,7 +511,7 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
     fprintf(stderr, "actual used height: %f\n", r->y);
 
   /* write out result file */
-  had_err = graphics_save(r->g, err);
+  had_err = graphics_save_to_file(r->g, filename, err);
   graphics_delete(r->g);
 
   return had_err;

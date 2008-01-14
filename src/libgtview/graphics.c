@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,24 +24,14 @@
 #include "libgtcore/fileutils.h"
 #include "libgtview/graphics.h"
 
-typedef enum {
-  PDF,
-  PNG,
-  PS
-} CairoGraphicsType;
-
 struct Graphics {
   cairo_t *cr;
   cairo_surface_t *surf;
-  CairoGraphicsType type;
   double margin_x, margin_y, height, width;
-  const char* filename;
 };
 
-void graphics_initialize(Graphics *g, const char *filename, unsigned int width,
-                         unsigned int height)
+void graphics_initialize(Graphics *g, unsigned int width, unsigned int height)
 {
-  g->filename = filename;
   g->cr = cairo_create(g->surf);
   assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
   g->width = width;
@@ -54,38 +44,13 @@ void graphics_initialize(Graphics *g, const char *filename, unsigned int width,
   cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
 }
 
-Graphics* graphics_new_png(const char *filename, unsigned int width,
-                           unsigned int height)
+Graphics* graphics_new(unsigned int width, unsigned int height)
 {
   Graphics *g = ma_malloc(sizeof (Graphics));
-  g->type = PNG;
   g->surf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
-  graphics_initialize(g, filename, width, height);
+  graphics_initialize(g, width, height);
   return g;
 }
-
-/* XXX: remove or enable the following code */
-#if 0
-Graphics* graphics_new_pdf(const char *filename, unsigned int width,
-                           unsigned int height)
-{
-  Graphics *g = ma_malloc(sizeof (Graphics));
-  g->type = PDF;
-  g->surf = cairo_pdf_surface_create(filename, width, height);
-  graphics_initialize(g, filename, width, height);
-  return g;
-}
-
-Graphics* graphics_new_ps(const char *filename, unsigned int width,
-                          unsigned int height)
-{
-  Graphics *g = ma_malloc(sizeof (Graphics));
-  g->type = PS;
-  g->surf = cairo_ps_surface_create(filename, width, height);
-  graphics_initialize(g, filename, width, height);
-  return g;
-}
-#endif
 
 void graphics_draw_text(Graphics *g, double x, double y, const char *text)
 {
@@ -395,28 +360,17 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
   cairo_restore(g->cr);
 }
 
-int graphics_save(const Graphics *g, Error *err)
+int graphics_save_to_file(const Graphics *g, const char *filename, Error *err)
 {
   cairo_status_t rval = CAIRO_STATUS_SUCCESS;
   error_check(err);
   assert(g);
 
-  switch (g->type) {
-    case PNG:
-      rval = cairo_surface_write_to_png(g->surf, g->filename);
-      break;
-    case PDF:
-    case PS:
-      cairo_show_page(g->cr);
-      cairo_surface_flush(g->surf);
-      if (!file_exists(g->filename))
-        rval = CAIRO_STATUS_WRITE_ERROR;
-      break;
-  }
+  rval = cairo_surface_write_to_png(g->surf, filename);
   assert(rval == CAIRO_STATUS_SUCCESS || rval == CAIRO_STATUS_WRITE_ERROR);
   if (rval == CAIRO_STATUS_WRITE_ERROR) {
     error_set(err, "an I/O error occurred while attempting to write image file "
-                 "\"%s\"", g->filename);
+                   "\"%s\"", filename);
     return -1;
   }
   return 0;
