@@ -21,7 +21,7 @@
 #include <stdlib.h>
 
 #ifndef SIZE_MAX
-#define SIZE_MAX ~(size_t)0
+#define SIZE_MAX (~(size_t)0)
 #endif
 
 /*
