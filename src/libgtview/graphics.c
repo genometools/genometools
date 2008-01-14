@@ -395,14 +395,13 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
   cairo_restore(g->cr);
 }
 
-int graphics_save(const Graphics *g, Error *e)
+int graphics_save(const Graphics *g, Error *err)
 {
   cairo_status_t rval = CAIRO_STATUS_SUCCESS;
-  error_check(e);
+  error_check(err);
   assert(g);
 
-  switch (g->type)
-  {
+  switch (g->type) {
     case PNG:
       rval = cairo_surface_write_to_png(g->surf, g->filename);
       break;
@@ -416,7 +415,7 @@ int graphics_save(const Graphics *g, Error *e)
   }
   assert(rval == CAIRO_STATUS_SUCCESS || rval == CAIRO_STATUS_WRITE_ERROR);
   if (rval == CAIRO_STATUS_WRITE_ERROR) {
-    error_set(e, "an I/O error occurred while attempting to write image file "
+    error_set(err, "an I/O error occurred while attempting to write image file "
                  "\"%s\"", g->filename);
     return -1;
   }

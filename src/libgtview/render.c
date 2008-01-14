@@ -469,11 +469,11 @@ static void render_ruler(Render *r)
 }
 
 int render_to_png(Render *r, Diagram *dia, const char *filename,
-                  unsigned int width, Error *e)
+                  unsigned int width, Error *err)
 {
   unsigned int height, had_err;
 
-  error_check(e);
+  error_check(err);
   assert(r && filename && width > 1);
 
   /* set initial image-specific values */
@@ -511,7 +511,7 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
     fprintf(stderr, "actual used height: %f\n", r->y);
 
   /* write out result file */
-  had_err = graphics_save(r->g, e);
+  had_err = graphics_save(r->g, err);
   graphics_delete(r->g);
 
   return had_err;
