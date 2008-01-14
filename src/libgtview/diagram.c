@@ -19,6 +19,7 @@
 
 #include "libgtcore/cstr.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/getbasename.h"
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/str.h"
@@ -344,11 +345,15 @@ static int collect_blocks(void *key, void *value, void *data, Error *e)
 
   for (i = 0; i < array_size(ni->blocktuples); i++) {
     Track *track;
-    const char *filename;
+    char *filename;
     Str *track_key;
     BlockTuple *bt = *(BlockTuple**) array_get(ni->blocktuples, i);
-    filename = genome_node_get_filename(ni->parent);
+    /* we take the basename of the filename to have nicer output in the
+       generated graphic. this might lead to ``collapsed'' tracks, if two files
+       with different paths have the same basename. */
+    filename = getbasename(genome_node_get_filename(ni->parent));
     track_key = track_key_new(filename, bt->gft);
+    ma_free(filename);
     track = hashtable_get(diagram->tracks, str_get(track_key));
 
     if (track == NULL) {
