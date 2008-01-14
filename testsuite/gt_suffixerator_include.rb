@@ -182,7 +182,7 @@ def checkuniquesub(reffile,queryfile)
   run_test(makeuniquesubcall(queryfile,"-pck pck"))
   run "mv #{$last_stdout} tmp.pck"
   run "diff tmp.pck tmp.fmi"
-  # run "rm -f sfx.* fmi.* pck.*"
+  run "rm -f sfx.* fmi.* pck.*"
 end
 
 def grumbach()
@@ -191,7 +191,7 @@ end
 
 allfiles.each do |reffile|
   allfiles.each do |queryfile|
-    if queryfile != reffile then
+    if reffile != "TTT-small.fna" && queryfile != reffile
       Name "gt uniquesub #{reffile} #{queryfile}"
       Keywords "gt_uniquesub small"
       Test do
