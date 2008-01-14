@@ -101,7 +101,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   option_parser_add_option(op, optionmax);
 
   optionoutput = option_new_stringarray("output",
-                          "set output flags (sequence, querypos)",
+                          "set output flags (sequence, querypos, refpos)",
                           flagsoutputoption);
   option_parser_add_option(op, optionoutput);
 
@@ -174,10 +174,10 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
     if (oprval != OPTIONPARSER_ERROR)
     {
       if (uniquesubcallinfo->minlength.defined &&
-         uniquesubcallinfo->maxlength.defined)
+          uniquesubcallinfo->maxlength.defined)
       {
         if (uniquesubcallinfo->maxlength.valueunsignedlong <
-           uniquesubcallinfo->minlength.valueunsignedlong)
+            uniquesubcallinfo->minlength.valueunsignedlong)
         {
           error_set(err,"minvalue must be smaller or equal than maxvalue");
           oprval = OPTIONPARSER_ERROR;
@@ -207,6 +207,14 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
             oprval = OPTIONPARSER_ERROR;
             break;
           }
+        }
+        if (oprval != OPTIONPARSER_ERROR &&
+            !uniquesubcallinfo->domatchingstatistics &&
+            (uniquesubcallinfo->showmode & SHOWREFPOS))
+        {
+          error_set(err,"flag \"refpos\" for option -output is only possible "
+                        "if also option -ms is used");
+          oprval = OPTIONPARSER_ERROR;
         }
       }
     }

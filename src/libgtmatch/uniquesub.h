@@ -40,6 +40,7 @@ int findsubqueryuniqueforward(const void *genericindex,
                               Definedunsignedlong maxlength,
                               bool showsequence,
                               bool showquerypos,
+                              bool showrefpos,
                               Error *err);
 
 #endif

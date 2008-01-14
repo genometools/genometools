@@ -29,7 +29,8 @@
 typedef struct
 {
   bool showsequence,
-       showquerypos;
+       showquerypos,
+       showrefpos;
   Definedunsignedlong minlength,
                       maxlength;
 } Rangespecinfo;
@@ -42,6 +43,7 @@ typedef int (*Processuniquelength)(const Alphabet *,
                                    const Uchar *,
                                    unsigned long,
                                    unsigned long,
+                                   Seqpos,
                                    void *,
                                    Error *err);
 typedef int (*Postprocessuniquelength)(const Alphabet *,
@@ -94,6 +96,7 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
                                              query,
                                              uniquelength,
                                              (unsigned long) (qptr-query),
+                                             witnessposition,
                                              substringinfo->processinfo,
                                              err) != 0)
       {
@@ -133,6 +136,7 @@ static int showifinlengthrange(const Alphabet *alphabet,
                                const Uchar *start,
                                unsigned long uniquelength,
                                unsigned long querystart,
+                               Seqpos refpos,
                                void *info,
                                 /*@unused@*/ Error *err)
 {
@@ -148,6 +152,10 @@ static int showifinlengthrange(const Alphabet *alphabet,
       printf("%lu ",querystart);
     }
     printf("%lu",uniquelength);
+    if (rangespecinfo->showrefpos)
+    {
+      printf(" " FormatSeqpos,PRINTSeqposcast(refpos));
+    }
     if (rangespecinfo->showsequence)
     {
       (void) putchar(' ');
@@ -187,6 +195,7 @@ int findsubqueryuniqueforward(const void *genericindex,
   rangespecinfo.maxlength = maxlength;
   rangespecinfo.showsequence = showsequence;
   rangespecinfo.showquerypos = showquerypos;
+  rangespecinfo.showrefpos = showrefpos;
   substringinfo.preprocessuniquelength = showunitnum;
   substringinfo.processuniquelength = showifinlengthrange;
   substringinfo.postprocessuniquelength = NULL;
