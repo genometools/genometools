@@ -24,20 +24,24 @@
 #include "libgtmatch/optionargmode.h"
 #include "libgtmatch/uniquesub.h"
 
-#include "tools/gt_uniquesub.h"
 #include "libgtmatch/stamp.h"
 #include "libgtmatch/fmi-fwduni.pr"
 #include "libgtmatch/fmi-map.pr"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/esa-minunique.pr"
+#include "libgtmatch/eis-bwtconstruct_params.h"
+#include "libgtmatch/eis-bwtseq.h"
+#include "tools/gt_uniquesub.h"
 
 #define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
+#define SHOWREFPOS     (SHOWSEQUENCE << 2)
 
 typedef enum
 {
   Fmindextype,
-  Saindextype
+  Esaindextype,
+  Packedindextype
 } Indextype;
 
 typedef struct
@@ -45,6 +49,7 @@ typedef struct
   Definedunsignedlong minlength,
                       maxlength;
   unsigned int showmode;
+  bool domatchingstatistics;
   Str *indexname;
   StrArray *queryfilenames;
   Indextype indextype;
@@ -57,14 +62,15 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
 {
   OptionParser *op;
   Option *optionmin, *optionmax, *optionoutput, *optionfmindex,
-         *optionesaindex, *optionquery;
+         *optionesaindex, *optionpckindex, *optionquery, *optionmstats;
   OPrval oprval;
   StrArray *flagsoutputoption;
   int parsed_args;
   Optionargmodedesc uniquesubmodedesctable[]
     = {
       {"sequence",SHOWSEQUENCE},
-      {"querypos",SHOWQUERYPOS}
+      {"querypos",SHOWQUERYPOS},
+      {"refpos",SHOWREFPOS}
   };
 
   error_check(err);
@@ -95,7 +101,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   option_parser_add_option(op, optionmax);
 
   optionoutput = option_new_stringarray("output",
-                          "set output flags (sequence, querypos)",
+                          "set output flags (sequence, querypos, refpos)",
                           flagsoutputoption);
   option_parser_add_option(op, optionoutput);
 
@@ -107,7 +113,18 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
                                      uniquesubcallinfo->indexname,NULL);
   option_parser_add_option(op, optionesaindex);
 
+  optionpckindex = option_new_string("pck", "specify packed index",
+                                     uniquesubcallinfo->indexname,NULL);
+  option_parser_add_option(op, optionpckindex);
+
   option_exclude(optionfmindex,optionesaindex);
+  option_exclude(optionpckindex,optionesaindex);
+  option_exclude(optionpckindex,optionfmindex);
+
+  optionmstats = option_new_bool("ms", "compute matching statistics",
+                                 &uniquesubcallinfo->domatchingstatistics,
+                                 false);
+  option_parser_add_option(op, optionmstats);
 
   optionquery = option_new_filenamearray("query", "specify queryfiles",
                                          uniquesubcallinfo->queryfilenames);
@@ -120,38 +137,47 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   {
     if (option_is_set(optionfmindex))
     {
-      assert(!option_is_set(optionesaindex));
       uniquesubcallinfo->indextype = Fmindextype;
     } else
     {
       if (option_is_set(optionesaindex))
       {
-        uniquesubcallinfo->indextype = Saindextype;
+        uniquesubcallinfo->indextype = Esaindextype;
       } else
       {
-        assert("unexpected case" == NULL);
+        if (option_is_set(optionpckindex))
+        {
+          uniquesubcallinfo->indextype = Packedindextype;
+        } else
+        {
+          error_set(err,"one of the options -fmi, -esa, -pck must be used");
+          oprval = OPTIONPARSER_ERROR;
+        }
       }
     }
-    if (option_is_set(optionmin))
+    if (oprval != OPTIONPARSER_ERROR)
     {
-       uniquesubcallinfo->minlength.defined = true;
-    }
-    if (option_is_set(optionmax))
-    {
-       uniquesubcallinfo->maxlength.defined = true;
-    }
-    if (!option_is_set(optionmin) && !option_is_set(optionmax))
-    {
-      error_set(err,"one of the options -min or -max must be set");
-      oprval = OPTIONPARSER_ERROR;
+      if (option_is_set(optionmin))
+      {
+         uniquesubcallinfo->minlength.defined = true;
+      }
+      if (option_is_set(optionmax))
+      {
+         uniquesubcallinfo->maxlength.defined = true;
+      }
+      if (!option_is_set(optionmin) && !option_is_set(optionmax))
+      {
+        error_set(err,"one of the options -min or -max must be set");
+        oprval = OPTIONPARSER_ERROR;
+      }
     }
     if (oprval != OPTIONPARSER_ERROR)
     {
       if (uniquesubcallinfo->minlength.defined &&
-         uniquesubcallinfo->maxlength.defined)
+          uniquesubcallinfo->maxlength.defined)
       {
         if (uniquesubcallinfo->maxlength.valueunsignedlong <
-           uniquesubcallinfo->minlength.valueunsignedlong)
+            uniquesubcallinfo->minlength.valueunsignedlong)
         {
           error_set(err,"minvalue must be smaller or equal than maxvalue");
           oprval = OPTIONPARSER_ERROR;
@@ -182,6 +208,14 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
             break;
           }
         }
+        if (oprval != OPTIONPARSER_ERROR &&
+            !uniquesubcallinfo->domatchingstatistics &&
+            (uniquesubcallinfo->showmode & SHOWREFPOS))
+        {
+          error_set(err,"flag \"refpos\" for option -output is only possible "
+                        "if also option -ms is used");
+          oprval = OPTIONPARSER_ERROR;
+        }
       }
     }
   }
@@ -195,13 +229,15 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   return oprval;
 }
 
-static int findminuniquesubstrings(int argc,const char **argv,Error *err)
+int gt_uniquesub(int argc, const char **argv, Error *err)
 {
   Uniquesubcallinfo uniquesubcallinfo;
   Fmindex fmindex;
   Suffixarray suffixarray;
+  BWTSeq *packedindex = NULL;
   Verboseinfo *verboseinfo;
   bool haserr = false;
+  Alphabet *alphabet = NULL;
 
   error_check(err);
   switch (parseuniquesub(&uniquesubcallinfo, argc, argv, err)) {
@@ -224,46 +260,96 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
     }
   } else
   {
-    Seqpos totallength;
+    if (uniquesubcallinfo.indextype == Esaindextype)
+    {
+      Seqpos totallength;
 
-    if (mapsuffixarray(&suffixarray,
-                       &totallength,
-                       SARR_ESQTAB | SARR_SUFTAB,
-                       uniquesubcallinfo.indexname,verboseinfo,err) != 0)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    if (uniquesubcallinfo.indextype == Fmindextype)
-    {
-      if (findsubqueryuniqueforward((const void *) &fmindex,
-                                    skfmuniqueforward,
-                                    fmindex.alphabet,
-                                    uniquesubcallinfo.queryfilenames,
-                                    uniquesubcallinfo.minlength,
-                                    uniquesubcallinfo.maxlength,
-                                    (uniquesubcallinfo.showmode & SHOWSEQUENCE)
-                                       ? true : false,
-                                    (uniquesubcallinfo.showmode & SHOWQUERYPOS)
-                                       ? true : false,
-                                    err) != 0)
+      if (mapsuffixarray(&suffixarray,
+                         &totallength,
+                         SARR_ESQTAB | SARR_SUFTAB,
+                         uniquesubcallinfo.indexname,verboseinfo,err) != 0)
       {
         haserr = true;
       }
     } else
     {
-      if (findsubqueryuniqueforward((const void *) &suffixarray,
-                                    suffixarrayuniqueforward,
-                                    suffixarray.alpha,
+      assert(uniquesubcallinfo.indextype == Packedindextype);
+      packedindex = loadBWTSeq(uniquesubcallinfo.indexname,
+                               BWTDEFOPT_MULTI_QUERY,err);
+      if (packedindex == NULL)
+      {
+        haserr = true;
+      }
+    }
+  }
+  if (!haserr)
+  {
+    const void *theindex;
+    Uniqueforwardfunction uniqueforwardfunction;
+
+    if (uniquesubcallinfo.indextype == Fmindextype)
+    {
+      theindex = (const void *) &fmindex;
+      if (uniquesubcallinfo.domatchingstatistics)
+      {
+        assert(!"domatchingstatistics for FMindex");
+      } else
+      {
+        uniqueforwardfunction = skfmuniqueforward;
+      }
+      alphabet = fmindex.alphabet;
+    } else
+    {
+      if (uniquesubcallinfo.indextype == Esaindextype)
+      {
+        theindex = (const void *) &suffixarray;
+        if (uniquesubcallinfo.domatchingstatistics)
+        {
+          uniqueforwardfunction = suffixarraymstats;
+        } else
+        {
+          uniqueforwardfunction = suffixarrayuniqueforward;
+        }
+        alphabet = suffixarray.alpha;
+      } else
+      {
+        assert(uniquesubcallinfo.indextype == Packedindextype);
+        theindex = (const void *) packedindex;
+        if (uniquesubcallinfo.domatchingstatistics)
+        {
+          /* EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter,
+                             const BWTSeq *bwtSeq, Error *err) */
+          assert(!"domatchingstatistics for packed index");
+        } else
+        {
+          uniqueforwardfunction = packedindexuniqueforward;
+        }
+        /* currently, only DNA is supported */
+        alphabet = assigninputalphabet(true, /* XXX Fix me and read alphabet */
+                                       false,
+                                       NULL,
+                                       NULL,
+                                       err);
+        if (alphabet == NULL)
+        {
+          haserr = true;
+        }
+      }
+    }
+    if (!haserr)
+    {
+      if (findsubqueryuniqueforward(theindex,
+                                    uniqueforwardfunction,
+                                    alphabet,
                                     uniquesubcallinfo.queryfilenames,
                                     uniquesubcallinfo.minlength,
                                     uniquesubcallinfo.maxlength,
                                     (uniquesubcallinfo.showmode & SHOWSEQUENCE)
-                                       ? true : false,
+                                      ? true : false,
                                     (uniquesubcallinfo.showmode & SHOWQUERYPOS)
-                                       ? true : false,
+                                      ? true : false,
+                                    (uniquesubcallinfo.showmode & SHOWREFPOS)
+                                      ? true : false,
                                     err) != 0)
       {
         haserr = true;
@@ -275,16 +361,19 @@ static int findminuniquesubstrings(int argc,const char **argv,Error *err)
     freefmindex(&fmindex);
   } else
   {
-    freesuffixarray(&suffixarray);
+    if (uniquesubcallinfo.indextype == Esaindextype)
+    {
+      freesuffixarray(&suffixarray);
+    } else
+    {
+      assert(uniquesubcallinfo.indextype == Packedindextype);
+      deleteBWTSeq(packedindex);
+      assert(alphabet != NULL);
+      freeAlphabet(&alphabet);
+    }
   }
   freeverboseinfo(&verboseinfo);
   str_delete(uniquesubcallinfo.indexname);
   strarray_delete(uniquesubcallinfo.queryfilenames);
   return haserr ? -1 : 0;
-}
-
-int gt_uniquesub(int argc, const char **argv, Error *err)
-{
-  error_check(err);
-  return findminuniquesubstrings(argc, argv, err);
 }

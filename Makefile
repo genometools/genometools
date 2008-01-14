@@ -207,8 +207,6 @@ ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
 ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
 ZLIB_DEP:=$(ZLIB_SRC:%.c=obj/%.d)
 
-SKTOOLS=$(shell grep -l Kurtz src/tools/*.c)
-
 SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
 
@@ -609,6 +607,9 @@ splint: obj/gt_config.h
 EISFILES=${shell ls ${CURDIR}/src/libgtmatch/*.c | grep eis-}\
          ${CURDIR}/src/libgtmatch/sfx-opt.c\
          ${CURDIR}/src/libgtmatch/sfx-run.c
+
+SKTOOLS=${filter-out src/tools/gt_uniquesub.c,\
+                     ${shell grep -l Kurtz src/tools/*.c}}
 
 sgt:${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/libgtmatch/*.c}}\

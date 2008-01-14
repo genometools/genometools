@@ -23,8 +23,10 @@
 #include "fmi-occ.gen"
 
 unsigned long skfmuniqueforward (const void *genericindex,
+                                 /*@unused@*/ Seqpos *witnessposition,
                                  const Uchar *qstart,
-                                 const Uchar *qend)
+                                 const Uchar *qend,
+                                 /*@unused@*/ Error *err)
 {
   Uchar cc;
   const Uchar *qptr;

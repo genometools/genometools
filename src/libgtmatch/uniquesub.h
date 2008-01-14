@@ -22,12 +22,15 @@
 #include "libgtcore/strarray.h"
 #include "libgtcore/error.h"
 #include "defined-types.h"
+#include "seqpos-def.h"
 #include "ushort-def.h"
 #include "alphadef.h"
 
 typedef unsigned long (*Uniqueforwardfunction) (const void *,
+                                                Seqpos *,
                                                 const Uchar *,
-                                                const Uchar *);
+                                                const Uchar *,
+                                                Error *err);
 
 int findsubqueryuniqueforward(const void *genericindex,
                               Uniqueforwardfunction uniqueforward,
@@ -37,6 +40,7 @@ int findsubqueryuniqueforward(const void *genericindex,
                               Definedunsignedlong maxlength,
                               bool showsequence,
                               bool showquerypos,
+                              bool showrefpos,
                               Error *err);
 
 #endif

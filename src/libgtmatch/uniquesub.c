@@ -29,7 +29,8 @@
 typedef struct
 {
   bool showsequence,
-       showquerypos;
+       showquerypos,
+       showrefpos;
   Definedunsignedlong minlength,
                       maxlength;
 } Rangespecinfo;
@@ -42,6 +43,7 @@ typedef int (*Processuniquelength)(const Alphabet *,
                                    const Uchar *,
                                    unsigned long,
                                    unsigned long,
+                                   Seqpos,
                                    void *,
                                    Error *err);
 typedef int (*Postprocessuniquelength)(const Alphabet *,
@@ -72,6 +74,7 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
 {
   const Uchar *qptr;
   unsigned long uniquelength, remaining;
+  Seqpos witnessposition;
 
   error_check(err);
   if (substringinfo->preprocessuniquelength != NULL &&
@@ -85,13 +88,15 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
   for (qptr = query, remaining = querylen; remaining > 0; qptr++, remaining--)
   {
     uniquelength = substringinfo->uniqueforward(substringinfo->genericindex,
-                                                qptr,query+querylen);
+                                                &witnessposition,
+                                                qptr,query+querylen,err);
     if (uniquelength > 0)
     {
       if (substringinfo->processuniquelength(substringinfo->alphabet,
                                              query,
                                              uniquelength,
                                              (unsigned long) (qptr-query),
+                                             witnessposition,
                                              substringinfo->processinfo,
                                              err) != 0)
       {
@@ -131,6 +136,7 @@ static int showifinlengthrange(const Alphabet *alphabet,
                                const Uchar *start,
                                unsigned long uniquelength,
                                unsigned long querystart,
+                               Seqpos refpos,
                                void *info,
                                 /*@unused@*/ Error *err)
 {
@@ -146,6 +152,10 @@ static int showifinlengthrange(const Alphabet *alphabet,
       printf("%lu ",querystart);
     }
     printf("%lu",uniquelength);
+    if (rangespecinfo->showrefpos)
+    {
+      printf(" " FormatSeqpos,PRINTSeqposcast(refpos));
+    }
     if (rangespecinfo->showsequence)
     {
       (void) putchar(' ');
@@ -166,6 +176,7 @@ int findsubqueryuniqueforward(const void *genericindex,
                               Definedunsignedlong maxlength,
                               bool showsequence,
                               bool showquerypos,
+                              bool showrefpos,
                               Error *err)
 {
   Substringinfo substringinfo;
@@ -184,6 +195,7 @@ int findsubqueryuniqueforward(const void *genericindex,
   rangespecinfo.maxlength = maxlength;
   rangespecinfo.showsequence = showsequence;
   rangespecinfo.showquerypos = showquerypos;
+  rangespecinfo.showrefpos = showrefpos;
   substringinfo.preprocessuniquelength = showunitnum;
   substringinfo.processuniquelength = showifinlengthrange;
   substringinfo.postprocessuniquelength = NULL;

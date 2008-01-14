@@ -30,7 +30,10 @@ cd testsuite
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_suffixerator'
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_trieins'
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_ltrharvest'
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_uniquesub'
 env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb -keywords 'gt_suffixerator and gttestdata' -gttestdata ${GTTESTDATA}
+env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb -keywords 'gt_uniquesub and gttestdata' -gttestdata ${GTTESTDATA}
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_packedindex' -gttestdata ${GTTESTDATA}
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
 # the following depends on vmatch-mini.x and mkvtree.x

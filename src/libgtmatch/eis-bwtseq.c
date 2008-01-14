@@ -386,6 +386,74 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   }
 }
 
+unsigned long packedindexuniqueforward(const void *genericindex,
+                                       /*@unused@*/ Seqpos *witnessposition,
+                                       const Uchar *qstart,
+                                       const Uchar *qend,
+                                       Error *err)
+{
+  Uchar cc;
+  const Uchar *qptr;
+  struct matchBound bwtbound;
+  const BWTSeq *bwtSeq = (BWTSeq *) genericindex;
+  Symbol curSym;
+  const MRAEnc *alphabet;
+
+  error_check(err);
+  alphabet = BWTSeqGetAlphabet(bwtSeq);
+  assert(bwtSeq && qstart && err);
+  qptr = qstart;
+  cc = *qptr++;
+#undef mydebug
+#ifdef mydebug
+  printf("# start cc=%u\n",cc);
+#endif
+  if (ISSPECIAL(cc))
+  {
+    return 0;
+  }
+  curSym = MRAEncMapSymbol(alphabet, cc);
+  bwtbound.lower = bwtSeq->count[curSym];
+  bwtbound.upper = bwtSeq->count[curSym+1];
+#ifdef mydebug
+  printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
+          "occurrences\n",
+         PRINTSeqposcast(bwtbound.lower),
+         PRINTSeqposcast(bwtbound.upper),
+         PRINTSeqposcast(bwtbound.upper - bwtbound.lower));
+#endif
+  while (qptr < qend && bwtbound.lower + 1 < bwtbound.upper)
+  {
+    cc = *qptr;
+#ifdef mydebug
+    printf("# cc=%u\n",cc);
+#endif
+    if (ISSPECIAL (cc))
+    {
+      return 0;
+    }
+    curSym = MRAEncMapSymbol(alphabet, cc);
+
+    bwtbound.lower = bwtSeq->count[curSym] +
+                     BWTSeqOcc(bwtSeq, curSym, bwtbound.lower, err);
+    bwtbound.upper = bwtSeq->count[curSym] +
+                     BWTSeqOcc(bwtSeq, curSym, bwtbound.upper, err);
+#ifdef mydebug
+    printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
+            "occurrences\n",
+           PRINTSeqposcast(bwtbound.lower),
+           PRINTSeqposcast(bwtbound.upper),
+           PRINTSeqposcast(bwtbound.upper - bwtbound.lower));
+#endif
+    qptr++;
+  }
+  if (bwtbound.lower + 1 == bwtbound.upper)
+  {
+    return (unsigned long) (qptr - qstart);
+  }
+  return 0;
+}
+
 extern Seqpos
 BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
                  Error *err)

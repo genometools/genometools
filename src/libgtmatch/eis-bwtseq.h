@@ -315,6 +315,22 @@ EMINumMatchesTotal(const BWTSeqExactMatchesIterator *iter);
 extern Seqpos
 EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
 
+/**
+ * \brief for packed index (given as void pointer), compute the longest
+ * prefix of string in range between qstart and qend that occurs exactly
+ * once in the index.
+ * @param packed index (given as void pointer)
+ * @param qstart points to memory area where query is found
+ * @param qend points to memory area immediately after the query
+ * @param err
+ * @return 0 if not unique, otherwise length of minmum unique prefix.
+ */
+unsigned long packedindexuniqueforward(const void *genericindex,
+                                       /*@unused@*/ Seqpos *witnessposition,
+                                       const Uchar *qstart,
+                                       const Uchar *qend,
+                                       Error *err);
+
 #include "libgtmatch/eis-bwtseqsimpleop.h"
 
 #endif
