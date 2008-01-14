@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/dynalloc.h"
 #include "libgtcore/genfile.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/fa.h"
@@ -295,10 +296,6 @@ void* fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
     ma_free(mapinfo);
   return map;
 }
-
-#ifndef SIZE_MAX
-#define SIZE_MAX ~(size_t)0
-#endif
 
 static void* fa_mmap_generic_path_func(const char *path, size_t *len,
                                        bool mapwritable, bool hard_fail,

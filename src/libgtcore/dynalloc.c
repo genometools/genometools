@@ -19,10 +19,6 @@
 #include "libgtcore/dynalloc.h"
 #include "libgtcore/ma.h"
 
-#ifndef SIZE_MAX
-#define SIZE_MAX ~(size_t)0
-#endif
-
 void* dynalloc(void *ptr, size_t *allocated, size_t size)
 {
   size_t size_to_alloc = 0;

@@ -25,6 +25,7 @@
 #include <unistd.h>
 
 #include "libgtcore/bitpackstring.h"
+#include "libgtcore/dynalloc.h"
 #include "libgtcore/safearith.h"
 
 /**
@@ -37,10 +38,6 @@
  * performance reasons. Just pretend you didn't know how these
  * functions work.
  */
-
-#ifndef SIZE_MAX
-#define SIZE_MAX ~(size_t)0
-#endif
 
 static inline size_t
 bitElemsAllocSize(BitOffset numBits)

@@ -20,6 +20,7 @@
 
 #include "libgtcore/bitpackstring.h"
 #include "libgtcore/combinatorics.h"
+#include "libgtcore/dynalloc.h"
 #include "libgtcore/error.h"
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
@@ -127,10 +128,6 @@ static void
 printComposition(FILE *fp, const unsigned *composition, Symbol numSyms,
                  unsigned blockSize);
 #endif /* DEBUG > 1 */
-
-#ifndef SIZE_MAX
-#define SIZE_MAX ~(size_t)0
-#endif
 
 static inline BitOffset
 compListPermStartOffset(struct compList *list, unsigned numSyms)
