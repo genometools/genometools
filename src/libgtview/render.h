@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -28,9 +29,13 @@ typedef struct Render Render;
 
 /* <cfg> is used to determine drawing options. */
 Render* render_new(Config*);
-/* Render <diagram> to PNG file <filename> (relative to working directory) */
+/* Render diagram to PNG file <filename> of given <width>
+   (relative to working directory) */
 int     render_to_png(Render*, Diagram*, const char *filename,
                       unsigned int width, Error*);
+/* Render <diagram> to <stream> (in PNG format of given <width>) */
+void    render_to_png_stream(Render*, Diagram *diagram, Str *stream,
+                             unsigned int width);
 void    render_delete(Render*);
 
 #endif

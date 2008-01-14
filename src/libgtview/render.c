@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -468,13 +469,11 @@ static void render_ruler(Render *r)
                               "3'");
 }
 
-int render_to_png(Render *r, Diagram *dia, const char *filename,
-                  unsigned int width, Error *err)
+static void render_prepare_graphics(Render *r, Diagram *dia, unsigned int width)
 {
-  unsigned int height, had_err;
+  unsigned int height;
 
-  error_check(err);
-  assert(r && filename && width > 1);
+  assert(r && width > 1);
 
   /* set initial image-specific values */
   r->y = 70;
@@ -509,12 +508,32 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
 
   if (config_get_verbose(r->cfg))
     fprintf(stderr, "actual used height: %f\n", r->y);
+}
+
+int render_to_png(Render *r, Diagram *dia, const char *filename,
+                  unsigned int width, Error *err)
+{
+  int had_err;
+
+  /* prepare graphics object */
+  render_prepare_graphics(r, dia, width);
 
   /* write out result file */
   had_err = graphics_save_to_file(r->g, filename, err);
   graphics_delete(r->g);
 
   return had_err;
+}
+
+void render_to_png_stream(Render *r, Diagram *dia, Str *stream,
+                          unsigned int width)
+{
+  /* prepare graphics object */
+  render_prepare_graphics(r, dia, width);
+
+  /* write out stream */
+  graphics_save_to_stream(r->g, stream);
+  graphics_delete(r->g);
 }
 
 void render_delete(Render *r)

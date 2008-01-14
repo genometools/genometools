@@ -362,9 +362,9 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
 
 int graphics_save_to_file(const Graphics *g, const char *filename, Error *err)
 {
-  cairo_status_t rval = CAIRO_STATUS_SUCCESS;
+  cairo_status_t rval;
   error_check(err);
-  assert(g);
+  assert(g && filename);
 
   rval = cairo_surface_write_to_png(g->surf, filename);
   assert(rval == CAIRO_STATUS_SUCCESS || rval == CAIRO_STATUS_WRITE_ERROR);
@@ -374,6 +374,22 @@ int graphics_save_to_file(const Graphics *g, const char *filename, Error *err)
     return -1;
   }
   return 0;
+}
+
+static cairo_status_t png_write_func(void *closure, const unsigned char *data,
+                                     unsigned int length)
+{
+  Str *stream = closure;
+  str_append_cstr_nt(stream, data, length);
+  return CAIRO_STATUS_SUCCESS;
+}
+
+void graphics_save_to_stream(const Graphics *g, Str *stream)
+{
+  cairo_status_t rval;
+  assert(g && stream);
+  rval = cairo_surface_write_to_png_stream(g->surf, png_write_func, stream);
+  assert(rval == CAIRO_STATUS_SUCCESS); /* png_write_func() is sane */
 }
 
 void graphics_delete(Graphics *g)

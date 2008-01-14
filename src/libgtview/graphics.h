@@ -78,6 +78,8 @@ void      graphics_draw_arrowhead(Graphics*, double x, double y, Color,
                                   ArrowStatus);
 /* Write out the Graphic as PNG to the given file with <filename>. */
 int       graphics_save_to_file(const Graphics*, const char *filename, Error*);
+/* Write out the Graphic as PNG to the given <stream>. */
+void      graphics_save_to_stream(const Graphics*, Str *stream);
 
 void      graphics_delete(Graphics*);
 
