@@ -639,10 +639,10 @@ obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
 	indent $@
 
-export MAKE # so compilation tests in testsuite can use the same make
 test: all
 	bin/gt -test
-	cd testsuite && env -i GT_MEM_BOOKKEEPING=on ruby -I. testsuite.rb \
+	cd testsuite && env -i GT_MEM_BOOKKEEPING=on MAKE=$(MAKE) \
+          ruby -I. testsuite.rb \
           -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin -cur $(CURDIR) \
           -gtruby $(CURDIR)/gtruby $(STEST_FLAGS)
 
