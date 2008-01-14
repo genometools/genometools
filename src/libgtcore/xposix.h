@@ -48,8 +48,7 @@ void   xglob(const char *pattern, int flags,
              int (*errfunc)(const char*, int), glob_t *pglob);
 int    xopen(const char *path, int flags, mode_t mode);
 int    xmkstemp(char *temp);
-/* low level wrappers for the mmap() and munmap() routines, see mmap.h for high
-   level routines */
+/* low-level wrapper for the mmap() routine */
 void*  xmmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset);
 /* generic unmapping routine */
 void   xmunmap(void *addr, size_t len);
