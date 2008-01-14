@@ -88,7 +88,7 @@ bool io_line_start(const IO *io)
 bool io_has_char(IO *io)
 {
   int rval;
-  char c;
+  char c = 0;
   assert(io);
   rval = io_get_char(io, &c);
   io_unget_char(io, c);
