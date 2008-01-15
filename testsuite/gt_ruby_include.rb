@@ -45,6 +45,12 @@ if $arguments["libgtview"] then
     grep $last_stderr, "GenomeTools error"
   end
 
+  Name "gtruby: libgtview bindings (PNG stream)"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}/gtruby/view_stream.rb test.png #{$testdata}gff3_file_1_short.txt"
+  end
+
   Name "gtruby: show_seqids"
   Keywords "gt_ruby"
   Test do

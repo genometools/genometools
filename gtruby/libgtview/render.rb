@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 
 require 'dl/import'
 require 'gthelper'
-require 'libgtcore/range'
+require 'libgtcore/str'
 
 module GT
   extend DL::Importable
@@ -26,6 +26,7 @@ module GT
   extern "Render* render_new(Config*)"
   extern "int render_to_png(Render*, Diagram*, const char*, unsigned int, " +
                            "Error*)"
+  extern "void render_to_png_stream(Render*, Diagram*, Str*, unsigned int)"
   extern "void render_delete(Render*)"
 
   class Render
@@ -40,6 +41,12 @@ module GT
       rval = GT.render_to_png(@render, diagram.diagram, filename, width,
                               err.to_ptr)
       if rval != 0 then GT.gterror(err) end
+    end
+
+    def to_png_stream(diagram, width = 800)
+      str = GT::Str.new()
+      GT.render_to_png_stream(@render, diagram.diagram, str.to_ptr, width)
+      str.get_mem.to_s(str.length)
     end
   end
 end
