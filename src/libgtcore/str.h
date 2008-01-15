@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -29,7 +29,10 @@ Str*          str_new(void);
 Str*          str_new_cstr(const char*);
 Str*          str_clone(const Str*);
 Str*          str_ref(Str*);
-char*         str_get(const Str*); /* never returns NULL */
+/* never returns NULL, always '\0' terminated */
+char*         str_get(const Str*);
+/* never returns NULL, not always '\0' terminated */
+void*         str_get_mem(const Str*);
 void          str_set(Str*, const char*);
 void          str_append_str(Str*, const Str*);
 void          str_append_cstr(Str*, const char*);

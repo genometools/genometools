@@ -155,6 +155,12 @@ char* str_get(const Str *s)
   return s->cstr;
 }
 
+void* str_get_mem(const Str *s)
+{
+  assert(s);
+  return s->cstr;
+}
+
 unsigned long str_length(const Str *s)
 {
   return s ? s->length : 0;
