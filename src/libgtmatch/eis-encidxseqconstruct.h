@@ -123,7 +123,7 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
  * @param err genometools reference for core functions
  */
 struct encIdxSeq *
-loadBlockEncIdxSeqForSA(Suffixarray *sa, Seqpos totalLen,
+loadBlockEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
                         const Str *projectName, int features, Error *err);
 
 #endif

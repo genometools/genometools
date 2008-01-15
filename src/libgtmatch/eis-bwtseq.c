@@ -75,7 +75,9 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   assert(sa && params && err);
   error_check(err);
   /* try loading index */
-  bwtSeq = loadBWTSeqForSA(params, sa, totalLen, err);
+  bwtSeq = loadBWTSeqForSA(params->projectName, params->baseType,
+                           params->seqParams.blockEnc.EISFeatureSet,
+                           sa, totalLen, err);
   /* if loading didn't work try on-demand creation */
   if (!bwtSeq)
   {
@@ -94,7 +96,6 @@ loadBWTSeq(const Str *projectName, int BWTOptFlags, Error *err)
   Suffixarray suffixArray;
   Seqpos len;
   Verboseinfo *verbosity;
-  struct bwtParam params;
   assert(projectName && err);
   error_check(err);
   /* FIXME: handle verbosity in a more sane fashion */
@@ -105,31 +106,29 @@ loadBWTSeq(const Str *projectName, int BWTOptFlags, Error *err)
     return NULL;
   }
   ++len;
-  params.projectName = projectName;
-  params.baseType = BWT_ON_BLOCK_ENC;
-  params.seqParams.blockEnc.EISFeatureSet
-    = convertBWTOptFlags2EISFeatures(BWTOptFlags);
-  bwtSeq = loadBWTSeqForSA(&params, &suffixArray, len, err);
+  bwtSeq = loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC, BWTOptFlags,
+                           &suffixArray, len, err);
   freesuffixarray(&suffixArray);
   freeverboseinfo(&verbosity);
   return bwtSeq;
 }
 
 extern BWTSeq *
-loadBWTSeqForSA(const struct bwtParam *params, Suffixarray *sa,
+loadBWTSeqForSA(const Str *projectName, enum seqBaseEncoding baseType,
+                int BWTOptFlags, const Suffixarray *sa,
                 Seqpos totalLen, Error *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   EISeq *seqIdx = NULL;
   MRAEnc *alphabet = NULL;
-  assert(params && sa && err);
+  assert(projectName && sa && err);
   alphabet = newMRAEncFromSA(sa);
-  switch (params->baseType)
+  switch (baseType)
   {
   case BWT_ON_BLOCK_ENC:
     if ((seqIdx = loadBlockEncIdxSeqForSA(
-           sa, totalLen, params->projectName,
-           params->seqParams.blockEnc.EISFeatureSet, err)))
+           sa, totalLen, projectName,
+           convertBWTOptFlags2EISFeatures(BWTOptFlags), err)))
     {
       if (!(bwtSeq = newBWTSeq(seqIdx, alphabet)))
         break;
@@ -431,9 +430,9 @@ unsigned long packedindexuniqueforward(const void *genericindex,
     curSym = MRAEncMapSymbol(alphabet, cc);
 
     bwtbound.lower = bwtSeq->count[curSym] +
-                     BWTSeqOcc(bwtSeq, curSym, bwtbound.lower, err);
+                     BWTSeqOcc(bwtSeq, curSym, bwtbound.lower);
     bwtbound.upper = bwtSeq->count[curSym] +
-                     BWTSeqOcc(bwtSeq, curSym, bwtbound.upper, err);
+                     BWTSeqOcc(bwtSeq, curSym, bwtbound.upper);
 #ifdef mydebug
     printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
             "occurrences\n",

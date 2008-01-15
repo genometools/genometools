@@ -83,6 +83,6 @@ reportSALongest(void *state);
  * @return alphabet
  */
 extern MRAEnc *
-newMRAEncFromSA(void *state);
+newMRAEncFromSA(const void *state);
 
 #endif
