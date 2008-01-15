@@ -21,6 +21,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/warning.h"
+#include "libgtext/luahelper.h"
 #include "libgtview/config.h"
 #include "lua.h"
 #include "lauxlib.h"
@@ -347,19 +348,11 @@ StrArray* config_get_cstr_list(const Config *cfg, const char *section,
 void config_set_cstr_list(Config *cfg,  const char *section, const char *key,
                           StrArray *list)
 {
-  unsigned long i;
   assert(cfg && section && key && list);
   config_find_section_for_setting(cfg, section);
   assert(lua_istable(cfg->L, -1));
   lua_pushstring(cfg->L, key);
-  /* XXX lua_push_strarray_as_table(cfg->L, list);
-   */
-  lua_newtable(cfg->L);
-  for (i = 0; i < strarray_size(list); i++) {
-    lua_pushinteger(cfg->L, i+1); /* in Lua we index from 1 on */
-    lua_pushstring(cfg->L, strarray_get(list, i));
-    lua_rawset(cfg->L, -3);
-  }
+  lua_push_strarray_as_table(cfg->L, list);
   lua_settable(cfg->L, -3);
 }
 
