@@ -380,7 +380,7 @@ static cairo_status_t png_write_func(void *closure, const unsigned char *data,
                                      unsigned int length)
 {
   Str *stream = closure;
-  str_append_cstr_nt(stream, data, length);
+  str_append_cstr_nt(stream, (char*) data, length);
   return CAIRO_STATUS_SUCCESS;
 }
 
