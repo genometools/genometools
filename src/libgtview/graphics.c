@@ -384,8 +384,6 @@ static cairo_status_t png_write_func(void *closure, const unsigned char *data,
   return CAIRO_STATUS_SUCCESS;
 }
 
-#include <string.h>
-
 void graphics_save_to_stream(const Graphics *g, Str *stream)
 {
   cairo_status_t rval;
