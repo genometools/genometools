@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -20,14 +20,21 @@ require 'dl/import'
 module GT
   extend DL::Importable
   dlload "libgtcore.so"
+  extern "StrArray* strarray_new()"
+  extern "void strarray_add_cstr(StrArray*, const char*)"
   extern "const char* strarray_get(const StrArray*, unsigned long)"
   extern "unsigned long strarray_size(const StrArray*)"
   extern "void strarray_delete(StrArray*)"
 
   class StrArray
-    def initialize(strarray_ptr)
+    attr_reader :strarray
+    def initialize(strarray_ptr = GT.strarray_new())
       @strarray = strarray_ptr
       @strarray.free = GT::symbol("strarray_delete", "0P")
+    end
+
+    def add_list(list)
+      list.each { |cstr| GT.strarray_add_cstr(@strarray, cstr) }
     end
 
     def to_a

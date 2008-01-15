@@ -21,7 +21,6 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/warning.h"
-#include "libgtlua/helper.h"
 #include "libgtview/config.h"
 #include "lua.h"
 #include "lauxlib.h"
@@ -198,7 +197,13 @@ Color config_get_color(const Config *cfg, const char *key)
   return color;
 }
 
-void config_set_color(Config *cfg, const char *key, Color color)
+void config_get_colorptr(const Config *cfg, Color *color, const char *key)
+{
+  assert(cfg && color && key);
+  *color = config_get_color(cfg, key);
+}
+
+void config_set_color(Config *cfg, const char *key, Color *color)
 {
   int i = 0;
   assert(cfg && key);
@@ -211,13 +216,13 @@ void config_set_color(Config *cfg, const char *key, Color color)
     lua_getfield(cfg->L, -1, key);
   }
   lua_pushstring(cfg->L, "red");
-  lua_pushnumber(cfg->L, color.red);
+  lua_pushnumber(cfg->L, color->red);
   lua_settable(cfg->L, -3);
   lua_pushstring(cfg->L, "green");
-  lua_pushnumber(cfg->L, color.green);
+  lua_pushnumber(cfg->L, color->green);
   lua_settable(cfg->L, -3);
   lua_pushstring(cfg->L, "blue");
-  lua_pushnumber(cfg->L, color.blue);
+  lua_pushnumber(cfg->L, color->blue);
   lua_settable(cfg->L, -3);
   lua_pop(cfg->L, i);
 }
@@ -306,9 +311,11 @@ StrArray* config_get_cstr_list(const Config *cfg, const char *section,
                                const char *key)
 {
   StrArray *list = NULL;
-  int had_err;
+  int i, had_err = 0;
   assert(cfg && section && key);
-  had_err = config_find_section_for_getting(cfg, section);
+  i = config_find_section_for_getting(cfg, section);
+  if (i < 0)
+    had_err = -1;
   if (!had_err) {
     /* lookup entry for given key */
     lua_getfield(cfg->L, -1, key);
@@ -340,11 +347,19 @@ StrArray* config_get_cstr_list(const Config *cfg, const char *section,
 void config_set_cstr_list(Config *cfg,  const char *section, const char *key,
                           StrArray *list)
 {
+  unsigned long i;
   assert(cfg && section && key && list);
   config_find_section_for_setting(cfg, section);
   assert(lua_istable(cfg->L, -1));
   lua_pushstring(cfg->L, key);
-  lua_push_strarray_as_table(cfg->L, list);
+  /* XXX lua_push_strarray_as_table(cfg->L, list);
+   */
+  lua_newtable(cfg->L);
+  for (i = 0; i < strarray_size(list); i++) {
+    lua_pushinteger(cfg->L, i+1); /* in Lua we index from 1 on */
+    lua_pushstring(cfg->L, strarray_get(list, i));
+    lua_rawset(cfg->L, -3);
+  }
   lua_settable(cfg->L, -3);
 }
 
@@ -457,7 +472,7 @@ int config_unit_test(Error *err)
   ensure(had_err, (strcmp(str,"")==0));
 
   /* change some values... */
-  config_set_color(cfg, "exon", col);
+  config_set_color(cfg, "exon", &col);
   config_set_num(cfg,"format", "margins", 11.0);
   config_set_num(cfg,"format", "foo", 2.0);
 
@@ -472,7 +487,7 @@ int config_unit_test(Error *err)
   ensure(had_err, num == 2.0);
 
   /* create a new color definition */
-  config_set_color(cfg, "foo", col);
+  config_set_color(cfg, "foo", &col);
   config_set_cstr(cfg, "bar", "baz", test1);
 
   /* is it saved correctly? */

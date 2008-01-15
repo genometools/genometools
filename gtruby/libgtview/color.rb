@@ -15,38 +15,12 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'dl/import'
+require 'dl/struct'
 
 module GT
-  extend DL::Importable
-  dlload "libgtcore.so"
-  extern "Str* str_new()"
-  extern "Str* str_new_cstr(const char*)"
-  extern "void* str_get_mem(const Str*)"
-  extern "unsigned long str_length(const Str*)"
-  extern "void str_delete(Str*)"
-
-  class Str
-    def initialize(cstr)
-      if cstr
-        @str = GT.str_new_cstr(cstr)
-      else
-        @str = GT.str_new()
-      end
-      @str.free = GT::symbol("str_delete", "0P")
-    end
-
-
-    def get_mem
-      GT.str_get_mem(@str)
-    end
-
-    def to_ptr
-      @str
-    end
-
-    def length
-      GT.str_length(@str)
-    end
-  end
+  Color = struct [
+    "double red",
+    "double green",
+    "double blue"
+  ]
 end

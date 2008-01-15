@@ -52,9 +52,12 @@ int            config_load_file(Config*, Str *filename, Error*);
 void           config_reload(Config*);
 /* Retrieve a color value from the configuration for <key> (i.e., feature). */
 Color          config_get_color(const Config*, const char *key);
+/* Similar to previous function. Necessary for Ruby bindings, because
+   apparently 'dl/import' cannot handle returned structs. */
+void           config_get_colorptr(const Config*, Color*, const char *key);
 /* Sets a color value in the configuration for <key> (i.e., feature) to a
    certain value. */
-void           config_set_color(Config*, const char *key, Color);
+void           config_set_color(Config*, const char *key, Color*);
 /* Retrieve string value of <key> in <section>.
    If not set, <deflt> is returned. */
 const char*    config_get_cstr(const Config*, const char *section,

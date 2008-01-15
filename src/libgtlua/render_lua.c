@@ -56,7 +56,7 @@ static int render_lua_to_png(lua_State *L)
     width = DEFAULT_RENDER_WIDTH;
   err = error_new();
   if (render_to_png(*render, *diagram, filename, width, err))
-    return luagt_error(L, err);
+    return lua_gt_error(L, err);
   error_delete(err);
   return 0;
 }

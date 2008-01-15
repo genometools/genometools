@@ -44,7 +44,7 @@ module GT
     end
 
     def to_png_stream(diagram, width = 800)
-      str = GT::Str.new()
+      str = GT::Str.new(nil)
       GT.render_to_png_stream(@render, diagram.diagram, str.to_ptr, width)
       str.get_mem.to_s(str.length)
     end
