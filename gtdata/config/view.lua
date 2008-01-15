@@ -11,18 +11,18 @@ config =
   -- where <val> is a decimal value between 0 and 1.
   colors =
   {
-    stroke          ={red=0.0,green=0.0,blue=0.0},
-    stroke_marked   ={red=1.0,green=0.0,blue=0.0},
-    track_title     ={red=0.6,green=0.6,blue=0.7},
-    exon            ={red=0.6,green=0.6,blue=0.9},
-    CDS             ={red=0.9,green=0.9,blue=0.2},
-    mRNA            ={red=0.4,green=0.5,blue=0.6},
-    TF_binding_site ={red=0.8,green=0.6,blue=0.6},
-    gene            ={red=0.9,green=0.9,blue=1.0},
-    intron          ={red=0.2,green=0.2,blue=0.6},
-    repeat_region   ={red=0.8,green=0.3,blue=0.3},
-    long_terminal_repeat ={red=0.9,green=0.9,blue=0.4},
-    LTR_retrotransposon  ={red=0.8,green=0.5,blue=0.5},
+    stroke               = {red=0.0, green=0.0, blue=0.0},
+    stroke_marked        = {red=1.0, green=0.0, blue=0.0},
+    track_title          = {red=0.6, green=0.6, blue=0.7},
+    exon                 = {red=0.6, green=0.6, blue=0.9},
+    CDS                  = {red=0.9, green=0.9, blue=0.2},
+    mRNA                 = {red=0.4, green=0.5, blue=0.6},
+    TF_binding_site      = {red=0.8, green=0.6, blue=0.6},
+    gene                 = {red=0.9, green=0.9, blue=1.0},
+    intron               = {red=0.2, green=0.2, blue=0.6},
+    repeat_region        = {red=0.8, green=0.3, blue=0.3},
+    long_terminal_repeat = {red=0.9, green=0.9, blue=0.4},
+    LTR_retrotransposon  = {red=0.8, green=0.5, blue=0.5},
   },
   -- Defines how a feature is drawn.
   -- Possible choices: "line", "box", "caret", "dashes"
@@ -55,7 +55,7 @@ config =
     intron = {"mRNA", "gene"},
     mRNA = {"gene"},
     long_terminal_repeat = {"LTR_retrotransposon","repeat_region"},
-    inverted_repeat={"repeat_region","LTR_retrotransposon"},
+    inverted_repeat= {"repeat_region","LTR_retrotransposon"},
   },
   -- Defines various format options for drawing.
   format =
