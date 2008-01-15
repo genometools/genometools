@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -32,6 +32,8 @@ int  luaset_modules_path(lua_State*, Error*);
 
 void luaset_arg(lua_State*, const char *argv_0, const char **argv);
 void lua_export_metatable(lua_State*, const char *metatable_desc);
+
+void lua_push_strarray_as_table(lua_State*, StrArray*);
 
 /* Propagate the error given in <err> (which must be set) to <L>.
    Takes ownership of the error and deletes it. */

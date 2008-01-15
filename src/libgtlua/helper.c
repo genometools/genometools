@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -113,6 +113,18 @@ void lua_export_metatable(lua_State *L, const char *metatable_desc)
   *dot = '_';
   lua_setglobal(L, mt);
   ma_free(mt);
+}
+
+void lua_push_strarray_as_table(lua_State *L, StrArray *sa)
+{
+  unsigned long i;
+  assert(L && sa);
+  lua_newtable(L);
+  for (i = 0; i < strarray_size(sa); i++) {
+    lua_pushinteger(L, i+1); /* in Lua we index from 1 on */
+    lua_pushstring(L, strarray_get(sa, i));
+    lua_rawset(L, -3);
+  }
 }
 
 int luagt_error(lua_State *L, Error *err)

@@ -1,6 +1,7 @@
   /*
-  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+  Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +21,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/warning.h"
+#include "libgtlua/helper.h"
 #include "libgtview/config.h"
 #include "lua.h"
 #include "lauxlib.h"
@@ -96,7 +98,7 @@ void config_reload(Config *cfg)
   assert(!rval); /* should not happen, config file was loaded before */
 }
 
-/* Searches for  <section> inside the config table, creating it if it does not
+/* Searches for <section> inside the config table, creating it if it does not
    exist and finally pushing it on the Lua stack (at the top).
    Returns the total number of items pushed on the stack by this function. */
 static int config_find_section_for_setting(Config* cfg, const char *section)
@@ -298,6 +300,52 @@ void config_set_num(Config *cfg, const char *section, const char *key,
   lua_pushnumber(cfg->L, number);
   lua_settable(cfg->L, -3);
   lua_pop(cfg->L, i);
+}
+
+StrArray* config_get_cstr_list(const Config *cfg, const char *section,
+                               const char *key)
+{
+  StrArray *list = NULL;
+  int had_err;
+  assert(cfg && section && key);
+  had_err = config_find_section_for_getting(cfg, section);
+  if (!had_err) {
+    /* lookup entry for given key */
+    lua_getfield(cfg->L, -1, key);
+    if (!lua_istable(cfg->L, -1))
+      had_err = -1;
+  }
+  /* build list */
+  if (!had_err) {
+    lua_Integer i = 0;
+    list = strarray_new();
+    for (;;) {
+      lua_pushinteger(cfg->L, ++i);
+      lua_gettable(cfg->L, -2);
+      if (lua_isnil(cfg->L, -1))
+        break;
+      if (lua_isstring(cfg->L, -1))
+        strarray_add_cstr(list, lua_tostring(cfg->L, -1));
+      lua_pop(cfg->L, 1);
+    }
+  }
+  /* return result */
+  if (had_err) {
+    strarray_delete(list);
+    return NULL;
+  }
+  return list;
+}
+
+void config_set_cstr_list(Config *cfg,  const char *section, const char *key,
+                          StrArray *list)
+{
+  assert(cfg && section && key && list);
+  config_find_section_for_setting(cfg, section);
+  assert(lua_istable(cfg->L, -1));
+  lua_pushstring(cfg->L, key);
+  lua_push_strarray_as_table(cfg->L, list);
+  lua_settable(cfg->L, -3);
 }
 
 bool config_cstr_in_list(const Config *cfg, const char *section,

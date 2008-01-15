@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+  Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +21,7 @@
 
 #include "lua.h"
 #include "libgtcore/str.h"
+#include "libgtcore/strarray.h"
 #include "libgtview/color.h"
 #include "libgtext/genome_feature_type.h"
 
@@ -67,6 +69,13 @@ double         config_get_num(const Config*, const char *section,
 /* Set numeric value of <key> in <section> to <number>. */
 void           config_set_num(Config*, const char *section, const char *key,
                               double number);
+/* Retrieve a list of string (as StrArray) for <key> in <section>, returns NULL
+   on error. */
+StrArray*      config_get_cstr_list(const Config*, const char *section,
+                                    const char *key);
+/* Set <key> in <section> to <list> of strings. */
+void           config_set_cstr_list(Config*, const char *section,
+                                    const char *key, StrArray *list);
 /* Check if <checkstr> appears in list of strings named <key> in <section>. */
 bool           config_cstr_in_list(const Config*, const char *section,
                                    const char *key, const char *checkstr);
