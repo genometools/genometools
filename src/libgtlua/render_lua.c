@@ -21,6 +21,7 @@
 #include "libgtlua/diagram_lua.h"
 #include "libgtlua/helper.h"
 #include "libgtlua/render_lua.h"
+#include "libgtview/luaconfig.h"
 #include "libgtview/render.h"
 
 #define RENDER_METATABLE  "GenomeTools.render"
@@ -33,7 +34,7 @@ static int render_lua_new(lua_State *L)
   Config *config;
   render = lua_newuserdata(L, sizeof (Render*));
   assert(render);
-  config = get_config_from_registry(L);
+  config = lua_get_config_from_registry(L);
   *render = render_new(config);
   luaL_getmetatable(L, RENDER_METATABLE);
   lua_setmetatable(L, -2);

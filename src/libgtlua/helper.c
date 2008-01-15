@@ -23,37 +23,8 @@
 #include "libgtcore/ma.h"
 #include "libgtlua/helper.h"
 
-#ifdef LIBGTVIEW
-#include "libgtview/config.h"
-#endif
-
 /* key used to store the Env object in the Lua registry */
 #define ENV_KEY env_new
-
-#ifdef LIBGTVIEW
-/* key used to store the Config object in the Lua registry */
-#define CONFIG_KEY config_new
-
-void put_config_in_registry(lua_State *L, Config *config)
-{
-  assert(L && config);
-  lua_pushlightuserdata(L, CONFIG_KEY);
-  lua_pushlightuserdata(L, config);
-  lua_rawset(L, LUA_REGISTRYINDEX);
-}
-
-Config* get_config_from_registry(lua_State *L)
-{
-  Config *config;
-  assert(L);
-  lua_pushlightuserdata(L, CONFIG_KEY);
-  lua_rawget(L, LUA_REGISTRYINDEX);
-  assert(lua_islightuserdata(L, -1));
-  config = lua_touserdata(L, -1);
-  lua_pop(L, 1);
-  return config;
-}
-#endif
 
 int lua_set_modules_path(lua_State *L, Error *err)
 {

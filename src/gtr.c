@@ -36,7 +36,7 @@
 #include "libgtlua/interactive.h"
 
 #ifdef LIBGTVIEW
-#include "libgtview/config.h"
+#include "libgtview/luaconfig.h"
 #endif
 
 struct GTR {
@@ -87,7 +87,7 @@ GTR* gtr_new(Error *err)
       if (config_load_file(gtr->config, config_file, err))
         had_err = -1;
       else
-        put_config_in_registry(gtr->L, gtr->config);
+        lua_put_config_in_registry(gtr->L, gtr->config);
     }
   }
   str_delete(config_file);

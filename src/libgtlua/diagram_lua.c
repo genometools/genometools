@@ -25,6 +25,7 @@
 #include "libgtlua/range_lua.h"
 #include "libgtview/feature_index.h"
 #include "libgtview/diagram.h"
+#include "libgtview/luaconfig.h"
 
 static int diagram_lua_new(lua_State *L)
 {
@@ -42,7 +43,7 @@ static int diagram_lua_new(lua_State *L)
   /* get range */
   range = check_range(L, 3);
   /* create diagram */
-  config = get_config_from_registry(L);
+  config = lua_get_config_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (Diagram*));
   assert(diagram);
   *diagram = diagram_new(*feature_index, seqid, range, config);
