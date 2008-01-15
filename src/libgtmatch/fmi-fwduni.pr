@@ -7,6 +7,12 @@ unsigned long skfmuniqueforward (const void *genericindex,
                                  const Uchar *qend,
                                  /*@unused@*/ Error *err);
 
+unsigned long skfmmstats (const void *genericindex,
+                          Seqpos *witnessposition,
+                          const Uchar *qstart,
+                          const Uchar *qend,
+                          /*@unused@*/ Error *err);
+
 #ifdef __cplusplus
 }
 #endif

@@ -105,7 +105,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   }
   if (!haserr)
   {
-    if (intstoreindexpos == (unsigned int) 1)
+    if (intstoreindexpos == 1U)
     {
       *storeindexpos = true;
     } else

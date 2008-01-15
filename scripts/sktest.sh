@@ -38,6 +38,7 @@ env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_packedindex' -gttestda
 #          -select 253 (run testcase 253)
 # the following depends on vmatch-mini.x and mkvtree.x
 # ../scripts/runmaxpairs.sh 14 ${GRUMBACH}/*.fna ../testdata/Duplicate.fna
+exit 1
 
 num=2
 while test ${num} -lt 10 
