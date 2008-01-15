@@ -38,19 +38,19 @@ BWTSeqHasLocateInformation(const BWTSeq *bwtSeq)
 }
 
 static inline Seqpos
-BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Error *err)
+BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos)
 {
-  assert(bwtSeq && err);
+  assert(bwtSeq);
   /* two counts must be treated specially:
    * 1. for the symbols mapped to the same value as the terminator
    * 2. for queries of the terminator itself */
   if (tsym < bwtSeq->bwtTerminatorFallback)
-    return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint, err);
+    return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint);
   else if (tsym > bwtSeq->bwtTerminatorFallback
            && tsym != bwtSeq->alphabetSize - 1)
-    return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint, err);
+    return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint);
   else if (tsym == bwtSeq->bwtTerminatorFallback)
-    return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint, err);
+    return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint);
 /*       - ((pos > bwtSeq->longest)?1:0); */
   else /* tsym == not flattened terminator == alphabetSize - 1 */
   {
@@ -60,20 +60,20 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Error *err)
 }
 
 static inline Seqpos
-BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos pos, Error *err)
+BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos pos)
 {
-  assert(bwtSeq && err);
+  assert(bwtSeq);
   Symbol tsym = MRAEncMapSymbol(bwtSeq->alphabet, sym);
-  return BWTSeqTransformedOcc(bwtSeq, tsym, pos, err);
+  return BWTSeqTransformedOcc(bwtSeq, tsym, pos);
 }
 
 static inline Seqpos
-BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Error *err)
+BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos)
 {
-  Symbol tSym = EISGetTransformedSym(bwtSeq->seqIdx, pos, bwtSeq->hint, err);
+  Symbol tSym = EISGetTransformedSym(bwtSeq->seqIdx, pos, bwtSeq->hint);
   if (pos != bwtSeq->longest)
   {
-    return bwtSeq->count[tSym] + BWTSeqTransformedOcc(bwtSeq, tSym, pos, err);
+    return bwtSeq->count[tSym] + BWTSeqTransformedOcc(bwtSeq, tSym, pos);
   }
   else
   {
@@ -83,39 +83,39 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Error *err)
 }
 
 static inline Seqpos
-BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym, Error *err)
+BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym)
 {
   Symbol  tSym;
-  assert(bwtSeq && err);
+  assert(bwtSeq);
   assert(MRAEncSymbolHasValidMapping(BWTSeqGetAlphabet(bwtSeq), sym));
   tSym = MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), sym);
   return bwtSeq->count[tSym];
 }
 
 static inline Seqpos
-BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym, Error *err)
+BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym)
 {
-  assert(bwtSeq && err);
+  assert(bwtSeq);
   assert(tSym <= bwtSeq->alphabetSize);
   return bwtSeq->count[tSym];
 }
 
 static struct matchBound *
 BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
-                Symbol nextSym, Error *err)
+                Symbol nextSym)
 {
   const MRAEnc *alphabet;
   Symbol curSym;
-  assert(bwtSeq && limits && err);
+  assert(bwtSeq && limits);
   assert(limits->upper < bwtSeq->count[bwtSeq->alphabetSize]
          && limits->lower < bwtSeq->count[bwtSeq->alphabetSize]);
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   curSym = MRAEncMapSymbol(alphabet, nextSym);
   assert(MRAEncSymbolHasValidMapping(alphabet, curSym));
   limits->upper = bwtSeq->count[curSym]
-    + BWTSeqTransformedOcc(bwtSeq, curSym, limits->upper, err);
+    + BWTSeqTransformedOcc(bwtSeq, curSym, limits->upper);
   limits->lower = bwtSeq->count[curSym]
-    + BWTSeqTransformedOcc(bwtSeq, curSym, limits->lower, err);
+    + BWTSeqTransformedOcc(bwtSeq, curSym, limits->lower);
   return limits;
 }
 
@@ -127,13 +127,12 @@ BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq)
 }
 
 static inline struct MatchData *
-EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
-                Error *err)
+EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq)
 {
   if (iter->nextMatchBWTPos < iter->bounds.lower)
   {
     iter->nextMatch.sfxArrayValue =
-      BWTSeqLocateMatch(bwtSeq, iter->nextMatchBWTPos, &iter->extBits, err);
+      BWTSeqLocateMatch(bwtSeq, iter->nextMatchBWTPos, &iter->extBits);
     {
       /* FIXME: map position back to original encoded sequence */
       iter->nextMatch.dbFile = 0;

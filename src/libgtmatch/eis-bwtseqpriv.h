@@ -54,10 +54,10 @@ struct BWTSeqExactMatchesIterator
 
 extern int
 BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
-                       struct extBitsRetrieval *extBits, Error *err);
+                       struct extBitsRetrieval *extBits);
 
 extern Seqpos
 BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
-                  struct extBitsRetrieval *extBits, Error *err);
+                  struct extBitsRetrieval *extBits);
 
 #endif

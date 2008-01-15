@@ -40,7 +40,6 @@ struct suffixarrayReadState
  * @param state reference of a struct suffixarrayReadState
  * @param dest write symbols here
  * @param len length of string to read
- * @param err
  */
 extern int
 saReadBWT(void *state, Symbol *dest, size_t len, Error *err);
@@ -61,7 +60,7 @@ saGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len);
  * @param src reference of a Suffixarray object
  * @param dest write suffix array values here
  * @param len length of part to read
- * @param err
+ * @param err genometools error object reference
  * @return number of entries read, less than len if end of sequence
  * reached
  */
@@ -81,10 +80,9 @@ reportSALongest(void *state);
 /**
  * @brief Query appropriate alphabet encoding for suffix array.
  * @param state reference of Suffixarray object
- * @param err
  * @return alphabet
  */
 extern MRAEnc *
-newMRAEncFromSA(void *state, Error *err);
+newMRAEncFromSA(void *state);
 
 #endif

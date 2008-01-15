@@ -131,11 +131,10 @@ deleteSfxInterface(sfxInterface *iface);
  * suffixerator (i.e. alphabet includes separator and terminator symbols).
  *
  * @param si reference of interface to suffixerator
- * @param err
  * @return reference of newly created alphabet object
  */
 extern MRAEnc *
-newMRAEncFromSfxI(const sfxInterface *si, Error *err);
+newMRAEncFromSfxI(const sfxInterface *si);
 
 /**
  * \brief Get reference for alphabet used to encode original sequence
@@ -205,7 +204,7 @@ getSfxILongestPos(const struct sfxInterface *si);
  */
 extern int
 SfxIRegisterReader(sfxInterface *iface, listenerID *id,
-                   enum sfxDataRequest request, Error *err);
+                   enum sfxDataRequest request);
 
 /**
  * \brief Reads portion of the BWT string produced by suffixerator.
@@ -214,19 +213,18 @@ SfxIRegisterReader(sfxInterface *iface, listenerID *id,
  * @param id value returned by corresponding SfxIRegisterReader call
  * @param len number of symbols to read
  * @param dest store read symbols here
- * @param err
  * @return number of symbols read (less than len implies end of file)
  */
 extern size_t
-readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,
-                 Uchar *dest, Error *err);
+readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len, Uchar *dest,
+                 Error *err);
 
 /**
  * @return actual number of symbols read
  */
 extern size_t
-readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
-                 Seqpos *dest, Error *err);
+readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len, Seqpos *dest,
+                 Error *err);
 
 /**
  * @return actual number of symbols read

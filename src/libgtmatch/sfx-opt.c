@@ -200,7 +200,7 @@ static OPrval parse_options(int *parsed_args,
   if (oprval == OPTIONPARSER_OK && !doesa)
   {
     computePackedIndexDefaults(&so->bwtIdxParams,
-                               BWTBaseFeatures & ~BWTProperlySorted, err);
+                               BWTBaseFeatures & ~BWTProperlySorted);
   }
   option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && *parsed_args != argc)

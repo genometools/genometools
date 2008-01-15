@@ -37,48 +37,46 @@ EISGetAlphabet(const EISeq *seq)
 }
 
 static inline Symbol
-EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Error *err)
+EISGetSym(EISeq *seq, Seqpos pos, EISHint hint)
 {
-  assert(seq && hint && err);
+  assert(seq && hint);
   return MRAEncRevMapSymbol(seq->alphabet,
-                            seq->classInfo->get(seq, pos, hint, err));
+                            seq->classInfo->get(seq, pos, hint));
 }
 
 static inline Symbol
-EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Error *err)
+EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint)
 {
-  assert(seq && hint && err);
-  return seq->classInfo->get(seq, pos, hint, err);
+  assert(seq && hint);
+  return seq->classInfo->get(seq, pos, hint);
 }
 
 static inline Seqpos
-EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
-        Error *err)
+EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint)
 {
   Symbol mSym;
   mSym = MRAEncMapSymbol(seq->alphabet, sym);
-  return seq->classInfo->rank(seq, mSym, pos, hint, err);
+  return seq->classInfo->rank(seq, mSym, pos, hint);
 }
 
 static inline void
 EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
-                     struct extBitsRetrieval *retval, union EISHint *hint,
-                     Error *err)
+                     struct extBitsRetrieval *retval, union EISHint *hint)
 {
-  return seq->classInfo->expose(seq, pos, flags, retval, hint, err);
+  return seq->classInfo->expose(seq, pos, flags, retval, hint);
 }
 
 static inline void
-initExtBitsRetrieval(struct extBitsRetrieval *r, Error *err)
+initExtBitsRetrieval(struct extBitsRetrieval *r)
 {
   memset(r, 0, sizeof (struct extBitsRetrieval));
 }
 
 static inline struct extBitsRetrieval *
-newExtBitsRetrieval(Error *err)
+newExtBitsRetrieval()
 {
   struct extBitsRetrieval *retval = ma_malloc(sizeof (struct extBitsRetrieval));
-  initExtBitsRetrieval(retval, err);
+  initExtBitsRetrieval(retval);
   return retval;
 }
 
@@ -100,10 +98,10 @@ deleteExtBitsRetrieval(struct extBitsRetrieval *r)
 
 static inline Seqpos
 EISSymTransformedRank(EISeq *seq, Symbol msym, Seqpos pos,
-                      union EISHint *hint, Error *err)
+                      union EISHint *hint)
 {
   assert(msym < MRAEncGetSize(EISGetAlphabet(seq)));
-  return seq->classInfo->rank(seq, msym, pos, hint, err);
+  return seq->classInfo->rank(seq, msym, pos, hint);
 }
 
 static inline FILE *
@@ -115,9 +113,9 @@ EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
 }
 
 static inline EISHint
-newEISHint(const EISeq *seq, Error *err)
+newEISHint(const EISeq *seq)
 {
-  return seq->classInfo->newHint(seq, err);
+  return seq->classInfo->newHint(seq);
 }
 
 static inline void
@@ -127,11 +125,10 @@ deleteEISHint(EISeq *seq, EISHint hint)
 }
 
 static inline int
-EISPrintDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
-                    Error *err)
+EISPrintDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint)
 {
   if (seq->classInfo->printPosDiags)
-    return seq->classInfo->printPosDiags(seq, pos, fp, hint, err);
+    return seq->classInfo->printPosDiags(seq, pos, fp, hint);
   else
     return 0;
 }
@@ -141,7 +138,7 @@ EISPrintExtDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
                        Error *err)
 {
   if (seq->classInfo->printExtPosDiags)
-    return seq->classInfo->printExtPosDiags(seq, pos, fp, hint, err);
+    return seq->classInfo->printExtPosDiags(seq, pos, fp, hint);
   else
     return 0;
 }

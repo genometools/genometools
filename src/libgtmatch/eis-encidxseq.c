@@ -58,7 +58,7 @@ const char *EISIntegrityCheckResultStrings[] =
               pos, rankQueryResult, rankExpect, symEnc);                \
       break;                                                            \
     }                                                                   \
-    EISPrintDiagsForPos(seqIdx, pos, stderr, hint, err);                \
+    EISPrintDiagsForPos(seqIdx, pos, stderr, hint);                     \
     deleteEISHint(seqIdx, hint);                                        \
     freesuffixarray(&suffixArray);                                      \
     freeverboseinfo(&verbosity);                                        \
@@ -99,7 +99,7 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
   }
   memset(rankTable, 0, sizeof (rankTable));
   bwtFP = suffixArray.bwttabstream.fp;
-  hint = newEISHint(seqIdx, err);
+  hint = newEISHint(seqIdx);
   alphabet = EISGetAlphabet(seqIdx);
   if (skip > 0)
   {
@@ -116,13 +116,13 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
     fseeko(bwtFP, skip, SEEK_SET);
     for (sym = 0; sym <= UCHAR_MAX; ++sym)
       if (MRAEncSymbolHasValidMapping(alphabet, sym))
-        rankTable[sym] = EISRank(seqIdx, sym, skip, hint, err);
+        rankTable[sym] = EISRank(seqIdx, sym, skip, hint);
     pos = skip;
   }
   while ((symRead = getc(bwtFP)) != EOF)
   {
     symOrig = symRead;
-    symEnc = EISGetSym(seqIdx, pos, hint, err);
+    symEnc = EISGetSym(seqIdx, pos, hint);
     if (!MRAEncSymbolHasValidMapping(alphabet, symEnc))
       verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_INVALID_SYMBOL);
     if (!MRAEncSymbolHasValidMapping(alphabet, symOrig))
@@ -136,13 +136,13 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
         if (MRAEncSymbolHasValidMapping(alphabet, symEnc)
             && ((rankExpect = rankTable[symEnc])
                 != (rankQueryResult
-                    = EISRank(seqIdx, symEnc, pos + 1, hint, err))))
+                    = EISRank(seqIdx, symEnc, pos + 1, hint))))
           verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
     }
     else
     {
       if ((rankExpect = rankTable[symEnc])
-          != (rankQueryResult = EISRank(seqIdx, symEnc, pos + 1, hint, err)))
+          != (rankQueryResult = EISRank(seqIdx, symEnc, pos + 1, hint)))
         verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
     }
     ++pos;
@@ -161,17 +161,18 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
 
 extern unsigned
 estimateSegmentSize(const union seqBaseEncParam *params,
-                    enum seqBaseEncoding encType, Error *err)
+                    enum seqBaseEncoding encType)
 {
   unsigned segmentLen = 0;
   switch (encType)
   {
   case BWT_ON_BLOCK_ENC:
     segmentLen =
-      blockEncIdxSeqSegmentLen(&params->blockEnc, err);
+      blockEncIdxSeqSegmentLen(&params->blockEnc);
     break;
   default:
-    error_set(err, "Illegal/unknown/unimplemented encoding requested!");
+    fputs("Illegal/unknown/unimplemented encoding requested!", stderr);
+    abort();
     break;
   }
   return segmentLen;

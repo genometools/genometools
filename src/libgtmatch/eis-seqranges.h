@@ -57,19 +57,17 @@ typedef size_t seqRangeListSearchHint;
  * @param rangesStartNum allocate space for this many ranges
  * @param alphabet map stored symbols according to this alphabet
  * @param features see enum SRLFeatures for a description
- * @param err
  * @return newly constructed list
  */
 extern struct seqRangeList *
 newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
-                enum SRLFeatures features, Error *err);
+                enum SRLFeatures features);
 /**
  * @brief Shrink the list according to the exact number of ranges stored.
  * @param rangeList
- * @param err
  */
 extern void
-SRLCompact(struct seqRangeList *rangeList, Error *err);
+SRLCompact(struct seqRangeList *rangeList);
 
 /**
  * @brief Destructor for sequence range lists.
@@ -84,22 +82,20 @@ deleteSeqRangeList(struct seqRangeList *rangeList);
  * @param pos start of new range
  * @param len length of new range
  * @param sym the range is a contiguous sequence of this symbol
- * @param err
  */
 extern void
 SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
-                  Symbol sym, Error *err);
+                  Symbol sym);
 
 /**
  * @brief Add a new range of length one
  * @param rangeList
  * @param pos at this position
  * @param sym this symbol occurs
- * @param err
  */
 extern void
 SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos,
-               Symbol sym, Error *err);
+               Symbol sym);
 
 /**
  * @brief Initialize a search hint by this function.

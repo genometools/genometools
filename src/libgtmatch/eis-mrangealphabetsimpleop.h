@@ -21,10 +21,10 @@
 
 static inline MRAEnc *
 MRAEncUInt8New(int numRanges, int symbolsPerRange[],
-               const uint8_t *mapping, Error *err)
+               const uint8_t *mapping)
 {
   return newMultiRangeAlphabetEncodingUInt8(numRanges, symbolsPerRange,
-                                            mapping, err);
+                                            mapping);
 }
 
 static inline size_t

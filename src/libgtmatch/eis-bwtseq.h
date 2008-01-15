@@ -57,7 +57,7 @@ typedef struct BWTSeqExactMatchesIterator BWTSeqExactMatchesIterator;
  * \brief Creates or loads an encoded indexed sequence object of the
  * BWT transform.
  * @param params a struct holding parameter information for index construction
- * @param err genometools reference for core functions
+ * @param err genometools error object reference
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
@@ -69,7 +69,7 @@ availBWTSeq(const struct bwtParam *params, Error *err);
  * @param projectName
  * @param BWTOptFlags Selects in-memory features of sequence index to
  * use, see enum BWTOptionDefaultsOptimizationFlags for possible settings.
- * @param err genometools reference for core functions
+ * @param err genometools error object reference
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
@@ -122,11 +122,10 @@ BWTSeqLength(const BWTSeq *bwtSeq);
  * @param tSym transformed symbol (as obtained by
  * MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), origSym)
  * @param pos right bound of BWT prefix queried
- * @param err genometools reference for core functions
  * @return number of occurrences of symbol up to but not including pos
  */
 static inline Seqpos
-BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tSym, Seqpos pos, Error *err);
+BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tSym, Seqpos pos);
 
 /**
  * \brief Query BWT sequence for the number of occurences of a symbol in a
@@ -135,22 +134,20 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tSym, Seqpos pos, Error *err);
  * @param tSym transformed symbol (as obtained by
  * MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), origSym)
  * @param pos right bound of BWT prefix queried
- * @param err genometools reference for core functions
  * @return number of occurrences of symbol up to but not including pos
  */
 static inline Seqpos
-BWTSeqOcc(const BWTSeq *bwtSeq, Symbol tSym, Seqpos pos, Error *err);
+BWTSeqOcc(const BWTSeq *bwtSeq, Symbol tSym, Seqpos pos);
 
 /**
  * \brief Given a position in the L-column of the matrix of rotations,
  * find the corresponding row in the F-column.
  * @param bwtSeq reference of object to query
  * @param pos row index for L-column
- * @param err genometools reference for core functions
  * @return index of corresponding row F-column
  */
 static inline Seqpos
-BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Error *err);
+BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos);
 
 /**
  * \brief Given a symbol, query the aggregate count of symbols with
@@ -158,11 +155,10 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Error *err);
  * standard literature on the BWT on which the given symbol is found.
  * @param bwtSeq reference of object to query
  * @param sym symbol to query counts sum for
- * @param err genometools reference for core functions
  * @return aggregate count
  */
 static inline Seqpos
-BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym, Error *err);
+BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym);
 
 /**
  * \brief Given a symbol, query the aggregate count of symbols with
@@ -175,11 +171,10 @@ BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym, Error *err);
  *
  * @param bwtSeq reference of object to query
  * @param tSym symbol to query counts sum for
- * @param err genometools
  * reference for core functions @return aggregate count
  */
 static inline Seqpos
-BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym, Error *err);
+BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym);
 
 /**
  * \brief Given a query string find number of matches in original
@@ -187,12 +182,10 @@ BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym, Error *err);
  * @param bwtSeq reference of object to query
  * @param query symbol string to search matches for
  * @param queryLen length of query string
- * @param err genometools reference for core functions
  * @return number of matches
  */
 extern Seqpos
-BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
-                 Error *err);
+BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen);
 
 /**
  * \brief Given a pair of limiting positions in the suffix array and a
@@ -200,12 +193,11 @@ BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
  * @param bwtSeq reference of sequence index to query
  * @param nextSym symbol by which to further restrict match
  * @param limits current restriction of match interval
- * @param err genometools reference for core functions
  * @return limits, with bounds adjusted
  */
 static inline struct matchBound *
 BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
-                Symbol nextSym, Error *err);
+                Symbol nextSym);
 
 /**
  * Error conditions encountered upon integrity check.
@@ -239,7 +231,6 @@ enum verifyBWTSeqErrCode
  *
  * @param bwtSeq index to check
  * @param projectName suffix array to load as reference
- * @param err
  * @param tickPrint print a dot every time tickPrint many symbols have
  *                  been processed
  * @param fp dots printed to this file
@@ -257,12 +248,10 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
  * @param bwtSeq reference of bwt sequence object to use for matching
  * @param query symbol string to search matches for
  * @param queryLen length of query string
- * @param err genometools reference for core functions
  * @return reference of iterator object, NULL on error
  */
 extern BWTSeqExactMatchesIterator *
-newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
-              Error *err);
+newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen);
 
 /**
  * \brief Deallocate an iterator object.
@@ -289,14 +278,12 @@ struct MatchData
  * \brief Get position of next match from an iterator.
  * @param iter reference of iterator object
  * @param bwtSeq reference of bwt sequence object to use for matching
- * @param err genometools reference for core functions
  * @return reference to a structure that specifies the location of a
  * match or NULL if no further match is available, the reference  will
  * become invalid  once the iterator has been queried again
  */
 static inline struct MatchData *
-EMIGetNextMatch(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
-                Error *err);
+EMIGetNextMatch(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq);
 
 /**
  * \brief Query an iterator for the total number of matches.

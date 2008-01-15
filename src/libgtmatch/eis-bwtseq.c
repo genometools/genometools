@@ -38,11 +38,10 @@
 
 static int
 initBWTSeqFromEncSeqIdx(struct BWTSeq *bwtSeq, struct encIdxSeq *baseSeqIdx,
-                        MRAEnc *alphabet, Seqpos *counts,
-                        Error *err);
+                        MRAEnc *alphabet, Seqpos *counts);
 
 static BWTSeq *
-newBWTSeq(struct encIdxSeq *seqIdx, MRAEnc *alphabet, Error *err);
+newBWTSeq(struct encIdxSeq *seqIdx, MRAEnc *alphabet);
 
 extern BWTSeq *
 availBWTSeq(const struct bwtParam *params, Error *err)
@@ -124,7 +123,7 @@ loadBWTSeqForSA(const struct bwtParam *params, Suffixarray *sa,
   EISeq *seqIdx = NULL;
   MRAEnc *alphabet = NULL;
   assert(params && sa && err);
-  alphabet = newMRAEncFromSA(sa, err);
+  alphabet = newMRAEncFromSA(sa);
   switch (params->baseType)
   {
   case BWT_ON_BLOCK_ENC:
@@ -132,7 +131,7 @@ loadBWTSeqForSA(const struct bwtParam *params, Suffixarray *sa,
            sa, totalLen, params->projectName,
            params->seqParams.blockEnc.EISFeatureSet, err)))
     {
-      if (!(bwtSeq = newBWTSeq(seqIdx, alphabet, err)))
+      if (!(bwtSeq = newBWTSeq(seqIdx, alphabet)))
         break;
       fputs("Using pre-computed sequence index.\n", stderr);
     }
@@ -166,7 +165,7 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   else
   {
     EISeq *seqIdx = NULL;
-    alphabet = newMRAEncFromSA(sa, err);
+    alphabet = newMRAEncFromSA(sa);
     switch (params->baseType)
     {
     case BWT_ON_BLOCK_ENC:
@@ -181,7 +180,7 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
       break;
     }
     if (seqIdx)
-      bwtSeq = newBWTSeq(seqIdx, alphabet, err);
+      bwtSeq = newBWTSeq(seqIdx, alphabet);
     if (!bwtSeq)
     {
       if (seqIdx)
@@ -230,10 +229,10 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
   if (params->locateInterval)
   {
     siriSeqpos.si = si;
-    if (!SfxIRegisterReader(si, &siriSeqpos.id, SFX_REQUEST_SUFTAB, err))
+    if (!SfxIRegisterReader(si, &siriSeqpos.id, SFX_REQUEST_SUFTAB))
       return NULL;
   }
-  alphabet = newMRAEncFromSfxI(si, err);
+  alphabet = newMRAEncFromSfxI(si);
   seqIdx= createBWTSeqGeneric(
     params, (indexCreateFunc)newBlockEncIdxSeqFromSfxI, si, totalLen,
     alphabet, GTAlphabetRangeHandling,
@@ -241,7 +240,7 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
     (reportLongest)getSfxILongestPos, si, err);
   if (seqIdx)
   {
-    bwtSeq = newBWTSeq(seqIdx, alphabet, err);
+    bwtSeq = newBWTSeq(seqIdx, alphabet);
   }
   if (!bwtSeq && seqIdx)
     deleteEncIdxSeq(seqIdx);
@@ -254,13 +253,12 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
  */
 static int
 initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
-                        MRAEnc *alphabet, Seqpos *counts,
-                        Error *err)
+                        MRAEnc *alphabet, Seqpos *counts)
 {
   size_t alphabetSize;
   Symbol bwtTerminatorFlat;
   EISHint hint;
-  assert(bwtSeq && seqIdx && err);
+  assert(bwtSeq && seqIdx);
   bwtSeq->alphabet = alphabet;
   alphabetSize = MRAEncGetSize(alphabet);
   if (!alphabetSize)
@@ -295,22 +293,22 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
       bwtSeq->featureToggles = header.featureToggles;
     }
   }
-  bwtSeq->hint = hint = newEISHint(seqIdx, err);
+  bwtSeq->hint = hint = newEISHint(seqIdx);
   {
     Symbol i;
     Seqpos len = EISLength(seqIdx), *count = bwtSeq->count;
     count[0] = 0;
     for (i = 0; i < bwtTerminatorFlat; ++i)
       count[i + 1] = count[i]
-        + EISSymTransformedRank(seqIdx, i, len, hint, err);
+        + EISSymTransformedRank(seqIdx, i, len, hint);
     /* handle character which the terminator has been mapped to specially */
     count[i + 1] = count[i]
-      + EISSymTransformedRank(seqIdx, i, len, hint, err) - 1;
+      + EISSymTransformedRank(seqIdx, i, len, hint) - 1;
     assert(count[i + 1] >= count[i]);
     /* now we can finish the rest of the symbols */
     for (i += 2; i < alphabetSize; ++i)
       count[i] = count[i - 1]
-        + EISSymTransformedRank(seqIdx, i - 1, len, hint, err);
+        + EISSymTransformedRank(seqIdx, i - 1, len, hint);
     /* and finally place the 1-count for the terminator */
     count[i] = count[i - 1] + 1;
 #ifdef DEBUG
@@ -329,13 +327,12 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
  * sequence object if return value is non-NULL
  */
 static BWTSeq *
-newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet, Error *err)
+newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet)
 {
   BWTSeq *bwtSeq;
   Seqpos *counts;
   unsigned alphabetSize;
-  assert(seqIdx && err);
-  error_check(err);
+  assert(seqIdx);
   /* alphabetSize is increased by one to handle the flattened
    * terminator symbol correctly */
   alphabetSize = MRAEncGetSize(alphabet) + 1;
@@ -344,7 +341,7 @@ newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet, Error *err)
   counts = (Seqpos *)((char  *)bwtSeq
                       + offsetAlign(sizeof (struct BWTSeq),
                                     sizeof (Seqpos)));
-  if (!initBWTSeqFromEncSeqIdx(bwtSeq, seqIdx, alphabet, counts, err))
+  if (!initBWTSeqFromEncSeqIdx(bwtSeq, seqIdx, alphabet, counts))
   {
     ma_free(bwtSeq);
     bwtSeq = NULL;
@@ -363,14 +360,13 @@ deleteBWTSeq(BWTSeq *bwtSeq)
 
 static inline void
 getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
-              struct matchBound *match, Error *err)
+              struct matchBound *match)
 {
   size_t i = queryLen;
   const Seqpos *count;
   Symbol curSym;
   const MRAEnc *alphabet;
-  assert(bwtSeq && query && err);
-  error_check(err);
+  assert(bwtSeq && query);
   count = bwtSeq->count;
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   curSym = MRAEncMapSymbol(alphabet, query[--i]);
@@ -380,9 +376,9 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   {
     curSym = MRAEncMapSymbol(alphabet, query[--i]);
     match->upper = count[curSym]
-      + BWTSeqOcc(bwtSeq, curSym, match->upper, err);
+      + BWTSeqOcc(bwtSeq, curSym, match->upper);
     match->lower = count[curSym]
-      + BWTSeqOcc(bwtSeq, curSym, match->lower, err);
+      + BWTSeqOcc(bwtSeq, curSym, match->lower);
   }
 }
 
@@ -455,13 +451,11 @@ unsigned long packedindexuniqueforward(const void *genericindex,
 }
 
 extern Seqpos
-BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
-                 Error *err)
+BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen)
 {
   struct matchBound match;
-  assert(bwtSeq && query && err);
-  error_check(err);
-  getMatchBound(bwtSeq, query, queryLen, &match, err);
+  assert(bwtSeq && query);
+  getMatchBound(bwtSeq, query, queryLen, &match);
   if (match.lower < match.upper)
     return 0;
   else
@@ -469,12 +463,10 @@ BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 }
 
 struct BWTSeqExactMatchesIterator *
-newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
-              Error *err)
+newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen)
 {
   struct BWTSeqExactMatchesIterator *newIter;
-  assert(bwtSeq && query && err);
-  error_check(err);
+  assert(bwtSeq && query);
   if (!bwtSeq->locateSampleInterval)
   {
     fputs("Index does not contain locate information.\n"
@@ -482,9 +474,9 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
     return NULL;
   }
   newIter = ma_malloc(sizeof (*newIter));
-  getMatchBound(bwtSeq, query, queryLen, &newIter->bounds, err);
+  getMatchBound(bwtSeq, query, queryLen, &newIter->bounds);
   newIter->nextMatchBWTPos = newIter->bounds.upper;
-  initExtBitsRetrieval(&newIter->extBits, err);
+  initExtBitsRetrieval(&newIter->extBits);
   return newIter;
 }
 
@@ -531,7 +523,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
     error_check(err);
 
     verbosity = newverboseinfo(true);
-    initExtBitsRetrieval(&extBits, err);
+    initExtBitsRetrieval(&extBits);
     if (mapsuffixarray(&suffixArray, &len,
                        SARR_SUFTAB | SARR_ESQTAB, projectName, verbosity, err))
     {
@@ -556,9 +548,9 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
     {
       Seqpos i;
       for (i = 0; i < len && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
-        if (BWTSeqPosHasLocateInfo(bwtSeq, i, &extBits, err))
+        if (BWTSeqPosHasLocateInfo(bwtSeq, i, &extBits))
         {
-          Seqpos sfxArrayValue = BWTSeqLocateMatch(bwtSeq, i, &extBits, err);
+          Seqpos sfxArrayValue = BWTSeqLocateMatch(bwtSeq, i, &extBits);
           if (sfxArrayValue != suffixArray.suftab[i])
           {
             error_set(err, "Failed suffixarray value comparison"
@@ -585,7 +577,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       /* handle first symbol specially because the encodedsequence
        * will not return the terminator symbol */
       {
-        Symbol sym = EISGetSym(bwtSeq->seqIdx, nextLocate, bwtSeq->hint, err);
+        Symbol sym = EISGetSym(bwtSeq->seqIdx, nextLocate, bwtSeq->hint);
         if (sym != UNDEFBWTCHAR)
         {
           error_set(err, "symbol mismatch at position "FormatSeqpos": "
@@ -595,14 +587,13 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
           break;
         }
         --i;
-        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, err);
+        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate);
       }
       while (i > 0)
       {
         Symbol symRef = getencodedchar(suffixArray.encseq,
                                        --i, suffixArray.readmode);
-        Symbol symCmp = EISGetSym(bwtSeq->seqIdx, nextLocate, bwtSeq->hint,
-                                  err);
+        Symbol symCmp = EISGetSym(bwtSeq->seqIdx, nextLocate, bwtSeq->hint);
         if (symCmp != symRef)
         {
           error_set(err, "symbol mismatch at position "FormatSeqpos": "
@@ -610,7 +601,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
           retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
           break;
         }
-        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, err);
+        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate);
       }
     }
   } while (0);

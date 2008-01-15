@@ -97,6 +97,6 @@ union seqBaseEncParam
  */
 extern unsigned
 estimateSegmentSize(const union seqBaseEncParam *params,
-                    enum seqBaseEncoding encType, Error *err);
+                    enum seqBaseEncoding encType);
 
 #endif

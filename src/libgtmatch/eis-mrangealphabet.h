@@ -29,7 +29,6 @@
 
 #include <inttypes.h>
 
-#include "libgtcore/error.h"
 #include "libgtmatch/alphadef.h"
 
 /** symbols are stored in this scalar type */
@@ -71,36 +70,32 @@ enum sourceEncType {
  * @param mapping maps all uint8_t input symbols to values in the
  * range 0..sum(symbolsPerRange) or the input alphabet specific
  * value UNDEF_UCHAR
- * @param err
  */
 static inline MRAEnc *
-MRAEncUInt8New(int numRanges, int symbolsPerRange[],
-               const uint8_t *mapping, Error *err);
+MRAEncUInt8New(int numRanges, int symbolsPerRange[], const uint8_t *mapping);
 
 /**
  * \brief Creates a mapping to two ranges (regular and special
  * symbols) from a given genometools alphabet.
  * @param alpha original alphabet
- * @param err
  */
 extern MRAEnc *
-MRAEncGTAlphaNew(const Alphabet *alpha, Error *err);
+MRAEncGTAlphaNew(const Alphabet *alpha);
 
 /**
  * \brief alias of MRAEncUInt8New
  */
 extern MRAEnc *
 newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
-                                   const uint8_t *mappings, Error *err);
+                                   const uint8_t *mappings);
 
 /**
  * @brief Copy constructor for multi-range alphabets
  * @param alpha alphabet to copy
- * @param err
  * @return new alphabet object
  */
 extern MRAEnc *
-MRAEncCopy(const MRAEnc *alpha, Error *err);
+MRAEncCopy(const MRAEnc *alpha);
 
 /**
  * \brief remap multirange alphabet by excluding some ranges
@@ -114,11 +109,10 @@ MRAEncCopy(const MRAEnc *alpha, Error *err);
  * range => maps all symbols in range to fallback, otherwise append to
  * already mapped symbols
  * @param fallback symbol to map not-included ranges to
- * @param err
  */
 extern MRAEnc *
 MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
-                       const int *rangeSel, Symbol fallback, Error *err);
+                       const int *rangeSel, Symbol fallback);
 
 /**
  * \brief Inserts a previously unmapped symbol into a range.
@@ -240,7 +234,6 @@ MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
 /**
  * @brief Delete alphabet object.
  * @param mralpha
- * @param err
  */
 extern void
 MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha);

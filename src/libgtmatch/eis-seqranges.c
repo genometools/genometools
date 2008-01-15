@@ -27,9 +27,8 @@
 
 struct seqRangeList *
 newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
-                enum SRLFeatures features, Error *err)
+                enum SRLFeatures features)
 {
-  assert(err);
   struct seqRangeList *newList;
   newList = ma_malloc(sizeof (struct seqRangeList));
   newList->numRanges = 0;
@@ -52,9 +51,9 @@ newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
 }
 
 void
-SRLCompact(struct seqRangeList *rangeList, Error *err)
+SRLCompact(struct seqRangeList *rangeList)
 {
-  assert(rangeList && err);
+  assert(rangeList);
   rangeList->ranges = ma_realloc(rangeList->ranges,
                                  sizeof (rangeList->ranges[0])
                                  * rangeList->numRanges);
@@ -79,9 +78,9 @@ deleteSeqRangeList(struct seqRangeList *rangeList)
 
 void
 SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
-                  Symbol esym, Error *err)
+                  Symbol esym)
 {
-  assert(rangeList && err);
+  assert(rangeList);
   if (len)
   {
     Symbol sym = MRAEncMapSymbol(rangeList->alphabet, esym);
@@ -164,9 +163,9 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
 
 void
 SRLinsertNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
-                  Symbol esym, Error *err)
+                  Symbol esym)
 {
-  assert(rangeList && err);
+  assert(rangeList);
   abort();
 /*   { */
 /*     Symbol sym = MRAEncMapSymbol(rangeList->alphabet, esym); */
@@ -176,15 +175,14 @@ SRLinsertNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
 }
 
 void
-SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos,
-               Symbol esym, Error *err)
+SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos, Symbol esym)
 {
   size_t numRanges;
   struct seqRange *lastRange;
   Seqpos lastRangeLen;
   unsigned symBits;
   Symbol sym;
-  assert(rangeList && err);
+  assert(rangeList);
   sym = MRAEncMapSymbol(rangeList->alphabet, esym);
   numRanges = rangeList->numRanges;
   lastRange = rangeList->ranges + numRanges - 1;
@@ -195,7 +193,7 @@ SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos,
   if (numRanges && lastRange->startPos + lastRangeLen > pos)
   {
     /* TODO: search for range */
-    SRLinsertNewRange(rangeList, pos, 1, esym, err);
+    SRLinsertNewRange(rangeList, pos, 1, esym);
   }
   else if (numRanges
            && (seqRangeSym(lastRange, symBits) == sym)
@@ -203,7 +201,7 @@ SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos,
            && (lastRangeLen < rangeList->maxRangeLen))
     seqRangeSetLen(lastRange, ++lastRangeLen, symBits);
   else
-    SRLAppendNewRange(rangeList, pos, 1, esym, err);
+    SRLAppendNewRange(rangeList, pos, 1, esym);
 }
 
 void

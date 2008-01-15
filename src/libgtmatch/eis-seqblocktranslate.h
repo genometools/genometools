@@ -75,16 +75,14 @@ struct compList
  * @param compList
  * @param blockSize length of q-words to encode
  * @param numSyms size of alphabet
- * @param err
  * @return 0 on error, !0 otherwise
  */
 extern int
 initCompositionList(struct compList *compList, unsigned blockSize,
-                    unsigned numSyms, Error *err);
+                    unsigned numSyms);
 /**
  * Deallocate resources of composition list object, storage struct is not freed.
  * @param clist
- * @param err
  */
 extern void
 destructCompositionList(struct compList *clist);
@@ -94,11 +92,10 @@ destructCompositionList(struct compList *clist);
  * index tuples
  * @param blockSize length of q-words to map
  * @param alphabetSize
- * @param err
  * @return NULL on error
  */
 extern struct compList *
-newCompositionList(unsigned blockSize, unsigned alphabetSize, Error *err);
+newCompositionList(unsigned blockSize, unsigned alphabetSize);
 
 /**
  * Delete composition list object.
@@ -119,7 +116,6 @@ deleteCompositionList(struct compList *clist);
  * index, idxOutput[1] the permutation index.
  * @param bitsOfPermIdx if non-NULL, the number of significant bits
  * for the permutation index is stored here.
- * @param err Error object.
  * @param permCompPA if not NULL must point to a memory region of
  * sufficient size to hold the concatenated bistring representations
  * of composition and permutation, composition at offset 0,
@@ -135,7 +131,7 @@ extern int
 block2IndexPair(const struct compList *compositionTable,
                 unsigned blockSize, unsigned alphabetSize,
                 const Symbol *block, PermCompIndex idxOutput[2],
-                unsigned *bitsOfPermIdx, Error *err,
+                unsigned *bitsOfPermIdx,
                 BitString permCompPA, unsigned *compPA);
 
 /**

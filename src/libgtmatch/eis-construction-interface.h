@@ -26,7 +26,6 @@
  * conforming to these functions.
  */
 #include <stdlib.h>
-#include "libgtcore/error.h"
 
 /**
  * generic method to aquire next readLen symbols of e.g. BWT string

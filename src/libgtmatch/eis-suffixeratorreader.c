@@ -127,9 +127,6 @@ deleteSeqStats(struct seqStats *stats)
   ma_free(stats);
 }
 
-#define INITOUTFILEPTR(PTR,FLAG,SUFFIX)                                 \
-  ((FLAG)?(PTR = opensfxfile(so->str_indexname,SUFFIX,"wb",err)):((void*)1))
-
 #define newSfxInterfaceWithReadersErrRet()        \
   do {                                            \
     if (iface->stats)                             \
@@ -189,7 +186,7 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
     iface->numReaders = 0;
     iface->readers = NULL;
     for (i = 0; i < numReaders; ++i)
-      if (!SfxIRegisterReader(iface, ids + i, requests[i], err))
+      if (!SfxIRegisterReader(iface, ids + i, requests[i]))
         newSfxInterfaceWithReadersErrRet();
   }
   return iface;
@@ -225,11 +222,11 @@ getSfxIAlphabet(const sfxInterface *si)
 }
 
 extern MRAEnc *
-newMRAEncFromSfxI(const sfxInterface *si, Error *err)
+newMRAEncFromSfxI(const sfxInterface *si)
 {
   MRAEnc *alphabet;
-  assert(si && err);
-  alphabet = MRAEncGTAlphaNew(getSfxIAlphabet(si), err);
+  assert(si);
+  alphabet = MRAEncGTAlphaNew(getSfxIAlphabet(si));
   MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
 }
@@ -261,7 +258,7 @@ getSfxIEncSeq(const sfxInterface *si)
 
 int
 SfxIRegisterReader(sfxInterface *iface, listenerID *id,
-                   enum sfxDataRequest request, Error *err)
+                   enum sfxDataRequest request)
 {
   size_t availId = iface->numReaders++;
   iface->readers = ma_realloc(iface->readers,
@@ -460,11 +457,10 @@ findMinOpenRequest(sfxInterface *iface, int reqType)
 
 static Seqpos
 sfxIReadAdvance(sfxInterface *iface,
-                Seqpos requestMaxPos,
-                Error *err)
+                Seqpos requestMaxPos, Error *err)
 {
   Seqpos requestMinPos, lengthOfExtension = 0;
-  assert(iface && err);
+  assert(iface);
   /* 1. find first position that still needs to be read */
   requestMinPos = findMinOpenRequest(iface, SFX_REQUEST_ANY);
   /* 2. move still unread old values as far as possible to head of copy */

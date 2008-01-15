@@ -21,7 +21,6 @@
 #include <string.h>
 
 #include "libgtcore/chardef.h"
-#include "libgtcore/error.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/str.h"
 #include "libgtcore/symboldef.h"
@@ -33,7 +32,7 @@
 
 MRAEnc *
 newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
-                                   const uint8_t *mappings, Error *err)
+                                   const uint8_t *mappings)
 {
   MRAEncUInt8 *newAlpha = NULL;
   size_t i;
@@ -78,7 +77,7 @@ newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
 }
 
 MRAEnc *
-MRAEncGTAlphaNew(const Alphabet *alpha, Error *err)
+MRAEncGTAlphaNew(const Alphabet *alpha)
 {
   int symsPerRange[2];
   uint8_t *mappings;
@@ -94,13 +93,13 @@ MRAEncGTAlphaNew(const Alphabet *alpha, Error *err)
   }
   symsPerRange[0] = numSyms - 1;
   symsPerRange[1] = 1;
-  result = newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings, err);
+  result = newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings);
   ma_free(mappings);
   return result;
 }
 
 extern MRAEnc *
-MRAEncCopy(const MRAEnc *alpha, Error *err)
+MRAEncCopy(const MRAEnc *alpha)
 {
   assert(alpha);
   switch (alpha->encType)
@@ -168,7 +167,7 @@ MRAEncGetSize(const MRAEnc *mralpha)
 
 extern MRAEnc *
 MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
-                       const int *rangeSel, Symbol fallback, Error *err)
+                       const int *rangeSel, Symbol fallback)
 {
   MRAEnc *newAlpha;
   switch (srcAlpha->encType)
@@ -201,7 +200,7 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
         }
       }
       newAlpha = newMultiRangeAlphabetEncodingUInt8(numRanges, newRanges,
-                                                    mappings, err);
+                                                    mappings);
       ma_free(mappings);
       ma_free(newRanges);
     }

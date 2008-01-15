@@ -44,7 +44,7 @@
  * @param len see parameter start for description
  * @param cbState is passed on every call back of bitInsertFunc to
  * pass information that is kept across individual calls
- * @param err genometools state, passes information about allocator etc
+ * @param err genometools error object reference
  * @return number of bits actually written, or (BitOffset)-1 if an
  * error occured
  */
@@ -136,7 +136,7 @@ typedef union EISHint *EISHint;
  * @param maxBitsPerPos at most this many bits will be appended to the
  * variable width part of the data
  * @param cbState will be passed on each call of biFunc
- * @param err genometools reference for core functions
+ * @param err genometools error object reference
  */
 extern EISeq *
 newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
@@ -151,7 +151,7 @@ newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
  * representation.
  * @param projectName base name of corresponding suffixerator project
  * @param features select optional in-memory data structures for speed-up
- * @param err genometools reference for core functions
+ * @param err genometools error object reference
  */
 extern EISeq *
 loadBlockEncIdxSeq(const Str *projectName, int features, Error *err);
@@ -179,11 +179,9 @@ EISGetAlphabet(const EISeq *seq);
  * @param pos occurences are counted up to this position
  * @param hint provides cache and direction information for queries
  * based on previous queries
- * @param err genometools state, passes information about allocator etc
  */
 static inline Seqpos
-EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
-        Error *err);
+EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint);
 
 /**
  * \brief Return number of occurrences of symbol sym in index up to
@@ -194,11 +192,10 @@ EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
  * @param pos occurences are counted up to this position
  * @param hint provides cache and direction information for queries
  * based on previous queries
- * @param err genometools state, passes information about allocator etc
  */
 static inline Seqpos
 EISSymTransformedRank(EISeq *seq, Symbol tSym, Seqpos pos,
-                      union EISHint *hint, Error *err);
+                      union EISHint *hint);
 
 /**
  * Presents the bits previously stored by a bitInsertFunc callback.
@@ -208,30 +205,25 @@ EISSymTransformedRank(EISeq *seq, Symbol tSym, Seqpos pos,
  * @param flags select which part of the extension bits to query
  * @param retval store information of retrieved bits here
  * @param hint provides cache and direction information for queries
- * @param err genometools state, passes information about allocator etc
  */
 static inline void
 EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
-                     struct extBitsRetrieval *retval, union EISHint *hint,
-                     Error *err);
+                     struct extBitsRetrieval *retval, union EISHint *hint);
 
 /**
  * \brief Initialize empty structure to hold retrieval results later.
  * @param r struct to initialize
- * @param err genometools state, passes information about allocator etc
  */
 static inline void
-initExtBitsRetrieval(struct extBitsRetrieval *r, Error *err);
+initExtBitsRetrieval(struct extBitsRetrieval *r);
 
 /**
  * \brief Allocate and initialize empty structure to hold retrieval
  * results later.
- * @param err genometools state, passes information about allocator
- * etc.
  * @return reference of new retrieval object
  */
 static inline struct extBitsRetrieval *
-newExtBitsRetrieval(Error *err);
+newExtBitsRetrieval();
 
 /**
  * \brief Destruct structure holding retrieval data, deallocates
@@ -270,11 +262,10 @@ EISLength(const EISeq *seq);
  * @param pos position to retrieve symbol for
  * @param hint optional caching/hinting structure (improves average
  * retrieval time)
- * @param err genometools state, passes information about allocator etc
  * @return value of symbol as encoded in original alphabet
  */
 static inline Symbol
-EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Error *err);
+EISGetSym(EISeq *seq, Seqpos pos, EISHint hint);
 
 /**
  * \brief Return symbol at specified position. Comparable to c[pos] if the
@@ -284,21 +275,19 @@ EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Error *err);
  * @param pos position to retrieve symbol for
  * @param hint optional caching/hinting structure (improves average
  * retrieval time)
- * @param err genometools state, passes information about allocator etc
  * @return value of symbol as processed by encoding alphabet
  */
 static inline Symbol
-EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Error *err);
+EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint);
 
 /**
  * \brief Construct new hinting structure to accelerate operations on
  * related positions.
  * @param seq reference of sequence object to use
- * @param err genometools error object
  * @return new EISHint handle
  */
 static inline EISHint
-newEISHint(const EISeq *seq, Error *err);
+newEISHint(const EISeq *seq);
 
 /**
  * Deallocate hinting data.
@@ -354,7 +343,6 @@ enum EISIntegrityCheckFlags
  * @param tickPrint print a dot every tickPrint symbols processed
  * @param fp print dots to this file pointer
  * @param chkFlags select additional tests (see enum EISIntegrityCheckFlags)
- * @param err
  */
 extern enum EISIntegrityCheckResults
 EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
@@ -377,12 +365,10 @@ EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
  * @param pos position for which to print context
  * @param fp print diagnostics to this file pointer
  * @param hint use this structure for hinting
- * @param err
  * @return 0 if an I/O error occured wrt fp
  */
 static inline int
-EISPrintDiagsForPos(const EISeq *seqIdx, Seqpos pos, FILE *fp, EISHint hint,
-                    Error *err);
+EISPrintDiagsForPos(const EISeq *seqIdx, Seqpos pos, FILE *fp, EISHint hint);
 
 #include "libgtmatch/eis-encidxseqsimpleop.h"
 

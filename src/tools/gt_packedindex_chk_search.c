@@ -157,13 +157,12 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
                               pptr,
                               patternLen);
         BWTSeqExactMatchesIterator *EMIter =
-          newEMIterator(bwtSeq, pptr, patternLen, err);
+          newEMIterator(bwtSeq, pptr, patternLen);
         Seqpos numMatches = EMINumMatchesTotal(EMIter);
         ensure(had_err, EMIter);
         if (had_err)
           break;
-        assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr,
-                                              patternLen, err));
+        assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen));
         assert(EMINumMatchesTotal(EMIter) == countmmsearchiterator(mmsi));
         fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n"
                 "pattern: ", trial,
@@ -173,7 +172,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
         while (nextmmsearchiterator(&dbstart,mmsi))
         {
           struct MatchData *match =
-            EMIGetNextMatch(EMIter, bwtSeq, err);
+            EMIGetNextMatch(EMIter, bwtSeq);
           ensure(had_err, match);
           if (had_err)
           {
@@ -191,8 +190,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
         }
         if (!had_err)
         {
-          struct MatchData *trailingMatch =
-            EMIGetNextMatch(EMIter, bwtSeq, err);
+          struct MatchData *trailingMatch = EMIGetNextMatch(EMIter, bwtSeq);
           ensure(had_err, !trailingMatch);
           if (had_err)
           {
@@ -264,7 +262,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   /* compute parameters currently not set from command-line or
    * determined indirectly */
   computePackedIndexDefaults(&params->idx,
-                             BWTBaseFeatures & ~BWTProperlySorted, err);
+                             BWTBaseFeatures & ~BWTProperlySorted);
 
   option_parser_delete(op);
 

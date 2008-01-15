@@ -66,12 +66,12 @@ reportSALongest(void *state)
 }
 
 extern MRAEnc *
-newMRAEncFromSA(void *state, Error *err)
+newMRAEncFromSA(void *state)
 {
   MRAEnc *alphabet;
   Suffixarray *sa = state;
-  assert(state && err);
-  alphabet = MRAEncGTAlphaNew(sa->alpha, err);
+  assert(state);
+  alphabet = MRAEncGTAlphaNew(sa->alpha);
   MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
 }

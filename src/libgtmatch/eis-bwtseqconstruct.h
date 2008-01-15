@@ -34,7 +34,7 @@
  * @param params a struct holding parameter information for index construction
  * @param sa Suffixarray data structure to build BWT index from
  * @param totalLen length of sorted sequence (including terminator)
- * @param err genometools reference for core functions
+ * @param err genometools error object reference
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
@@ -47,7 +47,7 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
  * @param params a struct holding parameter information for index construction
  * @param sa Suffixarray data structure to build BWT index from
  * @param totalLen length of BWT sequence (including terminator symbol)
- * @param err genometools reference for core functions
+ * @param err genometools error object reference
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *

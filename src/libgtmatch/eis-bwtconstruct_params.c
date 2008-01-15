@@ -53,7 +53,7 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
 }
 
 static int
-estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput, Error *err)
+estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput)
 {
   if (!paramOutput->final.locateInterval)
     return BWTBaseFeatures;
@@ -61,7 +61,7 @@ estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput, Error *err)
     /* two cases: we store 1 bit per position or log(segmentlen) for
      * each marked position plus one to note the number of marked positions */
     unsigned segmentLen = estimateSegmentSize(&paramOutput->final.seqParams,
-                                              paramOutput->final.baseType, err);
+                                              paramOutput->final.baseType);
     if (segmentLen > (segmentLen + 1) * requiredUIntBits(segmentLen)
         / paramOutput->final.locateInterval)
       return BWTLocateCount;
@@ -71,15 +71,14 @@ estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput, Error *err)
 }
 
 extern void
-computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles,
-                           Error *err)
+computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles)
 {
   if (option_is_set(paramOutput->useLocateBitmapOption))
     paramOutput->final.featureToggles
       |= (paramOutput->useLocateBitmap?BWTLocateBitmap:BWTLocateCount);
   else
     paramOutput->final.featureToggles
-      |= estimateBestLocateTypeFeature(paramOutput, err);
+      |= estimateBestLocateTypeFeature(paramOutput);
   paramOutput->final.featureToggles |= extraToggles;
   {
     int EISFeatureSet
