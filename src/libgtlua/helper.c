@@ -55,7 +55,7 @@ Config* get_config_from_registry(lua_State *L)
 }
 #endif
 
-int luaset_modules_path(lua_State *L, Error *err)
+int lua_set_modules_path(lua_State *L, Error *err)
 {
   Str *modules_path = NULL, *package_path = NULL;
   int had_err = 0;
@@ -82,7 +82,7 @@ int luaset_modules_path(lua_State *L, Error *err)
   return had_err;
 }
 
-void luaset_arg(lua_State *L, const char *argv_0, const char **argv)
+void lua_set_arg(lua_State *L, const char *argv_0, const char **argv)
 {
   lua_Integer n = 0;
   assert(L && argv_0);
@@ -127,7 +127,7 @@ void lua_push_strarray_as_table(lua_State *L, StrArray *sa)
   }
 }
 
-int luagt_error(lua_State *L, Error *err)
+int lua_gt_error(lua_State *L, Error *err)
 {
   assert(L && err);
   assert(error_is_set(err));

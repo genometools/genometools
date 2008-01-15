@@ -60,7 +60,7 @@ static int genome_stream_lua_next_tree(lua_State *L)
   GenomeNode *gn;
   Error *err = error_new();
   if (genome_stream_next_tree(*gs, &gn, err))
-    return luagt_error(L, err); /* handle error */
+    return lua_gt_error(L, err); /* handle error */
   else if (gn)
     genome_node_lua_push(L, gn);
   else

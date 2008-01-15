@@ -70,7 +70,7 @@ GTR* gtr_new(Error *err)
     luaL_openlibs(gtr->L); /* open the standard libraries */
     luaopen_gt(gtr->L);    /* open all GenomeTools libraries */
     luaopen_lfs(gtr->L);   /* open Lua filesystem */
-    had_err = luaset_modules_path(gtr->L, err);
+    had_err = lua_set_modules_path(gtr->L, err);
   }
 #ifdef LIBGTVIEW
   if (!had_err) {
@@ -234,7 +234,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
       if (file_exists(argv[0])) {
         /* run script */
         nargv = cstr_array_prefix_first(argv, error_get_progname(err));
-        luaset_arg(gtr->L, nargv[0], (const char**) nargv+1);
+        lua_set_arg(gtr->L, nargv[0], (const char**) nargv+1);
         if (luaL_dofile(gtr->L, argv[0])) {
           /* error */
           assert(lua_isstring(gtr->L, -1)); /* error message on top */
@@ -261,7 +261,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
   cstr_array_delete(nargv);
   if (!had_err && gtr->interactive) {
     showshortversion(error_get_progname(err));
-    luaset_arg(gtr->L, error_get_progname(err), argv);
+    lua_set_arg(gtr->L, error_get_progname(err), argv);
     run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)
