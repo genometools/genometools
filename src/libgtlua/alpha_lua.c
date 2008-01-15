@@ -17,7 +17,7 @@
 
 #include "lauxlib.h"
 #include "libgtcore/alpha.h"
-#include "libgtlua/helper.h"
+#include "libgtext/luahelper.h"
 #include "libgtlua/alpha_lua.h"
 
 #define ALPHA_METATABLE  "GenomeTools.alpha"

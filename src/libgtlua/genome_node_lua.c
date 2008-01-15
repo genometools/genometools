@@ -18,9 +18,9 @@
 #include "lauxlib.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/gff3_output.h"
+#include "libgtext/luahelper.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/genome_visitor_lua.h"
-#include "libgtlua/helper.h"
 #include "libgtlua/range_lua.h"
 
 static int genome_feature_lua_new(lua_State *L)

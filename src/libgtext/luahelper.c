@@ -21,7 +21,7 @@
 #include "libgtcore/cstr.h"
 #include "libgtcore/gtdatapath.h"
 #include "libgtcore/ma.h"
-#include "libgtlua/helper.h"
+#include "libgtext/luahelper.h"
 
 /* key used to store the Env object in the Lua registry */
 #define ENV_KEY env_new

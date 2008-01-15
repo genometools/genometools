@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef HELPER_H
-#define HELPER_H
+#ifndef LUAHELPER_H
+#define LUAHELPER_H
 
 #include "lua.h"
 #include "libgtcore/error.h"

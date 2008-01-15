@@ -17,7 +17,7 @@
 
 #include "lauxlib.h"
 #include "libgtcore/scorematrix.h"
-#include "libgtlua/helper.h"
+#include "libgtext/luahelper.h"
 #include "libgtlua/scorematrix_lua.h"
 
 #define SCOREMATRIX_METATABLE  "GenomeTools.scorematrix"

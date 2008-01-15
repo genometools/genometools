@@ -18,8 +18,8 @@
 #ifdef LIBGTVIEW
 
 #include "lauxlib.h"
+#include "libgtext/luahelper.h"
 #include "libgtlua/diagram_lua.h"
-#include "libgtlua/helper.h"
 #include "libgtlua/render_lua.h"
 #include "libgtview/luaconfig.h"
 #include "libgtview/render.h"

@@ -16,10 +16,10 @@
 */
 
 #include "lauxlib.h"
+#include "libgtext/luahelper.h"
 #include "libgtlua/genome_visitor_lua.h"
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/feature_visitor_lua.h"
-#include "libgtlua/helper.h"
 #include "libgtview/feature_visitor.h"
 
 static int feature_visitor_lua_new(lua_State *L)

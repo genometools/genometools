@@ -31,8 +31,8 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/gtdatahelp.h"
+#include "libgtext/luahelper.h"
 #include "libgtlua/gt_lua.h"
-#include "libgtlua/helper.h"
 #include "libgtlua/interactive.h"
 
 #ifdef LIBGTVIEW

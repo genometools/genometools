@@ -16,7 +16,7 @@
 */
 
 #include "lauxlib.h"
-#include "libgtlua/helper.h"
+#include "libgtext/luahelper.h"
 #include "libgtlua/range_lua.h"
 
 static int range_lua_new(lua_State *L)
