@@ -94,6 +94,16 @@ Test do
   end
 end
 
+Name "extract_affinealign"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}../gtscripts/extract_affinealign.lua #{$cur}"
+  run "cd affinealign && ${MAKE:-make}"
+  if not File.exists?("affinealign.tar.gz") then
+    raise TestFailed, "file 'affinealign.tar.gz' does not exist"
+  end
+end
+
 if $arguments["libgtview"] then
   Name "feature_index and feature_stream bindings"
   Keywords "gt_scripts"
