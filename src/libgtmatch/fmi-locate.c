@@ -20,7 +20,7 @@
 #include "fmindex.h"
 #include "fmi-bwtbound.h"
 #include "fmi-occ.gen"
- 
+
 static Seqpos searchsmallestgeq(const PairBwtidx *left,
                                 const PairBwtidx *right,
                                 Seqpos key)
@@ -36,13 +36,13 @@ static Seqpos searchsmallestgeq(const PairBwtidx *left,
   {
     len = (unsigned long) (rightptr-leftptr);
     midptr = leftptr + DIV2(len);
-    if(key < midptr->bwtpos)
+    if (key < midptr->bwtpos)
     {
       found = midptr;
       rightptr = midptr - 1;
     } else
     {
-      if(key > midptr->bwtpos)
+      if (key > midptr->bwtpos)
       {
         leftptr = midptr + 1;
       } else
@@ -62,11 +62,11 @@ Seqpos fmfindtextpos (const Fmindex *fm,Seqpos idx)
 
   while ((idx & fm->markdistminus1) != 0)
   {
-    if(idx == fm->longestsuffixpos || ISSPECIAL(cc = ACCESSBWTTEXT(idx)))
+    if (idx == fm->longestsuffixpos || ISSPECIAL(cc = ACCESSBWTTEXT(idx)))
     {
-      Seqpos smallestgeq 
+      Seqpos smallestgeq
                = searchsmallestgeq(fm->specpos.spacePairBwtidx,
-                                   fm->specpos.spacePairBwtidx + 
+                                   fm->specpos.spacePairBwtidx +
                                    fm->specpos.nextfreePairBwtidx - 1,
                                    idx);
       return (smallestgeq + offset) % fm->bwtlength;
