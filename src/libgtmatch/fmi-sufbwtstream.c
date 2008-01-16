@@ -406,7 +406,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
           pairptr = fmindex->specpos.spacePairBwtidx +
                     fmindex->specpos.nextfreePairBwtidx++;
           if (pairptr >= fmindex->specpos.spacePairBwtidx +
-                        fmindex->specpos.allocatedPairBwtidx)
+                         fmindex->specpos.allocatedPairBwtidx)
           {
             error_set(err,"program error: not enough space for specpos");
             haserr = true;
@@ -428,13 +428,13 @@ int sufbwt2fmindex(Fmindex *fmindex,
   if (!haserr)
   {
     if (storeindexpos &&
-       fmindex->specpos.allocatedPairBwtidx !=
-       fmindex->specpos.nextfreePairBwtidx)
+        fmindex->specpos.allocatedPairBwtidx !=
+        fmindex->specpos.nextfreePairBwtidx)
     {
       error_set(err,"program error: too much space for specpos: "
-             "allocated = %lu != %lu = used",
-             fmindex->specpos.allocatedPairBwtidx,
-             fmindex->specpos.nextfreePairBwtidx);
+                    "allocated = %lu != %lu = used",
+                    fmindex->specpos.allocatedPairBwtidx,
+                    fmindex->specpos.nextfreePairBwtidx);
       haserr = true;
     }
   }

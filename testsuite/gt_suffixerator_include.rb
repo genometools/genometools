@@ -166,36 +166,50 @@ def checkmapped(args)
   end
 end
 
-def makeuniquesubcall(queryfile,indexarg)
-  return "#{$bin}gt uniquesub -min 1 -max 20 -output querypos -query #{queryfile} #{indexarg}"
+def makeuniquesubcall(queryfile,indexarg,ms)
+  if ms
+    extra=" -ms"
+  else
+    extra=""
+  end
+  return "#{$bin}gt uniquesub #{extra} -min 1 -max 20 -output querypos -query #{queryfile} #{indexarg}"
 end
 
-def checkuniquesub(reffile,queryfile)
-  run_test("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}")
-  run_test(makeuniquesubcall(queryfile,"-fmi fmi"))
+def checkuniquesub(queryfile,ms)
+  run_test(makeuniquesubcall(queryfile,"-fmi fmi",ms))
   run "mv #{$last_stdout} tmp.fmi"
-  run_test("#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v -db #{reffile}")
-  run_test(makeuniquesubcall(queryfile,"-esa sfx"))
+  run_test(makeuniquesubcall(queryfile,"-esa sfx",ms))
   run "mv #{$last_stdout} tmp.esa"
   run "diff tmp.esa tmp.fmi"
-  run_test("#{$bin}gt packedindex mkindex -indexname pck -db #{reffile} -dna -pl -bsize 10 -locfreq 0 -locbitmap no -dir rev")
-  run_test(makeuniquesubcall(queryfile,"-pck pck"))
-  run "mv #{$last_stdout} tmp.pck"
-  run "diff tmp.pck tmp.fmi"
+  if not ms
+    run_test(makeuniquesubcall(queryfile,"-pck pck",ms))
+    run "mv #{$last_stdout} tmp.pck"
+    run "diff tmp.pck tmp.fmi"
+  end
   run "rm -f sfx.* fmi.* pck.*"
+end
+
+def createandcheckuniquesub(reffile,queryfile)
+  run_test("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}")
+  run_test("#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v -db #{reffile}")
+  run_test("#{$bin}gt packedindex mkindex -indexname pck -db #{reffile} -dna -pl -bsize 10 -locfreq 0 -locbitmap no -dir rev")
+  checkuniquesub(queryfile,false)
 end
 
 def grumbach()
   return "#{$gttestdata}DNA-mix/Grumbach.fna/"
 end
 
+# XXX FIXME remove the following exceptions
+
 allfiles.each do |reffile|
   allfiles.each do |queryfile|
-    if reffile != "TTT-small.fna" && queryfile != reffile
+    if reffile != "TTT-small.fna" && reffile != "RandomN.fna" && queryfile != reffile
       Name "gt uniquesub #{reffile} #{queryfile}"
       Keywords "gt_uniquesub small"
       Test do
-        checkuniquesub("#{$testdata}/#{reffile}","#{$testdata}/#{queryfile}")
+        createandcheckuniquesub("#{$testdata}/#{reffile}",
+                                "#{$testdata}/#{queryfile}")
       end 
     end
   end
@@ -232,6 +246,7 @@ if $gttestdata then
   Name "gt uniquesub at1MB U8"
   Keywords "gt_uniquesub gttestdata"
   Test do
-    checkuniquesub("#{$gttestdata}Iowa/at1MB","#{$gttestdata}Iowa/U89959.fna")
+    createandcheckuniquesub("#{$gttestdata}Iowa/at1MB",
+                            "#{$gttestdata}Iowa/U89959.fna")
   end
 end
