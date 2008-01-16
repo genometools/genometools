@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -67,7 +67,7 @@ static void fillDPtable(DPentry **dptable,
           Rvalue = infadd(dptable[i-1][j-1].Rdist, rcost);
           Dvalue = infadd(dptable[i-1][j-1].Ddist, rcost);
           Ivalue = infadd(dptable[i-1][j-1].Idist, rcost);
-          minvalue = MIN(MIN(Rvalue, Dvalue), Ivalue);
+          minvalue = MIN3(Rvalue, Dvalue, Ivalue);
           assert(minvalue != ULONG_MAX);
           dptable[i][j].Rdist = minvalue;
           /* set backtracing edge */
@@ -85,7 +85,7 @@ static void fillDPtable(DPentry **dptable,
           Rvalue = infadd(dptable[i-1][j].Rdist, gap_opening + gap_extension);
           Dvalue = infadd(dptable[i-1][j].Ddist, gap_extension);
           Ivalue = infadd(dptable[i-1][j].Idist, gap_opening + gap_extension);
-          minvalue = MIN(MIN(Rvalue, Dvalue), Ivalue);
+          minvalue = MIN3(Rvalue, Dvalue, Ivalue);
           assert(minvalue != ULONG_MAX);
           dptable[i][j].Ddist = minvalue;
           /* set backtracing edge */
@@ -103,7 +103,7 @@ static void fillDPtable(DPentry **dptable,
           Rvalue = infadd(dptable[i][j-1].Rdist, gap_opening + gap_extension);
           Dvalue = infadd(dptable[i][j-1].Ddist, gap_opening + gap_extension);
           Ivalue = infadd(dptable[i][j-1].Idist, gap_extension);
-          minvalue = MIN(MIN(Rvalue, Dvalue), Ivalue);
+          minvalue = MIN3(Rvalue, Dvalue, Ivalue);
           assert(minvalue != ULONG_MAX);
           dptable[i][j].Idist = minvalue;
           /* set backtracing edge */
@@ -126,8 +126,8 @@ static void traceback(Alignment *a, DPentry **dptable,
   Edge edge;
   assert(a && dptable);
   /* determine min{A_affine(m,n,x) | x in {R,D,I}} */
-  minvalue = MIN(MIN(dptable[i][j].Rdist, dptable[i][j].Ddist),
-                 dptable[i][j].Idist);
+  minvalue = MIN3(dptable[i][j].Rdist, dptable[i][j].Ddist,
+                  dptable[i][j].Idist);
   if (dptable[i][j].Rdist == minvalue)
     edge = R;
   else if (dptable[i][j].Ddist == minvalue)

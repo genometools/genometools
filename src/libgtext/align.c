@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -47,7 +47,7 @@ static void fillDPtable(DPentry **dptable,
       repvalue = dptable[i-1][j-1].distvalue + ((u[i-1] == v[j-1]) ? 0 : 1);
       delvalue = dptable[i-1][j].distvalue + 1;
       insvalue = dptable[i][j-1].distvalue + 1;
-      minvalue = MIN(MIN(repvalue, delvalue), insvalue);
+      minvalue = MIN3(repvalue, delvalue, insvalue);
       dptable[i][j].distvalue = minvalue;
       dptable[i][j].min_replacement = (minvalue == repvalue) ? true : false;
       dptable[i][j].min_deletion    = (minvalue == delvalue) ? true : false;
