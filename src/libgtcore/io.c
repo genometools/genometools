@@ -16,11 +16,11 @@
 */
 
 #include <assert.h>
+#include <string.h>
 #include "libgtcore/cstr.h"
-#include "libgtcore/fa.h"
+#include "libgtcore/genfile.h"
 #include "libgtcore/io.h"
 #include "libgtcore/ma.h"
-#include "libgtcore/xansi.h"
 
 struct IO {
   GenFile *fp;

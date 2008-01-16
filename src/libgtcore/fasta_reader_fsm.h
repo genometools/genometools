@@ -19,6 +19,7 @@
 #define FASTA_READER_FSM_H
 
 #include "libgtcore/fasta_reader.h"
+#include "libgtcore/str.h"
 
 /* implements the ``fasta reader'' interface with a finite state machine
    (for educational purposes, the recursive descent parser is much faster) */

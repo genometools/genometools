@@ -19,8 +19,7 @@
 #define FASTA_READER_H
 
 #include <stdbool.h>
-
-#include "libgtext/genome_node.h"
+#include "libgtcore/error.h"
 
 /* the ``fasta reader'' interface */
 typedef struct FastaReaderClass FastaReaderClass;

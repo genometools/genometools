@@ -18,6 +18,7 @@
 #ifndef FASTA_READER_REP_H
 #define FASTA_READER_REP_H
 
+#include <stdio.h>
 #include "libgtcore/fasta_reader.h"
 
 struct FastaReaderClass
