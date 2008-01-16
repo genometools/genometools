@@ -1,0 +1,1 @@
+scorefasta=6

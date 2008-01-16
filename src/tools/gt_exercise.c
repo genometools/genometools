@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -33,6 +33,7 @@
 #include "tools/gt_neighborjoining.h"
 #include "tools/gt_nussinov_rna_fold.h"
 #include "tools/gt_qgramdist.h"
+#include "tools/gt_scorefasta.h"
 #include "tools/gt_scorematrix.h"
 #include "tools/gt_swalign.h"
 #include "tools/gt_translate.h"
@@ -70,6 +71,7 @@ void register_exercises(Toolbox *exercise_toolbox)
   toolbox_add(exercise_toolbox, "neighborjoining", gt_neighborjoining);
   toolbox_add(exercise_toolbox, "nussinov_rna_fold", gt_nussinov_rna_fold);
   toolbox_add(exercise_toolbox, "qgramdist", gt_qgramdist);
+  toolbox_add(exercise_toolbox, "scorefasta", gt_scorefasta);
   toolbox_add(exercise_toolbox, "scorematrix", gt_scorematrix);
   toolbox_add(exercise_toolbox, "swalign", gt_swalign);
   toolbox_add(exercise_toolbox, "translate", gt_translate);
