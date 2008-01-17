@@ -21,6 +21,7 @@
 #include "fmindex.h"
 
 #include "fmi-occ.gen"
+#include "fmi-locate.pr"
 
 unsigned long skfmuniqueforward (const void *genericindex,
                                  /*@unused@*/ Seqpos *witnessposition,
@@ -33,31 +34,18 @@ unsigned long skfmuniqueforward (const void *genericindex,
   Bwtbound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 
+  assert(qstart < qend);
   qptr = qstart;
   cc = *qptr++;
-#undef mydebug
-#ifdef mydebug
-  printf("# start cc=%u\n",cc);
-#endif
   if (ISSPECIAL(cc))
   {
     return 0;
   }
   bwtbound.lbound = fmindex->tfreq[cc];
   bwtbound.ubound = fmindex->tfreq[cc+1];
-#ifdef mydebug
-  printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
-          "occurrences\n",
-         PRINTSeqposcast(bwtbound.lbound),
-         PRINTSeqposcast(bwtbound.ubound),
-         PRINTSeqposcast(bwtbound.ubound - bwtbound.lbound));
-#endif
   while (qptr < qend && bwtbound.lbound + 1 < bwtbound.ubound)
   {
     cc = *qptr;
-#ifdef mydebug
-    printf("# cc=%u\n",cc);
-#endif
     if (ISSPECIAL (cc))
     {
       return 0;
@@ -66,13 +54,6 @@ unsigned long skfmuniqueforward (const void *genericindex,
                       fmoccurrence (fmindex, cc, bwtbound.lbound);
     bwtbound.ubound = fmindex->tfreq[cc] +
                       fmoccurrence (fmindex, cc, bwtbound.ubound);
-#ifdef mydebug
-    printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
-            "occurrences\n",
-           PRINTSeqposcast(bwtbound.lbound),
-           PRINTSeqposcast(bwtbound.ubound),
-           PRINTSeqposcast(bwtbound.ubound - bwtbound.lbound));
-#endif
     qptr++;
   }
   if (bwtbound.lbound + 1 == bwtbound.ubound)
@@ -80,4 +61,51 @@ unsigned long skfmuniqueforward (const void *genericindex,
     return (unsigned long) (qptr - qstart);
   }
   return 0;
+}
+
+unsigned long skfmmstats (const void *genericindex,
+                          Seqpos *witnessposition,
+                          const Uchar *qstart,
+                          const Uchar *qend,
+                          /*@unused@*/ Error *err)
+{
+  Uchar cc;
+  const Uchar *qptr;
+  Seqpos prevlbound;
+  Bwtbound bwtbound;
+  const Fmindex *fmindex = (Fmindex *) genericindex;
+
+  assert(qstart < qend);
+  qptr = qstart;
+  cc = *qptr;
+  if (ISSPECIAL(cc))
+  {
+    return 0;
+  }
+  bwtbound.lbound = fmindex->tfreq[cc];
+  bwtbound.ubound = fmindex->tfreq[cc+1];
+  if (bwtbound.lbound >= bwtbound.ubound)
+  {
+    return 0;
+  }
+  prevlbound = bwtbound.lbound;
+  for (qptr++; qptr < qend; qptr++)
+  {
+    cc = *qptr;
+    if (ISSPECIAL (cc))
+    {
+      break;
+    }
+    bwtbound.lbound = fmindex->tfreq[cc] +
+                      fmoccurrence (fmindex, cc, bwtbound.lbound);
+    bwtbound.ubound = fmindex->tfreq[cc] +
+                      fmoccurrence (fmindex, cc, bwtbound.ubound);
+    if (bwtbound.lbound >= bwtbound.ubound)
+    {
+      break;
+    }
+    prevlbound = bwtbound.lbound;
+  }
+  *witnessposition = fmfindtextpos (fmindex,prevlbound);
+  return (unsigned long) (qptr - qstart);
 }

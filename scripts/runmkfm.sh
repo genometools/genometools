@@ -51,7 +51,7 @@ mkfmindex()
   indexname=$1
   shift
   iiargs=$*
-  cerr "${gtbin} mkfmindex -size small -noindexpos -fmout ${indexname} -ii ${iiargs}"
+  cerr "${gtbin} mkfmindex -size small -fmout ${indexname} -ii ${iiargs}"
 }
 
 needsrebuild=0
@@ -87,8 +87,6 @@ do
   fi
 done
 
-echo "here 0"
-
 if [ $needsrebuild -eq 1 ] ||
    [ ! -f ${fmindex}.fma ] ||
    [ ! -f ${fmindex}.fmd ] ||
@@ -101,8 +99,6 @@ else
   echo "# ${fmindex}.fmd is up to date"
   echo "# ${fmindex}.bwt is up to date"
 fi
-
-echo "here 1"
 
 if [ $needsrebuild -eq 1 ]
 then

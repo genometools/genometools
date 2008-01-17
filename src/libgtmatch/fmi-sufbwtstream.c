@@ -50,7 +50,7 @@ static void allocatefmtables(Fmindex *fm,bool storeindexpos)
     printf("# %lu wildcards in the last " FormatSeqpos
            " characters (%.2f)\n",
             (unsigned long) (fm->specialcharinfo.specialcharacters -
-                            fm->specpos.allocatedPairBwtidx),
+                             fm->specpos.allocatedPairBwtidx),
             PRINTSeqposcast(fm->specialcharinfo.specialcharacters),
             (double) (fm->specialcharinfo.specialcharacters -
                       fm->specpos.allocatedPairBwtidx)/
@@ -89,7 +89,7 @@ static void finalizefmfrequencies(Fmindex *fm)
   unsigned int j;
   Seqpos i, *freqptr;
 
-  for (j = (unsigned int) 2; j <= fm->mapsize; j++)
+  for (j = 2U; j <= fm->mapsize; j++)
   {
     fm->tfreq[j] += fm->tfreq[j - 1];
   }
@@ -219,7 +219,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   longest.defined = false;
   longest.valueseqpos = 0;
   numofindexes = (unsigned int) strarray_size(indexnametab);
-  if (numofindexes == (unsigned int) 1)
+  if (numofindexes == 1U)
   {
     Str *indexname = strarray_get_str(indexnametab,0);
 
@@ -329,7 +329,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     nextprogress = stepprogress = totallength/78;
     for (bwtpos = 0, nextmark = 0; ; bwtpos++)
     {
-      if (numofindexes == (unsigned int) 1)
+      if (numofindexes == 1U)
       {
         if (storeindexpos)
         {
@@ -406,7 +406,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
           pairptr = fmindex->specpos.spacePairBwtidx +
                     fmindex->specpos.nextfreePairBwtidx++;
           if (pairptr >= fmindex->specpos.spacePairBwtidx +
-                        fmindex->specpos.allocatedPairBwtidx)
+                         fmindex->specpos.allocatedPairBwtidx)
           {
             error_set(err,"program error: not enough space for specpos");
             haserr = true;
@@ -428,13 +428,13 @@ int sufbwt2fmindex(Fmindex *fmindex,
   if (!haserr)
   {
     if (storeindexpos &&
-       fmindex->specpos.allocatedPairBwtidx !=
-       fmindex->specpos.nextfreePairBwtidx)
+        fmindex->specpos.allocatedPairBwtidx !=
+        fmindex->specpos.nextfreePairBwtidx)
     {
       error_set(err,"program error: too much space for specpos: "
-             "allocated = %lu != %lu = used",
-             fmindex->specpos.allocatedPairBwtidx,
-             fmindex->specpos.nextfreePairBwtidx);
+                    "allocated = %lu != %lu = used",
+                    fmindex->specpos.allocatedPairBwtidx,
+                    fmindex->specpos.nextfreePairBwtidx);
       haserr = true;
     }
   }
@@ -446,7 +446,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       ALLOCASSIGNSPACE(fmindex->boundarray,NULL,Bwtbound,fmindex->numofcodes);
     }
-    if (numofindexes == (unsigned int) 1)
+    if (numofindexes == 1U)
     {
       fmindex->longestsuffixpos = suffixarray.longest.valueseqpos;
       freesuffixarray(&suffixarray);

@@ -380,6 +380,8 @@ static int runsuffixerator(bool doesa,
                 PRINTSeqposcast(specialcharinfo.specialcharacters));
     showverbose(verboseinfo,"specialranges=" FormatSeqpos,
                 PRINTSeqposcast(specialcharinfo.specialranges));
+    showverbose(verboseinfo,"realspecialranges=" FormatSeqpos,
+                PRINTSeqposcast(specialcharinfo.realspecialranges));
     if (!so->isplain)
     {
       showcharacterdistribution(alpha,characterdistribution,verboseinfo);

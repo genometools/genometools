@@ -76,6 +76,7 @@ typedef struct
 {
   Seqpos specialcharacters,      /* total number of special syms */
          specialranges,          /* number of ranges with special syms */
+         realspecialranges,
          lengthofspecialprefix,  /* number of specials at start of sequence */
          lengthofspecialsuffix;  /* number of specials at end of sequence */
 } Specialcharinfo;

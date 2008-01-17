@@ -32,12 +32,14 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
   Seqpos tmplength, *sequenceoffsettable;
   uint64_t tmpspecialcharacters,
            tmpspecialranges,
+           tmprealspecialranges,
            tmplarge;
 
   assert(numofindexes > 0);
   ALLOCASSIGNSPACE(sequenceoffsettable,NULL,Seqpos,numofindexes);
   tmpspecialcharacters = (uint64_t) (numofindexes-1);
   tmpspecialranges = 0;
+  tmprealspecialranges = 0;
   for (idx=0; idx<numofindexes; idx++)
   {
     if (idx == 0)
@@ -54,6 +56,8 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
       += (uint64_t) suffixarraytable[idx].specialcharinfo.specialcharacters;
     tmpspecialranges
       += (uint64_t) suffixarraytable[idx].specialcharinfo.specialranges;
+    tmprealspecialranges
+      += (uint64_t) suffixarraytable[idx].specialcharinfo.realspecialranges;
     if (idx > 0)
     {
       lastofprevious
@@ -69,12 +73,14 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
          if (ISSPECIAL(firstofcurrent))
          {
            tmpspecialranges--;
+           tmprealspecialranges--;
          }
       } else
       {
         if (ISNOTSPECIAL(firstofcurrent))
         {
           tmpspecialranges++;
+          tmprealspecialranges++;
         }
       }
     }
@@ -83,6 +89,7 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmplarge);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialcharacters);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialranges);
+    (void) CALLCASTFUNC(uint64_t,Seqpos,tmprealspecialranges);
     printf("# seqlen[%u] = " FormatSeqpos "\n",
            idx,
            PRINTSeqposcast(getencseqtotallength(suffixarraytable[idx].encseq)));
@@ -91,6 +98,7 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
   *totallength = sequenceoffsettable[numofindexes-1] + tmplength;
   specialcharinfo->specialcharacters = (Seqpos) tmpspecialcharacters;
   specialcharinfo->specialranges = (Seqpos) tmpspecialranges;
+  specialcharinfo->realspecialranges = (Seqpos) tmprealspecialranges;
   specialcharinfo->lengthofspecialprefix
     = suffixarraytable[0].specialcharinfo.lengthofspecialprefix;
   specialcharinfo->lengthofspecialsuffix

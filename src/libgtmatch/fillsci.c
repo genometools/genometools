@@ -42,13 +42,14 @@ static unsigned long currentrangevalue(unsigned long len,
   {
     return len/UCHAR_MAX * occcount;
   }
-  return (((unsigned long) 1) + len/UCHAR_MAX) * occcount;
+  return (1UL + len/UCHAR_MAX) * occcount;
 }
 
 typedef struct
 {
   Verboseinfo *verboseinfo;
-  Seqpos *specialrangesptr;
+  Seqpos *specialrangesptr,
+         *realspecialrangesptr;
 } Updatesumrangeinfo;
 
 static void updatesumranges(unsigned long key, unsigned long long value,
@@ -59,6 +60,7 @@ static void updatesumranges(unsigned long key, unsigned long long value,
 
   distvalue = (unsigned long) value; /* XXX: is this cast always OK? */
   (*updatesumrangeinfo->specialrangesptr) += currentrangevalue(key,distvalue);
+  (*updatesumrangeinfo->realspecialrangesptr) += (unsigned long) distvalue;
   showverbose(updatesumrangeinfo->verboseinfo,
               "specialranges of length %lu: %lu",key,distvalue);
 }
@@ -196,7 +198,10 @@ int fasta2sequencekeyvalues(
       FREESPACE(desc);
     }
     specialcharinfo->specialranges = 0;
+    specialcharinfo->realspecialranges = 0;
     updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
+    updatesumrangeinfo.realspecialrangesptr
+      = &specialcharinfo->realspecialranges;
     updatesumrangeinfo.verboseinfo = verboseinfo;
     discdistri_foreach(distspralen,updatesumranges,
                        &updatesumrangeinfo);
@@ -265,7 +270,9 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
     discdistri_add(distspralen,idx);
   }
   specialcharinfo->specialranges = 0;
+  specialcharinfo->realspecialranges = 0;
   updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
+  updatesumrangeinfo.realspecialrangesptr = &specialcharinfo->realspecialranges;
   updatesumrangeinfo.verboseinfo = verboseinfo;
   discdistri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;

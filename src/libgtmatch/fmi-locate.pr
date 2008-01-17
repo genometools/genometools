@@ -1,0 +1,8 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+Seqpos fmfindtextpos (const Fmindex *fm,Seqpos idx);
+
+#ifdef __cplusplus
+}
+#endif

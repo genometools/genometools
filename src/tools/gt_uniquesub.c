@@ -292,7 +292,7 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
       theindex = (const void *) &fmindex;
       if (uniquesubcallinfo.domatchingstatistics)
       {
-        assert(!"domatchingstatistics for FMindex");
+        uniqueforwardfunction = skfmmstats;
       } else
       {
         uniqueforwardfunction = skfmuniqueforward;
