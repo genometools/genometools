@@ -70,6 +70,8 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
                  &fmindex->specialcharinfo.specialcharacters,NULL);
   SETREADINTKEYS("specialranges",
                  &fmindex->specialcharinfo.specialranges,NULL);
+  SETREADINTKEYS("realspecialranges",
+                 &fmindex->specialcharinfo.realspecialranges,NULL);
   SETREADINTKEYS("lengthofspecialprefix",
                  &fmindex->specialcharinfo.lengthofspecialprefix,NULL);
   SETREADINTKEYS("lengthofspecialsuffix",
@@ -195,6 +197,14 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,
   fa_xfclose(fpin);
   if (!haserr)
   {
+    fmindex->bwtformatching = mapbwtencoding(indexname,verboseinfo,err);
+    if (fmindex->bwtformatching == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
     Str *tmpfilename;
 
     fmindex->specpos.nextfreePairBwtidx
@@ -214,14 +224,6 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,
       haserr = true;
     }
     str_delete(tmpfilename);
-  }
-  if (!haserr)
-  {
-    fmindex->bwtformatching = mapbwtencoding(indexname,verboseinfo,err);
-    if (fmindex->bwtformatching == NULL)
-    {
-      haserr = true;
-    }
   }
   if (!haserr)
   {

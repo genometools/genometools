@@ -50,7 +50,7 @@ static void allocatefmtables(Fmindex *fm,bool storeindexpos)
     printf("# %lu wildcards in the last " FormatSeqpos
            " characters (%.2f)\n",
             (unsigned long) (fm->specialcharinfo.specialcharacters -
-                            fm->specpos.allocatedPairBwtidx),
+                             fm->specpos.allocatedPairBwtidx),
             PRINTSeqposcast(fm->specialcharinfo.specialcharacters),
             (double) (fm->specialcharinfo.specialcharacters -
                       fm->specpos.allocatedPairBwtidx)/

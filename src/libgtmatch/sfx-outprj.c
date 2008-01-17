@@ -63,6 +63,7 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"totallength=" FormatSeqpos "\n",PRINTSeqposcast(totallength));
   PRJSPECIALOUT(specialcharacters);
   PRJSPECIALOUT(specialranges);
+  PRJSPECIALOUT(realspecialranges);
   PRJSPECIALOUT(lengthofspecialprefix);
   PRJSPECIALOUT(lengthofspecialsuffix);
   fprintf(outprj,"numofsequences=%lu\n",numofsequences);

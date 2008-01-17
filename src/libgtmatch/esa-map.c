@@ -71,6 +71,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                  &suffixarray->specialcharinfo.specialcharacters,NULL);
   SETREADINTKEYS("specialranges",
                  &suffixarray->specialcharinfo.specialranges,NULL);
+  SETREADINTKEYS("realspecialranges",
+                 &suffixarray->specialcharinfo.realspecialranges,NULL);
   SETREADINTKEYS("lengthofspecialprefix",
                  &suffixarray->specialcharinfo.lengthofspecialprefix,NULL);
   SETREADINTKEYS("lengthofspecialsuffix",

@@ -39,7 +39,7 @@ Seqpos determinenumberofspecialstostore(
   {
     addprefixsuffix++;
   }
-  return specialcharinfo->specialranges + 1 - addprefixsuffix;
+  return specialcharinfo->realspecialranges + 1 - addprefixsuffix;
 }
 
  DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)

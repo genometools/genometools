@@ -45,6 +45,8 @@ static int writefmascii (const Str *indexname,
                   PRINTSeqposcast(fm->specialcharinfo.specialcharacters));
   fprintf (fmafp, "specialranges=" FormatSeqpos "\n",
                   PRINTSeqposcast(fm->specialcharinfo.specialranges));
+  fprintf (fmafp, "realspecialranges=" FormatSeqpos "\n",
+                  PRINTSeqposcast(fm->specialcharinfo.realspecialranges));
   fprintf (fmafp, "lengthofspecialprefix=" FormatSeqpos "\n",
                   PRINTSeqposcast(fm->specialcharinfo.lengthofspecialprefix));
   fprintf (fmafp, "lengthofspecialsuffix=" FormatSeqpos "\n",
