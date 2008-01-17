@@ -48,7 +48,7 @@ static unsigned long currentrangevalue(unsigned long len,
 typedef struct
 {
   Verboseinfo *verboseinfo;
-  Seqpos *specialrangesptr, 
+  Seqpos *specialrangesptr,
          *realspecialrangesptr;
 } Updatesumrangeinfo;
 
@@ -200,7 +200,7 @@ int fasta2sequencekeyvalues(
     specialcharinfo->specialranges = 0;
     specialcharinfo->realspecialranges = 0;
     updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
-    updatesumrangeinfo.realspecialrangesptr 
+    updatesumrangeinfo.realspecialrangesptr
       = &specialcharinfo->realspecialranges;
     updatesumrangeinfo.verboseinfo = verboseinfo;
     discdistri_foreach(distspralen,updatesumranges,
