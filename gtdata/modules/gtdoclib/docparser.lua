@@ -19,11 +19,37 @@ module(..., package.seeall)
 
 require 'lpeg'
 
-Parser = {}
+DocParser = {}
 
-function Parser:new()
+-- Lexical Elements
+local Any           = lpeg.P(1)
+local Whitespace    = lpeg.S(" \t\n")
+local CCommentStart = lpeg.P("/*")
+local CCommentEnd   = lpeg.P("*/")
+local Space         = Whitespace^1
+local CComment      = CCommentStart * (Any - CCommentEnd)^0 * CCommentEnd
+local Code          = (Any - CCommentStart)^1
+
+-- Grammar
+local Elem, S = lpeg.V"Elem", lpeg.V"S"
+local G = lpeg.P{ S,
+ S    = lpeg.Ct(Elem^0);
+ Elem = lpeg.C(CComment) + Space + Code;
+}
+
+function DocParser:new()
   o = {}
+  o.pattern = G
   setmetatable(o, self)
   self.__index = self
   return o
+end
+
+function DocParser:parse(filename)
+  assert(filename)
+  print("parsing " .. filename)
+  local file, err = io.open(filename, "r")
+  assert(file, err)
+  local filecontent = file:read("*a")
+  return lpeg.match(self.pattern, filecontent)
 end

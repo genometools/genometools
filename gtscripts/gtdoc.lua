@@ -29,3 +29,23 @@ if #arg == 1 then
 else
   usage()
 end
+
+local export = { "src/libgtlua" }
+
+local doc_parser = DocParser:new()
+
+for _, v in ipairs(export) do
+  if is_dir(v) then
+    for f in lfs.dir(v) do
+      local filename = v .. "/" .. f
+      if is_header(filename) then
+        local r = doc_parser:parse(filename)
+        for k, v in ipairs(r) do
+          print(v)
+        end
+      end
+    end
+  else
+    assert(false, "not implemented") -- XXX
+  end
+end

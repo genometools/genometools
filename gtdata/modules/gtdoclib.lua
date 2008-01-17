@@ -20,6 +20,7 @@ module(..., package.seeall)
 require 'gtmodulehelper'
 
 -- all gtdoc modules which should be loaded
-local gtdocmodules = { "gtdoclib.parser" }
+local gtdocmodules = { "fileutils",
+                       "gtdoclib.docparser" }
 
 gtmodulehelper.load_modules(gtdocmodules);

@@ -1,6 +1,6 @@
 --[[
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,8 @@ module(modname, package.seeall)
 require 'gt'
 
 -- all GenomeTools modules which should be loaded
-local gtmodules = { "gtlua.feature_index",
+local gtmodules = { "fileutils",
+                    "gtlua.feature_index",
                     "gtlua.genome_features",
                     "gtlua.genome_node",
                     "gtlua.helper",
