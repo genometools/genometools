@@ -317,20 +317,21 @@ appendCallBackOutput(struct appendState *state,
                      unsigned callBackDataOffsetBits, void *cbState,
                      Error *err);
 
-typedef Seqpos *partialSymSums;
+typedef Seqpos partialSymSum;
 
-static inline partialSymSums
+static inline partialSymSum *
 newPartialSymSums(unsigned alphabetSize);
 
 static inline void
-deletePartialSymSums(partialSymSums sums);
+deletePartialSymSums(partialSymSum *sums);
 
 static inline void
-addBlock2PartialSymSums(partialSymSums sums, Symbol *block, unsigned blockSize);
+addBlock2PartialSymSums(partialSymSum *sums, const Symbol *block,
+                        unsigned blockSize);
 
 static inline void
-copyPartialSymSums(unsigned alphabetSize, partialSymSums dest,
-                   const partialSymSums src);
+copyPartialSymSums(unsigned alphabetSize, partialSymSum *dest,
+                   const partialSymSum *src);
 
 static inline Seqpos
 numBuckets(Seqpos seqLen, Seqpos bucketLen);
@@ -343,19 +344,19 @@ vwBits(Seqpos seqLen, unsigned blockSize, unsigned bucketBlocks,
        unsigned maxPermIdxBits, BitOffset maxVarExtBitsPerBucket);
 
 static void
-addRangeEncodedSyms(struct seqRangeList *rangeList, Symbol *block,
-                    unsigned blockSize, Seqpos blockNum, MRAEnc *alphabet,
-                    int selection, int *rangeSel);
+addRangeEncodedSyms(struct seqRangeList *rangeList, const Symbol *block,
+                    unsigned blockSize, Seqpos blockNum, const MRAEnc *alphabet,
+                    int selection, const int *rangeSel);
 
 static int
 updateIdxOutput(struct blockCompositionSeq *seqIdx,
                 struct appendState *aState,
-                partialSymSums buck);
+                const partialSymSum *buck);
 
 static int
 finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
                   struct appendState *state,
-                  partialSymSums buck, Error *err);
+                  const partialSymSum *buck, Error *err);
 
 static inline void
 symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx);
@@ -381,6 +382,63 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx);
     if (rangeMapAlphabet) MRAEncDelete(rangeMapAlphabet);               \
     return NULL;                                                        \
   } while (0)
+
+static void
+addBlock2OutputBuffer(
+  struct blockCompositionSeq *newSeqIdx,
+  partialSymSum *buck, Seqpos blockNum,
+  Symbol *block, unsigned blockSize,
+  const MRAEnc *alphabet, const int *modes,
+  const MRAEnc *blockMapAlphabet, unsigned blockMapAlphabetSize,
+  BitString permCompBSPreAlloc, unsigned *compositionPreAlloc,
+  unsigned compositionIdxBits, struct appendState *aState)
+{
+  PermCompIndex permCompIdx[2];
+  unsigned significantPermIdxBits;
+  /* a. update superbucket table */
+  addBlock2PartialSymSums(buck, block, blockSize);
+  /* b. add ranges of differently encoded symbols to
+   * corresponding representation */
+  addRangeEncodedSyms(newSeqIdx->rangeEncs, block, blockSize,
+                      blockNum, alphabet, REGIONS_LIST,
+                      modes);
+  /* c. add to table of composition/permutation indices */
+  MRAEncSymbolsTransform(blockMapAlphabet, block, blockSize);
+  /* FIXME control remapping */
+  /* currently invalid characters in input can seriously break this */
+  block2IndexPair(&newSeqIdx->compositionTable, blockSize,
+                  blockMapAlphabetSize, block, permCompIdx,
+                  &significantPermIdxBits,
+                  permCompBSPreAlloc, compositionPreAlloc);
+  append2IdxOutput(newSeqIdx, aState, permCompIdx, compositionIdxBits,
+                   significantPermIdxBits);
+}
+
+static int
+writeOutputBuffer(struct blockCompositionSeq *newSeqIdx,
+                  struct appendState *aState, bitInsertFunc biFunc,
+                  Seqpos lastUpdatePos, size_t bucketLen,
+                  unsigned callBackDataOffsetBits, void *cbState,
+                  const partialSymSum *buckLast, Error *err)
+{
+  if (biFunc)
+    if (appendCallBackOutput(aState, newSeqIdx, biFunc,
+                             lastUpdatePos, bucketLen,
+                             callBackDataOffsetBits, cbState, err)
+        == (BitOffset)-1)
+    {
+      perror("error condition while writing block-compressed"
+             " index data");
+      return -1;
+    }
+  if (!updateIdxOutput(newSeqIdx, aState, buckLast))
+  {
+    perror("error condition while writing block-compressed"
+           " index data");
+    return -1;
+  }
+  return 1;
+}
 
 #define newBlockEncIdxSeqLoopErr()                      \
   destructAppendState(&aState);                         \
@@ -408,7 +466,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      BitOffset maxVarExtBitsPerPos, void *cbState, Error *err)
 {
   struct blockCompositionSeq *newSeqIdx = NULL;
-  Symbol blockMapAlphabetSize, totalAlphabetSize;
+  unsigned blockMapAlphabetSize, totalAlphabetSize;
   size_t regionsEstimate=totalLen / 100;
   MRAEnc *blockMapAlphabet = NULL, *rangeMapAlphabet = NULL;
   BitOffset bitsPerComposition, bitsPerPermutation;
@@ -424,8 +482,8 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
 
   newSeqIdx = ma_calloc(sizeof (struct blockCompositionSeq), 1);
   newSeqIdx->bucketBlocks = bucketBlocks;
-  newSeqIdx->bitsPerSeqpos = requiredSeqposBits(newSeqIdx->baseClass.seqLen
-                                                = totalLen);
+  newSeqIdx->bitsPerSeqpos = requiredSeqposBits((newSeqIdx->baseClass.seqLen
+                                                 = totalLen) - 1);
   newSeqIdx->baseClass.alphabet = alphabet;
   /* TODO: improve guessing of number of necessary ranges */
   {
@@ -603,7 +661,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
         Symbol *block;
         unsigned *compositionPreAlloc;
         BitString permCompBSPreAlloc;
-        partialSymSums buck, buckLast;
+        partialSymSum *buck, *buckLast;
         block = ma_malloc(sizeof (Symbol) * blockSize);
         compositionPreAlloc = ma_malloc(sizeof (unsigned)
                                         * blockMapAlphabetSize);
@@ -622,8 +680,6 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
           blockNum = 0;
           while (blockNum < numFullBlocks)
           {
-            PermCompIndex permCompIdx[2];
-            unsigned significantPermIdxBits;
             int readResult;
             /* 3. for each chunk: */
             readResult = readNextBWTBlock(bwtReaderState, block, blockSize,
@@ -634,43 +690,21 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
               perror("error condition while reading index data");
               break;
             }
-            /* 3.a. update superbucket table */
-            addBlock2PartialSymSums(buck, block, blockSize);
-            /* 3.b. add ranges of differently encoded symbols to
-             * corresponding representation */
-            addRangeEncodedSyms(newSeqIdx->rangeEncs, block, blockSize,
-                                blockNum, alphabet, REGIONS_LIST,
-                                modesCopy);
-            /* 3.c. add to table of composition/permutation indices */
-            MRAEncSymbolsTransform(blockMapAlphabet, block, blockSize);
-            /* FIXME control remapping */
-            block2IndexPair(&newSeqIdx->compositionTable, blockSize,
-                            blockMapAlphabetSize, block, permCompIdx,
-                            &significantPermIdxBits,
-                            permCompBSPreAlloc, compositionPreAlloc);
-            append2IdxOutput(newSeqIdx, &aState,
-                             permCompIdx, compositionIdxBits,
-                             significantPermIdxBits);
+            addBlock2OutputBuffer(newSeqIdx, buck, blockNum,
+                                  block, blockSize,
+                                  alphabet, modesCopy,
+                                  blockMapAlphabet, blockMapAlphabetSize,
+                                  permCompBSPreAlloc, compositionPreAlloc,
+                                  compositionIdxBits, &aState);
             /* update on-disk structure */
             if (!((++blockNum) % bucketBlocks))
             {
               Seqpos pos = blockNum * blockSize;
-              if (biFunc)
-                if (appendCallBackOutput(&aState, newSeqIdx, biFunc,
-                                         lastUpdatePos, bucketLen,
-                                         callBackDataOffsetBits, cbState, err)
-                   == (BitOffset)-1)
-                {
-                  hadError = 1;
-                  perror("error condition while writing block-compressed"
-                         " index data");
-                  break;
-                }
-              if (!updateIdxOutput(newSeqIdx, &aState, buckLast))
+              if (writeOutputBuffer(newSeqIdx, &aState, biFunc, lastUpdatePos,
+                                    bucketLen, callBackDataOffsetBits, cbState,
+                                    buckLast, err) < 0)
               {
                 hadError = 1;
-                perror("error condition while writing block-compressed"
-                       " index data");
                 break;
               }
               /* update retained data */
@@ -681,77 +715,66 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
           /* handle last chunk */
           if (!hadError)
           {
-            PermCompIndex permCompIdx[2];
-            unsigned significantPermIdxBits;
-            int readResult;
             Seqpos symbolsLeft = totalLen % blockSize;
-            readResult = readNextBWTBlock(bwtReaderState, block, symbolsLeft,
-                                          err);
-            if (readResult < 0)
+            if (symbolsLeft)
+            {
+              int readResult;
+              readResult = readNextBWTBlock(bwtReaderState, block, symbolsLeft,
+                                            err);
+              if (readResult < 0)
+              {
+                hadError = 1;
+                perror("error condition while reading index data");
+                newBlockEncIdxSeqLoopErr();
+              }
+              else
+              {
+                memset(block + symbolsLeft, 0,
+                       sizeof (Symbol) * (blockSize - symbolsLeft));
+                addBlock2OutputBuffer(newSeqIdx, buck, blockNum,
+                                      block, blockSize,
+                                      alphabet, modesCopy,
+                                      blockMapAlphabet, blockMapAlphabetSize,
+                                      permCompBSPreAlloc, compositionPreAlloc,
+                                      compositionIdxBits, &aState);
+              }
+            }
+            if (lastUpdatePos < totalLen)
+            {
+              /* one bucket still unfinished */
+              if (writeOutputBuffer(newSeqIdx, &aState, biFunc, lastUpdatePos,
+                                    totalLen - lastUpdatePos,
+                                    callBackDataOffsetBits, cbState,
+                                    buckLast, err) < 0)
+              {
+                hadError = 1;
+                break;
+              }
+            }
+            if (!finalizeIdxOutput(newSeqIdx, &aState, buck, err))
             {
               hadError = 1;
-              perror("error condition while reading index data");
+              perror("error condition while writing block-compressed"
+                     " index data");
               newBlockEncIdxSeqLoopErr();
             }
-            else
+            if (!writeIdxHeader(newSeqIdx, numExtHeaders, headerIDs,
+                                extHeaderSizes, extHeaderCallbacks,
+                                headerCBData, err))
             {
-              memset(block + symbolsLeft, 0,
-                     sizeof (Symbol) * (blockSize - symbolsLeft));
-              addBlock2PartialSymSums(buck, block, blockSize);
-              addRangeEncodedSyms(newSeqIdx->rangeEncs, block, blockSize,
-                                  blockNum, alphabet, REGIONS_LIST,
-                                  modesCopy);
-              MRAEncSymbolsTransform(blockMapAlphabet, block, blockSize);
-              block2IndexPair(&newSeqIdx->compositionTable, blockSize,
-                              blockMapAlphabetSize, block, permCompIdx,
-                              &significantPermIdxBits,
-                              permCompBSPreAlloc, compositionPreAlloc);
-              append2IdxOutput(newSeqIdx, &aState, permCompIdx,
-                               compositionIdxBits, significantPermIdxBits);
-              if (biFunc)
-                if (appendCallBackOutput(&aState, newSeqIdx, biFunc,
-                                         lastUpdatePos,
-                                         totalLen - lastUpdatePos,
-                                         callBackDataOffsetBits, cbState, err)
-                   == (BitOffset)-1)
-                {
-                  hadError = 1;
-                  perror("error condition while writing block-compressed"
-                         " index data");
-                  break;
-                }
-              if (!updateIdxOutput(newSeqIdx, &aState, buckLast))
-              {
-                hadError = 1;
-                perror("error condition while writing block-compressed"
-                       " index data");
-                newBlockEncIdxSeqLoopErr();
-              }
-              if (!finalizeIdxOutput(newSeqIdx, &aState, buck, err))
-              {
-                hadError = 1;
-                perror("error condition while writing block-compressed"
-                       " index data");
-                newBlockEncIdxSeqLoopErr();
-              }
-              if (!writeIdxHeader(newSeqIdx, numExtHeaders, headerIDs,
-                                  extHeaderSizes, extHeaderCallbacks,
-                                  headerCBData, err))
-              {
-                hadError = 1;
-                perror("error condition while writing block-compressed"
-                       " index header");
-                newBlockEncIdxSeqLoopErr();
-              }
-              if (fflush(newSeqIdx->externalData.idxFP))
-              {
-                hadError = 1;
-                perror("error condition while writing block-compressed"
-                       " index header");
-                newBlockEncIdxSeqLoopErr();
-              }
-              tryMMapOfIndex(&newSeqIdx->externalData);
+              hadError = 1;
+              perror("error condition while writing block-compressed"
+                     " index header");
+              newBlockEncIdxSeqLoopErr();
             }
+            if (fflush(newSeqIdx->externalData.idxFP))
+            {
+              hadError = 1;
+              perror("error condition while writing block-compressed"
+                     " index header");
+              newBlockEncIdxSeqLoopErr();
+            }
+            tryMMapOfIndex(&newSeqIdx->externalData);
           }
           if (hadError)
           {
@@ -1401,20 +1424,21 @@ blockCompSeqGet(struct encIdxSeq *seq, Seqpos pos, union EISHint *hint)
   return sym;
 }
 
-static inline partialSymSums
+static inline partialSymSum *
 newPartialSymSums(unsigned alphabetSize)
 {
   return ma_calloc(alphabetSize, sizeof (Seqpos));
 }
 
 static inline void
-deletePartialSymSums(partialSymSums sums)
+deletePartialSymSums(partialSymSum *sums)
 {
   ma_free(sums);
 }
 
 static inline void
-addBlock2PartialSymSums(partialSymSums sums, Symbol *block, unsigned blockSize)
+addBlock2PartialSymSums(partialSymSum *sums, const Symbol *block,
+                        unsigned blockSize)
 {
   unsigned i;
   for (i = 0; i < blockSize; ++i)
@@ -1422,8 +1446,8 @@ addBlock2PartialSymSums(partialSymSums sums, Symbol *block, unsigned blockSize)
 }
 
 static inline void
-copyPartialSymSums(unsigned alphabetSize, partialSymSums dest,
-                   const partialSymSums src)
+copyPartialSymSums(unsigned alphabetSize, partialSymSum *dest,
+                   const partialSymSum *src)
 {
   memcpy(dest, src, sizeof (dest[0]) * alphabetSize);
 }
@@ -1532,9 +1556,9 @@ initAppendState(struct appendState *aState,
     permCacheLen = superBlockVarMaxBits(seqIdx) + bitElemBits - 1;
   aState->compCacheLen = compCacheLen;
   aState->permCacheLen = permCacheLen;
-  aState->compCache = ma_malloc(sizeof (BitElem) *
+  aState->compCache = ma_calloc(sizeof (BitElem),
                                 bitElemsAllocSize(compCacheLen));
-  aState->permCache = ma_malloc(sizeof (BitElem) *
+  aState->permCache = ma_calloc(sizeof (BitElem),
                                 bitElemsAllocSize(permCacheLen));
   aState->cwMemPos = cwPreCompIdxBits(seqIdx);
   aState->cwDiskOffset = aState->varMemPos = aState->cwMemOldBits =
@@ -1601,7 +1625,7 @@ appendCallBackOutput(struct appendState *state,
 static int
 updateIdxOutput(struct blockCompositionSeq *seqIdx,
                 struct appendState *aState,
-                partialSymSums buck)
+                const partialSymSum *buck)
 {
   size_t recordsExpected, cwBitElems;
   unsigned blockAlphabetSize;
@@ -2176,7 +2200,7 @@ seekToHeader(const struct encIdxSeq *seqIdx, uint16_t headerID,
 static int
 finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
                   struct appendState *aState,
-                  partialSymSums buck, Error *err)
+                  const partialSymSum *buck, Error *err)
 {
   off_t rangeEncPos;
   size_t recordsExpected;
@@ -2231,9 +2255,9 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
 }
 
 static void
-addRangeEncodedSyms(struct seqRangeList *rangeList, Symbol *block,
-                    unsigned blockSize, Seqpos blockNum, MRAEnc *alphabet,
-                    int selection, int *rangeSel)
+addRangeEncodedSyms(struct seqRangeList *rangeList, const Symbol *block,
+                    unsigned blockSize, Seqpos blockNum, const MRAEnc *alphabet,
+                    int selection, const int *rangeSel)
 {
   unsigned i;
   for (i = 0; i < blockSize; ++i)

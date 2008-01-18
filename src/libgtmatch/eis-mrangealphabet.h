@@ -217,7 +217,7 @@ MRAEncSymbolsRevTransform(const MRAEnc *mralpha, Symbol *symbols,
  */
 extern int
 MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
-                               int selection, int *rangeSel);
+                               int selection, const int *rangeSel);
 
 /**
  * @brief Read symbols from file and transform according to

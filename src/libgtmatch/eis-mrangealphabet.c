@@ -342,7 +342,7 @@ MRAEncSymbolsRevTransform(const MRAEnc *mralpha, Symbol *symbols,
 
 int
 MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
-                               int selection, int *rangeSel)
+                               int selection, const int *rangeSel)
 {
   size_t range = 0;
   assert(mralpha && rangeSel);

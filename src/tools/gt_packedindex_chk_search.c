@@ -156,49 +156,63 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
                               suffixarray.readmode,
                               pptr,
                               patternLen);
-        BWTSeqExactMatchesIterator *EMIter =
-          newEMIterator(bwtSeq, pptr, patternLen);
-        Seqpos numMatches = EMINumMatchesTotal(EMIter);
-        ensure(had_err, EMIter);
-        if (had_err)
-          break;
-        assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen));
-        assert(EMINumMatchesTotal(EMIter) == countmmsearchiterator(mmsi));
-        fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n"
-                "pattern: ", trial,
-                numMatches);
-        showsymbolstringgeneric(stderr, suffixarray.alpha, pptr, patternLen);
-        fputs("\n", stderr);
-        while (nextmmsearchiterator(&dbstart,mmsi))
+        if (BWTSeqHasLocateInformation(bwtSeq))
         {
-          struct MatchData *match =
-            EMIGetNextMatch(EMIter, bwtSeq);
-          ensure(had_err, match);
+          BWTSeqExactMatchesIterator *EMIter =
+            newEMIterator(bwtSeq, pptr, patternLen);
+          Seqpos numMatches = EMINumMatchesTotal(EMIter);
+          ensure(had_err, EMIter);
           if (had_err)
-          {
-            fputs("matches of fmindex expired before mmsearch!\n", stderr);
             break;
-          }
-          ensure(had_err, match->sfxArrayValue == dbstart);
-          if (had_err)
+          assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen));
+          assert(EMINumMatchesTotal(EMIter) == countmmsearchiterator(mmsi));
+          fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n"
+                  "pattern: ", trial, numMatches);
+          showsymbolstringgeneric(stderr, suffixarray.alpha, pptr, patternLen);
+          fputs("\n", stderr);
+          while (nextmmsearchiterator(&dbstart,mmsi))
           {
-            fprintf(stderr, "fmindex match doesn't equal mmsearch match "
-                    "result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
-                    match->sfxArrayValue, dbstart);
+            struct MatchData *match =
+              EMIGetNextMatch(EMIter, bwtSeq);
+            ensure(had_err, match);
+            if (had_err)
+            {
+              fputs("matches of fmindex expired before mmsearch!\n", stderr);
+              break;
+            }
+            ensure(had_err, match->sfxArrayValue == dbstart);
+            if (had_err)
+            {
+              fprintf(stderr, "fmindex match doesn't equal mmsearch match "
+                      "result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
+                      match->sfxArrayValue, dbstart);
+              had_err = true;
+            }
+          }
+          if (!had_err)
+          {
+            struct MatchData *trailingMatch = EMIGetNextMatch(EMIter, bwtSeq);
+            ensure(had_err, !trailingMatch);
+            if (had_err)
+            {
+              fputs("matches of mmsearch expired before fmindex!\n", stderr);
+              break;
+            }
+          }
+          deleteEMIterator(EMIter);
+        }
+        else
+        {
+          Seqpos numFMIMatches = BWTSeqMatchCount(bwtSeq, pptr, patternLen),
+            numMMSearchMatches = countmmsearchiterator(mmsi);
+          if ( numFMIMatches != numMMSearchMatches)
+          {
+            fprintf(stderr, "Number of matches not equal for suffix array ("
+                    FormatSeqpos") and fmindex ("FormatSeqpos".\n",
+                    numFMIMatches, numMMSearchMatches);
             had_err = true;
           }
         }
-        if (!had_err)
-        {
-          struct MatchData *trailingMatch = EMIGetNextMatch(EMIter, bwtSeq);
-          ensure(had_err, !trailingMatch);
-          if (had_err)
-          {
-            fputs("matches of mmsearch expired before fmindex!\n", stderr);
-            break;
-          }
-        }
-        deleteEMIterator(EMIter);
         freemmsearchiterator(&mmsi);
       }
       fprintf(stderr, "Finished %lu of %lu matchings successfully.\n",
