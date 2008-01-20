@@ -31,6 +31,7 @@
 #include "libgtmatch/esa-minunique.pr"
 #include "libgtmatch/eis-bwtconstruct_params.h"
 #include "libgtmatch/eis-bwtseq.h"
+#include "libgtmatch/eis-bwtseqconstruct.h"
 #include "tools/gt_uniquesub.h"
 
 #define SHOWSEQUENCE   1U
@@ -257,28 +258,39 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
     if (mapfmindex (&fmindex,uniquesubcallinfo.indexname,verboseinfo,err) != 0)
     {
       haserr = true;
+    } else
+    {
+      alphabet = fmindex.alphabet;
     }
   } else
   {
-    if (uniquesubcallinfo.indextype == Esaindextype)
-    {
-      Seqpos totallength;
+    Seqpos totallength;
 
-      if (mapsuffixarray(&suffixarray,
-                         &totallength,
-                         SARR_ESQTAB | SARR_SUFTAB,
-                         uniquesubcallinfo.indexname,verboseinfo,err) != 0)
-      {
-        haserr = true;
-      }
+    if (mapsuffixarray(&suffixarray,
+                       &totallength,
+                       (uniquesubcallinfo.indextype == Esaindextype) 
+                       ? (SARR_ESQTAB | SARR_SUFTAB) 
+                       : 0,
+                       uniquesubcallinfo.indexname,verboseinfo,err) != 0)
+    {
+      haserr = true;
     } else
     {
-      assert(uniquesubcallinfo.indextype == Packedindextype);
-      packedindex = loadBWTSeq(uniquesubcallinfo.indexname,
-                               BWTDEFOPT_MULTI_QUERY,err);
-      if (packedindex == NULL)
+      alphabet = suffixarray.alpha;
+    }
+    if (!haserr)
+    {
+      if (uniquesubcallinfo.indextype == Packedindextype)
       {
-        haserr = true;
+        packedindex = loadBWTSeqForSA(uniquesubcallinfo.indexname,
+                                      BWT_ON_BLOCK_ENC, 
+                                      BWTDEFOPT_MULTI_QUERY,
+                                      &suffixarray,
+                                      totallength, err);
+        if (packedindex == NULL)
+        {
+          haserr = true;
+        }
       }
     }
   }
@@ -297,7 +309,6 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
       {
         uniqueforwardfunction = skfmuniqueforward;
       }
-      alphabet = fmindex.alphabet;
     } else
     {
       if (uniquesubcallinfo.indextype == Esaindextype)
@@ -310,7 +321,6 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
         {
           uniqueforwardfunction = suffixarrayuniqueforward;
         }
-        alphabet = suffixarray.alpha;
       } else
       {
         assert(uniquesubcallinfo.indextype == Packedindextype);
@@ -323,16 +333,6 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
         } else
         {
           uniqueforwardfunction = packedindexuniqueforward;
-        }
-        /* currently, only DNA is supported */
-        alphabet = assigninputalphabet(true, /* XXX Fix me and read alphabet */
-                                       false,
-                                       NULL,
-                                       NULL,
-                                       err);
-        if (alphabet == NULL)
-        {
-          haserr = true;
         }
       }
     }
@@ -361,16 +361,11 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
     freefmindex(&fmindex);
   } else
   {
-    if (uniquesubcallinfo.indextype == Esaindextype)
+    if (uniquesubcallinfo.indextype == Packedindextype)
     {
-      freesuffixarray(&suffixarray);
-    } else
-    {
-      assert(uniquesubcallinfo.indextype == Packedindextype);
       deleteBWTSeq(packedindex);
-      assert(alphabet != NULL);
-      freeAlphabet(&alphabet);
     }
+    freesuffixarray(&suffixarray);
   }
   freeverboseinfo(&verboseinfo);
   str_delete(uniquesubcallinfo.indexname);

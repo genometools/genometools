@@ -204,7 +204,7 @@ end
 
 allfiles.each do |reffile|
   allfiles.each do |queryfile|
-    if reffile != "TTT-small.fna" && reffile != "RandomN.fna" && queryfile != reffile
+    if reffile != "TTT-small.fna" && queryfile != reffile
       Name "gt uniquesub #{reffile} #{queryfile}"
       Keywords "gt_uniquesub small"
       Test do

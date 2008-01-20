@@ -89,7 +89,8 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
   {
     uniquelength = substringinfo->uniqueforward(substringinfo->genericindex,
                                                 &witnessposition,
-                                                qptr,query+querylen,err);
+                                                qptr,
+                                                query+querylen);
     if (uniquelength > 0)
     {
       if (substringinfo->processuniquelength(substringinfo->alphabet,

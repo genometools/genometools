@@ -26,8 +26,7 @@
 unsigned long skfmuniqueforward (const void *genericindex,
                                  /*@unused@*/ Seqpos *witnessposition,
                                  const Uchar *qstart,
-                                 const Uchar *qend,
-                                 /*@unused@*/ Error *err)
+                                 const Uchar *qend)
 {
   Uchar cc;
   const Uchar *qptr;
@@ -66,8 +65,7 @@ unsigned long skfmuniqueforward (const void *genericindex,
 unsigned long skfmmstats (const void *genericindex,
                           Seqpos *witnessposition,
                           const Uchar *qstart,
-                          const Uchar *qend,
-                          /*@unused@*/ Error *err)
+                          const Uchar *qend)
 {
   Uchar cc;
   const Uchar *qptr;
