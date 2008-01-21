@@ -52,12 +52,24 @@ function is_regular_file(filename)
   return has_mode(filename, "file")
 end
 
--- returns true if file with <filename> is a header file, false otherwise
-function is_header(filename)
-  assert(filename)
-  if string.find(filename, "%.h$") and is_regular_file(filename) then
+local function is_regular_file_with_ending(filename, ending)
+  assert(filename and ending)
+  local pattern = "%." .. ending .. "$"
+  if string.find(filename, pattern) and is_regular_file(filename) then
     return true
   else
     return false
   end
+end
+
+-- returns true if file with <filename> is a header file, false otherwise
+function is_header(filename)
+  assert(filename)
+  return is_regular_file_with_ending(filename, "h")
+end
+
+-- returns true if file with <filename> is a Lua file, false otherwise
+function is_lua_file(filename)
+  assert(filename)
+  return is_regular_file_with_ending(filename, "lua")
 end
