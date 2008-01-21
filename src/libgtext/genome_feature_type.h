@@ -40,7 +40,7 @@ typedef enum {
   gft_repeat_region,
   gft_target_site_duplication,
   gft_three_prime_UTR,
-  gft_transcript,
+  gft_transcript
 } GenomeFeatureType;
 
 /* Determine a genome feature type <gft> from the string <gft_string>.
