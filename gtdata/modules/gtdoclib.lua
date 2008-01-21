@@ -21,6 +21,8 @@ require 'gtmodulehelper'
 
 -- all gtdoc modules which should be loaded
 local gtdocmodules = { "fileutils",
-                       "gtdoclib.docparser" }
+                       "gtdoclib.docbase",
+                       "gtdoclib.docparser",
+                       "gtdoclib.docvisitortxt" }
 
 gtmodulehelper.load_modules(gtdocmodules);

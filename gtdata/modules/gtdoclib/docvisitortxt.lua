@@ -15,39 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ]]
 
-require 'gtdoclib'
+module(..., package.seeall)
 
-function usage()
-  io.stderr:write(string.format("Usage: %s gt_home\n", arg[0]))
-  io.stderr:write("Generate documentation for the GenomeTools home directory " ..
-                  "gt_home.\n")
-  os.exit(1)
+DocVisitorTxt = {}
+
+function DocVisitorTxt:new()
+  o = {}
+  setmetatable(o, self)
+  self.__index = self
+  return o
 end
 
-if #arg == 1 then
-  gt_home = arg[1]
-else
-  usage()
+function DocVisitorTxt:visit_class(classname)
+  assert(classname)
+  io.write(string.format("class: %s\n", classname))
 end
-
-local export = { "src/libgtlua" }
-
-local doc_parser      = DocParser:new()
-local doc_base        = DocBase:new()
-local doc_visitor_txt = DocVisitorTxt:new()
-
-for _, v in ipairs(export) do
-  if is_dir(v) then
-    for f in lfs.dir(v) do
-      local filename = v .. "/" .. f
-      if is_header(filename) then
-        local ast = doc_parser:parse(filename)
-        doc_base:process_ast(ast)
-      end
-    end
-  else
-    assert(false, "not implemented") -- XXX
-  end
-end
-
-doc_base:accept(doc_visitor_txt)

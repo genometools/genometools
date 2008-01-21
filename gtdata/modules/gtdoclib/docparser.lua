@@ -22,19 +22,24 @@ require 'lpeg'
 DocParser = {}
 
 -- Lexical Elements
-local Any           = lpeg.P(1)
-local Whitespace    = lpeg.S(" \t\n")
-local CCommentStart = lpeg.P("/*")
-local CCommentEnd   = lpeg.P("*/")
-local Space         = Whitespace^1
-local CComment      = CCommentStart * (Any - CCommentEnd)^0 * CCommentEnd
-local Code          = (Any - CCommentStart)^1
+local Any            = lpeg.P(1)
+local Whitespace     = lpeg.S(" \t\n")
+local Character      = lpeg.R("AZ", "az")
+local CCommentStart  = lpeg.P("/*")
+local CCommentEnd    = lpeg.P("*/")
+local Space          = Whitespace^1
+local ExportCComment = CCommentStart * lpeg.P(" exports the ") *
+                       lpeg.Cc("class") * lpeg.C(Character^1) *
+                       lpeg.P(" class to Lua:") * (Any - CCommentEnd)^0  *
+                       CCommentEnd
+local CComment       = CCommentStart * (Any - CCommentEnd)^0 * CCommentEnd
+local Code           = (Any - CCommentStart)^1
 
 -- Grammar
 local Elem, S = lpeg.V"Elem", lpeg.V"S"
 local G = lpeg.P{ S,
  S    = lpeg.Ct(Elem^0);
- Elem = lpeg.C(CComment) + Space + Code;
+ Elem = lpeg.Ct(ExportCComment) + CComment + Space + Code;
 }
 
 function DocParser:new()
