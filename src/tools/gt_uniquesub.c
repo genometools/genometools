@@ -286,7 +286,7 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
                                       BWT_ON_BLOCK_ENC, 
                                       BWTDEFOPT_MULTI_QUERY,
                                       &suffixarray,
-                                      totallength, err);
+                                      totallength+1, err);
         if (packedindex == NULL)
         {
           haserr = true;
