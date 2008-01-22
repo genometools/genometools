@@ -56,13 +56,18 @@ local LuaOptionalComment   = LuaShortComment +
                              lpeg.Cc("comment") * lpeg.Cc("undefined")
 local LuaCommentStart      = LuaLongCommentStart + LuaShortCommentStart
 local LuaEnd               = lpeg.P("end")
+local LuaLocalFunction    =  lpeg.P("local") * OptionalSpace *
+                             lpeg.P("function") * OptionalSpace *
+                             lpeg.P(Any - lpeg.P("("))^1 *
+                             lpeg.P("(") * (Any - lpeg.P(")"))^0 *
+                             lpeg.P(")")
 local LuaGlobalFunction    = -lpeg.P("local") * OptionalSpace *
                              lpeg.C(lpeg.P("function")) * OptionalSpace *
                              lpeg.C(lpeg.P(Any - lpeg.P("("))^1) *
                              lpeg.P("(") * lpeg.C((Any - lpeg.P(")"))^0) *
                              lpeg.P(")")
 local ExportLuaMethod      = lpeg.Ct(LuaOptionalComment * LuaGlobalFunction)
-local CodeStop             = LuaCommentStart + LuaGlobalFunction
+local CodeStop             = LuaCommentStart + LuaLocalFunction + LuaGlobalFunction
 local LuaCode              = lpeg.Cc("code") * lpeg.C((Any - CodeStop)^1)
 
 -- C Grammar
@@ -76,7 +81,8 @@ CGrammar = CGrammar * -1
 -- Lua Grammar
 local LuaGrammar = lpeg.P{ Start,
   Start = lpeg.Ct(Elem^0);
-  Elem  = ExportLuaMethod + LuaLongComment + LuaShortComment + Space + LuaCode;
+  Elem  = ExportLuaMethod + LuaLongComment + LuaShortComment + Space +
+          LuaLocalFunction + LuaCode;
 }
 LuaGrammar = LuaGrammar * -1
 
