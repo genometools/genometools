@@ -535,7 +535,7 @@ ifeq ($(libgtview),yes)
 endif
 
 .SUFFIXES:
-.PHONY: dist srcdist release gt install splint test clean cleanup
+.PHONY: dist srcdist release gt install docs installwww splint test clean cleanup
 
 dist: all
 	tar cvzf gt-`cat VERSION`.tar.gz bin/gt
@@ -550,6 +550,10 @@ release:
 	gzip -9 > genometools-`cat VERSION`.tar.gz
 	scp "genometools-`cat VERSION`.tar.gz" $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
 	git push --tags origin master
+
+docs: bin/gt
+	bin/gt gtscripts/gtdoc.lua -html $(CURDIR) \
+        > www/genometools.org/htdocs/docs.html
 
 installwww:
 # install genometools.org website

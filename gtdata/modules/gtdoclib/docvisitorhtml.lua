@@ -31,6 +31,7 @@ end
 
 function DocVisitorHTML:show_header()
   lp.include(self.template_path .. "header.lp")
+  print("<pre>") -- XXX: remove
 end
 
 function DocVisitorHTML:visit_class(classname)
@@ -45,5 +46,6 @@ function DocVisitorHTML:visit_method(desc)
 end
 
 function DocVisitorHTML:show_footer()
+  print("</pre>") -- XXX: remove
   lp.include(self.template_path .. "footer.lp")
 end
