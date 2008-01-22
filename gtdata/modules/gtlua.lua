@@ -55,7 +55,8 @@ local function load_modules(modules)
   end
 end
 
-local function reload()
+-- Reload <gt> module.
+function reload()
   -- remove all exported symbols from gt table
   for k in pairs(gtexport) do
     gt[k] = nil

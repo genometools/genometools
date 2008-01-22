@@ -49,6 +49,7 @@ end
 local template_path = gt_home .. "/gtdata/modules/gtdoclib/"
 
 local export = { "src/libgtlua",
+                 "gtdata/modules/gtlua.lua",
                  "gtdata/modules/gtlua" }
 
 local doc_parser      = DocParser:new()
