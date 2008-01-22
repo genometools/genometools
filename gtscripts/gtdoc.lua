@@ -18,18 +18,24 @@
 require 'gtdoclib'
 
 function usage()
-  io.stderr:write(string.format("Usage: [-v] %s gt_home\n", arg[0]))
+  io.stderr:write(string.format("Usage: [-html | -v] %s gt_home\n", arg[0]))
   io.stderr:write("Generate documentation for the GenomeTools home directory " ..
                   "gt_home.\n")
   os.exit(1)
 end
 
 local be_verbose = false
+local out_mode   = "txt"
 
 if #arg >= 1 then
-  if string.match(arg[1], "^-v") then
-    be_verbose = true
-    table.remove(arg, 1)
+  while #arg >= 1 and string.match(arg[1], "^-") do
+    if string.match(arg[1], "^-h") then
+      out_mode = "html"
+      table.remove(arg, 1)
+    elseif string.match(arg[1], "^-v") then
+      be_verbose = true
+      table.remove(arg, 1)
+    end
   end
   if #arg == 1 then
     gt_home = arg[1]
@@ -45,7 +51,6 @@ local export = { "src/libgtlua",
 
 local doc_parser      = DocParser:new()
 local doc_base        = DocBase:new()
-local doc_visitor_txt = DocVisitorTxt:new()
 
 local function show_rec_array(array)
   assert(array)
@@ -82,4 +87,12 @@ for _, v in ipairs(export) do
   end
 end
 
-doc_base:accept(doc_visitor_txt)
+local doc_visitor
+if out_mode == "txt" then
+  doc_visitor = DocVisitorTxt:new()
+  doc_base:accept(doc_visitor)
+else
+  assert(out_mode == "html")
+  doc_visitor = DocVisitorHTML:new()
+  doc_base:accept(doc_visitor)
+end
