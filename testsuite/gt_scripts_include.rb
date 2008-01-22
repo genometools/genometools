@@ -119,7 +119,19 @@ end
 Name "gtdoc -v"
 Keywords "gt_scripts gtdoc"
 Test do
-  run_test "#{$bin}gt #{$testdata}../gtscripts/gtdoc.lua #{$cur}"
+  run_test "#{$bin}gt #{$testdata}../gtscripts/gtdoc.lua -v #{$cur}"
+end
+
+Name "gtdoc -html"
+Keywords "gt_scripts gtdoc"
+Test do
+  run_test "#{$bin}gt #{$testdata}../gtscripts/gtdoc.lua -html #{$cur}"
+end
+
+Name "gtdoc -html -v"
+Keywords "gt_scripts gtdoc"
+Test do
+  run_test "#{$bin}gt #{$testdata}../gtscripts/gtdoc.lua -html -v #{$cur}"
 end
 
 if $arguments["libgtview"] then
