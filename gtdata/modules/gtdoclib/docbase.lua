@@ -22,6 +22,7 @@ DocBase = {}
 function DocBase:new()
   o = {}
   o.classes = {}
+  o.functions = {}
   setmetatable(o, self)
   self.__index = self
   return o
@@ -32,15 +33,52 @@ function DocBase:add_class(classname)
   self.classes[#self.classes + 1] = classname
 end
 
+function DocBase:add_function(funcname, funcargs, comment)
+  assert(funcname and funcargs and comment)
+  local desc = {}
+  desc.name = funcname
+  desc.args = funcargs
+  desc.comment = comment
+  print("function added: " .. funcname)
+  self.functions[#self.functions + 1] = desc
+end
+
+local function function_keyword(ast)
+  for i, keyword in ipairs(ast) do
+    if keyword == "function" then
+      return i
+    end
+  end
+  return 0
+end
+
 function DocBase:process_ast(ast)
   assert(ast)
   for _, v in ipairs(ast) do
     if type(v) == "table" then
       self:process_ast(v)
     else
-      assert(#ast == 2)
-      self["add_" .. ast[1]](self, ast[2])
-      break
+      local keyword = ast[1]
+      -- print(keyword)
+      if keyword == "class" then
+        assert(#ast == 2)
+        self["add_" .. ast[1]](self, ast[2])
+        break
+      elseif keyword == "comment" then
+        local funcpos = function_keyword(ast)
+        local complete_comment = ""
+        if funcpos > 0 then
+          assert(funcpos > 2)
+          assert(#ast == funcpos + 2)
+          if ast[2] == "undefined" then
+            print("warning: undefined comment") -- XXX
+          else
+            complete_comment = table.concat(ast, " ", 2, funcpos-1)
+          end
+            self:add_function(ast[funcpos+1], ast[funcpos+2], complete_comment)
+          break
+        end
+      end
     end
   end
 end
@@ -50,5 +88,9 @@ function DocBase:accept(visitor)
   -- visit classes
   for _, classname in ipairs(self.classes) do
     visitor:visit_class(classname)
+  end
+  -- visit functions
+  for _, funcdesc in ipairs(self.functions) do
+    visitor:visit_function(funcdesc)
   end
 end

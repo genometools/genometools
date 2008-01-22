@@ -30,23 +30,41 @@ else
   usage()
 end
 
-local export = { "src/libgtlua" }
+local export = { "src/libgtlua",
+                 "gtdata/modules/gtlua/feature_index.lua" }
 
 local doc_parser      = DocParser:new()
 local doc_base        = DocBase:new()
 local doc_visitor_txt = DocVisitorTxt:new()
 
+local function show_rec_array(array)
+  assert(array)
+  for _, v in ipairs(array) do
+    if type(v) == "table" then
+      show_rec_array(v)
+    else
+      print(v)
+    end
+  end
+end
+
+local function process_file(filename)
+  assert(filename)
+  if is_header(filename) or is_lua_file(filename) then
+    local ast = doc_parser:parse(filename)
+    -- show_rec_array(ast)
+    doc_base:process_ast(ast)
+  end
+end
+
 for _, v in ipairs(export) do
   if is_dir(v) then
     for f in lfs.dir(v) do
       local filename = v .. "/" .. f
-      if is_header(filename) then
-        local ast = doc_parser:parse(filename)
-        doc_base:process_ast(ast)
-      end
+      process_file(filename)
     end
   else
-    assert(false, "not implemented") -- XXX
+    local ast = process_file(v)
   end
 end
 

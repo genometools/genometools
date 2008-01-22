@@ -18,33 +18,73 @@
 module(..., package.seeall)
 
 require 'lpeg'
+require 'fileutils'
 
 DocParser = {}
 
--- Lexical Elements
-local Any            = lpeg.P(1)
-local Whitespace     = lpeg.S(" \t\n")
+-- Common Lexical Elements
+local Any           = lpeg.P(1)
+local Newline       = lpeg.S("\n")
+local Whitespace    = lpeg.S(" \t\n")
+local OptionalSpace = Whitespace^0
+local Space         = Whitespace^1
+
+-- Lexical Elements of C
 local Character      = lpeg.R("AZ", "az")
 local CCommentStart  = lpeg.P("/*")
 local CCommentEnd    = lpeg.P("*/")
-local Space          = Whitespace^1
 local ExportCComment = CCommentStart * lpeg.P(" exports the ") *
                        lpeg.Cc("class") * lpeg.C(Character^1) *
-                       lpeg.P(" class to Lua:") * (Any - CCommentEnd)^0  *
+                       lpeg.P(" class to Lua:") * (Any - CCommentEnd)^0 *
                        CCommentEnd
 local CComment       = CCommentStart * (Any - CCommentEnd)^0 * CCommentEnd
-local Code           = (Any - CCommentStart)^1
+local CCode          = (Any - CCommentStart)^1
 
--- Grammar
-local Elem, S = lpeg.V"Elem", lpeg.V"S"
-local G = lpeg.P{ S,
- S    = lpeg.Ct(Elem^0);
- Elem = lpeg.Ct(ExportCComment) + CComment + Space + Code;
+-- Lexical Elements of Lua
+local LuaLongCommentStart  = lpeg.P("--[[")
+local LuaLongCommentEnd    = lpeg.P("]]")
+local LuaLongComment       = lpeg.Cc("long comment") *
+                             lpeg.C(LuaLongCommentStart *
+                                    (Any - LuaLongCommentEnd)^0 *
+                                    LuaLongCommentEnd)
+local LuaShortCommentStart = lpeg.P("--")
+local LuaShortCommentEnd   = Newline
+local LuaShortCommentLine  = OptionalSpace * LuaShortCommentStart *
+                             lpeg.C((Any - LuaShortCommentEnd)^0) *
+                             LuaShortCommentEnd
+local LuaShortComment      = lpeg.Cc("comment") * LuaShortCommentLine^1
+local LuaOptionalComment   = LuaShortComment +
+                             lpeg.Cc("comment") * lpeg.Cc("undefined")
+local LuaCommentStart      = LuaLongCommentStart + LuaShortCommentStart
+local LuaEnd               = lpeg.P("end")
+local LuaGlobalFunction    = -lpeg.P("local") * OptionalSpace *
+                             lpeg.C(lpeg.P("function")) * OptionalSpace *
+                             lpeg.C(lpeg.P(Any - lpeg.P("("))^1) *
+                             lpeg.P("(") * lpeg.C((Any - lpeg.P(")"))^0) *
+                             lpeg.P(")")
+local ExportLuaMethod      = lpeg.Ct(LuaOptionalComment * LuaGlobalFunction)
+local CodeStop             = LuaCommentStart + LuaGlobalFunction
+local LuaCode              = lpeg.Cc("code") * lpeg.C((Any - CodeStop)^1)
+
+-- C Grammar
+local Elem, Start = lpeg.V"Elem", lpeg.V"Start"
+local CGrammar = lpeg.P{ Start,
+ Start = lpeg.Ct(Elem^0);
+ Elem  = lpeg.Ct(ExportCComment) + CComment + Space + CCode;
 }
+CGrammar = CGrammar * -1
+
+-- Lua Grammar
+local LuaGrammar = lpeg.P{ Start,
+  Start = lpeg.Ct(Elem^0);
+  Elem  = ExportLuaMethod + LuaLongComment + LuaShortComment + Space + LuaCode;
+}
+LuaGrammar = LuaGrammar * -1
 
 function DocParser:new()
   o = {}
-  o.pattern = G
+  o.c_pattern   = CGrammar
+  o.lua_pattern = LuaGrammar
   setmetatable(o, self)
   self.__index = self
   return o
@@ -52,9 +92,14 @@ end
 
 function DocParser:parse(filename)
   assert(filename)
+  assert(is_header(filename) or is_lua_file(filename))
   print("parsing " .. filename)
   local file, err = io.open(filename, "r")
   assert(file, err)
   local filecontent = file:read("*a")
-  return lpeg.match(self.pattern, filecontent)
+  if is_header(filename) then
+    return lpeg.match(self.c_pattern, filecontent)
+  else -- is_lua_file(filename)
+    return lpeg.match(self.lua_pattern, filecontent)
+  end
 end
