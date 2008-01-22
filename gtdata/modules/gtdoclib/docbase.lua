@@ -64,7 +64,9 @@ function DocBase:process_ast(ast, be_verbose)
       self:process_ast(v, be_verbose)
     else
       local keyword = ast[1]
-      -- print(keyword)
+      if be_verbose then
+        print("keyword: " .. keyword)
+      end
       if keyword == "class" then
         assert(#ast == 2)
         self["add_" .. ast[1]](self, ast[2], be_verbose)
