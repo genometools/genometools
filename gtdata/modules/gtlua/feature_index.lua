@@ -1,6 +1,6 @@
 --[[
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,10 @@ require "gtlua.genome_features"
 
 -- XXX: remove if statement if libgtview is always compiled in
 if GenomeTools_feature_index then
+  -- Computes the coverage for the sequence ID <seqid>. The optional <maxdist>
+  -- parameter denotes the maximal distance two features can be apart without
+  -- creating a new Range. Returns a table of Ranges denoting parts of <seqid>
+  -- covered by features.
   function GenomeTools_feature_index:get_coverage(seqid, maxdist)
     assert(seqid)
     local maxdist = maxdist or 0
@@ -62,6 +66,9 @@ if GenomeTools_feature_index then
     return coverage
   end
 
+  -- Returns a table of Ranges denoting parts of <seqid> which are covered by at
+  -- least one marked feature. Internally, get_coverage() is called and the
+  -- <maxdist> is passed along.
   function GenomeTools_feature_index:get_marked_regions(seqid, maxdist)
     assert(seqid, "missing seqid argument")
     local coverage = self:get_coverage(seqid, maxdist)
@@ -75,9 +82,9 @@ if GenomeTools_feature_index then
     return marked
   end
 
-  -- render to PNG file <png_file> for <seqid> in <range> with optional <width>
-  -- if no <png_file> is given os.tmpname() is called to create one
-  -- returns name of written PNG file
+  -- Render to PNG file <png_file> for <seqid> in <range> with optional <width>.
+  -- If no <png_file> is given os.tmpname() is called to create one.
+  -- Returns name of written PNG file.
   function GenomeTools_feature_index:render_to_png(seqid, range, png_file, width)
     assert(seqid and range)
     png_file = png_file or os.tmpname()
@@ -88,7 +95,7 @@ if GenomeTools_feature_index then
     return png_file
   end
 
-  -- show all sequence ids
+  -- Show all sequence IDs.
   function GenomeTools_feature_index:show_seqids()
     for _,seqid in ipairs(feature_index:get_seqids()) do
       print(seqid)
