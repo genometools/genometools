@@ -18,14 +18,24 @@
 require 'gtdoclib'
 
 function usage()
-  io.stderr:write(string.format("Usage: %s gt_home\n", arg[0]))
+  io.stderr:write(string.format("Usage: [-v] %s gt_home\n", arg[0]))
   io.stderr:write("Generate documentation for the GenomeTools home directory " ..
                   "gt_home.\n")
   os.exit(1)
 end
 
-if #arg == 1 then
-  gt_home = arg[1]
+local be_verbose = false
+
+if #arg >= 1 then
+  if string.match(arg[1], "^-v") then
+    be_verbose = true
+    table.remove(arg, 1)
+  end
+  if #arg == 1 then
+    gt_home = arg[1]
+  else
+    usage()
+  end
 else
   usage()
 end
@@ -48,12 +58,15 @@ local function show_rec_array(array)
   end
 end
 
-local function process_file(filename)
+local function process_file(filename, be_verbose)
   assert(filename)
   if is_header(filename) or is_lua_file(filename) then
-    local ast = doc_parser:parse(filename)
-    -- show_rec_array(ast)
-    doc_base:process_ast(ast)
+    local ast = doc_parser:parse(filename, be_verbose)
+    if be_verbose then
+      print("showing ast:")
+      show_rec_array(ast)
+    end
+    doc_base:process_ast(ast, be_verbose)
   end
 end
 
@@ -61,10 +74,10 @@ for _, v in ipairs(export) do
   if is_dir(v) then
     for f in lfs.dir(v) do
       local filename = v .. "/" .. f
-      process_file(filename)
+      process_file(filename, be_verbose)
     end
   else
-    local ast = process_file(v)
+    process_file(v, be_verbose)
   end
 end
 

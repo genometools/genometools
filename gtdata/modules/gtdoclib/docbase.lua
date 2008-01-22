@@ -28,18 +28,23 @@ function DocBase:new()
   return o
 end
 
-function DocBase:add_class(classname)
+function DocBase:add_class(classname, be_verbose)
   assert(classname)
+  if be_verbose then
+    print("class added: " .. classname)
+  end
   self.classes[#self.classes + 1] = classname
 end
 
-function DocBase:add_function(funcname, funcargs, comment)
+function DocBase:add_function(funcname, funcargs, comment, be_verbose)
   assert(funcname and funcargs and comment)
   local desc = {}
   desc.name = funcname
   desc.args = funcargs
   desc.comment = comment
-  print("function added: " .. funcname)
+  if be_verbose then
+    print("function added: " .. funcname)
+  end
   self.functions[#self.functions + 1] = desc
 end
 
@@ -52,17 +57,17 @@ local function function_keyword(ast)
   return 0
 end
 
-function DocBase:process_ast(ast)
+function DocBase:process_ast(ast, be_verbose)
   assert(ast)
   for _, v in ipairs(ast) do
     if type(v) == "table" then
-      self:process_ast(v)
+      self:process_ast(v, be_verbose)
     else
       local keyword = ast[1]
       -- print(keyword)
       if keyword == "class" then
         assert(#ast == 2)
-        self["add_" .. ast[1]](self, ast[2])
+        self["add_" .. ast[1]](self, ast[2], be_verbose)
         break
       elseif keyword == "comment" then
         local funcpos = function_keyword(ast)
@@ -75,7 +80,8 @@ function DocBase:process_ast(ast)
           else
             complete_comment = table.concat(ast, " ", 2, funcpos-1)
           end
-            self:add_function(ast[funcpos+1], ast[funcpos+2], complete_comment)
+            self:add_function(ast[funcpos+1], ast[funcpos+2], complete_comment,
+                              be_verbose)
           break
         end
       end

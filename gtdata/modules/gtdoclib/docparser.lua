@@ -90,10 +90,12 @@ function DocParser:new()
   return o
 end
 
-function DocParser:parse(filename)
+function DocParser:parse(filename, be_verbose)
   assert(filename)
   assert(is_header(filename) or is_lua_file(filename))
-  print("parsing " .. filename)
+  if be_verbose then
+    print("parsing " .. filename)
+  end
   local file, err = io.open(filename, "r")
   assert(file, err)
   local filecontent = file:read("*a")
