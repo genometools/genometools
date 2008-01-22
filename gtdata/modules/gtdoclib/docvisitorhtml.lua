@@ -17,13 +17,33 @@
 
 module(..., package.seeall)
 
-require 'gtmodulehelper'
+lp = require 'cgilua/lp'
 
--- all gtdoc modules which should be loaded
-local gtdocmodules = { "fileutils",
-                       "gtdoclib.docbase",
-                       "gtdoclib.docparser",
-                       "gtdoclib.docvisitorhtml",
-                       "gtdoclib.docvisitortxt" }
+DocVisitorHTML = {}
 
-gtmodulehelper.load_modules(gtdocmodules);
+function DocVisitorHTML:new(template_path)
+  o = {}
+  o.template_path = template_path
+  setmetatable(o, self)
+  self.__index = self
+  return o
+end
+
+function DocVisitorHTML:show_header()
+  lp.include(self.template_path .. "header.lp")
+end
+
+function DocVisitorHTML:visit_class(classname)
+  assert(classname)
+  io.write(string.format("class: %s\n", classname))
+end
+
+function DocVisitorHTML:visit_method(desc)
+  assert(desc)
+  io.write(string.format("method:\n%s\n%s(%s)\n", desc.comment, desc.name,
+           desc.args))
+end
+
+function DocVisitorHTML:show_footer()
+  lp.include(self.template_path .. "footer.lp")
+end

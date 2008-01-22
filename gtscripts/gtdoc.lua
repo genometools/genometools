@@ -24,8 +24,8 @@ function usage()
   os.exit(1)
 end
 
-local be_verbose = false
-local out_mode   = "txt"
+local be_verbose    = false
+local out_mode      = "txt"
 
 if #arg >= 1 then
   while #arg >= 1 and string.match(arg[1], "^-") do
@@ -45,6 +45,8 @@ if #arg >= 1 then
 else
   usage()
 end
+
+local template_path = gt_home .. "/gtdata/modules/gtdoclib/"
 
 local export = { "src/libgtlua",
                  "gtdata/modules/gtlua" }
@@ -93,6 +95,8 @@ if out_mode == "txt" then
   doc_base:accept(doc_visitor)
 else
   assert(out_mode == "html")
-  doc_visitor = DocVisitorHTML:new()
+  doc_visitor = DocVisitorHTML:new(template_path)
+  doc_visitor:show_header()
   doc_base:accept(doc_visitor)
+  doc_visitor:show_footer()
 end
