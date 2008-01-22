@@ -41,7 +41,7 @@ else
 end
 
 local export = { "src/libgtlua",
-                 "gtdata/modules/gtlua/feature_index.lua" }
+                 "gtdata/modules/gtlua" }
 
 local doc_parser      = DocParser:new()
 local doc_base        = DocBase:new()

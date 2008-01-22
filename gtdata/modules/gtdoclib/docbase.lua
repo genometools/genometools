@@ -51,14 +51,16 @@ function DocBase:add_method(funcname, funcargs, comment, be_verbose)
   end
   -- check if the function name starts with an upper-case letter and is a method
   local classname = string.match(desc.name, "^(%a[%a%d_]*):")
-  -- transform classname
-  classname = string.gsub(classname, "^%a", string.upper)
-  classname = string.gsub(classname, "_%a", string.upper)
-  classname = string.gsub(classname, "_", "")
+  -- transform classname, if necessary
+  if classname then
+    classname = string.gsub(classname, "^%a", string.upper)
+    classname = string.gsub(classname, "_%a", string.upper)
+    classname = string.gsub(classname, "_", "")
+  end
   if be_verbose and classname then
     print("classname found: " .. classname)
   end
-  -- if this is a classname, try to store method in class
+  -- if this is a valid classname, try to store method in class
   if classname and self.classes[classname] then
     self.classes[classname][#self.classes[classname] + 1] = desc
   else
