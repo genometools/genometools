@@ -38,7 +38,7 @@ function features_show(features)
   end
 end
 
--- Print all marked <features> (which is an array) to stdout.
+-- Print all marked <features> (an array) to stdout.
 function features_show_marked(features)
   assert(features)
   if features_contain_marked(features) then
