@@ -78,7 +78,7 @@ function DocBase:process_ast(ast, be_verbose)
           if ast[2] == "undefined" then
             print("warning: undefined comment") -- XXX
           else
-            complete_comment = table.concat(ast, " ", 2, funcpos-1)
+            complete_comment = table.concat(ast, "", 2, funcpos-1)
           end
             self:add_method(ast[funcpos+1], ast[funcpos+2], complete_comment,
                             be_verbose)
