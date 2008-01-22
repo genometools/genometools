@@ -2,9 +2,9 @@ print ([[
 
 File format for mapping_file:
 
-The supplied mapping file efines a mapping table named ``chseqids''. It maps the
-sequence-regions given in the GFF3_file to other names.  It can be defined as
-follows:
+The supplied mapping file defines a mapping table named ``chseqids''. It maps
+the sequence-regions given in the GFF3_file to other names.  It can be defined
+as follows:
 
 chseqids = {
   chr1  = "seq1",
