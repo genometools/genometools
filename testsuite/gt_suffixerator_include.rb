@@ -167,6 +167,7 @@ def checkmapped(args)
 end
 
 def makeuniquesubcall(queryfile,indexarg,ms)
+  extra=String.new;
   if ms
     extra=" -ms"
   else
@@ -186,14 +187,15 @@ def checkuniquesub(queryfile,ms)
     run "mv #{$last_stdout} tmp.pck"
     run "diff tmp.pck tmp.fmi"
   end
-  run "rm -f sfx.* fmi.* pck.*"
 end
 
 def createandcheckuniquesub(reffile,queryfile)
   run_test("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}")
   run_test("#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v -db #{reffile}")
-  run_test("#{$bin}gt packedindex mkindex -indexname pck -db #{reffile} -dna -pl -bsize 10 -locfreq 0 -locbitmap no -dir rev")
+  run_test("#{$bin}gt packedindex mkindex -indexname pck -db #{reffile} -dna -pl -bsize 10 -locfreq 32 -dir rev")
   checkuniquesub(queryfile,false)
+  checkuniquesub(queryfile,true)
+  run "rm -f sfx.* fmi.* pck.*"
 end
 
 def grumbach()
