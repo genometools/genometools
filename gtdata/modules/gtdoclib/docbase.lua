@@ -101,6 +101,6 @@ function DocBase:accept(visitor)
   end
   -- visit methods
   for _, funcdesc in ipairs(self.methods) do
-    visitor:visit_methods(funcdesc)
+    visitor:visit_method(funcdesc)
   end
 end
