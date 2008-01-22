@@ -1,6 +1,6 @@
 --[[
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,11 +17,13 @@
 
 module(..., package.seeall)
 
+-- Show genome node on stdout (using the optional <gff3_visitor>).
 function GenomeTools_genome_node:show(gff3_visitor)
   local gff3_visitor = gff3_visitor or gt.gff3_visitor_new()
   self:accept(gff3_visitor)
 end
 
+-- Show marked parts of genome node on stdout.
 function GenomeTools_genome_node:show_marked()
   if self:contains_marked() then
     local gni = gt.genome_node_iterator_new(self)
