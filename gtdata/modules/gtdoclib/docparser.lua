@@ -35,8 +35,7 @@ local CCommentStart  = lpeg.P("/*")
 local CCommentEnd    = lpeg.P("*/")
 local ExportCComment = CCommentStart * lpeg.P(" exports the ") *
                        lpeg.Cc("class") * lpeg.C(Character^1) *
-                       lpeg.P(" class to Lua:") * (Any - CCommentEnd)^0 *
-                       CCommentEnd
+                       (Any - CCommentEnd)^0 * CCommentEnd
 local CComment       = CCommentStart * (Any - CCommentEnd)^0 * CCommentEnd
 local CCode          = (Any - CCommentStart)^1
 
