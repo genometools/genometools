@@ -23,8 +23,8 @@ require "gtlua.genome_features"
 if GenomeTools_feature_index then
   -- Computes the coverage for the sequence ID <seqid>. The optional <maxdist>
   -- parameter denotes the maximal distance two features can be apart without
-  -- creating a new Range. Returns a table of Ranges denoting parts of <seqid>
-  -- covered by features.
+  -- creating a new Range. Returns a table of Ranges denoting parts the of
+  -- <seqid> covered by features.
   function GenomeTools_feature_index:get_coverage(seqid, maxdist)
     assert(seqid)
     local maxdist = maxdist or 0
