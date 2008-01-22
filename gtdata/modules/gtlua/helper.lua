@@ -17,14 +17,14 @@
 
 module(..., package.seeall)
 
--- export the content of gt table to the global environment
+-- Export the content of <gt> table to the global environment.
 function export()
   for k,v in pairs(gt) do
     _G[k] = v
   end
 end
 
--- call external 'display' program for file <filename>
+-- Call external 'display' program for file <filename>.
 function display(filename)
   assert(filename and file_exists(filename))
   if os.execute("display " .. filename) ~= 0 then
@@ -36,7 +36,7 @@ function display(filename)
   end
 end
 
--- show all keys and values of table <tbl>
+-- Show all keys and values of table <tbl>.
 function show_table(tbl)
   assert(tbl)
   for k,v in pairs(tbl) do
@@ -44,7 +44,7 @@ function show_table(tbl)
   end
 end
 
--- show content of gt table
+-- Show content of the <gt> table.
 function show(all)
   local a = {}
   for k in pairs(gt) do
@@ -60,8 +60,8 @@ function show(all)
   end
 end
 
--- reload and export
+-- Reload the <gt> module and export its content to the global environment.
 function re()
-  reload()
-  export()
+  gt.reload()
+  gt.export()
 end
