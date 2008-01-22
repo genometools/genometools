@@ -31,7 +31,7 @@ function DocVisitorTxt:visit_class(classname)
   io.write(string.format("class: %s\n", classname))
 end
 
-function DocVisitorTxt:visit_function(desc)
+function DocVisitorTxt:visit_method(desc)
   assert(desc)
   io.write(string.format("method:\n%s\n%s(%s)\n", desc.comment, desc.name,
            desc.args))

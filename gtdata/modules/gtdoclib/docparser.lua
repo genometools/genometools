@@ -58,7 +58,7 @@ local LuaOptionalComment   = LuaShortComment +
 local LuaCommentStart      = LuaLongCommentStart + LuaShortCommentStart
 local LuaEnd               = lpeg.P("end")
 local LuaGlobalFunction    = -lpeg.P("local") * OptionalSpace *
-                             lpeg.C(lpeg.P("function")) * OptionalSpace *
+                             lpeg.C(lpeg.P("method")) * OptionalSpace *
                              lpeg.C(lpeg.P(Any - lpeg.P("("))^1) *
                              lpeg.P("(") * lpeg.C((Any - lpeg.P(")"))^0) *
                              lpeg.P(")")

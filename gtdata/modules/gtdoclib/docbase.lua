@@ -22,7 +22,7 @@ DocBase = {}
 function DocBase:new()
   o = {}
   o.classes = {}
-  o.functions = {}
+  o.methods = {}
   setmetatable(o, self)
   self.__index = self
   return o
@@ -36,21 +36,21 @@ function DocBase:add_class(classname, be_verbose)
   self.classes[#self.classes + 1] = classname
 end
 
-function DocBase:add_function(funcname, funcargs, comment, be_verbose)
+function DocBase:add_method(funcname, funcargs, comment, be_verbose)
   assert(funcname and funcargs and comment)
   local desc = {}
   desc.name = funcname
   desc.args = funcargs
   desc.comment = comment
   if be_verbose then
-    print("function added: " .. funcname)
+    print("method added: " .. funcname)
   end
-  self.functions[#self.functions + 1] = desc
+  self.methods[#self.methods + 1] = desc
 end
 
-local function function_keyword(ast)
+local function method_keyword(ast)
   for i, keyword in ipairs(ast) do
-    if keyword == "function" then
+    if keyword == "method" then
       return i
     end
   end
@@ -70,7 +70,7 @@ function DocBase:process_ast(ast, be_verbose)
         self["add_" .. ast[1]](self, ast[2], be_verbose)
         break
       elseif keyword == "comment" then
-        local funcpos = function_keyword(ast)
+        local funcpos = method_keyword(ast)
         local complete_comment = ""
         if funcpos > 0 then
           assert(funcpos > 2)
@@ -80,8 +80,8 @@ function DocBase:process_ast(ast, be_verbose)
           else
             complete_comment = table.concat(ast, " ", 2, funcpos-1)
           end
-            self:add_function(ast[funcpos+1], ast[funcpos+2], complete_comment,
-                              be_verbose)
+            self:add_method(ast[funcpos+1], ast[funcpos+2], complete_comment,
+                            be_verbose)
           break
         end
       end
@@ -95,8 +95,8 @@ function DocBase:accept(visitor)
   for _, classname in ipairs(self.classes) do
     visitor:visit_class(classname)
   end
-  -- visit functions
-  for _, funcdesc in ipairs(self.functions) do
-    visitor:visit_function(funcdesc)
+  -- visit methods
+  for _, funcdesc in ipairs(self.methods) do
+    visitor:visit_methods(funcdesc)
   end
 end
