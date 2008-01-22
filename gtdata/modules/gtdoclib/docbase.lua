@@ -17,6 +17,8 @@
 
 module(..., package.seeall)
 
+local w = require 'warning'
+
 DocBase = {}
 
 function DocBase:new()
@@ -50,7 +52,7 @@ end
 
 local function method_keyword(ast)
   for i, keyword in ipairs(ast) do
-    if keyword == "method" then
+    if keyword == "function" then
       return i
     end
   end
@@ -78,7 +80,7 @@ function DocBase:process_ast(ast, be_verbose)
           assert(funcpos > 2)
           assert(#ast == funcpos + 2)
           if ast[2] == "undefined" then
-            print("warning: undefined comment") -- XXX
+            w.warning("undefined comment")
           else
             complete_comment = table.concat(ast, "", 2, funcpos-1)
           end
