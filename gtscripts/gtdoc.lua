@@ -71,13 +71,14 @@ local function process_file(filename, be_verbose)
 end
 
 for _, v in ipairs(export) do
-  if is_dir(v) then
-    for f in lfs.dir(v) do
-      local filename = v .. "/" .. f
+  local filename = gt_home .. "/" .. v
+  if is_dir(filename) then
+    for f in lfs.dir(filename) do
+      local filename = filename .. "/" .. f
       process_file(filename, be_verbose)
     end
   else
-    process_file(v, be_verbose)
+    process_file(filename, be_verbose)
   end
 end
 

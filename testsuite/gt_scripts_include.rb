@@ -110,6 +110,18 @@ Test do
   run_test "#{$bin}gt #{$cur}/src/external/lpeg-0.7/test.lua"
 end
 
+Name "gtdoc"
+Keywords "gt_scripts gtdoc"
+Test do
+  run_test "#{$bin}gt #{$testdata}../gtscripts/gtdoc.lua #{$cur}"
+end
+
+Name "gtdoc -v"
+Keywords "gt_scripts gtdoc"
+Test do
+  run_test "#{$bin}gt #{$testdata}../gtscripts/gtdoc.lua #{$cur}"
+end
+
 if $arguments["libgtview"] then
   Name "feature_index and feature_stream bindings"
   Keywords "gt_scripts"
