@@ -447,6 +447,74 @@ unsigned long packedindexuniqueforward(const void *genericindex,
   return 0;
 }
 
+unsigned long packedindexmstatsforward(const void *genericindex,
+                                       Seqpos *witnessposition,
+                                       const Uchar *qstart,
+                                       const Uchar *qend)
+{
+  Uchar cc;
+  const Uchar *qptr;
+  Seqpos prevlbound;
+  struct matchBound bwtbound;
+  const BWTSeq *bwtSeq = (BWTSeq *) genericindex;
+  Symbol curSym;
+  const MRAEnc *alphabet;
+
+  assert(bwtSeq && qstart);
+  alphabet = BWTSeqGetAlphabet(bwtSeq);
+  qptr = qstart;
+  cc = *qptr;
+#undef mydebug
+#ifdef mydebug
+  printf("# start cc=%u\n",cc);
+#endif
+  if (ISSPECIAL(cc))
+  {
+    return 0;
+  }
+  curSym = MRAEncMapSymbol(alphabet, cc);
+  bwtbound.lower = bwtSeq->count[curSym];
+  bwtbound.upper = bwtSeq->count[curSym+1];
+#ifdef mydebug
+  printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
+          "occurrences\n",
+         PRINTSeqposcast(bwtbound.lower),
+         PRINTSeqposcast(bwtbound.upper),
+         PRINTSeqposcast(bwtbound.upper - bwtbound.lower));
+#endif
+  prevlbound = bwtbound.lower;
+  for (qptr++; qptr < qend; qptr++)
+  {
+    cc = *qptr;
+#ifdef mydebug
+    printf("# cc=%u\n",cc);
+#endif
+    if (ISSPECIAL (cc))
+    {
+      return 0;
+    }
+    curSym = MRAEncMapSymbol(alphabet, cc);
+    bwtbound.lower = bwtSeq->count[curSym] +
+                     BWTSeqOcc(bwtSeq, curSym, bwtbound.lower);
+    bwtbound.upper = bwtSeq->count[curSym] +
+                     BWTSeqOcc(bwtSeq, curSym, bwtbound.upper);
+#ifdef mydebug
+    printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
+            "occurrences\n",
+           PRINTSeqposcast(bwtbound.lower),
+           PRINTSeqposcast(bwtbound.upper),
+           PRINTSeqposcast(bwtbound.upper - bwtbound.lower));
+#endif
+    if (bwtbound.lower >= bwtbound.upper)
+    {
+      break;
+    }
+    prevlbound = bwtbound.lower;
+  }
+  *witnessposition = pckfindfirstmatch(bwtSeq,prevlbound);
+  return 0;
+}
+
 extern Seqpos
 BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen)
 {

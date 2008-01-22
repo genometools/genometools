@@ -327,9 +327,7 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
         theindex = (const void *) packedindex;
         if (uniquesubcallinfo.domatchingstatistics)
         {
-          /* EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter,
-                             const BWTSeq *bwtSeq, Error *err) */
-          assert(!"domatchingstatistics for packed index");
+          uniqueforwardfunction = packedindexmstatsforward;
         } else
         {
           uniqueforwardfunction = packedindexuniqueforward;
