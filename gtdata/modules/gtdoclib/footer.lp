@@ -1,7 +1,7 @@
 <div id="footer">
 Copyright &copy; 2008
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: <?lua= os.date("%Y-%m-%d") ?>
+Last update: <%=os.date("%Y-%m-%d")%>
 </div>
 </div>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">

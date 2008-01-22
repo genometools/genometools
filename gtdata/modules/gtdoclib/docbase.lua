@@ -114,21 +114,29 @@ end
 
 function DocBase:accept(visitor)
   assert(visitor)
-  -- visit classes
+  -- visit all classes
   local sorted_classes = {}
   for classname in pairs(self.classes) do
     sorted_classes[#sorted_classes + 1] = classname
   end
   table.sort(sorted_classes)
+  if visitor.visit_classes then
+    visitor:visit_classes(sorted_classes)
+  end
+  -- visit sole functions
+  for _, funcdesc in ipairs(self.solefuncs) do
+    if visitor.visit_sole_function then
+      visitor:visit_sole_function(funcdesc)
+    else
+      visitor:visit_method(funcdesc)
+    end
+  end
+  -- visit each class
   for _, classname in ipairs(sorted_classes) do
     visitor:visit_class(classname)
     -- visit methods for class
     for _, method in ipairs(self.classes[classname]) do
       visitor:visit_method(method)
     end
-  end
-  -- visit sole functions
-  for _, funcdesc in ipairs(self.solefuncs) do
-    visitor:visit_method(funcdesc)
   end
 end

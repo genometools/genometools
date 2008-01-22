@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>gtscript documentation</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a id="current" href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="libgtview.html"><tt>libgtview</tt> library</a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<h1><tt>gtscript</tt> documentation</h1>
+<strong>This documentation is incomplete!</strong> Check back later...
+<h2>Classes</h2>
+<ul>
+
+  <li><a href="#Alpha">Alpha</a>
+
+  <li><a href="#Bittab">Bittab</a>
+
+  <li><a href="#Diagram">Diagram</a>
+
+  <li><a href="#FeatureIndex">FeatureIndex</a>
+
+  <li><a href="#FeatureStream">FeatureStream</a>
+
+  <li><a href="#FeatureVisitor">FeatureVisitor</a>
+
+  <li><a href="#GenomeNode">GenomeNode</a>
+
+  <li><a href="#GenomeNodeIterator">GenomeNodeIterator</a>
+
+  <li><a href="#GenomeStream">GenomeStream</a>
+
+  <li><a href="#GenomeVisitor">GenomeVisitor</a>
+
+  <li><a href="#Range">Range</a>
+
+  <li><a href="#Render">Render</a>
+
+  <li><a href="#ScoreMatrix">ScoreMatrix</a>
+
+  <li><a href="#StreamEvaluator">StreamEvaluator</a>
+
+</ul>
+<h2>Sole functions</h2>
+<code>features_contain_marked(features)</code>
+<p>
+
+</p>
+<hr>
+<code>features_show(features)</code>
+<p>
+
+</p>
+<hr>
+<code>features_show_marked(features)</code>
+<p>
+
+</p>
+<hr>
+<code>export()</code>
+<p>
+export the content of gt table to the global environment
+</p>
+<hr>
+<code>display(filename)</code>
+<p>
+call external 'display' program for file <code>filename</code>
+</p>
+<hr>
+<code>show_table(tbl)</code>
+<p>
+show all keys and values of table <code>tbl</code>
+</p>
+<hr>
+<code>show(all)</code>
+<p>
+show content of gt table
+</p>
+<hr>
+<code>re()</code>
+<p>
+reload and export
+</p>
+<hr>
+<a name="Alpha"></a>
+<h2>Class Alpha</h2>
+<a name="Bittab"></a>
+<h2>Class Bittab</h2>
+<a name="Diagram"></a>
+<h2>Class Diagram</h2>
+<a name="FeatureIndex"></a>
+<h2>Class FeatureIndex</h2>
+<code>feature_index:get_coverage(seqid, maxdist)</code>
+<p>
+Computes the coverage for the sequence ID <code>seqid</code>. The optional <code>maxdist</code> parameter denotes the maximal distance two features can be apart without creating a new Range. Returns a table of Ranges denoting parts the of <code>seqid</code> covered by features.
+</p>
+<hr>
+<code>feature_index:get_marked_regions(seqid, maxdist)</code>
+<p>
+Returns a table of Ranges denoting parts of <code>seqid</code> which are covered by at least one marked feature. Internally, <code>get_coverage()</code> is called and the <code>maxdist</code> is passed along.
+</p>
+<hr>
+<code>feature_index:render_to_png(seqid, range, png_file, width)</code>
+<p>
+Render to PNG file <code>png_file</code> for <code>seqid</code> in <code>range</code> with optional <code>width</code>. If no <code>png_file</code> is given <code>os.tmpname()</code> is called to create one. Returns name of written PNG file.
+</p>
+<hr>
+<code>feature_index:show_seqids()</code>
+<p>
+Show all sequence IDs.
+</p>
+<hr>
+<a name="FeatureStream"></a>
+<h2>Class FeatureStream</h2>
+<a name="FeatureVisitor"></a>
+<h2>Class FeatureVisitor</h2>
+<a name="GenomeNode"></a>
+<h2>Class GenomeNode</h2>
+<code>genome_node:show(gff3_visitor)</code>
+<p>
+
+</p>
+<hr>
+<code>genome_node:show_marked()</code>
+<p>
+
+</p>
+<hr>
+<a name="GenomeNodeIterator"></a>
+<h2>Class GenomeNodeIterator</h2>
+<a name="GenomeStream"></a>
+<h2>Class GenomeStream</h2>
+<a name="GenomeVisitor"></a>
+<h2>Class GenomeVisitor</h2>
+<a name="Range"></a>
+<h2>Class Range</h2>
+<code>range:show()</code>
+<p>
+
+</p>
+<hr>
+<a name="Render"></a>
+<h2>Class Render</h2>
+<a name="ScoreMatrix"></a>
+<h2>Class ScoreMatrix</h2>
+<a name="StreamEvaluator"></a>
+<h2>Class StreamEvaluator</h2>
+<div id="footer">
+Copyright &copy; 2008
+<a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
+Last update: 2008-01-22
+</div>
+</div>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-301256-4";
+urchinTracker();
+</script>
+</body>
+</html>

@@ -19,3 +19,4 @@
 </div>
 <div id="main">
 <h1><tt>gtscript</tt> documentation</h1>
+<strong>This documentation is incomplete!</strong> Check back later...
