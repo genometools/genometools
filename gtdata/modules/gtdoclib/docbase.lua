@@ -49,7 +49,21 @@ function DocBase:add_method(funcname, funcargs, comment, be_verbose)
   if be_verbose then
     print("method added: " .. desc.name)
   end
-  self.solefuncs[#self.solefuncs + 1] = desc
+  -- check if the function name starts with an upper-case letter and is a method
+  local classname = string.match(desc.name, "^(%a[%a%d_]*):")
+  -- transform classname
+  classname = string.gsub(classname, "^%a", string.upper)
+  classname = string.gsub(classname, "_%a", string.upper)
+  classname = string.gsub(classname, "_", "")
+  if be_verbose and classname then
+    print("classname found: " .. classname)
+  end
+  -- if this is a classname, try to store method in class
+  if classname and self.classes[classname] then
+    self.classes[classname][#self.classes[classname] + 1] = desc
+  else
+    self.solefuncs[#self.solefuncs + 1] = desc
+  end
 end
 
 local function method_keyword(ast)
@@ -99,13 +113,17 @@ end
 function DocBase:accept(visitor)
   assert(visitor)
   -- visit classes
-  local sorted_classes = {} 
+  local sorted_classes = {}
   for classname in pairs(self.classes) do
     sorted_classes[#sorted_classes + 1] = classname
   end
   table.sort(sorted_classes)
   for _, classname in ipairs(sorted_classes) do
     visitor:visit_class(classname)
+    -- visit methods for class
+    for _, method in ipairs(self.classes[classname]) do
+      visitor:visit_method(method)
+    end
   end
   -- visit sole functions
   for _, funcdesc in ipairs(self.solefuncs) do
