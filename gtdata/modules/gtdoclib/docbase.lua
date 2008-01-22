@@ -24,8 +24,8 @@ DocBase = {}
 
 function DocBase:new()
   o = {}
-  o.classes = {}
-  o.methods = {}
+  o.classes   = {}
+  o.solefuncs = {}
   setmetatable(o, self)
   self.__index = self
   return o
@@ -42,13 +42,14 @@ end
 function DocBase:add_method(funcname, funcargs, comment, be_verbose)
   assert(funcname and funcargs and comment)
   local desc = {}
-  desc.name = funcname
+  -- remove ``GenomeTools_'' prefix which is used to extend exported C classes
+  desc.name = string.gsub(funcname, "^GenomeTools_", "")
   desc.args = funcargs
   desc.comment = comment
   if be_verbose then
-    print("method added: " .. funcname)
+    print("method added: " .. desc.name)
   end
-  self.methods[#self.methods + 1] = desc
+  self.solefuncs[#self.solefuncs + 1] = desc
 end
 
 local function method_keyword(ast)
@@ -101,8 +102,8 @@ function DocBase:accept(visitor)
   for _, classname in ipairs(self.classes) do
     visitor:visit_class(classname)
   end
-  -- visit methods
-  for _, funcdesc in ipairs(self.methods) do
+  -- visit sole functions
+  for _, funcdesc in ipairs(self.solefuncs) do
     visitor:visit_method(funcdesc)
   end
 end
