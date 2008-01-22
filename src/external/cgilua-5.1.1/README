@@ -1,0 +1,37 @@
+CGILua 5.1
+http://keplerproject.org/cgilua
+
+CGILua is a tool for creating dynamic Web pages and manipulating input
+data from Web forms. CGILua allows the separation of logic and data
+handling from the generation of pages, making it easy to develop web
+applications with Lua.
+
+One of advantages of CGILua is its abstraction of the underlying Web server.
+You can develop a CGILua application for one Web server and run it on any
+other Web server that supports CGILua, even if using a different launching model.
+
+CGILua can be used with a variety of Web servers and, for each server,
+with different launchers. A launcher is responsible for the interaction of
+CGILua and the Web server, for example using ISAPI on IIS or mod_lua on Apache.
+The reference implementation of CGILua launchers is Kepler.
+
+CGILua is free software and uses the same license as Lua 5.1. 
+
+Installation
+CGILua follows the package model for Lua 5.1, therefore it should be "installed" in your package.path. 
+
+Version 5.1.1 [21/Nov/2007]
+
+        * Changed the security policy for scripts. Now scripts have access to all Lua globals,
+        including the debug and os packages. It is up to the application developer to choose what policy to use
+        * If you are using Kepler, it is strongly suggested that you replace your previous CGILua config.lua file
+        with the new one installed by Kepler and then merge the differences
+        * Added the cgilua.dispatcher module
+        * Added default handlers for a set of MIME types. The default handlers return only the content-type and
+        conten-lenght headers for the files.
+        * Added functions cgilua.splitonfirst and cgilua.splitonlast
+        * Added functions cgilua.tmpfile and cgilua.tmpname
+        * Changed the use of "/test" for the session temporary directory checking (bug found by Yuri Takhteyev)
+        * Corrected the use of cgilua.QUERY in the session handling (bug found by Jim Madsen)
+        * Better handling of "application/xml" POST content types (patch by Ignacio Burgueño)
+        * Fixed Bug [#1910] - Bug in byte accounting in post.lua (found by Greg Bell)
