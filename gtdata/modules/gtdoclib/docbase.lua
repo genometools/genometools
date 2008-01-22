@@ -17,6 +17,7 @@
 
 module(..., package.seeall)
 
+require 'stringext'
 local w = require 'warning'
 
 DocBase = {}
@@ -83,6 +84,7 @@ function DocBase:process_ast(ast, be_verbose)
             w.warning("undefined comment")
           else
             complete_comment = table.concat(ast, "", 2, funcpos-1)
+            complete_comment = string.strip(complete_comment)
           end
             self:add_method(ast[funcpos+1], ast[funcpos+2], complete_comment,
                             be_verbose)
