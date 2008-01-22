@@ -86,7 +86,7 @@ end
 Name "extract_swalign -sol"
 Keywords "gt_scripts"
 Test do
-  run_test "#{$bin}gt #{$testdata}../gtscripts/extract_swalign.lua -sol " + 
+  run_test "#{$bin}gt #{$testdata}../gtscripts/extract_swalign.lua -sol " +
            "#{$cur} #{$testdata}BLOSUM62"
   run "cd swalign && ${MAKE:-make} test"
   if not File.exists?("swalign.tar.gz") then
