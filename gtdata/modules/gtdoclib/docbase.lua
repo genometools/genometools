@@ -36,7 +36,7 @@ function DocBase:add_class(classname, be_verbose)
   if be_verbose then
     print("class added: " .. classname)
   end
-  self.classes[#self.classes + 1] = classname
+  self.classes[classname] = self.classes[classname] or {}
 end
 
 function DocBase:add_method(funcname, funcargs, comment, be_verbose)
@@ -99,7 +99,12 @@ end
 function DocBase:accept(visitor)
   assert(visitor)
   -- visit classes
-  for _, classname in ipairs(self.classes) do
+  local sorted_classes = {} 
+  for classname in pairs(self.classes) do
+    sorted_classes[#sorted_classes + 1] = classname
+  end
+  table.sort(sorted_classes)
+  for _, classname in ipairs(sorted_classes) do
     visitor:visit_class(classname)
   end
   -- visit sole functions
