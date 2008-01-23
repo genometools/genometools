@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,8 +22,11 @@
 
 /* exports the GenomeNodeIterator class to Lua:
 
-              genome_node_iterator = gt.genome_node_iterator_new(genome_node)
-  genome_node genome_node_iterator:next()
+   -- Returns a new genome node iterator object for <genome_node>.
+   function genome_node_iterator_new(genome_node)
+
+   -- Returns the next genome node for <genome_node_iterator> or nil.
+   function genome_node_iterator:next()
 */
 int luaopen_genome_node_iterator(lua_State*);
 
