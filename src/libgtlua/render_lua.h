@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,8 +22,12 @@
 
 /* exports the Render class to Lua:
 
-   render = gt.render_new()
-            render:to_png(diagram, filename, [width])
+   -- Returns a new render object.
+   function render_new()
+
+   -- Uses <render> to render the given <diagram> as PNG to <filename>.
+   -- The optional <width> parameter sets the width of the PNG (default: 800).
+   function render:to_png(diagram, filename, width)
 */
 int luaopen_render(lua_State*);
 
