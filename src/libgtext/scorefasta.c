@@ -82,9 +82,10 @@ unsigned long scorefasta(const char *u, unsigned long ulen,
   }
 
   /* free space */
+  ma_free(count);
   for (i = 0; i < hsize; i++)
     array_delete(h[i]);
-  free(h);
+  ma_free(h);
 
   return maxcount;
 }
