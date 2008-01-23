@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,9 +22,14 @@
 
 /* exports the Alpha class to Lua:
 
-          alpha = gt.alpha_new_protein()
-   string alpha:decode(code)
-   number alpha:size()
+   -- Returns a new protein alphabet.
+   function alpha_new_protein()
+
+   -- Returns a string containing the decoded character of the <code> number.
+   function alpha:decode(code)
+
+   -- Returns the size of <alpha> a number.
+   function alpha:size()
 */
 int luaopen_alpha(lua_State*);
 
