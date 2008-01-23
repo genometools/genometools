@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -76,7 +76,7 @@ static Array* range_table_to_array(lua_State *L)
     else
       error = true;
     if (error) {
-      /* we have non range in the table */
+      /* we have a non range in the table */
       msg = lua_pushfstring(L, "expected %s as type of table entry %d",
                             RANGE_METATABLE, i);
       array_delete(ranges);
