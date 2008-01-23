@@ -23,7 +23,7 @@ require "gtlua.genome_features"
 if GenomeTools_feature_index then
   -- Computes the coverage for the sequence ID <seqid>. The optional <maxdist>
   -- parameter denotes the maximal distance two features can be apart without
-  -- creating a new Range. Returns a table of Ranges denoting parts the of
+  -- creating a new Range. Returns an array of Ranges denoting parts the of
   -- <seqid> covered by features.
   function GenomeTools_feature_index:get_coverage(seqid, maxdist)
     assert(seqid)
@@ -37,7 +37,7 @@ if GenomeTools_feature_index then
 
     -- collect all feature ranges
     for i, feature in ipairs(features) do
-      table.insert(ranges, feature:get_range())
+      ranges[#ranges+1] = feature:get_range()
     end
     -- sort feature ranges
     ranges = gt.ranges_sort(ranges)
@@ -52,7 +52,7 @@ if GenomeTools_feature_index then
         -- assert(startpos >= minstartpos)
         if (startpos > maxendpos + maxdist) then
           -- new region started
-          table.insert(coverage, gt.range_new(minstartpos, maxendpos))
+          coverage[#coverage+1] = gt.range_new(minstartpos, maxendpos)
           minstartpos = startpos
           maxendpos   = endpos
         else
@@ -66,8 +66,8 @@ if GenomeTools_feature_index then
     return coverage
   end
 
-  -- Returns a table of Ranges denoting parts of <seqid> which are covered by at
-  -- least one marked feature. Internally, get_coverage() is called and the
+  -- Returns an array of Ranges denoting parts of <seqid> which are covered by
+  -- at least one marked feature. Internally, get_coverage() is called and the
   -- <maxdist> is passed along.
   function GenomeTools_feature_index:get_marked_regions(seqid, maxdist)
     assert(seqid, "missing seqid argument")
