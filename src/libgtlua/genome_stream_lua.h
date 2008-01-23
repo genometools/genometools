@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,9 +22,16 @@
 
 /* exports the GenomeStream interface and its implementors of libgtext to Lua:
 
-   genome_stream = gt.gff3_in_stream_new_sorted(filename)
-   genome_stream = gt.gff3_out_stream_new(genome_stream)
-   genome_node   = genome_stream:next_tree()
+   -- Returns a new GFF3 input stream object for <filename>. The file <filename>
+   -- has to be a sorted GFF3 file.
+   function gff3_in_stream_new_sorted(filename)
+
+   -- Returns a new GFF3 output stream which pulls its features from
+   -- <genome_stream>.
+   function gff3_out_stream_new(genome_stream)
+
+   -- Returns the next genome node for <genome_stream> or nil.
+   function genome_stream:next_tree()
 */
 int luaopen_genome_stream(lua_State*);
 
