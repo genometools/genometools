@@ -20,10 +20,35 @@
 <div id="main">
 <h1><tt>gtscript</tt> documentation</h1>
 <p>
-<strong>This documentation is incomplete!</strong> Check back later...
+This document describes the <tt>gtscript</tt> API. <tt>gtscript</tt> is
+basically <a href="http://www.lua.org/">Lua</a> (an embeddable scripting
+language) plus parts of the <i>GenomeTools</i> C libraries exported to
+Lua. Because the <i>GenomeTools</i> binary <tt>gt</tt> contains an embedded Lua
+interpreter, <tt>gtscript</tt> files can be executed with the <tt>gt</tt>
+binary.
+The parts of the <i>GenomeTools</i> C libraries exported to Lua (the
+<tt>gtscript</tt> API) are described here, for a documentation of Lua itself and
+its APIs, please refer to the <a href="http://www.lua.org/manual/5.1/">Lua
+reference manual</a>.
 </p>
-<p>
-If a function returns an array, this denotes a table where only consecutive
+<h2>Notes</h2>
+<ul>
+<li>
+You have to add <code>require 'gtlua'</code> to your script
+in order to load the parts of the <tt>gtscript</tt> API which are implemented in
+<tt>gtscript</tt> itself.
+<li>
+By default, all functions of the <tt>gtscript</tt> API are contained in the
+<code>gt</code> table.  That is, you have to prepend all functions calls with
+``<code>gt.</code>''. For example, write <code>gt.show()</code> to call the
+<code>show()</code> function documented below.  You can use
+<code>gt.export()</code> or <code>gt.re()</code> to export the <code>gt</code>
+table to the global environment, which makes the prepending unnecessary (but
+clutters your global environment).
+<li>
+If a function is documented as ``returns an array'', this means that the function
+returns a table where only consecutive
 integer keys from 1 on are used and which can be traversed with the
-<code>ipairs()</code> function.
-</p>
+<a
+href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code></a> function.
+</ul>

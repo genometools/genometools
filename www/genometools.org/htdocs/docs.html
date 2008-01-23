@@ -19,7 +19,39 @@
 </div>
 <div id="main">
 <h1><tt>gtscript</tt> documentation</h1>
-<strong>This documentation is incomplete!</strong> Check back later...
+<p>
+This document describes the <tt>gtscript</tt> API. <tt>gtscript</tt> is
+basically <a href="http://www.lua.org/">Lua</a> (an embeddable scripting
+language) plus parts of the <i>GenomeTools</i> C libraries exported to
+Lua. Because the <i>GenomeTools</i> binary <tt>gt</tt> contains an embedded Lua
+interpreter, <tt>gtscript</tt> files can be executed with the <tt>gt</tt>
+binary.
+The parts of the <i>GenomeTools</i> C libraries exported to Lua (the
+<tt>gtscript</tt> API) are described here, for a documentation of Lua itself and
+its APIs, please refer to the <a href="http://www.lua.org/manual/5.1/">Lua
+reference manual</a>.
+</p>
+<h2>Notes</h2>
+<ul>
+<li>
+You have to add <code>require 'gtlua'</code> to your script
+in order to load the parts of the <tt>gtscript</tt> API which are implemented in
+<tt>gtscript</tt> itself.
+<li>
+By default, all functions of the <tt>gtscript</tt> API are contained in the
+<code>gt</code> table.  That is, you have to prepend all functions calls with
+``<code>gt.</code>''. For example, write <code>gt.show()</code> to call the
+<code>show()</code> function documented below.  You can use
+<code>gt.export()</code> or <code>gt.re()</code> to export the <code>gt</code>
+table to the global environment, which makes the prepending unnecessary (but
+clutters your global environment).
+<li>
+If a function is documented as ``returns an array'', this means that the function
+returns a table where only consecutive
+integer keys from 1 on are used and which can be traversed with the
+<a
+href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code></a> function.
+</ul>
 <h2>Classes</h2>
 <ul>
 
@@ -53,6 +85,31 @@
 
 </ul>
 <h2>Sole functions</h2>
+<code>gff3_in_stream_new_sorted(filename)</code>
+<p>
+Returns a new GFF3 input stream object for <code>filename</code>. The file <code>filename</code> has to be a sorted GFF3 file.
+</p>
+<hr>
+<code>gff3_out_stream_new(genome_stream)</code>
+<p>
+Returns a new GFF3 output stream which pulls its features from <code>genome_stream</code>.
+</p>
+<hr>
+<code>gff3_visitor_new()</code>
+<p>
+Returns a new GFF3 visitor.
+</p>
+<hr>
+<code>ranges_sort(range_array)</code>
+<p>
+Returns an array containing the ranges from array <code>range_array</code> in sorted order.
+</p>
+<hr>
+<code>ranges_are_sorted(range_array)</code>
+<p>
+Returns true if the ranges in array <code>range_array</code> are sorted, false otherwise.
+</p>
+<hr>
 <code>reload()</code>
 <p>
 Reload <code>gt</code> module.
@@ -100,20 +157,115 @@ Reload the <code>gt</code> module and export its content to the global environme
 <hr>
 <a name="Alpha"></a>
 <h2>Class Alpha</h2>
+<code>alpha_new_protein()</code>
+<p>
+Returns a new protein alphabet.
+</p>
+<hr>
+<code>alpha:decode(code)</code>
+<p>
+Returns a string containing the decoded character of the <code>code</code> number.
+</p>
+<hr>
+<code>alpha:size()</code>
+<p>
+Returns the size of <code>alpha</code> a number.
+</p>
+<hr>
 <a name="Bittab"></a>
 <h2>Class Bittab</h2>
+<code>bittab_new(num_of_bits)</code>
+<p>
+Returns a bittab with <code>num_of_bits</code> many bits.
+</p>
+<hr>
+<code>bittab:set_bit(bit)</code>
+<p>
+Set <code>bit</code> in <code>bittab</code>.
+</p>
+<hr>
+<code>bittab:unset_bit(bit)</code>
+<p>
+Unset <code>bit</code> in <code>bittab</code>.
+</p>
+<hr>
+<code>bittab:complement(src)</code>
+<p>
+Store the complement of bittab <code>src</code> in <code>bittab</code>. <code>bittab</code> and <code>src</code> must have the same size.
+</p>
+<hr>
+<code>bittab:equal(src)</code>
+<p>
+Set <code>bittab</code> equal to bittab <code>src</code>. <code>bittab</code> and <code>src</code> must have the same size.
+</p>
+<hr>
+<code>bittab:and_equal(src)</code>
+<p>
+Set <code>bittab</code> equal to the bitwise AND of <code>bittab</code> and <code>src</code>. <code>bittab</code> and <code>src</code> must have the same size.
+</p>
+<hr>
+<code>bittab:bit_is_set(bit)</code>
+<p>
+Returns true if <code>bit</code> is set in <code>bittab</code>, false otherwise.
+</p>
+<hr>
 <a name="Diagram"></a>
 <h2>Class Diagram</h2>
+<code>diagram_new(feature_index, range, seqid)</code>
+<p>
+Return a diagram object which contains the genome nodes given in <code>feature_index</code> in the given <code>range</code> of the sequence region with sequence ID <code>seqid</code>.
+</p>
+<hr>
 <a name="FeatureIndex"></a>
 <h2>Class FeatureIndex</h2>
+<code>feature_index_new()</code>
+<p>
+Returns a new <code>feature_index</code> object.
+</p>
+<hr>
+<code>feature_index:add_sequence_region(sequence_region)</code>
+<p>
+Add <code>sequence_region</code> to <code>feature_index</code>.
+</p>
+<hr>
+<code>feature_index:add_genome_feature(genome_feature)</code>
+<p>
+Add <code>genome_feature</code> to <code>feature_index</code>.
+</p>
+<hr>
+<code>feature_index:get_features_for_seqid(seqid)</code>
+<p>
+Returns the genome features for sequence ID <code>seqid</code> in an array.
+</p>
+<hr>
+<code>feature_index:get_features_for_range(seqid, range)</code>
+<p>
+Returns the genome features for sequence ID <code>seqid</code> within <code>range</code> in an array.
+</p>
+<hr>
+<code>feature_index:get_first_seqid()</code>
+<p>
+Returns the first sequence ID stored in <code>feature_index</code>.
+</p>
+<hr>
+<code>feature_index:get_seqids()</code>
+<p>
+Returns an array containins all sequence IDs stored in <code>feature_index</code>.
+</p>
+<hr>
+<code>feature_index:get_range_for_seqid(seqid)</code>
+<p>
+Returns the range covered by features of sequence ID <code>seqid</code> in <code>feature_index</code>.
+</p>
+<hr>
 <code>feature_index:get_coverage(seqid, maxdist)</code>
 <p>
-Computes the coverage for the sequence ID <code>seqid</code>. The optional <code>maxdist</code> parameter denotes the maximal distance two features can be apart without creating a new Range. Returns a table of Ranges denoting parts the of <code>seqid</code> covered by features.
+Computes the coverage for the sequence ID <code>seqid</code>. The optional <code>maxdist</code> parameter denotes the maximal distance two features can be apart without creating a new Range. Returns an array of Ranges denoting parts the of <code>seqid</code> covered by features.
 </p>
 <hr>
 <code>feature_index:get_marked_regions(seqid, maxdist)</code>
 <p>
-Returns a table of Ranges denoting parts of <code>seqid</code> which are covered by at least one marked feature. Internally, <code>get_coverage()</code> is called and the <code>maxdist</code> is passed along.
+Returns an array of Ranges denoting parts of <code>seqid</code> which are covered by at least one marked feature. Internally, <code>get_coverage()</code> is called and the <code>maxdist</code> is passed along.
 </p>
 <hr>
 <code>feature_index:render_to_png(seqid, range, png_file, width)</code>
@@ -128,8 +280,18 @@ Show all sequence IDs.
 <hr>
 <a name="FeatureStream"></a>
 <h2>Class FeatureStream</h2>
+<code>feature_stream_new(feature_index)</code>
+<p>
+Returns a new feature stream object over <code>feature_index</code>. That is, all genome nodes which are pulled through the feature stream are added to the <code>feature_index</code>.
+</p>
+<hr>
 <a name="FeatureVisitor"></a>
 <h2>Class FeatureVisitor</h2>
+<code>feature_visitor_new(feature_index)</code>
+<p>
+Returns a new feature visitor object over <code>feature_index</code>. That is, all genome nodes which are visited by the feature visitor are added to the <code>feature_index</code>.
+</p>
+<hr>
 <a name="GenomeNode"></a>
 <h2>Class GenomeNode</h2>
 <code>genome_node:show(gff3_visitor)</code>
@@ -144,12 +306,42 @@ Show marked parts of genome node on stdout.
 <hr>
 <a name="GenomeNodeIterator"></a>
 <h2>Class GenomeNodeIterator</h2>
+<code>genome_node_iterator_new(genome_node)</code>
+<p>
+Returns a new genome node iterator object for <code>genome_node</code>.
+</p>
+<hr>
+<code>genome_node_iterator:next()</code>
+<p>
+Returns the next genome node for <code>genome_node_iterator</code> or nil.
+</p>
+<hr>
 <a name="GenomeStream"></a>
 <h2>Class GenomeStream</h2>
+<code>genome_stream:next_tree()</code>
+<p>
+Returns the next genome node for <code>genome_stream</code> or nil.
+</p>
+<hr>
 <a name="GenomeVisitor"></a>
 <h2>Class GenomeVisitor</h2>
 <a name="Range"></a>
 <h2>Class Range</h2>
+<code>range_new(startpos, endpos)</code>
+<p>
+Returns a new range object with start <code>startpos</code> and end <code>endpos</code>. <code>startpos</code> must be smaller or equal than <code>endpos</code>.
+</p>
+<hr>
+<code>range:get_start()</code>
+<p>
+Returns start of <code>range</code>.
+</p>
+<hr>
+<code>range:get_end()</code>
+<p>
+Returns end of <code>range</code>.
+</p>
+<hr>
 <code>range:show()</code>
 <p>
 Show range on stdout.
@@ -157,14 +349,54 @@ Show range on stdout.
 <hr>
 <a name="Render"></a>
 <h2>Class Render</h2>
+<code>render_new()</code>
+<p>
+Returns a new render object.
+</p>
+<hr>
+<code>render:to_png(diagram, filename, width)</code>
+<p>
+Uses <code>render</code> to render the given <code>diagram</code> as PNG to <code>filename</code>. The optional <code>width</code> parameter sets the width of the PNG (default: 800).
+</p>
+<hr>
 <a name="ScoreMatrix"></a>
 <h2>Class ScoreMatrix</h2>
+<code>score_matrix_new_read_protein(path)</code>
+<p>
+Returns a new protein scorematrix object which has been read from file <code>path</code>.
+</p>
+<hr>
+<code>score_matrix:get_dimension()</code>
+<p>
+Returns the dimension of the <code>scorematrix</code> as number.
+</p>
+<hr>
+<code>score_matrix:get_score(idx1, idx2)</code>
+<p>
+Returns the score for <code>idx1</code>,<code>idx2</code> as number.
+</p>
+<hr>
 <a name="StreamEvaluator"></a>
 <h2>Class StreamEvaluator</h2>
+<code>stream_evaluator_new(reality_stream, prediction_stream)</code>
+<p>
+Returns a new stream evaluator object for the two genome streams <code>reality_stream</code> and <code>prediction_stream</code>.
+</p>
+<hr>
+<code>stream_evaluator:evaluate(genome_visitor)</code>
+<p>
+Run evaluation of <code>stream_evaluator</code>. All evaluated features are visited by the optional <code>genome_visitor</code>.
+</p>
+<hr>
+<code>stream_evaluator:show()</code>
+<p>
+Show result of <code>stream_evaluator</code> on stdout.
+</p>
+<hr>
 <div id="footer">
 Copyright &copy; 2008
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2008-01-22
+Last update: 2008-01-23
 </div>
 </div>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
