@@ -19,4 +19,11 @@
 </div>
 <div id="main">
 <h1><tt>gtscript</tt> documentation</h1>
+<p>
 <strong>This documentation is incomplete!</strong> Check back later...
+</p>
+<p>
+If a function returns an array, this denotes a table where only consecutive
+integer keys from 1 on are used and which can be traversed with the
+<code>ipairs()</code> function.
+</p>
