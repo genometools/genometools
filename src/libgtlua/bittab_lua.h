@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,13 +22,29 @@
 
 /* exports the Bittab class to Lua:
 
-           bittab = gt.bittab_new(num_of_bits)
-           bittab:set_bit(bit)
-           bittab:unset_bit(bit)
-           bittab:complement(src) -- bittab  = ~src
-           bittab:equal(src)      -- bittab  =  src
-           bittab:and_equal(src)  -- bittab &=  src
-   boolean bittab:bit_is_set(bit)
+   -- Returns a bittab with <num_of_bits> many bits.
+   function bittab_new(num_of_bits)
+
+   -- Set <bit> in <bittab>.
+   function bittab:set_bit(bit)
+
+   -- Unset <bit> in <bittab>.
+   function bittab:unset_bit(bit)
+
+   -- Store the complement of bittab <src> in <bittab>.
+   -- <bittab> and <src> must have the same size.
+   function bittab:complement(src)
+
+   -- Set <bittab> equal to bittab <src>.
+   -- <bittab> and <src> must have the same size.
+   function bittab:equal(src)
+
+   -- Set <bittab> equal to the bitwise AND of <bittab> and <src>.
+   -- <bittab> and <src> must have the same size.
+   function bittab:and_equal(src)
+
+   -- Returns true if <bit> is set in <bittab>, false otherwise.
+   function bittab:bit_is_set(bit)
 */
 int luaopen_bittab(lua_State*);
 
