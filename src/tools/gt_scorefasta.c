@@ -82,8 +82,8 @@ int gt_scorefasta(int argc, const char **argv, Error *err)
 
     /* free space */
     alpha_delete(alpha);
-    free(u);
-    free(w);
+    ma_free(u);
+    ma_free(w);
   }
 
   return had_err;
