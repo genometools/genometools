@@ -29,16 +29,6 @@ local Whitespace    = lpeg.S(" \t\n")
 local OptionalSpace = Whitespace^0
 local Space         = Whitespace^1
 
--- Lexical Elements of C
-local Character      = lpeg.R("AZ", "az")
-local CCommentStart  = lpeg.P("/*")
-local CCommentEnd    = lpeg.P("*/")
-local ExportCComment = CCommentStart * lpeg.P(" exports the ") *
-                       lpeg.Cc("class") * lpeg.C(Character^1) *
-                       (Any - CCommentEnd)^0 * CCommentEnd
-local CComment       = CCommentStart * (Any - CCommentEnd)^0 * CCommentEnd
-local CCode          = (Any - CCommentStart)^1
-
 -- Lexical Elements of Lua
 local LuaLongCommentStart  = lpeg.P("--[[")
 local LuaLongCommentEnd    = lpeg.P("]]")
@@ -70,21 +60,33 @@ local ExportLuaMethod      = lpeg.Ct(LuaOptionalComment * LuaGlobalFunction)
 local CodeStop             = LuaCommentStart + LuaLocalFunction + LuaGlobalFunction
 local LuaCode              = lpeg.Cc("code") * lpeg.C((Any - CodeStop)^1)
 
--- C Grammar
-local Elem, Start = lpeg.V"Elem", lpeg.V"Start"
-local CGrammar = lpeg.P{ Start,
- Start = lpeg.Ct(Elem^0);
- Elem  = lpeg.Ct(ExportCComment) + CComment + Space + CCode;
-}
-CGrammar = CGrammar * -1
+-- Lexical Elements of C
+local Character      = lpeg.R("AZ", "az")
+local CCommentStart  = lpeg.P("/*")
+local CCommentEnd    = lpeg.P("*/")
+local ExportCComment = CCommentStart * lpeg.P(" exports the ") *
+                       lpeg.Ct(lpeg.Cc("class") * lpeg.C(Character^1)) *
+                       (Any - lpeg.P("to Lua:"))^1 *
+                       lpeg.P("to Lua:") * ExportLuaMethod^0 *
+                       (Any - CCommentEnd)^0 * CCommentEnd
+local CComment       = CCommentStart * (Any - CCommentEnd)^0 * CCommentEnd
+local CCode          = (Any - CCommentStart)^1
 
 -- Lua Grammar
+local Elem, Start = lpeg.V"Elem", lpeg.V"Start"
 local LuaGrammar = lpeg.P{ Start,
   Start = lpeg.Ct(Elem^0);
   Elem  = ExportLuaMethod + LuaLongComment + LuaShortComment + Space +
           LuaLocalFunction + LuaCode;
 }
 LuaGrammar = LuaGrammar * -1
+
+-- C Grammar
+local CGrammar = lpeg.P{ Start,
+ Start = lpeg.Ct(Elem^0);
+ Elem  = lpeg.Ct(ExportCComment) + CComment + Space + CCode;
+}
+CGrammar = CGrammar * -1
 
 function DocParser:new()
   o = {}
