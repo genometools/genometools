@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +23,10 @@
 /* exports the FeatureVisitor class (which implements the GenomeVisitor)
    interface to Lua:
 
-   genome_visitor = gt.feature_visitor_new(feature_index)
+   -- Returns a new feature visitor object over <feature_index>. That is, all
+   -- genome nodes which are visited by the feature visitor are added to the
+   -- <feature_index>.
+   function feature_visitor_new(feature_index)
 */
 int luaopen_feature_visitor(lua_State*);
 
