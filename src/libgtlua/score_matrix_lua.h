@@ -22,11 +22,11 @@
 
 /* exports the ScoreMatrix class to Lua:
 
-   -- Returns a new protein scorematrix object which has been read from file
+   -- Returns a new protein score_matrix object which has been read from file
    -- <path>.
    function score_matrix_new_read_protein(path)
 
-   -- Returns the dimension of the <scorematrix> as number.
+   -- Returns the dimension of the <score_matrix> as number.
    function score_matrix:get_dimension()
 
    -- Returns the score for <idx1>,<idx2> as number.
