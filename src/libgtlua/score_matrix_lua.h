@@ -22,7 +22,7 @@
 
 /* exports the ScoreMatrix class to Lua:
 
-   -- Returns a new protein score_matrix object which has been read from file
+   -- Returns a new protein score matrix object which has been read from file
    -- <path>.
    function score_matrix_new_read_protein(path)
 
