@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,11 +23,23 @@
 
 /* exports the Range class to Lua:
 
-   range       = gt.range_new(startpos, endpos)
-   startpos    = range:get_start()
-   endpos      = range:get_end()
-   range_table = gt.ranges_sort(range_table)
-   boolean     = gt.ranges_are_sorted(range_table)
+   -- Returns a new range object with start <startpos> and end <endpos>.
+   -- <startpos> must be smaller or equal than <endpos>.
+   function range_new(startpos, endpos)
+
+   -- Returns start of <range>.
+   function range:get_start()
+
+   -- Returns end of <range>.
+   function range:get_end()
+
+   -- Returns an array containing the ranges from array <range_array> in sorted
+   -- order.
+   function ranges_sort(range_array)
+
+   -- Returns true if the ranges in array <range_array> are sorted, false
+   -- otherwise.
+   function ranges_are_sorted(range_array)
 */
 int luaopen_range(lua_State*);
 
