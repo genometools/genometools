@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +23,10 @@
 /* exports the FeatureStream class (which implements the GenomeStream) interface
    to Lua:
 
-   feature_stream = gt.feature_stream_new(feature_index)
+   -- Returns a new feature stream object over <feature_index>. That is, all
+   -- genome nodes which are pulled through the feature stream are added to the
+   -- <feature_index>.
+   function feature_stream_new(feature_index)
 */
 int luaopen_feature_stream(lua_State*);
 
