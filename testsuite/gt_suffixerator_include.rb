@@ -182,11 +182,9 @@ def checkuniquesub(queryfile,ms)
   run_test(makeuniquesubcall(queryfile,"-esa sfx",ms))
   run "mv #{$last_stdout} tmp.esa"
   run "diff tmp.esa tmp.fmi"
-  if not ms
-    run_test(makeuniquesubcall(queryfile,"-pck pck",ms))
-    run "mv #{$last_stdout} tmp.pck"
-    run "diff tmp.pck tmp.fmi"
-  end
+  run_test(makeuniquesubcall(queryfile,"-pck pck",ms))
+  run "mv #{$last_stdout} tmp.pck"
+  run "diff tmp.pck tmp.fmi"
 end
 
 def createandcheckuniquesub(reffile,queryfile)

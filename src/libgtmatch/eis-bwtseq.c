@@ -460,7 +460,7 @@ unsigned long packedindexmstatsforward(const void *genericindex,
   Symbol curSym;
   const MRAEnc *alphabet;
 
-  assert(bwtSeq && qstart);
+  assert(bwtSeq && qstart && qstart < qend);
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   qptr = qstart;
   cc = *qptr;
@@ -475,6 +475,10 @@ unsigned long packedindexmstatsforward(const void *genericindex,
   curSym = MRAEncMapSymbol(alphabet, cc);
   bwtbound.lower = bwtSeq->count[curSym];
   bwtbound.upper = bwtSeq->count[curSym+1];
+  if (bwtbound.lower >= bwtbound.upper)
+  {
+    return 0;
+  }
 #ifdef mydebug
   printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
           "occurrences\n",
@@ -491,7 +495,7 @@ unsigned long packedindexmstatsforward(const void *genericindex,
 #endif
     if (ISSPECIAL (cc))
     {
-      return 0;
+      break;
     }
     curSym = MRAEncMapSymbol(alphabet, cc);
     bwtbound.lower = bwtSeq->count[curSym] +
@@ -512,7 +516,7 @@ unsigned long packedindexmstatsforward(const void *genericindex,
     prevlbound = bwtbound.lower;
   }
   *witnessposition = pckfindfirstmatch(bwtSeq,prevlbound);
-  return 0;
+  return (unsigned long) (qptr - qstart);
 }
 
 extern Seqpos
