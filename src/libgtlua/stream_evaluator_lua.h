@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,9 +22,16 @@
 
 /* exports the StreamEvaluator class to Lua:
 
-   stream_evaluator = gt.stream_evaluator_new(reality_stream, prediction_stream)
-                      stream_evaluator:evaluate([genome_visitor])
-                      stream_evaluaotr:show()
+   -- Returns a new stream evaluator object for the two genome streams
+   -- <reality_stream> and <prediction_stream>.
+   function stream_evaluator_new(reality_stream, prediction_stream)
+
+   -- Run evaluation of <stream_evaluator>. All evaluated features are visited
+   -- by the optional <genome_visitor>.
+   function stream_evaluator:evaluate(genome_visitor)
+
+   -- Show result of <stream_evaluator> on stdout.
+   function stream_evaluator:show()
 */
 int luaopen_stream_evaluator(lua_State*);
 
