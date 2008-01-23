@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,9 +22,10 @@
 
 /* exports the Diagram class to Lua:
 
-   -- create a diagram which contains the genome nodes given in <feature_index>
-   -- in the given <range> in sequence region <seqid>
-   diagram = gt.diagram_new(feature_index, range, seqid)
+   -- Return a diagram object which contains the genome nodes given in
+   -- <feature_index> in the given <range> of the sequence region with sequence
+   -- ID <seqid>.
+   function diagram_new(feature_index, range, seqid)
 */
 int luaopen_diagram(lua_State*);
 
