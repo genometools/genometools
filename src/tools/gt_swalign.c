@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -65,7 +65,7 @@ int gt_swalign(int argc, const char **argv, Error *err)
 
   /* init */
   /* XXX: make this more flexible */
-  scorematrix  = scorematrix_read_protein(argv[parsed_args], err);
+  scorematrix  = score_matrix_new_read_protein(argv[parsed_args], err);
   if (scorematrix) {
     scorefunction = scorefunction_new(scorematrix, indelscore, indelscore);
     bioseq_1 = bioseq_new(argv[parsed_args+1], err);

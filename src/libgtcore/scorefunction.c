@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -42,13 +42,13 @@ int scorefunction_get_score(const ScoreFunction *sf,
                             unsigned int idx1, unsigned int idx2)
 {
   assert(sf);
-  return scorematrix_get_score(sf->sm, idx1, idx2);
+  return score_matrix_get_score(sf->sm, idx1, idx2);
 }
 
 const int** scorefunction_get_scores(const ScoreFunction *sf)
 {
   assert(sf);
-  return scorematrix_get_scores(sf->sm);
+  return score_matrix_get_scores(sf->sm);
 }
 
 int scorefunction_get_deletion_score(const ScoreFunction *sf)
@@ -66,6 +66,6 @@ int scorefunction_get_insertion_score(const ScoreFunction *sf)
 void scorefunction_delete(ScoreFunction *sf)
 {
   if (!sf) return;
-  scorematrix_delete(sf->sm);
+  score_matrix_delete(sf->sm);
   ma_free(sf);
 }

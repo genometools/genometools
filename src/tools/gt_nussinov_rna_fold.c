@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@
 #include "libgtcore/array2dim.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/option.h"
-#include "libgtcore/scorematrix.h"
+#include "libgtcore/score_matrix.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
 #include "tools/gt_nussinov_rna_fold.h"
@@ -31,10 +31,10 @@
           had_err = -1;                                                        \
         }                                                                      \
         if (!had_err) {                                                        \
-          scorematrix_set_score(energy_function, alpha_encode(dna_alpha,       \
+          score_matrix_set_score(energy_function, alpha_encode(dna_alpha,      \
                                 CHAR_1), alpha_encode(dna_alpha, CHAR_2),      \
                                 rval);                                         \
-          scorematrix_set_score(energy_function, alpha_encode(dna_alpha,       \
+          score_matrix_set_score(energy_function, alpha_encode(dna_alpha,      \
                                 CHAR_2), alpha_encode(dna_alpha, CHAR_1),      \
                                 rval);                                         \
        }
@@ -54,8 +54,8 @@ static int computeEentry(unsigned long i, unsigned long j, int **E,
     minvalue = value;
 
   /* 3. */
-  alphavalue = scorematrix_get_score(energy_function, rna_sequence[i-1],
-                                     rna_sequence[j-1]);
+  alphavalue = score_matrix_get_score(energy_function, rna_sequence[i-1],
+                                      rna_sequence[j-1]);
   if (alphavalue != INT_MAX)
     value =  E[i+1][j-1] + alphavalue;
   else
@@ -117,8 +117,8 @@ static void traceback(unsigned long i, unsigned long j, int **E,
     }
     else {
       /* 3. */
-      alphavalue = scorematrix_get_score(energy_function, rna_sequence[i-1],
-                                         rna_sequence[j-1]);
+      alphavalue = score_matrix_get_score(energy_function, rna_sequence[i-1],
+                                          rna_sequence[j-1]);
       if (alphavalue != INT_MAX && E[i][j] == E[i+1][j-1] + alphavalue) {
         fprintf(fp, "(%lu,%lu)", i, j);
         traceback(i+1, j-1, E, rna_sequence, rna_length, energy_function, fp);
@@ -154,17 +154,17 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
     fprintf(fp, "using the following parameters:\n");
     fprintf(fp, "l_min =  %u\n", l_min);
     fprintf(fp, "alpha(G,C) = alpha(C,G) = %d\n",
-            scorematrix_get_score(energy_function,
-                                  alpha_encode(dna_alpha, 'G'),
-                                  alpha_encode(dna_alpha, 'C')));
+            score_matrix_get_score(energy_function,
+                                   alpha_encode(dna_alpha, 'G'),
+                                   alpha_encode(dna_alpha, 'C')));
     fprintf(fp, "alpha(A,U) = alpha(U,A) = %d\n",
-            scorematrix_get_score(energy_function,
-                                  alpha_encode(dna_alpha, 'A'),
-                                  alpha_encode(dna_alpha, 'U')));
+            score_matrix_get_score(energy_function,
+                                   alpha_encode(dna_alpha, 'A'),
+                                   alpha_encode(dna_alpha, 'U')));
     fprintf(fp, "alpha(G,U) = alpha(U,G) = %d\n",
-            scorematrix_get_score(energy_function,
-                                  alpha_encode(dna_alpha, 'U'),
-                                  alpha_encode(dna_alpha, 'G')));
+            score_matrix_get_score(energy_function,
+                                   alpha_encode(dna_alpha, 'U'),
+                                   alpha_encode(dna_alpha, 'G')));
     fprintf(fp, "all other alpha values have been set to infinity\n");
   }
 
@@ -221,12 +221,12 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Error *err)
 
   /* set DNA alphabet */
   dna_alpha = alpha_new_dna();
-  energy_function = scorematrix_new(dna_alpha);
+  energy_function = score_matrix_new(dna_alpha);
 
   /* init the energy function */
   for (i = 0; i < alpha_size(dna_alpha); i++) {
     for (j = 0; j < alpha_size(dna_alpha); j++) {
-      scorematrix_set_score(energy_function, i, j, INT_MAX);
+      score_matrix_set_score(energy_function, i, j, INT_MAX);
     }
   }
 
@@ -256,7 +256,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Error *err)
 
   /* free */
   ma_free(rna_sequence);
-  scorematrix_delete(energy_function);
+  score_matrix_delete(energy_function);
   alpha_delete(dna_alpha);
 
   return had_err;

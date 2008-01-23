@@ -18,7 +18,7 @@
 require 'extractor' -- contains all the classes necessary for the extracting
 
 function usage()
-  io.stderr:write(string.format("Usage: %s [-sol] gt_home scorematrix_file\n",
+  io.stderr:write(string.format("Usage: %s [-sol] gt_home score_matrix_file\n",
                                 arg[0]))
   io.stderr:write("Extract swalign program from GenomeTools home directory " ..
                   "gt_home.\n")
@@ -34,7 +34,7 @@ if #arg >= 2 then
   end
   if #arg == 2 then
     gt_home = arg[1]
-    scorematrix_file = arg[2]
+    score_matrix_file = arg[2]
   else
     usage()
   end
@@ -42,21 +42,21 @@ else
   usage()
 end
 
--- returns C-function scorematrix_init() as string
-local function generate_scorematrix_init()
+-- returns C-function score_matrix_init() as string
+local function generate_score_matrix_init()
   local sminit = {}
   local protein_alpha = gt.alpha_new_protein()
-  local scorematrix = gt.scorematrix_read_protein(scorematrix_file)
-  assert(protein_alpha:size() == scorematrix:get_dimension())
-  sminit[#sminit + 1] = "static void scorematrix_init(int **scorematrix)"
+  local score_matrix = gt.score_matrix_new_read_protein(score_matrix_file)
+  assert(protein_alpha:size() == score_matrix:get_dimension())
+  sminit[#sminit + 1] = "static void score_matrix_init(int **score_matrix)"
   sminit[#sminit + 1] = "{"
-  sminit[#sminit + 1] = "  assert(scorematrix);"
-  for idx1 = 0, scorematrix:get_dimension()-1 do
-    for idx2 = 0, scorematrix:get_dimension()-1 do
-      sminit[#sminit + 1] = string.format("  scorematrix['%s']['%s'] = %d;",
+  sminit[#sminit + 1] = "  assert(score_matrix);"
+  for idx1 = 0, score_matrix:get_dimension()-1 do
+    for idx2 = 0, score_matrix:get_dimension()-1 do
+      sminit[#sminit + 1] = string.format("  score_matrix['%s']['%s'] = %d;",
                                           protein_alpha:decode(idx1),
                                           protein_alpha:decode(idx2),
-                                          scorematrix:get_score(idx1, idx2))
+                                          score_matrix:get_score(idx1, idx2))
     end
   end
   sminit[#sminit + 1] = "}"
@@ -134,7 +134,7 @@ prog:add_include('"alignment.h"')
 prog:add_include('"array2dim.h"')
 prog:add_include('"coordinate.h"')
 prog:add_include('"minmax.h"')
-prog:add_function(generate_scorematrix_init())
+prog:add_function(generate_score_matrix_init())
 swtemp = File:new("src/libgtext/swalign.c")
 prog:add_define("INDEL_SCORE", "-3")
 prog:add_typedef(swtemp:get_typedef("DPentry"))
@@ -147,7 +147,7 @@ if solution then
 end
 
 swalign_start = [[
-  int **scorematrix;
+  int **score_matrix;
   DPentry **dptable;
   const char *u, *v;
   unsigned long ulen, vlen;
@@ -164,9 +164,9 @@ swalign_start = [[
   ulen = strlen(u);
   vlen = strlen(v);
 
-  array2dim_calloc(scorematrix, CHAR_MAX, CHAR_MAX);
+  array2dim_calloc(score_matrix, CHAR_MAX, CHAR_MAX);
   array2dim_calloc(dptable, ulen+1, vlen+1);
-  scorematrix_init(scorematrix);
+  score_matrix_init(score_matrix);
   alignment = alignment_new();
 
 ]]
@@ -175,14 +175,14 @@ swalign_end = [[
 
   alignment_delete(alignment);
   array2dim_delete(dptable);
-  array2dim_delete(scorematrix);
+  array2dim_delete(score_matrix);
 
 ]]
 
 if solution then
 prog:set_content(swalign_start .. [[
   alignment = smith_waterman_align(u, v, u, v, ulen, vlen,
-                                   (const int**) scorematrix,
+                                   (const int**) score_matrix,
                                    INDEL_SCORE, INDEL_SCORE);
   alignment_show(alignment, stdout);
   printf("\n");
@@ -191,7 +191,7 @@ else
 prog:set_content(swalign_start .. [[
   {
     Coordinate alignment_end;
-    fillDPtable(dptable, u, ulen, v, vlen, (const int**) scorematrix,
+    fillDPtable(dptable, u, ulen, v, vlen, (const int**) score_matrix,
                 INDEL_SCORE, INDEL_SCORE, &alignment_end);
 
     /* XXX: include your code here... */

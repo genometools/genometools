@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SCOREMATRIX_H
-#define SCOREMATRIX_H
+#ifndef SCORE_MATRIX_H
+#define SCORE_MATRIX_H
 
 #include "libgtcore/alpha.h"
 #include "libgtcore/error.h"
@@ -24,16 +24,16 @@
 typedef struct ScoreMatrix ScoreMatrix;
 
 /* a score matrix is always defined over a given alphabet */
-ScoreMatrix* scorematrix_new(Alpha*);
+ScoreMatrix* score_matrix_new(Alpha*);
 /* reads in a protein scorematrix from the given <path> and returns it */
-ScoreMatrix* scorematrix_read_protein(const char *path, Error*);
-unsigned int scorematrix_get_dimension(const ScoreMatrix*);
-int          scorematrix_get_score(const ScoreMatrix*,
-                                   unsigned int, unsigned int);
-void         scorematrix_set_score(ScoreMatrix*,
-                                   unsigned int, unsigned int, int);
-const int**  scorematrix_get_scores(const ScoreMatrix*);
-void         scorematrix_show(const ScoreMatrix*, FILE*);
-void         scorematrix_delete(ScoreMatrix*);
+ScoreMatrix* score_matrix_new_read_protein(const char *path, Error*);
+unsigned int score_matrix_get_dimension(const ScoreMatrix*);
+int          score_matrix_get_score(const ScoreMatrix*,
+                                    unsigned int, unsigned int);
+void         score_matrix_set_score(ScoreMatrix*,
+                                    unsigned int, unsigned int, int);
+const int**  score_matrix_get_scores(const ScoreMatrix*);
+void         score_matrix_show(const ScoreMatrix*, FILE*);
+void         score_matrix_delete(ScoreMatrix*);
 
 #endif

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 */
 
 #include "libgtcore/option.h"
-#include "libgtcore/scorematrix.h"
+#include "libgtcore/score_matrix.h"
 #include "libgtcore/versionfunc.h"
 #include "tools/gt_scorematrix.h"
 
@@ -48,12 +48,12 @@ int gt_scorematrix(int argc, const char **argv, Error *err)
   }
   assert(parsed_args == 1);
 
-  sm = scorematrix_read_protein(argv[1], err);
+  sm = score_matrix_new_read_protein(argv[1], err);
   if (!sm)
     had_err = -1;
   if (!had_err)
-    scorematrix_show(sm, stdout);
-  scorematrix_delete(sm);
+    score_matrix_show(sm, stdout);
+  score_matrix_delete(sm);
 
   return had_err;
 }

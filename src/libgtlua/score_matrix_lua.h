@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,17 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SCOREMATRIX_LUA_H
-#define SCOREMATRIX_LUA_H
+#ifndef SCORE_MATRIX_LUA_H
+#define SCORE_MATRIX_LUA_H
 
 #include "lua.h"
 
 /* exports the ScoreMatrix class to Lua:
 
-          scorematrix = gt.scorematrix_read_protein(path)
-   number scorematrix:get_dimension()
-   number scorematrix:get_score(idx1, idx2)
+   -- Returns a new protein scorematrix object which has been read from file
+   -- <path>.
+   function score_matrix_new_read_protein(path)
+
+   -- Returns the dimension of the <scorematrix> as number.
+   function score_matrix:get_dimension()
+
+   -- Returns the score for <idx1>,<idx2> as number.
+   function score_matrix:get_score(idx1, idx2)
 */
-int luaopen_scorematrix(lua_State*);
+int luaopen_score_matrix(lua_State*);
 
 #endif

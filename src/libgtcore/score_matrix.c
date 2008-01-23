@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@
 #include "libgtcore/array.h"
 #include "libgtcore/array2dim.h"
 #include "libgtcore/parseutils.h"
-#include "libgtcore/scorematrix.h"
+#include "libgtcore/score_matrix.h"
 #include "libgtcore/str.h"
 #include "libgtcore/tokenizer.h"
 #include "libgtcore/undef.h"
@@ -31,7 +31,7 @@ struct ScoreMatrix {
   int **scores;
 };
 
-ScoreMatrix* scorematrix_new(Alpha *alpha)
+ScoreMatrix* score_matrix_new(Alpha *alpha)
 {
   ScoreMatrix *sm;
   assert(alpha);
@@ -140,10 +140,10 @@ static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
                                tokenizer_get_filename(tz), err);
       if (had_err)
         break;
-      scorematrix_set_score(sm,
-                            alpha_encode(sm->alpha, amino_acid),
-                            alpha_encode(sm->alpha, *(char*)
-                            array_get(index_to_alpha_char_mapping, i)), score);
+      score_matrix_set_score(sm,
+                             alpha_encode(sm->alpha, amino_acid),
+                             alpha_encode(sm->alpha, *(char*)
+                             array_get(index_to_alpha_char_mapping, i)), score);
       i++;
       str_delete(token);
       tokenizer_next_token(tz);
@@ -155,7 +155,7 @@ static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
 }
 
 /* the score matrix parser */
-static int parse_scorematrix(ScoreMatrix *sm, const char *path, Error *err)
+static int parse_score_matrix(ScoreMatrix *sm, const char *path, Error *err)
 {
   Tokenizer *tz;
   Array *index_to_alpha_char_mapping;
@@ -181,7 +181,7 @@ static int parse_scorematrix(ScoreMatrix *sm, const char *path, Error *err)
   /* check the number of parsed score lines */
   if (!had_err &&
       parsed_score_lines != array_size(index_to_alpha_char_mapping)) {
-    error_set(err, "the scorematrix given in '%s' is not symmetric", path);
+    error_set(err, "the score matrix given in '%s' is not symmetric", path);
     had_err = -1;
   }
 
@@ -191,7 +191,7 @@ static int parse_scorematrix(ScoreMatrix *sm, const char *path, Error *err)
   return had_err;
 }
 
-ScoreMatrix* scorematrix_read_protein(const char *path, Error *err)
+ScoreMatrix* score_matrix_new_read_protein(const char *path, Error *err)
 {
   Alpha *protein_alpha;
   ScoreMatrix *sm;
@@ -202,26 +202,26 @@ ScoreMatrix* scorematrix_read_protein(const char *path, Error *err)
 
   /* create score matrix */
   protein_alpha = alpha_new_protein();
-  sm = scorematrix_new(protein_alpha);
+  sm = score_matrix_new(protein_alpha);
   alpha_delete(protein_alpha);
 
   /* parse matrix file */
-  had_err = parse_scorematrix(sm, path, err);
+  had_err = parse_score_matrix(sm, path, err);
 
   if (had_err) {
-    scorematrix_delete(sm);
+    score_matrix_delete(sm);
     return NULL;
   }
   return sm;
 }
 
-unsigned int scorematrix_get_dimension(const ScoreMatrix *sm)
+unsigned int score_matrix_get_dimension(const ScoreMatrix *sm)
 {
   assert(sm);
   return sm->dimension;
 }
 
-int scorematrix_get_score(const ScoreMatrix *sm,
+int score_matrix_get_score(const ScoreMatrix *sm,
                           unsigned int idx1, unsigned int idx2)
 {
   assert(sm);
@@ -229,7 +229,7 @@ int scorematrix_get_score(const ScoreMatrix *sm,
   return sm->scores[idx1][idx2];
 }
 
-void scorematrix_set_score(ScoreMatrix *sm,
+void score_matrix_set_score(ScoreMatrix *sm,
                            unsigned int idx1, unsigned int idx2, int score)
 {
   assert(sm);
@@ -237,13 +237,13 @@ void scorematrix_set_score(ScoreMatrix *sm,
   sm->scores[idx1][idx2] = score;
 }
 
-const int** scorematrix_get_scores(const ScoreMatrix *sm)
+const int** score_matrix_get_scores(const ScoreMatrix *sm)
 {
   assert(sm);
   return (const int**) sm->scores;
 }
 
-void scorematrix_show(const ScoreMatrix *sm, FILE *fp)
+void score_matrix_show(const ScoreMatrix *sm, FILE *fp)
 {
   unsigned i, j;
   assert(sm && fp);
@@ -256,12 +256,12 @@ void scorematrix_show(const ScoreMatrix *sm, FILE *fp)
   for (i = 0; i < alpha_size(sm->alpha); i++) {
     xfputc(alpha_decode(sm->alpha, i), fp);
     for (j = 0; j < alpha_size(sm->alpha); j++)
-      fprintf(fp, " %2d", scorematrix_get_score(sm, i, j));
+      fprintf(fp, " %2d", score_matrix_get_score(sm, i, j));
     xfputc('\n', fp);
   }
 }
 
-void scorematrix_delete(ScoreMatrix *sm)
+void score_matrix_delete(ScoreMatrix *sm)
 {
   if (!sm) return;
   alpha_delete(sm->alpha);
