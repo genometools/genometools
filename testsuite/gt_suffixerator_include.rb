@@ -167,13 +167,13 @@ def checkmapped(args)
 end
 
 def makeuniquesubcall(queryfile,indexarg,ms)
-  extra=String.new;
+  extra=""
   if ms
     extra=" -ms"
-  else
-    extra=""
   end
-  return "#{$bin}gt uniquesub #{extra} -min 1 -max 20 -output querypos -query #{queryfile} #{indexarg}"
+  constantargs="-min 1 -max 20 -query #{queryfile} #{indexarg}"
+  prog="#{$bin}gt uniquesub -verify #{extra}"
+  return "#{prog} -output querypos sequence #{constantargs}"
 end
 
 def checkuniquesub(queryfile,ms)
@@ -191,6 +191,7 @@ def createandcheckuniquesub(reffile,queryfile)
   run_test("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}")
   run_test("#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v -db #{reffile}")
   run_test("#{$bin}gt packedindex mkindex -indexname pck -db #{reffile} -dna -pl -bsize 10 -locfreq 32 -dir rev")
+  run_test("#{$bin}gt suffixerator -indexname pck-vrf -db #{reffile} -dna -tis")
   checkuniquesub(queryfile,false)
   checkuniquesub(queryfile,true)
   run "rm -f sfx.* fmi.* pck.*"

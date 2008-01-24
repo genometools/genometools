@@ -50,7 +50,7 @@ typedef struct
   Definedunsignedlong minlength,
                       maxlength;
   unsigned int showmode;
-  bool domatchingstatistics;
+  bool domatchingstatistics, verifywitnesspos;
   Str *indexname;
   StrArray *queryfilenames;
   Indextype indextype;
@@ -63,7 +63,8 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
 {
   OptionParser *op;
   Option *optionmin, *optionmax, *optionoutput, *optionfmindex,
-         *optionesaindex, *optionpckindex, *optionquery, *optionmstats;
+         *optionesaindex, *optionpckindex, *optionquery, *optionmstats,
+         *optionverify;
   OPrval oprval;
   StrArray *flagsoutputoption;
   int parsed_args;
@@ -134,8 +135,14 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
                           flagsoutputoption);
   option_parser_add_option(op, optionoutput);
 
-  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc,
-                               err);
+  optionverify = option_new_bool("verify", "verify the witness positions",
+                                 &uniquesubcallinfo->verifywitnesspos,
+                                 false);
+  option_is_development_option(optionverify);
+  option_parser_add_option(op, optionverify);
+
+  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc,err);
+
   if (oprval == OPTIONPARSER_OK)
   {
     if (option_is_set(optionfmindex))
@@ -266,14 +273,16 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
     }
   } else
   {
-    Seqpos totallength;
+    Seqpos totallength = 0;
 
     if (mapsuffixarray(&suffixarray,
                        &totallength,
                        (uniquesubcallinfo.indextype == Esaindextype) 
-                       ? (SARR_ESQTAB | SARR_SUFTAB) 
-                       : 0,
-                       uniquesubcallinfo.indexname,verboseinfo,err) != 0)
+                         ? (SARR_ESQTAB | SARR_SUFTAB)
+                         : 0,
+                       uniquesubcallinfo.indexname,
+                       verboseinfo,
+                       err) != 0)
     {
       haserr = true;
     } else
@@ -338,7 +347,31 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
     }
     if (!haserr)
     {
-      if (findsubqueryuniqueforward(theindex,
+      Suffixarray tmpsuffixarray;
+
+      if (uniquesubcallinfo.indextype == Fmindextype &&
+          uniquesubcallinfo.verifywitnesspos &&
+          uniquesubcallinfo.domatchingstatistics)
+      {
+        Seqpos tmptotallength;
+        Str *tmpindexname = str_new_cstr("pck-vrf");
+        if (mapsuffixarray(&tmpsuffixarray,
+                           &tmptotallength,
+                           SARR_ESQTAB,
+                           tmpindexname,
+                           verboseinfo,
+                           err) != 0)
+        {
+          haserr = true;
+          assert("should not occur" == NULL);
+        }
+        str_delete(tmpindexname);
+      } else
+      {
+        tmpsuffixarray.encseq = NULL;
+      }
+      if (findsubqueryuniqueforward(tmpsuffixarray.encseq,
+                                    theindex,
                                     uniqueforwardfunction,
                                     alphabet,
                                     uniquesubcallinfo.queryfilenames,
@@ -357,6 +390,12 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
       {
         haserr = true;
       }
+      if (uniquesubcallinfo.indextype == Fmindextype &&
+          uniquesubcallinfo.verifywitnesspos &&
+          uniquesubcallinfo.domatchingstatistics)
+      {
+        freesuffixarray(&tmpsuffixarray);
+      }
     }
   }
   if (uniquesubcallinfo.indextype == Fmindextype)
@@ -364,7 +403,7 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
     freefmindex(&fmindex);
   } else
   {
-    if (uniquesubcallinfo.indextype == Packedindextype)
+    if (uniquesubcallinfo.indextype == Packedindextype && packedindex != NULL)
     {
       deleteBWTSeq(packedindex);
     }

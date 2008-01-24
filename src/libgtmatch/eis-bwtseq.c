@@ -369,6 +369,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   count = bwtSeq->count;
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   curSym = MRAEncMapSymbol(alphabet, query[--i]);
+  /* XXX Thomas: fix the following: lower is always the first index */
   match->upper = count[curSym];
   match->lower = count[curSym + 1];
   while ((match->upper <= match->lower) && (i > 0))
@@ -515,7 +516,11 @@ unsigned long packedindexmstatsforward(const void *genericindex,
     }
     prevlbound = bwtbound.lower;
   }
-  *witnessposition = pckfindfirstmatch(bwtSeq,prevlbound);
+  if (witnessposition != NULL)
+  {
+    *witnessposition = bwtSeq->seqIdx->seqLen - 1 - 1
+                       - pckfindfirstmatch(bwtSeq,prevlbound);
+  }
   return (unsigned long) (qptr - qstart);
 }
 

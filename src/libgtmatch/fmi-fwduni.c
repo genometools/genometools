@@ -104,6 +104,9 @@ unsigned long skfmmstats (const void *genericindex,
     }
     prevlbound = bwtbound.lbound;
   }
-  *witnessposition = fmfindtextpos (fmindex,prevlbound);
+  if (witnessposition != NULL)
+  {
+    *witnessposition = fmfindtextpos (fmindex,prevlbound);
+  }
   return (unsigned long) (qptr - qstart);
 }

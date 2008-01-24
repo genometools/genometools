@@ -25,6 +25,7 @@
 #include "optionargmode.h"
 #include "format64.h"
 #include "uniquesub.h"
+#include "encseq-def.h"
 
 typedef struct
 {
@@ -63,7 +64,33 @@ typedef struct
   Processuniquelength processuniquelength;
   Postprocessuniquelength postprocessuniquelength;
   void *processinfo;
+  const Encodedsequence *encseq;
 } Substringinfo;
+
+static void checkifsequenceisthere(const Encodedsequence *encseq,
+                                   Seqpos witnessposition,
+                                   unsigned long uniquelength,
+                                   const Uchar *qptr)
+{
+  unsigned long i;
+
+  for (i=0; i<uniquelength; i++)
+  {
+    if (qptr[i] != getencodedchar(encseq,witnessposition+i,Forwardmode))
+    {
+      fprintf(stderr,"at witnesspos " FormatSeqpos " query[%lu] = %u != %u = "
+                     " subject[%lu]\n",
+                     PRINTSeqposcast(witnessposition), 
+                     i,
+                     qptr[i],
+                     getencodedchar(encseq,witnessposition+i,Forwardmode),
+                     witnessposition+i);
+      exit(EXIT_FAILURE); /* Program error */
+    }
+  }
+}
+
+static unsigned long checksperformed = 0;
 
 static int uniqueposinsinglesequence(Substringinfo *substringinfo,
                                      uint64_t unitnum,
@@ -74,7 +101,7 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
 {
   const Uchar *qptr;
   unsigned long uniquelength, remaining;
-  Seqpos witnessposition;
+  Seqpos witnessposition, *wptr;
 
   error_check(err);
   if (substringinfo->preprocessuniquelength != NULL &&
@@ -85,19 +112,37 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
   {
     return -1;
   }
+  if (((Rangespecinfo *) substringinfo->processinfo)->showsubjectpos ||
+      substringinfo->encseq != NULL)
+  {
+    wptr = &witnessposition;
+  } else
+  {
+    wptr = NULL;
+  }
   for (qptr = query, remaining = querylen; remaining > 0; qptr++, remaining--)
   {
     uniquelength = substringinfo->uniqueforward(substringinfo->genericindex,
-                                                &witnessposition,
+                                                wptr,
                                                 qptr,
                                                 query+querylen);
     if (uniquelength > 0)
     {
+      if (wptr != NULL && substringinfo->encseq != NULL)
+      {
+        checksperformed++;
+        checkifsequenceisthere(substringinfo->encseq,
+                               witnessposition,
+                               uniquelength,
+                               qptr);
+      }
       if (substringinfo->processuniquelength(substringinfo->alphabet,
                                              query,
                                              uniquelength,
                                              (unsigned long) (qptr-query),
-                                             witnessposition,
+                                             wptr == NULL
+                                              ? (Seqpos) 0
+                                              : witnessposition,
                                              substringinfo->processinfo,
                                              err) != 0)
       {
@@ -169,7 +214,8 @@ static int showifinlengthrange(const Alphabet *alphabet,
   return 0;
 }
 
-int findsubqueryuniqueforward(const void *genericindex,
+int findsubqueryuniqueforward(const Encodedsequence *encseq,
+                              const void *genericindex,
                               Uniqueforwardfunction uniqueforward,
                               const Alphabet *alphabet,
                               const StrArray *queryfilenames,
@@ -203,6 +249,7 @@ int findsubqueryuniqueforward(const void *genericindex,
   substringinfo.alphabet = alphabet;
   substringinfo.processinfo = &rangespecinfo;
   substringinfo.uniqueforward = uniqueforward;
+  substringinfo.encseq = encseq;
   seqit = seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),true);
   for (unitnum = 0; /* Nothing */; unitnum++)
   {
@@ -233,5 +280,6 @@ int findsubqueryuniqueforward(const void *genericindex,
     FREESPACE(desc);
   }
   seqiterator_delete(seqit);
+  /* printf("# %lu checks performed\n",checksperformed); */
   return haserr ? -1 : 0;
 }

@@ -157,7 +157,10 @@ unsigned long suffixarraymstats (const void *genericindex,
                              (Seqpos) (qptr - qstart),
                              itv.left,itv.right))
     {
-      *witnessposition = suffixarray->suftab[itv.left];
+      if (witnessposition != NULL)
+      {
+        *witnessposition = suffixarray->suftab[itv.left];
+      }
       break;
     }
   }
