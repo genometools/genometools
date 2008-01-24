@@ -36,7 +36,7 @@
 
 #define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
-#define SHOWREFPOS     (SHOWSEQUENCE << 2)
+#define SHOWSUBJECTPOS (SHOWSEQUENCE << 2)
 
 typedef enum
 {
@@ -71,7 +71,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
     = {
       {"sequence",SHOWSEQUENCE},
       {"querypos",SHOWQUERYPOS},
-      {"refpos",SHOWREFPOS}
+      {"subjectpos",SHOWSUBJECTPOS}
   };
 
   error_check(err);
@@ -82,29 +82,14 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   uniquesubcallinfo->queryfilenames = strarray_new();
   flagsoutputoption = strarray_new();
 
-  op = option_parser_new("[option ...] -query queryfile [...]",
+  op = option_parser_new("[options ...] -query queryfile [...]",
                          "Compute length of minumum unique prefixes.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  optionmin = option_new_ulong_min("min",
-                                   "only output length "
-                                   "if >= given minimum length",
-                                   &uniquesubcallinfo->minlength.
-                                          valueunsignedlong,
-                                   0,(unsigned long) 1);
-  option_parser_add_option(op, optionmin);
 
-  optionmax = option_new_ulong_min("max",
-                                   "only output length "
-                                   "if <= given maximum length",
-                                   &uniquesubcallinfo->maxlength.
-                                          valueunsignedlong,
-                                   0,(unsigned long) 1);
-  option_parser_add_option(op, optionmax);
-
-  optionoutput = option_new_stringarray("output",
-                          "set output flags (sequence, querypos, refpos)",
-                          flagsoutputoption);
-  option_parser_add_option(op, optionoutput);
+  optionmstats = option_new_bool("ms", "compute matching statistics",
+                                 &uniquesubcallinfo->domatchingstatistics,
+                                 false);
+  option_parser_add_option(op, optionmstats);
 
   optionfmindex = option_new_string("fmi", "specify fmindex",
                                     uniquesubcallinfo->indexname,NULL);
@@ -122,15 +107,32 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   option_exclude(optionpckindex,optionesaindex);
   option_exclude(optionpckindex,optionfmindex);
 
-  optionmstats = option_new_bool("ms", "compute matching statistics",
-                                 &uniquesubcallinfo->domatchingstatistics,
-                                 false);
-  option_parser_add_option(op, optionmstats);
-
   optionquery = option_new_filenamearray("query", "specify queryfiles",
                                          uniquesubcallinfo->queryfilenames);
   option_is_mandatory(optionquery);
   option_parser_add_option(op, optionquery);
+
+
+  optionmin = option_new_ulong_min("min",
+                                   "only output length "
+                                   "if >= given minimum length",
+                                   &uniquesubcallinfo->minlength.
+                                          valueunsignedlong,
+                                   0,(unsigned long) 1);
+  option_parser_add_option(op, optionmin);
+
+  optionmax = option_new_ulong_min("max",
+                                   "only output length "
+                                   "if <= given maximum length",
+                                   &uniquesubcallinfo->maxlength.
+                                          valueunsignedlong,
+                                   0,(unsigned long) 1);
+  option_parser_add_option(op, optionmax);
+
+  optionoutput = option_new_stringarray("output",
+                          "set output flags (sequence, querypos, subjectpos)",
+                          flagsoutputoption);
+  option_parser_add_option(op, optionoutput);
 
   oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc,
                                err);
@@ -211,10 +213,10 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
         }
         if (oprval != OPTIONPARSER_ERROR &&
             !uniquesubcallinfo->domatchingstatistics &&
-            (uniquesubcallinfo->showmode & SHOWREFPOS))
+            (uniquesubcallinfo->showmode & SHOWSUBJECTPOS))
         {
-          error_set(err,"flag \"refpos\" for option -output is only possible "
-                        "if also option -ms is used");
+          error_set(err,"flag \"subjectpos\" for option -output "
+                        "is only possible if also option -ms is used");
           oprval = OPTIONPARSER_ERROR;
         }
       }
@@ -342,11 +344,14 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
                                     uniquesubcallinfo.queryfilenames,
                                     uniquesubcallinfo.minlength,
                                     uniquesubcallinfo.maxlength,
-                                    (uniquesubcallinfo.showmode & SHOWSEQUENCE)
+                                    (uniquesubcallinfo.showmode 
+                                                & SHOWSEQUENCE)
                                       ? true : false,
-                                    (uniquesubcallinfo.showmode & SHOWQUERYPOS)
+                                    (uniquesubcallinfo.showmode 
+                                                & SHOWQUERYPOS)
                                       ? true : false,
-                                    (uniquesubcallinfo.showmode & SHOWREFPOS)
+                                    (uniquesubcallinfo.showmode 
+                                                & SHOWSUBJECTPOS)
                                       ? true : false,
                                     err) != 0)
       {
