@@ -69,7 +69,8 @@ unsigned long skfmmstats (const void *genericindex,
 {
   Uchar cc;
   const Uchar *qptr;
-  Seqpos prevlbound, matchlength;
+  Seqpos prevlbound;
+  unsigned long matchlength;
   Bwtbound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 

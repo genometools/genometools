@@ -79,13 +79,14 @@ static void checkifsequenceisthere(const Encodedsequence *encseq,
     if (qptr[i] != getencodedchar(encseq,witnessposition+i,Forwardmode))
     {
       fprintf(stderr,"sequence of length %lu at witnesspos " FormatSeqpos
-                     " query[%lu] = %u != %u = subject[%lu]\n",
+                     " query[%lu] = %u != %u = subject[" FormatSeqpos "]\n",
                      uniquelength,
                      PRINTSeqposcast(witnessposition),
                      i,
-                     qptr[i],
-                     getencodedchar(encseq,witnessposition+i,Forwardmode),
-                     witnessposition+i);
+                     (unsigned int) qptr[i],
+                     (unsigned int) getencodedchar(encseq,witnessposition+i,
+                                                   Forwardmode),
+                     PRINTSeqposcast(witnessposition+(Seqpos) i));
       exit(EXIT_FAILURE); /* Program error */
     }
   }
