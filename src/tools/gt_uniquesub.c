@@ -113,7 +113,6 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   option_is_mandatory(optionquery);
   option_parser_add_option(op, optionquery);
 
-
   optionmin = option_new_ulong_min("min",
                                    "only output length "
                                    "if >= given minimum length",
@@ -277,7 +276,7 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
 
     if (mapsuffixarray(&suffixarray,
                        &totallength,
-                       (uniquesubcallinfo.indextype == Esaindextype) 
+                       (uniquesubcallinfo.indextype == Esaindextype)
                          ? (SARR_ESQTAB | SARR_SUFTAB)
                          : 0,
                        uniquesubcallinfo.indexname,
@@ -294,7 +293,7 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
       if (uniquesubcallinfo.indextype == Packedindextype)
       {
         packedindex = loadBWTSeqForSA(uniquesubcallinfo.indexname,
-                                      BWT_ON_BLOCK_ENC, 
+                                      BWT_ON_BLOCK_ENC,
                                       BWTDEFOPT_MULTI_QUERY,
                                       &suffixarray,
                                       totallength+1, err);
@@ -378,13 +377,13 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
                                       uniquesubcallinfo.queryfilenames,
                                       uniquesubcallinfo.minlength,
                                       uniquesubcallinfo.maxlength,
-                                      (uniquesubcallinfo.showmode 
+                                      (uniquesubcallinfo.showmode
                                                   & SHOWSEQUENCE)
                                         ? true : false,
-                                      (uniquesubcallinfo.showmode 
+                                      (uniquesubcallinfo.showmode
                                                   & SHOWQUERYPOS)
                                         ? true : false,
-                                      (uniquesubcallinfo.showmode 
+                                      (uniquesubcallinfo.showmode
                                                   & SHOWSUBJECTPOS)
                                         ? true : false,
                                       err) != 0)
