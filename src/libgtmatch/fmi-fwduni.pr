@@ -4,14 +4,12 @@ extern "C" {
 unsigned long skfmuniqueforward (const void *genericindex,
                                  /*@unused@*/ Seqpos *witnessposition,
                                  const Uchar *qstart,
-                                 const Uchar *qend,
-                                 /*@unused@*/ Error *err);
+                                 const Uchar *qend);
 
 unsigned long skfmmstats (const void *genericindex,
                           Seqpos *witnessposition,
                           const Uchar *qstart,
-                          const Uchar *qend,
-                          /*@unused@*/ Error *err);
+                          const Uchar *qend);
 
 #ifdef __cplusplus
 }

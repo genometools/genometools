@@ -315,8 +315,12 @@ EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
 unsigned long packedindexuniqueforward(const void *genericindex,
                                        /*@unused@*/ Seqpos *witnessposition,
                                        const Uchar *qstart,
-                                       const Uchar *qend,
-                                       Error *err);
+                                       const Uchar *qend);
+
+unsigned long packedindexmstatsforward(const void *genericindex,
+                                       Seqpos *witnessposition,
+                                       const Uchar *qstart,
+                                       const Uchar *qend);
 
 #include "libgtmatch/eis-bwtseqsimpleop.h"
 

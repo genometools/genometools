@@ -25,12 +25,13 @@
 #include "optionargmode.h"
 #include "format64.h"
 #include "uniquesub.h"
+#include "encseq-def.h"
 
 typedef struct
 {
   bool showsequence,
        showquerypos,
-       showrefpos;
+       showsubjectpos;
   Definedunsignedlong minlength,
                       maxlength;
 } Rangespecinfo;
@@ -63,7 +64,33 @@ typedef struct
   Processuniquelength processuniquelength;
   Postprocessuniquelength postprocessuniquelength;
   void *processinfo;
+  const Encodedsequence *encseq;
 } Substringinfo;
+
+static void checkifsequenceisthere(const Encodedsequence *encseq,
+                                   Seqpos witnessposition,
+                                   unsigned long uniquelength,
+                                   const Uchar *qptr)
+{
+  unsigned long i;
+
+  for (i=0; i<uniquelength; i++)
+  {
+    if (qptr[i] != getencodedchar(encseq,witnessposition+i,Forwardmode))
+    {
+      fprintf(stderr,"sequence of length %lu at witnesspos " FormatSeqpos
+                     " query[%lu] = %u != %u = subject[" FormatSeqpos "]\n",
+                     uniquelength,
+                     PRINTSeqposcast(witnessposition),
+                     i,
+                     (unsigned int) qptr[i],
+                     (unsigned int) getencodedchar(encseq,witnessposition+i,
+                                                   Forwardmode),
+                     PRINTSeqposcast(witnessposition+(Seqpos) i));
+      exit(EXIT_FAILURE); /* Program error */
+    }
+  }
+}
 
 static int uniqueposinsinglesequence(Substringinfo *substringinfo,
                                      uint64_t unitnum,
@@ -74,7 +101,7 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
 {
   const Uchar *qptr;
   unsigned long uniquelength, remaining;
-  Seqpos witnessposition;
+  Seqpos witnessposition, *wptr;
 
   error_check(err);
   if (substringinfo->preprocessuniquelength != NULL &&
@@ -85,18 +112,36 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
   {
     return -1;
   }
+  if (((Rangespecinfo *) substringinfo->processinfo)->showsubjectpos ||
+      substringinfo->encseq != NULL)
+  {
+    wptr = &witnessposition;
+  } else
+  {
+    wptr = NULL;
+  }
   for (qptr = query, remaining = querylen; remaining > 0; qptr++, remaining--)
   {
     uniquelength = substringinfo->uniqueforward(substringinfo->genericindex,
-                                                &witnessposition,
-                                                qptr,query+querylen,err);
+                                                wptr,
+                                                qptr,
+                                                query+querylen);
     if (uniquelength > 0)
     {
+      if (wptr != NULL && substringinfo->encseq != NULL)
+      {
+        checkifsequenceisthere(substringinfo->encseq,
+                               witnessposition,
+                               uniquelength,
+                               qptr);
+      }
       if (substringinfo->processuniquelength(substringinfo->alphabet,
                                              query,
                                              uniquelength,
                                              (unsigned long) (qptr-query),
-                                             witnessposition,
+                                             wptr == NULL
+                                              ? (Seqpos) 0
+                                              : witnessposition,
                                              substringinfo->processinfo,
                                              err) != 0)
       {
@@ -136,7 +181,7 @@ static int showifinlengthrange(const Alphabet *alphabet,
                                const Uchar *start,
                                unsigned long uniquelength,
                                unsigned long querystart,
-                               Seqpos refpos,
+                               Seqpos subjectpos,
                                void *info,
                                 /*@unused@*/ Error *err)
 {
@@ -152,9 +197,9 @@ static int showifinlengthrange(const Alphabet *alphabet,
       printf("%lu ",querystart);
     }
     printf("%lu",uniquelength);
-    if (rangespecinfo->showrefpos)
+    if (rangespecinfo->showsubjectpos)
     {
-      printf(" " FormatSeqpos,PRINTSeqposcast(refpos));
+      printf(" " FormatSeqpos,PRINTSeqposcast(subjectpos));
     }
     if (rangespecinfo->showsequence)
     {
@@ -168,7 +213,8 @@ static int showifinlengthrange(const Alphabet *alphabet,
   return 0;
 }
 
-int findsubqueryuniqueforward(const void *genericindex,
+int findsubqueryuniqueforward(const Encodedsequence *encseq,
+                              const void *genericindex,
                               Uniqueforwardfunction uniqueforward,
                               const Alphabet *alphabet,
                               const StrArray *queryfilenames,
@@ -176,7 +222,7 @@ int findsubqueryuniqueforward(const void *genericindex,
                               Definedunsignedlong maxlength,
                               bool showsequence,
                               bool showquerypos,
-                              bool showrefpos,
+                              bool showsubjectpos,
                               Error *err)
 {
   Substringinfo substringinfo;
@@ -195,13 +241,14 @@ int findsubqueryuniqueforward(const void *genericindex,
   rangespecinfo.maxlength = maxlength;
   rangespecinfo.showsequence = showsequence;
   rangespecinfo.showquerypos = showquerypos;
-  rangespecinfo.showrefpos = showrefpos;
+  rangespecinfo.showsubjectpos = showsubjectpos;
   substringinfo.preprocessuniquelength = showunitnum;
   substringinfo.processuniquelength = showifinlengthrange;
   substringinfo.postprocessuniquelength = NULL;
   substringinfo.alphabet = alphabet;
   substringinfo.processinfo = &rangespecinfo;
   substringinfo.uniqueforward = uniqueforward;
+  substringinfo.encseq = encseq;
   seqit = seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),true);
   for (unitnum = 0; /* Nothing */; unitnum++)
   {

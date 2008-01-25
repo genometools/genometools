@@ -25,14 +25,15 @@
 #include "seqpos-def.h"
 #include "ushort-def.h"
 #include "alphadef.h"
+#include "encseq-def.h"
 
 typedef unsigned long (*Uniqueforwardfunction) (const void *,
                                                 Seqpos *,
                                                 const Uchar *,
-                                                const Uchar *,
-                                                Error *err);
+                                                const Uchar *);
 
-int findsubqueryuniqueforward(const void *genericindex,
+int findsubqueryuniqueforward(const Encodedsequence *encseq,
+                              const void *genericindex,
                               Uniqueforwardfunction uniqueforward,
                               const Alphabet *alphabet,
                               const StrArray *queryfilenames,
@@ -40,7 +41,7 @@ int findsubqueryuniqueforward(const void *genericindex,
                               Definedunsignedlong maxlength,
                               bool showsequence,
                               bool showquerypos,
-                              bool showrefpos,
+                              bool showsubjectpos,
                               Error *err);
 
 #endif

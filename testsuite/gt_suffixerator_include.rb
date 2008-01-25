@@ -167,12 +167,13 @@ def checkmapped(args)
 end
 
 def makeuniquesubcall(queryfile,indexarg,ms)
+  extra=""
   if ms
     extra=" -ms"
-  else
-    extra=""
   end
-  return "#{$bin}gt uniquesub #{extra} -min 1 -max 20 -output querypos -query #{queryfile} #{indexarg}"
+  constantargs="-min 1 -max 20 -query #{queryfile} #{indexarg}"
+  prog="#{$bin}gt uniquesub -verify #{extra}"
+  return "#{prog} -output querypos #{constantargs}"
 end
 
 def checkuniquesub(queryfile,ms)
@@ -181,19 +182,19 @@ def checkuniquesub(queryfile,ms)
   run_test(makeuniquesubcall(queryfile,"-esa sfx",ms))
   run "mv #{$last_stdout} tmp.esa"
   run "diff tmp.esa tmp.fmi"
-  if not ms
-    run_test(makeuniquesubcall(queryfile,"-pck pck",ms))
-    run "mv #{$last_stdout} tmp.pck"
-    run "diff tmp.pck tmp.fmi"
-  end
-  run "rm -f sfx.* fmi.* pck.*"
+  run_test(makeuniquesubcall(queryfile,"-pck pck",ms))
+  run "mv #{$last_stdout} tmp.pck"
+  run "diff tmp.pck tmp.fmi"
 end
 
 def createandcheckuniquesub(reffile,queryfile)
   run_test("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}")
   run_test("#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v -db #{reffile}")
-  run_test("#{$bin}gt packedindex mkindex -indexname pck -db #{reffile} -dna -pl -bsize 10 -locfreq 0 -locbitmap no -dir rev")
+  run_test("#{$bin}gt packedindex mkindex -indexname pck -db #{reffile} -dna -pl -bsize 10 -locfreq 32 -dir rev")
+  run_test("#{$bin}gt suffixerator -indexname pck-vrf -db #{reffile} -dna -tis")
   checkuniquesub(queryfile,false)
+  checkuniquesub(queryfile,true)
+  run "rm -f sfx.* fmi.* pck.*"
 end
 
 def grumbach()
@@ -204,7 +205,7 @@ end
 
 allfiles.each do |reffile|
   allfiles.each do |queryfile|
-    if reffile != "TTT-small.fna" && reffile != "RandomN.fna" && queryfile != reffile
+    if reffile != "TTT-small.fna" && queryfile != reffile
       Name "gt uniquesub #{reffile} #{queryfile}"
       Keywords "gt_uniquesub small"
       Test do

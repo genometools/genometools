@@ -105,8 +105,7 @@ static bool findcharintervalbin(const Encodedsequence *encseq,
 unsigned long suffixarrayuniqueforward (const void *genericindex,
                                         /*@unused@*/ Seqpos *witnessposition,
                                         const Uchar *qstart,
-                                        const Uchar *qend,
-                                        /*@unused@*/ Error *err)
+                                        const Uchar *qend)
 {
   Simplelcpinterval itv;
   const Uchar *qptr;
@@ -139,8 +138,7 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
 unsigned long suffixarraymstats (const void *genericindex,
                                  Seqpos *witnessposition,
                                  const Uchar *qstart,
-                                 const Uchar *qend,
-                                 /*@unused@*/ Error *err)
+                                 const Uchar *qend)
 {
   Simplelcpinterval itv;
   const Uchar *qptr;
@@ -159,7 +157,10 @@ unsigned long suffixarraymstats (const void *genericindex,
                              (Seqpos) (qptr - qstart),
                              itv.left,itv.right))
     {
-      *witnessposition = suffixarray->suftab[itv.left];
+      if (witnessposition != NULL)
+      {
+        *witnessposition = suffixarray->suftab[itv.left];
+      }
       break;
     }
   }

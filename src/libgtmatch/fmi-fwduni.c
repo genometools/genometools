@@ -26,8 +26,7 @@
 unsigned long skfmuniqueforward (const void *genericindex,
                                  /*@unused@*/ Seqpos *witnessposition,
                                  const Uchar *qstart,
-                                 const Uchar *qend,
-                                 /*@unused@*/ Error *err)
+                                 const Uchar *qend)
 {
   Uchar cc;
   const Uchar *qptr;
@@ -66,12 +65,12 @@ unsigned long skfmuniqueforward (const void *genericindex,
 unsigned long skfmmstats (const void *genericindex,
                           Seqpos *witnessposition,
                           const Uchar *qstart,
-                          const Uchar *qend,
-                          /*@unused@*/ Error *err)
+                          const Uchar *qend)
 {
   Uchar cc;
   const Uchar *qptr;
   Seqpos prevlbound;
+  unsigned long matchlength;
   Bwtbound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 
@@ -106,6 +105,12 @@ unsigned long skfmmstats (const void *genericindex,
     }
     prevlbound = bwtbound.lbound;
   }
-  *witnessposition = fmfindtextpos (fmindex,prevlbound);
-  return (unsigned long) (qptr - qstart);
+  matchlength = (unsigned long) (qptr - qstart);
+  if (witnessposition != NULL)
+  {
+    Seqpos startpos = fmfindtextpos (fmindex,prevlbound);
+    assert((fmindex->bwtlength-1) >= (startpos + matchlength));
+    *witnessposition = (fmindex->bwtlength-1) - (startpos + matchlength);
+  }
+  return matchlength;
 }
