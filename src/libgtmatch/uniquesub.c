@@ -78,9 +78,10 @@ static void checkifsequenceisthere(const Encodedsequence *encseq,
   {
     if (qptr[i] != getencodedchar(encseq,witnessposition+i,Forwardmode))
     {
-      fprintf(stderr,"at witnesspos " FormatSeqpos " query[%lu] = %u != %u = "
-                     " subject[%lu]\n",
-                     PRINTSeqposcast(witnessposition), 
+      fprintf(stderr,"sequence of length %lu at witnesspos " FormatSeqpos
+                     " query[%lu] = %u != %u = subject[%lu]\n",
+                     uniquelength,
+                     PRINTSeqposcast(witnessposition),
                      i,
                      qptr[i],
                      getencodedchar(encseq,witnessposition+i,Forwardmode),
@@ -89,8 +90,6 @@ static void checkifsequenceisthere(const Encodedsequence *encseq,
     }
   }
 }
-
-static unsigned long checksperformed = 0;
 
 static int uniqueposinsinglesequence(Substringinfo *substringinfo,
                                      uint64_t unitnum,
@@ -130,7 +129,6 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
     {
       if (wptr != NULL && substringinfo->encseq != NULL)
       {
-        checksperformed++;
         checkifsequenceisthere(substringinfo->encseq,
                                witnessposition,
                                uniquelength,
@@ -280,6 +278,5 @@ int findsubqueryuniqueforward(const Encodedsequence *encseq,
     FREESPACE(desc);
   }
   seqiterator_delete(seqit);
-  /* printf("# %lu checks performed\n",checksperformed); */
   return haserr ? -1 : 0;
 }

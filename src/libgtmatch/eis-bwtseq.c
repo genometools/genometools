@@ -459,6 +459,7 @@ unsigned long packedindexmstatsforward(const void *genericindex,
   struct matchBound bwtbound;
   const BWTSeq *bwtSeq = (BWTSeq *) genericindex;
   Symbol curSym;
+  unsigned long matchlength;
   const MRAEnc *alphabet;
 
   assert(bwtSeq && qstart && qstart < qend);
@@ -516,12 +517,14 @@ unsigned long packedindexmstatsforward(const void *genericindex,
     }
     prevlbound = bwtbound.lower;
   }
+  matchlength = (unsigned long) (qptr - qstart);
   if (witnessposition != NULL)
   {
-    *witnessposition = bwtSeq->seqIdx->seqLen - 1 - 1
-                       - pckfindfirstmatch(bwtSeq,prevlbound);
+    Seqpos startpos = pckfindfirstmatch(bwtSeq,prevlbound);
+    assert((bwtSeq->seqIdx->seqLen-1) >= (startpos + matchlength));
+    *witnessposition = (bwtSeq->seqIdx->seqLen - 1) - (startpos + matchlength);
   }
-  return (unsigned long) (qptr - qstart);
+  return matchlength;
 }
 
 extern Seqpos

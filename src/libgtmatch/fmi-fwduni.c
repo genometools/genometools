@@ -69,7 +69,7 @@ unsigned long skfmmstats (const void *genericindex,
 {
   Uchar cc;
   const Uchar *qptr;
-  Seqpos prevlbound;
+  Seqpos prevlbound, matchlength;
   Bwtbound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 
@@ -104,9 +104,12 @@ unsigned long skfmmstats (const void *genericindex,
     }
     prevlbound = bwtbound.lbound;
   }
+  matchlength = (unsigned long) (qptr - qstart);
   if (witnessposition != NULL)
   {
-    *witnessposition = fmfindtextpos (fmindex,prevlbound);
+    Seqpos startpos = fmfindtextpos (fmindex,prevlbound);
+    assert((fmindex->bwtlength-1) >= (startpos + matchlength));
+    *witnessposition = (fmindex->bwtlength-1) - (startpos + matchlength);
   }
-  return (unsigned long) (qptr - qstart);
+  return matchlength;
 }

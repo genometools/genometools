@@ -173,7 +173,7 @@ def makeuniquesubcall(queryfile,indexarg,ms)
   end
   constantargs="-min 1 -max 20 -query #{queryfile} #{indexarg}"
   prog="#{$bin}gt uniquesub -verify #{extra}"
-  return "#{prog} -output querypos sequence #{constantargs}"
+  return "#{prog} -output querypos #{constantargs}"
 end
 
 def checkuniquesub(queryfile,ms)

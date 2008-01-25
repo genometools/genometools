@@ -273,7 +273,7 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
     }
   } else
   {
-    Seqpos totallength = 0;
+    Seqpos totallength;
 
     if (mapsuffixarray(&suffixarray,
                        &totallength,
@@ -349,7 +349,7 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
     {
       Suffixarray tmpsuffixarray;
 
-      if (uniquesubcallinfo.indextype == Fmindextype &&
+      if (uniquesubcallinfo.indextype != Esaindextype &&
           uniquesubcallinfo.verifywitnesspos &&
           uniquesubcallinfo.domatchingstatistics)
       {
@@ -363,34 +363,36 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
                            err) != 0)
         {
           haserr = true;
-          assert("should not occur" == NULL);
         }
         str_delete(tmpindexname);
       } else
       {
         tmpsuffixarray.encseq = NULL;
       }
-      if (findsubqueryuniqueforward(tmpsuffixarray.encseq,
-                                    theindex,
-                                    uniqueforwardfunction,
-                                    alphabet,
-                                    uniquesubcallinfo.queryfilenames,
-                                    uniquesubcallinfo.minlength,
-                                    uniquesubcallinfo.maxlength,
-                                    (uniquesubcallinfo.showmode 
-                                                & SHOWSEQUENCE)
-                                      ? true : false,
-                                    (uniquesubcallinfo.showmode 
-                                                & SHOWQUERYPOS)
-                                      ? true : false,
-                                    (uniquesubcallinfo.showmode 
-                                                & SHOWSUBJECTPOS)
-                                      ? true : false,
-                                    err) != 0)
+      if (!haserr)
       {
-        haserr = true;
+        if (findsubqueryuniqueforward(tmpsuffixarray.encseq,
+                                      theindex,
+                                      uniqueforwardfunction,
+                                      alphabet,
+                                      uniquesubcallinfo.queryfilenames,
+                                      uniquesubcallinfo.minlength,
+                                      uniquesubcallinfo.maxlength,
+                                      (uniquesubcallinfo.showmode 
+                                                  & SHOWSEQUENCE)
+                                        ? true : false,
+                                      (uniquesubcallinfo.showmode 
+                                                  & SHOWQUERYPOS)
+                                        ? true : false,
+                                      (uniquesubcallinfo.showmode 
+                                                  & SHOWSUBJECTPOS)
+                                        ? true : false,
+                                      err) != 0)
+        {
+          haserr = true;
+        }
       }
-      if (uniquesubcallinfo.indextype == Fmindextype &&
+      if (uniquesubcallinfo.indextype != Esaindextype &&
           uniquesubcallinfo.verifywitnesspos &&
           uniquesubcallinfo.domatchingstatistics)
       {
