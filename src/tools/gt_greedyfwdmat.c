@@ -33,6 +33,7 @@
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqconstruct.h"
 #include "tools/gt_uniquesub.h"
+#include "tools/gt_matchingstatistics.h"
 
 #define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
@@ -97,6 +98,7 @@ static OPrval parsegfmsub(bool doms,
 
   optionfmindex = option_new_string("fmi", "specify fmindex",
                                     gfmsubcallinfo->indexname,NULL);
+  option_is_development_option(optionverify);
   option_parser_add_option(op, optionfmindex);
 
   optionesaindex = option_new_string("esa", "specify suffix array",
@@ -134,22 +136,23 @@ static OPrval parsegfmsub(bool doms,
   option_parser_add_option(op, optionmax);
 
   optionoutput = option_new_stringarray("output",
-                          doms 
-                          ? "set output flags (sequence, querypos, subjectpos)"
-                          : "set output flags (sequence, querypos)",
-                          flagsoutputoption);
+                   doms 
+                     ? "set output flags (sequence, querypos, subjectpos)"
+                     : "set output flags (sequence, querypos)",
+                   flagsoutputoption);
   option_parser_add_option(op, optionoutput);
 
   if (doms)
   {
-    optionverify = option_new_bool("verify", "verify the witness positions",
+    optionverify = option_new_bool("verify","verify witness positions",
                                    &gfmsubcallinfo->verifywitnesspos,
                                    false);
     option_is_development_option(optionverify);
     option_parser_add_option(op, optionverify);
   }
 
-  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc,err);
+  oprval = option_parser_parse(op, &parsed_args, argc, argv, 
+                               versionfunc,err);
 
   if (oprval == OPTIONPARSER_OK)
   {
@@ -168,7 +171,7 @@ static OPrval parsegfmsub(bool doms,
           gfmsubcallinfo->indextype = Packedindextype;
         } else
         {
-          error_set(err,"one of the options -fmi, -esa, -pck must be used");
+          error_set(err,"one of the options -esa, -pck must be used");
           oprval = OPTIONPARSER_ERROR;
         }
       }
@@ -291,7 +294,8 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
   verboseinfo = newverboseinfo(false);
   if (gfmsubcallinfo.indextype == Fmindextype)
   {
-    if (mapfmindex (&fmindex,gfmsubcallinfo.indexname,verboseinfo,err) != 0)
+    if (mapfmindex (&fmindex,gfmsubcallinfo.indexname,
+                    verboseinfo,err) != 0)
     {
       haserr = true;
     } else
