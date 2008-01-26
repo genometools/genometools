@@ -608,7 +608,7 @@ EISFILES=${shell ls ${CURDIR}/src/libgtmatch/*.c | grep eis-}\
          ${CURDIR}/src/libgtmatch/sfx-opt.c\
          ${CURDIR}/src/libgtmatch/sfx-run.c
 
-SKTOOLS=${filter-out src/tools/gt_uniquesub.c,\
+SKTOOLS=${filter-out src/tools/gt_greedyfwdmat.c,\
                      ${shell grep -l Kurtz src/tools/*.c}}
 
 spgt:${addprefix obj/,${notdir ${subst .c,.splint,\

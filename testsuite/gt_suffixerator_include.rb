@@ -171,35 +171,36 @@ def checkmapped(args)
   end
 end
 
-def makeuniquesubcall(queryfile,indexarg,ms)
-  extra=""
+def makegreedyfwdmatcall(queryfile,indexarg,ms)
+  prog=""
   if ms
-    extra=" -ms"
+    prog="#{$bin}gt matstat -verify"
+  else
+    prog="#{$bin}gt uniquesub"
   end
   constantargs="-min 1 -max 20 -query #{queryfile} #{indexarg}"
-  prog="#{$bin}gt uniquesub -verify #{extra}"
   return "#{prog} -output querypos #{constantargs}"
 end
 
-def checkuniquesub(queryfile,ms)
-  run_test makeuniquesubcall(queryfile,"-fmi fmi",ms)
+def checkgreedyfwdmat(queryfile,ms)
+  run_test makegreedyfwdmatcall(queryfile,"-fmi fmi",ms)
   run "mv #{$last_stdout} tmp.fmi"
-  run_test makeuniquesubcall(queryfile,"-esa sfx",ms)
+  run_test makegreedyfwdmatcall(queryfile,"-esa sfx",ms)
   run "mv #{$last_stdout} tmp.esa"
   run "diff tmp.esa tmp.fmi"
-  run_test makeuniquesubcall(queryfile,"-pck pck",ms)
+  run_test makegreedyfwdmatcall(queryfile,"-pck pck",ms)
   run "mv #{$last_stdout} tmp.pck"
   run "diff tmp.pck tmp.fmi"
 end
 
-def createandcheckuniquesub(reffile,queryfile)
+def createandcheckgreedyfwdmat(reffile,queryfile)
   run_test "#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}"
   run_test "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
            "-db #{reffile}"
   run_test "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
            "-dna -pl -bsize 10 -locfreq 32 -dir rev"
-  checkuniquesub(queryfile,false)
-  checkuniquesub(queryfile,true)
+  checkgreedyfwdmat(queryfile,false)
+  checkgreedyfwdmat(queryfile,true)
   run "rm -f sfx.* fmi.* pck.*"
 end
 
@@ -212,10 +213,10 @@ end
 allfiles.each do |reffile|
   allfiles.each do |queryfile|
     if reffile != "TTT-small.fna" && queryfile != reffile
-      Name "gt uniquesub #{reffile} #{queryfile}"
-      Keywords "gt_uniquesub small"
+      Name "gt greedyfwdmat #{reffile} #{queryfile}"
+      Keywords "gt_greedyfwdmat small"
       Test do
-        createandcheckuniquesub("#{$testdata}/#{reffile}",
+        createandcheckgreedyfwdmat("#{$testdata}/#{reffile}",
                                 "#{$testdata}/#{queryfile}")
       end 
     end
@@ -250,10 +251,10 @@ if $gttestdata then
 
   checkmapped("-db #{$gttestdata}swissprot/swiss10K -parts 1 -pl -smap " +
               "TransProt11")
-  Name "gt uniquesub at1MB U8"
-  Keywords "gt_uniquesub gttestdata"
+  Name "gt greedyfwdmat at1MB U8"
+  Keywords "gt_greedyfwdmat gttestdata"
   Test do
-    createandcheckuniquesub("#{$gttestdata}Iowa/at1MB",
+    createandcheckgreedyfwdmat("#{$gttestdata}Iowa/at1MB",
                             "#{$gttestdata}Iowa/U89959.fna")
   end
 end
