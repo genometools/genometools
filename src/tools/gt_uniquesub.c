@@ -308,7 +308,7 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
   if (!haserr)
   {
     const void *theindex;
-    Uniqueforwardfunction uniqueforwardfunction = NULL;
+    Uniqueforwardfunction uniqueforwardfunction;
 
     if (uniquesubcallinfo.indextype == Fmindextype)
     {

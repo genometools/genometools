@@ -49,5 +49,10 @@ Show a summary of all options and terminate with \index{exit code} exit code 0.
 }
 }
 
-\parskip5pt
-\parindent0pt
+\newenvironment{Output}{%
+\begin{scriptsize}
+\begin{alltt}}{%
+\end{alltt}
+\end{scriptsize}%
+\addvspace{-\medskipamount}
+}
