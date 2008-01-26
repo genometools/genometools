@@ -611,10 +611,14 @@ EISFILES=${shell ls ${CURDIR}/src/libgtmatch/*.c | grep eis-}\
 SKTOOLS=${filter-out src/tools/gt_uniquesub.c,\
                      ${shell grep -l Kurtz src/tools/*.c}}
 
-sgt:${addprefix obj/,${notdir ${subst .c,.splint,\
+spgt:${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/libgtmatch/*.c}}\
                      ${wildcard ${CURDIR}/src/libgtltr/*.c}\
                                 ${SKTOOLS}}}}
+
+scgt:
+	src_check src/libgtmatch/* 
+	src_check src/libgtltr/*
 
 splintclean:
 	find obj -name '*.splint' | xargs rm -f

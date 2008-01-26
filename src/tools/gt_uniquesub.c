@@ -22,7 +22,7 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/defined-types.h"
 #include "libgtmatch/optionargmode.h"
-#include "libgtmatch/uniquesub.h"
+#include "libgtmatch/greedyfwdmat.h"
 
 #include "libgtmatch/stamp.h"
 #include "libgtmatch/fmi-fwduni.pr"
@@ -239,6 +239,17 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   return oprval;
 }
 
+static bool dotestsequence(const Uniquesubcallinfo *uniquesubcallinfo)
+{
+  if (uniquesubcallinfo->indextype == Packedindextype &&
+      uniquesubcallinfo->verifywitnesspos &&
+      uniquesubcallinfo->domatchingstatistics)
+  {
+    return true;
+  }
+  return false;
+}
+
 int gt_uniquesub(int argc, const char **argv, Error *err)
 {
   Uniquesubcallinfo uniquesubcallinfo;
@@ -274,12 +285,24 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
   } else
   {
     Seqpos totallength;
+    unsigned int mappedbits;
 
+    if (uniquesubcallinfo.indextype == Esaindextype)
+    {
+      mappedbits = SARR_ESQTAB | SARR_SUFTAB;
+    } else
+    {
+      if (dotestsequence(&uniquesubcallinfo))
+      {
+        mappedbits = SARR_ESQTAB;
+      } else
+      {
+        mappedbits = 0;
+      }
+    }
     if (mapsuffixarray(&suffixarray,
                        &totallength,
-                       (uniquesubcallinfo.indextype == Esaindextype) 
-                         ? (SARR_ESQTAB | SARR_SUFTAB)
-                         : 0,
+                       mappedbits,
                        uniquesubcallinfo.indexname,
                        verboseinfo,
                        err) != 0)
@@ -294,7 +317,7 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
       if (uniquesubcallinfo.indextype == Packedindextype)
       {
         packedindex = loadBWTSeqForSA(uniquesubcallinfo.indexname,
-                                      BWT_ON_BLOCK_ENC, 
+                                      BWT_ON_BLOCK_ENC,
                                       BWTDEFOPT_MULTI_QUERY,
                                       &suffixarray,
                                       totallength+1, err);
@@ -308,17 +331,17 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
   if (!haserr)
   {
     const void *theindex;
-    Uniqueforwardfunction uniqueforwardfunction;
+    Greedygmatchforwardfunction gmatchforwardfunction;
 
     if (uniquesubcallinfo.indextype == Fmindextype)
     {
       theindex = (const void *) &fmindex;
       if (uniquesubcallinfo.domatchingstatistics)
       {
-        uniqueforwardfunction = skfmmstats;
+        gmatchforwardfunction = skfmmstats;
       } else
       {
-        uniqueforwardfunction = skfmuniqueforward;
+        gmatchforwardfunction = skfmuniqueforward;
       }
     } else
     {
@@ -327,10 +350,10 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
         theindex = (const void *) &suffixarray;
         if (uniquesubcallinfo.domatchingstatistics)
         {
-          uniqueforwardfunction = suffixarraymstats;
+          gmatchforwardfunction = suffixarraymstats;
         } else
         {
-          uniqueforwardfunction = suffixarrayuniqueforward;
+          gmatchforwardfunction = suffixarrayuniqueforward;
         }
       } else
       {
@@ -338,65 +361,39 @@ int gt_uniquesub(int argc, const char **argv, Error *err)
         theindex = (const void *) packedindex;
         if (uniquesubcallinfo.domatchingstatistics)
         {
-          uniqueforwardfunction = packedindexmstatsforward;
+          gmatchforwardfunction = packedindexmstatsforward;
         } else
         {
-          uniqueforwardfunction = packedindexuniqueforward;
+          gmatchforwardfunction = packedindexuniqueforward;
         }
       }
     }
     if (!haserr)
     {
-      Suffixarray tmpsuffixarray;
-
-      if (uniquesubcallinfo.indextype != Esaindextype &&
-          uniquesubcallinfo.verifywitnesspos &&
-          uniquesubcallinfo.domatchingstatistics)
-      {
-        Seqpos tmptotallength;
-        Str *tmpindexname = str_new_cstr("pck-vrf");
-        if (mapsuffixarray(&tmpsuffixarray,
-                           &tmptotallength,
-                           SARR_ESQTAB,
-                           tmpindexname,
-                           verboseinfo,
-                           err) != 0)
-        {
-          haserr = true;
-        }
-        str_delete(tmpindexname);
-      } else
-      {
-        tmpsuffixarray.encseq = NULL;
-      }
       if (!haserr)
       {
-        if (findsubqueryuniqueforward(tmpsuffixarray.encseq,
+        if (findsubquerygmatchforward(dotestsequence(&uniquesubcallinfo)
+                                        ? suffixarray.encseq
+                                        : NULL,
                                       theindex,
-                                      uniqueforwardfunction,
+                                      gmatchforwardfunction,
                                       alphabet,
                                       uniquesubcallinfo.queryfilenames,
                                       uniquesubcallinfo.minlength,
                                       uniquesubcallinfo.maxlength,
-                                      (uniquesubcallinfo.showmode 
+                                      (uniquesubcallinfo.showmode
                                                   & SHOWSEQUENCE)
                                         ? true : false,
-                                      (uniquesubcallinfo.showmode 
+                                      (uniquesubcallinfo.showmode
                                                   & SHOWQUERYPOS)
                                         ? true : false,
-                                      (uniquesubcallinfo.showmode 
+                                      (uniquesubcallinfo.showmode
                                                   & SHOWSUBJECTPOS)
                                         ? true : false,
                                       err) != 0)
         {
           haserr = true;
         }
-      }
-      if (uniquesubcallinfo.indextype != Esaindextype &&
-          uniquesubcallinfo.verifywitnesspos &&
-          uniquesubcallinfo.domatchingstatistics)
-      {
-        freesuffixarray(&tmpsuffixarray);
       }
     }
   }

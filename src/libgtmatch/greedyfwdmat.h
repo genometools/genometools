@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef UNIQUESUB_H
-#define UNIQUESUB_H
+#ifndef GREEDYFWDMAT_H
+#define GREEDYFWDMAT_H
 
 #include <stdbool.h>
 #include "libgtcore/strarray.h"
@@ -27,14 +27,14 @@
 #include "alphadef.h"
 #include "encseq-def.h"
 
-typedef unsigned long (*Uniqueforwardfunction) (const void *,
-                                                Seqpos *,
-                                                const Uchar *,
-                                                const Uchar *);
+typedef unsigned long (*Greedygmatchforwardfunction) (const void *,
+                                                      Seqpos *,
+                                                      const Uchar *,
+                                                      const Uchar *);
 
-int findsubqueryuniqueforward(const Encodedsequence *encseq,
+int findsubquerygmatchforward(const Encodedsequence *encseq,
                               const void *genericindex,
-                              Uniqueforwardfunction uniqueforward,
+                              Greedygmatchforwardfunction gmatchforward,
                               const Alphabet *alphabet,
                               const StrArray *queryfilenames,
                               Definedunsignedlong minlength,
