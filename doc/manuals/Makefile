@@ -8,7 +8,7 @@ all:${ALL}
 	pdflatex $<
 
 clean:
-	${RM} *.aux  *.log *.bbl  *.blg *.dvi
+	${RM} *.aux  *.log *.bbl  *.blg *.dvi comment.cut
 
 cleanup:clean
 	${RM} ${ALL}

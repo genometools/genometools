@@ -7,17 +7,39 @@
 \usepackage{listings}
 \usepackage{bbm}
 \usepackage{verbatim}
+\usepackage{ifthen}
+\usepackage{comment}
 \usepackage{prognames}
 \usepackage{optionman}
 \usepackage{skaff}
 \newcommand{\Uniquesub}[0]{\texttt{uniquesub}\xspace}
+\newcommand{\Matstat}[0]{\texttt{uniquesub}\xspace}
 \newcommand{\Mup}[1]{\mathit{mup(s,#1)}}
-\newcommand{\Lmin}[0]{\mathit{mup(s)}}
 \newcommand{\Substring}[3]{#1[#2..#3]}
 
+\ifthenelse{\isundefined{\BuildMatstat}}{%
+\includecomment{AboutMatstat}
+\excludecomment{AboutUniquesub}
+\newcommand{\AboutMatstatcmd}[1]{#1}
+\newcommand{\AboutUniquesubcmd}[1]{}
+}{%
+\includecomment{AboutUniquesub}
+\excludecomment{AboutMatstat}
+\newcommand{\AboutUniquesubcmd}[1]{#1}
+\newcommand{\AboutMatstatcmd}[1]{}
+}
+
+\begin{AboutUniquesub}
 \title{\Uniquesub: a program for computing\\
        minimum unique substrings\\
        a manual}
+\end{AboutUniquesub}
+\begin{AboutMatstat}
+\title{\Matstat: a program for computing\\
+       matching statistics\\
+       a manual}
+\end{AboutMatstat}
+
 \author{\begin{tabular}{c}
          \textit{Stefan Kurtz}\\
          Center for Bioinformatics,\\
@@ -31,12 +53,11 @@
 
 The program \Uniquesub is called as follows:
 \par
-\noindent\Uniquesub [\textit{options}] \Showoption{query} \Showoptionkey{queryfile} [\textit{options}] 
+\noindent\Uniquesub [\textit{options}] \Showoption{query} \Showoptionarg{files} [\textit{options}] 
 \par
-The given \textit{queryfile} must be in multiple
-\Fasta format and can optionally be gzipped, in which case it must end 
-with the suffix \texttt{gz}.
-Each sequence in \texttt{queryfile} is called \textit{unit} in the following.
+\Showoptionarg{files} is a white space separated list of at least one 
+filename. Any sequence occurring in any file specified in \Showoptionarg{files}
+is called \textit{unit} in the following.
 In addition to the mandatory option \Showoption{query}, the program
 must be called with either option \Showoption{pck} or \Showoption{esa}
 which specify to use a packed index or an enhanced suffix array for 
@@ -118,12 +139,13 @@ If both options \Showoption{min} and \Showoption{max} are used, then
 the value specified by option \(\Showoption{min}\) must be smaller
 than the value specified by option \(\Showoption{max}\).
 \item
-Either option \Showoption{pck} or \Showoption{esa} must be used.
+Either option \Showoption{pck} or \Showoption{esa} must be used. Both cannot
+be combined.
 \end{enumerate}
 
 \section{Examples}
 
-Suppose that in some directory, say \texttt{home-sapiens}, we have 25 gzipped
+Suppose that in some directory, say \texttt{homo-sapiens}, we have 25 gzipped
 fasta files containing all 24 human chromomsomes plus one file with 
 mitrochondrial sequences. These may have been downloaded from
 \url{ftp://ftp.ensembl.org/pub/current_fasta/homo_sapiens_47_36i/dna}.
@@ -132,7 +154,7 @@ In the first step, we construct the packed index for the entire genome:
 
 \begin{Output}
 gt packedindex mkindex -dna -dir rev -parts 15 -bsize 10 -locfreq 32
-                       -indexname human-all -db home-sapiens/*.gz
+                       -indexname human-all -db homo-sapiens/*.gz
 \end{Output}
 
 The program runs for almost two hours and delivers 
@@ -161,19 +183,18 @@ unit 0 (Arabidopsis thaliana BAC T7I23, complete sequence)
 
 For all units \(s\) in the multiple \Fasta file \texttt{queryfile.fna},
 a line is shown, reporting the number of the unit and the original fasta
-header. Also, all positions \(i\) in \(s\) with \(\Mup{i}=\Lmin\) are reported.
-The first column is the relative position in the query sequence (counting
-from 0). The second column shows the value \(\Mup{i}\) whenever
-\(i\) is the value in the first column.
+header. Also, all for positions \(i\) in \(s\) satisfying 
+\(20\leq \Mup{i}\leq 30\), \(i\) and \(\Mup{i}\) is reported.
+The first column is the relative position in the unit sequence (counting
+from 0). The second column shows the value \(\Mup{i}\).
 
 To additionally report the sequence content of the
-minimum unique prefixes we add the keyword \Showoption{sequence} to option
-\Showoption{-output}:
+minimum unique prefixes we add the keyword \Showoptionkey{sequence} to option
+\Showoption{output}:
 
 \begin{Output}
 gt uniquesub -output querypos sequence -min 20 -max 30 
              -query queryfile.fna -pck human-all
-unit 0 (Arabidopsis thaliana BAC T7I23, complete sequence)
 unit 0 (Arabidopsis thaliana BAC T7I23, complete sequence)
 1007 20 ctgacagtttttttttttta
 1010 22 acagttttttttttttacttta
