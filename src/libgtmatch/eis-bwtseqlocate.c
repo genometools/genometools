@@ -205,7 +205,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
         {
           syms[0] = UNDEFBWTCHAR;
           if ((retcode = state->readOrigSeq(
-                 state->origSeqState, syms, 0, 1))!= 1)
+                 state->origSeqState, syms + 1, 0, 1))!= 1)
             return (BitOffset)-1;
         }
         else /* mapVal == seqLen - 1 */
