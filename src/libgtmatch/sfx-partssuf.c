@@ -112,7 +112,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
   {
     if (numofsuffixestoinsert < (Seqpos) numofparts)
     {
-      suftabparts->numofparts = (unsigned int) 1;
+      suftabparts->numofparts = 1U;
     } else
     {
       suftabparts->numofparts = numofparts;

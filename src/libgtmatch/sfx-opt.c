@@ -92,7 +92,7 @@ static OPrval parse_options(int *parsed_args,
                                  "automatically determined",
                                  &so->prefixlength,
                                  PREFIXLENGTH_AUTOMATIC,
-                                 (unsigned int) 1);
+                                 1U);
   option_argument_is_optional(optionpl);
   option_parser_add_option(op, optionpl);
 
@@ -100,8 +100,8 @@ static OPrval parse_options(int *parsed_args,
                                "specify number of parts in which the "
                                "sequence is processed",
                                &so->numofparts,
-                               (unsigned int) 1,
-                               (unsigned int) 1);
+                               1U,
+                               1U);
   option_parser_add_option(op, option);
 
   option = option_new_string("sat",
@@ -163,7 +163,7 @@ static OPrval parse_options(int *parsed_args,
   {
     if (!option_is_set(optionindexname))
     {
-      if (strarray_size(so->filenametab) > (unsigned long) 1)
+      if (strarray_size(so->filenametab) > 1UL)
       {
         error_set(err,"if more than one input file is given, then "
                           "option -indexname is mandatory");

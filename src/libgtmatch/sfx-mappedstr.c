@@ -70,7 +70,7 @@
           unsigned int rownumber;\
           ALLOCASSIGNSPACE(ARRAY2DIM,NULL,TYPE *,ROWS);\
           ALLOCASSIGNSPACE((ARRAY2DIM)[0],NULL,TYPE,(ROWS) * (COLUMNS));\
-          for (rownumber = (unsigned int) 1; rownumber < (ROWS); rownumber++)\
+          for (rownumber = 1U; rownumber < (ROWS); rownumber++)\
           {\
             (ARRAY2DIM)[rownumber] = (ARRAY2DIM)[rownumber-1] + (COLUMNS);\
           }\
@@ -101,7 +101,7 @@ static Codetype windowkmer2code(unsigned int numofchars,
     integercode = (Codetype) cc;
     foundspecial = false;
   }
-  for (i=(unsigned int) 1; i < kmersize; i++)
+  for (i=1U; i < kmersize; i++)
   {
     if (foundspecial)
     {
@@ -405,12 +405,12 @@ static void initmultimappower(unsigned int ***multimappower,
   unsigned int thepower, mapindex, *mmptr;
 
   ARRAY2DIMMALLOC(*multimappower,kmersize,numofchars,unsigned int);
-  thepower = (unsigned int) 1;
+  thepower = 1U;
   for (offset=(int) (kmersize - 1); offset>=0; offset--)
   {
     mmptr = (*multimappower)[offset];
     mmptr[0] = 0;
-    for (mapindex = (unsigned int) 1; mapindex < numofchars; mapindex++)
+    for (mapindex = 1U; mapindex < numofchars; mapindex++)
     {
       mmptr[mapindex] = mmptr[mapindex-1] + thepower;
     }

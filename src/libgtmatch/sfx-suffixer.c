@@ -37,8 +37,8 @@
 #include "sfx-mappedstr.pr"
 
 #define CODEBITS        (32-PREFIXLENBITS)
-#define MAXPREFIXLENGTH ((((unsigned int) 1) << PREFIXLENBITS) - 1)
-#define MAXCODEVALUE    ((((unsigned int) 1) << CODEBITS) - 1)
+#define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
+#define MAXCODEVALUE    ((1U << CODEBITS) - 1)
 
 typedef struct
 {
@@ -90,7 +90,7 @@ static int initbasepower(unsigned int **basepower,
                          unsigned int len,
                          Error *err)
 {
-  unsigned int thepower = (unsigned int) 1, i, minfailure;
+  unsigned int thepower = 1U, i, minfailure;
   bool haserr = false;
 
   error_check(err);

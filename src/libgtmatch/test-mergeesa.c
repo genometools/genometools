@@ -235,7 +235,7 @@ int performtheindexmerging(const Str *storeindex,
   }
   if (!haserr)
   {
-    if (strarray_size(indexnametab) > (unsigned long) 1)
+    if (strarray_size(indexnametab) > 1UL)
     {
       if (mergeandstoreindex(storeindex,&emmesa,err) != 0)
       {

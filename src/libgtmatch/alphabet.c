@@ -59,11 +59,11 @@
 
 #define DNABASES                     "aAcCgGtTuU"
 #define DNAWILDCARDS                 "nsywrkvbdhmNSYWRKVBDHM"
-#define MAPSIZEDNA                   ((unsigned int) 5)
+#define MAPSIZEDNA                   5U
 #define DNAALPHABETDOMAIN            DNABASES DNAWILDCARDS
 #define PROTEINUPPERAMINOACIDS       "LVIFKREDAGSTNQYWPHMC"
 #define PROTEINLOWERAMINOACIDS       "lvifkredagstnqywphmc"
-#define MAPSIZEPROTEIN               ((unsigned int) 21)
+#define MAPSIZEPROTEIN               21U
 #define PROTEINWILDCARDS             "XUBZ*-"
 #define PROTEINALPHABETDOMAIN        PROTEINUPPERAMINOACIDS PROTEINWILDCARDS
 

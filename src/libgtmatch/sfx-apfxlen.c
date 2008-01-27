@@ -42,7 +42,7 @@
 
 #define MAXMULTIPLIEROFTOTALLENGTH 4
 
-#define MAXVALUEWITHBITS(BITNUM)    ((((unsigned int) 1) << (BITNUM)) - 1)
+#define MAXVALUEWITHBITS(BITNUM)    ((1U << (BITNUM)) - 1)
 
 static unsigned int logalphasize(unsigned int numofchars,double value)
 {
@@ -51,7 +51,7 @@ static unsigned int logalphasize(unsigned int numofchars,double value)
 
   if (value <= (double) numofchars)
   {
-    return (unsigned int) 1;
+    return 1U;
   }
   logtmp1 = log(value);
   logtmp2 = log((double) numofchars);
@@ -68,7 +68,7 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
                               (double) totallength/SIZEOFBCKENTRY);
   if (prefixlength == 0)
   {
-    return (unsigned int) 1;
+    return 1U;
   } else
   {
     return prefixlength;

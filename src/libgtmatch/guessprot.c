@@ -38,7 +38,7 @@ int guessifproteinsequencestream(const StrArray *filenametab,Error *err)
                        NULL,
                        NULL,
                        NULL);
-  for (currentposition = 0; currentposition < (unsigned int) 1000;
+  for (currentposition = 0; currentposition < 1000U;
        currentposition++)
   {
     retval = fastabuffer_next(fb,&currentchar,err);

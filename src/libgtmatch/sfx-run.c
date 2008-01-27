@@ -570,11 +570,6 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
 #ifdef INLINEDENCSEQ
     showverbose(verboseinfo,"inlined encodeded sequence");
 #endif
-    freeverboseinfo(&verboseinfo);
-  }
-  if (retval == 0)
-  {
-    Verboseinfo *verboseinfo = newverboseinfo(so.beverbose);
     if (runsuffixerator(doesa,&so,verboseinfo,err) < 0)
     {
       haserr = true;
