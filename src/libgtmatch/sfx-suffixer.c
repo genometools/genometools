@@ -141,12 +141,12 @@ static void updatekmercount(void *processinfo,
     {
       if (firstspecial->specialpos > 0)
       {
-        Codeatposition cp;
+        Codeatposition *cp;
 
-        cp.code = code;
-        cp.maxprefixlen = firstspecial->specialpos;
-        cp.position = position + firstspecial->specialpos;
-        sfi->spaceCodeatposition[sfi->nextfreeCodeatposition++] = cp;
+        cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
+        cp->code = code;
+        cp->maxprefixlen = firstspecial->specialpos;
+        cp->position = position + firstspecial->specialpos;
         sfi->storespecials = false;
         sfi->leftborder[code]++;
       }

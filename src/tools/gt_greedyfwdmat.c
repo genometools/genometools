@@ -98,7 +98,6 @@ static OPrval parsegfmsub(bool doms,
 
   optionfmindex = option_new_string("fmi", "specify fmindex",
                                     gfmsubcallinfo->indexname,NULL);
-  option_is_development_option(optionverify);
   option_parser_add_option(op, optionfmindex);
 
   optionesaindex = option_new_string("esa", "specify suffix array",
