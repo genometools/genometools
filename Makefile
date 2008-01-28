@@ -623,7 +623,7 @@ spgt:${addprefix obj/,${notdir ${subst .c,.splint,\
                                 ${SKTOOLS}}}}
 
 scgt:
-	src_check src/libgtmatch/* 
+	src_check src/libgtmatch/*
 	src_check src/libgtltr/*
 
 splintclean:
