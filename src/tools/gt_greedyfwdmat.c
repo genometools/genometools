@@ -134,7 +134,7 @@ static OPrval parsegfmsub(bool doms,
   option_parser_add_option(op, optionmax);
 
   optionoutput = option_new_stringarray("output",
-                   doms 
+                   doms
                      ? "set output flags (sequence, querypos, subjectpos)"
                      : "set output flags (sequence, querypos)",
                    flagsoutputoption);
@@ -149,7 +149,7 @@ static OPrval parsegfmsub(bool doms,
     option_parser_add_option(op, optionverify);
   }
 
-  oprval = option_parser_parse(op, &parsed_args, argc, argv, 
+  oprval = option_parser_parse(op, &parsed_args, argc, argv,
                                versionfunc,err);
 
   if (oprval == OPTIONPARSER_OK)
