@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
+#include <errno.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/error.h"
 #include "spacedef.h"
@@ -62,8 +63,8 @@ DECLAREARRAYSTRUCT(Seqpos);
   unsigned int *filltable,
                *basepower;
   Seqpos specialcharacters,
-         *leftborder,
-         *countspecialcodes,
+         *leftborder, /* export this for bcktab */
+         *countspecialcodes, /* export this for bcktab */
          *suftab,
          *suftabptr;
   unsigned long nextfreeCodeatposition;
@@ -636,4 +637,39 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
   *numberofsuffixes = (Seqpos) sfi->fusp.nextfreeSeqpos;
   *specialsuffixes = true;
   return sfi->suftab;
+}
+
+int bcktab2file(FILE *fp,
+                const Sfxiterator *sfi,
+                unsigned int prefixlength,
+                Error *err)
+{
+  unsigned int numofallcodes = sfi->basepower[prefixlength],
+               numofspecialcodes = sfi->basepower[prefixlength-1];
+
+  if (fwrite(sfi->leftborder,
+             sizeof (*sfi->leftborder),
+             (size_t) (numofallcodes+1),
+             fp)
+             != (size_t) (numofallcodes+1))
+  {
+    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
+              numofallcodes+1,
+              (unsigned int) sizeof (*sfi->leftborder),
+              strerror(errno));
+    return -1;
+  }
+  if (fwrite(sfi->countspecialcodes,
+             sizeof (*sfi->countspecialcodes),
+             (size_t) numofspecialcodes,
+             fp)
+             != (size_t) numofspecialcodes)
+  {
+    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
+              numofspecialcodes,
+              (unsigned int) sizeof (*sfi->countspecialcodes),
+              strerror(errno));
+    return -2;
+  }
+  return 0;
 }

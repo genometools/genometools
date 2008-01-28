@@ -148,6 +148,12 @@ static OPrval parse_options(int *parsed_args,
                                so->str_indexname);
   }
 
+  option = option_new_bool("bck",
+                           "output bucket table to file",
+                           &so->outbcktab,
+                           false);
+  option_parser_add_option(op, option);
+
   option = option_new_bool("v",
                            "be verbose ",
                            &so->beverbose,
@@ -259,11 +265,12 @@ static void showoptions(const Suffixeratoroptions *so)
                           strarray_get(so->filenametab,i));
   }
   showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
-                        "outbwttab=%s,outdestab=%s",
+                        "outbwttab=%s,outbcktab=%s,outdestab=%s",
           so->outtistab ? "true" : "false",
           so->outsuftab ? "true" : "false",
           so->outlcptab ? "true" : "false",
           so->outbwttab ? "true" : "false",
+          so->outbcktab ? "true" : "false",
           so->outdestab ? "true" : "false");
 }
 
@@ -296,6 +303,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->outsuftab = false;
   so->outlcptab = false;
   so->outbwttab = false;
+  so->outbcktab = false;
   rval = parse_options(&parsed_args, doesa, so, argc, argv, err);
   if (rval == OPTIONPARSER_ERROR)
   {
