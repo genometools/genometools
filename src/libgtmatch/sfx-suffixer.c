@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
+#include <errno.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/error.h"
 #include "spacedef.h"
@@ -37,8 +38,8 @@
 #include "sfx-mappedstr.pr"
 
 #define CODEBITS        (32-PREFIXLENBITS)
-#define MAXPREFIXLENGTH ((((unsigned int) 1) << PREFIXLENBITS) - 1)
-#define MAXCODEVALUE    ((((unsigned int) 1) << CODEBITS) - 1)
+#define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
+#define MAXCODEVALUE    ((1U << CODEBITS) - 1)
 
 typedef struct
 {
@@ -62,8 +63,8 @@ DECLAREARRAYSTRUCT(Seqpos);
   unsigned int *filltable,
                *basepower;
   Seqpos specialcharacters,
-         *leftborder,
-         *countspecialcodes,
+         *leftborder, /* export this for bcktab */
+         *countspecialcodes, /* export this for bcktab */
          *suftab,
          *suftabptr;
   unsigned long nextfreeCodeatposition;
@@ -90,7 +91,7 @@ static int initbasepower(unsigned int **basepower,
                          unsigned int len,
                          Error *err)
 {
-  unsigned int thepower = (unsigned int) 1, i, minfailure;
+  unsigned int thepower = 1U, i, minfailure;
   bool haserr = false;
 
   error_check(err);
@@ -141,12 +142,12 @@ static void updatekmercount(void *processinfo,
     {
       if (firstspecial->specialpos > 0)
       {
-        Codeatposition cp;
+        Codeatposition *cp;
 
-        cp.code = code;
-        cp.maxprefixlen = firstspecial->specialpos;
-        cp.position = position + firstspecial->specialpos;
-        sfi->spaceCodeatposition[sfi->nextfreeCodeatposition++] = cp;
+        cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
+        cp->code = code;
+        cp->maxprefixlen = firstspecial->specialpos;
+        cp->position = position + firstspecial->specialpos;
         sfi->storespecials = false;
         sfi->leftborder[code]++;
       }
@@ -636,4 +637,39 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
   *numberofsuffixes = (Seqpos) sfi->fusp.nextfreeSeqpos;
   *specialsuffixes = true;
   return sfi->suftab;
+}
+
+int bcktab2file(FILE *fp,
+                const Sfxiterator *sfi,
+                unsigned int prefixlength,
+                Error *err)
+{
+  unsigned int numofallcodes = sfi->basepower[prefixlength],
+               numofspecialcodes = sfi->basepower[prefixlength-1];
+
+  if (fwrite(sfi->leftborder,
+             sizeof (*sfi->leftborder),
+             (size_t) (numofallcodes+1),
+             fp)
+             != (size_t) (numofallcodes+1))
+  {
+    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
+              numofallcodes+1,
+              (unsigned int) sizeof (*sfi->leftborder),
+              strerror(errno));
+    return -1;
+  }
+  if (fwrite(sfi->countspecialcodes,
+             sizeof (*sfi->countspecialcodes),
+             (size_t) numofspecialcodes,
+             fp)
+             != (size_t) numofspecialcodes)
+  {
+    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
+              numofspecialcodes,
+              (unsigned int) sizeof (*sfi->countspecialcodes),
+              strerror(errno));
+    return -2;
+  }
+  return 0;
 }

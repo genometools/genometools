@@ -16,7 +16,8 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   end
   run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
            "#{extra} #{outoptions()} -indexname sfx -db " + filearg
-  run_test "#{$bin}gt dev sfxmap -trials 10 #{outoptions()} -v sfx",:maxtime => 600
+  run_test "#{$bin}gt dev sfxmap -trials 10 #{outoptions()} -v sfx",
+           :maxtime => 600
 end
 
 def flattenfilelist(filelist)
@@ -105,7 +106,8 @@ Keywords "gt_suffixerator"
 Test do
   run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
            "-db #{$testdata}Random.fna"
-  run_test "#{$bin}gt dev sfxmap -tis -suf -des -trials 10 localidx",:retval => 1
+  run_test "#{$bin}gt dev sfxmap -tis -suf -des -trials 10 localidx",
+           :retval => 1
 end
 
 Name "gt suffixerator bwt"
@@ -160,40 +162,45 @@ def checkmapped(args)
   Name "gt suffixerator checkmapped"
   Keywords "gt_suffixerator gttestdata"
   Test do
-    run_test("#{$bin}gt suffixerator #{outoptions()} -indexname sfxidx #{args}", :maxtime => 600)
-    run_test("#{$bin}gt dev sfxmap #{outoptions()} -trials 10 -v sfxidx",:maxtime => 600)
-    run_test("#{$bin}gt dev sfxmap #{outoptions()} -stream -v sfxidx",:maxtime => 600)
+    run_test "#{$bin}gt suffixerator #{outoptions()} -indexname sfxidx #{args}",
+             :maxtime => 600
+    run_test "#{$bin}gt dev sfxmap #{outoptions()} -trials 10 -v sfxidx",
+             :maxtime => 600
+    run_test "#{$bin}gt dev sfxmap #{outoptions()} -stream -v sfxidx",
+             :maxtime => 600
   end
 end
 
-def makeuniquesubcall(queryfile,indexarg,ms)
-  extra=""
+def makegreedyfwdmatcall(queryfile,indexarg,ms)
+  prog=""
   if ms
-    extra=" -ms"
+    prog="#{$bin}gt matstat -verify"
+  else
+    prog="#{$bin}gt uniquesub"
   end
   constantargs="-min 1 -max 20 -query #{queryfile} #{indexarg}"
-  prog="#{$bin}gt uniquesub -verify #{extra}"
   return "#{prog} -output querypos #{constantargs}"
 end
 
-def checkuniquesub(queryfile,ms)
-  run_test(makeuniquesubcall(queryfile,"-fmi fmi",ms))
+def checkgreedyfwdmat(queryfile,ms)
+  run_test makegreedyfwdmatcall(queryfile,"-fmi fmi",ms)
   run "mv #{$last_stdout} tmp.fmi"
-  run_test(makeuniquesubcall(queryfile,"-esa sfx",ms))
+  run_test makegreedyfwdmatcall(queryfile,"-esa sfx",ms)
   run "mv #{$last_stdout} tmp.esa"
   run "diff tmp.esa tmp.fmi"
-  run_test(makeuniquesubcall(queryfile,"-pck pck",ms))
+  run_test makegreedyfwdmatcall(queryfile,"-pck pck",ms)
   run "mv #{$last_stdout} tmp.pck"
   run "diff tmp.pck tmp.fmi"
 end
 
-def createandcheckuniquesub(reffile,queryfile)
-  run_test("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}")
-  run_test("#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v -db #{reffile}")
-  run_test("#{$bin}gt packedindex mkindex -indexname pck -db #{reffile} -dna -pl -bsize 10 -locfreq 32 -dir rev")
-  run_test("#{$bin}gt suffixerator -indexname pck-vrf -db #{reffile} -dna -tis")
-  checkuniquesub(queryfile,false)
-  checkuniquesub(queryfile,true)
+def createandcheckgreedyfwdmat(reffile,queryfile)
+  run_test "#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}"
+  run_test "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
+           "-db #{reffile}"
+  run_test "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
+           "-dna -pl -bsize 10 -locfreq 32 -dir rev"
+  checkgreedyfwdmat(queryfile,false)
+  checkgreedyfwdmat(queryfile,true)
   run "rm -f sfx.* fmi.* pck.*"
 end
 
@@ -206,10 +213,10 @@ end
 allfiles.each do |reffile|
   allfiles.each do |queryfile|
     if reffile != "TTT-small.fna" && queryfile != reffile
-      Name "gt uniquesub #{reffile} #{queryfile}"
-      Keywords "gt_uniquesub small"
+      Name "gt greedyfwdmat #{reffile} #{queryfile}"
+      Keywords "gt_greedyfwdmat small"
       Test do
-        createandcheckuniquesub("#{$testdata}/#{reffile}",
+        createandcheckgreedyfwdmat("#{$testdata}/#{reffile}",
                                 "#{$testdata}/#{queryfile}")
       end 
     end
@@ -244,10 +251,10 @@ if $gttestdata then
 
   checkmapped("-db #{$gttestdata}swissprot/swiss10K -parts 1 -pl -smap " +
               "TransProt11")
-  Name "gt uniquesub at1MB U8"
-  Keywords "gt_uniquesub gttestdata"
+  Name "gt greedyfwdmat at1MB U8"
+  Keywords "gt_greedyfwdmat gttestdata"
   Test do
-    createandcheckuniquesub("#{$gttestdata}Iowa/at1MB",
+    createandcheckgreedyfwdmat("#{$gttestdata}Iowa/at1MB",
                             "#{$gttestdata}Iowa/U89959.fna")
   end
 end

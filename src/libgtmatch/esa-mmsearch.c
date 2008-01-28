@@ -531,7 +531,7 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                                   Forwardmode,
                                   numofchars,
                                   recommendedprefixlength(numofchars,dblen),
-                                  (unsigned int) 1, /* parts */
+                                  1U, /* parts */
                                   query,
                                   querylen,
                                   minlength,

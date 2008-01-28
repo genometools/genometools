@@ -24,7 +24,7 @@
 #include "spacedef.h"
 #include "optionargmode.h"
 #include "format64.h"
-#include "uniquesub.h"
+#include "greedyfwdmat.h"
 #include "encseq-def.h"
 
 typedef struct
@@ -36,81 +36,75 @@ typedef struct
                       maxlength;
 } Rangespecinfo;
 
-typedef int (*Preprocessuniquelength)(uint64_t,
-                                      const char *,
-                                      void *,
-                                      Error *err);
-typedef int (*Processuniquelength)(const Alphabet *,
-                                   const Uchar *,
-                                   unsigned long,
-                                   unsigned long,
-                                   Seqpos,
-                                   void *,
-                                   Error *err);
-typedef int (*Postprocessuniquelength)(const Alphabet *,
-                                       uint64_t,
+typedef void (*Preprocessgmatchlength)(uint64_t,
                                        const char *,
-                                       const Uchar *,
-                                       unsigned long,
-                                       void *,
-                                       Error *err);
+                                       void *);
+typedef void (*Processgmatchlength)(const Alphabet *,
+                                    const Uchar *,
+                                    unsigned long,
+                                    unsigned long,
+                                    Seqpos,
+                                    void *);
+typedef void (*Postprocessgmatchlength)(const Alphabet *,
+                                        uint64_t,
+                                        const char *,
+                                        const Uchar *,
+                                        unsigned long,
+                                        void *);
 
 typedef struct
 {
   const void *genericindex;
   const Alphabet *alphabet;
-  Uniqueforwardfunction uniqueforward;
-  Preprocessuniquelength preprocessuniquelength;
-  Processuniquelength processuniquelength;
-  Postprocessuniquelength postprocessuniquelength;
+  Greedygmatchforwardfunction gmatchforward;
+  Preprocessgmatchlength preprocessgmatchlength;
+  Processgmatchlength processgmatchlength;
+  Postprocessgmatchlength postprocessgmatchlength;
   void *processinfo;
   const Encodedsequence *encseq;
 } Substringinfo;
 
 static void checkifsequenceisthere(const Encodedsequence *encseq,
                                    Seqpos witnessposition,
-                                   unsigned long uniquelength,
+                                   unsigned long gmatchlength,
                                    const Uchar *qptr)
 {
   unsigned long i;
+  Uchar cc;
 
-  for (i=0; i<uniquelength; i++)
+  for (i=0; i<gmatchlength; i++)
   {
-    if (qptr[i] != getencodedchar(encseq,witnessposition+i,Forwardmode))
+    cc = getencodedchar(encseq,witnessposition+i,Forwardmode);
+    if (qptr[i] != cc)
     {
       fprintf(stderr,"sequence of length %lu at witnesspos " FormatSeqpos
                      " query[%lu] = %u != %u = subject[" FormatSeqpos "]\n",
-                     uniquelength,
+                     gmatchlength,
                      PRINTSeqposcast(witnessposition),
                      i,
                      (unsigned int) qptr[i],
-                     (unsigned int) getencodedchar(encseq,witnessposition+i,
-                                                   Forwardmode),
+                     (unsigned int) cc,
                      PRINTSeqposcast(witnessposition+(Seqpos) i));
       exit(EXIT_FAILURE); /* Program error */
     }
   }
 }
 
-static int uniqueposinsinglesequence(Substringinfo *substringinfo,
-                                     uint64_t unitnum,
-                                     const Uchar *query,
-                                     unsigned long querylen,
-                                     const char *desc,
-                                     Error *err)
+static void gmatchposinsinglesequence(Substringinfo *substringinfo,
+                                      uint64_t unitnum,
+                                      const Uchar *query,
+                                      unsigned long querylen,
+                                      const char *desc)
 {
   const Uchar *qptr;
-  unsigned long uniquelength, remaining;
+  unsigned long gmatchlength, remaining;
   Seqpos witnessposition, *wptr;
 
-  error_check(err);
-  if (substringinfo->preprocessuniquelength != NULL &&
-      substringinfo->preprocessuniquelength(unitnum,
-                                            desc,
-                                            substringinfo->processinfo,
-                                            err) != 0)
+  if (substringinfo->preprocessgmatchlength != NULL)
   {
-    return -1;
+    substringinfo->preprocessgmatchlength(unitnum,
+                                          desc,
+                                          substringinfo->processinfo);
   }
   if (((Rangespecinfo *) substringinfo->processinfo)->showsubjectpos ||
       substringinfo->encseq != NULL)
@@ -122,51 +116,44 @@ static int uniqueposinsinglesequence(Substringinfo *substringinfo,
   }
   for (qptr = query, remaining = querylen; remaining > 0; qptr++, remaining--)
   {
-    uniquelength = substringinfo->uniqueforward(substringinfo->genericindex,
+    gmatchlength = substringinfo->gmatchforward(substringinfo->genericindex,
                                                 wptr,
                                                 qptr,
                                                 query+querylen);
-    if (uniquelength > 0)
+    if (gmatchlength > 0)
     {
-      if (wptr != NULL && substringinfo->encseq != NULL)
+      if (substringinfo->encseq != NULL)
       {
+        assert(wptr != NULL);
         checkifsequenceisthere(substringinfo->encseq,
                                witnessposition,
-                               uniquelength,
+                               gmatchlength,
                                qptr);
       }
-      if (substringinfo->processuniquelength(substringinfo->alphabet,
-                                             query,
-                                             uniquelength,
-                                             (unsigned long) (qptr-query),
-                                             wptr == NULL
-                                              ? (Seqpos) 0
-                                              : witnessposition,
-                                             substringinfo->processinfo,
-                                             err) != 0)
-      {
-        return -2;
-      }
+      substringinfo->processgmatchlength(substringinfo->alphabet,
+                                         query,
+                                         gmatchlength,
+                                         (unsigned long) (qptr-query),
+                                         wptr == NULL
+                                           ? (Seqpos) 0
+                                           : witnessposition,
+                                         substringinfo->processinfo);
     }
   }
-  if (substringinfo->postprocessuniquelength != NULL &&
-      substringinfo->postprocessuniquelength(substringinfo->alphabet,
-                                             unitnum,
-                                             desc,
-                                             query,
-                                             querylen,
-                                             substringinfo->processinfo,
-                                             err) != 0)
+  if (substringinfo->postprocessgmatchlength != NULL)
   {
-    return -3;
+    substringinfo->postprocessgmatchlength(substringinfo->alphabet,
+                                           unitnum,
+                                           desc,
+                                           query,
+                                           querylen,
+                                           substringinfo->processinfo);
   }
-  return 0;
 }
 
-static int showunitnum(uint64_t unitnum,
+static void showunitnum(uint64_t unitnum,
                        const char *desc,
-                       /*@unused@*/ void *info,
-                       /*@unused@*/ Error *err)
+                       /*@unused@*/ void *info)
 {
   printf("unit " Formatuint64_t, PRINTuint64_tcast(unitnum));
   if (desc != NULL && desc[0] != '\0')
@@ -174,29 +161,27 @@ static int showunitnum(uint64_t unitnum,
     printf(" (%s)",desc);
   }
   printf("\n");
-  return 0;
 }
 
-static int showifinlengthrange(const Alphabet *alphabet,
-                               const Uchar *start,
-                               unsigned long uniquelength,
-                               unsigned long querystart,
-                               Seqpos subjectpos,
-                               void *info,
-                                /*@unused@*/ Error *err)
+static void showifinlengthrange(const Alphabet *alphabet,
+                                const Uchar *start,
+                                unsigned long gmatchlength,
+                                unsigned long querystart,
+                                Seqpos subjectpos,
+                                void *info)
 {
   Rangespecinfo *rangespecinfo = (Rangespecinfo *) info;
 
   if ((!rangespecinfo->minlength.defined ||
-      uniquelength >= rangespecinfo->minlength.valueunsignedlong) &&
+      gmatchlength >= rangespecinfo->minlength.valueunsignedlong) &&
      (!rangespecinfo->maxlength.defined ||
-      uniquelength <= rangespecinfo->maxlength.valueunsignedlong))
+      gmatchlength <= rangespecinfo->maxlength.valueunsignedlong))
   {
     if (rangespecinfo->showquerypos)
     {
       printf("%lu ",querystart);
     }
-    printf("%lu",uniquelength);
+    printf("%lu",gmatchlength);
     if (rangespecinfo->showsubjectpos)
     {
       printf(" " FormatSeqpos,PRINTSeqposcast(subjectpos));
@@ -206,16 +191,15 @@ static int showifinlengthrange(const Alphabet *alphabet,
       (void) putchar(' ');
       showsymbolstring(alphabet,
                        start + querystart,
-                       uniquelength);
+                       gmatchlength);
     }
     (void) putchar('\n');
   }
-  return 0;
 }
 
-int findsubqueryuniqueforward(const Encodedsequence *encseq,
+int findsubquerygmatchforward(const Encodedsequence *encseq,
                               const void *genericindex,
-                              Uniqueforwardfunction uniqueforward,
+                              Greedygmatchforwardfunction gmatchforward,
                               const Alphabet *alphabet,
                               const StrArray *queryfilenames,
                               Definedunsignedlong minlength,
@@ -242,12 +226,12 @@ int findsubqueryuniqueforward(const Encodedsequence *encseq,
   rangespecinfo.showsequence = showsequence;
   rangespecinfo.showquerypos = showquerypos;
   rangespecinfo.showsubjectpos = showsubjectpos;
-  substringinfo.preprocessuniquelength = showunitnum;
-  substringinfo.processuniquelength = showifinlengthrange;
-  substringinfo.postprocessuniquelength = NULL;
+  substringinfo.preprocessgmatchlength = showunitnum;
+  substringinfo.processgmatchlength = showifinlengthrange;
+  substringinfo.postprocessgmatchlength = NULL;
   substringinfo.alphabet = alphabet;
   substringinfo.processinfo = &rangespecinfo;
-  substringinfo.uniqueforward = uniqueforward;
+  substringinfo.gmatchforward = gmatchforward;
   substringinfo.encseq = encseq;
   seqit = seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),true);
   for (unitnum = 0; /* Nothing */; unitnum++)
@@ -266,16 +250,11 @@ int findsubqueryuniqueforward(const Encodedsequence *encseq,
     {
       break;
     }
-    if (uniqueposinsinglesequence(&substringinfo,
-                                  unitnum,
-                                  query,
-                                  querylen,
-                                  desc,
-                                  err) != 0)
-    {
-      haserr = true;
-      break;
-    }
+    gmatchposinsinglesequence(&substringinfo,
+                              unitnum,
+                              query,
+                              querylen,
+                              desc);
     FREESPACE(desc);
   }
   seqiterator_delete(seqit);

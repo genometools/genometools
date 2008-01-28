@@ -1,0 +1,268 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper,top=20mm,bottom=20mm,left=20mm,right=20mm]{geometry}
+\usepackage{url}
+\usepackage{alltt}
+\usepackage{xspace}
+\usepackage{times}
+\usepackage{listings}
+\usepackage{bbm}
+\usepackage{verbatim}
+\usepackage{ifthen}
+\usepackage{comment}
+\usepackage{optionman}
+
+\ifthenelse{\isundefined{\BuildMatstat}}{%
+\includecomment{AboutUniquesub}
+\excludecomment{AboutMatstat}
+\newcommand{\AboutUniquesubcmd}[1]{#1}
+\newcommand{\AboutMatstatcmd}[1]{}
+}{%
+\includecomment{AboutMatstat}
+\excludecomment{AboutUniquesub}
+\newcommand{\AboutMatstatcmd}[1]{#1}
+\newcommand{\AboutUniquesubcmd}[1]{}
+}
+
+\newcommand{\Substring}[3]{#1[#2..#3]}
+
+\begin{AboutUniquesub}
+\newcommand{\Program}[0]{\texttt{uniquesub}\xspace}
+\newcommand{\Mup}[1]{\mathit{mup(s,#1)}}
+\title{\Program: a program for computing\\
+       minimum unique substrings\\
+       a manual}
+\end{AboutUniquesub}
+
+\begin{AboutMatstat}
+\newcommand{\Program}[0]{\texttt{matstat}\xspace}
+\newcommand{\MS}[1]{\mathit{ms(s,#1)}}
+\title{\Program: a program for computing\\
+       matching statistics\\
+       a manual}
+\end{AboutMatstat}
+
+\author{\begin{tabular}{c}
+         \textit{Stefan Kurtz}\\
+         Center for Bioinformatics,\\
+         University of Hamburg
+        \end{tabular}}
+
+\begin{document}
+\maketitle
+
+\section{The program \Program}
+
+The program \Program is called as follows:
+\par
+\noindent\Program [\textit{options}] \Showoption{query} \Showoptionarg{files} [\textit{options}] 
+\par
+\Showoptionarg{files} is a white space separated list of at least one 
+filename. Any sequence occurring in any file specified in \Showoptionarg{files}
+is called \textit{unit} in the following.
+In addition to the mandatory option \Showoption{query}, the program
+must be called with either option \Showoption{pck} or \Showoption{esa}
+which specify to use a packed index or an enhanced suffix array for 
+a given set of subject sequences.
+
+\begin{AboutUniquesub}
+\Program computes for all positions \(i\) in each unit, say \(s\) of length
+\(n\), the length \(\Mup{i}\) of the minimum unique prefix 
+at position \(i\), if it exists. Uniqueness always refers to all substrings
+represented by the index. \(\Mup{i}\) is defined by the following two 
+statements:
+\begin{itemize}
+\item
+If \(\Substring{s}{i}{n-1}\) is not unique in the index, then \(\Mup{i}=\bot\).
+That is, it is undefined.
+\item
+If \(\Substring{s}{i}{n-1}\) is unique in the index, then \(\Mup{i}=m\), where 
+\(m\) is the smallest value such that \(i+m-1\leq n-1\) and 
+\(\Substring{s}{i}{i+m-1}\) occurs exactly once as a substring in the index.
+\end{itemize}
+Note that it is possible that for all \(i\in[0,n-1]\) we have 
+\(\Mup{i}=\bot\), which means that unit \(s\) does not contain any unique 
+substring. In this case, the program reports nothing for the corresponding
+unit.
+\end{AboutUniquesub}
+\begin{AboutMatstat}
+\Program computes the  \textit{matching statistics} for each unit. That is, 
+for each position \(i\) in 
+each unit, say \(s\) of length \(n\), \(\MS{i}=(l,j)\) is computed. Here
+\(l\) is the largest integer such that \(\Substring{s}{i}{i+l-1}\) matches
+a substring represented by the index and \(j\) is a start position of the
+matching substring in the index. We say that \(l\) is the length of \(\MS{i}\)
+and \(j\) is the subject position of \(\MS{i}\).
+\end{AboutMatstat}
+
+The following options are available in \Program:
+
+\begin{Justshowoptions}
+\begin{comment}
+\Option{fmi}{$\Showoptionarg{indexname}$}{
+Use the old implementation of the FMindex. This option is not recommended.
+}
+\end{comment}
+
+\Option{esa}{$\Showoptionarg{indexname}$}{
+Use the given enhanced suffix array to compute the matches.
+}
+
+\Option{pck}{$\Showoptionarg{indexname}$}{
+Use the packed index (an efficient representation of the FMindex)
+to compute the matches.
+}
+
+
+\Option{query}{$\Showoptionarg{files}$}{
+Specify a white space separated list of query files containing the units.
+At least one query file must be given. The files may be in 
+gzipped format, in which case they have to end with the suffix \texttt{.gz}.
+}
+
+\begin{AboutUniquesub}
+\Option{min}{$\ell$}{
+Specify the minimum length $\ell$ of the minimum unique prefixes.
+That is, for each unit \(s\) and each positions \(i\) in \(s\), the program 
+reports the values \(i\) and \(\Mup{i}\) whenever \(\Mup{i}\geq\ell\). 
+}
+
+\Option{max}{$\ell$}{
+Specify the maximum length $\ell$ of the minimum unique prefixes.
+That is, for each unit \(s\) and each positions \(i\) in \(s\), the program 
+reports the values \(i\) and \(\Mup{i}\) whenever \(\Mup{i}\leq\ell\).
+}
+
+\Option{output}{(\Showoptionkey{querypos}$\mid$\Showoptionkey{sequence})}{
+Specify what to output. At least one of the two keys words
+$\Showoptionkey{querypos}$ and $\Showoptionkey{sequence}$ must be used. 
+Using the keyword $\Showoptionkey{querypos}$ shows the query position.
+Using the keyword $\Showoptionkey{sequence}$ shows the sequence content
+of the match.
+}
+\end{AboutUniquesub}
+
+\begin{AboutMatstat}
+\Option{min}{$\ell$}{
+Specify the minimum value $\ell$ for the length of the matching statistics.
+That is, for each unit \(s\) and each position \(i\) in \(s\), the program 
+reports all values \(i\) and \(\MS{i}\) if the 
+length of \(\MS{i}\) is at least \(\ell\).
+}
+
+\Option{max}{$\ell$}{
+Specify the maximum length $\ell$ for the length of the matching statistics.
+That is, for each unit \(s\) and each positions \(i\) in \(s\), the program 
+reports the values \(i\) and \(\MS{i}\) if the length of \(\MS{i}\)
+is at most \(\ell\).
+}
+
+\Option{output}{(\Showoptionkey{subjectpos}$\mid$\Showoptionkey{querypos}$\mid$\Showoptionkey{sequence})}{
+Specify what to output. At least one of the three keys words
+$\Showoptionkey{subjectpos}$,
+$\Showoptionkey{querypos}$, and
+$\Showoptionkey{sequence}$ must be used.
+Using the keyword $\Showoptionkey{subjectpos}$ shows the 
+subject position of the matching statistics.
+Using the keyword $\Showoptionkey{querypos}$ shows the query position.
+Using the keyword $\Showoptionkey{sequence}$ shows the sequence content
+}
+\end{AboutMatstat}
+
+\Helpoption
+
+\end{Justshowoptions}
+The following conditions must be satisfied:
+\begin{enumerate}
+\item
+Either option  \Showoption{min} or option \Showoption{max} must be used.
+\item
+If both options \Showoption{min} and \Showoption{max} are used, then
+the value specified by option \(\Showoption{min}\) must be smaller
+than the value specified by option \(\Showoption{max}\).
+\item
+Either option \Showoption{pck} or \Showoption{esa} must be used. Both cannot
+be combined.
+\end{enumerate}
+
+\section{Examples}
+
+Suppose that in some directory, say \texttt{homo-sapiens}, we have 25 gzipped
+fasta files containing all 24 human chromomsomes plus one file with 
+mitrochondrial sequences. These may have been downloaded from
+\url{ftp://ftp.ensembl.org/pub/current_fasta/homo_sapiens_47_36i/dna}.
+
+In the first step, we construct the packed index for the entire genome:
+
+\begin{Output}
+gt packedindex mkindex -dna -dir rev -parts 15 -bsize 10 -locfreq 32
+                       -indexname human-all -db homo-sapiens/*.gz
+\end{Output}
+
+The program runs for almost two hours and delivers 
+an index \texttt{human-all} consisting of three files:
+
+\begin{Output}
+ls -lh human-all.*
+-rw-r----- 1 kurtz gistaff   37 2008-01-24 00:47 human-all.al1
+-rw-r----- 1 kurtz gistaff 1.9G 2008-01-24 02:37 human-all.bdx
+-rw-r----- 1 kurtz gistaff 3.4K 2008-01-24 02:37 human-all.prj
+\end{Output}
+
+This is used in the following call to the program \Program:
+
+\begin{AboutUniquesub}
+\begin{Output}
+gt uniquesub -output querypos -min 20 -max 30 -query queryfile.fna 
+             -pck human-all
+unit 0 (Mus musculus, chr 1, complete sequence)
+1007 20
+1010 22
+1011 22
+1012 21
+1013 21
+...
+\end{Output}
+
+For all units \(s\) in the multiple \Fasta file \texttt{queryfile.fna},
+a line is shown, reporting the number of the unit and the original fasta
+header. Also, all for positions \(i\) in \(s\) satisfying 
+\(20\leq \Mup{i}\leq 30\), \(i\) and \(\Mup{i}\) is reported.
+
+The first column is the relative position in the unit sequence (counting
+from 0). The second column shows the length value.
+
+To additionally report the sequence content of the
+minimum unique prefixes we add the keyword \Showoptionkey{sequence} to option
+\Showoption{output}:
+
+\begin{Output}
+gt uniquesub -output querypos sequence -min 20 -max 30 
+             -query queryfile.fna -pck human-all
+unit 0 (Mus musculus, chr 1, complete sequence)
+1007 20 ctgacagtttttttttttta
+1010 22 acagttttttttttttacttta
+1011 22 cagttttttttttttactttat
+1012 21 agttttttttttttactttat
+1013 21 gttttttttttttactttata
+...
+\end{Output}
+\end{AboutUniquesub}
+
+\begin{AboutMatstat}
+\begin{Output}
+gt matstat -output subjectpos querypos sequence -min 20 -max 30 
+           -query queryfile.fna -pck human-all
+unit 0 (Mus musculus, chr 1, complete sequence)
+22 20 390765125 actgtatctcaaaatataaa
+253 21 258488266 gggaataaacatgtcattgag
+254 20 258488267 ggaataaacatgtcattgag
+275 20 900483549 taattctatttttctttctt
+480 20 1008274536 gcttgaagatcatgatccag
+..
+\end{Output}
+Here, the first column shows the relative positions in unit 0 for which the
+length of the matching statistics is between 20 and 30. The second column is
+the corresponding length value. The third column shows position of the
+matching sequence in the index, and the fourth shows the sequence content.
+\end{AboutMatstat}
+\end{document}

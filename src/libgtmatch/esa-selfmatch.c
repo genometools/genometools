@@ -147,7 +147,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                                   numofchars,
                                   recommendedprefixlength(numofchars,
                                                           dblen+querylen+1),
-                                  (unsigned int) 1, /* parts */
+                                  1U, /* parts */
                                   NULL,
                                   verboseinfo,
                                   err) != 0)

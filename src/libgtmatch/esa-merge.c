@@ -271,7 +271,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
     haserr = true;
     return -1;
   }
-  if (!haserr && numofindexes > (unsigned int) 1)
+  if (!haserr && numofindexes > 1U)
   {
     unsigned int idx;
 
@@ -313,7 +313,7 @@ void wraptEmissionmergedesa(Emissionmergedesa *emmesa)
   }
   FREESPACE(emmesa->suffixarraytable);
   FREESPACE(emmesa->trierep.encseqreadinfo);
-  if (emmesa->numofindexes > (unsigned int) 1)
+  if (emmesa->numofindexes > 1U)
   {
     freetrierep(&emmesa->trierep);
   }

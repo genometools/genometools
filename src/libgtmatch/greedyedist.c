@@ -297,7 +297,7 @@ unsigned long greedyunitedist(const Uchar *useq,
 #endif
   assert(ulenvalue < (unsigned long) LONG_MAX);
   assert(vlenvalue < (unsigned long) LONG_MAX);
-  currentallocated = (unsigned long) 1;
+  currentallocated = 1UL;
   ALLOCASSIGNSPACE(gl.frontspace,NULL,Frontvalue,currentallocated);
   gl.useq = useq;
   gl.vseq = vseq;

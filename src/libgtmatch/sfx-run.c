@@ -59,7 +59,8 @@
 typedef struct
 {
   FILE *outfpsuftab,
-       *outfpbwttab;
+       *outfpbwttab,
+       *outfpbcktab;
   Seqpos pageoffset;
   const Encodedsequence *encseq;
   DefinedSeqpos longest;
@@ -77,6 +78,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
 
   outfileinfo->outfpsuftab = NULL;
   outfileinfo->outfpbwttab = NULL;
+  outfileinfo->outfpbcktab = NULL;
   outfileinfo->pageoffset = 0;
   outfileinfo->longest.defined = false;
   outfileinfo->longest.valueseqpos = 0;
@@ -97,7 +99,8 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   }
   INITOUTFILEPTR(outfileinfo->outfpsuftab,so->outsuftab,SUFTABSUFFIX);
   INITOUTFILEPTR(outfileinfo->outfpbwttab,so->outbwttab,BWTTABSUFFIX);
-  if (so->outsuftab || so->outbwttab || so->outlcptab)
+  INITOUTFILEPTR(outfileinfo->outfpbcktab,so->outbcktab,BCKTABSUFFIX);
+  if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab)
   {
     outfileinfo->encseq = encseq;
   } else
@@ -246,6 +249,13 @@ static int suffixeratorwithoutput(
         haserr = true;
         break;
       }
+    }
+  }
+  if (outfileinfo->outfpbcktab != NULL)
+  {
+    if (bcktab2file(outfileinfo->outfpbcktab,sfi,prefixlength,err) != 0)
+    {
+      haserr = true;
     }
   }
   if (sfi != NULL)
@@ -440,6 +450,7 @@ static int runsuffixerator(bool doesa,
   outfileinfo.outfpsuftab = NULL;
   outfileinfo.outfpbwttab = NULL;
   outfileinfo.outlcpinfo = NULL;
+  outfileinfo.outfpbcktab = NULL;
   if (!haserr)
   {
     if (initoutfileinfo(&outfileinfo,so->prefixlength,
@@ -508,6 +519,7 @@ static int runsuffixerator(bool doesa,
   }
   fa_fclose(outfileinfo.outfpsuftab);
   fa_fclose(outfileinfo.outfpbwttab);
+  fa_fclose(outfileinfo.outfpbcktab);
   if (!haserr)
   {
     Seqpos numoflargelcpvalues,
@@ -570,11 +582,6 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
 #ifdef INLINEDENCSEQ
     showverbose(verboseinfo,"inlined encodeded sequence");
 #endif
-    freeverboseinfo(&verboseinfo);
-  }
-  if (retval == 0)
-  {
-    Verboseinfo *verboseinfo = newverboseinfo(so.beverbose);
     if (runsuffixerator(doesa,&so,verboseinfo,err) < 0)
     {
       haserr = true;

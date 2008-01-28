@@ -15,37 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_OPTDEF_H
-#define SFX_OPTDEF_H
+#ifndef GT_MATCHINGSTATISTICS_H
+#define GT_MATCHINGSTATISTICS_H
 
-#include <stdbool.h>
-#include "libgtcore/str.h"
-#include "libgtcore/strarray.h"
-#include "readmode-def.h"
-#include "libgtmatch/eis-bwtconstruct_params.h"
-
-#define PREFIXLENGTH_AUTOMATIC 0
-
-typedef struct
-{
-  unsigned int numofparts,
-               prefixlength;
-  Str *str_indexname,
-      *str_smap,
-      *str_sat;
-  StrArray *filenametab;
-  Readmode readmode;
-  bool isdna,
-       isprotein,
-       isplain,
-       beverbose,
-       outtistab,
-       outsuftab,
-       outlcptab,
-       outbwttab,
-       outdestab,
-       outbcktab;
-  struct bwtOptions bwtIdxParams;
-} Suffixeratoroptions;
+/* the matchingstatistics tool */
+int gt_matchingstatistics(int argc, const char **argv, Error*);
 
 #endif

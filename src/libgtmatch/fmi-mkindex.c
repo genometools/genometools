@@ -45,10 +45,10 @@ typedef struct
 
 static Indexleveldesc indexlevel[] =
 {
-  {"tiny",  (unsigned int) 7, (unsigned int) 6},
-  {"small", (unsigned int) 7, (unsigned int) 4},
-  {"medium",(unsigned int) 5, (unsigned int) 3},
-  {"big",   (unsigned int) 4, (unsigned int) 2}
+  {"tiny",  7U, 6U},
+  {"small", 7U, 4U},
+  {"medium",5U, 3U},
+  {"big",   4U, 2U}
 };
 
 static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
@@ -96,7 +96,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   {
     if (!option_is_set(optionfmout))
     {
-      if (strarray_size(mkfmcallinfo->indexnametab) > (unsigned long) 1)
+      if (strarray_size(mkfmcallinfo->indexnametab) > 1UL)
       {
         error_set(err,"if more than one index is given, then "
                           "option -fmout is mandatory");

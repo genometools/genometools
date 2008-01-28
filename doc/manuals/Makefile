@@ -1,10 +1,15 @@
-BASE=ltrharvestman
+ALL=ltrharvestman.pdf\
+    uniquesub.pdf\
+    matstat.pdf
 
-all:${BASE}.pdf
+all:${ALL}
 
 %.pdf:%.tex
 	pdflatex $<
 	pdflatex $<
 
 clean:
-	${RM} ${BASE}.aux  ${BASE}.log ${BASE}.bbl  ${BASE}.blg ${BASE}.dvi
+	${RM} *.aux  *.log *.bbl  *.blg *.dvi comment.cut
+
+cleanup:clean
+	${RM} ${ALL}
