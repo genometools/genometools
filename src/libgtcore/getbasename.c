@@ -121,4 +121,3 @@ int getbasename_unit_test(Error *err)
 
   return had_err;
 }
-

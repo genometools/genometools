@@ -115,4 +115,3 @@ gt_packedindex_make(int argc, const char *argv[], Error *err)
 {
   return parseargsandcallsuffixerator(false, argc, argv, err);
 }
-

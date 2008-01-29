@@ -177,4 +177,3 @@ estimateSegmentSize(const union seqBaseEncParam *params,
   }
   return segmentLen;
 }
-

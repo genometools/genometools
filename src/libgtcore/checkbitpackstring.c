@@ -34,4 +34,3 @@ bitPackString_unit_test(Error *err)
     || bitPackStringInt32_unit_test(err)
     || bitPackStringInt64_unit_test(err);
 }
-

@@ -141,4 +141,3 @@ void track_delete(Track *track)
   str_delete(track->title);
   ma_free(track);
 }
-

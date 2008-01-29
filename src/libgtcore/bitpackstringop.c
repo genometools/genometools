@@ -550,4 +550,3 @@ bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits)
   } while (0);
   return ioError?-1:0;
 }
-

@@ -138,4 +138,3 @@ void element_delete(Element *element)
   if (!element) return;
   ma_free(element);
 }
-

@@ -252,4 +252,3 @@ int parseargsandcallmkfmindex(int argc,const char **argv,Error *err)
   freemkfmcallinfo(&mkfmcallinfo);
   return haserr ? -1 : 0;
 }
-
