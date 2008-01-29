@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 --[[
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -84,6 +84,7 @@ for i, fn in ipairs(arg) do -- iterate over all files
   local ln = 1 -- the line number
   local header_file = false
   local filelines = {}
+  local last_line = nil
 
   if string.find(fn, "%.h$") then
     header_file = true
@@ -149,8 +150,16 @@ for i, fn in ipairs(arg) do -- iterate over all files
       filelines[ln] = l
     end
 
+    -- remember last line
+    last_line = l
+
     -- increate line number
     ln = ln + 1
+  end
+
+  -- make sure last line is not empty
+  if last_line and string.find(last_line, "^$") then
+        err(fn, ln, "trailing line is empty")
   end
 
   if (header_file) then
