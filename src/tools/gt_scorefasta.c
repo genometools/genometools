@@ -24,40 +24,56 @@
 #include "libgtext/scorefasta.h"
 #include "tools/gt_scorefasta.h"
 
+typedef struct {
+  unsigned long q;
+} ScorefastaArguments;
+
+static void* gt_scorefasta_arguments_new(void)
+{
+  return ma_malloc(sizeof (ScorefastaArguments));
+}
+
+static void gt_scorefasta_arguments_delete(void *tool_arguments)
+{
+  ScorefastaArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  ma_free(arguments);
+}
+
 static OptionParser* gt_scorefasta_option_parser_new(void *tool_arguments)
 {
+  ScorefastaArguments *arguments = tool_arguments;
   OptionParser *op;
-  op = option_parser_new("[option ...] q u w", "Compute scorefasta for "
-                         "sequences u and w (with q-gram length q).");
-  option_parser_set_min_max_args(op, 3, 3);
+  Option *o;
+  assert(arguments);
+  op = option_parser_new("[option ...] u w",
+                         "Compute scorefasta for DNA sequences u and w).");
+  o = option_new_ulong_min("q", "set q-gram length", &arguments->q, 3, 1);
+  option_parser_add_option(op, o);
+  option_parser_set_min_max_args(op, 2, 2);
   return op;
 }
 
 static int gt_scorefasta_runner(int argc, const char **argv,
                                 void *tool_arguments, Error *err)
 {
-  int ret, had_err = 0;
-  unsigned long q, ulen, wlen;
+  ScorefastaArguments *arguments = tool_arguments;
+  unsigned long ulen, wlen;
   char *u, *w;
   Alpha *alpha;
-  error_check(err);
+  int had_err = 0;
 
-  /* assign q */
-  if (sscanf(argv[1],"%d", &ret) != 1 || ret <= 0) {
-    error_set(err, "first argument must be integer larger than zero");
-    had_err = -1;
-  }
-  else
-    q = ret;
+  error_check(err);
+  assert(arguments);
 
   if (!had_err) {
     /* store database sequence u and query sequence w */
-    ulen = strlen(argv[2]);
-    wlen = strlen(argv[3]);
+    ulen = strlen(argv[0]);
+    wlen = strlen(argv[1]);
     u = ma_malloc(ulen+1);
     w = ma_malloc(wlen+1);
-    strcpy(u, argv[2]);
-    strcpy(w, argv[3]);
+    strcpy(u, argv[0]);
+    strcpy(w, argv[1]);
 
     /* assign DNA alphabet */
     alpha = alpha_new_dna();
@@ -66,7 +82,7 @@ static int gt_scorefasta_runner(int argc, const char **argv,
     alpha_encode_seq(alpha, u, u, ulen);
     alpha_encode_seq(alpha, w, w, wlen);
 
-    printf("scorefasta=%lu\n", scorefasta(u, ulen, w, wlen, q,
+    printf("scorefasta=%lu\n", scorefasta(u, ulen, w, wlen, arguments->q,
                                           alpha_size(alpha)));
 
     /* free space */
@@ -80,8 +96,8 @@ static int gt_scorefasta_runner(int argc, const char **argv,
 
 Tool* gt_scorefasta(void)
 {
-  return tool_new(NULL,
-                  NULL,
+  return tool_new(gt_scorefasta_arguments_new,
+                  gt_scorefasta_arguments_delete,
                   gt_scorefasta_option_parser_new,
                   NULL,
                   gt_scorefasta_runner);

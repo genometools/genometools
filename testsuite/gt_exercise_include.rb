@@ -232,25 +232,25 @@ end
 Name "gt exercise scorefasta test"
 Keywords "gt_exercise"
 Test do
-  run_test "#{$bin}gt exercise scorefasta 1 AGTGCACACATC ATCACACTTAGC"
+  run_test "#{$bin}gt exercise scorefasta -q 1 AGTGCACACATC ATCACACTTAGC"
   run "diff #{$last_stdout} #{$testdata}score_6.txt"
 
-  run_test "#{$bin}gt exercise scorefasta 2 AGTGCACACATC ATCACACTTAGC"
+  run_test "#{$bin}gt exercise scorefasta -q 2 AGTGCACACATC ATCACACTTAGC"
   run "diff #{$last_stdout} #{$testdata}score_4.txt"
 
-  run_test "#{$bin}gt exercise scorefasta 3 AGTGCACACATC ATCACACTTAGC"
+  run_test "#{$bin}gt exercise scorefasta -q 3 AGTGCACACATC ATCACACTTAGC"
   run "diff #{$last_stdout} #{$testdata}score_3.txt"
 
-  run_test "#{$bin}gt exercise scorefasta 2 AGCGATAG AGTGACAG"
+  run_test "#{$bin}gt exercise scorefasta -q 2 AGCGATAG AGTGACAG"
   run "diff #{$last_stdout} #{$testdata}score_3.txt"
 
-  run_test "#{$bin}gt exercise scorefasta 3 AGCGATAG AGTGACAG"
+  run_test "#{$bin}gt exercise scorefasta -q 3 AGCGATAG AGTGACAG"
   run "diff #{$last_stdout} #{$testdata}score_0.txt"
 
-  run_test "#{$bin}gt exercise scorefasta 3 AG AGTGACAG"
+  run_test "#{$bin}gt exercise scorefasta -q 3 AG AGTGACAG"
   run "diff #{$last_stdout} #{$testdata}score_0.txt"
 
-  run_test "#{$bin}gt exercise scorefasta 3 AGCGATAG AG"
+  run_test "#{$bin}gt exercise scorefasta -q 3 AGCGATAG AG"
   run "diff #{$last_stdout} #{$testdata}score_0.txt"
 end
 
