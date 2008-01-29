@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/outputfile.h"
 #include "libgtcore/undef.h"
@@ -35,23 +36,29 @@ typedef struct {
        verbose;
   long offset;
   Str *offsetfile;
+  OutputFileInfo *ofi;
   GenFile *outfp;
 } GFF3Arguments;
 
-static OPrval parse_options(int *parsed_args, GFF3Arguments *arguments,
-                            int argc, const char **argv, Error *err)
+static void* gt_gff3_arguments_new(void)
 {
+  GFF3Arguments *arguments = ma_calloc(1, sizeof *arguments);
+  arguments->offsetfile = str_new();
+  arguments->ofi = outputfileinfo_new();
+  return arguments;
+}
+
+static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
+{
+  GFF3Arguments *arguments = tool_arguments;
   OptionParser *op;
-  OutputFileInfo *ofi;
   Option *sort_option, *mergefeat_option, *addintrons_option, *offset_option,
          *offsetfile_option, *option;
-  OPrval oprval;
-  error_check(err);
+  assert(arguments);
 
   /* init */
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Parse, possibly transform, and output GFF3 files.");
-  ofi = outputfileinfo_new();
 
   /* -sort */
   sort_option = option_new_bool("sort", "sort the GFF3 features (memory "
@@ -99,20 +106,16 @@ static OPrval parse_options(int *parsed_args, GFF3Arguments *arguments,
   option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi);
+  outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   /* parse options */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
 
-  /* free */
-  outputfileinfo_delete(ofi);
-  option_parser_delete(op);
-
-  return oprval;
+  return op;
 }
 
-int gt_gff3(int argc, const char **argv, Error *err)
+static int gt_gff3_tool_runner(int argc, const char **argv,
+                               void *tool_arguments, Error *err)
 {
   GenomeStream *gff3_in_stream,
                *sort_stream = NULL,
@@ -120,56 +123,46 @@ int gt_gff3(int argc, const char **argv, Error *err)
                *addintrons_stream = NULL,
                *gff3_out_stream = NULL,
                *last_stream;
-  GFF3Arguments arguments;
+  GFF3Arguments *arguments = tool_arguments;
   GenomeNode *gn;
-  int parsed_args, had_err = 0;
-  error_check(err);
+  int had_err = 0;
 
-  /* option parsing */
-  arguments.offsetfile = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
-      str_delete(arguments.offsetfile);
-      return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.offsetfile);
-      return 0;
-  }
+  error_check(err);
+  assert(arguments);
 
   /* create a gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
-                                               argv + parsed_args,
-                                               arguments.verbose &&
-                                               arguments.outfp,
-                                               arguments.checkids);
+  gff3_in_stream = gff3_in_stream_new_unsorted(argc,
+                                               argv,
+                                               arguments->verbose &&
+                                               arguments->outfp,
+                                               arguments->checkids);
   last_stream = gff3_in_stream;
 
   /* set offset (if necessary) */
-  if (arguments.offset != UNDEF_LONG)
-    gff3_in_stream_set_offset(gff3_in_stream, arguments.offset);
+  if (arguments->offset != UNDEF_LONG)
+    gff3_in_stream_set_offset(gff3_in_stream, arguments->offset);
 
   /* set offsetfile (if necessary) */
-  if (str_length(arguments.offsetfile)) {
+  if (str_length(arguments->offsetfile)) {
     had_err = gff3_in_stream_set_offsetfile(gff3_in_stream,
-                                            arguments.offsetfile, err);
+                                            arguments->offsetfile, err);
   }
 
   /* create sort stream (if necessary) */
-  if (!had_err && arguments.sort) {
+  if (!had_err && arguments->sort) {
     sort_stream = sort_stream_new(gff3_in_stream);
     last_stream = sort_stream;
   }
 
   /* create merge feature stream (if necessary) */
-  if (!had_err && arguments.mergefeat) {
+  if (!had_err && arguments->mergefeat) {
     assert(sort_stream);
     mergefeat_stream = mergefeat_stream_sorted_new(sort_stream);
     last_stream = mergefeat_stream;
   }
 
   /* create addintrons stream (if necessary) */
-  if (!had_err && arguments.addintrons) {
+  if (!had_err && arguments->addintrons) {
     assert(last_stream);
     addintrons_stream = addintrons_stream_new(last_stream);
     last_stream = addintrons_stream;
@@ -177,7 +170,7 @@ int gt_gff3(int argc, const char **argv, Error *err)
 
   /* create gff3 output stream */
   if (!had_err)
-    gff3_out_stream = gff3_out_stream_new(last_stream, arguments.outfp);
+    gff3_out_stream = gff3_out_stream_new(last_stream, arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err) {
@@ -188,13 +181,30 @@ int gt_gff3(int argc, const char **argv, Error *err)
   }
 
   /* free */
-  str_delete(arguments.offsetfile);
   genome_stream_delete(gff3_out_stream);
   genome_stream_delete(sort_stream);
   genome_stream_delete(mergefeat_stream);
   genome_stream_delete(addintrons_stream);
   genome_stream_delete(gff3_in_stream);
-  genfile_close(arguments.outfp);
 
   return had_err;
+}
+
+void gt_gff3_arguments_delete(void *tool_arguments)
+{
+  GFF3Arguments *arguments = tool_arguments;
+  if (!tool_arguments) return;
+  genfile_close(arguments->outfp);
+  outputfileinfo_delete(arguments->ofi);
+  str_delete(arguments->offsetfile);
+  ma_free(arguments);
+}
+
+Tool* gt_gff3(void)
+{
+  return tool_new(gt_gff3_arguments_new,
+                  gt_gff3_option_parser_new,
+                  NULL,
+                  gt_gff3_tool_runner,
+                  gt_gff3_arguments_delete);
 }

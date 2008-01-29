@@ -32,6 +32,7 @@ Toolbox* toolbox_new(void);
 void     toolbox_add_tool(Toolbox*, const char *toolname, Tool *tool);
 /* Get Tool with name <toolname> from <toolbox>. */
 Tool*    toolbox_get_tool(Toolbox*, const char *toolname);
+bool     toolbox_has_tool(const Toolbox*, const char *toolname); /*deprecated */
 void     toolbox_add(Toolbox*, const char *toolname, Toolfunc); /* deprecated */
 Toolfunc toolbox_get(const Toolbox*, const char *toolname); /* deprecated */
 /* shows all tools except tools with toolname ``dev'' */

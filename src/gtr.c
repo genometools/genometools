@@ -209,6 +209,7 @@ static int run_tests(GTR *gtr, Error *err)
 int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
 {
   Toolfunc toolfunc = NULL;
+  Tool *tool = NULL;
   char **nargv = NULL;
   void *mem, *map;
   int had_err = 0;
@@ -231,7 +232,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
     had_err = -1;
   }
   if (!had_err && argc) {
-    if (!gtr->tools || !(toolfunc = toolbox_get(gtr->tools, argv[0]))) {
+    if (!gtr->tools || !toolbox_has_tool(gtr->tools, argv[0])) {
       /* no tool found -> try to open script */
       if (file_exists(argv[0])) {
         /* run script */
@@ -255,9 +256,16 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
     }
     else {
       /* run tool */
+      if (!(toolfunc = toolbox_get(gtr->tools, argv[0]))) {
+        tool = toolbox_get_tool(gtr->tools, argv[0]);
+        assert(tool);
+      }
       nargv = cstr_array_prefix_first(argv, error_get_progname(err));
       error_set_progname(err, nargv[0]);
-      had_err = toolfunc(argc, (const char**) nargv, err);
+      if (toolfunc)
+        had_err = toolfunc(argc, (const char**) nargv, err);
+      else
+        had_err = tool_run(tool, argc, (const char**) nargv, err);
     }
   }
   cstr_array_delete(nargv);

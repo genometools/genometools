@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -88,7 +88,7 @@ Toolbox* gtt_tools(void)
   toolbox_add(tools, "extractfeat", gt_extractfeat);
   toolbox_add(tools, "extractseq", gt_extractseq);
   toolbox_add(tools, "filter", gt_filter);
-  toolbox_add(tools, "gff3", gt_gff3);
+  toolbox_add_tool(tools, "gff3", gt_gff3());
   toolbox_add(tools, "gff3_to_gtf", gt_gff3_to_gtf);
   toolbox_add(tools, "gtf_to_gff3", gt_gtf_to_gff3);
   toolbox_add(tools, "ltrharvest", gt_ltrharvest);

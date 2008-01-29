@@ -70,6 +70,14 @@ Tool* toolbox_get_tool(Toolbox *tb, const char *toolname)
   return NULL;
 }
 
+bool toolbox_has_tool(const Toolbox *tb, const char *toolname)
+{
+  assert(tb && tb->tools);
+  if (hashtable_get(tb->tools, toolname))
+    return true;
+  return false;
+}
+
 void toolbox_add(Toolbox *tb, const char *toolname, Toolfunc toolfunc)
 {
   Toolinfo *toolinfo;
