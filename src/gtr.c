@@ -208,7 +208,7 @@ static int run_tests(GTR *gtr, Error *err)
 
 int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
 {
-  Toolfunc toolfunc = NULL;
+  Toolfunc toolfunc;
   Tool *tool = NULL;
   char **nargv = NULL;
   void *mem, *map;
