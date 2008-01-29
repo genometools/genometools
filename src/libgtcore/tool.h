@@ -23,12 +23,16 @@
 /* the tool class */
 typedef struct Tool Tool;
 
+/* tool functions */
 typedef void*         (*ToolArgumentsNew)(void);
 typedef OptionParser* (*ToolOptionParserNew)(void *tool_arguments);
 typedef int           (*ToolArgumentCheck)(void *tool_arguments, Error*);
 typedef int           (*ToolRunner)(int rest_argc, const char **rest_argv,
                                     void *tool_arguments, Error*);
 typedef void          (*ToolArgumentsDelete)(void *tool_arguments);
+
+/* the type of a tool constructor */
+typedef Tool*         (*ToolConstructor)(void);
 
 /*
    Create a new tool object, with
