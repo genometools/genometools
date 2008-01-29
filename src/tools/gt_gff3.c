@@ -114,8 +114,8 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_gff3_tool_runner(int argc, const char **argv,
-                               void *tool_arguments, Error *err)
+static int gt_gff3_runner(int argc, const char **argv, void *tool_arguments,
+                          Error *err)
 {
   GenomeStream *gff3_in_stream,
                *sort_stream = NULL,
@@ -205,6 +205,6 @@ Tool* gt_gff3(void)
   return tool_new(gt_gff3_arguments_new,
                   gt_gff3_option_parser_new,
                   NULL,
-                  gt_gff3_tool_runner,
+                  gt_gff3_runner,
                   gt_gff3_arguments_delete);
 }

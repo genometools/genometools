@@ -42,7 +42,7 @@
 static void* gt_exercise_arguments_new(void)
 {
   Toolbox *exercise_toolbox = toolbox_new();
-  toolbox_add(exercise_toolbox, "affinealign", gt_affinealign);
+  toolbox_add_tool(exercise_toolbox, "affinealign", gt_affinealign());
   toolbox_add(exercise_toolbox, "align", gt_align);
   toolbox_add(exercise_toolbox, "casino", gt_casino);
   toolbox_add(exercise_toolbox, "coin", gt_coin);
@@ -76,8 +76,8 @@ static OptionParser* gt_exercise_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_exercise_tool_runner(int argc, const char **argv,
-                                   void *tool_arguments, Error *err)
+static int gt_exercise_runner(int argc, const char **argv, void *tool_arguments,
+                              Error *err)
 {
   Toolbox *exercise_toolbox = tool_arguments;
   Toolfunc toolfunc;
@@ -125,6 +125,6 @@ Tool* gt_exercise(void)
   return tool_new(gt_exercise_arguments_new,
                   gt_exercise_option_parser_new,
                   NULL,
-                  gt_exercise_tool_runner,
+                  gt_exercise_runner,
                   gt_exercise_arguments_delete);
 }
