@@ -19,6 +19,7 @@
 #define TOOLBOX_H
 
 #include "libgtcore/error.h"
+#include "libgtcore/tool.h"
 
 /* the toolbox class */
 typedef struct Toolbox Toolbox;
@@ -26,8 +27,13 @@ typedef struct Toolbox Toolbox;
 typedef int (*Toolfunc)(int argc, const char **argv, Error*);
 
 Toolbox* toolbox_new(void);
-void     toolbox_add(Toolbox*, const char *toolname, Toolfunc);
-Toolfunc toolbox_get(const Toolbox*, const char *toolname);
+
+/* Add <tool> with name <toolname> to <toolbox>. Takes ownership of <tool>. */
+void     toolbox_add_tool(Toolbox*, const char *toolname, Tool *tool);
+/* Get Tool with name <toolname> from <toolbox>. */
+Tool*    toolbox_get_tool(Toolbox*, const char *toolname);
+void     toolbox_add(Toolbox*, const char *toolname, Toolfunc); /* deprecated */
+Toolfunc toolbox_get(const Toolbox*, const char *toolname); /* deprecated */
 /* shows all tools except tools with toolname ``dev'' */
 int      toolbox_show(/*@unused@*/ const char *progname, void *toolbox, Error*);
 void     toolbox_delete(Toolbox*);

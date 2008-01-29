@@ -26,24 +26,67 @@ struct Toolbox {
   Hashtable *tools;
 };
 
+typedef struct {
+  Tool *tool;
+  Toolfunc toolfunc;
+} Toolinfo;
+
+Toolinfo* toolinfo_new(void)
+{
+  return ma_calloc(1, sizeof (Toolinfo));
+}
+
+void toolinfo_delete(Toolinfo *toolinfo)
+{
+  if (!toolinfo) return;
+  tool_delete(toolinfo->tool);
+  ma_free(toolinfo);
+}
+
 Toolbox* toolbox_new(void)
 {
   Toolbox *tb;
   tb = ma_malloc(sizeof (Toolbox));
-  tb->tools = hashtable_new(HASH_STRING, NULL, NULL);
+  tb->tools = hashtable_new(HASH_STRING, NULL, (FreeFunc) toolinfo_delete);
   return tb;
+}
+
+void toolbox_add_tool(Toolbox *tb, const char *toolname, Tool *tool)
+{
+  Toolinfo *toolinfo;
+  assert(tb && tb->tools);
+  toolinfo = toolinfo_new();
+  toolinfo->tool= tool;
+  hashtable_add(tb->tools, (char*) toolname, toolinfo);
+}
+
+Tool* toolbox_get_tool(Toolbox *tb, const char *toolname)
+{
+  Toolinfo *toolinfo;
+  assert(tb && tb->tools);
+  toolinfo = hashtable_get(tb->tools, toolname);
+  if (toolinfo)
+    return toolinfo->tool;
+  return NULL;
 }
 
 void toolbox_add(Toolbox *tb, const char *toolname, Toolfunc toolfunc)
 {
+  Toolinfo *toolinfo;
   assert(tb && tb->tools);
-  hashtable_add(tb->tools, (char*) toolname, toolfunc);
+  toolinfo = toolinfo_new();
+  toolinfo->toolfunc = toolfunc;
+  hashtable_add(tb->tools, (char*) toolname, toolinfo);
 }
 
 Toolfunc toolbox_get(const Toolbox *tb, const char *toolname)
 {
+  Toolinfo *toolinfo;
   assert(tb && tb->tools);
-  return hashtable_get(tb->tools, toolname);
+  toolinfo = hashtable_get(tb->tools, toolname);
+  if (toolinfo)
+    return toolinfo->toolfunc;
+  return NULL;
 }
 
 static int show_tool_name(void *key, void *value, void *data, Error *e)
