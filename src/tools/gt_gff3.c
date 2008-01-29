@@ -20,7 +20,7 @@
 #include "libgtcore/outputfile.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/versionfunc.h"
-#include "libgtext/addintrons_stream.h"
+#include "libgtext/add_introns_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtext/gtdatahelp.h"
@@ -130,7 +130,7 @@ static int gt_gff3_runner(int argc, const char **argv, void *tool_arguments,
   GenomeStream *gff3_in_stream,
                *sort_stream = NULL,
                *mergefeat_stream = NULL,
-               *addintrons_stream = NULL,
+               *add_introns_stream = NULL,
                *gff3_out_stream = NULL,
                *last_stream;
   GFF3Arguments *arguments = tool_arguments;
@@ -174,8 +174,8 @@ static int gt_gff3_runner(int argc, const char **argv, void *tool_arguments,
   /* create addintrons stream (if necessary) */
   if (!had_err && arguments->addintrons) {
     assert(last_stream);
-    addintrons_stream = addintrons_stream_new(last_stream);
-    last_stream = addintrons_stream;
+    add_introns_stream = add_introns_stream_new(last_stream);
+    last_stream = add_introns_stream;
   }
 
   /* create gff3 output stream */
@@ -194,7 +194,7 @@ static int gt_gff3_runner(int argc, const char **argv, void *tool_arguments,
   genome_stream_delete(gff3_out_stream);
   genome_stream_delete(sort_stream);
   genome_stream_delete(mergefeat_stream);
-  genome_stream_delete(addintrons_stream);
+  genome_stream_delete(add_introns_stream);
   genome_stream_delete(gff3_in_stream);
 
   return had_err;

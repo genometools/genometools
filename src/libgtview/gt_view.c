@@ -25,7 +25,7 @@
 #include "libgtcore/splitter.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/versionfunc.h"
-#include "libgtext/addintrons_stream.h"
+#include "libgtext/add_introns_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtview/config.h"
@@ -128,7 +128,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
 int gt_view(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream = NULL,
-               *addintrons_stream = NULL,
+               *add_introns_stream = NULL,
                *gff3_out_stream = NULL,
                *feature_stream = NULL,
                *last_stream;
@@ -185,8 +185,8 @@ int gt_view(int argc, const char **argv, Error *err)
 
       /* create add introns stream if -addintrons was used */
       if (arguments.addintrons) {
-        addintrons_stream = addintrons_stream_new(last_stream);
-        last_stream = addintrons_stream;
+        add_introns_stream = add_introns_stream_new(last_stream);
+        last_stream = add_introns_stream;
       }
 
       /* create gff3 output stream if -pipe was used */
@@ -206,7 +206,7 @@ int gt_view(int argc, const char **argv, Error *err)
 
       genome_stream_delete(feature_stream);
       genome_stream_delete(gff3_out_stream);
-      genome_stream_delete(addintrons_stream);
+      genome_stream_delete(add_introns_stream);
       genome_stream_delete(gff3_in_stream);
 
       if (!argv[parsed_args]) /* no GFF3 file was given at all */

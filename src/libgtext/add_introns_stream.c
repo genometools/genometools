@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,51 +17,51 @@
 
 #include <assert.h>
 #include "libgtext/genome_stream_rep.h"
-#include "libgtext/addintrons_stream.h"
-#include "libgtext/addintrons_visitor.h"
+#include "libgtext/add_introns_stream.h"
+#include "libgtext/add_introns_visitor.h"
 
 struct AddIntronsStream{
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
-  GenomeVisitor *addintrons_visitor;
+  GenomeVisitor *add_introns_visitor;
 };
 
-#define addintrons_stream_cast(GS)\
-        genome_stream_cast(addintrons_stream_class(), GS)
+#define add_introns_stream_cast(GS)\
+        genome_stream_cast(add_introns_stream_class(), GS)
 
-static int addintrons_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
+static int add_introns_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                        Error *e)
 {
   AddIntronsStream *ais;
   int had_err;
   error_check(e);
-  ais = addintrons_stream_cast(gs);
+  ais = add_introns_stream_cast(gs);
   had_err = genome_stream_next_tree(ais->in_stream, gn, e);
   if (!had_err && *gn)
-    had_err = genome_node_accept(*gn, ais->addintrons_visitor, e);
+    had_err = genome_node_accept(*gn, ais->add_introns_visitor, e);
   return had_err;
 }
 
-static void addintrons_stream_free(GenomeStream *gs)
+static void add_introns_stream_free(GenomeStream *gs)
 {
-  AddIntronsStream *ais = addintrons_stream_cast(gs);
-  genome_visitor_delete(ais->addintrons_visitor);
+  AddIntronsStream *ais = add_introns_stream_cast(gs);
+  genome_visitor_delete(ais->add_introns_visitor);
 }
 
-const GenomeStreamClass* addintrons_stream_class(void)
+const GenomeStreamClass* add_introns_stream_class(void)
 {
   static const GenomeStreamClass gsc = { sizeof (AddIntronsStream),
-                                         addintrons_stream_next_tree,
-                                         addintrons_stream_free };
+                                         add_introns_stream_next_tree,
+                                         add_introns_stream_free };
   return &gsc;
 }
 
-GenomeStream* addintrons_stream_new(GenomeStream *in_stream)
+GenomeStream* add_introns_stream_new(GenomeStream *in_stream)
 {
-  GenomeStream *gs = genome_stream_create(addintrons_stream_class(), true);
-  AddIntronsStream *ais = addintrons_stream_cast(gs);
+  GenomeStream *gs = genome_stream_create(add_introns_stream_class(), true);
+  AddIntronsStream *ais = add_introns_stream_cast(gs);
   assert(in_stream);
   ais->in_stream = in_stream;
-  ais->addintrons_visitor = addintrons_visitor_new();
+  ais->add_introns_visitor = add_introns_visitor_new();
   return gs;
 }

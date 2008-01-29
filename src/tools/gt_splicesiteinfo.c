@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/warning.h"
-#include "libgtext/addintrons_stream.h"
+#include "libgtext/add_introns_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/splicesiteinfo_stream.h"
 #include "libgtext/gtdatahelp.h"
@@ -61,7 +61,7 @@ static OPrval parse_options(int *parsed_args,
 int gt_splicesiteinfo(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream,
-               *addintrons_stream = NULL,
+               *add_introns_stream = NULL,
                *splicesiteinfo_stream = NULL;
   GenomeNode *gn;
   SpliceSiteInfoArguments arguments;
@@ -100,11 +100,11 @@ int gt_splicesiteinfo(int argc, const char **argv, Error *err)
   if (!had_err) {
     /* create addintrons stream (if necessary) */
     if (arguments.addintrons)
-      addintrons_stream = addintrons_stream_new(gff3_in_stream);
+      add_introns_stream = add_introns_stream_new(gff3_in_stream);
 
     /* create extract feature stream */
     splicesiteinfo_stream = splicesiteinfo_stream_new(arguments.addintrons
-                                                      ? addintrons_stream
+                                                      ? add_introns_stream
                                                       : gff3_in_stream,
                                                       regionmapping);
 
@@ -124,7 +124,7 @@ int gt_splicesiteinfo(int argc, const char **argv, Error *err)
 
   /* free */
   genome_stream_delete(splicesiteinfo_stream);
-  genome_stream_delete(addintrons_stream);
+  genome_stream_delete(add_introns_stream);
   genome_stream_delete(gff3_in_stream);
   str_delete(arguments.regionmapping);
   str_delete(arguments.seqfile);

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/undef.h"
-#include "libgtext/addintrons_visitor.h"
+#include "libgtext/add_introns_visitor.h"
 #include "libgtext/genome_visitor_rep.h"
 
 struct AddIntronsVisitor {
@@ -26,18 +26,18 @@ struct AddIntronsVisitor {
                 *previous_exon_feature;
 };
 
-#define addintrons_visitor_cast(GV)\
-        genome_visitor_cast(addintrons_visitor_class(), GV)
+#define add_introns_visitor_cast(GV)\
+        genome_visitor_cast(add_introns_visitor_class(), GV)
 
-static void addintrons_visitor_free(GenomeVisitor *gv)
+static void add_introns_visitor_free(GenomeVisitor *gv)
 {
 #ifndef NDEBUG
-  AddIntronsVisitor *addintrons_visitor = addintrons_visitor_cast(gv);
-  assert(addintrons_visitor);
+  AddIntronsVisitor *add_introns_visitor = add_introns_visitor_cast(gv);
+  assert(add_introns_visitor);
 #endif
 }
 
-static int addintrons_in_children(GenomeNode *gn, void *data, Error *e)
+static int add_introns_in_children(GenomeNode *gn, void *data, Error *e)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GenomeFeature *current_feature;
@@ -83,7 +83,7 @@ static int addintrons_in_children(GenomeNode *gn, void *data, Error *e)
   return 0;
 }
 
-static int addintrons_if_necessary(GenomeNode *gn, void *data, Error *e)
+static int add_introns_if_necessary(GenomeNode *gn, void *data, Error *e)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GenomeFeature *gf;
@@ -92,30 +92,31 @@ static int addintrons_if_necessary(GenomeNode *gn, void *data, Error *e)
   assert(gf);
   v->parent_feature = gf;
   v->previous_exon_feature = NULL;
-  return genome_node_traverse_direct_children(gn, v, addintrons_in_children, e);
+  return genome_node_traverse_direct_children(gn, v, add_introns_in_children,
+                                              e);
 }
 
-static int addintrons_visitor_genome_feature(GenomeVisitor *gv,
+static int add_introns_visitor_genome_feature(GenomeVisitor *gv,
                                              GenomeFeature *gf, Error *e)
 {
   AddIntronsVisitor *v;
   error_check(e);
-  v = addintrons_visitor_cast(gv);
+  v = add_introns_visitor_cast(gv);
   return genome_node_traverse_children((GenomeNode*) gf, v,
-                                       addintrons_if_necessary, false, e);
+                                       add_introns_if_necessary, false, e);
 }
 
-const GenomeVisitorClass* addintrons_visitor_class()
+const GenomeVisitorClass* add_introns_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (AddIntronsVisitor),
-                                          addintrons_visitor_free,
+                                          add_introns_visitor_free,
                                           NULL,
-                                          addintrons_visitor_genome_feature,
+                                          add_introns_visitor_genome_feature,
                                           NULL };
   return &gvc;
 }
 
-GenomeVisitor* addintrons_visitor_new(void)
+GenomeVisitor* add_introns_visitor_new(void)
 {
-  return genome_visitor_create(addintrons_visitor_class());
+  return genome_visitor_create(add_introns_visitor_class());
 }
