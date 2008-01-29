@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -67,7 +67,7 @@ void register_devtools(Toolbox *dev_toolbox)
 int gt_dev(int argc, const char **argv, Error *err)
 {
   Toolbox *dev_toolbox;
-  Tool devtool;
+  Toolfunc devtoolfunc;
   int parsed_args, had_err = 0;
   char **nargv = NULL;
   error_check(err);
@@ -87,7 +87,7 @@ int gt_dev(int argc, const char **argv, Error *err)
   assert(parsed_args < argc);
 
   /* get development tools */
-  if (!(devtool = toolbox_get(dev_toolbox, argv[1]))) {
+  if (!(devtoolfunc = toolbox_get(dev_toolbox, argv[1]))) {
     error_set(err, "development tool '%s' not found; option -help lists "
                    "possible tools", argv[1]);
     had_err = -1;
@@ -97,7 +97,7 @@ int gt_dev(int argc, const char **argv, Error *err)
   if (!had_err) {
     nargv = cstr_array_prefix_first(argv+parsed_args, argv[0]);
     error_set_progname(err, nargv[0]);
-    had_err = devtool(argc-parsed_args, (const char**) nargv, err);
+    had_err = devtoolfunc(argc-parsed_args, (const char**) nargv, err);
   }
 
   /* free */

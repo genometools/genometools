@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -34,13 +34,13 @@ Toolbox* toolbox_new(void)
   return tb;
 }
 
-void toolbox_add(Toolbox *tb, const char *toolname, Tool tool)
+void toolbox_add(Toolbox *tb, const char *toolname, Toolfunc toolfunc)
 {
   assert(tb && tb->tools);
-  hashtable_add(tb->tools, (char*) toolname, tool);
+  hashtable_add(tb->tools, (char*) toolname, toolfunc);
 }
 
-Tool toolbox_get(const Toolbox *tb, const char *toolname)
+Toolfunc toolbox_get(const Toolbox *tb, const char *toolname)
 {
   assert(tb && tb->tools);
   return hashtable_get(tb->tools, toolname);

@@ -81,7 +81,7 @@ void register_exercises(Toolbox *exercise_toolbox)
 int gt_exercise(int argc, const char **argv, Error *err)
 {
   Toolbox *exercise_toolbox;
-  Tool exercise;
+  Toolfunc exercise;
   int parsed_args, had_err = 0;
   char **nargv = NULL;
   error_check(err);

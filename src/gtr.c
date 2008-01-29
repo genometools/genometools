@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -208,7 +208,7 @@ static int run_tests(GTR *gtr, Error *err)
 
 int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
 {
-  Tool tool = NULL;
+  Toolfunc toolfunc = NULL;
   char **nargv = NULL;
   void *mem, *map;
   int had_err = 0;
@@ -231,7 +231,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
     had_err = -1;
   }
   if (!had_err && argc) {
-    if (!gtr->tools || !(tool = toolbox_get(gtr->tools, argv[0]))) {
+    if (!gtr->tools || !(toolfunc = toolbox_get(gtr->tools, argv[0]))) {
       /* no tool found -> try to open script */
       if (file_exists(argv[0])) {
         /* run script */
@@ -257,7 +257,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
       /* run tool */
       nargv = cstr_array_prefix_first(argv, error_get_progname(err));
       error_set_progname(err, nargv[0]);
-      had_err = tool(argc, (const char**) nargv, err);
+      had_err = toolfunc(argc, (const char**) nargv, err);
     }
   }
   cstr_array_delete(nargv);

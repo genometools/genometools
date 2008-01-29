@@ -37,7 +37,7 @@ int
 gt_packedindex(int argc, const char **argv, Error *err)
 {
   Toolbox *index_toolbox;
-  Tool indexTool;
+  Toolfunc indexTool;
   int parsed_args;
   bool had_err = false;
   char **nargv = NULL;

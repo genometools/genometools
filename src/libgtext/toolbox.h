@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,11 +23,11 @@
 /* the toolbox class */
 typedef struct Toolbox Toolbox;
 
-typedef int (*Tool)(int argc, const char **argv, Error*);
+typedef int (*Toolfunc)(int argc, const char **argv, Error*);
 
 Toolbox* toolbox_new(void);
-void     toolbox_add(Toolbox*, const char *toolname, Tool);
-Tool     toolbox_get(const Toolbox*, const char *toolname);
+void     toolbox_add(Toolbox*, const char *toolname, Toolfunc);
+Toolfunc toolbox_get(const Toolbox*, const char *toolname);
 /* shows all tools except tools with toolname ``dev'' */
 int      toolbox_show(/*@unused@*/ const char *progname, void *toolbox, Error*);
 void     toolbox_delete(Toolbox*);
