@@ -17,7 +17,7 @@
 
 #include "libgtcore/bioseq.h"
 #include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/affinealign.h"
 #include "libgtext/alignment.h"
@@ -29,13 +29,17 @@ typedef struct {
       gap_extension_cost;
 } Costs;
 
-static OPrval parse_options(int *parsed_args, Costs *costs, int argc,
-                            const char **argv, Error *err)
+static void* gt_affinealign_arguments_new(void)
+{
+  return ma_malloc(sizeof (Costs));
+}
+
+static OptionParser* gt_affinealign_option_parser_new(void *tool_arguments)
 {
   OptionParser *op;
   Option *option;
-  OPrval oprval;
-  error_check(err);
+  Costs *costs = tool_arguments;
+  assert(costs);
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
                          "sequence in seq_file_2 (affine gap costs).");
@@ -49,34 +53,27 @@ static OPrval parse_options(int *parsed_args, Costs *costs, int argc,
                           &costs->gap_extension_cost, 1);
   option_parser_add_option(op, option);
   option_parser_set_min_max_args(op, 2, 2);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
-int gt_affinealign(int argc, const char **argv, Error *err)
+static int gt_affinealign_runner(int argc, const char **argv,
+                                 void *tool_arguments, Error *err)
 {
   Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;
-  int parsed_args, had_err = 0;
+  int had_err = 0;
   Alignment *a;
-  Costs costs;
-  error_check(err);
+  Costs *costs = tool_arguments;
 
-  /* option parsing */
-  switch (parse_options(&parsed_args, &costs, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
-  }
-  assert(parsed_args+1 < argc);
+  error_check(err);
+  assert(costs);
 
   /* init */
-  bioseq_1 = bioseq_new(argv[parsed_args], err);
+  bioseq_1 = bioseq_new(argv[0], err);
   if (!bioseq_1)
      had_err = -1;
   if (!had_err) {
-    bioseq_2 = bioseq_new(argv[parsed_args+1], err);
+    bioseq_2 = bioseq_new(argv[1], err);
     if (!bioseq_2)
       had_err = -1;
   }
@@ -89,8 +86,8 @@ int gt_affinealign(int argc, const char **argv, Error *err)
                         bioseq_get_sequence_length(bioseq_1, i),
                         bioseq_get_sequence(bioseq_2, j),
                         bioseq_get_sequence_length(bioseq_2, j),
-                        costs.replacement_cost, costs.gap_opening_cost,
-                        costs.gap_extension_cost);
+                        costs->replacement_cost, costs->gap_opening_cost,
+                        costs->gap_extension_cost);
         alignment_show(a, stdout);
         xputchar('\n');
         alignment_delete(a);
@@ -103,4 +100,20 @@ int gt_affinealign(int argc, const char **argv, Error *err)
   bioseq_delete(bioseq_1);
 
   return had_err;
+}
+
+static void gt_affinealign_arguments_delete(void *tool_arguments)
+{
+  Costs *costs = tool_arguments;
+  if (!costs) return;
+  ma_free(costs);
+}
+
+Tool* gt_affinealign(void)
+{
+  return tool_new(gt_affinealign_arguments_new,
+                  gt_affinealign_option_parser_new,
+                  NULL,
+                  gt_affinealign_runner,
+                  gt_affinealign_arguments_delete);
 }
