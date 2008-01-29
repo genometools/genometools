@@ -21,7 +21,7 @@ require 'gtruby'
 
 if ARGV.size != 2 then
   STDERR.puts "Usage: #{$0} PNG_file GFF3_file"
-  STDERR.puts "Create PNG representation of GFF3 annotation file."
+  STDERR.puts "Create PNG representation of GFF3 annotation file (adds introns)."
   exit(1)
 end
 
@@ -30,6 +30,11 @@ pngfile  = ARGV[0]
 gff3file = ARGV[1]
 
 in_stream = GT::GFF3InStream.new(gff3file)
+
+# add introns
+add_introns_stream = GT::AddIntronsStream.new(in_stream)
+in_stream = add_introns_stream
+
 feature_index = GT::FeatureIndex.new()
 feature_stream = GT::FeatureStream.new(in_stream, feature_index)
 gn = feature_stream.next_tree()
