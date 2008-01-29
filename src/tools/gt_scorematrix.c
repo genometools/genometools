@@ -48,8 +48,7 @@ int gt_scorematrix(int argc, const char **argv, Error *err)
   }
   assert(parsed_args == 1);
 
-  sm = score_matrix_new_read_protein(argv[1], err);
-  if (!sm)
+  if (!(sm = score_matrix_new_read_protein(argv[1], err)))
     had_err = -1;
   if (!had_err)
     score_matrix_show(sm, stdout);
