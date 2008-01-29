@@ -24,34 +24,23 @@
 #include "libgtext/scorefasta.h"
 #include "tools/gt_scorefasta.h"
 
-static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+static OptionParser* gt_scorefasta_option_parser_new(void *tool_arguments)
 {
   OptionParser *op;
-  OPrval oprval;
-  error_check(err);
   op = option_parser_new("[option ...] q u w", "Compute scorefasta for "
                          "sequences u and w (with q-gram length q).");
   option_parser_set_min_max_args(op, 3, 3);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
-int gt_scorefasta(int argc, const char **argv, Error *err)
+static int gt_scorefasta_runner(int argc, const char **argv,
+                                void *tool_arguments, Error *err)
 {
-  int parsed_args, ret, had_err = 0;
+  int ret, had_err = 0;
   unsigned long q, ulen, wlen;
   char *u, *w;
   Alpha *alpha;
   error_check(err);
-
-  /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
-  }
 
   /* assign q */
   if (sscanf(argv[1],"%d", &ret) != 1 || ret <= 0) {
@@ -87,4 +76,13 @@ int gt_scorefasta(int argc, const char **argv, Error *err)
   }
 
   return had_err;
+}
+
+Tool* gt_scorefasta(void)
+{
+  return tool_new(NULL,
+                  NULL,
+                  gt_scorefasta_option_parser_new,
+                  NULL,
+                  gt_scorefasta_runner);
 }

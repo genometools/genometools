@@ -55,7 +55,7 @@ static void* gt_exercise_arguments_new(void)
   toolbox_add(exercise_toolbox, "neighborjoining", gt_neighborjoining);
   toolbox_add(exercise_toolbox, "nussinov_rna_fold", gt_nussinov_rna_fold);
   toolbox_add(exercise_toolbox, "qgramdist", gt_qgramdist);
-  toolbox_add(exercise_toolbox, "scorefasta", gt_scorefasta);
+  toolbox_add_tool(exercise_toolbox, "scorefasta", gt_scorefasta());
   toolbox_add(exercise_toolbox, "scorematrix", gt_scorematrix);
   toolbox_add(exercise_toolbox, "swalign", gt_swalign);
   toolbox_add(exercise_toolbox, "translate", gt_translate);

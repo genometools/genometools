@@ -18,7 +18,9 @@
 #ifndef GT_SCOREFASTA_H
 #define GT_SCOREFASTA_H
 
+#include "libgtcore/tool.h"
+
 /* the scorefasta tool */
-int gt_scorefasta(int argc, const char **argv, Error*);
+Tool* gt_scorefasta(void);
 
 #endif
