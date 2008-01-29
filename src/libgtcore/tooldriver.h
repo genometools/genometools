@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,7 +22,7 @@
 
 /* The tool driver module allows to compile a tool into a separate binary. This
    is mostly useful for legacy applications like GenomeThreader.
-   The tool driver creates an Env object, calls <tool>, and reports errors.
+   The tool driver creates an Error object, calls <tool>, and reports errors.
    See below for example code to create a separate binary for the eval tool.
    XXX: change example to reflect the real gth application
 */
