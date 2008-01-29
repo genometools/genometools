@@ -537,6 +537,29 @@ static bool has_extended_option(Array *options)
   return false;
 }
 
+void option_parser_set_min_args(OptionParser *op,
+                                unsigned int min_additional_arguments)
+{
+  assert(op);
+  op->min_additional_arguments = min_additional_arguments;
+}
+
+void option_parser_set_max_args(OptionParser *op,
+                                unsigned int max_additional_arguments)
+{
+  assert(op);
+  op->max_additional_arguments = max_additional_arguments;
+}
+
+void option_parser_set_min_max_args(OptionParser *op,
+                                    unsigned int min_additional_arguments,
+                                    unsigned int max_additional_arguments)
+{
+  assert(op);
+  op->min_additional_arguments = min_additional_arguments;
+  op->max_additional_arguments = max_additional_arguments;
+}
+
 static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                     const char **argv, ShowVersionFunc versionfunc,  Error *err)
 {
@@ -944,29 +967,6 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   if (had_err)
     return OPTIONPARSER_ERROR;
   return OPTIONPARSER_OK;
-}
-
-void option_parser_set_min_args(OptionParser *op,
-                                unsigned int min_additional_arguments)
-{
-  assert(op);
-  op->min_additional_arguments = min_additional_arguments;
-}
-
-void option_parser_set_max_args(OptionParser *op,
-                                unsigned int max_additional_arguments)
-{
-  assert(op);
-  op->max_additional_arguments = max_additional_arguments;
-}
-
-void option_parser_set_min_max_args(OptionParser *op,
-                                    unsigned int min_additional_arguments,
-                                    unsigned int max_additional_arguments)
-{
-  assert(op);
-  op->min_additional_arguments = min_additional_arguments;
-  op->max_additional_arguments = max_additional_arguments;
 }
 
 OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
