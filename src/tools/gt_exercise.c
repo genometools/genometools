@@ -80,13 +80,14 @@ static int gt_exercise_tool_runner(int argc, const char **argv,
                                    void *tool_arguments, Error *err)
 {
   Toolbox *exercise_toolbox = tool_arguments;
-  Toolfunc exercise;
+  Toolfunc toolfunc;
+  Tool *tool = NULL;
   int had_err = 0;
   char **nargv = NULL;
   error_check(err);
 
   /* get exercise */
-  if (!(exercise = toolbox_get(exercise_toolbox, argv[0]))) {
+  if (!toolbox_has_tool(exercise_toolbox, argv[0])) {
     error_set(err, "exercise '%s' not found; option -help lists possible "
                    "tools", argv[0]);
     had_err = -1;
@@ -94,9 +95,16 @@ static int gt_exercise_tool_runner(int argc, const char **argv,
 
   /* call exercise */
   if (!had_err) {
+    if (!(toolfunc = toolbox_get(exercise_toolbox, argv[0]))) {
+      tool = toolbox_get_tool(exercise_toolbox, argv[0]);
+      assert(tool);
+    }
     nargv = cstr_array_prefix_first(argv, error_get_progname(err));
     error_set_progname(err, nargv[0]);
-    had_err = exercise(argc, (const char**) nargv, err);
+    if (toolfunc)
+      had_err = toolfunc(argc, (const char**) nargv, err);
+    else
+      had_err = tool_run(tool, argc, (const char**) nargv, err);
   }
 
   /* free */
