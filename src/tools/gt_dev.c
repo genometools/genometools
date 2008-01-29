@@ -31,25 +31,9 @@
 #include "tools/gt_patternmatch.h"
 #include "tools/gt_skproto.h"
 
-static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Toolbox *dev_toolbox, Error *err)
+static void* gt_dev_arguments_new(void)
 {
-  OptionParser *op;
-  OPrval oprval;
-  error_check(err);
-  op = option_parser_new("[option ...] dev_tool_name [argument ...]",
-                         "Call development tool with name dev_tool_name and "
-                         "pass argument(s) to it.");
-  option_parser_set_comment_func(op, toolbox_show, dev_toolbox);
-  option_parser_set_min_args(op, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
-}
-
-void register_devtools(Toolbox *dev_toolbox)
-{
-  assert(dev_toolbox);
+  Toolbox *dev_toolbox = toolbox_new();
   /* add development tools here with a function call like this:
      toolbox_add(dev_toolbox, "devtool", gt_devtool); */
   toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
@@ -62,47 +46,65 @@ void register_devtools(Toolbox *dev_toolbox)
   toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
   toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
   toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
+  return dev_toolbox;
 }
 
-int gt_dev(int argc, const char **argv, Error *err)
+static OptionParser* gt_dev_option_parser_new(void *tool_arguments)
 {
-  Toolbox *dev_toolbox;
-  Toolfunc devtoolfunc;
-  int parsed_args, had_err = 0;
-  char **nargv = NULL;
-  error_check(err);
+  Toolbox *dev_toolbox = tool_arguments;
+  OptionParser *op;
+  assert(dev_toolbox);
+  op = option_parser_new("[option ...] dev_tool_name [argument ...]",
+                         "Call development tool with name dev_tool_name and "
+                         "pass argument(s) to it.");
+  option_parser_set_comment_func(op, toolbox_show, dev_toolbox);
+  option_parser_set_min_args(op, 1);
+  return op;
+}
 
-  /* option parsing */
-  dev_toolbox = toolbox_new();
-  register_devtools(dev_toolbox);
-  switch (parse_options(&parsed_args, argc, argv, dev_toolbox, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
-      toolbox_delete(dev_toolbox);
-      return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
-      toolbox_delete(dev_toolbox);
-      return 0;
-  }
-  assert(parsed_args < argc);
+static int gt_dev_runner(int argc, const char **argv, void *tool_arguments,
+                         Error *err)
+{
+  Toolbox *dev_toolbox = tool_arguments;
+  Toolfunc devtoolfunc;
+  int had_err = 0;
+  char **nargv = NULL;
+
+  error_check(err);
+  assert(dev_toolbox);
 
   /* get development tools */
-  if (!(devtoolfunc = toolbox_get(dev_toolbox, argv[1]))) {
+  if (!(devtoolfunc = toolbox_get(dev_toolbox, argv[0]))) {
     error_set(err, "development tool '%s' not found; option -help lists "
-                   "possible tools", argv[1]);
+                   "possible tools", argv[0]);
     had_err = -1;
   }
 
   /* call development tool */
   if (!had_err) {
-    nargv = cstr_array_prefix_first(argv+parsed_args, argv[0]);
+    nargv = cstr_array_prefix_first(argv, error_get_progname(err));
     error_set_progname(err, nargv[0]);
-    had_err = devtoolfunc(argc-parsed_args, (const char**) nargv, err);
+    had_err = devtoolfunc(argc, (const char**) nargv, err);
   }
 
   /* free */
   cstr_array_delete(nargv);
-  toolbox_delete(dev_toolbox);
 
   return had_err;
+}
+
+static void gt_dev_arguments_delete(void *tool_arguments)
+{
+  Toolbox *dev_toolbox = tool_arguments;
+  if (!dev_toolbox) return;
+  toolbox_delete(dev_toolbox);
+}
+
+Tool* gt_dev(void)
+{
+  return tool_new(gt_dev_arguments_new,
+                  gt_dev_option_parser_new,
+                  NULL,
+                  gt_dev_runner,
+                  gt_dev_arguments_delete);
 }
