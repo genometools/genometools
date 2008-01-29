@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -63,6 +63,8 @@ struct OptionParser {
   ShowCommentFunc comment_func;
   void *comment_func_data;
   const char *mailaddress;
+  unsigned int min_additional_arguments,
+               max_additional_arguments;
 };
 
 struct Option {
@@ -175,6 +177,8 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner)
   op->comment_func = NULL;
   op->comment_func_data = NULL;
   op->mailaddress = NULL;
+  op->min_additional_arguments = UNDEF_UINT;
+  op->max_additional_arguments = UNDEF_UINT;
   return op;
 }
 
@@ -534,10 +538,7 @@ static bool has_extended_option(Array *options)
 }
 
 static OPrval parse(OptionParser *op, int *parsed_args, int argc,
-                    const char **argv,
-                    ShowVersionFunc versionfunc,
-                    unsigned int min_additional_arguments,
-                    unsigned int max_additional_arguments, Error *err)
+                    const char **argv, ShowVersionFunc versionfunc,  Error *err)
 {
   int argnum, int_value;
   unsigned long i;
@@ -905,18 +906,18 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
     argnum++;
 
   /* check for minimum number of additional arguments, if necessary */
-  if (!had_err && min_additional_arguments != UNDEF_UINT &&
-      argc - argnum < min_additional_arguments) {
+  if (!had_err && op->min_additional_arguments != UNDEF_UINT &&
+      argc - argnum < op->min_additional_arguments) {
     error_set(err, "missing argument\nUsage: %s %s", op->progname,
               op->synopsis);
     had_err = -1;
   }
 
   /* check for maximal number of additional arguments, if necessary */
-  if (!had_err && max_additional_arguments != UNDEF_UINT &&
-      argc - argnum > max_additional_arguments) {
+  if (!had_err && op->max_additional_arguments != UNDEF_UINT &&
+      argc - argnum > op->max_additional_arguments) {
     error_set(err, "superfluous argument \"%s\"\nUsage: %s %s",
-              argv[argnum + max_additional_arguments], op->progname,
+              argv[argnum + op->max_additional_arguments], op->progname,
               op->synopsis);
     had_err = -1;
   }
@@ -945,13 +946,35 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   return OPTIONPARSER_OK;
 }
 
+void option_parser_set_min_args(OptionParser *op,
+                                unsigned int min_additional_arguments)
+{
+  assert(op);
+  op->min_additional_arguments = min_additional_arguments;
+}
+
+void option_parser_set_max_args(OptionParser *op,
+                                unsigned int max_additional_arguments)
+{
+  assert(op);
+  op->max_additional_arguments = max_additional_arguments;
+}
+
+void option_parser_set_min_max_args(OptionParser *op,
+                                    unsigned int min_additional_arguments,
+                                    unsigned int max_additional_arguments)
+{
+  assert(op);
+  op->min_additional_arguments = min_additional_arguments;
+  op->max_additional_arguments = max_additional_arguments;
+}
+
 OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                            const char **argv, ShowVersionFunc versionfunc,
                            Error *err)
 {
   error_check(err);
-  return parse(op, parsed_args, argc, argv, versionfunc, UNDEF_UINT, UNDEF_UINT,
-               err);
+  return parse(op, parsed_args, argc, argv, versionfunc, err);
 }
 
 OPrval option_parser_parse_min_args(OptionParser *op, int *parsed_args,
@@ -961,8 +984,8 @@ OPrval option_parser_parse_min_args(OptionParser *op, int *parsed_args,
                                     Error *err)
 {
   error_check(err);
-  return parse(op, parsed_args, argc, argv, versionfunc,
-               min_additional_arguments, UNDEF_UINT, err);
+  op->min_additional_arguments = min_additional_arguments;
+  return parse(op, parsed_args, argc, argv, versionfunc, err);
 }
 
 OPrval option_parser_parse_max_args(OptionParser *op, int *parsed_args,
@@ -972,8 +995,8 @@ OPrval option_parser_parse_max_args(OptionParser *op, int *parsed_args,
                                     Error *err)
 {
   error_check(err);
-  return parse(op, parsed_args, argc, argv, versionfunc, UNDEF_UINT,
-               max_additional_arguments, err);
+  op->max_additional_arguments = max_additional_arguments;
+  return parse(op, parsed_args, argc, argv, versionfunc, err);
 }
 
 OPrval option_parser_parse_min_max_args(OptionParser *op, int *parsed_args,
@@ -984,8 +1007,9 @@ OPrval option_parser_parse_min_max_args(OptionParser *op, int *parsed_args,
                                         Error *err)
 {
   error_check(err);
-  return parse(op, parsed_args, argc, argv, versionfunc,
-               min_additional_arguments, max_additional_arguments, err);
+  op->min_additional_arguments = min_additional_arguments;
+  op->max_additional_arguments = max_additional_arguments;
+  return parse(op, parsed_args, argc, argv, versionfunc, err);
 }
 
 void option_parser_delete(OptionParser *op)

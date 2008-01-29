@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -58,6 +58,10 @@ void          option_parser_set_mailaddress(OptionParser*, const char *address);
    example). */
 void          option_parser_register_hook(OptionParser*, OptionParserHookFunc,
                                           void *data);
+void          option_parser_set_min_args(OptionParser*, unsigned int);
+void          option_parser_set_max_args(OptionParser*, unsigned int);
+void          option_parser_set_min_max_args(OptionParser*, unsigned int,
+                                                            unsigned int);
 OPrval        option_parser_parse(OptionParser*, int *parsed_args, int argc,
                                   const char **argv, ShowVersionFunc, Error*);
 OPrval        option_parser_parse_min_args(OptionParser*, int *parsed_args,
