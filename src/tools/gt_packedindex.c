@@ -26,15 +26,38 @@
 #include "tools/gt_packedindex_chk_integrity.h"
 #include "tools/gt_packedindex_chk_search.h"
 
-static void
-register_packedindextools(Toolbox *packedindex_toolbox);
+/* rely on suffixerator for on the fly index construction */
+static int gt_packedindex_make(int argc, const char *argv[], Error *err)
+{
+  return parseargsandcallsuffixerator(false, argc, argv, err);
+}
 
-static OPrval
-parse_subtool_options(int *parsed_args, int argc, const char **argv,
-                      Toolbox *index_toolbox, Error *err);
+static void register_packedindextools(Toolbox *packedindex_toolbox)
+{
+  assert(packedindex_toolbox);
+  toolbox_add(packedindex_toolbox, "mkindex", gt_packedindex_make);
+  toolbox_add(packedindex_toolbox, "chkintegrity",
+              gt_packedindex_chk_integrity );
+  toolbox_add(packedindex_toolbox, "chksearch", gt_packedindex_chk_search);
+}
 
-int
-gt_packedindex(int argc, const char **argv, Error *err)
+static OPrval parse_subtool_options(int *parsed_args, int argc,
+                                    const char **argv, Toolbox *index_toolbox,
+                                    Error *err)
+{
+  OptionParser *op;
+  OPrval oprval;
+  error_check(err);
+  op = option_parser_new("[option ...] index_tool [argument ...]",
+                         "Call packed index tool with name index_tool and "
+                         "pass argument(s) to it.");
+  option_parser_set_comment_func(op, toolbox_show, index_toolbox);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  option_parser_delete(op);
+  return oprval;
+}
+
+int gt_packedindex(int argc, const char **argv, Error *err)
 {
   Toolbox *index_toolbox;
   Toolfunc indexTool;
@@ -75,43 +98,4 @@ gt_packedindex(int argc, const char **argv, Error *err)
   cstr_array_delete(nargv);
   toolbox_delete(index_toolbox);
   return had_err?-1:0;
-}
-
-static OPrval
-parse_subtool_options(int *parsed_args, int argc, const char **argv,
-                      Toolbox *index_toolbox, Error *err)
-{
-  OptionParser *op;
-  OPrval oprval;
-  error_check(err);
-  op = option_parser_new("[option ...] index_tool [argument ...]",
-                         "Call packed index tool with name index_tool and "
-                         "pass argument(s) to it.");
-  option_parser_set_comment_func(op, toolbox_show, index_toolbox);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
-}
-
-static int
-gt_packedindex_make(int argc, const char *argv[], Error *err);
-
-static void
-register_packedindextools(Toolbox *packedindex_toolbox)
-{
-  assert(packedindex_toolbox);
-  toolbox_add(packedindex_toolbox, "mkindex", gt_packedindex_make);
-  toolbox_add(packedindex_toolbox, "chkintegrity",
-              gt_packedindex_chk_integrity );
-  toolbox_add(packedindex_toolbox, "chksearch", gt_packedindex_chk_search);
-}
-
-/***************************************************************************
- * rely on suffixerator for on the fly index construction
- ***************************************************************************/
-
-static int
-gt_packedindex_make(int argc, const char *argv[], Error *err)
-{
-  return parseargsandcallsuffixerator(false, argc, argv, err);
 }
