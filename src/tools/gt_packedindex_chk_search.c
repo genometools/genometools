@@ -271,8 +271,8 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                             DEFAULT_PROGRESS_INTERVAL);
   option_parser_add_option(op, option);
 
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc,
-                                            argv, versionfunc, 1, 1, err);
+  option_parser_set_min_max_args(op, 1, 1);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   /* compute parameters currently not set from command-line or
    * determined indirectly */
   computePackedIndexDefaults(&params->idx,

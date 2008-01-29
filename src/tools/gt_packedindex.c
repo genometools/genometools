@@ -88,8 +88,7 @@ parse_subtool_options(int *parsed_args, int argc, const char **argv,
                          "Call packed index tool with name index_tool and "
                          "pass argument(s) to it.");
   option_parser_set_comment_func(op, toolbox_show, index_toolbox);
-  oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, err);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;
 }

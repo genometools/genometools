@@ -34,9 +34,8 @@ static OPrval parse_options(bool *onlyins,int *parsed_args,
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   option= option_new_bool("ins","perform only insertions",onlyins,false);
   option_parser_add_option(op, option);
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, (unsigned int) 1,
-                                            (unsigned int) 2, err);
+  option_parser_set_min_max_args(op, 1, 1);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;
 }
@@ -55,7 +54,7 @@ int gt_trieins(int argc, const char **argv, Error *err)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args == 1 || parsed_args == 2);
+  assert(parsed_args == 1);
 
   indexname = str_new_cstr(argv[parsed_args]);
   if (test_trieins(onlyins,indexname,err) != 0)

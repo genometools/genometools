@@ -64,24 +64,6 @@ void          option_parser_set_min_max_args(OptionParser*, unsigned int,
                                                             unsigned int);
 OPrval        option_parser_parse(OptionParser*, int *parsed_args, int argc,
                                   const char **argv, ShowVersionFunc, Error*);
-OPrval        option_parser_parse_min_args(OptionParser*, int *parsed_args,
-                                           int argc, const char **argv,
-                                           ShowVersionFunc,
-                                           unsigned int
-                                           min_additional_arguments, Error*);
-OPrval        option_parser_parse_max_args(OptionParser*, int *parsed_args,
-                                           int argc, const char **argv,
-                                           ShowVersionFunc,
-                                           unsigned int
-                                           max_additional_arguments, Error*);
-OPrval        option_parser_parse_min_max_args(OptionParser*, int *parsed_args,
-                                               int argc, const char **argv,
-                                               ShowVersionFunc,
-                                               unsigned int
-                                               min_additional_arguments,
-                                               unsigned int
-                                               max_additional_arguments,
-                                               Error*);
 void          option_parser_delete(OptionParser*);
 
 /* the options

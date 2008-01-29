@@ -32,8 +32,8 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   error_check(err);
   op = option_parser_new("[option ...] q u w", "Compute scorefasta for "
                          "sequences u and w (with q-gram length q).");
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 3, 3, err);
+  option_parser_set_min_max_args(op, 3, 3);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;
 }

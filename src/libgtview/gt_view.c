@@ -110,8 +110,8 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
 
   /* parse options */
-  oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, err);
+  option_parser_set_min_args(op, 1);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
 
   if (oprval == OPTIONPARSER_OK && !force && file_exists(argv[*parsed_args])) {
     error_set(err, "file \"%s\" exists already. use option -force to "

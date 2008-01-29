@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -63,8 +63,8 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
 
   /* parse options */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 2, err);
+  option_parser_set_min_max_args(op, 1, 2);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
 
   /* free */
   outputfileinfo_delete(ofi);

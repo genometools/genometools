@@ -560,8 +560,9 @@ void option_parser_set_min_max_args(OptionParser *op,
   op->max_additional_arguments = max_additional_arguments;
 }
 
-static OPrval parse(OptionParser *op, int *parsed_args, int argc,
-                    const char **argv, ShowVersionFunc versionfunc,  Error *err)
+OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
+                           const char **argv, ShowVersionFunc versionfunc,
+                           Error *err)
 {
   int argnum, int_value;
   unsigned long i;
@@ -967,49 +968,6 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   if (had_err)
     return OPTIONPARSER_ERROR;
   return OPTIONPARSER_OK;
-}
-
-OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
-                           const char **argv, ShowVersionFunc versionfunc,
-                           Error *err)
-{
-  error_check(err);
-  return parse(op, parsed_args, argc, argv, versionfunc, err);
-}
-
-OPrval option_parser_parse_min_args(OptionParser *op, int *parsed_args,
-                                    int argc, const char **argv,
-                                    ShowVersionFunc versionfunc,
-                                    unsigned int min_additional_arguments,
-                                    Error *err)
-{
-  error_check(err);
-  op->min_additional_arguments = min_additional_arguments;
-  return parse(op, parsed_args, argc, argv, versionfunc, err);
-}
-
-OPrval option_parser_parse_max_args(OptionParser *op, int *parsed_args,
-                                    int argc, const char **argv,
-                                    ShowVersionFunc versionfunc,
-                                    unsigned int max_additional_arguments,
-                                    Error *err)
-{
-  error_check(err);
-  op->max_additional_arguments = max_additional_arguments;
-  return parse(op, parsed_args, argc, argv, versionfunc, err);
-}
-
-OPrval option_parser_parse_min_max_args(OptionParser *op, int *parsed_args,
-                                        int argc, const char **argv,
-                                        ShowVersionFunc versionfunc,
-                                        unsigned int min_additional_arguments,
-                                        unsigned int max_additional_arguments,
-                                        Error *err)
-{
-  error_check(err);
-  op->min_additional_arguments = min_additional_arguments;
-  op->max_additional_arguments = max_additional_arguments;
-  return parse(op, parsed_args, argc, argv, versionfunc, err);
 }
 
 void option_parser_delete(OptionParser *op)

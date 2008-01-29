@@ -41,8 +41,8 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                          "Call development tool with name dev_tool_name and "
                          "pass argument(s) to it.");
   option_parser_set_comment_func(op, toolbox_show, dev_toolbox);
-  oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, err);
+  option_parser_set_min_args(op, 1);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;
 }

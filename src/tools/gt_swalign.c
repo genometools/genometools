@@ -39,8 +39,8 @@ static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
   o = option_new_int("indelscore", "set the score used for "
                      "insertions/deletions", indelscore, DEFAULT_INDELSCORE);
   option_parser_add_option(op, o);
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 3, 3, err);
+  option_parser_set_min_max_args(op, 3, 3);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;
 }

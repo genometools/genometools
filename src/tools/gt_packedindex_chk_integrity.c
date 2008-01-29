@@ -120,9 +120,9 @@ parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
                            &extRankCheck, false);
   option_parser_add_option(op, option);
 
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc,
-                                            (const char **)argv,
-                                            versionfunc, 1, 1, err);
+  option_parser_set_min_max_args(op, 1, 1);
+  oprval = option_parser_parse(op, parsed_args, argc, (const char**) argv,
+                               versionfunc, err);
   option_parser_delete(op);
   param->checkFlags = EIS_VERIFY_BASIC
     | (extRankCheck?EIS_VERIFY_EXT_RANK:0);

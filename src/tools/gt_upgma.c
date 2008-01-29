@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -34,8 +34,8 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                          "cost edit distance as distance function). If "
                          "'example' is given as\nsequence_file, a builtin "
                          "example is used.");
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 1, err);
+  option_parser_set_min_max_args(op, 1, 1);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;
 }

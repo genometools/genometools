@@ -28,8 +28,8 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   error_check(err);
   op = option_parser_new("scorematrix_filename", "Parse the given protein "
                          "score matrix and show it on stdout.");
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 1, err);
+  option_parser_set_min_max_args(op, 1, 1);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;
 }

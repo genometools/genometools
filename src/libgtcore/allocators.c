@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -38,8 +38,8 @@ static OPrval parse_env_options(int argc, const char **argv, Error *err)
   o = option_new_bool("spacepeak", "show space peak on stdout upon deletion",
                       &spacepeak, false);
   option_parser_add_option(op, o);
-  oprval = option_parser_parse_max_args(op, NULL, argc, argv, versionfunc, 0,
-                                        err);
+  option_parser_set_max_args(op, 0);
+  oprval = option_parser_parse(op, NULL, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;
 }
