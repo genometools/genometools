@@ -33,6 +33,7 @@
 #include "stamp.h"
 
 #include "opensfxfile.pr"
+#include "initbasepower.pr"
 
 #define DBFILEKEY "dbfile="
 
@@ -292,6 +293,8 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->llvtab = NULL;
   suffixarray->bwttab = NULL;
   suffixarray->destab = NULL;
+  suffixarray->bcktab = NULL;
+  suffixarray->countspecialcodes = NULL;
   suffixarray->alpha = NULL;
   suffixarray->encseq = NULL;
   suffixarray->bwttabstream.fp = NULL;
@@ -358,6 +361,8 @@ void freesuffixarray(Suffixarray *suffixarray)
   suffixarray->bwttab = NULL;
   fa_xmunmap((void *) suffixarray->destab);
   suffixarray->destab = NULL;
+  fa_xmunmap((void *) suffixarray->bcktab);
+  suffixarray->bcktab = NULL;
   fa_xfclose(suffixarray->suftabstream.fp);
   suffixarray->suftabstream.fp = NULL;
   fa_xfclose(suffixarray->lcptabstream.fp);
@@ -511,6 +516,38 @@ static int inputsuffixarray(bool map,
     } else
     {
       INITBufferedfile(indexname,&suffixarray->bwttabstream,BWTTABSUFFIX);
+    }
+  }
+  if (!haserr && (demand & SARR_BCKTAB))
+  {
+    if (map)
+    {
+      unsigned int numofallcodes, numofspecialcodes , *basepower;
+
+      basepower = initbasepower(getnumofcharsAlphabet(suffixarray->alpha),
+                                suffixarray->prefixlength);
+      numofallcodes = basepower[suffixarray->prefixlength];
+      numofspecialcodes = basepower[suffixarray->prefixlength-1];
+      FREESPACE(basepower);
+      suffixarray->bcktab = genericmaptable(indexname,
+                                            BCKTABSUFFIX,
+                                            (Seqpos) (numofallcodes + 1 +
+                                                      numofspecialcodes),
+                                            sizeof (Seqpos),
+                                            err);
+      if (suffixarray->bcktab == NULL)
+      {
+        haserr = true;
+        suffixarray->countspecialcodes = NULL;
+      } else
+      {
+        suffixarray->countspecialcodes 
+          = suffixarray->bcktab + numofallcodes + 1;
+      }
+    } else
+    {
+      error_set(err,"cannot stream bcktab");
+      haserr = true;
     }
   }
   if (haserr)

@@ -1,0 +1,8 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+unsigned int *initbasepower(unsigned int base,unsigned int len);
+
+#ifdef __cplusplus
+}
+#endif
