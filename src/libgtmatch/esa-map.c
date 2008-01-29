@@ -541,7 +541,7 @@ static int inputsuffixarray(bool map,
         suffixarray->countspecialcodes = NULL;
       } else
       {
-        suffixarray->countspecialcodes 
+        suffixarray->countspecialcodes
           = suffixarray->bcktab + numofallcodes + 1;
       }
     } else

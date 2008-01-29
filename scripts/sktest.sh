@@ -21,19 +21,45 @@
 
 set -e -x
 
+USAGE="Usage: $0 [-memcheck]"
+
+if test $# -eq 0
+then
+  MC=""
+else
+  if test $# -eq 1
+  then
+    if test "$1" = "-memcheck"
+    then
+      MC="-memcheck" 
+    else
+      echo ${USAGE}
+      exit 1
+    fi 
+  else
+    echo ${USAGE}
+    exit 1
+  fi
+fi
+
 outoptions="-tis -lcp -suf -bwt"
 ALLOUTPUTOPTS="../scripts/alloutputoptions.rb"
 
 cd testsuite
 
 # the make call normally used for development
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_greedyfwdmat'
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_suffixerator'
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_trieins'
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_ltrharvest'
-env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb -keywords 'gt_suffixerator and gttestdata' -gttestdata ${GTTESTDATA}
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_packedindex' -gttestdata ${GTTESTDATA}
-env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb -keywords 'gt_greedyfwdmat and gttestdata' -gttestdata ${GTTESTDATA}
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_greedyfwdmat'
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_suffixerator'
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_trieins'
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_ltrharvest'
+env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
+       ${MC} -keywords 'gt_suffixerator and gttestdata' \
+       -gttestdata ${GTTESTDATA}
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_packedindex' \
+       -gttestdata ${GTTESTDATA}
+env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
+       ${MC} -keywords 'gt_greedyfwdmat and gttestdata' \
+       -gttestdata ${GTTESTDATA}
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
 # the following depends on vmatch-mini.x and mkvtree.x

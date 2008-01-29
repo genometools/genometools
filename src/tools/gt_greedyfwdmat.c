@@ -147,6 +147,9 @@ static OPrval parsegfmsub(bool doms,
                                    false);
     option_is_development_option(optionverify);
     option_parser_add_option(op, optionverify);
+  } else
+  {
+    gfmsubcallinfo->verifywitnesspos = false;
   }
 
   oprval = option_parser_parse(op, &parsed_args, argc, argv,
@@ -307,7 +310,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
 
     if (gfmsubcallinfo.indextype == Esaindextype)
     {
-      mappedbits = SARR_ESQTAB | SARR_SUFTAB | SARR_BCKTAB;
+      mappedbits = SARR_ESQTAB | SARR_SUFTAB; /* | SARR_BCKTAB; */
     } else
     {
       if (dotestsequence(doms,&gfmsubcallinfo))
