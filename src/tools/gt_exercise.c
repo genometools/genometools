@@ -84,7 +84,9 @@ static int gt_exercise_runner(int argc, const char **argv, void *tool_arguments,
   Tool *tool = NULL;
   int had_err = 0;
   char **nargv = NULL;
+
   error_check(err);
+  assert(exercise_toolbox);
 
   /* get exercise */
   if (!toolbox_has_tool(exercise_toolbox, argv[0])) {
