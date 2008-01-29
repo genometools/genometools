@@ -42,7 +42,7 @@ static void* gt_dev_arguments_new(void)
   toolbox_add(dev_toolbox, "seqiterator", gt_seqiterator);
   toolbox_add(dev_toolbox, "trieins", gt_trieins);
   toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
-  toolbox_add(dev_toolbox, "skproto", gt_skproto);
+  toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
   toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
   toolbox_add(dev_toolbox, "paircmp", gt_paircmp);

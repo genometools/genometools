@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2001 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2001      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -27,15 +27,10 @@
 
 #define MAX_LINE_LENGTH  80
 
-static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+static OptionParser* gt_skproto_option_parser_new(void *tool_arguments)
 {
-  OptionParser *op;
-  OPrval oprval;
-  op = option_parser_new("[C-file ...]", "Extract Header-File from C-file(s).");
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+  return option_parser_new("[C-file ...]",
+                           "Extract Header-File from C-file(s).");
 }
 
 static char *forbid[] = {
@@ -156,27 +151,22 @@ static void skproto(const char *filename, FILE *fpin)
   str_delete(line);
 }
 
-int gt_skproto(int argc, const char **argv, Error *err)
+static int gt_skproto_runner(int argc, const char **argv, void *tool_arguments,
+                             Error *err)
 {
   FILE *fpin;
-  int i, parsed_args;
-  error_check(err);
+  int i;
 
-  /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
-  }
+  error_check(err);
 
   printf("#ifdef __cplusplus\n");
   printf("extern \"C\" {\n");
   printf("#endif\n");
 
-  if (parsed_args == argc)
+  if (!argc)
     skproto("(stdout)", stdin);
   else {
-    for (i = parsed_args; i < argc; i++) {
+    for (i = 0; i < argc; i++) {
       fpin = fa_xfopen(argv[i], "r");
       skproto(argv[i], fpin);
       fa_xfclose(fpin);
@@ -188,4 +178,13 @@ int gt_skproto(int argc, const char **argv, Error *err)
   printf("#endif\n");
 
   return 0;
+}
+
+Tool* gt_skproto(void)
+{
+  return tool_new(NULL,
+                  gt_skproto_option_parser_new,
+                  NULL,
+                  gt_skproto_runner,
+                  NULL);
 }
