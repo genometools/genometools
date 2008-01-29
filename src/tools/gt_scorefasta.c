@@ -61,37 +61,34 @@ static int gt_scorefasta_runner(int argc, const char **argv,
   unsigned long ulen, wlen;
   char *u, *w;
   Alpha *alpha;
-  int had_err = 0;
 
   error_check(err);
   assert(arguments);
 
-  if (!had_err) {
-    /* store database sequence u and query sequence w */
-    ulen = strlen(argv[0]);
-    wlen = strlen(argv[1]);
-    u = ma_malloc(ulen+1);
-    w = ma_malloc(wlen+1);
-    strcpy(u, argv[0]);
-    strcpy(w, argv[1]);
+  /* store database sequence u and query sequence w */
+  ulen = strlen(argv[0]);
+  wlen = strlen(argv[1]);
+  u = ma_malloc(ulen+1);
+  w = ma_malloc(wlen+1);
+  strcpy(u, argv[0]);
+  strcpy(w, argv[1]);
 
-    /* assign DNA alphabet */
-    alpha = alpha_new_dna();
+  /* assign DNA alphabet */
+  alpha = alpha_new_dna();
 
-    /* transform u and w according to DNA alphabet */
-    alpha_encode_seq(alpha, u, u, ulen);
-    alpha_encode_seq(alpha, w, w, wlen);
+  /* transform u and w according to DNA alphabet */
+  alpha_encode_seq(alpha, u, u, ulen);
+  alpha_encode_seq(alpha, w, w, wlen);
 
-    printf("scorefasta=%lu\n", scorefasta(u, ulen, w, wlen, arguments->q,
-                                          alpha_size(alpha)));
+  printf("scorefasta=%lu\n", scorefasta(u, ulen, w, wlen, arguments->q,
+                                        alpha_size(alpha)));
 
-    /* free space */
-    alpha_delete(alpha);
-    ma_free(u);
-    ma_free(w);
-  }
+  /* free space */
+  alpha_delete(alpha);
+  ma_free(u);
+  ma_free(w);
 
-  return had_err;
+  return 0;
 }
 
 Tool* gt_scorefasta(void)
