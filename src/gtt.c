@@ -100,7 +100,7 @@ Toolbox* gtt_tools(void)
   toolbox_add(tools, "splicesiteinfo", gt_splicesiteinfo);
   toolbox_add(tools, "stat", gt_stat);
   toolbox_add(tools, "suffixerator", gt_suffixerator);
-  toolbox_add(tools, "packedindex", gt_packedindex);
+  toolbox_add_tool(tools, "packedindex", gt_packedindex());
   toolbox_add(tools, "mkfmindex", gt_mkfmindex);
   toolbox_add(tools, "uniq", gt_uniq);
   toolbox_add(tools, "uniquesub", gt_uniquesub);

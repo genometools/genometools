@@ -32,70 +32,77 @@ static int gt_packedindex_make(int argc, const char *argv[], Error *err)
   return parseargsandcallsuffixerator(false, argc, argv, err);
 }
 
-static void register_packedindextools(Toolbox *packedindex_toolbox)
+static void* gt_packedindex_arguments_new(void)
 {
-  assert(packedindex_toolbox);
+  Toolbox *packedindex_toolbox = toolbox_new();
   toolbox_add(packedindex_toolbox, "mkindex", gt_packedindex_make);
   toolbox_add(packedindex_toolbox, "chkintegrity",
               gt_packedindex_chk_integrity );
   toolbox_add(packedindex_toolbox, "chksearch", gt_packedindex_chk_search);
+  return packedindex_toolbox;
 }
 
-static OPrval parse_subtool_options(int *parsed_args, int argc,
-                                    const char **argv, Toolbox *index_toolbox,
-                                    Error *err)
+static OptionParser* gt_packedindex_option_parser_new(void *tool_arguments)
 {
+  Toolbox *index_toolbox = tool_arguments;
   OptionParser *op;
-  OPrval oprval;
-  error_check(err);
+  assert(index_toolbox);
   op = option_parser_new("[option ...] index_tool [argument ...]",
                          "Call packed index tool with name index_tool and "
                          "pass argument(s) to it.");
   option_parser_set_comment_func(op, toolbox_show, index_toolbox);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
-int gt_packedindex(int argc, const char **argv, Error *err)
+static int gt_packedindex_runner(int argc, const char **argv,
+                                 void *tool_arguments, Error *err)
 {
-  Toolbox *index_toolbox;
-  Toolfunc indexTool;
-  int parsed_args;
+  Toolbox *index_toolbox = tool_arguments;
+  Toolfunc toolfunc;
+  Tool *tool = NULL;
   bool had_err = false;
   char **nargv = NULL;
+
   error_check(err);
-
-  index_toolbox = toolbox_new();
-  register_packedindextools(index_toolbox);
-
-  switch (parse_subtool_options(&parsed_args, argc, argv, index_toolbox, err))
-  {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
-      toolbox_delete(index_toolbox);
-      return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
-      toolbox_delete(index_toolbox);
-      return 0;
-  }
-  assert(parsed_args < argc);
+  assert(index_toolbox);
 
   /* determine tool */
-  if (!(indexTool = toolbox_get(index_toolbox, argv[1]))) {
+  if (!toolbox_has_tool(index_toolbox, argv[0])) {
     error_set(err, "packedindex tool '%s' not found; option -help lists "
-                   "possible tools", argv[1]);
+                   "possible tools", argv[0]);
     had_err = true;
   }
 
   /* call sub-tool */
   if (!had_err) {
-    nargv = cstr_array_prefix_first(argv+parsed_args, argv[0]);
+    if (!(toolfunc = toolbox_get(index_toolbox, argv[0]))) {
+      tool = toolbox_get_tool(index_toolbox, argv[0]);
+      assert(tool);
+    }
+    nargv = cstr_array_prefix_first(argv, error_get_progname(err));
     error_set_progname(err, nargv[0]);
-    had_err = indexTool(argc-parsed_args, (const char**) nargv, err);
+    if (toolfunc)
+      had_err = toolfunc(argc, (const char**) nargv, err);
+    else
+      had_err = tool_run(tool, argc, (const char**) nargv, err);
   }
 
   cstr_array_delete(nargv);
-  toolbox_delete(index_toolbox);
   return had_err?-1:0;
+}
+
+static void gt_packedindex_arguments_delete(void *tool_arguments)
+{
+  Toolbox *index_toolbox = tool_arguments;
+  if (!index_toolbox) return;
+  toolbox_delete(index_toolbox);
+}
+
+Tool* gt_packedindex(void)
+{
+  return tool_new(gt_packedindex_arguments_new,
+                  gt_packedindex_option_parser_new,
+                  NULL,
+                  gt_packedindex_runner,
+                  gt_packedindex_arguments_delete);
 }
