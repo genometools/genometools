@@ -42,6 +42,13 @@ static void* gt_packedindex_arguments_new(void)
   return packedindex_toolbox;
 }
 
+static void gt_packedindex_arguments_delete(void *tool_arguments)
+{
+  Toolbox *index_toolbox = tool_arguments;
+  if (!index_toolbox) return;
+  toolbox_delete(index_toolbox);
+}
+
 static OptionParser* gt_packedindex_option_parser_new(void *tool_arguments)
 {
   Toolbox *index_toolbox = tool_arguments;
@@ -91,18 +98,11 @@ static int gt_packedindex_runner(int argc, const char **argv,
   return had_err?-1:0;
 }
 
-static void gt_packedindex_arguments_delete(void *tool_arguments)
-{
-  Toolbox *index_toolbox = tool_arguments;
-  if (!index_toolbox) return;
-  toolbox_delete(index_toolbox);
-}
-
 Tool* gt_packedindex(void)
 {
   return tool_new(gt_packedindex_arguments_new,
+                  gt_packedindex_arguments_delete,
                   gt_packedindex_option_parser_new,
                   NULL,
-                  gt_packedindex_runner,
-                  gt_packedindex_arguments_delete);
+                  gt_packedindex_runner);
 }

@@ -21,17 +21,17 @@
 
 struct Tool {
   ToolArgumentsNew tool_arguments_new;
+  ToolArgumentsDelete tool_arguments_delete;
   ToolOptionParserNew tool_option_parser_new;
   ToolArgumentCheck tool_arguments_check;
   ToolRunner tool_runner;
-  ToolArgumentsDelete tool_arguments_delete;
 };
 
 Tool* tool_new(ToolArgumentsNew tool_arguments_new,
+               ToolArgumentsDelete tool_arguments_delete,
                ToolOptionParserNew tool_option_parser_new,
                ToolArgumentCheck tool_arguments_check,
-               ToolRunner tool_runner,
-               ToolArgumentsDelete tool_arguments_delete)
+               ToolRunner tool_runner)
 {
   Tool *tool;
   assert(tool_option_parser_new && tool_runner); /* required arguments */
@@ -40,10 +40,10 @@ Tool* tool_new(ToolArgumentsNew tool_arguments_new,
          (!tool_arguments_new && !tool_arguments_delete));
   tool = ma_malloc(sizeof *tool);
   tool->tool_arguments_new = tool_arguments_new;
+  tool->tool_arguments_delete = tool_arguments_delete;
   tool->tool_option_parser_new = tool_option_parser_new;
   tool->tool_arguments_check = tool_arguments_check;
   tool->tool_runner = tool_runner;
-  tool->tool_arguments_delete = tool_arguments_delete;
   return tool;
 }
 

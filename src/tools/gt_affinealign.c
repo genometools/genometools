@@ -34,6 +34,13 @@ static void* gt_affinealign_arguments_new(void)
   return ma_malloc(sizeof (Costs));
 }
 
+static void gt_affinealign_arguments_delete(void *tool_arguments)
+{
+  Costs *costs = tool_arguments;
+  if (!costs) return;
+  ma_free(costs);
+}
+
 static OptionParser* gt_affinealign_option_parser_new(void *tool_arguments)
 {
   OptionParser *op;
@@ -102,18 +109,11 @@ static int gt_affinealign_runner(int argc, const char **argv,
   return had_err;
 }
 
-static void gt_affinealign_arguments_delete(void *tool_arguments)
-{
-  Costs *costs = tool_arguments;
-  if (!costs) return;
-  ma_free(costs);
-}
-
 Tool* gt_affinealign(void)
 {
   return tool_new(gt_affinealign_arguments_new,
+                  gt_affinealign_arguments_delete,
                   gt_affinealign_option_parser_new,
                   NULL,
-                  gt_affinealign_runner,
-                  gt_affinealign_arguments_delete);
+                  gt_affinealign_runner);
 }

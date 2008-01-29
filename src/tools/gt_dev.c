@@ -49,6 +49,13 @@ static void* gt_dev_arguments_new(void)
   return dev_toolbox;
 }
 
+static void gt_dev_arguments_delete(void *tool_arguments)
+{
+  Toolbox *dev_toolbox = tool_arguments;
+  if (!dev_toolbox) return;
+  toolbox_delete(dev_toolbox);
+}
+
 static OptionParser* gt_dev_option_parser_new(void *tool_arguments)
 {
   Toolbox *dev_toolbox = tool_arguments;
@@ -101,18 +108,11 @@ static int gt_dev_runner(int argc, const char **argv, void *tool_arguments,
   return had_err;
 }
 
-static void gt_dev_arguments_delete(void *tool_arguments)
-{
-  Toolbox *dev_toolbox = tool_arguments;
-  if (!dev_toolbox) return;
-  toolbox_delete(dev_toolbox);
-}
-
 Tool* gt_dev(void)
 {
   return tool_new(gt_dev_arguments_new,
+                  gt_dev_arguments_delete,
                   gt_dev_option_parser_new,
                   NULL,
-                  gt_dev_runner,
-                  gt_dev_arguments_delete);
+                  gt_dev_runner);
 }

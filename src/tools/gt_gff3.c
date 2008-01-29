@@ -48,6 +48,16 @@ static void* gt_gff3_arguments_new(void)
   return arguments;
 }
 
+void gt_gff3_arguments_delete(void *tool_arguments)
+{
+  GFF3Arguments *arguments = tool_arguments;
+  if (!tool_arguments) return;
+  genfile_close(arguments->outfp);
+  outputfileinfo_delete(arguments->ofi);
+  str_delete(arguments->offsetfile);
+  ma_free(arguments);
+}
+
 static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 {
   GFF3Arguments *arguments = tool_arguments;
@@ -190,21 +200,11 @@ static int gt_gff3_runner(int argc, const char **argv, void *tool_arguments,
   return had_err;
 }
 
-void gt_gff3_arguments_delete(void *tool_arguments)
-{
-  GFF3Arguments *arguments = tool_arguments;
-  if (!tool_arguments) return;
-  genfile_close(arguments->outfp);
-  outputfileinfo_delete(arguments->ofi);
-  str_delete(arguments->offsetfile);
-  ma_free(arguments);
-}
-
 Tool* gt_gff3(void)
 {
   return tool_new(gt_gff3_arguments_new,
+                  gt_gff3_arguments_delete,
                   gt_gff3_option_parser_new,
                   NULL,
-                  gt_gff3_runner,
-                  gt_gff3_arguments_delete);
+                  gt_gff3_runner);
 }

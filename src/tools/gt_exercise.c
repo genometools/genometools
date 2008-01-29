@@ -63,6 +63,13 @@ static void* gt_exercise_arguments_new(void)
   return exercise_toolbox;
 }
 
+static void gt_exercise_arguments_delete(void *tool_arguments)
+{
+  Toolbox *exercise_toolbox = tool_arguments;
+  if (!exercise_toolbox) return;
+  toolbox_delete(exercise_toolbox);
+}
+
 static OptionParser* gt_exercise_option_parser_new(void *tool_arguments)
 {
   Toolbox *exercise_toolbox = tool_arguments;
@@ -115,18 +122,11 @@ static int gt_exercise_runner(int argc, const char **argv, void *tool_arguments,
   return had_err;
 }
 
-static void gt_exercise_arguments_delete(void *tool_arguments)
-{
-  Toolbox *exercise_toolbox = tool_arguments;
-  if (!exercise_toolbox) return;
-  toolbox_delete(exercise_toolbox);
-}
-
 Tool* gt_exercise(void)
 {
   return tool_new(gt_exercise_arguments_new,
+                  gt_exercise_arguments_delete,
                   gt_exercise_option_parser_new,
                   NULL,
-                  gt_exercise_runner,
-                  gt_exercise_arguments_delete);
+                  gt_exercise_runner);
 }

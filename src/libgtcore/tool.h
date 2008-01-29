@@ -25,11 +25,11 @@ typedef struct Tool Tool;
 
 /* tool functions */
 typedef void*         (*ToolArgumentsNew)(void);
+typedef void          (*ToolArgumentsDelete)(void *tool_arguments);
 typedef OptionParser* (*ToolOptionParserNew)(void *tool_arguments);
 typedef int           (*ToolArgumentCheck)(void *tool_arguments, Error*);
 typedef int           (*ToolRunner)(int rest_argc, const char **rest_argv,
                                     void *tool_arguments, Error*);
-typedef void          (*ToolArgumentsDelete)(void *tool_arguments);
 
 /* the type of a tool constructor */
 typedef Tool*         (*ToolConstructor)(void);
@@ -37,18 +37,18 @@ typedef Tool*         (*ToolConstructor)(void);
 /*
    Create a new tool object, with
    - a tool argument constructor <tool_arguments_new> (optional),
+   - a tool argument destructor <tool_arguments_delete> (optional).
    - a tool option parser constructor <tool_option_parser_new) (required),
    - a tool argument checker <tool_arguments_check> (optional),
    - a tool runner <tool_runner> (required), and
-   - a tool argument destructor <tool_arguments_delete> (optional).
    <tool_arguments_new> and <tool_arguments_check> imply each other.
    Returns a new Tool object.
 */
 Tool* tool_new(ToolArgumentsNew tool_arguments_new,
+               ToolArgumentsDelete tool_arguments_delete,
                ToolOptionParserNew tool_option_parser_new,
                ToolArgumentCheck tool_arguments_check,
-               ToolRunner tool_runner,
-               ToolArgumentsDelete tool_arguments_delete);
+               ToolRunner tool_runner);
 
 /*
   Run the given <tool> as follows:

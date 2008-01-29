@@ -183,8 +183,8 @@ static int gt_skproto_runner(int argc, const char **argv, void *tool_arguments,
 Tool* gt_skproto(void)
 {
   return tool_new(NULL,
+                  NULL,
                   gt_skproto_option_parser_new,
                   NULL,
-                  gt_skproto_runner,
-                  NULL);
+                  gt_skproto_runner);
 }
