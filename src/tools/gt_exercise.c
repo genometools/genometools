@@ -39,25 +39,9 @@
 #include "tools/gt_translate.h"
 #include "tools/gt_upgma.h"
 
-static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Toolbox *exercise_toolbox, Error *err)
+static void* gt_exercise_arguments_new(void)
 {
-  OptionParser *op;
-  OPrval oprval;
-  error_check(err);
-  op = option_parser_new("[option ...] exercise_tool_name [argument ...]",
-                         "Call exercise tool with name exercise_tool_name and "
-                         "pass argument(s) to it.");
-  option_parser_set_comment_func(op, toolbox_show, exercise_toolbox);
-  oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, err);
-  option_parser_delete(op);
-  return oprval;
-}
-
-void register_exercises(Toolbox *exercise_toolbox)
-{
-  assert(exercise_toolbox);
+  Toolbox *exercise_toolbox = toolbox_new();
   toolbox_add(exercise_toolbox, "affinealign", gt_affinealign);
   toolbox_add(exercise_toolbox, "align", gt_align);
   toolbox_add(exercise_toolbox, "casino", gt_casino);
@@ -76,46 +60,63 @@ void register_exercises(Toolbox *exercise_toolbox)
   toolbox_add(exercise_toolbox, "swalign", gt_swalign);
   toolbox_add(exercise_toolbox, "translate", gt_translate);
   toolbox_add(exercise_toolbox, "upgma", gt_upgma);
+  return exercise_toolbox;
 }
 
-int gt_exercise(int argc, const char **argv, Error *err)
+static OptionParser* gt_exercise_option_parser_new(void *tool_arguments)
 {
-  Toolbox *exercise_toolbox;
+  Toolbox *exercise_toolbox = tool_arguments;
+  OptionParser *op;
+  assert(exercise_toolbox);
+  op = option_parser_new("[option ...] exercise_tool_name [argument ...]",
+                         "Call exercise tool with name exercise_tool_name and "
+                         "pass argument(s) to it.");
+  option_parser_set_comment_func(op, toolbox_show, exercise_toolbox);
+  option_parser_set_min_args(op, 1);
+  return op;
+}
+
+static int gt_exercise_tool_runner(int argc, const char **argv,
+                                   void *tool_arguments, Error *err)
+{
+  Toolbox *exercise_toolbox = tool_arguments;
   Toolfunc exercise;
-  int parsed_args, had_err = 0;
+  int had_err = 0;
   char **nargv = NULL;
   error_check(err);
 
-  /* option parsing */
-  exercise_toolbox = toolbox_new();
-  register_exercises(exercise_toolbox);
-  switch (parse_options(&parsed_args, argc, argv, exercise_toolbox, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
-      toolbox_delete(exercise_toolbox);
-      return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
-      toolbox_delete(exercise_toolbox);
-      return 0;
-  }
-  assert(parsed_args < argc);
-
   /* get exercise */
-  if (!(exercise = toolbox_get(exercise_toolbox, argv[1]))) {
+  if (!(exercise = toolbox_get(exercise_toolbox, argv[0]))) {
     error_set(err, "exercise '%s' not found; option -help lists possible "
-                   "tools", argv[1]);
+                   "tools", argv[0]);
     had_err = -1;
   }
 
   /* call exercise */
   if (!had_err) {
-    nargv = cstr_array_prefix_first(argv+parsed_args, argv[0]);
-    had_err = exercise(argc-parsed_args, (const char**) nargv, err);
+    nargv = cstr_array_prefix_first(argv, error_get_progname(err));
+    error_set_progname(err, nargv[0]);
+    had_err = exercise(argc, (const char**) nargv, err);
   }
 
   /* free */
   cstr_array_delete(nargv);
-  toolbox_delete(exercise_toolbox);
 
   return had_err;
+}
+
+static void gt_exercise_arguments_delete(void *tool_arguments)
+{
+  Toolbox *exercise_toolbox = tool_arguments;
+  if (!exercise_toolbox) return;
+  toolbox_delete(exercise_toolbox);
+}
+
+Tool* gt_exercise(void)
+{
+  return tool_new(gt_exercise_arguments_new,
+                  gt_exercise_option_parser_new,
+                  NULL,
+                  gt_exercise_tool_runner,
+                  gt_exercise_arguments_delete);
 }
