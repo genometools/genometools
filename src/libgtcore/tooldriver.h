@@ -19,6 +19,7 @@
 #define TOOLDRIVER_H
 
 #include "libgtcore/error.h"
+#include "libgtcore/tool.h"
 
 /* The tool driver module allows to compile a tool into a separate binary. This
    is mostly useful for legacy applications like GenomeThreader.
@@ -28,6 +29,8 @@
 */
 int tooldriver(int(*tool)(int argc, const char **argv, Error*),
                int argc, char *argv[]);
+
+int toolobjdriver(ToolConstructor, int argc, char *argv[]);
 
 #if 0
 
