@@ -69,6 +69,37 @@ Array* pos_get(Pos *pos, unsigned long code)
   return hashtable_get(pos->mapping, (void*) code);
 }
 
+static long* compute_max_pos_scores(const char *w, unsigned long wlen,
+                                    const ScoreMatrix *score_matrix)
+{
+  long score, max_score, *max_matrix_scores, *max_pos_scores;
+  unsigned int dimension;
+  unsigned long i;
+
+  /* prepare space for lookahead data */
+  dimension = score_matrix_get_dimension(score_matrix);
+  max_matrix_scores = ma_malloc(sizeof (long) * dimension);
+  max_pos_scores = ma_malloc(sizeof (long) * wlen);
+  /* fill maximal matrix scores */
+  for (i = 0; i < dimension; i++) {
+    unsigned long j;
+    max_score = LONG_MIN;
+    for (j = 0; j < dimension; j++) {
+      score = score_matrix_get_score(score_matrix, i, j);
+      if (score > max_score)
+        max_score = score;
+    }
+    max_matrix_scores[i] = max_score;
+  }
+  /* fill maximal position scores */
+  for (i = 0; i < wlen; i++)
+    max_pos_scores[i] = max_matrix_scores[(int) w[i]];
+  /* free */
+  ma_free(max_matrix_scores);
+
+  return max_pos_scores;
+}
+
 static void blast_env_add_q_word(BlastEnv *be, const char *qgram_rest,
                                  char *current_word, long *max_cumul_scores,
                                  Alpha *alpha, unsigned long q,
@@ -113,9 +144,7 @@ BlastEnv* blast_env_new(const char *w, unsigned long wlen, Alpha *alpha,
   be->alpha = alpha_ref(alpha);
   be->q = q;
   if (wlen >= q) {
-    long score, max_score, *max_matrix_scores, *max_pos_scores,
-         *max_cumul_scores;
-    unsigned int dimension;
+    long *max_pos_scores, *max_cumul_scores;
     unsigned long i;
     char *current_word;
     be->V = bittab_new(pow(r, q));
@@ -123,26 +152,9 @@ BlastEnv* blast_env_new(const char *w, unsigned long wlen, Alpha *alpha,
     /* prepare space for current word */
     current_word = ma_malloc(sizeof (char) * (q+1));
     current_word[q] = '\0';
-    /* prepare space for lookahead data */
-    dimension = score_matrix_get_dimension(score_matrix);
-    max_matrix_scores = ma_malloc(sizeof (long) * dimension);
-    max_pos_scores = ma_malloc(sizeof (long) * wlen);
+    /* prepare data for lookahead */
+    max_pos_scores = compute_max_pos_scores(w, wlen, score_matrix);
     max_cumul_scores = ma_malloc(sizeof (long) * q);
-    /* fill maximal matrix scores (for lookahead) */
-    for (i = 0; i < dimension; i++) {
-      unsigned long j;
-      max_score = LONG_MIN;
-      for (j = 0; j < dimension; j++) {
-        score = score_matrix_get_score(score_matrix, i, j);
-        if (score > max_score)
-          max_score = score;
-      }
-      max_matrix_scores[i] = max_score;
-    }
-    /* fill maximal position scores (for lookahead) */
-    for (i = 0; i < wlen; i++) {
-      max_pos_scores[i] = max_matrix_scores[(int) w[i]];
-    }
     /* add all words to <blast_env> */
     for (i = 0; i < wlen - q + 1; i++) {
       long j;
@@ -154,7 +166,6 @@ BlastEnv* blast_env_new(const char *w, unsigned long wlen, Alpha *alpha,
                            k, 0, i, score_matrix);
     }
     /* free */
-    ma_free(max_matrix_scores);
     ma_free(max_cumul_scores);
     ma_free(max_pos_scores);
     ma_free(current_word);
