@@ -40,13 +40,22 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_qgramdist_test_align.out"
 end
 
-Name "gt exercise blastenv"
+Name "gt exercise blastenv (script)"
 Keywords "gt_exercise"
 Test do
   run_test "#{$bin}gt exercise blastenv #{$testdata}identity_score_matrix " +
            "GGCCGC"
   run "egrep '^[GC]{4}' #{$last_stdout}"
-  run "diff #{$last_stdout} #{$testdata}gt_blastenv_test.out"
+  run "diff #{$last_stdout} #{$testdata}gt_blastenv_test_script.out"
+end
+
+Name "gt exercise blastenv (lookahead)"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise blastenv -k 18 #{$testdata}BLOSUM62 " +
+           "SIEQSIEQSIEQSIEQSIEQSIEQSIEQSIEQSIEQSIEQSQSQSQSSSQQSQSS" +
+           "QSQSSSQSSQSQSSQSQQSQSQSSQS"
+  run "diff #{$last_stdout} #{$testdata}gt_blastenv_test_lookahead.out"
 end
 
 Name "gt exercise casino test "
