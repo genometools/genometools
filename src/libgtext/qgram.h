@@ -18,6 +18,7 @@
 #ifndef QGRAM_H
 #define QGRAM_H
 
+#include "libgtcore/alpha.h"
 #include "libgtcore/array.h"
 
 /* Encodes a word <w> of length <q> over an alphabet of size <alpha_size> as a
@@ -36,5 +37,10 @@ unsigned long qgram_step(unsigned long current_code, char previous, char next,
 void          qgram_compute(Array *qgrams, const char *encoded_seq,
                             unsigned long seqlen, unsigned long alpha_size,
                             unsigned int q);
+
+/* Decode <code> (which encodes a qgram of length <q> over alphabet <alpha) and
+   store the resulting string in <qgram>. */
+void          qgram_decode(char *qgram, unsigned long code, unsigned long q,
+                           Alpha *alpha);
 
 #endif

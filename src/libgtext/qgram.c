@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -64,5 +64,19 @@ void qgram_compute(Array *qgrams, const char *encoded_seq,
       array_add(qgrams, code);
       i++;
     }
+  }
+}
+
+void qgram_decode(char *qgram, unsigned long code, unsigned long q,
+                  Alpha *alpha)
+{
+  unsigned int alphabet_size, c = 0;
+  unsigned long i;
+  assert(qgram && q && alpha);
+  alphabet_size = alpha_size(alpha);
+  for (i = q; i > 0; i--) {
+    c = code % alphabet_size;
+    code = (code - c) / alphabet_size;
+    qgram[i-1] = alpha_decode(alpha, c);
   }
 }
