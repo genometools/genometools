@@ -131,45 +131,49 @@ static void blast_env_add_q_word(BlastEnv *be, const char *qgram_rest,
   }
 }
 
+static void blast_env_compute(BlastEnv *be, const char *w, unsigned long wlen,
+                              Alpha *alpha, unsigned long q, long k,
+                              const ScoreMatrix *score_matrix)
+{
+  long *max_pos_scores, *max_cumul_scores;
+  unsigned long i;
+  char *current_word;
+  be->V = bittab_new(pow(alpha_size(alpha), q));
+  be->pos = pos_new();
+  /* prepare space for current word */
+  current_word = ma_malloc(sizeof (char) * (q+1));
+  current_word[q] = '\0';
+  /* prepare data for lookahead */
+  max_pos_scores = compute_max_pos_scores(w, wlen, score_matrix);
+  max_cumul_scores = ma_malloc(sizeof (long) * q);
+  /* add all words to <blast_env> */
+  for (i = 0; i < wlen - q + 1; i++) {
+    long j;
+    /* fill maximal cumulative scores (for lookahead) */
+    max_cumul_scores[q-1] = max_pos_scores[i+q-1];
+    for (j = q-2; j >= 0; j--)
+      max_cumul_scores[j] = max_pos_scores[i+j] + max_cumul_scores[j+1];
+    blast_env_add_q_word(be, w+i, current_word, max_cumul_scores, alpha, q, q,
+                         k, 0, i, score_matrix);
+  }
+  /* free */
+  ma_free(max_cumul_scores);
+  ma_free(max_pos_scores);
+  ma_free(current_word);
+}
+
 BlastEnv* blast_env_new(const char *w, unsigned long wlen, Alpha *alpha,
                         unsigned long q, long k,
                         const ScoreMatrix *score_matrix)
 {
-  unsigned int r; /* the alphabet size */
   BlastEnv *be;
   assert(w && alpha && q && score_matrix);
-  r = alpha_size(alpha);
-  assert(r == score_matrix_get_dimension(score_matrix));
+  assert(alpha_size(alpha) == score_matrix_get_dimension(score_matrix));
   be = ma_calloc(1, sizeof *be);
   be->alpha = alpha_ref(alpha);
   be->q = q;
-  if (wlen >= q) {
-    long *max_pos_scores, *max_cumul_scores;
-    unsigned long i;
-    char *current_word;
-    be->V = bittab_new(pow(r, q));
-    be->pos = pos_new();
-    /* prepare space for current word */
-    current_word = ma_malloc(sizeof (char) * (q+1));
-    current_word[q] = '\0';
-    /* prepare data for lookahead */
-    max_pos_scores = compute_max_pos_scores(w, wlen, score_matrix);
-    max_cumul_scores = ma_malloc(sizeof (long) * q);
-    /* add all words to <blast_env> */
-    for (i = 0; i < wlen - q + 1; i++) {
-      long j;
-      /* fill maximal cumulative scores (for lookahead) */
-      max_cumul_scores[q-1] = max_pos_scores[i+q-1];
-      for (j = q-2; j >= 0; j--)
-        max_cumul_scores[j] = max_pos_scores[i+j] + max_cumul_scores[j+1];
-      blast_env_add_q_word(be, w+i, current_word, max_cumul_scores, alpha, q, q,
-                           k, 0, i, score_matrix);
-    }
-    /* free */
-    ma_free(max_cumul_scores);
-    ma_free(max_pos_scores);
-    ma_free(current_word);
-  }
+  if (wlen >= q)
+    blast_env_compute(be, w, wlen, alpha, q, k, score_matrix);
   return be;
 }
 
