@@ -192,6 +192,11 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
   return iface;
 }
 
+extern const Sfxiterator *SfxInterface2Sfxiterator(const sfxInterface *iface)
+{
+  return iface->sfi;
+}
+
 extern void
 deleteSfxInterface(sfxInterface *iface)
 {
