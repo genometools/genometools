@@ -40,6 +40,15 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_qgramdist_test_align.out"
 end
 
+Name "gt exercise blastenv"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise blastenv #{$testdata}identity_score_matrix " +
+           "GGCCGC"
+  run "egrep '^[GC]{4}' #{$last_stdout}"
+  run "diff #{$last_stdout} #{$testdata}gt_blastenv_test.out"
+end
+
 Name "gt exercise casino test "
 Keywords "gt_exercise"
 Test do
