@@ -46,6 +46,7 @@ static void add_introns_stream_free(GenomeStream *gs)
 {
   AddIntronsStream *ais = add_introns_stream_cast(gs);
   genome_visitor_delete(ais->add_introns_visitor);
+  genome_stream_delete(ais->in_stream);
 }
 
 const GenomeStreamClass* add_introns_stream_class(void)
@@ -61,7 +62,7 @@ GenomeStream* add_introns_stream_new(GenomeStream *in_stream)
   GenomeStream *gs = genome_stream_create(add_introns_stream_class(), true);
   AddIntronsStream *ais = add_introns_stream_cast(gs);
   assert(in_stream);
-  ais->in_stream = in_stream;
+  ais->in_stream = genome_stream_ref(in_stream);
   ais->add_introns_visitor = add_introns_visitor_new();
   return gs;
 }
