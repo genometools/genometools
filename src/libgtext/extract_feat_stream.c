@@ -31,17 +31,17 @@ struct ExtractFeatStream
         genome_stream_cast(extract_feat_stream_class(), GS)
 
 static int extract_feat_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                         Error *e)
+                                         Error *err)
 {
   ExtractFeatStream *efs;
   int had_err;
-  error_check(e);
+  error_check(err);
   efs = extract_feat_stream_cast(gs);
-  had_err = genome_stream_next_tree(efs->in_stream, gn, e);
+  had_err = genome_stream_next_tree(efs->in_stream, gn, err);
   if (!had_err) {
     assert(efs->extract_feat_visitor);
     if (*gn) {
-      had_err = genome_node_accept(*gn, efs->extract_feat_visitor, e);
+      had_err = genome_node_accept(*gn, efs->extract_feat_visitor, err);
       if (had_err) {
         /* we own the node -> delete it */
         genome_node_rec_delete(*gn);
