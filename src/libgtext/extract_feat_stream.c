@@ -56,6 +56,7 @@ static void extract_feat_stream_free(GenomeStream *gs)
 {
   ExtractFeatStream *extract_feat_stream = extract_feat_stream_cast(gs);
   genome_visitor_delete(extract_feat_stream->extract_feat_visitor);
+  genome_stream_delete(extract_feat_stream->in_stream);
 }
 
 const GenomeStreamClass* extract_feat_stream_class(void)
@@ -73,7 +74,7 @@ GenomeStream* extract_feat_stream_new(GenomeStream *in_stream,
 {
   GenomeStream *gs = genome_stream_create(extract_feat_stream_class(), true);
   ExtractFeatStream *efs = extract_feat_stream_cast(gs);
-  efs->in_stream = in_stream;
+  efs->in_stream = genome_stream_ref(in_stream);
   efs->extract_feat_visitor = extractfeat_visitor_new(rm, type, join,
                                                       translate);
   return gs;

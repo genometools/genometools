@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -73,6 +73,7 @@ static void sort_stream_free(GenomeStream *gs)
   for (i = 0; i < array_size(sort_stream->trees); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(sort_stream->trees, i));
   array_delete(sort_stream->trees);
+  genome_stream_delete(sort_stream->in_stream);
 }
 
 const GenomeStreamClass* sort_stream_class(void)
@@ -88,7 +89,7 @@ GenomeStream* sort_stream_new(GenomeStream *in_stream)
   GenomeStream *gs = genome_stream_create(sort_stream_class(), true);
   SortStream *sort_stream = sort_stream_cast(gs);
   assert(in_stream);
-  sort_stream->in_stream = in_stream;
+  sort_stream->in_stream = genome_stream_ref(in_stream);
   sort_stream->sorted = false;
   sort_stream->idx = 0;
   sort_stream->trees = array_new(sizeof (GenomeNode*));

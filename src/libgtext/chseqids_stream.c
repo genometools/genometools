@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -135,6 +135,7 @@ static void chseqids_stream_free(GenomeStream *gs)
                            array_get(cs->genome_node_buffer, i));
   }
   array_delete(cs->genome_node_buffer);
+  genome_stream_delete(cs->in_stream);
 }
 
 const GenomeStreamClass* chseqids_stream_class(void)
@@ -155,7 +156,7 @@ GenomeStream* chseqids_stream_new(GenomeStream *in_stream, Str *chseqids_file,
   assert(genome_stream_is_sorted(in_stream));
   gs = genome_stream_create(chseqids_stream_class(), false);
   cs = chseqids_stream_cast(gs);
-  cs->in_stream = in_stream;
+  cs->in_stream = genome_stream_ref(in_stream);
   cs->chseqids_mapping = mapping_new(chseqids_file, "chseqids",
                                      MAPPINGTYPE_STRING, e);
   if (!cs->chseqids_mapping) {

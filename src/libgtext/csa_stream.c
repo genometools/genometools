@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -73,6 +73,7 @@ static void csa_stream_free(GenomeStream *gs)
 {
   CSAStream *cs = csa_stream_cast(gs);
   genome_visitor_delete(cs->csa_visitor);
+  genome_stream_delete(cs->in_stream);
 }
 
 const GenomeStreamClass* csa_stream_class(void)
@@ -88,7 +89,7 @@ GenomeStream* csa_stream_new(GenomeStream *in_stream, unsigned long join_length)
   GenomeStream *gs = genome_stream_create(csa_stream_class(),
                                           genome_stream_is_sorted(in_stream));
   CSAStream *cs = csa_stream_cast(gs);
-  cs->in_stream = in_stream;
+  cs->in_stream = genome_stream_ref(in_stream);
   cs->csa_visitor = csa_visitor_new(join_length);
   return gs;
 }

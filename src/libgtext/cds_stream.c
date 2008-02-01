@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -45,6 +45,7 @@ static void cds_stream_free(GenomeStream *gs)
 {
   CDSStream *cds_stream = cds_stream_cast(gs);
   genome_visitor_delete(cds_stream->cds_visitor);
+  genome_stream_delete(cds_stream->in_stream);
 }
 
 const GenomeStreamClass* cds_stream_class(void)
@@ -65,7 +66,7 @@ GenomeStream* cds_stream_new(GenomeStream *in_stream, RegionMapping *rm,
   gs = genome_stream_create(cds_stream_class(), true);
   cds_stream = cds_stream_cast(gs);
   source_str = str_new_cstr(source);
-  cds_stream->in_stream = in_stream;
+  cds_stream->in_stream = genome_stream_ref(in_stream);
   cds_stream->cds_visitor = cds_visitor_new(rm, source_str);
   if (!cds_stream->cds_visitor)
     had_err = -1;

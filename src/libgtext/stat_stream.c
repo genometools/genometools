@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -53,6 +53,7 @@ static void stat_stream_free(GenomeStream *gs)
 {
   StatStream *stat_stream = stat_stream_cast(gs);
   genome_visitor_delete(stat_stream->stat_visitor);
+  genome_stream_delete(stat_stream->in_stream);
 }
 
 const GenomeStreamClass* stat_stream_class(void)
@@ -72,7 +73,7 @@ GenomeStream* stat_stream_new(GenomeStream *in_stream,
 {
   GenomeStream *gs = genome_stream_create(stat_stream_class(), true);
   StatStream *ss = stat_stream_cast(gs);
-  ss->in_stream = in_stream;
+  ss->in_stream = genome_stream_ref(in_stream);
   ss->stat_visitor = stat_visitor_new(gene_length_distri, gene_score_distri,
                                       exon_length_distri, exon_number_distri,
                                       intron_length_distri);

@@ -56,6 +56,7 @@ static void splice_site_info_stream_free(GenomeStream *gs)
 {
   SpliceSiteInfoStream *ssis = splice_site_info_stream_cast(gs);
   genome_visitor_delete(ssis->splice_site_info_visitor);
+  genome_stream_delete(ssis->in_stream);
 }
 
 const GenomeStreamClass* splice_site_info_stream_class(void)
@@ -72,7 +73,7 @@ GenomeStream* splice_site_info_stream_new(GenomeStream *in_stream,
   GenomeStream *gs = genome_stream_create(splice_site_info_stream_class(),
                                           false);
   SpliceSiteInfoStream *ssis = splice_site_info_stream_cast(gs);
-  ssis->in_stream = in_stream;
+  ssis->in_stream = genome_stream_ref(in_stream);
   ssis->splice_site_info_visitor = splicesiteinfo_visitor_new(rm);
   return gs;
 }

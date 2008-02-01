@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -44,6 +44,7 @@ static void gtf_out_stream_free(GenomeStream *gs)
 {
   GTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
   genome_visitor_delete(gtf_out_stream->gtf_visitor);
+  genome_stream_delete(gtf_out_stream->in_stream);
 }
 
 const GenomeStreamClass* gtf_out_stream_class(void)
@@ -59,7 +60,7 @@ GenomeStream* gtf_out_stream_new(GenomeStream *in_stream, GenFile *outfp)
   GenomeStream *gs = genome_stream_create(gtf_out_stream_class(),
                                           genome_stream_is_sorted(in_stream));
   GTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
-  gtf_out_stream->in_stream = in_stream;
+  gtf_out_stream->in_stream = genome_stream_ref(in_stream);
   gtf_out_stream->gtf_visitor = gtf_visitor_new(outfp);
   return gs;
 }

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -133,6 +133,7 @@ static void uniq_stream_free(GenomeStream *gs)
   UniqStream *us = uniq_stream_cast(gs);
   genome_node_rec_delete(us->first_node);
   genome_node_rec_delete(us->second_node);
+  genome_stream_delete(us->in_stream);
 }
 
 const GenomeStreamClass* uniq_stream_class(void)
@@ -150,6 +151,6 @@ GenomeStream* uniq_stream_new(GenomeStream *in_stream)
   assert(in_stream && genome_stream_is_sorted(in_stream));
   gs = genome_stream_create(uniq_stream_class(), true);
   us = uniq_stream_cast(gs);
-  us->in_stream = in_stream;
+  us->in_stream = genome_stream_ref(in_stream);
   return gs;
 }

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -98,6 +98,9 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
 static void merge_stream_free(GenomeStream *gs)
 {
   MergeStream *ms = merge_stream_cast(gs);
+  unsigned long i;
+  for (i = 0; i < array_size(ms->genome_streams); i++)
+    genome_stream_delete(*(GenomeStream**) array_get(ms->genome_streams, i));
   array_delete(ms->genome_streams);
   ma_free(ms->buffer);
 }
@@ -112,10 +115,11 @@ const GenomeStreamClass* merge_stream_class(void)
 
 GenomeStream* merge_stream_new(const Array *genome_streams)
 {
-  GenomeStream *gs = genome_stream_create(merge_stream_class(), true);
+  GenomeStream *in_stream,
+               *gs = genome_stream_create(merge_stream_class(), true);
   MergeStream *ms = merge_stream_cast(gs);
-#ifndef NDEBUG
   unsigned long i;
+#ifndef NDEBUG
   assert(array_size(genome_streams)); /* at least on input stream given */
   /* each input stream is sorted */
   for (i = 0; i < array_size(genome_streams); i++) {
@@ -123,7 +127,12 @@ GenomeStream* merge_stream_new(const Array *genome_streams)
                                    array_get(genome_streams, i)));
   }
 #endif
-  ms->genome_streams = array_clone(genome_streams);
+  ms->genome_streams = array_new(sizeof (GenomeStream*));
+  for (i = 0; i < array_size(genome_streams); i++) {
+    in_stream = genome_stream_ref(*(GenomeStream**)
+                                  array_get(genome_streams, i));
+    array_add(ms->genome_streams, in_stream);
+  }
   ms->buffer = ma_calloc(array_size(genome_streams), sizeof (GenomeNode*));
   return gs;
 }
