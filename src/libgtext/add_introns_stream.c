@@ -30,15 +30,15 @@ struct AddIntronsStream{
         genome_stream_cast(add_introns_stream_class(), GS)
 
 static int add_introns_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                       Error *e)
+                                        Error *err)
 {
   AddIntronsStream *ais;
   int had_err;
-  error_check(e);
+  error_check(err);
   ais = add_introns_stream_cast(gs);
-  had_err = genome_stream_next_tree(ais->in_stream, gn, e);
+  had_err = genome_stream_next_tree(ais->in_stream, gn, err);
   if (!had_err && *gn)
-    had_err = genome_node_accept(*gn, ais->add_introns_visitor, e);
+    had_err = genome_node_accept(*gn, ais->add_introns_visitor, err);
   return had_err;
 }
 
