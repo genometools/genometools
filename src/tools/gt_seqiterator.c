@@ -134,11 +134,11 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
     }
     ma_free(desc);
   }
-  seqiterator_delete(seqit);
   if (verbose)
   {
     progressbar_stop();
   }
+  seqiterator_delete(seqit);
   strarray_delete(files);
   if (dodistlen)
   {
