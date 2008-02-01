@@ -23,9 +23,14 @@
 #include "libgtcore/outputfile.h"
 #include "tools/gt_extractseq.h"
 
+#define FROMPOS_OPTION_STR  "frompos"
+#define TOPOS_OPTION_STR    "topos"
+
 typedef struct {
   Str *pattern;
-  unsigned long width;
+  unsigned long frompos,
+                topos,
+                width;
   OutputFileInfo *ofi;
   GenFile *outfp;
 } ExtractSeqArguments;
@@ -52,35 +57,90 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
 {
   ExtractSeqArguments *arguments = tool_arguments;
   OptionParser *op;
-  Option *option;
+  Option *frompos_option, *topos_option, *match_option, *width_option;
   assert(arguments);
 
   /* init */
   op = option_parser_new("[option ...] [sequence_file ...]",
                          "Extract sequences from given sequence file(s).");
 
+  /* -frompos */
+  frompos_option = option_new_ulong_min(FROMPOS_OPTION_STR,
+                                        "extract sequence from this position\n"
+                                        "counting from 1 on",
+                                        &arguments->frompos, 0, 1);
+  option_parser_add_option(op, frompos_option);
+
+  /* -topos */
+  topos_option = option_new_ulong_min(TOPOS_OPTION_STR,
+                                      "extract sequence up to this position\n"
+                                      "counting from 1 on",
+                                      &arguments->topos, 0, 1);
+  option_parser_add_option(op, topos_option);
+
   /* -match */
-  option = option_new_string("match", "extract all sequences whose description "
-                             "matches the given pattern.\nThe given pattern "
-                             "must be a valid extended regular expression.",
-                             arguments->pattern, NULL);
-  option_is_mandatory(option);
-  option_parser_add_option(op, option);
+  match_option = option_new_string("match", "extract all sequences whose "
+                                   "description matches the given pattern.\n"
+                                   "The given pattern must be a valid extended "
+                                   "regular expression.", arguments->pattern,
+                                   NULL);
+  option_parser_add_option(op, match_option);
 
   /* -width */
-  option = option_new_ulong("width", "set output width for showing of "
-                            "sequences (0 disables formatting)",
-                            &arguments->width, 0);
-  option_parser_add_option(op, option);
+  width_option = option_new_ulong("width", "set output width for showing of "
+                                  "sequences (0 disables formatting)",
+                                  &arguments->width, 0);
+  option_parser_add_option(op, width_option);
 
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
+  /* option implications */
+  option_imply(frompos_option, topos_option);
+  option_imply(topos_option, frompos_option);
+
+  /* option exclusions */
+  option_exclude(frompos_option, match_option);
+  option_exclude(topos_option, match_option);
+
   return op;
 }
 
-static int extractseq(GenFile *outfp, Bioseq *bs, const char *pattern,
-                      unsigned long width, Error *err)
+static int gt_extractseq_arguments_check(void *tool_arguments, Error *err)
+{
+  ExtractSeqArguments *arguments = tool_arguments;
+  error_check(err);
+  assert(arguments);
+  if (arguments->frompos > arguments->topos) {
+    error_set(err,
+              "argument to option '-%s' must be <= argument to option '-%s'",
+              FROMPOS_OPTION_STR, TOPOS_OPTION_STR);
+    return -1;
+  }
+  return 0;
+}
+
+static int extractseq_pos(GenFile *outfp, Bioseq *bs, unsigned long frompos,
+                          unsigned long topos, unsigned long width, Error *err)
+{
+  int had_err = 0;
+  error_check(err);
+  assert(bs);
+  if (topos > bioseq_get_raw_sequence_length(bs)) {
+    error_set(err,
+              "argument %lu to option '-%s' is larger than sequence length %lu",
+              topos, TOPOS_OPTION_STR, bioseq_get_raw_sequence_length(bs));
+    had_err = -1;
+  }
+  if (!had_err) {
+    fasta_show_entry_generic(NULL, bioseq_get_raw_sequence(bs) + frompos - 1,
+                             topos - frompos + 1, width, outfp);
+  }
+  return had_err;
+}
+
+static int extractseq_match(GenFile *outfp, Bioseq *bs, const char *pattern,
+                            unsigned long width, Error *err)
 {
   const char *desc;
   unsigned long i;
@@ -117,8 +177,15 @@ static int gt_extractseq_runner(int argc, const char **argv,
     if (!(bs = bioseq_new("-", err)))
       had_err = -1;
     if (!had_err) {
-      had_err = extractseq(arguments->outfp, bs, str_get(arguments->pattern),
-                           arguments->width, err);
+      if (arguments->frompos) {
+        had_err = extractseq_pos(arguments->outfp, bs, arguments->frompos,
+                                 arguments->topos, arguments->width, err);
+      }
+      else {
+        had_err = extractseq_match(arguments->outfp, bs,
+                                   str_get(arguments->pattern),
+                                   arguments->width, err);
+      }
     }
     bioseq_delete(bs);
   }
@@ -128,8 +195,15 @@ static int gt_extractseq_runner(int argc, const char **argv,
     if (!(bs = bioseq_new(argv[arg], err)))
       had_err = -1;
     if (!had_err) {
-      had_err = extractseq(arguments->outfp, bs, str_get(arguments->pattern),
-                           arguments->width, err);
+      if (arguments->frompos) {
+        had_err = extractseq_pos(arguments->outfp, bs, arguments->frompos,
+                                 arguments->topos, arguments->width, err);
+      }
+      else {
+        had_err = extractseq_match(arguments->outfp, bs,
+                                   str_get(arguments->pattern),
+                                   arguments->width, err);
+      }
     }
     bioseq_delete(bs);
     arg++;
@@ -143,6 +217,6 @@ Tool* gt_extractseq(void)
   return tool_new(gt_extractseq_arguments_new,
                   gt_extractseq_arguments_delete,
                   gt_extractseq_option_parser_new,
-                  NULL,
+                  gt_extractseq_arguments_check,
                   gt_extractseq_runner);
 }

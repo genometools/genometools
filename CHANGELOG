@@ -1,3 +1,8 @@
+changes in version 1.0.9 (2008-02-04):
+
+- `gt extractseq` has new options -frompos and -topos
+
+
 changes in version 1.0.8 (2007-12-13):
 
 - the GenomeTools Ruby bindings (see gtruby/README) have been added
