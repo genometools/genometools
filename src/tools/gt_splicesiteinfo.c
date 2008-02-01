@@ -20,7 +20,7 @@
 #include "libgtcore/warning.h"
 #include "libgtext/add_introns_stream.h"
 #include "libgtext/gff3_in_stream.h"
-#include "libgtext/splicesiteinfo_stream.h"
+#include "libgtext/splice_site_info_stream.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/seqid2file.h"
 #include "tools/gt_splicesiteinfo.h"
@@ -62,7 +62,7 @@ int gt_splicesiteinfo(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream,
                *add_introns_stream = NULL,
-               *splicesiteinfo_stream = NULL;
+               *splice_site_info_stream = NULL;
   GenomeNode *gn;
   SpliceSiteInfoArguments arguments;
   RegionMapping *regionmapping;
@@ -103,27 +103,27 @@ int gt_splicesiteinfo(int argc, const char **argv, Error *err)
       add_introns_stream = add_introns_stream_new(gff3_in_stream);
 
     /* create extract feature stream */
-    splicesiteinfo_stream = splicesiteinfo_stream_new(arguments.addintrons
-                                                      ? add_introns_stream
-                                                      : gff3_in_stream,
-                                                      regionmapping);
+    splice_site_info_stream = splice_site_info_stream_new(arguments.addintrons
+                                                          ? add_introns_stream
+                                                          : gff3_in_stream,
+                                                          regionmapping);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(splicesiteinfo_stream, &gn,
+    while (!(had_err = genome_stream_next_tree(splice_site_info_stream, &gn,
                                                err)) && gn) {
       genome_node_rec_delete(gn);
     }
   }
 
   if (!had_err) {
-    if (!splicesiteinfo_stream_show(splicesiteinfo_stream)) {
+    if (!splice_site_info_stream_show(splice_site_info_stream)) {
       warning("input file(s) contained no intron, use option -addintrons to "
               "add introns automatically");
     }
   }
 
   /* free */
-  genome_stream_delete(splicesiteinfo_stream);
+  genome_stream_delete(splice_site_info_stream);
   genome_stream_delete(add_introns_stream);
   genome_stream_delete(gff3_in_stream);
   str_delete(arguments.regionmapping);

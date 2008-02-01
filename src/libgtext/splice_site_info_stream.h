@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SPLICESITEINFO_STREAM_H
-#define SPLICESITEINFO_STREAM_H
+#ifndef SPLICE_SITE_INFO_STREAM_H
+#define SPLICE_SITE_INFO_STREAM_H
 
 #include <stdio.h>
 #include "libgtext/genome_stream.h"
@@ -25,12 +25,12 @@
 /* implements the ``genome_stream'' interface */
 typedef struct SpliceSiteInfoStream SpliceSiteInfoStream;
 
-const GenomeStreamClass* splicesiteinfo_stream_class(void);
+const GenomeStreamClass* splice_site_info_stream_class(void);
 
 /* create a SpliceSiteInfoStream, takes ownership of RegionMapping  */
-GenomeStream*            splicesiteinfo_stream_new(GenomeStream*,
-                                                   RegionMapping*);
+GenomeStream*            splice_site_info_stream_new(GenomeStream*,
+                                                     RegionMapping*);
 /* returns if an intron has been processed, false otherwise */
-bool                     splicesiteinfo_stream_show(GenomeStream*);
+bool                     splice_site_info_stream_show(GenomeStream*);
 
 #endif
