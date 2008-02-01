@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -235,7 +235,7 @@ int array_example(Error *err)
 
 int array_unit_test(Error *err)
 {
-  Array *char_array, *int_array, *a = NULL, *aref;
+  Array *char_array, *int_array, *a = NULL, *aref, *aclone;
   char cc, *char_array_test;
   int ci, *int_array_test;
   unsigned long i, j, size;
@@ -323,6 +323,14 @@ int array_unit_test(Error *err)
     i = 0;
     ensure(had_err, !array_iterate(a, iterate_test_func, &i, err));
     ensure(had_err, array_iterate(a, iterate_fail_func, NULL, err));
+  }
+  if (!had_err) {
+    aclone = array_clone(a);
+    for (i = 0;!had_err && i < array_size(a); i++) {
+      ensure(had_err, !range_compare_ptr(array_get(a, i),
+                                         array_get(aclone, i)));
+    }
+    array_delete(aclone);
   }
   if (!had_err) {
     array_rem(a, 13);
