@@ -485,34 +485,46 @@ static int runsuffixerator(bool doesa,
       {
         sfxInterface *si;
         BWTSeq *bwtSeq;
+        const Sfxiterator *sfi;
+
         showverbose(verboseinfo, "run construction of packed index for:\n"
                     "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
                     so->bwtIdxParams.final.seqParams.blockEnc.blockSize,
                     so->bwtIdxParams.final.seqParams.blockEnc.bucketBlocks,
                     so->bwtIdxParams.final.locateInterval);
-        if (!(si = newSfxInterface(so, encseq, &specialcharinfo,
-                                   numofsequences, mtime, totallength + 1,
-                                   alpha, characterdistribution,
-                                   verboseinfo, err)))
+        si = newSfxInterface(so, encseq, &specialcharinfo,
+                             numofsequences, mtime, totallength + 1,
+                             alpha, characterdistribution,
+                             verboseinfo, err);
+        if (si == NULL)
         {
-          fputs("Index creation failed.\n", stderr);
           haserr = true;
-        }
-        else if (
-          !(bwtSeq = createBWTSeqFromSfxI(&so->bwtIdxParams.final, si,
-                                          getSfxILength(si), err)))
+        } else
         {
-          fputs("Index creation failed.\n", stderr);
-          deleteSfxInterface(si);
-          haserr = true;
-        }
-        else
-        {
-          deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
+          bwtSeq = createBWTSeqFromSfxI(&so->bwtIdxParams.final, si,
+                                        getSfxILength(si), err);
+          if (bwtSeq == NULL)
+          {
+            deleteSfxInterface(si);
+            haserr = true;
+          } else
+          {
+            deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
+          }
         }
         /*
         outfileinfo.longest = getSfxILongestPos(si);
         */
+        sfi = SfxInterface2Sfxiterator(si);
+        assert(sfi != NULL);
+        if (outfileinfo.outfpbcktab != NULL)
+        {
+          if (bcktab2file(outfileinfo.outfpbcktab,sfi,so->prefixlength,
+                          err) != 0)
+          {
+            haserr = true;
+          }
+        }
         deleteSfxInterface(si);
       }
     }

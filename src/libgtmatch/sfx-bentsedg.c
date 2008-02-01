@@ -31,6 +31,7 @@
 #include "esafileend.h"
 #include "sfx-codespec.h"
 #include "sfx-outlcp.h"
+#include "bckbound.h"
 
 #include "sfx-cmpsuf.pr"
 #include "opensfxfile.pr"
@@ -345,60 +346,6 @@ static void outmany0lcpvalues(Seqpos many,Outlcpinfo *outlcpinfo)
   xfwrite(outvalues,sizeof (Uchar),(size_t) many % NUMBEROFZEROS,
           outlcpinfo->outfplcptab);
   outlcpinfo->countoutputlcpvalues += many;
-}
-
-typedef struct
-{
-  Seqpos left;
-  unsigned long nonspecialsinbucket,
-                specialsinbucket;
-} Bucketboundaries;
-
-static unsigned int calcbucketboundaries(Bucketboundaries *bbound,
-                                         const Seqpos *leftborder,
-                                         const Seqpos *countspecialcodes,
-                                         Codetype code,
-                                         Codetype maxcode,
-                                         Seqpos totalwidth,
-                                         unsigned int rightchar,
-                                         unsigned int numofchars)
-{
-  bbound->left = leftborder[code];
-  if (code == maxcode)
-  {
-    assert(totalwidth >= bbound->left);
-    bbound->nonspecialsinbucket = (unsigned long) (totalwidth - bbound->left);
-  } else
-  {
-    if (leftborder[code+1] > 0)
-    {
-      bbound->nonspecialsinbucket
-        = (unsigned long) (leftborder[code+1] - bbound->left);
-    } else
-    {
-      bbound->nonspecialsinbucket = 0;
-    }
-  }
-  assert(rightchar == code % numofchars);
-  if (rightchar == numofchars - 1)
-  {
-    bbound->specialsinbucket
-      = (unsigned long)
-        countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
-    if (bbound->nonspecialsinbucket >= bbound->specialsinbucket)
-    {
-      bbound->nonspecialsinbucket -= bbound->specialsinbucket;
-    } else
-    {
-      bbound->nonspecialsinbucket = 0;
-    }
-    rightchar = 0;
-  } else
-  {
-    bbound->specialsinbucket = 0;
-    rightchar++;
-  }
-  return rightchar;
 }
 
 static unsigned long determinemaxbucketsize(const Seqpos *leftborder,

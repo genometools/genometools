@@ -26,11 +26,12 @@
 
 #define FILEBUFFERSIZE 65536
 
-#define SARR_ESQTAB ((unsigned int) 1)
-#define SARR_SUFTAB ((unsigned int) 1 << 1)
-#define SARR_LCPTAB ((unsigned int) 1 << 2)
-#define SARR_BWTTAB ((unsigned int) 1 << 3)
-#define SARR_DESTAB ((unsigned int) 1 << 4)
+#define SARR_ESQTAB 1U
+#define SARR_SUFTAB (1U << 1)
+#define SARR_LCPTAB (1U << 2)
+#define SARR_BWTTAB (1U << 3)
+#define SARR_DESTAB (1U << 4)
+#define SARR_BCKTAB (1U << 5)
 
 #define SARR_ALLTAB (SARR_ESQTAB |\
                      SARR_SUFTAB |\
@@ -96,6 +97,8 @@ typedef struct
   const Uchar *lcptab;
   const Largelcpvalue *llvtab;
   const Uchar *bwttab;
+  const Seqpos *bcktab,
+               *countspecialcodes;
   /* or with streams */
   SeqposBufferedfile suftabstream;
   UcharBufferedfile bwttabstream,

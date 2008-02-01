@@ -36,6 +36,7 @@
 #include "stamp.h"
 
 #include "sfx-mappedstr.pr"
+#include "initbasepower.pr"
 
 #define CODEBITS        (32-PREFIXLENBITS)
 #define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
@@ -85,48 +86,17 @@ DECLAREARRAYSTRUCT(Seqpos);
   bool exhausted;
 };
 
-static int initbasepower(unsigned int **basepower,
-                         unsigned int **filltable,
-                         unsigned int base,
-                         unsigned int len,
-                         Error *err)
+static unsigned int *initfilltable(const unsigned int *basepower,
+                                   unsigned int len)
 {
-  unsigned int thepower = 1U, i, minfailure;
-  bool haserr = false;
+  unsigned int i, *filltable;
 
-  error_check(err);
-  ALLOCASSIGNSPACE(*basepower,NULL,unsigned int,len+1);
-  ALLOCASSIGNSPACE(*filltable,NULL,unsigned int,len);
-  minfailure = UINT_MAX/base;
-  for (i=0; /* Nothing */; i++)
+  ALLOCASSIGNSPACE(filltable,NULL,unsigned int,len);
+  for (i=0; i<len; i++)
   {
-    (*basepower)[i] = thepower;
-    if (i == len)
-    {
-      break;
-    }
-    if (thepower >= minfailure)
-    {
-      error_set(err,"overflow when computing %u * %u",thepower,base);
-      haserr = true;
-      break;
-    }
-    thepower *= base;
+    filltable[i] = basepower[len-i]-1;
   }
-  if (!haserr)
-  {
-    for (i=0; i<len; i++)
-    {
-      (*filltable)[i] = (*basepower)[len-i]-1;
-    }
-  }
-  if (haserr)
-  {
-    FREESPACE(*basepower);
-    FREESPACE(*filltable);
-    return -1;
-  }
-  return 0;
+  return filltable;
 }
 
 static void updatekmercount(void *processinfo,
@@ -352,18 +322,8 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   if (!haserr)
   {
     assert(sfi != NULL);
-    if (initbasepower(&sfi->basepower,
-                      &sfi->filltable,
-                      numofchars,
-                      prefixlength,
-                      err) != 0)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    assert(sfi != NULL);
+    sfi->basepower = initbasepower(numofchars,prefixlength);
+    sfi->filltable = initfilltable(sfi->basepower,prefixlength);
     assert(sfi->basepower != NULL);
     numofallcodes = sfi->basepower[prefixlength];
     if (numofallcodes-1 > MAXCODEVALUE)

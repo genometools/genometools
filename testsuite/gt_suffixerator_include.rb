@@ -188,17 +188,17 @@ def checkgreedyfwdmat(queryfile,ms)
   run_test makegreedyfwdmatcall(queryfile,"-esa sfx",ms)
   run "mv #{$last_stdout} tmp.esa"
   run "diff tmp.esa tmp.fmi"
-  run_test makegreedyfwdmatcall(queryfile,"-pck pck",ms)
+  run_test makegreedyfwdmatcall(queryfile,"-pck pck",ms), :maxtime => 600
   run "mv #{$last_stdout} tmp.pck"
   run "diff tmp.pck tmp.fmi"
 end
 
 def createandcheckgreedyfwdmat(reffile,queryfile)
-  run_test "#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}"
-  run_test "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
+  run "#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}"
+  run "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
            "-db #{reffile}"
-  run_test "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
-           "-dna -pl -bsize 10 -locfreq 32 -dir rev", :maxtime => 60
+  run "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
+           "-dna -pl -bsize 10 -locfreq 32 -dir rev"
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
   run "rm -f sfx.* fmi.* pck.*"
@@ -212,14 +212,25 @@ end
 
 allfiles.each do |reffile|
   allfiles.each do |queryfile|
-    if reffile != "TTT-small.fna" && queryfile != reffile
+    if queryfile != reffile
       Name "gt greedyfwdmat #{reffile} #{queryfile}"
       Keywords "gt_greedyfwdmat small"
       Test do
         createandcheckgreedyfwdmat("#{$testdata}/#{reffile}",
-                                "#{$testdata}/#{queryfile}")
+                                   "#{$testdata}/#{queryfile}")
       end 
     end
+  end
+end
+
+allfiles.each do |reffile|
+  Name "gt packedindex #{reffile}"
+  Keywords "gt_packedindex small"
+  Test do
+    run_test "#{$bin}gt packedindex mkindex -tis -indexname pck " +
+             " -db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
+             " -locfreq 32 -dir rev", 
+             :maxtime => 600
   end
 end
 

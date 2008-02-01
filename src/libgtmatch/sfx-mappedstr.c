@@ -183,12 +183,12 @@ typedef struct
 {
   Specialpositions spos;
   Uchar *cyclicwindow;
-  unsigned int numofchars;
-  unsigned int kmersize,
-           windowwidth,
-           firstindex,
-           *filltable,
-           lengthwithoutspecial;
+  unsigned int numofchars,
+               kmersize,
+               windowwidth,
+               firstindex,
+               *filltable,
+               lengthwithoutspecial;
   Codetype codewithoutspecial,
            **multimappower;
 } Streamstate;

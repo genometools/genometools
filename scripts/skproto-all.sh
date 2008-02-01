@@ -41,6 +41,7 @@ encodedseq.c
 enum-patt.c
 esa-mmsearch.c
 esa-seqread.c
+greedyfwdmat.c
 inl-encseq.c
 mapspec-gen.c
 measure-time.c

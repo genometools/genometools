@@ -147,8 +147,12 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq)
 static inline Seqpos pckfindfirstmatch(const BWTSeq *bwtSeq,Seqpos lowerbound)
 {
   struct extBitsRetrieval extBits;
+  Seqpos pos;
+
   initExtBitsRetrieval(&extBits);
-  return BWTSeqLocateMatch(bwtSeq,lowerbound,&extBits);
+  pos = BWTSeqLocateMatch(bwtSeq,lowerbound,&extBits);
+  destructExtBitsRetrieval(&extBits);
+  return pos;
 }
 
 #endif

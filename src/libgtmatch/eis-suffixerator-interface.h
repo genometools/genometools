@@ -119,6 +119,15 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                            Error *err);
 
 /**
+ * @brief get Sfxiterator from SfxInterface
+ *
+ * @param iface to take Sfxiterator from
+ *
+ */
+extern const Sfxiterator *
+SfxInterface2Sfxiterator(const sfxInterface *iface);
+
+/**
  * @brief Deallocate resources of suffixerator interface object.
  *
  * @param iface object to delete
