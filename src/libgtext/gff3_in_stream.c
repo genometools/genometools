@@ -200,7 +200,7 @@ static GenomeStream* gff3_in_stream_new(StrArray *files, /* takes ownership */
 {
   GenomeStream *gs = genome_stream_create(gff3_in_stream_class(),
                                           ensure_sorting);
-  GFF3InStream *gff3_in_stream         = gff3_in_stream_cast(gs);
+  GFF3InStream *gff3_in_stream           = gff3_in_stream_cast(gs);
   gff3_in_stream->next_file              = 0;
   gff3_in_stream->files                  = files;
   gff3_in_stream->stdinstr               = str_new_cstr("stdin");
