@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef EXTRACTFEAT_STREAM_H
-#define EXTRACTFEAT_STREAM_H
+#ifndef EXTRACT_FEAT_STREAM_H
+#define EXTRACT_FEAT_STREAM_H
 
 #include <stdio.h>
 #include "libgtext/genome_stream.h"
@@ -25,11 +25,11 @@
 /* implements the ``genome_stream'' interface */
 typedef struct ExtractFeatStream ExtractFeatStream;
 
-const GenomeStreamClass* extractfeat_stream_class(void);
+const GenomeStreamClass* extract_feat_stream_class(void);
 
 /* create a ExtractFeatStream, takes ownership of RegionMapping  */
-GenomeStream*            extractfeat_stream_new(GenomeStream*, RegionMapping*,
-                                                GenomeFeatureType type,
-                                                bool join, bool translate);
+GenomeStream*            extract_feat_stream_new(GenomeStream*, RegionMapping*,
+                                                 GenomeFeatureType type,
+                                                 bool join, bool translate);
 
 #endif

@@ -17,7 +17,7 @@
 
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
-#include "libgtext/extractfeat_stream.h"
+#include "libgtext/extract_feat_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/seqid2file.h"
@@ -78,7 +78,7 @@ static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
 
 int gt_extractfeat(int argc, const char **argv, Error *err)
 {
-  GenomeStream *gff3_in_stream = NULL, *extractfeat_stream = NULL;
+  GenomeStream *gff3_in_stream = NULL, *extract_feat_stream = NULL;
   GenomeNode *gn;
   GenomeFeatureType type;
   ExtractFeatArguments arguments;
@@ -126,19 +126,19 @@ int gt_extractfeat(int argc, const char **argv, Error *err)
 
   if (!had_err) {
     /* create extract feature stream */
-    extractfeat_stream = extractfeat_stream_new(gff3_in_stream, regionmapping,
-                                                type, arguments.join,
-                                                arguments.translate);
+    extract_feat_stream = extract_feat_stream_new(gff3_in_stream, regionmapping,
+                                                  type, arguments.join,
+                                                  arguments.translate);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(extractfeat_stream, &gn, err)) &&
-           gn) {
+    while (!(had_err = genome_stream_next_tree(extract_feat_stream, &gn,
+                                               err)) && gn) {
       genome_node_rec_delete(gn);
     }
   }
 
   /* free */
-  genome_stream_delete(extractfeat_stream);
+  genome_stream_delete(extract_feat_stream);
   genome_stream_delete(gff3_in_stream);
   str_delete(arguments.regionmapping);
   str_delete(arguments.seqfile);
