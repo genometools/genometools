@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,30 +18,46 @@
 #include "libgtcore/bioseq.h"
 #include "libgtcore/fasta.h"
 #include "libgtcore/grep.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/outputfile.h"
-#include "libgtcore/versionfunc.h"
 #include "tools/gt_extractseq.h"
 
 typedef struct {
   Str *pattern;
   unsigned long width;
+  OutputFileInfo *ofi;
   GenFile *outfp;
 } ExtractSeqArguments;
 
-static OPrval parse_options(int *parsed_args, ExtractSeqArguments *arguments,
-                            int argc, const char **argv, Error *err)
+static void* gt_extractseq_arguments_new(void)
 {
+  ExtractSeqArguments *arguments = ma_calloc(1, sizeof *arguments);
+  arguments->pattern = str_new();
+  arguments->ofi = outputfileinfo_new();
+  return arguments;
+}
+
+static void gt_extractseq_arguments_delete(void *tool_arguments)
+{
+  ExtractSeqArguments *arguments = tool_arguments;
+  if (!tool_arguments) return;
+  genfile_close(arguments->outfp);
+  outputfileinfo_delete(arguments->ofi);
+  str_delete(arguments->pattern);
+  ma_free(arguments);
+}
+
+static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
+{
+  ExtractSeqArguments *arguments = tool_arguments;
   OptionParser *op;
-  OutputFileInfo *ofi;
   Option *option;
-  OPrval oprval;
-  error_check(err);
+  assert(arguments);
 
   /* init */
   op = option_parser_new("[option ...] [sequence_file ...]",
                          "Extract sequences from given sequence file(s).");
-  ofi = outputfileinfo_new();
 
   /* -match */
   option = option_new_string("match", "extract all sequences whose description "
@@ -58,16 +74,9 @@ static OPrval parse_options(int *parsed_args, ExtractSeqArguments *arguments,
   option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi);
+  outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
-  /* parse */
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-
-  /* free */
-  outputfileinfo_delete(ofi);
-  option_parser_delete(op);
-
-  return oprval;
+  return op;
 }
 
 static int extractseq(GenFile *outfp, Bioseq *bs, const char *pattern,
@@ -94,50 +103,46 @@ static int extractseq(GenFile *outfp, Bioseq *bs, const char *pattern,
   return had_err;
 }
 
-int gt_extractseq(int argc, const char **argv, Error *err)
+static int gt_extractseq_runner(int argc, const char **argv,
+                                void *tool_arguments, Error *err)
 {
-  ExtractSeqArguments arguments;
+  ExtractSeqArguments *arguments = tool_arguments;
   Bioseq *bs;
-  int parsed_args, had_err = 0;
+  int arg = 0, had_err = 0;
+
   error_check(err);
+  assert(arguments);
 
-  /* option parsing */
-  arguments.pattern = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
-      str_delete(arguments.pattern);
-      return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.pattern);
-      return 0;
-  }
-
-  if (parsed_args == argc) { /* no file given, use stdin */
+  if (argc == 0) { /* no file given, use stdin */
     if (!(bs = bioseq_new("-", err)))
       had_err = -1;
     if (!had_err) {
-      had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
-                           arguments.width, err);
+      had_err = extractseq(arguments->outfp, bs, str_get(arguments->pattern),
+                           arguments->width, err);
     }
     bioseq_delete(bs);
   }
 
   /* process all files */
-  while (!had_err && parsed_args < argc) {
-    if (!(bs = bioseq_new(argv[parsed_args], err)))
+  while (!had_err && arg < argc) {
+    if (!(bs = bioseq_new(argv[arg], err)))
       had_err = -1;
     if (!had_err) {
-      had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
-                           arguments.width, err);
+      had_err = extractseq(arguments->outfp, bs, str_get(arguments->pattern),
+                           arguments->width, err);
     }
     bioseq_delete(bs);
-    parsed_args++;
+    arg++;
   }
 
-  /* free */
-  str_delete(arguments.pattern);
-  genfile_close(arguments.outfp);
-
   return had_err;
+}
+
+Tool* gt_extractseq(void)
+{
+  return tool_new(gt_extractseq_arguments_new,
+                  gt_extractseq_arguments_delete,
+                  gt_extractseq_option_parser_new,
+                  NULL,
+                  gt_extractseq_runner);
 }
