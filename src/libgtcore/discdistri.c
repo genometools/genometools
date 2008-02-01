@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -127,7 +127,7 @@ static int foreach_iterfunc(void *key, void *value, void *data, Error *e)
 {
   ForeachInfo *info;
   error_check(e);
-  assert(key && value && data);
+  assert(value && data);
   info = (ForeachInfo*) data;
   info->func((unsigned long) key, *(unsigned long long*) value, info->data);
   return 0;

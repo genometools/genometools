@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -123,7 +123,7 @@ static int save_hash_entry(void *key, void *value, void *data, Error *err)
   Array *hash_entries;
   HashEntry he;
   error_check(err);
-  assert(key && value && data);
+  assert(value && data);
   hash_entries = (Array*) data;
   he.key = key;
   he.value = value;
