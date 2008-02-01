@@ -198,7 +198,7 @@ def createandcheckgreedyfwdmat(reffile,queryfile)
   run_test "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
            "-db #{reffile}"
   run_test "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
-           "-dna -pl -bsize 10 -locfreq 32 -dir rev"
+           "-dna -pl -bsize 10 -locfreq 32 -dir rev", :maxtime => 60
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
   run "rm -f sfx.* fmi.* pck.*"
