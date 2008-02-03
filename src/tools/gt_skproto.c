@@ -27,7 +27,8 @@
 
 #define MAX_LINE_LENGTH  80
 
-static OptionParser* gt_skproto_option_parser_new(void *tool_arguments)
+static OptionParser* gt_skproto_option_parser_new(/*@unused@*/ 
+                                                  void *tool_arguments)
 {
   return option_parser_new("[C-file ...]",
                            "Extract Header-File from C-file(s).");
@@ -151,7 +152,8 @@ static void skproto(const char *filename, FILE *fpin)
   str_delete(line);
 }
 
-static int gt_skproto_runner(int argc, const char **argv, void *tool_arguments,
+static int gt_skproto_runner(int argc, const char **argv, 
+                             /*@unused@*/ void *tool_arguments,
                              Error *err)
 {
   FILE *fpin;

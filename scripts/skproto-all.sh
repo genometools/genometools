@@ -59,9 +59,10 @@ uniquesub.c
 verbose.c
 END_OF_TEXT
 
-SKPROTO=./bin/skproto
+# SKPROTO=./bin/skproto
+SKPROTO='./bin/gt dev skproto'
 
-if test ! -f ${SKPROTO}
+if test ! -f ./bin/gt
 then
   echo "$0: ${SKPROTO} does not exist"
   exit 1

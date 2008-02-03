@@ -47,7 +47,7 @@ static OPrval parse_options(bool *verbose,bool *dodistlen,int *parsed_args,
   option= option_new_bool("distlen","show distribution of sequence length",
                            dodistlen,false);
   option_parser_add_option(op, option);
-  option_parser_set_min_args(op, 1);
+  option_parser_set_min_args(op, 1U);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;

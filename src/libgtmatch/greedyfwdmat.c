@@ -25,6 +25,7 @@
 #include "optionargmode.h"
 #include "format64.h"
 #include "greedyfwdmat.h"
+#include "substriter.h"
 #include "encseq-def.h"
 
 typedef struct
@@ -258,5 +259,33 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
     FREESPACE(desc);
   }
   seqiterator_delete(seqit);
+  return haserr ? -1 : 0;
+}
+
+int runsubstringiteration(const Alphabet *alphabet,
+                          const StrArray *queryfilenames,
+                          unsigned int prefixlength,
+                          Error *err)
+{
+  Substriter *substriter;
+  Substring substring;
+  bool haserr = false;
+  int retval;
+
+  substriter = substriter_new(queryfilenames,alphabet,prefixlength);
+  while (true)
+  {
+    retval = substriter_next(&substring,substriter,err);
+    if (retval < 0)
+    {
+      haserr = true;
+      break;
+    }
+    if (retval == 0)
+    {
+      break;
+    }
+  }
+  substriter_delete(&substriter);
   return haserr ? -1 : 0;
 }
