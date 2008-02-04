@@ -534,11 +534,6 @@ static OPrval parse_options(int *parsed_args,
       lo->gff3output = true;
     }
   }
-  /* Error from optionparser occurred */
-  else
-  {
-    /*oprval = OPTIONPARSER_ERROR;*/
-  }
 
   option_parser_delete(op);
   return oprval;
