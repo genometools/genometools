@@ -27,7 +27,8 @@ typedef struct Tool Tool;
 typedef void*         (*ToolArgumentsNew)(void);
 typedef void          (*ToolArgumentsDelete)(void *tool_arguments);
 typedef OptionParser* (*ToolOptionParserNew)(void *tool_arguments);
-typedef int           (*ToolArgumentsCheck)(void *tool_arguments, Error*);
+typedef int           (*ToolArgumentsCheck)(int rest_argc,
+                                            void *tool_arguments, Error*);
 typedef int           (*ToolRunner)(int rest_argc, const char **rest_argv,
                                     void *tool_arguments, Error*);
 

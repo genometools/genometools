@@ -106,7 +106,8 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_extractseq_arguments_check(void *tool_arguments, Error *err)
+static int gt_extractseq_arguments_check(int rest_argc, void *tool_arguments,
+                                         Error *err)
 {
   ExtractSeqArguments *arguments = tool_arguments;
   error_check(err);

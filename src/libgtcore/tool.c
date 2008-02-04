@@ -52,7 +52,8 @@ int tool_run(Tool *tool, int argc, const char **argv, Error *err)
   void *tool_arguments = NULL;
   OptionParser *op;
   OPrval oprval;
-  int parsed_args, had_err = 0;
+  int parsed_args, rest_argc, had_err = 0;
+  const char **rest_argv;
   error_check(err);
   assert(tool);
 
@@ -76,14 +77,17 @@ int tool_run(Tool *tool, int argc, const char **argv, Error *err)
       return 0;
   }
 
+  /* determine rest of argument counter and vector */
+  rest_argc = argc - parsed_args;
+  rest_argv = argv + parsed_args;
+
   /* check tool arguments */
   if (!had_err && tool->tool_arguments_check)
-    had_err = tool->tool_arguments_check(tool_arguments, err);
+    had_err = tool->tool_arguments_check(rest_argc, tool_arguments, err);
 
   /* run tool */
   if (!had_err) {
-    had_err = tool->tool_runner(argc - parsed_args, argv + parsed_args,
-                                tool_arguments, err);
+    had_err = tool->tool_runner(rest_argc, rest_argv, tool_arguments, err);
   }
 
   /* delete tool argument object */
