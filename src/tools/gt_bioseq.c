@@ -16,9 +16,9 @@
 */
 
 #include "libgtcore/bioseq.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/undef.h"
-#include "libgtcore/versionfunc.h"
 #include "tools/gt_bioseq.h"
 
 typedef struct {
@@ -31,14 +31,27 @@ typedef struct {
                 width;
 } BioseqArguments;
 
-static OPrval parse_options(int *parsed_args, BioseqArguments *arguments,
-                            int argc, const char **argv, Error *err)
+static void* gt_bioseq_arguments_new(void)
 {
+  BioseqArguments *arguments = ma_calloc(1, sizeof *arguments);
+  return arguments;
+}
+
+static void gt_bioseq_arguments_delete(void *tool_arguments)
+{
+  BioseqArguments *arguments = tool_arguments;
+  if (!tool_arguments) return;
+  ma_free(arguments);
+}
+
+static OptionParser* gt_bioseq_option_parser_new(void *tool_arguments)
+{
+  BioseqArguments *arguments = tool_arguments;
   Option *option, *option_showfasta, *option_showseqnum, *option_width,
          *option_stat;
   OptionParser *op;
-  OPrval oprval;
-  error_check(err);
+  assert(arguments);
+
   op = option_parser_new("[option ...] sequence_file [...]",
                          "Construct the Biosequence files for the given "
                          "sequence_file(s) (if necessary).");
@@ -90,76 +103,85 @@ static OPrval parse_options(int *parsed_args, BioseqArguments *arguments,
   option_exclude(option_showfasta, option_showseqnum);
   option_exclude(option_showseqnum, option_stat);
 
-  /* parse */
+  /* set minimal arugments */
   option_parser_set_min_args(op, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
 
-  return oprval;
+  return op;
 }
 
-int gt_bioseq(int argc, const char **argv, Error *err)
+static int gt_bioseq_arguments_check(int rest_argc, void *tool_arguments,
+                                     Error *err)
 {
-  BioseqArguments arguments;
-  Bioseq *bioseq;
-  int parsed_args, had_err = 0;
+  BioseqArguments *arguments = tool_arguments;
   error_check(err);
-
-  /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
-  }
-  assert(parsed_args < argc);
-
+  assert(arguments);
   /* option -showseqnum makes only sense if we got a single sequence file */
-  if (arguments.showseqnum != UNDEF_ULONG && parsed_args + 1 != argc) {
+  if (arguments->showseqnum != UNDEF_ULONG && rest_argc > 1) {
     error_set(err, "option '-showseqnum' makes only sense with a single "
                    "sequence_file");
-    had_err = -1;
+    return -1;
   }
+  return 0;
+}
 
-  while (!had_err && parsed_args < argc) {
+static int gt_bioseq_runner(int argc, const char **argv,
+                            void *tool_arguments, Error *err)
+{
+  BioseqArguments *arguments = tool_arguments;
+  Bioseq *bioseq;
+  int arg = 0, had_err = 0;
+  error_check(err);
+  assert(tool_arguments);
+
+  while (!had_err && arg < argc) {
     /* bioseq construction */
-    if (arguments.recreate)
-      bioseq = bioseq_new_recreate(argv[parsed_args], err);
+    if (arguments->recreate)
+      bioseq = bioseq_new_recreate(argv[arg], err);
     else
-      bioseq = bioseq_new(argv[parsed_args], err);
+      bioseq = bioseq_new(argv[arg], err);
     if (!bioseq)
       had_err = -1;
 
     /* output */
-    if (!had_err && arguments.showfasta)
-      bioseq_show_as_fasta(bioseq, arguments.width);
+    if (!had_err && arguments->showfasta)
+      bioseq_show_as_fasta(bioseq, arguments->width);
 
-    if (!had_err && arguments.showseqnum != UNDEF_ULONG) {
-      if (arguments.showseqnum > bioseq_number_of_sequences(bioseq)) {
+    if (!had_err && arguments->showseqnum != UNDEF_ULONG) {
+      if (arguments->showseqnum > bioseq_number_of_sequences(bioseq)) {
         error_set(err, "argument '%lu' to option '-showseqnum' is too "
                        "large. The Biosequence contains only '%lu' sequences.",
-                  arguments.showseqnum, bioseq_number_of_sequences(bioseq));
+                  arguments->showseqnum, bioseq_number_of_sequences(bioseq));
         had_err = -1;
       }
       if (!had_err) {
-        bioseq_show_sequence_as_fasta(bioseq, arguments.showseqnum - 1,
-                                      arguments.width);
+        bioseq_show_sequence_as_fasta(bioseq, arguments->showseqnum - 1,
+                                      arguments->width);
       }
     }
 
-    if (!had_err && arguments.gc_content)
+    if (!had_err && arguments->gc_content)
       bioseq_show_gc_content(bioseq);
 
-    if (!had_err && arguments.stat)
+    if (!had_err && arguments->stat)
       bioseq_show_stat(bioseq);
 
-    if (!had_err && arguments.seqlengthdistri)
+    if (!had_err && arguments->seqlengthdistri)
       bioseq_show_seqlengthdistri(bioseq);
 
     /* free */
     bioseq_delete(bioseq);
 
-    parsed_args++;
+    arg++;
   }
 
   return had_err;
+}
+
+Tool* gt_bioseq(void)
+{
+  return tool_new(gt_bioseq_arguments_new,
+                  gt_bioseq_arguments_delete,
+                  gt_bioseq_option_parser_new,
+                  gt_bioseq_arguments_check,
+                  gt_bioseq_runner);
 }
