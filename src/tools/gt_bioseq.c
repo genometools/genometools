@@ -144,7 +144,7 @@ static int gt_bioseq_runner(int argc, const char **argv,
 {
   BioseqArguments *arguments = tool_arguments;
   Bioseq *bioseq;
-  FastaReaderType reader_type;
+  FastaReaderType reader_type = FASTA_READER_REC;
   int arg = 0, had_err = 0;
   error_check(err);
   assert(tool_arguments);
