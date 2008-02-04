@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "libgtcore/bioseq.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
@@ -29,11 +30,13 @@ typedef struct {
        seqlengthdistri;
   unsigned long showseqnum,
                 width;
+  Str *reader;
 } BioseqArguments;
 
 static void* gt_bioseq_arguments_new(void)
 {
   BioseqArguments *arguments = ma_calloc(1, sizeof *arguments);
+  arguments->reader = str_new();
   return arguments;
 }
 
@@ -41,15 +44,17 @@ static void gt_bioseq_arguments_delete(void *tool_arguments)
 {
   BioseqArguments *arguments = tool_arguments;
   if (!tool_arguments) return;
+  str_delete(arguments->reader);
   ma_free(arguments);
 }
 
 static OptionParser* gt_bioseq_option_parser_new(void *tool_arguments)
 {
   BioseqArguments *arguments = tool_arguments;
-  Option *option, *option_showfasta, *option_showseqnum, *option_width,
-         *option_stat;
+  Option *option, *option_recreate, *option_showfasta, *option_showseqnum,
+         *option_width, *option_stat, *option_reader;
   OptionParser *op;
+  static const char *reader_types[] = { "rec", "fsm", "seqit", NULL };
   assert(arguments);
 
   op = option_parser_new("[option ...] sequence_file [...]",
@@ -57,9 +62,10 @@ static OptionParser* gt_bioseq_option_parser_new(void *tool_arguments)
                          "sequence_file(s) (if necessary).");
 
   /* -recreate */
-  option = option_new_bool("recreate", "recreate Biosequence files, even if "
-                           "they exist already", &arguments->recreate, false);
-  option_parser_add_option(op, option);
+  option_recreate = option_new_bool("recreate", "recreate Biosequence files, "
+                                    "even if they exist already",
+                                    &arguments->recreate, false);
+  option_parser_add_option(op, option_recreate);
 
   /* -showfasta */
   option_showfasta = option_new_bool("showfasta", "show sequences on stdout "
@@ -95,7 +101,16 @@ static OptionParser* gt_bioseq_option_parser_new(void *tool_arguments)
                                   &arguments->width, 0);
   option_parser_add_option(op, option_width);
 
+  /* -reader */
+  option_reader = option_new_choice("reader", "set fasta reader type\n"
+                                    "choose rec|fsm|seqit",
+                                    arguments->reader, reader_types[0],
+                                    reader_types);
+  option_is_development_option(option_reader);
+  option_parser_add_option(op, option_reader);
+
   /* option implications */
+  option_imply(option_reader, option_recreate);
   option_imply_either_2(option_width, option_showfasta, option_showseqnum);
 
   /* option exclusions */
@@ -129,14 +144,26 @@ static int gt_bioseq_runner(int argc, const char **argv,
 {
   BioseqArguments *arguments = tool_arguments;
   Bioseq *bioseq;
+  FastaReaderType reader_type;
   int arg = 0, had_err = 0;
   error_check(err);
   assert(tool_arguments);
 
+  /* determine fasta reader type */
+  if (!strcmp(str_get(arguments->reader), "rec"))
+    reader_type = FASTA_READER_REC;
+  else if (!strcmp(str_get(arguments->reader), "fsm"))
+    reader_type = FASTA_READER_FSM;
+  else if (!strcmp(str_get(arguments->reader), "seqit"))
+    reader_type = FASTA_READER_SEQIT;
+  else {
+    assert(0); /* cannot happen */
+  }
+
   while (!had_err && arg < argc) {
     /* bioseq construction */
     if (arguments->recreate)
-      bioseq = bioseq_new_recreate(argv[arg], err);
+      bioseq = bioseq_new_with_fasta_reader(argv[arg], reader_type, err);
     else
       bioseq = bioseq_new(argv[arg], err);
     if (!bioseq)
