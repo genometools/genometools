@@ -81,12 +81,28 @@ Test do
   run "diff #{$last_stdout} #{$testdata}frompos.fas"
 end
 
-Name "gt extractseq -frompos (fail)"
+Name "gt extractseq -frompos (stdin)"
+Keywords "gt_extractseq"
+Test do
+  run "cat  #{$testdata}foobar.fas | #{$memcheck} #{$bin}gt extractseq " +
+      "-frompos 5 -topos 12"
+  run "diff #{$last_stdout} #{$testdata}frompos.fas"
+end
+
+Name "gt extractseq -frompos (fail 1)"
 Keywords "gt_extractseq"
 Test do
   run_test "#{$bin}gt extractseq -frompos 5 -topos 17 #{$testdata}foobar.fas",
            :retval => 1
   grep $last_stderr, "larger than"
+end
+
+Name "gt extractseq -frompos (fail 2)"
+Keywords "gt_extractseq"
+Test do
+  run_test "#{$bin}gt extractseq -frompos 18 -topos 17 #{$testdata}foobar.fas",
+           :retval => 1
+  grep $last_stderr, "must be <= argument"
 end
 
 Name "gt extractseq marker.fas"
