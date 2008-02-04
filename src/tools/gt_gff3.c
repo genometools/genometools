@@ -118,7 +118,7 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
-  /* parse options */
+  /* set comment function */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
 
   return op;
