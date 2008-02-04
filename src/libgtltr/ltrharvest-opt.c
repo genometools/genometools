@@ -488,30 +488,25 @@ static OPrval parse_options(int *parsed_args,
     /* If option overlaps is set */
     if (option_is_set(optionoverlaps))
     {
-      if ( strcmp(str_get(lo->str_overlaps), "no") == 0)
+      if (strcmp(str_get(lo->str_overlaps), "no") == 0)
       {
         lo->bestofoverlap = false;
         lo->nooverlapallowed = true;
       }
-      else {
-        if ( strcmp(str_get(lo->str_overlaps), "best") == 0 )
-        {
-          lo->bestofoverlap = true;
-          lo->nooverlapallowed = false;
-        }
-        else {
-          if ( strcmp(str_get(lo->str_overlaps), "all") == 0 )
-          {
-            lo->bestofoverlap = false;
-            lo->nooverlapallowed = false;
-          }
-          else
-          {
-            error_set(err,
-               "argument of -overlaps is not valid. Choose best|all|no");
-            oprval = OPTIONPARSER_ERROR;
-          }
-        }
+      else if (strcmp(str_get(lo->str_overlaps), "best") == 0 )
+      {
+        lo->bestofoverlap = true;
+        lo->nooverlapallowed = false;
+      }
+      else if (strcmp(str_get(lo->str_overlaps), "all") == 0 )
+      {
+        lo->bestofoverlap = false;
+        lo->nooverlapallowed = false;
+      }
+      else
+      {
+        error_set(err,"argument of -overlaps is not valid. Choose best|all|no");
+        oprval = OPTIONPARSER_ERROR;
       }
     }
     else
