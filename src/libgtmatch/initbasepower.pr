@@ -5,7 +5,9 @@ unsigned int *initbasepower(unsigned int base,unsigned int len);
 
 unsigned int *initfilltable(const unsigned int *basepower,unsigned int len);
 
-unsigned int *initmappower(unsigned int numofchars,unsigned int qvalue);
+Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue);
+
+void multimappowerfree(Codetype **multimappower);
 
 #ifdef __cplusplus
 }

@@ -17,8 +17,8 @@
 
 #include <limits.h>
 #include <assert.h>
-#include <math.h>
 #include "spacedef.h"
+#include "intcode-def.h"
 
 unsigned int *initbasepower(unsigned int base,unsigned int len)
 {
@@ -56,19 +56,39 @@ unsigned int *initfilltable(const unsigned int *basepower,unsigned int len)
   return filltable;
 }
 
-unsigned int *initmappower(unsigned int numofchars,unsigned int qvalue)
-{
-  unsigned int *mappower,
-               mapindex,
-               thepower = (unsigned int) pow((double) numofchars,
-                                             (double) (qvalue-1));
+#define ARRAY2DIMMALLOC(ARRAY2DIM, ROWS, COLUMNS, TYPE)\
+        {\
+          unsigned int rownumber;\
+          ALLOCASSIGNSPACE(ARRAY2DIM,NULL,TYPE *,ROWS);\
+          ALLOCASSIGNSPACE((ARRAY2DIM)[0],NULL,TYPE,(ROWS) * (COLUMNS));\
+          for (rownumber = 1U; rownumber < (ROWS); rownumber++)\
+          {\
+            (ARRAY2DIM)[rownumber] = (ARRAY2DIM)[rownumber-1] + (COLUMNS);\
+          }\
+        }
 
-  assert(numofchars > 0);
-  ALLOCASSIGNSPACE(mappower,NULL,unsigned int,numofchars);
-  mappower[0] = 0;
-  for (mapindex = 1U; mapindex < numofchars; mapindex++)
+Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue)
+{
+  int offset;
+  unsigned int mapindex;
+  Codetype thepower = (Codetype) 1, *mmptr, **multimappower;
+
+  ARRAY2DIMMALLOC(multimappower,qvalue,numofchars,unsigned int);
+  for (offset=(int) (qvalue - 1); offset>=0; offset--)
   {
-    mappower[mapindex] = mappower[mapindex-1] + thepower;
+    mmptr = multimappower[offset];
+    mmptr[0] = 0;
+    for (mapindex = 1U; mapindex < numofchars; mapindex++)
+    {
+      mmptr[mapindex] = mmptr[mapindex-1] + thepower;
+    }
+    thepower *= numofchars;
   }
-  return mappower;
+  return multimappower;
+}
+
+void multimappowerfree(Codetype **multimappower)
+{
+  FREESPACE(multimappower[0]);
+  FREESPACE(multimappower);
 }

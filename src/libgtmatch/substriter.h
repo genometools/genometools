@@ -23,6 +23,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
+#include "libgtmatch/intcode-def.h"
 #include "alphadef.h"
 
 typedef struct Substriter Substriter;
@@ -30,7 +31,7 @@ typedef struct Substriter Substriter;
 typedef struct
 {
   const Uchar *querystart, *queryptr;
-  unsigned int currentcode;
+  Codetype currentcode;
   bool definedcurrentcode;
   unsigned long remaining;
   char *desc;

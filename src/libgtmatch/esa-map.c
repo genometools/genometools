@@ -29,6 +29,7 @@
 #include "encseq-def.h"
 #include "esafileend.h"
 #include "sfx-ri-def.h"
+#include "intcode-def.h"
 #include "spacedef.h"
 #include "stamp.h"
 

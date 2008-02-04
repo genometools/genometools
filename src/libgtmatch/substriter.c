@@ -28,7 +28,8 @@ struct Substriter
 {
   uint64_t unitnum;
   SeqIterator *seqit;
-  unsigned int qvalue, numofchars, *mappower;
+  unsigned int qvalue, numofchars;
+  Codetype **multimappower;
   bool newseq;
 };
 
@@ -41,32 +42,29 @@ Substriter *substriter_new(const StrArray *queryfilenames,
   substriter->unitnum = 0;
   substriter->seqit
     = seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),true);
-  substriter->mappower = initmappower(getnumofcharsAlphabet(alphabet),qvalue);
+  substriter->multimappower = initmultimappower(getnumofcharsAlphabet(alphabet),
+                                                qvalue);
   substriter->newseq = true;
   return substriter;
 }
 
-static unsigned int qgram2code(unsigned int *code,unsigned int numofchars,
-                               unsigned int qvalue,const Uchar *qgram)
+static unsigned int qgram2code(Codetype *code,
+                               const Codetype **multimappower,
+                               unsigned int qvalue,
+                               const Uchar *qgram)
 {
-  unsigned int i, tmpcode;
+  int i;
+  Codetype tmpcode = 0;
   Uchar a;
 
-  a = qgram[0];
-  if (ISSPECIAL(a))
-  {
-    return 0;
-  }
-  tmpcode = (unsigned int) a;
-  for (i=1U; i < qvalue; i++)
+  for (i=(int) qvalue-1; i>=0; i--)
   {
     a = qgram[i];
     if (ISSPECIAL(a))
     {
-      return i;
+      return (unsigned int) i;
     }
-    tmpcode *= numofchars;
-    tmpcode += (unsigned int) a;
+    tmpcode += multimappower[i][a];
   }
   *code = tmpcode;
   return qvalue;
@@ -96,9 +94,10 @@ int substriter_next(Substring *substring,Substriter *substriter,Error *err)
       substriter->newseq = false;
       if (substring->remaining >= (unsigned long) substriter->qvalue)
       {
-        firstspecial 
-          = qgram2code(&substring->currentcode,substriter->numofchars,
-                       substriter->qvalue,substring->querystart);
+        firstspecial = qgram2code(&substring->currentcode,
+                                  (const Codetype **) substriter->multimappower,
+                                  substriter->qvalue,
+                                  substring->querystart);
       }
       break;
     }
@@ -124,6 +123,6 @@ uint64_t substriter_unitnum(const Substriter *substriter)
 void substriter_delete(Substriter **substriter)
 {
   seqiterator_delete((*substriter)->seqit);
-  FREESPACE((*substriter)->mappower);
+  multimappowerfree((*substriter)->multimappower);
   FREESPACE(*substriter);
 }

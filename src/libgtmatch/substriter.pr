@@ -5,7 +5,8 @@ struct Substriter
 {
   uint64_t unitnum;
   SeqIterator *seqit;
-  unsigned int qvalue, numofchars, *mappower;
+  unsigned int qvalue, numofchars;
+  const Codetype **multimappower;
   bool newseq;
 };
 Substriter *substriter_new(const StrArray *queryfilenames,
