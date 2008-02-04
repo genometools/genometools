@@ -88,3 +88,10 @@ Test do
            :retval => 1
   grep $last_stderr, "larger than"
 end
+
+Name "gt extractseq marker.fas"
+Keywords "gt_extractseq"
+Test do
+  run_test "#{$bin}gt extractseq -frompos 21 -topos 40 #{$testdata}marker.fas"
+  run "diff #{$last_stdout} #{$testdata}marker.out"
+end
