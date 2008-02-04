@@ -505,8 +505,7 @@ static OPrval parse_options(int *parsed_args,
       }
       else
       {
-        error_set(err,"argument of -overlaps is not valid. Choose best|all|no");
-        oprval = OPTIONPARSER_ERROR;
+        assert(0); /* cannot happen */
       }
     }
     else
