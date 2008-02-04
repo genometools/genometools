@@ -199,7 +199,7 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
                                   Str *bioseq_raw_file,
                                   FastaReaderType fasta_reader_type, Error *err)
 {
-  FastaReader *fasta_reader;
+  FastaReader *fasta_reader = NULL;
   Str *sequence_filename;
   int had_err;
 
