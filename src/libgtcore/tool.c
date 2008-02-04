@@ -23,14 +23,14 @@ struct Tool {
   ToolArgumentsNew tool_arguments_new;
   ToolArgumentsDelete tool_arguments_delete;
   ToolOptionParserNew tool_option_parser_new;
-  ToolArgumentCheck tool_arguments_check;
+  ToolArgumentsCheck tool_arguments_check;
   ToolRunner tool_runner;
 };
 
 Tool* tool_new(ToolArgumentsNew tool_arguments_new,
                ToolArgumentsDelete tool_arguments_delete,
                ToolOptionParserNew tool_option_parser_new,
-               ToolArgumentCheck tool_arguments_check,
+               ToolArgumentsCheck tool_arguments_check,
                ToolRunner tool_runner)
 {
   Tool *tool;
