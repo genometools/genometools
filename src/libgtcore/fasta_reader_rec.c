@@ -52,22 +52,19 @@ static int parse_fasta_description(Str *description, IO *seqio, Error *err)
 
 static int parse_fasta_sequence(Str *sequence, IO *seqio, Error *err)
 {
-  int rval;
   char cc;
   error_check(err);
   assert(sequence && seqio);
-  rval = io_get_char(seqio, &cc);
-  /* make sure we got a sequence */
-  if (rval || cc == '\n' || cc == FASTA_SEPARATOR) {
-    error_set(err, "empty sequence after description given in line %lu",
-              io_get_line_number(seqio) - 1);
-    return -1;
-  }
-  str_append_char(sequence, cc);
+  assert(!str_length(sequence));
   /* read sequence */
   while (!io_get_char(seqio, &cc) && cc != FASTA_SEPARATOR) {
-    if (cc != '\n')
+    if (cc != '\n' && cc != ' ')
       str_append_char(sequence, cc);
+  }
+  if (!str_length(sequence)) {
+    error_set(err, "empty sequence given in line %lu",
+              io_get_line_number(seqio));
+    return -1;
   }
   if (cc == FASTA_SEPARATOR)
     io_unget_char(seqio, FASTA_SEPARATOR);

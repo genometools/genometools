@@ -135,7 +135,8 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
                 break;
               str_reset(sequence);
             }
-            str_append_char(sequence, cc);
+            if (cc != ' ')
+              str_append_char(sequence, cc);
           }
         }
         break;
