@@ -27,10 +27,10 @@
 struct Substriter
 {
   uint64_t unitnum;
-  SeqIterator *seqit;
   unsigned int qvalue, numofchars;
-  Codetype **multimappower;
   bool newseq;
+  Codetype **multimappower;
+  SeqIterator *seqit;
 };
 
 Substriter *substriter_new(const StrArray *queryfilenames,
@@ -40,9 +40,12 @@ Substriter *substriter_new(const StrArray *queryfilenames,
   Substriter *substriter;
   ALLOCASSIGNSPACE(substriter,NULL,Substriter,1);
   substriter->unitnum = 0;
-  substriter->seqit
-    = seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),true);
-  substriter->multimappower = initmultimappower(getnumofcharsAlphabet(alphabet),
+  substriter->qvalue = qvalue;
+  substriter->numofchars = getnumofcharsAlphabet(alphabet);
+  substriter->seqit = seqiterator_new(queryfilenames,
+                                      getsymbolmapAlphabet(alphabet),
+                                      true);
+  substriter->multimappower = initmultimappower(substriter->numofchars,
                                                 qvalue);
   substriter->newseq = true;
   return substriter;
