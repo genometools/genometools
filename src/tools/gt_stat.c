@@ -112,8 +112,6 @@ int gt_stat(int argc, const char **argv, Error *err)
      them afterwards */
   while (!(had_err = genome_stream_next_tree(stat_stream, &gn, err)) && gn) {
     genome_node_rec_delete(gn);
-    if (had_err)
-      break;
   }
 
   /* show statistics */
