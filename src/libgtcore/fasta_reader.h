@@ -25,6 +25,12 @@
 typedef struct FastaReaderClass FastaReaderClass;
 typedef struct FastaReader FastaReader;
 
+typedef enum {
+  FASTA_READER_REC,
+  FASTA_READER_FSM,
+  FASTA_READER_SEQIT
+} FastaReaderType;
+
 /* gets called for each description (the start of a fasta entry) */
 typedef int (*FastaReaderProcDescription)(const char *description,
                                           unsigned long length, void *data,
