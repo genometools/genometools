@@ -151,12 +151,6 @@ size_t array_elem_size(const Array *a)
   return a->size_of_elem;
 }
 
-size_t array_mem_size(const Array *a)
-{
-  assert(a);
-  return sizeof *a + a->allocated * a->size_of_elem;
-}
-
 unsigned long array_size(const Array *a)
 {
   return a ? a->next_free : 0;
@@ -355,7 +349,6 @@ int array_unit_test(Error *err)
       ensure(had_err, !range_compare(range, *(Range*) array_get(a, i)));
     }
   }
-  array_mem_size(a);
   array_delete(a);
 
   array_delete(char_array);
