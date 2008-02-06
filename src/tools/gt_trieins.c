@@ -34,7 +34,7 @@ static OPrval parse_options(bool *onlyins,int *parsed_args,
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   option= option_new_bool("ins","perform only insertions",onlyins,false);
   option_parser_add_option(op, option);
-  option_parser_set_min_max_args(op, 1, 1);
+  option_parser_set_min_max_args(op, 1U, 1U);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;

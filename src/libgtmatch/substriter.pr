@@ -1,0 +1,24 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+struct Substriter
+{
+  uint64_t unitnum;
+  SeqIterator *seqit;
+  unsigned int qvalue, numofchars;
+  const Codetype **multimappower;
+  bool newseq;
+};
+Substriter *substriter_new(const StrArray *queryfilenames,
+                           const Alphabet *alphabet,
+                           unsigned int qvalue);
+
+int substriter_next(Substring *substring,Substriter *substriter,Error *err);
+
+uint64_t substriter_unitnum(const Substriter *substriter);
+
+void substriter_delete(Substriter **substriter);
+
+#ifdef __cplusplus
+}
+#endif

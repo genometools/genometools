@@ -36,6 +36,8 @@
 #include "sfx-nextchar.h"
 #endif
 
+#include "initbasepower.pr"
+
 #ifdef SPECIALCASE4
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
         if ((NUMOFCHARS) == DNAALPHASIZE)\
@@ -64,21 +66,6 @@
         CODE = (Codetype) (((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) *\
                            (NUMOFCHARS) + (CC))
 #endif
-
-#define ARRAY2DIMMALLOC(ARRAY2DIM, ROWS, COLUMNS, TYPE)\
-        {\
-          unsigned int rownumber;\
-          ALLOCASSIGNSPACE(ARRAY2DIM,NULL,TYPE *,ROWS);\
-          ALLOCASSIGNSPACE((ARRAY2DIM)[0],NULL,TYPE,(ROWS) * (COLUMNS));\
-          for (rownumber = 1U; rownumber < (ROWS); rownumber++)\
-          {\
-            (ARRAY2DIM)[rownumber] = (ARRAY2DIM)[rownumber-1] + (COLUMNS);\
-          }\
-        }
-
-#define ARRAY2DIMFREE(ARRAY2DIM)\
-        FREESPACE((ARRAY2DIM)[0]);\
-        FREESPACE(ARRAY2DIM)
 
 #ifndef NDEBUG
 static Codetype windowkmer2code(unsigned int numofchars,
@@ -124,7 +111,7 @@ static Codetype windowkmer2code(unsigned int numofchars,
 
 static Codetype prefixwindowkmer2code(unsigned int firstspecialpos,
                                       unsigned int kmersize,
-                                      Codetype **multimappower,
+                                      const Codetype **multimappower,
                                       const Uchar *cyclicwindow,
                                       unsigned int firstindex)
 {
@@ -189,8 +176,8 @@ typedef struct
                firstindex,
                *filltable,
                lengthwithoutspecial;
-  Codetype codewithoutspecial,
-           **multimappower;
+  Codetype codewithoutspecial;
+  Codetype **multimappower;
 } Streamstate;
 
 static void specialemptyqueue(Specialpositions *spos,unsigned int queuesize)
@@ -397,27 +384,6 @@ static void shiftrightwithchar(
   }
 }
 
-static void initmultimappower(unsigned int ***multimappower,
-                              unsigned int numofchars,
-                              unsigned int kmersize)
-{
-  int offset;
-  unsigned int thepower, mapindex, *mmptr;
-
-  ARRAY2DIMMALLOC(*multimappower,kmersize,numofchars,unsigned int);
-  thepower = 1U;
-  for (offset=(int) (kmersize - 1); offset>=0; offset--)
-  {
-    mmptr = (*multimappower)[offset];
-    mmptr[0] = 0;
-    for (mapindex = 1U; mapindex < numofchars; mapindex++)
-    {
-      mmptr[mapindex] = mmptr[mapindex-1] + thepower;
-    }
-    thepower *= numofchars;
-  }
-}
-
 static void filllargestchartable(unsigned int **filltable,
                                  unsigned int numofchars,
                                  unsigned int kmersize)
@@ -454,7 +420,7 @@ static int getencseqkmersgeneric(
   bool haserr = false;
 
   error_check(err);
-  initmultimappower(&spwp.multimappower,numofchars,kmersize);
+  spwp.multimappower = initmultimappower(numofchars,kmersize);
   spwp.lengthwithoutspecial = 0;
   spwp.codewithoutspecial = 0;
   spwp.kmersize = kmersize;
@@ -524,7 +490,7 @@ static int getencseqkmersgeneric(
   }
   FREESPACE(spwp.cyclicwindow);
   FREESPACE(spwp.filltable);
-  ARRAY2DIMFREE(spwp.multimappower);
+  multimappowerfree(spwp.multimappower);
   specialwrapqueue(&spwp.spos);
   return haserr ? -1 : 0;
 }

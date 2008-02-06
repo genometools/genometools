@@ -279,6 +279,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
   Verboseinfo *verboseinfo;
   bool haserr = false;
   Alphabet *alphabet = NULL;
+  unsigned int prefixlength = 0;
 
   error_check(err);
   switch (parsegfmsub(doms,&gfmsubcallinfo, argc, argv, err)) {
@@ -332,6 +333,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
     } else
     {
       alphabet = suffixarray.alpha;
+      prefixlength = suffixarray.prefixlength;
     }
     if (!haserr)
     {
@@ -391,30 +393,33 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
     }
     if (!haserr)
     {
-      if (!haserr)
+      if (prefixlength > 0 &&
+          runsubstringiteration(alphabet,
+                                gfmsubcallinfo.queryfilenames,
+                                prefixlength,
+                                err) != 0)
       {
-        if (findsubquerygmatchforward(dotestsequence(doms,&gfmsubcallinfo)
-                                        ? suffixarray.encseq
-                                        : NULL,
-                                      theindex,
-                                      gmatchforwardfunction,
-                                      alphabet,
-                                      gfmsubcallinfo.queryfilenames,
-                                      gfmsubcallinfo.minlength,
-                                      gfmsubcallinfo.maxlength,
-                                      (gfmsubcallinfo.showmode
-                                                  & SHOWSEQUENCE)
-                                        ? true : false,
-                                      (gfmsubcallinfo.showmode
-                                                  & SHOWQUERYPOS)
-                                        ? true : false,
-                                      (gfmsubcallinfo.showmode
-                                                  & SHOWSUBJECTPOS)
-                                        ? true : false,
-                                      err) != 0)
-        {
-          haserr = true;
-        }
+        haserr = true;
+      }
+      if (!haserr &&
+          findsubquerygmatchforward(dotestsequence(doms,&gfmsubcallinfo)
+                                      ? suffixarray.encseq
+                                      : NULL,
+                                    theindex,
+                                    gmatchforwardfunction,
+                                    alphabet,
+                                    gfmsubcallinfo.queryfilenames,
+                                    gfmsubcallinfo.minlength,
+                                    gfmsubcallinfo.maxlength,
+                                    (gfmsubcallinfo.showmode & SHOWSEQUENCE) 
+                                           ? true : false,
+                                    (gfmsubcallinfo.showmode & SHOWQUERYPOS)
+                                           ? true : false,
+                                    (gfmsubcallinfo.showmode & SHOWSUBJECTPOS)
+                                           ? true : false,
+                                    err) != 0)
+      {
+        haserr = true;
       }
     }
   }

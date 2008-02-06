@@ -28,7 +28,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   error_check(err);
   op = option_parser_new("filenames",
                          "guess if sequence in filenames is protein or DNA.");
-  option_parser_set_min_args(op, 1);
+  option_parser_set_min_args(op, 1U);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;

@@ -44,4 +44,8 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
                               bool showsubjectpos,
                               Error *err);
 
+int runsubstringiteration(const Alphabet *alphabet,
+                          const StrArray *queryfilenames,
+                          unsigned int prefixlength,
+                          Error *err);
 #endif

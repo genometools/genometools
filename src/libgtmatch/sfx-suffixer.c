@@ -86,19 +86,6 @@ DECLAREARRAYSTRUCT(Seqpos);
   bool exhausted;
 };
 
-static unsigned int *initfilltable(const unsigned int *basepower,
-                                   unsigned int len)
-{
-  unsigned int i, *filltable;
-
-  ALLOCASSIGNSPACE(filltable,NULL,unsigned int,len);
-  for (i=0; i<len; i++)
-  {
-    filltable[i] = basepower[len-i]-1;
-  }
-  return filltable;
-}
-
 static void updatekmercount(void *processinfo,
                             Codetype code,
                             Seqpos position,

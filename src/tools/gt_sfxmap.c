@@ -95,7 +95,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                                   false);
   option_parser_add_option(op, optionverbose);
 
-  option_parser_set_min_max_args(op, 1, 2);
+  option_parser_set_min_max_args(op, 1U, 2U);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
   return oprval;
