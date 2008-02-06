@@ -411,7 +411,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
                                     gfmsubcallinfo.queryfilenames,
                                     gfmsubcallinfo.minlength,
                                     gfmsubcallinfo.maxlength,
-                                    (gfmsubcallinfo.showmode & SHOWSEQUENCE) 
+                                    (gfmsubcallinfo.showmode & SHOWSEQUENCE)
                                            ? true : false,
                                     (gfmsubcallinfo.showmode & SHOWQUERYPOS)
                                            ? true : false,
