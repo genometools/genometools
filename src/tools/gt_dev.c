@@ -32,6 +32,8 @@
 #include "tools/gt_sfxmap.h"
 #include "tools/gt_skproto.h"
 #include "tools/gt_trieins.h"
+/* remove me please */
+#include "tools/gt_testhmm.h"
 
 static void* gt_dev_arguments_new(void)
 {
@@ -50,7 +52,16 @@ static void* gt_dev_arguments_new(void)
   toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
   toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   toolbox_add(dev_toolbox, "trieins", gt_trieins);
+<<<<<<< HEAD:src/tools/gt_dev.c
   return dev_toolbox;
+=======
+  toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
+  toolbox_add(dev_toolbox, "skproto", gt_skproto);
+  toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
+  toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
+  toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
+  toolbox_add(dev_toolbox, "testhmm", gt_testhmm);
+>>>>>>> add PPT detection to LTRharvest:src/tools/gt_dev.c
 }
 
 static void gt_dev_arguments_delete(void *tool_arguments)
