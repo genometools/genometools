@@ -73,10 +73,6 @@ double ppt_find(LTRboundaries *ltr,
                 double score_func(unsigned long, unsigned int))
 {
   assert(ltr && seq && score_func && lo && radius > 0);
-  printf("length:%d == %lu\n",
-          sizeof (seq),
-          (unsigned long) ltr->rightLTR_3-ltr->leftLTR_5+1);
-  assert(sizeof (seq) == ltr->rightLTR_3-ltr->leftLTR_5+1);
   unsigned int *encoded_seq=NULL, *decoded=NULL;
   double score=0.0;
   const Alpha *alpha = alpha_new_dna();
@@ -93,7 +89,7 @@ double ppt_find(LTRboundaries *ltr,
     encoded_seq[i] = alpha_encode(alpha, seq[i]);
   }
 
-  /* make sure that we do not cross the 3' boundary */
+  /* make sure that we do not cross the 3' LTR boundary */
   radius = MIN(radius, rltrlen);
 
   /* use Viterbi algorithm to decode emissions within radius */
@@ -102,7 +98,7 @@ double ppt_find(LTRboundaries *ltr,
 
   /* group hits into stretches */
   cur_hit = ma_malloc(sizeof (PPT_Hit));
-  cur_hit->start = 0;
+  cur_hit->start = 0UL;
   cur_hit->score = 0.0;
   for (i=0;i<2*radius-1;i++)
   {

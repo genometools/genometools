@@ -22,8 +22,6 @@
 #include "libgtcore/option.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/bioseq.h"
-#include "libgtcore/tokenizer.h"
-#include "libgtcore/io.h"
 #include "libgtltr/ppt.h"
 
 int gt_testhmm(int argc, const char **argv, Error *err)
@@ -80,15 +78,19 @@ int gt_testhmm(int argc, const char **argv, Error *err)
     LTRboundaries *line = NULL;
     const Alpha *alpha = alpha_new_dna();
     char out[BUFSIZ] = "\0" ;  /* TODO: make this overflow-safe, IF NEEDED*/
+    char *desc = NULL;
 
     /* get element */
     seq = bioseq_get_seq(bs, seqindex);
     encoded_seq_c = (char*) seq_get_encoded(seq);
     seqlen = seq_length(seq);
 
-    /* identify element */
-    /* TODO: do this with a tokenizer */
-    sscanf(seq_get_description(seq)," %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s [%lu,%*d]", &ltrstart);
+    /* identify element, quick and dirty */
+    desc = (char*)seq_get_description(seq);
+    /* search for beginning of interval */
+    while(*desc != '[')
+      desc++;
+    sscanf(desc,"[%lu,%*d]", &ltrstart);
 
     /* find annotation line for element */
     for(i=0;i<array_size(ltrboundaries);i++)
@@ -155,7 +157,7 @@ int gt_testhmm(int argc, const char **argv, Error *err)
           if (uhit->state == PPT_UBOX)
           {
             snprintf(out, BUFSIZ, "hit: PPT length %lu"
-                                  ", U-box length %lu, score %f",
+                                  ", U-box length %lu score %f",
                                 hit->end-hit->start+1,
                                 uhit->end-uhit->start+1,
                                 hit->score);
@@ -170,14 +172,22 @@ int gt_testhmm(int argc, const char **argv, Error *err)
                                 hit->score);
         }
       }
-      ma_free(hit);
     }
     printf("\n%s\n\n", out);
+
+    /* free stuff */
+
+    for(i=0;i<array_size(results);i++)
+    {
+      ma_free(*(PPT_Hit**) array_get(results,i));
+    }
     ma_free(seqc);
+    ma_free(prseq);
     alpha_delete((Alpha*)alpha);
     array_delete(results);
   }
 
+  /* free annotations */
   for(i=0;i<array_size(ltrboundaries);i++)
   {
     LTRboundaries *line = *(LTRboundaries**) array_get(ltrboundaries, i);
