@@ -77,7 +77,7 @@ Toolbox* gtt_tools(void)
   Toolbox *tools = toolbox_new();
 
   /* add tools */
-  toolbox_add(tools, "bioseq", gt_bioseq);
+  toolbox_add_tool(tools, "bioseq", gt_bioseq());
   toolbox_add(tools, "cds", gt_cds);
   toolbox_add(tools, "chseqids", gt_chseqids);
   toolbox_add(tools, "clean", gt_clean);

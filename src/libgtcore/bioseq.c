@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -196,9 +196,11 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
 }
 
 static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
-                                  Str *bioseq_raw_file, Error *err)
+                                  Str *bioseq_raw_file,
+                                  FastaReaderType fasta_reader_type, Error *err)
 {
-  FastaReader *fasta_reader;
+  FastaReader *fasta_reader = NULL;
+  Str *sequence_filename;
   int had_err;
 
   error_check(err);
@@ -220,7 +222,19 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
   }
 
   /* read fasta file */
-  fasta_reader = fasta_reader_rec_new(bs->use_stdin ? NULL : bs->sequence_file);
+  sequence_filename = bs->use_stdin ? NULL : bs->sequence_file;
+  switch (fasta_reader_type) {
+    case FASTA_READER_REC:
+      fasta_reader = fasta_reader_rec_new(sequence_filename);
+      break;
+    case FASTA_READER_FSM:
+      fasta_reader = fasta_reader_fsm_new(sequence_filename);
+      break;
+    case FASTA_READER_SEQIT:
+      fasta_reader = fasta_reader_seqit_new(sequence_filename);
+      break;
+    default: assert(0);
+  }
   had_err = fasta_reader_run(fasta_reader, proc_description, proc_sequence_part,
                              proc_sequence_length, &bioseq_files_info, err);
   fasta_reader_delete(fasta_reader);
@@ -242,7 +256,8 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
   return had_err;
 }
 
-static int bioseq_fill(Bioseq *bs, bool recreate, Error *err)
+static int bioseq_fill(Bioseq *bs, bool recreate,
+                       FastaReaderType fasta_reader_type, Error *err)
 {
   Str *bioseq_index_file = NULL,
       *bioseq_raw_file = NULL;
@@ -265,7 +280,7 @@ static int bioseq_fill(Bioseq *bs, bool recreate, Error *err)
       file_is_newer(str_get(bs->sequence_file), str_get(bioseq_index_file)) ||
       file_is_newer(str_get(bs->sequence_file), str_get(bioseq_raw_file))) {
     had_err = construct_bioseq_files(bs, bioseq_index_file, bioseq_raw_file,
-                                     err);
+                                     fasta_reader_type, err);
   }
 
   if (!had_err && !bs->use_stdin) {
@@ -281,8 +296,11 @@ static int bioseq_fill(Bioseq *bs, bool recreate, Error *err)
   return had_err;
 }
 
-static Bioseq* bioseq_new_with_recreate(Str *sequence_file, bool recreate,
-                                        Error *err)
+static Bioseq* bioseq_new_with_recreate_and_type(Str *sequence_file,
+                                                 bool recreate,
+                                                 FastaReaderType
+                                                 fasta_reader_type,
+                                                 Error *err)
 {
   Bioseq *bs;
   int had_err = 0;
@@ -299,7 +317,7 @@ static Bioseq* bioseq_new_with_recreate(Str *sequence_file, bool recreate,
     bs->sequence_file = str_ref(sequence_file);
     bs->descriptions = array_new(sizeof (char*));
     bs->sequence_ranges = array_new(sizeof (Range));
-    had_err = bioseq_fill(bs, recreate, err);
+    had_err = bioseq_fill(bs, recreate, fasta_reader_type, err);
   }
   if (had_err) {
     bioseq_delete(bs);
@@ -314,7 +332,7 @@ Bioseq* bioseq_new(const char *sequence_file, Error *err)
   Str *seqfile;
   error_check(err);
   seqfile = str_new_cstr(sequence_file);
-  bs = bioseq_new_with_recreate(seqfile, false, err);
+  bs = bioseq_new_with_recreate_and_type(seqfile, false, FASTA_READER_REC, err);
   str_delete(seqfile);
   return bs;
 }
@@ -325,14 +343,27 @@ Bioseq* bioseq_new_recreate(const char *sequence_file, Error *err)
   Str *seqfile;
   error_check(err);
   seqfile = str_new_cstr(sequence_file);
-  bs = bioseq_new_with_recreate(seqfile, true, err);
+  bs = bioseq_new_with_recreate_and_type(seqfile, true, FASTA_READER_REC, err);
   str_delete(seqfile);
   return bs;
 }
 
 Bioseq* bioseq_new_str(Str *sequence_file, Error *err)
 {
-  return bioseq_new_with_recreate(sequence_file, false, err);
+  return bioseq_new_with_recreate_and_type(sequence_file, false,
+                                           FASTA_READER_REC, err);
+}
+
+Bioseq* bioseq_new_with_fasta_reader(const char *sequence_file,
+                                     FastaReaderType fasta_reader, Error *err)
+{
+  Bioseq *bs;
+  Str *seqfile;
+  error_check(err);
+  seqfile = str_new_cstr(sequence_file);
+  bs = bioseq_new_with_recreate_and_type(seqfile, true, fasta_reader, err);
+  str_delete(seqfile);
+  return bs;
 }
 
 static void determine_alpha_if_necessary(Bioseq *bs)

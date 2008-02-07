@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,7 @@
 #define BIOSEQ_H
 
 #include "libgtcore/error.h"
+#include "libgtcore/fasta_reader.h"
 #include "libgtcore/seq.h"
 #include "libgtcore/str.h"
 
@@ -33,6 +34,11 @@ Bioseq*       bioseq_new(const char *sequence_file, Error*);
 /* construct a new bioseq object (and always create the the bioseq files) */
 Bioseq*       bioseq_new_recreate(const char *sequence_file, Error*);
 Bioseq*       bioseq_new_str(Str* sequence_file, Error*);
+/* construct a new bioseq object (and always create the bioseq files)
+   with a certain <fasta_reader> */
+Bioseq*       bioseq_new_with_fasta_reader(const char *sequence_file,
+                                           FastaReaderType fasta_reader,
+                                           Error*);
 Alpha*        bioseq_get_alpha(Bioseq*);
 Seq*          bioseq_get_seq(Bioseq*, unsigned long);
 const char*   bioseq_get_description(Bioseq*, unsigned long);
