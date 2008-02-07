@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_TESTHMM_H
-#define GT_TESTHMM_H
+#ifndef GT_FINDPPT_H
+#define GT_FINDPPT_H
 
-/* the ppt HMM test tool */
-int gt_testhmm(int argc, const char **argv, Error*);
+/* the PPT finder tool */
+int gt_findppt(int argc, const char **argv, Error*);
 
 #endif

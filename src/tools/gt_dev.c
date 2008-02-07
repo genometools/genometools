@@ -34,6 +34,7 @@
 #include "tools/gt_trieins.h"
 /* remove me please */
 #include "tools/gt_testhmm.h"
+#include "tools/gt_findppt.h"
 
 static void* gt_dev_arguments_new(void)
 {
@@ -60,6 +61,7 @@ static void* gt_dev_arguments_new(void)
   toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
   toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
   toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
+<<<<<<< HEAD:src/tools/gt_dev.c
   toolbox_add(dev_toolbox, "testhmm", gt_testhmm);
 >>>>>>> add PPT detection to LTRharvest:src/tools/gt_dev.c
 }
@@ -69,6 +71,9 @@ static void gt_dev_arguments_delete(void *tool_arguments)
   Toolbox *dev_toolbox = tool_arguments;
   if (!dev_toolbox) return;
   toolbox_delete(dev_toolbox);
+=======
+  toolbox_add(dev_toolbox, "findppt", gt_findppt);
+>>>>>>> make 'gt findppt' a proper tool:src/tools/gt_dev.c
 }
 
 static OptionParser* gt_dev_option_parser_new(void *tool_arguments)
