@@ -36,11 +36,10 @@ typedef struct
 {
   bool verbose,
        dodistlen;
-  Str *str_extractfile;
 } Seqiteroptions;
 
 static OPrval parse_options(Seqiteroptions *seqiteroptions,
-                            int *parsed_args,int argc, 
+                            int *parsed_args,int argc,
                             const char **argv, Error *err)
 {
   OptionParser *op;
@@ -48,8 +47,7 @@ static OPrval parse_options(Seqiteroptions *seqiteroptions,
   OPrval oprval;
 
   error_check(err);
-  
-  seqiteroptions->str_extractfile = str_new();
+
   op = option_parser_new("[options] file [...]",
                          "Parse the supplied Fasta files.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -59,11 +57,6 @@ static OPrval parse_options(Seqiteroptions *seqiteroptions,
 
   option= option_new_bool("distlen","show distribution of sequence length",
                            &seqiteroptions->dodistlen,false);
-  option_parser_add_option(op, option);
-
-  option= option_new_string("extractsubseq",
-                            "extract subsequences specified in given file",
-                            seqiteroptions->str_extractfile,NULL);
   option_parser_add_option(op, option);
 
   option_parser_set_min_args(op, 1U);
@@ -82,11 +75,6 @@ static void showdistseqlen(unsigned long key, unsigned long long value,
          BUCKETSIZE * key,
          BUCKETSIZE * (key+1) - 1,
          distvalue);
-}
-
-static void freeseqiteroptions(Seqiteroptions *seqiteroptions)
-{
-  str_delete(seqiteroptions->str_extractfile);
 }
 
 int gt_seqiterator(int argc, const char **argv, Error *err)
@@ -109,11 +97,9 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   /* option parsing */
   switch (parse_options(&seqiteroptions,&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: 
-        freeseqiteroptions(&seqiteroptions);
+    case OPTIONPARSER_ERROR:
         return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: 
-        freeseqiteroptions(&seqiteroptions);
+    case OPTIONPARSER_REQUESTS_EXIT:
         return 0;
   }
 
@@ -122,7 +108,6 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   {
     strarray_add_cstr(files, argv[i]);
   }
-
   totalsize = files_estimate_total_size(files);
   printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
@@ -168,9 +153,6 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   }
   seqiterator_delete(seqit);
   strarray_delete(files);
-  STAMP;
-  freeseqiteroptions(&seqiteroptions);
-  STAMP;
   if (seqiteroptions.dodistlen)
   {
     printf("# " Formatuint64_t " sequences of average length %.2f\n",

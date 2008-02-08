@@ -52,6 +52,7 @@ sfx-outlcp.c
 sfx-partssuf.c
 sfx-readint.c
 sfx-suffixer.c
+substriter.c
 test-pairwise.c
 trieins.c
 turnwheels.c

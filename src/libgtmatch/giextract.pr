@@ -1,0 +1,10 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int extractginumbers(bool verbose,
+                     /*@unused@*/ const Str *ginumberfile,
+                     int argc,const char **argv,Error *err);
+
+#ifdef __cplusplus
+}
+#endif

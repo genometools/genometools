@@ -625,6 +625,7 @@ spgt:${addprefix obj/,${notdir ${subst .c,.splint,\
 scgt:
 	src_check src/libgtmatch/*
 	src_check src/libgtltr/*
+	src_check src/tools/*
 
 splintclean:
 	find obj -name '*.splint' | xargs rm -f
