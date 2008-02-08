@@ -22,6 +22,7 @@
 #include "libgtext/hmm.h"
 #include "libgtltr/repeattypes.h"
 #include "libgtltr/ltrharvest-opt.h"
+#include "libgtcore/undef.h"
 
 /* This enumeration defines the states in the PPT detection HMM. */
 typedef enum {
@@ -33,11 +34,14 @@ typedef enum {
 
 /* This struct holds information about a PPT or U-box region.
    See ppt.c for HMM parameters. */
-typedef struct {
+typedef struct PPT_Hit PPT_Hit;
+
+struct PPT_Hit {
   unsigned long start, end;
   double score;
   PPT_States state;
-} PPT_Hit;
+  PPT_Hit *ubox;
+};
 
 /* Initializes a new HMM with PPT/U-box finding capability. */
 HMM*     ppt_hmm_new(const Alpha *alpha);
@@ -45,13 +49,13 @@ HMM*     ppt_hmm_new(const Alpha *alpha);
 /* Score function for PPT candidates. */
 double   ppt_score(unsigned long posdiff, unsigned int width);
 
-/* Searches for PPTs in the given sequence and returns the best
-   position-based score 0 <= s <= 1. */
-double   ppt_find(LTRboundaries *ltr,
-                  Array *results,
-                  unsigned int radius,
-                  char* seq,
-                  LTRharvestoptions *lo,
-                  double score_func(unsigned long, unsigned int));
+/* Searches for PPTs in the given sequence and returns the index of the
+   highest scored PPT in the results array. */
+unsigned long  ppt_find(LTRboundaries *ltr,
+                        Array *results,
+                        unsigned int radius,
+                        char* seq,
+                        LTRharvestoptions *lo,
+                        double score_func(unsigned long, unsigned int));
 
 #endif
