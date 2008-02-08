@@ -24,7 +24,6 @@
 #include "libgtcore/fileutils.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/bioseq.h"
-#include "libgtcore/str.h"
 #include "libgtltr/ppt.h"
 
 typedef struct {
