@@ -45,7 +45,7 @@ HMM*     ppt_hmm_new(const Alpha *alpha);
 /* Score function for PPT candidates. */
 double   ppt_score(unsigned long posdiff, unsigned int width);
 
-/* Searches for a PPT in the given sequence and returns a
+/* Searches for PPTs in the given sequence and returns the best
    position-based score 0 <= s <= 1. */
 double   ppt_find(LTRboundaries *ltr,
                   Array *results,
