@@ -30,7 +30,7 @@ typedef enum {
   READING_DESCRIPTION,
   READING_SEQUENCE_AFTER_NEWLINE,
   READING_SEQUENCE
-} FastaReader_state;
+} FastaReaderState;
 
 #define fasta_reader_fsm_cast(FR)\
         fasta_reader_cast(fasta_reader_fsm_class(), FR)
@@ -44,7 +44,7 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
 {
   FastaReaderFSM *fr = fasta_reader_fsm_cast(fasta_reader);
   unsigned char cc;
-  FastaReader_state state = EXPECTING_SEPARATOR;
+  FastaReaderState state = EXPECTING_SEPARATOR;
   unsigned long sequence_length = 0, line_counter = 1;
   Str *description, *sequence;
   int had_err = 0;
