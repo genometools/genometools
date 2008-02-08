@@ -3,7 +3,8 @@ extern "C" {
 #endif
 int extractginumbers(bool verbose,
                      /*@unused@*/ const Str *ginumberfile,
-                     int argc,const char **argv,Error *err);
+                     StrArray *filetab,
+                     Error *err);
 
 #ifdef __cplusplus
 }

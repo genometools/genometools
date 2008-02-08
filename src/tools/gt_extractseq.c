@@ -182,22 +182,37 @@ static int gt_extractseq_runner(int argc, const char **argv,
                                 void *tool_arguments, Error *err)
 {
   ExtractSeqArguments *arguments = tool_arguments;
+  int had_err = 0;
 
   error_check(err);
   assert(arguments);
-
   if (str_length(arguments->str_ginumberfile) > 0)
   {
     if (argc > 0)
     {
-      return extractginumbers(true,arguments->str_ginumberfile,argc,argv,err);
+      StrArray *referencefiletab;
+      int i, had_err = 0;
+
+      referencefiletab = strarray_new();
+      for (i = 0; i < argc; i++)
+      {
+        strarray_add_cstr(referencefiletab, argv[i]);
+      }
+      if (extractginumbers(true,arguments->str_ginumberfile,
+                           referencefiletab,err) != 1)
+      {
+        had_err = -1;
+      }
+      strarray_delete(referencefiletab);
+    } else
+    {
+      error_set(err,"option -ginum requires at least one file argument");
+      had_err = -1;
     }
-    error_set(err,"option -ginum requires at least one file argument");
-    return -1;
   } else
   {
     Bioseq *bs;
-    int arg = 0, had_err = 0;
+    int arg = 0;
     if (argc == 0) { /* no file given, use stdin */
       if (!(bs = bioseq_new("-", err)))
         had_err = -1;
@@ -233,8 +248,8 @@ static int gt_extractseq_runner(int argc, const char **argv,
       bioseq_delete(bs);
       arg++;
     }
-    return had_err;
   }
+  return had_err;
 }
 
 Tool* gt_extractseq(void)
