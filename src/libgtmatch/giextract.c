@@ -26,6 +26,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/seqiterator.h"
 #include "libgtcore/progressbar.h"
+#include "libgtcore/fasta.h"
 #include "spacedef.h"
 #include "divmodmul.h"
 #include "format64.h"
@@ -75,6 +76,7 @@ static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
 typedef struct
 {
   unsigned long ginumber, frompos, topos;
+  bool markhit;
 } Ginumberwithrange;
 
 static int compareginumbers(const void *a,const void *b)
@@ -102,7 +104,9 @@ static Ginumberwithrange *readginumberfile(bool verbose,
   unsigned long linenum;
   long readlong1, readlong2, readlong3;
   Ginumberwithrange *ginumbertable;
+  unsigned long i;
 
+  verbose = false;
   *numofentries = file_number_of_lines(str_get(ginumberfile));
   fp = fa_fopen(str_get(ginumberfile),"r");
   if (fp == NULL)
@@ -133,6 +137,7 @@ static Ginumberwithrange *readginumberfile(bool verbose,
     ginumbertable[linenum].frompos = (unsigned long) readlong2;
     CHECKPOSITIVE(readlong3,"third");
     ginumbertable[linenum].topos = (unsigned long) readlong3;
+    ginumbertable[linenum].markhit = false;
     if (ginumbertable[linenum].frompos > ginumbertable[linenum].topos)
     {
       error_set(err,"file \"%s\", line %lu: illegal format: second value %lu "
@@ -151,17 +156,20 @@ static Ginumberwithrange *readginumberfile(bool verbose,
     FREESPACE(ginumbertable);
     return NULL;
   }
-  qsort(ginumbertable,sizeof(Ginumberwithrange),(size_t) *numofentries,
+  qsort(ginumbertable,(size_t) *numofentries,sizeof(Ginumberwithrange),
         compareginumbers);
   if (verbose)
   {
     printf("# %lu gi-queries successfully parsed and sorted\n",*numofentries);
   }
+  for(i=0; i<*numofentries; i++)
+  {
+    printf("%lu\n",ginumbertable[i].ginumber);
+  }
   return ginumbertable;
 }
 
-static const Ginumberwithrange *findginumber(
-                                  unsigned long ginumber,
+static unsigned long findginumber(unsigned long ginumber,
                                   const Ginumberwithrange *ginumbertable,
                                   unsigned long numofentries)
 {
@@ -174,12 +182,12 @@ static const Ginumberwithrange *findginumber(
     midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
     if (midptr->ginumber == ginumber)
     {
-      if (midptr-1 >= ginumbertable && (midptr-1)->ginumber == ginumber)
+      if (midptr > ginumbertable && (midptr-1)->ginumber == ginumber)
       {
         rightptr = midptr - 1;
       } else
       {
-        return midptr;
+        return (unsigned long) (midptr - ginumbertable);
       }
     }
     if (ginumber < midptr->ginumber)
@@ -190,10 +198,28 @@ static const Ginumberwithrange *findginumber(
       leftptr = midptr + 1;
     }
   }
-  return NULL;
+  return numofentries;
+}
+
+static void outputnonmarked(const Ginumberwithrange *ginumbertable,
+                            unsigned long numofentries)
+{
+  unsigned long i, countmissing = 0;
+
+  for(i=0; i<numofentries; i++)
+  {
+    if(!ginumbertable[i].markhit)
+    {
+      printf("missing gi number %lu\n",ginumbertable[i].ginumber);
+      countmissing++;
+    }
+  }
+  printf("missing gi numbers: %lu\n",countmissing);
 }
 
 int extractginumbers(bool verbose,
+                     GenFile *outfp,
+                     unsigned long width, 
                      const Str *ginumberfile,
                      StrArray *referencefiletab,
                      Error *err)
@@ -206,11 +232,10 @@ int extractginumbers(bool verbose,
   long readlong;
   off_t totalsize;
   Ginumberwithrange *ginumbertable;
-  const Ginumberwithrange *ginumberhit;
+  unsigned long ginumberhit;
   const char *ginumberasstring;
 
   error_check(err);
-
   ginumbertable = readginumberfile(verbose,&numofentries,ginumberfile,err);
   if (ginumbertable == NULL)
   {
@@ -253,16 +278,33 @@ int extractginumbers(bool verbose,
       }
       referenceginumber = (unsigned long) readlong;
       ginumberhit = findginumber(referenceginumber,ginumbertable,numofentries);
-      if (ginumberhit != NULL)
+      if (ginumberhit < numofentries)
       {
-        while (ginumberhit < ginumbertable + numofentries &&
-               ginumberhit->ginumber == referenceginumber)
+        while (ginumberhit < numofentries &&
+               ginumbertable[ginumberhit].ginumber == referenceginumber)
         {
-          printf("# output sequence for ginumber %lu\n",referenceginumber);
+          if (ginumbertable[ginumberhit].markhit)
+          {
+            fprintf(stderr,"ginumber %lu was already found before\n",
+                     ginumbertable[ginumberhit].ginumber);
+            exit(EXIT_FAILURE); /* programming error */
+          }
+          genfile_xprintf(outfp, 
+                          ">%lu[%lu,%lu]",referenceginumber,
+                          ginumbertable[ginumberhit].frompos,
+                          ginumbertable[ginumberhit].topos);
+          fasta_show_entry_generic(NULL, 
+                                   (const char *) (sequence + 
+                                                   ginumbertable[ginumberhit].
+                                                   frompos - 1),
+                                   ginumbertable[ginumberhit].topos -
+                                   ginumbertable[ginumberhit].frompos+1,
+                                   width, outfp);
+          ginumbertable[ginumberhit].markhit = true;
           ginumberhit++;
         }
       }
-      printf("%lu 1 %lu\n",referenceginumber,len);
+      /* printf("%lu 1 %lu\n",referenceginumber,len); */
     }
     ma_free(desc);
   }
@@ -270,6 +312,7 @@ int extractginumbers(bool verbose,
   {
     progressbar_stop();
   }
+  outputnonmarked(ginumbertable,numofentries);
   FREESPACE(ginumbertable);
   seqiterator_delete(seqit);
   return had_err;

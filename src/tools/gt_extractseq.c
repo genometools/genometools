@@ -198,8 +198,12 @@ static int gt_extractseq_runner(int argc, const char **argv,
       {
         strarray_add_cstr(referencefiletab, argv[i]);
       }
-      if (extractginumbers(true,arguments->str_ginumberfile,
-                           referencefiletab,err) != 1)
+      if (extractginumbers(true,
+                           arguments->outfp,
+                           arguments->width,
+                           arguments->str_ginumberfile,
+                           referencefiletab,
+                           err) != 1)
       {
         had_err = -1;
       }
