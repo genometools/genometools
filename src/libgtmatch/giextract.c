@@ -91,6 +91,26 @@ static int compareginumbers(const void *a,const void *b)
   {
     return 1;
   }
+  if (((Ginumberwithrange *) a)->frompos <
+      ((Ginumberwithrange *) b)->frompos)
+  {
+    return -1;
+  }
+  if (((Ginumberwithrange *) a)->frompos >
+      ((Ginumberwithrange *) b)->frompos)
+  {
+    return 1;
+  }
+  if (((Ginumberwithrange *) a)->topos <
+      ((Ginumberwithrange *) b)->topos)
+  {
+    return -1;
+  }
+  if (((Ginumberwithrange *) a)->topos >
+      ((Ginumberwithrange *) b)->topos)
+  {
+    return 1;
+  }
   return 0;
 }
 
@@ -104,9 +124,10 @@ static Ginumberwithrange *readginumberfile(bool verbose,
   unsigned long linenum;
   long readlong1, readlong2, readlong3;
   Ginumberwithrange *ginumbertable;
+#ifdef DEBUG
   unsigned long i;
+#endif
 
-  verbose = false;
   *numofentries = file_number_of_lines(str_get(ginumberfile));
   fp = fa_fopen(str_get(ginumberfile),"r");
   if (fp == NULL)
@@ -162,10 +183,12 @@ static Ginumberwithrange *readginumberfile(bool verbose,
   {
     printf("# %lu gi-queries successfully parsed and sorted\n",*numofentries);
   }
-  for(i=0; i<*numofentries; i++)
+#ifdef DEBUG
+  for (i=0; i<*numofentries; i++)
   {
-    printf("%lu\n",ginumbertable[i].ginumber);
+    printf("%lu %lu\n",i,ginumbertable[i].ginumber);
   }
+#endif
   return ginumbertable;
 }
 
@@ -189,13 +212,15 @@ static unsigned long findginumber(unsigned long ginumber,
       {
         return (unsigned long) (midptr - ginumbertable);
       }
-    }
-    if (ginumber < midptr->ginumber)
-    {
-      rightptr = midptr-1;
     } else
     {
-      leftptr = midptr + 1;
+      if (ginumber < midptr->ginumber)
+      {
+        rightptr = midptr-1;
+      } else
+      {
+        leftptr = midptr + 1;
+      }
     }
   }
   return numofentries;
@@ -206,20 +231,24 @@ static void outputnonmarked(const Ginumberwithrange *ginumbertable,
 {
   unsigned long i, countmissing = 0;
 
-  for(i=0; i<numofentries; i++)
+  for (i=0; i<numofentries; i++)
   {
-    if(!ginumbertable[i].markhit)
+    if (!ginumbertable[i].markhit)
     {
-      printf("missing gi number %lu\n",ginumbertable[i].ginumber);
+      printf("unsatisfied %lu %lu %lu\n",ginumbertable[i].ginumber,
+                                         ginumbertable[i].frompos,
+                                         ginumbertable[i].topos);
       countmissing++;
     }
   }
-  printf("missing gi numbers: %lu\n",countmissing);
+  printf("# number of unsatified gi queries: %lu\n",countmissing);
 }
+
+#define EXTRABUF 128
 
 int extractginumbers(bool verbose,
                      GenFile *outfp,
-                     unsigned long width, 
+                     unsigned long width,
                      const Str *ginumberfile,
                      StrArray *referencefiletab,
                      Error *err)
@@ -228,12 +257,14 @@ int extractginumbers(bool verbose,
   const Uchar *sequence;
   char *desc;
   unsigned long len, ginumlen, numofentries, referenceginumber;
-  int had_err;
+  int had_err = 0;
   long readlong;
   off_t totalsize;
   Ginumberwithrange *ginumbertable;
-  unsigned long ginumberhit;
+  unsigned long ginumberhit, countmarkhit = 0;
   const char *ginumberasstring;
+  char *headerbufferspace = NULL;
+  size_t headerbuffersize = 0, headerlength;
 
   error_check(err);
   ginumbertable = readginumberfile(verbose,&numofentries,ginumberfile,err);
@@ -252,7 +283,7 @@ int extractginumbers(bool verbose,
                                                            (unsigned long long)
                                                            totalsize);
   }
-  while (true)
+  while (had_err != -1 && countmarkhit < numofentries)
   {
     had_err = seqiterator_next(seqit, &sequence, &len, &desc, err);
     if (had_err != 1)
@@ -289,25 +320,37 @@ int extractginumbers(bool verbose,
                      ginumbertable[ginumberhit].ginumber);
             exit(EXIT_FAILURE); /* programming error */
           }
-          genfile_xprintf(outfp, 
-                          ">%lu[%lu,%lu]",referenceginumber,
+          headerlength = strlen(desc);
+          if (headerbuffersize < headerlength + EXTRABUF + 1)
+          {
+            headerbuffersize = headerlength + EXTRABUF + 1;
+            headerbufferspace = ma_realloc(headerbufferspace,
+                                           sizeof (char) * headerbuffersize);
+          }
+          (void) snprintf(headerbufferspace,headerbuffersize,"%lu %lu %lu %s",
+                          referenceginumber,
                           ginumbertable[ginumberhit].frompos,
-                          ginumbertable[ginumberhit].topos);
-          fasta_show_entry_generic(NULL, 
-                                   (const char *) (sequence + 
+                          ginumbertable[ginumberhit].topos,
+                          desc);
+          fasta_show_entry_generic(headerbufferspace,
+                                   (const char *) (sequence +
                                                    ginumbertable[ginumberhit].
                                                    frompos - 1),
                                    ginumbertable[ginumberhit].topos -
                                    ginumbertable[ginumberhit].frompos+1,
                                    width, outfp);
           ginumbertable[ginumberhit].markhit = true;
+          countmarkhit++;
           ginumberhit++;
         }
       }
-      /* printf("%lu 1 %lu\n",referenceginumber,len); */
+#ifdef DEBUG
+      printf("%lu 1 %lu\n",referenceginumber,len);
+#endif
     }
     ma_free(desc);
   }
+  ma_free(headerbufferspace);
   if (verbose)
   {
     progressbar_stop();
