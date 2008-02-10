@@ -31,40 +31,13 @@
 #include "divmodmul.h"
 #include "format64.h"
 
-static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
-                                 Error *err)
-{
-  unsigned long i, firstpipe = 0, secondpipe = 0;
+#define EXTRABUF 128
 
-  for (i=0; desc[i] != '\0'; i++)
-  {
-    if (desc[i] == '|')
-    {
-      if (firstpipe > 0)
-      {
-        assert(i>0);
-        secondpipe = i;
-        break;
-      }
-      assert(i>0);
-      firstpipe = i;
-    }
-  }
-  if (firstpipe == 0 || secondpipe == 0)
-  {
-    error_set(err,"Cannot find gi-number in description \"%s\"\n",desc);
-    return NULL;
-  }
-  assert(firstpipe < secondpipe);
-  *ginumlen = firstpipe - secondpipe - 1;
-  return desc + firstpipe + 1;
-}
-
-#define CHECKPOSITIVE(VAL,WHICH)\
+#define CHECKPOSITIVE(VAL,FORMAT,WHICH)\
         if ((VAL) <= 0)\
         {\
           error_set(err,"file \"%s\", line %lu: illegal format: %s element "\
-                        " = %ld is not a positive integer",\
+                        " = " FORMAT " is not a positive integer",\
                         str_get(ginumberfile),\
                         linenum+1,\
                         WHICH,\
@@ -75,7 +48,8 @@ static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
 
 typedef struct
 {
-  unsigned long ginumber, frompos, topos;
+  uint64_t ginumber;
+  unsigned long frompos, topos;
   bool markhit;
 } Ginumberwithrange;
 
@@ -122,13 +96,20 @@ static Ginumberwithrange *readginumberfile(bool verbose,
   FILE *fp;
   bool haserr = false;
   unsigned long linenum;
-  long readlong1, readlong2, readlong3;
+  int64_t readint64;
+  long readlongfrom, readlongto;
   Ginumberwithrange *ginumbertable;
 #ifdef DEBUG
   unsigned long i;
 #endif
 
+  error_check(err);
   *numofentries = file_number_of_lines(str_get(ginumberfile));
+  if (*numofentries == 0)
+  {
+    error_set(err,"empty file \"%s\" not allowed",str_get(ginumberfile));
+    return NULL;
+  }
   fp = fa_fopen(str_get(ginumberfile),"r");
   if (fp == NULL)
   {
@@ -144,7 +125,8 @@ static Ginumberwithrange *readginumberfile(bool verbose,
   ALLOCASSIGNSPACE(ginumbertable,NULL,Ginumberwithrange,*numofentries);
   for (linenum = 0; !feof(fp); linenum++)
   {
-    if (fscanf(fp,"%ld %ld %ld\n",&readlong1,&readlong2,&readlong3) != 3)
+    if (fscanf(fp,FormatScanint64_t " %ld %ld\n",
+               SCANint64_tcast(&readint64),&readlongfrom,&readlongto) != 3)
     {
       error_set(err,"file \"%s\", line %lu: illegal format",
                   str_get(ginumberfile),
@@ -152,12 +134,12 @@ static Ginumberwithrange *readginumberfile(bool verbose,
       haserr = true;
       break;
     }
-    CHECKPOSITIVE(readlong1,"first");
-    ginumbertable[linenum].ginumber = (unsigned long) readlong1;
-    CHECKPOSITIVE(readlong2,"second");
-    ginumbertable[linenum].frompos = (unsigned long) readlong2;
-    CHECKPOSITIVE(readlong3,"third");
-    ginumbertable[linenum].topos = (unsigned long) readlong3;
+    CHECKPOSITIVE(readint64,FormatScanint64_t,"first");
+    ginumbertable[linenum].ginumber = (uint64_t) readint64;
+    CHECKPOSITIVE(readlongfrom,"%ld","second");
+    ginumbertable[linenum].frompos = (unsigned long) readlongfrom;
+    CHECKPOSITIVE(readlongfrom,"%ld","third");
+    ginumbertable[linenum].topos = (unsigned long) readlongto;
     ginumbertable[linenum].markhit = false;
     if (ginumbertable[linenum].frompos > ginumbertable[linenum].topos)
     {
@@ -192,7 +174,7 @@ static Ginumberwithrange *readginumberfile(bool verbose,
   return ginumbertable;
 }
 
-static unsigned long findginumber(unsigned long ginumber,
+static unsigned long findginumber(uint64_t ginumber,
                                   const Ginumberwithrange *ginumbertable,
                                   unsigned long numofentries)
 {
@@ -235,16 +217,45 @@ static void outputnonmarked(const Ginumberwithrange *ginumbertable,
   {
     if (!ginumbertable[i].markhit)
     {
-      printf("unsatisfied %lu %lu %lu\n",ginumbertable[i].ginumber,
-                                         ginumbertable[i].frompos,
-                                         ginumbertable[i].topos);
+      printf("unsatisfied " Formatuint64_t " %lu %lu\n",
+              PRINTuint64_tcast(ginumbertable[i].ginumber),
+              ginumbertable[i].frompos,
+              ginumbertable[i].topos);
       countmissing++;
     }
   }
   printf("# number of unsatified gi queries: %lu\n",countmissing);
 }
 
-#define EXTRABUF 128
+static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
+                                 Error *err)
+{
+  unsigned long i, firstpipe = 0, secondpipe = 0;
+
+  error_check(err);
+  for (i=0; desc[i] != '\0'; i++)
+  {
+    if (desc[i] == '|')
+    {
+      if (firstpipe > 0)
+      {
+        assert(i>0);
+        secondpipe = i;
+        break;
+      }
+      assert(i>0);
+      firstpipe = i;
+    }
+  }
+  if (firstpipe == 0 || secondpipe == 0)
+  {
+    error_set(err,"Cannot find gi-number in description \"%s\"\n",desc);
+    return NULL;
+  }
+  assert(firstpipe < secondpipe);
+  *ginumlen = firstpipe - secondpipe - 1;
+  return desc + firstpipe + 1;
+}
 
 int extractginumbers(bool verbose,
                      GenFile *outfp,
@@ -255,15 +266,14 @@ int extractginumbers(bool verbose,
 {
   SeqIterator *seqit;
   const Uchar *sequence;
-  char *desc;
-  unsigned long len, ginumlen, numofentries, referenceginumber;
+  char *desc, *headerbufferspace = NULL;
+  const char *ginumberasstring;
+  uint64_t referenceginumber;
+  unsigned long len, ginumlen, numofentries, ginumberhit, countmarkhit = 0;
   int had_err = 0;
-  long readlong;
+  int64_t readint64;
   off_t totalsize;
   Ginumberwithrange *ginumbertable;
-  unsigned long ginumberhit, countmarkhit = 0;
-  const char *ginumberasstring;
-  char *headerbufferspace = NULL;
   size_t headerbuffersize = 0, headerlength;
 
   error_check(err);
@@ -296,18 +306,20 @@ int extractginumbers(bool verbose,
       had_err = -1;
     } else
     {
-      if (sscanf(ginumberasstring,"%ld|",&readlong) != 1)
+      if (sscanf(ginumberasstring,FormatScanint64_t "|",
+                 SCANint64_tcast(&readint64)) != 1)
       {
         error_set(err,"cannot parse ginumber(integer) in \"%s\"",
                     ginumberasstring);
         had_err = -1;
       }
-      if (had_err != -1 && readlong <= 0)
+      if (had_err != -1 && readint64 <= 0)
       {
-        error_set(err,"gi number %ld must be positive",readlong);
+        error_set(err,"gi number " Formatuint64_t "must be positive integer",
+                      readint64);
         had_err = -1;
       }
-      referenceginumber = (unsigned long) readlong;
+      referenceginumber = (uint64_t) readint64;
       ginumberhit = findginumber(referenceginumber,ginumbertable,numofentries);
       if (ginumberhit < numofentries)
       {
@@ -316,8 +328,9 @@ int extractginumbers(bool verbose,
         {
           if (ginumbertable[ginumberhit].markhit)
           {
-            fprintf(stderr,"ginumber %lu was already found before\n",
-                     ginumbertable[ginumberhit].ginumber);
+            fprintf(stderr,"ginumber " Formatuint64_t
+                           " was already found before\n",
+                     PRINTuint64_tcast(ginumbertable[ginumberhit].ginumber));
             exit(EXIT_FAILURE); /* programming error */
           }
           headerlength = strlen(desc);
@@ -327,8 +340,9 @@ int extractginumbers(bool verbose,
             headerbufferspace = ma_realloc(headerbufferspace,
                                            sizeof (char) * headerbuffersize);
           }
-          (void) snprintf(headerbufferspace,headerbuffersize,"%lu %lu %lu %s",
-                          referenceginumber,
+          (void) snprintf(headerbufferspace,headerbuffersize,Formatuint64_t
+                          " %lu %lu %s",
+                          PRINTuint64_tcast(referenceginumber),
                           ginumbertable[ginumberhit].frompos,
                           ginumbertable[ginumberhit].topos,
                           desc);
@@ -344,9 +358,10 @@ int extractginumbers(bool verbose,
           ginumberhit++;
         }
       }
-#ifdef DEBUG
-      printf("%lu 1 %lu\n",referenceginumber,len);
-#endif
+//#ifdef DEBUG
+      printf(Formatuint64_t " 1 %lu\n",PRINTuint64_tcast(referenceginumber),
+             len);
+//#endif
     }
     ma_free(desc);
   }
