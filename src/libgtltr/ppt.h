@@ -54,7 +54,7 @@ double   ppt_score(unsigned long posdiff, unsigned int width);
 unsigned long  ppt_find(LTRboundaries *ltr,
                         Array *results,
                         unsigned int radius,
-                        char* seq,
+                        const char *seq,
                         LTRharvestoptions *lo,
                         double score_func(unsigned long, unsigned int));
 
