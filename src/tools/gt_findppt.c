@@ -88,7 +88,8 @@ static void print_str_upper(char* str)
   }
 }
 
-static void output_csv(Array* results, unsigned long startpos,
+static void output_csv(Array* results, LTRboundaries *b,
+                       unsigned long startpos,
                        unsigned int index, const char* seqoffset)
 {
   if (index != UNDEF_ULONG)
@@ -99,18 +100,21 @@ static void output_csv(Array* results, unsigned long startpos,
 
     tmp[CSV_SEQ_SPACING]='\0';
     showhit = *(PPT_Hit**) array_get(results, index);
+    printf("%lu;%lu;", (unsigned long) b->leftLTR_5,
+                       (unsigned long) b->rightLTR_3);
     printf("%lu;", startpos+showhit->start);
     printf("%lu;", showhit->end-showhit->start+1);
     s = showhit->start;
     e = showhit->end;
     if (showhit->ubox)
     {
+      printf("%lu;", startpos+showhit->ubox->start);
       printf("%lu;",
-              showhit->ubox->end-showhit->ubox->start+1);
+            showhit->ubox->end-showhit->ubox->start+1);
       s = showhit->ubox->start;
     }
     else
-      printf("0;");
+      printf(";0;");
 
     strncpy(tmp, seqoffset+s-1-CSV_SEQ_SPACING, CSV_SEQ_SPACING);
     printf("%s", tmp);
@@ -283,6 +287,7 @@ int gt_findppt(int argc, const char **argv, Error *err)
         }
 
         output_csv(results,
+                   line,
                    line->leftLTR_5+seqlen-(line->rightLTR_3-line->rightLTR_5)
                      -options.ppt_radius,
                    idx,
