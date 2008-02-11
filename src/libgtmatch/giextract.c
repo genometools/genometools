@@ -27,7 +27,6 @@
 #include "libgtcore/seqiterator.h"
 #include "libgtcore/progressbar.h"
 #include "libgtcore/fasta.h"
-#include "spacedef.h"
 #include "divmodmul.h"
 #include "format64.h"
 
@@ -51,61 +50,90 @@ typedef struct
   uint64_t ginumber;
   unsigned long frompos, topos;
   bool markhit;
-} Ginumberwithrange;
+} Giquery;
 
 static int compareginumbers(const void *a,const void *b)
 {
-  if (((Ginumberwithrange *) a)->ginumber <
-      ((Ginumberwithrange *) b)->ginumber)
+  if (((Giquery *) a)->ginumber < ((Giquery *) b)->ginumber)
   {
     return -1;
   }
-  if (((Ginumberwithrange *) a)->ginumber >
-      ((Ginumberwithrange *) b)->ginumber)
+  if (((Giquery *) a)->ginumber > ((Giquery *) b)->ginumber)
   {
     return 1;
   }
-  if (((Ginumberwithrange *) a)->frompos <
-      ((Ginumberwithrange *) b)->frompos)
+  if (((Giquery *) a)->frompos < ((Giquery *) b)->frompos)
   {
     return -1;
   }
-  if (((Ginumberwithrange *) a)->frompos >
-      ((Ginumberwithrange *) b)->frompos)
+  if (((Giquery *) a)->frompos > ((Giquery *) b)->frompos)
   {
     return 1;
   }
-  if (((Ginumberwithrange *) a)->topos <
-      ((Ginumberwithrange *) b)->topos)
+  if (((Giquery *) a)->topos < ((Giquery *) b)->topos)
   {
     return -1;
   }
-  if (((Ginumberwithrange *) a)->topos >
-      ((Ginumberwithrange *) b)->topos)
+  if (((Giquery *) a)->topos > ((Giquery *) b)->topos)
   {
     return 1;
   }
   return 0;
 }
 
-static Ginumberwithrange *readginumberfile(bool verbose,
-                                           unsigned long *numofentries,
-                                           const Str *ginumberfile,
-                                           Error *err)
+static unsigned long remdupsgiqueries(Giquery *giqueries,
+                                      unsigned long numofqueries)
+{
+  if (numofqueries == 0)
+  {
+    return 0;
+  } else
+  {
+    Giquery *storeptr, *readptr;
+    unsigned long newnumofqueries;
+
+    for (storeptr = giqueries, readptr = giqueries+1;
+         readptr < giqueries + numofqueries;
+         readptr++)
+    {
+      if (storeptr->ginumber != readptr->ginumber ||
+          storeptr->frompos != readptr->frompos ||
+          storeptr->topos != readptr->topos)
+      {
+        storeptr++;
+        if (storeptr != readptr)
+        {
+          *storeptr = *readptr;
+        }
+      }
+    }
+    newnumofqueries = (unsigned long) (storeptr - giqueries + 1);
+    if (newnumofqueries < numofqueries)
+    {
+      printf("# removed %lu duplicates\n",numofqueries - newnumofqueries);
+    }
+    return newnumofqueries;
+  }
+}
+
+static Giquery *readginumberfile(bool verbose,
+                                 unsigned long *numofqueries,
+                                 const Str *ginumberfile,
+                                 Error *err)
 {
   FILE *fp;
   bool haserr = false;
   unsigned long linenum;
   int64_t readint64;
   long readlongfrom, readlongto;
-  Ginumberwithrange *ginumbertable;
+  Giquery *giqueries;
 #ifdef DEBUG
   unsigned long i;
 #endif
 
   error_check(err);
-  *numofentries = file_number_of_lines(str_get(ginumberfile));
-  if (*numofentries == 0)
+  *numofqueries = file_number_of_lines(str_get(ginumberfile));
+  if (*numofqueries == 0)
   {
     error_set(err,"empty file \"%s\" not allowed",str_get(ginumberfile));
     return NULL;
@@ -122,7 +150,7 @@ static Ginumberwithrange *readginumberfile(bool verbose,
   {
     printf("# opened gi-queryfile \"%s\"\n",str_get(ginumberfile));
   }
-  ALLOCASSIGNSPACE(ginumbertable,NULL,Ginumberwithrange,*numofentries);
+  giqueries = ma_malloc(sizeof(*giqueries) * (*numofqueries));
   for (linenum = 0; !feof(fp); linenum++)
   {
     if (fscanf(fp,FormatScanint64_t " %ld %ld\n",
@@ -135,20 +163,20 @@ static Ginumberwithrange *readginumberfile(bool verbose,
       break;
     }
     CHECKPOSITIVE(readint64,FormatScanint64_t,"first");
-    ginumbertable[linenum].ginumber = (uint64_t) readint64;
+    giqueries[linenum].ginumber = (uint64_t) readint64;
     CHECKPOSITIVE(readlongfrom,"%ld","second");
-    ginumbertable[linenum].frompos = (unsigned long) readlongfrom;
+    giqueries[linenum].frompos = (unsigned long) readlongfrom;
     CHECKPOSITIVE(readlongfrom,"%ld","third");
-    ginumbertable[linenum].topos = (unsigned long) readlongto;
-    ginumbertable[linenum].markhit = false;
-    if (ginumbertable[linenum].frompos > ginumbertable[linenum].topos)
+    giqueries[linenum].topos = (unsigned long) readlongto;
+    giqueries[linenum].markhit = false;
+    if (giqueries[linenum].frompos > giqueries[linenum].topos)
     {
       error_set(err,"file \"%s\", line %lu: illegal format: second value %lu "
                     "is larger than third value %lu",
                   str_get(ginumberfile),
                   linenum+1,
-                  ginumbertable[linenum].frompos,
-                  ginumbertable[linenum].topos);
+                  giqueries[linenum].frompos,
+                  giqueries[linenum].topos);
       haserr = true;
       break;
     }
@@ -156,43 +184,44 @@ static Ginumberwithrange *readginumberfile(bool verbose,
   fa_fclose(fp);
   if (haserr)
   {
-    FREESPACE(ginumbertable);
+    ma_free(giqueries);
     return NULL;
   }
-  qsort(ginumbertable,(size_t) *numofentries,sizeof(Ginumberwithrange),
+  qsort(giqueries,(size_t) *numofqueries,sizeof(*giqueries),
         compareginumbers);
   if (verbose)
   {
-    printf("# %lu gi-queries successfully parsed and sorted\n",*numofentries);
+    printf("# %lu gi-queries successfully parsed and sorted\n",*numofqueries);
   }
+  *numofqueries = remdupsgiqueries(giqueries,*numofqueries);
 #ifdef DEBUG
-  for (i=0; i<*numofentries; i++)
+  for (i=0; i<*numofqueries; i++)
   {
-    printf("%lu %lu\n",i,ginumbertable[i].ginumber);
+    printf("%lu %lu\n",i,giqueries[i].ginumber);
   }
 #endif
-  return ginumbertable;
+  return giqueries;
 }
 
 static unsigned long findginumber(uint64_t ginumber,
-                                  const Ginumberwithrange *ginumbertable,
-                                  unsigned long numofentries)
+                                  const Giquery *giqueries,
+                                  unsigned long numofqueries)
 {
-  const Ginumberwithrange *leftptr, *rightptr, *midptr;
+  const Giquery *leftptr, *rightptr, *midptr;
 
-  leftptr = ginumbertable;
-  rightptr = ginumbertable + numofentries - 1;
+  leftptr = giqueries;
+  rightptr = giqueries + numofqueries - 1;
   while (leftptr <= rightptr)
   {
     midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
     if (midptr->ginumber == ginumber)
     {
-      if (midptr > ginumbertable && (midptr-1)->ginumber == ginumber)
+      if (midptr > giqueries && (midptr-1)->ginumber == ginumber)
       {
         rightptr = midptr - 1;
       } else
       {
-        return (unsigned long) (midptr - ginumbertable);
+        return (unsigned long) (midptr - giqueries);
       }
     } else
     {
@@ -205,22 +234,22 @@ static unsigned long findginumber(uint64_t ginumber,
       }
     }
   }
-  return numofentries;
+  return numofqueries;
 }
 
-static void outputnonmarked(const Ginumberwithrange *ginumbertable,
-                            unsigned long numofentries)
+static void outputnonmarked(const Giquery *giqueries,
+                            unsigned long numofqueries)
 {
   unsigned long i, countmissing = 0;
 
-  for (i=0; i<numofentries; i++)
+  for (i=0; i<numofqueries; i++)
   {
-    if (!ginumbertable[i].markhit)
+    if (!giqueries[i].markhit)
     {
       printf("unsatisfied " Formatuint64_t " %lu %lu\n",
-              PRINTuint64_tcast(ginumbertable[i].ginumber),
-              ginumbertable[i].frompos,
-              ginumbertable[i].topos);
+              PRINTuint64_tcast(giqueries[i].ginumber),
+              giqueries[i].frompos,
+              giqueries[i].topos);
       countmissing++;
     }
   }
@@ -269,16 +298,16 @@ int extractginumbers(bool verbose,
   char *desc, *headerbufferspace = NULL;
   const char *ginumberasstring;
   uint64_t referenceginumber;
-  unsigned long len, ginumlen, numofentries, ginumberhit, countmarkhit = 0;
+  unsigned long len, ginumlen, numofqueries, ginumberhit, countmarkhit = 0;
   int had_err = 0;
   int64_t readint64;
   off_t totalsize;
-  Ginumberwithrange *ginumbertable;
+  Giquery *giqueries;
   size_t headerbuffersize = 0, headerlength;
 
   error_check(err);
-  ginumbertable = readginumberfile(verbose,&numofentries,ginumberfile,err);
-  if (ginumbertable == NULL)
+  giqueries = readginumberfile(verbose,&numofqueries,ginumberfile,err);
+  if (giqueries == NULL)
   {
     return -1;
   }
@@ -293,7 +322,7 @@ int extractginumbers(bool verbose,
                                                            (unsigned long long)
                                                            totalsize);
   }
-  while (had_err != -1 && countmarkhit < numofentries)
+  while (had_err != -1 && countmarkhit < numofqueries)
   {
     had_err = seqiterator_next(seqit, &sequence, &len, &desc, err);
     if (had_err != 1)
@@ -320,17 +349,17 @@ int extractginumbers(bool verbose,
         had_err = -1;
       }
       referenceginumber = (uint64_t) readint64;
-      ginumberhit = findginumber(referenceginumber,ginumbertable,numofentries);
-      if (ginumberhit < numofentries)
+      ginumberhit = findginumber(referenceginumber,giqueries,numofqueries);
+      if (ginumberhit < numofqueries)
       {
-        while (ginumberhit < numofentries &&
-               ginumbertable[ginumberhit].ginumber == referenceginumber)
+        while (ginumberhit < numofqueries &&
+               giqueries[ginumberhit].ginumber == referenceginumber)
         {
-          if (ginumbertable[ginumberhit].markhit)
+          if (giqueries[ginumberhit].markhit)
           {
             fprintf(stderr,"ginumber " Formatuint64_t
                            " was already found before\n",
-                     PRINTuint64_tcast(ginumbertable[ginumberhit].ginumber));
+                     PRINTuint64_tcast(giqueries[ginumberhit].ginumber));
             exit(EXIT_FAILURE); /* programming error */
           }
           headerlength = strlen(desc);
@@ -338,30 +367,31 @@ int extractginumbers(bool verbose,
           {
             headerbuffersize = headerlength + EXTRABUF + 1;
             headerbufferspace = ma_realloc(headerbufferspace,
-                                           sizeof (char) * headerbuffersize);
+                                           sizeof (*headerbufferspace)
+                                           * headerbuffersize);
           }
           (void) snprintf(headerbufferspace,headerbuffersize,Formatuint64_t
                           " %lu %lu %s",
                           PRINTuint64_tcast(referenceginumber),
-                          ginumbertable[ginumberhit].frompos,
-                          ginumbertable[ginumberhit].topos,
+                          giqueries[ginumberhit].frompos,
+                          giqueries[ginumberhit].topos,
                           desc);
           fasta_show_entry_generic(headerbufferspace,
                                    (const char *) (sequence +
-                                                   ginumbertable[ginumberhit].
+                                                   giqueries[ginumberhit].
                                                    frompos - 1),
-                                   ginumbertable[ginumberhit].topos -
-                                   ginumbertable[ginumberhit].frompos+1,
+                                   giqueries[ginumberhit].topos -
+                                   giqueries[ginumberhit].frompos+1,
                                    width, outfp);
-          ginumbertable[ginumberhit].markhit = true;
+          giqueries[ginumberhit].markhit = true;
           countmarkhit++;
           ginumberhit++;
         }
       }
-//#ifdef DEBUG
+#ifdef DEBUG
       printf(Formatuint64_t " 1 %lu\n",PRINTuint64_tcast(referenceginumber),
              len);
-//#endif
+#endif
     }
     ma_free(desc);
   }
@@ -370,8 +400,8 @@ int extractginumbers(bool verbose,
   {
     progressbar_stop();
   }
-  outputnonmarked(ginumbertable,numofentries);
-  FREESPACE(ginumbertable);
+  outputnonmarked(giqueries,numofqueries);
+  ma_free(giqueries);
   seqiterator_delete(seqit);
   return had_err;
 }
