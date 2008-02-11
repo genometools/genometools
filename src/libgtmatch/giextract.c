@@ -110,7 +110,8 @@ static unsigned long remdupsgiqueries(Giquery *giqueries,
     newnumofqueries = (unsigned long) (storeptr - giqueries + 1);
     if (newnumofqueries < numofqueries)
     {
-      printf("# removed %lu duplicates\n",numofqueries - newnumofqueries);
+      printf("# removed %lu duplicate gi-queries\n",
+              numofqueries - newnumofqueries);
     }
     return newnumofqueries;
   }
@@ -125,7 +126,7 @@ static Giquery *readginumberfile(bool verbose,
   bool haserr = false;
   unsigned long linenum;
   int64_t readint64;
-  long readlongfrom, readlongto;
+  long readlongfrompos, readlongtopos;
   Giquery *giqueries;
 #ifdef DEBUG
   unsigned long i;
@@ -154,7 +155,8 @@ static Giquery *readginumberfile(bool verbose,
   for (linenum = 0; !feof(fp); linenum++)
   {
     if (fscanf(fp,FormatScanint64_t " %ld %ld\n",
-               SCANint64_tcast(&readint64),&readlongfrom,&readlongto) != 3)
+               SCANint64_tcast(&readint64),&readlongfrompos,
+                                           &readlongtopos) != 3)
     {
       error_set(err,"file \"%s\", line %lu: illegal format",
                   str_get(ginumberfile),
@@ -164,10 +166,10 @@ static Giquery *readginumberfile(bool verbose,
     }
     CHECKPOSITIVE(readint64,FormatScanint64_t,"first");
     giqueries[linenum].ginumber = (uint64_t) readint64;
-    CHECKPOSITIVE(readlongfrom,"%ld","second");
-    giqueries[linenum].frompos = (unsigned long) readlongfrom;
-    CHECKPOSITIVE(readlongfrom,"%ld","third");
-    giqueries[linenum].topos = (unsigned long) readlongto;
+    CHECKPOSITIVE(readlongfrompos,"%ld","second");
+    giqueries[linenum].frompos = (unsigned long) readlongfrompos;
+    CHECKPOSITIVE(readlongfrompos,"%ld","third");
+    giqueries[linenum].topos = (unsigned long) readlongtopos;
     giqueries[linenum].markhit = false;
     if (giqueries[linenum].frompos > giqueries[linenum].topos)
     {
