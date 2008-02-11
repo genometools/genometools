@@ -48,7 +48,6 @@ struct BWTSeqExactMatchesIterator
 {
   struct matchBound bounds;
   Seqpos nextMatchBWTPos;
-  struct MatchData nextMatch;
   struct extBitsRetrieval extBits;
 };
 

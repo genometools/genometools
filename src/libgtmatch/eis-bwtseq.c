@@ -546,28 +546,71 @@ BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen)
     return match.lower - match.upper;
 }
 
-struct BWTSeqExactMatchesIterator *
-newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen)
+extern bool
+initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+               const Symbol *query, size_t queryLen)
 {
-  struct BWTSeqExactMatchesIterator *newIter;
-  assert(bwtSeq && query);
+  assert(iter && bwtSeq && query);
   if (!bwtSeq->locateSampleInterval)
   {
     fputs("Index does not contain locate information.\n"
           "Localization of matches impossible!", stderr);
+    return false;
+  }
+  getMatchBound(bwtSeq, query, queryLen, &iter->bounds);
+  iter->nextMatchBWTPos = iter->bounds.upper;
+  initExtBitsRetrieval(&iter->extBits);
+  return true;
+}
+
+extern bool
+initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq)
+{
+  assert(iter && bwtSeq);
+  if (!bwtSeq->locateSampleInterval)
+  {
+    fputs("Index does not contain locate information.\n"
+          "Localization of matches impossible!", stderr);
+    return false;
+  }
+  iter->bounds.upper = iter->bounds.lower = iter->nextMatchBWTPos = 0;
+  initExtBitsRetrieval(&iter->extBits);
+  return true;
+}
+
+struct BWTSeqExactMatchesIterator *
+newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen)
+{
+  struct BWTSeqExactMatchesIterator *iter;
+  assert(bwtSeq && query);
+  iter = ma_malloc(sizeof (*iter));
+  if (initEMIterator(iter, bwtSeq, query, queryLen))
+    return iter;
+  else
+  {
+    ma_free(iter);
     return NULL;
   }
-  newIter = ma_malloc(sizeof (*newIter));
-  getMatchBound(bwtSeq, query, queryLen, &newIter->bounds);
-  newIter->nextMatchBWTPos = newIter->bounds.upper;
-  initExtBitsRetrieval(&newIter->extBits);
-  return newIter;
+}
+
+extern bool
+reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+                 const Symbol *query, size_t queryLen)
+{
+  getMatchBound(bwtSeq, query, queryLen, &iter->bounds);
+  iter->nextMatchBWTPos = iter->bounds.upper;
+  return true;
+}
+
+extern void
+destructEMIterator(struct BWTSeqExactMatchesIterator *iter)
+{
+  destructExtBitsRetrieval(&iter->extBits);
 }
 
 void
 deleteEMIterator(struct BWTSeqExactMatchesIterator *iter)
 {
-  destructExtBitsRetrieval(&iter->extBits);
   ma_free(iter);
 }
 

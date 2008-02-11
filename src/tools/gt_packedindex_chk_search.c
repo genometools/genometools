@@ -58,7 +58,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
   Str *inputProject = NULL;
   int parsedArgs;
   bool had_err = false;
-
+  BWTSeqExactMatchesIterator EMIter;
+  bool EMIterInitialized = false;
   inputProject = str_new();
 
   do {
@@ -100,6 +101,10 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
         error_set(err, "aborted because of index integrity check fail");
         break;
       }
+      ensure(had_err, initEmptyEMIterator(&EMIter, bwtSeq));
+      if (had_err)
+        break;
+      EMIterInitialized = true;
     }
     {
       Seqpos totalLen, dbstart;
@@ -158,40 +163,40 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
                               patternLen);
         if (BWTSeqHasLocateInformation(bwtSeq))
         {
-          BWTSeqExactMatchesIterator *EMIter =
-            newEMIterator(bwtSeq, pptr, patternLen);
-          Seqpos numMatches = EMINumMatchesTotal(EMIter);
-          ensure(had_err, EMIter);
+          Seqpos numMatches;
+          ensure(had_err, reinitEMIterator(&EMIter, bwtSeq, pptr, patternLen));
           if (had_err)
             break;
+          numMatches = EMINumMatchesTotal(&EMIter);
           assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen));
-          assert(EMINumMatchesTotal(EMIter) == countmmsearchiterator(mmsi));
+          assert(EMINumMatchesTotal(&EMIter) == countmmsearchiterator(mmsi));
           fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n"
                   "pattern: ", trial, numMatches);
           showsymbolstringgeneric(stderr, suffixarray.alpha, pptr, patternLen);
           fputs("\n", stderr);
           while (nextmmsearchiterator(&dbstart,mmsi))
           {
-            struct MatchData *match =
-              EMIGetNextMatch(EMIter, bwtSeq);
+            Seqpos matchPos = 0;
+            bool match = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             ensure(had_err, match);
             if (had_err)
             {
               fputs("matches of fmindex expired before mmsearch!\n", stderr);
               break;
             }
-            ensure(had_err, match->sfxArrayValue == dbstart);
+            ensure(had_err, matchPos == dbstart);
             if (had_err)
             {
               fprintf(stderr, "fmindex match doesn't equal mmsearch match "
                       "result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
-                      match->sfxArrayValue, dbstart);
+                      matchPos, dbstart);
               had_err = true;
             }
           }
           if (!had_err)
           {
-            struct MatchData *trailingMatch = EMIGetNextMatch(EMIter, bwtSeq);
+            Seqpos matchPos;
+            bool trailingMatch = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             ensure(had_err, !trailingMatch);
             if (had_err)
             {
@@ -199,7 +204,6 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
               break;
             }
           }
-          deleteEMIterator(EMIter);
         }
         else
         {
@@ -219,6 +223,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
               trial, params.numOfSamples);
     }
   } while (0);
+  if (EMIterInitialized) destructEMIterator(&EMIter);
   if (saIsLoaded) freesuffixarray(&suffixarray);
   if (epi) freeEnumpatterniterator(&epi);
   if (bwtSeq) deleteBWTSeq(bwtSeq);

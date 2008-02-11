@@ -245,6 +245,65 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
  *
  * Warning: the iterator object will become invalid once the
  * corresponding bwt sequence object has been deleted.
+ *
+ * Warning: user must manage storage of iter manually
+ *
+ * @param iter points to storage for iterator
+ * @param bwtSeq reference of bwt sequence object to use for matching
+ * @param query symbol string to search matches for
+ * @param queryLen length of query string
+ * @return true if successfully initialized, false on error
+ */
+extern bool
+initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+               const Symbol *query, size_t queryLen);
+
+/**
+ * \brief Only initializes empty iterator for given
+ * sequence object.
+ *
+ * Warning: the iterator object will become invalid once the
+ * corresponding bwt sequence object has been deleted.
+ *
+ * Warning: user must manage storage of iter manually
+ * @param iter points to storage for iterator
+ * @param bwtSeq reference of bwt sequence object to use for matching
+ * @return true if successfully initialized, false on error
+ */
+extern bool
+initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwt);
+
+/**
+ * \brief Set up iterator for new query, iter must have been
+ * initialized previously. Everything else is identical to
+ * initEMIterator.
+ *
+ * Warning: the iterator object will become invalid once the
+ * corresponding bwt sequence object has been deleted.
+ * @param iter points to storage for iterator
+ * @param bwtSeq reference of bwt sequence object to use for matching
+ * @param query symbol string to search matches for
+ * @param queryLen length of query string
+ * @return true if successfully initialized, false on error
+ */
+extern bool
+reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+                 const Symbol *query, size_t queryLen);
+/**
+ * \brief Destruct resources of matches iterator. Does not free the
+ * storage of iterator itself.
+ * Warning: user must manage storage of iter manually
+ * @param iter reference to matches iterator
+ */
+extern void
+destructEMIterator(struct BWTSeqExactMatchesIterator *iter);
+
+/**
+ * \brief Given a query string produce iterator for all matches in
+ * original sequence (of which the sequence object is a BWT).
+ *
+ * Warning: the iterator object will become invalid once the
+ * corresponding bwt sequence object has been deleted.
  * @param bwtSeq reference of bwt sequence object to use for matching
  * @param query symbol string to search matches for
  * @param queryLen length of query string
@@ -261,29 +320,16 @@ extern void
 deleteEMIterator(BWTSeqExactMatchesIterator *iter);
 
 /**
- * location data corresponding to a match
- */
-struct MatchData
-{
-  const char *dbFile;           /**< name of original sequence file
-                                 *  the match is from  */
-  Seqpos sfxArrayValue,         /**< position of match in concatenated
-                                 *  encoded sequence representation
-                                 *  of multiple database files */
-    dbFilePos;                  /**< position of match in original
-                                 *  sequence file dbFile */
-};
-
-/**
  * \brief Get position of next match from an iterator.
  * @param iter reference of iterator object
  * @param bwtSeq reference of bwt sequence object to use for matching
- * @return reference to a structure that specifies the location of a
- * match or NULL if no further match is available, the reference  will
- * become invalid  once the iterator has been queried again
+ * @param pos location of match will be stored here if a further match
+ * is available, not modified otherwise
+ * @return true if another match could be found, false otherwise
  */
-static inline struct MatchData *
-EMIGetNextMatch(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq);
+static inline bool
+EMIGetNextMatch(BWTSeqExactMatchesIterator *iter, Seqpos *pos,
+                const BWTSeq *bwtSeq);
 
 /**
  * \brief Query an iterator for the total number of matches.

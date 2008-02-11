@@ -126,22 +126,18 @@ BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq)
   return bwtSeq->seqIdx;
 }
 
-static inline struct MatchData *
-EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq)
+static inline bool
+EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, Seqpos *pos,
+                const BWTSeq *bwtSeq)
 {
   if (iter->nextMatchBWTPos < iter->bounds.lower)
   {
-    iter->nextMatch.sfxArrayValue =
-      BWTSeqLocateMatch(bwtSeq, iter->nextMatchBWTPos, &iter->extBits);
-    {
-      /* FIXME: map position back to original encoded sequence */
-      iter->nextMatch.dbFile = 0;
-    }
+    *pos = BWTSeqLocateMatch(bwtSeq, iter->nextMatchBWTPos, &iter->extBits);
     ++iter->nextMatchBWTPos;
-    return &iter->nextMatch;
+    return true;
   }
   else
-    return NULL;
+    return false;
 }
 
 static inline Seqpos pckfindfirstmatch(const BWTSeq *bwtSeq,Seqpos lowerbound)
