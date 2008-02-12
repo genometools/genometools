@@ -20,6 +20,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/scorefasta.h"
 #include "tools/gt_scorefasta.h"
@@ -54,7 +55,7 @@ static OptionParser* gt_scorefasta_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_scorefasta_runner(int argc, const char **argv,
+static int gt_scorefasta_runner(UNUSED int argc, const char **argv,
                                 void *tool_arguments, Error *err)
 {
   ScorefastaArguments *arguments = tool_arguments;

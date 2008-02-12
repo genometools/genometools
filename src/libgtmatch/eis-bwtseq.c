@@ -20,6 +20,7 @@
 #include "libgtcore/dataalign.h"
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
+#include "libgtcore/unused.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/seqpos-def.h"
@@ -383,7 +384,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 }
 
 unsigned long packedindexuniqueforward(const void *genericindex,
-                                       /*@unused@*/ Seqpos *witnessposition,
+                                       UNUSED Seqpos *witnessposition,
                                        const Uchar *qstart,
                                        const Uchar *qend)
 {
@@ -586,7 +587,8 @@ EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
 
 extern int
 BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
-                      unsigned long tickPrint, FILE *fp, Error *err)
+                      UNUSED unsigned long tickPrint, UNUSED FILE *fp,
+                      Error *err)
 {
   Suffixarray suffixArray;
   struct extBitsRetrieval extBits;

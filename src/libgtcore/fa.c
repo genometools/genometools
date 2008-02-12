@@ -20,6 +20,7 @@
 #include "libgtcore/hashtable.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/xbzlib.h"
 #include "libgtcore/xposix.h"
@@ -373,7 +374,8 @@ void fa_xmunmap(void *addr)
   hashtable_remove(fa->memory_maps, addr);
 }
 
-static int check_fptr_leak(void *key, void *value, void *data, Error *e)
+static int check_fptr_leak(void *key, void *value, void *data,
+                           UNUSED Error *err)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAFileInfo *fileinfo = (FAFileInfo*) value;
@@ -387,7 +389,8 @@ static int check_fptr_leak(void *key, void *value, void *data, Error *e)
   return 0;
 }
 
-static int check_mmap_leak(void *key, void *value, void *data, Error *e)
+static int check_mmap_leak(void *key, void *value, void *data,
+                           UNUSED Error *err)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAMapInfo *mapinfo = (FAMapInfo*) value;

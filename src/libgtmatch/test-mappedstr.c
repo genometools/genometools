@@ -21,6 +21,7 @@
 #include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "libgtcore/error.h"
+#include "libgtcore/unused.h"
 #include "spacedef.h"
 #include "alphadef.h"
 #include "encseq-def.h"
@@ -94,9 +95,9 @@ DECLAREARRAYSTRUCT(Codetype);
 
 static void outkmeroccurrence(void *processinfo,
                               Codetype code,
-                              /*@unused@*/ Seqpos position,
-                              /*@unused@*/ const Firstspecialpos
-                                                 *firstspecialposition)
+                              UNUSED Seqpos position,
+                              UNUSED const Firstspecialpos
+                                           *firstspecialposition)
 {
   ArrayCodetype *codelist = (ArrayCodetype *) processinfo;
 

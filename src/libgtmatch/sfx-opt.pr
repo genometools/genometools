@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void wrapsfxoptions(Suffixeratoroptions *so,Error *err);
+void wrapsfxoptions(Suffixeratoroptions *so);
 
 int suffixeratoroptions(Suffixeratoroptions *so,
                         bool doesa,

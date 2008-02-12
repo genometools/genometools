@@ -53,7 +53,7 @@
  *  return    int    0 - OK.
  *                   1 - Error.
  */
-#define KT_KEY_FN(fn) int (fn)(GetLine *gl, int count, void *data)
+#define KT_KEY_FN(fn) int (fn)(__attribute__ ((unused)) GetLine *gl, __attribute__ ((unused)) int count, __attribute__ ((unused)) void *data)
 
 typedef KT_KEY_FN(KtKeyFn);
 

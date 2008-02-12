@@ -21,6 +21,7 @@
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/st.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 
 struct Hashtable
@@ -89,8 +90,7 @@ void hashtable_remove(Hashtable *ht, void *key)
     ht->value_free((void*) value);
 }
 
-static int st_iterfunc(void *key, void *value, void *data,
-                       /*@unused@*/ Error *err)
+static int st_iterfunc(void *key, void *value, void *data, UNUSED Error *err)
 {
   St_iterfunc_info *info = (St_iterfunc_info*) data;
   assert(info->iterfunc);
@@ -190,7 +190,8 @@ int hashtable_foreach_no(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
   return hashtable_foreach_ordered(ht, iterfunc, data, ulongcmp, err);
 }
 
-static int remove_key_value_pair(void *key, void *value, void *data, Error *err)
+static int remove_key_value_pair(void *key, void *value, void *data,
+                                 UNUSED Error *err)
 {
   Hashtable *ht= (Hashtable*) data;
   assert(ht);

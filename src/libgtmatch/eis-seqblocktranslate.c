@@ -23,6 +23,7 @@
 #include "libgtcore/dynalloc.h"
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtmatch/eis-seqblocktranslate.h"
 
 #if 1
@@ -298,7 +299,7 @@ printComposition(FILE *fp, const unsigned *composition,
 
 static void
 initPermutation(Symbol *permutation, const unsigned *composition,
-                unsigned blockSize, unsigned alphabetSize);
+                unsigned alphabetSize);
 static inline void
 nextPermutation(Symbol *permutation, unsigned blockSize);
 
@@ -324,7 +325,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
   if (!(currentPermutation = ma_malloc(sizeof (Symbol) * blockSize)))
     return -1;
   permutation->catPermsOffset = permOffset;
-  initPermutation(currentPermutation, composition, blockSize, alphabetSize);
+  initPermutation(currentPermutation, composition, alphabetSize);
   {
     size_t i = 0;
     BitOffset offset = permOffset;
@@ -352,14 +353,14 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
 }
 
 static void
-destructPermutationsList(struct permList *permutation)
+destructPermutationsList(UNUSED struct permList *permutation)
 {
 /*   ma_free(permutation->catPerms); */
 }
 
 static void
 initPermutation(Symbol *permutation, const unsigned *composition,
-                unsigned blockSize, unsigned alphabetSize)
+                unsigned alphabetSize)
 {
   Symbol sym, *p = permutation;
   unsigned j;

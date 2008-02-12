@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/unused.h"
 #include "spacedef.h"
 #include "sarr-def.h"
 #include "trieins-def.h"
@@ -24,7 +25,7 @@
 #include "esa-map.pr"
 
 static void maketrie(Trierep *trierep,
-                     /*@unused@*/ const Uchar *characters,
+                     UNUSED const Uchar *characters,
                      Seqpos len)
 {
   Suffixinfo suffixinfo;
@@ -48,9 +49,9 @@ static void maketrie(Trierep *trierep,
 }
 
 static void successivelydeletesmallest(Trierep *trierep,
-                                       /*@unused@*/ Seqpos seqlen,
-                                       /*@unused@*/ const Uchar *characters,
-                                       /*@unused@*/ Error *err)
+                                       UNUSED Seqpos seqlen,
+                                       UNUSED const Uchar *characters,
+                                       UNUSED Error *err)
 {
   Trienode *smallest;
 #ifdef WITHTRIEIDENT

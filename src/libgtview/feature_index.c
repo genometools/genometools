@@ -25,6 +25,7 @@
 #include "libgtcore/minmax.h"
 #include "libgtcore/range.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtview/feature_index.h"
 #include "libgtext/genome_node.h"
 
@@ -153,7 +154,7 @@ const char* feature_index_get_first_seqid(const FeatureIndex *fi)
   return fi->firstseqid;
 }
 
-int store_seqid(void *key, void *value, void *data, Error *e)
+int store_seqid(void *key, UNUSED void *value, void *data, UNUSED Error *err)
 {
   StrArray *seqids = (StrArray*) data;
   const char *seqid = (const char*) key;

@@ -29,11 +29,12 @@
 #include "libtecla.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtlua/interactive.h"
 
 static lua_State *globalL = NULL;
 
-static void lstop(lua_State *L, lua_Debug *ar) {
+static void lstop(lua_State *L, UNUSED lua_Debug *ar) {
   lua_sethook(L, NULL, 0, 0);
   luaL_error(L, "interrupted!");
 }

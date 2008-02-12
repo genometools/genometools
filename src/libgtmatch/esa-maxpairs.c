@@ -16,6 +16,7 @@
 */
 
 #include "libgtcore/arraydef.h"
+#include "libgtcore/unused.h"
 #include "spacedef.h"
 #include "seqpos-def.h"
 #include "esa-seqread.h"
@@ -80,7 +81,7 @@ static Dfsinfo *allocateDfsinfo(Dfsstate *state)
   return dfsinfo;
 }
 
-static void freeDfsinfo(Dfsinfo *dfsinfo,/*@unused@*/ Dfsstate *state)
+static void freeDfsinfo(Dfsinfo *dfsinfo, UNUSED Dfsstate *state)
 {
   FREESPACE(dfsinfo->nodeposlist);
   FREESPACE(dfsinfo);

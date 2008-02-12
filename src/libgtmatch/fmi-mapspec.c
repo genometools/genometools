@@ -15,12 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/unused.h"
 #include "fmindex.h"
 #include "mapspec-def.h"
 
 static void assignfmmapspecification(ArrayMapspecification *mapspectable,
                                      void *voidinfo,
-                                     /*@unused@*/ bool writemode)
+                                     UNUSED bool writemode)
 {
   Fmindexwithoptions *fmwithoptions = (Fmindexwithoptions *) voidinfo;
   Fmindex *fmindex;

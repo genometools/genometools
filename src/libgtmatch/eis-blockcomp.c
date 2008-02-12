@@ -39,6 +39,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/str.h"
+#include "libgtcore/unused.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/esa-map.pr"
@@ -305,8 +306,7 @@ static void
 destructAppendState(struct appendState *aState);
 
 static inline void
-append2IdxOutput(struct blockCompositionSeq *newSeqIdx,
-                 struct appendState *state,
+append2IdxOutput(struct appendState *state,
                  PermCompIndex permCompIdx[2],
                  unsigned bitsOfCompositionIdx, unsigned bitsOfPermutationIdx);
 
@@ -355,8 +355,7 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
 
 static int
 finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
-                  struct appendState *state,
-                  const partialSymSum *buck, Error *err);
+                  struct appendState *state);
 
 static inline void
 symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx);
@@ -410,7 +409,7 @@ addBlock2OutputBuffer(
                   blockMapAlphabetSize, block, permCompIdx,
                   &significantPermIdxBits,
                   permCompBSPreAlloc, compositionPreAlloc);
-  append2IdxOutput(newSeqIdx, aState, permCompIdx, compositionIdxBits,
+  append2IdxOutput(aState, permCompIdx, compositionIdxBits,
                    significantPermIdxBits);
 }
 
@@ -751,7 +750,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                 break;
               }
             }
-            if (!finalizeIdxOutput(newSeqIdx, &aState, buck, err))
+            if (!finalizeIdxOutput(newSeqIdx, &aState))
             {
               hadError = 1;
               perror("error condition while writing block-compressed"
@@ -1088,8 +1087,8 @@ fetchSuperBlock(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
 }
 
 static Seqpos
-blockCompSeqSelect(struct encIdxSeq *seq, Symbol sym, Seqpos count,
-                   union EISHint *hint)
+blockCompSeqSelect(UNUSED struct encIdxSeq *seq, UNUSED Symbol sym,
+                   UNUSED Seqpos count, UNUSED union EISHint *hint)
 {
   /* FIXME: implementation pending */
   abort();
@@ -1576,8 +1575,7 @@ destructAppendState(struct appendState *aState)
  * @return 0 on successfull update, <0 on error
  */
 static inline void
-append2IdxOutput(struct blockCompositionSeq *newSeqIdx,
-                 struct appendState *state,
+append2IdxOutput(struct appendState *state,
                  PermCompIndex permCompIdx[2],
                  unsigned bitsOfCompositionIdx, unsigned bitsOfPermutationIdx)
 {
@@ -2199,8 +2197,7 @@ seekToHeader(const struct encIdxSeq *seqIdx, uint16_t headerID,
  */
 static int
 finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
-                  struct appendState *aState,
-                  const partialSymSum *buck, Error *err)
+                  struct appendState *aState)
 {
   off_t rangeEncPos;
   size_t recordsExpected;

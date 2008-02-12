@@ -73,7 +73,7 @@ const char *_hd_last_home_dir_error(HomeDir *home);
  * completion of the scan, or 1 if an error occurred or a call to the
  * callback function returned 1.
  */
-#define HOME_DIR_FN(fn) int (fn)(void *data, const char *usrnam, const char *homedir, char *errmsg, int maxerr)
+#define HOME_DIR_FN(fn) int (fn)(void *data, const char *usrnam, __attribute__ ((unused)) const char *homedir, char *errmsg, int maxerr)
 
 int _hd_scan_user_home_dirs(HomeDir *home, const char *prefix, void *data,
 			    HOME_DIR_FN(*callback_fn));

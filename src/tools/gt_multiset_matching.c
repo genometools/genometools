@@ -18,6 +18,7 @@
 #include <string.h>
 #include "libgtcore/error.h"
 #include "libgtcore/option.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/multiset_matching.h"
 #include "tools/gt_multiset_matching.h"
@@ -37,7 +38,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-static void show_match(unsigned long pos, void *data)
+static void show_match(unsigned long pos, UNUSED void *data)
 {
   printf("%lu\n", pos + 1);
 }

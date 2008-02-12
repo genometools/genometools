@@ -21,6 +21,7 @@
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/score_matrix.h"
+#include "libgtcore/unused.h"
 #include "libgtext/blast_env.h"
 #include "tools/gt_blastenv.h"
 
@@ -58,7 +59,7 @@ static OptionParser* gt_blastenv_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_blastenv_runner(int argc, const char **argv,
+static int gt_blastenv_runner(UNUSED int argc, const char **argv,
                               void *tool_arguments, Error *err)
 {
   ScorefastaArguments *arguments = tool_arguments;

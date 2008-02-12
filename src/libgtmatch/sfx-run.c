@@ -23,6 +23,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/filelengthvalues.h"
 #include "libgtcore/seqiterator.h"
+#include "libgtcore/unused.h"
 #include "spacedef.h"
 #include "alphadef.h"
 #include "sfx-optdef.h"
@@ -210,7 +211,7 @@ static int suffixeratorwithoutput(
                  unsigned int numofchars,
                  unsigned int prefixlength,
                  unsigned int numofparts,
-                 const Str *indexname,
+                 UNUSED const Str *indexname,
                  Measuretime *mtime,
                  Verboseinfo *verboseinfo,
                  Error *err)
@@ -265,8 +266,7 @@ static int suffixeratorwithoutput(
   return haserr ? -1 : 0;
 }
 
-static unsigned long *initcharacterdistribution(const Alphabet *alpha,
-                                                Error *err)
+static unsigned long *initcharacterdistribution(const Alphabet *alpha)
 {
   unsigned long *characterdistribution;
   unsigned int mapsize, idx;
@@ -330,7 +330,7 @@ static int runsuffixerator(bool doesa,
   {
     if (!so->isplain)
     {
-      characterdistribution = initcharacterdistribution(alpha,err);
+      characterdistribution = initcharacterdistribution(alpha);
     }
     if (fasta2sequencekeyvalues(so->str_indexname,
                                 &numofsequences,
@@ -606,6 +606,6 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
       haserr = true;
     }
   }
-  wrapsfxoptions(&so,err);
+  wrapsfxoptions(&so);
   return haserr ? -1 : 0;
 }

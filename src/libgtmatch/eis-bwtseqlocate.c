@@ -16,6 +16,7 @@
 #include <stdlib.h>
 
 #include "libgtcore/chardef.h"
+#include "libgtcore/unused.h"
 #include "libgtmatch/eis-bitpackseqpos.h"
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqcreate.h"
@@ -162,7 +163,7 @@ destructAddLocateInfoState(struct addLocateInfoState *state)
 static BitOffset
 addLocateInfo(BitString cwDest, BitOffset cwOffset,
               BitString varDest, BitOffset varOffset,
-              Seqpos start, Seqpos len, void *cbState, Error *err)
+              UNUSED Seqpos start, Seqpos len, void *cbState, Error *err)
 {
   BitOffset bitsWritten = 0;
   struct addLocateInfoState *state = cbState;

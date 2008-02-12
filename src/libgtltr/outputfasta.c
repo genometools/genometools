@@ -18,6 +18,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/str.h"
+#include "libgtcore/unused.h"
 #include "libgtmatch/alphadef.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/spacedef.h"
@@ -107,7 +108,7 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
 }
 
 static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
-                    Seqpos len, /*@unused@*/Str *str_indexfilename, Error *err)
+                    Seqpos len, UNUSED Str *str_indexfilename, Error *err)
 {
   unsigned long i, desclen;
   const char *desptr;

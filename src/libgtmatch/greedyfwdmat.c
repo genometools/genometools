@@ -19,6 +19,7 @@
 #include <string.h>
 #include "libgtcore/error.h"
 #include "libgtcore/seqiterator.h"
+#include "libgtcore/unused.h"
 #include "defined-types.h"
 #include "alphadef.h"
 #include "spacedef.h"
@@ -153,8 +154,8 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
 }
 
 static void showunitnum(uint64_t unitnum,
-                       const char *desc,
-                       /*@unused@*/ void *info)
+                        const char *desc,
+                        UNUSED void *info)
 {
   printf("unit " Formatuint64_t, PRINTuint64_tcast(unitnum));
   if (desc != NULL && desc[0] != '\0')

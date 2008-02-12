@@ -24,6 +24,7 @@
 #include "libgtcore/ma.h"
 #include "libgtcore/str.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/warning.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_feature.h"
@@ -289,14 +290,16 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
   assert(hashtable_get(d->nodeinfo, node));
 }
 
-static int diagram_add_tracklines(void *key, void *value, void *data, Error *e)
+static int diagram_add_tracklines(UNUSED void *key, void *value, void *data,
+                                  UNUSED Error *err)
 {
   int *add = (int*) data;
   *add += track_get_number_of_lines((Track*) value);
   return 0;
 }
 
-static int diagram_track_delete(void *key, void *value, void *data, Error *e)
+static int diagram_track_delete(UNUSED void *key, void *value,
+                                UNUSED void *data, UNUSED Error *err)
 {
   track_delete((Track*) value);
   return 0;
@@ -332,7 +335,8 @@ static Str* track_key_new(const char *filename, GenomeFeatureType type)
 }
 
 /* Create Tracks for all Blocks in the diagram. */
-static int collect_blocks(void *key, void *value, void *data, Error *e)
+static int collect_blocks(UNUSED void *key, void *value, void *data,
+                          UNUSED Error *err)
 {
   NodeInfoElement *ni = (NodeInfoElement*) value;
   Diagram *diagram = (Diagram*) data;

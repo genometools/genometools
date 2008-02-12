@@ -19,6 +19,7 @@
 #include "libgtcore/arraydef.h"
 #include "libgtcore/error.h"
 #include "libgtcore/log.h"
+#include "libgtcore/unused.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/intcode-def.h"
@@ -151,13 +152,9 @@ int simpleexactselfmatchstore (
   return 0;
 }
 
-int subsimpleexactselfmatchstore (
-  void *info,
-  unsigned long len,
-  Seqpos dbstart,
-   /*@unused@*/ uint64_t queryoffset,
-  unsigned long querystart,
-  /*@unused@*/ Error *err)
+int subsimpleexactselfmatchstore(void *info, unsigned long len, Seqpos dbstart,
+                                 UNUSED uint64_t queryoffset,
+                                 unsigned long querystart, UNUSED Error *err)
 {
   Repeat *nextfreerepeatptr;
   SubRepeatInfo *sri = (SubRepeatInfo *) info;

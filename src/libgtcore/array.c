@@ -23,6 +23,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/range.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 
 #define NUM_OF_TESTS    100
@@ -206,7 +207,8 @@ static int iterate_test_func(void *info, const void *value, Error *err)
   return had_err;
 }
 
-static int iterate_fail_func(void *info, const void *value, Error *err)
+static int iterate_fail_func(UNUSED void *info, UNUSED const void *value,
+                             UNUSED Error *err)
 {
   return -1;
 }

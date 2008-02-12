@@ -21,6 +21,7 @@
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/outputfile.h"
+#include "libgtcore/unused.h"
 #include "tools/gt_extractseq.h"
 
 #define FROMPOS_OPTION_STR  "frompos"
@@ -106,7 +107,7 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_extractseq_arguments_check(int rest_argc, void *tool_arguments,
+static int gt_extractseq_arguments_check(UNUSED int argc, void *tool_arguments,
                                          Error *err)
 {
   ExtractSeqArguments *arguments = tool_arguments;

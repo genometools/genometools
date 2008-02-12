@@ -17,6 +17,7 @@
 
 #include "libgtcore/error.h"
 #include "libgtcore/option.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/fmindex.h"
 #include "libgtmatch/sarr-def.h"

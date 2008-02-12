@@ -22,12 +22,12 @@
 #include "verbose-def.h"
 #include "seqpos-def.h"
 
-int testmaxpairs(/*@unused@*/ const Str *indexname,
-                 /*@unused@*/ unsigned long samples,
-                 /*@unused@*/ unsigned int minlength,
-                 /*@unused@*/ Seqpos substringlength,
-                 /*@unused@*/ Verboseinfo *verboseinfo,
-                 /*@unused@*/ Error *err)
+int testmaxpairs(UNUSED const Str *indexname,
+                 UNUSED unsigned long samples,
+                 UNUSED unsigned int minlength,
+                 UNUSED Seqpos substringlength,
+                 UNUSED Verboseinfo *verboseinfo,
+                 UNUSED Error *err)
 {
   return 0;
 }
@@ -36,6 +36,7 @@ int testmaxpairs(/*@unused@*/ const Str *indexname,
 
 #include "libgtcore/array.h"
 #include "libgtcore/arraydef.h"
+#include "libgtcore/unused.h"
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
@@ -77,7 +78,7 @@ static int storemaxmatchquery(void *info,
                               Seqpos dbstart,
                               uint64_t queryseqnum,
                               unsigned long querystart,
-                              /*@unused@*/ Error *err)
+                              UNUSED Error *err)
 {
   Array *tab = (Array *) info;
   Substringmatch subm;
@@ -196,8 +197,8 @@ static int orderSubstringmatch(const void *a,const void *b)
   return 0;
 }
 
-static int showSubstringmatch(/*@unused@*/ void *info,const void *a,
-                              /*@unused@*/ Error *err)
+static int showSubstringmatch(UNUSED void *info,const void *a,
+                              UNUSED Error *err)
 {
   Substringmatch *m = (Substringmatch *) a;
 

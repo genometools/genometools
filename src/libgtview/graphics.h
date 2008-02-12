@@ -73,7 +73,7 @@ void      graphics_draw_caret(Graphics*, double x, double y, double width,
 void      graphics_draw_rectangle(Graphics*, double x, double y,
                                   bool filled, Color fill_color, bool outlined,
                                   Color outline_color, double outline_width,
-                                  double width, double height);
+                                  double width);
 void      graphics_draw_arrowhead(Graphics*, double x, double y, Color,
                                   ArrowStatus);
 /* Write out the Graphic as PNG to the given file with <filename>. */

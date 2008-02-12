@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include "libgtcore/chardef.h"
+#include "libgtcore/unused.h"
 #include "divmodmul.h"
 #include "fmindex.h"
 
@@ -24,7 +25,7 @@
 #include "fmi-locate.pr"
 
 unsigned long skfmuniqueforward (const void *genericindex,
-                                 /*@unused@*/ Seqpos *witnessposition,
+                                 UNUSED Seqpos *witnessposition,
                                  const Uchar *qstart,
                                  const Uchar *qend)
 {

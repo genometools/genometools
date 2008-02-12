@@ -18,6 +18,7 @@
 #include <string.h>
 #include "libgtcore/bioseq.h"
 #include "libgtcore/option.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/linearedist.h"
 #include "libgtext/neighborjoining.h"
@@ -50,7 +51,7 @@ static double distfunc(unsigned long i, unsigned long j, void *data)
 }
 
 static double exampledistfunc(unsigned long i, unsigned long j,
-                              /*@unused@*/ void *data)
+                              UNUSED void *data)
 {
   static const double exampledistances[5][5] =
     { {0.0   , 0.1715, 0.2147, 0.3091, 0.2326},

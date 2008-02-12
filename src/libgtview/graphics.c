@@ -300,7 +300,7 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
 void graphics_draw_rectangle(Graphics *g, double x, double y,
                              bool filled, Color fill_color, bool outlined,
                              Color outline_color, double outline_width,
-                             double width, double height)
+                             double width)
 {
   assert(g);
   /* save cairo context */

@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtext/comment.h"
 #include "libgtext/genome_node_rep.h"
 
@@ -48,7 +49,7 @@ static Str* comment_get_idstr(GenomeNode *gn)
   return c->comment_str;
 }
 
-static Range comment_get_range(/*@unused@*/ GenomeNode *gn)
+static Range comment_get_range(UNUSED GenomeNode *gn)
 {
   Range range;
   range.start = 0;

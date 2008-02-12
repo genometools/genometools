@@ -274,7 +274,7 @@ static void showoptions(const Suffixeratoroptions *so)
           so->outdestab ? "true" : "false");
 }
 
-void wrapsfxoptions(Suffixeratoroptions *so,Error *err)
+void wrapsfxoptions(Suffixeratoroptions *so)
 {
   /* no checking if error occurs, since errors have been output before */
   str_delete(so->str_indexname);

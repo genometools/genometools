@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <limits.h>
+#include "libgtcore/unused.h"
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "emimergeesa.h"
@@ -36,7 +37,7 @@ static void fillandinsert(Trierep *trierep,
                           unsigned int idx,
                           Seqpos suftabvalue,
                           Trienode *node,
-                          /*@unused@*/ uint64_t ident)
+                          UNUSED uint64_t ident)
 {
   Suffixinfo sinfo;
 

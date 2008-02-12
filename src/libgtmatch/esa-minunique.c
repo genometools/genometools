@@ -18,6 +18,7 @@
 #include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/symboldef.h"
+#include "libgtcore/unused.h"
 #include "sarr-def.h"
 #include "seqpos-def.h"
 #include "divmodmul.h"
@@ -103,7 +104,7 @@ static bool findcharintervalbin(const Encodedsequence *encseq,
 }
 
 unsigned long suffixarrayuniqueforward (const void *genericindex,
-                                        /*@unused@*/ Seqpos *witnessposition,
+                                        UNUSED Seqpos *witnessposition,
                                         const Uchar *qstart,
                                         const Uchar *qend)
 {

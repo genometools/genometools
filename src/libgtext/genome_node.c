@@ -21,6 +21,7 @@
 #include "libgtcore/ma.h"
 #include "libgtcore/msort.h"
 #include "libgtcore/queue.h"
+#include "libgtcore/unused.h"
 #include "libgtext/genome_node_rep.h"
 
 typedef struct {
@@ -103,7 +104,7 @@ void* genome_node_cast(const GenomeNodeClass *gnc, GenomeNode *gn)
   return NULL;
 }
 
-static int increase_reference_count(GenomeNode *gn, /*@unused@*/ void *data,
+static int increase_reference_count(GenomeNode *gn, UNUSED void *data,
                                     Error *e)
 {
   error_check(e);
@@ -411,7 +412,7 @@ bool genome_node_is_marked(const GenomeNode *gn)
   return gn->mark;
 }
 
-static int check_marked_status(GenomeNode *gn, void *data, Error *e)
+static int check_marked_status(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   bool *marked = data;
   if (gn->mark)
@@ -549,7 +550,7 @@ int genome_node_compare(GenomeNode **gn_a, GenomeNode **gn_b)
 }
 
 int genome_node_compare_with_data(GenomeNode **gn_a, GenomeNode **gn_b,
-                                  void *unused)
+                                  UNUSED void *unused)
 {
   return genome_node_cmp(*gn_a, *gn_b);
 }
@@ -573,7 +574,8 @@ void genome_node_delete(GenomeNode *gn)
   ma_free(gn);
 }
 
-static int free_genome_node(GenomeNode *gn, /*@unused@*/ void *data, Error *e)
+static int free_genome_node(GenomeNode *gn, UNUSED void *data,
+                            UNUSED Error *err)
 {
   genome_node_delete(gn);
   return 0;

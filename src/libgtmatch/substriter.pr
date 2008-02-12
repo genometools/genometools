@@ -4,10 +4,10 @@ extern "C" {
 struct Substriter
 {
   uint64_t unitnum;
-  SeqIterator *seqit;
   unsigned int qvalue, numofchars;
-  const Codetype **multimappower;
   bool newseq;
+  Codetype **multimappower;
+  SeqIterator *seqit;
 };
 Substriter *substriter_new(const StrArray *queryfilenames,
                            const Alphabet *alphabet,

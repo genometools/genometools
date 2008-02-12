@@ -100,7 +100,7 @@ newSfxInterface(Suffixeratoroptions *so,
 
 static struct seqStats *
 newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
-                        const unsigned long *characterdistribution, Error *err)
+                        const unsigned long *characterdistribution)
 {
   struct seqStats *stats = NULL;
   unsigned i, mapSize;
@@ -162,7 +162,7 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
   iface->encseq = encseq;
   iface->stats = newSeqStatsFromCharDist(iface->alpha, iface->length,
                                          numofsequences,
-                                         characterdistribution, err);
+                                         characterdistribution);
   if (!(iface->sfi = newSfxiterator(specialcharinfo->specialcharacters,
                                     specialcharinfo->specialranges,
                                     encseq, so->readmode,

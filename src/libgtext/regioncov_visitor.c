@@ -20,6 +20,7 @@
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
+#include "libgtcore/unused.h"
 #include "libgtext/genome_visitor_rep.h"
 #include "libgtext/regioncov_visitor.h"
 
@@ -100,7 +101,7 @@ GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist)
   return gv;
 }
 
-static int show_rangelist(void *key, void *value, void *data, Error *e)
+static int show_rangelist(void *key, void *value, UNUSED void *data, Error *e)
 {
   unsigned long i;
   Array *rangelist;

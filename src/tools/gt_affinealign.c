@@ -18,6 +18,7 @@
 #include "libgtcore/bioseq.h"
 #include "libgtcore/option.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/affinealign.h"
 #include "libgtext/alignment.h"
@@ -63,7 +64,7 @@ static OptionParser* gt_affinealign_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_affinealign_runner(int argc, const char **argv,
+static int gt_affinealign_runner(UNUSED int argc, const char **argv,
                                  void *tool_arguments, Error *err)
 {
   Bioseq *bioseq_1, *bioseq_2 = NULL;

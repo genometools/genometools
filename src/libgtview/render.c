@@ -20,6 +20,7 @@
 #include <string.h>
 #include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
+#include "libgtcore/unused.h"
 #include "libgtview/render.h"
 #include "libgtview/graphics.h"
 #include "libgtview/element.h"
@@ -357,7 +358,7 @@ static void mark_caption_collisions(Render *r, Line *line)
   }
 }
 
-static int render_track(void *key, void *value, void *data, Error *e)
+static int render_track(void *key, void *value, void *data, UNUSED Error *err)
 {
   Render* r = (Render*) data;
   Track* track = (Track*) value;

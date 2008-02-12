@@ -5,6 +5,7 @@
 
 #include "libgtcore/ma.h"
 #include "libgtcore/st.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 
 typedef struct st_table_entry st_table_entry;
@@ -427,7 +428,7 @@ st_delete_safe(table, key, value, never)
 
 static int
 delete_never(key, value, never)
-    st_data_t /*@unused@*/ key, value, never;
+    st_data_t UNUSED key, value, never;
 {
     if (value == never) return ST_DELETE;
     return ST_CONTINUE;

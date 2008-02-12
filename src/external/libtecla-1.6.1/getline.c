@@ -8749,8 +8749,11 @@ int gl_watch_fd(GetLine *gl, int fd, GlFdEvent event,
  * assumes that the caller has checked its arguments and blocked the
  * delivery of signals.
  */
-static int _gl_watch_fd(GetLine *gl, int fd, GlFdEvent event,
-			GlFdEventFn *callback, void *data)
+static int _gl_watch_fd(__attribute__ ((unused)) GetLine *gl,
+                        __attribute__ ((unused)) int fd,
+                        __attribute__ ((unused)) GlFdEvent event,
+			__attribute__ ((unused)) GlFdEventFn *callback,
+                        __attribute__ ((unused)) void *data)
 #if !defined(HAVE_SELECT)
 {return 1;}               /* The facility isn't supported on this system */
 #else
@@ -8884,8 +8887,11 @@ static int _gl_watch_fd(GetLine *gl, int fd, GlFdEvent event,
  *                               error message is generated in the latter
  *                               case.
  */
-int gl_inactivity_timeout(GetLine *gl, GlTimeoutFn *timeout_fn, void *data,
-		   unsigned long sec, unsigned long nsec)
+int gl_inactivity_timeout(__attribute__ ((unused)) GetLine *gl,
+                          __attribute__ ((unused)) GlTimeoutFn *timeout_fn,
+                          __attribute__ ((unused)) void *data,
+		          __attribute__ ((unused)) unsigned long sec,
+                          __attribute__ ((unused)) unsigned long nsec)
 #if !defined(HAVE_SELECT)
 {return 1;}               /* The facility isn't supported on this system */
 #else
@@ -8936,7 +8942,8 @@ int gl_inactivity_timeout(GetLine *gl, GlTimeoutFn *timeout_fn, void *data,
  *  return    int    0 - OK.
  *                   1 - An error occurred.
  */
-static int gl_event_handler(GetLine *gl, int fd)
+static int gl_event_handler(__attribute__ ((unused)) GetLine *gl,
+                            __attribute__ ((unused)) int fd)
 #if !defined(HAVE_SELECT)
 {return 0;}
 #else

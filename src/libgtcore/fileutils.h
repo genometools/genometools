@@ -32,7 +32,7 @@ bool           file_is_newer(const char *a, const char *b);
 unsigned long  file_number_of_lines(const char*);
 
 /* set <path> to the dirname of <file>, if it has one, to "" otherwise */
-void           file_dirname(Str *path, const char *file, Error*);
+void           file_dirname(Str *path, const char *file);
 
 /* find 'file' in $PATH, if it has no dirname; set 'path' to dirname otherwise.
    sets 'path' to the empty string if 'file' could not be found in $PATH. */

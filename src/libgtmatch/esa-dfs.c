@@ -17,6 +17,7 @@
 
 #include <limits.h>
 #include "libgtcore/symboldef.h"
+#include "libgtcore/unused.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
 #include "esa-seqread.h"
@@ -108,7 +109,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                                             Seqpos,Dfsstate *,Error *),
                   */
                   Dfsstate *state,
-                  /*@unused@*/ Verboseinfo *verboseinfo,
+                  UNUSED Verboseinfo *verboseinfo,
                   Error *err)
 {
   bool firstedge,

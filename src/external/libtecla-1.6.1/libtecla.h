@@ -337,7 +337,7 @@ typedef CPL_MATCH_FN(CplMatchFn);
  *                          1 - Do include this file in the list
  *                              of completions.
  */
-#define CPL_CHECK_FN(fn) int (fn)(void *data, const char *pathname)
+#define CPL_CHECK_FN(fn) int (fn)(__attribute__ ((unused)) void *data, const char *pathname)
 typedef CPL_CHECK_FN(CplCheckFn);
 
 /*

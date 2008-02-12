@@ -21,6 +21,7 @@
 #include "libgtcore/fasta.h"
 #include "libgtcore/stringdistri.h"
 #include "libgtcore/translate.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/warning.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/genome_node_iterator.h"
@@ -150,7 +151,7 @@ GenomeVisitor* splicesiteinfo_visitor_new(RegionMapping *rm)
 }
 
 static void showsplicesite(const char *string, unsigned long occurrences,
-                           double probability, void *unused)
+                           double probability, UNUSED void *unused)
 {
   assert(string && strlen(string) == 4);
   xputchar(string[0]);
@@ -162,7 +163,7 @@ static void showsplicesite(const char *string, unsigned long occurrences,
 }
 
 static void showsinglesite(const char *string, unsigned long occurrences,
-                           double probability, void *unused)
+                           double probability, UNUSED void *unused)
 {
   assert(string && strlen(string) == 2);
   printf("%s: %6.2f%% (n=%lu)\n", string, probability * 100.0, occurrences);

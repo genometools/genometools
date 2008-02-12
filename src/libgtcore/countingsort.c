@@ -20,6 +20,7 @@
 #include "libgtcore/countingsort.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 
 void countingsort(void *out, const void *in, size_t elem_size,
@@ -67,7 +68,7 @@ unsigned long countingsort_get_max(const void *in, size_t elem_size,
   return max_value;
 }
 
-static unsigned long get_int(const void *elem, /*@unused@*/ void *data)
+static unsigned long get_int(const void *elem, UNUSED void *data)
 {
   assert(elem);
   return *(unsigned int*) elem;

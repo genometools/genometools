@@ -122,19 +122,20 @@
     ((*p) == 0xF4 ? (p)[1] > 0x8F : ((p)[1] & 0xC0) == 0xC0)))
 
 static int PTRFASTCALL
-isNever(const ENCODING *enc, const char *p)
+isNever(__attribute__ ((unused)) const ENCODING *enc,
+        __attribute__ ((unused)) const char *p)
 {
   return 0;
 }
 
 static int PTRFASTCALL
-utf8_isName2(const ENCODING *enc, const char *p)
+utf8_isName2(__attribute__ ((unused)) const ENCODING *enc, const char *p)
 {
   return UTF8_GET_NAMING2(namePages, (const unsigned char *)p);
 }
 
 static int PTRFASTCALL
-utf8_isName3(const ENCODING *enc, const char *p)
+utf8_isName3(__attribute__ ((unused)) const ENCODING *enc, const char *p)
 {
   return UTF8_GET_NAMING3(namePages, (const unsigned char *)p);
 }
@@ -142,13 +143,13 @@ utf8_isName3(const ENCODING *enc, const char *p)
 #define utf8_isName4 isNever
 
 static int PTRFASTCALL
-utf8_isNmstrt2(const ENCODING *enc, const char *p)
+utf8_isNmstrt2(__attribute__ ((unused)) const ENCODING *enc, const char *p)
 {
   return UTF8_GET_NAMING2(nmstrtPages, (const unsigned char *)p);
 }
 
 static int PTRFASTCALL
-utf8_isNmstrt3(const ENCODING *enc, const char *p)
+utf8_isNmstrt3(__attribute__ ((unused)) const ENCODING *enc, const char *p)
 {
   return UTF8_GET_NAMING3(nmstrtPages, (const unsigned char *)p);
 }
@@ -156,19 +157,19 @@ utf8_isNmstrt3(const ENCODING *enc, const char *p)
 #define utf8_isNmstrt4 isNever
 
 static int PTRFASTCALL
-utf8_isInvalid2(const ENCODING *enc, const char *p)
+utf8_isInvalid2(__attribute__ ((unused)) const ENCODING *enc, const char *p)
 {
   return UTF8_INVALID2((const unsigned char *)p);
 }
 
 static int PTRFASTCALL
-utf8_isInvalid3(const ENCODING *enc, const char *p)
+utf8_isInvalid3(__attribute__ ((unused)) const ENCODING *enc, const char *p)
 {
   return UTF8_INVALID3((const unsigned char *)p);
 }
 
 static int PTRFASTCALL
-utf8_isInvalid4(const ENCODING *enc, const char *p)
+utf8_isInvalid4(__attribute__ ((unused)) const ENCODING *enc, const char *p)
 {
   return UTF8_INVALID4((const unsigned char *)p);
 }
@@ -319,7 +320,7 @@ enum {  /* UTF8_cvalN is value of masked first byte of N byte sequence */
 };
 
 static void PTRCALL
-utf8_toUtf8(const ENCODING *enc,
+utf8_toUtf8(__attribute__ ((unused)) const ENCODING *enc,
             const char **fromP, const char *fromLim,
             char **toP, const char *toLim)
 {
@@ -426,7 +427,7 @@ static const struct normal_encoding internal_utf8_encoding = {
 };
 
 static void PTRCALL
-latin1_toUtf8(const ENCODING *enc,
+latin1_toUtf8(__attribute__ ((unused)) const ENCODING *enc,
               const char **fromP, const char *fromLim,
               char **toP, const char *toLim)
 {
@@ -451,7 +452,7 @@ latin1_toUtf8(const ENCODING *enc,
 }
 
 static void PTRCALL
-latin1_toUtf16(const ENCODING *enc,
+latin1_toUtf16(__attribute__ ((unused)) const ENCODING *enc,
                const char **fromP, const char *fromLim,
                unsigned short **toP, const unsigned short *toLim)
 {
@@ -484,7 +485,7 @@ static const struct normal_encoding latin1_encoding = {
 };
 
 static void PTRCALL
-ascii_toUtf8(const ENCODING *enc,
+ascii_toUtf8(__attribute__ ((unused)) const ENCODING *enc,
              const char **fromP, const char *fromLim,
              char **toP, const char *toLim)
 {
@@ -537,7 +538,7 @@ unicode_byte_type(char hi, char lo)
 
 #define DEFINE_UTF16_TO_UTF8(E) \
 static void  PTRCALL \
-E ## toUtf8(const ENCODING *enc, \
+E ## toUtf8(__attribute__ ((unused)) const ENCODING *enc, \
             const char **fromP, const char *fromLim, \
             char **toP, const char *toLim) \
 { \
@@ -600,7 +601,7 @@ E ## toUtf8(const ENCODING *enc, \
 
 #define DEFINE_UTF16_TO_UTF16(E) \
 static void  PTRCALL \
-E ## toUtf16(const ENCODING *enc, \
+E ## toUtf16(__attribute__ ((unused)) const ENCODING *enc, \
              const char **fromP, const char *fromLim, \
              unsigned short **toP, const unsigned short *toLim) \
 { \
@@ -938,7 +939,7 @@ streqci(const char *s1, const char *s2)
 }
 
 static void PTRCALL
-initUpdatePosition(const ENCODING *enc, const char *ptr,
+initUpdatePosition(__attribute__ ((unused)) const ENCODING *enc, const char *ptr,
                    const char *end, POSITION *pos)
 {
   normal_updatePosition(&utf8_encoding.enc, ptr, end, pos);

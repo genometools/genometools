@@ -20,6 +20,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 
 #include "libgtmatch/eis-seqranges.h"
@@ -162,8 +163,8 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
 }
 
 void
-SRLinsertNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
-                  Symbol esym)
+SRLinsertNewRange(struct seqRangeList *rangeList, UNUSED Seqpos pos,
+                  UNUSED Seqpos len, UNUSED Symbol esym)
 {
   assert(rangeList);
   abort();

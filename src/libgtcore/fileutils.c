@@ -63,7 +63,7 @@ unsigned long file_number_of_lines(const char *path)
   return number_of_lines;
 }
 
-void file_dirname(Str *path, const char *file, Error *err)
+void file_dirname(Str *path, const char *file)
 {
   long i;
   str_reset(path);
@@ -86,7 +86,7 @@ int file_find_in_path(Str *path, const char *file, Error *err)
   assert(file);
 
   /* check if 'file' has dirname */
-  file_dirname(path, file, err);
+  file_dirname(path, file);
   if (str_length(path))
     return had_err;
   /* 'file' has no dirname -> scan $PATH */

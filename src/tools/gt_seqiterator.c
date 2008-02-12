@@ -22,6 +22,7 @@
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/seqiterator.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xposix.h"
 #include "libgtcore/progressbar.h"
@@ -54,7 +55,7 @@ static OPrval parse_options(bool *verbose,bool *dodistlen,int *parsed_args,
 }
 
 static void showdistseqlen(unsigned long key, unsigned long long value,
-                           /*@unused@*/ void *data)
+                           UNUSED void *data)
 {
   unsigned long distvalue;
 

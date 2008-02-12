@@ -21,6 +21,7 @@
 #include "libgtcore/range.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strand.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/consensus_sa.h"
@@ -176,10 +177,10 @@ static void get_exons(Array *exon_ranges, const void *sa)
 }
 
 static void process_splice_form(Array *spliced_alignments_in_form,
-                                /*@unused@*/ const void *set_of_sas,
-                                /*@unused@*/ unsigned long number_of_sas,
-                                /*@unused@*/ size_t size_of_sa,
-                                /*@unused@*/ void *userdata)
+                                UNUSED const void *set_of_sas,
+                                UNUSED unsigned long number_of_sas,
+                                UNUSED size_t size_of_sa,
+                                UNUSED void *userdata)
 {
   unsigned long i;
 

@@ -1147,7 +1147,8 @@ XML_UseParserAsHandlerArg(XML_Parser parser)
 }
 
 enum XML_Error XMLCALL
-XML_UseForeignDTD(XML_Parser parser, XML_Bool useDTD)
+XML_UseForeignDTD(__attribute__ ((unused)) XML_Parser parser,
+                  __attribute__ ((unused)) XML_Bool useDTD)
 {
 #ifdef XML_DTD
   /* block after XML_Parse()/XML_ParseBuffer() has been called */
@@ -1776,7 +1777,9 @@ XML_GetCurrentByteCount(XML_Parser parser)
 }
 
 const char * XMLCALL
-XML_GetInputContext(XML_Parser parser, int *offset, int *size)
+XML_GetInputContext(__attribute__ ((unused)) XML_Parser parser,
+                    __attribute__ ((unused)) int *offset,
+                    __attribute__ ((unused)) int *size)
 {
 #ifdef XML_CONTEXT_BYTES
   if (eventPtr && buffer) {
@@ -4804,9 +4807,9 @@ internalEntityProcessor(XML_Parser parser,
 
 static enum XML_Error PTRCALL
 errorProcessor(XML_Parser parser,
-               const char *s,
-               const char *end,
-               const char **nextPtr)
+               __attribute__ ((unused)) const char *s,
+               __attribute__ ((unused)) const char *end,
+               __attribute__ ((unused)) const char **nextPtr)
 {
   return errorCode;
 }

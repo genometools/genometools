@@ -15,12 +15,13 @@
 */
 
 #include "libgtcore/chardef.h"
+#include "libgtcore/unused.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-suffixarray-interface.h"
 
 extern int
-saReadBWT(void *state, Symbol *dest, size_t len, Error *err)
+saReadBWT(void *state, Symbol *dest, size_t len, UNUSED Error *err)
 {
   struct suffixarrayReadState *saRState;
   assert(state);

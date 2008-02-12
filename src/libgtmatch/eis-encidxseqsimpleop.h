@@ -134,8 +134,7 @@ EISPrintDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint)
 }
 
 static inline int
-EISPrintExtDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
-                       Error *err)
+EISPrintExtDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint)
 {
   if (seq->classInfo->printExtPosDiags)
     return seq->classInfo->printExtPosDiags(seq, pos, fp, hint);

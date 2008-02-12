@@ -26,6 +26,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/str.h"
+#include "libgtcore/unused.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
 #include "intbits-tab.h"
@@ -1382,7 +1383,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr)
 
 static Uchar seqdelivercharViadirectaccess(
                         const Encodedsequence *encseq,
-                        /*@unused@*/ Encodedsequencescanstate *esr,
+                        UNUSED Encodedsequencescanstate *esr,
                         Seqpos pos)
 {
   return encseq->plainseq[pos];
@@ -1390,7 +1391,7 @@ static Uchar seqdelivercharViadirectaccess(
 
 static Uchar seqdelivercharnoSpecial(
                         const Encodedsequence *encseq,
-                        /*@unused@*/ Encodedsequencescanstate *esr,
+                        UNUSED Encodedsequencescanstate *esr,
                         Seqpos pos)
 {
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
@@ -1398,7 +1399,7 @@ static Uchar seqdelivercharnoSpecial(
 
 static Uchar seqdelivercharViabitaccessSpecial(
                             const Encodedsequence *encseq,
-                            /*@unused@*/ Encodedsequencescanstate *esr,
+                            UNUSED Encodedsequencescanstate *esr,
                             Seqpos pos)
 {
   if (ISIBITSET(encseq->specialbits,pos))

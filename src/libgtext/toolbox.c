@@ -18,6 +18,7 @@
 #include <string.h>
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/compare.h"
 #include "libgtext/toolbox.h"
@@ -97,16 +98,16 @@ Toolfunc toolbox_get(const Toolbox *tb, const char *toolname)
   return NULL;
 }
 
-static int show_tool_name(void *key, void *value, void *data, Error *e)
+static int show_tool_name(void *key, void *value, UNUSED void *data, Error *err)
 {
-  error_check(e);
+  error_check(err);
   assert(key && value);
   if (strcmp(key, "dev"))
     xputs(key);
   return 0;
 }
 
-int toolbox_show(const char *progname, void *toolbox, Error *err)
+int toolbox_show(UNUSED const char *progname, void *toolbox, Error *err)
 {
   Toolbox *tb;
   int had_err = 0;
