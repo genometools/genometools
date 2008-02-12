@@ -103,6 +103,8 @@ static bool findcharintervalbin(const Encodedsequence *encseq,
 }
 
 unsigned long suffixarrayuniqueforward (const void *genericindex,
+                                        Seqpos left,
+                                        Seqpos right,
                                         /*@unused@*/ Seqpos *witnessposition,
                                         const Uchar *qstart,
                                         const Uchar *qend)
@@ -111,8 +113,8 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
   const Uchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
 
-  itv.left = 0;
-  itv.right = getencseqtotallength(suffixarray->encseq);
+  itv.left = left;
+  itv.right = right;
   for (qptr = qstart; /* Nothing */; qptr++)
   {
     if (itv.left < itv.right)
@@ -136,6 +138,8 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
 }
 
 unsigned long suffixarraymstats (const void *genericindex,
+                                 Seqpos left,
+                                 Seqpos right,
                                  Seqpos *witnessposition,
                                  const Uchar *qstart,
                                  const Uchar *qend)
@@ -144,8 +148,8 @@ unsigned long suffixarraymstats (const void *genericindex,
   const Uchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
 
-  itv.left = 0;
-  itv.right = getencseqtotallength(suffixarray->encseq);
+  itv.left = left;
+  itv.right = right;
   for (qptr = qstart; /* Nothing */; qptr++)
   {
     assert(itv.left <= itv.right);

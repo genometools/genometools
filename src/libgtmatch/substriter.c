@@ -27,7 +27,8 @@
 struct Substriter
 {
   uint64_t unitnum;
-  unsigned int qvalue, numofchars;
+  unsigned int qvalue,
+               numofchars;
   bool newseq;
   Codetype **multimappower;
   SeqIterator *seqit;
@@ -45,8 +46,7 @@ Substriter *substriter_new(const StrArray *queryfilenames,
   substriter->seqit = seqiterator_new(queryfilenames,
                                       getsymbolmapAlphabet(alphabet),
                                       true);
-  substriter->multimappower = initmultimappower(substriter->numofchars,
-                                                qvalue);
+  substriter->multimappower = initmultimappower(substriter->numofchars,qvalue);
   substriter->newseq = true;
   return substriter;
 }
@@ -60,7 +60,7 @@ static unsigned int qgram2code(Codetype *code,
   Codetype tmpcode = 0;
   Uchar a;
 
-  for (i=(int) qvalue-1; i>=0; i--)
+  for (i=(int) (qvalue-1); i>=0; i--)
   {
     a = qgram[i];
     if (ISSPECIAL(a))
@@ -75,12 +75,13 @@ static unsigned int qgram2code(Codetype *code,
 
 int substriter_next(Substring *substring,Substriter *substriter,Error *err)
 {
+  unsigned int firstspecial;
+
   while (true)
   {
     if (substriter->newseq)
     {
       int retval;
-      unsigned int firstspecial;
 
       retval = seqiterator_next(substriter->seqit,
                                 &substring->querystart,
@@ -94,26 +95,40 @@ int substriter_next(Substring *substring,Substriter *substriter,Error *err)
       }
       substring->queryptr = substring->querystart;
       assert(substring->remaining > 0);
-      substriter->newseq = false;
       if (substring->remaining >= (unsigned long) substriter->qvalue)
       {
         firstspecial = qgram2code(&substring->currentcode,
                                   (const Codetype **) substriter->multimappower,
                                   substriter->qvalue,
                                   substring->querystart);
+        substriter->newseq = false;
+        if (firstspecial == substriter->qvalue)
+        {
+          break;
+        }
       }
-      break;
-    }
-    assert(substring->remaining > 0);
-    substring->remaining--;
-    substring->queryptr++;
-    if (substring->remaining > 0)
+    } else
     {
-      break;
+      assert(substring->remaining > 0);
+      substring->remaining--;
+      substring->queryptr++;
+      if (substring->remaining >= (unsigned long) substriter->qvalue)
+      {
+        firstspecial = qgram2code(&substring->currentcode,
+                                  (const Codetype **) substriter->multimappower,
+                                  substriter->qvalue,
+                                  substring->querystart);
+        if (firstspecial == substriter->qvalue)
+        {
+          break;
+        }
+      } else
+      {
+        substriter->newseq = true;
+        substriter->unitnum++;
+        FREESPACE(substring->desc);
+      }
     }
-    substriter->newseq = true;
-    substriter->unitnum++;
-    FREESPACE(substring->desc);
   }
   return 1;
 }

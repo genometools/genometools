@@ -24,6 +24,8 @@
 #include "fmi-locate.pr"
 
 unsigned long skfmuniqueforward (const void *genericindex,
+                                 /*@unused@*/ Seqpos left,
+                                 /*@unused@*/ Seqpos right,
                                  /*@unused@*/ Seqpos *witnessposition,
                                  const Uchar *qstart,
                                  const Uchar *qend)
@@ -63,6 +65,8 @@ unsigned long skfmuniqueforward (const void *genericindex,
 }
 
 unsigned long skfmmstats (const void *genericindex,
+                          /*@unused@*/ Seqpos left,
+                          /*@unused@*/ Seqpos right,
                           Seqpos *witnessposition,
                           const Uchar *qstart,
                           const Uchar *qend)

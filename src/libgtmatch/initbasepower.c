@@ -44,6 +44,27 @@ unsigned int *initbasepower(unsigned int base,unsigned int len)
   return basepower;
 }
 
+unsigned int ontheflybasepower(unsigned int base,unsigned int len)
+{
+  unsigned int thepower = 1U, i, minfailure;
+
+  minfailure = UINT_MAX/base;
+  for (i=0; /* Nothing */; i++)
+  {
+    if (i == len)
+    {
+      break;
+    }
+    if (thepower >= minfailure)
+    {
+      fprintf(stderr,"overflow when computing %u * %u",thepower,base);
+      exit(EXIT_FAILURE); /* programming error */
+    }
+    thepower *= base;
+  }
+  return thepower;
+}
+
 unsigned int *initfilltable(const unsigned int *basepower,unsigned int len)
 {
   unsigned int i, *filltable;

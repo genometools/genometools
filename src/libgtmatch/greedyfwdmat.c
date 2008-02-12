@@ -25,8 +25,11 @@
 #include "optionargmode.h"
 #include "format64.h"
 #include "greedyfwdmat.h"
+#include "bckbound.h"
 #include "substriter.h"
 #include "encseq-def.h"
+
+#include "initbasepower.pr"
 
 typedef struct
 {
@@ -56,6 +59,7 @@ typedef void (*Postprocessgmatchlength)(const Alphabet *,
 typedef struct
 {
   const void *genericindex;
+  Seqpos totallength;
   const Alphabet *alphabet;
   Greedygmatchforwardfunction gmatchforward;
   Preprocessgmatchlength preprocessgmatchlength;
@@ -118,6 +122,8 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
   for (qptr = query, remaining = querylen; remaining > 0; qptr++, remaining--)
   {
     gmatchlength = substringinfo->gmatchforward(substringinfo->genericindex,
+                                                0,
+                                                substringinfo->totallength,
                                                 wptr,
                                                 qptr,
                                                 query+querylen);
@@ -200,6 +206,7 @@ static void showifinlengthrange(const Alphabet *alphabet,
 
 int findsubquerygmatchforward(const Encodedsequence *encseq,
                               const void *genericindex,
+                              Seqpos totallength,
                               Greedygmatchforwardfunction gmatchforward,
                               const Alphabet *alphabet,
                               const StrArray *queryfilenames,
@@ -222,6 +229,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
 
   error_check(err);
   substringinfo.genericindex = genericindex;
+  substringinfo.totallength = totallength;
   rangespecinfo.minlength = minlength;
   rangespecinfo.maxlength = maxlength;
   rangespecinfo.showsequence = showsequence;
@@ -262,17 +270,28 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
-int runsubstringiteration(const Alphabet *alphabet,
-                          const StrArray *queryfilenames,
+int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
+                          const void *genericindex,
+                          Seqpos totalwidth,
+                          const Seqpos *leftborder,
+                          const Seqpos *countspecialcodes,
+                          const Alphabet *alphabet,
                           unsigned int prefixlength,
+                          const StrArray *queryfilenames,
                           Error *err)
 {
   Substriter *substriter;
   Substring substring;
   bool haserr = false;
   int retval;
+  unsigned int numofchars;
+  unsigned long gmatchlength, gmatchlength2;
+  Codetype maxcode;
+  Bucketboundaries bbound;
 
   substriter = substriter_new(queryfilenames,alphabet,prefixlength);
+  numofchars = getnumofcharsAlphabet(alphabet);
+  maxcode = ontheflybasepower(numofchars,prefixlength);
   while (true)
   {
     retval = substriter_next(&substring,substriter,err);
@@ -284,6 +303,34 @@ int runsubstringiteration(const Alphabet *alphabet,
     if (retval == 0)
     {
       break;
+    }
+    assert(substring.remaining >= (unsigned long) prefixlength);
+    gmatchlength = gmatchforward(genericindex,
+                                 0,
+                                 totalwidth,
+                                 NULL,
+                                 substring.queryptr,
+                                 substring.queryptr + substring.remaining);
+    if (leftborder != NULL)
+    {
+      (void) calcbucketboundaries(&bbound,
+                                  leftborder,
+                                  countspecialcodes,
+                                  substring.currentcode,
+                                  maxcode,
+                                  totalwidth,
+                                  substring.currentcode % numofchars,
+                                  numofchars);
+      if (bbound.nonspecialsinbucket > 0)
+      {
+        gmatchlength2 = gmatchforward(genericindex,
+                                      bbound.left,
+                                      bbound.left+bbound.nonspecialsinbucket-1,
+                                      NULL,
+                                      substring.queryptr + prefixlength,
+                                      substring.queryptr + substring.remaining);
+        assert(gmatchlength2 == gmatchlength);
+      }
     }
   }
   substriter_delete(&substriter);

@@ -32,7 +32,6 @@ typedef struct
 {
   const Uchar *querystart, *queryptr;
   Codetype currentcode;
-  bool definedcurrentcode;
   unsigned long remaining;
   char *desc;
 } Substring;

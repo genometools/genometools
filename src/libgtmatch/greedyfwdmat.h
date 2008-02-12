@@ -28,12 +28,15 @@
 #include "encseq-def.h"
 
 typedef unsigned long (*Greedygmatchforwardfunction) (const void *,
+                                                      Seqpos left,
+                                                      Seqpos right,
                                                       Seqpos *,
                                                       const Uchar *,
                                                       const Uchar *);
 
 int findsubquerygmatchforward(const Encodedsequence *encseq,
                               const void *genericindex,
+                              Seqpos totallength,
                               Greedygmatchforwardfunction gmatchforward,
                               const Alphabet *alphabet,
                               const StrArray *queryfilenames,
@@ -44,8 +47,13 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
                               bool showsubjectpos,
                               Error *err);
 
-int runsubstringiteration(const Alphabet *alphabet,
-                          const StrArray *queryfilenames,
+int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
+                          const void *genericindex,
+                          Seqpos totalwidth,
+                          const Seqpos *leftborder,
+                          const Seqpos *countspecialcodes,
+                          const Alphabet *alphabet,
                           unsigned int prefixlength,
+                          const StrArray *queryfilenames,
                           Error *err);
 #endif

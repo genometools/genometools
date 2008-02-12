@@ -280,6 +280,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
   bool haserr = false;
   Alphabet *alphabet = NULL;
   unsigned int prefixlength = 0;
+  Seqpos totallength;
 
   error_check(err);
   switch (parsegfmsub(doms,&gfmsubcallinfo, argc, argv, err)) {
@@ -304,14 +305,18 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
     {
       alphabet = fmindex.alphabet;
     }
+    totallength = fmindex.bwtlength-1;
   } else
   {
-    Seqpos totallength;
     unsigned int mappedbits;
 
     if (gfmsubcallinfo.indextype == Esaindextype)
     {
-      mappedbits = SARR_ESQTAB | SARR_SUFTAB; /* | SARR_BCKTAB; */
+      mappedbits = SARR_ESQTAB | SARR_SUFTAB
+#ifdef WITHBCKTAB
+                   | SARR_BCKTAB
+#endif
+                   ;
     } else
     {
       if (dotestsequence(doms,&gfmsubcallinfo))
@@ -393,19 +398,29 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
     }
     if (!haserr)
     {
+#ifdef WITHBCKTAB
       if (prefixlength > 0 &&
-          runsubstringiteration(alphabet,
-                                gfmsubcallinfo.queryfilenames,
+          gfmsubcallinfo.indextype == Esaindextype &&
+          runsubstringiteration(gmatchforwardfunction,
+                                theindex,
+                                totallength,
+                                suffixarray.bcktab,
+                                suffixarray.countspecialcodes,
+                                alphabet,
                                 prefixlength,
+                                gfmsubcallinfo.queryfilenames,
                                 err) != 0)
+
       {
         haserr = true;
       }
+#endif
       if (!haserr &&
           findsubquerygmatchforward(dotestsequence(doms,&gfmsubcallinfo)
                                       ? suffixarray.encseq
                                       : NULL,
                                     theindex,
+                                    totallength,
                                     gmatchforwardfunction,
                                     alphabet,
                                     gfmsubcallinfo.queryfilenames,
