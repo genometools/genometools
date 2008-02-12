@@ -21,7 +21,7 @@ require "extractor.file"
 
 local makefile_template = [[
 CC:=gcc
-CFLAGS:=-Wall -Werror -g -Os -pipe
+CFLAGS:=-Wall -Werror -Wunused-parameter -g -Os -pipe
 LD:=$(CC)
 
 SRC:=$(wildcard *.c)
