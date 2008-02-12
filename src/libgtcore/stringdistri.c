@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/stringdistri.h"
+#include "libgtcore/unused.h"
 
 struct StringDistri {
   Hashtable *hashdist;
@@ -56,11 +57,12 @@ typedef struct {
   unsigned long num_of_occurrences;
 } ForeachInfo;
 
-static int foreach_iterfunc(void *key, void *value, void *data, Error *e)
+static int foreach_iterfunc(void *key, void *value, void *data,
+                            UNUSED Error *err)
 {
   unsigned long occurrences;
   ForeachInfo *info;
-  error_check(e);
+  error_check(err);
   assert(key && value && data);
   occurrences = *(unsigned long*) value;
   info = (ForeachInfo*) data;

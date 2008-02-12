@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 
 /* the memory allocator class */
@@ -140,7 +141,7 @@ void* ma_realloc_mem(void *ptr, size_t size, const char *filename, int line)
   return xrealloc(ptr, size);
 }
 
-void ma_free_mem(void *ptr, const char *filename, int line)
+void ma_free_mem(void *ptr, UNUSED const char *filename, UNUSED int line)
 {
   MAInfo *mainfo;
   assert(ma);
@@ -171,11 +172,12 @@ void ma_free_func(void *ptr)
   ma_free(ptr);
 }
 
-static int check_space_leak(void *key, void *value, void *data, Error *e)
+static int check_space_leak(UNUSED void *key, void *value, void *data,
+                            UNUSED Error *err)
 {
   CheckSpaceLeakInfo *info = (CheckSpaceLeakInfo*) data;
   MAInfo *mainfo = (MAInfo*) value;
-  error_check(e);
+  error_check(err);
   assert(key && value && data);
   /* report only the first leak */
   if (!info->has_leak) {

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/fa.h"
+#include "libgtcore/unused.h"
 #include "libgtext/genome_stream_rep.h"
 #include "libgtext/gtf_in_stream.h"
 #include "libgtext/gtf_parser.h"
@@ -30,10 +31,11 @@ struct GTFInStream
 #define gtf_in_stream_cast(GS)\
         genome_stream_cast(gtf_in_stream_class(), GS)
 
-static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
+static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
+                                   UNUSED Error *err)
 {
   GTFInStream *is;
-  error_check(e);
+  error_check(err);
   is = gtf_in_stream_cast(gs);
   if (queue_size(is->genome_node_buffer)) {
     /* we still have a node in the buffer -> serve it from there */

@@ -123,7 +123,7 @@ void* array_get_space(const Array *a)
   return a->space;
 }
 
-void array_add_elem(Array *a, void *elem, size_t size_of_elem)
+void array_add_elem(Array *a, void *elem, UNUSED size_t size_of_elem)
 {
   assert(a && elem);
   assert(a->size_of_elem == size_of_elem);
@@ -190,7 +190,7 @@ int array_iterate(const Array *a,
   return 0;
 }
 
-static int iterate_test_func(void *info, const void *value, Error *err)
+static int iterate_test_func(void *info, const void *value, UNUSED Error *err)
 {
   unsigned long *i;
   Range range;
@@ -213,7 +213,7 @@ static int iterate_fail_func(UNUSED void *info, UNUSED const void *value,
   return -1;
 }
 
-int array_example(Error *err)
+int array_example(UNUSED Error *err)
 {
   unsigned long i;
   Array *a;

@@ -17,6 +17,7 @@
 
 #include "libgtcore/bioseq.h"
 #include "libgtcore/option.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/align.h"
@@ -42,14 +43,14 @@ static OPrval parse_options(int *parsed_args, bool *all, int argc,
   return oprval;
 }
 
-void show_alignment(const Alignment *a, void *data)
+void show_alignment(const Alignment *a, UNUSED void *data)
 {
   assert(a && !data);
   alignment_show(a, stdout);
   xputchar('\n');
 }
 
-void show_aligns(unsigned long aligns, void *data)
+void show_aligns(unsigned long aligns, UNUSED void *data)
 {
   assert(aligns && !data);
   printf("number of optimal alignments: %lu\n\n", aligns);

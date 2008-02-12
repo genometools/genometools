@@ -44,7 +44,7 @@ typedef struct Config Config;
    given. */
 Config*        config_new(bool verbose, Error*);
 /* Create a Config object wich reuses the given Lua state. */
-Config*        config_new_with_state(lua_State*, Error*);
+Config*        config_new_with_state(lua_State*);
 /* Load and executes a Lua configuration file with given <filename>.
    This file must contain a global table called 'config'. */
 int            config_load_file(Config*, Str *filename, Error*);

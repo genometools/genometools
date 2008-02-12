@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,10 +16,11 @@
 */
 
 #include <assert.h>
-#include "libgtview/feature_visitor.h"
-#include "libgtview/feature_index.h"
+#include "libgtcore/unused.h"
 #include "libgtext/genome_visitor_rep.h"
 #include "libgtext/sequence_region.h"
+#include "libgtview/feature_index.h"
+#include "libgtview/feature_visitor.h"
 
 struct FeatureVisitor {
   const GenomeVisitor parent_instance;
@@ -37,19 +38,20 @@ static void feature_visitor_free(GenomeVisitor *gv)
 }
 
 static int feature_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                          Error *e)
+                                          UNUSED Error *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
-  error_check(e);
+  error_check(err);
   feature_index_add_genome_feature(v->feature_index, gf);
   return 0;
 }
 
 static int feature_visitor_sequence_region(GenomeVisitor *gv,
-                                           SequenceRegion *sr, Error *e)
+                                           SequenceRegion *sr,
+                                           UNUSED Error *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
-  error_check(e);
+  error_check(err);
   feature_index_add_sequence_region(v->feature_index, sr);
   return 0;
 }

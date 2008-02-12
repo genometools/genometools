@@ -118,7 +118,8 @@ typedef struct {
        *value;
 } HashEntry;
 
-static int save_hash_entry(void *key, void *value, void *data, Error *err)
+static int save_hash_entry(void *key, void *value, void *data,
+                           UNUSED Error *err)
 {
   Array *hash_entries;
   HashEntry he;

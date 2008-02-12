@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/discdistri.h"
+#include "libgtcore/unused.h"
 #include "libgtext/genome_visitor_rep.h"
 #include "libgtext/stat_visitor.h"
 
@@ -49,11 +50,11 @@ static void stat_visitor_free(GenomeVisitor *gv)
   discdistri_delete(stat_visitor->intron_length_distribution);
 }
 
-static int add_exon_number(GenomeNode *gn, void *data, Error *e)
+static int add_exon_number(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   StatVisitor *stat_visitor = (StatVisitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
-  error_check(e);
+  error_check(err);
   assert(stat_visitor && gf);
   if (genome_feature_get_type(gf) == gft_exon)
     stat_visitor->exon_number_for_distri++;
@@ -126,10 +127,10 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 }
 
 static int stat_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                        Error *e)
+                                        UNUSED Error *err)
 {
   StatVisitor *stat_visitor;
-  error_check(e);
+  error_check(err);
   stat_visitor = stat_visitor_cast(gv);
   stat_visitor->number_of_sequence_regions++;
   stat_visitor->total_length_of_sequence_regions +=

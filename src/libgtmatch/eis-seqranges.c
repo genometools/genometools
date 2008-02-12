@@ -163,7 +163,7 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
 }
 
 void
-SRLinsertNewRange(struct seqRangeList *rangeList, UNUSED Seqpos pos,
+SRLinsertNewRange(UNUSED struct seqRangeList *rangeList, UNUSED Seqpos pos,
                   UNUSED Seqpos len, UNUSED Symbol esym)
 {
   assert(rangeList);
@@ -465,7 +465,7 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp)
 /* FIXME: convert to platform-independent variant */
 struct seqRangeList *
 SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
-                  enum SRLFeatures features, Error *err)
+                  enum SRLFeatures features, UNUSED Error *err)
 {
   struct seqRangeList *newRangeList;
   size_t numRanges;

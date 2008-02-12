@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "libgtcore/hashtable.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtext/mergefeat_visitor.h"
 #include "libgtext/genome_visitor_rep.h"
 
@@ -39,12 +40,12 @@ static void mergefeat_visitor_free(GenomeVisitor *gv)
   array_delete(mergefeat_visitor->nodes_to_remove);
 }
 
-static int mergefeat_in_children(GenomeNode *gn, void *data, Error *e)
+static int mergefeat_in_children(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GenomeFeature *previous_feature, *current_feature;
   Range previous_range, current_range;
-  error_check(e);
+  error_check(err);
   current_feature = genome_node_cast(genome_feature_class(), gn);
   assert(current_feature);
   if ((previous_feature = hashtable_get(v->ht, genome_feature_type_get_cstr(

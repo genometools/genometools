@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -40,12 +40,13 @@ static void regioncov_visitor_free(GenomeVisitor *gv)
 }
 
 static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
-                                            GenomeFeature *gf, Error *e)
+                                            GenomeFeature *gf,
+                                            UNUSED Error *err)
 {
   Range *old_range_ptr, old_range, new_range;
   Array *ranges;
   RegionCovVisitor *regioncov_visitor;
-  error_check(e);
+  error_check(err);
   regioncov_visitor = regioncov_visitor_cast(gv);
   ranges = hashtable_get(regioncov_visitor->region2rangelist,
                          str_get(genome_node_get_seqid((GenomeNode*) gf)));
@@ -67,11 +68,12 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
 }
 
 static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
-                                             SequenceRegion *sr, Error *e)
+                                             SequenceRegion *sr,
+                                             UNUSED Error *err)
 {
   RegionCovVisitor *regioncov_visitor;
   Array *rangelist;
-  error_check(e);
+  error_check(err);
   regioncov_visitor = regioncov_visitor_cast(gv);
   rangelist = array_new(sizeof (Range));
   hashtable_add(regioncov_visitor->region2rangelist,
@@ -101,12 +103,13 @@ GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist)
   return gv;
 }
 
-static int show_rangelist(void *key, void *value, UNUSED void *data, Error *e)
+static int show_rangelist(void *key, void *value, UNUSED void *data,
+                          UNUSED Error *err)
 {
   unsigned long i;
   Array *rangelist;
   Range *rangeptr;
-  error_check(e);
+  error_check(err);
   assert(key && value);
   rangelist = (Array*) value;
   if (array_size(rangelist)) {

@@ -56,10 +56,9 @@ Config* config_new(bool verbose, Error *err)
   return cfg;
 }
 
-Config* config_new_with_state(lua_State *L, Error *err)
+Config* config_new_with_state(lua_State *L)
 {
   Config *cfg;
-  error_check(err);
   cfg = ma_calloc(1, sizeof (Config));
   cfg->L = L;
   return cfg;

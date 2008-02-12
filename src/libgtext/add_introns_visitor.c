@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtext/add_introns_visitor.h"
 #include "libgtext/genome_visitor_rep.h"
 
@@ -29,15 +30,8 @@ struct AddIntronsVisitor {
 #define add_introns_visitor_cast(GV)\
         genome_visitor_cast(add_introns_visitor_class(), GV)
 
-static void add_introns_visitor_free(GenomeVisitor *gv)
-{
-#ifndef NDEBUG
-  AddIntronsVisitor *add_introns_visitor = add_introns_visitor_cast(gv);
-  assert(add_introns_visitor);
-#endif
-}
-
-static int add_introns_in_children(GenomeNode *gn, void *data, Error *e)
+static int add_introns_in_children(GenomeNode *gn, void *data,
+                                   UNUSED Error *err)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GenomeFeature *current_feature;
@@ -45,7 +39,7 @@ static int add_introns_in_children(GenomeNode *gn, void *data, Error *e)
   Range previous_range, current_range, intron_range;
   Strand previous_strand, current_strand, intron_strand;
   Str *parent_seqid;
-  error_check(e);
+  error_check(err);
   current_feature = genome_node_cast(genome_feature_class(), gn);
   assert(current_feature);
   if (genome_feature_get_type(current_feature) == gft_exon) {
@@ -109,7 +103,7 @@ static int add_introns_visitor_genome_feature(GenomeVisitor *gv,
 const GenomeVisitorClass* add_introns_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (AddIntronsVisitor),
-                                          add_introns_visitor_free,
+                                          NULL,
                                           NULL,
                                           add_introns_visitor_genome_feature,
                                           NULL };

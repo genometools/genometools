@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtext/consensus_sa.h"
 
 typedef struct {
@@ -102,7 +103,7 @@ static bool has_donor_site(Array *gene, unsigned long exon)
   return true;
 }
 
-static bool has_acceptor_site(Array *gene, unsigned long exon)
+static bool has_acceptor_site(UNUSED Array *gene, unsigned long exon)
 {
   assert(exon < array_size(gene));
   if (exon == 0)

@@ -154,7 +154,7 @@ static void skproto(const char *filename, FILE *fpin)
 
 static int gt_skproto_runner(int argc, const char **argv,
                              UNUSED void *tool_arguments,
-                             Error *err)
+                             UNUSED Error *err)
 {
   FILE *fpin;
   int i;

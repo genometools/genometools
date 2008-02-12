@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@
 #include <string.h>
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_visitor_rep.h"
 #include "libgtext/gff3_output.h"
@@ -68,10 +69,11 @@ static void gff3_visitor_free(GenomeVisitor *gv)
   hashtable_delete(gff3_visitor->genome_feature_to_unique_id_str);
 }
 
-static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c, Error *e)
+static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
+                                UNUSED Error *err)
 {
   GFF3Visitor *gff3_visitor;
-  error_check(e);
+  error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && c);
   gff3_version_string(gv);
@@ -79,11 +81,11 @@ static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c, Error *e)
   return 0;
 }
 
-static int add_id(GenomeNode *gn, void *data, Error *e)
+static int add_id(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   Add_id_info *info = (Add_id_info*) data;
   Array *parent_features = NULL;
-  error_check(e);
+  error_check(err);
   assert(gn && info && info->genome_feature_to_id_array && info->id);
   parent_features = hashtable_get(info->genome_feature_to_id_array, gn);
   if (!parent_features) {
@@ -95,10 +97,10 @@ static int add_id(GenomeNode *gn, void *data, Error *e)
 }
 
 static int show_attribute(const char *attr_name, const char *attr_value,
-                          void *data, Error *e)
+                          void *data, UNUSED Error *err)
 {
   ShowAttributeInfo *info = (ShowAttributeInfo*) data;
-  error_check(e);
+  error_check(err);
   assert(attr_name && attr_value && info);
   if (strcmp(attr_name, ID_STRING) && strcmp(attr_name, PARENT_STRING)) {
     if (*info->attribute_shown)
@@ -110,7 +112,8 @@ static int show_attribute(const char *attr_name, const char *attr_value,
   return 0;
 }
 
-static int gff3_show_genome_feature(GenomeNode *gn, void *data, Error *e)
+static int gff3_show_genome_feature(GenomeNode *gn, void *data,
+                                    UNUSED Error *err)
 {
   bool part_shown = false;
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
@@ -121,7 +124,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data, Error *e)
   int had_err;
   Str *id;
 
-  error_check(e);
+  error_check(err);
   assert(gn && gf && gff3_visitor);
 
   /* output leading part */
@@ -239,10 +242,10 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 }
 
 static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                        Error *e)
+                                        UNUSED Error *err)
 {
   GFF3Visitor *gff3_visitor;
-  error_check(e);
+  error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && sr);
   /* a sequence region has no children */

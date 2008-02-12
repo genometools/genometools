@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/mathsupport.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 
 #define NUM_OF_TESTS  100
@@ -161,7 +162,7 @@ static int intcompare(const void *a, const void *b)
   return *(int*) a - *(int*) b;
 }
 
-int dlist_example(Error *err)
+int dlist_example(UNUSED Error *err)
 {
   Dlistelem *dlistelem;
   Dlist *dlist;

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "libgtcore/fptr.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/warning.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_visitor_rep.h"
@@ -45,20 +46,20 @@ static void gtf_visitor_free(GenomeVisitor *gv)
   array_delete(gtf_visitor->CDS_features);
 }
 
-static int gtf_visitor_comment(GenomeVisitor *gv, Comment *c, Error *e)
+static int gtf_visitor_comment(GenomeVisitor *gv, Comment *c, UNUSED Error *err)
 {
   GTFVisitor *gtf_visitor;
-  error_check(e);
+  error_check(err);
   gtf_visitor = gtf_visitor_cast(gv);
   genfile_xprintf(gtf_visitor->outfp, "#%s\n", comment_get_comment(c));
   return 0;
 }
 
-static int save_exon_node(GenomeNode *gn, void *data, Error *e)
+static int save_exon_node(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   GTFVisitor *gtf_visitor;
   GenomeFeatureType gft;
-  error_check(e);
+  error_check(err);
   assert(gn && data);
   gtf_visitor = (GTFVisitor*) data;
   gft = genome_feature_get_type((GenomeFeature*) gn);

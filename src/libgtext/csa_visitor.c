@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,7 @@
 #include "libgtcore/log.h"
 #include "libgtcore/queue.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtext/consensus_sa.h"
 #include "libgtext/csa_visitor.h"
 #include "libgtext/genome_visitor_rep.h"
@@ -58,10 +59,10 @@ static void csa_visitor_free(GenomeVisitor *gv)
 }
 
 static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                      Error *e)
+                                      UNUSED Error *err)
 {
   CSAVisitor *csa_visitor;
-  error_check(e);
+  error_check(err);
   csa_visitor = csa_visitor_cast(gv);
 
   /* determine the first range if necessary */
@@ -106,10 +107,11 @@ static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   return 0;
 }
 
-static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn, Error *e)
+static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn,
+                                    UNUSED Error *err)
 {
   CSAVisitor *csa_visitor;
-  error_check(e);
+  error_check(err);
   csa_visitor = csa_visitor_cast(gv);
   queue_add(csa_visitor->genome_node_buffer, gn);
   return 0;
@@ -175,12 +177,12 @@ static Strand get_strand(const void *sa)
   return genome_feature_get_strand(gf);
 }
 
-static int save_exon(GenomeNode *gn, void *data, Error *e)
+static int save_exon(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   GenomeFeature *gf = (GenomeFeature*) gn;
   Array *exon_ranges = (Array*) data;
   Range range;
-  error_check(e);
+  error_check(err);
   assert(gf && exon_ranges);
   if (genome_feature_get_type(gf) == gft_exon) {
     range = genome_node_get_range(gn);

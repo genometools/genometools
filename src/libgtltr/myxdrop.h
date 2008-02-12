@@ -19,6 +19,7 @@
 #define MYXDROP_H
 
 #include "libgtcore/arraydef.h"
+#include "libgtcore/unused.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/seqpos-def.h"
 
@@ -120,7 +121,7 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                      int ulen,\
                                      int vlen,\
                                      Xdropscore xdropbelowscore,\
-                                     Error *err)
+                                     UNUSED Error *err)
 
 void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                                     Myxdropbest * xdropbest,
@@ -145,5 +146,5 @@ void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                                     int ulen,\
                                     int vlen,\
                                     Xdropscore xdropbelowscore,\
-                                    Error *err)
+                                    UNUSED Error *err)
 #endif

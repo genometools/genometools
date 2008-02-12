@@ -37,6 +37,7 @@
 #include "libgtcore/sig.h"
 #include "libgtcore/str.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/xposix.h"
 
@@ -60,7 +61,7 @@ typedef struct {
 } Construct_bioseq_files_info;
 
 static int proc_description(const char *description, unsigned long length,
-                            void *data, Error *err)
+                            void *data, UNUSED Error *err)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   char *description_cstr;
@@ -78,7 +79,7 @@ static int proc_description(const char *description, unsigned long length,
 }
 
 static int proc_sequence_part(const char *seqpart, unsigned long length,
-                              void *data, Error *err)
+                              void *data, UNUSED Error *err)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   error_check(err);
@@ -97,7 +98,7 @@ static int proc_sequence_part(const char *seqpart, unsigned long length,
 }
 
 static int proc_sequence_length(unsigned long sequence_length, void *data,
-                                Error *err)
+                                UNUSED Error *err)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   Range range;

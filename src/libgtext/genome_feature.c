@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_node_rep.h"
@@ -283,11 +284,11 @@ Phase genome_feature_get_phase(GenomeFeature *gf)
   return gf->phase;
 }
 
-static int save_exon(GenomeNode *gn, void *data, Error *e)
+static int save_exon(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   GenomeFeature *gf;
   Array *exon_features = (Array*) data;
-  error_check(e);
+  error_check(err);
   gf = (GenomeFeature*) gn;
   assert(gf && exon_features);
   if (genome_feature_get_type(gf) == gft_exon) {
@@ -305,11 +306,11 @@ void genome_feature_get_exons(GenomeFeature *gf, Array *exon_features)
   assert(!had_err); /* cannot happen, because save_exon() is sane */
 }
 
-static int save_exons_and_cds(GenomeNode *gn, void *data, Error *e)
+static int save_exons_and_cds(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   GenomeFeature *gf;
-  error_check(e);
+  error_check(err);
   gf = (GenomeFeature*) gn;
   assert(gf && info);
   if (genome_feature_get_type(gf) == gft_exon)
@@ -342,11 +343,12 @@ static void set_transcript_types(Array *features)
   }
 }
 
-static int determine_transcripttypes(GenomeNode *gn, void *data, Error *e)
+static int determine_transcripttypes(GenomeNode *gn, void *data,
+                                     UNUSED Error *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   int had_err;
-  error_check(e);
+  error_check(err);
   assert(gn && info);
   /* reset exon_features and cds_features */
   array_reset(info->exon_features);

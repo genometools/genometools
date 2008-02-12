@@ -374,7 +374,7 @@ void fa_xmunmap(void *addr)
   hashtable_remove(fa->memory_maps, addr);
 }
 
-static int check_fptr_leak(void *key, void *value, void *data,
+static int check_fptr_leak(UNUSED void *key, void *value, void *data,
                            UNUSED Error *err)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
@@ -389,7 +389,7 @@ static int check_fptr_leak(void *key, void *value, void *data,
   return 0;
 }
 
-static int check_mmap_leak(void *key, void *value, void *data,
+static int check_mmap_leak(UNUSED void *key, void *value, void *data,
                            UNUSED Error *err)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;

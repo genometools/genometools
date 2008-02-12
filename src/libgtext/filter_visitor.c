@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,7 @@
 #include <string.h>
 #include "libgtcore/queue.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtext/filter_visitor.h"
 #include "libgtext/genome_visitor_rep.h"
 
@@ -43,21 +44,22 @@ static void filter_visitor_free(GenomeVisitor *gv)
   str_delete(filter_visitor->typefilter);
 }
 
-static int filter_visitor_comment(GenomeVisitor *gv, Comment *c, Error *e)
+static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,
+                                  UNUSED Error *err)
 {
   FilterVisitor *filter_visitor;
-  error_check(e);
+  error_check(err);
   filter_visitor = filter_visitor_cast(gv);
   queue_add(filter_visitor->genome_node_buffer, c);
   return 0;
 }
 
 static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                         Error *e)
+                                         UNUSED Error *err)
 {
   FilterVisitor *fv;
   bool filter_node = false;
-  error_check(e);
+  error_check(err);
   fv = filter_visitor_cast(gv);
   if (!str_length(fv->seqid) || /* no seqid was specified or seqids are equal */
       !str_cmp(fv->seqid, genome_node_get_seqid((GenomeNode*) gf))) {
@@ -93,10 +95,10 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 }
 
 static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                          Error *e)
+                                          UNUSED Error *err)
 {
   FilterVisitor *filter_visitor;
-  error_check(e);
+  error_check(err);
   filter_visitor = filter_visitor_cast(gv);
   if (!str_length(filter_visitor->seqid) || /* no seqid was specified */
       !str_cmp(filter_visitor->seqid,    /* or seqids are equal */

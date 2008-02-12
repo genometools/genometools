@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/termios.h>
+#include "libgtcore/unused.h"
 #include "libgtcore/xposix.h"
 
 #define DEFAULT_WINDOW_SIZE  80
@@ -172,7 +173,7 @@ static void refresh_progressbar(void)
   xwrite(STDOUT_FILENO, buf, strlen(buf));
 }
 
-static void update_progressbar(int sigraised)
+static void update_progressbar(UNUSED int sigraised)
 {
   int last_errno = errno;
   assert(sigraised == SIGALRM);
@@ -189,7 +190,7 @@ static void update_progressbar(int sigraised)
   errno = last_errno;
 }
 
-static void sig_winch(int sigraised)
+static void sig_winch(UNUSED int sigraised)
 {
   assert(sigraised == SIGWINCH);
   window_resized = 1;

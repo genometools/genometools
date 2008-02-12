@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtext/genome_visitor_rep.h"
 
 GenomeVisitor* genome_visitor_create(const GenomeVisitorClass *gvc)
@@ -29,7 +30,8 @@ GenomeVisitor* genome_visitor_create(const GenomeVisitorClass *gvc)
   return gv;
 }
 
-void* genome_visitor_cast(const GenomeVisitorClass *gvc, GenomeVisitor *gv)
+void* genome_visitor_cast(UNUSED const GenomeVisitorClass *gvc,
+                          GenomeVisitor *gv)
 {
   assert(gvc && gv && gv->c_class == gvc);
   return gv;

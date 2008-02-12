@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +26,7 @@
 #include "libgtcore/parseutils.h"
 #include "libgtcore/splitter.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/warning.h"
 #include "libgtext/comment.h"
 #include "libgtext/genome_feature.h"
@@ -579,13 +580,14 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   return had_err;
 }
 
-static int add_auto_sr_to_queue(void *key, void *value, void *data, Error *e)
+static int add_auto_sr_to_queue(UNUSED void *key, void *value, void *data,
+                                UNUSED Error *err)
 {
   AutomaticSequenceRegion *auto_sr = value;
   Queue *genome_nodes = data;
   GenomeNode *gf;
   unsigned int i;
-  error_check(e);
+  error_check(err);
   assert(key && value && data);
   if (array_size(auto_sr->genome_features)) {
     queue_add(genome_nodes, auto_sr->sequence_region);

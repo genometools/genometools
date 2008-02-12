@@ -1774,7 +1774,7 @@ static size_t
 writeIdxHeader(struct blockCompositionSeq *seqIdx,
                size_t numExtHeaders, uint16_t *headerIDs,
                uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
-               void **headerCBData, Error *err)
+               void **headerCBData, UNUSED Error *err)
 {
   FILE *fp;
   /* construct memory buffer with header data */

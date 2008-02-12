@@ -22,6 +22,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 
 struct DiscDistri {
   Hashtable *hashdist;
@@ -80,13 +81,13 @@ typedef struct {
   GenFile *genfile;
 } ShowValueInfo;
 
-static int showvalue(void *key, void *value, void *data, Error *e)
+static int showvalue(void *key, void *value, void *data, UNUSED Error *err)
 {
   unsigned long long occurrences;
   double probability;
   ShowValueInfo *info;
 
-  error_check(e);
+  error_check(err);
   assert(key && value && data);
 
   occurrences = *(unsigned long long*) value;
@@ -123,10 +124,11 @@ typedef struct {
   void *data;
 } ForeachInfo;
 
-static int foreach_iterfunc(void *key, void *value, void *data, Error *e)
+static int foreach_iterfunc(void *key, void *value, void *data,
+                            UNUSED Error *err)
 {
   ForeachInfo *info;
-  error_check(e);
+  error_check(err);
   assert(value && data);
   info = (ForeachInfo*) data;
   info->func((unsigned long) key, *(unsigned long long*) value, info->data);

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 #include "libgtcore/hashtable.h"
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/warning.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/evaluator.h"
@@ -239,13 +240,13 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   return evaluator;
 }
 
-static int set_actuals_and_sort_them(void *key, void *value, void *data,
-                                     Error *e)
+static int set_actuals_and_sort_them(UNUSED void *key, void *value, void *data,
+                                     UNUSED Error *err)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *s = (Slot*) value;
 
-  error_check(e);
+  error_check(err);
   assert(key && value && data);
 
   /* set actual genes */
@@ -414,14 +415,14 @@ static void add_nucleotide_exon(Bittab *nucleotides, Range range,
   }
 }
 
-static int process_real_feature(GenomeNode *gn, void *data, Error *e)
+static int process_real_feature(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   ProcessRealFeatureInfo *info = (ProcessRealFeatureInfo*) data;
   GenomeNode *gn_ref;
   GenomeFeature *gf;
   Range range;
 
-  error_check(e);
+  error_check(err);
   assert(gn && data);
   gf = (GenomeFeature*) gn;
 
@@ -522,12 +523,12 @@ static int process_real_feature(GenomeNode *gn, void *data, Error *e)
   return 0;
 }
 
-static int store_exon(GenomeNode *gn, void *data, Error *e)
+static int store_exon(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   Array *exons = (Array*) data;
   Range range;
   GenomeFeature *gf;
-  error_check(e);
+  error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && exons);
   if (genome_feature_get_type(gf) == gft_exon) {
@@ -576,12 +577,12 @@ typedef struct {
         *mRNAs;
 } Store_gene_feature_info;
 
-static int store_gene_feature(GenomeNode *gn, void *data, Error *e)
+static int store_gene_feature(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   GenomeFeature *gf;
   Store_gene_feature_info *info = (Store_gene_feature_info*) data;
   Range range;
-  error_check(e);
+  error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && info);
   switch (genome_feature_get_type(gf)) {
@@ -861,7 +862,8 @@ static void store_true_exon(GenomeNode *gn, Strand predicted_strand,
   }
 }
 
-static int process_predicted_feature(GenomeNode *gn, void *data, Error *e)
+static int process_predicted_feature(GenomeNode *gn, void *data,
+                                     UNUSED Error *err)
 {
   ProcessPredictedFeatureInfo *info = (ProcessPredictedFeatureInfo*) data;
   Range predicted_range;
@@ -870,7 +872,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *e)
   Array *real_genome_nodes;
   GenomeNode **real_gn;
 
-  error_check(e);
+  error_check(err);
   assert(gn && data);
 
   predicted_range = genome_node_get_range(gn);
@@ -1139,11 +1141,12 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *e)
   return 0;
 }
 
-int determine_missing_features(void *key, void *value, void *data, Error *e)
+int determine_missing_features(UNUSED void *key, void *value, void *data,
+                               UNUSED Error *err)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
-  error_check(e);
+  error_check(err);
   assert(key && value && data);
   if (slot->overlapped_genes_forward) {
     se->missing_genes += bittab_size(slot->overlapped_genes_forward) -
@@ -1192,12 +1195,13 @@ static void add_nucleotide_values(NucEval *nucleotides, Bittab *real,
   nucleotides->FN += bittab_count_set_bits(tmp);
 }
 
-int compute_nucleotides_values(void *key, void *value, void *data, Error *e)
+int compute_nucleotides_values(UNUSED void *key, void *value, void *data,
+                               UNUSED Error *err)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
   Bittab *tmp;
-  error_check(e);
+  error_check(err);
   assert(key && value && data);
   /* add ``out of range'' FPs */
   se->mRNA_nucleotides.FP += slot->FP_mRNA_nucleotides_forward;

@@ -76,7 +76,7 @@ GTR* gtr_new(Error *err)
   }
 #ifdef LIBGTVIEW
   if (!had_err) {
-    if (!(gtr->config = config_new_with_state(gtr->L, err)))
+    if (!(gtr->config = config_new_with_state(gtr->L)))
       had_err = -1;
   }
   if (!had_err) {

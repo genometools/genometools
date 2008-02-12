@@ -56,7 +56,7 @@ static OptionParser* gt_scorefasta_option_parser_new(void *tool_arguments)
 }
 
 static int gt_scorefasta_runner(UNUSED int argc, const char **argv,
-                                void *tool_arguments, Error *err)
+                                void *tool_arguments, UNUSED Error *err)
 {
   ScorefastaArguments *arguments = tool_arguments;
   unsigned long ulen, wlen;

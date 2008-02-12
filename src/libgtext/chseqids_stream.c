@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include "libgtcore/unused.h"
 #include "libgtext/chseqids_stream.h"
 #include "libgtext/genome_stream_rep.h"
 #include "libgtext/mapping.h"
@@ -32,10 +33,10 @@ struct ChseqidsStream {
 #define chseqids_stream_cast(GS)\
         genome_stream_cast(chseqids_stream_class(), GS)
 
-static int change_sequence_id(GenomeNode *gn, void *data, Error *e)
+static int change_sequence_id(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   Str *changed_seqid = data;
-  error_check(e);
+  error_check(err);
   assert(changed_seqid);
   genome_node_set_seqid(gn, changed_seqid);
   return 0;

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 
 #define NUM_OF_TESTS    50
@@ -306,7 +307,7 @@ void bittab_show(const Bittab *b, FILE *outfp)
   (void) putc('\n', outfp);
 }
 
-int bittab_example(Error *err)
+int bittab_example(UNUSED Error *err)
 {
   unsigned long bit;
   Bittab *b;
