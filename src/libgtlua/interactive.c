@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -109,7 +109,7 @@ static int incomplete(lua_State *L, int status) {
   return 0;  /* else... */
 }
 
-static int pushline(lua_State *L, bool firstline, GetLine *gl) {
+static int pushline(lua_State *L, bool firstline, UNUSED GetLine *gl) {
   char buffer[BUFSIZ];
   char *b = buffer;
   size_t l;
