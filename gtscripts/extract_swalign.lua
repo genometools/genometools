@@ -83,6 +83,9 @@ p:add(f)
 f = File:new("src/libgtcore/undef.h")
 p:add(f)
 
+f = File:new("src/libgtcore/unused.h")
+p:add(f)
+
 f = File:new("src/libgtext/coordinate.h")
 p:add(f)
 

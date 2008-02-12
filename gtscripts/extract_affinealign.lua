@@ -46,6 +46,9 @@ p:add(f)
 f = File:new("src/libgtcore/minmax.h")
 p:add(f)
 
+f = File:new("src/libgtcore/unused.h")
+p:add(f)
+
 m = Module:new("src/libgtcore/xansi")
 m:bare_includes()
 p:add(m)
