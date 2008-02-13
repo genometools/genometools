@@ -84,7 +84,7 @@ static void print_str_upper(char* str)
 {
   register int t;
 
-  for(t=0; str[t]; ++t)  {
+  for (t=0; str[t]; ++t)  {
     putchar(toupper(str[t]));
   }
 }
@@ -96,26 +96,26 @@ static void output_tabular(Array* results, LTRboundaries *b,
 {
   unsigned long i;
   /* print reference sequence */
-  char *prseq = ma_malloc(sizeof(char) * 2*options.ppt_radius+1);
+  char *prseq = ma_malloc(sizeof (char) * 2*options.ppt_radius+1);
   strncpy(prseq,
           seqoffset-1,
           2*options.ppt_radius);
   prseq[2*options.ppt_radius] = '\0';
   printf("%s\n", prseq);
 
-  for(i=0;i<options.ppt_radius;i++)
+  for (i=0;i<options.ppt_radius;i++)
   {
     printf(" ");
   }
   printf("|\n");
 
-  for(i=0;i<array_size(results);i++)
+  for (i=0;i<array_size(results);i++)
   {
     unsigned long j;
     PPT_Hit *hit = *(PPT_Hit**) array_get(results, i);
-    for(j=0;j<hit->end-hit->start+1;j++)
+    for (j=0;j<hit->end-hit->start+1;j++)
     {
-      switch(hit->state)
+      switch (hit->state)
       {
         case PPT_OUT:
           printf("-");
@@ -148,7 +148,7 @@ static void output_csv(PPT_Hit *showhit, LTRboundaries *b,
     tmp[CSV_SEQ_SPACING]='\0';
     printf("%lu;%lu;", (unsigned long) b->leftLTR_5,
                        (unsigned long) b->rightLTR_3);
-    switch(showhit->strand)
+    switch (showhit->strand)
     {
       case STRAND_FORWARD:
         printf("+;"); break;
@@ -176,7 +176,7 @@ static void output_csv(PPT_Hit *showhit, LTRboundaries *b,
     strncpy(tmp, seqoffset+s-1-CSV_SEQ_SPACING, CSV_SEQ_SPACING);
     printf("%s", tmp);
 
-    seq = ma_malloc(sizeof(char) * e-s+2);
+    seq = ma_malloc(sizeof (char) * e-s+2);
     strncpy(seq, seqoffset+s-1, e-s+1);
     seq[e-s+1]='\0';
     print_str_upper(seq);
@@ -221,12 +221,12 @@ int gt_findppt(int argc, const char **argv, Error *err)
     fprintf(stderr,"%li sequences loaded.\n", nofseq);
 
     /* read annotations from file */
-    ltrboundaries = array_new(sizeof(LTRboundaries*));
+    ltrboundaries = array_new(sizeof (LTRboundaries*));
     fp = fopen(argv[parsed_args+1],"r");
 
-    while(fgets(sline, BUFSIZ, fp) != NULL)
+    while (fgets(sline, BUFSIZ, fp) != NULL)
     {
-      LTRboundaries *ltr = ma_malloc(sizeof(LTRboundaries));
+      LTRboundaries *ltr = ma_malloc(sizeof (LTRboundaries));
       unsigned long leftLTR_5=0, leftLTR_3, rightLTR_3, rightLTR_5;
       float similarity;
       sscanf(sline,"%*d %*d %*d %lu %lu %*d %lu %lu %*d %f %*d",
@@ -248,7 +248,7 @@ int gt_findppt(int argc, const char **argv, Error *err)
     fclose(fp);
 
     fprintf(stderr, "%lu annotations loaded.\n", array_size(ltrboundaries));
-    for(seqindex=0UL;seqindex<nofseq;seqindex++)
+    for (seqindex=0UL;seqindex<nofseq;seqindex++)
     {
       Seq *seq;
       unsigned long seqlen;
@@ -267,21 +267,21 @@ int gt_findppt(int argc, const char **argv, Error *err)
       /* identify element, quick and dirty */
       desc = (char*)seq_get_description(seq);
       /* search for beginning of interval */
-      while(*desc != '[')
+      while (*desc != '[')
         desc++;
       sscanf(desc,"[%lu,%*d]", &ltrstart);
 
       /* find annotation line for element */
-      for(i=0;i<array_size(ltrboundaries);i++)
+      for (i=0;i<array_size(ltrboundaries);i++)
       {
         line  = *(LTRboundaries**) array_get(ltrboundaries, i);
-        if(line->leftLTR_5 == ltrstart)
+        if (line->leftLTR_5 == ltrstart)
           break;
       }
       /* if no annotation could be found, skip this prediction */
       if (line)
       {
-        if(!opts.csv)
+        if (!opts.csv)
           printf("\nsequence #%lu [%lu,%lu] (%lu/%lubp):\n", seqindex,
                               (unsigned long) line->leftLTR_5,
                               (unsigned long) line->rightLTR_3,
@@ -302,8 +302,8 @@ int gt_findppt(int argc, const char **argv, Error *err)
                      -options.ppt_radius);
 
         /* run PPT identification on both strands */
-        results_p = array_new(sizeof(PPT_Hit*));
-        results_m = array_new(sizeof(PPT_Hit*));
+        results_p = array_new(sizeof (PPT_Hit*));
+        results_m = array_new(sizeof (PPT_Hit*));
         idx_p = ppt_find(seqc,
                          seqlen,
                          line->rightLTR_3-line->rightLTR_5+1,
@@ -365,11 +365,11 @@ int gt_findppt(int argc, const char **argv, Error *err)
         }
 
         /* free stuff */
-        for(i=0;i<array_size(results_p);i++)
+        for (i=0;i<array_size(results_p);i++)
         {
           ma_free(*(PPT_Hit**) array_get(results_p,i));
         }
-        for(i=0;i<array_size(results_m);i++)
+        for (i=0;i<array_size(results_m);i++)
         {
           ma_free(*(PPT_Hit**) array_get(results_m,i));
         }
@@ -382,7 +382,7 @@ int gt_findppt(int argc, const char **argv, Error *err)
         warning("LTR transposon found with no matching annotation!");
     }
     /* free annotations */
-    for(i=0;i<array_size(ltrboundaries);i++)
+    for (i=0;i<array_size(ltrboundaries);i++)
     {
       LTRboundaries *line = *(LTRboundaries**) array_get(ltrboundaries, i);
       ma_free(line);

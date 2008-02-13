@@ -25,7 +25,6 @@
 #include "libgtltr/repeattypes.h"
 #include "libgtltr/ltrharvest-opt.h"
 
-
 /* This enumeration defines the states in the PPT detection HMM. */
 typedef enum {
   PPT_IN,
