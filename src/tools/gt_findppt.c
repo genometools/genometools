@@ -291,6 +291,9 @@ int gt_findppt(int argc, const char **argv, Error *err)
       /* if no annotation could be found, skip this prediction */
       if (line)
       {
+        double pscore = 0.0, mscore = 0.0;
+        PPT_Hit *maxhit_p = NULL, *maxhit_m = NULL;
+
         if (!opts.csv)
           printf("\nsequence #%lu [%lu,%lu] (%lu/%lubp):\n", seqindex,
                               (unsigned long) line->leftLTR_5,
@@ -328,8 +331,8 @@ int gt_findppt(int argc, const char **argv, Error *err)
                          &options,
                          ppt_score,
                          STRAND_REVERSE);
-        double pscore = 0.0, mscore = 0.0;
-        PPT_Hit *maxhit_p = NULL, *maxhit_m = NULL;
+
+        /* find out which strand scored better */
         if (idx_p != UNDEF_ULONG)
         {
           maxhit_p = *(PPT_Hit**) array_get(results_p, idx_p);
@@ -340,6 +343,8 @@ int gt_findppt(int argc, const char **argv, Error *err)
           maxhit_m = *(PPT_Hit**) array_get(results_m, idx_m);
           mscore = maxhit_m->score;
         }
+
+        /* print output */
         if (pscore > mscore)
         {
           if (opts.csv)
