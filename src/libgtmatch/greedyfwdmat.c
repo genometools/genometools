@@ -321,15 +321,21 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                   totalwidth,
                                   substring.currentcode % numofchars,
                                   numofchars);
-      if (bbound.nonspecialsinbucket > 0)
+      if (bbound.nonspecialsinbucket > 0 && gmatchlength >= prefixlength)
       {
-        gmatchlength2 = gmatchforward(genericindex,
+        gmatchlength2 = prefixlength +
+                        gmatchforward(genericindex,
                                       bbound.left,
                                       bbound.left+bbound.nonspecialsinbucket-1,
                                       NULL,
                                       substring.queryptr + prefixlength,
                                       substring.queryptr + substring.remaining);
-        assert(gmatchlength2 == gmatchlength);
+        if (gmatchlength2 != gmatchlength)
+        {
+          fprintf(stderr,"gmatchlength2 = %lu != %lu = gmatchlength\n",
+                          gmatchlength2,gmatchlength);
+          exit(EXIT_FAILURE);
+        }
       }
     }
   }
