@@ -65,21 +65,23 @@ double ppt_score(unsigned long posdiff, unsigned int width)
   return score/optscore;
 }
 
-unsigned long ppt_find(LTRboundaries *ltr,
+unsigned long ppt_find(const char *seq,
+                       unsigned long seqlen,
+                       unsigned long ltrlen,
                        Array *results,
-                       unsigned int radius,
-                       const char *seq,
                        LTRharvestoptions *lo,
-                       double score_func(unsigned long, unsigned int))
+                       double score_func(unsigned long, unsigned int),
+                       Strand strand)
 {
-  assert(ltr && seq && results && score_func && lo && radius > 0);
-  unsigned int *encoded_seq=NULL, *decoded=NULL;
+  assert(seq && seqlen>0 && ltrlen>0 && results && score_func && lo
+          && strand != STRAND_UNKNOWN && strand != STRAND_BOTH);
+  unsigned int *encoded_seq=NULL,
+               *decoded=NULL;
   const Alpha *alpha = alpha_new_dna();
   HMM *hmm = ppt_hmm_new(alpha);
   PPT_Hit *cur_hit;
-  unsigned long seqlen = ltr->rightLTR_3 - ltr->leftLTR_5+1,
-                i = 0,
-                rltrlen = ltr->rightLTR_3 - ltr->rightLTR_5+1,
+  unsigned long i = 0,
+                radius = 0,
                 highest_index = UNDEF_ULONG;
   double highest_score = 0.0;
 
@@ -90,17 +92,18 @@ unsigned long ppt_find(LTRboundaries *ltr,
     encoded_seq[i] = alpha_encode(alpha, seq[i]);
   }
 
-  /* make sure that we do not cross the 3' LTR boundary */
-  radius = MIN(radius, rltrlen);
+  /* make sure that we do not cross the LTR boundary */
+  radius = MIN(lo->ppt_radius, ltrlen);
 
   /* use Viterbi algorithm to decode emissions within radius */
   decoded = ma_malloc(sizeof (unsigned int) * 2*radius+2);
-  hmm_decode(hmm, decoded, encoded_seq+seqlen-rltrlen-radius, 2*radius);
+  hmm_decode(hmm, decoded, encoded_seq+seqlen-ltrlen-radius, 2*radius);
 
   /* group hits into stretches */
   cur_hit = ma_malloc(sizeof (PPT_Hit));
   cur_hit->start = 0UL;
   cur_hit->score = 0.0;
+  cur_hit->strand = strand;
   cur_hit->ubox = NULL;
   for (i=0;i<2*radius-1;i++)
   {
@@ -122,6 +125,7 @@ unsigned long ppt_find(LTRboundaries *ltr,
         cur_hit = ma_malloc(sizeof (PPT_Hit));
         cur_hit->start = i+1;
         cur_hit->score = 0.0;
+        cur_hit->strand = strand;
         cur_hit->ubox = NULL;
       }
     }
@@ -131,12 +135,13 @@ unsigned long ppt_find(LTRboundaries *ltr,
   /* score and report PPTs */
   for (i=0;i<array_size(results);i++)
   {
+    unsigned long ltrlen;
     PPT_Hit *hit = *(PPT_Hit**) array_get(results,i);
     if (hit->state == PPT_IN)
     {
-      hit->score = score_func(abs((seqlen-rltrlen-1)
-                                 -(seqlen-rltrlen-1)-radius+hit->end),
-                             radius);
+      hit->score = score_func(abs((seqlen-ltrlen-1)
+                                 -(seqlen-ltrlen-1)-radius+hit->end),
+                              radius);
       if (i>0)
       {
         PPT_Hit *uhit = *(PPT_Hit**) array_get(results,i-1);

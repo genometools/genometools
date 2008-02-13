@@ -26,6 +26,7 @@
 #include "libgtcore/warning.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/bioseq.h"
+#include "libgtext/reverse.h"
 #include "libgtltr/ppt.h"
 
 /* number of nucleotides to print around PPT hits in CSV output */
@@ -88,20 +89,76 @@ static void print_str_upper(char* str)
   }
 }
 
-static void output_csv(Array* results, LTRboundaries *b,
+static void output_tabular(Array* results, LTRboundaries *b,
                        unsigned long startpos,
-                       unsigned int index, const char* seqoffset)
+                       unsigned int index, const char* seqoffset,
+                       LTRharvestoptions options)
 {
-  if (index != UNDEF_ULONG)
+  unsigned long i;
+  /* print reference sequence */
+  char *prseq = ma_malloc(sizeof(char) * 2*options.ppt_radius+1);
+  strncpy(prseq,
+          seqoffset-1,
+          2*options.ppt_radius);
+  prseq[2*options.ppt_radius] = '\0';
+  printf("%s\n", prseq);
+
+  for(i=0;i<options.ppt_radius;i++)
+  {
+    printf(" ");
+  }
+  printf("|\n");
+
+  for(i=0;i<array_size(results);i++)
+  {
+    unsigned long j;
+    PPT_Hit *hit = *(PPT_Hit**) array_get(results, i);
+    for(j=0;j<hit->end-hit->start+1;j++)
+    {
+      switch(hit->state)
+      {
+        case PPT_OUT:
+          printf("-");
+          break;
+        case PPT_IN:
+          printf("P");
+          break;
+        case PPT_UBOX:
+          printf("U");
+          break;
+        case PPT_NOF_STATES:
+        default:
+          break;
+      }
+    }
+  }
+  ma_free(prseq);
+  printf("\n");
+}
+
+static void output_csv(PPT_Hit *showhit, LTRboundaries *b,
+                       unsigned long startpos,
+                       const char* seqoffset)
+{
+  if (showhit)
   {
     unsigned long s, e;
     char *seq, tmp[CSV_SEQ_SPACING+1];
-    PPT_Hit *showhit;
 
     tmp[CSV_SEQ_SPACING]='\0';
-    showhit = *(PPT_Hit**) array_get(results, index);
     printf("%lu;%lu;", (unsigned long) b->leftLTR_5,
                        (unsigned long) b->rightLTR_3);
+    switch(showhit->strand)
+    {
+      case STRAND_FORWARD:
+        printf("+;"); break;
+      case STRAND_REVERSE:
+        printf("-;"); break;
+      case STRAND_UNKNOWN:
+      case STRAND_BOTH:
+      case NUM_OF_STRAND_TYPES:
+        return;
+    }
     printf("%lu;", startpos+showhit->start);
     printf("%lu;", showhit->end-showhit->start+1);
     s = showhit->start;
@@ -196,10 +253,12 @@ int gt_findppt(int argc, const char **argv, Error *err)
       Seq *seq;
       unsigned long seqlen;
       const char *seqc, *seqoffset;
-      unsigned long ltrstart=0UL, idx=0UL;
+      char *seqc_m, *seqoffset_m;
+      unsigned long ltrstart=0UL, idx_p=0UL, idx_m=0UL;
       LTRboundaries *line = NULL;
       const Alpha *alpha = alpha_new_dna();
       char *desc = NULL;
+      Array *results_p, *results_m;
 
       /* get element */
       seq = bioseq_get_seq(bs, seqindex);
@@ -223,86 +282,104 @@ int gt_findppt(int argc, const char **argv, Error *err)
       if (line)
       {
         if(!opts.csv)
-          printf("\nsequence %lu [%lu,%lu] (%lu/%lubp):\n", seqindex,
+          printf("\nsequence #%lu [%lu,%lu] (%lu/%lubp):\n", seqindex,
                               (unsigned long) line->leftLTR_5,
                               (unsigned long) line->rightLTR_3,
                               (unsigned long) line->rightLTR_3-
                                  (unsigned long) line->leftLTR_5+1,
                               seqlen);
 
+        /* prepare sequences */
         seqc = seq_get_orig(seq);
+        seqc_m = ma_malloc(sizeof (char) * seqlen);
+        memcpy(seqc_m, seqc, (sizeof (char) * seqlen));
+        reverse_complement(seqc_m, seqlen, err);
+
+        /* precalculate search offsets in sequences */
         seqoffset = seqc+(seqlen-(line->rightLTR_3-line->rightLTR_5)
                      -options.ppt_radius);
+        seqoffset_m = seqc_m+(seqlen-(line->leftLTR_3-line->leftLTR_5)
+                     -options.ppt_radius);
 
-        /* run PPT identification */
-        Array *results = array_new(sizeof(PPT_Hit*));
-        idx = ppt_find(line,
-                       results,
-                       options.ppt_radius,
-                       seqc,
-                       &options,
-                       ppt_score);
-
-        if(!opts.csv)
+        /* run PPT identification on both strands */
+        results_p = array_new(sizeof(PPT_Hit*));
+        results_m = array_new(sizeof(PPT_Hit*));
+        idx_p = ppt_find(seqc,
+                         seqlen,
+                         line->rightLTR_3-line->rightLTR_5+1,
+                         results_p,
+                         &options,
+                         ppt_score,
+                         STRAND_FORWARD);
+        idx_m = ppt_find(seqc_m,
+                         seqlen,
+                         line->leftLTR_3-line->leftLTR_5+1,
+                         results_m,
+                         &options,
+                         ppt_score,
+                         STRAND_REVERSE);
+        double pscore = 0.0, mscore = 0.0;
+        PPT_Hit *maxhit_p = NULL, *maxhit_m = NULL;
+        if (idx_p != UNDEF_ULONG)
         {
-          /* print reference sequence */
-          char *prseq = ma_malloc(sizeof(char) * 2*options.ppt_radius+1);
-          strncpy(prseq,
-                  seqoffset-1,
-                  2*options.ppt_radius);
-          prseq[2*options.ppt_radius] = '\0';
-          printf("%s\n", prseq);
-
-          for(i=0;i<options.ppt_radius;i++)
-          {
-            printf(" ");
-          }
-          printf("|\n");
-
-          for(i=0;i<array_size(results);i++)
-          {
-            unsigned long j;
-            PPT_Hit *hit = *(PPT_Hit**) array_get(results, i);
-            for(j=0;j<hit->end-hit->start+1;j++)
-            {
-              switch(hit->state)
-              {
-                case PPT_OUT:
-                  printf("-");
-                  break;
-                case PPT_IN:
-                  printf("P");
-                  break;
-                case PPT_UBOX:
-                  printf("U");
-                  break;
-                case PPT_NOF_STATES:
-                default:
-                  break;
-              }
-            }
-          }
-          ma_free(prseq);
-          printf("\n");
+          maxhit_p = *(PPT_Hit**) array_get(results_p, idx_p);
+          pscore = maxhit_p->score;
         }
-
-        output_csv(results,
-                   line,
-                   line->leftLTR_5+seqlen-(line->rightLTR_3-line->rightLTR_5)
-                     -options.ppt_radius,
-                   idx,
-                   seqoffset);
+        if (idx_m != UNDEF_ULONG)
+        {
+          maxhit_m = *(PPT_Hit**) array_get(results_m, idx_m);
+          mscore = maxhit_m->score;
+        }
+        if (pscore > mscore)
+        {
+          if (opts.csv)
+          output_csv(maxhit_p,
+                  line,
+                  line->leftLTR_5+seqlen-(line->rightLTR_3-line->rightLTR_5)
+                    -options.ppt_radius,
+                  seqoffset);
+          else
+          output_tabular(results_p,
+                  line,
+                  line->leftLTR_5+seqlen-(line->rightLTR_3-line->rightLTR_5)
+                    -options.ppt_radius,
+                  idx_p,
+                  seqoffset,
+                  options);
+        }
+        else
+        {
+          if (opts.csv)
+          output_csv(maxhit_m,
+                  line,
+                  line->leftLTR_5+(line->leftLTR_3-line->leftLTR_5),
+                  seqoffset_m);
+          else
+          output_tabular(results_m,
+                  line,
+                  line->leftLTR_5+seqlen-(line->rightLTR_3-line->rightLTR_5)
+                    -options.ppt_radius,
+                  idx_m,
+                  seqoffset_m,
+                  options);
+        }
 
         /* free stuff */
-        for(i=0;i<array_size(results);i++)
+        for(i=0;i<array_size(results_p);i++)
         {
-          ma_free(*(PPT_Hit**) array_get(results,i));
+          ma_free(*(PPT_Hit**) array_get(results_p,i));
+        }
+        for(i=0;i<array_size(results_m);i++)
+        {
+          ma_free(*(PPT_Hit**) array_get(results_m,i));
         }
         alpha_delete((Alpha*)alpha);
-        array_delete(results);
+        array_delete(results_p);
+        array_delete(results_m);
+        ma_free(seqc_m);
       }
       else
-        warning("LTR transposon found with no matching annotation!\n");
+        warning("LTR transposon found with no matching annotation!");
     }
     /* free annotations */
     for(i=0;i<array_size(ltrboundaries);i++)
@@ -310,6 +387,7 @@ int gt_findppt(int argc, const char **argv, Error *err)
       LTRboundaries *line = *(LTRboundaries**) array_get(ltrboundaries, i);
       ma_free(line);
     }
+
   }
 
   array_delete(ltrboundaries);
