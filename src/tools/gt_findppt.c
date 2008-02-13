@@ -90,9 +90,8 @@ static void print_str_upper(char* str)
 }
 
 static void output_tabular(Array* results, LTRboundaries *b,
-                       unsigned long startpos,
-                       unsigned int index, const char* seqoffset,
-                       LTRharvestoptions options)
+                           unsigned int index, const char* seqoffset,
+                           LTRharvestoptions options)
 {
   unsigned long i;
   /* print reference sequence */
@@ -137,13 +136,15 @@ static void output_tabular(Array* results, LTRboundaries *b,
 }
 
 static void output_csv(PPT_Hit *showhit, LTRboundaries *b,
-                       unsigned long startpos,
+                       LTRharvestoptions *options,
                        const char* seqoffset)
 {
   if (showhit)
   {
-    unsigned long s, e;
-    char *seq, tmp[CSV_SEQ_SPACING+1];
+    unsigned long startpos,
+                  s = showhit->start,
+                  e = showhit->end;
+    char *seq = NULL, tmp[CSV_SEQ_SPACING+1];
 
     tmp[CSV_SEQ_SPACING]='\0';
     printf("%lu;%lu;", (unsigned long) b->leftLTR_5,
@@ -151,27 +152,36 @@ static void output_csv(PPT_Hit *showhit, LTRboundaries *b,
     switch (showhit->strand)
     {
       case STRAND_FORWARD:
-        printf("+;"); break;
+        printf("+;");
+        startpos = b->rightLTR_5-options->ppt_radius;
+        printf("%lu;", startpos+s);
+        printf("%lu;", e-s+1);
+        if (showhit->ubox)
+        {
+          printf("%lu;", startpos+showhit->ubox->start);
+          printf("%lu;", showhit->ubox->end-showhit->ubox->start+1);
+          s = showhit->ubox->start;
+        } else
+          printf(";0;");
+        break;
       case STRAND_REVERSE:
-        printf("-;"); break;
+        printf("-;");
+        startpos = b->leftLTR_3+options->ppt_radius;
+        printf("%lu;", startpos-e);
+        printf("%lu;", e-s+1);
+        if (showhit->ubox)
+        {
+          printf("%lu;", startpos-showhit->ubox->end);
+          printf("%lu;", showhit->ubox->end-showhit->ubox->start+1);
+          s = showhit->ubox->start;
+        } else
+          printf(";0;");
+        break;
       case STRAND_UNKNOWN:
       case STRAND_BOTH:
       case NUM_OF_STRAND_TYPES:
         return;
     }
-    printf("%lu;", startpos+showhit->start);
-    printf("%lu;", showhit->end-showhit->start+1);
-    s = showhit->start;
-    e = showhit->end;
-    if (showhit->ubox)
-    {
-      printf("%lu;", startpos+showhit->ubox->start);
-      printf("%lu;",
-            showhit->ubox->end-showhit->ubox->start+1);
-      s = showhit->ubox->start;
-    }
-    else
-      printf(";0;");
 
     strncpy(tmp, seqoffset+s-1-CSV_SEQ_SPACING, CSV_SEQ_SPACING);
     printf("%s", tmp);
@@ -335,14 +345,11 @@ int gt_findppt(int argc, const char **argv, Error *err)
           if (opts.csv)
           output_csv(maxhit_p,
                   line,
-                  line->leftLTR_5+seqlen-(line->rightLTR_3-line->rightLTR_5)
-                    -options.ppt_radius,
+                  &options,
                   seqoffset);
           else
           output_tabular(results_p,
                   line,
-                  line->leftLTR_5+seqlen-(line->rightLTR_3-line->rightLTR_5)
-                    -options.ppt_radius,
                   idx_p,
                   seqoffset,
                   options);
@@ -352,13 +359,11 @@ int gt_findppt(int argc, const char **argv, Error *err)
           if (opts.csv)
           output_csv(maxhit_m,
                   line,
-                  line->leftLTR_5+(line->leftLTR_3-line->leftLTR_5),
+                  &options,
                   seqoffset_m);
           else
           output_tabular(results_m,
                   line,
-                  line->leftLTR_5+seqlen-(line->rightLTR_3-line->rightLTR_5)
-                    -options.ppt_radius,
                   idx_m,
                   seqoffset_m,
                   options);
