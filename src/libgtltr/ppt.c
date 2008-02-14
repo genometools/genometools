@@ -30,37 +30,37 @@ HMM* ppt_hmm_new(const Alpha *alpha)
   hmm = hmm_new(PPT_NOF_STATES, alpha_size(alpha));
 
   /* set emission probabilities */
-  hmm_set_emission_probability(hmm, PPT_OUT, alpha_encode(alpha, 'g'), 0.25);
-  hmm_set_emission_probability(hmm, PPT_OUT, alpha_encode(alpha, 'a'), 0.25);
-  hmm_set_emission_probability(hmm, PPT_OUT, alpha_encode(alpha, 'c'), 0.25);
-  hmm_set_emission_probability(hmm, PPT_OUT, alpha_encode(alpha, 't'), 0.25);
-  hmm_set_emission_probability(hmm, PPT_IN, alpha_encode(alpha, 'g'), 0.485);
-  hmm_set_emission_probability(hmm, PPT_IN, alpha_encode(alpha, 'a'), 0.485);
-  hmm_set_emission_probability(hmm, PPT_IN, alpha_encode(alpha, 'c'), 0.015);
-  hmm_set_emission_probability(hmm, PPT_IN, alpha_encode(alpha, 't'), 0.015);
+  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 'g'), 0.25);
+  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 'a'), 0.25);
+  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 'c'), 0.25);
+  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 't'), 0.25);
+  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 'g'), 0.485);
+  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 'a'), 0.485);
+  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 'c'), 0.015);
+  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 't'), 0.015);
   hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 'g'), 0.02);
   hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 'a'), 0.02);
   hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 'c'), 0.02);
   hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 't'), 0.94);
-  hmm_set_emission_probability(hmm, PPT_N, alpha_encode(alpha, 'g'), 0.00);
-  hmm_set_emission_probability(hmm, PPT_N, alpha_encode(alpha, 'a'), 0.00);
-  hmm_set_emission_probability(hmm, PPT_N, alpha_encode(alpha, 'c'), 0.00);
-  hmm_set_emission_probability(hmm, PPT_N, alpha_encode(alpha, 't'), 0.00);
-  hmm_set_emission_probability(hmm, PPT_N, alpha_encode(alpha, 'n'), 1.00);
+  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'g'), 0.00);
+  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'a'), 0.00);
+  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'c'), 0.00);
+  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 't'), 0.00);
+  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'n'), 1.00);
 
   /* set transition probabilities */
-  hmm_set_transition_probability(hmm, PPT_OUT, PPT_IN,        0.09);
-  hmm_set_transition_probability(hmm, PPT_OUT, PPT_N,         0.09);
-  hmm_set_transition_probability(hmm, PPT_OUT, PPT_UBOX,      0.09);
-  hmm_set_transition_probability(hmm, PPT_UBOX, PPT_OUT,      0.09);
-  hmm_set_transition_probability(hmm, PPT_UBOX, PPT_N,        0.09);
-  hmm_set_transition_probability(hmm, PPT_UBOX, PPT_IN,       0.09);
-  hmm_set_transition_probability(hmm, PPT_IN, PPT_UBOX,       0.09);
-  hmm_set_transition_probability(hmm, PPT_IN, PPT_OUT,        0.09);
-  hmm_set_transition_probability(hmm, PPT_IN, PPT_N,          0.09);
-  hmm_set_transition_probability(hmm, PPT_N, PPT_UBOX,        0.09);
-  hmm_set_transition_probability(hmm, PPT_N, PPT_OUT,         0.09);
-  hmm_set_transition_probability(hmm, PPT_N, PPT_IN,          0.09);
+  hmm_set_transition_probability(hmm, PPT_OUT, PPT_IN,   0.09);
+  hmm_set_transition_probability(hmm, PPT_OUT, PPT_N,    0.09);
+  hmm_set_transition_probability(hmm, PPT_OUT, PPT_UBOX, 0.09);
+  hmm_set_transition_probability(hmm, PPT_UBOX, PPT_OUT, 0.09);
+  hmm_set_transition_probability(hmm, PPT_UBOX, PPT_N,   0.09);
+  hmm_set_transition_probability(hmm, PPT_UBOX, PPT_IN,  0.09);
+  hmm_set_transition_probability(hmm, PPT_IN, PPT_UBOX,  0.09);
+  hmm_set_transition_probability(hmm, PPT_IN, PPT_OUT,   0.09);
+  hmm_set_transition_probability(hmm, PPT_IN, PPT_N,     0.09);
+  hmm_set_transition_probability(hmm, PPT_N, PPT_UBOX,   0.09);
+  hmm_set_transition_probability(hmm, PPT_N, PPT_OUT,    0.09);
+  hmm_set_transition_probability(hmm, PPT_N, PPT_IN,     0.09);
   hmm_set_missing_transition_probabilities(hmm);
   assert(hmm_is_valid(hmm));
 
