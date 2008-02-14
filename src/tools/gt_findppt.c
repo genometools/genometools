@@ -220,7 +220,7 @@ static void read_ltrboundaries_from_file(const char *filename, Array *ltrboundar
    ltr->similarity = (double) similarity;
    if (leftLTR_5>0)
      array_add(ltrboundaries, ltr);
-  else
+   else
      ma_free(ltr);
   }
   fclose(fp);
