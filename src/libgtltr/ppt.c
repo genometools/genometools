@@ -44,12 +44,12 @@ HMM* ppt_hmm_new(const Alpha *alpha)
   hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 't'), 0.94);
 
   /* set transition probabilities */
-  hmm_set_transition_probability(hmm, PPT_IN, PPT_OUT, 0.05);
-  hmm_set_transition_probability(hmm, PPT_OUT, PPT_IN, 0.05);
-  hmm_set_transition_probability(hmm, PPT_OUT, PPT_UBOX, 0.05);
-  hmm_set_transition_probability(hmm, PPT_UBOX, PPT_OUT, 0.05);
-  hmm_set_transition_probability(hmm, PPT_UBOX, PPT_IN, 0.05);
-  hmm_set_transition_probability(hmm, PPT_IN, PPT_UBOX, 0.05);
+  hmm_set_transition_probability(hmm, PPT_IN, PPT_OUT, 0.1);
+  hmm_set_transition_probability(hmm, PPT_OUT, PPT_IN, 0.1);
+  hmm_set_transition_probability(hmm, PPT_OUT, PPT_UBOX, 0.1);
+  hmm_set_transition_probability(hmm, PPT_UBOX, PPT_OUT, 0.1);
+  hmm_set_transition_probability(hmm, PPT_UBOX, PPT_IN, 0.1);
+  hmm_set_transition_probability(hmm, PPT_IN, PPT_UBOX, 0.1);
   hmm_set_missing_transition_probabilities(hmm);
   assert(hmm_is_valid(hmm));
 

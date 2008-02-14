@@ -83,19 +83,33 @@ static OPrval parse_options(int *parsed_args, HMMTestOptions *opts, int argc,
 static void print_str_upper(char* str)
 {
   register int t;
-
   for (t=0; str[t]; ++t)  {
     putchar(toupper(str[t]));
   }
 }
 
-static void output_tabular(Array* results, LTRboundaries *b,
-                           unsigned int index, const char* seqoffset,
+static void output_tabular(Array *results, LTRboundaries *b,
+                           unsigned long index, const char *seqoffset,
                            LTRharvestoptions options)
 {
   unsigned long i;
+  PPT_Hit *hit;
+  char *prseq;
+
+  if (index == UNDEF_ULONG)
+    return;
+
+  hit = *(PPT_Hit**) array_get(results, index);
+
+  printf("\n[%lu,%lu] (%lubp), strand %c:\n",
+        (unsigned long) b->leftLTR_5,
+        (unsigned long) b->rightLTR_3,
+        (unsigned long) b->rightLTR_3-
+           (unsigned long) b->leftLTR_5+1,
+        STRANDCHARS[hit->strand]);
+
   /* print reference sequence */
-  char *prseq = ma_malloc(sizeof (char) * 2*options.ppt_radius+1);
+  prseq = ma_malloc(sizeof (char) * 2*options.ppt_radius+1);
   strncpy(prseq,
           seqoffset-1,
           2*options.ppt_radius);
@@ -137,7 +151,7 @@ static void output_tabular(Array* results, LTRboundaries *b,
 
 static void output_csv(PPT_Hit *showhit, LTRboundaries *b,
                        LTRharvestoptions *options,
-                       const char* seqoffset)
+                       const char *seqoffset)
 {
   if (showhit)
   {
@@ -266,7 +280,7 @@ int gt_findppt(int argc, const char **argv, Error *err)
       Seq *seq;
       unsigned long seqlen;
       const char *seqc, *seqoffset;
-      char *seqc_m, *seqoffset_m;
+      char *seqc_m = NULL, *seqoffset_m = NULL;
       unsigned long ltrstart=0UL, idx_p=0UL, idx_m=0UL;
       LTRboundaries *line = NULL;
       const Alpha *alpha = alpha_new_dna();
@@ -296,14 +310,6 @@ int gt_findppt(int argc, const char **argv, Error *err)
       {
         double pscore = 0.0, mscore = 0.0;
         PPT_Hit *maxhit_p = NULL, *maxhit_m = NULL;
-
-        if (!opts.csv)
-          printf("\nsequence #%lu [%lu,%lu] (%lu/%lubp):\n", seqindex,
-                              (unsigned long) line->leftLTR_5,
-                              (unsigned long) line->rightLTR_3,
-                              (unsigned long) line->rightLTR_3-
-                                 (unsigned long) line->leftLTR_5+1,
-                              seqlen);
 
         /* prepare sequences */
         seqc = seq_get_orig(seq);
