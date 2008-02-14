@@ -161,7 +161,10 @@ unsigned long ppt_find(const char *seq,
           hit->ubox = uhit;
       }
       if (hit->score > highest_score)
+      {
         highest_index = i;
+        highest_score = hit->score;
+      }
     }
   }
 
