@@ -198,6 +198,34 @@ static void output_csv(PPT_Hit *showhit, LTRboundaries *b,
   };
 }
 
+static void read_ltrboundaries_from_file(const char *filename, Array *ltrboundaries)
+{
+  FILE *fp = fopen(filename,"r");
+  char sline[BUFSIZ];
+  while (fgets(sline, BUFSIZ, fp) != NULL)
+  {
+    LTRboundaries *ltr = ma_malloc(sizeof (LTRboundaries));
+    unsigned long leftLTR_5=0, leftLTR_3, rightLTR_3, rightLTR_5;
+    float similarity;
+    sscanf(sline,"%*d %*d %*d %lu %lu %*d %lu %lu %*d %f %*d",
+                                           &leftLTR_5,
+                                           &leftLTR_3,
+                                           &rightLTR_5,
+                                           &rightLTR_3,
+                                           &similarity);
+   ltr->leftLTR_3 = (Seqpos) leftLTR_3;
+   ltr->leftLTR_5 = (Seqpos) leftLTR_5;
+   ltr->rightLTR_3 = (Seqpos) rightLTR_3;
+   ltr->rightLTR_5 = (Seqpos) rightLTR_5;
+   ltr->similarity = (double) similarity;
+   if (leftLTR_5>0)
+     array_add(ltrboundaries, ltr);
+  else
+     ma_free(ltr);
+  }
+  fclose(fp);
+}
+
 int gt_findppt(int argc, const char **argv, Error *err)
 {
   unsigned int i;
@@ -208,8 +236,6 @@ int gt_findppt(int argc, const char **argv, Error *err)
   long nofseq;
   Array *ltrboundaries;
   LTRharvestoptions options;
-  FILE *fp=NULL;
-  char sline[BUFSIZ];
 
   /* option parsing */
   switch (parse_options(&parsed_args, &opts, argc, argv, err)) {
@@ -232,30 +258,7 @@ int gt_findppt(int argc, const char **argv, Error *err)
 
     /* read annotations from file */
     ltrboundaries = array_new(sizeof (LTRboundaries*));
-    fp = fopen(argv[parsed_args+1],"r");
-
-    while (fgets(sline, BUFSIZ, fp) != NULL)
-    {
-      LTRboundaries *ltr = ma_malloc(sizeof (LTRboundaries));
-      unsigned long leftLTR_5=0, leftLTR_3, rightLTR_3, rightLTR_5;
-      float similarity;
-      sscanf(sline,"%*d %*d %*d %lu %lu %*d %lu %lu %*d %f %*d",
-                                             &leftLTR_5,
-                                             &leftLTR_3,
-                                             &rightLTR_5,
-                                             &rightLTR_3,
-                                             &similarity);
-     ltr->leftLTR_3 = (Seqpos) leftLTR_3;
-     ltr->leftLTR_5 = (Seqpos) leftLTR_5;
-     ltr->rightLTR_3 = (Seqpos) rightLTR_3;
-     ltr->rightLTR_5 = (Seqpos) rightLTR_5;
-     ltr->similarity = (double) similarity;
-     if (leftLTR_5>0)
-       array_add(ltrboundaries, ltr);
-    else
-       ma_free(ltr);
-    }
-    fclose(fp);
+    read_ltrboundaries_from_file(argv[parsed_args+1],ltrboundaries);
 
     fprintf(stderr, "%lu annotations loaded.\n", array_size(ltrboundaries));
     for (seqindex=0UL;seqindex<nofseq;seqindex++)
@@ -397,7 +400,6 @@ int gt_findppt(int argc, const char **argv, Error *err)
       LTRboundaries *line = *(LTRboundaries**) array_get(ltrboundaries, i);
       ma_free(line);
     }
-
   }
 
   array_delete(ltrboundaries);
