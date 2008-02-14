@@ -30,6 +30,7 @@ typedef enum {
   PPT_IN,
   PPT_OUT,
   PPT_UBOX,
+  PPT_NSTRETCH,
   PPT_NOF_STATES
 } PPT_States;
 
