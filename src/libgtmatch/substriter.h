@@ -30,7 +30,7 @@ typedef struct Substriter Substriter;
 
 typedef struct
 {
-  const Uchar *querystart, *queryptr;
+  const Uchar *start, *currentptr;
   Codetype currentcode;
   unsigned long remaining;
   char *desc;

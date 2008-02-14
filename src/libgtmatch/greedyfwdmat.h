@@ -28,6 +28,7 @@
 #include "encseq-def.h"
 
 typedef unsigned long (*Greedygmatchforwardfunction) (const void *,
+                                                      unsigned long offset,
                                                       Seqpos left,
                                                       Seqpos right,
                                                       Seqpos *,

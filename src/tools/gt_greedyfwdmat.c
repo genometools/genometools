@@ -313,7 +313,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
     if (gfmsubcallinfo.indextype == Esaindextype)
     {
       mappedbits = SARR_ESQTAB | SARR_SUFTAB
-#define WITHBCKTAB
+#undef WITHBCKTAB
 #ifdef WITHBCKTAB
                    | SARR_BCKTAB
 #endif

@@ -123,6 +123,7 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
   {
     gmatchlength = substringinfo->gmatchforward(substringinfo->genericindex,
                                                 0,
+                                                0,
                                                 substringinfo->totallength,
                                                 wptr,
                                                 qptr,
@@ -307,10 +308,11 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
     assert(substring.remaining >= (unsigned long) prefixlength);
     gmatchlength = gmatchforward(genericindex,
                                  0,
+                                 0,
                                  totalwidth,
                                  NULL,
-                                 substring.queryptr,
-                                 substring.queryptr + substring.remaining);
+                                 substring.currentptr,
+                                 substring.currentptr + substring.remaining);
     if (leftborder != NULL)
     {
       (void) calcbucketboundaries(&bbound,
@@ -321,17 +323,25 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                   totalwidth,
                                   substring.currentcode % numofchars,
                                   numofchars);
-      if (bbound.nonspecialsinbucket > 0 && gmatchlength >= prefixlength)
+      if (bbound.nonspecialsinbucket > 0)
+          /* gmatchlength >= (unsigned long) prefixlength) */
       {
-        gmatchlength2 = prefixlength +
-                        gmatchforward(genericindex,
+        gmatchlength2 = gmatchforward(genericindex,
+                                      (unsigned long) prefixlength,
                                       bbound.left,
                                       bbound.left+bbound.nonspecialsinbucket-1,
                                       NULL,
-                                      substring.queryptr + prefixlength,
-                                      substring.queryptr + substring.remaining);
+                                      substring.currentptr+prefixlength,
+                                      substring.currentptr+substring.remaining);
         if (gmatchlength2 != gmatchlength)
         {
+          fprintf(stderr,"at offset %lu:\n",(unsigned long)
+                                              (substring.currentptr -
+                                               substring.start));
+          fprintf(stderr,"bbound=(" FormatSeqpos "," "%lu" ")\n",
+                          PRINTSeqposcast(bbound.left),
+                          PRINTSeqposcast(bbound.left+
+                                          bbound.nonspecialsinbucket-1));
           fprintf(stderr,"gmatchlength2 = %lu != %lu = gmatchlength\n",
                           gmatchlength2,gmatchlength);
           exit(EXIT_FAILURE);

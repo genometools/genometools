@@ -84,7 +84,7 @@ int substriter_next(Substring *substring,Substriter *substriter,Error *err)
       int retval;
 
       retval = seqiterator_next(substriter->seqit,
-                                &substring->querystart,
+                                &substring->start,
                                 &substring->remaining,
                                 &substring->desc,
                                 err);
@@ -93,14 +93,14 @@ int substriter_next(Substring *substring,Substriter *substriter,Error *err)
         FREESPACE(substring->desc);
         return retval;
       }
-      substring->queryptr = substring->querystart;
+      substring->currentptr = substring->start;
       assert(substring->remaining > 0);
       if (substring->remaining >= (unsigned long) substriter->qvalue)
       {
         firstspecial = qgram2code(&substring->currentcode,
                                   (const Codetype **) substriter->multimappower,
                                   substriter->qvalue,
-                                  substring->querystart);
+                                  substring->currentptr);
         substriter->newseq = false;
         if (firstspecial == substriter->qvalue)
         {
@@ -111,13 +111,13 @@ int substriter_next(Substring *substring,Substriter *substriter,Error *err)
     {
       assert(substring->remaining > 0);
       substring->remaining--;
-      substring->queryptr++;
+      substring->currentptr++;
       if (substring->remaining >= (unsigned long) substriter->qvalue)
       {
         firstspecial = qgram2code(&substring->currentcode,
                                   (const Codetype **) substriter->multimappower,
                                   substriter->qvalue,
-                                  substring->querystart);
+                                  substring->currentptr);
         if (firstspecial == substriter->qvalue)
         {
           break;
