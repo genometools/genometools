@@ -96,17 +96,18 @@ static void output_tabular(Array *results, LTRboundaries *b,
   PPT_Hit *hit;
   char *prseq;
 
-  if (index == UNDEF_ULONG)
-    return;
+  printf("\n[%lu,%lu] (%lubp)",
+           (unsigned long) b->leftLTR_5,
+           (unsigned long) b->rightLTR_3,
+           (unsigned long) b->rightLTR_3-
+              (unsigned long) b->leftLTR_5+1);
 
-  hit = *(PPT_Hit**) array_get(results, index);
-
-  printf("\n[%lu,%lu] (%lubp), strand %c:\n",
-        (unsigned long) b->leftLTR_5,
-        (unsigned long) b->rightLTR_3,
-        (unsigned long) b->rightLTR_3-
-           (unsigned long) b->leftLTR_5+1,
-        STRANDCHARS[hit->strand]);
+  if (index != UNDEF_ULONG)
+  {
+    hit = *(PPT_Hit**) array_get(results, index);
+    printf(", strand %c:", STRANDCHARS[hit->strand]);
+  }
+  printf("\n");
 
   /* print reference sequence */
   prseq = ma_malloc(sizeof (char) * 2*options.ppt_radius+1);
