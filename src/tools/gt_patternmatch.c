@@ -164,7 +164,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
           }
         }
       }
-      if (pmopt->usebcktab)
+      if (pmopt->usebcktab && mmsibck != NULL)
       {
         while (nextmmsearchiterator(&dbstart,mmsibck))
         {
@@ -243,7 +243,6 @@ static OPrval parse_options(Pmatchoptions *pmopt,
   option_parser_add_option(op, option);
   option_is_mandatory(option);
 
-  option_is_mandatory_either(optionbck,optionimm);
   oprval = option_parser_parse(op, parsed_args, argc, argv,
                                versionfunc, err);
   option_parser_delete(op);
