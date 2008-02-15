@@ -100,6 +100,7 @@ typedef struct
   const Uchar *bwttab;
   const Seqpos *bcktab,
                *countspecialcodes;
+  Codetype **multimappower;
   Codetype numofallcodes; /* number of all codes */
   /* or with streams */
   SeqposBufferedfile suftabstream;

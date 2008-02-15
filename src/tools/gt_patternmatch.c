@@ -29,7 +29,6 @@
 #include "libgtmatch/spacedef.h"
 
 #include "libgtmatch/esa-map.pr"
-#include "libgtmatch/initbasepower.pr"
 
 #include "tools/gt_patternmatch.h"
 
@@ -39,6 +38,31 @@ typedef struct
   bool showpatt, usebcktab, immediate;
   Str *indexname;
 } Pmatchoptions;
+
+static void comparemmsis(const MMsearchiterator *mmsi1,
+                         const MMsearchiterator *mmsi2)
+{
+  if (isemptymmsearchiterator(mmsi1))
+  {
+    if (!isemptymmsearchiterator(mmsi2))
+    {
+      fprintf(stderr,"mmsi1 is empty but mmsi2 not\n");
+      exit(EXIT_FAILURE);
+    }
+  } else
+  {
+    if (isemptymmsearchiterator(mmsi2))
+    {
+      fprintf(stderr,"mmsi2 is empty but mmsi1 not\n");
+      exit(EXIT_FAILURE);
+    }
+    if (!identicalmmsearchiterators(mmsi1,mmsi2))
+    {
+      fprintf(stderr,"mmsi1 and mmsi2 are different\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+}
 
 static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
 {
@@ -74,7 +98,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     Enumpatterniterator *epi;
     unsigned int firstspecial,
                  numofchars = getnumofcharsAlphabet(suffixarray.alpha);
-    Codetype code = 0, **multimappower;
+    Codetype code = 0;
     MMsearchiterator *mmsibck, *mmsiimm;
     Bucketboundaries bbound;
 
@@ -83,13 +107,6 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
                                  suffixarray.encseq,
                                  numofchars,
                                  err);
-    if (pmopt->usebcktab)
-    {
-      multimappower = initmultimappower(numofchars,suffixarray.prefixlength);
-    } else
-    {
-      multimappower = NULL;
-    }
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
       pptr = nextEnumpatterniterator(&patternlen,epi);
@@ -101,7 +118,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
       if (pmopt->usebcktab)
       {
         firstspecial = qgram2code(&code,
-                                  (const Codetype **) multimappower,
+                                  (const Codetype **) suffixarray.multimappower,
                                   suffixarray.prefixlength,
                                   pptr);
         assert(firstspecial == suffixarray.prefixlength);
@@ -142,26 +159,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
       }
       if (pmopt->immediate && pmopt->usebcktab)
       {
-        if (isemptymmsearchiterator(mmsibck))
-        {
-          if (!isemptymmsearchiterator(mmsiimm))
-          {
-            fprintf(stderr,"mmsibck is empty but mmsiim not\n");
-            exit(EXIT_FAILURE);
-          }
-        } else
-        {
-          if (isemptymmsearchiterator(mmsiimm))
-          {
-            fprintf(stderr,"mmsiimm is empty but mmsibck not\n");
-            exit(EXIT_FAILURE);
-          }
-          if (!identicalmmsearchiterators(mmsiimm,mmsibck))
-          {
-            fprintf(stderr,"mmsiimm and mmsibck are not identical\n");
-            exit(EXIT_FAILURE);
-          }
-        }
+        comparemmsis(mmsibck,mmsiimm);
       }
       if (pmopt->usebcktab && mmsibck != NULL)
       {
@@ -185,10 +183,6 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
       showPatterndistribution(epi);
     }
     freeEnumpatterniterator(&epi);
-    if (multimappower != NULL)
-    {
-      multimappowerfree(multimappower);
-    }
   }
   freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;

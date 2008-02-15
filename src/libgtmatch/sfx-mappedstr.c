@@ -490,7 +490,7 @@ static int getencseqkmersgeneric(
   }
   FREESPACE(spwp.cyclicwindow);
   FREESPACE(spwp.filltable);
-  multimappowerfree(spwp.multimappower);
+  multimappowerfree(&spwp.multimappower);
   specialwrapqueue(&spwp.spos);
   return haserr ? -1 : 0;
 }

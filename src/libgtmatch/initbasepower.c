@@ -89,8 +89,12 @@ Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue)
   return multimappower;
 }
 
-void multimappowerfree(Codetype **multimappower)
+void multimappowerfree(Codetype ***multimappower)
 {
-  FREESPACE(multimappower[0]);
-  FREESPACE(multimappower);
+  if (*multimappower != NULL)
+  {
+    FREESPACE((*multimappower)[0]);
+    FREESPACE((*multimappower));
+    *multimappower = NULL;
+  }
 }
