@@ -75,7 +75,8 @@ initExtBitsRetrieval(struct extBitsRetrieval *r)
 static inline struct extBitsRetrieval *
 newExtBitsRetrieval()
 {
-  struct extBitsRetrieval *retval = ma_malloc(sizeof (struct extBitsRetrieval));
+  struct extBitsRetrieval *retval
+    = ma_malloc(sizeof (struct extBitsRetrieval));
   initExtBitsRetrieval(retval);
   return retval;
 }
