@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,7 +24,10 @@ typedef struct FilterVisitor FilterVisitor;
 #include "libgtext/genome_visitor.h"
 
 const GenomeVisitorClass* filter_visitor_class(void);
+/* If <strand> is != NUM_OF_STRAND_TYPES, then each genome feature must have
+   strand <strand>. */
 GenomeVisitor*            filter_visitor_new(Str *seqid, Str *typefilter,
+                                             Strand strand,
                                              unsigned long max_gene_length,
                                              unsigned long max_gene_num,
                                              double min_gene_score);

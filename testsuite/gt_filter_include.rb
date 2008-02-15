@@ -60,3 +60,31 @@ Test do
   run_test "#{$bin}gt filter -maxgenenum 0 #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
 end
+Name "gt filter test 9 (-maxgenenum)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -maxgenenum 0 #{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
+end
+
+Name "gt filter test 10 (-strand)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -strand + #{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
+end
+
+Name "gt filter test 11 (-strand)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -strand - #{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
+end
+
+Name "gt filter test 12 (-strand)"
+Keywords "gt_filter"
+Test do
+  run_test("#{$bin}gt filter -strand foo #{$testdata}standard_gene_as_tree.gff3",
+           :retval => 1)
+  grep $last_stderr, /must be one of/
+end

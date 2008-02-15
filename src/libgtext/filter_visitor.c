@@ -27,6 +27,7 @@ struct FilterVisitor {
   Queue *genome_node_buffer;
   Str *seqid,
       *typefilter;
+  Strand strand;
   unsigned long max_gene_length,
                 gene_num,     /* the number of passed genes */
                 max_gene_num; /* the maximal number of genes which can pass */
@@ -52,6 +53,14 @@ static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,
   filter_visitor = filter_visitor_cast(gv);
   queue_add(filter_visitor->genome_node_buffer, c);
   return 0;
+}
+
+static bool filter_strand(GenomeFeature *gf, Strand strand)
+{
+  assert(gf);
+  if (strand != NUM_OF_STRAND_TYPES && genome_feature_get_strand(gf) != strand)
+    return true;
+  return false;
 }
 
 static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
@@ -85,6 +94,9 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   }
   else
     filter_node = true;
+
+  if (!filter_node)
+    filter_node = filter_strand(gf, fv->strand);
 
   if (filter_node)
     genome_node_rec_delete((GenomeNode*) gf);
@@ -120,7 +132,7 @@ const GenomeVisitorClass* filter_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
+GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter, Strand strand,
                                   unsigned long max_gene_length,
                                   unsigned long max_gene_num,
                                   double min_gene_score)
@@ -130,6 +142,7 @@ GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
   filter_visitor->genome_node_buffer = queue_new();
   filter_visitor->seqid = str_ref(seqid);
   filter_visitor->typefilter = str_ref(typefilter);
+  filter_visitor->strand = strand;
   filter_visitor->max_gene_length = max_gene_length;
   filter_visitor->gene_num = 0;
   filter_visitor->max_gene_num = max_gene_num;

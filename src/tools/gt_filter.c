@@ -19,15 +19,20 @@
 #include "libgtcore/option.h"
 #include "libgtcore/outputfile.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtext/filter_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "tools/gt_filter.h"
 
+#define STRAND_OPT  "strand"
+
 typedef struct {
   bool verbose;
   Str *seqid,
-      *typefilter;
+      *typefilter,
+      *strand_char;
+  Strand strand;
   unsigned long max_gene_length,
                 max_gene_num;
   double min_gene_score;
@@ -40,6 +45,8 @@ static void* gt_filter_arguments_new(void)
   FilterArguments *arguments = ma_calloc(1, sizeof *arguments);
   arguments->seqid = str_new();
   arguments->typefilter = str_new();
+  arguments->strand_char = str_new();
+  arguments->strand = NUM_OF_STRAND_TYPES;
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -50,6 +57,7 @@ static void gt_filter_arguments_delete(void *tool_arguments)
   if (!tool_arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
+  str_delete(arguments->strand_char);
   str_delete(arguments->typefilter);
   str_delete(arguments->seqid);
   ma_free(arguments);
@@ -76,6 +84,13 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
                              "given type", arguments->typefilter, NULL);
   /* XXX */
   option_is_development_option(option);
+  option_parser_add_option(op, option);
+
+  /* - strand */
+  option = option_new_string(STRAND_OPT, "filter out all top-level features "
+                             "(i.e., features without parents) whose strand is "
+                             "different from the given one (must be one of '"
+                             STRANDCHARS"')", arguments->strand_char, NULL);
   option_parser_add_option(op, option);
 
   /* -maxgenelength */
@@ -106,6 +121,27 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
   return op;
 }
 
+static int gt_filter_arguments_check(UNUSED int rest_argc, void *tool_arguments,
+                                     Error *err)
+{
+  FilterArguments *arguments = tool_arguments;
+  int had_err = 0;
+  error_check(err);
+  assert(arguments);
+  if (str_length(arguments->strand_char)) {
+    Strand strand = strand_get(str_get(arguments->strand_char)[0]);
+    if ((str_length(arguments->strand_char) > 1) ||
+        (strand == NUM_OF_STRAND_TYPES)) {
+      error_set(err, "argument to option -"STRAND_OPT" must be one of '"
+                STRANDCHARS"'");
+      had_err = -1;
+    }
+    if (!had_err)
+      arguments->strand = strand;
+  }
+  return had_err;
+}
+
 static int gt_filter_runner(int argc, const char **argv, void *tool_arguments,
                             Error *err)
 {
@@ -124,7 +160,7 @@ static int gt_filter_runner(int argc, const char **argv, void *tool_arguments,
 
   /* create a filter stream */
   filter_stream = filter_stream_new(gff3_in_stream, arguments->seqid,
-                                    arguments->typefilter,
+                                    arguments->typefilter, arguments->strand,
                                     arguments->max_gene_length,
                                     arguments->max_gene_num,
                                     arguments->min_gene_score);
@@ -151,6 +187,6 @@ Tool* gt_filter(void)
   return tool_new(gt_filter_arguments_new,
                   gt_filter_arguments_delete,
                   gt_filter_option_parser_new,
-                  NULL,
+                  gt_filter_arguments_check,
                   gt_filter_runner);
 }
