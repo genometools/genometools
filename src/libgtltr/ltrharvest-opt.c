@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 David Ellinghaus <dellinghaus@zbh.uni-hamburg.de>
+  Copyright (c) 2007 David Ellinghaus <d.ellinghaus@ikmb.uni-kiel.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -217,7 +217,7 @@ static OPrval parse_options(int *parsed_args,
   error_check(err);
   op = option_parser_new("[option ...] -index filenameindex",
                          "Predict LTR retrotransposons.");
-  option_parser_set_mailaddress(op,"<dellinghaus@zbh.uni-hamburg.de>");
+  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
   /* -index */
   lo->str_indexname = str_new();
