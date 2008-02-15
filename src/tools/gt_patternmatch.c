@@ -27,6 +27,7 @@
 #include "libgtmatch/qgram2code.h"
 #include "libgtmatch/bckbound.h"
 #include "libgtmatch/spacedef.h"
+#include "libgtmatch/cutendpfx.h"
 
 #include "libgtmatch/esa-map.pr"
 
