@@ -28,10 +28,17 @@ typedef struct
   Seqpos left;
   unsigned long nonspecialsinbucket,
                 specialsinbucket;
-} Bucketboundaries;
+} Bucketspecification;
+
+typedef struct
+{
+  Seqpos offset,
+         left,
+         right;
+} Lcpinterval;
 
 /*@unused@*/ static inline unsigned int
-              calcbucketboundaries(Bucketboundaries *bbound,
+              calcbucketboundaries(Bucketspecification *bucketspec,
                                    const Seqpos *leftborder,
                                    const Seqpos *countspecialcodes,
                                    Codetype code,
@@ -40,39 +47,39 @@ typedef struct
                                    unsigned int rightchar,
                                    unsigned int numofchars)
 {
-  bbound->left = leftborder[code];
+  bucketspec->left = leftborder[code];
   if (code == maxcode)
   {
-    assert(totalwidth >= bbound->left);
-    bbound->nonspecialsinbucket = (unsigned long) (totalwidth - bbound->left);
+    assert(totalwidth >= bucketspec->left);
+    bucketspec->nonspecialsinbucket = (unsigned long) (totalwidth - bucketspec->left);
   } else
   {
     if (leftborder[code+1] > 0)
     {
-      bbound->nonspecialsinbucket
-        = (unsigned long) (leftborder[code+1] - bbound->left);
+      bucketspec->nonspecialsinbucket
+        = (unsigned long) (leftborder[code+1] - bucketspec->left);
     } else
     {
-      bbound->nonspecialsinbucket = 0;
+      bucketspec->nonspecialsinbucket = 0;
     }
   }
   assert(rightchar == code % numofchars);
   if (rightchar == numofchars - 1)
   {
-    bbound->specialsinbucket
+    bucketspec->specialsinbucket
       = (unsigned long)
         countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
-    if (bbound->nonspecialsinbucket >= bbound->specialsinbucket)
+    if (bucketspec->nonspecialsinbucket >= bucketspec->specialsinbucket)
     {
-      bbound->nonspecialsinbucket -= bbound->specialsinbucket;
+      bucketspec->nonspecialsinbucket -= bucketspec->specialsinbucket;
     } else
     {
-      bbound->nonspecialsinbucket = 0;
+      bucketspec->nonspecialsinbucket = 0;
     }
     rightchar = 0;
   } else
   {
-    bbound->specialsinbucket = 0;
+    bucketspec->specialsinbucket = 0;
     rightchar++;
   }
   return rightchar;
