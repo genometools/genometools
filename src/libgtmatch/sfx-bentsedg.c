@@ -357,12 +357,12 @@ static unsigned long determinemaxbucketsize(const Seqpos *leftborder,
 {
   unsigned long maxbucketsize = 1UL;
   unsigned int rightchar = mincode % numofchars;
-  Bucketboundaries bbound;
+  Bucketspecification bucketspec;
   Codetype code;
 
   for (code = mincode; code <= maxcode; code++)
   {
-    rightchar = calcbucketboundaries(&bbound,
+    rightchar = calcbucketboundaries(&bucketspec,
                                      leftborder,
                                      countspecialcodes,
                                      code,
@@ -370,13 +370,13 @@ static unsigned long determinemaxbucketsize(const Seqpos *leftborder,
                                      totalwidth,
                                      rightchar,
                                      numofchars);
-    if (bbound.nonspecialsinbucket > maxbucketsize)
+    if (bucketspec.nonspecialsinbucket > maxbucketsize)
     {
-      maxbucketsize = bbound.nonspecialsinbucket;
+      maxbucketsize = bucketspec.nonspecialsinbucket;
     }
-    if (bbound.specialsinbucket > maxbucketsize)
+    if (bucketspec.specialsinbucket > maxbucketsize)
     {
-      maxbucketsize = bbound.specialsinbucket;
+      maxbucketsize = bucketspec.specialsinbucket;
     }
   }
   return maxbucketsize;
@@ -580,7 +580,7 @@ void sortallbuckets(Seqpos *suftabptr,
   unsigned int rightchar = mincode % numofchars;
   Seqpos totallength = getencseqtotallength(encseq);
   ArrayMKVstack mkvauxstack;
-  Bucketboundaries bbound;
+  Bucketspecification bucketspec;
   unsigned long maxbucketsize;
   Seqpos lcpvalue;
   Encodedsequencescanstate *esr1, *esr2;
@@ -617,7 +617,7 @@ void sortallbuckets(Seqpos *suftabptr,
   INITARRAY(&mkvauxstack,MKVstack);
   for (code = mincode; code <= maxcode; code++)
   {
-    rightchar = calcbucketboundaries(&bbound,
+    rightchar = calcbucketboundaries(&bucketspec,
                                      leftborder,
                                      countspecialcodes,
                                      code,
@@ -629,21 +629,21 @@ void sortallbuckets(Seqpos *suftabptr,
     {
       (void) nextTurningwheel(outlcpinfo->tw);
     }
-    if (bbound.nonspecialsinbucket > 0)
+    if (bucketspec.nonspecialsinbucket > 0)
     {
-      if (bbound.nonspecialsinbucket > 1UL)
+      if (bucketspec.nonspecialsinbucket > 1UL)
       {
         if (lcpsubtab != NULL)
         {
-          lcpsubtab->suftabbase = suftabptr + bbound.left;
+          lcpsubtab->suftabbase = suftabptr + bucketspec.left;
         }
         bentleysedgewick(encseq,
                          readmode,
                          totallength,
                          &mkvauxstack,
-                         suftabptr + bbound.left,
-                         suftabptr + bbound.left +
-                                     bbound.nonspecialsinbucket - 1,
+                         suftabptr + bucketspec.left,
+                         suftabptr + bucketspec.left +
+                                     bucketspec.nonspecialsinbucket - 1,
                          (Seqpos) prefixlength,
                          lcpsubtab);
       }
@@ -657,21 +657,21 @@ void sortallbuckets(Seqpos *suftabptr,
           lcpvalue = computelocallcpvalue(encseq,
                                           readmode,
                                           previoussuffix,
-                                          suftabptr[bbound.left],
+                                          suftabptr[bucketspec.left],
                                           esr1,
                                           esr2);
         }
         assert(lcpsubtab != NULL);
         SETLCP(0,lcpvalue);
         multilcpvalue(outlcpinfo,
-                      bbound.nonspecialsinbucket,
-                      bbound.left);
-        previoussuffix = suftabptr[bbound.left+bbound.nonspecialsinbucket-1];
+                      bucketspec.nonspecialsinbucket,
+                      bucketspec.left);
+        previoussuffix = suftabptr[bucketspec.left+bucketspec.nonspecialsinbucket-1];
       }
     }
     if (outlcpinfo != NULL)
     {
-      if (bbound.specialsinbucket > 0)
+      if (bucketspec.specialsinbucket > 0)
       {
         bucketends(encseq,
                    readmode,
@@ -679,13 +679,13 @@ void sortallbuckets(Seqpos *suftabptr,
                    esr2,
                    outlcpinfo,
                    previoussuffix,
-                   suftabptr + bbound.left + bbound.nonspecialsinbucket,
-                   bbound.specialsinbucket);
+                   suftabptr + bucketspec.left + bucketspec.nonspecialsinbucket,
+                   bucketspec.specialsinbucket);
       }
-      if (bbound.nonspecialsinbucket + bbound.specialsinbucket > 0)
+      if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket > 0)
       {
-        previoussuffix = suftabptr[bbound.left + bbound.nonspecialsinbucket +
-                                   bbound.specialsinbucket - 1];
+        previoussuffix = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket +
+                                   bucketspec.specialsinbucket - 1];
       }
     }
   }

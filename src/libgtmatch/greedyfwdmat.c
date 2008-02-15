@@ -290,7 +290,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   unsigned int numofchars;
   unsigned long gmatchlength, gmatchlength2;
   Codetype maxcode;
-  Bucketboundaries bbound;
+  Bucketspecification bucketspec;
 
   substriter->seqit = seqiterator_new(filenames,
                                       getsymbolmapAlphabet(alphabet),
@@ -320,7 +320,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                  substring.currentptr + substring.remaining);
     if (leftborder != NULL)
     {
-      (void) calcbucketboundaries(&bbound,
+      (void) calcbucketboundaries(&bucketspec,
                                   leftborder,
                                   countspecialcodes,
                                   substring.currentcode,
@@ -328,12 +328,12 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                   totalwidth,
                                   substring.currentcode % numofchars,
                                   numofchars);
-      if (bbound.nonspecialsinbucket > 0)
+      if (bucketspec.nonspecialsinbucket > 0)
       {
         gmatchlength2 = gmatchforward(genericindex,
                                       (unsigned long) prefixlength,
-                                      bbound.left,
-                                      bbound.left+bbound.nonspecialsinbucket-1,
+                                      bucketspec.left,
+                                      bucketspec.left+bucketspec.nonspecialsinbucket-1,
                                       NULL,
                                       substring.currentptr+prefixlength,
                                       substring.currentptr+substring.remaining);
@@ -342,10 +342,10 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
           fprintf(stderr,"at offset %lu:\n",(unsigned long)
                                               (substring.currentptr -
                                                substring.start));
-          fprintf(stderr,"bbound=(" FormatSeqpos "," "%lu" ")\n",
-                          PRINTSeqposcast(bbound.left),
-                          PRINTSeqposcast(bbound.left+
-                                          bbound.nonspecialsinbucket-1));
+          fprintf(stderr,"bucketspec=(" FormatSeqpos "," "%lu" ")\n",
+                          PRINTSeqposcast(bucketspec.left),
+                          PRINTSeqposcast(bucketspec.left+
+                                          bucketspec.nonspecialsinbucket-1));
           fprintf(stderr,"gmatchlength2 = %lu != %lu = gmatchlength\n",
                           gmatchlength2,gmatchlength);
           exit(EXIT_FAILURE);
@@ -378,7 +378,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   unsigned int numofchars;
   unsigned long gmatchlength, gmatchlength2;
   Codetype maxcode;
-  Bucketboundaries bbound;
+  Bucketspecification bucketspec;
   bool haserr = false;
 
   seqit = seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),true);

@@ -100,7 +100,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
                  numofchars = getnumofcharsAlphabet(suffixarray.alpha);
     Codetype code = 0;
     MMsearchiterator *mmsibck, *mmsiimm;
-    Bucketboundaries bbound;
+    Bucketspecification bucketspec;
 
     epi = newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
@@ -122,7 +122,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
                                   suffixarray.prefixlength,
                                   pptr);
         assert(firstspecial == suffixarray.prefixlength);
-        (void) calcbucketboundaries(&bbound,
+        (void) calcbucketboundaries(&bucketspec,
                                     suffixarray.bcktab,
                                     suffixarray.countspecialcodes,
                                     code,
@@ -130,16 +130,16 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
                                     totallength,
                                     code % numofchars,
                                     numofchars);
-        if (bbound.nonspecialsinbucket == 0)
+        if (bucketspec.nonspecialsinbucket == 0)
         {
           mmsibck = NULL;
         } else
         {
           mmsibck = newmmsearchiterator(suffixarray.encseq,
                                         suffixarray.suftab,
-                                        bbound.left,
-                                        bbound.left +
-                                          bbound.nonspecialsinbucket-1,
+                                        bucketspec.left,
+                                        bucketspec.left +
+                                          bucketspec.nonspecialsinbucket-1,
                                         (Seqpos) suffixarray.prefixlength,
                                         suffixarray.readmode,
                                         pptr,
