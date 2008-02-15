@@ -303,6 +303,8 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->llvtabstream.fp = NULL;
   suffixarray->lcptabstream.fp = NULL;
   suffixarray->destablength = 0;
+  suffixarray->multimappower = NULL;
+  suffixarray->numofallcodes = 0;
 }
 
 static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
@@ -380,6 +382,7 @@ void freesuffixarray(Suffixarray *suffixarray)
   strarray_delete(suffixarray->filenametab);
   suffixarray->filenametab = NULL;
   FREESPACE(suffixarray->filelengthtab);
+  multimappowerfree(&suffixarray->multimappower);
 }
 
 static int inputsuffixarray(bool map,
@@ -523,17 +526,20 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      unsigned int numofallcodes, numofspecialcodes , *basepower;
+      Codetype numofspecialcodes, *basepower;
+      unsigned int numofchars = getnumofcharsAlphabet(suffixarray->alpha);
 
-      basepower = initbasepower(getnumofcharsAlphabet(suffixarray->alpha),
-                                suffixarray->prefixlength);
-      numofallcodes = basepower[suffixarray->prefixlength];
+      basepower = initbasepower(numofchars,suffixarray->prefixlength);
+      suffixarray->numofallcodes = basepower[suffixarray->prefixlength];
       numofspecialcodes = basepower[suffixarray->prefixlength-1];
       FREESPACE(basepower);
+      suffixarray->multimappower 
+        = initmultimappower(numofchars,suffixarray->prefixlength);
       suffixarray->bcktab = genericmaptable(indexname,
                                             BCKTABSUFFIX,
-                                            (Seqpos) (numofallcodes + 1 +
-                                                      numofspecialcodes),
+                                            (Seqpos)
+                                             (suffixarray->numofallcodes + 1 +
+                                              numofspecialcodes),
                                             sizeof (Seqpos),
                                             err);
       if (suffixarray->bcktab == NULL)
@@ -543,7 +549,7 @@ static int inputsuffixarray(bool map,
       } else
       {
         suffixarray->countspecialcodes
-          = suffixarray->bcktab + numofallcodes + 1;
+          = suffixarray->bcktab + suffixarray->numofallcodes + 1;
       }
     } else
     {

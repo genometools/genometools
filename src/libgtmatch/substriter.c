@@ -83,6 +83,6 @@ int substriter_next(Substriter *substriter)
 
 void substriter_delete(Substriter **substriter)
 {
-  multimappowerfree((*substriter)->multimappower);
+  multimappowerfree(&(*substriter)->multimappower);
   FREESPACE(*substriter);
 }

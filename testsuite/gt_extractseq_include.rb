@@ -112,12 +112,12 @@ Test do
   run "diff #{$last_stdout} #{$testdata}marker.out"
 end
 
-if $gttestdata then
-  Name "gt extractseq ginum"
-  Keywords "gt_extractseq"
-  Test do
-    run_test "#{$bin}gt extractseq -o gi-extract.fna.gz -gzip " +
-             "-ginum #{$gttestdata}gi-queries/gi-queries.txt " + 
-             "#{$gttestdata}Iowa/at1MB"
-  end
-end
+# if $gttestdata then
+  # Name "gt extractseq ginum"
+  # Keywords "gt_extractseq"
+  # Test do
+    # run_test "#{$bin}gt extractseq -o gi-extract.fna.gz -gzip " +
+             # "-ginum #{$gttestdata}gi-queries/gi-queries.txt " + 
+             # "#{$gttestdata}Iowa/at1MB"
+  # end
+# end

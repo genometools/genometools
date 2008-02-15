@@ -1,15 +1,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned int *initbasepower(unsigned int base,unsigned int len);
+Codetype *initbasepower(unsigned int base,unsigned int len);
 
-unsigned int ontheflybasepower(unsigned int base,unsigned int len);
-
-unsigned int *initfilltable(const unsigned int *basepower,unsigned int len);
+Codetype *initfilltable(const Codetype *basepower,unsigned int len);
 
 Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue);
 
-void multimappowerfree(Codetype **multimappower);
+void multimappowerfree(Codetype ***multimappower);
 
 #ifdef __cplusplus
 }

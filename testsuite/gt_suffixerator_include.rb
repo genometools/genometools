@@ -78,9 +78,9 @@ Name "gt suffixerator patternmatch"
 Keywords "gt_suffixerator"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
-           "-indexname sfx -dna -suf -tis -pl"
+           "-indexname sfx -dna -bck -suf -tis -pl"
   run_test "#{$bin}gt dev patternmatch -samples 1000 -minpl 10 -maxpl 15 " +
-           " -ii sfx"
+           " -bck -imm -ii sfx"
 end
 =end
 

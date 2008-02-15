@@ -5,7 +5,7 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
                                         unsigned long offset,
                                         Seqpos left,
                                         Seqpos right,
-                                        /*@unused@*/ Seqpos *witnessposition,
+                                        UNUSED Seqpos *witnessposition,
                                         const Uchar *qstart,
                                         const Uchar *qend);
 

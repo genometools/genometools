@@ -22,6 +22,7 @@
 #include "libgtcore/filelengthvalues.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
+#include "intcode-def.h"
 #include "encseq-def.h"
 
 #define FILEBUFFERSIZE 65536
@@ -99,6 +100,8 @@ typedef struct
   const Uchar *bwttab;
   const Seqpos *bcktab,
                *countspecialcodes;
+  Codetype **multimappower;
+  Codetype numofallcodes; /* number of all codes */
   /* or with streams */
   SeqposBufferedfile suftabstream;
   UcharBufferedfile bwttabstream,
