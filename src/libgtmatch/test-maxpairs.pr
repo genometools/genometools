@@ -1,12 +1,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int testmaxpairs(/*@unused@*/ const Str *indexname,
-                 /*@unused@*/ unsigned long samples,
-                 /*@unused@*/ unsigned int minlength,
-                 /*@unused@*/ Seqpos substringlength,
-                 /*@unused@*/ Verboseinfo *verboseinfo,
-                 /*@unused@*/ Error *err);
+int testmaxpairs(UNUSED const Str *indexname,
+                 UNUSED unsigned long samples,
+                 UNUSED unsigned int minlength,
+                 UNUSED Seqpos substringlength,
+                 UNUSED Verboseinfo *verboseinfo,
+                 UNUSED Error *err);
 
 int testmaxpairs(const Str *indexname,
                  unsigned long samples,

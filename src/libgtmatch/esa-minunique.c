@@ -36,7 +36,7 @@ typedef struct
 static Seqpos findright(const Encodedsequence *encseq,
                         const Seqpos *suftab,
                         Uchar cc,
-                        Seqpos offset,
+                        unsigned long offset,
                         Seqpos l,
                         Seqpos r)
 {
@@ -63,7 +63,7 @@ static bool findcharintervalbin(const Encodedsequence *encseq,
                                 const Seqpos *suftab,
                                 Simplelcpinterval *itv,
                                 Uchar cc,
-                                Seqpos lcpvalue,
+                                unsigned long lcpvalue,
                                 Seqpos i,
                                 Seqpos j)
 {
@@ -104,7 +104,10 @@ static bool findcharintervalbin(const Encodedsequence *encseq,
 }
 
 unsigned long suffixarrayuniqueforward (const void *genericindex,
-                                        UNUSED Seqpos *witnessposition,
+                                        unsigned long offset,
+                                        Seqpos left,
+                                        Seqpos right,
+                                        /*@unused@*/ Seqpos *witnessposition,
                                         const Uchar *qstart,
                                         const Uchar *qend)
 {
@@ -112,9 +115,9 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
   const Uchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
 
-  itv.left = 0;
-  itv.right = getencseqtotallength(suffixarray->encseq);
-  for (qptr = qstart; /* Nothing */; qptr++)
+  itv.left = left;
+  itv.right = right;
+  for (qptr = qstart; /* Nothing */; qptr++, offset++)
   {
     if (itv.left < itv.right)
     {
@@ -123,20 +126,23 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
                                suffixarray->suftab,
                                &itv,
                                *qptr,
-                               (Seqpos) (qptr - qstart),
+                               offset,
                                itv.left,itv.right))
       {
         break;
       }
     } else
     {
-      return (unsigned long) (qptr - qstart);
+      return offset;
     }
   }
   return 0;
 }
 
 unsigned long suffixarraymstats (const void *genericindex,
+                                 unsigned long offset,
+                                 Seqpos left,
+                                 Seqpos right,
                                  Seqpos *witnessposition,
                                  const Uchar *qstart,
                                  const Uchar *qend)
@@ -145,9 +151,9 @@ unsigned long suffixarraymstats (const void *genericindex,
   const Uchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
 
-  itv.left = 0;
-  itv.right = getencseqtotallength(suffixarray->encseq);
-  for (qptr = qstart; /* Nothing */; qptr++)
+  itv.left = left;
+  itv.right = right;
+  for (qptr = qstart; /* Nothing */; qptr++, offset++)
   {
     assert(itv.left <= itv.right);
     if (qptr >= qend || ISSPECIAL(*qptr) ||
@@ -155,7 +161,7 @@ unsigned long suffixarraymstats (const void *genericindex,
                              suffixarray->suftab,
                              &itv,
                              *qptr,
-                             (Seqpos) (qptr - qstart),
+                             offset,
                              itv.left,itv.right))
     {
       if (witnessposition != NULL)
@@ -165,5 +171,5 @@ unsigned long suffixarraymstats (const void *genericindex,
       break;
     }
   }
-  return (unsigned long) (qptr - qstart);
+  return offset;
 }

@@ -25,16 +25,16 @@
 
 #ifdef S_SPLINT_S
 #define Formatuint64_t "%lu"
-#define Scanuint64_tcast(X) ((unsigned long *) (X))
+#define SCANint64_tcast(X) ((long *) (X))
 #define PRINTuint64_tcast(X) ((unsigned long) (X))
 #else
 #define Formatuint64_t "%" PRIu64
-#define Scanuint64_tcast(X) (X)
+#define SCANint64_tcast(X) (X)
 #define PRINTuint64_tcast(X) (X)
 #endif
 
 #ifdef S_SPLINT_S
-#define FormatScanint64_t "%lu"
+#define FormatScanint64_t "%ld"
 #else
 #define FormatScanint64_t "%" SCNd64
 #endif

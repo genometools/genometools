@@ -142,17 +142,18 @@ static OPrval parse_options(int *parsed_args,
                              false);
     option_parser_add_option(op, option);
 
-  } else
-  {
-    registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
-                               so->str_indexname);
   }
-
   option = option_new_bool("bck",
                            "output bucket table to file",
                            &so->outbcktab,
                            false);
   option_parser_add_option(op, option);
+
+  if (!doesa)
+  {
+    registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
+                               so->str_indexname);
+  }
 
   option = option_new_bool("v",
                            "be verbose ",

@@ -28,26 +28,38 @@
 #include "libgtcore/progressbar.h"
 #include "libgtcore/discdistri.h"
 #include "libgtmatch/format64.h"
+#include "libgtmatch/stamp.h"
 #include "tools/gt_seqiterator.h"
 
 #define BUCKETSIZE 100
 
-static OPrval parse_options(bool *verbose,bool *dodistlen,int *parsed_args,
-                            int argc, const char **argv, Error *err)
+typedef struct
+{
+  bool verbose,
+       dodistlen;
+} Seqiteroptions;
+
+static OPrval parse_options(Seqiteroptions *seqiteroptions,
+                            int *parsed_args,int argc,
+                            const char **argv, Error *err)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
 
   error_check(err);
+
   op = option_parser_new("[options] file [...]",
                          "Parse the supplied Fasta files.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option= option_new_bool("v","be verbose",verbose,false);
+
+  option= option_new_bool("v","be verbose",&seqiteroptions->verbose,false);
   option_parser_add_option(op, option);
+
   option= option_new_bool("distlen","show distribution of sequence length",
-                           dodistlen,false);
+                           &seqiteroptions->dodistlen,false);
   option_parser_add_option(op, option);
+
   option_parser_set_min_args(op, 1U);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_delete(op);
@@ -76,18 +88,20 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   int i, parsed_args, had_err;
   off_t totalsize;
   DiscDistri *distseqlen = NULL;
-  bool verbose = false, dodistlen = false;
   uint64_t numofseq = 0, sumlength = 0;
   unsigned long minlength = 0, maxlength = 0;
   bool minlengthdefined = false;
+  Seqiteroptions seqiteroptions;
 
   error_check(err);
 
   /* option parsing */
-  switch (parse_options(&verbose,&dodistlen,&parsed_args, argc, argv, err)) {
+  switch (parse_options(&seqiteroptions,&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+    case OPTIONPARSER_ERROR:
+        return -1;
+    case OPTIONPARSER_REQUESTS_EXIT:
+        return 0;
   }
 
   files = strarray_new();
@@ -95,16 +109,15 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   {
     strarray_add_cstr(files, argv[i]);
   }
-
   totalsize = files_estimate_total_size(files);
   printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
   seqit = seqiterator_new(files, NULL, true);
-  if (dodistlen)
+  if (seqiteroptions.dodistlen)
   {
     distseqlen = discdistri_new();
   }
-  if (verbose)
+  if (seqiteroptions.verbose)
   {
     progressbar_start(seqiterator_getcurrentcounter(seqit, (unsigned long long)
                                                            totalsize),
@@ -114,7 +127,7 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   while (true)
   {
     had_err = seqiterator_next(seqit, &sequence, &len, &desc, err);
-    if (dodistlen)
+    if (seqiteroptions.dodistlen)
     {
       if (!minlengthdefined || minlength > len)
       {
@@ -135,13 +148,13 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
     }
     ma_free(desc);
   }
-  if (verbose)
+  if (seqiteroptions.verbose)
   {
     progressbar_stop();
   }
   seqiterator_delete(seqit);
   strarray_delete(files);
-  if (dodistlen)
+  if (seqiteroptions.dodistlen)
   {
     printf("# " Formatuint64_t " sequences of average length %.2f\n",
              PRINTuint64_tcast(numofseq),(double) sumlength/numofseq);

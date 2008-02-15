@@ -38,7 +38,7 @@
   fp = fa_fopen(str_get(tmpfilename),mode);
   if (fp == NULL)
   {
-    error_set(err,"fa_open: cannot open file \"%s\": %s",
+    error_set(err,"fa_fopen: cannot open file \"%s\": %s",
                   str_get(tmpfilename),
                   strerror(errno));
   }

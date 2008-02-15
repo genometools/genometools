@@ -1,0 +1,13 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int extractginumbers(bool verbose,
+                     GenFile *outfp,
+                     unsigned long width,
+                     const Str *ginumberfile,
+                     StrArray *referencefiletab,
+                     Error *err);
+
+#ifdef __cplusplus
+}
+#endif

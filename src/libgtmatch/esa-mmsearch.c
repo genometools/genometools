@@ -213,6 +213,20 @@ bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi)
   return false;
 }
 
+bool isemptymmsearchiterator(const MMsearchiterator *mmsi)
+{
+  return mmsi == NULL || mmsi->lcpitv.left > mmsi->lcpitv.right;
+}
+
+bool identicalmmsearchiterators(const MMsearchiterator *mmsi1,
+                                const MMsearchiterator *mmsi2)
+{
+  assert(mmsi1 != NULL);
+  assert(mmsi2 != NULL);
+  return mmsi1->lcpitv.left == mmsi2->lcpitv.left &&
+         mmsi1->lcpitv.right == mmsi2->lcpitv.right;
+}
+
 void freemmsearchiterator(MMsearchiterator **mmsi)
 {
   freeEncodedsequencescanstate(&(*mmsi)->esr);

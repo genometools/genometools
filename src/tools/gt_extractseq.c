@@ -22,6 +22,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/outputfile.h"
 #include "libgtcore/unused.h"
+#include "libgtmatch/giextract.pr"
 #include "tools/gt_extractseq.h"
 
 #define FROMPOS_OPTION_STR  "frompos"
@@ -34,12 +35,14 @@ typedef struct {
                 width;
   OutputFileInfo *ofi;
   GenFile *outfp;
+  Str *str_ginumberfile;
 } ExtractSeqArguments;
 
 static void* gt_extractseq_arguments_new(void)
 {
   ExtractSeqArguments *arguments = ma_calloc(1, sizeof *arguments);
   arguments->pattern = str_new();
+  arguments->str_ginumberfile = str_new();
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -51,6 +54,7 @@ static void gt_extractseq_arguments_delete(void *tool_arguments)
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
   str_delete(arguments->pattern);
+  str_delete(arguments->str_ginumberfile);
   ma_free(arguments);
 }
 
@@ -58,7 +62,8 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
 {
   ExtractSeqArguments *arguments = tool_arguments;
   OptionParser *op;
-  Option *frompos_option, *topos_option, *match_option, *width_option;
+  Option *frompos_option, *topos_option, *match_option, *width_option,
+         *ginumberoption;
   assert(arguments);
 
   /* init */
@@ -87,6 +92,13 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
                                    NULL);
   option_parser_add_option(op, match_option);
 
+  /* -ginum */
+  ginumberoption = option_new_filename("ginum",
+                                       "extract subsequences for gi numbers "
+                                       "in specified file",
+                                       arguments->str_ginumberfile);
+  option_parser_add_option(op, ginumberoption);
+
   /* -width */
   width_option = option_new_ulong("width", "set output width for showing of "
                                   "sequences (0 disables formatting)",
@@ -103,6 +115,8 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   /* option exclusions */
   option_exclude(frompos_option, match_option);
   option_exclude(topos_option, match_option);
+  option_exclude(frompos_option, ginumberoption);
+  option_exclude(match_option, ginumberoption);
 
   return op;
 }
@@ -169,48 +183,77 @@ static int gt_extractseq_runner(int argc, const char **argv,
                                 void *tool_arguments, Error *err)
 {
   ExtractSeqArguments *arguments = tool_arguments;
-  Bioseq *bs;
-  int arg = 0, had_err = 0;
+  int had_err = 0;
 
   error_check(err);
   assert(arguments);
-
-  if (argc == 0) { /* no file given, use stdin */
-    if (!(bs = bioseq_new("-", err)))
+  if (str_length(arguments->str_ginumberfile) > 0)
+  {
+    if (argc == 0)
+    {
+      error_set(err,"option -ginum requires at least one file argument");
       had_err = -1;
-    if (!had_err) {
-      if (arguments->frompos) {
-        had_err = extractseq_pos(arguments->outfp, bs, arguments->frompos,
-                                 arguments->topos, arguments->width, err);
-      }
-      else {
-        had_err = extractseq_match(arguments->outfp, bs,
-                                   str_get(arguments->pattern),
-                                   arguments->width, err);
-      }
-    }
-    bioseq_delete(bs);
-  }
+    } else
+    {
+      StrArray *referencefiletab;
+      int i;
 
-  /* process all files */
-  while (!had_err && arg < argc) {
-    if (!(bs = bioseq_new(argv[arg], err)))
-      had_err = -1;
-    if (!had_err) {
-      if (arguments->frompos) {
-        had_err = extractseq_pos(arguments->outfp, bs, arguments->frompos,
-                                 arguments->topos, arguments->width, err);
+      referencefiletab = strarray_new();
+      for (i = 0; i < argc; i++)
+      {
+        strarray_add_cstr(referencefiletab, argv[i]);
       }
-      else {
-        had_err = extractseq_match(arguments->outfp, bs,
-                                   str_get(arguments->pattern),
-                                   arguments->width, err);
+      if (extractginumbers(true,
+                           arguments->outfp,
+                           arguments->width,
+                           arguments->str_ginumberfile,
+                           referencefiletab,
+                           err) != 1)
+      {
+        had_err = -1;
       }
+      strarray_delete(referencefiletab);
     }
-    bioseq_delete(bs);
-    arg++;
-  }
+  } else
+  {
+    Bioseq *bs;
+    int arg = 0;
+    if (argc == 0) { /* no file given, use stdin */
+      if (!(bs = bioseq_new("-", err)))
+        had_err = -1;
+      if (!had_err) {
+        if (arguments->frompos) {
+          had_err = extractseq_pos(arguments->outfp, bs, arguments->frompos,
+                                   arguments->topos, arguments->width, err);
+        }
+        else {
+          had_err = extractseq_match(arguments->outfp, bs,
+                                     str_get(arguments->pattern),
+                                     arguments->width, err);
+        }
+      }
+      bioseq_delete(bs);
+    }
 
+    /* process all files */
+    while (!had_err && arg < argc) {
+      if (!(bs = bioseq_new(argv[arg], err)))
+        had_err = -1;
+      if (!had_err) {
+        if (arguments->frompos) {
+          had_err = extractseq_pos(arguments->outfp, bs, arguments->frompos,
+                                   arguments->topos, arguments->width, err);
+        }
+        else {
+          had_err = extractseq_match(arguments->outfp, bs,
+                                     str_get(arguments->pattern),
+                                     arguments->width, err);
+        }
+      }
+      bioseq_delete(bs);
+      arg++;
+    }
+  }
   return had_err;
 }
 

@@ -384,7 +384,10 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 }
 
 unsigned long packedindexuniqueforward(const void *genericindex,
-                                       UNUSED Seqpos *witnessposition,
+                                       /*@unused@*/ unsigned long offset,
+                                       /*@unused@*/ Seqpos left,
+                                       /*@unused@*/ Seqpos right,
+                                       /*@unused@*/ Seqpos *witnessposition,
                                        const Uchar *qstart,
                                        const Uchar *qend)
 {
@@ -450,6 +453,9 @@ unsigned long packedindexuniqueforward(const void *genericindex,
 }
 
 unsigned long packedindexmstatsforward(const void *genericindex,
+                                       /*@unused@*/ unsigned long offset,
+                                       /*@unused@*/ Seqpos left,
+                                       /*@unused@*/ Seqpos right,
                                        Seqpos *witnessposition,
                                        const Uchar *qstart,
                                        const Uchar *qend)

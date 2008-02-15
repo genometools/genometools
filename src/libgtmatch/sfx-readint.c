@@ -100,7 +100,7 @@ static int scanuintintline(uint32_t *lengthofkey,
 
       if (sscanf((const char *) (linebuffer + i + 1),
                  FormatScanint64_t,
-                 Scanuint64_tcast(&readint)) != 1 ||
+                 SCANint64_tcast(&readint)) != 1 ||
          readint < (int64_t) 0)
       {
         error_set(err,"cannot find non-negative integer in \"%*.*s\"",

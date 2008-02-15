@@ -24,15 +24,19 @@
 #include "libgtmatch/stamp.h"
 #include "libgtmatch/enum-patt-def.h"
 #include "libgtmatch/esa-mmsearch-def.h"
+#include "libgtmatch/substriter.h"
+#include "libgtmatch/bckbound.h"
+#include "libgtmatch/spacedef.h"
 
 #include "libgtmatch/esa-map.pr"
+#include "libgtmatch/initbasepower.pr"
 
 #include "tools/gt_patternmatch.h"
 
 typedef struct
 {
   unsigned long minpatternlen, maxpatternlen, numofsamples;
-  bool showpatt;
+  bool showpatt, usebcktab, immediate;
   Str *indexname;
 } Pmatchoptions;
 
@@ -43,15 +47,24 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
   bool haserr = false;
   const Uchar *pptr;
   unsigned long patternlen;
-  MMsearchiterator *mmsi;
+  unsigned int demand = SARR_SUFTAB | SARR_ESQTAB;
 
+  if (pmopt->usebcktab)
+  {
+    demand |= SARR_BCKTAB;
+  }
   if (mapsuffixarray(&suffixarray,
                      &totallength,
-                     SARR_SUFTAB | SARR_ESQTAB,
+                     demand,
                      pmopt->indexname,
                      NULL,
                      err) != 0)
   {
+    haserr = true;
+  }
+  if (pmopt->minpatternlen < (unsigned long) suffixarray.prefixlength)
+  {
+    error_set(err,"length of pattern must be >= %u",suffixarray.prefixlength);
     haserr = true;
   }
   if (!haserr)
@@ -59,12 +72,25 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     unsigned long trial;
     Seqpos dbstart;
     Enumpatterniterator *epi;
+    unsigned int firstspecial,
+                 numofchars = getnumofcharsAlphabet(suffixarray.alpha);
+    Codetype maxcode, code = 0, **multimappower;
+    MMsearchiterator *mmsibck, *mmsiimm;
+    Bucketboundaries bbound;
 
     epi = newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
-                                 getnumofcharsAlphabet(suffixarray.alpha),
+                                 numofchars,
                                  err);
+    if (pmopt->usebcktab)
+    {
+      multimappower = initmultimappower(numofchars,suffixarray.prefixlength);
+    } else
+    {
+      multimappower = NULL;
+    }
+    maxcode = ontheflybasepower(numofchars,suffixarray.prefixlength);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
       pptr = nextEnumpatterniterator(&patternlen,epi);
@@ -73,25 +99,97 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
         showsymbolstring(suffixarray.alpha,pptr,patternlen);
         printf("\n");
       }
-      mmsi = newmmsearchiterator(suffixarray.encseq,
-                                 suffixarray.suftab,
-                                 0,  /* leftbound */
-                                 totallength, /* rightbound */
-                                 0, /* offset */
-                                 suffixarray.readmode,
-                                 pptr,
-                                 patternlen);
-      while (nextmmsearchiterator(&dbstart,mmsi))
+      if (pmopt->usebcktab)
       {
-        /* Nothing */;
+        firstspecial = qgram2code(&code,
+                                  (const Codetype **) multimappower,
+                                  suffixarray.prefixlength,
+                                  pptr);
+        assert(firstspecial == suffixarray.prefixlength);
+        (void) calcbucketboundaries(&bbound,
+                                    suffixarray.bcktab,
+                                    suffixarray.countspecialcodes,
+                                    code,
+                                    maxcode,
+                                    totallength,
+                                    code % numofchars,
+                                    numofchars);
+        if (bbound.nonspecialsinbucket == 0)
+        {
+          mmsibck = NULL;
+        } else
+        {
+          mmsibck = newmmsearchiterator(suffixarray.encseq,
+                                        suffixarray.suftab,
+                                        bbound.left,
+                                        bbound.left +
+                                          bbound.nonspecialsinbucket-1,
+                                        (Seqpos) suffixarray.prefixlength,
+                                        suffixarray.readmode,
+                                        pptr,
+                                        patternlen);
+        }
       }
-      freemmsearchiterator(&mmsi);
+      if (pmopt->immediate)
+      {
+        mmsiimm = newmmsearchiterator(suffixarray.encseq,
+                                      suffixarray.suftab,
+                                      0,  /* leftbound */
+                                      totallength, /* rightbound */
+                                      0, /* offset */
+                                      suffixarray.readmode,
+                                      pptr,
+                                      patternlen);
+      }
+      if (pmopt->immediate && pmopt->usebcktab)
+      {
+        if (isemptymmsearchiterator(mmsibck))
+        {
+          if (!isemptymmsearchiterator(mmsiimm))
+          {
+            fprintf(stderr,"mmsibck is empty but mmsiim not\n");
+            exit(EXIT_FAILURE);
+          }
+        } else
+        {
+          if (isemptymmsearchiterator(mmsiimm))
+          {
+            fprintf(stderr,"mmsiimm is empty but mmsibck not\n");
+            exit(EXIT_FAILURE);
+          }
+          if (!identicalmmsearchiterators(mmsiimm,mmsibck))
+          {
+            fprintf(stderr,"mmsiimm and mmsibck are not identical\n");
+            exit(EXIT_FAILURE);
+          }
+        }
+      }
+      if (pmopt->usebcktab)
+      {
+        while (nextmmsearchiterator(&dbstart,mmsibck))
+        {
+          /* Nothing */;
+        }
+        freemmsearchiterator(&mmsibck);
+      }
+      if (pmopt->immediate)
+      {
+        while (nextmmsearchiterator(&dbstart,mmsiimm))
+        {
+          /* Nothing */;
+        }
+        freemmsearchiterator(&mmsiimm);
+      }
     }
     if (pmopt->showpatt)
     {
       showPatterndistribution(epi);
     }
     freeEnumpatterniterator(&epi);
+    if (multimappower != NULL)
+    {
+      multimappowerfree(multimappower);
+    }
   }
   freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
@@ -102,7 +200,7 @@ static OPrval parse_options(Pmatchoptions *pmopt,
                             int argc, const char **argv, Error *err)
 {
   OptionParser *op;
-  Option *option;
+  Option *option, *optionimm, *optionbck;
   OPrval oprval;
 
   error_check(err);
@@ -129,15 +227,27 @@ static OPrval parse_options(Pmatchoptions *pmopt,
                             false);
   option_parser_add_option(op, option);
 
+  optionbck = option_new_bool("bck","Use the bucket boundaries",
+                              &pmopt->usebcktab,
+                              false);
+  option_parser_add_option(op, optionbck);
+
+  optionimm = option_new_bool("imm","Start with offset 0",
+                              &pmopt->immediate,
+                              false);
+  option_parser_add_option(op, optionimm);
+
   option = option_new_string("ii",
                              "Specify input index",
                              pmopt->indexname, NULL);
   option_parser_add_option(op, option);
   option_is_mandatory(option);
 
+  option_is_mandatory_either(optionbck,optionimm);
   oprval = option_parser_parse(op, parsed_args, argc, argv,
                                versionfunc, err);
   option_parser_delete(op);
+
   return oprval;
 }
 

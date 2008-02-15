@@ -115,8 +115,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       if (sscanf((const char *) str_get(currentline),
                   "dbfile=%s " FormatScanint64_t " " FormatScanint64_t "\n",
                    tmpfilename,
-                   Scanuint64_tcast(&readint1),
-                   Scanuint64_tcast(&readint2)) != 3)
+                   SCANint64_tcast(&readint1),
+                   SCANint64_tcast(&readint2)) != 3)
       {
         error_set(err,"cannot parse line %*.*s",
                           (int) currentlinelength,

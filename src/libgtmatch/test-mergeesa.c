@@ -54,7 +54,7 @@ static int initNameandFILE(NameandFILE *nf,
   nf->fp = fa_fopen(str_get(nf->outfilename),"wb");
   if (nf->fp == NULL)
   {
-    error_set(err,"fa_open: cannot open file \"%s\": %s",
+    error_set(err,"fa_fopen: cannot open file \"%s\": %s",
                   str_get(nf->outfilename),
                   strerror(errno));
     return -1;
