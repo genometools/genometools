@@ -533,7 +533,7 @@ static int inputsuffixarray(bool map,
       suffixarray->numofallcodes = basepower[suffixarray->prefixlength];
       numofspecialcodes = basepower[suffixarray->prefixlength-1];
       FREESPACE(basepower);
-      suffixarray->multimappower 
+      suffixarray->multimappower
         = initmultimappower(numofchars,suffixarray->prefixlength);
       suffixarray->bcktab = genericmaptable(indexname,
                                             BCKTABSUFFIX,
