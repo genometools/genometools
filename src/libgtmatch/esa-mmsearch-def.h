@@ -33,6 +33,11 @@ MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
 
 bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi);
 
+bool isemptymmsearchiterator(const MMsearchiterator *mmsi);
+
+bool identicalmmsearchiterators(const MMsearchiterator *mmsi1,
+                                const MMsearchiterator *mmsi2);
+
 void freemmsearchiterator(MMsearchiterator **mmsi);
 
 int runquerysubstringmatch(const Encodedsequence *dbencseq,

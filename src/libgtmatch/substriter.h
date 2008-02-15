@@ -20,30 +20,41 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
-#include "libgtcore/error.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
-#include "libgtmatch/intcode-def.h"
+#include "intcode-def.h"
 #include "alphadef.h"
 
 typedef struct Substriter Substriter;
 
-typedef struct
-{
-  const Uchar *start, *currentptr;
-  Codetype currentcode;
-  unsigned long remaining;
-  char *desc;
-} Substring;
+Substriter *substriter_new(const Alphabet *alphabet,unsigned int qvalue);
 
-Substriter *substriter_new(const StrArray *queryfilenames,
-                           const Alphabet *alphabet,
-                           unsigned int qvalue);
+void substriter_init(Substriter *substriter,const Uchar *start,
+                     unsigned long len);
 
-int substriter_next(Substring *substring,Substriter *substriter,Error *err);
-
-uint64_t substriter_unitnum(const Substriter *substriter);
+int substriter_next(Substriter *substriter);
 
 void substriter_delete(Substriter **substriter);
 
+static inline unsigned int qgram2code(Codetype *code,
+                                      const Codetype **multimappower,
+                                      unsigned int qvalue,
+                                      const Uchar *qgram)
+{
+  int i;
+  Codetype tmpcode = 0;
+  Uchar a;
+
+  for (i=(int) (qvalue-1); i>=0; i--)
+  {
+    a = qgram[i];
+    if (ISSPECIAL(a))
+    {
+      return (unsigned int) i;
+    }
+    tmpcode += multimappower[i][a];
+  }
+  *code = tmpcode;
+  return qvalue;
+}
 #endif

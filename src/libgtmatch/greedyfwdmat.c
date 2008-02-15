@@ -17,6 +17,7 @@
 
 #include <inttypes.h>
 #include <string.h>
+#include <stdbool.h>
 #include "libgtcore/error.h"
 #include "libgtcore/seqiterator.h"
 #include "defined-types.h"
@@ -26,7 +27,6 @@
 #include "format64.h"
 #include "greedyfwdmat.h"
 #include "bckbound.h"
-#include "substriter.h"
 #include "encseq-def.h"
 
 #include "initbasepower.pr"
@@ -271,6 +271,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
+/*
 int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const void *genericindex,
                           Seqpos totalwidth,
@@ -290,6 +291,9 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   Codetype maxcode;
   Bucketboundaries bbound;
 
+  substriter->seqit = seqiterator_new(filenames,
+                                      getsymbolmapAlphabet(alphabet),
+                                      true);
   substriter = substriter_new(queryfilenames,alphabet,prefixlength);
   numofchars = getnumofcharsAlphabet(alphabet);
   maxcode = ontheflybasepower(numofchars,prefixlength);
@@ -324,7 +328,6 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                   substring.currentcode % numofchars,
                                   numofchars);
       if (bbound.nonspecialsinbucket > 0)
-          /* gmatchlength >= (unsigned long) prefixlength) */
       {
         gmatchlength2 = gmatchforward(genericindex,
                                       (unsigned long) prefixlength,
@@ -352,3 +355,51 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   substriter_delete(&substriter);
   return haserr ? -1 : 0;
 }
+
+int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
+                          const void *genericindex,
+                          Seqpos totalwidth,
+                          const Seqpos *leftborder,
+                          const Seqpos *countspecialcodes,
+                          const Alphabet *alphabet,
+                          unsigned int prefixlength,
+                          const StrArray *queryfilenames,
+                          Error *err)
+{
+  SeqIterator *seqit;
+  const Uchar *query;
+  unsigned long querylen;
+  char *desc = NULL;
+  Substriter *substriter;
+  Substring substring;
+  bool haserr = false;
+  int retval;
+  unsigned int numofchars;
+  unsigned long gmatchlength, gmatchlength2;
+  Codetype maxcode;
+  Bucketboundaries bbound;
+  bool haserr = false;
+
+  seqit = seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),true);
+  for (unitnum = 0; ; unitnum++)
+  {
+    retval = seqiterator_next(seqit,
+                              &query,
+                              &querylen,
+                              &desc,
+                              err);
+    if (retval < 0)
+    {
+      haserr = true;
+      break;
+    }
+    if (retval == 0)
+    {
+      break;
+    }
+    FREESPACE(desc);
+  }
+  seqiterator_delete(seqit);
+  return haserr ? -1 : 0;
+}
+*/

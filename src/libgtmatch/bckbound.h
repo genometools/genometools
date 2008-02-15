@@ -30,14 +30,15 @@ typedef struct
                 specialsinbucket;
 } Bucketboundaries;
 
-static inline unsigned int calcbucketboundaries(Bucketboundaries *bbound,
-                                         const Seqpos *leftborder,
-                                         const Seqpos *countspecialcodes,
-                                         Codetype code,
-                                         Codetype maxcode,
-                                         Seqpos totalwidth,
-                                         unsigned int rightchar,
-                                         unsigned int numofchars)
+/*@unused@*/ static inline unsigned int
+              calcbucketboundaries(Bucketboundaries *bbound,
+                                   const Seqpos *leftborder,
+                                   const Seqpos *countspecialcodes,
+                                   Codetype code,
+                                   Codetype maxcode,
+                                   Seqpos totalwidth,
+                                   unsigned int rightchar,
+                                   unsigned int numofchars)
 {
   bbound->left = leftborder[code];
   if (code == maxcode)
