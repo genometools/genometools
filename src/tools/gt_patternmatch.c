@@ -24,7 +24,7 @@
 #include "libgtmatch/stamp.h"
 #include "libgtmatch/enum-patt-def.h"
 #include "libgtmatch/esa-mmsearch-def.h"
-#include "libgtmatch/substriter.h"
+#include "libgtmatch/qgram2code.h"
 #include "libgtmatch/bckbound.h"
 #include "libgtmatch/spacedef.h"
 

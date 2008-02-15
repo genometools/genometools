@@ -51,7 +51,8 @@ typedef struct
   if (code == maxcode)
   {
     assert(totalwidth >= bucketspec->left);
-    bucketspec->nonspecialsinbucket = (unsigned long) (totalwidth - bucketspec->left);
+    bucketspec->nonspecialsinbucket
+      = (unsigned long) (totalwidth - bucketspec->left);
   } else
   {
     if (leftborder[code+1] > 0)

@@ -22,6 +22,7 @@
 #include "spacedef.h"
 #include "intcode-def.h"
 #include "substriter.h"
+#include "qgram2code.h"
 
 #include "initbasepower.pr"
 

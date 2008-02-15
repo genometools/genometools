@@ -20,6 +20,8 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <string.h>
+#include "libgtcore/symboldef.h"
+#include "libgtcore/chardef.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
@@ -30,21 +32,67 @@ typedef struct
   const Seqpos *bcktab,
                *countspecialcodes;
   Codetype numofallcodes;
-  unsigned int prefixlength;
+  const Codetype **multimappower;
+  unsigned int prefixlength,
+               demandprefixlength;
   Bucketspecification bucketspec;
+  Codetype currentcode;
 } Bucketenumerator;
+
+static inline unsigned int extendqgram2code(Uchar extendchar,
+                                            Codetype *code,
+                                            const Codetype **multimappower,
+                                            unsigned int qvalue,
+                                            unsigned int qvalueprefix,
+                                            const Uchar *qgram)
+{
+  int i;
+  Codetype tmpcode = 0;
+  Uchar a;
+
+  assert(qvalueprefix > 0);
+  assert(qvalue > qvalueprefix);
+  for (i=(int) (qvalue-1); i>=(int) qvalueprefix; i--)
+  {
+    tmpcode += multimappower[i][extendchar];
+  }
+  for (i=(int) (qvalueprefix-1); i>=0; i--)
+  {
+    a = qgram[i];
+    if (ISSPECIAL(a))
+    {
+      return (unsigned int) i;
+    }
+    tmpcode += multimappower[i][a];
+  }
+  *code = tmpcode;
+  return qvalue;
+}
 
 Bucketenumerator *newbucketenumerator(const Seqpos *bcktab,
                                       const Seqpos *countspecialcodes,
                                       Codetype numofallcodes,
-                                      unsigned int prefixlength)
+                                      const Codetype **multimappower,
+                                      unsigned int prefixlength,
+                                      const Uchar *demandprefix,
+                                      unsigned int demandprefixlength)
 {
   Bucketenumerator *bucketenumerator;
+  unsigned int firstspecial;
 
   ALLOCASSIGNSPACE(bucketenumerator,NULL,Bucketenumerator,1);
   bucketenumerator->bcktab = bcktab;
   bucketenumerator->countspecialcodes = countspecialcodes;
   bucketenumerator->numofallcodes = numofallcodes;
   bucketenumerator->prefixlength = prefixlength;
+  bucketenumerator->demandprefixlength = demandprefixlength;
+  bucketenumerator->multimappower = multimappower;
+  firstspecial = extendqgram2code(0,
+                                  &bucketenumerator->currentcode,
+                                  bucketenumerator->multimappower,
+                                  prefixlength,
+                                  demandprefixlength,
+                                  demandprefix);
+  assert(firstspecial == demandprefixlength);
   return bucketenumerator;
 }
