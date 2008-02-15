@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/outputfile.h"
 #include "libgtcore/undef.h"
-#include "libgtcore/versionfunc.h"
 #include "libgtext/filter_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
@@ -31,21 +31,39 @@ typedef struct {
   unsigned long max_gene_length,
                 max_gene_num;
   double min_gene_score;
-  GenFile *outfp;
-} FilterArgumentss;
-
-static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
-                            int argc, const char **argv, Error *err)
-{
-  OptionParser *op;
   OutputFileInfo *ofi;
+  GenFile *outfp;
+} FilterArguments;
+
+static void* gt_filter_arguments_new(void)
+{
+  FilterArguments *arguments = ma_calloc(1, sizeof *arguments);
+  arguments->seqid = str_new();
+  arguments->typefilter = str_new();
+  arguments->ofi = outputfileinfo_new();
+  return arguments;
+}
+
+static void gt_filter_arguments_delete(void *tool_arguments)
+{
+  FilterArguments *arguments = tool_arguments;
+  if (!tool_arguments) return;
+  genfile_close(arguments->outfp);
+  outputfileinfo_delete(arguments->ofi);
+  str_delete(arguments->typefilter);
+  str_delete(arguments->seqid);
+  ma_free(arguments);
+}
+
+static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
+{
+  FilterArguments *arguments = tool_arguments;
+  OptionParser *op;
   Option *option;
-  OPrval oprval;
-  error_check(err);
+  assert(arguments);
 
   /* init */
   op = option_parser_new("[option ...] [GFF3_file ...]", "Filter GFF3 files.");
-  ofi = outputfileinfo_new();
 
   /* -seqid */
   option = option_new_string("seqid", "seqid a feature must have to pass the "
@@ -83,55 +101,36 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
   option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi);
+  outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
-  /* parse options */
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-
-  /* free */
-  outputfileinfo_delete(ofi);
-  option_parser_delete(op);
-
-  return oprval;
+  return op;
 }
 
-int gt_filter(int argc, const char **argv, Error *err)
+static int gt_filter_runner(int argc, const char **argv, void *tool_arguments,
+                            Error *err)
 {
+  FilterArguments *arguments = tool_arguments;
   GenomeStream *gff3_in_stream, *filter_stream, *gff3_out_stream;
   GenomeNode *gn;
-  FilterArgumentss arguments;
-  int parsed_args, had_err;
+  int had_err;
 
-  /* option parsing */
-  arguments.seqid = str_new();
-  arguments.typefilter = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
-      str_delete(arguments.seqid);
-      str_delete(arguments.typefilter);
-      return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.seqid);
-      str_delete(arguments.typefilter);
-      return 0;
-  }
+  error_check(err);
+  assert(arguments);
 
   /* create a gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
-                                               argv + parsed_args,
-                                               arguments.verbose &&
-                                               arguments.outfp, false);
+  gff3_in_stream = gff3_in_stream_new_unsorted(argc, argv,
+                                               arguments->verbose &&
+                                               arguments->outfp, false);
 
   /* create a filter stream */
-  filter_stream = filter_stream_new(gff3_in_stream, arguments.seqid,
-                                    arguments.typefilter,
-                                    arguments.max_gene_length,
-                                    arguments.max_gene_num,
-                                    arguments.min_gene_score);
+  filter_stream = filter_stream_new(gff3_in_stream, arguments->seqid,
+                                    arguments->typefilter,
+                                    arguments->max_gene_length,
+                                    arguments->max_gene_num,
+                                    arguments->min_gene_score);
 
   /* create a gff3 output stream */
-  gff3_out_stream = gff3_out_stream_new(filter_stream, arguments.outfp);
+  gff3_out_stream = gff3_out_stream_new(filter_stream, arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
@@ -143,9 +142,15 @@ int gt_filter(int argc, const char **argv, Error *err)
   genome_stream_delete(gff3_out_stream);
   genome_stream_delete(filter_stream);
   genome_stream_delete(gff3_in_stream);
-  genfile_close(arguments.outfp);
-  str_delete(arguments.seqid);
-  str_delete(arguments.typefilter);
 
   return had_err;
+}
+
+Tool* gt_filter(void)
+{
+  return tool_new(gt_filter_arguments_new,
+                  gt_filter_arguments_delete,
+                  gt_filter_option_parser_new,
+                  NULL,
+                  gt_filter_runner);
 }

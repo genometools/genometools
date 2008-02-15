@@ -87,7 +87,7 @@ Toolbox* gtt_tools(void)
   toolbox_add_tool(tools, "exercise", gt_exercise());
   toolbox_add(tools, "extractfeat", gt_extractfeat);
   toolbox_add_tool(tools, "extractseq", gt_extractseq());
-  toolbox_add(tools, "filter", gt_filter);
+  toolbox_add_tool(tools, "filter", gt_filter());
   toolbox_add_tool(tools, "gff3", gt_gff3());
   toolbox_add(tools, "gff3_to_gtf", gt_gff3_to_gtf);
   toolbox_add(tools, "gtf_to_gff3", gt_gtf_to_gff3);
