@@ -74,7 +74,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     Enumpatterniterator *epi;
     unsigned int firstspecial,
                  numofchars = getnumofcharsAlphabet(suffixarray.alpha);
-    Codetype maxcode, code = 0, **multimappower;
+    Codetype code = 0, **multimappower;
     MMsearchiterator *mmsibck, *mmsiimm;
     Bucketboundaries bbound;
 
@@ -90,7 +90,6 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     {
       multimappower = NULL;
     }
-    maxcode = ontheflybasepower(numofchars,suffixarray.prefixlength);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
       pptr = nextEnumpatterniterator(&patternlen,epi);
@@ -110,7 +109,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
                                     suffixarray.bcktab,
                                     suffixarray.countspecialcodes,
                                     code,
-                                    maxcode,
+                                    suffixarray.numofallcodes,
                                     totallength,
                                     code % numofchars,
                                     numofchars);

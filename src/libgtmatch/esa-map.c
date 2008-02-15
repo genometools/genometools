@@ -523,17 +523,18 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      unsigned int numofallcodes, numofspecialcodes , *basepower;
+      Codetype numofspecialcodes, *basepower;
 
       basepower = initbasepower(getnumofcharsAlphabet(suffixarray->alpha),
                                 suffixarray->prefixlength);
-      numofallcodes = basepower[suffixarray->prefixlength];
+      suffixarray->numofallcodes = basepower[suffixarray->prefixlength];
       numofspecialcodes = basepower[suffixarray->prefixlength-1];
       FREESPACE(basepower);
       suffixarray->bcktab = genericmaptable(indexname,
                                             BCKTABSUFFIX,
-                                            (Seqpos) (numofallcodes + 1 +
-                                                      numofspecialcodes),
+                                            (Seqpos)
+                                             (suffixarray->numofallcodes + 1 +
+                                              numofspecialcodes),
                                             sizeof (Seqpos),
                                             err);
       if (suffixarray->bcktab == NULL)
@@ -543,7 +544,7 @@ static int inputsuffixarray(bool map,
       } else
       {
         suffixarray->countspecialcodes
-          = suffixarray->bcktab + numofallcodes + 1;
+          = suffixarray->bcktab + suffixarray->numofallcodes + 1;
       }
     } else
     {
