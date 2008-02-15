@@ -666,7 +666,8 @@ void sortallbuckets(Seqpos *suftabptr,
         multilcpvalue(outlcpinfo,
                       bucketspec.nonspecialsinbucket,
                       bucketspec.left);
-        previoussuffix = suftabptr[bucketspec.left+bucketspec.nonspecialsinbucket-1];
+        previoussuffix = suftabptr[bucketspec.left +
+                                   bucketspec.nonspecialsinbucket-1];
       }
     }
     if (outlcpinfo != NULL)
@@ -684,7 +685,8 @@ void sortallbuckets(Seqpos *suftabptr,
       }
       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket > 0)
       {
-        previoussuffix = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket +
+        previoussuffix = suftabptr[bucketspec.left +
+                                   bucketspec.nonspecialsinbucket +
                                    bucketspec.specialsinbucket - 1];
       }
     }

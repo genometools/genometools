@@ -333,7 +333,8 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
         gmatchlength2 = gmatchforward(genericindex,
                                       (unsigned long) prefixlength,
                                       bucketspec.left,
-                                      bucketspec.left+bucketspec.nonspecialsinbucket-1,
+                                      bucketspec.left+bucketspec
+                                      .nonspecialsinbucket-1,
                                       NULL,
                                       substring.currentptr+prefixlength,
                                       substring.currentptr+substring.remaining);
