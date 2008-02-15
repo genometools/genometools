@@ -73,7 +73,6 @@ Test do
   run_test "#{$bin}gt dev maxpairs -samples 40 -l 6 -ii sfx",:maxtime => 600
 end
 
-=begin
 Name "gt suffixerator patternmatch"
 Keywords "gt_suffixerator"
 Test do
@@ -82,7 +81,6 @@ Test do
   run_test "#{$bin}gt dev patternmatch -samples 1000 -minpl 10 -maxpl 15 " +
            " -bck -imm -ii sfx"
 end
-=end
 
 alldir.each do |dir|
   Name "gt suffixerator #{dir}"
