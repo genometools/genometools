@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,7 @@ bool          range_contains(Range, Range);
 bool          range_within(Range, unsigned long);
 Range         range_join(Range, Range);
 Range         range_offset(Range, long offset);
+Range         range_reorder(Range);
 unsigned long range_length(Range);
 int           range_unit_test(Error*);
 

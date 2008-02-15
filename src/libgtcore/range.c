@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -126,6 +126,16 @@ Range range_offset(Range range, long offset)
   return transformed_range;
 }
 
+Range range_reorder(Range range)
+{
+  Range ordered_range;
+  if (range.start <= range.end)
+    return range;
+  ordered_range.start = range.end;
+  ordered_range.end   = range.start;
+  return ordered_range;
+}
+
 unsigned long range_length(Range range)
 {
   assert(range.start <= range.end);
@@ -233,6 +243,17 @@ int range_unit_test(Error *err)
            ranges_out[i].end == (*(Range*) array_get(ranges, i)).end);
   }
   array_delete(ctr);
+
+  /* test range_reorder() */
+  if (!had_err) {
+    Range range = { 1, 100 };
+    range = range_reorder(range);
+    ensure(had_err, range.start == 1 && range.end == 100);
+    range.start = 100;
+    range.end = 1;
+    range = range_reorder(range);
+    ensure(had_err, range.start == 1 && range.end == 100);
+  }
 
   /* free */
   array_delete(ranges);
