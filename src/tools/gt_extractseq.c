@@ -23,6 +23,7 @@
 #include "libgtcore/outputfile.h"
 #include "libgtcore/unused.h"
 #include "libgtmatch/giextract.pr"
+#include "libgtext/gtdatahelp.h"
 #include "tools/gt_extractseq.h"
 
 #define FROMPOS_OPTION_STR  "frompos"
@@ -94,7 +95,7 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
 
   /* -ginum */
   ginumberoption = option_new_filename("ginum",
-                                       "extract subsequences for gi numbers "
+                                       "extract substrings for gi numbers "
                                        "in specified file",
                                        arguments->str_ginumberfile);
   option_parser_add_option(op, ginumberoption);
@@ -118,6 +119,7 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   option_exclude(frompos_option, ginumberoption);
   option_exclude(match_option, ginumberoption);
 
+  option_parser_set_comment_func(op, gtdata_show_help, NULL);
   return op;
 }
 
