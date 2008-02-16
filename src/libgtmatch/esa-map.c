@@ -304,6 +304,7 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->lcptabstream.fp = NULL;
   suffixarray->destablength = 0;
   suffixarray->multimappower = NULL;
+  suffixarray->filltable = NULL;
   suffixarray->numofallcodes = 0;
 }
 
@@ -383,6 +384,7 @@ void freesuffixarray(Suffixarray *suffixarray)
   suffixarray->filenametab = NULL;
   FREESPACE(suffixarray->filelengthtab);
   multimappowerfree(&suffixarray->multimappower);
+  FREESPACE(suffixarray->filltable);
 }
 
 static int inputsuffixarray(bool map,
@@ -532,6 +534,8 @@ static int inputsuffixarray(bool map,
       basepower = initbasepower(numofchars,suffixarray->prefixlength);
       suffixarray->numofallcodes = basepower[suffixarray->prefixlength];
       numofspecialcodes = basepower[suffixarray->prefixlength-1];
+      suffixarray->filltable = initfilltable(basepower,
+                                             suffixarray->prefixlength);
       FREESPACE(basepower);
       suffixarray->multimappower
         = initmultimappower(numofchars,suffixarray->prefixlength);

@@ -40,7 +40,7 @@ struct Bucketenumerator
   Codetype currentcode, lastcode;
 };
 
-static inline unsigned int extendqgram2code(Codetype *code,
+static inline unsigned int prefixqgram2code(Codetype *code,
                                             const Codetype **multimappower,
                                             unsigned int qvalue,
                                             unsigned int qvalueprefix,
@@ -89,12 +89,12 @@ Bucketenumerator *newbucketenumerator(Seqpos totallength,
   bucketenumerator->multimappower = multimappower;
   bucketenumerator->filltable = filltable;
   bucketenumerator->numofchars = numofchars;
-  firstspecial = extendqgram2code(&bucketenumerator->currentcode,
+  firstspecial = prefixqgram2code(&bucketenumerator->currentcode,
                                   bucketenumerator->multimappower,
                                   prefixlength,
                                   demandprefixlength,
                                   demandprefix);
-  assert(firstspecial == demandprefixlength);
+  assert(firstspecial == prefixlength);
   bucketenumerator->lastcode = bucketenumerator->currentcode +
                                bucketenumerator->filltable[demandprefixlength];
   return bucketenumerator;
