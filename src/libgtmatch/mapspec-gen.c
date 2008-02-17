@@ -74,6 +74,7 @@ static uint64_t detexpectedaccordingtomapspec(const ArrayMapspecification
   return sumup;
 }
 
+#undef DEBUG
 #ifdef DEBUG
 static void showmapspec(const Mapspecification *mapspec)
 {
