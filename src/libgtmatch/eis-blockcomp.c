@@ -739,7 +739,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                                       compositionIdxBits, &aState);
               }
             }
-            if (lastUpdatePos < totalLen)
+            if (lastUpdatePos <= totalLen)
             {
               /* one bucket still unfinished */
               if (writeOutputBuffer(newSeqIdx, &aState, biFunc, lastUpdatePos,
@@ -1041,7 +1041,7 @@ fetchSuperBlock(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
   struct superBlock *retval = NULL;
   assert(seqIdx);
   assert(bucketNum * seqIdx->bucketBlocks * seqIdx->blockSize
-         < seqIdx->baseClass.seqLen);
+         <= seqIdx->baseClass.seqLen);
   if (sBlockPreAlloc)
     retval = sBlockPreAlloc;
   else
@@ -1485,7 +1485,8 @@ superBlockVarMaxReadSize(const struct blockCompositionSeq *seqIdx)
 static inline Seqpos
 numBuckets(Seqpos seqLen, Seqpos bucketLen)
 {
-  return seqLen / bucketLen + ((seqLen % bucketLen)?1:0);
+  /* seqLen + 1 because the partial sums for seqLen are used  */
+  return (seqLen + 1) / bucketLen + (((seqLen + 1) % bucketLen)?1:0);
 }
 
 static inline off_t
