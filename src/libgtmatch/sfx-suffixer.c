@@ -59,7 +59,8 @@ DECLAREARRAYSTRUCT(Seqpos);
 
 typedef struct
 {
-  unsigned long **startpointers, *counters, numofcounters;
+  unsigned long **startpointers,
+                numofcounters;
 } Distpfxidxcnts;
 
  struct Sfxiterator
@@ -91,6 +92,7 @@ typedef struct
   Seqpos previoussuffix;
   bool exhausted;
   Distpfxidxcnts distpfxidx;
+  unsigned long countpfxidx[MAXPREFIXLENGTH];
 };
 
 static void updatekmercount(void *processinfo,
@@ -288,8 +290,8 @@ void freeSfxiterator(Sfxiterator **sfi)
   FREESPACE((*sfi)->leftborder);
   FREESPACE((*sfi)->countspecialcodes);
   FREESPACE((*sfi)->suftab);
+  FREESPACE((*sfi)->distpfxidx.startpointers[0]);
   FREESPACE((*sfi)->distpfxidx.startpointers);
-  FREESPACE((*sfi)->distpfxidx.counters);
   freesuftabparts((*sfi)->suftabparts);
   FREESPACE(*sfi);
 }
@@ -302,6 +304,7 @@ static void initdistprefixindexcounts(Distpfxidxcnts *distpfxidx,
   if (prefixlength > 2U)
   {
     unsigned int idx;
+    unsigned long *counters;
 
     for (distpfxidx->numofcounters = 0, idx=1U; idx <= prefixlength-2; idx++)
     {
@@ -310,11 +313,9 @@ static void initdistprefixindexcounts(Distpfxidxcnts *distpfxidx,
     assert(distpfxidx->numofcounters > 0);
     ALLOCASSIGNSPACE(distpfxidx->startpointers,NULL,unsigned long *,
                      prefixlength-2);
-    ALLOCASSIGNSPACE(distpfxidx->counters,NULL,unsigned long,
-                     distpfxidx->numofcounters);
-    memset(distpfxidx->counters,0,(size_t) sizeof (*distpfxidx->counters) *
-                                  distpfxidx->numofcounters);
-    distpfxidx->startpointers[0] = distpfxidx->counters;
+    ALLOCASSIGNSPACE(counters,NULL,unsigned long,distpfxidx->numofcounters);
+    memset(counters,0,(size_t) sizeof (*counters) * distpfxidx->numofcounters);
+    distpfxidx->startpointers[0] = counters;
     for (idx=1U; idx< prefixlength-2; idx++)
     {
       distpfxidx->startpointers[idx]
@@ -362,7 +363,6 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->suftabptr = NULL;
     sfi->suftabparts = NULL;
     sfi->distpfxidx.startpointers = NULL;
-    sfi->distpfxidx.counters = NULL;
     sfi->distpfxidx.numofcounters = 0;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
@@ -506,6 +506,8 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->countspecialcodes,
                  sfi->numofchars,
                  sfi->prefixlength,
+                 sfi->countpfxidx,
+                 (const unsigned long **) sfi->distpfxidx.startpointers,
                  sfi->currentmincode,
                  sfi->currentmaxcode,
                  totalwidth,

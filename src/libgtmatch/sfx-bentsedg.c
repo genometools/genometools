@@ -17,12 +17,12 @@
 
 #include <limits.h>
 #include <assert.h>
-#include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/arraydef.h"
+#include "libgtcore/unused.h"
 #include "divmodmul.h"
 #include "intcode-def.h"
 #include "spacedef.h"
@@ -454,6 +454,10 @@ static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
 
 static void bucketends(const Encodedsequence *encseq,
                        Readmode readmode,
+                       UNUSED Codetype code,
+                       UNUSED unsigned int prefixlength,
+                       unsigned long *countpfxidx,
+                       UNUSED const unsigned long **distpfxidx_startpointers,
                        Encodedsequencescanstate *esr1,
                        Encodedsequencescanstate *esr2,
                        Outlcpinfo *outlcpinfo,
@@ -464,6 +468,10 @@ static void bucketends(const Encodedsequence *encseq,
   unsigned long i;
   Seqpos lcpvalue;
 
+  for (i=0; i<prefixlength; i++)
+  {
+    countpfxidx[i] = 0;
+  }
   for (i=0; i<specialsinbucket; i++)
   {
     lcpvalue = computelocallcpvalue(encseq,
@@ -477,9 +485,25 @@ static void bucketends(const Encodedsequence *encseq,
     {
       outlcpinfo->maxbranchdepth = lcpvalue;
     }
-    assert(lcpvalue < (Seqpos) UCHAR_MAX);
+    assert(lcpvalue < (Seqpos) prefixlength);
     assert(lcpvalue > 0);
+    if (i>0)
+    {
+      countpfxidx[lcpvalue-1]++;
+    }
     outlcpinfo->lcpsubtab.smalllcpvalues[i] = (Uchar) lcpvalue;
+  }
+  for (i=1U; i<prefixlength-1; i++)
+  {
+    if (countpfxidx[i-1] != distpfxidx_startpointers[i-1][ordercode])
+    {
+      fprintf(stderr,"countpfxidx[%u] = %lu != %lu = "
+                     "distpfxidx_startpointers[%u][%u]\n",
+                     i-1,countpfxidx[i-1],
+                     distpfxidx_startpointers[i-1][ordercode],
+                     i-1,ordercode);
+      exit(EXIT_FAILURE);
+    }
   }
   outlcpinfo->countoutputlcpvalues += specialsinbucket;
   xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
@@ -570,6 +594,8 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Seqpos *countspecialcodes,
                     unsigned int numofchars,
                     unsigned int prefixlength,
+                    unsigned long *countpfxidx,
+                    const unsigned long **distpfxidx_startpointers,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos totalwidth,
@@ -608,11 +634,6 @@ void sortallbuckets(Seqpos *suftabptr,
                      lcpsubtab->spaceSeqpos,Seqpos,
                      lcpsubtab->allocatedSeqpos);
     lcpsubtab->smalllcpvalues = (Uchar *) lcpsubtab->spaceSeqpos;
-    /*
-    ALLOCASSIGNSPACE(lcpsubtab->smalllcpvalues,
-                     lcpsubtab->smalllcpvalues,Uchar,
-                     lcpsubtab->allocatedSeqpos);
-    */
   }
   INITARRAY(&mkvauxstack,MKVstack);
   for (code = mincode; code <= maxcode; code++)
@@ -676,6 +697,10 @@ void sortallbuckets(Seqpos *suftabptr,
       {
         bucketends(encseq,
                    readmode,
+                   code,
+                   prefixlength,
+                   countpfxidx,
+                   distpfxidx_startpointers,
                    esr1,
                    esr2,
                    outlcpinfo,
