@@ -38,3 +38,10 @@ gthlicense.aux
 gthlicense.log
 gthlicense.pdf
 cscope.*
+/doc/manuals/*.aux
+/doc/manuals/*.toc
+/doc/manuals/*.log
+/doc/manuals/*.blg
+/doc/manuals/*.bbl
+/doc/manuals/auto
+.gdb_history
