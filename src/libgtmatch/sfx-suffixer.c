@@ -195,15 +195,17 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
   unsigned long insertindex, j;
   Seqpos stidx;
   unsigned long prefixindexdist[MAXPREFIXLENGTH];
-  Codetype ordercode, divider;
+  Codetype ordercode;
 
 #ifdef LONGOUTPUT
   char buffer[MAXPREFIXLENGTH+1];
 #endif
 
+  printf("prefixlengt=%u\n",sfi->prefixlength);
   for (prefixindex=0; prefixindex < sfi->prefixlength; prefixindex++)
   {
-    divider = sfi->basepower[sfi->prefixlength - prefixindex];
+    ordercode = (code - sfi->filltable[prefixindex])/
+                sfi->basepower[sfi->prefixlength - prefixindex];
     prefixindexdist[prefixindex] = 0;
     for (j=0, insertindex = 0; j < sfi->nextfreeCodeatposition; j++)
     {
@@ -218,11 +220,12 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
             (prefixindex > 0 || code != sfi->filltable[0]))
         {
           assert(prefixindex > 0);
-          ordercode = (code - sfi->filltable[prefixindex])/divider;
+          /*
           if (prefixindex < sfi->prefixlength-1)
           {
             sfi->distpfxidx.startpointers[prefixindex-1][ordercode]++;
           }
+          */
           prefixindexdist[prefixindex]++;
           sfi->countspecialcodes[FROMCODE2SPECIALCODE(code,sfi->numofchars)]++;
           stidx = --sfi->leftborder[code];
@@ -308,6 +311,7 @@ static void initdistprefixindexcounts(Distpfxidxcnts *distpfxidx,
 
     for (distpfxidx->numofcounters = 0, idx=1U; idx <= prefixlength-2; idx++)
     {
+      printf("# row %u has %u elements\n",idx,basepower[idx]);
       distpfxidx->numofcounters += basepower[idx];
     }
     assert(distpfxidx->numofcounters > 0);
@@ -316,7 +320,7 @@ static void initdistprefixindexcounts(Distpfxidxcnts *distpfxidx,
     ALLOCASSIGNSPACE(counters,NULL,unsigned long,distpfxidx->numofcounters);
     memset(counters,0,(size_t) sizeof (*counters) * distpfxidx->numofcounters);
     distpfxidx->startpointers[0] = counters;
-    for (idx=1U; idx< prefixlength-2; idx++)
+    for (idx=1U; idx<prefixlength-2; idx++)
     {
       distpfxidx->startpointers[idx]
         = distpfxidx->startpointers[idx-1] + basepower[idx];
@@ -502,16 +506,18 @@ static void preparethispart(Sfxiterator *sfi,
   sortallbuckets(sfi->suftabptr,
                  sfi->encseq,
                  sfi->readmode,
+                 sfi->currentmincode,
+                 sfi->currentmaxcode,
+                 totalwidth,
+                 sfi->previoussuffix,
                  sfi->leftborder,
                  sfi->countspecialcodes,
                  sfi->numofchars,
                  sfi->prefixlength,
                  sfi->countpfxidx,
                  (const unsigned long **) sfi->distpfxidx.startpointers,
-                 sfi->currentmincode,
-                 sfi->currentmaxcode,
-                 totalwidth,
-                 sfi->previoussuffix,
+                 (const Codetype *) sfi->basepower,
+                 (const Codetype *) sfi->filltable,
                  sfi->outlcpinfo);
   assert(totalwidth > 0);
   sfi->previoussuffix = sfi->suftab[sfi->widthofpart-1];

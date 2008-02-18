@@ -38,16 +38,18 @@ void freeoutlcptab(Outlcpinfo **outlcpinfo);
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
                     Readmode readmode,
+                    Codetype mincode,
+                    Codetype maxcode,
+                    Seqpos totalwidth,
+                    Seqpos previoussuffix,
                     const Seqpos *leftborder,
                     const Seqpos *countspecialcodes,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     unsigned long *countpfxidx,
                     const unsigned long **distpfxidx_startpointers,
-                    Codetype mincode,
-                    Codetype maxcode,
-                    Seqpos totalwidth,
-                    Seqpos previoussuffix,
+                    const Codetype *basepower,
+                    const Codetype *filltable,
                     Outlcpinfo *outlcpinfo);
 
 #endif
