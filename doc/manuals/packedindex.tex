@@ -1,0 +1,386 @@
+\documentclass[12pt,titlepage]{article}
+\usepackage[a4paper,top=30mm,bottom=30mm,left=20mm,right=20mm]{geometry}
+\usepackage{url}
+\usepackage{alltt}
+\usepackage{xspace}
+\usepackage{times}
+\usepackage{listings}
+\usepackage{bbm}
+\usepackage{verbatim}
+\usepackage{optionman}
+
+\newcommand{\packedindex}{\textit{packedindex}\xspace}
+\newcommand{\GenomeTools}{\textit{GenomeTools}\xspace}
+\newcommand{\Suffixerator}{\textit{Suffixerator}\xspace}
+\newcommand{\Gt}{\texttt{gt}\xspace}
+\newcommand{\Gtsuffixerator}{\texttt{gt suffixerator}\xspace}
+\newcommand{\Gtpackedindex}{\texttt{gt packedindex}\xspace}
+\newcommand{\species}[1]{{\fontshape{it}\selectfont #1}}%
+
+\title{\packedindex  manual}
+\author{\begin{tabular}{c}
+         \textit{Thomas Jahns}\\
+         \textit{Stefan Kurtz}\\[1cm]
+         Research Group for Genomeinformatics\\
+         Center for Bioinformatics\\
+         University of Hamburg\\
+         Bundesstrasse 43\\
+         20146 Hamburg\\
+         Germany\\[1cm]
+         \url{kurtz@zbh.uni-hamburg.de}\\[1cm]
+         \begin{tabular}{p{0.8\textwidth}}
+%        In any documentation or publication about research using \LTRharvest
+%        please cite the following paper:\\[5mm]
+%        D.~Ellinghaus, S.~Kurtz, and U.~Willhoeft.
+%        \LTRharvest, an efficient and flexible software for de novo
+%        detection of LTR retrotransposons.
+%        BMC Bioinformatics 2008, 9:18
+        \end{tabular}
+        \end{tabular}}
+\begin{document}
+\maketitle
+
+\section{Introduction}
+\label{Introduction}
+
+The \packedindex tools of the \GenomeTools package facilitate the
+creation of sequence index files which implement the FM
+index\cite{oai:CiteSeerPSU:481302} concept for biological sequences
+with some more recent features
+incorporated\cite{journals/talg/FerraginaMMN07}.
+
+The \packedindex routines and tools are written in \texttt{C} and are
+part of the \GenomeTools library \cite{genometools}. \packedindex
+methods are called as part of the single binary named \Gt.
+
+The \packedindex tools depend on routines of the \Suffixerator program
+to prepare the  data stored in the index. Many command-line options
+are therefore the same.
+
+\section{Usage}
+\label{Usage}
+
+Some text is highlighted by different fonts according to the following rules.
+
+\newcommand{\toolname}[1]{\texttt{\bfseries #1}}
+\newcommand{\toolarg}[1]{\texttt{\itshape #1}}
+\newcommand{\tooloption}[1]{\texttt{-#1}}
+\newcommand{\tooloptionarg}[1]{\texttt{#1}}
+\begin{itemize}
+\item \toolname{toolname} is used for the names of software tools.
+\item \toolarg{filename} is used for file names.
+\item \tooloption{option} is used for program options.
+\item \tooloptionarg{argument} is used for the argument(s) of an
+      option.
+\end{itemize}
+
+\subsection{The \packedindex tools}
+\label{Overview}
+
+The creation and integrity checks of the \packedindex tools are
+available as a sub-tool of \Gt. Each of those is called by giving
+\toolname{packedindex} as the first argument of the \toolname{gt}
+command-line.
+
+%\Gtltrharvest \Showoption{index} \Showoptionarg{indexname} $[$\emph{options}$]$%
+%
+%where \Showoptionarg{indexname} denotes the enhanced suffix array index of 
+%the target sequence(s) constructed by the program \Suffixerator. 
+%An overview of all possible options with a short one-line description of 
+%each option is given in Table \ref{overviewOpt}.
+%All options can be specified only once.
+
+\subsubsection{Options common to all tools}
+\label{sec:packedindex:commonoptions}
+
+\begin{Justshowoptions}
+
+% \Option{v}{}{
+% This option enables the verbose mode. This means, that some more information
+% about the processing will be printed to \texttt{stdout} during the run.
+% This includes a long list of switched on or switched off options.
+% }
+
+\Option{help}{}{
+Prints a summary of available options to standard output and
+terminates with exit code $0$.
+}
+
+\end{Justshowoptions}
+
+
+\subsubsection{The creation of packedindex files}
+\label{sec:packedindex:mkindex}
+
+The command to build a \packedindex is
+\begin{quote}
+  \ttfamily%
+  \toolname{gt} \toolname{packedindex} \toolname{mkindex} [{\rmfamily
+    Options}] \tooloption{db} \toolarg{sequenceinput...}
+\end{quote}
+
+The following options are specific to the \packedindex
+\toolname{mkindex} tool:
+
+\begin{table}[htbp]
+\caption{Overview of the \packedindex \toolname{mkindex} options.}
+\begin{footnotesize}
+\[
+\renewcommand{\arraystretch}{0.89}
+\begin{tabular}{ll}\hline
+\Showoption{bsize}& specify the number of symbols joined in a block
+\\
+\Showoption{blbuck}& specify number of blocks to join in a bucket
+\\
+\Showoption{locfreq}& specify interval at which locate marks will be inserted
+\\
+\Showoption{locbitmap}& force/deny use of the bitmap tagging method
+\\
+\hline
+\end{tabular}
+%\input{ltrprogoptions}
+\]
+\end{footnotesize}
+\label{tab:packedindex:mkindex:options}
+\end{table}
+
+%%%%
+\begin{Justshowoptions}
+
+\Option{bsize}{\Showoptionarg{u}}{
+Group \Showoptionarg{u} symbols in one block. While bigger blocks can
+speed up index access, the block size should be chosen so that
+\begin{displaymath}
+  \alpha^u u\lceil\log_2 \alpha\rceil
+\end{displaymath}
+does not exceed the relevant cache size (typically of the 2nd level
+chache) of the system.
+
+The default of a block size of 8 results in a lookup-table size of
+128kiB for the DNA alphabet. Systems with larger 2nd level cache like
+4MiB on the Intel Core2 Duo might show improved performance when
+choosing block size 10.
+}
+
+\Option{blbuck}{\Showoptionarg{k}}{
+Group this many blocks so that every atomic query of the index will on
+average require $\frac{k}{2}$ lookups of the block table (see option
+\Showoption{bsize}). While smaller blocks decrease query times, the
+corresponding increase in memory usage of the index will eventually
+defeat this effect.
+}
+
+\Option{locfreq}{\Showoptionarg{f}}{
+Put location marks at interval \Showoptionarg{f} into the
+index. For a sequence of length $n$, $\frac{n}{f}\lceil\log_2n\rceil$ bits of
+storage will be required. 
+
+Locate queries (i.e. finding the position of matches) will
+require $\frac{f}{2}$ operations. Again having an index that does not
+fit main memory will eventually defeat the speed gains of lower
+intervals.
+}
+
+\Option{locbitmap}{\Showoptionarg{yes} or \Showoptionarg{no}}{
+Force/disable the use of a bitmap for locate marks. Finding marked
+positions will be faster if a bitmap is used but will require $n$ bits
+for a sequence of length $n$. If no locate bitmap is used, extra space usage
+will be $\frac{n}{f}\lceil\log_2uk\rceil$.
+
+By default the optimal value in terms of space usage will be chosen.
+}
+\end{Justshowoptions}
+%%%%
+
+\subsubsection{packedindex integrity check tool}
+\label{sec:packedindex:chkintegrity}
+
+The integrity check tool is intended to verify that an index correctly
+represents the encoded BWT sequence. Therefore the .bwt file for the
+index project in question must have been generated as a prerequisite
+for this check.
+
+To check a \packedindex index file BWT sequence representation issue
+\begin{quote}
+  \ttfamily%
+  \toolname{gt} \toolname{packedindex} \toolname{chkintegrity} [{\rmfamily
+    Options}] \toolarg{indexname}
+\end{quote}
+
+where \toolarg{indexname} refers to the name given previously on index
+creation (or automatically derived from the sequence input file set).
+The .bwt table file must have previously been generated with the
+\toolname{suffixerator} tool. See
+section~\ref{sec:packedindex:examples} for an example.
+
+\begin{table}[htbp]
+\caption{Overview of the \packedindex \toolname{chkintegrity} options.}
+\begin{footnotesize}
+\[
+\renewcommand{\arraystretch}{0.89}
+\begin{tabular}{ll}\hline
+\Showoption{skip}& specify the number of symbols to skip before
+starting the comparison
+\\
+\Showoption{ticks}& print a dot after this many symbols processed correctly
+\\
+\Showoption{ext-rank-check}& do additional checks of rank query results
+\\
+\hline
+\end{tabular}
+%\input{ltrprogoptions}
+\]
+\end{footnotesize}
+\label{tab:packedindex:chkintegrity:options}
+\end{table}
+
+\begin{Justshowoptions}
+
+\Option{skip}{\Showoptionarg{k}}{
+Start the comparison \Showoptionarg{k} has to be a positive integer. If this
+option is not selected by the user, then \Showoptionarg{$L_{ex}$} is set
+to $30$ by default.
+}
+
+\Option{ticks}{\Showoptionarg{$k$}}{ 
+As a form of progress meter, print a dot after $k$ symbols of the
+packedindex and the reference file (\toolarg{indexname.bwt}) compared
+equal and rank information was computed correctly.
+}
+
+\Option{ext-rank-check}{\Showoptionarg{yes$\|$no}}{ 
+If yes, enables additional checks of the rank results, i.e. for all
+positions rank queries will be computed for all symbols of the
+alphabet and not only for the symbol for which the rank value changed
+in the reference.
+}
+\end{Justshowoptions}
+
+\subsubsection{Check \packedindex search accuracy tool}
+
+This check verifies that a packedindex correctly represents both the
+original sequence and correctly delivers the exact same search results
+as the suffix array.
+
+To check a \packedindex index file issue
+\begin{quote}
+  \ttfamily%
+  \toolname{gt} \toolname{packedindex} \toolname{chksearch} [{\rmfamily
+    Options}] \toolarg{indexname}
+\end{quote}
+
+where \toolarg{indexname} refers to the name given previously on index
+creation (or automatically derived from the sequence input file set).
+
+The encoded sequence (\toolarg{.esq}) and suffix array table
+(\toolarg{.suf}) must have been previously generated with the
+\toolname{suffixerator} tool.
+
+\begin{table}[htbp]
+\caption{Overview of the \packedindex \toolname{chksearch} options.}
+\begin{footnotesize}
+\[
+\renewcommand{\arraystretch}{0.89}
+\begin{tabular}{ll}\hline
+\Showoption{minpatlen}& shortest pattern length
+\\
+\Showoption{maxpatlen}& longest pattern length
+\\
+\Showoption{ticks}& print a dot after this many symbols processed correctly
+\\
+\Showoption{nsamples}& generate this many patterns to search for
+\\
+\Showoption{chksfxarray}& do additional checks of stored suffix array data
+\\
+\hline
+\end{tabular}
+%\input{ltrprogoptions}
+\]
+\end{footnotesize}
+\label{tab:packedindex:chksearch:options}
+\end{table}
+
+\begin{Justshowoptions}
+
+\Option{minpatlen}{\Showoptionarg{$l$}}{ 
+Perform searches for patterns that are at least of length $l$.
+}
+
+\Option{maxpatlen}{\Showoptionarg{$m$}}{
+Perform searches for patterns that are at most of length $l$.
+}
+
+\Option{nsamples}{\Showoptionarg{$k$}}{
+Generate $k$ patterns to search for, defaults to 1000.
+}
+
+\Option{chksfxarray}{\Showoptionarg{yes$\|$no}}{
+Verify integrity of stored suffix array positions.
+}
+
+\Option{ticks}{\Showoptionarg{$k$}}{
+Print a dot after this many searches completed correctly. If
+\Showoption{chksfxarray} is set, also prints a dot for every $k$
+suffix array values compared.
+}
+\end{Justshowoptions}
+
+\section{Examples}
+\label{sec:packedindex:examples}
+
+\subsection{Create an index for sequence data from the
+  \toolarg{gttestdata} repository\cite{gttestdata}}
+\label{sec:packedindex:examples:yeast}
+
+Amongst the more voluminous sequence data sets there is the
+\species{Saccharomyces cerevisiae} genome in the
+\toolarg{ltrharvest/s\_cer} sub-directory. This example will show how
+to build an index for chromosome 1 (file
+\toolarg{chr01.19960731.fsa.gz}).
+
+First compute the \packedindex index file (this assumes
+\toolarg{chr01.19960731.fsa.gz} has been copied/linked to the current
+directory and the gt binary is in the PATH):
+\begin{footnotesize}
+\begin{verbatim}
+$ gt packedindex mkindex -db chr01.19960731.fsa.gz -indexname chr01 -tis -des
+# TIME determining sequence length and number of special symbols 0.04
+# TIME computing sequence encoding 0.04
+[...]
+# TIME overall 0.71
+$
+\end{verbatim}
+\end{footnotesize}
+
+Then build the reference files that the index subsumes:
+\begin{footnotesize}
+\begin{verbatim}
+$ gt suffixerator -db chr01.19960731.fsa.gz -indexname chr01 -bwt -suf -des
+# TIME determining sequence length and number of special symbols 0.04
+# TIME computing sequence encoding 0.04
+[...]
+# TIME overall 0.31
+$
+\end{verbatim}
+\end{footnotesize}
+
+This index can then be verified or used in one of the tools supporting
+it. For integrity check use:
+\begin{footnotesize}
+\begin{verbatim}
+$ gt packedindex chr01
+# Using index over sequence 230210 symbols long.
+[...]
+..
+$ gt packedindex chksearch chr01
+Using pre-computed sequence index.
+[...]
+Finished 1000 of 1000 matchings successfully.
+$
+\end{verbatim}
+\end{footnotesize}
+
+\bibliographystyle{unsrt}
+\bibliography{gtmanuals}
+
+\end{document}
