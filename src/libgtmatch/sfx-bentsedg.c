@@ -470,7 +470,7 @@ static void bucketends(const Encodedsequence *encseq,
   unsigned long i;
   unsigned int prefixindex;
   Seqpos lcpvalue;
-  /* Codetype ordercode; */
+  Codetype ordercode;
 
   for (prefixindex=0; prefixindex<prefixlength; prefixindex++)
   {
@@ -493,14 +493,18 @@ static void bucketends(const Encodedsequence *encseq,
     assert(lcpvalue > 0);
     countpfxidx[lcpvalue-1]++;
     outlcpinfo->lcpsubtab.smalllcpvalues[i] = (Uchar) lcpvalue;
+    if (i > 0)
+    {
+      assert(outlcpinfo->lcpsubtab.smalllcpvalues[i-1] >= (Uchar) lcpvalue);
+    }
   }
-  /*
   for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
   {
     if (countpfxidx[prefixindex-1] > 0)
     {
       ordercode = (code - filltable[prefixindex])/
                   basepower[prefixlength - prefixindex];
+      /*
       printf("filletable[%u]=%u\n",prefixindex,filltable[prefixindex]);
       printf("basepower[%u]=%u\n",prefixlength-prefixindex,
                                   basepower[prefixlength-prefixindex]);
@@ -508,6 +512,7 @@ static void bucketends(const Encodedsequence *encseq,
              (unsigned int) code,
              prefixindex-1,
              ordercode);
+      */
       if (countpfxidx[prefixindex-1] !=
           distpfxidx_startpointers[prefixindex-1][ordercode])
       {
@@ -519,10 +524,10 @@ static void bucketends(const Encodedsequence *encseq,
                        distpfxidx_startpointers[prefixindex-1][ordercode],
                        prefixindex-1,
                        ordercode);
+        exit(EXIT_FAILURE);
       }
     }
   }
-  */
   outlcpinfo->countoutputlcpvalues += specialsinbucket;
   xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
           sizeof (Uchar),(size_t) specialsinbucket,outlcpinfo->outfplcptab);
@@ -588,9 +593,6 @@ void freeoutlcptab(Outlcpinfo **outlcpinfo)
   fa_fclose((*outlcpinfo)->outfpllvtab);
   FREEARRAY(&(*outlcpinfo)->lcpsubtab,Seqpos);
   freeTurningwheel(&(*outlcpinfo)->tw);
-  /*
-  FREESPACE((*outlcpinfo)->lcpsubtab.smalllcpvalues);
-  */
   FREEARRAY(&(*outlcpinfo)->lcpsubtab.largelcpvalues,Largelcpvalue);
   FREESPACE(*outlcpinfo);
 }
@@ -715,6 +717,7 @@ void sortallbuckets(Seqpos *suftabptr,
     {
       if (bucketspec.specialsinbucket > 0)
       {
+        assert(bucketspec.nonspecialsinbucket > 0);
         bucketends(encseq,
                    readmode,
                    esr1,

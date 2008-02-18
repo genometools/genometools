@@ -195,17 +195,15 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
   unsigned long insertindex, j;
   Seqpos stidx;
   unsigned long prefixindexdist[MAXPREFIXLENGTH];
-  Codetype ordercode;
+  Codetype ordercode, divider;
 
 #ifdef LONGOUTPUT
   char buffer[MAXPREFIXLENGTH+1];
 #endif
 
-  printf("prefixlengt=%u\n",sfi->prefixlength);
   for (prefixindex=0; prefixindex < sfi->prefixlength; prefixindex++)
   {
-    ordercode = (code - sfi->filltable[prefixindex])/
-                sfi->basepower[sfi->prefixlength - prefixindex];
+    divider = sfi->basepower[sfi->prefixlength - prefixindex];
     prefixindexdist[prefixindex] = 0;
     for (j=0, insertindex = 0; j < sfi->nextfreeCodeatposition; j++)
     {
@@ -219,13 +217,12 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode &&
             (prefixindex > 0 || code != sfi->filltable[0]))
         {
+          ordercode = (code - sfi->filltable[prefixindex])/divider;
           assert(prefixindex > 0);
-          /*
           if (prefixindex < sfi->prefixlength-1)
           {
             sfi->distpfxidx.startpointers[prefixindex-1][ordercode]++;
           }
-          */
           prefixindexdist[prefixindex]++;
           sfi->countspecialcodes[FROMCODE2SPECIALCODE(code,sfi->numofchars)]++;
           stidx = --sfi->leftborder[code];
@@ -293,8 +290,11 @@ void freeSfxiterator(Sfxiterator **sfi)
   FREESPACE((*sfi)->leftborder);
   FREESPACE((*sfi)->countspecialcodes);
   FREESPACE((*sfi)->suftab);
-  FREESPACE((*sfi)->distpfxidx.startpointers[0]);
-  FREESPACE((*sfi)->distpfxidx.startpointers);
+  if ((*sfi)->distpfxidx.startpointers != NULL)
+  {
+    FREESPACE((*sfi)->distpfxidx.startpointers[0]);
+    FREESPACE((*sfi)->distpfxidx.startpointers);
+  }
   freesuftabparts((*sfi)->suftabparts);
   FREESPACE(*sfi);
 }
