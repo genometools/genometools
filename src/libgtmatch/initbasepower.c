@@ -54,6 +54,9 @@ Codetype *initfilltable(const Codetype *basepower,unsigned int len)
   for (i=0; i<len; i++)
   {
     filltable[i] = basepower[len-i]-1;
+    /*
+    printf("filltable[%u]=%u\n",i,filltable[i]);
+    */
   }
   return filltable;
 }

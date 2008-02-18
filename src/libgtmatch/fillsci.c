@@ -34,15 +34,15 @@
 static unsigned long currentrangevalue(unsigned long len,
                                        unsigned long occcount)
 {
-  if (len <= UCHAR_MAX)
+  if (len <= (unsigned long) (UCHAR_MAX+1))
   {
     return occcount;
   }
-  if (len % UCHAR_MAX == 0)
+  if (len % (UCHAR_MAX+1) == 0)
   {
-    return len/UCHAR_MAX * occcount;
+    return len/(UCHAR_MAX+1) * occcount;
   }
-  return (1UL + len/UCHAR_MAX) * occcount;
+  return (1UL + len/(UCHAR_MAX+1)) * occcount;
 }
 
 typedef struct

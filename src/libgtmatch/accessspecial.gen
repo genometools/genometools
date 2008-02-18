@@ -25,6 +25,9 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
   int retval;
   Bitstring bitwise = 0;
   Uchar lastspeciallength = 0;
+#ifndef NDEBUG
+  Seqpos sumspecials = 0, countspecials = 0;
+#endif
 #ifndef NOENDPTR
   unsigned long *endptrUint, endspecialcells;
   Seqpos nextcheck;
@@ -55,13 +58,20 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
       if (lastspeciallength > 0)
       {
         /* note that we store one less than the length to prevent overflows */
+        assert(currentspecialchar > 0);
         encseq->specialrangelength[currentspecialchar-1] = lastspeciallength-1;
+#ifndef NDEBUG
+        sumspecials += (Seqpos) lastspeciallength;
+#endif
       }
       break;
     }
     if (ISSPECIAL(cc))
     {
-      if (lastspeciallength == 0)
+#ifndef NDEBUG
+      countspecials++;
+#endif
+      if (lastspeciallength == 0) /* at beginning of special range */
       {
         ACCESSENCSEQ(encseq,specialpositions)[currentspecialchar++]
 #ifndef NOENDPTR
@@ -70,11 +80,15 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
           = pos;
 #endif
         lastspeciallength = (Uchar) 1;
-      } else
+      } else /* extend special range */
       {
-        if (lastspeciallength == (Uchar) UCHAR_MAX)
+        if (lastspeciallength == (Uchar) UCHAR_MAX) /* already max length */
         {
+          assert(currentspecialchar > 0);
           encseq->specialrangelength[currentspecialchar-1] = (Uchar) UCHAR_MAX;
+#ifndef NDEBUG
+          sumspecials += (Seqpos) (UCHAR_MAX+1);
+#endif
           lastspeciallength = 0;
         } else
         {
@@ -86,6 +100,9 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
       if (lastspeciallength > 0)
       {
         encseq->specialrangelength[currentspecialchar-1] = lastspeciallength-1;
+#ifndef NDEBUG
+        sumspecials += (Seqpos) lastspeciallength;
+#endif
         lastspeciallength = 0;
       }
     }
@@ -98,6 +115,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
 #endif
     UPDATESEQBUFFER(encseq->fourcharsinonebyte,cc);
   }
+  assert(sumspecials == countspecials);
   UPDATESEQBUFFERFINAL(encseq->fourcharsinonebyte);
 #ifndef NOENDPTR
   while (endptrUint < ACCESSENCSEQ(encseq,endspecialsubsUint) + endspecialcells)

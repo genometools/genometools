@@ -15,25 +15,32 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SUBSTRITER_H
-#define SUBSTRITER_H
+#ifndef QGRAM2CODE_H
+#define QGRAM2CODE_H
 
-#include <inttypes.h>
-#include <stdbool.h>
-#include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
 #include "intcode-def.h"
-#include "alphadef.h"
 
-typedef struct Substriter Substriter;
+static inline unsigned int qgram2code(Codetype *code,
+                                      const Codetype **multimappower,
+                                      unsigned int qvalue,
+                                      const Uchar *qgram)
+{
+  int i;
+  Codetype tmpcode = 0;
+  Uchar a;
 
-Substriter *substriter_new(const Alphabet *alphabet,unsigned int qvalue);
-
-void substriter_init(Substriter *substriter,const Uchar *start,
-                     unsigned long len);
-
-int substriter_next(Substriter *substriter);
-
-void substriter_delete(Substriter **substriter);
+  for (i=(int) (qvalue-1); i>=0; i--)
+  {
+    a = qgram[i];
+    if (ISSPECIAL(a))
+    {
+      return (unsigned int) i;
+    }
+    tmpcode += multimappower[i][a];
+  }
+  *code = tmpcode;
+  return qvalue;
+}
 
 #endif

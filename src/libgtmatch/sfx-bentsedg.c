@@ -667,7 +667,7 @@ void sortallbuckets(Seqpos *suftabptr,
                       bucketspec.nonspecialsinbucket,
                       bucketspec.left);
         previoussuffix = suftabptr[bucketspec.left +
-                                   bucketspec.nonspecialsinbucket-1];
+                                   bucketspec.nonspecialsinbucket - 1];
       }
     }
     if (outlcpinfo != NULL)
