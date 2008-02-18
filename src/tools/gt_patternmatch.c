@@ -66,6 +66,8 @@ static void comparemmsis(const MMsearchiterator *mmsi1,
   }
 }
 
+#define UNDEFREFSTART totallength
+
 static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
 {
   Suffixarray suffixarray;
@@ -136,10 +138,10 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
                                                  pptr,
                                                  (unsigned int) patternlen,
                                                  numofchars);
-          refstart = totallength;
+          refstart = UNDEFREFSTART;
           while (nextbucketenumerator(&itv,bucketenumerator))
           {
-            if (refstart == totallength)
+            if (refstart == UNDEFREFSTART)
             {
               refstart = suffixarray.suftab[itv.left];
             } else

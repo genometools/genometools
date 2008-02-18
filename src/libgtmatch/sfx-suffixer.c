@@ -37,6 +37,7 @@
 
 #include "sfx-mappedstr.pr"
 #include "initbasepower.pr"
+#include "kmer2string.pr"
 
 #define CODEBITS        (32-PREFIXLENBITS)
 #define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
@@ -55,6 +56,11 @@ DECLAREARRAYSTRUCT(Codeatposition);
 #undef LONGOUTPUT
 
 DECLAREARRAYSTRUCT(Seqpos);
+
+typedef struct
+{
+  unsigned long **startpointers, *counters, numofcounters;
+} Distpfxidxcnts;
 
  struct Sfxiterator
 {
@@ -84,6 +90,7 @@ DECLAREARRAYSTRUCT(Seqpos);
   Sequencerange overhang;
   Seqpos previoussuffix;
   bool exhausted;
+  Distpfxidxcnts distpfxidx;
 };
 
 static void updatekmercount(void *processinfo,
@@ -185,9 +192,17 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
   unsigned int prefixindex;
   unsigned long insertindex, j;
   Seqpos stidx;
+  unsigned long prefixindexdist[MAXPREFIXLENGTH];
+  Codetype ordercode, divider;
+
+#ifdef LONGOUTPUT
+  char buffer[MAXPREFIXLENGTH+1];
+#endif
 
   for (prefixindex=0; prefixindex < sfi->prefixlength; prefixindex++)
   {
+    divider = sfi->basepower[sfi->prefixlength - prefixindex];
+    prefixindexdist[prefixindex] = 0;
     for (j=0, insertindex = 0; j < sfi->nextfreeCodeatposition; j++)
     {
       if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixlen)
@@ -200,14 +215,30 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode &&
             (prefixindex > 0 || code != sfi->filltable[0]))
         {
+          assert(prefixindex > 0);
+          ordercode = (code - sfi->filltable[prefixindex])/divider;
+          if (prefixindex < sfi->prefixlength-1)
+          {
+            sfi->distpfxidx.startpointers[prefixindex-1][ordercode]++;
+          }
+          prefixindexdist[prefixindex]++;
           sfi->countspecialcodes[FROMCODE2SPECIALCODE(code,sfi->numofchars)]++;
           stidx = --sfi->leftborder[code];
 #ifdef LONGOUTPUT
-          printf("insert special_suffix " FormatSeqpos
-                 " (code %u) at location " FormatSeqpos "\n",
+          assert(sfi->numofchars == 4U);
+          kmercode2string(buffer,
+                          code,
+                          sfi->numofchars,
+                          sfi->prefixlength,
+                          "acgt");
+          printf("ordercode=%u\n",(unsigned int) ordercode);
+          printf("insert special_suffix_for_prefixindex %u " FormatSeqpos
+                 " (code %u,\"%s\") at location " FormatSeqpos "\n",
+                 prefixindex,
                  PRINTSeqposcast(sfi->spaceCodeatposition[j].position -
                                  prefixindex),
                  (unsigned int) code,
+                 buffer,
                  PRINTSeqposcast(stidx));
 #endif
           sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
@@ -233,6 +264,11 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
       sfi->nextfreeCodeatposition = insertindex;
     }
   }
+  for (prefixindex=0; prefixindex < sfi->prefixlength; prefixindex++)
+  {
+    printf("# prefixindex %u occurs %lu times\n",
+            prefixindex,prefixindexdist[prefixindex]);
+  }
 }
 
 void freeSfxiterator(Sfxiterator **sfi)
@@ -252,8 +288,39 @@ void freeSfxiterator(Sfxiterator **sfi)
   FREESPACE((*sfi)->leftborder);
   FREESPACE((*sfi)->countspecialcodes);
   FREESPACE((*sfi)->suftab);
+  FREESPACE((*sfi)->distpfxidx.startpointers);
+  FREESPACE((*sfi)->distpfxidx.counters);
   freesuftabparts((*sfi)->suftabparts);
   FREESPACE(*sfi);
+}
+
+static void initdistprefixindexcounts(Distpfxidxcnts *distpfxidx,
+                                      const Codetype *basepower,
+                                      unsigned int prefixlength)
+{
+
+  if (prefixlength > 2U)
+  {
+    unsigned int idx;
+
+    for (distpfxidx->numofcounters = 0, idx=1U; idx <= prefixlength-2; idx++)
+    {
+      distpfxidx->numofcounters += basepower[idx];
+    }
+    assert(distpfxidx->numofcounters > 0);
+    ALLOCASSIGNSPACE(distpfxidx->startpointers,NULL,unsigned long *,
+                     prefixlength-2);
+    ALLOCASSIGNSPACE(distpfxidx->counters,NULL,unsigned long,
+                     distpfxidx->numofcounters);
+    memset(distpfxidx->counters,0,(size_t) sizeof (*distpfxidx->counters) *
+                                  distpfxidx->numofcounters);
+    distpfxidx->startpointers[0] = distpfxidx->counters;
+    for (idx=1U; idx< prefixlength-2; idx++)
+    {
+      distpfxidx->startpointers[idx]
+        = distpfxidx->startpointers[idx-1] + basepower[idx];
+    }
+  }
 }
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
@@ -294,6 +361,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->suftab = NULL;
     sfi->suftabptr = NULL;
     sfi->suftabparts = NULL;
+    sfi->distpfxidx.startpointers = NULL;
+    sfi->distpfxidx.counters = NULL;
+    sfi->distpfxidx.numofcounters = 0;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
     sfi->numofchars = numofchars;
@@ -320,6 +390,11 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                     numofallcodes-1,
                     (unsigned int) CODEBITS);
       haserr = true;
+    } else
+    {
+      initdistprefixindexcounts(&sfi->distpfxidx,
+                                sfi->basepower,
+                                sfi->prefixlength);
     }
   }
   if (!haserr)
