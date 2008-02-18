@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -33,6 +33,7 @@ static const char *genome_feature_type_strings[] = { "CDS",
                                                      "cDNA_match",
                                                      "exon",
                                                      "five_prime_UTR",
+                                                     "five_prime_splice_site",
                                                      "gene",
                                                      "intron",
                                                      "inverted_repeat",
@@ -42,6 +43,7 @@ static const char *genome_feature_type_strings[] = { "CDS",
                                                      "repeat_region",
                                                      "target_site_duplication",
                                                      "three_prime_UTR",
+                                                     "three_prime_splice_site",
                                                      "transcript"
                                                    };
 
