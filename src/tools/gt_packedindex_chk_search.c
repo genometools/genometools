@@ -101,11 +101,11 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
         error_set(err, "aborted because of index integrity check fail");
         break;
       }
-      ensure(had_err, initEmptyEMIterator(&EMIter, bwtSeq));
-      if (had_err)
-        break;
-      EMIterInitialized = true;
     }
+    ensure(had_err, initEmptyEMIterator(&EMIter, bwtSeq));
+    if (had_err)
+      break;
+    EMIterInitialized = true;
     {
       Seqpos totalLen, dbstart;
       unsigned long trial, patternLen;
@@ -170,10 +170,11 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
           numMatches = EMINumMatchesTotal(&EMIter);
           assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen));
           assert(EMINumMatchesTotal(&EMIter) == countmmsearchiterator(mmsi));
-          fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n"
-                  "pattern: ", trial, numMatches);
-          showsymbolstringgeneric(stderr, suffixarray.alpha, pptr, patternLen);
-          fputs("\n", stderr);
+/*        fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n" */
+/*                "pattern: ", trial, numMatches); */
+/*        showsymbolstringgeneric(stderr, suffixarray.alpha, pptr, */
+/*                                patternLen); */
+/*        putc('\n', stderr); */
           while (nextmmsearchiterator(&dbstart,mmsi))
           {
             Seqpos matchPos = 0;
@@ -218,7 +219,11 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
           }
         }
         freemmsearchiterator(&mmsi);
+        if (params.progressInterval && !((trial + 1) % params.progressInterval))
+          putc('.', stderr);
       }
+      if (params.progressInterval)
+        putc('\n', stderr);
       fprintf(stderr, "Finished %lu of %lu matchings successfully.\n",
               trial, params.numOfSamples);
     }
@@ -238,7 +243,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
 {
   OptionParser *op;
   OPrval oprval;
-  Option *option;
+  Option *option, *optionProgress;
 
   error_check(err);
   op = option_parser_new("indexname",
@@ -271,10 +276,10 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                            &params->checkSuffixArrayValues, false);
   option_parser_add_option(op, option);
 
-  option = option_new_ulong("ticks", "print dot after this many symbols"
-                            " tested okay", &params->progressInterval,
-                            DEFAULT_PROGRESS_INTERVAL);
-  option_parser_add_option(op, option);
+  optionProgress = option_new_ulong("ticks", "print dot after this many symbols"
+                                    " tested okay", &params->progressInterval,
+                                    DEFAULT_PROGRESS_INTERVAL);
+  option_parser_add_option(op, optionProgress);
 
   option_parser_set_min_max_args(op, 1, 1);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);

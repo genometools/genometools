@@ -636,7 +636,7 @@ EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
 
 extern int
 BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
-                      UNUSED unsigned long tickPrint, UNUSED FILE *fp,
+                      unsigned long tickPrint, FILE *fp,
                       Error *err)
 {
   Suffixarray suffixArray;
@@ -676,6 +676,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
     {
       Seqpos i;
       for (i = 0; i < len && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
+      {
         if (BWTSeqPosHasLocateInfo(bwtSeq, i, &extBits))
         {
           Seqpos sfxArrayValue = BWTSeqLocateMatch(bwtSeq, i, &extBits);
@@ -689,6 +690,11 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
             break;
           }
         }
+        if (tickPrint && !((i + 1) % tickPrint))
+          putc('.', fp);
+      }
+      if (tickPrint)
+        putc('\n', fp);
       if (retval != VERIFY_BWTSEQ_NO_ERROR)
         break;
     }
