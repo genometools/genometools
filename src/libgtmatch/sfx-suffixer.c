@@ -57,12 +57,6 @@ DECLAREARRAYSTRUCT(Codeatposition);
 
 DECLAREARRAYSTRUCT(Seqpos);
 
-typedef struct
-{
-  unsigned long **startpointers,
-                numofcounters;
-} Distpfxidxcnts;
-
  struct Sfxiterator
 {
   bool storespecials;
@@ -86,13 +80,13 @@ typedef struct
   unsigned int part,
                numofchars,
                prefixlength;
+  const Uchar *characters;
   ArraySeqpos fusp;
   Specialrangeiterator *sri;
   Sequencerange overhang;
   Seqpos previoussuffix;
   bool exhausted;
-  Distpfxidxcnts distpfxidx;
-  unsigned long countpfxidx[MAXPREFIXLENGTH];
+  unsigned long **distpfxidx;
 };
 
 static void updatekmercount(void *processinfo,
@@ -190,21 +184,18 @@ static Codetype codedownscale(const unsigned int *filltable,
 
 static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
 {
-  Codetype code;
+  Codetype code, ordercode, divider;
   unsigned int prefixindex;
   unsigned long insertindex, j;
   Seqpos stidx;
-  unsigned long prefixindexdist[MAXPREFIXLENGTH];
-  Codetype ordercode, divider;
 
 #ifdef LONGOUTPUT
   char buffer[MAXPREFIXLENGTH+1];
 #endif
 
-  for (prefixindex=0; prefixindex < sfi->prefixlength; prefixindex++)
+  for (prefixindex=1U; prefixindex < sfi->prefixlength; prefixindex++)
   {
-    divider = sfi->basepower[sfi->prefixlength - prefixindex];
-    prefixindexdist[prefixindex] = 0;
+    divider = sfi->filltable[prefixindex]+1;
     for (j=0, insertindex = 0; j < sfi->nextfreeCodeatposition; j++)
     {
       if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixlen)
@@ -214,33 +205,30 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
                              sfi->spaceCodeatposition[j].code,
                              prefixindex,
                              sfi->spaceCodeatposition[j].maxprefixlen);
-        if (code >= sfi->currentmincode && code <= sfi->currentmaxcode &&
-            (prefixindex > 0 || code != sfi->filltable[0]))
+        if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
         {
-          ordercode = (code - sfi->filltable[prefixindex])/divider;
-          assert(prefixindex > 0);
           if (prefixindex < sfi->prefixlength-1)
           {
-            sfi->distpfxidx.startpointers[prefixindex-1][ordercode]++;
+            ordercode = (code - sfi->filltable[prefixindex])/divider;
+            sfi->distpfxidx[prefixindex-1][ordercode]++;
           }
-          prefixindexdist[prefixindex]++;
           sfi->countspecialcodes[FROMCODE2SPECIALCODE(code,sfi->numofchars)]++;
           stidx = --sfi->leftborder[code];
 #ifdef LONGOUTPUT
-          assert(sfi->numofchars == 4U);
           kmercode2string(buffer,
                           code,
                           sfi->numofchars,
                           sfi->prefixlength,
-                          "acgt");
-          printf("ordercode=%u\n",(unsigned int) ordercode);
+                          sfi->characters);
           printf("insert special_suffix_for_prefixindex %u " FormatSeqpos
-                 " (code %u,\"%s\") at location " FormatSeqpos "\n",
+                 " (code %u,\"%s\",ordercode=%u) at location "
+                 FormatSeqpos "\n",
                  prefixindex,
                  PRINTSeqposcast(sfi->spaceCodeatposition[j].position -
                                  prefixindex),
                  (unsigned int) code,
                  buffer,
+                 (unsigned int) (code - sfi->filltable[prefixindex])/divider,
                  PRINTSeqposcast(stidx));
 #endif
           sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
@@ -266,11 +254,6 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
       sfi->nextfreeCodeatposition = insertindex;
     }
   }
-  for (prefixindex=0; prefixindex < sfi->prefixlength; prefixindex++)
-  {
-    printf("# prefixindex %u occurs %lu times\n",
-            prefixindex,prefixindexdist[prefixindex]);
-  }
 }
 
 void freeSfxiterator(Sfxiterator **sfi)
@@ -290,41 +273,41 @@ void freeSfxiterator(Sfxiterator **sfi)
   FREESPACE((*sfi)->leftborder);
   FREESPACE((*sfi)->countspecialcodes);
   FREESPACE((*sfi)->suftab);
-  if ((*sfi)->distpfxidx.startpointers != NULL)
+  if ((*sfi)->distpfxidx != NULL)
   {
-    FREESPACE((*sfi)->distpfxidx.startpointers[0]);
-    FREESPACE((*sfi)->distpfxidx.startpointers);
+    FREESPACE((*sfi)->distpfxidx[0]);
+    FREESPACE((*sfi)->distpfxidx);
   }
   freesuftabparts((*sfi)->suftabparts);
   FREESPACE(*sfi);
 }
 
-static void initdistprefixindexcounts(Distpfxidxcnts *distpfxidx,
-                                      const Codetype *basepower,
-                                      unsigned int prefixlength)
+static unsigned long **initdistprefixindexcounts(const Codetype *basepower,
+                                                 unsigned int prefixlength)
 {
 
   if (prefixlength > 2U)
   {
     unsigned int idx;
-    unsigned long *counters;
+    unsigned long *counters, numofcounters, **distpfxidx;
 
-    for (distpfxidx->numofcounters = 0, idx=1U; idx <= prefixlength-2; idx++)
+    for (numofcounters = 0, idx=1U; idx <= prefixlength-2; idx++)
     {
-      printf("# row %u has %u elements\n",idx,basepower[idx]);
-      distpfxidx->numofcounters += basepower[idx];
+      numofcounters += basepower[idx];
     }
-    assert(distpfxidx->numofcounters > 0);
-    ALLOCASSIGNSPACE(distpfxidx->startpointers,NULL,unsigned long *,
-                     prefixlength-2);
-    ALLOCASSIGNSPACE(counters,NULL,unsigned long,distpfxidx->numofcounters);
-    memset(counters,0,(size_t) sizeof (*counters) * distpfxidx->numofcounters);
-    distpfxidx->startpointers[0] = counters;
+    assert(numofcounters > 0);
+    ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-2);
+    ALLOCASSIGNSPACE(counters,NULL,unsigned long,numofcounters);
+    memset(counters,0,(size_t) sizeof (*counters) * numofcounters);
+    distpfxidx[0] = counters;
     for (idx=1U; idx<prefixlength-2; idx++)
     {
-      distpfxidx->startpointers[idx]
-        = distpfxidx->startpointers[idx-1] + basepower[idx];
+      distpfxidx[idx] = distpfxidx[idx-1] + basepower[idx];
     }
+    return distpfxidx;
+  } else
+  {
+    return NULL;
   }
 }
 
@@ -335,6 +318,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             const Encodedsequence *encseq,
                             Readmode readmode,
                             unsigned int numofchars,
+                            const Uchar *characters,
                             unsigned int prefixlength,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
@@ -366,11 +350,11 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->suftab = NULL;
     sfi->suftabptr = NULL;
     sfi->suftabparts = NULL;
-    sfi->distpfxidx.startpointers = NULL;
-    sfi->distpfxidx.numofcounters = 0;
+    sfi->distpfxidx = NULL;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
     sfi->numofchars = numofchars;
+    sfi->characters = characters;
     sfi->prefixlength = prefixlength;
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
@@ -396,9 +380,8 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
       haserr = true;
     } else
     {
-      initdistprefixindexcounts(&sfi->distpfxidx,
-                                sfi->basepower,
-                                sfi->prefixlength);
+      sfi->distpfxidx = initdistprefixindexcounts(sfi->basepower,
+                                                  sfi->prefixlength);
     }
   }
   if (!haserr)
@@ -432,7 +415,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     for (optr = sfi->leftborder + 1;
          optr < sfi->leftborder + numofallcodes; optr++)
     {
-      /*/ printf("leftborder[%u]=%u\n",(unsigned int) (optr - sfi->leftborder),
+      /* printf("leftborder[%u]=%u\n",(unsigned int) (optr - sfi->leftborder),
                                    *optr); */
       *optr += *(optr-1);
     }
@@ -514,9 +497,7 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->countspecialcodes,
                  sfi->numofchars,
                  sfi->prefixlength,
-                 sfi->countpfxidx,
-                 (const unsigned long **) sfi->distpfxidx.startpointers,
-                 (const Codetype *) sfi->basepower,
+                 (const unsigned long **) sfi->distpfxidx,
                  (const Codetype *) sfi->filltable,
                  sfi->outlcpinfo);
   assert(totalwidth > 0);

@@ -35,7 +35,6 @@
 
 #include "sfx-cmpsuf.pr"
 #include "opensfxfile.pr"
-#include "kmer2string.pr"
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
@@ -459,15 +458,12 @@ static void bucketends(const Encodedsequence *encseq,
                        Encodedsequencescanstate *esr2,
                        Outlcpinfo *outlcpinfo,
                        Seqpos previoussuffix,
-                       const Seqpos *specialsection,
+                       Seqpos firstspecialsuffix,
                        unsigned long specialsinbucket,
                        Codetype code,
                        unsigned int prefixlength,
-                       unsigned long *countpfxidx,
                        const unsigned long **distpfxidx_startpointers,
-                       const Codetype *basepower,
-                       const Codetype *filltable,
-                       unsigned int numofchars)
+                       const Codetype *filltable)
 {
   unsigned long i;
   unsigned int prefixindex;
@@ -475,62 +471,54 @@ static void bucketends(const Encodedsequence *encseq,
   Codetype ordercode;
   unsigned long insertindex;
 
-  for (prefixindex=0; prefixindex<prefixlength; prefixindex++)
+  if (specialsinbucket > 1UL)
   {
-    countpfxidx[prefixindex] = 0;
-  }
-  for (i=0; i<specialsinbucket; i++)
-  {
-    lcpvalue = computelocallcpvalue(encseq,
-                                    readmode,
-                                    i == 0 ? previoussuffix
-                                           : specialsection[i-1],
-                                    specialsection[i],
-                                    esr1,
-                                    esr2);
-    if (outlcpinfo->maxbranchdepth < lcpvalue)
+    insertindex = specialsinbucket-1;
+    for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
     {
-      outlcpinfo->maxbranchdepth = lcpvalue;
-    }
-    assert(lcpvalue < (Seqpos) prefixlength);
-    assert(lcpvalue > 0);
-    countpfxidx[lcpvalue-1]++;
-    outlcpinfo->lcpsubtab.smalllcpvalues[i] = (Uchar) lcpvalue;
-    if (i > 0)
-    {
-      assert(outlcpinfo->lcpsubtab.smalllcpvalues[i-1] >= (Uchar) lcpvalue);
-    }
-  }
-  insertindex = specialsinbucket-1;
-  for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
-  {
-    if (countpfxidx[prefixindex-1] > 0)
-    {
-      assert(code >= filltable[prefixindex]);
-      ordercode = (code - filltable[prefixindex])/
-                  basepower[prefixlength - prefixindex];
-      assert(ordercode < basepower[prefixindex]);
-      if (countpfxidx[prefixindex-1] !=
-          distpfxidx_startpointers[prefixindex-1][ordercode])
+      if (code >= filltable[prefixindex])
       {
-        char buffer[20+1];
-          kmercode2string(buffer,
-	                  code,
-                          numofchars,
-                          prefixlength,
-                          "acgt");
-        fprintf(stderr,"code %u(%s): countpfxidx[%u] = %lu != %lu = "
-                       "distpfxidx_startpointers[%u][%u]\n",
-                       (unsigned int) code,
-                       buffer,
-                       prefixindex-1,
-                       countpfxidx[prefixindex-1],
-                       distpfxidx_startpointers[prefixindex-1][ordercode],
-                       prefixindex-1,
-                       ordercode);
+        ordercode = code - filltable[prefixindex];
+        if (ordercode % (filltable[prefixindex] + 1) == 0)
+        {
+          ordercode = ordercode/(filltable[prefixindex] + 1);
+          if (distpfxidx_startpointers[prefixindex-1][ordercode] > 0)
+          {
+            for (i=0; insertindex > 0 &&
+                      i<distpfxidx_startpointers[prefixindex-1][ordercode];
+                 i++, insertindex--)
+            {
+              outlcpinfo->lcpsubtab.smalllcpvalues[insertindex]
+                = (Uchar) prefixindex;
+              if (outlcpinfo->maxbranchdepth < (Seqpos) prefixindex)
+              {
+                outlcpinfo->maxbranchdepth = (Seqpos) prefixindex;
+              }
+            }
+          }
+        }
       }
     }
+    while (insertindex > 0)
+    {
+      outlcpinfo->lcpsubtab.smalllcpvalues[insertindex]
+        = (Uchar) (prefixlength-1);
+      insertindex--;
+    }
   }
+  lcpvalue = computelocallcpvalue(encseq,
+                                  readmode,
+                                  previoussuffix,
+                                  firstspecialsuffix,
+                                  esr1,
+                                  esr2);
+  if (outlcpinfo->maxbranchdepth < lcpvalue)
+  {
+    outlcpinfo->maxbranchdepth = lcpvalue;
+  }
+  assert(lcpvalue < (Seqpos) prefixlength);
+  assert(lcpvalue > 0);
+  outlcpinfo->lcpsubtab.smalllcpvalues[0] = (Uchar) lcpvalue;
   outlcpinfo->countoutputlcpvalues += specialsinbucket;
   xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
           sizeof (Uchar),(size_t) specialsinbucket,outlcpinfo->outfplcptab);
@@ -621,9 +609,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Seqpos *countspecialcodes,
                     unsigned int numofchars,
                     unsigned int prefixlength,
-                    unsigned long *countpfxidx,
                     const unsigned long **distpfxidx_startpointers,
-                    const Codetype *basepower,
                     const Codetype *filltable,
                     Outlcpinfo *outlcpinfo)
 {
@@ -726,15 +712,12 @@ void sortallbuckets(Seqpos *suftabptr,
                    esr2,
                    outlcpinfo,
                    previoussuffix,
-                   suftabptr + bucketspec.left + bucketspec.nonspecialsinbucket,
+                   suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket],
                    bucketspec.specialsinbucket,
                    code,
                    prefixlength,
-                   countpfxidx,
                    distpfxidx_startpointers,
-                   basepower,
-                   filltable,
-                   numofchars);
+                   filltable);
       }
       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket > 0)
       {
