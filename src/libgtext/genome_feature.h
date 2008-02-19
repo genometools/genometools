@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -56,6 +56,9 @@ void                   genome_feature_add_attribute(GenomeFeature*,
 int                    genome_feature_foreach_attribute(GenomeFeature*,
                                                         AttributeIterFunc,
                                                         void *data, Error*);
+bool                   genome_feature_has_splice_site(const GenomeFeature*);
+double                 genome_feature_average_splice_site_prob(const
+                                                               GenomeFeature*);
 /* returns true, if the given features have the same seqid, feature type, range,
    strand, and phase */
 bool                   genome_features_are_similar(GenomeFeature*,

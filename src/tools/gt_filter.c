@@ -32,10 +32,12 @@ typedef struct {
   Str *seqid,
       *typefilter,
       *strand_char;
+  Range overlap_range;
   Strand strand;
   unsigned long max_gene_length,
                 max_gene_num;
-  double min_gene_score;
+  double min_gene_score,
+         min_average_splice_site_prob;
   OutputFileInfo *ofi;
   GenFile *outfp;
 } FilterArguments;
@@ -86,7 +88,13 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
   option_is_development_option(option);
   option_parser_add_option(op, option);
 
-  /* - strand */
+  /* -overlap */
+  option = option_new_range("overlap", "filter out all features which do not "
+                            "overlap with the given range.",
+                            &arguments->overlap_range, NULL);
+  option_parser_add_option(op, option);
+
+  /* -strand */
   option = option_new_string(STRAND_OPT, "filter out all top-level features "
                              "(i.e., features without parents) whose strand is "
                              "different from the given one (must be one of '"
@@ -109,6 +117,13 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
   option = option_new_double("mingenescore", "the minimum score a gene must "
                              "have to pass the filter",
                              &arguments->min_gene_score, UNDEF_DOUBLE);
+  option_parser_add_option(op, option);
+
+  /* -minaveragessp */
+  option = option_new_probability("minaveragessp", "set the minimum average "
+                                  "splice site probability.",
+                                  &arguments->min_average_splice_site_prob,
+                                  UNDEF_DOUBLE);
   option_parser_add_option(op, option);
 
   /* -v */
@@ -160,10 +175,13 @@ static int gt_filter_runner(int argc, const char **argv, void *tool_arguments,
 
   /* create a filter stream */
   filter_stream = filter_stream_new(gff3_in_stream, arguments->seqid,
-                                    arguments->typefilter, arguments->strand,
+                                    arguments->typefilter,
+                                    arguments->overlap_range,
+                                    arguments->strand,
                                     arguments->max_gene_length,
                                     arguments->max_gene_num,
-                                    arguments->min_gene_score);
+                                    arguments->min_gene_score,
+                                    arguments->min_average_splice_site_prob);
 
   /* create a gff3 output stream */
   gff3_out_stream = gff3_out_stream_new(filter_stream, arguments->outfp);

@@ -1,0 +1,12 @@
+##gff-version   3
+##sequence-region   region.fas|1 1 2000701
+region.fas|1	gth	gene	609666	620119	.	-	.	ID=gene1
+region.fas|1	gth	mRNA	609666	620119	.	-	.	ID=mRNA1;Parent=gene1
+region.fas|1	gth	exon	609666	613203	0.980215	-	.	Parent=mRNA1
+region.fas|1	region.fas|1	three_prime_splice_site	613203	613204	0.543150	-	.	Parent=mRNA1
+region.fas|1	region.fas|1	five_prime_splice_site	613277	613278	0.503940	-	.	Parent=mRNA1
+region.fas|1	gth	exon	613278	613446	0.967456	-	.	Parent=mRNA1
+region.fas|1	region.fas|1	three_prime_splice_site	613446	613447	0.000050	-	.	Parent=mRNA1
+region.fas|1	region.fas|1	five_prime_splice_site	620085	620086	0.471685	-	.	Parent=mRNA1
+region.fas|1	gth	exon	620086	620119	0.970588	-	.	Parent=mRNA1
+###

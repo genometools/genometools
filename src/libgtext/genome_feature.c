@@ -24,6 +24,7 @@
 #include "libgtcore/unused.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
+#include "libgtext/genome_node_iterator.h"
 #include "libgtext/genome_node_rep.h"
 
 struct GenomeFeature
@@ -419,6 +420,49 @@ int genome_feature_foreach_attribute(GenomeFeature *gf,
                                    data, e);
   }
   return had_err;
+}
+
+bool genome_feature_has_splice_site(const GenomeFeature *gf)
+{
+  GenomeNodeIterator *gni;
+  GenomeFeatureType gft;
+  GenomeNode *gn;
+  bool has_splice_site = false;
+  assert(gf);
+  gni = genome_node_iterator_new((GenomeNode*) gf);
+  while ((gn = genome_node_iterator_next(gni))) {
+    gft = genome_feature_get_type((GenomeFeature*) gn);
+    if (gft == gft_five_prime_splice_site ||
+        gft == gft_three_prime_splice_site) {
+      has_splice_site = true;
+      break;
+    }
+  }
+  genome_node_iterator_delete(gni);
+  return has_splice_site;
+}
+
+double genome_feature_average_splice_site_prob(const GenomeFeature *gf)
+{
+  GenomeNodeIterator *gni;
+  GenomeFeatureType gft;
+  GenomeNode *gn;
+  unsigned long num_of_splice_sites = 0;
+  double averagessp = 0.0;
+  assert(gf);
+  gni = genome_node_iterator_new((GenomeNode*) gf);
+  while ((gn = genome_node_iterator_next(gni))) {
+    gft = genome_feature_get_type((GenomeFeature*) gn);
+    if (gft == gft_five_prime_splice_site ||
+        gft == gft_three_prime_splice_site) {
+      averagessp += genome_feature_get_score((GenomeFeature*) gn);
+      num_of_splice_sites++;
+    }
+  }
+  genome_node_iterator_delete(gni);
+  if (num_of_splice_sites)
+    averagessp /= num_of_splice_sites;
+  return averagessp;
 }
 
 bool genome_features_are_similar(GenomeFeature *gf_a, GenomeFeature *gf_b)

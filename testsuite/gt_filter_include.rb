@@ -88,3 +88,35 @@ Test do
            :retval => 1)
   grep $last_stderr, /must be one of/
 end
+
+Name "gt filter test 13 (-overlap)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -overlap 2000 3000 " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
+end
+
+Name "gt filter test 14 (-overlap)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -overlap 9001 10000 " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
+end
+
+Name "gt filter test 15 (-minaveragessp)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -minaveragessp 0.5 " +
+           "#{$testdata}splice_site_prob.gff3"
+  run "diff #{$last_stdout} #{$testdata}splice_site_prob.out"
+end
+
+Name "gt filter test 16 (-minaveragessp)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -minaveragessp 0.35 " +
+           "#{$testdata}splice_site_prob.gff3"
+  run "diff #{$last_stdout} #{$testdata}splice_site_prob.gff3"
+end

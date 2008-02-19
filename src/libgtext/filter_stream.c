@@ -78,19 +78,23 @@ const GenomeStreamClass* filter_stream_class(void)
 }
 
 GenomeStream* filter_stream_new(GenomeStream *in_stream,
-                                Str *seqid, Str *typefilter, Strand strand,
+                                Str *seqid, Str *typefilter,
+                                Range overlap_range, Strand strand,
                                 unsigned long max_gene_length,
                                 unsigned long max_gene_num,
-                                double min_gene_score)
+                                double min_gene_score,
+                                double min_average_splice_site_prob)
 {
   GenomeStream *gs = genome_stream_create(filter_stream_class(),
                                           genome_stream_is_sorted(in_stream));
   FilterStream *filter_stream = filter_stream_cast(gs);
   assert(in_stream);
   filter_stream->in_stream = genome_stream_ref(in_stream);
-  filter_stream->filter_visitor = filter_visitor_new(seqid, typefilter, strand,
+  filter_stream->filter_visitor = filter_visitor_new(seqid, typefilter,
+                                                     overlap_range, strand,
                                                      max_gene_length,
                                                      max_gene_num,
-                                                     min_gene_score);
+                                                     min_gene_score,
+                                                  min_average_splice_site_prob);
   return gs;
 }
