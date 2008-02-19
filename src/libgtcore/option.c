@@ -43,6 +43,7 @@ typedef enum {
   OPTION_UINT,
   OPTION_LONG,
   OPTION_ULONG,
+  OPTION_RANGE,
   OPTION_STRING,
   OPTION_STRINGARRAY,
   OPTION_VERSION,
@@ -80,6 +81,7 @@ struct Option {
     unsigned int ui;
     long l;
     unsigned long ul;
+    Range r;
     const char *s;
   } default_value;
   const char** domain;
@@ -360,6 +362,15 @@ static int show_help(OptionParser *op, OptionType optiontype, Error *err)
           xputs("undefined");
         else
           printf("%lu\n", option->default_value.ul);
+      }
+      else if (option->option_type == OPTION_RANGE) {
+        printf("%*s  default: ", (int) max_option_length, "");
+        if (option->default_value.r.start == UNDEF_ULONG)
+          xputs("undefined");
+        else {
+          printf("%lu %lu\n", option->default_value.r.start,
+                 option->default_value.r.end);
+        }
       }
       else if (option->option_type == OPTION_STRING) {
         printf("%*s  default: ", (int) max_option_length, "");
@@ -871,6 +882,54 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 option_parsed = true;
               }
               break;
+            case OPTION_RANGE:
+              if (optional_arg(option, argnum, argc, argv)) {
+                option_parsed = true;
+                break;
+              }
+              /* parse first argument */
+              had_err = check_missing_argument(argnum, argc, option->option_str,
+                                               err);
+              if (!had_err) {
+                argnum++;
+                if (parse_long(&long_value, argv[argnum]) || long_value < 0) {
+                  error_set(err, "first argument to option \"-%s\" must be a "
+                                 "non-negative integer",
+                            str_get(option->option_str));
+                  had_err = -1;
+                }
+                else
+                  ((Range*) option->value)->start = long_value;
+              }
+              /* parse second argument */
+              if (!had_err) {
+                had_err = check_missing_argument(argnum, argc,
+                                                 option->option_str, err);
+              }
+              if (!had_err) {
+                argnum++;
+                if (parse_long(&long_value, argv[argnum]) || long_value < 0) {
+                  error_set(err, "second argument to option \"-%s\" must be a "
+                                 "non-negative integer",
+                            str_get(option->option_str));
+                  had_err = -1;
+                }
+                else
+                  ((Range*) option->value)->end = long_value;
+              }
+              /* check arguments */
+              if (!had_err && (((Range*) option->value)->start >
+                               ((Range*) option->value)->end)) {
+                error_set(err, "first argument %lu to option \"-%s\" must be "
+                               "<= than second argument %lu",
+                          ((Range*) option->value)->start,
+                          str_get(option->option_str),
+                          ((Range*) option->value)->end);
+                had_err = -1;
+              }
+              if (!had_err)
+                option_parsed = true;
+              break;
             case OPTION_STRING:
               if (optional_arg(option, argnum, argc, argv)) {
                 option_parsed = true;
@@ -1167,6 +1226,18 @@ Option *option_new_ulong_min_max(const char *option_str,
   o->min_value.ul = min_value;
   o->max_value_set = true;
   o->max_value.ul = max_value;
+  return o;
+}
+
+Option* option_new_range(const char *option_str, const char *description,
+                         Range *value, Range *default_value)
+{
+  Option *o = option_new(option_str, description, value);
+  o->option_type = OPTION_RANGE;
+  o->default_value.r.start = default_value ? default_value->start : UNDEF_ULONG;
+  o->default_value.r.end   = default_value ? default_value->end   : UNDEF_ULONG;
+  value->start = o->default_value.r.start;
+  value->end   = o->default_value.r.end;
   return o;
 }
 

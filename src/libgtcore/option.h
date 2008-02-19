@@ -19,6 +19,7 @@
 #define OPTION_H
 
 #include <stdbool.h>
+#include "libgtcore/range.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 
@@ -133,6 +134,10 @@ Option*        option_new_ulong_min_max(const char *option_str,
                                         unsigned long default_value,
                                         unsigned long min_value,
                                         unsigned long max_value);
+/* if <default_value> equals NULL, UNDEF_LONG will be used as default for
+   range->start and range->end */
+Option*        option_new_range(const char *option_str, const char *description,
+                                Range *value, Range *default_value);
 Option*        option_new_string(const char *option_str,
                                  const char *description,
                                  Str *value, const char *default_value);
