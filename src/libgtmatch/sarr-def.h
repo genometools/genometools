@@ -86,7 +86,6 @@ typedef struct
   unsigned long numofdbsequences; /* XXX: move to encoded sequence */
   StrArray *filenametab;
   Filelengthvalues *filelengthtab;
-  unsigned int prefixlength;
   DefinedSeqpos numoflargelcpvalues;
   Encodedsequence *encseq;
   DefinedSeqpos longest;
@@ -97,11 +96,15 @@ typedef struct
   const Seqpos *suftab;
   const Uchar *lcptab;
   const Largelcpvalue *llvtab;
+  /* put the following into its own structure */
+  unsigned int prefixlength;
   const Uchar *bwttab;
   const Seqpos *bcktab,
                *countspecialcodes;
-  Codetype **multimappower, *filltable;
-  Codetype numofallcodes; /* number of all codes */
+  Codetype **multimappower,
+           *basepower,
+           *filltable;
+
   /* or with streams */
   SeqposBufferedfile suftabstream;
   UcharBufferedfile bwttabstream,

@@ -97,7 +97,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     Enumpatterniterator *epi;
     unsigned int firstspecial,
                  numofchars = getnumofcharsAlphabet(suffixarray.alpha);
-    Codetype code = 0;
+    Codetype code = 0, numofallcodes;
     MMsearchiterator *mmsibck, *mmsiimm;
     Bucketspecification bucketspec;
     Bucketenumerator *bucketenumerator;
@@ -114,6 +114,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
                                  err);
     esr1 = newEncodedsequencescanstate();
     esr2 = newEncodedsequencescanstate();
+    numofallcodes = suffixarray.basepower[suffixarray.prefixlength];
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
       pptr = nextEnumpatterniterator(&patternlen,epi);
@@ -130,7 +131,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
           bucketenumerator = newbucketenumerator(totallength,
                                                  suffixarray.bcktab,
                                                  suffixarray.countspecialcodes,
-                                                 suffixarray.numofallcodes,
+                                                 numofallcodes,
                                                  (const Codetype **)
                                                  suffixarray.multimappower,
                                                  suffixarray.filltable,
@@ -175,7 +176,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
                                       suffixarray.bcktab,
                                       suffixarray.countspecialcodes,
                                       code,
-                                      suffixarray.numofallcodes,
+                                      numofallcodes,
                                       totallength,
                                       code % numofchars,
                                       numofchars);

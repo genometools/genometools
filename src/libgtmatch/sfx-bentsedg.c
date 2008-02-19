@@ -452,6 +452,45 @@ static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
   return lcpvalue;
 }
 
+static unsigned long *pfxidxpartialsums(unsigned long specialsinbucket,
+                                        Codetype code,
+                                        unsigned int prefixlength,
+                                        const unsigned long **distpfxidx,
+                                        const Codetype *filltable)
+{
+  unsigned long sumcount = 0, *count;
+  unsigned int prefixindex;
+  Codetype ordercode;
+
+  ALLOCASSIGNSPACE(count,NULL,unsigned long,prefixlength);
+  count[0] = 0;
+  for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
+  {
+    count[prefixindex] = 0;
+    if (code >= filltable[prefixindex])
+    {
+      ordercode = code - filltable[prefixindex];
+      if (ordercode % (filltable[prefixindex] + 1) == 0)
+      {
+        ordercode = ordercode/(filltable[prefixindex] + 1);
+        count[prefixindex] = distpfxidx[prefixindex-1][ordercode];
+        sumcount += count[prefixindex];
+      }
+    }
+  }
+  assert(specialsinbucket >= sumcount);
+  count[prefixlength-1] = specialsinbucket - sumcount;
+  if (prefixlength > 2U)
+  {
+    for (prefixindex = prefixlength-2; prefixindex>=1U; prefixindex--)
+    {
+      count[prefixindex] += count[prefixindex+1];
+    }
+    assert(count[1] == specialsinbucket);
+  }
+  return count;
+}
+
 static void bucketends(const Encodedsequence *encseq,
                        Readmode readmode,
                        Encodedsequencescanstate *esr1,
@@ -462,18 +501,17 @@ static void bucketends(const Encodedsequence *encseq,
                        unsigned long specialsinbucket,
                        Codetype code,
                        unsigned int prefixlength,
-                       const unsigned long **distpfxidx_startpointers,
+                       const unsigned long **distpfxidx,
                        const Codetype *filltable)
 {
-  unsigned long i;
-  unsigned int prefixindex;
   Seqpos lcpvalue;
-  Codetype ordercode;
-  unsigned long insertindex;
 
   if (specialsinbucket > 1UL)
   {
-    insertindex = specialsinbucket-1;
+    unsigned int prefixindex;
+    Codetype ordercode;
+    unsigned long idx, insertindex = specialsinbucket-1;
+
     for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
     {
       if (code >= filltable[prefixindex])
@@ -482,18 +520,19 @@ static void bucketends(const Encodedsequence *encseq,
         if (ordercode % (filltable[prefixindex] + 1) == 0)
         {
           ordercode = ordercode/(filltable[prefixindex] + 1);
-          if (distpfxidx_startpointers[prefixindex-1][ordercode] > 0)
+          if (distpfxidx[prefixindex-1][ordercode] > 0 &&
+              insertindex > 0)
           {
-            for (i=0; insertindex > 0 &&
-                      i<distpfxidx_startpointers[prefixindex-1][ordercode];
-                 i++, insertindex--)
+            for (idx=0;
+                 insertindex > 0 && idx < distpfxidx[prefixindex-1][ordercode];
+                 idx++, insertindex--)
             {
               outlcpinfo->lcpsubtab.smalllcpvalues[insertindex]
                 = (Uchar) prefixindex;
-              if (outlcpinfo->maxbranchdepth < (Seqpos) prefixindex)
-              {
-                outlcpinfo->maxbranchdepth = (Seqpos) prefixindex;
-              }
+            }
+            if (outlcpinfo->maxbranchdepth < (Seqpos) prefixindex)
+            {
+              outlcpinfo->maxbranchdepth = (Seqpos) prefixindex;
             }
           }
         }
@@ -609,7 +648,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Seqpos *countspecialcodes,
                     unsigned int numofchars,
                     unsigned int prefixlength,
-                    const unsigned long **distpfxidx_startpointers,
+                    const unsigned long **distpfxidx,
                     const Codetype *filltable,
                     Outlcpinfo *outlcpinfo)
 {
@@ -706,6 +745,14 @@ void sortallbuckets(Seqpos *suftabptr,
     {
       if (bucketspec.specialsinbucket > 0)
       {
+        unsigned long *partialsums;
+
+        partialsums = pfxidxpartialsums(bucketspec.specialsinbucket,
+                                        code,
+                                        prefixlength,
+                                        distpfxidx,
+                                        filltable);
+        FREESPACE(partialsums);
         bucketends(encseq,
                    readmode,
                    esr1,
@@ -716,7 +763,7 @@ void sortallbuckets(Seqpos *suftabptr,
                    bucketspec.specialsinbucket,
                    code,
                    prefixlength,
-                   distpfxidx_startpointers,
+                   distpfxidx,
                    filltable);
       }
       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket > 0)

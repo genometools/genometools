@@ -201,7 +201,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       if (littleendian != (uint32_t) 1)
       {
         error_set(err,"computer has little endian byte order, while index "
-                          "was build on computer with big endian byte order");
+                      "was build on computer with big endian byte order");
         haserr = true;
       }
     } else
@@ -209,8 +209,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       if (littleendian == (uint32_t) 1)
       {
         error_set(err,"computer has big endian byte order, while index "
-                          "was build on computer with little endian byte "
-                          "order");
+                      "was build on computer with little endian byte "
+                      "order");
         haserr = true;
       }
     }
@@ -305,7 +305,7 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->destablength = 0;
   suffixarray->multimappower = NULL;
   suffixarray->filltable = NULL;
-  suffixarray->numofallcodes = 0;
+  suffixarray->basepower = NULL;
 }
 
 static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
@@ -385,6 +385,7 @@ void freesuffixarray(Suffixarray *suffixarray)
   FREESPACE(suffixarray->filelengthtab);
   multimappowerfree(&suffixarray->multimappower);
   FREESPACE(suffixarray->filltable);
+  FREESPACE(suffixarray->basepower);
 }
 
 static int inputsuffixarray(bool map,
@@ -528,21 +529,21 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      Codetype numofspecialcodes, *basepower;
+      Codetype numofallcodes, numofspecialcodes;
       unsigned int numofchars = getnumofcharsAlphabet(suffixarray->alpha);
 
-      basepower = initbasepower(numofchars,suffixarray->prefixlength);
-      suffixarray->numofallcodes = basepower[suffixarray->prefixlength];
-      numofspecialcodes = basepower[suffixarray->prefixlength-1];
-      suffixarray->filltable = initfilltable(basepower,
+      suffixarray->basepower
+        = initbasepower(numofchars,suffixarray->prefixlength);
+      numofallcodes = suffixarray->basepower[suffixarray->prefixlength];
+      numofspecialcodes = suffixarray->basepower[suffixarray->prefixlength-1];
+      suffixarray->filltable = initfilltable(suffixarray->basepower,
                                              suffixarray->prefixlength);
-      FREESPACE(basepower);
       suffixarray->multimappower
         = initmultimappower(numofchars,suffixarray->prefixlength);
       suffixarray->bcktab = genericmaptable(indexname,
                                             BCKTABSUFFIX,
                                             (Seqpos)
-                                             (suffixarray->numofallcodes + 1 +
+                                             (numofallcodes + 1 +
                                               numofspecialcodes),
                                             sizeof (Seqpos),
                                             err);
@@ -553,7 +554,7 @@ static int inputsuffixarray(bool map,
       } else
       {
         suffixarray->countspecialcodes
-          = suffixarray->bcktab + suffixarray->numofallcodes + 1;
+          = suffixarray->bcktab + numofallcodes + 1;
       }
     } else
     {

@@ -46,7 +46,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Seqpos *countspecialcodes,
                     unsigned int numofchars,
                     unsigned int prefixlength,
-                    const unsigned long **distpfxidx_startpointers,
+                    const unsigned long **distpfxidx,
                     const Codetype *filltable,
                     Outlcpinfo *outlcpinfo);
 
