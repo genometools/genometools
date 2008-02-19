@@ -35,6 +35,7 @@
 
 #include "sfx-cmpsuf.pr"
 #include "opensfxfile.pr"
+#include "kmer2string.pr"
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
@@ -460,17 +461,19 @@ static void bucketends(const Encodedsequence *encseq,
                        Seqpos previoussuffix,
                        const Seqpos *specialsection,
                        unsigned long specialsinbucket,
-                       UNUSED Codetype code,
+                       Codetype code,
                        unsigned int prefixlength,
                        unsigned long *countpfxidx,
-                       UNUSED const unsigned long **distpfxidx_startpointers,
-                       UNUSED const Codetype *basepower,
-                       UNUSED const Codetype *filltable)
+                       const unsigned long **distpfxidx_startpointers,
+                       const Codetype *basepower,
+                       const Codetype *filltable,
+                       unsigned int numofchars)
 {
   unsigned long i;
   unsigned int prefixindex;
   Seqpos lcpvalue;
   Codetype ordercode;
+  unsigned long insertindex;
 
   for (prefixindex=0; prefixindex<prefixlength; prefixindex++)
   {
@@ -498,33 +501,33 @@ static void bucketends(const Encodedsequence *encseq,
       assert(outlcpinfo->lcpsubtab.smalllcpvalues[i-1] >= (Uchar) lcpvalue);
     }
   }
+  insertindex = specialsinbucket-1;
   for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
   {
     if (countpfxidx[prefixindex-1] > 0)
     {
+      assert(code >= filltable[prefixindex]);
       ordercode = (code - filltable[prefixindex])/
                   basepower[prefixlength - prefixindex];
-      /*
-      printf("filletable[%u]=%u\n",prefixindex,filltable[prefixindex]);
-      printf("basepower[%u]=%u\n",prefixlength-prefixindex,
-                                  basepower[prefixlength-prefixindex]);
-      printf("code %u: access distpfxidx_startpointers[%u][%u]\n",
-             (unsigned int) code,
-             prefixindex-1,
-             ordercode);
-      */
+      assert(ordercode < basepower[prefixindex]);
       if (countpfxidx[prefixindex-1] !=
           distpfxidx_startpointers[prefixindex-1][ordercode])
       {
-        fprintf(stderr,"code %u: countpfxidx[%u] = %lu != %lu = "
+        char buffer[20+1];
+          kmercode2string(buffer,
+	                  code,
+                          numofchars,
+                          prefixlength,
+                          "acgt");
+        fprintf(stderr,"code %u(%s): countpfxidx[%u] = %lu != %lu = "
                        "distpfxidx_startpointers[%u][%u]\n",
                        (unsigned int) code,
+                       buffer,
                        prefixindex-1,
                        countpfxidx[prefixindex-1],
                        distpfxidx_startpointers[prefixindex-1][ordercode],
                        prefixindex-1,
                        ordercode);
-        exit(EXIT_FAILURE);
       }
     }
   }
@@ -717,7 +720,6 @@ void sortallbuckets(Seqpos *suftabptr,
     {
       if (bucketspec.specialsinbucket > 0)
       {
-        assert(bucketspec.nonspecialsinbucket > 0);
         bucketends(encseq,
                    readmode,
                    esr1,
@@ -731,7 +733,8 @@ void sortallbuckets(Seqpos *suftabptr,
                    countpfxidx,
                    distpfxidx_startpointers,
                    basepower,
-                   filltable);
+                   filltable,
+                   numofchars);
       }
       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket > 0)
       {
