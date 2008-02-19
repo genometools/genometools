@@ -59,7 +59,8 @@ DECLAREARRAYSTRUCT(Seqpos);
 
 typedef struct
 {
-  unsigned long **startpointers, *counters, numofcounters;
+  unsigned long **startpointers,
+                numofcounters;
 } Distpfxidxcnts;
 
  struct Sfxiterator
@@ -91,6 +92,7 @@ typedef struct
   Seqpos previoussuffix;
   bool exhausted;
   Distpfxidxcnts distpfxidx;
+  unsigned long countpfxidx[MAXPREFIXLENGTH];
 };
 
 static void updatekmercount(void *processinfo,
@@ -215,8 +217,8 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode &&
             (prefixindex > 0 || code != sfi->filltable[0]))
         {
-          assert(prefixindex > 0);
           ordercode = (code - sfi->filltable[prefixindex])/divider;
+          assert(prefixindex > 0);
           if (prefixindex < sfi->prefixlength-1)
           {
             sfi->distpfxidx.startpointers[prefixindex-1][ordercode]++;
@@ -288,8 +290,11 @@ void freeSfxiterator(Sfxiterator **sfi)
   FREESPACE((*sfi)->leftborder);
   FREESPACE((*sfi)->countspecialcodes);
   FREESPACE((*sfi)->suftab);
-  FREESPACE((*sfi)->distpfxidx.startpointers);
-  FREESPACE((*sfi)->distpfxidx.counters);
+  if ((*sfi)->distpfxidx.startpointers != NULL)
+  {
+    FREESPACE((*sfi)->distpfxidx.startpointers[0]);
+    FREESPACE((*sfi)->distpfxidx.startpointers);
+  }
   freesuftabparts((*sfi)->suftabparts);
   FREESPACE(*sfi);
 }
@@ -302,20 +307,20 @@ static void initdistprefixindexcounts(Distpfxidxcnts *distpfxidx,
   if (prefixlength > 2U)
   {
     unsigned int idx;
+    unsigned long *counters;
 
     for (distpfxidx->numofcounters = 0, idx=1U; idx <= prefixlength-2; idx++)
     {
+      printf("# row %u has %u elements\n",idx,basepower[idx]);
       distpfxidx->numofcounters += basepower[idx];
     }
     assert(distpfxidx->numofcounters > 0);
     ALLOCASSIGNSPACE(distpfxidx->startpointers,NULL,unsigned long *,
                      prefixlength-2);
-    ALLOCASSIGNSPACE(distpfxidx->counters,NULL,unsigned long,
-                     distpfxidx->numofcounters);
-    memset(distpfxidx->counters,0,(size_t) sizeof (*distpfxidx->counters) *
-                                  distpfxidx->numofcounters);
-    distpfxidx->startpointers[0] = distpfxidx->counters;
-    for (idx=1U; idx< prefixlength-2; idx++)
+    ALLOCASSIGNSPACE(counters,NULL,unsigned long,distpfxidx->numofcounters);
+    memset(counters,0,(size_t) sizeof (*counters) * distpfxidx->numofcounters);
+    distpfxidx->startpointers[0] = counters;
+    for (idx=1U; idx<prefixlength-2; idx++)
     {
       distpfxidx->startpointers[idx]
         = distpfxidx->startpointers[idx-1] + basepower[idx];
@@ -362,7 +367,6 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->suftabptr = NULL;
     sfi->suftabparts = NULL;
     sfi->distpfxidx.startpointers = NULL;
-    sfi->distpfxidx.counters = NULL;
     sfi->distpfxidx.numofcounters = 0;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
@@ -502,14 +506,18 @@ static void preparethispart(Sfxiterator *sfi,
   sortallbuckets(sfi->suftabptr,
                  sfi->encseq,
                  sfi->readmode,
-                 sfi->leftborder,
-                 sfi->countspecialcodes,
-                 sfi->numofchars,
-                 sfi->prefixlength,
                  sfi->currentmincode,
                  sfi->currentmaxcode,
                  totalwidth,
                  sfi->previoussuffix,
+                 sfi->leftborder,
+                 sfi->countspecialcodes,
+                 sfi->numofchars,
+                 sfi->prefixlength,
+                 sfi->countpfxidx,
+                 (const unsigned long **) sfi->distpfxidx.startpointers,
+                 (const Codetype *) sfi->basepower,
+                 (const Codetype *) sfi->filltable,
                  sfi->outlcpinfo);
   assert(totalwidth > 0);
   sfi->previoussuffix = sfi->suftab[sfi->widthofpart-1];
