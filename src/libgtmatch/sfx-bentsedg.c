@@ -515,7 +515,7 @@ static void bucketends(const Encodedsequence *encseq,
       {
         char buffer[20+1];
           kmercode2string(buffer,
-	                  code,
+                          code,
                           numofchars,
                           prefixlength,
                           "acgt");
