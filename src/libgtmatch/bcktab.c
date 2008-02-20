@@ -131,6 +131,95 @@ void initbcktabwithNULL(Bcktab *bcktab)
   bcktab->basepower = NULL;
 }
 
+static unsigned long **initdistprefixindexcounts(const Codetype *basepower,
+                                                 unsigned int prefixlength)
+{
+  if (prefixlength > 2U)
+  {
+    unsigned int idx;
+    unsigned long *counters, numofcounters, **distpfxidx;
+
+    for (numofcounters = 0, idx=1U; idx <= prefixlength-2; idx++)
+    {
+      numofcounters += basepower[idx];
+    }
+    assert(numofcounters > 0);
+    ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-2);
+    ALLOCASSIGNSPACE(counters,NULL,unsigned long,numofcounters);
+    memset(counters,0,(size_t) sizeof (*counters) * numofcounters);
+    distpfxidx[0] = counters;
+    for (idx=1U; idx<prefixlength-2; idx++)
+    {
+      distpfxidx[idx] = distpfxidx[idx-1] + basepower[idx];
+    }
+    return distpfxidx;
+  } else
+  {
+    return NULL;
+  }
+}
+
+int allocBcktab(Bcktab *bcktab,
+                unsigned int numofchars,
+                unsigned int prefixlength,
+                unsigned int codebits,
+                unsigned int maxcodevalue,
+                Error *err)
+{
+  bool haserr = false;
+
+  bcktab->distpfxidx = NULL;
+  bcktab->filltable = NULL;
+  bcktab->basepower = NULL;
+  bcktab->leftborder = NULL;
+  bcktab->countspecialcodes = NULL;
+  bcktab->basepower = initbasepower(numofchars,prefixlength);
+  bcktab->filltable = initfilltable(bcktab->basepower,prefixlength);
+  bcktab->numofallcodes = bcktab->basepower[prefixlength];
+  bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
+  if (bcktab->numofallcodes-1 > maxcodevalue)
+  {
+    error_set(err,"alphasize^prefixlength-1 = %u does not fit into "
+                  " %u bits: choose smaller value for prefixlength",
+                  bcktab->numofallcodes-1,
+                  codebits);
+    haserr = true;
+  } else
+  {
+    bcktab->distpfxidx = initdistprefixindexcounts(bcktab->basepower,
+                                                   prefixlength);
+  }
+  if (!haserr)
+  {
+    ALLOCASSIGNSPACE(bcktab->leftborder,NULL,Seqpos,
+                     bcktab->numofallcodes+1);
+    memset(bcktab->leftborder,0,
+           sizeof (*bcktab->leftborder) *
+           (size_t) bcktab->numofallcodes);
+    ALLOCASSIGNSPACE(bcktab->countspecialcodes,NULL,Seqpos,
+                     bcktab->numofspecialcodes);
+    memset(bcktab->countspecialcodes,0,
+           sizeof (*bcktab->countspecialcodes) *
+                  (size_t) bcktab->numofspecialcodes);
+  }
+  return haserr ? -1 : 0;
+}
+
+void updatebckspecials(Bcktab *bcktab,
+                       Codetype code,
+                       unsigned int numofchars,
+                       unsigned int prefixindex,
+                       unsigned int prefixlength)
+{
+  if (prefixindex < prefixlength-1)
+  {
+    Codetype ordercode = (code - bcktab->filltable[prefixindex])/
+                         (bcktab->filltable[prefixindex]+1);
+    bcktab->distpfxidx[prefixindex-1][ordercode]++;
+  }
+  bcktab->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)]++;
+}
+
 int bcktab2file(FILE *fp,
                 const Bcktab *bcktab,
                 Error *err)

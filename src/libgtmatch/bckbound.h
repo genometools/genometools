@@ -61,6 +61,19 @@ void freebcktab(Bcktab *bcktab);
 
 void initbcktabwithNULL(Bcktab *bcktab);
 
+int allocBcktab(Bcktab *bcktab,
+                unsigned int numofchars,
+                unsigned int prefixlength,
+                unsigned int codebits,
+                unsigned int maxcodevalue,
+                Error *err);
+
+void updatebckspecials(Bcktab *bcktab,
+                       Codetype code,
+                       unsigned int numofchars,
+                       unsigned int prefixindex,
+                       unsigned int prefixlength);
+
 int bcktab2file(FILE *fp,
                 const Bcktab *bcktab,
                 Error *err);

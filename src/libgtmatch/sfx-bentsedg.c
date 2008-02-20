@@ -743,7 +743,7 @@ void sortallbuckets(Seqpos *suftabptr,
         partialsums = pfxidxpartialsums(bucketspec.specialsinbucket,
                                         code,
                                         prefixlength,
-                                        (const unsigned long **) 
+                                        (const unsigned long **)
                                            bcktab->distpfxidx,
                                         bcktab->filltable);
         FREESPACE(partialsums);

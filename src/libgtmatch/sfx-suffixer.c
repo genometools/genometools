@@ -36,7 +36,6 @@
 #include "stamp.h"
 
 #include "sfx-mappedstr.pr"
-#include "initbasepower.pr"
 #include "kmer2string.pr"
 
 #define CODEBITS        (32-PREFIXLENBITS)
@@ -134,15 +133,7 @@ static void insertwithoutspecial(void *processinfo,
 
     if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
     {
-      Seqpos stidx;
-
-      stidx = --sfi->bcktab.leftborder[code];
-#ifdef LONGOUTPUT
-      printf("insert suffix " FormatSeqpos " at location " FormatSeqpos "\n",
-              PRINTSeqposcast(position),
-              PRINTSeqposcast(stidx));
-#endif
-      sfi->suftabptr[stidx] = position;
+      sfi->suftabptr[--sfi->bcktab.leftborder[code]] = position;
     }
   }
 }
@@ -162,73 +153,43 @@ static void reversespecialcodes(Codeatposition *spaceCodeatposition,
   }
 }
 
-static Codetype codedownscale(const unsigned int *filltable,
-                              const unsigned int *basepower,
+static Codetype codedownscale(const Bcktab *bcktab,
                               Codetype code,
                               unsigned int prefixindex,
                               unsigned int maxprefixlen)
 {
   unsigned int remain;
 
-  code -= filltable[maxprefixlen];
+  code -= bcktab->filltable[maxprefixlen];
   remain = maxprefixlen-prefixindex;
-  code %= (filltable[remain]+1);
-  code *= basepower[remain];
-  code += filltable[prefixindex];
+  code %= (bcktab->filltable[remain]+1);
+  code *= bcktab->basepower[remain];
+  code += bcktab->filltable[prefixindex];
   return code;
 }
 
 static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
 {
-  Codetype code, ordercode, divider;
+  Codetype code;
   unsigned int prefixindex;
   unsigned long insertindex, j;
   Seqpos stidx;
 
-#ifdef LONGOUTPUT
-  char buffer[MAXPREFIXLENGTH+1];
-#endif
-
   for (prefixindex=1U; prefixindex < sfi->prefixlength; prefixindex++)
   {
-    divider = sfi->bcktab.filltable[prefixindex]+1;
     for (j=0, insertindex = 0; j < sfi->nextfreeCodeatposition; j++)
     {
       if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixlen)
       {
-        code = codedownscale(sfi->bcktab.filltable,
-                             sfi->bcktab.basepower,
+        code = codedownscale(&sfi->bcktab,
                              sfi->spaceCodeatposition[j].code,
                              prefixindex,
                              sfi->spaceCodeatposition[j].maxprefixlen);
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
         {
-          if (prefixindex < sfi->prefixlength-1)
-          {
-            ordercode = (code - sfi->bcktab.filltable[prefixindex])/divider;
-            sfi->bcktab.distpfxidx[prefixindex-1][ordercode]++;
-          }
-          sfi->bcktab.countspecialcodes[
-               FROMCODE2SPECIALCODE(code,sfi->numofchars)]++;
+          updatebckspecials(&sfi->bcktab,code,sfi->numofchars,
+                            prefixindex,sfi->prefixlength);
           stidx = --sfi->bcktab.leftborder[code];
-#ifdef LONGOUTPUT
-          kmercode2string(buffer,
-                          code,
-                          sfi->numofchars,
-                          sfi->prefixlength,
-                          sfi->characters);
-          printf("insert special_suffix_for_prefixindex %u " FormatSeqpos
-                 " (code %u,\"%s\",ordercode=%u) at location "
-                 FormatSeqpos "\n",
-                 prefixindex,
-                 PRINTSeqposcast(sfi->spaceCodeatposition[j].position -
-                                 prefixindex),
-                 (unsigned int) code,
-                 buffer,
-                 (unsigned int) (code - sfi->bcktab.filltable[prefixindex])/
-                                divider,
-                 PRINTSeqposcast(stidx));
-#endif
           sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
                                   prefixindex;
         }
@@ -281,35 +242,6 @@ void freeSfxiterator(Sfxiterator **sfi)
   FREESPACE(*sfi);
 }
 
-static unsigned long **initdistprefixindexcounts(const Codetype *basepower,
-                                                 unsigned int prefixlength)
-{
-
-  if (prefixlength > 2U)
-  {
-    unsigned int idx;
-    unsigned long *counters, numofcounters, **distpfxidx;
-
-    for (numofcounters = 0, idx=1U; idx <= prefixlength-2; idx++)
-    {
-      numofcounters += basepower[idx];
-    }
-    assert(numofcounters > 0);
-    ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-2);
-    ALLOCASSIGNSPACE(counters,NULL,unsigned long,numofcounters);
-    memset(counters,0,(size_t) sizeof (*counters) * numofcounters);
-    distpfxidx[0] = counters;
-    for (idx=1U; idx<prefixlength-2; idx++)
-    {
-      distpfxidx[idx] = distpfxidx[idx-1] + basepower[idx];
-    }
-    return distpfxidx;
-  } else
-  {
-    return NULL;
-  }
-}
-
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
@@ -356,42 +288,19 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
-
-    sfi->bcktab.distpfxidx = NULL;
-    sfi->bcktab.filltable = NULL;
-    sfi->bcktab.basepower = NULL;
-    sfi->bcktab.leftborder = NULL;
-    sfi->bcktab.countspecialcodes = NULL;
-    sfi->bcktab.basepower = initbasepower(numofchars,prefixlength);
-    sfi->bcktab.filltable = initfilltable(sfi->bcktab.basepower,prefixlength);
-    sfi->bcktab.numofallcodes = sfi->bcktab.basepower[prefixlength];
-    sfi->bcktab.numofspecialcodes = sfi->bcktab.basepower[prefixlength-1];
-    if (sfi->bcktab.numofallcodes-1 > MAXCODEVALUE)
+    if (allocBcktab(&sfi->bcktab,
+                    numofchars,
+                    prefixlength,
+                    (unsigned int) CODEBITS,
+                    (unsigned int) MAXCODEVALUE,
+                    err) != 0)
     {
-      error_set(err,"alphasize^prefixlength-1 = %u does not fit into "
-                    " %u bits: choose smaller value for prefixlength",
-                    sfi->bcktab.numofallcodes-1,
-                    (unsigned int) CODEBITS);
       haserr = true;
-    } else
-    {
-      sfi->bcktab.distpfxidx = initdistprefixindexcounts(sfi->bcktab.basepower,
-                                                         sfi->prefixlength);
     }
   }
   if (!haserr)
   {
     assert(sfi != NULL);
-    ALLOCASSIGNSPACE(sfi->bcktab.leftborder,NULL,Seqpos,
-                     sfi->bcktab.numofallcodes+1);
-    memset(sfi->bcktab.leftborder,0,
-           sizeof (*sfi->bcktab.leftborder) *
-           (size_t) sfi->bcktab.numofallcodes);
-    ALLOCASSIGNSPACE(sfi->bcktab.countspecialcodes,NULL,Seqpos,
-                     sfi->bcktab.numofspecialcodes);
-    memset(sfi->bcktab.countspecialcodes,0,
-           sizeof (*sfi->bcktab.countspecialcodes) *
-                  (size_t) sfi->bcktab.numofspecialcodes);
     sfi->storespecials = true;
     if (mtime != NULL)
     {
