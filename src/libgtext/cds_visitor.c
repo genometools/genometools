@@ -91,13 +91,7 @@ static int extract_spliced_seq(GenomeNode *gn, CDSVisitor *visitor, Error *err)
 static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
-  GenomeNode *cds_feature;
-  Str *pr_0, *pr_1, *pr_2;
   GenomeFeature *gf;
-  unsigned long i;
-  Array *orfs;
-  Range orf, cds;
-  Strand strand;
   int had_err;
 
   error_check(err);
@@ -106,6 +100,13 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 
   had_err = extract_spliced_seq(gn, v, err);
   if (!had_err && splicedseq_length(v->splicedseq) > 2) {
+    GenomeNode *cds_feature;
+    Str *pr_0, *pr_1, *pr_2;
+    unsigned long i;
+    Range orf, cds;
+    Strand strand;
+    Array *orfs;
+
     strand = genome_feature_get_strand(gf);
     if (strand == STRAND_REVERSE) {
       if (splicedseq_reverse(v->splicedseq, err))
