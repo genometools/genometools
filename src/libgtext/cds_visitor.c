@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -135,7 +135,7 @@ static void create_CDS_features_for_ORF(Range orf, CDSVisitor *v,
   genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
   genome_node_set_phase(cds_feature, PHASE_ZERO);
   /* all CDS features in between */
-  for (i = strand == STRAND_FORWARD ? orf.start + 1 : orf.end - 1;
+  for (i = strand == STRAND_FORWARD ? orf.start : orf.end;
        strand == STRAND_FORWARD ? i < orf.end : i > orf.start;
        strand == STRAND_FORWARD ? i++ : i--) {
     if (splicedseq_pos_is_border(v->splicedseq, i)) {
