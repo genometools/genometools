@@ -105,6 +105,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     Encodedsequencescanstate *esr1, *esr2;
     int retval;
     Seqpos idx, maxlcp;
+    const Codetype **multimappower = bcktab_multimappower(&suffixarray.bcktab);
 
     epi = newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
@@ -159,8 +160,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
         } else
         {
           firstspecial = qgram2code(&code,
-                                    (const Codetype **)
-                                       suffixarray.bcktab.multimappower,
+                                    multimappower,
                                     suffixarray.prefixlength,
                                     pptr);
           assert(firstspecial == suffixarray.prefixlength);

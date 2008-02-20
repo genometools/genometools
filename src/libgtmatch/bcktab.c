@@ -20,6 +20,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/fa.h"
+#include "libgtcore/symboldef.h"
 #include "esafileend.h"
 #include "spacedef.h"
 #include "bckbound.h"
@@ -142,16 +143,6 @@ void freebcktab(Bcktab *bcktab,bool mapped)
   FREESPACE(bcktab->basepower);
 }
 
-void initbcktabwithNULL(Bcktab *bcktab)
-{
-  bcktab->leftborder = NULL;
-  bcktab->countspecialcodes = NULL;
-  bcktab->multimappower = NULL;
-  bcktab->filltable = NULL;
-  bcktab->basepower = NULL;
-  bcktab->distpfxidx = NULL;
-}
-
 static unsigned long **initdistprefixindexcounts(const Codetype *basepower,
                                                  unsigned int prefixlength)
 {
@@ -180,6 +171,16 @@ static unsigned long **initdistprefixindexcounts(const Codetype *basepower,
   }
 }
 
+void initbcktabwithNULL(Bcktab *bcktab)
+{
+  bcktab->leftborder = NULL;
+  bcktab->countspecialcodes = NULL;
+  bcktab->multimappower = NULL;
+  bcktab->filltable = NULL;
+  bcktab->basepower = NULL;
+  bcktab->distpfxidx = NULL;
+}
+
 int allocBcktab(Bcktab *bcktab,
                 Seqpos totallength,
                 unsigned int numofchars,
@@ -190,12 +191,7 @@ int allocBcktab(Bcktab *bcktab,
 {
   bool haserr = false;
 
-  bcktab->distpfxidx = NULL;
-  bcktab->filltable = NULL;
-  bcktab->basepower = NULL;
-  bcktab->leftborder = NULL;
-  bcktab->multimappower = NULL;
-  bcktab->countspecialcodes = NULL;
+  initbcktabwithNULL(bcktab);
   bcktab->totallength = totallength;
   bcktab->basepower = initbasepower(numofchars,prefixlength);
   bcktab->filltable = initfilltable(bcktab->basepower,prefixlength);
@@ -400,21 +396,90 @@ unsigned long *pfxidxpartialsums(unsigned long specialsinbucket,
   return count;
 }
 
+unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
+                              unsigned long specialsinbucket,
+                              const Bcktab *bcktab,
+                              Codetype code,
+                              unsigned int prefixlength)
+{
+  unsigned int prefixindex, maxvalue = 0;
+  Codetype ordercode;
+  unsigned long idx, insertindex = specialsinbucket-1;
+
+  for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
+  {
+    if (code >= bcktab->filltable[prefixindex])
+    {
+      ordercode = code - bcktab->filltable[prefixindex];
+      if (ordercode % (bcktab->filltable[prefixindex] + 1) == 0)
+      {
+        ordercode = ordercode/(bcktab->filltable[prefixindex] + 1);
+        if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0 &&
+            insertindex > 0)
+        {
+          for (idx=0;
+               insertindex > 0 &&
+               idx < bcktab->distpfxidx[prefixindex-1][ordercode];
+               idx++, insertindex--)
+          {
+            lcpsubtab[insertindex] = (Uchar) prefixindex;
+          }
+          if (maxvalue < prefixindex)
+          {
+            maxvalue = prefixindex;
+          }
+        }
+      }
+    }
+  }
+  while (insertindex > 0)
+  {
+    lcpsubtab[insertindex] = (Uchar) (prefixlength-1);
+    if (maxvalue < prefixindex)
+    {
+      maxvalue = prefixindex;
+    }
+    insertindex--;
+  }
+  return maxvalue;
+}
+
+const Codetype **bcktab_multimappower(const Bcktab *bcktab)
+{
+  return (const Codetype **) bcktab->multimappower;
+}
+
+Codetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx)
+{
+  return bcktab->filltable[idx];
+}
+
+Seqpos *bcktab_leftborder(Bcktab *bcktab)
+{
+  return bcktab->leftborder;
+}
+
+Codetype bcktab_numofallcodes(Bcktab *bcktab)
+{
+  return bcktab->numofallcodes;
+}
+
 /*
 src/libgtmatch/bckbound.h  interface
 src/libgtmatch/bcktab.c    implementation
-src/libgtmatch/cutendpfx.c  only multimappower and filltable
+
+src/libgtmatch/sfx-suffixer.c  used in opaque way
+src/tools/gt_patternmatch.c    used in opaque way
+src/libgtmatch/cutendpfx.c     used in opaque way
 src/libgtmatch/cutendpfx.h  interface
 src/libgtmatch/esa-map.c    used in opaque way
 src/libgtmatch/sarr-def.h   used in opaque way
 src/libgtmatch/sfx-apfxlen.c  no usage
-src/libgtmatch/sfx-bentsedg.c only in bucketends -> bcktab.c
+src/libgtmatch/sfx-bentsedg.c no usage
 src/libgtmatch/sfx-opt.c      no usage
 src/libgtmatch/sfx-optdef.h      no usage
 src/libgtmatch/sfx-outlcp.h   only declaration
 src/libgtmatch/sfx-run.c          no usage
-src/libgtmatch/sfx-suffixer.c    only access to leftborder and numofallcodes
 src/libgtmatch/sfx-suffixer.h  interface
 src/tools/gt_greedyfwdmat.c    only in previous version
-src/tools/gt_patternmatch.c    only multimappower
 */

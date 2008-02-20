@@ -21,6 +21,7 @@
 #include <assert.h>
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
+#include "libgtcore/symboldef.h"
 #include "seqpos-def.h"
 #include "intcode-def.h"
 
@@ -99,5 +100,19 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
 void calcbucketboundaries(Bucketspecification *bucketspec,
                           const Bcktab *bcktab,
                           Codetype code);
+
+unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
+                              unsigned long specialsinbucket,
+                              const Bcktab *bcktab,
+                              Codetype code,
+                              unsigned int prefixlength);
+
+const Codetype **bcktab_multimappower(const Bcktab *bcktab);
+
+Codetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx);
+
+Seqpos *bcktab_leftborder(Bcktab *bcktab);
+
+Codetype bcktab_numofallcodes(Bcktab *bcktab);
 
 #endif

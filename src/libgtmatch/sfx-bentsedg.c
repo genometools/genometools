@@ -462,45 +462,19 @@ static void bucketends(const Encodedsequence *encseq,
                        const Bcktab *bcktab)
 {
   Seqpos lcpvalue;
-  
+
   if (specialsinbucket > 1UL)
   {
-    unsigned int prefixindex;
-    Codetype ordercode;
-    unsigned long idx, insertindex = specialsinbucket-1;
+    unsigned int maxvalue;
 
-    for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
+    maxvalue = pfxidx2lcpvalues(outlcpinfo->lcpsubtab.smalllcpvalues,
+                                specialsinbucket,
+                                bcktab,
+                                code,
+                                prefixlength);
+    if (outlcpinfo->maxbranchdepth < (Seqpos) maxvalue)
     {
-      if (code >= bcktab->filltable[prefixindex])
-      {
-        ordercode = code - bcktab->filltable[prefixindex];
-        if (ordercode % (bcktab->filltable[prefixindex] + 1) == 0)
-        {
-          ordercode = ordercode/(bcktab->filltable[prefixindex] + 1);
-          if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0 &&
-              insertindex > 0)
-          {
-            for (idx=0;
-                 insertindex > 0 && 
-                 idx < bcktab->distpfxidx[prefixindex-1][ordercode];
-                 idx++, insertindex--)
-            {
-              outlcpinfo->lcpsubtab.smalllcpvalues[insertindex]
-                = (Uchar) prefixindex;
-            }
-            if (outlcpinfo->maxbranchdepth < (Seqpos) prefixindex)
-            {
-              outlcpinfo->maxbranchdepth = (Seqpos) prefixindex;
-            }
-          }
-        }
-      }
-    }
-    while (insertindex > 0)
-    {
-      outlcpinfo->lcpsubtab.smalllcpvalues[insertindex]
-        = (Uchar) (prefixlength-1);
-      insertindex--;
+      outlcpinfo->maxbranchdepth = (Seqpos) maxvalue;
     }
   }
   lcpvalue = computelocallcpvalue(encseq,

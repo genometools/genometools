@@ -72,13 +72,14 @@ Bucketenumerator *newbucketenumerator(const Bcktab *bcktab,
   bucketenumerator->prefixlength = prefixlength;
   bucketenumerator->demandprefixlength = demandprefixlength;
   firstspecial = prefixqgram2code(&bucketenumerator->currentcode,
-                                  (const Codetype **) bcktab->multimappower,
+                                  bcktab_multimappower(bcktab),
                                   prefixlength,
                                   demandprefixlength,
                                   demandprefix);
   assert(firstspecial == prefixlength);
   bucketenumerator->lastcode
-    = bucketenumerator->currentcode + bcktab->filltable[demandprefixlength];
+    = bucketenumerator->currentcode
+      + bcktab_filltable(bcktab,demandprefixlength);
   return bucketenumerator;
 }
 
