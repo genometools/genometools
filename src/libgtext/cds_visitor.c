@@ -78,7 +78,17 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *e)
   return had_err;
 }
 
-static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *e)
+static int extract_spliced_seq(GenomeNode *gn, CDSVisitor *visitor, Error *err)
+{
+  error_check(err);
+  assert(gn && visitor);
+  /* traverse the direct children */
+  splicedseq_reset(visitor->splicedseq);
+  return genome_node_traverse_direct_children(gn, visitor,
+                                              extract_cds_if_necessary, err);
+}
+
+static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GenomeNode *cds_feature;
@@ -90,18 +100,15 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *e)
   Strand strand;
   int had_err;
 
-  error_check(e);
+  error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 
-  /* traverse the direct children */
-  splicedseq_reset(v->splicedseq);
-  had_err = genome_node_traverse_direct_children(gn, v,
-                                                 extract_cds_if_necessary, e);
+  had_err = extract_spliced_seq(gn, v, err);
   if (!had_err && splicedseq_length(v->splicedseq) > 2) {
     strand = genome_feature_get_strand(gf);
     if (strand == STRAND_REVERSE) {
-      if (splicedseq_reverse(v->splicedseq, e))
+      if (splicedseq_reverse(v->splicedseq, err))
         return -1;
     }
     /* determine ORFs for all three frames */
