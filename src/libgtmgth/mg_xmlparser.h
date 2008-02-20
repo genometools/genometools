@@ -17,11 +17,11 @@
 */
 
 #include <expat.h>
-#ifndef CURLDEF
-#include "libgtmgth/metagenomethreader.h"
-#endif
+
 #ifdef CURLDEF
 #include <curl.h>
+#else
+#include "libgtmgth/metagenomethreader.h"
 #endif
 
 /* Funktion, in der die Struktur 'gefuellt' und der XML-Parser
