@@ -16,9 +16,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <metagenomethreader.h>
 #include <limits.h>
 #include <float.h>
+#include "libgtmgth/metagenomethreader.h"
 
 #define GENEPREDSTRUCT(path)    parsestruct_ptr->geneprediction_static.path
 

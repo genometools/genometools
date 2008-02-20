@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <mg_computepath.h>
+#include "libgtmgth/mg_computepath.h"
 
 int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
                    HitInformation *hit_information,

@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <mg_compute_gene_prediction.h>
+#include "libgtmgth/mg_compute_gene_prediction.h"
 
 int mg_compute_gene_prediction(CombinedScoreMatrixEntry
                                **combinedscore_matrix,

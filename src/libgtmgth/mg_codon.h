@@ -23,9 +23,11 @@
 
     modiefied for metagenomethreader;
 */
-#include <mg_xmlparser.h>
+
 #ifndef CODON_H
 #define CODON_H
+
+#include "libgtmgth/mg_xmlparser.h"
 
 char mg_codon2amino(char, char, char);
 

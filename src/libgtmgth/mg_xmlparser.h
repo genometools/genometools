@@ -18,7 +18,7 @@
 
 #include <expat.h>
 #ifndef CURLDEF
-#include <metagenomethreader.h>
+#include "libgtmgth/metagenomethreader.h"
 #endif
 #ifdef CURLDEF
 #include <curl.h>

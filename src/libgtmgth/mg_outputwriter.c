@@ -16,7 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <mg_outputwriter.h>
+#include "libgtcore/unused.h"
+#include "libgtmgth/mg_outputwriter.h"
 
 static int newmemory_hash(void *, void *, void *, Error *);
 
@@ -1106,9 +1107,9 @@ static void as_coding(ParseStruct *parsestruct_ptr,
 }
 
 
-static int newmemory_hash( /*@unused@*/ void *key,
+static int newmemory_hash(UNUSED void *key,
                           void *value, void *data,
-                          /*@unused@*/ Error * err)
+                          UNUSED Error * err)
 {
   /* Parsestruct-Struktur */
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;

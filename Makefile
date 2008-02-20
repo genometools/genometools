@@ -66,6 +66,7 @@ endif
 
 # the default GenomeTools libraries which are build
 GTLIBS:=lib/libgtext.a\
+        lib/libgtmgth.a\
         lib/libgtmatch.a\
         lib/libgtltr.a\
         lib/libgtcore.a\
@@ -102,6 +103,11 @@ LIBGTEXT_CXX_SRC:=$(wildcard src/libgtext/*.cxx)
 LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
 LIBGTEXT_CXX_DEP:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.d)
 LIBGTEXT_LIBDEP=-lgtcore -lbz2 -lz
+
+# the MetaGenomeThreader library
+LIBGTMGTH_SRC:=$(wildcard src/libgtmgth/*.c)
+LIBGTMGTH_OBJ:=$(LIBGTMGTH_SRC:%.c=obj/%.o)
+LIBGTMGTH_DEP:=$(LIBGTMGTH_SRC:%.c=obj/%.d)
 
 # the GenomeTools matching library
 LIBGTMATCH_SRC:=$(wildcard src/libgtmatch/*.c)
@@ -336,6 +342,14 @@ lib/libgtext$(SHARED_OBJ_NAME_EXT): $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) \
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTEXT_C_OBJ) \
           $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ) -o $@ $(LIBGTEXT_LIBDEP)
 
+lib/libgtmgth.a: $(LIBGTMGTH_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@ar ru $@ $(LIBGTMGTH_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 lib/libgtmatch.a: $(LIBGTMATCH_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -515,6 +529,7 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 	 $(LIBGTCORE_DEP) \
 	 $(LIBGTEXT_C_DEP) \
 	 $(LIBGTEXT_CXX_DEP) \
+	 $(LIBGTMGTH_DEP) \
 	 $(LIBGTMATCH_DEP) \
 	 $(LIBGTLTR_DEP) \
 	 $(LIBGTLUA_C_DEP) \

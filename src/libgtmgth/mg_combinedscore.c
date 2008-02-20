@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <mg_combinedscore.h>
+#include "libgtmgth/mg_combinedscore.h"
 
 int mg_combinedscore(ParseStruct *parsestruct_ptr,
                      unsigned long hit_counter, Error * err)

@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/codon.h>
-#include <mg_xmlparser.h>
+#include "libgtcore/codon.h"
+#include "libgtmgth/mg_xmlparser.h"
 
 #define POSITION(query_from, hit_number, position, k)\
            (*(long*)array_get((query_from), (hit_number)))+(position)+(k)-1

@@ -16,8 +16,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <mg_xmlparser.h>
 #include <float.h>
+#include "libgtmgth/mg_xmlparser.h"
+
 #define UNDEFINED   9
 
 /* Funktion zur DP-Berechnung der Pfade durch die Combined-Score-Matrix

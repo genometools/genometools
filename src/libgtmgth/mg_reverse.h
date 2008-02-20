@@ -23,9 +23,11 @@
 
   modified for metagenomethreader
 */
-#include <metagenomethreader.h>
+
 #ifndef REVERSE_H
 #define REVERSE_H
+
+#include "libgtmgth/metagenomethreader.h"
 
 //#include <gtcore.h>
 #include <assert.h>

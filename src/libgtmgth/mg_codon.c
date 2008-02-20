@@ -29,7 +29,7 @@
 
 /*     modified for metagenomethreader; */
 
-#include <mg_codon.h>
+#include "libgtmgth/mg_codon.h"
 
 #define T_CODE 0
 #define C_CODE 1

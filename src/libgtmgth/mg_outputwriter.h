@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <metagenomethreader.h>
+#include "libgtmgth/metagenomethreader.h"
 
 /* Funktion, die nacheinander die erforderlichen Funktionen zur Erstellung
    des txt-Dokuments aufruft

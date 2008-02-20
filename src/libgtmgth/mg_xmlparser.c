@@ -15,7 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <mg_xmlparser.h>
+#include "libgtcore/unused.h"
+#include "libgtmgth/mg_xmlparser.h"
 
 /* Expat-Funktion zur Behandlung oeffnender XML-Tags
    Parameter: void-Zeiger auf die (Nutzer)Daten - hier: parsestruct-Struktur;
@@ -142,7 +143,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
 }
 
 static void XMLCALL startElement(void *data, const char *name,
-                                 /*@unused@*/ const char **atts)
+                                 UNUSED const char **atts)
 {
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;
 

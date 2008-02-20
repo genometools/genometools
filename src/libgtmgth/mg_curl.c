@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <mg_curl.h>
+#include "libgtmgth/mg_curl.h"
 
 void *myrealloc(void *ptr, size_t size)
 {

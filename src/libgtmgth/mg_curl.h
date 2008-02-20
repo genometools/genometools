@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <metagenomethreader.h>
+#include "libgtmgth/metagenomethreader.h"
 
 #ifndef S_SPLINT_S
 #include <curl/curl.h>

@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/tooldriver.h>
-#include <metagenomethreader.h>
+#include "libgtcore/tooldriver.h"
+#include "libgtmgth/metagenomethreader.h"
 
 int main(int argc, char *argv[])
 {

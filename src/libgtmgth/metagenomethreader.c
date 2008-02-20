@@ -15,8 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <metagenomethreader.h>
-#include <libgtcore/fileutils.h>
+#include "libgtcore/fileutils.h"
+#include "libgtcore/unused.h"
+#include "libgtmgth/metagenomethreader.h"
 
 /* Funktion zur Ausgabe des Statistikbereichs
    Parameter: Schluessel, Value, User-Data, Env-Variable
@@ -603,7 +604,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
   return had_err;
 }
 
-static int printout_hits( /*@unused@*/ void *key,
+static int printout_hits(UNUSED void *key,
                          void *value, void *data, Error * err)
 {
   /* Parsestruct-Struktur */
