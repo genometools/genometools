@@ -108,8 +108,8 @@ static OPrval parse_options(int *parsed_args,
      Eintretens eines bzw. in ein Gen ; default: -2 */
   leavegene_value_option =
     option_new_double("l",
-                      "negative score for leaving a gene on forward strand\
-                       or enter a gene on reverse strand",
+                      "negative score for leaving a gene on forward strand "
+                      "or enter a gene on reverse strand",
                       &metagenomethreader_arguments->leavegene_value,
                       -2.0);
   option_parser_add_option(op, leavegene_value_option);
@@ -118,8 +118,8 @@ static OPrval parse_options(int *parsed_args,
      zusammenhaengender Genbereich vorliegt; default: 400 */
   prediction_span_option =
     option_new_double("p",
-                      "max. span between coding-regions resume as one\
-                       prediction",
+                      "max. span between coding-regions resume as one "
+                      "prediction",
                       &metagenomethreader_arguments->prediction_span,
                       400.0);
   option_parser_add_option(op, prediction_span_option);
@@ -128,8 +128,8 @@ static OPrval parse_options(int *parsed_args,
      Frameshift vorliegt; default: 200 */
   frameshift_span_option =
     option_new_double("f",
-                      "max. span between coding-regions in different\
-                       reading frames resume as one prediction",
+                      "max. span between coding-regions in different "
+                      "reading frames resume as one prediction",
                       &metagenomethreader_arguments->frameshift_span,
                       200.0);
   option_parser_add_option(op, frameshift_span_option);
