@@ -15,8 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
+#include "libgtcore/unused.h"
 #include "libgtext/cds_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
@@ -32,13 +33,30 @@ typedef struct {
       *regionmapping;
 } CDSArguments;
 
-static OPrval parse_options(int *parsed_args, CDSArguments *arguments,
-                            int argc, const char **argv, Error *err)
+static void *gt_cds_arguments_new(void)
 {
+  CDSArguments *arguments = ma_calloc(1, sizeof *arguments);
+  arguments->seqfile = str_new();
+  arguments->regionmapping = str_new();
+  return arguments;
+}
+
+static void gt_cds_arguments_delete(void *tool_arguments)
+{
+  CDSArguments *arguments = tool_arguments;
+  if (!tool_arguments) return;
+  str_delete(arguments->regionmapping);
+  str_delete(arguments->seqfile);
+  ma_free(arguments);
+}
+
+static OptionParser* gt_cds_option_parser_new(void *tool_arguments)
+{
+  CDSArguments *arguments = tool_arguments;
   OptionParser *op;
   Option *option;
-  OPrval oprval;
-  error_check(err);
+  assert(arguments);
+
   op = option_parser_new("[option ...] GFF3_file", "Add CDS features to exon "
                          "features given in GFF3_file.");
 
@@ -49,48 +67,30 @@ static OPrval parse_options(int *parsed_args, CDSArguments *arguments,
   option = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, option);
 
-  /* parse */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
-
   option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+
+  return op;
 }
 
-int gt_cds(int argc, const char **argv, Error *err)
+static int gt_cds_runner(UNUSED int argc, const char **argv,
+                         void *tool_arguments, Error *err)
 {
   GenomeStream *gff3_in_stream, *cds_stream = NULL, *gff3_out_stream = NULL;
   GenomeNode *gn;
-  CDSArguments arguments;
+  CDSArguments *arguments = tool_arguments;
   RegionMapping *regionmapping;
-  int parsed_args, had_err = 0;
+  int had_err = 0;
+
   error_check(err);
-
-  /* option parsing */
-  arguments.seqfile = str_new();
-  arguments.regionmapping = str_new();
-
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
-      str_delete(arguments.regionmapping);
-      str_delete(arguments.seqfile);
-      return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.regionmapping);
-      str_delete(arguments.seqfile);
-      return 0;
-  }
+  assert(arguments);
 
   /* create gff3 input stream */
-  assert(parsed_args < argc);
-  gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                             arguments.verbose);
+  gff3_in_stream = gff3_in_stream_new_sorted(argv[0], arguments->verbose);
 
   /* create region mapping */
-  regionmapping = seqid2file_regionmapping_new(arguments.seqfile,
-                                               arguments.regionmapping, err);
+  regionmapping = seqid2file_regionmapping_new(arguments->seqfile,
+                                               arguments->regionmapping, err);
   if (!regionmapping)
     had_err = -1;
 
@@ -117,8 +117,15 @@ int gt_cds(int argc, const char **argv, Error *err)
   genome_stream_delete(gff3_out_stream);
   genome_stream_delete(cds_stream);
   genome_stream_delete(gff3_in_stream);
-  str_delete(arguments.regionmapping);
-  str_delete(arguments.seqfile);
 
   return had_err;
+}
+
+Tool *gt_cds(void)
+{
+  return tool_new(gt_cds_arguments_new,
+                  gt_cds_arguments_delete,
+                  gt_cds_option_parser_new,
+                  NULL,
+                  gt_cds_runner);
 }
