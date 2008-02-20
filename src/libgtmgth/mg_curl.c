@@ -15,6 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifdef CURLDEF
+
 #include "libgtmgth/mg_curl.h"
 
 void *myrealloc(void *ptr, size_t size)
@@ -192,3 +194,5 @@ int mg_curl(ParseStruct *parsestruct_ptr,
 
   return had_err;
 }
+
+#endif
