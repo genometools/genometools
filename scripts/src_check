@@ -84,6 +84,7 @@ for i, fn in ipairs(arg) do -- iterate over all files
   local ln = 1 -- the line number
   local header_file = false
   local filelines = {}
+  local first_line = nil
   local last_line = nil
 
   if string.find(fn, "%.h$") then
@@ -91,6 +92,9 @@ for i, fn in ipairs(arg) do -- iterate over all files
   end
 
   for l in io.lines(fn) do -- iterate over all lines
+    -- remember first line
+    if not first_line then first_line = l end
+
     -- check for unnecessary blanks
     if string.find(l, " $") then
       err(fn, ln, "unnecessary blank(s) at the end of line")
@@ -157,9 +161,14 @@ for i, fn in ipairs(arg) do -- iterate over all files
     ln = ln + 1
   end
 
+  -- make sure first line is not empty
+  if first_line and string.find(first_line, "^$") then
+    err(fn, 1, "first line is empty")
+  end
+
   -- make sure last line is not empty
   if last_line and string.find(last_line, "^$") then
-        err(fn, ln, "trailing line is empty")
+    err(fn, ln-1, "trailing line is empty")
   end
 
   if (header_file) then
