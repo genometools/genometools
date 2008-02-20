@@ -44,6 +44,7 @@ typedef struct
   Seqpos *leftborder,
          *countspecialcodes;
   Codetype numofallcodes,
+           numofspecialcodes,
            **multimappower,
            *basepower,
            *filltable;
@@ -58,6 +59,10 @@ int mapbcktab(Bcktab *bcktab,
 void freebcktab(Bcktab *bcktab);
 
 void initbcktabwithNULL(Bcktab *bcktab);
+
+int bcktab2file(FILE *fp,
+                const Bcktab *bcktab,
+                Error *err);
 
 /*@unused@*/ static inline unsigned int
               calcbucketboundaries(Bucketspecification *bucketspec,

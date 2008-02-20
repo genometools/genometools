@@ -47,7 +47,6 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,
                               Sfxiterator *sfi,
                               Error *err);
 
-int bcktab2file(FILE *fp,const Sfxiterator *sfi,unsigned int prefixlength,
-                Error *err);
+int sfibcktab2file(FILE *fp,const Sfxiterator *sfi,Error *err);
 
 #endif

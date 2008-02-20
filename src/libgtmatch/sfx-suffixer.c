@@ -327,7 +327,6 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Error *err)
 {
   Sfxiterator *sfi = NULL;
-  unsigned int numofallcodes = 0, numofspecialcodes;
   Seqpos *optr;
   bool haserr = false;
 
@@ -343,10 +342,6 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
                      Codeatposition,specialranges+1);
     sfi->nextfreeCodeatposition = 0;
-    sfi->bcktab.filltable = NULL;
-    sfi->bcktab.basepower = NULL;
-    sfi->bcktab.leftborder = NULL;
-    sfi->bcktab.countspecialcodes = NULL;
     sfi->suftab = NULL;
     sfi->suftabptr = NULL;
     sfi->suftabparts = NULL;
@@ -363,19 +358,20 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
-  }
-  if (!haserr)
-  {
-    assert(sfi != NULL);
+
+    sfi->bcktab.filltable = NULL;
+    sfi->bcktab.basepower = NULL;
+    sfi->bcktab.leftborder = NULL;
+    sfi->bcktab.countspecialcodes = NULL;
     sfi->bcktab.basepower = initbasepower(numofchars,prefixlength);
     sfi->bcktab.filltable = initfilltable(sfi->bcktab.basepower,prefixlength);
-    assert(sfi->bcktab.basepower != NULL);
-    numofallcodes = sfi->bcktab.basepower[prefixlength];
-    if (numofallcodes-1 > MAXCODEVALUE)
+    sfi->bcktab.numofallcodes = sfi->bcktab.basepower[prefixlength];
+    sfi->bcktab.numofspecialcodes = sfi->bcktab.basepower[prefixlength-1];
+    if (sfi->bcktab.numofallcodes-1 > MAXCODEVALUE)
     {
       error_set(err,"alphasize^prefixlength-1 = %u does not fit into "
                     " %u bits: choose smaller value for prefixlength",
-                    numofallcodes-1,
+                    sfi->bcktab.numofallcodes-1,
                     (unsigned int) CODEBITS);
       haserr = true;
     } else
@@ -387,16 +383,16 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   if (!haserr)
   {
     assert(sfi != NULL);
-    assert(sfi->bcktab.basepower != NULL);
-    numofspecialcodes = sfi->bcktab.basepower[prefixlength-1];
-    ALLOCASSIGNSPACE(sfi->bcktab.leftborder,NULL,Seqpos,numofallcodes+1);
+    ALLOCASSIGNSPACE(sfi->bcktab.leftborder,NULL,Seqpos,
+                     sfi->bcktab.numofallcodes+1);
     memset(sfi->bcktab.leftborder,0,
-           sizeof (*sfi->bcktab.leftborder) * (size_t) numofallcodes);
+           sizeof (*sfi->bcktab.leftborder) * 
+           (size_t) sfi->bcktab.numofallcodes);
     ALLOCASSIGNSPACE(sfi->bcktab.countspecialcodes,NULL,Seqpos,
-                     numofspecialcodes);
+                     sfi->bcktab.numofspecialcodes);
     memset(sfi->bcktab.countspecialcodes,0,
            sizeof (*sfi->bcktab.countspecialcodes) *
-                  (size_t) numofspecialcodes);
+                  (size_t) sfi->bcktab.numofspecialcodes);
     sfi->storespecials = true;
     if (mtime != NULL)
     {
@@ -410,21 +406,20 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                    prefixlength,
                    err);
     assert(specialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
-    assert(sfi->bcktab.filltable != NULL);
     assert(sfi->bcktab.leftborder != NULL);
     /* printf("leftborder[0]=%u\n",sfi.leftborder[0]); */
     for (optr = sfi->bcktab.leftborder + 1;
-         optr < sfi->bcktab.leftborder + numofallcodes; optr++)
+         optr < sfi->bcktab.leftborder + sfi->bcktab.numofallcodes; optr++)
     {
       /* printf("leftborder[%u]=%u\n",(unsigned int) (optr - sfi->leftborder),
                                    *optr); */
       *optr += *(optr-1);
     }
-    sfi->bcktab.leftborder[numofallcodes]
+    sfi->bcktab.leftborder[sfi->bcktab.numofallcodes]
       = sfi->totallength - specialcharacters;
     sfi->suftabparts = newsuftabparts(numofparts,
                                       sfi->bcktab.leftborder,
-                                      numofallcodes,
+                                      sfi->bcktab.numofallcodes,
                                       sfi->totallength - specialcharacters,
                                       specialcharacters + 1,
                                       verboseinfo);
@@ -650,37 +645,9 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
   return sfi->suftab;
 }
 
-int bcktab2file(FILE *fp,
-                const Sfxiterator *sfi,
-                unsigned int prefixlength,
-                Error *err)
+int sfibcktab2file(FILE *fp,
+                   const Sfxiterator *sfi,
+                   Error *err)
 {
-  unsigned int numofallcodes = sfi->bcktab.basepower[prefixlength],
-               numofspecialcodes = sfi->bcktab.basepower[prefixlength-1];
-
-  if (fwrite(sfi->bcktab.leftborder,
-             sizeof (*sfi->bcktab.leftborder),
-             (size_t) (numofallcodes+1),
-             fp)
-             != (size_t) (numofallcodes+1))
-  {
-    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
-              numofallcodes+1,
-              (unsigned int) sizeof (*sfi->bcktab.leftborder),
-              strerror(errno));
-    return -1;
-  }
-  if (fwrite(sfi->bcktab.countspecialcodes,
-             sizeof (*sfi->bcktab.countspecialcodes),
-             (size_t) numofspecialcodes,
-             fp)
-             != (size_t) numofspecialcodes)
-  {
-    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
-              numofspecialcodes,
-              (unsigned int) sizeof (*sfi->bcktab.countspecialcodes),
-              strerror(errno));
-    return -2;
-  }
-  return 0;
+  return bcktab2file(fp,&sfi->bcktab,err);
 }

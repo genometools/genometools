@@ -256,7 +256,7 @@ static int suffixeratorwithoutput(
   }
   if (outfileinfo->outfpbcktab != NULL)
   {
-    if (bcktab2file(outfileinfo->outfpbcktab,sfi,prefixlength,err) != 0)
+    if (sfibcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)
     {
       haserr = true;
     }
@@ -522,8 +522,7 @@ static int runsuffixerator(bool doesa,
         assert(sfi != NULL);
         if (outfileinfo.outfpbcktab != NULL)
         {
-          if (bcktab2file(outfileinfo.outfpbcktab,sfi,so->prefixlength,
-                          err) != 0)
+          if (sfibcktab2file(outfileinfo.outfpbcktab,sfi,err) != 0)
           {
             haserr = true;
           }

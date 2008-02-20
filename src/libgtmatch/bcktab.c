@@ -130,3 +130,34 @@ void initbcktabwithNULL(Bcktab *bcktab)
   bcktab->filltable = NULL;
   bcktab->basepower = NULL;
 }
+
+int bcktab2file(FILE *fp,
+                const Bcktab *bcktab,
+                Error *err)
+{
+  if (fwrite(bcktab->leftborder,
+             sizeof (*bcktab->leftborder),
+             (size_t) (bcktab->numofallcodes+1),
+             fp)
+             != (size_t) (bcktab->numofallcodes+1))
+  {
+    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
+              bcktab->numofallcodes+1,
+              (unsigned int) sizeof (*bcktab->leftborder),
+              strerror(errno));
+    return -1;
+  }
+  if (fwrite(bcktab->countspecialcodes,
+             sizeof (*bcktab->countspecialcodes),
+             (size_t) bcktab->numofspecialcodes,
+             fp)
+             != (size_t) bcktab->numofspecialcodes)
+  {
+    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
+              bcktab->numofspecialcodes,
+              (unsigned int) sizeof (*bcktab->countspecialcodes),
+              strerror(errno));
+    return -2;
+  }
+  return 0;
+}
