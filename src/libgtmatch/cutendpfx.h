@@ -29,11 +29,7 @@
 typedef struct Bucketenumerator Bucketenumerator;
 
 Bucketenumerator *newbucketenumerator(Seqpos totallength,
-                                      const Seqpos *bcktab,
-                                      const Seqpos *countspecialcodes,
-                                      Codetype numofallcodes,
-                                      const Codetype **multimappower,
-                                      const Codetype *filltable,
+                                      const Bcktab *bcktab,
                                       unsigned int prefixlength,
                                       const Uchar *demandprefix,
                                       unsigned int demandprefixlength,

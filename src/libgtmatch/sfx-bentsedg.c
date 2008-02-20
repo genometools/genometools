@@ -348,8 +348,7 @@ static void outmany0lcpvalues(Seqpos many,Outlcpinfo *outlcpinfo)
   outlcpinfo->countoutputlcpvalues += many;
 }
 
-static unsigned long determinemaxbucketsize(const Seqpos *leftborder,
-                                            const Seqpos *countspecialcodes,
+static unsigned long determinemaxbucketsize(const Bcktab *bcktab,
                                             const Codetype mincode,
                                             const Codetype maxcode,
                                             Seqpos totalwidth,
@@ -363,8 +362,7 @@ static unsigned long determinemaxbucketsize(const Seqpos *leftborder,
   for (code = mincode; code <= maxcode; code++)
   {
     rightchar = calcbucketboundaries(&bucketspec,
-                                     leftborder,
-                                     countspecialcodes,
+                                     bcktab,
                                      code,
                                      maxcode,
                                      totalwidth,
@@ -644,12 +642,10 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype maxcode,
                     Seqpos totalwidth,
                     Seqpos previoussuffix,
-                    const Seqpos *leftborder,
-                    const Seqpos *countspecialcodes,
+                    const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     const unsigned long **distpfxidx,
-                    const Codetype *filltable,
                     Outlcpinfo *outlcpinfo)
 {
   Codetype code;
@@ -671,8 +667,7 @@ void sortallbuckets(Seqpos *suftabptr,
   }
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
-  maxbucketsize = determinemaxbucketsize(leftborder,
-                                         countspecialcodes,
+  maxbucketsize = determinemaxbucketsize(bcktab,
                                          mincode,
                                          maxcode,
                                          totalwidth,
@@ -689,8 +684,7 @@ void sortallbuckets(Seqpos *suftabptr,
   for (code = mincode; code <= maxcode; code++)
   {
     rightchar = calcbucketboundaries(&bucketspec,
-                                     leftborder,
-                                     countspecialcodes,
+                                     bcktab,
                                      code,
                                      maxcode,
                                      totalwidth,
@@ -751,7 +745,7 @@ void sortallbuckets(Seqpos *suftabptr,
                                         code,
                                         prefixlength,
                                         distpfxidx,
-                                        filltable);
+                                        bcktab->filltable);
         FREESPACE(partialsums);
         bucketends(encseq,
                    readmode,
@@ -764,7 +758,7 @@ void sortallbuckets(Seqpos *suftabptr,
                    code,
                    prefixlength,
                    distpfxidx,
-                   filltable);
+                   bcktab->filltable);
       }
       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket > 0)
       {

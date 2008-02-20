@@ -23,6 +23,7 @@
 #include "encseq-def.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
+#include "bckbound.h"
 
 typedef struct Outlcpinfo Outlcpinfo;
 
@@ -42,12 +43,10 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype maxcode,
                     Seqpos totalwidth,
                     Seqpos previoussuffix,
-                    const Seqpos *leftborder,
-                    const Seqpos *countspecialcodes,
+                    const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     const unsigned long **distpfxidx,
-                    const Codetype *filltable,
                     Outlcpinfo *outlcpinfo);
 
 #endif

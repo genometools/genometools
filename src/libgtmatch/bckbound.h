@@ -19,6 +19,8 @@
 #define BCKBOUND_H
 
 #include <assert.h>
+#include "libgtcore/error.h"
+#include "libgtcore/str.h"
 #include "seqpos-def.h"
 #include "sfx-codespec.h"
 #include "intcode-def.h"
@@ -37,17 +39,36 @@ typedef struct
          right;
 } Lcpinterval;
 
+typedef struct
+{
+  Seqpos *leftborder,
+         *countspecialcodes;
+  Codetype numofallcodes,
+           **multimappower,
+           *basepower,
+           *filltable;
+} Bcktab;
+
+int mapbcktab(Bcktab *bcktab,
+              const Str *indexname,
+              unsigned int numofchars,
+              unsigned int prefixlength,
+              Error *err);
+
+void freebcktab(Bcktab *bcktab);
+
+void initbcktabwithNULL(Bcktab *bcktab);
+
 /*@unused@*/ static inline unsigned int
               calcbucketboundaries(Bucketspecification *bucketspec,
-                                   const Seqpos *leftborder,
-                                   const Seqpos *countspecialcodes,
+                                   const Bcktab *bcktab,
                                    Codetype code,
                                    Codetype maxcode,
                                    Seqpos totalwidth,
                                    unsigned int rightchar,
                                    unsigned int numofchars)
 {
-  bucketspec->left = leftborder[code];
+  bucketspec->left = bcktab->leftborder[code];
   if (code == maxcode)
   {
     assert(totalwidth >= bucketspec->left);
@@ -55,10 +76,10 @@ typedef struct
       = (unsigned long) (totalwidth - bucketspec->left);
   } else
   {
-    if (leftborder[code+1] > 0)
+    if (bcktab->leftborder[code+1] > 0)
     {
       bucketspec->nonspecialsinbucket
-        = (unsigned long) (leftborder[code+1] - bucketspec->left);
+        = (unsigned long) (bcktab->leftborder[code+1] - bucketspec->left);
     } else
     {
       bucketspec->nonspecialsinbucket = 0;
@@ -69,7 +90,7 @@ typedef struct
   {
     bucketspec->specialsinbucket
       = (unsigned long)
-        countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
+        bcktab->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
     if (bucketspec->nonspecialsinbucket >= bucketspec->specialsinbucket)
     {
       bucketspec->nonspecialsinbucket -= bucketspec->specialsinbucket;
