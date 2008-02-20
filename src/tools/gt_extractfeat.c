@@ -15,8 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
+#include "libgtcore/unused.h"
 #include "libgtext/extract_feat_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gtdatahelp.h"
@@ -27,25 +28,45 @@ typedef struct {
   bool join,
        translate,
        verbose;
-  Str *type,
+  Str *typestr,
       *seqfile,
       *regionmapping;
+  GenomeFeatureType type;
 } ExtractFeatArguments;
 
-static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
-                            int argc, const char **argv, Error *err)
+static void* gt_extractfeat_arguments_new(void)
 {
+  ExtractFeatArguments *arguments = ma_calloc(1, sizeof *arguments);
+  arguments->typestr = str_new();
+  arguments->seqfile = str_new();
+  arguments->regionmapping = str_new();
+  return arguments;
+}
+
+static void gt_extractfeat_arguments_delete(void *tool_arguments)
+{
+  ExtractFeatArguments *arguments = tool_arguments;
+  if (!tool_arguments) return;
+  str_delete(arguments->regionmapping);
+  str_delete(arguments->seqfile);
+  str_delete(arguments->typestr);
+  ma_free(arguments);
+}
+
+static OptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
+{
+  ExtractFeatArguments *arguments = tool_arguments;
   OptionParser *op;
   Option *option;
-  OPrval oprval;
-  error_check(err);
+  assert(arguments);
+
   op = option_parser_new("[option ...] GFF3_file",
                          "Extract features given in GFF3_file from "
                          "sequence file.");
 
   /* -type */
   option = option_new_string("type", "set type of features to extract",
-                             arguments->type, NULL);
+                             arguments->typestr, NULL);
   option_is_mandatory(option);
   option_parser_add_option(op, option);
 
@@ -68,58 +89,51 @@ static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
   option = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, option);
 
-  /* parse */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
   option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+
+  return op;
 }
 
-int gt_extractfeat(int argc, const char **argv, Error *err)
+static int gt_extractfeat_arguments_check(UNUSED int argc, void *tool_arguments,
+                                          Error *err)
 {
-  GenomeStream *gff3_in_stream = NULL, *extract_feat_stream = NULL;
-  GenomeNode *gn;
-  GenomeFeatureType type;
-  ExtractFeatArguments arguments;
-  RegionMapping *regionmapping;
-  int parsed_args, had_err = 0;
-  error_check(err);
+  ExtractFeatArguments *arguments = tool_arguments;
+  int had_err = 0;
 
-  /* option parsing */
-  arguments.type = str_new();
-  arguments.seqfile = str_new();
-  arguments.regionmapping = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
-      str_delete(arguments.regionmapping);
-      str_delete(arguments.seqfile);
-      str_delete(arguments.type);
-      return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.regionmapping);
-      str_delete(arguments.seqfile);
-      str_delete(arguments.type);
-      return 0;
-  }
+  error_check(err);
+  assert(arguments);
 
   /* determine type and make sure it is a valid one */
-  if (genome_feature_type_get(&type, str_get(arguments.type)) == -1) {
+  if (genome_feature_type_get(&arguments->type,
+                              str_get(arguments->typestr)) == -1) {
     error_set(err, "\"%s\" is not a valid feature type",
-              str_get(arguments.type));
+              str_get(arguments->typestr));
     had_err = -1;
   }
 
+  return had_err;
+}
+
+static int gt_extractfeat_runner(UNUSED int argc, const char **argv,
+                                 void *tool_arguments, Error *err)
+{
+  GenomeStream *gff3_in_stream = NULL, *extract_feat_stream = NULL;
+  GenomeNode *gn;
+  ExtractFeatArguments *arguments = tool_arguments;
+  RegionMapping *regionmapping;
+  int had_err = 0;
+
+  error_check(err);
+  assert(arguments);
+
   if (!had_err) {
     /* create gff3 input stream */
-    assert(parsed_args < argc);
-    gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                               arguments.verbose);
+    gff3_in_stream = gff3_in_stream_new_sorted(argv[0], arguments->verbose);
 
     /* create region mapping */
-    regionmapping = seqid2file_regionmapping_new(arguments.seqfile,
-                                                 arguments.regionmapping, err);
+    regionmapping = seqid2file_regionmapping_new(arguments->seqfile,
+                                                 arguments->regionmapping, err);
     if (!regionmapping)
       had_err = -1;
   }
@@ -127,8 +141,9 @@ int gt_extractfeat(int argc, const char **argv, Error *err)
   if (!had_err) {
     /* create extract feature stream */
     extract_feat_stream = extract_feat_stream_new(gff3_in_stream, regionmapping,
-                                                  type, arguments.join,
-                                                  arguments.translate);
+                                                  arguments->type,
+                                                  arguments->join,
+                                                  arguments->translate);
 
     /* pull the features through the stream and free them afterwards */
     while (!(had_err = genome_stream_next_tree(extract_feat_stream, &gn,
@@ -140,9 +155,15 @@ int gt_extractfeat(int argc, const char **argv, Error *err)
   /* free */
   genome_stream_delete(extract_feat_stream);
   genome_stream_delete(gff3_in_stream);
-  str_delete(arguments.regionmapping);
-  str_delete(arguments.seqfile);
-  str_delete(arguments.type);
 
   return had_err;
+}
+
+Tool* gt_extractfeat(void)
+{
+  return tool_new(gt_extractfeat_arguments_new,
+                  gt_extractfeat_arguments_delete,
+                  gt_extractfeat_option_parser_new,
+                  gt_extractfeat_arguments_check,
+                  gt_extractfeat_runner);
 }
