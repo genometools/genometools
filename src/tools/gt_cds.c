@@ -30,9 +30,9 @@ typedef struct {
   bool verbose;
   Str *seqfile,
       *regionmapping;
-} CDS_arguments;
+} CDSArguments;
 
-static OPrval parse_options(int *parsed_args, CDS_arguments *arguments,
+static OPrval parse_options(int *parsed_args, CDSArguments *arguments,
                             int argc, const char **argv, Error *err)
 {
   OptionParser *op;
@@ -62,7 +62,7 @@ int gt_cds(int argc, const char **argv, Error *err)
 {
   GenomeStream *gff3_in_stream, *cds_stream = NULL, *gff3_out_stream = NULL;
   GenomeNode *gn;
-  CDS_arguments arguments;
+  CDSArguments arguments;
   RegionMapping *regionmapping;
   int parsed_args, had_err = 0;
   error_check(err);
