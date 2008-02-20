@@ -202,6 +202,8 @@ static OPrval parse_options(int *parsed_args,
                     &metagenomethreader_arguments->extended_mode, false);
   option_parser_add_option(op, extended_mode_option);
 
+  option_parser_set_mailaddress(op, "<dschmitz@zbh.uni-hamburg.de>");
+
   /* es werden die Parameter XML-File, Query-Fasta-File und Hit-FASTA-File
      erwartet, Min und Max. der Anzahl an Parametern ist also 3 */
   oprval = option_parser_parse(op,
