@@ -82,7 +82,6 @@ DECLAREARRAYSTRUCT(Seqpos);
   Sequencerange overhang;
   Seqpos previoussuffix;
   bool exhausted;
-  unsigned long **distpfxidx;
   Bcktab bcktab;
 };
 
@@ -207,7 +206,7 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
           if (prefixindex < sfi->prefixlength-1)
           {
             ordercode = (code - sfi->bcktab.filltable[prefixindex])/divider;
-            sfi->distpfxidx[prefixindex-1][ordercode]++;
+            sfi->bcktab.distpfxidx[prefixindex-1][ordercode]++;
           }
           sfi->bcktab.countspecialcodes[
                FROMCODE2SPECIALCODE(code,sfi->numofchars)]++;
@@ -273,10 +272,10 @@ void freeSfxiterator(Sfxiterator **sfi)
   FREESPACE((*sfi)->bcktab.leftborder);
   FREESPACE((*sfi)->bcktab.countspecialcodes);
   FREESPACE((*sfi)->suftab);
-  if ((*sfi)->distpfxidx != NULL)
+  if ((*sfi)->bcktab.distpfxidx != NULL)
   {
-    FREESPACE((*sfi)->distpfxidx[0]);
-    FREESPACE((*sfi)->distpfxidx);
+    FREESPACE((*sfi)->bcktab.distpfxidx[0]);
+    FREESPACE((*sfi)->bcktab.distpfxidx);
   }
   freesuftabparts((*sfi)->suftabparts);
   FREESPACE(*sfi);
@@ -345,7 +344,6 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->suftab = NULL;
     sfi->suftabptr = NULL;
     sfi->suftabparts = NULL;
-    sfi->distpfxidx = NULL;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
     sfi->numofchars = numofchars;
@@ -359,6 +357,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->part = 0;
     sfi->exhausted = false;
 
+    sfi->bcktab.distpfxidx = NULL;
     sfi->bcktab.filltable = NULL;
     sfi->bcktab.basepower = NULL;
     sfi->bcktab.leftborder = NULL;
@@ -376,8 +375,8 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
       haserr = true;
     } else
     {
-      sfi->distpfxidx = initdistprefixindexcounts(sfi->bcktab.basepower,
-                                                  sfi->prefixlength);
+      sfi->bcktab.distpfxidx = initdistprefixindexcounts(sfi->bcktab.basepower,
+                                                         sfi->prefixlength);
     }
   }
   if (!haserr)
@@ -386,7 +385,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     ALLOCASSIGNSPACE(sfi->bcktab.leftborder,NULL,Seqpos,
                      sfi->bcktab.numofallcodes+1);
     memset(sfi->bcktab.leftborder,0,
-           sizeof (*sfi->bcktab.leftborder) * 
+           sizeof (*sfi->bcktab.leftborder) *
            (size_t) sfi->bcktab.numofallcodes);
     ALLOCASSIGNSPACE(sfi->bcktab.countspecialcodes,NULL,Seqpos,
                      sfi->bcktab.numofspecialcodes);
@@ -493,7 +492,6 @@ static void preparethispart(Sfxiterator *sfi,
                  &sfi->bcktab,
                  sfi->numofchars,
                  sfi->prefixlength,
-                 (const unsigned long **) sfi->distpfxidx,
                  sfi->outlcpinfo);
   assert(totalwidth > 0);
   sfi->previoussuffix = sfi->suftab[sfi->widthofpart-1];

@@ -645,7 +645,6 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
-                    const unsigned long **distpfxidx,
                     Outlcpinfo *outlcpinfo)
 {
   Codetype code;
@@ -744,7 +743,8 @@ void sortallbuckets(Seqpos *suftabptr,
         partialsums = pfxidxpartialsums(bucketspec.specialsinbucket,
                                         code,
                                         prefixlength,
-                                        distpfxidx,
+                                        (const unsigned long **) 
+                                           bcktab->distpfxidx,
                                         bcktab->filltable);
         FREESPACE(partialsums);
         bucketends(encseq,
@@ -757,7 +757,7 @@ void sortallbuckets(Seqpos *suftabptr,
                    bucketspec.specialsinbucket,
                    code,
                    prefixlength,
-                   distpfxidx,
+                   (const unsigned long **) bcktab->distpfxidx,
                    bcktab->filltable);
       }
       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket > 0)

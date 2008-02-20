@@ -48,6 +48,7 @@ typedef struct
            **multimappower,
            *basepower,
            *filltable;
+  unsigned long **distpfxidx;
 } Bcktab;
 
 int mapbcktab(Bcktab *bcktab,
