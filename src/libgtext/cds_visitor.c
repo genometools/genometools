@@ -88,6 +88,71 @@ static int extract_spliced_seq(GenomeNode *gn, CDSVisitor *visitor, Error *err)
                                               extract_cds_if_necessary, err);
 }
 
+static void create_CDS_features_for_longest_ORF(Array *orfs, CDSVisitor *v,
+                                                GenomeNode *gn)
+{
+  GenomeNode *cds_feature;
+  unsigned long i;
+  Range orf, cds;
+  Strand strand = genome_feature_get_strand((GenomeFeature*) gn);
+
+  assert(array_size(orfs));
+
+  /* sort ORFs according to length */
+  ranges_sort_by_length_stable(orfs);
+
+  /* create CDS features from the longest ORF */
+  orf = *(Range*) array_get(orfs, 0);
+  assert(range_length(orf) >= 3);
+  /* the first CDS feature */
+  /*printf("%lu, %lu\n", orf.start, orf.end); */
+  cds.start = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
+                             ? orf.start : orf.end) + 1;
+  cds.end = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
+                           ? orf.end : orf.start) + 1;
+  /*printf("%lu, %lu\n", cds.start, cds.end);*/
+  cds_feature = genome_feature_new(gft_CDS, cds,
+                                   genome_feature_get_strand((GenomeFeature*)
+                                                             gn), NULL,
+                                   UNDEF_ULONG);
+  genome_node_set_source(cds_feature, v->source);
+  genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
+  genome_node_set_phase(cds_feature, PHASE_ZERO);
+  /* all CDS features in between */
+  for (i = strand == STRAND_FORWARD ? orf.start + 1 : orf.end - 1;
+       strand == STRAND_FORWARD ? i < orf.end : i > orf.start;
+       strand == STRAND_FORWARD ? i++ : i--) {
+    if (splicedseq_pos_is_border(v->splicedseq, i)) {
+      /*printf("i=%lu\n", i);*/
+      genome_feature_set_end((GenomeFeature*) cds_feature,
+                             splicedseq_map(v->splicedseq, i) + 1);
+      genome_node_is_part_of_genome_node(gn, cds_feature);
+      if (strand == STRAND_FORWARD)
+        orf.start = i + 1;
+      else
+        orf.end = i - 1;
+      cds.start = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
+                                 ? orf.start : orf.end) + 1;
+      cds.end = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
+                               ? orf.end : orf.start) + 1;
+      cds_feature = genome_feature_new(gft_CDS, cds,
+                                 genome_feature_get_strand((GenomeFeature*) gn),
+                                       NULL, UNDEF_ULONG);
+      genome_node_set_source(cds_feature, v->source);
+      genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
+      /* XXX correct this */
+      genome_node_set_phase(cds_feature, (Phase)
+                            splicedseq_map(v->splicedseq, orf.start) % 3);
+    }
+  }
+  /* set the end of the last CDS feature and store it */
+  genome_feature_set_end((GenomeFeature*) cds_feature,
+                         splicedseq_map(v->splicedseq,
+                                        strand == STRAND_FORWARD
+                                        ? orf.end : orf.start) + 1);
+  genome_node_is_part_of_genome_node(gn, cds_feature);
+}
+
 static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
@@ -100,15 +165,10 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 
   had_err = extract_spliced_seq(gn, v, err);
   if (!had_err && splicedseq_length(v->splicedseq) > 2) {
-    GenomeNode *cds_feature;
     Str *pr_0, *pr_1, *pr_2;
-    unsigned long i;
-    Range orf, cds;
-    Strand strand;
     Array *orfs;
 
-    strand = genome_feature_get_strand(gf);
-    if (strand == STRAND_REVERSE) {
+    if (genome_feature_get_strand(gf) == STRAND_REVERSE) {
       if (splicedseq_reverse(v->splicedseq, err))
         return -1;
     }
@@ -128,60 +188,8 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
     determine_ORFs(orfs, 1, str_get(pr_1), str_length(pr_1));
     determine_ORFs(orfs, 2, str_get(pr_2), str_length(pr_2));
 
-    if (array_size(orfs)) {
-      /* sort ORFs according to length */
-      ranges_sort_by_length_stable(orfs);
-
-      /* create CDS features from the longest ORF */
-      orf = *(Range*) array_get(orfs, 0);
-      assert(range_length(orf) >= 3);
-      /* the first CDS feature */
-      /*printf("%lu, %lu\n", orf.start, orf.end); */
-      cds.start = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
-                                 ? orf.start : orf.end) + 1;
-      cds.end = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
-                               ? orf.end : orf.start) + 1;
-      /*printf("%lu, %lu\n", cds.start, cds.end);*/
-      cds_feature = genome_feature_new(gft_CDS, cds,
-                                       genome_feature_get_strand(gf), NULL,
-                                       UNDEF_ULONG);
-      genome_node_set_source(cds_feature, v->source);
-      genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
-      genome_node_set_phase(cds_feature, PHASE_ZERO);
-      /* all CDS features in between */
-      for (i = strand == STRAND_FORWARD ? orf.start + 1 : orf.end - 1;
-           strand == STRAND_FORWARD ? i < orf.end : i > orf.start;
-           strand == STRAND_FORWARD ? i++ : i--) {
-        if (splicedseq_pos_is_border(v->splicedseq, i)) {
-          /*printf("i=%lu\n", i);*/
-          genome_feature_set_end((GenomeFeature*) cds_feature,
-                                 splicedseq_map(v->splicedseq, i) + 1);
-          genome_node_is_part_of_genome_node(gn, cds_feature);
-          if (strand == STRAND_FORWARD)
-            orf.start = i + 1;
-          else
-            orf.end = i - 1;
-          cds.start = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
-                                     ? orf.start : orf.end) + 1;
-          cds.end = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
-                                   ? orf.end : orf.start) + 1;
-          cds_feature = genome_feature_new(gft_CDS, cds,
-                                           genome_feature_get_strand(gf),
-                                           NULL, UNDEF_ULONG);
-          genome_node_set_source(cds_feature, v->source);
-          genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
-          /* XXX correct this */
-          genome_node_set_phase(cds_feature, (Phase)
-                                splicedseq_map(v->splicedseq, orf.start) % 3);
-        }
-      }
-      /* set the end of the last CDS feature and store it */
-      genome_feature_set_end((GenomeFeature*) cds_feature,
-                             splicedseq_map(v->splicedseq,
-                                            strand == STRAND_FORWARD
-                                            ? orf.end : orf.start) + 1);
-      genome_node_is_part_of_genome_node(gn, cds_feature);
-    }
+    if (array_size(orfs))
+      create_CDS_features_for_longest_ORF(orfs, v, gn);
 
     /* free */
     array_delete(orfs);
