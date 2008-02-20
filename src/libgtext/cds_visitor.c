@@ -88,21 +88,39 @@ static int extract_spliced_seq(GenomeNode *gn, CDSVisitor *visitor, Error *err)
                                               extract_cds_if_necessary, err);
 }
 
-static void create_CDS_features_for_longest_ORF(Array *orfs, CDSVisitor *v,
-                                                GenomeNode *gn)
+static Array* determine_ORFs_for_all_three_frames(Splicedseq *ss)
+{
+  Str *pr_0, *pr_1, *pr_2;
+  Array *orfs;
+  assert(ss);
+
+  pr_0 = str_new();
+  pr_1 = str_new();
+  pr_2 = str_new();
+  orfs = array_new(sizeof (Range));
+
+  translate_dna(pr_0, splicedseq_get(ss), splicedseq_length(ss), 0);
+  translate_dna(pr_1, splicedseq_get(ss), splicedseq_length(ss), 1);
+  translate_dna(pr_2, splicedseq_get(ss), splicedseq_length(ss), 2);
+  determine_ORFs(orfs, 0, str_get(pr_0), str_length(pr_0));
+  determine_ORFs(orfs, 1, str_get(pr_1), str_length(pr_1));
+  determine_ORFs(orfs, 2, str_get(pr_2), str_length(pr_2));
+
+  str_delete(pr_2);
+  str_delete(pr_1);
+  str_delete(pr_0);
+
+  return orfs;
+}
+
+static void create_CDS_features_for_ORF(Range orf, CDSVisitor *v,
+                                        GenomeNode *gn)
 {
   GenomeNode *cds_feature;
   unsigned long i;
-  Range orf, cds;
+  Range cds;
   Strand strand = genome_feature_get_strand((GenomeFeature*) gn);
 
-  assert(array_size(orfs));
-
-  /* sort ORFs according to length */
-  ranges_sort_by_length_stable(orfs);
-
-  /* create CDS features from the longest ORF */
-  orf = *(Range*) array_get(orfs, 0);
   assert(range_length(orf) >= 3);
   /* the first CDS feature */
   cds.start = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
@@ -150,6 +168,18 @@ static void create_CDS_features_for_longest_ORF(Array *orfs, CDSVisitor *v,
   genome_node_is_part_of_genome_node(gn, cds_feature);
 }
 
+static void create_CDS_features_for_longest_ORF(Array *orfs, CDSVisitor *v,
+                                                GenomeNode *gn)
+{
+  if (array_size(orfs)) {
+    /* sort ORFs according to length */
+    ranges_sort_by_length_stable(orfs);
+
+    /* create CDS features from the longest ORF */
+    create_CDS_features_for_ORF(*(Range*) array_get_first(orfs), v, gn);
+  }
+}
+
 static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
@@ -162,36 +192,17 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 
   had_err = extract_spliced_seq(gn, v, err);
   if (!had_err && splicedseq_length(v->splicedseq) > 2) {
-    Str *pr_0, *pr_1, *pr_2;
     Array *orfs;
 
     if (genome_feature_get_strand(gf) == STRAND_REVERSE) {
       if (splicedseq_reverse(v->splicedseq, err))
         return -1;
     }
-    /* determine ORFs for all three frames */
-    pr_0 = str_new();
-    pr_1 = str_new();
-    pr_2 = str_new();
-    orfs = array_new(sizeof (Range));
-    translate_dna(pr_0, splicedseq_get(v->splicedseq),
-                  splicedseq_length(v->splicedseq), 0);
-    translate_dna(pr_1, splicedseq_get(v->splicedseq),
-                  splicedseq_length(v->splicedseq), 1);
-    translate_dna(pr_2, splicedseq_get(v->splicedseq),
-                  splicedseq_length(v->splicedseq), 2);
-    determine_ORFs(orfs, 0, str_get(pr_0), str_length(pr_0));
-    determine_ORFs(orfs, 1, str_get(pr_1), str_length(pr_1));
-    determine_ORFs(orfs, 2, str_get(pr_2), str_length(pr_2));
 
-    if (array_size(orfs))
-      create_CDS_features_for_longest_ORF(orfs, v, gn);
+    orfs = determine_ORFs_for_all_three_frames(v->splicedseq);
+    create_CDS_features_for_longest_ORF(orfs, v, gn);
 
-    /* free */
     array_delete(orfs);
-    str_delete(pr_2);
-    str_delete(pr_1);
-    str_delete(pr_0);
   }
   return had_err;
 }
