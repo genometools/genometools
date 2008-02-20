@@ -43,7 +43,7 @@ static void cds_visitor_free(GenomeVisitor *gv)
   regionmapping_delete(cds_visitor->regionmapping);
 }
 
-static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *e)
+static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GenomeFeature *gf;
@@ -52,7 +52,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *e)
   unsigned long raw_sequence_length;
   int had_err = 0;
 
-  error_check(e);
+  error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 
@@ -60,14 +60,14 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *e)
       (genome_feature_get_strand(gf) == STRAND_FORWARD ||
        genome_feature_get_strand(gf) == STRAND_REVERSE)) {
     had_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
-                                             genome_node_get_seqid(gn), e);
+                                             genome_node_get_seqid(gn), err);
     if (!had_err) {
       range = genome_node_get_range(gn);
       assert(range.start && range.end); /* 1-based coordinates */
       had_err = regionmapping_get_raw_sequence_length(v->regionmapping,
                                                       &raw_sequence_length,
                                                       genome_node_get_seqid(gn),
-                                                      e);
+                                                      err);
     }
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
@@ -192,12 +192,12 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 }
 
 static int cds_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                      Error *e)
+                                      Error *err)
 {
   CDSVisitor *v = cds_visitor_cast(gv);
-  error_check(e);
+  error_check(err);
   return genome_node_traverse_children((GenomeNode*) gf, v,
-                                       add_cds_if_necessary, false, e);
+                                       add_cds_if_necessary, false, err);
 
 }
 
