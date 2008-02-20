@@ -45,6 +45,7 @@ config =
                  "LTR_retrotransposon","inverted_repeat",
                  "target_site_duplication", "five_prime_splice_site",
                  "three_prime_splice_site" },
+  },
   -- Defines precedence of same level feature types when overlapping
   -- in a collapsed track.
   -- read "=" as ">" or "dominates"
