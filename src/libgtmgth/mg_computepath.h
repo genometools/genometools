@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -15,6 +14,9 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
+#ifndef MG_COMPUTEPATH_H
+#define MG_COMPUTEPATH_H
 
 #include <float.h>
 #include "libgtmgth/mg_xmlparser.h"
@@ -33,3 +35,5 @@ int mg_computepath(CombinedScoreMatrixEntry **,
    (Zeiger auf) Array der moeglichen Vorgaenger
    Returnwert: void */
 static void compute_precursors(short, unsigned long, short *);
+
+#endif

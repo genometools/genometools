@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -15,6 +14,9 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
+#ifndef MG_CURL_H
+#define MG_CURL_H
 
 #include "libgtmgth/metagenomethreader.h"
 
@@ -47,3 +49,5 @@ void *myrealloc(void *, size_t);
                speichernden Daten
    Returnwert: Groesse des neu allokierten Speicherbereichs*/
 size_t WriteMemoryCallback(void *, size_t, size_t, void *);
+
+#endif

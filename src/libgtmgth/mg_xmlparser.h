@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -15,6 +14,9 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
+#ifndef MG_XMLPARSER_H
+#define MG_XMLPARSER_H
 
 #include <expat.h>
 
@@ -37,3 +39,5 @@ int mg_xmlparser(ParseStruct *, GenFile *, Error *);
               int-Wert der Laenge des Textes zwischen den XML-Tags
    Returnwert: void */
 void text(void *, const XML_Char *, int);
+
+#endif

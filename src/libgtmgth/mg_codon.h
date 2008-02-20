@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -24,8 +23,8 @@
     modiefied for metagenomethreader;
 */
 
-#ifndef CODON_H
-#define CODON_H
+#ifndef MG_CODON_H
+#define MG_CODON_H
 
 #include "libgtmgth/mg_xmlparser.h"
 

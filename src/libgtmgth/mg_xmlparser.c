@@ -55,7 +55,6 @@ static void flag_delete(unsigned short *, unsigned short *, char);
    Returnwert: void */
 static void check_counter(unsigned short *, char);
 
-
 int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
                  Error * err)
 {
@@ -277,7 +276,7 @@ static void XMLCALL endElement(void *data, const char *name)
         PARSESTRUCT(query_frame_tmp) = strarray_new();
         PARSESTRUCT(hit_frame_tmp) = strarray_new();
 
-        /* Fuer den Fall eines Parse-Fehlers - Das Flag zeigt an, dass die 
+        /* Fuer den Fall eines Parse-Fehlers - Das Flag zeigt an, dass die
            Strings angelegt und nicht geloescht wurden */
         PARSESTRUCT(xml_tag_flag) = SET;
 
@@ -327,7 +326,7 @@ static void XMLCALL endElement(void *data, const char *name)
 
         if (!isalpha(*gi_ptr))
         {
-          /* bestimmen der GI-Nummer Laenge; strspn liest solange Zeichen, 
+          /* bestimmen der GI-Nummer Laenge; strspn liest solange Zeichen,
              bis ein Zeichen auftritt, dass nicht im angegebenen String
              auftaucht - hier: '|' */
           gi_len = strspn(gi_ptr + 1, "0123456789") + 1;
@@ -385,7 +384,7 @@ static void XMLCALL endElement(void *data, const char *name)
         ulong_numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
         /* Der Query-from Wert wird zum Array query_from hinzugefuegt */
         array_add_elem(MATRIXSTRUCT(query_from), &ulong_numb_buf,
-                       sizeof(unsigned long));
+                       sizeof (unsigned long));
       }
       /* Query-Stop-Wert wird gespeichert/Bearbeitung siehe
          Query-Start-Wert */
@@ -394,7 +393,7 @@ static void XMLCALL endElement(void *data, const char *name)
       {
         ulong_numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
         array_add_elem(MATRIXSTRUCT(query_to), &ulong_numb_buf,
-                       sizeof(unsigned long));
+                       sizeof (unsigned long));
       }
       /* Hit-from XML-Tag */
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 3)) ==
@@ -426,7 +425,7 @@ static void XMLCALL endElement(void *data, const char *name)
         /* abspeichern des query_frames fuer spaetere Sequenzberechnnugen
            als long Value */
         numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
-        array_add_elem(MATRIXSTRUCT(query_frame), &numb_buf, sizeof(long));
+        array_add_elem(MATRIXSTRUCT(query_frame), &numb_buf, sizeof (long));
       }
       /* Hit-Frame XML-Tag/Bearbeitung siehe Query-Frame XML-Tag als
          String */
@@ -441,9 +440,9 @@ static void XMLCALL endElement(void *data, const char *name)
         /* abspeichern des hit_frames fuer spaetere Sequenzberechnnugen
            als long Value */
         numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
-        array_add_elem(MATRIXSTRUCT(hit_frame), &numb_buf, sizeof(long));
+        array_add_elem(MATRIXSTRUCT(hit_frame), &numb_buf, sizeof (long));
 
-        /* Wenn ein Hit-FASTA-File vorliegt existiert eine Bioseq-Struktur 
+        /* Wenn ein Hit-FASTA-File vorliegt existiert eine Bioseq-Struktur
            und eine Hashtabelle, ueber die die Hit-Sequenz-Informationen
            eingelesen werden */
         if (ARGUMENTSSTRUCT(hitfile_bool))

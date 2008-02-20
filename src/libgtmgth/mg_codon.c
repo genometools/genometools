@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -66,7 +65,6 @@ char mg_codon2amino(char n0, char n1, char n2)
     default:
       code = G_CODE << 4;
   }
-
 
   switch (n1)
   {

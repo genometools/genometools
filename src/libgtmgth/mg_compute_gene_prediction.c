@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -46,7 +45,7 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
 
   /* Array fuer das Speichern der Frames des optimalen Pfades */
   Array *frame_path_array;
-  frame_path_array = array_new(sizeof(unsigned short));
+  frame_path_array = array_new(sizeof (unsigned short));
 
   error_check(err);
 
@@ -71,13 +70,13 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
       array2dim_calloc(regionmatrix, 7, 1);
       /* frame-counter zaehlt die Auftritts-haeufigkeiten der einzelnen
          Frames im opt. Pfad */
-      frame_counter = ma_calloc(7, sizeof(unsigned long));
+      frame_counter = ma_calloc(7, sizeof (unsigned long));
       real_frame_score = 0;
 
       for (row_idx = 0; row_idx < 7; row_idx++)
       {
-        regionmatrix[row_idx][0].from = array_new(sizeof(unsigned long));
-        regionmatrix[row_idx][0].to = array_new(sizeof(unsigned long));
+        regionmatrix[row_idx][0].from = array_new(sizeof (unsigned long));
+        regionmatrix[row_idx][0].to = array_new(sizeof (unsigned long));
       }
       /* Aufruf der Genvorhersagemethode */
       gene_prediction(row_index,
@@ -145,7 +144,6 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
   return had_err;
 }
 
-
 static void gene_prediction(unsigned short row,
                             unsigned long column,
                             double max_lastcolumn,
@@ -166,7 +164,7 @@ static void gene_prediction(unsigned short row,
   /* die ersten beiden Spalten werden gesondert bearbeitet, da immer zwei
      Spalten zur Beurteilung, ob es sich um kodierende oder
      nicht-kodierende Positionen handelt, benoetigt werden. Zudem werden
-     erst so die Berechnungen der Sequenzlaengen kodierender Bereiche bei 
+     erst so die Berechnungen der Sequenzlaengen kodierender Bereiche bei
      Framewechsel und auch bei Wechsel von kodierendem zu
      nicht-kodierendem Bereich */
   if (column == str_length(MATRIXSTRUCT(query_dna)) - 1)
@@ -228,7 +226,7 @@ static void gene_prediction(unsigned short row,
 
         GENEPREDSTRUCT(codingcounter) = 0;
       }
-      /* wenn noncodingcounter > 0 liegt ein Wechsel von nicht-kodierender 
+      /* wenn noncodingcounter > 0 liegt ein Wechsel von nicht-kodierender
          zu kodierender Region vor */
       else if (GENEPREDSTRUCT(noncodingcounter) > 0)
       {
@@ -339,7 +337,7 @@ static void gene_prediction(unsigned short row,
       }
       else
       {
-        /* if-Fall: Wechsel des Leserahmens von kodierendem zu kodierendem 
+        /* if-Fall: Wechsel des Leserahmens von kodierendem zu kodierendem
            Abschnitt */
         if (GENEPREDSTRUCT(current_frame) != GENEPREDSTRUCT(frame_before))
         {
@@ -397,7 +395,7 @@ static void gene_prediction(unsigned short row,
     GENEPREDSTRUCT(noncodingcounter) = 0;
     GENEPREDSTRUCT(codingcounter) = 0;
   }
-  /* solange das Stop-Flag nicht gesetzt ist wird die CombinedScore-Matrix 
+  /* solange das Stop-Flag nicht gesetzt ist wird die CombinedScore-Matrix
      rekursiv spaltenweise abgearbeitet */
   if (!GENEPREDSTRUCT(function_stop))
   {
@@ -460,14 +458,14 @@ int frameshiftprocessing(ParseStruct *parsestruct_ptr,
 
   error_check(err);
 
-  tmp_from = array_new(sizeof(unsigned long));
-  tmp_to = array_new(sizeof(unsigned long));
-  real_from = array_new(sizeof(unsigned long));
-  real_to = array_new(sizeof(unsigned long));
-  real_fromtmp = array_new(sizeof(unsigned long));
-  real_totmp = array_new(sizeof(unsigned long));
-  realfrom = array_new(sizeof(unsigned long));
-  realto = array_new(sizeof(unsigned long));
+  tmp_from = array_new(sizeof (unsigned long));
+  tmp_to = array_new(sizeof (unsigned long));
+  real_from = array_new(sizeof (unsigned long));
+  real_to = array_new(sizeof (unsigned long));
+  real_fromtmp = array_new(sizeof (unsigned long));
+  real_totmp = array_new(sizeof (unsigned long));
+  realfrom = array_new(sizeof (unsigned long));
+  realto = array_new(sizeof (unsigned long));
 
   /* Vergleich mit allen anderen Frames - Der reale Frame ist der Frame
      mit der hoechsten Haeufigkeit (frame_counter) */
@@ -545,7 +543,7 @@ int frameshiftprocessing(ParseStruct *parsestruct_ptr,
 
             /* Falls der betrachtete Abschnitt des zu vergleichenden
                Frames innerhalb des max. Abstandes liegt (per Option bei
-               Programmaufruf einstellbar) und der kodierende Bereich kein 
+               Programmaufruf einstellbar) und der kodierende Bereich kein
                Stop-Codon enthaelt werden die Grenzen des Abschnittes im
                real_fromtmp- bzw. real_totmp-Array abgespeichert */
             if (!check_bp
@@ -649,8 +647,8 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
 
   error_check(err);
 
-  tmp_from = array_new(sizeof(unsigned long));
-  tmp_to = array_new(sizeof(unsigned long));
+  tmp_from = array_new(sizeof (unsigned long));
+  tmp_to = array_new(sizeof (unsigned long));
 
   /* Frames werden nacheinander abgearbeitet - zeilenkodiert */
   for (row_index = 0; row_index < 7; row_index++)
@@ -791,7 +789,7 @@ static int check_coding(ParseStruct *parsestruct_ptr,
 
   error_check(err);
 
-  contig_seq_tri = ma_calloc(4, sizeof(char));
+  contig_seq_tri = ma_calloc(4, sizeof (char));
 
   /* Start- und Endsequenzpositionen der in AS umzuwandelnden Sequenz */
   startpoint = from;
@@ -816,7 +814,7 @@ static int check_coding(ParseStruct *parsestruct_ptr,
     /* if: aktueller Leserahmen ist -1, -2 oder -3 */
     if (current_frame < 0)
     {
-      /* fuer die weiteren Berechnungen erfolgt eine Multiplikation mit -1 
+      /* fuer die weiteren Berechnungen erfolgt eine Multiplikation mit -1
        */
       current_frame *= -1;
       /* das reverse Komplement der Sequenz wird gebildet - erweiterte
@@ -985,7 +983,7 @@ static void merge_array(RegionStruct **regionmatrix,
           real_to = *(unsigned long *) array_get(real_totmp, tmp_index);
         }
       }
-      /* rekursiver Aufruf der Sortierfunktion unter Beruecksichtigung der 
+      /* rekursiver Aufruf der Sortierfunktion unter Beruecksichtigung der
          neu Eingetragenen Abschnitte */
       merge_array(regionmatrix,
                   real_from_ar,
@@ -1019,7 +1017,7 @@ static void merge_array(RegionStruct **regionmatrix,
                                          real_index);
         }
       }
-      /* rekursiver Aufruf der Sortierfunktion unter Beruecksichtigung der 
+      /* rekursiver Aufruf der Sortierfunktion unter Beruecksichtigung der
          neu Eingetragenen Abschnitte */
       merge_array(regionmatrix,
                   real_from_ar,
@@ -1043,7 +1041,7 @@ static void sort_realtmp(Array * realfrom,
     from_tmp = 0,
     to_tmp = 0;
 
-  /* durchlaufen des Arrays mit einer aeusseren und einer inneren Schleife 
+  /* durchlaufen des Arrays mit einer aeusseren und einer inneren Schleife
    */
   for (index_outer = 0; index_outer < array_size(real_fromtmp);
        index_outer++)
@@ -1093,7 +1091,7 @@ short check_stopcodon(char *contig_seq_ptrfct)
   unsigned short codon_status = 0;
 
   /* jeder if-Zweig ueberprueft entsprechend des
-     Metagenomethreader-Arguments zur Verwendung alternativer Start-Codons 
+     Metagenomethreader-Arguments zur Verwendung alternativer Start-Codons
      auf Start-Codons */
   if (!strcmp(contig_seq_ptrfct, "tga")
       || !strcmp(contig_seq_ptrfct, "taa")

@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -89,7 +88,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
     for (j = 0; j < contig_len; j++)
     {
       combinedscore_matrix[k][j].hit_number =
-        array_new(sizeof(unsigned long));
+        array_new(sizeof (unsigned long));
     }
   }
 
@@ -104,10 +103,10 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
   for (i = 0; i < hit_counter; i++)
   {
     /* Speicherplatz fuer die Hilfszeilen wird reserviert */
-    matrix_row = ma_calloc(contig_len, sizeof(double));
-    count_row = ma_calloc(contig_len, sizeof(unsigned long));
-    contig_seq_tri = ma_calloc(4, sizeof(char));
-    hit_seq_tri = ma_calloc(4, sizeof(char));
+    matrix_row = ma_calloc(contig_len, sizeof (double));
+    count_row = ma_calloc(contig_len, sizeof (unsigned long));
+    contig_seq_tri = ma_calloc(4, sizeof (char));
+    hit_seq_tri = ma_calloc(4, sizeof (char));
 
     /* Zeiger auf die Proteinsequenzen von Hit und Query */
     contig_as_ptr = strarray_get(MATRIXSTRUCT(hsp_qseq), i);
@@ -154,7 +153,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
     }
 
     /* Speicherplatreservierung fuer die Query-DNA-Seq. */
-    contig_seq = ma_calloc(contig_seq_diff, sizeof(char));
+    contig_seq = ma_calloc(contig_seq_diff, sizeof (char));
     /* kopieren von contig_seq_diff-1 Zeichen */
     (void) snprintf(contig_seq, contig_seq_diff, "%s",
                     contig_seq_ptr +
@@ -162,7 +161,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
 
     /* die laenge der Hit-Sequenz kann max. der Laenge der QueryDNA Seq
        entsprechen */
-    hit_seq = ma_calloc(hit_seq_diff, sizeof(char));
+    hit_seq = ma_calloc(hit_seq_diff, sizeof (char));
     /* kopieren von hit_seq_diff-1 Zeichen */
     (void) snprintf(hit_seq, hit_seq_diff, "%s",
                     strarray_get(MATRIXSTRUCT(hit_dna), i));
@@ -289,7 +288,6 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
       }
     }
 
-
     /* Aufruf der Funktion computepath - DP-Ansatz uebergeben werden: die
        Combined-Score-Matrix Anzahl Zeilen Anzahl Spalten */
     had_err = mg_computepath(combinedscore_matrix,
@@ -340,7 +338,8 @@ short get_matrix_row(long frame_fct)
   }
 }
 
-/* Umkehrfunktion zu get_matrix_row - aus der Matrix-Zeile wird der Leserahmen bestimmt */
+/* Umkehrfunktion zu get_matrix_row - aus der Matrix-Zeile wird der Leserahmen
+   bestimmt */
 short get_current_frame(long row_fct)
 {
   switch (row_fct)
@@ -395,7 +394,7 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
       && *(long *) MATRIXSTRUCT(query_to) != contig_len && k == 3)
   {
     /* Wenn der Leserahmen negativ ist, muessen die Combined-Scores von
-       Rechts nach Links in die Combined-Score Matrix eingetragen werden - 
+       Rechts nach Links in die Combined-Score Matrix eingetragen werden -
        also ausgehend vom Query-to Wert */
     if (current_row_fct > 3)
     {
@@ -445,17 +444,17 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
     {
       if (!ARGUMENTSSTRUCT(homology_mode))
       {
-        /* DNA-Basen stimmen nicht ueberein - synonymer Austausch; hit_seq 
+        /* DNA-Basen stimmen nicht ueberein - synonymer Austausch; hit_seq
            ist Zeiger auf die erste DNA-Base der Sequenz position ist die
            aktuelle Position in der DNA-Sequenz und k die Position im
            aktuellen Triplet */
         if (tolower(*(hit_seq + position_hit + k)) !=
             tolower(*(contig_seq + position_contig + k)))
         {
-          /* Bei Uebereinstimmung der AS und keiner Basen-Uebereinstimmung 
+          /* Bei Uebereinstimmung der AS und keiner Basen-Uebereinstimmung
              wird der Zaheler der Synonymen Basen-Austausche erhoeht, der
              aktuellen Position in der Combined-Score-Matrix der Wert 1
-             hinzuaddiert und gleichzeitig die Anzahl der beteiligten Hits 
+             hinzuaddiert und gleichzeitig die Anzahl der beteiligten Hits
              ebenfalls um 1 erhoeht */
           add_scores(parsestruct_ptr, matrix_row, count_row_fct,
                      current_row_fct, hit_number, position_contig, k,
@@ -470,10 +469,10 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
         if (tolower(*(hit_seq + position_hit + k)) ==
             tolower(*(contig_seq + position_contig + k)))
         {
-          /* Bei Uebereinstimmung der AS und keiner Basen-Uebereinstimmung 
+          /* Bei Uebereinstimmung der AS und keiner Basen-Uebereinstimmung
              wird der Zaheler der Synonymen Basen-Austausche erhoeht, der
              aktuellen Position in der Combined-Score-Matrix der Wert 1
-             hinzuaddiert und gleichzeitig die Anzahl der beteiligten Hits 
+             hinzuaddiert und gleichzeitig die Anzahl der beteiligten Hits
              ebenfalls um 1 erhoeht */
           add_scores(parsestruct_ptr, matrix_row, count_row_fct,
                      current_row_fct, hit_number, position_contig, k,
@@ -569,7 +568,7 @@ static void add_scores(ParseStruct *parsestruct_ptr,
                        unsigned short k, double score)
 {
   /* Wenn der Query-Leserahmen negativ ist, muessen die Combined-Scores
-     von Rechts nach Links in die Combined-Score Matrix eingetragen werden 
+     von Rechts nach Links in die Combined-Score Matrix eingetragen werden
      - also ausgehend vom Query-to Wert */
   if (current_row_fct > 3)
   {

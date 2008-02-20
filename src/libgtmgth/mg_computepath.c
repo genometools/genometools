@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -71,62 +70,74 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
   /* Spaltenweise Berechnung des opt. Pfades */
   for (column_index = 1; column_index < contig_len; column_index++)
   {
-        for(row_index = 0; row_index < rows; row_index++)
+    for (row_index = 0; row_index < rows; row_index++)
+    {
+      /* Zaehlvariable fuer die Zeile wird umgerechnet in den entsprechenden
+         Leserahmen */
+      current_frame = get_current_frame(row_index);
+      /* Aufruf der Methode zum Berechnen der moeglichen Leserahmen anhand von
+         aktuellem Leserahmen und der Query-DNA-Sequenz */
+      compute_precursors(current_frame,
+                         column_index,
+                         precursors);
+
+      precursor_index = 0;
+      /* der max-Wert der moeglichen Vorgaenger wird berechnet */
+      while ((precursors[precursor_index] != UNDEFINED) && precursor_index < 3)
+      {
+        /* aktueller Vorgaengerleserahmen - es gibt max. 3 moegliche
+           Vorgaenger */
+        precursors_frame = precursors[precursor_index];
+        /* Vorgaengerleserahmen wird umgerechnet in die entsprechende
+           Matrix-Zeile */
+        precursors_row = get_matrix_row(precursors_frame);
+
+        /* der DP-Algo umfasst 3 moegliche Faelle
+           1. Fall: Wechsel vom Reversen- auf den Forward-Strang bzw.
+           umgekehrt */
+        if ((current_frame < 0 && precursors_frame > 0) ||
+            (current_frame > 0 && precursors_frame < 0))
         {
-            /* Zaehlvariable fuer die Zeile wird umgerechnet in den entsprechenden Leserahmen */
-            current_frame = get_current_frame(row_index);
-            /* Aufruf der Methode zum Berechnen der moeglichen Leserahmen anhand von aktuellem
-               Leserahmen und der Query-DNA-Sequenz */
-            compute_precursors(current_frame,
-                               column_index,
-                               precursors);
-
-            precursor_index = 0;
-            /* der max-Wert der moeglichen Vorgaenger wird berechnet */
-            while((precursors[precursor_index] != UNDEFINED) && precursor_index < 3)
-            {
-                /* aktueller Vorgaengerleserahmen - es gibt max. 3 moegliche Vorgaenger */
-                precursors_frame = precursors[precursor_index];
-                /* Vorgaengerleserahmen wird umgerechnet in die entsprechende Matrix-Zeile */
-                precursors_row = get_matrix_row(precursors_frame);
-
-                /* der DP-Algo umfasst 3 moegliche Faelle
-                   1. Fall: Wechsel vom Reversen- auf den Forward-Strang bzw. umgekehrt */
-                if((current_frame < 0 && precursors_frame > 0) || (current_frame > 0 && precursors_frame < 0))
-                {
-                    max_new = path_matrix[precursors_row][column_index-1].score + combinedscore_matrix[row_index][column_index].matrix_score + 2*q;
-                }
-                /* 2. Fall: Einfacher Wechsel des Leserahmens, also von + zu + bzw. - zu - */
-                else if(current_frame != 0 && precursors_frame != current_frame)
-                {
-                    max_new = path_matrix[precursors_row][column_index-1].score + combinedscore_matrix[row_index][column_index].matrix_score + q;
-                }
-                /* 3. Fall: Leserahmen wird beibehalten bzw. Wechsel von kodierend zu nicht-kodierend 
-                      oder umgekehrt */
-                else
-                {
-                    max_new = path_matrix[precursors_row][column_index-1].score + combinedscore_matrix[row_index][column_index].matrix_score;
-                }
-
-                /* Bestimmen des Max-Wertes der max. 3 Moeglichkeiten und Speichern der Zeile, von der 
-                   der Max-Wert stammt */
-                if(max_new > max_old)
-                {
-                    max_old = max_new;
-                    maxpath_frame = precursors_row;
-                }
-                precursor_index++;
-            }
-
-            /* Speichern des Max-Wertes und der "Vorgaenger"-Zeile;
-               zuruecksetzen der Variablen */
-            path_matrix[row_index][column_index].score      = max_old;
-            path_matrix[row_index][column_index].path_frame = maxpath_frame;
-
-            max_new = DBL_MIN;
-            max_old = DBL_MIN;
-            maxpath_frame = 0;
+            max_new = path_matrix[precursors_row][column_index-1].score +
+                      combinedscore_matrix[row_index][column_index].matrix_score
+                      + 2*q;
         }
+        /* 2. Fall: Einfacher Wechsel des Leserahmens, also von + zu +
+           bzw.- zu - */
+        else if (current_frame != 0 && precursors_frame != current_frame)
+        {
+            max_new = path_matrix[precursors_row][column_index-1].score +
+                      combinedscore_matrix[row_index][column_index].matrix_score
+                      + q;
+        }
+        /* 3. Fall: Leserahmen wird beibehalten bzw. Wechsel von kodierend zu
+           nicht-kodierend oder umgekehrt */
+        else
+        {
+            max_new = path_matrix[precursors_row][column_index-1].score +
+                      combinedscore_matrix[row_index][column_index]
+                      .matrix_score;
+        }
+
+        /* Bestimmen des Max-Wertes der max. 3 Moeglichkeiten und Speichern der
+           Zeile, von der der Max-Wert stammt */
+        if (max_new > max_old)
+        {
+            max_old = max_new;
+            maxpath_frame = precursors_row;
+        }
+        precursor_index++;
+      }
+
+      /* Speichern des Max-Wertes und der "Vorgaenger"-Zeile;
+         zuruecksetzen der Variablen */
+      path_matrix[row_index][column_index].score      = max_old;
+      path_matrix[row_index][column_index].path_frame = maxpath_frame;
+
+      max_new = DBL_MIN;
+      max_old = DBL_MIN;
+      maxpath_frame = 0;
+    }
   }
 
   /* Aufruf der Methode zur Genvorhersage */

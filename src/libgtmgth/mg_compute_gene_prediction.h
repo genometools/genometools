@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -15,6 +14,9 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
+#ifndef MG_COMPUTE_GENE_PREDICTION_H
+#define MG_COMPUTE_GENE_PREDICTION_H
 
 #include <limits.h>
 #include <float.h>
@@ -82,3 +84,5 @@ static void merge_array(RegionStruct **,
               From- und To-Werten der zu sortierenden Arrays;
    Returnwert: void */
 static void sort_realtmp(Array *, Array *, Array *, Array *);
+
+#endif

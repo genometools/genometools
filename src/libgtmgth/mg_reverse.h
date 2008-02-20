@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -24,8 +23,8 @@
   modified for metagenomethreader
 */
 
-#ifndef REVERSE_H
-#define REVERSE_H
+#ifndef MG_REVERSE_H
+#define MG_REVERSE_H
 
 #include "libgtmgth/metagenomethreader.h"
 

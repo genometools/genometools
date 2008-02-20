@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -194,7 +193,7 @@ void output_header_html(ParseStruct *parsestruct_ptr)
 
   /* Headerbereich schreiben inkl. Auflistung der Parametereinstellugen */
   genfile_xprintf(FILEPOINTEROUT,
-                  "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 "
+                  "<!DOCTYPE html PUBLIC \"-/""/W3C/""/DTD XHTML 1.0 "
                   "Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/"
                   "xhtml1-transitional.dtd\">");
   genfile_xprintf(FILEPOINTEROUT,
@@ -206,7 +205,7 @@ void output_header_html(ParseStruct *parsestruct_ptr)
                   tmstamp->tm_mday, tmstamp->tm_mon + 1,
                   tmstamp->tm_year + 1900);
   genfile_xprintf(FILEPOINTEROUT,
-                  "<meta http-equiv=\"Content-type\" content=\"text/html; " 
+                  "<meta http-equiv=\"Content-type\" content=\"text/html; "
                   "charset=iso-8859-1\"/>");
   genfile_xprintf(FILEPOINTEROUT,
                   "<link rel=\"stylesheet\" type=\"text/css\" "
@@ -347,7 +346,7 @@ void output_header_xml(ParseStruct *parsestruct_ptr)
   /* Headerbereich schreiben inkl. Auflistung der Parametereinstellugen */
   genfile_xprintf(FILEPOINTEROUT, "<?xml version=\"1.0\"?>\n");
   genfile_xprintf(FILEPOINTEROUT,
-                  "<!DOCTYPE BlastOutput PUBLIC \"-//NCBI//NCBI "
+                  "<!DOCTYPE BlastOutput PUBLIC \"-/""/NCBI/""/NCBI "
                   "BlastOutput/EN\" \"NCBI_BlastOutput.dtd\">\n");
   genfile_xprintf(FILEPOINTEROUT, "<MetagenomethreaderOutput>\n");
   genfile_xprintf(FILEPOINTEROUT,
@@ -541,7 +540,7 @@ void output_hitdna(ParseStruct *parsestruct_ptr,
              Stringende-Zeichen */
           contig_seq_diff = to - from + 2;
 
-          contig_seq = ma_calloc(contig_seq_diff, sizeof(char));
+          contig_seq = ma_calloc(contig_seq_diff, sizeof (char));
           /* kopieren von contig_seq_diff-1 Zeichen */
           (void) snprintf(contig_seq, contig_seq_diff, "%s",
                           contig_seq_ptr + from);
@@ -575,7 +574,7 @@ void output_hitdna(ParseStruct *parsestruct_ptr,
 
             if (hit_ptr == NULL)
             {
-              hit_ptr = ma_calloc(hitcounter, sizeof(unsigned long));
+              hit_ptr = ma_calloc(hitcounter, sizeof (unsigned long));
             }
             /* Abfragen aller Hit-Nummern fuer jede Position */
             for (hit_index = 0; hit_index < hit_numbers; hit_index++)
@@ -646,11 +645,11 @@ void output_hitdna(ParseStruct *parsestruct_ptr,
                   HITSTRUCT(hitsnum) =
                     ma_realloc(hitsnum_tmp,
                                parsestruct_ptr->hits_memory *
-                               sizeof(unsigned long));
+                               sizeof (unsigned long));
                   HITSTRUCT(memory) =
                     ma_realloc(memory_tmp,
                                parsestruct_ptr->hits_memory *
-                               sizeof(unsigned long));
+                               sizeof (unsigned long));
 
                   hashtable_reset(parsestruct_ptr->resulthits);
 
@@ -763,17 +762,21 @@ static void print_codingheader(ParseStruct *parsestruct_ptr,
       /* Ausgabe Coding-DNA-Header - html */
     case 2:
       genfile_xprintf(FILEPOINTEROUT,
-                      "<tr><td colspan=\"2\"><font class=\"font_header\"><br>Coding-DNA</font></td></tr>");
+                      "<tr><td colspan=\"2\"><font class=\"font_header\"><br>"
+                      "Coding-DNA</font></td></tr>");
       genfile_xprintf(FILEPOINTEROUT,
-                      "<tr><td colspan=\"2\"><font class=\"class\">%s</font></td></tr>",
+                      "<tr><td colspan=\"2\"><font class=\"class\">%s</font>"
+                      "</td></tr>",
                       contig_seq);
       genfile_xprintf(FILEPOINTEROUT,
-                      "<tr><td colspan=\"2\"><font class=\"font_header\">Protein-Sequence</font></td></tr>");
+                      "<tr><td colspan=\"2\"><font class=\"font_header\">"
+                      "Protein-Sequence</font></td></tr>");
       genfile_xprintf(FILEPOINTEROUT,
-                      "<tr><td colspan=\"2\"><font class=\"class\">%s</font></td></tr>",
-                      str_get(as_seq));
+                      "<tr><td colspan=\"2\"><font class=\"class\">%s</font>"
+                      "</td></tr>", str_get(as_seq));
       genfile_xprintf(FILEPOINTEROUT,
-                      "<tr><td colspan=\"2\"><font class=\"font_header\">Hit-Information Section</font></td></tr>");
+                      "<tr><td colspan=\"2\"><font class=\"font_header\">"
+                      "Hit-Information Section</font></td></tr>");
       break;
       /* Ausgabe Coding-DNA-Header - xml */
     case 3:
@@ -787,7 +790,6 @@ static void print_codingheader(ParseStruct *parsestruct_ptr,
       break;
   }
 }
-
 
 static void print_hitinformation(ParseStruct *parsestruct_ptr,
                                  HitInformation *hit_information,
@@ -815,7 +817,8 @@ static void print_hitinformation(ParseStruct *parsestruct_ptr,
       genfile_xprintf(FILEPOINTEROUT,
                       "<tr><td colspan=\"2\"><font class=\"class\">gi-nr: ");
       genfile_xprintf(FILEPOINTEROUT,
-                      "<a href=\"http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?db=nuccore&id=%s\">",
+                      "<a href=\"http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi"
+                      "?db=nuccore&id=%s\">",
                       strarray_get(hit_information->hit_gi, seq_index));
       genfile_xprintf(FILEPOINTEROUT, "gi|%s</a>  ",
                       strarray_get(hit_information->hit_gi, seq_index));
@@ -976,16 +979,15 @@ static void as_coding(ParseStruct *parsestruct_ptr,
     startpoint += 3;
   }
 
-
   if (ARGUMENTSSTRUCT(extended_mode))
   {
     Str *as_seq_start;
 
     as_seq_start = str_new();
 
-    contig_seq_tri = ma_calloc(4, sizeof(char));
+    contig_seq_tri = ma_calloc(4, sizeof (char));
 
-    // DNA-Basen-Triplet einlesen 
+    /* DNA-Basen-Triplet einlesen */
     *(contig_seq_tri) = tolower(*(contig_seq + startpoint - 3));
     *(contig_seq_tri + 1) = tolower(*(contig_seq + startpoint - 2));
     *(contig_seq_tri + 2) = tolower(*(contig_seq + startpoint - 1));
@@ -993,10 +995,9 @@ static void as_coding(ParseStruct *parsestruct_ptr,
 
     found = check_stopcodon(contig_seq_tri);
 
-
     while (startpoint <= contig_len - 3 && !found_end && found)
     {
-      // DNA-Basen-Triplet einlesen 
+      /* DNA-Basen-Triplet einlesen */
       *(contig_seq_tri) = tolower(*(contig_seq + startpoint - 3));
       *(contig_seq_tri + 1) = tolower(*(contig_seq + startpoint - 2));
       *(contig_seq_tri + 2) = tolower(*(contig_seq + startpoint - 1));
@@ -1006,22 +1007,21 @@ static void as_coding(ParseStruct *parsestruct_ptr,
 
       if (found_end)
       {
-        // Aktuelles Query-Triplet 
+        /* Aktuelles Query-Triplet */
         contig_triplet[0] = contig_seq[startpoint];
         contig_triplet[1] = contig_seq[startpoint + 1];
         contig_triplet[2] = contig_seq[startpoint + 2];
 
-        // Bestimmen der AS der jeweiligen Triplets
+        /* Bestimmen der AS der jeweiligen Triplets */
         contig_as = mg_codon2amino(contig_triplet[0],
                                    contig_triplet[1], contig_triplet[2]);
         str_append_char(as_seq, contig_as);
       }
-      // Startwert um 3 Basen weitersetzen
+      /* Startwert um 3 Basen weitersetzen */
       startpoint += 3;
     }
 
-
-    // DNA-Basen-Triplet einlesen 
+    /* DNA-Basen-Triplet einlesen */
     *(contig_seq_tri) = tolower(*(contig_seq + startpoint_start));
     *(contig_seq_tri + 1) = tolower(*(contig_seq + startpoint_start + 1));
     *(contig_seq_tri + 2) = tolower(*(contig_seq + startpoint_start + 2));
@@ -1035,7 +1035,7 @@ static void as_coding(ParseStruct *parsestruct_ptr,
     {
       while (startpoint_start > 2 && !found)
       {
-        // DNA-Basen-Triplet einlesen 
+        /* DNA-Basen-Triplet einlesen */
         *(contig_seq_tri) = tolower(*(contig_seq + startpoint_start - 3));
         *(contig_seq_tri + 1) =
           tolower(*(contig_seq + startpoint_start - 2));
@@ -1053,7 +1053,7 @@ static void as_coding(ParseStruct *parsestruct_ptr,
           {
             if (!found_start)
             {
-              // DNA-Basen-Triplet einlesen 
+              /* DNA-Basen-Triplet einlesen */
               *(contig_seq_tri) = tolower(*(contig_seq + startpoint_atg));
               *(contig_seq_tri + 1) =
                 tolower(*(contig_seq + startpoint_atg + 1));
@@ -1064,7 +1064,7 @@ static void as_coding(ParseStruct *parsestruct_ptr,
               start_codon = check_startcodon(parsestruct_ptr,
                                              contig_seq_tri);
 
-              // ueberpruefen auf Start-Codon 
+              /* ueberpruefen auf Start-Codon */
               if (start_codon)
               {
                 str_append_char(as_seq_start, 'M');
@@ -1073,19 +1073,19 @@ static void as_coding(ParseStruct *parsestruct_ptr,
             }
             else
             {
-              // Aktuelles Query-Triplet 
+              /* Aktuelles Query-Triplet */
               contig_triplet[0] = contig_seq[startpoint_atg];
               contig_triplet[1] = contig_seq[startpoint_atg + 1];
               contig_triplet[2] = contig_seq[startpoint_atg + 2];
 
-              // Bestimmen der AS der jeweiligen Triplets
+              /* Bestimmen der AS der jeweiligen Triplets */
               contig_as = mg_codon2amino(contig_triplet[0],
                                          contig_triplet[1],
                                          contig_triplet[2]);
 
               str_append_char(as_seq_start, contig_as);
             }
-            // Startwert um 3 Basen weitersetzen
+            /* Startwert um 3 Basen weitersetzen */
             startpoint_atg += 3;
           }
         }
@@ -1105,7 +1105,6 @@ static void as_coding(ParseStruct *parsestruct_ptr,
     (void) mg_reverse_complement(contig_seq, contig_len, err);
   }
 }
-
 
 static int newmemory_hash(UNUSED void *key,
                           void *value, void *data,
@@ -1135,9 +1134,11 @@ static void output_statistics_header(ParseStruct *parsestruct_ptr)
   else if (ARGUMENTSSTRUCT(outputfile_format) == 2)
   {
     genfile_xprintf(FILEPOINTEROUT,
-                    "<tr><td colspan=\"2\"><table cellspacing=\"1\" cellpadding=\"3\">");
+                    "<tr><td colspan=\"2\"><table cellspacing=\"1\" "
+                    "cellpadding=\"3\">");
     genfile_xprintf(FILEPOINTEROUT,
-                    "<tr><td colspan=\"2\"><font class=\"font_header\"><br><br>Statistic-Section<br><br></font></td></tr>");
+                    "<tr><td colspan=\"2\"><font class=\"font_header\"><br><br>"
+                    "Statistic-Section<br><br></font></td></tr>");
   }
   else
   {
@@ -1151,7 +1152,7 @@ short check_startcodon(ParseStruct *parsestruct_ptr,
   unsigned short codon_status = 0;
 
   /* jeder if-Zweig ueberprueft entsprechend des
-     Metagenomethreader-Arguments zur Verwendung alternativer Start-Codons 
+     Metagenomethreader-Arguments zur Verwendung alternativer Start-Codons
      auf Start-Codons */
   if (ARGUMENTSSTRUCT(codon_mode) == 2)
   {

@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -16,6 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef MG_COMBINEDSCORE_H
+#define MG_COMBINEDSCORE_H
+
 #include "libgtcore/codon.h"
 #include "libgtmgth/mg_xmlparser.h"
 
@@ -29,7 +31,7 @@
    Parameter: Combined-Score-Matrix, Hit-AS, Query-AS, aktueller
               Leserahmen der Query-DNA, Position in der Query-Seq.,
               Position in der Hit-Seq., Laenge des Blast-Hits, Laenge der
-              Contig-Seq, Hit-Nr, Zeiger auf die ParseStruct-Struktur, 
+              Contig-Seq, Hit-Nr, Zeiger auf die ParseStruct-Struktur,
               Hilfezeile fuer die Combined-Scores, Hilfszeile der Counts,
               Query-DNA-Seq, Hit-DNA-Seq, Zeiger auf die
               HitInformation-Struktur
@@ -53,7 +55,7 @@ static void fill_matrix(CombinedScoreMatrixEntry **,
 /* Funktion zur Berechnung des Matrixscore an der entsprechenden Position
    der Combined-Score-Matrix
    Parameter: Zeiger auf ParseStruct, Hilfszeilen matrix_row u. count_row,
-              aktuelle Matrix-Zeile, Hit-Number, Position in der Query-DNA, 
+              aktuelle Matrix-Zeile, Hit-Number, Position in der Query-DNA,
               Position im Triplet, Score - abh. vom Fall (syn, nonsyn,
               stop-codon in Query- oder Hit-Sequence, Blast-Hit-Ende)
    Returnwert: void */
@@ -65,3 +67,5 @@ static void add_scores(ParseStruct *,
                        unsigned long,
                        unsigned short,
                        double);
+
+#endif

@@ -320,11 +320,11 @@ int metagenomethreader(int argc, const char **argv, Error * err)
     parsestruct.result_hits = str_new();
 
     /* diverse Zeiger auf Informationen aus dem XML-File */
-    parsestruct.matrix_info.query_from = array_new(sizeof(unsigned long));
-    parsestruct.matrix_info.query_to = array_new(sizeof(unsigned long));
-    parsestruct.matrix_info.query_frame = array_new(sizeof(unsigned long));
-    parsestruct.matrix_info.hit_frame = array_new(sizeof(unsigned long));
-    parsestruct.value_tmp = array_new(sizeof(unsigned long));
+    parsestruct.matrix_info.query_from = array_new(sizeof (unsigned long));
+    parsestruct.matrix_info.query_to = array_new(sizeof (unsigned long));
+    parsestruct.matrix_info.query_frame = array_new(sizeof (unsigned long));
+    parsestruct.matrix_info.hit_frame = array_new(sizeof (unsigned long));
+    parsestruct.value_tmp = array_new(sizeof (unsigned long));
 
     /* mit dem schliessenden Iteration_hits XML-Tag wird im Programmablauf
        der Abschluss eines Query-Eintrages erkannt */
@@ -392,9 +392,9 @@ int metagenomethreader(int argc, const char **argv, Error * err)
 
     /* Speicher fuer die Statistik reservieren und zuweisen */
     parsestruct.hits_statistics.hitsnum =
-      ma_calloc(MEMORY_SIZE, sizeof(unsigned long));
+      ma_calloc(MEMORY_SIZE, sizeof (unsigned long));
     parsestruct.hits_statistics.memory =
-      ma_calloc(MEMORY_SIZE, sizeof(unsigned long));
+      ma_calloc(MEMORY_SIZE, sizeof (unsigned long));
 
     /* Variable der Umgebungsvariablen - genometools.org */
     parsestruct.err = err;
@@ -408,7 +408,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
     nrofseq = bioseq_number_of_sequences(parsestruct.queryseq);
     /* Speicherbereich reservieren fuer Zeiger auf die Indices der
        Query-DNA-Eintraege in der Bioseq-Struktur */
-    querynum = ma_calloc(nrofseq, sizeof(unsigned long));
+    querynum = ma_calloc(nrofseq, sizeof (unsigned long));
     /* Hash erzeugen - Eintraege: Key - Query-FASTA-Def; Value - Zeiger
        auf deren Indices in der Bioseq - Struktur */
     parsestruct.queryhash = hashtable_new(HASH_STRING, NULL, NULL);
@@ -438,7 +438,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
       nrofseq = bioseq_number_of_sequences(parsestruct.hitseq);
       /* Speicherbereich reservieren fuer Zeiger auf die Indices der
          Hit-DNA-Eintraege in der Bioseq-Struktur */
-      hitnum = ma_calloc(nrofseq, sizeof(unsigned long));
+      hitnum = ma_calloc(nrofseq, sizeof (unsigned long));
       /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile; Value - Zeiger
          auf deren Indices in der Bioseq - Struktur */
       parsestruct.hithash = hashtable_new(HASH_STRING, NULL, NULL);
@@ -536,7 +536,6 @@ int metagenomethreader(int argc, const char **argv, Error * err)
     {
       /* Schreiben des Ausgabe-Footers */
       mg_outputwriter(parsestruct_ptr, NULL, NULL, NULL, 'v', err);
-
 
       /* Ausgeben der verwendeten Hit-Def, in dem die Hashtabelle einmal
          vollstaendig durchlaufen wird */

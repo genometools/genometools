@@ -15,21 +15,24 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/array.h>
-#include <libgtcore/strarray.h>
-#include <libgtcore/str.h>
-#include <libgtcore/array2dim.h>
-#include <libgtcore/error.h>
-#include <libgtcore/option.h>
-#include <libgtcore/versionfunc.h>
-#include <libgtcore/bioseq.h>
-#include <libgtcore/hashtable.h>
-#include <libgtcore/error.h>
-#include "libgtcore/ma.h"
+#ifndef METAGENOMETHREADER_H
+#define METAGENOMETHREADER_H
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include "libgtcore/array.h"
+#include "libgtcore/strarray.h"
+#include "libgtcore/str.h"
+#include "libgtcore/array2dim.h"
+#include "libgtcore/error.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/bioseq.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/error.h"
+#include "libgtcore/ma.h"
 
 /* jeweils die Anzahl der zu betrachtenden XML-Tags; Definitionen werden auch
  * in Schleifenkoepfen verwendet */
@@ -139,7 +142,6 @@ typedef struct
     hitsnumber,
     stat_pos;
 } HitsStatistic;
-
 
 /* Struktur fuer Variablen in der mg_xmlparser-Datei */
 typedef struct
@@ -302,3 +304,5 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry **,
    Parameter: Zeiger auf eine Seq., Seq-Laenge, Error-Variable
    Returnwert: had_err */
 int mg_reverse_complement(char *, unsigned long, Error *);
+
+#endif

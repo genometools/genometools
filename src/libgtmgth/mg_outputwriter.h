@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -15,6 +14,9 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
+#ifndef MG_OUTPUTWRITER_H
+#define MG_OUTPUTWRITER_H
 
 #include "libgtmgth/metagenomethreader.h"
 
@@ -125,7 +127,6 @@ static void output_footer_html(ParseStruct *);
    Returnwert: void */
 static void output_footer_xml(ParseStruct *);
 
-
 /* Funktion zum Schreiben der Metagenomethreader-Statistik der Text-Datei
    Parameter: Zeiger auf die ParseStruct-Struktur
    Returnwert: void */
@@ -155,3 +156,5 @@ static void output_statistics_header(ParseStruct *);
    Parameter: Zeiger auf die ParseStruct-Struktur
    Returnwert: void */
 static void output_close_iteration_xml(ParseStruct *);
+
+#endif
