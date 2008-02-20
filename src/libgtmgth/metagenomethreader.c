@@ -66,8 +66,6 @@ static OPrval parse_options(int *parsed_args,
     ("[option ...] XML-File Query-FASTA-File Hit-FASTA-File",
      "Metagenomethreader, for predicting genes in metagenomeprojects.");
 
-  /* option_parser_set_min_max_args(op, 3, 17); */
-
   /* Option zur Eingabe des Scores fuer synonymen Basenaustausch; default:
      1.0 */
   syn_value_option =
@@ -203,11 +201,11 @@ static OPrval parse_options(int *parsed_args,
   option_parser_add_option(op, extended_mode_option);
 
   option_parser_set_mailaddress(op, "<dschmitz@zbh.uni-hamburg.de>");
+  option_parser_set_min_max_args(op, 3, 3);
 
   /* es werden die Parameter XML-File, Query-Fasta-File und Hit-FASTA-File
      erwartet, Min und Max. der Anzahl an Parametern ist also 3 */
-  oprval = option_parser_parse(op,
-                               parsed_args, argc, argv, versionfunc, err);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
 
   option_parser_delete(op);
   return oprval;
@@ -216,7 +214,7 @@ static OPrval parse_options(int *parsed_args,
 int metagenomethreader(int argc, const char **argv, Error * err)
 {
   int had_err = 0,
-    parsed_args = 0;
+      parsed_args = 0;
 
   /* Variablen/Zeiger zur Erstellung des Hashes fuer die Bioseq-Strukturen
    */
@@ -249,10 +247,8 @@ int metagenomethreader(int argc, const char **argv, Error * err)
   error_check(err);
 
   /* option parsing */
-  switch (parse_options
-          (&parsed_args, &parsestruct.metagenomethreader_arguments, argc,
-           argv, err))
-  {
+  switch (parse_options(&parsed_args, &parsestruct.metagenomethreader_arguments,
+                        argc, argv, err)) {
     case OPTIONPARSER_OK:
       break;
     case OPTIONPARSER_ERROR:
@@ -266,7 +262,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
   }
 
   /* Bioseqstruktur des Query-DNA-FASTA-File wird erzeugt */
-  parsestruct.queryseq = bioseq_new(argv[argc - 2], err);
+  parsestruct.queryseq = bioseq_new(argv[parsed_args + 1], err);
   /* Erstellung der Bioseq-Struktur fehlerhaft -> Fehlercode setzen */
   if (!parsestruct.queryseq)
   {
@@ -279,7 +275,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
   if (ARGUMENTS(hitfile_bool) && !had_err)
   {
     /* Bioseqstruktur des Hit-DNA-FASTA-File wird erzeugt */
-    parsestruct.hitseq = bioseq_new(argv[argc - 1], err);
+    parsestruct.hitseq = bioseq_new(argv[parsed_args + 2], err);
     /* Erstellung der Bioseq-Struktur fehlerhaft -> Fehlercode setzen */
     if (!parsestruct.hitseq)
     {
@@ -405,8 +401,8 @@ int metagenomethreader(int argc, const char **argv, Error * err)
 
     /* Abspeichern des XML- und des Hit-Dateinamens in der
        ParseStruct-Struktur */
-    str_set(parsestruct.hit_fastafile, argv[argc - 1]);
-    str_set(parsestruct.xmlfile, argv[argc - 3]);
+    str_set(parsestruct.hit_fastafile, argv[parsed_args + 2]);
+    str_set(parsestruct.xmlfile, argv[parsed_args]);
 
     /* Anzahl der Query-DNA-Eintraege */
     nrofseq = bioseq_number_of_sequences(parsestruct.queryseq);
@@ -490,7 +486,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
     /* Der Name des XML-Files mit den Blast-Hits ist das erste Argument
        nach dem Programmnamen */
     fp_xmlfile =
-      genfile_open(genfilemode_determine(argv[argc - 3]), argv[argc - 3],
+      genfile_open(genfilemode_determine(argv[parsed_args]), argv[parsed_args],
                    "r");
 
     if (file_exists(str_get(outputfilename)))
