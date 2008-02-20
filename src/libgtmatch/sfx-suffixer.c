@@ -257,6 +257,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->part = 0;
     sfi->exhausted = false;
     if (allocBcktab(&sfi->bcktab,
+                    sfi->totallength,
                     numofchars,
                     prefixlength,
                     (unsigned int) CODEBITS,

@@ -28,12 +28,10 @@
 
 typedef struct Bucketenumerator Bucketenumerator;
 
-Bucketenumerator *newbucketenumerator(Seqpos totallength,
-                                      const Bcktab *bcktab,
+Bucketenumerator *newbucketenumerator(const Bcktab *bcktab,
                                       unsigned int prefixlength,
                                       const Uchar *demandprefix,
-                                      unsigned int demandprefixlength,
-                                      unsigned int numofchars);
+                                      unsigned int demandprefixlength);
 
 bool nextbucketenumerator(Lcpinterval *itv,Bucketenumerator *bucketenumerator);
 

@@ -89,12 +89,14 @@ static void *genericmaptable(const Str *indexname,
 
 int mapbcktab(Bcktab *bcktab,
               const Str *indexname,
+              Seqpos totallength,
               unsigned int numofchars,
               unsigned int prefixlength,
               Error *err)
 {
   Codetype numofspecialcodes;
 
+  bcktab->totallength = totallength;
   bcktab->basepower = initbasepower(numofchars,prefixlength);
   bcktab->numofallcodes = bcktab->basepower[prefixlength];
   numofspecialcodes = bcktab->basepower[prefixlength-1];
@@ -179,6 +181,7 @@ static unsigned long **initdistprefixindexcounts(const Codetype *basepower,
 }
 
 int allocBcktab(Bcktab *bcktab,
+                Seqpos totallength,
                 unsigned int numofchars,
                 unsigned int prefixlength,
                 unsigned int codebits,
@@ -193,6 +196,7 @@ int allocBcktab(Bcktab *bcktab,
   bcktab->leftborder = NULL;
   bcktab->multimappower = NULL;
   bcktab->countspecialcodes = NULL;
+  bcktab->totallength = totallength;
   bcktab->basepower = initbasepower(numofchars,prefixlength);
   bcktab->filltable = initfilltable(bcktab->basepower,prefixlength);
   bcktab->numofallcodes = bcktab->basepower[prefixlength];
@@ -295,13 +299,13 @@ int bcktab2file(FILE *fp,
   return 0;
 }
 
-unsigned int calcbucketboundaries(Bucketspecification *bucketspec,
-                                  const Bcktab *bcktab,
-                                  Codetype code,
-                                  Codetype maxcode,
-                                  Seqpos totalwidth,
-                                  unsigned int rightchar,
-                                  unsigned int numofchars)
+unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
+                                   const Bcktab *bcktab,
+                                   Codetype code,
+                                   Codetype maxcode,
+                                   Seqpos totalwidth,
+                                   unsigned int rightchar,
+                                   unsigned int numofchars)
 {
   bucketspec->left = bcktab->leftborder[code];
   if (code == maxcode)
@@ -341,3 +345,76 @@ unsigned int calcbucketboundaries(Bucketspecification *bucketspec,
   }
   return rightchar;
 }
+
+void calcbucketboundaries(Bucketspecification *bucketspec,
+                          const Bcktab *bcktab,
+                          Codetype code)
+{
+  unsigned int numofchars = bcktab->basepower[1];
+  assert(code != bcktab->numofallcodes);
+  (void) calcbucketboundsparts(bucketspec,
+                               bcktab,
+                               code,
+                               bcktab->numofallcodes, /* code < numofallcodes */
+                               0,                     /* not necessary */
+                               code % numofchars,
+                               numofchars);
+}
+
+unsigned long *pfxidxpartialsums(unsigned long specialsinbucket,
+                                 Codetype code,
+                                 unsigned int prefixlength,
+                                 const unsigned long **distpfxidx,
+                                 const Codetype *filltable)
+{
+  unsigned long sumcount = 0, *count;
+  unsigned int prefixindex;
+  Codetype ordercode;
+
+  ALLOCASSIGNSPACE(count,NULL,unsigned long,prefixlength);
+  count[0] = 0;
+  for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
+  {
+    count[prefixindex] = 0;
+    if (code >= filltable[prefixindex])
+    {
+      ordercode = code - filltable[prefixindex];
+      if (ordercode % (filltable[prefixindex] + 1) == 0)
+      {
+        ordercode = ordercode/(filltable[prefixindex] + 1);
+        count[prefixindex] = distpfxidx[prefixindex-1][ordercode];
+        sumcount += count[prefixindex];
+      }
+    }
+  }
+  assert(specialsinbucket >= sumcount);
+  count[prefixlength-1] = specialsinbucket - sumcount;
+  if (prefixlength > 2U)
+  {
+    for (prefixindex = prefixlength-2; prefixindex>=1U; prefixindex--)
+    {
+      count[prefixindex] += count[prefixindex+1];
+    }
+    assert(count[1] == specialsinbucket);
+  }
+  return count;
+}
+
+/*
+src/libgtmatch/bckbound.h  interface
+src/libgtmatch/bcktab.c    implementation
+src/libgtmatch/cutendpfx.c  only multimappower and filltable
+src/libgtmatch/cutendpfx.h  interface
+src/libgtmatch/esa-map.c    used in opaque way
+src/libgtmatch/sarr-def.h   used in opaque way
+src/libgtmatch/sfx-apfxlen.c  no usage
+src/libgtmatch/sfx-bentsedg.c only in bucketends -> bcktab.c
+src/libgtmatch/sfx-opt.c      no usage
+src/libgtmatch/sfx-optdef.h      no usage
+src/libgtmatch/sfx-outlcp.h   only declaration
+src/libgtmatch/sfx-run.c          no usage
+src/libgtmatch/sfx-suffixer.c    only access to leftborder and numofallcodes
+src/libgtmatch/sfx-suffixer.h  interface
+src/tools/gt_greedyfwdmat.c    only in previous version
+src/tools/gt_patternmatch.c    only multimappower
+*/

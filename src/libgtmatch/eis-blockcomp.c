@@ -142,7 +142,7 @@ struct sfxInterfaceReadState
 };
 
 static int
-sfxIBWTReadNext(void *state, Symbol *dest, size_t readLen, 
+sfxIBWTReadNext(void *state, Symbol *dest, size_t readLen,
                 UNUSED Error *err)
 {
   struct sfxInterfaceReadState *SIState = state;

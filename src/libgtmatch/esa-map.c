@@ -523,6 +523,7 @@ static int inputsuffixarray(bool map,
     {
       if (mapbcktab(&suffixarray->bcktab,
                     indexname,
+                    *totallength,
                     getnumofcharsAlphabet(suffixarray->alpha),
                     suffixarray->prefixlength,
                     err) != 0)

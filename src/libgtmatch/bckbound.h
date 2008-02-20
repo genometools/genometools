@@ -40,7 +40,8 @@ typedef struct
 
 typedef struct
 {
-  Seqpos *leftborder,
+  Seqpos totallength,
+         *leftborder,
          *countspecialcodes;
   Codetype numofallcodes,
            numofspecialcodes,
@@ -52,6 +53,7 @@ typedef struct
 
 int mapbcktab(Bcktab *bcktab,
               const Str *indexname,
+              Seqpos totallength,
               unsigned int numofchars,
               unsigned int prefixlength,
               Error *err);
@@ -61,6 +63,7 @@ void freebcktab(Bcktab *bcktab,bool mapped);
 void initbcktabwithNULL(Bcktab *bcktab);
 
 int allocBcktab(Bcktab *bcktab,
+                Seqpos totallength,
                 unsigned int numofchars,
                 unsigned int prefixlength,
                 unsigned int codebits,
@@ -85,12 +88,16 @@ int bcktab2file(FILE *fp,
                 const Bcktab *bcktab,
                 Error *err);
 
-unsigned int calcbucketboundaries(Bucketspecification *bucketspec,
-                                  const Bcktab *bcktab,
-                                  Codetype code,
-                                  Codetype maxcode,
-                                  Seqpos totalwidth,
-                                  unsigned int rightchar,
-                                  unsigned int numofchars);
+unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
+                                   const Bcktab *bcktab,
+                                   Codetype code,
+                                   Codetype maxcode,
+                                   Seqpos totalwidth,
+                                   unsigned int rightchar,
+                                   unsigned int numofchars);
+
+void calcbucketboundaries(Bucketspecification *bucketspec,
+                          const Bcktab *bcktab,
+                          Codetype code);
 
 #endif

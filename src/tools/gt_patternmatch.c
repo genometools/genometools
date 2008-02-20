@@ -95,8 +95,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     unsigned long trial;
     Seqpos dbstart;
     Enumpatterniterator *epi;
-    unsigned int firstspecial,
-                 numofchars = getnumofcharsAlphabet(suffixarray.alpha);
+    unsigned int firstspecial;
     Codetype code = 0;
     MMsearchiterator *mmsibck, *mmsiimm;
     Bucketspecification bucketspec;
@@ -110,7 +109,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     epi = newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
-                                 numofchars,
+                                 getnumofcharsAlphabet(suffixarray.alpha),
                                  err);
     esr1 = newEncodedsequencescanstate();
     esr2 = newEncodedsequencescanstate();
@@ -128,12 +127,10 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
         {
           mmsibck = NULL;
           bucketenumerator
-            = newbucketenumerator(totallength,
-                                  &suffixarray.bcktab,
+            = newbucketenumerator(&suffixarray.bcktab,
                                   suffixarray.prefixlength,
                                   pptr,
-                                  (unsigned int) patternlen,
-                                  numofchars);
+                                  (unsigned int) patternlen);
           refstart = UNDEFREFSTART;
           while (nextbucketenumerator(&itv,bucketenumerator))
           {
@@ -167,13 +164,9 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
                                     suffixarray.prefixlength,
                                     pptr);
           assert(firstspecial == suffixarray.prefixlength);
-          (void) calcbucketboundaries(&bucketspec,
-                                      &suffixarray.bcktab,
-                                      code,
-                                      suffixarray.bcktab.numofallcodes,
-                                      totallength,
-                                      code % numofchars,
-                                      numofchars);
+          calcbucketboundaries(&bucketspec,
+                               &suffixarray.bcktab,
+                               code);
           if (bucketspec.nonspecialsinbucket == 0)
           {
             mmsibck = NULL;
