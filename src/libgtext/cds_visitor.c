@@ -105,12 +105,10 @@ static void create_CDS_features_for_longest_ORF(Array *orfs, CDSVisitor *v,
   orf = *(Range*) array_get(orfs, 0);
   assert(range_length(orf) >= 3);
   /* the first CDS feature */
-  /*printf("%lu, %lu\n", orf.start, orf.end); */
   cds.start = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
                              ? orf.start : orf.end) + 1;
   cds.end = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
                            ? orf.end : orf.start) + 1;
-  /*printf("%lu, %lu\n", cds.start, cds.end);*/
   cds_feature = genome_feature_new(gft_CDS, cds,
                                    genome_feature_get_strand((GenomeFeature*)
                                                              gn), NULL,
@@ -123,7 +121,6 @@ static void create_CDS_features_for_longest_ORF(Array *orfs, CDSVisitor *v,
        strand == STRAND_FORWARD ? i < orf.end : i > orf.start;
        strand == STRAND_FORWARD ? i++ : i--) {
     if (splicedseq_pos_is_border(v->splicedseq, i)) {
-      /*printf("i=%lu\n", i);*/
       genome_feature_set_end((GenomeFeature*) cds_feature,
                              splicedseq_map(v->splicedseq, i) + 1);
       genome_node_is_part_of_genome_node(gn, cds_feature);
@@ -176,7 +173,6 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
     pr_0 = str_new();
     pr_1 = str_new();
     pr_2 = str_new();
-    /* printf("pr_0=%s\n", str_get(pr_0)); */
     orfs = array_new(sizeof (Range));
     translate_dna(pr_0, splicedseq_get(v->splicedseq),
                   splicedseq_length(v->splicedseq), 0);
