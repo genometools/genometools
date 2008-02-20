@@ -67,3 +67,9 @@ Test do
   run "#{$bin}gt stat -exonnumberdistri #{$testdata}encode_known_genes_Mar07.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_stat_exonnumberdistri_encode.out"
 end
+
+Name "gt stat (unsorted)"
+Keywords "gt_stat"
+Test do
+  run "#{$bin}gt stat #{$testdata}unsorted_gff3_file.txt"
+end

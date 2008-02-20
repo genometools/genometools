@@ -71,7 +71,7 @@ GenomeStream* stat_stream_new(GenomeStream *in_stream,
                               bool exon_number_distri,
                               bool intron_length_distri)
 {
-  GenomeStream *gs = genome_stream_create(stat_stream_class(), true);
+  GenomeStream *gs = genome_stream_create(stat_stream_class(), false);
   StatStream *ss = stat_stream_cast(gs);
   ss->in_stream = genome_stream_ref(in_stream);
   ss->stat_visitor = stat_visitor_new(gene_length_distri, gene_score_distri,
