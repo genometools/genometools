@@ -70,7 +70,8 @@ GTLIBS:=lib/libgtext.a\
         lib/libgtmatch.a\
         lib/libgtltr.a\
         lib/libgtcore.a\
-        lib/libgtlua.a
+        lib/libgtlua.a\
+        lib/libexpat.a
 
 # the default GenomeThreader shared libraries which are build
 GTSHAREDLIBS:=lib/libgtcore$(SHARED_OBJ_NAME_EXT)\

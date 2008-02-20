@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 2007 David Schmitz-Huebsch <dschmitz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -16,10 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/tooldriver.h"
 #include "libgtmgth/metagenomethreader.h"
+#include "tools/gt_mgth.h"
 
-int main(int argc, char *argv[])
+int gt_mgth(int argc, const char **argv, Error *err)
 {
-  return tooldriver(metagenomethreader, argc, argv);
+  error_check(err);
+  return metagenomethreader(argc, argv, err);
 }

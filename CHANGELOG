@@ -1,6 +1,7 @@
-changes in version 1.1.0 (2008-02-19)
+changes in version 1.1.0 (2008-02-20)
 
 - `gt filter` has new optios -strand, -overlap, and -minaveragessp
+- new tool `gt mgth` has been added
 
 
 changes in version 1.0.9 (2008-02-04):
