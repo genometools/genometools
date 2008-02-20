@@ -442,6 +442,7 @@ static int constructsarrandrunmmsearch(
                  const Encodedsequence *dbencseq,
                  Readmode readmode,
                  unsigned int numofchars,
+                 const Uchar *characters,
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  const Uchar *query,
@@ -463,6 +464,7 @@ static int constructsarrandrunmmsearch(
                        dbencseq,
                        readmode,
                        numofchars,
+                       characters,
                        prefixlength,
                        numofparts,
                        NULL,
@@ -476,8 +478,7 @@ static int constructsarrandrunmmsearch(
   {
     while (true)
     {
-      suftabptr = nextSfxiterator(&numofsuffixes,&specialsuffixes,
-                                  mtime,sfi,err);
+      suftabptr = nextSfxiterator(&numofsuffixes,&specialsuffixes,mtime,sfi);
       if (suftabptr == NULL)
       {
         break;
@@ -538,6 +539,7 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                                   dbencseq,
                                   Forwardmode,
                                   numofchars,
+                                  getcharactersAlphabet(alpha),
                                   recommendedprefixlength(numofchars,dblen),
                                   1U, /* parts */
                                   query,

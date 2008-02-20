@@ -27,15 +27,9 @@
 
 struct Bucketenumerator
 {
-  const Seqpos *bcktab,
-               *countspecialcodes;
-  Codetype numofallcodes;
-  const Codetype *filltable,
-                 **multimappower;
+  const Bcktab *bcktab; /* only need multimappower and filltable */
   unsigned int prefixlength,
-               numofchars,
                demandprefixlength;
-  Seqpos totallength;
   Bucketspecification bucketspec;
   Codetype currentcode, lastcode;
 };
@@ -65,38 +59,27 @@ static inline unsigned int prefixqgram2code(Codetype *code,
   return qvalue;
 }
 
-Bucketenumerator *newbucketenumerator(Seqpos totallength,
-                                      const Seqpos *bcktab,
-                                      const Seqpos *countspecialcodes,
-                                      Codetype numofallcodes,
-                                      const Codetype **multimappower,
-                                      const Codetype *filltable,
+Bucketenumerator *newbucketenumerator(const Bcktab *bcktab,
                                       unsigned int prefixlength,
                                       const Uchar *demandprefix,
-                                      unsigned int demandprefixlength,
-                                      unsigned int numofchars)
+                                      unsigned int demandprefixlength)
 {
   Bucketenumerator *bucketenumerator;
   unsigned int firstspecial;
 
   ALLOCASSIGNSPACE(bucketenumerator,NULL,Bucketenumerator,1);
-  bucketenumerator->totallength = totallength;
   bucketenumerator->bcktab = bcktab;
-  bucketenumerator->countspecialcodes = countspecialcodes;
-  bucketenumerator->numofallcodes = numofallcodes;
   bucketenumerator->prefixlength = prefixlength;
   bucketenumerator->demandprefixlength = demandprefixlength;
-  bucketenumerator->multimappower = multimappower;
-  bucketenumerator->filltable = filltable;
-  bucketenumerator->numofchars = numofchars;
   firstspecial = prefixqgram2code(&bucketenumerator->currentcode,
-                                  bucketenumerator->multimappower,
+                                  bcktab_multimappower(bcktab),
                                   prefixlength,
                                   demandprefixlength,
                                   demandprefix);
   assert(firstspecial == prefixlength);
-  bucketenumerator->lastcode = bucketenumerator->currentcode +
-                               bucketenumerator->filltable[demandprefixlength];
+  bucketenumerator->lastcode
+    = bucketenumerator->currentcode
+      + bcktab_filltable(bcktab,demandprefixlength);
   return bucketenumerator;
 }
 
@@ -108,15 +91,9 @@ bool nextbucketenumerator(Lcpinterval *itv,Bucketenumerator *bucketenumerator)
     {
       break;
     }
-    (void) calcbucketboundaries(&bucketenumerator->bucketspec,
-                                bucketenumerator->bcktab,
-                                bucketenumerator->countspecialcodes,
-                                bucketenumerator->currentcode,
-                                bucketenumerator->numofallcodes,
-                                bucketenumerator->totallength,
-                                bucketenumerator->currentcode %
-                                  bucketenumerator->numofchars,
-                                bucketenumerator->numofchars);
+    calcbucketboundaries(&bucketenumerator->bucketspec,
+                         bucketenumerator->bcktab,
+                         bucketenumerator->currentcode);
     bucketenumerator->currentcode++;
     if (bucketenumerator->bucketspec.nonspecialsinbucket > 0)
     {

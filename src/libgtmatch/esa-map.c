@@ -31,10 +31,10 @@
 #include "sfx-ri-def.h"
 #include "intcode-def.h"
 #include "spacedef.h"
+#include "bckbound.h"
 #include "stamp.h"
 
 #include "opensfxfile.pr"
-#include "initbasepower.pr"
 
 #define DBFILEKEY "dbfile="
 
@@ -201,7 +201,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       if (littleendian != (uint32_t) 1)
       {
         error_set(err,"computer has little endian byte order, while index "
-                          "was build on computer with big endian byte order");
+                      "was build on computer with big endian byte order");
         haserr = true;
       }
     } else
@@ -209,8 +209,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       if (littleendian == (uint32_t) 1)
       {
         error_set(err,"computer has big endian byte order, while index "
-                          "was build on computer with little endian byte "
-                          "order");
+                      "was build on computer with little endian byte "
+                      "order");
         haserr = true;
       }
     }
@@ -294,8 +294,6 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->llvtab = NULL;
   suffixarray->bwttab = NULL;
   suffixarray->destab = NULL;
-  suffixarray->bcktab = NULL;
-  suffixarray->countspecialcodes = NULL;
   suffixarray->alpha = NULL;
   suffixarray->encseq = NULL;
   suffixarray->bwttabstream.fp = NULL;
@@ -303,9 +301,7 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->llvtabstream.fp = NULL;
   suffixarray->lcptabstream.fp = NULL;
   suffixarray->destablength = 0;
-  suffixarray->multimappower = NULL;
-  suffixarray->filltable = NULL;
-  suffixarray->numofallcodes = 0;
+  initbcktabwithNULL(&suffixarray->bcktab);
 }
 
 static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
@@ -365,8 +361,6 @@ void freesuffixarray(Suffixarray *suffixarray)
   suffixarray->bwttab = NULL;
   fa_xmunmap((void *) suffixarray->destab);
   suffixarray->destab = NULL;
-  fa_xmunmap((void *) suffixarray->bcktab);
-  suffixarray->bcktab = NULL;
   fa_xfclose(suffixarray->suftabstream.fp);
   suffixarray->suftabstream.fp = NULL;
   fa_xfclose(suffixarray->lcptabstream.fp);
@@ -383,8 +377,7 @@ void freesuffixarray(Suffixarray *suffixarray)
   strarray_delete(suffixarray->filenametab);
   suffixarray->filenametab = NULL;
   FREESPACE(suffixarray->filelengthtab);
-  multimappowerfree(&suffixarray->multimappower);
-  FREESPACE(suffixarray->filltable);
+  freebcktab(&suffixarray->bcktab,true);
 }
 
 static int inputsuffixarray(bool map,
@@ -528,32 +521,14 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      Codetype numofspecialcodes, *basepower;
-      unsigned int numofchars = getnumofcharsAlphabet(suffixarray->alpha);
-
-      basepower = initbasepower(numofchars,suffixarray->prefixlength);
-      suffixarray->numofallcodes = basepower[suffixarray->prefixlength];
-      numofspecialcodes = basepower[suffixarray->prefixlength-1];
-      suffixarray->filltable = initfilltable(basepower,
-                                             suffixarray->prefixlength);
-      FREESPACE(basepower);
-      suffixarray->multimappower
-        = initmultimappower(numofchars,suffixarray->prefixlength);
-      suffixarray->bcktab = genericmaptable(indexname,
-                                            BCKTABSUFFIX,
-                                            (Seqpos)
-                                             (suffixarray->numofallcodes + 1 +
-                                              numofspecialcodes),
-                                            sizeof (Seqpos),
-                                            err);
-      if (suffixarray->bcktab == NULL)
+      if (mapbcktab(&suffixarray->bcktab,
+                    indexname,
+                    *totallength,
+                    getnumofcharsAlphabet(suffixarray->alpha),
+                    suffixarray->prefixlength,
+                    err) != 0)
       {
         haserr = true;
-        suffixarray->countspecialcodes = NULL;
-      } else
-      {
-        suffixarray->countspecialcodes
-          = suffixarray->bcktab + suffixarray->numofallcodes + 1;
       }
     } else
     {

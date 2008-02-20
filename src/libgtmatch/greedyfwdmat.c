@@ -320,14 +320,14 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                  substring.currentptr + substring.remaining);
     if (leftborder != NULL)
     {
-      (void) calcbucketboundaries(&bucketspec,
-                                  leftborder,
-                                  countspecialcodes,
-                                  substring.currentcode,
-                                  maxcode,
-                                  totalwidth,
-                                  substring.currentcode % numofchars,
-                                  numofchars);
+      calcbucketboundaries(&bucketspec,
+                           leftborder,
+                           countspecialcodes,
+                           substring.currentcode,
+                           maxcode,
+                           totalwidth,
+                           substring.currentcode % numofchars,
+                           numofchars);
       if (bucketspec.nonspecialsinbucket > 0)
       {
         gmatchlength2 = gmatchforward(genericindex,

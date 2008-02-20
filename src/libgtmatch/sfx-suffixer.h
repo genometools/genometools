@@ -33,6 +33,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             const Encodedsequence *encseq,
                             Readmode readmode,
                             unsigned int numofchars,
+                            const Uchar *characters,
                             unsigned int prefixlength,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
@@ -43,10 +44,8 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
 const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,
                               bool *specialsuffixes,
                               Measuretime *mtime,
-                              Sfxiterator *sfi,
-                              Error *err);
+                              Sfxiterator *sfi);
 
-int bcktab2file(FILE *fp,const Sfxiterator *sfi,unsigned int prefixlength,
-                Error *err);
+int sfibcktab2file(FILE *fp,const Sfxiterator *sfi,Error *err);
 
 #endif

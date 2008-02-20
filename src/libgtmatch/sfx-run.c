@@ -209,6 +209,7 @@ static int suffixeratorwithoutput(
                  const Encodedsequence *encseq,
                  Readmode readmode,
                  unsigned int numofchars,
+                 const Uchar *characters,
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  UNUSED const Str *indexname,
@@ -226,6 +227,7 @@ static int suffixeratorwithoutput(
                        encseq,
                        readmode,
                        numofchars,
+                       characters,
                        prefixlength,
                        numofparts,
                        outfileinfo->outlcpinfo,
@@ -240,7 +242,7 @@ static int suffixeratorwithoutput(
     while (true)
     {
       suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
-                                  mtime,sfi,err);
+                                  mtime,sfi);
       if (suftabptr == NULL)
       {
         break;
@@ -254,7 +256,7 @@ static int suffixeratorwithoutput(
   }
   if (outfileinfo->outfpbcktab != NULL)
   {
-    if (bcktab2file(outfileinfo->outfpbcktab,sfi,prefixlength,err) != 0)
+    if (sfibcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)
     {
       haserr = true;
     }
@@ -472,6 +474,7 @@ static int runsuffixerator(bool doesa,
                            encseq,
                            so->readmode,
                            numofchars,
+                           getcharactersAlphabet(alpha),
                            so->prefixlength,
                            so->numofparts,
                            so->outlcptab ? so->str_indexname : NULL,
@@ -519,8 +522,7 @@ static int runsuffixerator(bool doesa,
         assert(sfi != NULL);
         if (outfileinfo.outfpbcktab != NULL)
         {
-          if (bcktab2file(outfileinfo.outfpbcktab,sfi,so->prefixlength,
-                          err) != 0)
+          if (sfibcktab2file(outfileinfo.outfpbcktab,sfi,err) != 0)
           {
             haserr = true;
           }

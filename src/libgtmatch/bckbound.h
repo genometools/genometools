@@ -19,8 +19,10 @@
 #define BCKBOUND_H
 
 #include <assert.h>
+#include "libgtcore/error.h"
+#include "libgtcore/str.h"
+#include "libgtcore/symboldef.h"
 #include "seqpos-def.h"
-#include "sfx-codespec.h"
 #include "intcode-def.h"
 
 typedef struct
@@ -37,53 +39,80 @@ typedef struct
          right;
 } Lcpinterval;
 
-/*@unused@*/ static inline unsigned int
-              calcbucketboundaries(Bucketspecification *bucketspec,
-                                   const Seqpos *leftborder,
-                                   const Seqpos *countspecialcodes,
+typedef struct
+{
+  Seqpos totallength,
+         *leftborder,
+         *countspecialcodes;
+  Codetype numofallcodes,
+           numofspecialcodes,
+           **multimappower,
+           *basepower,
+           *filltable;
+  unsigned long **distpfxidx;
+} Bcktab;
+
+int mapbcktab(Bcktab *bcktab,
+              const Str *indexname,
+              Seqpos totallength,
+              unsigned int numofchars,
+              unsigned int prefixlength,
+              Error *err);
+
+void freebcktab(Bcktab *bcktab,bool mapped);
+
+void initbcktabwithNULL(Bcktab *bcktab);
+
+int allocBcktab(Bcktab *bcktab,
+                Seqpos totallength,
+                unsigned int numofchars,
+                unsigned int prefixlength,
+                unsigned int codebits,
+                unsigned int maxcodevalue,
+                Error *err);
+
+void updatebckspecials(Bcktab *bcktab,
+                       Codetype code,
+                       unsigned int numofchars,
+                       unsigned int prefixindex,
+                       unsigned int prefixlength);
+
+Codetype codedownscale(const Bcktab *bcktab,
+                       Codetype code,
+                       unsigned int prefixindex,
+                       unsigned int maxprefixlen);
+
+void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
+                         Seqpos specialcharacters);
+
+int bcktab2file(FILE *fp,
+                const Bcktab *bcktab,
+                Error *err);
+
+unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
+                                   const Bcktab *bcktab,
                                    Codetype code,
                                    Codetype maxcode,
                                    Seqpos totalwidth,
                                    unsigned int rightchar,
-                                   unsigned int numofchars)
-{
-  bucketspec->left = leftborder[code];
-  if (code == maxcode)
-  {
-    assert(totalwidth >= bucketspec->left);
-    bucketspec->nonspecialsinbucket
-      = (unsigned long) (totalwidth - bucketspec->left);
-  } else
-  {
-    if (leftborder[code+1] > 0)
-    {
-      bucketspec->nonspecialsinbucket
-        = (unsigned long) (leftborder[code+1] - bucketspec->left);
-    } else
-    {
-      bucketspec->nonspecialsinbucket = 0;
-    }
-  }
-  assert(rightchar == code % numofchars);
-  if (rightchar == numofchars - 1)
-  {
-    bucketspec->specialsinbucket
-      = (unsigned long)
-        countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
-    if (bucketspec->nonspecialsinbucket >= bucketspec->specialsinbucket)
-    {
-      bucketspec->nonspecialsinbucket -= bucketspec->specialsinbucket;
-    } else
-    {
-      bucketspec->nonspecialsinbucket = 0;
-    }
-    rightchar = 0;
-  } else
-  {
-    bucketspec->specialsinbucket = 0;
-    rightchar++;
-  }
-  return rightchar;
-}
+                                   unsigned int numofchars);
+
+void calcbucketboundaries(Bucketspecification *bucketspec,
+                          const Bcktab *bcktab,
+                          Codetype code);
+
+unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
+                              unsigned long specialsinbucket,
+                              const Bcktab *bcktab,
+                              Codetype code,
+                              unsigned int prefixlength);
+
+const Codetype **bcktab_multimappower(const Bcktab *bcktab);
+
+Codetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx);
+
+Seqpos *bcktab_leftborder(Bcktab *bcktab);
+
+Codetype bcktab_numofallcodes(Bcktab *bcktab);
 
 #endif

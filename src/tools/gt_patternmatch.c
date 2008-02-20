@@ -95,8 +95,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     unsigned long trial;
     Seqpos dbstart;
     Enumpatterniterator *epi;
-    unsigned int firstspecial,
-                 numofchars = getnumofcharsAlphabet(suffixarray.alpha);
+    unsigned int firstspecial;
     Codetype code = 0;
     MMsearchiterator *mmsibck, *mmsiimm;
     Bucketspecification bucketspec;
@@ -106,11 +105,12 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     Encodedsequencescanstate *esr1, *esr2;
     int retval;
     Seqpos idx, maxlcp;
+    const Codetype **multimappower = bcktab_multimappower(&suffixarray.bcktab);
 
     epi = newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
-                                 numofchars,
+                                 getnumofcharsAlphabet(suffixarray.alpha),
                                  err);
     esr1 = newEncodedsequencescanstate();
     esr2 = newEncodedsequencescanstate();
@@ -127,17 +127,11 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
         if (patternlen < (unsigned long) suffixarray.prefixlength)
         {
           mmsibck = NULL;
-          bucketenumerator = newbucketenumerator(totallength,
-                                                 suffixarray.bcktab,
-                                                 suffixarray.countspecialcodes,
-                                                 suffixarray.numofallcodes,
-                                                 (const Codetype **)
-                                                 suffixarray.multimappower,
-                                                 suffixarray.filltable,
-                                                 suffixarray.prefixlength,
-                                                 pptr,
-                                                 (unsigned int) patternlen,
-                                                 numofchars);
+          bucketenumerator
+            = newbucketenumerator(&suffixarray.bcktab,
+                                  suffixarray.prefixlength,
+                                  pptr,
+                                  (unsigned int) patternlen);
           refstart = UNDEFREFSTART;
           while (nextbucketenumerator(&itv,bucketenumerator))
           {
@@ -166,33 +160,28 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
         } else
         {
           firstspecial = qgram2code(&code,
-                                    (const Codetype **)
-                                       suffixarray.multimappower,
+                                    multimappower,
                                     suffixarray.prefixlength,
                                     pptr);
           assert(firstspecial == suffixarray.prefixlength);
-          (void) calcbucketboundaries(&bucketspec,
-                                      suffixarray.bcktab,
-                                      suffixarray.countspecialcodes,
-                                      code,
-                                      suffixarray.numofallcodes,
-                                      totallength,
-                                      code % numofchars,
-                                      numofchars);
+          calcbucketboundaries(&bucketspec,
+                               &suffixarray.bcktab,
+                               code);
           if (bucketspec.nonspecialsinbucket == 0)
           {
             mmsibck = NULL;
           } else
           {
-            mmsibck = newmmsearchiterator(suffixarray.encseq,
-                                          suffixarray.suftab,
-                                          bucketspec.left,
-                                          bucketspec.left +
-                                            bucketspec.nonspecialsinbucket-1,
-                                          (Seqpos) suffixarray.prefixlength,
-                                          suffixarray.readmode,
-                                          pptr,
-                                          patternlen);
+            mmsibck
+              = newmmsearchiterator(suffixarray.encseq,
+                                    suffixarray.suftab,
+                                    bucketspec.left,
+                                    bucketspec.left +
+                                      bucketspec.nonspecialsinbucket-1,
+                                    (Seqpos) suffixarray.prefixlength,
+                                    suffixarray.readmode,
+                                    pptr,
+                                    patternlen);
           }
         }
       }

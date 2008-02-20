@@ -40,6 +40,7 @@ static int constructsarrandrunmaxpairs(
                  Seqpos specialranges,
                  Readmode readmode,
                  unsigned int numofchars,
+                 const Uchar *characters,
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  Measuretime *mtime,
@@ -57,6 +58,7 @@ static int constructsarrandrunmaxpairs(
                        ssi->encseq,
                        readmode,
                        numofchars,
+                       characters,
                        prefixlength,
                        numofparts,
                        NULL,
@@ -75,8 +77,7 @@ static int constructsarrandrunmaxpairs(
                                                  readmode);
     while (true)
     {
-      suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
-                                  mtime,sfi,err);
+      suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,mtime,sfi);
       if (suftabptr == NULL || specialsuffixes)
       {
         break;
@@ -145,6 +146,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                                   samplespecialcharinfo.specialranges,
                                   Forwardmode,
                                   numofchars,
+                                  getcharactersAlphabet(alpha),
                                   recommendedprefixlength(numofchars,
                                                           dblen+querylen+1),
                                   1U, /* parts */

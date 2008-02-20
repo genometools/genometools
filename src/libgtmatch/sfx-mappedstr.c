@@ -400,99 +400,80 @@ static void filllargestchartable(unsigned int **filltable,
   }
 }
 
-static int getencseqkmersgeneric(
-                      const Encodedsequence *encseq,
-                      Readmode readmode,
-                      const StrArray *filenametab,
-                      void(*processkmercode)(void *,Codetype,Seqpos,
-                                             const Firstspecialpos *),
-                      void *processkmercodeinfo,
-                      unsigned int numofchars,
-                      unsigned int kmersize,
-                      const Uchar *symbolmap,
-                      bool plainformat,
-                      Error *err)
+static void initstreamstate(Streamstate *spwp,unsigned int numofchars,
+                            unsigned int kmersize)
+{
+  spwp->multimappower = initmultimappower(numofchars,kmersize);
+  spwp->lengthwithoutspecial = 0;
+  spwp->codewithoutspecial = 0;
+  spwp->kmersize = kmersize;
+  spwp->numofchars = numofchars;
+  spwp->windowwidth = 0;
+  spwp->firstindex = 0;
+  ALLOCASSIGNSPACE(spwp->cyclicwindow,NULL,Uchar,kmersize);
+  specialemptyqueue(&spwp->spos,kmersize);
+  filllargestchartable(&spwp->filltable,numofchars,kmersize);
+}
+
+static void freestreamstate(Streamstate *spwp)
+{
+  FREESPACE(spwp->cyclicwindow);
+  FREESPACE(spwp->filltable);
+  multimappowerfree(&spwp->multimappower);
+  specialwrapqueue(&spwp->spos);
+}
+
+static void doovershoot(Streamstate *spwp,
+                        void(*processkmercode)(void *,Codetype,Seqpos,
+                                               const Firstspecialpos *),
+                        void *processkmercodeinfo,
+                        Seqpos currentposition,
+                        unsigned int kmersize)
 {
   unsigned int overshoot;
+
+  for (overshoot=0; overshoot<kmersize; overshoot++)
+  {
+    shiftrightwithchar(processkmercode,processkmercodeinfo,spwp,
+                       currentposition + overshoot,(Uchar) WILDCARD);
+  }
+}
+
+void getencseqkmers(
+        const Encodedsequence *encseq,
+        Readmode readmode,
+        void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
+        void *processkmercodeinfo,
+        unsigned int numofchars,
+        unsigned int kmersize)
+{
   Seqpos currentposition = 0;
   Streamstate spwp;
   Uchar charcode;
-  bool haserr = false;
 
-  error_check(err);
-  spwp.multimappower = initmultimappower(numofchars,kmersize);
-  spwp.lengthwithoutspecial = 0;
-  spwp.codewithoutspecial = 0;
-  spwp.kmersize = kmersize;
-  spwp.numofchars = numofchars;
-  spwp.windowwidth = 0;
-  spwp.firstindex = 0;
-  ALLOCASSIGNSPACE(spwp.cyclicwindow,NULL,Uchar,kmersize);
-  specialemptyqueue(&spwp.spos,kmersize);
-  filllargestchartable(&spwp.filltable,numofchars,kmersize);
-  if (encseq != NULL)
+  Seqpos totallength = getencseqtotallength(encseq);
+  Encodedsequencescanstate *esr;
+
+  initstreamstate(&spwp,numofchars,kmersize);
+  esr = newEncodedsequencescanstate();
+  initEncodedsequencescanstate(esr,encseq,readmode,0);
+  for (currentposition = 0; currentposition<totallength; currentposition++)
   {
-    Seqpos totallength = getencseqtotallength(encseq);
-    Encodedsequencescanstate *esr;
-
-    esr = newEncodedsequencescanstate();
-    initEncodedsequencescanstate(esr,encseq,readmode,0);
-    for (currentposition = 0; currentposition<totallength; currentposition++)
-    {
-      charcode = sequentialgetencodedchar(encseq,esr,currentposition);
-      CHECKENCCHAR(charcode,encseq,currentposition,readmode);
-      shiftrightwithchar(processkmercode,processkmercodeinfo,
-                         &spwp,currentposition,charcode);
-    }
-    if (esr != NULL)
-    {
-      freeEncodedsequencescanstate(&esr);
-    }
-  } else
-  {
-    FastaBuffer *fb;
-    int retval;
-
-    assert(readmode == Forwardmode);
-    if (!haserr)
-    {
-      fb = fastabuffer_new(filenametab,
-                           symbolmap,
-                           plainformat,
-                           NULL,
-                           NULL,
-                           NULL);
-      for (currentposition = 0; /* Nothing */; currentposition++)
-      {
-        retval = fastabuffer_next(fb,&charcode,err);
-        if (retval < 0)
-        {
-          haserr = true;
-          break;
-        }
-        if (retval == 0)
-        {
-          break;
-        }
-        shiftrightwithchar(processkmercode,processkmercodeinfo,
-                           &spwp,currentposition,charcode);
-      }
-      fastabuffer_delete(fb);
-    }
+    charcode = sequentialgetencodedchar(encseq,esr,currentposition);
+    CHECKENCCHAR(charcode,encseq,currentposition,readmode);
+    shiftrightwithchar(processkmercode,processkmercodeinfo,
+                       &spwp,currentposition,charcode);
   }
-  if (!haserr)
+  if (esr != NULL)
   {
-    for (overshoot=0; overshoot<kmersize; overshoot++)
-    {
-      shiftrightwithchar(processkmercode,processkmercodeinfo,&spwp,
-                         currentposition + overshoot,(Uchar) WILDCARD);
-    }
+    freeEncodedsequencescanstate(&esr);
   }
-  FREESPACE(spwp.cyclicwindow);
-  FREESPACE(spwp.filltable);
-  multimappowerfree(&spwp.multimappower);
-  specialwrapqueue(&spwp.spos);
-  return haserr ? -1 : 0;
+  doovershoot(&spwp,
+              processkmercode,
+              processkmercodeinfo,
+              currentposition,
+              kmersize);
+  freestreamstate(&spwp);
 }
 
 int getfastastreamkmers(
@@ -505,35 +486,46 @@ int getfastastreamkmers(
         bool plainformat,
         Error *err)
 {
-  return getencseqkmersgeneric(NULL,
-                               Forwardmode,
-                               filenametab,
-                               processkmercode,
-                               processkmercodeinfo,
-                               numofchars,
-                               kmersize,
-                               symbolmap,
-                               plainformat,
-                               err);
-}
+  Seqpos currentposition = 0;
+  Streamstate spwp;
+  Uchar charcode;
+  bool haserr = false;
+  FastaBuffer *fb;
+  int retval;
 
-void getencseqkmers(
-        const Encodedsequence *encseq,
-        Readmode readmode,
-        void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
-        void *processkmercodeinfo,
-        unsigned int numofchars,
-        unsigned int kmersize,
-        Error *err)
-{
-  (void) getencseqkmersgeneric(encseq, /* not NULL */
-                               readmode,
-                               NULL,
-                               processkmercode,
-                               processkmercodeinfo,
-                               numofchars,
-                               kmersize,
-                               NULL,
-                               false,
-                               err);
+  error_check(err);
+  initstreamstate(&spwp,numofchars,kmersize);
+  assert(readmode == Forwardmode);
+  fb = fastabuffer_new(filenametab,
+                       symbolmap,
+                       plainformat,
+                       NULL,
+                       NULL,
+                       NULL);
+  for (currentposition = 0; /* Nothing */; currentposition++)
+  {
+    retval = fastabuffer_next(fb,&charcode,err);
+    if (retval < 0)
+    {
+      haserr = true;
+      break;
+    }
+    if (retval == 0)
+    {
+      break;
+    }
+    shiftrightwithchar(processkmercode,processkmercodeinfo,
+                       &spwp,currentposition,charcode);
+  }
+  fastabuffer_delete(fb);
+  if (!haserr)
+  {
+    doovershoot(&spwp,
+                processkmercode,
+                processkmercodeinfo,
+                currentposition,
+                kmersize);
+  }
+  freestreamstate(&spwp);
+  return haserr ? -1 : 0;
 }

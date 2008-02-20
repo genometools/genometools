@@ -29,13 +29,11 @@
 #include "encseq-def.h"
 #include "turnwheels.h"
 #include "esafileend.h"
-#include "sfx-codespec.h"
 #include "sfx-outlcp.h"
 #include "bckbound.h"
 
 #include "sfx-cmpsuf.pr"
 #include "opensfxfile.pr"
-#include "kmer2string.pr"
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
@@ -349,8 +347,7 @@ static void outmany0lcpvalues(Seqpos many,Outlcpinfo *outlcpinfo)
   outlcpinfo->countoutputlcpvalues += many;
 }
 
-static unsigned long determinemaxbucketsize(const Seqpos *leftborder,
-                                            const Seqpos *countspecialcodes,
+static unsigned long determinemaxbucketsize(const Bcktab *bcktab,
                                             const Codetype mincode,
                                             const Codetype maxcode,
                                             Seqpos totalwidth,
@@ -363,14 +360,13 @@ static unsigned long determinemaxbucketsize(const Seqpos *leftborder,
 
   for (code = mincode; code <= maxcode; code++)
   {
-    rightchar = calcbucketboundaries(&bucketspec,
-                                     leftborder,
-                                     countspecialcodes,
-                                     code,
-                                     maxcode,
-                                     totalwidth,
-                                     rightchar,
-                                     numofchars);
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      totalwidth,
+                                      rightchar,
+                                      numofchars);
     if (bucketspec.nonspecialsinbucket > maxbucketsize)
     {
       maxbucketsize = bucketspec.nonspecialsinbucket;
@@ -459,78 +455,41 @@ static void bucketends(const Encodedsequence *encseq,
                        Encodedsequencescanstate *esr2,
                        Outlcpinfo *outlcpinfo,
                        Seqpos previoussuffix,
-                       const Seqpos *specialsection,
+                       Seqpos firstspecialsuffix,
                        unsigned long specialsinbucket,
                        Codetype code,
                        unsigned int prefixlength,
-                       unsigned long *countpfxidx,
-                       const unsigned long **distpfxidx_startpointers,
-                       const Codetype *basepower,
-                       const Codetype *filltable,
-                       unsigned int numofchars)
+                       const Bcktab *bcktab)
 {
-  unsigned long i;
-  unsigned int prefixindex;
   Seqpos lcpvalue;
-  Codetype ordercode;
-  unsigned long insertindex;
 
-  for (prefixindex=0; prefixindex<prefixlength; prefixindex++)
+  if (specialsinbucket > 1UL)
   {
-    countpfxidx[prefixindex] = 0;
-  }
-  for (i=0; i<specialsinbucket; i++)
-  {
-    lcpvalue = computelocallcpvalue(encseq,
-                                    readmode,
-                                    i == 0 ? previoussuffix
-                                           : specialsection[i-1],
-                                    specialsection[i],
-                                    esr1,
-                                    esr2);
-    if (outlcpinfo->maxbranchdepth < lcpvalue)
+    unsigned int maxvalue;
+
+    maxvalue = pfxidx2lcpvalues(outlcpinfo->lcpsubtab.smalllcpvalues,
+                                specialsinbucket,
+                                bcktab,
+                                code,
+                                prefixlength);
+    if (outlcpinfo->maxbranchdepth < (Seqpos) maxvalue)
     {
-      outlcpinfo->maxbranchdepth = lcpvalue;
-    }
-    assert(lcpvalue < (Seqpos) prefixlength);
-    assert(lcpvalue > 0);
-    countpfxidx[lcpvalue-1]++;
-    outlcpinfo->lcpsubtab.smalllcpvalues[i] = (Uchar) lcpvalue;
-    if (i > 0)
-    {
-      assert(outlcpinfo->lcpsubtab.smalllcpvalues[i-1] >= (Uchar) lcpvalue);
+      outlcpinfo->maxbranchdepth = (Seqpos) maxvalue;
     }
   }
-  insertindex = specialsinbucket-1;
-  for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
+  lcpvalue = computelocallcpvalue(encseq,
+                                  readmode,
+                                  previoussuffix,
+                                  firstspecialsuffix,
+                                  esr1,
+                                  esr2);
+  if (outlcpinfo->maxbranchdepth < lcpvalue)
   {
-    if (countpfxidx[prefixindex-1] > 0)
-    {
-      assert(code >= filltable[prefixindex]);
-      ordercode = (code - filltable[prefixindex])/
-                  basepower[prefixlength - prefixindex];
-      assert(ordercode < basepower[prefixindex]);
-      if (countpfxidx[prefixindex-1] !=
-          distpfxidx_startpointers[prefixindex-1][ordercode])
-      {
-        char buffer[20+1];
-          kmercode2string(buffer,
-                          code,
-                          numofchars,
-                          prefixlength,
-                          "acgt");
-        fprintf(stderr,"code %u(%s): countpfxidx[%u] = %lu != %lu = "
-                       "distpfxidx_startpointers[%u][%u]\n",
-                       (unsigned int) code,
-                       buffer,
-                       prefixindex-1,
-                       countpfxidx[prefixindex-1],
-                       distpfxidx_startpointers[prefixindex-1][ordercode],
-                       prefixindex-1,
-                       ordercode);
-      }
-    }
+    outlcpinfo->maxbranchdepth = lcpvalue;
   }
+  assert(lcpvalue < (Seqpos) prefixlength);
+  assert(lcpvalue > 0);
+  outlcpinfo->lcpsubtab.smalllcpvalues[0] = (Uchar) lcpvalue;
   outlcpinfo->countoutputlcpvalues += specialsinbucket;
   xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
           sizeof (Uchar),(size_t) specialsinbucket,outlcpinfo->outfplcptab);
@@ -617,14 +576,9 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype maxcode,
                     Seqpos totalwidth,
                     Seqpos previoussuffix,
-                    const Seqpos *leftborder,
-                    const Seqpos *countspecialcodes,
+                    const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
-                    unsigned long *countpfxidx,
-                    const unsigned long **distpfxidx_startpointers,
-                    const Codetype *basepower,
-                    const Codetype *filltable,
                     Outlcpinfo *outlcpinfo)
 {
   Codetype code;
@@ -646,8 +600,7 @@ void sortallbuckets(Seqpos *suftabptr,
   }
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
-  maxbucketsize = determinemaxbucketsize(leftborder,
-                                         countspecialcodes,
+  maxbucketsize = determinemaxbucketsize(bcktab,
                                          mincode,
                                          maxcode,
                                          totalwidth,
@@ -663,14 +616,13 @@ void sortallbuckets(Seqpos *suftabptr,
   INITARRAY(&mkvauxstack,MKVstack);
   for (code = mincode; code <= maxcode; code++)
   {
-    rightchar = calcbucketboundaries(&bucketspec,
-                                     leftborder,
-                                     countspecialcodes,
-                                     code,
-                                     maxcode,
-                                     totalwidth,
-                                     rightchar,
-                                     numofchars);
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      totalwidth,
+                                      rightchar,
+                                      numofchars);
     if (outlcpinfo != NULL && code > 0)
     {
       (void) nextTurningwheel(outlcpinfo->tw);
@@ -726,15 +678,11 @@ void sortallbuckets(Seqpos *suftabptr,
                    esr2,
                    outlcpinfo,
                    previoussuffix,
-                   suftabptr + bucketspec.left + bucketspec.nonspecialsinbucket,
+                   suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket],
                    bucketspec.specialsinbucket,
                    code,
                    prefixlength,
-                   countpfxidx,
-                   distpfxidx_startpointers,
-                   basepower,
-                   filltable,
-                   numofchars);
+                   bcktab);
       }
       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket > 0)
       {
