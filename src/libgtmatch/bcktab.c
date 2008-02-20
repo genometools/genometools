@@ -26,6 +26,9 @@
 
 #include "initbasepower.pr"
 
+#define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
+                            (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS))
+
 /* DELETE THE FOLLOWING THREE FUNCTIONS */
 
 static void *genericmaponlytable(const Str *indexname,const char *suffix,
@@ -112,12 +115,27 @@ int mapbcktab(Bcktab *bcktab,
   return 0;
 }
 
-void freebcktab(Bcktab *bcktab)
+void freebcktab(Bcktab *bcktab,bool mapped)
 {
-  fa_xmunmap((void *) bcktab->leftborder);
-  bcktab->leftborder = NULL;
-  bcktab->countspecialcodes = NULL;
-  multimappowerfree(&bcktab->multimappower);
+  if (mapped)
+  {
+    fa_xmunmap((void *) bcktab->leftborder);
+    bcktab->leftborder = NULL;
+    bcktab->countspecialcodes = NULL;
+  } else
+  {
+    FREESPACE(bcktab->leftborder);
+    FREESPACE(bcktab->countspecialcodes);
+  }
+  if (bcktab->multimappower != NULL)
+  {
+    multimappowerfree(&bcktab->multimappower);
+  }
+  if (bcktab->distpfxidx != NULL)
+  {
+    FREESPACE(bcktab->distpfxidx[0]);
+    FREESPACE(bcktab->distpfxidx);
+  }
   FREESPACE(bcktab->filltable);
   FREESPACE(bcktab->basepower);
 }
@@ -129,6 +147,7 @@ void initbcktabwithNULL(Bcktab *bcktab)
   bcktab->multimappower = NULL;
   bcktab->filltable = NULL;
   bcktab->basepower = NULL;
+  bcktab->distpfxidx = NULL;
 }
 
 static unsigned long **initdistprefixindexcounts(const Codetype *basepower,
@@ -172,6 +191,7 @@ int allocBcktab(Bcktab *bcktab,
   bcktab->filltable = NULL;
   bcktab->basepower = NULL;
   bcktab->leftborder = NULL;
+  bcktab->multimappower = NULL;
   bcktab->countspecialcodes = NULL;
   bcktab->basepower = initbasepower(numofchars,prefixlength);
   bcktab->filltable = initfilltable(bcktab->basepower,prefixlength);
@@ -220,6 +240,30 @@ void updatebckspecials(Bcktab *bcktab,
   bcktab->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)]++;
 }
 
+void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
+                         Seqpos specialcharacters)
+{
+  Codetype specialcode;
+
+  specialcode = FROMCODE2SPECIALCODE(bcktab->filltable[0],numofchars);
+  bcktab->countspecialcodes[specialcode] += specialcharacters + 1;
+}
+
+Codetype codedownscale(const Bcktab *bcktab,
+                       Codetype code,
+                       unsigned int prefixindex,
+                       unsigned int maxprefixlen)
+{
+  unsigned int remain;
+
+  code -= bcktab->filltable[maxprefixlen];
+  remain = maxprefixlen-prefixindex;
+  code %= (bcktab->filltable[remain]+1);
+  code *= bcktab->basepower[remain];
+  code += bcktab->filltable[prefixindex];
+  return code;
+}
+
 int bcktab2file(FILE *fp,
                 const Bcktab *bcktab,
                 Error *err)
@@ -249,4 +293,51 @@ int bcktab2file(FILE *fp,
     return -2;
   }
   return 0;
+}
+
+unsigned int calcbucketboundaries(Bucketspecification *bucketspec,
+                                  const Bcktab *bcktab,
+                                  Codetype code,
+                                  Codetype maxcode,
+                                  Seqpos totalwidth,
+                                  unsigned int rightchar,
+                                  unsigned int numofchars)
+{
+  bucketspec->left = bcktab->leftborder[code];
+  if (code == maxcode)
+  {
+    assert(totalwidth >= bucketspec->left);
+    bucketspec->nonspecialsinbucket
+      = (unsigned long) (totalwidth - bucketspec->left);
+  } else
+  {
+    if (bcktab->leftborder[code+1] > 0)
+    {
+      bucketspec->nonspecialsinbucket
+        = (unsigned long) (bcktab->leftborder[code+1] - bucketspec->left);
+    } else
+    {
+      bucketspec->nonspecialsinbucket = 0;
+    }
+  }
+  assert(rightchar == code % numofchars);
+  if (rightchar == numofchars - 1)
+  {
+    bucketspec->specialsinbucket
+      = (unsigned long)
+        bcktab->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
+    if (bucketspec->nonspecialsinbucket >= bucketspec->specialsinbucket)
+    {
+      bucketspec->nonspecialsinbucket -= bucketspec->specialsinbucket;
+    } else
+    {
+      bucketspec->nonspecialsinbucket = 0;
+    }
+    rightchar = 0;
+  } else
+  {
+    bucketspec->specialsinbucket = 0;
+    rightchar++;
+  }
+  return rightchar;
 }

@@ -77,8 +77,7 @@ static int constructsarrandrunmaxpairs(
                                                  readmode);
     while (true)
     {
-      suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
-                                  mtime,sfi,err);
+      suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,mtime,sfi);
       if (suftabptr == NULL || specialsuffixes)
       {
         break;

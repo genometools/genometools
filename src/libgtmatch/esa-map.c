@@ -377,7 +377,7 @@ void freesuffixarray(Suffixarray *suffixarray)
   strarray_delete(suffixarray->filenametab);
   suffixarray->filenametab = NULL;
   FREESPACE(suffixarray->filelengthtab);
-  freebcktab(&suffixarray->bcktab);
+  freebcktab(&suffixarray->bcktab,true);
 }
 
 static int inputsuffixarray(bool map,

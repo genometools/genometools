@@ -142,13 +142,14 @@ struct sfxInterfaceReadState
 };
 
 static int
-sfxIBWTReadNext(void *state, Symbol *dest, size_t readLen, Error *err)
+sfxIBWTReadNext(void *state, Symbol *dest, size_t readLen, 
+                UNUSED Error *err)
 {
   struct sfxInterfaceReadState *SIState = state;
   size_t readCount;
   assert(state && SIState->si);
   readCount = readSfxIBWTRange(SIState->si, SIState->bwtReadId, readLen,
-                               dest, err);
+                               dest);
   MRAEncSymbolsTransform(SIState->alphabet, dest, readCount);
   return (readCount==readLen?1:-1);
 }

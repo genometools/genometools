@@ -44,8 +44,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
 const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,
                               bool *specialsuffixes,
                               Measuretime *mtime,
-                              Sfxiterator *sfi,
-                              Error *err);
+                              Sfxiterator *sfi);
 
 int sfibcktab2file(FILE *fp,const Sfxiterator *sfi,Error *err);
 

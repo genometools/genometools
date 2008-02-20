@@ -26,8 +26,9 @@
 #include "libgtcore/seqiterator.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
-#include "libgtmatch/seqpos-def.h"
 #include "libgtcore/symboldef.h"
+#include "libgtcore/unused.h"
+#include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/verbose-def.h"
 #include "libgtmatch/esafileend.h"
 #include "libgtmatch/sfx-optdef.h"
@@ -77,8 +78,7 @@ struct sfxInterface
 
 static Seqpos
 sfxIReadAdvance(sfxInterface *iface,
-                Seqpos requestMaxPos,
-                Error *err);
+                Seqpos requestMaxPos);
 
 extern sfxInterface *
 newSfxInterface(Suffixeratoroptions *so,
@@ -277,7 +277,7 @@ SfxIRegisterReader(sfxInterface *iface, listenerID *id,
 }
 
 static Seqpos
-getSufTabVal(sfxInterface *iface, Seqpos pos, Error *err)
+getSufTabVal(sfxInterface *iface, Seqpos pos)
 {
   assert(iface && pos < iface->length);
   while (1)
@@ -299,7 +299,7 @@ getSufTabVal(sfxInterface *iface, Seqpos pos, Error *err)
     else
     {
       while (pos >= iface->lastGeneratedStart + iface->lastGeneratedLen)
-        if (!sfxIReadAdvance(iface, pos, err))
+        if (!sfxIReadAdvance(iface, pos))
           break;
     }
   }
@@ -318,8 +318,7 @@ SfxIGetOrigSeq(void *state, Symbol *dest, Seqpos pos, size_t len)
 }
 
 extern size_t
-readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,
-                 Uchar *dest, Error *err)
+readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,Uchar *dest)
 {
   size_t i, effLen;
   Seqpos start;
@@ -329,7 +328,7 @@ readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,
   effLen = MIN((size_t)len, (size_t)(iface->length - start));
   for (i = 0; i < (size_t)effLen; ++i)
   {
-    Seqpos sufTabVal = getSufTabVal(iface, start + i, err);
+    Seqpos sufTabVal = getSufTabVal(iface, start + i);
     if (sufTabVal != 0)
       dest[i] = getencodedchar(iface->encseq, sufTabVal - 1,
                                iface->so.readmode);
@@ -342,7 +341,7 @@ readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,
 
 extern size_t
 readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
-                 Seqpos *dest, Error *err)
+                 Seqpos *dest, UNUSED Error *err)
 {
   size_t i, effLen;
   Seqpos start;
@@ -365,8 +364,8 @@ readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
                          false,
                          false,
                          0,
-                         getSufTabVal(iface, start + i - 1, err),
-                         getSufTabVal(iface, start + i, err),
+                         getSufTabVal(iface, start + i - 1),
+                         getSufTabVal(iface, start + i),
                          NULL,  /* XXX FIXME */
                          NULL);  /* XXX FIXME */
 #ifndef NDEBUG
@@ -377,7 +376,7 @@ readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
               " " FormatSeqpos " = %d",
               PRINTSeqposcast(start + (Seqpos)i - 1),
               PRINTSeqposcast(start + (Seqpos)i),
-              PRINTSeqposcast(getSufTabVal(iface, start + (Seqpos)i, err)),
+              PRINTSeqposcast(getSufTabVal(iface, start + (Seqpos)i)),
               cmp);
       exit(EXIT_FAILURE);
     }
@@ -389,7 +388,7 @@ readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
 
 size_t
 readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
-                    Seqpos *dest, Error *err)
+                    Seqpos *dest)
 {
   Seqpos start;
   assert(iface && id < iface->numReaders && dest);
@@ -437,7 +436,7 @@ readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
     else
     {
       while (start + len > iface->prevGeneratedStart + iface->prevGeneratedLen)
-        if (!sfxIReadAdvance(iface, start + len, err))
+        if (!sfxIReadAdvance(iface, start + len))
         {
           /* Caution: sneakily updates the length parameter to obtain a
            * request we can fulfill */
@@ -463,7 +462,7 @@ findMinOpenRequest(sfxInterface *iface, int reqType)
 
 static Seqpos
 sfxIReadAdvance(sfxInterface *iface,
-                Seqpos requestMaxPos, Error *err)
+                Seqpos requestMaxPos)
 {
   Seqpos requestMinPos, lengthOfExtension = 0;
   assert(iface);
@@ -517,7 +516,7 @@ sfxIReadAdvance(sfxInterface *iface,
     iface->lastGeneratedStart += iface->lastGeneratedLen;
     if ((iface->lastGeneratedSufTabSegment =
         nextSfxiterator(&iface->lastGeneratedLen, &iface->specialsuffixes,
-                        iface->mtime, iface->sfi, err)))
+                        iface->mtime, iface->sfi)))
     {
       size_t pos;
       /* size_t because the current approach cannot generate more

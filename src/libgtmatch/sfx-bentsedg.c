@@ -29,7 +29,6 @@
 #include "encseq-def.h"
 #include "turnwheels.h"
 #include "esafileend.h"
-#include "sfx-codespec.h"
 #include "sfx-outlcp.h"
 #include "bckbound.h"
 

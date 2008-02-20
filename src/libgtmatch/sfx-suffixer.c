@@ -29,14 +29,12 @@
 #include "intcode-def.h"
 #include "encseq-def.h"
 #include "safecast-gen.h"
-#include "sfx-codespec.h"
 #include "sfx-partssuf-def.h"
 #include "sfx-suffixer.h"
 #include "sfx-outlcp.h"
 #include "stamp.h"
 
 #include "sfx-mappedstr.pr"
-#include "kmer2string.pr"
 
 #define CODEBITS        (32-PREFIXLENBITS)
 #define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
@@ -50,9 +48,6 @@ typedef struct
 } Codeatposition;
 
 DECLAREARRAYSTRUCT(Codeatposition);
-
-#define LONGOUTPUT
-#undef LONGOUTPUT
 
 DECLAREARRAYSTRUCT(Seqpos);
 
@@ -81,7 +76,7 @@ DECLAREARRAYSTRUCT(Seqpos);
   Sequencerange overhang;
   Seqpos previoussuffix;
   bool exhausted;
-  Bcktab bcktab;
+  Bcktab bcktab; /* only direct access to leftborder and numofallcodes */
 };
 
 static void updatekmercount(void *processinfo,
@@ -153,21 +148,6 @@ static void reversespecialcodes(Codeatposition *spaceCodeatposition,
   }
 }
 
-static Codetype codedownscale(const Bcktab *bcktab,
-                              Codetype code,
-                              unsigned int prefixindex,
-                              unsigned int maxprefixlen)
-{
-  unsigned int remain;
-
-  code -= bcktab->filltable[maxprefixlen];
-  remain = maxprefixlen-prefixindex;
-  code %= (bcktab->filltable[remain]+1);
-  code *= bcktab->basepower[remain];
-  code += bcktab->filltable[prefixindex];
-  return code;
-}
-
 static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
 {
   Codetype code;
@@ -217,28 +197,16 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
 
 void freeSfxiterator(Sfxiterator **sfi)
 {
-  Codetype specialcode;
-
-  specialcode = FROMCODE2SPECIALCODE((*sfi)->bcktab.filltable[0],
-                                     (*sfi)->numofchars);
-  (*sfi)->bcktab.countspecialcodes[specialcode]
-    += ((*sfi)->specialcharacters + 1);
+  addfinalbckspecials(&(*sfi)->bcktab,(*sfi)->numofchars,
+                      (*sfi)->specialcharacters);
   if ((*sfi)->sri != NULL)
   {
     freespecialrangeiterator(&(*sfi)->sri);
   }
   FREESPACE((*sfi)->spaceCodeatposition);
-  FREESPACE((*sfi)->bcktab.filltable);
-  FREESPACE((*sfi)->bcktab.basepower);
-  FREESPACE((*sfi)->bcktab.leftborder);
-  FREESPACE((*sfi)->bcktab.countspecialcodes);
   FREESPACE((*sfi)->suftab);
-  if ((*sfi)->bcktab.distpfxidx != NULL)
-  {
-    FREESPACE((*sfi)->bcktab.distpfxidx[0]);
-    FREESPACE((*sfi)->bcktab.distpfxidx);
-  }
   freesuftabparts((*sfi)->suftabparts);
+  freebcktab(&(*sfi)->bcktab,false);
   FREESPACE(*sfi);
 }
 
@@ -311,8 +279,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                    updatekmercount,
                    sfi,
                    numofchars,
-                   prefixlength,
-                   err);
+                   prefixlength);
     assert(specialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
     assert(sfi->bcktab.leftborder != NULL);
     /* printf("leftborder[0]=%u\n",sfi.leftborder[0]); */
@@ -362,8 +329,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
 }
 
 static void preparethispart(Sfxiterator *sfi,
-                            Measuretime *mtime,
-                            Error *err)
+                            Measuretime *mtime)
 {
   Seqpos totalwidth;
 
@@ -384,8 +350,7 @@ static void preparethispart(Sfxiterator *sfi,
                  insertwithoutspecial,
                  sfi,
                  sfi->numofchars,
-                 sfi->prefixlength,
-                 err);
+                 sfi->prefixlength);
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,"sorting the buckets");
@@ -530,12 +495,11 @@ static void fillspecialnextpage(Sfxiterator *sfi)
 }
 
 const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
-                              Measuretime *mtime,Sfxiterator *sfi,Error *err)
+                              Measuretime *mtime,Sfxiterator *sfi)
 {
-  error_check(err);
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
-    preparethispart(sfi,mtime,err);
+    preparethispart(sfi,mtime);
     *numberofsuffixes = sfi->widthofpart;
     *specialsuffixes = false;
     return sfi->suftab;
@@ -556,5 +520,6 @@ int sfibcktab2file(FILE *fp,
                    const Sfxiterator *sfi,
                    Error *err)
 {
+  error_check(err);
   return bcktab2file(fp,&sfi->bcktab,err);
 }

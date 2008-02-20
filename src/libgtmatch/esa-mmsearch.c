@@ -478,8 +478,7 @@ static int constructsarrandrunmmsearch(
   {
     while (true)
     {
-      suftabptr = nextSfxiterator(&numofsuffixes,&specialsuffixes,
-                                  mtime,sfi,err);
+      suftabptr = nextSfxiterator(&numofsuffixes,&specialsuffixes,mtime,sfi);
       if (suftabptr == NULL)
       {
         break;

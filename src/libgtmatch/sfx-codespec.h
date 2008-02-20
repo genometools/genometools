@@ -18,7 +18,4 @@
 #ifndef SFX_CODESPEC_H
 #define SFX_CODESPEC_H
 
-#define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
-                            (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS))
-
 #endif

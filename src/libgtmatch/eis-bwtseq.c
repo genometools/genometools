@@ -199,11 +199,11 @@ struct sfxIReadInfo
 };
 
 static int
-sfxIReadSeqpos(void *src, Seqpos *dest, size_t len, Error *err)
+sfxIReadSeqpos(void *src, Seqpos *dest, size_t len, UNUSED Error *err)
 {
   return readSfxISufTabRange(((struct sfxIReadInfo *)src)->si,
                              ((struct sfxIReadInfo *)src)->id,
-                             len, dest, err) == len;
+                             len, dest) == len;
 }
 
 #if 0
@@ -212,7 +212,7 @@ sfxIReadBWTSym(void *src, Symbol *dest, size_t len, Error *err)
 {
   return readSfxIBWTRange(((struct sfxIReadInfo *)src)->si,
                           ((struct sfxIReadInfo *)src)->id,
-                          len, dest, err) == len;
+                          len, dest) == len;
 }
 #endif
 

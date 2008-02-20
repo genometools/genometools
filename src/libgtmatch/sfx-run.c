@@ -242,7 +242,7 @@ static int suffixeratorwithoutput(
     while (true)
     {
       suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
-                                  mtime,sfi,err);
+                                  mtime,sfi);
       if (suftabptr == NULL)
       {
         break;
