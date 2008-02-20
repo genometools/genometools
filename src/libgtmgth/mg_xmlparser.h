@@ -19,11 +19,10 @@
 #define MG_XMLPARSER_H
 
 #include <expat.h>
+#include "libgtmgth/metagenomethreader.h"
 
 #ifdef CURLDEF
 #include <curl.h>
-#else
-#include "libgtmgth/metagenomethreader.h"
 #endif
 
 /* Funktion, in der die Struktur 'gefuellt' und der XML-Parser

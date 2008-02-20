@@ -26,8 +26,6 @@
 #include <curl/easy.h>
 #endif
 
-#define CURLDEF
-
 /* Expat Hilfs-Struktur zum Abspeichern der Hit-DNA-Sequenz und der
    Hit-DNA-Laenge */
 typedef struct

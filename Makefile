@@ -252,6 +252,12 @@ ifeq ($(static),yes)
   GT_LDFLAGS += -static
 endif
 
+ifeq ($(curl),yes)
+  EXP_CPPFLAGS += -DCURLDEF
+  GT_CPPFLAGS += -I/usr/include/curl -I/usr/local/include/curl
+  EXP_LDLIBS += -lcurl
+endif
+
 ifneq ($(curses),no)
   GTLIBS := $(GTLIBS) lib/libtecla.a
   EXP_CPPFLAGS += -DCURSES
