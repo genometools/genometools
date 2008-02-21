@@ -25,6 +25,7 @@ typedef struct RegionMapping RegionMapping;
 
 RegionMapping* region_mapping_new_mapping(Str *mapping_filename, Error*);
 RegionMapping* region_mapping_new_seqfile(Str *sequence_filename);
+RegionMapping* region_mapping_ref(RegionMapping*);
 int            region_mapping_get_raw_sequence(RegionMapping*, const char**,
                                                Str *seqid, Error*);
 int            region_mapping_get_raw_sequence_length(RegionMapping*,

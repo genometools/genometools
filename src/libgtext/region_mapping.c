@@ -30,6 +30,7 @@ struct RegionMapping {
       *sequence_name; /* the (current) sequence name */
   Mapping *mapping;
   Bioseq *bioseq; /* the current bioseq */
+  unsigned int reference_count;
 };
 
 RegionMapping* region_mapping_new_mapping(Str *mapping_filename, Error *e)
@@ -55,8 +56,15 @@ RegionMapping* region_mapping_new_seqfile(Str *sequence_filename)
   return rm;
 }
 
+RegionMapping* region_mapping_ref(RegionMapping *rm)
+{
+  assert(rm);
+  rm->reference_count++;
+  return rm;
+}
+
 static Str* region_mapping_map(RegionMapping *rm, const char *sequence_region,
-                              Error *e)
+                               Error *e)
 {
   error_check(e);
   assert(rm && sequence_region);
@@ -92,7 +100,7 @@ static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Error *e)
 }
 
 int region_mapping_get_raw_sequence(RegionMapping *rm, const char **raw,
-                                   Str *seqid, Error *e)
+                                    Str *seqid, Error *e)
 {
   int had_err = 0;
   error_check(e);
@@ -104,8 +112,8 @@ int region_mapping_get_raw_sequence(RegionMapping *rm, const char **raw,
 }
 
 int region_mapping_get_raw_sequence_length(RegionMapping *rm,
-                                          unsigned long *length, Str *seqid,
-                                          Error *e)
+                                           unsigned long *length, Str *seqid,
+                                           Error *e)
 {
   int had_err = 0;
   error_check(e);
@@ -119,6 +127,10 @@ int region_mapping_get_raw_sequence_length(RegionMapping *rm,
 void region_mapping_delete(RegionMapping *rm)
 {
   if (!rm) return;
+  if (rm->reference_count) {
+    rm->reference_count--;
+    return;
+  }
   str_delete(rm->sequence_filename);
   str_delete(rm->sequence_file);
   str_delete(rm->sequence_name);
