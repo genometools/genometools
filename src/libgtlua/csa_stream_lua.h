@@ -20,12 +20,13 @@
 
 #include "lua.h"
 
-/* exports the CSAStream class (which implements the GenomeStream) interface to
-   Lua:
+/* exports the CSAStream class (which implements the GenomeStream) interface
+   to Lua:
 
-   -- Returns a new CSA (consensus spliced alignment) stream object which uses
-   -- genome stream <in_stream> as input. The CSA stream replaces spliced
-   -- alignments with computed consensus splied alignments.
+   -- Returns a new CSA (consensus spliced alignment) stream object (a genome
+   -- stream) which uses genome stream <in_stream> as input.
+   -- The CSA stream replaces spliced alignments with computed consensus spliced
+   -- alignments.
    -- The optional <join> parameters sets the length for the spliced alignment
    -- clustering (default: 300).
    function csa_stream_new(feature_index, join)

@@ -58,6 +58,8 @@ function DocBase:add_method(funcname, funcargs, comment, be_verbose)
   end
   -- transform classname, if necessary
   if classname then
+    -- special case for abbrevated class names
+    classname = string.gsub(classname, "^%a%a%a_", string.upper)
     classname = string.gsub(classname, "^%a", string.upper)
     classname = string.gsub(classname, "_%a", string.upper)
     classname = string.gsub(classname, "_", "")

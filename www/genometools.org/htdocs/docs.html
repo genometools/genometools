@@ -59,6 +59,8 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
   <li><a href="#Bittab">Bittab</a>
 
+  <li><a href="#CSAStream">CSAStream</a>
+
   <li><a href="#Diagram">Diagram</a>
 
   <li><a href="#FeatureIndex">FeatureIndex</a>
@@ -207,6 +209,13 @@ Set <code>bittab</code> equal to the bitwise AND of <code>bittab</code> and <cod
 <code>bittab:bit_is_set(bit)</code>
 <p>
 Returns true if <code>bit</code> is set in <code>bittab</code>, false otherwise.
+</p>
+<hr>
+<a name="CSAStream"></a>
+<h2>Class CSAStream</h2>
+<code>csa_stream_new(feature_index, join)</code>
+<p>
+Returns a new CSA (consensus spliced alignment) stream object (a genome stream) which uses genome stream <code>in_stream</code> as input. The CSA stream replaces spliced alignments with computed consensus spliced alignments. The optional <code>join</code> parameters sets the length for the spliced alignment clustering (default: 300).
 </p>
 <hr>
 <a name="Diagram"></a>
