@@ -42,6 +42,9 @@
    -- Set the sequence id of <genome_node> to <seqid>.
    function genome_node:set_seqid(seqid)
 
+   -- Returns the strand of <genome_feature>.
+   function genome_feature:get_strand()
+
    -- Returns the source of <genome_feature>.
    function genome_feature:get_source()
 
