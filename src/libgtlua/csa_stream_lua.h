@@ -29,7 +29,7 @@
    -- alignments.
    -- The optional <join> parameters sets the length for the spliced alignment
    -- clustering (default: 300).
-   function csa_stream_new(feature_index, join)
+   function csa_stream_new(in_stream, join)
 */
 int luaopen_csa_stream(lua_State*);
 
