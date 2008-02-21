@@ -59,6 +59,9 @@
 
    -- Show leading part of GFF3 output for <genome_feature>
    function genome_feature:output_leading()
+
+   -- Return type of <genome_feature> as string.
+   function genome_feature:get_type()
 */
 int luaopen_genome_node(lua_State*);
 

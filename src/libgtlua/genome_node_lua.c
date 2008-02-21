@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -169,6 +169,18 @@ static int genome_feature_lua_output_leading(lua_State *L)
   return 0;
 }
 
+static int genome_feature_lua_get_type(lua_State *L)
+{
+  GenomeNode **gn;
+  GenomeFeature *gf;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a genome feature */
+  gf = genome_node_cast(genome_feature_class(), *gn);
+  luaL_argcheck(L, gf, 1, "not a genome feature");
+  lua_pushstring(L, genome_feature_type_get_cstr(genome_feature_get_type(gf)));
+  return 1;
+}
+
 static int genome_node_lua_delete(lua_State *L)
 {
   GenomeNode **gn;
@@ -194,6 +206,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "is_marked", genome_node_lua_is_marked },
   { "contains_marked", genome_node_lua_contains_marked },
   { "output_leading", genome_feature_lua_output_leading },
+  { "get_type", genome_feature_lua_get_type },
   { NULL, NULL }
 };
 
