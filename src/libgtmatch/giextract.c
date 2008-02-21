@@ -203,7 +203,7 @@ static Giquery *readginumberfile(bool verbose,
 #ifdef DEBUG
   for (i=0; i<*numofqueries; i++)
   {
-    printf("%lu %lu\n",i,giqueries[i].ginumber);
+    printf("%lu "Formatuint64_t"\n",i,giqueries[i].ginumber);
   }
 #endif
   return giqueries;
