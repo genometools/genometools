@@ -19,6 +19,16 @@ Test do
   run_test "#{$bin}gt #{$testdata}/gtscripts/bittab.lua"
 end
 
+1.upto(4) do |i|
+  Name "csa_stream bindings #{i}"
+  Keywords "gt_scripts"
+  Test do
+    run_test "#{$bin}gt  #{$testdata}/gtscripts/csa_stream.lua " +
+             "#{$testdata}/gt_csa_prob_#{i}.in"
+    run "diff #{$last_stdout} #{$testdata}/gt_csa_prob_#{i}.out"
+  end
+end
+
 Name "genome_node bindings"
 Keywords "gt_scripts"
 Test do
