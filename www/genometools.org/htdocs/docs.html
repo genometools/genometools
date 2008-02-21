@@ -59,6 +59,8 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
   <li><a href="#Bittab">Bittab</a>
 
+  <li><a href="#CDSStream">CDSStream</a>
+
   <li><a href="#CSAStream">CSAStream</a>
 
   <li><a href="#Diagram">Diagram</a>
@@ -132,6 +134,11 @@ Print the given array of <code>features</code> to stdout.
 <code>features_show_marked(features)</code>
 <p>
 Print all marked <code>features</code> (an array) to stdout.
+</p>
+<hr>
+<code>features_mRNA2genes(in_features)</code>
+<p>
+Return an array of genome features which contains a separate gene feature for each mRNA in <code>in_features</code>.
 </p>
 <hr>
 <code>export()</code>
@@ -213,9 +220,16 @@ Set <code>bittab</code> equal to the bitwise AND of <code>bittab</code> and <cod
 Returns true if <code>bit</code> is set in <code>bittab</code>, false otherwise.
 </p>
 <hr>
+<a name="CDSStream"></a>
+<h2>Class CDSStream</h2>
+<code>cds_stream_new(region_mapping)</code>
+<p>
+Returns a new CDS (coding sequence) stream object (a genome stream) which uses genome stream <code>in_stream</code> as input. The CDS stream adds CDS features to exon features in <code>in_stream</code>. The given <code>region_mapping</code> is used to map the sequence regions given in <code>in_stream</code> to the actual sequence files necessary for computing the coding sequences.
+</p>
+<hr>
 <a name="CSAStream"></a>
 <h2>Class CSAStream</h2>
-<code>csa_stream_new(feature_index, join)</code>
+<code>csa_stream_new(in_stream, join)</code>
 <p>
 Returns a new CSA (consensus spliced alignment) stream object (a genome stream) which uses genome stream <code>in_stream</code> as input. The CSA stream replaces spliced alignments with computed consensus spliced alignments. The optional <code>join</code> parameters sets the length for the spliced alignment clustering (default: 300).
 </p>
