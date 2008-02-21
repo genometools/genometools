@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,7 +22,12 @@
 
 typedef struct GenomeNodeIterator GenomeNodeIterator;
 
-GenomeNodeIterator* genome_node_iterator_new(GenomeNode*);
+/* Return a new genome node iterator which performs a depth-first traversal of
+   <genome_node> (including <genome_node> itself). */
+GenomeNodeIterator* genome_node_iterator_new(GenomeNode *genome_node);
+/* Return a new genome node iterator which iterates over all direct children of
+   <genome_node> (whithout <genome_node> itself). */
+GenomeNodeIterator* genome_node_iterator_new_direct(GenomeNode *genome_node);
 GenomeNode*         genome_node_iterator_next(GenomeNodeIterator*);
 int                 genome_node_iterator_example(void);
 void                genome_node_iterator_delete(GenomeNodeIterator*);

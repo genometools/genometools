@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,37 +22,63 @@
 struct GenomeNodeIterator {
   GenomeNode *gn;
   Array *node_stack;
+  bool direct;
 };
 
-GenomeNodeIterator* genome_node_iterator_new(GenomeNode *gn)
+static GenomeNodeIterator* genome_node_iterator_new_base(GenomeNode *gn)
 {
   GenomeNodeIterator *gni;
   assert(gn);
   gni = ma_malloc(sizeof *gni);
   gni->gn = genome_node_rec_ref(gn);
   gni->node_stack = array_new(sizeof (GenomeNode*));
+  return gni;
+}
+
+GenomeNodeIterator* genome_node_iterator_new(GenomeNode *gn)
+{
+  GenomeNodeIterator *gni;
+  assert(gn);
+  gni = genome_node_iterator_new_base(gn);
   array_add(gni->node_stack, gni->gn);
+  gni->direct = false;
+  return gni;
+}
+
+static void add_children_to_stack(Array *node_stack, GenomeNode *gn)
+{
+  GenomeNode *child;
+  Dlistelem *dlistelem;
+  assert(node_stack && gn);
+  /* add the children backwards to traverse in order */
+  for (dlistelem = dlist_last(gn->children); dlistelem != NULL;
+       dlistelem = dlistelem_previous(dlistelem)) {
+    child = dlistelem_get_data(dlistelem);
+    array_add(node_stack, child);
+  }
+}
+
+GenomeNodeIterator* genome_node_iterator_new_direct(GenomeNode *gn)
+{
+  GenomeNodeIterator *gni;
+  assert(gn);
+  gni = genome_node_iterator_new_base(gn);
+  add_children_to_stack(gni->node_stack, gn);
+  gni->direct = true;
   return gni;
 }
 
 GenomeNode* genome_node_iterator_next(GenomeNodeIterator *gni)
 {
-  GenomeNode *gn, *child;
-  Dlistelem *dlistelem;
+  GenomeNode *gn;
   assert(gni);
   if (!array_size(gni->node_stack))
     return NULL;
   /* pop */
   gn = *(GenomeNode**) array_pop(gni->node_stack);
   /* push children on stack */
-  if (gn->children) {
-    /* add the children backwards to traverse in order */
-    for (dlistelem = dlist_last(gn->children); dlistelem != NULL;
-         dlistelem = dlistelem_previous(dlistelem)) {
-      child = dlistelem_get_data(dlistelem);
-      array_add(gni->node_stack, child);
-    }
-  }
+  if (!gni->direct && gn->children)
+    add_children_to_stack(gni->node_stack, gn);
   return gn;
 }
 
