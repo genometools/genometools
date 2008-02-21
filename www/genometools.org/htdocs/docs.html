@@ -91,6 +91,21 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
 </ul>
 <h2>Sole functions</h2>
+<code>genome_feature_new(type, range, strand)</code>
+<p>
+Returns a new genome feature of <code>type</code> spanning <code>range</code> on <code>strand</code>.
+</p>
+<hr>
+<code>sequence_region_new(seqid, range)</code>
+<p>
+Returns a new sequence region for sequence id <code>seqid</code> spanning <code>range</code>.
+</p>
+<hr>
+<code>genome_feature:output_leading()</code>
+<p>
+Show leading part of GFF3 output for <code>genome_feature</code>
+</p>
+<hr>
 <code>gff3_in_stream_new_sorted(filename)</code>
 <p>
 Returns a new GFF3 input stream object for <code>filename</code>. The file <code>filename</code> has to be a sorted GFF3 file.
@@ -324,6 +339,51 @@ Returns a new feature visitor object over <code>feature_index</code>. That is, a
 <hr>
 <a name="GenomeNode"></a>
 <h2>Class GenomeNode</h2>
+<code>genome_node:get_filename()</code>
+<p>
+Returns the filenname of <code>genome_node</code>.
+</p>
+<hr>
+<code>genome_node:get_range()</code>
+<p>
+Returns the range of <code>genome_node</code>.
+</p>
+<hr>
+<code>genome_node:get_seqid()</code>
+<p>
+Returns the sequence id of <code>genome_node</code>.
+</p>
+<hr>
+<code>genome_node:set_seqid(seqid)</code>
+<p>
+Set the sequence id of <code>genome_node</code> to <code>seqid</code>.
+</p>
+<hr>
+<code>genome_node:accept(genome_visitor)</code>
+<p>
+Accept <code>genome_visitor</code>.
+</p>
+<hr>
+<code>genome_node:is_part_of_genome_node(child_node)</code>
+<p>
+Make <code>genome_node</code> the parent of <code>child_node</code>.
+</p>
+<hr>
+<code>genome_node:mark()</code>
+<p>
+Mark <code>genome_node</code>.
+</p>
+<hr>
+<code>genome_node:is_marked()</code>
+<p>
+Returns true if <code>genome_node</code> is marked, false otherwise.
+</p>
+<hr>
+<code>genome_node:contains_marked()</code>
+<p>
+Returns true if <code>genome_node</code> contains a marked node, false otherwise.
+</p>
+<hr>
 <code>genome_node:show(gff3_visitor)</code>
 <p>
 Show genome node on stdout (using the optional <code>gff3_visitor</code>).
