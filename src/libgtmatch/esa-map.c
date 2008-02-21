@@ -31,7 +31,7 @@
 #include "sfx-ri-def.h"
 #include "intcode-def.h"
 #include "spacedef.h"
-#include "bckbound.h"
+#include "bcktab.h"
 #include "stamp.h"
 
 #include "opensfxfile.pr"
@@ -301,7 +301,7 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->llvtabstream.fp = NULL;
   suffixarray->lcptabstream.fp = NULL;
   suffixarray->destablength = 0;
-  initbcktabwithNULL(&suffixarray->bcktab);
+  suffixarray->bcktab = NULL;
 }
 
 static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
@@ -377,7 +377,10 @@ void freesuffixarray(Suffixarray *suffixarray)
   strarray_delete(suffixarray->filenametab);
   suffixarray->filenametab = NULL;
   FREESPACE(suffixarray->filelengthtab);
-  freebcktab(&suffixarray->bcktab,true);
+  if (suffixarray->bcktab != NULL)
+  {
+    freebcktab(&suffixarray->bcktab,true);
+  }
 }
 
 static int inputsuffixarray(bool map,
@@ -521,12 +524,12 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      if (mapbcktab(&suffixarray->bcktab,
-                    indexname,
-                    *totallength,
-                    getnumofcharsAlphabet(suffixarray->alpha),
-                    suffixarray->prefixlength,
-                    err) != 0)
+      suffixarray->bcktab = mapbcktab(indexname,
+                                      *totallength,
+                                      getnumofcharsAlphabet(suffixarray->alpha),
+                                      suffixarray->prefixlength,
+                                      err);
+      if (suffixarray->bcktab == NULL)
       {
         haserr = true;
       }

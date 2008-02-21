@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BCKBOUND_H
-#define BCKBOUND_H
+#ifndef BCKTAB_H
+#define BCKTAB_H
 
 #include <assert.h>
 #include "libgtcore/error.h"
@@ -39,37 +39,24 @@ typedef struct
          right;
 } Lcpinterval;
 
-typedef struct
-{
-  Seqpos totallength,
-         *leftborder,
-         *countspecialcodes;
-  Codetype numofallcodes,
-           numofspecialcodes,
-           **multimappower,
-           *basepower,
-           *filltable;
-  unsigned long **distpfxidx;
-} Bcktab;
+typedef struct Bcktab Bcktab;
 
-int mapbcktab(Bcktab *bcktab,
-              const Str *indexname,
-              Seqpos totallength,
-              unsigned int numofchars,
-              unsigned int prefixlength,
-              Error *err);
+Bcktab *mapbcktab(const Str *indexname,
+                  Seqpos totallength,
+                  unsigned int numofchars,
+                  unsigned int prefixlength,
+                  Error *err);
 
-void freebcktab(Bcktab *bcktab,bool mapped);
+void freebcktab(Bcktab **bcktab,bool mapped);
 
 void initbcktabwithNULL(Bcktab *bcktab);
 
-int allocBcktab(Bcktab *bcktab,
-                Seqpos totallength,
-                unsigned int numofchars,
-                unsigned int prefixlength,
-                unsigned int codebits,
-                unsigned int maxcodevalue,
-                Error *err);
+Bcktab *allocBcktab(Seqpos totallength,
+                    unsigned int numofchars,
+                    unsigned int prefixlength,
+                    unsigned int codebits,
+                    unsigned int maxcodevalue,
+                    Error *err);
 
 void updatebckspecials(Bcktab *bcktab,
                        Codetype code,
@@ -85,9 +72,7 @@ Codetype codedownscale(const Bcktab *bcktab,
 void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
                          Seqpos specialcharacters);
 
-int bcktab2file(FILE *fp,
-                const Bcktab *bcktab,
-                Error *err);
+int bcktab2file(FILE *fp,const Bcktab *bcktab,Error *err);
 
 unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
                                    const Bcktab *bcktab,
@@ -114,5 +99,7 @@ Codetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx);
 Seqpos *bcktab_leftborder(Bcktab *bcktab);
 
 Codetype bcktab_numofallcodes(Bcktab *bcktab);
+
+void checkcountspecialcodes(const Bcktab *bcktab,unsigned int prefixlength);
 
 #endif

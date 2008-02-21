@@ -23,7 +23,7 @@
 #include "encseq-def.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
-#include "bckbound.h"
+#include "bcktab.h"
 
 typedef struct Outlcpinfo Outlcpinfo;
 

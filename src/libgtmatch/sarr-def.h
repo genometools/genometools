@@ -24,7 +24,7 @@
 #include "alphadef.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
-#include "bckbound.h"
+#include "bcktab.h"
 
 #define FILEBUFFERSIZE 65536
 
@@ -99,7 +99,7 @@ typedef struct
   const Largelcpvalue *llvtab;
   const Uchar *bwttab;
   unsigned int prefixlength;
-  Bcktab bcktab;
+  Bcktab *bcktab;
   /* or with streams */
   SeqposBufferedfile suftabstream;
   UcharBufferedfile bwttabstream,

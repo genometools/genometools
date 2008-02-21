@@ -22,7 +22,7 @@
 #include "intcode-def.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
-#include "bckbound.h"
+#include "bcktab.h"
 #include "cutendpfx.h"
 
 struct Bucketenumerator

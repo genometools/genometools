@@ -30,7 +30,7 @@
 #include "turnwheels.h"
 #include "esafileend.h"
 #include "sfx-outlcp.h"
-#include "bckbound.h"
+#include "bcktab.h"
 
 #include "sfx-cmpsuf.pr"
 #include "opensfxfile.pr"

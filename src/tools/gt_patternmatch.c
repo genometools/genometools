@@ -25,7 +25,7 @@
 #include "libgtmatch/enum-patt-def.h"
 #include "libgtmatch/esa-mmsearch-def.h"
 #include "libgtmatch/qgram2code.h"
-#include "libgtmatch/bckbound.h"
+#include "libgtmatch/bcktab.h"
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/cutendpfx.h"
 
@@ -105,7 +105,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     Encodedsequencescanstate *esr1, *esr2;
     int retval;
     Seqpos idx, maxlcp;
-    const Codetype **multimappower = bcktab_multimappower(&suffixarray.bcktab);
+    const Codetype **multimappower = bcktab_multimappower(suffixarray.bcktab);
 
     epi = newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
@@ -128,7 +128,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
         {
           mmsibck = NULL;
           bucketenumerator
-            = newbucketenumerator(&suffixarray.bcktab,
+            = newbucketenumerator(suffixarray.bcktab,
                                   suffixarray.prefixlength,
                                   pptr,
                                   (unsigned int) patternlen);
@@ -165,7 +165,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
                                     pptr);
           assert(firstspecial == suffixarray.prefixlength);
           calcbucketboundaries(&bucketspec,
-                               &suffixarray.bcktab,
+                               suffixarray.bcktab,
                                code);
           if (bucketspec.nonspecialsinbucket == 0)
           {

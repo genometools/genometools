@@ -24,7 +24,7 @@
 #include "libgtcore/symboldef.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
-#include "bckbound.h"
+#include "bcktab.h"
 
 typedef struct Bucketenumerator Bucketenumerator;
 

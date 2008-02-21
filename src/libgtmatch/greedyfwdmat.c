@@ -27,7 +27,7 @@
 #include "optionargmode.h"
 #include "format64.h"
 #include "greedyfwdmat.h"
-#include "bckbound.h"
+#include "bcktab.h"
 #include "encseq-def.h"
 
 #include "initbasepower.pr"

@@ -76,7 +76,7 @@ DECLAREARRAYSTRUCT(Seqpos);
   Sequencerange overhang;
   Seqpos previoussuffix;
   bool exhausted;
-  Bcktab bcktab;
+  Bcktab *bcktab;
   Codetype numofallcodes;
   Seqpos *leftborder; /* points to bcktab->leftborder */
 };
@@ -163,13 +163,13 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
     {
       if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixlen)
       {
-        code = codedownscale(&sfi->bcktab,
+        code = codedownscale(sfi->bcktab,
                              sfi->spaceCodeatposition[j].code,
                              prefixindex,
                              sfi->spaceCodeatposition[j].maxprefixlen);
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
         {
-          updatebckspecials(&sfi->bcktab,code,sfi->numofchars,
+          updatebckspecials(sfi->bcktab,code,sfi->numofchars,
                             prefixindex,sfi->prefixlength);
           stidx = --sfi->leftborder[code];
           sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
@@ -199,7 +199,8 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
 
 void freeSfxiterator(Sfxiterator **sfi)
 {
-  addfinalbckspecials(&(*sfi)->bcktab,(*sfi)->numofchars,
+  /* checkcountspecialcodes((*sfi)->bcktab,(*sfi)->prefixlength); */
+  addfinalbckspecials((*sfi)->bcktab,(*sfi)->numofchars,
                       (*sfi)->specialcharacters);
   if ((*sfi)->sri != NULL)
   {
@@ -208,7 +209,10 @@ void freeSfxiterator(Sfxiterator **sfi)
   FREESPACE((*sfi)->spaceCodeatposition);
   FREESPACE((*sfi)->suftab);
   freesuftabparts((*sfi)->suftabparts);
-  freebcktab(&(*sfi)->bcktab,false);
+  if ((*sfi)->bcktab != NULL)
+  {
+    freebcktab(&(*sfi)->bcktab,false);
+  }
   FREESPACE(*sfi);
 }
 
@@ -258,21 +262,21 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
-    if (allocBcktab(&sfi->bcktab,
-                    sfi->totallength,
-                    numofchars,
-                    prefixlength,
-                    (unsigned int) CODEBITS,
-                    (unsigned int) MAXCODEVALUE,
-                    err) != 0)
+    sfi->bcktab = allocBcktab(sfi->totallength,
+                              numofchars,
+                              prefixlength,
+                              (unsigned int) CODEBITS,
+                              (unsigned int) MAXCODEVALUE,
+                              err);
+    if (sfi->bcktab == NULL)
     {
       haserr = true;
       sfi->leftborder = NULL;
       sfi->numofallcodes = 0;
     } else
     {
-      sfi->leftborder = bcktab_leftborder(&sfi->bcktab);
-      sfi->numofallcodes = bcktab_numofallcodes(&sfi->bcktab);
+      sfi->leftborder = bcktab_leftborder(sfi->bcktab);
+      sfi->numofallcodes = bcktab_numofallcodes(sfi->bcktab);
     }
   }
   if (!haserr)
@@ -372,7 +376,7 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->currentmaxcode,
                  totalwidth,
                  sfi->previoussuffix,
-                 &sfi->bcktab,
+                 sfi->bcktab,
                  sfi->numofchars,
                  sfi->prefixlength,
                  sfi->outlcpinfo);
@@ -530,5 +534,5 @@ int sfibcktab2file(FILE *fp,
                    Error *err)
 {
   error_check(err);
-  return bcktab2file(fp,&sfi->bcktab,err);
+  return bcktab2file(fp,sfi->bcktab,err);
 }

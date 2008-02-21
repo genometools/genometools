@@ -23,12 +23,25 @@
 #include "libgtcore/symboldef.h"
 #include "esafileend.h"
 #include "spacedef.h"
-#include "bckbound.h"
+#include "bcktab.h"
 
 #include "initbasepower.pr"
 
 #define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
                             (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS))
+
+struct Bcktab
+{
+  Seqpos totallength,
+         *leftborder,
+         *countspecialcodes;
+  Codetype numofallcodes,
+           numofspecialcodes,
+           **multimappower,
+           *basepower,
+           *filltable;
+  unsigned long **distpfxidx;
+};
 
 /* DELETE THE FOLLOWING THREE FUNCTIONS */
 
@@ -88,87 +101,31 @@ static void *genericmaptable(const Str *indexname,
   return ptr;
 }
 
-int mapbcktab(Bcktab *bcktab,
-              const Str *indexname,
-              Seqpos totallength,
-              unsigned int numofchars,
-              unsigned int prefixlength,
-              Error *err)
+void freebcktab(Bcktab **bcktab,bool mapped)
 {
-  Codetype numofspecialcodes;
-
-  bcktab->totallength = totallength;
-  bcktab->basepower = initbasepower(numofchars,prefixlength);
-  bcktab->numofallcodes = bcktab->basepower[prefixlength];
-  numofspecialcodes = bcktab->basepower[prefixlength-1];
-  bcktab->filltable = initfilltable(bcktab->basepower,prefixlength);
-  bcktab->multimappower = initmultimappower(numofchars,prefixlength);
-  bcktab->leftborder
-    = genericmaptable(indexname,
-                      BCKTABSUFFIX,
-                      (Seqpos) (bcktab->numofallcodes + 1 + numofspecialcodes),
-                      sizeof (Seqpos),
-                      err);
-  if (bcktab->leftborder == NULL)
-  {
-    bcktab->countspecialcodes = NULL;
-    return -1;
-  }
-  bcktab->countspecialcodes = bcktab->leftborder + bcktab->numofallcodes + 1;
-  return 0;
-}
-
-void freebcktab(Bcktab *bcktab,bool mapped)
-{
+  Bcktab *bcktabptr = *bcktab;
   if (mapped)
   {
-    fa_xmunmap((void *) bcktab->leftborder);
-    bcktab->leftborder = NULL;
-    bcktab->countspecialcodes = NULL;
+    fa_xmunmap((void *) bcktabptr->leftborder);
+    bcktabptr->leftborder = NULL;
+    bcktabptr->countspecialcodes = NULL;
   } else
   {
-    FREESPACE(bcktab->leftborder);
-    FREESPACE(bcktab->countspecialcodes);
+    FREESPACE(bcktabptr->leftborder);
+    FREESPACE(bcktabptr->countspecialcodes);
   }
-  if (bcktab->multimappower != NULL)
+  if (bcktabptr->multimappower != NULL)
   {
-    multimappowerfree(&bcktab->multimappower);
+    multimappowerfree(&bcktabptr->multimappower);
   }
-  if (bcktab->distpfxidx != NULL)
+  if (bcktabptr->distpfxidx != NULL)
   {
-    FREESPACE(bcktab->distpfxidx[0]);
-    FREESPACE(bcktab->distpfxidx);
+    FREESPACE(bcktabptr->distpfxidx[0]);
+    FREESPACE(bcktabptr->distpfxidx);
   }
-  FREESPACE(bcktab->filltable);
-  FREESPACE(bcktab->basepower);
-}
-
-static unsigned long **initdistprefixindexcounts(const Codetype *basepower,
-                                                 unsigned int prefixlength)
-{
-  if (prefixlength > 2U)
-  {
-    unsigned int idx;
-    unsigned long *counters, numofcounters, **distpfxidx;
-
-    for (numofcounters = 0, idx=1U; idx <= prefixlength-2; idx++)
-    {
-      numofcounters += basepower[idx];
-    }
-    assert(numofcounters > 0);
-    ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-2);
-    ALLOCASSIGNSPACE(counters,NULL,unsigned long,numofcounters);
-    memset(counters,0,(size_t) sizeof (*counters) * numofcounters);
-    distpfxidx[0] = counters;
-    for (idx=1U; idx<prefixlength-2; idx++)
-    {
-      distpfxidx[idx] = distpfxidx[idx-1] + basepower[idx];
-    }
-    return distpfxidx;
-  } else
-  {
-    return NULL;
-  }
+  FREESPACE(bcktabptr->filltable);
+  FREESPACE(bcktabptr->basepower);
+  FREESPACE(*bcktab);
 }
 
 void initbcktabwithNULL(Bcktab *bcktab)
@@ -181,16 +138,85 @@ void initbcktabwithNULL(Bcktab *bcktab)
   bcktab->distpfxidx = NULL;
 }
 
-int allocBcktab(Bcktab *bcktab,
-                Seqpos totallength,
-                unsigned int numofchars,
-                unsigned int prefixlength,
-                unsigned int codebits,
-                unsigned int maxcodevalue,
-                Error *err)
+Bcktab *mapbcktab(const Str *indexname,
+                  Seqpos totallength,
+                  unsigned int numofchars,
+                  unsigned int prefixlength,
+                  Error *err)
 {
+  Bcktab *bcktab;
   bool haserr = false;
 
+  ALLOCASSIGNSPACE(bcktab,NULL,Bcktab,1);
+  bcktab->totallength = totallength;
+  bcktab->basepower = initbasepower(numofchars,prefixlength);
+  bcktab->numofallcodes = bcktab->basepower[prefixlength];
+  bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
+  bcktab->filltable = initfilltable(bcktab->basepower,prefixlength);
+  bcktab->multimappower = initmultimappower(numofchars,prefixlength);
+  bcktab->distpfxidx = NULL;
+  bcktab->leftborder
+    = genericmaptable(indexname,
+                      BCKTABSUFFIX,
+                      (Seqpos) (bcktab->numofallcodes + 1 + 
+                                bcktab->numofspecialcodes),
+                      sizeof (Seqpos),
+                      err);
+  if (bcktab->leftborder == NULL)
+  {
+    bcktab->countspecialcodes = NULL;
+    haserr = true;
+  } else
+  {
+    bcktab->countspecialcodes = bcktab->leftborder + bcktab->numofallcodes + 1;
+  }
+  if (haserr)
+  {
+    freebcktab(&bcktab,false);
+    return NULL;
+  }
+  return bcktab;
+}
+
+static unsigned long **initdistprefixindexcounts(const Codetype *basepower,
+                                                 unsigned int prefixlength)
+{
+  if (prefixlength > 1U)
+  {
+    unsigned int idx;
+    unsigned long *counters, numofcounters, **distpfxidx;
+
+    for (numofcounters = 0, idx=1U; idx <= prefixlength-1; idx++)
+    {
+      numofcounters += basepower[idx];
+    }
+    assert(numofcounters > 0);
+    ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-1);
+    ALLOCASSIGNSPACE(counters,NULL,unsigned long,numofcounters);
+    memset(counters,0,(size_t) sizeof (*counters) * numofcounters);
+    distpfxidx[0] = counters;
+    for (idx=1U; idx<prefixlength-1; idx++)
+    {
+      distpfxidx[idx] = distpfxidx[idx-1] + basepower[idx];
+    }
+    return distpfxidx;
+  } else
+  {
+    return NULL;
+  }
+}
+
+Bcktab *allocBcktab(Seqpos totallength,
+                    unsigned int numofchars,
+                    unsigned int prefixlength,
+                    unsigned int codebits,
+                    unsigned int maxcodevalue,
+                    Error *err)
+{
+  Bcktab *bcktab;
+  bool haserr = false;
+
+  ALLOCASSIGNSPACE(bcktab,NULL,Bcktab,1);
   initbcktabwithNULL(bcktab);
   bcktab->totallength = totallength;
   bcktab->basepower = initbasepower(numofchars,prefixlength);
@@ -222,7 +248,12 @@ int allocBcktab(Bcktab *bcktab,
            sizeof (*bcktab->countspecialcodes) *
                   (size_t) bcktab->numofspecialcodes);
   }
-  return haserr ? -1 : 0;
+  if (haserr)
+  {
+    freebcktab(&bcktab,false);
+    return NULL;
+  }
+  return bcktab;
 }
 
 void updatebckspecials(Bcktab *bcktab,
@@ -231,11 +262,15 @@ void updatebckspecials(Bcktab *bcktab,
                        unsigned int prefixindex,
                        unsigned int prefixlength)
 {
-  if (prefixindex < prefixlength-1)
+  if (prefixindex <= prefixlength-1)
   {
     Codetype ordercode = (code - bcktab->filltable[prefixindex])/
                          (bcktab->filltable[prefixindex]+1);
     bcktab->distpfxidx[prefixindex-1][ordercode]++;
+    if (prefixindex == prefixlength-1)
+    {
+      assert(FROMCODE2SPECIALCODE(code,numofchars) == ordercode);
+    }
   }
   bcktab->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)]++;
 }
@@ -247,6 +282,31 @@ void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
 
   specialcode = FROMCODE2SPECIALCODE(bcktab->filltable[0],numofchars);
   bcktab->countspecialcodes[specialcode] += specialcharacters + 1;
+}
+
+void checkcountspecialcodes(const Bcktab *bcktab,unsigned int prefixlength)
+{
+  unsigned int idx;
+
+  if (prefixlength >= 2U)
+  {
+    for (idx=0; idx<bcktab->numofspecialcodes; idx++)
+    {
+
+      if(bcktab->countspecialcodes[idx] != 
+         bcktab->distpfxidx[prefixlength-2][idx])
+      {
+        fprintf(stderr,"countspecialcodes[%u] = %u != %lu = "
+                       "distpfxidx[%u][%u]\n",
+                       idx,
+                       bcktab->countspecialcodes[idx],
+                       bcktab->distpfxidx[prefixlength-2][idx],
+                       prefixlength-2,
+                       idx);
+        exit(EXIT_FAILURE);
+      }
+    }
+  }
 }
 
 Codetype codedownscale(const Bcktab *bcktab,
@@ -463,23 +523,3 @@ Codetype bcktab_numofallcodes(Bcktab *bcktab)
 {
   return bcktab->numofallcodes;
 }
-
-/*
-src/libgtmatch/bckbound.h  interface
-src/libgtmatch/bcktab.c    implementation
-
-src/libgtmatch/sfx-suffixer.c  used in opaque way
-src/tools/gt_patternmatch.c    used in opaque way
-src/libgtmatch/cutendpfx.c     used in opaque way
-src/libgtmatch/cutendpfx.h  interface
-src/libgtmatch/esa-map.c    used in opaque way
-src/libgtmatch/sarr-def.h   used in opaque way
-src/libgtmatch/sfx-apfxlen.c  no usage
-src/libgtmatch/sfx-bentsedg.c no usage
-src/libgtmatch/sfx-opt.c      no usage
-src/libgtmatch/sfx-optdef.h      no usage
-src/libgtmatch/sfx-outlcp.h   only declaration
-src/libgtmatch/sfx-run.c          no usage
-src/libgtmatch/sfx-suffixer.h  interface
-src/tools/gt_greedyfwdmat.c    only in previous version
-*/
