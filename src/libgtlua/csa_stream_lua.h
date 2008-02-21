@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,23 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
-#include "libgtlua/csa_stream_lua.h"
-#include "libgtlua/genome_node_lua.h"
-#include "libgtlua/genome_node_iterator_lua.h"
-#include "libgtlua/genome_stream_lua.h"
-#include "libgtlua/genome_visitor_lua.h"
-#include "libgtlua/gtext_lua.h"
-#include "libgtlua/stream_evaluator_lua.h"
+#ifndef CSA_STREAM_LUA_H
+#define CSA_STREAM_LUA_H
 
-int luaopen_gtext(lua_State *L)
-{
-  assert(L);
-  luaopen_csa_stream(L);
-  luaopen_genome_node(L);
-  luaopen_genome_node_iterator(L);
-  luaopen_genome_stream(L);
-  luaopen_genome_visitor(L);
-  luaopen_stream_evaluator(L);
-  return 1;
-}
+#include "lua.h"
+
+/* exports the CSAStream class (which implements the GenomeStream) interface to
+   Lua:
+
+   -- Returns a new CSA (consensus spliced alignment) stream object which uses
+   -- genome stream <in_stream> as input. The CSA stream replaces spliced
+   -- alignments with computed consensus splied alignments.
+   -- The optional <join> parameters sets the length for the spliced alignment
+   -- clustering (default: 300).
+   function csa_stream_new(feature_index, join)
+*/
+int luaopen_csa_stream(lua_State*);
+
+#endif

@@ -23,8 +23,6 @@
 #include "libgtext/gff3_out_stream.h"
 #include "tools/gt_csa.h"
 
-#define DEFAULT_JOINLENGTH 300
-
 typedef struct {
   bool verbose;
   unsigned long join_length;
@@ -49,7 +47,7 @@ static OPrval parse_options(int *parsed_args, CSAArguments *arguments,
   /* -join-length */
   option = option_new_ulong("join-length", "set join length for the spliced "
                             "alignment clustering", &arguments->join_length,
-                            DEFAULT_JOINLENGTH);
+                            DEFAULT_JOIN_LENGTH);
   option_parser_add_option(op, option);
 
   /* -v */
