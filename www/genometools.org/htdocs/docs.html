@@ -101,6 +101,11 @@ Returns a new genome feature of <code>type</code> spanning <code>range</code> on
 Returns a new sequence region for sequence id <code>seqid</code> spanning <code>range</code>.
 </p>
 <hr>
+<code>genome_feature:get_source()</code>
+<p>
+Returns the source of <code>genome_feature</code>.
+</p>
+<hr>
 <code>genome_feature:output_leading()</code>
 <p>
 Show leading part of GFF3 output for <code>genome_feature</code>
@@ -362,6 +367,11 @@ Returns the sequence id of <code>genome_node</code>.
 <code>genome_node:set_seqid(seqid)</code>
 <p>
 Set the sequence id of <code>genome_node</code> to <code>seqid</code>.
+</p>
+<hr>
+<code>genome_node:set_source(source)</code>
+<p>
+Set the source of <code>genome_node</code> to <code>source</code>.
 </p>
 <hr>
 <code>genome_node:accept(genome_visitor)</code>

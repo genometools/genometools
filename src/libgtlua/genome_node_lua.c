@@ -112,6 +112,29 @@ static int genome_node_lua_set_seqid(lua_State *L)
   return 0;
 }
 
+static int genome_feature_lua_get_source(lua_State *L)
+{
+  GenomeNode **gn = check_genome_node(L, 1);
+  GenomeFeature *gf;
+  /* make sure we get a genome feature */
+  gf = genome_node_cast(genome_feature_class(), *gn);
+  luaL_argcheck(L, gf, 1, "not a genome feature");
+  lua_pushstring(L, genome_feature_get_source(gf));
+  return 1;
+}
+
+static int genome_node_lua_set_source(lua_State *L)
+{
+  const char *source;
+  Str *source_str;
+  GenomeNode **gn = check_genome_node(L, 1);
+  source = luaL_checkstring(L, 2);
+  source_str = str_new_cstr(source);
+  genome_node_set_source(*gn, source_str);
+  str_delete(source_str);
+  return 0;
+}
+
 static int genome_node_lua_accept(lua_State *L)
 {
   GenomeNode **gn;
@@ -200,6 +223,8 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_range", genome_node_lua_get_range },
   { "get_seqid", genome_node_lua_get_seqid },
   { "set_seqid", genome_node_lua_set_seqid },
+  { "get_source", genome_feature_lua_get_source },
+  { "set_source", genome_node_lua_set_source },
   { "accept", genome_node_lua_accept },
   { "is_part_of_genome_node", genome_node_lua_is_part_of_genome_node },
   { "mark", genome_node_lua_mark },
