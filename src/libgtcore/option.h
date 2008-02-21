@@ -153,6 +153,7 @@ Option*        option_new_filename(const char *option_str,
                                    const char *description, Str*);
 Option*        option_new_filenamearray(const char *option_str,
                                         const char *description, StrArray*);
+const char*    option_get_name(const Option *o);
 void           option_is_mandatory(Option*);
 void           option_is_mandatory_either(Option*, const Option*);
 /* if this function was called, <o> is only shown in the output of -help+ */

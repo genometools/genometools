@@ -1305,6 +1305,12 @@ Option* option_new_choice(const char *option_str, const char *description,
   return o;
 }
 
+const char* option_get_name(const Option *o)
+{
+  assert(o);
+  return str_get(o->option_str);
+}
+
 void option_is_mandatory(Option *o)
 {
   assert(o);
