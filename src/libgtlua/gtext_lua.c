@@ -22,6 +22,7 @@
 #include "libgtlua/genome_stream_lua.h"
 #include "libgtlua/genome_visitor_lua.h"
 #include "libgtlua/gtext_lua.h"
+#include "libgtlua/region_mapping_lua.h"
 #include "libgtlua/stream_evaluator_lua.h"
 
 int luaopen_gtext(lua_State *L)
@@ -32,6 +33,7 @@ int luaopen_gtext(lua_State *L)
   luaopen_genome_node_iterator(L);
   luaopen_genome_stream(L);
   luaopen_genome_visitor(L);
+  luaopen_region_mapping(L);
   luaopen_stream_evaluator(L);
   return 1;
 }
