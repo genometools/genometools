@@ -29,6 +29,18 @@ end
   end
 end
 
+1.upto(14) do |i|
+  Name "cds_stream bindings #{i}"
+  Keywords "gt_scripts"
+  Test do
+    run_test "#{$bin}gt  #{$testdata}/gtscripts/cds_stream.lua " +
+             "#{$testdata}/gt_cds_test_#{i}.fas " +
+             "#{$testdata}/gt_cds_test_#{i}.in"
+    run "sed 's/gtscript/gt cds/' #{$last_stdout}"
+    run "diff #{$last_stdout} #{$testdata}/gt_cds_test_#{i}.out"
+  end
+end
+
 Name "genome_node bindings"
 Keywords "gt_scripts"
 Test do
