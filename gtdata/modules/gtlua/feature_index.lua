@@ -101,4 +101,17 @@ if GenomeTools_feature_index then
       print(seqid)
     end
   end
+
+  -- Returns all features from <feature_index>.
+  function GenomeTools_feature_index:get_all_features()
+    local seqids = self:get_seqids()
+    local all_features = {}
+    for _, seqid in ipairs(seqids) do
+      local seqid_features = self:get_features_for_seqid(seqid)
+      for _, feature in ipairs(seqid_features) do
+        all_features[#all_features + 1] = feature
+      end
+    end
+    return all_features
+  end
 end
