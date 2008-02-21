@@ -156,7 +156,7 @@ Print the given array of <code>features</code> to stdout.
 Print all marked <code>features</code> (an array) to stdout.
 </p>
 <hr>
-<code>features_mRNA2genes(in_features)</code>
+<code>features_mRNAs2genes(in_features)</code>
 <p>
 Return an array of genome features which contains a separate gene feature for each mRNA in <code>in_features</code>.
 </p>
@@ -403,7 +403,12 @@ Show marked parts of genome node on stdout.
 <h2>Class GenomeNodeIterator</h2>
 <code>genome_node_iterator_new(genome_node)</code>
 <p>
-Returns a new genome node iterator object for <code>genome_node</code>.
+Returns a new genome node iterator which performs a depth-first traversel of <code>genome_node</code> (including <code>genome_node</code> itself).
+</p>
+<hr>
+<code>genome_node_iterator_new_direct(genome_node)</code>
+<p>
+Returns a noew genome node iterator wich iterates over all direct children of <code>genome_node</code> (without <code>genome_node</code> itself).
 </p>
 <hr>
 <code>genome_node_iterator:next()</code>

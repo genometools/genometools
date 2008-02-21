@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -39,6 +39,20 @@ static int genome_node_iterator_lua_new(lua_State *L)
   return 1;
 }
 
+static int genome_node_iterator_lua_new_direct(lua_State *L)
+{
+  GenomeNodeIterator **gni;
+  GenomeNode **gn;
+  assert(L);
+  gn = check_genome_node(L, 1);
+  gni = lua_newuserdata(L, sizeof (GenomeNodeIterator*));
+  assert(gni);
+  *gni = genome_node_iterator_new_direct(*gn);
+  luaL_getmetatable(L, GENOME_NODE_ITERATOR_METATABLE);
+  lua_setmetatable(L, -2);
+  return 1;
+}
+
 static int genome_node_iterator_lua_next(lua_State *L)
 {
   GenomeNodeIterator **gni;
@@ -62,6 +76,7 @@ static int genome_node_iterator_lua_delete(lua_State *L)
 
 static const struct luaL_Reg genome_node_iterator_lib_f [] = {
   { "genome_node_iterator_new", genome_node_iterator_lua_new },
+  { "genome_node_iterator_new_direct", genome_node_iterator_lua_new_direct },
   { NULL, NULL }
 };
 

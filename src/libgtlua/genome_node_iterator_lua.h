@@ -22,8 +22,13 @@
 
 /* exports the GenomeNodeIterator class to Lua:
 
-   -- Returns a new genome node iterator object for <genome_node>.
+   -- Returns a new genome node iterator which performs a depth-first traversel
+   -- of <genome_node> (including <genome_node> itself).
    function genome_node_iterator_new(genome_node)
+
+   -- Returns a noew genome node iterator wich iterates over all direct children
+   -- of <genome_node> (without <genome_node> itself).
+   function genome_node_iterator_new_direct(genome_node)
 
    -- Returns the next genome node for <genome_node_iterator> or nil.
    function genome_node_iterator:next()
