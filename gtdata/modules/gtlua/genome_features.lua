@@ -47,3 +47,44 @@ function features_show_marked(features)
     end
   end
 end
+
+local function create_gene_from_mRNA(mRNA)
+  assert(mRNA)
+  assert(mRNA:get_type() == "mRNA")
+  local gene = gt.genome_feature_new("gene", mRNA:get_range(),
+                                     mRNA:get_strand())
+  gene:set_seqid(mRNA:get_seqid())
+  gene:set_source(mRNA:get_source())
+  local gni = gt.genome_node_iterator_new_direct(mRNA)
+  local old_child = gni:next()
+  while (old_child) do
+    local new_child = gt.genome_feature_new(old_child:get_type(),
+                                            old_child:get_range(),
+                                            old_child:get_strand())
+    new_child:set_seqid(old_child:get_seqid())
+    new_child:set_source(old_child:get_source())
+    gene:is_part_of_genome_node(new_child)
+    old_child = gni:next()
+  end
+  return gene
+end
+
+-- Return an array of genome features which contains a separate gene feature for
+-- each mRNA in <in_features>.
+function features_mRNAs2genes(in_features)
+  assert(in_features)
+  local out_features = {}
+  for _, in_feature in ipairs(in_features) do
+    if in_feature:get_type() == "gene" then
+      local gni = gt.genome_node_iterator_new_direct(in_feature)
+      local child = gni:next()
+      while (child) do
+        if child:get_type() == "mRNA" then
+          out_features[#out_features + 1] = create_gene_from_mRNA(child)
+        end
+        child = gni:next()
+      end
+    end
+  end
+  return out_features
+end
