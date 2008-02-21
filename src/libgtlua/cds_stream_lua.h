@@ -15,21 +15,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef REGION_MAPPING_LUA_H
-#define REGION_MAPPING_LUA_H
+#ifndef CDS_STREAM_LUA_H
+#define CDS_STREAM_LUA_H
 
 #include "lua.h"
 
-/* exports the RegionMapping class to Lua:
+/* exports the CDSStream class (which implements the GenomeStream) interface
+   to Lua:
 
-   -- Returns a new region mapping which maps everything onto sequence file
-   -- <seqfile>.
-   function region_mapping_new_seqfile(seqfile)
+   -- Returns a new CDS (coding sequence) stream object (a genome stream) which
+   -- uses genome stream <in_stream> as input.
+   -- The CDS stream adds CDS features to exon features in <in_stream>.
+   -- The given <region_mapping> is used to map the sequence regions given in
+   -- <in_stream> to the actual sequence files necessary for computing the
+   -- coding sequences.
+   function cds_stream_new(region_mapping)
 */
-int luaopen_region_mapping(lua_State*);
-
-#define REGION_MAPPING_METATABLE  "GenomeTools.region_mapping"
-#define check_region_mapping(L, POS) \
-        (RegionMapping**) luaL_checkudata(L, POS, REGION_MAPPING_METATABLE)
+int luaopen_cds_stream(lua_State*);
 
 #endif

@@ -21,10 +21,6 @@
 #include "libgtlua/region_mapping_lua.h"
 #include "libgtlua/gtcore_lua.h"
 
-#define REGION_MAPPING_METATABLE  "GenomeTools.region_mapping"
-#define check_region_mapping(L, POS) \
-        (RegionMapping**) luaL_checkudata(L, POS, REGION_MAPPING_METATABLE)
-
 static int region_mapping_lua_new_seqfile(lua_State *L)
 {
   const char *seqfilename;
