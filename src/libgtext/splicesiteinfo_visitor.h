@@ -23,7 +23,7 @@ typedef struct SpliceSiteInfoVisitor SpliceSiteInfoVisitor;
 
 #include <stdbool.h>
 #include "libgtext/genome_visitor.h"
-#include "libgtext/regionmapping.h"
+#include "libgtext/region_mapping.h"
 
 const GenomeVisitorClass* splicesiteinfo_visitor_class(void);
 /* takes ownership of <rm> */

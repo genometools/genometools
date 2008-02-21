@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +23,7 @@ typedef struct ExtractFeatVisitor ExtractFeatVisitor;
 
 #include <stdbool.h>
 #include "libgtext/genome_visitor.h"
-#include "libgtext/regionmapping.h"
+#include "libgtext/region_mapping.h"
 
 const GenomeVisitorClass* extractfeat_visitor_class(void);
 /* takes ownership of <rm> */

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,21 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef REGIONMAPPING_H
-#define REGIONMAPPING_H
+#ifndef REGION_MAPPING_H
+#define REGION_MAPPING_H
 
 #include "libgtcore/str.h"
 
 /* maps a sequence-region to a sequence file */
 typedef struct RegionMapping RegionMapping;
 
-RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Error*);
-RegionMapping* regionmapping_new_seqfile(Str *sequence_filename);
-int            regionmapping_get_raw_sequence(RegionMapping*, const char**,
-                                              Str *seqid, Error*);
-int            regionmapping_get_raw_sequence_length(RegionMapping*,
-                                                     unsigned long*,
-                                                     Str *seqid, Error*);
-void           regionmapping_delete(RegionMapping*);
+RegionMapping* region_mapping_new_mapping(Str *mapping_filename, Error*);
+RegionMapping* region_mapping_new_seqfile(Str *sequence_filename);
+int            region_mapping_get_raw_sequence(RegionMapping*, const char**,
+                                               Str *seqid, Error*);
+int            region_mapping_get_raw_sequence_length(RegionMapping*,
+                                                      unsigned long*,
+                                                      Str *seqid, Error*);
+void           region_mapping_delete(RegionMapping*);
 
 #endif

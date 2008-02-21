@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,7 +22,7 @@
 #include "libgtcore/bioseq.h"
 #include "libgtcore/ma.h"
 #include "libgtext/mapping.h"
-#include "libgtext/regionmapping.h"
+#include "libgtext/region_mapping.h"
 
 struct RegionMapping {
   Str *sequence_filename,
@@ -32,7 +32,7 @@ struct RegionMapping {
   Bioseq *bioseq; /* the current bioseq */
 };
 
-RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Error *e)
+RegionMapping* region_mapping_new_mapping(Str *mapping_filename, Error *e)
 {
   RegionMapping *rm;
   error_check(e);
@@ -40,13 +40,13 @@ RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Error *e)
   rm = ma_calloc(1, sizeof (RegionMapping));
   rm->mapping = mapping_new(mapping_filename, "mapping", MAPPINGTYPE_STRING, e);
   if (!rm->mapping) {
-    regionmapping_delete(rm);
+    region_mapping_delete(rm);
     return NULL;
   }
   return rm;
 }
 
-RegionMapping* regionmapping_new_seqfile(Str *sequence_filename)
+RegionMapping* region_mapping_new_seqfile(Str *sequence_filename)
 {
   RegionMapping *rm;
   assert(sequence_filename);
@@ -55,7 +55,7 @@ RegionMapping* regionmapping_new_seqfile(Str *sequence_filename)
   return rm;
 }
 
-static Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
+static Str* region_mapping_map(RegionMapping *rm, const char *sequence_region,
                               Error *e)
 {
   error_check(e);
@@ -73,7 +73,7 @@ static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Error *e)
   assert(rm && seqid);
   if (!rm->sequence_file || str_cmp(rm->sequence_name, seqid)) {
     str_delete(rm->sequence_file);
-    rm->sequence_file = regionmapping_map(rm, str_get(seqid), e);
+    rm->sequence_file = region_mapping_map(rm, str_get(seqid), e);
     if (!rm->sequence_file)
       had_err = -1;
     else {
@@ -91,7 +91,7 @@ static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Error *e)
   return had_err;
 }
 
-int regionmapping_get_raw_sequence(RegionMapping *rm, const char **raw,
+int region_mapping_get_raw_sequence(RegionMapping *rm, const char **raw,
                                    Str *seqid, Error *e)
 {
   int had_err = 0;
@@ -103,7 +103,7 @@ int regionmapping_get_raw_sequence(RegionMapping *rm, const char **raw,
   return had_err;
 }
 
-int regionmapping_get_raw_sequence_length(RegionMapping *rm,
+int region_mapping_get_raw_sequence_length(RegionMapping *rm,
                                           unsigned long *length, Str *seqid,
                                           Error *e)
 {
@@ -116,7 +116,7 @@ int regionmapping_get_raw_sequence_length(RegionMapping *rm,
   return had_err;
 }
 
-void regionmapping_delete(RegionMapping *rm)
+void region_mapping_delete(RegionMapping *rm)
 {
   if (!rm) return;
   str_delete(rm->sequence_filename);

@@ -32,7 +32,7 @@ struct ExtractFeatVisitor {
        translate,
        reverse_strand;
   unsigned long fastaseq_counter;
-  RegionMapping *regionmapping;
+  RegionMapping *region_mapping;
 };
 
 #define extractfeat_visitor_cast(GV)\
@@ -45,7 +45,7 @@ static void extractfeat_visitor_free(GenomeVisitor *gv)
   str_delete(extractfeat_visitor->description);
   str_delete(extractfeat_visitor->sequence);
   str_delete(extractfeat_visitor->protein);
-  regionmapping_delete(extractfeat_visitor->regionmapping);
+  region_mapping_delete(extractfeat_visitor->region_mapping);
 }
 
 static int extract_join_feature(GenomeNode *gn, void *data, Error *e)
@@ -64,16 +64,16 @@ static int extract_join_feature(GenomeNode *gn, void *data, Error *e)
   gf_type = genome_feature_get_type(gf);
 
   if (gf_type == v->type) {
-    had_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
-                                             genome_node_get_seqid(gn), e);
+    had_err = region_mapping_get_raw_sequence(v->region_mapping, &raw_sequence,
+                                              genome_node_get_seqid(gn), e);
     if (!had_err) {
       range = genome_node_get_range(gn);
       assert(range.start); /* 1-based coordinates */
       raw_sequence += range.start - 1;
-      had_err = regionmapping_get_raw_sequence_length(v->regionmapping,
-                                                      &raw_sequence_length,
+      had_err = region_mapping_get_raw_sequence_length(v->region_mapping,
+                                                       &raw_sequence_length,
                                                       genome_node_get_seqid(gn),
-                                                      e);
+                                                       e);
     }
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
@@ -144,15 +144,16 @@ static int extract_feature(GenomeNode *gn, void *data, Error *e)
     /* otherwise we only have to look this feature */
     range = genome_node_get_range(gn);
     assert(range.start); /* 1-based coordinates */
-    had_err = regionmapping_get_raw_sequence_length(v->regionmapping,
-                                                    &raw_sequence_length,
-                                                    genome_node_get_seqid(gn),
-                                                    e);
+    had_err = region_mapping_get_raw_sequence_length(v->region_mapping,
+                                                     &raw_sequence_length,
+                                                     genome_node_get_seqid(gn),
+                                                     e);
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
       str_reset(v->sequence);
-      had_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
-                                               genome_node_get_seqid(gn), e);
+      had_err = region_mapping_get_raw_sequence(v->region_mapping,
+                                                &raw_sequence,
+                                                genome_node_get_seqid(gn), e);
     }
     if (!had_err) {
       str_append_cstr_nt(v->sequence, raw_sequence + range.start - 1,
@@ -186,7 +187,7 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
   ExtractFeatVisitor *efv;
   error_check(e);
   efv = extractfeat_visitor_cast(gv);
-  assert(efv->regionmapping);
+  assert(efv->region_mapping);
   return genome_node_traverse_children((GenomeNode*) gf, efv, extract_feature,
                                        false, e);
 }
@@ -217,6 +218,6 @@ GenomeVisitor* extractfeat_visitor_new(RegionMapping *rm,
   efv->join = join;
   efv->translate = translate;
   efv->fastaseq_counter = 0;
-  efv->regionmapping = rm;
+  efv->region_mapping = rm;
   return gv;
 }

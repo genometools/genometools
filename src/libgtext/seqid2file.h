@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@
 #define SEQID2FILE_H
 
 #include "libgtcore/option.h"
-#include "libgtext/regionmapping.h"
+#include "libgtext/region_mapping.h"
 
 /* add the options -seqfile and -regionmapping to the given option parser */
 void           seqid2file_options(OptionParser*, Str *seqfile,

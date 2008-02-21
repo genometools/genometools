@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -51,7 +51,7 @@ RegionMapping* seqid2file_regionmapping_new(Str *seqfile, Str *regionmapping,
   assert(!(str_length(seqfile) && str_length(regionmapping)));
   /* create region mapping */
   if (str_length(seqfile))
-    return regionmapping_new_seqfile(seqfile);
+    return region_mapping_new_seqfile(seqfile);
   else
-    return regionmapping_new_mapping(regionmapping, e);
+    return region_mapping_new_mapping(regionmapping, e);
 }

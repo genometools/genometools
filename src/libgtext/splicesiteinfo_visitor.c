@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,7 +31,7 @@
 
 struct SpliceSiteInfoVisitor {
   const GenomeVisitor parent_instance;
-  RegionMapping *regionmapping;
+  RegionMapping *region_mapping;
   StringDistri *splicesites,
                *donorsites,
                *acceptorsites;
@@ -47,7 +47,7 @@ static void splicesiteinfo_visitor_free(GenomeVisitor *gv)
   SpliceSiteInfoVisitor *splicesiteinfo_visitor;
   assert(gv);
   splicesiteinfo_visitor = splicesiteinfo_visitor_cast(gv);
-  regionmapping_delete(splicesiteinfo_visitor->regionmapping);
+  region_mapping_delete(splicesiteinfo_visitor->region_mapping);
   stringdistri_delete(splicesiteinfo_visitor->splicesites);
   stringdistri_delete(splicesiteinfo_visitor->donorsites);
   stringdistri_delete(splicesiteinfo_visitor->acceptorsites);
@@ -70,11 +70,11 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
   assert(range.start); /* 1-based coordinates */
   if (range_length(range) >= 4) {
     seqid = genome_node_get_seqid(intron);
-    had_err = regionmapping_get_raw_sequence(ssiv->regionmapping, &sequence,
-                                             seqid, e);
+    had_err = region_mapping_get_raw_sequence(ssiv->region_mapping, &sequence,
+                                              seqid, e);
     if (!had_err) {
-      had_err = regionmapping_get_raw_sequence_length(ssiv->regionmapping,
-                                                      &seqlen, seqid, e);
+      had_err = region_mapping_get_raw_sequence_length(ssiv->region_mapping,
+                                                       &seqlen, seqid, e);
     }
     if (!had_err) {
       assert(range.end <= seqlen);
@@ -116,7 +116,7 @@ static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
   int had_err = 0;
   error_check(e);
   ssiv = splicesiteinfo_visitor_cast(gv);
-  assert(ssiv->regionmapping);
+  assert(ssiv->region_mapping);
   gni = genome_node_iterator_new((GenomeNode*) gf);
   while (!had_err && (node = genome_node_iterator_next(gni))) {
     if (genome_feature_get_type((GenomeFeature*) node) == gft_intron)
@@ -143,7 +143,7 @@ GenomeVisitor* splicesiteinfo_visitor_new(RegionMapping *rm)
   assert(rm);
   gv = genome_visitor_create(splicesiteinfo_visitor_class());
   ssiv = splicesiteinfo_visitor_cast(gv);
-  ssiv->regionmapping = rm;
+  ssiv->region_mapping = rm;
   ssiv->splicesites = stringdistri_new();
   ssiv->acceptorsites = stringdistri_new();
   ssiv->donorsites = stringdistri_new();

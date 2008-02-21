@@ -28,7 +28,7 @@ struct CDSVisitor {
   Str *source;
   Splicedseq *splicedseq; /* the (spliced) sequence of the currently considered
                              gene */
-  RegionMapping *regionmapping;
+  RegionMapping *region_mapping;
 };
 
 #define cds_visitor_cast(GV)\
@@ -40,7 +40,7 @@ static void cds_visitor_free(GenomeVisitor *gv)
   assert(cds_visitor);
   str_delete(cds_visitor->source);
   splicedseq_delete(cds_visitor->splicedseq);
-  regionmapping_delete(cds_visitor->regionmapping);
+  region_mapping_delete(cds_visitor->region_mapping);
 }
 
 static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
@@ -59,15 +59,15 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
   if (genome_feature_get_type(gf) == gft_exon &&
       (genome_feature_get_strand(gf) == STRAND_FORWARD ||
        genome_feature_get_strand(gf) == STRAND_REVERSE)) {
-    had_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
-                                             genome_node_get_seqid(gn), err);
+    had_err = region_mapping_get_raw_sequence(v->region_mapping, &raw_sequence,
+                                              genome_node_get_seqid(gn), err);
     if (!had_err) {
       range = genome_node_get_range(gn);
       assert(range.start && range.end); /* 1-based coordinates */
-      had_err = regionmapping_get_raw_sequence_length(v->regionmapping,
-                                                      &raw_sequence_length,
+      had_err = region_mapping_get_raw_sequence_length(v->region_mapping,
+                                                       &raw_sequence_length,
                                                       genome_node_get_seqid(gn),
-                                                      err);
+                                                       err);
     }
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
@@ -227,15 +227,15 @@ const GenomeVisitorClass* cds_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* cds_visitor_new(RegionMapping *regionmapping, Str *source)
+GenomeVisitor* cds_visitor_new(RegionMapping *region_mapping, Str *source)
 {
   GenomeVisitor *gv;
   CDSVisitor *cds_visitor;
-  assert(regionmapping);
+  assert(region_mapping);
   gv = genome_visitor_create(cds_visitor_class());
   cds_visitor = cds_visitor_cast(gv);
   cds_visitor->source = str_ref(source);
   cds_visitor->splicedseq = splicedseq_new();
-  cds_visitor->regionmapping = regionmapping;
+  cds_visitor->region_mapping = region_mapping;
   return gv;
 }

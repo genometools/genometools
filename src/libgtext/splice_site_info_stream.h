@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "libgtext/genome_stream.h"
-#include "libgtext/regionmapping.h"
+#include "libgtext/region_mapping.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct SpliceSiteInfoStream SpliceSiteInfoStream;
