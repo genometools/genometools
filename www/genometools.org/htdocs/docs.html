@@ -285,9 +285,9 @@ Returns all features from <code>feature_index</code>.
 <hr>
 <a name="FeatureStream"></a>
 <h2>Class FeatureStream</h2>
-<code>feature_stream_new(feature_index)</code>
+<code>feature_stream_new(in_stream, feature_index)</code>
 <p>
-Returns a new feature stream object over <code>feature_index</code>. That is, all genome nodes which are pulled through the feature stream are added to the <code>feature_index</code>.
+Returns a new feature stream object over <code>feature_index</code> which uses the genome stream <code>in_stream</code> as input. That is, all genome nodes which are pulled through the feature stream are added to the <code>feature_index</code>.
 </p>
 <hr>
 <a name="FeatureVisitor"></a>

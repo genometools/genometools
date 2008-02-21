@@ -23,10 +23,10 @@
 /* exports the FeatureStream class (which implements the GenomeStream) interface
    to Lua:
 
-   -- Returns a new feature stream object over <feature_index>. That is, all
-   -- genome nodes which are pulled through the feature stream are added to the
-   -- <feature_index>.
-   function feature_stream_new(feature_index)
+   -- Returns a new feature stream object over <feature_index> which uses the
+   -- genome stream <in_stream> as input. That is, all genome nodes which are
+   -- pulled through the feature stream are added to the <feature_index>.
+   function feature_stream_new(in_stream, feature_index)
 */
 int luaopen_feature_stream(lua_State*);
 
