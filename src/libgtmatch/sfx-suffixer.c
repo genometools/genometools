@@ -199,7 +199,7 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
 
 void freeSfxiterator(Sfxiterator **sfi)
 {
-  /* checkcountspecialcodes((*sfi)->bcktab,(*sfi)->prefixlength); */
+  checkcountspecialcodes((*sfi)->bcktab,(*sfi)->prefixlength);
   addfinalbckspecials((*sfi)->bcktab,(*sfi)->numofchars,
                       (*sfi)->specialcharacters);
   if ((*sfi)->sri != NULL)

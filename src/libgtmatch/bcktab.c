@@ -262,15 +262,13 @@ void updatebckspecials(Bcktab *bcktab,
                        unsigned int prefixindex,
                        unsigned int prefixlength)
 {
-  if (prefixindex <= prefixlength-1)
+  Codetype ordercode = (code - bcktab->filltable[prefixindex])/
+                       (bcktab->filltable[prefixindex]+1);
+  assert(prefixindex > 0);
+  bcktab->distpfxidx[prefixindex-1][ordercode]++;
+  if (prefixindex == prefixlength-1)
   {
-    Codetype ordercode = (code - bcktab->filltable[prefixindex])/
-                         (bcktab->filltable[prefixindex]+1);
-    bcktab->distpfxidx[prefixindex-1][ordercode]++;
-    if (prefixindex == prefixlength-1)
-    {
-      assert(FROMCODE2SPECIALCODE(code,numofchars) == ordercode);
-    }
+    assert(FROMCODE2SPECIALCODE(code,numofchars) == ordercode);
   }
   bcktab->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)]++;
 }
@@ -284,28 +282,64 @@ void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
   bcktab->countspecialcodes[specialcode] += specialcharacters + 1;
 }
 
+static void pfxidxpartialsums(unsigned long *count,
+                              unsigned long specialsinbucket,
+                              Codetype code,
+                              unsigned int prefixlength,
+                              const unsigned long **distpfxidx,
+                              const Codetype *filltable)
+{
+  unsigned int prefixindex;
+  Codetype ordercode, divisor;
+
+  count[0] = 0;
+  for (prefixindex=1U; prefixindex<=prefixlength-1; prefixindex++)
+  {
+    divisor = filltable[prefixindex] + 1;
+    count[prefixindex] = 0;
+    if (code >= filltable[prefixindex])
+    {
+      ordercode = code - filltable[prefixindex];
+      if (ordercode % divisor == 0)
+      {
+        ordercode /= divisor;
+        count[prefixindex] = distpfxidx[prefixindex-1][ordercode];
+      }
+    }
+  }
+  if (prefixlength > 2U)
+  {
+    for (prefixindex = prefixlength-3; prefixindex>=1U; prefixindex--)
+    {
+      count[prefixindex] += count[prefixindex+1];
+    }
+    if (count[1] != specialsinbucket)
+    {
+      fprintf(stderr,"code %u: count[1] = %lu != %lu = specialsinbucket\n",
+              code,count[1],specialsinbucket);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+
 void checkcountspecialcodes(const Bcktab *bcktab,unsigned int prefixlength)
 {
-  unsigned int idx;
+  Codetype code;
+  unsigned long *count;
 
   if (prefixlength >= 2U)
   {
-    for (idx=0; idx<bcktab->numofspecialcodes; idx++)
+    ALLOCASSIGNSPACE(count,NULL,unsigned long,prefixlength);
+    for (code=0; code<bcktab->numofspecialcodes; code++)
     {
-
-      if(bcktab->countspecialcodes[idx] != 
-         bcktab->distpfxidx[prefixlength-2][idx])
-      {
-        fprintf(stderr,"countspecialcodes[%u] = %u != %lu = "
-                       "distpfxidx[%u][%u]\n",
-                       idx,
-                       bcktab->countspecialcodes[idx],
-                       bcktab->distpfxidx[prefixlength-2][idx],
-                       prefixlength-2,
-                       idx);
-        exit(EXIT_FAILURE);
-      }
+      pfxidxpartialsums(count,
+                        bcktab->countspecialcodes[code],
+                        code,
+                        prefixlength,
+                        (const unsigned long **) bcktab->distpfxidx,
+                        bcktab->filltable);
     }
+    FREESPACE(count);
   }
 }
 
@@ -417,45 +451,6 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
                                numofchars);
 }
 
-unsigned long *pfxidxpartialsums(unsigned long specialsinbucket,
-                                 Codetype code,
-                                 unsigned int prefixlength,
-                                 const unsigned long **distpfxidx,
-                                 const Codetype *filltable)
-{
-  unsigned long sumcount = 0, *count;
-  unsigned int prefixindex;
-  Codetype ordercode;
-
-  ALLOCASSIGNSPACE(count,NULL,unsigned long,prefixlength);
-  count[0] = 0;
-  for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
-  {
-    count[prefixindex] = 0;
-    if (code >= filltable[prefixindex])
-    {
-      ordercode = code - filltable[prefixindex];
-      if (ordercode % (filltable[prefixindex] + 1) == 0)
-      {
-        ordercode = ordercode/(filltable[prefixindex] + 1);
-        count[prefixindex] = distpfxidx[prefixindex-1][ordercode];
-        sumcount += count[prefixindex];
-      }
-    }
-  }
-  assert(specialsinbucket >= sumcount);
-  count[prefixlength-1] = specialsinbucket - sumcount;
-  if (prefixlength > 2U)
-  {
-    for (prefixindex = prefixlength-2; prefixindex>=1U; prefixindex--)
-    {
-      count[prefixindex] += count[prefixindex+1];
-    }
-    assert(count[1] == specialsinbucket);
-  }
-  return count;
-}
-
 unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
                               unsigned long specialsinbucket,
                               const Bcktab *bcktab,
@@ -463,17 +458,18 @@ unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
                               unsigned int prefixlength)
 {
   unsigned int prefixindex, maxvalue = 0;
-  Codetype ordercode;
+  Codetype ordercode, divisor;
   unsigned long idx, insertindex = specialsinbucket-1;
 
   for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
   {
+    divisor = bcktab->filltable[prefixindex] + 1;
     if (code >= bcktab->filltable[prefixindex])
     {
       ordercode = code - bcktab->filltable[prefixindex];
-      if (ordercode % (bcktab->filltable[prefixindex] + 1) == 0)
+      if (ordercode % divisor == 0)
       {
-        ordercode = ordercode/(bcktab->filltable[prefixindex] + 1);
+        ordercode /= divisor;
         if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0 &&
             insertindex > 0)
         {
