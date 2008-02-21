@@ -25,6 +25,8 @@ static int range_lua_new(lua_State *L)
   Range *range;
   startpos = luaL_checklong(L, 1);
   endpos   = luaL_checklong(L, 2);
+  luaL_argcheck(L, startpos > 0, 1, "must be > 0");
+  luaL_argcheck(L, endpos > 0, 2, "must be > 0");
   luaL_argcheck(L, startpos <= endpos, 1, "must be <= endpos");
   range = lua_newuserdata(L, sizeof (Range));
   range->start = startpos;
