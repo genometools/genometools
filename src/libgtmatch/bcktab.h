@@ -49,8 +49,6 @@ Bcktab *mapbcktab(const Str *indexname,
 
 void freebcktab(Bcktab **bcktab,bool mapped);
 
-void initbcktabwithNULL(Bcktab *bcktab);
-
 Bcktab *allocBcktab(Seqpos totallength,
                     unsigned int numofchars,
                     unsigned int prefixlength,

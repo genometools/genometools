@@ -132,7 +132,7 @@ void freebcktab(Bcktab **bcktab,bool mapped)
   FREESPACE(*bcktab);
 }
 
-void initbcktabwithNULL(Bcktab *bcktab)
+static void initbcktabwithNULL(Bcktab *bcktab)
 {
   bcktab->leftborder = NULL;
   bcktab->countspecialcodes = NULL;
