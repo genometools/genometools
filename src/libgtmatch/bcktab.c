@@ -64,6 +64,22 @@ static unsigned long numofdistpfxidxcounters(const Codetype *basepower,
   return 0;
 }
 
+static void setdistpfxidxptrs(unsigned long **distpfxidx,
+                              unsigned long *ptr,
+                              const Codetype *basepower,
+                              unsigned int prefixlength)
+{
+  unsigned int idx;
+  unsigned long offset = 0;
+
+  distpfxidx[0] = ptr;
+  for (idx=1U; idx<prefixlength-1; idx++)
+  {
+    offset += (unsigned long) basepower[idx];
+    distpfxidx[idx] = distpfxidx[idx-1] + basepower[idx];
+  }
+}
+
 static unsigned long **allocdistprefixindexcounts(const Codetype *basepower,
                                                   unsigned int prefixlength)
 {
@@ -74,7 +90,6 @@ static unsigned long **allocdistprefixindexcounts(const Codetype *basepower,
     numofcounters = numofdistpfxidxcounters(basepower,prefixlength);
     if (numofcounters > 0)
     {
-      unsigned int idx;
       unsigned long *counters, **distpfxidx;
 
       ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-1);
@@ -83,11 +98,7 @@ static unsigned long **allocdistprefixindexcounts(const Codetype *basepower,
               (unsigned long) sizeof (*distpfxidx) * (prefixlength-1) +
                               sizeof (*counters) * numofcounters);
       memset(counters,0,(size_t) sizeof (*counters) * numofcounters);
-      distpfxidx[0] = counters;
-      for (idx=1U; idx<prefixlength-1; idx++)
-      {
-        distpfxidx[idx] = distpfxidx[idx-1] + basepower[idx];
-      }
+      setdistpfxidxptrs(distpfxidx,counters,basepower,prefixlength);
       return distpfxidx;
     }
   }
@@ -178,7 +189,7 @@ static void assignbcktabmapspecification(ArrayMapspecification *mapspectable,
   unsigned long numofcounters;
 
   NEWMAPSPEC(bcktab->leftborder,Seqpos,
-             (unsigned long) bcktab->numofallcodes+1);
+             (unsigned long) (bcktab->numofallcodes+1));
   NEWMAPSPEC(bcktab->countspecialcodes,Unsignedlong,
              (unsigned long) bcktab->numofspecialcodes);
   numofcounters = numofdistpfxidxcounters((const Codetype *) bcktab->basepower,
@@ -242,6 +253,11 @@ Bcktab *mapbcktab(const Str *indexname,
   {
     freebcktab(&bcktab);
     return NULL;
+  }
+  if (bcktab->distpfxidx != NULL)
+  {
+    setdistpfxidxptrs(bcktab->distpfxidx,bcktab->distpfxidx[0],
+                      bcktab->basepower,bcktab->prefixlength);
   }
   checkcountspecialcodes(bcktab);
   return bcktab;
@@ -375,7 +391,6 @@ void checkcountspecialcodes(const Bcktab *bcktab)
     ALLOCASSIGNSPACE(count,NULL,unsigned long,bcktab->prefixlength);
     for (code=0; code<bcktab->numofallcodes; code++)
     {
-      printf("code=%u\n",code);
       pfxidxpartialsums(count,
                         code,
                         bcktab);
