@@ -540,6 +540,66 @@ bsGetUniformInt64Array(constBitString str, BitOffset offset, unsigned numBits,
                        size_t numValues, int64_t val[]);
 
 /**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numBits number of bits composing each integer
+ * @param numValues number of integers to read
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetUniformUInt8ArrayAdd(constBitString str, BitOffset offset,
+                          unsigned numBits, size_t numValues,
+                          uint8_t val[]);
+
+/**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numBits number of bits composing each integer
+ * @param numValues number of integers to read
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetUniformUInt16ArrayAdd(constBitString str, BitOffset offset,
+                           unsigned numBits, size_t numValues,
+                           uint16_t val[]);
+
+/**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numBits number of bits composing each integer
+ * @param numValues number of integers to read
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,
+                           unsigned numBits, size_t numValues,
+                           uint32_t val[]);
+
+/**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numBits number of bits composing each integer
+ * @param numValues number of integers to read
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetUniformUInt64ArrayAdd(constBitString str, BitOffset offset,
+                           unsigned numBits, size_t numValues,
+                           uint64_t val[]);
+
+/**
  * \brief Compares substrings of bitstrings, starting at respective offsets,
  * both of lenght numBits.
  *

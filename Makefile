@@ -91,7 +91,14 @@ SKPROTO_OBJ:=$(SKPROTO_SRC:%.c=obj/%.o)
 SKPROTO_DEP:=$(SKPROTO_SRC:%.c=obj/%.d)
 
 # the core GenomeTools library (no other dependencies)
+AUTOGEN_LIBGTCORE_SRC:= src/libgtcore/bitpackstringop8.c \
+	src/libgtcore/checkbitpackstring8.c \
+	src/libgtcore/bitpackstringop16.c src/libgtcore/checkbitpackstring16.c \
+	src/libgtcore/bitpackstringop32.c src/libgtcore/checkbitpackstring32.c \
+	src/libgtcore/bitpackstringop64.c src/libgtcore/checkbitpackstring64.c
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
+LIBGTCORE_SRC:=$(filter-out $(AUTOGEN_LIBGTCORE_SRC), $(LIBGTCORE_SRC)) \
+	 $(AUTOGEN_LIBGTCORE_SRC)
 LIBGTCORE_OBJ:=$(LIBGTCORE_SRC:%.c=obj/%.o)
 LIBGTCORE_DEP:=$(LIBGTCORE_SRC:%.c=obj/%.d)
 LIBGTCORE_LIBDEP=-lbz2 -lz
