@@ -445,6 +445,7 @@ static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
             PRINTSeqposcast(suffixpos2),
             cmp,
             PRINTSeqposcast(lcpvalue));
+    exit(EXIT_FAILURE);
   }
   return lcpvalue;
 }
@@ -454,7 +455,7 @@ static void bucketends(const Encodedsequence *encseq,
                        Encodedsequencescanstate *esr1,
                        Encodedsequencescanstate *esr2,
                        Outlcpinfo *outlcpinfo,
-                       Seqpos previoussuffix,
+                       Seqpos startpos_previoussuffix,
                        Seqpos firstspecialsuffix,
                        unsigned long specialsinbucket,
                        Codetype code,
@@ -462,6 +463,11 @@ static void bucketends(const Encodedsequence *encseq,
 {
   Seqpos lcpvalue;
 
+  /* 
+     there is at least one element in the bucket. if there is more than
+     one element in the bucket, then we insert them using the 
+     information from the bcktab
+  */
   if (specialsinbucket > 1UL)
   {
     unsigned int maxvalue;
@@ -477,7 +483,7 @@ static void bucketends(const Encodedsequence *encseq,
   }
   lcpvalue = computelocallcpvalue(encseq,
                                   readmode,
-                                  previoussuffix,
+                                  startpos_previoussuffix,
                                   firstspecialsuffix,
                                   esr1,
                                   esr2);
@@ -571,7 +577,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos totalwidth,
-                    Seqpos previoussuffix,
+                    Suffixwithcode *previoussuffix,
                     const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
@@ -645,23 +651,28 @@ void sortallbuckets(Seqpos *suftabptr,
       {
         if (code == 0)
         {
+          /* first part first code */
           lcpvalue = 0;
         } else
         {
+          /* compute lcpvalue of first element of bucket with
+             last element of previous bucket */
           lcpvalue = computelocallcpvalue(encseq,
                                           readmode,
-                                          previoussuffix,
+                                          previoussuffix->startpos,
                                           suftabptr[bucketspec.left],
                                           esr1,
                                           esr2);
         }
         assert(lcpsubtab != NULL);
         SETLCP(0,lcpvalue);
+        /* all other lcp-values are computed and they can be output */
         multilcpvalue(outlcpinfo,
                       bucketspec.nonspecialsinbucket,
                       bucketspec.left);
-        previoussuffix = suftabptr[bucketspec.left +
-                                   bucketspec.nonspecialsinbucket - 1];
+        /* previoussuffix becomes last nonspecial element in current bucket */
+        previoussuffix->startpos 
+          = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
       }
     }
     if (outlcpinfo != NULL)
@@ -673,7 +684,8 @@ void sortallbuckets(Seqpos *suftabptr,
                    esr1,
                    esr2,
                    outlcpinfo,
-                   previoussuffix,
+                   previoussuffix->startpos,
+                   /* first special element in bucket */
                    suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket],
                    bucketspec.specialsinbucket,
                    code,
@@ -681,9 +693,11 @@ void sortallbuckets(Seqpos *suftabptr,
       }
       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket > 0)
       {
-        previoussuffix = suftabptr[bucketspec.left +
-                                   bucketspec.nonspecialsinbucket +
-                                   bucketspec.specialsinbucket - 1];
+        /* if there is at least one element in the bucket, then the last
+           one becomes the next previous suffix */
+        previoussuffix->startpos = suftabptr[bucketspec.left +
+                                             bucketspec.nonspecialsinbucket +
+                                             bucketspec.specialsinbucket - 1];
       }
     }
   }

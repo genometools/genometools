@@ -23,8 +23,6 @@
 #include "libgtcore/arraydef.h"
 #include "libgtcore/error.h"
 #include "spacedef.h"
-#include "intbits.h"
-#include "divmodmul.h"
 #include "measure-time-if.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
@@ -51,7 +49,7 @@ DECLAREARRAYSTRUCT(Codeatposition);
 
 DECLAREARRAYSTRUCT(Seqpos);
 
- struct Sfxiterator
+struct Sfxiterator
 {
   bool storespecials;
   Codetype currentmincode,
@@ -74,7 +72,7 @@ DECLAREARRAYSTRUCT(Seqpos);
   ArraySeqpos fusp;
   Specialrangeiterator *sri;
   Sequencerange overhang;
-  Seqpos previoussuffix;
+  Suffixwithcode previoussuffix;
   bool exhausted;
   Bcktab *bcktab;
   Codetype numofallcodes;
@@ -256,7 +254,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->prefixlength = prefixlength;
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
-    sfi->previoussuffix = 0;
+    sfi->previoussuffix.startpos = 0;
+    sfi->previoussuffix.code = 0;
+    sfi->previoussuffix.prefixindex = 0;
     sfi->outlcpinfo = outlcpinfo;
     sfi->sri = NULL;
     sfi->part = 0;
@@ -374,13 +374,14 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->currentmincode,
                  sfi->currentmaxcode,
                  totalwidth,
-                 sfi->previoussuffix,
+                 &sfi->previoussuffix,
                  sfi->bcktab,
                  sfi->numofchars,
                  sfi->prefixlength,
                  sfi->outlcpinfo);
   assert(totalwidth > 0);
-  sfi->previoussuffix = sfi->suftab[sfi->widthofpart-1];
+  /* save last suffix of last part */
+  sfi->previoussuffix.startpos = sfi->suftab[sfi->widthofpart-1];
   sfi->part++;
 }
 
