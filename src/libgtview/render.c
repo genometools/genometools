@@ -150,9 +150,14 @@ static void render_line(Render *r, Line *line)
     Dlist *elems = block_get_elements(block);
     Range block_range = block_get_range(block);
     DrawingRange draw_range;
+    Color grey;
+    double bar_height = config_get_num(r->cfg, "format", "bar_height", 15),
+           min_len_block = config_get_num(r->cfg,
+                                          "format", "min_len_block", 40);
     const char* caption;
     Strand strand = block_get_strand(block);
-
+    grey.red = grey.green = grey.blue = .85;
+    
     /* draw block caption */
     draw_range = render_convert_coords(r, block_range);
     if (block_caption_is_visible(block)) {
@@ -162,6 +167,45 @@ static void render_line(Render *r, Line *line)
                          MAX(r->margins, draw_range.start),
                          r->y-6,
                          caption);
+    }
+
+    /* do not draw further details in very small blocks */
+    if (!block_has_only_one_fullsize_element(block)
+         && draw_range.end-draw_range.start < min_len_block)
+    {
+      int arrow_status = ARROW_NONE;
+      GenomeFeatureType btype = block_get_type(block);
+      Strand strand = block_get_strand(block);
+      if (strand == STRAND_REVERSE || strand == STRAND_BOTH)
+        arrow_status = ARROW_LEFT;
+      if (strand == STRAND_FORWARD || strand == STRAND_BOTH)
+        arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
+      graphics_draw_box(r->g,
+                        draw_range.start,
+                        r->y,
+                        draw_range.end-draw_range.start,
+                        bar_height,
+                        config_get_color(r->cfg,
+                                         genome_feature_type_get_cstr(btype)),
+                        arrow_status,
+                        config_get_num(r->cfg, "format", "arrow_width", 6),
+                        1,
+                        config_get_color(r->cfg, "stroke"),
+                        true);
+      /* draw arrowheads at clipped margins */
+      if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
+          graphics_draw_arrowhead(r->g,
+                                  r->margins-10,
+                                  r->y+((bar_height-8)/2),
+                                  grey,
+                                  ARROW_LEFT);
+      if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
+          graphics_draw_arrowhead(r->g,
+                                  r->width-r->margins+10,
+                                  r->y+((bar_height-8)/2),
+                                  grey,
+                                  ARROW_RIGHT);
+      continue;
     }
 
     /* draw parent block boundaries */
@@ -183,24 +227,22 @@ static void render_line(Render *r, Line *line)
       Element *elem = (Element*) dlistelem_get_data(delem);
       Range elem_range = element_get_range(elem);
       DrawingRange draw_range;
-      double elem_start, elem_width, bar_height, stroke_width;
-      Color grey, elem_color;
+      double elem_start, elem_width, stroke_width;
+      Color elem_color;
       int arrow_status = ARROW_NONE;
       const char *style,
                  *type = genome_feature_type_get_cstr(element_get_type(elem));
 
+      /* This shouldn't happen. */
       if (!range_overlap(elem_range, diagram_get_range(r->dia)))
         continue;
 
       if ((strand == STRAND_REVERSE || strand == STRAND_BOTH)
-             && delem == dlist_first(elems))
+             /*&& delem == dlist_first(elems)*/)
         arrow_status = ARROW_LEFT;
       if ((strand == STRAND_FORWARD || strand == STRAND_BOTH)
-             && dlistelem_next(delem) == NULL)
+             /*&& dlistelem_next(delem) == NULL*/)
         arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
-
-      grey.red = grey.green = grey.blue = .85;
-      bar_height = config_get_num(r->cfg, "format", "bar_height", 15);
 
       if (config_get_verbose(r->cfg))
         fprintf(stderr, "processing element from %lu to %lu, strand %d\n",
@@ -242,7 +284,8 @@ static void render_line(Render *r, Line *line)
                        arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6),
                        stroke_width,
-                       elem_color);
+                       elem_color,
+                       false);
       }
       else if (strcmp(style, "caret")==0)
       {
@@ -251,7 +294,7 @@ static void render_line(Render *r, Line *line)
                        r->y,
                        elem_width,
                        bar_height,
-                       arrow_status,
+                       ARROW_NONE,
                        config_get_num(r->cfg, "format", "arrow_width", 6),
                        stroke_width,
                        elem_color);
@@ -286,7 +329,8 @@ static void render_line(Render *r, Line *line)
                        arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6),
                        stroke_width,
-                       elem_color);
+                       elem_color,
+                       false);
       }
 
       /* draw arrowheads at clipped margins */
