@@ -458,7 +458,6 @@ static void bucketends(const Encodedsequence *encseq,
                        Seqpos firstspecialsuffix,
                        unsigned long specialsinbucket,
                        Codetype code,
-                       unsigned int prefixlength,
                        const Bcktab *bcktab)
 {
   Seqpos lcpvalue;
@@ -470,8 +469,7 @@ static void bucketends(const Encodedsequence *encseq,
     maxvalue = pfxidx2lcpvalues(outlcpinfo->lcpsubtab.smalllcpvalues,
                                 specialsinbucket,
                                 bcktab,
-                                code,
-                                prefixlength);
+                                code);
     if (outlcpinfo->maxbranchdepth < (Seqpos) maxvalue)
     {
       outlcpinfo->maxbranchdepth = (Seqpos) maxvalue;
@@ -487,8 +485,6 @@ static void bucketends(const Encodedsequence *encseq,
   {
     outlcpinfo->maxbranchdepth = lcpvalue;
   }
-  assert(lcpvalue < (Seqpos) prefixlength);
-  assert(lcpvalue > 0);
   outlcpinfo->lcpsubtab.smalllcpvalues[0] = (Uchar) lcpvalue;
   outlcpinfo->countoutputlcpvalues += specialsinbucket;
   xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
@@ -681,7 +677,6 @@ void sortallbuckets(Seqpos *suftabptr,
                    suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket],
                    bucketspec.specialsinbucket,
                    code,
-                   prefixlength,
                    bcktab);
       }
       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket > 0)

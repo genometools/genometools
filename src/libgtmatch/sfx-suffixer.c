@@ -169,8 +169,7 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
                              sfi->spaceCodeatposition[j].maxprefixlen);
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
         {
-          updatebckspecials(sfi->bcktab,code,sfi->numofchars,
-                            prefixindex,sfi->prefixlength);
+          updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
           stidx = --sfi->leftborder[code];
           sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
                                   prefixindex;
@@ -199,7 +198,7 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
 
 void freeSfxiterator(Sfxiterator **sfi)
 {
-  checkcountspecialcodes((*sfi)->bcktab,(*sfi)->prefixlength);
+  checkcountspecialcodes((*sfi)->bcktab);
   addfinalbckspecials((*sfi)->bcktab,(*sfi)->numofchars,
                       (*sfi)->specialcharacters);
   if ((*sfi)->sri != NULL)

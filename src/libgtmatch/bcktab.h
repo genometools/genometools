@@ -59,8 +59,7 @@ Bcktab *allocBcktab(Seqpos totallength,
 void updatebckspecials(Bcktab *bcktab,
                        Codetype code,
                        unsigned int numofchars,
-                       unsigned int prefixindex,
-                       unsigned int prefixlength);
+                       unsigned int prefixindex);
 
 Codetype codedownscale(const Bcktab *bcktab,
                        Codetype code,
@@ -87,8 +86,7 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
 unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
                               unsigned long specialsinbucket,
                               const Bcktab *bcktab,
-                              Codetype code,
-                              unsigned int prefixlength);
+                              Codetype code);
 
 const Codetype **bcktab_multimappower(const Bcktab *bcktab);
 
@@ -98,6 +96,6 @@ Seqpos *bcktab_leftborder(Bcktab *bcktab);
 
 Codetype bcktab_numofallcodes(Bcktab *bcktab);
 
-void checkcountspecialcodes(const Bcktab *bcktab,unsigned int prefixlength);
+void checkcountspecialcodes(const Bcktab *bcktab);
 
 #endif
