@@ -27,6 +27,7 @@
 
 typedef struct
 {
+  bool defined;
   Seqpos startpos;
   Codetype code;
   unsigned int prefixindex;

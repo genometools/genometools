@@ -649,11 +649,7 @@ void sortallbuckets(Seqpos *suftabptr,
       }
       if (outlcpinfo != NULL)
       {
-        if (code == 0)
-        {
-          /* first part first code */
-          lcpvalue = 0;
-        } else
+        if (previoussuffix->defined)
         {
           /* compute lcpvalue of first element of bucket with
              last element of previous bucket */
@@ -663,6 +659,10 @@ void sortallbuckets(Seqpos *suftabptr,
                                           suftabptr[bucketspec.left],
                                           esr1,
                                           esr2);
+        } else
+        {
+          /* first part first code */
+          lcpvalue = 0;
         }
         assert(lcpsubtab != NULL);
         SETLCP(0,lcpvalue);
@@ -698,6 +698,7 @@ void sortallbuckets(Seqpos *suftabptr,
         previoussuffix->startpos = suftabptr[bucketspec.left +
                                              bucketspec.nonspecialsinbucket +
                                              bucketspec.specialsinbucket - 1];
+        previoussuffix->defined = true;
       }
     }
   }

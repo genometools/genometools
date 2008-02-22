@@ -257,6 +257,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->previoussuffix.startpos = 0;
     sfi->previoussuffix.code = 0;
     sfi->previoussuffix.prefixindex = 0;
+    sfi->previoussuffix.defined = false;
     sfi->outlcpinfo = outlcpinfo;
     sfi->sri = NULL;
     sfi->part = 0;
