@@ -463,9 +463,9 @@ static void bucketends(const Encodedsequence *encseq,
 {
   Seqpos lcpvalue;
 
-  /* 
+  /*
      there is at least one element in the bucket. if there is more than
-     one element in the bucket, then we insert them using the 
+     one element in the bucket, then we insert them using the
      information from the bcktab
   */
   if (specialsinbucket > 1UL)
@@ -671,7 +671,7 @@ void sortallbuckets(Seqpos *suftabptr,
                       bucketspec.nonspecialsinbucket,
                       bucketspec.left);
         /* previoussuffix becomes last nonspecial element in current bucket */
-        previoussuffix->startpos 
+        previoussuffix->startpos
           = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
       }
     }
