@@ -59,6 +59,31 @@ EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint)
   return seq->classInfo->rank(seq, mSym, pos, hint);
 }
 
+static inline Seqpos
+EISSymTransformedRank(EISeq *seq, Symbol tSym, Seqpos pos,
+                      union EISHint *hint)
+{
+  assert(tSym < MRAEncGetSize(EISGetAlphabet(seq)));
+  return seq->classInfo->rank(seq, tSym, pos, hint);
+}
+
+static inline struct SeqposPair
+EISPosPairRank(EISeq *seq, Symbol sym, Seqpos posA, Seqpos posB,
+               union EISHint *hint)
+{
+  Symbol tSym;
+  tSym = MRAEncMapSymbol(seq->alphabet, sym);
+  return seq->classInfo->posPairRank(seq, tSym, posA, posB, hint);
+}
+
+static inline struct SeqposPair
+EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, Seqpos posA, Seqpos posB,
+                             union EISHint *hint)
+{
+  assert(tSym < MRAEncGetSize(EISGetAlphabet(seq)));
+  return seq->classInfo->posPairRank(seq, tSym, posA, posB, hint);
+}
+
 static inline void
 EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint)
@@ -95,14 +120,6 @@ deleteExtBitsRetrieval(struct extBitsRetrieval *r)
 {
   destructExtBitsRetrieval(r);
   ma_free(r);
-}
-
-static inline Seqpos
-EISSymTransformedRank(EISeq *seq, Symbol msym, Seqpos pos,
-                      union EISHint *hint)
-{
-  assert(msym < MRAEncGetSize(EISGetAlphabet(seq)));
-  return seq->classInfo->rank(seq, msym, pos, hint);
 }
 
 static inline FILE *

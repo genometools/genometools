@@ -184,7 +184,7 @@ static inline Seqpos
 EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint);
 
 /**
- * \brief Return number of occurrences of symbol sym in index up to
+ * \brief Return number of occurrences of symbol tSym in index up to
  * but not including given position.
  * @param seq sequence index object to query
  * @param tSym symbol to query occurrences of, but already transformed
@@ -196,6 +196,48 @@ EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint);
 static inline Seqpos
 EISSymTransformedRank(EISeq *seq, Symbol tSym, Seqpos pos,
                       union EISHint *hint);
+
+struct SeqposPair
+{
+  Seqpos a,b;
+};
+
+/**
+ * \brief Return number of occurrences of symbol sym in index up to
+ * but not including given positions.
+ *
+ * precondition: posA <= posB
+ * @param seq sequence index object to query
+ * @param sym original alphabet symbol to query occurrences of
+ * @param posA occurences are counted up to this position
+ * @param posB as for posA occurences are counted up to this position
+ * @param hint provides cache and direction information for queries
+ * based on previous queries
+ * @return members a and b of returned struct contain Occ results for
+ * posA and posB respectively
+ */
+static inline struct SeqposPair
+EISPosPairRank(EISeq *seq, Symbol sym, Seqpos posA, Seqpos posB,
+               union EISHint *hint);
+
+/**
+ * \brief Return number of occurrences of symbol sym in index up to
+ * but not including given positions.
+ *
+ * precondition: posA <= posB
+ * @param seq sequence index object to query
+ * @param tSym symbol to query occurrences of, but already transformed
+ * by input alphabet
+ * @param posA occurences are counted up to this position
+ * @param posB as for posA occurences are counted up to this position
+ * @param hint provides cache and direction information for queries
+ * based on previous queries
+ * @return members a and b of returned struct contain Occ results for
+ * posA and posB respectively
+ */
+static inline struct SeqposPair
+EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, Seqpos posA, Seqpos posB,
+                             union EISHint *hint);
 
 /**
  * Presents the bits previously stored by a bitInsertFunc callback.

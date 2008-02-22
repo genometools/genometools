@@ -1170,25 +1170,32 @@ cacheFetchSuperBlock(const struct blockCompositionSeq *seqIdx,
 }
 #endif /* USE_SBLOCK_CACHE */
 
-#define walkCompIndices(seqIdx, sBlock, blockNum, cwOffset,             \
+#define walkCompIndices(seqIdx, sBlock, numBlocks, cwOffset,            \
                         codeForCompIndex, varOffset)                    \
   do {                                                                  \
-    unsigned blocksLeft = blockNum;                                     \
-    unsigned bitsPerCompositionIdx =                                    \
-      seqIdx->compositionTable.compositionIdxBits;                      \
-    cwOffset = sBlockGetCompIdxOffset(sBlock, seqIdx, 0);               \
-    varOffset = sBlock->varDataMemBase;                                 \
+    unsigned blocksLeft = (numBlocks),                                  \
+      bitsPerCompositionIdx =                                           \
+      (seqIdx)->compositionTable.compositionIdxBits;                    \
     while (blocksLeft)                                                  \
     {                                                                   \
       PermCompIndex compIndex;                                          \
-      compIndex = bsGetPermCompIndex(sBlock->cwData, cwIdxMemOffset,    \
+      compIndex = bsGetPermCompIndex((sBlock)->cwData, cwIdxMemOffset,  \
                                      bitsPerCompositionIdx);            \
       codeForCompIndex;                                                 \
-      varOffset +=                                                      \
-        seqIdx->compositionTable.permutations[compIndex].permIdxBits;   \
-      cwOffset += bitsPerCompositionIdx;                                \
+      (varOffset) +=                                                    \
+        (seqIdx)->compositionTable.permutations[compIndex].permIdxBits; \
+      (cwOffset) += bitsPerCompositionIdx;                              \
       --blocksLeft;                                                     \
     }                                                                   \
+  } while (0)
+
+#define walkCompIndicesPrefix(seqIdx, sBlock, blockNum, cwOffset,       \
+                              codeForCompIndex, varOffset)              \
+  do {                                                                  \
+    cwOffset = sBlockGetCompIdxOffset(sBlock, seqIdx, 0);               \
+    varOffset = sBlock->varDataMemBase;                                 \
+    walkCompIndices(seqIdx, sBlock, blockNum, cwOffset,                 \
+                    codeForCompIndex, varOffset);                       \
   } while (0)
 
 static inline void
@@ -1243,8 +1250,8 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
     block = blockPA;
   else
     block = ma_calloc(sizeof (Symbol), blockSize);
-  walkCompIndices(seqIdx, sBlock, blockNum % seqIdx->bucketBlocks,
-                  cwIdxMemOffset, , varDataMemOffset);
+  walkCompIndicesPrefix(seqIdx, sBlock, blockNum % seqIdx->bucketBlocks,
+                        cwIdxMemOffset, , varDataMemOffset);
   unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
               blockSize);
   if (queryRangeEnc)
@@ -1258,6 +1265,35 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
   return block;
 }
 
+static inline Seqpos
+adjustPosRankForBlock(struct blockCompositionSeq *seqIdx,
+                      struct superBlock *sBlock, Seqpos pos, UNUSED Symbol eSym,
+                      Symbol bSym, unsigned blockSize,
+                      Seqpos preBlockRankCount, BitOffset cwIdxMemOffset,
+                      BitOffset varDataMemOffset,
+                      unsigned bitsPerCompositionIdx)
+{
+  Seqpos rankCount = preBlockRankCount;
+  unsigned inBlockPos;
+  if ((inBlockPos = pos % blockSize)
+      && symCountFromComposition(
+        &seqIdx->compositionTable, seqIdx->blockEncNumSyms,
+        bsGetPermCompIndex(sBlock->cwData, cwIdxMemOffset,
+                           bitsPerCompositionIdx), bSym))
+  {
+    Symbol block[blockSize];
+    unsigned i;
+    unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
+                inBlockPos);
+    for (i = 0; i < inBlockPos; ++i)
+    {
+      if (block[i] == bSym)
+        ++rankCount;
+    }
+  }
+  return rankCount;
+}
+
 /* Note: pos is meant exclusively, i.e. returns 0
    for any query where pos==0 because that corresponds to the empty prefix */
 static Seqpos
@@ -1265,7 +1301,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
                  union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
-  Seqpos blockNum, rankCount;
+  Seqpos rankCount;
   assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
   assert(MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
@@ -1277,7 +1313,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
     BitOffset varDataMemOffset, cwIdxMemOffset;
     struct superBlock *sBlock;
     Symbol bSym = MRAEncMapSymbol(seqIdx->blockMapAlphabet, eSym);
-    Seqpos bucketNum;
+    Seqpos blockNum, bucketNum;
     unsigned blockSize = seqIdx->blockSize, bitsPerCompositionIdx
       = seqIdx->compositionTable.compositionIdxBits;
     bucketNum = bucketNumFromPos(seqIdx, pos);
@@ -1289,35 +1325,19 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
 #endif
     rankCount = sBlockGetPartialSymSum(sBlock, bSym, seqIdx);
     blockNum = blockNumFromPos(seqIdx, pos);
-    walkCompIndices(
+    walkCompIndicesPrefix(
       seqIdx, sBlock, blockNum % seqIdx->bucketBlocks, cwIdxMemOffset,
       rankCount += symCountFromComposition(
         &seqIdx->compositionTable, seqIdx->blockEncNumSyms, compIndex, bSym);,
       varDataMemOffset);
+    rankCount = adjustPosRankForBlock(
+      seqIdx, sBlock, pos, eSym, bSym, blockSize, rankCount, cwIdxMemOffset,
+      varDataMemOffset, bitsPerCompositionIdx);
+    if (bSym == seqIdx->blockEncFallback)
     {
-      unsigned inBlockPos;
-      if ((inBlockPos = pos % blockSize)
-          && symCountFromComposition(
-            &seqIdx->compositionTable, seqIdx->blockEncNumSyms,
-            bsGetPermCompIndex(sBlock->cwData, cwIdxMemOffset,
-                               bitsPerCompositionIdx), bSym))
-      {
-        Symbol block[blockSize];
-        unsigned i;
-        unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
-                    inBlockPos);
-        for (i = 0; i < inBlockPos; ++i)
-        {
-          if (block[i] == eSym)
-            ++rankCount;
-        }
-      }
-      if (bSym == seqIdx->blockEncFallback)
-      {
-        Seqpos base = bucketBasePos(seqIdx, bucketNum);
-        rankCount -= SRLAllSymbolsCountInSeqRegion(
-          seqIdx->rangeEncs, base, pos, &hint->bcHint.rangeHint);
-      }
+      Seqpos base = bucketBasePos(seqIdx, bucketNum);
+      rankCount -= SRLAllSymbolsCountInSeqRegion(
+        seqIdx->rangeEncs, base, pos, &hint->bcHint.rangeHint);
     }
 #ifndef USE_SBLOCK_CACHE
     deleteSuperBlock(sBlock);
@@ -1329,6 +1349,95 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
                                           &hint->bcHint.rangeHint);
   }
   return rankCount;
+}
+
+/* Note: pos is meant exclusively, i.e. returns 0
+   for any query where pos==0 because that corresponds to the empty prefix */
+static struct SeqposPair
+blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos posA,
+                        Seqpos posB, union EISHint *hint)
+{
+  struct blockCompositionSeq *seqIdx;
+  struct SeqposPair rankCounts;
+  Seqpos bucketNum;
+  assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
+  assert(posA <= posB);
+  seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
+  assert(MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
+                                        eSym, BLOCK_COMPOSITION_INCLUDE,
+                                        seqIdx->modes) >= 0);
+  /* Only when both positions are in same bucket, special treatment
+   * makes sense. */
+  {
+    Seqpos bucketNumA, bucketNumB;
+    bucketNumA = bucketNumFromPos(seqIdx, posA);
+    bucketNumB = bucketNumFromPos(seqIdx, posB);
+    if (bucketNumA != bucketNumB)
+    {
+      rankCounts.a = blockCompSeqRank(eSeqIdx, eSym, posA, hint);
+      rankCounts.b = blockCompSeqRank(eSeqIdx, eSym, posB, hint);
+      return rankCounts;
+    }
+    bucketNum = bucketNumA;
+  }
+  if (MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet, eSym,
+                                     BLOCK_COMPOSITION_INCLUDE, seqIdx->modes))
+  {
+    BitOffset varDataMemOffset, cwIdxMemOffset;
+    struct superBlock *sBlock;
+    Seqpos blockNumA = blockNumFromPos(seqIdx, posA),
+      blockNumB = blockNumFromPos(seqIdx, posB);
+    Symbol bSym = MRAEncMapSymbol(seqIdx->blockMapAlphabet, eSym);
+    unsigned blockSize = seqIdx->blockSize, bitsPerCompositionIdx
+      = seqIdx->compositionTable.compositionIdxBits,
+      inBlockPosA = blockNumA % seqIdx->bucketBlocks,
+      inBlockPosB = blockNumB % seqIdx->bucketBlocks;
+#ifdef USE_SBLOCK_CACHE
+    sBlock = cacheFetchSuperBlock(seqIdx, bucketNum,
+                                  &hint->bcHint.sBlockCache);
+#else
+    sBlock = fetchSuperBlock(seqIdx, bucketNum, NULL);
+#endif
+    rankCounts.a = sBlockGetPartialSymSum(sBlock, bSym, seqIdx);
+    walkCompIndicesPrefix(
+      seqIdx, sBlock, inBlockPosA, cwIdxMemOffset,
+      rankCounts.a += symCountFromComposition(
+        &seqIdx->compositionTable, seqIdx->blockEncNumSyms, compIndex, bSym),
+      varDataMemOffset);
+    rankCounts.b = rankCounts.a;
+    rankCounts.a =
+      adjustPosRankForBlock(seqIdx, sBlock, posA, eSym, bSym, blockSize,
+                            rankCounts.a, cwIdxMemOffset, varDataMemOffset,
+                            bitsPerCompositionIdx);
+    walkCompIndices(
+      seqIdx, sBlock, inBlockPosB - inBlockPosA, cwIdxMemOffset,
+      rankCounts.b += symCountFromComposition(
+        &seqIdx->compositionTable, seqIdx->blockEncNumSyms, compIndex, bSym),
+      varDataMemOffset);
+    rankCounts.b =
+      adjustPosRankForBlock(seqIdx, sBlock, posB, eSym, bSym, blockSize,
+                            rankCounts.b, cwIdxMemOffset, varDataMemOffset,
+                            bitsPerCompositionIdx);
+    if (bSym == seqIdx->blockEncFallback)
+    {
+      Seqpos base = bucketBasePos(seqIdx, bucketNum);
+      rankCounts.a -= SRLAllSymbolsCountInSeqRegion(
+        seqIdx->rangeEncs, base, posA, &hint->bcHint.rangeHint);
+      rankCounts.b -= SRLAllSymbolsCountInSeqRegion(
+        seqIdx->rangeEncs, base, posB, &hint->bcHint.rangeHint);
+    }
+#ifndef USE_SBLOCK_CACHE
+    deleteSuperBlock(sBlock);
+#endif
+  }
+  else
+  {
+    rankCounts.a = SRLSymbolCountInSeqRegion(seqIdx->rangeEncs, 0, posA, eSym,
+                                             &hint->bcHint.rangeHint);
+    rankCounts.b = SRLSymbolCountInSeqRegion(seqIdx->rangeEncs, 0, posA, eSym,
+                                             &hint->bcHint.rangeHint);
+  }
+  return rankCounts;
 }
 
 static void
@@ -2374,7 +2483,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
       fprintf(fp, "# bits of constant width extension data: %llu\n",
               (unsigned long long)seqIdx->cwExtBitsPerBucket);
     }
-    walkCompIndices(
+    walkCompIndicesPrefix(
       seqIdx, sBlock, seqIdx->bucketBlocks, cwIdxMemOffset,
       outCount +=
       fprintf(
@@ -2412,7 +2521,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
         if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
           outCount += fputs("&", fp);
       }
-      walkCompIndices(
+      walkCompIndicesPrefix(
         seqIdx, sBlock, seqIdx->bucketBlocks, cwIdxMemOffset,
         bsPrint(fp, sBlock->cwData, cwIdxMemOffset, idxBits);
         if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
@@ -2420,7 +2529,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
       bsPrint(fp, sBlock->cwData, sBlockCWExtBitsOffset(sBlock, seqIdx),
               seqIdx->cwExtBitsPerBucket);
       fputs("\n# variable width string: \n", fp);
-      walkCompIndices(
+      walkCompIndicesPrefix(
         seqIdx, sBlock, seqIdx->bucketBlocks, cwIdxMemOffset,
         idxBits =
         seqIdx->compositionTable.permutations[compIndex].permIdxBits;
@@ -2513,6 +2622,7 @@ static const struct encIdxSeqClass blockCompositionSeqClass =
 {
   .delete = deleteBlockEncIdxSeq,
   .rank = blockCompSeqRank,
+  .posPairRank = blockCompSeqPosPairRank,
   .select = blockCompSeqSelect,
   .get = blockCompSeqGet,
   .newHint = newBlockCompSeqHint,
