@@ -31,16 +31,18 @@ struct Block {
   GenomeFeatureType type;
 };
 
-/* Compare function used to insert Elements into dlist */
+/* Compare function used to insert Elements into dlist, order by type */
 static int elemcmp(const void *a, const void *b)
 {
   Element *elem_a = (Element*) a;
   Element *elem_b = (Element*) b;
 
-  Range ra = element_get_range(elem_a);
-  Range rb = element_get_range(elem_b);
+  GenomeFeatureType ta = element_get_type(elem_a);
+  GenomeFeatureType tb = element_get_type(elem_b);
 
-  return range_compare(ra, rb);
+  if (ta == tb)
+    return 0;
+  else return (ta < tb ? 1 : -1);
 }
 
 Block* block_new(void)
