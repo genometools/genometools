@@ -30,6 +30,10 @@
 #define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
                             (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS))
 
+/*
+  ADD prefixlength
+*/
+
 struct Bcktab
 {
   Seqpos totallength,
@@ -265,6 +269,10 @@ void updatebckspecials(Bcktab *bcktab,
   Codetype ordercode = (code - bcktab->filltable[prefixindex])/
                        (bcktab->filltable[prefixindex]+1);
   assert(prefixindex > 0);
+  if (code == 0)
+  {
+    printf("increment [prefixindex=%u,pos=%u]\n",prefixindex,ordercode);
+  }
   bcktab->distpfxidx[prefixindex-1][ordercode]++;
   if (prefixindex == prefixlength-1)
   {
@@ -282,41 +290,68 @@ void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
   bcktab->countspecialcodes[specialcode] += specialcharacters + 1;
 }
 
+static long fromcode2countspecialcodes(Codetype code,
+                                       unsigned int prefixlength,
+                                       const Bcktab *bcktab)
+{
+  if (code >= bcktab->filltable[prefixlength-1])
+  {
+    Codetype ordercode = code - bcktab->filltable[prefixlength-1];
+    Codetype divisor = bcktab->filltable[prefixlength-1] + 1;
+    if (ordercode % divisor == 0)
+    {
+      ordercode /= divisor;
+      return bcktab->countspecialcodes[ordercode];
+    }
+  }
+  return 0;
+}
+
 static void pfxidxpartialsums(unsigned long *count,
-                              unsigned long specialsinbucket,
                               Codetype code,
-                              unsigned int prefixlength,
-                              const unsigned long **distpfxidx,
-                              const Codetype *filltable)
+                              const Bcktab *bcktab,
+                              unsigned int prefixlength)
 {
   unsigned int prefixindex;
+  unsigned long sum = 0; 
   Codetype ordercode, divisor;
 
   count[0] = 0;
   for (prefixindex=1U; prefixindex<=prefixlength-1; prefixindex++)
   {
-    divisor = filltable[prefixindex] + 1;
     count[prefixindex] = 0;
-    if (code >= filltable[prefixindex])
+    if (code >= bcktab->filltable[prefixindex])
     {
-      ordercode = code - filltable[prefixindex];
+      ordercode = code - bcktab->filltable[prefixindex];
+      divisor = bcktab->filltable[prefixindex] + 1;
       if (ordercode % divisor == 0)
       {
         ordercode /= divisor;
-        count[prefixindex] = distpfxidx[prefixindex-1][ordercode];
+        count[prefixindex] = bcktab->distpfxidx[prefixindex-1][ordercode];
+        sum += count[prefixindex];
+        if (prefixindex == prefixlength -1)
+        {
+          if (sum != bcktab->countspecialcodes[ordercode])
+          {
+            fprintf(stderr,"code %u: sum = %lu != %u = specialsinbucket\n",
+                    code,sum,bcktab->countspecialcodes[ordercode]);
+            exit(EXIT_FAILURE);
+          }
+        }
       }
     }
   }
+  assert(sum == fromcode2countspecialcodes(code,prefixlength,bcktab));
   if (prefixlength > 2U)
   {
-    for (prefixindex = prefixlength-3; prefixindex>=1U; prefixindex--)
+    for (prefixindex = prefixlength-2; prefixindex>=1U; prefixindex--)
     {
       count[prefixindex] += count[prefixindex+1];
     }
-    if (count[1] != specialsinbucket)
+    if (sum != count[1])
     {
-      fprintf(stderr,"code %u: count[1] = %lu != %lu = specialsinbucket\n",
-              code,count[1],specialsinbucket);
+      fprintf(stderr,"code %u: sum = %lu != %lu = count[1]\n",
+              code,sum,count[1]);
       exit(EXIT_FAILURE);
     }
   }
@@ -330,14 +365,12 @@ void checkcountspecialcodes(const Bcktab *bcktab,unsigned int prefixlength)
   if (prefixlength >= 2U)
   {
     ALLOCASSIGNSPACE(count,NULL,unsigned long,prefixlength);
-    for (code=0; code<bcktab->numofspecialcodes; code++)
+    for (code=0; code<bcktab->numofallcodes; code++)
     {
       pfxidxpartialsums(count,
-                        bcktab->countspecialcodes[code],
                         code,
-                        prefixlength,
-                        (const unsigned long **) bcktab->distpfxidx,
-                        bcktab->filltable);
+                        bcktab,
+                        prefixlength);
     }
     FREESPACE(count);
   }
@@ -463,10 +496,10 @@ unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
 
   for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
   {
-    divisor = bcktab->filltable[prefixindex] + 1;
     if (code >= bcktab->filltable[prefixindex])
     {
       ordercode = code - bcktab->filltable[prefixindex];
+      divisor = bcktab->filltable[prefixindex] + 1;
       if (ordercode % divisor == 0)
       {
         ordercode /= divisor;
