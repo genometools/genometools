@@ -59,12 +59,49 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos)
   }
 }
 
+static inline struct SeqposPair
+BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
+                            Seqpos posA, Seqpos posB)
+{
+  assert(bwtSeq);
+  /* two counts must be treated specially:
+   * 1. for the symbols mapped to the same value as the terminator
+   * 2. for queries of the terminator itself */
+  if (tSym < bwtSeq->bwtTerminatorFallback)
+    return EISSymTransformedPosPairRank(bwtSeq->seqIdx, tSym, posA, posB,
+                                        bwtSeq->hint);
+  else if (tSym > bwtSeq->bwtTerminatorFallback
+           && tSym != bwtSeq->alphabetSize - 1)
+    return EISSymTransformedPosPairRank(bwtSeq->seqIdx, tSym, posA, posB,
+                                        bwtSeq->hint);
+  else if (tSym == bwtSeq->bwtTerminatorFallback)
+    return EISSymTransformedPosPairRank(bwtSeq->seqIdx, tSym, posA, posB,
+                                        bwtSeq->hint);
+/*       - ((pos > bwtSeq->longest)?1:0); */
+  else /* tSym == not flattened terminator == alphabetSize - 1 */
+  {
+    struct SeqposPair occ;
+    assert(tSym == bwtSeq->alphabetSize - 1);
+    occ.a = (posA > bwtSeq->longest)?1:0;
+    occ.b = (posB > bwtSeq->longest)?1:0;
+    return occ;
+  }
+}
+
 static inline Seqpos
 BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos pos)
 {
   assert(bwtSeq);
-  Symbol tsym = MRAEncMapSymbol(bwtSeq->alphabet, sym);
-  return BWTSeqTransformedOcc(bwtSeq, tsym, pos);
+  Symbol tSym = MRAEncMapSymbol(bwtSeq->alphabet, sym);
+  return BWTSeqTransformedOcc(bwtSeq, tSym, pos);
+}
+
+static inline struct SeqposPair
+BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos posA, Seqpos posB)
+{
+  assert(bwtSeq);
+  Symbol tSym = MRAEncMapSymbol(bwtSeq->alphabet, sym);
+  return BWTSeqTransformedPosPairOcc(bwtSeq, tSym, posA, posB);
 }
 
 static inline Seqpos
@@ -107,15 +144,15 @@ BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
   const MRAEnc *alphabet;
   Symbol curSym;
   assert(bwtSeq && limits);
-  assert(limits->upper < bwtSeq->count[bwtSeq->alphabetSize]
-         && limits->lower < bwtSeq->count[bwtSeq->alphabetSize]);
+  assert(limits->start < bwtSeq->count[bwtSeq->alphabetSize]
+         && limits->end < bwtSeq->count[bwtSeq->alphabetSize]);
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   curSym = MRAEncMapSymbol(alphabet, nextSym);
   assert(MRAEncSymbolHasValidMapping(alphabet, curSym));
-  limits->upper = bwtSeq->count[curSym]
-    + BWTSeqTransformedOcc(bwtSeq, curSym, limits->upper);
-  limits->lower = bwtSeq->count[curSym]
-    + BWTSeqTransformedOcc(bwtSeq, curSym, limits->lower);
+  limits->start = bwtSeq->count[curSym]
+    + BWTSeqTransformedOcc(bwtSeq, curSym, limits->start);
+  limits->end = bwtSeq->count[curSym]
+    + BWTSeqTransformedOcc(bwtSeq, curSym, limits->end);
   return limits;
 }
 
@@ -130,7 +167,7 @@ static inline bool
 EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, Seqpos *pos,
                 const BWTSeq *bwtSeq)
 {
-  if (iter->nextMatchBWTPos < iter->bounds.lower)
+  if (iter->nextMatchBWTPos < iter->bounds.end)
   {
     *pos = BWTSeqLocateMatch(bwtSeq, iter->nextMatchBWTPos, &iter->extBits);
     ++iter->nextMatchBWTPos;

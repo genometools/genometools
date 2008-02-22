@@ -370,16 +370,19 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   count = bwtSeq->count;
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   curSym = MRAEncMapSymbol(alphabet, query[--i]);
-  /* XXX Thomas: fix the following: lower is always the first index */
-  match->upper = count[curSym];
-  match->lower = count[curSym + 1];
-  while ((match->upper <= match->lower) && (i > 0))
+  match->start = count[curSym];
+  match->end   = count[curSym + 1];
+  while ((match->start <= match->end) && (i > 0))
   {
+    struct SeqposPair occPair;
     curSym = MRAEncMapSymbol(alphabet, query[--i]);
-    match->upper = count[curSym]
-      + BWTSeqOcc(bwtSeq, curSym, match->upper);
-    match->lower = count[curSym]
-      + BWTSeqOcc(bwtSeq, curSym, match->lower);
+    occPair = BWTSeqPosPairOcc(bwtSeq, curSym, match->start, match->end);
+    match->start = count[curSym] + occPair.a;
+    match->end   = count[curSym] + occPair.b;
+/*     match->start = count[curSym] + BWTSeqOcc(bwtSeq, curSym,
+ *     match->start); */
+/*     match->end = count[curSym] + BWTSeqOcc(bwtSeq, curSym,
+ *     match->end); */
   }
 }
 
@@ -411,16 +414,16 @@ unsigned long packedindexuniqueforward(const void *genericindex,
     return 0;
   }
   curSym = MRAEncMapSymbol(alphabet, cc);
-  bwtbound.lower = bwtSeq->count[curSym];
-  bwtbound.upper = bwtSeq->count[curSym+1];
+  bwtbound.end = bwtSeq->count[curSym];
+  bwtbound.start = bwtSeq->count[curSym+1];
 #ifdef mydebug
   printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
           "occurrences\n",
-         PRINTSeqposcast(bwtbound.lower),
-         PRINTSeqposcast(bwtbound.upper),
-         PRINTSeqposcast(bwtbound.upper - bwtbound.lower));
+         PRINTSeqposcast(bwtbound.end),
+         PRINTSeqposcast(bwtbound.start),
+         PRINTSeqposcast(bwtbound.start - bwtbound.end));
 #endif
-  while (qptr < qend && bwtbound.lower + 1 < bwtbound.upper)
+  while (qptr < qend && bwtbound.end + 1 < bwtbound.start)
   {
     cc = *qptr;
 #ifdef mydebug
@@ -432,20 +435,20 @@ unsigned long packedindexuniqueforward(const void *genericindex,
     }
     curSym = MRAEncMapSymbol(alphabet, cc);
 
-    bwtbound.lower = bwtSeq->count[curSym] +
-                     BWTSeqOcc(bwtSeq, curSym, bwtbound.lower);
-    bwtbound.upper = bwtSeq->count[curSym] +
-                     BWTSeqOcc(bwtSeq, curSym, bwtbound.upper);
+    bwtbound.end = bwtSeq->count[curSym] +
+                     BWTSeqOcc(bwtSeq, curSym, bwtbound.end);
+    bwtbound.start = bwtSeq->count[curSym] +
+                     BWTSeqOcc(bwtSeq, curSym, bwtbound.start);
 #ifdef mydebug
     printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
             "occurrences\n",
-           PRINTSeqposcast(bwtbound.lower),
-           PRINTSeqposcast(bwtbound.upper),
-           PRINTSeqposcast(bwtbound.upper - bwtbound.lower));
+           PRINTSeqposcast(bwtbound.end),
+           PRINTSeqposcast(bwtbound.start),
+           PRINTSeqposcast(bwtbound.start - bwtbound.end));
 #endif
     qptr++;
   }
-  if (bwtbound.lower + 1 == bwtbound.upper)
+  if (bwtbound.end + 1 == bwtbound.start)
   {
     return (unsigned long) (qptr - qstart);
   }
@@ -482,20 +485,20 @@ unsigned long packedindexmstatsforward(const void *genericindex,
     return 0;
   }
   curSym = MRAEncMapSymbol(alphabet, cc);
-  bwtbound.lower = bwtSeq->count[curSym];
-  bwtbound.upper = bwtSeq->count[curSym+1];
-  if (bwtbound.lower >= bwtbound.upper)
+  bwtbound.end = bwtSeq->count[curSym];
+  bwtbound.start = bwtSeq->count[curSym+1];
+  if (bwtbound.end >= bwtbound.start)
   {
     return 0;
   }
 #ifdef mydebug
   printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
           "occurrences\n",
-         PRINTSeqposcast(bwtbound.lower),
-         PRINTSeqposcast(bwtbound.upper),
-         PRINTSeqposcast(bwtbound.upper - bwtbound.lower));
+         PRINTSeqposcast(bwtbound.end),
+         PRINTSeqposcast(bwtbound.start),
+         PRINTSeqposcast(bwtbound.start - bwtbound.end));
 #endif
-  prevlbound = bwtbound.lower;
+  prevlbound = bwtbound.end;
   for (qptr++; qptr < qend; qptr++)
   {
     cc = *qptr;
@@ -507,22 +510,22 @@ unsigned long packedindexmstatsforward(const void *genericindex,
       break;
     }
     curSym = MRAEncMapSymbol(alphabet, cc);
-    bwtbound.lower = bwtSeq->count[curSym] +
-                     BWTSeqOcc(bwtSeq, curSym, bwtbound.lower);
-    bwtbound.upper = bwtSeq->count[curSym] +
-                     BWTSeqOcc(bwtSeq, curSym, bwtbound.upper);
+    bwtbound.end = bwtSeq->count[curSym] +
+                     BWTSeqOcc(bwtSeq, curSym, bwtbound.end);
+    bwtbound.start = bwtSeq->count[curSym] +
+                     BWTSeqOcc(bwtSeq, curSym, bwtbound.start);
 #ifdef mydebug
     printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
             "occurrences\n",
-           PRINTSeqposcast(bwtbound.lower),
-           PRINTSeqposcast(bwtbound.upper),
-           PRINTSeqposcast(bwtbound.upper - bwtbound.lower));
+           PRINTSeqposcast(bwtbound.end),
+           PRINTSeqposcast(bwtbound.start),
+           PRINTSeqposcast(bwtbound.start - bwtbound.end));
 #endif
-    if (bwtbound.lower >= bwtbound.upper)
+    if (bwtbound.end >= bwtbound.start)
     {
       break;
     }
-    prevlbound = bwtbound.lower;
+    prevlbound = bwtbound.end;
   }
   matchlength = (unsigned long) (qptr - qstart);
   if (witnessposition != NULL)
@@ -540,10 +543,10 @@ BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen)
   struct matchBound match;
   assert(bwtSeq && query);
   getMatchBound(bwtSeq, query, queryLen, &match);
-  if (match.lower < match.upper)
+  if (match.end < match.start)
     return 0;
   else
-    return match.lower - match.upper;
+    return match.end - match.start;
 }
 
 extern bool
@@ -558,7 +561,7 @@ initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
     return false;
   }
   getMatchBound(bwtSeq, query, queryLen, &iter->bounds);
-  iter->nextMatchBWTPos = iter->bounds.upper;
+  iter->nextMatchBWTPos = iter->bounds.start;
   initExtBitsRetrieval(&iter->extBits);
   return true;
 }
@@ -573,7 +576,7 @@ initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq)
           "Localization of matches impossible!", stderr);
     return false;
   }
-  iter->bounds.upper = iter->bounds.lower = iter->nextMatchBWTPos = 0;
+  iter->bounds.start = iter->bounds.end = iter->nextMatchBWTPos = 0;
   initExtBitsRetrieval(&iter->extBits);
   return true;
 }
@@ -598,7 +601,7 @@ reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                  const Symbol *query, size_t queryLen)
 {
   getMatchBound(bwtSeq, query, queryLen, &iter->bounds);
-  iter->nextMatchBWTPos = iter->bounds.upper;
+  iter->nextMatchBWTPos = iter->bounds.start;
   return true;
 }
 
@@ -618,20 +621,20 @@ Seqpos
 EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
 {
   assert(iter);
-  if (iter->bounds.upper > iter->bounds.lower)
+  if (iter->bounds.start > iter->bounds.end)
     return 0;
   else
-    return iter->bounds.lower - iter->bounds.upper;
+    return iter->bounds.end - iter->bounds.start;
 }
 
 extern Seqpos
 EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
 {
   assert(iter);
-  if (iter->nextMatchBWTPos > iter->bounds.lower)
+  if (iter->nextMatchBWTPos > iter->bounds.end)
     return 0;
   else
-    return iter->bounds.lower - iter->bounds.upper;
+    return iter->bounds.end - iter->bounds.start;
 }
 
 extern int
@@ -667,7 +670,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
     if (BWTSeqLength(bwtSeq) != len)
     {
       error_set(err, "length mismatch for suffix array project %s and "
-                    "bwt sequence index", str_get(projectName));
+                "bwt sequence index", str_get(projectName));
       retval = VERIFY_BWTSEQ_LENCOMPARE_ERROR;
       break;
     }

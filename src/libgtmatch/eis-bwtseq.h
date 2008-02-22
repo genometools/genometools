@@ -43,8 +43,8 @@
  */
 struct matchBound
 {
-  Seqpos upper,                 /**< index of first boundary row */
-    lower;                      /**< index of second boundary row */
+  Seqpos start,                 /**< index of first boundary row */
+    end;                      /**< index of second boundary row */
 };
 
 /** Object holding a BWT sequence index */
