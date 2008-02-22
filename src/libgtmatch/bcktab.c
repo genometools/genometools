@@ -22,6 +22,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/symboldef.h"
 #include "esafileend.h"
+#include "mapspec-def.h"
 #include "spacedef.h"
 #include "bcktab.h"
 
@@ -33,94 +34,54 @@
 struct Bcktab
 {
   Seqpos totallength,
-         *leftborder,
-         *countspecialcodes;
+         *leftborder;
   Codetype numofallcodes,
            numofspecialcodes,
            **multimappower,
            *basepower,
            *filltable;
   unsigned int prefixlength;
-  unsigned long **distpfxidx;
+  unsigned long sizeofrep,
+                *countspecialcodes,
+                **distpfxidx;
+  void *mappedptr;
 };
 
-/* DELETE THE FOLLOWING THREE FUNCTIONS */
-
-static void *genericmaponlytable(const Str *indexname,const char *suffix,
-                                 size_t *numofbytes,Error *err)
+static unsigned long numofdistpfxidxcounters(const Codetype *basepower,
+                                             unsigned int prefixlength)
 {
-  Str *tmpfilename;
-  void *ptr;
-  bool haserr = false;
-
-  error_check(err);
-  tmpfilename = str_clone(indexname);
-  str_append_cstr(tmpfilename,suffix);
-  ptr = fa_mmap_read(str_get(tmpfilename),numofbytes);
-  if (ptr == NULL)
+  if (prefixlength > 2U)
   {
-    error_set(err,"cannot map file \"%s\": %s",str_get(tmpfilename),
-                  strerror(errno));
-    haserr = true;
-  }
-  str_delete(tmpfilename);
-  return haserr ? NULL : ptr;
-}
+    unsigned long numofcounters = 0;
+    unsigned int idx;
 
-static int checkmappedfilesize(size_t numofbytes,Seqpos expectedunits,
-                               size_t sizeofunit,Error *err)
-{
-  error_check(err);
-  if (expectedunits != (Seqpos) (numofbytes/sizeofunit))
-  {
-    error_set(err,"number of mapped units = %lu != " FormatSeqpos
-                      " = expected number of integers",
-                      (unsigned long) (numofbytes/sizeofunit),
-                      PRINTSeqposcast(expectedunits));
-    return -1;
+    for (idx=1U; idx < prefixlength-1; idx++)
+    {
+      numofcounters += basepower[idx];
+    }
+    return numofcounters;
   }
   return 0;
 }
 
-static void *genericmaptable(const Str *indexname,
-                             const char *suffix,
-                             Seqpos expectedunits,size_t sizeofunit,
-                             Error *err)
-{
-  size_t numofbytes;
-
-  void *ptr = genericmaponlytable(indexname,suffix,&numofbytes,err);
-  if (ptr == NULL)
-  {
-    return NULL;
-  }
-  if (checkmappedfilesize(numofbytes,expectedunits,sizeofunit,err) != 0)
-  {
-    fa_xmunmap(ptr);
-    return NULL;
-  }
-  return ptr;
-}
-
-static unsigned long **initdistprefixindexcounts(const Codetype *basepower,
-                                                 unsigned int prefixlength)
+static unsigned long **allocdistprefixindexcounts(const Codetype *basepower,
+                                                  unsigned int prefixlength)
 {
   if (prefixlength > 2U)
   {
-    unsigned int idx;
-    unsigned long *counters, numofcounters, **distpfxidx;
+    unsigned long numofcounters;
 
-    for (numofcounters = 0, idx=1U; idx < prefixlength-1; idx++)
-    {
-      numofcounters += basepower[idx];
-    }
+    numofcounters = numofdistpfxidxcounters(basepower,prefixlength);
     if (numofcounters > 0)
     {
+      unsigned int idx;
+      unsigned long *counters, **distpfxidx;
+
       ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-1);
       ALLOCASSIGNSPACE(counters,NULL,unsigned long,numofcounters);
-      printf("# sizeof(distpfxidx)=%lu\n",
-              sizeof (unsigned long *) * (prefixlength-1) + 
-              sizeof (unsigned long) * numofcounters);
+      printf("# sizeof (distpfxidx)=%lu\n",
+              (unsigned long) sizeof (*distpfxidx) * (prefixlength-1) +
+                              sizeof (*counters) * numofcounters);
       memset(counters,0,(size_t) sizeof (*counters) * numofcounters);
       distpfxidx[0] = counters;
       for (idx=1U; idx<prefixlength-1; idx++)
@@ -144,44 +105,19 @@ static Bcktab *newBcktab(unsigned int numofchars,
   bcktab->countspecialcodes = NULL;
   bcktab->distpfxidx = NULL;
   bcktab->totallength = totallength;
+  bcktab->mappedptr = NULL;
   bcktab->prefixlength = prefixlength;
   bcktab->basepower = initbasepower(numofchars,prefixlength);
   bcktab->filltable = initfilltable(bcktab->basepower,prefixlength);
   bcktab->numofallcodes = bcktab->basepower[prefixlength];
   bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
   bcktab->multimappower = initmultimappower(numofchars,prefixlength);
-  return bcktab;
-}
-
-Bcktab *mapbcktab(const Str *indexname,
-                  Seqpos totallength,
-                  unsigned int numofchars,
-                  unsigned int prefixlength,
-                  Error *err)
-{
-  Bcktab *bcktab;
-  bool haserr = false;
-
-  bcktab = newBcktab(numofchars,prefixlength,totallength);
-  bcktab->leftborder
-    = genericmaptable(indexname,
-                      BCKTABSUFFIX,
-                      (Seqpos) (bcktab->numofallcodes + 1 + 
-                                bcktab->numofspecialcodes),
-                      sizeof (Seqpos),
-                      err);
-  if (bcktab->leftborder == NULL)
-  {
-    haserr = true;
-  } else
-  {
-    bcktab->countspecialcodes = bcktab->leftborder + bcktab->numofallcodes + 1;
-  }
-  if (haserr)
-  {
-    freebcktab(&bcktab,false);
-    return NULL;
-  }
+  bcktab->sizeofrep
+    = (unsigned long)
+      sizeof (*bcktab->leftborder) * (bcktab->numofallcodes + 1) +
+      sizeof (*bcktab->countspecialcodes) * bcktab->numofspecialcodes +
+      sizeof (unsigned long) * numofdistpfxidxcounters(bcktab->basepower,
+                                                       bcktab->prefixlength);
   return bcktab;
 }
 
@@ -208,51 +144,136 @@ Bcktab *allocBcktab(Seqpos totallength,
   {
     ALLOCASSIGNSPACE(bcktab->leftborder,NULL,Seqpos,
                      bcktab->numofallcodes+1);
-    printf("# sizeof(leftborder)=%lu\n",(unsigned long) sizeof (Seqpos) *
-                                        (bcktab->numofallcodes+1));
+    printf("# sizeof (leftborder)=%lu\n",
+              (unsigned long) sizeof (*bcktab->leftborder) *
+                              (bcktab->numofallcodes+1));
     memset(bcktab->leftborder,0,
            sizeof (*bcktab->leftborder) *
            (size_t) bcktab->numofallcodes);
-    ALLOCASSIGNSPACE(bcktab->countspecialcodes,NULL,Seqpos,
+    ALLOCASSIGNSPACE(bcktab->countspecialcodes,NULL,unsigned long,
                      bcktab->numofspecialcodes);
-    printf("# sizeof(countspecialcodes)=%lu\n",
-              (unsigned long) sizeof (Seqpos) *
+    printf("# sizeof (countspecialcodes)=%lu\n",
+              (unsigned long) sizeof (*bcktab->countspecialcodes) *
               bcktab->numofspecialcodes);
     memset(bcktab->countspecialcodes,0,
            sizeof (*bcktab->countspecialcodes) *
                   (size_t) bcktab->numofspecialcodes);
-    bcktab->distpfxidx = initdistprefixindexcounts(bcktab->basepower,
-                                                   prefixlength);
+    bcktab->distpfxidx = allocdistprefixindexcounts(bcktab->basepower,
+                                                    prefixlength);
   }
   if (haserr)
   {
-    freebcktab(&bcktab,false);
+    freebcktab(&bcktab);
     return NULL;
   }
   return bcktab;
 }
 
-void freebcktab(Bcktab **bcktab,bool mapped)
+static void assignbcktabmapspecification(ArrayMapspecification *mapspectable,
+                                         void *voidinfo,
+                                         bool writemode)
+{
+  Bcktab *bcktab = (Bcktab *) voidinfo;
+  Mapspecification *mapspecptr;
+  unsigned long numofcounters;
+
+  NEWMAPSPEC(bcktab->leftborder,Seqpos,
+             (unsigned long) bcktab->numofallcodes+1);
+  NEWMAPSPEC(bcktab->countspecialcodes,Unsignedlong,
+             (unsigned long) bcktab->numofspecialcodes);
+  numofcounters = numofdistpfxidxcounters((const Codetype *) bcktab->basepower,
+                                          bcktab->prefixlength);
+  if (numofcounters > 0)
+  {
+    if (!writemode)
+    {
+      ALLOCASSIGNSPACE(bcktab->distpfxidx,NULL,unsigned long *,
+                       bcktab->prefixlength-1);
+    }
+    NEWMAPSPEC(bcktab->distpfxidx[0],Unsignedlong,numofcounters);
+  }
+}
+
+int bcktab2file(FILE *fp,const Bcktab *bcktab,Error *err)
+{
+  error_check(err);
+  return flushtheindex2file(fp,
+                            assignbcktabmapspecification,
+                            (Bcktab *) bcktab,
+                            bcktab->sizeofrep,
+                            err);
+}
+
+static int fillbcktabmapspecstartptr(Bcktab *bcktab,
+                                     const Str *indexname,
+                                     Error *err)
+{
+  bool haserr = false;
+  Str *tmpfilename;
+
+  error_check(err);
+  tmpfilename = str_clone(indexname);
+  str_append_cstr(tmpfilename,BCKTABSUFFIX);
+  if (fillmapspecstartptr(assignbcktabmapspecification,
+                          &bcktab->mappedptr,
+                          bcktab,
+                          tmpfilename,
+                          bcktab->sizeofrep,
+                          err) != 0)
+  {
+    haserr = true;
+  }
+  str_delete(tmpfilename);
+  return haserr ? -1 : 0;
+}
+
+Bcktab *mapbcktab(const Str *indexname,
+                  Seqpos totallength,
+                  unsigned int numofchars,
+                  unsigned int prefixlength,
+                  Error *err)
+{
+  Bcktab *bcktab;
+
+  bcktab = newBcktab(numofchars,prefixlength,totallength);
+  if (fillbcktabmapspecstartptr(bcktab,
+                                indexname,
+                                err) != 0)
+  {
+    freebcktab(&bcktab);
+    return NULL;
+  }
+  checkcountspecialcodes(bcktab);
+  return bcktab;
+}
+
+void freebcktab(Bcktab **bcktab)
 {
   Bcktab *bcktabptr = *bcktab;
-  if (mapped)
+
+  if (bcktabptr->mappedptr != NULL) /* use mapped file */
   {
-    fa_xmunmap((void *) bcktabptr->leftborder);
+    fa_xmunmap(bcktabptr->mappedptr);
+    bcktabptr->mappedptr = NULL;
     bcktabptr->leftborder = NULL;
     bcktabptr->countspecialcodes = NULL;
+    if (bcktabptr->distpfxidx != NULL)
+    {
+      bcktabptr->distpfxidx[0] = NULL;
+    }
   } else
   {
     FREESPACE(bcktabptr->leftborder);
     FREESPACE(bcktabptr->countspecialcodes);
+    if (bcktabptr->distpfxidx != NULL)
+    {
+      FREESPACE(bcktabptr->distpfxidx[0]);
+    }
   }
+  FREESPACE(bcktabptr->distpfxidx);
   if (bcktabptr->multimappower != NULL)
   {
     multimappowerfree(&bcktabptr->multimappower);
-  }
-  if (bcktabptr->distpfxidx != NULL)
-  {
-    FREESPACE(bcktabptr->distpfxidx[0]);
-    FREESPACE(bcktabptr->distpfxidx);
   }
   FREESPACE(bcktabptr->filltable);
   FREESPACE(bcktabptr->basepower);
@@ -280,11 +301,12 @@ void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
   Codetype specialcode;
 
   specialcode = FROMCODE2SPECIALCODE(bcktab->filltable[0],numofchars);
-  bcktab->countspecialcodes[specialcode] += specialcharacters + 1;
+  bcktab->countspecialcodes[specialcode]
+    += (unsigned long) specialcharacters + 1;
 }
 
-static long fromcode2countspecialcodes(Codetype code,
-                                       const Bcktab *bcktab)
+static unsigned long fromcode2countspecialcodes(Codetype code,
+                                                const Bcktab *bcktab)
 {
   if (code >= bcktab->filltable[bcktab->prefixlength-1])
   {
@@ -353,6 +375,7 @@ void checkcountspecialcodes(const Bcktab *bcktab)
     ALLOCASSIGNSPACE(count,NULL,unsigned long,bcktab->prefixlength);
     for (code=0; code<bcktab->numofallcodes; code++)
     {
+      printf("code=%u\n",code);
       pfxidxpartialsums(count,
                         code,
                         bcktab);
@@ -374,37 +397,6 @@ Codetype codedownscale(const Bcktab *bcktab,
   code *= bcktab->basepower[remain];
   code += bcktab->filltable[prefixindex];
   return code;
-}
-
-int bcktab2file(FILE *fp,
-                const Bcktab *bcktab,
-                Error *err)
-{
-  if (fwrite(bcktab->leftborder,
-             sizeof (*bcktab->leftborder),
-             (size_t) (bcktab->numofallcodes+1),
-             fp)
-             != (size_t) (bcktab->numofallcodes+1))
-  {
-    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
-              bcktab->numofallcodes+1,
-              (unsigned int) sizeof (*bcktab->leftborder),
-              strerror(errno));
-    return -1;
-  }
-  if (fwrite(bcktab->countspecialcodes,
-             sizeof (*bcktab->countspecialcodes),
-             (size_t) bcktab->numofspecialcodes,
-             fp)
-             != (size_t) bcktab->numofspecialcodes)
-  {
-    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
-              bcktab->numofspecialcodes,
-              (unsigned int) sizeof (*bcktab->countspecialcodes),
-              strerror(errno));
-    return -2;
-  }
-  return 0;
 }
 
 unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
@@ -436,8 +428,7 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
   if (rightchar == numofchars - 1)
   {
     bucketspec->specialsinbucket
-      = (unsigned long)
-        bcktab->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
+      = bcktab->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
     if (bucketspec->nonspecialsinbucket >= bucketspec->specialsinbucket)
     {
       bucketspec->nonspecialsinbucket -= bucketspec->specialsinbucket;
@@ -532,7 +523,7 @@ Seqpos *bcktab_leftborder(Bcktab *bcktab)
   return bcktab->leftborder;
 }
 
-Codetype bcktab_numofallcodes(Bcktab *bcktab)
+Codetype bcktab_numofallcodes(const Bcktab *bcktab)
 {
   return bcktab->numofallcodes;
 }

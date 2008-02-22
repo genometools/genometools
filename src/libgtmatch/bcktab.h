@@ -47,7 +47,7 @@ Bcktab *mapbcktab(const Str *indexname,
                   unsigned int prefixlength,
                   Error *err);
 
-void freebcktab(Bcktab **bcktab,bool mapped);
+void freebcktab(Bcktab **bcktab);
 
 Bcktab *allocBcktab(Seqpos totallength,
                     unsigned int numofchars,
@@ -94,7 +94,7 @@ Codetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx);
 
 Seqpos *bcktab_leftborder(Bcktab *bcktab);
 
-Codetype bcktab_numofallcodes(Bcktab *bcktab);
+Codetype bcktab_numofallcodes(const Bcktab *bcktab);
 
 void checkcountspecialcodes(const Bcktab *bcktab);
 

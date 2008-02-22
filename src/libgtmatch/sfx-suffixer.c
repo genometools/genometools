@@ -210,7 +210,7 @@ void freeSfxiterator(Sfxiterator **sfi)
   freesuftabparts((*sfi)->suftabparts);
   if ((*sfi)->bcktab != NULL)
   {
-    freebcktab(&(*sfi)->bcktab,false);
+    freebcktab(&(*sfi)->bcktab);
   }
   FREESPACE(*sfi);
 }

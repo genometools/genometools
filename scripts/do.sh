@@ -1,3 +1,3 @@
 #!/bin/sh
 
-gt suffixerator -db ${AT} -dna -v -pl -tis -suf -lcp -bwt -des
+gt suffixerator -db ${AT} -dna -v -pl -bck -tis -suf -lcp -bwt -des

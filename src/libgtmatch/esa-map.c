@@ -379,7 +379,7 @@ void freesuffixarray(Suffixarray *suffixarray)
   FREESPACE(suffixarray->filelengthtab);
   if (suffixarray->bcktab != NULL)
   {
-    freebcktab(&suffixarray->bcktab,true);
+    freebcktab(&suffixarray->bcktab);
   }
 }
 
