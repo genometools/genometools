@@ -45,8 +45,6 @@ typedef struct
   Seqpos position; /* get rid of this by using information from encseq */
 } Codeatposition;
 
-DECLAREARRAYSTRUCT(Codeatposition);
-
 DECLAREARRAYSTRUCT(Seqpos);
 
 struct Sfxiterator
