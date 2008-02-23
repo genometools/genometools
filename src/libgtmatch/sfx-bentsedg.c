@@ -450,18 +450,19 @@ static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
   return lcpvalue;
 }
 
-static void bucketends(const Encodedsequence *encseq,
-                       Readmode readmode,
-                       Encodedsequencescanstate *esr1,
-                       Encodedsequencescanstate *esr2,
-                       Outlcpinfo *outlcpinfo,
-                       Seqpos startpos_previoussuffix,
-                       Seqpos firstspecialsuffix,
-                       unsigned long specialsinbucket,
-                       Codetype code,
-                       const Bcktab *bcktab)
+static unsigned int bucketends(const Encodedsequence *encseq,
+                               Readmode readmode,
+                               Encodedsequencescanstate *esr1,
+                               Encodedsequencescanstate *esr2,
+                               Outlcpinfo *outlcpinfo,
+                               Suffixwithcode *previoussuffix,
+                               Seqpos firstspecialsuffix,
+                               unsigned long specialsinbucket,
+                               Codetype code,
+                               const Bcktab *bcktab)
 {
   Seqpos lcpvalue;
+  unsigned int maxprefixindex, minprefixindex;
 
   /*
      there is at least one element in the bucket. if there is more than
@@ -470,20 +471,23 @@ static void bucketends(const Encodedsequence *encseq,
   */
   if (specialsinbucket > 1UL)
   {
-    unsigned int maxvalue;
-
-    maxvalue = pfxidx2lcpvalues(outlcpinfo->lcpsubtab.smalllcpvalues,
-                                specialsinbucket,
-                                bcktab,
-                                code);
-    if (outlcpinfo->maxbranchdepth < (Seqpos) maxvalue)
+    maxprefixindex = pfxidx2lcpvalues(&minprefixindex,
+                                      outlcpinfo->lcpsubtab.smalllcpvalues,
+                                      specialsinbucket,
+                                      bcktab,
+                                      code);
+    if (outlcpinfo->maxbranchdepth < (Seqpos) maxprefixindex)
     {
-      outlcpinfo->maxbranchdepth = (Seqpos) maxvalue;
+      outlcpinfo->maxbranchdepth = (Seqpos) maxprefixindex;
     }
+  } else
+  {
+    maxprefixindex = singletonmaxprefixindex(bcktab,code);
+    minprefixindex = maxprefixindex;
   }
   lcpvalue = computelocallcpvalue(encseq,
                                   readmode,
-                                  startpos_previoussuffix,
+                                  previoussuffix->startpos,
                                   firstspecialsuffix,
                                   esr1,
                                   esr2);
@@ -495,6 +499,7 @@ static void bucketends(const Encodedsequence *encseq,
   outlcpinfo->countoutputlcpvalues += specialsinbucket;
   xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
           sizeof (Uchar),(size_t) specialsinbucket,outlcpinfo->outfplcptab);
+  return minprefixindex;
 }
 
 Outlcpinfo *newlcpoutfileinfo(const Str *indexname,
@@ -571,6 +576,18 @@ Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
   return outlcpinfo->maxbranchdepth;
 }
 
+/*
+static void consistencyofsuffix(const Encodedsequence *encseq,
+                                unsigned int prefixlength,
+                                Suffixwithcode *suffix)
+{
+  if (suffix->prefixindex == prefixlength)
+  {
+
+  }
+}
+*/
+
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
                     Readmode readmode,
@@ -584,7 +601,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     Outlcpinfo *outlcpinfo)
 {
   Codetype code;
-  unsigned int rightchar = mincode % numofchars;
+  unsigned int rightchar = mincode % numofchars, minprefixindex;
   Seqpos totallength = getencseqtotallength(encseq);
   ArrayMKVstack mkvauxstack;
   Bucketspecification bucketspec;
@@ -673,32 +690,46 @@ void sortallbuckets(Seqpos *suftabptr,
         /* previoussuffix becomes last nonspecial element in current bucket */
         previoussuffix->startpos
           = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
+        previoussuffix->code = code;
+        previoussuffix->prefixindex = prefixlength;
       }
     }
     if (outlcpinfo != NULL)
     {
       if (bucketspec.specialsinbucket > 0)
       {
-        bucketends(encseq,
-                   readmode,
-                   esr1,
-                   esr2,
-                   outlcpinfo,
-                   previoussuffix->startpos,
-                   /* first special element in bucket */
-                   suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket],
-                   bucketspec.specialsinbucket,
-                   code,
-                   bcktab);
-      }
-      if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket > 0)
-      {
-        /* if there is at least one element in the bucket, then the last
-           one becomes the next previous suffix */
+        minprefixindex = bucketends(encseq,
+                                    readmode,
+                                    esr1,
+                                    esr2,
+                                    outlcpinfo,
+                                    previoussuffix,
+                                    /* first special element in bucket */
+                                    suftabptr[bucketspec.left +
+                                              bucketspec.nonspecialsinbucket],
+                                    bucketspec.specialsinbucket,
+                                    code,
+                                    bcktab);
+        /* there is at least one special element: this is the last element
+           in the bucket, and thus the previoussuffix for the next round */
         previoussuffix->startpos = suftabptr[bucketspec.left +
                                              bucketspec.nonspecialsinbucket +
                                              bucketspec.specialsinbucket - 1];
         previoussuffix->defined = true;
+        previoussuffix->code = code;
+        previoussuffix->prefixindex = minprefixindex;
+      } else
+      {
+        if (bucketspec.nonspecialsinbucket > 0)
+        {
+          /* if there is at least one element in the bucket, then the last
+             one becomes the next previous suffix */
+          previoussuffix->startpos
+             = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
+          previoussuffix->defined = true;
+          previoussuffix->code = code;
+          previoussuffix->prefixindex = prefixlength;
+        }
       }
     }
   }

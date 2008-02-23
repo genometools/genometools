@@ -40,9 +40,12 @@ Outlcpinfo *newlcpoutfileinfo(const Str *indexname,
                               unsigned int numofchars,
                               Seqpos totallength,
                               Error *err);
-Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
-Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
+
 void freeoutlcptab(Outlcpinfo **outlcpinfo);
+
+Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
+
+Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,

@@ -83,7 +83,10 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
                           const Bcktab *bcktab,
                           Codetype code);
 
-unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
+unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code);
+
+unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
+                              Uchar *lcpsubtab,
                               unsigned long specialsinbucket,
                               const Bcktab *bcktab,
                               Codetype code);

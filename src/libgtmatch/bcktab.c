@@ -475,15 +475,47 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
                                numofchars);
 }
 
-unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
+unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
+{
+  unsigned int prefixindex;
+
+  if (bcktab->prefixlength > 2U)
+  {
+    Codetype ordercode, divisor;
+    for (prefixindex=bcktab->prefixlength-2; prefixindex>=1U; prefixindex--)
+    {
+      if (code >= bcktab->filltable[prefixindex])
+      {
+        ordercode = code - bcktab->filltable[prefixindex];
+        divisor = bcktab->filltable[prefixindex] + 1;
+        if (ordercode % divisor == 0)
+        {
+          ordercode /= divisor;
+          if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0)
+          {
+            return prefixindex;
+          }
+        }
+      } else
+      {
+        break;
+      }
+    }
+  }
+  return bcktab->prefixlength-1;
+}
+
+unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
+                              Uchar *lcpsubtab,
                               unsigned long specialsinbucket,
                               const Bcktab *bcktab,
                               Codetype code)
 {
-  unsigned int prefixindex, maxvalue = 0;
+  unsigned int prefixindex, maxprefixindex = 0;
   Codetype ordercode, divisor;
   unsigned long idx, insertindex = specialsinbucket-1;
 
+  *minprefixindex = bcktab->prefixlength;
   for (prefixindex=1U; prefixindex<bcktab->prefixlength-1; prefixindex++)
   {
     if (code >= bcktab->filltable[prefixindex])
@@ -493,19 +525,23 @@ unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
       if (ordercode % divisor == 0)
       {
         ordercode /= divisor;
-        if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0 &&
-            insertindex > 0)
+        if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0)
         {
+          maxprefixindex = prefixindex;
+          if (*minprefixindex > prefixindex)
+          {
+            *minprefixindex = prefixindex;
+          }
+          if (insertindex == 0)
+          {
+            break;
+          }
           for (idx=0;
                insertindex > 0 &&
                idx < bcktab->distpfxidx[prefixindex-1][ordercode];
                idx++, insertindex--)
           {
             lcpsubtab[insertindex] = (Uchar) prefixindex;
-          }
-          if (maxvalue < prefixindex)
-          {
-            maxvalue = prefixindex;
           }
         }
       }
@@ -514,13 +550,14 @@ unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
   while (insertindex > 0)
   {
     lcpsubtab[insertindex] = (Uchar) (bcktab->prefixlength-1);
-    if (maxvalue < prefixindex)
+    maxprefixindex = bcktab->prefixlength-1;
+    if (*minprefixindex > bcktab->prefixlength - 1)
     {
-      maxvalue = prefixindex;
+      *minprefixindex = bcktab->prefixlength-1;
     }
     insertindex--;
   }
-  return maxvalue;
+  return maxprefixindex;
 }
 
 const Codetype **bcktab_multimappower(const Bcktab *bcktab)
