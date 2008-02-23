@@ -25,7 +25,9 @@ Turningwheel *newTurningwheel(unsigned int numofwheels,
 
 bool nextTurningwheel(Turningwheel *tw);
 
-unsigned int minchangedTurningwheel(Turningwheel *tw);
+unsigned int minchangedTurningwheel(const Turningwheel *tw);
+
+void outputTurningwheel(const Turningwheel *tw);
 
 void freeTurningwheel(Turningwheel **tw);
 

@@ -40,14 +40,6 @@ typedef struct
          right;
 } Lcpinterval;
 
-typedef struct
-{
-  bool defined;
-  Seqpos startpos;
-  Codetype code;
-  unsigned int prefixindex;
-} Suffixwithcode;
-
 typedef struct Outlcpinfo Outlcpinfo;
 
 typedef struct Bcktab Bcktab;
@@ -110,13 +102,16 @@ Seqpos *bcktab_leftborder(Bcktab *bcktab);
 
 Codetype bcktab_numofallcodes(const Bcktab *bcktab);
 
+#ifndef NDEBUG
 void checkcountspecialcodes(const Bcktab *bcktab);
+#endif
 
+#ifdef DEBUG
 void consistencyofsuffix(int line,
                          const Encodedsequence *encseq,
                          Readmode readmode,
                          const Bcktab *bcktab,
                          unsigned int numofchars,
                          const Suffixwithcode *suffix);
-
+#endif
 #endif

@@ -70,7 +70,6 @@ struct Sfxiterator
   ArraySeqpos fusp;
   Specialrangeiterator *sri;
   Sequencerange overhang;
-  Suffixwithcode previoussuffix;
   bool exhausted;
   Bcktab *bcktab;
   Codetype numofallcodes;
@@ -194,7 +193,9 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
 
 void freeSfxiterator(Sfxiterator **sfi)
 {
+#ifndef NDEBUG
   checkcountspecialcodes((*sfi)->bcktab);
+#endif
   addfinalbckspecials((*sfi)->bcktab,(*sfi)->numofchars,
                       (*sfi)->specialcharacters);
   if ((*sfi)->sri != NULL)
@@ -252,10 +253,6 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->prefixlength = prefixlength;
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
-    sfi->previoussuffix.startpos = 0;
-    sfi->previoussuffix.code = 0;
-    sfi->previoussuffix.prefixindex = 0;
-    sfi->previoussuffix.defined = false;
     sfi->outlcpinfo = outlcpinfo;
     sfi->sri = NULL;
     sfi->part = 0;
@@ -370,7 +367,6 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->currentmincode,
                  sfi->currentmaxcode,
                  totalwidth,
-                 &sfi->previoussuffix,
                  sfi->bcktab,
                  sfi->numofchars,
                  sfi->prefixlength,

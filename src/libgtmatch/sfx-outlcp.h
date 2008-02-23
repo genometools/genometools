@@ -25,11 +25,11 @@
 #include "seqpos-def.h"
 #include "bcktab.h"
 
-Outlcpinfo *newlcpoutfileinfo(const Str *indexname,
-                              unsigned int prefixlength,
-                              unsigned int numofchars,
-                              Seqpos totallength,
-                              Error *err);
+Outlcpinfo *newlcpoutinfo(const Str *indexname,
+                          unsigned int prefixlength,
+                          unsigned int numofchars,
+                          Seqpos totallength,
+                          Error *err);
 
 void freeoutlcptab(Outlcpinfo **outlcpinfo);
 
@@ -43,7 +43,6 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos totalwidth,
-                    Suffixwithcode *previoussuffix,
                     const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,

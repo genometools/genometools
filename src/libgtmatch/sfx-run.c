@@ -86,10 +86,10 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   if (so->outlcptab)
   {
     outfileinfo->outlcpinfo
-      = newlcpoutfileinfo(so->outlcptab ? so->str_indexname : NULL,
-                          prefixlength,
-                          numofchars,
-                          getencseqtotallength(encseq),err);
+      = newlcpoutinfo(so->outlcptab ? so->str_indexname : NULL,
+                      prefixlength,
+                      numofchars,
+                      getencseqtotallength(encseq),err);
     if (outfileinfo->outlcpinfo == NULL)
     {
       haserr = true;

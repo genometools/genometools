@@ -25,7 +25,6 @@
 #include "esafileend.h"
 #include "mapspec-def.h"
 #include "spacedef.h"
-#include "qgram2code.h"
 #include "bcktab.h"
 
 #include "initbasepower.pr"
@@ -263,7 +262,9 @@ Bcktab *mapbcktab(const Str *indexname,
     setdistpfxidxptrs(bcktab->distpfxidx,bcktab->distpfxidx[0],
                       bcktab->basepower,bcktab->prefixlength);
   }
+#ifndef NDEBUG
   checkcountspecialcodes(bcktab);
+#endif
   return bcktab;
 }
 
@@ -326,6 +327,7 @@ void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
     += (unsigned long) specialcharacters + 1;
 }
 
+#ifndef NDEBUG
 static unsigned long fromcode2countspecialcodes(Codetype code,
                                                 const Bcktab *bcktab)
 {
@@ -403,6 +405,7 @@ void checkcountspecialcodes(const Bcktab *bcktab)
     FREESPACE(count);
   }
 }
+#endif
 
 Codetype codedownscale(const Bcktab *bcktab,
                        Codetype code,
@@ -510,8 +513,6 @@ unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
   return bcktab->prefixlength-1;
 }
 
-#define SHOWCODE 15
-
 unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
                               Uchar *lcpsubtab,
                               unsigned long specialsinbucket,
@@ -524,12 +525,6 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
   Uchar *insertptr;
 
   *minprefixindex = bcktab->prefixlength;
-#ifdef DEBUG
-  if (code == SHOWCODE)
-  {
-    printf("specialsinbucket=%lu\n",specialsinbucket);
-  }
-#endif
   insertptr = lcpsubtab + specialsinbucket - 1;
   for (prefixindex=1U; prefixindex<bcktab->prefixlength-1; prefixindex++)
   {
@@ -542,13 +537,6 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
         ordercode /= divisor;
         if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0)
         {
-#ifdef DEBUG
-          if (code == SHOWCODE)
-          {
-            printf("(1) insert %lu suffixes with prefixindex %u\n",
-                    bcktab->distpfxidx[prefixindex-1][ordercode],prefixindex);
-          }
-#endif
           maxprefixindex = prefixindex;
           if (*minprefixindex > prefixindex)
           {
@@ -563,13 +551,6 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
       }
     }
   }
-#ifdef DEBUG
-  if (code == SHOWCODE && insertptr >= lcpsubtab)
-  {
-    printf("(2) insert %lu suffixes with prefixindex %u\n",
-             (unsigned long) (insertptr-lcpsubtab),bcktab->prefixlength-1);
-  }
-#endif
   if (insertptr >= lcpsubtab)
   {
     maxprefixindex = bcktab->prefixlength-1;
@@ -582,13 +563,6 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
       *insertptr-- = (Uchar) (bcktab->prefixlength-1);
     }
   }
-#ifdef DEBUG
-  if (code == SHOWCODE)
-  {
-    printf("minprefixindex=%u,maxprefixindex=%u\n",
-            *minprefixindex,maxprefixindex);
-  }
-#endif
   return maxprefixindex;
 }
 
@@ -612,6 +586,8 @@ Codetype bcktab_numofallcodes(const Bcktab *bcktab)
   return bcktab->numofallcodes;
 }
 
+#ifdef DEBUG
+#include "qgram2code.h"
 void consistencyofsuffix(int line,
                          const Encodedsequence *encseq,
                          Readmode readmode,
@@ -656,3 +632,4 @@ void consistencyofsuffix(int line,
     exit(EXIT_FAILURE);
   }
 }
+#endif

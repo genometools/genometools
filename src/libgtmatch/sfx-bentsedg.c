@@ -22,6 +22,7 @@
 #include "libgtcore/xansi.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/arraydef.h"
+#include "libgtcore/unused.h"
 #include "divmodmul.h"
 #include "spacedef.h"
 #include "encseq-def.h"
@@ -32,6 +33,7 @@
 
 #include "sfx-cmpsuf.pr"
 #include "opensfxfile.pr"
+#include "kmer2string.pr"
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
@@ -116,7 +118,17 @@ typedef struct
   const Seqpos *suftabbase;
 } Lcpsubtab;
 
- struct Outlcpinfo
+typedef struct
+{
+  bool defined;
+  Codetype code;
+  unsigned int prefixindex;
+#ifdef DEBUG
+  Seqpos startpos;
+#endif
+} Suffixwithcode;
+
+struct Outlcpinfo
 {
   FILE *outfplcptab,
        *outfpllvtab;
@@ -126,6 +138,8 @@ typedef struct
          maxbranchdepth;
   Turningwheel *tw;
   Lcpsubtab lcpsubtab;
+  Suffixwithcode previoussuffix;
+  bool previousbucketwasempty;
 };
 
 static Suffixptr *medianof3(const Encodedsequence *encseq,
@@ -415,14 +429,34 @@ static void multilcpvalue(Outlcpinfo *outlcpinfo,
           outlcpinfo->outfpllvtab);
 }
 
+#ifdef DEBUG
+static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
+{
+  char buffer[18+1];
+
+  kmercode2string(buffer,
+                  suffix->code,
+                  4,
+                  8,
+                  "acgt");
+  fprintf(fp,"(startpos=%lu,code=%u,prefixindex=%u,\"%s\")",
+              (unsigned long) suffix->startpos,
+              suffix->code,suffix->prefixindex,
+              buffer);
+}
+#endif
+
+#ifdef DEBUG
 static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
                                    Readmode readmode,
                                    const Suffixwithcode *previoussuffix,
-                                   Seqpos suffixpos2,
+                                   const Suffixwithcode *currentsuffix,
+                                   unsigned int minchanged,
                                    Encodedsequencescanstate *esr1,
                                    Encodedsequencescanstate *esr2)
 {
   Seqpos lcpvalue;
+  unsigned int lcpvalue2;
   int cmp;
 
   cmp = comparetwosuffixes(encseq,
@@ -432,7 +466,7 @@ static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
                            false,
                            0,
                            previoussuffix->startpos,
-                           suffixpos2,
+                           currentsuffix->startpos,
                            esr1,
                            esr2);
   if (cmp > 0)
@@ -440,24 +474,62 @@ static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
     fprintf(stderr,"cmp " FormatSeqpos
             " " FormatSeqpos " = %d, lcpval=" FormatSeqpos "\n",
             PRINTSeqposcast(previoussuffix->startpos),
-            PRINTSeqposcast(suffixpos2),
+            PRINTSeqposcast(currentsuffix->startpos),
             cmp,
             PRINTSeqposcast(lcpvalue));
     exit(EXIT_FAILURE);
   }
+  if (previoussuffix->code == currentsuffix->code)
+  {
+    assert(lcpvalue == MIN(previoussuffix->prefixindex,
+                           currentsuffix->prefixindex));
+  } else
+  {
+    assert(previoussuffix->code < currentsuffix->code);
+    lcpvalue2 = MIN(minchanged,MIN(previoussuffix->prefixindex,
+                                   currentsuffix->prefixindex));
+    if (lcpvalue != lcpvalue2)
+    {
+      fprintf(stderr,"lcpvalue = %lu != %u = lcpvalue2\n",
+              (unsigned long) lcpvalue,
+              lcpvalue2);
+      fprintf(stderr,"previoussuffix=");
+      showSuffixwithcode(stderr,previoussuffix);
+      fprintf(stderr,"\ncurrentsuffix=");
+      showSuffixwithcode(stderr,currentsuffix);
+      fprintf(stderr,"\n");
+      exit(EXIT_FAILURE);
+    }
+  }
   return lcpvalue;
 }
+#endif
 
-static unsigned int bucketends(const Encodedsequence *encseq,
-                               Readmode readmode,
-                               Encodedsequencescanstate *esr1,
-                               Encodedsequencescanstate *esr2,
-                               Outlcpinfo *outlcpinfo,
+static Seqpos computelocallcpvalue(const Suffixwithcode *previoussuffix,
+                                   const Suffixwithcode *currentsuffix,
+                                   unsigned int minchanged)
+{
+  unsigned int lcpvalue;
+
+  if (previoussuffix->code == currentsuffix->code)
+  {
+    lcpvalue = MIN(previoussuffix->prefixindex,
+                   currentsuffix->prefixindex);
+  } else
+  {
+    assert(previoussuffix->code < currentsuffix->code);
+    lcpvalue = MIN(minchanged,MIN(previoussuffix->prefixindex,
+                                  currentsuffix->prefixindex));
+  }
+  return (Seqpos) lcpvalue;
+}
+
+static unsigned int bucketends(Outlcpinfo *outlcpinfo,
                                Suffixwithcode *previoussuffix,
-                               Seqpos firstspecialsuffix,
+                               UNUSED Seqpos firstspecialsuffix,
+                               unsigned int minchanged,
                                unsigned long specialsinbucket,
                                Codetype code,
-                               unsigned int numofchars,
                                const Bcktab *bcktab)
 {
   Seqpos lcpvalue;
@@ -485,17 +557,16 @@ static unsigned int bucketends(const Encodedsequence *encseq,
     minprefixindex = maxprefixindex = singletonmaxprefixindex(bcktab,code);
   }
   firstspecialsuffixwithcode.code = code;
-  firstspecialsuffixwithcode.startpos = firstspecialsuffix;
   firstspecialsuffixwithcode.prefixindex = maxprefixindex;
+#ifdef DEBUG
+  firstspecialsuffixwithcode.startpos = firstspecialsuffix;
   consistencyofsuffix(__LINE__,
                       encseq,readmode,bcktab,numofchars,
                       &firstspecialsuffixwithcode);
-  lcpvalue = computelocallcpvalue(encseq,
-                                  readmode,
-                                  previoussuffix,
-                                  firstspecialsuffix,
-                                  esr1,
-                                  esr2);
+#endif
+  lcpvalue = computelocallcpvalue(previoussuffix,
+                                  &firstspecialsuffixwithcode,
+                                  minchanged);
   if (outlcpinfo->maxbranchdepth < lcpvalue)
   {
     outlcpinfo->maxbranchdepth = lcpvalue;
@@ -507,11 +578,11 @@ static unsigned int bucketends(const Encodedsequence *encseq,
   return minprefixindex;
 }
 
-Outlcpinfo *newlcpoutfileinfo(const Str *indexname,
-                              unsigned int prefixlength,
-                              unsigned int numofchars,
-                              Seqpos totallength,
-                              Error *err)
+Outlcpinfo *newlcpoutinfo(const Str *indexname,
+                          unsigned int prefixlength,
+                          unsigned int numofchars,
+                          Seqpos totallength,
+                          Error *err)
 {
   bool haserr = false;
   Outlcpinfo *outlcpinfo;
@@ -546,6 +617,13 @@ Outlcpinfo *newlcpoutfileinfo(const Str *indexname,
   INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   outlcpinfo->lcpsubtab.smalllcpvalues = NULL;
   outlcpinfo->tw = newTurningwheel(prefixlength,numofchars);
+#ifdef DEBUG
+  outlcpinfo->previoussuffix.startpos = 0;
+#endif
+  outlcpinfo->previoussuffix.code = 0;
+  outlcpinfo->previoussuffix.prefixindex = 0;
+  outlcpinfo->previoussuffix.defined = false;
+  outlcpinfo->previousbucketwasempty = false;
   if (haserr)
   {
     FREESPACE(outlcpinfo);
@@ -587,21 +665,21 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos totalwidth,
-                    Suffixwithcode *previoussuffix,
                     const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     Outlcpinfo *outlcpinfo)
 {
   Codetype code;
-  unsigned int rightchar = mincode % numofchars, minprefixindex;
+  unsigned int rightchar = mincode % numofchars, minprefixindex,
+               minchanged = 0;
   Seqpos totallength = getencseqtotallength(encseq);
   ArrayMKVstack mkvauxstack;
   Bucketspecification bucketspec;
   unsigned long maxbucketsize;
   Seqpos lcpvalue;
-  Encodedsequencescanstate *esr1, *esr2;
   Lcpsubtab *lcpsubtab;
+  Suffixwithcode firstsuffixofbucket;
 
   if (outlcpinfo == NULL)
   {
@@ -610,8 +688,6 @@ void sortallbuckets(Seqpos *suftabptr,
   {
     lcpsubtab = &outlcpinfo->lcpsubtab;
   }
-  esr1 = newEncodedsequencescanstate();
-  esr2 = newEncodedsequencescanstate();
   maxbucketsize = determinemaxbucketsize(bcktab,
                                          mincode,
                                          maxcode,
@@ -638,6 +714,13 @@ void sortallbuckets(Seqpos *suftabptr,
     if (outlcpinfo != NULL && code > 0)
     {
       (void) nextTurningwheel(outlcpinfo->tw);
+      if (!outlcpinfo->previousbucketwasempty)
+      {
+        minchanged = minchangedTurningwheel(outlcpinfo->tw);
+      } else
+      {
+        minchanged = MIN(minchanged,minchangedTurningwheel(outlcpinfo->tw));
+      }
     }
     if (bucketspec.nonspecialsinbucket > 0)
     {
@@ -659,16 +742,21 @@ void sortallbuckets(Seqpos *suftabptr,
       }
       if (outlcpinfo != NULL)
       {
-        if (previoussuffix->defined)
+        if (outlcpinfo->previoussuffix.defined)
         {
           /* compute lcpvalue of first element of bucket with
              last element of previous bucket */
-          lcpvalue = computelocallcpvalue(encseq,
-                                          readmode,
-                                          previoussuffix,
-                                          suftabptr[bucketspec.left],
-                                          esr1,
-                                          esr2);
+          firstsuffixofbucket.code = code;
+          firstsuffixofbucket.prefixindex = prefixlength;
+#ifdef DEBUG
+          firstsuffixofbucket.startpos = suftabptr[bucketspec.left];
+          consistencyofsuffix(__LINE__,
+                              encseq,readmode,bcktab,numofchars,
+                              &firstsuffixofbucket);
+#endif
+          lcpvalue = computelocallcpvalue(&outlcpinfo->previoussuffix,
+                                          &firstsuffixofbucket,
+                                          minchanged);
         } else
         {
           /* first part first code */
@@ -681,59 +769,72 @@ void sortallbuckets(Seqpos *suftabptr,
                       bucketspec.nonspecialsinbucket,
                       bucketspec.left);
         /* previoussuffix becomes last nonspecial element in current bucket */
-        previoussuffix->startpos
+        outlcpinfo->previoussuffix.code = code;
+        outlcpinfo->previoussuffix.prefixindex = prefixlength;
+#ifdef DEBUG
+        outlcpinfo->previoussuffix.startpos
           = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
-        previoussuffix->code = code;
-        previoussuffix->prefixindex = prefixlength;
         consistencyofsuffix(__LINE__,
-                            encseq,readmode,bcktab,numofchars,previoussuffix);
+                            encseq,readmode,bcktab,numofchars,
+                            &outlcpinfo->previoussuffix);
+#endif
       }
     }
     if (outlcpinfo != NULL)
     {
       if (bucketspec.specialsinbucket > 0)
       {
-        minprefixindex = bucketends(encseq,
-                                    readmode,
-                                    esr1,
-                                    esr2,
-                                    outlcpinfo,
-                                    previoussuffix,
+        minprefixindex = bucketends(outlcpinfo,
+                                    &outlcpinfo->previoussuffix,
                                     /* first special element in bucket */
                                     suftabptr[bucketspec.left +
                                               bucketspec.nonspecialsinbucket],
+                                    minchanged,
                                     bucketspec.specialsinbucket,
                                     code,
-                                    numofchars,
                                     bcktab);
         /* there is at least one special element: this is the last element
            in the bucket, and thus the previoussuffix for the next round */
-        previoussuffix->startpos = suftabptr[bucketspec.left +
-                                             bucketspec.nonspecialsinbucket +
-                                             bucketspec.specialsinbucket - 1];
-        previoussuffix->defined = true;
-        previoussuffix->code = code;
-        previoussuffix->prefixindex = minprefixindex;
+        outlcpinfo->previoussuffix.defined = true;
+        outlcpinfo->previoussuffix.code = code;
+        outlcpinfo->previoussuffix.prefixindex = minprefixindex;
+#ifdef DEBUG
+        outlcpinfo->previoussuffix.startpos
+           = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket +
+                                         bucketspec.specialsinbucket - 1];
         consistencyofsuffix(__LINE__,
-                            encseq,readmode,bcktab,numofchars,previoussuffix);
+                            encseq,readmode,bcktab,numofchars,
+                            &outlcpinfo->previoussuffix);
+#endif
       } else
       {
         if (bucketspec.nonspecialsinbucket > 0)
         {
           /* if there is at least one element in the bucket, then the last
              one becomes the next previous suffix */
-          previoussuffix->startpos
-             = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
-          previoussuffix->defined = true;
-          previoussuffix->code = code;
-          previoussuffix->prefixindex = prefixlength;
+          outlcpinfo->previoussuffix.defined = true;
+          outlcpinfo->previoussuffix.code = code;
+          outlcpinfo->previoussuffix.prefixindex = prefixlength;
+#ifdef DEBUG
+          outlcpinfo->previoussuffix.startpos
+            = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
           consistencyofsuffix(__LINE__,
-                              encseq,readmode,bcktab,numofchars,previoussuffix);
+                              encseq,readmode,bcktab,numofchars,
+                              &outlcpinfo->previoussuffix);
+#endif
         }
       }
     }
+    if (outlcpinfo != NULL)
+    {
+      if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket == 0)
+      {
+        outlcpinfo->previousbucketwasempty = true;
+      } else
+      {
+        outlcpinfo->previousbucketwasempty = false;
+      }
+    }
   }
-  freeEncodedsequencescanstate(&esr1);
-  freeEncodedsequencescanstate(&esr2);
   FREEARRAY(&mkvauxstack,MKVstack);
 }
