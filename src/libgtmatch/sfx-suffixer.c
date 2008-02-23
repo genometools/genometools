@@ -295,12 +295,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                    prefixlength);
     assert(specialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
     assert(sfi->leftborder != NULL);
-    /* printf("leftborder[0]=%u\n",sfi->leftborder[0]); */
     for (optr = sfi->leftborder + 1;
          optr < sfi->leftborder + sfi->numofallcodes; optr++)
     {
-      /* printf("leftborder[%u]=%u\n",(unsigned int) (optr - sfi->leftborder),
-                                   *optr); */
       *optr += *(optr-1);
     }
     sfi->leftborder[sfi->numofallcodes]
@@ -381,8 +378,6 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->prefixlength,
                  sfi->outlcpinfo);
   assert(totalwidth > 0);
-  /* save last suffix of last part */
-  sfi->previoussuffix.startpos = sfi->suftab[sfi->widthofpart-1];
   sfi->part++;
 }
 
