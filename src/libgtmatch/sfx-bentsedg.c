@@ -22,9 +22,7 @@
 #include "libgtcore/xansi.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/arraydef.h"
-#include "libgtcore/unused.h"
 #include "divmodmul.h"
-#include "intcode-def.h"
 #include "spacedef.h"
 #include "encseq-def.h"
 #include "turnwheels.h"
@@ -419,7 +417,7 @@ static void multilcpvalue(Outlcpinfo *outlcpinfo,
 
 static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
                                    Readmode readmode,
-                                   Seqpos suffixpos1,
+                                   const Suffixwithcode *previoussuffix,
                                    Seqpos suffixpos2,
                                    Encodedsequencescanstate *esr1,
                                    Encodedsequencescanstate *esr2)
@@ -433,7 +431,7 @@ static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
                            false,
                            false,
                            0,
-                           suffixpos1,
+                           previoussuffix->startpos,
                            suffixpos2,
                            esr1,
                            esr2);
@@ -441,7 +439,7 @@ static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
   {
     fprintf(stderr,"cmp " FormatSeqpos
             " " FormatSeqpos " = %d, lcpval=" FormatSeqpos "\n",
-            PRINTSeqposcast(suffixpos1),
+            PRINTSeqposcast(previoussuffix->startpos),
             PRINTSeqposcast(suffixpos2),
             cmp,
             PRINTSeqposcast(lcpvalue));
@@ -459,10 +457,12 @@ static unsigned int bucketends(const Encodedsequence *encseq,
                                Seqpos firstspecialsuffix,
                                unsigned long specialsinbucket,
                                Codetype code,
+                               unsigned int numofchars,
                                const Bcktab *bcktab)
 {
   Seqpos lcpvalue;
   unsigned int maxprefixindex, minprefixindex;
+  Suffixwithcode firstspecialsuffixwithcode;
 
   /*
      there is at least one element in the bucket. if there is more than
@@ -482,12 +482,17 @@ static unsigned int bucketends(const Encodedsequence *encseq,
     }
   } else
   {
-    maxprefixindex = singletonmaxprefixindex(bcktab,code);
-    minprefixindex = maxprefixindex;
+    minprefixindex = maxprefixindex = singletonmaxprefixindex(bcktab,code);
   }
+  firstspecialsuffixwithcode.code = code;
+  firstspecialsuffixwithcode.startpos = firstspecialsuffix;
+  firstspecialsuffixwithcode.prefixindex = maxprefixindex;
+  consistencyofsuffix(__LINE__,
+                      encseq,readmode,bcktab,numofchars,
+                      &firstspecialsuffixwithcode);
   lcpvalue = computelocallcpvalue(encseq,
                                   readmode,
-                                  previoussuffix->startpos,
+                                  previoussuffix,
                                   firstspecialsuffix,
                                   esr1,
                                   esr2);
@@ -576,18 +581,6 @@ Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
   return outlcpinfo->maxbranchdepth;
 }
 
-/*
-static void consistencyofsuffix(const Encodedsequence *encseq,
-                                unsigned int prefixlength,
-                                Suffixwithcode *suffix)
-{
-  if (suffix->prefixindex == prefixlength)
-  {
-
-  }
-}
-*/
-
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
                     Readmode readmode,
@@ -672,7 +665,7 @@ void sortallbuckets(Seqpos *suftabptr,
              last element of previous bucket */
           lcpvalue = computelocallcpvalue(encseq,
                                           readmode,
-                                          previoussuffix->startpos,
+                                          previoussuffix,
                                           suftabptr[bucketspec.left],
                                           esr1,
                                           esr2);
@@ -692,6 +685,8 @@ void sortallbuckets(Seqpos *suftabptr,
           = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
         previoussuffix->code = code;
         previoussuffix->prefixindex = prefixlength;
+        consistencyofsuffix(__LINE__,
+                            encseq,readmode,bcktab,numofchars,previoussuffix);
       }
     }
     if (outlcpinfo != NULL)
@@ -709,6 +704,7 @@ void sortallbuckets(Seqpos *suftabptr,
                                               bucketspec.nonspecialsinbucket],
                                     bucketspec.specialsinbucket,
                                     code,
+                                    numofchars,
                                     bcktab);
         /* there is at least one special element: this is the last element
            in the bucket, and thus the previoussuffix for the next round */
@@ -718,6 +714,8 @@ void sortallbuckets(Seqpos *suftabptr,
         previoussuffix->defined = true;
         previoussuffix->code = code;
         previoussuffix->prefixindex = minprefixindex;
+        consistencyofsuffix(__LINE__,
+                            encseq,readmode,bcktab,numofchars,previoussuffix);
       } else
       {
         if (bucketspec.nonspecialsinbucket > 0)
@@ -729,6 +727,8 @@ void sortallbuckets(Seqpos *suftabptr,
           previoussuffix->defined = true;
           previoussuffix->code = code;
           previoussuffix->prefixindex = prefixlength;
+          consistencyofsuffix(__LINE__,
+                              encseq,readmode,bcktab,numofchars,previoussuffix);
         }
       }
     }

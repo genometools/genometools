@@ -22,6 +22,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/symboldef.h"
+#include "encseq-def.h"
 #include "seqpos-def.h"
 #include "intcode-def.h"
 
@@ -38,6 +39,16 @@ typedef struct
          left,
          right;
 } Lcpinterval;
+
+typedef struct
+{
+  bool defined;
+  Seqpos startpos;
+  Codetype code;
+  unsigned int prefixindex;
+} Suffixwithcode;
+
+typedef struct Outlcpinfo Outlcpinfo;
 
 typedef struct Bcktab Bcktab;
 
@@ -100,5 +111,12 @@ Seqpos *bcktab_leftborder(Bcktab *bcktab);
 Codetype bcktab_numofallcodes(const Bcktab *bcktab);
 
 void checkcountspecialcodes(const Bcktab *bcktab);
+
+void consistencyofsuffix(int line,
+                         const Encodedsequence *encseq,
+                         Readmode readmode,
+                         const Bcktab *bcktab,
+                         unsigned int numofchars,
+                         const Suffixwithcode *suffix);
 
 #endif

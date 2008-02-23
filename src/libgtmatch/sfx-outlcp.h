@@ -25,16 +25,6 @@
 #include "seqpos-def.h"
 #include "bcktab.h"
 
-typedef struct
-{
-  bool defined;
-  Seqpos startpos;
-  Codetype code;
-  unsigned int prefixindex;
-} Suffixwithcode;
-
-typedef struct Outlcpinfo Outlcpinfo;
-
 Outlcpinfo *newlcpoutfileinfo(const Str *indexname,
                               unsigned int prefixlength,
                               unsigned int numofchars,

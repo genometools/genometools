@@ -21,9 +21,11 @@
 #include "libgtcore/str.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/symboldef.h"
+#include "libgtcore/chardef.h"
 #include "esafileend.h"
 #include "mapspec-def.h"
 #include "spacedef.h"
+#include "qgram2code.h"
 #include "bcktab.h"
 
 #include "initbasepower.pr"
@@ -44,6 +46,7 @@ struct Bcktab
   unsigned long sizeofrep,
                 *countspecialcodes,
                 **distpfxidx;
+  Uchar *qgrambuffer;
   void *mappedptr;
 };
 
@@ -123,6 +126,7 @@ static Bcktab *newBcktab(unsigned int numofchars,
   bcktab->numofallcodes = bcktab->basepower[prefixlength];
   bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
   bcktab->multimappower = initmultimappower(numofchars,prefixlength);
+  ALLOCASSIGNSPACE(bcktab->qgrambuffer,NULL,Uchar,prefixlength);
   bcktab->sizeofrep
     = (unsigned long)
       sizeof (*bcktab->leftborder) * (bcktab->numofallcodes + 1) +
@@ -293,6 +297,7 @@ void freebcktab(Bcktab **bcktab)
   }
   FREESPACE(bcktabptr->filltable);
   FREESPACE(bcktabptr->basepower);
+  FREESPACE(bcktabptr->qgrambuffer);
   FREESPACE(*bcktab);
 }
 
@@ -505,6 +510,8 @@ unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
   return bcktab->prefixlength-1;
 }
 
+#define SHOWCODE 15
+
 unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
                               Uchar *lcpsubtab,
                               unsigned long specialsinbucket,
@@ -513,9 +520,17 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
 {
   unsigned int prefixindex, maxprefixindex = 0;
   Codetype ordercode, divisor;
-  unsigned long idx, insertindex = specialsinbucket-1;
+  unsigned long idx;
+  Uchar *insertptr;
 
   *minprefixindex = bcktab->prefixlength;
+#ifdef DEBUG
+  if (code == SHOWCODE)
+  {
+    printf("specialsinbucket=%lu\n",specialsinbucket);
+  }
+#endif
+  insertptr = lcpsubtab + specialsinbucket - 1;
   for (prefixindex=1U; prefixindex<bcktab->prefixlength-1; prefixindex++)
   {
     if (code >= bcktab->filltable[prefixindex])
@@ -527,36 +542,53 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
         ordercode /= divisor;
         if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0)
         {
+#ifdef DEBUG
+          if (code == SHOWCODE)
+          {
+            printf("(1) insert %lu suffixes with prefixindex %u\n",
+                    bcktab->distpfxidx[prefixindex-1][ordercode],prefixindex);
+          }
+#endif
           maxprefixindex = prefixindex;
           if (*minprefixindex > prefixindex)
           {
             *minprefixindex = prefixindex;
           }
-          if (insertindex == 0)
+          for (idx=0; idx < bcktab->distpfxidx[prefixindex-1][ordercode]; idx++)
           {
-            break;
-          }
-          for (idx=0;
-               insertindex > 0 &&
-               idx < bcktab->distpfxidx[prefixindex-1][ordercode];
-               idx++, insertindex--)
-          {
-            lcpsubtab[insertindex] = (Uchar) prefixindex;
+            assert(insertptr >= lcpsubtab);
+            *insertptr-- = (Uchar) prefixindex;
           }
         }
       }
     }
   }
-  while (insertindex > 0)
+#ifdef DEBUG
+  if (code == SHOWCODE && insertptr >= lcpsubtab)
   {
-    lcpsubtab[insertindex] = (Uchar) (bcktab->prefixlength-1);
+    printf("(2) insert %lu suffixes with prefixindex %u\n",
+             (unsigned long) (insertptr-lcpsubtab),bcktab->prefixlength-1);
+  }
+#endif
+  if (insertptr >= lcpsubtab)
+  {
     maxprefixindex = bcktab->prefixlength-1;
-    if (*minprefixindex > bcktab->prefixlength - 1)
+    if (*minprefixindex == bcktab->prefixlength)
     {
       *minprefixindex = bcktab->prefixlength-1;
     }
-    insertindex--;
+    while (insertptr >= lcpsubtab)
+    {
+      *insertptr-- = (Uchar) (bcktab->prefixlength-1);
+    }
   }
+#ifdef DEBUG
+  if (code == SHOWCODE)
+  {
+    printf("minprefixindex=%u,maxprefixindex=%u\n",
+            *minprefixindex,maxprefixindex);
+  }
+#endif
   return maxprefixindex;
 }
 
@@ -578,4 +610,49 @@ Seqpos *bcktab_leftborder(Bcktab *bcktab)
 Codetype bcktab_numofallcodes(const Bcktab *bcktab)
 {
   return bcktab->numofallcodes;
+}
+
+void consistencyofsuffix(int line,
+                         const Encodedsequence *encseq,
+                         Readmode readmode,
+                         const Bcktab *bcktab,
+                         unsigned int numofchars,
+                         const Suffixwithcode *suffix)
+{
+  unsigned int idx, firstspecial = bcktab->prefixlength, gramfirstspecial;
+  Codetype qgramcode = 0;
+  Uchar cc = 0;
+
+  for (idx=0; idx<bcktab->prefixlength; idx++)
+  {
+    if ((Seqpos) (suffix->startpos + idx) >= bcktab->totallength)
+    {
+      firstspecial = idx;
+      break;
+    }
+    cc = getencodedchar(encseq,suffix->startpos + idx, readmode);
+    if (ISSPECIAL(cc))
+    {
+      firstspecial = idx;
+      break;
+    }
+    bcktab->qgrambuffer[idx] = cc;
+  }
+  for (idx=firstspecial; idx<bcktab->prefixlength; idx++)
+  {
+    bcktab->qgrambuffer[idx] = (Uchar) (numofchars-1);
+  }
+  gramfirstspecial = qgram2code(&qgramcode,
+                                (const Codetype **) bcktab->multimappower,
+                                bcktab->prefixlength,
+                                bcktab->qgrambuffer);
+  assert(gramfirstspecial == bcktab->prefixlength);
+  assert(qgramcode == suffix->code);
+  if (firstspecial != suffix->prefixindex)
+  {
+    fprintf(stderr,"line %d: code=%u: ",line,suffix->code);
+    fprintf(stderr,"firstspecial = %u != %u = suffix->prefixindex\n",
+                    firstspecial,suffix->prefixindex);
+    exit(EXIT_FAILURE);
+  }
 }
