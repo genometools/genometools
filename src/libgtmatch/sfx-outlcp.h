@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
+#include "defined-types.h"
 #include "encseq-def.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
@@ -46,6 +47,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
+                    const Definedunsignedint *maxdepth,
                     Outlcpinfo *outlcpinfo);
 
 #endif

@@ -220,6 +220,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Suffixptr *l,
                              Suffixptr *r,
                              Seqpos d,
+                             UNUSED const Definedunsignedint *maxdepth,
                              Lcpsubtab *lcpsubtab)
 {
   Suffixptr *left, *right, *leftplusw;
@@ -668,6 +669,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
+                    const Definedunsignedint *maxdepth,
                     Outlcpinfo *outlcpinfo)
 {
   Codetype code;
@@ -714,12 +716,12 @@ void sortallbuckets(Seqpos *suftabptr,
     if (outlcpinfo != NULL && code > 0)
     {
       (void) nextTurningwheel(outlcpinfo->tw);
-      if (!outlcpinfo->previousbucketwasempty)
-      {
-        minchanged = minchangedTurningwheel(outlcpinfo->tw);
-      } else
+      if (outlcpinfo->previousbucketwasempty)
       {
         minchanged = MIN(minchanged,minchangedTurningwheel(outlcpinfo->tw));
+      } else
+      {
+        minchanged = minchangedTurningwheel(outlcpinfo->tw);
       }
     }
     if (bucketspec.nonspecialsinbucket > 0)
@@ -738,6 +740,7 @@ void sortallbuckets(Seqpos *suftabptr,
                          suftabptr + bucketspec.left +
                                      bucketspec.nonspecialsinbucket - 1,
                          (Seqpos) prefixlength,
+                         maxdepth,
                          lcpsubtab);
       }
       if (outlcpinfo != NULL)

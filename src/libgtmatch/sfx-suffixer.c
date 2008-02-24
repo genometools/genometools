@@ -74,6 +74,7 @@ struct Sfxiterator
   Bcktab *bcktab;
   Codetype numofallcodes;
   Seqpos *leftborder; /* points to bcktab->leftborder */
+  const Definedunsignedint *maxdepth;
 };
 
 static void updatekmercount(void *processinfo,
@@ -221,6 +222,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int numofchars,
                             const Uchar *characters,
                             unsigned int prefixlength,
+                            const Definedunsignedint *maxdepth,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
                             Measuretime *mtime,
@@ -251,6 +253,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->numofchars = numofchars;
     sfi->characters = characters;
     sfi->prefixlength = prefixlength;
+    sfi->maxdepth = maxdepth;
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
     sfi->outlcpinfo = outlcpinfo;
@@ -370,6 +373,7 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->bcktab,
                  sfi->numofchars,
                  sfi->prefixlength,
+                 sfi->maxdepth,
                  sfi->outlcpinfo);
   assert(totalwidth > 0);
   sfi->part++;
