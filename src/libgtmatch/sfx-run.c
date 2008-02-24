@@ -410,7 +410,8 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    if (so->outsuftab || so->outbwttab || so->outlcptab || !doesa)
+    if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
+        !doesa)
     {
       if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
       {
@@ -435,6 +436,28 @@ static int runsuffixerator(bool doesa,
                                   recommendedprefixlength(
                                   numofchars,
                                   totallength));
+        }
+      }
+      if (so->maxdepth.defined)
+      {
+        if (so->maxdepth.valueunsignedint == MAXDEPTH_AUTOMATIC)
+        {
+          so->maxdepth.valueunsignedint = so->prefixlength;
+          showverbose(verboseinfo,
+                      "automatically determined maxdepth = %u",
+                      so->maxdepth.valueunsignedint);
+        } else
+        {
+          if (so->maxdepth.valueunsignedint < so->prefixlength)
+          {
+            so->maxdepth.valueunsignedint = so->prefixlength;
+            showverbose(verboseinfo,
+                        "set maxdepth = %u",so->maxdepth.valueunsignedint);
+          } else
+          {
+            showverbose(verboseinfo,
+                        "use maxdepth = %u",so->maxdepth.valueunsignedint);
+          }
         }
       }
     } else

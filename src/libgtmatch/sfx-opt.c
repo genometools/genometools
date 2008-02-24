@@ -41,6 +41,7 @@ static OPrval parse_options(int *parsed_args,
          *optionprotein,
          *optionplain,
          *optionpl,
+         *optionmaxdepth,
          *optionindexname,
          *optiondb,
          *optiondir,
@@ -95,6 +96,15 @@ static OPrval parse_options(int *parsed_args,
                                  1U);
   option_argument_is_optional(optionpl);
   option_parser_add_option(op, optionpl);
+
+  optionmaxdepth = option_new_uint_min("maxdepth",
+                                       "restrict suffix sorting to prefixes "
+                                       "of the given length",
+                                       &so->maxdepth.valueunsignedint,
+                                       MAXDEPTH_AUTOMATIC,
+                                       1U);
+  option_argument_is_optional(optionmaxdepth);
+  option_parser_add_option(op, optionmaxdepth);
 
   option = option_new_uint_min("parts",
                                "specify number of parts in which the "
@@ -204,6 +214,13 @@ static OPrval parse_options(int *parsed_args,
       }
     }
   }
+  if (oprval == OPTIONPARSER_OK)
+  {
+    if (option_is_set(optionmaxdepth))
+    {
+      so->maxdepth.defined = true;
+    }
+  }
   if (oprval == OPTIONPARSER_OK && !doesa)
   {
     computePackedIndexDefaults(&so->bwtIdxParams,
@@ -301,6 +318,8 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->str_smap = str_new();
   so->str_sat = str_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
+  so->maxdepth.defined = false;
+  so->maxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
   so->outsuftab = false;
   so->outlcptab = false;
   so->outbwttab = false;
