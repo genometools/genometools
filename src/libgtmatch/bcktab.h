@@ -22,7 +22,6 @@
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/symboldef.h"
-#include "encseq-def.h"
 #include "seqpos-def.h"
 #include "intcode-def.h"
 

@@ -22,6 +22,7 @@
 #include <errno.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/error.h"
+#include "libgtcore/unused.h"
 #include "spacedef.h"
 #include "measure-time-if.h"
 #include "intcode-def.h"
@@ -40,7 +41,7 @@
 
 typedef struct
 {
-  unsigned int maxprefixlen:PREFIXLENBITS;
+  unsigned int maxprefixindex:PREFIXLENBITS;
   unsigned int code:CODEBITS;
   Seqpos position; /* get rid of this by using information from encseq */
 } Codeatposition;
@@ -77,6 +78,100 @@ struct Sfxiterator
   const Definedunsignedint *maxdepth;
 };
 
+static void newcodelistelem(Codeatposition *cp,Seqpos prevright,Seqpos currleft,
+                            unsigned int prefixlength)
+{
+ Seqpos distance = currleft - prevright;
+
+  if (distance > (Seqpos) (prefixlength-1))
+  {
+    distance = (Seqpos) (prefixlength-1);
+  }
+  cp->maxprefixindex = (unsigned int) distance;
+  cp->position = currleft;
+}
+
+static unsigned long produceCodeatpositionlist(Codeatposition *codelist,
+                                               const  Encodedsequence *encseq,
+                                               UNUSED bool moveforward,
+                                               Seqpos realspecialranges,
+                                               unsigned int prefixlength)
+{
+  Sequencerange previousrange;
+  unsigned long insertindex = 0;
+  Seqpos totallength;
+
+  previousrange.rightpos = 0;
+  if (hasspecialranges(encseq))
+  {
+    Specialrangeiterator *sri;
+    Sequencerange currentrange;
+    bool firstrange = true;
+
+    sri = newspecialrangeiterator(encseq,true);
+    while (nextspecialrangeiterator(&currentrange,sri))
+    {
+      if (firstrange)
+      {
+        firstrange = false;
+      }
+      if (currentrange.leftpos > previousrange.rightpos)
+      {
+        assert(insertindex < (unsigned long) (realspecialranges + 1));
+        newcodelistelem(codelist + insertindex,previousrange.rightpos,
+                        currentrange.leftpos,prefixlength);
+        insertindex++;
+      }
+      previousrange = currentrange;
+    }
+    freespecialrangeiterator(&sri);
+  }
+  totallength = getencseqtotallength(encseq);
+  if (totallength > previousrange.rightpos)
+  {
+    assert(insertindex < (unsigned long) (realspecialranges + 1));
+    newcodelistelem(codelist + insertindex,previousrange.rightpos,totallength,
+                    prefixlength);
+    insertindex++;
+  }
+  return insertindex;
+}
+
+static void compareCodeatpositionlists(UNUSED const Codeatposition *codelist1,
+                                       unsigned long len1,
+                                       UNUSED const Codeatposition *codelist2,
+                                       unsigned long len2)
+{
+  // unsigned long idx;
+
+  if (len1 != len2)
+  {
+    fprintf(stderr,"len1 = %lu != %lu = len2\n",len1,len2);
+    exit(EXIT_FAILURE); /* program error */
+  }
+  /*
+  for (idx=0; idx<len1; idx++)
+  {
+    if (codelist1[idx].position != codelist2[idx].position)
+    {
+      fprintf(stderr,"idx %lu, codelist1.position = " FormatSeqpos " != "
+                      FormatSeqpos " = codelist2.position\n",idx,
+                      PRINTSeqposcast(codelist1[idx].position),
+                      PRINTSeqposcast(codelist2[idx].position));
+      exit(EXIT_FAILURE); 
+    }
+    if (codelist1[idx].maxprefixindex != codelist2[idx].maxprefixindex)
+    {
+      fprintf(stderr,"idx %lu, codelist1.maxprefixindex = %u != %u = "
+                     "codelist2.maxprefixindex\n",idx,
+                      codelist1[idx].maxprefixindex,
+                      codelist2[idx].maxprefixindex);
+      exit(EXIT_FAILURE);
+    }
+  }
+  */
+}
+
 static void updatekmercount(void *processinfo,
                             Codetype code,
                             Seqpos position,
@@ -94,7 +189,7 @@ static void updatekmercount(void *processinfo,
 
         cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
         cp->code = code;
-        cp->maxprefixlen = firstspecial->specialpos;
+        cp->maxprefixindex = firstspecial->specialpos;
         cp->position = position + firstspecial->specialpos;
         sfi->storespecials = false;
         sfi->leftborder[code]++;
@@ -157,12 +252,12 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
   {
     for (j=0, insertindex = 0; j < sfi->nextfreeCodeatposition; j++)
     {
-      if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixlen)
+      if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixindex)
       {
         code = codedownscale(sfi->bcktab,
                              sfi->spaceCodeatposition[j].code,
                              prefixindex,
-                             sfi->spaceCodeatposition[j].maxprefixlen);
+                             sfi->spaceCodeatposition[j].maxprefixindex);
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
         {
           updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
@@ -174,7 +269,7 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
       if (deletevalues)
       {
         if (prefixindex < sfi->prefixlength - 1 &&
-            prefixindex < sfi->spaceCodeatposition[j].maxprefixlen)
+            prefixindex < sfi->spaceCodeatposition[j].maxprefixindex)
         {
           if (insertindex < j)
           {
@@ -244,6 +339,8 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
     ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
                      Codeatposition,realspecialranges+1);
+    printf("# sizeof (spaceCodeatposition)=%lu\n",
+              (unsigned long ) sizeof (Codeatposition) * (realspecialranges+1));
     sfi->nextfreeCodeatposition = 0;
     sfi->suftab = NULL;
     sfi->suftabptr = NULL;
@@ -280,6 +377,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   }
   if (!haserr)
   {
+    unsigned long nextfreeCodeatposition2;
+    Codeatposition *spaceCodeatposition2;
+
     assert(sfi != NULL);
     sfi->storespecials = true;
     if (mtime != NULL)
@@ -293,6 +393,19 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                    numofchars,
                    prefixlength);
     assert(realspecialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
+    ALLOCASSIGNSPACE(spaceCodeatposition2,NULL,Codeatposition,
+                     realspecialranges+1);
+    nextfreeCodeatposition2
+      = produceCodeatpositionlist(spaceCodeatposition2,
+                                  encseq,
+                                  ISDIRREVERSE(readmode) ? false : true,
+                                  realspecialranges,
+                                  prefixlength);
+    compareCodeatpositionlists(sfi->spaceCodeatposition,
+                               sfi->nextfreeCodeatposition,
+                               spaceCodeatposition2,
+                               nextfreeCodeatposition2);
+    FREESPACE(spaceCodeatposition2);
     assert(sfi->leftborder != NULL);
     for (optr = sfi->leftborder + 1;
          optr < sfi->leftborder + sfi->numofallcodes; optr++)
