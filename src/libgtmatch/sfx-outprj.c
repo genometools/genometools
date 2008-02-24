@@ -24,7 +24,9 @@
 #include "libgtcore/filelengthvalues.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/str.h"
+#include "libgtcore/unused.h"
 #include "seqpos-def.h"
+#include "defined-types.h"
 #include "format64.h"
 #include "spacedef.h"
 #include "esafileend.h"
@@ -45,6 +47,7 @@ static void showprjinfo(FILE *outprj,
                         unsigned long numofsequences,
                         const Specialcharinfo *specialcharinfo,
                         unsigned int prefixlength,
+                        UNUSED const Definedunsignedint *maxdepth,
                         Seqpos numoflargelcpvalues,
                         Seqpos maxbranchdepth,
                         const DefinedSeqpos *longest)
@@ -75,6 +78,12 @@ static void showprjinfo(FILE *outprj,
             PRINTSeqposcast(longest->valueseqpos));
   }
   fprintf(outprj,"prefixlength=%u\n",prefixlength);
+  /*
+  if (maxdepth->defined)
+  {
+    fprintf(outprj,"maxdepth=%u\n",maxdepth->valueunsignedint);
+  }
+  */
   fprintf(outprj,"largelcpvalues=" FormatSeqpos "\n",
                    PRINTSeqposcast(numoflargelcpvalues));
   fprintf(outprj,"maxbranchdepth=" FormatSeqpos "\n",
@@ -93,6 +102,7 @@ int outprjfile(const Str *indexname,
                unsigned long numofsequences,
                const Specialcharinfo *specialcharinfo,
                unsigned int prefixlength,
+               const Definedunsignedint *maxdepth,
                Seqpos numoflargelcpvalues,
                Seqpos maxbranchdepth,
                const DefinedSeqpos *longest,
@@ -117,6 +127,7 @@ int outprjfile(const Str *indexname,
                 numofsequences,
                 specialcharinfo,
                 prefixlength,
+                maxdepth,
                 numoflargelcpvalues,
                 maxbranchdepth,
                 longest);

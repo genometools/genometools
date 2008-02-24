@@ -164,7 +164,7 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                                          numofsequences,
                                          characterdistribution);
   if (!(iface->sfi = newSfxiterator(specialcharinfo->specialcharacters,
-                                    specialcharinfo->specialranges,
+                                    specialcharinfo->realspecialranges,
                                     encseq,
                                     so->readmode,
                                     getnumofcharsAlphabet(alpha),

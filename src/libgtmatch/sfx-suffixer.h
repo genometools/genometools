@@ -29,7 +29,7 @@ typedef struct Sfxiterator Sfxiterator;
 void freeSfxiterator(Sfxiterator **sfi);
 
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
-                            Seqpos specialranges,
+                            Seqpos realspecialranges,
                             const Encodedsequence *encseq,
                             Readmode readmode,
                             unsigned int numofchars,

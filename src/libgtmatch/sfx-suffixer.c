@@ -216,7 +216,7 @@ void freeSfxiterator(Sfxiterator **sfi)
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
-                            Seqpos specialranges,
+                            Seqpos realspecialranges,
                             const Encodedsequence *encseq,
                             Readmode readmode,
                             unsigned int numofchars,
@@ -243,7 +243,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   {
     ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
     ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
-                     Codeatposition,specialranges+1);
+                     Codeatposition,realspecialranges+1);
     sfi->nextfreeCodeatposition = 0;
     sfi->suftab = NULL;
     sfi->suftabptr = NULL;
@@ -253,6 +253,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->numofchars = numofchars;
     sfi->characters = characters;
     sfi->prefixlength = prefixlength;
+    assert(maxdepth != NULL);
     sfi->maxdepth = maxdepth;
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
@@ -291,7 +292,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                    sfi,
                    numofchars,
                    prefixlength);
-    assert(specialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
+    assert(realspecialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
     assert(sfi->leftborder != NULL);
     for (optr = sfi->leftborder + 1;
          optr < sfi->leftborder + sfi->numofallcodes; optr++)
@@ -364,18 +365,21 @@ static void preparethispart(Sfxiterator *sfi,
     deliverthetime(stdout,mtime,"sorting the buckets");
   }
   totalwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
-  sortallbuckets(sfi->suftabptr,
-                 sfi->encseq,
-                 sfi->readmode,
-                 sfi->currentmincode,
-                 sfi->currentmaxcode,
-                 totalwidth,
-                 sfi->bcktab,
-                 sfi->numofchars,
-                 sfi->prefixlength,
-                 sfi->maxdepth,
-                 sfi->outlcpinfo);
-  assert(totalwidth > 0);
+  if (!sfi->maxdepth->defined ||
+      sfi->prefixlength < sfi->maxdepth->valueunsignedint)
+  {
+    sortallbuckets(sfi->suftabptr,
+                   sfi->encseq,
+                   sfi->readmode,
+                   sfi->currentmincode,
+                   sfi->currentmaxcode,
+                   totalwidth,
+                   sfi->bcktab,
+                   sfi->numofchars,
+                   sfi->prefixlength,
+                   sfi->maxdepth,
+                   sfi->outlcpinfo);
+  }
   sfi->part++;
 }
 

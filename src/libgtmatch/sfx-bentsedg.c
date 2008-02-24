@@ -41,11 +41,20 @@
 #define ISNOTEND(POS)   ((POS) < totallength && ISNOTSPECIAL(ACCESSCHAR(POS)))
 
 #define DECLARETMPC Uchar tmpsvar, tmptvar
-#define DEREF(VAR,A,S)\
-        (((A) < totallength && ISNOTSPECIAL(VAR = ACCESSCHAR(S))) ?\
-        ((Seqpos) VAR) : UNIQUEINT(S))
 
-#define PTR2INT(VAR,I) DEREF(VAR,cptr = *(I)+depth,cptr)
+#define DEREF(VAR,PTR)\
+        (((PTR) < totallength && ISNOTSPECIAL(VAR = ACCESSCHAR(PTR))) ?\
+        ((Seqpos) VAR) : UNIQUEINT(PTR))
+
+#define DEREFMAXDEPTH(VAR,START,PTR)\
+        (((PTR) < (START) + maxdepth->valueunsignedint && \
+          (PTR) < totallength && ISNOTSPECIAL(VAR = ACCESSCHAR(PTR))) ?\
+        ((Seqpos) VAR) : UNIQUEINT(PTR))
+
+#define PTR2INT(VAR,I)\
+        (((cptr = *(I)+depth) < totallength &&\
+           ISNOTSPECIAL(VAR = ACCESSCHAR(cptr))) ? ((Seqpos) VAR)\
+                                                 : UNIQUEINT(cptr))
 
 #define LCPINDEX(I)       (Seqpos) ((I) - lcpsubtab->suftabbase)
 #define SETLCP(I,V)       lcpsubtab->spaceSeqpos[I] = V
@@ -54,8 +63,15 @@
         for (sptr = (S)+(OFFSET), tptr = (T)+(OFFSET); /* Nothing */;\
              sptr++, tptr++)\
         {\
-          ccs = DEREF(tmpsvar,sptr,sptr);\
-          cct = DEREF(tmptvar,tptr,tptr);\
+          if (maxdepth->defined)\
+          {\
+            ccs = DEREFMAXDEPTH(tmpsvar,S,sptr);\
+            cct = DEREFMAXDEPTH(tmptvar,T,tptr);\
+          } else\
+          {\
+            ccs = DEREF(tmpsvar,sptr);\
+            cct = DEREF(tmptvar,tptr);\
+          }\
           if (ccs != cct)\
           {\
             LL = (Seqpos) (tptr - (T));\
@@ -84,13 +100,17 @@
 #define SMALLSIZE (Seqpos) 6
 
 #define SUBSORT(WIDTH,BORDER,LEFT,RIGHT,DEPTH)\
-        if ((WIDTH) <= (BORDER))\
+        if (!maxdepth->defined ||\
+            (DEPTH) < (Seqpos) maxdepth->valueunsignedint)\
         {\
-          insertionsort(encseq,lcpsubtab,readmode,totallength,\
-                        DEPTH,LEFT,RIGHT);\
-        } else\
-        {\
-          PUSHMKVSTACK(LEFT,RIGHT,DEPTH);\
+          if ((WIDTH) <= (BORDER))\
+          {\
+            insertionsort(encseq,lcpsubtab,readmode,totallength,\
+                          DEPTH,LEFT,RIGHT,maxdepth);\
+          } else\
+          {\
+            PUSHMKVSTACK(LEFT,RIGHT,DEPTH);\
+          }\
         }
 
 #define PUSHMKVSTACK(L,R,D)\
@@ -175,7 +195,8 @@ static void insertionsort(const Encodedsequence *encseq,
                           Seqpos totallength,
                           Seqpos depth,
                           Suffixptr *leftptr,
-                          Suffixptr *rightptr)
+                          Suffixptr *rightptr,
+                          UNUSED const Definedunsignedint *maxdepth)
 {
   Suffixptr sptr, tptr, *pi, *pj, temp;
   Seqpos ccs, cct, lcpindex, lcplen;
@@ -220,7 +241,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Suffixptr *l,
                              Suffixptr *r,
                              Seqpos d,
-                             UNUSED const Definedunsignedint *maxdepth,
+                             const Definedunsignedint *maxdepth,
                              Lcpsubtab *lcpsubtab)
 {
   Suffixptr *left, *right, *leftplusw;
@@ -231,7 +252,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
   {
-    insertionsort(encseq,lcpsubtab,readmode,totallength,d,l,r);
+    insertionsort(encseq,lcpsubtab,readmode,totallength,d,l,r,maxdepth);
     return;
   }
   left = l;
