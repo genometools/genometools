@@ -1858,7 +1858,6 @@ static Encodedsequencefunctions encodedseqfunctab[] =
           = encodedseqfunctab[(int) sat].delivercharnospecial.function;\
         encseq->delivercharnospecialname\
           = encodedseqfunctab[(int) sat].delivercharnospecial.funcname
-        
 
 /*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
                                                   const StrArray *filenametab,

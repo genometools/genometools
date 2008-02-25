@@ -31,9 +31,9 @@
 #include "sfx-partssuf-def.h"
 #include "sfx-suffixer.h"
 #include "sfx-outlcp.h"
+#include "sfx-enumcodes.h"
 #include "stamp.h"
 
-#include "initbasepower.pr"
 #include "sfx-mappedstr.pr"
 
 #define CODEBITS        (32-PREFIXLENBITS)
@@ -79,162 +79,6 @@ struct Sfxiterator
   const Definedunsignedint *maxdepth;
 };
 
-typedef struct
-{
-  Sequencerange previousrange;
-  Specialrangeiterator *sri;
-  bool moveforward;
-  Seqpos totallength;
-  bool exhausted;
-  const Encodedsequence *encseq;
-  Readmode readmode;
-  unsigned int prefixlength;
-  Codetype **multimappower;
-  Codetype *filltable;
-} Enumcodeatposition;
-
-static void newEnumcodeatposition(Enumcodeatposition *ecp,
-                                  const Encodedsequence *encseq,
-                                  Readmode readmode,
-                                  unsigned int prefixlength,
-                                  unsigned int numofchars)
-{
-  ecp->encseq = encseq;
-  ecp->readmode = readmode;
-  ecp->multimappower = initmultimappower(numofchars,prefixlength);
-  ecp->filltable = initfilltable(numofchars,prefixlength);
-  ecp->prefixlength = prefixlength;
-  ecp->moveforward = ISDIRREVERSE(readmode) ? true : false;
-  ecp->totallength = getencseqtotallength(encseq);
-  if (ecp->moveforward)
-  {
-    ecp->previousrange.leftpos = ecp->previousrange.rightpos = 0;
-  } else
-  {
-    ecp->previousrange.leftpos = ecp->previousrange.rightpos = ecp->totallength;
-  }
-  ecp->exhausted = false;
-  if (hasspecialranges(encseq))
-  {
-    ecp->sri = newspecialrangeiterator(encseq,ecp->moveforward);
-  } else
-  {
-    ecp->sri = NULL;
-  }
-}
-
-static Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
-                                       unsigned int maxprefixindex,
-                                       Seqpos pos)
-{
-  Codetype code;
-  unsigned int idx;
-  Uchar cc;
-
-  assert(maxprefixindex > 0 && maxprefixindex < ecp->prefixlength);
-  code = ecp->filltable[maxprefixindex];
-  for (idx=0; idx<maxprefixindex; idx++)
-  {
-    assert((Seqpos) (pos + idx) < ecp->totallength);
-    cc = getencodedcharnospecial(ecp->encseq,pos + idx, ecp->readmode);
-    assert(ISNOTSPECIAL(cc));
-    code += ecp->multimappower[idx][cc];
-  }
-  return code;
-}
-
-static bool newcodelistelem(Codeatposition *cp,
-                            Seqpos smallerval,
-                            Seqpos largerval,
-                            const Enumcodeatposition *ecp)
-{
-  if (smallerval < largerval)
-  {
-    Seqpos distance = largerval - smallerval;
-
-    if (distance > (Seqpos) (ecp->prefixlength-1))
-    {
-      distance = (Seqpos) (ecp->prefixlength-1);
-    }
-    cp->maxprefixindex = (unsigned int) distance;
-    if (ecp->moveforward)
-    {
-      cp->position = ecp->totallength - smallerval;
-    } else
-    {
-      cp->position = largerval;
-    }
-    assert(cp->position >= distance);
-    cp->code = computefilledqgramcode(ecp,cp->maxprefixindex,
-                                      cp->position - cp->maxprefixindex);
-    return true;
-  }
-  return false;
-}
-
-static bool nextEnumcodeatposition(Codeatposition *cp,Enumcodeatposition *ecp)
-{
-  Sequencerange currentrange;
-  bool done;
-
-  if (ecp->exhausted)
-  {
-    return false;
-  }
-  while (ecp->sri != NULL)
-  {
-    if (!nextspecialrangeiterator(&currentrange,ecp->sri))
-    {
-      freespecialrangeiterator(&ecp->sri);
-      ecp->sri = NULL;
-      break;
-    }
-    if (ecp->moveforward)
-    {
-      if (newcodelistelem(cp,
-                          ecp->previousrange.rightpos,
-                          currentrange.leftpos,
-                          ecp))
-      {
-        ecp->previousrange = currentrange;
-        return true;
-      }
-    } else
-    {
-      if (newcodelistelem(cp,
-                          currentrange.rightpos,
-                          ecp->previousrange.leftpos,
-                          ecp))
-      {
-        ecp->previousrange = currentrange;
-        return true;
-      }
-    }
-    ecp->previousrange = currentrange;
-  }
-  ecp->exhausted = true;
-  if (ecp->moveforward)
-  {
-    done = newcodelistelem(cp,
-                           ecp->previousrange.rightpos,
-                           ecp->totallength,
-                           ecp);
-  } else
-  {
-    done = newcodelistelem(cp,
-                           0,
-                           ecp->previousrange.leftpos,
-                           ecp);
-  }
-  return done;
-}
-
-static void freeEnumcodeatposition(Enumcodeatposition *ecp)
-{
-  FREESPACE(ecp->filltable);
-  multimappowerfree(&ecp->multimappower);
-}
-
 static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
                                                const  Encodedsequence *encseq,
                                                Readmode readmode,
@@ -243,17 +87,25 @@ static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
 {
   if (prefixlength > 1U)
   {
-    Enumcodeatposition ecp;
+    Enumcodeatposition *ecp;
     unsigned long insertindex;
+    Specialcontext specialcontext;
 
-    newEnumcodeatposition(&ecp,
-                          encseq,
-                          readmode,
-                          prefixlength,
-                          numofchars);
-    for (insertindex = 0; nextEnumcodeatposition(codelist + insertindex,&ecp);
+    ecp = newEnumcodeatposition(encseq,
+                                readmode,
+                                prefixlength,
+                                numofchars);
+    for (insertindex = 0; nextEnumcodeatposition(&specialcontext,ecp);
          insertindex++)
-       /* Nothing */;
+    {
+      codelist[insertindex].maxprefixindex = specialcontext.maxprefixindex;
+      codelist[insertindex].position = specialcontext.position;
+      codelist[insertindex].code
+        =  computefilledqgramcode(ecp,
+                                  specialcontext.maxprefixindex,
+                                  specialcontext.position -
+                                  specialcontext.maxprefixindex);
+    }
     freeEnumcodeatposition(&ecp);
     return insertindex;
   }
