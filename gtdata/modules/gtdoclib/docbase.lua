@@ -124,7 +124,9 @@ function DocBase:accept(visitor)
   -- visit all classes
   local sorted_classes = {}
   for classname in pairs(self.classes) do
-    sorted_classes[#sorted_classes + 1] = classname
+    if #self.classes[classname] > 0 then
+      sorted_classes[#sorted_classes + 1] = classname
+    end
   end
   table.sort(sorted_classes)
   if visitor.visit_classes then
