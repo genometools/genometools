@@ -91,7 +91,7 @@ if $gttestdata then
       runAndCheckPackedIndex('dmel',
                              [file], nil, nil,
                              { 'bdxcreat' => 7200, 'suffixerator' => 7200,
-                               'chkintegrity' => 1600, 'chksearch' => 800 })
+                               'chkintegrity' => 3200, 'chksearch' => 800 })
     end
   end
 end
