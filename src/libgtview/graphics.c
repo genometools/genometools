@@ -37,8 +37,7 @@ void graphics_initialize(Graphics *g, unsigned int width, unsigned int height)
   g->width = width;
   g->height = height;
   g->margin_x = g->margin_y = 20;
-  cairo_set_source_rgb(g->cr, 1, 1, 1);
-  cairo_set_operator(g->cr, CAIRO_OPERATOR_SOURCE);
+  cairo_set_source_rgba(g->cr, 1, 1, 1, 1);
   cairo_paint(g->cr);
   cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
@@ -47,14 +46,18 @@ void graphics_initialize(Graphics *g, unsigned int width, unsigned int height)
 Graphics* graphics_new(unsigned int width, unsigned int height)
 {
   Graphics *g = ma_malloc(sizeof (Graphics));
-  g->surf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
+  g->surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
   graphics_initialize(g, width, height);
   return g;
 }
 
 void graphics_draw_text(Graphics *g, double x, double y, const char *text)
 {
+  cairo_text_extents_t ext;
   assert(g && text);
+  cairo_text_extents(g->cr, text, &ext);
+  if (x+ext.width > g->width)
+    return;
   cairo_set_source_rgb(g->cr, 0, 0, 0);
   cairo_move_to(g->cr, x, y);
   cairo_show_text(g->cr, text);
@@ -123,10 +126,13 @@ void graphics_draw_vertical_line(Graphics *g, double x, double y,
                                  Color color, double length)
 {
   assert(g);
+  cairo_save(g->cr);
   cairo_move_to(g->cr, x, y);
+  cairo_set_line_width(g->cr, 0.7);
   cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
   cairo_rel_line_to(g->cr, 0, length);
   cairo_stroke(g->cr);
+  cairo_restore(g->cr);
 }
 
 double graphics_get_text_width(Graphics *g, const char* text)
@@ -141,9 +147,10 @@ double graphics_get_text_width(Graphics *g, const char* text)
 void graphics_draw_box(Graphics *g, double x, double y, double width,
                        double height, Color fill_color,
                        ArrowStatus arrow_status, double arrow_width,
-                       double stroke_width, Color stroke_color)
+                       double stroke_width, Color stroke_color, bool dashed)
 {
   assert(g);
+  double dashes[]={2.0};
   /* save cairo context */
   cairo_save(g->cr);
   cairo_rectangle(g->cr, g->margin_x, g->margin_y,
@@ -177,15 +184,19 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
       cairo_rectangle(g->cr, x, y, width, height);
    }
    /* fill area */
-   cairo_set_source_rgb(g->cr, fill_color.red,
-                               fill_color.green,
-                               fill_color.blue);
+   cairo_set_source_rgba(g->cr, fill_color.red,
+                                fill_color.green,
+                                fill_color.blue,
+                                0.5);
    cairo_fill_preserve(g->cr);
    /* draw outline */
    cairo_set_line_width(g->cr, stroke_width);
-   cairo_set_source_rgb(g->cr, stroke_color.red,
-                               stroke_color.green,
-                               stroke_color.blue);
+   cairo_set_source_rgba(g->cr, stroke_color.red,
+                                stroke_color.green,
+                                stroke_color.blue,
+                                0.7);
+   if (dashed)
+     cairo_set_dash(g->cr, dashes, 1, (double) 0);
    cairo_stroke(g->cr);
    /* restore cairo context */
    cairo_restore(g->cr);

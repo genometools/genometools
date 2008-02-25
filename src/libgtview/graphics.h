@@ -60,7 +60,8 @@ void      graphics_draw_vertical_line(Graphics*, double x, double y,
 void      graphics_draw_box(Graphics*, double x, double y, double width,
                             double height, Color fill_color,
                             ArrowStatus arrow_status, double arrow_width,
-                            double stroke_width, Color stroke_color);
+                            double stroke_width, Color stroke_color,
+                            bool dashed);
 void      graphics_draw_dashes(Graphics*, double x, double y, double width,
                                double height, ArrowStatus arrow_status,
                                double arrow_width, double stroke_width,

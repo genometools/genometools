@@ -31,16 +31,18 @@ struct Block {
   GenomeFeatureType type;
 };
 
-/* Compare function used to insert Elements into dlist */
+/* Compare function used to insert Elements into dlist, order by type */
 static int elemcmp(const void *a, const void *b)
 {
   Element *elem_a = (Element*) a;
   Element *elem_b = (Element*) b;
 
-  Range ra = element_get_range(elem_a);
-  Range rb = element_get_range(elem_b);
+  GenomeFeatureType ta = element_get_type(elem_a);
+  GenomeFeatureType tb = element_get_type(elem_b);
 
-  return range_compare(ra, rb);
+  if (ta == tb)
+    return 0;
+  else return (ta < tb ? 1 : -1);
 }
 
 Block* block_new(void)
@@ -65,17 +67,15 @@ Block* block_new_from_node(GenomeNode *node)
   block = block_new();
   block_set_range(block, genome_node_get_range(node));
   block_set_strand(block, genome_feature_get_strand((GenomeFeature*) node));
+  block_set_type(block, genome_feature_get_type((GenomeFeature*) node));
   return block;
 }
 
 void block_insert_element(Block *block, GenomeNode *gn, Config *cfg)
 {
-  Dlistelem *elem;
-  Range elem_r, gn_r;
-  DominateStatus dominates;
-  int count = 0;
-  Element *element, *e;
-  GenomeFeatureType gn_type, e_type;
+  Range gn_r;
+  Element *e;
+  GenomeFeatureType gn_type;
 
   assert(block && gn && cfg);
 
@@ -86,137 +86,8 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg)
           genome_feature_type_get_cstr(gn_type),
           gn_r.start, gn_r.end);
 
-  for (elem = dlist_first(block->elements); elem;
-       elem = dlistelem_next(elem)) {
-    element = (Element*) dlistelem_get_data(elem);
-    elem_r = element_get_range(element);
-
-    if (range_overlap(elem_r, gn_r)) {
-      count += 1;
-      e_type = element_get_type(element);
-
-      dominates = config_dominates(cfg, e_type, gn_type);
-
-      if (gn_r.start == elem_r.start && gn_r.end < elem_r.end) {
-        /* Case:    -------------------
-                    ---------- */
-        switch (dominates) {
-          case DOMINATES_FIRST:
-            break;
-          case DOMINATES_NOT_SPECIFIED:
-          case DOMINATES_UNKNOWN_TYPE:
-          case DOMINATES_EQUAL:
-          case DOMINATES_SECOND:
-            elem_r.start = gn_r.end+1;
-            if (elem_r.start == elem_r.end+1) {
-              dlist_remove(block->elements, elem);
-              element_delete(element);
-            }
-            else
-              element_set_range(element, elem_r);
-            e = element_new_empty();
-            element_set_range(e, gn_r);
-            element_set_type(e, gn_type);
-            dlist_add(block->elements, e);
-            elem = dlist_find(block->elements, e);
-            break;
-        }
-      }
-      else if (gn_r.start >= elem_r.start && gn_r.end == elem_r.end) {
-        /* Case:  --------------
-                     -----------  */
-        switch (dominates) {
-          case DOMINATES_FIRST:
-            gn_r.start = elem_r.end;
-            break;
-          case DOMINATES_NOT_SPECIFIED:
-          case DOMINATES_UNKNOWN_TYPE:
-          case DOMINATES_EQUAL:
-          case DOMINATES_SECOND:
-            elem_r.end = gn_r.start-1;
-            if (elem_r.start == elem_r.end+1) {
-              dlist_remove(block->elements, elem);
-              element_delete(element);
-            }
-            else
-              element_set_range(element, elem_r);
-            e = element_new(gn);
-            element_set_range(e, gn_r);
-            element_set_type(e, gn_type);
-            dlist_add(block->elements, e);
-            elem = dlist_find(block->elements, e);
-            break;
-        }
-      }
-      else if (elem_r.start <= gn_r.start && elem_r.end < gn_r.end) {
-        /* Case: ----------
-                 -------------- */
-        bool removed = false;
-        unsigned long tmp;
-        Range gnnew_r;
-
-        switch (dominates) {
-          case DOMINATES_FIRST:
-            gn_r.start = elem_r.end+1;
-            break;
-          case DOMINATES_EQUAL:
-          case DOMINATES_UNKNOWN_TYPE:
-          case DOMINATES_NOT_SPECIFIED:
-          case DOMINATES_SECOND:
-            tmp = elem_r.end;
-            elem_r.end = gn_r.start-1;
-            if (elem_r.start == elem_r.end+1) {
-              dlist_remove(block->elements, elem);
-              element_delete(element);
-              removed = true;
-              elem_r.end = tmp;
-            }
-            else
-              element_set_range(element, elem_r);
-            gnnew_r = gn_r;
-            gnnew_r.end = elem_r.end;
-            e = element_new_empty();
-            element_set_range(e, gnnew_r);
-            element_set_type(e, e_type);
-            dlist_add(block->elements, e);
-            gn_r.start = elem_r.end+1;
-            if (removed)
-              elem = dlist_find(block->elements, e);
-            break;
-        }
-      }
-      else if (elem_r.start < gn_r.start && gn_r.end < elem_r.end) {
-        /* Case: -------------
-                    ------      */
-        Range elemnew_r;
-        Element *elemnew;
-
-        switch (dominates) {
-          case DOMINATES_FIRST:
-            break;
-          case DOMINATES_EQUAL:
-          case DOMINATES_SECOND:
-          case DOMINATES_NOT_SPECIFIED:
-          case DOMINATES_UNKNOWN_TYPE:
-            elemnew_r = elem_r;
-            elem_r.end = gn_r.start-1;
-            element_set_range(element, elem_r);
-            elemnew_r.start = gn_r.end+1;
-            elemnew = element_new_empty();
-            element_set_range(elemnew, elemnew_r);
-            element_set_type(elemnew, e_type);
-            e = element_new(gn);
-            dlist_add(block->elements, elemnew);
-            dlist_add(block->elements, e);
-            break;
-        }
-      }
-    }
-  }
-  if (count == 0) {
-    e = element_new(gn);
-    dlist_add(block->elements, e);
-  }
+  e = element_new(gn);
+  dlist_add(block->elements, e);
 }
 
 Range block_get_range(const Block *block)
@@ -320,11 +191,11 @@ int block_unit_test(Error *err)
   r1.start = 10UL;
   r1.end = 50UL;
 
-  r2.start = 51UL;
-  r2.end = 80UL;
+  r2.start = 40UL;
+  r2.end = 50UL;
 
-  gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0);
-  gn2 = genome_feature_new(gft_intron, r2, STRAND_FORWARD, NULL, 0);
+  gn1 = genome_feature_new(gft_gene, r1, STRAND_FORWARD, NULL, 0);
+  gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, NULL, 0);
 
   e1 = element_new(gn1);
   e2 = element_new(gn2);

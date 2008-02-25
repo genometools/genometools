@@ -73,5 +73,6 @@ config =
     stroke_width = .5, -- width of outlines, in pixels
     stroke_marked_width = 1.5, -- width of outlines for marked elements, in pixels
     show_grid = "yes", -- shows light vertical lines for orientation
+    min_len_block = 40, -- minimum length of a block in which single elements are shown
   },
 }
