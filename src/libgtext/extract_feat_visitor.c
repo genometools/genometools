@@ -30,8 +30,7 @@ struct ExtractFeatVisitor {
       *protein;       /* the translated protein sequence (if applicable) */
   GenomeFeatureType type;
   bool join,
-       translate,
-       reverse_strand;
+       translate;
   unsigned long fastaseq_counter;
   RegionMapping *region_mapping;
 };
@@ -125,19 +124,19 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
   if (v->join) {
     GenomeNodeIterator *gni;
     GenomeNode *child;
+    bool reverse_strand = false;
     /* in this case we have to traverse the children */
     str_reset(v->sequence);
-    v->reverse_strand = false;
     gni = genome_node_iterator_new_direct(gn);
     while (!had_err && (child = genome_node_iterator_next(gni))) {
       if (extract_join_feature(child, v->type, v->region_mapping, v->sequence,
-                               &v->reverse_strand, err)) {
+                               &reverse_strand, err)) {
         had_err = -1;
       }
     }
     genome_node_iterator_delete(gni);
     if (!had_err && str_length(v->sequence)) {
-      if (v->reverse_strand) {
+      if (reverse_strand) {
         had_err = reverse_complement(str_get(v->sequence),
                                      str_length(v->sequence), err);
       }
