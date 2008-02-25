@@ -78,22 +78,35 @@ struct Sfxiterator
   const Definedunsignedint *maxdepth;
 };
 
-static void newcodelistelem(Codeatposition *cp,Seqpos prevright,Seqpos currleft,
+static void newcodelistelem(Codeatposition *cp,
+                            Seqpos smallerval,
+                            Seqpos largerval,
+                            Seqpos totallength,
+                            bool moveforward,
                             unsigned int prefixlength)
 {
- Seqpos distance = currleft - prevright;
+  Seqpos distance;
 
+  assert(smallerval < largerval);
+  distance = largerval - smallerval;
   if (distance > (Seqpos) (prefixlength-1))
   {
     distance = (Seqpos) (prefixlength-1);
   }
   cp->maxprefixindex = (unsigned int) distance;
-  cp->position = currleft;
+  if (moveforward)
+  {
+    cp->position = largerval;
+  } else
+  {
+    cp->position = totallength - smallerval;
+  }
+  //printf(": dist=%u,value=%u\n",distance,cp->position);
 }
 
 static unsigned long produceCodeatpositionlist(Codeatposition *codelist,
                                                const  Encodedsequence *encseq,
-                                               UNUSED bool moveforward,
+                                               bool moveforward,
                                                Seqpos realspecialranges,
                                                unsigned int prefixlength)
 {
@@ -101,55 +114,103 @@ static unsigned long produceCodeatpositionlist(Codeatposition *codelist,
   unsigned long insertindex = 0;
   Seqpos totallength;
 
-  previousrange.rightpos = 0;
+  if (prefixlength == 1U)
+  {
+    return 0;
+  }
+  totallength = getencseqtotallength(encseq);
+  if (moveforward)
+  {
+    previousrange.leftpos = previousrange.rightpos = 0;
+  } else
+  {
+    previousrange.rightpos = totallength;
+    previousrange.leftpos = totallength;
+  }
   if (hasspecialranges(encseq))
   {
     Specialrangeiterator *sri;
     Sequencerange currentrange;
-    bool firstrange = true;
 
-    sri = newspecialrangeiterator(encseq,true);
+    sri = newspecialrangeiterator(encseq,moveforward);
     while (nextspecialrangeiterator(&currentrange,sri))
     {
-      if (firstrange)
+      //printf("range %u %u\n",currentrange.leftpos,currentrange.rightpos);
+      if (moveforward)
       {
-        firstrange = false;
-      }
-      if (currentrange.leftpos > previousrange.rightpos)
+        if (previousrange.rightpos < currentrange.leftpos)
+        {
+          assert(insertindex < (unsigned long) (realspecialranges + 1));
+          newcodelistelem(codelist + insertindex,
+                          previousrange.rightpos,
+                          currentrange.leftpos,
+                          totallength,
+                          moveforward,
+                          prefixlength);
+          insertindex++;
+        }
+      } else
       {
-        assert(insertindex < (unsigned long) (realspecialranges + 1));
-        newcodelistelem(codelist + insertindex,previousrange.rightpos,
-                        currentrange.leftpos,prefixlength);
-        insertindex++;
+        if (currentrange.rightpos < previousrange.leftpos)
+        {
+          assert(insertindex < (unsigned long) (realspecialranges + 1));
+          //printf("insertinner\n");
+          newcodelistelem(codelist + insertindex,
+                          currentrange.rightpos,
+                          previousrange.leftpos,
+                          totallength,
+                          moveforward,
+                          prefixlength);
+          insertindex++;
+        }
       }
       previousrange = currentrange;
     }
     freespecialrangeiterator(&sri);
   }
-  totallength = getencseqtotallength(encseq);
-  if (totallength > previousrange.rightpos)
+  if (moveforward)
   {
-    assert(insertindex < (unsigned long) (realspecialranges + 1));
-    newcodelistelem(codelist + insertindex,previousrange.rightpos,totallength,
-                    prefixlength);
-    insertindex++;
+    if (previousrange.rightpos < totallength)
+    {
+      assert(insertindex < (unsigned long) (realspecialranges + 1));
+      newcodelistelem(codelist + insertindex,
+                      previousrange.rightpos,
+                      totallength,
+                      totallength,
+                      moveforward,
+                      prefixlength);
+      insertindex++;
+    }
+  } else
+  {
+    if (0 < previousrange.leftpos)
+    {
+      assert(insertindex < (unsigned long) (realspecialranges + 1));
+      //printf("insertlast\n");
+      newcodelistelem(codelist + insertindex,
+                      0,
+                      previousrange.leftpos,
+                      totallength,
+                      moveforward,
+                      prefixlength);
+      insertindex++;
+    }
   }
   return insertindex;
 }
 
-static void compareCodeatpositionlists(UNUSED const Codeatposition *codelist1,
+static void compareCodeatpositionlists(const Codeatposition *codelist1,
                                        unsigned long len1,
-                                       UNUSED const Codeatposition *codelist2,
+                                       const Codeatposition *codelist2,
                                        unsigned long len2)
 {
-  // unsigned long idx;
+  unsigned long idx;
 
   if (len1 != len2)
   {
     fprintf(stderr,"len1 = %lu != %lu = len2\n",len1,len2);
     exit(EXIT_FAILURE); /* program error */
   }
-  /*
   for (idx=0; idx<len1; idx++)
   {
     if (codelist1[idx].position != codelist2[idx].position)
@@ -169,7 +230,6 @@ static void compareCodeatpositionlists(UNUSED const Codeatposition *codelist1,
       exit(EXIT_FAILURE);
     }
   }
-  */
 }
 
 static void updatekmercount(void *processinfo,

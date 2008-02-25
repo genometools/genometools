@@ -447,13 +447,12 @@ void getencseqkmers(
         unsigned int numofchars,
         unsigned int kmersize)
 {
-  Seqpos currentposition = 0;
+  Seqpos currentposition = 0, totallength;
   Streamstate spwp;
   Uchar charcode;
-
-  Seqpos totallength = getencseqtotallength(encseq);
   Encodedsequencescanstate *esr;
 
+  totallength = getencseqtotallength(encseq);
   initstreamstate(&spwp,numofchars,kmersize);
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,readmode,0);
