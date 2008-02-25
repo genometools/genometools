@@ -29,6 +29,8 @@ struct encIdxSeqClass
                  union EISHint *hint);
   struct SeqposPair (*posPairRank)(EISeq *seq, Symbol tSym, Seqpos posA,
                                    Seqpos posB, union EISHint *hint);
+  void (*rangeRank)(struct encIdxSeq *eSeqIdx, unsigned range, Seqpos pos,
+                    Seqpos *rankCounts, union EISHint *hint);
   Seqpos (*select)(EISeq *seq, Symbol sym, Seqpos count,
                    union EISHint *hint);
   Symbol (*get)(EISeq *seq, Seqpos pos, EISHint hint);

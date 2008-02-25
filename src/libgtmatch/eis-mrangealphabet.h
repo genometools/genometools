@@ -33,7 +33,13 @@
 
 /** symbols are stored in this scalar type */
 typedef unsigned char Symbol;
-
+#define PRIuSymbol "u"
+/** let's assume 65536 ranges are enough */
+typedef unsigned AlphabetRangeID;
+/** Caution: sizeof (AlphabetRangeID) >= sizeof (AlphabetRangeSize)
+ *           must be true, AlphabetRangeSize must be able to
+ *           represent the total number of symbols */
+typedef unsigned short AlphabetRangeSize;
 /** retrieve symbol from BitString */
 #define bsGetSymbol bsGetUInt8
 /** store symbol in BitString */
@@ -72,7 +78,8 @@ enum sourceEncType {
  * value UNDEF_UCHAR
  */
 static inline MRAEnc *
-MRAEncUInt8New(int numRanges, int symbolsPerRange[], const uint8_t *mapping);
+MRAEncUInt8New(AlphabetRangeID numRanges, AlphabetRangeSize symbolsPerRange[],
+               const uint8_t *mapping);
 
 /**
  * \brief Creates a mapping to two ranges (regular and special
@@ -86,7 +93,8 @@ MRAEncGTAlphaNew(const Alphabet *alpha);
  * \brief alias of MRAEncUInt8New
  */
 extern MRAEnc *
-newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
+newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,
+                                   const AlphabetRangeSize symbolsPerRange[],
                                    const uint8_t *mappings);
 
 /**
@@ -124,14 +132,14 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
  * @param range number of range to insert new symbol into
  */
 extern void
-MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, int range);
+MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range);
 
 /**
  * \brief Query number of ranges in alphabet.
  * @param mralpha alphabet to query for number of ranges
  * @return number of ranges
  */
-extern size_t
+extern AlphabetRangeID
 MRAEncGetNumRanges(const MRAEnc *mralpha);
 
 /**
@@ -139,15 +147,24 @@ MRAEncGetNumRanges(const MRAEnc *mralpha);
  * @param mralpha alphabet to get range from
  * @param range
  */
-static inline size_t
-MRAEncGetRangeSize(const MRAEnc *mralpha, size_t range);
+static inline AlphabetRangeSize
+MRAEncGetRangeSize(const MRAEnc *mralpha, AlphabetRangeID range);
+
+/**
+ * \brief Query symbol which starts range.
+ * @param mralpha
+ * @param range start symbol of range, symbols of range range from
+ * MRAEncGetRangeBase(alph, range) to MRAEncGetRangeBase(alph, range + 1) - 1
+ */
+static inline Symbol
+MRAEncGetRangeBase(const MRAEnc *mralpha, AlphabetRangeID range);
 
 /**
  * @brief Get number of different symbols in alphabet.
  * @param mralpha
  * @return number of symbols in alphabet
  */
-extern size_t
+extern AlphabetRangeSize
 MRAEncGetSize(const MRAEnc *mralpha);
 
 /**

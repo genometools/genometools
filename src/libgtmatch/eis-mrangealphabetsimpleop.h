@@ -20,19 +20,29 @@
 #include "libgtmatch/eis-mrangealphabetpriv.h"
 
 static inline MRAEnc *
-MRAEncUInt8New(int numRanges, int symbolsPerRange[],
+MRAEncUInt8New(AlphabetRangeID numRanges, AlphabetRangeSize symbolsPerRange[],
                const uint8_t *mapping)
 {
   return newMultiRangeAlphabetEncodingUInt8(numRanges, symbolsPerRange,
                                             mapping);
 }
 
-static inline size_t
-MRAEncGetRangeSize(const MRAEnc *mralpha, size_t range)
+static inline AlphabetRangeSize
+MRAEncGetRangeSize(const MRAEnc *mralpha, AlphabetRangeID range)
 {
   assert(mralpha);
   assert(mralpha->numRanges > range);
   return mralpha->symbolsPerRange[range];
+}
+
+static inline Symbol
+MRAEncGetRangeBase(const MRAEnc *mralpha, AlphabetRangeID range)
+{
+  assert(mralpha && mralpha->numRanges > range);
+  if (range == 0)
+    return 0;
+  else
+    return mralpha->rangeEndIndices[range - 1];
 }
 
 static inline size_t

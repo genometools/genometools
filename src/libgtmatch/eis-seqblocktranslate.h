@@ -26,6 +26,8 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "libgtmatch/seqpos-def.h"
+#include "libgtmatch/eis-bitpackseqpos.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 
 /** store indices in this scalar */
@@ -181,6 +183,28 @@ symCountFromComposition(struct compList *compositionTable,
   return bsGetUInt(compositionTable->catCompsPerms,
                    compIndex * bitsPerComp + sym * bitsPerCount,
                    bitsPerCount);
+}
+
+/**
+ * @brief Add symbol occurrences for a composition given by index
+ * @param compositionTable
+ * @param alphabetSize
+ * @param compIndex composition index
+ * @param counts add occurrence counts to this array
+ */
+static inline void
+addSymCountsFromComposition(struct compList *compositionTable,
+                            unsigned alphabetSize,
+                            PermCompIndex compIndex, Seqpos *counts)
+{
+  BitOffset bitsPerComp, bitsPerCount;
+  assert(compositionTable);
+  bitsPerCount = compositionTable->bitsPerCount;
+  bitsPerComp = bitsPerCount * alphabetSize;
+  assert(compIndex < compositionTable->numCompositions);
+  bsGetUniformSeqposArrayAdd(compositionTable->catCompsPerms,
+                             compIndex * bitsPerComp, bitsPerCount,
+                             alphabetSize, counts);
 }
 
 #endif

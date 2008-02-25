@@ -214,7 +214,7 @@ bsGetUniformUInt32Array(constBitString str, BitOffset offset,
     /* now we have enough bits in accum */
     while (bitsInAccum >= numBits)
     {
-      val[j++] = ((accum >> (bitsInAccum - numBits)) & valMask );
+      val[j++] = ((accum >> (bitsInAccum - numBits)) & valMask);
       bitsInAccum -= numBits;
     }
   }
@@ -704,7 +704,7 @@ bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,
     /* now we have enough bits in accum */
     while (bitsInAccum >= numBits)
     {
-      val[j++] += ((accum >> (bitsInAccum - numBits)) & valMask );
+      val[j++] += ((accum >> (bitsInAccum - numBits)) & valMask);
       bitsInAccum -= numBits;
     }
   }

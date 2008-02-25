@@ -230,7 +230,8 @@ struct blockCompositionSeq
   int *modes;
   unsigned bucketBlocks, blockSize, callBackDataOffsetBits, bitsPerSeqpos,
     bitsPerVarDiskOffset;
-  Symbol blockEncNumSyms, blockEncFallback, rangeEncFallback;
+  AlphabetRangeSize blockMapAlphabetSize;
+  Symbol blockEncFallback, rangeEncFallback;
   int numModes;
   unsigned *partialSymSumBits, *partialSymSumBitsSums, symSumBits;
 };
@@ -321,7 +322,7 @@ appendCallBackOutput(struct appendState *state,
 typedef Seqpos partialSymSum;
 
 static inline partialSymSum *
-newPartialSymSums(unsigned alphabetSize);
+newPartialSymSums(AlphabetRangeSize alphabetSize);
 
 static inline void
 deletePartialSymSums(partialSymSum *sums);
@@ -331,7 +332,7 @@ addBlock2PartialSymSums(partialSymSum *sums, const Symbol *block,
                         unsigned blockSize);
 
 static inline void
-copyPartialSymSums(unsigned alphabetSize, partialSymSum *dest,
+copyPartialSymSums(AlphabetRangeSize alphabetSize, partialSymSum *dest,
                    const partialSymSum *src);
 
 static inline Seqpos
@@ -389,7 +390,7 @@ addBlock2OutputBuffer(
   partialSymSum *buck, Seqpos blockNum,
   Symbol *block, unsigned blockSize,
   const MRAEnc *alphabet, const int *modes,
-  const MRAEnc *blockMapAlphabet, unsigned blockMapAlphabetSize,
+  const MRAEnc *blockMapAlphabet, AlphabetRangeSize blockMapAlphabetSize,
   BitString permCompBSPreAlloc, unsigned *compositionPreAlloc,
   unsigned compositionIdxBits, struct appendState *aState)
 {
@@ -466,7 +467,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      BitOffset maxVarExtBitsPerPos, void *cbState, Error *err)
 {
   struct blockCompositionSeq *newSeqIdx = NULL;
-  unsigned blockMapAlphabetSize, totalAlphabetSize;
+  AlphabetRangeSize blockMapAlphabetSize, totalAlphabetSize;
   size_t regionsEstimate=totalLen / 100;
   MRAEnc *blockMapAlphabet = NULL, *rangeMapAlphabet = NULL;
   BitOffset bitsPerComposition, bitsPerPermutation;
@@ -515,7 +516,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
         break;
       }
     }
-    newSeqIdx->blockEncNumSyms = blockMapAlphabetSize;
+    newSeqIdx->blockMapAlphabetSize = blockMapAlphabetSize;
     newSeqIdx->blockMapAlphabet = blockMapAlphabet =
       MRAEncSecondaryMapping(alphabet, BLOCK_COMPOSITION_INCLUDE, modesCopy,
                              newSeqIdx->blockEncFallback = 0);
@@ -528,7 +529,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
   }
   newSeqIdx->partialSymSumBits
     = ma_malloc(sizeof (newSeqIdx->partialSymSumBits[0])
-                    * blockMapAlphabetSize * 2);
+                * blockMapAlphabetSize * 2);
   newSeqIdx->partialSymSumBitsSums
     = newSeqIdx->partialSymSumBits + blockMapAlphabetSize;
   if (stats)
@@ -545,16 +546,16 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
         unsigned i;
         for (i = 0; i <= UINT8_MAX; ++i)
           if (MRAEncSymbolIsInSelectedRanges(
-               alphabet, eSym = MRAEncMapSymbol(alphabet, i),
-               BLOCK_COMPOSITION_INCLUDE, modesCopy)
-             && ((bSym = MRAEncMapSymbol(blockMapAlphabet, eSym))
-                 < blockMapAlphabetSize))
+                alphabet, eSym = MRAEncMapSymbol(alphabet, i),
+                BLOCK_COMPOSITION_INCLUDE, modesCopy)
+              && ((bSym = MRAEncMapSymbol(blockMapAlphabet, eSym))
+                  < blockMapAlphabetSize))
             symCounts[bSym]
               += stats->symbolDistributionTable[i];
 #if DEBUG > 1
         for (i = 0; i < blockMapAlphabetSize; ++i)
         {
-          fprintf(stderr, "symCount[%u]="FormatSeqpos"\n", (unsigned)i,
+          fprintf(stderr, "symCount[%"PRIuSymbol"]="FormatSeqpos"\n", (Symbol)i,
                   stats->symbolDistributionTable[i]);
         }
 #endif /* DEBUG > 1 */
@@ -573,7 +574,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
 #ifdef DEBUG
           for (i = 0; i < blockMapAlphabetSize; ++i)
           {
-            fprintf(stderr, "bitsPerSymSum[%u]=%u\n", (unsigned)i,
+            fprintf(stderr, "bitsPerSymSum[%"PRIuSymbol"]=%u\n", (Symbol)i,
                     newSeqIdx->partialSymSumBits[i]);
           }
 #endif  /* DEBUG */
@@ -589,7 +590,8 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
       {
         Symbol eSym, rSym;
         Seqpos regionSymCount = 0;
-        unsigned rangeMapAlphabetSize = MRAEncGetSize(rangeMapAlphabet);
+        AlphabetRangeSize rangeMapAlphabetSize
+          = MRAEncGetSize(rangeMapAlphabet);
         unsigned i;
         for (i = 0; i <= UINT8_MAX; ++i)
           if (MRAEncSymbolIsInSelectedRanges(
@@ -663,7 +665,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
         BitString permCompBSPreAlloc;
         partialSymSum *buck, *buckLast;
         block = ma_malloc(sizeof (Symbol) * blockSize);
-        compositionPreAlloc = ma_malloc(sizeof (unsigned)
+        compositionPreAlloc = ma_malloc(sizeof (compositionPreAlloc[0])
                                         * blockMapAlphabetSize);
         permCompBSPreAlloc =
           ma_malloc(bitElemsAllocSize(bitsPerComposition + bitsPerPermutation)
@@ -902,7 +904,7 @@ static inline void
 symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx)
 {
   unsigned i;
-  unsigned blockMapAlphabetSize = seqIdx->blockEncNumSyms;
+  AlphabetRangeSize blockMapAlphabetSize = seqIdx->blockMapAlphabetSize;
   seqIdx->partialSymSumBitsSums[0] = 0;
   seqIdx->partialSymSumBits[0] = seqIdx->bitsPerSeqpos;
   for (i = 1; i < blockMapAlphabetSize; ++i)
@@ -910,8 +912,8 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx)
       + (seqIdx->partialSymSumBits[i] = seqIdx->bitsPerSeqpos);
   seqIdx->symSumBits = blockMapAlphabetSize * seqIdx->bitsPerSeqpos;
 #ifdef DEBUG
-  fprintf(stderr, "symSumBits=%u, blockEncNumSyms=%u\n",
-          seqIdx->symSumBits, seqIdx->blockEncNumSyms);
+  fprintf(stderr, "symSumBits=%u, blockMapAlphabetSize=%u\n",
+          seqIdx->symSumBits, seqIdx->blockMapAlphabetSize);
 #endif
   assert(seqIdx->partialSymSumBitsSums[i - 1] + seqIdx->bitsPerSeqpos
          == seqIdx->symSumBits);
@@ -923,6 +925,16 @@ sBlockGetPartialSymSum(struct superBlock *sBlock, Symbol sym,
 {
   return bsGetSeqpos(sBlock->cwData, seqIdx->partialSymSumBitsSums[sym]
                      + sBlock->cwIdxMemBase, seqIdx->partialSymSumBits[sym]);
+}
+
+static inline void
+sBlockGetPartialSymSums(struct superBlock *sBlock,
+                        const struct blockCompositionSeq *seqIdx,
+                        Seqpos *sums)
+{
+  bsGetNonUniformSeqposArray(
+    sBlock->cwData, sBlock->cwIdxMemBase, seqIdx->blockMapAlphabetSize,
+    seqIdx->symSumBits, seqIdx->partialSymSumBits, sums);
 }
 
 static inline BitOffset
@@ -1267,17 +1279,16 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
 
 static inline Seqpos
 adjustPosRankForBlock(struct blockCompositionSeq *seqIdx,
-                      struct superBlock *sBlock, Seqpos pos, UNUSED Symbol eSym,
-                      Symbol bSym, unsigned blockSize,
-                      Seqpos preBlockRankCount, BitOffset cwIdxMemOffset,
-                      BitOffset varDataMemOffset,
+                      struct superBlock *sBlock, Seqpos pos, Symbol bSym,
+                      unsigned blockSize, Seqpos preBlockRankCount,
+                      BitOffset cwIdxMemOffset, BitOffset varDataMemOffset,
                       unsigned bitsPerCompositionIdx)
 {
   Seqpos rankCount = preBlockRankCount;
   unsigned inBlockPos;
   if ((inBlockPos = pos % blockSize)
       && symCountFromComposition(
-        &seqIdx->compositionTable, seqIdx->blockEncNumSyms,
+        &seqIdx->compositionTable, seqIdx->blockMapAlphabetSize,
         bsGetPermCompIndex(sBlock->cwData, cwIdxMemOffset,
                            bitsPerCompositionIdx), bSym))
   {
@@ -1328,10 +1339,11 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
     walkCompIndicesPrefix(
       seqIdx, sBlock, blockNum % seqIdx->bucketBlocks, cwIdxMemOffset,
       rankCount += symCountFromComposition(
-        &seqIdx->compositionTable, seqIdx->blockEncNumSyms, compIndex, bSym);,
+        &seqIdx->compositionTable, seqIdx->blockMapAlphabetSize, compIndex,
+        bSym);,
       varDataMemOffset);
     rankCount = adjustPosRankForBlock(
-      seqIdx, sBlock, pos, eSym, bSym, blockSize, rankCount, cwIdxMemOffset,
+      seqIdx, sBlock, pos, bSym, blockSize, rankCount, cwIdxMemOffset,
       varDataMemOffset, bitsPerCompositionIdx);
     if (bSym == seqIdx->blockEncFallback)
     {
@@ -1402,20 +1414,22 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos posA,
     walkCompIndicesPrefix(
       seqIdx, sBlock, inBlockPosA, cwIdxMemOffset,
       rankCounts.a += symCountFromComposition(
-        &seqIdx->compositionTable, seqIdx->blockEncNumSyms, compIndex, bSym),
+        &seqIdx->compositionTable, seqIdx->blockMapAlphabetSize, compIndex,
+        bSym),
       varDataMemOffset);
     rankCounts.b = rankCounts.a;
     rankCounts.a =
-      adjustPosRankForBlock(seqIdx, sBlock, posA, eSym, bSym, blockSize,
+      adjustPosRankForBlock(seqIdx, sBlock, posA, bSym, blockSize,
                             rankCounts.a, cwIdxMemOffset, varDataMemOffset,
                             bitsPerCompositionIdx);
     walkCompIndices(
       seqIdx, sBlock, inBlockPosB - inBlockPosA, cwIdxMemOffset,
       rankCounts.b += symCountFromComposition(
-        &seqIdx->compositionTable, seqIdx->blockEncNumSyms, compIndex, bSym),
+        &seqIdx->compositionTable, seqIdx->blockMapAlphabetSize, compIndex,
+        bSym),
       varDataMemOffset);
     rankCounts.b =
-      adjustPosRankForBlock(seqIdx, sBlock, posB, eSym, bSym, blockSize,
+      adjustPosRankForBlock(seqIdx, sBlock, posB, bSym, blockSize,
                             rankCounts.b, cwIdxMemOffset, varDataMemOffset,
                             bitsPerCompositionIdx);
     if (bSym == seqIdx->blockEncFallback)
@@ -1513,6 +1527,85 @@ blockCompSeqExpose(struct encIdxSeq *eSeqIdx, Seqpos pos, int flags,
   }
 }
 
+static inline void
+adjustRanksForBlock(struct blockCompositionSeq *seqIdx,
+                      struct superBlock *sBlock, Seqpos pos,
+                      unsigned blockSize, Seqpos rankCounts[],
+                      BitOffset cwIdxMemOffset, BitOffset varDataMemOffset)
+{
+  unsigned inBlockPos = pos % blockSize;
+  if (inBlockPos)
+  {
+    Symbol block[blockSize];
+    unsigned i;
+    unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
+                inBlockPos);
+    for (i = 0; i < inBlockPos; ++i)
+      ++(rankCounts[block[i]]);
+  }
+}
+
+static void
+blockCompSeqRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
+                      Seqpos pos, Seqpos *rankCounts, union EISHint *hint)
+{
+  struct blockCompositionSeq *seqIdx;
+  assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
+  seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
+  assert(range >= 0 && range < MRAEncGetNumRanges(EISGetAlphabet(eSeqIdx)));
+  switch (seqIdx->modes[range])
+  {
+  case BLOCK_COMPOSITION_INCLUDE:
+    {
+      BitOffset varDataMemOffset, cwIdxMemOffset;
+      struct superBlock *sBlock;
+/*       Symbol bSym = MRAEncMapSymbol(seqIdx->blockMapAlphabet, eSym); */
+      Seqpos blockNum, bucketNum;
+      unsigned blockSize = seqIdx->blockSize;
+      bucketNum = bucketNumFromPos(seqIdx, pos);
+#ifdef USE_SBLOCK_CACHE
+      sBlock = cacheFetchSuperBlock(seqIdx, bucketNum,
+                                    &hint->bcHint.sBlockCache);
+#else
+      sBlock = fetchSuperBlock(seqIdx, bucketNum, NULL);
+#endif
+      {
+        sBlockGetPartialSymSums(sBlock, seqIdx, rankCounts);
+        blockNum = blockNumFromPos(seqIdx, pos);
+        walkCompIndicesPrefix(
+          seqIdx, sBlock, blockNum % seqIdx->bucketBlocks, cwIdxMemOffset,
+          addSymCountsFromComposition(&seqIdx->compositionTable,
+                                      seqIdx->blockMapAlphabetSize, compIndex,
+                                      rankCounts);,
+          varDataMemOffset);
+        adjustRanksForBlock(seqIdx, sBlock, pos, blockSize, rankCounts,
+                            cwIdxMemOffset, varDataMemOffset);
+        {
+          Seqpos base = bucketBasePos(seqIdx, bucketNum);
+          rankCounts[seqIdx->blockEncFallback]
+            -= SRLAllSymbolsCountInSeqRegion(
+              seqIdx->rangeEncs, base, pos, &hint->bcHint.rangeHint);
+        }
+      }
+#ifndef USE_SBLOCK_CACHE
+      deleteSuperBlock(sBlock);
+#endif
+    }
+    break;
+  case REGIONS_LIST:
+    {
+      AlphabetRangeSize sym,
+        rangeEncNumSyms = MRAEncGetSize(seqIdx->rangeMapAlphabet);
+      for (sym = 0; sym < rangeEncNumSyms; ++sym)
+        rankCounts[sym] = SRLSymbolCountInSeqRegion(
+          seqIdx->rangeEncs, 0, pos,
+          MRAEncRevMapSymbol(seqIdx->rangeMapAlphabet, sym),
+          &hint->bcHint.rangeHint);
+    }
+    break;
+  }
+}
+
 static Symbol
 blockCompSeqGet(struct encIdxSeq *seq, Seqpos pos, union EISHint *hint)
 {
@@ -1534,7 +1627,7 @@ blockCompSeqGet(struct encIdxSeq *seq, Seqpos pos, union EISHint *hint)
 }
 
 static inline partialSymSum *
-newPartialSymSums(unsigned alphabetSize)
+newPartialSymSums(AlphabetRangeSize alphabetSize)
 {
   return ma_calloc(alphabetSize, sizeof (Seqpos));
 }
@@ -1555,7 +1648,7 @@ addBlock2PartialSymSums(partialSymSum *sums, const Symbol *block,
 }
 
 static inline void
-copyPartialSymSums(unsigned alphabetSize, partialSymSum *dest,
+copyPartialSymSums(AlphabetRangeSize alphabetSize, partialSymSum *dest,
                    const partialSymSum *src)
 {
   memcpy(dest, src, sizeof (dest[0]) * alphabetSize);
@@ -1737,13 +1830,13 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
                 const partialSymSum *buck)
 {
   size_t recordsExpected, cwBitElems;
-  unsigned blockAlphabetSize;
+  AlphabetRangeSize blockAlphabetSize;
   assert(seqIdx && aState && buck);
   /* seek2/write constant width indices */
   assert(seqIdx->externalData.cwDataPos + aState->cwDiskOffset
          < seqIdx->externalData.varDataPos
          + aState->varDiskOffset/bitElemBits * sizeof (BitElem));
-  blockAlphabetSize = seqIdx->blockEncNumSyms;
+  blockAlphabetSize = seqIdx->blockMapAlphabetSize;
   /* put bucket data for count up to the beginning of the current
    * block into the cw BitString */
   assert(sizeof (Seqpos) * CHAR_BIT >= seqIdx->bitsPerSeqpos);
@@ -1830,7 +1923,7 @@ blockEncIdxSeqHeaderLength(struct blockCompositionSeq *seqIdx,
     + 12                        /* offset of variable length data */
     + 12                        /* offset of range encodings */
     + 4 + 4                     /* bits used per seqpos */
-    + 4 + 4 + 4 * seqIdx->blockEncNumSyms /* bit counts for partial sums */
+    + 4 + 4 + 4 * seqIdx->blockMapAlphabetSize /* bit counts for partial sums */
     + 4 + 4                     /* block encoding fallback symbol */
     + 4 + 4                     /* range encoding fallback symbol */
     + 4 + 4                     /* num modes */
@@ -1920,10 +2013,10 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
   *(uint32_t *)(buf + offset + 4) = seqIdx->bitsPerSeqpos;
   offset += 8;
   *(uint32_t *)(buf + offset) = SSBT_HEADER_FIELD;
-  *(uint32_t *)(buf + offset + 4) = seqIdx->blockEncNumSyms;
-  for (i = 0; i < seqIdx->blockEncNumSyms; ++i)
+  *(uint32_t *)(buf + offset + 4) = seqIdx->blockMapAlphabetSize;
+  for (i = 0; i < seqIdx->blockMapAlphabetSize; ++i)
     *(uint32_t *)(buf + offset + 8 + 4*i) = seqIdx->partialSymSumBits[i];
-  offset += 8 + 4 * seqIdx->blockEncNumSyms;
+  offset += 8 + 4 * seqIdx->blockMapAlphabetSize;
   *(uint32_t *)(buf + offset) = BEFB_HEADER_FIELD;
   *(uint32_t *)(buf + offset + 4) = seqIdx->blockEncFallback;
   offset += 8;
@@ -2126,8 +2219,8 @@ loadBlockEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
               newSeqIdx->partialSymSumBits[i]
                 = *(uint32_t *)(buf + offset + 8 + 4*i);
 #ifdef DEBUG
-              fprintf(stderr, "partialSymSumBits[%u]=%u\n",
-                      (unsigned)i, newSeqIdx->partialSymSumBits[i]);
+              fprintf(stderr, "partialSymSumBits[%"PRIuSymbol"]=%u\n",
+                      (Symbol)i, newSeqIdx->partialSymSumBits[i]);
 #endif
               newSeqIdx->partialSymSumBitsSums[i] =
                 newSeqIdx->partialSymSumBitsSums[i - 1]
@@ -2189,7 +2282,7 @@ loadBlockEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
       loadBlockEncIdxSeqErrRet();
   }
   {
-    size_t range, numAlphabetRanges = newSeqIdx->numModes =
+    AlphabetRangeID range, numAlphabetRanges = newSeqIdx->numModes =
       MRAEncGetNumRanges(alphabet);
     totalAlphabetSize = MRAEncGetSize(alphabet);
     blockMapAlphabetSize = 0;
@@ -2219,7 +2312,7 @@ loadBlockEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
     newSeqIdx->rangeMapAlphabet = rangeMapAlphabet =
       MRAEncSecondaryMapping(alphabet, REGIONS_LIST, modesCopy,
                              newSeqIdx->rangeEncFallback);
-    newSeqIdx->blockEncNumSyms = blockMapAlphabetSize;
+    newSeqIdx->blockMapAlphabetSize = blockMapAlphabetSize;
     assert(MRAEncGetSize(blockMapAlphabet) == blockMapAlphabetSize);
   }
   if (!newSeqIdx->partialSymSumBits && blockMapAlphabetSize)
@@ -2425,7 +2518,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
 {
   Seqpos lastBucket = blockNumFromPos(seqIdx, EISLength(&seqIdx->baseClass)),
     start, end;
-  unsigned i, blockMapAlphabetSize = seqIdx->blockEncNumSyms;
+  AlphabetRangeSize i, blockMapAlphabetSize = seqIdx->blockMapAlphabetSize;
   int outCount = 0;
   assert(seqIdx && fp && hint);
   if (bucketBasePos(seqIdx, bucketNum) >= EISLength(&seqIdx->baseClass))
@@ -2623,6 +2716,7 @@ static const struct encIdxSeqClass blockCompositionSeqClass =
   .delete = deleteBlockEncIdxSeq,
   .rank = blockCompSeqRank,
   .posPairRank = blockCompSeqPosPairRank,
+  .rangeRank = blockCompSeqRangeRank,
   .select = blockCompSeqSelect,
   .get = blockCompSeqGet,
   .newHint = newBlockCompSeqHint,

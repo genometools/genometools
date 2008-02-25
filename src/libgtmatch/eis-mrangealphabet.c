@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "libgtcore/chardef.h"
+#include "libgtcore/dataalign.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/str.h"
 #include "libgtcore/symboldef.h"
@@ -31,20 +32,29 @@
 #include "libgtmatch/eis-mrangealphabetpriv.h"
 
 MRAEnc *
-newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
+newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,
+                                   const AlphabetRangeSize symbolsPerRange[],
                                    const uint8_t *mappings)
 {
   MRAEncUInt8 *newAlpha = NULL;
-  size_t i;
-  assert(numRanges > 0);
-  if ((newAlpha = ma_calloc(sizeof (MRAEncUInt8), 1))
-     && (newAlpha->baseClass.rangeEndIndices =
-         ma_calloc(sizeof (size_t), numRanges))
-     && (newAlpha->baseClass.symbolsPerRange =
-         ma_calloc(sizeof (size_t), numRanges)))
+  size_t rEIOffset = offsetAlign(
+    sizeof (MRAEncUInt8),
+    sizeof (newAlpha->baseClass.rangeEndIndices[0]));
+  size_t sPROffset = offsetAlign(
+    rEIOffset  +  sizeof (newAlpha->baseClass.rangeEndIndices[0]) * numRanges,
+    sizeof (newAlpha->baseClass.symbolsPerRange[0]));
+  AlphabetRangeID i;
+  if ((newAlpha = ma_calloc(
+         sPROffset
+         + sizeof (newAlpha->baseClass.symbolsPerRange[0]) * numRanges,
+         1)))
   {
+    newAlpha->baseClass.rangeEndIndices
+      = (AlphabetRangeSize *)((char *)newAlpha + rEIOffset);
+    newAlpha->baseClass.symbolsPerRange
+      = (AlphabetRangeSize *)((char *)newAlpha + sPROffset);
     newAlpha->baseClass.encType = sourceUInt8;
-    newAlpha->baseClass.numRanges = (size_t)numRanges;
+    newAlpha->baseClass.numRanges = numRanges;
     memset(newAlpha->mappings, UNDEF_UCHAR, UINT8_MAX+1);
     memset(newAlpha->revMappings, UNDEF_UCHAR, UINT8_MAX+1);
     newAlpha->baseClass.rangeEndIndices[0] =
@@ -79,7 +89,7 @@ newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
 MRAEnc *
 MRAEncGTAlphaNew(const Alphabet *alpha)
 {
-  int symsPerRange[2];
+  AlphabetRangeSize symsPerRange[2];
   uint8_t *mappings;
   MRAEnc *result;
   uint32_t numSyms = getmapsizeAlphabet(alpha);
@@ -108,13 +118,15 @@ MRAEncCopy(const MRAEnc *alpha)
     {
       MRAEncUInt8 *newAlpha = NULL;
       const MRAEncUInt8 *srcAlpha = constMRAEnc2MRAEncUInt8(alpha);
-      size_t numRanges = alpha->numRanges;
+      int numRanges = alpha->numRanges;
       assert(numRanges > 0);
       if ((newAlpha = ma_calloc(sizeof (MRAEncUInt8), 1))
           && (newAlpha->baseClass.rangeEndIndices =
-              ma_malloc(sizeof (size_t) * numRanges))
+              ma_malloc(sizeof (newAlpha->baseClass.rangeEndIndices[0])
+                        * numRanges))
           && (newAlpha->baseClass.symbolsPerRange =
-              ma_malloc(sizeof (size_t) * numRanges)))
+              ma_malloc(sizeof (newAlpha->baseClass.rangeEndIndices[0])
+                        * numRanges)))
       {
         newAlpha->baseClass.encType = sourceUInt8;
         newAlpha->baseClass.numRanges = srcAlpha->baseClass.numRanges;
@@ -148,16 +160,16 @@ MRAEncCopy(const MRAEnc *alpha)
   }
 }
 
-size_t
+AlphabetRangeID
 MRAEncGetNumRanges(const MRAEnc *mralpha)
 {
   return mralpha->numRanges;
 }
 
-extern size_t
+extern AlphabetRangeSize
 MRAEncGetSize(const MRAEnc *mralpha)
 {
-  size_t range, numRanges = mralpha->numRanges, sumRanges = 0;
+  AlphabetRangeID range, numRanges = mralpha->numRanges, sumRanges = 0;
   for (range = 0; range < numRanges; ++range)
   {
     sumRanges += mralpha->symbolsPerRange[range];
@@ -176,12 +188,12 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
     {
       const MRAEncUInt8 *ui8alpha;
       uint8_t *mappings, destSym;
-      int *newRanges, sym;
-      size_t range, numRanges = MRAEncGetNumRanges(srcAlpha);
+      AlphabetRangeSize *newRanges, sym;
+      AlphabetRangeID range, numRanges = MRAEncGetNumRanges(srcAlpha);
       ui8alpha = constMRAEnc2MRAEncUInt8(srcAlpha);
       mappings = ma_malloc(sizeof (uint8_t) * (UINT8_MAX + 1));
       memset(mappings, UNDEF_UCHAR, UINT8_MAX+1);
-      newRanges = ma_malloc(sizeof (int) * numRanges);
+      newRanges = ma_malloc(sizeof (newRanges[0]) * numRanges);
       sym = 0;
       destSym = 0;
       for (range = 0; range < numRanges; ++range)
@@ -213,7 +225,7 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
 }
 
 void
-MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, int range)
+MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range)
 {
   Symbol insertPos, numSyms;
   assert(mralpha && range < mralpha->numRanges);
@@ -235,7 +247,6 @@ MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, int range)
           ui8alpha->revMappings[i] = origSym;
           ui8alpha->mappings[origSym] += 1;
         }
-
       }
       /* do actual insertion */
       ui8alpha->mappings[sym] = insertPos;
@@ -243,7 +254,7 @@ MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, int range)
       /* adjust ranges */
       mralpha->symbolsPerRange[range] += 1;
       {
-        int i;
+        AlphabetRangeID i;
         for (i = range; i < mralpha->numRanges; ++i)
         {
           mralpha->rangeEndIndices[i] += 1;
@@ -344,10 +355,10 @@ int
 MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
                                int selection, const int *rangeSel)
 {
-  size_t range = 0;
+  AlphabetRangeID range = 0;
   assert(mralpha && rangeSel);
   while (range < mralpha->numRanges
-        && sym >= mralpha->rangeEndIndices[range])
+         && sym >= mralpha->rangeEndIndices[range])
     ++range;
   if (range < mralpha->numRanges)
   {
@@ -367,8 +378,6 @@ void
 MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha)
 {
   assert(mralpha);
-  ma_free(mralpha->symbolsPerRange);
-  ma_free(mralpha->rangeEndIndices);
   switch (mralpha->encType)
   {
     MRAEncUInt8 *ui8alpha;

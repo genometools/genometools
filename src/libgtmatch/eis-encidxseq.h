@@ -240,6 +240,23 @@ EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, Seqpos posA, Seqpos posB,
                              union EISHint *hint);
 
 /**
+ * \brief Return number of occurrences of all symbols in selected
+ * range in index up to but not including given position.
+ *
+ * @param seq sequence index object to query
+ * @param range compute rank counts for all symbols in this range
+ * @param pos occurences are counted up to (but not including) this position
+ * @param rankCounts
+ * @param hint provides cache and direction information for queries
+ * based on previous queries
+ * @return members a and b of returned struct contain Occ results for
+ * posA and posB respectively
+ */
+static inline void
+EISRangeRank(EISeq *seq, AlphabetRangeID range, Seqpos pos, Seqpos *rankCounts,
+             union EISHint *hint);
+
+/**
  * Presents the bits previously stored by a bitInsertFunc callback.
  * @param seq
  * @param pos sequence position for which to retrieve corresponding

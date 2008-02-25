@@ -72,7 +72,7 @@ bsGetUniform@uTypeTag@Array@VecOpName@(constBitString str, BitOffset offset,
     /* now we have enough bits in accum */
     while (bitsInAccum >= numBits)
     {
-      val[j++] @AssignOp@ ((accum >> (bitsInAccum - numBits)) & valMask );
+      val[j++] @AssignOp@ ((accum >> (bitsInAccum - numBits)) & valMask);
       bitsInAccum -= numBits;
     }
   }

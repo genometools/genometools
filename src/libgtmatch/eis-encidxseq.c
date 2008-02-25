@@ -13,6 +13,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#include <stdlib.h>
 #include <string.h>
 
 #include "libgtmatch/seqpos-def.h"
@@ -39,9 +40,9 @@ const char *EISIntegrityCheckResultStrings[] =
   "the rank operation delivered a wrong count"
 };
 
-#define verifyIntegrityErrRet(retval)                                   \
-  do {                                                                  \
-    switch (retval) {                                                   \
+#define verifyIntegrityErrRet(retcode)                                  \
+  {                                                                     \
+    switch (retcode) {                                                  \
     case EIS_INTEGRITY_CHECK_INVALID_SYMBOL:                            \
       fprintf(stderr, "Comparision failed at position "FormatSeqpos     \
               ", reference symbol: %u, symbol read: %u\n",              \
@@ -59,11 +60,9 @@ const char *EISIntegrityCheckResultStrings[] =
       break;                                                            \
     }                                                                   \
     EISPrintDiagsForPos(seqIdx, pos, stderr, hint);                     \
-    deleteEISHint(seqIdx, hint);                                        \
-    freesuffixarray(&suffixArray);                                      \
-    freeverboseinfo(&verbosity);                                        \
-    return retval;                                                      \
-  } while (0)
+    retval = retcode;                                                   \
+    break;                                                              \
+  }
 
 /**
  * @param tickPrint if not zero, print a . every tickPrint symbols to
@@ -75,7 +74,6 @@ extern enum EISIntegrityCheckResults
 EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
                    unsigned long tickPrint, FILE *fp, int chkFlags, Error *err)
 {
-  Seqpos rankTable[UCHAR_MAX+1];
   FILE *bwtFP;
   Seqpos pos = 0;
   Suffixarray suffixArray;
@@ -85,7 +83,9 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
   Seqpos seqLastPos, rankQueryResult, rankExpect;
   Verboseinfo *verbosity;
   const MRAEnc *alphabet;
-  int symRead;
+  AlphabetRangeSize alphabetSize;
+  AlphabetRangeID numRanges;
+  enum EISIntegrityCheckResults retval = EIS_INTEGRITY_CHECK_NO_ERROR;
   verbosity = newverboseinfo(true);
   /* two part process: enumerate all positions of original sequence
    * and verify that the query functions return correct values */
@@ -97,66 +97,91 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
     freeverboseinfo(&verbosity);
     return EIS_INTEGRITY_CHECK_SA_LOAD_ERROR;
   }
-  memset(rankTable, 0, sizeof (rankTable));
   bwtFP = suffixArray.bwttabstream.fp;
   hint = newEISHint(seqIdx);
   alphabet = EISGetAlphabet(seqIdx);
-  if (skip > 0)
+  alphabetSize = MRAEncGetSize(alphabet);
+  numRanges = MRAEncGetNumRanges(alphabet);
+  do
   {
-    Seqpos len = EISLength(seqIdx);
-    unsigned sym;
-    if (skip >= len)
+    Seqpos rankTable[alphabetSize], rangeRanks[alphabetSize];
+    int symRead;
+    memset(rankTable, 0, sizeof (rankTable));
+    if (skip > 0)
     {
-      showverbose(verbosity, "Invalid skip request: %lld,"
-                  " too large for sequence length: "FormatSeqpos,
-                  (long long)skip, len);
-      freeverboseinfo(&verbosity);
-      return -1;
+      Seqpos len = EISLength(seqIdx);
+      unsigned sym;
+      if (skip >= len)
+      {
+        showverbose(verbosity, "Invalid skip request: %lld,"
+                    " too large for sequence length: "FormatSeqpos,
+                    (long long)skip, len);
+        freeverboseinfo(&verbosity);
+        return -1;
+      }
+      fseeko(bwtFP, skip, SEEK_SET);
+      for (sym = 0; sym <= UCHAR_MAX; ++sym)
+        if (MRAEncSymbolHasValidMapping(alphabet, sym))
+          rankTable[sym] = EISRank(seqIdx, sym, skip, hint);
+      pos = skip;
     }
-    fseeko(bwtFP, skip, SEEK_SET);
-    for (sym = 0; sym <= UCHAR_MAX; ++sym)
-      if (MRAEncSymbolHasValidMapping(alphabet, sym))
-        rankTable[sym] = EISRank(seqIdx, sym, skip, hint);
-    pos = skip;
-  }
-  while ((symRead = getc(bwtFP)) != EOF)
-  {
-    symOrig = symRead;
-    symEnc = EISGetSym(seqIdx, pos, hint);
-    if (!MRAEncSymbolHasValidMapping(alphabet, symEnc))
-      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_INVALID_SYMBOL);
-    if (!MRAEncSymbolHasValidMapping(alphabet, symOrig))
-      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
-    if (symEnc != symOrig)
-      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_INVALID_SYMBOL);
-    ++rankTable[symOrig];
-    if (chkFlags & EIS_VERIFY_EXT_RANK)
+    while (retval == EIS_INTEGRITY_CHECK_NO_ERROR
+           && (symRead = getc(bwtFP)) != EOF)
     {
-      for (symEnc = 0; symEnc <= UCHAR_MAX; ++symEnc)
-        if (MRAEncSymbolHasValidMapping(alphabet, symEnc)
-            && ((rankExpect = rankTable[symEnc])
-                != (rankQueryResult
-                    = EISRank(seqIdx, symEnc, pos + 1, hint))))
+      symOrig = MRAEncMapSymbol(alphabet, symRead);
+      symEnc = EISGetTransformedSym(seqIdx, pos, hint);
+      if (symEnc >= alphabetSize)
+        verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_INVALID_SYMBOL);
+      if (symOrig >= alphabetSize)
+        verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
+      if (symEnc != symOrig)
+        verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_INVALID_SYMBOL);
+      ++rankTable[symOrig];
+      if (chkFlags & EIS_VERIFY_EXT_RANK)
+      {
+        unsigned sym;
+        for (sym = 0; sym < alphabetSize; ++sym)
+          if ((rankExpect = rankTable[sym])
+              != (rankQueryResult
+                  = EISSymTransformedRank(seqIdx, sym, pos + 1, hint)))
+            verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+      }
+      else
+      {
+        if ((rankExpect = rankTable[symEnc])
+            != (rankQueryResult = EISSymTransformedRank(seqIdx, symEnc,
+                                                        pos + 1, hint)))
           verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+      }
+      /* do rank for full range on some occasions */
+      if (!(random() % 128))
+      {
+        unsigned i;
+        AlphabetRangeSize numSymsInRange;
+        AlphabetRangeID range = random() % numRanges;
+        Symbol rangeBase = MRAEncGetRangeBase(alphabet, range);
+        numSymsInRange = MRAEncGetRangeSize(alphabet, range);
+        EISRangeRank(seqIdx, range, pos + 1, rangeRanks, hint);
+        for (i = 0; i < numSymsInRange; ++i)
+        {
+          if ((rankQueryResult = rangeRanks[i])
+              != (rankExpect = rankTable[rangeBase + i]))
+            verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+        }
+      }
+      ++pos;
+      if (tickPrint && !(pos % tickPrint))
+        putc('.', fp);
     }
-    else
-    {
-      if ((rankExpect = rankTable[symEnc])
-          != (rankQueryResult = EISRank(seqIdx, symEnc, pos + 1, hint)))
-        verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
-    }
-    ++pos;
-    if (tickPrint && !(pos % tickPrint))
-      putc('.', fp);
-  }
-  if (tickPrint)
-    putc('\n', fp);
-  if (ferror(bwtFP))
-    verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
+    if (tickPrint)
+      putc('\n', fp);
+    if (ferror(bwtFP))
+      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
+  } while (0);
   deleteEISHint(seqIdx, hint);
   freesuffixarray(&suffixArray);
   freeverboseinfo(&verbosity);
-  return EIS_INTEGRITY_CHECK_NO_ERROR;
+  return retval;
 }
 
 extern unsigned

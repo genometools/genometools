@@ -29,7 +29,15 @@
 #define bsGetSeqpos bsGetUInt32
 /** store Seqpos in BitString */
 #define bsStoreSeqpos bsStoreUInt32
-/** store array of Seqpos values in BitString  */
+/** read back array of Seqpos values in BitString */
+#define bsGetUniformSeqposArray bsGetUniformUInt32Array
+/** read back array of Seqpos values in BitString */
+#define bsGetUniformSeqposArrayAdd bsGetUniformUInt32ArrayAdd
+/** read back array of Seqpos values in BitString */
+#define bsGetNonUniformSeqposArray bsGetNonUniformUInt32Array
+/** read back array of Seqpos values in BitString */
+#define bsGetNonUniformSeqposArrayAdd bsGetNonUniformUInt32ArrayAdd
+/** store array of Seqpos values in BitString */
 #define bsStoreUniformSeqposArray bsStoreUniformUInt32Array
 /** how many bits are required to store given Seqpos value */
 #define requiredSeqposBits requiredUInt32Bits
@@ -38,6 +46,14 @@
 #define bsGetSeqpos bsGetUInt64
 /** store Seqpos in BitString */
 #define bsStoreSeqpos bsStoreUInt64
+/** read back array of Seqpos values in BitString */
+#define bsGetUniformSeqposArray bsGetUniformUInt64Array
+/** read back array of Seqpos values in BitString */
+#define bsGetUniformSeqposArrayAdd bsGetUniformUInt64ArrayAdd
+/** read back array of Seqpos values in BitString */
+#define bsGetNonUniformSeqposArray bsGetNonUniformUInt64Array
+/** read back array of Seqpos values in BitString */
+#define bsGetNonUniformSeqposArrayAdd bsGetNonUniformUInt64ArrayAdd
 /** store array of Seqpos values in BitString  */
 #define bsStoreUniformSeqposArray bsStoreUniformUInt64Array
 /** how many bits are required to store given Seqpos value */

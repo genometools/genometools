@@ -25,8 +25,9 @@
 struct multiRangeAlphabetEncoding
 {
   enum sourceEncType encType;
-  size_t numRanges;
-  size_t *rangeEndIndices, /*< maps to the last position + 1 for each range */
+  AlphabetRangeID numRanges;
+  AlphabetRangeSize *rangeEndIndices, /*< maps to the last position + 1
+                                       * for each range */
     *symbolsPerRange;   /*< gives number of symbols in each range */
 };
 
