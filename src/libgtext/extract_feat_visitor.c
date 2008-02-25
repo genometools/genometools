@@ -86,6 +86,20 @@ static int extract_join_feature(GenomeNode *gn, ExtractFeatVisitor *v,
   return had_err;
 }
 
+static void construct_description(Str *description, GenomeFeatureType type,
+                                  unsigned long counter, bool join,
+                                  bool translate)
+{
+  assert(!str_length(description));
+  str_append_cstr(description, genome_feature_type_get_cstr(type));
+  str_append_char(description, '_');
+  str_append_ulong(description, counter);
+  if (join)
+    str_append_cstr(description, " (joined)");
+  if (translate)
+    str_append_cstr(description, " (translated)");
+}
+
 static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
 {
   GenomeFeatureType gf_type;
@@ -102,14 +116,9 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
 
   /* construct description if necessary */
   if (!str_length(v->description)) {
-    str_append_cstr(v->description, genome_feature_type_get_cstr(v->type));
-    str_append_char(v->description, '_');
     v->fastaseq_counter++;
-    str_append_ulong(v->description, v->fastaseq_counter);
-    if (v->join)
-      str_append_cstr(v->description, " (joined)");
-    if (v->translate)
-      str_append_cstr(v->description, " (translated)");
+    construct_description(v->description, v->type, v->fastaseq_counter, v->join,
+                          v->translate);
   }
 
   if (v->join) {
