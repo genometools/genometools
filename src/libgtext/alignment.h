@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include "libgtcore/error.h"
+#include "libgtcore/range.h"
 
 /* the Alignment class (an Alignment object has to be contructed backwards) */
 typedef struct Alignment Alignment;
@@ -28,7 +29,10 @@ Alignment*    alignment_new(void);
 Alignment*    alignment_new_with_seqs(const char *u, unsigned long ulen,
                                       const char *v, unsigned long vlen);
 void          alignment_set_seqs(Alignment*, const char *u, unsigned long ulen,
-                                 const char *v, unsigned long vlen);
+                                 Range urange, const char *v,
+                                 unsigned long vlen, Range vrange);
+Range         alignment_get_urange(Alignment*);
+Range         alignment_get_vrange(Alignment*);
 void          alignment_add_replacement(Alignment*);
 void          alignment_add_deletion(Alignment*);
 void          alignment_add_insertion(Alignment*);

@@ -31,6 +31,8 @@ struct Alignment {
              *v;
   unsigned long ulen,
                 vlen;
+  Range urange,
+        vrange;
   Array *eops;
 };
 
@@ -59,20 +61,41 @@ Alignment* alignment_new_with_seqs(const char *u, unsigned long ulen,
                                    const char *v, unsigned long vlen)
 {
   Alignment *a;
+  Range urange, vrange;
   assert(u && v);
+  urange.start = vrange.start = 0;
+  urange.end = ulen-1;
+  vrange.end = vlen-1;
   a = alignment_new();
-  alignment_set_seqs(a, u, ulen, v, vlen);
+  alignment_set_seqs(a, u, ulen, urange, v, vlen, vrange);
   return a;
 }
 
 void alignment_set_seqs(Alignment *a, const char *u, unsigned long ulen,
-                        const char *v, unsigned long vlen)
+                        Range urange, const char *v, unsigned long vlen,
+                        Range vrange)
 {
   assert(a && u && v);
   a->u = u;
   a->v = v;
   a->ulen = ulen;
   a->vlen = vlen;
+  a->urange.start = urange.start;
+  a->urange.end   = urange.end;
+  a->vrange.start = vrange.start;
+  a->vrange.end   = vrange.end;
+}
+
+Range alignment_get_urange(Alignment *a)
+{
+  assert(a);
+  return a->urange;
+}
+
+Range alignment_get_vrange(Alignment *a)
+{
+  assert(a);
+  return a->vrange;
 }
 
 static void alignment_add_eop(Alignment *a, Eoptype type)
@@ -160,7 +183,7 @@ unsigned long alignment_eval(const Alignment *a)
     switch (meop.type) {
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
-          if (a->u[uctr] != a->v[vctr])
+          if (a->u[a->urange.start + uctr] != a->v[a->vrange.start + vctr])
             sumcost++;
           uctr++;
           vctr++;
@@ -197,7 +220,7 @@ void alignment_show(const Alignment *a, FILE *fp)
       case Replacement:
       case Deletion:
         for (j = 0; j < meop.steps; j++)
-          xfputc(a->u[uctr++], fp);
+          xfputc(a->u[a->urange.start + uctr++], fp);
         break;
       case Insertion:
         for (j = 0; j < meop.steps; j++)
@@ -213,7 +236,7 @@ void alignment_show(const Alignment *a, FILE *fp)
     switch (meop.type) {
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
-          if (a->u[uctr++] == a->v[vctr++])
+          if (a->u[a->urange.start + uctr++] == a->v[a->vrange.start + vctr++])
             xfputc(MATCHSYMBOL, fp);
           else
             xfputc(MISMATCHSYMBOL, fp);
@@ -242,7 +265,7 @@ void alignment_show(const Alignment *a, FILE *fp)
       case Replacement:
       case Insertion:
         for (j = 0; j < meop.steps; j++)
-          xfputc(a->v[vctr++], fp);
+          xfputc(a->v[a->vrange.start + vctr++], fp);
         break;
       case Deletion:
         for (j = 0; j < meop.steps; j++)
