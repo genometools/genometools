@@ -77,8 +77,6 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
   <li><a href="#GenomeStream">GenomeStream</a>
 
-  <li><a href="#GenomeVisitor">GenomeVisitor</a>
-
   <li><a href="#Range">Range</a>
 
   <li><a href="#RegionMapping">RegionMapping</a>
@@ -154,6 +152,11 @@ Returns an array containing the ranges from array <code>range_array</code> in so
 <code>ranges_are_sorted(range_array)</code>
 <p>
 Returns true if the ranges in array <code>range_array</code> are sorted, false otherwise.
+</p>
+<hr>
+<code>translate_dna(dna)</code>
+<p>
+Returns translated <code>dna</code>.
 </p>
 <hr>
 <code>reload()</code>
@@ -443,8 +446,6 @@ Returns the next genome node for <code>genome_node_iterator</code> or nil.
 Returns the next genome node for <code>genome_stream</code> or nil.
 </p>
 <hr>
-<a name="GenomeVisitor"></a>
-<h2>Class GenomeVisitor</h2>
 <a name="Range"></a>
 <h2>Class Range</h2>
 <code>range_new(startpos, endpos)</code>

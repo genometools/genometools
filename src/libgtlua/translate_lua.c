@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,21 +15,30 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
-#include "libgtlua/alpha_lua.h"
-#include "libgtlua/bittab_lua.h"
-#include "libgtlua/gtcore_lua.h"
-#include "libgtlua/range_lua.h"
-#include "libgtlua/score_matrix_lua.h"
+#include <string.h>
+#include "lauxlib.h"
+#include "libgtcore/translate.h"
 #include "libgtlua/translate_lua.h"
 
-int luaopen_gtcore(lua_State *L)
+static int translate_dna_lua(lua_State *L)
+{
+  Str *protein;
+  const char *dna = luaL_checkstring(L, 1);
+  protein = str_new();
+  translate_dna(protein, dna, strlen(dna), 0);
+  lua_pushstring(L, str_get(protein));
+  str_delete(protein);
+  return 1;
+}
+
+static const struct luaL_Reg translate_lib_f [] = {
+  { "translate_dna", translate_dna_lua },
+  { NULL, NULL }
+};
+
+int luaopen_translate(lua_State *L)
 {
   assert(L);
-  luaopen_alpha(L);
-  luaopen_bittab(L);
-  luaopen_range(L);
-  luaopen_score_matrix(L);
-  luaopen_translate(L);
+  luaL_register(L, "gt", translate_lib_f);
   return 1;
 }
