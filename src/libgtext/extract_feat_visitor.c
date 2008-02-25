@@ -52,7 +52,6 @@ static int extract_join_feature(GenomeNode *gn, GenomeFeatureType type,
                                 RegionMapping *region_mapping, Str *sequence,
                                 bool *reverse_strand, Error *err)
 {
-  GenomeFeatureType gf_type;
   const char *raw_sequence;
   unsigned long raw_sequence_length;
   GenomeFeature *gf;
@@ -62,9 +61,8 @@ static int extract_join_feature(GenomeNode *gn, GenomeFeatureType type,
   error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
-  gf_type = genome_feature_get_type(gf);
 
-  if (gf_type == type) {
+  if (genome_feature_get_type(gf) == type) {
     had_err = region_mapping_get_raw_sequence(region_mapping, &raw_sequence,
                                               genome_node_get_seqid(gn), err);
     if (!had_err) {
@@ -102,7 +100,6 @@ static void construct_description(Str *description, GenomeFeatureType type,
 
 static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
 {
-  GenomeFeatureType gf_type;
   GenomeFeature *gf;
   Range range;
   const char *raw_sequence;
@@ -112,7 +109,6 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
   error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
-  gf_type = genome_feature_get_type(gf);
 
   /* construct description if necessary */
   if (!str_length(v->description)) {
@@ -156,7 +152,7 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
       str_reset(v->description);
     }
   }
-  else if (gf_type == v->type) {
+  else if (genome_feature_get_type(gf) == v->type) {
     assert(!had_err);
     /* otherwise we only have to look this feature */
     range = genome_node_get_range(gn);
