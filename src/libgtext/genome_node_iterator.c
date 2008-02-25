@@ -49,7 +49,7 @@ static void add_children_to_stack(Array *node_stack, GenomeNode *gn)
 {
   GenomeNode *child;
   Dlistelem *dlistelem;
-  assert(node_stack && gn);
+  assert(node_stack && gn && gn->children);
   /* add the children backwards to traverse in order */
   for (dlistelem = dlist_last(gn->children); dlistelem != NULL;
        dlistelem = dlistelem_previous(dlistelem)) {
@@ -63,7 +63,8 @@ GenomeNodeIterator* genome_node_iterator_new_direct(GenomeNode *gn)
   GenomeNodeIterator *gni;
   assert(gn);
   gni = genome_node_iterator_new_base(gn);
-  add_children_to_stack(gni->node_stack, gn);
+  if (gn->children)
+    add_children_to_stack(gni->node_stack, gn);
   gni->direct = true;
   return gni;
 }
