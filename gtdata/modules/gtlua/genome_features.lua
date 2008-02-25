@@ -88,3 +88,15 @@ function features_mRNAs2genes(in_features)
   end
   return out_features
 end
+
+-- Return an array with the sequences of the given features.
+function features_extract_sequences(features, type, join, region_mapping)
+  local sequences = {}
+  for _, feature in ipairs(features) do
+    local sequence = feature:extract_sequence(type, join, region_mapping)
+    if type then
+      sequences[#sequences + 1] = sequence
+    end
+  end
+  return sequences
+end
