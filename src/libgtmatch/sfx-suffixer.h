@@ -38,6 +38,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             const Definedunsignedint *maxdepth,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
+                            bool dofast,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
                             Error *err);

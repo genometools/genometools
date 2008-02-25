@@ -471,6 +471,7 @@ static int constructsarrandrunmmsearch(
                        &maxdepth,
                        numofparts,
                        NULL,
+                       true, /* dofast */
                        mtime,
                        NULL,
                        err);

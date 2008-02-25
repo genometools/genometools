@@ -214,6 +214,7 @@ static int suffixeratorwithoutput(
                  const Definedunsignedint *maxdepth,
                  unsigned int numofparts,
                  UNUSED const Str *indexname,
+                 bool dofast,
                  Measuretime *mtime,
                  Verboseinfo *verboseinfo,
                  Error *err)
@@ -233,6 +234,7 @@ static int suffixeratorwithoutput(
                        maxdepth,
                        numofparts,
                        outfileinfo->outlcpinfo,
+                       dofast,
                        mtime,
                        verboseinfo,
                        err);
@@ -504,6 +506,7 @@ static int runsuffixerator(bool doesa,
                            &so->maxdepth,
                            so->numofparts,
                            so->outlcptab ? so->str_indexname : NULL,
+                           so->dofast,
                            mtime,
                            verboseinfo,
                            err) != 0)

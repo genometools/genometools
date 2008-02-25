@@ -361,6 +361,22 @@ void freeSfxiterator(Sfxiterator **sfi)
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
+static bool dicidespecialcodesfast(bool dofast,
+                                   const Encodedsequence *encseq,
+                                   Seqpos realspecialranges)
+{
+  if (!dofast && hasfastspecialrangeenumerator(encseq))
+  {
+    Seqpos totallength = getencseqtotallength(encseq);
+
+    if (realspecialranges * sizeof (Codeatposition) > totallength/6)
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Seqpos realspecialranges,
                             const Encodedsequence *encseq,
@@ -371,6 +387,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             const Definedunsignedint *maxdepth,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
+                            bool dofast,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
                             Error *err)
@@ -388,7 +405,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   } else
   {
     ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
-    sfi->specialcodesfast = false;
+    sfi->specialcodesfast = dicidespecialcodesfast(dofast,
+                                                   encseq,
+                                                   realspecialranges);
     if (sfi->specialcodesfast)
     {
       ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,

@@ -173,6 +173,7 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                                     &so->maxdepth,
                                     so->numofparts,
                                     NULL,
+                                    so->dofast,
                                     iface->mtime,
                                     verbosity, err)))
     newSfxInterfaceWithReadersErrRet();

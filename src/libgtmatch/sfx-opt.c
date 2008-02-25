@@ -48,6 +48,7 @@ static OPrval parse_options(int *parsed_args,
          *optionindexname,
          *optiondb,
          *optiondir,
+         *optionfast,
          *optiondes;
   OPrval oprval;
   Str *dirarg = str_new();
@@ -74,6 +75,7 @@ static OPrval parse_options(int *parsed_args,
   optionprotein = option_new_bool("protein","input is Protein sequence",
                                   &so->isprotein,false);
   option_parser_add_option(op, optionprotein);
+
   optionplain = option_new_bool("plain","process as plain text",
                                 &so->isplain,false);
   option_parser_add_option(op, optionplain);
@@ -111,6 +113,11 @@ static OPrval parse_options(int *parsed_args,
     option_is_development_option(optionmaxdepth);
     option_argument_is_optional(optionmaxdepth);
     option_parser_add_option(op, optionmaxdepth);
+
+    optionfast = option_new_bool("fast","be faster but use more space",
+                                 &so->dofast,false);
+    option_is_development_option(optionfast);
+    option_parser_add_option(op, optionfast);
   } else
   {
     optionmaxdepth = NULL;
@@ -299,6 +306,7 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     showdefinitelyverbose("prefixlength=%u",so->prefixlength);
   }
+  showdefinitelyverbose("fast=%s",so->dofast ? "true" : "false");
   showdefinitelyverbose("parts=%u",so->numofparts);
   for (i=0; i<strarray_size(so->filenametab); i++)
   {

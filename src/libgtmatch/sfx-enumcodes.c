@@ -165,16 +165,16 @@ void freeEnumcodeatposition(Enumcodeatposition **ecp)
 }
 
 Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
-                                unsigned int maxprefixindex,
+                                unsigned int prefixindex,
                                 Seqpos pos)
 {
   Codetype code;
   unsigned int idx;
   Uchar cc;
 
-  assert(maxprefixindex > 0 && maxprefixindex < ecp->prefixlength);
-  code = ecp->filltable[maxprefixindex];
-  for (idx=0; idx<maxprefixindex; idx++)
+  assert(prefixindex > 0 && prefixindex < ecp->prefixlength);
+  code = ecp->filltable[prefixindex];
+  for (idx=0; idx<prefixindex; idx++)
   {
     assert((Seqpos) (pos + idx) < ecp->totallength);
     cc = getencodedcharnospecial(ecp->encseq,pos + idx, ecp->readmode);
@@ -186,7 +186,7 @@ Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
 
 bool computefilledqgramcodestopatmax(Codetype *code,
                                      const Enumcodeatposition *ecp,
-                                     unsigned int maxprefixindex,
+                                     unsigned int prefixindex,
                                      Seqpos pos,
                                      Codetype stopcode)
 {
@@ -194,13 +194,13 @@ bool computefilledqgramcodestopatmax(Codetype *code,
   unsigned int idx;
   Uchar cc;
 
-  assert(maxprefixindex > 0 && maxprefixindex < ecp->prefixlength);
-  tmpcode = ecp->filltable[maxprefixindex];
+  assert(prefixindex > 0 && prefixindex < ecp->prefixlength);
+  tmpcode = ecp->filltable[prefixindex];
   if (tmpcode > stopcode)
   {
     return false;
   }
-  for (idx=0; idx<maxprefixindex; idx++)
+  for (idx=0; idx<prefixindex; idx++)
   {
     assert((Seqpos) (pos + idx) < ecp->totallength);
     cc = getencodedcharnospecial(ecp->encseq,pos + idx, ecp->readmode);

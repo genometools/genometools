@@ -1513,7 +1513,16 @@ bool hasspecialranges(const Encodedsequence *encseq)
   return false;
 }
 
- struct Specialrangeiterator
+bool hasfastspecialrangeenumerator(const Encodedsequence *encseq)
+{
+  if (encseq->sat == Viadirectaccess || encseq->sat == Viadirectaccess)
+  {
+    return false;
+  }
+  return true;
+}
+
+struct Specialrangeiterator
 {
   bool direct, moveforward, exhausted;
   const Encodedsequence *encseq;

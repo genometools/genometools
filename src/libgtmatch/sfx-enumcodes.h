@@ -30,12 +30,6 @@ typedef struct
   Seqpos position;
 } Specialcontext;
 
-typedef struct
-{
-  bool defined;
-  Codetype valuecodetype;
-} DefinedCodetype;
-
 Enumcodeatposition *newEnumcodeatposition(const Encodedsequence *encseq,
                                           Readmode readmode,
                                           unsigned int prefixlength,
@@ -47,12 +41,12 @@ bool nextEnumcodeatposition(Specialcontext *specialcontext,
 void freeEnumcodeatposition(Enumcodeatposition **ecp);
 
 Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
-                                unsigned int maxprefixindex,
+                                unsigned int prefixindex,
                                 Seqpos pos);
 
 bool computefilledqgramcodestopatmax(Codetype *code,
                                      const Enumcodeatposition *ecp,
-                                     unsigned int maxprefixindex,
+                                     unsigned int prefixindex,
                                      Seqpos pos,
                                      Codetype stopcode);
 #endif
