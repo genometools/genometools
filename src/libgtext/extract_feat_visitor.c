@@ -49,8 +49,9 @@ static void extract_feat_visitor_free(GenomeVisitor *gv)
   region_mapping_delete(extract_feat_visitor->region_mapping);
 }
 
-static int extract_join_feature(GenomeNode *gn, ExtractFeatVisitor *v,
-                                Error *err)
+static int extract_join_feature(GenomeNode *gn, GenomeFeatureType type,
+                                RegionMapping *region_mapping, Str *sequence,
+                                bool *reverse_strand, Error *err)
 {
   GenomeFeatureType gf_type;
   const char *raw_sequence;
@@ -64,23 +65,23 @@ static int extract_join_feature(GenomeNode *gn, ExtractFeatVisitor *v,
   assert(gf);
   gf_type = genome_feature_get_type(gf);
 
-  if (gf_type == v->type) {
-    had_err = region_mapping_get_raw_sequence(v->region_mapping, &raw_sequence,
+  if (gf_type == type) {
+    had_err = region_mapping_get_raw_sequence(region_mapping, &raw_sequence,
                                               genome_node_get_seqid(gn), err);
     if (!had_err) {
       range = genome_node_get_range(gn);
       assert(range.start); /* 1-based coordinates */
       raw_sequence += range.start - 1;
-      had_err = region_mapping_get_raw_sequence_length(v->region_mapping,
+      had_err = region_mapping_get_raw_sequence_length(region_mapping,
                                                        &raw_sequence_length,
                                                       genome_node_get_seqid(gn),
                                                        err);
     }
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
-      str_append_cstr_nt(v->sequence, raw_sequence, range_length(range));
+      str_append_cstr_nt(sequence, raw_sequence, range_length(range));
       if (genome_feature_get_strand(gf) == STRAND_REVERSE)
-        v->reverse_strand = true;
+        *reverse_strand = true;
     }
   }
   return had_err;
@@ -129,8 +130,10 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
     v->reverse_strand = false;
     gni = genome_node_iterator_new_direct(gn);
     while (!had_err && (child = genome_node_iterator_next(gni))) {
-      if (extract_join_feature(child, v, err))
+      if (extract_join_feature(child, v->type, v->region_mapping, v->sequence,
+                               &v->reverse_strand, err)) {
         had_err = -1;
+      }
     }
     genome_node_iterator_delete(gni);
     if (!had_err && str_length(v->sequence)) {
