@@ -227,7 +227,7 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
   genome_nodes_sort(exons_from_sa);
 
   while (exon_feature_index < array_size(exon_nodes) &&
-        exons_from_sa_index < array_size(exons_from_sa)) {
+         exons_from_sa_index < array_size(exons_from_sa)) {
     exon_feature = *(GenomeFeature**)
                    array_get(exon_nodes, exon_feature_index);
     exons_from_sa_feature = *(GenomeFeature**)
