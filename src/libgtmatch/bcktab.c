@@ -121,7 +121,7 @@ static Bcktab *newBcktab(unsigned int numofchars,
   bcktab->mappedptr = NULL;
   bcktab->prefixlength = prefixlength;
   bcktab->basepower = initbasepower(numofchars,prefixlength);
-  bcktab->filltable = initfilltable(bcktab->basepower,prefixlength);
+  bcktab->filltable = initfilltable(numofchars,prefixlength);
   bcktab->numofallcodes = bcktab->basepower[prefixlength];
   bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
   bcktab->multimappower = initmultimappower(numofchars,prefixlength);

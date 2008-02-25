@@ -45,19 +45,18 @@ Codetype *initbasepower(unsigned int base,unsigned int len)
   return basepower;
 }
 
-Codetype *initfilltable(const Codetype *basepower,unsigned int len)
+Codetype *initfilltable(unsigned int base,unsigned int len)
 {
   unsigned int i;
-  Codetype *filltable;
+  Codetype *filltable, *basepower;
 
+  basepower = initbasepower(base,len);
   ALLOCASSIGNSPACE(filltable,NULL,Codetype,len);
   for (i=0; i<len; i++)
   {
     filltable[i] = basepower[len-i]-1;
-    /*
-    printf("filltable[%u]=%u\n",i,filltable[i]);
-    */
   }
+  FREESPACE(basepower);
   return filltable;
 }
 

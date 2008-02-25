@@ -33,6 +33,7 @@
 #include "sfx-outlcp.h"
 #include "stamp.h"
 
+#include "initbasepower.pr"
 #include "sfx-mappedstr.pr"
 
 #define CODEBITS        (32-PREFIXLENBITS)
@@ -78,128 +79,33 @@ struct Sfxiterator
   const Definedunsignedint *maxdepth;
 };
 
-static unsigned long newcodelistelem(Codeatposition *codelist,
-                                     unsigned long insertindex,
-                                     Seqpos smallerval,
-                                     Seqpos largerval,
-                                     Seqpos totallength,
-                                     bool moveforward,
-                                     unsigned int prefixlength)
-{
-  if (smallerval < largerval)
-  {
-    Seqpos distance;
-    distance = largerval - smallerval;
-    if (distance > (Seqpos) (prefixlength-1))
-    {
-      distance = (Seqpos) (prefixlength-1);
-    }
-    codelist[insertindex].maxprefixindex = (unsigned int) distance;
-    if (moveforward)
-    {
-      codelist[insertindex].position = totallength - smallerval;
-    } else
-    {
-      codelist[insertindex].position = largerval;
-    }
-    return insertindex+1;
-  }
-  return insertindex;
-}
-
-static unsigned long produceCodeatpositionlist(Codeatposition *codelist,
-                                               const  Encodedsequence *encseq,
-                                               bool moveforward,
-                                               unsigned int prefixlength)
-{
-  Sequencerange previousrange;
-  unsigned long insertindex = 0;
-  Seqpos totallength;
-
-  assert(prefixlength > 0);
-  if (prefixlength == 1U)
-  {
-    return 0;
-  }
-  totallength = getencseqtotallength(encseq);
-  if (moveforward)
-  {
-    previousrange.leftpos = previousrange.rightpos = 0;
-  } else
-  {
-    previousrange.leftpos = previousrange.rightpos = totallength;
-  }
-  if (hasspecialranges(encseq))
-  {
-    Specialrangeiterator *sri;
-    Sequencerange currentrange;
-
-    sri = newspecialrangeiterator(encseq,moveforward);
-    while (nextspecialrangeiterator(&currentrange,sri))
-    {
-      if (moveforward)
-      {
-        insertindex = newcodelistelem(codelist,
-                                      insertindex,
-                                      previousrange.rightpos,
-                                      currentrange.leftpos,
-                                      totallength,
-                                      moveforward,
-                                      prefixlength);
-      } else
-      {
-        insertindex = newcodelistelem(codelist,
-                                      insertindex,
-                                      currentrange.rightpos,
-                                      previousrange.leftpos,
-                                      totallength,
-                                      moveforward,
-                                      prefixlength);
-      }
-      previousrange = currentrange;
-    }
-    freespecialrangeiterator(&sri);
-  }
-  if (moveforward)
-  {
-    insertindex = newcodelistelem(codelist,
-                                  insertindex,
-                                  previousrange.rightpos,
-                                  totallength,
-                                  totallength,
-                                  moveforward,
-                                  prefixlength);
-  } else
-  {
-    insertindex = newcodelistelem(codelist,
-                                  insertindex,
-                                  0,
-                                  previousrange.leftpos,
-                                  totallength,
-                                  moveforward,
-                                  prefixlength);
-  }
-  return insertindex;
-}
-
 typedef struct
 {
   Sequencerange previousrange;
   Specialrangeiterator *sri;
   bool moveforward;
-  unsigned int prefixlength;
   Seqpos totallength;
   bool exhausted;
+  const Encodedsequence *encseq;
+  Readmode readmode;
+  unsigned int prefixlength;
+  Codetype **multimappower;
+  Codetype *filltable;
 } Enumcodeatposition;
 
 static void newEnumcodeatposition(Enumcodeatposition *ecp,
                                   const Encodedsequence *encseq,
                                   Readmode readmode,
-                                  unsigned int prefixlength)
+                                  unsigned int prefixlength,
+                                  unsigned int numofchars)
 {
-  ecp->moveforward =  ISDIRREVERSE(readmode) ? true : false;
-  ecp->totallength = getencseqtotallength(encseq);
+  ecp->encseq = encseq;
+  ecp->readmode = readmode;
+  ecp->multimappower = initmultimappower(numofchars,prefixlength);
+  ecp->filltable = initfilltable(numofchars,prefixlength);
   ecp->prefixlength = prefixlength;
+  ecp->moveforward = ISDIRREVERSE(readmode) ? true : false;
+  ecp->totallength = getencseqtotallength(encseq);
   if (ecp->moveforward)
   {
     ecp->previousrange.leftpos = ecp->previousrange.rightpos = 0;
@@ -217,10 +123,30 @@ static void newEnumcodeatposition(Enumcodeatposition *ecp,
   }
 }
 
-static bool newcodelistelem2(Codeatposition *cp,
-                             Seqpos smallerval,
-                             Seqpos largerval,
-                             const Enumcodeatposition *ecp)
+static Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
+                                       unsigned int maxprefixindex,
+                                       Seqpos pos)
+{
+  Codetype code;
+  unsigned int idx;
+  Uchar cc;
+
+  assert(maxprefixindex > 0 && maxprefixindex < ecp->prefixlength);
+  code = ecp->filltable[maxprefixindex];
+  for (idx=0; idx<maxprefixindex; idx++)
+  {
+    assert((Seqpos) (pos + idx) < ecp->totallength);
+    cc = getencodedchar(ecp->encseq,pos + idx, ecp->readmode);
+    assert(ISNOTSPECIAL(cc));
+    code += ecp->multimappower[idx][cc];
+  }
+  return code;
+}
+
+static bool newcodelistelem(Codeatposition *cp,
+                            Seqpos smallerval,
+                            Seqpos largerval,
+                            const Enumcodeatposition *ecp)
 {
   if (smallerval < largerval)
   {
@@ -238,15 +164,18 @@ static bool newcodelistelem2(Codeatposition *cp,
     {
       cp->position = largerval;
     }
+    assert(cp->position >= distance);
+    cp->code = computefilledqgramcode(ecp,cp->maxprefixindex,
+                                      cp->position - cp->maxprefixindex);
     return true;
   }
   return false;
 }
 
-static bool nextEnumcodeatposition(Codeatposition *cp,
-                                   Enumcodeatposition *ecp)
+static bool nextEnumcodeatposition(Codeatposition *cp,Enumcodeatposition *ecp)
 {
   Sequencerange currentrange;
+  bool done;
 
   if (ecp->exhausted)
   {
@@ -262,17 +191,17 @@ static bool nextEnumcodeatposition(Codeatposition *cp,
     }
     if (ecp->moveforward)
     {
-      if (newcodelistelem2(cp,
-                           ecp->previousrange.rightpos,
-                           currentrange.leftpos,
-                           ecp))
+      if (newcodelistelem(cp,
+                          ecp->previousrange.rightpos,
+                          currentrange.leftpos,
+                          ecp))
       {
         ecp->previousrange = currentrange;
         return true;
       }
     } else
     {
-      if (newcodelistelem2(cp,
+      if (newcodelistelem(cp,
                           currentrange.rightpos,
                           ecp->previousrange.leftpos,
                           ecp))
@@ -286,23 +215,31 @@ static bool nextEnumcodeatposition(Codeatposition *cp,
   ecp->exhausted = true;
   if (ecp->moveforward)
   {
-    return newcodelistelem2(cp,
-                            ecp->previousrange.rightpos,
-                            ecp->totallength,
-                            ecp);
+    done = newcodelistelem(cp,
+                           ecp->previousrange.rightpos,
+                           ecp->totallength,
+                           ecp);
   } else
   {
-    return newcodelistelem2(cp,
-                            0,
-                            ecp->previousrange.leftpos,
-                            ecp);
+    done = newcodelistelem(cp,
+                           0,
+                           ecp->previousrange.leftpos,
+                           ecp);
   }
+  return done;
+}
+
+static void freeEnumcodeatposition(Enumcodeatposition *ecp)
+{
+  FREESPACE(ecp->filltable);
+  multimappowerfree(&ecp->multimappower);
 }
 
 static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
                                                const  Encodedsequence *encseq,
                                                Readmode readmode,
-                                               unsigned int prefixlength)
+                                               unsigned int prefixlength,
+                                               unsigned int numofchars)
 {
   if (prefixlength > 1U)
   {
@@ -312,10 +249,12 @@ static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
     newEnumcodeatposition(&ecp,
                           encseq,
                           readmode,
-                          prefixlength);
+                          prefixlength,
+                          numofchars);
     for (insertindex = 0; nextEnumcodeatposition(codelist + insertindex,&ecp);
          insertindex++)
        /* Nothing */;
+    freeEnumcodeatposition(&ecp);
     return insertindex;
   }
   return 0;
@@ -351,6 +290,14 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
                       codelist2[idx].maxprefixindex);
       exit(EXIT_FAILURE); /* program error */
     }
+    if (codelist1[idx].code != codelist2[idx].code)
+    {
+      fprintf(stderr,"idx %lu, codelist1.code = %u != %u = "
+                     "codelist2.code\n",idx,
+                      codelist1[idx].code,
+                      codelist2[idx].code);
+      exit(EXIT_FAILURE); /* program error */
+    }
   }
 }
 
@@ -359,39 +306,26 @@ static void verifycodelistcomputation(
                        Readmode readmode,
                        Seqpos realspecialranges,
                        unsigned int prefixlength,
+                       unsigned int numofchars,
                        unsigned long nextfreeCodeatposition1,
                        const Codeatposition *spaceCodeatposition1)
 {
-  unsigned long nextfreeCodeatposition2,
-                nextfreeCodeatposition3;
-  Codeatposition *spaceCodeatposition2,
-                 *spaceCodeatposition3;
+  unsigned long nextfreeCodeatposition2;
+  Codeatposition *spaceCodeatposition2;
 
   ALLOCASSIGNSPACE(spaceCodeatposition2,NULL,Codeatposition,
                    realspecialranges+1);
-  nextfreeCodeatposition2
-    = produceCodeatpositionlist(spaceCodeatposition2,
-                                encseq,
-                                ISDIRREVERSE(readmode) ? true : false,
-                                prefixlength);
+  nextfreeCodeatposition2 = iterproduceCodeatposition(spaceCodeatposition2,
+                                                      encseq,
+                                                      readmode,
+                                                      prefixlength,
+                                                      numofchars);
   assert(realspecialranges+1 >= (Seqpos) nextfreeCodeatposition2);
   compareCodeatpositionlists(spaceCodeatposition1,
                              nextfreeCodeatposition1,
                              spaceCodeatposition2,
                              nextfreeCodeatposition2);
   FREESPACE(spaceCodeatposition2);
-  ALLOCASSIGNSPACE(spaceCodeatposition3,NULL,Codeatposition,
-                   realspecialranges+1);
-  nextfreeCodeatposition3 = iterproduceCodeatposition(spaceCodeatposition3,
-                                                      encseq,
-                                                      readmode,
-                                                      prefixlength);
-  assert(realspecialranges+1 >= (Seqpos) nextfreeCodeatposition3);
-  compareCodeatpositionlists(spaceCodeatposition1,
-                             nextfreeCodeatposition1,
-                             spaceCodeatposition3,
-                             nextfreeCodeatposition3);
-  FREESPACE(spaceCodeatposition3);
 }
 
 static void updatekmercount(void *processinfo,
@@ -617,6 +551,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               readmode,
                               realspecialranges,
                               prefixlength,
+                              numofchars,
                               sfi->nextfreeCodeatposition,
                               sfi->spaceCodeatposition);
     assert(sfi->leftborder != NULL);
