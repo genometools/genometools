@@ -33,6 +33,9 @@
    -- Returns end of <range>.
    function range:get_end()
 
+   -- Returns true if <range> and <other_range> overlap, false otherwise.
+   function range:overlap(other_range)
+
    -- Returns an array containing the ranges from array <range_array> in sorted
    -- order.
    function ranges_sort(range_array)

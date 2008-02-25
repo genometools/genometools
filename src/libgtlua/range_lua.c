@@ -50,6 +50,15 @@ static int range_lua_get_end(lua_State *L)
   return 1;
 }
 
+static int range_lua_overlap(lua_State *L)
+{
+  Range *range_a, *range_b;
+  range_a = check_range(L, 1);
+  range_b = check_range(L, 2);
+  lua_pushboolean(L, range_overlap(*range_a, *range_b));
+  return 1;
+}
+
 static Array* range_table_to_array(lua_State *L)
 {
   lua_Integer i = 1;
@@ -138,6 +147,7 @@ static const struct luaL_Reg range_lib_f [] = {
 static const struct luaL_Reg range_lib_m [] = {
   { "get_start", range_lua_get_start},
   { "get_end", range_lua_get_end},
+  { "overlap", range_lua_overlap},
   { NULL, NULL }
 };
 
