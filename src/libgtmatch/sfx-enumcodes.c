@@ -183,3 +183,34 @@ Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
   }
   return code;
 }
+
+bool computefilledqgramcodestopatmax(Codetype *code,
+                                     const Enumcodeatposition *ecp,
+                                     unsigned int maxprefixindex,
+                                     Seqpos pos,
+                                     Codetype stopcode)
+{
+  Codetype tmpcode;
+  unsigned int idx;
+  Uchar cc;
+
+  assert(maxprefixindex > 0 && maxprefixindex < ecp->prefixlength);
+  tmpcode = ecp->filltable[maxprefixindex];
+  if (tmpcode > stopcode)
+  {
+    return false;
+  }
+  for (idx=0; idx<maxprefixindex; idx++)
+  {
+    assert((Seqpos) (pos + idx) < ecp->totallength);
+    cc = getencodedcharnospecial(ecp->encseq,pos + idx, ecp->readmode);
+    assert(ISNOTSPECIAL(cc));
+    tmpcode += ecp->multimappower[idx][cc];
+    if (tmpcode > stopcode)
+    {
+      return false;
+    }
+  }
+  *code = tmpcode;
+  return true;
+}

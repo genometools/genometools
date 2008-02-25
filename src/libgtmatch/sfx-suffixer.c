@@ -75,10 +75,12 @@ struct Sfxiterator
   bool exhausted;
   Bcktab *bcktab;
   Codetype numofallcodes;
+  bool specialcodesfast;
   Seqpos *leftborder; /* points to bcktab->leftborder */
   const Definedunsignedint *maxdepth;
 };
 
+#ifdef DEBUG
 static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
                                                const  Encodedsequence *encseq,
                                                Readmode readmode,
@@ -101,10 +103,10 @@ static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
       codelist[insertindex].maxprefixindex = specialcontext.maxprefixindex;
       codelist[insertindex].position = specialcontext.position;
       codelist[insertindex].code
-        =  computefilledqgramcode(ecp,
-                                  specialcontext.maxprefixindex,
-                                  specialcontext.position -
-                                  specialcontext.maxprefixindex);
+        = computefilledqgramcode(ecp,
+                                 specialcontext.maxprefixindex,
+                                 specialcontext.position -
+                                 specialcontext.maxprefixindex);
     }
     freeEnumcodeatposition(&ecp);
     return insertindex;
@@ -179,6 +181,7 @@ static void verifycodelistcomputation(
                              nextfreeCodeatposition2);
   FREESPACE(spaceCodeatposition2);
 }
+#endif
 
 static void updatekmercount(void *processinfo,
                             Codetype code,
@@ -193,12 +196,15 @@ static void updatekmercount(void *processinfo,
     {
       if (firstspecial->specialpos > 0)
       {
-        Codeatposition *cp;
+        if (sfi->specialcodesfast)
+        {
+          Codeatposition *cp;
 
-        cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
-        cp->code = code;
-        cp->maxprefixindex = firstspecial->specialpos;
-        cp->position = position + firstspecial->specialpos;
+          cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
+          cp->code = code;
+          cp->maxprefixindex = firstspecial->specialpos;
+          cp->position = position + firstspecial->specialpos;
+        }
         sfi->storespecials = false;
         sfi->leftborder[code]++;
       }
@@ -249,7 +255,7 @@ static void reversespecialcodes(Codeatposition *spaceCodeatposition,
   }
 }
 
-static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
+static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
 {
   Codetype code;
   unsigned int prefixindex;
@@ -292,6 +298,43 @@ static void derivespecialcodes(Sfxiterator *sfi,bool deletevalues)
     {
       sfi->nextfreeCodeatposition = insertindex;
     }
+  }
+}
+
+static void derivespecialcodesonthefly(Sfxiterator *sfi)
+{
+  Codetype code;
+  unsigned int prefixindex;
+  Seqpos stidx;
+  Enumcodeatposition *ecp;
+  Specialcontext specialcontext;
+
+  for (prefixindex=1U; prefixindex < sfi->prefixlength; prefixindex++)
+  {
+    ecp = newEnumcodeatposition(sfi->encseq,sfi->readmode,
+                                sfi->prefixlength,
+                                sfi->numofchars);
+    while (nextEnumcodeatposition(&specialcontext,ecp))
+    {
+      if (prefixindex <= specialcontext.maxprefixindex)
+      {
+        if (computefilledqgramcodestopatmax(&code,
+                                            ecp,
+                                            prefixindex,
+                                            specialcontext.position-prefixindex,
+                                            sfi->currentmaxcode))
+        {
+          assert(code <= sfi->currentmaxcode);
+          if (code >= sfi->currentmincode)
+          {
+            updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
+            stidx = --sfi->leftborder[code];
+            sfi->suftabptr[stidx] = specialcontext.position - prefixindex;
+          }
+        }
+      }
+    }
+    freeEnumcodeatposition(&ecp);
   }
 }
 
@@ -345,10 +388,17 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   } else
   {
     ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
-    ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
-                     Codeatposition,realspecialranges+1);
-    printf("# sizeof (spaceCodeatposition)=%lu\n",
+    sfi->specialcodesfast = false;
+    if (sfi->specialcodesfast)
+    {
+      ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
+                       Codeatposition,realspecialranges+1);
+      printf("# sizeof (spaceCodeatposition)=%lu\n",
               (unsigned long ) sizeof (Codeatposition) * (realspecialranges+1));
+    } else
+    {
+      sfi->spaceCodeatposition = NULL;
+    }
     sfi->nextfreeCodeatposition = 0;
     sfi->suftab = NULL;
     sfi->suftabptr = NULL;
@@ -397,8 +447,12 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                    sfi,
                    numofchars,
                    prefixlength);
-    assert(realspecialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
-    reversespecialcodes(sfi->spaceCodeatposition,sfi->nextfreeCodeatposition);
+    if (sfi->specialcodesfast)
+    {
+      assert(realspecialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
+      reversespecialcodes(sfi->spaceCodeatposition,sfi->nextfreeCodeatposition);
+    }
+#ifdef DEBUG
     verifycodelistcomputation(encseq,
                               readmode,
                               realspecialranges,
@@ -406,6 +460,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               numofchars,
                               sfi->nextfreeCodeatposition,
                               sfi->spaceCodeatposition);
+#endif
     assert(sfi->leftborder != NULL);
     for (optr = sfi->leftborder + 1;
          optr < sfi->leftborder + sfi->numofallcodes; optr++)
@@ -459,9 +514,15 @@ static void preparethispart(Sfxiterator *sfi,
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
   sfi->suftabptr = sfi->suftab -
                    stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
-  derivespecialcodes(sfi,
-                     (stpgetnumofparts(sfi->suftabparts) == 1U)
-                       ? true : false);
+  if (sfi->specialcodesfast)
+  {
+    derivespecialcodesfromtable(sfi,
+                                (stpgetnumofparts(sfi->suftabparts) == 1U)
+                                ? true : false);
+  } else
+  {
+    derivespecialcodesonthefly(sfi);
+  }
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,"inserting suffixes into buckets");
