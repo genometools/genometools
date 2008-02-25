@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include "libgtext/extract_feat_stream.h"
-#include "libgtext/extractfeat_visitor.h"
+#include "libgtext/extract_feat_visitor.h"
 #include "libgtext/genome_stream_rep.h"
 
 struct ExtractFeatStream
@@ -75,7 +75,7 @@ GenomeStream* extract_feat_stream_new(GenomeStream *in_stream,
   GenomeStream *gs = genome_stream_create(extract_feat_stream_class(), true);
   ExtractFeatStream *efs = extract_feat_stream_cast(gs);
   efs->in_stream = genome_stream_ref(in_stream);
-  efs->extract_feat_visitor = extractfeat_visitor_new(rm, type, join,
-                                                      translate);
+  efs->extract_feat_visitor = extract_feat_visitor_new(rm, type, join,
+                                                       translate);
   return gs;
 }

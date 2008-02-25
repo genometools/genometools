@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "libgtcore/fasta.h"
 #include "libgtcore/translate.h"
-#include "libgtext/extractfeat_visitor.h"
+#include "libgtext/extract_feat_visitor.h"
 #include "libgtext/genome_visitor_rep.h"
 #include "libgtext/reverse.h"
 
@@ -35,17 +35,17 @@ struct ExtractFeatVisitor {
   RegionMapping *region_mapping;
 };
 
-#define extractfeat_visitor_cast(GV)\
-        genome_visitor_cast(extractfeat_visitor_class(), GV)
+#define extract_feat_visitor_cast(GV)\
+        genome_visitor_cast(extract_feat_visitor_class(), GV)
 
-static void extractfeat_visitor_free(GenomeVisitor *gv)
+static void extract_feat_visitor_free(GenomeVisitor *gv)
 {
-  ExtractFeatVisitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
-  assert(extractfeat_visitor);
-  str_delete(extractfeat_visitor->description);
-  str_delete(extractfeat_visitor->sequence);
-  str_delete(extractfeat_visitor->protein);
-  region_mapping_delete(extractfeat_visitor->region_mapping);
+  ExtractFeatVisitor *extract_feat_visitor = extract_feat_visitor_cast(gv);
+  assert(extract_feat_visitor);
+  str_delete(extract_feat_visitor->description);
+  str_delete(extract_feat_visitor->sequence);
+  str_delete(extract_feat_visitor->protein);
+  region_mapping_delete(extract_feat_visitor->region_mapping);
 }
 
 static int extract_join_feature(GenomeNode *gn, void *data, Error *e)
@@ -181,36 +181,36 @@ static int extract_feature(GenomeNode *gn, void *data, Error *e)
   return had_err;
 }
 
-static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
-                                              GenomeFeature *gf, Error *e)
+static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
+                                               GenomeFeature *gf, Error *e)
 {
   ExtractFeatVisitor *efv;
   error_check(e);
-  efv = extractfeat_visitor_cast(gv);
+  efv = extract_feat_visitor_cast(gv);
   assert(efv->region_mapping);
   return genome_node_traverse_children((GenomeNode*) gf, efv, extract_feature,
-                                       false, e);
+                                        false, e);
 }
 
-const GenomeVisitorClass* extractfeat_visitor_class()
+const GenomeVisitorClass* extract_feat_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (ExtractFeatVisitor),
-                                          extractfeat_visitor_free,
+                                          extract_feat_visitor_free,
                                           NULL,
-                                          extractfeat_visitor_genome_feature,
+                                          extract_feat_visitor_genome_feature,
                                           NULL };
   return &gvc;
 }
 
-GenomeVisitor* extractfeat_visitor_new(RegionMapping *rm,
+GenomeVisitor* extract_feat_visitor_new(RegionMapping *rm,
                                        GenomeFeatureType type, bool join,
                                        bool translate)
 {
   GenomeVisitor *gv;
   ExtractFeatVisitor *efv;
   assert(rm);
-  gv = genome_visitor_create(extractfeat_visitor_class());
-  efv= extractfeat_visitor_cast(gv);
+  gv = genome_visitor_create(extract_feat_visitor_class());
+  efv= extract_feat_visitor_cast(gv);
   efv->description = str_new();
   efv->sequence = str_new();
   efv->protein = str_new();

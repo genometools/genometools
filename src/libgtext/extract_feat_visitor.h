@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef EXTRACTFEAT_VISITOR_H
-#define EXTRACTFEAT_VISITOR_H
+#ifndef EXTRACT_FEAT_VISITOR_H
+#define EXTRACT_FEAT_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
 typedef struct ExtractFeatVisitor ExtractFeatVisitor;
@@ -25,10 +25,10 @@ typedef struct ExtractFeatVisitor ExtractFeatVisitor;
 #include "libgtext/genome_visitor.h"
 #include "libgtext/region_mapping.h"
 
-const GenomeVisitorClass* extractfeat_visitor_class(void);
+const GenomeVisitorClass* extract_feat_visitor_class(void);
 /* takes ownership of <rm> */
-GenomeVisitor*            extractfeat_visitor_new(RegionMapping *rm,
-                                                  GenomeFeatureType, bool join,
-                                                  bool translate);
+GenomeVisitor*            extract_feat_visitor_new(RegionMapping *rm,
+                                                   GenomeFeatureType, bool join,
+                                                   bool translate);
 
 #endif
