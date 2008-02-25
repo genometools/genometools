@@ -135,7 +135,6 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
     GenomeNode *child;
     bool reverse_strand = false;
     /* in this case we have to traverse the children */
-    str_reset(v->sequence);
     gni = genome_node_iterator_new_direct(gn);
     while (!had_err && (child = genome_node_iterator_next(gni))) {
       if (extract_join_feature(child, v->type, v->region_mapping, v->sequence,
@@ -149,10 +148,6 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
         had_err = reverse_complement(str_get(v->sequence),
                                      str_length(v->sequence), err);
       }
-      if (!had_err) {
-        show_entry(v->description, v->sequence, v->translate);
-      }
-      str_reset(v->description);
     }
   }
   else if (genome_feature_get_type(gf) == v->type) {
@@ -166,7 +161,6 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
                                                      err);
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
-      str_reset(v->sequence);
       had_err = region_mapping_get_raw_sequence(v->region_mapping,
                                                 &raw_sequence,
                                                 genome_node_get_seqid(gn), err);
@@ -179,10 +173,6 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
                                      str_length(v->sequence), err);
       }
     }
-    if (!had_err) {
-      show_entry(v->description, v->sequence, v->translate);
-    }
-    str_reset(v->description);
   }
   return had_err;
 }
@@ -201,6 +191,12 @@ static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
   while (!had_err && (gn = genome_node_iterator_next(gni))) {
     if (extract_feature(gn, efv, err))
       had_err = -1;
+
+    if (!had_err && str_length(efv->sequence)) {
+      show_entry(efv->description, efv->sequence, efv->translate);
+      str_reset(efv->description);
+      str_reset(efv->sequence);
+    }
   }
   genome_node_iterator_delete(gni);
   return had_err;
