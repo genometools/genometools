@@ -157,7 +157,7 @@ static void render_line(Render *r, Line *line)
     const char* caption;
     Strand strand = block_get_strand(block);
     grey.red = grey.green = grey.blue = .85;
-    
+
     /* draw block caption */
     draw_range = render_convert_coords(r, block_range);
     if (block_caption_is_visible(block)) {
