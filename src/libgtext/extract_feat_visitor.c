@@ -123,13 +123,6 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 
-  /* construct description if necessary */
-  if (!str_length(v->description)) {
-    v->fastaseq_counter++;
-    construct_description(v->description, v->type, v->fastaseq_counter, v->join,
-                          v->translate);
-  }
-
   if (v->join) {
     GenomeNodeIterator *gni;
     GenomeNode *child;
@@ -189,6 +182,13 @@ static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
   assert(efv->region_mapping);
   gni = genome_node_iterator_new((GenomeNode*) gf);
   while (!had_err && (gn = genome_node_iterator_next(gni))) {
+    /* construct description if necessary */
+    if (!str_length(efv->description)) {
+      efv->fastaseq_counter++;
+      construct_description(efv->description, efv->type, efv->fastaseq_counter,
+                            efv->join, efv->translate);
+    }
+
     if (extract_feature(gn, efv, err))
       had_err = -1;
 
