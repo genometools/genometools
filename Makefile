@@ -498,41 +498,51 @@ obj/gt_config.h:
 	    -e 's/^/#define GT_CPPFLAGS "/'; \
 	  echo '#define GT_VERSION "'`cat VERSION`\" ) > $@
 
-src/libgtcore/bitpackstringop8.c: src/libgtcore/bitpackstringop.template
-	@echo '[rebuild $@]'
-	@scripts/template2c.pl 8 $^
+bitpackstringop_Dependencies=src/libgtcore/bitpackstringop.template \
+	 src/libgtcore/bitpackstringvectorreadop.gen \
+	 src/libgtcore/bitpackstringvectorwriteop.gen \
+	 scripts/template2c.pl
 
-src/libgtcore/checkbitpackstring8.c: src/libgtcore/checkbitpackstring.template
+src/libgtcore/bitpackstringop8.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl 8 $^
+	@scripts/template2c.pl 8 $<
 
-src/libgtcore/bitpackstringop16.c: src/libgtcore/bitpackstringop.template
+src/libgtcore/checkbitpackstring8.c: \
+ src/libgtcore/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl 16 $^
+	@scripts/template2c.pl 8 $<
 
-src/libgtcore/checkbitpackstring16.c: src/libgtcore/checkbitpackstring.template
+src/libgtcore/bitpackstringop16.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl 16 $^
+	@scripts/template2c.pl 16 $<
 
-src/libgtcore/bitpackstringop32.c: src/libgtcore/bitpackstringop.template
+src/libgtcore/checkbitpackstring16.c: \
+ src/libgtcore/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl 32 $^
+	@scripts/template2c.pl 16 $<
 
-src/libgtcore/checkbitpackstring32.c: src/libgtcore/checkbitpackstring.template
+src/libgtcore/bitpackstringop32.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl 32 $^
+	@scripts/template2c.pl 32 $<
 
-src/libgtcore/bitpackstringop64.c: src/libgtcore/bitpackstringop.template
+src/libgtcore/checkbitpackstring32.c: \
+ src/libgtcore/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl 64 $^
+	@scripts/template2c.pl 32 $<
 
-src/libgtcore/checkbitpackstring64.c: src/libgtcore/checkbitpackstring.template
+src/libgtcore/bitpackstringop64.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl 64 $^
+	@scripts/template2c.pl 64 $<
 
-src/libgtcore/checkbitpackstring-int.c: src/libgtcore/checkbitpackstring.template
+src/libgtcore/checkbitpackstring64.c: \
+ src/libgtcore/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl '-int' $^
+	@scripts/template2c.pl 64 $<
+
+src/libgtcore/checkbitpackstring-int.c: \
+ src/libgtcore/checkbitpackstring.template scripts/template2c.pl
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl '-int' $<
 
 define COMPILE_template
 $(1): $(2)

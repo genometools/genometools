@@ -63,6 +63,7 @@ genBitCount(uint16_t v)
 
 #define freeResourcesAndReturn(retval) \
   do {                                 \
+    ma_free(numBitsList);              \
     ma_free(randSrc);                  \
     ma_free(randCmp);                  \
     ma_free(bitStore);                 \
@@ -78,6 +79,7 @@ bitPackStringInt16_unit_test(Error *err)
   uint16_t *randSrc = NULL; /*< create random ints here for input as bit
                                 *  store */
   uint16_t *randCmp = NULL; /*< used for random ints read back */
+  unsigned *numBitsList = NULL;
   size_t i, numRnd;
   BitOffset offsetStart, offset;
   unsigned long seedval;
@@ -363,6 +365,149 @@ bitPackStringInt16_unit_test(Error *err)
     }
     log_log("passed\n");
   }
+
+  log_log("bsStoreNonUniformUInt16Array/bsGetUInt16: ");
+  {
+    BitOffset bitsTotal = 0;
+    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    for (i = 0; i < numRnd; ++i)
+      bitsTotal += (numBitsList[i] = random()%16 + 1);
+    offset = offsetStart;
+    bsStoreNonUniformUInt16Array(bitStore, offset, numRnd, bitsTotal,
+                                     numBitsList, randSrc);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      uint16_t mask = (numBits < 16)?
+        ~((~(uint16_t)0) << numBits):~(uint16_t)0;
+      uint16_t v = randSrc[i] & mask;
+      uint16_t r = bsGetUInt16(bitStore, offset, numBits);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRIu16", got %"PRIu16",\n"
+                "seed = %lu, i = %lu, bits=%u\n",
+                v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+      offset += numBits;
+    }
+    log_log("passed\n");
+    log_log("bsStoreNonUniformUInt16Array/"
+            "bsGetNonUniformUInt16Array: ");
+    bsGetNonUniformUInt16Array(bitStore, offset = offsetStart,
+                                   numRnd, bitsTotal, numBitsList, randCmp);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      uint16_t mask = (numBits < 16)?
+        ~((~(uint16_t)0) << numBits):~(uint16_t)0;
+      uint16_t v = randSrc[i] & mask,
+        r = randCmp[i];
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log( "Expected %"PRIu16", got %"PRIu16",\n seed = %lu,"
+                " i = %lu, bits=%u\n",
+                v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    if (numRnd > 1)
+    {
+      unsigned numBits = numBitsList[0];
+      uint16_t mask = (numBits < 16)?
+        ~((~(uint16_t)0) << numBits):~(uint16_t)0;
+      uint16_t v = randSrc[0] & mask;
+      uint16_t r;
+      bsGetNonUniformUInt16Array(bitStore, offsetStart, 1, numBits,
+                                     numBitsList, &r);
+      if (r != v)
+      {
+        log_log("Expected %"PRIu16", got %"PRIu16", seed = %lu,"
+                " one value extraction\n",
+                v, r, seedval);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    log_log(" passed\n");
+    ma_free(numBitsList);
+    numBitsList = NULL;
+  }
+  log_log("bsNonStoreUniformInt16Array/bsGetInt16: ");
+  {
+    BitOffset bitsTotal = 0;
+    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    for (i = 0; i < numRnd; ++i)
+      bitsTotal += (numBitsList[i] = random()%16 + 1);
+    offset = offsetStart;
+    bsStoreNonUniformInt16Array(bitStore, offset, numRnd, bitsTotal,
+                                     numBitsList, (int16_t *)randSrc);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      int16_t mask = (numBits < 16)
+        ? ~((~(int16_t)0) << numBits) : ~(int16_t)0;
+      int16_t m = (int16_t)1 << (numBits - 1);
+      int16_t v = (int16_t)((randSrc[i] & mask) ^ m) - m;
+      int16_t r = bsGetInt16(bitStore, offset, numBits);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRId16", got %"PRId16",\n"
+                    "seed = %lu, i = %lu, numBits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+      offset += numBits;
+    }
+    log_log("passed\n");
+    log_log("bsStoreNonUniformInt16Array/"
+            "bsGetNonUniformInt16Array: ");
+    bsGetNonUniformInt16Array(bitStore, offset = offsetStart, numRnd,
+                                   bitsTotal, numBitsList,
+                                   (int16_t *)randCmp);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      int16_t mask = (numBits < 16)
+        ? ~((~(int16_t)0) << numBits) : ~(int16_t)0;
+      int16_t m = (int16_t)1 << (numBits - 1);
+      int16_t v = (int16_t)((randSrc[i] & mask) ^ m) - m;
+      int16_t r = randCmp[i];
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRId16", got %"PRId16
+                ", seed = %lu, i = %lu\n",
+                v, r, seedval, (unsigned long)i);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    if (numRnd > 0)
+    {
+      unsigned numBits = numBitsList[0];
+      int16_t mask = (numBits < 16)
+        ? ~((~(int16_t)0) << numBits) : ~(int16_t)0;
+      int16_t m = (int16_t)1 << (numBits - 1);
+      int16_t v = (int16_t)((randSrc[0] & mask) ^ m) - m;
+      int16_t r = 0;
+      bsGetNonUniformInt16Array(bitStore, offsetStart,
+                                     1, numBits, numBitsList, &r);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRId16", got %"PRId16
+                ", seed = %lu, one value extraction\n",
+                v, r, seedval);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    log_log("passed\n");
+    ma_free(numBitsList);
+    numBitsList = NULL;
+  }
+
   if (numRnd > 0)
   {
     log_log("bsCopy: ");

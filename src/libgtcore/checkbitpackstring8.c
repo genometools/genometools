@@ -63,6 +63,7 @@ genBitCount(uint8_t v)
 
 #define freeResourcesAndReturn(retval) \
   do {                                 \
+    ma_free(numBitsList);              \
     ma_free(randSrc);                  \
     ma_free(randCmp);                  \
     ma_free(bitStore);                 \
@@ -78,6 +79,7 @@ bitPackStringInt8_unit_test(Error *err)
   uint8_t *randSrc = NULL; /*< create random ints here for input as bit
                                 *  store */
   uint8_t *randCmp = NULL; /*< used for random ints read back */
+  unsigned *numBitsList = NULL;
   size_t i, numRnd;
   BitOffset offsetStart, offset;
   unsigned long seedval;
@@ -363,6 +365,149 @@ bitPackStringInt8_unit_test(Error *err)
     }
     log_log("passed\n");
   }
+
+  log_log("bsStoreNonUniformUInt8Array/bsGetUInt8: ");
+  {
+    BitOffset bitsTotal = 0;
+    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    for (i = 0; i < numRnd; ++i)
+      bitsTotal += (numBitsList[i] = random()%8 + 1);
+    offset = offsetStart;
+    bsStoreNonUniformUInt8Array(bitStore, offset, numRnd, bitsTotal,
+                                     numBitsList, randSrc);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      uint8_t mask = (numBits < 8)?
+        ~((~(uint8_t)0) << numBits):~(uint8_t)0;
+      uint8_t v = randSrc[i] & mask;
+      uint8_t r = bsGetUInt8(bitStore, offset, numBits);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRIu8", got %"PRIu8",\n"
+                "seed = %lu, i = %lu, bits=%u\n",
+                v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+      offset += numBits;
+    }
+    log_log("passed\n");
+    log_log("bsStoreNonUniformUInt8Array/"
+            "bsGetNonUniformUInt8Array: ");
+    bsGetNonUniformUInt8Array(bitStore, offset = offsetStart,
+                                   numRnd, bitsTotal, numBitsList, randCmp);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      uint8_t mask = (numBits < 8)?
+        ~((~(uint8_t)0) << numBits):~(uint8_t)0;
+      uint8_t v = randSrc[i] & mask,
+        r = randCmp[i];
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log( "Expected %"PRIu8", got %"PRIu8",\n seed = %lu,"
+                " i = %lu, bits=%u\n",
+                v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    if (numRnd > 1)
+    {
+      unsigned numBits = numBitsList[0];
+      uint8_t mask = (numBits < 8)?
+        ~((~(uint8_t)0) << numBits):~(uint8_t)0;
+      uint8_t v = randSrc[0] & mask;
+      uint8_t r;
+      bsGetNonUniformUInt8Array(bitStore, offsetStart, 1, numBits,
+                                     numBitsList, &r);
+      if (r != v)
+      {
+        log_log("Expected %"PRIu8", got %"PRIu8", seed = %lu,"
+                " one value extraction\n",
+                v, r, seedval);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    log_log(" passed\n");
+    ma_free(numBitsList);
+    numBitsList = NULL;
+  }
+  log_log("bsNonStoreUniformInt8Array/bsGetInt8: ");
+  {
+    BitOffset bitsTotal = 0;
+    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    for (i = 0; i < numRnd; ++i)
+      bitsTotal += (numBitsList[i] = random()%8 + 1);
+    offset = offsetStart;
+    bsStoreNonUniformInt8Array(bitStore, offset, numRnd, bitsTotal,
+                                     numBitsList, (int8_t *)randSrc);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      int8_t mask = (numBits < 8)
+        ? ~((~(int8_t)0) << numBits) : ~(int8_t)0;
+      int8_t m = (int8_t)1 << (numBits - 1);
+      int8_t v = (int8_t)((randSrc[i] & mask) ^ m) - m;
+      int8_t r = bsGetInt8(bitStore, offset, numBits);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRId8", got %"PRId8",\n"
+                    "seed = %lu, i = %lu, numBits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+      offset += numBits;
+    }
+    log_log("passed\n");
+    log_log("bsStoreNonUniformInt8Array/"
+            "bsGetNonUniformInt8Array: ");
+    bsGetNonUniformInt8Array(bitStore, offset = offsetStart, numRnd,
+                                   bitsTotal, numBitsList,
+                                   (int8_t *)randCmp);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      int8_t mask = (numBits < 8)
+        ? ~((~(int8_t)0) << numBits) : ~(int8_t)0;
+      int8_t m = (int8_t)1 << (numBits - 1);
+      int8_t v = (int8_t)((randSrc[i] & mask) ^ m) - m;
+      int8_t r = randCmp[i];
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRId8", got %"PRId8
+                ", seed = %lu, i = %lu\n",
+                v, r, seedval, (unsigned long)i);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    if (numRnd > 0)
+    {
+      unsigned numBits = numBitsList[0];
+      int8_t mask = (numBits < 8)
+        ? ~((~(int8_t)0) << numBits) : ~(int8_t)0;
+      int8_t m = (int8_t)1 << (numBits - 1);
+      int8_t v = (int8_t)((randSrc[0] & mask) ^ m) - m;
+      int8_t r = 0;
+      bsGetNonUniformInt8Array(bitStore, offsetStart,
+                                     1, numBits, numBitsList, &r);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRId8", got %"PRId8
+                ", seed = %lu, one value extraction\n",
+                v, r, seedval);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    log_log("passed\n");
+    ma_free(numBitsList);
+    numBitsList = NULL;
+  }
+
   if (numRnd > 0)
   {
     log_log("bsCopy: ");

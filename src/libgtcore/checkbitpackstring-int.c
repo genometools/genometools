@@ -63,6 +63,7 @@ genBitCount(unsigned v)
 
 #define freeResourcesAndReturn(retval) \
   do {                                 \
+    ma_free(numBitsList);              \
     ma_free(randSrc);                  \
     ma_free(randCmp);                  \
     ma_free(bitStore);                 \
@@ -78,6 +79,7 @@ bitPackStringInt_unit_test(Error *err)
   unsigned *randSrc = NULL; /*< create random ints here for input as bit
                                 *  store */
   unsigned *randCmp = NULL; /*< used for random ints read back */
+  unsigned *numBitsList = NULL;
   size_t i, numRnd;
   BitOffset offsetStart, offset;
   unsigned long seedval;
@@ -363,6 +365,149 @@ bitPackStringInt_unit_test(Error *err)
     }
     log_log("passed\n");
   }
+
+  log_log("bsStoreNonUniformUIntArray/bsGetUInt: ");
+  {
+    BitOffset bitsTotal = 0;
+    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    for (i = 0; i < numRnd; ++i)
+      bitsTotal += (numBitsList[i] = random()%32 + 1);
+    offset = offsetStart;
+    bsStoreNonUniformUIntArray(bitStore, offset, numRnd, bitsTotal,
+                                     numBitsList, randSrc);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      unsigned mask = (numBits < 32)?
+        ~((~(unsigned)0) << numBits):~(unsigned)0;
+      unsigned v = randSrc[i] & mask;
+      unsigned r = bsGetUInt(bitStore, offset, numBits);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %""u"", got %""u"",\n"
+                "seed = %lu, i = %lu, bits=%u\n",
+                v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+      offset += numBits;
+    }
+    log_log("passed\n");
+    log_log("bsStoreNonUniformUIntArray/"
+            "bsGetNonUniformUIntArray: ");
+    bsGetNonUniformUIntArray(bitStore, offset = offsetStart,
+                                   numRnd, bitsTotal, numBitsList, randCmp);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      unsigned mask = (numBits < 32)?
+        ~((~(unsigned)0) << numBits):~(unsigned)0;
+      unsigned v = randSrc[i] & mask,
+        r = randCmp[i];
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log( "Expected %""u"", got %""u"",\n seed = %lu,"
+                " i = %lu, bits=%u\n",
+                v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    if (numRnd > 1)
+    {
+      unsigned numBits = numBitsList[0];
+      unsigned mask = (numBits < 32)?
+        ~((~(unsigned)0) << numBits):~(unsigned)0;
+      unsigned v = randSrc[0] & mask;
+      unsigned r;
+      bsGetNonUniformUIntArray(bitStore, offsetStart, 1, numBits,
+                                     numBitsList, &r);
+      if (r != v)
+      {
+        log_log("Expected %""u"", got %""u"", seed = %lu,"
+                " one value extraction\n",
+                v, r, seedval);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    log_log(" passed\n");
+    ma_free(numBitsList);
+    numBitsList = NULL;
+  }
+  log_log("bsNonStoreUniformIntArray/bsGetInt: ");
+  {
+    BitOffset bitsTotal = 0;
+    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    for (i = 0; i < numRnd; ++i)
+      bitsTotal += (numBitsList[i] = random()%32 + 1);
+    offset = offsetStart;
+    bsStoreNonUniformIntArray(bitStore, offset, numRnd, bitsTotal,
+                                     numBitsList, (int *)randSrc);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      int mask = (numBits < 32)
+        ? ~((~(int)0) << numBits) : ~(int)0;
+      int m = (int)1 << (numBits - 1);
+      int v = (int)((randSrc[i] & mask) ^ m) - m;
+      int r = bsGetInt(bitStore, offset, numBits);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %""d"", got %""d"",\n"
+                    "seed = %lu, i = %lu, numBits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+      offset += numBits;
+    }
+    log_log("passed\n");
+    log_log("bsStoreNonUniformIntArray/"
+            "bsGetNonUniformIntArray: ");
+    bsGetNonUniformIntArray(bitStore, offset = offsetStart, numRnd,
+                                   bitsTotal, numBitsList,
+                                   (int *)randCmp);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      int mask = (numBits < 32)
+        ? ~((~(int)0) << numBits) : ~(int)0;
+      int m = (int)1 << (numBits - 1);
+      int v = (int)((randSrc[i] & mask) ^ m) - m;
+      int r = randCmp[i];
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %""d"", got %""d"
+                ", seed = %lu, i = %lu\n",
+                v, r, seedval, (unsigned long)i);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    if (numRnd > 0)
+    {
+      unsigned numBits = numBitsList[0];
+      int mask = (numBits < 32)
+        ? ~((~(int)0) << numBits) : ~(int)0;
+      int m = (int)1 << (numBits - 1);
+      int v = (int)((randSrc[0] & mask) ^ m) - m;
+      int r = 0;
+      bsGetNonUniformIntArray(bitStore, offsetStart,
+                                     1, numBits, numBitsList, &r);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %""d"", got %""d"
+                ", seed = %lu, one value extraction\n",
+                v, r, seedval);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    log_log("passed\n");
+    ma_free(numBitsList);
+    numBitsList = NULL;
+  }
+
   if (numRnd > 0)
   {
     log_log("bsCopy: ");

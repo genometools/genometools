@@ -66,15 +66,34 @@ enum {
 /** store array of unsigned ints in BitString */
 #define bsStoreUniformUIntArray(str, offset, numBits, numValues, val) \
   bsStoreUniformUInt32Array(str, offset, numBits, numValues, val)
+/** store array of unsigned ints in BitString */
+#define bsStoreNonUniformUIntArray(str, offset, numValues, bitsTotal, \
+                                   numBitsList, val)                  \
+  bsStoreNonUniformUInt32Array(str, offset, numValues, bitsTotal, \
+                               numBitsList, val)
+/** store array of unsigned ints in BitString */
+#define bsStoreNonUniformIntArray(str, offset, numValues, bitsTotal, \
+                                  numBitsList, val)                  \
+  bsStoreNonUniformInt32Array(str, offset, numValues, bitsTotal, \
+                              numBitsList, val)
 /** store array of ints in BitString */
 #define bsStoreUniformIntArray(str, offset, numBits, numValues, val) \
   bsStoreUniformInt32Array(str, offset, numBits, numValues, val)
 /** get array of unsigned ints from BitString */
 #define bsGetUniformUIntArray(str, offset, numBits, numValues, val) \
   bsGetUniformUInt32Array(str, offset, numBits, numValues, val)
+/** get array of unsigned ints from BitString */
+#define bsGetNonUniformUIntArray(str, offset, numValues, bitsTotal, \
+                                 numBitsList, val)                      \
+  bsGetNonUniformUInt32Array(str, offset, numValues, bitsTotal, \
+                             numBitsList, val)
 /** get array of ints from BitString */
 #define bsGetUniformIntArray(str, offset, numBits, numValues, val) \
   bsGetUniformInt32Array(str, offset, numBits, numValues, val)
+#define bsGetNonUniformIntArray(str, offset, numValues, bitsTotal, \
+                                numBitsList, val)                  \
+  bsGetNonUniformInt32Array(str, offset, numValues, bitsTotal, \
+                             numBitsList, val)
 
 /**
  * \brief Computes number of BitElem objects needed to store requested number
@@ -346,6 +365,7 @@ bsStoreInt32(BitString str, BitOffset offset, unsigned numBits, uint32_t val);
 static inline void
 bsStoreInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val);
 /* higher level functions */
+
 /**
  * \brief Store n unsigned integers of specified length from array, in
  * bitstring, starting at given position.
@@ -394,6 +414,72 @@ bsStoreUniformUInt32Array(BitString str, BitOffset offset, unsigned numBits,
 void
 bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
                           size_t numValues, const uint64_t val[]);
+
+/**
+ * \brief Store n unsigned integers of specified length from array, in
+ * bitstring, starting at given position.
+ * @param str bitstring to write to
+ * @param offset position to start writing at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList number of bits composing each integer, one bit
+ * count per value
+ * @param val read integers from this array
+ */
+void
+bsStoreNonUniformUInt8Array(
+  BitString str, BitOffset offset, size_t numValues, BitOffset totalBitsLeft,
+  unsigned *numBitsList, const uint8_t val[]);
+/**
+ * \brief Store n unsigned integers of specified length from array, in
+ * bitstring, starting at given position.
+ * @param str bitstring to write to
+ * @param offset position to start writing at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList number of bits composing each integer, one bit
+ * count per value
+ * @param val read integers from this array
+ */
+void
+bsStoreNonUniformUInt16Array(
+  BitString str, BitOffset offset, size_t numValues, BitOffset totalBitsLeft,
+  unsigned *numBitsList, const uint16_t val[]);
+/**
+ * \brief Store n unsigned integers of specified length from array, in
+ * bitstring, starting at given position.
+ * @param str bitstring to write to
+ * @param offset position to start writing at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList number of bits composing each integer, one bit
+ * count per value
+ * @param val read integers from this array
+ */
+void
+bsStoreNonUniformUInt32Array(
+  BitString str, BitOffset offset, size_t numValues, BitOffset totalBitsLeft,
+  unsigned *numBitsList, const uint32_t val[]);
+/**
+ * \brief Store n unsigned integers of specified length from array, in
+ * bitstring, starting at given position.
+ * @param str bitstring to write to
+ * @param offset position to start writing at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList number of bits composing each integer, one bit
+ * count per value
+ * @param val read integers from this array
+ */
+void
+bsStoreNonUniformUInt64Array(
+  BitString str, BitOffset offset, size_t numValues, BitOffset totalBitsLeft,
+  unsigned *numBitsList, const uint64_t val[]);
+
 /**
  * \brief Store n unsigned integers of specified length from array, in
  * bitstring, starting at given position.
@@ -442,6 +528,7 @@ bsStoreUniformInt32Array(BitString str, BitOffset offset, unsigned numBits,
 static inline void
 bsStoreUniformInt64Array(BitString str, BitOffset offset, unsigned numBits,
                          size_t numValues, const int64_t val[]);
+
 /**
  * \brief Retrieve n unsigned integers of specified length from
  * bitstring, starting at given position.
@@ -490,6 +577,7 @@ bsGetUniformUInt32Array(constBitString str, BitOffset offset, unsigned numBits,
 void
 bsGetUniformUInt64Array(constBitString str, BitOffset offset, unsigned numBits,
                         size_t numValues, uint64_t val[]);
+
 /**
  * \brief Retrieve n integers of specified length from bitstring,
  * starting at given position.
@@ -540,6 +628,128 @@ bsGetUniformInt64Array(constBitString str, BitOffset offset, unsigned numBits,
                        size_t numValues, int64_t val[]);
 
 /**
+ * \brief Retrieve n unsigned integers of specified length from
+ * bitstring, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val store integers read in this array
+ */
+void
+bsGetNonUniformUInt8Array(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], uint8_t val[]);
+/**
+ * \brief Retrieve n unsigned integers of specified length from
+ * bitstring, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val store integers read in this array
+ */
+void
+bsGetNonUniformUInt16Array(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], uint16_t val[]);
+/**
+ * \brief Retrieve n unsigned integers of specified length from
+ * bitstring, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val store integers read in this array
+ */
+void
+bsGetNonUniformUInt32Array(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], uint32_t val[]);
+/**
+ * \brief Retrieve n unsigned integers of specified length from
+ * bitstring, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val store integers read in this array
+ */
+void
+bsGetNonUniformUInt64Array(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], uint64_t val[]);
+
+/**
+ * \brief Retrieve n unsigned integers of specified length from
+ * bitstring, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val store integers read in this array
+ */
+void
+bsGetNonUniformInt8Array(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], int8_t val[]);
+/**
+ * \brief Retrieve n unsigned integers of specified length from
+ * bitstring, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val store integers read in this array
+ */
+void
+bsGetNonUniformInt16Array(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], int16_t val[]);
+/**
+ * \brief Retrieve n unsigned integers of specified length from
+ * bitstring, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val store integers read in this array
+ */
+void
+bsGetNonUniformInt32Array(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], int32_t val[]);
+/**
+ * \brief Retrieve n unsigned integers of specified length from
+ * bitstring, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val store integers read in this array
+ */
+void
+bsGetNonUniformInt64Array(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], int64_t val[]);
+
+/**
  * \brief Add n unsigned integers of specified length from
  * bitstring to the given vector of values, starting at given position.
  * @param str bitstring to read from
@@ -553,7 +763,6 @@ void
 bsGetUniformUInt8ArrayAdd(constBitString str, BitOffset offset,
                           unsigned numBits, size_t numValues,
                           uint8_t val[]);
-
 /**
  * \brief Add n unsigned integers of specified length from
  * bitstring to the given vector of values, starting at given position.
@@ -568,7 +777,6 @@ void
 bsGetUniformUInt16ArrayAdd(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            uint16_t val[]);
-
 /**
  * \brief Add n unsigned integers of specified length from
  * bitstring to the given vector of values, starting at given position.
@@ -583,7 +791,6 @@ void
 bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            uint32_t val[]);
-
 /**
  * \brief Add n unsigned integers of specified length from
  * bitstring to the given vector of values, starting at given position.
@@ -598,6 +805,136 @@ void
 bsGetUniformUInt64ArrayAdd(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            uint64_t val[]);
+
+/**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetNonUniformUInt8ArrayAdd(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], uint8_t val[]);
+/**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetNonUniformUInt16ArrayAdd(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], uint16_t val[]);
+/**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetNonUniformUInt32ArrayAdd(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], uint32_t val[]);
+/**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetNonUniformUInt64ArrayAdd(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], uint64_t val[]);
+
+/**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetNonUniformInt8ArrayAdd(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], int8_t val[]);
+/**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetNonUniformInt16ArrayAdd(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], int16_t val[]);
+/**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetNonUniformInt32ArrayAdd(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], int32_t val[]);
+/**
+ * \brief Add n unsigned integers of specified length from
+ * bitstring to the given vector of values, starting at given position.
+ * @param str bitstring to read from
+ * @param offset position to start reading at (bit exact)
+ * @param numValues number of integers to read
+ * @param numBitsTotal number of bits to be read in total, must equal
+ * \f$\sum^\mathrm{numValues}_i numBitsList[i]\f$
+ * @param numBitsList vector of number of bits composing each integer
+ * @param val sum of integer read and the value in val will be
+ * returned in this array
+ */
+void
+bsGetNonUniformInt64ArrayAdd(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], int64_t val[]);
 
 /**
  * \brief Compares substrings of bitstrings, starting at respective offsets,

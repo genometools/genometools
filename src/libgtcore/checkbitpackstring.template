@@ -60,6 +60,7 @@ genBitCount(@uOpType@ v)
 
 #define freeResourcesAndReturn(retval) \
   do {                                 \
+    ma_free(numBitsList);              \
     ma_free(randSrc);                  \
     ma_free(randCmp);                  \
     ma_free(bitStore);                 \
@@ -75,6 +76,7 @@ bitPackString@iTypeTag@_unit_test(Error *err)
   @uOpType@ *randSrc = NULL; /*< create random ints here for input as bit
                                 *  store */
   @uOpType@ *randCmp = NULL; /*< used for random ints read back */
+  unsigned *numBitsList = NULL;
   size_t i, numRnd;
   BitOffset offsetStart, offset;
   unsigned long seedval;
@@ -360,6 +362,149 @@ bitPackString@iTypeTag@_unit_test(Error *err)
     }
     log_log("passed\n");
   }
+
+  log_log("bsStoreNonUniform@uTypeTag@Array/bsGet@uTypeTag@: ");
+  {
+    BitOffset bitsTotal = 0;
+    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    for (i = 0; i < numRnd; ++i)
+      bitsTotal += (numBitsList[i] = random()%@bitSize@ + 1);
+    offset = offsetStart;
+    bsStoreNonUniform@uTypeTag@Array(bitStore, offset, numRnd, bitsTotal,
+                                     numBitsList, randSrc);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      @uOpType@ mask = (numBits < @bitSize@)?
+        ~((~(@uOpType@)0) << numBits):~(@uOpType@)0;
+      @uOpType@ v = randSrc[i] & mask;
+      @uOpType@ r = bsGet@uTypeTag@(bitStore, offset, numBits);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"@uOpPRI@", got %"@uOpPRI@",\n"
+                "seed = %lu, i = %lu, bits=%u\n",
+                v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+      offset += numBits;
+    }
+    log_log("passed\n");
+    log_log("bsStoreNonUniform@uTypeTag@Array/"
+            "bsGetNonUniform@uTypeTag@Array: ");
+    bsGetNonUniform@uTypeTag@Array(bitStore, offset = offsetStart,
+                                   numRnd, bitsTotal, numBitsList, randCmp);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      @uOpType@ mask = (numBits < @bitSize@)?
+        ~((~(@uOpType@)0) << numBits):~(@uOpType@)0;
+      @uOpType@ v = randSrc[i] & mask,
+        r = randCmp[i];
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log( "Expected %"@uOpPRI@", got %"@uOpPRI@",\n seed = %lu,"
+                " i = %lu, bits=%u\n",
+                v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    if (numRnd > 1)
+    {
+      unsigned numBits = numBitsList[0];
+      @uOpType@ mask = (numBits < @bitSize@)?
+        ~((~(@uOpType@)0) << numBits):~(@uOpType@)0;
+      @uOpType@ v = randSrc[0] & mask;
+      @uOpType@ r;
+      bsGetNonUniform@uTypeTag@Array(bitStore, offsetStart, 1, numBits,
+                                     numBitsList, &r);
+      if (r != v)
+      {
+        log_log("Expected %"@uOpPRI@", got %"@uOpPRI@", seed = %lu,"
+                " one value extraction\n",
+                v, r, seedval);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    log_log(" passed\n");
+    ma_free(numBitsList);
+    numBitsList = NULL;
+  }
+  log_log("bsNonStoreUniform@iTypeTag@Array/bsGet@iTypeTag@: ");
+  {
+    BitOffset bitsTotal = 0;
+    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    for (i = 0; i < numRnd; ++i)
+      bitsTotal += (numBitsList[i] = random()%@bitSize@ + 1);
+    offset = offsetStart;
+    bsStoreNonUniform@iTypeTag@Array(bitStore, offset, numRnd, bitsTotal,
+                                     numBitsList, (@iOpType@ *)randSrc);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      @iOpType@ mask = (numBits < @bitSize@)
+        ? ~((~(@iOpType@)0) << numBits) : ~(@iOpType@)0;
+      @iOpType@ m = (@iOpType@)1 << (numBits - 1);
+      @iOpType@ v = (@iOpType@)((randSrc[i] & mask) ^ m) - m;
+      @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, numBits);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"@dOpPRI@", got %"@dOpPRI@",\n"
+                    "seed = %lu, i = %lu, numBits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+      offset += numBits;
+    }
+    log_log("passed\n");
+    log_log("bsStoreNonUniform@iTypeTag@Array/"
+            "bsGetNonUniform@iTypeTag@Array: ");
+    bsGetNonUniform@iTypeTag@Array(bitStore, offset = offsetStart, numRnd,
+                                   bitsTotal, numBitsList,
+                                   (@iOpType@ *)randCmp);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      @iOpType@ mask = (numBits < @bitSize@)
+        ? ~((~(@iOpType@)0) << numBits) : ~(@iOpType@)0;
+      @iOpType@ m = (@iOpType@)1 << (numBits - 1);
+      @iOpType@ v = (@iOpType@)((randSrc[i] & mask) ^ m) - m;
+      @iOpType@ r = randCmp[i];
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"@dOpPRI@", got %"@dOpPRI@
+                ", seed = %lu, i = %lu\n",
+                v, r, seedval, (unsigned long)i);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    if (numRnd > 0)
+    {
+      unsigned numBits = numBitsList[0];
+      @iOpType@ mask = (numBits < @bitSize@)
+        ? ~((~(@iOpType@)0) << numBits) : ~(@iOpType@)0;
+      @iOpType@ m = (@iOpType@)1 << (numBits - 1);
+      @iOpType@ v = (@iOpType@)((randSrc[0] & mask) ^ m) - m;
+      @iOpType@ r = 0;
+      bsGetNonUniform@iTypeTag@Array(bitStore, offsetStart,
+                                     1, numBits, numBitsList, &r);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"@dOpPRI@", got %"@dOpPRI@
+                ", seed = %lu, one value extraction\n",
+                v, r, seedval);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    log_log("passed\n");
+    ma_free(numBitsList);
+    numBitsList = NULL;
+  }
+
   if (numRnd > 0)
   {
     log_log("bsCopy: ");

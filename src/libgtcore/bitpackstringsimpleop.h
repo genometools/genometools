@@ -159,7 +159,7 @@ requiredInt64Bits(int64_t v)
 
 static inline void
 bsStoreUniformInt8Array(BitString str, BitOffset offset, unsigned numBits,
-                       size_t numValues, const int8_t val[])
+                        size_t numValues, const int8_t val[])
 {
   bsStoreUniformUInt8Array(str, offset, numBits, numValues,
                            (const uint8_t *)val);
@@ -167,7 +167,7 @@ bsStoreUniformInt8Array(BitString str, BitOffset offset, unsigned numBits,
 
 static inline void
 bsStoreUniformInt16Array(BitString str, BitOffset offset, unsigned numBits,
-                       size_t numValues, const int16_t val[])
+                         size_t numValues, const int16_t val[])
 {
   bsStoreUniformUInt16Array(str, offset, numBits, numValues,
                             (const uint16_t *)val);
@@ -175,7 +175,7 @@ bsStoreUniformInt16Array(BitString str, BitOffset offset, unsigned numBits,
 
 static inline void
 bsStoreUniformInt32Array(BitString str, BitOffset offset, unsigned numBits,
-                       size_t numValues, const int32_t val[])
+                         size_t numValues, const int32_t val[])
 {
   bsStoreUniformUInt32Array(str, offset, numBits, numValues,
                             (const uint32_t *)val);
@@ -183,10 +183,46 @@ bsStoreUniformInt32Array(BitString str, BitOffset offset, unsigned numBits,
 
 static inline void
 bsStoreUniformInt64Array(BitString str, BitOffset offset, unsigned numBits,
-                       size_t numValues, const int64_t val[])
+                         size_t numValues, const int64_t val[])
 {
   bsStoreUniformUInt64Array(str, offset, numBits, numValues,
                             (const uint64_t *)val);
+}
+
+static inline void
+bsStoreNonUniformInt8Array(BitString str, BitOffset offset, size_t numValues,
+                           BitOffset totalBits, unsigned *numBitsList,
+                           const int8_t val[])
+{
+  bsStoreNonUniformUInt8Array(str, offset, numValues, totalBits, numBitsList,
+                              (const uint8_t *)val);
+}
+
+static inline void
+bsStoreNonUniformInt16Array(BitString str, BitOffset offset, size_t numValues,
+                            BitOffset totalBits, unsigned *numBitsList,
+                            const int16_t val[])
+{
+  bsStoreNonUniformUInt16Array(str, offset, numValues, totalBits, numBitsList,
+                               (const uint16_t *)val);
+}
+
+static inline void
+bsStoreNonUniformInt32Array(BitString str, BitOffset offset, size_t numValues,
+                            BitOffset totalBits, unsigned *numBitsList,
+                            const int32_t val[])
+{
+  bsStoreNonUniformUInt32Array(str, offset, numValues, totalBits, numBitsList,
+                               (const uint32_t *)val);
+}
+
+static inline void
+bsStoreNonUniformInt64Array(BitString str, BitOffset offset, size_t numValues,
+                            BitOffset totalBits, unsigned *numBitsList,
+                            const int64_t val[])
+{
+  bsStoreNonUniformUInt64Array(str, offset, numValues, totalBits, numBitsList,
+                               (const uint64_t *)val);
 }
 
 static inline void

@@ -139,6 +139,7 @@ bsStoreUInt8(BitString str, BitOffset offset,
 /*
  * include variations of vector operations
  */
+
 /*
   Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 
@@ -154,6 +155,8 @@ bsStoreUInt8(BitString str, BitOffset offset,
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
+#include "libgtcore/unused.h"
 
 void
 bsGetUniformUInt8Array(constBitString str, BitOffset offset,
@@ -217,6 +220,140 @@ bsGetUniformUInt8Array(constBitString str, BitOffset offset,
   }
 }
 
+void
+bsGetNonUniformUInt8Array(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], uint8_t val[])
+{
+  /* idea: read as much as possible from str in each iteration,
+   * accumulate if bitsLeft < numBits */
+  size_t j = 0;
+  BitOffset totalBitsLeft = numBitsTotal;
+  size_t elemStart = offset/bitElemBits;
+  unsigned bitTop = offset%bitElemBits,
+    bitsRead = 0; /*< how many bits in current *p are read */
+  const BitElem *p = str + elemStart;
+  unsigned bitsInAccum = 0;
+  unsigned long accum = 0;
+  assert(str && val);
+  /* user requested zero values, ugly but must be handled, since legal */
+  if (!totalBitsLeft)
+  {
+    return;
+  }
+  /* get bits of first element if not aligned */
+  if (bitTop)
+  {
+    unsigned long mask; /*< all of the bits we want to get from *p */
+    unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
+    unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
+    mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+    accum = ((*p++) & mask) >> unreadRightBits;
+    bitsInAccum += bits2Read;
+    totalBitsLeft -= bits2Read;
+  }
+  while (j < numValues)
+  {
+    while (bitsInAccum < numBitsList[j] && totalBitsLeft)
+    {
+      unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
+      unsigned long mask;
+      bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
+      mask = (~((~(unsigned long)0) << bits2Read));
+      accum = accum << bits2Read | (((*p) >> (bitElemBits
+                                              - bits2Read - bitsRead)) & mask);
+      bitsInAccum += bits2Read;
+      totalBitsLeft -= bits2Read;
+      /* all of *p consumed? */
+      if ((bitsRead += bits2Read) == bitElemBits)
+      {
+        ++p, bitsRead = 0;
+      }
+    }
+    {
+      unsigned numBits;
+      /* now we have enough bits in accum */
+      while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
+      {
+        unsigned long valMask;
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        valMask = ~(unsigned long)0;
+        if (numBits < (sizeof (val[0])*CHAR_BIT))
+          valMask = ~(valMask << numBits);
+        val[j++] = ((accum >> (bitsInAccum - numBits)) & valMask );
+        bitsInAccum -= numBits;
+      }
+    }
+  }
+}
+
+void
+bsGetNonUniformInt8Array(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], int8_t val[])
+{
+  /* idea: read as much as possible from str in each iteration,
+   * accumulate if bitsLeft < numBits */
+  size_t j = 0;
+  BitOffset totalBitsLeft = numBitsTotal;
+  size_t elemStart = offset/bitElemBits;
+  unsigned bitTop = offset%bitElemBits,
+    bitsRead = 0; /*< how many bits in current *p are read */
+  const BitElem *p = str + elemStart;
+  unsigned bitsInAccum = 0;
+  unsigned long accum = 0;
+  assert(str && val);
+  /* user requested zero values, ugly but must be handled, since legal */
+  if (!totalBitsLeft)
+  {
+    return;
+  }
+  /* get bits of first element if not aligned */
+  if (bitTop)
+  {
+    unsigned long mask; /*< all of the bits we want to get from *p */
+    unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
+    unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
+    mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+    accum = ((*p++) & mask) >> unreadRightBits;
+    bitsInAccum += bits2Read;
+    totalBitsLeft -= bits2Read;
+  }
+  while (j < numValues)
+  {
+    while (bitsInAccum < numBitsList[j] && totalBitsLeft)
+    {
+      unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
+      unsigned long mask;
+      bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
+      mask = (~((~(unsigned long)0) << bits2Read));
+      accum = accum << bits2Read | (((*p) >> (bitElemBits
+                                              - bits2Read - bitsRead)) & mask);
+      bitsInAccum += bits2Read;
+      totalBitsLeft -= bits2Read;
+      /* all of *p consumed? */
+      if ((bitsRead += bits2Read) == bitElemBits)
+      {
+        ++p, bitsRead = 0;
+      }
+    }
+    {
+      unsigned numBits;
+      /* now we have enough bits in accum */
+      while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
+      {
+        unsigned long valMask = (numBits < 8)
+          ? ~((~(unsigned long)0) << numBits) : ~(unsigned long)0;
+        int8_t m = (int8_t)1 << (numBits - 1);
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        val[j++] = ((((accum >> (bitsInAccum - numBits)) & valMask)
+                              ^ m) - m);
+        bitsInAccum -= numBits;
+      }
+    }
+  }
+}
+
 /*
   Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 
@@ -232,6 +369,8 @@ bsGetUniformUInt8Array(constBitString str, BitOffset offset,
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
+#include "libgtcore/unused.h"
 
 void
 bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
@@ -354,6 +493,143 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
   }
 }
 
+void
+bsStoreNonUniformUInt8Array(
+  BitString str, BitOffset offset, UNUSED size_t numValues,
+  BitOffset totalBitsLeft, unsigned numBitsList[], const uint8_t val[])
+{
+  /* idea: read as much as possible from val in each iteration,
+   * accumulate if bitsInAccum < bitElemBits */
+  size_t j = 0;
+  unsigned bitTop = offset%bitElemBits,
+    bitsLeft; /*< how many bits in currentVal == val[j] are left */
+  BitElem *p = str + offset/bitElemBits;
+  unsigned bitsInAccum;
+  unsigned long accum, valMask = ~(unsigned long)0, currentVal;
+  if (numBitsList[0] < (sizeof (val[0])*CHAR_BIT))
+    valMask = ~(valMask << numBitsList[0]);
+  assert(str && val);
+  assert(numBitsList[0] <= sizeof (val[0])*CHAR_BIT);
+  /* user requested zero values, ugly but must be handled, since legal */
+  if (!totalBitsLeft)
+  {
+    return;
+  }
+  accum = val[0] & valMask;
+  totalBitsLeft -= bitsInAccum = numBitsList[0];
+  if (totalBitsLeft)
+  {
+    unsigned numBits = numBitsList[++j];
+    assert(numBits <= sizeof (val[0])*CHAR_BIT);
+    valMask = (numBits < 8)?
+      ~((~(uint8_t)0) << numBits):~(uint8_t)0;
+    currentVal = val[j] & valMask;
+    totalBitsLeft -= bitsLeft = numBits;
+  }
+  else
+  {
+    currentVal = 0;
+    bitsLeft = 0;
+  }
+  /* set bits of first element if not aligned */
+  if (bitTop)
+  {
+    BitElem mask = ~(~(unsigned long)0 << (bitElemBits - bitTop));
+    while ((totalBitsLeft || bitsLeft) && bitsInAccum < bitElemBits - bitTop)
+    {
+      unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
+
+      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      {
+        accum = accum << bits2Read
+          | ((currentVal) >> (bitsLeft - bits2Read));
+      }
+      else
+        accum = currentVal;
+
+      /* all of val[j] consumed? */
+      bitsInAccum += bits2Read;
+      if (!(bitsLeft -= bits2Read) && totalBitsLeft)
+      {
+        unsigned numBits = numBitsList[++j];
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        valMask = (numBits < 8)?
+          ~((~(uint8_t)0) << numBits):~(uint8_t)0;
+        currentVal = val[j] & valMask, totalBitsLeft -= bitsLeft = numBits;
+      }
+    }
+    /* at this point accum holds as many bits as we could get
+     * to fill the first BitElem in str, but did we get enough? */
+    if (bitsInAccum < bitElemBits - bitTop)
+    {
+      /* no there's not enough */
+      unsigned backShift = bitElemBits - bitsInAccum - bitTop;
+      mask &= ~(unsigned long)0 << backShift;
+      *p = (*p & ~mask) | ((accum << backShift) & mask);
+      /* TODO: try wether  r = a ^ ((a ^ b) & mask) is faster, see below */
+      return; /* if we couldn't gather more bits, there's none left */
+    }
+    else
+    {
+      /* yep, just or with accumVals */
+      *p = (*p & ~mask) | (accum >> (bitsInAccum - bitElemBits + bitTop));
+      ++p;
+      bitsInAccum -= bitElemBits - bitTop;
+    }
+  }
+
+  while (totalBitsLeft || (bitsInAccum + bitsLeft) > bitElemBits)
+  {
+    while ((totalBitsLeft || bitsLeft)
+          && ((bitsInAccum < bitElemBits)
+              || (bitsLeft < sizeof (accum)*CHAR_BIT - bitsInAccum)))
+    {
+      unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
+      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      {
+        unsigned long mask = ~((~(unsigned long)0) << bits2Read);
+        accum = accum << bits2Read
+          | ((currentVal >> (bitsLeft - bits2Read)) & mask);
+      }
+      else
+        accum = currentVal;
+      bitsInAccum += bits2Read;
+      /* all of currentVal == val[j] consumed? */
+      if (bits2Read == bitsLeft && totalBitsLeft)
+      {
+        unsigned numBits = numBitsList[++j];
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        valMask = (numBits < 8)?
+          ~((~(uint8_t)0) << numBits):~(uint8_t)0;
+        currentVal = val[j] & valMask, totalBitsLeft -= bitsLeft = numBits;
+      }
+      else
+        bitsLeft -= bits2Read;
+    }
+    /* now we have enough bits in accum */
+    while (bitsInAccum >= bitElemBits)
+    {
+      *p++ = accum >> (bitsInAccum - bitElemBits);
+      bitsInAccum -= bitElemBits;
+    }
+  }
+  /* write the rest bits left in accum and currentVal */
+  accum = (accum << bitsLeft)
+    | (currentVal & (valMask >> (numBitsList[j] - bitsLeft)));
+  bitsInAccum += bitsLeft;
+  while (bitsInAccum >= bitElemBits)
+  {
+    *p++ = accum >> (bitsInAccum - bitElemBits);
+    bitsInAccum -= bitElemBits;
+  }
+  if (bitsInAccum)
+  {
+    unsigned long mask =
+      ~(unsigned long)0 << (bitElemBits - bitsInAccum);
+    *p = (*p & ~mask) | ((accum << (bitElemBits - bitsInAccum))& mask);
+  }
+}
+
 /*
   Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 
@@ -369,6 +645,8 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
+#include "libgtcore/unused.h"
 
 void
 bsGetUniformUInt8ArrayAdd(constBitString str, BitOffset offset,
@@ -428,6 +706,140 @@ bsGetUniformUInt8ArrayAdd(constBitString str, BitOffset offset,
     {
       val[j++] += ((accum >> (bitsInAccum - numBits)) & valMask );
       bitsInAccum -= numBits;
+    }
+  }
+}
+
+void
+bsGetNonUniformUInt8ArrayAdd(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], uint8_t val[])
+{
+  /* idea: read as much as possible from str in each iteration,
+   * accumulate if bitsLeft < numBits */
+  size_t j = 0;
+  BitOffset totalBitsLeft = numBitsTotal;
+  size_t elemStart = offset/bitElemBits;
+  unsigned bitTop = offset%bitElemBits,
+    bitsRead = 0; /*< how many bits in current *p are read */
+  const BitElem *p = str + elemStart;
+  unsigned bitsInAccum = 0;
+  unsigned long accum = 0;
+  assert(str && val);
+  /* user requested zero values, ugly but must be handled, since legal */
+  if (!totalBitsLeft)
+  {
+    return;
+  }
+  /* get bits of first element if not aligned */
+  if (bitTop)
+  {
+    unsigned long mask; /*< all of the bits we want to get from *p */
+    unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
+    unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
+    mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+    accum = ((*p++) & mask) >> unreadRightBits;
+    bitsInAccum += bits2Read;
+    totalBitsLeft -= bits2Read;
+  }
+  while (j < numValues)
+  {
+    while (bitsInAccum < numBitsList[j] && totalBitsLeft)
+    {
+      unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
+      unsigned long mask;
+      bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
+      mask = (~((~(unsigned long)0) << bits2Read));
+      accum = accum << bits2Read | (((*p) >> (bitElemBits
+                                              - bits2Read - bitsRead)) & mask);
+      bitsInAccum += bits2Read;
+      totalBitsLeft -= bits2Read;
+      /* all of *p consumed? */
+      if ((bitsRead += bits2Read) == bitElemBits)
+      {
+        ++p, bitsRead = 0;
+      }
+    }
+    {
+      unsigned numBits;
+      /* now we have enough bits in accum */
+      while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
+      {
+        unsigned long valMask;
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        valMask = ~(unsigned long)0;
+        if (numBits < (sizeof (val[0])*CHAR_BIT))
+          valMask = ~(valMask << numBits);
+        val[j++] += ((accum >> (bitsInAccum - numBits)) & valMask );
+        bitsInAccum -= numBits;
+      }
+    }
+  }
+}
+
+void
+bsGetNonUniformInt8ArrayAdd(
+  constBitString str, BitOffset offset, size_t numValues,
+  BitOffset numBitsTotal, unsigned numBitsList[], int8_t val[])
+{
+  /* idea: read as much as possible from str in each iteration,
+   * accumulate if bitsLeft < numBits */
+  size_t j = 0;
+  BitOffset totalBitsLeft = numBitsTotal;
+  size_t elemStart = offset/bitElemBits;
+  unsigned bitTop = offset%bitElemBits,
+    bitsRead = 0; /*< how many bits in current *p are read */
+  const BitElem *p = str + elemStart;
+  unsigned bitsInAccum = 0;
+  unsigned long accum = 0;
+  assert(str && val);
+  /* user requested zero values, ugly but must be handled, since legal */
+  if (!totalBitsLeft)
+  {
+    return;
+  }
+  /* get bits of first element if not aligned */
+  if (bitTop)
+  {
+    unsigned long mask; /*< all of the bits we want to get from *p */
+    unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
+    unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
+    mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+    accum = ((*p++) & mask) >> unreadRightBits;
+    bitsInAccum += bits2Read;
+    totalBitsLeft -= bits2Read;
+  }
+  while (j < numValues)
+  {
+    while (bitsInAccum < numBitsList[j] && totalBitsLeft)
+    {
+      unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
+      unsigned long mask;
+      bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
+      mask = (~((~(unsigned long)0) << bits2Read));
+      accum = accum << bits2Read | (((*p) >> (bitElemBits
+                                              - bits2Read - bitsRead)) & mask);
+      bitsInAccum += bits2Read;
+      totalBitsLeft -= bits2Read;
+      /* all of *p consumed? */
+      if ((bitsRead += bits2Read) == bitElemBits)
+      {
+        ++p, bitsRead = 0;
+      }
+    }
+    {
+      unsigned numBits;
+      /* now we have enough bits in accum */
+      while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
+      {
+        unsigned long valMask = (numBits < 8)
+          ? ~((~(unsigned long)0) << numBits) : ~(unsigned long)0;
+        int8_t m = (int8_t)1 << (numBits - 1);
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        val[j++] += ((((accum >> (bitsInAccum - numBits)) & valMask)
+                              ^ m) - m);
+        bitsInAccum -= numBits;
+      }
     }
   }
 }

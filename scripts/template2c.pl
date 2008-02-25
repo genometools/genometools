@@ -24,7 +24,7 @@ my %stdTypeReplacements =
      'uTypeTag' => [ 'UInt8', 'UInt16', 'UInt32', 'UInt64', 'UInt' ],
      'iTypeTag' => [ 'Int8', 'Int16', 'Int32', 'Int64', 'Int' ],
      'uOpPRI' => [ 'PRIu8', 'PRIu16', 'PRIu32', 'PRIu64', '"u"' ],
-     'iOpPRI' => [ 'PRId8', 'PRId16', 'PRId32', 'PRId64', '"d"' ]
+     'dOpPRI' => [ 'PRId8', 'PRId16', 'PRId32', 'PRId64', '"d"' ]
     );
 
 my ($lengthTag, @inputs) = @ARGV;

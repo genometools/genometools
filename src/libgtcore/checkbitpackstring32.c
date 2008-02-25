@@ -63,6 +63,7 @@ genBitCount(uint32_t v)
 
 #define freeResourcesAndReturn(retval) \
   do {                                 \
+    ma_free(numBitsList);              \
     ma_free(randSrc);                  \
     ma_free(randCmp);                  \
     ma_free(bitStore);                 \
@@ -78,6 +79,7 @@ bitPackStringInt32_unit_test(Error *err)
   uint32_t *randSrc = NULL; /*< create random ints here for input as bit
                                 *  store */
   uint32_t *randCmp = NULL; /*< used for random ints read back */
+  unsigned *numBitsList = NULL;
   size_t i, numRnd;
   BitOffset offsetStart, offset;
   unsigned long seedval;
@@ -363,6 +365,149 @@ bitPackStringInt32_unit_test(Error *err)
     }
     log_log("passed\n");
   }
+
+  log_log("bsStoreNonUniformUInt32Array/bsGetUInt32: ");
+  {
+    BitOffset bitsTotal = 0;
+    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    for (i = 0; i < numRnd; ++i)
+      bitsTotal += (numBitsList[i] = random()%32 + 1);
+    offset = offsetStart;
+    bsStoreNonUniformUInt32Array(bitStore, offset, numRnd, bitsTotal,
+                                     numBitsList, randSrc);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      uint32_t mask = (numBits < 32)?
+        ~((~(uint32_t)0) << numBits):~(uint32_t)0;
+      uint32_t v = randSrc[i] & mask;
+      uint32_t r = bsGetUInt32(bitStore, offset, numBits);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRIu32", got %"PRIu32",\n"
+                "seed = %lu, i = %lu, bits=%u\n",
+                v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+      offset += numBits;
+    }
+    log_log("passed\n");
+    log_log("bsStoreNonUniformUInt32Array/"
+            "bsGetNonUniformUInt32Array: ");
+    bsGetNonUniformUInt32Array(bitStore, offset = offsetStart,
+                                   numRnd, bitsTotal, numBitsList, randCmp);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      uint32_t mask = (numBits < 32)?
+        ~((~(uint32_t)0) << numBits):~(uint32_t)0;
+      uint32_t v = randSrc[i] & mask,
+        r = randCmp[i];
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log( "Expected %"PRIu32", got %"PRIu32",\n seed = %lu,"
+                " i = %lu, bits=%u\n",
+                v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    if (numRnd > 1)
+    {
+      unsigned numBits = numBitsList[0];
+      uint32_t mask = (numBits < 32)?
+        ~((~(uint32_t)0) << numBits):~(uint32_t)0;
+      uint32_t v = randSrc[0] & mask;
+      uint32_t r;
+      bsGetNonUniformUInt32Array(bitStore, offsetStart, 1, numBits,
+                                     numBitsList, &r);
+      if (r != v)
+      {
+        log_log("Expected %"PRIu32", got %"PRIu32", seed = %lu,"
+                " one value extraction\n",
+                v, r, seedval);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    log_log(" passed\n");
+    ma_free(numBitsList);
+    numBitsList = NULL;
+  }
+  log_log("bsNonStoreUniformInt32Array/bsGetInt32: ");
+  {
+    BitOffset bitsTotal = 0;
+    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    for (i = 0; i < numRnd; ++i)
+      bitsTotal += (numBitsList[i] = random()%32 + 1);
+    offset = offsetStart;
+    bsStoreNonUniformInt32Array(bitStore, offset, numRnd, bitsTotal,
+                                     numBitsList, (int32_t *)randSrc);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      int32_t mask = (numBits < 32)
+        ? ~((~(int32_t)0) << numBits) : ~(int32_t)0;
+      int32_t m = (int32_t)1 << (numBits - 1);
+      int32_t v = (int32_t)((randSrc[i] & mask) ^ m) - m;
+      int32_t r = bsGetInt32(bitStore, offset, numBits);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRId32", got %"PRId32",\n"
+                    "seed = %lu, i = %lu, numBits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+      offset += numBits;
+    }
+    log_log("passed\n");
+    log_log("bsStoreNonUniformInt32Array/"
+            "bsGetNonUniformInt32Array: ");
+    bsGetNonUniformInt32Array(bitStore, offset = offsetStart, numRnd,
+                                   bitsTotal, numBitsList,
+                                   (int32_t *)randCmp);
+    for (i = 0; i < numRnd; ++i)
+    {
+      unsigned numBits = numBitsList[i];
+      int32_t mask = (numBits < 32)
+        ? ~((~(int32_t)0) << numBits) : ~(int32_t)0;
+      int32_t m = (int32_t)1 << (numBits - 1);
+      int32_t v = (int32_t)((randSrc[i] & mask) ^ m) - m;
+      int32_t r = randCmp[i];
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRId32", got %"PRId32
+                ", seed = %lu, i = %lu\n",
+                v, r, seedval, (unsigned long)i);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    if (numRnd > 0)
+    {
+      unsigned numBits = numBitsList[0];
+      int32_t mask = (numBits < 32)
+        ? ~((~(int32_t)0) << numBits) : ~(int32_t)0;
+      int32_t m = (int32_t)1 << (numBits - 1);
+      int32_t v = (int32_t)((randSrc[0] & mask) ^ m) - m;
+      int32_t r = 0;
+      bsGetNonUniformInt32Array(bitStore, offsetStart,
+                                     1, numBits, numBitsList, &r);
+      ensure(had_err, r == v);
+      if (had_err)
+      {
+        log_log("Expected %"PRId32", got %"PRId32
+                ", seed = %lu, one value extraction\n",
+                v, r, seedval);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    log_log("passed\n");
+    ma_free(numBitsList);
+    numBitsList = NULL;
+  }
+
   if (numRnd > 0)
   {
     log_log("bsCopy: ");
