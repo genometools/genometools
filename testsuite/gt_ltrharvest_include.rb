@@ -48,7 +48,10 @@ if $gttestdata then
     Name "gt ltrharvest D. melanogaster chromosome #{chr} all runs"
     Keywords "gt_ltrharvest"
     Test do
-      run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz -dna -suf -lcp -tis -des", :maxtime => 500
+      run_test "#{$bin}gt suffixerator " +\
+               "-db #{$gttestdata}ltrharvest/d_mel/" +\
+               "#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz " +\
+               "-dna -suf -lcp -tis -des", :maxtime => 500
       runs_dmel.each_pair do |key,run|
         ltrun = LTRharvestRun.new("dmel_test",\
                                   run,\
@@ -60,7 +63,8 @@ if $gttestdata then
           resultanno = LTRAnnotation.new
           resultanno.load_from_ltrharvest(resultfile)
           refanno = LTRAnnotation.new
-          refanno.load_from_berkeley("#{$gttestdata}ltrharvest/d_mel/dmel_test_Run#{key}_#{chr}.result")
+          refanno.load_from_berkeley("#{$gttestdata}ltrharvest/d_mel/" +\
+                                     "dmel_test_Run#{key}_#{chr}.result")
           refanno.compare(resultanno) do |tp_list, htp_startpos_list,\
                                           htp_endpos_list, fp_list, fn_list,\
                                           difference|
@@ -267,5 +271,3 @@ while thisisnottheend
     end
   end
 end
-
-
