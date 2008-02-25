@@ -49,9 +49,9 @@ static void extract_feat_visitor_free(GenomeVisitor *gv)
   region_mapping_delete(extract_feat_visitor->region_mapping);
 }
 
-static int extract_join_feature(GenomeNode *gn, void *data, Error *err)
+static int extract_join_feature(GenomeNode *gn, ExtractFeatVisitor *v,
+                                Error *err)
 {
-  ExtractFeatVisitor *v = (ExtractFeatVisitor*) data;
   GenomeFeatureType gf_type;
   const char *raw_sequence;
   unsigned long raw_sequence_length;
@@ -113,11 +113,17 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
   }
 
   if (v->join) {
+    GenomeNodeIterator *gni;
+    GenomeNode *child;
     /* in this case we have to traverse the children */
     str_reset(v->sequence);
     v->reverse_strand = false;
-    had_err = genome_node_traverse_direct_children(gn, v, extract_join_feature,
-                                                   err);
+    gni = genome_node_iterator_new_direct(gn);
+    while (!had_err && (child = genome_node_iterator_next(gni))) {
+      if (extract_join_feature(child, v, err))
+        had_err = -1;
+    }
+    genome_node_iterator_delete(gni);
     if (!had_err && str_length(v->sequence)) {
       if (v->reverse_strand) {
         had_err = reverse_complement(str_get(v->sequence),
