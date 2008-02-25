@@ -111,6 +111,11 @@ Returns the strand of <code>genome_feature</code>.
 Returns the source of <code>genome_feature</code>.
 </p>
 <hr>
+<code>genome_feature:set_source(source)</code>
+<p>
+Set the source of <code>genome_feature</code> to <code>source</code>.
+</p>
+<hr>
 <code>genome_feature:output_leading()</code>
 <p>
 Show leading part of GFF3 output for <code>genome_feature</code>
@@ -119,6 +124,11 @@ Show leading part of GFF3 output for <code>genome_feature</code>
 <code>genome_feature:get_type()</code>
 <p>
 Return type of <code>genome_feature</code> as string.
+</p>
+<hr>
+<code>genome_feature:extract_sequence(type, join, region_mapping)</code>
+<p>
+Extract the sequence of <code>genome_feature</code>. If <code>join</code> is false and <code>genome_feature</code> has type <code>type</code> the sequence is returned (using <code>region_mapping</code> to get it). If <code>join</code> is true and <code>genome_feature</code> has children of type <code>type</code> their joined sequences are returned. If none of the above applies nil is returned.
 </p>
 <hr>
 <code>gff3_in_stream_new_sorted(filename)</code>
@@ -374,11 +384,6 @@ Returns the sequence id of <code>genome_node</code>.
 Set the sequence id of <code>genome_node</code> to <code>seqid</code>.
 </p>
 <hr>
-<code>genome_node:set_source(source)</code>
-<p>
-Set the source of <code>genome_node</code> to <code>source</code>.
-</p>
-<hr>
 <code>genome_node:accept(genome_visitor)</code>
 <p>
 Accept <code>genome_visitor</code>.
@@ -518,7 +523,7 @@ Show result of <code>stream_evaluator</code> on stdout.
 <div id="footer">
 Copyright &copy; 2008
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2008-02-21
+Last update: 2008-02-25
 </div>
 </div>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">

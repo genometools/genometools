@@ -16,12 +16,14 @@
 */
 
 #include "lauxlib.h"
+#include "libgtext/extract_feat_sequence.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/gff3_output.h"
 #include "libgtext/luahelper.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/genome_visitor_lua.h"
 #include "libgtlua/range_lua.h"
+#include "libgtlua/region_mapping_lua.h"
 
 static int genome_feature_lua_new(lua_State *L)
 {
@@ -222,6 +224,40 @@ static int genome_feature_lua_get_type(lua_State *L)
   return 1;
 }
 
+static int genome_feature_lua_extract_sequence(lua_State *L)
+{
+  GenomeNode **gn;
+  GenomeFeature *gf;
+  const char *typestr;
+  GenomeFeatureType type;
+  bool join;
+  RegionMapping **region_mapping;
+  Str *sequence;
+  Error *err;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a genome feature */
+  gf = genome_node_cast(genome_feature_class(), *gn);
+  luaL_argcheck(L, gf, 1, "not a genome feature");
+  typestr = lua_tostring(L, 2);
+  luaL_argcheck(L, !genome_feature_type_get(&type, typestr), 2,
+                "not a valid type");
+  join = lua_toboolean(L, 3);
+  region_mapping = check_region_mapping(L, 4);
+  err = error_new();
+  sequence = str_new();
+  if (extract_feat_sequence(sequence, *gn, type, join, *region_mapping, err)) {
+    str_delete(sequence);
+    return lua_gt_error(L, err);
+  }
+  if (str_length(sequence))
+    lua_pushstring(L, str_get(sequence));
+  else
+    lua_pushnil(L);
+  str_delete(sequence);
+  error_delete(err);
+  return 1;
+}
+
 static int genome_node_lua_delete(lua_State *L)
 {
   GenomeNode **gn;
@@ -251,6 +287,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "contains_marked", genome_node_lua_contains_marked },
   { "output_leading", genome_feature_lua_output_leading },
   { "get_type", genome_feature_lua_get_type },
+  { "extract_sequence", genome_feature_lua_extract_sequence },
   { NULL, NULL }
 };
 

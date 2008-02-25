@@ -71,6 +71,14 @@
 
    -- Return type of <genome_feature> as string.
    function genome_feature:get_type()
+
+   -- Extract the sequence of <genome_feature>.
+   -- If <join> is false and <genome_feature> has type <type> the sequence is
+   -- returned (using <region_mapping> to get it).
+   -- If <join> is true and <genome_feature> has children of type <type> their
+   -- joined sequences are returned.
+   -- If none of the above applies nil is returned.
+   function genome_feature:extract_sequence(type, join, region_mapping)
 */
 int luaopen_genome_node(lua_State*);
 
