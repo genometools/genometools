@@ -98,6 +98,21 @@ static void construct_description(Str *description, GenomeFeatureType type,
     str_append_cstr(description, " (translated)");
 }
 
+static void show_entry(Str *description, Str *sequence, Str *protein,
+                       bool translate)
+{
+  if (translate) {
+    str_reset(protein);
+    translate_dna(protein, str_get(sequence), str_length(sequence), 0);
+    fasta_show_entry(str_get(description), str_get(protein),
+                     str_length(protein), 0);
+  }
+  else {
+    fasta_show_entry(str_get(description), str_get(sequence),
+                     str_length(sequence), 0);
+  }
+}
+
 static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
 {
   GenomeFeature *gf;
@@ -137,17 +152,7 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
                                      str_length(v->sequence), err);
       }
       if (!had_err) {
-        if (v->translate) {
-          str_reset(v->protein);
-          translate_dna(v->protein, str_get(v->sequence),
-                        str_length(v->sequence), 0);
-          fasta_show_entry(str_get(v->description), str_get(v->protein),
-                           str_length(v->protein), 0);
-        }
-        else {
-          fasta_show_entry(str_get(v->description), str_get(v->sequence),
-                           str_length(v->sequence), 0);
-        }
+        show_entry(v->description, v->sequence, v->protein, v->translate);
       }
       str_reset(v->description);
     }
@@ -177,17 +182,7 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
       }
     }
     if (!had_err) {
-      if (v->translate) {
-        str_reset(v->protein);
-        translate_dna(v->protein, str_get(v->sequence), str_length(v->sequence),
-                      0);
-        fasta_show_entry(str_get(v->description), str_get(v->protein),
-                         str_length(v->protein), 0);
-      }
-      else {
-        fasta_show_entry(str_get(v->description), str_get(v->sequence),
-                         str_length(v->sequence), 0);
-      }
+      show_entry(v->description, v->sequence, v->protein, v->translate);
     }
     str_reset(v->description);
   }
