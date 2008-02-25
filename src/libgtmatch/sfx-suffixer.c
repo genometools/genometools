@@ -136,7 +136,7 @@ static Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
   for (idx=0; idx<maxprefixindex; idx++)
   {
     assert((Seqpos) (pos + idx) < ecp->totallength);
-    cc = getencodedchar(ecp->encseq,pos + idx, ecp->readmode);
+    cc = getencodedcharnospecial(ecp->encseq,pos + idx, ecp->readmode);
     assert(ISNOTSPECIAL(cc));
     code += ecp->multimappower[idx][cc];
   }

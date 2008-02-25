@@ -153,6 +153,8 @@ typedef uint32_t Uint32;
   const char *name;
   Uchar(*deliverchar)(const Encodedsequence *,Seqpos);
   const char *delivercharname;
+  Uchar(*delivercharnospecial)(const Encodedsequence *,Seqpos);
+  const char *delivercharnospecialname;
   Uchar(*seqdeliverchar)(const Encodedsequence *,
                          Encodedsequencescanstate *,Seqpos);
   const char *seqdelivercharname;
@@ -212,7 +214,7 @@ typedef struct
 typedef struct
 {
   Fillencposfunc fillpos;
-  Delivercharfunc deliverchar,
+  Delivercharfunc delivercharnospecial,
                   delivercharspecial,
                   delivercharspecialrange;
   SeqDelivercharfunc seqdeliverchar,
@@ -255,6 +257,44 @@ Uchar getencodedchar(const Encodedsequence *encseq,
     return (Uchar) 3 - cc;
   }
   fprintf(stderr,"getencodedchar: readmode %d not implemented\n",
+                 (int) readmode);
+  exit(EXIT_FAILURE); /* programming error */
+}
+
+Uchar getencodedcharnospecial(const Encodedsequence *encseq,
+                              Seqpos pos,
+                              Readmode readmode)
+{
+  if (readmode == Forwardmode)
+  {
+    return encseq->delivercharnospecial(encseq,pos);
+  }
+  if (readmode == Reversemode)
+  {
+    return encseq->delivercharnospecial(encseq,
+                                        REVERSEPOS(encseq->totallength,pos));
+  }
+  if (readmode == Complementmode) /* only works with dna */
+  {
+    Uchar cc = encseq->delivercharnospecial(encseq,pos);
+    if (ISSPECIAL(cc))
+    {
+      return cc;
+    }
+    return (Uchar) 3 - cc;
+  }
+  if (readmode == Reversecomplementmode) /* only works with dna */
+  {
+    Uchar cc = encseq->delivercharnospecial(encseq,
+                                            REVERSEPOS(encseq->totallength,
+                                                       pos));
+    if (ISSPECIAL(cc))
+    {
+      return cc;
+    }
+    return (Uchar) 3 - cc;
+  }
+  fprintf(stderr,"getencodedcharnospecial: readmode %d not implemented\n",
                  (int) readmode);
   exit(EXIT_FAILURE); /* programming error */
 }
@@ -1811,9 +1851,14 @@ static Encodedsequencefunctions encodedseqfunctab[] =
           SEQASSIGNAPPFUNC(special);\
         } else\
         {\
-          ASSIGNAPPFUNC( ); /* Note the importance of the space between ( ) */\
+          ASSIGNAPPFUNC(nospecial);\
           SEQASSIGNAPPFUNC( );\
-        }
+        }\
+        encseq->delivercharnospecial\
+          = encodedseqfunctab[(int) sat].delivercharnospecial.function;\
+        encseq->delivercharnospecialname\
+          = encodedseqfunctab[(int) sat].delivercharnospecial.funcname
+        
 
 /*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
                                                   const StrArray *filenametab,
