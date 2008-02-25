@@ -374,7 +374,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   if (!had_err && score_value != UNDEF_DOUBLE)
     genome_feature_set_score((GenomeFeature*) genome_feature, score_value);
   if (!had_err && phase_value != PHASE_UNDEFINED)
-    genome_node_set_phase(genome_feature, phase_value);
+    genome_feature_set_phase(genome_feature, phase_value);
 
   /* store id */
   if (!had_err && id) {

@@ -340,12 +340,6 @@ void genome_node_set_seqid(GenomeNode *gn, Str *seqid)
   gn->c_class->set_seqid(gn, seqid);
 }
 
-void genome_node_set_phase(GenomeNode *gn, Phase p)
-{
-  assert(gn && gn->c_class && gn->c_class->set_phase);
-  gn->c_class->set_phase(gn, p);
-}
-
 int genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, Error *e)
 {
   error_check(e);

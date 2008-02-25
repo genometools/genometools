@@ -94,7 +94,7 @@ void genome_feature_set_source(GenomeNode *gn, Str *source)
   gf->source = str_ref(source);
 }
 
-static void genome_feature_set_phase(GenomeNode *gn, Phase phase)
+void genome_feature_set_phase(GenomeNode *gn, Phase phase)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(gf && gf->phase == PHASE_UNDEFINED);
@@ -118,7 +118,6 @@ const GenomeNodeClass* genome_feature_class()
                                        genome_feature_get_range,
                                        NULL,
                                        genome_feature_set_seqid,
-                                       genome_feature_set_phase,
                                        genome_feature_accept };
   return &gnc;
 }

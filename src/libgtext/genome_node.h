@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -55,7 +55,6 @@ unsigned long genome_node_get_end(GenomeNode*);
 Range         genome_node_get_range(GenomeNode*);
 void          genome_node_set_range(GenomeNode*, Range);
 void          genome_node_set_seqid(GenomeNode*, Str*);
-void          genome_node_set_phase(GenomeNode*, Phase);
 int           genome_node_accept(GenomeNode*, GenomeVisitor*, Error*);
 /* <parent> takes ownership of <child> */
 void          genome_node_is_part_of_genome_node(GenomeNode *parent,
