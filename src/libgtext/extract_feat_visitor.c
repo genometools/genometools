@@ -26,8 +26,7 @@
 struct ExtractFeatVisitor {
   const GenomeVisitor parent_instance;
   Str *description,   /* the description of the currently extracted feature */
-      *sequence,      /* the sequence of the currently extracted feature */
-      *protein;       /* the translated protein sequence (if applicable) */
+      *sequence;      /* the sequence of the currently extracted feature */
   GenomeFeatureType type;
   bool join,
        translate;
@@ -44,7 +43,6 @@ static void extract_feat_visitor_free(GenomeVisitor *gv)
   assert(extract_feat_visitor);
   str_delete(extract_feat_visitor->description);
   str_delete(extract_feat_visitor->sequence);
-  str_delete(extract_feat_visitor->protein);
   region_mapping_delete(extract_feat_visitor->region_mapping);
 }
 
@@ -98,14 +96,14 @@ static void construct_description(Str *description, GenomeFeatureType type,
     str_append_cstr(description, " (translated)");
 }
 
-static void show_entry(Str *description, Str *sequence, Str *protein,
-                       bool translate)
+static void show_entry(Str *description, Str *sequence, bool translate)
 {
   if (translate) {
-    str_reset(protein);
+    Str *protein = str_new();
     translate_dna(protein, str_get(sequence), str_length(sequence), 0);
     fasta_show_entry(str_get(description), str_get(protein),
                      str_length(protein), 0);
+    str_delete(protein);
   }
   else {
     fasta_show_entry(str_get(description), str_get(sequence),
@@ -152,7 +150,7 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
                                      str_length(v->sequence), err);
       }
       if (!had_err) {
-        show_entry(v->description, v->sequence, v->protein, v->translate);
+        show_entry(v->description, v->sequence, v->translate);
       }
       str_reset(v->description);
     }
@@ -182,7 +180,7 @@ static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *err)
       }
     }
     if (!had_err) {
-      show_entry(v->description, v->sequence, v->protein, v->translate);
+      show_entry(v->description, v->sequence, v->translate);
     }
     str_reset(v->description);
   }
@@ -229,7 +227,6 @@ GenomeVisitor* extract_feat_visitor_new(RegionMapping *rm,
   efv= extract_feat_visitor_cast(gv);
   efv->description = str_new();
   efv->sequence = str_new();
-  efv->protein = str_new();
   efv->type = type;
   efv->join = join;
   efv->translate = translate;
