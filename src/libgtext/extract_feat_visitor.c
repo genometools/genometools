@@ -19,6 +19,7 @@
 #include "libgtcore/fasta.h"
 #include "libgtcore/translate.h"
 #include "libgtext/extract_feat_visitor.h"
+#include "libgtext/genome_node_iterator.h"
 #include "libgtext/genome_visitor_rep.h"
 #include "libgtext/reverse.h"
 
@@ -185,11 +186,19 @@ static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
                                                GenomeFeature *gf, Error *e)
 {
   ExtractFeatVisitor *efv;
+  GenomeNodeIterator *gni;
+  GenomeNode *gn;
+  int had_err = 0;
   error_check(e);
   efv = extract_feat_visitor_cast(gv);
   assert(efv->region_mapping);
-  return genome_node_traverse_children((GenomeNode*) gf, efv, extract_feature,
-                                        false, e);
+  gni = genome_node_iterator_new((GenomeNode*) gf);
+  while (!had_err && (gn = genome_node_iterator_next(gni))) {
+    if (extract_feature(gn, efv, e))
+      had_err = -1;
+  }
+  genome_node_iterator_delete(gni);
+  return had_err;
 }
 
 const GenomeVisitorClass* extract_feat_visitor_class()
