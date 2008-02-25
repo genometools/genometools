@@ -86,9 +86,8 @@ static int extract_join_feature(GenomeNode *gn, void *data, Error *e)
   return had_err;
 }
 
-static int extract_feature(GenomeNode *gn, void *data, Error *e)
+static int extract_feature(GenomeNode *gn, ExtractFeatVisitor *v, Error *e)
 {
-  ExtractFeatVisitor *v = (ExtractFeatVisitor*) data;
   GenomeFeatureType gf_type;
   GenomeFeature *gf;
   Range range;
