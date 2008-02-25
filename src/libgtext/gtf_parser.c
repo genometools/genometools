@@ -444,7 +444,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
                       source_str);
       }
       assert(source_str);
-      genome_node_set_source(gn, source_str);
+      genome_feature_set_source(gn, source_str);
 
       if (score_value != UNDEF_DOUBLE)
         genome_feature_set_score((GenomeFeature*) gn, score_value);

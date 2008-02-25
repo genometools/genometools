@@ -75,7 +75,6 @@ const GenomeNodeClass* comment_class()
                                        NULL,
                                        NULL,
                                        NULL,
-                                       NULL,
                                        comment_accept };
   return &gnc;
 }

@@ -368,7 +368,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                     source_str);
     }
     assert(source_str);
-    genome_node_set_source(genome_feature, source_str);
+    genome_feature_set_source(genome_feature, source_str);
   }
 
   if (!had_err && score_value != UNDEF_DOUBLE)

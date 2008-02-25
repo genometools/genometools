@@ -33,7 +33,6 @@ struct GenomeNodeClass
   Range (*get_range)(GenomeNode*);
   void  (*set_range)(GenomeNode*, Range);
   void  (*set_seqid)(GenomeNode*, Str*);
-  void  (*set_source)(GenomeNode*, Str*);
   void  (*set_phase)(GenomeNode*, Phase);
   int   (*accept)(GenomeNode*, GenomeVisitor*, Error*);
 };

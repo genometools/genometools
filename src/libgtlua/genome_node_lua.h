@@ -48,8 +48,8 @@
    -- Returns the source of <genome_feature>.
    function genome_feature:get_source()
 
-   -- Set the source of <genome_node> to <source>.
-   function genome_node:set_source(source)
+   -- Set the source of <genome_feature> to <source>.
+   function genome_feature:set_source(source)
 
    -- Accept <genome_visitor>.
    function genome_node:accept(genome_visitor)

@@ -340,12 +340,6 @@ void genome_node_set_seqid(GenomeNode *gn, Str *seqid)
   gn->c_class->set_seqid(gn, seqid);
 }
 
-void genome_node_set_source(GenomeNode *gn, Str *source)
-{
-  assert(gn && gn->c_class && gn->c_class->set_source && source);
-  gn->c_class->set_source(gn, source);
-}
-
 void genome_node_set_phase(GenomeNode *gn, Phase p)
 {
   assert(gn && gn->c_class && gn->c_class->set_phase);

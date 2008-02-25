@@ -81,7 +81,6 @@ const GenomeNodeClass* sequence_region_class()
                                        sequence_region_set_range,
                                        sequence_region_set_seqid,
                                        NULL,
-                                       NULL,
                                        sequence_region_accept };
   return &gnc;
 }
