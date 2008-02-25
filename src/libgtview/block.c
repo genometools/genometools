@@ -191,11 +191,11 @@ int block_unit_test(Error *err)
   r1.start = 10UL;
   r1.end = 50UL;
 
-  r2.start = 51UL;
-  r2.end = 80UL;
+  r2.start = 40UL;
+  r2.end = 50UL;
 
-  gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0);
-  gn2 = genome_feature_new(gft_intron, r2, STRAND_FORWARD, NULL, 0);
+  gn1 = genome_feature_new(gft_gene, r1, STRAND_FORWARD, NULL, 0);
+  gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, NULL, 0);
 
   e1 = element_new(gn1);
   e2 = element_new(gn2);
