@@ -130,7 +130,7 @@ static ScoreFunction* dna_scorefunc_new(Alpha *a, int match, int mismatch,
 static LTRboundaries* find_element(Seq *seq, Array *annos)
 {
   unsigned long ltrstart, i;
-  LTRboundaries *line;
+  LTRboundaries *line = NULL;
   /* identify element, quick and dirty */
   char *desc = (char*)seq_get_description(seq);
   /* search for beginning of interval */
