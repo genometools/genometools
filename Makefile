@@ -570,7 +570,7 @@ GTSYSTEMNAME:=$(shell uname -sm | tr ' ' _)
 GTDISTBASENAME:="gt-$(VERSION)-$(GTSYSTEMNAME)-${BIT}"
 DISTDIR:="$(CURDIR)/dist/$(GTSYSTEMNAME)"
 
-dist: all
+dist:
 	@echo "[build distribution]"
 	rm -rf dist
 	mkdir -p $(DISTDIR)
@@ -578,6 +578,7 @@ dist: all
 	cp bin/gt $(DISTDIR)/bin/.
 	strip $(DISTDIR)/bin/gt
 	cp -r $(CURDIR)/gtdata $(DISTDIR)/.
+	tar -cvzf dist-${GTSYSTEMNAME}.tar.gz dist
 
 srcdist:
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
