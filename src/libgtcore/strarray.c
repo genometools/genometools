@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -68,6 +68,15 @@ Str* strarray_get_str(const StrArray *sa, unsigned long strnum)
 {
   assert(sa && strnum < array_size(sa->strings));
   return *(Str**) array_get(sa->strings, strnum);
+}
+
+void strarray_set_size(StrArray *sa, unsigned long size)
+{
+  unsigned long i;
+  assert(sa && size <= array_size(sa->strings));
+  for (i = size; i < array_size(sa->strings); i++)
+    str_delete(*(Str**) array_get(sa->strings, i));
+  array_set_size(sa->strings, size);
 }
 
 unsigned long strarray_size(const StrArray *sa)
