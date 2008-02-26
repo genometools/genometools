@@ -572,20 +572,12 @@ DISTDIR:="$(CURDIR)/dist/$(GTSYSTEMNAME)"
 
 dist: all
 	@echo "[build distribution]"
-	@rm -rf $(DISTDIR})
-	@rm -f $(DISTDIR)/$(GTDISTBASENAME).tar.gz
-	@mkdir -p $(GTDISTDIR)
-	@mkdir -p $(GTDISTDIR)/bin/bssm
-	@mkdir -p $(GTDISTDIR)/bin/gthdata
-	@mkdir -p $(GTDISTDIR)/doc
-	@mkdir -p $(GTDISTDIR)/data
-	@cp bin/gt $(GTDISTDIR)/bin
-	@strip $(GTDISTDIR)/bin/gt
-ifndef NO_STATIC_LINKING
-	@cp bin/gt_static $(GTDISTDIR)/bin
-	@strip $(GTDISTDIR)/bin/gt_static
-endif
-	@cp -r $(CURDIR)/gthdata $(GTHDISTDIR)
+	rm -rf dist
+	mkdir -p $(DISTDIR)
+	mkdir -p $(DISTDIR)/bin
+	cp bin/gt $(DISTDIR)/bin/.
+	strip $(DISTDIR)/bin/gt
+	cp -r $(CURDIR)/gtdata $(DISTDIR)/.
 
 srcdist:
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
