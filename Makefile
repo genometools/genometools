@@ -597,7 +597,11 @@ dist: all
 	@rm -rf $(GTDISTDIR)
 	@rm -rf $(DISTDIR)/$(GTDISTBASENAME).tar.gz
 	@mkdir -p $(GTDISTDIR)/bin
-	@cp bin/gt $(GTDISTDIR)/bin
+	@cp $(CURDIR)/doc/dist_readme.txt $(GTDISTDIR)/README
+	@cp $(CURDIR)/LICENSE $(GTDISTDIR)
+	@cp $(CURDIR)/CONTRIBUTORS $(GTDISTDIR)
+	@cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
+	@cp $(CURDIR)/bin/gt $(GTDISTDIR)/bin
 	@strip $(GTDISTDIR)/bin/gt
 	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
 	@cd $(DISTDIR) && tar cf $(GTDISTBASENAME).tar $(GTDISTBASENAME)
