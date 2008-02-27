@@ -285,6 +285,133 @@ static void showsequencefeatures(Verboseinfo *verboseinfo,
   }
 }
 
+static int detpfxlenandmaxdepth(unsigned int *prefixlength,
+                                Definedunsignedint *maxdepth,
+                                const Suffixeratoroptions *so,
+                                unsigned int numofchars,
+                                Seqpos totallength,
+                                Verboseinfo *verboseinfo,
+                                Error *err)
+{
+  bool haserr = false;
+
+  if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
+  {
+    *prefixlength = recommendedprefixlength(numofchars,totallength);
+    showverbose(verboseinfo,
+                "automatically determined prefixlength = %u",
+                *prefixlength);
+  } else
+  {
+    unsigned int maxprefixlen;
+
+    *prefixlength = so->prefixlength;
+    maxprefixlen
+      = whatisthemaximalprefixlength(numofchars,
+                                     totallength,
+                                     (unsigned int) PREFIXLENBITS);
+    if (checkprefixlength(maxprefixlen,*prefixlength,err) != 0)
+    {
+      haserr = true;
+    } else
+    {
+      showmaximalprefixlength(maxprefixlen,
+                              recommendedprefixlength(
+                              numofchars,
+                              totallength));
+    }
+  }
+  if (!haserr && so->maxdepth.defined)
+  {
+    if (so->maxdepth.valueunsignedint == MAXDEPTH_AUTOMATIC)
+    {
+      maxdepth->defined = true;
+      maxdepth->valueunsignedint = *prefixlength;
+      showverbose(verboseinfo,
+                  "automatically determined maxdepth = %u",
+                  maxdepth->valueunsignedint);
+    } else
+    {
+      if (maxdepth->valueunsignedint < *prefixlength)
+      {
+        maxdepth->defined = true;
+        maxdepth->valueunsignedint = *prefixlength;
+        showverbose(verboseinfo,
+                    "set maxdepth = %u",maxdepth->valueunsignedint);
+      } else
+      {
+        showverbose(verboseinfo,
+                    "use maxdepth = %u",maxdepth->valueunsignedint);
+      }
+    }
+  }
+  return haserr ? -1 : 0;
+}
+
+static int run_packedindexconstruction(Verboseinfo *verboseinfo,
+                                       Measuretime *mtime,
+                                       FILE *outfpbcktab,
+                                       const Suffixeratoroptions *so,
+                                       unsigned int prefixlength,
+                                       const Definedunsignedint *maxdepth,
+                                       Sfxseqinfo *sfxseqinfo,
+                                       Error *err)
+{
+  sfxInterface *si;
+  BWTSeq *bwtSeq;
+  const Sfxiterator *sfi;
+  bool haserr = false;
+
+  showverbose(verboseinfo, "run construction of packed index for:\n"
+              "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
+              so->bwtIdxParams.final.seqParams.blockEnc.blockSize,
+              so->bwtIdxParams.final.seqParams.blockEnc.bucketBlocks,
+              so->bwtIdxParams.final.locateInterval);
+  si = newSfxInterface(so->readmode,
+                       prefixlength,
+                       so->numofparts,
+                       maxdepth,
+                       so->dofast,
+                       sfxseqinfo->encseq,
+                       &sfxseqinfo->specialcharinfo,
+                       sfxseqinfo->numofsequences,
+                       mtime,
+                       getencseqtotallength(sfxseqinfo->encseq) + 1,
+                       sfxseqinfo->alpha,
+                       sfxseqinfo->characterdistribution,
+                       verboseinfo, err);
+  if (si == NULL)
+  {
+    haserr = true;
+  } else
+  {
+    bwtSeq = createBWTSeqFromSfxI(&so->bwtIdxParams.final, si,
+                                  getSfxILength(si), err);
+    if (bwtSeq == NULL)
+    {
+      deleteSfxInterface(si);
+      haserr = true;
+    } else
+    {
+      deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
+    }
+  }
+  /*
+  outfileinfo.longest = getSfxILongestPos(si);
+  */
+  sfi = SfxInterface2Sfxiterator(si);
+  assert(sfi != NULL);
+  if (outfpbcktab != NULL)
+  {
+    if (sfibcktab2file(outfpbcktab,sfi,err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  deleteSfxInterface(si);
+  return haserr ? -1 : 0;
+}
+
 static int runsuffixerator(bool doesa,
                            const Suffixeratoroptions *so,
                            Verboseinfo *verboseinfo,
@@ -296,6 +423,7 @@ static int runsuffixerator(bool doesa,
   Sfxseqinfo sfxseqinfo;
   unsigned int prefixlength;
   Definedunsignedint maxdepth;
+  Seqpos totallength;
 
   error_check(err);
   if (so->showtime)
@@ -311,6 +439,7 @@ static int runsuffixerator(bool doesa,
   {
     haserr = true;
   }
+  totallength = getencseqtotallength(sfxseqinfo.encseq);
   if (!haserr)
   {
     showsequencefeatures(verboseinfo,
@@ -339,56 +468,16 @@ static int runsuffixerator(bool doesa,
         !doesa)
     {
       unsigned int numofchars = getnumofcharsAlphabet(sfxseqinfo.alpha);
-      Seqpos totallength = getencseqtotallength(sfxseqinfo.encseq);
 
-      if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
+      if (detpfxlenandmaxdepth(&prefixlength,
+                               &maxdepth,
+                               so,
+                               numofchars,
+                               totallength,
+                               verboseinfo,
+                               err) != 0)
       {
-        prefixlength = recommendedprefixlength(numofchars,totallength);
-        showverbose(verboseinfo,
-                    "automatically determined prefixlength = %u",
-                    prefixlength);
-      } else
-      {
-        unsigned int maxprefixlen;
-
-        maxprefixlen
-          = whatisthemaximalprefixlength(numofchars,
-                                         totallength,
-                                         (unsigned int) PREFIXLENBITS);
-        if (checkprefixlength(maxprefixlen,prefixlength,err) != 0)
-        {
-          haserr = true;
-        } else
-        {
-          showmaximalprefixlength(maxprefixlen,
-                                  recommendedprefixlength(
-                                  numofchars,
-                                  totallength));
-        }
-      }
-      if (so->maxdepth.defined)
-      {
-        if (so->maxdepth.valueunsignedint == MAXDEPTH_AUTOMATIC)
-        {
-          maxdepth.defined = true;
-          maxdepth.valueunsignedint = prefixlength;
-          showverbose(verboseinfo,
-                      "automatically determined maxdepth = %u",
-                      maxdepth.valueunsignedint);
-        } else
-        {
-          if (maxdepth.valueunsignedint < prefixlength)
-          {
-            maxdepth.defined = true;
-            maxdepth.valueunsignedint = prefixlength;
-            showverbose(verboseinfo,
-                        "set maxdepth = %u",maxdepth.valueunsignedint);
-          } else
-          {
-            showverbose(verboseinfo,
-                        "use maxdepth = %u",maxdepth.valueunsignedint);
-          }
-        }
+        haserr = true;
       }
     } else
     {
@@ -419,7 +508,6 @@ static int runsuffixerator(bool doesa,
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || !doesa)
     {
-      Seqpos totallength = getencseqtotallength(sfxseqinfo.encseq);
       if (doesa)
       {
         if (suffixeratorwithoutput(
@@ -443,56 +531,17 @@ static int runsuffixerator(bool doesa,
         }
       } else
       {
-        sfxInterface *si;
-        BWTSeq *bwtSeq;
-        const Sfxiterator *sfi;
-
-        showverbose(verboseinfo, "run construction of packed index for:\n"
-                    "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
-                    so->bwtIdxParams.final.seqParams.blockEnc.blockSize,
-                    so->bwtIdxParams.final.seqParams.blockEnc.bucketBlocks,
-                    so->bwtIdxParams.final.locateInterval);
-        si = newSfxInterface(so->readmode,
-                             prefixlength,
-                             so->numofparts,
-                             &maxdepth,
-                             so->dofast,
-                             sfxseqinfo.encseq,
-                             &sfxseqinfo.specialcharinfo,
-                             sfxseqinfo.numofsequences,
-                             mtime, totallength + 1,
-                             sfxseqinfo.alpha,
-                             sfxseqinfo.characterdistribution,
-                             verboseinfo, err);
-        if (si == NULL)
+        if (run_packedindexconstruction(verboseinfo,
+                                        mtime,
+                                        outfileinfo.outfpbcktab,
+                                        so,
+                                        prefixlength,
+                                        &maxdepth,
+                                        &sfxseqinfo,
+                                        err) != 0)
         {
           haserr = true;
-        } else
-        {
-          bwtSeq = createBWTSeqFromSfxI(&so->bwtIdxParams.final, si,
-                                        getSfxILength(si), err);
-          if (bwtSeq == NULL)
-          {
-            deleteSfxInterface(si);
-            haserr = true;
-          } else
-          {
-            deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
-          }
         }
-        /*
-        outfileinfo.longest = getSfxILongestPos(si);
-        */
-        sfi = SfxInterface2Sfxiterator(si);
-        assert(sfi != NULL);
-        if (outfileinfo.outfpbcktab != NULL)
-        {
-          if (sfibcktab2file(outfileinfo.outfpbcktab,sfi,err) != 0)
-          {
-            haserr = true;
-          }
-        }
-        deleteSfxInterface(si);
       }
     }
   }
@@ -502,8 +551,7 @@ static int runsuffixerator(bool doesa,
   if (!haserr)
   {
     Seqpos numoflargelcpvalues,
-           maxbranchdepth,
-           totallength = getencseqtotallength(sfxseqinfo.encseq);
+           maxbranchdepth;
 
     if (outfileinfo.outlcpinfo == NULL)
     {
