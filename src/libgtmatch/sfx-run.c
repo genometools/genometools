@@ -35,6 +35,7 @@
 #include "intcode-def.h"
 #include "sfx-suffixer.h"
 #include "sfx-outlcp.h"
+#include "sfx-run.h"
 
 #include "opensfxfile.pr"
 #include "fillsci.pr"
@@ -303,35 +304,35 @@ static void showcharacterdistribution(
   }
 }
 
-static int runsuffixerator(bool doesa,
-                           Suffixeratoroptions *so,
-                           Verboseinfo *verboseinfo,
-                           Error *err)
+typedef struct
 {
-  unsigned int numofchars = 0;
   unsigned long numofsequences;
-  Seqpos totallength;
   Alphabet *alpha;
   Specialcharinfo specialcharinfo;
-  Filelengthvalues *filelengthtab = NULL;
+  Filelengthvalues *filelengthtab;
+  Encodedsequence *encseq;
+  unsigned long *characterdistribution;
+} Sfxseqinfo;
+
+static int fromfiles2sequences(Sfxseqinfo *sfxseqinfo,
+                               Measuretime *mtime,
+                               const Suffixeratoroptions *so,
+                               Verboseinfo *verboseinfo,
+                               Error *err)
+{
+  Seqpos totallength;
   bool haserr = false;
-  Encodedsequence *encseq = NULL;
-  Measuretime *mtime = NULL;
-  Outfileinfo outfileinfo;
-  unsigned long *characterdistribution = NULL;
 
   error_check(err);
-  if (so->showtime)
-  {
-    mtime = inittheclock("determining sequence length and number of "
-                         "special symbols");
-  }
-  alpha = assigninputalphabet(so->isdna,
-                              so->isprotein,
-                              so->str_smap,
-                              so->filenametab,
-                              err);
-  if (alpha == NULL)
+  sfxseqinfo->filelengthtab = NULL;
+  sfxseqinfo->encseq = NULL;
+  sfxseqinfo->characterdistribution = NULL;
+  sfxseqinfo->alpha = assigninputalphabet(so->isdna,
+                                          so->isprotein,
+                                          so->str_smap,
+                                          so->filenametab,
+                                          err);
+  if (sfxseqinfo->alpha == NULL)
   {
     haserr = true;
   }
@@ -339,18 +340,19 @@ static int runsuffixerator(bool doesa,
   {
     if (!so->isplain)
     {
-      characterdistribution = initcharacterdistribution(alpha);
+      sfxseqinfo->characterdistribution
+        = initcharacterdistribution(sfxseqinfo->alpha);
     }
     if (fasta2sequencekeyvalues(so->str_indexname,
-                                &numofsequences,
+                                &sfxseqinfo->numofsequences,
                                 &totallength,
-                                &specialcharinfo,
+                                &sfxseqinfo->specialcharinfo,
                                 so->filenametab,
-                                &filelengthtab,
-                                getsymbolmapAlphabet(alpha),
+                                &sfxseqinfo->filelengthtab,
+                                getsymbolmapAlphabet(sfxseqinfo->alpha),
                                 so->isplain,
                                 so->outdestab,
-                                characterdistribution,
+                                sfxseqinfo->characterdistribution,
                                 verboseinfo,
                                 err) != 0)
     {
@@ -359,8 +361,7 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    numofchars = getnumofcharsAlphabet(alpha);
-    if (outal1file(so->str_indexname,alpha,err) != 0)
+    if (outal1file(so->str_indexname,sfxseqinfo->alpha,err) != 0)
     {
       haserr = true;
     }
@@ -371,64 +372,105 @@ static int runsuffixerator(bool doesa,
     {
       deliverthetime(stdout,mtime,"computing sequence encoding");
     }
-    encseq = files2encodedsequence(true,
-                                   so->filenametab,
-                                   so->isplain,
-                                   totallength,
-                                   specialcharinfo.specialranges,
-                                   alpha,
-                                   str_length(so->str_sat) > 0
-                                         ? str_get(so->str_sat)
-                                         : NULL,
-                                   verboseinfo,
-                                   err);
-    if (encseq == NULL)
+    sfxseqinfo->encseq
+      = files2encodedsequence(true,
+                              so->filenametab,
+                              so->isplain,
+                              totallength,
+                              sfxseqinfo->specialcharinfo.specialranges,
+                              sfxseqinfo->alpha,
+                              str_length(so->str_sat) > 0
+                                ? str_get(so->str_sat)
+                                : NULL,
+                              verboseinfo,
+                              err);
+    if (sfxseqinfo->encseq == NULL)
     {
       haserr = true;
     } else
     {
       if (so->outtistab)
       {
-        if (flushencseqfile(so->str_indexname,encseq,err) != 0)
+        if (flushencseqfile(so->str_indexname,sfxseqinfo->encseq,err) != 0)
         {
           haserr = true;
         }
       }
     }
   }
+  return haserr ? -1 : 0;
+}
+
+static int runsuffixerator(bool doesa,
+                           const Suffixeratoroptions *so,
+                           Verboseinfo *verboseinfo,
+                           Error *err)
+{
+  Measuretime *mtime = NULL;
+  Outfileinfo outfileinfo;
+  bool haserr = false;
+  Sfxseqinfo sfxseqinfo;
+  unsigned int prefixlength;
+  Definedunsignedint maxdepth;
+
+  error_check(err);
+  if (so->showtime)
+  {
+    mtime = inittheclock("determining sequence length and number of "
+                         "special symbols");
+  }
+  if (fromfiles2sequences(&sfxseqinfo,
+                          mtime,
+                          so,
+                          verboseinfo,
+                          err) != 0)
+  {
+    haserr = true;
+  }
   if (!haserr)
   {
     showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
-                PRINTSeqposcast(specialcharinfo.specialcharacters));
+                PRINTSeqposcast(sfxseqinfo.specialcharinfo.specialcharacters));
     showverbose(verboseinfo,"specialranges=" FormatSeqpos,
-                PRINTSeqposcast(specialcharinfo.specialranges));
+                PRINTSeqposcast(sfxseqinfo.specialcharinfo.specialranges));
     showverbose(verboseinfo,"realspecialranges=" FormatSeqpos,
-                PRINTSeqposcast(specialcharinfo.realspecialranges));
-    if (!so->isplain)
+                PRINTSeqposcast(sfxseqinfo.specialcharinfo.realspecialranges));
+    if (sfxseqinfo.characterdistribution != NULL)
     {
-      showcharacterdistribution(alpha,characterdistribution,verboseinfo);
-    }
-    if (so->readmode == Complementmode || so->readmode == Reversecomplementmode)
-    {
-      if (!isdnaalphabet(alpha))
+      if (!so->isplain)
       {
-        error_set(err,"option %s only can be used for DNA alphabets",
-                          so->readmode == Complementmode ? "-cpl" : "rcl");
-        haserr = true;
+        showcharacterdistribution(sfxseqinfo.alpha,
+                                  sfxseqinfo.characterdistribution,
+                                  verboseinfo);
+      }
+      if (so->readmode == Complementmode ||
+          so->readmode == Reversecomplementmode)
+      {
+        if (!isdnaalphabet(sfxseqinfo.alpha))
+        {
+          error_set(err,"option %s only can be used for DNA alphabets",
+                            so->readmode == Complementmode ? "-cpl" : "rcl");
+          haserr = true;
+        }
       }
     }
   }
+  prefixlength = so->prefixlength;
+  maxdepth.defined = false;
   if (!haserr)
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
         !doesa)
     {
+      unsigned int numofchars = getnumofcharsAlphabet(sfxseqinfo.alpha);
+      Seqpos totallength = getencseqtotallength(sfxseqinfo.encseq);
+
       if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
       {
-        so->prefixlength = recommendedprefixlength(numofchars,totallength);
+        prefixlength = recommendedprefixlength(numofchars,totallength);
         showverbose(verboseinfo,
                     "automatically determined prefixlength = %u",
-                    so->prefixlength);
+                    prefixlength);
       } else
       {
         unsigned int maxprefixlen;
@@ -437,7 +479,7 @@ static int runsuffixerator(bool doesa,
           = whatisthemaximalprefixlength(numofchars,
                                          totallength,
                                          (unsigned int) PREFIXLENBITS);
-        if (checkprefixlength(maxprefixlen,so->prefixlength,err) != 0)
+        if (checkprefixlength(maxprefixlen,prefixlength,err) != 0)
         {
           haserr = true;
         } else
@@ -452,21 +494,23 @@ static int runsuffixerator(bool doesa,
       {
         if (so->maxdepth.valueunsignedint == MAXDEPTH_AUTOMATIC)
         {
-          so->maxdepth.valueunsignedint = so->prefixlength;
+          maxdepth.defined = true;
+          maxdepth.valueunsignedint = prefixlength;
           showverbose(verboseinfo,
                       "automatically determined maxdepth = %u",
-                      so->maxdepth.valueunsignedint);
+                      maxdepth.valueunsignedint);
         } else
         {
-          if (so->maxdepth.valueunsignedint < so->prefixlength)
+          if (maxdepth.valueunsignedint < prefixlength)
           {
-            so->maxdepth.valueunsignedint = so->prefixlength;
+            maxdepth.defined = true;
+            maxdepth.valueunsignedint = prefixlength;
             showverbose(verboseinfo,
-                        "set maxdepth = %u",so->maxdepth.valueunsignedint);
+                        "set maxdepth = %u",maxdepth.valueunsignedint);
           } else
           {
             showverbose(verboseinfo,
-                        "use maxdepth = %u",so->maxdepth.valueunsignedint);
+                        "use maxdepth = %u",maxdepth.valueunsignedint);
           }
         }
       }
@@ -488,8 +532,9 @@ static int runsuffixerator(bool doesa,
   outfileinfo.outfpbcktab = NULL;
   if (!haserr)
   {
-    if (initoutfileinfo(&outfileinfo,so->prefixlength,
-                        numofchars,encseq,so,err) != 0)
+    if (initoutfileinfo(&outfileinfo,prefixlength,
+                        getnumofcharsAlphabet(sfxseqinfo.alpha),
+                        sfxseqinfo.encseq,so,err) != 0)
     {
       haserr = true;
     }
@@ -498,18 +543,19 @@ static int runsuffixerator(bool doesa,
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || !doesa)
     {
+      Seqpos totallength = getencseqtotallength(sfxseqinfo.encseq);
       if (doesa)
       {
         if (suffixeratorwithoutput(
                            &outfileinfo,
-                           specialcharinfo.specialcharacters,
-                           specialcharinfo.realspecialranges,
-                           encseq,
+                           sfxseqinfo.specialcharinfo.specialcharacters,
+                           sfxseqinfo.specialcharinfo.realspecialranges,
+                           sfxseqinfo.encseq,
                            so->readmode,
-                           numofchars,
-                           getcharactersAlphabet(alpha),
-                           so->prefixlength,
-                           &so->maxdepth,
+                           getnumofcharsAlphabet(sfxseqinfo.alpha),
+                           getcharactersAlphabet(sfxseqinfo.alpha),
+                           prefixlength,
+                           &maxdepth,
                            so->numofparts,
                            so->outlcptab ? so->str_indexname : NULL,
                            so->dofast,
@@ -530,9 +576,17 @@ static int runsuffixerator(bool doesa,
                     so->bwtIdxParams.final.seqParams.blockEnc.blockSize,
                     so->bwtIdxParams.final.seqParams.blockEnc.bucketBlocks,
                     so->bwtIdxParams.final.locateInterval);
-        si = newSfxInterface(so, encseq, &specialcharinfo,
-                             numofsequences, mtime, totallength + 1,
-                             alpha, characterdistribution,
+        si = newSfxInterface(so->readmode,
+                             prefixlength,
+                             so->numofparts,
+                             &maxdepth,
+                             so->dofast,
+                             sfxseqinfo.encseq,
+                             &sfxseqinfo.specialcharinfo,
+                             sfxseqinfo.numofsequences,
+                             mtime, totallength + 1,
+                             sfxseqinfo.alpha,
+                             sfxseqinfo.characterdistribution,
                              verboseinfo, err);
         if (si == NULL)
         {
@@ -572,7 +626,8 @@ static int runsuffixerator(bool doesa,
   if (!haserr)
   {
     Seqpos numoflargelcpvalues,
-           maxbranchdepth;
+           maxbranchdepth,
+           totallength = getencseqtotallength(sfxseqinfo.encseq);
 
     if (outfileinfo.outlcpinfo == NULL)
     {
@@ -585,12 +640,12 @@ static int runsuffixerator(bool doesa,
     if (outprjfile(so->str_indexname,
                    so->filenametab,
                    so->readmode,
-                   filelengthtab,
+                   sfxseqinfo.filelengthtab,
                    totallength,
-                   numofsequences,
-                   &specialcharinfo,
-                   so->prefixlength,
-                   &so->maxdepth,
+                   sfxseqinfo.numofsequences,
+                   &sfxseqinfo.specialcharinfo,
+                   prefixlength,
+                   &maxdepth,
                    numoflargelcpvalues,
                    maxbranchdepth,
                    &outfileinfo.longest,
@@ -603,13 +658,13 @@ static int runsuffixerator(bool doesa,
   {
     freeoutlcptab(&outfileinfo.outlcpinfo);
   }
-  FREESPACE(filelengthtab);
-  if (alpha != NULL)
+  FREESPACE(sfxseqinfo.filelengthtab);
+  if (sfxseqinfo.alpha != NULL)
   {
-    freeAlphabet(&alpha);
+    freeAlphabet(&sfxseqinfo.alpha);
   }
-  freeEncodedsequence(&encseq);
-  FREESPACE(characterdistribution);
+  freeEncodedsequence(&sfxseqinfo.encseq);
+  FREESPACE(sfxseqinfo.characterdistribution);
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,NULL);

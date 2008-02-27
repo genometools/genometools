@@ -21,7 +21,7 @@
 #include "libgtcore/cstr.h"
 #include "libgtext/toolbox.h"
 #include "libgtcore/versionfunc.h"
-#include "libgtmatch/sfx-run.pr"
+#include "libgtmatch/sfx-run.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_packedindex_chk_integrity.h"
 #include "tools/gt_packedindex_chk_search.h"

@@ -50,9 +50,11 @@ measure-time.c
 optionargmode.c
 overallseq.c
 sfx-bentsedg.c
+sfx-enumcodes.c
 sfx-outlcp.c
 sfx-partssuf.c
 sfx-readint.c
+sfx-run.c
 sfx-suffixer.c
 substriter.c
 test-pairwise.c

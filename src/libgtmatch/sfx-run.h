@@ -15,12 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef SFX_RUN_H
+#define SFX_RUN_H
+#include <stdbool.h>
 #include "libgtcore/error.h"
-#include "libgtmatch/sfx-run.h"
-#include "tools/gt_suffixerator.h"
 
-int gt_suffixerator(int argc, const char **argv, Error *err)
-{
-  error_check(err);
-  return parseargsandcallsuffixerator(true,argc, argv, err);
-}
+int parseargsandcallsuffixerator(bool doesa,int argc,
+                                 const char **argv,Error *err);
+
+#endif
+
