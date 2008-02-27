@@ -438,8 +438,11 @@ static int runsuffixerator(bool doesa,
                            err) != 0)
   {
     haserr = true;
+    totallength = 0;
+  } else
+  {
+    totallength = getencseqtotallength(sfxseqinfo.encseq);
   }
-  totallength = getencseqtotallength(sfxseqinfo.encseq);
   if (!haserr)
   {
     showsequencefeatures(verboseinfo,
