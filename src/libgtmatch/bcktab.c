@@ -21,182 +21,133 @@
 #include "libgtcore/str.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/symboldef.h"
+#include "libgtcore/chardef.h"
 #include "esafileend.h"
+#include "mapspec-def.h"
 #include "spacedef.h"
-#include "bckbound.h"
+#include "bcktab.h"
 
 #include "initbasepower.pr"
 
 #define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
                             (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS))
 
-/* DELETE THE FOLLOWING THREE FUNCTIONS */
-
-static void *genericmaponlytable(const Str *indexname,const char *suffix,
-                                 size_t *numofbytes,Error *err)
+struct Bcktab
 {
-  Str *tmpfilename;
-  void *ptr;
-  bool haserr = false;
+  Seqpos totallength,
+         *leftborder;
+  Codetype numofallcodes,
+           numofspecialcodes,
+           **multimappower,
+           *basepower,
+           *filltable;
+  unsigned int prefixlength;
+  unsigned long sizeofrep,
+                *countspecialcodes,
+                **distpfxidx;
+  Uchar *qgrambuffer;
+  void *mappedptr;
+};
 
-  error_check(err);
-  tmpfilename = str_clone(indexname);
-  str_append_cstr(tmpfilename,suffix);
-  ptr = fa_mmap_read(str_get(tmpfilename),numofbytes);
-  if (ptr == NULL)
-  {
-    error_set(err,"cannot map file \"%s\": %s",str_get(tmpfilename),
-                  strerror(errno));
-    haserr = true;
-  }
-  str_delete(tmpfilename);
-  return haserr ? NULL : ptr;
-}
-
-static int checkmappedfilesize(size_t numofbytes,Seqpos expectedunits,
-                               size_t sizeofunit,Error *err)
-{
-  error_check(err);
-  if (expectedunits != (Seqpos) (numofbytes/sizeofunit))
-  {
-    error_set(err,"number of mapped units = %lu != " FormatSeqpos
-                      " = expected number of integers",
-                      (unsigned long) (numofbytes/sizeofunit),
-                      PRINTSeqposcast(expectedunits));
-    return -1;
-  }
-  return 0;
-}
-
-static void *genericmaptable(const Str *indexname,
-                             const char *suffix,
-                             Seqpos expectedunits,size_t sizeofunit,
-                             Error *err)
-{
-  size_t numofbytes;
-
-  void *ptr = genericmaponlytable(indexname,suffix,&numofbytes,err);
-  if (ptr == NULL)
-  {
-    return NULL;
-  }
-  if (checkmappedfilesize(numofbytes,expectedunits,sizeofunit,err) != 0)
-  {
-    fa_xmunmap(ptr);
-    return NULL;
-  }
-  return ptr;
-}
-
-int mapbcktab(Bcktab *bcktab,
-              const Str *indexname,
-              Seqpos totallength,
-              unsigned int numofchars,
-              unsigned int prefixlength,
-              Error *err)
-{
-  Codetype numofspecialcodes;
-
-  bcktab->totallength = totallength;
-  bcktab->basepower = initbasepower(numofchars,prefixlength);
-  bcktab->numofallcodes = bcktab->basepower[prefixlength];
-  numofspecialcodes = bcktab->basepower[prefixlength-1];
-  bcktab->filltable = initfilltable(bcktab->basepower,prefixlength);
-  bcktab->multimappower = initmultimappower(numofchars,prefixlength);
-  bcktab->leftborder
-    = genericmaptable(indexname,
-                      BCKTABSUFFIX,
-                      (Seqpos) (bcktab->numofallcodes + 1 + numofspecialcodes),
-                      sizeof (Seqpos),
-                      err);
-  if (bcktab->leftborder == NULL)
-  {
-    bcktab->countspecialcodes = NULL;
-    return -1;
-  }
-  bcktab->countspecialcodes = bcktab->leftborder + bcktab->numofallcodes + 1;
-  return 0;
-}
-
-void freebcktab(Bcktab *bcktab,bool mapped)
-{
-  if (mapped)
-  {
-    fa_xmunmap((void *) bcktab->leftborder);
-    bcktab->leftborder = NULL;
-    bcktab->countspecialcodes = NULL;
-  } else
-  {
-    FREESPACE(bcktab->leftborder);
-    FREESPACE(bcktab->countspecialcodes);
-  }
-  if (bcktab->multimappower != NULL)
-  {
-    multimappowerfree(&bcktab->multimappower);
-  }
-  if (bcktab->distpfxidx != NULL)
-  {
-    FREESPACE(bcktab->distpfxidx[0]);
-    FREESPACE(bcktab->distpfxidx);
-  }
-  FREESPACE(bcktab->filltable);
-  FREESPACE(bcktab->basepower);
-}
-
-static unsigned long **initdistprefixindexcounts(const Codetype *basepower,
-                                                 unsigned int prefixlength)
+static unsigned long numofdistpfxidxcounters(const Codetype *basepower,
+                                             unsigned int prefixlength)
 {
   if (prefixlength > 2U)
   {
+    unsigned long numofcounters = 0;
     unsigned int idx;
-    unsigned long *counters, numofcounters, **distpfxidx;
 
-    for (numofcounters = 0, idx=1U; idx <= prefixlength-2; idx++)
+    for (idx=1U; idx < prefixlength-1; idx++)
     {
       numofcounters += basepower[idx];
     }
-    assert(numofcounters > 0);
-    ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-2);
-    ALLOCASSIGNSPACE(counters,NULL,unsigned long,numofcounters);
-    memset(counters,0,(size_t) sizeof (*counters) * numofcounters);
-    distpfxidx[0] = counters;
-    for (idx=1U; idx<prefixlength-2; idx++)
-    {
-      distpfxidx[idx] = distpfxidx[idx-1] + basepower[idx];
-    }
-    return distpfxidx;
-  } else
+    return numofcounters;
+  }
+  return 0;
+}
+
+static void setdistpfxidxptrs(unsigned long **distpfxidx,
+                              unsigned long *ptr,
+                              const Codetype *basepower,
+                              unsigned int prefixlength)
+{
+  unsigned int idx;
+  unsigned long offset = 0;
+
+  distpfxidx[0] = ptr;
+  for (idx=1U; idx<prefixlength-1; idx++)
   {
-    return NULL;
+    offset += (unsigned long) basepower[idx];
+    distpfxidx[idx] = distpfxidx[idx-1] + basepower[idx];
   }
 }
 
-void initbcktabwithNULL(Bcktab *bcktab)
+static unsigned long **allocdistprefixindexcounts(const Codetype *basepower,
+                                                  unsigned int prefixlength,
+                                                  Verboseinfo *verboseinfo)
 {
-  bcktab->leftborder = NULL;
-  bcktab->countspecialcodes = NULL;
-  bcktab->multimappower = NULL;
-  bcktab->filltable = NULL;
-  bcktab->basepower = NULL;
-  bcktab->distpfxidx = NULL;
+  if (prefixlength > 2U)
+  {
+    unsigned long numofcounters;
+
+    numofcounters = numofdistpfxidxcounters(basepower,prefixlength);
+    if (numofcounters > 0)
+    {
+      unsigned long *counters, **distpfxidx;
+
+      ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-1);
+      ALLOCASSIGNSPACE(counters,NULL,unsigned long,numofcounters);
+      showverbose(verboseinfo,"sizeof (distpfxidx)=%lu",
+                  (unsigned long) sizeof (*distpfxidx) * (prefixlength-1) +
+                                  sizeof (*counters) * numofcounters);
+      memset(counters,0,(size_t) sizeof (*counters) * numofcounters);
+      setdistpfxidxptrs(distpfxidx,counters,basepower,prefixlength);
+      return distpfxidx;
+    }
+  }
+  return NULL;
 }
 
-int allocBcktab(Bcktab *bcktab,
-                Seqpos totallength,
-                unsigned int numofchars,
-                unsigned int prefixlength,
-                unsigned int codebits,
-                unsigned int maxcodevalue,
-                Error *err)
+static Bcktab *newBcktab(unsigned int numofchars,
+                         unsigned int prefixlength,
+                         Seqpos totallength)
 {
-  bool haserr = false;
+  Bcktab *bcktab;
 
-  initbcktabwithNULL(bcktab);
+  ALLOCASSIGNSPACE(bcktab,NULL,Bcktab,1);
+  bcktab->leftborder = NULL;
+  bcktab->countspecialcodes = NULL;
+  bcktab->distpfxidx = NULL;
   bcktab->totallength = totallength;
+  bcktab->mappedptr = NULL;
+  bcktab->prefixlength = prefixlength;
   bcktab->basepower = initbasepower(numofchars,prefixlength);
-  bcktab->filltable = initfilltable(bcktab->basepower,prefixlength);
+  bcktab->filltable = initfilltable(numofchars,prefixlength);
   bcktab->numofallcodes = bcktab->basepower[prefixlength];
   bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
+  bcktab->multimappower = initmultimappower(numofchars,prefixlength);
+  ALLOCASSIGNSPACE(bcktab->qgrambuffer,NULL,Uchar,prefixlength);
+  bcktab->sizeofrep
+    = (unsigned long)
+      sizeof (*bcktab->leftborder) * (bcktab->numofallcodes + 1) +
+      sizeof (*bcktab->countspecialcodes) * bcktab->numofspecialcodes +
+      sizeof (unsigned long) * numofdistpfxidxcounters(bcktab->basepower,
+                                                       bcktab->prefixlength);
+  return bcktab;
+}
+
+Bcktab *allocBcktab(Seqpos totallength,
+                    unsigned int numofchars,
+                    unsigned int prefixlength,
+                    unsigned int codebits,
+                    unsigned int maxcodevalue,
+                    Verboseinfo *verboseinfo,
+                    Error *err)
+{
+  Bcktab *bcktab;
+  bool haserr = false;
+
+  bcktab = newBcktab(numofchars,prefixlength,totallength);
   if (bcktab->numofallcodes-1 > maxcodevalue)
   {
     error_set(err,"alphasize^prefixlength-1 = %u does not fit into "
@@ -204,34 +155,164 @@ int allocBcktab(Bcktab *bcktab,
                   bcktab->numofallcodes-1,
                   codebits);
     haserr = true;
-  } else
-  {
-    bcktab->distpfxidx = initdistprefixindexcounts(bcktab->basepower,
-                                                   prefixlength);
   }
   if (!haserr)
   {
     ALLOCASSIGNSPACE(bcktab->leftborder,NULL,Seqpos,
                      bcktab->numofallcodes+1);
+    showverbose(verboseinfo,"sizeof (leftborder)=%lu",
+              (unsigned long) sizeof (*bcktab->leftborder) *
+                              (bcktab->numofallcodes+1));
     memset(bcktab->leftborder,0,
            sizeof (*bcktab->leftborder) *
            (size_t) bcktab->numofallcodes);
-    ALLOCASSIGNSPACE(bcktab->countspecialcodes,NULL,Seqpos,
+    ALLOCASSIGNSPACE(bcktab->countspecialcodes,NULL,unsigned long,
                      bcktab->numofspecialcodes);
+    showverbose(verboseinfo,
+                "sizeof (countspecialcodes)=%lu",
+                (unsigned long) sizeof (*bcktab->countspecialcodes) *
+                bcktab->numofspecialcodes);
     memset(bcktab->countspecialcodes,0,
            sizeof (*bcktab->countspecialcodes) *
                   (size_t) bcktab->numofspecialcodes);
+    bcktab->distpfxidx = allocdistprefixindexcounts(bcktab->basepower,
+                                                    prefixlength,
+                                                    verboseinfo);
   }
+  if (haserr)
+  {
+    freebcktab(&bcktab);
+    return NULL;
+  }
+  return bcktab;
+}
+
+static void assignbcktabmapspecification(ArrayMapspecification *mapspectable,
+                                         void *voidinfo,
+                                         bool writemode)
+{
+  Bcktab *bcktab = (Bcktab *) voidinfo;
+  Mapspecification *mapspecptr;
+  unsigned long numofcounters;
+
+  NEWMAPSPEC(bcktab->leftborder,Seqpos,
+             (unsigned long) (bcktab->numofallcodes+1));
+  NEWMAPSPEC(bcktab->countspecialcodes,Unsignedlong,
+             (unsigned long) bcktab->numofspecialcodes);
+  numofcounters = numofdistpfxidxcounters((const Codetype *) bcktab->basepower,
+                                          bcktab->prefixlength);
+  if (numofcounters > 0)
+  {
+    if (!writemode)
+    {
+      ALLOCASSIGNSPACE(bcktab->distpfxidx,NULL,unsigned long *,
+                       bcktab->prefixlength-1);
+    }
+    NEWMAPSPEC(bcktab->distpfxidx[0],Unsignedlong,numofcounters);
+  }
+}
+
+int bcktab2file(FILE *fp,const Bcktab *bcktab,Error *err)
+{
+  error_check(err);
+  return flushtheindex2file(fp,
+                            assignbcktabmapspecification,
+                            (Bcktab *) bcktab,
+                            bcktab->sizeofrep,
+                            err);
+}
+
+static int fillbcktabmapspecstartptr(Bcktab *bcktab,
+                                     const Str *indexname,
+                                     Error *err)
+{
+  bool haserr = false;
+  Str *tmpfilename;
+
+  error_check(err);
+  tmpfilename = str_clone(indexname);
+  str_append_cstr(tmpfilename,BCKTABSUFFIX);
+  if (fillmapspecstartptr(assignbcktabmapspecification,
+                          &bcktab->mappedptr,
+                          bcktab,
+                          tmpfilename,
+                          bcktab->sizeofrep,
+                          err) != 0)
+  {
+    haserr = true;
+  }
+  str_delete(tmpfilename);
   return haserr ? -1 : 0;
+}
+
+Bcktab *mapbcktab(const Str *indexname,
+                  Seqpos totallength,
+                  unsigned int numofchars,
+                  unsigned int prefixlength,
+                  Error *err)
+{
+  Bcktab *bcktab;
+
+  bcktab = newBcktab(numofchars,prefixlength,totallength);
+  if (fillbcktabmapspecstartptr(bcktab,
+                                indexname,
+                                err) != 0)
+  {
+    freebcktab(&bcktab);
+    return NULL;
+  }
+  if (bcktab->distpfxidx != NULL)
+  {
+    setdistpfxidxptrs(bcktab->distpfxidx,bcktab->distpfxidx[0],
+                      bcktab->basepower,bcktab->prefixlength);
+  }
+#ifndef NDEBUG
+  checkcountspecialcodes(bcktab);
+#endif
+  return bcktab;
+}
+
+void freebcktab(Bcktab **bcktab)
+{
+  Bcktab *bcktabptr = *bcktab;
+
+  if (bcktabptr->mappedptr != NULL) /* use mapped file */
+  {
+    fa_xmunmap(bcktabptr->mappedptr);
+    bcktabptr->mappedptr = NULL;
+    bcktabptr->leftborder = NULL;
+    bcktabptr->countspecialcodes = NULL;
+    if (bcktabptr->distpfxidx != NULL)
+    {
+      bcktabptr->distpfxidx[0] = NULL;
+    }
+  } else
+  {
+    FREESPACE(bcktabptr->leftborder);
+    FREESPACE(bcktabptr->countspecialcodes);
+    if (bcktabptr->distpfxidx != NULL)
+    {
+      FREESPACE(bcktabptr->distpfxidx[0]);
+    }
+  }
+  FREESPACE(bcktabptr->distpfxidx);
+  if (bcktabptr->multimappower != NULL)
+  {
+    multimappowerfree(&bcktabptr->multimappower);
+  }
+  FREESPACE(bcktabptr->filltable);
+  FREESPACE(bcktabptr->basepower);
+  FREESPACE(bcktabptr->qgrambuffer);
+  FREESPACE(*bcktab);
 }
 
 void updatebckspecials(Bcktab *bcktab,
                        Codetype code,
                        unsigned int numofchars,
-                       unsigned int prefixindex,
-                       unsigned int prefixlength)
+                       unsigned int prefixindex)
 {
-  if (prefixindex < prefixlength-1)
+  assert(prefixindex > 0);
+  if (prefixindex < bcktab->prefixlength-1)
   {
     Codetype ordercode = (code - bcktab->filltable[prefixindex])/
                          (bcktab->filltable[prefixindex]+1);
@@ -246,8 +327,89 @@ void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
   Codetype specialcode;
 
   specialcode = FROMCODE2SPECIALCODE(bcktab->filltable[0],numofchars);
-  bcktab->countspecialcodes[specialcode] += specialcharacters + 1;
+  bcktab->countspecialcodes[specialcode]
+    += (unsigned long) specialcharacters + 1;
 }
+
+#ifndef NDEBUG
+static unsigned long fromcode2countspecialcodes(Codetype code,
+                                                const Bcktab *bcktab)
+{
+  if (code >= bcktab->filltable[bcktab->prefixlength-1])
+  {
+    Codetype ordercode = code - bcktab->filltable[bcktab->prefixlength-1];
+    Codetype divisor = bcktab->filltable[bcktab->prefixlength-1] + 1;
+    if (ordercode % divisor == 0)
+    {
+      ordercode /= divisor;
+      return bcktab->countspecialcodes[ordercode];
+    }
+  }
+  return 0;
+}
+
+static void pfxidxpartialsums(unsigned long *count,
+                              Codetype code,
+                              const Bcktab *bcktab)
+{
+  unsigned int prefixindex;
+  unsigned long sum = 0, specialsinbucket;
+  Codetype ordercode, divisor;
+
+  memset(count,0,sizeof (*count) * (size_t) bcktab->prefixlength);
+  for (prefixindex=bcktab->prefixlength-2; prefixindex>=1U; prefixindex--)
+  {
+    if (code >= bcktab->filltable[prefixindex])
+    {
+      ordercode = code - bcktab->filltable[prefixindex];
+      divisor = bcktab->filltable[prefixindex] + 1;
+      if (ordercode % divisor == 0)
+      {
+        ordercode /= divisor;
+        count[prefixindex] = bcktab->distpfxidx[prefixindex-1][ordercode];
+        sum += count[prefixindex];
+      }
+    } else
+    {
+      break;
+    }
+  }
+  specialsinbucket = fromcode2countspecialcodes(code,bcktab);
+  assert(sum <= specialsinbucket);
+  count[bcktab->prefixlength-1] = specialsinbucket - sum;
+  if (bcktab->prefixlength > 2U)
+  {
+    for (prefixindex = bcktab->prefixlength-2; prefixindex>=1U; prefixindex--)
+    {
+      count[prefixindex] += count[prefixindex+1];
+    }
+    if (specialsinbucket != count[1])
+    {
+      fprintf(stderr,"code %u: sum = %lu != %lu = count[1]\n",
+              code,sum,count[1]);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+
+void checkcountspecialcodes(const Bcktab *bcktab)
+{
+  Codetype code;
+  unsigned long *count;
+
+  if (bcktab->prefixlength >= 2U)
+  {
+    ALLOCASSIGNSPACE(count,NULL,unsigned long,bcktab->prefixlength);
+    for (code=0; code<bcktab->numofallcodes; code++)
+    {
+      pfxidxpartialsums(count,
+                        code,
+                        bcktab);
+    }
+    FREESPACE(count);
+  }
+}
+#endif
 
 Codetype codedownscale(const Bcktab *bcktab,
                        Codetype code,
@@ -262,37 +424,6 @@ Codetype codedownscale(const Bcktab *bcktab,
   code *= bcktab->basepower[remain];
   code += bcktab->filltable[prefixindex];
   return code;
-}
-
-int bcktab2file(FILE *fp,
-                const Bcktab *bcktab,
-                Error *err)
-{
-  if (fwrite(bcktab->leftborder,
-             sizeof (*bcktab->leftborder),
-             (size_t) (bcktab->numofallcodes+1),
-             fp)
-             != (size_t) (bcktab->numofallcodes+1))
-  {
-    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
-              bcktab->numofallcodes+1,
-              (unsigned int) sizeof (*bcktab->leftborder),
-              strerror(errno));
-    return -1;
-  }
-  if (fwrite(bcktab->countspecialcodes,
-             sizeof (*bcktab->countspecialcodes),
-             (size_t) bcktab->numofspecialcodes,
-             fp)
-             != (size_t) bcktab->numofspecialcodes)
-  {
-    error_set(err,"cannot write %u items of size %u: errormsg=\"%s\"",
-              bcktab->numofspecialcodes,
-              (unsigned int) sizeof (*bcktab->countspecialcodes),
-              strerror(errno));
-    return -2;
-  }
-  return 0;
 }
 
 unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
@@ -324,8 +455,7 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
   if (rightchar == numofchars - 1)
   {
     bucketspec->specialsinbucket
-      = (unsigned long)
-        bcktab->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
+      = bcktab->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)];
     if (bucketspec->nonspecialsinbucket >= bucketspec->specialsinbucket)
     {
       bucketspec->nonspecialsinbucket -= bucketspec->specialsinbucket;
@@ -357,91 +487,87 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
                                numofchars);
 }
 
-unsigned long *pfxidxpartialsums(unsigned long specialsinbucket,
-                                 Codetype code,
-                                 unsigned int prefixlength,
-                                 const unsigned long **distpfxidx,
-                                 const Codetype *filltable)
+unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
 {
-  unsigned long sumcount = 0, *count;
   unsigned int prefixindex;
-  Codetype ordercode;
 
-  ALLOCASSIGNSPACE(count,NULL,unsigned long,prefixlength);
-  count[0] = 0;
-  for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
+  if (bcktab->prefixlength > 2U)
   {
-    count[prefixindex] = 0;
-    if (code >= filltable[prefixindex])
+    Codetype ordercode, divisor;
+    for (prefixindex=bcktab->prefixlength-2; prefixindex>=1U; prefixindex--)
     {
-      ordercode = code - filltable[prefixindex];
-      if (ordercode % (filltable[prefixindex] + 1) == 0)
+      if (code >= bcktab->filltable[prefixindex])
       {
-        ordercode = ordercode/(filltable[prefixindex] + 1);
-        count[prefixindex] = distpfxidx[prefixindex-1][ordercode];
-        sumcount += count[prefixindex];
+        ordercode = code - bcktab->filltable[prefixindex];
+        divisor = bcktab->filltable[prefixindex] + 1;
+        if (ordercode % divisor == 0)
+        {
+          ordercode /= divisor;
+          if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0)
+          {
+            return prefixindex;
+          }
+        }
+      } else
+      {
+        break;
       }
     }
   }
-  assert(specialsinbucket >= sumcount);
-  count[prefixlength-1] = specialsinbucket - sumcount;
-  if (prefixlength > 2U)
-  {
-    for (prefixindex = prefixlength-2; prefixindex>=1U; prefixindex--)
-    {
-      count[prefixindex] += count[prefixindex+1];
-    }
-    assert(count[1] == specialsinbucket);
-  }
-  return count;
+  return bcktab->prefixlength-1;
 }
 
-unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
+unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
+                              Uchar *lcpsubtab,
                               unsigned long specialsinbucket,
                               const Bcktab *bcktab,
-                              Codetype code,
-                              unsigned int prefixlength)
+                              Codetype code)
 {
-  unsigned int prefixindex, maxvalue = 0;
-  Codetype ordercode;
-  unsigned long idx, insertindex = specialsinbucket-1;
+  unsigned int prefixindex, maxprefixindex = 0;
+  Codetype ordercode, divisor;
+  unsigned long idx;
+  Uchar *insertptr;
 
-  for (prefixindex=1U; prefixindex<prefixlength-1; prefixindex++)
+  *minprefixindex = bcktab->prefixlength;
+  insertptr = lcpsubtab + specialsinbucket - 1;
+  for (prefixindex=1U; prefixindex<bcktab->prefixlength-1; prefixindex++)
   {
     if (code >= bcktab->filltable[prefixindex])
     {
       ordercode = code - bcktab->filltable[prefixindex];
-      if (ordercode % (bcktab->filltable[prefixindex] + 1) == 0)
+      divisor = bcktab->filltable[prefixindex] + 1;
+      if (ordercode % divisor == 0)
       {
-        ordercode = ordercode/(bcktab->filltable[prefixindex] + 1);
-        if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0 &&
-            insertindex > 0)
+        ordercode /= divisor;
+        if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0)
         {
-          for (idx=0;
-               insertindex > 0 &&
-               idx < bcktab->distpfxidx[prefixindex-1][ordercode];
-               idx++, insertindex--)
+          maxprefixindex = prefixindex;
+          if (*minprefixindex > prefixindex)
           {
-            lcpsubtab[insertindex] = (Uchar) prefixindex;
+            *minprefixindex = prefixindex;
           }
-          if (maxvalue < prefixindex)
+          for (idx=0; idx < bcktab->distpfxidx[prefixindex-1][ordercode]; idx++)
           {
-            maxvalue = prefixindex;
+            assert(insertptr >= lcpsubtab);
+            *insertptr-- = (Uchar) prefixindex;
           }
         }
       }
     }
   }
-  while (insertindex > 0)
+  if (insertptr >= lcpsubtab)
   {
-    lcpsubtab[insertindex] = (Uchar) (prefixlength-1);
-    if (maxvalue < prefixindex)
+    maxprefixindex = bcktab->prefixlength-1;
+    if (*minprefixindex == bcktab->prefixlength)
     {
-      maxvalue = prefixindex;
+      *minprefixindex = bcktab->prefixlength-1;
     }
-    insertindex--;
+    while (insertptr >= lcpsubtab)
+    {
+      *insertptr-- = (Uchar) (bcktab->prefixlength-1);
+    }
   }
-  return maxvalue;
+  return maxprefixindex;
 }
 
 const Codetype **bcktab_multimappower(const Bcktab *bcktab)
@@ -459,27 +585,55 @@ Seqpos *bcktab_leftborder(Bcktab *bcktab)
   return bcktab->leftborder;
 }
 
-Codetype bcktab_numofallcodes(Bcktab *bcktab)
+Codetype bcktab_numofallcodes(const Bcktab *bcktab)
 {
   return bcktab->numofallcodes;
 }
 
-/*
-src/libgtmatch/bckbound.h  interface
-src/libgtmatch/bcktab.c    implementation
+#ifdef DEBUG
+#include "qgram2code.h"
+void consistencyofsuffix(int line,
+                         const Encodedsequence *encseq,
+                         Readmode readmode,
+                         const Bcktab *bcktab,
+                         unsigned int numofchars,
+                         const Suffixwithcode *suffix)
+{
+  unsigned int idx, firstspecial = bcktab->prefixlength, gramfirstspecial;
+  Codetype qgramcode = 0;
+  Uchar cc = 0;
 
-src/libgtmatch/sfx-suffixer.c  used in opaque way
-src/tools/gt_patternmatch.c    used in opaque way
-src/libgtmatch/cutendpfx.c     used in opaque way
-src/libgtmatch/cutendpfx.h  interface
-src/libgtmatch/esa-map.c    used in opaque way
-src/libgtmatch/sarr-def.h   used in opaque way
-src/libgtmatch/sfx-apfxlen.c  no usage
-src/libgtmatch/sfx-bentsedg.c no usage
-src/libgtmatch/sfx-opt.c      no usage
-src/libgtmatch/sfx-optdef.h      no usage
-src/libgtmatch/sfx-outlcp.h   only declaration
-src/libgtmatch/sfx-run.c          no usage
-src/libgtmatch/sfx-suffixer.h  interface
-src/tools/gt_greedyfwdmat.c    only in previous version
-*/
+  for (idx=0; idx<bcktab->prefixlength; idx++)
+  {
+    if ((Seqpos) (suffix->startpos + idx) >= bcktab->totallength)
+    {
+      firstspecial = idx;
+      break;
+    }
+    cc = getencodedchar(encseq,suffix->startpos + idx, readmode);
+    if (ISSPECIAL(cc))
+    {
+      firstspecial = idx;
+      break;
+    }
+    bcktab->qgrambuffer[idx] = cc;
+  }
+  for (idx=firstspecial; idx<bcktab->prefixlength; idx++)
+  {
+    bcktab->qgrambuffer[idx] = (Uchar) (numofchars-1);
+  }
+  gramfirstspecial = qgram2code(&qgramcode,
+                                (const Codetype **) bcktab->multimappower,
+                                bcktab->prefixlength,
+                                bcktab->qgrambuffer);
+  assert(gramfirstspecial == bcktab->prefixlength);
+  assert(qgramcode == suffix->code);
+  if (firstspecial != suffix->prefixindex)
+  {
+    fprintf(stderr,"line %d: code=%u: ",line,suffix->code);
+    fprintf(stderr,"firstspecial = %u != %u = suffix->prefixindex\n",
+                    firstspecial,suffix->prefixindex);
+    exit(EXIT_FAILURE);
+  }
+}
+#endif

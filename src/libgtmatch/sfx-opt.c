@@ -40,10 +40,15 @@ static OPrval parse_options(int *parsed_args,
          *optiondna,
          *optionprotein,
          *optionplain,
+         *optionsuf,
+         *optionlcp,
+         *optionbwt,
          *optionpl,
+         *optionmaxdepth,
          *optionindexname,
          *optiondb,
          *optiondir,
+         *optionfast,
          *optiondes;
   OPrval oprval;
   Str *dirarg = str_new();
@@ -70,6 +75,7 @@ static OPrval parse_options(int *parsed_args,
   optionprotein = option_new_bool("protein","input is Protein sequence",
                                   &so->isprotein,false);
   option_parser_add_option(op, optionprotein);
+
   optionplain = option_new_bool("plain","process as plain text",
                                 &so->isplain,false);
   option_parser_add_option(op, optionplain);
@@ -96,12 +102,34 @@ static OPrval parse_options(int *parsed_args,
   option_argument_is_optional(optionpl);
   option_parser_add_option(op, optionpl);
 
+  if (doesa)
+  {
+    optionmaxdepth = option_new_uint_min("maxdepth",
+                                         "restrict suffix sorting to prefixes "
+                                         "of the given length",
+                                         &so->maxdepth.valueunsignedint,
+                                         MAXDEPTH_AUTOMATIC,
+                                         1U);
+    option_is_development_option(optionmaxdepth);
+    option_argument_is_optional(optionmaxdepth);
+    option_parser_add_option(op, optionmaxdepth);
+
+    optionfast = option_new_bool("fast","be faster but use more space",
+                                 &so->dofast,false);
+    option_is_development_option(optionfast);
+    option_parser_add_option(op, optionfast);
+  } else
+  {
+    optionmaxdepth = NULL;
+  }
+
   option = option_new_uint_min("parts",
                                "specify number of parts in which the "
                                "sequence is processed",
                                &so->numofparts,
                                1U,
                                1U);
+  option_is_development_option(option);
   option_parser_add_option(op, option);
 
   option = option_new_string("sat",
@@ -124,24 +152,27 @@ static OPrval parse_options(int *parsed_args,
 
   if (doesa)
   {
-    option = option_new_bool("suf",
-                             "output suffix array (suftab) to file",
-                             &so->outsuftab,
-                             false);
-    option_parser_add_option(op, option);
+    optionsuf = option_new_bool("suf",
+                                "output suffix array (suftab) to file",
+                                &so->outsuftab,
+                                false);
+    option_parser_add_option(op, optionsuf);
 
-    option = option_new_bool("lcp",
-                             "output lcp table (lcptab) to file",
-                             &so->outlcptab,
-                             false);
-    option_parser_add_option(op, option);
-    option = option_new_bool("bwt",
-                             "output Burrows-Wheeler Transformation "
-                             "(bwttab) to file",
-                             &so->outbwttab,
-                             false);
-    option_parser_add_option(op, option);
+    optionlcp = option_new_bool("lcp",
+                                "output lcp table (lcptab) to file",
+                                &so->outlcptab,
+                                false);
+    option_parser_add_option(op, optionlcp);
 
+    optionbwt = option_new_bool("bwt",
+                                "output Burrows-Wheeler Transformation "
+                                "(bwttab) to file",
+                                &so->outbwttab,
+                                false);
+    option_parser_add_option(op, optionbwt);
+  } else
+  {
+    optionsuf = optionlcp = optionbwt = NULL;
   }
   option = option_new_bool("bck",
                            "output bucket table to file",
@@ -154,6 +185,11 @@ static OPrval parse_options(int *parsed_args,
     registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
                                so->str_indexname);
   }
+  option = option_new_bool("showtime",
+                           "show the time of the different computation phases",
+                           &so->showtime,
+                           false);
+  option_parser_add_option(op, option);
 
   option = option_new_bool("v",
                            "be verbose ",
@@ -164,6 +200,14 @@ static OPrval parse_options(int *parsed_args,
   option_exclude(optionsmap, optiondna);
   option_exclude(optionsmap, optionprotein);
   option_exclude(optiondna, optionprotein);
+  if (doesa)
+  {
+    assert(optionmaxdepth != NULL);
+    option_exclude(optionmaxdepth, optionlcp);
+                   /* because lcp table may be incorrect. XXX change later */
+    option_exclude(optionmaxdepth, optionbwt);
+                   /* because bwt table may be incorrect. XXX change later */
+  }
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc,
                                err);
   if (oprval == OPTIONPARSER_OK)
@@ -202,6 +246,14 @@ static OPrval parse_options(int *parsed_args,
                           "-dna, -protein, or -smap is mandatory");
         oprval = OPTIONPARSER_ERROR;
       }
+    }
+  }
+  if (oprval == OPTIONPARSER_OK && doesa)
+  {
+    assert(optionmaxdepth != NULL);
+    if (option_is_set(optionmaxdepth))
+    {
+      so->maxdepth.defined = true;
     }
   }
   if (oprval == OPTIONPARSER_OK && !doesa)
@@ -259,6 +311,7 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     showdefinitelyverbose("prefixlength=%u",so->prefixlength);
   }
+  showdefinitelyverbose("fast=%s",so->dofast ? "true" : "false");
   showdefinitelyverbose("parts=%u",so->numofparts);
   for (i=0; i<strarray_size(so->filenametab); i++)
   {
@@ -301,6 +354,8 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->str_smap = str_new();
   so->str_sat = str_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
+  so->maxdepth.defined = false;
+  so->maxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
   so->outsuftab = false;
   so->outlcptab = false;
   so->outbwttab = false;

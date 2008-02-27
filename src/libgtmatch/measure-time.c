@@ -26,12 +26,15 @@
   const char *eventdescription;
 };
 
-void inittheclock(Measuretime **mtime,const char *event)
+Measuretime *inittheclock(const char *event)
 {
-  *mtime = ma_malloc(sizeof (Measuretime));
-  (*mtime)->startclock = clock();
-  (*mtime)->overalltime = 0;
-  (*mtime)->eventdescription = event;
+  Measuretime *mtime;
+
+  mtime = ma_malloc(sizeof (Measuretime));
+  mtime->startclock = clock();
+  mtime->overalltime = 0;
+  mtime->eventdescription = event;
+  return mtime;
 }
 
 void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent)

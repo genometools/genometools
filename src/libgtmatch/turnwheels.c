@@ -73,9 +73,19 @@ bool nextTurningwheel(Turningwheel *tw)
   return true;
 }
 
-unsigned int minchangedTurningwheel(Turningwheel *tw)
+unsigned int minchangedTurningwheel(const Turningwheel *tw)
 {
   return tw->minchanged;
+}
+
+void outputTurningwheel(const Turningwheel *tw)
+{
+  unsigned int i;
+
+  for (i=0; i<tw->numofwheels; i++)
+  {
+    printf("%u",tw->wheelspace[i]);
+  }
 }
 
 void freeTurningwheel(Turningwheel **tw)

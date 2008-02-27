@@ -37,7 +37,7 @@ typedef struct
 static int constructsarrandrunmaxpairs(
                  Substringmatchinfo *ssi,
                  Seqpos specialcharacters,
-                 Seqpos specialranges,
+                 Seqpos realspecialranges,
                  Readmode readmode,
                  unsigned int numofchars,
                  const Uchar *characters,
@@ -52,16 +52,20 @@ static int constructsarrandrunmaxpairs(
   bool haserr = false;
   Sfxiterator *sfi;
   bool specialsuffixes = false;
+  Definedunsignedint maxdepth;
 
+  maxdepth.defined = false;
   sfi = newSfxiterator(specialcharacters,
-                       specialranges,
+                       realspecialranges,
                        ssi->encseq,
                        readmode,
                        numofchars,
                        characters,
                        prefixlength,
+                       &maxdepth,
                        numofparts,
                        NULL,
+                       true, /* dofast */
                        mtime,
                        NULL,
                        err);
@@ -143,7 +147,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
   numofchars = getnumofcharsAlphabet(alpha);
   if (constructsarrandrunmaxpairs(&ssi,
                                   samplespecialcharinfo.specialcharacters,
-                                  samplespecialcharinfo.specialranges,
+                                  samplespecialcharinfo.realspecialranges,
                                   Forwardmode,
                                   numofchars,
                                   getcharactersAlphabet(alpha),

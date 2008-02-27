@@ -15,20 +15,32 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TURNWHEELS_H
-#define TURNWHEELS_H
+#ifndef SFX_INPUT_H
+#define SFX_INPUT_H
 
-typedef struct Turningwheel Turningwheel;
+#include "libgtcore/filelengthvalues.h"
+#include "alphadef.h"
+#include "seqpos-def.h"
+#include "measure-time-if.h"
+#include "encseq-def.h"
+#include "sfx-optdef.h"
 
-Turningwheel *newTurningwheel(unsigned int numofwheels,
-                              unsigned int asize);
+typedef struct
+{
+  unsigned long numofsequences;
+  Alphabet *alpha;
+  Specialcharinfo specialcharinfo;
+  Filelengthvalues *filelengthtab;
+  Encodedsequence *encseq;
+  unsigned long *characterdistribution;
+} Sfxseqinfo;
 
-bool nextTurningwheel(Turningwheel *tw);
+int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
+                         Measuretime *mtime,
+                         const Suffixeratoroptions *so,
+                         Verboseinfo *verboseinfo,
+                         Error *err);
 
-unsigned int minchangedTurningwheel(const Turningwheel *tw);
-
-void outputTurningwheel(const Turningwheel *tw);
-
-void freeTurningwheel(Turningwheel **tw);
+void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo);
 
 #endif

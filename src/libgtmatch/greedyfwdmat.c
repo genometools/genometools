@@ -27,7 +27,7 @@
 #include "optionargmode.h"
 #include "format64.h"
 #include "greedyfwdmat.h"
-#include "bckbound.h"
+#include "bcktab.h"
 #include "encseq-def.h"
 
 #include "initbasepower.pr"
@@ -80,7 +80,7 @@ static void checkifsequenceisthere(const Encodedsequence *encseq,
 
   for (i=0; i<gmatchlength; i++)
   {
-    cc = getencodedchar(encseq,witnessposition+i,Forwardmode);
+    cc = getencodedcharnospecial(encseq,witnessposition+i,Forwardmode);
     if (qptr[i] != cc)
     {
       fprintf(stderr,"sequence of length %lu at witnesspos " FormatSeqpos

@@ -22,14 +22,17 @@
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 #include "readmode-def.h"
-#include "libgtmatch/eis-bwtconstruct_params.h"
+#include "defined-types.h"
+#include "eis-bwtconstruct_params.h"
 
 #define PREFIXLENGTH_AUTOMATIC 0
+#define MAXDEPTH_AUTOMATIC     0
 
 typedef struct
 {
   unsigned int numofparts,
                prefixlength;
+  Definedunsignedint maxdepth;
   Str *str_indexname,
       *str_smap,
       *str_sat;
@@ -38,13 +41,15 @@ typedef struct
   bool isdna,
        isprotein,
        isplain,
+       dofast,
        beverbose,
        outtistab,
        outsuftab,
        outlcptab,
        outbwttab,
        outdestab,
-       outbcktab;
+       outbcktab,
+       showtime;
   struct bwtOptions bwtIdxParams;
 } Suffixeratoroptions;
 

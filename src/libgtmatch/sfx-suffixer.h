@@ -29,14 +29,16 @@ typedef struct Sfxiterator Sfxiterator;
 void freeSfxiterator(Sfxiterator **sfi);
 
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
-                            Seqpos specialranges,
+                            Seqpos realspecialranges,
                             const Encodedsequence *encseq,
                             Readmode readmode,
                             unsigned int numofchars,
                             const Uchar *characters,
                             unsigned int prefixlength,
+                            const Definedunsignedint *maxdepth,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
+                            bool dofast,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
                             Error *err);

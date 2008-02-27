@@ -24,7 +24,6 @@
 
 #include "libgtcore/error.h"
 #include "libgtmatch/sfx-suffixer.h"
-#include "libgtmatch/sfx-optdef.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 
 /** every reader is identified by a unique scalar */
@@ -68,7 +67,11 @@ enum sfxDataRequest {
  * @return interface object reference
  */
 extern sfxInterface *
-newSfxInterface(Suffixeratoroptions *so,
+newSfxInterface(Readmode readmode,
+                unsigned int prefixlength,
+                unsigned int numofparts,
+                const Definedunsignedint *maxdepth,
+                bool dofast,
                 const Encodedsequence *encseq,
                 const Specialcharinfo *specialcharinfo,
                 unsigned long numofsequences,
@@ -104,7 +107,11 @@ newSfxInterface(Suffixeratoroptions *so,
  * @return interface object reference
  */
 extern sfxInterface *
-newSfxInterfaceWithReaders(Suffixeratoroptions *so,
+newSfxInterfaceWithReaders(Readmode readmode,
+                           unsigned int prefixlength,
+                           unsigned int numofparts,
+                           const Definedunsignedint *maxdepth,
+                           bool dofast,
                            size_t numReaders,
                            enum sfxDataRequest *requests,
                            listenerID *ids,

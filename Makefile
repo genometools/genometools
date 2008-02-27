@@ -272,6 +272,12 @@ ifeq ($(memcheck),yes)
   STEST_FLAGS += -memcheck
 endif
 
+ifeq ($(64bit),yes)
+  BIT=64bit
+else
+  BIT=32bit
+endif
+
 ifeq ($(libgtview),yes)
   GTLIBS := $(GTLIBS) lib/libgtview.a
   GTSHAREDLIBS := $(GTSHAREDLIBS) lib/libgtview$(SHARED_OBJ_NAME_EXT)
@@ -559,8 +565,20 @@ endif
 .SUFFIXES:
 .PHONY: dist srcdist release gt install docs installwww splint test clean cleanup
 
-dist: all
-	tar cvzf gt-`cat VERSION`.tar.gz bin/gt
+VERSION:="`cat $(CURDIR)/VERSION`"
+GTSYSTEMNAME:=$(shell uname -sm | tr ' ' _)
+GTDISTBASENAME:="gt-$(VERSION)-$(GTSYSTEMNAME)-${BIT}"
+DISTDIR:="$(CURDIR)/dist/$(GTSYSTEMNAME)"
+
+dist:
+	@echo "[build distribution]"
+	rm -rf dist
+	mkdir -p $(DISTDIR)
+	mkdir -p $(DISTDIR)/bin
+	cp bin/gt $(DISTDIR)/bin/.
+	strip $(DISTDIR)/bin/gt
+	cp -r $(CURDIR)/gtdata $(DISTDIR)/.
+	tar -cvzf dist-${GTSYSTEMNAME}.tar.gz dist
 
 srcdist:
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \

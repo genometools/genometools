@@ -94,6 +94,9 @@ typedef struct
           )\
         )
 
+#define getencodedcharnospecial(ENCSEQ,POS,RM)\
+        getencodedchar(ENCSEQ,POS,RM)
+
 #define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS)\
         getencodedchar(ENCSEQ,POS,(ENCSEQSTATE)->readmode)
 
@@ -107,6 +110,10 @@ Seqpos getencseqtotallength(const Encodedsequence *encseq);
 
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
+
+Uchar getencodedcharnospecial(const Encodedsequence *encseq,
+                              Seqpos pos,
+                              Readmode readmode);
 
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
@@ -161,6 +168,8 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
                                               bool moveforward);
 
 bool hasspecialranges(const Encodedsequence *encseq);
+
+bool hasfastspecialrangeenumerator(const Encodedsequence *encseq);
 
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
 

@@ -15,13 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BCKBOUND_H
-#define BCKBOUND_H
+#ifndef BCKTAB_H
+#define BCKTAB_H
 
 #include <assert.h>
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/symboldef.h"
+#include "verbose-def.h"
 #include "seqpos-def.h"
 #include "intcode-def.h"
 
@@ -39,43 +40,30 @@ typedef struct
          right;
 } Lcpinterval;
 
-typedef struct
-{
-  Seqpos totallength,
-         *leftborder,
-         *countspecialcodes;
-  Codetype numofallcodes,
-           numofspecialcodes,
-           **multimappower,
-           *basepower,
-           *filltable;
-  unsigned long **distpfxidx;
-} Bcktab;
+typedef struct Outlcpinfo Outlcpinfo;
 
-int mapbcktab(Bcktab *bcktab,
-              const Str *indexname,
-              Seqpos totallength,
-              unsigned int numofchars,
-              unsigned int prefixlength,
-              Error *err);
+typedef struct Bcktab Bcktab;
 
-void freebcktab(Bcktab *bcktab,bool mapped);
+Bcktab *mapbcktab(const Str *indexname,
+                  Seqpos totallength,
+                  unsigned int numofchars,
+                  unsigned int prefixlength,
+                  Error *err);
 
-void initbcktabwithNULL(Bcktab *bcktab);
+void freebcktab(Bcktab **bcktab);
 
-int allocBcktab(Bcktab *bcktab,
-                Seqpos totallength,
-                unsigned int numofchars,
-                unsigned int prefixlength,
-                unsigned int codebits,
-                unsigned int maxcodevalue,
-                Error *err);
+Bcktab *allocBcktab(Seqpos totallength,
+                    unsigned int numofchars,
+                    unsigned int prefixlength,
+                    unsigned int codebits,
+                    unsigned int maxcodevalue,
+                    Verboseinfo *verboseinfo,
+                    Error *err);
 
 void updatebckspecials(Bcktab *bcktab,
                        Codetype code,
                        unsigned int numofchars,
-                       unsigned int prefixindex,
-                       unsigned int prefixlength);
+                       unsigned int prefixindex);
 
 Codetype codedownscale(const Bcktab *bcktab,
                        Codetype code,
@@ -85,9 +73,7 @@ Codetype codedownscale(const Bcktab *bcktab,
 void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
                          Seqpos specialcharacters);
 
-int bcktab2file(FILE *fp,
-                const Bcktab *bcktab,
-                Error *err);
+int bcktab2file(FILE *fp,const Bcktab *bcktab,Error *err);
 
 unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
                                    const Bcktab *bcktab,
@@ -101,11 +87,13 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
                           const Bcktab *bcktab,
                           Codetype code);
 
-unsigned int pfxidx2lcpvalues(Uchar *lcpsubtab,
+unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code);
+
+unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
+                              Uchar *lcpsubtab,
                               unsigned long specialsinbucket,
                               const Bcktab *bcktab,
-                              Codetype code,
-                              unsigned int prefixlength);
+                              Codetype code);
 
 const Codetype **bcktab_multimappower(const Bcktab *bcktab);
 
@@ -113,6 +101,18 @@ Codetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx);
 
 Seqpos *bcktab_leftborder(Bcktab *bcktab);
 
-Codetype bcktab_numofallcodes(Bcktab *bcktab);
+Codetype bcktab_numofallcodes(const Bcktab *bcktab);
 
+#ifndef NDEBUG
+void checkcountspecialcodes(const Bcktab *bcktab);
+#endif
+
+#ifdef DEBUG
+void consistencyofsuffix(int line,
+                         const Encodedsequence *encseq,
+                         Readmode readmode,
+                         const Bcktab *bcktab,
+                         unsigned int numofchars,
+                         const Suffixwithcode *suffix);
+#endif
 #endif

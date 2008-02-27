@@ -26,4 +26,10 @@ typedef struct
   unsigned long valueunsignedlong;
 } Definedunsignedlong;
 
+typedef struct
+{
+  bool defined;
+  unsigned int valueunsignedint;
+} Definedunsignedint;
+
 #endif

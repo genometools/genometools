@@ -1,9 +1,0 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-int parseargsandcallsuffixerator(bool doesa,int argc,
-                                 const char **argv,Error *err);
-
-#ifdef __cplusplus
-}
-#endif

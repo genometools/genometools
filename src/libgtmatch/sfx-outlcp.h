@@ -20,21 +20,23 @@
 #include <stdio.h>
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
+#include "defined-types.h"
 #include "encseq-def.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
-#include "bckbound.h"
+#include "bcktab.h"
 
-typedef struct Outlcpinfo Outlcpinfo;
+Outlcpinfo *newlcpoutinfo(const Str *indexname,
+                          unsigned int prefixlength,
+                          unsigned int numofchars,
+                          Seqpos totallength,
+                          Error *err);
 
-Outlcpinfo *newlcpoutfileinfo(const Str *indexname,
-                              unsigned int prefixlength,
-                              unsigned int numofchars,
-                              Seqpos totallength,
-                              Error *err);
-Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
-Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 void freeoutlcptab(Outlcpinfo **outlcpinfo);
+
+Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
+
+Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
@@ -42,10 +44,11 @@ void sortallbuckets(Seqpos *suftabptr,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos totalwidth,
-                    Seqpos previoussuffix,
                     const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
-                    Outlcpinfo *outlcpinfo);
+                    const Definedunsignedint *maxdepth,
+                    Outlcpinfo *outlcpinfo,
+                    unsigned long long *bucketiterstep);
 
 #endif

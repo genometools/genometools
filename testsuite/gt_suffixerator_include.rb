@@ -1,6 +1,11 @@
-def outoptions()
+def outoptionsnobck()
   return "-tis -suf -bwt -lcp -des"
 end
+
+def outoptions()
+  return outoptionsnobck() + " -bck"
+end
+
 
 def checksfx(parts,pl,withsmap,sat,filelist)
   if withsmap == 0
@@ -166,7 +171,7 @@ def checkmapped(args)
              :maxtime => 600
     run_test "#{$bin}gt dev sfxmap #{outoptions()} -trials 10 -v sfxidx",
              :maxtime => 600
-    run_test "#{$bin}gt dev sfxmap #{outoptions()} -stream -v sfxidx",
+    run_test "#{$bin}gt dev sfxmap #{outoptionsnobck()} -stream -v sfxidx",
              :maxtime => 600
   end
 end
@@ -183,9 +188,9 @@ def makegreedyfwdmatcall(queryfile,indexarg,ms)
 end
 
 def checkgreedyfwdmat(queryfile,ms)
-  run_test makegreedyfwdmatcall(queryfile,"-fmi fmi",ms)
+  run_test makegreedyfwdmatcall(queryfile,"-fmi fmi",ms), :maxtime => 600
   run "mv #{$last_stdout} tmp.fmi"
-  run_test makegreedyfwdmatcall(queryfile,"-esa sfx",ms)
+  run_test makegreedyfwdmatcall(queryfile,"-esa sfx",ms), :maxtime => 600
   run "mv #{$last_stdout} tmp.esa"
   run "diff tmp.esa tmp.fmi"
   run_test makegreedyfwdmatcall(queryfile,"-pck pck",ms), :maxtime => 600
@@ -207,8 +212,6 @@ end
 def grumbach()
   return "#{$gttestdata}DNA-mix/Grumbach.fna/"
 end
-
-# XXX FIXME remove the following exceptions
 
 allfiles.each do |reffile|
   allfiles.each do |queryfile|
@@ -242,13 +245,10 @@ if $gttestdata then
               "#{grumbach()}hs5hcmvcg.fna " +
               "#{grumbach()}humdystrop.fna " +
               "#{grumbach()}humghcsa.fna " +
-              "#{grumbach()}humhbb.fna " +
               "#{grumbach()}humhdabcd.fna " +
               "#{grumbach()}humhprtb.fna " +
               "#{grumbach()}mipacga.fna " +
               "#{grumbach()}mpocpcg.fna " +
-              "#{grumbach()}mpomtcg.fna " +
-              "#{grumbach()}vaccg.fna " +
               "#{grumbach()}ychrIII.fna " +
               "-parts 3 -pl")
 

@@ -15,20 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TURNWHEELS_H
-#define TURNWHEELS_H
+#ifndef SFX_RUN_H
+#define SFX_RUN_H
+#include <stdbool.h>
+#include "libgtcore/error.h"
 
-typedef struct Turningwheel Turningwheel;
-
-Turningwheel *newTurningwheel(unsigned int numofwheels,
-                              unsigned int asize);
-
-bool nextTurningwheel(Turningwheel *tw);
-
-unsigned int minchangedTurningwheel(const Turningwheel *tw);
-
-void outputTurningwheel(const Turningwheel *tw);
-
-void freeTurningwheel(Turningwheel **tw);
+int parseargsandcallsuffixerator(bool doesa,int argc,
+                                 const char **argv,Error *err);
 
 #endif

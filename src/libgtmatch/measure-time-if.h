@@ -21,7 +21,7 @@
 
 typedef struct Measuretime Measuretime;
 
-void inittheclock(Measuretime **mtime,const char *event);
+Measuretime *inittheclock(const char *event);
 
 void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent);
 

@@ -21,6 +21,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/error.h"
 #include "libgtcore/fastabuffer.h"
+#include "libgtcore/unused.h"
 #include "encseq-def.h"
 #include "spacedef.h"
 
@@ -254,6 +255,11 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
 bool hasspecialranges(const Encodedsequence *encseq)
 {
   return encseq->hasspecialcharacters;
+}
+
+bool hasfastspecialrangeenumerator(UNUSED const Encodedsequence *encseq)
+{
+  return false;
 }
 
 static bool bitanddirectnextspecialrangeiterator(Sequencerange *range,

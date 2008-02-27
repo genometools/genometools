@@ -31,7 +31,6 @@
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/verbose-def.h"
 #include "libgtmatch/esafileend.h"
-#include "libgtmatch/sfx-optdef.h"
 #include "libgtmatch/intcode-def.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/sfx-cmpsuf.pr"
@@ -47,7 +46,10 @@ struct sfxIReaderState
 
 struct sfxInterface
 {
-  Suffixeratoroptions so;
+  Readmode readmode;
+  unsigned int prefixlength, numofparts;
+  const Definedunsignedint *maxdepth;
+  bool dofast;
   Measuretime *mtime;
   Seqpos length;
   const Alphabet *alpha;
@@ -81,7 +83,11 @@ sfxIReadAdvance(sfxInterface *iface,
                 Seqpos requestMaxPos);
 
 extern sfxInterface *
-newSfxInterface(Suffixeratoroptions *so,
+newSfxInterface(Readmode readmode,
+                unsigned int prefixlength,
+                unsigned int numofparts,
+                const Definedunsignedint *maxdepth,
+                bool dofast,
                 const Encodedsequence *encseq,
                 const Specialcharinfo *specialcharinfo,
                 unsigned long numofsequences,
@@ -92,7 +98,9 @@ newSfxInterface(Suffixeratoroptions *so,
                 Verboseinfo *verbosity,
                 Error *err)
 {
-  return newSfxInterfaceWithReaders(so, 0, NULL, NULL, encseq,
+  return newSfxInterfaceWithReaders(readmode, prefixlength,
+                                    numofparts, maxdepth,
+                                    dofast, 0, NULL, NULL, encseq,
                                     specialcharinfo, numofsequences, mtime,
                                     length, alpha, characterdistribution,
                                     verbosity, err);
@@ -137,7 +145,11 @@ deleteSeqStats(struct seqStats *stats)
   } while (0)
 
 extern sfxInterface *
-newSfxInterfaceWithReaders(Suffixeratoroptions *so,
+newSfxInterfaceWithReaders(Readmode readmode,
+                           unsigned int prefixlength,
+                           unsigned int numofparts,
+                           const Definedunsignedint *maxdepth,
+                           bool dofast,
                            size_t numReaders,
                            enum sfxDataRequest *requests,
                            listenerID *ids,
@@ -155,7 +167,7 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
   error_check(err);
 
   iface = ma_calloc(1, sizeof (*iface));
-  memcpy(&iface->so, so, sizeof (*so));
+  iface->readmode = readmode;
   iface->mtime = mtime;
   iface->length = length;
   iface->alpha = alpha;
@@ -164,13 +176,16 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                                          numofsequences,
                                          characterdistribution);
   if (!(iface->sfi = newSfxiterator(specialcharinfo->specialcharacters,
-                                    specialcharinfo->specialranges,
-                                    encseq, so->readmode,
+                                    specialcharinfo->realspecialranges,
+                                    encseq,
+                                    readmode,
                                     getnumofcharsAlphabet(alpha),
                                     getcharactersAlphabet(alpha),
-                                    so->prefixlength,
-                                    so->numofparts,
+                                    prefixlength,
+                                    maxdepth,
+                                    numofparts,
                                     NULL,
+                                    dofast,
                                     iface->mtime,
                                     verbosity, err)))
     newSfxInterfaceWithReadersErrRet();
@@ -216,7 +231,7 @@ SfxIReadESQRange(sfxInterface *iface, Seqpos start, Seqpos len,
   assert(dest);
   for (i = 0; i < (size_t)len; ++i)
   {
-    dest[i] = getencodedchar(iface->encseq, start + i, iface->so.readmode);
+    dest[i] = getencodedchar(iface->encseq, start + i, iface->readmode);
   }
   return dest;
 }
@@ -313,7 +328,7 @@ SfxIGetOrigSeq(void *state, Symbol *dest, Seqpos pos, size_t len)
   assert(state);
   iface = state;
   for (i = 0; i < len; ++i)
-    dest[i] = getencodedchar(iface->encseq, pos + i, iface->so.readmode);
+    dest[i] = getencodedchar(iface->encseq, pos + i, iface->readmode);
   return len;
 }
 
@@ -331,7 +346,7 @@ readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,Uchar *dest)
     Seqpos sufTabVal = getSufTabVal(iface, start + i);
     if (sufTabVal != 0)
       dest[i] = getencodedchar(iface->encseq, sufTabVal - 1,
-                               iface->so.readmode);
+                               iface->readmode);
     else
       dest[i] = (Uchar) UNDEFBWTCHAR;
   }
@@ -359,7 +374,7 @@ readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
     int cmp =
 #endif /* NDEBUG */
       comparetwosuffixes(iface->encseq,
-                         iface->so.readmode,
+                         iface->readmode,
                          dest + i,
                          false,
                          false,

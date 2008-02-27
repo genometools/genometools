@@ -20,9 +20,9 @@
 
 /* The GenomeTools matching library (libgtmatch) header */
 #include "libgtmatch/sarr-def.h"
+#include "libgtmatch/sfx-run.h"
 
 #include "libgtmatch/guessprot.pr"
-#include "libgtmatch/sfx-run.pr"
 #include "libgtmatch/fmi-mkindex.pr"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/sfx-suftaborder.pr"

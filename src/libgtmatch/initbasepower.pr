@@ -3,7 +3,7 @@ extern "C" {
 #endif
 Codetype *initbasepower(unsigned int base,unsigned int len);
 
-Codetype *initfilltable(const Codetype *basepower,unsigned int len);
+Codetype *initfilltable(unsigned int base,unsigned int len);
 
 Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue);
 
