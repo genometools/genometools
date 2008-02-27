@@ -415,8 +415,8 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
       ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
                        Codeatposition,realspecialranges+1);
       showverbose(verboseinfo,"sizeof (spaceCodeatposition)=%lu",
-                              (unsigned long ) sizeof (Codeatposition) *
-                                               (realspecialranges+1));
+                              (unsigned long) (sizeof (Codeatposition) *
+                                               (realspecialranges+1)));
     } else
     {
       sfi->spaceCodeatposition = NULL;
