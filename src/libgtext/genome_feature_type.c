@@ -29,6 +29,7 @@
 static const char *genome_feature_type_strings[] = { "CDS",
                                                      "EST_match",
                                                      "LTR_retrotransposon",
+                                                     "SNP",
                                                      "TF_binding_site",
                                                      "cDNA_match",
                                                      "exon",

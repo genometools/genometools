@@ -27,6 +27,7 @@ typedef enum {
   gft_CDS,
   gft_EST_match,
   gft_LTR_retrotransposon,
+  gft_SNP,
   gft_TF_binding_site,
   gft_cDNA_match,
   gft_exon,
