@@ -316,13 +316,16 @@ static int runsuffixerator(bool doesa,
   Filelengthvalues *filelengthtab = NULL;
   bool haserr = false;
   Encodedsequence *encseq = NULL;
-  Measuretime *mtime;
+  Measuretime *mtime = NULL;
   Outfileinfo outfileinfo;
   unsigned long *characterdistribution = NULL;
 
   error_check(err);
-  inittheclock(&mtime,
-               "determining sequence length and number of special symbols");
+  if (so->showtime)
+  {
+    mtime = inittheclock("determining sequence length and number of "
+                         "special symbols");
+  }
   alpha = assigninputalphabet(so->isdna,
                               so->isprotein,
                               so->str_smap,
@@ -364,7 +367,10 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    deliverthetime(stdout,mtime,"computing sequence encoding");
+    if (mtime != NULL)
+    {
+      deliverthetime(stdout,mtime,"computing sequence encoding");
+    }
     encseq = files2encodedsequence(true,
                                    so->filenametab,
                                    so->isplain,
@@ -604,7 +610,10 @@ static int runsuffixerator(bool doesa,
   }
   freeEncodedsequence(&encseq);
   FREESPACE(characterdistribution);
-  deliverthetime(stdout,mtime,NULL);
+  if (mtime != NULL)
+  {
+    deliverthetime(stdout,mtime,NULL);
+  }
   return haserr ? -1 : 0;
 }
 

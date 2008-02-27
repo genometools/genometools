@@ -22,6 +22,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/symboldef.h"
+#include "verbose-def.h"
 #include "seqpos-def.h"
 #include "intcode-def.h"
 
@@ -56,6 +57,7 @@ Bcktab *allocBcktab(Seqpos totallength,
                     unsigned int prefixlength,
                     unsigned int codebits,
                     unsigned int maxcodevalue,
+                    Verboseinfo *verboseinfo,
                     Error *err);
 
 void updatebckspecials(Bcktab *bcktab,

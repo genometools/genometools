@@ -48,7 +48,8 @@ typedef struct
        outlcptab,
        outbwttab,
        outdestab,
-       outbcktab;
+       outbcktab,
+       showtime;
   struct bwtOptions bwtIdxParams;
 } Suffixeratoroptions;
 

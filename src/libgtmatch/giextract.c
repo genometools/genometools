@@ -30,7 +30,7 @@
 #include "divmodmul.h"
 #include "format64.h"
 
-/* 
+/*
   XXX move this to the libgtcore.
 */
 

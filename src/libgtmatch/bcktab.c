@@ -83,7 +83,8 @@ static void setdistpfxidxptrs(unsigned long **distpfxidx,
 }
 
 static unsigned long **allocdistprefixindexcounts(const Codetype *basepower,
-                                                  unsigned int prefixlength)
+                                                  unsigned int prefixlength,
+                                                  Verboseinfo *verboseinfo)
 {
   if (prefixlength > 2U)
   {
@@ -96,9 +97,9 @@ static unsigned long **allocdistprefixindexcounts(const Codetype *basepower,
 
       ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-1);
       ALLOCASSIGNSPACE(counters,NULL,unsigned long,numofcounters);
-      printf("# sizeof (distpfxidx)=%lu\n",
-              (unsigned long) sizeof (*distpfxidx) * (prefixlength-1) +
-                              sizeof (*counters) * numofcounters);
+      showverbose(verboseinfo,"sizeof (distpfxidx)=%lu",
+                  (unsigned long) sizeof (*distpfxidx) * (prefixlength-1) +
+                                  sizeof (*counters) * numofcounters);
       memset(counters,0,(size_t) sizeof (*counters) * numofcounters);
       setdistpfxidxptrs(distpfxidx,counters,basepower,prefixlength);
       return distpfxidx;
@@ -140,6 +141,7 @@ Bcktab *allocBcktab(Seqpos totallength,
                     unsigned int prefixlength,
                     unsigned int codebits,
                     unsigned int maxcodevalue,
+                    Verboseinfo *verboseinfo,
                     Error *err)
 {
   Bcktab *bcktab;
@@ -158,7 +160,7 @@ Bcktab *allocBcktab(Seqpos totallength,
   {
     ALLOCASSIGNSPACE(bcktab->leftborder,NULL,Seqpos,
                      bcktab->numofallcodes+1);
-    printf("# sizeof (leftborder)=%lu\n",
+    showverbose(verboseinfo,"sizeof (leftborder)=%lu",
               (unsigned long) sizeof (*bcktab->leftborder) *
                               (bcktab->numofallcodes+1));
     memset(bcktab->leftborder,0,
@@ -166,14 +168,16 @@ Bcktab *allocBcktab(Seqpos totallength,
            (size_t) bcktab->numofallcodes);
     ALLOCASSIGNSPACE(bcktab->countspecialcodes,NULL,unsigned long,
                      bcktab->numofspecialcodes);
-    printf("# sizeof (countspecialcodes)=%lu\n",
-              (unsigned long) sizeof (*bcktab->countspecialcodes) *
-              bcktab->numofspecialcodes);
+    showverbose(verboseinfo,
+                "sizeof (countspecialcodes)=%lu",
+                (unsigned long) sizeof (*bcktab->countspecialcodes) *
+                bcktab->numofspecialcodes);
     memset(bcktab->countspecialcodes,0,
            sizeof (*bcktab->countspecialcodes) *
                   (size_t) bcktab->numofspecialcodes);
     bcktab->distpfxidx = allocdistprefixindexcounts(bcktab->basepower,
-                                                    prefixlength);
+                                                    prefixlength,
+                                                    verboseinfo);
   }
   if (haserr)
   {

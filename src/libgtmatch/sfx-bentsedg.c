@@ -691,7 +691,8 @@ void sortallbuckets(Seqpos *suftabptr,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     const Definedunsignedint *maxdepth,
-                    Outlcpinfo *outlcpinfo)
+                    Outlcpinfo *outlcpinfo,
+                    unsigned long long *bucketiterstep)
 {
   Codetype code;
   unsigned int rightchar = mincode % numofchars, minprefixindex,
@@ -727,6 +728,7 @@ void sortallbuckets(Seqpos *suftabptr,
   INITARRAY(&mkvauxstack,MKVstack);
   for (code = mincode; code <= maxcode; code++)
   {
+    (*bucketiterstep)++;
     rightchar = calcbucketboundsparts(&bucketspec,
                                       bcktab,
                                       code,

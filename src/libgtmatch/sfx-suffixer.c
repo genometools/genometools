@@ -23,6 +23,7 @@
 #include "libgtcore/arraydef.h"
 #include "libgtcore/error.h"
 #include "libgtcore/unused.h"
+#include "libgtcore/progressbar.h"
 #include "spacedef.h"
 #include "measure-time-if.h"
 #include "intcode-def.h"
@@ -78,6 +79,7 @@ struct Sfxiterator
   bool specialcodesfast;
   Seqpos *leftborder; /* points to bcktab->leftborder */
   const Definedunsignedint *maxdepth;
+  unsigned long long bucketiterstep;
 };
 
 #ifdef DEBUG
@@ -412,8 +414,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     {
       ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
                        Codeatposition,realspecialranges+1);
-      printf("# sizeof (spaceCodeatposition)=%lu\n",
-              (unsigned long ) sizeof (Codeatposition) * (realspecialranges+1));
+      showverbose(verboseinfo,"sizeof (spaceCodeatposition)=%lu",
+                              (unsigned long ) sizeof (Codeatposition) *
+                                               (realspecialranges+1));
     } else
     {
       sfi->spaceCodeatposition = NULL;
@@ -435,11 +438,13 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
+    sfi->bucketiterstep = 0;
     sfi->bcktab = allocBcktab(sfi->totallength,
                               numofchars,
                               prefixlength,
                               (unsigned int) CODEBITS,
                               (unsigned int) MAXCODEVALUE,
+                              verboseinfo,
                               err);
     if (sfi->bcktab == NULL)
     {
@@ -527,7 +532,12 @@ static void preparethispart(Sfxiterator *sfi,
                             Measuretime *mtime)
 {
   Seqpos totalwidth;
-
+  unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
+  if (sfi->part == 0 && mtime == NULL)
+  {
+    progressbar_start(&sfi->bucketiterstep,
+                      (unsigned long long) sfi->numofallcodes);
+  }
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
@@ -535,9 +545,7 @@ static void preparethispart(Sfxiterator *sfi,
                    stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
   if (sfi->specialcodesfast)
   {
-    derivespecialcodesfromtable(sfi,
-                                (stpgetnumofparts(sfi->suftabparts) == 1U)
-                                ? true : false);
+    derivespecialcodesfromtable(sfi,(numofparts == 1U) ? true : false);
   } else
   {
     derivespecialcodesonthefly(sfi);
@@ -570,7 +578,8 @@ static void preparethispart(Sfxiterator *sfi,
                    sfi->numofchars,
                    sfi->prefixlength,
                    sfi->maxdepth,
-                   sfi->outlcpinfo);
+                   sfi->outlcpinfo,
+                   &sfi->bucketiterstep);
   }
   sfi->part++;
 }
@@ -709,6 +718,10 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
   }
   if (sfi->exhausted)
   {
+    if (mtime == NULL)
+    {
+      progressbar_stop();
+    }
     return NULL;
   }
   sfi->fusp.nextfreeSeqpos = 0;

@@ -185,6 +185,11 @@ static OPrval parse_options(int *parsed_args,
     registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
                                so->str_indexname);
   }
+  option = option_new_bool("showtime",
+                           "show the time of the different computation phases",
+                           &so->showtime,
+                           false);
+  option_parser_add_option(op, option);
 
   option = option_new_bool("v",
                            "be verbose ",
