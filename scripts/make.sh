@@ -17,4 +17,4 @@
 #
 
 # the make call normally used for development
-gmake libgtview=yes test
+gmake 64bit=yes libgtview=yes test
