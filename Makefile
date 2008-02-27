@@ -569,16 +569,19 @@ VERSION:="`cat $(CURDIR)/VERSION`"
 GTSYSTEMNAME:=$(shell uname -sm | tr ' ' _)
 GTDISTBASENAME:="gt-$(VERSION)-$(GTSYSTEMNAME)-${BIT}"
 DISTDIR:="$(CURDIR)/dist/$(GTSYSTEMNAME)"
+GTDISTDIR:="$(DISTDIR)/$(GTDISTBASENAME)"
 
-dist:
+dist: all
 	@echo "[build distribution]"
-	rm -rf dist
-	mkdir -p $(DISTDIR)
-	mkdir -p $(DISTDIR)/bin
-	cp bin/gt $(DISTDIR)/bin/.
-	strip $(DISTDIR)/bin/gt
-	cp -r $(CURDIR)/gtdata $(DISTDIR)/.
-	tar -cvzf dist-${GTSYSTEMNAME}.tar.gz dist
+	@rm -rf $(GTDISTDIR)
+	@rm -rf $(DISTDIR)/$(GTDISTBASENAME).tar.gz
+	@mkdir -p $(GTDISTDIR)/bin
+	@cp bin/gt $(GTDISTDIR)/bin
+	@strip $(GTDISTDIR)/bin/gt
+	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
+	@cd $(DISTDIR) && tar cf $(GTDISTBASENAME).tar $(GTDISTBASENAME)
+	@cd $(DISTDIR) && gzip -f -9 $(GTDISTBASENAME).tar
+	@echo "$(DISTDIR)/$(GTDISTBASENAME).tar.gz"
 
 srcdist:
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
