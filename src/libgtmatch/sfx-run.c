@@ -21,10 +21,7 @@
 #include <errno.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/fa.h"
-#include "libgtcore/filelengthvalues.h"
-#include "libgtcore/seqiterator.h"
 #include "libgtcore/unused.h"
-#include "spacedef.h"
 #include "alphadef.h"
 #include "sfx-optdef.h"
 #include "encseq-def.h"
@@ -35,10 +32,10 @@
 #include "intcode-def.h"
 #include "sfx-suffixer.h"
 #include "sfx-outlcp.h"
+#include "sfx-input.h"
 #include "sfx-run.h"
 
 #include "opensfxfile.pr"
-#include "fillsci.pr"
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
 #include "sfx-apfxlen.pr"
@@ -184,25 +181,6 @@ static int suftab2file(Outfileinfo *outfileinfo,
   return haserr ? -1 : 0;
 }
 
-static int outal1file(const Str *indexname,const Alphabet *alpha,Error *err)
-{
-  FILE *al1fp;
-  bool haserr = false;
-
-  error_check(err);
-  al1fp = opensfxfile(indexname,ALPHABETFILESUFFIX,"wb",err);
-  if (al1fp == NULL)
-  {
-    haserr = true;
-  }
-  if (!haserr)
-  {
-    outputalphabet(al1fp,alpha);
-    fa_xfclose(al1fp);
-  }
-  return haserr ? -1 : 0;
-}
-
 static int suffixeratorwithoutput(
                  Outfileinfo *outfileinfo,
                  Seqpos specialcharacters,
@@ -273,20 +251,6 @@ static int suffixeratorwithoutput(
   return haserr ? -1 : 0;
 }
 
-static unsigned long *initcharacterdistribution(const Alphabet *alpha)
-{
-  unsigned long *characterdistribution;
-  unsigned int mapsize, idx;
-
-  mapsize = getmapsizeAlphabet(alpha);
-  ALLOCASSIGNSPACE(characterdistribution,NULL,unsigned long,mapsize-1);
-  for (idx=0; idx<mapsize-1; idx++)
-  {
-    characterdistribution[idx] = 0;
-  }
-  return characterdistribution;
-}
-
 static void showcharacterdistribution(
                    const  Alphabet *alpha,
                    const unsigned long *characterdistribution,
@@ -304,112 +268,21 @@ static void showcharacterdistribution(
   }
 }
 
-typedef struct
+static void showsequencefeatures(Verboseinfo *verboseinfo,
+                                 const Specialcharinfo *specialcharinfo,
+                                 const Alphabet *alpha,
+                                 const unsigned long *characterdistribution)
 {
-  unsigned long numofsequences;
-  Alphabet *alpha;
-  Specialcharinfo specialcharinfo;
-  Filelengthvalues *filelengthtab;
-  Encodedsequence *encseq;
-  unsigned long *characterdistribution;
-} Sfxseqinfo;
-
-static int fromfiles2sequences(Sfxseqinfo *sfxseqinfo,
-                               Measuretime *mtime,
-                               const Suffixeratoroptions *so,
-                               Verboseinfo *verboseinfo,
-                               Error *err)
-{
-  Seqpos totallength;
-  bool haserr = false;
-
-  error_check(err);
-  sfxseqinfo->filelengthtab = NULL;
-  sfxseqinfo->encseq = NULL;
-  sfxseqinfo->characterdistribution = NULL;
-  sfxseqinfo->alpha = assigninputalphabet(so->isdna,
-                                          so->isprotein,
-                                          so->str_smap,
-                                          so->filenametab,
-                                          err);
-  if (sfxseqinfo->alpha == NULL)
+  showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
+              PRINTSeqposcast(specialcharinfo->specialcharacters));
+  showverbose(verboseinfo,"specialranges=" FormatSeqpos,
+              PRINTSeqposcast(specialcharinfo->specialranges));
+  showverbose(verboseinfo,"realspecialranges=" FormatSeqpos,
+              PRINTSeqposcast(specialcharinfo->realspecialranges));
+  if (characterdistribution != NULL)
   {
-    haserr = true;
+    showcharacterdistribution(alpha,characterdistribution,verboseinfo);
   }
-  if (!haserr)
-  {
-    if (!so->isplain)
-    {
-      sfxseqinfo->characterdistribution
-        = initcharacterdistribution(sfxseqinfo->alpha);
-    }
-    if (fasta2sequencekeyvalues(so->str_indexname,
-                                &sfxseqinfo->numofsequences,
-                                &totallength,
-                                &sfxseqinfo->specialcharinfo,
-                                so->filenametab,
-                                &sfxseqinfo->filelengthtab,
-                                getsymbolmapAlphabet(sfxseqinfo->alpha),
-                                so->isplain,
-                                so->outdestab,
-                                sfxseqinfo->characterdistribution,
-                                verboseinfo,
-                                err) != 0)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    if (outal1file(so->str_indexname,sfxseqinfo->alpha,err) != 0)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    if (mtime != NULL)
-    {
-      deliverthetime(stdout,mtime,"computing sequence encoding");
-    }
-    sfxseqinfo->encseq
-      = files2encodedsequence(true,
-                              so->filenametab,
-                              so->isplain,
-                              totallength,
-                              sfxseqinfo->specialcharinfo.specialranges,
-                              sfxseqinfo->alpha,
-                              str_length(so->str_sat) > 0
-                                ? str_get(so->str_sat)
-                                : NULL,
-                              verboseinfo,
-                              err);
-    if (sfxseqinfo->encseq == NULL)
-    {
-      haserr = true;
-    } else
-    {
-      if (so->outtistab)
-      {
-        if (flushencseqfile(so->str_indexname,sfxseqinfo->encseq,err) != 0)
-        {
-          haserr = true;
-        }
-      }
-    }
-  }
-  return haserr ? -1 : 0;
-}
-
-static void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo)
-{
-  FREESPACE(sfxseqinfo->filelengthtab);
-  if (sfxseqinfo->alpha != NULL)
-  {
-    freeAlphabet(&sfxseqinfo->alpha);
-  }
-  freeEncodedsequence(&sfxseqinfo->encseq);
-  FREESPACE(sfxseqinfo->characterdistribution);
 }
 
 static int runsuffixerator(bool doesa,
@@ -430,37 +303,29 @@ static int runsuffixerator(bool doesa,
     mtime = inittheclock("determining sequence length and number of "
                          "special symbols");
   }
-  if (fromfiles2sequences(&sfxseqinfo,
-                          mtime,
-                          so,
-                          verboseinfo,
-                          err) != 0)
+  if (fromfiles2Sfxseqinfo(&sfxseqinfo,
+                           mtime,
+                           so,
+                           verboseinfo,
+                           err) != 0)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
-                PRINTSeqposcast(sfxseqinfo.specialcharinfo.specialcharacters));
-    showverbose(verboseinfo,"specialranges=" FormatSeqpos,
-                PRINTSeqposcast(sfxseqinfo.specialcharinfo.specialranges));
-    showverbose(verboseinfo,"realspecialranges=" FormatSeqpos,
-                PRINTSeqposcast(sfxseqinfo.specialcharinfo.realspecialranges));
+    showsequencefeatures(verboseinfo,
+                         &sfxseqinfo.specialcharinfo,
+                         sfxseqinfo.alpha,
+                         sfxseqinfo.characterdistribution);
     if (sfxseqinfo.characterdistribution != NULL)
     {
-      if (!so->isplain)
-      {
-        showcharacterdistribution(sfxseqinfo.alpha,
-                                  sfxseqinfo.characterdistribution,
-                                  verboseinfo);
-      }
       if (so->readmode == Complementmode ||
           so->readmode == Reversecomplementmode)
       {
         if (!isdnaalphabet(sfxseqinfo.alpha))
         {
-          error_set(err,"option %s only can be used for DNA alphabets",
-                            so->readmode == Complementmode ? "-cpl" : "rcl");
+          error_set(err,"option -%s only can be used for DNA alphabets",
+                            so->readmode == Complementmode ? "cpl" : "rcl");
           haserr = true;
         }
       }
