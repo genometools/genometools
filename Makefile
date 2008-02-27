@@ -272,10 +272,31 @@ ifeq ($(memcheck),yes)
   STEST_FLAGS += -memcheck
 endif
 
+# system specific stuff (concerning 64bit compilation)
+ifeq ($(64bit),yes)
+  ifneq ($(MACHINE),x86_64)
+    m64=yes
+  endif
+else
+  ifeq ($(MACHINE),x86_64)
+    m32=yes
+  endif
+endif
+
 ifeq ($(64bit),yes)
   BIT=64bit
 else
   BIT=32bit
+endif
+
+ifeq ($(m32),yes)
+  GT_CFLAGS += -m32
+  GT_LDFLAGS += -m32
+endif
+
+ifeq ($(m64),yes)
+  GT_CFLAGS += -m64
+  GT_LDFLAGS += -m64
 endif
 
 ifeq ($(libgtview),yes)
