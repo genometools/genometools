@@ -423,7 +423,7 @@ static int runsuffixerator(bool doesa,
   Sfxseqinfo sfxseqinfo;
   unsigned int prefixlength;
   Definedunsignedint maxdepth;
-  Seqpos totallength;
+  Seqpos totallength = 0;
 
   error_check(err);
   if (so->showtime)
@@ -431,15 +431,27 @@ static int runsuffixerator(bool doesa,
     mtime = inittheclock("determining sequence length and number of "
                          "special symbols");
   }
-  if (fromfiles2Sfxseqinfo(&sfxseqinfo,
-                           mtime,
-                           so,
-                           verboseinfo,
-                           err) != 0)
+  if (str_length(so->str_inputindex) > 0)
   {
-    haserr = true;
-    totallength = 0;
+    if (fromsarr2Sfxseqinfo(&sfxseqinfo,
+                            so->str_indexname,
+                            verboseinfo,
+                            err) != 0)
+    {
+      haserr = true;
+    }
   } else
+  {
+    if (fromfiles2Sfxseqinfo(&sfxseqinfo,
+                             mtime,
+                             so,
+                             verboseinfo,
+                             err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
   {
     totallength = getencseqtotallength(sfxseqinfo.encseq);
   }
@@ -585,7 +597,8 @@ static int runsuffixerator(bool doesa,
   {
     freeoutlcptab(&outfileinfo.outlcpinfo);
   }
-  freeSfxseqinfo(&sfxseqinfo);
+  freeSfxseqinfo(&sfxseqinfo,
+                 (str_length(so->str_inputindex) > 0) ? true : false);
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,NULL);

@@ -33,6 +33,7 @@ typedef struct
   Filelengthvalues *filelengthtab;
   Encodedsequence *encseq;
   unsigned long *characterdistribution;
+  void *voidptr2suffixarray;
 } Sfxseqinfo;
 
 int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
@@ -41,6 +42,11 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                          Verboseinfo *verboseinfo,
                          Error *err);
 
-void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo);
+int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
+                        const Str *indexname,
+                        Verboseinfo *verboseinfo,
+                        Error *err);
+
+void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo,bool mapped);
 
 #endif

@@ -26,7 +26,7 @@
 #include "encseq-def.h"
 #include "bcktab.h"
 
-#define FILEBUFFERSIZE 65536
+#define FILEBUFFERSIZE 4096
 
 #define SARR_ESQTAB 1U
 #define SARR_SUFTAB (1U << 1)
@@ -84,12 +84,12 @@ DECLAREBufferedfiletype(Largelcpvalue);
 
 typedef struct
 {
-  unsigned long numofdbsequences; /* XXX: move to encoded sequence */
   StrArray *filenametab;
   Filelengthvalues *filelengthtab;
   DefinedSeqpos numoflargelcpvalues;
   Encodedsequence *encseq;
   DefinedSeqpos longest;
+  unsigned long numofdbsequences;  /* XXX: move to encoded sequence */
   Specialcharinfo specialcharinfo; /* XXX: move to encoded sequence */
   Alphabet *alpha;                 /* XXX: move to encoded sequence */
   Readmode readmode; /* relevant when reading the encoded sequence */

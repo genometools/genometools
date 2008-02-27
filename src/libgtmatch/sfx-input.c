@@ -28,9 +28,12 @@
 #include "measure-time-if.h"
 #include "esafileend.h"
 #include "verbose-def.h"
+#include "sarr-def.h"
+#include "stamp.h"
 #include "sfx-input.h"
 
 #include "opensfxfile.pr"
+#include "esa-map.pr"
 #include "fillsci.pr"
 
 static int outal1file(const Str *indexname,const Alphabet *alpha,Error *err)
@@ -76,6 +79,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   bool haserr = false;
 
   error_check(err);
+  sfxseqinfo->voidptr2suffixarray = NULL;
   sfxseqinfo->filelengthtab = NULL;
   sfxseqinfo->encseq = NULL;
   sfxseqinfo->characterdistribution = NULL;
@@ -153,13 +157,57 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   return haserr ? -1 : 0;
 }
 
-void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo)
+int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
+                        const Str *indexname,
+                        Verboseinfo *verboseinfo,
+                        Error *err)
 {
-  FREESPACE(sfxseqinfo->filelengthtab);
-  if (sfxseqinfo->alpha != NULL)
+  Seqpos totallength;
+  bool haserr = false;
+  Suffixarray *suffixarray;
+
+  ALLOCASSIGNSPACE(suffixarray,NULL,Suffixarray,1);
+  sfxseqinfo->characterdistribution = NULL;
+  sfxseqinfo->voidptr2suffixarray = NULL;
+  if (mapsuffixarray(suffixarray,
+                     &totallength,
+                     SARR_ESQTAB,
+                     indexname,
+                     verboseinfo,
+                     err) != 0)
   {
-    freeAlphabet(&sfxseqinfo->alpha);
+    haserr = true;
+    FREESPACE(suffixarray);
+  } else
+  {
+    sfxseqinfo->voidptr2suffixarray = suffixarray; /* for freeing it later */
+    sfxseqinfo->numofsequences = suffixarray->numofdbsequences;
+    sfxseqinfo->alpha = suffixarray->alpha;
+    sfxseqinfo->specialcharinfo = suffixarray->specialcharinfo;
+    sfxseqinfo->filelengthtab = suffixarray->filelengthtab;
+    assert(sfxseqinfo->filelengthtab != NULL);
+    sfxseqinfo->encseq = suffixarray->encseq;
   }
-  freeEncodedsequence(&sfxseqinfo->encseq);
+  return haserr ? -1 : 0;
+}
+
+void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo,bool mapped)
+{
   FREESPACE(sfxseqinfo->characterdistribution);
+  if (mapped)
+  {
+    if (sfxseqinfo->voidptr2suffixarray != NULL)
+    {
+      freesuffixarray((Suffixarray *) sfxseqinfo->voidptr2suffixarray);
+    }
+    FREESPACE(sfxseqinfo->voidptr2suffixarray);
+  } else
+  {
+    FREESPACE(sfxseqinfo->filelengthtab);
+    if (sfxseqinfo->alpha != NULL)
+    {
+      freeAlphabet(&sfxseqinfo->alpha);
+    }
+    freeEncodedsequence(&sfxseqinfo->encseq);
+  }
 }
