@@ -30,6 +30,7 @@
 #include "readmode-def.h"
 #include "verbose-def.h"
 #include "intcode-def.h"
+#include "stamp.h"
 #include "sfx-suffixer.h"
 #include "sfx-outlcp.h"
 #include "sfx-input.h"
@@ -434,11 +435,19 @@ static int runsuffixerator(bool doesa,
   if (str_length(so->str_inputindex) > 0)
   {
     if (fromsarr2Sfxseqinfo(&sfxseqinfo,
-                            so->str_indexname,
+                            so->str_inputindex,
                             verboseinfo,
                             err) != 0)
     {
       haserr = true;
+    }
+    if (so->outtistab && strcmp(str_get(so->str_inputindex),
+                                str_get(so->str_indexname)) != 0)
+    {
+      if (flushencseqfile(so->str_indexname,sfxseqinfo.encseq,err) != 0)
+      {
+        haserr = true;
+      }
     }
   } else
   {
@@ -576,9 +585,11 @@ static int runsuffixerator(bool doesa,
       numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
       maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
     }
+    assert(sfxseqinfo.numofsequences > 0);
+    assert(sfxseqinfo.filelengthtab != NULL);
     if (outprjfile(so->str_indexname,
-                   so->filenametab,
-                   so->readmode,
+                   sfxseqinfo.filenametab,
+                   sfxseqinfo.readmode,
                    sfxseqinfo.filelengthtab,
                    totallength,
                    sfxseqinfo.numofsequences,

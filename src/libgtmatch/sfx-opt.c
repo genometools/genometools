@@ -48,6 +48,7 @@ static OPrval parse_options(int *parsed_args,
          *optionindexname,
          *optiondb,
          *optionii,
+         *optionsat,
          *optiondir,
          *optionfast,
          *optiondes;
@@ -138,10 +139,10 @@ static OPrval parse_options(int *parsed_args,
   option_is_development_option(option);
   option_parser_add_option(op, option);
 
-  option = option_new_string("sat",
-                             "dev-opt: specify kind of sequence representation",
-                             so->str_sat, NULL);
-  option_parser_add_option(op, option);
+  optionsat = option_new_string("sat",
+                                "specify kind of sequence representation",
+                                so->str_sat, NULL);
+  option_parser_add_option(op, optionsat);
 
   option = option_new_bool("tis",
                            "output transformed and encoded input "
@@ -203,6 +204,13 @@ static OPrval parse_options(int *parsed_args,
                            false);
   option_parser_add_option(op, option);
 
+  option_exclude(optionii, optiondb);
+  option_exclude(optionii, optiondir);
+  option_exclude(optionii, optionsmap);
+  option_exclude(optionii, optiondna);
+  option_exclude(optionii, optionprotein);
+  option_exclude(optionii, optionplain);
+  option_exclude(optionii, optionsat);
   option_exclude(optionsmap, optiondna);
   option_exclude(optionsmap, optionprotein);
   option_exclude(optiondna, optionprotein);
@@ -226,7 +234,7 @@ static OPrval parse_options(int *parsed_args,
     {
       if (!option_is_set(optionindexname))
       {
-        if (strarray_size(so->filenametab) > 0)
+        if (option_is_set(optiondb))
         {
           if (strarray_size(so->filenametab) > 1UL)
           {
@@ -340,6 +348,8 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     showdefinitelyverbose("inputindex=%s",str_get(so->str_inputindex));
   }
+  assert(str_length(so->str_indexname) > 0);
+  showdefinitelyverbose("indexname=%s",str_get(so->str_indexname));
   showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
                         "outbwttab=%s,outbcktab=%s,outdestab=%s",
           so->outtistab ? "true" : "false",

@@ -33,6 +33,8 @@ typedef struct
   Filelengthvalues *filelengthtab;
   Encodedsequence *encseq;
   unsigned long *characterdistribution;
+  Readmode readmode;
+  StrArray *filenametab;
   void *voidptr2suffixarray;
 } Sfxseqinfo;
 

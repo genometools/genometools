@@ -94,7 +94,11 @@ alldir.each do |dir|
      run_test "#{$bin}gt suffixerator -dir #{dir} -tis -suf -bwt -lcp " +
               "-indexname sfx -pl -db " + 
          flattenfilelist(allfiles)
-   end
+     run_test "#{$bin}gt suffixerator -fast -dir #{dir} -tis -suf -lcp " +
+              "-indexname sfx -pl -db " +
+         flattenfilelist(allfiles)
+     run_test "#{$bin}gt suffixerator -tis -bwt -lcp -pl -ii sfx"
+  end
 end
 
 runsfxfail "-indexname sfx -db /nothing"

@@ -83,6 +83,8 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   sfxseqinfo->filelengthtab = NULL;
   sfxseqinfo->encseq = NULL;
   sfxseqinfo->characterdistribution = NULL;
+  sfxseqinfo->readmode = so->readmode;
+  sfxseqinfo->filenametab = so->filenametab;
   sfxseqinfo->alpha = assigninputalphabet(so->isdna,
                                           so->isprotein,
                                           so->str_smap,
@@ -185,6 +187,8 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
     sfxseqinfo->alpha = suffixarray->alpha;
     sfxseqinfo->specialcharinfo = suffixarray->specialcharinfo;
     sfxseqinfo->filelengthtab = suffixarray->filelengthtab;
+    sfxseqinfo->readmode = suffixarray->readmode;
+    sfxseqinfo->filenametab = suffixarray->filenametab;
     assert(sfxseqinfo->filelengthtab != NULL);
     sfxseqinfo->encseq = suffixarray->encseq;
   }
