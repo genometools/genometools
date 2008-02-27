@@ -566,9 +566,9 @@ endif
 .PHONY: dist srcdist release gt install docs installwww splint test clean cleanup
 
 VERSION:="`cat $(CURDIR)/VERSION`"
-GTSYSTEMNAME:=$(shell uname -sm | tr ' ' _)
-GTDISTBASENAME:="gt-$(VERSION)-$(GTSYSTEMNAME)-${BIT}"
-DISTDIR:="$(CURDIR)/dist/$(GTSYSTEMNAME)"
+SYSTEMNAME:=$(shell uname -sm | tr ' ' _)
+GTDISTBASENAME:="gt-$(VERSION)-$(SYSTEMNAME)-${BIT}"
+DISTDIR:="$(CURDIR)/dist/$(SYSTEMNAME)"
 GTDISTDIR:="$(DISTDIR)/$(GTDISTBASENAME)"
 
 dist: all
