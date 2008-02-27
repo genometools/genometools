@@ -401,6 +401,17 @@ static int fromfiles2sequences(Sfxseqinfo *sfxseqinfo,
   return haserr ? -1 : 0;
 }
 
+static void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo)
+{
+  FREESPACE(sfxseqinfo->filelengthtab);
+  if (sfxseqinfo->alpha != NULL)
+  {
+    freeAlphabet(&sfxseqinfo->alpha);
+  }
+  freeEncodedsequence(&sfxseqinfo->encseq);
+  FREESPACE(sfxseqinfo->characterdistribution);
+}
+
 static int runsuffixerator(bool doesa,
                            const Suffixeratoroptions *so,
                            Verboseinfo *verboseinfo,
@@ -658,13 +669,7 @@ static int runsuffixerator(bool doesa,
   {
     freeoutlcptab(&outfileinfo.outlcpinfo);
   }
-  FREESPACE(sfxseqinfo.filelengthtab);
-  if (sfxseqinfo.alpha != NULL)
-  {
-    freeAlphabet(&sfxseqinfo.alpha);
-  }
-  freeEncodedsequence(&sfxseqinfo.encseq);
-  FREESPACE(sfxseqinfo.characterdistribution);
+  freeSfxseqinfo(&sfxseqinfo);
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,NULL);
