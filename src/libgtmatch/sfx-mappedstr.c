@@ -174,9 +174,9 @@ typedef struct
                kmersize,
                windowwidth,
                firstindex,
-               *filltable,
                lengthwithoutspecial;
-  Codetype codewithoutspecial;
+  Codetype codewithoutspecial,
+           *filltable;
   Codetype **multimappower;
 } Streamstate;
 
@@ -384,15 +384,14 @@ static void shiftrightwithchar(
   }
 }
 
-static void filllargestchartable(unsigned int **filltable,
+static void filllargestchartable(Codetype **filltable,
                                  unsigned int numofchars,
                                  unsigned int kmersize)
 {
-  unsigned int *ptr;
-  Codetype code;
+  Codetype code, *ptr;
 
-  ALLOCASSIGNSPACE(*filltable,NULL,unsigned int,kmersize);
-  code = numofchars;
+  ALLOCASSIGNSPACE(*filltable,NULL,Codetype,kmersize);
+  code = (Codetype) numofchars;
   for (ptr = *filltable + kmersize - 1; ptr >= *filltable; ptr--)
   {
     *ptr = code-1;

@@ -19,11 +19,13 @@
 #include <stdio.h>
 #include <math.h>
 #include "libgtcore/error.h"
+#include "libgtcore/minmax.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
 #include "verbose-def.h"
 
 #include "bcktab.h"
+#include "initbasepower.pr"
 
 /*
   We need \texttt{prefixlenbits} bits to store the length of
@@ -60,9 +62,9 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
       return prefixlength-1;
     }
   }
-/*@ignore@*/
+  /*@ignore@*/
   return 0;
-/*@end@*/
+  /*@end@*/
 }
 
 unsigned int recommendedprefixlength(unsigned int numofchars,
@@ -76,7 +78,8 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
     return 1U;
   } else
   {
-    return prefixlength;
+    unsigned int mbp = maxbasepower(numofchars);
+    return MIN(mbp,prefixlength);
   }
 }
 
@@ -84,11 +87,13 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
                                           Seqpos totallength,
                                           unsigned int prefixlenbits)
 {
-  unsigned int maxprefixlen;
+  unsigned int maxprefixlen, mbp;
 
   maxprefixlen = prefixlengthwithmaxspace(numofchars,totallength,
-                                          (unsigned int) 
+                                          (unsigned int)
                                           MAXMULTIPLIEROFTOTALLENGTH);
+  mbp = maxbasepower(numofchars);
+  maxprefixlen = MIN(mbp,maxprefixlen);
   if (prefixlenbits > 0)
   {
     unsigned int tmplength;
@@ -111,7 +116,8 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
 }
 
 int checkprefixlength(unsigned int maxprefixlen,
-                      unsigned int prefixlength,Error *err)
+                      unsigned int prefixlength,
+                      Error *err)
 {
   error_check(err);
   if (maxprefixlen < prefixlength)
@@ -129,6 +135,7 @@ void showmaximalprefixlength(Verboseinfo *verboseinfo,
                              unsigned int maxprefixlen,
                              unsigned int recommended)
 {
+  /* XXX: use one call of showverbose to display this */
   showverbose(verboseinfo,
               "for this input size and alphabet size, "
               "the maximal prefixlength");

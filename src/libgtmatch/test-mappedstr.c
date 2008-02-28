@@ -48,14 +48,14 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
 
   if (startpos >= totallength)
   {
-    integercode = numofchars - 1;
+    integercode = (Codetype) (numofchars - 1);
     foundspecial = true;
   } else
   {
     cc = getencodedchar(encseq,startpos,readmode); /* for testing */
     if (ISSPECIAL(cc))
     {
-      integercode = numofchars - 1;
+      integercode = (Codetype) (numofchars - 1);
       foundspecial = true;
     } else
     {
@@ -160,8 +160,8 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
                       kmersize,
                       characters);
       error_set(err,
-                    "codeliststream[%lu] = %u != %u = "
-                    "codeliststring[%lu]\n%s != %s",
+                    "codeliststream[%lu] = " FormatCodetype " != "
+                    FormatCodetype " = codeliststring[%lu]\n%s != %s",
                     i,
                     codeliststream->spaceCodetype[i],
                     codeliststring->spaceCodetype[i],

@@ -56,7 +56,7 @@ Bcktab *allocBcktab(Seqpos totallength,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     unsigned int codebits,
-                    unsigned int maxcodevalue,
+                    Codetype maxcodevalue,
                     Verboseinfo *verboseinfo,
                     Error *err);
 

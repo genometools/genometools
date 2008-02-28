@@ -50,4 +50,6 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,
 
 int sfibcktab2file(FILE *fp,const Sfxiterator *sfi,Error *err);
 
+unsigned int getprefixlenbits(void);
+
 #endif

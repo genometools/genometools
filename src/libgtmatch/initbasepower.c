@@ -19,17 +19,30 @@
 #include "spacedef.h"
 #include "intcode-def.h"
 
-Codetype *initbasepower(unsigned int base,unsigned int len)
+unsigned int maxbasepower(unsigned int numofchars)
 {
+  Codetype minfailure, thepower = (Codetype) 1;
   unsigned int i;
-  Codetype thepower = (Codetype) 1, minfailure, *basepower;
 
-  ALLOCASSIGNSPACE(basepower,NULL,Codetype,len+1);
-  minfailure = (~(Codetype) 0)/(Codetype) base;
+  minfailure = (~(Codetype) 0)/(Codetype) numofchars;
+  for (i=0; thepower < minfailure; i++)
+  {
+    thepower *= numofchars;
+  }
+  return i;
+}
+
+Codetype *initbasepower(unsigned int numofchars,unsigned int prefixlength)
+{
+  Codetype thepower = (Codetype) 1, minfailure, *basepower;
+  unsigned int i;
+
+  ALLOCASSIGNSPACE(basepower,NULL,Codetype,prefixlength+1);
+  minfailure = (~(Codetype) 0)/(Codetype) numofchars;
   for (i=0; /* Nothing */; i++)
   {
     basepower[i] = thepower;
-    if (i == len)
+    if (i == prefixlength)
     {
       break;
     }
@@ -37,24 +50,24 @@ Codetype *initbasepower(unsigned int base,unsigned int len)
     {
       FREESPACE(basepower);
       fprintf(stderr,"overflow when computing %lu * %u",
-              (unsigned long) thepower,base);
+              (unsigned long) thepower,numofchars);
       exit(EXIT_FAILURE); /* programming error */
     }
-    thepower *= base;
+    thepower *= numofchars;
   }
   return basepower;
 }
 
-Codetype *initfilltable(unsigned int base,unsigned int len)
+Codetype *initfilltable(unsigned int numofchars,unsigned int prefixlength)
 {
   unsigned int i;
   Codetype *filltable, *basepower;
 
-  basepower = initbasepower(base,len);
-  ALLOCASSIGNSPACE(filltable,NULL,Codetype,len);
-  for (i=0; i<len; i++)
+  basepower = initbasepower(numofchars,prefixlength);
+  ALLOCASSIGNSPACE(filltable,NULL,Codetype,prefixlength);
+  for (i=0; i<prefixlength; i++)
   {
-    filltable[i] = basepower[len-i]-1;
+    filltable[i] = basepower[prefixlength-i]-1;
   }
   FREESPACE(basepower);
   return filltable;

@@ -159,7 +159,7 @@ Bcktab *allocBcktab(Seqpos totallength,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     unsigned int codebits,
-                    unsigned int maxcodevalue,
+                    Codetype maxcodevalue,
                     Verboseinfo *verboseinfo,
                     Error *err)
 {
@@ -169,8 +169,9 @@ Bcktab *allocBcktab(Seqpos totallength,
   bcktab = newBcktab(numofchars,prefixlength,totallength);
   if (bcktab->numofallcodes-1 > maxcodevalue)
   {
-    error_set(err,"alphasize^prefixlength-1 = %u does not fit into "
-                  " %u bits: choose smaller value for prefixlength",
+    error_set(err,"alphasize^prefixlength-1 = " FormatCodetype
+                  " does not fit into %u"
+                  " bits: choose smaller value for prefixlength",
                   bcktab->numofallcodes-1,
                   codebits);
     haserr = true;
@@ -404,7 +405,7 @@ static void pfxidxpartialsums(unsigned long *count,
     }
     if (specialsinbucket != count[1])
     {
-      fprintf(stderr,"code %u: sum = %lu != %lu = count[1]\n",
+      fprintf(stderr,"code " FormatCodetype ": sum = %lu != %lu = count[1]\n",
               code,sum,count[1]);
       exit(EXIT_FAILURE);
     }
@@ -470,7 +471,7 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
       bucketspec->nonspecialsinbucket = 0;
     }
   }
-  assert(rightchar == code % numofchars);
+  assert(rightchar == (unsigned int) (code % numofchars));
   if (rightchar == numofchars - 1)
   {
     bucketspec->specialsinbucket
@@ -495,14 +496,14 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
                           const Bcktab *bcktab,
                           Codetype code)
 {
-  unsigned int numofchars = bcktab->basepower[1];
+  unsigned int numofchars = (unsigned int) bcktab->basepower[1];
   assert(code != bcktab->numofallcodes);
   (void) calcbucketboundsparts(bucketspec,
                                bcktab,
                                code,
                                bcktab->numofallcodes, /* code < numofallcodes */
                                0,                     /* not necessary */
-                               code % numofchars,
+                               (unsigned int) (code % numofchars),
                                numofchars);
 }
 

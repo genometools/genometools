@@ -20,7 +20,6 @@
 #include <assert.h>
 #include <limits.h>
 #include <errno.h>
-#include <assert.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/error.h"
 #include "libgtcore/unused.h"
@@ -38,6 +37,7 @@
 
 #include "sfx-mappedstr.pr"
 
+#define PREFIXLENBITS   4
 #define CODEBITS        (32-PREFIXLENBITS)
 #define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
 #define MAXCODEVALUE    ((1U << CODEBITS) - 1)
@@ -204,7 +204,9 @@ static void updatekmercount(void *processinfo,
           Codeatposition *cp;
 
           cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
-          cp->code = code;
+          assert(code <= (Codetype) MAXCODEVALUE);
+          cp->code = (unsigned int) code;
+          assert(firstspecial->specialpos <= MAXPREFIXLENGTH);
           cp->maxprefixindex = firstspecial->specialpos;
           cp->position = position + firstspecial->specialpos;
         }
@@ -272,7 +274,7 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
       if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixindex)
       {
         code = codedownscale(sfi->bcktab,
-                             sfi->spaceCodeatposition[j].code,
+                             (Codetype) sfi->spaceCodeatposition[j].code,
                              prefixindex,
                              sfi->spaceCodeatposition[j].maxprefixindex);
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
@@ -450,7 +452,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               numofchars,
                               prefixlength,
                               (unsigned int) CODEBITS,
-                              (unsigned int) MAXCODEVALUE,
+                              (Codetype) MAXCODEVALUE,
                               verboseinfo,
                               err);
     if (sfi->bcktab == NULL)
@@ -745,4 +747,9 @@ int sfibcktab2file(FILE *fp,
 {
   error_check(err);
   return bcktab2file(fp,sfi->bcktab,err);
+}
+
+unsigned int getprefixlenbits(void)
+{
+  return (unsigned int) PREFIXLENBITS;
 }

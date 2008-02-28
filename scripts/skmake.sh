@@ -78,7 +78,8 @@ else
   then
     makecompilerflags 64 0 $icc > LocalMakefile
   else
-    makecompilerflags 32 $big $icc > LocalMakefile
+    # makecompilerflags 32 $big $icc > LocalMakefile
+    makecompilerflags 64 $big $icc > LocalMakefile
   fi
 fi
 
