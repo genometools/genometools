@@ -47,7 +47,7 @@ void showverbose(Verboseinfo *verboseinfo,const char *format, ...)
     va_start(ap, format);
     printf("# ");
     (void) vprintf(format, ap);
-    fflush(stdout);
+    (void) fflush(stdout);
     printf("\n");
     va_end(ap);
   }

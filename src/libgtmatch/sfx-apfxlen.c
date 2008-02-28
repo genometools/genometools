@@ -60,8 +60,9 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
       return prefixlength-1;
     }
   }
-  assert("not expected" == NULL);
+/*@ignore@*/
   return 0;
+/*@end@*/
 }
 
 unsigned int recommendedprefixlength(unsigned int numofchars,
@@ -86,12 +87,14 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
   unsigned int maxprefixlen;
 
   maxprefixlen = prefixlengthwithmaxspace(numofchars,totallength,
+                                          (unsigned int) 
                                           MAXMULTIPLIEROFTOTALLENGTH);
   if (prefixlenbits > 0)
   {
     unsigned int tmplength;
-    tmplength 
+    tmplength
       = prefixlengthwithmaxspace(numofchars,
+                                 (Seqpos)
                                  MAXREMAININGAFTERPREFIXLEN(prefixlenbits),
                                  1U);
     if (tmplength > 0 && maxprefixlen > tmplength)
