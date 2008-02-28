@@ -11,7 +11,8 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
 int checkprefixlength(unsigned int maxprefixlen,
                       unsigned int prefixlength,Error *err);
 
-void showmaximalprefixlength(unsigned int maxprefixlen,
+void showmaximalprefixlength(Verboseinfo *verboseinfo,
+                             unsigned int maxprefixlen,
                              unsigned int recommended);
 
 #ifdef __cplusplus

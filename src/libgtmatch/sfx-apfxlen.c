@@ -21,8 +21,9 @@
 #include "libgtcore/error.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
+#include "verbose-def.h"
 
-#define SIZEOFBCKENTRY (2 * sizeof (Seqpos))
+#include "bcktab.h"
 
 /*
   We need \texttt{prefixlenbits} bits to store the length of
@@ -44,19 +45,23 @@
 
 #define MAXVALUEWITHBITS(BITNUM)    ((1U << (BITNUM)) - 1)
 
-static unsigned int logalphasize(unsigned int numofchars,double value)
+static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
+                                             Seqpos maxbytes,
+                                             unsigned int factor)
 {
-  unsigned int retval;
-  double logtmp1, logtmp2;
+  unsigned int prefixlength;
+  unsigned long sizeofrep;
 
-  if (value <= (double) numofchars)
+  for (prefixlength = 1U; /* Nothing */; prefixlength++)
   {
-    return 1U;
+    sizeofrep = sizeofbuckettable(numofchars,prefixlength);
+    if ((Seqpos) (sizeofrep / factor) > maxbytes)
+    {
+      return prefixlength-1;
+    }
   }
-  logtmp1 = log(value);
-  logtmp2 = log((double) numofchars);
-  retval = (unsigned int) floor(logtmp1/logtmp2);
-  return retval;
+  assert("not expected" == NULL);
+  return 0;
 }
 
 unsigned int recommendedprefixlength(unsigned int numofchars,
@@ -64,8 +69,7 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
 {
   unsigned int prefixlength;
 
-  prefixlength = logalphasize(numofchars,
-                              (double) totallength/SIZEOFBCKENTRY);
+  prefixlength = prefixlengthwithmaxspace(numofchars,totallength,1U);
   if (prefixlength == 0)
   {
     return 1U;
@@ -81,21 +85,21 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
 {
   unsigned int maxprefixlen;
 
-  maxprefixlen = logalphasize(numofchars,
-                           (double) totallength/
-                                (SIZEOFBCKENTRY/MAXMULTIPLIEROFTOTALLENGTH));
+  maxprefixlen = prefixlengthwithmaxspace(numofchars,totallength,
+                                          MAXMULTIPLIEROFTOTALLENGTH);
   if (prefixlenbits > 0)
   {
     unsigned int tmplength;
-    tmplength = logalphasize(numofchars,
-                             (double)
-                             MAXREMAININGAFTERPREFIXLEN(prefixlenbits));
-    if (maxprefixlen > tmplength)
+    tmplength 
+      = prefixlengthwithmaxspace(numofchars,
+                                 MAXREMAININGAFTERPREFIXLEN(prefixlenbits),
+                                 1U);
+    if (tmplength > 0 && maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;
     }
     tmplength = MAXVALUEWITHBITS(prefixlenbits);
-    if (maxprefixlen > tmplength)
+    if (tmplength > 0 && maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;
     }
@@ -118,12 +122,13 @@ int checkprefixlength(unsigned int maxprefixlen,
   return 0;
 }
 
-void showmaximalprefixlength(unsigned int maxprefixlen,
+void showmaximalprefixlength(Verboseinfo *verboseinfo,
+                             unsigned int maxprefixlen,
                              unsigned int recommended)
 {
-  printf("# for this input size and alphabet size, the maximal prefixlength\n"
-         "# (argument of option -pl) is %u,\n"
-         "# the recommended prefixlength is %u\n",
-         maxprefixlen,
-         recommended);
+  showverbose(verboseinfo,
+              "for this input size and alphabet size, "
+              "the maximal prefixlength");
+  showverbose(verboseinfo,"(argument of option -pl) is %u,",maxprefixlen);
+  showverbose(verboseinfo,"the recommended prefixlength is %u",recommended);
 }

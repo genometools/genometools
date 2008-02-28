@@ -316,7 +316,8 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
       haserr = true;
     } else
     {
-      showmaximalprefixlength(maxprefixlen,
+      showmaximalprefixlength(verboseinfo,
+                              maxprefixlen,
                               recommendedprefixlength(
                               numofchars,
                               totallength));
