@@ -38,6 +38,29 @@ function features_show(features)
   end
 end
 
+-- Return all marked <features> (an array) as an array or nil if <features>
+-- contains no marked features.
+function features_get_marked(features)
+  assert(features)
+  local marked_features = nil
+  if features_contain_marked(features) then
+    marked_features = {}
+    for _, feature in ipairs(features) do
+      if feature:contains_marked() then
+        local gni = gt.genome_node_iterator_new(feature)
+        local node = gni:next()
+        while node do
+          if node:is_marked() then
+            marked_features[#marked_features + 1] = node
+          end
+          node = gni:next()
+        end
+      end
+    end
+  end
+  return marked_features
+end
+
 -- Print all marked <features> (an array) to stdout.
 function features_show_marked(features)
   assert(features)
