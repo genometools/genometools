@@ -1262,8 +1262,7 @@ Option* option_new_range(const char *option_str, const char *description,
 }
 
 Option* option_new_range_min_max(const char *option_str,
-                                 const char *description,
-                                 Range *value,
+                                 const char *description, Range *value,
                                  Range *default_value,
                                  unsigned long min_value,
                                  unsigned long max_value)
