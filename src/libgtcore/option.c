@@ -898,6 +898,16 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                             str_get(option->option_str));
                   had_err = -1;
                 }
+              }
+              if (!had_err) {
+                /* minimum value check */
+                if (option->min_value_set &&
+                    long_value < option->min_value.ul) {
+                  error_set(err, "first argument to option \"-%s\" must be an "
+                                 "integer >= %lu", str_get(option->option_str),
+                            option->min_value.ul);
+                  had_err = -1;
+                }
                 else
                   ((Range*) option->value)->start = long_value;
               }
@@ -912,6 +922,16 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                   error_set(err, "second argument to option \"-%s\" must be a "
                                  "non-negative integer",
                             str_get(option->option_str));
+                  had_err = -1;
+                }
+              }
+              if (!had_err) {
+                /* maximum value check */
+                if (option->max_value_set &&
+                    long_value > option->max_value.ul) {
+                  error_set(err, "second argument to option \"-%s\" must be an "
+                                 "integer <= %lu", str_get(option->option_str),
+                            option->max_value.ul);
                   had_err = -1;
                 }
                 else
@@ -1239,6 +1259,21 @@ Option* option_new_range(const char *option_str, const char *description,
   value->start = o->default_value.r.start;
   value->end   = o->default_value.r.end;
   return o;
+}
+
+Option* option_new_range_min_max(const char *option_str,
+                                 const char *description, Range *value,
+                                 Range *default_value,
+                                 unsigned long min_value,
+                                 unsigned long max_value)
+{
+   Option *o = option_new_range(option_str, description,
+                                value, default_value);
+   o->min_value_set = true;
+   o->min_value.ul = min_value;
+   o->max_value_set = true;
+   o->max_value.ul = max_value;
+   return o;
 }
 
 Option* option_new_string(const char *option_str, const char *description,
