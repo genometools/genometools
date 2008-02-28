@@ -131,13 +131,56 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tSym, Seqpos pos);
  * \brief Query BWT sequence for the number of occurences of a symbol in a
  * given prefix.
  * @param bwtSeq reference of object to query
- * @param tSym transformed symbol (as obtained by
- * MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), origSym)
+ * @param sym symbol (from original alphabet)
  * @param pos right bound of BWT prefix queried
  * @return number of occurrences of symbol up to but not including pos
  */
 static inline Seqpos
-BWTSeqOcc(const BWTSeq *bwtSeq, Symbol tSym, Seqpos pos);
+BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos pos);
+
+/**
+ * \brief Query BWT sequence for the number of occurences of a symbol
+ * in two given prefixes.
+ * @param bwtSeq reference of object to query
+ * @param tSym transformed symbol (as obtained by
+ * MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), origSym)
+ * @param posA right bound of first BWT prefix queried
+ * @param posA right bound of second BWT prefix queried
+ * @return number of occurrences of symbol up to but not including
+ * posA and posB respectively in fields a and b of returned struct
+ */
+static inline struct SeqposPair
+BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
+                            Seqpos posA, Seqpos posB);
+
+/**
+ * \brief Query BWT sequence for the number of occurences of a symbol
+ * in two given prefixes.
+ * @param bwtSeq reference of object to query
+ * @param sym symbol (from original alphabet)
+ * @param posA right bound of first BWT prefix queried
+ * @param posB right bound of second BWT prefix queried
+ * @return number of occurrences of symbol up to but not including
+ * posA and posB respectively in fields a and b of returned struct
+ */
+static inline struct SeqposPair
+BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos posA, Seqpos posB);
+
+/**
+ * \brief Query BWT sequence for the number of occurences of all symbols in a
+ * given alphabet range and BWT sequence prefix.
+ * @param bwtSeq reference of object to query
+ * @param range range of symbols in alphabet to query
+ * @param pos right bound of BWT prefix queried
+ * @param rangeOccs write ranks for all symbols in range to this
+ * array. The referenced memory must be sized appropriately to
+ * accomodate as many symbols as are in range (MRAEncGetRangeSize if
+ * in doubt) and rangeOccs[i] will hold the occurrence count of symbol
+ * MRAEncRevMapSymbol(alphabet, i + MRAEncGetRangeBase(alphabet, range))
+ */
+static inline void
+BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
+               Seqpos *rangeOccs);
 
 /**
  * \brief Given a position in the L-column of the matrix of rotations,

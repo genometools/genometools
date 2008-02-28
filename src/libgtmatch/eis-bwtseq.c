@@ -376,12 +376,13 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   {
     struct SeqposPair occPair;
     curSym = MRAEncMapSymbol(alphabet, query[--i]);
-    occPair = BWTSeqPosPairOcc(bwtSeq, curSym, match->start, match->end);
+    occPair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym, match->start,
+                                          match->end);
     match->start = count[curSym] + occPair.a;
     match->end   = count[curSym] + occPair.b;
-/*     match->start = count[curSym] + BWTSeqOcc(bwtSeq, curSym,
+/*     match->start = count[curSym] + BWTSeqTransformedOcc(bwtSeq, curSym,
  *     match->start); */
-/*     match->end = count[curSym] + BWTSeqOcc(bwtSeq, curSym,
+/*     match->end = count[curSym] + BWTSeqTransformedOcc(bwtSeq, curSym,
  *     match->end); */
   }
 }

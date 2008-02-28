@@ -54,7 +54,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
   Suffixarray suffixarray;
   Enumpatterniterator *epi = NULL;
   bool saIsLoaded = false;
-  struct BWTSeq *bwtSeq = NULL;
+  BWTSeq *bwtSeq = NULL;
   Str *inputProject = NULL;
   int parsedArgs;
   bool had_err = false;

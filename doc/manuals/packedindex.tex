@@ -57,7 +57,7 @@ The \packedindex tools depend on routines of the \Suffixerator program
 to prepare the  data stored in the index. Many command-line options
 are therefore the same.
 
-\section{Usage}
+\section{Command line tools}
 \label{Usage}
 
 Some text is highlighted by different fonts according to the following rules.
@@ -325,7 +325,7 @@ suffix array values compared.
 }
 \end{Justshowoptions}
 
-\section{Examples}
+\subsection{Examples}
 \label{sec:packedindex:examples}
 
 \subsection{Create an index for sequence data from the
@@ -379,6 +379,30 @@ Finished 1000 of 1000 matchings successfully.
 $
 \end{verbatim}
 \end{footnotesize}
+
+\section{Programmers guide}
+\label{sec:packedindex:progguide}
+
+\subsection{High-level API}
+\label{sec:packedindex:proguide:highlvl}
+
+\newcommand{\funcName}[1]{\texttt{#1}}
+\lstset{language=C,frame=single,}%
+
+To load an existing packedindex project (e.g. created with the tools
+described above), use the \funcName{loadBWTSeq} function. This
+description will use the \toolarg{chr01} index produced in the
+examples of the command line tools:
+\begin{listing}
+{
+  Error *err;
+  BWTSeq *exampleIndex;
+  Str *idxProject;
+  err = error_new();
+  str_set(idxProject, "chr01");
+  exampleIndex = loadBWTSeq(idxProject, BWTDEFOPT_MULTI_QUERY, err);
+}
+\end{listing}
 
 \bibliographystyle{unsrt}
 \bibliography{gtmanuals}

@@ -104,6 +104,13 @@ BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos posA, Seqpos posB)
   return BWTSeqTransformedPosPairOcc(bwtSeq, tSym, posA, posB);
 }
 
+static inline void
+BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
+               Seqpos *rangeOccs)
+{
+  EISRangeRank(bwtSeq->seqIdx, range, pos, rangeOccs, bwtSeq->hint);
+}
+
 static inline Seqpos
 BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos)
 {
