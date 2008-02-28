@@ -729,6 +729,16 @@ static void store_predicted_exon_collapsed(TranscriptUsedExons *used_exons,
   }
 }
 
+static void mark_and_show_false_exon(GenomeNode *gn, bool exondiff)
+{
+  genome_node_mark(gn); /* mark false exons */
+  if (exondiff) {
+    printf("> ");
+    gff3_output_leading((GenomeFeature*) gn, NULL);
+    printf(".\n");
+  }
+}
+
 static void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
                                 bool exondiff, Range *predicted_range,
                                 Array *exons_forward,
@@ -758,6 +768,8 @@ static void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
         (*ctr_ptr)--;
         evaluator_add_true(exon_evaluator);
       }
+      else
+        mark_and_show_false_exon(gn, exondiff);
       if (true_exons_forward_collapsed &&
           !bittab_bit_is_set(true_exons_forward_collapsed, num)) {
         bittab_set_bit(true_exons_forward_collapsed, num);
@@ -771,6 +783,8 @@ static void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
         (*ctr_ptr)--;
         evaluator_add_true(exon_evaluator);
       }
+      else
+        mark_and_show_false_exon(gn, exondiff);
       if (true_exons_reverse_collapsed &&
           !bittab_bit_is_set(true_exons_reverse_collapsed, num)) {
         bittab_set_bit(true_exons_reverse_collapsed, num);
@@ -778,14 +792,8 @@ static void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
       }
     }
   }
-  else  {
-    genome_node_mark(gn); /* mark false exons */
-    if (exondiff) {
-      printf("> ");
-      gff3_output_leading((GenomeFeature*) gn, NULL);
-      printf(".\n");
-    }
-  }
+  else
+    mark_and_show_false_exon(gn, exondiff);
 }
 
 static void store_true_exon(GenomeNode *gn, Strand predicted_strand,
