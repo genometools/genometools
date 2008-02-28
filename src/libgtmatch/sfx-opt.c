@@ -47,6 +47,8 @@ static OPrval parse_options(int *parsed_args,
          *optionmaxdepth,
          *optionindexname,
          *optiondb,
+         *optionii,
+         *optionsat,
          *optiondir,
          *optionfast,
          *optiondes;
@@ -54,14 +56,19 @@ static OPrval parse_options(int *parsed_args,
   Str *dirarg = str_new();
 
   error_check(err);
-  op = option_parser_new("[option ...] -db file [...]",
+  op = option_parser_new("[option ...] (-db file [...] | -ii index)",
                          doesa ? "Compute enhanced suffix array."
                                : "Compute packed index.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optiondb = option_new_filenamearray("db","specify database files",
                                       so->filenametab);
-  option_is_mandatory(optiondb);
   option_parser_add_option(op, optiondb);
+
+  optionii = option_new_filename("ii","specify sequence index created "
+                                      " previously by -tis option",
+                                 so->str_inputindex);
+  option_is_mandatory_either(optiondb,optionii);
+  option_parser_add_option(op, optionii);
 
   optionsmap = option_new_string("smap",
                                  "specify file containing a symbol mapping",
@@ -132,10 +139,10 @@ static OPrval parse_options(int *parsed_args,
   option_is_development_option(option);
   option_parser_add_option(op, option);
 
-  option = option_new_string("sat",
-                             "dev-opt: specify kind of sequence representation",
-                             so->str_sat, NULL);
-  option_parser_add_option(op, option);
+  optionsat = option_new_string("sat",
+                                "specify kind of sequence representation",
+                                so->str_sat, NULL);
+  option_parser_add_option(op, optionsat);
 
   option = option_new_bool("tis",
                            "output transformed and encoded input "
@@ -197,6 +204,13 @@ static OPrval parse_options(int *parsed_args,
                            false);
   option_parser_add_option(op, option);
 
+  option_exclude(optionii, optiondb);
+  option_exclude(optionii, optiondir);
+  option_exclude(optionii, optionsmap);
+  option_exclude(optionii, optiondna);
+  option_exclude(optionii, optionprotein);
+  option_exclude(optionii, optionplain);
+  option_exclude(optionii, optionsat);
   option_exclude(optionsmap, optiondna);
   option_exclude(optionsmap, optionprotein);
   option_exclude(optiondna, optionprotein);
@@ -212,26 +226,38 @@ static OPrval parse_options(int *parsed_args,
                                err);
   if (oprval == OPTIONPARSER_OK)
   {
-    if (!option_is_set(optionindexname))
-    {
-      if (strarray_size(so->filenametab) > 1UL)
-      {
-        error_set(err,"if more than one input file is given, then "
-                          "option -indexname is mandatory");
-        oprval = OPTIONPARSER_ERROR;
-      } else
-      {
-        char *basenameptr;
-
-        basenameptr = getbasename(strarray_get(so->filenametab,0));
-        str_set(so->str_indexname,basenameptr);
-        ma_free(basenameptr);
-      }
-    }
-    if (strarray_size(so->filenametab) == 0)
+    if (option_is_set(optiondb) && strarray_size(so->filenametab) == 0)
     {
       error_set(err,"missing argument to option -db");
       oprval = OPTIONPARSER_ERROR;
+    } else
+    {
+      if (!option_is_set(optionindexname))
+      {
+        if (option_is_set(optiondb))
+        {
+          if (strarray_size(so->filenametab) > 1UL)
+          {
+            error_set(err,"if more than one input file is given, then "
+                              "option -indexname is mandatory");
+            oprval = OPTIONPARSER_ERROR;
+          } else
+          {
+            char *basenameptr;
+
+            basenameptr = getbasename(strarray_get(so->filenametab,0));
+            str_set(so->str_indexname,basenameptr);
+            ma_free(basenameptr);
+          }
+        } else
+        {
+          char *basenameptr;
+
+          basenameptr = getbasename(str_get(so->str_inputindex));
+          str_set(so->str_indexname,basenameptr);
+          ma_free(basenameptr);
+        }
+      }
     }
   }
   if (oprval == OPTIONPARSER_OK)
@@ -318,6 +344,12 @@ static void showoptions(const Suffixeratoroptions *so)
     showdefinitelyverbose("inputfile[%lu]=%s",i,
                           strarray_get(so->filenametab,i));
   }
+  if (str_length(so->str_inputindex) > 0)
+  {
+    showdefinitelyverbose("inputindex=%s",str_get(so->str_inputindex));
+  }
+  assert(str_length(so->str_indexname) > 0);
+  showdefinitelyverbose("indexname=%s",str_get(so->str_indexname));
   showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
                         "outbwttab=%s,outbcktab=%s,outdestab=%s",
           so->outtistab ? "true" : "false",
@@ -332,6 +364,7 @@ void wrapsfxoptions(Suffixeratoroptions *so)
 {
   /* no checking if error occurs, since errors have been output before */
   str_delete(so->str_indexname);
+  str_delete(so->str_inputindex);
   str_delete(so->str_smap);
   str_delete(so->str_sat);
   strarray_delete(so->filenametab);
@@ -349,10 +382,11 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   error_check(err);
   so->isdna = false;
   so->isprotein = false;
+  so->str_inputindex = str_new();
   so->str_indexname = str_new();
-  so->filenametab = strarray_new();
   so->str_smap = str_new();
   so->str_sat = str_new();
+  so->filenametab = strarray_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   so->maxdepth.defined = false;
   so->maxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;

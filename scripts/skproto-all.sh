@@ -51,6 +51,7 @@ optionargmode.c
 overallseq.c
 sfx-bentsedg.c
 sfx-enumcodes.c
+sfx-input.c
 sfx-outlcp.c
 sfx-partssuf.c
 sfx-readint.c

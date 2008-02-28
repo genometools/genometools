@@ -103,6 +103,9 @@ Seqpos *bcktab_leftborder(Bcktab *bcktab);
 
 Codetype bcktab_numofallcodes(const Bcktab *bcktab);
 
+unsigned long sizeofbuckettable(unsigned int numofchars,
+                                unsigned int prefixlength);
+
 #ifndef NDEBUG
 void checkcountspecialcodes(const Bcktab *bcktab);
 #endif

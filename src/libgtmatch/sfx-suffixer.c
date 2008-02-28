@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <errno.h>
+#include <assert.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/error.h"
 #include "libgtcore/unused.h"
@@ -343,10 +344,16 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
 void freeSfxiterator(Sfxiterator **sfi)
 {
 #ifndef NDEBUG
-  checkcountspecialcodes((*sfi)->bcktab);
+  if ((*sfi)->bcktab != NULL)
+  {
+    checkcountspecialcodes((*sfi)->bcktab);
+  }
 #endif
-  addfinalbckspecials((*sfi)->bcktab,(*sfi)->numofchars,
-                      (*sfi)->specialcharacters);
+  if ((*sfi)->bcktab != NULL)
+  {
+    addfinalbckspecials((*sfi)->bcktab,(*sfi)->numofchars,
+                        (*sfi)->specialcharacters);
+  }
   if ((*sfi)->sri != NULL)
   {
     freespecialrangeiterator(&(*sfi)->sri);

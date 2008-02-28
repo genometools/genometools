@@ -66,6 +66,25 @@ static unsigned long numofdistpfxidxcounters(const Codetype *basepower,
   return 0;
 }
 
+unsigned long sizeofbuckettable(unsigned int numofchars,
+                                unsigned int prefixlength)
+{
+  unsigned long sizeofrep;
+  Codetype *basepower, numofallcodes, numofspecialcodes;
+
+  basepower = initbasepower(numofchars,prefixlength);
+  numofallcodes = basepower[prefixlength];
+  numofspecialcodes = basepower[prefixlength-1];
+  sizeofrep
+    = (unsigned long)
+      sizeof (Seqpos) * (numofallcodes + 1) +
+      sizeof (Seqpos) * numofspecialcodes +
+      sizeof (unsigned long) * numofdistpfxidxcounters(basepower,
+                                                       prefixlength);
+  FREESPACE(basepower);
+  return sizeofrep;
+}
+
 static void setdistpfxidxptrs(unsigned long **distpfxidx,
                               unsigned long *ptr,
                               const Codetype *basepower,

@@ -33,7 +33,8 @@ typedef struct
   unsigned int numofparts,
                prefixlength;
   Definedunsignedint maxdepth;
-  Str *str_indexname,
+  Str *str_inputindex,
+      *str_indexname,
       *str_smap,
       *str_sat;
   StrArray *filenametab;
