@@ -87,7 +87,7 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
   unsigned int maxprefixlen;
 
   maxprefixlen = prefixlengthwithmaxspace(numofchars,totallength,
-                                          (unsigned int) 
+                                          (unsigned int)
                                           MAXMULTIPLIEROFTOTALLENGTH);
   if (prefixlenbits > 0)
   {
