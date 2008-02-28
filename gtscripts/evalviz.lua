@@ -84,4 +84,5 @@ end
 
 -- get ready for interactive mode
 fi = feature_index
+features = fi:get_all_features()
 gt.export()
