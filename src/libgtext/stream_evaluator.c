@@ -733,7 +733,6 @@ static void mark_and_show_false_exon(GenomeNode *gn, bool exondiff)
 {
   genome_node_mark(gn); /* mark false exons */
   if (exondiff) {
-    printf("> ");
     gff3_output_leading((GenomeFeature*) gn, NULL);
     printf(".\n");
   }
