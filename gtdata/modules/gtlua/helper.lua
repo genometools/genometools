@@ -26,7 +26,7 @@ end
 
 -- Call external 'display' program for file <filename>.
 function display(filename)
-  assert(filename and file_exists(filename))
+  assert(filename and gt.file_exists(filename))
   if os.execute("display " .. filename) ~= 0 then
     io.stdout:write("\nexit (type 'y' to confirm)? ")
     if io.stdin:read() == "y" then
