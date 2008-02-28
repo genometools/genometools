@@ -344,3 +344,10 @@ Test do
   run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_illegal_feature_start.gff3", :retval => 1)
   grep $last_stderr, "illegal feature start"
 end
+
+Name "gt gff3 corrupt gff3 header"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}corrupt_gff3_header.txt", :retval => 1)
+  grep $last_stderr, "could not parse integer"
+end

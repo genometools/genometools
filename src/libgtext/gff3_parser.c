@@ -637,13 +637,17 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
         /* skip blanks */
         while (line[0] == ' ')
           line++;
-        had_err = parse_int_line(&version, line, *line_number, filename, err);
+        if (parse_int_line(&version, line, *line_number, filename, err)) {
+          had_err = -1;
+          break;
+        }
       }
       if (!had_err) {
         if (version != GFF_VERSION) {
           error_set(err, "GFF version %d does not equal required version %u ",
                     version, GFF_VERSION);
           had_err = -1;
+          break;
         }
       }
     }
