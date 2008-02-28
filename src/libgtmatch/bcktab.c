@@ -167,7 +167,7 @@ Bcktab *allocBcktab(Seqpos totallength,
   bool haserr = false;
 
   bcktab = newBcktab(numofchars,prefixlength,totallength);
-  if (bcktab->numofallcodes-1 > maxcodevalue)
+  if (maxcodevalue > 0 && bcktab->numofallcodes-1 > maxcodevalue)
   {
     error_set(err,"alphasize^prefixlength-1 = " FormatCodetype
                   " does not fit into %u"

@@ -90,7 +90,7 @@ Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue)
   unsigned int mapindex;
   Codetype thepower = (Codetype) 1, *mmptr, **multimappower;
 
-  ARRAY2DIMMALLOC(multimappower,qvalue,numofchars,unsigned int);
+  ARRAY2DIMMALLOC(multimappower,qvalue,numofchars,Codetype);
   for (offset=(int) (qvalue - 1); offset>=0; offset--)
   {
     mmptr = multimappower[offset];

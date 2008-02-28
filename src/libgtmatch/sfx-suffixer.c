@@ -372,21 +372,26 @@ void freeSfxiterator(Sfxiterator **sfi)
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
-static bool dicidespecialcodesfast(bool dofast,
-                                   const Encodedsequence *encseq,
-                                   Seqpos realspecialranges)
+static bool decidespecialcodesfast(bool dofast,
+                                   UNUSED const Encodedsequence *encseq,
+                                   UNUSED Seqpos realspecialranges)
 {
+  return dofast;
+}
+
+#ifdef mydebug
   if (!dofast && hasfastspecialrangeenumerator(encseq))
   {
     Seqpos totallength = getencseqtotallength(encseq);
 
-    if (realspecialranges * sizeof (Codeatposition) > totallength/6)
+    if (realspecialranges * sizeof (Codeatposition) > totallength/10)
     {
       return false;
     }
   }
   return true;
 }
+#endif
 
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Seqpos realspecialranges,
@@ -408,15 +413,17 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   bool haserr = false;
 
   error_check(err);
-  if (prefixlength == 0 || prefixlength > MAXPREFIXLENGTH)
+  assert(prefixlength > 0);
+  if (dofast && prefixlength > MAXPREFIXLENGTH)
   {
     error_set(err,"argument for option -pl must be in the range [1,%u]",
                   MAXPREFIXLENGTH);
     haserr = true;
-  } else
+  }
+  if (!haserr)
   {
     ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
-    sfi->specialcodesfast = dicidespecialcodesfast(dofast,
+    sfi->specialcodesfast = decidespecialcodesfast(dofast,
                                                    encseq,
                                                    realspecialranges);
     if (sfi->specialcodesfast)
@@ -452,7 +459,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               numofchars,
                               prefixlength,
                               (unsigned int) CODEBITS,
-                              (Codetype) MAXCODEVALUE,
+                              sfi->specialcodesfast 
+                                ? (Codetype) MAXCODEVALUE
+                                : 0,
                               verboseinfo,
                               err);
     if (sfi->bcktab == NULL)
