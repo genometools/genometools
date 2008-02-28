@@ -440,6 +440,10 @@ unsigned long packedindexuniqueforward(const void *genericindex,
                      BWTSeqOcc(bwtSeq, curSym, bwtbound.end);
     bwtbound.start = bwtSeq->count[curSym] +
                      BWTSeqOcc(bwtSeq, curSym, bwtbound.start);
+    /*
+      aber vorher keine Transformation;
+      BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos posA, Seqpos posB);
+    */
 #ifdef mydebug
     printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
             "occurrences\n",

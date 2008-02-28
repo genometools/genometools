@@ -7,6 +7,7 @@
 \usepackage{listings}
 \usepackage{bbm}
 \usepackage{verbatim}
+\usepackage{comment}
 \usepackage{optionman}
 
 \newcommand{\packedindex}{\textit{packedindex}\xspace}
@@ -393,16 +394,17 @@ To load an existing packedindex project (e.g. created with the tools
 described above), use the \funcName{loadBWTSeq} function. This
 description will use the \toolarg{chr01} index produced in the
 examples of the command line tools:
-\begin{listing}
-{
-  Error *err;
-  BWTSeq *exampleIndex;
-  Str *idxProject;
-  err = error_new();
-  str_set(idxProject, "chr01");
-  exampleIndex = loadBWTSeq(idxProject, BWTDEFOPT_MULTI_QUERY, err);
-}
-\end{listing}
+%\begin{listing}
+%{
+%  Error *err;
+%  BWTSeq *exampleIndex;
+%  Str *idxProject;
+%  err = error_new();
+%  str_set(idxProject, "chr01");
+%  exampleIndex = loadBWTSeq(idxProject, BWTDEFOPT_MULTI_QUERY, err);
+%}
+%\end{listing}
+%\end{comment}
 
 \bibliographystyle{unsrt}
 \bibliography{gtmanuals}
