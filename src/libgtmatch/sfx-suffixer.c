@@ -393,6 +393,7 @@ static bool decidespecialcodesfast(bool dofast,
 }
 #endif
 
+#ifdef mydebug
 static void showleftborder(const Seqpos *leftborder,
                            Codetype numofallcodes)
 {
@@ -407,6 +408,7 @@ static void showleftborder(const Seqpos *leftborder,
     }
   }
 }
+#endif
 
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Seqpos realspecialranges,
@@ -526,7 +528,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     }
     sfi->leftborder[sfi->numofallcodes]
       = sfi->totallength - specialcharacters;
+#ifdef mydebug
     showleftborder(sfi->leftborder,sfi->numofallcodes);
+#endif
     sfi->suftabparts = newsuftabparts(numofparts,
                                       sfi->leftborder,
                                       sfi->numofallcodes,
