@@ -26,6 +26,8 @@
 #include "encseq-def.h"
 #include "bcktab.h"
 
+/* use dynamic allocation for buffers */
+
 #define FILEBUFFERSIZE 4096
 
 #define SARR_ESQTAB 1U

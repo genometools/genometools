@@ -65,8 +65,8 @@ static OPrval parse_options(Seqiteroptions *seqiteroptions,
 
   optionastretch = option_new_bool("astretch",
                                    "show distribution of A-substrings",
-                                   &seqiteroptions->doatretch,false);
-  option_exclude(optiondistlen, astretch);
+                                   &seqiteroptions->doastretch,false);
+  option_exclude(optiondistlen, optionastretch);
   option_parser_add_option(op, optionastretch);
 
   option_parser_set_min_args(op, 1U);
@@ -87,10 +87,92 @@ static void showdistseqlen(unsigned long key, unsigned long long value,
          distvalue);
 }
 
-static void accumulateastretch(DiscDist *distastretch,
-                               const Uchar *sequence,
-                               unsigned long len)
+typedef struct
 {
+  unsigned long long sumA, *mmercount;
+  unsigned long maxvalue, minkey;
+} Astretchinfo;
+
+static void showastretches(unsigned long key, unsigned long long value,
+                           void *data)
+{
+  Astretchinfo *astretchinfo = (Astretchinfo *) data;
+
+  astretchinfo->sumA += value * (unsigned long long) key;
+  if (key > astretchinfo->maxvalue)
+  {
+    astretchinfo->maxvalue = key;
+  }
+  /*@ignore@*/
+  printf("%lu %llu\n", key,value);
+  /*@end@*/
+}
+
+static void showmeroccurrence(unsigned long key, unsigned long long value,
+                              void *data)
+{
+  unsigned long len;
+  Astretchinfo *astretchinfo = (Astretchinfo *) data;
+
+  for (len=astretchinfo->minkey; len<= key; len++)
+  {
+    assert(len <= astretchinfo->maxvalue);
+    astretchinfo->mmercount[len] += value;
+  }
+}
+
+static unsigned long long accumulateastretch(DiscDistri *distastretch,
+                                             const Uchar *sequence,
+                                             unsigned long len)
+{
+  unsigned long i, lenofastretch = 0;
+  unsigned long long countA = 0;
+
+  for (i=0; i<len; i++)
+  {
+    if (sequence[i] == 'A' || sequence[i] == 'a')
+    {
+      countA++;
+      lenofastretch++;
+    } else
+    {
+      if (lenofastretch > 0)
+      {
+        discdistri_add(distastretch,lenofastretch);
+        lenofastretch = 0;
+      }
+    }
+  }
+  if (lenofastretch > 0)
+  {
+    discdistri_add(distastretch,lenofastretch);
+  }
+  return countA;
+}
+
+static void processastretches(const DiscDistri *distastretch,
+                              unsigned long long countA)
+{
+  Astretchinfo astretchinfo;
+  unsigned long len;
+
+  astretchinfo.sumA = 0;
+  astretchinfo.maxvalue = 0;
+  astretchinfo.minkey = 10UL;
+  discdistri_foreach(distastretch,showastretches,&astretchinfo);
+  astretchinfo.mmercount = ma_malloc(sizeof(*astretchinfo.mmercount) *
+                                    (astretchinfo.maxvalue+1));
+  memset(astretchinfo.mmercount,0,sizeof (*astretchinfo.mmercount) *
+                                  (astretchinfo.maxvalue+1));
+  discdistri_foreach(distastretch,showmeroccurrence,&astretchinfo);
+  for (len=astretchinfo.minkey; len<=astretchinfo.maxvalue; len++)
+  {
+    /*@ignore@*/
+    printf("a^{%lu} occurs %llu times\n", len,astretchinfo.mmercount[len]);
+    /*@end@*/
+  }
+  assert(astretchinfo.sumA == countA);
+  ma_free(astretchinfo.mmercount);
 }
 
 int gt_seqiterator(int argc, const char **argv, Error *err)
@@ -106,6 +188,7 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   DiscDistri *distastretch = NULL;
   uint64_t numofseq = 0, sumlength = 0;
   unsigned long minlength = 0, maxlength = 0;
+  unsigned long long countA = 0;
   bool minlengthdefined = false;
   Seqiteroptions seqiteroptions;
 
@@ -133,7 +216,7 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   {
     distseqlen = discdistri_new();
   }
-  if (seqiterations.doastrectch)
+  if (seqiteroptions.doastretch)
   {
     distastretch = discdistri_new();
   }
@@ -162,9 +245,9 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
       numofseq++;
       discdistri_add(distseqlen,len/BUCKETSIZE);
     }
-    if (seqiterations.doastretch)
+    if (seqiteroptions.doastretch)
     {
-      accumulateastretch(distastretch,sequence,len); 
+      countA += accumulateastretch(distastretch,sequence,len);
     }
     if (had_err != 1)
     {
@@ -189,8 +272,9 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
     discdistri_foreach(distseqlen,showdistseqlen,NULL);
     discdistri_delete(distseqlen);
   }
-  if (seqiterations.doastretch)
+  if (seqiteroptions.doastretch)
   {
+    processastretches(distastretch,countA);
     discdistri_delete(distastretch);
   }
   return had_err;

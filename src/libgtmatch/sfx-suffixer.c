@@ -399,7 +399,7 @@ static void showleftborder(const Seqpos *leftborder,
 {
   Codetype i;
 
-  for(i=0; i<numofallcodes; i++)
+  for (i=0; i<numofallcodes; i++)
   {
     printf("%lu\n",(unsigned long) leftborder[i]);
     if (leftborder[i] > (Seqpos) 4565143388UL)
@@ -476,7 +476,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               numofchars,
                               prefixlength,
                               (unsigned int) CODEBITS,
-                              sfi->specialcodesfast 
+                              sfi->specialcodesfast
                                 ? (Codetype) MAXCODEVALUE
                                 : 0,
                               verboseinfo,
