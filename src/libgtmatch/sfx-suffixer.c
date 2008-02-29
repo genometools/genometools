@@ -393,6 +393,21 @@ static bool decidespecialcodesfast(bool dofast,
 }
 #endif
 
+static void showleftborder(const Seqpos *leftborder,
+                           Codetype numofallcodes)
+{
+  Codetype i;
+
+  for(i=0; i<numofallcodes; i++)
+  {
+    printf("%lu\n",(unsigned long) leftborder[i]);
+    if (leftborder[i] > (Seqpos) 4565143388UL)
+    {
+      break;
+    }
+  }
+}
+
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Seqpos realspecialranges,
                             const Encodedsequence *encseq,
@@ -511,6 +526,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     }
     sfi->leftborder[sfi->numofallcodes]
       = sfi->totallength - specialcharacters;
+    showleftborder(sfi->leftborder,sfi->numofallcodes);
     sfi->suftabparts = newsuftabparts(numofparts,
                                       sfi->leftborder,
                                       sfi->numofallcodes,
