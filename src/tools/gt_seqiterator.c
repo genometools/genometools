@@ -117,7 +117,7 @@ static void showmeroccurrence(unsigned long key, unsigned long long value,
   for (len=astretchinfo->minkey; len<= key; len++)
   {
     assert(len <= astretchinfo->maxvalue);
-    astretchinfo->mmercount[len] += value;
+    astretchinfo->mmercount[len] += value * (unsigned long long) (key-len+1);
   }
 }
 
