@@ -24,6 +24,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/progressbar.h"
+#include "libgtcore/minmax.h"
 #include "spacedef.h"
 #include "measure-time-if.h"
 #include "intcode-def.h"
@@ -211,12 +212,14 @@ static void updatekmercount(void *processinfo,
           cp->position = position + firstspecial->specialpos;
         }
         sfi->storespecials = false;
+        assert(code > 0);
         sfi->leftborder[code]++;
       }
     } else
     {
       if (firstspecial->specialpos > 0)
       {
+        assert(code > 0);
         sfi->leftborder[code]++;
       } else
       {
@@ -333,6 +336,7 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
           if (code >= sfi->currentmincode)
           {
             updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
+            assert(code > 0);
             stidx = --sfi->leftborder[code];
             sfi->suftabptr[stidx] = specialcontext.position - prefixindex;
           }
@@ -393,22 +397,17 @@ static bool decidespecialcodesfast(bool dofast,
 }
 #endif
 
-#ifdef mydebug
 static void showleftborder(const Seqpos *leftborder,
                            Codetype numofallcodes)
 {
   Codetype i;
 
-  for (i=0; i<numofallcodes; i++)
+  for (i=0; i<MIN(numofallcodes,(Codetype) 1024); i++)
   {
-    printf("%lu\n",(unsigned long) leftborder[i]);
-    if (leftborder[i] > (Seqpos) 4565143388UL)
-    {
-      break;
-    }
+    printf("leftborder[" FormatCodetype "]=" FormatSeqpos "\n",
+            i,leftborder[i]);
   }
 }
-#endif
 
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Seqpos realspecialranges,
@@ -521,6 +520,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               sfi->spaceCodeatposition);
 #endif
     assert(sfi->leftborder != NULL);
+    showleftborder(sfi->leftborder,sfi->numofallcodes);
     for (optr = sfi->leftborder + 1;
          optr < sfi->leftborder + sfi->numofallcodes; optr++)
     {
@@ -528,9 +528,6 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     }
     sfi->leftborder[sfi->numofallcodes]
       = sfi->totallength - specialcharacters;
-#ifdef mydebug
-    showleftborder(sfi->leftborder,sfi->numofallcodes);
-#endif
     sfi->suftabparts = newsuftabparts(numofparts,
                                       sfi->leftborder,
                                       sfi->numofallcodes,
