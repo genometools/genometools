@@ -63,7 +63,7 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
     }
   }
   /*@ignore@*/
-  return 0;
+  return 1U;
   /*@end@*/
 }
 
@@ -79,7 +79,13 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
   } else
   {
     unsigned int mbp = maxbasepower(numofchars);
-    return MIN(mbp,prefixlength);
+    if (mbp >= 1U)
+    {
+      return MIN(mbp,prefixlength);
+    } else
+    {
+      return prefixlength;
+    }
   }
 }
 
@@ -111,6 +117,10 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
     {
       maxprefixlen = tmplength;
     }
+  }
+  if (maxprefixlen == 0)
+  {
+    return 1U;
   }
   return maxprefixlen;
 }
