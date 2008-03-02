@@ -208,10 +208,12 @@ static Codetype getencseqcode(const Encodedsequence *encseq,
   return code;
 }
 
+#ifdef mydebug
 static Codetype previouscode = 0;
 static bool previousfirstspecialdefined = false,
             previousstorespecials = false;
 unsigned int previousspecialpos = 0;
+#endif
 
 static void updatekmercount(void *processinfo,
                             Codetype code,
@@ -254,6 +256,7 @@ static void updatekmercount(void *processinfo,
     }
   } else
   {
+#ifdef mydebug
     if (code == 0)
     {
       Codetype code2 = getencseqcode(sfi->encseq,
@@ -278,12 +281,15 @@ static void updatekmercount(void *processinfo,
         exit(EXIT_FAILURE);
       }
     }
+#endif
     sfi->leftborder[code]++;
   }
+#ifdef mydebug
   previouscode = code;
   previousfirstspecialdefined = firstspecial->defined;
   previousstorespecials = sfi->storespecials;
   previousspecialpos = firstspecial->specialpos;
+#endif
 }
 
 static void insertwithoutspecial(void *processinfo,

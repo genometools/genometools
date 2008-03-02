@@ -37,30 +37,35 @@
 #include "safecast-gen.h"
 #include "esafileend.h"
 #include "verbose-def.h"
-#include "format64.h"
 #include "stamp.h"
 
 #include "opensfxfile.pr"
 #include "fillsci.pr"
 
+#define EXTRACTENCODEDCHAR(FCB,IDX)\
+        ((FCB[(unsigned long) DIV4(IDX)] >> (6 - (int) MULT2(MOD4(IDX))))\
+         & (Uchar) 3)
+
+/*
 #ifdef Seqposequalsunsignedint
-#define Uint32Const(N)   (N##U)  /* unsigned int constant */
+#define Uint32Const(N)   (N##U) 
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         ((ESEQ[DIV4(IDX)] >> (Uint32Const(6) - MULT2(MOD4(IDX)))) &\
                               Uint32Const(3))
 #else
-#define Uint64Const(N)   (N##UL) /* uint64_t constant */
+#define Uint64Const(N)   (N##UL)
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         ((ESEQ[(unsigned long) DIV4(IDX)] >> (Uint64Const(6) - \
                                        (uint64_t) MULT2(MOD4(IDX))))\
          & Uint64Const(3))
+*/
 
 /*
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         extractencodedchar(ESEQ,IDX)
-*/
 
 #endif
+*/
 
 #define WRITTENPOSACCESSTYPE(V) {V, #V}
 
@@ -198,37 +203,10 @@ typedef uint32_t Uint32;
   /* only for Viauint32tables */
   Uint32 *uint32specialpositions;
   unsigned long *uint32endspecialsubsUint;
-
 };
 
-/*
+#ifdef mydebug
 #ifndef Seqposequalsunsignedint
-
-#define FIRSTBITBYTE (1 << 7)
-
-#define ISBITSETBYTE(S,I)\
-        (((S) << (I)) & FIRSTBITBYTE)
-
-static char *bytes2string(Uchar bs)
-{
-  unsigned int i;
-  char *csptr;
-  static char cs[8+1];
-
-  for(csptr=cs, i=0; i < 8; i++)
-  {
-     if(ISBITSETBYTE(bs,i))
-     {
-       *csptr = '1';
-     } else
-     {
-       *csptr = '0';
-     }
-     csptr++;
-  }
-  *csptr = '\0';
-  return cs;
-}
 
 static Uchar extractencodedchar(const Uchar *fourcharsinonebyte,Seqpos pos)
 {
@@ -250,7 +228,7 @@ static Uchar extractencodedchar(const Uchar *fourcharsinonebyte,Seqpos pos)
   return result;
 }
 #endif
-*/
+#endif
 
 typedef struct
 {
