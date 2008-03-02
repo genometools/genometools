@@ -49,10 +49,35 @@
                               Uint32Const(3))
 #else
 #define Uint64Const(N)   (N##UL) /* uint64_t constant */
+
+/*
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         ((ESEQ[(unsigned long) DIV4(IDX)] >> (Uint64Const(6) - \
                                        (uint64_t) MULT2(MOD4(IDX))))\
          & Uint64Const(3))
+*/
+
+#define EXTRACTENCODEDCHAR(ESEQ,IDX)\
+        extractencodedchar(ESEQ,IDX)
+
+static Uchar extractencodedchar(const Encodedsequence *encseq,
+                                Seqpos pos)
+{
+  unsigned long idx;
+  uint64_t shiftval, aftershift, andpattern, result;
+
+  idx = (unsigned long) DIV(pos);
+  printf("idx=%lu\n",idx);
+  shiftval =  Uint64Const(6) - (uint64_t) MULT2(MOD4(IDX));
+  printf("shiftval=" Formatuint64_t "\n",shiftval);
+  aftershift = encseq->fourcharinonebyte[idx] >> shiftval;
+  printf("aftershift=" Formatuint64_t "\n",aftershift);
+  andpattern = Uint64Const(3);
+  printf("andpattern=" Formatuint64_t "\n",andpattern);
+  result = aftershift & andpattern;
+  printf("result=" Formatuint64_t "\n",result);
+  return result;
+}
 #endif
 
 #define WRITTENPOSACCESSTYPE(V) {V, #V}
@@ -232,6 +257,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,
 {
   if (readmode == Forwardmode)
   {
+    STAMP;
     return encseq->deliverchar(encseq,pos);
   }
   if (readmode == Reversemode)
@@ -753,6 +779,7 @@ static Uchar deliverfromfourchars(const Encodedsequence *encseq,
                                   Seqpos pos)
 {
   assert(pos < encseq->totallength);
+    STAMP;
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
@@ -814,14 +841,18 @@ static Uchar delivercharViaushorttablesSpecialfirst(
                                                Seqpos pos)
 {
   assert(pos < encseq->totallength);
+    STAMP;
   if (ushortcheckspecial(encseq,pos))
   {
+    STAMP;
     if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
+    STAMP;
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
+  STAMP;
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
@@ -830,14 +861,17 @@ static Uchar delivercharViaushorttablesSpecialrange(
                                                Seqpos pos)
 {
   assert(pos < encseq->totallength);
+    STAMP;
   if (ushortcheckspecialrange(encseq,pos))
   {
+    STAMP;
     if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
+    STAMP;
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
@@ -943,6 +977,7 @@ static Seqpos accessspecialpositions(const Encodedsequence *encseq,
   }
   if (encseq->sat == Viaushorttables)
   {
+    STAMP;
     return encseq->ushortspecialpositions[idx];
   }
   if (encseq->sat == Viauint32tables)
