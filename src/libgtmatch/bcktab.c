@@ -284,7 +284,7 @@ Bcktab *mapbcktab(const Str *indexname,
     setdistpfxidxptrs(bcktab->distpfxidx,bcktab->distpfxidx[0],
                       bcktab->basepower,bcktab->prefixlength);
   }
-#ifndef NDEBUG
+#ifdef mydebug
   checkcountspecialcodes(bcktab);
 #endif
   return bcktab;
@@ -349,7 +349,7 @@ void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
     += (unsigned long) (specialcharacters + 1);
 }
 
-#ifndef NDEBUG
+#ifdef mydebug
 static unsigned long fromcode2countspecialcodes(Codetype code,
                                                 const Bcktab *bcktab)
 {

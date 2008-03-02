@@ -20,9 +20,6 @@
 #include <ctype.h>
 #include <zlib.h>
 #include <stdbool.h>
-#ifndef NDEBUG
-#define NDEBUG
-#endif
 #include <assert.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/error.h"
@@ -32,7 +29,7 @@
 #include "intcode-def.h"
 #include "encseq-def.h"
 #include "stamp.h"
-#ifndef NDEBUG
+#ifdef mydebug
 #include "sfx-nextchar.h"
 #endif
 
@@ -67,7 +64,7 @@
                            (NUMOFCHARS) + (CC))
 #endif
 
-#ifndef NDEBUG
+#ifdef mydebug
 static Codetype windowkmer2code(unsigned int numofchars,
                                 unsigned int kmersize,
                                 const Uchar *cyclicwindow,
@@ -304,7 +301,7 @@ static void shiftrightwithchar(
                Seqpos currentposition,
                Uchar charcode)
 {
-#ifndef NDEBUG
+#ifdef mydebug
   Firstspecialpos firstspecialposbrute;
 #endif
 
@@ -326,7 +323,7 @@ static void shiftrightwithchar(
       spwp->firstindex++;
     }
   }
-#ifndef NDEBUG
+#ifdef mydebug
   if (!specialqueueisempty(&spwp->spos))
   {
     Queueelem *head = specialheadofqueue(&spwp->spos);
@@ -356,7 +353,7 @@ static void shiftrightwithchar(
     Firstspecialpos localfirstspecial;
     Codetype code;
 
-#ifndef NDEBUG
+#ifdef mydebug
     Codetype wcode;
 
     wcode = windowkmer2code(spwp->numofchars,
@@ -376,7 +373,9 @@ static void shiftrightwithchar(
       localfirstspecial.defined = true;
       localfirstspecial.specialpos = head->distvalue;
     }
+#ifdef mydebug
     assert(wcode == code);
+#endif
     processkmercode(processkmercodeinfo,
                     code,
                     currentposition + 1 - spwp->kmersize,
@@ -493,7 +492,6 @@ int getfastastreamkmers(
 
   error_check(err);
   initstreamstate(&spwp,numofchars,kmersize);
-  assert(readmode == Forwardmode);
   fb = fastabuffer_new(filenametab,
                        symbolmap,
                        plainformat,

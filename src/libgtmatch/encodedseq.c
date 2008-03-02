@@ -43,12 +43,13 @@
 #include "fillsci.pr"
 
 #define EXTRACTENCODEDCHAR(FCB,IDX)\
-        ((FCB[(unsigned long) DIV4(IDX)] >> (6 - (int) MULT2(MOD4(IDX))))\
+        ((FCB[(unsigned long) DIV4(IDX)] >> \
+         (6UL - (unsigned long) MULT2(MOD4(IDX))))\
          & (Uchar) 3)
 
 /*
 #ifdef Seqposequalsunsignedint
-#define Uint32Const(N)   (N##U) 
+#define Uint32Const(N)   (N##U)
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         ((ESEQ[DIV4(IDX)] >> (Uint32Const(6) - MULT2(MOD4(IDX)))) &\
                               Uint32Const(3))

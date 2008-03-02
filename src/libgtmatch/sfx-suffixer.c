@@ -187,6 +187,7 @@ static void verifycodelistcomputation(
 }
 #endif
 
+#ifdef mydebug
 static Codetype getencseqcode(const Encodedsequence *encseq,
                               Readmode readmode,
                               Seqpos totallength,
@@ -208,7 +209,6 @@ static Codetype getencseqcode(const Encodedsequence *encseq,
   return code;
 }
 
-#ifdef mydebug
 static Codetype previouscode = 0;
 static bool previousfirstspecialdefined = false,
             previousstorespecials = false;
@@ -409,7 +409,7 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
 
 void freeSfxiterator(Sfxiterator **sfi)
 {
-#ifndef NDEBUG
+#ifdef mydebug
   if ((*sfi)->bcktab != NULL)
   {
     checkcountspecialcodes((*sfi)->bcktab);
