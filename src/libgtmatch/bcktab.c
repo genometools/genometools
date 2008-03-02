@@ -91,12 +91,10 @@ static void setdistpfxidxptrs(unsigned long **distpfxidx,
                               unsigned int prefixlength)
 {
   unsigned int idx;
-  unsigned long offset = 0;
 
   distpfxidx[0] = ptr;
   for (idx=1U; idx<prefixlength-1; idx++)
   {
-    offset += (unsigned long) basepower[idx];
     distpfxidx[idx] = distpfxidx[idx-1] + basepower[idx];
   }
 }
@@ -185,7 +183,7 @@ Bcktab *allocBcktab(Seqpos totallength,
                               (bcktab->numofallcodes+1));
     memset(bcktab->leftborder,0,
            sizeof (*bcktab->leftborder) *
-           (size_t) bcktab->numofallcodes);
+           (size_t) (bcktab->numofallcodes+1));
     ALLOCASSIGNSPACE(bcktab->countspecialcodes,NULL,unsigned long,
                      bcktab->numofspecialcodes);
     showverbose(verboseinfo,
@@ -348,7 +346,7 @@ void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
 
   specialcode = FROMCODE2SPECIALCODE(bcktab->filltable[0],numofchars);
   bcktab->countspecialcodes[specialcode]
-    += (unsigned long) specialcharacters + 1;
+    += (unsigned long) (specialcharacters + 1);
 }
 
 #ifndef NDEBUG
@@ -509,11 +507,11 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
 
 unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
 {
-  unsigned int prefixindex;
-
   if (bcktab->prefixlength > 2U)
   {
     Codetype ordercode, divisor;
+    unsigned int prefixindex;
+
     for (prefixindex=bcktab->prefixlength-2; prefixindex>=1U; prefixindex--)
     {
       if (code >= bcktab->filltable[prefixindex])

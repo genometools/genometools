@@ -187,6 +187,27 @@ static void verifycodelistcomputation(
 }
 #endif
 
+static Codetype getencseqcode(const Encodedsequence *encseq,
+                              Readmode readmode,
+                              Seqpos totallength,
+                              const Codetype **multimappower,
+                              unsigned int prefixlength,
+                              Seqpos pos)
+{
+  Codetype code = 0;
+  unsigned int idx;
+  Uchar cc;
+
+  for (idx=0; idx<prefixlength; idx++)
+  {
+    assert((Seqpos) (pos + idx) < totallength);
+    cc = getencodedcharnospecial(encseq,pos + idx, readmode);
+    assert(ISNOTSPECIAL(cc));
+    code += multimappower[idx][cc];
+  }
+  return code;
+}
+
 static void updatekmercount(void *processinfo,
                             Codetype code,
                             Seqpos position,
@@ -228,6 +249,20 @@ static void updatekmercount(void *processinfo,
     }
   } else
   {
+    if (code == 0)
+    {
+      Codetype code2 = getencseqcode(sfi->encseq,
+                                     sfi->readmode,
+                                     getencseqtotallength(sfi->encseq),
+                                     bcktab_multimappower(sfi->bcktab),
+                                     sfi->prefixlength,
+                                     position);
+      if (code2 != 0)
+      {
+        fprintf(stderr,"code2 = %lu != 0\n",code2);
+        exit(EXIT_FAILURE);
+      }
+    }
     sfi->leftborder[code]++;
   }
 }
@@ -397,6 +432,7 @@ static bool decidespecialcodesfast(bool dofast,
 }
 #endif
 
+#ifdef mydebug
 static void showleftborder(const Seqpos *leftborder,
                            Codetype numofallcodes)
 {
@@ -408,6 +444,7 @@ static void showleftborder(const Seqpos *leftborder,
             i,leftborder[i]);
   }
 }
+#endif
 
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Seqpos realspecialranges,
@@ -520,7 +557,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               sfi->spaceCodeatposition);
 #endif
     assert(sfi->leftborder != NULL);
+#ifdef mydebug
     showleftborder(sfi->leftborder,sfi->numofallcodes);
+#endif
     for (optr = sfi->leftborder + 1;
          optr < sfi->leftborder + sfi->numofallcodes; optr++)
     {
