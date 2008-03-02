@@ -208,6 +208,11 @@ static Codetype getencseqcode(const Encodedsequence *encseq,
   return code;
 }
 
+static Codetype previouscode = 0;
+static bool previousfirstspecialdefined = false,
+            previousstorespecials = false;
+unsigned int previousspecialpos = 0;
+
 static void updatekmercount(void *processinfo,
                             Codetype code,
                             Seqpos position,
@@ -259,12 +264,26 @@ static void updatekmercount(void *processinfo,
                                      position);
       if (code2 != 0)
       {
-        fprintf(stderr,"code2 = %lu != 0\n",code2);
+        printf("### position " FormatSeqpos ", code2 = %lu != 0\n",
+                        position,code2);
+        printf("previouscode = " FormatCodetype "\n",
+                        previouscode);
+        if (previousfirstspecialdefined)
+        {
+          printf("previousfirstspecialdefined = true\n");
+          printf("previousstorespecials = %s\n",
+                  previousstorespecials ? "true" : "false");
+          printf("previousspecialpos = %u\n",previousspecialpos);
+        }
         exit(EXIT_FAILURE);
       }
     }
     sfi->leftborder[code]++;
   }
+  previouscode = code;
+  previousfirstspecialdefined = firstspecial->defined;
+  previousstorespecials = sfi->storespecials;
+  previousspecialpos = firstspecial->specialpos;
 }
 
 static void insertwithoutspecial(void *processinfo,
