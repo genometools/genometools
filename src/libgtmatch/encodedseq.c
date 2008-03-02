@@ -37,6 +37,7 @@
 #include "safecast-gen.h"
 #include "esafileend.h"
 #include "verbose-def.h"
+#include "format64.h"
 #include "stamp.h"
 
 #include "opensfxfile.pr"
@@ -60,24 +61,6 @@
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         extractencodedchar(ESEQ,IDX)
 
-static Uchar extractencodedchar(const Encodedsequence *encseq,
-                                Seqpos pos)
-{
-  unsigned long idx;
-  uint64_t shiftval, aftershift, andpattern, result;
-
-  idx = (unsigned long) DIV(pos);
-  printf("idx=%lu\n",idx);
-  shiftval =  Uint64Const(6) - (uint64_t) MULT2(MOD4(IDX));
-  printf("shiftval=" Formatuint64_t "\n",shiftval);
-  aftershift = encseq->fourcharinonebyte[idx] >> shiftval;
-  printf("aftershift=" Formatuint64_t "\n",aftershift);
-  andpattern = Uint64Const(3);
-  printf("andpattern=" Formatuint64_t "\n",andpattern);
-  result = aftershift & andpattern;
-  printf("result=" Formatuint64_t "\n",result);
-  return result;
-}
 #endif
 
 #define WRITTENPOSACCESSTYPE(V) {V, #V}
@@ -217,6 +200,26 @@ typedef uint32_t Uint32;
   unsigned long *uint32endspecialsubsUint;
 
 };
+
+#ifndef Seqposequalsunsignedint
+static Uchar extractencodedchar(const Uchar *fourcharsinonebyte,Seqpos pos)
+{
+  unsigned long idx;
+  uint64_t shiftval, aftershift, andpattern, result;
+
+  idx = (unsigned long) DIV4(pos);
+  printf("idx=%lu\n",idx);
+  shiftval = Uint64Const(6) - (uint64_t) MULT2(MOD4(pos));
+  printf("shiftval=" Formatuint64_t "\n",shiftval);
+  aftershift = fourcharsinonebyte[idx] >> shiftval;
+  printf("aftershift=" Formatuint64_t "\n",aftershift);
+  andpattern = Uint64Const(3);
+  printf("andpattern=" Formatuint64_t "\n",andpattern);
+  result = aftershift & andpattern;
+  printf("result=" Formatuint64_t "\n",result);
+  return result;
+}
+#endif
 
 typedef struct
 {
