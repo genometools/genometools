@@ -265,7 +265,7 @@ static void updatekmercount(void *processinfo,
       if (code2 != 0)
       {
         printf("### position " FormatSeqpos ", code2 = %lu != 0\n",
-                        position,code2);
+                        PRINTSeqposcast(position),code2);
         printf("previouscode = " FormatCodetype "\n",
                         previouscode);
         if (previousfirstspecialdefined)

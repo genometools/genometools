@@ -166,7 +166,6 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
   {
     haserr = true;
   }
-  freeverboseinfo(&verboseinfo);
   if (suffixarray.encseq != NULL)
   {
     if (!haserr)
@@ -179,6 +178,8 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
            ((Readmode) readmode) == Forwardmode ||
            ((Readmode) readmode) == Reversemode)
         {
+          showverbose(verboseinfo,"testencodedsequence(readmode=%s)",
+                                  showreadmode((Readmode) readmode));
           if (testencodedsequence(suffixarray.filenametab,
                                   suffixarray.encseq,
                                   (Readmode) readmode,
@@ -194,6 +195,7 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
     }
     if (!haserr)
     {
+      showverbose(verboseinfo,"checkspecialrangesfast");
       if (checkspecialrangesfast(suffixarray.encseq) != 0)
       {
         haserr = true;
@@ -201,6 +203,7 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
     }
     if (!haserr)
     {
+      showverbose(verboseinfo,"checkmarkpos");
       if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,
                        err) != 0)
       {
@@ -209,6 +212,7 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
     }
     if (suffixarray.prefixlength > 0 && !haserr)
     {
+      showverbose(verboseinfo,"verifymappedstr");
       if (verifymappedstr(&suffixarray,err) != 0)
       {
         haserr = true;
@@ -228,6 +232,7 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
       {
         ssar = NULL;
       }
+      showverbose(verboseinfo,"checkentiresuftab");
       checkentiresuftab(suffixarray.encseq,
                         suffixarray.readmode,
                         getcharactersAlphabet(suffixarray.alpha),
@@ -245,10 +250,12 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
   }
   if (sfxmapoptions.inputdes && !haserr)
   {
+    showverbose(verboseinfo,"checkalldescriptions");
     checkalldescriptions(suffixarray.destab,suffixarray.destablength,
                          suffixarray.numofdbsequences);
   }
   str_delete(indexname);
   freesuffixarray(&suffixarray);
+  freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;
 }
