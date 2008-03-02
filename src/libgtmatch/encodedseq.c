@@ -50,16 +50,15 @@
                               Uint32Const(3))
 #else
 #define Uint64Const(N)   (N##UL) /* uint64_t constant */
-
-/*
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         ((ESEQ[(unsigned long) DIV4(IDX)] >> (Uint64Const(6) - \
                                        (uint64_t) MULT2(MOD4(IDX))))\
          & Uint64Const(3))
-*/
 
+/*
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         extractencodedchar(ESEQ,IDX)
+*/
 
 #endif
 
@@ -85,7 +84,8 @@
 #define DECLARESEQBUFFER(TABLE)\
         unsigned long fourcharssize\
           = detsizeoffourcharsinonebyte(encseq->totallength);\
-        unsigned int widthbuffer = 0, j = 0;\
+        unsigned int widthbuffer = 0;\
+        unsigned long j = 0;\
         ALLOCASSIGNSPACE(TABLE,NULL,Uchar,fourcharssize)
 
 #define UPDATESEQBUFFER(TABLE,CC)\
@@ -201,13 +201,43 @@ typedef uint32_t Uint32;
 
 };
 
+/*
 #ifndef Seqposequalsunsignedint
+
+#define FIRSTBITBYTE (1 << 7)
+
+#define ISBITSETBYTE(S,I)\
+        (((S) << (I)) & FIRSTBITBYTE)
+
+static char *bytes2string(Uchar bs)
+{
+  unsigned int i;
+  char *csptr;
+  static char cs[8+1];
+
+  for(csptr=cs, i=0; i < 8; i++)
+  {
+     if(ISBITSETBYTE(bs,i))
+     {
+       *csptr = '1';
+     } else
+     {
+       *csptr = '0';
+     }
+     csptr++;
+  }
+  *csptr = '\0';
+  return cs;
+}
+
 static Uchar extractencodedchar(const Uchar *fourcharsinonebyte,Seqpos pos)
 {
   unsigned long idx;
   uint64_t shiftval, aftershift, andpattern, result;
 
+  printf("extractencodedchar(pos=%lu)\n",(unsigned long) pos);
   idx = (unsigned long) DIV4(pos);
+  printf("bitstring=%s\n",bytes2string(fourcharsinonebyte[idx]));
   printf("idx=%lu\n",idx);
   shiftval = Uint64Const(6) - (uint64_t) MULT2(MOD4(pos));
   printf("shiftval=" Formatuint64_t "\n",shiftval);
@@ -220,6 +250,7 @@ static Uchar extractencodedchar(const Uchar *fourcharsinonebyte,Seqpos pos)
   return result;
 }
 #endif
+*/
 
 typedef struct
 {
@@ -260,7 +291,6 @@ Uchar getencodedchar(const Encodedsequence *encseq,
 {
   if (readmode == Forwardmode)
   {
-    STAMP;
     return encseq->deliverchar(encseq,pos);
   }
   if (readmode == Reversemode)
@@ -782,7 +812,6 @@ static Uchar deliverfromfourchars(const Encodedsequence *encseq,
                                   Seqpos pos)
 {
   assert(pos < encseq->totallength);
-    STAMP;
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
@@ -844,18 +873,14 @@ static Uchar delivercharViaushorttablesSpecialfirst(
                                                Seqpos pos)
 {
   assert(pos < encseq->totallength);
-    STAMP;
   if (ushortcheckspecial(encseq,pos))
   {
-    STAMP;
     if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
-    STAMP;
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
-  STAMP;
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
@@ -864,17 +889,14 @@ static Uchar delivercharViaushorttablesSpecialrange(
                                                Seqpos pos)
 {
   assert(pos < encseq->totallength);
-    STAMP;
   if (ushortcheckspecialrange(encseq,pos))
   {
-    STAMP;
     if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
-    STAMP;
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
@@ -980,7 +1002,6 @@ static Seqpos accessspecialpositions(const Encodedsequence *encseq,
   }
   if (encseq->sat == Viaushorttables)
   {
-    STAMP;
     return encseq->ushortspecialpositions[idx];
   }
   if (encseq->sat == Viauint32tables)
