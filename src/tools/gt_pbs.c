@@ -54,10 +54,10 @@ static OPrval parse_options(int *parsed_args, PBSOptions *opts, int argc,
   option = option_new_uint("aliminlen", "minimum PBS local alignment length",
                           &opts->ali_min_len, 11);
   option_parser_add_option(op, option);
-  option = option_new_uint("maxoffset", "maximal allowed offset from LTR boundary",
+  option = option_new_uint("maxoffsetltr", "maximal allowed offset from LTR boundary",
                           &opts->max_offset, 4);
   option_parser_add_option(op, option);
-  option = option_new_uint("maxoffset", "maximal allowed offset from tRNA 3' end",
+  option = option_new_uint("maxoffsettrna", "maximal allowed offset from tRNA 3' end",
                           &opts->max_offset_trna, 10);
   option_parser_add_option(op, option);
   option = option_new_uint("maxedist", "maximal allowed alignment edit distance",
