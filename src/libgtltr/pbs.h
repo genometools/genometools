@@ -42,6 +42,8 @@ struct PBS_Hit {
   Alignment *ali;
 };
 
+/* Aligns tRNA from a library to the LTR retrotransposon candidate and
+   returns highest-scoring hit (newly created). */
 PBS_Hit* pbs_find(const char *seq,
                   LTRboundaries *line,
                   unsigned long seqlen,
