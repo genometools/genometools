@@ -83,7 +83,11 @@ PBS_Hit* pbs_find(const char *seq,
   PBS_Hit *hit;
   Alignment *ali;
   Alpha *a = (Alpha*) alpha_new_dna();
-  ScoreFunction *sf = dna_scorefunc_new(a, 5, -10, -20, -20);
+  ScoreFunction *sf = dna_scorefunc_new(a,
+                                        lo->pbs_ali_score_match,
+                                        lo->pbs_ali_score_mismatch,
+                                        lo->pbs_ali_score_deletion,
+                                        lo->pbs_ali_score_insertion);
 
   hitlist = dlist_new(pbs_hit_compare);
 
@@ -136,7 +140,7 @@ PBS_Hit* pbs_find(const char *seq,
       hit->offset  = abs(lo->pbs_radius-urange.start);
       hit->edist   = dist;
       hit->score   = pbs_score_func(dist,
-                                    lo->pbs_radius-urange.start,
+                                    abs(lo->pbs_radius-urange.start),
                                     urange.end-urange.start+1,
                                     trna_seqlen,
                                     vrange.start);
@@ -162,7 +166,7 @@ PBS_Hit* pbs_find(const char *seq,
       hit->offset  = abs(lo->pbs_radius-urange.start);
       hit->edist   = dist;
       hit->score   = pbs_score_func(dist,
-                                    lo->pbs_radius-urange.start,
+                                    abs(lo->pbs_radius-urange.start),
                                     urange.end-urange.start+1,
                                     trna_seqlen,
                                     vrange.start);

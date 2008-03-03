@@ -157,6 +157,10 @@ int gt_findpbs(int argc, const char **argv, Error *err)
   lo.pbs_radius = opts.radius;
   lo.pbs_maxoffset_5_ltr = opts.max_offset;
   lo.pbs_maxoffset_trna = opts.max_offset_trna;
+  lo.pbs_ali_score_match = 5;
+  lo.pbs_ali_score_mismatch = -10;
+  lo.pbs_ali_score_insertion = -20;
+  lo.pbs_ali_score_deletion = -20;
 
   /* get sequences from FASTA file */
   trnas = bioseq_new(argv[parsed_args], err);
