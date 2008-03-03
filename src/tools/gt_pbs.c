@@ -23,30 +23,47 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/fileutils.h"
+#include "libgtcore/strand.h"
 #include "libgtcore/warning.h"
 #include "libgtcore/ma.h"
-#include "libgtcore/bioseq.h"
-#include "libgtext/reverse.h"
-#include "libgtext/swalign.h"
+#include "libgtltr/pbs.h"
 #include "libgtltr/repeattypes.h"
 #include "libgtltr/ltrharvest-opt.h"
 
-#define ALILEN 30
-#define ALIMINLEN 12
-
 typedef struct {
-  unsigned int alilen;
+  unsigned int radius,
+               ali_min_len,
+               max_offset,
+               max_offset_trna,
+               max_edist;
 } PBSOptions;
 
 static OPrval parse_options(int *parsed_args, PBSOptions *opts, int argc,
                             const char **argv, Error *err)
 {
   OptionParser *op;
-/*  Option *option; */
+  Option *option;
   OPrval oprval;
   error_check(err);
   op = option_parser_new("[option ...] trna_file fasta_file tabular_file",
                          "Find and score primer tRNA binding sites.");
+
+  option = option_new_uint("radius", "radius around 5' LTR to search in",
+                          &opts->radius, 30);
+  option_parser_add_option(op, option);
+  option = option_new_uint("aliminlen", "minimum PBS local alignment length",
+                          &opts->ali_min_len, 11);
+  option_parser_add_option(op, option);
+  option = option_new_uint("maxoffset", "maximal allowed offset from LTR boundary",
+                          &opts->max_offset, 4);
+  option_parser_add_option(op, option);
+  option = option_new_uint("maxoffset", "maximal allowed offset from tRNA 3' end",
+                          &opts->max_offset_trna, 10);
+  option_parser_add_option(op, option);
+  option = option_new_uint("maxedist", "maximal allowed alignment edit distance",
+                          &opts->max_edist, 1);
+  option_parser_add_option(op, option);
+
   option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 3, 3, err);
@@ -98,35 +115,6 @@ static void read_ltrboundaries_from_file(const char *filename, Array *ltrboundar
   fclose(fp);
 }
 
-void reverse_seq(char *seq, unsigned long seqlen)
-{
-  char *front_char, *back_char, tmp_char;
-  for (front_char = seq, back_char = seq + seqlen - 1;
-       front_char <= back_char;
-       front_char++, back_char--) {
-    tmp_char = *back_char;
-    *back_char = *front_char;
-    *front_char = tmp_char;
-  }
-}
-
-static ScoreFunction* dna_scorefunc_new(Alpha *a, int match, int mismatch,
-                                        int insertion, int deletion)
-{
-  ScoreMatrix *sm = score_matrix_new(a);
-  ScoreFunction *sf = scorefunction_new(sm, insertion, deletion);
-  unsigned int m,n;
-
-  for(m=0;m<5;m++)
-  {
-    for(n=0;n<5;n++)
-    {
-      score_matrix_set_score(sm, m,n,(n==m ? match : mismatch));
-    }
-  }
-  return sf;
-}
-
 static LTRboundaries* find_element(Seq *seq, Array *annos)
 {
   unsigned long ltrstart, i;
@@ -150,15 +138,12 @@ static LTRboundaries* find_element(Seq *seq, Array *annos)
 
 int gt_findpbs(int argc, const char **argv, Error *err)
 {
-  unsigned long i,j;
+  unsigned long i;
   int parsed_args, had_err = 0;
   Bioseq *trnas, *fastas;
   PBSOptions opts;
+  LTRharvestoptions lo;
   Array *annos;
-  Alignment *ali;
-  long dist;
-  Alpha *a = (Alpha*) alpha_new_dna();
-  ScoreFunction *sf = dna_scorefunc_new(a, 5, -4, -10, -10);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &opts, argc, argv, err)) {
@@ -166,6 +151,12 @@ int gt_findpbs(int argc, const char **argv, Error *err)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
+
+  lo.pbs_aliminlen = opts.ali_min_len;
+  lo.pbs_maxedist = opts.max_edist;
+  lo.pbs_radius = opts.radius;
+  lo.pbs_maxoffset_5_ltr = opts.max_offset;
+  lo.pbs_maxoffset_trna = opts.max_offset_trna;
 
   /* get sequences from FASTA file */
   trnas = bioseq_new(argv[parsed_args], err);
@@ -175,73 +166,35 @@ int gt_findpbs(int argc, const char **argv, Error *err)
 
   for(i=0;i<bioseq_number_of_sequences(fastas);i++)
   {
-    Seq *seq, *seq_forward, *seq_rev;
-    unsigned long seqlen;
-    char *seq_rev_full;
-    LTRboundaries *line;
-    seq = bioseq_get_seq(fastas, i);
-    seqlen = seq_length(seq);
+    PBS_Hit *hit;
+    Seq *seq = bioseq_get_seq(fastas, i);
+    LTRboundaries *line = find_element(seq, annos);
 
-    /* get reverse complement */
-    seq_rev_full = ma_malloc(sizeof(char)*seqlen);
-    memcpy(seq_rev_full, seq_get_orig(seq), sizeof(char)*seqlen);
-    reverse_complement(seq_rev_full, seqlen, err);
+    if (!line)
+      continue;
 
-    /* get element boundaries */
-    line = find_element(seq, annos);
-    printf("%s\n", seq_get_description(seq));
-    seq_forward = seq_new(seq_get_orig(seq)+
-                            line->leftLTR_3-line->leftLTR_5-ALILEN+1,
-                          2*ALILEN,
-                          a);
+    hit = pbs_find(seq_get_orig(seq),
+                   line,
+                   seq_length(seq),
+                   line->rightLTR_3-line->leftLTR_5+1,
+                   trnas,
+                   &lo,
+                   err);
 
-    seq_rev = seq_new_own(seq_rev_full+
-                            line->rightLTR_3-line->rightLTR_5-ALILEN+1,
-                          2*ALILEN,
-                          a);
-
-
-    for(j=0;j<bioseq_number_of_sequences(trnas);j++)
+    if(hit)
     {
-      Seq *trna_seq, *trna_rev;
-      char *trna_rev_full;
-      unsigned long trna_seqlen;
-      Range urange, vrange;
-
-      trna_seq = bioseq_get_seq(trnas, j);
-      trna_seqlen = seq_length(trna_seq);
-      trna_rev_full = ma_malloc(sizeof (char)*trna_seqlen);
-      memcpy(trna_rev_full, seq_get_orig(trna_seq), sizeof(char)*trna_seqlen);
-      reverse_complement(trna_rev_full, trna_seqlen, err);
-      trna_rev = seq_new_own(trna_rev_full, trna_seqlen, a);
-
-      ali = swalign(seq_forward, trna_seq, sf);
-      dist = alignment_eval(ali);
-      urange = alignment_get_urange(ali);
-      vrange = alignment_get_vrange(ali);
-      if (dist < 2 && urange.end-urange.start+1 >= ALIMINLEN)
-      {
-        printf("%s\n", seq_get_description(trna_seq));
-        printf("%lu-%lu (%d)\n", urange.start, urange.end, abs(ALILEN-urange.start));
-        alignment_show(ali, stdout);
-        printf("%lu-%lu\n", vrange.start, vrange.end);
-        printf("on fwd: %lu\n\n", dist);
-      }
-      ali = swalign(seq_rev, trna_seq, sf);
-      dist = alignment_eval(ali);
-      urange = alignment_get_urange(ali);
-      vrange = alignment_get_vrange(ali);
-      if (dist < 2 && urange.end-urange.start+1 >= ALIMINLEN)
-      {
-        printf("%s\n", seq_get_description(trna_seq));
-        printf("%lu-%lu (%d)\n", urange.start, urange.end, abs(ALILEN-urange.start));
-        alignment_show(ali, stdout);
-        printf("%lu-%lu\n", vrange.start, vrange.end);
-        printf("on rev: %lu\n\n", dist);
-      }
+      printf("%lu %lu %lu %lu %lu %f %s %c\n",
+                (unsigned long) line->leftLTR_5,
+                (unsigned long) line->rightLTR_3,
+                hit->offset,
+                hit->edist,
+                hit->tstart,
+                hit->score,
+                hit->trna,
+                STRANDCHARS[hit->strand]);
+      ma_free(hit);
     }
   }
-
 
   bioseq_delete(trnas);
   bioseq_delete(fastas);

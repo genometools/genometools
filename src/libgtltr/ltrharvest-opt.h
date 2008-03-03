@@ -62,6 +62,19 @@ typedef struct
                ppt_radius;     /* area around 3' LTR beginning to search
                                   for PPTs */
 
+  unsigned int pbs_aliminlen,    /* minimum alignment length for PBS/tRNA */
+               pbs_radius,       /* area around 5' LTR end to search
+                                    for PBSs */
+               pbs_maxedist,     /* maximum unit edit distance in PBS
+                                    local alignments */
+               pbs_maxoffset_5_ltr,  /* maximum hit offset from 5' LTR end */
+               pbs_maxoffset_trna;   /* maximum hit offset from 3' tRNA end */
+
+  int pbs_ali_score_match,      /* scores for PBS local alignment */
+      pbs_ali_score_mismatch,
+      pbs_ali_score_deletion,
+      pbs_ali_score_insertion;
+
   unsigned int minlengthTSD,   /* minlength of TSD, default */
                maxlengthTSD;   /* maxlength of TSD, default */
                                /* by default no search for TSDs */
