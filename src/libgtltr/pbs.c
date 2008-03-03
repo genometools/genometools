@@ -74,7 +74,7 @@ PBS_Hit* pbs_find(const char *seq,
                   unsigned long ltrlen,
                   Bioseq *trna_lib,
                   LTRharvestoptions *lo,
-                    Error *err)
+                  Error *err)
 {
   Seq *seq_forward, *seq_rev;
   unsigned long j, dist;
