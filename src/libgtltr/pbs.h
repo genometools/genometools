@@ -39,7 +39,6 @@ struct PBS_Hit {
                 strand;
   double score;
   const char *trna;
-  Alignment *ali;
 };
 
 /* Aligns tRNA from a library to the LTR retrotransposon candidate and

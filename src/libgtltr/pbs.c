@@ -44,9 +44,9 @@ static ScoreFunction* dna_scorefunc_new(Alpha *a, int match, int mismatch,
   return sf;
 }
 
-double pbs_score_func(unsigned long edist, unsigned long offset,
-                      unsigned long alilen, unsigned long trnalen,
-                      unsigned long trna_offset)
+static double pbs_score_func(unsigned long edist, unsigned long offset,
+                             unsigned long alilen, unsigned long trnalen,
+                             unsigned long trna_offset)
 {
   double penalties;
   if (edist == 0 || offset == 0)
@@ -56,6 +56,39 @@ double pbs_score_func(unsigned long edist, unsigned long offset,
   return ((double) alilen *
              (double) ((trnalen - trna_offset)/(double) trnalen))
           /penalties;
+}
+
+static void pbs_add_hit(Dlist *hitlist, Alignment *ali, LTRharvestoptions *lo,
+                        unsigned long trna_seqlen, const char *desc,
+                        Strand strand)
+{
+  unsigned long dist;
+  PBS_Hit *hit;
+  Range urange, vrange;
+
+  dist = alignment_eval(ali);
+  urange = alignment_get_urange(ali);
+  vrange = alignment_get_vrange(ali);
+  if (dist <= lo->pbs_maxedist
+        && abs(lo->pbs_radius-urange.start) <= lo->pbs_maxoffset_5_ltr
+        && abs(urange.end-urange.start+1) >= lo->pbs_aliminlen
+        && vrange.start <= lo->pbs_maxoffset_trna)
+  {
+    hit = ma_malloc(sizeof (PBS_Hit));
+    hit->strand  = strand;
+    hit->trna    = desc;
+    hit->tstart  = vrange.start;
+    hit->start   = urange.start;
+    hit->end     = urange.end;
+    hit->offset  = abs(lo->pbs_radius-urange.start);
+    hit->edist   = dist;
+    hit->score   = pbs_score_func(dist,
+                                  abs(lo->pbs_radius-urange.start),
+                                  urange.end-urange.start+1,
+                                  trna_seqlen,
+                                  vrange.start);
+    dlist_add(hitlist, hit);
+  }
 }
 
 static int pbs_hit_compare(const void *h1, const void *h2)
@@ -77,10 +110,9 @@ PBS_Hit* pbs_find(const char *seq,
                   Error *err)
 {
   Seq *seq_forward, *seq_rev;
-  unsigned long j, dist;
+  unsigned long j;
   char *seq_rev_full;
   Dlist *hitlist;
-  PBS_Hit *hit;
   Alignment *ali;
   Alpha *a = (Alpha*) alpha_new_dna();
   ScoreFunction *sf = dna_scorefunc_new(a,
@@ -111,68 +143,26 @@ PBS_Hit* pbs_find(const char *seq,
     Seq *trna_seq, *trna_from3;
     char *trna_from3_full;
     unsigned long trna_seqlen;
-    Range urange, vrange;
 
     trna_seq = bioseq_get_seq(trna_lib, j);
     trna_seqlen = seq_length(trna_seq);
 
-    /* construct tRNA */
     trna_from3_full = ma_malloc(sizeof (char)*trna_seqlen);
     memcpy(trna_from3_full, seq_get_orig(trna_seq), sizeof(char)*trna_seqlen);
     reverse_complement(trna_from3_full, trna_seqlen, err);
     trna_from3 = seq_new_own(trna_from3_full, trna_seqlen, a);
 
     ali = swalign(seq_forward, trna_from3, sf);
-    dist = alignment_eval(ali);
-    urange = alignment_get_urange(ali);
-    vrange = alignment_get_vrange(ali);
-    if (dist <= lo->pbs_maxedist
-          && abs(lo->pbs_radius-urange.start) <= lo->pbs_maxoffset_5_ltr
-          && abs(urange.end-urange.start+1) >= lo->pbs_aliminlen
-          && vrange.start <= lo->pbs_maxoffset_trna)
-    {
-      hit = ma_malloc(sizeof (PBS_Hit));
-      hit->strand  = STRAND_FORWARD;
-      hit->trna    = seq_get_description(trna_seq);
-      hit->tstart  = vrange.start;
-      hit->start   = urange.start;
-      hit->end     = urange.end;
-      hit->offset  = abs(lo->pbs_radius-urange.start);
-      hit->edist   = dist;
-      hit->score   = pbs_score_func(dist,
-                                    abs(lo->pbs_radius-urange.start),
-                                    urange.end-urange.start+1,
-                                    trna_seqlen,
-                                    vrange.start);
-      /* hit->ali     = ali; */
-      dlist_add(hitlist, hit);
-    }
+
+    pbs_add_hit(hitlist,ali,lo,trna_seqlen,
+                seq_get_description(trna_seq), STRAND_FORWARD);
+
     alignment_delete(ali);
     ali = swalign(seq_rev, trna_from3, sf);
-    dist = alignment_eval(ali);
-    urange = alignment_get_urange(ali);
-    vrange = alignment_get_vrange(ali);
-    if (dist <= lo->pbs_maxedist
-          && abs(lo->pbs_radius-urange.start) <= lo->pbs_maxoffset_5_ltr
-          && abs(urange.end-urange.start+1) >= lo->pbs_aliminlen
-          && vrange.start <= lo->pbs_maxoffset_trna)
-    {
-      hit = ma_malloc(sizeof (PBS_Hit));
-      hit->strand  = STRAND_REVERSE;
-      hit->trna    = seq_get_description(trna_seq);
-      hit->start   = urange.start;
-      hit->end     = urange.end;
-      hit->tstart  = vrange.start;
-      hit->offset  = abs(lo->pbs_radius-urange.start);
-      hit->edist   = dist;
-      hit->score   = pbs_score_func(dist,
-                                    abs(lo->pbs_radius-urange.start),
-                                    urange.end-urange.start+1,
-                                    trna_seqlen,
-                                    vrange.start);
-      /* hit->ali     = ali; */
-      dlist_add(hitlist, hit);
-    }
+
+    pbs_add_hit(hitlist,ali,lo,trna_seqlen,
+                seq_get_description(trna_seq), STRAND_REVERSE);
+
     alignment_delete(ali);
     seq_delete(trna_from3);
   }
