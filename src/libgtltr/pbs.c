@@ -122,8 +122,8 @@ PBS_Hit* pbs_find(const char *seq,
   ScoreFunction *sf = dna_scorefunc_new(a,
                                         lo->pbs_ali_score_match,
                                         lo->pbs_ali_score_mismatch,
-                                        lo->pbs_ali_score_deletion,
-                                        lo->pbs_ali_score_insertion);
+                                        lo->pbs_ali_score_insertion,
+                                        lo->pbs_ali_score_deletion);
 
   /* We use a Dlist to maintain an ordered list of high-scoring local
      alignments. If this is not used in the future, a simple maximization
