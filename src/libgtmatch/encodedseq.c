@@ -86,13 +86,15 @@
          & (Twobitencoding) 3)
 
 #define DECLARESEQBUFFER(TABLE)\
-        unsigned long unitsoftwobitencoding\
-          = detunitsoftwobitencoding(encseq->totallength);\
         unsigned long widthbuffer = 0;\
-        unsigned long j = 0;\
-        ALLOCASSIGNSPACE(TABLE,NULL,Twobitencoding,unitsoftwobitencoding)
+        Twobitencoding *tbeptr;\
+        encseq->unitsoftwobitencoding\
+          = detunitsoftwobitencoding(encseq->totallength);\
+        ALLOCASSIGNSPACE(TABLE,NULL,Twobitencoding,\
+                         encseq->unitsoftwobitencoding);\
+        tbeptr = TABLE
 
-#define UPDATESEQBUFFER(TABLE,CC)\
+#define UPDATESEQBUFFER(CC)\
         bitwise <<= 2;\
         if (ISNOTSPECIAL(CC))\
         {\
@@ -106,7 +108,7 @@
         }\
         if (widthbuffer == (unsigned long) (UNITSIN2BITENC - 1))\
         {\
-          TABLE[j++] = bitwise;\
+          *tbeptr++ = bitwise;\
           widthbuffer = 0;\
           bitwise = 0;\
         } else\
@@ -114,11 +116,11 @@
           widthbuffer++;\
         }
 
-#define UPDATESEQBUFFERFINAL(TABLE)\
+#define UPDATESEQBUFFERFINAL\
         if (widthbuffer > 0)\
         {\
           bitwise <<= (MAXSHIFTRIGHTUNITSIN2BITENC - MULT2(widthbuffer));\
-          TABLE[j] = bitwise;\
+          *tbeptr = bitwise;\
         }
 
 #define ENCSEQFILESUFFIX     ".esq"
@@ -162,6 +164,7 @@ typedef uint32_t Uint32;
               Viauint32tables */
 
   Twobitencoding *twobitencoding;
+  unsigned long unitsoftwobitencoding;
 
   /* only for Viauchartables,
               Viaushorttables,
@@ -452,9 +455,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
 {
   Encodedsequence *encseq = (Encodedsequence *) voidinfo;
   Mapspecification *mapspecptr;
-  unsigned long unitsoftwobitencoding, numofunits;
+  unsigned long numofunits;
 
-  unitsoftwobitencoding = detunitsoftwobitencoding(encseq->totallength);
   if (writemode)
   {
     ALLOCASSIGNSPACE(encseq->satcharptr,NULL,Uchar,1);
@@ -468,7 +470,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       NEWMAPSPEC(encseq->plainseq,Uchar,numofunits);
       break;
     case Viabitaccess:
-      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,unitsoftwobitencoding);
+      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+                 encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
         numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
@@ -477,7 +480,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       }
       break;
     case Viauchartables:
-      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,unitsoftwobitencoding);
+      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+                 encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
         NEWMAPSPEC(encseq->ucharspecialpositions,Uchar,
@@ -490,7 +494,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       }
       break;
     case Viaushorttables:
-      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,unitsoftwobitencoding);
+      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+                 encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
         NEWMAPSPEC(encseq->ushortspecialpositions,Ushort,
@@ -503,7 +508,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       }
       break;
     case Viauint32tables:
-      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,unitsoftwobitencoding);
+      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+                 encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
         NEWMAPSPEC(encseq->uint32specialpositions,Uint32,
@@ -927,9 +933,9 @@ static int fillbitaccesstab(Encodedsequence *encseq,
     {
       SETIBIT(encseq->specialbits,pos);
     }
-    UPDATESEQBUFFER(encseq->twobitencoding,cc);
+    UPDATESEQBUFFER(cc);
   }
-  UPDATESEQBUFFERFINAL(encseq->twobitencoding);
+  UPDATESEQBUFFERFINAL;
   return 0;
 }
 
@@ -1689,6 +1695,7 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
   encseq->twobitencoding = NULL;
+  encseq->unitsoftwobitencoding = 0;
   encseq->specialrangelength = NULL;
   encseq->plainseq = NULL;
   encseq->specialbits = NULL;
@@ -2028,48 +2035,48 @@ typedef struct
 {
   Twobitencoding tbe;
   unsigned int units;
-} PrefixTwobitencoding;
+} PrefixofTwobitencoding;
 
-PrefixTwobitencoding extractunitatpos(const Twobitencoding *twobitencoding,
-                                      unsigned long numofunits,
-                                      Seqpos pos, Seqpos totallength)
+void extractunitatpos(PrefixofTwobitencoding *ptbe,
+                      const Encodedsequence *encseq,
+                      unsigned long numofunits,
+                      Seqpos pos, 
+                      Seqpos totallength)
 {
   Seqpos stoppos;
-  PrefixTwobitencoding ptbe;
 
   stoppos = totallength; /* MIN(totallength,nextspecialposition) */
   if (pos >= stoppos)
   {
-    ptbe.units = 0;
-    ptbe.tbe = 0;
+    ptbe->units = 0;
+    ptbe->tbe = 0;
   } else
   {
     unsigned long offset;
 
     if (pos + MULT2(UNITSIN2BITENC) >= stoppos)
     {
-      ptbe.units = (unsigned int)
+      ptbe->units = (unsigned int)
                    DIV2(stoppos - (pos + MULT2(UNITSIN2BITENC)));
     } else
     {
-      ptbe.units = UNITSIN2BITENC;
+      ptbe->units = UNITSIN2BITENC;
     }
     offset = (unsigned long) MULT2(MODBYUNITSIN2BITENC(pos));
     if (offset == 0)
     {
-      ptbe.tbe = twobitencoding[DIVBYUNITSIN2BITENC(pos)];
+      ptbe->tbe = encseq->twobitencoding[DIVBYUNITSIN2BITENC(pos)];
     } else
     {
       unsigned long unit = (unsigned long) DIVBYUNITSIN2BITENC(pos);
-      ptbe.tbe = (Twobitencoding) (twobitencoding[unit] << offset);
+      ptbe->tbe = (Twobitencoding) (encseq->twobitencoding[unit] << offset);
       if (unit < numofunits - 1)
       {
-        ptbe.tbe |= twobitencoding[unit+1] >>
+        ptbe->tbe |= encseq->twobitencoding[unit+1] >>
                     (MAXSHIFTRIGHTUNITSIN2BITENC - offset);
       }
     }
   }
-  return ptbe;
 }
 
 /*

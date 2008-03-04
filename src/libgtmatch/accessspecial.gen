@@ -113,10 +113,10 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
       nextcheck += (Seqpos) (MAXSPECIALTYPE+1);
     }
 #endif
-    UPDATESEQBUFFER(encseq->twobitencoding,cc);
+    UPDATESEQBUFFER(cc);
   }
   assert(sumspecials == countspecials);
-  UPDATESEQBUFFERFINAL(encseq->twobitencoding);
+  UPDATESEQBUFFERFINAL;
 #ifndef NOENDPTR
   while (endptrUint < ACCESSENCSEQ(encseq,endspecialsubsUint) + endspecialcells)
   {
