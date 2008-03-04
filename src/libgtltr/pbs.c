@@ -143,10 +143,10 @@ PBS_Hit* pbs_find(const char *seq,
                         2*lo->pbs_radius,
                         a);
 
-  seq_rev = seq_new(seq_rev_full+
-                      line->rightLTR_3-line->rightLTR_5-lo->pbs_radius+1,
-                    2*lo->pbs_radius,
-                    a);
+  seq_rev     = seq_new(seq_rev_full+
+                          line->rightLTR_3-line->rightLTR_5-lo->pbs_radius+1,
+                        2*lo->pbs_radius,
+                        a);
 
   for(j=0;j<bioseq_number_of_sequences(trna_lib);j++)
   {
@@ -163,19 +163,17 @@ PBS_Hit* pbs_find(const char *seq,
     trna_from3 = seq_new_own(trna_from3_full, trna_seqlen, a);
 
     ali = swalign(seq_forward, trna_from3, sf);
-
     pbs_add_hit(hitlist,ali,lo,trna_seqlen,
                 seq_get_description(trna_seq), STRAND_FORWARD,
                 seqoffset);
-
     alignment_delete(ali);
-    ali = swalign(seq_rev, trna_from3, sf);
 
+    ali = swalign(seq_rev, trna_from3, sf);
     pbs_add_hit(hitlist,ali,lo,trna_seqlen,
                 seq_get_description(trna_seq), STRAND_REVERSE,
                 seqoffset_rev);
-
     alignment_delete(ali);
+
     seq_delete(trna_from3);
   }
   seq_delete(seq_forward);
