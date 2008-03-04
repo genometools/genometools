@@ -34,6 +34,7 @@
 #include "libgtext/alignment.h"
 #include "libgtext/evaluator.h"
 #include "libgtext/genome_node_iterator.h"
+#include "libgtext/gff3_escaping.h"
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
 #include "tools/gt_bioseq.h"
@@ -138,6 +139,7 @@ Hashtable* gtt_unit_tests(void)
   hashtable_add(unit_tests, "genome node iterator example",
                 genome_node_iterator_example);
   hashtable_add(unit_tests, "getbasename module", getbasename_unit_test);
+  hashtable_add(unit_tests, "gff3 escaping module", gff3_escaping_unit_test);
   hashtable_add(unit_tests, "grep module", grep_unit_test);
   hashtable_add(unit_tests, "hashtable class", hashtable_unit_test);
   hashtable_add(unit_tests, "hmm class", hmm_unit_test);
