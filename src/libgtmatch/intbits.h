@@ -73,7 +73,7 @@ typedef uint32_t Bitstring;
 {
   unsigned int i;
 
-  for(i=0; i < 8U; i++)
+  for (i=0; i < 8U; i++)
   {
      (void) putchar(ISBITSET((Bitstring) bs,i) ? '1' : '0');
   }

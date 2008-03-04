@@ -123,6 +123,9 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case PairBwtidxType:
       ASSIGNPTR2STARTPTR(PairBwtidx);
       break;
+    case TwobitencodingType:
+      ASSIGNPTR2STARTPTR(Twobitencoding);
+      break;
     default:
       error_set(err,"no assignment specification for size %lu",
                     (unsigned long) mapspec->sizeofunit);
@@ -285,6 +288,9 @@ int flushtheindex2file(FILE *fp,
           break;
         case PairBwtidxType:
           WRITEACTIONWITHTYPE(PairBwtidx);
+          break;
+        case TwobitencodingType:
+          WRITEACTIONWITHTYPE(Twobitencoding);
           break;
         default:
            error_set(err,"no map specification for size %lu",
