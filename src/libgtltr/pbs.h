@@ -36,7 +36,8 @@ struct PBS_Hit {
                 edist,
                 offset,
                 tstart,
-                strand;
+                alilen;
+  Strand strand;
   double score;
   const char *trna;
 };

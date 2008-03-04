@@ -187,14 +187,15 @@ int gt_findpbs(int argc, const char **argv, Error *err)
 
     if(hit)
     {
-      printf("%lu %lu %lu %lu %lu %f %s %c\n",
+      printf("%lu %lu %lu %lu %lu %lu %s %lu %c\n",
                 (unsigned long) line->leftLTR_5,
                 (unsigned long) line->rightLTR_3,
                 hit->offset,
                 hit->edist,
                 hit->tstart,
-                hit->score,
+                hit->alilen,
                 hit->trna,
+                hit->start,
                 STRANDCHARS[hit->strand]);
       ma_free(hit);
     }

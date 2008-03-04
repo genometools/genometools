@@ -60,7 +60,7 @@ static double pbs_score_func(unsigned long edist, unsigned long offset,
 
 static void pbs_add_hit(Dlist *hitlist, Alignment *ali, LTRharvestoptions *lo,
                         unsigned long trna_seqlen, const char *desc,
-                        Strand strand)
+                        Strand strand, unsigned long seqoffset)
 {
   unsigned long dist;
   PBS_Hit *hit;
@@ -77,8 +77,12 @@ static void pbs_add_hit(Dlist *hitlist, Alignment *ali, LTRharvestoptions *lo,
     hit = ma_malloc(sizeof (PBS_Hit));
     hit->strand  = strand;
     hit->trna    = desc;
+    hit->alilen  = abs(urange.end-urange.start+1);
     hit->tstart  = vrange.start;
-    hit->start   = urange.start;
+    if (strand == STRAND_FORWARD)
+      hit->start   = seqoffset + urange.start;
+    else if (strand == STRAND_REVERSE)
+      hit->start   = seqoffset - urange.end;
     hit->end     = urange.end;
     hit->offset  = abs(lo->pbs_radius-urange.start);
     hit->edist   = dist;
@@ -110,7 +114,7 @@ PBS_Hit* pbs_find(const char *seq,
                   Error *err)
 {
   Seq *seq_forward, *seq_rev;
-  unsigned long j;
+  unsigned long j, seqoffset, seqoffset_rev;
   char *seq_rev_full;
   Dlist *hitlist;
   Alignment *ali;
@@ -121,12 +125,18 @@ PBS_Hit* pbs_find(const char *seq,
                                         lo->pbs_ali_score_deletion,
                                         lo->pbs_ali_score_insertion);
 
+  /* We use a Dlist to maintain an ordered list of high-scoring local
+     alignments. If this is not used in the future, a simple maximization
+     could suffice. */
   hitlist = dlist_new(pbs_hit_compare);
 
   /* get reverse complement */
   seq_rev_full = ma_malloc(sizeof(char)*seqlen);
   memcpy(seq_rev_full, seq, sizeof(char)*seqlen);
   reverse_complement(seq_rev_full, seqlen, err);
+
+  seqoffset = line->leftLTR_3-lo->pbs_radius;
+  seqoffset_rev = line->rightLTR_5+lo->pbs_radius;
 
   seq_forward = seq_new(seq+
                           line->leftLTR_3-line->leftLTR_5-lo->pbs_radius+1,
@@ -155,13 +165,15 @@ PBS_Hit* pbs_find(const char *seq,
     ali = swalign(seq_forward, trna_from3, sf);
 
     pbs_add_hit(hitlist,ali,lo,trna_seqlen,
-                seq_get_description(trna_seq), STRAND_FORWARD);
+                seq_get_description(trna_seq), STRAND_FORWARD,
+                seqoffset);
 
     alignment_delete(ali);
     ali = swalign(seq_rev, trna_from3, sf);
 
     pbs_add_hit(hitlist,ali,lo,trna_seqlen,
-                seq_get_description(trna_seq), STRAND_REVERSE);
+                seq_get_description(trna_seq), STRAND_REVERSE,
+                seqoffset_rev);
 
     alignment_delete(ali);
     seq_delete(trna_from3);
