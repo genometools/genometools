@@ -976,8 +976,14 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                   strarray_add_cstr(option->value, argv[argnum]);
                   option_parsed = true;
                 }
-                else
+                else {
+                  if (!option_parsed) {
+                    error_set(err, "missing argument to option \"-%s\"",
+                              str_get(option->option_str));
+                    had_err = -1;
+                  }
                   break;
+                }
               }
               break;
             case OPTION_VERSION:
