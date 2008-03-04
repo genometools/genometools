@@ -335,7 +335,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                   maxdepth->valueunsignedint);
     } else
     {
-      if (maxdepth->valueunsignedint < *prefixlength)
+      if (so->maxdepth.valueunsignedint < *prefixlength)
       {
         maxdepth->defined = true;
         maxdepth->valueunsignedint = *prefixlength;
@@ -343,6 +343,8 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                     "set maxdepth = %u",maxdepth->valueunsignedint);
       } else
       {
+        maxdepth->defined = true;
+        maxdepth->valueunsignedint = so->maxdepth.valueunsignedint;
         showverbose(verboseinfo,
                     "use maxdepth = %u",maxdepth->valueunsignedint);
       }
