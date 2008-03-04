@@ -25,6 +25,8 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/bzip2-1.0.5 \
             -I$(CURDIR)/src/external/agg-2.4/include \
             -I$(CURDIR)/src/external/libpng-1.2.18 \
+            -I$(CURDIR)/src/external/hmmer-2.3.2/src \
+            -I$(CURDIR)/src/external/hmmer-2.3.2/squid \
             -I$(CURDIR)/src/external/libtecla-1.6.1
 # these variables are exported by the configuration script
 CC:=gcc
@@ -75,10 +77,15 @@ GTLIBS:=lib/libgtexercise.a\
         lib/libgtext.a\
         lib/libgtmgth.a\
         lib/libgtmatch.a\
-        lib/libgtltr.a\
         lib/libgtcore.a\
         lib/libgtlua.a\
         lib/libexpat.a
+        lib/libhmmer.a\
+        lib/libgtltr.a
+        
+# the default GenomeThreader shared libraries which are build
+GTSHAREDLIBS:=lib/libgtcore$(SHARED_OBJ_NAME_EXT)\
+              lib/libgtext$(SHARED_OBJ_NAME_EXT)
 
 # libraries for which we build replacements (that also appear in dependencies)
 EXP_LDLIBS+=-lz -lbz2
@@ -231,6 +238,32 @@ LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
 LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
 LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.d)
 
+HMMER_DIR:=src/external/hmmer-2.3.2/src
+SQUID_DIR:=src/external/hmmer-2.3.2/squid
+HMMER_SRC:=$(HMMER_DIR)/alphabet.c \
+           $(HMMER_DIR)/core_algorithms.c $(HMMER_DIR)/debug.c \
+           $(HMMER_DIR)/display.c $(HMMER_DIR)/emit.c \
+           $(HMMER_DIR)/fast_algorithms.c $(HMMER_DIR)/histogram.c \
+           $(HMMER_DIR)/hmmio.c $(HMMER_DIR)/mathsupport.c $(HMMER_DIR)/masks.c \
+           $(HMMER_DIR)/misc.c $(HMMER_DIR)/plan7.c $(HMMER_DIR)/plan9.c \
+           $(HMMER_DIR)/postprob.c $(HMMER_DIR)/prior.c $(HMMER_DIR)/pvm.c \
+           $(HMMER_DIR)/threads.c $(HMMER_DIR)/tophits.c $(HMMER_DIR)/trace.c \
+           $(SQUID_DIR)/a2m.c $(SQUID_DIR)/aligneval.c $(SQUID_DIR)/alignio.c \
+           $(SQUID_DIR)/clustal.c $(SQUID_DIR)/cluster.c $(SQUID_DIR)/dayhoff.c \
+           $(SQUID_DIR)/eps.c $(SQUID_DIR)/file.c $(SQUID_DIR)/getopt.c \
+           $(SQUID_DIR)/gki.c $(SQUID_DIR)/hsregex.c \
+           $(SQUID_DIR)/iupac.c $(SQUID_DIR)/msa.c $(SQUID_DIR)/msf.c \
+           $(SQUID_DIR)/phylip.c $(SQUID_DIR)/revcomp.c $(SQUID_DIR)/rk.c \
+           $(SQUID_DIR)/selex.c $(SQUID_DIR)/seqencode.c $(SQUID_DIR)/shuffle.c \
+           $(SQUID_DIR)/sqerror.c $(SQUID_DIR)/sqio.c $(SQUID_DIR)/squidcore.c \
+           $(SQUID_DIR)/sre_ctype.c $(SQUID_DIR)/sre_math.c $(SQUID_DIR)/sre_random.c\
+           $(SQUID_DIR)/sre_string.c $(SQUID_DIR)/ssi.c $(SQUID_DIR)/stack.c \
+           $(SQUID_DIR)/stockholm.c $(SQUID_DIR)/stopwatch.c \
+           $(SQUID_DIR)/translate.c $(SQUID_DIR)/types.c \
+           $(SQUID_DIR)/vectorops.c $(SQUID_DIR)/weight.c
+HMMER_OBJ:=$(HMMER_SRC:%.c=obj/%.o)
+HMMER_DEP:=$(HMMER_SRC:%.c=obj/%.d)
+
 ZLIB_DIR:=src/external/zlib-1.2.3
 ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
           $(ZLIB_DIR)/gzio.c $(ZLIB_DIR)/uncompr.c $(ZLIB_DIR)/deflate.c \
@@ -369,6 +402,15 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+lib/libhmmer.a: $(HMMER_DIR)/config.h $(SQUID_DIR)/squidconf.h \
+           $(SQUID_DIR)/squid.h $(HMMER_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@ar ru $@ $(HMMER_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 lib/libz.a: $(ZLIB_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -430,7 +472,6 @@ lib/libgtltr.a: $(LIBGTLTR_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
-
 
 lib/libgtview.a: $(LIBGTVIEW_C_OBJ)
 	@echo "[link $(@F)]"
@@ -507,6 +548,25 @@ bin/rnv: $(RNVMAIN_OBJ) lib/librnv.a lib/libexpat.a
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -o $@
 
+$(SQUID_DIR)/squidconf.h:
+	@echo '[create $(@F)]'
+	@scripts/generate_hmmer_squidconf_h $(SQUID_DIR)/squidconf.h.in > $@
+
+$(SQUID_DIR)/squid.h:
+	@echo '[create $(@F)]'
+	@scripts/generate_hmmer_squid_h  $(SQUID_DIR)/squid.h.in > $@
+
+$(HMMER_DIR)/config.h:
+	@echo '[create $(@F)]'
+	@cp $(HMMER_DIR)/config.h.in $(HMMER_DIR)/config.h
+	@sed  -i 's/#undef PACKAGE_VERSION/#define PACKAGE_VERSION "2.3.2"/' $@
+	@sed  -i 's/#undef PACKAGE_NAME/#define PACKAGE_NAME "HMMER"/' $@
+	@sed  -i 's/#undef PACKAGE_TARNAME/#define PACKAGE_TARNAME "hmmer"/' $@
+	@sed  -i 's/#undef PACKAGE_STRING/#define PACKAGE_STRING "HMMER 2.3.2"/' $@
+	@sed  -i 's/#undef PACKAGE_DATE/#define PACKAGE_DATE "Oct 2003"/' $@
+	@sed  -i 's/#undef PACKAGE_COPYRIGHT/#define PACKAGE_COPYRIGHT "Copyright (C) 1992-2003 HHMI\/Washington University School of Medicine"/' $@
+	@sed  -i 's/#undef PACKAGE_LICENSE/#define PACKAGE_LICENSE "Freely distributed under the GNU General Public License (GPL)"/' $@
+          
 obj/gt_config.h:
 	@echo '[create $@]'
 	@test -d $(@D) || mkdir -p $(@D)
@@ -564,6 +624,21 @@ src/libgtcore/checkbitpackstring-int.c: \
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl '-int' $<
 
+# HMMER will not compile without warnings, so no GT_CFLAGS
+obj/src/external/hmmer-2.3.2/squid/%.o: src/external/hmmer-2.3.2/squid/%.c
+	@echo "[compile $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) $(3)
+	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(3) -MM -MP \
+	  -MT $@
+
+obj/src/external/hmmer-2.3.2/src/%.o: src/external/hmmer-2.3.2/src/%.c
+	@echo "[compile $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) $(3)
+	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(3) -MM -MP \
+	  -MT $@
+
 define COMPILE_template
 $(1): $(2)
 	@echo "[compile $$(@F)]"
@@ -616,6 +691,7 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 	 $(LIBRNV_DEP) \
 	 $(RNVMAIN_DEP) \
 	 $(LIBBZ2_DEP) \
+         $(HMMER_DEP) \
 	 $(ZLIB_DEP)
 
 ifeq ($(libgtview),yes)
@@ -769,6 +845,7 @@ test: all
           -gtruby $(CURDIR)/gtruby $(STEST_FLAGS)
 
 clean:
+	rm -rf $(HMMER_DIR)/config.h $(SQUID_DIR)/squidconf.h $(SQUID_DIR)/squid.h
 	rm -rf obj
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 

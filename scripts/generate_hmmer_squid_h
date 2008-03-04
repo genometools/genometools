@@ -1,0 +1,7 @@
+#!/bin/sh -e
+
+sed -e 's/#include <stdlib.h>/#include <stdlib.h>\
+#include <stdint.h>/'\
+    -e 's/@SQD_UINT16@/uint16_t/'\
+    -e 's/@SQD_UINT32@/uint32_t/'\
+    -e 's/@SQD_UINT64@/uint64_t/' $1

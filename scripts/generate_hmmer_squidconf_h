@@ -1,0 +1,15 @@
+#!/bin/sh -e
+
+sed  -e 's/#undef SQUID_VERSION/#define SQUID_VERSION "1.9g"/'\
+     -e 's/#undef SQUID_RELCODE/#define SQUID_RELCODE "squid1_9g"/'\
+     -e 's/#undef SQUID_DATE/#define SQUID_DATE "January 2003"/'\
+     -e 's/#undef SQUID_COPYRIGHT/#define SQUID_COPYRIGHT "Copyright (C) 1992-2003 HHMI\/Washington University School of Medicine"/'\
+     -e 's/#undef SQUID_LICENSE/#define SQUID_LICENSE "Freely distributed under the GNU General Public License (GPL)"/'\
+     -e 's/SIZEOF_UNSIGNED_SHORT      0/SIZEOF_UNSIGNED_SHORT      2/'\
+     -e 's/SIZEOF_UNSIGNED_INT        0/SIZEOF_UNSIGNED_INT        4/'\
+     -e 's/#define SIZEOF_UNSIGNED_LONG       0/#ifdef _LP64\
+#define SIZEOF_UNSIGNED_LONG       8\
+#else\
+#define SIZEOF_UNSIGNED_LONG       4\
+#endif/'\
+     -e 's/SIZEOF_UNSIGNED_LONG_LONG  0/SIZEOF_UNSIGNED_LONG_LONG  8/' $1
