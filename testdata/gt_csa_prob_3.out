@@ -2,10 +2,10 @@
 ##sequence-region   NC_003070 1 4294967295
 NC_003070	gt csa	gene	20552738	20553188	.	+	.	ID=gene1
 NC_003070	gt csa	mRNA	20552738	20553188	.	+	.	ID=mRNA1;Parent=gene1
-NC_003070	gt csa	exon	20552738	20552824	0.747126	+	.	Parent=mRNA1
-NC_003070	gt csa	exon	20553053	20553188	0.801471	+	.	Parent=mRNA1
+NC_003070	gt csa	exon	20552738	20552824	0.747	+	.	Parent=mRNA1
+NC_003070	gt csa	exon	20553053	20553188	0.801	+	.	Parent=mRNA1
 ###
 NC_003070	gt csa	gene	24280722	24280936	.	+	.	ID=gene2
 NC_003070	gt csa	mRNA	24280722	24280936	.	+	.	ID=mRNA2;Parent=gene2
-NC_003070	gt csa	exon	24280722	24280936	0.804651	+	.	Parent=mRNA2
+NC_003070	gt csa	exon	24280722	24280936	0.805	+	.	Parent=mRNA2
 ###
