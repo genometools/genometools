@@ -121,6 +121,13 @@ Test do
   run "diff #{$last_stdout} #{$testdata}U89959_ginums.out"
 end
 
+Name "gt extractseq -ginum (corrupt)"
+Keywords "gt_extractseq"
+Test do
+  run_test("#{$bin}gt extractseq -ginum #{$testdata}U89959_ginums.corrupt " +
+           "#{$testdata}U89959_ests.fas.gz", :retval => 1)
+end
+
 Name "gt extractseq -ginum (fail)"
 Keywords "gt_extractseq"
 Test do
