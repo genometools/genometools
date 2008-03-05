@@ -1,0 +1,20 @@
+MD5 - Cryptographic Library for Lua
+Copyright 2003-2007 PUC-Rio
+http://www.keplerproject.org/md5
+
+MD5 offers basic cryptographic facilities for Lua 5.1: a hash (digest)
+function, a pair crypt/decrypt based on MD5 and CFB, and a pair crypt/decrypt based
+on DES with 56-bit keys.
+
+MD5 current version is 1.1.1.
+
+To install on Linux/OSX/BSD, please edit the config file and then call
+
+make
+make install
+
+The last step may require root privileges.
+
+Please check the documentation at /doc/us/ for more information.
+
+The DES 56 C library was implemented by Stuart Levy and uses a MIT license too (check the source)
