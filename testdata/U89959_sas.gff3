@@ -1,0 +1,1598 @@
+##gff-version   3
+##sequence-region   1877523 1 106973
+1877523	gth	gene	1074	1540	1.000000	+	.	ID=gene1;Target=8721428 1 303 +
+1877523	gth	exon	1074	1171	1.000000	+	.	Parent=gene1
+1877523	gth	five_prime_splice_site	1172	1173	0.865736	+	.	Parent=gene1
+1877523	gth	three_prime_splice_site	1257	1258	0.994343	+	.	Parent=gene1
+1877523	gth	exon	1259	1354	1.000000	+	.	Parent=gene1
+1877523	gth	five_prime_splice_site	1355	1356	0.000050	+	.	Parent=gene1
+1877523	gth	three_prime_splice_site	1430	1431	0.745137	+	.	Parent=gene1
+1877523	gth	exon	1432	1540	1.000000	+	.	Parent=gene1
+###
+1877523	gth	gene	2779	3355	0.840256	+	.	ID=gene2;Target=8732738 1 337 +
+1877523	gth	exon	2779	2801	0.695652	+	.	Parent=gene2
+1877523	gth	five_prime_splice_site	2802	2803	0.458732	+	.	Parent=gene2
+1877523	gth	three_prime_splice_site	3041	3042	0.000001	+	.	Parent=gene2
+1877523	gth	exon	3043	3355	0.840256	+	.	Parent=gene2
+###
+1877523	gth	gene	3025	3351	1.000000	+	.	ID=gene3;Target=19837778 1 327 +
+1877523	gth	exon	3025	3351	1.000000	+	.	Parent=gene3
+###
+1877523	gth	gene	3041	3651	0.996078	-	.	ID=gene4;Target=8732878 1 536 -
+1877523	gth	exon	3041	3550	0.996078	-	.	Parent=gene4
+1877523	gth	three_prime_splice_site	3550	3551	0.999965	-	.	Parent=gene4
+1877523	gth	five_prime_splice_site	3625	3626	0.741158	-	.	Parent=gene4
+1877523	gth	exon	3626	3651	1.000000	-	.	Parent=gene4
+###
+1877523	gth	gene	3077	3506	0.974419	+	.	ID=gene5;Target=19843099 1 426 +
+1877523	gth	exon	3077	3506	0.974419	+	.	Parent=gene5
+###
+1877523	gth	gene	4768	5357	0.987288	-	.	ID=gene6;Target=19871046 1 591 +
+1877523	gth	exon	4768	5357	0.987288	-	.	Parent=gene6
+###
+1877523	gth	gene	9505	10058	1.000000	+	.	ID=gene7;Target=8682455 1 554 +
+1877523	gth	exon	9505	10058	1.000000	+	.	Parent=gene7
+###
+1877523	gth	gene	12024	12542	1.000000	-	.	ID=gene8;Target=8688760 1 519 +
+1877523	gth	exon	12024	12542	1.000000	-	.	Parent=gene8
+###
+1877523	gth	gene	13014	13465	0.880531	-	.	ID=gene9;Target=2748705 1 459 +
+1877523	gth	exon	13014	13465	0.880531	-	.	Parent=gene9
+###
+1877523	gth	gene	15955	16603	0.996918	+	.	ID=gene10;Target=19878194 1 649 +
+1877523	gth	exon	15955	16603	0.996918	+	.	Parent=gene10
+###
+1877523	gth	gene	17165	17684	0.984772	+	.	ID=gene11;Target=19798999 1 396 -
+1877523	gth	exon	17165	17247	0.969880	+	.	Parent=gene11
+1877523	gth	five_prime_splice_site	17248	17249	0.999999	+	.	Parent=gene11
+1877523	gth	three_prime_splice_site	17372	17373	0.993753	+	.	Parent=gene11
+1877523	gth	exon	17374	17684	0.988746	+	.	Parent=gene11
+###
+1877523	gth	gene	25221	26100	1.000000	+	.	ID=gene12;Target=8690053 1 521 +
+1877523	gth	exon	25221	25310	1.000000	+	.	Parent=gene12
+1877523	gth	five_prime_splice_site	25311	25312	0.993266	+	.	Parent=gene12
+1877523	gth	three_prime_splice_site	25508	25509	0.438707	+	.	Parent=gene12
+1877523	gth	exon	25510	25626	1.000000	+	.	Parent=gene12
+1877523	gth	five_prime_splice_site	25627	25628	0.998165	+	.	Parent=gene12
+1877523	gth	three_prime_splice_site	25711	25712	0.995784	+	.	Parent=gene12
+1877523	gth	exon	25713	25841	1.000000	+	.	Parent=gene12
+1877523	gth	five_prime_splice_site	25842	25843	0.629704	+	.	Parent=gene12
+1877523	gth	three_prime_splice_site	25914	25915	0.926271	+	.	Parent=gene12
+1877523	gth	exon	25916	26100	1.000000	+	.	Parent=gene12
+###
+1877523	gth	gene	27900	28989	1.000000	+	.	ID=gene13;Target=8726341 1 499 +
+1877523	gth	exon	27900	28003	1.000000	+	.	Parent=gene13
+1877523	gth	five_prime_splice_site	28004	28005	0.999496	+	.	Parent=gene13
+1877523	gth	three_prime_splice_site	28267	28268	0.994946	+	.	Parent=gene13
+1877523	gth	exon	28269	28424	1.000000	+	.	Parent=gene13
+1877523	gth	five_prime_splice_site	28425	28426	0.935946	+	.	Parent=gene13
+1877523	gth	three_prime_splice_site	28505	28506	0.000050	+	.	Parent=gene13
+1877523	gth	exon	28507	28579	1.000000	+	.	Parent=gene13
+1877523	gth	five_prime_splice_site	28580	28581	0.988929	+	.	Parent=gene13
+1877523	gth	three_prime_splice_site	28684	28685	0.994191	+	.	Parent=gene13
+1877523	gth	exon	28686	28753	1.000000	+	.	Parent=gene13
+1877523	gth	five_prime_splice_site	28754	28755	0.999040	+	.	Parent=gene13
+1877523	gth	three_prime_splice_site	28890	28891	0.998962	+	.	Parent=gene13
+1877523	gth	exon	28892	28989	1.000000	+	.	Parent=gene13
+###
+1877523	gth	gene	28990	29817	1.000000	+	.	ID=gene14;Target=8726286 1 477 +
+1877523	gth	exon	28990	29037	1.000000	+	.	Parent=gene14
+1877523	gth	five_prime_splice_site	29038	29039	0.906982	+	.	Parent=gene14
+1877523	gth	three_prime_splice_site	29132	29133	0.000050	+	.	Parent=gene14
+1877523	gth	exon	29134	29242	1.000000	+	.	Parent=gene14
+1877523	gth	five_prime_splice_site	29243	29244	0.839836	+	.	Parent=gene14
+1877523	gth	three_prime_splice_site	29329	29330	0.999923	+	.	Parent=gene14
+1877523	gth	exon	29331	29477	1.000000	+	.	Parent=gene14
+1877523	gth	five_prime_splice_site	29478	29479	0.982568	+	.	Parent=gene14
+1877523	gth	three_prime_splice_site	29569	29570	0.997892	+	.	Parent=gene14
+1877523	gth	exon	29571	29618	1.000000	+	.	Parent=gene14
+1877523	gth	five_prime_splice_site	29619	29620	0.000050	+	.	Parent=gene14
+1877523	gth	three_prime_splice_site	29691	29692	0.993214	+	.	Parent=gene14
+1877523	gth	exon	29693	29817	1.000000	+	.	Parent=gene14
+###
+1877523	gth	gene	30278	31355	1.000000	+	.	ID=gene15;Target=8690080 1 524 +
+1877523	gth	exon	30278	30391	1.000000	+	.	Parent=gene15
+1877523	gth	five_prime_splice_site	30392	30393	0.985046	+	.	Parent=gene15
+1877523	gth	three_prime_splice_site	30475	30476	0.918252	+	.	Parent=gene15
+1877523	gth	exon	30477	30562	1.000000	+	.	Parent=gene15
+1877523	gth	five_prime_splice_site	30563	30564	0.937747	+	.	Parent=gene15
+1877523	gth	three_prime_splice_site	30656	30657	0.972592	+	.	Parent=gene15
+1877523	gth	exon	30658	30763	1.000000	+	.	Parent=gene15
+1877523	gth	five_prime_splice_site	30764	30765	0.996281	+	.	Parent=gene15
+1877523	gth	three_prime_splice_site	30988	30989	0.999625	+	.	Parent=gene15
+1877523	gth	exon	30990	31085	1.000000	+	.	Parent=gene15
+1877523	gth	five_prime_splice_site	31086	31087	0.644271	+	.	Parent=gene15
+1877523	gth	three_prime_splice_site	31232	31233	0.986778	+	.	Parent=gene15
+1877523	gth	exon	31234	31355	1.000000	+	.	Parent=gene15
+###
+1877523	gth	gene	31265	31820	1.000000	+	.	ID=gene16;Target=8689616 1 333 +
+1877523	gth	exon	31265	31386	1.000000	+	.	Parent=gene16
+1877523	gth	five_prime_splice_site	31387	31388	0.995715	+	.	Parent=gene16
+1877523	gth	three_prime_splice_site	31536	31537	0.989563	+	.	Parent=gene16
+1877523	gth	exon	31538	31720	1.000000	+	.	Parent=gene16
+1877523	gth	five_prime_splice_site	31721	31722	0.994302	+	.	Parent=gene16
+1877523	gth	three_prime_splice_site	31791	31792	0.995288	+	.	Parent=gene16
+1877523	gth	exon	31793	31820	1.000000	+	.	Parent=gene16
+###
+1877523	gth	gene	31855	32362	1.000000	+	.	ID=gene17;Target=8689215 1 334 +
+1877523	gth	exon	31855	32022	1.000000	+	.	Parent=gene17
+1877523	gth	five_prime_splice_site	32023	32024	0.000050	+	.	Parent=gene17
+1877523	gth	three_prime_splice_site	32116	32117	0.557948	+	.	Parent=gene17
+1877523	gth	exon	32118	32220	1.000000	+	.	Parent=gene17
+1877523	gth	five_prime_splice_site	32221	32222	0.911690	+	.	Parent=gene17
+1877523	gth	three_prime_splice_site	32298	32299	0.895203	+	.	Parent=gene17
+1877523	gth	exon	32300	32362	1.000000	+	.	Parent=gene17
+###
+1877523	gth	gene	31907	32349	1.000000	+	.	ID=gene18;Target=9784594 1 269 +
+1877523	gth	exon	31907	32022	1.000000	+	.	Parent=gene18
+1877523	gth	five_prime_splice_site	32023	32024	0.000050	+	.	Parent=gene18
+1877523	gth	three_prime_splice_site	32116	32117	0.557948	+	.	Parent=gene18
+1877523	gth	exon	32118	32220	1.000000	+	.	Parent=gene18
+1877523	gth	five_prime_splice_site	32221	32222	0.911690	+	.	Parent=gene18
+1877523	gth	three_prime_splice_site	32298	32299	0.895203	+	.	Parent=gene18
+1877523	gth	exon	32300	32349	1.000000	+	.	Parent=gene18
+###
+1877523	gth	gene	32928	33488	0.967172	+	.	ID=gene19;Target=19875482 1 227 +
+1877523	gth	exon	32928	32955	1.000000	+	.	Parent=gene19
+1877523	gth	five_prime_splice_site	32956	32957	0.985130	+	.	Parent=gene19
+1877523	gth	three_prime_splice_site	33189	33190	0.999411	+	.	Parent=gene19
+1877523	gth	exon	33191	33317	0.980315	+	.	Parent=gene19
+1877523	gth	five_prime_splice_site	33318	33319	0.956165	+	.	Parent=gene19
+1877523	gth	three_prime_splice_site	33416	33417	0.982645	+	.	Parent=gene19
+1877523	gth	exon	33418	33488	0.943662	+	.	Parent=gene19
+###
+1877523	gth	gene	33296	34560	1.000000	+	.	ID=gene20;Target=9782568 1 427 +
+1877523	gth	exon	33296	33317	0.636364	+	.	Parent=gene20
+1877523	gth	five_prime_splice_site	33318	33319	0.956165	+	.	Parent=gene20
+1877523	gth	three_prime_splice_site	33416	33417	0.982645	+	.	Parent=gene20
+1877523	gth	exon	33418	33518	1.000000	+	.	Parent=gene20
+1877523	gth	five_prime_splice_site	33519	33520	0.992521	+	.	Parent=gene20
+1877523	gth	three_prime_splice_site	33781	33782	0.989984	+	.	Parent=gene20
+1877523	gth	exon	33783	33917	1.000000	+	.	Parent=gene20
+1877523	gth	five_prime_splice_site	33918	33919	0.705436	+	.	Parent=gene20
+1877523	gth	three_prime_splice_site	33994	33995	0.988265	+	.	Parent=gene20
+1877523	gth	exon	33996	34076	1.000000	+	.	Parent=gene20
+1877523	gth	five_prime_splice_site	34077	34078	0.961219	+	.	Parent=gene20
+1877523	gth	three_prime_splice_site	34470	34471	0.999337	+	.	Parent=gene20
+1877523	gth	exon	34472	34560	1.000000	+	.	Parent=gene20
+###
+1877523	gth	gene	35628	36362	0.920759	+	.	ID=gene21;Target=2759121 1 451 +
+1877523	gth	exon	35628	35712	0.958824	+	.	Parent=gene21
+1877523	gth	five_prime_splice_site	35713	35714	0.987617	+	.	Parent=gene21
+1877523	gth	three_prime_splice_site	35818	35819	0.971389	+	.	Parent=gene21
+1877523	gth	exon	35820	36011	0.979167	+	.	Parent=gene21
+1877523	gth	five_prime_splice_site	36012	36013	0.955124	+	.	Parent=gene21
+1877523	gth	three_prime_splice_site	36099	36100	0.991701	+	.	Parent=gene21
+1877523	gth	exon	36101	36205	0.923810	+	.	Parent=gene21
+1877523	gth	five_prime_splice_site	36206	36207	0.990419	+	.	Parent=gene21
+1877523	gth	three_prime_splice_site	36295	36296	0.978997	+	.	Parent=gene21
+1877523	gth	exon	36297	36362	0.696970	+	.	Parent=gene21
+###
+1877523	gth	gene	35628	36392	0.984310	+	.	ID=gene22;Target=5841805 1 479 +
+1877523	gth	exon	35628	35712	1.000000	+	.	Parent=gene22
+1877523	gth	five_prime_splice_site	35713	35714	0.987617	+	.	Parent=gene22
+1877523	gth	three_prime_splice_site	35818	35819	0.971389	+	.	Parent=gene22
+1877523	gth	exon	35820	36011	1.000000	+	.	Parent=gene22
+1877523	gth	five_prime_splice_site	36012	36013	0.955124	+	.	Parent=gene22
+1877523	gth	three_prime_splice_site	36099	36100	0.991701	+	.	Parent=gene22
+1877523	gth	exon	36101	36205	1.000000	+	.	Parent=gene22
+1877523	gth	five_prime_splice_site	36206	36207	0.990419	+	.	Parent=gene22
+1877523	gth	three_prime_splice_site	36295	36296	0.978997	+	.	Parent=gene22
+1877523	gth	exon	36297	36392	0.921875	+	.	Parent=gene22
+###
+1877523	gth	gene	36370	37156	1.000000	+	.	ID=gene23;Target=8683519 1 604 -
+1877523	gth	exon	36370	36431	1.000000	+	.	Parent=gene23
+1877523	gth	five_prime_splice_site	36432	36433	0.994029	+	.	Parent=gene23
+1877523	gth	three_prime_splice_site	36519	36520	0.999643	+	.	Parent=gene23
+1877523	gth	exon	36521	36721	1.000000	+	.	Parent=gene23
+1877523	gth	five_prime_splice_site	36722	36723	0.909560	+	.	Parent=gene23
+1877523	gth	three_prime_splice_site	36814	36815	0.967565	+	.	Parent=gene23
+1877523	gth	exon	36816	37156	1.000000	+	.	Parent=gene23
+###
+1877523	gth	gene	36402	37106	1.000000	+	.	ID=gene24;Target=8682814 1 522 -
+1877523	gth	exon	36402	36431	1.000000	+	.	Parent=gene24
+1877523	gth	five_prime_splice_site	36432	36433	0.994029	+	.	Parent=gene24
+1877523	gth	three_prime_splice_site	36519	36520	0.999643	+	.	Parent=gene24
+1877523	gth	exon	36521	36721	1.000000	+	.	Parent=gene24
+1877523	gth	five_prime_splice_site	36722	36723	0.909560	+	.	Parent=gene24
+1877523	gth	three_prime_splice_site	36814	36815	0.967565	+	.	Parent=gene24
+1877523	gth	exon	36816	37106	1.000000	+	.	Parent=gene24
+###
+1877523	gth	gene	36531	37190	1.000000	+	.	ID=gene25;Target=8690927 1 566 -
+1877523	gth	exon	36531	36721	1.000000	+	.	Parent=gene25
+1877523	gth	five_prime_splice_site	36722	36723	0.909560	+	.	Parent=gene25
+1877523	gth	three_prime_splice_site	36814	36815	0.967565	+	.	Parent=gene25
+1877523	gth	exon	36816	37190	1.000000	+	.	Parent=gene25
+###
+1877523	gth	gene	36546	37186	0.989945	+	.	ID=gene26;Target=5845530 1 547 -
+1877523	gth	exon	36546	36721	0.968750	+	.	Parent=gene26
+1877523	gth	five_prime_splice_site	36722	36723	0.909560	+	.	Parent=gene26
+1877523	gth	three_prime_splice_site	36814	36815	0.967565	+	.	Parent=gene26
+1877523	gth	exon	36816	37186	1.000000	+	.	Parent=gene26
+###
+1877523	gth	gene	36594	37208	1.000000	+	.	ID=gene27;Target=8717375 1 521 -
+1877523	gth	exon	36594	36721	1.000000	+	.	Parent=gene27
+1877523	gth	five_prime_splice_site	36722	36723	0.909560	+	.	Parent=gene27
+1877523	gth	three_prime_splice_site	36814	36815	0.967565	+	.	Parent=gene27
+1877523	gth	exon	36816	37208	1.000000	+	.	Parent=gene27
+###
+1877523	gth	gene	36812	37235	0.997642	-	.	ID=gene28;Target=8735393 1 424 +
+1877523	gth	exon	36812	37235	0.997642	-	.	Parent=gene28
+###
+1877523	gth	gene	36816	37208	0.964377	+	.	ID=gene29;Target=2048630 53 438 +
+1877523	gth	exon	36816	37208	0.964377	+	.	Parent=gene29
+###
+1877523	gth	gene	36827	37206	0.997368	-	.	ID=gene30;Target=19741846 1 380 +
+1877523	gth	exon	36827	37206	0.997368	-	.	Parent=gene30
+###
+1877523	gth	gene	36840	37234	1.000000	-	.	ID=gene31;Target=8738747 1 395 +
+1877523	gth	exon	36840	37234	1.000000	-	.	Parent=gene31
+###
+1877523	gth	gene	37071	37203	1.000000	-	.	ID=gene32;Target=8679389 1 133 +
+1877523	gth	exon	37071	37203	1.000000	-	.	Parent=gene32
+###
+1877523	gth	gene	37669	39259	1.000000	-	.	ID=gene33;Target=8738841 1 588 -
+1877523	gth	exon	37669	37891	1.000000	-	.	Parent=gene33
+1877523	gth	three_prime_splice_site	37891	37892	0.934910	-	.	Parent=gene33
+1877523	gth	five_prime_splice_site	37971	37972	0.873458	-	.	Parent=gene33
+1877523	gth	exon	37972	38060	1.000000	-	.	Parent=gene33
+1877523	gth	three_prime_splice_site	38060	38061	0.978371	-	.	Parent=gene33
+1877523	gth	five_prime_splice_site	38655	38656	0.856182	-	.	Parent=gene33
+1877523	gth	exon	38656	38794	1.000000	-	.	Parent=gene33
+1877523	gth	three_prime_splice_site	38794	38795	0.975551	-	.	Parent=gene33
+1877523	gth	five_prime_splice_site	38926	38927	0.977278	-	.	Parent=gene33
+1877523	gth	exon	38927	38997	1.000000	-	.	Parent=gene33
+1877523	gth	three_prime_splice_site	38997	38998	0.768157	-	.	Parent=gene33
+1877523	gth	five_prime_splice_site	39103	39104	0.491304	-	.	Parent=gene33
+1877523	gth	exon	39104	39148	1.000000	-	.	Parent=gene33
+1877523	gth	three_prime_splice_site	39148	39149	0.990760	-	.	Parent=gene33
+1877523	gth	five_prime_splice_site	39238	39239	0.998435	-	.	Parent=gene33
+1877523	gth	exon	39239	39259	1.000000	-	.	Parent=gene33
+###
+1877523	gth	gene	37691	38766	0.995012	-	.	ID=gene34;Target=19831991 1 401 -
+1877523	gth	exon	37691	37891	0.990050	-	.	Parent=gene34
+1877523	gth	three_prime_splice_site	37891	37892	0.934910	-	.	Parent=gene34
+1877523	gth	five_prime_splice_site	37971	37972	0.873458	-	.	Parent=gene34
+1877523	gth	exon	37972	38060	1.000000	-	.	Parent=gene34
+1877523	gth	three_prime_splice_site	38060	38061	0.978371	-	.	Parent=gene34
+1877523	gth	five_prime_splice_site	38655	38656	0.856182	-	.	Parent=gene34
+1877523	gth	exon	38656	38766	1.000000	-	.	Parent=gene34
+###
+1877523	gth	gene	37692	38756	1.000000	-	.	ID=gene35;Target=19840745 1 390 -
+1877523	gth	exon	37692	37891	1.000000	-	.	Parent=gene35
+1877523	gth	three_prime_splice_site	37891	37892	0.934910	-	.	Parent=gene35
+1877523	gth	five_prime_splice_site	37971	37972	0.873458	-	.	Parent=gene35
+1877523	gth	exon	37972	38060	1.000000	-	.	Parent=gene35
+1877523	gth	three_prime_splice_site	38060	38061	0.978371	-	.	Parent=gene35
+1877523	gth	five_prime_splice_site	38655	38656	0.856182	-	.	Parent=gene35
+1877523	gth	exon	38656	38756	1.000000	-	.	Parent=gene35
+###
+1877523	gth	gene	37716	39118	0.967368	-	.	ID=gene36;Target=5843191 1 490 -
+1877523	gth	exon	37716	37891	0.977273	-	.	Parent=gene36
+1877523	gth	three_prime_splice_site	37891	37892	0.934910	-	.	Parent=gene36
+1877523	gth	five_prime_splice_site	37971	37972	0.873458	-	.	Parent=gene36
+1877523	gth	exon	37972	38060	1.000000	-	.	Parent=gene36
+1877523	gth	three_prime_splice_site	38060	38061	0.978371	-	.	Parent=gene36
+1877523	gth	five_prime_splice_site	38655	38656	0.856182	-	.	Parent=gene36
+1877523	gth	exon	38656	38794	0.953237	-	.	Parent=gene36
+1877523	gth	three_prime_splice_site	38794	38795	0.975551	-	.	Parent=gene36
+1877523	gth	five_prime_splice_site	38926	38927	0.977278	-	.	Parent=gene36
+1877523	gth	exon	38927	38997	0.929577	-	.	Parent=gene36
+1877523	gth	three_prime_splice_site	38997	38998	0.768157	-	.	Parent=gene36
+1877523	gth	five_prime_splice_site	39103	39104	0.491304	-	.	Parent=gene36
+1877523	gth	exon	39104	39118	0.933333	-	.	Parent=gene36
+###
+1877523	gth	gene	38927	40032	0.996435	-	.	ID=gene37;Target=19869427 1 606 +
+1877523	gth	exon	38927	38997	0.985915	-	.	Parent=gene37
+1877523	gth	three_prime_splice_site	38997	38998	0.768157	-	.	Parent=gene37
+1877523	gth	five_prime_splice_site	39103	39104	0.491304	-	.	Parent=gene37
+1877523	gth	exon	39104	39148	1.000000	-	.	Parent=gene37
+1877523	gth	three_prime_splice_site	39148	39149	0.990760	-	.	Parent=gene37
+1877523	gth	five_prime_splice_site	39238	39239	0.998435	-	.	Parent=gene37
+1877523	gth	exon	39239	39328	1.000000	-	.	Parent=gene37
+1877523	gth	three_prime_splice_site	39328	39329	0.974361	-	.	Parent=gene37
+1877523	gth	five_prime_splice_site	39437	39438	0.999364	-	.	Parent=gene37
+1877523	gth	exon	39438	39526	1.000000	-	.	Parent=gene37
+1877523	gth	three_prime_splice_site	39526	39527	0.453238	-	.	Parent=gene37
+1877523	gth	five_prime_splice_site	39613	39614	0.986430	-	.	Parent=gene37
+1877523	gth	exon	39614	39689	1.000000	-	.	Parent=gene37
+1877523	gth	three_prime_splice_site	39689	39690	0.973471	-	.	Parent=gene37
+1877523	gth	five_prime_splice_site	39797	39798	0.999425	-	.	Parent=gene37
+1877523	gth	exon	39798	40032	0.995745	-	.	Parent=gene37
+###
+1877523	gth	gene	38938	40006	0.998092	-	.	ID=gene38;Target=8722075 1 568 +
+1877523	gth	exon	38938	38997	1.000000	-	.	Parent=gene38
+1877523	gth	three_prime_splice_site	38997	38998	0.768157	-	.	Parent=gene38
+1877523	gth	five_prime_splice_site	39103	39104	0.491304	-	.	Parent=gene38
+1877523	gth	exon	39104	39148	1.000000	-	.	Parent=gene38
+1877523	gth	three_prime_splice_site	39148	39149	0.990760	-	.	Parent=gene38
+1877523	gth	five_prime_splice_site	39238	39239	0.998435	-	.	Parent=gene38
+1877523	gth	exon	39239	39328	1.000000	-	.	Parent=gene38
+1877523	gth	three_prime_splice_site	39328	39329	0.974361	-	.	Parent=gene38
+1877523	gth	five_prime_splice_site	39437	39438	0.999364	-	.	Parent=gene38
+1877523	gth	exon	39438	39526	1.000000	-	.	Parent=gene38
+1877523	gth	three_prime_splice_site	39526	39527	0.453238	-	.	Parent=gene38
+1877523	gth	five_prime_splice_site	39613	39614	0.986430	-	.	Parent=gene38
+1877523	gth	exon	39614	39689	1.000000	-	.	Parent=gene38
+1877523	gth	three_prime_splice_site	39689	39690	0.973471	-	.	Parent=gene38
+1877523	gth	five_prime_splice_site	39797	39798	0.999425	-	.	Parent=gene38
+1877523	gth	exon	39798	40006	0.995215	-	.	Parent=gene38
+###
+1877523	gth	gene	42783	43204	1.000000	-	.	ID=gene39;Target=19858773 1 422 +
+1877523	gth	exon	42783	43204	1.000000	-	.	Parent=gene39
+###
+1877523	gth	gene	44029	44540	0.971564	+	.	ID=gene40;Target=402959 1 423 +
+1877523	gth	exon	44029	44263	0.991489	+	.	Parent=gene40
+1877523	gth	five_prime_splice_site	44264	44265	0.989613	+	.	Parent=gene40
+1877523	gth	three_prime_splice_site	44352	44353	0.997882	+	.	Parent=gene40
+1877523	gth	exon	44354	44540	0.946524	+	.	Parent=gene40
+###
+1877523	gth	gene	45542	45866	0.990769	-	.	ID=gene41;Target=8682693 1 322 +
+1877523	gth	exon	45542	45866	0.990769	-	.	Parent=gene41
+###
+1877523	gth	gene	45559	45941	0.924282	-	.	ID=gene42;Target=402964 1 388 +
+1877523	gth	exon	45559	45941	0.924282	-	.	Parent=gene42
+###
+1877523	gth	gene	45843	45920	0.948718	+	.	ID=gene43;Target=8720010 1 78 -
+1877523	gth	exon	45843	45920	0.948718	+	.	Parent=gene43
+###
+1877523	gth	gene	49874	50547	1.000000	-	.	ID=gene44;Target=19837290 1 412 +
+1877523	gth	exon	49874	50284	1.000000	-	.	Parent=gene44
+1877523	gth	three_prime_splice_site	50284	50285	0.587476	-	.	Parent=gene44
+1877523	gth	five_prime_splice_site	50546	50547	0.677445	-	.	Parent=gene44
+1877523	gth	exon	50547	50547	1.000000	-	.	Parent=gene44
+###
+1877523	gth	gene	50433	51134	0.977612	-	.	ID=gene45;Target=19807151 1 426 -
+1877523	gth	exon	50433	50834	0.977612	-	.	Parent=gene45
+1877523	gth	three_prime_splice_site	50834	50835	0.998495	-	.	Parent=gene45
+1877523	gth	five_prime_splice_site	51112	51113	0.998469	-	.	Parent=gene45
+1877523	gth	exon	51113	51134	1.000000	-	.	Parent=gene45
+###
+1877523	gth	gene	50475	50702	1.000000	+	.	ID=gene46;Target=8727457 1 228 +
+1877523	gth	exon	50475	50702	1.000000	+	.	Parent=gene46
+###
+1877523	gth	gene	50475	51193	1.000000	-	.	ID=gene47;Target=8731976 1 441 -
+1877523	gth	exon	50475	50834	1.000000	-	.	Parent=gene47
+1877523	gth	three_prime_splice_site	50834	50835	0.998495	-	.	Parent=gene47
+1877523	gth	five_prime_splice_site	51112	51113	0.998469	-	.	Parent=gene47
+1877523	gth	exon	51113	51193	1.000000	-	.	Parent=gene47
+###
+1877523	gth	gene	50590	51354	1.000000	-	.	ID=gene48;Target=19805724 1 385 -
+1877523	gth	exon	50590	50834	1.000000	-	.	Parent=gene48
+1877523	gth	three_prime_splice_site	50834	50835	0.998495	-	.	Parent=gene48
+1877523	gth	five_prime_splice_site	51112	51113	0.998469	-	.	Parent=gene48
+1877523	gth	exon	51113	51216	1.000000	-	.	Parent=gene48
+1877523	gth	three_prime_splice_site	51216	51217	0.988436	-	.	Parent=gene48
+1877523	gth	five_prime_splice_site	51318	51319	0.999889	-	.	Parent=gene48
+1877523	gth	exon	51319	51354	1.000000	-	.	Parent=gene48
+###
+1877523	gth	gene	50758	52232	0.990942	-	.	ID=gene49;Target=19866668 1 647 +
+1877523	gth	exon	50758	50834	0.948052	-	.	Parent=gene49
+1877523	gth	three_prime_splice_site	50834	50835	0.998495	-	.	Parent=gene49
+1877523	gth	five_prime_splice_site	51112	51113	0.998469	-	.	Parent=gene49
+1877523	gth	exon	51113	51216	1.000000	-	.	Parent=gene49
+1877523	gth	three_prime_splice_site	51216	51217	0.988436	-	.	Parent=gene49
+1877523	gth	five_prime_splice_site	51318	51319	0.999889	-	.	Parent=gene49
+1877523	gth	exon	51319	51474	1.000000	-	.	Parent=gene49
+1877523	gth	three_prime_splice_site	51474	51475	0.889181	-	.	Parent=gene49
+1877523	gth	five_prime_splice_site	51551	51552	0.983549	-	.	Parent=gene49
+1877523	gth	exon	51552	51623	1.000000	-	.	Parent=gene49
+1877523	gth	three_prime_splice_site	51623	51624	0.985976	-	.	Parent=gene49
+1877523	gth	five_prime_splice_site	51710	51711	0.976801	-	.	Parent=gene49
+1877523	gth	exon	51711	51758	1.000000	-	.	Parent=gene49
+1877523	gth	three_prime_splice_site	51758	51759	0.962491	-	.	Parent=gene49
+1877523	gth	five_prime_splice_site	51848	51849	0.636801	-	.	Parent=gene49
+1877523	gth	exon	51849	51896	1.000000	-	.	Parent=gene49
+1877523	gth	three_prime_splice_site	51896	51897	0.990259	-	.	Parent=gene49
+1877523	gth	five_prime_splice_site	51982	51983	0.978308	-	.	Parent=gene49
+1877523	gth	exon	51983	52055	1.000000	-	.	Parent=gene49
+1877523	gth	three_prime_splice_site	52055	52056	0.886661	-	.	Parent=gene49
+1877523	gth	five_prime_splice_site	52162	52163	0.902283	-	.	Parent=gene49
+1877523	gth	exon	52163	52232	0.985714	-	.	Parent=gene49
+###
+1877523	gth	gene	51139	51852	0.915033	-	.	ID=gene50;Target=2747604 1 362 +
+1877523	gth	exon	51139	51216	0.717949	-	.	Parent=gene50
+1877523	gth	three_prime_splice_site	51216	51217	0.988436	-	.	Parent=gene50
+1877523	gth	five_prime_splice_site	51318	51319	0.999889	-	.	Parent=gene50
+1877523	gth	exon	51319	51474	0.974359	-	.	Parent=gene50
+1877523	gth	three_prime_splice_site	51474	51475	0.889181	-	.	Parent=gene50
+1877523	gth	five_prime_splice_site	51551	51552	0.983549	-	.	Parent=gene50
+1877523	gth	exon	51552	51623	1.000000	-	.	Parent=gene50
+1877523	gth	three_prime_splice_site	51623	51624	0.985976	-	.	Parent=gene50
+1877523	gth	five_prime_splice_site	51710	51711	0.976801	-	.	Parent=gene50
+1877523	gth	exon	51711	51758	0.979167	-	.	Parent=gene50
+1877523	gth	three_prime_splice_site	51758	51759	0.962491	-	.	Parent=gene50
+1877523	gth	five_prime_splice_site	51848	51849	0.636801	-	.	Parent=gene50
+1877523	gth	exon	51849	51852	1.000000	-	.	Parent=gene50
+###
+1877523	gth	gene	51334	52222	0.904624	-	.	ID=gene51;Target=2596256 1 446 +
+1877523	gth	exon	51334	51474	0.765957	-	.	Parent=gene51
+1877523	gth	three_prime_splice_site	51474	51475	0.889181	-	.	Parent=gene51
+1877523	gth	five_prime_splice_site	51551	51552	0.983549	-	.	Parent=gene51
+1877523	gth	exon	51552	51623	1.000000	-	.	Parent=gene51
+1877523	gth	three_prime_splice_site	51623	51624	0.985976	-	.	Parent=gene51
+1877523	gth	five_prime_splice_site	51710	51711	0.976801	-	.	Parent=gene51
+1877523	gth	exon	51711	51758	1.000000	-	.	Parent=gene51
+1877523	gth	three_prime_splice_site	51758	51759	0.962491	-	.	Parent=gene51
+1877523	gth	five_prime_splice_site	51848	51849	0.636801	-	.	Parent=gene51
+1877523	gth	exon	51849	51896	0.979167	-	.	Parent=gene51
+1877523	gth	three_prime_splice_site	51896	51897	0.990259	-	.	Parent=gene51
+1877523	gth	five_prime_splice_site	51982	51983	0.978308	-	.	Parent=gene51
+1877523	gth	exon	51983	52055	1.000000	-	.	Parent=gene51
+1877523	gth	three_prime_splice_site	52055	52056	0.886661	-	.	Parent=gene51
+1877523	gth	five_prime_splice_site	52162	52163	0.902283	-	.	Parent=gene51
+1877523	gth	exon	52163	52222	1.000000	-	.	Parent=gene51
+###
+1877523	gth	gene	51376	52048	0.938819	-	.	ID=gene52;Target=2596953 1 336 +
+1877523	gth	exon	51376	51474	0.853535	-	.	Parent=gene52
+1877523	gth	three_prime_splice_site	51474	51475	0.889181	-	.	Parent=gene52
+1877523	gth	five_prime_splice_site	51551	51552	0.983549	-	.	Parent=gene52
+1877523	gth	exon	51552	51623	1.000000	-	.	Parent=gene52
+1877523	gth	three_prime_splice_site	51623	51624	0.985976	-	.	Parent=gene52
+1877523	gth	five_prime_splice_site	51710	51711	0.976801	-	.	Parent=gene52
+1877523	gth	exon	51711	51758	1.000000	-	.	Parent=gene52
+1877523	gth	three_prime_splice_site	51758	51759	0.962491	-	.	Parent=gene52
+1877523	gth	five_prime_splice_site	51848	51849	0.636801	-	.	Parent=gene52
+1877523	gth	exon	51849	51896	0.979167	-	.	Parent=gene52
+1877523	gth	three_prime_splice_site	51896	51897	0.990259	-	.	Parent=gene52
+1877523	gth	five_prime_splice_site	51982	51983	0.978308	-	.	Parent=gene52
+1877523	gth	exon	51983	52048	1.000000	-	.	Parent=gene52
+###
+1877523	gth	gene	51376	52224	0.910131	-	.	ID=gene53;Target=5839790 1 404 +
+1877523	gth	exon	51376	51474	0.848485	-	.	Parent=gene53
+1877523	gth	three_prime_splice_site	51474	51475	0.889181	-	.	Parent=gene53
+1877523	gth	five_prime_splice_site	51551	51552	0.983549	-	.	Parent=gene53
+1877523	gth	exon	51552	51623	0.930556	-	.	Parent=gene53
+1877523	gth	three_prime_splice_site	51623	51624	0.985976	-	.	Parent=gene53
+1877523	gth	five_prime_splice_site	51710	51711	0.976801	-	.	Parent=gene53
+1877523	gth	exon	51711	51758	0.822917	-	.	Parent=gene53
+1877523	gth	three_prime_splice_site	51758	51759	0.962491	-	.	Parent=gene53
+1877523	gth	five_prime_splice_site	51848	51849	0.636801	-	.	Parent=gene53
+1877523	gth	exon	51849	51896	0.958333	-	.	Parent=gene53
+1877523	gth	three_prime_splice_site	51896	51897	0.990259	-	.	Parent=gene53
+1877523	gth	five_prime_splice_site	51982	51983	0.978308	-	.	Parent=gene53
+1877523	gth	exon	51983	52055	0.958904	-	.	Parent=gene53
+1877523	gth	three_prime_splice_site	52055	52056	0.886661	-	.	Parent=gene53
+1877523	gth	five_prime_splice_site	52162	52163	0.902283	-	.	Parent=gene53
+1877523	gth	exon	52163	52224	0.927419	-	.	Parent=gene53
+###
+1877523	gth	gene	51446	52242	0.995556	-	.	ID=gene54;Target=403229 1 350 +
+1877523	gth	exon	51446	51474	0.965517	-	.	Parent=gene54
+1877523	gth	three_prime_splice_site	51474	51475	0.889181	-	.	Parent=gene54
+1877523	gth	five_prime_splice_site	51551	51552	0.983549	-	.	Parent=gene54
+1877523	gth	exon	51552	51623	1.000000	-	.	Parent=gene54
+1877523	gth	three_prime_splice_site	51623	51624	0.985976	-	.	Parent=gene54
+1877523	gth	five_prime_splice_site	51710	51711	0.976801	-	.	Parent=gene54
+1877523	gth	exon	51711	51758	1.000000	-	.	Parent=gene54
+1877523	gth	three_prime_splice_site	51758	51759	0.962491	-	.	Parent=gene54
+1877523	gth	five_prime_splice_site	51848	51849	0.636801	-	.	Parent=gene54
+1877523	gth	exon	51849	51896	1.000000	-	.	Parent=gene54
+1877523	gth	three_prime_splice_site	51896	51897	0.990259	-	.	Parent=gene54
+1877523	gth	five_prime_splice_site	51982	51983	0.978308	-	.	Parent=gene54
+1877523	gth	exon	51983	52055	0.986301	-	.	Parent=gene54
+1877523	gth	three_prime_splice_site	52055	52056	0.886661	-	.	Parent=gene54
+1877523	gth	five_prime_splice_site	52162	52163	0.902283	-	.	Parent=gene54
+1877523	gth	exon	52163	52242	1.000000	-	.	Parent=gene54
+###
+1877523	gth	gene	51599	52231	0.992958	-	.	ID=gene55;Target=9785390 1 263 +
+1877523	gth	exon	51599	51623	1.000000	-	.	Parent=gene55
+1877523	gth	three_prime_splice_site	51623	51624	0.985976	-	.	Parent=gene55
+1877523	gth	five_prime_splice_site	51710	51711	0.976801	-	.	Parent=gene55
+1877523	gth	exon	51711	51758	1.000000	-	.	Parent=gene55
+1877523	gth	three_prime_splice_site	51758	51759	0.962491	-	.	Parent=gene55
+1877523	gth	five_prime_splice_site	51848	51849	0.636801	-	.	Parent=gene55
+1877523	gth	exon	51849	51896	1.000000	-	.	Parent=gene55
+1877523	gth	three_prime_splice_site	51896	51897	0.990259	-	.	Parent=gene55
+1877523	gth	five_prime_splice_site	51982	51983	0.978308	-	.	Parent=gene55
+1877523	gth	exon	51983	52055	1.000000	-	.	Parent=gene55
+1877523	gth	three_prime_splice_site	52055	52056	0.886661	-	.	Parent=gene55
+1877523	gth	five_prime_splice_site	52162	52163	0.902283	-	.	Parent=gene55
+1877523	gth	exon	52163	52231	0.985507	-	.	Parent=gene55
+###
+1877523	gth	gene	53602	54271	0.994131	-	.	ID=gene56;Target=8697180 1 427 -
+1877523	gth	exon	53602	53914	0.992013	-	.	Parent=gene56
+1877523	gth	three_prime_splice_site	53914	53915	0.991057	-	.	Parent=gene56
+1877523	gth	five_prime_splice_site	54158	54159	0.993987	-	.	Parent=gene56
+1877523	gth	exon	54159	54271	1.000000	-	.	Parent=gene56
+###
+1877523	gth	gene	53602	54710	0.995215	-	.	ID=gene57;Target=19803773 1 627 -
+1877523	gth	exon	53602	53914	0.993610	-	.	Parent=gene57
+1877523	gth	three_prime_splice_site	53914	53915	0.991057	-	.	Parent=gene57
+1877523	gth	five_prime_splice_site	54158	54159	0.993987	-	.	Parent=gene57
+1877523	gth	exon	54159	54335	1.000000	-	.	Parent=gene57
+1877523	gth	three_prime_splice_site	54335	54336	0.998497	-	.	Parent=gene57
+1877523	gth	five_prime_splice_site	54573	54574	0.950831	-	.	Parent=gene57
+1877523	gth	exon	54574	54710	0.992701	-	.	Parent=gene57
+###
+1877523	gth	gene	53624	54279	0.989078	-	.	ID=gene58;Target=19840006 1 413 -
+1877523	gth	exon	53624	53914	0.987973	-	.	Parent=gene58
+1877523	gth	three_prime_splice_site	53914	53915	0.991057	-	.	Parent=gene58
+1877523	gth	five_prime_splice_site	54158	54159	0.993987	-	.	Parent=gene58
+1877523	gth	exon	54159	54279	0.991736	-	.	Parent=gene58
+###
+1877523	gth	gene	53624	54283	0.991587	-	.	ID=gene59;Target=19823046 1 417 -
+1877523	gth	exon	53624	53914	0.987973	-	.	Parent=gene59
+1877523	gth	three_prime_splice_site	53914	53915	0.991057	-	.	Parent=gene59
+1877523	gth	five_prime_splice_site	54158	54159	0.993987	-	.	Parent=gene59
+1877523	gth	exon	54159	54283	1.000000	-	.	Parent=gene59
+###
+1877523	gth	gene	53631	54335	0.865510	-	.	ID=gene60;Target=2393553 57 528 +
+1877523	gth	exon	53631	53914	0.991197	-	.	Parent=gene60
+1877523	gth	three_prime_splice_site	53914	53915	0.991057	-	.	Parent=gene60
+1877523	gth	five_prime_splice_site	54158	54159	0.993987	-	.	Parent=gene60
+1877523	gth	exon	54159	54335	0.663842	-	.	Parent=gene60
+###
+1877523	gth	gene	53632	53909	0.991007	+	.	ID=gene61;Target=8697126 1 279 +
+1877523	gth	exon	53632	53909	0.991007	+	.	Parent=gene61
+###
+1877523	gth	gene	53645	54320	0.989583	-	.	ID=gene62;Target=19843722 1 431 -
+1877523	gth	exon	53645	53914	0.990741	-	.	Parent=gene62
+1877523	gth	three_prime_splice_site	53914	53915	0.991057	-	.	Parent=gene62
+1877523	gth	five_prime_splice_site	54158	54159	0.993987	-	.	Parent=gene62
+1877523	gth	exon	54159	54320	0.987654	-	.	Parent=gene62
+###
+1877523	gth	gene	53829	54829	0.991329	-	.	ID=gene63;Target=8696505 49 568 +
+1877523	gth	exon	53829	53914	0.970930	-	.	Parent=gene63
+1877523	gth	three_prime_splice_site	53914	53915	0.991057	-	.	Parent=gene63
+1877523	gth	five_prime_splice_site	54158	54159	0.993987	-	.	Parent=gene63
+1877523	gth	exon	54159	54335	1.000000	-	.	Parent=gene63
+1877523	gth	three_prime_splice_site	54335	54336	0.998497	-	.	Parent=gene63
+1877523	gth	five_prime_splice_site	54573	54574	0.950831	-	.	Parent=gene63
+1877523	gth	exon	54574	54829	0.992188	-	.	Parent=gene63
+###
+1877523	gth	gene	53850	54807	0.912815	-	.	ID=gene64;Target=5839694 1 477 +
+1877523	gth	exon	53850	53914	0.746154	-	.	Parent=gene64
+1877523	gth	three_prime_splice_site	53914	53915	0.991057	-	.	Parent=gene64
+1877523	gth	five_prime_splice_site	54158	54159	0.993987	-	.	Parent=gene64
+1877523	gth	exon	54159	54335	0.887006	-	.	Parent=gene64
+1877523	gth	three_prime_splice_site	54335	54336	0.998497	-	.	Parent=gene64
+1877523	gth	five_prime_splice_site	54573	54574	0.950831	-	.	Parent=gene64
+1877523	gth	exon	54574	54807	0.978632	-	.	Parent=gene64
+###
+1877523	gth	gene	54167	54769	0.997260	-	.	ID=gene65;Target=9778953 1 365 +
+1877523	gth	exon	54167	54335	0.994083	-	.	Parent=gene65
+1877523	gth	three_prime_splice_site	54335	54336	0.998497	-	.	Parent=gene65
+1877523	gth	five_prime_splice_site	54573	54574	0.950831	-	.	Parent=gene65
+1877523	gth	exon	54574	54769	1.000000	-	.	Parent=gene65
+###
+1877523	gth	gene	54178	54828	0.979419	-	.	ID=gene66;Target=19865963 1 414 +
+1877523	gth	exon	54178	54335	0.952532	-	.	Parent=gene66
+1877523	gth	three_prime_splice_site	54335	54336	0.998497	-	.	Parent=gene66
+1877523	gth	five_prime_splice_site	54573	54574	0.950831	-	.	Parent=gene66
+1877523	gth	exon	54574	54828	0.996078	-	.	Parent=gene66
+###
+1877523	gth	gene	54212	54697	0.951613	-	.	ID=gene67;Target=9784661 1 248 +
+1877523	gth	exon	54212	54335	0.959677	-	.	Parent=gene67
+1877523	gth	three_prime_splice_site	54335	54336	0.998497	-	.	Parent=gene67
+1877523	gth	five_prime_splice_site	54573	54574	0.950831	-	.	Parent=gene67
+1877523	gth	exon	54574	54697	0.943548	-	.	Parent=gene67
+###
+1877523	gth	gene	54263	54808	0.930195	-	.	ID=gene68;Target=933584 1 311 +
+1877523	gth	exon	54263	54335	0.815068	-	.	Parent=gene68
+1877523	gth	three_prime_splice_site	54335	54336	0.998497	-	.	Parent=gene68
+1877523	gth	five_prime_splice_site	54573	54574	0.950831	-	.	Parent=gene68
+1877523	gth	exon	54574	54808	0.965957	-	.	Parent=gene68
+###
+1877523	gth	gene	54321	54829	0.992188	-	.	ID=gene69;Target=8696543 49 319 +
+1877523	gth	exon	54321	54335	1.000000	-	.	Parent=gene69
+1877523	gth	three_prime_splice_site	54335	54336	0.998497	-	.	Parent=gene69
+1877523	gth	five_prime_splice_site	54573	54574	0.950831	-	.	Parent=gene69
+1877523	gth	exon	54574	54829	0.992188	-	.	Parent=gene69
+###
+1877523	gth	gene	54991	56652	0.998165	+	.	ID=gene70;Target=19874826 1 651 +
+1877523	gth	exon	54991	55057	0.985075	+	.	Parent=gene70
+1877523	gth	five_prime_splice_site	55058	55059	0.896061	+	.	Parent=gene70
+1877523	gth	three_prime_splice_site	55143	55144	0.999541	+	.	Parent=gene70
+1877523	gth	exon	55145	55230	1.000000	+	.	Parent=gene70
+1877523	gth	five_prime_splice_site	55231	55232	0.997188	+	.	Parent=gene70
+1877523	gth	three_prime_splice_site	55298	55299	0.000050	+	.	Parent=gene70
+1877523	gth	exon	55300	55341	1.000000	+	.	Parent=gene70
+1877523	gth	five_prime_splice_site	55342	55343	0.996792	+	.	Parent=gene70
+1877523	gth	three_prime_splice_site	55451	55452	0.898393	+	.	Parent=gene70
+1877523	gth	exon	55453	55498	1.000000	+	.	Parent=gene70
+1877523	gth	five_prime_splice_site	55499	55500	0.237330	+	.	Parent=gene70
+1877523	gth	three_prime_splice_site	55616	55617	0.996829	+	.	Parent=gene70
+1877523	gth	exon	55618	55704	1.000000	+	.	Parent=gene70
+1877523	gth	five_prime_splice_site	55705	55706	0.991137	+	.	Parent=gene70
+1877523	gth	three_prime_splice_site	55816	55817	0.951625	+	.	Parent=gene70
+1877523	gth	exon	55818	55873	1.000000	+	.	Parent=gene70
+1877523	gth	five_prime_splice_site	55874	55875	0.982907	+	.	Parent=gene70
+1877523	gth	three_prime_splice_site	56034	56035	0.035667	+	.	Parent=gene70
+1877523	gth	exon	56036	56153	1.000000	+	.	Parent=gene70
+1877523	gth	five_prime_splice_site	56154	56155	0.990226	+	.	Parent=gene70
+1877523	gth	three_prime_splice_site	56279	56280	0.702559	+	.	Parent=gene70
+1877523	gth	exon	56281	56339	1.000000	+	.	Parent=gene70
+1877523	gth	five_prime_splice_site	56340	56341	0.464022	+	.	Parent=gene70
+1877523	gth	three_prime_splice_site	56447	56448	0.287282	+	.	Parent=gene70
+1877523	gth	exon	56449	56520	1.000000	+	.	Parent=gene70
+1877523	gth	five_prime_splice_site	56521	56522	0.187256	+	.	Parent=gene70
+1877523	gth	three_prime_splice_site	56633	56634	0.790630	+	.	Parent=gene70
+1877523	gth	exon	56635	56652	1.000000	+	.	Parent=gene70
+###
+1877523	gth	gene	58115	59001	0.983731	+	.	ID=gene71;Target=19741042 1 460 -
+1877523	gth	exon	58115	58209	0.957895	+	.	Parent=gene71
+1877523	gth	five_prime_splice_site	58210	58211	0.855963	+	.	Parent=gene71
+1877523	gth	three_prime_splice_site	58459	58460	0.999509	+	.	Parent=gene71
+1877523	gth	exon	58461	58526	1.000000	+	.	Parent=gene71
+1877523	gth	five_prime_splice_site	58527	58528	0.784252	+	.	Parent=gene71
+1877523	gth	three_prime_splice_site	58622	58623	0.977151	+	.	Parent=gene71
+1877523	gth	exon	58624	58717	1.000000	+	.	Parent=gene71
+1877523	gth	five_prime_splice_site	58718	58719	0.000050	+	.	Parent=gene71
+1877523	gth	three_prime_splice_site	58794	58795	0.999625	+	.	Parent=gene71
+1877523	gth	exon	58796	59001	0.983010	+	.	Parent=gene71
+###
+1877523	gth	gene	59010	59484	1.000000	+	.	ID=gene72;Target=8715845 1 475 +
+1877523	gth	exon	59010	59484	1.000000	+	.	Parent=gene72
+###
+1877523	gth	gene	59148	59880	0.990812	+	.	ID=gene73;Target=19864079 1 653 +
+1877523	gth	exon	59148	59526	0.989446	+	.	Parent=gene73
+1877523	gth	five_prime_splice_site	59527	59528	0.993496	+	.	Parent=gene73
+1877523	gth	three_prime_splice_site	59605	59606	0.997306	+	.	Parent=gene73
+1877523	gth	exon	59607	59880	0.992701	+	.	Parent=gene73
+###
+1877523	gth	gene	59164	59418	0.996078	+	.	ID=gene74;Target=9787190 1 255 +
+1877523	gth	exon	59164	59418	0.996078	+	.	Parent=gene74
+###
+1877523	gth	gene	59643	59976	0.991018	+	.	ID=gene75;Target=397215 1 333 +
+1877523	gth	exon	59643	59976	0.991018	+	.	Parent=gene75
+###
+1877523	gth	gene	60190	60487	0.986577	+	.	ID=gene76;Target=398270 1 298 +
+1877523	gth	exon	60190	60487	0.986577	+	.	Parent=gene76
+###
+1877523	gth	gene	60319	61000	0.997067	-	.	ID=gene77;Target=19801463 1 682 +
+1877523	gth	exon	60319	61000	0.997067	-	.	Parent=gene77
+###
+1877523	gth	gene	60410	60968	1.000000	-	.	ID=gene78;Target=8692149 1 559 +
+1877523	gth	exon	60410	60968	1.000000	-	.	Parent=gene78
+###
+1877523	gth	gene	60450	60902	0.997792	-	.	ID=gene79;Target=19827386 1 453 +
+1877523	gth	exon	60450	60902	0.997792	-	.	Parent=gene79
+###
+1877523	gth	gene	60459	60958	0.996000	-	.	ID=gene80;Target=7610825 1 500 +
+1877523	gth	exon	60459	60958	0.996000	-	.	Parent=gene80
+###
+1877523	gth	gene	60463	60958	0.995968	-	.	ID=gene81;Target=8736724 1 496 +
+1877523	gth	exon	60463	60958	0.995968	-	.	Parent=gene81
+###
+1877523	gth	gene	60508	60959	0.983407	-	.	ID=gene82;Target=19828552 1 452 +
+1877523	gth	exon	60508	60959	0.983407	-	.	Parent=gene82
+###
+1877523	gth	gene	60542	60950	1.000000	-	.	ID=gene83;Target=19838343 1 409 +
+1877523	gth	exon	60542	60950	1.000000	-	.	Parent=gene83
+###
+1877523	gth	gene	60558	60947	0.994872	-	.	ID=gene84;Target=397216 1 390 +
+1877523	gth	exon	60558	60947	0.994872	-	.	Parent=gene84
+###
+1877523	gth	gene	61186	61922	0.956989	+	.	ID=gene85;Target=2722481 1 371 +
+1877523	gth	exon	61186	61281	0.989583	+	.	Parent=gene85
+1877523	gth	five_prime_splice_site	61282	61283	0.316069	+	.	Parent=gene85
+1877523	gth	three_prime_splice_site	61563	61564	0.958532	+	.	Parent=gene85
+1877523	gth	exon	61565	61641	0.948052	+	.	Parent=gene85
+1877523	gth	five_prime_splice_site	61642	61643	0.000050	+	.	Parent=gene85
+1877523	gth	three_prime_splice_site	61722	61723	0.994319	+	.	Parent=gene85
+1877523	gth	exon	61724	61922	0.944724	+	.	Parent=gene85
+###
+1877523	gth	gene	61212	61974	1.000000	+	.	ID=gene86;Target=19837990 1 398 -
+1877523	gth	exon	61212	61281	1.000000	+	.	Parent=gene86
+1877523	gth	five_prime_splice_site	61282	61283	0.316069	+	.	Parent=gene86
+1877523	gth	three_prime_splice_site	61563	61564	0.958532	+	.	Parent=gene86
+1877523	gth	exon	61565	61641	1.000000	+	.	Parent=gene86
+1877523	gth	five_prime_splice_site	61642	61643	0.000050	+	.	Parent=gene86
+1877523	gth	three_prime_splice_site	61722	61723	0.994319	+	.	Parent=gene86
+1877523	gth	exon	61724	61974	1.000000	+	.	Parent=gene86
+###
+1877523	gth	gene	62196	62646	0.921286	+	.	ID=gene87;Target=2747645 1 448 +
+1877523	gth	exon	62196	62646	0.921286	+	.	Parent=gene87
+###
+1877523	gth	gene	63106	63942	1.000000	+	.	ID=gene88;Target=8701755 1 598 -
+1877523	gth	exon	63106	63178	1.000000	+	.	Parent=gene88
+1877523	gth	five_prime_splice_site	63179	63180	0.000050	+	.	Parent=gene88
+1877523	gth	three_prime_splice_site	63269	63270	0.998981	+	.	Parent=gene88
+1877523	gth	exon	63271	63391	1.000000	+	.	Parent=gene88
+1877523	gth	five_prime_splice_site	63392	63393	0.823227	+	.	Parent=gene88
+1877523	gth	three_prime_splice_site	63466	63467	0.000050	+	.	Parent=gene88
+1877523	gth	exon	63468	63683	1.000000	+	.	Parent=gene88
+1877523	gth	five_prime_splice_site	63684	63685	0.999422	+	.	Parent=gene88
+1877523	gth	three_prime_splice_site	63753	63754	0.992285	+	.	Parent=gene88
+1877523	gth	exon	63755	63942	1.000000	+	.	Parent=gene88
+###
+1877523	gth	gene	63306	63942	1.000000	+	.	ID=gene89;Target=8735505 1 490 -
+1877523	gth	exon	63306	63391	1.000000	+	.	Parent=gene89
+1877523	gth	five_prime_splice_site	63392	63393	0.823227	+	.	Parent=gene89
+1877523	gth	three_prime_splice_site	63466	63467	0.000050	+	.	Parent=gene89
+1877523	gth	exon	63468	63683	1.000000	+	.	Parent=gene89
+1877523	gth	five_prime_splice_site	63684	63685	0.999422	+	.	Parent=gene89
+1877523	gth	three_prime_splice_site	63753	63754	0.992285	+	.	Parent=gene89
+1877523	gth	exon	63755	63942	1.000000	+	.	Parent=gene89
+###
+1877523	gth	gene	63910	64320	0.979319	+	.	ID=gene90;Target=19798134 1 412 +
+1877523	gth	exon	63910	64320	0.979319	+	.	Parent=gene90
+###
+1877523	gth	gene	63935	64280	0.985549	+	.	ID=gene91;Target=5846657 1 345 +
+1877523	gth	exon	63935	64280	0.985549	+	.	Parent=gene91
+###
+1877523	gth	gene	64196	65033	0.998418	-	.	ID=gene92;Target=19877649 1 632 +
+1877523	gth	exon	64196	64605	1.000000	-	.	Parent=gene92
+1877523	gth	three_prime_splice_site	64605	64606	0.942151	-	.	Parent=gene92
+1877523	gth	five_prime_splice_site	64811	64812	0.991077	-	.	Parent=gene92
+1877523	gth	exon	64812	65033	0.995495	-	.	Parent=gene92
+###
+1877523	gth	gene	65467	66157	0.992399	+	.	ID=gene93;Target=19875812 1 621 +
+1877523	gth	exon	65467	66058	0.992399	+	.	Parent=gene93
+1877523	gth	five_prime_splice_site	66059	66060	0.999821	+	.	Parent=gene93
+1877523	gth	three_prime_splice_site	66128	66129	0.993838	+	.	Parent=gene93
+1877523	gth	exon	66130	66157	0.964286	+	.	Parent=gene93
+###
+1877523	gth	gene	67358	68298	0.982095	+	.	ID=gene94;Target=396603 1 749 +
+1877523	gth	exon	67358	67550	1.000000	+	.	Parent=gene94
+1877523	gth	five_prime_splice_site	67551	67552	0.895580	+	.	Parent=gene94
+1877523	gth	three_prime_splice_site	67634	67635	0.998117	+	.	Parent=gene94
+1877523	gth	exon	67636	67908	0.968864	+	.	Parent=gene94
+1877523	gth	five_prime_splice_site	67909	67910	0.999818	+	.	Parent=gene94
+1877523	gth	three_prime_splice_site	68009	68010	0.999478	+	.	Parent=gene94
+1877523	gth	exon	68011	68298	0.982639	+	.	Parent=gene94
+###
+1877523	gth	gene	67871	68396	0.989637	+	.	ID=gene95;Target=19742246 1 423 -
+1877523	gth	exon	67871	67908	0.947368	+	.	Parent=gene95
+1877523	gth	five_prime_splice_site	67909	67910	0.999818	+	.	Parent=gene95
+1877523	gth	three_prime_splice_site	68009	68010	0.999478	+	.	Parent=gene95
+1877523	gth	exon	68011	68396	0.989637	+	.	Parent=gene95
+###
+1877523	gth	gene	69163	69893	0.980410	+	.	ID=gene96;Target=19872996 1 536 +
+1877523	gth	exon	69163	69265	0.970874	+	.	Parent=gene96
+1877523	gth	five_prime_splice_site	69266	69267	0.980751	+	.	Parent=gene96
+1877523	gth	three_prime_splice_site	69373	69374	0.000050	+	.	Parent=gene96
+1877523	gth	exon	69375	69598	1.000000	+	.	Parent=gene96
+1877523	gth	five_prime_splice_site	69599	69600	0.996233	+	.	Parent=gene96
+1877523	gth	three_prime_splice_site	69683	69684	0.993394	+	.	Parent=gene96
+1877523	gth	exon	69685	69893	0.964115	+	.	Parent=gene96
+###
+1877523	gth	gene	69171	69968	0.996683	+	.	ID=gene97;Target=19869130 1 603 +
+1877523	gth	exon	69171	69265	0.989474	+	.	Parent=gene97
+1877523	gth	five_prime_splice_site	69266	69267	0.980751	+	.	Parent=gene97
+1877523	gth	three_prime_splice_site	69373	69374	0.000050	+	.	Parent=gene97
+1877523	gth	exon	69375	69598	1.000000	+	.	Parent=gene97
+1877523	gth	five_prime_splice_site	69599	69600	0.996233	+	.	Parent=gene97
+1877523	gth	three_prime_splice_site	69683	69684	0.993394	+	.	Parent=gene97
+1877523	gth	exon	69685	69968	0.996479	+	.	Parent=gene97
+###
+1877523	gth	gene	69173	69853	0.991770	+	.	ID=gene98;Target=19870921 1 486 +
+1877523	gth	exon	69173	69265	0.989247	+	.	Parent=gene98
+1877523	gth	five_prime_splice_site	69266	69267	0.980751	+	.	Parent=gene98
+1877523	gth	three_prime_splice_site	69373	69374	0.000050	+	.	Parent=gene98
+1877523	gth	exon	69375	69598	1.000000	+	.	Parent=gene98
+1877523	gth	five_prime_splice_site	69599	69600	0.996233	+	.	Parent=gene98
+1877523	gth	three_prime_splice_site	69683	69684	0.993394	+	.	Parent=gene98
+1877523	gth	exon	69685	69853	0.982249	+	.	Parent=gene98
+###
+1877523	gth	gene	69196	70072	0.931973	+	.	ID=gene99;Target=905849 1 455 +
+1877523	gth	exon	69196	69265	0.985714	+	.	Parent=gene99
+1877523	gth	five_prime_splice_site	69266	69267	0.980751	+	.	Parent=gene99
+1877523	gth	three_prime_splice_site	69373	69374	0.000050	+	.	Parent=gene99
+1877523	gth	exon	69375	69598	0.991071	+	.	Parent=gene99
+1877523	gth	five_prime_splice_site	69599	69600	0.996233	+	.	Parent=gene99
+1877523	gth	three_prime_splice_site	69683	69684	0.993394	+	.	Parent=gene99
+1877523	gth	exon	69685	69831	0.816327	+	.	Parent=gene99
+1877523	gth	five_prime_splice_site	69832	69833	0.480014	+	.	Parent=gene99
+1877523	gth	three_prime_splice_site	70061	70062	0.999030	+	.	Parent=gene99
+1877523	gth	exon	70063	70072	0.400000	+	.	Parent=gene99
+###
+1877523	gth	gene	69219	69775	1.000000	+	.	ID=gene100;Target=7612059 1 362 +
+1877523	gth	exon	69219	69265	1.000000	+	.	Parent=gene100
+1877523	gth	five_prime_splice_site	69266	69267	0.980751	+	.	Parent=gene100
+1877523	gth	three_prime_splice_site	69373	69374	0.000050	+	.	Parent=gene100
+1877523	gth	exon	69375	69598	1.000000	+	.	Parent=gene100
+1877523	gth	five_prime_splice_site	69599	69600	0.996233	+	.	Parent=gene100
+1877523	gth	three_prime_splice_site	69683	69684	0.993394	+	.	Parent=gene100
+1877523	gth	exon	69685	69775	1.000000	+	.	Parent=gene100
+###
+1877523	gth	gene	71414	71679	0.958084	+	.	ID=gene101;Target=17520 1 168 +
+1877523	gth	exon	71414	71479	1.000000	+	.	Parent=gene101
+1877523	gth	five_prime_splice_site	71480	71481	0.948182	+	.	Parent=gene101
+1877523	gth	three_prime_splice_site	71577	71578	0.981710	+	.	Parent=gene101
+1877523	gth	exon	71579	71679	0.930693	+	.	Parent=gene101
+###
+1877523	gth	gene	71458	72009	0.989899	+	.	ID=gene102;Target=8734707 1 319 +
+1877523	gth	exon	71458	71479	1.000000	+	.	Parent=gene102
+1877523	gth	five_prime_splice_site	71480	71481	0.948182	+	.	Parent=gene102
+1877523	gth	three_prime_splice_site	71577	71578	0.981710	+	.	Parent=gene102
+1877523	gth	exon	71579	71779	0.985075	+	.	Parent=gene102
+1877523	gth	five_prime_splice_site	71780	71781	0.998059	+	.	Parent=gene102
+1877523	gth	three_prime_splice_site	71912	71913	0.976542	+	.	Parent=gene102
+1877523	gth	exon	71914	72009	1.000000	+	.	Parent=gene102
+###
+1877523	gth	gene	72121	72340	0.965909	+	.	ID=gene103;Target=2597031 1 221 +
+1877523	gth	exon	72121	72340	0.965909	+	.	Parent=gene103
+###
+1877523	gth	gene	72121	72603	0.930642	+	.	ID=gene104;Target=958004 1 484 +
+1877523	gth	exon	72121	72603	0.930642	+	.	Parent=gene104
+###
+1877523	gth	gene	72137	72552	0.917151	+	.	ID=gene105;Target=1159193 1 351 +
+1877523	gth	exon	72137	72296	1.000000	+	.	Parent=gene105
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene105
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene105
+1877523	gth	exon	72369	72552	0.845109	+	.	Parent=gene105
+###
+1877523	gth	gene	72185	72753	1.000000	+	.	ID=gene106;Target=8737761 1 497 -
+1877523	gth	exon	72185	72296	1.000000	+	.	Parent=gene106
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene106
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene106
+1877523	gth	exon	72369	72753	1.000000	+	.	Parent=gene106
+###
+1877523	gth	gene	72204	72660	0.855844	+	.	ID=gene107;Target=2749490 79 466 +
+1877523	gth	exon	72204	72296	0.634409	+	.	Parent=gene107
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene107
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene107
+1877523	gth	exon	72369	72660	0.926370	+	.	Parent=gene107
+###
+1877523	gth	gene	72214	72751	0.987124	+	.	ID=gene108;Target=7610337 1 466 -
+1877523	gth	exon	72214	72296	1.000000	+	.	Parent=gene108
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene108
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene108
+1877523	gth	exon	72369	72751	0.984334	+	.	Parent=gene108
+###
+1877523	gth	gene	72231	72731	0.997669	+	.	ID=gene109;Target=19829297 1 429 -
+1877523	gth	exon	72231	72296	1.000000	+	.	Parent=gene109
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene109
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene109
+1877523	gth	exon	72369	72731	0.997245	+	.	Parent=gene109
+###
+1877523	gth	gene	72246	72753	0.995413	+	.	ID=gene110;Target=19829716 1 434 -
+1877523	gth	exon	72246	72296	0.980392	+	.	Parent=gene110
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene110
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene110
+1877523	gth	exon	72369	72753	0.997403	+	.	Parent=gene110
+###
+1877523	gth	gene	72252	72753	0.988312	+	.	ID=gene111;Target=19831127 1 431 -
+1877523	gth	exon	72252	72296	1.000000	+	.	Parent=gene111
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene111
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene111
+1877523	gth	exon	72369	72753	0.988312	+	.	Parent=gene111
+###
+1877523	gth	gene	72252	72803	1.000000	+	.	ID=gene112;Target=8731753 1 480 -
+1877523	gth	exon	72252	72296	1.000000	+	.	Parent=gene112
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene112
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene112
+1877523	gth	exon	72369	72803	1.000000	+	.	Parent=gene112
+###
+1877523	gth	gene	72262	72754	1.000000	+	.	ID=gene113;Target=19839622 1 421 -
+1877523	gth	exon	72262	72296	1.000000	+	.	Parent=gene113
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene113
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene113
+1877523	gth	exon	72369	72754	1.000000	+	.	Parent=gene113
+###
+1877523	gth	gene	72264	72572	0.965686	+	.	ID=gene114;Target=2762921 1 237 +
+1877523	gth	exon	72264	72296	0.939394	+	.	Parent=gene114
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene114
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene114
+1877523	gth	exon	72369	72572	0.965686	+	.	Parent=gene114
+###
+1877523	gth	gene	72264	72670	0.930464	+	.	ID=gene115;Target=2762922 1 337 +
+1877523	gth	exon	72264	72296	0.969697	+	.	Parent=gene115
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene115
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene115
+1877523	gth	exon	72369	72670	0.930464	+	.	Parent=gene115
+###
+1877523	gth	gene	72270	72801	0.997691	+	.	ID=gene116;Target=19825274 1 460 -
+1877523	gth	exon	72270	72296	0.962963	+	.	Parent=gene116
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene116
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene116
+1877523	gth	exon	72369	72801	0.997691	+	.	Parent=gene116
+###
+1877523	gth	gene	72275	72752	0.872396	+	.	ID=gene117;Target=19855736 1 420 -
+1877523	gth	exon	72275	72296	1.000000	+	.	Parent=gene117
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene117
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene117
+1877523	gth	exon	72369	72752	0.872396	+	.	Parent=gene117
+###
+1877523	gth	gene	72277	72753	1.000000	+	.	ID=gene118;Target=8695920 1 405 -
+1877523	gth	exon	72277	72296	1.000000	+	.	Parent=gene118
+1877523	gth	five_prime_splice_site	72297	72298	0.994645	+	.	Parent=gene118
+1877523	gth	three_prime_splice_site	72367	72368	0.696333	+	.	Parent=gene118
+1877523	gth	exon	72369	72753	1.000000	+	.	Parent=gene118
+###
+1877523	gth	gene	72359	72801	0.985327	-	.	ID=gene119;Target=19841232 1 443 +
+1877523	gth	exon	72359	72801	0.985327	-	.	Parent=gene119
+###
+1877523	gth	gene	72367	72810	1.000000	-	.	ID=gene120;Target=19826275 1 444 +
+1877523	gth	exon	72367	72810	1.000000	-	.	Parent=gene120
+###
+1877523	gth	gene	72371	72801	0.995360	-	.	ID=gene121;Target=19834843 1 430 +
+1877523	gth	exon	72371	72801	0.995360	-	.	Parent=gene121
+###
+1877523	gth	gene	72372	72801	0.989535	-	.	ID=gene122;Target=19828253 1 431 +
+1877523	gth	exon	72372	72801	0.989535	-	.	Parent=gene122
+###
+1877523	gth	gene	72372	72801	1.000000	-	.	ID=gene123;Target=19825742 1 430 +
+1877523	gth	exon	72372	72801	1.000000	-	.	Parent=gene123
+###
+1877523	gth	gene	72374	72827	0.992291	-	.	ID=gene124;Target=19828054 1 455 +
+1877523	gth	exon	72374	72827	0.992291	-	.	Parent=gene124
+###
+1877523	gth	gene	72383	72801	0.995227	-	.	ID=gene125;Target=19844666 1 418 +
+1877523	gth	exon	72383	72801	0.995227	-	.	Parent=gene125
+###
+1877523	gth	gene	72384	72801	1.000000	-	.	ID=gene126;Target=19829934 1 418 +
+1877523	gth	exon	72384	72801	1.000000	-	.	Parent=gene126
+###
+1877523	gth	gene	72386	72802	0.992806	-	.	ID=gene127;Target=19842362 1 417 +
+1877523	gth	exon	72386	72802	0.992806	-	.	Parent=gene127
+###
+1877523	gth	gene	72386	72803	0.973684	-	.	ID=gene128;Target=19837074 1 417 +
+1877523	gth	exon	72386	72803	0.973684	-	.	Parent=gene128
+###
+1877523	gth	gene	72390	72754	0.997260	-	.	ID=gene129;Target=8728304 1 365 +
+1877523	gth	exon	72390	72754	0.997260	-	.	Parent=gene129
+###
+1877523	gth	gene	72390	72804	0.979518	-	.	ID=gene130;Target=19827775 1 416 +
+1877523	gth	exon	72390	72804	0.979518	-	.	Parent=gene130
+###
+1877523	gth	gene	72399	72801	1.000000	-	.	ID=gene131;Target=19855995 1 403 +
+1877523	gth	exon	72399	72801	1.000000	-	.	Parent=gene131
+###
+1877523	gth	gene	72400	72753	1.000000	-	.	ID=gene132;Target=8694120 1 354 +
+1877523	gth	exon	72400	72753	1.000000	-	.	Parent=gene132
+###
+1877523	gth	gene	72404	72804	0.997506	-	.	ID=gene133;Target=19831839 1 401 +
+1877523	gth	exon	72404	72804	0.997506	-	.	Parent=gene133
+###
+1877523	gth	gene	72422	72826	0.997531	-	.	ID=gene134;Target=19833332 1 405 +
+1877523	gth	exon	72422	72826	0.997531	-	.	Parent=gene134
+###
+1877523	gth	gene	72424	72753	0.928788	+	.	ID=gene135;Target=3449674 1 333 +
+1877523	gth	exon	72424	72753	0.928788	+	.	Parent=gene135
+###
+1877523	gth	gene	72437	72805	0.981030	-	.	ID=gene136;Target=8732348 1 369 +
+1877523	gth	exon	72437	72805	0.981030	-	.	Parent=gene136
+###
+1877523	gth	gene	72522	72801	0.971429	-	.	ID=gene137;Target=8695842 1 280 +
+1877523	gth	exon	72522	72801	0.971429	-	.	Parent=gene137
+###
+1877523	gth	gene	72653	74046	0.978102	-	.	ID=gene138;Target=2597485 1 163 -
+1877523	gth	exon	72653	72789	0.978102	-	.	Parent=gene138
+1877523	gth	three_prime_splice_site	72789	72790	0.000001	-	.	Parent=gene138
+1877523	gth	five_prime_splice_site	74020	74021	0.513570	-	.	Parent=gene138
+1877523	gth	exon	74021	74046	0.615385	-	.	Parent=gene138
+###
+1877523	gth	gene	72653	74920	0.918919	-	.	ID=gene139;Target=3450080 1 166 -
+1877523	gth	exon	72653	72800	0.918919	-	.	Parent=gene139
+1877523	gth	three_prime_splice_site	72800	72801	0.000001	-	.	Parent=gene139
+1877523	gth	five_prime_splice_site	74900	74901	0.919317	-	.	Parent=gene139
+1877523	gth	exon	74901	74920	0.750000	-	.	Parent=gene139
+###
+1877523	gth	gene	79098	79663	0.866397	-	.	ID=gene140;Target=19857409 11 314 -
+1877523	gth	exon	79098	79127	0.766667	-	.	Parent=gene140
+1877523	gth	three_prime_splice_site	79127	79128	0.000020	-	.	Parent=gene140
+1877523	gth	five_prime_splice_site	79240	79241	0.000001	-	.	Parent=gene140
+1877523	gth	exon	79241	79487	0.866397	-	.	Parent=gene140
+1877523	gth	three_prime_splice_site	79487	79488	0.898885	-	.	Parent=gene140
+1877523	gth	five_prime_splice_site	79635	79636	0.999254	-	.	Parent=gene140
+1877523	gth	exon	79636	79663	1.000000	-	.	Parent=gene140
+###
+1877523	gth	gene	86444	89957	0.741000	-	.	ID=gene141;Target=19873300 87 582 +
+1877523	gth	exon	86444	86516	0.767123	-	.	Parent=gene141
+1877523	gth	three_prime_splice_site	86516	86517	0.998976	-	.	Parent=gene141
+1877523	gth	five_prime_splice_site	89439	89440	0.998953	-	.	Parent=gene141
+1877523	gth	exon	89440	89702	0.682510	-	.	Parent=gene141
+1877523	gth	three_prime_splice_site	89702	89703	0.845743	-	.	Parent=gene141
+1877523	gth	five_prime_splice_site	89793	89794	0.932541	-	.	Parent=gene141
+1877523	gth	exon	89794	89957	0.823171	-	.	Parent=gene141
+###
+1877523	gth	gene	90829	91133	0.947541	+	.	ID=gene142;Target=5845361 1 307 +
+1877523	gth	exon	90829	91133	0.947541	+	.	Parent=gene142
+###
+1877523	gth	gene	91050	91786	1.000000	-	.	ID=gene143;Target=8735154 1 543 -
+1877523	gth	exon	91050	91401	1.000000	-	.	Parent=gene143
+1877523	gth	three_prime_splice_site	91401	91402	0.999609	-	.	Parent=gene143
+1877523	gth	five_prime_splice_site	91523	91524	0.917285	-	.	Parent=gene143
+1877523	gth	exon	91524	91713	1.000000	-	.	Parent=gene143
+1877523	gth	three_prime_splice_site	91713	91714	0.848000	-	.	Parent=gene143
+1877523	gth	five_prime_splice_site	91785	91786	0.992729	-	.	Parent=gene143
+1877523	gth	exon	91786	91786	1.000000	-	.	Parent=gene143
+###
+1877523	gth	gene	92903	93265	1.000000	-	.	ID=gene144;Target=9786193 1 266 +
+1877523	gth	exon	92903	93008	1.000000	-	.	Parent=gene144
+1877523	gth	three_prime_splice_site	93008	93009	0.986828	-	.	Parent=gene144
+1877523	gth	five_prime_splice_site	93105	93106	0.924927	-	.	Parent=gene144
+1877523	gth	exon	93106	93265	1.000000	-	.	Parent=gene144
+###
+1877523	gth	gene	93551	94053	0.957300	-	.	ID=gene145;Target=19806050 1 401 -
+1877523	gth	exon	93551	93913	0.957300	-	.	Parent=gene145
+1877523	gth	three_prime_splice_site	93913	93914	0.991662	-	.	Parent=gene145
+1877523	gth	five_prime_splice_site	94016	94017	0.995817	-	.	Parent=gene145
+1877523	gth	exon	94017	94053	0.918919	-	.	Parent=gene145
+###
+1877523	gth	gene	93552	93837	0.830420	-	.	ID=gene146;Target=2047981 81 377 +
+1877523	gth	exon	93552	93837	0.830420	-	.	Parent=gene146
+###
+1877523	gth	gene	93633	94384	1.000000	-	.	ID=gene147;Target=19857902 1 407 -
+1877523	gth	exon	93633	93913	1.000000	-	.	Parent=gene147
+1877523	gth	three_prime_splice_site	93913	93914	0.991662	-	.	Parent=gene147
+1877523	gth	five_prime_splice_site	94016	94017	0.995817	-	.	Parent=gene147
+1877523	gth	exon	94017	94124	1.000000	-	.	Parent=gene147
+1877523	gth	three_prime_splice_site	94124	94125	0.997954	-	.	Parent=gene147
+1877523	gth	five_prime_splice_site	94366	94367	0.994427	-	.	Parent=gene147
+1877523	gth	exon	94367	94384	1.000000	-	.	Parent=gene147
+###
+1877523	gth	gene	94706	95368	0.949612	-	.	ID=gene148;Target=9782167 1 392 +
+1877523	gth	exon	94706	94771	0.871212	-	.	Parent=gene148
+1877523	gth	three_prime_splice_site	94771	94772	0.992644	-	.	Parent=gene148
+1877523	gth	five_prime_splice_site	94876	94877	0.984995	-	.	Parent=gene148
+1877523	gth	exon	94877	94985	0.954128	-	.	Parent=gene148
+1877523	gth	three_prime_splice_site	94985	94986	0.956646	-	.	Parent=gene148
+1877523	gth	five_prime_splice_site	95070	95071	0.957967	-	.	Parent=gene148
+1877523	gth	exon	95071	95147	1.000000	-	.	Parent=gene148
+1877523	gth	three_prime_splice_site	95147	95148	0.992214	-	.	Parent=gene148
+1877523	gth	five_prime_splice_site	95233	95234	0.937408	-	.	Parent=gene148
+1877523	gth	exon	95234	95368	0.955556	-	.	Parent=gene148
+###
+1877523	gth	gene	95317	96614	0.994574	-	.	ID=gene149;Target=19866748 1 646 +
+1877523	gth	exon	95317	95454	1.000000	-	.	Parent=gene149
+1877523	gth	three_prime_splice_site	95454	95455	0.938199	-	.	Parent=gene149
+1877523	gth	five_prime_splice_site	95841	95842	0.988107	-	.	Parent=gene149
+1877523	gth	exon	95842	95947	0.990566	-	.	Parent=gene149
+1877523	gth	three_prime_splice_site	95947	95948	0.998959	-	.	Parent=gene149
+1877523	gth	five_prime_splice_site	96035	96036	0.993223	-	.	Parent=gene149
+1877523	gth	exon	96036	96140	1.000000	-	.	Parent=gene149
+1877523	gth	three_prime_splice_site	96140	96141	0.868902	-	.	Parent=gene149
+1877523	gth	five_prime_splice_site	96231	96232	0.996492	-	.	Parent=gene149
+1877523	gth	exon	96232	96330	1.000000	-	.	Parent=gene149
+1877523	gth	three_prime_splice_site	96330	96331	0.996101	-	.	Parent=gene149
+1877523	gth	five_prime_splice_site	96417	96418	0.958296	-	.	Parent=gene149
+1877523	gth	exon	96418	96614	0.987310	-	.	Parent=gene149
+###
+1877523	gth	gene	95905	96592	0.989446	-	.	ID=gene150;Target=9778306 1 422 +
+1877523	gth	exon	95905	95947	0.906977	-	.	Parent=gene150
+1877523	gth	three_prime_splice_site	95947	95948	0.998959	-	.	Parent=gene150
+1877523	gth	five_prime_splice_site	96035	96036	0.993223	-	.	Parent=gene150
+1877523	gth	exon	96036	96140	1.000000	-	.	Parent=gene150
+1877523	gth	three_prime_splice_site	96140	96141	0.868902	-	.	Parent=gene150
+1877523	gth	five_prime_splice_site	96231	96232	0.996492	-	.	Parent=gene150
+1877523	gth	exon	96232	96330	1.000000	-	.	Parent=gene150
+1877523	gth	three_prime_splice_site	96330	96331	0.996101	-	.	Parent=gene150
+1877523	gth	five_prime_splice_site	96417	96418	0.958296	-	.	Parent=gene150
+1877523	gth	exon	96418	96592	0.977143	-	.	Parent=gene150
+###
+1877523	gth	gene	95929	96592	0.984169	-	.	ID=gene151;Target=9778321 1 398 +
+1877523	gth	exon	95929	95947	0.947368	-	.	Parent=gene151
+1877523	gth	three_prime_splice_site	95947	95948	0.998959	-	.	Parent=gene151
+1877523	gth	five_prime_splice_site	96035	96036	0.993223	-	.	Parent=gene151
+1877523	gth	exon	96036	96140	0.980952	-	.	Parent=gene151
+1877523	gth	three_prime_splice_site	96140	96141	0.868902	-	.	Parent=gene151
+1877523	gth	five_prime_splice_site	96231	96232	0.996492	-	.	Parent=gene151
+1877523	gth	exon	96232	96330	1.000000	-	.	Parent=gene151
+1877523	gth	three_prime_splice_site	96330	96331	0.996101	-	.	Parent=gene151
+1877523	gth	five_prime_splice_site	96417	96418	0.958296	-	.	Parent=gene151
+1877523	gth	exon	96418	96592	0.977143	-	.	Parent=gene151
+###
+1877523	gth	gene	98857	99326	1.000000	-	.	ID=gene152;Target=19836538 1 392 -
+1877523	gth	exon	98857	99121	1.000000	-	.	Parent=gene152
+1877523	gth	three_prime_splice_site	99121	99122	0.995233	-	.	Parent=gene152
+1877523	gth	five_prime_splice_site	99199	99200	0.999923	-	.	Parent=gene152
+1877523	gth	exon	99200	99326	1.000000	-	.	Parent=gene152
+###
+1877523	gth	gene	98861	99271	1.000000	-	.	ID=gene153;Target=8737545 1 333 -
+1877523	gth	exon	98861	99121	1.000000	-	.	Parent=gene153
+1877523	gth	three_prime_splice_site	99121	99122	0.995233	-	.	Parent=gene153
+1877523	gth	five_prime_splice_site	99199	99200	0.999923	-	.	Parent=gene153
+1877523	gth	exon	99200	99271	1.000000	-	.	Parent=gene153
+###
+1877523	gth	gene	98861	99511	0.900406	-	.	ID=gene154;Target=2446000 47 535 +
+1877523	gth	exon	98861	99121	0.992337	-	.	Parent=gene154
+1877523	gth	three_prime_splice_site	99121	99122	0.995233	-	.	Parent=gene154
+1877523	gth	five_prime_splice_site	99199	99200	0.999923	-	.	Parent=gene154
+1877523	gth	exon	99200	99361	0.882716	-	.	Parent=gene154
+1877523	gth	three_prime_splice_site	99361	99362	0.000050	-	.	Parent=gene154
+1877523	gth	five_prime_splice_site	99442	99443	0.797923	-	.	Parent=gene154
+1877523	gth	exon	99443	99511	0.594203	-	.	Parent=gene154
+###
+1877523	gth	gene	98878	99663	0.986692	-	.	ID=gene155;Target=5846455 1 525 -
+1877523	gth	exon	98878	99121	0.995902	-	.	Parent=gene155
+1877523	gth	three_prime_splice_site	99121	99122	0.995233	-	.	Parent=gene155
+1877523	gth	five_prime_splice_site	99199	99200	0.999923	-	.	Parent=gene155
+1877523	gth	exon	99200	99361	1.000000	-	.	Parent=gene155
+1877523	gth	three_prime_splice_site	99361	99362	0.000050	-	.	Parent=gene155
+1877523	gth	five_prime_splice_site	99442	99443	0.797923	-	.	Parent=gene155
+1877523	gth	exon	99443	99511	1.000000	-	.	Parent=gene155
+1877523	gth	three_prime_splice_site	99511	99512	0.998085	-	.	Parent=gene155
+1877523	gth	five_prime_splice_site	99612	99613	0.998653	-	.	Parent=gene155
+1877523	gth	exon	99613	99663	0.882353	-	.	Parent=gene155
+###
+1877523	gth	gene	98909	99450	1.000000	-	.	ID=gene156;Target=8734273 1 383 -
+1877523	gth	exon	98909	99121	1.000000	-	.	Parent=gene156
+1877523	gth	three_prime_splice_site	99121	99122	0.995233	-	.	Parent=gene156
+1877523	gth	five_prime_splice_site	99199	99200	0.999923	-	.	Parent=gene156
+1877523	gth	exon	99200	99361	1.000000	-	.	Parent=gene156
+1877523	gth	three_prime_splice_site	99361	99362	0.000050	-	.	Parent=gene156
+1877523	gth	five_prime_splice_site	99442	99443	0.797923	-	.	Parent=gene156
+1877523	gth	exon	99443	99450	1.000000	-	.	Parent=gene156
+###
+1877523	gth	gene	98987	99504	0.962396	-	.	ID=gene157;Target=397246 1 362 +
+1877523	gth	exon	98987	99121	0.900000	-	.	Parent=gene157
+1877523	gth	three_prime_splice_site	99121	99122	0.995233	-	.	Parent=gene157
+1877523	gth	five_prime_splice_site	99199	99200	0.999923	-	.	Parent=gene157
+1877523	gth	exon	99200	99361	1.000000	-	.	Parent=gene157
+1877523	gth	three_prime_splice_site	99361	99362	0.000050	-	.	Parent=gene157
+1877523	gth	five_prime_splice_site	99442	99443	0.797923	-	.	Parent=gene157
+1877523	gth	exon	99443	99504	1.000000	-	.	Parent=gene157
+###
+1877523	gth	gene	99613	100804	0.998489	-	.	ID=gene158;Target=19863867 1 661 +
+1877523	gth	exon	99613	99877	1.000000	-	.	Parent=gene158
+1877523	gth	three_prime_splice_site	99877	99878	0.980556	-	.	Parent=gene158
+1877523	gth	five_prime_splice_site	100101	100102	0.977525	-	.	Parent=gene158
+1877523	gth	exon	100102	100226	1.000000	-	.	Parent=gene158
+1877523	gth	three_prime_splice_site	100226	100227	0.999914	-	.	Parent=gene158
+1877523	gth	five_prime_splice_site	100326	100327	0.998837	-	.	Parent=gene158
+1877523	gth	exon	100327	100434	1.000000	-	.	Parent=gene158
+1877523	gth	three_prime_splice_site	100434	100435	0.979333	-	.	Parent=gene158
+1877523	gth	five_prime_splice_site	100538	100539	0.921899	-	.	Parent=gene158
+1877523	gth	exon	100539	100646	1.000000	-	.	Parent=gene158
+1877523	gth	three_prime_splice_site	100646	100647	0.000050	-	.	Parent=gene158
+1877523	gth	five_prime_splice_site	100748	100749	0.995265	-	.	Parent=gene158
+1877523	gth	exon	100749	100804	0.982143	-	.	Parent=gene158
+###
+1877523	gth	gene	99698	100804	0.996534	-	.	ID=gene159;Target=19870774 1 577 +
+1877523	gth	exon	99698	99877	0.994444	-	.	Parent=gene159
+1877523	gth	three_prime_splice_site	99877	99878	0.980556	-	.	Parent=gene159
+1877523	gth	five_prime_splice_site	100101	100102	0.977525	-	.	Parent=gene159
+1877523	gth	exon	100102	100226	1.000000	-	.	Parent=gene159
+1877523	gth	three_prime_splice_site	100226	100227	0.999914	-	.	Parent=gene159
+1877523	gth	five_prime_splice_site	100326	100327	0.998837	-	.	Parent=gene159
+1877523	gth	exon	100327	100434	1.000000	-	.	Parent=gene159
+1877523	gth	three_prime_splice_site	100434	100435	0.979333	-	.	Parent=gene159
+1877523	gth	five_prime_splice_site	100538	100539	0.921899	-	.	Parent=gene159
+1877523	gth	exon	100539	100646	1.000000	-	.	Parent=gene159
+1877523	gth	three_prime_splice_site	100646	100647	0.000050	-	.	Parent=gene159
+1877523	gth	five_prime_splice_site	100748	100749	0.995265	-	.	Parent=gene159
+1877523	gth	exon	100749	100804	0.982143	-	.	Parent=gene159
+###
+1877523	gth	gene	99801	100766	0.933014	-	.	ID=gene160;Target=958152 1 437 +
+1877523	gth	exon	99801	99877	0.759740	-	.	Parent=gene160
+1877523	gth	three_prime_splice_site	99877	99878	0.980556	-	.	Parent=gene160
+1877523	gth	five_prime_splice_site	100101	100102	0.977525	-	.	Parent=gene160
+1877523	gth	exon	100102	100226	0.948000	-	.	Parent=gene160
+1877523	gth	three_prime_splice_site	100226	100227	0.999914	-	.	Parent=gene160
+1877523	gth	five_prime_splice_site	100326	100327	0.998837	-	.	Parent=gene160
+1877523	gth	exon	100327	100434	1.000000	-	.	Parent=gene160
+1877523	gth	three_prime_splice_site	100434	100435	0.979333	-	.	Parent=gene160
+1877523	gth	five_prime_splice_site	100538	100539	0.921899	-	.	Parent=gene160
+1877523	gth	exon	100539	100646	0.972222	-	.	Parent=gene160
+1877523	gth	three_prime_splice_site	100646	100647	0.000050	-	.	Parent=gene160
+1877523	gth	five_prime_splice_site	100748	100749	0.995265	-	.	Parent=gene160
+1877523	gth	exon	100749	100766	1.000000	-	.	Parent=gene160
+###
+1877523	gth	gene	100105	100634	1.000000	-	.	ID=gene161;Target=8732177 1 326 +
+1877523	gth	exon	100105	100226	1.000000	-	.	Parent=gene161
+1877523	gth	three_prime_splice_site	100226	100227	0.999914	-	.	Parent=gene161
+1877523	gth	five_prime_splice_site	100326	100327	0.998837	-	.	Parent=gene161
+1877523	gth	exon	100327	100434	1.000000	-	.	Parent=gene161
+1877523	gth	three_prime_splice_site	100434	100435	0.979333	-	.	Parent=gene161
+1877523	gth	five_prime_splice_site	100538	100539	0.921899	-	.	Parent=gene161
+1877523	gth	exon	100539	100634	1.000000	-	.	Parent=gene161
+###
+1877523	gth	gene	103616	104455	0.959677	+	.	ID=gene162;Target=2580948 1 435 +
+1877523	gth	exon	103616	103753	0.974638	+	.	Parent=gene162
+1877523	gth	five_prime_splice_site	103754	103755	0.990188	+	.	Parent=gene162
+1877523	gth	three_prime_splice_site	103980	103981	0.996499	+	.	Parent=gene162
+1877523	gth	exon	103982	104035	0.981481	+	.	Parent=gene162
+1877523	gth	five_prime_splice_site	104036	104037	0.997152	+	.	Parent=gene162
+1877523	gth	three_prime_splice_site	104116	104117	0.982015	+	.	Parent=gene162
+1877523	gth	exon	104118	104198	0.975309	+	.	Parent=gene162
+1877523	gth	five_prime_splice_site	104199	104200	0.992005	+	.	Parent=gene162
+1877523	gth	three_prime_splice_site	104293	104294	0.999978	+	.	Parent=gene162
+1877523	gth	exon	104295	104455	0.931677	+	.	Parent=gene162
+###
+1877523	gth	gene	103616	104478	0.909190	+	.	ID=gene163;Target=2759743 1 460 +
+1877523	gth	exon	103616	103753	1.000000	+	.	Parent=gene163
+1877523	gth	five_prime_splice_site	103754	103755	0.990188	+	.	Parent=gene163
+1877523	gth	three_prime_splice_site	103980	103981	0.996499	+	.	Parent=gene163
+1877523	gth	exon	103982	104035	0.981481	+	.	Parent=gene163
+1877523	gth	five_prime_splice_site	104036	104037	0.997152	+	.	Parent=gene163
+1877523	gth	three_prime_splice_site	104116	104117	0.982015	+	.	Parent=gene163
+1877523	gth	exon	104118	104198	1.000000	+	.	Parent=gene163
+1877523	gth	five_prime_splice_site	104199	104200	0.992005	+	.	Parent=gene163
+1877523	gth	three_prime_splice_site	104293	104294	0.999978	+	.	Parent=gene163
+1877523	gth	exon	104295	104478	0.779891	+	.	Parent=gene163
+###
+1877523	gth	gene	103616	104819	0.951636	+	.	ID=gene164;Target=5840051 1 700 +
+1877523	gth	exon	103616	103753	1.000000	+	.	Parent=gene164
+1877523	gth	five_prime_splice_site	103754	103755	0.990188	+	.	Parent=gene164
+1877523	gth	three_prime_splice_site	103980	103981	0.996499	+	.	Parent=gene164
+1877523	gth	exon	103982	104035	1.000000	+	.	Parent=gene164
+1877523	gth	five_prime_splice_site	104036	104037	0.997152	+	.	Parent=gene164
+1877523	gth	three_prime_splice_site	104116	104117	0.982015	+	.	Parent=gene164
+1877523	gth	exon	104118	104198	1.000000	+	.	Parent=gene164
+1877523	gth	five_prime_splice_site	104199	104200	0.992005	+	.	Parent=gene164
+1877523	gth	three_prime_splice_site	104293	104294	0.999978	+	.	Parent=gene164
+1877523	gth	exon	104295	104724	0.920930	+	.	Parent=gene164
+1877523	gth	five_prime_splice_site	104725	104726	0.952847	+	.	Parent=gene164
+1877523	gth	three_prime_splice_site	104801	104802	0.814114	+	.	Parent=gene164
+1877523	gth	exon	104803	104819	0.764706	+	.	Parent=gene164
+###
+1877523	gth	gene	103706	104416	0.828794	+	.	ID=gene165;Target=8686177 99 409 +
+1877523	gth	exon	103706	103731	0.884615	+	.	Parent=gene165
+1877523	gth	five_prime_splice_site	103732	103733	0.000020	+	.	Parent=gene165
+1877523	gth	three_prime_splice_site	103797	103798	0.000050	+	.	Parent=gene165
+1877523	gth	exon	103799	103826	0.517857	+	.	Parent=gene165
+1877523	gth	five_prime_splice_site	103827	103828	0.326008	+	.	Parent=gene165
+1877523	gth	three_prime_splice_site	103980	103981	0.996499	+	.	Parent=gene165
+1877523	gth	exon	103982	104035	0.777778	+	.	Parent=gene165
+1877523	gth	five_prime_splice_site	104036	104037	0.997152	+	.	Parent=gene165
+1877523	gth	three_prime_splice_site	104116	104117	0.982015	+	.	Parent=gene165
+1877523	gth	exon	104118	104198	0.839506	+	.	Parent=gene165
+1877523	gth	five_prime_splice_site	104199	104200	0.992005	+	.	Parent=gene165
+1877523	gth	three_prime_splice_site	104293	104294	0.999978	+	.	Parent=gene165
+1877523	gth	exon	104295	104416	0.844262	+	.	Parent=gene165
+###
+1877523	gth	gene	103713	104391	0.812500	+	.	ID=gene166;Target=453733 78 357 +
+1877523	gth	exon	103713	103731	1.000000	+	.	Parent=gene166
+1877523	gth	five_prime_splice_site	103732	103733	0.000020	+	.	Parent=gene166
+1877523	gth	three_prime_splice_site	103797	103798	0.000050	+	.	Parent=gene166
+1877523	gth	exon	103799	103826	0.517857	+	.	Parent=gene166
+1877523	gth	five_prime_splice_site	103827	103828	0.326008	+	.	Parent=gene166
+1877523	gth	three_prime_splice_site	103980	103981	0.996499	+	.	Parent=gene166
+1877523	gth	exon	103982	104035	0.777778	+	.	Parent=gene166
+1877523	gth	five_prime_splice_site	104036	104037	0.997152	+	.	Parent=gene166
+1877523	gth	three_prime_splice_site	104116	104117	0.982015	+	.	Parent=gene166
+1877523	gth	exon	104118	104198	0.839506	+	.	Parent=gene166
+1877523	gth	five_prime_splice_site	104199	104200	0.992005	+	.	Parent=gene166
+1877523	gth	three_prime_splice_site	104293	104294	0.999978	+	.	Parent=gene166
+1877523	gth	exon	104295	104391	0.809278	+	.	Parent=gene166
+###
+1877523	gth	gene	103746	104415	0.824219	+	.	ID=gene167;Target=8722221 103 366 +
+1877523	gth	exon	103746	103753	0.875000	+	.	Parent=gene167
+1877523	gth	five_prime_splice_site	103754	103755	0.990188	+	.	Parent=gene167
+1877523	gth	three_prime_splice_site	103980	103981	0.996499	+	.	Parent=gene167
+1877523	gth	exon	103982	104035	0.777778	+	.	Parent=gene167
+1877523	gth	five_prime_splice_site	104036	104037	0.997152	+	.	Parent=gene167
+1877523	gth	three_prime_splice_site	104116	104117	0.982015	+	.	Parent=gene167
+1877523	gth	exon	104118	104198	0.839506	+	.	Parent=gene167
+1877523	gth	five_prime_splice_site	104199	104200	0.992005	+	.	Parent=gene167
+1877523	gth	three_prime_splice_site	104293	104294	0.999978	+	.	Parent=gene167
+1877523	gth	exon	104295	104415	0.834711	+	.	Parent=gene167
+###
+1877523	gth	gene	103746	104440	0.829181	+	.	ID=gene168;Target=623629 87 375 +
+1877523	gth	exon	103746	103753	0.875000	+	.	Parent=gene168
+1877523	gth	five_prime_splice_site	103754	103755	0.990188	+	.	Parent=gene168
+1877523	gth	three_prime_splice_site	103980	103981	0.996499	+	.	Parent=gene168
+1877523	gth	exon	103982	104035	0.777778	+	.	Parent=gene168
+1877523	gth	five_prime_splice_site	104036	104037	0.997152	+	.	Parent=gene168
+1877523	gth	three_prime_splice_site	104116	104117	0.982015	+	.	Parent=gene168
+1877523	gth	exon	104118	104198	0.839506	+	.	Parent=gene168
+1877523	gth	five_prime_splice_site	104199	104200	0.992005	+	.	Parent=gene168
+1877523	gth	three_prime_splice_site	104293	104294	0.999978	+	.	Parent=gene168
+1877523	gth	exon	104295	104440	0.842466	+	.	Parent=gene168
+###
+1877523	gth	gene	103982	104683	0.817568	+	.	ID=gene169;Target=9778203 71 401 +
+1877523	gth	exon	103982	104035	0.759259	+	.	Parent=gene169
+1877523	gth	five_prime_splice_site	104036	104037	0.997152	+	.	Parent=gene169
+1877523	gth	three_prime_splice_site	104116	104117	0.982015	+	.	Parent=gene169
+1877523	gth	exon	104118	104198	0.839506	+	.	Parent=gene169
+1877523	gth	five_prime_splice_site	104199	104200	0.992005	+	.	Parent=gene169
+1877523	gth	three_prime_splice_site	104293	104294	0.999978	+	.	Parent=gene169
+1877523	gth	exon	104295	104455	0.826087	+	.	Parent=gene169
+1877523	gth	five_prime_splice_site	104456	104457	0.522235	+	.	Parent=gene169
+1877523	gth	three_prime_splice_site	104647	104648	0.000001	+	.	Parent=gene169
+1877523	gth	exon	104649	104683	0.971429	+	.	Parent=gene169
+###
+1877523	gth	gene	103982	104881	0.909091	+	.	ID=gene170;Target=8731408 68 518 +
+1877523	gth	exon	103982	104035	0.944444	+	.	Parent=gene170
+1877523	gth	five_prime_splice_site	104036	104037	0.997152	+	.	Parent=gene170
+1877523	gth	three_prime_splice_site	104116	104117	0.982015	+	.	Parent=gene170
+1877523	gth	exon	104118	104198	0.950617	+	.	Parent=gene170
+1877523	gth	five_prime_splice_site	104199	104200	0.992005	+	.	Parent=gene170
+1877523	gth	three_prime_splice_site	104293	104294	0.999978	+	.	Parent=gene170
+1877523	gth	exon	104295	104455	0.888199	+	.	Parent=gene170
+1877523	gth	five_prime_splice_site	104456	104457	0.522235	+	.	Parent=gene170
+1877523	gth	three_prime_splice_site	104647	104648	0.000001	+	.	Parent=gene170
+1877523	gth	exon	104649	104724	0.934211	+	.	Parent=gene170
+1877523	gth	five_prime_splice_site	104725	104726	0.952847	+	.	Parent=gene170
+1877523	gth	three_prime_splice_site	104801	104802	0.814114	+	.	Parent=gene170
+1877523	gth	exon	104803	104881	0.860759	+	.	Parent=gene170
+###
+1877523	gth	gene	104394	105201	0.830044	+	.	ID=gene171;Target=937871 1 457 +
+1877523	gth	exon	104394	104455	0.887097	+	.	Parent=gene171
+1877523	gth	five_prime_splice_site	104456	104457	0.522235	+	.	Parent=gene171
+1877523	gth	three_prime_splice_site	104647	104648	0.000001	+	.	Parent=gene171
+1877523	gth	exon	104649	104724	0.921053	+	.	Parent=gene171
+1877523	gth	five_prime_splice_site	104725	104726	0.952847	+	.	Parent=gene171
+1877523	gth	three_prime_splice_site	104801	104802	0.814114	+	.	Parent=gene171
+1877523	gth	exon	104803	104928	0.841270	+	.	Parent=gene171
+1877523	gth	five_prime_splice_site	104929	104930	0.880576	+	.	Parent=gene171
+1877523	gth	three_prime_splice_site	105008	105009	0.990170	+	.	Parent=gene171
+1877523	gth	exon	105010	105201	0.768229	+	.	Parent=gene171
+###
+1877523	gth	gene	104803	105220	0.851632	+	.	ID=gene172;Target=9781141 22 358 +
+1877523	gth	exon	104803	104928	0.841270	+	.	Parent=gene172
+1877523	gth	five_prime_splice_site	104929	104930	0.880576	+	.	Parent=gene172
+1877523	gth	three_prime_splice_site	105008	105009	0.990170	+	.	Parent=gene172
+1877523	gth	exon	105010	105220	0.857820	+	.	Parent=gene172
+###
+1877523	gth	gene	104912	105793	0.887324	+	.	ID=gene173;Target=7611662 1 549 -
+1877523	gth	exon	104912	104928	0.823529	+	.	Parent=gene173
+1877523	gth	five_prime_splice_site	104929	104930	0.880576	+	.	Parent=gene173
+1877523	gth	three_prime_splice_site	105008	105009	0.990170	+	.	Parent=gene173
+1877523	gth	exon	105010	105228	0.863014	+	.	Parent=gene173
+1877523	gth	five_prime_splice_site	105229	105230	0.996479	+	.	Parent=gene173
+1877523	gth	three_prime_splice_site	105313	105314	0.994995	+	.	Parent=gene173
+1877523	gth	exon	105315	105428	0.912281	+	.	Parent=gene173
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene173
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene173
+1877523	gth	exon	105500	105535	1.000000	+	.	Parent=gene173
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene173
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene173
+1877523	gth	exon	105630	105793	0.902439	+	.	Parent=gene173
+###
+1877523	gth	gene	105009	105793	0.883534	+	.	ID=gene174;Target=8734901 1 533 -
+1877523	gth	exon	105009	105228	0.863636	+	.	Parent=gene174
+1877523	gth	five_prime_splice_site	105229	105230	0.996479	+	.	Parent=gene174
+1877523	gth	three_prime_splice_site	105313	105314	0.994995	+	.	Parent=gene174
+1877523	gth	exon	105315	105428	0.912281	+	.	Parent=gene174
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene174
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene174
+1877523	gth	exon	105500	105535	1.000000	+	.	Parent=gene174
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene174
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene174
+1877523	gth	exon	105630	105793	0.890244	+	.	Parent=gene174
+###
+1877523	gth	gene	105069	105815	0.876087	+	.	ID=gene175;Target=19801855 1 495 -
+1877523	gth	exon	105069	105228	0.831250	+	.	Parent=gene175
+1877523	gth	five_prime_splice_site	105229	105230	0.996479	+	.	Parent=gene175
+1877523	gth	three_prime_splice_site	105313	105314	0.994995	+	.	Parent=gene175
+1877523	gth	exon	105315	105428	0.912281	+	.	Parent=gene175
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene175
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene175
+1877523	gth	exon	105500	105535	1.000000	+	.	Parent=gene175
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene175
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene175
+1877523	gth	exon	105630	105815	0.892473	+	.	Parent=gene175
+###
+1877523	gth	gene	105090	105793	0.877698	+	.	ID=gene176;Target=8695006 1 452 -
+1877523	gth	exon	105090	105228	0.820144	+	.	Parent=gene176
+1877523	gth	five_prime_splice_site	105229	105230	0.996479	+	.	Parent=gene176
+1877523	gth	three_prime_splice_site	105313	105314	0.994995	+	.	Parent=gene176
+1877523	gth	exon	105315	105428	0.912281	+	.	Parent=gene176
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene176
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene176
+1877523	gth	exon	105500	105535	0.972222	+	.	Parent=gene176
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene176
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene176
+1877523	gth	exon	105630	105793	0.902439	+	.	Parent=gene176
+###
+1877523	gth	gene	105091	105793	0.856971	+	.	ID=gene177;Target=8702125 1 452 -
+1877523	gth	exon	105091	105228	0.786232	+	.	Parent=gene177
+1877523	gth	five_prime_splice_site	105229	105230	0.996479	+	.	Parent=gene177
+1877523	gth	three_prime_splice_site	105313	105314	0.994995	+	.	Parent=gene177
+1877523	gth	exon	105315	105428	0.885965	+	.	Parent=gene177
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene177
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene177
+1877523	gth	exon	105500	105535	0.972222	+	.	Parent=gene177
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene177
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene177
+1877523	gth	exon	105630	105793	0.896341	+	.	Parent=gene177
+###
+1877523	gth	gene	105140	105793	0.880109	+	.	ID=gene178;Target=19825204 1 402 -
+1877523	gth	exon	105140	105228	0.797753	+	.	Parent=gene178
+1877523	gth	five_prime_splice_site	105229	105230	0.996479	+	.	Parent=gene178
+1877523	gth	three_prime_splice_site	105313	105314	0.994995	+	.	Parent=gene178
+1877523	gth	exon	105315	105428	0.912281	+	.	Parent=gene178
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene178
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene178
+1877523	gth	exon	105500	105535	1.000000	+	.	Parent=gene178
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene178
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene178
+1877523	gth	exon	105630	105793	0.902439	+	.	Parent=gene178
+###
+1877523	gth	gene	105170	105793	0.862018	+	.	ID=gene179;Target=2748033 88 460 -
+1877523	gth	exon	105170	105228	0.686441	+	.	Parent=gene179
+1877523	gth	five_prime_splice_site	105229	105230	0.996479	+	.	Parent=gene179
+1877523	gth	three_prime_splice_site	105313	105314	0.994995	+	.	Parent=gene179
+1877523	gth	exon	105315	105428	0.903509	+	.	Parent=gene179
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene179
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene179
+1877523	gth	exon	105500	105535	1.000000	+	.	Parent=gene179
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene179
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene179
+1877523	gth	exon	105630	105793	0.896341	+	.	Parent=gene179
+###
+1877523	gth	gene	105175	105793	0.900602	+	.	ID=gene180;Target=19835442 1 367 -
+1877523	gth	exon	105175	105228	0.870370	+	.	Parent=gene180
+1877523	gth	five_prime_splice_site	105229	105230	0.996479	+	.	Parent=gene180
+1877523	gth	three_prime_splice_site	105313	105314	0.994995	+	.	Parent=gene180
+1877523	gth	exon	105315	105428	0.912281	+	.	Parent=gene180
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene180
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene180
+1877523	gth	exon	105500	105535	1.000000	+	.	Parent=gene180
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene180
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene180
+1877523	gth	exon	105630	105793	0.902439	+	.	Parent=gene180
+###
+1877523	gth	gene	105189	105793	0.895683	+	.	ID=gene181;Target=8734878 1 354 -
+1877523	gth	exon	105189	105228	0.875000	+	.	Parent=gene181
+1877523	gth	five_prime_splice_site	105229	105230	0.996479	+	.	Parent=gene181
+1877523	gth	three_prime_splice_site	105313	105314	0.994995	+	.	Parent=gene181
+1877523	gth	exon	105315	105428	0.912281	+	.	Parent=gene181
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene181
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene181
+1877523	gth	exon	105500	105535	1.000000	+	.	Parent=gene181
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene181
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene181
+1877523	gth	exon	105630	105793	0.884146	+	.	Parent=gene181
+###
+1877523	gth	gene	105190	105793	0.906475	+	.	ID=gene182;Target=19823987 1 352 -
+1877523	gth	exon	105190	105228	0.871795	+	.	Parent=gene182
+1877523	gth	five_prime_splice_site	105229	105230	0.996479	+	.	Parent=gene182
+1877523	gth	three_prime_splice_site	105313	105314	0.994995	+	.	Parent=gene182
+1877523	gth	exon	105315	105428	0.912281	+	.	Parent=gene182
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene182
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene182
+1877523	gth	exon	105500	105535	1.000000	+	.	Parent=gene182
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene182
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene182
+1877523	gth	exon	105630	105793	0.902439	+	.	Parent=gene182
+###
+1877523	gth	gene	105199	105793	0.845324	+	.	ID=gene183;Target=19841468 39 385 -
+1877523	gth	exon	105199	105228	0.833333	+	.	Parent=gene183
+1877523	gth	five_prime_splice_site	105229	105230	0.996479	+	.	Parent=gene183
+1877523	gth	three_prime_splice_site	105313	105314	0.994995	+	.	Parent=gene183
+1877523	gth	exon	105315	105428	0.903509	+	.	Parent=gene183
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene183
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene183
+1877523	gth	exon	105500	105535	0.972222	+	.	Parent=gene183
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene183
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene183
+1877523	gth	exon	105630	105793	0.804878	+	.	Parent=gene183
+###
+1877523	gth	gene	105348	105815	0.895131	+	.	ID=gene184;Target=2747682 1 302 +
+1877523	gth	exon	105348	105428	0.913580	+	.	Parent=gene184
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene184
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene184
+1877523	gth	exon	105500	105535	1.000000	+	.	Parent=gene184
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene184
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene184
+1877523	gth	exon	105630	105815	0.887097	+	.	Parent=gene184
+###
+1877523	gth	gene	105348	105815	0.898876	+	.	ID=gene185;Target=2412846 1 302 +
+1877523	gth	exon	105348	105428	0.913580	+	.	Parent=gene185
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene185
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene185
+1877523	gth	exon	105500	105535	1.000000	+	.	Parent=gene185
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene185
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene185
+1877523	gth	exon	105630	105815	0.892473	+	.	Parent=gene185
+###
+1877523	gth	gene	105371	105813	0.896694	+	.	ID=gene186;Target=17325 1 277 -
+1877523	gth	exon	105371	105428	0.931034	+	.	Parent=gene186
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene186
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene186
+1877523	gth	exon	105500	105535	0.972222	+	.	Parent=gene186
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene186
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene186
+1877523	gth	exon	105630	105813	0.885870	+	.	Parent=gene186
+###
+1877523	gth	gene	105382	105851	0.986486	+	.	ID=gene187;Target=3449578 65 370 +
+1877523	gth	exon	105382	105428	0.978723	+	.	Parent=gene187
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene187
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene187
+1877523	gth	exon	105500	105535	0.902778	+	.	Parent=gene187
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene187
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene187
+1877523	gth	exon	105630	105851	0.986486	+	.	Parent=gene187
+###
+1877523	gth	gene	105394	105860	0.826840	+	.	ID=gene188;Target=19859011 1 296 -
+1877523	gth	exon	105394	105428	0.971429	+	.	Parent=gene188
+1877523	gth	five_prime_splice_site	105429	105430	0.954974	+	.	Parent=gene188
+1877523	gth	three_prime_splice_site	105498	105499	0.994056	+	.	Parent=gene188
+1877523	gth	exon	105500	105535	1.000000	+	.	Parent=gene188
+1877523	gth	five_prime_splice_site	105536	105537	0.957388	+	.	Parent=gene188
+1877523	gth	three_prime_splice_site	105628	105629	0.503498	+	.	Parent=gene188
+1877523	gth	exon	105630	105860	0.826840	+	.	Parent=gene188
+###
+1877523	gth	gene	105662	105806	0.855172	-	.	ID=gene189;Target=8735385 30 173 +
+1877523	gth	exon	105662	105806	0.855172	-	.	Parent=gene189
+###
+1877523	gth	gene	106097	106973	0.997647	+	.	ID=gene190;Target=19871766 1 425 +
+1877523	gth	exon	106097	106290	0.994845	+	.	Parent=gene190
+1877523	gth	five_prime_splice_site	106291	106292	0.969716	+	.	Parent=gene190
+1877523	gth	three_prime_splice_site	106564	106565	0.986434	+	.	Parent=gene190
+1877523	gth	exon	106566	106619	1.000000	+	.	Parent=gene190
+1877523	gth	five_prime_splice_site	106620	106621	0.997542	+	.	Parent=gene190
+1877523	gth	three_prime_splice_site	106700	106701	0.972645	+	.	Parent=gene190
+1877523	gth	exon	106702	106782	1.000000	+	.	Parent=gene190
+1877523	gth	five_prime_splice_site	106783	106784	0.996813	+	.	Parent=gene190
+1877523	gth	three_prime_splice_site	106876	106877	0.999923	+	.	Parent=gene190
+1877523	gth	exon	106878	106973	1.000000	+	.	Parent=gene190
+###
+1877523	gth	gene	106133	106934	0.965714	+	.	ID=gene191;Target=17300 1 350 +
+1877523	gth	exon	106133	106290	0.962025	+	.	Parent=gene191
+1877523	gth	five_prime_splice_site	106291	106292	0.969716	+	.	Parent=gene191
+1877523	gth	three_prime_splice_site	106564	106565	0.986434	+	.	Parent=gene191
+1877523	gth	exon	106566	106619	0.981481	+	.	Parent=gene191
+1877523	gth	five_prime_splice_site	106620	106621	0.997542	+	.	Parent=gene191
+1877523	gth	three_prime_splice_site	106700	106701	0.972645	+	.	Parent=gene191
+1877523	gth	exon	106702	106782	1.000000	+	.	Parent=gene191
+1877523	gth	five_prime_splice_site	106783	106784	0.996813	+	.	Parent=gene191
+1877523	gth	three_prime_splice_site	106876	106877	0.999923	+	.	Parent=gene191
+1877523	gth	exon	106878	106934	0.912281	+	.	Parent=gene191
+###
+1877523	gth	gene	106148	106751	0.965587	+	.	ID=gene192;Target=7612621 1 248 +
+1877523	gth	exon	106148	106290	0.947552	+	.	Parent=gene192
+1877523	gth	five_prime_splice_site	106291	106292	0.969716	+	.	Parent=gene192
+1877523	gth	three_prime_splice_site	106564	106565	0.986434	+	.	Parent=gene192
+1877523	gth	exon	106566	106619	1.000000	+	.	Parent=gene192
+1877523	gth	five_prime_splice_site	106620	106621	0.997542	+	.	Parent=gene192
+1877523	gth	three_prime_splice_site	106700	106701	0.972645	+	.	Parent=gene192
+1877523	gth	exon	106702	106751	0.980000	+	.	Parent=gene192
+###
+1877523	gth	gene	106149	106973	0.923593	+	.	ID=gene193;Target=935362 1 377 +
+1877523	gth	exon	106149	106290	0.978873	+	.	Parent=gene193
+1877523	gth	five_prime_splice_site	106291	106292	0.969716	+	.	Parent=gene193
+1877523	gth	three_prime_splice_site	106564	106565	0.986434	+	.	Parent=gene193
+1877523	gth	exon	106566	106619	0.944444	+	.	Parent=gene193
+1877523	gth	five_prime_splice_site	106620	106621	0.997542	+	.	Parent=gene193
+1877523	gth	three_prime_splice_site	106700	106701	0.972645	+	.	Parent=gene193
+1877523	gth	exon	106702	106782	0.975309	+	.	Parent=gene193
+1877523	gth	five_prime_splice_site	106783	106784	0.996813	+	.	Parent=gene193
+1877523	gth	three_prime_splice_site	106876	106877	0.999923	+	.	Parent=gene193
+1877523	gth	exon	106878	106973	0.786458	+	.	Parent=gene193
+###
+1877523	gth	gene	106156	106973	0.915301	+	.	ID=gene194;Target=936803 1 374 +
+1877523	gth	exon	106156	106290	0.970370	+	.	Parent=gene194
+1877523	gth	five_prime_splice_site	106291	106292	0.969716	+	.	Parent=gene194
+1877523	gth	three_prime_splice_site	106564	106565	0.986434	+	.	Parent=gene194
+1877523	gth	exon	106566	106619	0.981481	+	.	Parent=gene194
+1877523	gth	five_prime_splice_site	106620	106621	0.997542	+	.	Parent=gene194
+1877523	gth	three_prime_splice_site	106700	106701	0.972645	+	.	Parent=gene194
+1877523	gth	exon	106702	106782	1.000000	+	.	Parent=gene194
+1877523	gth	five_prime_splice_site	106783	106784	0.996813	+	.	Parent=gene194
+1877523	gth	three_prime_splice_site	106876	106877	0.999923	+	.	Parent=gene194
+1877523	gth	exon	106878	106973	0.729167	+	.	Parent=gene194
+###
+1877523	gth	gene	106156	106973	1.000000	+	.	ID=gene195;Target=7612394 1 366 +
+1877523	gth	exon	106156	106290	1.000000	+	.	Parent=gene195
+1877523	gth	five_prime_splice_site	106291	106292	0.969716	+	.	Parent=gene195
+1877523	gth	three_prime_splice_site	106564	106565	0.986434	+	.	Parent=gene195
+1877523	gth	exon	106566	106619	1.000000	+	.	Parent=gene195
+1877523	gth	five_prime_splice_site	106620	106621	0.997542	+	.	Parent=gene195
+1877523	gth	three_prime_splice_site	106700	106701	0.972645	+	.	Parent=gene195
+1877523	gth	exon	106702	106782	1.000000	+	.	Parent=gene195
+1877523	gth	five_prime_splice_site	106783	106784	0.996813	+	.	Parent=gene195
+1877523	gth	three_prime_splice_site	106876	106877	0.999923	+	.	Parent=gene195
+1877523	gth	exon	106878	106973	1.000000	+	.	Parent=gene195
+###
+1877523	gth	gene	106161	106750	0.967391	+	.	ID=gene196;Target=2733258 26 261 +
+1877523	gth	exon	106161	106290	0.961538	+	.	Parent=gene196
+1877523	gth	five_prime_splice_site	106291	106292	0.969716	+	.	Parent=gene196
+1877523	gth	three_prime_splice_site	106564	106565	0.986434	+	.	Parent=gene196
+1877523	gth	exon	106566	106619	0.981481	+	.	Parent=gene196
+1877523	gth	five_prime_splice_site	106620	106621	0.997542	+	.	Parent=gene196
+1877523	gth	three_prime_splice_site	106700	106701	0.972645	+	.	Parent=gene196
+1877523	gth	exon	106702	106750	0.724490	+	.	Parent=gene196
+###
+1877523	gth	gene	106168	106917	0.980620	+	.	ID=gene197;Target=8729681 1 298 +
+1877523	gth	exon	106168	106290	0.975610	+	.	Parent=gene197
+1877523	gth	five_prime_splice_site	106291	106292	0.969716	+	.	Parent=gene197
+1877523	gth	three_prime_splice_site	106564	106565	0.986434	+	.	Parent=gene197
+1877523	gth	exon	106566	106619	0.981481	+	.	Parent=gene197
+1877523	gth	five_prime_splice_site	106620	106621	0.997542	+	.	Parent=gene197
+1877523	gth	three_prime_splice_site	106700	106701	0.972645	+	.	Parent=gene197
+1877523	gth	exon	106702	106782	0.987654	+	.	Parent=gene197
+1877523	gth	five_prime_splice_site	106783	106784	0.996813	+	.	Parent=gene197
+1877523	gth	three_prime_splice_site	106876	106877	0.999923	+	.	Parent=gene197
+1877523	gth	exon	106878	106917	0.950000	+	.	Parent=gene197
+###
+1877523	gth	gene	106224	106710	0.958678	+	.	ID=gene198;Target=2759942 1 130 +
+1877523	gth	exon	106224	106290	0.940299	+	.	Parent=gene198
+1877523	gth	five_prime_splice_site	106291	106292	0.969716	+	.	Parent=gene198
+1877523	gth	three_prime_splice_site	106564	106565	0.986434	+	.	Parent=gene198
+1877523	gth	exon	106566	106619	0.981481	+	.	Parent=gene198
+1877523	gth	five_prime_splice_site	106620	106621	0.997542	+	.	Parent=gene198
+1877523	gth	three_prime_splice_site	106700	106701	0.972645	+	.	Parent=gene198
+1877523	gth	exon	106702	106710	1.000000	+	.	Parent=gene198
+###
+1877523	gth	gene	106716	106973	0.846626	+	.	ID=gene199;Target=9778889 1 162 +
+1877523	gth	exon	106716	106782	0.805970	+	.	Parent=gene199
+1877523	gth	five_prime_splice_site	106783	106784	0.996813	+	.	Parent=gene199
+1877523	gth	three_prime_splice_site	106876	106877	0.999923	+	.	Parent=gene199
+1877523	gth	exon	106878	106973	0.875000	+	.	Parent=gene199
+###
