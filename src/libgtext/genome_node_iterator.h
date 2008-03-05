@@ -26,7 +26,7 @@ typedef struct GenomeNodeIterator GenomeNodeIterator;
    <genome_node> (including <genome_node> itself). */
 GenomeNodeIterator* genome_node_iterator_new(GenomeNode *genome_node);
 /* Return a new genome node iterator which iterates over all direct children of
-   <genome_node> (whithout <genome_node> itself). */
+   <genome_node> (without <genome_node> itself). */
 GenomeNodeIterator* genome_node_iterator_new_direct(GenomeNode *genome_node);
 GenomeNode*         genome_node_iterator_next(GenomeNodeIterator*);
 int                 genome_node_iterator_example(void);
