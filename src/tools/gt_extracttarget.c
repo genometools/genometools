@@ -31,13 +31,13 @@
 #include "tools/gt_extracttarget.h"
 
 typedef struct {
-  Str *seqfile;
+  StrArray *seqfiles;
 } ExtractTargetArguments;
 
 static void* gt_extracttarget_arguments_new(void)
 {
   ExtractTargetArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->seqfile = str_new();
+  arguments->seqfiles = strarray_new();
   return arguments;
 }
 
@@ -45,7 +45,7 @@ static void gt_extracttarget_arguments_delete(void *tool_arguments)
 {
   ExtractTargetArguments *arguments = tool_arguments;
   if (!arguments) return;
-  str_delete(arguments->seqfile);
+  strarray_delete(arguments->seqfiles);
   ma_free(arguments);
 }
 
@@ -62,8 +62,8 @@ static OptionParser* gt_extracttarget_option_parser_new(void *tool_arguments)
                          "sequence_file.");
 
   /* -seqfile */
-  o = option_new_filename("seqfile", "set the sequence file from which to "
-                          "extract the features", arguments->seqfile);
+  o = option_new_filenamearray("seqfiles", "set the sequence file from which "
+                               "to extract the features", arguments->seqfiles);
   option_is_mandatory(o);
   option_parser_add_option(op, o);
 
@@ -87,8 +87,8 @@ static bool show_target(UNUSED unsigned long pos, void *data)
   return true;
 }
 
-static int extracttarget_from_bioseq(const char *target, Bioseq *bioseq,
-                                     Error *err)
+static int extracttarget_from_seqfiles(const char *target, StrArray *seqfiles,
+                                       Error *err)
 {
   Str *unescaped_target;
   char *escaped_target;
@@ -96,12 +96,12 @@ static int extracttarget_from_bioseq(const char *target, Bioseq *bioseq,
   unsigned long i;
   int had_err = 0;
   error_check(err);
-  assert(target && bioseq);
+  assert(target && seqfiles);
   splitter = splitter_new();
   unescaped_target = str_new();
   escaped_target = cstr_dup(target);
   splitter_split(splitter, escaped_target, strlen(escaped_target), ',');
-  for (i = 0; i < splitter_size(splitter); i++) {
+  for (i = 0; !had_err && i < splitter_size(splitter); i++) {
     Splitter *blank_splitter;
     char *token = splitter_get_token(splitter, i);
     blank_splitter = splitter_new();
@@ -111,14 +111,23 @@ static int extracttarget_from_bioseq(const char *target, Bioseq *bioseq,
                             strlen(splitter_get_token(blank_splitter, 0)), err);
     if (!had_err) {
       unsigned long j;
-      for (j = 0; j < bioseq_number_of_sequences(bioseq); j++) {
-        TargetInfo target_info;
-        const char *desc = bioseq_get_description(bioseq, j);
-        target_info.bioseq = bioseq;
-        target_info.seqnum = j;
-        string_matching_bmh(desc, strlen(desc), str_get(unescaped_target),
-                            str_length(unescaped_target), show_target,
-                            &target_info);
+      for (j = 0; j < strarray_size(seqfiles); j++) {
+        unsigned long k;
+        Bioseq *bioseq;
+        if (!(bioseq =  bioseq_new(strarray_get(seqfiles, j), err))) {
+          had_err = -1;
+          break;
+        }
+        for (k = 0; k < bioseq_number_of_sequences(bioseq); k++) {
+          TargetInfo target_info;
+          const char *desc = bioseq_get_description(bioseq, k);
+          target_info.bioseq = bioseq;
+          target_info.seqnum = k;
+          string_matching_bmh(desc, strlen(desc), str_get(unescaped_target),
+                              str_length(unescaped_target), show_target,
+                              &target_info);
+        }
+        bioseq_delete(bioseq);
       }
     }
     splitter_delete(blank_splitter);
@@ -129,19 +138,20 @@ static int extracttarget_from_bioseq(const char *target, Bioseq *bioseq,
   return had_err;
 }
 
-static int extracttarget_from_node(GenomeNode *gn, Bioseq *bioseq, Error *err)
+static int extracttarget_from_node(GenomeNode *gn, StrArray *seqfiles,
+                                   Error *err)
 {
   GenomeNodeIterator *gni;
   int had_err = 0;
   error_check(err);
-  assert(gn && bioseq);
+  assert(gn && seqfiles);
   if (genome_node_cast(genome_feature_class(), gn)) {
     const char *target;
     GenomeNode *child;
     gni = genome_node_iterator_new(gn);
     while (!had_err && (child = genome_node_iterator_next(gni))) {
       if ((target = genome_feature_get_attribute(child, "Target")))
-        had_err = extracttarget_from_bioseq(target, bioseq, err);
+        had_err = extracttarget_from_seqfiles(target, seqfiles, err);
     }
     genome_node_iterator_delete(gni);
   }
@@ -154,24 +164,18 @@ static int gt_extracttarget_runner(UNUSED int argc, const char **argv,
   ExtractTargetArguments *arguments = tool_arguments;
   GenomeStream *gff3_in_stream;
   GenomeNode *gn;
-  Bioseq *bioseq;
-  int had_err = 0;
+  int had_err;
 
   error_check(err);
   assert(arguments);
 
   gff3_in_stream = gff3_in_stream_new_unsorted(1, argv, false, false);
 
-  if (!(bioseq = bioseq_new(str_get(arguments->seqfile), err)))
-    had_err = -1;
-
-  while (!had_err &&
-         !(had_err = genome_stream_next_tree(gff3_in_stream, &gn, err)) && gn) {
-    had_err = extracttarget_from_node(gn, bioseq, err);
+  while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, err)) && gn) {
+    had_err = extracttarget_from_node(gn, arguments->seqfiles, err);
     genome_node_rec_delete(gn);
   }
 
-  bioseq_delete(bioseq);
   genome_stream_delete(gff3_in_stream);
 
   return had_err;
