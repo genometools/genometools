@@ -112,6 +112,23 @@ Test do
   run "diff #{$last_stdout} #{$testdata}marker.out"
 end
 
+Name "gt extractseq -ginum"
+Keywords "gt_extractseq"
+Test do
+  run_test "#{$bin}gt extractseq -ginum #{$testdata}U89959_ginums.txt " +
+           "#{$testdata}U89959_ests.fas.gz"
+  run "grep -v '^#' #{$last_stdout}"
+  run "diff #{$last_stdout} #{$testdata}U89959_ginums.out"
+end
+
+Name "gt extractseq -ginum (fail)"
+Keywords "gt_extractseq"
+Test do
+  run_test("#{$bin}gt extractseq -ginum #{$testdata}U89959_ginums.txt",
+           :retval => 1)
+  grep $last_stderr, /requires at least one file argument/
+end
+
 if $gttestdata then
   Name "gt extractseq ginum"
   Keywords "gt_extractseq"
