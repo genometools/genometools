@@ -47,7 +47,6 @@ struct PBS_Hit {
 PBS_Hit* pbs_find(const char *seq,
                   LTRboundaries *line,
                   unsigned long seqlen,
-                  unsigned long ltrlen,
                   Bioseq *trna_lib,
                   LTRharvestoptions *lo,
                   Error *err);

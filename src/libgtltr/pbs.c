@@ -108,7 +108,6 @@ static int pbs_hit_compare(const void *h1, const void *h2)
 PBS_Hit* pbs_find(const char *seq,
                   LTRboundaries *line,
                   unsigned long seqlen,
-                  unsigned long ltrlen,
                   Bioseq *trna_lib,
                   LTRharvestoptions *lo,
                   Error *err)

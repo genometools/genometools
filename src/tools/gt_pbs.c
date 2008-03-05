@@ -180,7 +180,6 @@ int gt_findpbs(int argc, const char **argv, Error *err)
     hit = pbs_find(seq_get_orig(seq),
                    line,
                    seq_length(seq),
-                   line->rightLTR_3-line->leftLTR_5+1,
                    trnas,
                    &lo,
                    err);
