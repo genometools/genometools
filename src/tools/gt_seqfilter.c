@@ -37,7 +37,7 @@ static void* gt_seqfilter_arguments_new(void)
 static void gt_seqfilter_arguments_delete(void *tool_arguments)
 {
   SeqFilterArguments *arguments = tool_arguments;
-  if (!tool_arguments) return;
+  if (!arguments) return;
   ma_free(arguments);
 }
 

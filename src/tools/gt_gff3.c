@@ -51,7 +51,7 @@ static void* gt_gff3_arguments_new(void)
 static void gt_gff3_arguments_delete(void *tool_arguments)
 {
   GFF3Arguments *arguments = tool_arguments;
-  if (!tool_arguments) return;
+  if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
   str_delete(arguments->offsetfile);

@@ -43,7 +43,7 @@ static void* gt_bioseq_arguments_new(void)
 static void gt_bioseq_arguments_delete(void *tool_arguments)
 {
   BioseqArguments *arguments = tool_arguments;
-  if (!tool_arguments) return;
+  if (!arguments) return;
   str_delete(arguments->reader);
   ma_free(arguments);
 }

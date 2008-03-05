@@ -56,7 +56,7 @@ static void* gt_filter_arguments_new(void)
 static void gt_filter_arguments_delete(void *tool_arguments)
 {
   FilterArguments *arguments = tool_arguments;
-  if (!tool_arguments) return;
+  if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
   str_delete(arguments->strand_char);

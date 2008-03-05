@@ -44,7 +44,7 @@ static void *gt_cds_arguments_new(void)
 static void gt_cds_arguments_delete(void *tool_arguments)
 {
   CDSArguments *arguments = tool_arguments;
-  if (!tool_arguments) return;
+  if (!arguments) return;
   str_delete(arguments->regionmapping);
   str_delete(arguments->seqfile);
   ma_free(arguments);

@@ -84,7 +84,7 @@ Toolbox* gtt_tools(void)
   toolbox_add_tool(tools, "cds", gt_cds());
   toolbox_add(tools, "chseqids", gt_chseqids);
   toolbox_add(tools, "clean", gt_clean);
-  toolbox_add(tools, "csa", gt_csa);
+  toolbox_add_tool(tools, "csa", gt_csa());
   toolbox_add_tool(tools, "dev", gt_dev());
   toolbox_add(tools, "eval", gt_eval);
   toolbox_add_tool(tools, "exercise", gt_exercise());

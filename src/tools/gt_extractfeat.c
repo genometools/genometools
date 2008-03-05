@@ -46,7 +46,7 @@ static void* gt_extractfeat_arguments_new(void)
 static void gt_extractfeat_arguments_delete(void *tool_arguments)
 {
   ExtractFeatArguments *arguments = tool_arguments;
-  if (!tool_arguments) return;
+  if (!arguments) return;
   str_delete(arguments->regionmapping);
   str_delete(arguments->seqfile);
   str_delete(arguments->typestr);
