@@ -19,9 +19,9 @@
 #define INTCODE_DEF_H
 #include <stdbool.h>
 
-#define PREFIXLENBITS   4
+typedef unsigned long Codetype;      /* \Typedef{Codetype} */
 
-typedef unsigned int Codetype;      /* \Typedef{Codetype} */
+#define FormatCodetype "%lu"
 
 typedef struct
 {

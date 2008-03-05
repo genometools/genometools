@@ -1,9 +1,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-Codetype *initbasepower(unsigned int base,unsigned int len);
+unsigned int maxbasepower(unsigned int numofchars);
 
-Codetype *initfilltable(unsigned int base,unsigned int len);
+Codetype *initbasepower(unsigned int numofchars,unsigned int prefixlength);
+
+Codetype *initfilltable(unsigned int numofchars,unsigned int prefixlength);
 
 Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue);
 

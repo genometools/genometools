@@ -30,7 +30,7 @@ void kmercode2string(char *buffer,
   buffer[kmersize] = '\0';
   for (i=(int) (kmersize-1); i>=0; i--)
   {
-    cc = tmpcode % numofchars;
+    cc = (unsigned int) (tmpcode % numofchars);
     buffer[i] = (char) characters[cc];
     tmpcode = (tmpcode - cc) / numofchars;
   }

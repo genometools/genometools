@@ -48,6 +48,9 @@ ALLOUTPUTOPTS="../scripts/alloutputoptions.rb"
 cd testsuite
 
 # the make call normally used for development
+env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
+       ${MC} -keywords 'gt_packedindex_at1MB' \
+       -gttestdata ${GTTESTDATA}
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_suffixerator'
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_trieins'
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_greedyfwdmat'
@@ -56,13 +59,11 @@ env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords 'gt_suffixerator and gttestdata' \
        -gttestdata ${GTTESTDATA}
 env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
-       ${MC} -keywords 'gt_packedindex' \
-       -gttestdata ${GTTESTDATA}
-env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords 'gt_greedyfwdmat and gttestdata' \
        -gttestdata ${GTTESTDATA}
 env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords gt_extractseq -gttestdata ${GTTESTDATA}
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_packedindex'
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
 # the following depends on vmatch-mini.x and mkvtree.x

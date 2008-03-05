@@ -18,6 +18,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/array.h"
 #include "libgtcore/fastabuffer.h"
+#include "libgtcore/progressbar.h"
 #include "spacedef.h"
 #include "readmode-def.h"
 #include "encseq-def.h"
@@ -81,9 +82,11 @@ static int testfullscan(const StrArray *filenametab,
   int retval;
   bool haserr = false;
   Encodedsequencescanstate *esr;
+  unsigned long long fullscanpbar = 0;
 
   error_check(err);
   totallength = getencseqtotallength(encseq);
+  progressbar_start(&fullscanpbar,(unsigned long long) totallength);
   if (filenametab != NULL)
   {
     fb = fastabuffer_new(filenametab,
@@ -145,7 +148,9 @@ static int testfullscan(const StrArray *filenametab,
       haserr = true;
       break;
     }
+    fullscanpbar++;
   }
+  progressbar_stop();
   if (!haserr)
   {
     if (pos != totallength)
@@ -169,6 +174,11 @@ int testencodedsequence(const StrArray *filenametab,
 {
   bool haserr = false;
 
+  if (hasfastspecialrangeenumerator(encseq))
+  {
+    STAMP;
+    checkextractunitatpos(encseq);
+  }
   if (trials > 0)
   {
     if (testscanatpos(encseq,

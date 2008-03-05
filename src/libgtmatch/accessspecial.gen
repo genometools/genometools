@@ -23,7 +23,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
   unsigned long currentspecialchar = 0;
   Seqpos pos;
   int retval;
-  Bitstring bitwise = 0;
+  Twobitencoding bitwise = 0;
   Uchar lastspeciallength = 0;
 #ifndef NDEBUG
   Seqpos sumspecials = 0, countspecials = 0;
@@ -32,7 +32,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
   unsigned long *endptrUint, endspecialcells;
   Seqpos nextcheck;
 #endif
-  DECLARESEQBUFFER(encseq->fourcharsinonebyte);
+  DECLARESEQBUFFER(encseq->twobitencoding);
 
   ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,specialpositions),NULL,SPECIALTYPE,
                    encseq->numofspecialstostore);
@@ -113,10 +113,10 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
       nextcheck += (Seqpos) (MAXSPECIALTYPE+1);
     }
 #endif
-    UPDATESEQBUFFER(encseq->fourcharsinonebyte,cc);
+    UPDATESEQBUFFER(cc);
   }
   assert(sumspecials == countspecials);
-  UPDATESEQBUFFERFINAL(encseq->fourcharsinonebyte);
+  UPDATESEQBUFFERFINAL;
 #ifndef NOENDPTR
   while (endptrUint < ACCESSENCSEQ(encseq,endspecialsubsUint) + endspecialcells)
   {

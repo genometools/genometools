@@ -56,7 +56,7 @@ Bcktab *allocBcktab(Seqpos totallength,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     unsigned int codebits,
-                    unsigned int maxcodevalue,
+                    Codetype maxcodevalue,
                     Verboseinfo *verboseinfo,
                     Error *err);
 
@@ -106,11 +106,11 @@ Codetype bcktab_numofallcodes(const Bcktab *bcktab);
 unsigned long sizeofbuckettable(unsigned int numofchars,
                                 unsigned int prefixlength);
 
-#ifndef NDEBUG
+#ifdef mydebug
 void checkcountspecialcodes(const Bcktab *bcktab);
 #endif
 
-#ifdef DEBUG
+#ifdef mydebug
 void consistencyofsuffix(int line,
                          const Encodedsequence *encseq,
                          Readmode readmode,

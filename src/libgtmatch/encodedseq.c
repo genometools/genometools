@@ -26,6 +26,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/str.h"
+#include "libgtcore/minmax.h"
 #include "libgtcore/unused.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
@@ -41,21 +42,6 @@
 
 #include "opensfxfile.pr"
 #include "fillsci.pr"
-
-#ifdef Seqposequalsunsignedint
-#define Uint32Const(N)   (N##U)  /* unsigned int constant */
-#define EXTRACTENCODEDCHAR(ESEQ,IDX)\
-        ((ESEQ[DIV4(IDX)] >> (Uint32Const(6) - MULT2(MOD4(IDX)))) &\
-                              Uint32Const(3))
-#else
-#define Uint64Const(N)   (N##UL) /* uint64_t constant */
-#define EXTRACTENCODEDCHAR(ESEQ,IDX)\
-        ((ESEQ[(unsigned long) DIV4(IDX)] >> (Uint64Const(6) - \
-                                       (uint64_t) MULT2(MOD4(IDX))))\
-         & Uint64Const(3))
-#endif
-
-#define WRITTENPOSACCESSTYPE(V) {V, #V}
 
 #define CHECKANDUPDATE(VAL)\
         tmp = detsizeencseq(VAL,totallength,specialranges);\
@@ -74,28 +60,56 @@
 #define ACCESSSEQUENCELENGTH(ENCSEQ)\
         (ENCSEQ)->totallength
 
-#define DECLARESEQBUFFER(TABLE)\
-        unsigned long fourcharssize\
-          = detsizeoffourcharsinonebyte(encseq->totallength);\
-        unsigned int widthbuffer = 0, j = 0;\
-        ALLOCASSIGNSPACE(TABLE,NULL,Uchar,fourcharssize)
+/* The following implements the access functions to the bit encoding */
 
-#define UPDATESEQBUFFER(TABLE,CC)\
+#ifdef NEWTWOBITENCODING
+
+#define UNITSIN2BITENC              16
+#define DIVBYUNITSIN2BITENC(V)      DIV16(V)
+#define MODBYUNITSIN2BITENC(V)      MOD16(V)
+#define MAXSHIFTLEFTUNITSIN2BITENC  30UL
+#define MAXSHIFTRIGHTUNITSIN2BITENC 32UL
+
+#else
+
+#define UNITSIN2BITENC              4
+#define DIVBYUNITSIN2BITENC(V)      DIV4(V)
+#define MODBYUNITSIN2BITENC(V)      MOD4(V)
+#define MAXSHIFTLEFTUNITSIN2BITENC  6UL
+#define MAXSHIFTRIGHTUNITSIN2BITENC 8UL
+
+#endif
+
+#define EXTRACTENCODEDCHAR(TWOBITENCODING,IDX)\
+        ((TWOBITENCODING[(unsigned long) DIVBYUNITSIN2BITENC(IDX)] >> \
+         (MAXSHIFTLEFTUNITSIN2BITENC - \
+          (unsigned long) MULT2(MODBYUNITSIN2BITENC(IDX))))\
+         & (Twobitencoding) 3)
+
+#define DECLARESEQBUFFER(TABLE)\
+        unsigned long widthbuffer = 0;\
+        Twobitencoding *tbeptr;\
+        encseq->unitsoftwobitencoding\
+          = detunitsoftwobitencoding(encseq->totallength);\
+        ALLOCASSIGNSPACE(TABLE,NULL,Twobitencoding,\
+                         encseq->unitsoftwobitencoding);\
+        tbeptr = TABLE
+
+#define UPDATESEQBUFFER(CC)\
         bitwise <<= 2;\
         if (ISNOTSPECIAL(CC))\
         {\
-          bitwise |= (CC);\
+          bitwise |= (Twobitencoding) (CC);\
         } else\
         {\
           if ((CC) == (Uchar) SEPARATOR)\
           {\
-            bitwise |= (Bitstring) 1;\
+            bitwise |= (Twobitencoding) 1;\
           }\
         }\
-        if (widthbuffer == 3U)\
+        if (widthbuffer == (unsigned long) (UNITSIN2BITENC - 1))\
         {\
-          TABLE[j] = (Uchar) bitwise;\
-          j++;\
+          *tbeptr++ = bitwise;\
           widthbuffer = 0;\
           bitwise = 0;\
         } else\
@@ -103,25 +117,11 @@
           widthbuffer++;\
         }
 
-#define UPDATESEQBUFFERFINAL(TABLE)\
-        if (widthbuffer == 1U)\
+#define UPDATESEQBUFFERFINAL\
+        if (widthbuffer > 0)\
         {\
-          bitwise <<= 6;\
-          TABLE[j] = (Uchar) bitwise;\
-        } else\
-        {\
-          if (widthbuffer == 2U)\
-          {\
-            bitwise <<= 4;\
-            TABLE[j] = (Uchar) bitwise;\
-          } else\
-          {\
-            if (widthbuffer == 3U)\
-            {\
-              bitwise <<= 2;\
-              TABLE[j] = (Uchar) bitwise;\
-            }\
-          }\
+          bitwise <<= (MAXSHIFTRIGHTUNITSIN2BITENC - MULT2(widthbuffer));\
+          *tbeptr = bitwise;\
         }
 
 #define ENCSEQFILESUFFIX     ".esq"
@@ -164,7 +164,8 @@ typedef uint32_t Uint32;
               Viaushorttables,
               Viauint32tables */
 
-  Uchar *fourcharsinonebyte;
+  Twobitencoding *twobitencoding;
+  unsigned long unitsoftwobitencoding;
 
   /* only for Viauchartables,
               Viaushorttables,
@@ -190,7 +191,6 @@ typedef uint32_t Uint32;
   /* only for Viauint32tables */
   Uint32 *uint32specialpositions;
   unsigned long *uint32endspecialsubsUint;
-
 };
 
 typedef struct
@@ -435,16 +435,17 @@ static WrittenPositionaccesstype wpa[] = {
 
  DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
 
-static unsigned long detsizeoffourcharsinonebyte(Seqpos totallength)
+static unsigned long detunitsoftwobitencoding(Seqpos totallength)
 {
-  uint64_t fourcharssize;
+  uint64_t unitsoftwobitencoding;
 
-  if (totallength < (Seqpos) 4)
+  if (totallength < (Seqpos) UNITSIN2BITENC)
   {
     return 1UL;
   }
-  fourcharssize = (uint64_t) 1 + DIV4(totallength - 1);
-  return CALLCASTFUNC(uint64_t,unsigned_long,fourcharssize);
+  unitsoftwobitencoding = (uint64_t) 1 +
+                          DIVBYUNITSIN2BITENC(totallength - 1);
+  return CALLCASTFUNC(uint64_t,unsigned_long,unitsoftwobitencoding);
 }
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
@@ -455,9 +456,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
 {
   Encodedsequence *encseq = (Encodedsequence *) voidinfo;
   Mapspecification *mapspecptr;
-  unsigned long fourcharssize, numofunits;
+  unsigned long numofunits;
 
-  fourcharssize = detsizeoffourcharsinonebyte(encseq->totallength);
   if (writemode)
   {
     ALLOCASSIGNSPACE(encseq->satcharptr,NULL,Uchar,1);
@@ -471,7 +471,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       NEWMAPSPEC(encseq->plainseq,Uchar,numofunits);
       break;
     case Viabitaccess:
-      NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
+      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+                 encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
         numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
@@ -480,7 +481,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       }
       break;
     case Viauchartables:
-      NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
+      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+                 encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
         NEWMAPSPEC(encseq->ucharspecialpositions,Uchar,
@@ -493,7 +495,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       }
       break;
     case Viaushorttables:
-      NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
+      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+                 encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
         NEWMAPSPEC(encseq->ushortspecialpositions,Ushort,
@@ -506,7 +509,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       }
       break;
     case Viauint32tables:
-      NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
+      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+                 encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
         NEWMAPSPEC(encseq->uint32specialpositions,Uint32,
@@ -579,7 +583,9 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
                               Seqpos specialranges)
 {
   uint64_t sum,
-           fourcharssize = (uint64_t) detsizeoffourcharsinonebyte(totallength);
+           sizeoftwobitencoding
+             = (uint64_t) detunitsoftwobitencoding(totallength) *
+               (uint64_t) sizeof (Twobitencoding);
 
   switch (sat)
   {
@@ -587,7 +593,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          sum = totallength * (uint64_t) sizeof (Uchar);
          break;
     case Viabitaccess:
-         sum = fourcharssize;
+         sum = sizeoftwobitencoding;
          if (specialranges > 0)
          {
            sum += (uint64_t) sizeof (Bitstring) *
@@ -595,7 +601,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          }
          break;
     case Viauchartables:
-         sum = fourcharssize;
+         sum = sizeoftwobitencoding;
          if (specialranges > 0)
          {
            sum += (uint64_t) sizeof (Uchar) * specialranges +
@@ -605,7 +611,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          }
          break;
     case Viaushorttables:
-         sum = fourcharssize;
+         sum = sizeoftwobitencoding;
          if (specialranges > 0)
          {
            sum += (uint64_t) sizeof (Ushort) * specialranges +
@@ -615,7 +621,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          }
          break;
     case Viauint32tables:
-         sum = fourcharssize;
+         sum = sizeoftwobitencoding;
          if (specialranges > 0)
          {
            sum += (uint64_t) sizeof (uint32_t) * specialranges +
@@ -667,23 +673,23 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
         }
         break;
       case Viabitaccess:
-        FREESPACE(encseq->fourcharsinonebyte);
+        FREESPACE(encseq->twobitencoding);
         FREESPACE(encseq->specialbits);
         break;
       case Viauchartables:
-        FREESPACE(encseq->fourcharsinonebyte);
+        FREESPACE(encseq->twobitencoding);
         FREESPACE(encseq->ucharspecialpositions);
         FREESPACE(encseq->ucharendspecialsubsUint);
         FREESPACE(encseq->specialrangelength);
         break;
       case Viaushorttables:
-        FREESPACE(encseq->fourcharsinonebyte);
+        FREESPACE(encseq->twobitencoding);
         FREESPACE(encseq->ushortspecialpositions);
         FREESPACE(encseq->ushortendspecialsubsUint);
         FREESPACE(encseq->specialrangelength);
         break;
       case Viauint32tables:
-        FREESPACE(encseq->fourcharsinonebyte);
+        FREESPACE(encseq->twobitencoding);
         FREESPACE(encseq->uint32specialpositions);
         FREESPACE(encseq->uint32endspecialsubsUint);
         FREESPACE(encseq->specialrangelength);
@@ -749,11 +755,11 @@ static Uchar delivercharViadirectaccess(const Encodedsequence *encseq,
 
 /* generic for the case that there are no specialsymbols */
 
-static Uchar deliverfromfourchars(const Encodedsequence *encseq,
-                                  Seqpos pos)
+static Uchar deliverfromtwobitencoding(const Encodedsequence *encseq,
+                                       Seqpos pos)
 {
   assert(pos < encseq->totallength);
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 /* Viabitaccess */
@@ -764,13 +770,13 @@ static Uchar delivercharViabitaccessSpecial(const Encodedsequence *encseq,
   assert(pos < encseq->totallength);
   if (ISIBITSET(encseq->specialbits,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 /* Viauchartables */
@@ -782,13 +788,13 @@ static Uchar delivercharViauchartablesSpecialfirst(
   assert(pos < encseq->totallength);
   if (ucharcheckspecial(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 static Uchar delivercharViauchartablesSpecialrange(
@@ -798,13 +804,13 @@ static Uchar delivercharViauchartablesSpecialrange(
   assert(pos < encseq->totallength);
   if (ucharcheckspecialrange(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 /* Viaushorttables */
@@ -816,13 +822,13 @@ static Uchar delivercharViaushorttablesSpecialfirst(
   assert(pos < encseq->totallength);
   if (ushortcheckspecial(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 static Uchar delivercharViaushorttablesSpecialrange(
@@ -832,13 +838,13 @@ static Uchar delivercharViaushorttablesSpecialrange(
   assert(pos < encseq->totallength);
   if (ushortcheckspecialrange(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 /* Viauint32tables */
@@ -850,13 +856,13 @@ static Uchar delivercharViauint32tablesSpecialfirst(
   assert(pos < encseq->totallength);
   if (uint32checkspecial(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 static Uchar delivercharViauint32tablesSpecialrange(
@@ -866,13 +872,13 @@ static Uchar delivercharViauint32tablesSpecialrange(
   assert(pos < encseq->totallength);
   if (uint32checkspecialrange(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,Error *e)
@@ -908,8 +914,8 @@ static int fillbitaccesstab(Encodedsequence *encseq,
   Uchar cc;
   Seqpos pos;
   int retval;
-  Bitstring bitwise = 0;
-  DECLARESEQBUFFER(encseq->fourcharsinonebyte);
+  Twobitencoding bitwise = 0;
+  DECLARESEQBUFFER(encseq->twobitencoding);
 
   error_check(e);
   INITBITTAB(encseq->specialbits,encseq->totallength);
@@ -928,9 +934,9 @@ static int fillbitaccesstab(Encodedsequence *encseq,
     {
       SETIBIT(encseq->specialbits,pos);
     }
-    UPDATESEQBUFFER(encseq->fourcharsinonebyte,cc);
+    UPDATESEQBUFFER(cc);
   }
-  UPDATESEQBUFFERFINAL(encseq->fourcharsinonebyte);
+  UPDATESEQBUFFERFINAL;
   return 0;
 }
 
@@ -1051,8 +1057,8 @@ static void showallspecialpositions(const Encodedsequence *encseq)
   if (encseq->numofspecialstostore > 0)
   {
     if (encseq->sat == Viauchartables ||
-       encseq->sat == Viaushorttables ||
-       encseq->sat == Viauint32tables)
+        encseq->sat == Viaushorttables ||
+        encseq->sat == Viauint32tables)
     {
       showallspecialpositionswithpages(encseq);
     }
@@ -1434,7 +1440,7 @@ static Uchar seqdelivercharnoSpecial(
                         UNUSED Encodedsequencescanstate *esr,
                         Seqpos pos)
 {
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 static Uchar seqdelivercharViabitaccessSpecial(
@@ -1444,13 +1450,13 @@ static Uchar seqdelivercharViabitaccessSpecial(
 {
   if (ISIBITSET(encseq->specialbits,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
       return (Uchar) SEPARATOR;
     }
     return (Uchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
@@ -1471,7 +1477,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
       {
         if (pos >= esr->previousrange.leftpos)
         {
-          if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+          if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
           {
             return (Uchar) SEPARATOR;
           }
@@ -1488,7 +1494,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
       {
         if (pos < esr->previousrange.rightpos)
         {
-          if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+          if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
           {
             return (Uchar) SEPARATOR;
           }
@@ -1501,7 +1507,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
       }
     }
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 bool hasspecialranges(const Encodedsequence *encseq)
@@ -1515,7 +1521,7 @@ bool hasspecialranges(const Encodedsequence *encseq)
 
 bool hasfastspecialrangeenumerator(const Encodedsequence *encseq)
 {
-  if (encseq->sat == Viadirectaccess || encseq->sat == Viadirectaccess)
+  if (encseq->sat == Viadirectaccess || encseq->sat == Viabitaccess)
   {
     return false;
   }
@@ -1689,7 +1695,14 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->name = accesstype2name(sat);
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
-  encseq->fourcharsinonebyte = NULL;
+  encseq->twobitencoding = NULL;
+  if (sat == Viadirectaccess)
+  {
+    encseq->unitsoftwobitencoding = 0;
+  } else
+  {
+    encseq->unitsoftwobitencoding = detunitsoftwobitencoding(totallength);
+  }
   encseq->specialrangelength = NULL;
   encseq->plainseq = NULL;
   encseq->specialbits = NULL;
@@ -1799,7 +1812,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 
     { /* Viabitaccess */
       NAMEDFUNCTION(fillbitaccesstab),
-      NAMEDFUNCTION(deliverfromfourchars),
+      NAMEDFUNCTION(deliverfromtwobitencoding),
       NAMEDFUNCTION(delivercharViabitaccessSpecial),
       NAMEDFUNCTION(delivercharViabitaccessSpecial),
       NAMEDFUNCTION(seqdelivercharnoSpecial),
@@ -1808,7 +1821,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 
     { /* Viauchartables */
       NAMEDFUNCTION(ucharfillspecialtables),
-      NAMEDFUNCTION(deliverfromfourchars),
+      NAMEDFUNCTION(deliverfromtwobitencoding),
       NAMEDFUNCTION(delivercharViauchartablesSpecialfirst),
       NAMEDFUNCTION(delivercharViauchartablesSpecialrange),
       NAMEDFUNCTION(seqdelivercharnoSpecial),
@@ -1817,7 +1830,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 
     { /* Viaushorttables */
       NAMEDFUNCTION(ushortfillspecialtables),
-      NAMEDFUNCTION(deliverfromfourchars),
+      NAMEDFUNCTION(deliverfromtwobitencoding),
       NAMEDFUNCTION(delivercharViaushorttablesSpecialfirst),
       NAMEDFUNCTION(delivercharViaushorttablesSpecialrange),
       NAMEDFUNCTION(seqdelivercharnoSpecial),
@@ -1826,7 +1839,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 
     { /* Viauint32tables */
       NAMEDFUNCTION(uint32fillspecialtables),
-      NAMEDFUNCTION(deliverfromfourchars),
+      NAMEDFUNCTION(deliverfromtwobitencoding),
       NAMEDFUNCTION(delivercharViauint32tablesSpecialfirst),
       NAMEDFUNCTION(delivercharViauint32tablesSpecialrange),
       NAMEDFUNCTION(seqdelivercharnoSpecial),
@@ -2024,5 +2037,242 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   encseq->mappedptr = NULL;
   return encseq;
 }
+
+typedef struct
+{
+  Twobitencoding tbe;
+  unsigned int prefix;
+} PrefixofTwobitencoding;
+
+static Seqpos getnextstoppos(const Encodedsequence *encseq,
+                             Encodedsequencescanstate *esr,
+                             Seqpos pos)
+{
+  while (esr->hasprevious)
+  {
+    if (ISDIRREVERSE(esr->readmode))
+    {
+      if (pos < esr->previousrange.rightpos)
+      {
+        if (pos >= esr->previousrange.leftpos)
+        {
+          return pos; /* is in current special range */
+        }
+        /* follows current special range */
+        if (esr->hasrange)
+        {
+          advanceEncodedseqstate(encseq,esr,false);
+        } else
+        {
+          break;
+        }
+      } else
+      {
+        assert(esr->previousrange.rightpos > 0);
+        return esr->previousrange.rightpos - 1;
+      }
+    } else
+    {
+      if (pos >= esr->previousrange.leftpos)
+      {
+        if (pos < esr->previousrange.rightpos)
+        {
+          return pos; /* is in current special range */
+        }
+        /* follows current special range */
+        if (esr->hasrange)
+        {
+          advanceEncodedseqstate(encseq,esr,true);
+        } else
+        {
+          break;
+        }
+      } else
+      {
+        return esr->previousrange.leftpos;
+      }
+    }
+  }
+  return encseq->totallength;
+}
+
+static void extractunitatpos(PrefixofTwobitencoding *ptbe,
+                      const Encodedsequence *encseq,
+                      Encodedsequencescanstate *esr,
+                      Seqpos startpos)
+{
+  Seqpos stoppos;
+
+  assert(encseq->sat != Viadirectaccess);
+  if (encseq->sat == Viabitaccess)
+  {
+    fprintf(stderr,"extractunitatpos for bitaccess not implemented\n");
+    exit(EXIT_FAILURE);
+  }
+  stoppos = getnextstoppos(encseq,esr,startpos);
+  if (startpos >= stoppos)
+  {
+    ptbe->prefix = 0;
+    ptbe->tbe = 0;
+  } else
+  {
+    unsigned long shiftval;
+
+    if (startpos + UNITSIN2BITENC >= stoppos)
+    {
+      ptbe->prefix = (unsigned int) (stoppos - startpos);
+    } else
+    {
+      ptbe->prefix = (unsigned int) UNITSIN2BITENC;
+    }
+    assert(ptbe->prefix > 0);
+    shiftval = (unsigned long) MULT2(MODBYUNITSIN2BITENC(startpos));
+    if (shiftval == 0)
+    {
+      ptbe->tbe = encseq->twobitencoding[DIVBYUNITSIN2BITENC(startpos)];
+    } else
+    {
+      unsigned long unit = (unsigned long) DIVBYUNITSIN2BITENC(startpos);
+      ptbe->tbe = (Twobitencoding) (encseq->twobitencoding[unit] << shiftval);
+      assert(encseq->unitsoftwobitencoding > 0);
+      if (unit < encseq->unitsoftwobitencoding - 1)
+      {
+        ptbe->tbe |= encseq->twobitencoding[unit+1] >>
+                     (MAXSHIFTRIGHTUNITSIN2BITENC - shiftval);
+      }
+    }
+  }
+}
+
+static void extractunitatpos_bruteforce(PrefixofTwobitencoding *ptbe,
+                                 const Encodedsequence *encseq,
+                                 Seqpos startpos)
+{
+  Uchar cc;
+  Seqpos pos;
+
+  ptbe->tbe = 0;
+  for (pos = startpos; pos < startpos + UNITSIN2BITENC; pos++)
+  {
+    if (pos == encseq->totallength)
+    {
+      ptbe->prefix = (unsigned int) (pos - startpos);
+      ptbe->tbe <<= MULT2(startpos + UNITSIN2BITENC - pos);
+      return;
+    }
+    cc = getencodedchar(encseq,pos,Forwardmode);
+    if (ISSPECIAL(cc))
+    {
+      ptbe->prefix = (unsigned int) (pos - startpos);
+      ptbe->tbe <<= MULT2(startpos + UNITSIN2BITENC - pos);
+      return;
+    }
+    assert(cc < (Uchar) 4);
+    ptbe->tbe = (ptbe->tbe << 2) | cc;
+  }
+  ptbe->prefix = (unsigned int) UNITSIN2BITENC;
+}
+
+static void showsequenceatstartpos(const Encodedsequence *encseq,
+                                   Seqpos startpos)
+{
+  Seqpos pos, endpos;
+  Uchar buffer[UNITSIN2BITENC];
+
+  endpos = MIN(startpos + UNITSIN2BITENC - 1,encseq->totallength-1);
+  encseqextract(buffer,encseq,startpos,endpos);
+  fprintf(stderr,"          0123456789012345\n");
+  fprintf(stderr,"sequence=\"");
+  for (pos=0; pos<endpos - startpos + 1; pos++)
+  {
+    if (ISSPECIAL(buffer[pos]))
+    {
+      fprintf(stderr,"$");
+    } else
+    {
+      fprintf(stderr,"%c","acgt"[buffer[pos]]);
+    }
+  }
+  fprintf(stderr,"\"\n");
+}
+
+static bool comparetbe(Twobitencoding tbe1,Twobitencoding tbe2,
+                       unsigned int prefix)
+{
+  Twobitencoding mask;
+
+  if (prefix == 0)
+  {
+    return true;
+  }
+  if (prefix == (unsigned int) UNITSIN2BITENC)
+  {
+    return (tbe1 == tbe2) ? true : false;
+  }
+  assert(prefix < (unsigned int) UNITSIN2BITENC);
+  mask = ~(((Twobitencoding) 1 << MULT2(UNITSIN2BITENC - prefix)) - 1);
+  assert(mask > 0);
+  if ((tbe1 & mask) == (tbe2 & mask))
+  {
+    return true;
+  } else
+  {
+    char buf1[MULT2(UNITSIN2BITENC)+1], buf2[MULT2(UNITSIN2BITENC)+1],
+         bufmask[MULT2(UNITSIN2BITENC)+1];
+
+    uint32_t2string(bufmask,mask);
+    uint32_t2string(buf1,tbe1);
+    uint32_t2string(buf2,tbe2);
+    fprintf(stderr,"prefix = %u: \n%s (mask)\n%s (tbe1)\n%s (tbe2)\n",
+            prefix,bufmask,buf1,buf2);
+    return false;
+  }
+}
+
+void checkextractunitatpos(const Encodedsequence *encseq)
+{
+  PrefixofTwobitencoding ptbe1, ptbe2;
+  Encodedsequencescanstate *esr;
+  Seqpos startpos;
+
+  esr = newEncodedsequencescanstate();
+  initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
+  for (startpos = 0; startpos < encseq->totallength; startpos++)
+  {
+    extractunitatpos(&ptbe1,
+                     encseq,
+                     esr,
+                     startpos);
+    extractunitatpos_bruteforce(&ptbe2,
+                                encseq,
+                                startpos);
+    if (ptbe1.prefix != ptbe2.prefix)
+    {
+      fprintf(stderr,"pos " FormatSeqpos
+                     ": fast.prefix = %u != %u = brute.prefix\n",
+              PRINTSeqposcast(startpos),ptbe1.prefix,ptbe2.prefix);
+      showsequenceatstartpos(encseq,startpos);
+      exit(EXIT_FAILURE);
+    }
+    if (!comparetbe(ptbe1.tbe,ptbe2.tbe,ptbe1.prefix))
+    {
+      fprintf(stderr,"pos " FormatSeqpos "\n",PRINTSeqposcast(startpos));
+      showsequenceatstartpos(encseq,startpos);
+      exit(EXIT_FAILURE);
+    }
+  }
+  freeEncodedsequencescanstate(&esr);
+}
+
+/*
+int compareEncseqsequences(Seqpos *lcp,const Encodedsequence *encseq,
+                           Seqos pos1,Seqpos pos2)
+{
+  unsigned long unit1 = (unsigned long) DIVBYUNITSIN2BITENC(pos1),
+                unit2 = (unsigned long) DIVBYUNITSIN2BITENC(pos2),
+                offset1 = MODBYUNITSIN2BITENC(pos1),
+                offset2 = MODBYUNITSIN2BITENC(pos1);
+}
+*/
 
 #endif /* ifndef INLINEDENCSEQ */

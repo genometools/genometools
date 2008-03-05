@@ -388,7 +388,7 @@ static unsigned long determinemaxbucketsize(const Bcktab *bcktab,
                                             unsigned int numofchars)
 {
   unsigned long maxbucketsize = 1UL;
-  unsigned int rightchar = mincode % numofchars;
+  unsigned int rightchar = (unsigned int) (mincode % numofchars);
   Bucketspecification bucketspec;
   Codetype code;
 
@@ -695,7 +695,8 @@ void sortallbuckets(Seqpos *suftabptr,
                     unsigned long long *bucketiterstep)
 {
   Codetype code;
-  unsigned int rightchar = mincode % numofchars, minprefixindex,
+  unsigned int rightchar = (unsigned int) (mincode % numofchars),
+               minprefixindex,
                minchanged = 0;
   Seqpos totallength = getencseqtotallength(encseq);
   ArrayMKVstack mkvauxstack;

@@ -43,6 +43,10 @@ makecompilerflags()
   else
     printf " CC='ccache gcc'"
   fi
+  if test $1 -eq 64
+  then
+    printf " 64bit=yes"
+  fi
   printf " CFLAGS='-O3 -m$1"
   # printf " -DINLINEDENCSEQ"
   # printf " -DINLINEDSequentialsuffixarrayreader"

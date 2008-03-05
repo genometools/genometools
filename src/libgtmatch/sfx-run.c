@@ -193,7 +193,6 @@ static int suffixeratorwithoutput(
                  unsigned int prefixlength,
                  const Definedunsignedint *maxdepth,
                  unsigned int numofparts,
-                 UNUSED const Str *indexname,
                  bool dofast,
                  Measuretime *mtime,
                  Verboseinfo *verboseinfo,
@@ -310,7 +309,9 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
     maxprefixlen
       = whatisthemaximalprefixlength(numofchars,
                                      totallength,
-                                     (unsigned int) PREFIXLENBITS);
+                                     so->dofast
+                                     ? getprefixlenbits()
+                                     : 0);
     if (checkprefixlength(maxprefixlen,*prefixlength,err) != 0)
     {
       haserr = true;
@@ -334,7 +335,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                   maxdepth->valueunsignedint);
     } else
     {
-      if (maxdepth->valueunsignedint < *prefixlength)
+      if (so->maxdepth.valueunsignedint < *prefixlength)
       {
         maxdepth->defined = true;
         maxdepth->valueunsignedint = *prefixlength;
@@ -342,6 +343,8 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                     "set maxdepth = %u",maxdepth->valueunsignedint);
       } else
       {
+        maxdepth->defined = true;
+        maxdepth->valueunsignedint = so->maxdepth.valueunsignedint;
         showverbose(verboseinfo,
                     "use maxdepth = %u",maxdepth->valueunsignedint);
       }
@@ -546,7 +549,6 @@ static int runsuffixerator(bool doesa,
                            prefixlength,
                            &maxdepth,
                            so->numofparts,
-                           so->outlcptab ? so->str_indexname : NULL,
                            so->dofast,
                            mtime,
                            verboseinfo,

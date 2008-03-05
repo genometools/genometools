@@ -96,7 +96,6 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     Seqpos dbstart;
     Enumpatterniterator *epi;
     unsigned int firstspecial;
-    Codetype code = 0;
     MMsearchiterator *mmsibck, *mmsiimm;
     Bucketspecification bucketspec;
     Bucketenumerator *bucketenumerator;
@@ -105,6 +104,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     Encodedsequencescanstate *esr1, *esr2;
     int retval;
     Seqpos idx, maxlcp;
+    Codetype code = 0;
     const Codetype **multimappower = bcktab_multimappower(suffixarray.bcktab);
 
     epi = newenumpatterniterator(pmopt->minpatternlen,

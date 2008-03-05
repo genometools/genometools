@@ -69,6 +69,13 @@ if $gttestdata then
       ["#{$gttestdata}ltrharvest/s_cer/chr01.19960731.fsa.gz"], nil, nil)
   end
 
+  Name "gt packedindex check tools for at1MB"
+  Keywords "gt_packedindex_at1MB"
+  Test do
+    runAndCheckPackedIndex('at1MB',
+      ["#{$gttestdata}Iowa/at1MB"], nil, nil)
+  end
+
   dmelFiles = aPrefix("#{$gttestdata}ltrharvest/d_mel/",
                       [
                        'X_genomic_dmel_RELEASE3-1.FASTA.gz',

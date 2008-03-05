@@ -20,11 +20,11 @@
 #include <assert.h>
 #include <limits.h>
 #include <errno.h>
-#include <assert.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/error.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/progressbar.h"
+#include "libgtcore/minmax.h"
 #include "spacedef.h"
 #include "measure-time-if.h"
 #include "intcode-def.h"
@@ -38,6 +38,7 @@
 
 #include "sfx-mappedstr.pr"
 
+#define PREFIXLENBITS   4
 #define CODEBITS        (32-PREFIXLENBITS)
 #define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
 #define MAXCODEVALUE    ((1U << CODEBITS) - 1)
@@ -186,6 +187,34 @@ static void verifycodelistcomputation(
 }
 #endif
 
+#ifdef mydebug
+static Codetype getencseqcode(const Encodedsequence *encseq,
+                              Readmode readmode,
+                              Seqpos totallength,
+                              const Codetype **multimappower,
+                              unsigned int prefixlength,
+                              Seqpos pos)
+{
+  Codetype code = 0;
+  unsigned int idx;
+  Uchar cc;
+
+  for (idx=0; idx<prefixlength; idx++)
+  {
+    assert((Seqpos) (pos + idx) < totallength);
+    cc = getencodedcharnospecial(encseq,pos + idx, readmode);
+    assert(ISNOTSPECIAL(cc));
+    code += multimappower[idx][cc];
+  }
+  return code;
+}
+
+static Codetype previouscode = 0;
+static bool previousfirstspecialdefined = false,
+            previousstorespecials = false;
+unsigned int previousspecialpos = 0;
+#endif
+
 static void updatekmercount(void *processinfo,
                             Codetype code,
                             Seqpos position,
@@ -204,17 +233,21 @@ static void updatekmercount(void *processinfo,
           Codeatposition *cp;
 
           cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
-          cp->code = code;
+          assert(code <= (Codetype) MAXCODEVALUE);
+          cp->code = (unsigned int) code;
+          assert(firstspecial->specialpos <= MAXPREFIXLENGTH);
           cp->maxprefixindex = firstspecial->specialpos;
           cp->position = position + firstspecial->specialpos;
         }
         sfi->storespecials = false;
+        assert(code > 0);
         sfi->leftborder[code]++;
       }
     } else
     {
       if (firstspecial->specialpos > 0)
       {
+        assert(code > 0);
         sfi->leftborder[code]++;
       } else
       {
@@ -223,8 +256,40 @@ static void updatekmercount(void *processinfo,
     }
   } else
   {
+#ifdef mydebug
+    if (code == 0)
+    {
+      Codetype code2 = getencseqcode(sfi->encseq,
+                                     sfi->readmode,
+                                     getencseqtotallength(sfi->encseq),
+                                     bcktab_multimappower(sfi->bcktab),
+                                     sfi->prefixlength,
+                                     position);
+      if (code2 != 0)
+      {
+        printf("### position " FormatSeqpos ", code2 = %lu != 0\n",
+                        PRINTSeqposcast(position),code2);
+        printf("previouscode = " FormatCodetype "\n",
+                        previouscode);
+        if (previousfirstspecialdefined)
+        {
+          printf("previousfirstspecialdefined = true\n");
+          printf("previousstorespecials = %s\n",
+                  previousstorespecials ? "true" : "false");
+          printf("previousspecialpos = %u\n",previousspecialpos);
+        }
+        exit(EXIT_FAILURE);
+      }
+    }
+#endif
     sfi->leftborder[code]++;
   }
+#ifdef mydebug
+  previouscode = code;
+  previousfirstspecialdefined = firstspecial->defined;
+  previousstorespecials = sfi->storespecials;
+  previousspecialpos = firstspecial->specialpos;
+#endif
 }
 
 static void insertwithoutspecial(void *processinfo,
@@ -272,7 +337,7 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
       if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixindex)
       {
         code = codedownscale(sfi->bcktab,
-                             sfi->spaceCodeatposition[j].code,
+                             (Codetype) sfi->spaceCodeatposition[j].code,
                              prefixindex,
                              sfi->spaceCodeatposition[j].maxprefixindex);
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
@@ -331,6 +396,7 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
           if (code >= sfi->currentmincode)
           {
             updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
+            assert(code > 0);
             stidx = --sfi->leftborder[code];
             sfi->suftabptr[stidx] = specialcontext.position - prefixindex;
           }
@@ -343,7 +409,7 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
 
 void freeSfxiterator(Sfxiterator **sfi)
 {
-#ifndef NDEBUG
+#ifdef mydebug
   if ((*sfi)->bcktab != NULL)
   {
     checkcountspecialcodes((*sfi)->bcktab);
@@ -370,21 +436,40 @@ void freeSfxiterator(Sfxiterator **sfi)
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
-static bool dicidespecialcodesfast(bool dofast,
-                                   const Encodedsequence *encseq,
-                                   Seqpos realspecialranges)
+static bool decidespecialcodesfast(bool dofast,
+                                   UNUSED const Encodedsequence *encseq,
+                                   UNUSED Seqpos realspecialranges)
 {
+  return dofast;
+}
+
+#ifdef mydebug
   if (!dofast && hasfastspecialrangeenumerator(encseq))
   {
     Seqpos totallength = getencseqtotallength(encseq);
 
-    if (realspecialranges * sizeof (Codeatposition) > totallength/6)
+    if (realspecialranges * sizeof (Codeatposition) > totallength/10)
     {
       return false;
     }
   }
   return true;
 }
+#endif
+
+#ifdef mydebug
+static void showleftborder(const Seqpos *leftborder,
+                           Codetype numofallcodes)
+{
+  Codetype i;
+
+  for (i=0; i<MIN(numofallcodes,(Codetype) 1024); i++)
+  {
+    printf("leftborder[" FormatCodetype "]=" FormatSeqpos "\n",
+            i,leftborder[i]);
+  }
+}
+#endif
 
 Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Seqpos realspecialranges,
@@ -406,15 +491,17 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   bool haserr = false;
 
   error_check(err);
-  if (prefixlength == 0 || prefixlength > MAXPREFIXLENGTH)
+  assert(prefixlength > 0);
+  if (dofast && prefixlength > MAXPREFIXLENGTH)
   {
     error_set(err,"argument for option -pl must be in the range [1,%u]",
                   MAXPREFIXLENGTH);
     haserr = true;
-  } else
+  }
+  if (!haserr)
   {
     ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
-    sfi->specialcodesfast = dicidespecialcodesfast(dofast,
+    sfi->specialcodesfast = decidespecialcodesfast(dofast,
                                                    encseq,
                                                    realspecialranges);
     if (sfi->specialcodesfast)
@@ -450,7 +537,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               numofchars,
                               prefixlength,
                               (unsigned int) CODEBITS,
-                              (unsigned int) MAXCODEVALUE,
+                              sfi->specialcodesfast
+                                ? (Codetype) MAXCODEVALUE
+                                : 0,
                               verboseinfo,
                               err);
     if (sfi->bcktab == NULL)
@@ -493,6 +582,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               sfi->spaceCodeatposition);
 #endif
     assert(sfi->leftborder != NULL);
+#ifdef mydebug
+    showleftborder(sfi->leftborder,sfi->numofallcodes);
+#endif
     for (optr = sfi->leftborder + 1;
          optr < sfi->leftborder + sfi->numofallcodes; optr++)
     {
@@ -745,4 +837,9 @@ int sfibcktab2file(FILE *fp,
 {
   error_check(err);
   return bcktab2file(fp,sfi->bcktab,err);
+}
+
+unsigned int getprefixlenbits(void)
+{
+  return (unsigned int) PREFIXLENBITS;
 }

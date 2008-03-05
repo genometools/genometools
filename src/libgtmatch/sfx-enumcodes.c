@@ -35,8 +35,7 @@ struct Enumcodeatposition
   const Encodedsequence *encseq;
   Readmode readmode;
   unsigned int prefixlength;
-  Codetype **multimappower;
-  Codetype *filltable;
+  Codetype **multimappower, *filltable;
 };
 
 Enumcodeatposition *newEnumcodeatposition(const Encodedsequence *encseq,

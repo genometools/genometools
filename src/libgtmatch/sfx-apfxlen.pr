@@ -9,7 +9,8 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
                                           unsigned int prefixlenbits);
 
 int checkprefixlength(unsigned int maxprefixlen,
-                      unsigned int prefixlength,Error *err);
+                      unsigned int prefixlength,
+                      Error *err);
 
 void showmaximalprefixlength(Verboseinfo *verboseinfo,
                              unsigned int maxprefixlen,
