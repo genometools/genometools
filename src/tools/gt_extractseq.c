@@ -180,6 +180,32 @@ static int extractseq_match(GenFile *outfp, Bioseq *bs, const char *pattern,
   return had_err;
 }
 
+static int process_ginum(Str *ginum, int argc, const char **argv,
+                         unsigned long width, GenFile *outfp, Error *err)
+{
+  int had_err = 0;
+  error_check(err);
+  assert(str_length(ginum));
+
+  if (!argc == 0) {
+    error_set(err,"option -ginum requires at least one file argument");
+    had_err = -1;
+  }
+
+  if (!had_err) {
+    StrArray *referencefiletab;
+    int i;
+    referencefiletab = strarray_new();
+    for (i = 0; i < argc; i++)
+      strarray_add_cstr(referencefiletab, argv[i]);
+    had_err = extractginumbers(true, outfp, width, ginum, referencefiletab,
+                               err);
+    strarray_delete(referencefiletab);
+  }
+
+  return had_err;
+}
+
 static int gt_extractseq_runner(int argc, const char **argv,
                                 void *tool_arguments, Error *err)
 {
@@ -188,35 +214,11 @@ static int gt_extractseq_runner(int argc, const char **argv,
 
   error_check(err);
   assert(arguments);
-  if (str_length(arguments->ginum))
-  {
-    if (argc == 0)
-    {
-      error_set(err,"option -ginum requires at least one file argument");
-      had_err = -1;
-    } else
-    {
-      StrArray *referencefiletab;
-      int i;
-
-      referencefiletab = strarray_new();
-      for (i = 0; i < argc; i++)
-      {
-        strarray_add_cstr(referencefiletab, argv[i]);
-      }
-      if (extractginumbers(true,
-                           arguments->outfp,
-                           arguments->width,
-                           arguments->ginum,
-                           referencefiletab,
-                           err) != 1)
-      {
-        had_err = -1;
-      }
-      strarray_delete(referencefiletab);
-    }
-  } else
-  {
+  if (str_length(arguments->ginum)) {
+    had_err = process_ginum(arguments->ginum, argc, argv, arguments->width,
+                            arguments->outfp, err);
+  }
+  else {
     Bioseq *bs;
     int arg = 0;
     if (argc == 0) { /* no file given, use stdin */
