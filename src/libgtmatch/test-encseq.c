@@ -191,6 +191,9 @@ int testencodedsequence(const StrArray *filenametab,
       haserr = true;
     }
   }
+  /*
+  checkextractunitatpos(encseq);
+  */
   return haserr ? -1 : 0;
 }
 

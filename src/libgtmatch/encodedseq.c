@@ -26,6 +26,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/str.h"
+#include "libgtcore/minmax.h"
 #include "libgtcore/unused.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
@@ -1056,8 +1057,8 @@ static void showallspecialpositions(const Encodedsequence *encseq)
   if (encseq->numofspecialstostore > 0)
   {
     if (encseq->sat == Viauchartables ||
-       encseq->sat == Viaushorttables ||
-       encseq->sat == Viauint32tables)
+        encseq->sat == Viaushorttables ||
+        encseq->sat == Viauint32tables)
     {
       showallspecialpositionswithpages(encseq);
     }
@@ -1695,7 +1696,13 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
   encseq->twobitencoding = NULL;
-  encseq->unitsoftwobitencoding = 0;
+  if (sat == Viauchartables || sat == Viaushorttables || sat == Viauint32tables)
+  {
+    encseq->unitsoftwobitencoding = detunitsoftwobitencoding(totallength);
+  } else
+  {
+    encseq->unitsoftwobitencoding = 0;
+  }
   encseq->specialrangelength = NULL;
   encseq->plainseq = NULL;
   encseq->specialbits = NULL;
@@ -2037,46 +2044,183 @@ typedef struct
   unsigned int units;
 } PrefixofTwobitencoding;
 
-void extractunitatpos(PrefixofTwobitencoding *ptbe,
+static Seqpos getnextstoppos(const Encodedsequence *encseq,
+                             Encodedsequencescanstate *esr,
+                             Seqpos pos)
+{
+  while (esr->hasprevious)
+  {
+    if (ISDIRREVERSE(esr->readmode))
+    {
+      if (pos < esr->previousrange.rightpos)
+      {
+        if (pos >= esr->previousrange.leftpos)
+        {
+          return pos; /* is in current special range */
+        }
+        /* follows current special range */
+        if (esr->hasrange)
+        {
+          advanceEncodedseqstate(encseq,esr,false);
+        }
+      } else
+      {
+        assert(esr->previousrange.rightpos > 0);
+        return esr->previousrange.rightpos - 1;
+      }
+    } else
+    {
+      if (pos >= esr->previousrange.leftpos)
+      {
+        if (pos < esr->previousrange.rightpos)
+        {
+          return pos; /* is in current special range */
+        }
+        /* follows current special range */
+        if (esr->hasrange)
+        {
+          advanceEncodedseqstate(encseq,esr,true);
+        }
+      } else
+      {
+        return esr->previousrange.leftpos;
+      }
+    }
+  }
+  return encseq->totallength;
+}
+
+static void extractunitatpos(PrefixofTwobitencoding *ptbe,
                       const Encodedsequence *encseq,
-                      unsigned long numofunits,
-                      Seqpos pos, 
-                      Seqpos totallength)
+                      Encodedsequencescanstate *esr,
+                      Seqpos startpos)
 {
   Seqpos stoppos;
 
-  stoppos = totallength; /* MIN(totallength,nextspecialposition) */
-  if (pos >= stoppos)
+  stoppos = getnextstoppos(encseq,esr,startpos);
+  if (startpos >= stoppos)
   {
     ptbe->units = 0;
     ptbe->tbe = 0;
   } else
   {
-    unsigned long offset;
+    unsigned long shiftval;
 
-    if (pos + MULT2(UNITSIN2BITENC) >= stoppos)
+    if (startpos + UNITSIN2BITENC >= stoppos)
     {
-      ptbe->units = (unsigned int)
-                   DIV2(stoppos - (pos + MULT2(UNITSIN2BITENC)));
+      ptbe->units = (unsigned int) (stoppos - startpos);
     } else
     {
-      ptbe->units = UNITSIN2BITENC;
+      ptbe->units = (unsigned int) UNITSIN2BITENC;
     }
-    offset = (unsigned long) MULT2(MODBYUNITSIN2BITENC(pos));
-    if (offset == 0)
+    assert(ptbe->units > 0);
+    shiftval = (unsigned long) MULT2(MODBYUNITSIN2BITENC(startpos));
+    if (shiftval == 0)
     {
-      ptbe->tbe = encseq->twobitencoding[DIVBYUNITSIN2BITENC(pos)];
+      ptbe->tbe = encseq->twobitencoding[DIVBYUNITSIN2BITENC(startpos)];
     } else
     {
-      unsigned long unit = (unsigned long) DIVBYUNITSIN2BITENC(pos);
-      ptbe->tbe = (Twobitencoding) (encseq->twobitencoding[unit] << offset);
-      if (unit < numofunits - 1)
+      unsigned long unit = (unsigned long) DIVBYUNITSIN2BITENC(startpos);
+      ptbe->tbe = (Twobitencoding) (encseq->twobitencoding[unit] << shiftval);
+      assert(encseq->unitsoftwobitencoding > 0);
+      if (unit < encseq->unitsoftwobitencoding - 1)
       {
         ptbe->tbe |= encseq->twobitencoding[unit+1] >>
-                    (MAXSHIFTRIGHTUNITSIN2BITENC - offset);
+                     (MAXSHIFTRIGHTUNITSIN2BITENC - shiftval);
       }
     }
   }
+}
+
+static void extractunitatpos_bruteforce(PrefixofTwobitencoding *ptbe,
+                                 const Encodedsequence *encseq,
+                                 Seqpos startpos)
+{
+  Uchar cc;
+  Seqpos pos;
+
+  ptbe->tbe = 0;
+  for (pos = startpos; pos < startpos + UNITSIN2BITENC; pos++)
+  {
+    if (pos == encseq->totallength)
+    {
+      ptbe->units = (unsigned int) (pos - startpos);
+      ptbe->tbe <<= MULT2(startpos + UNITSIN2BITENC - pos);
+      return;
+    }
+    cc = getencodedchar(encseq,pos,Forwardmode);
+    if (ISSPECIAL(cc))
+    {
+      ptbe->units = (unsigned int) (pos - startpos);
+      ptbe->tbe <<= MULT2(startpos + UNITSIN2BITENC - pos);
+      return;
+    }
+    assert(cc < (Uchar) 4);
+    ptbe->tbe = (ptbe->tbe << 2) | cc;
+  }
+  ptbe->units = (unsigned int) UNITSIN2BITENC;
+}
+
+void checkextractunitatpos(const Encodedsequence *encseq)
+{
+  PrefixofTwobitencoding ptbe1, ptbe2;
+  Encodedsequencescanstate *esr;
+  Seqpos startpos, endpos;
+  Uchar buffer[UNITSIN2BITENC];
+
+  esr = newEncodedsequencescanstate();
+  initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
+  for (startpos = 0; startpos < encseq->totallength; startpos++)
+  {
+    extractunitatpos(&ptbe1,
+                     encseq,
+                     esr,
+                     startpos);
+    extractunitatpos_bruteforce(&ptbe2,
+                                encseq,
+                                startpos);
+    if (ptbe1.units != ptbe2.units)
+    {
+      fprintf(stderr,"pos " FormatSeqpos
+                     ": fast.units = %u != %u = brute.units\n",
+              PRINTSeqposcast(startpos),ptbe1.units,ptbe2.units);
+    }
+    if (ptbe1.tbe != ptbe2.tbe)
+    {
+      char buf1[MULT2(UNITSIN2BITENC)+1], buf2[MULT2(UNITSIN2BITENC)+1];
+
+      uint32_t2string(buf1,ptbe1.tbe);
+      uint32_t2string(buf2,ptbe2.tbe);
+      fprintf(stderr,"pos " FormatSeqpos
+                     ": fast.tbe = \n%s !=\n%s = brute.units\n",
+              PRINTSeqposcast(startpos),buf1,buf2);
+    }
+    if (ptbe1.units != ptbe2.units || ptbe1.tbe != ptbe2.tbe)
+    {
+      Seqpos pos;
+
+      endpos = MIN(startpos + UNITSIN2BITENC - 1,encseq->totallength-1);
+      encseqextract(buffer,
+                    encseq,
+                    startpos,
+                    endpos);
+      fprintf(stderr,"          0123456789012345\n");
+      fprintf(stderr,"sequence=\"");
+      for (pos=0; pos<endpos - startpos + 1; pos++)
+      {
+        if (ISSPECIAL(buffer[pos]))
+        {
+          fprintf(stderr,"$");
+        } else
+        {
+          fprintf(stderr,"%c","acgt"[buffer[pos]]);
+        }
+      }
+      fprintf(stderr,"\"\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+  freeEncodedsequencescanstate(&esr);
 }
 
 /*

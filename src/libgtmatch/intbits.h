@@ -69,14 +69,26 @@ typedef uint32_t Bitstring;
 #define MULWORDSIZE(I)\
         ((I) << LOGWORDSIZE)              /* \((I) * w\) */
 
-/*@unused@*/ static inline void byte2string(unsigned char bs)
+/*@unused@*/ static inline void byte2string(char *buffer,unsigned char bs)
 {
   unsigned int i;
 
   for (i=0; i < 8U; i++)
   {
-     (void) putchar(ISBITSET((Bitstring) bs,i) ? '1' : '0');
+    buffer[i] = ISBITSET((Bitstring) bs,i) ? '1' : '0';
   }
+  buffer[8] = '\0';
+}
+
+/*@unused@*/ static inline void uint32_t2string(char *buffer,uint32_t bs)
+{
+  unsigned int i;
+
+  for (i=0; i < 32U; i++)
+  {
+    buffer[i] = ISBITSET((Bitstring) bs,i) ? '1' : '0';
+  }
+  buffer[32] = '\0';
 }
 
 #endif

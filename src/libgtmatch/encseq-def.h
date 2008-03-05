@@ -182,4 +182,6 @@ void encseqextract(Uchar *buffer,
                    Seqpos frompos,
                    Seqpos topos);
 
+void checkextractunitatpos(const Encodedsequence *encseq);
+
 #endif
