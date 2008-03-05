@@ -187,7 +187,7 @@ static int process_ginum(Str *ginum, int argc, const char **argv,
   error_check(err);
   assert(str_length(ginum));
 
-  if (!argc == 0) {
+  if (argc == 0) {
     error_set(err,"option -ginum requires at least one file argument");
     had_err = -1;
   }
@@ -198,8 +198,8 @@ static int process_ginum(Str *ginum, int argc, const char **argv,
     referencefiletab = strarray_new();
     for (i = 0; i < argc; i++)
       strarray_add_cstr(referencefiletab, argv[i]);
-    had_err = extractginumbers(true, outfp, width, ginum, referencefiletab,
-                               err);
+    if (extractginumbers(true, outfp, width, ginum, referencefiletab, err) != 1)
+      had_err = -1;
     strarray_delete(referencefiletab);
   }
 
