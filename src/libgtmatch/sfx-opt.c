@@ -121,14 +121,14 @@ static OPrval parse_options(int *parsed_args,
     option_argument_is_optional(optionmaxdepth);
     option_parser_add_option(op, optionmaxdepth);
 
-    optionfast = option_new_bool("fast","be faster but use more space",
-                                 &so->dofast,false);
-    option_is_development_option(optionfast);
-    option_parser_add_option(op, optionfast);
   } else
   {
     optionmaxdepth = NULL;
   }
+  optionfast = option_new_bool("fast","be faster but use more space",
+                               &so->dofast,false);
+  option_is_development_option(optionfast);
+  option_parser_add_option(op, optionfast);
 
   option = option_new_uint_min("parts",
                                "specify number of parts in which the "
