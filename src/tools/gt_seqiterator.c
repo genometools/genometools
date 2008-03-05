@@ -151,7 +151,7 @@ static unsigned long long accumulateastretch(DiscDistri *distastretch,
 }
 
 static void processastretches(const DiscDistri *distastretch,
-                              unsigned long long countA)
+                              UNUSED unsigned long long countA)
 {
   Astretchinfo astretchinfo;
   unsigned long len;
