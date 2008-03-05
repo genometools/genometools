@@ -17,6 +17,7 @@
 
 INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/zlib-1.2.3 \
+            -I$(CURDIR)/src/external/md5-1.1.1/src \
             -I$(CURDIR)/src/external/lua-5.1.3/src \
             -I$(CURDIR)/src/external/luafilesystem-1.3.0/src \
             -I$(CURDIR)/src/external/lpeg-0.7 \
@@ -163,6 +164,8 @@ LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
            $(LUA_DIR)/ldblib.c $(LUA_DIR)/liolib.c $(LUA_DIR)/lmathlib.c \
            $(LUA_DIR)/loslib.c $(LUA_DIR)/ltablib.c $(LUA_DIR)/lstrlib.c \
            $(LUA_DIR)/loadlib.c $(LUA_DIR)/linit.c \
+           src/external/md5-1.1.1/src/md5.c\
+           src/external/md5-1.1.1/src/md5lib.c\
            src/external/luafilesystem-1.3.0/src/lfs.c\
            src/external/lpeg-0.7/lpeg.c
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)

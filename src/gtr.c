@@ -22,6 +22,7 @@
 #include "lualib.h"
 #include "lfs.h"
 #include "lpeg.h"
+#include "md5.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/fa.h"
@@ -68,10 +69,11 @@ GTR* gtr_new(Error *err)
     had_err = -1;
   }
   if (!had_err) {
-    luaL_openlibs(gtr->L); /* open the standard libraries */
-    luaopen_gt(gtr->L);    /* open all GenomeTools libraries */
-    luaopen_lfs(gtr->L);   /* open Lua filesystem */
-    luaopen_lpeg(gtr->L);  /* open LPeg library */
+    luaL_openlibs(gtr->L);    /* open the standard libraries */
+    luaopen_gt(gtr->L);       /* open all GenomeTools libraries */
+    luaopen_lfs(gtr->L);      /* open Lua filesystem */
+    luaopen_lpeg(gtr->L);     /* open LPeg library */
+    luaopen_md5_core(gtr->L); /* open MD5 library */
     had_err = lua_set_modules_path(gtr->L, err);
   }
 #ifdef LIBGTVIEW
