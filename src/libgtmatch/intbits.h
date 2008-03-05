@@ -72,10 +72,11 @@ typedef uint32_t Bitstring;
 /*@unused@*/ static inline void byte2string(char *buffer,unsigned char bs)
 {
   unsigned int i;
+  unsigned char mask;
 
-  for (i=0; i < 8U; i++)
+  for (i=0, mask = (unsigned char) 128; i < 8U; i++, mask >>= 1)
   {
-    buffer[i] = ISBITSET((Bitstring) bs,i) ? '1' : '0';
+    buffer[i] = (bs & mask) ? '1' : '0';
   }
   buffer[8] = '\0';
 }
@@ -83,10 +84,11 @@ typedef uint32_t Bitstring;
 /*@unused@*/ static inline void uint32_t2string(char *buffer,uint32_t bs)
 {
   unsigned int i;
+  uint32_t mask;
 
-  for (i=0; i < 32U; i++)
+  for (i=0, mask = (uint32_t) 2147483648U; i < 32U; i++, mask >>= 1)
   {
-    buffer[i] = ISBITSET((Bitstring) bs,i) ? '1' : '0';
+    buffer[i] = (bs & mask) ? '1' : '0';
   }
   buffer[32] = '\0';
 }

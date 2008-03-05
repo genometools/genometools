@@ -174,6 +174,11 @@ int testencodedsequence(const StrArray *filenametab,
 {
   bool haserr = false;
 
+  if (hasfastspecialrangeenumerator(encseq))
+  {
+    STAMP;
+    checkextractunitatpos(encseq);
+  }
   if (trials > 0)
   {
     if (testscanatpos(encseq,
@@ -191,9 +196,6 @@ int testencodedsequence(const StrArray *filenametab,
       haserr = true;
     }
   }
-  /*
-  checkextractunitatpos(encseq);
-  */
   return haserr ? -1 : 0;
 }
 
