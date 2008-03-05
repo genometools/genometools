@@ -176,7 +176,6 @@ int testencodedsequence(const StrArray *filenametab,
 
   if (hasfastspecialrangeenumerator(encseq))
   {
-    STAMP;
     checkextractunitatpos(encseq);
   }
   if (trials > 0)

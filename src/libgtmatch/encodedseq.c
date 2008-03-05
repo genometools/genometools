@@ -2038,12 +2038,6 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   return encseq;
 }
 
-typedef struct
-{
-  Twobitencoding tbe;
-  unsigned int prefix;
-} PrefixofTwobitencoding;
-
 static Seqpos getnextstoppos(const Encodedsequence *encseq,
                              Encodedsequencescanstate *esr,
                              Seqpos pos)
@@ -2096,17 +2090,23 @@ static Seqpos getnextstoppos(const Encodedsequence *encseq,
   return encseq->totallength;
 }
 
-static void extractunitatpos(PrefixofTwobitencoding *ptbe,
-                      const Encodedsequence *encseq,
-                      Encodedsequencescanstate *esr,
-                      Seqpos startpos)
+typedef struct
+{
+  Twobitencoding tbe;
+  unsigned int prefix;
+} PrefixofTwobitencoding;
+
+static void extracttwobitencoding(PrefixofTwobitencoding *ptbe,
+                                  const Encodedsequence *encseq,
+                                  Encodedsequencescanstate *esr,
+                                  Seqpos startpos)
 {
   Seqpos stoppos;
 
   assert(encseq->sat != Viadirectaccess);
   if (encseq->sat == Viabitaccess)
   {
-    fprintf(stderr,"extractunitatpos for bitaccess not implemented\n");
+    fprintf(stderr,"extracttwobitencoding for bitaccess not implemented yet\n");
     exit(EXIT_FAILURE);
   }
   stoppos = getnextstoppos(encseq,esr,startpos);
@@ -2139,14 +2139,17 @@ static void extractunitatpos(PrefixofTwobitencoding *ptbe,
       {
         ptbe->tbe |= encseq->twobitencoding[unit+1] >>
                      (MAXSHIFTRIGHTUNITSIN2BITENC - shiftval);
+      } else
+      {
+        assert(ptbe->prefix < (unsigned int) UNITSIN2BITENC);
       }
     }
   }
 }
 
-static void extractunitatpos_bruteforce(PrefixofTwobitencoding *ptbe,
-                                 const Encodedsequence *encseq,
-                                 Seqpos startpos)
+static void extracttwobitencoding_bruteforce(PrefixofTwobitencoding *ptbe,
+                                             const Encodedsequence *encseq,
+                                             Seqpos startpos)
 {
   Uchar cc;
   Seqpos pos;
@@ -2196,6 +2199,9 @@ static void showsequenceatstartpos(const Encodedsequence *encseq,
   fprintf(stderr,"\"\n");
 }
 
+#define MASKPREFIX(PFX)\
+        ~(((Twobitencoding) 1 << MULT2(UNITSIN2BITENC - (PFX))) - 1)
+
 static bool comparetbe(Twobitencoding tbe1,Twobitencoding tbe2,
                        unsigned int prefix)
 {
@@ -2210,7 +2216,7 @@ static bool comparetbe(Twobitencoding tbe1,Twobitencoding tbe2,
     return (tbe1 == tbe2) ? true : false;
   }
   assert(prefix < (unsigned int) UNITSIN2BITENC);
-  mask = ~(((Twobitencoding) 1 << MULT2(UNITSIN2BITENC - prefix)) - 1);
+  mask = MASKPREFIX(prefix);
   assert(mask > 0);
   if ((tbe1 & mask) == (tbe2 & mask))
   {
@@ -2239,13 +2245,8 @@ void checkextractunitatpos(const Encodedsequence *encseq)
   initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
   for (startpos = 0; startpos < encseq->totallength; startpos++)
   {
-    extractunitatpos(&ptbe1,
-                     encseq,
-                     esr,
-                     startpos);
-    extractunitatpos_bruteforce(&ptbe2,
-                                encseq,
-                                startpos);
+    extracttwobitencoding(&ptbe1,encseq,esr,startpos);
+    extracttwobitencoding_bruteforce(&ptbe2,encseq,startpos);
     if (ptbe1.prefix != ptbe2.prefix)
     {
       fprintf(stderr,"pos " FormatSeqpos
@@ -2264,15 +2265,58 @@ void checkextractunitatpos(const Encodedsequence *encseq)
   freeEncodedsequencescanstate(&esr);
 }
 
-/*
-int compareEncseqsequences(Seqpos *lcp,const Encodedsequence *encseq,
-                           Seqos pos1,Seqpos pos2)
+static int requiredUIntTwobitencoding(uint32_t v)
 {
-  unsigned long unit1 = (unsigned long) DIVBYUNITSIN2BITENC(pos1),
-                unit2 = (unsigned long) DIVBYUNITSIN2BITENC(pos2),
-                offset1 = MODBYUNITSIN2BITENC(pos1),
-                offset2 = MODBYUNITSIN2BITENC(pos1);
+  int r;
+  static const int MultiplyDeBruijnBitPosition[32] = {
+    1, 2, 29, 3, 30, 15, 25, 4, 31, 23, 21, 16, 26, 18, 5, 9,
+    32, 28, 14, 24, 22, 20, 17, 8, 27, 13, 19, 7, 12, 6, 11, 10
+  };
+  v |= v >> 1; /* first round down to power of 2 */
+  v |= v >> 2;
+  v |= v >> 4;
+  v |= v >> 8;
+  v |= v >> 16;
+  v = (v >> 1) + 1;
+  r = MultiplyDeBruijnBitPosition[(v * (uint32_t)0x077CB531UL) >> 27];
+  return r;
 }
-*/
+
+int compareEncseqsequences(Seqpos *lcp,
+                           const Encodedsequence *encseq,
+                           Encodedsequencescanstate *esr1,
+                           Encodedsequencescanstate *esr2,
+                           Seqpos pos1,Seqpos pos2)
+{
+  PrefixofTwobitencoding ptbe1, ptbe2;
+  Twobitencoding mask;
+  unsigned int firstdiffbitfromleft;
+
+  *lcp = 0;
+  initEncodedsequencescanstate(esr1,encseq,Forwardmode,pos1);
+  initEncodedsequencescanstate(esr2,encseq,Forwardmode,pos2);
+  while (true)
+  {
+    extracttwobitencoding(&ptbe1,encseq,esr1,pos1);
+    extracttwobitencoding(&ptbe2,encseq,esr2,pos2);
+    if (ptbe1.prefix < ptbe2.prefix) /* ISSPECIAL(seq1[ptbe1.prefix])  */
+    {
+      mask = MASKPREFIX(ptbe1.prefix);
+      ptbe1.tbe &= mask;
+      ptbe2.tbe &= mask;
+      if (ptbe1.tbe == ptbe2.tbe)
+      {
+        *lcp += ptbe1.prefix;
+        return -1;
+      }
+      assert((ptbe1.tbe ^ ptbe2.tbe) > 0);
+      firstdiffbitfromleft = (unsigned int)
+                             MULT2(UNITSIN2BITENC) -
+                             requiredUIntTwobitencoding(ptbe1.tbe ^ ptbe2.tbe);
+      *lcp += DIV2(firstdiffbitfromleft);
+      return -1;
+    }
+  }
+}
 
 #endif /* ifndef INLINEDENCSEQ */
