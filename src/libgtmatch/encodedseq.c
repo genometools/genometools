@@ -585,7 +585,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
   uint64_t sum,
            sizeoftwobitencoding
              = (uint64_t) detunitsoftwobitencoding(totallength) *
-               sizeof (Twobitencoding);
+               (uint64_t) sizeof (Twobitencoding);
 
   switch (sat)
   {
@@ -1696,7 +1696,10 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
   encseq->twobitencoding = NULL;
-  if (sat == Viauchartables || sat == Viaushorttables || sat == Viauint32tables)
+  if (sat == Viabitaccess ||
+      sat == Viauchartables || 
+      sat == Viaushorttables || 
+      sat == Viauint32tables)
   {
     encseq->unitsoftwobitencoding = detunitsoftwobitencoding(totallength);
   } else
@@ -2041,7 +2044,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
 typedef struct
 {
   Twobitencoding tbe;
-  unsigned int units;
+  unsigned int prefix;
 } PrefixofTwobitencoding;
 
 static Seqpos getnextstoppos(const Encodedsequence *encseq,
