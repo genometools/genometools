@@ -323,6 +323,31 @@ static bool genome_nodes_are_sorted_and_do_not_overlap(Array *exon_nodes)
 }
 #endif
 
+static void mRNA_set_target_attribute(GenomeFeature *mRNA_feature,
+                                      Array *spliced_alignments_in_form,
+                                      const void *set_of_sas, size_t size_of_sa)
+{
+  GenomeNode *sa_node;
+  unsigned long i;
+  Str *targets;
+  assert(mRNA_feature && spliced_alignments_in_form);
+  targets = str_new();
+  for (i = 0; i < array_size(spliced_alignments_in_form); i++) {
+    sa_node = *(GenomeNode**)
+              (set_of_sas +
+              *(unsigned long*) array_get(spliced_alignments_in_form, i) *
+              size_of_sa);
+    if (genome_feature_get_attribute(sa_node, "Target")) {
+      if (str_length(targets))
+        str_append_char(targets, ',');
+      str_append_cstr(targets, genome_feature_get_attribute(sa_node, "Target"));
+    }
+  }
+  if (str_length(targets))
+    genome_feature_add_attribute(mRNA_feature, "Target", str_get(targets));
+  str_delete(targets);
+}
+
 static void process_splice_form(Array *spliced_alignments_in_form,
                                 const void *set_of_sas,
                                 unsigned long number_of_sas,
@@ -405,6 +430,8 @@ static void process_splice_form(Array *spliced_alignments_in_form,
                                     NULL, UNDEF_ULONG);
   genome_node_set_seqid(mRNA_feature, info->seqid);
   genome_feature_set_source(mRNA_feature, info->gth_csa_source_str);
+  mRNA_set_target_attribute((GenomeFeature*) mRNA_feature,
+                            spliced_alignments_in_form, set_of_sas, size_of_sa);
   genome_node_is_part_of_genome_node(info->gene_feature, mRNA_feature);
   for (i = 0; i < array_size(exon_nodes); i++) {
     genome_node_is_part_of_genome_node(mRNA_feature,
