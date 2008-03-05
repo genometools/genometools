@@ -30,20 +30,20 @@
 #define TOPOS_OPTION_STR    "topos"
 
 typedef struct {
-  Str *pattern;
+  Str *pattern,
+      *ginum;
   unsigned long frompos,
                 topos,
                 width;
   OutputFileInfo *ofi;
   GenFile *outfp;
-  Str *str_ginumberfile;
 } ExtractSeqArguments;
 
 static void* gt_extractseq_arguments_new(void)
 {
   ExtractSeqArguments *arguments = ma_calloc(1, sizeof *arguments);
   arguments->pattern = str_new();
-  arguments->str_ginumberfile = str_new();
+  arguments->ginum = str_new();
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -54,8 +54,8 @@ static void gt_extractseq_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
+  str_delete(arguments->ginum);
   str_delete(arguments->pattern);
-  str_delete(arguments->str_ginumberfile);
   ma_free(arguments);
 }
 
@@ -94,10 +94,9 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, match_option);
 
   /* -ginum */
-  ginum_option = option_new_filename("ginum",
-                                       "extract substrings for gi numbers "
-                                       "in specified file",
-                                       arguments->str_ginumberfile);
+  ginum_option = option_new_filename("ginum", "extract substrings for gi "
+                                     "numbers in specified file",
+                                     arguments->ginum);
   option_parser_add_option(op, ginum_option);
 
   /* -width */
@@ -189,7 +188,7 @@ static int gt_extractseq_runner(int argc, const char **argv,
 
   error_check(err);
   assert(arguments);
-  if (str_length(arguments->str_ginumberfile) > 0)
+  if (str_length(arguments->ginum))
   {
     if (argc == 0)
     {
@@ -208,7 +207,7 @@ static int gt_extractseq_runner(int argc, const char **argv,
       if (extractginumbers(true,
                            arguments->outfp,
                            arguments->width,
-                           arguments->str_ginumberfile,
+                           arguments->ginum,
                            referencefiletab,
                            err) != 1)
       {
