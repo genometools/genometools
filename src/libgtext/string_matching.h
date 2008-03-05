@@ -15,33 +15,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SPLITTER_H
-#define SPLITTER_H
+#ifndef STRING_MATCHING_H
+#define STRING_MATCHING_H
 
-#include "libgtcore/error.h"
+#include <stdbool.h>
 
-typedef struct Splitter Splitter;
+/* Gets called for every match. If it returns true, the matching is stopped. */
+typedef bool (*ProcessMatch)(unsigned long pos, void *data);
 
-Splitter*     splitter_new(void);
+/* Boyer-Moore-Horspool (O(n*m) time worst-case; sublinear on average). */
+void string_matching_bmh(const char *s, unsigned long n,
+                         const char *p, unsigned long m,
+                         ProcessMatch, void *data);
 
-/* split <string> of given <length> into tokens delimited by 'delimiter'.
-   <string> is modified in the splitting process! */
-void          splitter_split(Splitter*, char *string, unsigned long length,
-                             char delimiter);
-
-/* get all tokens */
-char**        splitter_get_tokens(Splitter*);
-
-/* get token with number <token_num> */
-char*         splitter_get_token(Splitter*, unsigned long token_num);
-
-/* reset the splitter */
-void          splitter_reset(Splitter*);
-
-/* returns the number of tokens */
-unsigned long splitter_size(Splitter*);
-
-int           splitter_unit_test(Error*);
-void          splitter_delete(Splitter*);
+/* Shift-And algorithm (O(n*(m/|w|) time, |w| is the word size). */
+void string_matching_shift_and(const char *s, unsigned long n,
+                               const char *p, unsigned long m,
+                               ProcessMatch, void *data);
 
 #endif

@@ -20,32 +20,34 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtext/toolbox.h"
 #include "tools/gt_dev.h"
+#include "tools/gt_extracttarget.h"
 #include "tools/gt_guessprot.h"
+#include "tools/gt_maxpairs.h"
+#include "tools/gt_mergeesa.h"
+#include "tools/gt_paircmp.h"
+#include "tools/gt_patternmatch.h"
 #include "tools/gt_regioncov.h"
 #include "tools/gt_seqiterator.h"
 #include "tools/gt_sfxmap.h"
-#include "tools/gt_trieins.h"
-#include "tools/gt_mergeesa.h"
-#include "tools/gt_maxpairs.h"
-#include "tools/gt_paircmp.h"
-#include "tools/gt_patternmatch.h"
 #include "tools/gt_skproto.h"
+#include "tools/gt_trieins.h"
 
 static void* gt_dev_arguments_new(void)
 {
   Toolbox *dev_toolbox = toolbox_new();
   /* add development tools here with a function call like this:
      toolbox_add(dev_toolbox, "devtool", gt_devtool); */
+  toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
   toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
-  toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
-  toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
-  toolbox_add(dev_toolbox, "seqiterator", gt_seqiterator);
-  toolbox_add(dev_toolbox, "trieins", gt_trieins);
-  toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
-  toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
-  toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
+  toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
   toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
+  toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
+  toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
+  toolbox_add(dev_toolbox, "seqiterator", gt_seqiterator);
+  toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
+  toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
+  toolbox_add(dev_toolbox, "trieins", gt_trieins);
   return dev_toolbox;
 }
 
