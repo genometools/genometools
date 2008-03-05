@@ -64,7 +64,7 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   ExtractSeqArguments *arguments = tool_arguments;
   OptionParser *op;
   Option *frompos_option, *topos_option, *match_option, *width_option,
-         *ginumberoption;
+         *ginum_option;
   assert(arguments);
 
   /* init */
@@ -94,11 +94,11 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, match_option);
 
   /* -ginum */
-  ginumberoption = option_new_filename("ginum",
+  ginum_option = option_new_filename("ginum",
                                        "extract substrings for gi numbers "
                                        "in specified file",
                                        arguments->str_ginumberfile);
-  option_parser_add_option(op, ginumberoption);
+  option_parser_add_option(op, ginum_option);
 
   /* -width */
   width_option = option_new_ulong("width", "set output width for showing of "
@@ -116,8 +116,8 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   /* option exclusions */
   option_exclude(frompos_option, match_option);
   option_exclude(topos_option, match_option);
-  option_exclude(frompos_option, ginumberoption);
-  option_exclude(match_option, ginumberoption);
+  option_exclude(frompos_option, ginum_option);
+  option_exclude(match_option, ginum_option);
 
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
   return op;
