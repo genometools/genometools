@@ -39,8 +39,8 @@ a manual}
 \section{Introduction} \label{Introduction}
 
 This document describes the \MetagenomeThreader, a software tool
-for \textit{de novo} predictions of genes in sequences of metagenomeprojects.
-The \MetagenomeThreader is based on the algorithem von Krause et al \cite{krause}.
+for the prediction of genes in sequences of metagenome projects.
+The \MetagenomeThreader is based on the algorithem from Krause et al \cite{krause}.
 For the prediction of EGTs (Environmental Gene Tags) the metagenome sequences are
 blasted against a nucleotide database and the resultig BLAST-hits are used to
 compute a combined score for every position in a DNA-sequence. The combinded score
@@ -71,13 +71,13 @@ Some text is highlighted by different fonts according to the following rules.
 \subsection{The functionality of the \MetagenomeThreader} \label{Functional}
 
 The \MetagenomeThreader needs 3 data sets. It will be assumed that the metagenome
-sequences are at hand. The BLAST-hits will then be generated through a BLAST of 
-the metagenomesequences against a nucleotide database such as nt from NCBI.
+sequences are at hand. The BLAST-hits will then be generated through a BLAST of
+the metagenome-sequences against a nucleotide database such as nt from NCBI.
 \Attention Generating the BLAST-hits is not part of the \MetagenomeThreader and
-has to be done manually. The resulting BLAST-hits have to be saved in XML-format.
-If the BLAST-hits are genereated, the hit-seqeunces can be achived through the
+has to be done preliminary. The resulting BLAST-hits have to be saved in XML-format.
+If the BLAST-hits are genereated, the hit-sequences can be achieved through the
 \MetagenomeThreader. For the generation of the hit-sequence file the \MetagenomeThreader
-needs a local copy of a nucleotide database, such as nt from NCBI, which will be scaned
+needs a local copy of a nucleotide database, such as nt from NCBI, which will be scanned
 during the \MetagenomeThreader processing. You can download a nucleotide database
 from
 \\
@@ -88,11 +88,13 @@ from
 The \MetagenomeThreader will be installed and is ready for use after the
 installation of the \GenomeTools (see \cite{genometools} for installation instructions).
 There are two different installation possibilities of the \GenomeTools in relation to the \MetagenomeThreader.
-The standard installation installs the \MetagenomeThreader without the cURL-module.
-If you want to install the \MetagenomeThreader including the cURL-Module you have to install the
-\GenomeTools with the command \texttt{make curl="yes"}. It is only meaningful if your PC has a internet connection.
-With the cURL-Module missing Hit-Sequences will be query online otherwise they
-will be ignored during the computation of the EGTs.
+The standard installation installs the
+\\
+\MetagenomeThreader without the cURL-module.
+If you want to install the \MetagenomeThreader including the cURL-module, you have to install the
+\GenomeTools with the command \texttt{make curl="yes"}. A connection to the internet is required to use the
+curl module. With the curl-module, the MetagenomeThreader will run a online query for
+missing hit-sequences, otherwise they will be ignored during the computation of the EGT's.
 
 \subsection{The Options of the \MetagenomeThreader} \label{Overview}
 
@@ -101,15 +103,15 @@ Since \MetagenomeThreader is part of \Gt, the \MetagenomeThreader is called as f
 \Gtmgth $[$\emph{options}$]$ \XMLFile \MGFile \HitFile
 
 where \XMLFile denotes the XML formatted BLAST-hit file, \MGFile the FASTA formatted
-metagenomesequences file and \HitFile the FASTA formatted hit-sequences file.
+metagenome-sequences file and \HitFile the FASTA formatted hit-sequences file.
 The \XMLFile has to be created with a BLAST-Program. Because of the dimension of the
-resulting files in metagenomeprojects a online BLAST ist not advisable or practicable.
+resulting files in metagenome projects a online BLAST ist not advisable or practicable.
 The hit-sequence file may be empty at the first program call.
-All three Files have to be given at every program call and could also be zipped files
+All three Files have to be given at every program call and can also be zipped files
 (\texttt{\small{.gz}}).
 An overview of all possible options with a short one-line descripton of 
 each option is given in Table \ref{overviewOpt}.
-All options can be specified only once.
+All options can only be specified once.
 
 \begin{table}[htbp]
 \caption{Overview of the \MetagenomeThreader Options.}
@@ -304,13 +306,13 @@ is $1$.
 Specify the computing mode. If \Showoption{m} is set to \Showoptionarg{yes},
 the specified scores are used, if there are equal amino acids, otherwise they are
 used if the amino acids are different. The \Showoption{m} has only experimental status.
-Results are notchecked.
+Results are not checked.
 If this option is not selected by the user, the default value of $m$ is \Showoptionarg{no}.
 }
 
 \Option{g}{\Showoptionarg{yes}$|$\Showoptionarg{no}}{
 Specify if the testmode should be use to make the results comparable in the \GenomeTools
-testsuite. This option is not relevant for normal use of the \MetagenomeThreader.
+test suite. This option is not relevant for normal use of the \MetagenomeThreader.
 If this option is not selected by the user, the default value of $g$
 is \Showoptionarg{no}.
 }
@@ -392,11 +394,11 @@ to the sequence length of all hit-sequences used for the EGT prediction
 In the HTML-format the GI-number of the BLAST-hits is a hyperlink to the
 linked NCBI entry.
 
-\Attention It is recommend that you save the hit-sequence file at two
-different location because if you use a existing hit-sequence file and
-forget to use the -t option without the argument true the hit-sequence file
-will be overwritten and you have to scan the nucleotide database and/or query
-the hit-sequences online again.
+\Attention It is recommended that the hit-sequence file is stored at two
+different locations because if an existing hit-sequence file is used and
+the \MetagenomeThreader is called without \Showoption{t} \Showoptionarg{yes} the hit-sequence file
+will be overwritten and a new scan of the nucleotide database and/or online query of the
+hit-sequences has to be performed.
 
 %\bibliographystyle{plain}
 %\bibliography{references}
