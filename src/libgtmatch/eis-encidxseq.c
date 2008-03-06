@@ -23,6 +23,11 @@
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-encidxseqpriv.h"
 
+enum {
+  AVG_RANGE_RANK_INTERVAL = 128, /**< do range rank queries
+                                  * approximately at this interval  */
+};
+
 void
 deleteEncIdxSeq(EISeq *seq)
 {
@@ -56,7 +61,7 @@ const char *EISIntegrityCheckResultStrings[] =
       fprintf(stderr, "At position "FormatSeqpos                        \
               ", rank operation yielded  wrong count: "FormatSeqpos     \
               ", expected "FormatSeqpos" for symbol %d\n",              \
-              pos, rankQueryResult, rankExpect, symEnc);                \
+              pos, rankQueryResult, rankExpect, rankCmpSym);            \
       break;                                                            \
     }                                                                   \
     EISPrintDiagsForPos(seqIdx, pos, stderr, hint);                     \
@@ -104,9 +109,13 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
   numRanges = MRAEncGetNumRanges(alphabet);
   do
   {
-    Seqpos rankTable[alphabetSize], rangeRanks[alphabetSize];
-    int symRead;
+    Seqpos rankTable[alphabetSize], rangeRanks[2][alphabetSize],
+      pairRangeRanks[2* alphabetSize], lastRangeRankPos = 0;
+    int symRead, rt = 0;
+    AlphabetRangeID lastRangeID = 0;
+    unsigned rankCmpSym;
     memset(rankTable, 0, sizeof (rankTable));
+    memset(rangeRanks, 0, sizeof (rangeRanks));
     if (skip > 0)
     {
       Seqpos len = EISLength(seqIdx);
@@ -139,35 +148,54 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
       ++rankTable[symOrig];
       if (chkFlags & EIS_VERIFY_EXT_RANK)
       {
-        unsigned sym;
-        for (sym = 0; sym < alphabetSize; ++sym)
-          if ((rankExpect = rankTable[sym])
+        for (rankCmpSym = 0; rankCmpSym < alphabetSize; ++rankCmpSym)
+          if ((rankExpect = rankTable[rankCmpSym])
               != (rankQueryResult
-                  = EISSymTransformedRank(seqIdx, sym, pos + 1, hint)))
+                  = EISSymTransformedRank(seqIdx, rankCmpSym, pos + 1, hint)))
             verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
       }
       else
       {
+        rankCmpSym = symEnc;
         if ((rankExpect = rankTable[symEnc])
             != (rankQueryResult = EISSymTransformedRank(seqIdx, symEnc,
                                                         pos + 1, hint)))
           verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
       }
       /* do rank for full range on some occasions */
-      if (!(random() % 128))
+      if (!(random() % AVG_RANGE_RANK_INTERVAL))
       {
         unsigned i;
-        AlphabetRangeSize numSymsInRange;
+        AlphabetRangeSize rangeSize;
         AlphabetRangeID range = random() % numRanges;
         Symbol rangeBase = MRAEncGetRangeBase(alphabet, range);
-        numSymsInRange = MRAEncGetRangeSize(alphabet, range);
-        EISRangeRank(seqIdx, range, pos + 1, rangeRanks, hint);
-        for (i = 0; i < numSymsInRange; ++i)
+        rangeSize = MRAEncGetRangeSize(alphabet, range);
+        EISRangeRank(seqIdx, range, pos + 1, rangeRanks[rt], hint);
+        for (i = 0; i < rangeSize; ++i)
         {
-          if ((rankQueryResult = rangeRanks[i])
-              != (rankExpect = rankTable[rangeBase + i]))
+          rankCmpSym = rangeBase + i;
+          if ((rankQueryResult = rangeRanks[rt][i])
+              != (rankExpect = rankTable[rankCmpSym]))
             verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
         }
+        if (range == lastRangeID)
+        {
+          EISPosPairRangeRank(seqIdx, range, lastRangeRankPos, pos + 1,
+                              pairRangeRanks, hint);
+          for (i = 0; i < rangeSize; ++i)
+          {
+            rankCmpSym = rangeBase + i;
+            if ((rankQueryResult = pairRangeRanks[rangeSize + i])
+                != (rankExpect = rankTable[rankCmpSym]))
+              verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+            if ((rankQueryResult = pairRangeRanks[i])
+                != (rankExpect = rangeRanks[rt ^ 1][rankCmpSym]))
+              verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+          }
+        }
+        lastRangeID =
+        lastRangeRankPos = pos + 1;
+        rt ^= 1;
       }
       ++pos;
       if (tickPrint && !(pos % tickPrint))

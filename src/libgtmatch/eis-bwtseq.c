@@ -267,12 +267,13 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
     return 0;
   /* FIXME: this should probably be handled in chardef.h to have a
    * unique mapping */
-  MRAEncAddSymbolToRange(alphabet, SEPARATOR - 3, 1);
+  /* FIXME: this assumes there is exactly two ranges */
+  MRAEncAddSymbolToRange(alphabet, bwtTerminatorSym, 1);
   assert(MRAEncGetSize(alphabet) ==  alphabetSize + 1);
   alphabetSize = MRAEncGetSize(alphabet);
   bwtSeq->bwtTerminatorFallback = bwtTerminatorFlat =
     MRAEncMapSymbol(alphabet, UNDEFBWTCHAR);
-
+  bwtSeq->bwtTerminatorFallbackRange = 1;
   bwtSeq->count = counts;
   bwtSeq->seqIdx = seqIdx;
   bwtSeq->alphabetSize = alphabetSize;

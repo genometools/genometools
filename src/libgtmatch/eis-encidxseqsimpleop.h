@@ -83,6 +83,13 @@ EISRangeRank(EISeq *seq, AlphabetRangeID range, Seqpos pos, Seqpos *rankCounts,
   return seq->classInfo->rangeRank(seq, range, pos, rankCounts, hint);
 }
 
+static inline void
+EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, Seqpos posA, Seqpos posB,
+                    Seqpos *rankCounts, union EISHint *hint)
+{
+  seq->classInfo->posPairRangeRank(seq, range, posA, posB, rankCounts, hint);
+}
+
 static inline struct SeqposPair
 EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, Seqpos posA, Seqpos posB,
                              union EISHint *hint)

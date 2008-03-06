@@ -16,8 +16,13 @@
 #ifndef EIS_BWTSEQPRIV_H
 #define EIS_BWTSEQPRIV_H
 
+#include "libgtcore/chardef.h"
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-encidxseq.h"
+
+enum {
+  bwtTerminatorSym = SEPARATOR - 3,
+};
 
 struct BWTSeq
 {
@@ -29,6 +34,7 @@ struct BWTSeq
   Symbol bwtTerminatorFallback;  /**< the terminator symbol has been
                                   * flattened into this symbol for
                                   * storage reasons */
+  AlphabetRangeID bwtTerminatorFallbackRange;
   Seqpos longest;
   Seqpos *count;
   int featureToggles;

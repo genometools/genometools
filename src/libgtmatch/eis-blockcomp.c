@@ -1402,8 +1402,8 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos posA,
     Symbol bSym = MRAEncMapSymbol(seqIdx->blockMapAlphabet, eSym);
     unsigned blockSize = seqIdx->blockSize, bitsPerCompositionIdx
       = seqIdx->compositionTable.compositionIdxBits,
-      inBlockPosA = blockNumA % seqIdx->bucketBlocks,
-      inBlockPosB = blockNumB % seqIdx->bucketBlocks;
+      inBucketBlockNumA = blockNumA % seqIdx->bucketBlocks,
+      inBucketBlockNumB = blockNumB % seqIdx->bucketBlocks;
 #ifdef USE_SBLOCK_CACHE
     sBlock = cacheFetchSuperBlock(seqIdx, bucketNum,
                                   &hint->bcHint.sBlockCache);
@@ -1412,7 +1412,7 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos posA,
 #endif
     rankCounts.a = sBlockGetPartialSymSum(sBlock, bSym, seqIdx);
     walkCompIndicesPrefix(
-      seqIdx, sBlock, inBlockPosA, cwIdxMemOffset,
+      seqIdx, sBlock, inBucketBlockNumA, cwIdxMemOffset,
       rankCounts.a += symCountFromComposition(
         &seqIdx->compositionTable, seqIdx->blockMapAlphabetSize, compIndex,
         bSym),
@@ -1423,7 +1423,7 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos posA,
                             rankCounts.a, cwIdxMemOffset, varDataMemOffset,
                             bitsPerCompositionIdx);
     walkCompIndices(
-      seqIdx, sBlock, inBlockPosB - inBlockPosA, cwIdxMemOffset,
+      seqIdx, sBlock, inBucketBlockNumB - inBucketBlockNumA, cwIdxMemOffset,
       rankCounts.b += symCountFromComposition(
         &seqIdx->compositionTable, seqIdx->blockMapAlphabetSize, compIndex,
         bSym),
@@ -1559,7 +1559,6 @@ blockCompSeqRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
     {
       BitOffset varDataMemOffset, cwIdxMemOffset;
       struct superBlock *sBlock;
-/*       Symbol bSym = MRAEncMapSymbol(seqIdx->blockMapAlphabet, eSym); */
       Seqpos blockNum, bucketNum;
       unsigned blockSize = seqIdx->blockSize;
       bucketNum = bucketNumFromPos(seqIdx, pos);
@@ -1599,6 +1598,90 @@ blockCompSeqRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
       for (sym = 0; sym < rangeEncNumSyms; ++sym)
         rankCounts[sym] = SRLSymbolCountInSeqRegion(
           seqIdx->rangeEncs, 0, pos,
+          MRAEncRevMapSymbol(seqIdx->rangeMapAlphabet, sym),
+          &hint->bcHint.rangeHint);
+    }
+    break;
+  }
+}
+
+static void
+blockCompSeqPosPairRangeRank(
+  struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
+  Seqpos posA, Seqpos posB, Seqpos *rankCounts, union EISHint *hint)
+{
+  struct blockCompositionSeq *seqIdx;
+  assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
+  seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
+  assert(range >= 0 && range < MRAEncGetNumRanges(EISGetAlphabet(eSeqIdx)));
+  switch (seqIdx->modes[range])
+  {
+  case BLOCK_COMPOSITION_INCLUDE:
+    {
+      BitOffset varDataMemOffset, cwIdxMemOffset;
+      struct superBlock *sBlock;
+      AlphabetRangeSize rsize = MRAEncGetRangeSize(eSeqIdx->alphabet, range);
+      /* Only when both positions are in same bucket, special treatment
+       * makes sense. */
+      Seqpos bucketNum = bucketNumFromPos(seqIdx, posA);
+      if (bucketNum != bucketNumFromPos(seqIdx, posB))
+      {
+        blockCompSeqRangeRank(eSeqIdx, range, posA, rankCounts, hint);
+        blockCompSeqRangeRank(eSeqIdx, range, posB, rankCounts + rsize, hint);
+        return;
+      }
+#ifdef USE_SBLOCK_CACHE
+      sBlock = cacheFetchSuperBlock(seqIdx, bucketNum,
+                                    &hint->bcHint.sBlockCache);
+#else
+      sBlock = fetchSuperBlock(seqIdx, bucketNum, NULL);
+#endif
+      {
+        Seqpos blockNumA = blockNumFromPos(seqIdx, posA),
+          blockNumB = blockNumFromPos(seqIdx, posB);
+        unsigned blockSize = seqIdx->blockSize,
+          inBucketBlockNumA = blockNumA % seqIdx->bucketBlocks,
+          inBucketBlockNumB = blockNumB % seqIdx->bucketBlocks;
+        sBlockGetPartialSymSums(sBlock, seqIdx, rankCounts);
+        walkCompIndicesPrefix(
+          seqIdx, sBlock, inBucketBlockNumA, cwIdxMemOffset,
+          addSymCountsFromComposition(&seqIdx->compositionTable,
+                                      seqIdx->blockMapAlphabetSize, compIndex,
+                                      rankCounts);,
+          varDataMemOffset);
+        memcpy(rankCounts + rsize, rankCounts, rsize * sizeof (rankCounts[0]));
+        adjustRanksForBlock(seqIdx, sBlock, posA, blockSize, rankCounts,
+                            cwIdxMemOffset, varDataMemOffset);
+        walkCompIndices(
+          seqIdx, sBlock, inBucketBlockNumB - inBucketBlockNumA, cwIdxMemOffset,
+          addSymCountsFromComposition(&seqIdx->compositionTable,
+                                      seqIdx->blockMapAlphabetSize, compIndex,
+                                      rankCounts + rsize);,
+          varDataMemOffset);
+        adjustRanksForBlock(seqIdx, sBlock, posB, blockSize, rankCounts,
+                            cwIdxMemOffset, varDataMemOffset);
+        {
+          Seqpos base = bucketBasePos(seqIdx, bucketNum);
+          rankCounts[seqIdx->blockEncFallback]
+            -= SRLAllSymbolsCountInSeqRegion(
+              seqIdx->rangeEncs, base, posA, &hint->bcHint.rangeHint);
+          rankCounts[rsize + seqIdx->blockEncFallback]
+            -= SRLAllSymbolsCountInSeqRegion(
+              seqIdx->rangeEncs, base, posB, &hint->bcHint.rangeHint);
+        }
+      }
+#ifndef USE_SBLOCK_CACHE
+      deleteSuperBlock(sBlock);
+#endif
+    }
+    break;
+  case REGIONS_LIST:
+    {
+      AlphabetRangeSize sym,
+        rangeEncNumSyms = MRAEncGetSize(seqIdx->rangeMapAlphabet);
+      for (sym = 0; sym < rangeEncNumSyms; ++sym)
+        rankCounts[sym] = SRLSymbolCountInSeqRegion(
+          seqIdx->rangeEncs, 0, posA,
           MRAEncRevMapSymbol(seqIdx->rangeMapAlphabet, sym),
           &hint->bcHint.rangeHint);
     }
@@ -2717,6 +2800,7 @@ static const struct encIdxSeqClass blockCompositionSeqClass =
   .rank = blockCompSeqRank,
   .posPairRank = blockCompSeqPosPairRank,
   .rangeRank = blockCompSeqRangeRank,
+  .posPairRangeRank = blockCompSeqPosPairRangeRank,
   .select = blockCompSeqSelect,
   .get = blockCompSeqGet,
   .newHint = newBlockCompSeqHint,

@@ -172,8 +172,8 @@ BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos posA, Seqpos posB);
  * @param bwtSeq reference of object to query
  * @param range range of symbols in alphabet to query
  * @param pos right bound of BWT prefix queried
- * @param rangeOccs write ranks for all symbols in range to this
- * array. The referenced memory must be sized appropriately to
+ * @param rangeOccs occurrence counts for all symbols in range are written to
+ * this array. The referenced memory must be sized appropriately to
  * accomodate as many symbols as are in range (MRAEncGetRangeSize if
  * in doubt) and rangeOccs[i] will hold the occurrence count of symbol
  * MRAEncRevMapSymbol(alphabet, i + MRAEncGetRangeBase(alphabet, range))
@@ -184,6 +184,27 @@ BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
 
 /* XXx: range 0 for range = 0 for regular symbols;
    Seqpos rangeOcc[4]; */
+
+/**
+ * \brief Query BWT sequence for the number of occurences of all symbols in a
+ * given alphabet range and BWT sequence prefix.
+ * @param bwtSeq reference of object to query
+ * @param range range of symbols in alphabet to query
+ * @param pos right bound of BWT prefix queried
+ * @param rangeOccs occurrence counts for all symbols in range are written to
+ * this array. The referenced memory must be sized appropriately to
+ * accomodate two-times as many positions symbols as are in range
+ * (use MRAEncGetRangeSize if in doubt) and rangeOccs[i] will hold the
+ * occurrence count of symbol
+ * MRAEncRevMapSymbol(alphabet, i + MRAEncGetRangeBase(alphabet, range))
+ * up to position posA while the corresponding is true for
+ * rangeOccs[rangeSize + i] concerning posB
+ * @param hint provides cache and direction information for queries
+ * based on previous queries
+ */
+static inline void
+BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
+               Seqpos *rangeOccs);
 
 /**
  * \brief Given a position in the L-column of the matrix of rotations,

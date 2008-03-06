@@ -246,15 +246,40 @@ EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, Seqpos posA, Seqpos posB,
  * @param seq sequence index object to query
  * @param range compute rank counts for all symbols in this range
  * @param pos occurences are counted up to (but not including) this position
- * @param rankCounts
+ * @param rankCounts ranks for all symbols in range are written to this
+ * array. The referenced memory must be sized appropriately to
+ * accomodate as many symbols as are in range (MRAEncGetRangeSize if
+ * in doubt) and rankCounts[i] will hold the occurrence count of symbol
+ * MRAEncRevMapSymbol(alphabet, i + MRAEncGetRangeBase(alphabet, range))
  * @param hint provides cache and direction information for queries
  * based on previous queries
- * @return members a and b of returned struct contain Occ results for
- * posA and posB respectively
  */
 static inline void
 EISRangeRank(EISeq *seq, AlphabetRangeID range, Seqpos pos, Seqpos *rankCounts,
              union EISHint *hint);
+
+/**
+ * \brief Return number of occurrences of all symbols in selected
+ * range in index up to but not including given position.
+ *
+ * @param seq sequence index object to query
+ * @param range compute rank counts for all symbols in this range
+ * @param posA occurences are counted up to (but not including) this position
+ * @param posB occurences are counted up to (but not including) this position
+ * @param rankCounts ranks for all symbols in range are written to this
+ * array. The referenced memory must be sized appropriately to
+ * accomodate two-times as many positions symbols as are in range
+ * (use MRAEncGetRangeSize if in doubt) and rankCounts[i] will hold the
+ * occurrence count of symbol
+ * MRAEncRevMapSymbol(alphabet, i + MRAEncGetRangeBase(alphabet, range))
+ * up to position posA while the corresponding is true for
+ * rankCounts[rangeSize + i] concerning posB
+ * @param hint provides cache and direction information for queries
+ * based on previous queries
+ */
+static inline void
+EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, Seqpos posA, Seqpos posB,
+                    Seqpos *rankCounts, union EISHint *hint);
 
 /**
  * Presents the bits previously stored by a bitInsertFunc callback.
