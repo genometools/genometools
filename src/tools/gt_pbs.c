@@ -30,14 +30,6 @@
 #include "libgtltr/repeattypes.h"
 #include "libgtltr/ltrharvest-opt.h"
 
-typedef struct {
-  unsigned int radius,
-               ali_min_len,
-               max_offset,
-               max_offset_trna,
-               max_edist;
-} PBSOptions;
-
 static OPrval parse_options(int *parsed_args, PBSOptions *opts, int argc,
                             const char **argv, Error *err)
 {
@@ -142,7 +134,6 @@ int gt_findpbs(int argc, const char **argv, Error *err)
   int parsed_args, had_err = 0;
   Bioseq *trnas, *fastas;
   PBSOptions opts;
-  LTRharvestoptions lo;
   Array *annos;
 
   /* option parsing */
@@ -152,15 +143,10 @@ int gt_findpbs(int argc, const char **argv, Error *err)
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
 
-  lo.pbs_aliminlen = opts.ali_min_len;
-  lo.pbs_maxedist = opts.max_edist;
-  lo.pbs_radius = opts.radius;
-  lo.pbs_maxoffset_5_ltr = opts.max_offset;
-  lo.pbs_maxoffset_trna = opts.max_offset_trna;
-  lo.pbs_ali_score_match = 5;
-  lo.pbs_ali_score_mismatch = -10;
-  lo.pbs_ali_score_insertion = -20;
-  lo.pbs_ali_score_deletion = -20;
+  opts.ali_score_match = 5;
+  opts.ali_score_mismatch = -10;
+  opts.ali_score_insertion = -20;
+  opts.ali_score_deletion = -20;
 
   /* get sequences from FASTA file */
   trnas = bioseq_new(argv[parsed_args], err);
@@ -181,7 +167,7 @@ int gt_findpbs(int argc, const char **argv, Error *err)
                    line,
                    seq_length(seq),
                    trnas,
-                   &lo,
+                   &opts,
                    err);
 
     if(hit)

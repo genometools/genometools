@@ -27,10 +27,20 @@
 #include "libgtltr/repeattypes.h"
 #include "libgtltr/ltrharvest-opt.h"
 
-/* This struct holds information about a primer binding site (PBS). */
-typedef struct PBS_Hit PBS_Hit;
+typedef struct PBSOptions {
+  unsigned int radius,
+               ali_min_len,
+               max_offset,
+               max_offset_trna,
+               max_edist;
+  int ali_score_match,
+      ali_score_mismatch,
+      ali_score_insertion,
+      ali_score_deletion;
+} PBSOptions;
 
-struct PBS_Hit {
+/* This struct holds information about a primer binding site (PBS). */
+typedef struct PBS_Hit {
   unsigned long start,
                 end,
                 edist,
@@ -40,7 +50,7 @@ struct PBS_Hit {
   Strand strand;
   double score;
   const char *trna;
-};
+} PBS_Hit;
 
 /* Aligns tRNA from a library to the LTR retrotransposon candidate and
    returns highest-scoring hit (newly created). */
@@ -48,7 +58,7 @@ PBS_Hit* pbs_find(const char *seq,
                   LTRboundaries *line,
                   unsigned long seqlen,
                   Bioseq *trna_lib,
-                  LTRharvestoptions *lo,
+                  PBSOptions *lo,
                   Error *err);
 
 #endif

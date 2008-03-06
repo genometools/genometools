@@ -80,11 +80,11 @@ unsigned long ppt_find(const char *seq,
                        unsigned long seqlen,
                        unsigned long ltrlen,
                        Array *results,
-                       LTRharvestoptions *lo,
+                       PPTOptions *o,
                        double score_func(unsigned long, unsigned int),
                        Strand strand)
 {
-  assert(seq && seqlen>0 && ltrlen>0 && results && score_func && lo
+  assert(seq && seqlen>0 && ltrlen>0 && results && score_func && o
           && strand != STRAND_UNKNOWN && strand != STRAND_BOTH);
   unsigned int *encoded_seq=NULL,
                *decoded=NULL;
@@ -104,7 +104,7 @@ unsigned long ppt_find(const char *seq,
   }
 
   /* make sure that we do not cross the LTR boundary */
-  radius = MIN(lo->ppt_radius, ltrlen);
+  radius = MIN(o->radius, ltrlen);
 
   /* use Viterbi algorithm to decode emissions within radius */
   decoded = ma_malloc(sizeof (unsigned int) * 2*radius+2);
@@ -123,9 +123,9 @@ unsigned long ppt_find(const char *seq,
     if (decoded[i+1] != decoded[i] || i+2==2*radius)
     {
       if ((cur_hit->state == PPT_IN
-           && cur_hit->end-cur_hit->start+1 >= lo->ppt_minlen)
+           && cur_hit->end-cur_hit->start+1 >= o->ppt_minlen)
           || (cur_hit->state == PPT_UBOX
-           && cur_hit->end-cur_hit->start+1 >= lo->ubox_minlen))
+           && cur_hit->end-cur_hit->start+1 >= o->ubox_minlen))
         array_add(results, cur_hit);
       else {
         cur_hit->state = PPT_OUT;

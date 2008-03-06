@@ -22,10 +22,10 @@
 #include "libgtcore/minmax.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/array.h"
-#include "libgtltr/pbs.h"
 #include "libgtcore/bioseq.h"
 #include "libgtext/reverse.h"
 #include "libgtext/swalign.h"
+#include "libgtltr/pbs.h"
 
 static ScoreFunction* dna_scorefunc_new(Alpha *a, int match, int mismatch,
                                         int insertion, int deletion)
@@ -58,7 +58,7 @@ static double pbs_score_func(unsigned long edist, unsigned long offset,
           /penalties;
 }
 
-static void pbs_add_hit(Dlist *hitlist, Alignment *ali, LTRharvestoptions *lo,
+static void pbs_add_hit(Dlist *hitlist, Alignment *ali, PBSOptions *o,
                         unsigned long trna_seqlen, const char *desc,
                         Strand strand, unsigned long seqoffset)
 {
@@ -69,10 +69,10 @@ static void pbs_add_hit(Dlist *hitlist, Alignment *ali, LTRharvestoptions *lo,
   dist = alignment_eval(ali);
   urange = alignment_get_urange(ali);
   vrange = alignment_get_vrange(ali);
-  if (dist <= lo->pbs_maxedist
-        && abs(lo->pbs_radius-urange.start) <= lo->pbs_maxoffset_5_ltr
-        && abs(urange.end-urange.start+1) >= lo->pbs_aliminlen
-        && vrange.start <= lo->pbs_maxoffset_trna)
+  if (dist <= o->max_edist
+        && abs(o->radius-urange.start) <= o->max_offset
+        && abs(urange.end-urange.start+1) >= o->ali_min_len
+        && vrange.start <= o->max_offset_trna)
   {
     hit = ma_malloc(sizeof (PBS_Hit));
     hit->strand  = strand;
@@ -84,10 +84,10 @@ static void pbs_add_hit(Dlist *hitlist, Alignment *ali, LTRharvestoptions *lo,
     else if (strand == STRAND_REVERSE)
       hit->start   = seqoffset - urange.end;
     hit->end     = urange.end;
-    hit->offset  = abs(lo->pbs_radius-urange.start);
+    hit->offset  = abs(o->radius-urange.start);
     hit->edist   = dist;
     hit->score   = pbs_score_func(dist,
-                                  abs(lo->pbs_radius-urange.start),
+                                  abs(o->radius-urange.start),
                                   urange.end-urange.start+1,
                                   trna_seqlen,
                                   vrange.start);
@@ -109,7 +109,7 @@ PBS_Hit* pbs_find(const char *seq,
                   LTRboundaries *line,
                   unsigned long seqlen,
                   Bioseq *trna_lib,
-                  LTRharvestoptions *lo,
+                  PBSOptions *o,
                   Error *err)
 {
   Seq *seq_forward, *seq_rev;
@@ -119,10 +119,10 @@ PBS_Hit* pbs_find(const char *seq,
   Alignment *ali;
   Alpha *a = (Alpha*) alpha_new_dna();
   ScoreFunction *sf = dna_scorefunc_new(a,
-                                        lo->pbs_ali_score_match,
-                                        lo->pbs_ali_score_mismatch,
-                                        lo->pbs_ali_score_insertion,
-                                        lo->pbs_ali_score_deletion);
+                                        o->ali_score_match,
+                                        o->ali_score_mismatch,
+                                        o->ali_score_insertion,
+                                        o->ali_score_deletion);
 
   /* We use a Dlist to maintain an ordered list of high-scoring local
      alignments. If this is not used in the future, a simple maximization
@@ -134,17 +134,17 @@ PBS_Hit* pbs_find(const char *seq,
   memcpy(seq_rev_full, seq, sizeof(char)*seqlen);
   reverse_complement(seq_rev_full, seqlen, err);
 
-  seqoffset = line->leftLTR_3-lo->pbs_radius;
-  seqoffset_rev = line->rightLTR_5+lo->pbs_radius;
+  seqoffset = line->leftLTR_3-o->radius;
+  seqoffset_rev = line->rightLTR_5+o->radius;
 
   seq_forward = seq_new(seq+
-                          line->leftLTR_3-line->leftLTR_5-lo->pbs_radius+1,
-                        2*lo->pbs_radius,
+                          line->leftLTR_3-line->leftLTR_5-o->radius+1,
+                        2*o->radius,
                         a);
 
   seq_rev     = seq_new(seq_rev_full+
-                          line->rightLTR_3-line->rightLTR_5-lo->pbs_radius+1,
-                        2*lo->pbs_radius,
+                          line->rightLTR_3-line->rightLTR_5-o->radius+1,
+                        2*o->radius,
                         a);
 
   for(j=0;j<bioseq_number_of_sequences(trna_lib);j++)
@@ -162,13 +162,13 @@ PBS_Hit* pbs_find(const char *seq,
     trna_from3 = seq_new_own(trna_from3_full, trna_seqlen, a);
 
     ali = swalign(seq_forward, trna_from3, sf);
-    pbs_add_hit(hitlist,ali,lo,trna_seqlen,
+    pbs_add_hit(hitlist,ali,o,trna_seqlen,
                 seq_get_description(trna_seq), STRAND_FORWARD,
                 seqoffset);
     alignment_delete(ali);
 
     ali = swalign(seq_rev, trna_from3, sf);
-    pbs_add_hit(hitlist,ali,lo,trna_seqlen,
+    pbs_add_hit(hitlist,ali,o,trna_seqlen,
                 seq_get_description(trna_seq), STRAND_REVERSE,
                 seqoffset_rev);
     alignment_delete(ali);

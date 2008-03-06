@@ -33,13 +33,11 @@
 #define CSV_SEQ_SPACING 10
 
 typedef struct {
-  unsigned int ppt_minlen,
-               ubox_minlen,
-               radius;
+  PPTOptions *opts;
   bool csv;
-} HMMTestOptions;
+} PPTToolOptions;
 
-static OPrval parse_options(int *parsed_args, HMMTestOptions *opts, int argc,
+static OPrval parse_options(int *parsed_args, PPTToolOptions *opts, int argc,
                             const char **argv, Error *err)
 {
   OptionParser *op;
@@ -50,14 +48,14 @@ static OPrval parse_options(int *parsed_args, HMMTestOptions *opts, int argc,
                          "Find and score polypurine tracts in LTRharvest "
                          "predictions.");
   option = option_new_uint("pptminlen", "minimum length for PPTs",
-                          &opts->ppt_minlen, 6);
+                          &opts->opts->ppt_minlen, 6);
   option_parser_add_option(op, option);
   option = option_new_uint("uboxminlen", "minimum length for U-boxes",
-                          &opts->ubox_minlen, 3);
+                          &opts->opts->ubox_minlen, 3);
   option_parser_add_option(op, option);
   option = option_new_uint("radius", "radius around beginning of 3' LTR "
                                     "to search in",
-                          &opts->radius, 40);
+                          &opts->opts->radius, 40);
   option_parser_add_option(op, option);
   option = option_new_bool("csv", "print output in CSV format",
                           &opts->csv, 0);
@@ -90,7 +88,7 @@ static void print_str_upper(char* str)
 
 static void output_tabular(Array *results, LTRboundaries *b,
                            unsigned long index, const char *seqoffset,
-                           LTRharvestoptions options)
+                           PPTOptions *options)
 {
   unsigned long i;
   PPT_Hit *hit;
@@ -110,14 +108,14 @@ static void output_tabular(Array *results, LTRboundaries *b,
   printf("\n");
 
   /* print reference sequence */
-  prseq = ma_malloc(sizeof (char) * 2*options.ppt_radius+1);
+  prseq = ma_malloc(sizeof (char) * 2*options->radius+1);
   strncpy(prseq,
           seqoffset-1,
-          2*options.ppt_radius);
-  prseq[2*options.ppt_radius] = '\0';
+          2*options->radius);
+  prseq[2*options->radius] = '\0';
   printf("%s\n", prseq);
 
-  for (i=0;i<options.ppt_radius;i++)
+  for (i=0;i<options->radius;i++)
   {
     printf(" ");
   }
@@ -151,7 +149,7 @@ static void output_tabular(Array *results, LTRboundaries *b,
 }
 
 static void output_csv(PPT_Hit *showhit, LTRboundaries *b,
-                       LTRharvestoptions *options,
+                       PPTOptions *options,
                        const char *seqoffset)
 {
   if (showhit)
@@ -168,7 +166,7 @@ static void output_csv(PPT_Hit *showhit, LTRboundaries *b,
     {
       case STRAND_FORWARD:
         printf("+;");
-        startpos = b->rightLTR_5-options->ppt_radius;
+        startpos = b->rightLTR_5-options->radius;
         printf("%lu;", startpos+s);
         printf("%lu;", e-s+1);
         if (showhit->ubox)
@@ -181,7 +179,7 @@ static void output_csv(PPT_Hit *showhit, LTRboundaries *b,
         break;
       case STRAND_REVERSE:
         printf("-;");
-        startpos = b->leftLTR_3+options->ppt_radius;
+        startpos = b->leftLTR_3+options->radius;
         printf("%lu;", startpos-e);
         printf("%lu;", e-s+1);
         if (showhit->ubox)
@@ -247,10 +245,11 @@ int gt_findppt(int argc, const char **argv, Error *err)
   unsigned long seqindex;
   int parsed_args, had_err = 0;
   Bioseq *bs;
-  HMMTestOptions opts;
   long nofseq;
   Array *ltrboundaries;
-  LTRharvestoptions options;
+  PPTOptions options;
+  PPTToolOptions opts;
+  opts.opts = &options;
 
   /* option parsing */
   switch (parse_options(&parsed_args, &opts, argc, argv, err)) {
@@ -259,9 +258,9 @@ int gt_findppt(int argc, const char **argv, Error *err)
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
 
-  options.ppt_minlen = opts.ppt_minlen;
-  options.ubox_minlen = opts.ubox_minlen;
-  options.ppt_radius = opts.radius;
+  options.ppt_minlen = opts.opts->ppt_minlen;
+  options.ubox_minlen = opts.opts->ubox_minlen;
+  options.radius = opts.opts->radius;
 
   /* get sequences from FASTA file */
   bs = bioseq_new(argv[parsed_args], err);
@@ -320,9 +319,9 @@ int gt_findppt(int argc, const char **argv, Error *err)
 
         /* precalculate search offsets in sequences */
         seqoffset = seqc+(seqlen-(line->rightLTR_3-line->rightLTR_5)
-                     -options.ppt_radius);
+                     -options.radius);
         seqoffset_m = seqc_m+(seqlen-(line->leftLTR_3-line->leftLTR_5)
-                     -options.ppt_radius);
+                     -options.radius);
 
         /* run PPT identification on both strands */
         results_p = array_new(sizeof (PPT_Hit*));
@@ -367,7 +366,7 @@ int gt_findppt(int argc, const char **argv, Error *err)
                   line,
                   idx_p,
                   seqoffset,
-                  options);
+                  &options);
         }
         else
         {
@@ -381,7 +380,7 @@ int gt_findppt(int argc, const char **argv, Error *err)
                   line,
                   idx_m,
                   seqoffset_m,
-                  options);
+                  &options);
         }
 
         /* free stuff */

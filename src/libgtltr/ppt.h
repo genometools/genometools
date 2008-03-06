@@ -25,6 +25,12 @@
 #include "libgtltr/repeattypes.h"
 #include "libgtltr/ltrharvest-opt.h"
 
+typedef struct {
+  unsigned int ppt_minlen,
+               ubox_minlen,
+               radius;
+} PPTOptions;
+
 /* This enumeration defines the states in the PPT detection HMM. */
 typedef enum {
   PPT_IN,
@@ -60,7 +66,7 @@ unsigned long ppt_find(const char *seq,
                        unsigned long seqlen,
                        unsigned long ltrlen,
                        Array *results,
-                       LTRharvestoptions *lo,
+                       PPTOptions *opts,
                        double score_func(unsigned long, unsigned int),
                        Strand strand);
 
