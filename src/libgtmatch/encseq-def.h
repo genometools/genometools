@@ -22,6 +22,7 @@
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
+#include "libgtcore/unused.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "readmode-def.h"
@@ -183,5 +184,13 @@ void encseqextract(Uchar *buffer,
                    Seqpos topos);
 
 void checkextractunitatpos(const Encodedsequence *encseq);
+
+int compareEncseqsequences(Seqpos *lcp,
+                           const Encodedsequence *encseq,
+                           Encodedsequencescanstate *esr1,
+                           Encodedsequencescanstate *esr2,
+                           Seqpos pos1,Seqpos pos2,
+                           Seqpos depth,
+                           UNUSED Seqpos totallength);
 
 #endif

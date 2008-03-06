@@ -59,10 +59,20 @@
 #define LCPINDEX(I)       (Seqpos) ((I) - lcpsubtab->suftabbase)
 #define SETLCP(I,V)       lcpsubtab->spaceSeqpos[I] = V
 
-#define STRINGCOMPARE(S,T,OFFSET,LL)\
+#undef FASTSTRINGCOMPARE
+#ifdef  FASTSTRINGCOMPARE
+#define STRINGCOMPARE(RET,S,T,OFFSET,LL)\
+        RET = compareEncseqsequences(&(LL),encseq,esr1,esr2,S,T,OFFSET,\
+                                     totallength);
+#else
+
+#define STRINGCOMPARE(RET,S,T,OFFSET,LL)\
+        Suffixptr sptr, tptr;\
         for (sptr = (S)+(OFFSET), tptr = (T)+(OFFSET); /* Nothing */;\
              sptr++, tptr++)\
         {\
+          Seqpos ccs, cct;\
+          Uchar tmpsvar, tmptvar;\
           if (maxdepth->defined)\
           {\
             ccs = DEREFMAXDEPTH(tmpsvar,S,sptr);\
@@ -75,9 +85,11 @@
           if (ccs != cct)\
           {\
             LL = (Seqpos) (tptr - (T));\
+            RET = (ccs < cct) ? -1 : 1;\
             break;\
           }\
         }
+#endif
 
 #define SWAP(A,B)\
         if ((A) != (B))\
@@ -191,38 +203,47 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
 
 static void insertionsort(const Encodedsequence *encseq,
                           Lcpsubtab *lcpsubtab,
-                          Readmode readmode,
+                          UNUSED Readmode readmode,
                           Seqpos totallength,
                           Seqpos depth,
                           Suffixptr *leftptr,
                           Suffixptr *rightptr,
                           UNUSED const Definedunsignedint *maxdepth)
 {
-  Suffixptr sptr, tptr, *pi, *pj, temp;
-  Seqpos ccs, cct, lcpindex, lcplen;
-  Uchar tmpsvar, tmptvar;
-
+  Suffixptr *pi, *pj;
+  Seqpos lcpindex, lcplen;
+  int retval;
+#ifdef  FASTSTRINGCOMPARE
+  Encodedsequencescanstate *esr1, *esr2;
+  esr1 = newEncodedsequencescanstate();
+  esr2 = newEncodedsequencescanstate();
+#endif
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
     for (pj = pi; pj > leftptr; pj--)
     {
-      STRINGCOMPARE(*(pj-1),*pj,depth,lcplen);
+      Suffixptr temp;
+      STRINGCOMPARE(retval,*(pj-1),*pj,depth,lcplen);
       if (lcpsubtab != NULL)
       {
         lcpindex = LCPINDEX(pj);
-        if (ccs > cct && pj < pi)
+        if (retval > 0 && pj < pi)
         {
           SETLCP(lcpindex+1,lcpsubtab->spaceSeqpos[lcpindex]);
         }
         SETLCP(lcpindex,lcplen);
       }
-      if (ccs < cct)
+      if (retval < 0)
       {
         break;
       }
       SWAP(pj,pj-1);
     }
   }
+#ifdef  FASTSTRINGCOMPARE
+  freeEncodedsequencescanstate(&esr1);
+  freeEncodedsequencescanstate(&esr2);
+#endif
 }
 
 typedef struct
