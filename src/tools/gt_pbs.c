@@ -57,8 +57,9 @@ static OPrval parse_options(int *parsed_args, PBSOptions *opts, int argc,
   option_parser_add_option(op, option);
 
   option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 3, 3, err);
+  option_parser_set_min_max_args(op, 3, 3);
+  oprval = option_parser_parse(op, parsed_args, argc, argv,
+                               versionfunc, err);
 
   if (oprval == OPTIONPARSER_OK && !file_exists(argv[*parsed_args]))
   {

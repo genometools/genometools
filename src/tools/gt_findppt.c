@@ -61,8 +61,9 @@ static OPrval parse_options(int *parsed_args, PPTToolOptions *opts, int argc,
                           &opts->csv, 0);
   option_parser_add_option(op, option);
   option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 2, 2, err);
+  option_parser_set_min_max_args(op, 2, 2);
+  oprval = option_parser_parse(op, parsed_args, argc, argv,
+                               versionfunc, err);
 
   if (oprval == OPTIONPARSER_OK && !file_exists(argv[*parsed_args]))
   {
