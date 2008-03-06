@@ -132,6 +132,12 @@ Test do
   run_test "#{$bin}gt #{$cur}/src/external/lpeg-0.7/test.lua"
 end
 
+Name "MD5 library"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$cur}/src/external/md5-1.1.1/tests/test.lua"
+end
+
 Name "gtdoc"
 Keywords "gt_scripts gtdoc"
 Test do
