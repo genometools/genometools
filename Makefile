@@ -166,6 +166,8 @@ LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
            $(LUA_DIR)/loadlib.c $(LUA_DIR)/linit.c \
            src/external/md5-1.1.1/src/md5.c\
            src/external/md5-1.1.1/src/md5lib.c\
+           src/external/md5-1.1.1/src/des56.c\
+           src/external/md5-1.1.1/src/ldes56.c\
            src/external/luafilesystem-1.3.0/src/lfs.c\
            src/external/lpeg-0.7/lpeg.c
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)

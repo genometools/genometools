@@ -23,6 +23,7 @@
 #include "lfs.h"
 #include "lpeg.h"
 #include "md5.h"
+#include "ldes56.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/fa.h"
@@ -74,6 +75,7 @@ GTR* gtr_new(Error *err)
     luaopen_lfs(gtr->L);      /* open Lua filesystem */
     luaopen_lpeg(gtr->L);     /* open LPeg library */
     luaopen_md5_core(gtr->L); /* open MD5 library */
+    luaopen_des56(gtr->L);
     had_err = lua_set_modules_path(gtr->L, err);
   }
 #ifdef LIBGTVIEW
