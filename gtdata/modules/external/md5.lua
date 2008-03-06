@@ -4,8 +4,19 @@
 
 local core = require"md5.core"
 local string = require"string"
+local pairs  = _G.pairs
+local assert = _G.assert
+local md5 = _G.md5
 
 module ("md5")
+
+-- export md5.core to md5
+for k, v in pairs(core) do
+  if k ~= "_M" and k ~= "_NAME" and k~= "_PACKAGE" then
+    assert(not md5[k]) -- symbol is undefined
+    md5[k] = v -- export symbol
+  end
+end
 
 ----------------------------------------------------------------------------
 -- @param k String with original message.
