@@ -1,0 +1,519 @@
+
+Parametereinstellungen
+ Synonymic Value: 4.1200
+ Nonsynonymic Value: 2.9000
+ Blasthit-End Value: -10.0000
+ Query-Stopcodon-Value: -7.5000
+ Hit-Stopcodon-Value: -2.0000
+ Frameshift-Span: 211.0000
+ Prediction-Span: 300.0000
+ Leavegene-Value: -0.5000
+ Curl-DB: nucleotide
+ Output-Filename: Pyrococcus_horikoshii
+ Output-Fileformat: 1
+ Hitfile (yes=1/no=0): 1
+ Min Protein-Length (>=15): 17
+ Min Result-Percentage: 0.1300
+ Extended-Modus (yes=1/no=0): 0
+ Homology-Modus (yes=1/no=0): 0
+ Codon-Modus (yes=1/no=0): 3
+
+Query-DNA-Entry-Section
+
+Query-DNA-Def: read_01|beg|115|length|892|forward|matePair|read_02|chimeric|false|gi
+Query_DNA-Sequence:
+tcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataacctccttaaataatacgtcaatggatttctgatgtatttacagtgcttatcgggagtgcacaattgtggggcgttagcccttatcttttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttcaattattatcggtaaaatttcctcagttattactctaatgtcctttatacagtctttaaccctaacgttcctccttggtgggttt
+
+Coding-DNA-Entry-Section
+
+Coding-DNA: 
+caacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatt
+Protein-Seq: EMEGWLGTELVFDIDAKDLPLRRCEHEPGTVCPICLNDAKEIVRDTVIILREELGFNDIHIIYSGRGYHIRVLDEWALKLDSKSRERILSFVSASEIEDV
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6754 to: 7299
+gi-nr: gi|57158259 gi_def: Thermococcus kodakarensis KOD1 DNA, complete genome hsp_num: 3 from: 1599700 to: 1599915
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 546
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+tggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataa
+Protein-Seq: GYTWREEGMLLREVTREERKNFYTNEWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATAPYAVYSSVALYEKPQ
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6754 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 546
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+ttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttca
+Protein-Seq: LKPQIDAHLHYLRINPMRSRISGTTSDLDIQQILASKTAEIPPGTFPQTVK
+Hit-Information Section
+
+
+Coding-DNA: 
+caacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatt
+Protein-Seq: EMEGWLGTELVFDIDAKDLPLRRCEHEPGTVCPICLNDAKEIVRDTVIILREELGFNDIHIIYSGRGYHIRVLDEWALKLDSKSRERILSFVSASEIEDV
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6754 to: 7299
+gi-nr: gi|57158259 gi_def: Thermococcus kodakarensis KOD1 DNA, complete genome hsp_num: 3 from: 1599700 to: 1599915
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 546
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+tggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataa
+Protein-Seq: GYTWREEGMLLREVTREERKNFYTNEWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATAPYAVYSSVALYEKPQ
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6754 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 546
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+ttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttca
+Protein-Seq: LKPQIDAHLHYLRINPMRSRISGTTSDLDIQQILASKTAEIPPGTFPQTVK
+Hit-Information Section
+
+
+Query-DNA-Entry-Section
+
+Query-DNA-Def: read_03|beg|18|length|964|forward|matePair|read_04|chimeric|false|gi
+Query_DNA-Sequence:
+cagtataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataacctccttaaataatacgtcaatggatttctgatgtatttacagtgcttatcgggagtgcacaattgtggggcgttagcccttatcttttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttcaattattatcggtaaaatttcctcagttattactctaatgtcctttatacagtctttaac
+
+Coding-DNA-Entry-Section
+
+Coding-DNA: 
+cagtataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaa
+Protein-Seq: ICLNDAKEIVRDTVIILREELGFNDIHIIYSGRGYHIRVLDEWALKLDSKSRERILSFVSASEIEDVEEFRKLLLNKRGWFVLNHGYPRAFRLRFGYFIL
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6655 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186068 to: 186949
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 645
+
+
+Coding-DNA: 
+tggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggt
+Protein-Seq: YTNEWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATAPYAVYSSVALYEKPQEMEGWLGTELVFDIDAKDLPLRRCEHEPGTVCPI
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6655 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186068 to: 186949
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 645
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+aaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataa
+Protein-Seq: GYTWREEGMLLREVTREERKNFY
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6655 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186068 to: 186949
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 645
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+ttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttca
+Protein-Seq: LKPQIDAHLHYLRINPMRSRISGTTSDLDIQQILASKTAEIPPGTFPQTVK
+Hit-Information Section
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186068 to: 186949
+
+
+Query-DNA-Entry-Section
+
+Query-DNA-Def: read_05|beg|3|length|808|forward|matePair|read_06|chimeric|false|gi
+Query_DNA-Sequence:
+gggaagcttaatcctcagtataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataacctccttaaataatacgtcaatggatttctgatgtatttacagtgcttatcgggagtgcacaattgtggggcgttagcccttatcttttcacagtttgggggaaagtaccaggtggaatttccgct
+
+Coding-DNA-Entry-Section
+
+Coding-DNA: 
+gggaagcttaatcctcagtataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctcctta
+Protein-Seq: AKEIVRDTVIILREELGFNDIHIIYSGRGYHIRVLDEWALKLDSKSRERILSFVSASEIEDVEEFRKLLLNKRGWFVLNHGYPRAFRLRFGYFILRIKLP
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6640 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186056 to: 186859
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 660
+
+
+Coding-DNA: 
+gtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaa
+Protein-Seq: VKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATAPYAVYSSVALYEKPQEMEGWLGTELVFDIDAKDLPLRRCEHEPGTVCPICLNDA
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6640 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186056 to: 186859
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 660
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+cttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataa
+Protein-Seq: GYTWREEGMLLREVTREERKNFYTNEWKV
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6640 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186056 to: 186859
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 660
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+gggaagcttaatcctcagtataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctcctta
+Protein-Seq: AKEIVRDTVIILREELGFNDIHIIYSGRGYHIRVLDEWALKLDSKSRERILSFVSASEIEDVEEFRKLLLNKRGWFVLNHGYPRAFRLRFGYFILRIKLP
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6640 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186056 to: 186859
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 660
+
+
+Coding-DNA: 
+gtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaa
+Protein-Seq: VKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATAPYAVYSSVALYEKPQEMEGWLGTELVFDIDAKDLPLRRCEHEPGTVCPICLNDA
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6640 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186056 to: 186859
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 660
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+cttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataa
+Protein-Seq: GYTWREEGMLLREVTREERKNFYTNEWKV
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6640 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186056 to: 186859
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 660
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Query-DNA-Entry-Section
+
+Query-DNA-Def: read_07|beg|30|length|733|forward|matePair|read_08|chimeric|false|gi
+Query_DNA-Sequence:
+gccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataacctccttaaataatacgtcaatggatttctgatgtatttacagtgcttatcgggagtgcacaattgtggggcgttagc
+
+Coding-DNA-Entry-Section
+
+Coding-DNA: 
+gccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactg
+Protein-Seq: TVCPICLNDAKEIVRDTVIILREELGFNDIHIIYSGRGYHIRVLDEWALKLDSKSRERILSFVSASEIEDVEEFRKLLLNKRGWFVLNHGYPRAFRLRFG
+Hit-Information Section
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186080 to: 186793
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6667 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 633
+
+
+Coding-DNA: 
+tcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttcttt
+Protein-Seq: RKNFYTNEWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATAPYAVYSSVALYEKPQEMEGWLGTELVFDIDAKDLPLRRCEHEPGT
+Hit-Information Section
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186080 to: 186793
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6667 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 633
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+gccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactg
+Protein-Seq: TVCPICLNDAKEIVRDTVIILREELGFNDIHIIYSGRGYHIRVLDEWALKLDSKSRERILSFVSASEIEDVEEFRKLLLNKRGWFVLNHGYPRAFRLRFG
+Hit-Information Section
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186080 to: 186793
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6667 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 633
+
+
+Coding-DNA: 
+tcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttcttt
+Protein-Seq: RKNFYTNEWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATAPYAVYSSVALYEKPQEMEGWLGTELVFDIDAKDLPLRRCEHEPGT
+Hit-Information Section
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186080 to: 186793
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6667 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 633
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Query-DNA-Entry-Section
+
+Query-DNA-Def: read_09|beg|8|length|882|forward|matePair|read_10|chimeric|false|gi
+Query_DNA-Sequence:
+gcttaatcctcagtataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataacctccttaaataatacgtcaatggatttctgatgtatttacagtgcttatcgggagtgcacaattgtggggcgttagcccttatcttttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctca
+
+Coding-DNA-Entry-Section
+
+Coding-DNA: 
+cttaatcctcagtataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgttt
+Protein-Seq: LNDAKEIVRDTVIILREELGFNDIHIIYSGRGYHIRVLDEWALKLDSKSRERILSFVSASEIEDVEEFRKLLLNKRGWFVLNHGYPRAFRLRFGYFILRIK
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6649 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186059 to: 186937
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 651
+
+
+Coding-DNA: 
+agcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccat
+Protein-Seq: EWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATAPYAVYSSVALYEKPQEMEGWLGTELVFDIDAKDLPLRRCEHEPGTVCPICL
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6649 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186059 to: 186937
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 651
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+attggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataa
+Protein-Seq: GYTWREEGMLLREVTREERKNFYTNE
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6649 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186059 to: 186937
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 651
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+ttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcc
+Protein-Seq: RINPMRSRISGTTSDLDIQQILASKTAEIPPGTFPQTVK
+Hit-Information Section
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186059 to: 186937
+
+
+Coding-DNA: 
+cttaatcctcagtataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgttt
+Protein-Seq: LNDAKEIVRDTVIILREELGFNDIHIIYSGRGYHIRVLDEWALKLDSKSRERILSFVSASEIEDVEEFRKLLLNKRGWFVLNHGYPRAFRLRFGYFILRIK
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6649 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186059 to: 186937
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 651
+
+
+Coding-DNA: 
+agcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccat
+Protein-Seq: EWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATAPYAVYSSVALYEKPQEMEGWLGTELVFDIDAKDLPLRRCEHEPGTVCPICL
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6649 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186059 to: 186937
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 651
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+attggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataa
+Protein-Seq: GYTWREEGMLLREVTREERKNFYTNE
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6649 to: 7299
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186059 to: 186937
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 651
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+ttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcc
+Protein-Seq: RINPMRSRISGTTSDLDIQQILASKTAEIPPGTFPQTVK
+Hit-Information Section
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186059 to: 186937
+
+
+Query-DNA-Entry-Section
+
+Query-DNA-Def: read_11|beg|21|length|987|forward|matePair|read_12|chimeric|false|gi
+Query_DNA-Sequence:
+tataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataacctccttaaataatacgtcaatggatttctgatgtatttacagtgcttatcgggagtgcacaattgtggggcgttagcccttatcttttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttcaattattatcggtaaaatttcctcagttattactctaatgtcctttatacagtctttaaccctaacgttcctccttggtgggtttg
+
+Coding-DNA-Entry-Section
+
+Coding-DNA: 
+tataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaatt
+Protein-Seq: PICLNDAKEIVRDTVIILREELGFNDIHIIYSGRGYHIRVLDEWALKLDSKSRERILSFVSASEIEDVEEFRKLLLNKRGWFVLNHGYPRAFRLRFGYFI
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6658 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 642
+
+
+Coding-DNA: 
+acatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggt
+Protein-Seq: YTNEWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATAPYAVYSSVALYEKPQEMEGWLGTELVFDIDAKDLPLRRCEHEPGTVCP
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6658 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 642
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+aaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataa
+Protein-Seq: GYTWREEGMLLREVTREERKNFY
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6658 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 642
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+ttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttca
+Protein-Seq: LKPQIDAHLHYLRINPMRSRISGTTSDLDIQQILASKTAEIPPGTFPQTVK
+Hit-Information Section
+
+
+Coding-DNA: 
+tataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcgatttcactagcagaaacaaatgacaaaattctttccctggacttcgaatctagcttgagggcccattcatccaaaactctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaatt
+Protein-Seq: PICLNDAKEIVRDTVIILREELGFNDIHIIYSGRGYHIRVLDEWALKLDSKSRERILSFVSASEIEDVEEFRKLLLNKRGWFVLNHGYPRAFRLRFGYFI
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6658 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 642
+
+
+Coding-DNA: 
+acatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggt
+Protein-Seq: YTNEWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATAPYAVYSSVALYEKPQEMEGWLGTELVFDIDAKDLPLRRCEHEPGTVCP
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6658 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 642
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+aaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataa
+Protein-Seq: GYTWREEGMLLREVTREERKNFY
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6658 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 642
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+ttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttca
+Protein-Seq: LKPQIDAHLHYLRINPMRSRISGTTSDLDIQQILASKTAEIPPGTFPQTVK
+Hit-Information Section
+
+
+Query-DNA-Entry-Section
+
+Query-DNA-Def: read_13|beg|202|length|749|forward|matePair|read_14|chimeric|false|gi
+Query_DNA-Sequence:
+actctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataacctccttaaataatacgtcaatggatttctgatgtatttacagtgcttatcgggagtgcacaattgtggggcgttagcccttatcttttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttcaattattatcggtaaaatttcctcagtta
+
+Coding-DNA-Entry-Section
+
+Coding-DNA: 
+ctctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcag
+Protein-Seq: TDIRDLEDYIRATAPYAVYSSVALYEKPQEMEGWLGTELVFDIDAKDLPLRRCEHEPGTVCPICLNDAKEIVRDTVIILREELGFNDIHIIYSGRGYHIR
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6841 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 459
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+tatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataa
+Protein-Seq: GYTWREEGMLLREVTREERKNFYTNEWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYT
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6841 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 459
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+ttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttca
+Protein-Seq: LKPQIDAHLHYLRINPMRSRISGTTSDLDIQQILASKTAEIPPGTFPQTVK
+Hit-Information Section
+
+
+Coding-DNA: 
+ctctaatatggtaaccccttccagaatatatgatatgtatgtcattgaatcctaactcctcccttagtattattacggtatccctcactatctccttagcgtcgtttaagcaaattggacatactgttcctggctcatgctcgcaccttcttaacggtaagtccttagcatctatgtcaaagacgagttcagtccctaaccatccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcag
+Protein-Seq: TDIRDLEDYIRATAPYAVYSSVALYEKPQEMEGWLGTELVFDIDAKDLPLRRCEHEPGTVCPICLNDAKEIVRDTVIILREELGFNDIHIIYSGRGYHIR
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6841 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 459
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+tatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataa
+Protein-Seq: GYTWREEGMLLREVTREERKNFYTNEWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYT
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 6841 to: 7299
+gi-nr: gi|9453868 gi_def: Pyrococcus furiosus priA gene for DNA primase, complete cds hsp_num: 1 from: 1 to: 459
+gi-nr: gi|3342818 gi_def: Thermophilic archaeon 'Bonch-Osmolovskaya' primase small subunit homolog gene, complete cds hsp_num: 1 from: 21 to: 341
+
+
+Coding-DNA: 
+ttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttca
+Protein-Seq: LKPQIDAHLHYLRINPMRSRISGTTSDLDIQQILASKTAEIPPGTFPQTVK
+Hit-Information Section
+
+
+Query-DNA-Entry-Section
+
+Query-DNA-Def: read_15|beg|406|length|868|forward|gi
+Query_DNA-Sequence:
+ccctccatttcctggggcttctcataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgagatccctaatgtcagtatattggtttttcctgtcactaggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtccttaaccttccattcattggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataacctccttaaataatacgtcaatggatttctgatgtatttacagtgcttatcgggagtgcacaattgtggggcgttagcccttatcttttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatctatttgcggcttcaattattatcggtaaaatttcctcagttattactctaatgtcctttatacagtctttaaccctaacgttcctccttggtgggtttggacagattcttgcatagctcaaaaagctcgtcaataatacggtaattgcatagttcctaattccctgaggaacaccctttagggcgttcttaatacaagggggaaagaactccggccttagttttcctccttgaatctctccgaattttcttccaaactcttcctccgcaaaggcttggatttcacccagaactttcctgtagaattctgggagttcatctctaatttcgtaaagcatgtttacgcccctttccacattcctctca
+
+Coding-DNA-Entry-Section
+
+Coding-DNA: 
+ataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgag
+Protein-Seq: SRRLHKGHGPLCRLFQRCTL*
+Hit-Information Section
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186459 to: 187205
+
+
+Coding-DNA: 
+aggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtc
+Protein-Seq: GHTRFHCEDIRVKGIWIRSFGRGA*
+Hit-Information Section
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186459 to: 187205
+
+
+Coding-DNA: 
+attggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataacctccttaaataatacgtcaatggatttctgatgtatttacagtgcttatcgggagtgcacaattgtggggcgttagcccttatcttttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatcta
+Protein-Seq: NRCSPPLFEDQPNEIKNIWYHLGFGYTANPSLEDSGNSTWYFPPNCEKIRANAPQLCTPDKHCKYIRNPLTYYLRRLYLEGRRNAPKRGNKRGKKELLHQ*
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 7352 to: 7918
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186459 to: 187205
+gi-nr: gi|57158259 gi_def: Thermococcus kodakarensis KOD1 DNA, complete genome hsp_num: 1 from: 1598889 to: 1599311
+
+
+Coding-DNA: 
+tgcggcttcaattattatcggtaaaatttcctcagttattactctaatgtcctttatacagtctttaaccctaacgttcctccttggtgggtttggacagattcttgcatagctcaaaaagctcgtcaataatacggtaattgcatagttcctaattccctgaggaacaccctttagggcgttcttaatacaagggggaaagaactccggccttagttttcctccttgaatctctccgaattttcttccaaactcttcctccgcaaaggcttggatttcacccagaactttcctgtagaat
+Protein-Seq: EFYRKVLGEIQAFAEEEFGRKFGEIQGGKLRPEFFPPCIKNALKGVPQGIRNYAITVLLTSFLSYARICPNPPRRNVRVKDCIKDIRVITEEILPIIIEAAN
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 7352 to: 7918
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186459 to: 187205
+gi-nr: gi|57158259 gi_def: Thermococcus kodakarensis KOD1 DNA, complete genome hsp_num: 1 from: 1598889 to: 1599311
+
+
+Coding-DNA: 
+ataaagtgcaacgctggaataaacggcatagggggccgtggcccttatgtaatcttcgag
+Protein-Seq: SRRLHKGHGPLCRLFQRCTL*
+Hit-Information Section
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186459 to: 187205
+
+
+Coding-DNA: 
+aggcccctctcccgaatgatcgaatccaaattcccttaactctaatgtcttcacaatgaaatctggtatgtc
+Protein-Seq: GHTRFHCEDIRVKGIWIRSFGRGA*
+Hit-Information Section
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186459 to: 187205
+
+
+Coding-DNA: 
+attggtgtaaaagttctttctttcctctcttgttacctctcttaggagcattccttcttccctccaggtataacctccttaaataatacgtcaatggatttctgatgtatttacagtgcttatcgggagtgcacaattgtggggcgttagcccttatcttttcacagtttgggggaaagtaccaggtggaatttccgctgtcttcgaggctaggatttgctgtatatccaaatccgaggtggtaccagatattcttgatctcattgggttgatcctcaaataatggaggtgagcatcta
+Protein-Seq: NRCSPPLFEDQPNEIKNIWYHLGFGYTANPSLEDSGNSTWYFPPNCEKIRANAPQLCTPDKHCKYIRNPLTYYLRRLYLEGRRNAPKRGNKRGKKELLHQ*
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 7352 to: 7918
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186459 to: 187205
+gi-nr: gi|57158259 gi_def: Thermococcus kodakarensis KOD1 DNA, complete genome hsp_num: 1 from: 1598889 to: 1599311
+
+
+Coding-DNA: 
+tgcggcttcaattattatcggtaaaatttcctcagttattactctaatgtcctttatacagtctttaaccctaacgttcctccttggtgggtttggacagattcttgcatagctcaaaaagctcgtcaataatacggtaattgcatagttcctaattccctgaggaacaccctttagggcgttcttaatacaagggggaaagaactccggccttagttttcctccttgaatctctccgaattttcttccaaactcttcctccgcaaaggcttggatttcacccagaactttcctgtagaat
+Protein-Seq: EFYRKVLGEIQAFAEEEFGRKFGEIQGGKLRPEFFPPCIKNALKGVPQGIRNYAITVLLTSFLSYARICPNPPRRNVRVKDCIKDIRVITEEILPIIIEAAN
+Hit-Information Section
+gi-nr: gi|18892016 gi_def: Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome hsp_num: 1 from: 7352 to: 7918
+gi-nr: gi|5457433 gi_def: Pyrococcus abyssi complete genome; segment 1/6 hsp_num: 1 from: 186459 to: 187205
+gi-nr: gi|57158259 gi_def: Thermococcus kodakarensis KOD1 DNA, complete genome hsp_num: 1 from: 1598889 to: 1599311
+
+
+Statistic-Section
+
+26.3353    Pyrococcus furiosus priA gene for DNA primase, complete cds
+31.5633    Pyrococcus abyssi complete genome; segment 1/6
+29.2915    Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome

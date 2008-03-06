@@ -17,7 +17,8 @@
 
 #include "libgtcore/fileutils.h"
 #include "libgtcore/unused.h"
-#include "libgtmgth/metagenomethreader.h"
+#include "libgtmatch/giextract.pr"
+#include "metagenomethreader.h"
 
 /* Funktion zur Ausgabe des Statistikbereichs
    Parameter: Schluessel, Value, User-Data, Env-Variable
@@ -49,9 +50,11 @@ static OPrval parse_options(int *parsed_args,
    *curlfcgi_option,
    *leavegene_value_option,
    *resulttextfile_name_option,
+   *giexpfile_name_option,
    *hitfile_bool_option,
    *homology_mode_option,
    *extended_mode_option,
+   *testmodus_mode_option,
    *outputfile_format_option,
    *codon_mode_option,
    *min_as_option,
@@ -108,8 +111,8 @@ static OPrval parse_options(int *parsed_args,
      Eintretens eines bzw. in ein Gen ; default: -2 */
   leavegene_value_option =
     option_new_double("l",
-                      "negative score for leaving a gene on forward strand "
-                      "or enter a gene on reverse strand",
+                      "score for leaving a gene on forward/reverse strand "
+                      "or enter a gene on forward/reverse strand",
                       &metagenomethreader_arguments->leavegene_value,
                       -2.0);
   option_parser_add_option(op, leavegene_value_option);
@@ -117,21 +120,22 @@ static OPrval parse_options(int *parsed_args,
   /* Option zur Eingabe des Wertes innerhalb welches Zwischenbereichs ein
      zusammenhaengender Genbereich vorliegt; default: 400 */
   prediction_span_option =
-    option_new_double("p",
-                      "max. span between coding-regions resume as one "
-                      "prediction",
-                      &metagenomethreader_arguments->prediction_span,
-                      400.0);
+    option_new_double_min("p",
+                          "max. span between coding-regions resume as one "
+                          "prediction",
+                          &metagenomethreader_arguments->prediction_span,
+                          400.0, 0.0);
   option_parser_add_option(op, prediction_span_option);
 
   /* Option zur Eingabe des Wertes innerhalb welches Zwischenbereichs ein
      Frameshift vorliegt; default: 200 */
   frameshift_span_option =
-    option_new_double("f",
-                      "max. span between coding-regions in different "
-                      "reading frames resume as one prediction",
-                      &metagenomethreader_arguments->frameshift_span,
-                      200.0);
+    option_new_double_min("f",
+                          "max. span between coding-regions in different "
+                          "reading frames resume as coding-regions in the optimal"
+                          "reading-frame",
+                          &metagenomethreader_arguments->frameshift_span,
+                      200.0, 0.0);
   option_parser_add_option(op, frameshift_span_option);
 
   /* Option zur Eingabe der DB, die bei der Verwendung des fcgi-Skriptes
@@ -148,6 +152,12 @@ static OPrval parse_options(int *parsed_args,
                       metagenomethreader_arguments->outputtextfile_name,
                       "output");
   option_parser_add_option(op, resulttextfile_name_option);
+
+  /* Option zur Angabe der Hit-Sequenz-DB  */
+  giexpfile_name_option =
+    option_new_stringarray("k", "name for the Hit-Sequence-DB",
+                           metagenomethreader_arguments->giexpfile_name);
+  option_parser_add_option(op, giexpfile_name_option);
 
   /* Option zur Angabe, ob ein Hit-FASTA-File exisitiert; default: false */
   hitfile_bool_option =
@@ -192,6 +202,13 @@ static OPrval parse_options(int *parsed_args,
     option_new_bool("m", "search for homology",
                     &metagenomethreader_arguments->homology_mode, false);
   option_parser_add_option(op, homology_mode_option);
+
+  /* Testmodus: die Programm-Parameter werden zur Vergleichbarkeit der Ergebnisse
+     nicht mit ausgegeben; default: false */
+  testmodus_mode_option =
+    option_new_bool("g", "testmodus, output without creating date",
+                    &metagenomethreader_arguments->testmodus_mode, false);
+  option_parser_add_option(op, testmodus_mode_option);
 
   /* Option zur Angabe, ob die EGTs auf den max. ORF erweitert werden
      sollen, default: false */
@@ -242,6 +259,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
 
   ARGUMENTS(curl_fcgi_db) = str_new();
   ARGUMENTS(outputtextfile_name) = str_new();
+  ARGUMENTS(giexpfile_name) = strarray_new();
 
   /* Check der Umgebungsvariablen */
   error_check(err);
@@ -355,6 +373,8 @@ int metagenomethreader(int argc, const char **argv, Error * err)
     parsestruct.hit_flag = UNSET;
     parsestruct.hit_hsp_flag = UNSET;
     parsestruct.xml_tag_flag = UNSET;
+    parsestruct.giexp_flag = UNSET;
+    parsestruct.gi_flag = UNSET;
 
     /* Variablen (Zeilennummer, Fehlercode) zur Fehlerbehandlung waehrend
        des Parsvorganges des XML-Files */
@@ -363,7 +383,8 @@ int metagenomethreader(int argc, const char **argv, Error * err)
 
     /* Zaehlvariablen fuer die Anzahl der Syn- und Nichtsynonymen
        DNA-Austausche */
-    parsestruct.syn = 0.0, parsestruct.non_syn = 0.0;
+    parsestruct.syn = 0.0;
+    parsestruct.non_syn = 0.0;
 
     /* hit_counter zum Zaehlen der Hits pro Hit-GI */
     parsestruct.xmlparser_static.hit_counter = 0;
@@ -420,7 +441,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
       descr_ptr_query =
         (char *) bioseq_get_description(parsestruct.queryseq, loop_index);
       /* Position in der Bioseq in den Speicher querynum schreiben */
-      *(querynum + loop_index) = loop_index;
+      querynum[loop_index] = loop_index;
 
       /* Dem aktuellen Schluessel Zeige auf die Position in der Bioseq
          zuordnen */
@@ -450,7 +471,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
         descr_ptr_hit =
           (char *) bioseq_get_description(parsestruct.hitseq, loop_index);
         /* Position in der Bioseq in den Speicher hitnum schreiben */
-        *(hitnum + loop_index) = loop_index;
+        hitnum[loop_index] = loop_index;
 
         /* Dem aktuellen Schluessel Zeige auf die Position in der Bioseq
            zuordnen */
@@ -503,34 +524,115 @@ int metagenomethreader(int argc, const char **argv, Error * err)
       genfile_open(genfilemode_determine(str_get(outputfilename)),
                    str_get(outputfilename), "a+");
 
-    /* Falls ein Hit-File vorliegt, wird die Datei im a+ Modus
-       geoeffnet->neue Datensaetze werden angehaengt */
-    if (ARGUMENTS(hitfile_bool))
+    if (!ARGUMENTS(hitfile_bool))
     {
-      /* Die Hit-Datei wird mit dem Modus a+ geoeffnet */
-      parsestruct.fp_blasthit_file =
+      Str *gi_numbers_txt;
+      gi_numbers_txt = str_new();
+
+      str_set(gi_numbers_txt, "gi_numbers.txt");
+      unsigned long row_width = 150;
+
+      if (!strarray_size(ARGUMENTS(giexpfile_name)))
+      {
+        strarray_add_cstr(ARGUMENTS(giexpfile_name), "nt.gz");
+      }
+
+      /* Datei fuer die GI-Nr. des XML-Files  */
+      parsestruct.fp_giexp_file =
         genfile_open(genfilemode_determine
-                     (str_get(parsestruct.hit_fastafile)),
-                     str_get(parsestruct.hit_fastafile), "a+");
-    }
-    /* kein Hit-File angegeben - ACHTUNG - ein evt. existierendes Hit-File
-       mit identischem Filename wird ueberschrieben */
-    else
-    {
-      /* Die Hit-Datei wird mit dem Modus w+ geoeffnet */
-      parsestruct.fp_blasthit_file =
-        genfile_open(genfilemode_determine
-                     (str_get(parsestruct.hit_fastafile)),
-                     str_get(parsestruct.hit_fastafile), "w+");
+                     (str_get(gi_numbers_txt)),
+                     str_get(gi_numbers_txt), "w+");
+
+      had_err = mg_xmlparser(parsestruct_ptr, fp_xmlfile, err);
+
+      genfile_close(parsestruct.fp_giexp_file);
+      genfile_close(fp_xmlfile);
+
+      if(!had_err)
+      {
+        parsestruct.giexp_flag = 1;
+
+        /* Die Hit-Datei wird mit dem Modus w+ geoeffnet */
+        parsestruct.fp_blasthit_file =
+          genfile_open(genfilemode_determine
+                       (str_get(parsestruct.hit_fastafile)),
+                       str_get(parsestruct.hit_fastafile), "w+");
+
+        had_err = extractginumbers(true,
+                                   parsestruct.fp_blasthit_file,
+                                   row_width,
+                                   gi_numbers_txt,
+                                   ARGUMENTS(giexpfile_name),
+                                   err);
+
+        genfile_close(parsestruct.fp_blasthit_file);
+
+        if(had_err)
+        {
+          had_err = 0;
+        }
+        /* XXX else XXX */
+
+        if(!had_err)
+	    {
+          parsestruct.hitseq = bioseq_new(argv[parsed_args + 2], err);
+
+          if (!parsestruct.hitseq)
+          {
+            had_err = -1;
+          }
+	      if (!had_err)
+          {
+            /* Anzahl der Hit-DNA-Eintraege */
+            nrofseq = bioseq_number_of_sequences(parsestruct.hitseq);
+            /* Speicherbereich reservieren fuer Zeiger auf die Indices der
+               Hit-DNA-Eintraege in der Bioseq-Struktur */
+            hitnum = ma_calloc(nrofseq, sizeof (unsigned long));
+            /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile;
+               Value - Zeiger
+               auf deren Indices in der Bioseq - Struktur */
+            parsestruct.hithash = hashtable_new(HASH_STRING, NULL, NULL);
+
+            /* Hit-Fasta-File zeilenweise abarbeiten */
+            for (loop_index = 0; loop_index < nrofseq; loop_index++)
+            {
+              /* Der Schluessel ist die Hit-FASTA-Zeile */
+              descr_ptr_hit =
+              (char *) bioseq_get_description(parsestruct.hitseq, loop_index);
+              /* Position in der Bioseq in den Speicher hitnum schreiben */
+              hitnum[loop_index] = loop_index;
+
+             /* Dem aktuellen Schluessel Zeige auf die Position in der Bioseq
+                zuordnen */
+            if (!hashtable_get(parsestruct.hithash, descr_ptr_hit))
+                hashtable_add(parsestruct.hithash, descr_ptr_hit,
+                               hitnum + loop_index);
+            }
+          }
+        }
+      }
     }
 
-    /* Schreiben des Ausgabe-Headers */
-    mg_outputwriter(parsestruct_ptr, NULL, NULL, NULL, 't', err);
+    if (!had_err)
+    {
+      /* Schreiben des Ausgabe-Headers */
+      mg_outputwriter(parsestruct_ptr, NULL, NULL, NULL, 't', err);
 
-    /* Aufruf des xmlparsers; uebergeben werden: Zeiger auf die
-       parser_array-Struktur der Filepointer auf die XML-Datei Zeiger auf
-       die "Programmierumgebung" */
-    had_err = mg_xmlparser(parsestruct_ptr, fp_xmlfile, err);
+      if (!ARGUMENTS(hitfile_bool))
+      {
+        /* Der Name des XML-Files mit den Blast-Hits ist das erste Argument
+           nach dem Programmnamen */
+        fp_xmlfile =
+          genfile_open(genfilemode_determine(argv[parsed_args]),
+                       argv[parsed_args], "r");
+      }
+      parsestruct.giexp_flag = 1;
+
+      /* Aufruf des xmlparsers; uebergeben werden: Zeiger auf die
+         parser_array-Struktur der Filepointer auf die XML-Datei Zeiger auf
+         die "Programmierumgebung" */
+      had_err = mg_xmlparser(parsestruct_ptr, fp_xmlfile, err);
+    }
 
     if (!had_err)
     {
@@ -579,23 +681,21 @@ int metagenomethreader(int argc, const char **argv, Error * err)
     /* Schliessen der XML-, Output-Datei und des Hit-Sequenz-Files */
     genfile_close(fp_xmlfile);
     genfile_close(parsestruct.fp_outputfile);
-    genfile_close(parsestruct.fp_blasthit_file);
 
     /* Hashtable loeschen */
     hashtable_delete(parsestruct.queryhash);
     hashtable_delete(parsestruct.resulthits);
 
-    if (ARGUMENTS(hitfile_bool))
-    {
-      hashtable_delete(parsestruct.hithash);
-      bioseq_delete(parsestruct.hitseq);
-      ma_free(hitnum);
-    }
+    hashtable_delete(parsestruct.hithash);
+    bioseq_delete(parsestruct.hitseq);
+    ma_free(hitnum);
+
     bioseq_delete(parsestruct.queryseq);
   }
 
   str_delete(ARGUMENTS(curl_fcgi_db));
   str_delete(ARGUMENTS(outputtextfile_name));
+  strarray_delete(ARGUMENTS(giexpfile_name));
 
   /* Rueckgabe des Fehlercode */
   return had_err;
@@ -615,7 +715,7 @@ static int printout_hits(UNUSED void *key,
   /* Ausgabe erfolgt nur, wenn der Anteil des Hits ueber dem Wert des
      Metagenomethreader-Argumentes liegt */
   if ((double)
-      (*(HITSTRUCT(hitsnum) + HITSTRUCT(stat_pos)) /
+      (HITSTRUCT(hitsnum)[HITSTRUCT(stat_pos)] /
        (double) HITSTRUCT(hitsnumber)) >= ARGUMENTSSTRUCT(percent_value))
   {
     mg_outputwriter(parsestruct_ptr, NULL, NULL, NULL, 's', err);

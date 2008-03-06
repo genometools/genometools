@@ -19,7 +19,8 @@
 #define MG_COMPUTEPATH_H
 
 #include <float.h>
-#include "libgtmgth/mg_xmlparser.h"
+#include "metagenomethreader.h"
+#include "mg_compute_gene_prediction.h"
 
 #define UNDEFINED   9
 
@@ -29,11 +30,4 @@
 int mg_computepath(CombinedScoreMatrixEntry **,
                    HitInformation *hit_information,
                    unsigned long, unsigned long, ParseStruct *, Error *);
-
-/* Funktion zur Berechnung der erlaubten Vorgaenger-Leserahmen
-   Parameter: aktueller Leserahmen, Position in der Query-Sequence,
-   (Zeiger auf) Array der moeglichen Vorgaenger
-   Returnwert: void */
-static void compute_precursors(short, unsigned long, short *);
-
 #endif
