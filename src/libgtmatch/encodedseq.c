@@ -67,24 +67,24 @@
 #define UNITSIN2BITENC              16
 #define DIVBYUNITSIN2BITENC(V)      DIV16(V)
 #define MODBYUNITSIN2BITENC(V)      MOD16(V)
-#define MAXSHIFTLEFTUNITSIN2BITENC  30UL
-#define MAXSHIFTRIGHTUNITSIN2BITENC 32UL
 
 #else
 
 #define UNITSIN2BITENC              4
 #define DIVBYUNITSIN2BITENC(V)      DIV4(V)
 #define MODBYUNITSIN2BITENC(V)      MOD4(V)
-#define MAXSHIFTLEFTUNITSIN2BITENC  6UL
-#define MAXSHIFTRIGHTUNITSIN2BITENC 8UL
 
 #endif
 
-#define EXTRACTENCODEDCHAR(TWOBITENCODING,IDX)\
-        ((TWOBITENCODING[(unsigned long) DIVBYUNITSIN2BITENC(IDX)] >> \
-         (MAXSHIFTLEFTUNITSIN2BITENC - \
-          (unsigned long) MULT2(MODBYUNITSIN2BITENC(IDX))))\
+#define EXTRACTENCODEDCHARSCALAR(SCALAR,PREFIX)\
+        (((SCALAR) >> \
+         MULT2(UNITSIN2BITENC - 1 - (unsigned long) (PREFIX)))\
          & (Twobitencoding) 3)
+
+#define EXTRACTENCODEDCHAR(TWOBITENCODING,IDX)\
+        EXTRACTENCODEDCHARSCALAR(\
+                  TWOBITENCODING[(unsigned long) DIVBYUNITSIN2BITENC(IDX)],\
+                  MODBYUNITSIN2BITENC(IDX))
 
 #define DECLARESEQBUFFER(TABLE)\
         unsigned long widthbuffer = 0;\
@@ -120,7 +120,7 @@
 #define UPDATESEQBUFFERFINAL\
         if (widthbuffer > 0)\
         {\
-          bitwise <<= (MAXSHIFTRIGHTUNITSIN2BITENC - MULT2(widthbuffer));\
+          bitwise <<= MULT2(UNITSIN2BITENC - widthbuffer);\
           *tbeptr = bitwise;\
         }
 
@@ -2116,7 +2116,7 @@ static void extracttwobitencoding(PrefixofTwobitencoding *ptbe,
     ptbe->tbe = 0;
   } else
   {
-    unsigned long shiftval;
+    unsigned long prefix;
 
     if (startpos + UNITSIN2BITENC >= stoppos)
     {
@@ -2126,19 +2126,20 @@ static void extracttwobitencoding(PrefixofTwobitencoding *ptbe,
       ptbe->prefix = (unsigned int) UNITSIN2BITENC;
     }
     assert(ptbe->prefix > 0);
-    shiftval = (unsigned long) MULT2(MODBYUNITSIN2BITENC(startpos));
-    if (shiftval == 0)
+    prefix = (unsigned long) MODBYUNITSIN2BITENC(startpos);
+    if (prefix == 0)
     {
       ptbe->tbe = encseq->twobitencoding[DIVBYUNITSIN2BITENC(startpos)];
     } else
     {
       unsigned long unit = (unsigned long) DIVBYUNITSIN2BITENC(startpos);
-      ptbe->tbe = (Twobitencoding) (encseq->twobitencoding[unit] << shiftval);
+      ptbe->tbe = (Twobitencoding) (encseq->twobitencoding[unit] <<
+                                    MULT2(prefix));
       assert(encseq->unitsoftwobitencoding > 0);
       if (unit < encseq->unitsoftwobitencoding - 1)
       {
         ptbe->tbe |= encseq->twobitencoding[unit+1] >>
-                     (MAXSHIFTRIGHTUNITSIN2BITENC - shiftval);
+                     MULT2(UNITSIN2BITENC - prefix);
       } else
       {
         assert(ptbe->prefix < (unsigned int) UNITSIN2BITENC);
@@ -2282,23 +2283,40 @@ static int requiredUIntTwobitencoding(uint32_t v)
   return r;
 }
 
+static int prefixofdifftbe(Seqpos *lcp,Twobitencoding tbe1,Twobitencoding tbe2)
+{
+  unsigned int commonprefix;
+
+  assert((tbe1 ^ tbe2) > 0);
+  commonprefix = (unsigned int) DIV2(MULT2(UNITSIN2BITENC) -
+                                requiredUIntTwobitencoding(tbe1 ^ tbe2));
+  *lcp += commonprefix;
+  if (EXTRACTENCODEDCHARSCALAR(tbe1,commonprefix) <
+      EXTRACTENCODEDCHARSCALAR(tbe2,commonprefix))
+  {
+    return -1;
+  }
+  return 1;
+}
+
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
                            Encodedsequencescanstate *esr1,
                            Encodedsequencescanstate *esr2,
-                           Seqpos pos1,Seqpos pos2)
+                           Seqpos pos1,Seqpos pos2,
+                           Seqpos depth,
+                           UNUSED Seqpos totallength)
 {
   PrefixofTwobitencoding ptbe1, ptbe2;
   Twobitencoding mask;
-  unsigned int firstdiffbitfromleft;
 
-  *lcp = 0;
+  *lcp = depth;
   initEncodedsequencescanstate(esr1,encseq,Forwardmode,pos1);
   initEncodedsequencescanstate(esr2,encseq,Forwardmode,pos2);
   while (true)
   {
-    extracttwobitencoding(&ptbe1,encseq,esr1,pos1);
-    extracttwobitencoding(&ptbe2,encseq,esr2,pos2);
+    extracttwobitencoding(&ptbe1,encseq,esr1,pos1 + *lcp);
+    extracttwobitencoding(&ptbe2,encseq,esr2,pos2 + *lcp);
     if (ptbe1.prefix < ptbe2.prefix) /* ISSPECIAL(seq1[ptbe1.prefix])  */
     {
       mask = MASKPREFIX(ptbe1.prefix);
@@ -2307,15 +2325,42 @@ int compareEncseqsequences(Seqpos *lcp,
       if (ptbe1.tbe == ptbe2.tbe)
       {
         *lcp += ptbe1.prefix;
+        return 1;
+      }
+      return prefixofdifftbe(lcp,ptbe1.tbe,ptbe2.tbe);
+    }
+    if (ptbe1.prefix > ptbe2.prefix) /* ISSPECIAL(seq2[ptbe2.prefix])  */
+    {
+      mask = MASKPREFIX(ptbe2.prefix);
+      ptbe1.tbe &= mask;
+      ptbe2.tbe &= mask;
+      if (ptbe1.tbe == ptbe2.tbe)
+      {
+        *lcp += ptbe2.prefix;
         return -1;
       }
-      assert((ptbe1.tbe ^ ptbe2.tbe) > 0);
-      firstdiffbitfromleft = (unsigned int)
-                             MULT2(UNITSIN2BITENC) -
-                             requiredUIntTwobitencoding(ptbe1.tbe ^ ptbe2.tbe);
-      *lcp += DIV2(firstdiffbitfromleft);
-      return -1;
+      return prefixofdifftbe(lcp,ptbe1.tbe,ptbe2.tbe);
     }
+    assert(ptbe1.prefix == ptbe2.prefix);
+    if (ptbe1.prefix < (unsigned int) UNITSIN2BITENC)
+    {
+      mask = MASKPREFIX(ptbe1.prefix);
+      ptbe1.tbe &= mask;
+      ptbe2.tbe &= mask;
+      if (ptbe1.tbe == ptbe2.tbe)
+      {
+        *lcp += ptbe1.prefix;
+        return (pos1 < pos2) ? -1 : 1;
+      }
+      return prefixofdifftbe(lcp,ptbe1.tbe,ptbe2.tbe);
+    }
+    assert(ptbe1.prefix == (unsigned int) UNITSIN2BITENC &&
+           ptbe2.prefix == (unsigned int) UNITSIN2BITENC);
+    if (ptbe1.tbe != ptbe2.tbe)
+    {
+      return prefixofdifftbe(lcp,ptbe1.tbe,ptbe2.tbe);
+    }
+    *lcp += UNITSIN2BITENC;
   }
 }
 

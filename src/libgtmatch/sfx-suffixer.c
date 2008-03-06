@@ -492,8 +492,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
 
   error_check(err);
   assert(prefixlength > 0);
-  if (dofast && 
-      prefixlength > MAXPREFIXLENGTH)
+  if (dofast && prefixlength > MAXPREFIXLENGTH)
   {
     error_set(err,"argument for option -pl must be in the range [1,%u]",
                   MAXPREFIXLENGTH);
