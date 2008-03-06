@@ -5,6 +5,7 @@
 */
 
 
+#include <stdint.h>
 #include <string.h>
 
 #include "md5.h"
@@ -12,7 +13,7 @@
 
 #define WORD 32
 #define MASK 0xFFFFFFFF
-typedef unsigned long WORD32;
+typedef uint32_t WORD32;
 
 
 /**
