@@ -46,6 +46,8 @@ const char*   bioseq_get_description(Bioseq*, unsigned long);
 /* Return sequence with given <index> (not '\0' terminated). */
 const char*   bioseq_get_sequence(Bioseq*, unsigned long index);
 const char*   bioseq_get_raw_sequence(Bioseq*);
+/* Return MD5 fingerprint of sequence with given <index>. */
+const char*   bioseq_get_md5_fingerprint(Bioseq*, unsigned long index);
 unsigned long bioseq_get_sequence_length(Bioseq*, unsigned long);
 unsigned long bioseq_get_raw_sequence_length(Bioseq*);
 unsigned long bioseq_number_of_sequences(Bioseq*);

@@ -32,6 +32,7 @@
 #include "libgtcore/gc_content.h"
 #include "libgtcore/grep.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/md5_fingerprint.h"
 #include "libgtcore/parseutils.h"
 #include "libgtcore/range.h"
 #include "libgtcore/sig.h"
@@ -51,6 +52,7 @@ struct Bioseq {
   size_t raw_sequence_length,
          allocated;
   Alpha *alpha;
+  char **md5_fingerprints;
 };
 
 typedef struct {
@@ -371,6 +373,11 @@ void bioseq_delete(Bioseq *bs)
 {
   unsigned long i;
   if (!bs) return;
+  if (bs->md5_fingerprints) {
+    for (i = 0; i < array_size(bs->descriptions); i++)
+      ma_free(bs->md5_fingerprints[i]);
+    ma_free(bs->md5_fingerprints);
+  }
   str_delete(bs->sequence_file);
   if (bs->seqs) {
     for (i = 0; i < array_size(bs->descriptions); i++)
@@ -440,6 +447,22 @@ const char* bioseq_get_raw_sequence(Bioseq *bs)
 {
   assert(bs);
   return bs->raw_sequence;
+}
+
+const char* bioseq_get_md5_fingerprint(Bioseq *bs, unsigned long idx)
+{
+  assert(bs && idx < bioseq_number_of_sequences(bs));
+  if (!bs->md5_fingerprints) {
+    bs->md5_fingerprints = ma_calloc(bioseq_number_of_sequences(bs),
+                                     sizeof (char*));
+  }
+  if (!bs->md5_fingerprints[idx]) {
+    bs->md5_fingerprints[idx] = md5_fingerprint(bioseq_get_sequence(bs, idx),
+                                                bioseq_get_sequence_length(bs,
+                                                                          idx));
+  }
+  assert(bs->md5_fingerprints[idx]);
+  return bs->md5_fingerprints[idx];
 }
 
 unsigned long bioseq_get_sequence_length(Bioseq *bs, unsigned long idx)
