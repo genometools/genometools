@@ -76,7 +76,7 @@ static OptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static char *compute_md5_fingerprint(const char *sequence, unsigned long seqlen)
+static char *md5_fingerprint(const char *sequence, unsigned long seqlen)
 {
   unsigned char output[16];
   char  *upper, *fingerprint;
@@ -101,8 +101,8 @@ static void translate_sequence_file(Bioseq *bs)
   assert(bs);
   for (i = 0; i < bioseq_number_of_sequences(bs); i++) {
     char *fingerprint;
-    fingerprint = compute_md5_fingerprint(bioseq_get_sequence(bs, i),
-                                          bioseq_get_sequence_length(bs, i));
+    fingerprint = md5_fingerprint(bioseq_get_sequence(bs, i),
+                                  bioseq_get_sequence_length(bs, i));
     printf("%s\t%s\n", fingerprint, bioseq_get_description(bs, i));
     ma_free(fingerprint);
   }
