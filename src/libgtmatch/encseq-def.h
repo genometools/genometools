@@ -193,4 +193,14 @@ int compareEncseqsequences(Seqpos *lcp,
                            Seqpos depth,
                            UNUSED Seqpos totallength);
 
+int multicharactercompare(const Encodedsequence *encseq,
+                          Encodedsequencescanstate *esr1,
+                          Seqpos pos1,
+                          Encodedsequencescanstate *esr2,
+			  Seqpos pos2);
+
+int multicharactercompare_bruteforce(const Encodedsequence *encseq,
+                                     Seqpos pos1,
+                                     Seqpos pos2);
+
 #endif

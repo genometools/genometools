@@ -26,48 +26,74 @@
 
 #include "arrcmp.pr"
 
-static int testscanatpos(const Encodedsequence *encseq,
-                         Readmode readmode,
-                         unsigned long trials,
-                         Error *err)
+static void testscanatpos(const Encodedsequence *encseq,
+                          Readmode readmode,
+                          unsigned long trials)
 {
   Encodedsequencescanstate *esr = NULL;
   Seqpos pos, startpos, totallength;
   unsigned long trial;
   Uchar ccra, ccsr;
-  bool haserr = false;
 
-  error_check(err);
   totallength = getencseqtotallength(encseq);
   srand48(42349421);
-  for (trial = 0; !haserr && trial < trials; trial++)
+  for (trial = 0; trial < trials; trial++)
   {
     startpos = (Seqpos) (drand48() * (double) totallength);
     printf("trial %lu at " FormatSeqpos "\n",trial,PRINTSeqposcast(startpos));
     esr = newEncodedsequencescanstate();
     initEncodedsequencescanstate(esr,encseq,readmode,startpos);
-    for (pos=startpos; !haserr && pos < totallength; pos++)
+    for (pos=startpos; pos < totallength; pos++)
     {
       ccra = getencodedchar(encseq,pos,readmode); /* Random access */
       ccsr = sequentialgetencodedchar(encseq,esr,pos);
       if (ccra != ccsr)
       {
-        error_set(err,"startpos = " FormatSeqpos
-                          " access=%s, mode=%s: position=" FormatSeqpos
-                          ": random access (correct) = %u != %u = "
-                          " sequential read (wrong)",
-                          startpos,
-                          encseqaccessname(encseq),
-                          showreadmode(readmode),
-                          pos,
-                          (unsigned int) ccra,
-                          (unsigned int) ccsr);
-        haserr = true;
+        fprintf(stderr,"startpos = " FormatSeqpos
+                       " access=%s, mode=%s: position=" FormatSeqpos
+                       ": random access (correct) = %u != %u = "
+                       " sequential read (wrong)",
+                       PRINTSeqposcast(startpos),
+                       encseqaccessname(encseq),
+                       showreadmode(readmode),
+                       PRINTSeqposcast(pos),
+                       (unsigned int) ccra,
+                       (unsigned int) ccsr);
+        exit(EXIT_FAILURE); /* programming error */
       }
     }
     freeEncodedsequencescanstate(&esr);
   }
-  return haserr ? -1 : 0;
+}
+
+static void testmulticharactercompare(const Encodedsequence *encseq,
+                                      unsigned long trials)
+{
+  Encodedsequencescanstate *esr1, *esr2;
+  Seqpos pos1, pos2, totallength;
+  unsigned long trial;
+  int ret1, ret2;
+
+  esr1 = newEncodedsequencescanstate();
+  esr2 = newEncodedsequencescanstate();
+  totallength = getencseqtotallength(encseq);
+  srand48(42349421);
+  for (trial = 0; trial < trials; trial++)
+  {
+    pos1 = (Seqpos) (drand48() * (double) totallength);
+    pos2 = (Seqpos) (drand48() * (double) totallength);
+    ret1 = multicharactercompare(encseq,esr1,pos1,esr2,pos2);
+    ret2 = multicharactercompare_bruteforce(encseq,pos1,pos2);
+    if (ret1 != ret2)
+    {
+      fprintf(stderr,"pos1=" FormatSeqpos ", pos2=" FormatSeqpos "\n",
+              PRINTSeqposcast(pos1),PRINTSeqposcast(pos2));
+      fprintf(stderr,"ret1=%d, ret2=%d\n",ret1,ret2);
+      exit(EXIT_FAILURE); /* programming error */
+    }
+  }
+  freeEncodedsequencescanstate(&esr1);
+  freeEncodedsequencescanstate(&esr2);
 }
 
 static int testfullscan(const StrArray *filenametab,
@@ -172,30 +198,19 @@ int testencodedsequence(const StrArray *filenametab,
                         unsigned long trials,
                         Error *err)
 {
-  bool haserr = false;
-
   if (hasfastspecialrangeenumerator(encseq))
   {
     checkextractunitatpos(encseq);
+    if (trials > 0)
+    {
+      testmulticharactercompare(encseq,trials);
+    }
   }
   if (trials > 0)
   {
-    if (testscanatpos(encseq,
-                      readmode,
-                      trials,
-                      err) != 0)
-    {
-      haserr = true;
-    }
+    testscanatpos(encseq,readmode,trials);
   }
-  if (!haserr)
-  {
-    if (testfullscan(filenametab,encseq,readmode,symbolmap,err) != 0)
-    {
-      haserr = true;
-    }
-  }
-  return haserr ? -1 : 0;
+  return testfullscan(filenametab,encseq,readmode,symbolmap,err);
 }
 
 static void makeerrormsg(const Sequencerange *vala,const Sequencerange *valb,
