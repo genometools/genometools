@@ -18,7 +18,6 @@
 #include <string.h>
 #include "libgtcore/bioseq.h"
 #include "libgtcore/ma.h"
-#include "libgtcore/md5_fingerprint.h"
 #include "libgtcore/option.h"
 #include "libgtcore/unused.h"
 #include "libgtext/gtdatahelp.h"
@@ -79,11 +78,8 @@ static void translate_sequence_file(Bioseq *bs)
   unsigned long i;
   assert(bs);
   for (i = 0; i < bioseq_number_of_sequences(bs); i++) {
-    char *fingerprint;
-    fingerprint = md5_fingerprint(bioseq_get_sequence(bs, i),
-                                  bioseq_get_sequence_length(bs, i));
-    printf("%s\t%s\n", fingerprint, bioseq_get_description(bs, i));
-    ma_free(fingerprint);
+    printf("%s\t%s\n", bioseq_get_md5_fingerprint(bs, i),
+                       bioseq_get_description(bs, i));
   }
 }
 
