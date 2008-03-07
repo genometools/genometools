@@ -40,7 +40,8 @@ typedef struct
        inputbwt,
        inputlcp,
        inputbck;
-  unsigned long trials;
+  unsigned long scantrials,
+                multicharcmptrials;
 } Sfxmapoptions;
 
 static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
@@ -50,9 +51,9 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                             Error *err)
 {
   OptionParser *op;
-  Option *optionstream, *optionverbose, *optiontrials,
-         *optionbck, *optionsuf, *optiondes, *optionbwt, *optionlcp,
-         *optiontis;
+  Option *optionstream, *optionverbose, *optionscantrials,
+         *optionmulticharcmptrials, *optionbck, *optionsuf, 
+         *optiondes, *optionbwt, *optionlcp, *optiontis;
   OPrval oprval;
 
   error_check(err);
@@ -63,10 +64,16 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                                  &sfxmapoptions->usestream,false);
   option_parser_add_option(op, optionstream);
 
-  optiontrials = option_new_ulong("trials",
-                                  "specify number of sequential trials",
-                                  &sfxmapoptions->trials,0);
-  option_parser_add_option(op, optiontrials);
+  optionscantrials = option_new_ulong("scantrials",
+                                      "specify number of scan trials",
+                                      &sfxmapoptions->scantrials,0);
+  option_parser_add_option(op, optionscantrials);
+
+  optionmulticharcmptrials 
+    = option_new_ulong("multicharcmptrials",
+                       "specify number of multichar cmp trials",
+                       &sfxmapoptions->multicharcmptrials,0);
+  option_parser_add_option(op, optionmulticharcmptrials);
 
   optiontis = option_new_bool("tis","input the transformed input sequence",
                               &sfxmapoptions->inputtis,
@@ -184,7 +191,8 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
                                   suffixarray.encseq,
                                   (Readmode) readmode,
                                   getsymbolmapAlphabet(suffixarray.alpha),
-                                  sfxmapoptions.trials,
+                                  sfxmapoptions.scantrials,
+                                  sfxmapoptions.multicharcmptrials,
                                   err) != 0)
           {
             haserr = true;

@@ -6,6 +6,9 @@ def outoptions()
   return outoptionsnobck() + " -bck"
 end
 
+def trials()
+  return "-scantrials 10 -multicharcmptrials 1000"
+end
 
 def checksfx(parts,pl,withsmap,sat,filelist)
   if withsmap == 0
@@ -21,7 +24,7 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   end
   run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
            "#{extra} #{outoptions()} -indexname sfx -db " + filearg
-  run_test "#{$bin}gt dev sfxmap -trials 10 #{outoptions()} -v sfx",
+  run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions()} -v sfx",
            :maxtime => 600
 end
 
@@ -115,7 +118,7 @@ Keywords "gt_suffixerator"
 Test do
   run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
            "-db #{$testdata}Random.fna"
-  run_test "#{$bin}gt dev sfxmap -tis -suf -des -trials 10 localidx",
+  run_test "#{$bin}gt dev sfxmap -tis -suf -des #{trials()} localidx",
            :retval => 1
 end
 
@@ -173,7 +176,7 @@ def checkmapped(args)
   Test do
     run_test "#{$bin}gt suffixerator #{outoptions()} -indexname sfxidx #{args}",
              :maxtime => 600
-    run_test "#{$bin}gt dev sfxmap #{outoptions()} -trials 10 -v sfxidx",
+    run_test "#{$bin}gt dev sfxmap #{outoptions()} #{trials()} -v sfxidx",
              :maxtime => 600
     run_test "#{$bin}gt dev sfxmap #{outoptionsnobck()} -stream -v sfxidx",
              :maxtime => 600

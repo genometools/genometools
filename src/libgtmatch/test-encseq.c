@@ -28,7 +28,7 @@
 
 static void testscanatpos(const Encodedsequence *encseq,
                           Readmode readmode,
-                          unsigned long trials)
+                          unsigned long scantrials)
 {
   Encodedsequencescanstate *esr = NULL;
   Seqpos pos, startpos, totallength;
@@ -37,7 +37,7 @@ static void testscanatpos(const Encodedsequence *encseq,
 
   totallength = getencseqtotallength(encseq);
   srand48(42349421);
-  for (trial = 0; trial < trials; trial++)
+  for (trial = 0; trial < scantrials; trial++)
   {
     startpos = (Seqpos) (drand48() * (double) totallength);
     printf("trial %lu at " FormatSeqpos "\n",trial,PRINTSeqposcast(startpos));
@@ -67,30 +67,21 @@ static void testscanatpos(const Encodedsequence *encseq,
 }
 
 static void testmulticharactercompare(const Encodedsequence *encseq,
-                                      unsigned long trials)
+                                      unsigned long multicharcmptrials)
 {
   Encodedsequencescanstate *esr1, *esr2;
   Seqpos pos1, pos2, totallength;
   unsigned long trial;
-  int ret1, ret2;
 
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
   totallength = getencseqtotallength(encseq);
   srand48(42349421);
-  for (trial = 0; trial < trials; trial++)
+  for (trial = 0; trial < multicharcmptrials; trial++)
   {
     pos1 = (Seqpos) (drand48() * (double) totallength);
     pos2 = (Seqpos) (drand48() * (double) totallength);
-    ret1 = multicharactercompare(encseq,esr1,pos1,esr2,pos2);
-    ret2 = multicharactercompare_bruteforce(encseq,pos1,pos2);
-    if (ret1 != ret2)
-    {
-      fprintf(stderr,"pos1=" FormatSeqpos ", pos2=" FormatSeqpos "\n",
-              PRINTSeqposcast(pos1),PRINTSeqposcast(pos2));
-      fprintf(stderr,"ret1=%d, ret2=%d\n",ret1,ret2);
-      exit(EXIT_FAILURE); /* programming error */
-    }
+    (void) multicharactercompare(encseq,esr1,pos1,esr2,pos2);
   }
   freeEncodedsequencescanstate(&esr1);
   freeEncodedsequencescanstate(&esr2);
@@ -195,20 +186,21 @@ int testencodedsequence(const StrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         const Uchar *symbolmap,
-                        unsigned long trials,
+                        unsigned long scantrials,
+                        unsigned long multicharcmptrials,
                         Error *err)
 {
   if (hasfastspecialrangeenumerator(encseq))
   {
     checkextractunitatpos(encseq);
-    if (trials > 0)
+    if (multicharcmptrials > 0)
     {
-      testmulticharactercompare(encseq,trials);
+      testmulticharactercompare(encseq,multicharcmptrials);
     }
   }
-  if (trials > 0)
+  if (scantrials > 0)
   {
-    testscanatpos(encseq,readmode,trials);
+    testscanatpos(encseq,readmode,scantrials);
   }
   return testfullscan(filenametab,encseq,readmode,symbolmap,err);
 }

@@ -2202,7 +2202,8 @@ static void showsequenceatstartpos(const Encodedsequence *encseq,
 }
 
 #define MASKPREFIX(PFX)\
-        ~(((Twobitencoding) 1 << MULT2(UNITSIN2BITENC - (PFX))) - 1)
+        ((PFX) == 0) ? 0 :\
+        (~(((Twobitencoding) 1 << MULT2(UNITSIN2BITENC - (PFX))) - 1))
 
 static bool comparetbe(Twobitencoding tbe1,Twobitencoding tbe2,
                        unsigned int prefix)
@@ -2309,7 +2310,10 @@ static int compareTwobitencodings(PrefixofTwobitencoding *ptbe1,
 
   if (ptbe1->prefix < ptbe2->prefix) /* ISSPECIAL(seq1[ptbe1.prefix])  */
   {
+    char buf1[MULT2(UNITSIN2BITENC)+1];
+
     mask = MASKPREFIX(ptbe1->prefix);
+    uint32_t2string(buf1,mask);
     ptbe1->tbe &= mask;
     ptbe2->tbe &= mask;
     if (ptbe1->tbe == ptbe2->tbe)
@@ -2356,24 +2360,9 @@ static int compareTwobitencodings(PrefixofTwobitencoding *ptbe1,
   return UNITSIN2BITENC;
 }
 
-int multicharactercompare(const Encodedsequence *encseq,
-                          Encodedsequencescanstate *esr1,
-                          Seqpos pos1,
-                          Encodedsequencescanstate *esr2,
-                          Seqpos pos2)
-{
-  PrefixofTwobitencoding ptbe1, ptbe2;
-
-  initEncodedsequencescanstate(esr1,encseq,Forwardmode,pos1);
-  initEncodedsequencescanstate(esr2,encseq,Forwardmode,pos2);
-  extracttwobitencoding(&ptbe1,encseq,esr1,pos1);
-  extracttwobitencoding(&ptbe2,encseq,esr2,pos2);
-  return compareTwobitencodings(&ptbe1,pos1,&ptbe2,pos2);
-}
-
-int multicharactercompare_bruteforce(const Encodedsequence *encseq,
-                                     Seqpos pos1,
-                                     Seqpos pos2)
+static int multicharactercompare_bruteforce(const Encodedsequence *encseq,
+                                            Seqpos pos1,
+                                            Seqpos pos2)
 {
   Uchar cc1, cc2;
   unsigned int lcp;
@@ -2416,6 +2405,54 @@ int multicharactercompare_bruteforce(const Encodedsequence *encseq,
     }
   }
   return (int) UNITSIN2BITENC;
+}
+
+int multicharactercompare_withtest(const Encodedsequence *encseq,
+                                   Encodedsequencescanstate *esr1,
+                                   Seqpos pos1,
+                                   Encodedsequencescanstate *esr2,
+                                   Seqpos pos2)
+{
+  PrefixofTwobitencoding ptbe1, ptbe2;
+  int ret1, ret2;
+
+  initEncodedsequencescanstate(esr1,encseq,Forwardmode,pos1);
+  initEncodedsequencescanstate(esr2,encseq,Forwardmode,pos2);
+  extracttwobitencoding(&ptbe1,encseq,esr1,pos1);
+  extracttwobitencoding(&ptbe2,encseq,esr2,pos2);
+  ret1 = compareTwobitencodings(&ptbe1,pos1,&ptbe2,pos2);
+  ret2 = multicharactercompare_bruteforce(encseq,pos1,pos2);
+  if (ret1 != ret2)
+  {
+    char buf1[MULT2(UNITSIN2BITENC)+1], buf2[MULT2(UNITSIN2BITENC)+1];
+
+    fprintf(stderr,"pos1=" FormatSeqpos ", pos2=" FormatSeqpos "\n",
+            PRINTSeqposcast(pos1),PRINTSeqposcast(pos2));
+    fprintf(stderr,"ret1=%d, ret2=%d\n",ret1,ret2);
+    showsequenceatstartpos(encseq,pos1);
+    uint32_t2string(buf1,ptbe1.tbe);
+    fprintf(stderr,"v1=%s(prefix=%u)\n",buf1,ptbe1.prefix);
+    showsequenceatstartpos(encseq,pos2);
+    uint32_t2string(buf2,ptbe2.tbe);
+    fprintf(stderr,"v2=%s(prefix=%u)\n",buf2,ptbe2.prefix);
+    exit(EXIT_FAILURE); /* programming error */
+  }
+  return ret1;
+}
+
+int multicharactercompare(const Encodedsequence *encseq,
+                          Encodedsequencescanstate *esr1,
+                          Seqpos pos1,
+                          Encodedsequencescanstate *esr2,
+                          Seqpos pos2)
+{
+  PrefixofTwobitencoding ptbe1, ptbe2;
+
+  initEncodedsequencescanstate(esr1,encseq,Forwardmode,pos1);
+  initEncodedsequencescanstate(esr2,encseq,Forwardmode,pos2);
+  extracttwobitencoding(&ptbe1,encseq,esr1,pos1);
+  extracttwobitencoding(&ptbe2,encseq,esr2,pos2);
+  return compareTwobitencodings(&ptbe1,pos1,&ptbe2,pos2);
 }
 
 int compareEncseqsequences(Seqpos *lcp,
