@@ -116,7 +116,7 @@ Name "gt extractseq -ginum"
 Keywords "gt_extractseq"
 Test do
   run_test "#{$bin}gt extractseq -ginum #{$testdata}U89959_ginums.txt " +
-           "#{$testdata}U89959_ests.fas.gz"
+           "#{$testdata}U89959_ests.fas"
   run "grep -v '^#' #{$last_stdout}"
   run "diff #{$last_stdout} #{$testdata}U89959_ginums.out"
 end
@@ -125,7 +125,7 @@ Name "gt extractseq -ginum (corrupt)"
 Keywords "gt_extractseq"
 Test do
   run_test("#{$bin}gt extractseq -ginum #{$testdata}U89959_ginums.corrupt " +
-           "#{$testdata}U89959_ests.fas.gz", :retval => 1)
+           "#{$testdata}U89959_ests.fas", :retval => 1)
 end
 
 Name "gt extractseq -ginum (fail)"
