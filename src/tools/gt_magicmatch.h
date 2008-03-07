@@ -20,7 +20,7 @@
 
 #include "libgtcore/tool.h"
 
-/* the MagicMatch target tool */
+/* the MagicMatch tool */
 Tool* gt_magicmatch(void);
 
 #endif
