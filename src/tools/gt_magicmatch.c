@@ -23,6 +23,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/safearith.h"
 #include "libgtcore/unused.h"
+#include "libgtext/gtdatahelp.h"
 #include "tools/gt_magicmatch.h"
 
 typedef struct {
@@ -69,6 +70,7 @@ static OptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
   option_is_mandatory(o);
   option_parser_add_option(op, o);
 
+  option_parser_set_comment_func(op, gtdata_show_help, NULL);
   option_parser_set_min_max_args(op, 0, 0);
 
   return op;
