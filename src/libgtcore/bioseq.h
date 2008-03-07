@@ -29,43 +29,43 @@
 
 typedef struct Bioseq Bioseq;
 
-/* construct a new bioseq object (and create the bioseq files, if necessary) */
+/* Construct a new bioseq object (and create the bioseq files, if necessary). */
 Bioseq*       bioseq_new(const char *sequence_file, Error*);
-/* construct a new bioseq object (and always create the the bioseq files) */
+/* Construct a new bioseq object (and always create the the bioseq files). */
 Bioseq*       bioseq_new_recreate(const char *sequence_file, Error*);
 Bioseq*       bioseq_new_str(Str* sequence_file, Error*);
-/* construct a new bioseq object (and always create the bioseq files)
-   with a certain <fasta_reader> */
+/* Construct a new bioseq object (and always create the bioseq files)
+   with a certain <fasta_reader>. */
 Bioseq*       bioseq_new_with_fasta_reader(const char *sequence_file,
                                            FastaReaderType fasta_reader,
                                            Error*);
+void          bioseq_delete(Bioseq*);
 Alpha*        bioseq_get_alpha(Bioseq*);
 Seq*          bioseq_get_seq(Bioseq*, unsigned long);
 const char*   bioseq_get_description(Bioseq*, unsigned long);
-/* return sequence with given <index> (not '\0' terminated) */
+/* Return sequence with given <index> (not '\0' terminated). */
 const char*   bioseq_get_sequence(Bioseq*, unsigned long index);
 const char*   bioseq_get_raw_sequence(Bioseq*);
 unsigned long bioseq_get_sequence_length(Bioseq*, unsigned long);
 unsigned long bioseq_get_raw_sequence_length(Bioseq*);
 unsigned long bioseq_number_of_sequences(Bioseq*);
-void          bioseq_delete(Bioseq*);
 
-/* shows a bioseq on stdout (in fasta format).
-   If width is != 0 the sequences are formatted accordingly */
+/* Shows a bioseq on stdout (in fasta format).
+   If width is != 0 the sequences are formatted accordingly. */
 void bioseq_show_as_fasta(Bioseq*, unsigned long width);
 
-/* shows a sequence with number ``seqnum'' from a bioseq on stdout (in fasta
-   format). If width is != 0 the sequences are formatted accordingly */
+/* Shows a sequence with number ``seqnum'' from a bioseq on stdout (in fasta
+   format). If width is != 0 the sequences are formatted accordingly. */
 void bioseq_show_sequence_as_fasta(Bioseq*, unsigned long seqnum,
                                    unsigned long width);
 
-/* shows GC-content on stdout (for DNA files */
+/* Shows GC-content on stdout (for DNA files). */
 void bioseq_show_gc_content(Bioseq*);
 
-/* shows bioseq statistics (on stdout) */
+/* Shows bioseq statistics (on stdout). */
 void bioseq_show_stat(Bioseq*);
 
-/* shows bioseq sequence length distribution (on stdout) */
+/* Shows bioseq sequence length distribution (on stdout). */
 void bioseq_show_seqlengthdistri(Bioseq*);
 
 #endif

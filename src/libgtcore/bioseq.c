@@ -367,6 +367,28 @@ Bioseq* bioseq_new_with_fasta_reader(const char *sequence_file,
   return bs;
 }
 
+void bioseq_delete(Bioseq *bs)
+{
+  unsigned long i;
+  if (!bs) return;
+  str_delete(bs->sequence_file);
+  if (bs->seqs) {
+    for (i = 0; i < array_size(bs->descriptions); i++)
+      seq_delete(bs->seqs[i]);
+    ma_free(bs->seqs);
+  }
+  for (i = 0; i < array_size(bs->descriptions); i++)
+    ma_free(*(char**) array_get(bs->descriptions, i));
+  array_delete(bs->descriptions);
+  array_delete(bs->sequence_ranges);
+  if (bs->use_stdin)
+    ma_free(bs->raw_sequence);
+  else
+    fa_xmunmap(bs->raw_sequence);
+  alpha_delete(bs->alpha);
+  ma_free(bs);
+}
+
 static void determine_alpha_if_necessary(Bioseq *bs)
 {
   assert(bs);
@@ -438,28 +460,6 @@ unsigned long bioseq_number_of_sequences(Bioseq *bs)
 {
   assert(bs);
   return array_size(bs->descriptions);
-}
-
-void bioseq_delete(Bioseq *bs)
-{
-  unsigned long i;
-  if (!bs) return;
-  str_delete(bs->sequence_file);
-  if (bs->seqs) {
-    for (i = 0; i < array_size(bs->descriptions); i++)
-      seq_delete(bs->seqs[i]);
-    ma_free(bs->seqs);
-  }
-  for (i = 0; i < array_size(bs->descriptions); i++)
-    ma_free(*(char**) array_get(bs->descriptions, i));
-  array_delete(bs->descriptions);
-  array_delete(bs->sequence_ranges);
-  if (bs->use_stdin)
-    ma_free(bs->raw_sequence);
-  else
-    fa_xmunmap(bs->raw_sequence);
-  alpha_delete(bs->alpha);
-  ma_free(bs);
 }
 
 void bioseq_show_as_fasta(Bioseq *bs, unsigned long width)
