@@ -18,10 +18,10 @@
 #include <string.h>
 #include "libgtcore/bioseq.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/md5_fingerprint.h"
 #include "libgtcore/option.h"
 #include "libgtcore/unused.h"
 #include "libgtext/gtdatahelp.h"
-#include "libgtext/md5_fingerprint.h"
 #include "tools/gt_magicmatch.h"
 
 typedef struct {

@@ -18,8 +18,8 @@
 #include <ctype.h>
 #include "md5.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/md5_fingerprint.h"
 #include "libgtcore/safearith.h"
-#include "libgtext/md5_fingerprint.h"
 
 char *md5_fingerprint(const char *sequence, unsigned long seqlen)
 {
