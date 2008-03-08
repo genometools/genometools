@@ -20,6 +20,12 @@
 #include "libgtcore/range.h"
 #include "ltrelement.h"
 
+unsigned long ltrelement_length(LTRElement *e)
+{
+  assert(e && (e->leftLTR_3 >= e->leftLTR_5));
+  return e->rightLTR_3 - e->leftLTR_5;
+}
+
 unsigned long ltrelement_leftltrlen(LTRElement *e)
 {
   assert(e && (e->leftLTR_3 >= e->leftLTR_5));

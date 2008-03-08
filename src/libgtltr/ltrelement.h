@@ -35,7 +35,7 @@ typedef struct LTRElement {
                 rightLTR_5;
   GenomeNode *mainnode;
 } LTRElement;
-
+unsigned long ltrelement_length(LTRElement *e);
 unsigned long ltrelement_leftltrlen(LTRElement *e);
 unsigned long ltrelement_rightltrlen(LTRElement *e);
 void ltrelement_offset2pos_fwd(LTRElement *e, Range *rng,
