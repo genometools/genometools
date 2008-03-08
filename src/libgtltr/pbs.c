@@ -105,17 +105,18 @@ static int pbs_hit_compare(const void *h1, const void *h2)
   else return (hp1->score > hp2->score ? -1 : 1);
 }
 
-PBS_Hit* pbs_find(const char *seq,
-                  LTRboundaries *line,
-                  unsigned long seqlen,
+void     pbs_find(const char *seq,
+                  const char *rev_seq,
+                  LTRElement *element,
                   Bioseq *trna_lib,
+                  PBSResults *results,
                   PBSOptions *o,
                   Error *err)
 {
   Seq *seq_forward, *seq_rev;
   unsigned long j, seqoffset, seqoffset_rev;
-  char *seq_rev_full;
-  Dlist *hitlist;
+  results->hits_fwd = dlist_new(pbs_hit_compare);
+  results->hits_rev = dlist_new(pbs_hit_compare);
   Alignment *ali;
   Alpha *a = (Alpha*) alpha_new_dna();
   ScoreFunction *sf = dna_scorefunc_new(a,
@@ -124,26 +125,16 @@ PBS_Hit* pbs_find(const char *seq,
                                         o->ali_score_insertion,
                                         o->ali_score_deletion);
 
-  /* We use a Dlist to maintain an ordered list of high-scoring local
-     alignments. If this is not used in the future, a simple maximization
-     could suffice. */
-  hitlist = dlist_new(pbs_hit_compare);
+  seqoffset = element->leftLTR_3-o->radius;
+  seqoffset_rev = element->rightLTR_5+o->radius;
 
-  /* get reverse complement */
-  seq_rev_full = ma_malloc(sizeof(char)*seqlen);
-  memcpy(seq_rev_full, seq, sizeof(char)*seqlen);
-  reverse_complement(seq_rev_full, seqlen, err);
-
-  seqoffset = line->leftLTR_3-o->radius;
-  seqoffset_rev = line->rightLTR_5+o->radius;
-
-  seq_forward = seq_new(seq+
-                          line->leftLTR_3-line->leftLTR_5-o->radius+1,
+  seq_forward = seq_new(seq +
+                          element->leftLTR_3-element->leftLTR_5-o->radius+1,
                         2*o->radius,
                         a);
 
-  seq_rev     = seq_new(seq_rev_full+
-                          line->rightLTR_3-line->rightLTR_5-o->radius+1,
+  seq_rev     = seq_new(rev_seq +
+                          element->rightLTR_3-element->rightLTR_5-o->radius+1,
                         2*o->radius,
                         a);
 
@@ -162,13 +153,13 @@ PBS_Hit* pbs_find(const char *seq,
     trna_from3 = seq_new_own(trna_from3_full, trna_seqlen, a);
 
     ali = swalign(seq_forward, trna_from3, sf);
-    pbs_add_hit(hitlist,ali,o,trna_seqlen,
+    pbs_add_hit(results->hits_fwd,ali,o,trna_seqlen,
                 seq_get_description(trna_seq), STRAND_FORWARD,
                 seqoffset);
     alignment_delete(ali);
 
     ali = swalign(seq_rev, trna_from3, sf);
-    pbs_add_hit(hitlist,ali,o,trna_seqlen,
+    pbs_add_hit(results->hits_rev,ali,o,trna_seqlen,
                 seq_get_description(trna_seq), STRAND_REVERSE,
                 seqoffset_rev);
     alignment_delete(ali);
@@ -177,27 +168,43 @@ PBS_Hit* pbs_find(const char *seq,
   }
   seq_delete(seq_forward);
   seq_delete(seq_rev);
-  ma_free(seq_rev_full);
   scorefunction_delete(sf);
   alpha_delete(a);
 
-  if(dlist_size(hitlist) > 0)
+  if (dlist_size(results->hits_fwd) > 0)
   {
     Dlistelem *delem;
-    PBS_Hit* result;
-    delem = dlist_first(hitlist);
-    result = (PBS_Hit*) dlistelem_get_data(delem);
-    for(delem=dlistelem_next(delem);delem;delem = dlistelem_next(delem))
+    delem = dlist_first(results->hits_fwd);
+    results->best_hit = (PBS_Hit*) dlistelem_get_data(delem);
+  }
+  if (dlist_size(results->hits_rev) > 0)
+  {
+    Dlistelem *delem;
+    PBS_Hit *tmp;
+    delem = dlist_first(results->hits_fwd);
+    tmp = (PBS_Hit*) dlistelem_get_data(delem);
+    if (tmp->score > results->best_hit->score)
+      results->best_hit = tmp;
+  }
+}
+
+void pbs_clear_results(PBSResults *results)
+{
+    Dlistelem *delem;
+    for(delem = dlist_first(results->hits_fwd);
+        delem;
+        delem = dlistelem_next(delem))
     {
       PBS_Hit *hit = (PBS_Hit*) dlistelem_get_data(delem);
       ma_free(hit);
     }
-    dlist_delete(hitlist);
-    return result;
-  }
-  else
-  {
-    dlist_delete(hitlist);
-    return NULL;
-  }
+    dlist_delete(results->hits_fwd);
+    for(delem = dlist_first(results->hits_rev);
+        delem;
+        delem = dlistelem_next(delem))
+    {
+      PBS_Hit *hit = (PBS_Hit*) dlistelem_get_data(delem);
+      ma_free(hit);
+    }
+    dlist_delete(results->hits_rev);
 }

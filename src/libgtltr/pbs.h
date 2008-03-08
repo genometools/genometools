@@ -20,12 +20,12 @@
 
 #include "libgtcore/undef.h"
 #include "libgtcore/bioseq.h"
+#include "libgtcore/dlist.h"
 #include "libgtcore/seq.h"
 #include "libgtcore/strand.h"
 #include "libgtcore/scorefunction.h"
 #include "libgtext/alignment.h"
-#include "libgtltr/repeattypes.h"
-#include "libgtltr/ltrharvest-opt.h"
+#include "libgtltr/ltrelement.h"
 
 typedef struct PBSOptions {
   unsigned int radius,
@@ -52,12 +52,18 @@ typedef struct PBS_Hit {
   const char *trna;
 } PBS_Hit;
 
+typedef struct PBSResults {
+  Dlist *hits_fwd, *hits_rev;
+  PBS_Hit *best_hit;
+} PBSResults;
+
 /* Aligns tRNA from a library to the LTR retrotransposon candidate and
    returns highest-scoring hit (newly created). */
-PBS_Hit* pbs_find(const char *seq,
-                  LTRboundaries *line,
-                  unsigned long seqlen,
+void     pbs_find(const char *seq,
+                  const char *rev_seq,
+                  LTRElement *element,
                   Bioseq *trna_lib,
+                  PBSResults *results,
                   PBSOptions *lo,
                   Error *err);
 
