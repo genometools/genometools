@@ -227,8 +227,10 @@ void ppt_clear_results(PPTResults *results)
   {
     ma_free(*(PPT_Hit**) array_get(results->hits_fwd,i));
   }
+  array_delete(results->hits_fwd);
   for (i=0;i<array_size(results->hits_rev);i++)
   {
     ma_free(*(PPT_Hit**) array_get(results->hits_rev,i));
   }
+  array_delete(results->hits_rev);
 }
