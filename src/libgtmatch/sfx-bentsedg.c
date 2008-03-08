@@ -61,12 +61,12 @@
 
 #undef FASTSTRINGCOMPARE
 #ifdef  FASTSTRINGCOMPARE
-#define STRINGCOMPARE(RET,S,T,OFFSET,LL)\
+#define STRINGCOMPARE(RET,LL,S,T,OFFSET)\
         RET = compareEncseqsequences(&(LL),encseq,esr1,esr2,S,T,OFFSET,\
                                      totallength);
 #else
 
-#define STRINGCOMPARE(RET,S,T,OFFSET,LL)\
+#define STRINGCOMPARE(RET,LL,S,T,OFFSET)\
         Suffixptr sptr, tptr;\
         for (sptr = (S)+(OFFSET), tptr = (T)+(OFFSET); /* Nothing */;\
              sptr++, tptr++)\
@@ -223,7 +223,7 @@ static void insertionsort(const Encodedsequence *encseq,
     for (pj = pi; pj > leftptr; pj--)
     {
       Suffixptr temp;
-      STRINGCOMPARE(retval,*(pj-1),*pj,depth,lcplen);
+      STRINGCOMPARE(retval,lcplen,*(pj-1),*pj,depth);
       if (lcpsubtab != NULL)
       {
         lcpindex = LCPINDEX(pj);

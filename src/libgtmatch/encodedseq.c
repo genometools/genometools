@@ -2285,23 +2285,23 @@ static int requiredUIntTwobitencoding(uint32_t v)
   return r;
 }
 
-static int prefixofdifftbe(Twobitencoding tbe1,Twobitencoding tbe2)
+static int prefixofdifftbe(unsigned int *lcpvalue,
+                           Twobitencoding tbe1,Twobitencoding tbe2)
 {
-  unsigned int commonprefix;
-
   assert((tbe1 ^ tbe2) > 0);
-  commonprefix = (unsigned int) DIV2(MULT2(UNITSIN2BITENC) -
-                                requiredUIntTwobitencoding(tbe1 ^ tbe2));
-  assert(commonprefix < (unsigned int) UNITSIN2BITENC);
-  if (EXTRACTENCODEDCHARSCALAR(tbe1,commonprefix) <
-      EXTRACTENCODEDCHARSCALAR(tbe2,commonprefix))
+  *lcpvalue = (unsigned int) DIV2(MULT2(UNITSIN2BITENC) -
+                                  requiredUIntTwobitencoding(tbe1 ^ tbe2));
+  assert(*lcpvalue < (unsigned int) UNITSIN2BITENC);
+  if (EXTRACTENCODEDCHARSCALAR(tbe1,*lcpvalue) <
+      EXTRACTENCODEDCHARSCALAR(tbe2,*lcpvalue))
   {
-    return -(int) commonprefix;
+    return -1;
   }
-  return (int) commonprefix;
+  return 1;
 }
 
-static int compareTwobitencodings(PrefixofTwobitencoding *ptbe1,
+static int compareTwobitencodings(unsigned int *lcpvalue,
+                                  PrefixofTwobitencoding *ptbe1,
                                   Seqpos pos1,
                                   PrefixofTwobitencoding *ptbe2,
                                   Seqpos pos2)
@@ -2310,18 +2310,16 @@ static int compareTwobitencodings(PrefixofTwobitencoding *ptbe1,
 
   if (ptbe1->prefix < ptbe2->prefix) /* ISSPECIAL(seq1[ptbe1.prefix])  */
   {
-    char buf1[MULT2(UNITSIN2BITENC)+1];
-
     mask = MASKPREFIX(ptbe1->prefix);
-    uint32_t2string(buf1,mask);
     ptbe1->tbe &= mask;
     ptbe2->tbe &= mask;
     if (ptbe1->tbe == ptbe2->tbe)
     {
       assert(ptbe1->prefix < (unsigned int) UNITSIN2BITENC);
-      return (int) ptbe1->prefix;
+      *lcpvalue = ptbe1->prefix;
+      return 1;
     }
-    return prefixofdifftbe(ptbe1->tbe,ptbe2->tbe);
+    return prefixofdifftbe(lcpvalue,ptbe1->tbe,ptbe2->tbe);
   }
   if (ptbe1->prefix > ptbe2->prefix) /* ISSPECIAL(seq2[ptbe2->prefix])  */
   {
@@ -2331,9 +2329,10 @@ static int compareTwobitencodings(PrefixofTwobitencoding *ptbe1,
     if (ptbe1->tbe == ptbe2->tbe)
     {
       assert(ptbe2->prefix < (unsigned int) UNITSIN2BITENC);
-      return - (int) ptbe2->prefix;
+      *lcpvalue = ptbe2->prefix;
+      return -1;
     }
-    return prefixofdifftbe(ptbe1->tbe,ptbe2->tbe);
+    return prefixofdifftbe(lcpvalue,ptbe1->tbe,ptbe2->tbe);
   }
   assert(ptbe1->prefix == ptbe2->prefix);
   if (ptbe1->prefix < (unsigned int) UNITSIN2BITENC)
@@ -2343,43 +2342,51 @@ static int compareTwobitencodings(PrefixofTwobitencoding *ptbe1,
     ptbe2->tbe &= mask;
     if (ptbe1->tbe == ptbe2->tbe)
     {
+      *lcpvalue = ptbe1->prefix;
       if (pos1 < pos2)
       {
-        return - (int) ptbe1->prefix;
+        return -1;
       }
-      return (int) ptbe1->prefix;
+      return 1;
     }
-    return prefixofdifftbe(ptbe1->tbe,ptbe2->tbe);
+    return prefixofdifftbe(lcpvalue,ptbe1->tbe,ptbe2->tbe);
   }
   assert(ptbe1->prefix == (unsigned int) UNITSIN2BITENC &&
          ptbe2->prefix == (unsigned int) UNITSIN2BITENC);
   if (ptbe1->tbe != ptbe2->tbe)
   {
-    return prefixofdifftbe(ptbe1->tbe,ptbe2->tbe);
+    return prefixofdifftbe(lcpvalue,ptbe1->tbe,ptbe2->tbe);
   }
-  return UNITSIN2BITENC;
+  *lcpvalue = UNITSIN2BITENC;
+  return 0;
 }
 
-static int multicharactercompare_bruteforce(const Encodedsequence *encseq,
+static int multicharactercompare_bruteforce(Seqpos *lcpvalue,
+                                            const Encodedsequence *encseq,
                                             Seqpos pos1,
-                                            Seqpos pos2)
+                                            Seqpos pos2,
+                                            Seqpos maxlcp)
 {
   Uchar cc1, cc2;
-  unsigned int lcp;
+  Seqpos lcp;
+  int retval = 0;
 
-  for (lcp = 0; lcp < (Seqpos) UNITSIN2BITENC; lcp++)
+  for (lcp = 0; lcp < maxlcp; lcp++)
   {
     if (pos1 + lcp == encseq->totallength)
     {
       if (pos2 + lcp == encseq->totallength && pos1 < pos2)
       {
-        return - (int) lcp;
+        retval = -1;
+        break;
       }
-      return (int) lcp; 
+      retval = 1;
+      break;
     }
     if (pos2 + lcp == encseq->totallength)
     {
-      return -(int) lcp; 
+      retval = -1;
+      break;
     }
     cc1 = getencodedchar(encseq,pos1+lcp,Forwardmode);
     cc2 = getencodedchar(encseq,pos2+lcp,Forwardmode);
@@ -2387,42 +2394,51 @@ static int multicharactercompare_bruteforce(const Encodedsequence *encseq,
     {
       if (ISSPECIAL(cc2) && pos1 < pos2)
       {
-        return - (int) lcp;
+        retval = -1;
+        break;
       }
-      return (int) lcp;
+      retval = 1;
+      break;
     }
     if (ISSPECIAL(cc2))
     {
-      return -(int) lcp;
+      retval = -1;
+      break;
     }
     if (cc1 < cc2)
     {
-      return -(int) lcp;
+      retval = -1;
+      break;
     }
     if (cc1 > cc2)
     {
-      return (int) lcp;
+      retval = 1;
+      break;
     }
   }
-  return (int) UNITSIN2BITENC;
+  *lcpvalue = lcp;
+  return retval;
 }
 
-int multicharactercompare_withtest(const Encodedsequence *encseq,
-                                   Encodedsequencescanstate *esr1,
-                                   Seqpos pos1,
-                                   Encodedsequencescanstate *esr2,
-                                   Seqpos pos2)
+void multicharactercompare_withtest(const Encodedsequence *encseq,
+                                    Encodedsequencescanstate *esr1,
+                                    Seqpos pos1,
+                                    Encodedsequencescanstate *esr2,
+                                    Seqpos pos2)
 {
   PrefixofTwobitencoding ptbe1, ptbe2;
+  unsigned int lcpvalue1;
+  Seqpos lcpvalue2;
   int ret1, ret2;
 
   initEncodedsequencescanstate(esr1,encseq,Forwardmode,pos1);
   initEncodedsequencescanstate(esr2,encseq,Forwardmode,pos2);
   extracttwobitencoding(&ptbe1,encseq,esr1,pos1);
   extracttwobitencoding(&ptbe2,encseq,esr2,pos2);
-  ret1 = compareTwobitencodings(&ptbe1,pos1,&ptbe2,pos2);
-  ret2 = multicharactercompare_bruteforce(encseq,pos1,pos2);
-  if (ret1 != ret2)
+  ret1 = compareTwobitencodings(&lcpvalue1,&ptbe1,pos1,&ptbe2,pos2);
+  ret2 = multicharactercompare_bruteforce(&lcpvalue2,encseq,pos1,
+                                          pos2,UNITSIN2BITENC);
+  if (ret1 != ret2 || (Seqpos) lcpvalue1 != lcpvalue2)
   {
     char buf1[MULT2(UNITSIN2BITENC)+1], buf2[MULT2(UNITSIN2BITENC)+1];
 
@@ -2437,10 +2453,10 @@ int multicharactercompare_withtest(const Encodedsequence *encseq,
     fprintf(stderr,"v2=%s(prefix=%u)\n",buf2,ptbe2.prefix);
     exit(EXIT_FAILURE); /* programming error */
   }
-  return ret1;
 }
 
-int multicharactercompare(const Encodedsequence *encseq,
+int multicharactercompare(unsigned int *lcpvalue,
+                          const Encodedsequence *encseq,
                           Encodedsequencescanstate *esr1,
                           Seqpos pos1,
                           Encodedsequencescanstate *esr2,
@@ -2452,7 +2468,7 @@ int multicharactercompare(const Encodedsequence *encseq,
   initEncodedsequencescanstate(esr2,encseq,Forwardmode,pos2);
   extracttwobitencoding(&ptbe1,encseq,esr1,pos1);
   extracttwobitencoding(&ptbe2,encseq,esr2,pos2);
-  return compareTwobitencodings(&ptbe1,pos1,&ptbe2,pos2);
+  return compareTwobitencodings(lcpvalue,&ptbe1,pos1,&ptbe2,pos2);
 }
 
 int compareEncseqsequences(Seqpos *lcp,
@@ -2464,29 +2480,24 @@ int compareEncseqsequences(Seqpos *lcp,
                            UNUSED Seqpos totallength)
 {
   PrefixofTwobitencoding ptbe1, ptbe2;
+  unsigned int lcpvalue;
   int retval;
 
   *lcp = depth;
-  initEncodedsequencescanstate(esr1,encseq,Forwardmode,pos1);
-  initEncodedsequencescanstate(esr2,encseq,Forwardmode,pos2);
+  initEncodedsequencescanstate(esr1,encseq,Forwardmode,pos1 + depth);
+  initEncodedsequencescanstate(esr2,encseq,Forwardmode,pos2 + depth);
   while (true)
   {
     extracttwobitencoding(&ptbe1,encseq,esr1,pos1 + *lcp);
     extracttwobitencoding(&ptbe2,encseq,esr2,pos2 + *lcp);
-    retval = compareTwobitencodings(&ptbe1,pos1,&ptbe2,pos2);
-    if (retval < (int) UNITSIN2BITENC)
+    retval = compareTwobitencodings(&lcpvalue,&ptbe1,pos1,&ptbe2,pos2);
+    *lcp += lcpvalue;
+    if (retval != 0)
     {
       break;
     }
-    *lcp += (Seqpos) UNITSIN2BITENC;
   }
-  if (retval < 0)
-  {
-    *lcp += (Seqpos) -retval;
-    return -1;
-  }
-  *lcp += (Seqpos) retval;
-  return 1;
+  return retval;
 }
 
 #endif /* ifndef INLINEDENCSEQ */

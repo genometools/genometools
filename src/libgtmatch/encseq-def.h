@@ -193,16 +193,17 @@ int compareEncseqsequences(Seqpos *lcp,
                            Seqpos depth,
                            UNUSED Seqpos totallength);
 
-int multicharactercompare(const Encodedsequence *encseq,
+int multicharactercompare(unsigned int *lcpvalue,
+                          const Encodedsequence *encseq,
                           Encodedsequencescanstate *esr1,
                           Seqpos pos1,
                           Encodedsequencescanstate *esr2,
 			  Seqpos pos2);
 
-int multicharactercompare_withtest(const Encodedsequence *encseq,
-                                   Encodedsequencescanstate *esr1,
-                                   Seqpos pos1,
-                                   Encodedsequencescanstate *esr2,
-			           Seqpos pos2);
+void multicharactercompare_withtest(const Encodedsequence *encseq,
+                                    Encodedsequencescanstate *esr1,
+                                    Seqpos pos1,
+                                    Encodedsequencescanstate *esr2,
+			            Seqpos pos2);
 
 #endif
