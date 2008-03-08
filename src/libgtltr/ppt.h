@@ -22,8 +22,7 @@
 #include "libgtcore/undef.h"
 #include "libgtcore/strand.h"
 #include "libgtext/hmm.h"
-#include "libgtltr/repeattypes.h"
-#include "libgtltr/ltrharvest-opt.h"
+#include "libgtltr/ltrelement.h"
 
 typedef struct {
   unsigned int ppt_minlen,
@@ -52,22 +51,24 @@ struct PPT_Hit {
   Strand strand;
 };
 
+typedef struct PPTResults {
+  Array *hits_fwd, *hits_rev;
+  PPT_Hit *best_hit;
+} PPTResults;
+
 /* Initializes a new HMM with PPT/U-box finding capability. */
 HMM*     ppt_hmm_new(const Alpha *alpha);
 
 /* Position-specific score function for PPT candidates. */
 double   ppt_score(unsigned long posdiff, unsigned int width);
 
-/* Searches for PPTs in the given sequence and returns the index of the
-   highest scored PPT in the results array. 'ltrlen' specifies the length of
-   the LTR to the right of the boundary.
-   The strand is given for annotation to the result list. */
-unsigned long ppt_find(const char *seq,
-                       unsigned long seqlen,
-                       unsigned long ltrlen,
-                       Array *results,
-                       PPTOptions *opts,
-                       double score_func(unsigned long, unsigned int),
-                       Strand strand);
+/* Searches for PPTs in the given sequence. */
+void ppt_find(const char *seq,
+              const char *rev_seq,
+              LTRElement *element,
+              PPTResults *results,
+              PPTOptions *o);
+
+void ppt_clear_results(PPTResults *results);
 
 #endif

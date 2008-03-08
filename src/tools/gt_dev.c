@@ -32,10 +32,6 @@
 #include "tools/gt_sfxmap.h"
 #include "tools/gt_skproto.h"
 #include "tools/gt_trieins.h"
-/* remove me please */
-#include "tools/gt_findppt.h"
-#include "tools/gt_pbs.h"
-#include "tools/gt_pdom.h"
 
 static void* gt_dev_arguments_new(void)
 {
@@ -54,9 +50,6 @@ static void* gt_dev_arguments_new(void)
   toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
   toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   toolbox_add(dev_toolbox, "trieins", gt_trieins);
-  toolbox_add(dev_toolbox, "findppt", gt_findppt);
-  toolbox_add(dev_toolbox, "findpbs", gt_findpbs);
-  toolbox_add(dev_toolbox, "findpdom", gt_findpdom);
   return dev_toolbox;
 }
 
