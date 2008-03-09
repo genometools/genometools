@@ -67,6 +67,7 @@ static void testscanatpos(const Encodedsequence *encseq,
 }
 
 static void testmulticharactercompare(const Encodedsequence *encseq,
+                                      Readmode readmode,
                                       unsigned long multicharcmptrials)
 {
   Encodedsequencescanstate *esr1, *esr2;
@@ -81,7 +82,7 @@ static void testmulticharactercompare(const Encodedsequence *encseq,
   {
     pos1 = (Seqpos) (drand48() * (double) totallength);
     pos2 = (Seqpos) (drand48() * (double) totallength);
-    (void) multicharactercompare_withtest(encseq,esr1,pos1,esr2,pos2);
+    (void) multicharactercompare_withtest(encseq,readmode,esr1,pos1,esr2,pos2);
   }
   freeEncodedsequencescanstate(&esr1);
   freeEncodedsequencescanstate(&esr2);
@@ -195,7 +196,7 @@ int testencodedsequence(const StrArray *filenametab,
     checkextractunitatpos(encseq);
     if (multicharcmptrials > 0)
     {
-      testmulticharactercompare(encseq,multicharcmptrials);
+      testmulticharactercompare(encseq,Forwardmode,multicharcmptrials);
     }
   }
   if (scantrials > 0)

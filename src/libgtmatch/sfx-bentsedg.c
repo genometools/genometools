@@ -59,11 +59,18 @@
 #define LCPINDEX(I)       (Seqpos) ((I) - lcpsubtab->suftabbase)
 #define SETLCP(I,V)       lcpsubtab->spaceSeqpos[I] = V
 
-#undef FASTSTRINGCOMPARE
+#undef  FASTSTRINGCOMPARE
 #ifdef  FASTSTRINGCOMPARE
 #define STRINGCOMPARE(RET,LL,S,T,OFFSET)\
-        RET = compareEncseqsequences(&(LL),encseq,esr1,esr2,S,T,OFFSET,\
-                                     totallength);
+        if (lcpsubtab != NULL)\
+        {\
+          RET = compareEncseqsequences(&(LL),encseq,readmode,esr1,esr2,\
+                                       S,T,OFFSET,totallength);\
+        } else\
+        {\
+          RET = compareEncseqsequences_nolcp(encseq,readmode,esr1,esr2,\
+                                             S,T,OFFSET,totallength);\
+        }
 #else
 
 #define STRINGCOMPARE(RET,LL,S,T,OFFSET)\
@@ -211,12 +218,15 @@ static void insertionsort(const Encodedsequence *encseq,
                           UNUSED const Definedunsignedint *maxdepth)
 {
   Suffixptr *pi, *pj;
-  Seqpos lcpindex, lcplen;
+  Seqpos lcpindex, lcplen = 0;
   int retval;
 #ifdef  FASTSTRINGCOMPARE
   Encodedsequencescanstate *esr1, *esr2;
-  esr1 = newEncodedsequencescanstate();
-  esr2 = newEncodedsequencescanstate();
+  if (hasspecialranges(encseq))
+  {
+    esr1 = newEncodedsequencescanstate();
+    esr2 = newEncodedsequencescanstate();
+  }
 #endif
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
@@ -241,8 +251,11 @@ static void insertionsort(const Encodedsequence *encseq,
     }
   }
 #ifdef  FASTSTRINGCOMPARE
-  freeEncodedsequencescanstate(&esr1);
-  freeEncodedsequencescanstate(&esr2);
+  if (hasspecialranges(encseq))
+  {
+    freeEncodedsequencescanstate(&esr1);
+    freeEncodedsequencescanstate(&esr2);
+  }
 #endif
 }
 
@@ -885,4 +898,7 @@ void sortallbuckets(Seqpos *suftabptr,
     }
   }
   FREEARRAY(&mkvauxstack,MKVstack);
+#ifdef  FASTSTRINGCOMPARE
+  showocccase();
+#endif
 }
