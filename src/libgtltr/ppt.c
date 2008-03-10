@@ -30,23 +30,23 @@ HMM* ppt_hmm_new(const Alpha *alpha)
   hmm = hmm_new(PPT_NOF_STATES, alpha_size(alpha));
 
   /* set emission probabilities */
-  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 'g'), 0.25);
-  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 'a'), 0.25);
-  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 'c'), 0.25);
-  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 't'), 0.25);
-  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 'g'),  0.485);
-  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 'a'),  0.485);
-  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 'c'),  0.015);
-  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 't'),  0.015);
-  hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 'g'), 0.03);
-  hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 'a'), 0.03);
-  hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 'c'), 0.03);
-  hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 't'), 0.91);
-  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'g'), 0.00);
-  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'a'), 0.00);
-  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'c'), 0.00);
-  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 't'), 0.00);
-  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'n'), 1.00);
+  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 'G'), 0.25);
+  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 'A'), 0.25);
+  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 'C'), 0.25);
+  hmm_set_emission_probability(hmm, PPT_OUT,  alpha_encode(alpha, 'T'), 0.25);
+  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 'G'),  0.485);
+  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 'A'),  0.485);
+  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 'C'),  0.015);
+  hmm_set_emission_probability(hmm, PPT_IN,  alpha_encode(alpha, 'T'),  0.015);
+  hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 'G'), 0.03);
+  hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 'A'), 0.03);
+  hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 'C'), 0.03);
+  hmm_set_emission_probability(hmm, PPT_UBOX, alpha_encode(alpha, 'T'), 0.91);
+  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'G'), 0.00);
+  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'A'), 0.00);
+  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'C'), 0.00);
+  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'T'), 0.00);
+  hmm_set_emission_probability(hmm, PPT_N,    alpha_encode(alpha, 'N'), 1.00);
 
   /* set transition probabilities */
   hmm_set_transition_probability(hmm, PPT_OUT, PPT_IN,   0.05);
@@ -169,6 +169,8 @@ void ppt_find(const char *seq,
                 ltrlen;
   PPT_Hit *tmp;
 
+  results->best_hit = NULL;
+
   /* do PPT finding on forward strand
    * -------------------------------- */
   ltrlen = ltrelement_rightltrlen(element);
@@ -202,15 +204,14 @@ void ppt_find(const char *seq,
     encoded_seq[i] = alpha_encode(alpha, rev_seq[i]);
   }
   /* use Viterbi algorithm to decode emissions within radius */
-  decoded = ma_malloc(sizeof (unsigned int) * 2*radius+2);
   hmm_decode(hmm, decoded, encoded_seq+seqlen-ltrlen-radius, 2*radius);
-  group_hits(decoded, results_rev, o, radius, STRAND_FORWARD);
+  group_hits(decoded, results_rev, o, radius, STRAND_REVERSE);
   highest_rev = score_hits(results_rev, seqlen, ltrlen, radius);
   results->hits_rev = results_rev;
   if (highest_rev != UNDEF_ULONG)
   {
     tmp = *(PPT_Hit**) array_get(results_rev, highest_rev);
-    if (tmp->score > results->best_hit->score)
+    if (!results->best_hit || tmp->score > results->best_hit->score)
       results->best_hit = tmp;
   }
 
