@@ -21,7 +21,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/range.h"
 #include "libgtcore/strand.h"
-#include "libgtext/genome_node.h"
+#include "libgtext/genome_feature.h"
 
 enum Offset {
   OFFSET_END_LEFT_LTR,
@@ -33,8 +33,13 @@ typedef struct LTRElement {
                 leftLTR_5,
                 rightLTR_3,
                 rightLTR_5;
-  GenomeNode *mainnode;
+  GenomeFeature *mainnode,
+                *leftLTR,
+                *rightLTR,
+                *leftTSD,
+                *rightTSD;
 } LTRElement;
+
 unsigned long ltrelement_length(LTRElement *e);
 unsigned long ltrelement_leftltrlen(LTRElement *e);
 unsigned long ltrelement_rightltrlen(LTRElement *e);

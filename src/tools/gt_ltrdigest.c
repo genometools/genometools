@@ -25,6 +25,7 @@
 #include "libgtcore/unused.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
+#include "libgtltr/ltrdigest_stream.h"
 #include "libgtltr/pbs.h"
 #include "libgtltr/ppt.h"
 #include "libgtltr/pdom.h"
@@ -166,7 +167,8 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
 {
   LTRdigestOptions *arguments = tool_arguments;
   GenomeStream *gff3_in_stream,
-               *gff3_out_stream;
+               *gff3_out_stream,
+               *ltrdigest_stream;
   GenomeNode *gn;
 
   int had_err = 0;
@@ -177,9 +179,9 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                                               arguments->verbose &&
                                               arguments->outfp);
 
-  /* insert LTRdigest stream here! */
+  ltrdigest_stream = ltrdigest_stream_new(gff3_in_stream);
 
-  gff3_out_stream = gff3_out_stream_new(gff3_in_stream, arguments->outfp);
+  gff3_out_stream = gff3_out_stream_new(ltrdigest_stream, arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
@@ -188,6 +190,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
   }
 
   genome_stream_delete(gff3_out_stream);
+  genome_stream_delete(ltrdigest_stream);
   genome_stream_delete(gff3_in_stream);
   return had_err;
 }
