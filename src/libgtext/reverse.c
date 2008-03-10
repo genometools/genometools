@@ -26,6 +26,7 @@ static int complement(char *reverse_char, char dna_char, Error *e)
     case 'C': *reverse_char = 'G'; return 0;
     case 'G': *reverse_char = 'C'; return 0;
     case 'T': *reverse_char = 'A'; return 0;
+    case 'N': *reverse_char = 'N'; return 0;
     case 'a': *reverse_char = 't'; return 0;
     case 'c': *reverse_char = 'g'; return 0;
     case 'g': *reverse_char = 'c'; return 0;
