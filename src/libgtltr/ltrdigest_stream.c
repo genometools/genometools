@@ -35,11 +35,6 @@ struct LTRdigestStream {
   LTRElement element;
 };
 
-void range_print(Range r)
-{
-  fprintf(stderr, "(%lu-%lu)\n", r.start, r.end);
-}
-
 #define ltrdigest_stream_cast(GS)\
         genome_stream_cast(ltrdigest_stream_class(), GS)
 
