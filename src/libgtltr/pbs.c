@@ -108,15 +108,12 @@ static int pbs_hit_compare(const void *h1, const void *h2)
 void     pbs_find(const char *seq,
                   const char *rev_seq,
                   LTRElement *element,
-                  Bioseq *trna_lib,
                   PBSResults *results,
                   PBSOptions *o,
                   Error *err)
 {
   Seq *seq_forward, *seq_rev;
   unsigned long j, seqoffset, seqoffset_rev;
-  results->hits_fwd = dlist_new(pbs_hit_compare);
-  results->hits_rev = dlist_new(pbs_hit_compare);
   Alignment *ali;
   Alpha *a = (Alpha*) alpha_new_dna();
   ScoreFunction *sf = dna_scorefunc_new(a,
@@ -124,6 +121,10 @@ void     pbs_find(const char *seq,
                                         o->ali_score_mismatch,
                                         o->ali_score_insertion,
                                         o->ali_score_deletion);
+
+  results->hits_fwd = dlist_new(pbs_hit_compare);
+  results->hits_rev = dlist_new(pbs_hit_compare);
+  results->best_hit = NULL;
 
   seqoffset = element->leftLTR_3-o->radius;
   seqoffset_rev = element->rightLTR_5+o->radius;
@@ -138,13 +139,13 @@ void     pbs_find(const char *seq,
                         2*o->radius,
                         a);
 
-  for(j=0;j<bioseq_number_of_sequences(trna_lib);j++)
+  for(j=0;j<bioseq_number_of_sequences(o->trna_lib);j++)
   {
     Seq *trna_seq, *trna_from3;
     char *trna_from3_full;
     unsigned long trna_seqlen;
 
-    trna_seq = bioseq_get_seq(trna_lib, j);
+    trna_seq = bioseq_get_seq(o->trna_lib, j);
     trna_seqlen = seq_length(trna_seq);
 
     trna_from3_full = ma_malloc(sizeof (char)*trna_seqlen);
@@ -181,9 +182,9 @@ void     pbs_find(const char *seq,
   {
     Dlistelem *delem;
     PBS_Hit *tmp;
-    delem = dlist_first(results->hits_fwd);
+    delem = dlist_first(results->hits_rev);
     tmp = (PBS_Hit*) dlistelem_get_data(delem);
-    if (tmp->score > results->best_hit->score)
+    if (!results->best_hit || tmp->score > results->best_hit->score)
       results->best_hit = tmp;
   }
 }

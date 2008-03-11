@@ -37,6 +37,7 @@ typedef struct PBSOptions {
       ali_score_mismatch,
       ali_score_insertion,
       ali_score_deletion;
+  Bioseq *trna_lib;
 } PBSOptions;
 
 /* This struct holds information about a primer binding site (PBS). */
@@ -62,9 +63,10 @@ typedef struct PBSResults {
 void     pbs_find(const char *seq,
                   const char *rev_seq,
                   LTRElement *element,
-                  Bioseq *trna_lib,
                   PBSResults *results,
                   PBSOptions *lo,
                   Error *err);
+
+void pbs_clear_results(PBSResults *results);
 
 #endif
