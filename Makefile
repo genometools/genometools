@@ -35,7 +35,7 @@ EXP_CFLAGS:=$(CFLAGS)
 EXP_LDFLAGS:=$(LDFLAGS)
 EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
-EXP_LDLIBS:=$(LIBS) -lm
+EXP_LDLIBS:=$(LIBS) -lm -lhmmer
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Werror -Wunused-parameter -pipe -fPIC -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
