@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include <ctype.h>
 #include "libgtcore/array.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
@@ -183,7 +184,8 @@ unsigned long alignment_eval(const Alignment *a)
     switch (meop.type) {
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
-          if (a->u[a->urange.start + uctr] != a->v[a->vrange.start + vctr])
+          if (tolower(a->u[a->urange.start + uctr])
+                != tolower(a->v[a->vrange.start + vctr]))
             sumcost++;
           uctr++;
           vctr++;
@@ -236,7 +238,8 @@ void alignment_show(const Alignment *a, FILE *fp)
     switch (meop.type) {
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
-          if (a->u[a->urange.start + uctr++] == a->v[a->vrange.start + vctr++])
+          if (tolower(a->u[a->urange.start + uctr++])
+                == tolower(a->v[a->vrange.start + vctr++]))
             xfputc(MATCHSYMBOL, fp);
           else
             xfputc(MISMATCHSYMBOL, fp);
