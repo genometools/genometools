@@ -20,6 +20,7 @@
 #include <float.h>
 #include <pthread.h>
 #include "libgtcore/codon.h"
+#include "libgtcore/log.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/translate.h"
 #include "libgtcore/unused.h"
@@ -133,6 +134,8 @@ int pdom_load_hmm_files(PdomOptions *opts, Error *err)
           hmm->name);
     if(hmmfp) HMMFileClose(hmmfp);
   }
+  log_log("Loaded %lu HMM model(s)\n",
+          array_size(opts->plan7_ts));
   return had_err;
 }
 

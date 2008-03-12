@@ -199,17 +199,13 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
   arguments->pbs_opts.ali_score_insertion = -20;
   arguments->pbs_opts.ali_score_mismatch = -10;
   arguments->pbs_opts.ali_score_match = 5;
-
   arguments->pdom_opts.plan7_ts = array_new(sizeof (struct plan7_s*));
 
   had_err = pdom_load_hmm_files(&arguments->pdom_opts,
                            err);
 
   if(!had_err)
-    {
-
-    fprintf(stderr, "loaded %lu HMM models\n", array_size(arguments->pdom_opts.plan7_ts));
-
+  {
     gff3_in_stream  = gff3_in_stream_new_sorted(argv[0],
                                                 arguments->verbose &&
                                                 arguments->outfp);
