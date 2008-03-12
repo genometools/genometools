@@ -96,15 +96,15 @@ int pdom_domain_report_hits(void *key, void *value, void *data,
   return 0;
 }
 
-int load_hmm_files(StrArray *files, Array *models, Error *err)
+int pdom_load_hmm_files(PdomOptions *opts, Error *err)
 {
   unsigned long i;
   int had_err = 0;
-  for(i=0;i<strarray_size(files);i++)
+  for(i=0;i<strarray_size(opts->hmm_files);i++)
   {
     HMMFILE *hmmfp;
     struct plan7_s *hmm;
-    char *hmmfile = (char*)strarray_get(files, i);
+    char *hmmfile = (char*)strarray_get(opts->hmm_files, i);
     if ((hmmfp = HMMFileOpen(hmmfile, "HMMERDB")) == NULL)
     {
       error_set(err, "failed to open HMM file '%s'", hmmfile);
@@ -126,11 +126,11 @@ int load_hmm_files(StrArray *files, Array *models, Error *err)
     if (!had_err)
     {
       P7Logoddsify(hmm, true);
-      array_add(models, hmm);
+      array_add(opts->plan7_ts, hmm);
     }
-    /*if (!SetAutocuts(thresh, hmm))
+    if (!SetAutocuts(&opts->thresh, hmm))
       Die("HMM %s did not contain the GA, TC, or NC cutoffs you needed",
-          hmm->name);*/
+          hmm->name);
     if(hmmfp) HMMFileClose(hmmfp);
   }
   return had_err;
@@ -139,18 +139,17 @@ int load_hmm_files(StrArray *files, Array *models, Error *err)
 void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
                PdomResults *results, PdomOptions *opts)
 {
-  struct threshold_s thresh;
   char *fwd_fr1, *fwd_fr2, *fwd_fr3,
        *rev_fr1, *rev_fr2, *rev_fr3;
   unsigned long i,
                 seqlen = ltrelement_length(element);
 
-  thresh.globT   = -FLT_MAX;
-  thresh.domT    = -FLT_MAX;
-  thresh.domE    = FLT_MAX;
-  thresh.autocut = CUT_NONE;
-  thresh.Z       = 1;
-  thresh.globE   = opts->evalue_cutoff;
+  opts->thresh.globT   = -FLT_MAX;
+  opts->thresh.domT    = -FLT_MAX;
+  opts->thresh.domE    = FLT_MAX;
+  opts->thresh.autocut = CUT_NONE;
+  opts->thresh.Z       = 1;
+  opts->thresh.globE   = opts->evalue_cutoff;
 
   results->empty = TRUE;
 
@@ -170,12 +169,12 @@ void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
     hit->hits_rev = AllocTophits(20);
     hit->best_hit = NULL;
 
-    hmmer_search(hmm,fwd_fr1,strlen(fwd_fr1),"0+",&thresh,ghit,hit->hits_fwd);
-    hmmer_search(hmm,fwd_fr2,strlen(fwd_fr2),"1+",&thresh,ghit,hit->hits_fwd);
-    hmmer_search(hmm,fwd_fr3,strlen(fwd_fr3),"2+",&thresh,ghit,hit->hits_fwd);
-    hmmer_search(hmm,rev_fr1,strlen(rev_fr1),"0-",&thresh,ghit,hit->hits_rev);
-    hmmer_search(hmm,rev_fr2,strlen(rev_fr2),"1-",&thresh,ghit,hit->hits_rev);
-    hmmer_search(hmm,rev_fr3,strlen(rev_fr3),"2-",&thresh,ghit,hit->hits_rev);
+    hmmer_search(hmm,fwd_fr1,strlen(fwd_fr1),"0+",&opts->thresh,ghit,hit->hits_fwd);
+    hmmer_search(hmm,fwd_fr2,strlen(fwd_fr2),"1+",&opts->thresh,ghit,hit->hits_fwd);
+    hmmer_search(hmm,fwd_fr3,strlen(fwd_fr3),"2+",&opts->thresh,ghit,hit->hits_fwd);
+    hmmer_search(hmm,rev_fr1,strlen(rev_fr1),"0-",&opts->thresh,ghit,hit->hits_rev);
+    hmmer_search(hmm,rev_fr2,strlen(rev_fr2),"1-",&opts->thresh,ghit,hit->hits_rev);
+    hmmer_search(hmm,rev_fr3,strlen(rev_fr3),"2-",&opts->thresh,ghit,hit->hits_rev);
 
     FullSortTophits(hit->hits_fwd);
     FullSortTophits(hit->hits_rev);

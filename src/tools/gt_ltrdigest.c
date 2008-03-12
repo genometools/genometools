@@ -202,8 +202,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
 
   arguments->pdom_opts.plan7_ts = array_new(sizeof (struct plan7_s*));
 
-  had_err = load_hmm_files(arguments->pdom_opts.hmm_files,
-                           arguments->pdom_opts.plan7_ts,
+  had_err = pdom_load_hmm_files(&arguments->pdom_opts,
                            err);
 
   if(!had_err)

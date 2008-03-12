@@ -29,6 +29,7 @@ typedef struct PdomOptions {
   double evalue_cutoff;
   StrArray *hmm_files;
   Array *plan7_ts;
+  struct threshold_s thresh;
 } PdomOptions;
 
 typedef struct PdomHit {
@@ -42,7 +43,7 @@ typedef struct PdomResults {
   bool empty;
 } PdomResults;
 
-int  load_hmm_files(StrArray *files, Array *models, Error *err);
+int  pdom_load_hmm_files(PdomOptions *opts, Error *err);
 int  pdom_domain_report_hits(void *key, void *value, UNUSED void *data,
                              UNUSED Error *err);
 void pdom_convert_frame_position(Range *rng, int frame);
