@@ -60,7 +60,7 @@ double pbs_score_func(unsigned long edist, unsigned long offset,
 
 void pbs_add_hit(Dlist *hitlist, Alignment *ali, PBSOptions *o,
                  unsigned long trna_seqlen, const char *desc,
-                 Strand strand, unsigned long seqoffset)
+                 Strand strand)
 {
   unsigned long dist;
   PBS_Hit *hit;
@@ -79,10 +79,7 @@ void pbs_add_hit(Dlist *hitlist, Alignment *ali, PBSOptions *o,
     hit->trna    = desc;
     hit->alilen  = abs(urange.end-urange.start+1);
     hit->tstart  = vrange.start;
-    if (strand == STRAND_FORWARD)
-      hit->start   = seqoffset + urange.start;
-    else if (strand == STRAND_REVERSE)
-      hit->start   = seqoffset - urange.end;
+    hit->start   = urange.start;
     hit->end     = urange.end;
     hit->offset  = abs(o->radius-urange.start);
     hit->edist   = dist;
@@ -113,7 +110,7 @@ void     pbs_find(const char *seq,
                   Error *err)
 {
   Seq *seq_forward, *seq_rev;
-  unsigned long j, seqoffset, seqoffset_rev;
+  unsigned long j;
   Alignment *ali;
   Alpha *a = (Alpha*) alpha_new_dna();
   ScoreFunction *sf = dna_scorefunc_new(a,
@@ -125,9 +122,6 @@ void     pbs_find(const char *seq,
   results->hits_fwd = dlist_new(pbs_hit_compare);
   results->hits_rev = dlist_new(pbs_hit_compare);
   results->best_hit = NULL;
-
-  seqoffset = element->leftLTR_3-o->radius;
-  seqoffset_rev = element->rightLTR_5+o->radius;
 
   seq_forward = seq_new(seq +
                           element->leftLTR_3-element->leftLTR_5-o->radius+1,
@@ -155,14 +149,12 @@ void     pbs_find(const char *seq,
 
     ali = swalign(seq_forward, trna_from3, sf);
     pbs_add_hit(results->hits_fwd,ali,o,trna_seqlen,
-                seq_get_description(trna_seq), STRAND_FORWARD,
-                seqoffset);
+                seq_get_description(trna_seq), STRAND_FORWARD);
     alignment_delete(ali);
 
     ali = swalign(seq_rev, trna_from3, sf);
     pbs_add_hit(results->hits_rev,ali,o,trna_seqlen,
-                seq_get_description(trna_seq), STRAND_REVERSE,
-                seqoffset_rev);
+                seq_get_description(trna_seq), STRAND_REVERSE);
     alignment_delete(ali);
 
     seq_delete(trna_from3);
