@@ -17,8 +17,8 @@
 
 #include <string.h>
 #include <ctype.h>
-#include <math.h>
 #include <float.h>
+#include <pthread.h>
 #include "libgtcore/codon.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/translate.h"

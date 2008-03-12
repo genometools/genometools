@@ -101,8 +101,8 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
   hashtable_delete(pdom_results.domains);
 }
 
-static int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                      Error *e)
+int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
+                               Error *e)
 {
   LTRdigestStream *ls;
   int had_err;
@@ -150,7 +150,7 @@ static int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   return had_err;
 }
 
-static void ltrdigest_stream_free(GenomeStream *gs)
+void ltrdigest_stream_free(GenomeStream *gs)
 {
   LTRdigestStream *ls = ltrdigest_stream_cast(gs);
   genome_visitor_delete((GenomeVisitor*) ls->lv);
