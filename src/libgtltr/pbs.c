@@ -27,8 +27,8 @@
 #include "libgtext/swalign.h"
 #include "libgtltr/pbs.h"
 
-static ScoreFunction* dna_scorefunc_new(Alpha *a, int match, int mismatch,
-                                        int insertion, int deletion)
+ScoreFunction* dna_scorefunc_new(Alpha *a, int match, int mismatch,
+                                 int insertion, int deletion)
 {
   ScoreMatrix *sm = score_matrix_new(a);
   ScoreFunction *sf = scorefunction_new(sm, insertion, deletion);
@@ -44,9 +44,9 @@ static ScoreFunction* dna_scorefunc_new(Alpha *a, int match, int mismatch,
   return sf;
 }
 
-static double pbs_score_func(unsigned long edist, unsigned long offset,
-                             unsigned long alilen, unsigned long trnalen,
-                             unsigned long trna_offset)
+double pbs_score_func(unsigned long edist, unsigned long offset,
+                      unsigned long alilen, unsigned long trnalen,
+                      unsigned long trna_offset)
 {
   double penalties;
   if (edist == 0 || offset == 0)
@@ -58,9 +58,9 @@ static double pbs_score_func(unsigned long edist, unsigned long offset,
           /penalties;
 }
 
-static void pbs_add_hit(Dlist *hitlist, Alignment *ali, PBSOptions *o,
-                        unsigned long trna_seqlen, const char *desc,
-                        Strand strand, unsigned long seqoffset)
+void pbs_add_hit(Dlist *hitlist, Alignment *ali, PBSOptions *o,
+                 unsigned long trna_seqlen, const char *desc,
+                 Strand strand, unsigned long seqoffset)
 {
   unsigned long dist;
   PBS_Hit *hit;
@@ -95,7 +95,7 @@ static void pbs_add_hit(Dlist *hitlist, Alignment *ali, PBSOptions *o,
   }
 }
 
-static int pbs_hit_compare(const void *h1, const void *h2)
+int pbs_hit_compare(const void *h1, const void *h2)
 {
   PBS_Hit *hp1 = (PBS_Hit*) h1;
   PBS_Hit *hp2 = (PBS_Hit*) h2;

@@ -45,8 +45,8 @@ struct LTRdigestStream {
 #define ltrdigest_stream_cast(GS)\
         genome_stream_cast(ltrdigest_stream_class(), GS)
 
-static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
-                          Error *err)
+void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
+                   Error *err)
 {
   PPTResults ppt_results;
   PBSResults pbs_results;

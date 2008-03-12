@@ -31,13 +31,13 @@
 #include "squid.h"
 #include "funcs.h"
 
-static void hmmer_search(struct plan7_s *hmm,
-                         char *seq,
-                         unsigned long seqlen,
-                         char *seqdesc,
-                         struct threshold_s *thresh,
-                         struct tophit_s *ghit,
-                         struct tophit_s *dhit)
+void hmmer_search(struct plan7_s *hmm,
+                  char *seq,
+                  unsigned long seqlen,
+                  char *seqdesc,
+                  struct threshold_s *thresh,
+                  struct tophit_s *ghit,
+                  struct tophit_s *dhit)
 {
   struct dpmatrix_s *mx;
   struct p7trace_s *tr;
@@ -71,14 +71,14 @@ static void hmmer_search(struct plan7_s *hmm,
   FreePlan7Matrix(mx);
 }
 
-static inline void convert_frame_position(Range *rng, int frame)
+void convert_frame_position(Range *rng, int frame)
 {
   rng->start = (rng->start - 1)*CODONLENGTH + (frame - 1);
   rng->end   = (rng->end   - 1)*CODONLENGTH + (frame - 1);
 }
 
 int pdom_domain_report_hits(void *key, void *value, UNUSED void *data,
-                             UNUSED Error *err)
+                            UNUSED Error *err)
 {
   struct plan7_s *model = (struct plan7_s *) key;
   PdomHit *hit = (PdomHit*) value;

@@ -75,8 +75,8 @@ double ppt_score(unsigned long posdiff, unsigned int width)
   return score/optscore;
 }
 
-static unsigned long score_hits(Array *results, unsigned long seqlen,
-                                unsigned long ltrlen, unsigned int radius)
+unsigned long score_hits(Array *results, unsigned long seqlen,
+                         unsigned long ltrlen, unsigned int radius)
 {
   unsigned long i = 0,
                 highest_index = UNDEF_ULONG;
@@ -108,8 +108,8 @@ static unsigned long score_hits(Array *results, unsigned long seqlen,
   return highest_index;
 }
 
-static void group_hits(unsigned int *decoded, Array *results, PPTOptions *o,
-                       unsigned long radius, Strand strand)
+void group_hits(unsigned int *decoded, Array *results, PPTOptions *o,
+                unsigned long radius, Strand strand)
 {
   PPT_Hit *cur_hit;
   unsigned long i = 0;
