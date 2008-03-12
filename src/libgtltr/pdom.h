@@ -18,15 +18,17 @@
 #ifndef PDOM_H
 #define PDOM_H
 
-#include "libgtcore/dlist.h"
+#include "libgtcore/array.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/strand.h"
 #include "libgtcore/strarray.h"
+#include "libgtltr/ltrelement.h"
 #include "structs.h"
 
 typedef struct PdomOptions {
   double evalue_cutoff;
   StrArray *hmm_files;
+  Array *plan7_ts;
 } PdomOptions;
 
 typedef struct PdomHit {
@@ -39,5 +41,13 @@ typedef struct PdomResults {
   double combined_e_value;
   bool empty;
 } PdomResults;
+
+int  load_hmm_files(StrArray *files, Array *models, Error *err);
+int  pdom_domain_report_hits(void *key, void *value, UNUSED void *data,
+                             UNUSED Error *err);
+void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
+               PdomResults *results, PdomOptions *opts);
+void pdom_clear_hmms(Array*);
+void pdom_clear_domain_hit(void*);
 
 #endif
