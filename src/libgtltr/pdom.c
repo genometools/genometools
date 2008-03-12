@@ -77,17 +77,18 @@ void pdom_convert_frame_position(Range *rng, int frame)
   rng->end   = (rng->end   - 1)*CODONLENGTH + frame;
 }
 
-int pdom_domain_report_hits(void *key, void *value, UNUSED void *data,
+int pdom_domain_report_hits(void *key, void *value, void *data,
                             UNUSED Error *err)
 {
   struct plan7_s *model = (struct plan7_s *) key;
+  FILE *fp = (FILE*) data;
   PdomHit *hit = (PdomHit*) value;
   Range rng;
   int frame = atoi(hit->best_hit->name);
   rng.start = hit->best_hit->sqfrom;
   rng.end = hit->best_hit->sqto;
   pdom_convert_frame_position(&rng, frame);
-  printf("    Pdom: \t%s \t%g \t(%c, %lu, %lu)\n", model->name,
+  fprintf(fp, "    Pdom: \t%s \t%g \t(%c, %lu, %lu)\n", model->name,
                                                hit->best_hit->pvalue,
                                                hit->best_hit->name[1],
                                                rng.start,
