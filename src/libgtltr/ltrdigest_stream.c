@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include "libgtcore/log.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/range.h"
 #include "libgtcore/str.h"
@@ -39,11 +40,112 @@ struct LTRdigestStream {
   PPTOptions *ppt_opts;
   PdomOptions *pdom_opts;
   LTRdigestVisitor *lv;
+  Str *ltrdigest_tag;
   LTRElement element;
 };
 
 #define ltrdigest_stream_cast(GS)\
         genome_stream_cast(ltrdigest_stream_class(), GS)
+
+int pdom_domain_attach_gff3(void *key, void *value, void *data,
+                            UNUSED Error *err)
+{
+  struct plan7_s *model = (struct plan7_s *) key;
+  LTRdigestStream  *ls = (LTRdigestStream *) data;
+  PdomHit *hit = (PdomHit*) value;
+  Range rng;
+  Phase frame = phase_get(hit->best_hit->name[0]);
+  rng.start = hit->best_hit->sqfrom;
+  rng.end = hit->best_hit->sqto;
+  pdom_convert_frame_position(&rng, frame);
+  /* XXXTODO! */
+  rng.start += ls->element.leftLTR_5;
+  rng.end   += ls->element.leftLTR_5;
+  GenomeNode *gf = genome_feature_new(gft_protein_match,
+                                      rng,
+                                      strand_get(hit->best_hit->name[1]),
+                                      NULL,
+                                      0);
+  genome_feature_set_source(gf, ls->ltrdigest_tag);
+  genome_feature_set_phase(gf, frame);
+  genome_feature_add_attribute((GenomeFeature*) gf,"PfamName", model->name);
+  genome_feature_add_attribute((GenomeFeature*) gf,"PfamID", model->acc);
+  genome_node_set_seqid((GenomeNode*) gf,
+                        genome_node_get_idstr(
+                          (GenomeNode*) ls->element.mainnode));
+
+  genome_node_is_part_of_genome_node((GenomeNode*) ls->element.mainnode, gf);
+  return 0;
+}
+
+void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
+                                Str *tag, unsigned int radius)
+{
+  Range pbs_range;
+  GenomeNode *gf;
+  pbs_range.start = results->best_hit->start;
+  pbs_range.end   = results->best_hit->end;
+  switch(results->best_hit->strand)
+  {
+    case STRAND_FORWARD:
+      ltrelement_offset2pos_fwd(element, &pbs_range, radius,
+                                OFFSET_END_LEFT_LTR);
+      break;
+    case STRAND_REVERSE:
+      ltrelement_offset2pos_rev(element, &pbs_range, radius,
+                                OFFSET_END_LEFT_LTR);
+      break;
+    default:
+      break;
+  }
+  gf = genome_feature_new(gft_primer_binding_site,
+                          pbs_range,
+                          results->best_hit->strand,
+                          NULL,
+                          0);
+  genome_feature_set_source(gf, tag);
+  genome_node_set_seqid((GenomeNode*) gf,
+                        genome_node_get_idstr(
+                          (GenomeNode*) element->mainnode));
+  genome_feature_add_attribute((GenomeFeature*) gf,"tRNA",
+                              results->best_hit->trna);
+  genome_feature_set_strand((GenomeNode*)element->mainnode,
+                         results->best_hit->strand);
+  genome_node_is_part_of_genome_node((GenomeNode*) element->mainnode, gf);
+}
+
+void ppt_attach_results_to_gff3(PPTResults *results, LTRElement *element,
+                                Str *tag, unsigned int radius)
+{
+  Range ppt_range;
+  GenomeNode *gf;
+  ppt_range.start = results->best_hit->start;
+  ppt_range.end   = results->best_hit->end;
+  switch(results->best_hit->strand)
+  {
+    case STRAND_FORWARD:
+      ltrelement_offset2pos_fwd(element, &ppt_range, radius,
+                                OFFSET_BEGIN_RIGHT_LTR);
+      break;
+    case STRAND_REVERSE:
+      ltrelement_offset2pos_rev(element, &ppt_range, radius,
+                                OFFSET_BEGIN_RIGHT_LTR);
+      break;
+    default:
+      break;
+  }
+  gf = genome_feature_new(gft_rr_tract,
+                                      ppt_range,
+                                      results->best_hit->strand,
+                                      NULL,
+                                      0);
+  genome_feature_set_source(gf, tag);
+  genome_node_set_seqid((GenomeNode*) gf,
+                        genome_node_get_idstr(
+                          (GenomeNode*) element->mainnode));
+
+  genome_node_is_part_of_genome_node((GenomeNode*) element->mainnode, gf);
+}
 
 void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
                    Error *err)
@@ -66,19 +168,27 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
   ppt_find((const char*) base_seq, (const char*) rev_seq,
            element, &ppt_results, ls->ppt_opts);
   if (ppt_results.best_hit)
-    fprintf(stdout, "    PPT: \tscore: %f \t(%c)\n",
-                    ppt_results.best_hit->score,
-                    STRANDCHARS[ppt_results.best_hit->strand]);
+  {
+    log_log("    PPT: \tscore: %f \t(%c)\n",
+            ppt_results.best_hit->score,
+            STRANDCHARS[ppt_results.best_hit->strand]);
+    ppt_attach_results_to_gff3(&ppt_results, element,
+                               ls->ltrdigest_tag, ls->pbs_opts->radius);
+  }
 
   /* PBS finding
    * ----------- */
   pbs_find((const char*) base_seq, (const char*) rev_seq,
            element, &pbs_results, ls->pbs_opts, err);
-  if (pbs_results.best_hit)
-    fprintf(stdout, "    PBS: \tscore: %f \t(%c, %s)\n",
-                    pbs_results.best_hit->score,
-                    STRANDCHARS[pbs_results.best_hit->strand],
-                    pbs_results.best_hit->trna);
+   if (pbs_results.best_hit)
+   {
+    log_log("    PBS: \tscore: %f \t(%c, %s)\n",
+            pbs_results.best_hit->score,
+            STRANDCHARS[pbs_results.best_hit->strand],
+            pbs_results.best_hit->trna);
+    pbs_attach_results_to_gff3(&pbs_results, element,
+                               ls->ltrdigest_tag, ls->pbs_opts->radius);
+   }
 
   /* Protein domain finding
    * ----------------------*/
@@ -88,12 +198,10 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
   if (!pdom_results.empty)
   {
     hashtable_foreach(pdom_results.domains,
-                      (Hashiteratorfunc) pdom_domain_report_hits,
-                      NULL,
+                      (Hashiteratorfunc) pdom_domain_attach_gff3,
+                      ls,
                       err);
   }
-
-  /* process and annotate results here */
 
   ma_free(rev_seq);
   ppt_clear_results(&ppt_results);
@@ -113,9 +221,6 @@ int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   /* initialize this element */
   memset(&ls->element, 0, sizeof (LTRElement));
 
-      if(error_is_set(e))
-      printf("error: %s", error_get(e));
-
   /* get annotations from parser */
   had_err = genome_stream_next_tree(ls->in_stream, gn, e);
   if (!had_err && *gn)
@@ -132,12 +237,12 @@ int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   if(ls->element.mainnode)
   {
     unsigned long seqid;
-    fprintf(stdout,"%lu %lu %lu %lu %lu %lu\n", ls->element.leftLTR_5,
-                                                ls->element.rightLTR_3,
-                                                ls->element.leftLTR_5,
-                                                ls->element.leftLTR_3,
-                                                ls->element.rightLTR_5,
-                                                ls->element.rightLTR_3);
+    log_log("%lu %lu %lu %lu %lu %lu\n", ls->element.leftLTR_5,
+                                         ls->element.rightLTR_3,
+                                         ls->element.leftLTR_5,
+                                         ls->element.leftLTR_3,
+                                         ls->element.rightLTR_5,
+                                         ls->element.rightLTR_3);
 
     /* TODO: use MD5 hashes to identify sequence */
     const char *sreg = str_get(genome_node_get_seqid((GenomeNode*) ls->element.mainnode));
@@ -154,6 +259,7 @@ void ltrdigest_stream_free(GenomeStream *gs)
 {
   LTRdigestStream *ls = ltrdigest_stream_cast(gs);
   genome_visitor_delete((GenomeVisitor*) ls->lv);
+  str_delete(ls->ltrdigest_tag);
   genome_stream_delete(ls->in_stream);
 }
 
@@ -180,6 +286,7 @@ GenomeStream* ltrdigest_stream_new(GenomeStream *in_stream,
   ls->pbs_opts = pbs_opts;
   ls->pdom_opts = pdom_opts;
   ls->bioseq = bioseq;
+  ls->ltrdigest_tag = str_new_cstr("LTRdigest");
   ls->lv = (LTRdigestVisitor*) ltrdigest_visitor_new(&ls->element);
   return gs;
 }

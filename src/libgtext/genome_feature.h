@@ -49,6 +49,7 @@ void                   genome_feature_get_exons(GenomeFeature*,
 void                   genome_feature_determine_transcripttypes(GenomeFeature*);
 TranscriptFeatureType  genome_feature_get_transcriptfeaturetype(GenomeFeature*);
 void                   genome_feature_set_source(GenomeNode*, Str *source);
+void                   genome_feature_set_strand(GenomeNode*, Strand);
 void                   genome_feature_set_phase(GenomeNode*, Phase);
 void                   genome_feature_set_end(GenomeFeature*, unsigned long);
 void                   genome_feature_set_score(GenomeFeature*, double);

@@ -101,6 +101,13 @@ void genome_feature_set_phase(GenomeNode *gn, Phase phase)
   gf->phase = phase;
 }
 
+void genome_feature_set_strand(GenomeNode *gn, Strand strand)
+{
+  GenomeFeature *gf = genome_feature_cast(gn);
+  assert(gf);
+  gf->strand = strand;
+}
+
 static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Error *e)
 {
   GenomeFeature *gf;

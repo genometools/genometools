@@ -183,7 +183,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
 {
   LTRdigestOptions *arguments = tool_arguments;
   GenomeStream *gff3_in_stream,
-//               *gff3_out_stream,
+               *gff3_out_stream,
                *ltrdigest_stream;
   GenomeNode *gn;
 
@@ -221,15 +221,15 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                                             &arguments->ppt_opts,
                                             &arguments->pdom_opts);
 
-  //  gff3_out_stream = gff3_out_stream_new(ltrdigest_stream, arguments->outfp);
+    gff3_out_stream = gff3_out_stream_new(ltrdigest_stream, arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(ltrdigest_stream, &gn, err)) &&
+    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
            gn) {
       genome_node_rec_delete(gn);
     }
 
-  //  genome_stream_delete(gff3_out_stream);
+    genome_stream_delete(gff3_out_stream);
     genome_stream_delete(ltrdigest_stream);
     genome_stream_delete(gff3_in_stream);
   }

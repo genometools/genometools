@@ -45,6 +45,12 @@ void ltrelement_offset2pos_fwd(LTRElement *e, Range *rng,
   unsigned long len = range_length(*rng);
   switch(o)
   {
+    case OFFSET_BEGIN_LEFT_LTR:
+      rng->start = e->leftLTR_5 - radius + rng->start;
+      break;
+    case OFFSET_END_RIGHT_LTR:
+      rng->start = e->rightLTR_3 - radius + rng->start;
+      break;
     case OFFSET_END_LEFT_LTR:
       rng->start = e->leftLTR_3 - radius + rng->start;
       break;
@@ -62,6 +68,12 @@ void ltrelement_offset2pos_rev(LTRElement *e, Range *rng,
   unsigned long len = range_length(*rng);
   switch(o)
   {
+    case OFFSET_END_RIGHT_LTR:
+      rng->start = e->leftLTR_5 + radius - rng->end;
+      break;
+    case OFFSET_BEGIN_LEFT_LTR:
+      rng->start = e->rightLTR_3 + radius - rng->end;
+      break;
     case OFFSET_END_LEFT_LTR:
       rng->start = e->rightLTR_5 + radius - rng->end;
       break;
