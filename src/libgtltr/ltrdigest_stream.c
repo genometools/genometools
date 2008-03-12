@@ -58,9 +58,19 @@ int pdom_domain_attach_gff3(void *key, void *value, void *data,
   rng.start = hit->best_hit->sqfrom;
   rng.end = hit->best_hit->sqto;
   pdom_convert_frame_position(&rng, frame);
-  /* XXXTODO! */
-  rng.start += ls->element.leftLTR_5;
-  rng.end   += ls->element.leftLTR_5;
+  switch(strand_get(hit->best_hit->name[1]))
+  {
+    case STRAND_FORWARD:
+      ltrelement_offset2pos_fwd(&ls->element, &rng, 0,
+                                OFFSET_BEGIN_LEFT_LTR);
+      break;
+    case STRAND_REVERSE:
+      ltrelement_offset2pos_rev(&ls->element, &rng, 0,
+                                OFFSET_BEGIN_LEFT_LTR);
+      break;
+    default:
+      break;
+  }
   GenomeNode *gf = genome_feature_new(gft_protein_match,
                                       rng,
                                       strand_get(hit->best_hit->name[1]),
@@ -109,8 +119,6 @@ void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
                           (GenomeNode*) element->mainnode));
   genome_feature_add_attribute((GenomeFeature*) gf,"tRNA",
                               results->best_hit->trna);
-  genome_feature_set_strand((GenomeNode*)element->mainnode,
-                         results->best_hit->strand);
   genome_node_is_part_of_genome_node((GenomeNode*) element->mainnode, gf);
 }
 
@@ -143,7 +151,6 @@ void ppt_attach_results_to_gff3(PPTResults *results, LTRElement *element,
   genome_node_set_seqid((GenomeNode*) gf,
                         genome_node_get_idstr(
                           (GenomeNode*) element->mainnode));
-
   genome_node_is_part_of_genome_node((GenomeNode*) element->mainnode, gf);
 }
 
