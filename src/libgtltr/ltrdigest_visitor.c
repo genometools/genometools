@@ -35,14 +35,11 @@ static int ltrdigest_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf
                                             UNUSED Error *err)
 {
   LTRdigestVisitor *lv = ltrdigest_visitor_cast(gv);
-  GenomeFeatureType gft;
   Range node_range;
   assert(lv);
   error_check(err);
 
-  gft = genome_feature_get_type(gf);
-
-  switch(gft)
+  switch(genome_feature_get_type(gf))
   {
     case gft_LTR_retrotransposon:
       lv->element->mainnode = gf;

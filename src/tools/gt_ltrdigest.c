@@ -18,6 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "libgtcore/bioseq.h"
+#include "libgtcore/fileutils.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/outputfile.h"
@@ -65,7 +66,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 {
   LTRdigestOptions *arguments = tool_arguments;
   OptionParser *op;
-  Option *o;
+  Option *o, *ot;
   assert(arguments);
 
   /* init */
@@ -127,18 +128,18 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                       30);
   option_parser_add_option(op, o);
 
-  o = option_new_filename("trnas",
+  ot = option_new_filename("trnas",
                           "tRNA library in multiple FASTA format for PBS "
                           "detection",
                           arguments->trna_lib);
-  option_parser_add_option(op, o);
+  option_parser_add_option(op, ot);
 
  /* PBS search options */
 
   o = option_new_probability("pdomevalcutoff",
                              "E-value cutoff for HMMER protein domain search",
                              &arguments->pdom_opts.evalue_cutoff,
-                             0.00001);
+                             0.000001);
   option_parser_add_option(op, o);
 
   o = option_new_filenamearray("hmms",
@@ -149,7 +150,6 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, o);
 
   /* verbosity */
-
   o = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, o);
 
@@ -162,12 +162,28 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   return op;
 }
 
+int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
+                                 Error* err)
+{
+  LTRdigestOptions *arguments = tool_arguments;
+  int had_err  = 0;
+
+  /* TODO: more checks */
+  if (arguments->trna_lib && !file_exists(str_get(arguments->trna_lib)))
+  {
+    error_set(err, "File '%s' does not exist!", str_get(arguments->trna_lib));
+    had_err = -1;
+  }
+
+  return had_err;
+}
+
 static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                                void *tool_arguments, Error *err)
 {
   LTRdigestOptions *arguments = tool_arguments;
   GenomeStream *gff3_in_stream,
-               *gff3_out_stream,
+//               *gff3_out_stream,
                *ltrdigest_stream;
   GenomeNode *gn;
 
@@ -175,23 +191,51 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
   error_check(err);
   assert(arguments);
 
-  gff3_in_stream  = gff3_in_stream_new_sorted(argv[0],
-                                              arguments->verbose &&
-                                              arguments->outfp);
+  /* set additional arguments/options */
+  /* TODO: error checking for corrupt file! */
+  Bioseq *bioseq = bioseq_new(argv[1], err);
+  arguments->pbs_opts.trna_lib = bioseq_new(str_get(arguments->trna_lib),err);
+  arguments->pbs_opts.ali_score_deletion = -20;
+  arguments->pbs_opts.ali_score_insertion = -20;
+  arguments->pbs_opts.ali_score_mismatch = -10;
+  arguments->pbs_opts.ali_score_match = 5;
 
-  ltrdigest_stream = ltrdigest_stream_new(gff3_in_stream);
+  arguments->pdom_opts.plan7_ts = array_new(sizeof (struct plan7_s*));
 
-  gff3_out_stream = gff3_out_stream_new(ltrdigest_stream, arguments->outfp);
+  had_err = load_hmm_files(arguments->pdom_opts.hmm_files,
+                           arguments->pdom_opts.plan7_ts,
+                           err);
 
-  /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
-         gn) {
-    genome_node_rec_delete(gn);
+  if(!had_err)
+    {
+
+    fprintf(stderr, "loaded %lu HMM models\n", array_size(arguments->pdom_opts.plan7_ts));
+
+    gff3_in_stream  = gff3_in_stream_new_sorted(argv[0],
+                                                arguments->verbose &&
+                                                arguments->outfp);
+
+    ltrdigest_stream = ltrdigest_stream_new(gff3_in_stream,
+                                            bioseq,
+                                            &arguments->pbs_opts,
+                                            &arguments->ppt_opts,
+                                            &arguments->pdom_opts);
+
+  //  gff3_out_stream = gff3_out_stream_new(ltrdigest_stream, arguments->outfp);
+
+    /* pull the features through the stream and free them afterwards */
+    while (!(had_err = genome_stream_next_tree(ltrdigest_stream, &gn, err)) &&
+           gn) {
+      genome_node_rec_delete(gn);
+    }
+
+  //  genome_stream_delete(gff3_out_stream);
+    genome_stream_delete(ltrdigest_stream);
+    genome_stream_delete(gff3_in_stream);
   }
-
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(ltrdigest_stream);
-  genome_stream_delete(gff3_in_stream);
+  pdom_clear_hmms(arguments->pdom_opts.plan7_ts);
+  bioseq_delete(bioseq);
+  bioseq_delete(arguments->pbs_opts.trna_lib);
   return had_err;
 }
 
@@ -200,6 +244,6 @@ Tool* gt_ltrdigest(void)
   return tool_new(gt_ltrdigest_arguments_new,
                   gt_ltrdigest_arguments_delete,
                   gt_ltrdigest_option_parser_new,
-                  NULL,
+                  gt_ltrdigest_arguments_check,
                   gt_ltrdigest_runner);
 }

@@ -18,13 +18,21 @@
 #ifndef LTRDIGEST_STREAM_H
 #define LTRDIGEST_STREAM_H
 
+#include "libgtcore/bioseq.h"
 #include "libgtext/genome_stream.h"
+#include "libgtltr/pbs.h"
+#include "libgtltr/ppt.h"
+#include "libgtltr/pdom.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct LTRdigestStream LTRdigestStream;
 
 const GenomeStreamClass* ltrdigest_stream_class(void);
 
-GenomeStream*            ltrdigest_stream_new(GenomeStream*);
+GenomeStream* ltrdigest_stream_new(GenomeStream *in_stream,
+                                   Bioseq *bioseq,
+                                   PBSOptions *pbs_opts,
+                                   PPTOptions *ppt_opts,
+                                   PdomOptions *pdom_opts);
 
 #endif
