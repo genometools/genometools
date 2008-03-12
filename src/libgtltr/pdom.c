@@ -71,10 +71,10 @@ void hmmer_search(struct plan7_s *hmm,
   FreePlan7Matrix(mx);
 }
 
-void convert_frame_position(Range *rng, int frame)
+void pdom_convert_frame_position(Range *rng, int frame)
 {
-  rng->start = (rng->start - 1)*CODONLENGTH + (frame - 1);
-  rng->end   = (rng->end   - 1)*CODONLENGTH + (frame - 1);
+  rng->start = (rng->start - 1)*CODONLENGTH + frame;
+  rng->end   = (rng->end   - 1)*CODONLENGTH + frame;
 }
 
 int pdom_domain_report_hits(void *key, void *value, UNUSED void *data,
@@ -86,7 +86,7 @@ int pdom_domain_report_hits(void *key, void *value, UNUSED void *data,
   int frame = atoi(hit->best_hit->name);
   rng.start = hit->best_hit->sqfrom;
   rng.end = hit->best_hit->sqto;
-  convert_frame_position(&rng, frame);
+  pdom_convert_frame_position(&rng, frame);
   printf("    Pdom: \t%s \t%g \t(%c, %lu, %lu)\n", model->name,
                                                hit->best_hit->pvalue,
                                                hit->best_hit->name[1],
@@ -169,12 +169,12 @@ void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
     hit->hits_rev = AllocTophits(20);
     hit->best_hit = NULL;
 
-    hmmer_search(hmm,fwd_fr1,strlen(fwd_fr1),"1+",&thresh,ghit,hit->hits_fwd);
-    hmmer_search(hmm,fwd_fr2,strlen(fwd_fr2),"2+",&thresh,ghit,hit->hits_fwd);
-    hmmer_search(hmm,fwd_fr3,strlen(fwd_fr3),"3+",&thresh,ghit,hit->hits_fwd);
-    hmmer_search(hmm,rev_fr1,strlen(rev_fr1),"1-",&thresh,ghit,hit->hits_rev);
-    hmmer_search(hmm,rev_fr2,strlen(rev_fr2),"2-",&thresh,ghit,hit->hits_rev);
-    hmmer_search(hmm,rev_fr3,strlen(rev_fr3),"3-",&thresh,ghit,hit->hits_rev);
+    hmmer_search(hmm,fwd_fr1,strlen(fwd_fr1),"0+",&thresh,ghit,hit->hits_fwd);
+    hmmer_search(hmm,fwd_fr2,strlen(fwd_fr2),"1+",&thresh,ghit,hit->hits_fwd);
+    hmmer_search(hmm,fwd_fr3,strlen(fwd_fr3),"2+",&thresh,ghit,hit->hits_fwd);
+    hmmer_search(hmm,rev_fr1,strlen(rev_fr1),"0-",&thresh,ghit,hit->hits_rev);
+    hmmer_search(hmm,rev_fr2,strlen(rev_fr2),"1-",&thresh,ghit,hit->hits_rev);
+    hmmer_search(hmm,rev_fr3,strlen(rev_fr3),"2-",&thresh,ghit,hit->hits_rev);
 
     FullSortTophits(hit->hits_fwd);
     FullSortTophits(hit->hits_rev);
