@@ -41,7 +41,7 @@ typedef enum {
   gft_primer_binding_site,
   gft_protein_match,
   gft_repeat_region,
-  gft_rr_tract,
+  gft_RR_tract,
   gft_target_site_duplication,
   gft_three_prime_UTR,
   gft_three_prime_splice_site,
