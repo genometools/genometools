@@ -108,6 +108,8 @@ void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
     default:
       break;
   }
+  results->best_hit->start = pbs_range.start;
+  results->best_hit->end = pbs_range.end;
   gf = genome_feature_new(gft_primer_binding_site,
                           pbs_range,
                           results->best_hit->strand,
@@ -142,7 +144,9 @@ void ppt_attach_results_to_gff3(PPTResults *results, LTRElement *element,
     default:
       break;
   }
-  gf = genome_feature_new(gft_rr_tract,
+  results->best_hit->start = ppt_range.start;
+  results->best_hit->end = ppt_range.end;
+  gf = genome_feature_new(gft_RR_tract,
                                       ppt_range,
                                       results->best_hit->strand,
                                       NULL,
