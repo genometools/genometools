@@ -75,9 +75,9 @@ void pbs_add_hit(Dlist *hitlist, Alignment *ali, PBSOptions *o,
         && vrange.start <= o->max_offset_trna)
   {
     hit = ma_malloc(sizeof (PBS_Hit));
+    hit->alilen  = abs(urange.end-urange.start)+1;
     hit->strand  = strand;
     hit->trna    = desc;
-    hit->alilen  = abs(urange.end-urange.start+1);
     hit->tstart  = vrange.start;
     hit->start   = urange.start;
     hit->end     = urange.end;
@@ -102,12 +102,12 @@ int pbs_hit_compare(const void *h1, const void *h2)
   else return (hp1->score > hp2->score ? -1 : 1);
 }
 
-void     pbs_find(const char *seq,
-                  const char *rev_seq,
-                  LTRElement *element,
-                  PBSResults *results,
-                  PBSOptions *o,
-                  Error *err)
+void pbs_find(const char *seq,
+              const char *rev_seq,
+              LTRElement *element,
+              PBSResults *results,
+              PBSOptions *o,
+              Error *err)
 {
   Seq *seq_forward, *seq_rev;
   unsigned long j;
@@ -119,17 +119,19 @@ void     pbs_find(const char *seq,
                                         o->ali_score_insertion,
                                         o->ali_score_deletion);
 
+  assert(seq && rev_seq && sf && a && element && results);
+
   results->hits_fwd = dlist_new(pbs_hit_compare);
   results->hits_rev = dlist_new(pbs_hit_compare);
   results->best_hit = NULL;
 
   seq_forward = seq_new(seq +
-                          element->leftLTR_3-element->leftLTR_5-o->radius+1,
+                          element->leftLTR_3-element->leftLTR_5-o->radius,
                         2*o->radius,
                         a);
 
   seq_rev     = seq_new(rev_seq +
-                          element->rightLTR_3-element->rightLTR_5-o->radius+1,
+                          element->rightLTR_3-element->rightLTR_5-o->radius,
                         2*o->radius,
                         a);
 

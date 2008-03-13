@@ -60,13 +60,13 @@ typedef struct PBSResults {
 
 /* Aligns tRNA from a library to the LTR retrotransposon candidate and
    returns highest-scoring hit (newly created). */
-void     pbs_find(const char *seq,
-                  const char *rev_seq,
-                  LTRElement *element,
-                  PBSResults *results,
-                  PBSOptions *lo,
-                  Error *err);
+void  pbs_find(const char *seq,
+               const char *rev_seq,
+               LTRElement *element,
+               PBSResults *results,
+               PBSOptions *lo,
+               Error *err);
 
-void pbs_clear_results(PBSResults *results);
+void  pbs_clear_results(PBSResults *results);
 
 #endif
