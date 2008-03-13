@@ -1521,7 +1521,9 @@ bool hasspecialranges(const Encodedsequence *encseq)
 
 bool hasfastspecialrangeenumerator(const Encodedsequence *encseq)
 {
-  return (encseq->sat == Viadirectaccess) ? false : true;
+  return (encseq->sat == Viadirectaccess ||
+          encseq->sat == Viabitaccess) ? false : true; 
+          /* XXX remove bitaccess */
 }
 
 struct Specialrangeiterator
