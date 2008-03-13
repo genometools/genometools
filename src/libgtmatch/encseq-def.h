@@ -208,14 +208,14 @@ int multicharactercompare(unsigned int *lcpvalue,
                           Encodedsequencescanstate *esr1,
                           Seqpos pos1,
                           Encodedsequencescanstate *esr2,
-			  Seqpos pos2);
+                          Seqpos pos2);
 
 void multicharactercompare_withtest(const Encodedsequence *encseq,
                                     Readmode readmode,
                                     Encodedsequencescanstate *esr1,
                                     Seqpos pos1,
                                     Encodedsequencescanstate *esr2,
-			            Seqpos pos2);
+                                    Seqpos pos2);
 
 void showocccase(void);
 

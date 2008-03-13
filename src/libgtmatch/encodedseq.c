@@ -1521,16 +1521,12 @@ bool hasspecialranges(const Encodedsequence *encseq)
 
 bool hasfastspecialrangeenumerator(const Encodedsequence *encseq)
 {
-  if (encseq->sat == Viadirectaccess || encseq->sat == Viabitaccess)
-  {
-    return false;
-  }
-  return true;
+  return (encseq->sat == Viadirectaccess) ? false : true;
 }
 
 struct Specialrangeiterator
 {
-  bool direct, moveforward, exhausted;
+  bool moveforward, exhausted;
   const Encodedsequence *encseq;
   Encodedsequencescanstate *esr;
   Seqpos pos,
@@ -1558,11 +1554,9 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
       sri->pos = encseq->totallength-1;
     }
     sri->esr = NULL;
-    sri->direct = (encseq->sat == Viadirectaccess) ? true : false;
   } else
   {
     sri->pos = 0;
-    sri->direct = false;
     sri->esr = newEncodedsequencescanstate();
     initEncodedsequencescanstate(sri->esr,encseq,
                                  moveforward ? Forwardmode
@@ -1573,22 +1567,14 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
   return sri;
 }
 
-static bool bitanddirectnextspecialrangeiterator(Sequencerange *range,
-                                                 Specialrangeiterator *sri)
+static bool directnextspecialrangeiterator(Sequencerange *range,
+                                           Specialrangeiterator *sri)
 {
-  bool success = false, isspecialchar;
+  bool success = false;
 
   while (!success)
   {
-    if (sri->direct)
-    {
-      isspecialchar = ISSPECIAL(sri->encseq->plainseq[sri->pos]);
-    } else
-    {
-      isspecialchar = ISIBITSET(sri->encseq->specialbits,sri->pos)
-                      ? true : false;
-    }
-    if (isspecialchar)
+    if (ISSPECIAL(sri->encseq->plainseq[sri->pos]))
     {
       sri->lengthofspecialrange++;
     } else
@@ -1641,15 +1627,103 @@ static bool bitanddirectnextspecialrangeiterator(Sequencerange *range,
   return success;
 }
 
+static bool bitnextspecialrangeiterator(Sequencerange *range,
+                                        Specialrangeiterator *sri)
+{
+  bool success = false;
+  Bitstring currentword;
+
+  while (!success)
+  {
+    currentword = BITNUM2WORD(sri->encseq->specialbits,sri->pos);
+    if (ISBITSET(currentword,sri->pos))
+    {
+      sri->lengthofspecialrange++;
+    } else
+    {
+      if (sri->lengthofspecialrange > 0)
+      {
+        if (sri->moveforward)
+        {
+          range->leftpos = sri->pos - sri->lengthofspecialrange;
+          range->rightpos = sri->pos;
+        } else
+        {
+          range->leftpos = sri->pos+1;
+          range->rightpos = sri->pos+1+sri->lengthofspecialrange;
+        }
+        success = true;
+        sri->lengthofspecialrange = 0;
+      }
+    }
+    if (sri->moveforward)
+    {
+      if (sri->pos == sri->encseq->totallength - 1)
+      {
+        if (sri->lengthofspecialrange > 0)
+        {
+          range->leftpos = sri->encseq->totallength - sri->lengthofspecialrange;
+          range->rightpos = sri->encseq->totallength;
+          success = true;
+        }
+        sri->exhausted = true;
+        break;
+      }
+      if (currentword == 0)
+      {
+        sri->pos += INTWORDSIZE;
+        if (sri->pos >= sri->encseq->totallength)
+        {
+          sri->exhausted = true;
+          break;
+        }
+      } else
+      {
+        sri->pos++;
+      }
+    } else
+    {
+      if (sri->pos == 0)
+      {
+        if (sri->lengthofspecialrange > 0)
+        {
+          range->leftpos = 0;
+          range->rightpos = sri->lengthofspecialrange;
+          success = true;
+        }
+        sri->exhausted = true;
+        break;
+      }
+      if (currentword == 0)
+      {
+        if (sri->pos < INTWORDSIZE)
+        {
+          sri->exhausted = true;
+          break;
+        }
+        sri->pos -= INTWORDSIZE;
+      } else
+      {
+        sri->pos--;
+      }
+    }
+  }
+  return success;
+}
+
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
 {
   if (sri->exhausted)
   {
     return false;
   }
-  if (sri->encseq->sat == Viadirectaccess || sri->encseq->sat == Viabitaccess)
+  if (sri->encseq->sat == Viadirectaccess)
   {
-    return bitanddirectnextspecialrangeiterator(range,sri);
+    return directnextspecialrangeiterator(range,sri);
+  }
+  if (sri->encseq->sat == Viabitaccess)
+  {
+    return bitnextspecialrangeiterator(range,sri);
   }
   assert(sri->esr->hasprevious);
   *range = sri->esr->previousrange;
@@ -2181,7 +2255,6 @@ static void extracttwobitencoding_bruteforce(PrefixofTwobitencoding *ptbe,
   ptbe->prefix = (unsigned int) UNITSIN2BITENC;
 }
 
-
 static void showsequenceatstartpos(const Encodedsequence *encseq,
                                    Seqpos startpos)
 {
@@ -2546,7 +2619,7 @@ int compareEncseqsequences(Seqpos *lcp,
 {
   PrefixofTwobitencoding ptbe1, ptbe2;
   unsigned int lcpvalue;
-  int retval; 
+  int retval;
 #undef mydebug
 #ifdef mydebug
   Seqpos lcp2;
@@ -2569,7 +2642,7 @@ int compareEncseqsequences(Seqpos *lcp,
     retval = compareTwobitencodings(&lcpvalue,&ptbe1,pos1,&ptbe2,pos2);
     occcase[lcpvalue]++;
     depth += lcpvalue;
-  } while(retval == 0);
+  } while (retval == 0);
   *lcp = depth;
 #ifdef mydebug
   assert(retval == retval2);
@@ -2587,7 +2660,7 @@ int compareEncseqsequences_nolcp(const Encodedsequence *encseq,
                                  UNUSED Seqpos totallength)
 {
   PrefixofTwobitencoding ptbe1, ptbe2;
-  int retval; 
+  int retval;
   assert(readmode == Forwardmode);
   if (encseq->numofspecialstostore > 0)
   {
@@ -2600,7 +2673,7 @@ int compareEncseqsequences_nolcp(const Encodedsequence *encseq,
     extracttwobitencoding(&ptbe2,encseq,esr2,pos2 + depth);
     retval = compareTwobitencodings_nolcp(&ptbe1,pos1,&ptbe2,pos2);
     depth += UNITSIN2BITENC;
-  } while(retval == 0);
+  } while (retval == 0);
   return retval;
 }
 
@@ -2609,11 +2682,11 @@ void showocccase(void)
   unsigned int i;
   uint64_t all = 0;
 
-  for(i=0; i<=UNITSIN2BITENC; i++)
+  for (i=0; i<=(unsigned int) UNITSIN2BITENC; i++)
   {
     all += (uint64_t) occcase[i];
   }
-  for(i=0; i<=UNITSIN2BITENC; i++)
+  for (i=0; i<=(unsigned int) UNITSIN2BITENC; i++)
   {
     printf("i=%u: %lu cases (%.4f)\n",i,occcase[i],(double) occcase[i]/all);
   }
