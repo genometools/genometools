@@ -20,6 +20,7 @@
 
 #include "libgtcore/error.h"
 #include "libgtcore/range.h"
+#include "libgtcore/seq.h"
 #include "libgtcore/strand.h"
 #include "libgtext/genome_feature.h"
 
@@ -39,10 +40,15 @@ typedef struct LTRElement {
                 *leftLTR,
                 *rightLTR,
                 *leftTSD,
-                *rightTSD;
+                *rightTSD,
+                *ppt,
+                *pbs;
+  Array *pdoms;
 } LTRElement;
 
 unsigned long ltrelement_length(LTRElement *e);
+char* ltrelement_get_sequence(unsigned long start, unsigned long end,
+                              Strand strand, Seq *seq, Error *err);
 unsigned long ltrelement_leftltrlen(LTRElement *e);
 unsigned long ltrelement_rightltrlen(LTRElement *e);
 void ltrelement_offset2pos_fwd(LTRElement *e, Range *rng,

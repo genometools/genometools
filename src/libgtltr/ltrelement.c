@@ -16,8 +16,11 @@
 */
 
 #include <assert.h>
+#include <string.h>
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/range.h"
+#include "libgtext/reverse.h"
 #include "ltrelement.h"
 
 unsigned long ltrelement_length(LTRElement *e)
@@ -32,10 +35,24 @@ unsigned long ltrelement_leftltrlen(LTRElement *e)
   return e->leftLTR_3-e->leftLTR_5+1;
 }
 
+char* ltrelement_get_sequence(unsigned long start, unsigned long end,
+                              Strand strand, Seq *seq, Error *err)
+{
+  char *out;
+  unsigned long len;
+  len = end - start + 1;
+  out = ma_malloc(sizeof (char) * len + 1);
+  memcpy(out, seq_get_orig(seq)+start, sizeof (char) * len);
+  if (strand == STRAND_REVERSE)
+    reverse_complement(out, len, err);
+  out[len]='\0';
+  return out;
+}
+
 unsigned long ltrelement_rightltrlen(LTRElement *e)
 {
   assert(e && (e->rightLTR_3 >= e->rightLTR_5));
-  return e->rightLTR_3-e->rightLTR_5+1;
+  return e->rightLTR_3 - e->rightLTR_5 + 1;
 }
 
 void ltrelement_offset2pos_fwd(LTRElement *e, Range *rng,
@@ -58,7 +75,7 @@ void ltrelement_offset2pos_fwd(LTRElement *e, Range *rng,
       rng->start = e->rightLTR_5 - radius + rng->start;
       break;
   }
-  rng->end = rng->start + len;
+  rng->end = rng->start + len -1 ;
 }
 
 void ltrelement_offset2pos_rev(LTRElement *e, Range *rng,
@@ -69,19 +86,19 @@ void ltrelement_offset2pos_rev(LTRElement *e, Range *rng,
   switch(o)
   {
     case OFFSET_END_RIGHT_LTR:
-      rng->start = e->leftLTR_5 + radius - rng->end;
+      rng->start = e->leftLTR_5 + radius - rng->end - 1;
       break;
     case OFFSET_BEGIN_LEFT_LTR:
       rng->start = e->rightLTR_3 + radius - rng->end;
       break;
     case OFFSET_END_LEFT_LTR:
-      rng->start = e->rightLTR_5 + radius - rng->end;
+      rng->start = e->rightLTR_5 + radius - rng->end  - 1;
       break;
     case OFFSET_BEGIN_RIGHT_LTR:
       rng->start = e->leftLTR_3 + radius - rng->end;
       break;
   }
-  rng->end = rng->start + len;
+  rng->end = rng->start + len - 1;
 }
 
 int ltrelement_unit_test(Error *err)
@@ -103,7 +120,7 @@ int ltrelement_unit_test(Error *err)
 
   ltrelement_offset2pos_fwd(&element, &rng1, radius, OFFSET_END_LEFT_LTR);
   ensure(had_err, 122 == rng1.start);
-  ensure(had_err, 149 == rng1.end);
+  ensure(had_err, 148 == rng1.end);
 
   rng1.start = rng2.start = 2;
   rng1.end = rng2.end = 28;
