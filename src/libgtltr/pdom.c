@@ -101,6 +101,9 @@ int pdom_load_hmm_files(PdomOptions *opts, Error *err)
 {
   unsigned long i;
   int had_err = 0;
+
+  assert(opts && err);
+
   for(i=0;i<strarray_size(opts->hmm_files);i++)
   {
     HMMFILE *hmmfp;
@@ -146,6 +149,8 @@ void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
        *rev_fr1, *rev_fr2, *rev_fr3;
   unsigned long i,
                 seqlen = ltrelement_length(element);
+
+  assert(seq && rev_seq && element && results && opts);
 
   opts->thresh.globT   = -FLT_MAX;
   opts->thresh.domT    = -FLT_MAX;
