@@ -27,6 +27,8 @@ HMM* ppt_hmm_new(const Alpha *alpha)
 {
   HMM *hmm;
 
+  assert(alpha);
+
   hmm = hmm_new(PPT_NOF_STATES, alpha_size(alpha));
 
   /* set emission probabilities */
@@ -82,10 +84,13 @@ unsigned long score_hits(Array *results, unsigned long seqlen,
                 highest_index = UNDEF_ULONG;
   double highest_score = 0.0;
 
+  assert(results);
+
   /* score and report PPTs */
   for (i=0;i<array_size(results);i++)
   {
     PPT_Hit *hit = *(PPT_Hit**) array_get(results,i);
+    assert(hit->end >= hit->start);
     if (hit->state == PPT_IN)
     {
       hit->score = ppt_score(abs((seqlen-ltrlen-1)
@@ -113,6 +118,8 @@ void group_hits(unsigned int *decoded, Array *results, PPTOptions *o,
 {
   PPT_Hit *cur_hit;
   unsigned long i = 0;
+
+  assert(decoded && results && o && strand != STRAND_UNKNOWN);
 
   /* group hits into stretches */
   cur_hit = ma_malloc(sizeof (PPT_Hit));
@@ -169,6 +176,8 @@ void ppt_find(const char *seq,
                 ltrlen;
   PPT_Hit *tmp;
 
+  assert(seq && rev_seq && element && results && o);
+
   results->best_hit = NULL;
 
   /* do PPT finding on forward strand
@@ -184,7 +193,7 @@ void ppt_find(const char *seq,
   }
   /* use Viterbi algorithm to decode emissions within radius */
   decoded = ma_malloc(sizeof (unsigned int) * 2*radius+2);
-  hmm_decode(hmm, decoded, encoded_seq+seqlen-ltrlen-radius, 2*radius);
+  hmm_decode(hmm, decoded, encoded_seq+seqlen-ltrlen-radius+1, 2*radius);
   group_hits(decoded, results_fwd, o, radius, STRAND_FORWARD);
   highest_fwd = score_hits(results_fwd, seqlen, ltrlen, radius);
   results->hits_fwd = results_fwd;
@@ -224,14 +233,19 @@ void ppt_find(const char *seq,
 void ppt_clear_results(PPTResults *results)
 {
   unsigned long i;
+
+  if (!results) return;
+
   for (i=0;i<array_size(results->hits_fwd);i++)
   {
-    ma_free(*(PPT_Hit**) array_get(results->hits_fwd,i));
+    PPT_Hit * hit = *(PPT_Hit**) array_get(results->hits_fwd,i);
+    ma_free(hit);
   }
   array_delete(results->hits_fwd);
   for (i=0;i<array_size(results->hits_rev);i++)
   {
-    ma_free(*(PPT_Hit**) array_get(results->hits_rev,i));
+    PPT_Hit * hit = *(PPT_Hit**) array_get(results->hits_rev,i);
+    ma_free(hit);
   }
   array_delete(results->hits_rev);
 }
