@@ -15,16 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LTRDIGEST_VISITOR_H
-#define LTRDIGEST_VISITOR_H
+#ifndef LTR_VISITOR_H
+#define LTR_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct LTRdigestVisitor LTRdigestVisitor;
+typedef struct LTRVisitor LTRVisitor;
 
 #include "libgtext/genome_visitor.h"
 #include "libgtltr/ltrelement.h"
 
-const GenomeVisitorClass* ltrdigest_visitor_class(void);
-GenomeVisitor*            ltrdigest_visitor_new(LTRElement *element);
+const GenomeVisitorClass* ltr_visitor_class(void);
+GenomeVisitor*            ltr_visitor_new(LTRElement *element);
 
 #endif

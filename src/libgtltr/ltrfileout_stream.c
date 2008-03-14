@@ -25,14 +25,14 @@
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_node_iterator.h"
 #include "libgtltr/ltrfileout_stream.h"
-#include "libgtltr/ltrdigest_visitor.h"
+#include "libgtltr/ltr_visitor.h"
 
 struct LTRFileOutStream {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
   Bioseq *bioseq;
   FILE *fp;
-  LTRdigestVisitor *lv;
+  LTRVisitor *lv;
   LTRElement element;
 };
 
@@ -79,7 +79,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 
     /* output whole retrotransposon range */
     rng = genome_node_get_range((GenomeNode*) ls->element.mainnode);
-    fprintf(ls->fp, "%lu %lu ",rng.start, rng.end);
+    fprintf(ls->fp, "%lu\t%lu\t",rng.start, rng.end);
 
     lltr_rng = genome_node_get_range((GenomeNode*) ls->element.leftLTR);
     rltr_rng = genome_node_get_range((GenomeNode*) ls->element.rightLTR);
@@ -91,11 +91,11 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       ppt_seq = ltrelement_get_sequence(ppt_rng.start, ppt_rng.end,
                                         genome_feature_get_strand(ls->element.ppt),
                                         seq, e);
-      fprintf(ls->fp, "%lu %lu %s %c ", ppt_rng.start, ppt_rng.end,
+      fprintf(ls->fp, "%lu\t%lu\t%s\t%c\t", ppt_rng.start, ppt_rng.end,
                       ppt_seq,
                       STRANDCHARS[genome_feature_get_strand(ls->element.ppt)]);
       ma_free((char*) ppt_seq);
-    } else fprintf(ls->fp, "- - - - ");
+    } else fprintf(ls->fp, "\t\t\t\t");
 
     /* output PBS */
     if (ls->element.pbs)
@@ -104,12 +104,14 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       pbs_seq = ltrelement_get_sequence(pbs_rng.start, pbs_rng.end,
                                         genome_feature_get_strand(ls->element.pbs),
                                         seq, e);
-      fprintf(ls->fp, "%lu %lu %s %s %c ", pbs_rng.start, pbs_rng.end,
+      fprintf(ls->fp, "%lu\t%lu\t%s\t%s\t%c\t", pbs_rng.start, pbs_rng.end,
                       genome_feature_get_attribute((GenomeNode*) ls->element.pbs, "tRNA"),
                       pbs_seq,
                       STRANDCHARS[genome_feature_get_strand(ls->element.pbs)]);
       ma_free((char*) pbs_seq);
-    } else fprintf(ls->fp, "- - - - - ");
+    } else fprintf(ls->fp, "\t\t\t\t\t");
+
+    /* output protein domains */
     pdoms = str_new();
     for(i=0;i<array_size(ls->element.pdoms);i++)
     {
@@ -117,6 +119,9 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       str_append_cstr(pdoms,
                       genome_feature_get_attribute((GenomeNode*)gf,
                                                    "PfamName"));
+      str_append_cstr(pdoms,"(");
+      str_append_char(pdoms, STRANDCHARS[genome_feature_get_strand(gf)]);
+      str_append_cstr(pdoms,")");
       if (i != array_size(ls->element.pdoms)-1)
         str_append_cstr(pdoms, "/");
     }
@@ -157,6 +162,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   ls->in_stream = genome_stream_ref(in_stream);
   ls->bioseq = bioseq;
   ls->fp = fp;
-  ls->lv = (LTRdigestVisitor*) ltrdigest_visitor_new(&ls->element);
+  fprintf(fp, "LTRret start\tLTRret end\tPPT start\tPPT end\tPPT motif\tPPT strand\n");
+  ls->lv = (LTRVisitor*) ltr_visitor_new(&ls->element);
   return gs;
 }

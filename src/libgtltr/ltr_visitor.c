@@ -21,20 +21,20 @@
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_visitor_rep.h"
 #include "libgtext/sequence_region.h"
-#include "libgtltr/ltrdigest_visitor.h"
+#include "libgtltr/ltr_visitor.h"
 
-struct LTRdigestVisitor {
+struct LTRVisitor {
   const GenomeVisitor parent_instance;
   LTRElement *element;
 };
 
-#define ltrdigest_visitor_cast(GV)\
-        genome_visitor_cast(ltrdigest_visitor_class(), GV)
+#define ltr_visitor_cast(GV)\
+        genome_visitor_cast(ltr_visitor_class(), GV)
 
-static int ltrdigest_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                            UNUSED Error *err)
+static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
+                                      UNUSED Error *err)
 {
-  LTRdigestVisitor *lv = ltrdigest_visitor_cast(gv);
+  LTRVisitor *lv = ltr_visitor_cast(gv);
   Range node_range;
   assert(lv);
   error_check(err);
@@ -94,34 +94,34 @@ static int ltrdigest_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf
   return 0;
 }
 
-int ltrdigest_visitor_sequence_region(GenomeVisitor *gv,
-                                             SequenceRegion *sr,
-                                             UNUSED Error *err)
+int ltr_visitor_sequence_region(GenomeVisitor *gv,
+                                SequenceRegion *sr,
+                                UNUSED Error *err)
 {
-  LTRdigestVisitor *v = ltrdigest_visitor_cast(gv);
+  LTRVisitor *v = ltr_visitor_cast(gv);
   assert(v && sr);
   error_check(err);
 
   return 0;
 }
 
-const GenomeVisitorClass* ltrdigest_visitor_class()
+const GenomeVisitorClass* ltr_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof (LTRdigestVisitor),
+  static const GenomeVisitorClass gvc = { sizeof (LTRVisitor),
                                           NULL,
                                           NULL,
-                                          ltrdigest_visitor_genome_feature,
+                                          ltr_visitor_genome_feature,
                                           NULL };
   return &gvc;
 }
 
-GenomeVisitor* ltrdigest_visitor_new(LTRElement *element)
+GenomeVisitor* ltr_visitor_new(LTRElement *element)
 {
   GenomeVisitor *gv;
-  LTRdigestVisitor *lv;
+  LTRVisitor *lv;
   assert(element);
-  gv = genome_visitor_create(ltrdigest_visitor_class());
-  lv = ltrdigest_visitor_cast(gv);
+  gv = genome_visitor_create(ltr_visitor_class());
+  lv = ltr_visitor_cast(gv);
   lv->element = element;
   assert(lv);
   return gv;

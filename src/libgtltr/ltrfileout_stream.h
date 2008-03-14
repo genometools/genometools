@@ -20,9 +20,6 @@
 
 #include "libgtcore/bioseq.h"
 #include "libgtext/genome_stream.h"
-#include "libgtltr/pbs.h"
-#include "libgtltr/ppt.h"
-#include "libgtltr/pdom.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct LTRFileOutStream LTRFileOutStream;

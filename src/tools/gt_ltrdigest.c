@@ -205,7 +205,7 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
                                  Error* err)
 {
   LTRdigestOptions *arguments = tool_arguments;
-  FILE *fp;
+  FILE *fp = NULL;
   int had_err  = 0;
 
   /* TODO: more checks */
@@ -221,9 +221,7 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
     error_set(err, "Could not open tabular outfile '%s'!",
                    str_get(arguments->taboutfile));
     had_err = -1;
-  }
-
-  fclose(fp);
+  } else fclose(fp);
   return had_err;
 }
 
@@ -246,11 +244,16 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
   /* set additional arguments/options */
   /* TODO: error checking for corrupt file! */
   Bioseq *bioseq = bioseq_new(argv[1], err);
-  arguments->pbs_opts.trna_lib = bioseq_new(str_get(arguments->trna_lib),err);
-  arguments->pdom_opts.plan7_ts = array_new(sizeof (struct plan7_s*));
+  if (error_is_set(err))
+    had_err = -1;
+  if (!had_err)
+  {
+    arguments->pbs_opts.trna_lib = bioseq_new(str_get(arguments->trna_lib),err);
+    arguments->pdom_opts.plan7_ts = array_new(sizeof (struct plan7_s*));
 
-  had_err = pdom_load_hmm_files(&arguments->pdom_opts,
-                           err);
+    had_err = pdom_load_hmm_files(&arguments->pdom_opts,
+                                  err);
+  }
 
   if(!had_err)
   {
@@ -274,7 +277,12 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                                             bioseq,
                                             fp);
       last_stream = tab_out_stream;
-    } else last_stream = ltrdigest_stream;
+    }
+    else
+    {
+      last_stream = ltrdigest_stream;
+      fclose(fp);
+     }
 
 
     gff3_out_stream = gff3_out_stream_new(last_stream, arguments->outfp);
@@ -288,14 +296,17 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
     genome_stream_delete(gff3_out_stream);
     genome_stream_delete(ltrdigest_stream);
     if (tab_out_stream)
+    {
       genome_stream_delete(tab_out_stream);
+      fclose(fp);
+    }
     genome_stream_delete(gff3_in_stream);
+    pdom_clear_hmms(arguments->pdom_opts.plan7_ts);
   }
 
-  pdom_clear_hmms(arguments->pdom_opts.plan7_ts);
   bioseq_delete(bioseq);
   bioseq_delete(arguments->pbs_opts.trna_lib);
-  fclose(fp);
+
   return had_err;
 }
 

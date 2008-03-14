@@ -27,7 +27,7 @@
 #include "libgtext/genome_node_iterator.h"
 #include "libgtext/reverse.h"
 #include "libgtltr/ltrdigest_stream.h"
-#include "libgtltr/ltrdigest_visitor.h"
+#include "libgtltr/ltr_visitor.h"
 #include "libgtltr/pbs.h"
 #include "libgtltr/ppt.h"
 #include "libgtltr/pdom.h"
@@ -39,7 +39,7 @@ struct LTRdigestStream {
   PBSOptions *pbs_opts;
   PPTOptions *ppt_opts;
   PdomOptions *pdom_opts;
-  LTRdigestVisitor *lv;
+  LTRVisitor *lv;
   Str *ltrdigest_tag;
   LTRElement element;
 };
@@ -298,6 +298,6 @@ GenomeStream* ltrdigest_stream_new(GenomeStream *in_stream,
   ls->pdom_opts = pdom_opts;
   ls->bioseq = bioseq;
   ls->ltrdigest_tag = str_new_cstr("LTRdigest");
-  ls->lv = (LTRdigestVisitor*) ltrdigest_visitor_new(&ls->element);
+  ls->lv = (LTRVisitor*) ltr_visitor_new(&ls->element);
   return gs;
 }
