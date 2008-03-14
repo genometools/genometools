@@ -78,7 +78,7 @@ struct Sfxiterator
   bool exhausted;
   Bcktab *bcktab;
   Codetype numofallcodes;
-  bool specialcodesfast;
+  bool storespecialcodes;
   Seqpos *leftborder; /* points to bcktab->leftborder */
   const Definedunsignedint *maxdepth;
   unsigned long long bucketiterstep;
@@ -228,7 +228,7 @@ static void updatekmercount(void *processinfo,
     {
       if (firstspecial->specialpos > 0)
       {
-        if (sfi->specialcodesfast)
+        if (sfi->storespecialcodes)
         {
           Codeatposition *cp;
 
@@ -501,9 +501,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   if (!haserr)
   {
     ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
-    sfi->specialcodesfast = decidespecialcodesfast(dofast,
-                                                   encseq,
-                                                   realspecialranges);
+    sfi->storespecialcodes = decidespecialcodesfast(dofast,
+                                                    encseq,
+                                                    realspecialranges);
     if (sfi->specialcodesfast)
     {
       ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
@@ -537,7 +537,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               numofchars,
                               prefixlength,
                               (unsigned int) CODEBITS,
-                              sfi->specialcodesfast
+                              sfi->storespecialcodes
                                 ? (Codetype) MAXCODEVALUE
                                 : 0,
                               verboseinfo,
@@ -567,7 +567,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                    sfi,
                    numofchars,
                    prefixlength);
-    if (sfi->specialcodesfast)
+    if (sfi->storespecialcodes)
     {
       assert(realspecialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
       reversespecialcodes(sfi->spaceCodeatposition,sfi->nextfreeCodeatposition);
@@ -642,7 +642,7 @@ static void preparethispart(Sfxiterator *sfi,
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
   sfi->suftabptr = sfi->suftab -
                    stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
-  if (sfi->specialcodesfast)
+  if (sfi->storespecialcodes)
   {
     derivespecialcodesfromtable(sfi,(numofparts == 1U) ? true : false);
   } else
