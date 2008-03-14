@@ -209,19 +209,23 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
   int had_err  = 0;
 
   /* TODO: more checks */
+  /* -trnas */
   if (arguments->trna_lib && !file_exists(str_get(arguments->trna_lib)))
   {
     error_set(err, "File '%s' does not exist!", str_get(arguments->trna_lib));
     had_err = -1;
   }
+  /* -taboutfile */
   if (!had_err && arguments->taboutfile
-        && str_length(arguments->taboutfile) > 0
-        && !(fp = fopen(str_get(arguments->taboutfile),"w+")))
+        && str_length(arguments->taboutfile) > 0)
   {
-    error_set(err, "Could not open tabular outfile '%s'!",
-                   str_get(arguments->taboutfile));
-    had_err = -1;
-  } else fclose(fp);
+    if (!(fp = fopen(str_get(arguments->taboutfile),"w+")))
+    {
+      error_set(err, "Could not open tabular outfile '%s'!",
+                     str_get(arguments->taboutfile));
+      had_err = -1;
+    } else fclose(fp);
+  }
   return had_err;
 }
 
@@ -281,7 +285,6 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
     else
     {
       last_stream = ltrdigest_stream;
-      fclose(fp);
      }
 
 
