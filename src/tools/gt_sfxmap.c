@@ -52,7 +52,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
 {
   OptionParser *op;
   Option *optionstream, *optionverbose, *optionscantrials,
-         *optionmulticharcmptrials, *optionbck, *optionsuf, 
+         *optionmulticharcmptrials, *optionbck, *optionsuf,
          *optiondes, *optionbwt, *optionlcp, *optiontis;
   OPrval oprval;
 
@@ -69,7 +69,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                                       &sfxmapoptions->scantrials,0);
   option_parser_add_option(op, optionscantrials);
 
-  optionmulticharcmptrials 
+  optionmulticharcmptrials
     = option_new_ulong("multicharcmptrials",
                        "specify number of multichar cmp trials",
                        &sfxmapoptions->multicharcmptrials,0);

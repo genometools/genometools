@@ -107,8 +107,8 @@ end
 runsfxfail "-indexname sfx -db /nothing"
 runsfxfail "-indexname /nothing/sfx -db #{$testdata}TTT-small.fna"
 runsfxfail "-smap /nothing -db #{$testdata}TTT-small.fna"
-runsfxfail "-dna -db #{$testdata}sw100K1.fna"
-runsfxfail "-protein -dir cpl -db #{$testdata}sw100K1.fna"
+runsfxfail "-dna -db #{$testdata}sw100K1.fsa"
+runsfxfail "-protein -dir cpl -db #{$testdata}sw100K1.fsa"
 runsfxfail "-dna -db #{$testdata}Random.fna RandomN.fna"
 runsfxfail "-dna -suf -pl 10 -db #{$testdata}Random.fna"
 runsfxfail "-dna -tis -sat plain -db #{$testdata}TTT-small.fna"
@@ -149,7 +149,7 @@ end
     Name "gt sfxmap protein #{extraname} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
-      checksfx(parts,3,extra,"direct",["sw100K1.fna","sw100K2.fna"])
+      checksfx(parts,3,extra,"direct",["sw100K1.fsa","sw100K2.fsa"])
     end
   end
 end

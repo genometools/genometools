@@ -38,7 +38,6 @@
 #include "safecast-gen.h"
 #include "esafileend.h"
 #include "verbose-def.h"
-#include "stamp.h"
 
 #include "opensfxfile.pr"
 #include "fillsci.pr"
@@ -1522,7 +1521,7 @@ bool hasspecialranges(const Encodedsequence *encseq)
 bool hasfastspecialrangeenumerator(const Encodedsequence *encseq)
 {
   return (encseq->sat == Viadirectaccess ||
-          encseq->sat == Viabitaccess) ? false : true; 
+          encseq->sat == Viabitaccess) ? false : true;
           /* XXX remove bitaccess */
 }
 
@@ -1554,6 +1553,11 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
     } else
     {
       sri->pos = encseq->totallength-1;
+      if (encseq->sat == Viabitaccess &&
+          BITNUM2WORD(sri->encseq->specialbits,sri->pos) == 0)
+      {
+        sri->pos -= (MODWORDSIZE(sri->pos) + 1);
+      }
     }
     sri->esr = NULL;
   } else
@@ -1673,6 +1677,7 @@ static bool bitnextspecialrangeiterator(Sequencerange *range,
       }
       if (currentword == 0)
       {
+        assert(MODWORDSIZE(sri->pos) == 0);
         sri->pos += INTWORDSIZE;
         if (sri->pos >= sri->encseq->totallength)
         {
@@ -1698,6 +1703,7 @@ static bool bitnextspecialrangeiterator(Sequencerange *range,
       }
       if (currentword == 0)
       {
+        assert(MODWORDSIZE(sri->pos) == INTWORDSIZE-1);
         if (sri->pos < INTWORDSIZE)
         {
           sri->exhausted = true;
