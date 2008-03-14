@@ -193,7 +193,7 @@ static int suffixeratorwithoutput(
                  unsigned int prefixlength,
                  const Definedunsignedint *maxdepth,
                  unsigned int numofparts,
-                 bool dofast,
+                 const Sfxstrategy *sfxstrategy,
                  Measuretime *mtime,
                  Verboseinfo *verboseinfo,
                  Error *err)
@@ -213,7 +213,7 @@ static int suffixeratorwithoutput(
                        maxdepth,
                        numofparts,
                        outfileinfo->outlcpinfo,
-                       dofast,
+                       sfxstrategy,
                        mtime,
                        verboseinfo,
                        err);
@@ -309,7 +309,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
     maxprefixlen
       = whatisthemaximalprefixlength(numofchars,
                                      totallength,
-                                     so->dofast
+                                     so->sfxstrategy.storespecialcodes
                                      ? getprefixlenbits()
                                      : 0);
     if (checkprefixlength(maxprefixlen,*prefixlength,err) != 0)
@@ -376,7 +376,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                        prefixlength,
                        so->numofparts,
                        maxdepth,
-                       so->dofast,
+                       &so->sfxstrategy,
                        sfxseqinfo->encseq,
                        &sfxseqinfo->specialcharinfo,
                        sfxseqinfo->numofsequences,
@@ -549,7 +549,7 @@ static int runsuffixerator(bool doesa,
                            prefixlength,
                            &maxdepth,
                            so->numofparts,
-                           so->dofast,
+                           &so->sfxstrategy,
                            mtime,
                            verboseinfo,
                            err) != 0)

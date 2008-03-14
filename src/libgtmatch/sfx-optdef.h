@@ -23,6 +23,7 @@
 #include "libgtcore/strarray.h"
 #include "readmode-def.h"
 #include "defined-types.h"
+#include "sfx-strategy.h"
 #include "eis-bwtconstruct_params.h"
 
 #define PREFIXLENGTH_AUTOMATIC 0
@@ -42,7 +43,6 @@ typedef struct
   bool isdna,
        isprotein,
        isplain,
-       dofast,
        beverbose,
        outtistab,
        outsuftab,
@@ -51,6 +51,7 @@ typedef struct
        outdestab,
        outbcktab,
        showtime;
+  Sfxstrategy sfxstrategy;
   struct bwtOptions bwtIdxParams;
 } Suffixeratoroptions;
 

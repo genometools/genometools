@@ -34,6 +34,7 @@
 #include "sfx-suffixer.h"
 #include "sfx-outlcp.h"
 #include "sfx-enumcodes.h"
+#include "sfx-strategy.h"
 #include "stamp.h"
 
 #include "sfx-mappedstr.pr"
@@ -436,27 +437,6 @@ void freeSfxiterator(Sfxiterator **sfi)
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
-static bool decidespecialcodesfast(bool dofast,
-                                   UNUSED const Encodedsequence *encseq,
-                                   UNUSED Seqpos realspecialranges)
-{
-  return dofast;
-}
-
-#ifdef mydebug
-  if (!dofast && hasfastspecialrangeenumerator(encseq))
-  {
-    Seqpos totallength = getencseqtotallength(encseq);
-
-    if (realspecialranges * sizeof (Codeatposition) > totallength/10)
-    {
-      return false;
-    }
-  }
-  return true;
-}
-#endif
-
 #ifdef mydebug
 static void showleftborder(const Seqpos *leftborder,
                            Codetype numofallcodes)
@@ -481,7 +461,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             const Definedunsignedint *maxdepth,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
-                            bool dofast,
+                            const Sfxstrategy *sfxstrategy,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
                             Error *err)
@@ -492,7 +472,8 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
 
   error_check(err);
   assert(prefixlength > 0);
-  if (dofast && prefixlength > MAXPREFIXLENGTH)
+  if (sfxstrategy != NULL && sfxstrategy->storespecialcodes &&
+      prefixlength > MAXPREFIXLENGTH)
   {
     error_set(err,"argument for option -pl must be in the range [1,%u]",
                   MAXPREFIXLENGTH);
@@ -501,10 +482,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   if (!haserr)
   {
     ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
-    sfi->storespecialcodes = decidespecialcodesfast(dofast,
-                                                    encseq,
-                                                    realspecialranges);
-    if (sfi->specialcodesfast)
+    if (sfxstrategy != NULL && sfxstrategy->storespecialcodes)
     {
       ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
                        Codeatposition,realspecialranges+1);
@@ -524,6 +502,13 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->numofchars = numofchars;
     sfi->characters = characters;
     sfi->prefixlength = prefixlength;
+    if (sfxstrategy != NULL)
+    {
+       sfi->storespecialcodes = sfxstrategy->storespecialcodes;
+    } else
+    {
+       sfi->storespecialcodes = false;
+    }
     assert(maxdepth != NULL);
     sfi->maxdepth = maxdepth;
     sfi->totallength = getencseqtotallength(encseq);

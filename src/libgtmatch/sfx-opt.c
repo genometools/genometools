@@ -50,7 +50,7 @@ static OPrval parse_options(int *parsed_args,
          *optionii,
          *optionsat,
          *optiondir,
-         *optionfast,
+         *optionstorespecialcodes,
          *optiondes;
   OPrval oprval;
   Str *dirarg = str_new();
@@ -125,10 +125,12 @@ static OPrval parse_options(int *parsed_args,
   {
     optionmaxdepth = NULL;
   }
-  optionfast = option_new_bool("fast","be faster but use more space",
-                               &so->dofast,false);
-  option_is_development_option(optionfast);
-  option_parser_add_option(op, optionfast);
+  optionstorespecialcodes
+    = option_new_bool("storespecialcodes",
+                      "store special codes (this may speed up the program)",
+                      &so->sfxstrategy.storespecialcodes,false);
+  option_is_development_option(optionstorespecialcodes);
+  option_parser_add_option(op, optionstorespecialcodes);
 
   option = option_new_uint_min("parts",
                                "specify number of parts in which the "
@@ -337,7 +339,8 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     showdefinitelyverbose("prefixlength=%u",so->prefixlength);
   }
-  showdefinitelyverbose("fast=%s",so->dofast ? "true" : "false");
+  showdefinitelyverbose("storespecialcodes=%s",
+                        so->sfxstrategy.storespecialcodes ? "true" : "false");
   showdefinitelyverbose("parts=%u",so->numofparts);
   for (i=0; i<strarray_size(so->filenametab); i++)
   {

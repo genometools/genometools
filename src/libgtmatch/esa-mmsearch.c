@@ -471,7 +471,7 @@ static int constructsarrandrunmmsearch(
                        &maxdepth,
                        numofparts,
                        NULL,
-                       true, /* dofast */
+                       NULL, /* sfxstrategy */
                        mtime,
                        NULL,
                        err);

@@ -65,7 +65,7 @@ static int constructsarrandrunmaxpairs(
                        &maxdepth,
                        numofparts,
                        NULL,
-                       true, /* dofast */
+                       NULL, /* sfxstrategy */
                        mtime,
                        NULL,
                        err);
