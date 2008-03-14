@@ -41,7 +41,7 @@ char* ltrelement_get_sequence(unsigned long start, unsigned long end,
   char *out;
   unsigned long len;
   len = end - start + 1;
-  out = ma_malloc(sizeof (char) * len + 1);
+  out = ma_malloc(sizeof (char) * (len + 1));
   memcpy(out, seq_get_orig(seq)+start, sizeof (char) * len);
   if (strand == STRAND_REVERSE)
     reverse_complement(out, len, err);

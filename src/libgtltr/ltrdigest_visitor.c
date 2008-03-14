@@ -65,14 +65,28 @@ static int ltrdigest_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf
       /* XXX: check order if unsorted! */
       if(lv->element->leftTSD == NULL)
       {
-        node_range = genome_node_get_range((GenomeNode*) gf);
         lv->element->leftTSD = gf;
       }
       else
       {
-        node_range = genome_node_get_range((GenomeNode*) gf);
         lv->element->rightTSD = gf;
       }
+      break;
+    case gft_RR_tract:
+      if(lv->element->ppt == NULL)
+      {
+        lv->element->ppt = gf;
+      }
+      break;
+    case gft_primer_binding_site:
+      if(lv->element->pbs == NULL)
+      {
+        lv->element->pbs = gf;
+      }
+      break;
+    case gft_protein_match:
+      if (lv->element->pdoms)
+        array_add(lv->element->pdoms, gf);
       break;
     default:
       break;

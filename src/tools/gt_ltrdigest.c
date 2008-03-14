@@ -27,6 +27,7 @@
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtltr/ltrdigest_stream.h"
+#include "libgtltr/ltrfileout_stream.h"
 #include "libgtltr/pbs.h"
 #include "libgtltr/ppt.h"
 #include "libgtltr/pdom.h"
@@ -37,6 +38,7 @@ typedef struct LTRdigestOptions {
   PPTOptions  ppt_opts;
   PdomOptions pdom_opts;
   Str *trna_lib;
+  Str *taboutfile;
   bool verbose;
   OutputFileInfo *ofi;
   GenFile *outfp;
@@ -47,6 +49,7 @@ static void* gt_ltrdigest_arguments_new(void)
   LTRdigestOptions *arguments = ma_calloc(1, sizeof *arguments);
   arguments->pdom_opts.hmm_files = strarray_new();
   arguments->trna_lib = str_new();
+  arguments->taboutfile = str_new();
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -57,6 +60,7 @@ static void gt_ltrdigest_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   strarray_delete(arguments->pdom_opts.hmm_files);
   str_delete(arguments->trna_lib);
+  str_delete(arguments->taboutfile);
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
   ma_free(arguments);
@@ -133,6 +137,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                           "detection",
                           arguments->trna_lib);
   option_parser_add_option(op, ot);
+  option_hide_default(ot);
 
  /* PBS search options */
 
@@ -148,6 +153,40 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                                "2.0 format",
                                arguments->pdom_opts.hmm_files);
   option_parser_add_option(op, o);
+
+  o = option_new_filename("taboutfile",
+                          "filename for tabular output including sequences",
+                          arguments->taboutfile);
+  option_parser_add_option(op, o);
+  option_hide_default(o);
+
+  o = option_new_int("pbsmatchscore",
+                     "match score for PBS/tRNA alignments",
+                      &arguments->pbs_opts.ali_score_match,
+                      5);
+  option_parser_add_option(op, o);
+  option_is_extended_option(o);
+
+  o = option_new_int("pbsmismatchscore",
+                     "mismatch score for PBS/tRNA alignments",
+                      &arguments->pbs_opts.ali_score_mismatch,
+                      -10);
+  option_parser_add_option(op, o);
+  option_is_extended_option(o);
+
+  o = option_new_int("pbsinsertionscore",
+                     "insertion score for PBS/tRNA alignments",
+                      &arguments->pbs_opts.ali_score_insertion,
+                      -20);
+  option_parser_add_option(op, o);
+  option_is_extended_option(o);
+
+  o = option_new_int("pbsdeletionscore",
+                     "deletion score for PBS/tRNA alignments",
+                      &arguments->pbs_opts.ali_score_deletion,
+                      -20);
+  option_parser_add_option(op, o);
+  option_is_extended_option(o);
 
   /* verbosity */
   o = option_new_verbose(&arguments->verbose);
@@ -166,6 +205,7 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
                                  Error* err)
 {
   LTRdigestOptions *arguments = tool_arguments;
+  FILE *fp;
   int had_err  = 0;
 
   /* TODO: more checks */
@@ -174,7 +214,16 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
     error_set(err, "File '%s' does not exist!", str_get(arguments->trna_lib));
     had_err = -1;
   }
+  if (!had_err && arguments->taboutfile
+        && str_length(arguments->taboutfile) > 0
+        && !(fp = fopen(str_get(arguments->taboutfile),"w+")))
+  {
+    error_set(err, "Could not open tabular outfile '%s'!",
+                   str_get(arguments->taboutfile));
+    had_err = -1;
+  }
 
+  fclose(fp);
   return had_err;
 }
 
@@ -182,10 +231,13 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                                void *tool_arguments, Error *err)
 {
   LTRdigestOptions *arguments = tool_arguments;
-  GenomeStream *gff3_in_stream,
-               *gff3_out_stream,
-               *ltrdigest_stream;
+  GenomeStream *gff3_in_stream   = NULL,
+               *gff3_out_stream  = NULL,
+               *ltrdigest_stream = NULL,
+               *tab_out_stream   = NULL,
+               *last_stream      = NULL;
   GenomeNode *gn;
+  FILE *fp = NULL;
 
   int had_err = 0;
   error_check(err);
@@ -195,10 +247,6 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
   /* TODO: error checking for corrupt file! */
   Bioseq *bioseq = bioseq_new(argv[1], err);
   arguments->pbs_opts.trna_lib = bioseq_new(str_get(arguments->trna_lib),err);
-  arguments->pbs_opts.ali_score_deletion = -20;
-  arguments->pbs_opts.ali_score_insertion = -20;
-  arguments->pbs_opts.ali_score_mismatch = -10;
-  arguments->pbs_opts.ali_score_match = 5;
   arguments->pdom_opts.plan7_ts = array_new(sizeof (struct plan7_s*));
 
   had_err = pdom_load_hmm_files(&arguments->pdom_opts,
@@ -206,6 +254,8 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
 
   if(!had_err)
   {
+    /* set up stream flow
+     * ------------------*/
     gff3_in_stream  = gff3_in_stream_new_sorted(argv[0],
                                                 arguments->verbose &&
                                                 arguments->outfp);
@@ -216,7 +266,18 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                                             &arguments->ppt_opts,
                                             &arguments->pdom_opts);
 
-    gff3_out_stream = gff3_out_stream_new(ltrdigest_stream, arguments->outfp);
+    /* attach tabular output stream, if requested */
+    if (arguments->taboutfile
+          && (fp = fopen(str_get(arguments->taboutfile),"w+")))
+    {
+      tab_out_stream = ltr_fileout_stream_new(ltrdigest_stream,
+                                            bioseq,
+                                            fp);
+      last_stream = tab_out_stream;
+    } else last_stream = ltrdigest_stream;
+
+
+    gff3_out_stream = gff3_out_stream_new(last_stream, arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */
     while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
@@ -226,11 +287,15 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
 
     genome_stream_delete(gff3_out_stream);
     genome_stream_delete(ltrdigest_stream);
+    if (tab_out_stream)
+      genome_stream_delete(tab_out_stream);
     genome_stream_delete(gff3_in_stream);
   }
+
   pdom_clear_hmms(arguments->pdom_opts.plan7_ts);
   bioseq_delete(bioseq);
   bioseq_delete(arguments->pbs_opts.trna_lib);
+  fclose(fp);
   return had_err;
 }
 
