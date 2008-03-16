@@ -100,7 +100,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                           abs(rltr_rng.start - ppt_rng.end) :
                           abs(lltr_rng.end - ppt_rng.start)));
       ma_free((char*) ppt_seq);
-    } else fprintf(ls->fp, "\t\t\t\t");
+    } else fprintf(ls->fp, "\t\t\t\t\t");
 
     /* output PBS */
     if (ls->element.pbs)
@@ -111,13 +111,17 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       pbs_seq = ltrelement_get_sequence(pbs_rng.start, pbs_rng.end,
                                         pbs_strand,
                                         seq, e);
-      fprintf(ls->fp, "%lu\t%lu\t%s\t%s\t%c\t", pbs_rng.start, pbs_rng.end,
+      fprintf(ls->fp, "%lu\t%lu\t%c\t%s\t%s\t%s\t%s\t", pbs_rng.start, pbs_rng.end,
+                      STRANDCHARS[pbs_strand],
                       genome_feature_get_attribute((GenomeNode*)
-                                                    ls->element.pbs, "trna"),
+                                              ls->element.pbs, "trna"),
                       pbs_seq,
-                      STRANDCHARS[pbs_strand]);
+                      genome_feature_get_attribute((GenomeNode*)
+                                              ls->element.pbs, "trnaoffset"),
+                      genome_feature_get_attribute((GenomeNode*)
+                                              ls->element.pbs, "pbsoffset"));
       ma_free((char*) pbs_seq);
-    } else fprintf(ls->fp, "\t\t\t\t\t");
+    } else fprintf(ls->fp, "\t\t\t\t\t\t\t");
 
     /* output protein domains */
     pdoms = str_new();
@@ -173,8 +177,8 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   ls->bioseq = bioseq;
   ls->fp = fp;
   fprintf(fp, "LTRret start\tLTRret end");
-  fprintf(fp, "\tPPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset\n");
-  fprintf(fp, "\tPPT start\tPPT end\tPPT motif\tPPT strand\n");
+  fprintf(fp, "\tPPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");
+  fprintf(fp, "\tPBS start\tPBS end\tPBS strand\ttRNA\tRNA motif\tPBS offset\ttRNA offset\n");
   ls->lv = (LTRVisitor*) ltr_visitor_new(&ls->element);
   return gs;
 }

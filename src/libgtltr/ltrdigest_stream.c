@@ -79,7 +79,7 @@ int pdom_domain_attach_gff3(void *key, void *value, void *data,
   genome_feature_set_source(gf, ls->ltrdigest_tag);
   genome_feature_set_phase(gf, frame);
   genome_feature_add_attribute((GenomeFeature*) gf,"pfamname", model->name);
-  genome_feature_add_attribute((GenomeFeature*) gf,"pfamnD", model->acc);
+  genome_feature_add_attribute((GenomeFeature*) gf,"pfamid", model->acc);
   genome_node_set_seqid((GenomeNode*) gf,
                         genome_node_get_idstr(
                           (GenomeNode*) ls->element.mainnode));
@@ -121,10 +121,11 @@ void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
                         genome_node_get_idstr(
                           (GenomeNode*) element->mainnode));
   genome_feature_add_attribute((GenomeFeature*) gf,"trna",
-                              results->best_hit->trna);
+                                results->best_hit->trna);
   snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->tstart);
-  genome_feature_add_attribute((GenomeFeature*) gf,"trnaoffset",
-                              buffer);
+  genome_feature_add_attribute((GenomeFeature*) gf,"trnaoffset", buffer);
+  snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->offset);
+  genome_feature_add_attribute((GenomeFeature*) gf,"pbsoffset", buffer);
   genome_node_is_part_of_genome_node((GenomeNode*) element->mainnode, gf);
 }
 
