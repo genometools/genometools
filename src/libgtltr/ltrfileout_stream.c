@@ -111,7 +111,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       pbs_seq = ltrelement_get_sequence(pbs_rng.start, pbs_rng.end,
                                         pbs_strand,
                                         seq, e);
-      fprintf(ls->fp, "%lu\t%lu\t%c\t%s\t%s\t%s\t%s\t", pbs_rng.start, pbs_rng.end,
+      fprintf(ls->fp, "%lu\t%lu\t%c\t%s\t%s\t%s\t%s\t%s\t", pbs_rng.start, pbs_rng.end,
                       STRANDCHARS[pbs_strand],
                       genome_feature_get_attribute((GenomeNode*)
                                               ls->element.pbs, "trna"),
@@ -119,9 +119,11 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                       genome_feature_get_attribute((GenomeNode*)
                                               ls->element.pbs, "trnaoffset"),
                       genome_feature_get_attribute((GenomeNode*)
-                                              ls->element.pbs, "pbsoffset"));
+                                              ls->element.pbs, "pbsoffset"),
+                       genome_feature_get_attribute((GenomeNode*)
+                                              ls->element.pbs, "edist"));
       ma_free((char*) pbs_seq);
-    } else fprintf(ls->fp, "\t\t\t\t\t\t\t");
+    } else fprintf(ls->fp, "\t\t\t\t\t\t\t\t");
 
     /* output protein domains */
     pdoms = str_new();
@@ -178,7 +180,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   ls->fp = fp;
   fprintf(fp, "LTRret start\tLTRret end");
   fprintf(fp, "\tPPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");
-  fprintf(fp, "\tPBS start\tPBS end\tPBS strand\ttRNA\tRNA motif\tPBS offset\ttRNA offset\n");
+  fprintf(fp, "\tPBS start\tPBS end\tPBS strand\ttRNA\tRNA motif\tPBS offset\ttRNA offset\tPBS/tRNA edist\n");
   ls->lv = (LTRVisitor*) ltr_visitor_new(&ls->element);
   return gs;
 }

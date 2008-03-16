@@ -126,6 +126,8 @@ void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
   genome_feature_add_attribute((GenomeFeature*) gf,"trnaoffset", buffer);
   snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->offset);
   genome_feature_add_attribute((GenomeFeature*) gf,"pbsoffset", buffer);
+  snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->edist);
+  genome_feature_add_attribute((GenomeFeature*) gf,"edist", buffer);
   genome_node_is_part_of_genome_node((GenomeNode*) element->mainnode, gf);
 }
 
