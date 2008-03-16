@@ -52,9 +52,7 @@ static int constructsarrandrunmaxpairs(
   bool haserr = false;
   Sfxiterator *sfi;
   bool specialsuffixes = false;
-  Definedunsignedint maxdepth;
 
-  maxdepth.defined = false;
   sfi = newSfxiterator(specialcharacters,
                        realspecialranges,
                        ssi->encseq,
@@ -62,12 +60,11 @@ static int constructsarrandrunmaxpairs(
                        numofchars,
                        characters,
                        prefixlength,
-                       &maxdepth,
                        numofparts,
-                       NULL,
+                       NULL, /* oulcpinfo */
                        NULL, /* sfxstrategy */
                        mtime,
-                       NULL,
+                       NULL, /* verbosinfo */
                        err);
   if (sfi == NULL)
   {

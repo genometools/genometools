@@ -19,9 +19,11 @@
 #define SFX_STRATEGY_H
 
 #include <stdbool.h>
+#include "defined-types.h"
 
 typedef struct
 {
+  Definedunsignedint maxdepth;
   bool storespecialcodes;
 } Sfxstrategy;
 

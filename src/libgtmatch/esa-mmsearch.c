@@ -458,9 +458,7 @@ static int constructsarrandrunmmsearch(
   Seqpos numofsuffixes;
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
-  Definedunsignedint maxdepth;
 
-  maxdepth.defined = false;
   sfi = newSfxiterator(specialcharacters,
                        realspecialranges,
                        dbencseq,
@@ -468,12 +466,11 @@ static int constructsarrandrunmmsearch(
                        numofchars,
                        characters,
                        prefixlength,
-                       &maxdepth,
                        numofparts,
-                       NULL,
+                       NULL, /* outlcpinfo */
                        NULL, /* sfxstrategy */
                        mtime,
-                       NULL,
+                       NULL, /* verboseinfo */
                        err);
   if (sfi == NULL)
   {

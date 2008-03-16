@@ -215,7 +215,7 @@ static void insertionsort(const Encodedsequence *encseq,
                           Seqpos depth,
                           Suffixptr *leftptr,
                           Suffixptr *rightptr,
-                          UNUSED const Definedunsignedint *maxdepth)
+                          const Definedunsignedint *maxdepth)
 {
   Suffixptr *pi, *pj;
   Seqpos lcpindex, lcplen = 0;

@@ -79,9 +79,9 @@ struct Sfxiterator
   bool exhausted;
   Bcktab *bcktab;
   Codetype numofallcodes;
-  bool storespecialcodes;
   Seqpos *leftborder; /* points to bcktab->leftborder */
-  const Definedunsignedint *maxdepth;
+  bool storespecialcodes;
+  Definedunsignedint maxdepth;
   unsigned long long bucketiterstep;
 };
 
@@ -458,7 +458,6 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int numofchars,
                             const Uchar *characters,
                             unsigned int prefixlength,
-                            const Definedunsignedint *maxdepth,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
                             const Sfxstrategy *sfxstrategy,
@@ -505,12 +504,12 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     if (sfxstrategy != NULL)
     {
        sfi->storespecialcodes = sfxstrategy->storespecialcodes;
+       sfi->maxdepth = sfxstrategy->maxdepth;
     } else
     {
        sfi->storespecialcodes = false;
+       sfi->maxdepth.defined = false;
     }
-    assert(maxdepth != NULL);
-    sfi->maxdepth = maxdepth;
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
     sfi->outlcpinfo = outlcpinfo;
@@ -649,8 +648,8 @@ static void preparethispart(Sfxiterator *sfi,
     deliverthetime(stdout,mtime,"sorting the buckets");
   }
   totalwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
-  if (!sfi->maxdepth->defined ||
-      sfi->prefixlength < sfi->maxdepth->valueunsignedint)
+  if (!sfi->maxdepth.defined ||
+      sfi->prefixlength < sfi->maxdepth.valueunsignedint)
   {
     sortallbuckets(sfi->suftabptr,
                    sfi->encseq,
@@ -661,7 +660,7 @@ static void preparethispart(Sfxiterator *sfi,
                    sfi->bcktab,
                    sfi->numofchars,
                    sfi->prefixlength,
-                   sfi->maxdepth,
+                   &sfi->maxdepth,
                    sfi->outlcpinfo,
                    &sfi->bucketiterstep);
   }

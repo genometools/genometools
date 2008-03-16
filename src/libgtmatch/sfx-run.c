@@ -191,7 +191,6 @@ static int suffixeratorwithoutput(
                  unsigned int numofchars,
                  const Uchar *characters,
                  unsigned int prefixlength,
-                 const Definedunsignedint *maxdepth,
                  unsigned int numofparts,
                  const Sfxstrategy *sfxstrategy,
                  Measuretime *mtime,
@@ -210,7 +209,6 @@ static int suffixeratorwithoutput(
                        numofchars,
                        characters,
                        prefixlength,
-                       maxdepth,
                        numofparts,
                        outfileinfo->outlcpinfo,
                        sfxstrategy,
@@ -358,8 +356,8 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                                        FILE *outfpbcktab,
                                        const Suffixeratoroptions *so,
                                        unsigned int prefixlength,
-                                       const Definedunsignedint *maxdepth,
                                        Sfxseqinfo *sfxseqinfo,
+                                       const Sfxstrategy *sfxstrategy,
                                        Error *err)
 {
   sfxInterface *si;
@@ -375,8 +373,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
   si = newSfxInterface(so->readmode,
                        prefixlength,
                        so->numofparts,
-                       maxdepth,
-                       &so->sfxstrategy,
+                       sfxstrategy,
                        sfxseqinfo->encseq,
                        &sfxseqinfo->specialcharinfo,
                        sfxseqinfo->numofsequences,
@@ -427,8 +424,8 @@ static int runsuffixerator(bool doesa,
   bool haserr = false;
   Sfxseqinfo sfxseqinfo;
   unsigned int prefixlength;
-  Definedunsignedint maxdepth;
   Seqpos totallength = 0;
+  Sfxstrategy sfxstrategy;
 
   error_check(err);
   if (so->showtime)
@@ -489,7 +486,8 @@ static int runsuffixerator(bool doesa,
     }
   }
   prefixlength = so->prefixlength;
-  maxdepth.defined = false;
+  sfxstrategy = so->sfxstrategy;
+  sfxstrategy.maxdepth.defined = false;
   if (!haserr)
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
@@ -498,7 +496,7 @@ static int runsuffixerator(bool doesa,
       unsigned int numofchars = getnumofcharsAlphabet(sfxseqinfo.alpha);
 
       if (detpfxlenandmaxdepth(&prefixlength,
-                               &maxdepth,
+                               &sfxstrategy.maxdepth,
                                so,
                                numofchars,
                                totallength,
@@ -547,9 +545,8 @@ static int runsuffixerator(bool doesa,
                            getnumofcharsAlphabet(sfxseqinfo.alpha),
                            getcharactersAlphabet(sfxseqinfo.alpha),
                            prefixlength,
-                           &maxdepth,
                            so->numofparts,
-                           &so->sfxstrategy,
+                           &sfxstrategy,
                            mtime,
                            verboseinfo,
                            err) != 0)
@@ -563,8 +560,8 @@ static int runsuffixerator(bool doesa,
                                         outfileinfo.outfpbcktab,
                                         so,
                                         prefixlength,
-                                        &maxdepth,
                                         &sfxseqinfo,
+                                        &sfxstrategy,
                                         err) != 0)
         {
           haserr = true;
@@ -598,7 +595,7 @@ static int runsuffixerator(bool doesa,
                    sfxseqinfo.numofsequences,
                    &sfxseqinfo.specialcharinfo,
                    prefixlength,
-                   &maxdepth,
+                   &sfxstrategy.maxdepth,
                    numoflargelcpvalues,
                    maxbranchdepth,
                    &outfileinfo.longest,

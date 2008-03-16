@@ -48,7 +48,6 @@ struct sfxInterface
 {
   Readmode readmode;
   unsigned int prefixlength, numofparts;
-  const Definedunsignedint *maxdepth;
   const Sfxstrategy *sfxstrategy;
   Measuretime *mtime;
   Seqpos length;
@@ -86,7 +85,6 @@ extern sfxInterface *
 newSfxInterface(Readmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
-                const Definedunsignedint *maxdepth,
                 const Sfxstrategy *sfxstrategy,
                 const Encodedsequence *encseq,
                 const Specialcharinfo *specialcharinfo,
@@ -99,7 +97,7 @@ newSfxInterface(Readmode readmode,
                 Error *err)
 {
   return newSfxInterfaceWithReaders(readmode, prefixlength,
-                                    numofparts, maxdepth,
+                                    numofparts,
                                     sfxstrategy, 0, NULL, NULL, encseq,
                                     specialcharinfo, numofsequences, mtime,
                                     length, alpha, characterdistribution,
@@ -148,7 +146,6 @@ extern sfxInterface *
 newSfxInterfaceWithReaders(Readmode readmode,
                            unsigned int prefixlength,
                            unsigned int numofparts,
-                           const Definedunsignedint *maxdepth,
                            const Sfxstrategy *sfxstrategy,
                            size_t numReaders,
                            enum sfxDataRequest *requests,
@@ -182,7 +179,6 @@ newSfxInterfaceWithReaders(Readmode readmode,
                                     getnumofcharsAlphabet(alpha),
                                     getcharactersAlphabet(alpha),
                                     prefixlength,
-                                    maxdepth,
                                     numofparts,
                                     NULL,
                                     sfxstrategy,
