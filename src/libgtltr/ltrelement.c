@@ -155,8 +155,6 @@ int ltrelement_unit_test(Error *err)
          !strcmp("CCTCG\0", cseq));
   ma_free(cseq);
 
-  cseq = ltrelement_get_sequence(2, 16, STRAND_REVERSE, seq, err);
-
   alpha_delete(alpha);
   seq_delete(seq);
 
