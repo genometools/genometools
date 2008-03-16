@@ -40,6 +40,9 @@ char* ltrelement_get_sequence(unsigned long start, unsigned long end,
 {
   char *out;
   unsigned long len;
+
+  assert(seq && end >= start && end <= seq_length(seq));
+
   len = end - start + 1;
   out = ma_malloc(sizeof (char) * (len + 1));
   memcpy(out, seq_get_orig(seq)+start, sizeof (char) * len);
@@ -107,35 +110,55 @@ int ltrelement_unit_test(Error *err)
   error_check(err);
 
   LTRElement element;
-  Range rng1, rng2;
+  Range rng1;
+  Seq *seq;
+  char *testseq = "ATCGAGGGGTCGAAT", *cseq;
+  Alpha *alpha;
   unsigned long radius = 30;
+
+  alpha = alpha_new_dna();
+  seq = seq_new(testseq, 15, alpha);
 
   element.leftLTR_5 = 100;
   element.leftLTR_3 = 150;
   element.rightLTR_5 = 450;
   element.rightLTR_3 = 600;
 
-  rng1.start = rng2.start = 2;
-  rng1.end = rng2.end = 28;
+  rng1.start = 2;
+  rng1.end = 28;
 
   ltrelement_offset2pos_fwd(&element, &rng1, radius, OFFSET_END_LEFT_LTR);
   ensure(had_err, 122 == rng1.start);
   ensure(had_err, 148 == rng1.end);
 
-  rng1.start = rng2.start = 2;
-  rng1.end = rng2.end = 28;
+  rng1.start = 2;
+  rng1.end = 28;
 
   ltrelement_offset2pos_fwd(&element, &rng1, radius, OFFSET_BEGIN_RIGHT_LTR);
   ensure(had_err, 422 == rng1.start);
-  ensure(had_err, 449 == rng1.end);
+  ensure(had_err, 448 == rng1.end);
 
-
-  rng1.start = rng2.start = 2;
-  rng1.end = rng2.end = 28;
+  rng1.start = 2;
+  rng1.end = 28;
 
   ltrelement_offset2pos_rev(&element, &rng1, radius, OFFSET_END_LEFT_LTR);
-  ensure(had_err, 452 == rng1.start);
-  ensure(had_err, 479 == rng1.end);
+  ensure(had_err, 451 == rng1.start);
+  ensure(had_err, 477 == rng1.end);
+
+  cseq = ltrelement_get_sequence(2, 6, STRAND_FORWARD, seq, err);
+  ensure(had_err,
+         !strcmp("CGAGG\0", cseq));
+  ma_free(cseq);
+
+  cseq = ltrelement_get_sequence(2, 6, STRAND_REVERSE, seq, err);
+  ensure(had_err,
+         !strcmp("CCTCG\0", cseq));
+  ma_free(cseq);
+
+  cseq = ltrelement_get_sequence(2, 16, STRAND_REVERSE, seq, err);
+
+  alpha_delete(alpha);
+  seq_delete(seq);
 
   return had_err;
 }
