@@ -24,7 +24,10 @@
 typedef struct
 {
   Definedunsignedint maxdepth;
-  bool storespecialcodes;
+  bool cmpcharbychar, /* compare suffixes character by character instead
+                         of comparing entire words (only for two bit
+                         encoding */
+       storespecialcodes;
 } Sfxstrategy;
 
 #endif

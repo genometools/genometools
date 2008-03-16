@@ -1525,6 +1525,11 @@ bool hasfastspecialrangeenumerator(const Encodedsequence *encseq)
           /* XXX remove bitaccess */
 }
 
+bool possibletocmpbitwise(const Encodedsequence *encseq)
+{
+  return hasfastspecialrangeenumerator(encseq);
+}
+
 struct Specialrangeiterator
 {
   bool moveforward, exhausted;
@@ -2614,8 +2619,6 @@ int multicharactercompare(unsigned int *lcpvalue,
   return compareTwobitencodings(lcpvalue,&ptbe1,pos1,&ptbe2,pos2);
 }
 
-static unsigned long occcase[UNITSIN2BITENC+1] = {0};
-
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
                            Readmode readmode,
@@ -2640,6 +2643,7 @@ int compareEncseqsequences(Seqpos *lcp,
                                              0);
   lcp2 += depth;
 #endif
+
   assert(readmode == Forwardmode);
   initEncodedsequencescanstate(esr1,encseq,readmode,pos1 + depth);
   initEncodedsequencescanstate(esr2,encseq,readmode,pos2 + depth);
@@ -2648,7 +2652,6 @@ int compareEncseqsequences(Seqpos *lcp,
     extracttwobitencoding(&ptbe1,encseq,esr1,pos1 + depth);
     extracttwobitencoding(&ptbe2,encseq,esr2,pos2 + depth);
     retval = compareTwobitencodings(&lcpvalue,&ptbe1,pos1,&ptbe2,pos2);
-    occcase[lcpvalue]++;
     depth += lcpvalue;
   } while (retval == 0);
   *lcp = depth;
@@ -2669,6 +2672,7 @@ int compareEncseqsequences_nolcp(const Encodedsequence *encseq,
 {
   PrefixofTwobitencoding ptbe1, ptbe2;
   int retval;
+
   assert(readmode == Forwardmode);
   if (encseq->numofspecialstostore > 0)
   {
@@ -2683,21 +2687,6 @@ int compareEncseqsequences_nolcp(const Encodedsequence *encseq,
     depth += UNITSIN2BITENC;
   } while (retval == 0);
   return retval;
-}
-
-void showocccase(void)
-{
-  unsigned int i;
-  uint64_t all = 0;
-
-  for (i=0; i<=(unsigned int) UNITSIN2BITENC; i++)
-  {
-    all += (uint64_t) occcase[i];
-  }
-  for (i=0; i<=(unsigned int) UNITSIN2BITENC; i++)
-  {
-    printf("i=%u: %lu cases (%.4f)\n",i,occcase[i],(double) occcase[i]/all);
-  }
 }
 
 #endif /* ifndef INLINEDENCSEQ */

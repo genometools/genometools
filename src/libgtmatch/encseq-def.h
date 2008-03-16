@@ -172,6 +172,8 @@ bool hasspecialranges(const Encodedsequence *encseq);
 
 bool hasfastspecialrangeenumerator(const Encodedsequence *encseq);
 
+bool possibletocmpbitwise(const Encodedsequence *encseq);
+
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
 
 void freespecialrangeiterator(Specialrangeiterator **sri);

@@ -45,6 +45,7 @@ static OPrval parse_options(int *parsed_args,
          *optionbwt,
          *optionpl,
          *optionmaxdepth,
+         *optioncmpcharbychar,
          *optionindexname,
          *optiondb,
          *optionii,
@@ -125,6 +126,12 @@ static OPrval parse_options(int *parsed_args,
   {
     optionmaxdepth = NULL;
   }
+  optioncmpcharbychar = option_new_bool("cmpcharbychar",
+                         "compare suffixes by character wise comparisons",
+                         &so->sfxstrategy.cmpcharbychar,false);
+  option_is_development_option(optioncmpcharbychar);
+  option_parser_add_option(op, optioncmpcharbychar);
+
   optionstorespecialcodes
     = option_new_bool("storespecialcodes",
                       "store special codes (this may speed up the program)",

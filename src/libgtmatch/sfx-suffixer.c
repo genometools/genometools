@@ -82,7 +82,8 @@ struct Sfxiterator
   Seqpos *leftborder; /* points to bcktab->leftborder */
   bool storespecialcodes;
   Definedunsignedint maxdepth;
-  unsigned long long bucketiterstep;
+  bool cmpcharbychar;
+  unsigned long long bucketiterstep; /* for progressbar */
 };
 
 #ifdef DEBUG
@@ -505,10 +506,19 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     {
        sfi->storespecialcodes = sfxstrategy->storespecialcodes;
        sfi->maxdepth = sfxstrategy->maxdepth;
+       sfi->cmpcharbychar = sfxstrategy->cmpcharbychar;
+       if (sfxstrategy->cmpcharbychar || !possibletocmpbitwise(encseq))
+       {
+         sfi->cmpcharbychar = true;
+       } else
+       {
+         sfi->cmpcharbychar = false;
+       }
     } else
     {
        sfi->storespecialcodes = false;
        sfi->maxdepth.defined = false;
+       sfi->cmpcharbychar = possibletocmpbitwise(encseq) ? false : true;
     }
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
@@ -660,8 +670,9 @@ static void preparethispart(Sfxiterator *sfi,
                    sfi->bcktab,
                    sfi->numofchars,
                    sfi->prefixlength,
-                   &sfi->maxdepth,
                    sfi->outlcpinfo,
+                   &sfi->maxdepth,
+                   sfi->cmpcharbychar,
                    &sfi->bucketiterstep);
   }
   sfi->part++;
