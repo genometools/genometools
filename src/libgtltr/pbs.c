@@ -186,20 +186,29 @@ void pbs_find(const char *seq,
 void pbs_clear_results(PBSResults *results)
 {
     Dlistelem *delem;
-    for(delem = dlist_first(results->hits_fwd);
-        delem;
-        delem = dlistelem_next(delem))
+
+    if (!results) return;
+
+    if(results->hits_fwd)
     {
-      PBS_Hit *hit = (PBS_Hit*) dlistelem_get_data(delem);
-      ma_free(hit);
+      for(delem = dlist_first(results->hits_fwd);
+          delem;
+          delem = dlistelem_next(delem))
+      {
+        PBS_Hit *hit = (PBS_Hit*) dlistelem_get_data(delem);
+        ma_free(hit);
+      }
+      dlist_delete(results->hits_fwd);
     }
-    dlist_delete(results->hits_fwd);
-    for(delem = dlist_first(results->hits_rev);
-        delem;
-        delem = dlistelem_next(delem))
+    if(results->hits_rev)
     {
-      PBS_Hit *hit = (PBS_Hit*) dlistelem_get_data(delem);
-      ma_free(hit);
+      for(delem = dlist_first(results->hits_rev);
+          delem;
+          delem = dlistelem_next(delem))
+      {
+        PBS_Hit *hit = (PBS_Hit*) dlistelem_get_data(delem);
+        ma_free(hit);
+      }
+      dlist_delete(results->hits_rev);
     }
-    dlist_delete(results->hits_rev);
 }

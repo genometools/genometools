@@ -373,8 +373,10 @@ void pdom_clear_domain_hit(void *value)
 {
   if (!value) return;
   PdomHit *hit = (PdomHit*) value;
-  FreeTophits(hit->hits_fwd);
-  FreeTophits(hit->hits_rev);
+  if(hit->hits_fwd)
+    FreeTophits(hit->hits_fwd);
+  if(hit->hits_rev)
+    FreeTophits(hit->hits_rev);
   ma_free(hit);
 }
 

@@ -181,6 +181,11 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
   rev_seq[seqlen] = '\0';
   reverse_complement(rev_seq, seqlen, err);
 
+  /* initialize results */
+  memset(&ppt_results, 0, sizeof (PPTResults));
+  memset(&pbs_results, 0, sizeof (PBSResults));
+  memset(&pdom_results, 0, sizeof (PdomResults));
+
   /* PPT finding
    * -----------*/
   ppt_find((const char*) base_seq, (const char*) rev_seq,
@@ -196,21 +201,24 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
 
   /* PBS finding
    * ----------- */
-  pbs_find((const char*) base_seq, (const char*) rev_seq,
-           element, &pbs_results, ls->pbs_opts, err);
-   if (pbs_results.best_hit)
-   {
-    log_log("    PBS: \tscore: %f \t(%c, %s)\n",
-            pbs_results.best_hit->score,
-            STRANDCHARS[pbs_results.best_hit->strand],
-            pbs_results.best_hit->trna);
-    pbs_attach_results_to_gff3(&pbs_results, element,
-                               ls->ltrdigest_tag, ls->pbs_opts->radius);
-   }
+  if(ls->pbs_opts->trna_lib)
+  {
+    pbs_find((const char*) base_seq, (const char*) rev_seq,
+             element, &pbs_results, ls->pbs_opts, err);
+     if (pbs_results.best_hit)
+     {
+      log_log("    PBS: \tscore: %f \t(%c, %s)\n",
+              pbs_results.best_hit->score,
+              STRANDCHARS[pbs_results.best_hit->strand],
+              pbs_results.best_hit->trna);
+      pbs_attach_results_to_gff3(&pbs_results, element,
+                                 ls->ltrdigest_tag, ls->pbs_opts->radius);
+     }
+  }
 
   /* Protein domain finding
    * ----------------------*/
-  pdom_results.domains = hashtable_new(HASH_STRING, NULL, pdom_clear_domain_hit);
+  pdom_results.domains = hashtable_new(HASH_DIRECT,NULL,pdom_clear_domain_hit);
   pdom_find((const char*) base_seq, (const char*) rev_seq,
             element, &pdom_results, ls->pdom_opts);
   if (!pdom_results.empty)

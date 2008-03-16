@@ -236,16 +236,23 @@ void ppt_clear_results(PPTResults *results)
 
   if (!results) return;
 
-  for (i=0;i<array_size(results->hits_fwd);i++)
+  if(results->hits_fwd)
   {
-    PPT_Hit * hit = *(PPT_Hit**) array_get(results->hits_fwd,i);
-    ma_free(hit);
+    for (i=0;i<array_size(results->hits_fwd);i++)
+    {
+      PPT_Hit * hit = *(PPT_Hit**) array_get(results->hits_fwd,i);
+      ma_free(hit);
+    }
+    array_delete(results->hits_fwd);
   }
-  array_delete(results->hits_fwd);
-  for (i=0;i<array_size(results->hits_rev);i++)
+  if(results->hits_fwd)
   {
-    PPT_Hit * hit = *(PPT_Hit**) array_get(results->hits_rev,i);
-    ma_free(hit);
+    for (i=0;i<array_size(results->hits_rev);i++)
+
+    {
+      PPT_Hit * hit = *(PPT_Hit**) array_get(results->hits_rev,i);
+      ma_free(hit);
+    }
+    array_delete(results->hits_rev);
   }
-  array_delete(results->hits_rev);
 }

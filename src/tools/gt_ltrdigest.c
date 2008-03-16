@@ -70,7 +70,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 {
   LTRdigestOptions *arguments = tool_arguments;
   OptionParser *op;
-  Option *o, *ot;
+  Option *o, *ot, *oh;
   assert(arguments);
 
   /* init */
@@ -101,37 +101,6 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 
   /* PBS search options */
 
-  o = option_new_uint("pbsaliminlen",
-                      "minimum length of PBS/tRNA alignments",
-                      &arguments->pbs_opts.ali_min_len,
-                      11);
-  option_parser_add_option(op, o);
-
-  o = option_new_uint("pbsmaxoffsetltr",
-                      "maximal allowed PBS offset from LTR boundary",
-                      &arguments->pbs_opts.max_offset,
-                      5);
-  option_parser_add_option(op, o);
-
-  o = option_new_uint("pbsmaxoffsettrna",
-                      "maximal allowed PBS alignment offset from tRNA 3' end",
-                      &arguments->pbs_opts.max_offset_trna,
-                      10);
-  option_parser_add_option(op, o);
-
-  o = option_new_uint("pbsmaxedist",
-                      "maximal allowed PBS/tRNA alignment unit edit distance",
-                      &arguments->pbs_opts.max_edist,
-                      1);
-  option_parser_add_option(op, o);
-
-  o = option_new_uint("pbsradius",
-                      "radius around end of 5' LTR "
-                      " to search for PBS",
-                      &arguments->pbs_opts.radius,
-                      30);
-  option_parser_add_option(op, o);
-
   ot = option_new_filename("trnas",
                           "tRNA library in multiple FASTA format for PBS "
                           "detection",
@@ -139,25 +108,62 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, ot);
   option_hide_default(ot);
 
+  o = option_new_uint("pbsaliminlen",
+                      "minimum length of PBS/tRNA alignments",
+                      &arguments->pbs_opts.ali_min_len,
+                      11);
+  option_parser_add_option(op, o);
+  option_imply(o, ot);
+
+  o = option_new_uint("pbsmaxoffsetltr",
+                      "maximal allowed PBS offset from LTR boundary",
+                      &arguments->pbs_opts.max_offset,
+                      5);
+  option_parser_add_option(op, o);
+  option_imply(o, ot);
+
+  o = option_new_uint("pbsmaxoffsettrna",
+                      "maximal allowed PBS alignment offset from tRNA 3' end",
+                      &arguments->pbs_opts.max_offset_trna,
+                      10);
+  option_parser_add_option(op, o);
+  option_imply(o, ot);
+
+  o = option_new_uint("pbsmaxedist",
+                      "maximal allowed PBS/tRNA alignment unit edit distance",
+                      &arguments->pbs_opts.max_edist,
+                      1);
+  option_parser_add_option(op, o);
+  option_imply(o, ot);
+
+  o = option_new_uint("pbsradius",
+                      "radius around end of 5' LTR "
+                      " to search for PBS",
+                      &arguments->pbs_opts.radius,
+                      30);
+  option_parser_add_option(op, o);
+  option_imply(o, ot);
+
  /* Protein domain search options */
+
+  oh = option_new_filenamearray("hmms",
+                               "profile HMM models for domain detection "
+                               "(separate by spaces, finish with --) in HMMER "
+                               "2.0 format",
+                               arguments->pdom_opts.hmm_files);
+  option_parser_add_option(op, oh);
 
   o = option_new_probability("pdomevalcutoff",
                              "E-value cutoff for HMMER protein domain search",
                              &arguments->pdom_opts.evalue_cutoff,
                              0.000001);
   option_parser_add_option(op, o);
-
-  o = option_new_filenamearray("hmms",
-                               "profile HMM models for domain detection "
-                               "(separate by spaces, finish with --) in HMMER "
-                               "2.0 format",
-                               arguments->pdom_opts.hmm_files);
-  option_parser_add_option(op, o);
+  option_imply(o, oh);
 
   o = option_new_uint_min("threads",
                           "number of threads to use in HMMER scanning",
                           &arguments->pdom_opts.nof_threads,
-                          1, 1);
+                          2, 1);
   option_parser_add_option(op, o);
 
   /* Extended PBS options */
@@ -168,6 +174,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                       5);
   option_parser_add_option(op, o);
   option_is_extended_option(o);
+  option_imply(o, ot);
 
   o = option_new_int("pbsmismatchscore",
                      "mismatch score for PBS/tRNA alignments",
@@ -175,6 +182,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                       -10);
   option_parser_add_option(op, o);
   option_is_extended_option(o);
+  option_imply(o, ot);
 
   o = option_new_int("pbsinsertionscore",
                      "insertion score for PBS/tRNA alignments",
@@ -182,6 +190,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                       -20);
   option_parser_add_option(op, o);
   option_is_extended_option(o);
+  option_imply(o, ot);
 
   o = option_new_int("pbsdeletionscore",
                      "deletion score for PBS/tRNA alignments",
@@ -189,6 +198,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                       -20);
   option_parser_add_option(op, o);
   option_is_extended_option(o);
+  option_imply(o, ot);
 
   /* Tabular output file */
   o = option_new_filename("taboutfile",
