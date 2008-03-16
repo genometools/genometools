@@ -32,18 +32,32 @@
 #include "squid.h"
 #include "funcs.h"
 
+typedef struct pdom_shared {
+  pthread_t *thread;
+  int nof_threads;
+  unsigned long next_hmm;
+  Array *hmms;
+  char *fwd_fr1, *fwd_fr2, *fwd_fr3,
+       *rev_fr1, *rev_fr2, *rev_fr3;
+  PdomResults *results;
+  PdomOptions *opts;
+  pthread_mutex_t in_lock, out_lock;
+} pdom_shared_s;
+
 void hmmer_search(struct plan7_s *hmm,
                   char *seq,
                   unsigned long seqlen,
                   char *seqdesc,
                   struct threshold_s *thresh,
                   struct tophit_s *ghit,
-                  struct tophit_s *dhit)
+                  struct tophit_s *dhit,
+                  pthread_mutex_t *lock)
 {
   struct dpmatrix_s *mx;
   struct p7trace_s *tr;
-  unsigned char   *dsq;
-  float  sc;
+  unsigned char *dsq;
+  float sc;
+  int rtn;
   double pvalue, evalue;
 
   mx = CreatePlan7Matrix(1, hmm->M, 25, 0);
@@ -57,6 +71,11 @@ void hmmer_search(struct plan7_s *hmm,
 
   sc -= TraceScoreCorrection(hmm, tr, dsq);
 
+  if ((rtn = pthread_mutex_lock(lock)) != 0)
+  {
+    fprintf(stderr, "pthread_mutex_lock failure: %s\n", strerror(rtn));
+    exit(EXIT_FAILURE);
+  }
   pvalue = PValue(hmm, sc);
   evalue = thresh->Z ? (double) thresh->Z * pvalue : (double) pvalue;
 
@@ -66,6 +85,11 @@ void hmmer_search(struct plan7_s *hmm,
                                    tr, hmm, dsq, seqlen,
                                    seqdesc, NULL, NULL,
                                    false, sc, true, thresh, FALSE);
+  }
+  if ((rtn = pthread_mutex_unlock(lock)) != 0)
+  {
+    fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(rtn));
+    exit(EXIT_FAILURE);
   }
   P7FreeTrace(tr);
   free(dsq);
@@ -89,11 +113,12 @@ int pdom_domain_report_hits(void *key, void *value, void *data,
   rng.start = hit->best_hit->sqfrom;
   rng.end = hit->best_hit->sqto;
   pdom_convert_frame_position(&rng, frame);
-  fprintf(fp, "    Pdom: \t%s \t%g \t(%c, %lu, %lu)\n", model->name,
-                                               hit->best_hit->pvalue,
-                                               hit->best_hit->name[1],
-                                               rng.start,
-                                               rng.end);
+  fprintf(fp, "    Pdom: \t%s \t%g \t(%c, %lu, %lu)\n",
+              model->name,
+              hit->best_hit->pvalue,
+              hit->best_hit->name[1],
+              rng.start,
+              rng.end);
   return 0;
 }
 
@@ -142,53 +167,70 @@ int pdom_load_hmm_files(PdomOptions *opts, Error *err)
   return had_err;
 }
 
-void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
-               PdomResults *results, PdomOptions *opts)
+void* pdom_per_domain_worker_thread(void *data)
 {
-  char *fwd_fr1, *fwd_fr2, *fwd_fr3,
-       *rev_fr1, *rev_fr2, *rev_fr3;
-  unsigned long i,
-                seqlen = ltrelement_length(element);
+  pdom_shared_s *shared;
+  struct plan7_s *hmm;
+  int rtn;
+  struct tophit_s *ghit;
 
-  assert(seq && rev_seq && element && results && opts);
+  shared = (pdom_shared_s *) data;
 
-  opts->thresh.globT   = -FLT_MAX;
-  opts->thresh.domT    = -FLT_MAX;
-  opts->thresh.domE    = FLT_MAX;
-  opts->thresh.autocut = CUT_NONE;
-  opts->thresh.Z       = 1;
-  opts->thresh.globE   = opts->evalue_cutoff;
-
-  results->empty = TRUE;
-
-  /* create translations */
-  translate_all_frames(&fwd_fr1,&fwd_fr2,&fwd_fr3,    seq,seqlen);
-  translate_all_frames(&rev_fr1,&rev_fr2,&rev_fr3,rev_seq,seqlen);
-
-  /* search for all pHMMs in the current sequence.
-   * TODO: we may save time by only looking at the inner region w/o LTRs */
-  for(i=0;i<array_size(opts->plan7_ts);i++)
+  for(;;)
   {
-    struct plan7_s *hmm = *(struct plan7_s**) array_get(opts->plan7_ts,i);
-    struct tophit_s *ghit;
+    /* Lock input */
+    if ((rtn = pthread_mutex_lock(&shared->in_lock)) != 0)
+    {
+      fprintf(stderr, "pthread_mutex_lock failure: %s\n", strerror(rtn));
+      exit(EXIT_FAILURE);
+    }
+    /* Have all HMMs been distributed? If so, we are done here. */
+    if (shared->next_hmm == array_size(shared->opts->plan7_ts))
+    {
+      if ((rtn = pthread_mutex_unlock(&shared->in_lock)) != 0)
+      {
+        fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(rtn));
+        exit(EXIT_FAILURE);
+      }
+      pthread_exit(NULL);
+    }
+
+    /* Get work from HMM list */
+    hmm = *(struct plan7_s**) array_get(shared->opts->plan7_ts,
+                                        shared->next_hmm);
+    shared->next_hmm++;
+
+    /* work claimed, release input */
+    if ((rtn = pthread_mutex_unlock(&shared->in_lock)) != 0)
+    {
+      fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(rtn));
+      exit(EXIT_FAILURE);
+    }
+
     PdomHit *hit = ma_malloc(sizeof(PdomHit));
     ghit = AllocTophits(20);
     hit->hits_fwd = AllocTophits(20);
     hit->hits_rev = AllocTophits(20);
     hit->best_hit = NULL;
 
-    hmmer_search(hmm,fwd_fr1,strlen(fwd_fr1),"0+",&opts->thresh,ghit,hit->hits_fwd);
-    hmmer_search(hmm,fwd_fr2,strlen(fwd_fr2),"1+",&opts->thresh,ghit,hit->hits_fwd);
-    hmmer_search(hmm,fwd_fr3,strlen(fwd_fr3),"2+",&opts->thresh,ghit,hit->hits_fwd);
-    hmmer_search(hmm,rev_fr1,strlen(rev_fr1),"0-",&opts->thresh,ghit,hit->hits_rev);
-    hmmer_search(hmm,rev_fr2,strlen(rev_fr2),"1-",&opts->thresh,ghit,hit->hits_rev);
-    hmmer_search(hmm,rev_fr3,strlen(rev_fr3),"2-",&opts->thresh,ghit,hit->hits_rev);
+    hmmer_search(hmm,shared->fwd_fr1,strlen(shared->fwd_fr1),"0+",
+                 &shared->opts->thresh,ghit, hit->hits_fwd, &shared->out_lock);
+    hmmer_search(hmm,shared->fwd_fr2,strlen(shared->fwd_fr2),"1+",
+                 &shared->opts->thresh,ghit, hit->hits_fwd, &shared->out_lock);
+    hmmer_search(hmm,shared->fwd_fr3,strlen(shared->fwd_fr3),"2+",
+                 &shared->opts->thresh,ghit, hit->hits_fwd, &shared->out_lock);
+    hmmer_search(hmm,shared->rev_fr1,strlen(shared->rev_fr1),"0-",
+                 &shared->opts->thresh,ghit, hit->hits_rev, &shared->out_lock);
+    hmmer_search(hmm,shared->rev_fr2,strlen(shared->rev_fr2),"1-",
+                 &shared->opts->thresh,ghit, hit->hits_rev, &shared->out_lock);
+    hmmer_search(hmm,shared->rev_fr3,strlen(shared->rev_fr3),"2-",
+                 &shared->opts->thresh,ghit, hit->hits_rev, &shared->out_lock);
 
     FullSortTophits(hit->hits_fwd);
     FullSortTophits(hit->hits_rev);
     if(hit->hits_fwd->num > 0 || hit->hits_rev->num > 0)
     {
-      results->empty = FALSE;
+      shared->results->empty = FALSE;
       if (hit->hits_fwd->num > 0)
       {
         if (hit->hits_rev->num > 0)
@@ -203,11 +245,125 @@ void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
       }
       else
         hit->best_hit = hit->hits_rev->hit[0];
-      hashtable_add(results->domains, hmm, hit);
+
+      assert(hit->best_hit);
+
+      /* Lock results, we want to write to the result hashtable */
+      if ((rtn = pthread_mutex_lock(&(shared->out_lock))) != 0)
+      {
+        fprintf(stderr, "pthread_mutex_lock failure: %s\n", strerror(rtn));
+        exit(EXIT_FAILURE);
+      }
+      hashtable_add(shared->results->domains, hmm, hit);
+
+      /* unlock results */
+      if ((rtn = pthread_mutex_unlock(&(shared->out_lock))) != 0)
+      {
+        fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(rtn));
+        exit(EXIT_FAILURE);
+      }
     }
-    else pdom_clear_domain_hit(hit);
+    else
+      pdom_clear_domain_hit(hit);
+
     FreeTophits(ghit);
   }
+}
+
+static pdom_shared_s* pdom_run_threads(Array *hmms, int nof_threads,
+                                  char *fwd_fr1,char *fwd_fr2,char *fwd_fr3,
+                                  char *rev_fr1,char *rev_fr2,char *rev_fr3,
+                                  PdomResults *results, PdomOptions *opts)
+{
+  int rtn, i;
+  pdom_shared_s *shared;
+  pthread_attr_t attr;
+
+  assert(hmms && nof_threads > 0 && *fwd_fr1 && *fwd_fr2 && *fwd_fr3
+          && *rev_fr1 && rev_fr2 && rev_fr3 && results && opts);
+
+  shared = ma_malloc(sizeof (pdom_shared_s));
+
+  shared->nof_threads = nof_threads;
+  shared->thread = ma_malloc(sizeof (pthread_t) * nof_threads);
+  shared->hmms = hmms;
+  shared->fwd_fr1 = fwd_fr1;
+  shared->fwd_fr2 = fwd_fr2;
+  shared->fwd_fr3 = fwd_fr3;
+  shared->rev_fr1 = rev_fr1;
+  shared->rev_fr2 = rev_fr2;
+  shared->rev_fr3 = rev_fr3;
+  shared->next_hmm = 0;
+  shared->results = results;
+  shared->opts = opts;
+
+  if ((rtn = pthread_mutex_init(&shared->in_lock, NULL)) != 0)
+  {
+    fprintf(stderr, "pthread_mutex_init FAILED; %s\n", strerror(rtn));
+    exit(EXIT_FAILURE);
+  }
+  if ((rtn = pthread_mutex_init(&shared->out_lock, NULL)) != 0)
+  {
+    fprintf(stderr, "pthread_mutex_init FAILED; %s\n", strerror(rtn));
+    exit(EXIT_FAILURE);
+  }
+
+  pthread_attr_init(&attr);
+
+  for (i = 0; i < nof_threads; i++)
+  {
+    if ((rtn = pthread_create(&(shared->thread[i]), &attr,
+           pdom_per_domain_worker_thread, (void *) shared)) != 0)
+    {
+      fprintf(stderr,"Failed to create thread %d; return code %d\n", i, rtn);
+      exit(EXIT_FAILURE);
+    }
+  }
+  pthread_attr_destroy(&attr);
+  return shared;
+}
+
+static void pdom_free_shared(pdom_shared_s *shared)
+{
+  ma_free(shared->thread);
+  ma_free(shared);
+}
+
+void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
+               PdomResults *results, PdomOptions *opts)
+{
+  char *fwd_fr1, *fwd_fr2, *fwd_fr3,
+       *rev_fr1, *rev_fr2, *rev_fr3;
+  unsigned long seqlen = ltrelement_length(element);
+  pdom_shared_s *shared;
+  int i;
+
+  assert(seq && rev_seq && element && results && opts);
+
+  results->empty = TRUE;
+
+  /* create translations */
+  translate_all_frames(&fwd_fr1,&fwd_fr2,&fwd_fr3,    seq,seqlen);
+  translate_all_frames(&rev_fr1,&rev_fr2,&rev_fr3,rev_seq,seqlen);
+
+  /* start worker threads */
+  shared = pdom_run_threads(opts->plan7_ts, opts->nof_threads,
+                            fwd_fr1, fwd_fr2, fwd_fr3,
+                            rev_fr1, rev_fr2, rev_fr3,
+                            results, opts);
+
+  /* continue when all threads are done */
+  for (i = 0; i < shared->nof_threads; i++)
+  {
+    if (pthread_join(shared->thread[i],NULL) != 0)
+    {
+      fprintf(stderr, "pthread_join failed");
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  pdom_free_shared(shared);
+
   SqdClean();
   ma_free(fwd_fr1);ma_free(fwd_fr2);ma_free(fwd_fr3);
   ma_free(rev_fr1);ma_free(rev_fr2);ma_free(rev_fr3);
@@ -225,6 +381,7 @@ void pdom_clear_domain_hit(void *value)
 void pdom_clear_hmms(Array *hmms)
 {
   unsigned long i;
+  if (!hmms) return;
   for(i=0;i<array_size(hmms);i++)
   {
     FreePlan7(*(struct plan7_s**) array_get(hmms,i));

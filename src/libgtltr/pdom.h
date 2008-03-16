@@ -30,6 +30,7 @@ typedef struct PdomOptions {
   StrArray *hmm_files;
   Array *plan7_ts;
   struct threshold_s thresh;
+  unsigned int nof_threads;
 } PdomOptions;
 
 typedef struct PdomHit {

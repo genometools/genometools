@@ -139,7 +139,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, ot);
   option_hide_default(ot);
 
- /* PBS search options */
+ /* Protein domain search options */
 
   o = option_new_probability("pdomevalcutoff",
                              "E-value cutoff for HMMER protein domain search",
@@ -148,17 +148,19 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, o);
 
   o = option_new_filenamearray("hmms",
-                               "HMMER models for protein domain detection "
+                               "profile HMM models for domain detection "
                                "(separate by spaces, finish with --) in HMMER "
                                "2.0 format",
                                arguments->pdom_opts.hmm_files);
   option_parser_add_option(op, o);
 
-  o = option_new_filename("taboutfile",
-                          "filename for tabular output including sequences",
-                          arguments->taboutfile);
+  o = option_new_uint_min("threads",
+                          "number of threads to use in HMMER scanning",
+                          &arguments->pdom_opts.nof_threads,
+                          1, 1);
   option_parser_add_option(op, o);
-  option_hide_default(o);
+
+  /* Extended PBS options */
 
   o = option_new_int("pbsmatchscore",
                      "match score for PBS/tRNA alignments",
@@ -188,6 +190,13 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, o);
   option_is_extended_option(o);
 
+  /* Tabular output file */
+  o = option_new_filename("taboutfile",
+                          "filename for tabular output including sequences",
+                          arguments->taboutfile);
+  option_parser_add_option(op, o);
+  option_hide_default(o);
+
   /* verbosity */
   o = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, o);
@@ -210,10 +219,14 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
 
   /* TODO: more checks */
   /* -trnas */
-  if (arguments->trna_lib && !file_exists(str_get(arguments->trna_lib)))
+  if (arguments->trna_lib
+        && str_length(arguments->trna_lib) > 0)
   {
-    error_set(err, "File '%s' does not exist!", str_get(arguments->trna_lib));
-    had_err = -1;
+    if(!file_exists(str_get(arguments->trna_lib)))
+    {
+      error_set(err, "File '%s' does not exist!", str_get(arguments->trna_lib));
+      had_err = -1;
+    }
   }
   /* -taboutfile */
   if (!had_err && arguments->taboutfile
@@ -246,15 +259,29 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
   assert(arguments);
 
   /* set additional arguments/options */
-  /* TODO: error checking for corrupt file! */
+  arguments->pdom_opts.thresh.globT   = -FLT_MAX;
+  arguments->pdom_opts.thresh.domT    = -FLT_MAX;
+  arguments->pdom_opts.thresh.domE    = FLT_MAX;
+  arguments->pdom_opts.thresh.autocut = CUT_NONE;
+  arguments->pdom_opts.thresh.Z       = 1;
+  arguments->pdom_opts.thresh.globE   = arguments->pdom_opts.evalue_cutoff;
+
+  /* Open sequence file */
   Bioseq *bioseq = bioseq_new(argv[1], err);
   if (error_is_set(err))
     had_err = -1;
-  if (!had_err)
+  /* Open tRNA library if given. */
+  if (!had_err && arguments->trna_lib
+        && str_length(arguments->trna_lib) > 0)
   {
     arguments->pbs_opts.trna_lib = bioseq_new(str_get(arguments->trna_lib),err);
+    if (error_is_set(err))
+      had_err = -1;
+  }
+  /* Open HMMER files if given. */
+  if (!had_err)
+  {
     arguments->pdom_opts.plan7_ts = array_new(sizeof (struct plan7_s*));
-
     had_err = pdom_load_hmm_files(&arguments->pdom_opts,
                                   err);
   }
@@ -278,15 +305,14 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
           && (fp = fopen(str_get(arguments->taboutfile),"w+")))
     {
       tab_out_stream = ltr_fileout_stream_new(ltrdigest_stream,
-                                            bioseq,
-                                            fp);
+                                              bioseq,
+                                              fp);
       last_stream = tab_out_stream;
     }
     else
     {
       last_stream = ltrdigest_stream;
      }
-
 
     gff3_out_stream = gff3_out_stream_new(last_stream, arguments->outfp);
 

@@ -87,27 +87,35 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     /* output PPT */
     if (ls->element.ppt)
     {
+      Strand ppt_strand;
+      ppt_strand = genome_feature_get_strand(ls->element.ppt);
       ppt_rng = genome_node_get_range((GenomeNode*) ls->element.ppt);
       ppt_seq = ltrelement_get_sequence(ppt_rng.start, ppt_rng.end,
-                                        genome_feature_get_strand(ls->element.ppt),
+                                        ppt_strand,
                                         seq, e);
-      fprintf(ls->fp, "%lu\t%lu\t%s\t%c\t", ppt_rng.start, ppt_rng.end,
+      fprintf(ls->fp, "%lu\t%lu\t%s\t%c\t%d\t", ppt_rng.start, ppt_rng.end,
                       ppt_seq,
-                      STRANDCHARS[genome_feature_get_strand(ls->element.ppt)]);
+                      STRANDCHARS[ppt_strand],
+                      (ppt_strand == STRAND_FORWARD ?
+                          abs(rltr_rng.start - ppt_rng.end) :
+                          abs(lltr_rng.end - ppt_rng.start)));
       ma_free((char*) ppt_seq);
     } else fprintf(ls->fp, "\t\t\t\t");
 
     /* output PBS */
     if (ls->element.pbs)
     {
+      Strand pbs_strand;
+      pbs_strand = genome_feature_get_strand(ls->element.pbs);
       pbs_rng = genome_node_get_range((GenomeNode*) ls->element.pbs);
       pbs_seq = ltrelement_get_sequence(pbs_rng.start, pbs_rng.end,
-                                        genome_feature_get_strand(ls->element.pbs),
+                                        pbs_strand,
                                         seq, e);
       fprintf(ls->fp, "%lu\t%lu\t%s\t%s\t%c\t", pbs_rng.start, pbs_rng.end,
-                      genome_feature_get_attribute((GenomeNode*) ls->element.pbs, "tRNA"),
+                      genome_feature_get_attribute((GenomeNode*)
+                                                    ls->element.pbs, "trna"),
                       pbs_seq,
-                      STRANDCHARS[genome_feature_get_strand(ls->element.pbs)]);
+                      STRANDCHARS[pbs_strand]);
       ma_free((char*) pbs_seq);
     } else fprintf(ls->fp, "\t\t\t\t\t");
 
@@ -118,9 +126,11 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       GenomeFeature *gf = *(GenomeFeature**) array_get(ls->element.pdoms, i);
       str_append_cstr(pdoms,
                       genome_feature_get_attribute((GenomeNode*)gf,
-                                                   "PfamName"));
+                                                   "pfamname"));
       str_append_cstr(pdoms,"(");
+      str_append_ulong(pdoms, (unsigned long) genome_feature_get_phase(gf));
       str_append_char(pdoms, STRANDCHARS[genome_feature_get_strand(gf)]);
+
       str_append_cstr(pdoms,")");
       if (i != array_size(ls->element.pdoms)-1)
         str_append_cstr(pdoms, "/");
@@ -162,7 +172,9 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   ls->in_stream = genome_stream_ref(in_stream);
   ls->bioseq = bioseq;
   ls->fp = fp;
-  fprintf(fp, "LTRret start\tLTRret end\tPPT start\tPPT end\tPPT motif\tPPT strand\n");
+  fprintf(fp, "LTRret start\tLTRret end");
+  fprintf(fp, "\tPPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset\n");
+  fprintf(fp, "\tPPT start\tPPT end\tPPT motif\tPPT strand\n");
   ls->lv = (LTRVisitor*) ltr_visitor_new(&ls->element);
   return gs;
 }

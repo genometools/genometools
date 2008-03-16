@@ -75,11 +75,11 @@ int pdom_domain_attach_gff3(void *key, void *value, void *data,
                                       rng,
                                       strand_get(hit->best_hit->name[1]),
                                       NULL,
-                                      0);
+                                      UNDEF_ULONG);
   genome_feature_set_source(gf, ls->ltrdigest_tag);
   genome_feature_set_phase(gf, frame);
-  genome_feature_add_attribute((GenomeFeature*) gf,"PfamName", model->name);
-  genome_feature_add_attribute((GenomeFeature*) gf,"PfamID", model->acc);
+  genome_feature_add_attribute((GenomeFeature*) gf,"pfamname", model->name);
+  genome_feature_add_attribute((GenomeFeature*) gf,"pfamnD", model->acc);
   genome_node_set_seqid((GenomeNode*) gf,
                         genome_node_get_idstr(
                           (GenomeNode*) ls->element.mainnode));
@@ -93,6 +93,7 @@ void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
 {
   Range pbs_range;
   GenomeNode *gf;
+  char buffer[BUFSIZ];
   pbs_range.start = results->best_hit->start;
   pbs_range.end   = results->best_hit->end;
   switch(results->best_hit->strand)
@@ -114,13 +115,16 @@ void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
                           pbs_range,
                           results->best_hit->strand,
                           NULL,
-                          0);
+                          UNDEF_ULONG);
   genome_feature_set_source(gf, tag);
   genome_node_set_seqid((GenomeNode*) gf,
                         genome_node_get_idstr(
                           (GenomeNode*) element->mainnode));
-  genome_feature_add_attribute((GenomeFeature*) gf,"tRNA",
+  genome_feature_add_attribute((GenomeFeature*) gf,"trna",
                               results->best_hit->trna);
+  snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->tstart);
+  genome_feature_add_attribute((GenomeFeature*) gf,"trnaoffset",
+                              buffer);
   genome_node_is_part_of_genome_node((GenomeNode*) element->mainnode, gf);
 }
 
@@ -150,7 +154,7 @@ void ppt_attach_results_to_gff3(PPTResults *results, LTRElement *element,
                                       ppt_range,
                                       results->best_hit->strand,
                                       NULL,
-                                      0);
+                                      UNDEF_ULONG);
   genome_feature_set_source(gf, tag);
   genome_node_set_seqid((GenomeNode*) gf,
                         genome_node_get_idstr(
