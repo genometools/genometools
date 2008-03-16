@@ -158,8 +158,12 @@ int pdom_load_hmm_files(PdomOptions *opts, Error *err)
       array_add(opts->plan7_ts, hmm);
     }
     if (!SetAutocuts(&opts->thresh, hmm))
-      Die("HMM %s did not contain the GA, TC, or NC cutoffs you needed",
-          hmm->name);
+    {
+      fprintf(stderr,"HMM %s did not contain the GA, TC, or NC "
+                     "cutoffs you needed",
+                     hmm->name);
+      exit(EXIT_FAILURE);
+    }
     if(hmmfp) HMMFileClose(hmmfp);
   }
   log_log("Loaded %lu HMM model(s)\n",
