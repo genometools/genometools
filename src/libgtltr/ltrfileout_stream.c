@@ -180,7 +180,8 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   ls->fp = fp;
   fprintf(fp, "LTRret start\tLTRret end");
   fprintf(fp, "\tPPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");
-  fprintf(fp, "\tPBS start\tPBS end\tPBS strand\ttRNA\tRNA motif\tPBS offset\ttRNA offset\tPBS/tRNA edist\n");
+  fprintf(fp, "\tPBS start\tPBS end\tPBS strand\ttRNA\tRNA motif\tPBS offset"
+              "\ttRNA offset\tPBS/tRNA edist\n");
   ls->lv = (LTRVisitor*) ltr_visitor_new(&ls->element);
   return gs;
 }
