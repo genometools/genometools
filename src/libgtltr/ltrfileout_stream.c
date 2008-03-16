@@ -165,8 +165,8 @@ const GenomeStreamClass* ltr_fileout_stream_class(void)
 }
 
 GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
-                                   Bioseq *bioseq,
-                                   FILE *fp)
+                                     Bioseq *bioseq,
+                                     FILE *fp)
 {
   GenomeStream *gs;
   LTRFileOutStream *ls;
