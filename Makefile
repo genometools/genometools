@@ -58,7 +58,7 @@ SYSTEM:=$(shell uname -s)
 MACHINE:=$(shell uname -m)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
-  SHARED:=-dynamiclib
+  SHARED:=-dynamiclib -undefined dynamic_lookup
   SHARED_OBJ_NAME_EXT:=.dylib
 else
   SHARED_OBJ_NAME_EXT:=.so
