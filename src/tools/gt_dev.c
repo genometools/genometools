@@ -21,6 +21,7 @@
 #include "libgtext/toolbox.h"
 #include "tools/gt_dev.h"
 #include "tools/gt_extracttarget.h"
+#include "tools/gt_fingerprint.h"
 #include "tools/gt_guessprot.h"
 #include "tools/gt_magicmatch.h"
 #include "tools/gt_maxpairs.h"
@@ -39,6 +40,7 @@ static void* gt_dev_arguments_new(void)
   /* add development tools here with a function call like this:
      toolbox_add(dev_toolbox, "devtool", gt_devtool); */
   toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
+  toolbox_add_tool(dev_toolbox, "fingerprint", gt_fingerprint());
   toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
   toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
   toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
