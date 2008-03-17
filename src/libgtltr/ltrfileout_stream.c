@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdio.h>
 #include <string.h>
 #include "libgtcore/ma.h"
 #include "libgtcore/range.h"
@@ -120,7 +121,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                               ls->element.pbs, "trnaoffset"),
                       genome_feature_get_attribute((GenomeNode*)
                                               ls->element.pbs, "pbsoffset"),
-                       genome_feature_get_attribute((GenomeNode*)
+                      genome_feature_get_attribute((GenomeNode*)
                                               ls->element.pbs, "edist"));
       ma_free((char*) pbs_seq);
     } else fprintf(ls->fp, "\t\t\t\t\t\t\t\t");
@@ -146,6 +147,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     fprintf(ls->fp, "\n");
   }
   array_delete(ls->element.pdoms);
+  fflush(ls->fp);
   return had_err;
 }
 
