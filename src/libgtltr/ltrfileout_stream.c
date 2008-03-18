@@ -141,6 +141,8 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 
     /* output protein domains */
     pdoms = str_new();
+    if(STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
+      array_reverse(ls->element.pdoms);
     for (i=0;i<array_size(ls->element.pdoms);i++)
     {
       GenomeFeature *gf = *(GenomeFeature**) array_get(ls->element.pdoms, i);
@@ -194,7 +196,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   LTRFileOutStream *ls;
   char buffer[PATH_MAX];
 
-  assert(fp && in_stream && bioseq);
+  assert(fp && in_stream && bioseq && ppt_opts && pbs_opts && pdom_opts);
 
   gs = genome_stream_create(ltr_fileout_stream_class(), true);
   ls = ltr_fileout_stream_cast(gs);
@@ -250,19 +252,23 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
           fprintf(fp, ", ");
       }
       fprintf(fp, ")\n");
-      fprintf(fp, "HMMER e-value cutoff \t%g\t1.0e-6\n",
+      fprintf(fp, "pHMM e-value cutoff \t%g\t1.0e-6\n",
                                          pdom_opts->evalue_cutoff);
     }
     fprintf(fp, "\n");
   }
 
   /* print headline */
-  fprintf(fp, "LTRret start\tLTRret end\tLTRret length\t"
+  fprintf(fp, "element start\telement end\telement length\t"
               "lLTR start\tlLTR end\tlLTR length\t"
               "rLTR start\trLTR end\trLTR length\t"
-              "\tPPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset"
-              "\tPBS start\tPBS end\tPBS strand\ttRNA\tRNA motif\tPBS offset"
-              "\ttRNA offset\tPBS/tRNA edist\n");
+              "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset\t");
+  if (strcmp(trnafilename, "") != 0)
+    fprintf(fp, "PBS start\tPBS end\tPBS strand\ttRNA\tRNA motif\tPBS offset\t"
+                "tRNA offset\tPBS/tRNA edist\t");
+  if (array_size(pdom_opts->plan7_ts) > 0)
+    fprintf(fp, "Protein domain hits\n");
+
   ls->lv = (LTRVisitor*) ltr_visitor_new(&ls->element);
   return gs;
 }
