@@ -194,7 +194,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
 {
   GenomeStream *gs;
   LTRFileOutStream *ls;
-  char buffer[PATH_MAX];
+  char buffer[PATH_MAX+1];
 
   assert(fp && in_stream && bioseq && ppt_opts && pbs_opts && pdom_opts);
 
@@ -207,15 +207,16 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   if (with_metadata)
   {
     unsigned long i;
+    bool has_cwd;
     /* get current working dir */
-    memset(buffer, 0, PATH_MAX);
-    getcwd(buffer, PATH_MAX);
+    memset(buffer, 0, PATH_MAX+1);
+    has_cwd = (getcwd(buffer, PATH_MAX) != NULL);
     /* append working dir to relative paths if necessary */
-    if (seqfilename[0] != '/')
+    if (seqfilename[0] != '/' && has_cwd)
       fprintf(fp, "Sequence file used\t%s/%s\n", buffer, seqfilename);
     else
       fprintf(fp, "Sequence file used\t%s\n", seqfilename);
-    if (gfffilename[0] != '/')
+    if (gfffilename[0] != '/' && has_cwd)
       fprintf(fp, "GFF3 input used\t%s/%s\n", buffer, gfffilename);
     else
       fprintf(fp, "GFF3 input used\t%s\n", gfffilename);
@@ -224,7 +225,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
     fprintf(fp, "PPT search radius\t%d\t30\n", ppt_opts->radius);
     if (strcmp(trnafilename, "") != 0)
     {
-      if (trnafilename[0] != '/')
+      if (trnafilename[0] != '/' && has_cwd)
         fprintf(fp, "tRNA library for PBS detection\t%s/%s\n",
                                               buffer, trnafilename);
       else
