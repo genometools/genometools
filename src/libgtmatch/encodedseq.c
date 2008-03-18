@@ -2265,10 +2265,6 @@ static void revextract2bitenc(PrefixofTwobitencoding *ptbe,
   {
     stoppos = 0;
   }
-  if (startpos == (Seqpos) 772375)
-  {
-    printf("stopppos=%u\n",stoppos);
-  }
   if (startpos < stoppos)
   {
     ptbe->commonunits = 0;
@@ -2365,12 +2361,12 @@ static void revextract2bitenc_bruteforce(PrefixofTwobitencoding *ptbe,
 
 static void showbufchar(Uchar cc)
 {
-  if (cc == WILDCARD)
+  if (cc == (Uchar) WILDCARD)
   {
     fprintf(stderr,"$");
   } else
   {
-    if (cc == SEPARATOR)
+    if (cc == (Uchar) SEPARATOR)
     {
       fprintf(stderr,"#");
     } else
@@ -2509,9 +2505,9 @@ static void revcheckextractunitatpos(const Encodedsequence *encseq)
   Seqpos startpos;
 
   esr = newEncodedsequencescanstate();
-  initEncodedsequencescanstate(esr,encseq,Reversemode,encseq->totallength-1);
+  initEncodedsequencescanstate(esr,encseq,Reversemode,0);
   startpos = encseq->totallength-1;
-  while(true)
+  while (true)
   {
     revextract2bitenc(&ptbe1,encseq,esr,startpos);
     revextract2bitenc_bruteforce(&ptbe2,encseq,startpos);
@@ -2550,21 +2546,20 @@ void checkextractunitatpos(const Encodedsequence *encseq,bool fwd)
   }
 }
 
-static int requiredUIntTwobitencoding(uint32_t v)
-{
-  int r;
-  static const int MultiplyDeBruijnBitPosition[32] = {
+static const int MultiplyDeBruijnBitPosition[32] = {
     1, 2, 29, 3, 30, 15, 25, 4, 31, 23, 21, 16, 26, 18, 5, 9,
     32, 28, 14, 24, 22, 20, 17, 8, 27, 13, 19, 7, 12, 6, 11, 10
-  };
+};
+
+static int requiredUIntTwobitencoding(uint32_t v)
+{
   v |= v >> 1; /* first round down to power of 2 */
   v |= v >> 2;
   v |= v >> 4;
   v |= v >> 8;
   v |= v >> 16;
   v = (v >> 1) + 1;
-  r = MultiplyDeBruijnBitPosition[(v * (uint32_t)0x077CB531UL) >> 27];
-  return r;
+  return MultiplyDeBruijnBitPosition[(v * (uint32_t)0x077CB531UL) >> 27];
 }
 
 static int prefixofdifftbe(unsigned int *lcpvalue,
