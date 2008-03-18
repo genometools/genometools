@@ -40,7 +40,8 @@ typedef struct PdomHit {
 
 typedef struct PdomResults {
   Hashtable *domains;                  /* maps models to PdomHits */
-  double combined_e_value;
+  double combined_e_value_fwd,
+         combined_e_value_rev;
   bool empty;
 } PdomResults;
 

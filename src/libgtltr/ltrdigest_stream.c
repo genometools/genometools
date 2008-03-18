@@ -197,6 +197,8 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
             STRANDCHARS[ppt_results.best_hit->strand]);
     ppt_attach_results_to_gff3(&ppt_results, element,
                                ls->ltrdigest_tag, ls->pbs_opts->radius);
+    genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
+                                ppt_results.best_hit->strand);
   }
 
   /* PBS finding
@@ -213,6 +215,9 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
               pbs_results.best_hit->trna);
       pbs_attach_results_to_gff3(&pbs_results, element,
                                  ls->ltrdigest_tag, ls->pbs_opts->radius);
+      genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
+                                pbs_results.best_hit->strand);
+
      }
   }
 
@@ -227,6 +232,12 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
                       (Hashiteratorfunc) pdom_domain_attach_gff3,
                       ls,
                       err);
+    if (pdom_results.combined_e_value_fwd < pdom_results.combined_e_value_rev)
+      genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
+                                STRAND_FORWARD);
+    else
+      genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
+                                STRAND_REVERSE);
   }
 
   ma_free(rev_seq);

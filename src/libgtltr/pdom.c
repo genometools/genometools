@@ -177,6 +177,7 @@ void* pdom_per_domain_worker_thread(void *data)
   struct plan7_s *hmm;
   int rtn;
   struct tophit_s *ghit;
+  bool best_fwd = TRUE;
 
   shared = (pdom_shared_s *) data;
 
@@ -242,13 +243,19 @@ void* pdom_per_domain_worker_thread(void *data)
           if (hit->hits_fwd->hit[0]->score > hit->hits_rev->hit[0]->score)
             hit->best_hit = hit->hits_fwd->hit[0];
           else
+          {
             hit->best_hit = hit->hits_rev->hit[0];
+            best_fwd = FALSE;
+          }
         }
         else
           hit->best_hit = hit->hits_fwd->hit[0];
       }
       else
+      {
         hit->best_hit = hit->hits_rev->hit[0];
+        best_fwd = FALSE;
+      }
 
       assert(hit->best_hit);
 
@@ -258,7 +265,13 @@ void* pdom_per_domain_worker_thread(void *data)
         fprintf(stderr, "pthread_mutex_lock failure: %s\n", strerror(rtn));
         exit(EXIT_FAILURE);
       }
+
+      /* register results */
       hashtable_add(shared->results->domains, hmm, hit);
+      if (best_fwd)
+        shared->results->combined_e_value_fwd *= hit->best_hit->pvalue;
+      else
+        shared->results->combined_e_value_rev *= hit->best_hit->pvalue;
 
       /* unlock results */
       if ((rtn = pthread_mutex_unlock(&(shared->out_lock))) != 0)
@@ -345,6 +358,7 @@ void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
   assert(seq && rev_seq && element && results && opts);
 
   results->empty = TRUE;
+  results->combined_e_value_fwd = results->combined_e_value_rev = 1.0;
 
   /* create translations */
   translate_all_frames(&fwd_fr1,&fwd_fr2,&fwd_fr3,    seq,seqlen);
