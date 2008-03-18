@@ -28,7 +28,7 @@
 #include "readmode-def.h"
 #include "verbose-def.h"
 
-#define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))
+#define REVERSEPOS(TOTALLENGTH,POS) ((TOTALLENGTH) - 1 - (POS))
 
 #ifdef DEBUG
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
@@ -185,7 +185,7 @@ void encseqextract(Uchar *buffer,
                    Seqpos frompos,
                    Seqpos topos);
 
-void checkextractunitatpos(const Encodedsequence *encseq);
+void checkextractunitatpos(const Encodedsequence *encseq,bool fwd);
 
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,

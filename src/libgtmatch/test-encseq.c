@@ -193,7 +193,10 @@ int testencodedsequence(const StrArray *filenametab,
 {
   if (hasfastspecialrangeenumerator(encseq))
   {
-    checkextractunitatpos(encseq);
+    if (readmode == Forwardmode || readmode == Reversemode)
+    {
+      checkextractunitatpos(encseq,ISDIRREVERSE(readmode) ? false : true);
+    }
     if (multicharcmptrials > 0)
     {
       testmulticharactercompare(encseq,Forwardmode,multicharcmptrials);
