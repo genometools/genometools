@@ -15,11 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LTR_FILEOUT_STREAM_H
-#define LTR_FILEOUT_STREAM_H
+#ifndef LTRFILEOUT_STREAM_H
+#define LTRFILEOUT_STREAM_H
 
 #include "libgtcore/bioseq.h"
 #include "libgtext/genome_stream.h"
+#include "libgtltr/pbs.h"
+#include "libgtltr/ppt.h"
+#include "libgtltr/pdom.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct LTRFileOutStream LTRFileOutStream;
@@ -27,7 +30,14 @@ typedef struct LTRFileOutStream LTRFileOutStream;
 const GenomeStreamClass* ltr_fileout_stream_class(void);
 
 GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
-                                   Bioseq *bioseq,
-                                   FILE *fp);
+                                     Bioseq *bioseq,
+                                     FILE *fp,
+                                     bool with_metadata,
+                                     PPTOptions *ppt_opts,
+                                     PBSOptions *pbs_opts,
+                                     PdomOptions *pdom_opts,
+                                     const char *trnafilename,
+                                     const char *seqfilename,
+                                     const char *gfffilename);
 
 #endif

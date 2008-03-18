@@ -39,7 +39,7 @@ typedef struct LTRdigestOptions {
   PdomOptions pdom_opts;
   Str *trna_lib;
   Str *taboutfile;
-  bool verbose;
+  bool verbose, withmetadata;
   OutputFileInfo *ofi;
   GenFile *outfp;
 } LTRdigestOptions;
@@ -47,6 +47,7 @@ typedef struct LTRdigestOptions {
 static void* gt_ltrdigest_arguments_new(void)
 {
   LTRdigestOptions *arguments = ma_calloc(1, sizeof *arguments);
+  memset(arguments, 0, sizeof *arguments);
   arguments->pdom_opts.hmm_files = strarray_new();
   arguments->trna_lib = str_new();
   arguments->taboutfile = str_new();
@@ -70,7 +71,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 {
   LTRdigestOptions *arguments = tool_arguments;
   OptionParser *op;
-  Option *o, *ot, *oh;
+  Option *o, *ot, *oh, *oto;
   assert(arguments);
 
   /* init */
@@ -158,6 +159,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                              &arguments->pdom_opts.evalue_cutoff,
                              0.000001);
   option_parser_add_option(op, o);
+  option_is_extended_option(o);
   option_imply(o, oh);
 
   o = option_new_uint_min("threads",
@@ -201,11 +203,18 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_imply(o, ot);
 
   /* Tabular output file */
-  o = option_new_filename("taboutfile",
+  oto = option_new_filename("taboutfile",
                           "filename for tabular output including sequences",
                           arguments->taboutfile);
+  option_parser_add_option(op, oto);
+  option_hide_default(oto);
+
+  o = option_new_bool("tabmeta",
+                      "output metadata about this run into tabular outfile",
+                      &arguments->withmetadata,
+                      true);
   option_parser_add_option(op, o);
-  option_hide_default(o);
+  option_imply(o, oto);
 
   /* verbosity */
   o = option_new_verbose(&arguments->verbose);
@@ -316,7 +325,14 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
     {
       tab_out_stream = ltr_fileout_stream_new(ltrdigest_stream,
                                               bioseq,
-                                              fp);
+                                              fp,
+                                              arguments->withmetadata,
+                                              &arguments->ppt_opts,
+                                              &arguments->pbs_opts,
+                                              &arguments->pdom_opts,
+                                              str_get(arguments->trna_lib),
+                                              argv[1],
+                                              argv[0]);
       last_stream = tab_out_stream;
     }
     else

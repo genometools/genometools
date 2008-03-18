@@ -63,7 +63,7 @@ void ltrelement_offset2pos_fwd(LTRElement *e, Range *rng,
                                enum Offset o)
 {
   unsigned long len = range_length(*rng);
-  switch(o)
+  switch (o)
   {
     case OFFSET_BEGIN_LEFT_LTR:
       rng->start = e->leftLTR_5 - radius + rng->start;
@@ -86,7 +86,7 @@ void ltrelement_offset2pos_rev(LTRElement *e, Range *rng,
                                enum Offset o)
 {
   unsigned long len = range_length(*rng);
-  switch(o)
+  switch (o)
   {
     case OFFSET_END_RIGHT_LTR:
       rng->start = e->leftLTR_5 + radius - rng->end - 1;
