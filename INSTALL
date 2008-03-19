@@ -35,6 +35,12 @@ Building GenomeTools with the view tool (requires installed cairo library):
 invoke make as above with the argument libgtview=yes
 
 
+Building GenomeTools as a Univeral Binary (on Mac OS X):
+--------------------------------------------------------
+
+invoke make as above with the argument universal=yes
+
+
 Testing GenomeTools (optional)
 ------------------------------
 

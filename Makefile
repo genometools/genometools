@@ -55,11 +55,16 @@ BUILDSTAMP:=$(shell date +'"%Y-%m-%d %H:%M:%S"')
 
 # try to set RANLIB automatically
 SYSTEM:=$(shell uname -s)
-MACHINE:=$(shell uname -m)
+  MACHINE:=$(shell uname -m)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
   SHARED:=-dynamiclib -undefined dynamic_lookup
   SHARED_OBJ_NAME_EXT:=.dylib
+  ifeq ($(universal),yes)
+    MACHINE:="Universal_Binary"
+    GT_CFLAGS+=-arch i386 -arch ppc -arch_errors_fatal
+    GT_LDFLAGS+=-arch i386 -arch ppc -arch_errors_fatal
+  endif
 else
   SHARED_OBJ_NAME_EXT:=.so
   SHARED:=-shared
@@ -609,7 +614,7 @@ endif
 .PHONY: dist srcdist release gt install docs installwww splint test clean cleanup
 
 VERSION:="`cat $(CURDIR)/VERSION`"
-SYSTEMNAME:=$(shell uname -sm | tr ' ' _)
+SYSTEMNAME:="$(SYSTEM)_$(MACHINE)"
 GTDISTBASENAME:="gt-$(VERSION)-$(SYSTEMNAME)-${BIT}"
 DISTDIR:="$(CURDIR)/dist/$(SYSTEMNAME)"
 GTDISTDIR:="$(DISTDIR)/$(GTDISTBASENAME)"
