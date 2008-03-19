@@ -187,6 +187,13 @@ void encseqextract(Uchar *buffer,
 
 void checkextractunitatpos(const Encodedsequence *encseq,bool fwd);
 
+void multicharactercompare_withtest(const Encodedsequence *encseq,
+                                    Readmode readmode,
+                                    Encodedsequencescanstate *esr1,
+                                    Seqpos pos1,
+                                    Encodedsequencescanstate *esr2,
+                                    Seqpos pos2);
+
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
                            Readmode readmode,
@@ -203,22 +210,5 @@ int compareEncseqsequences_nolcp(const Encodedsequence *encseq,
                                  Seqpos pos1,Seqpos pos2,
                                  Seqpos depth,
                                  UNUSED Seqpos totallength);
-
-int multicharactercompare(unsigned int *lcpvalue,
-                          const Encodedsequence *encseq,
-                          Readmode readmode,
-                          Encodedsequencescanstate *esr1,
-                          Seqpos pos1,
-                          Encodedsequencescanstate *esr2,
-                          Seqpos pos2);
-
-void multicharactercompare_withtest(const Encodedsequence *encseq,
-                                    Readmode readmode,
-                                    Encodedsequencescanstate *esr1,
-                                    Seqpos pos1,
-                                    Encodedsequencescanstate *esr2,
-                                    Seqpos pos2);
-
-void showocccase(void);
 
 #endif
