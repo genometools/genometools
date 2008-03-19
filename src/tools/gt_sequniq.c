@@ -41,6 +41,7 @@ static int gt_sequniq_runner(int argc, const char **argv,
   Bioseq *bs;
   StringDistri *sd;
   unsigned long i, j;
+  unsigned long long duplicates = 0, num_of_sequences = 0;
   int had_err = 0;
 
   error_check(err);
@@ -57,9 +58,19 @@ static int gt_sequniq_runner(int argc, const char **argv,
                            bioseq_get_sequence(bs, j),
                            bioseq_get_sequence_length(bs, j), 0);
         }
+        else
+          duplicates++;
+        num_of_sequences++;
       }
     }
     bioseq_delete(bs);
+  }
+
+  /* show statistics */
+  if (!had_err) {
+    fprintf(stderr, "# %llu out of %llu sequences have been removed (%.3f%%)\n",
+            duplicates, num_of_sequences,
+            ((double) duplicates / num_of_sequences) * 100.0);
   }
 
   stringdistri_delete(sd);

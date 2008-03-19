@@ -76,6 +76,7 @@ static int gt_seqfilter_runner(int argc, const char **argv,
   SeqFilterArguments *arguments = tool_arguments;
   Bioseq *bioseq;
   unsigned long i;
+  unsigned long long duplicates = 0, num_of_sequences = 0;
   int arg = 0, had_err = 0;
 
   error_check(err);
@@ -95,11 +96,21 @@ static int gt_seqfilter_runner(int argc, const char **argv,
                          bioseq_get_sequence(bioseq, i),
                          bioseq_get_sequence_length(bioseq, i), 0);
       }
+      else
+        duplicates++;
+      num_of_sequences++;
     }
 
     bioseq_delete(bioseq);
 
     arg++;
+  }
+
+  /* show statistics */
+  if (!had_err) {
+    fprintf(stderr, "# %llu out of %llu sequences have been removed (%.3f%%)\n",
+            duplicates, num_of_sequences,
+            ((double) duplicates / num_of_sequences) * 100.0);
   }
 
   return had_err;
