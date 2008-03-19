@@ -15,11 +15,11 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'dl/import'
+require 'gtdlload'
 
 module GT
   extend DL::Importable
-  dlload "libgtcore.so"
+  gtdlload "libgt"
   extern "StrArray* strarray_new()"
   extern "void strarray_add_cstr(StrArray*, const char*)"
   extern "const char* strarray_get(const StrArray*, unsigned long)"

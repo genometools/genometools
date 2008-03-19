@@ -80,10 +80,6 @@ GTLIBS:=lib/libgtexercise.a\
         lib/libgtlua.a\
         lib/libexpat.a
 
-# the default GenomeThreader shared libraries which are build
-GTSHAREDLIBS:=lib/libgtcore$(SHARED_OBJ_NAME_EXT)\
-              lib/libgtext$(SHARED_OBJ_NAME_EXT)
-
 # libraries for which we build replacements (that also appear in dependencies)
 EXP_LDLIBS+=-lz -lbz2
 OVERRIDELIBS:=lib/libbz2.a
@@ -243,6 +239,10 @@ ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
 ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
 ZLIB_DEP:=$(ZLIB_SRC:%.c=obj/%.d)
 
+# the objects which are included into the single GenomeThreader shared library
+GTSHAREDLIB_OBJ:=$(LIBGTCORE_OBJ) $(LIBGTEXT_C_OBJ) $(LIBLUA_OBJ)
+GTSHAREDLIB_LIBDEP:=$(LIBGTCORE_LIBDEP)
+
 SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
 
@@ -329,7 +329,8 @@ endif
 
 ifeq ($(libgtview),yes)
   GTLIBS := $(GTLIBS) lib/libgtview.a
-  GTSHAREDLIBS := $(GTSHAREDLIBS) lib/libgtview$(SHARED_OBJ_NAME_EXT)
+  GTSHAREDLIB_OBJ := $(GTSHAREDLIB_OBJ) $(LIBGTVIEW_C_OBJ)
+  GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lcairo
   EXP_CPPFLAGS += -DLIBGTVIEW
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
@@ -341,7 +342,8 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
-all: $(GTLIBS) $(GTSHAREDLIBS) bin/skproto bin/gt bin/example bin/lua bin/rnv
+all: $(GTLIBS) lib/libgt$(SHARED_OBJ_NAME_EXT) bin/skproto bin/gt \
+     bin/example bin/lua bin/rnv
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
@@ -383,11 +385,11 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtcore$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(LIBGTCORE_OBJ)
+lib/libgt$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(GTSHAREDLIB_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTCORE_OBJ) \
-	-o $@ $(LIBGTCORE_LIBDEP)
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(GTSHAREDLIB_OBJ) \
+	-o $@ $(GTSHAREDLIB_LIBDEP)
 
 lib/libgtext.a: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
@@ -396,13 +398,6 @@ lib/libgtext.a: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
-
-lib/libgtext$(SHARED_OBJ_NAME_EXT): $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) \
-  $(LIBLUA_OBJ) lib/libgtcore$(SHARED_OBJ_NAME_EXT)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTEXT_C_OBJ) \
-          $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ) -o $@ $(LIBGTEXT_LIBDEP)
 
 lib/libgtexercise.a: $(LIBGTEXERCISE_OBJ)
 	@echo "[link $(@F)]"
@@ -444,13 +439,6 @@ lib/libgtview.a: $(LIBGTVIEW_C_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
-
-lib/libgtview$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(LIBGTVIEW_C_OBJ) \
-  lib/libgtcore$(SHARED_OBJ_NAME_EXT) lib/libgtext$(SHARED_OBJ_NAME_EXT)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTVIEW_C_OBJ) \
-	-o $@ $(LIBGTVIEW_LIBDEP)
 
 lib/libgtlua.a: $(LIBGTLUA_C_OBJ)
 	@echo "[link $(@F)]"

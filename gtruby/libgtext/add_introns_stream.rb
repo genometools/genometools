@@ -15,12 +15,12 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'dl/import'
+require 'gtdlload'
 require 'libgtext/genome_stream'
 
 module GT
   extend DL::Importable
-  dlload "libgtext.so"
+  gtdlload "libgt"
   extern "GenomeStream* add_introns_stream_new(GenomeStream*)"
 
   class AddIntronsStream

@@ -21,8 +21,7 @@ require 'libgtcore/str'
 
 module GT
   extend DL::Importable
-  dlload "libcairo.so"
-  dlload "libgtview.so"
+  gtdlload "libgt"
   extern "Render* render_new(Config*)"
   extern "int render_to_png(Render*, Diagram*, const char*, unsigned int, " +
                            "Error*)"

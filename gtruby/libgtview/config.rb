@@ -15,14 +15,14 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'dl/import'
+require 'gtdlload'
 require 'gthelper'
 require 'libgtcore/error'
 require 'libgtview/color'
 
 module GT
   extend DL::Importable
-  dlload "libgtview.so"
+  gtdlload "libgt"
   typealias "bool", "ibool"
   extern "Config* config_new(bool, Error*)"
   extern "int config_load_file(Config*, Str*, Error*)"

@@ -109,10 +109,7 @@ require 'gt_mmapandread_include'
 require 'gt_mutate_include'
 require 'gt_packedindex_include'
 require 'gt_regioncov_include'
-# XXX: remove this when gtruby works on Darwin
-if `uname -s`.chomp != "Darwin" then
-  require 'gt_ruby_include'
-end
+require 'gt_ruby_include'
 require 'gt_scripts_include'
 require 'gt_seqiterator_include'
 require 'gt_sequniq_include'
