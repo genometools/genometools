@@ -506,13 +506,12 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     {
        sfi->storespecialcodes = sfxstrategy->storespecialcodes;
        sfi->maxdepth = sfxstrategy->maxdepth;
-       sfi->cmpcharbychar = sfxstrategy->cmpcharbychar;
        if (sfxstrategy->cmpcharbychar || !possibletocmpbitwise(encseq))
        {
          sfi->cmpcharbychar = true;
        } else
        {
-         sfi->cmpcharbychar = false;
+         sfi->cmpcharbychar = true; /* XXX false; */
        }
     } else
     {

@@ -182,6 +182,9 @@ static inline void
 BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
                Seqpos *rangeOccs);
 
+/* XXx: range 0 for range = 0 for regular symbols;
+   Seqpos rangeOcc[4]; */
+
 /**
  * \brief Given a position in the L-column of the matrix of rotations,
  * find the corresponding row in the F-column.

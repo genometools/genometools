@@ -2736,23 +2736,30 @@ static int compareTwobitencodings_nolcp(EndofTwobitencoding *ptbe1,
   return 0;
 }
 
-static int multicharactercompare_bruteforce(Seqpos *lcpvalue,
-                                            const Encodedsequence *encseq,
-                                            Readmode readmode,
-                                            Seqpos pos1,
-                                            Seqpos pos2,
-                                            Seqpos maxlcp)
+/*
+static int multicharactercompare_bruteforce(UNUSED Seqpos *lcpvalue,
+                                            UNUSED const Encodedsequence
+                                                   *encseq,
+                                            UNUSED Readmode readmode,
+                                            UNUSED Seqpos pos1,
+                                            UNUSED Seqpos pos2,
+                                            UNUSED Seqpos maxlcp)
 {
+  return 0;
+}
+*/
 
+void multicharactercompare_withtest(UNUSED const Encodedsequence *encseq,
+                                    UNUSED Readmode readmode,
+                                    UNUSED Encodedsequencescanstate *esr1,
+                                    UNUSED Seqpos pos1,
+                                    UNUSED Encodedsequencescanstate *esr2,
+                                    UNUSED Seqpos pos2)
+{
+  return;
 }
 
-void multicharactercompare_withtest(const Encodedsequence *encseq,
-                                    Readmode readmode,
-                                    Encodedsequencescanstate *esr1,
-                                    Seqpos pos1,
-                                    Encodedsequencescanstate *esr2,
-                                    Seqpos pos2)
-{
+/*
   EndofTwobitencoding ptbe1, ptbe2;
   unsigned int lcpvalue1;
   Seqpos lcpvalue2;
@@ -2779,9 +2786,10 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
     showsequenceatstartpos(fwd,encseq,pos2);
     uint32_t2string(buf2,ptbe2.tbe);
     fprintf(stderr,"v2=%s(commonunits=%u)\n",buf2,ptbe2.commonunits);
-    exit(EXIT_FAILURE); /* programming error */
+    exit(EXIT_FAILURE);
   }
 }
+*/
 
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
