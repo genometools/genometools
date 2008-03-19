@@ -30,6 +30,7 @@ static OptionParser* gt_fingerprint_option_parser_new(UNUSED
   op = option_parser_new("[option ...] sequence_file [...] ",
                          "Show duplicate fingerprints for each sequence given "
                          "in sequence_file(s).");
+  option_parser_set_min_args(op, 1);
   return op;
 }
 
