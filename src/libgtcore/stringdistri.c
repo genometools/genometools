@@ -51,6 +51,16 @@ void stringdistri_add(StringDistri *d, const char *key)
   d->num_of_occurrences++;
 }
 
+unsigned long stringdistri_get(const StringDistri *d, const char *key)
+{
+  unsigned long *valueptr;
+  assert(d && key);
+  if ((valueptr = hashtable_get(d->hashdist, (void*) key)))
+    return *valueptr;
+  else
+    return 0;
+}
+
 typedef struct {
   StringDistriIterFunc func;
   void *data;

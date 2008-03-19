@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -30,6 +30,7 @@ typedef void (*StringDistriIterFunc)(const char *string,
 
 StringDistri*      stringdistri_new(void);
 void               stringdistri_add(StringDistri*, const char*);
+unsigned long      stringdistri_get(const StringDistri*, const char*);
 void               stringdistri_foreach(const StringDistri*,
                                         StringDistriIterFunc, void *data);
 void               stringdistri_delete(StringDistri*);
