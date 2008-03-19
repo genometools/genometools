@@ -51,12 +51,10 @@ char* ltrelement_get_sequence(unsigned long start, unsigned long end,
                               Strand strand, Seq *seq, Error *err);
 unsigned long ltrelement_leftltrlen(LTRElement *e);
 unsigned long ltrelement_rightltrlen(LTRElement *e);
-void ltrelement_offset2pos_fwd(LTRElement *e, Range *rng,
-                               unsigned long radius,
-                               enum Offset o);
-void ltrelement_offset2pos_rev(LTRElement *e, Range *rng,
-                               unsigned long radius,
-                               enum Offset o);
+void ltrelement_offset2pos(LTRElement *e, Range *rng,
+                           unsigned long radius,
+                           enum Offset o,
+                           Strand strand);
 
 int ltrelement_unit_test(Error *err);
 #endif

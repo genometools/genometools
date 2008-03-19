@@ -58,19 +58,9 @@ int pdom_domain_attach_gff3(void *key, void *value, void *data,
   rng.start = hit->best_hit->sqfrom;
   rng.end = hit->best_hit->sqto;
   pdom_convert_frame_position(&rng, frame);
-  switch(strand_get(hit->best_hit->name[1]))
-  {
-    case STRAND_FORWARD:
-      ltrelement_offset2pos_fwd(&ls->element, &rng, 0,
-                                OFFSET_BEGIN_LEFT_LTR);
-      break;
-    case STRAND_REVERSE:
-      ltrelement_offset2pos_rev(&ls->element, &rng, 0,
-                                OFFSET_BEGIN_LEFT_LTR);
-      break;
-    default:
-      break;
-  }
+  ltrelement_offset2pos(&ls->element, &rng, 0,
+                        OFFSET_BEGIN_LEFT_LTR,
+                        strand_get(hit->best_hit->name[1]));
   GenomeNode *gf = genome_feature_new(gft_protein_match,
                                       rng,
                                       strand_get(hit->best_hit->name[1]),
@@ -96,19 +86,9 @@ void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
   char buffer[BUFSIZ];
   pbs_range.start = results->best_hit->start;
   pbs_range.end   = results->best_hit->end;
-  switch(results->best_hit->strand)
-  {
-    case STRAND_FORWARD:
-      ltrelement_offset2pos_fwd(element, &pbs_range, radius,
-                                OFFSET_END_LEFT_LTR);
-      break;
-    case STRAND_REVERSE:
-      ltrelement_offset2pos_rev(element, &pbs_range, radius,
-                                OFFSET_END_LEFT_LTR);
-      break;
-    default:
-      break;
-  }
+  ltrelement_offset2pos(element, &pbs_range, radius,
+                        OFFSET_END_LEFT_LTR,
+                        results->best_hit->strand);
   results->best_hit->start = pbs_range.start;
   results->best_hit->end = pbs_range.end;
   gf = genome_feature_new(gft_primer_binding_site,
@@ -138,26 +118,16 @@ void ppt_attach_results_to_gff3(PPTResults *results, LTRElement *element,
   GenomeNode *gf;
   ppt_range.start = results->best_hit->start;
   ppt_range.end   = results->best_hit->end;
-  switch(results->best_hit->strand)
-  {
-    case STRAND_FORWARD:
-      ltrelement_offset2pos_fwd(element, &ppt_range, radius,
-                                OFFSET_BEGIN_RIGHT_LTR);
-      break;
-    case STRAND_REVERSE:
-      ltrelement_offset2pos_rev(element, &ppt_range, radius,
-                                OFFSET_BEGIN_RIGHT_LTR);
-      break;
-    default:
-      break;
-  }
+  ltrelement_offset2pos(element, &ppt_range, radius,
+                        OFFSET_BEGIN_RIGHT_LTR,
+                        results->best_hit->strand);
   results->best_hit->start = ppt_range.start;
   results->best_hit->end = ppt_range.end;
   gf = genome_feature_new(gft_RR_tract,
-                                      ppt_range,
-                                      results->best_hit->strand,
-                                      NULL,
-                                      UNDEF_ULONG);
+                          ppt_range,
+                          results->best_hit->strand,
+                          NULL,
+                          UNDEF_ULONG);
   genome_feature_set_source(gf, tag);
   genome_node_set_seqid((GenomeNode*) gf,
                         genome_node_get_idstr(

@@ -140,28 +140,31 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     } else fprintf(ls->fp, "\t\t\t\t\t\t\t\t");
 
     /* output protein domains */
-    pdoms = str_new();
-    if(STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
-      array_reverse(ls->element.pdoms);
-    for (i=0;i<array_size(ls->element.pdoms);i++)
+    if(array_size(ls->element.pdoms) > 0)
     {
-      GenomeFeature *gf = *(GenomeFeature**) array_get(ls->element.pdoms, i);
-      str_append_cstr(pdoms,
-                      genome_feature_get_attribute((GenomeNode*)gf,
-                                                   "pfamname"));
-      str_append_cstr(pdoms,"(");
-      str_append_ulong(pdoms, (unsigned long) genome_feature_get_phase(gf));
-      str_append_char(pdoms, STRANDCHARS[genome_feature_get_strand(gf)]);
+      pdoms = str_new();
+      if(STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
+        array_reverse(ls->element.pdoms);
+      for (i=0;i<array_size(ls->element.pdoms);i++)
+      {
+        GenomeFeature *gf = *(GenomeFeature**) array_get(ls->element.pdoms, i);
+        str_append_cstr(pdoms,
+                        genome_feature_get_attribute((GenomeNode*)gf,
+                                                     "pfamname"));
+        str_append_cstr(pdoms,"(");
+        str_append_ulong(pdoms, (unsigned long) genome_feature_get_phase(gf));
+        str_append_char(pdoms, STRANDCHARS[genome_feature_get_strand(gf)]);
 
-      str_append_cstr(pdoms,")");
-      if (i != array_size(ls->element.pdoms)-1)
-        str_append_cstr(pdoms, "/");
+        str_append_cstr(pdoms,")");
+        if (i != array_size(ls->element.pdoms)-1)
+          str_append_cstr(pdoms, "/");
+      }
+      fprintf(ls->fp,"%s", str_get(pdoms));
+      str_delete(pdoms);
     }
-    fprintf(ls->fp,"%s", str_get(pdoms));
-    str_delete(pdoms);
-    fprintf(ls->fp, "\n");
+    array_delete(ls->element.pdoms);
   }
-  array_delete(ls->element.pdoms);
+  fprintf(ls->fp, "\n");
   fflush(ls->fp);
   return had_err;
 }

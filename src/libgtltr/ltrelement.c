@@ -58,50 +58,52 @@ unsigned long ltrelement_rightltrlen(LTRElement *e)
   return e->rightLTR_3 - e->rightLTR_5 + 1;
 }
 
-void ltrelement_offset2pos_fwd(LTRElement *e, Range *rng,
+void ltrelement_offset2pos(LTRElement *e, Range *rng,
                                unsigned long radius,
-                               enum Offset o)
+                               enum Offset o,
+                               Strand strand)
 {
   unsigned long len = range_length(*rng);
-  switch (o)
+  switch (strand)
   {
-    case OFFSET_BEGIN_LEFT_LTR:
-      rng->start = e->leftLTR_5 - radius + rng->start;
+    case STRAND_FORWARD:
+      switch (o)
+      {
+        case OFFSET_BEGIN_LEFT_LTR:
+          rng->start = e->leftLTR_5 - radius + rng->start;
+          break;
+        case OFFSET_END_RIGHT_LTR:
+          rng->start = e->rightLTR_3 - radius + rng->start;
+          break;
+        case OFFSET_END_LEFT_LTR:
+          rng->start = e->leftLTR_3 - radius + rng->start;
+          break;
+        case OFFSET_BEGIN_RIGHT_LTR:
+          rng->start = e->rightLTR_5 - radius + rng->start;
+          break;
+      }
       break;
-    case OFFSET_END_RIGHT_LTR:
-      rng->start = e->rightLTR_3 - radius + rng->start;
+    case STRAND_REVERSE:
+      switch (o)
+      {
+        case OFFSET_END_RIGHT_LTR:
+          rng->start = e->leftLTR_5 + radius - rng->end - 1;
+          break;
+        case OFFSET_BEGIN_LEFT_LTR:
+          rng->start = e->rightLTR_3 + radius - rng->end;
+          break;
+        case OFFSET_END_LEFT_LTR:
+          rng->start = e->rightLTR_5 + radius - rng->end  - 1;
+          break;
+        case OFFSET_BEGIN_RIGHT_LTR:
+          rng->start = e->leftLTR_3 + radius - rng->end;
+          break;
+      }
       break;
-    case OFFSET_END_LEFT_LTR:
-      rng->start = e->leftLTR_3 - radius + rng->start;
-      break;
-    case OFFSET_BEGIN_RIGHT_LTR:
-      rng->start = e->rightLTR_5 - radius + rng->start;
+    default:
       break;
   }
   rng->end = rng->start + len -1 ;
-}
-
-void ltrelement_offset2pos_rev(LTRElement *e, Range *rng,
-                               unsigned long radius,
-                               enum Offset o)
-{
-  unsigned long len = range_length(*rng);
-  switch (o)
-  {
-    case OFFSET_END_RIGHT_LTR:
-      rng->start = e->leftLTR_5 + radius - rng->end - 1;
-      break;
-    case OFFSET_BEGIN_LEFT_LTR:
-      rng->start = e->rightLTR_3 + radius - rng->end;
-      break;
-    case OFFSET_END_LEFT_LTR:
-      rng->start = e->rightLTR_5 + radius - rng->end  - 1;
-      break;
-    case OFFSET_BEGIN_RIGHT_LTR:
-      rng->start = e->leftLTR_3 + radius - rng->end;
-      break;
-  }
-  rng->end = rng->start + len - 1;
 }
 
 int ltrelement_unit_test(Error *err)
@@ -127,21 +129,24 @@ int ltrelement_unit_test(Error *err)
   rng1.start = 2;
   rng1.end = 28;
 
-  ltrelement_offset2pos_fwd(&element, &rng1, radius, OFFSET_END_LEFT_LTR);
+  ltrelement_offset2pos(&element, &rng1, radius, OFFSET_END_LEFT_LTR,
+                        STRAND_FORWARD);
   ensure(had_err, 122 == rng1.start);
   ensure(had_err, 148 == rng1.end);
 
   rng1.start = 2;
   rng1.end = 28;
 
-  ltrelement_offset2pos_fwd(&element, &rng1, radius, OFFSET_BEGIN_RIGHT_LTR);
+  ltrelement_offset2pos(&element, &rng1, radius, OFFSET_BEGIN_RIGHT_LTR,
+                        STRAND_FORWARD);
   ensure(had_err, 422 == rng1.start);
   ensure(had_err, 448 == rng1.end);
 
   rng1.start = 2;
   rng1.end = 28;
 
-  ltrelement_offset2pos_rev(&element, &rng1, radius, OFFSET_END_LEFT_LTR);
+  ltrelement_offset2pos(&element, &rng1, radius, OFFSET_END_LEFT_LTR,
+                        STRAND_REVERSE);
   ensure(had_err, 451 == rng1.start);
   ensure(had_err, 477 == rng1.end);
 
