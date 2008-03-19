@@ -59,38 +59,6 @@
 #define LCPINDEX(I)       (Seqpos) ((I) - lcpsubtab->suftabbase)
 #define SETLCP(I,V)       lcpsubtab->spaceSeqpos[I] = V
 
-#undef FASTSTRINGCOMPARE
-#ifdef  FASTSTRINGCOMPARE
-#define STRINGCOMPARE(RET,S,T,OFFSET,LL)\
-        RET = compareEncseqsequences(&(LL),encseq,esr1,esr2,S,T,OFFSET,\
-                                     totallength);
-#else
-
-#define STRINGCOMPARE(RET,S,T,OFFSET,LL)\
-        Suffixptr sptr, tptr;\
-        for (sptr = (S)+(OFFSET), tptr = (T)+(OFFSET); /* Nothing */;\
-             sptr++, tptr++)\
-        {\
-          Seqpos ccs, cct;\
-          Uchar tmpsvar, tmptvar;\
-          if (maxdepth->defined)\
-          {\
-            ccs = DEREFMAXDEPTH(tmpsvar,S,sptr);\
-            cct = DEREFMAXDEPTH(tmptvar,T,tptr);\
-          } else\
-          {\
-            ccs = DEREF(tmpsvar,sptr);\
-            cct = DEREF(tmptvar,tptr);\
-          }\
-          if (ccs != cct)\
-          {\
-            LL = (Seqpos) (tptr - (T));\
-            RET = (ccs < cct) ? -1 : 1;\
-            break;\
-          }\
-        }
-#endif
-
 #define SWAP(A,B)\
         if ((A) != (B))\
         {\
@@ -118,7 +86,7 @@
           if ((WIDTH) <= (BORDER))\
           {\
             insertionsort(encseq,lcpsubtab,readmode,totallength,\
-                          DEPTH,LEFT,RIGHT,maxdepth);\
+                          DEPTH,LEFT,RIGHT,maxdepth,cmpcharbychar);\
           } else\
           {\
             PUSHMKVSTACK(LEFT,RIGHT,DEPTH);\
@@ -208,22 +176,59 @@ static void insertionsort(const Encodedsequence *encseq,
                           Seqpos depth,
                           Suffixptr *leftptr,
                           Suffixptr *rightptr,
-                          UNUSED const Definedunsignedint *maxdepth)
+                          const Definedunsignedint *maxdepth,
+                          bool cmpcharbychar)
 {
   Suffixptr *pi, *pj;
-  Seqpos lcpindex, lcplen;
+  Seqpos lcpindex, lcplen = 0;
   int retval;
-#ifdef  FASTSTRINGCOMPARE
-  Encodedsequencescanstate *esr1, *esr2;
-  esr1 = newEncodedsequencescanstate();
-  esr2 = newEncodedsequencescanstate();
-#endif
+  Suffixptr sptr, tptr, temp;
+  Encodedsequencescanstate *esr1 = NULL, *esr2 = NULL;
+
+  if (!cmpcharbychar && hasspecialranges(encseq))
+  {
+    esr1 = newEncodedsequencescanstate();
+    esr2 = newEncodedsequencescanstate();
+  }
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
     for (pj = pi; pj > leftptr; pj--)
     {
-      Suffixptr temp;
-      STRINGCOMPARE(retval,*(pj-1),*pj,depth,lcplen);
+      if (cmpcharbychar)
+      {
+        for (sptr = (*(pj-1))+depth, tptr = (*pj)+depth; /* Nothing */;
+             sptr++, tptr++)
+        {
+          Seqpos ccs, cct;
+          Uchar tmpsvar, tmptvar;
+          if (maxdepth->defined)
+          {
+            ccs = DEREFMAXDEPTH(tmpsvar,*(pj-1),sptr);
+            cct = DEREFMAXDEPTH(tmptvar,*pj,tptr);
+          } else
+          {
+            ccs = DEREF(tmpsvar,sptr);
+            cct = DEREF(tmptvar,tptr);
+          }
+          if (ccs != cct)
+          {
+            lcplen = (Seqpos) (tptr - *pj);
+            retval = (ccs < cct) ? -1 : 1;
+            break;
+          }
+        }
+      } else
+      {
+        if (lcpsubtab != NULL)\
+        {
+          retval = compareEncseqsequences(&lcplen,encseq,readmode,esr1,esr2,
+                                       *(pj-1),*pj,depth,totallength);
+        } else
+        {
+          retval = compareEncseqsequences_nolcp(encseq,readmode,esr1,esr2,
+                                             *(pj-1),*pj,depth,totallength);
+        }
+      }
       if (lcpsubtab != NULL)
       {
         lcpindex = LCPINDEX(pj);
@@ -240,10 +245,11 @@ static void insertionsort(const Encodedsequence *encseq,
       SWAP(pj,pj-1);
     }
   }
-#ifdef  FASTSTRINGCOMPARE
-  freeEncodedsequencescanstate(&esr1);
-  freeEncodedsequencescanstate(&esr2);
-#endif
+  if (!cmpcharbychar && hasspecialranges(encseq))
+  {
+    freeEncodedsequencescanstate(&esr1);
+    freeEncodedsequencescanstate(&esr2);
+  }
 }
 
 typedef struct
@@ -262,8 +268,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Suffixptr *l,
                              Suffixptr *r,
                              Seqpos d,
+                             Lcpsubtab *lcpsubtab,
                              const Definedunsignedint *maxdepth,
-                             Lcpsubtab *lcpsubtab)
+                             bool cmpcharbychar)
 {
   Suffixptr *left, *right, *leftplusw;
   Seqpos w, val, partval, depth, offset, doubleoffset, width;
@@ -273,7 +280,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
   {
-    insertionsort(encseq,lcpsubtab,readmode,totallength,d,l,r,maxdepth);
+    insertionsort(encseq,lcpsubtab,readmode,totallength,d,l,r,maxdepth,
+                  cmpcharbychar);
     return;
   }
   left = l;
@@ -711,8 +719,9 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
-                    const Definedunsignedint *maxdepth,
                     Outlcpinfo *outlcpinfo,
+                    const Definedunsignedint *maxdepth,
+                    bool cmpcharbychar,
                     unsigned long long *bucketiterstep)
 {
   Codetype code;
@@ -785,8 +794,9 @@ void sortallbuckets(Seqpos *suftabptr,
                          suftabptr + bucketspec.left +
                                      bucketspec.nonspecialsinbucket - 1,
                          (Seqpos) prefixlength,
+                         lcpsubtab,
                          maxdepth,
-                         lcpsubtab);
+                         cmpcharbychar);
       }
       if (outlcpinfo != NULL)
       {

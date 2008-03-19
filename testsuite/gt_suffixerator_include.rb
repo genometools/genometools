@@ -6,6 +6,9 @@ def outoptions()
   return outoptionsnobck() + " -bck"
 end
 
+def trials()
+  return "-scantrials 10 -multicharcmptrials 1000"
+end
 
 def checksfx(parts,pl,withsmap,sat,filelist)
   if withsmap == 0
@@ -21,7 +24,7 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   end
   run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
            "#{extra} #{outoptions()} -indexname sfx -db " + filearg
-  run_test "#{$bin}gt dev sfxmap -trials 10 #{outoptions()} -v sfx",
+  run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions()} -v sfx",
            :maxtime => 600
 end
 
@@ -94,7 +97,7 @@ alldir.each do |dir|
      run_test "#{$bin}gt suffixerator -dir #{dir} -tis -suf -bwt -lcp " +
               "-indexname sfx -pl -db " + 
          flattenfilelist(allfiles)
-     run_test "#{$bin}gt suffixerator -fast -dir #{dir} -tis -suf -lcp " +
+     run_test "#{$bin}gt suffixerator -storespecialcodes -dir #{dir} -tis -suf -lcp " +
               "-indexname sfx -pl -db " +
          flattenfilelist(allfiles)
      run_test "#{$bin}gt suffixerator -tis -bwt -lcp -pl -ii sfx"
@@ -104,8 +107,8 @@ end
 runsfxfail "-indexname sfx -db /nothing"
 runsfxfail "-indexname /nothing/sfx -db #{$testdata}TTT-small.fna"
 runsfxfail "-smap /nothing -db #{$testdata}TTT-small.fna"
-runsfxfail "-dna -db #{$testdata}sw100K1.fna"
-runsfxfail "-protein -dir cpl -db #{$testdata}sw100K1.fna"
+runsfxfail "-dna -db #{$testdata}sw100K1.fsa"
+runsfxfail "-protein -dir cpl -db #{$testdata}sw100K1.fsa"
 runsfxfail "-dna -db #{$testdata}Random.fna RandomN.fna"
 runsfxfail "-dna -suf -pl 10 -db #{$testdata}Random.fna"
 runsfxfail "-dna -tis -sat plain -db #{$testdata}TTT-small.fna"
@@ -115,7 +118,7 @@ Keywords "gt_suffixerator"
 Test do
   run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
            "-db #{$testdata}Random.fna"
-  run_test "#{$bin}gt dev sfxmap -tis -suf -des -trials 10 localidx",
+  run_test "#{$bin}gt dev sfxmap -tis -suf -des #{trials()} localidx",
            :retval => 1
 end
 
@@ -146,7 +149,7 @@ end
     Name "gt sfxmap protein #{extraname} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
-      checksfx(parts,3,extra,"direct",["sw100K1.fna","sw100K2.fna"])
+      checksfx(parts,3,extra,"direct",["sw100K1.fsa","sw100K2.fsa"])
     end
   end
 end
@@ -173,7 +176,7 @@ def checkmapped(args)
   Test do
     run_test "#{$bin}gt suffixerator #{outoptions()} -indexname sfxidx #{args}",
              :maxtime => 600
-    run_test "#{$bin}gt dev sfxmap #{outoptions()} -trials 10 -v sfxidx",
+    run_test "#{$bin}gt dev sfxmap #{outoptions()} #{trials()} -v sfxidx",
              :maxtime => 600
     run_test "#{$bin}gt dev sfxmap #{outoptionsnobck()} -stream -v sfxidx",
              :maxtime => 600

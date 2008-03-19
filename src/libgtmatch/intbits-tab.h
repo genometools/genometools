@@ -21,6 +21,15 @@
 #include "intbits.h"
 #include "spacedef.h"
 
+#define DIVWORDSIZE(I)\
+        ((I) >> LOGWORDSIZE)              /* \((I) div w\) */
+
+#define MODWORDSIZE(I)\
+        ((I) & (INTWORDSIZE-1))           /* \((I) mod w\) */
+
+#define MULWORDSIZE(I)\
+        ((I) << LOGWORDSIZE)              /* \((I) * w\) */
+
 /*
   The following defines the number of integers for a bitvector with N bits.
 */
@@ -72,5 +81,12 @@
 */
 
 #define ISIBITSET(TAB,I)  ((TAB)[DIVWORDSIZE(I)] & ITHBIT(MODWORDSIZE(I)))
+
+/*
+  \texttt{BITNUM2WORD(TAB,I)} delivers the integer containing
+  the \texttt{I}-th bit.
+*/
+
+#define BITNUM2WORD(TAB,I)  (TAB)[DIVWORDSIZE(I)]
 
 #endif

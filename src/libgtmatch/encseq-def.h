@@ -28,7 +28,7 @@
 #include "readmode-def.h"
 #include "verbose-def.h"
 
-#define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))
+#define REVERSEPOS(TOTALLENGTH,POS) ((TOTALLENGTH) - 1 - (POS))
 
 #ifdef DEBUG
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
@@ -172,6 +172,8 @@ bool hasspecialranges(const Encodedsequence *encseq);
 
 bool hasfastspecialrangeenumerator(const Encodedsequence *encseq);
 
+bool possibletocmpbitwise(const Encodedsequence *encseq);
+
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
 
 void freespecialrangeiterator(Specialrangeiterator **sri);
@@ -183,14 +185,30 @@ void encseqextract(Uchar *buffer,
                    Seqpos frompos,
                    Seqpos topos);
 
-void checkextractunitatpos(const Encodedsequence *encseq);
+void checkextractunitatpos(const Encodedsequence *encseq,bool fwd);
+
+void multicharactercompare_withtest(const Encodedsequence *encseq,
+                                    Readmode readmode,
+                                    Encodedsequencescanstate *esr1,
+                                    Seqpos pos1,
+                                    Encodedsequencescanstate *esr2,
+                                    Seqpos pos2);
 
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
+                           Readmode readmode,
                            Encodedsequencescanstate *esr1,
                            Encodedsequencescanstate *esr2,
                            Seqpos pos1,Seqpos pos2,
                            Seqpos depth,
                            UNUSED Seqpos totallength);
+
+int compareEncseqsequences_nolcp(const Encodedsequence *encseq,
+                                 Readmode readmode,
+                                 Encodedsequencescanstate *esr1,
+                                 Encodedsequencescanstate *esr2,
+                                 Seqpos pos1,Seqpos pos2,
+                                 Seqpos depth,
+                                 UNUSED Seqpos totallength);
 
 #endif

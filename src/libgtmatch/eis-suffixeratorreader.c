@@ -48,8 +48,7 @@ struct sfxInterface
 {
   Readmode readmode;
   unsigned int prefixlength, numofparts;
-  const Definedunsignedint *maxdepth;
-  bool dofast;
+  const Sfxstrategy *sfxstrategy;
   Measuretime *mtime;
   Seqpos length;
   const Alphabet *alpha;
@@ -86,8 +85,7 @@ extern sfxInterface *
 newSfxInterface(Readmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
-                const Definedunsignedint *maxdepth,
-                bool dofast,
+                const Sfxstrategy *sfxstrategy,
                 const Encodedsequence *encseq,
                 const Specialcharinfo *specialcharinfo,
                 unsigned long numofsequences,
@@ -99,8 +97,8 @@ newSfxInterface(Readmode readmode,
                 Error *err)
 {
   return newSfxInterfaceWithReaders(readmode, prefixlength,
-                                    numofparts, maxdepth,
-                                    dofast, 0, NULL, NULL, encseq,
+                                    numofparts,
+                                    sfxstrategy, 0, NULL, NULL, encseq,
                                     specialcharinfo, numofsequences, mtime,
                                     length, alpha, characterdistribution,
                                     verbosity, err);
@@ -148,8 +146,7 @@ extern sfxInterface *
 newSfxInterfaceWithReaders(Readmode readmode,
                            unsigned int prefixlength,
                            unsigned int numofparts,
-                           const Definedunsignedint *maxdepth,
-                           bool dofast,
+                           const Sfxstrategy *sfxstrategy,
                            size_t numReaders,
                            enum sfxDataRequest *requests,
                            listenerID *ids,
@@ -182,10 +179,9 @@ newSfxInterfaceWithReaders(Readmode readmode,
                                     getnumofcharsAlphabet(alpha),
                                     getcharactersAlphabet(alpha),
                                     prefixlength,
-                                    maxdepth,
                                     numofparts,
                                     NULL,
-                                    dofast,
+                                    sfxstrategy,
                                     iface->mtime,
                                     verbosity, err)))
     newSfxInterfaceWithReadersErrRet();

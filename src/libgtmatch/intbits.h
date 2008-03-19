@@ -62,12 +62,6 @@ typedef uint32_t Bitstring;
         (EXCEPTFIRSTBIT >> 2)             /* \(0001^{w-3}\) */
 #define EXCEPTFIRSTFOURBITS\
         (EXCEPTFIRSTBIT >> 3)             /* \(00001^{w-4}\) */
-#define DIVWORDSIZE(I)\
-        ((I) >> LOGWORDSIZE)              /* \((I) div w\) */
-#define MODWORDSIZE(I)\
-        ((I) & (INTWORDSIZE-1))           /* \((I) mod w\) */
-#define MULWORDSIZE(I)\
-        ((I) << LOGWORDSIZE)              /* \((I) * w\) */
 
 /*@unused@*/ static inline void byte2string(char *buffer,unsigned char bs)
 {

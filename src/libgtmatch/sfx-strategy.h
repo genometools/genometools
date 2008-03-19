@@ -15,44 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_OPTDEF_H
-#define SFX_OPTDEF_H
+#ifndef SFX_STRATEGY_H
+#define SFX_STRATEGY_H
 
 #include <stdbool.h>
-#include "libgtcore/str.h"
-#include "libgtcore/strarray.h"
-#include "readmode-def.h"
 #include "defined-types.h"
-#include "sfx-strategy.h"
-#include "eis-bwtconstruct_params.h"
-
-#define PREFIXLENGTH_AUTOMATIC 0
-#define MAXDEPTH_AUTOMATIC     0
 
 typedef struct
 {
-  unsigned int numofparts,
-               prefixlength;
   Definedunsignedint maxdepth;
-  Str *str_inputindex,
-      *str_indexname,
-      *str_smap,
-      *str_sat;
-  StrArray *filenametab;
-  Readmode readmode;
-  bool isdna,
-       isprotein,
-       isplain,
-       beverbose,
-       outtistab,
-       outsuftab,
-       outlcptab,
-       outbwttab,
-       outdestab,
-       outbcktab,
-       showtime;
-  Sfxstrategy sfxstrategy;
-  struct bwtOptions bwtIdxParams;
-} Suffixeratoroptions;
+  bool cmpcharbychar, /* compare suffixes character by character instead
+                         of comparing entire words (only for two bit
+                         encoding */
+       storespecialcodes;
+} Sfxstrategy;
 
 #endif

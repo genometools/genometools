@@ -47,8 +47,9 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
-                    const Definedunsignedint *maxdepth,
                     Outlcpinfo *outlcpinfo,
+                    const Definedunsignedint *maxdepth,
+                    bool cmpcharbychar,
                     unsigned long long *bucketiterstep);
 
 #endif

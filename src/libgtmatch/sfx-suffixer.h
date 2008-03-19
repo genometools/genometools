@@ -20,6 +20,7 @@
 #include "libgtcore/error.h"
 #include "readmode-def.h"
 #include "measure-time-if.h"
+#include "sfx-strategy.h"
 #include "sfx-outlcp.h"
 #include "verbose-def.h"
 #include "seqpos-def.h"
@@ -35,10 +36,9 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int numofchars,
                             const Uchar *characters,
                             unsigned int prefixlength,
-                            const Definedunsignedint *maxdepth,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
-                            bool dofast,
+                            const Sfxstrategy *sfxstrategy,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
                             Error *err);

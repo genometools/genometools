@@ -150,13 +150,13 @@ end
 Name "gt bioseq -seqlengthdistri"
 Keywords "gt_bioseq"
 Test do
-  run_test "#{$bin}gt bioseq -seqlengthdistri #{$testdata}sw100K1.fna"
+  run_test "#{$bin}gt bioseq -seqlengthdistri #{$testdata}sw100K1.fsa"
   run "diff #{$last_stdout} #{$testdata}gt_bioseq_seqlengthdistri.out"
 end
 
 Name "gt bioseq -showseqnum 1.5"
 Keywords "gt_bioseq"
 Test do
-  run_test("#{$bin}gt bioseq -showseqnum 1.5 #{$testdata}sw100K1.fna",
+  run_test("#{$bin}gt bioseq -showseqnum 1.5 #{$testdata}sw100K1.fsa",
            :retval => 1)
 end
