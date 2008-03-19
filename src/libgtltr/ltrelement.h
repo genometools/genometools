@@ -43,18 +43,21 @@ typedef struct LTRElement {
                 *rightTSD,
                 *ppt,
                 *pbs;
+  unsigned long seqnr;
   Array *pdoms;
 } LTRElement;
 
 unsigned long ltrelement_length(LTRElement *e);
-char* ltrelement_get_sequence(unsigned long start, unsigned long end,
-                              Strand strand, Seq *seq, Error *err);
+char*         ltrelement_get_sequence(unsigned long start, unsigned long end,
+                                      Strand strand, Seq *seq, Error *err);
 unsigned long ltrelement_leftltrlen(LTRElement *e);
 unsigned long ltrelement_rightltrlen(LTRElement *e);
-void ltrelement_offset2pos(LTRElement *e, Range *rng,
-                           unsigned long radius,
-                           enum Offset o,
-                           Strand strand);
+void          ltrelement_offset2pos(LTRElement *e, Range *rng,
+                                    unsigned long radius,
+                                    enum Offset o,
+                                    Strand strand);
+int           ltrelement_format_description(LTRElement *e, char *buf,
+                                            size_t buflen);
 
-int ltrelement_unit_test(Error *err);
+int           ltrelement_unit_test(Error *err);
 #endif

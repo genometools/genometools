@@ -16,7 +16,6 @@
 */
 
 #include <string.h>
-#include "libgtcore/log.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/range.h"
 #include "libgtcore/str.h"
@@ -162,9 +161,6 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
            element, &ppt_results, ls->ppt_opts);
   if (ppt_results.best_hit)
   {
-    log_log("    PPT: \tscore: %f \t(%c)\n",
-            ppt_results.best_hit->score,
-            STRANDCHARS[ppt_results.best_hit->strand]);
     ppt_attach_results_to_gff3(&ppt_results, element,
                                ls->ltrdigest_tag, ls->pbs_opts->radius);
     genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
@@ -179,15 +175,10 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
              element, &pbs_results, ls->pbs_opts, err);
      if (pbs_results.best_hit)
      {
-      log_log("    PBS: \tscore: %f \t(%c, %s)\n",
-              pbs_results.best_hit->score,
-              STRANDCHARS[pbs_results.best_hit->strand],
-              pbs_results.best_hit->trna);
       pbs_attach_results_to_gff3(&pbs_results, element,
                                  ls->ltrdigest_tag, ls->pbs_opts->radius);
       genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
                                 pbs_results.best_hit->strand);
-
      }
   }
 
@@ -244,12 +235,6 @@ int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   if(ls->element.mainnode)
   {
     unsigned long seqid;
-    log_log("%lu %lu %lu %lu %lu %lu\n", ls->element.leftLTR_5,
-                                         ls->element.rightLTR_3,
-                                         ls->element.leftLTR_5,
-                                         ls->element.leftLTR_3,
-                                         ls->element.rightLTR_5,
-                                         ls->element.rightLTR_3);
 
     /* TODO: use MD5 hashes to identify sequence */
     const char *sreg = str_get(genome_node_get_seqid((GenomeNode*) ls->element.mainnode));

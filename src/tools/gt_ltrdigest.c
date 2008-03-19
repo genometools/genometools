@@ -38,8 +38,8 @@ typedef struct LTRdigestOptions {
   PPTOptions  ppt_opts;
   PdomOptions pdom_opts;
   Str *trna_lib;
-  Str *taboutfile;
-  bool verbose, withmetadata;
+  Str *prefix;
+  bool verbose;
   OutputFileInfo *ofi;
   GenFile *outfp;
 } LTRdigestOptions;
@@ -50,7 +50,7 @@ static void* gt_ltrdigest_arguments_new(void)
   memset(arguments, 0, sizeof *arguments);
   arguments->pdom_opts.hmm_files = strarray_new();
   arguments->trna_lib = str_new();
-  arguments->taboutfile = str_new();
+  arguments->prefix = str_new();
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -61,7 +61,7 @@ static void gt_ltrdigest_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   strarray_delete(arguments->pdom_opts.hmm_files);
   str_delete(arguments->trna_lib);
-  str_delete(arguments->taboutfile);
+  str_delete(arguments->prefix);
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
   ma_free(arguments);
@@ -82,13 +82,13 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   /* PPT search options */
 
   o = option_new_uint("pptminlen",
-                      "minimum PPT length",
+                      "minimal required PPT length",
                       &arguments->ppt_opts.ppt_minlen,
                       6);
   option_parser_add_option(op, o);
 
   o = option_new_uint("uboxminlen",
-                      "minimum U-box length",
+                      "minimal required U-box length",
                       &arguments->ppt_opts.ubox_minlen,
                       3);
   option_parser_add_option(op, o);
@@ -104,13 +104,14 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 
   ot = option_new_filename("trnas",
                           "tRNA library in multiple FASTA format for PBS "
-                          "detection",
+                          "detection\n"
+                          "Omit this option to disable PBS search.",
                           arguments->trna_lib);
   option_parser_add_option(op, ot);
   option_hide_default(ot);
 
   o = option_new_uint("pbsaliminlen",
-                      "minimum length of PBS/tRNA alignments",
+                      "minimal required length of PBS/tRNA alignments",
                       &arguments->pbs_opts.ali_min_len,
                       11);
   option_parser_add_option(op, o);
@@ -149,13 +150,14 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 
   oh = option_new_filenamearray("hmms",
                                "profile HMM models for domain detection "
-                               "(separate by spaces, finish with --) in HMMER "
-                               "2.0 format",
+                               "(separate by spaces, finish with --) in HMMER"
+                               "2 format\n"
+                               "Omit this option to disable pHMM search.",
                                arguments->pdom_opts.hmm_files);
   option_parser_add_option(op, oh);
 
   o = option_new_probability("pdomevalcutoff",
-                             "E-value cutoff for HMMER protein domain search",
+                             "E-value cutoff for pHMM search",
                              &arguments->pdom_opts.evalue_cutoff,
                              0.000001);
   option_parser_add_option(op, o);
@@ -163,7 +165,8 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_imply(o, oh);
 
   o = option_new_uint_min("threads",
-                          "number of threads to use in HMMER scanning",
+                          "number of concurrent worker threads to use in "
+                          "pHMM scanning",
                           &arguments->pdom_opts.nof_threads,
                           2, 1);
   option_parser_add_option(op, o);
@@ -202,19 +205,15 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_is_extended_option(o);
   option_imply(o, ot);
 
-  /* Tabular output file */
-  oto = option_new_filename("taboutfile",
-                          "filename for tabular output including sequences",
-                          arguments->taboutfile);
+  /* Output files */
+  oto = option_new_string("outfileprefix",
+                          "prefix for output files (e.g. 'foo' will create "
+                          "files called 'foo_*.csv' and 'foo_*.fas')\n"
+                          "Omit this option for GFF3 output only.",
+                          arguments->prefix,
+                          NULL);
   option_parser_add_option(op, oto);
   option_hide_default(oto);
-
-  o = option_new_bool("tabmeta",
-                      "output metadata about this run into tabular outfile",
-                      &arguments->withmetadata,
-                      true);
-  option_parser_add_option(op, o);
-  option_imply(o, oto);
 
   /* verbosity */
   o = option_new_verbose(&arguments->verbose);
@@ -233,7 +232,6 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
                                  Error* err)
 {
   LTRdigestOptions *arguments = tool_arguments;
-  FILE *fp = NULL;
   int had_err  = 0;
 
   /* TODO: more checks */
@@ -247,17 +245,7 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
       had_err = -1;
     }
   }
-  /* -taboutfile */
-  if (!had_err && arguments->taboutfile
-        && str_length(arguments->taboutfile) > 0)
-  {
-    if (!(fp = fopen(str_get(arguments->taboutfile),"w+")))
-    {
-      error_set(err, "Could not open tabular outfile '%s'!",
-                     str_get(arguments->taboutfile));
-      had_err = -1;
-    } else fclose(fp);
-  }
+
   return had_err;
 }
 
@@ -271,7 +259,6 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                *tab_out_stream   = NULL,
                *last_stream      = NULL;
   GenomeNode *gn;
-  FILE *fp = NULL;
 
   int had_err = 0;
   error_check(err);
@@ -320,13 +307,11 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                                             &arguments->pdom_opts);
 
     /* attach tabular output stream, if requested */
-    if (arguments->taboutfile
-          && (fp = fopen(str_get(arguments->taboutfile),"w+")))
+    if (str_length(arguments->prefix) > 0)
     {
       tab_out_stream = ltr_fileout_stream_new(ltrdigest_stream,
                                               bioseq,
-                                              fp,
-                                              arguments->withmetadata,
+                                              str_get(arguments->prefix),
                                               &arguments->ppt_opts,
                                               &arguments->pbs_opts,
                                               &arguments->pdom_opts,
@@ -353,7 +338,6 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
     if (tab_out_stream)
     {
       genome_stream_delete(tab_out_stream);
-      fclose(fp);
     }
     genome_stream_delete(gff3_in_stream);
     pdom_clear_hmms(arguments->pdom_opts.plan7_ts);

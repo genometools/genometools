@@ -18,10 +18,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/fasta.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/range.h"
 #include "libgtcore/str.h"
-#include "libgtcore/unused.h"
 #include "libgtext/genome_stream_rep.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
@@ -29,11 +30,18 @@
 #include "libgtltr/ltrfileout_stream.h"
 #include "libgtltr/ltr_visitor.h"
 
+#define FSWIDTH 60
+
 struct LTRFileOutStream {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
   Bioseq *bioseq;
-  FILE *fp;
+  const char *fileprefix;
+  GenFile *metadata_file,
+          *tabout_file,
+          *pbsout_file,
+          *pptout_file;
+  Hashtable *pdomout_files;
   LTRVisitor *lv;
   LTRElement element;
 };
@@ -74,18 +82,19 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   {
     unsigned long seqid, i;
 
-    /* find sequence */
+    /* find sequence in Bioseq multifasta */
     const char *sreg = str_get(genome_node_get_seqid((GenomeNode*)
                                                      ls->element.mainnode));
     sscanf(sreg,"seq%lu", &seqid);
     Seq *seq = bioseq_get_seq(ls->bioseq, seqid);
-
-    lltr_rng = genome_node_get_range((GenomeNode*) ls->element.leftLTR);
-    rltr_rng = genome_node_get_range((GenomeNode*) ls->element.rightLTR);
+    ls->element.seqnr = seqid;
 
     /* output basic retrotransposon data */
+    lltr_rng = genome_node_get_range((GenomeNode*) ls->element.leftLTR);
+    rltr_rng = genome_node_get_range((GenomeNode*) ls->element.rightLTR);
     rng = genome_node_get_range((GenomeNode*) ls->element.mainnode);
-    fprintf(ls->fp, "%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t",
+    genfile_xprintf(ls->tabout_file,
+                    "%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t",
                     rng.start,
                     rng.end,
                     ltrelement_length(&ls->element),
@@ -100,30 +109,43 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     if (ls->element.ppt)
     {
       Strand ppt_strand;
+      char desc[BUFSIZ];
       ppt_strand = genome_feature_get_strand(ls->element.ppt);
       ppt_rng = genome_node_get_range((GenomeNode*) ls->element.ppt);
       ppt_seq = ltrelement_get_sequence(ppt_rng.start, ppt_rng.end,
                                         ppt_strand,
                                         seq, e);
-      fprintf(ls->fp, "%lu\t%lu\t%s\t%c\t%d\t", ppt_rng.start, ppt_rng.end,
+      ltrelement_format_description(&ls->element, desc, BUFSIZ-1);
+      fasta_show_entry_generic(desc, ppt_seq, range_length(ppt_rng), FSWIDTH,
+                               ls->pptout_file);
+      genfile_xprintf(ls->tabout_file,
+                      "%lu\t%lu\t%s\t%c\t%d\t",
+                      ppt_rng.start,
+                      ppt_rng.end,
                       ppt_seq,
                       STRANDCHARS[ppt_strand],
                       (ppt_strand == STRAND_FORWARD ?
                           abs(rltr_rng.start - ppt_rng.end) :
                           abs(lltr_rng.end - ppt_rng.start)));
       ma_free((char*) ppt_seq);
-    } else fprintf(ls->fp, "\t\t\t\t\t");
+    } else genfile_xprintf(ls->tabout_file, "\t\t\t\t\t");
 
     /* output PBS */
     if (ls->element.pbs)
     {
       Strand pbs_strand;
+      char desc[BUFSIZ];
+
       pbs_strand = genome_feature_get_strand(ls->element.pbs);
       pbs_rng = genome_node_get_range((GenomeNode*) ls->element.pbs);
       pbs_seq = ltrelement_get_sequence(pbs_rng.start, pbs_rng.end,
                                         pbs_strand,
                                         seq, e);
-      fprintf(ls->fp, "%lu\t%lu\t%c\t%s\t%s\t%s\t%s\t%s\t",
+      ltrelement_format_description(&ls->element, desc, BUFSIZ-1);
+      fasta_show_entry_generic(desc, pbs_seq, range_length(pbs_rng), FSWIDTH,
+                               ls->pbsout_file);
+      genfile_xprintf(ls->tabout_file,
+                      "%lu\t%lu\t%c\t%s\t%s\t%s\t%s\t%s\t",
                       pbs_rng.start,
                       pbs_rng.end,
                       STRANDCHARS[pbs_strand],
@@ -137,20 +159,25 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                       genome_feature_get_attribute((GenomeNode*)
                                               ls->element.pbs, "edist"));
       ma_free((char*) pbs_seq);
-    } else fprintf(ls->fp, "\t\t\t\t\t\t\t\t");
+    } else genfile_xprintf(ls->tabout_file, "\t\t\t\t\t\t\t\t");
 
     /* output protein domains */
     if(array_size(ls->element.pdoms) > 0)
     {
+      char desc[BUFSIZ];
       pdoms = str_new();
+      ltrelement_format_description(&ls->element, desc, BUFSIZ-1);
       if(STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
         array_reverse(ls->element.pdoms);
       for (i=0;i<array_size(ls->element.pdoms);i++)
       {
+        GenFile *genfile = NULL;
+        Range pdom_rng;
         GenomeFeature *gf = *(GenomeFeature**) array_get(ls->element.pdoms, i);
-        str_append_cstr(pdoms,
-                        genome_feature_get_attribute((GenomeNode*)gf,
-                                                     "pfamname"));
+        char *pdom_seq;
+        const char *pfamname = genome_feature_get_attribute((GenomeNode*)gf,
+                                                            "pfamname");
+        str_append_cstr(pdoms, pfamname);
         str_append_cstr(pdoms,"(");
         str_append_ulong(pdoms, (unsigned long) genome_feature_get_phase(gf));
         str_append_char(pdoms, STRANDCHARS[genome_feature_get_strand(gf)]);
@@ -158,20 +185,135 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
         str_append_cstr(pdoms,")");
         if (i != array_size(ls->element.pdoms)-1)
           str_append_cstr(pdoms, "/");
+
+        /* get protein domain output file name */
+        genfile = (GenFile*) hashtable_get(ls->pdomout_files, pfamname);
+        if (genfile == NULL)
+        {
+          /* no file opened for this domain yet, do it */
+          char buffer[BUFSIZ];
+          snprintf(buffer, BUFSIZ-1, "%s_pdom_%s.fas",
+                   ls->fileprefix, pfamname);
+          genfile = genfile_open(GFM_UNCOMPRESSED, buffer, "w+");
+          hashtable_add(ls->pdomout_files, cstr_dup(pfamname), genfile);
+        }
+        pdom_rng = genome_node_get_range((GenomeNode*) gf);
+        pdom_seq = ltrelement_get_sequence(pdom_rng.start,
+                                           pdom_rng.end,
+                                           genome_feature_get_strand(gf),
+                                           seq, e);
+        /* write out sequence to file */
+        fasta_show_entry_generic(desc,
+                                 pdom_seq,
+                                 range_length(pdom_rng),
+                                 FSWIDTH,
+                                 genfile);
+        ma_free(pdom_seq);
       }
-      fprintf(ls->fp,"%s", str_get(pdoms));
+      /* write domains to tabular outfile */
+      genfile_xprintf(ls->tabout_file, "%s", str_get(pdoms));
       str_delete(pdoms);
     }
-    array_delete(ls->element.pdoms);
   }
-  fprintf(ls->fp, "\n");
-  fflush(ls->fp);
+  array_delete(ls->element.pdoms);
+  genfile_xprintf(ls->tabout_file, "\n");
   return had_err;
+}
+
+static void write_metadata(GenFile *metadata_file,
+                           PPTOptions *ppt_opts,
+                           PBSOptions *pbs_opts,
+                           PdomOptions *pdom_opts,
+                           const char *trnafilename,
+                           const char *seqfilename,
+                           const char *gfffilename)
+{
+  unsigned long i;
+  char buffer[PATH_MAX+1];
+  bool has_cwd;
+
+  /* get working directory */
+  memset(buffer, 0, PATH_MAX+1);
+  has_cwd = (getcwd(buffer, PATH_MAX) != NULL);
+
+  /* append working dir to relative paths if necessary */
+  if (seqfilename[0] != '/' && has_cwd)
+    genfile_xprintf(metadata_file,
+                    "Sequence file used\t%s/%s\n", buffer, seqfilename);
+  else
+    genfile_xprintf(metadata_file,
+                    "Sequence file used\t%s\n", seqfilename);
+  if (gfffilename[0] != '/' && has_cwd)
+    genfile_xprintf(metadata_file,
+                    "GFF3 input used\t%s/%s\n", buffer, gfffilename);
+  else
+    genfile_xprintf(metadata_file,
+                    "GFF3 input used\t%s\n", gfffilename);
+  genfile_xprintf(metadata_file,
+                  "PPT minimum length\t%u\t6\n", ppt_opts->ppt_minlen);
+  genfile_xprintf(metadata_file,
+                  "U-box minimum length\t%u\t3\n", ppt_opts->ubox_minlen);
+  genfile_xprintf(metadata_file,
+                  "PPT search radius\t%u\t30\n", ppt_opts->radius);
+  if (strcmp(trnafilename, "") != 0)
+  {
+    if (trnafilename[0] != '/' && has_cwd)
+      genfile_xprintf(metadata_file,
+                      "tRNA library for PBS detection\t%s/%s\n",
+                      buffer, trnafilename);
+    else
+      genfile_xprintf(metadata_file,
+                       "tRNA library for PBS detection\t%s\n",
+                       trnafilename);
+    genfile_xprintf(metadata_file,
+                    "PBS/tRNA minimum alignment length\t%u\t11\n",
+                    pbs_opts->ali_min_len);
+    genfile_xprintf(metadata_file,
+                    "PBS/tRNA maximum unit edit distance\t%u\t1\n",
+                    pbs_opts->max_edist);
+    genfile_xprintf(metadata_file,
+                    "PBS max offset from 5' LTR end\t%u\t5\n",
+                    pbs_opts->max_offset);
+    genfile_xprintf(metadata_file,
+                    "tRNA max offset from 3' end\t%u\t10\n",
+                    pbs_opts->max_offset_trna);
+    genfile_xprintf(metadata_file,
+                    "PBS search radius\t%d\t30\n", pbs_opts->radius);
+  }
+  if (array_size(pdom_opts->plan7_ts) > 0)
+  {
+    genfile_xprintf(metadata_file,
+                    "Protein domains\t%lu (",
+                    array_size(pdom_opts->plan7_ts));
+    for (i=0;i<array_size(pdom_opts->plan7_ts);i++)
+    {
+      struct plan7_s *model = *(struct plan7_s **)
+                                      array_get(pdom_opts->plan7_ts, i);
+      genfile_xprintf(metadata_file, "%s", model->name);
+      if (i != array_size(pdom_opts->plan7_ts)-1)
+        genfile_xprintf(metadata_file, ", ");
+    }
+    genfile_xprintf(metadata_file, ")\n");
+    genfile_xprintf(metadata_file,
+                    "pHMM e-value cutoff \t%g\t%g\n",
+                    pdom_opts->evalue_cutoff,
+                    0.000001);
+  }
+  genfile_xprintf(metadata_file, "\n");
 }
 
 void ltr_fileout_stream_free(GenomeStream *gs)
 {
   LTRFileOutStream *ls = ltr_fileout_stream_cast(gs);
+  if (ls->tabout_file)
+    genfile_close(ls->tabout_file);
+  if (ls->metadata_file)
+    genfile_close(ls->metadata_file);
+  if (ls->pbsout_file)
+    genfile_close(ls->pbsout_file);
+  if (ls->pptout_file)
+    genfile_close(ls->pptout_file);
+  hashtable_delete(ls->pdomout_files);
   genome_visitor_delete((GenomeVisitor*) ls->lv);
   genome_stream_delete(ls->in_stream);
 }
@@ -186,8 +328,7 @@ const GenomeStreamClass* ltr_fileout_stream_class(void)
 
 GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
                                      Bioseq *bioseq,
-                                     FILE *fp,
-                                     bool with_metadata,
+                                     char *file_prefix,
                                      PPTOptions *ppt_opts,
                                      PBSOptions *pbs_opts,
                                      PdomOptions *pdom_opts,
@@ -197,82 +338,55 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
 {
   GenomeStream *gs;
   LTRFileOutStream *ls;
-  char buffer[PATH_MAX+1];
+  char fn[BUFSIZ];
 
-  assert(fp && in_stream && bioseq && ppt_opts && pbs_opts && pdom_opts);
+  assert(file_prefix && in_stream && bioseq && ppt_opts
+          && pbs_opts && pdom_opts);
 
   gs = genome_stream_create(ltr_fileout_stream_class(), true);
   ls = ltr_fileout_stream_cast(gs);
+
+  /* ref GFF input stream and sequences*/
   ls->in_stream = genome_stream_ref(in_stream);
   ls->bioseq = bioseq;
-  ls->fp = fp;
 
-  if (with_metadata)
-  {
-    unsigned long i;
-    bool has_cwd;
-    /* get current working dir */
-    memset(buffer, 0, PATH_MAX+1);
-    has_cwd = (getcwd(buffer, PATH_MAX) != NULL);
-    /* append working dir to relative paths if necessary */
-    if (seqfilename[0] != '/' && has_cwd)
-      fprintf(fp, "Sequence file used\t%s/%s\n", buffer, seqfilename);
-    else
-      fprintf(fp, "Sequence file used\t%s\n", seqfilename);
-    if (gfffilename[0] != '/' && has_cwd)
-      fprintf(fp, "GFF3 input used\t%s/%s\n", buffer, gfffilename);
-    else
-      fprintf(fp, "GFF3 input used\t%s\n", gfffilename);
-    fprintf(fp, "PPT minimum length\t%i\t6\n", ppt_opts->ppt_minlen);
-    fprintf(fp, "U-box minimum length\t%d\t3\n", ppt_opts->ubox_minlen);
-    fprintf(fp, "PPT search radius\t%d\t30\n", ppt_opts->radius);
-    if (strcmp(trnafilename, "") != 0)
-    {
-      if (trnafilename[0] != '/' && has_cwd)
-        fprintf(fp, "tRNA library for PBS detection\t%s/%s\n",
-                                              buffer, trnafilename);
-      else
-        fprintf(fp, "tRNA library for PBS detection\t%s\n",
-                                              trnafilename);
-      fprintf(fp, "PBS/tRNA minimum alignment length\t%d\t11\n",
-                                              pbs_opts->ali_min_len);
-      fprintf(fp, "PBS/tRNA maximal unit edit distance\t%d\t1\n",
-                                              pbs_opts->max_edist);
-      fprintf(fp, "PBS max offset from 5' LTR end\t%d\t5\n",
-                                              pbs_opts->max_offset);
-      fprintf(fp, "tRNA max offset from 3' end\t%d\t10\n",
-                                              pbs_opts->max_offset_trna);
-      fprintf(fp, "PBS search radius\t%d\t30\n", pbs_opts->radius);
-    }
-    if (array_size(pdom_opts->plan7_ts) > 0)
-    {
-      fprintf(fp, "Protein domains\t%lu (", array_size(pdom_opts->plan7_ts));
-      for (i=0;i<array_size(pdom_opts->plan7_ts);i++)
-      {
-        struct plan7_s *model = *(struct plan7_s **)
-                                        array_get(pdom_opts->plan7_ts, i);
-        fprintf(fp, "%s", model->name);
-        if (i != array_size(pdom_opts->plan7_ts)-1)
-          fprintf(fp, ", ");
-      }
-      fprintf(fp, ")\n");
-      fprintf(fp, "pHMM e-value cutoff \t%g\t1.0e-6\n",
-                                         pdom_opts->evalue_cutoff);
-    }
-    fprintf(fp, "\n");
-  }
+  /* open outfiles */
+  ls->fileprefix = file_prefix;
+  snprintf(fn, BUFSIZ-1, "%s_tabout.csv", file_prefix);
+  ls->tabout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
+  snprintf(fn, BUFSIZ-1, "%s_ppt.fas", file_prefix);
+  ls->pptout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
+  snprintf(fn, BUFSIZ-1, "%s_pbs.fas", file_prefix);
+  ls->pbsout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
+  snprintf(fn, BUFSIZ-1, "%s_conditions.csv", file_prefix);
+  ls->metadata_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
+  ls->pdomout_files = hashtable_new(HASH_STRING,
+                                    ma_free_func,
+                                    (FreeFunc) genfile_close);
 
-  /* print headline */
-  fprintf(fp, "element start\telement end\telement length\t"
+  /* log run conditions in file */
+  write_metadata(ls->metadata_file,
+                 ppt_opts,
+                 pbs_opts,
+                 pdom_opts,
+                 trnafilename,
+                 seqfilename,
+                 gfffilename);
+
+  /* print tabular outfile headline */
+  genfile_xprintf(ls->tabout_file,
+              "element start\telement end\telement length\t"
               "lLTR start\tlLTR end\tlLTR length\t"
               "rLTR start\trLTR end\trLTR length\t"
               "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset\t");
   if (strcmp(trnafilename, "") != 0)
-    fprintf(fp, "PBS start\tPBS end\tPBS strand\ttRNA\tRNA motif\tPBS offset\t"
-                "tRNA offset\tPBS/tRNA edist\t");
+    genfile_xprintf(ls->tabout_file,
+              "PBS start\tPBS end\tPBS strand\ttRNA\tRNA motif\tPBS offset\t"
+              "tRNA offset\tPBS/tRNA edist\t");
   if (array_size(pdom_opts->plan7_ts) > 0)
-    fprintf(fp, "Protein domain hits\n");
+    genfile_xprintf(ls->tabout_file, "Protein domain hits\n");
 
+  /* create visitor */
   ls->lv = (LTRVisitor*) ltr_visitor_new(&ls->element);
   return gs;
 }

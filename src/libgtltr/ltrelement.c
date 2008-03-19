@@ -106,6 +106,13 @@ void ltrelement_offset2pos(LTRElement *e, Range *rng,
   rng->end = rng->start + len -1 ;
 }
 
+int ltrelement_format_description(LTRElement *e, char *buf, size_t buflen)
+{
+  assert(buf && e);
+  return snprintf(buf, buflen, "seq%lu_%lu_%lu",
+                  e->seqnr, e->leftLTR_5, e->rightLTR_3);
+}
+
 int ltrelement_unit_test(Error *err)
 {
   int had_err = 0;

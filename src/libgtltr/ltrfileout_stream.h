@@ -31,8 +31,7 @@ const GenomeStreamClass* ltr_fileout_stream_class(void);
 
 GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
                                      Bioseq *bioseq,
-                                     FILE *fp,
-                                     bool with_metadata,
+                                     char *file_prefix,
                                      PPTOptions *ppt_opts,
                                      PBSOptions *pbs_opts,
                                      PdomOptions *pdom_opts,
