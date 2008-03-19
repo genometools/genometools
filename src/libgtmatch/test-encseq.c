@@ -195,11 +195,11 @@ int testencodedsequence(const StrArray *filenametab,
   {
     if (readmode == Forwardmode || readmode == Reversemode)
     {
-      checkextractunitatpos(encseq,ISDIRREVERSE(readmode) ? false : true);
-    }
-    if (multicharcmptrials > 0)
-    {
-      testmulticharactercompare(encseq,Forwardmode,multicharcmptrials);
+      checkextractunitatpos(ISDIRREVERSE(readmode) ? false : true,encseq);
+      if (multicharcmptrials > 0)
+      {
+        testmulticharactercompare(encseq,readmode,multicharcmptrials);
+      }
     }
   }
   if (scantrials > 0)

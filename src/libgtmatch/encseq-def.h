@@ -185,7 +185,7 @@ void encseqextract(Uchar *buffer,
                    Seqpos frompos,
                    Seqpos topos);
 
-void checkextractunitatpos(const Encodedsequence *encseq,bool fwd);
+void checkextractunitatpos(bool fwd,const Encodedsequence *encseq);
 
 void multicharactercompare_withtest(const Encodedsequence *encseq,
                                     Readmode readmode,

@@ -18,12 +18,13 @@
 #include "libgtcore/chardef.h"
 #include "encseq-def.h"
 
+
 int comparetwosuffixes(const Encodedsequence *encseq,
                        Readmode readmode,
                        Seqpos *maxlcp,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
-                       Seqpos depth,
+                       Seqpos maxdepth,
                        Seqpos start1,
                        Seqpos start2,
                        Encodedsequencescanstate *esr1,
@@ -34,19 +35,29 @@ int comparetwosuffixes(const Encodedsequence *encseq,
   int retval;
 
   end1 = end2 = getencseqtotallength(encseq);
-  if (depth > 0)
+  if (ISDIRREVERSE(readmode))
   {
-    if (end1 > start1 + depth)
+    printf("maxdepth=%u\n",maxdepth);
+  }
+  if (maxdepth > 0)
+  {
+    if (end1 > start1 + maxdepth)
     {
-      end1 = start1 + depth;
+      end1 = start1 + maxdepth;
     }
-    if (end2 > start2 + depth)
+    if (end2 > start2 + maxdepth)
     {
-      end2 = start2 + depth;
+      end2 = start2 + maxdepth;
     }
   }
-  initEncodedsequencescanstate(esr1,encseq,readmode,start1);
-  initEncodedsequencescanstate(esr2,encseq,readmode,start2);
+  if (esr1 != NULL && esr2 != NULL)
+  {
+    initEncodedsequencescanstate(esr1,encseq,readmode,start1);
+    initEncodedsequencescanstate(esr2,encseq,readmode,start2);
+  } else
+  {
+    assert(esr1 == NULL && esr2 == NULL);
+  }
   for (pos1=start1, pos2=start2; /* Nothing */; pos1++, pos2++)
   {
     if (pos1 >= end1 || pos2 >= end2)
@@ -55,10 +66,22 @@ int comparetwosuffixes(const Encodedsequence *encseq,
       retval = 0;
       break;
     }
-    cc1 = sequentialgetencodedchar(encseq,esr1,pos1);
-    CHECKENCCHAR(cc1,encseq,pos1,readmode);
-    cc2 = sequentialgetencodedchar(encseq,esr2,pos2);
-    CHECKENCCHAR(cc2,encseq,pos2,readmode);
+    if (esr1 != NULL)
+    {
+      cc1 = sequentialgetencodedchar(encseq,esr1,pos1);
+      CHECKENCCHAR(cc1,encseq,pos1,readmode);
+    } else
+    {
+      cc1 = getencodedchar(encseq,pos1,readmode);
+    }
+    if (esr2 != NULL)
+    {
+      cc2 = sequentialgetencodedchar(encseq,esr2,pos2);
+      CHECKENCCHAR(cc2,encseq,pos2,readmode);
+    } else
+    {
+      cc2 = getencodedchar(encseq,pos2,readmode);
+    }
     if (ISSPECIAL(cc1))
     {
       if (ISSPECIAL(cc2))
