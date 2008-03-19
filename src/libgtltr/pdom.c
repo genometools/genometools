@@ -129,7 +129,7 @@ int pdom_load_hmm_files(PdomOptions *opts, Error *err)
 
   assert(opts && err);
 
-  for(i=0;i<strarray_size(opts->hmm_files);i++)
+  for (i=0;i<strarray_size(opts->hmm_files);i++)
   {
     HMMFILE *hmmfp;
     struct plan7_s *hmm;
@@ -164,7 +164,7 @@ int pdom_load_hmm_files(PdomOptions *opts, Error *err)
                      hmm->name);
       exit(EXIT_FAILURE);
     }
-    if(hmmfp) HMMFileClose(hmmfp);
+    if (hmmfp) HMMFileClose(hmmfp);
   }
   log_log("Loaded %lu HMM model(s)\n",
           array_size(opts->plan7_ts));
@@ -181,7 +181,7 @@ void* pdom_per_domain_worker_thread(void *data)
 
   shared = (pdom_shared_s *) data;
 
-  for(;;)
+  for (;;)
   {
     /* Lock input */
     if ((rtn = pthread_mutex_lock(&shared->in_lock)) != 0)
@@ -212,7 +212,7 @@ void* pdom_per_domain_worker_thread(void *data)
       exit(EXIT_FAILURE);
     }
 
-    PdomHit *hit = ma_malloc(sizeof(PdomHit));
+    PdomHit *hit = ma_malloc(sizeof (PdomHit));
     ghit = AllocTophits(20);
     hit->hits_fwd = AllocTophits(20);
     hit->hits_rev = AllocTophits(20);
@@ -233,7 +233,7 @@ void* pdom_per_domain_worker_thread(void *data)
 
     FullSortTophits(hit->hits_fwd);
     FullSortTophits(hit->hits_rev);
-    if(hit->hits_fwd->num > 0 || hit->hits_rev->num > 0)
+    if (hit->hits_fwd->num > 0 || hit->hits_rev->num > 0)
     {
       shared->results->empty = FALSE;
       if (hit->hits_fwd->num > 0)
@@ -391,9 +391,9 @@ void pdom_clear_domain_hit(void *value)
 {
   if (!value) return;
   PdomHit *hit = (PdomHit*) value;
-  if(hit->hits_fwd)
+  if (hit->hits_fwd)
     FreeTophits(hit->hits_fwd);
-  if(hit->hits_rev)
+  if (hit->hits_rev)
     FreeTophits(hit->hits_rev);
   ma_free(hit);
 }
@@ -402,7 +402,7 @@ void pdom_clear_hmms(Array *hmms)
 {
   unsigned long i;
   if (!hmms) return;
-  for(i=0;i<array_size(hmms);i++)
+  for (i=0;i<array_size(hmms);i++)
   {
     FreePlan7(*(struct plan7_s**) array_get(hmms,i));
   }

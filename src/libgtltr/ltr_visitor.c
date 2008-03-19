@@ -39,14 +39,14 @@ static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   assert(lv);
   error_check(err);
 
-  switch(genome_feature_get_type(gf))
+  switch (genome_feature_get_type(gf))
   {
     case gft_LTR_retrotransposon:
       lv->element->mainnode = gf;
       break;
     case gft_long_terminal_repeat:
       /* XXX: check order if unsorted! */
-      if(lv->element->leftLTR == NULL)
+      if (lv->element->leftLTR == NULL)
       {
         node_range = genome_node_get_range((GenomeNode*) gf);
         lv->element->leftLTR = gf;
@@ -63,7 +63,7 @@ static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       break;
     case gft_target_site_duplication:
       /* XXX: check order if unsorted! */
-      if(lv->element->leftTSD == NULL)
+      if (lv->element->leftTSD == NULL)
       {
         lv->element->leftTSD = gf;
       }
@@ -73,13 +73,13 @@ static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       }
       break;
     case gft_RR_tract:
-      if(lv->element->ppt == NULL)
+      if (lv->element->ppt == NULL)
       {
         lv->element->ppt = gf;
       }
       break;
     case gft_primer_binding_site:
-      if(lv->element->pbs == NULL)
+      if (lv->element->pbs == NULL)
       {
         lv->element->pbs = gf;
       }

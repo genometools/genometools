@@ -169,7 +169,7 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
 
   /* PBS finding
    * ----------- */
-  if(ls->pbs_opts->trna_lib)
+  if (ls->pbs_opts->trna_lib)
   {
     pbs_find((const char*) base_seq, (const char*) rev_seq,
              element, &pbs_results, ls->pbs_opts, err);
@@ -227,17 +227,18 @@ int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     GenomeNode *mygn;
     /* fill LTRElement structure from GFF3 subgraph */
     gni = genome_node_iterator_new(*gn);
-    for(mygn = *gn; mygn; mygn = genome_node_iterator_next(gni))
+    for (mygn = *gn; mygn; mygn = genome_node_iterator_next(gni))
       genome_node_accept(mygn, (GenomeVisitor*) ls->lv, e);
     genome_node_iterator_delete(gni);
   }
 
-  if(ls->element.mainnode)
+  if (ls->element.mainnode)
   {
     unsigned long seqid;
+    const char *sreg;
 
     /* TODO: use MD5 hashes to identify sequence */
-    const char *sreg = str_get(genome_node_get_seqid((GenomeNode*) ls->element.mainnode));
+    sreg = str_get(genome_node_get_seqid((GenomeNode*) ls->element.mainnode));
     sscanf(sreg,"seq%lu", &seqid);
     Seq *seq = bioseq_get_seq(ls->bioseq, seqid);
 

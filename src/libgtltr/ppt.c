@@ -166,8 +166,8 @@ void ppt_find(const char *seq,
                *decoded=NULL;
   const Alpha *alpha = alpha_new_dna();
   HMM *hmm = ppt_hmm_new(alpha);
-  Array *results_fwd = array_new(sizeof(PPT_Hit*)),
-        *results_rev = array_new(sizeof(PPT_Hit*));
+  Array *results_fwd = array_new(sizeof (PPT_Hit*)),
+        *results_rev = array_new(sizeof (PPT_Hit*));
   unsigned long i = 0,
                 radius = 0,
                 seqlen = ltrelement_length(element),
@@ -236,7 +236,7 @@ void ppt_clear_results(PPTResults *results)
 
   if (!results) return;
 
-  if(results->hits_fwd)
+  if (results->hits_fwd)
   {
     for (i=0;i<array_size(results->hits_fwd);i++)
     {
@@ -245,7 +245,7 @@ void ppt_clear_results(PPTResults *results)
     }
     array_delete(results->hits_fwd);
   }
-  if(results->hits_fwd)
+  if (results->hits_fwd)
   {
     for (i=0;i<array_size(results->hits_rev);i++)
 

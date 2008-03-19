@@ -162,12 +162,12 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     } else genfile_xprintf(ls->tabout_file, "\t\t\t\t\t\t\t\t");
 
     /* output protein domains */
-    if(array_size(ls->element.pdoms) > 0)
+    if (array_size(ls->element.pdoms) > 0)
     {
       char desc[BUFSIZ];
       pdoms = str_new();
       ltrelement_format_description(&ls->element, desc, BUFSIZ-1);
-      if(STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
+      if (STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
         array_reverse(ls->element.pdoms);
       for (i=0;i<array_size(ls->element.pdoms);i++)
       {

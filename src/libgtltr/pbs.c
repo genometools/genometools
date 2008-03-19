@@ -34,9 +34,9 @@ ScoreFunction* dna_scorefunc_new(Alpha *a, int match, int mismatch,
   ScoreFunction *sf = scorefunction_new(sm, insertion, deletion);
   unsigned int m,n;
 
-  for(m=0;m<5;m++)
+  for (m=0;m<5;m++)
   {
-    for(n=0;n<5;n++)
+    for (n=0;n<5;n++)
     {
       score_matrix_set_score(sm, m,n,(n==m ? match : mismatch));
     }
@@ -97,7 +97,7 @@ int pbs_hit_compare(const void *h1, const void *h2)
   PBS_Hit *hp1 = (PBS_Hit*) h1;
   PBS_Hit *hp2 = (PBS_Hit*) h2;
 
-  if(hp1->score == hp2->score)
+  if (hp1->score == hp2->score)
     return 0;
   else return (hp1->score > hp2->score ? -1 : 1);
 }
@@ -135,7 +135,7 @@ void pbs_find(const char *seq,
                         2*o->radius,
                         a);
 
-  for(j=0;j<bioseq_number_of_sequences(o->trna_lib);j++)
+  for (j=0;j<bioseq_number_of_sequences(o->trna_lib);j++)
   {
     Seq *trna_seq, *trna_from3;
     char *trna_from3_full;
@@ -145,7 +145,7 @@ void pbs_find(const char *seq,
     trna_seqlen = seq_length(trna_seq);
 
     trna_from3_full = ma_malloc(sizeof (char)*trna_seqlen);
-    memcpy(trna_from3_full, seq_get_orig(trna_seq), sizeof(char)*trna_seqlen);
+    memcpy(trna_from3_full, seq_get_orig(trna_seq), sizeof (char)*trna_seqlen);
     reverse_complement(trna_from3_full, trna_seqlen, err);
     trna_from3 = seq_new_own(trna_from3_full, trna_seqlen, a);
 
@@ -189,9 +189,9 @@ void pbs_clear_results(PBSResults *results)
 
     if (!results) return;
 
-    if(results->hits_fwd)
+    if (results->hits_fwd)
     {
-      for(delem = dlist_first(results->hits_fwd);
+      for (delem = dlist_first(results->hits_fwd);
           delem;
           delem = dlistelem_next(delem))
       {
@@ -200,9 +200,9 @@ void pbs_clear_results(PBSResults *results)
       }
       dlist_delete(results->hits_fwd);
     }
-    if(results->hits_rev)
+    if (results->hits_rev)
     {
-      for(delem = dlist_first(results->hits_rev);
+      for (delem = dlist_first(results->hits_rev);
           delem;
           delem = dlistelem_next(delem))
       {
