@@ -17,17 +17,29 @@
 
 #ifdef CURLDEF
 
-#include "libgtmgth/mg_curl.h"
+#include "metagenomethreader.h"
 
-void *myrealloc(void *ptr, size_t size)
+#ifndef S_SPLINT_S
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
+#endif
+
+/* Expat Hilfs-Struktur zum Abspeichern der Hit-DNA-Sequenz und der
+   Hit-DNA-Laenge */
+typedef struct
 {
-  /* There might be a realloc() out there that doesn't like reallocing
-     NULL pointers, so we take care of it here */
-  if (ptr)
-    return realloc(ptr, size);
-  else
-    return malloc(size);
-}
+  char *memory;
+  size_t size;
+} MemoryStruct;
+
+/* Expat-Hilfsfunktion zum Abspeichern der empfangenen Daten
+   Parameter:  void-Zeiger auf den Anfang des Speicherbereichs,
+               Anzahl zu speichernder Elemente, Groesse des zu
+               speichernden Datentyps, void-Zeiger auf die zu
+               speichernden Daten
+   Returnwert: Groesse des neu allokierten Speicherbereichs*/
+size_t WriteMemoryCallback(void *, size_t, size_t, void *);
 
 size_t WriteMemoryCallback(void *ptr,
                            size_t size, size_t nmemb, void *data)
@@ -35,7 +47,7 @@ size_t WriteMemoryCallback(void *ptr,
   size_t realsize = size * nmemb;
   MemoryStruct *mem = (MemoryStruct *) data;
 
-  mem->memory = (char *) myrealloc(mem->memory, mem->size + realsize + 1);
+  mem->memory = (char *) realloc(mem->memory, mem->size + realsize + 1);
   if (mem->memory)
   {
     memcpy(&(mem->memory[mem->size]), ptr, realsize);
@@ -53,6 +65,7 @@ int mg_curl(ParseStruct *parsestruct_ptr,
 
   /* Laenge der aus dem XML-File stammenden Hit-DNA-Sequnez */
   unsigned long seq_len;
+  long numb_from = 0, numb_to = 0, numb_diff = 0;
 
   Str *seq_var,
    *http_adr;
@@ -158,29 +171,42 @@ int mg_curl(ParseStruct *parsestruct_ptr,
          etc. ist */
       assert(seq_pos != NULL);
       seq_len = strspn(seq_pos + 16, "gactrymkswhbvdnu");
-      /* seq_len Zeichen werden in die Hilfsvariable seq_var kopiert */
-      str_append_cstr_nt(seq_var, seq_pos + 16, seq_len);
 
-      /* Die Sequenz in seq_var wird in das StrArray hit_dna kopiert */
-      strarray_add_cstr(MATRIXSTRUCT(hit_dna), str_get(seq_var));
+      numb_from = atol(strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
+      numb_to = atol(strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
 
-      /* das Hit-Sequenz-File wird geschrieben; die erste Zeile eines
-         Eintrages ist die Hit-GI-Def, an die durch ein Leerzeichen
-         getrennt die Hsp-Num des jeweiligen Hits angehaengt wird */
-      genfile_xprintf(parsestruct_ptr->fp_blasthit_file, ">%s ",
-                      strarray_get(MATRIXSTRUCT(hit_num), hit_counter));
-      genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
-                      strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
-      genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
-                      strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
-      genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
-                      strarray_get(MATRIXSTRUCT(fasta_row), hit_counter));
-      genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",
-                      strarray_get(MATRIXSTRUCT(hit_gi_def), hit_counter));
+      numb_diff = numb_to - numb_from +1;
 
-      /* nach dem GI-Def Eintrag folgt in der naechsten Zeile die Sequenz */
-      genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",
-                      str_get(seq_var));
+      if (numb_diff == seq_len)
+      {
+        /* seq_len Zeichen werden in die Hilfsvariable seq_var kopiert */
+        str_append_cstr_nt(seq_var, seq_pos + 16, seq_len);
+
+        /* Die Sequenz in seq_var wird in das StrArray hit_dna kopiert */
+        strarray_add_cstr(MATRIXSTRUCT(hit_dna), str_get(seq_var));
+
+        /* das Hit-Sequenz-File wird geschrieben; die erste Zeile eines
+           Eintrages ist die Hit-GI-Def, an die durch ein Leerzeichen
+           getrennt die Hsp-Num des jeweiligen Hits angehaengt wird */
+        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, ">%s ",
+                        strarray_get(MATRIXSTRUCT(hit_num), hit_counter));
+        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
+                        strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
+        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
+                        strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
+        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
+                        strarray_get(MATRIXSTRUCT(fasta_row), hit_counter));
+        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",
+                        strarray_get(MATRIXSTRUCT(hit_gi_def), hit_counter));
+
+        /* nach dem GI-Def Eintrag folgt in der naechsten Zeile die Sequenz */
+        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",
+                        str_get(seq_var));
+      }
+      else
+      {
+        PARSESTRUCT(gi_flag) = 1;
+      }
     }
   }
   /* cleanup des Curl-Handle */

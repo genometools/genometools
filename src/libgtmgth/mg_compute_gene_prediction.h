@@ -20,69 +20,16 @@
 
 #include <limits.h>
 #include <float.h>
-#include "libgtmgth/metagenomethreader.h"
+#include "metagenomethreader.h"
 
-#define GENEPREDSTRUCT(path)    parsestruct_ptr->geneprediction_static.path
+#define GENEPREDSTRUCT(PATH)    parsestruct_ptr->geneprediction_static.PATH
 
-/* Funktion zur Berechnung der Start-Stop Informationen der genkodierenden
-   Bereiche sowie deren Leserahmen
-   Parameter: row, column, max-Wert der letzten Spalte der Opt-Path-Matrix,
-              Path-Matrix, CombinedScore-Matrix, Array des opt. Pfades
-              (Leserahmen), Hit-Information, Zeiger auf ParseStruct, Zeiger
-              auf RegionStruct, Zeiger auf den Speicherbereich zum
-              Abspeichern der beteiligten Hits an einem Ergebnis
+/* Funktion zur Berechnung der Genkodierenden-Sequenzbereiche
+   Parameter: CombinedScore-Matrix, Opt-Path-Matrix, column bzw. Laenge
+              der Query-Sequenz, Hit-Informationen, ParseStruct-Zeiger
    Returnwert: void */
-static void gene_prediction(unsigned short,
-                            unsigned long,
-                            double,
-                            PathMatrixEntry **,
-                            CombinedScoreMatrixEntry **,
-                            Array *,
-                            HitInformation *,
-                            ParseStruct *,
-                            RegionStruct **, unsigned long *, Error *);
-
-/* Funktion zur Identifizierung von Frameshifts
-   Parameter: Zeiger auf ParseStruct, Zeiger auf RegionStruct,
-              der "reale" Leserahmen
-   Returnwert: void */
-int frameshiftprocessing(ParseStruct *, RegionStruct **, short, Error *);
-
-/* Funktion zur Vereinigung von genkodierenden Bereichen innerhalb des
-   selben Leserahmen
-   Parameter: Zeiger auf ParseStruct, Zeiger auf RegionStruct,
-              der "reale" Leserahmen
-   Returnwert: void */
-static void genemergeprocessing(ParseStruct *, RegionStruct **, Error *);
-
-/* Funktion zur Ueberpruefung von Sequenzbereichen auf beinhaltende
-   Stop-Codons
-   Parameter: Zeiger auf ParseStruct, from-Wert, to-Wert,
-              aktueller Leserahmen
-   Returnwert: 0 - kein Stop-Codon; 1 - Stop-Codon */
-static int check_coding(ParseStruct *,
-                        unsigned long, unsigned long, short, Error *);
-
-/* Funktion zum sortierten Einfuegen neuer Bereichsgrenzen kodierender
-   Abschnitte in das real-Frame-Array
-   Parameter: Zeiger auf RegionStruct-Struktur, Arrays mit den From- und
-              To-Werten des real-Frames,Arrays mit den From- und To-Werten
-              der einzufuegenden Abschnitte, Index des Real-Frames,Index
-              des tmp-Frames, real-Frame, Zeilenindex;
-   Returnwert: void */
-static void merge_array(RegionStruct **,
-                        Array *,
-                        Array *,
-                        Array *,
-                        Array *,
-                        unsigned long,
-                        unsigned long, short, unsigned short);
-
-/* Funktion zum sortierten der Arrays mit den neu einzufuegenden
-   Bereichsgrenzen
-   Parameter: Arrays der sortierten From- und To-Werte, Arrays mit den
-              From- und To-Werten der zu sortierenden Arrays;
-   Returnwert: void */
-static void sort_realtmp(Array *, Array *, Array *, Array *);
-
+int mg_compute_gene_prediction(CombinedScoreMatrixEntry **,
+                               PathMatrixEntry **,
+                               unsigned long,
+                               HitInformation *, ParseStruct *, Error *);
 #endif

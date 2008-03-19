@@ -28,7 +28,7 @@
 
 /*     modified for metagenomethreader; */
 
-#include "libgtmgth/mg_codon.h"
+#include "mg_codon.h"
 
 #define T_CODE 0
 #define C_CODE 1

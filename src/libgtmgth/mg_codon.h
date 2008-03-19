@@ -26,8 +26,6 @@
 #ifndef MG_CODON_H
 #define MG_CODON_H
 
-#include "libgtmgth/mg_xmlparser.h"
-
 char mg_codon2amino(char, char, char);
 
 #endif

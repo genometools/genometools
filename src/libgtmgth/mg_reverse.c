@@ -24,7 +24,7 @@
 
 */
 
-#include "libgtmgth/mg_reverse.h"
+#include "mg_reverse.h"
 
 static int mg_complement(char *reverse_char, char dna_char, Error * err)
 {

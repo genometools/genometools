@@ -1,0 +1,534 @@
+\documentclass[12pt,titlepage]{article}
+\usepackage[a4paper,top=30mm,bottom=30mm,left=20mm,right=20mm]{geometry}
+\usepackage{url}
+\usepackage{alltt}
+\usepackage{xspace}
+\usepackage{times}
+\usepackage{listings}
+\usepackage{bbm}
+\usepackage{verbatim}
+\usepackage{optionman}
+\usepackage{graphicx}
+\usepackage{color}
+\input{dvipsnam.def}
+
+\newcommand{\MetagenomeThreader}{\textit{MetagenomeThreader}\xspace}
+\newcommand{\GenomeTools}{\textit{GenomeTools}\xspace}
+\newcommand{\nucleotide}{\textit{nucleotide}\xspace}
+\newcommand{\XMLFile}{\texttt{\small{BLAST-Filename}}\xspace}
+\newcommand{\MGFile}{\texttt{\small{Metagenome-Filename}}\xspace}
+\newcommand{\HitFile}{\texttt{\small{Hit-Sequence-Filename}}\xspace}
+\newcommand{\Gtmgth}{\texttt{gt mgth}\xspace}
+\newcommand{\Gt}{\texttt{gt}\xspace}
+\newcommand{\Attention}{\textbf{ATTENTION:}\xspace}
+
+\setlength{\tabcolsep}{2pt}
+
+
+\title{\MetagenomeThreader\\
+a manual}
+\author{\begin{tabular}{c}
+         \textit{David Schmitz-H\"{u}bsch}\\
+         \textit{Stefan Kurtz}\\[1cm]
+         Research Group for Genomeinformatics\\
+         Center for Bioinformatics\\
+         University of Hamburg\\
+         Bundesstrasse 43\\
+         20146 Hamburg\\
+         Germany\\[1cm]
+        \end{tabular}}
+\begin{document}
+\maketitle
+
+
+
+\section{Introduction} \label{Introduction}
+
+This document describes the \MetagenomeThreader, a software tool
+for the prediction of genes in sequences of metagenome projects.
+The \MetagenomeThreader is based on the algorithem from Krause et al \cite{krause}.
+For the prediction of EGTs (Environmental Gene Tags) the metagenome sequences are
+blasted against a nucleotide database and the resultig BLAST-hits are used to
+process a combined score for every position in a DNA-sequence. The combined score
+reflects the potential that a specific DNA-sequence position is a coding one.
+
+The \MetagenomeThreader is written in \texttt{C} and is based 
+on the \GenomeTools library \cite{genometools}.
+\\
+The \MetagenomeThreader is called as part of the single binary named \Gt. 
+%The source code is single threaded and can be compiled on 32-bit and 64-bit 
+%platforms without making any changes to the sources.
+
+\section{Usage} \label{Usage}
+
+\subsection{The meaning of used type of fonts} \label{Fonts}
+Some text is highlighted by different fonts according to the following rules.
+
+\begin{itemize}
+\item \texttt{Typewriter font} is used for the names of software tools.
+\item \texttt{\small{Small typewriter font}} is used for file names.
+\item \begin{footnotesize}\texttt{Footnote sized typewriter font}
+      \end{footnotesize} with a leading 
+      \begin{footnotesize}\texttt{'-'}\end{footnotesize} 
+      is used for program options.
+\item \Showoptionarg{small italic font} is used for the argument(s) of an
+      option.
+\end{itemize}
+
+\subsection{The functionality of the \MetagenomeThreader} \label{Functional}
+
+The \MetagenomeThreader needs 3 data sets, the metagenome
+sequences are also required. The BLAST-hits will then be generated through a BLAST of
+the metagenome-sequences against a nucleotide database such as nt from NCBI.
+\Attention Generating the BLAST-hits is not part of the \MetagenomeThreader and
+has to be done preliminary. The resulting BLAST-hits have to be saved in XML-format.
+If the BLAST-hits are generated, the hit-sequences can be achieved through the
+\MetagenomeThreader. In order to generate the hit-sequence file, the \MetagenomeThreader
+requires a local copy of the appropriate nucleotide database, such as nt from NCBI, which will be scanned
+during the \MetagenomeThreader processing. You can download a nucleotide database
+from
+\\
+{\url{ftp://ftp.ncbi.nih.gov/blast/db/FASTA}} for example.
+
+\subsection{The Installation of the \MetagenomeThreader} \label{Install}
+
+The \MetagenomeThreader will be installed and is ready for use after the
+installation of the \GenomeTools (see \cite{genometools} for installation instructions).
+There are two different installation options for the \GenomeTools in relation to the \MetagenomeThreader.
+The standard installation installs the
+\\
+\MetagenomeThreader without the cURL-module.
+If you prefer to install the \MetagenomeThreader including the cURL-module, you have to include the
+the command \texttt{make curl="yes"} during the \GenomeTools installation process.
+A connection to the internet is required to use the curl module.
+With the curl-module, the MetagenomeThreader will run an online query for
+missing hit-sequences, otherwise they will be ignored during the processing of the EGT's.
+
+\subsection{The Options of the \MetagenomeThreader} \label{Overview}
+
+Since \MetagenomeThreader is part of \Gt, the \MetagenomeThreader is called as following:
+
+\Gtmgth $[$\emph{options}$]$ \XMLFile \MGFile \HitFile
+
+\XMLFile denotes the XML formatted BLAST-hit file, \MGFile the FASTA formatted
+metagenome-sequences file and the \HitFile the FASTA formatted hit-sequences file.
+The \XMLFile has to be created with a BLAST-Program. Because of the dimension of the
+resulting files in metagenome projects, an online BLAST is neither advisable nor practicable.
+The hit-sequence file may be empty at the time of the first program call.
+All three files have to be provided at every program call and can also be zipped files
+(\texttt{\small{.gz}}).
+An overview of all possible options with a short descripton of 
+each option is available in table \ref{overviewOpt}.
+All options can only be specified once.
+
+\begin{table}[htbp]
+\caption{Overview of the \MetagenomeThreader Options.}
+\begin{footnotesize}
+\[
+\renewcommand{\arraystretch}{0.89}
+\begin{tabular}{p{2cm}p{14cm}}\hline
+\\
+\Showoption{s}& specify score for a synonymic base exchange
+\\
+\Showoption{n}& specify score for a nonsynonymic base exchange
+\\
+\Showoption{b}& specify score for a blast-hit end within a query-sequence
+\\
+\Showoption{q}& specify score for a stop-codon within a query-sequence
+\\
+\Showoption{h}& specify score for a stop-codon within a hit-sequence
+\\
+\Showoption{l}& specify score leaving a gene on forward/reverse strand or enter a gene
+on forward/reverse strand
+\\
+\Showoption{p}& specify maximum span between coding-regions in the same reading frame
+resume as one prediction
+\\
+\Showoption{f}& specify maximum span between coding-regions in different reading
+frames resume as coding-regions in the optimal reading-frame
+\\
+\Showoption{o}& specify the database name for the fcgi-database used in the cURL-module
+\\
+\Showoption{k}& specify the database name used for the hit-sequence extraction
+\\
+\Showoption{t}& specify yes$|$no if a hit-sequence file exists
+\\
+\Showoption{r}& specify 1$|$2$|$3 for the format of the output-file 
+\\
+\Showoption{a}& specify minimum length of the amino acid sequences in the result
+\\
+\Showoption{d}& specify minimum percent-value for the different kinds in the hit-statistic output
+\\
+\Showoption{e}& specify 1$|$2$|$3 for the use of alternative start-codons
+\\
+\Showoption{m}& specify yes$|$no if the processing has to be based on homology - experimental
+\\
+\Showoption{g}& specify yes$|$no for the \GenomeTools test modus - output without the creating date
+\\
+\Showoption{x}& specify yes$|$no to extend EGTs to max length
+\\
+\Showoption{version}& display version information and exit
+\\
+\Showoption{help}& show all options
+\\
+\hline
+\end{tabular}
+%\input{ltrprogoptions}
+\]
+\end{footnotesize}
+\label{overviewOpt}
+\end{table}
+
+%%%%
+\subsection{\MetagenomeThreader Options}
+
+\begin{Justshowoptions}
+
+\Option{s}{\Showoptionarg{score}}{
+Specify the score for synonymic base exchanges.
+\Showoptionarg{score} has to be specified as a double. If this
+option is not selected by the user, then \Showoptionarg{score} is set
+to $1.00$ by default (recommended: positive score).
+}
+
+\Option{n}{\Showoptionarg{score}}{ 
+Specify the score for nonsynonymic base exchanges. \Showoptionarg{score}
+has to be specified as a double. If this option is not selected
+by the user, then \Showoptionarg{score} is set to $-1.00$ by default
+(recommended: negative score).
+}
+
+\Option{b}{\Showoptionarg{score}}{ 
+Specify the score for a blast-hit end within a query-sequence. \Showoptionarg{score}
+has to be specified as a double.
+If this option is not selected by the user, then \Showoptionarg{score} 
+is set to $-10.00$ by default  (recommended: negative score).
+}
+
+\Option{q}{\Showoptionarg{score}}{ 
+Specify the score for a stop-codon in the query-sequence.
+\Showoptionarg{score} has to be specified as a negative double.
+If this option is not selected by the user, then \Showoptionarg{score} 
+is set to $-2.00$ by default  (recommended: negative score).
+}
+
+\Option{h}{\Showoptionarg{score}}{ 
+Specify the score for a stop-codon in the hit-sequence.
+\Showoptionarg{score} has to be specified as a negative double.
+If this option is not selected by the user, then \Showoptionarg{score} 
+is set to $-5.00$ by default  (recommended: negative score).
+}
+
+\Option{l}{\Showoptionarg{score}}{
+Specify the score for leaving a gene on forward/reverse strand or enter
+a gene on forward/reverse strand. The argument \Showoptionarg{score} has to be
+specified as a negative double.
+If this option is not selected by the user, the default value is
+set to $-2$  (recommended: negative score).
+}
+
+\Option{p}{\Showoptionarg{$S_{max}$}}{
+Specify the maximum span between two coding-regions in the same reading frame
+in which they resume as one coding-region.
+The argument \Showoptionarg{$S_{max}$} has to be specified as a positive double.
+If this option is not selected by the user, \Showoptionarg{$S_{max}$} is
+set to $400.00$ by default.
+}
+
+\Option{f}{\Showoptionarg{$S_{max}$}}{
+Specify the maximum span between coding-regions in different reading frames
+in which they resume as coding-regions in the optimal reading-frame.
+The argument \Showoptionarg{$S_{max}$} has to be specified as a positive double.
+If this option is not selected by the user, \Showoptionarg{$S_{max}$} is
+set to $200.00$ by default.
+}
+
+\Option{c}{\Showoptionarg{$DB_{name}$}}{
+Specify the name of the database used in the cURL-Module.
+The argument \Showoptionarg{$DB_{name}$} has to be chosen as a valid database
+which you can find under
+\\
+\mbox{\url{http://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?}}.
+If this option is not selected by the user, \Showoptionarg{$DB_{name}$} is
+set to \nucleotide by default.
+}
+
+\Option{o}{\Showoptionarg{output filename}}{
+Specify the name of the resulting output-file where the predictions will be written to.
+Each prediction will be represented by an individual block (see chapter \ref{Examples}).
+If this option is not selected by the user, \Showoptionarg{output filename} is
+set to $output$ by default.
+}
+
+\Option{k}{\Showoptionarg{$DB_{Hit-Seq}$}}{
+Specify the path to the hit-sequence database.
+The argument \Showoptionarg{$DB_{Hit-Seq}$} has to be chosen as a valid path to a valid
+database which you can find under
+\\
+\mbox{\url{ftp://ftp.ncbi.nih.gov/blast/db/FASTA/}} for example.
+If this option is not selected by the user, \Showoptionarg{$DB_{Hit-Seq}$} is
+set to $nt.gz$ by default.
+}
+
+\Option{t}{\Showoptionarg{yes}$|$\Showoptionarg{no}}{
+Specify if a hit-sequence file was already created (\Showoptionarg{yes})
+or not created until now (\Showoptionarg{no}). If this option is not selected by
+the user, \Showoption{t} is set to \Showoptionarg{no} by default.
+\Attention If there is already a hit-sequence file and you do not use \Showoption{t}
+\Showoptionarg{yes} the existing hit-sequence file will be deleted.
+}
+
+\Option{r}{\Showoptionarg{1}$|$\Showoptionarg{2}$|$\Showoptionarg{3}}{
+Specify the format for the output-file.
+You can choose between .txt (1), .html (2) und .xml (3) format.
+If this option is not selected by the user, the default value of $r$
+is $1$.
+}
+
+\Option{a}{\Showoptionarg{$AA_{min}$}}{
+Specify the minimum number of amino-acids in the amino-acid sequences in the
+output. Shorter amino-acid sequences will not appear in the output.
+The argument \Showoptionarg{$AA_{min}$} has to be chosen as a value higher or equal
+than 15. If this option is not selected by the user, the default value of $a$
+is $15$.
+}
+
+\Option{d}{\Showoptionarg{$Stat_{min}$}}{
+Specify the minimum percentage which the species must have to appear in the output-file
+in the statistic section. The argument \Showoptionarg{similaritythreshold} has to
+be chosen from the range [0.0,1.0] and means a percentage.
+If this option is not selected by the user, the default value of $d$
+is $0.0$.
+}
+
+\Option{e}{\Showoptionarg{1}$|$\Showoptionarg{2}$|$\Showoptionarg{3}}{
+Specify the format for the different start-codon modes.
+You can choose between (1): AUG, (2): AUG, CUG, GUG and
+(3): AUG, CUG, GUG, UUG. \Showoption{e} makes only sense if \Showoption{x} is set
+to \Showoptionarg{true}.
+If this option is not selected by the user, the default value of $e$
+is $1$.
+}
+
+\Option{m}{\Showoptionarg{yes}$|$\Showoptionarg{no}}{
+Specify the processing mode. If \Showoption{m} is set to \Showoptionarg{yes},
+the specified scores are used if there are equal amino acids, otherwise they are
+used if the amino acids are different. The \Showoption{m} has only experimental status.
+Results are not checked.
+If this option is not selected by the user, the default value of $m$ is \Showoptionarg{no}.
+}
+
+\Option{g}{\Showoptionarg{yes}$|$\Showoptionarg{no}}{
+Specify if the testmode should be used to make the results comparable in the \GenomeTools
+test suite. This option is not relevant for normal use of the \MetagenomeThreader.
+If this option is not selected by the user, the default value of $g$
+is \Showoptionarg{no}.
+}
+
+\Option{x}{\Showoptionarg{yes}$|$\Showoptionarg{no}}{
+Specify if the extended mode should be switched on.
+If \Showoption{x} is set to \Showoptionarg{yes} the processed EGTs will be extended to its max
+length in both directions.
+If this option is not selected by the user, the default value of $x$
+is $no$.
+}
+
+\Option{help}{}{
+\MetagenomeThreader will show a summary of all options on
+\texttt{stdout} and terminate with exit code $0$.
+}
+
+\Option{version}{}{
+Shows the version of \GenomeTools.
+}
+
+\end{Justshowoptions}
+
+%%%%%%%%%%%%
+
+\section{Example of a Result from the \MetagenomeThreader} \label{Examples}
+
+\subsection{Header of the \MetagenomeThreader Result}
+\label{example-results}
+
+
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{4.5 cm}p{2,2 cm}|}
+\hline
+MetagenomeThreader&
+\\
+Result 29.11.2007&
+\\
+&
+\\
+Parameter settings&
+\\
+Synonymic Value:& 1.0000
+\\
+Non-Synonymic Value: &-1.0000
+\\
+Blast-Hit-End Value: &-10.0000
+\\
+Query Stop-Codon Value: &-2.0000
+\\
+Hit Stop-Codon Value: &-5.0000
+\\
+Frameshift-Span: &200.0000
+\\
+Prediction-Span: &400.0000
+\\
+Leavegene-Value: &-2.0000
+\\
+cURL-DB: &nucleotide
+\\
+Output-Filename: &Metagenome
+\\
+Output-Fileformat: &2
+\\
+(1/2/3)&
+\\
+Hitfile: &1
+\\
+(yes=1/no=0)&
+\\
+Min-Protein-Length &50
+\\
+(\textgreater=15)&
+\\
+Min-Result-Percentage: &0.0000
+\\
+Extended-Modus &1
+\\
+(yes=1/no=0)&
+\\
+Homology-Modus &0
+\\
+(yes=1/no=0)&
+\\
+Codon-Modus &1
+\\
+(1/2/3)&
+\\
+\hline
+\end{tabular}
+
+\begin{tabular}{l}
+Content:
+\\
+- date of program execution
+\\
+- used program parameters
+\end{tabular}
+
+
+\subsection{Sequence-Section of the \MetagenomeThreader result}
+\label{example-sequence}
+
+\begin{tabular}{|p{16.5 cm}p{0.5 cm}|}
+\hline
+Query-DNA-Entry Section&A
+\\
+&
+\\
+Query-DNA-Def: read\_11$\vert$beg$\vert$21$\vert$length$\vert$987$\vert$forward$\vert$NC\_000961$\vert$read\_12$\vert$chimeric$\vert$false$\vert$gi &
+\\
+Query-DNA-Sequence&
+\\
+\small{tataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcga...}&
+\\
+\hline
+\end{tabular}
+
+\begin{tabular}{|p{16.5 cm}p{0.5 cm}|}
+\hline
+Coding-DNA-Entry-Section&B
+\\
+&
+\\
+Coding-DNA&
+\\
+\small{tataaaatagccaaatctgagcctaaaagcccttggatatccatgatttagaacgaaccatcccctcttattcaggagaagttttctgaactcttcaacatcctcga...}&
+\\
+Protein-Sequence&
+\\
+\small{MLLREVTREERKNFYTNEWKVKDIPDFIVKTLELREFGFDHSGEGPSDRKNQYTDIRDLEDYIRATA...}&
+\\
+Hit-Information Section&
+\\
+gi-nr: gi18892016 gi-def: \small{Pyrococcus furiosus DSM 3638, section 12 of 173... from: 6558 to: 7299}&
+\\
+gi-nr: gi9453868 gi-def: \small{Pyrococcus furiosus priA gene for DNA primase... from: 1 to: 642}&
+\\
+gi-nr: gi3342818 gi-def: \small{Thermophilic archaeon Bonch-Osmolovskaya primase... from: 21 to: 341}&
+\\
+\hline
+\end{tabular}
+
+\begin{tabular}{p{1cm}p{15,7cm}}
+Content:
+\\
+\mbox{- A:} &Output of the metagenome sequence and the metagenome sequence definition
+\\
+\mbox{- B:} &for every EGT
+\\
+&
+\begin{tabular}{p{0,1cm}p{14.9cm}}
+\mbox{-}& EGT DNA-sequence
+\\
+\mbox{-}& EGT amino acid sequence
+\\
+\mbox{-}& for the EGT processing used hit-definition
+\end{tabular}
+\end{tabular}
+
+\subsection{Statistic-Section of the \MetagenomeThreader result}
+
+\begin{tabular}{|r p{12.5 cm}|}
+\hline
+0.7764& Salmonella enterica subsp. enterica serovar Choleraesuis str. SC-B67
+\\
+0.7764& Salmonella typhimurium LT2, section 22 of 220 of the complete genome
+\\
+14.2553& Vibrio cholerae O395 chromosome 2, complete genome
+\\
+7.1809& Pyrococcus furiosus DSM 3638, section 12 of 173 of the complete genome
+\\
+0.2029& Escheria coli K12 MG1655, complete genome
+\\
+\hline
+\end{tabular}
+
+\begin{tabular}{p{0,1cm}p{14cm}}
+Content:
+\\
+- &procentual value as the relation of the hit-sequence length
+to the sequence length of all hit-sequences used for the EGT prediction
+\\
+- &BLAST-hit definitions
+\end{tabular}
+
+In the HTML-format the GI-number of the BLAST-hits is a hyperlink to the
+linked NCBI entry.
+
+\Attention It is recommended that the hit-sequence file is stored at two
+different locations because if an existing hit-sequence file is used and
+the \MetagenomeThreader is called without \Showoption{t} \Showoptionarg{yes}, the hit-sequence file
+will be overwritten and a new scan of the nucleotide database and / or an online query of the
+hit-sequences has to be performed.
+
+%\bibliographystyle{plain}
+%\bibliography{references}
+\begin{thebibliography}{1}
+
+\bibitem{krause}
+L.~Krause \textit{et al}.
+\newblock Finding novel genes in bacterial communities isolated
+from the environment. \textit{Bioinformatics}, 22:e281-e289, 2006.
+
+\bibitem{genometools}
+G.~Gremme.
+\newblock The \textsc{GenomeTools} genome analysis system.
+  \url{http://genometools.org}.
+
+\end{thebibliography}
+\end{document}

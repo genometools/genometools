@@ -19,20 +19,19 @@
 #define METAGENOMETHREADER_H
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "libgtcore/array.h"
-#include "libgtcore/strarray.h"
-#include "libgtcore/str.h"
 #include "libgtcore/array2dim.h"
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
 #include "libgtcore/bioseq.h"
-#include "libgtcore/hashtable.h"
 #include "libgtcore/error.h"
+#include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/option.h"
+#include "libgtcore/str.h"
+#include "libgtcore/strarray.h"
+#include "libgtcore/versionfunc.h"
 
 /* jeweils die Anzahl der zu betrachtenden XML-Tags; Definitionen werden auch
  * in Schleifenkoepfen verwendet */
@@ -45,15 +44,16 @@
 #define MEMORY_SIZE     250
 
 /* Makros zum Zugriff auf die Parsestruct-Strukturen und Substrukturen */
-#define ARGUMENTS(path)\
-             parsestruct.metagenomethreader_arguments.path
-#define ARGUMENTSSTRUCT(path)\
-             parsestruct_ptr->metagenomethreader_arguments.path
-#define MATRIXSTRUCT(path)      parsestruct_ptr->matrix_info.path
-#define XMLPARSERSTRUCT(path)   parsestruct_ptr->xmlparser_static.path
-#define HITSTRUCT(path)         parsestruct_ptr->hits_statistics.path
+#define ARGUMENTS(PATH)\
+             parsestruct.metagenomethreader_arguments.PATH
+#define ARGUMENTSSTRUCT(PATH)\
+             parsestruct_ptr->metagenomethreader_arguments.PATH
+#define MATRIXSTRUCT(PATH)      parsestruct_ptr->matrix_info.PATH
+#define XMLPARSERSTRUCT(PATH)   parsestruct_ptr->xmlparser_static.PATH
+#define HITSTRUCT(PATH)         parsestruct_ptr->hits_statistics.PATH
 #define FILEPOINTEROUT          parsestruct_ptr->fp_outputfile
-#define PARSESTRUCT(path)       parsestruct_ptr->path
+#define HITFILEOUT              parsestruct_ptr->fp_giexp_file
+#define PARSESTRUCT(PATH)       parsestruct_ptr->PATH
 
 /* Strukturdefinition fuer die Eintraege in der Combined-Score-Matrix */
 typedef struct
@@ -103,11 +103,13 @@ typedef struct
     percent_value;
   Str *curl_fcgi_db,
    *outputtextfile_name;
+  StrArray *giexpfile_name;
   int outputfile_format,
     codon_mode;
   bool hitfile_bool,
     homology_mode,
-    extended_mode;
+    extended_mode,
+    testmodus_mode;
   unsigned long min_as;
 } MetagenomeThreaderArguments;
 
@@ -192,7 +194,8 @@ typedef struct
   Bioseq *queryseq,
    *hitseq;
   GenFile *fp_outputfile,
-   *fp_blasthit_file;
+   *fp_blasthit_file,
+   *fp_giexp_file;
   Hashtable *queryhash,
    *hithash,
    *resulthits;
@@ -201,7 +204,9 @@ typedef struct
   unsigned short def_flag,
     hit_flag,
     hit_hsp_flag,
-    xml_tag_flag;
+    xml_tag_flag,
+    giexp_flag,
+    gi_flag;
   unsigned long xml_linenumber,
     hits_memory;
   double syn,
@@ -219,15 +224,6 @@ typedef struct
    Returnwert: Fehlercode */
 int metagenomethreader(int argc, const char **argv, Error *);
 
-/* Funktion zur Ausgabe der berechneten Ergebnisse
-   Parameter:  Zeiger auf ParseStruct-Struktur, CombinedScore-Matrix,
-               die HitInformation-Struktur, die RegionStruct-Struktur,
-               das Char-Zeichen, um welchen Bereich es sich handelt
-   Returnwert: void */
-void mg_outputwriter(ParseStruct *,
-                     CombinedScoreMatrixEntry **,
-                     HitInformation *, RegionStruct **, char, Error *);
-
 /* Funktion zur Umwandlung eines Zeichen in einen kleinbuchstaben
    Parameter:  Zeichen als int-Wert
    Returnwert: das Zeichen als Kleinbuchstabe - int-Wert */
@@ -237,12 +233,6 @@ int tolower(int);
    Parameter: Zeichen
    Returnwert: Buchstabe: von 0 verschiedener Wert, sonst 0 */
 int isalpha(int);
-
-/* Funktion zur Ueberpruefung auf ein Start-Codon(ATG)
-   Parameter:  Zeiger auf ParseStruct-Struktur, Zeiger auf ein Triplet
-               von Zeichen
-   Returnwert: 0 = kein Start-Codon, 1 = Start-Codon */
-short check_startcodon(ParseStruct *, char *);
 
 /* Funktion zur Ueberpruefung auf ein Stop-Codon
    Parameter:  Zeiger auf ParseStruct-Struktur, Zeiger auf ein Triplet
@@ -274,13 +264,6 @@ void mg_outputwriter(ParseStruct *,
                      CombinedScoreMatrixEntry **,
                      HitInformation *, RegionStruct **, char, Error *);
 
-/* Funktion zur DP-Berechnung der Pfade durch die Combined-Score-Matrix
-   Parameter: Combined-Score Matrix, Anzahl Zeilen, Anzahl Spalten
-   Returnwert: void */
-int mg_computepath(CombinedScoreMatrixEntry **,
-                   HitInformation *hit_information,
-                   unsigned long, unsigned long, ParseStruct *, Error *);
-
 /* Funktion zur Bestimmung der zu einem Lesereahmen gehoerigen Matrix-Zeile
    Parameter: aktueller Leserahmen
    Returnwert: Matrixzeile */
@@ -290,15 +273,6 @@ short get_matrix_row(long);
    Parameter: Matrixzeile
    Returnwert: Leserahmen */
 short get_current_frame(long);
-
-/* Funktion zur Berechnung der Genkodierenden-Sequenzbereiche
-   Parameter: CombinedScore-Matrix, Opt-Path-Matrix, column bzw. Laenge
-              der Query-Sequenz, Hit-Informationen, ParseStruct-Zeiger
-   Returnwert: void */
-int mg_compute_gene_prediction(CombinedScoreMatrixEntry **,
-                               PathMatrixEntry **,
-                               unsigned long,
-                               HitInformation *, ParseStruct *, Error *);
 
 /* Funktion zur Berechnung des reversen Komplements
    Parameter: Zeiger auf eine Seq., Seq-Laenge, Error-Variable
