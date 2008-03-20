@@ -1129,7 +1129,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
       contig_triplet[0] = contig_seq[startpoint];
       contig_triplet[1] = contig_seq[startpoint + 1];
       contig_triplet[2] = contig_seq[startpoint + 2];
-      assert(contig_triplet);
+      /* XXX assert(contig_triplet); */
 
       /* Bestimmen der AS der jeweiligen Triplets */
       contig_as = mg_codon2amino(contig_triplet[0],
@@ -1174,7 +1174,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
           contig_triplet[0] = contig_seq[startpoint];
           contig_triplet[1] = contig_seq[startpoint + 1];
           contig_triplet[2] = contig_seq[startpoint + 2];
-          assert(contig_triplet);
+          /* XXX assert(contig_triplet); */
 
           /* Bestimmen der AS der jeweiligen Triplets */
           contig_as = mg_codon2amino(contig_triplet[0],
@@ -1246,7 +1246,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
                 contig_triplet[0] = contig_seq[startpoint_atg];
                 contig_triplet[1] = contig_seq[startpoint_atg + 1];
                 contig_triplet[2] = contig_seq[startpoint_atg + 2];
-                assert(contig_triplet);
+                /* XXX assert(contig_triplet); */
 
                 /* Bestimmen der AS der jeweiligen Triplets */
                 contig_as = mg_codon2amino(contig_triplet[0],
