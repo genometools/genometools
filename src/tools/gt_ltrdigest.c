@@ -26,11 +26,9 @@
 #include "libgtcore/unused.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
+#include "libgtltr/ltrdigest_def.h"
 #include "libgtltr/ltrdigest_stream.h"
 #include "libgtltr/ltrfileout_stream.h"
-#include "libgtltr/pbs.h"
-#include "libgtltr/ppt.h"
-#include "libgtltr/pdom.h"
 #include "tools/gt_ltrdigest.h"
 
 typedef struct LTRdigestOptions {
@@ -260,7 +258,8 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                *last_stream      = NULL;
   GenomeNode *gn;
 
-  int had_err = 0;
+  int had_err      = 0,
+      tests_to_run = 0;
   error_check(err);
   assert(arguments);
 
@@ -276,17 +275,23 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
   Bioseq *bioseq = bioseq_new(argv[1], err);
   if (error_is_set(err))
     had_err = -1;
+
+  /* Always search for PPT. */
+  tests_to_run |= LTRDIGEST_RUN_PPT;
+
   /* Open tRNA library if given. */
   if (!had_err && arguments->trna_lib
         && str_length(arguments->trna_lib) > 0)
   {
+    tests_to_run |= LTRDIGEST_RUN_PBS;
     arguments->pbs_opts.trna_lib = bioseq_new(str_get(arguments->trna_lib),err);
     if (error_is_set(err))
       had_err = -1;
   }
   /* Open HMMER files if given. */
-  if (!had_err)
+  if (!had_err && strarray_size(arguments->pdom_opts.hmm_files) > 0)
   {
+    tests_to_run |= LTRDIGEST_RUN_PDOM;
     arguments->pdom_opts.plan7_ts = array_new(sizeof (struct plan7_s*));
     had_err = pdom_load_hmm_files(&arguments->pdom_opts,
                                   err);
@@ -301,6 +306,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                                                 arguments->outfp);
 
     ltrdigest_stream = ltrdigest_stream_new(gff3_in_stream,
+                                            tests_to_run,
                                             bioseq,
                                             &arguments->pbs_opts,
                                             &arguments->ppt_opts,
@@ -310,6 +316,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
     if (str_length(arguments->prefix) > 0)
     {
       tab_out_stream = ltr_fileout_stream_new(ltrdigest_stream,
+                                              tests_to_run,
                                               bioseq,
                                               str_get(arguments->prefix),
                                               &arguments->ppt_opts,

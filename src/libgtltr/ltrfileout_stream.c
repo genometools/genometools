@@ -43,6 +43,7 @@ struct LTRFileOutStream {
           *pptout_file;
   Hashtable *pdomout_files;
   LTRVisitor *lv;
+  int tests_to_run;
   LTRElement element;
 };
 
@@ -221,6 +222,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 }
 
 static void write_metadata(GenFile *metadata_file,
+                           int tests_to_run,
                            PPTOptions *ppt_opts,
                            PBSOptions *pbs_opts,
                            PdomOptions *pdom_opts,
@@ -249,13 +251,18 @@ static void write_metadata(GenFile *metadata_file,
   else
     genfile_xprintf(metadata_file,
                     "GFF3 input used\t%s\n", gfffilename);
-  genfile_xprintf(metadata_file,
-                  "PPT minimum length\t%u\t6\n", ppt_opts->ppt_minlen);
-  genfile_xprintf(metadata_file,
-                  "U-box minimum length\t%u\t3\n", ppt_opts->ubox_minlen);
-  genfile_xprintf(metadata_file,
-                  "PPT search radius\t%u\t30\n", ppt_opts->radius);
-  if (strcmp(trnafilename, "") != 0)
+
+  if (tests_to_run & LTRDIGEST_RUN_PPT)
+  {
+    genfile_xprintf(metadata_file,
+                    "PPT minimum length\t%u\t6\n", ppt_opts->ppt_minlen);
+    genfile_xprintf(metadata_file,
+                    "U-box minimum length\t%u\t3\n", ppt_opts->ubox_minlen);
+    genfile_xprintf(metadata_file,
+                    "PPT search radius\t%u\t30\n", ppt_opts->radius);
+  }
+
+  if (tests_to_run & LTRDIGEST_RUN_PBS)
   {
     if (trnafilename[0] != '/' && has_cwd)
       genfile_xprintf(metadata_file,
@@ -280,7 +287,8 @@ static void write_metadata(GenFile *metadata_file,
     genfile_xprintf(metadata_file,
                     "PBS search radius\t%d\t30\n", pbs_opts->radius);
   }
-  if (array_size(pdom_opts->plan7_ts) > 0)
+
+  if (tests_to_run & LTRDIGEST_RUN_PDOM)
   {
     genfile_xprintf(metadata_file,
                     "Protein domains\t%lu (",
@@ -327,6 +335,7 @@ const GenomeStreamClass* ltr_fileout_stream_class(void)
 }
 
 GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
+                                     int tests_to_run,
                                      Bioseq *bioseq,
                                      char *file_prefix,
                                      PPTOptions *ppt_opts,
@@ -349,6 +358,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   /* ref GFF input stream and sequences*/
   ls->in_stream = genome_stream_ref(in_stream);
   ls->bioseq = bioseq;
+  ls->tests_to_run = tests_to_run;
 
   /* open outfiles */
   ls->fileprefix = file_prefix;
@@ -366,6 +376,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
 
   /* log run conditions in file */
   write_metadata(ls->metadata_file,
+                 tests_to_run,
                  ppt_opts,
                  pbs_opts,
                  pdom_opts,

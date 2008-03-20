@@ -15,25 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LTRDIGEST_STREAM_H
-#define LTRDIGEST_STREAM_H
+#ifndef LTRDIGEST_DEF_H
+#define LTRDIGEST_DEF_H
 
-#include "libgtcore/bioseq.h"
-#include "libgtext/genome_stream.h"
 #include "libgtltr/pbs.h"
 #include "libgtltr/ppt.h"
 #include "libgtltr/pdom.h"
 
-/* implements the ``genome_stream'' interface */
-typedef struct LTRdigestStream LTRdigestStream;
-
-const GenomeStreamClass* ltrdigest_stream_class(void);
-
-GenomeStream* ltrdigest_stream_new(GenomeStream *in_stream,
-                                   int tests_to_run,
-                                   Bioseq *bioseq,
-                                   PBSOptions *pbs_opts,
-                                   PPTOptions *ppt_opts,
-                                   PdomOptions *pdom_opts);
+enum LTRdigestRunScans {
+  LTRDIGEST_RUN_PPT  = 0x1,
+  LTRDIGEST_RUN_PBS  = 0x2,
+  LTRDIGEST_RUN_PDOM = 0x4
+};
 
 #endif

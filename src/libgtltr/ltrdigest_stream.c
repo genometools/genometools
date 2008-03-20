@@ -25,11 +25,9 @@
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_node_iterator.h"
 #include "libgtext/reverse.h"
+#include "libgtltr/ltrdigest_def.h"
 #include "libgtltr/ltrdigest_stream.h"
 #include "libgtltr/ltr_visitor.h"
-#include "libgtltr/pbs.h"
-#include "libgtltr/ppt.h"
-#include "libgtltr/pdom.h"
 
 struct LTRdigestStream {
   const GenomeStream parent_instance;
@@ -40,6 +38,7 @@ struct LTRdigestStream {
   PdomOptions *pdom_opts;
   LTRVisitor *lv;
   Str *ltrdigest_tag;
+  int tests_to_run;
   LTRElement element;
 };
 
@@ -157,19 +156,22 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
 
   /* PPT finding
    * -----------*/
-  ppt_find((const char*) base_seq, (const char*) rev_seq,
-           element, &ppt_results, ls->ppt_opts);
-  if (ppt_results.best_hit)
+  if (ls->tests_to_run & LTRDIGEST_RUN_PPT)
   {
-    ppt_attach_results_to_gff3(&ppt_results, element,
-                               ls->ltrdigest_tag, ls->pbs_opts->radius);
-    genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
-                                ppt_results.best_hit->strand);
+    ppt_find((const char*) base_seq, (const char*) rev_seq,
+             element, &ppt_results, ls->ppt_opts);
+    if (ppt_results.best_hit)
+    {
+      ppt_attach_results_to_gff3(&ppt_results, element,
+                                 ls->ltrdigest_tag, ls->pbs_opts->radius);
+      genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
+                                  ppt_results.best_hit->strand);
+    }
   }
 
   /* PBS finding
    * ----------- */
-  if (ls->pbs_opts->trna_lib)
+  if (ls->tests_to_run & LTRDIGEST_RUN_PBS)
   {
     pbs_find((const char*) base_seq, (const char*) rev_seq,
              element, &pbs_results, ls->pbs_opts, err);
@@ -184,27 +186,34 @@ void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
 
   /* Protein domain finding
    * ----------------------*/
-  pdom_results.domains = hashtable_new(HASH_DIRECT,NULL,pdom_clear_domain_hit);
-  pdom_find((const char*) base_seq, (const char*) rev_seq,
-            element, &pdom_results, ls->pdom_opts);
-  if (!pdom_results.empty)
+  if (ls->tests_to_run & LTRDIGEST_RUN_PDOM)
   {
-    hashtable_foreach(pdom_results.domains,
-                      (Hashiteratorfunc) pdom_domain_attach_gff3,
-                      ls,
-                      err);
-    if (pdom_results.combined_e_value_fwd < pdom_results.combined_e_value_rev)
-      genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
-                                STRAND_FORWARD);
-    else
-      genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
-                                STRAND_REVERSE);
+    pdom_results.domains = hashtable_new(HASH_DIRECT,
+                                         NULL,
+                                         pdom_clear_domain_hit);
+    pdom_find((const char*) base_seq, (const char*) rev_seq,
+              element, &pdom_results, ls->pdom_opts);
+    if (!pdom_results.empty)
+    {
+      hashtable_foreach(pdom_results.domains,
+                        (Hashiteratorfunc) pdom_domain_attach_gff3,
+                        ls,
+                        err);
+      /* determine most likely strand from protein domain results */
+      if (pdom_results.combined_e_value_fwd
+            < pdom_results.combined_e_value_rev)
+        genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
+                                  STRAND_FORWARD);
+      else
+        genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
+                                  STRAND_REVERSE);
+    }
+    hashtable_delete(pdom_results.domains);
   }
 
   ma_free(rev_seq);
   ppt_clear_results(&ppt_results);
   pbs_clear_results(&pbs_results);
-  hashtable_delete(pdom_results.domains);
 }
 
 int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
@@ -265,6 +274,7 @@ const GenomeStreamClass* ltrdigest_stream_class(void)
 }
 
 GenomeStream* ltrdigest_stream_new(GenomeStream *in_stream,
+                                   int tests_to_run,
                                    Bioseq *bioseq,
                                    PBSOptions *pbs_opts,
                                    PPTOptions *ppt_opts,
@@ -278,6 +288,7 @@ GenomeStream* ltrdigest_stream_new(GenomeStream *in_stream,
   ls->ppt_opts = ppt_opts;
   ls->pbs_opts = pbs_opts;
   ls->pdom_opts = pdom_opts;
+  ls->tests_to_run = tests_to_run;
   ls->bioseq = bioseq;
   ls->ltrdigest_tag = str_new_cstr("LTRdigest");
   ls->lv = (LTRVisitor*) ltr_visitor_new(&ls->element);

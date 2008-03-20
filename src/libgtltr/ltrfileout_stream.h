@@ -20,9 +20,7 @@
 
 #include "libgtcore/bioseq.h"
 #include "libgtext/genome_stream.h"
-#include "libgtltr/pbs.h"
-#include "libgtltr/ppt.h"
-#include "libgtltr/pdom.h"
+#include "libgtltr/ltrdigest_def.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct LTRFileOutStream LTRFileOutStream;
@@ -30,6 +28,7 @@ typedef struct LTRFileOutStream LTRFileOutStream;
 const GenomeStreamClass* ltr_fileout_stream_class(void);
 
 GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
+                                     int tests_to_run,
                                      Bioseq *bioseq,
                                      char *file_prefix,
                                      PPTOptions *ppt_opts,
