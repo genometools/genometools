@@ -13,7 +13,7 @@ int comparetwosuffixes(const Encodedsequence *encseq,
                        Encodedsequencescanstate *esr2);
 
 int comparetwostrings(const Encodedsequence *encseq,
-                      bool moveforward,
+                      Readmode readmode,
                       Seqpos *maxcommon,
                       Seqpos start1,
                       Seqpos start2);

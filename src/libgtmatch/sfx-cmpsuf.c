@@ -132,7 +132,7 @@ int comparetwosuffixes(const Encodedsequence *encseq,
 }
 
 int comparetwostrings(const Encodedsequence *encseq,
-                      bool moveforward,
+                      Readmode readmode,
                       Seqpos *maxcommon,
                       Seqpos start1,
                       Seqpos start2)
@@ -140,6 +140,7 @@ int comparetwostrings(const Encodedsequence *encseq,
   Uchar cc1, cc2;
   Seqpos pos1, pos2, end1, end2;
   int retval;
+  bool moveforward = ISDIRREVERSE(readmode) ? false : true;
 
   if (moveforward)
   {
@@ -224,17 +225,15 @@ int comparetwostrings(const Encodedsequence *encseq,
         retval = -1; /* a < b */
         break;
       }
-      if (cc1 < cc2)
+      if (cc1 != cc2)
       {
         *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
-        retval = -1; /* a < b */
-        break;
-      }
-      if (cc1 > cc2)
-      {
-        *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
-        retval = 1; /* a > b */
-        break;
+        if (ISDIRCOMPLEMENT(readmode))
+        {
+          cc1 = COMPLEMENTBASE(cc1);
+          cc2 = COMPLEMENTBASE(cc2);
+        }
+        return (cc1 < cc2) ? -1 : 1;
       }
     }
     if (moveforward)

@@ -83,7 +83,7 @@ static void testmulticharactercompare(const Encodedsequence *encseq,
     pos1 = (Seqpos) (drand48() * (double) totallength);
     pos2 = (Seqpos) (drand48() * (double) totallength);
     (void) multicharactercompare_withtest(encseq,
-                                          ISDIRREVERSE(readmode) ? false : true,
+                                          readmode,
                                           esr1,pos1,esr2,pos2);
   }
   freeEncodedsequencescanstate(&esr1);
@@ -195,13 +195,10 @@ int testencodedsequence(const StrArray *filenametab,
 {
   if (hasfastspecialrangeenumerator(encseq))
   {
-    if (readmode == Forwardmode || readmode == Reversemode)
+    checkextractunitatpos(readmode,encseq);
+    if (multicharcmptrials > 0)
     {
-      checkextractunitatpos(ISDIRREVERSE(readmode) ? false : true,encseq);
-      if (multicharcmptrials > 0)
-      {
-        testmulticharactercompare(encseq,readmode,multicharcmptrials);
-      }
+      testmulticharactercompare(encseq,readmode,multicharcmptrials);
     }
   }
   if (scantrials > 0)

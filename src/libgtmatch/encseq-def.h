@@ -186,10 +186,10 @@ void encseqextract(Uchar *buffer,
                    Seqpos frompos,
                    Seqpos topos);
 
-void checkextractunitatpos(bool fwd,const Encodedsequence *encseq);
+void checkextractunitatpos(Readmode readmode,const Encodedsequence *encseq);
 
 void multicharactercompare_withtest(const Encodedsequence *encseq,
-                                    bool fwd,
+                                    Readmode readmode,
                                     Encodedsequencescanstate *esr1,
                                     Seqpos pos1,
                                     Encodedsequencescanstate *esr2,
