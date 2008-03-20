@@ -40,7 +40,9 @@ struct LTRFileOutStream {
   GenFile *metadata_file,
           *tabout_file,
           *pbsout_file,
-          *pptout_file;
+          *pptout_file,
+          *ltr5out_file,
+          *ltr3out_file;
   Hashtable *pdomout_files;
   LTRVisitor *lv;
   int tests_to_run;
@@ -82,6 +84,9 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   if (ls->element.mainnode)
   {
     unsigned long seqid, i;
+    char *outseq,
+         desc[BUFSIZ];
+    Range ltr3_rng, ltr5_rng;
 
     /* find sequence in Bioseq multifasta */
     const char *sreg = str_get(genome_node_get_seqid((GenomeNode*)
@@ -89,6 +94,8 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     sscanf(sreg,"seq%lu", &seqid);
     Seq *seq = bioseq_get_seq(ls->bioseq, seqid);
     ls->element.seqnr = seqid;
+
+    ltrelement_format_description(&ls->element, desc, BUFSIZ-1);
 
     /* output basic retrotransposon data */
     lltr_rng = genome_node_get_range((GenomeNode*) ls->element.leftLTR);
@@ -110,13 +117,11 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     if (ls->element.ppt)
     {
       Strand ppt_strand;
-      char desc[BUFSIZ];
       ppt_strand = genome_feature_get_strand(ls->element.ppt);
       ppt_rng = genome_node_get_range((GenomeNode*) ls->element.ppt);
       ppt_seq = ltrelement_get_sequence(ppt_rng.start, ppt_rng.end,
                                         ppt_strand,
                                         seq, e);
-      ltrelement_format_description(&ls->element, desc, BUFSIZ-1);
       fasta_show_entry_generic(desc, ppt_seq, range_length(ppt_rng), FSWIDTH,
                                ls->pptout_file);
       genfile_xprintf(ls->tabout_file,
@@ -135,14 +140,12 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     if (ls->element.pbs)
     {
       Strand pbs_strand;
-      char desc[BUFSIZ];
 
       pbs_strand = genome_feature_get_strand(ls->element.pbs);
       pbs_rng = genome_node_get_range((GenomeNode*) ls->element.pbs);
       pbs_seq = ltrelement_get_sequence(pbs_rng.start, pbs_rng.end,
                                         pbs_strand,
                                         seq, e);
-      ltrelement_format_description(&ls->element, desc, BUFSIZ-1);
       fasta_show_entry_generic(desc, pbs_seq, range_length(pbs_rng), FSWIDTH,
                                ls->pbsout_file);
       genfile_xprintf(ls->tabout_file,
@@ -165,7 +168,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     /* output protein domains */
     if (array_size(ls->element.pdoms) > 0)
     {
-      char desc[BUFSIZ];
+
       pdoms = str_new();
       ltrelement_format_description(&ls->element, desc, BUFSIZ-1);
       if (STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
@@ -215,6 +218,41 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       genfile_xprintf(ls->tabout_file, "%s", str_get(pdoms));
       str_delete(pdoms);
     }
+
+    /* output LTRs (we just expect them to exist) */
+    switch(genome_feature_get_strand(ls->element.mainnode))
+    {
+      case STRAND_REVERSE:
+        ltr5_rng = rltr_rng;
+        ltr3_rng = lltr_rng;
+        break;
+      case STRAND_FORWARD:
+      default:
+        ltr5_rng = lltr_rng;
+        ltr3_rng = rltr_rng;
+        break;
+    }
+    outseq = ltrelement_get_sequence(ltr5_rng.start,
+                              ltr5_rng.end,
+                              genome_feature_get_strand(ls->element.mainnode),
+                              seq, e);
+    fasta_show_entry_generic(desc,
+                             outseq,
+                             range_length(ltr5_rng),
+                             FSWIDTH,
+                             ls->ltr5out_file);
+    ma_free(outseq);
+    outseq = ltrelement_get_sequence(ltr3_rng.start,
+                              ltr3_rng.end,
+                              genome_feature_get_strand(ls->element.mainnode),
+                              seq, e);
+    fasta_show_entry_generic(desc,
+                             outseq,
+                             range_length(ltr3_rng),
+                             FSWIDTH,
+                             ls->ltr3out_file);
+    ma_free(outseq);
+
   }
   array_delete(ls->element.pdoms);
   genfile_xprintf(ls->tabout_file, "\n");
@@ -321,6 +359,10 @@ void ltr_fileout_stream_free(GenomeStream *gs)
     genfile_close(ls->pbsout_file);
   if (ls->pptout_file)
     genfile_close(ls->pptout_file);
+  if (ls->ltr5out_file)
+    genfile_close(ls->ltr5out_file);
+  if (ls->ltr3out_file)
+    genfile_close(ls->ltr3out_file);
   hashtable_delete(ls->pdomout_files);
   genome_visitor_delete((GenomeVisitor*) ls->lv);
   genome_stream_delete(ls->in_stream);
@@ -364,12 +406,23 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   ls->fileprefix = file_prefix;
   snprintf(fn, BUFSIZ-1, "%s_tabout.csv", file_prefix);
   ls->tabout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
-  snprintf(fn, BUFSIZ-1, "%s_ppt.fas", file_prefix);
-  ls->pptout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
-  snprintf(fn, BUFSIZ-1, "%s_pbs.fas", file_prefix);
-  ls->pbsout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
+  if (tests_to_run & LTRDIGEST_RUN_PPT)
+  {
+    snprintf(fn, BUFSIZ-1, "%s_ppt.fas", file_prefix);
+    ls->pptout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
+  }
+  if (tests_to_run & LTRDIGEST_RUN_PBS)
+  {
+    snprintf(fn, BUFSIZ-1, "%s_pbs.fas", file_prefix);
+    ls->pbsout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
+  }
+  snprintf(fn, BUFSIZ-1, "%s_5ltr.fas", file_prefix);
+  ls->ltr5out_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
+  snprintf(fn, BUFSIZ-1, "%s_3ltr.fas", file_prefix);
+  ls->ltr3out_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
   snprintf(fn, BUFSIZ-1, "%s_conditions.csv", file_prefix);
   ls->metadata_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
+
   ls->pdomout_files = hashtable_new(HASH_STRING,
                                     ma_free_func,
                                     (FreeFunc) genfile_close);
