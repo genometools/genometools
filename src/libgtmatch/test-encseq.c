@@ -46,7 +46,7 @@ static void testscanatpos(const Encodedsequence *encseq,
     for (pos=startpos; pos < totallength; pos++)
     {
       ccra = getencodedchar(encseq,pos,readmode); /* Random access */
-      ccsr = sequentialgetencodedchar(encseq,esr,pos);
+      ccsr = sequentialgetencodedchar(encseq,esr,pos,readmode);
       if (ccra != ccsr)
       {
         fprintf(stderr,"startpos = " FormatSeqpos
@@ -82,7 +82,9 @@ static void testmulticharactercompare(const Encodedsequence *encseq,
   {
     pos1 = (Seqpos) (drand48() * (double) totallength);
     pos2 = (Seqpos) (drand48() * (double) totallength);
-    (void) multicharactercompare_withtest(encseq,readmode,esr1,pos1,esr2,pos2);
+    (void) multicharactercompare_withtest(encseq,
+                                          ISDIRREVERSE(readmode) ? false : true,
+                                          esr1,pos1,esr2,pos2);
   }
   freeEncodedsequencescanstate(&esr1);
   freeEncodedsequencescanstate(&esr2);
@@ -153,7 +155,7 @@ static int testfullscan(const StrArray *filenametab,
         break;
       }
     }
-    ccsr = sequentialgetencodedchar(encseq,esr,pos);
+    ccsr = sequentialgetencodedchar(encseq,esr,pos,readmode);
     if (ccra != ccsr)
     {
       error_set(err,"access=%s, mode=%s: position=" FormatSeqpos

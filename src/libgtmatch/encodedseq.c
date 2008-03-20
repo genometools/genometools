@@ -305,14 +305,14 @@ Uchar getencodedcharnospecial(const Encodedsequence *encseq,
 struct Encodedsequencescanstate
 {
   unsigned long firstcell, /* first index of tables with startpos and length */
-                lastcell;  /* last index of tables with startpos and length */
-  unsigned long nextpage,  /* next page to be used */
+                lastcell,  /* last index of tables with startpos and length */
+                nextpage,  /* next page to be used */
                 numofspecialcells; /* number of pages */
-  Readmode readmode;    /* mode of reading the sequence */
   unsigned int maxspecialtype;  /* maximal value of special type */
   Sequencerange previousrange,  /* previous range of wildcards */
                 currentrange;   /* current range of wildcards */
-  bool morepagesleft,
+  bool moveforward,
+       morepagesleft,
        hasrange,        /* there is some range */
        hasprevious,     /* there is some previous range */
        hascurrent;      /* there is some current range */
@@ -337,9 +337,10 @@ static void showsequencerange(const Sequencerange *range)
 
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
-                               Seqpos pos)
+                               Seqpos pos,
+                               Readmode readmode)
 {
-  if (esr->readmode == Forwardmode)
+  if (readmode == Forwardmode)
   {
 #ifdef DEBUG
     printf("esr: nextpage=%lu,firstcell=%lu,lastcell=%lu,",
@@ -350,12 +351,12 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
 #endif
     return encseq->seqdeliverchar(encseq,esr,pos);
   }
-  if (esr->readmode == Reversemode)
+  if (readmode == Reversemode)
   {
     return encseq->seqdeliverchar(encseq,esr,
                                   REVERSEPOS(encseq->totallength,pos));
   }
-  if (esr->readmode == Complementmode) /* only works with dna */
+  if (readmode == Complementmode) /* only works with dna */
   {
     Uchar cc = encseq->seqdeliverchar(encseq,esr,pos);
     if (ISSPECIAL(cc))
@@ -364,7 +365,7 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
     }
     return (Uchar) 3 - cc;
   }
-  if (esr->readmode == Reversecomplementmode) /* only works with dna */
+  if (readmode == Reversecomplementmode) /* only works with dna */
   {
     Uchar cc = encseq->seqdeliverchar(encseq,esr,
                                       REVERSEPOS(encseq->totallength,pos));
@@ -375,7 +376,7 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
     return (Uchar) 3 - cc;
   }
   fprintf(stderr,"sequentialgetencodedchar: readmode %d not implemented\n",
-                  (int) esr->readmode);
+                  (int) readmode);
   exit(EXIT_FAILURE); /* programming error */
 }
 
@@ -393,7 +394,7 @@ void encseqextract(Uchar *buffer,
   initEncodedsequencescanstate(esr,encseq,Forwardmode,frompos);
   for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
   {
-    buffer[idx] = sequentialgetencodedchar(encseq,esr,pos);
+    buffer[idx] = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
   }
   freeEncodedsequencescanstate(&esr);
 }
@@ -1387,19 +1388,12 @@ Encodedsequencescanstate *newEncodedsequencescanstate(void)
   return esr;
 }
 
-void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
-                                  const Encodedsequence *encseq,
-                                  Readmode readmode,
-                                  Seqpos startpos)
+static void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
+                                                const Encodedsequence *encseq,
+                                                bool moveforward,
+                                                Seqpos startpos)
 {
-  bool moveforward;
-
-  if (ISDIRREVERSE(readmode))
-  {
-    startpos = REVERSEPOS(encseq->totallength,startpos);
-  }
-  esr->readmode = readmode;
-  moveforward = ISDIRREVERSE(readmode) ? false : true;
+  esr->moveforward = moveforward;
   if (encseq->sat == Viauchartables ||
       encseq->sat == Viaushorttables ||
       encseq->sat == Viauint32tables)
@@ -1422,6 +1416,27 @@ void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
 #endif
     }
     advanceEncodedseqstate(encseq,esr,moveforward);
+  }
+}
+
+void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
+                                  const Encodedsequence *encseq,
+                                  Readmode readmode,
+                                  Seqpos startpos)
+{
+  if (ISDIRREVERSE(readmode))
+  {
+    initEncodedsequencescanstategeneric(esr,
+                                        encseq,
+                                        false,
+                                        REVERSEPOS(encseq->totallength,
+                                                   startpos));
+  } else
+  {
+    initEncodedsequencescanstategeneric(esr,
+                                        encseq,
+                                        true,
+                                        startpos);
   }
 }
 
@@ -1474,24 +1489,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
 #endif
   if (esr->hasprevious)
   {
-    if (ISDIRREVERSE(esr->readmode))
-    {
-      if (pos < esr->previousrange.rightpos)
-      {
-        if (pos >= esr->previousrange.leftpos)
-        {
-          if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-          {
-            return (Uchar) SEPARATOR;
-          }
-          return (Uchar) WILDCARD;
-        }
-        if (esr->hasrange)
-        {
-          advanceEncodedseqstate(encseq,esr,false);
-        }
-      }
-    } else
+    if (esr->moveforward)
     {
       if (pos >= esr->previousrange.leftpos)
       {
@@ -1506,6 +1504,23 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
         if (esr->hasrange)
         {
           advanceEncodedseqstate(encseq,esr,true);
+        }
+      }
+    } else
+    {
+      if (pos < esr->previousrange.rightpos)
+      {
+        if (pos >= esr->previousrange.leftpos)
+        {
+          if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
+          {
+            return (Uchar) SEPARATOR;
+          }
+          return (Uchar) WILDCARD;
+        }
+        if (esr->hasrange)
+        {
+          advanceEncodedseqstate(encseq,esr,false);
         }
       }
     }
@@ -1573,10 +1588,11 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
   {
     sri->pos = 0;
     sri->esr = newEncodedsequencescanstate();
-    initEncodedsequencescanstate(sri->esr,encseq,
-                                 moveforward ? Forwardmode
-                                             : Reversemode,
-                                 0);
+    initEncodedsequencescanstategeneric(sri->esr,
+                                        encseq,
+                                        moveforward,
+                                        moveforward ? 0
+                                                    : (encseq->totallength-1));
   }
   assert(sri != NULL);
   return sri;
@@ -2133,7 +2149,7 @@ static Seqpos fwdgetnextstoppos(const Encodedsequence *encseq,
                                 Encodedsequencescanstate *esr,
                                 Seqpos pos)
 {
-  assert(!ISDIRREVERSE(esr->readmode));
+  assert(esr->moveforward);
   while (esr->hasprevious)
   {
     if (pos >= esr->previousrange.leftpos)
@@ -2162,7 +2178,7 @@ static Seqpos revgetnextstoppos(const Encodedsequence *encseq,
                                 Encodedsequencescanstate *esr,
                                 Seqpos pos)
 {
-  assert(ISDIRREVERSE(esr->readmode));
+  assert(!esr->moveforward);
   while (esr->hasprevious)
   {
     if (pos < esr->previousrange.rightpos)
@@ -2509,15 +2525,8 @@ void checkextractunitatpos(bool fwd,const Encodedsequence *encseq)
   Seqpos startpos;
 
   esr = newEncodedsequencescanstate();
-  if (fwd)
-  {
-    initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
-    startpos = 0;
-  } else
-  {
-    initEncodedsequencescanstate(esr,encseq,Reversemode,0);
-    startpos = encseq->totallength-1;
-  }
+  startpos = fwd ? 0 : (encseq->totallength-1);
+  initEncodedsequencescanstategeneric(esr,encseq,fwd,startpos);
   while (true)
   {
     extract2bitenc(fwd,&ptbe1,encseq,esr,startpos);
@@ -2744,32 +2753,8 @@ static int compareTwobitencodings_nolcp(EndofTwobitencoding *ptbe1,
   return 0;
 }
 
-static int multicharactercompare_bruteforce(Seqpos *lcpvalue,
-                                            const Encodedsequence *encseq,
-                                            Readmode readmode,
-                                            Seqpos maxlcp,
-                                            Seqpos pos1,
-                                            Seqpos pos2)
-{
-  if (ISDIRREVERSE(readmode))
-  {
-    pos1 = REVERSEPOS(encseq->totallength,pos1);
-    pos2 = REVERSEPOS(encseq->totallength,pos2);
-  }
-  return comparetwosuffixes(encseq,
-                            readmode,
-                            lcpvalue,
-                            false,
-                            false,
-                            maxlcp,
-                            pos1,
-                            pos2,
-                            NULL,
-                            NULL);
-}
-
 void multicharactercompare_withtest(const Encodedsequence *encseq,
-                                    Readmode readmode,
+                                    bool fwd,
                                     Encodedsequencescanstate *esr1,
                                     Seqpos pos1,
                                     Encodedsequencescanstate *esr2,
@@ -2779,23 +2764,21 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
   unsigned int lcpvalue1;
   Seqpos lcpvalue2;
   int ret1, ret2;
-  bool fwd = ISDIRREVERSE(readmode) ? false : true;
 
-  initEncodedsequencescanstate(esr1,encseq,readmode,pos1);
-  initEncodedsequencescanstate(esr2,encseq,readmode,pos2);
+  initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1);
+  initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2);
   extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
   extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
   ret1 = compareTwobitencodings(fwd,&lcpvalue1,&ptbe1,pos1,&ptbe2,pos2);
-  ret2 = multicharactercompare_bruteforce(&lcpvalue2,encseq,readmode,
-                                          (Seqpos) UNITSIN2BITENC,
-                                          pos1,pos2);
+  lcpvalue2 = (Seqpos) UNITSIN2BITENC;
+  ret2 = comparetwostrings(encseq,fwd,&lcpvalue2,pos1,pos2);
   if (ret1 != ret2 || (Seqpos) lcpvalue1 != lcpvalue2)
   {
     char buf1[MULT2(UNITSIN2BITENC)+1], buf2[MULT2(UNITSIN2BITENC)+1];
 
-    fprintf(stderr,"readmode = %s: "
+    fprintf(stderr,"%s: "
                    "pos1=" FormatSeqpos ", pos2=" FormatSeqpos "\n",
-            showreadmode(readmode),
+            fwd ? "fwd" : "rev",
             PRINTSeqposcast(pos1),PRINTSeqposcast(pos2));
     fprintf(stderr,"ret1=%d, ret2=%d\n",ret1,ret2);
     fprintf(stderr,"lcpvalue1=%u, lcpvalue2=" FormatSeqpos "\n",lcpvalue1,
@@ -2826,12 +2809,12 @@ int compareEncseqsequences(Seqpos *lcp,
 #ifdef mydebug
   Seqpos lcp2;
   int retval2;
-  retval2 = multicharactercompare_bruteforce(&lcp2,
-                                             encseq,
-                                             readmode,
-                                             0,
-                                             pos1+depth,
-                                             pos2+depth);
+  lcp2 = 0;
+  retval2 = comparetwostrings(encseq,
+                              ISDIRERVERSE(readmode) ? false : true,
+                              &lcp2,
+                              pos1+depth,
+                              pos2+depth);
   lcp2 += depth;
 #endif
 

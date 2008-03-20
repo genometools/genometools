@@ -6,11 +6,17 @@ int comparetwosuffixes(const Encodedsequence *encseq,
                        Seqpos *maxlcp,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
-                       Seqpos depth,
+                       Seqpos maxdepth,
                        Seqpos start1,
                        Seqpos start2,
                        Encodedsequencescanstate *esr1,
                        Encodedsequencescanstate *esr2);
+
+int comparetwostrings(const Encodedsequence *encseq,
+                      bool moveforward,
+                      Seqpos *maxcommon,
+                      Seqpos start1,
+                      Seqpos start2);
 
 #ifdef __cplusplus
 }

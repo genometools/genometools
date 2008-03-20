@@ -35,7 +35,7 @@ static int addmarkpos(ArraySeqpos *asp,
   initEncodedsequencescanstate(esr,encseq,Forwardmode,seqrange->leftpos);
   for (pos=seqrange->leftpos; pos<seqrange->rightpos; pos++)
   {
-    currentchar = sequentialgetencodedchar(encseq,esr,pos);
+    currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
     assert(ISSPECIAL(currentchar));
     if (currentchar == (Uchar) SEPARATOR)
     {
@@ -238,7 +238,7 @@ int checkmarkpos(const Encodedsequence *encseq,
     initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
     for (pos=0; pos<totallength; pos++)
     {
-      currentchar = sequentialgetencodedchar(encseq,esr,pos);
+      currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
       if (currentchar == (Uchar) SEPARATOR)
       {
         currentseqnum++;

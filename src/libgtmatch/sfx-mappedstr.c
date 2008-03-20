@@ -456,7 +456,7 @@ void getencseqkmers(
   initEncodedsequencescanstate(esr,encseq,readmode,0);
   for (currentposition = 0; currentposition<totallength; currentposition++)
   {
-    charcode = sequentialgetencodedchar(encseq,esr,currentposition);
+    charcode = sequentialgetencodedchar(encseq,esr,currentposition,readmode);
     CHECKENCCHAR(charcode,encseq,currentposition,readmode);
     shiftrightwithchar(processkmercode,processkmercodeinfo,
                        &spwp,currentposition,charcode);

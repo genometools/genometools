@@ -98,8 +98,8 @@ typedef struct
 #define getencodedcharnospecial(ENCSEQ,POS,RM)\
         getencodedchar(ENCSEQ,POS,RM)
 
-#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS)\
-        getencodedchar(ENCSEQ,POS,(ENCSEQSTATE)->readmode)
+#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS,READMODE)\
+        getencodedchar(ENCSEQ,POS,READMODE)
 
 #else
 
@@ -118,7 +118,8 @@ Uchar getencodedcharnospecial(const Encodedsequence *encseq,
 
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
-                               Seqpos pos);
+                               Seqpos pos,
+                               Readmode readmode);
 
 #endif
 
@@ -188,7 +189,7 @@ void encseqextract(Uchar *buffer,
 void checkextractunitatpos(bool fwd,const Encodedsequence *encseq);
 
 void multicharactercompare_withtest(const Encodedsequence *encseq,
-                                    Readmode readmode,
+                                    bool fwd,
                                     Encodedsequencescanstate *esr1,
                                     Seqpos pos1,
                                     Encodedsequencescanstate *esr2,

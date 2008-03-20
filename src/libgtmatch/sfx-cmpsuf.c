@@ -18,7 +18,6 @@
 #include "libgtcore/chardef.h"
 #include "encseq-def.h"
 
-
 int comparetwosuffixes(const Encodedsequence *encseq,
                        Readmode readmode,
                        Seqpos *maxlcp,
@@ -35,10 +34,6 @@ int comparetwosuffixes(const Encodedsequence *encseq,
   int retval;
 
   end1 = end2 = getencseqtotallength(encseq);
-  if (ISDIRREVERSE(readmode))
-  {
-    printf("maxdepth=%u\n",maxdepth);
-  }
   if (maxdepth > 0)
   {
     if (end1 > start1 + maxdepth)
@@ -68,7 +63,7 @@ int comparetwosuffixes(const Encodedsequence *encseq,
     }
     if (esr1 != NULL)
     {
-      cc1 = sequentialgetencodedchar(encseq,esr1,pos1);
+      cc1 = sequentialgetencodedchar(encseq,esr1,pos1,readmode);
       CHECKENCCHAR(cc1,encseq,pos1,readmode);
     } else
     {
@@ -76,7 +71,7 @@ int comparetwosuffixes(const Encodedsequence *encseq,
     }
     if (esr2 != NULL)
     {
-      cc2 = sequentialgetencodedchar(encseq,esr2,pos2);
+      cc2 = sequentialgetencodedchar(encseq,esr2,pos2,readmode);
       CHECKENCCHAR(cc2,encseq,pos2,readmode);
     } else
     {
@@ -131,6 +126,129 @@ int comparetwosuffixes(const Encodedsequence *encseq,
         retval = 1; /* a > b */
         break;
       }
+    }
+  }
+  return retval;
+}
+
+int comparetwostrings(const Encodedsequence *encseq,
+                      bool moveforward,
+                      Seqpos *maxcommon,
+                      Seqpos start1,
+                      Seqpos start2)
+{
+  Uchar cc1, cc2;
+  Seqpos pos1, pos2, end1, end2;
+  int retval;
+
+  if (moveforward)
+  {
+    end1 = end2 = getencseqtotallength(encseq);
+    if (*maxcommon > 0)
+    {
+      if (end1 > start1 + *maxcommon)
+      {
+        end1 = start1 + *maxcommon;
+      }
+      if (end2 > start2 + *maxcommon)
+      {
+        end2 = start2 + *maxcommon;
+      }
+    }
+  } else
+  {
+    end1 = end2 = 0;
+    if (*maxcommon > 0)
+    {
+      if (start1 >= *maxcommon)
+      {
+        end1 = start1 - *maxcommon + 1;
+      }
+      if (start2>= *maxcommon)
+      {
+        end2 = start2 - *maxcommon + 1;
+      }
+    }
+  }
+  pos1 = start1;
+  pos2 = start2;
+  while (true)
+  {
+    if (moveforward)
+    {
+      if (pos1 >= end1 || pos2 >= end2)
+      {
+        *maxcommon = pos1 - start1;
+        retval = 0;
+        break;
+      }
+    } else
+    {
+      if (pos1 <= end1 || pos2 <= end2)
+      {
+        *maxcommon = start1 - pos1;
+        retval = 0;
+        break;
+      }
+    }
+    cc1 = getencodedchar(encseq,pos1,Forwardmode);
+    cc2 = getencodedchar(encseq,pos2,Forwardmode);
+    if (ISSPECIAL(cc1))
+    {
+      if (ISSPECIAL(cc2))
+      {
+        if (pos1 < pos2)
+        {
+          *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
+          retval = -1; /* a < b */
+          break;
+        }
+        if (pos1 > pos2)
+        {
+          *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
+          retval = 1; /* a > b */
+          break;
+        }
+        *maxcommon = moveforward ? pos1 - start1 + 1 : start1 - pos1 + 1;
+        retval = 0; /* a = b */
+        break;
+      }
+      *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
+      retval = 1; /* a > b */
+      break;
+    } else
+    {
+      if (ISSPECIAL(cc2))
+      {
+        *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
+        retval = -1; /* a < b */
+        break;
+      }
+      if (cc1 < cc2)
+      {
+        *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
+        retval = -1; /* a < b */
+        break;
+      }
+      if (cc1 > cc2)
+      {
+        *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
+        retval = 1; /* a > b */
+        break;
+      }
+    }
+    if (moveforward)
+    {
+      assert(pos1 < end1);
+      assert(pos2 < end2);
+      pos1++;
+      pos2++;
+    } else
+    {
+      assert(end1 < pos1);
+      assert(end2 < pos2);
+      pos1--;
+      pos2--;
     }
   }
   return retval;

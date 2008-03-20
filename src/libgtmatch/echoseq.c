@@ -162,7 +162,7 @@ void encseq2symbolstring(FILE *fpout,
   lastpos = start + wlen - 1;
   for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
-    currentchar = sequentialgetencodedchar(encseq,esr,idx);
+    currentchar = sequentialgetencodedchar(encseq,esr,idx,readmode);
     if (currentchar == (Uchar) SEPARATOR)
     {
       fprintf(fpout,"\n>\n");
