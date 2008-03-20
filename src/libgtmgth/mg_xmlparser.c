@@ -417,7 +417,7 @@ static void XMLCALL endElement(void *data, const char *name)
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 3)) ==
                0)
       {
-        if(PARSESTRUCT(giexp_flag))
+        if (PARSESTRUCT(giexp_flag))
         {
           /* Speichern des Hit-from Wertes in der matrix_info Struktur
              innerhalb der parsestruct-Struktur */
@@ -426,7 +426,8 @@ static void XMLCALL endElement(void *data, const char *name)
         }
         else
         {
-          genfile_xprintf(HITFILEOUT, "%s ", str_get(PARSESTRUCT(hit_gi_nr_tmp)));
+          genfile_xprintf(HITFILEOUT, "%s ",
+                          str_get(PARSESTRUCT(hit_gi_nr_tmp)));
           genfile_xprintf(HITFILEOUT, "%s ", str_get(PARSESTRUCT(buf_ptr)));
         }
       }
@@ -434,7 +435,7 @@ static void XMLCALL endElement(void *data, const char *name)
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 4)) ==
                0)
       {
-        if(PARSESTRUCT(giexp_flag))
+        if (PARSESTRUCT(giexp_flag))
         {
           /* Speichern des Hit-from Wertes in der matrix_info Struktur
              innerhalb der parsestruct-Struktur */
@@ -567,24 +568,36 @@ static void XMLCALL endElement(void *data, const char *name)
         /* Zaehler fuer die Hits pro GI-Nummer wird um 1 erhoeht */
         XMLPARSERSTRUCT(hit_counter)++;
 
-
         if (PARSESTRUCT(gi_flag))
         {
            PARSESTRUCT(gi_flag) = 0;
 
-           strarray_set_size(MATRIXSTRUCT(hit_gi_nr), strarray_size(MATRIXSTRUCT(hit_gi_nr))-1);
-           strarray_set_size(MATRIXSTRUCT(hit_gi_def), strarray_size(MATRIXSTRUCT(hit_gi_def))-1);
-           strarray_set_size(MATRIXSTRUCT(hit_acc), strarray_size(MATRIXSTRUCT(hit_acc))-1);
-           strarray_set_size(MATRIXSTRUCT(fasta_row), strarray_size(MATRIXSTRUCT(fasta_row))-1);
-           strarray_set_size(MATRIXSTRUCT(hit_num), strarray_size(MATRIXSTRUCT(hit_num))-1);
-           array_set_size(MATRIXSTRUCT(query_from), array_size(MATRIXSTRUCT(query_from))-1);
-           array_set_size(MATRIXSTRUCT(query_to), array_size(MATRIXSTRUCT(query_to))-1);
-           strarray_set_size(MATRIXSTRUCT(hit_from), strarray_size(MATRIXSTRUCT(hit_from))-1);
-           strarray_set_size(MATRIXSTRUCT(hit_to), strarray_size(MATRIXSTRUCT(hit_to))-1);
-           array_set_size(MATRIXSTRUCT(query_frame), array_size(MATRIXSTRUCT(query_frame))-1);
-           array_set_size(MATRIXSTRUCT(hit_frame),  array_size(MATRIXSTRUCT(hit_frame))-1);
-           strarray_set_size(MATRIXSTRUCT(hsp_qseq), strarray_size(MATRIXSTRUCT(hsp_qseq))-1);
-           strarray_set_size(MATRIXSTRUCT(hsp_hseq), strarray_size(MATRIXSTRUCT(hsp_hseq))-1);
+           strarray_set_size(MATRIXSTRUCT(hit_gi_nr),
+                             strarray_size(MATRIXSTRUCT(hit_gi_nr))-1);
+           strarray_set_size(MATRIXSTRUCT(hit_gi_def),
+                             strarray_size(MATRIXSTRUCT(hit_gi_def))-1);
+           strarray_set_size(MATRIXSTRUCT(hit_acc),
+                             strarray_size(MATRIXSTRUCT(hit_acc))-1);
+           strarray_set_size(MATRIXSTRUCT(fasta_row),
+                             strarray_size(MATRIXSTRUCT(fasta_row))-1);
+           strarray_set_size(MATRIXSTRUCT(hit_num),
+                             strarray_size(MATRIXSTRUCT(hit_num))-1);
+           array_set_size(MATRIXSTRUCT(query_from),
+                          array_size(MATRIXSTRUCT(query_from))-1);
+           array_set_size(MATRIXSTRUCT(query_to),
+                          array_size(MATRIXSTRUCT(query_to))-1);
+           strarray_set_size(MATRIXSTRUCT(hit_from),
+                             strarray_size(MATRIXSTRUCT(hit_from))-1);
+           strarray_set_size(MATRIXSTRUCT(hit_to),
+                             strarray_size(MATRIXSTRUCT(hit_to))-1);
+           array_set_size(MATRIXSTRUCT(query_frame),
+                          array_size(MATRIXSTRUCT(query_frame))-1);
+           array_set_size(MATRIXSTRUCT(hit_frame),
+                          array_size(MATRIXSTRUCT(hit_frame))-1);
+           strarray_set_size(MATRIXSTRUCT(hsp_qseq),
+                             strarray_size(MATRIXSTRUCT(hsp_qseq))-1);
+           strarray_set_size(MATRIXSTRUCT(hsp_hseq),
+                             strarray_size(MATRIXSTRUCT(hsp_hseq))-1);
 
            XMLPARSERSTRUCT(hit_counter)--;
         }
@@ -635,7 +648,8 @@ void textElement(void *data, const XML_Char *txt_element, int len)
   {
     /* falls ein Flag gesetzt ist (relevanter XML-Tag Zwischenbereich),
        wird mit der Bearbeitung der Textpassage begonnen; dazu wird der
-       "aktuelle Text" txt_element an den bereits eingelesenen Text angehaengt */
+       "aktuelle Text" txt_element an den bereits eingelesenen Text angehaengt
+     */
     if (PARSESTRUCT(hit_flag) == SET || PARSESTRUCT(def_flag) == SET
         || PARSESTRUCT(hit_hsp_flag) == SET)
     {

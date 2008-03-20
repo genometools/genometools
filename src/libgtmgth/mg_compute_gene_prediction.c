@@ -78,7 +78,6 @@ static void merge_array(RegionStruct **,
    Returnwert: void */
 static void sort_realtmp(Array *, Array *, Array *, Array *);
 
-
 int mg_compute_gene_prediction(CombinedScoreMatrixEntry
                                **combinedscore_matrix,
                                PathMatrixEntry **path_matrix,

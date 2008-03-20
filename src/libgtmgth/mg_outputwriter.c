@@ -154,8 +154,6 @@ static short check_startcodon(const ParseStruct *, const char *);
    Returnwert: void */
 static void output_close_iteration_xml(const ParseStruct *);
 
-
-
 /* Zeitstruktur liefert die Struktur fuer das aktuelle Datum in der Form
    dd.mm.yyyy */
 struct tm *today(void)
@@ -278,7 +276,7 @@ static void output_header_txt(const ParseStruct *parsestruct_ptr)
 
   tmstamp = today();
 
-  if(!ARGUMENTSSTRUCT(testmodus_mode))
+  if (!ARGUMENTSSTRUCT(testmodus_mode))
   {
     /* Headerbereich schreiben inkl. Auflistung der Parametereinstellugen */
     genfile_xprintf(FILEPOINTEROUT,
@@ -339,7 +337,7 @@ static void output_header_html(const ParseStruct *parsestruct_ptr)
                   "<html xmlns=\"http://www.w3.org/1999/xhtml\" "
                   "xml:lang=\"de\" lang=\"de\">");
   genfile_xprintf(FILEPOINTEROUT, "<head>");
-  if(!ARGUMENTSSTRUCT(testmodus_mode))
+  if (!ARGUMENTSSTRUCT(testmodus_mode))
   {
     genfile_xprintf(FILEPOINTEROUT,
                     "<title>Metagenomethreader Result %d.%d.%d</title>",
@@ -357,7 +355,7 @@ static void output_header_html(const ParseStruct *parsestruct_ptr)
     genfile_xprintf(FILEPOINTEROUT,
                     "<table border=\"0\" width=\"800\" cellspacing=\"1\" "
                     "cellpadding=\"2\">");
-  if(!ARGUMENTSSTRUCT(testmodus_mode))
+  if (!ARGUMENTSSTRUCT(testmodus_mode))
   {
     genfile_xprintf(FILEPOINTEROUT,
                     "<tr><td width=\"200\"><font class=\"font_header\">"
@@ -498,7 +496,7 @@ static void output_header_xml(const ParseStruct *parsestruct_ptr)
                   "  <MetagenomethreaderOutput_title>Metagenomethreader"
                   "</MetagenomethreaderOutput_title>\n");
 
-  if(!ARGUMENTSSTRUCT(testmodus_mode))
+  if (!ARGUMENTSSTRUCT(testmodus_mode))
   {
     genfile_xprintf(FILEPOINTEROUT,
                     "  <MetagenomethreaderOutput_date>Result %d.%d.%d"
@@ -1109,7 +1107,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
     endpoint = contig_len - from;
   }
 
-  if(!had_err)
+  if (!had_err)
   {
     if (startpoint < 3)
     {

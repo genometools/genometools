@@ -132,8 +132,8 @@ static OPrval parse_options(int *parsed_args,
   frameshift_span_option =
     option_new_double_min("f",
                           "max. span between coding-regions in different "
-                          "reading frames resume as coding-regions in the optimal"
-                          "reading-frame",
+                          "reading frames resume as coding-regions in the "
+                          "optimal reading-frame",
                           &metagenomethreader_arguments->frameshift_span,
                       200.0, 0.0);
   option_parser_add_option(op, frameshift_span_option);
@@ -203,8 +203,8 @@ static OPrval parse_options(int *parsed_args,
                     &metagenomethreader_arguments->homology_mode, false);
   option_parser_add_option(op, homology_mode_option);
 
-  /* Testmodus: die Programm-Parameter werden zur Vergleichbarkeit der Ergebnisse
-     nicht mit ausgegeben; default: false */
+  /* Testmodus: die Programm-Parameter werden zur Vergleichbarkeit der
+     Ergebnisse nicht mit ausgegeben; default: false */
   testmodus_mode_option =
     option_new_bool("g", "testmodus, output without creating date",
                     &metagenomethreader_arguments->testmodus_mode, false);
@@ -548,7 +548,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
       genfile_close(parsestruct.fp_giexp_file);
       genfile_close(fp_xmlfile);
 
-      if(!had_err)
+      if (!had_err)
       {
         parsestruct.giexp_flag = 1;
 
@@ -567,21 +567,21 @@ int metagenomethreader(int argc, const char **argv, Error * err)
 
         genfile_close(parsestruct.fp_blasthit_file);
 
-        if(had_err)
+        if (had_err)
         {
           had_err = 0;
         }
         /* XXX else XXX */
 
-        if(!had_err)
-	    {
+        if (!had_err)
+        {
           parsestruct.hitseq = bioseq_new(argv[parsed_args + 2], err);
 
           if (!parsestruct.hitseq)
           {
             had_err = -1;
           }
-	      if (!had_err)
+          if (!had_err)
           {
             /* Anzahl der Hit-DNA-Eintraege */
             nrofseq = bioseq_number_of_sequences(parsestruct.hitseq);
