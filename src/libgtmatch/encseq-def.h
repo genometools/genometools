@@ -201,15 +201,13 @@ int compareEncseqsequences(Seqpos *lcp,
                            Encodedsequencescanstate *esr1,
                            Encodedsequencescanstate *esr2,
                            Seqpos pos1,Seqpos pos2,
-                           Seqpos depth,
-                           UNUSED Seqpos totallength);
+                           Seqpos depth);
 
 int compareEncseqsequences_nolcp(const Encodedsequence *encseq,
                                  Readmode readmode,
                                  Encodedsequencescanstate *esr1,
                                  Encodedsequencescanstate *esr2,
                                  Seqpos pos1,Seqpos pos2,
-                                 Seqpos depth,
-                                 UNUSED Seqpos totallength);
+                                 Seqpos depth);
 
 #endif

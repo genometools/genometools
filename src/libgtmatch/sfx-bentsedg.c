@@ -219,14 +219,14 @@ static void insertionsort(const Encodedsequence *encseq,
         }
       } else
       {
-        if (lcpsubtab != NULL)\
+        if (lcpsubtab != NULL)
         {
           retval = compareEncseqsequences(&lcplen,encseq,readmode,esr1,esr2,
-                                       *(pj-1),*pj,depth,totallength);
+                                          *(pj-1),*pj,depth);
         } else
         {
           retval = compareEncseqsequences_nolcp(encseq,readmode,esr1,esr2,
-                                             *(pj-1),*pj,depth,totallength);
+                                                *(pj-1),*pj,depth);
         }
       }
       if (lcpsubtab != NULL)

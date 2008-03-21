@@ -511,7 +511,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
          sfi->cmpcharbychar = true;
        } else
        {
-         sfi->cmpcharbychar = true; /* XXX false; */
+         sfi->cmpcharbychar = false;
        }
     } else
     {
