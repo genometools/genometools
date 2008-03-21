@@ -82,9 +82,7 @@ static void testmulticharactercompare(const Encodedsequence *encseq,
   {
     pos1 = (Seqpos) (drand48() * (double) totallength);
     pos2 = (Seqpos) (drand48() * (double) totallength);
-    (void) multicharactercompare_withtest(encseq,
-                                          readmode,
-                                          esr1,pos1,esr2,pos2);
+    (void) multicharactercompare_withtest(encseq,readmode,esr1,pos1,esr2,pos2);
   }
   freeEncodedsequencescanstate(&esr1);
   freeEncodedsequencescanstate(&esr2);
