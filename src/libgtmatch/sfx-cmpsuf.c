@@ -134,33 +134,81 @@ int comparetwosuffixes(const Encodedsequence *encseq,
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
 
-static Seqpos comparetwocharacters(const Encodedsequence *encseq,
-                                   Readmode readmode,
-                                   Seqpos start1,
-                                   Seqpos start2,
-                                   Seqpos depth)
+static Seqpos extractsinglecharacter(const Encodedsequence *encseq,
+                                     bool fwd,
+                                     bool complement,
+                                     Seqpos pos,
+                                     Seqpos depth,
+                                     Seqpos totallength)
+{
+  Seqpos cc;
+
+  if (fwd)
+  {
+    if (pos + depth >= totallength)
+    {
+      cc = pos + depth + COMPAREOFFSET;
+    } else
+    {
+      cc = getencodedchar(encseq,pos + depth,Forwardmode);
+      if (ISSPECIAL(cc))
+      {
+        cc = pos + depth + COMPAREOFFSET;
+      } else
+      {
+        if (complement)
+        {
+          cc = COMPLEMENTBASE(cc);
+        }
+      }
+    }
+  } else
+  {
+    if (pos < depth)
+    {
+      cc = depth - pos + COMPAREOFFSET;
+    } else
+    {
+      cc = getencodedchar(encseq,pos - depth,Forwardmode);
+      if (ISSPECIAL(cc))
+      {
+        cc = pos - depth + COMPAREOFFSET;
+      } else
+      {
+        if (complement)
+        {
+          cc = COMPLEMENTBASE(cc);
+        }
+      }
+    }
+  }
+  return cc;
+}
+
+int comparewithonespecial(const Encodedsequence *encseq,
+                          bool fwd,
+                          bool complement,
+                          Seqpos pos1,
+                          Seqpos pos2,
+                          Seqpos depth,
+                          Seqpos totallength)
 {
   Seqpos cc1, cc2;
 
-  if (ISDIRREVERSE(readmode))
-  {
-    if (start1 + depth >= totallength)
-    {
-      cc1 = totallength + COMPAREOFFSET;
-    } else
-    {
-      cc1 = getencodedchar(encseq,start1 + depth,Forwardmode);
-      if (ISSPECIAL(cc1))
-      {
-        return start1 + depth COMPAREOFFSET;
-      }
-      if (complement)
-      {
-        cc1 = COMPLEMENTBASE(cc1);
-      }
-
-    }
-  }
+  cc1 = extractsinglecharacter(encseq,
+                               fwd,
+                               complement,
+                               pos1,
+                               depth,
+                               totallength);
+  cc2 = extractsinglecharacter(encseq,
+                               fwd,
+                               complement,
+                               pos2,
+                               depth,
+                               totallength);
+  assert(cc1 != cc2);
+  return cc1 < cc2 ? -1 : 1;
 }
 
 static Seqpos derefcharboundaries(const Encodedsequence *encseq,
@@ -206,8 +254,8 @@ static Seqpos derefcharboundaries(const Encodedsequence *encseq,
 int comparetwostrings(const Encodedsequence *encseq,
                       Readmode readmode,
                       Seqpos *maxcommon,
-                      Seqpos start1,
-                      Seqpos start2)
+                      Seqpos pos1,
+                      Seqpos pos2)
 {
   Seqpos currentoffset, maxoffset, cc1, cc2,
          totallength = getencseqtotallength(encseq);
@@ -216,16 +264,16 @@ int comparetwostrings(const Encodedsequence *encseq,
 
   if (moveforward)
   {
-    assert(start1 < totallength);
-    assert(start2 < totallength);
-    maxoffset = MIN(totallength - start1,totallength - start2);
+    assert(pos1 < totallength);
+    assert(pos2 < totallength);
+    maxoffset = MIN(totallength - pos1,totallength - pos2);
     if (*maxcommon > 0)
     {
       maxoffset = MIN(*maxcommon,maxoffset);
     }
   } else
   {
-    maxoffset = MIN(start1+1,start2+1);
+    maxoffset = MIN(pos1+1,pos2+1);
     if (*maxcommon > 0)
     {
       maxoffset = MIN(*maxcommon,maxoffset);
@@ -233,9 +281,9 @@ int comparetwostrings(const Encodedsequence *encseq,
   }
   for (currentoffset = 0; currentoffset <= maxoffset; currentoffset++)
   {
-    cc1 = derefcharboundaries(encseq,start1,maxoffset,currentoffset,
+    cc1 = derefcharboundaries(encseq,pos1,maxoffset,currentoffset,
                               totallength,moveforward,complement);
-    cc2 = derefcharboundaries(encseq,start2,maxoffset,currentoffset,
+    cc2 = derefcharboundaries(encseq,pos2,maxoffset,currentoffset,
                               totallength,moveforward,complement);
     if (cc1 < cc2)
     {
@@ -247,7 +295,7 @@ int comparetwostrings(const Encodedsequence *encseq,
       *maxcommon = currentoffset;
       return 1;
     }
-    if (start1 == start2 && cc1 >= (Seqpos) COMPAREOFFSET)
+    if (pos1 == pos2 && cc1 >= (Seqpos) COMPAREOFFSET)
     {
       *maxcommon = currentoffset;
       return 0;
@@ -258,10 +306,10 @@ int comparetwostrings(const Encodedsequence *encseq,
 }
 
 #ifdef OLDVERSION
-int comparetwostrings(const Encodedsequence *encseq,
+int comparetwostrings2(const Encodedsequence *encseq,
                       Readmode readmode,
                       Seqpos *maxcommon,
-                      Seqpos start1,
+                      Seqpos pos1,
                       Seqpos start2)
 {
   Uchar cc1, cc2;
@@ -274,7 +322,7 @@ int comparetwostrings(const Encodedsequence *encseq,
     end1 = end2 = getencseqtotallength(encseq) - 1;
     if (*maxcommon > 0)
     {
-      if (end1 > start1 + *maxcommon - 1)
+      if (end1 > pos1 + *maxcommon - 1)
       {
         end1 = start1 + *maxcommon - 1;
       }

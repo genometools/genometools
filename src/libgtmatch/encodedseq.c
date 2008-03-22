@@ -1422,6 +1422,7 @@ static void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
       esr->firstcell = esr->lastcell = 0;
     } else
     {
+      assert(startpos < encseq->totallength);
       binpreparenextrange(encseq,esr,moveforward,startpos);
 #ifdef DEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
@@ -2230,6 +2231,7 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
   Seqpos stoppos;
 
   assert(encseq->sat != Viadirectaccess);
+  assert(startpos < encseq->totallength);
   if (encseq->sat == Viabitaccess)
   {
     fprintf(stderr,"fwdextract2bitenc for bitaccess not implemented yet\n");
@@ -2817,7 +2819,12 @@ int compareEncseqsequences(Seqpos *lcp,
   EndofTwobitencoding ptbe1, ptbe2;
   unsigned int commonunits;
   int retval;
-  bool fwd;
+  bool fwd, complement = ISDIRCOMPLEMENT(readmode);
+#define mydebug
+#ifdef mydebug
+  Seqpos lcp2 = 0;
+  int retval2;
+#endif
 
   assert(pos1 != pos2);
   if (ISDIRREVERSE(readmode))
@@ -2829,24 +2836,38 @@ int compareEncseqsequences(Seqpos *lcp,
   {
     fwd = true;
   }
-#define mydebug
 #ifdef mydebug
-  Seqpos lcp2 = 0;
-  int retval2;
   if (fwd)
   {
-    retval2 = comparetwostrings(encseq,
-                                readmode,
-                                &lcp2,
-                                pos1+depth,
-                                pos2+depth);
-    lcp2 += depth;
+    if (pos1 + depth >= encseq->totallength ||
+        pos2 + depth >= encseq->totallength)
+    {
+      retval2 = comparewithonespecial(encseq,
+                                      fwd,
+                                      complement,
+                                      pos1,
+                                      pos2,
+                                      depth,
+                                      encseq->totallength);
+    } else
+    {
+      retval2 = comparetwostrings(encseq,
+                                  readmode,
+                                  &lcp2,
+                                  pos1+depth,
+                                  pos2+depth);
+    }
   } else
   {
-    if(pos1 < depth || pos2 < depth)
+    if (pos1 < depth || pos2 < depth)
     {
-      lcp2 = 0;
-      retval2 = comparetwocharacters(encseq,readmode,pos1,pos2,depth);
+      retval2 = comparewithonespecial(encseq,
+                                      fwd,
+                                      complement,
+                                      pos1,
+                                      pos2,
+                                      depth,
+                                      encseq->totallength);
     } else
     {
       retval2 = comparetwostrings(encseq,
@@ -2856,38 +2877,69 @@ int compareEncseqsequences(Seqpos *lcp,
                                   pos2-depth);
     }
   }
+  lcp2 += depth;
 #endif
-
   if (encseq->numofspecialstostore > 0)
   {
     if (fwd)
     {
-      initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1 + depth);
-      initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2 + depth);
+      if (pos1 + depth < encseq->totallength && 
+          pos2 + depth < encseq->totallength)
+      {
+        initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1 + depth);
+        initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2 + depth);
+      }
     } else
     {
-      assert(pos1 >= depth);
-      assert(pos2 >= depth);
-      initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1 - depth);
-      initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2 - depth);
+      if (pos1 >= depth && pos2 >= depth)
+      {
+        initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1 - depth);
+        initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2 - depth);
+      }
     }
   }
   do
   {
     if (fwd)
     {
-      fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
-      fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
+      if (pos1 + depth < encseq->totallength && 
+          pos2 + depth < encseq->totallength)
+      {
+        fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
+        fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
+        retval = compareTwobitencodings(readmode,&commonunits,
+                                        &ptbe1,pos1,&ptbe2,pos2);
+        depth += commonunits;
+      } else
+      {
+        retval = comparewithonespecial(encseq,
+                                       fwd,
+                                       complement,
+                                       pos1,
+                                       pos2,
+                                       depth,
+                                       encseq->totallength);
+      }
     } else
     {
-      assert(pos1 >= depth);
-      assert(pos2 >= depth);
-      revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
-      revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
+      if (pos1 >= depth && pos2 >= depth)
+      {
+        revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
+        revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
+        retval = compareTwobitencodings(readmode,&commonunits,
+                                        &ptbe1,pos1,&ptbe2,pos2);
+        depth += commonunits;
+      } else
+      {
+        retval = comparewithonespecial(encseq,
+                                       fwd,
+                                       complement,
+                                       pos1,
+                                       pos2,
+                                       depth,
+                                       encseq->totallength);
+      }
     }
-    retval = compareTwobitencodings(readmode,&commonunits,
-                                    &ptbe1,pos1,&ptbe2,pos2);
-    depth += commonunits;
   } while (retval == 0);
   *lcp = depth;
 #ifdef mydebug
@@ -2923,8 +2975,8 @@ int compareEncseqsequences_nolcp(const Encodedsequence *encseq,
   assert(readmode == Forwardmode);
   if (encseq->numofspecialstostore > 0)
   {
-    initEncodedsequencescanstate(esr1,encseq,fwd,pos1 + depth);
-    initEncodedsequencescanstate(esr2,encseq,fwd,pos2 + depth);
+    initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1 + depth);
+    initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2 + depth);
   }
   do
   {
