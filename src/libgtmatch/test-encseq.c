@@ -85,23 +85,26 @@ static void testmulticharactercompare(const Encodedsequence *encseq,
   Encodedsequencescanstate *esr1, *esr2;
   Seqpos pos1, pos2, totallength;
   unsigned long trial;
+  bool fwd = ISDIRREVERSE(readmode) ? false : true,
+       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
 
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
   totallength = getencseqtotallength(encseq);
   srand48(42349421);
-  (void) multicharactercompare_withtest(encseq,readmode,esr1,0,esr2,0);
-  (void) multicharactercompare_withtest(encseq,readmode,esr1,0,esr2,
+  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,0);
+  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,
                                         totallength-1);
-  (void) multicharactercompare_withtest(encseq,readmode,esr1,totallength-1,esr2,
-                                        0);
-  (void) multicharactercompare_withtest(encseq,readmode,esr1,totallength-1,esr2,
-                                        totallength-1);
+  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,
+                                        totallength-1,esr2,0);
+  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,
+                                        totallength-1,esr2,totallength-1);
   for (trial = 0; trial < multicharcmptrials; trial++)
   {
     pos1 = (Seqpos) (drand48() * (double) totallength);
     pos2 = (Seqpos) (drand48() * (double) totallength);
-    (void) multicharactercompare_withtest(encseq,readmode,esr1,pos1,esr2,pos2);
+    (void) multicharactercompare_withtest(encseq,fwd,complement,
+                                          esr1,pos1,esr2,pos2);
   }
   freeEncodedsequencescanstate(&esr1);
   freeEncodedsequencescanstate(&esr2);
@@ -212,7 +215,8 @@ int testencodedsequence(const StrArray *filenametab,
 {
   if (hasfastspecialrangeenumerator(encseq))
   {
-    checkextractunitatpos(readmode,encseq);
+    checkextractunitatpos(encseq,ISDIRREVERSE(readmode) ? false : true,
+                          ISDIRCOMPLEMENT(readmode) ? true : false);
     if (multicharcmptrials > 0)
     {
       testmulticharactercompare(encseq,readmode,multicharcmptrials);

@@ -184,6 +184,8 @@ static void insertionsort(const Encodedsequence *encseq,
   int retval;
   Suffixptr sptr, tptr, temp;
   Encodedsequencescanstate *esr1 = NULL, *esr2 = NULL;
+  bool fwd = ISDIRREVERSE(readmode) ? false : true,
+       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
 
   if (!cmpcharbychar && hasspecialranges(encseq))
   {
@@ -219,16 +221,8 @@ static void insertionsort(const Encodedsequence *encseq,
         }
       } else
       {
-        if (lcpsubtab != NULL)
-        {
-          retval = compareEncseqsequences(&lcplen,encseq,readmode,esr1,esr2,
-                                          *(pj-1),*pj,depth);
-        } else
-        {
-          /* XXX compareEncseqsequences_nolcp */
-          retval = compareEncseqsequences(&lcplen,encseq,readmode,esr1,esr2,
-                                          *(pj-1),*pj,depth);
-        }
+        retval = compareEncseqsequences(&lcplen,encseq,fwd,complement,
+                                        esr1,esr2,*(pj-1),*pj,depth);
       }
       if (lcpsubtab != NULL)
       {
