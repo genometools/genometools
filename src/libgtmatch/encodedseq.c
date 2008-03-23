@@ -2850,6 +2850,25 @@ void checkextractunitatpos(const Encodedsequence *encseq,
   freeEncodedsequencescanstate(&esr);
 }
 
+int multicharactercompare(const Encodedsequence *encseq,
+                          bool fwd,
+                          bool complement,
+                          Encodedsequencescanstate *esr1,
+                          Seqpos pos1,
+                          Encodedsequencescanstate *esr2,
+                          Seqpos pos2)
+{
+  EndofTwobitencoding ptbe1, ptbe2;
+  unsigned int commonunits;
+
+  initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1);
+  initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2);
+  extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
+  extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
+  return compareTwobitencodings(fwd,complement,&commonunits,
+                                &ptbe1,pos1,&ptbe2,pos2);
+}
+
 void multicharactercompare_withtest(const Encodedsequence *encseq,
                                     bool fwd,
                                     bool complement,
