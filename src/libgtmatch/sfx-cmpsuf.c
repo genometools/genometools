@@ -190,10 +190,9 @@ int comparewithonespecial(const Encodedsequence *encseq,
                           bool complement,
                           Seqpos pos1,
                           Seqpos pos2,
-                          Seqpos depth,
-                          Seqpos totallength)
+                          Seqpos depth)
 {
-  Seqpos cc1, cc2;
+  Seqpos cc1, cc2, totallength = getencseqtotallength(encseq);
 
   cc1 = extractsinglecharacter(encseq,
                                fwd,
@@ -212,14 +211,14 @@ int comparewithonespecial(const Encodedsequence *encseq,
 }
 
 static Seqpos derefcharboundaries(const Encodedsequence *encseq,
+                                  bool fwd,
+                                  bool complement,
                                   Seqpos start,
                                   Seqpos maxoffset,
                                   Seqpos currentoffset,
-                                  Seqpos totallength,
-                                  bool moveforward,
-                                  bool complement)
+                                  Seqpos totallength)
 {
-  if (moveforward)
+  if (fwd)
   {
     if (start + currentoffset == totallength)
     {
@@ -252,17 +251,16 @@ static Seqpos derefcharboundaries(const Encodedsequence *encseq,
 }
 
 int comparetwostrings(const Encodedsequence *encseq,
-                      Readmode readmode,
+                      bool fwd,
+                      bool complement,
                       Seqpos *maxcommon,
                       Seqpos pos1,
                       Seqpos pos2)
 {
   Seqpos currentoffset, maxoffset, cc1, cc2,
          totallength = getencseqtotallength(encseq);
-  bool moveforward = ISDIRREVERSE(readmode) ? false : true,
-       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  if (moveforward)
+  if (fwd)
   {
     assert(pos1 < totallength);
     assert(pos2 < totallength);
@@ -281,10 +279,10 @@ int comparetwostrings(const Encodedsequence *encseq,
   }
   for (currentoffset = 0; currentoffset <= maxoffset; currentoffset++)
   {
-    cc1 = derefcharboundaries(encseq,pos1,maxoffset,currentoffset,
-                              totallength,moveforward,complement);
-    cc2 = derefcharboundaries(encseq,pos2,maxoffset,currentoffset,
-                              totallength,moveforward,complement);
+    cc1 = derefcharboundaries(encseq,fwd,complement,
+                              pos1,maxoffset,currentoffset,totallength);
+    cc2 = derefcharboundaries(encseq,fwd,complement,
+                              pos2,maxoffset,currentoffset,totallength);
     if (cc1 < cc2)
     {
       *maxcommon = currentoffset;
@@ -305,158 +303,56 @@ int comparetwostrings(const Encodedsequence *encseq,
   return 0;
 }
 
-#ifdef OLDVERSION
-int comparetwostrings2(const Encodedsequence *encseq,
-                      Readmode readmode,
-                      Seqpos *maxcommon,
-                      Seqpos pos1,
-                      Seqpos start2)
+int comparetwostringsgeneric(const Encodedsequence *encseq,
+                             bool fwd,
+                             bool complement,
+                             Seqpos *maxcommon,
+                             Seqpos pos1,
+                             Seqpos pos2,
+                             Seqpos depth)
 {
-  Uchar cc1, cc2;
-  Seqpos pos1, pos2, end1, end2;
+  Seqpos totallength = getencseqtotallength(encseq);
   int retval;
-  bool stopat0 = false, moveforward = ISDIRREVERSE(readmode) ? false : true;
 
-  if (moveforward)
+  if (fwd)
   {
-    end1 = end2 = getencseqtotallength(encseq) - 1;
-    if (*maxcommon > 0)
+    if (pos1 + depth < totallength && pos2 + depth < totallength)
     {
-      if (end1 > pos1 + *maxcommon - 1)
-      {
-        end1 = start1 + *maxcommon - 1;
-      }
-      if (end2 > start2 + *maxcommon - 1)
-      {
-        end2 = start2 + *maxcommon -1;
-      }
+      retval = comparetwostrings(encseq,
+                                 fwd,
+                                 complement,
+                                 maxcommon,
+                                 pos1+depth,
+                                 pos2+depth);
+    } else
+    {
+      retval = comparewithonespecial(encseq,
+                                     fwd,
+                                     complement,
+                                     pos1,
+                                     pos2,
+                                     depth);
     }
   } else
   {
-    end1 = end2 = 0;
-    if (*maxcommon > 0)
+    if (pos1 >= depth && pos2 >= depth)
     {
-      if (start1 >= *maxcommon)
-      {
-        end1 = start1 - *maxcommon + 1;
-      }
-      if (start2>= *maxcommon)
-      {
-        end2 = start2 - *maxcommon + 1;
-      }
+      retval = comparetwostrings(encseq,
+                                 fwd,
+                                 complement,
+                                 maxcommon,
+                                 pos1-depth,
+                                 pos2-depth);
+    } else
+    {
+      retval = comparewithonespecial(encseq,
+                                     fwd,
+                                     complement,
+                                     pos1,
+                                     pos2,
+                                     depth);
     }
   }
-  pos1 = start1;
-  pos2 = start2;
-  while (true)
-  {
-    if (moveforward)
-    {
-      if (pos1 > end1)
-      {
-        if (pos2 > end2)
-        {
-          *maxcommon = pos1 - start1;
-          if (pos1 < pos2)
-          {
-            retval = -1;
-            break;
-          }
-          if (pos1 > pos1)
-          {
-            retval = 1;
-            break;
-          }
-          retval = 0;
-          break;
-        }
-      }
-    } else
-    {
-      if (stopat0)
-      {
-        *maxcommon = start1 - pos1 + 1;
-        assert(pos1 == 0 || pos2 == 0);
-        if (pos1 == 0)
-        {
-          if (pos2 == 0)
-          {
-            retval = 0;
-            break;
-          }
-          retval = 1;
-          break;
-        }
-        retval = -1;
-        break;
-      }
-      if (pos1 < end1 || pos2 < end2)
-      {
-        *maxcommon = start1 - pos1;
-        retval = 0;
-        break;
-      }
-    }
-    cc1 = getencodedchar(encseq,pos1,Forwardmode);
-    cc2 = getencodedchar(encseq,pos2,Forwardmode);
-    if (ISSPECIAL(cc1))
-    {
-      if (ISSPECIAL(cc2))
-      {
-        if (pos1 < pos2)
-        {
-          *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
-          retval = -1; /* a < b */
-          break;
-        }
-        if (pos1 > pos2)
-        {
-          *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
-          retval = 1; /* a > b */
-          break;
-        }
-        *maxcommon = moveforward ? pos1 - start1 + 1 : start1 - pos1 + 1;
-        retval = 0; /* a = b */
-        break;
-      }
-      *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
-      retval = 1; /* a > b */
-      break;
-    } else
-    {
-      if (ISSPECIAL(cc2))
-      {
-        *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
-        retval = -1; /* a < b */
-        break;
-      }
-      if (cc1 != cc2)
-      {
-        *maxcommon = moveforward ? pos1 - start1 : start1 - pos1;
-        if (ISDIRCOMPLEMENT(readmode))
-        {
-          cc1 = COMPLEMENTBASE(cc1);
-          cc2 = COMPLEMENTBASE(cc2);
-        }
-        return (cc1 < cc2) ? -1 : 1;
-      }
-    }
-    if (moveforward)
-    {
-      pos1++;
-      pos2++;
-    } else
-    {
-      if (pos1 == 0 || pos2 == 0)
-      {
-        stopat0 = true;
-      } else
-      {
-        pos1--;
-        pos2--;
-      }
-    }
-  }
+  *maxcommon += depth;
   return retval;
 }
-#endif

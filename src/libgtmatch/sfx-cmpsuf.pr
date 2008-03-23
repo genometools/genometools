@@ -17,20 +17,22 @@ int comparewithonespecial(const Encodedsequence *encseq,
                           bool complement,
                           Seqpos pos1,
                           Seqpos pos2,
-                          Seqpos depth,
-                          Seqpos totallength);
+                          Seqpos depth);
 
 int comparetwostrings(const Encodedsequence *encseq,
-                      Readmode readmode,
+                      bool fwd,
+                      bool complement,
                       Seqpos *maxcommon,
                       Seqpos pos1,
                       Seqpos pos2);
 
-int comparetwostrings2(const Encodedsequence *encseq,
-                      Readmode readmode,
-                      Seqpos *maxcommon,
-                      Seqpos pos1,
-                      Seqpos start2);
+int comparetwostringsgeneric(const Encodedsequence *encseq,
+                             bool fwd,
+                             bool complement,
+                             Seqpos *maxcommon,
+                             Seqpos pos1,
+                             Seqpos pos2,
+                             Seqpos depth);
 
 #ifdef __cplusplus
 }

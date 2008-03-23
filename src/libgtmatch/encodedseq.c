@@ -305,9 +305,9 @@ struct Encodedsequencescanstate
        hascurrent;      /* there is some current range */
 };
 
-#undef DEBUG
+#undef RANGEDEBUG
 
-#ifdef DEBUG
+#ifdef RANGEDEBUG
 static void showsequencerange(const Sequencerange *range)
 {
   if (range->leftpos + 1 == range->rightpos)
@@ -980,7 +980,7 @@ static unsigned int sat2maxspecialtype(Positionaccesstype sat)
   exit(EXIT_FAILURE); /* programming error */
 }
 
-#ifdef DEBUG
+#ifdef RANGEDEBUG
 
 static void showspecialpositionswithpages(const Encodedsequence *encseq,
                                           unsigned long pgnum,
@@ -1130,7 +1130,7 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
     {
       esr->lastcell--;
     }
-#ifdef DEBUG
+#ifdef RANGEDEBUG
     printf("advance with firstcell=%lu, lastcell=%lu\n",
             esr->firstcell,esr->lastcell);
 #endif
@@ -1230,7 +1230,7 @@ static void binpreparenextrange(const Encodedsequence *encseq,
   {
     cellnum = endpos0 + DIV2(endpos1 - endpos0 - 1);
     determinerange(&range,encseq,esr,pagenum,cellnum);
-#ifdef DEBUG
+#ifdef RANGEDEBUG
     printf("binsearch in [%lu,%lu] => mid = %lu => ",endpos0,endpos1,cellnum);
     showsequencerange(&range);
     printf("\n");
@@ -1289,7 +1289,7 @@ static void binpreparenextrange(const Encodedsequence *encseq,
       found = true;
     }
   }
-#ifdef DEBUG
+#ifdef RANGEDEBUG
   if (found)
   {
     determinerange(&range,encseq,esr,pagenum,
@@ -1310,7 +1310,7 @@ static void binpreparenextrange(const Encodedsequence *encseq,
   {
     determinerange(&esr->previousrange,encseq,esr,pagenum,
                    moveforward ? esr->firstcell: (esr->lastcell-1));
-#ifdef DEBUG
+#ifdef RANGEDEBUG
     printf("previousrange=");
     showsequencerange(&esr->previousrange);
     printf("\n");
@@ -1388,7 +1388,7 @@ static void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
     {
       assert(startpos < encseq->totallength);
       binpreparenextrange(encseq,esr,moveforward,startpos);
-#ifdef DEBUG
+#ifdef RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
                        esr->firstcell,esr->lastcell,esr->nextpage);
 #endif
@@ -1459,7 +1459,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
                                    Encodedsequencescanstate *esr,
                                    Seqpos pos)
 {
-#ifdef DEBUG
+#ifdef RANGEDEBUG
   printf("pos=" FormatSeqpos ",previous=(" FormatSeqpos "," FormatSeqpos ")\n",
           PRINTSeqposcast(pos),
           PRINTSeqposcast(esr->previousrange.leftpos),
@@ -2017,7 +2017,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
       haserr = true;
     }
   }
-#ifdef DEBUG
+#ifdef RANGEDEBUG
   if (!haserr)
   {
     showallspecialpositions(encseq);
@@ -2073,7 +2073,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
       freeEncodedsequence(&encseq);
     }
   }
-#ifdef DEBUG
+#ifdef RANGEDEBUG
   if (!haserr)
   {
     showallspecialpositions(encseq);
@@ -2741,7 +2741,8 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
   unsigned int commonunits1;
   Seqpos commonunits2;
   int ret1, ret2;
-  bool fwd = ISDIRREVERSE(readmode) ? false : true;
+  bool fwd = ISDIRREVERSE(readmode) ? false : true,
+       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
 
   initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1);
   initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2);
@@ -2750,7 +2751,7 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
   ret1 = compareTwobitencodings(readmode,&commonunits1,&ptbe1,
                                 pos1,&ptbe2,pos2);
   commonunits2 = (Seqpos) UNITSIN2BITENC;
-  ret2 = comparetwostrings(encseq,readmode,&commonunits2,pos1,pos2);
+  ret2 = comparetwostrings(encseq,fwd,complement,&commonunits2,pos1,pos2);
   if (ret1 != ret2 || (Seqpos) commonunits1 != commonunits2)
   {
     char buf1[MULT2(UNITSIN2BITENC)+1], buf2[MULT2(UNITSIN2BITENC)+1];
@@ -2783,12 +2784,7 @@ int compareEncseqsequences(Seqpos *lcp,
   EndofTwobitencoding ptbe1, ptbe2;
   unsigned int commonunits;
   int retval;
-  bool fwd, complement = ISDIRCOMPLEMENT(readmode);
-#define mydebug
-#ifdef mydebug
-  Seqpos lcp2 = 0;
-  int retval2;
-#endif
+  bool fwd, complement = ISDIRCOMPLEMENT(readmode) ? true : false;
 
   assert(pos1 != pos2);
   if (ISDIRREVERSE(readmode))
@@ -2800,49 +2796,6 @@ int compareEncseqsequences(Seqpos *lcp,
   {
     fwd = true;
   }
-#ifdef mydebug
-  if (fwd)
-  {
-    if (pos1 + depth < encseq->totallength &&
-        pos2 + depth < encseq->totallength)
-    {
-      retval2 = comparetwostrings(encseq,
-                                  readmode,
-                                  &lcp2,
-                                  pos1+depth,
-                                  pos2+depth);
-    } else
-    {
-      retval2 = comparewithonespecial(encseq,
-                                      fwd,
-                                      complement,
-                                      pos1,
-                                      pos2,
-                                      depth,
-                                      encseq->totallength);
-    }
-  } else
-  {
-    if (pos1 >= depth && pos2 >= depth)
-    {
-      retval2 = comparetwostrings(encseq,
-                                  readmode,
-                                  &lcp2,
-                                  pos1-depth,
-                                  pos2-depth);
-    } else
-    {
-      retval2 = comparewithonespecial(encseq,
-                                      fwd,
-                                      complement,
-                                      pos1,
-                                      pos2,
-                                      depth,
-                                      encseq->totallength);
-    }
-  }
-  lcp2 += depth;
-#endif
   if (encseq->numofspecialstostore > 0)
   {
     if (fwd)
@@ -2881,8 +2834,7 @@ int compareEncseqsequences(Seqpos *lcp,
                                        complement,
                                        pos1,
                                        pos2,
-                                       depth,
-                                       encseq->totallength);
+                                       depth);
       }
     } else
     {
@@ -2900,27 +2852,39 @@ int compareEncseqsequences(Seqpos *lcp,
                                        complement,
                                        pos1,
                                        pos2,
-                                       depth,
-                                       encseq->totallength);
+                                       depth);
       }
     }
   } while (retval == 0);
   *lcp = depth;
-#ifdef mydebug
-  assert(retval == retval2);
-  if (*lcp != lcp2)
+#define FASTCOMPAREDEBUG
+#ifdef FASTCOMPAREDEBUG
   {
-    fprintf(stderr,"line %d: pos1 = %u, pos2 = %u, depth = %u, "
-                   "lcp = %u != %u = lcp2\n",
-                    __LINE__,
-                    (unsigned int) pos1,
-                    (unsigned int) pos2,
-                    (unsigned int) depth,
-                    (unsigned int) lcp,
-                    (unsigned int) lcp2);
-    exit(EXIT_FAILURE);
+    Seqpos lcp2 = 0;
+    int retval2;
+
+    retval2 = comparetwostringsgeneric(encseq,
+                                       fwd,
+                                       complement,
+                                       &lcp2,
+                                       pos1,
+                                       pos2,
+                                       depth);
+    assert(retval == retval2);
+    if (*lcp != lcp2)
+    {
+      fprintf(stderr,"line %d: pos1 = %u, pos2 = %u, depth = %u, "
+                     "lcp = %u != %u = lcp2\n",
+                      __LINE__,
+                      (unsigned int) pos1,
+                      (unsigned int) pos2,
+                      (unsigned int) depth,
+                      (unsigned int) lcp,
+                      (unsigned int) lcp2);
+      exit(EXIT_FAILURE); /* assertion failed */
+    }
+    assert(*lcp == lcp2);
   }
-  assert(*lcp == lcp2);
 #endif
   return retval;
 }
