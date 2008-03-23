@@ -205,7 +205,6 @@ void checkentiresuftab(const Encodedsequence *encseq,
   assert(*suftab < totallength);
   for (ptr = suftab + 1; !haserr && ptr <= suftab + totallength; ptr++)
   {
-    // printf("%u %u\n",(unsigned int) (ptr-suftab),(unsigned int) *ptr);
     if (ptr < suftab + totallength)
     {
       assert(*ptr < totallength);
@@ -269,7 +268,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
         fprintf(stderr,", maxlcp = " FormatSeqpos " != " FormatSeqpos "\n",
                     PRINTSeqposcast(maxlcp),
                     PRINTSeqposcast(currentlcp));
-        exit(EXIT_FAILURE); /* Programming error */
+        exit(EXIT_FAILURE); /* programming error */
       }
     }
   }

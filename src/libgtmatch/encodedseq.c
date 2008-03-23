@@ -233,73 +233,60 @@ Uchar getencodedchar(const Encodedsequence *encseq,
                      Seqpos pos,
                      Readmode readmode)
 {
-  if (readmode == Forwardmode)
+  assert(pos < encseq->totallength);
+  switch (readmode)
   {
-    return encseq->deliverchar(encseq,pos);
+    case Forwardmode:
+      return encseq->deliverchar(encseq,pos);
+    case Reversemode:
+      return encseq->deliverchar(encseq,REVERSEPOS(encseq->totallength,pos));
+    case Complementmode: /* only works with dna */
+      {
+        Uchar cc = encseq->deliverchar(encseq,pos);
+        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+      }
+    case Reversecomplementmode: /* only works with dna */
+      {
+        Uchar cc = encseq->deliverchar(encseq,
+                                       REVERSEPOS(encseq->totallength,pos));
+        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+      }
+    default:
+      fprintf(stderr,"getencodedchar: readmode %d not implemented\n",
+                     (int) readmode);
+      exit(EXIT_FAILURE); /* programming error */
   }
-  if (readmode == Reversemode)
-  {
-    return encseq->deliverchar(encseq,REVERSEPOS(encseq->totallength,pos));
-  }
-  if (readmode == Complementmode) /* only works with dna */
-  {
-    Uchar cc = encseq->deliverchar(encseq,pos);
-    if (ISSPECIAL(cc))
-    {
-      return cc;
-    }
-    return COMPLEMENTBASE(cc);
-  }
-  if (readmode == Reversecomplementmode) /* only works with dna */
-  {
-    Uchar cc = encseq->deliverchar(encseq,REVERSEPOS(encseq->totallength,pos));
-    if (ISSPECIAL(cc))
-    {
-      return cc;
-    }
-    return COMPLEMENTBASE(cc);
-  }
-  fprintf(stderr,"getencodedchar: readmode %d not implemented\n",
-                 (int) readmode);
-  exit(EXIT_FAILURE); /* programming error */
 }
 
 Uchar getencodedcharnospecial(const Encodedsequence *encseq,
                               Seqpos pos,
                               Readmode readmode)
 {
-  if (readmode == Forwardmode)
+  assert(pos < encseq->totallength);
+  switch (readmode)
   {
-    return encseq->delivercharnospecial(encseq,pos);
+    case Forwardmode:
+      return encseq->delivercharnospecial(encseq,pos);
+    case Reversemode:
+      return encseq->delivercharnospecial(encseq,
+                                          REVERSEPOS(encseq->totallength,pos));
+    case Complementmode: /* only works with dna */
+      {
+        Uchar cc = encseq->delivercharnospecial(encseq,pos);
+        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+      }
+    case Reversecomplementmode: /* only works with dna */
+      {
+        Uchar cc = encseq->delivercharnospecial(encseq,
+                                                REVERSEPOS(encseq->totallength,
+                                                           pos));
+        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+      }
+    default:
+      fprintf(stderr,"getencodedcharnospecial: readmode %d not implemented\n",
+                     (int) readmode);
+      exit(EXIT_FAILURE); /* programming error */
   }
-  if (readmode == Reversemode)
-  {
-    return encseq->delivercharnospecial(encseq,
-                                        REVERSEPOS(encseq->totallength,pos));
-  }
-  if (readmode == Complementmode) /* only works with dna */
-  {
-    Uchar cc = encseq->delivercharnospecial(encseq,pos);
-    if (ISSPECIAL(cc))
-    {
-      return cc;
-    }
-    return COMPLEMENTBASE(cc);
-  }
-  if (readmode == Reversecomplementmode) /* only works with dna */
-  {
-    Uchar cc = encseq->delivercharnospecial(encseq,
-                                            REVERSEPOS(encseq->totallength,
-                                                       pos));
-    if (ISSPECIAL(cc))
-    {
-      return cc;
-    }
-    return COMPLEMENTBASE(cc);
-  }
-  fprintf(stderr,"getencodedcharnospecial: readmode %d not implemented\n",
-                 (int) readmode);
-  exit(EXIT_FAILURE); /* programming error */
 }
 
 struct Encodedsequencescanstate
@@ -340,44 +327,30 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Seqpos pos,
                                Readmode readmode)
 {
-  if (readmode == Forwardmode)
+  assert(pos < encseq->totallength);
+  switch (readmode)
   {
-#ifdef DEBUG
-    printf("esr: nextpage=%lu,firstcell=%lu,lastcell=%lu,",
-           esr->nextpage,esr->firstcell,esr->lastcell);
-    printf("leftpos=" FormatSeqpos ",rightpos=" FormatSeqpos "\n",
-            PRINTSeqposcast(esr->currentrange.leftpos),
-            PRINTSeqposcast(esr->currentrange.rightpos));
-#endif
-    return encseq->seqdeliverchar(encseq,esr,pos);
+    case Forwardmode:
+      return encseq->seqdeliverchar(encseq,esr,pos);
+    case Reversemode:
+      return encseq->seqdeliverchar(encseq,esr,
+                                    REVERSEPOS(encseq->totallength,pos));
+    case Complementmode: /* only works with dna */
+      {
+        Uchar cc = encseq->seqdeliverchar(encseq,esr,pos);
+        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+      }
+    case Reversecomplementmode: /* only works with dna */
+      {
+        Uchar cc = encseq->seqdeliverchar(encseq,esr,
+                                          REVERSEPOS(encseq->totallength,pos));
+        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+      }
+    default:
+      fprintf(stderr,"sequentialgetencodedchar: readmode %d not implemented\n",
+                     (int) readmode);
+      exit(EXIT_FAILURE); /* programming error */
   }
-  if (readmode == Reversemode)
-  {
-    return encseq->seqdeliverchar(encseq,esr,
-                                  REVERSEPOS(encseq->totallength,pos));
-  }
-  if (readmode == Complementmode) /* only works with dna */
-  {
-    Uchar cc = encseq->seqdeliverchar(encseq,esr,pos);
-    if (ISSPECIAL(cc))
-    {
-      return cc;
-    }
-    return COMPLEMENTBASE(cc);
-  }
-  if (readmode == Reversecomplementmode) /* only works with dna */
-  {
-    Uchar cc = encseq->seqdeliverchar(encseq,esr,
-                                      REVERSEPOS(encseq->totallength,pos));
-    if (ISSPECIAL(cc))
-    {
-      return cc;
-    }
-    return COMPLEMENTBASE(cc);
-  }
-  fprintf(stderr,"sequentialgetencodedchar: readmode %d not implemented\n",
-                  (int) readmode);
-  exit(EXIT_FAILURE); /* programming error */
 }
 
 void encseqextract(Uchar *buffer,
@@ -766,7 +739,6 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
 static Uchar delivercharViadirectaccess(const Encodedsequence *encseq,
                                         Seqpos pos)
 {
-  assert(pos < encseq->totallength);
   return encseq->plainseq[pos];
 }
 
@@ -775,7 +747,6 @@ static Uchar delivercharViadirectaccess(const Encodedsequence *encseq,
 static Uchar deliverfromtwobitencoding(const Encodedsequence *encseq,
                                        Seqpos pos)
 {
-  assert(pos < encseq->totallength);
   return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
@@ -784,7 +755,6 @@ static Uchar deliverfromtwobitencoding(const Encodedsequence *encseq,
 static Uchar delivercharViabitaccessSpecial(const Encodedsequence *encseq,
                                             Seqpos pos)
 {
-  assert(pos < encseq->totallength);
   if (ISIBITSET(encseq->specialbits,pos))
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
@@ -802,7 +772,6 @@ static Uchar delivercharViauchartablesSpecialfirst(
                                               const Encodedsequence *encseq,
                                               Seqpos pos)
 {
-  assert(pos < encseq->totallength);
   if (ucharcheckspecial(encseq,pos))
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
@@ -818,7 +787,6 @@ static Uchar delivercharViauchartablesSpecialrange(
                                               const Encodedsequence *encseq,
                                               Seqpos pos)
 {
-  assert(pos < encseq->totallength);
   if (ucharcheckspecialrange(encseq,pos))
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
@@ -836,7 +804,6 @@ static Uchar delivercharViaushorttablesSpecialfirst(
                                                const Encodedsequence *encseq,
                                                Seqpos pos)
 {
-  assert(pos < encseq->totallength);
   if (ushortcheckspecial(encseq,pos))
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
@@ -852,7 +819,6 @@ static Uchar delivercharViaushorttablesSpecialrange(
                                                const Encodedsequence *encseq,
                                                Seqpos pos)
 {
-  assert(pos < encseq->totallength);
   if (ushortcheckspecialrange(encseq,pos))
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
@@ -870,7 +836,6 @@ static Uchar delivercharViauint32tablesSpecialfirst(
                                                 const Encodedsequence *encseq,
                                                 Seqpos pos)
 {
-  assert(pos < encseq->totallength);
   if (uint32checkspecial(encseq,pos))
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
@@ -886,7 +851,6 @@ static Uchar delivercharViauint32tablesSpecialrange(
                                                  const Encodedsequence *encseq,
                                                  Seqpos pos)
 {
-  assert(pos < encseq->totallength);
   if (uint32checkspecialrange(encseq,pos))
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
@@ -2883,7 +2847,7 @@ int compareEncseqsequences(Seqpos *lcp,
   {
     if (fwd)
     {
-      if (pos1 + depth < encseq->totallength && 
+      if (pos1 + depth < encseq->totallength &&
           pos2 + depth < encseq->totallength)
       {
         initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1 + depth);
@@ -2902,7 +2866,7 @@ int compareEncseqsequences(Seqpos *lcp,
   {
     if (fwd)
     {
-      if (pos1 + depth < encseq->totallength && 
+      if (pos1 + depth < encseq->totallength &&
           pos2 + depth < encseq->totallength)
       {
         fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
@@ -2958,33 +2922,6 @@ int compareEncseqsequences(Seqpos *lcp,
   }
   assert(*lcp == lcp2);
 #endif
-  return retval;
-}
-
-int compareEncseqsequences_nolcp(const Encodedsequence *encseq,
-                                 Readmode readmode,
-                                 Encodedsequencescanstate *esr1,
-                                 Encodedsequencescanstate *esr2,
-                                 Seqpos pos1,Seqpos pos2,
-                                 Seqpos depth)
-{
-  EndofTwobitencoding ptbe1, ptbe2;
-  int retval;
-  bool fwd = ISDIRREVERSE(readmode) ? false : true;
-
-  assert(readmode == Forwardmode);
-  if (encseq->numofspecialstostore > 0)
-  {
-    initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1 + depth);
-    initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2 + depth);
-  }
-  do
-  {
-    extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1 + depth);
-    extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2 + depth);
-    retval = compareTwobitencodings(readmode,NULL,&ptbe1,pos1,&ptbe2,pos2);
-    depth += UNITSIN2BITENC;
-  } while (retval == 0);
   return retval;
 }
 
