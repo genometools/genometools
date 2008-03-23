@@ -179,7 +179,6 @@ void checkentiresuftab(const Encodedsequence *encseq,
   int retval;
 #endif
 
-  printf("check entire suftab\n");
   error_check(err);
   assert(!specialsareequal || specialsareequalatdepth0);
   INITBITTAB(startposoccurs,totallength+1);
@@ -203,32 +202,42 @@ void checkentiresuftab(const Encodedsequence *encseq,
   FREESPACE(startposoccurs);
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
+  assert(*suftab < totallength);
   for (ptr = suftab + 1; !haserr && ptr <= suftab + totallength; ptr++)
   {
-    cmp = comparetwosuffixes(encseq,
-                             readmode,
-                             &maxlcp,
-                             specialsareequal,
-                             specialsareequalatdepth0,
-                             depth,
-                             *(ptr-1),
-                             *ptr,
-                             esr1,
-                             esr2);
-    if (cmp > 0)
+    // printf("%u %u\n",(unsigned int) (ptr-suftab),(unsigned int) *ptr);
+    if (ptr < suftab + totallength)
     {
-      showcomparisonfailure("checkentiresuftab",
-                            encseq,
-                            readmode,
-                            characters,
-                            suftab,
-                            depth,
-                            ptr-1,
-                            ptr,
-                            cmp,
-                            maxlcp);
-      haserr = true;
-      break;
+      assert(*ptr < totallength);
+      cmp = comparetwosuffixes(encseq,
+                               readmode,
+                               &maxlcp,
+                               specialsareequal,
+                               specialsareequalatdepth0,
+                               depth,
+                               *(ptr-1),
+                               *ptr,
+                               esr1,
+                               esr2);
+      if (cmp > 0)
+      {
+        showcomparisonfailure("checkentiresuftab",
+                              encseq,
+                              readmode,
+                              characters,
+                              suftab,
+                              depth,
+                              ptr-1,
+                              ptr,
+                              cmp,
+                              maxlcp);
+        haserr = true;
+        break;
+      }
+    } else
+    {
+      maxlcp = 0;
+      assert(*ptr == totallength);
     }
     if (ssar != NULL)
     {
@@ -248,13 +257,15 @@ void checkentiresuftab(const Encodedsequence *encseq,
 #endif
       if (maxlcp != currentlcp)
       {
-        fprintf(stderr,"%lu: startpos=" FormatSeqpos "firstchar=%u, startpos="
-                FormatSeqpos "=%u",
+        fprintf(stderr,"%lu: startpos=" FormatSeqpos ", firstchar=%u, "
+                "startpos=" FormatSeqpos ",firstchar=%u",
                 (unsigned long) (ptr - suftab),
                 PRINTSeqposcast(*(ptr-1)),
                 (unsigned int) getencodedchar(encseq,*(ptr-1),readmode),
-                PRINTSeqposcast(*(ptr)),
-                (unsigned int) getencodedchar(encseq,*ptr,readmode));
+                PRINTSeqposcast(*ptr),
+                (*ptr < totallength)
+                ? (unsigned int) getencodedchar(encseq,*ptr,readmode)
+                : SEPARATOR);
         fprintf(stderr,", maxlcp = " FormatSeqpos " != " FormatSeqpos "\n",
                     PRINTSeqposcast(maxlcp),
                     PRINTSeqposcast(currentlcp));

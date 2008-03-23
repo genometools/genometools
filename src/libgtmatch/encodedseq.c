@@ -2839,27 +2839,15 @@ int compareEncseqsequences(Seqpos *lcp,
 #ifdef mydebug
   if (fwd)
   {
-    if (pos1 + depth >= encseq->totallength ||
-        pos2 + depth >= encseq->totallength)
-    {
-      retval2 = comparewithonespecial(encseq,
-                                      fwd,
-                                      complement,
-                                      pos1,
-                                      pos2,
-                                      depth,
-                                      encseq->totallength);
-    } else
+    if (pos1 + depth < encseq->totallength &&
+        pos2 + depth < encseq->totallength)
     {
       retval2 = comparetwostrings(encseq,
                                   readmode,
                                   &lcp2,
                                   pos1+depth,
                                   pos2+depth);
-    }
-  } else
-  {
-    if (pos1 < depth || pos2 < depth)
+    } else
     {
       retval2 = comparewithonespecial(encseq,
                                       fwd,
@@ -2868,13 +2856,25 @@ int compareEncseqsequences(Seqpos *lcp,
                                       pos2,
                                       depth,
                                       encseq->totallength);
-    } else
+    }
+  } else
+  {
+    if (pos1 >= depth && pos2 >= depth)
     {
       retval2 = comparetwostrings(encseq,
                                   readmode,
                                   &lcp2,
                                   pos1-depth,
                                   pos2-depth);
+    } else
+    {
+      retval2 = comparewithonespecial(encseq,
+                                      fwd,
+                                      complement,
+                                      pos1,
+                                      pos2,
+                                      depth,
+                                      encseq->totallength);
     }
   }
   lcp2 += depth;

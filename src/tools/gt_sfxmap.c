@@ -254,6 +254,7 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
       {
         freeSequentialsuffixarrayreader(&ssar);
       }
+      showverbose(verboseinfo,"okay");
     }
   }
   if (sfxmapoptions.inputdes && !haserr)

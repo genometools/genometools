@@ -225,8 +225,9 @@ static void insertionsort(const Encodedsequence *encseq,
                                           *(pj-1),*pj,depth);
         } else
         {
-          retval = compareEncseqsequences_nolcp(encseq,readmode,esr1,esr2,
-                                                *(pj-1),*pj,depth);
+          /* XXX compareEncseqsequences_nolcp */
+          retval = compareEncseqsequences(&lcplen,encseq,readmode,esr1,esr2,
+                                          *(pj-1),*pj,depth);
         }
       }
       if (lcpsubtab != NULL)
