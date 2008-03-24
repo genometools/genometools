@@ -30,7 +30,9 @@
 #include "libgtltr/ltrfileout_stream.h"
 #include "libgtltr/ltr_visitor.h"
 
-#define FSWIDTH 60
+#define FSWIDTH         60
+#define MAXFILENAMELEN 128
+#define MAXFASTAHEADER 256
 
 struct LTRFileOutStream {
   const GenomeStream parent_instance;
@@ -85,7 +87,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   {
     unsigned long seqid, i;
     char *outseq,
-         desc[BUFSIZ];
+         desc[MAXFASTAHEADER];
     Range ltr3_rng, ltr5_rng;
 
     /* find sequence in Bioseq multifasta */
@@ -95,7 +97,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     Seq *seq = bioseq_get_seq(ls->bioseq, seqid);
     ls->element.seqnr = seqid;
 
-    ltrelement_format_description(&ls->element, desc, BUFSIZ-1);
+    ltrelement_format_description(&ls->element, desc, MAXFASTAHEADER-1);
 
     /* output basic retrotransposon data */
     lltr_rng = genome_node_get_range((GenomeNode*) ls->element.leftLTR);
@@ -168,9 +170,8 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     /* output protein domains */
     if (array_size(ls->element.pdoms) > 0)
     {
-
       pdoms = str_new();
-      ltrelement_format_description(&ls->element, desc, BUFSIZ-1);
+      ltrelement_format_description(&ls->element, desc, MAXFASTAHEADER-1);
       if (STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
         array_reverse(ls->element.pdoms);
       for (i=0;i<array_size(ls->element.pdoms);i++)
@@ -189,13 +190,13 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
         if (i != array_size(ls->element.pdoms)-1)
           str_append_cstr(pdoms, "/");
 
-        /* get protein domain output file name */
+        /* get protein domain output file */
         genfile = (GenFile*) hashtable_get(ls->pdomout_files, pfamname);
         if (genfile == NULL)
         {
           /* no file opened for this domain yet, do it */
-          char buffer[BUFSIZ];
-          snprintf(buffer, BUFSIZ-1, "%s_pdom_%s.fas",
+          char buffer[MAXFILENAMELEN];
+          snprintf(buffer, MAXFILENAMELEN-1, "%s_pdom_%s.fas",
                    ls->fileprefix, pfamname);
           genfile = genfile_open(GFM_UNCOMPRESSED, buffer, "w+");
           hashtable_add(ls->pdomout_files, cstr_dup(pfamname), genfile);
@@ -333,7 +334,7 @@ static void write_metadata(GenFile *metadata_file,
     for (i=0;i<array_size(pdom_opts->plan7_ts);i++)
     {
       struct plan7_s *model = *(struct plan7_s **)
-                                      array_get(pdom_opts->plan7_ts, i);
+                                  array_get(pdom_opts->plan7_ts, i);
       genfile_xprintf(metadata_file, "%s", model->name);
       if (i != array_size(pdom_opts->plan7_ts)-1)
         genfile_xprintf(metadata_file, ", ");
@@ -388,7 +389,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
 {
   GenomeStream *gs;
   LTRFileOutStream *ls;
-  char fn[BUFSIZ];
+  char fn[MAXFILENAMELEN];
 
   assert(file_prefix && in_stream && bioseq && ppt_opts
           && pbs_opts && pdom_opts);
@@ -403,23 +404,23 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
 
   /* open outfiles */
   ls->fileprefix = file_prefix;
-  snprintf(fn, BUFSIZ-1, "%s_tabout.csv", file_prefix);
+  snprintf(fn, MAXFILENAMELEN-1, "%s_tabout.csv", file_prefix);
   ls->tabout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
   if (tests_to_run & LTRDIGEST_RUN_PPT)
   {
-    snprintf(fn, BUFSIZ-1, "%s_ppt.fas", file_prefix);
+    snprintf(fn, MAXFILENAMELEN-1, "%s_ppt.fas", file_prefix);
     ls->pptout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
   }
   if (tests_to_run & LTRDIGEST_RUN_PBS)
   {
-    snprintf(fn, BUFSIZ-1, "%s_pbs.fas", file_prefix);
+    snprintf(fn, MAXFILENAMELEN-1, "%s_pbs.fas", file_prefix);
     ls->pbsout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
   }
-  snprintf(fn, BUFSIZ-1, "%s_5ltr.fas", file_prefix);
+  snprintf(fn, MAXFILENAMELEN-1, "%s_5ltr.fas", file_prefix);
   ls->ltr5out_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
-  snprintf(fn, BUFSIZ-1, "%s_3ltr.fas", file_prefix);
+  snprintf(fn, MAXFILENAMELEN-1, "%s_3ltr.fas", file_prefix);
   ls->ltr3out_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
-  snprintf(fn, BUFSIZ-1, "%s_conditions.csv", file_prefix);
+  snprintf(fn, MAXFILENAMELEN-1, "%s_conditions.csv", file_prefix);
   ls->metadata_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
 
   /* create hashtable to hold protein domain output files */
