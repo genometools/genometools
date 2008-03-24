@@ -45,8 +45,8 @@ struct LTRdigestStream {
 #define ltrdigest_stream_cast(GS)\
         genome_stream_cast(ltrdigest_stream_class(), GS)
 
-int pdom_domain_attach_gff3(void *key, void *value, void *data,
-                            UNUSED Error *err)
+static int pdom_domain_attach_gff3(void *key, void *value, void *data,
+                                   UNUSED Error *err)
 {
   struct plan7_s *model = (struct plan7_s *) key;
   LTRdigestStream  *ls = (LTRdigestStream *) data;
@@ -76,8 +76,8 @@ int pdom_domain_attach_gff3(void *key, void *value, void *data,
   return 0;
 }
 
-void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
-                                Str *tag, unsigned int radius)
+static void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
+                                       Str *tag, unsigned int radius)
 {
   Range pbs_range;
   GenomeNode *gf;
@@ -109,8 +109,8 @@ void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
   genome_node_is_part_of_genome_node((GenomeNode*) element->mainnode, gf);
 }
 
-void ppt_attach_results_to_gff3(PPTResults *results, LTRElement *element,
-                                Str *tag, unsigned int radius)
+static void ppt_attach_results_to_gff3(PPTResults *results, LTRElement *element,
+                                       Str *tag, unsigned int radius)
 {
   Range ppt_range;
   GenomeNode *gf;
@@ -133,7 +133,7 @@ void ppt_attach_results_to_gff3(PPTResults *results, LTRElement *element,
   genome_node_is_part_of_genome_node((GenomeNode*) element->mainnode, gf);
 }
 
-void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
+static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
                    Error *err)
 {
   PPTResults ppt_results;

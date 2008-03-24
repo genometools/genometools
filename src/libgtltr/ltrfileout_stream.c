@@ -185,7 +185,6 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
         str_append_cstr(pdoms,"(");
         str_append_ulong(pdoms, (unsigned long) genome_feature_get_phase(gf));
         str_append_char(pdoms, STRANDCHARS[genome_feature_get_strand(gf)]);
-
         str_append_cstr(pdoms,")");
         if (i != array_size(ls->element.pdoms)-1)
           str_append_cstr(pdoms, "/");
@@ -220,7 +219,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     }
 
     /* output LTRs (we just expect them to exist) */
-    switch(genome_feature_get_strand(ls->element.mainnode))
+    switch (genome_feature_get_strand(ls->element.mainnode))
     {
       case STRAND_REVERSE:
         ltr5_rng = rltr_rng;
@@ -423,6 +422,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   snprintf(fn, BUFSIZ-1, "%s_conditions.csv", file_prefix);
   ls->metadata_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
 
+  /* create hashtable to hold protein domain output files */
   ls->pdomout_files = hashtable_new(HASH_STRING,
                                     ma_free_func,
                                     (FreeFunc) genfile_close);
@@ -443,11 +443,11 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
               "lLTR start\tlLTR end\tlLTR length\t"
               "rLTR start\trLTR end\trLTR length\t"
               "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset\t");
-  if (strcmp(trnafilename, "") != 0)
+  if (tests_to_run & LTRDIGEST_RUN_PBS)
     genfile_xprintf(ls->tabout_file,
               "PBS start\tPBS end\tPBS strand\ttRNA\tRNA motif\tPBS offset\t"
               "tRNA offset\tPBS/tRNA edist\t");
-  if (array_size(pdom_opts->plan7_ts) > 0)
+  if (tests_to_run & LTRDIGEST_RUN_PDOM)
     genfile_xprintf(ls->tabout_file, "Protein domain hits\n");
 
   /* create visitor */
