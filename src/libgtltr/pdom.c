@@ -102,26 +102,6 @@ void pdom_convert_frame_position(Range *rng, int frame)
   rng->end   = (rng->end   - 1)*CODONLENGTH + frame;
 }
 
-int pdom_domain_report_hits(void *key, void *value, void *data,
-                            UNUSED Error *err)
-{
-  struct plan7_s *model = (struct plan7_s *) key;
-  FILE *fp = (FILE*) data;
-  PdomHit *hit = (PdomHit*) value;
-  Range rng;
-  int frame = atoi(hit->best_hit->name);
-  rng.start = hit->best_hit->sqfrom;
-  rng.end = hit->best_hit->sqto;
-  pdom_convert_frame_position(&rng, frame);
-  fprintf(fp, "    Pdom: \t%s \t%g \t(%c, %lu, %lu)\n",
-              model->name,
-              hit->best_hit->pvalue,
-              hit->best_hit->name[1],
-              rng.start,
-              rng.end);
-  return 0;
-}
-
 int pdom_load_hmm_files(PdomOptions *opts, Error *err)
 {
   unsigned long i;
@@ -136,13 +116,13 @@ int pdom_load_hmm_files(PdomOptions *opts, Error *err)
     char *hmmfile = (char*)strarray_get(opts->hmm_files, i);
     if ((hmmfp = HMMFileOpen(hmmfile, "HMMERDB")) == NULL)
     {
-      error_set(err, "failed to open HMM file '%s'", hmmfile);
+      error_set(err, "Failed to open HMM file '%s'", hmmfile);
       had_err = -1;
       break;
     }
     if (!had_err && !HMMFileRead(hmmfp, &hmm))
     {
-      error_set(err, "failed to read any HMMs from file '%s'", hmmfile);
+      error_set(err, "Failed to read any HMMs from file '%s'", hmmfile);
       had_err = -1;
       break;
     }
@@ -166,7 +146,7 @@ int pdom_load_hmm_files(PdomOptions *opts, Error *err)
     }
     if (hmmfp) HMMFileClose(hmmfp);
   }
-  log_log("Loaded %lu HMM model(s)\n",
+  log_log("Loaded %lu HMM model(s)",
           array_size(opts->plan7_ts));
   return had_err;
 }
@@ -186,7 +166,7 @@ void* pdom_per_domain_worker_thread(void *data)
     /* Lock input */
     if ((rtn = pthread_mutex_lock(&shared->in_lock)) != 0)
     {
-      fprintf(stderr, "pthread_mutex_lock failure: %s\n", strerror(rtn));
+      fprintf(stderr, "Failed to lock: %s\n", strerror(rtn));
       exit(EXIT_FAILURE);
     }
     /* Have all HMMs been distributed? If so, we are done here. */
@@ -194,7 +174,7 @@ void* pdom_per_domain_worker_thread(void *data)
     {
       if ((rtn = pthread_mutex_unlock(&shared->in_lock)) != 0)
       {
-        fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(rtn));
+        fprintf(stderr, "Failed to unlock: %s\n", strerror(rtn));
         exit(EXIT_FAILURE);
       }
       pthread_exit(NULL);
@@ -262,7 +242,7 @@ void* pdom_per_domain_worker_thread(void *data)
       /* Lock results, we want to write to the result hashtable */
       if ((rtn = pthread_mutex_lock(&(shared->out_lock))) != 0)
       {
-        fprintf(stderr, "pthread_mutex_lock failure: %s\n", strerror(rtn));
+        fprintf(stderr, "Failed to lock: %s\n", strerror(rtn));
         exit(EXIT_FAILURE);
       }
 
@@ -276,7 +256,7 @@ void* pdom_per_domain_worker_thread(void *data)
       /* unlock results */
       if ((rtn = pthread_mutex_unlock(&(shared->out_lock))) != 0)
       {
-        fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(rtn));
+        fprintf(stderr, "Failed to unlock: %s\n", strerror(rtn));
         exit(EXIT_FAILURE);
       }
     }
@@ -316,12 +296,12 @@ static pdom_shared_s* pdom_run_threads(Array *hmms, int nof_threads,
 
   if ((rtn = pthread_mutex_init(&shared->in_lock, NULL)) != 0)
   {
-    fprintf(stderr, "pthread_mutex_init FAILED; %s\n", strerror(rtn));
+    fprintf(stderr, "Could not initialize lock! %s\n", strerror(rtn));
     exit(EXIT_FAILURE);
   }
   if ((rtn = pthread_mutex_init(&shared->out_lock, NULL)) != 0)
   {
-    fprintf(stderr, "pthread_mutex_init FAILED; %s\n", strerror(rtn));
+    fprintf(stderr, "Could not initialize lock! %s\n", strerror(rtn));
     exit(EXIT_FAILURE);
   }
 
@@ -332,7 +312,7 @@ static pdom_shared_s* pdom_run_threads(Array *hmms, int nof_threads,
     if ((rtn = pthread_create(&(shared->thread[i]), &attr,
            pdom_per_domain_worker_thread, (void *) shared)) != 0)
     {
-      fprintf(stderr,"Failed to create thread %d; return code %d\n", i, rtn);
+      fprintf(stderr,"Failed to create thread %d, return code %d\n", i, rtn);
       exit(EXIT_FAILURE);
     }
   }
@@ -375,7 +355,7 @@ void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
   {
     if (pthread_join(shared->thread[i],NULL) != 0)
     {
-      fprintf(stderr, "pthread_join failed");
+      fprintf(stderr, "Could not join threads!");
       exit(EXIT_FAILURE);
     }
   }

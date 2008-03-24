@@ -46,7 +46,6 @@ typedef struct PdomResults {
 } PdomResults;
 
 int  pdom_load_hmm_files(PdomOptions *opts, Error *err);
-int  pdom_domain_report_hits(void *key, void *value, void *data, Error *err);
 void pdom_convert_frame_position(Range *rng, int frame);
 void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
                PdomResults *results, PdomOptions *opts);
