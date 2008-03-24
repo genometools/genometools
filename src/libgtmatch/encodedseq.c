@@ -2185,6 +2185,7 @@ typedef struct
 {
   Twobitencoding tbe;           /* two bit encoding */
   unsigned int unitsnotspecial; /* units which are not special */
+  Seqpos position;
 } EndofTwobitencoding;
 
 static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
@@ -2208,6 +2209,7 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
   {
     stoppos = encseq->totallength;
   }
+  ptbe->position = startpos;
   if (startpos >= stoppos)
   {
     ptbe->unitsnotspecial = 0;
@@ -2264,6 +2266,7 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
   {
     stoppos = 0;
   }
+  ptbe->position = startpos;
   if (startpos < stoppos)
   {
     ptbe->unitsnotspecial = 0;
@@ -2421,9 +2424,7 @@ static int compareTwobitencodings(bool fwd,
                                   bool complement,
                                   unsigned int *commonunits,
                                   EndofTwobitencoding *ptbe1,
-                                  Seqpos pos1,
-                                  EndofTwobitencoding *ptbe2,
-                                  Seqpos pos2)
+                                  EndofTwobitencoding *ptbe2)
 {
   Twobitencoding mask;
 
@@ -2473,15 +2474,15 @@ static int compareTwobitencodings(bool fwd,
       {
         *commonunits = ptbe1->unitsnotspecial;
       }
-      if (pos1 < pos2)
+      if (ptbe1->position < ptbe2->position)
       {
         return -1;
       }
-      if (pos1 > pos2)
+      if (ptbe1->position > ptbe2->position)
       {
         return 1;
       }
-      if (pos1 == pos2)
+      if (ptbe1->position == ptbe2->position)
       {
         return 0;
       }
@@ -2549,7 +2550,7 @@ int compareEncseqsequences(Seqpos *lcp,
         fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
         fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
         retval = compareTwobitencodings(true,complement,&commonunits,
-                                        &ptbe1,pos1,&ptbe2,pos2);
+                                        &ptbe1,&ptbe2);
         depth += commonunits;
       } else
       {
@@ -2567,7 +2568,7 @@ int compareEncseqsequences(Seqpos *lcp,
         revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
         revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
         retval = compareTwobitencodings(false,complement,&commonunits,
-                                        &ptbe1,pos1,&ptbe2,pos2);
+                                        &ptbe1,&ptbe2);
         depth += commonunits;
       } else
       {
@@ -2812,7 +2813,7 @@ void checkextractunitatpos(const Encodedsequence *encseq,
     extract2bitenc_bruteforce(fwd,&ptbe2,encseq,startpos);
     if (ptbe1.unitsnotspecial != ptbe2.unitsnotspecial)
     {
-      fprintf(stderr,"fwd=%s,complement=%s: pos " FormatSeqpos 
+      fprintf(stderr,"fwd=%s,complement=%s: pos " FormatSeqpos
                      ": fast.unitsnotspecial = %u "
                      " != %u = brute.unitsnotspecial\n",
               fwd ? "true" : "false",
@@ -2859,14 +2860,22 @@ int multicharactercompare(const Encodedsequence *encseq,
                           Seqpos pos2)
 {
   EndofTwobitencoding ptbe1, ptbe2;
-  unsigned int commonunits;
+  int retval;
+  unsigned commonunits;
 
   initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1);
   initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2);
   extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
   extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
-  return compareTwobitencodings(fwd,complement,&commonunits,
-                                &ptbe1,pos1,&ptbe2,pos2);
+  retval = compareTwobitencodings(fwd,complement,&commonunits,&ptbe1,&ptbe2);
+  if (retval == 0)
+  {
+    assert(commonunits == (unsigned int) UNITSIN2BITENC);
+  } else
+  {
+    assert(commonunits < (unsigned int) UNITSIN2BITENC);
+  }
+  return retval;
 }
 
 void multicharactercompare_withtest(const Encodedsequence *encseq,
@@ -2886,8 +2895,7 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
   initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2);
   extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
   extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
-  ret1 = compareTwobitencodings(fwd,complement,&commonunits1,&ptbe1,
-                                pos1,&ptbe2,pos2);
+  ret1 = compareTwobitencodings(fwd,complement,&commonunits1,&ptbe1,&ptbe2);
   commonunits2 = (Seqpos) UNITSIN2BITENC;
   ret2 = comparetwostrings(encseq,fwd,complement,&commonunits2,pos1,pos2);
   if (ret1 != ret2 || (Seqpos) commonunits1 != commonunits2)

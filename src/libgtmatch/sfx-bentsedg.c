@@ -40,15 +40,8 @@
 #define ACCESSCHAR(POS) getencodedchar(encseq,POS,readmode) /* XXX */
 #define ISNOTEND(POS)   ((POS) < totallength && ISNOTSPECIAL(ACCESSCHAR(POS)))
 
-#define DECLARETMPC Uchar tmpsvar, tmptvar
-
-#define DEREF(VAR,PTR)\
-        (((PTR) < totallength && ISNOTSPECIAL(VAR = ACCESSCHAR(PTR))) ?\
-        ((Seqpos) VAR) : UNIQUEINT(PTR))
-
-#define DEREFMAXDEPTH(VAR,START,PTR)\
-        (((PTR) < (START) + maxdepth->valueunsignedint && \
-          (PTR) < totallength && ISNOTSPECIAL(VAR = ACCESSCHAR(PTR))) ?\
+#define DEREF(VAR,PTR,STOPPOS)\
+        (((PTR) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHAR(PTR))) ?\
         ((Seqpos) VAR) : UNIQUEINT(PTR))
 
 #define PTR2INT(VAR,I)\
@@ -105,8 +98,6 @@
         D = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].depth;\
         width = (Seqpos) ((R) - (L) + 1)
 
-typedef Seqpos Suffixptr;
-
 DECLAREARRAYSTRUCT(Largelcpvalue);
 
 typedef struct
@@ -142,6 +133,15 @@ struct Outlcpinfo
   bool previousbucketwasempty;
 };
 
+/*
+typedef struct
+{
+  Seqpos value;
+} Suffixptr;
+*/
+
+typedef Seqpos Suffixptr;
+
 static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Readmode readmode,
                             Seqpos totallength,
@@ -160,7 +160,8 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
   {
     return a;
   }
-  if ((valc = PTR2INT(tmpsvar,c)) == vala || valc == valb)
+  valc = PTR2INT(tmpsvar,c);
+  if (valc == vala || valc == valb)
   {
     return c;
   }
@@ -171,7 +172,7 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
 
 static void insertionsort(const Encodedsequence *encseq,
                           Lcpsubtab *lcpsubtab,
-                          UNUSED Readmode readmode,
+                          Readmode readmode,
                           Seqpos totallength,
                           Seqpos depth,
                           Suffixptr *leftptr,
@@ -205,12 +206,14 @@ static void insertionsort(const Encodedsequence *encseq,
           Uchar tmpsvar, tmptvar;
           if (maxdepth->defined)
           {
-            ccs = DEREFMAXDEPTH(tmpsvar,*(pj-1),sptr);
-            cct = DEREFMAXDEPTH(tmptvar,*pj,tptr);
+            ccs = DEREF(tmpsvar,sptr,
+                        MIN(totallength,*(pj-1)+maxdepth->valueunsignedint));
+            cct = DEREF(tmptvar,tptr,
+                        MIN(totallength,*pj+maxdepth->valueunsignedint));
           } else
           {
-            ccs = DEREF(tmpsvar,sptr);
-            cct = DEREF(tmptvar,tptr);
+            ccs = DEREF(tmpsvar,sptr,totallength);
+            cct = DEREF(tmptvar,tptr,totallength);
           }
           if (ccs != cct)
           {
@@ -309,7 +312,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       while (pb <= pc)
       {
-        if ((val = PTR2INT(tmpsvar,pb)) > partval)
+        val = PTR2INT(tmpsvar,pb);
+        if (val > partval)
         {
           break;
         }
@@ -322,7 +326,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       }
       while (pb <= pc)
       {
-        if ((val = PTR2INT(tmpsvar,pc)) < partval)
+        val = PTR2INT(tmpsvar,pc);
+        if (val < partval)
         {
           break;
         }
