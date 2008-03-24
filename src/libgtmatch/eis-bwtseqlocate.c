@@ -24,7 +24,8 @@
 #include "libgtmatch/eis-mrangealphabet.h"
 
 /**
- * \file eis-bwtseqcreate.c generic methods for bwt index creation
+ * \file eis-bwtseqcreate.c generic methods for bwt index creation and
+ * everything related to storing/retrieving locate information
  */
 
 enum {
@@ -87,10 +88,10 @@ struct seqRevMapEntry
 struct addLocateInfoState
 {
   Seqpos seqLen;
-  void *spReadState, *origSeqState;
+  void *origSeqState;
   const MRAEnc *alphabet;
   int *specialRanges;
-  SeqposReadFunc readSeqpos;
+  SeqDataReader readSeqpos;
   GetOrigSeqSym readOrigSeq;
   unsigned locateInterval, bitsPerOrigPos, bitsPerSeqpos;
   int featureToggles;
@@ -114,7 +115,7 @@ bitsPerPosUpperBound(struct addLocateInfoState *state)
 static void
 initAddLocateInfoState(struct addLocateInfoState *state,
                        GetOrigSeqSym readOrigSeq, void *origSeqState,
-                       SeqposReadFunc readSeqpos, void *spReadState,
+                       SeqDataReader readSeqpos,
                        const MRAEnc *alphabet, int *specialRanges,
                        Seqpos srcLen, const struct bwtParam *params)
 {
@@ -126,7 +127,6 @@ initAddLocateInfoState(struct addLocateInfoState *state,
   state->seqLen = srcLen;
   state->specialRanges = specialRanges;
   state->readSeqpos = readSeqpos;
-  state->spReadState = spReadState;
   state->readOrigSeq = readOrigSeq;
   state->origSeqState = origSeqState;
   state->featureToggles = params->featureToggles;
@@ -189,8 +189,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
     {
       int specialRegularSymTransition = 0;
       /* 1.a read array index*/
-      if ((retcode = state->readSeqpos(state->spReadState, &mapVal, 1, err))
-          != 1)
+      if ((retcode = SDRRead(state->readSeqpos, &mapVal, 1, err)) != 1)
         return (BitOffset)-1;
       /* 1.b find current symbol and compare to special ranges */
       if (!properlySorted)
@@ -278,7 +277,7 @@ createBWTSeqGeneric(const struct bwtParam *params,
                     Seqpos totalLen,
                     const MRAEnc *alphabet, int *specialRanges,
                     GetOrigSeqSym readOrigSeq, void *origSeqState,
-                    SeqposReadFunc readNextSeqpos, void *spReadState,
+                    SeqDataReader readNextSeqpos,
                     reportLongest lrepFunc, void *lrepState, Error *err)
 {
   struct encIdxSeq *baseSeqIdx = NULL;
@@ -299,7 +298,7 @@ createBWTSeqGeneric(const struct bwtParam *params,
     error_unset(err);
     initAddLocateInfoState(&varState,
                            readOrigSeq, origSeqState,
-                           readNextSeqpos, spReadState,
+                           readNextSeqpos,
                            alphabet, specialRanges,
                            totalLen, params);
     varStateIsInitialized = true;

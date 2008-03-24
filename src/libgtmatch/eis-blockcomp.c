@@ -51,6 +51,7 @@
 #include "libgtmatch/eis-seqranges.h"
 #include "libgtmatch/eis-seqblocktranslate.h"
 #include "libgtmatch/eis-construction-interface.h"
+#include "libgtmatch/eis-seqdatasrc.h"
 #include "libgtmatch/eis-suffixerator-interface.h"
 #include "libgtmatch/eis-suffixarray-interface.h"
 
@@ -91,7 +92,7 @@ newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
 static EISeq *
 newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
-                     SymReadFunc readNextBWTBlock, void *bwtReaderState,
+                     SeqDataReader BWTGenerator,
                      const struct blockEncParams *params,
                      size_t numExtHeaders, uint16_t *headerIDs,
                      uint32_t *extHeaderSizes,
@@ -113,49 +114,49 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                         Error *err)
 {
   struct encIdxSeq *newSeqIdx;
-  struct suffixarrayReadState state;
+  struct suffixarrayFileInterface sai;
+  MRAEnc *alphabet;
   assert(sa && projectName && err);
-  if (!sa->bwttabstream.fp)
-  {
-    fprintf(stderr, "error: bwt data not available for given project: %s",
-            str_get(projectName));
-    return NULL;
-  }
-  state.sa = sa;
-  state.alphabet = newMRAEncFromSA(sa);
-  newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName, state.alphabet,
-                                   NULL, saReadBWT, &state, params,
+  alphabet = newMRAEncFromSA(sa);
+  initSuffixarrayFileInterface(&sai, sa);
+  newSeqIdx = newBlockEncIdxSeqFromSAI(
+    &sai, alphabet, totalLen, projectName, params, numExtHeaders, headerIDs,
+    extHeaderSizes, extHeaderCallbacks, headerCBData, biFunc, cwExtBitsPerPos,
+    maxVarExtBitsPerPos, cbState, err);
+  if (!newSeqIdx)
+    MRAEncDelete(alphabet);
+  return newSeqIdx;
+}
+
+extern EISeq *
+newBlockEncIdxSeqFromSAI(struct suffixarrayFileInterface *sai, MRAEnc *alphabet,
+                         Seqpos totalLen, const Str *projectName,
+                         const struct blockEncParams *params,
+                         size_t numExtHeaders, uint16_t *headerIDs,
+                         uint32_t *extHeaderSizes,
+                         headerWriteFunc *extHeaderCallbacks,
+                         void **headerCBData,
+                         bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
+                         BitOffset maxVarExtBitsPerPos, void *cbState,
+                         Error *err)
+{
+  struct encIdxSeq *newSeqIdx;
+  Suffixarray *sa;
+  SeqDataReader BWTGenerator;
+  assert(sai && alphabet && projectName && err);
+  sa = sai->sa;
+  BWTGenerator = SAIMakeBWTReader(sai);
+  newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName, alphabet,
+                                   NULL, BWTGenerator, params,
                                    numExtHeaders, headerIDs, extHeaderSizes,
                                    extHeaderCallbacks, headerCBData, biFunc,
                                    cwExtBitsPerPos, maxVarExtBitsPerPos,
                                    cbState, err);
-  if (!newSeqIdx)
-    MRAEncDelete(state.alphabet);
   return newSeqIdx;
 }
 
-struct sfxInterfaceReadState
-{
-  sfxInterface *si;
-  listenerID bwtReadId;
-  MRAEnc *alphabet;
-};
-
-static int
-sfxIBWTReadNext(void *state, Symbol *dest, size_t readLen,
-                UNUSED Error *err)
-{
-  struct sfxInterfaceReadState *SIState = state;
-  size_t readCount;
-  assert(state && SIState->si);
-  readCount = readSfxIBWTRange(SIState->si, SIState->bwtReadId, readLen,
-                               dest);
-  MRAEncSymbolsTransform(SIState->alphabet, dest, readCount);
-  return (readCount==readLen?1:-1);
-}
-
 extern EISeq *
-newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
+newBlockEncIdxSeqFromSfxI(sfxInterface *sfxi, Seqpos totalLen,
                           const Str *projectName,
                           const struct blockEncParams *params,
                           size_t numExtHeaders, uint16_t *headerIDs,
@@ -167,23 +168,25 @@ newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
                           Error *err)
 {
   struct encIdxSeq *newSeqIdx;
-  struct sfxInterfaceReadState state;
-  assert(si && projectName && err);
+  SeqDataReader readSfxBWTSym;
+  MRAEnc *alphabet;
+/*   struct sfxInterfaceReadState state; */
+  assert(sfxi && projectName && err);
   /* register bwttab reader */
-  if (!SfxIRegisterReader(si, &state.bwtReadId, SFX_REQUEST_BWTTAB))
+  if (!SDRIsValid(readSfxBWTSym
+                  = SfxIRegisterReader(sfxi, SFX_REQUEST_BWTTAB)))
     return NULL;
-  state.si = si;
   /* convert alphabet */
-  state.alphabet = newMRAEncFromSfxI(si);
+  alphabet = newMRAEncFromSfxI(sfxi);
   newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName,
-                                   state.alphabet, getSfxISeqStats(si),
-                                   sfxIBWTReadNext, &state, params,
+                                   alphabet, getSfxISeqStats(sfxi),
+                                   readSfxBWTSym, params,
                                    numExtHeaders, headerIDs, extHeaderSizes,
                                    extHeaderCallbacks, headerCBData, biFunc,
                                    cwExtBitsPerPos, maxVarExtBitsPerPos,
                                    cbState, err);
   if (!newSeqIdx)
-    MRAEncDelete(state.alphabet);
+    MRAEncDelete(alphabet);
   return newSeqIdx;
 }
 
@@ -457,7 +460,7 @@ writeOutputBuffer(struct blockCompositionSeq *newSeqIdx,
 static EISeq *
 newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
-                     SymReadFunc readNextBWTBlock, void *bwtReaderState,
+                     SeqDataReader BWTGenerator,
                      const struct blockEncParams *params,
                      size_t numExtHeaders, uint16_t *headerIDs,
                      uint32_t *extHeaderSizes,
@@ -682,16 +685,16 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
           blockNum = 0;
           while (blockNum < numFullBlocks)
           {
-            int readResult;
+            size_t readResult;
             /* 3. for each chunk: */
-            readResult = readNextBWTBlock(bwtReaderState, block, blockSize,
-                                          err);
-            if (readResult < 0)
+            readResult = SDRRead(BWTGenerator, block, blockSize, err);
+            if (readResult != blockSize)
             {
               hadError = 1;
               perror("error condition while reading index data");
               break;
             }
+            MRAEncSymbolsTransform(alphabet, block, blockSize);
             addBlock2OutputBuffer(newSeqIdx, buck, blockNum,
                                   block, blockSize,
                                   alphabet, modesCopy,
@@ -720,10 +723,9 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             Seqpos symbolsLeft = totalLen % blockSize;
             if (symbolsLeft)
             {
-              int readResult;
-              readResult = readNextBWTBlock(bwtReaderState, block, symbolsLeft,
-                                            err);
-              if (readResult < 0)
+              size_t readResult;
+              readResult = SDRRead(BWTGenerator, block, symbolsLeft, err);
+              if (readResult < symbolsLeft)
               {
                 hadError = 1;
                 perror("error condition while reading index data");
@@ -731,6 +733,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
               }
               else
               {
+                MRAEncSymbolsTransform(alphabet, block, symbolsLeft);
                 memset(block + symbolsLeft, 0,
                        sizeof (Symbol) * (blockSize - symbolsLeft));
                 addBlock2OutputBuffer(newSeqIdx, buck, blockNum,

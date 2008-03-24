@@ -27,6 +27,7 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-suffixerator-interface.h"
+#include "libgtmatch/eis-suffixarray-interface.h"
 
 /**
  * \brief Loads (or creates if necessary) an encoded indexed sequence
@@ -79,5 +80,19 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
 extern BWTSeq *
 createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                    Seqpos totalLen, Error *err);
+
+/**
+ * \brief Creates or loads an encoded indexed sequence object of the
+ * BWT transform.
+ * @param params a struct holding parameter information for index construction
+ * @param sai interface to suffix array to read data for BWT index from
+ * @param totalLen length of BWT sequence (including terminator symbol)
+ * @param err genometools reference for core functions
+ * @return reference to new BWT sequence object
+ */
+extern BWTSeq *
+createBWTSeqFromSAI(const struct bwtParam *params,
+                    struct suffixarrayFileInterface *sai,
+                    Seqpos totalLen, Error *err);
 
 #endif

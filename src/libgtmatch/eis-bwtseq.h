@@ -44,7 +44,7 @@
 struct matchBound
 {
   Seqpos start,                 /**< index of first boundary row */
-    end;                      /**< index of second boundary row */
+    end;                        /**< index of second boundary row */
 };
 
 /** Object holding a BWT sequence index */
@@ -62,6 +62,17 @@ typedef struct BWTSeqExactMatchesIterator BWTSeqExactMatchesIterator;
  */
 extern BWTSeq *
 availBWTSeq(const struct bwtParam *params, Error *err);
+
+/**
+ * \brief Creates an encoded indexed sequence object of the BWT
+ * transform by translating the information in a pre-existing suffix
+ * array.
+ * @param params a struct holding parameter information for index construction
+ * @param err genometools error object reference
+ * @return reference to new BWT sequence object
+ */
+extern BWTSeq *
+trSuftab2BWTSeq(const struct bwtParam *params, Error *err);
 
 /**
  * \brief Loads an encoded indexed sequence object of the

@@ -15,8 +15,9 @@
 */
 
 #include <errno.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "libgtcore/dataalign.h"
@@ -33,16 +34,10 @@
 #include "libgtmatch/esafileend.h"
 #include "libgtmatch/intcode-def.h"
 #include "libgtmatch/encseq-def.h"
-#include "libgtmatch/sfx-cmpsuf.pr"
 
 #include "libgtmatch/eis-encidxseq.h"
+#include "libgtmatch/eis-sequencemultiread.h"
 #include "libgtmatch/eis-suffixerator-interface.h"
-
-struct sfxIReaderState
-{
-  Seqpos nextReadPos;
-  int readFlag;
-};
 
 struct sfxInterface
 {
@@ -60,26 +55,58 @@ struct sfxInterface
   /* data relevant to holding portions of the suffix array */
   Seqpos lastGeneratedLen, lastGeneratedStart;
   const Seqpos *lastGeneratedSufTabSegment;
-  /**< pointer to part of suffix array
-   * returned by last iterator call*/
-  Seqpos *prevGeneratedSufTabSegments; /**< holds cache of suffix array
-                                  * parts returned by previous to last
-                                  * iterator calls as far back as
-                                  * required by the readers */
-  Seqpos prevGeneratedStart;
-  size_t prevGeneratedSize,     /**< maximum number of Seqpos values
-                                 * the cache may hold  */
-    prevGeneratedLen;           /**< number of Seqpos values the
-                                 * cache holds currently */
   /* data relevant to listeners */
-  int allRequests;
-  size_t numReaders;
-  struct sfxIReaderState *readers;
+  struct seqReaderSet readerSet;
+  struct saTaggedXltorStateList xltorStates;
 };
 
+#if 0
 static Seqpos
-sfxIReadAdvance(sfxInterface *iface,
+sfxIReadAdvance(sfxInterface *sfxi,
                 Seqpos requestMaxPos);
+#endif
+
+static SeqDataTranslator
+sfxIRequest2XltorFunc(UNUSED sfxInterface *sfxi,
+                      UNUSED enum sfxDataRequest request)
+{
+  SeqDataTranslator tr = { { NULL }, NULL };
+  switch (request)
+  {
+    union saXltorState readState;
+    struct saTaggedXltorState *stateStore;
+  case SFX_REQUEST_BWTTAB:
+    readState.encSeqTr.readmode = sfxi->readmode;
+    readState.encSeqTr.encseq = sfxi->encseq;
+    stateStore = addSuffixarrayXltor(&sfxi->xltorStates,
+                                     request, readState);
+    tr.state.ref = &stateStore->state.encSeqTr;
+    tr.translateData = (seqDataTranslateFunc)translateSuftab2BWT;
+    break;
+  case SFX_REQUEST_SUFTAB:
+    tr.state.elemSize = sizeof (Seqpos);
+    break;
+  case SFX_REQUEST_LCPTAB:
+    readState.lcpState.readmode = sfxi->readmode;
+    readState.lcpState.encseq = sfxi->encseq;
+    readState.lcpState.lastSufIdx = -1;
+    stateStore = addSuffixarrayXltor(&sfxi->xltorStates,
+                                     request, readState);
+    tr.state.ref = &stateStore->state.lcpState;
+    tr.translateData = (seqDataTranslateFunc)translateSuftab2LCP;
+    break;
+  default:
+    fprintf(stderr, "error: unimplemented request!\n");
+    abort();
+    break;
+  }
+  return tr;
+}
+
+static size_t
+sfxIGenerate(void *iface, void *backlogState,
+             move2BacklogFunc move2Backlog, void *output, Seqpos generateStart,
+             size_t len, SeqDataTranslator xltor, Error *err);
 
 extern sfxInterface *
 newSfxInterface(Readmode readmode,
@@ -135,11 +162,10 @@ deleteSeqStats(struct seqStats *stats)
 
 #define newSfxInterfaceWithReadersErrRet()        \
   do {                                            \
-    if (iface->stats)                             \
-      deleteSeqStats(iface->stats);               \
-    if (iface->readers)                           \
-      ma_free(iface->readers);                    \
-    if (iface) ma_free(iface);                    \
+    if (sfxi->stats)                             \
+      deleteSeqStats(sfxi->stats);               \
+    if (sfxi) ma_free(sfxi);                    \
+    sfxi = NULL;                                 \
   } while (0)
 
 extern sfxInterface *
@@ -148,8 +174,8 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            unsigned int numofparts,
                            const Sfxstrategy *sfxstrategy,
                            size_t numReaders,
-                           enum sfxDataRequest *requests,
-                           listenerID *ids,
+                           enum sfxDataRequest readerRequests[],
+                           SeqDataReader readers[],
                            const Encodedsequence *encseq,
                            const Specialcharinfo *specialcharinfo,
                            unsigned long numofsequences,
@@ -159,20 +185,19 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            const unsigned long *characterdistribution,
                            Verboseinfo *verbosity, Error *err)
 {
-  sfxInterface *iface = NULL;
-
+  sfxInterface *sfxi = NULL;
   error_check(err);
 
-  iface = ma_calloc(1, sizeof (*iface));
-  iface->readmode = readmode;
-  iface->mtime = mtime;
-  iface->length = length;
-  iface->alpha = alpha;
-  iface->encseq = encseq;
-  iface->stats = newSeqStatsFromCharDist(iface->alpha, iface->length,
+  sfxi = ma_calloc(1, sizeof (*sfxi));
+  sfxi->readmode = readmode;
+  sfxi->mtime = mtime;
+  sfxi->length = length;
+  sfxi->alpha = alpha;
+  sfxi->encseq = encseq;
+  sfxi->stats = newSeqStatsFromCharDist(sfxi->alpha, sfxi->length,
                                          numofsequences,
                                          characterdistribution);
-  if (!(iface->sfi = newSfxiterator(specialcharinfo->specialcharacters,
+  if (!(sfxi->sfi = newSfxiterator(specialcharinfo->specialcharacters,
                                     specialcharinfo->realspecialranges,
                                     encseq,
                                     readmode,
@@ -182,58 +207,49 @@ newSfxInterfaceWithReaders(Readmode readmode,
                                     numofparts,
                                     NULL,
                                     sfxstrategy,
-                                    iface->mtime,
+                                    sfxi->mtime,
                                     verbosity, err)))
     newSfxInterfaceWithReadersErrRet();
-  iface->longest.defined = false;
-  iface->specialsuffixes = false;
+  sfxi->longest.defined = false;
+  sfxi->specialsuffixes = false;
 
-  iface->prevGeneratedSize = iface->lastGeneratedStart
-    = iface->prevGeneratedStart = 0;
-  iface->lastGeneratedSufTabSegment = iface->prevGeneratedSufTabSegments = NULL;
+  sfxi->lastGeneratedStart = sfxi->lastGeneratedLen = 0;
+  sfxi->lastGeneratedSufTabSegment = NULL;
 
-  iface->allRequests = SFX_REQUEST_NONE;
+  initEmptySeqReaderSet(&sfxi->readerSet, SFX_REQUEST_NONE, sizeof (Seqpos),
+                        sfxIGenerate, sfxi);
+
+  initSATaggedXltorStateList(&sfxi->xltorStates);
+
   {
     size_t i;
-    iface->numReaders = 0;
-    iface->readers = NULL;
     for (i = 0; i < numReaders; ++i)
-      if (!SfxIRegisterReader(iface, ids + i, requests[i]))
+    {
+      readers[i] = SfxIRegisterReader(sfxi, readerRequests[i]);
+      if (!readers[i].readData)
         newSfxInterfaceWithReadersErrRet();
+    }
   }
-  return iface;
+  return sfxi;
 }
 
-extern const Sfxiterator *SfxInterface2Sfxiterator(const sfxInterface *iface)
+extern const Sfxiterator *SfxInterface2Sfxiterator(const sfxInterface *sfxi)
 {
-  return iface->sfi;
+  return sfxi->sfi;
 }
 
 extern void
-deleteSfxInterface(sfxInterface *iface)
+deleteSfxInterface(sfxInterface *sfxi)
 {
-  ma_free(iface->prevGeneratedSufTabSegments);
-  freeSfxiterator(&iface->sfi);
-  deleteSeqStats(iface->stats);
-  ma_free(iface->readers);
-  ma_free(iface);
-}
-
-const Uchar *
-SfxIReadESQRange(sfxInterface *iface, Seqpos start, Seqpos len,
-                 Uchar *dest)
-{
-  size_t i;
-  assert(dest);
-  for (i = 0; i < (size_t)len; ++i)
-  {
-    dest[i] = getencodedchar(iface->encseq, start + i, iface->readmode);
-  }
-  return dest;
+  destructSATaggedXltorStateList(&sfxi->xltorStates);
+  destructSeqReaderSet(&sfxi->readerSet);
+  freeSfxiterator(&sfxi->sfi);
+  deleteSeqStats(sfxi->stats);
+  ma_free(sfxi);
 }
 
 extern const Alphabet *
-getSfxIAlphabet(const sfxInterface *si)
+SfxIGetAlphabet(const sfxInterface *si)
 {
   return si->alpha;
 }
@@ -243,7 +259,7 @@ newMRAEncFromSfxI(const sfxInterface *si)
 {
   MRAEnc *alphabet;
   assert(si);
-  alphabet = MRAEncGTAlphaNew(getSfxIAlphabet(si));
+  alphabet = MRAEncGTAlphaNew(SfxIGetAlphabet(si));
   MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
 }
@@ -268,290 +284,89 @@ getSfxILongestPos(const struct sfxInterface *si)
 }
 
 extern const Encodedsequence *
-getSfxIEncSeq(const sfxInterface *si)
+SfxIGetEncSeq(const sfxInterface *si)
 {
   return si->encseq;
 }
 
-int
-SfxIRegisterReader(sfxInterface *iface, listenerID *id,
-                   enum sfxDataRequest request)
+extern SeqDataReader
+SfxIRegisterReader(sfxInterface *sfxi, enum sfxDataRequest request)
 {
-  size_t availId = iface->numReaders++;
-  iface->readers = ma_realloc(iface->readers,
-                              sizeof (iface->readers[0]) * (availId + 1));
-  iface->readers[availId].nextReadPos = 0;
-  iface->readers[availId].readFlag = request;
-  iface->allRequests |= request;
-  *id = availId;
-  return 1;
+  return seqReaderSetRegisterConsumer(
+    &sfxi->readerSet, request, sfxIRequest2XltorFunc(sfxi, request));
 }
 
-static Seqpos
-getSufTabVal(sfxInterface *iface, Seqpos pos)
-{
-  assert(iface && pos < iface->length);
-  while (1)
-  {
-    if (pos >= iface->lastGeneratedStart
-       && pos < iface->lastGeneratedStart + iface->lastGeneratedLen)
-    {
-      /* pos is in last block */
-      return iface->lastGeneratedSufTabSegment[pos
-                                               - iface->lastGeneratedStart];
-    }
-    else if (pos >= iface->prevGeneratedStart
-            && pos < iface->prevGeneratedStart + iface->prevGeneratedLen)
-    {
-      /* pos is in prev block */
-      return iface->prevGeneratedSufTabSegments[pos
-                                                - iface->prevGeneratedStart];
-    }
-    else
-    {
-      while (pos >= iface->lastGeneratedStart + iface->lastGeneratedLen)
-        if (!sfxIReadAdvance(iface, pos))
-          break;
-    }
-  }
-}
-
-extern int
+extern size_t
 SfxIGetOrigSeq(void *state, Symbol *dest, Seqpos pos, size_t len)
 {
-  struct sfxInterface *iface;
+  struct sfxInterface *sfxi;
   size_t i;
   assert(state);
-  iface = state;
+  sfxi = state;
   for (i = 0; i < len; ++i)
-    dest[i] = getencodedchar(iface->encseq, pos + i, iface->readmode);
+    dest[i] = getencodedchar(sfxi->encseq, pos + i, sfxi->readmode);
   return len;
 }
 
-extern size_t
-readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,Uchar *dest)
+/** writes substring of suffix table to output, puts older data into
+ * cache if necessary */
+static size_t
+sfxIGenerate(void *iface, void *backlogState,
+             move2BacklogFunc move2Backlog, void *output, Seqpos generateStart,
+             size_t len, SeqDataTranslator xltor, UNUSED Error *err)
 {
-  size_t i, effLen;
-  Seqpos start;
-  assert(iface && id < iface->numReaders && dest);
-  assert(iface->readers[id].readFlag == SFX_REQUEST_BWTTAB);
-  start = iface->readers[id].nextReadPos;
-  effLen = MIN((size_t)len, (size_t)(iface->length - start));
-  for (i = 0; i < (size_t)effLen; ++i)
-  {
-    Seqpos sufTabVal = getSufTabVal(iface, start + i);
-    if (sufTabVal != 0)
-      dest[i] = getencodedchar(iface->encseq, sufTabVal - 1,
-                               iface->readmode);
-    else
-      dest[i] = (Uchar) UNDEFBWTCHAR;
-  }
-  iface->readers[id].nextReadPos = start + effLen;
-  return effLen;
-}
-
-extern size_t
-readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
-                 Seqpos *dest, UNUSED Error *err)
-{
-  size_t i, effLen;
-  Seqpos start;
-  assert(iface && id < iface->numReaders && dest);
-  assert(iface->readers[id].readFlag == SFX_REQUEST_LCPTAB);
-  start = iface->readers[id].nextReadPos;
-  effLen = MIN(len, iface->length - start);
-  if (start == 0)
-    dest[0] = 0, i = 1;
-  else
-    i = 0;
-  for (; i < (size_t)len; ++i)
-  {
-#ifndef NDEBUG
-    int cmp =
-#endif /* NDEBUG */
-      comparetwosuffixes(iface->encseq,
-                         iface->readmode,
-                         dest + i,
-                         false,
-                         false,
-                         0,
-                         getSufTabVal(iface, start + i - 1),
-                         getSufTabVal(iface, start + i),
-                         NULL,  /* XXX FIXME */
-                         NULL);  /* XXX FIXME */
-#ifndef NDEBUG
-    if (cmp > 0)
-    {
-      fprintf(stderr,"pos = " FormatSeqpos
-              ": cmp " FormatSeqpos
-              " " FormatSeqpos " = %d",
-              PRINTSeqposcast(start + (Seqpos)i - 1),
-              PRINTSeqposcast(start + (Seqpos)i),
-              PRINTSeqposcast(getSufTabVal(iface, start + (Seqpos)i)),
-              cmp);
-      exit(EXIT_FAILURE);
-    }
-#endif /* NDEBUG */
-  }
-  iface->readers[id].nextReadPos = start + len - 1;
-  return effLen;
-}
-
-size_t
-readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
-                    Seqpos *dest)
-{
-  Seqpos start;
-  assert(iface && id < iface->numReaders && dest);
-  start = iface->readers[id].nextReadPos;
-  while (1)
-  {
-    if (start >= iface->lastGeneratedStart
-       && len <= iface->lastGeneratedLen)
-    {
-      /* chunk is completely contained in last block */
-      iface->readers[id].nextReadPos = start + len;
-      memcpy(dest,
-             iface->lastGeneratedSufTabSegment
-             + start - iface->lastGeneratedStart,
-             sizeof (dest[0]) * len);
-      return len;
-    }
-    else if (start >= iface->prevGeneratedStart
-            && len <= iface->prevGeneratedLen)
-    {
-      /* chunk is completely contained in prev block */
-      iface->readers[id].nextReadPos = start + len;
-      memcpy(dest,
-             iface->prevGeneratedSufTabSegments
-             + start - iface->prevGeneratedStart,
-             sizeof (dest[0]) * len);
-      return len;
-    }
-    else if (start + len < iface->lastGeneratedStart + iface->lastGeneratedLen)
-    {
-      /* chunk overlaps both segments, but does not extend beyond
-       * last segment */
-      iface->readers[id].nextReadPos = start + len;
-      memcpy(dest,
-             iface->prevGeneratedSufTabSegments
-             + start - iface->prevGeneratedStart,
-             sizeof (dest[0])
-             * (iface->prevGeneratedLen + iface->prevGeneratedStart - start));
-      memcpy(dest,
-             iface->lastGeneratedSufTabSegment,
-             sizeof (dest[0])
-             * (start + len - iface->lastGeneratedStart));
-      return len;
-    }
-    else
-    {
-      while (start + len > iface->prevGeneratedStart + iface->prevGeneratedLen)
-        if (!sfxIReadAdvance(iface, start + len))
-        {
-          /* Caution: sneakily updates the length parameter to obtain a
-           * request we can fulfill */
-          len = iface->lastGeneratedStart + iface->lastGeneratedLen - start;
-          break;
-        }
-    }
-  }
-}
-
-static Seqpos
-findMinOpenRequest(sfxInterface *iface, int reqType)
-{
-  Seqpos min;
-  size_t i;
-  assert(iface);
-  min = iface->length;
-  for (i = 0; i < iface->numReaders; ++i)
-    if (iface->readers[i].readFlag & reqType)
-      min = MIN(min, iface->readers[i].nextReadPos);
-  return min;
-}
-
-static Seqpos
-sfxIReadAdvance(sfxInterface *iface,
-                Seqpos requestMaxPos)
-{
-  Seqpos requestMinPos, lengthOfExtension = 0;
-  assert(iface);
-  /* 1. find first position that still needs to be read */
-  requestMinPos = findMinOpenRequest(iface, SFX_REQUEST_ANY);
-  /* 2. move still unread old values as far as possible to head of copy */
-  assert(requestMinPos >= iface->prevGeneratedStart);
-  assert(requestMinPos <= iface->lastGeneratedStart + iface->lastGeneratedLen);
-  if (requestMinPos < iface->prevGeneratedStart + iface->prevGeneratedLen)
-  {
-    size_t prevSegmentUnread
-      = iface->prevGeneratedLen - requestMinPos + iface->prevGeneratedStart;
-    memmove(iface->prevGeneratedSufTabSegments,
-            iface->prevGeneratedSufTabSegments + requestMinPos
-            - iface->prevGeneratedStart,
-            sizeof (iface->prevGeneratedSufTabSegments[0]) *
-            prevSegmentUnread);
-    iface->prevGeneratedLen = prevSegmentUnread;
-    iface->prevGeneratedStart = requestMinPos;
-  }
-  else
-  {
-    iface->prevGeneratedLen = 0;
-    iface->prevGeneratedStart = requestMinPos;
-  }
+  sfxInterface *sfxi = iface;
+  size_t elemsLeft = len;
+  assert(sfxi && backlogState && move2Backlog && output);
+  assert(generateStart + len <= sfxi->length);
   do
   {
-    Seqpos copyStartPos = MAX(requestMinPos, iface->lastGeneratedStart);
-    size_t copyLen = iface->lastGeneratedLen
-      - copyStartPos + iface->lastGeneratedStart;
-    /* 3. extend cache to also accept all values in last region read */
-    if (copyLen)
+    if (generateStart < sfxi->lastGeneratedStart + sfxi->lastGeneratedLen)
     {
-      size_t prevGeneratedSizeLeft = iface->prevGeneratedSize
-        - iface->prevGeneratedLen;
-      if (copyLen > prevGeneratedSizeLeft)
-      {
-        size_t newSize = iface->prevGeneratedLen + copyLen;
-        iface->prevGeneratedSufTabSegments =
-          ma_realloc(iface->prevGeneratedSufTabSegments,
-                     sizeof (iface->lastGeneratedSufTabSegment[0]) * newSize);
-        iface->prevGeneratedSize = newSize;
-      }
-      memcpy(iface->prevGeneratedSufTabSegments + iface->prevGeneratedLen,
-             iface->lastGeneratedSufTabSegment
-             + copyStartPos - iface->lastGeneratedStart,
-             sizeof (iface->lastGeneratedSufTabSegment[0]) * copyLen);
-      iface->prevGeneratedLen += copyLen;
+      size_t copyLen = MIN(elemsLeft, sfxi->lastGeneratedStart
+                           + sfxi->lastGeneratedLen - generateStart),
+        charsWritten =
+        SDRTranslate(xltor, output, sfxi->lastGeneratedSufTabSegment
+                     + generateStart - sfxi->lastGeneratedStart, copyLen);
+      generateStart += copyLen;
+      elemsLeft -= copyLen;
+      output = (char *)output + charsWritten;
     }
-    /* 4. read next region of sequence by calling nextSfxIterator */
-    iface->lastGeneratedStart += iface->lastGeneratedLen;
-    if ((iface->lastGeneratedSufTabSegment =
-        nextSfxiterator(&iface->lastGeneratedLen, &iface->specialsuffixes,
-                        iface->mtime, iface->sfi)))
+    /* 1. read next region of sequence by calling nextSfxIterator */
+    if (elemsLeft)
     {
-      size_t pos;
-      /* size_t because the current approach cannot generate more
-       * than memory will hold anyway */
-      size_t lastGeneratedLen = iface->lastGeneratedLen;
-      const Seqpos *suftab = iface->lastGeneratedSufTabSegment;
-      lengthOfExtension += iface->lastGeneratedLen;
-      if (!iface->longest.defined)
-        for (pos=0; pos < lastGeneratedLen; pos++)
-        {
-          if (suftab[pos] == 0)
+      move2Backlog(backlogState, sfxi->lastGeneratedSufTabSegment,
+                   sfxi->lastGeneratedStart, sfxi->lastGeneratedLen);
+      sfxi->lastGeneratedStart += sfxi->lastGeneratedLen;
+      if ((sfxi->lastGeneratedSufTabSegment =
+           nextSfxiterator(&sfxi->lastGeneratedLen, &sfxi->specialsuffixes,
+                           sfxi->mtime, sfxi->sfi)))
+      {
+        size_t pos;
+        /* size_t because the current approach cannot generate more
+         * than memory will hold anyway */
+        size_t lastGeneratedLen = sfxi->lastGeneratedLen;
+        const Seqpos *suftab = sfxi->lastGeneratedSufTabSegment;
+        if (!sfxi->longest.defined)
+          for (pos=0; pos < lastGeneratedLen; pos++)
           {
-            iface->longest.defined = true;
-            iface->longest.valueseqpos = iface->lastGeneratedStart + pos;
+            if (suftab[pos] == 0)
+            {
+              sfxi->longest.defined = true;
+              sfxi->longest.valueseqpos = sfxi->lastGeneratedStart + pos;
+              break;
+            }
           }
-        }
-    /* uncomment this to reenable synchronous writing of tables */
-/*if (iface->lastGeneratedSufTabSegment == NULL */
-/*    || suftab2file(&iface->outfileinfo, iface->lastGeneratedSufTabSegment, */
-/*                   iface->so.readmode, iface->lastGeneratedLen, err) != 0) */
+        /* uncomment this to reenable synchronous writing of tables */
+/*if (sfxi->lastGeneratedSufTabSegment == NULL */
+/*    || suftab2file(&sfxi->outfileinfo, sfxi->lastGeneratedSufTabSegment, */
+/*                   sfxi->so.readmode, sfxi->lastGeneratedLen, err) != 0) */
 /*       break; */
+      }
+      else
+        break;
     }
     /* 5. if positions in region don't suffice go back to step 3. */
-  } while (requestMaxPos
-           >= iface->lastGeneratedStart + iface->lastGeneratedLen);
-  return lengthOfExtension;
+  } while (elemsLeft);
+  return len - elemsLeft;
 }

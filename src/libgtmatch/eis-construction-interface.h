@@ -27,20 +27,29 @@
  */
 #include <stdlib.h>
 
+#include "libgtcore/error.h"
+#include "libgtmatch/seqpos-def.h"
+#include "libgtmatch/eis-mrangealphabet.h"
+
 /**
  * generic method to aquire next readLen symbols of e.g. BWT string
+ * @return actual number of symbols acquired
  */
-typedef int (*SymReadFunc)(void *state, Symbol *dest, size_t readLen,
-                           Error *err);
+typedef size_t (*SymReadFunc)(void *state, Symbol *dest, size_t readLen,
+                              Error *err);
 
 /**
  * generic method to aquire next Seqpos value from suffix array
+ * @return actual number of values acquired
  */
-typedef int (*SeqposReadFunc)(void *src, Seqpos *dest, size_t len, Error *err);
+typedef size_t (*SeqposReadFunc)(void *src, Seqpos *dest, size_t len,
+                                 Error *err);
 
 /**
  * \brief generic method to access the original encoded sequence
+ * @return actual number of symbols acquired
  */
-typedef int (*GetOrigSeqSym)(void *state, Symbol *dest, Seqpos pos, size_t len);
+typedef size_t (*GetOrigSeqSym)(void *state, Symbol *dest, Seqpos pos,
+                                size_t len);
 
 #endif

@@ -24,9 +24,10 @@
 
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqpriv.h"
-#include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-construction-interface.h"
+#include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-seqdatasrc.h"
 
 enum {
   NORMAL_RANGE  = 0,
@@ -73,7 +74,7 @@ createBWTSeqGeneric(const struct bwtParam *params,
                     indexCreateFunc createIndex, void *baseSrc, Seqpos totalLen,
                     const MRAEnc *alphabet, int *specialRanges,
                     GetOrigSeqSym readOrigSeq, void *origSeqState,
-                    SeqposReadFunc readNextSeqpos, void *spReadState,
+                    SeqDataReader readNextSeqpos,
                     reportLongest lrepFunc, void *lrepState, Error *err);
 
 #endif

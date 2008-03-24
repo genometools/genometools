@@ -22,38 +22,54 @@
  * Defines functions conforming to the signatures defined in
  * eis-construction-interface.h for suffix array objects.
  */
+#include <stdlib.h>
+#include "libgtcore/error.h"
+#include "libgtmatch/sarr-def.h"
+#include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-seqdatasrc.h"
+#include "libgtmatch/eis-sequencemultiread.h"
 
 /**
  * Used to pass suffixarray to read from and alphabet to encode with
  * to readers.
  */
-struct suffixarrayReadState
+struct suffixarrayFileInterface
 {
   Suffixarray *sa;              /**< the suffix array to read from */
-  MRAEnc *alphabet;             /**< the alphabet to use for transformation */
+  struct seqReaderSet readerSet;
+  int numBWTFileReaders;
+  struct saTaggedXltorStateList xltorStates;
 };
 
-/**
- * @brief Read given length of symbols from the BWT, starting after last
- * position read.
- * @param state reference of a struct suffixarrayReadState
- * @param dest write symbols here
- * @param len length of string to read
- */
-extern int
-saReadBWT(void *state, Symbol *dest, size_t len, Error *err);
+extern void
+initSuffixarrayFileInterface(struct suffixarrayFileInterface *sai,
+                             Suffixarray *sa);
+
+extern void
+destructSuffixarrayFileInterface(struct suffixarrayFileInterface *sai);
+
+extern SeqDataReader
+SAIMakeReader(struct suffixarrayFileInterface *sai, enum sfxDataRequest rtype);
+
+extern SeqDataReader
+SAIMakeBWTReader(struct suffixarrayFileInterface *sai);
+
+extern SeqDataReader
+SAIMakeSufTabReader(struct suffixarrayFileInterface *sai);
 
 /**
  * @brief Gets symbols of original sequence at given position.
- * @param state reference of a struct suffixarrayReadState
+ * @param state reference of a struct suffixarrayFileInterface
  * @param dest write symbols here
  * @param pos get symbols starting at this position in original sequence
  * @param len length of string to read
+ * @return actual number of symbols read
  */
-extern int
-saGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len);
+extern size_t
+SAIGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len);
 
+#if 0
 /**
  * @brief Read part of the suffix array starting from position after
  * last read.
@@ -64,8 +80,9 @@ saGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len);
  * @return number of entries read, less than len if end of sequence
  * reached
  */
-extern int
+extern size_t
 saReadSeqpos(void *src, Seqpos *dest, size_t len, Error *err);
+#endif
 
 /**
  * @brief Query position of suffix starting at position 0, can be
@@ -75,7 +92,7 @@ saReadSeqpos(void *src, Seqpos *dest, size_t len, Error *err);
  * @return
  */
 extern DefinedSeqpos
-reportSALongest(void *state);
+reportSAILongest(void *state);
 
 /**
  * @brief Query appropriate alphabet encoding for suffix array.

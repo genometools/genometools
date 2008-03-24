@@ -69,6 +69,33 @@ availBWTSeq(const struct bwtParam *params, Error *err)
 }
 
 extern BWTSeq *
+trSuftab2BWTSeq(const struct bwtParam *params, Error *err)
+{
+  struct BWTSeq *bwtSeq = NULL;
+  Suffixarray suffixArray;
+  Seqpos len;
+  Verboseinfo *verbosity;
+  assert(params && err);
+  error_check(err);
+  /* FIXME: handle verbosity in a more sane fashion */
+  verbosity = newverboseinfo(false);
+  if (streamsuffixarray(&suffixArray, &len,
+                        SARR_SUFTAB | SARR_BWTTAB | SARR_ESQTAB,
+                        params->projectName, verbosity, err)
+      && streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_ESQTAB,
+                           params->projectName, verbosity, err))
+  {
+    freeverboseinfo(&verbosity);
+    return NULL;
+  }
+  ++len;
+  bwtSeq = createBWTSeqFromSA(params, &suffixArray, len, err);
+  freesuffixarray(&suffixArray);
+  freeverboseinfo(&verbosity);
+  return bwtSeq;
+}
+
+extern BWTSeq *
 availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                   Seqpos totalLen, Error *err)
 {
@@ -150,13 +177,7 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                    Seqpos totalLen, Error *err)
 {
   BWTSeq *bwtSeq = NULL;
-  MRAEnc *alphabet = NULL;
-  if (params->locateInterval && !sa->suftabstream.fp)
-  {
-    fprintf(stderr, "error: locate sampling requested but not available"
-            " for project %s\n", str_get(params->projectName));
-  }
-  else if (!sa->longest.defined)
+  if (!sa->longest.defined)
   {
     fprintf(stderr,
             "error: position of null-rotation/longest suffix not available"
@@ -164,16 +185,45 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   }
   else
   {
+    struct suffixarrayFileInterface sai;
+    MRAEnc *alphabet = newMRAEncFromSA(sa);
+    initSuffixarrayFileInterface(&sai, sa);
+    if (!(bwtSeq = createBWTSeqFromSAI(params, &sai, totalLen, err)))
+    {
+      if (alphabet)
+        MRAEncDelete(alphabet);
+    }
+  }
+  return bwtSeq;
+}
+
+extern BWTSeq *
+createBWTSeqFromSAI(const struct bwtParam *params,
+                    struct suffixarrayFileInterface *sai,
+                    Seqpos totalLen, Error *err)
+{
+  BWTSeq *bwtSeq = NULL;
+  MRAEnc *alphabet = NULL;
+  SeqDataReader readSfxIdx = { NULL, NULL };
+  assert(sai && err && params);
+  if (params->locateInterval
+      && !SDRIsValid(readSfxIdx
+                               = SAIMakeReader(sai, SFX_REQUEST_SUFTAB)))
+  {
+    fprintf(stderr, "error: locate sampling requested but not available"
+            " for project %s\n", str_get(params->projectName));
+  }
+  else
+  {
     EISeq *seqIdx = NULL;
-    alphabet = newMRAEncFromSA(sa);
     switch (params->baseType)
     {
     case BWT_ON_BLOCK_ENC:
       seqIdx =
         createBWTSeqGeneric(
-          params, (indexCreateFunc)newBlockEncIdxSeqFromSA, sa, totalLen,
-          alphabet, GTAlphabetRangeHandling, saGetOrigSeqSym, sa, saReadSeqpos,
-          sa, reportSALongest, sa, err);
+          params, (indexCreateFunc)newBlockEncIdxSeqFromSAI, &sai, totalLen,
+          alphabet, GTAlphabetRangeHandling, SAIGetOrigSeqSym, sai, readSfxIdx,
+          reportSAILongest, sai, err);
       break;
     default:
       error_set(err, "Illegal/unknown/unimplemented encoding requested!");
@@ -192,52 +242,28 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   return bwtSeq;
 }
 
-struct sfxIReadInfo
-{
-  sfxInterface *si;
-  listenerID id;
-};
-
-static int
-sfxIReadSeqpos(void *src, Seqpos *dest, size_t len, UNUSED Error *err)
-{
-  return readSfxISufTabRange(((struct sfxIReadInfo *)src)->si,
-                             ((struct sfxIReadInfo *)src)->id,
-                             len, dest) == len;
-}
-
-#if 0
-static int
-sfxIReadBWTSym(void *src, Symbol *dest, size_t len, Error *err)
-{
-  return readSfxIBWTRange(((struct sfxIReadInfo *)src)->si,
-                          ((struct sfxIReadInfo *)src)->id,
-                          len, dest) == len;
-}
-#endif
-
 extern BWTSeq *
-createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
+createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
                      Seqpos totalLen, Error *err)
 {
-  struct sfxIReadInfo siriSeqpos;
   EISeq *seqIdx = NULL;
   BWTSeq *bwtSeq = NULL;
   MRAEnc *alphabet = NULL;
-  assert(si && params && err);
-
+  SeqDataReader readSfxIdx = { NULL, NULL };
+  assert(sfxi && params && err);
   if (params->locateInterval)
   {
-    siriSeqpos.si = si;
-    if (!SfxIRegisterReader(si, &siriSeqpos.id, SFX_REQUEST_SUFTAB))
+    if (!SDRIsValid(readSfxIdx
+                              = SfxIRegisterReader(sfxi,
+                                                   SFX_REQUEST_SUFTAB)))
       return NULL;
   }
-  alphabet = newMRAEncFromSfxI(si);
+  alphabet = newMRAEncFromSfxI(sfxi);
   seqIdx= createBWTSeqGeneric(
-    params, (indexCreateFunc)newBlockEncIdxSeqFromSfxI, si, totalLen,
+    params, (indexCreateFunc)newBlockEncIdxSeqFromSfxI, sfxi, totalLen,
     alphabet, GTAlphabetRangeHandling,
-    SfxIGetOrigSeq, si, sfxIReadSeqpos, &siriSeqpos,
-    (reportLongest)getSfxILongestPos, si, err);
+    SfxIGetOrigSeq, sfxi, readSfxIdx,
+    (reportLongest)getSfxILongestPos, sfxi, err);
   if (seqIdx)
   {
     bwtSeq = newBWTSeq(seqIdx, alphabet);

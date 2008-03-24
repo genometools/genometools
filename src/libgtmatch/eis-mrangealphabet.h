@@ -243,8 +243,9 @@ MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
  * @param fp file pointer
  * @param numSyms read this many symbols
  * @param dest write converted symbols here
+ * @return number of symbols actually read
  */
-extern int
+extern size_t
 MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
                        size_t numSyms, Symbol *dest);
 

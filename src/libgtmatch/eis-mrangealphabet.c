@@ -269,13 +269,13 @@ MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range)
 }
 
 /**
- * @return -1 on error, 0 on EOF, >0 otherwise
+ * @return number of symbols actually read
  */
-int
+size_t
 MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
                        size_t numSyms, Symbol *dest)
 {
-  int retval = 1;
+  int retval = 0;
   switch (mralpha->encType)
   {
   case sourceUInt8:
@@ -289,14 +289,9 @@ MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
         if (c != EOF)
           dest[i] = ui8alpha->mappings[c];
         else
-        {
-          if (feof(fp))
-            retval = 0;
-          else                  /*< obviously some i/o error occured */
-            retval = -1;
           break;
-        }
       }
+      retval = i;
     }
     break;
   default:
