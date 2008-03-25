@@ -2582,7 +2582,7 @@ int compareEncseqsequences(Seqpos *lcp,
     }
   } while (retval == 0);
   *lcp = depth;
-#define FASTCOMPAREDEBUG
+#undef FASTCOMPAREDEBUG
 #ifdef FASTCOMPAREDEBUG
   {
     Seqpos lcp2 = 0;
@@ -2611,6 +2611,33 @@ int compareEncseqsequences(Seqpos *lcp,
     assert(*lcp == lcp2);
   }
 #endif
+  return retval;
+}
+
+int multicharactercompare(const Encodedsequence *encseq,
+                          bool fwd,
+                          bool complement,
+                          Encodedsequencescanstate *esr1,
+                          Seqpos pos1,
+                          Encodedsequencescanstate *esr2,
+                          Seqpos pos2)
+{
+  EndofTwobitencoding ptbe1, ptbe2;
+  int retval;
+  unsigned commonunits;
+
+  initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1);
+  initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2);
+  extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
+  extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
+  retval = compareTwobitencodings(fwd,complement,&commonunits,&ptbe1,&ptbe2);
+  if (retval == 0)
+  {
+    assert(commonunits == (unsigned int) UNITSIN2BITENC);
+  } else
+  {
+    assert(commonunits < (unsigned int) UNITSIN2BITENC);
+  }
   return retval;
 }
 
@@ -2849,33 +2876,6 @@ void checkextractunitatpos(const Encodedsequence *encseq,
     }
   }
   freeEncodedsequencescanstate(&esr);
-}
-
-int multicharactercompare(const Encodedsequence *encseq,
-                          bool fwd,
-                          bool complement,
-                          Encodedsequencescanstate *esr1,
-                          Seqpos pos1,
-                          Encodedsequencescanstate *esr2,
-                          Seqpos pos2)
-{
-  EndofTwobitencoding ptbe1, ptbe2;
-  int retval;
-  unsigned commonunits;
-
-  initEncodedsequencescanstategeneric(esr1,encseq,fwd,pos1);
-  initEncodedsequencescanstategeneric(esr2,encseq,fwd,pos2);
-  extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
-  extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
-  retval = compareTwobitencodings(fwd,complement,&commonunits,&ptbe1,&ptbe2);
-  if (retval == 0)
-  {
-    assert(commonunits == (unsigned int) UNITSIN2BITENC);
-  } else
-  {
-    assert(commonunits < (unsigned int) UNITSIN2BITENC);
-  }
-  return retval;
 }
 
 void multicharactercompare_withtest(const Encodedsequence *encseq,

@@ -44,11 +44,6 @@
         (((PTR) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHAR(PTR))) ?\
         ((Seqpos) VAR) : UNIQUEINT(PTR))
 
-#define PTR2INT(VAR,I)\
-        (((cptr = *(I)+depth) < totallength &&\
-           ISNOTSPECIAL(VAR = ACCESSCHAR(cptr))) ? ((Seqpos) VAR)\
-                                                 : UNIQUEINT(cptr))
-
 #define LCPINDEX(I)       (Seqpos) ((I) - lcpsubtab->suftabbase)
 #define SETLCP(I,V)       lcpsubtab->spaceSeqpos[I] = V
 
@@ -133,14 +128,39 @@ struct Outlcpinfo
   bool previousbucketwasempty;
 };
 
-/*
+typedef Seqpos Suffixptr;
+
+#define FASTCOMPARE
+#ifdef FASTCOMPARE
+
 typedef struct
 {
   Seqpos value;
-} Suffixptr;
-*/
+} Sfxcmpval;
 
-typedef Seqpos Suffixptr;
+#define PTR2INT(VAR,TMPVAR,I)\
+        VAR.value = (((cptr = *(I)+depth) < totallength &&\
+              ISNOTSPECIAL(TMPVAR = ACCESSCHAR(cptr))) ? ((Seqpos) TMPVAR)\
+                                                       : UNIQUEINT(cptr))
+
+#define SfxcmpvalEQUAL(X,Y)    ((X).value == (Y).value)
+#define SfxcmpvalSMALLER(X,Y)  ((X).value < (Y).value)
+#define COMMONUNITS            1
+
+#else
+
+typedef Seqpos Sfxcmpval;
+
+#define PTR2INT(VAR,TMPVAR,I)\
+        VAR = (((cptr = *(I)+depth) < totallength &&\
+              ISNOTSPECIAL(TMPVAR = ACCESSCHAR(cptr))) ? ((Seqpos) TMPVAR)\
+                                                       : UNIQUEINT(cptr))
+
+#define SfxcmpvalEQUAL(X,Y)    ((X) == (Y))
+#define SfxcmpvalSMALLER(X,Y)  ((X) < (Y))
+#define COMMONUNITS            1
+
+#endif
 
 static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Readmode readmode,
@@ -151,23 +171,24 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Suffixptr *c)
 {
   Suffixptr cptr;
-  Seqpos vala, valb, valc;
-  Uchar tmpsvar, tmptvar;
+  Sfxcmpval vala, valb, valc;
+  Uchar tmpavar, tmpbvar;
 
-  vala = PTR2INT(tmpsvar,a);
-  valb = PTR2INT(tmptvar,b);
-  if (vala == valb)
+  PTR2INT(vala,tmpavar,a);
+  PTR2INT(valb,tmpbvar,b);
+  if (SfxcmpvalEQUAL(vala,valb))
   {
     return a;
   }
-  valc = PTR2INT(tmpsvar,c);
-  if (valc == vala || valc == valb)
+  PTR2INT(valc,tmpavar,c);
+  if (SfxcmpvalEQUAL(valc,vala) || SfxcmpvalEQUAL(valc,valb))
   {
     return c;
   }
-  return vala < valb ?
-        (valb < valc ? b : (vala < valc ? c : a))
-      : (valb > valc ? b : (vala < valc ? a : c));
+  return SfxcmpvalSMALLER(vala,valb) ?
+        (SfxcmpvalSMALLER(valb,valc) ? b : (SfxcmpvalEQUAL(vala,valc) ? c : a))
+      : (SfxcmpvalSMALLER(valb,valc) ? (SfxcmpvalSMALLER(vala,valc) ? a : c)
+                                       : b);
 }
 
 static void insertionsort(const Encodedsequence *encseq,
@@ -271,9 +292,10 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              bool cmpcharbychar)
 {
   Suffixptr *left, *right, *leftplusw;
-  Seqpos w, val, partval, depth, offset, doubleoffset, width;
+  Sfxcmpval partval, val;
+  Seqpos w, depth, offset, doubleoffset, width;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
-  Uchar tmpsvar;
+  Uchar tmpvar;
 
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
@@ -305,19 +327,19 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     }
     pm = medianof3(encseq,readmode,totallength,depth,pl,pm,pr);
     SWAP(left, pm);
-    partval = PTR2INT(tmpsvar,left);
+    PTR2INT(partval,tmpvar,left);
     pa = pb = left + 1;
     pc = pd = right;
     for (;;)
     {
       while (pb <= pc)
       {
-        val = PTR2INT(tmpsvar,pb);
-        if (val > partval)
+        PTR2INT(val,tmpvar,pb);
+        if (SfxcmpvalSMALLER(partval,val))
         {
           break;
         }
-        if (val == partval)
+        if (SfxcmpvalEQUAL(val,partval))
         {
           SWAP(pa, pb);
           pa++;
@@ -326,12 +348,12 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       }
       while (pb <= pc)
       {
-        val = PTR2INT(tmpsvar,pc);
-        if (val < partval)
+        PTR2INT(val,tmpvar,pc);
+        if (SfxcmpvalSMALLER(val,partval))
         {
           break;
         }
-        if (val == partval)
+        if (SfxcmpvalEQUAL(val,partval))
         {
           SWAP(pc, pd);
           pd--;
@@ -346,7 +368,6 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       pb++;
       pc--;
     }
-
     assert(pa >= left);
     assert(pb >= pa);
     w = MIN((Seqpos) (pa-left),(Seqpos) (pb-pa));
@@ -374,7 +395,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       right -= (pd-pb);
       width = (Seqpos) (right-leftplusw);
-      SUBSORT(width,SMALLSIZE,leftplusw,right-1,depth+1);
+      SUBSORT(width,SMALLSIZE,leftplusw,right-1,depth+COMMONUNITS);
     }
     if (w > 0)
     {
