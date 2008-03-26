@@ -1,0 +1,340 @@
+\documentclass[12pt,titlepage]{article}
+\usepackage[a4paper,top=30mm,bottom=30mm,left=20mm,right=20mm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+\usepackage{alltt}
+\usepackage{xspace}
+\usepackage{times}
+\usepackage{listings}
+\usepackage{bbm}
+\usepackage{verbatim}
+%\usepackage{hyperref}
+\usepackage{optionman}
+
+\newcommand{\LTRdigest}{\textit{LTRdigest}\xspace}
+\newcommand{\GenomeTools}{\textit{GenomeTools}\xspace}
+\newcommand{\Suffixerator}{\textit{Suffixerator}\xspace}
+\newcommand{\GtLTRdigest}{\texttt{gt dev ltrdigest}\xspace}
+\newcommand{\Gt}{\texttt{gt}\xspace}
+\newcommand{\Gtsuffixerator}{\texttt{gt suffixerator}\xspace}
+
+\title{\LTRdigest User's Manual\\\footnotesize
+(Preliminary version)}
+\author{\textit{Sascha Steinbiss}}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+\label{Introduction}
+
+This document describes \LTRdigest , a software tool for identification and annotation of characteristic sequence features of LTR retrotransposons in predicted candidates, like those output by \emph{LTRharvest}\cite{EKW07}. In particular, \LTRdigest can be used to find
+\begin{itemize}
+  \item polypurine tracts (PPT)
+  \item primer binding sites (PBS) and
+  \item protein domains
+\end{itemize}
+inside a sequence region predicted to be a LTR retrotransposon.
+
+For this identification, \LTRdigest utilises a number of algorithms to create an annotation based on user-supplied constraints. For example, length and position values for possible features can be extensively parameterised, as can be algorithmic parameters like alignment scores and cutoffs.
+
+\LTRdigest computes the boundaries and attributes of the features that fit the user-supplied model and outputs them in GFF3 format\cite{gff3} (in addition to the existing LTR retrotransposon annotation), as well as the corresponding sequences in multiple FASTA format. In addition, a tab-separated summary file is created that can conveniently and quickly browsed for results.
+
+\LTRdigest is written in \texttt{C} and it is based on the \GenomeTools library \cite{genometools}.  \LTRdigest is called as part of the single binary named \Gt.
+
+The source code can be compiled on 32-bit and 64-bit platforms without making any changes to the sources. It incorporates HMMER, a popular and widely used profile HMM package that is used for identification of protein domains, for example taken from the Pfam database. The protein domain search is implemented to be run in a multi-threaded fashion, thus making use of modern multi-core computer systems.
+
+\section{Usage} \label{Usage}
+
+Some text is highlighted by different fonts according to the following rules.
+
+\begin{itemize}
+\item \texttt{Typewriter font} is used for the names of software tools.
+\item \texttt{\small{Small typewriter font}} is used for file names.
+\item \begin{footnotesize}\texttt{Footnote sized typewriter font}
+      \end{footnotesize} with a leading
+      \begin{footnotesize}\texttt{'-'}\end{footnotesize}
+      is used for program options.
+\item \Showoptionarg{small italic font} is used for the argument(s) of an
+      option.
+\end{itemize}
+
+\subsection{\LTRdigest command line options}
+
+Since \LTRdigest is part of \Gt, \LTRdigest is called as follows.
+
+\GtLTRdigest  $[$\emph{options}$]$ \Showoptionarg{GFF3\_file} \Showoptionarg{FASTA\_file}
+
+where \emph{GFF3\_file} denotes the GFF3 input file and  \emph{FASTA\_file} the corresponding sequence file.
+An overview of all possible options with a short one-line description of
+each option is given in Table \ref{overviewOpt}.
+All options can be specified only once.
+
+\begin{table}[htbp]
+\caption{Overview of the \LTRdigest options sorted by categories.}
+\begin{footnotesize}
+\[
+\renewcommand{\arraystretch}{0.89}
+\begin{tabular}{ll}\hline
+\Showoptiongroup{Input options}
+\emph{GFF3\_file}& specify the path to the GFF3 input file
+\\
+\emph{FASTA\_file}& specify the path to the input sequences
+\\
+
+\Showoptiongroup{Output options}
+\Showoption{outfileprefix}& specify prefix for sequence and tabular output files
+\\
+\Showoption{o}& specify file to output result GFF3 into
+\\
+\Showoption{gzip}& gzip-compress output file
+\\
+\Showoption{bzip2}& bzip2-compress output file
+\\
+\Showoption{force}& force output file to be overwritten
+\\
+\Showoptiongroup{PPT constraint options}
+\Showoption{pptlen}& specify a range of acceptable PPT lengths
+\\
+\Showoption{uboxlen}& specify a range of acceptable U-box lengths
+\\
+\Showoption{pptradius}& specify region around 3' LTR beginning to search for PPT
+\\
+\Showoptiongroup{PBS constraint options}
+\Showoption{trnas}& tRNA library in multiple FASTA format
+\\
+\Showoption{pbsalilen}& specify a range of acceptable PBS lengths
+\\
+\Showoption{pbsoffset}& specify a range of acceptable PBS offsets from 5' LTR
+\\
+\Showoption{pbstrnaoffset}& specify a range of acceptable tRNA/PBS alignment offsets from tRNA 3' end
+\\
+\Showoption{pbsmaxedist}& specify the maximal allowed unit edit distance in tRNA/PBS alignment
+\\
+\Showoption{pbsradius}& specify region around 5' LTR end to search for PBS
+\\
+\Showoptiongroup{Protein domain search options}
+\Showoption{hmms}& specify a list of pHMMs for domain search in HMMER2 format
+\\
+\Showoption{pdomevalcutoff}& specify an E-value cutoff for pHMM search
+\\
+\Showoption{threads}& specify the number of threads to use in HMMER searching
+\\
+\Showoptiongroup{Alignment options}
+\Showoption{pbsmatchscore}& specify matchscore for PBS/tRNA Smith-Waterman alignment
+\\
+\Showoption{pbsmismatchscore}& specify mismatchscore for PBS/tRNA Smith-Waterman alignment
+\\
+\Showoption{pbsinsertionscore}& specify insertionscore for PBS/tRNA Smith-Waterman alignment
+\\
+\Showoption{pbsdeletionscore}& specify deletionscore for PBS/tRNA Smith-Waterman alignment
+\\
+\Showoptiongroup{Miscellaneous options}
+\Showoption{v}& verbose mode
+\\
+\Showoption{help}& show basic options
+\\
+\Showoption{help+}& show basic and extended options
+\\
+\hline
+\end{tabular}
+\]
+\end{footnotesize}
+\label{overviewOpt}
+\end{table}
+
+%%%%
+\subsection{Input parameters}
+
+\emph{GFF3\_file}\\ specifies the path to the GFF3 input file. It has to include at least position annotation for the LTR retrotransposon itself (\texttt{LTR\_retrotransposon} type) and the predicted LTRs (\texttt{long\_terminal\_repeat} type) because this information is needed to locate the favored positions of the features in question. The GFF3 file must also be sorted by position, which can be done using \GenomeTools :\\
+\texttt{gt gff3} \Showoption{sort} \Showoptionarg{unsorted\_gff3\_file} \texttt{\symbol{62}} \Showoptionarg{sorted\_gff3\_file}\\
+
+\emph{FASTA\_file}\\ specifies the path to the FASTA sequence file corresponding to the GFF3 annotation. The sequence may be supplied in bzip2- or gzip-compressed format.
+
+%%%%
+\subsection{Output options}
+
+Results are reported in GFF3 format on stdout and can easily
+be written to a file using the notation \texttt{\symbol{62}}
+\Showoptionarg{GFF3\_resultfile} as in the following example:
+
+\GtLTRdigest $[$\emph{options}$]$ \Showoptionarg{GFF3\_file} \Showoptionarg{FASTA\_file} \texttt{\symbol{62}} \Showoptionarg{GFF3\_resultfile}
+
+\begin{Justshowoptions}
+\Option{outfileprefix}{\Showoptionarg{prefix}}{
+If this option is given, a number of files containing further information will be created during the \LTRdigest\ run:
+\begin{itemize}
+  \item \texttt{$<$prefix$>$\_tabout.csv} contains a tab-separated summary of the results that can, for example, be opened in a spreadsheet software or processed by a script. Each column is described in the file's header line and each row describes exactly one LTR retrotransposon candidate.
+  \item \texttt{$<$prefix$>$\_conditions.csv} contains information about the parameters used in the current run for documentation purposes.
+  \item \texttt{$<$prefix$>$\_pbs.fas} contains the PBS sequences identified in the current run in multiple FASTA format.
+  \item \texttt{$<$prefix$>$\_ppt.fas} contains the PPT sequences identified in the current run in multiple FASTA format.
+  \item The files \texttt{$<$prefix$>$\_5ltr.fas} and \texttt{$<$prefix$>$\_3ltr.fas} contain the 5' and 3' LTR sequences identified in the current run in multiple FASTA format.
+   \item Additionally, one \texttt{$<$prefix$>$\_pdom\_$<$domainname$>$.fas} file will be created per protein domain model given. This file contains the FASTA DNA sequences of the HMM matches to the LTR retrotransposon.
+\end{itemize}
+In FASTA output files, each FASTA header contains position and sequence region information to match the hit to the corresponding LTR retrotransposon.
+}
+\end{Justshowoptions}
+
+
+%%%%
+\subsection{PPT constraint options}
+
+These options provide the opportunity to exclude predictions with unwanted sequence, length or distance features. If a particular option is not given by the user, a default value for this options will be set, except for the options \Showoption{trnas} and \Showoption{hmms}. Thus, if neither a tRNA library nor a list of pHMMs is given, only a PPT search will be conducted by \LTRdigest .
+
+\begin{Justshowoptions}
+
+\Option{pptlen}{\Showoptionarg{$L_{min}$} \Showoptionarg{$L_{max}$}}{
+Specify the minimum and maximum allowed lengths for PPT predictions. If a purine-rich region shorter than \Showoptionarg{$L_{min}$} or longer than \Showoptionarg{$L_{max}$} is found, it will be skipped.
+\\
+\Showoptionarg{$L_{min}$} and \Showoptionarg{$L_{min}$} have to be positive integers. If this
+option is not selected by the user, then \Showoptionarg{$L_{min}$} is set
+to $8$, \Showoptionarg{$L_{max}$} to 30.
+}
+
+\Option{uboxlen}{\Showoptionarg{$L_{min}$} \Showoptionarg{$L_{max}$}}{
+Specify the minimum and maximum allowed lengths for U-box predictions. If a uracil-rich region preceding a PPT shorter than \Showoptionarg{$L_{min}$} or longer than \Showoptionarg{$L_{max}$} is found, it will be skipped.\\
+\Showoptionarg{$L_{min}$} and \Showoptionarg{$L_{min}$} have to be positive integers. If this
+option is not selected by the user, then \Showoptionarg{$L_{min}$} is set
+to $3$, \Showoptionarg{$L_{max}$} to 30.
+}
+
+\Option{pptradius}{\Showoptionarg{$r$}}{
+Specify the area around the 3' LTR beginning ($l_{s}$) to be searched for PPTs, in other words, define the search interval $[l_{s}-r, l_{s}+r]$.\\
+\Showoptionarg{$r$} has to be a positive integer. If this
+option is not selected by the user, then \Showoptionarg{$r$} is set to 30.
+}
+
+\end{Justshowoptions}
+
+\subsection{PBS options}
+
+\begin{Justshowoptions}
+
+\Option{trnas}{\Showoptionarg{$trnafile$}}{
+Specify a file in multiple FASTA format to be used as a tRNA library that is aligned to the area around the end of the 5' LTR to find a putative PBS. The header of each sequence in this file should reflect the encoded amino acid and codon.
+%\Showoptionarg{$trnafile$} has to be an existing file in multiple FASTA format.
+If this option is not selected by the user, then PBS searching is skipped altogether.
+}
+
+\Option{pbsalilen}{\Showoptionarg{$L_{min}$} \Showoptionarg{$L_{max}$}}{
+Specify the minimum and maximum allowed lengths for PBS/tRNA alignments. If a local alignment shorter than \Showoptionarg{$L_{min}$} or longer than \Showoptionarg{$L_{max}$} is found, it will be skipped.
+\\
+\Showoptionarg{$L_{min}$} and \Showoptionarg{$L_{min}$} have to be positive integers. If this
+option is not selected by the user, then \Showoptionarg{$L_{min}$} is set
+to $11$, \Showoptionarg{$L_{max}$} to 30.
+}
+
+\Option{pbsoffset}{\Showoptionarg{$L_{min}$} \Showoptionarg{$L_{max}$}}{
+Specify the minimum and maximum allowed PBS offsets from the 5' LTR end positions. If a local alignment with an offset smaller than \Showoptionarg{$L_{min}$} or greater than \Showoptionarg{$L_{max}$} is found, it will be skipped.
+\\
+\Showoptionarg{$L_{min}$} and \Showoptionarg{$L_{min}$} have to be positive integers. If this
+option is not selected by the user, then \Showoptionarg{$L_{min}$} is set
+to $0$, \Showoptionarg{$L_{max}$} to 5.
+}
+
+\Option{pbstrnaoffset}{\Showoptionarg{$L_{min}$} \Showoptionarg{$L_{max}$}}{
+Specify the minimum and maximum allowed PBS/tRNA alignment offsets from the 3' end of the tRNA. If a local alignment with an offset smaller than \Showoptionarg{$L_{min}$} or greater than \Showoptionarg{$L_{max}$} is found, it will be skipped.
+\\
+\Showoptionarg{$L_{min}$} and \Showoptionarg{$L_{min}$} have to be positive integers. If this
+option is not selected by the user, then \Showoptionarg{$L_{min}$} is set
+to $0$, \Showoptionarg{$L_{max}$} to 5.
+}
+
+\Option{pptmaxedist}{\Showoptionarg{$d$}}{
+Specify the maximal allowed unit edit distance in a local PBS/tRNA alignment. All optimal local alignments with a unit edit distance $> d$ will be skipped. Set this to 0 to accept exact matches only. It is also possible to fine-tune the results by adjusting the match/mismatch/indelscores used in the Smith-Waterman alignment (see below).\\
+\Showoptionarg{$d$} has to be a positive integer. If this
+option is not selected by the user, then \Showoptionarg{$d$} is set to 1.
+}
+
+\Option{pbsradius}{\Showoptionarg{$r$}}{
+Specify the area around the 5' LTR end ($l_{e}$) to be searched for a PBS, in other words, define the search interval $[l_{e}-r, l_{e}+r]$.\\
+\Showoptionarg{$r$} has to be a positive integer. If this
+option is not selected by the user, then \Showoptionarg{$r$} is set to 30.
+}
+
+\Option{pbsmatchscore}{\Showoptionarg{$score_m$}}{
+Specify the match score used in the PBS/tRNA Smith-Waterman alignment. Lower this value to discourage matches, increase this value to prefer matches.\\
+\Showoptionarg{$score_m$} has to be an integer. If this
+option is not selected by the user, then \Showoptionarg{$score_m$} is set to 5.
+}
+
+\Option{pbsmismatchscore}{\Showoptionarg{$score_{mm}$}}{
+Specify the mismatch score used in the PBS/tRNA Smith-Waterman alignment. Lower this value to discourage mismatches, increase this value to prefer mismatches.\\
+\Showoptionarg{$score_{mm}$} has to be an integer. If this
+option is not selected by the user, then \Showoptionarg{$score_{mm}$} is set to -10.
+}
+
+\Option{pbsdeletionscore}{\Showoptionarg{$score_d$}}{
+Specify the deletion score used in the PBS/tRNA Smith-Waterman alignment. Lower this value to discourage deletions, increase this value to prefer deletions.\\
+\Showoptionarg{$score_d$} has to be an integer. If this
+option is not selected by the user, then \Showoptionarg{$score_d$} is set to -20.
+}
+
+\Option{pbsinsertionscore}{\Showoptionarg{$score_i$}}{
+Specify the insertion score used in the PBS/tRNA Smith-Waterman alignment. Lower this value to discourage insertions, increase this value to prefer insertions.\\
+\Showoptionarg{$score_i$} has to be an integer. If this
+option is not selected by the user, then \Showoptionarg{$score_i$} is set to -20.
+}
+
+\end{Justshowoptions}
+
+\subsection{Protein domain search options}
+
+\begin{Justshowoptions}
+
+\Option{hmms}{\Showoptionarg{$hmmfile_1, hmmfile_2, \dots, hmmfile_n$}}{
+Specify a list of pHMM files in HMMER2 format. The pHMMs must be defined for the amino acid alphabet and follow the Plan7 specification. For example, pHMMs defining protein domains taken from the Pfam database can be used here. Every file must exist and be readable, otherwise an error is reported. If this option is not given by the user, protein domain searching is skipped altogether.
+}
+
+\Option{pdomevalcutoff}{\Showoptionarg{$c$}}{
+Specify the E-value cutoff for HMMER searches. All hits that fail to meet this maximal e-value requirement are discarded.\\
+\Showoptionarg{$c$} has to be a probability ($0 \leq c \leq 1$). If this
+option is not selected by the user, then \Showoptionarg{$c$} is set to $10^{-6}$.
+}
+
+\Option{threads}{\Showoptionarg{$n$}}{
+Specify how many HMM models to process concurrently when searching with HMMER. This value is typically set to the number of CPUs in the machine running \LTRdigest . No speedup will be achieved if only one HMM model is used or if the number of threads is lower than the actual number of processors in the system.\\
+\Showoptionarg{$n$} has to be a positive integer. If this option is not selected by the user, then \Showoptionarg{$n$} is set to 2.
+}
+\end{Justshowoptions}
+
+\section{Example}
+
+This section describes an example session with \LTRdigest . It is assumes here that a \emph{LTRharvest} run on a genome has already been performed and produced a \texttt{ltrs.gff3} file containing the basic GFF3 annotation. The enhanced suffix array (ESA) index, any sequence output or the tabular standard output from \emph{LTRharvest} will not be needed, but the original sequence from which the ESA index was generated (called \texttt{genome.fas} here).
+
+We will also assume that the HMM files to be used are called \texttt{HMM1.hmm}, \texttt{HMM2.hmm} and \texttt{HMM3.hmm}, we will be using a tRNA library called \texttt{tRNA.fas}, and we are running \LTRdigest on a dual-core system. We also want to restrict the PBS offset from the LTR end to a maximum of 3 nucleotides, while we want the PPT length to be at least 10 nucleotides. Finally, we want all output such as sequences written to files beginning with ``mygenome-ltrs''.
+
+First, sort the GFF3 output by position:
+\\[0.5cm]
+\texttt{gt gff3 -sort ltrs.gff3 $>$ ltrs\_sorted.gff3}
+\\[0.5cm]
+Then, you can start the \LTRdigest run with the following command line using the parameters above:
+\\[0.5cm]
+\texttt{\GtLTRdigest\ -pptlen 10 30 -pbsoffset 0 3 -trnas tRNA.fas \\-hmms HMM*.hmm -threads 2 -outfileprefix mygenome-ltrs ltrs\_sorted.gff3 genome.fas $>$ ltrs\_after\_ltrdigest.gff3}
+\\[0.5cm]
+If this is the first time \LTRdigest is used in conjunction with the given sequence file, it may take a few moments before the calculation actually begins, because \LTRdigest has to preprocess the sequence file before it can be used in any prediction. This delay will disappear in subsequent runs.
+
+No screen output (except possible error messages) is produced since the GFF3 output on stdout is redirected to a file. Additionally, the files \texttt{mygenome\--ltrs\_conditions.csv}, \texttt{mygenome\--ltrs\_3ltr.fas}, \texttt{mygenome\--ltrs\_5ltr.fas}, \texttt{mygenome\--ltrs\_ppt.fas}, \texttt{mygenome\--ltrs\_pbs.fas}, \texttt{mygenome-\-ltrs\_tabout.csv} and one FASTA file for each of the HMM models will be created and updated during the computation. As the files are buffered, it may take a while before first output to these files can be observed.
+
+The calculation may be restarted with the same or changed parameters afterwards, overwriting the output files in the process. If it is desired to keep sequences etc. from each run, keep in mind to assign specific \texttt{-outfileprefix} values to each run.
+
+\bibliographystyle{unsrt}
+\begin{thebibliography}{1}
+
+\bibitem{EKW07}
+D.~Ellinghaus, S.~Kurtz, and U.~Willhoeft.
+\newblock \emph{LTRharvest}, an efficient and flexible software for de novo
+  detection of \normalsize{LTR} retrotransposons.
+\newblock {\em BMC Bioinformatics 9:18, 2008}, 2007.
+
+\bibitem{gff3}
+\textsc{GFF3}, tab delimited file format for genome annotation.
+  \url{http://www.sequenceontology.org/gff3.shtml}.
+
+\bibitem{genometools}
+G.~Gremme.
+\newblock The \textsc{GenomeTools} genome analysis system.
+  \url{http://genometools.org}.
+
+\end{thebibliography}
+\end{document}
