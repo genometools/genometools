@@ -252,10 +252,9 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                              FSWIDTH,
                              ls->ltr3out_file);
     ma_free(outseq);
-
+    genfile_xprintf(ls->tabout_file, "\n");
   }
   array_delete(ls->element.pdoms);
-  genfile_xprintf(ls->tabout_file, "\n");
   return had_err;
 }
 
@@ -293,9 +292,13 @@ static void write_metadata(GenFile *metadata_file,
   if (tests_to_run & LTRDIGEST_RUN_PPT)
   {
     genfile_xprintf(metadata_file,
-                    "PPT minimum length\t%u\t6\n", ppt_opts->ppt_minlen);
+                    "PPT length\t%lu-%lunt\t8-30nt\n",
+                    ppt_opts->ppt_len.start,
+                    ppt_opts->ppt_len.end);
     genfile_xprintf(metadata_file,
-                    "U-box minimum length\t%u\t3\n", ppt_opts->ubox_minlen);
+                    "U-box length\t%lu-%lunt\t3-30nt\n",
+                    ppt_opts->ubox_len.start,
+                    ppt_opts->ubox_len.end);
     genfile_xprintf(metadata_file,
                     "PPT search radius\t%u\t30\n", ppt_opts->radius);
   }
@@ -311,17 +314,20 @@ static void write_metadata(GenFile *metadata_file,
                        "tRNA library for PBS detection\t%s\n",
                        trnafilename);
     genfile_xprintf(metadata_file,
-                    "PBS/tRNA minimum alignment length\t%u\t11\n",
-                    pbs_opts->ali_min_len);
+                    "allowed PBS/tRNA alignment length range\t%lu-%lunt\t11-30nt\n",
+                    pbs_opts->alilen.start,
+                    pbs_opts->alilen.end);
     genfile_xprintf(metadata_file,
                     "PBS/tRNA maximum unit edit distance\t%u\t1\n",
                     pbs_opts->max_edist);
     genfile_xprintf(metadata_file,
-                    "PBS max offset from 5' LTR end\t%u\t5\n",
-                    pbs_opts->max_offset);
+                    "allowed PBS offset from 5' LTR range\t%lu-%lunt\t0-5nt\n",
+                    pbs_opts->offsetlen.start,
+                    pbs_opts->offsetlen.end);
     genfile_xprintf(metadata_file,
-                    "tRNA max offset from 3' end\t%u\t10\n",
-                    pbs_opts->max_offset_trna);
+                    "allowed PBS offset from 3' tRNA end range\t%lu-%lunt\t0-5nt\n",
+                    pbs_opts->trnaoffsetlen.start,
+                    pbs_opts->trnaoffsetlen.end);
     genfile_xprintf(metadata_file,
                     "PBS search radius\t%d\t30\n", pbs_opts->radius);
   }
@@ -443,13 +449,14 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
               "element start\telement end\telement length\t"
               "lLTR start\tlLTR end\tlLTR length\t"
               "rLTR start\trLTR end\trLTR length\t"
-              "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset\t");
+              "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");
   if (tests_to_run & LTRDIGEST_RUN_PBS)
     genfile_xprintf(ls->tabout_file,
-              "PBS start\tPBS end\tPBS strand\ttRNA\tRNA motif\tPBS offset\t"
-              "tRNA offset\tPBS/tRNA edist\t");
+              "\tPBS start\tPBS end\tPBS strand\ttRNA\ttRNA motif\tPBS offset\t"
+              "tRNA offset\tPBS/tRNA edist");
   if (tests_to_run & LTRDIGEST_RUN_PDOM)
-    genfile_xprintf(ls->tabout_file, "Protein domain hits\n");
+    genfile_xprintf(ls->tabout_file, "\tProtein domain hits");
+  genfile_xprintf(ls->tabout_file, "\n");
 
   /* create visitor */
   ls->lv = (LTRVisitor*) ltr_visitor_new(&ls->element);

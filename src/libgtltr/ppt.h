@@ -25,9 +25,8 @@
 #include "libgtltr/ltrelement.h"
 
 typedef struct {
-  unsigned int ppt_minlen,
-               ubox_minlen,
-               radius;
+  Range ppt_len, ubox_len;
+  unsigned int radius;
 } PPTOptions;
 
 /* This enumeration defines the states in the PPT detection HMM. */

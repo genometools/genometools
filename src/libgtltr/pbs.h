@@ -29,10 +29,10 @@
 
 typedef struct PBSOptions {
   unsigned int radius,
-               ali_min_len,
-               max_offset,
-               max_offset_trna,
                max_edist;
+  Range alilen,
+        offsetlen,
+        trnaoffsetlen;
   int ali_score_match,
       ali_score_mismatch,
       ali_score_insertion,

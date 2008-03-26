@@ -134,9 +134,11 @@ void group_hits(unsigned int *decoded, Array *results, PPTOptions *o,
     if (decoded[i+1] != decoded[i] || i+2==2*radius)
     {
       if ((cur_hit->state == PPT_IN
-           && cur_hit->end-cur_hit->start+1 >= o->ppt_minlen)
+           && cur_hit->end-cur_hit->start+1 >= o->ppt_len.start
+           && cur_hit->end-cur_hit->start+1 <= o->ppt_len.end)
           || (cur_hit->state == PPT_UBOX
-           && cur_hit->end-cur_hit->start+1 >= o->ubox_minlen))
+           && cur_hit->end-cur_hit->start+1 >= o->ubox_len.start
+           && cur_hit->end-cur_hit->start+1 <= o->ubox_len.end))
         array_add(results, cur_hit);
       else {
         cur_hit->state = PPT_OUT;

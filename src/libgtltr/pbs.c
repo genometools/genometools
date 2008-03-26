@@ -70,9 +70,12 @@ void pbs_add_hit(Dlist *hitlist, Alignment *ali, PBSOptions *o,
   urange = alignment_get_urange(ali);
   vrange = alignment_get_vrange(ali);
   if (dist <= o->max_edist
-        && abs(o->radius-urange.start) <= o->max_offset
-        && abs(urange.end-urange.start+1) >= o->ali_min_len
-        && vrange.start <= o->max_offset_trna)
+        && abs(o->radius-urange.start) <= o->offsetlen.end
+        && abs(o->radius-urange.start) >= o->offsetlen.start
+        && abs(urange.end-urange.start+1) <= o->alilen.end
+        && abs(urange.end-urange.start+1) >= o->alilen.start
+        && vrange.start <= o->trnaoffsetlen.end
+        && vrange.start >= o->trnaoffsetlen.start)
   {
     hit = ma_malloc(sizeof (PBS_Hit));
     hit->alilen  = abs(urange.end-urange.start)+1;

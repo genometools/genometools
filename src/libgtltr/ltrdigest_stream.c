@@ -134,7 +134,7 @@ static void ppt_attach_results_to_gff3(PPTResults *results, LTRElement *element,
 }
 
 static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
-                   Error *err)
+                          Error *err)
 {
   PPTResults ppt_results;
   PBSResults pbs_results;

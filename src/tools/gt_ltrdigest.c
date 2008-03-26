@@ -70,6 +70,11 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   LTRdigestOptions *arguments = tool_arguments;
   OptionParser *op;
   Option *o, *ot, *oh, *oto;
+  static Range pptlen_defaults           = { 8, 30},
+               uboxlen_defaults          = { 3, 30},
+               pbsalilen_defaults        = {11, 30},
+               pbsoffsetlen_defaults     = { 0,  5},
+               pbstrnaoffsetlen_defaults = { 0,  5};
   assert(arguments);
 
   /* init */
@@ -79,16 +84,28 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 
   /* PPT search options */
 
-  o = option_new_uint("pptminlen",
+/*  o = option_new_uint("pptminlen",
                       "minimal required PPT length",
                       &arguments->ppt_opts.ppt_minlen,
                       6);
+  option_parser_add_option(op, o); */
+
+  o = option_new_range("pptlen",
+                       "required PPT length range",
+                       &arguments->ppt_opts.ppt_len,
+                       &pptlen_defaults);
   option_parser_add_option(op, o);
 
-  o = option_new_uint("uboxminlen",
+  /*o = option_new_uint("uboxminlen",
                       "minimal required U-box length",
                       &arguments->ppt_opts.ubox_minlen,
                       3);
+  option_parser_add_option(op, o); */
+
+  o = option_new_range("uboxlen",
+                       "required U-box length range",
+                       &arguments->ppt_opts.ubox_len,
+                       &uboxlen_defaults);
   option_parser_add_option(op, o);
 
   o = option_new_uint("pptradius",
@@ -108,24 +125,30 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, ot);
   option_hide_default(ot);
 
-  o = option_new_uint("pbsaliminlen",
+  /* o = option_new_uint("pbsaliminlen",
                       "minimal required length of PBS/tRNA alignments",
                       &arguments->pbs_opts.ali_min_len,
                       11);
   option_parser_add_option(op, o);
-  option_imply(o, ot);
+  option_imply(o, ot); */
 
-  o = option_new_uint("pbsmaxoffsetltr",
-                      "maximal allowed PBS offset from LTR boundary",
-                      &arguments->pbs_opts.max_offset,
-                      5);
+  o = option_new_range("pbsalilen",
+                       "required PBS/tRNA alignment length range",
+                       &arguments->pbs_opts.alilen,
+                       &pbsalilen_defaults);
+  option_parser_add_option(op, o);
+
+  o = option_new_range("pbsoffset",
+                       "allowed PBS offset from LTR boundary range",
+                       &arguments->pbs_opts.offsetlen,
+                       &pbsoffsetlen_defaults);
   option_parser_add_option(op, o);
   option_imply(o, ot);
 
-  o = option_new_uint("pbsmaxoffsettrna",
-                      "maximal allowed PBS alignment offset from tRNA 3' end",
-                      &arguments->pbs_opts.max_offset_trna,
-                      10);
+  o = option_new_range("pbstrnaoffset",
+                       "allowed PBS/tRNA 3' end alignment offset range",
+                       &arguments->pbs_opts.trnaoffsetlen,
+                       &pbstrnaoffsetlen_defaults);
   option_parser_add_option(op, o);
   option_imply(o, ot);
 
