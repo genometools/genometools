@@ -68,7 +68,7 @@ Array* array_ref(Array *a)
 void* array_get(const Array *a, unsigned long idx)
 {
   assert(a && idx < a->next_free);
-  return a->space + idx * a->size_of_elem;
+  return (char *)a->space + idx * a->size_of_elem;
 }
 
 void* array_get_first(const Array *a)
@@ -86,7 +86,7 @@ void* array_pop(Array *a)
 {
   assert(a && a->next_free);
   a->next_free--;
-  return a->space + a->next_free * a->size_of_elem;
+  return (char *)a->space + a->next_free * a->size_of_elem;
 }
 
 void array_rem(Array *a, unsigned long idx)
@@ -95,7 +95,8 @@ void array_rem(Array *a, unsigned long idx)
   assert(a && idx < a->next_free);
   /* move elements */
   for (i = idx+1; i < a->next_free; i++) {
-    memcpy(a->space + (i-1) * a->size_of_elem, a->space + i * a->size_of_elem,
+    memcpy((char *)a->space + (i-1) * a->size_of_elem,
+           (char *)a->space + i * a->size_of_elem,
            a->size_of_elem);
   }
   /* remove last (now duplicated) element */
@@ -104,10 +105,11 @@ void array_rem(Array *a, unsigned long idx)
 
 void array_reverse(Array *a)
 {
-  void *front, *back, *tmp;
+  char *front, *back, *tmp;
   assert(a);
   tmp = ma_malloc(a->size_of_elem);
-  for (front = a->space, back = a->space + (a->next_free-1) * a->size_of_elem;
+  for (front = a->space,
+         back = (char *)a->space + (a->next_free-1) * a->size_of_elem;
        front < back;
        front += a->size_of_elem, back -= a->size_of_elem) {
     memcpy(tmp, front, a->size_of_elem);
@@ -134,7 +136,8 @@ void array_add_elem(Array *a, void *elem, UNUSED size_t size_of_elem)
                         (a->next_free + 1) * a->size_of_elem);
   }
   /* add */
-  memcpy(a->space + a->next_free * a->size_of_elem, elem, a->size_of_elem);
+  memcpy((char *)a->space + a->next_free * a->size_of_elem, elem,
+         a->size_of_elem);
   a->next_free++;
 }
 

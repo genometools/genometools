@@ -334,7 +334,7 @@ static void mRNA_set_target_attribute(GenomeFeature *mRNA_feature,
   targets = str_new();
   for (i = 0; i < array_size(spliced_alignments_in_form); i++) {
     sa_node = *(GenomeNode**)
-              (set_of_sas +
+              ((char *)set_of_sas +
               *(unsigned long*) array_get(spliced_alignments_in_form, i) *
               size_of_sa);
     if (genome_feature_get_attribute(sa_node, "Target")) {
@@ -367,7 +367,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
     gene_range.end   = 0UL;
     /* for the gene range we have to iterate over all spliced alignments */
     for (i = 0; i < number_of_sas; i++) {
-      sa_node = *(GenomeNode**) (set_of_sas + i * size_of_sa);
+      sa_node = *(GenomeNode**) ((char *)set_of_sas + i * size_of_sa);
 
       /* gene range */
       tmp_range = genome_node_get_range(sa_node);
@@ -382,7 +382,8 @@ static void process_splice_form(Array *spliced_alignments_in_form,
       else {
         assert(!str_cmp(info->seqid,
                         genome_node_get_seqid(*(GenomeNode**)
-                                              (set_of_sas + i * size_of_sa))));
+                                              ((char *)set_of_sas
+                                               + i * size_of_sa))));
       }
     }
 
@@ -390,7 +391,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
        splice form */
     for (i = 0; i < array_size(spliced_alignments_in_form); i++) {
       sa_node = *(GenomeNode**)
-                (set_of_sas +
+                ((char *)set_of_sas +
                  *(unsigned long*) array_get(spliced_alignments_in_form, i) *
                  size_of_sa);
       info->gene_strand =
@@ -414,7 +415,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
     assert(sa_num < number_of_sas);
     add_sa_to_exon_feature_array(exon_nodes,
                                  *(GenomeFeature**)
-                                 (set_of_sas + sa_num * size_of_sa),
+                                 ((char *)set_of_sas + sa_num * size_of_sa),
                                  info->seqid, info->gth_csa_source_str,
                                  info->gene_strand);
   }

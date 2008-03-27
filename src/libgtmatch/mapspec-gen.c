@@ -34,7 +34,7 @@
           *((TYPE **) mapspec->startptr) = NULL;\
         } else\
         {\
-          voidptr = (((void *) ptr) + byteoffset);\
+          voidptr = (((char *) ptr) + byteoffset);\
           *((TYPE **) mapspec->startptr) = voidptr;\
         }
 

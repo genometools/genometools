@@ -35,7 +35,7 @@ void countingsort(void *out, const void *in, size_t elem_size,
 
   /* count number of elements of a given value */
   for (i = 0; i < size; i++) {
-    k = get_elemvalue(in + elem_size * i, data);
+    k = get_elemvalue((const char *)in + elem_size * i, data);
     assert(k <= max_elemvalue);
     c[k]++;
   }
@@ -46,8 +46,9 @@ void countingsort(void *out, const void *in, size_t elem_size,
 
   /* sorting (stable) */
   for (i = size; i > 0; i--) {
-    k = get_elemvalue(in + elem_size * (i-1), data);
-    memcpy(out + elem_size * (c[k] - 1), in + elem_size * (i-1), elem_size);
+    k = get_elemvalue((const char *)in + elem_size * (i-1), data);
+    memcpy((char *)out + elem_size * (c[k] - 1),
+           (const char *)in + elem_size * (i-1), elem_size);
     c[k]--;
   }
 
@@ -61,7 +62,7 @@ unsigned long countingsort_get_max(const void *in, size_t elem_size,
 {
   unsigned long i, value, max_value = 0;
   for (i = 0; i < size; i++) {
-    value = get_elemvalue(in + elem_size * i, data);
+    value = get_elemvalue((const char *)in + elem_size * i, data);
     if (value > max_value)
       max_value = value;
   }
