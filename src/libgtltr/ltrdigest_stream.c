@@ -53,6 +53,11 @@ static int pdom_domain_attach_gff3(void *key, void *value, void *data,
   PdomHit *hit = (PdomHit*) value;
   Range rng;
   Phase frame = phase_get(hit->best_hit->name[0]);
+
+  if (strand_get(hit->best_hit->name[1])
+         != genome_feature_get_strand(ls->element.mainnode))
+    return 0;
+
   rng.start = hit->best_hit->sqfrom;
   rng.end = hit->best_hit->sqto;
   pdom_convert_frame_position(&rng, frame);
@@ -195,10 +200,6 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
               element, &pdom_results, ls->pdom_opts);
     if (!pdom_results.empty)
     {
-      hashtable_foreach(pdom_results.domains,
-                        (Hashiteratorfunc) pdom_domain_attach_gff3,
-                        ls,
-                        err);
       /* determine most likely strand from protein domain results */
       if (pdom_results.combined_e_value_fwd
             < pdom_results.combined_e_value_rev)
@@ -207,6 +208,10 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
       else
         genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
                                   STRAND_REVERSE);
+      hashtable_foreach(pdom_results.domains,
+                        (Hashiteratorfunc) pdom_domain_attach_gff3,
+                        ls,
+                        err);
     }
     hashtable_delete(pdom_results.domains);
   }
