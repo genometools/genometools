@@ -132,7 +132,7 @@ static Giquery *readginumberfile(bool verbose,
   int64_t readint64;
   long readlongfrompos, readlongtopos;
   Giquery *giqueries;
-#ifdef DEBUG
+#ifdef SKDEBUG
   unsigned long i;
 #endif
 
@@ -200,7 +200,7 @@ static Giquery *readginumberfile(bool verbose,
     printf("# %lu gi-queries successfully parsed and sorted\n",*numofqueries);
   }
   *numofqueries = remdupsgiqueries(giqueries,*numofqueries);
-#ifdef DEBUG
+#ifdef SKDEBUG
   for (i=0; i<*numofqueries; i++)
   {
     printf("%lu "Formatuint64_t"\n",i,giqueries[i].ginumber);
@@ -394,7 +394,7 @@ int extractginumbers(bool verbose,
           ginumberhit++;
         }
       }
-#ifdef DEBUG
+#ifdef SKDEBUG
       printf(Formatuint64_t " 1 %lu\n",PRINTuint64_tcast(referenceginumber),
              len);
 #endif

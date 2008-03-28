@@ -30,7 +30,7 @@
 
 #define REVERSEPOS(TOTALLENGTH,POS) ((TOTALLENGTH) - 1 - (POS))
 
-#ifdef DEBUG
+#ifdef SKDEBUG
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
         {\
           Uchar cctmp = getencodedchar(ENCSEQ,POS,READMODE);\

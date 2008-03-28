@@ -109,7 +109,7 @@ typedef struct
   bool defined;
   Codetype code;
   unsigned int prefixindex;
-#ifdef DEBUG
+#ifdef SKDEBUG
   Seqpos startpos;
 #endif
 } Suffixwithcode;
@@ -130,22 +130,26 @@ struct Outlcpinfo
 
 typedef Seqpos Suffixptr;
 
-#define FASTCOMPARE
+#undef FASTCOMPARE
 #ifdef FASTCOMPARE
 
-typedef struct
-{
-  Seqpos value;
-} Sfxcmpval;
+typedef EndofTwobitencoding Sfxcmpval;
 
-#define PTR2INT(VAR,TMPVAR,I)\
-        VAR.value = (((cptr = *(I)+depth) < totallength &&\
-              ISNOTSPECIAL(TMPVAR = ACCESSCHAR(cptr))) ? ((Seqpos) TMPVAR)\
-                                                       : UNIQUEINT(cptr))
+#define PTR2INT(VAR,TMPVAR,IDXPTR)\
+        {\
+          Encodedsequencescanstate *esr;\
+          Seqpos pos = *(IDXPTR);\
+          esr = newEncodedsequencescanstate();\
+          initEncodedsequencescanstategeneric(esr,encseq,fwd,pos);\
+          extract2bitenc(fwd,&VAR,encseq,esr,pos);\
+        }
 
-#define SfxcmpvalEQUAL(X,Y)    ((X).value == (Y).value)
-#define SfxcmpvalSMALLER(X,Y)  ((X).value < (Y).value)
-#define COMMONUNITS            1
+#define SfxcmpvalEQUAL(X,Y)\
+        (compareTwobitencodings(fwd,complement,&commonunits,&X,&Y) == 0)
+#define SfxcmpvalSMALLER(X,Y)\
+        (compareTwobitencodings(fwd,complement,&commonunits,&X,&Y) < 0)
+#define COMMONUNITS\
+        UNITSIN2BITENC
 
 #else
 
@@ -501,7 +505,7 @@ static void multilcpvalue(Outlcpinfo *outlcpinfo,
           outlcpinfo->outfpllvtab);
 }
 
-#ifdef DEBUG
+#ifdef SKDEBUG
 static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
 {
   char buffer[18+1];
@@ -518,7 +522,7 @@ static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
 }
 #endif
 
-#ifdef DEBUG
+#ifdef SKDEBUG
 static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
                                    Readmode readmode,
                                    const Suffixwithcode *previoussuffix,
@@ -630,7 +634,7 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
   }
   firstspecialsuffixwithcode.code = code;
   firstspecialsuffixwithcode.prefixindex = maxprefixindex;
-#ifdef DEBUG
+#ifdef SKDEBUG
   firstspecialsuffixwithcode.startpos = firstspecialsuffix;
   consistencyofsuffix(__LINE__,
                       encseq,readmode,bcktab,numofchars,
@@ -689,7 +693,7 @@ Outlcpinfo *newlcpoutinfo(const Str *indexname,
   INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   outlcpinfo->lcpsubtab.smalllcpvalues = NULL;
   outlcpinfo->tw = newTurningwheel(prefixlength,numofchars);
-#ifdef DEBUG
+#ifdef SKDEBUG
   outlcpinfo->previoussuffix.startpos = 0;
 #endif
   outlcpinfo->previoussuffix.code = 0;
@@ -827,7 +831,7 @@ void sortallbuckets(Seqpos *suftabptr,
              last element of previous bucket */
           firstsuffixofbucket.code = code;
           firstsuffixofbucket.prefixindex = prefixlength;
-#ifdef DEBUG
+#ifdef SKDEBUG
           firstsuffixofbucket.startpos = suftabptr[bucketspec.left];
           consistencyofsuffix(__LINE__,
                               encseq,readmode,bcktab,numofchars,
@@ -850,7 +854,7 @@ void sortallbuckets(Seqpos *suftabptr,
         /* previoussuffix becomes last nonspecial element in current bucket */
         outlcpinfo->previoussuffix.code = code;
         outlcpinfo->previoussuffix.prefixindex = prefixlength;
-#ifdef DEBUG
+#ifdef SKDEBUG
         outlcpinfo->previoussuffix.startpos
           = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
         consistencyofsuffix(__LINE__,
@@ -877,7 +881,7 @@ void sortallbuckets(Seqpos *suftabptr,
         outlcpinfo->previoussuffix.defined = true;
         outlcpinfo->previoussuffix.code = code;
         outlcpinfo->previoussuffix.prefixindex = minprefixindex;
-#ifdef DEBUG
+#ifdef SKDEBUG
         outlcpinfo->previoussuffix.startpos
            = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket +
                                          bucketspec.specialsinbucket - 1];
@@ -894,7 +898,7 @@ void sortallbuckets(Seqpos *suftabptr,
           outlcpinfo->previoussuffix.defined = true;
           outlcpinfo->previoussuffix.code = code;
           outlcpinfo->previoussuffix.prefixindex = prefixlength;
-#ifdef DEBUG
+#ifdef SKDEBUG
           outlcpinfo->previoussuffix.startpos
             = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
           consistencyofsuffix(__LINE__,

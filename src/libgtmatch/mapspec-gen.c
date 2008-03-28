@@ -74,8 +74,8 @@ static uint64_t detexpectedaccordingtomapspec(const ArrayMapspecification
   return sumup;
 }
 
-#undef DEBUG
-#ifdef DEBUG
+#undef SKDEBUG
+#ifdef SKDEBUG
 static void showmapspec(const Mapspecification *mapspec)
 {
   printf("(%s,size=%lu,elems=%lu)",
@@ -253,7 +253,7 @@ int flushtheindex2file(FILE *fp,
                     mapspectable.nextfreeMapspecification;
        mapspecptr++)
   {
-#ifdef DEBUG
+#ifdef SKDEBUG
     printf("# flushtheindex2file");
     showmapspec(mapspecptr);
     printf(" at byteoffset %lu\n",byteoffset);

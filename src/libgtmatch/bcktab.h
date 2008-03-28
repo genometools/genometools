@@ -106,11 +106,11 @@ Codetype bcktab_numofallcodes(const Bcktab *bcktab);
 unsigned long sizeofbuckettable(unsigned int numofchars,
                                 unsigned int prefixlength);
 
-#ifdef mydebug
+#ifdef SKDEBUG
 void checkcountspecialcodes(const Bcktab *bcktab);
 #endif
 
-#ifdef mydebug
+#ifdef SKDEBUG
 void consistencyofsuffix(int line,
                          const Encodedsequence *encseq,
                          Readmode readmode,

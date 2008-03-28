@@ -138,7 +138,7 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
   {
     len = (unsigned long) (right-left);
     mid = left + DIV2(len);
-#ifdef DEBUG
+#ifdef SKDEBUG
     printf("left=%lu,right = %lu\n",left,right);
     printf("mid=%lu\n",mid);
 #endif
@@ -191,7 +191,7 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
   {
     len = (unsigned long) (right-left);
     mid = left + DIV2(len);
-#ifdef DEBUG
+#ifdef SKDEBUG
     printf("left=%lu,right = %lu\n",left,right);
     printf("mid=%lu\n",mid);
 #endif

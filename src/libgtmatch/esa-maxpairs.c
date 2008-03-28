@@ -186,7 +186,7 @@ static int processleafedge(bool firstsucc,
   Seqpos *start, *spptr;
   Uchar leftchar;
 
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("processleafedge " FormatSeqpos " firstsucc=%s, "
          " depth(father)= " FormatSeqpos "\n",
          PRINTSeqposcast(leafnumber),
@@ -209,7 +209,7 @@ static int processleafedge(bool firstsucc,
   }
   state->initialized = false;
   state->depth = fatherdepth;
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("processleafedge: leftchar %u\n",(unsigned int) leftchar);
 #endif
   if (firstsucc)
@@ -266,7 +266,7 @@ static int processbranchedge(bool firstsucc,
   unsigned int chfather, chson;
   Seqpos *start, *spptr, *fptr, *fstart;
 
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("processbranchedge firstsucc=%s, "
          " depth(father)= " FormatSeqpos "\n",
          firstsucc ? "true" : "false",
@@ -286,7 +286,7 @@ static int processbranchedge(bool firstsucc,
   if (father->commonchar != ISLEFTDIVERSE)
   {
     assert(son != NULL);
-#ifdef DEBUG
+#ifdef SKDEBUG
     printf("commonchar=%u\n",(unsigned int) son->commonchar);
 #endif
     if (son->commonchar != ISLEFTDIVERSE)

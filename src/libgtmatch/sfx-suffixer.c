@@ -86,7 +86,7 @@ struct Sfxiterator
   unsigned long long bucketiterstep; /* for progressbar */
 };
 
-#ifdef DEBUG
+#ifdef SKDEBUG
 static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
                                                const  Encodedsequence *encseq,
                                                Readmode readmode,
@@ -189,7 +189,7 @@ static void verifycodelistcomputation(
 }
 #endif
 
-#ifdef mydebug
+#ifdef SKDEBUG
 static Codetype getencseqcode(const Encodedsequence *encseq,
                               Readmode readmode,
                               Seqpos totallength,
@@ -258,7 +258,7 @@ static void updatekmercount(void *processinfo,
     }
   } else
   {
-#ifdef mydebug
+#ifdef SKDEBUG
     if (code == 0)
     {
       Codetype code2 = getencseqcode(sfi->encseq,
@@ -286,7 +286,7 @@ static void updatekmercount(void *processinfo,
 #endif
     sfi->leftborder[code]++;
   }
-#ifdef mydebug
+#ifdef SKDEBUG
   previouscode = code;
   previousfirstspecialdefined = firstspecial->defined;
   previousstorespecials = sfi->storespecials;
@@ -411,7 +411,7 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
 
 void freeSfxiterator(Sfxiterator **sfi)
 {
-#ifdef mydebug
+#ifdef SKDEBUG
   if ((*sfi)->bcktab != NULL)
   {
     checkcountspecialcodes((*sfi)->bcktab);
@@ -438,7 +438,7 @@ void freeSfxiterator(Sfxiterator **sfi)
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
-#ifdef mydebug
+#ifdef SKDEBUG
 static void showleftborder(const Seqpos *leftborder,
                            Codetype numofallcodes)
 {
@@ -565,7 +565,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
       assert(realspecialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
       reversespecialcodes(sfi->spaceCodeatposition,sfi->nextfreeCodeatposition);
     }
-#ifdef DEBUG
+#ifdef SKDEBUG
     verifycodelistcomputation(encseq,
                               readmode,
                               realspecialranges,
@@ -575,7 +575,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               sfi->spaceCodeatposition);
 #endif
     assert(sfi->leftborder != NULL);
-#ifdef mydebug
+#ifdef SKDEBUG
     showleftborder(sfi->leftborder,sfi->numofallcodes);
 #endif
     for (optr = sfi->leftborder + 1;

@@ -29,7 +29,7 @@
 #include "intcode-def.h"
 #include "encseq-def.h"
 #include "stamp.h"
-#ifdef mydebug
+#ifdef SKDEBUG
 #include "sfx-nextchar.h"
 #endif
 
@@ -64,7 +64,7 @@
                            (NUMOFCHARS) + (CC))
 #endif
 
-#ifdef mydebug
+#ifdef SKDEBUG
 static Codetype windowkmer2code(unsigned int numofchars,
                                 unsigned int kmersize,
                                 const Uchar *cyclicwindow,
@@ -301,7 +301,7 @@ static void shiftrightwithchar(
                Seqpos currentposition,
                Uchar charcode)
 {
-#ifdef mydebug
+#ifdef SKDEBUG
   Firstspecialpos firstspecialposbrute;
 #endif
 
@@ -323,7 +323,7 @@ static void shiftrightwithchar(
       spwp->firstindex++;
     }
   }
-#ifdef mydebug
+#ifdef SKDEBUG
   if (!specialqueueisempty(&spwp->spos))
   {
     Queueelem *head = specialheadofqueue(&spwp->spos);
@@ -353,7 +353,7 @@ static void shiftrightwithchar(
     Firstspecialpos localfirstspecial;
     Codetype code;
 
-#ifdef mydebug
+#ifdef SKDEBUG
     Codetype wcode;
 
     wcode = windowkmer2code(spwp->numofchars,
@@ -373,7 +373,7 @@ static void shiftrightwithchar(
       localfirstspecial.defined = true;
       localfirstspecial.specialpos = head->distvalue;
     }
-#ifdef mydebug
+#ifdef SKDEBUG
     assert(wcode == code);
 #endif
     processkmercode(processkmercodeinfo,

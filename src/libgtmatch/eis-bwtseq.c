@@ -406,8 +406,8 @@ unsigned long packedindexuniqueforward(const void *genericindex,
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   qptr = qstart;
   cc = *qptr++;
-#undef mydebug
-#ifdef mydebug
+#undef SKDEBUG
+#ifdef SKDEBUG
   printf("# start cc=%u\n",cc);
 #endif
   if (ISSPECIAL(cc))
@@ -417,7 +417,7 @@ unsigned long packedindexuniqueforward(const void *genericindex,
   curSym = MRAEncMapSymbol(alphabet, cc);
   bwtbound.end = bwtSeq->count[curSym];
   bwtbound.start = bwtSeq->count[curSym+1];
-#ifdef mydebug
+#ifdef SKDEBUG
   printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
           "occurrences\n",
          PRINTSeqposcast(bwtbound.end),
@@ -427,7 +427,7 @@ unsigned long packedindexuniqueforward(const void *genericindex,
   while (qptr < qend && bwtbound.end + 1 < bwtbound.start)
   {
     cc = *qptr;
-#ifdef mydebug
+#ifdef SKDEBUG
     printf("# cc=%u\n",cc);
 #endif
     if (ISSPECIAL (cc))
@@ -445,7 +445,7 @@ unsigned long packedindexuniqueforward(const void *genericindex,
       BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym,
                        Seqpos posA, Seqpos posB);
     */
-#ifdef mydebug
+#ifdef SKDEBUG
     printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
             "occurrences\n",
            PRINTSeqposcast(bwtbound.end),
@@ -482,8 +482,8 @@ unsigned long packedindexmstatsforward(const void *genericindex,
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   qptr = qstart;
   cc = *qptr;
-#undef mydebug
-#ifdef mydebug
+#undef SKDEBUG
+#ifdef SKDEBUG
   printf("# start cc=%u\n",cc);
 #endif
   if (ISSPECIAL(cc))
@@ -497,7 +497,7 @@ unsigned long packedindexmstatsforward(const void *genericindex,
   {
     return 0;
   }
-#ifdef mydebug
+#ifdef SKDEBUG
   printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
           "occurrences\n",
          PRINTSeqposcast(bwtbound.end),
@@ -508,7 +508,7 @@ unsigned long packedindexmstatsforward(const void *genericindex,
   for (qptr++; qptr < qend; qptr++)
   {
     cc = *qptr;
-#ifdef mydebug
+#ifdef SKDEBUG
     printf("# cc=%u\n",cc);
 #endif
     if (ISSPECIAL (cc))
@@ -520,7 +520,7 @@ unsigned long packedindexmstatsforward(const void *genericindex,
                      BWTSeqOcc(bwtSeq, curSym, bwtbound.end);
     bwtbound.start = bwtSeq->count[curSym] +
                      BWTSeqOcc(bwtSeq, curSym, bwtbound.start);
-#ifdef mydebug
+#ifdef SKDEBUG
     printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
             "occurrences\n",
            PRINTSeqposcast(bwtbound.end),
