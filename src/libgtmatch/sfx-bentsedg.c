@@ -130,23 +130,35 @@ struct Outlcpinfo
 
 typedef Seqpos Suffixptr;
 
-#undef FASTCOMPARE
-#ifdef FASTCOMPARE
+#undef FASTTQSORT
+#ifdef FASTTQSORT
 
 typedef EndofTwobitencoding Sfxcmp;
 
 #define PTR2INT(VAR,TMPVAR,IDXPTR)\
         {\
-          Encodedsequencescanstate *esr;\
-          Seqpos pos = *(IDXPTR);\
-          esr = newEncodedsequencescanstate();\
-          initEncodedsequencescanstategeneric(esr,encseq,fwd,pos);\
-          extract2bitenc(fwd,&VAR,encseq,esr,pos);\
-          FREESPACE(esr);\
+          Seqpos pos = *(IDXPTR)+depth;\
+          if (pos < totallength)\
+          {\
+            Encodedsequencescanstate *esr;\
+            esr = newEncodedsequencescanstate();\
+            initEncodedsequencescanstategeneric(esr,encseq,fwd,pos);\
+            extract2bitenc(fwd,&VAR,encseq,esr,pos);\
+            FREESPACE(esr);\
+          } else\
+          {\
+            VAR.tbe = 0;\
+            VAR.unitsnotspecial = 0;\
+            VAR.position = pos;\
+          }\
         }
 
 #define Sfxdocompare(X,Y)\
-        ret##X##Y = compareTwobitencodings(fwd,complement,&commonunits,&X,&Y)
+        {\
+          unsigned int commonunits;\
+          ret##X##Y = compareTwobitencodings(fwd,complement,\
+                                             &commonunits,&X,&Y);\
+        }
 
 #define SfxcmpEQUAL(X,Y)      (ret##X##Y == 0)
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
@@ -179,11 +191,14 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Suffixptr *b,
                             Suffixptr *c)
 {
-  Suffixptr cptr;
   Sfxcmp vala, valb, valc;
-  Uchar tmpavar, tmpbvar;
-#ifdef FASTCOMPARE
+#ifdef FASTTQSORT
+  bool fwd = ISDIRREVERSE(readmode) ? false : true,
+       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
   int retvalavalb, retvalavalc, retvalbvalc;
+#else
+  Suffixptr cptr;
+  Uchar tmpavar, tmpbvar;
 #endif
 
   PTR2INT(vala,tmpavar,a);
@@ -199,8 +214,8 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
   {
     return c;
   }
-  Sfxdocompare(valc,valb);
-  if (SfxcmpEQUAL(valc,valb))
+  Sfxdocompare(valb,valc);
+  if (SfxcmpEQUAL(valb,valc))
   {
     return c;
   }
@@ -313,9 +328,12 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   Sfxcmp partval, val;
   Seqpos w, depth, offset, doubleoffset, width;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
-  Uchar tmpvar;
-#ifdef FASTCOMPARE
+#ifdef FASTTQSORT
+  bool fwd = ISDIRREVERSE(readmode) ? false : true,
+       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
   int retvalpartval;
+#else
+  Uchar tmpvar;
 #endif
 
   width = (Seqpos) (r - l + 1);

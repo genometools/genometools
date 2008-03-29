@@ -63,6 +63,20 @@ typedef uint32_t Bitstring;
 #define EXCEPTFIRSTFOURBITS\
         (EXCEPTFIRSTBIT >> 3)             /* \(00001^{w-4}\) */
 
+#define NEWTWOBITENCODING
+#ifdef NEWTWOBITENCODING
+typedef uint32_t Twobitencoding;
+#define UNITSIN2BITENC              16
+#define DIVBYUNITSIN2BITENC(V)      DIV16(V)
+#define MODBYUNITSIN2BITENC(V)      MOD16(V)
+
+#else
+typedef unsigned char Twobitencoding;
+#define UNITSIN2BITENC              4
+#define DIVBYUNITSIN2BITENC(V)      DIV4(V)
+#define MODBYUNITSIN2BITENC(V)      MOD4(V)
+#endif
+
 /*@unused@*/ static inline void byte2string(char *buffer,unsigned char bs)
 {
   unsigned int i;

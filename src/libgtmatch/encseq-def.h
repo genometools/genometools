@@ -25,6 +25,7 @@
 #include "libgtcore/unused.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
+#include "intbits.h"
 #include "readmode-def.h"
 #include "verbose-def.h"
 
@@ -103,6 +104,13 @@ typedef struct
 
 #else
 
+typedef struct
+{
+  Twobitencoding tbe;           /* two bit encoding */
+  unsigned int unitsnotspecial; /* units which are not special */
+  Seqpos position;
+} EndofTwobitencoding;
+
 typedef struct Encodedsequence Encodedsequence;
 typedef struct Encodedsequencescanstate Encodedsequencescanstate;
 typedef struct Specialrangeiterator Specialrangeiterator;
@@ -121,6 +129,18 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Seqpos pos,
                                Readmode readmode);
 
+void extract2bitenc(bool fwd,
+                    EndofTwobitencoding *ptbe,
+                    const Encodedsequence *encseq,
+                    Encodedsequencescanstate *esr,
+                    Seqpos startpos);
+
+int compareTwobitencodings(bool fwd,
+                           bool complement,
+                           unsigned int *commonunits,
+                           EndofTwobitencoding *ptbe1,
+                           EndofTwobitencoding *ptbe2);
+
 #endif
 
 /* the functions with exactly the same interface for both implementation of
@@ -136,6 +156,11 @@ void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
                                   const Encodedsequence *encseq,
                                   Readmode readmode,
                                   Seqpos startpos);
+
+void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
+                                         const Encodedsequence *encseq,
+                                         bool moveforward,
+                                         Seqpos startpos);
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
 

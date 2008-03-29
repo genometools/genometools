@@ -62,20 +62,6 @@
 
 /* The following implements the access functions to the bit encoding */
 
-#ifdef NEWTWOBITENCODING
-
-#define UNITSIN2BITENC              16
-#define DIVBYUNITSIN2BITENC(V)      DIV16(V)
-#define MODBYUNITSIN2BITENC(V)      MOD16(V)
-
-#else
-
-#define UNITSIN2BITENC              4
-#define DIVBYUNITSIN2BITENC(V)      DIV4(V)
-#define MODBYUNITSIN2BITENC(V)      MOD4(V)
-
-#endif
-
 #define EXTRACTENCODEDCHARSCALARFROMLEFT(SCALAR,PREFIX)\
         (((SCALAR) >> \
          MULT2(UNITSIN2BITENC - 1 - (unsigned long) (PREFIX)))\
@@ -1365,10 +1351,10 @@ Encodedsequencescanstate *newEncodedsequencescanstate(void)
   return esr;
 }
 
-static void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
-                                                const Encodedsequence *encseq,
-                                                bool moveforward,
-                                                Seqpos startpos)
+void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
+                                         const Encodedsequence *encseq,
+                                         bool moveforward,
+                                         Seqpos startpos)
 {
   esr->moveforward = moveforward;
   if (encseq->sat == Viauchartables ||
@@ -2181,13 +2167,6 @@ static Seqpos revgetnextstoppos(const Encodedsequence *encseq,
   return 0; /* virtual stop at -1 */
 }
 
-typedef struct
-{
-  Twobitencoding tbe;           /* two bit encoding */
-  unsigned int unitsnotspecial; /* units which are not special */
-  Seqpos position;
-} EndofTwobitencoding;
-
 static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
                               const Encodedsequence *encseq,
                               Encodedsequencescanstate *esr,
@@ -2303,11 +2282,11 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
   }
 }
 
-static void extract2bitenc(bool fwd,
-                           EndofTwobitencoding *ptbe,
-                           const Encodedsequence *encseq,
-                           Encodedsequencescanstate *esr,
-                           Seqpos startpos)
+void extract2bitenc(bool fwd,
+                    EndofTwobitencoding *ptbe,
+                    const Encodedsequence *encseq,
+                    Encodedsequencescanstate *esr,
+                    Seqpos startpos)
 {
   if (fwd)
   {
@@ -2420,11 +2399,11 @@ static int endofdifftbe(bool fwd,bool complement,
          (complement,endvalue,tbe1,tbe2);
 }
 
-static int compareTwobitencodings(bool fwd,
-                                  bool complement,
-                                  unsigned int *commonunits,
-                                  EndofTwobitencoding *ptbe1,
-                                  EndofTwobitencoding *ptbe2)
+int compareTwobitencodings(bool fwd,
+                           bool complement,
+                           unsigned int *commonunits,
+                           EndofTwobitencoding *ptbe1,
+                           EndofTwobitencoding *ptbe2)
 {
   Twobitencoding mask;
 
