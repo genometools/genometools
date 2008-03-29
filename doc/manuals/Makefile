@@ -1,4 +1,5 @@
 ALL=ltrharvestman.pdf\
+    ltrdigestman.pdf\
     uniquesub.pdf\
     matstat.pdf\
     mgth.pdf\

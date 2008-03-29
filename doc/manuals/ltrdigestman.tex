@@ -42,7 +42,7 @@ For this identification, \LTRdigest utilises a number of algorithms to create an
 
 \LTRdigest is written in \texttt{C} and it is based on the \GenomeTools library \cite{genometools}.  \LTRdigest is called as part of the single binary named \Gt.
 
-The source code can be compiled on 32-bit and 64-bit platforms without making any changes to the sources. It incorporates HMMER, a popular and widely used profile HMM package that is used for identification of protein domains, for example taken from the Pfam database. The protein domain search is implemented to be run in a multi-threaded fashion, thus making use of modern multi-core computer systems.
+The source code can be compiled on 32-bit and 64-bit platforms without making any changes to the sources. It incorporates HMMER\cite{hmmer}, a popular and widely used profile hidden Markov model package that is used for identification of protein domains, for example using pHMMs taken from the Pfam\cite{pfam} database. The protein domain search is implemented to be run in a multi-threaded fashion, thus making use of modern multi-core computer systems.
 
 \section{Usage} \label{Usage}
 
@@ -212,7 +212,6 @@ option is not selected by the user, then \Showoptionarg{$r$} is set to 30.
 
 \Option{trnas}{\Showoptionarg{$trnafile$}}{
 Specify a file in multiple FASTA format to be used as a tRNA library that is aligned to the area around the end of the 5' LTR to find a putative PBS. The header of each sequence in this file should reflect the encoded amino acid and codon.
-%\Showoptionarg{$trnafile$} has to be an existing file in multiple FASTA format.
 If this option is not selected by the user, then PBS searching is skipped altogether.
 }
 
@@ -325,16 +324,28 @@ The calculation may be restarted with the same or changed parameters afterwards,
 D.~Ellinghaus, S.~Kurtz, and U.~Willhoeft.
 \newblock \emph{LTRharvest}, an efficient and flexible software for de novo
   detection of \normalsize{LTR} retrotransposons.
-\newblock {\em BMC Bioinformatics 9:18, 2008}, 2007.
+\newblock {\em BMC Bioinformatics} 9:18, 2008.
 
 \bibitem{gff3}
-\textsc{GFF3}, tab delimited file format for genome annotation.
+L.~Stein.
+\newblock Generic Feature Format Version 3.
   \url{http://www.sequenceontology.org/gff3.shtml}.
 
 \bibitem{genometools}
 G.~Gremme.
 \newblock The \textsc{GenomeTools} genome analysis system.
   \url{http://genometools.org}.
+
+\bibitem{pfam}
+R.D.~Finn, J.~Mistry, B.~Schuster-Boeckler, S.~Griffiths-Jones, V.~Hollich, T.~Lassmann,S.~Moxon, M.~Marshall, A.~Khanna, R.~Durbin, S.R.~Eddy, E.L.L.~Sonnhammer and A.~Bateman.
+\newblock  Pfam: clans, web tools and services.
+\newblock {\em Nucleic Acids Research} (Database Issue), 34:D247-D251, 2006.
+
+\bibitem{hmmer}
+S.R.~Eddy.
+\newblock HMMER: Biosequence analysis using profile hidden Markov models.
+  \url{http://hmmer.janelia.org}.
+
 
 \end{thebibliography}
 \end{document}
