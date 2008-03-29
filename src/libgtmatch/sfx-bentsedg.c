@@ -133,7 +133,7 @@ typedef Seqpos Suffixptr;
 #undef FASTCOMPARE
 #ifdef FASTCOMPARE
 
-typedef EndofTwobitencoding Sfxcmpval;
+typedef EndofTwobitencoding Sfxcmp;
 
 #define PTR2INT(VAR,TMPVAR,IDXPTR)\
         {\
@@ -142,27 +142,32 @@ typedef EndofTwobitencoding Sfxcmpval;
           esr = newEncodedsequencescanstate();\
           initEncodedsequencescanstategeneric(esr,encseq,fwd,pos);\
           extract2bitenc(fwd,&VAR,encseq,esr,pos);\
+          FREESPACE(esr);\
         }
 
-#define SfxcmpvalEQUAL(X,Y)\
-        (compareTwobitencodings(fwd,complement,&commonunits,&X,&Y) == 0)
-#define SfxcmpvalSMALLER(X,Y)\
-        (compareTwobitencodings(fwd,complement,&commonunits,&X,&Y) < 0)
-#define COMMONUNITS\
-        UNITSIN2BITENC
+#define Sfxdocompare(X,Y)\
+        ret##X##Y = compareTwobitencodings(fwd,complement,&commonunits,&X,&Y)
+
+#define SfxcmpEQUAL(X,Y)      (ret##X##Y == 0)
+#define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
+#define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
+
+#define COMMONUNITS           UNITSIN2BITENC
 
 #else
 
-typedef Seqpos Sfxcmpval;
+typedef Seqpos Sfxcmp;
 
 #define PTR2INT(VAR,TMPVAR,I)\
         VAR = (((cptr = *(I)+depth) < totallength &&\
               ISNOTSPECIAL(TMPVAR = ACCESSCHAR(cptr))) ? ((Seqpos) TMPVAR)\
                                                        : UNIQUEINT(cptr))
 
-#define SfxcmpvalEQUAL(X,Y)    ((X) == (Y))
-#define SfxcmpvalSMALLER(X,Y)  ((X) < (Y))
-#define COMMONUNITS            1
+#define Sfxdocompare(X,Y)     /* Nothing */
+#define SfxcmpEQUAL(X,Y)      ((X) == (Y))
+#define SfxcmpSMALLER(X,Y)    ((X) < (Y))
+#define SfxcmpGREATER(X,Y)    ((X) > (Y))
+#define COMMONUNITS           1
 
 #endif
 
@@ -175,24 +180,33 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Suffixptr *c)
 {
   Suffixptr cptr;
-  Sfxcmpval vala, valb, valc;
+  Sfxcmp vala, valb, valc;
   Uchar tmpavar, tmpbvar;
+#ifdef FASTCOMPARE
+  int retvalavalb, retvalavalc, retvalbvalc;
+#endif
 
   PTR2INT(vala,tmpavar,a);
   PTR2INT(valb,tmpbvar,b);
-  if (SfxcmpvalEQUAL(vala,valb))
+  Sfxdocompare(vala,valb);
+  if (SfxcmpEQUAL(vala,valb))
   {
     return a;
   }
   PTR2INT(valc,tmpavar,c);
-  if (SfxcmpvalEQUAL(valc,vala) || SfxcmpvalEQUAL(valc,valb))
+  Sfxdocompare(vala,valc);
+  if (SfxcmpEQUAL(vala,valc))
   {
     return c;
   }
-  return SfxcmpvalSMALLER(vala,valb) ?
-        (SfxcmpvalSMALLER(valb,valc) ? b : (SfxcmpvalEQUAL(vala,valc) ? c : a))
-      : (SfxcmpvalSMALLER(valb,valc) ? (SfxcmpvalSMALLER(vala,valc) ? a : c)
-                                       : b);
+  Sfxdocompare(valc,valb);
+  if (SfxcmpEQUAL(valc,valb))
+  {
+    return c;
+  }
+  return SfxcmpSMALLER(vala,valb) ?
+        (SfxcmpSMALLER(valb,valc) ? b : (SfxcmpSMALLER(vala,valc) ? c : a))
+      : (SfxcmpGREATER(valb,valc) ? b : (SfxcmpSMALLER(vala,valc) ? a : c));
 }
 
 static void insertionsort(const Encodedsequence *encseq,
@@ -296,10 +310,13 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              bool cmpcharbychar)
 {
   Suffixptr *left, *right, *leftplusw;
-  Sfxcmpval partval, val;
+  Sfxcmp partval, val;
   Seqpos w, depth, offset, doubleoffset, width;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
   Uchar tmpvar;
+#ifdef FASTCOMPARE
+  int retvalpartval;
+#endif
 
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
@@ -339,11 +356,12 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       while (pb <= pc)
       {
         PTR2INT(val,tmpvar,pb);
-        if (SfxcmpvalSMALLER(partval,val))
+        Sfxdocompare(val,partval);
+        if (SfxcmpGREATER(val,partval))
         {
           break;
         }
-        if (SfxcmpvalEQUAL(val,partval))
+        if (SfxcmpEQUAL(val,partval))
         {
           SWAP(pa, pb);
           pa++;
@@ -353,11 +371,12 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       while (pb <= pc)
       {
         PTR2INT(val,tmpvar,pc);
-        if (SfxcmpvalSMALLER(val,partval))
+        Sfxdocompare(val,partval);
+        if (SfxcmpSMALLER(val,partval))
         {
           break;
         }
-        if (SfxcmpvalEQUAL(val,partval))
+        if (SfxcmpEQUAL(val,partval))
         {
           SWAP(pc, pd);
           pd--;
