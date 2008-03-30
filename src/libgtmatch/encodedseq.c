@@ -2402,18 +2402,20 @@ static int endofdifftbe(bool fwd,bool complement,
 int compareTwobitencodings(bool fwd,
                            bool complement,
                            unsigned int *commonunits,
-                           EndofTwobitencoding *ptbe1,
-                           EndofTwobitencoding *ptbe2)
+                           const EndofTwobitencoding *ptbe1,
+                           const EndofTwobitencoding *ptbe2)
 {
   Twobitencoding mask;
 
   if (ptbe1->unitsnotspecial < ptbe2->unitsnotspecial)
       /* ISSPECIAL(seq1[ptbe1.unitsnotspecial]) */
   {
+    Twobitencoding tbe1, tbe2;
+
     mask = MASKEND(fwd,ptbe1->unitsnotspecial);
-    ptbe1->tbe &= mask;
-    ptbe2->tbe &= mask;
-    if (ptbe1->tbe == ptbe2->tbe)
+    tbe1 = ptbe1->tbe & mask;
+    tbe2 = ptbe2->tbe & mask;
+    if (tbe1 == tbe2)
     {
       assert(ptbe1->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
       if (commonunits != NULL)
@@ -2422,15 +2424,17 @@ int compareTwobitencodings(bool fwd,
       }
       return 1;
     }
-    return endofdifftbe(fwd,complement,commonunits,ptbe1->tbe,ptbe2->tbe);
+    return endofdifftbe(fwd,complement,commonunits,tbe1,tbe2);
   }
   if (ptbe1->unitsnotspecial > ptbe2->unitsnotspecial)
      /* ISSPECIAL(seq2[ptbe2->unitsnotspecial]) */
   {
+    Twobitencoding tbe1, tbe2;
+
     mask = MASKEND(fwd,ptbe2->unitsnotspecial);
-    ptbe1->tbe &= mask;
-    ptbe2->tbe &= mask;
-    if (ptbe1->tbe == ptbe2->tbe)
+    tbe1 = ptbe1->tbe & mask;
+    tbe2 = ptbe2->tbe & mask;
+    if (tbe1 == tbe2)
     {
       assert(ptbe2->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
       if (commonunits != NULL)
@@ -2439,15 +2443,17 @@ int compareTwobitencodings(bool fwd,
       }
       return -1;
     }
-    return endofdifftbe(fwd,complement,commonunits,ptbe1->tbe,ptbe2->tbe);
+    return endofdifftbe(fwd,complement,commonunits,tbe1,tbe2);
   }
   assert(ptbe1->unitsnotspecial == ptbe2->unitsnotspecial);
   if (ptbe1->unitsnotspecial < (unsigned int) UNITSIN2BITENC)
   {
+    Twobitencoding tbe1, tbe2;
+
     mask = MASKEND(fwd,ptbe1->unitsnotspecial);
-    ptbe1->tbe &= mask;
-    ptbe2->tbe &= mask;
-    if (ptbe1->tbe == ptbe2->tbe)
+    tbe1 = ptbe1->tbe & mask;
+    tbe2 = ptbe2->tbe & mask;
+    if (tbe1 == tbe2)
     {
       if (commonunits != NULL)
       {
@@ -2466,7 +2472,7 @@ int compareTwobitencodings(bool fwd,
         return 0;
       }
     }
-    return endofdifftbe(fwd,complement,commonunits,ptbe1->tbe,ptbe2->tbe);
+    return endofdifftbe(fwd,complement,commonunits,tbe1,tbe2);
   }
   assert(ptbe1->unitsnotspecial == (unsigned int) UNITSIN2BITENC &&
          ptbe2->unitsnotspecial == (unsigned int) UNITSIN2BITENC);

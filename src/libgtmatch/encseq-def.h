@@ -138,8 +138,8 @@ void extract2bitenc(bool fwd,
 int compareTwobitencodings(bool fwd,
                            bool complement,
                            unsigned int *commonunits,
-                           EndofTwobitencoding *ptbe1,
-                           EndofTwobitencoding *ptbe2);
+                           const EndofTwobitencoding *ptbe1,
+                           const EndofTwobitencoding *ptbe2);
 
 #endif
 

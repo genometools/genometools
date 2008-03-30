@@ -137,7 +137,7 @@ struct Outlcpinfo
 
 typedef Seqpos Suffixptr;
 
-#define FASTTQSORT
+#undef FASTTQSORT
 #ifdef FASTTQSORT
 
 typedef EndofTwobitencoding Sfxcmp;
@@ -186,6 +186,7 @@ typedef Seqpos Sfxcmp;
 
 #endif
 
+#ifdef FASTTQSORT
 static void checksuffixrange(const Encodedsequence *encseq,
                              bool fwd,
                              bool complement,
@@ -214,10 +215,25 @@ static void checksuffixrange(const Encodedsequence *encseq,
       fprintf(stderr,"suffix " FormatSeqpos " vs " FormatSeqpos "\n",
                      PRINTSeqposcast(*sufptr),
                      PRINTSeqposcast(*(sufptr+1)));
+      fprintf(stderr,"in range of length " FormatSeqpos "\n",
+                     PRINTSeqposcast(right - left + 1));
       exit(EXIT_FAILURE);
     }
   }
 }
+#else
+static void checksuffixrange(UNUSED const Encodedsequence *encseq,
+                             UNUSED bool fwd,
+                             UNUSED bool complement,
+                             UNUSED Seqpos *left,
+                             UNUSED Seqpos *right,
+                             UNUSED Seqpos depth,
+                             UNUSED int line)
+{
+  return;
+}
+
+#endif
 
 static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Readmode readmode,
@@ -364,9 +380,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   Sfxcmp partval, val;
   Seqpos w, depth, offset, doubleoffset, width;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
-#ifdef FASTTQSORT
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
+#ifdef FASTTQSORT
   int retvalpartval;
 #else
   Uchar tmpvar;
