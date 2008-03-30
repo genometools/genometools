@@ -68,13 +68,20 @@
 #define SMALLSIZE (Seqpos) 6
 
 #define SUBSORT(WIDTH,BORDER,LEFT,RIGHT,DEPTH)\
+        checksuffixrange(encseq,\
+                         fwd,\
+                         complement,\
+                         LEFT,\
+                         RIGHT,\
+                         DEPTH,\
+                         __LINE__);\
         if (!maxdepth->defined ||\
             (DEPTH) < (Seqpos) maxdepth->valueunsignedint)\
         {\
           if ((WIDTH) <= (BORDER))\
           {\
             insertionsort(encseq,lcpsubtab,readmode,totallength,\
-                          DEPTH,LEFT,RIGHT,maxdepth,cmpcharbychar);\
+                          LEFT,RIGHT,DEPTH,maxdepth,cmpcharbychar);\
           } else\
           {\
             PUSHMKVSTACK(LEFT,RIGHT,DEPTH);\
@@ -130,7 +137,7 @@ struct Outlcpinfo
 
 typedef Seqpos Suffixptr;
 
-#undef FASTTQSORT
+#define FASTTQSORT
 #ifdef FASTTQSORT
 
 typedef EndofTwobitencoding Sfxcmp;
@@ -154,11 +161,7 @@ typedef EndofTwobitencoding Sfxcmp;
         }
 
 #define Sfxdocompare(X,Y)\
-        {\
-          unsigned int commonunits;\
-          ret##X##Y = compareTwobitencodings(fwd,complement,\
-                                             &commonunits,&X,&Y);\
-        }
+        ret##X##Y = compareTwobitencodings(fwd,complement,NULL,&X,&Y)
 
 #define SfxcmpEQUAL(X,Y)      (ret##X##Y == 0)
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
@@ -182,6 +185,39 @@ typedef Seqpos Sfxcmp;
 #define COMMONUNITS           1
 
 #endif
+
+static void checksuffixrange(const Encodedsequence *encseq,
+                             bool fwd,
+                             bool complement,
+                             Seqpos *left,
+                             Seqpos *right,
+                             Seqpos depth,
+                             int line)
+{
+  Seqpos *sufptr, newdepth = depth;
+
+  for (sufptr=left; sufptr<right; sufptr++)
+  {
+    (void) comparetwostrings(encseq,
+                             fwd,
+                             complement,
+                             &newdepth,
+                             *sufptr,
+                             *(sufptr+1));
+    if (depth > newdepth)
+    {
+      fprintf(stderr,"line %d: "
+                     "depth=" FormatSeqpos " > " FormatSeqpos "=newdepth\n",
+                     line,
+                     PRINTSeqposcast(depth),
+                     PRINTSeqposcast(newdepth));
+      fprintf(stderr,"suffix " FormatSeqpos " vs " FormatSeqpos "\n",
+                     PRINTSeqposcast(*sufptr),
+                     PRINTSeqposcast(*(sufptr+1)));
+      exit(EXIT_FAILURE);
+    }
+  }
+}
 
 static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Readmode readmode,
@@ -228,9 +264,9 @@ static void insertionsort(const Encodedsequence *encseq,
                           Lcpsubtab *lcpsubtab,
                           Readmode readmode,
                           Seqpos totallength,
-                          Seqpos depth,
                           Suffixptr *leftptr,
                           Suffixptr *rightptr,
+                          Seqpos depth,
                           const Definedunsignedint *maxdepth,
                           bool cmpcharbychar)
 {
@@ -339,7 +375,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
   {
-    insertionsort(encseq,lcpsubtab,readmode,totallength,d,l,r,maxdepth,
+    insertionsort(encseq,lcpsubtab,readmode,totallength,l,r,d,maxdepth,
                   cmpcharbychar);
     return;
   }
