@@ -80,7 +80,7 @@
         {\
           if ((WIDTH) <= (BORDER))\
           {\
-            insertionsort(encseq,lcpsubtab,readmode,totallength,\
+            insertionsort(encseq,esr1,esr2,lcpsubtab,readmode,totallength,\
                           LEFT,RIGHT,DEPTH,maxdepth,cmpcharbychar);\
           } else\
           {\
@@ -144,19 +144,33 @@ typedef EndofTwobitencoding Sfxcmp;
 
 #define PTR2INT(VAR,TMPVAR,IDXPTR)\
         {\
-          Seqpos pos = *(IDXPTR)+depth;\
-          if (pos < totallength)\
+          Seqpos pos = *(IDXPTR);\
+          if (fwd)\
           {\
-            Encodedsequencescanstate *esr;\
-            esr = newEncodedsequencescanstate();\
-            initEncodedsequencescanstategeneric(esr,encseq,fwd,pos);\
-            extract2bitenc(fwd,&VAR,encseq,esr,pos);\
-            FREESPACE(esr);\
+            if (pos + depth < totallength)\
+            {\
+              pos += depth;\
+              initEncodedsequencescanstategeneric(esr1,encseq,true,pos);\
+              extract2bitenc(true,&VAR,encseq,esr1,pos);\
+            } else\
+            {\
+              VAR.tbe = 0;\
+              VAR.unitsnotspecial = 0;\
+              VAR.position = pos;\
+            }\
           } else\
           {\
-            VAR.tbe = 0;\
-            VAR.unitsnotspecial = 0;\
-            VAR.position = pos;\
+            if (pos >= depth)\
+            {\
+              pos -= depth;\
+              initEncodedsequencescanstategeneric(esr1,encseq,false,pos);\
+              extract2bitenc(false,&VAR,encseq,esr1,pos);\
+            } else\
+            {\
+              VAR.tbe = 0;\
+              VAR.unitsnotspecial = 0;\
+              VAR.position = pos;\
+            }\
           }\
         }
 
@@ -186,7 +200,7 @@ typedef Seqpos Sfxcmp;
 
 #endif
 
-#ifdef FASTTQSORT
+#ifdef SKDEBUG
 static void checksuffixrange(const Encodedsequence *encseq,
                              bool fwd,
                              bool complement,
@@ -236,6 +250,7 @@ static void checksuffixrange(UNUSED const Encodedsequence *encseq,
 #endif
 
 static Suffixptr *medianof3(const Encodedsequence *encseq,
+                            UNUSED Encodedsequencescanstate *esr1,
                             Readmode readmode,
                             Seqpos totallength,
                             Seqpos depth,
@@ -277,6 +292,8 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
 }
 
 static void insertionsort(const Encodedsequence *encseq,
+                          Encodedsequencescanstate *esr1,
+                          Encodedsequencescanstate *esr2,
                           Lcpsubtab *lcpsubtab,
                           Readmode readmode,
                           Seqpos totallength,
@@ -290,15 +307,9 @@ static void insertionsort(const Encodedsequence *encseq,
   Seqpos lcpindex, lcplen = 0;
   int retval;
   Suffixptr sptr, tptr, temp;
-  Encodedsequencescanstate *esr1 = NULL, *esr2 = NULL;
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  if (!cmpcharbychar && hasspecialranges(encseq))
-  {
-    esr1 = newEncodedsequencescanstate();
-    esr2 = newEncodedsequencescanstate();
-  }
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
     for (pj = pi; pj > leftptr; pj--)
@@ -349,11 +360,6 @@ static void insertionsort(const Encodedsequence *encseq,
       SWAP(pj,pj-1);
     }
   }
-  if (!cmpcharbychar && hasspecialranges(encseq))
-  {
-    freeEncodedsequencescanstate(&esr1);
-    freeEncodedsequencescanstate(&esr2);
-  }
 }
 
 typedef struct
@@ -366,6 +372,8 @@ typedef struct
 DECLAREARRAYSTRUCT(MKVstack);
 
 static void bentleysedgewick(const Encodedsequence *encseq,
+                             Encodedsequencescanstate *esr1,
+                             Encodedsequencescanstate *esr2,
                              Readmode readmode,
                              Seqpos totallength,
                              ArrayMKVstack *mkvauxstack,
@@ -391,8 +399,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
   {
-    insertionsort(encseq,lcpsubtab,readmode,totallength,l,r,d,maxdepth,
-                  cmpcharbychar);
+    insertionsort(encseq,esr1,esr2,lcpsubtab,readmode,totallength,
+                  l,r,d,maxdepth,cmpcharbychar);
     return;
   }
   left = l;
@@ -409,14 +417,14 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     { /* On big arrays, pseudomedian of 9 */
       offset = DIV8(width);
       doubleoffset = MULT2(offset);
-      pl = medianof3(encseq,readmode,totallength,depth,
+      pl = medianof3(encseq,esr1,readmode,totallength,depth,
                      pl,pl+offset,pl+doubleoffset);
-      pm = medianof3(encseq,readmode,totallength,depth,
+      pm = medianof3(encseq,esr1,readmode,totallength,depth,
                      pm-offset,pm,pm+offset);
-      pr = medianof3(encseq,readmode,totallength,depth,
+      pr = medianof3(encseq,esr1,readmode,totallength,depth,
                      pr-doubleoffset,pr-offset,pr);
     }
-    pm = medianof3(encseq,readmode,totallength,depth,pl,pm,pr);
+    pm = medianof3(encseq,esr1,readmode,totallength,depth,pl,pm,pr);
     SWAP(left, pm);
     PTR2INT(partval,tmpvar,left);
     pa = pb = left + 1;
@@ -849,6 +857,8 @@ void sortallbuckets(Seqpos *suftabptr,
   Seqpos lcpvalue;
   Lcpsubtab *lcpsubtab;
   Suffixwithcode firstsuffixofbucket;
+  Encodedsequencescanstate *esr1 = NULL,
+                           *esr2 = NULL;
 
   if (outlcpinfo == NULL)
   {
@@ -856,6 +866,11 @@ void sortallbuckets(Seqpos *suftabptr,
   } else
   {
     lcpsubtab = &outlcpinfo->lcpsubtab;
+  }
+  if (!cmpcharbychar && hasspecialranges(encseq))
+  {
+    esr1 = newEncodedsequencescanstate();
+    esr2 = newEncodedsequencescanstate();
   }
   maxbucketsize = determinemaxbucketsize(bcktab,
                                          mincode,
@@ -901,6 +916,8 @@ void sortallbuckets(Seqpos *suftabptr,
           lcpsubtab->suftabbase = suftabptr + bucketspec.left;
         }
         bentleysedgewick(encseq,
+                         esr1,
+                         esr2,
                          readmode,
                          totallength,
                          &mkvauxstack,
@@ -1007,6 +1024,13 @@ void sortallbuckets(Seqpos *suftabptr,
         outlcpinfo->previousbucketwasempty = false;
       }
     }
+  }
+  if (!cmpcharbychar && hasspecialranges(encseq))
+  {
+    assert(esr1 != NULL);
+    freeEncodedsequencescanstate(&esr1);
+    assert(esr2 != NULL);
+    freeEncodedsequencescanstate(&esr2);
   }
   FREEARRAY(&mkvauxstack,MKVstack);
 }

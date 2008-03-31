@@ -283,6 +283,6 @@ if $gttestdata then
   Keywords "gt_greedyfwdmat gttestdata"
   Test do
     createandcheckgreedyfwdmat("#{$gttestdata}Iowa/at1MB",
-                            "#{$gttestdata}Iowa/U89959.fna")
+                               "#{$gttestdata}Iowa/U89959.fna")
   end
 end

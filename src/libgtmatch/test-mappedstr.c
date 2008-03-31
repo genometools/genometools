@@ -159,8 +159,7 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
                       numofchars,
                       kmersize,
                       characters);
-      error_set(err,
-                    "codeliststream[%lu] = " FormatCodetype " != "
+      error_set(err,"codeliststream[%lu] = " FormatCodetype " != "
                     FormatCodetype " = codeliststring[%lu]\n%s != %s",
                     i,
                     codeliststream->spaceCodetype[i],
