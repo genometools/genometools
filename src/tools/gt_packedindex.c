@@ -23,6 +23,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/sfx-run.h"
 #include "tools/gt_packedindex.h"
+#include "tools/gt_packedindex_trsuftab.h"
 #include "tools/gt_packedindex_chk_integrity.h"
 #include "tools/gt_packedindex_chk_search.h"
 
@@ -36,6 +37,7 @@ static void* gt_packedindex_arguments_new(void)
 {
   Toolbox *packedindex_toolbox = toolbox_new();
   toolbox_add(packedindex_toolbox, "mkindex", gt_packedindex_make);
+  toolbox_add(packedindex_toolbox, "trsuftab", gt_packedindex_trsuftab);
   toolbox_add(packedindex_toolbox, "chkintegrity",
               gt_packedindex_chk_integrity );
   toolbox_add(packedindex_toolbox, "chksearch", gt_packedindex_chk_search);

@@ -115,21 +115,18 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
 {
   struct encIdxSeq *newSeqIdx;
   struct suffixarrayFileInterface sai;
-  MRAEnc *alphabet;
   assert(sa && projectName && err);
-  alphabet = newMRAEncFromSA(sa);
   initSuffixarrayFileInterface(&sai, sa);
   newSeqIdx = newBlockEncIdxSeqFromSAI(
-    &sai, alphabet, totalLen, projectName, params, numExtHeaders, headerIDs,
+    &sai, totalLen, projectName, params, numExtHeaders, headerIDs,
     extHeaderSizes, extHeaderCallbacks, headerCBData, biFunc, cwExtBitsPerPos,
     maxVarExtBitsPerPos, cbState, err);
-  if (!newSeqIdx)
-    MRAEncDelete(alphabet);
+  destructSuffixarrayFileInterface(&sai);
   return newSeqIdx;
 }
 
 extern EISeq *
-newBlockEncIdxSeqFromSAI(struct suffixarrayFileInterface *sai, MRAEnc *alphabet,
+newBlockEncIdxSeqFromSAI(struct suffixarrayFileInterface *sai,
                          Seqpos totalLen, const Str *projectName,
                          const struct blockEncParams *params,
                          size_t numExtHeaders, uint16_t *headerIDs,
@@ -141,23 +138,25 @@ newBlockEncIdxSeqFromSAI(struct suffixarrayFileInterface *sai, MRAEnc *alphabet,
                          Error *err)
 {
   struct encIdxSeq *newSeqIdx;
-  Suffixarray *sa;
   SeqDataReader BWTGenerator;
-  assert(sai && alphabet && projectName && err);
-  sa = sai->sa;
+  MRAEnc *alphabet;
+  assert(sai && projectName && err);
   BWTGenerator = SAIMakeBWTReader(sai);
+  alphabet = newMRAEncFromSAI(sai);
   newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName, alphabet,
                                    NULL, BWTGenerator, params,
                                    numExtHeaders, headerIDs, extHeaderSizes,
                                    extHeaderCallbacks, headerCBData, biFunc,
                                    cwExtBitsPerPos, maxVarExtBitsPerPos,
                                    cbState, err);
+  if (!newSeqIdx)
+    MRAEncDelete(alphabet);
   return newSeqIdx;
 }
 
 extern EISeq *
-newBlockEncIdxSeqFromSfxI(sfxInterface *sfxi, Seqpos totalLen,
-                          const Str *projectName,
+newBlockEncIdxSeqFromSfxI(sfxInterface *sfxi,
+                          Seqpos totalLen, const Str *projectName,
                           const struct blockEncParams *params,
                           size_t numExtHeaders, uint16_t *headerIDs,
                           uint32_t *extHeaderSizes,

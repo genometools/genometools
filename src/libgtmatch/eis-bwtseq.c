@@ -186,13 +186,9 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   else
   {
     struct suffixarrayFileInterface sai;
-    MRAEnc *alphabet = newMRAEncFromSA(sa);
     initSuffixarrayFileInterface(&sai, sa);
-    if (!(bwtSeq = createBWTSeqFromSAI(params, &sai, totalLen, err)))
-    {
-      if (alphabet)
-        MRAEncDelete(alphabet);
-    }
+    bwtSeq = createBWTSeqFromSAI(params, &sai, totalLen, err);
+    destructSuffixarrayFileInterface(&sai);
   }
   return bwtSeq;
 }
@@ -206,6 +202,7 @@ createBWTSeqFromSAI(const struct bwtParam *params,
   MRAEnc *alphabet = NULL;
   SeqDataReader readSfxIdx = { NULL, NULL };
   assert(sai && err && params);
+  alphabet = newMRAEncFromSAI(sai);
   if (params->locateInterval
       && !SDRIsValid(readSfxIdx
                                = SAIMakeReader(sai, SFX_REQUEST_SUFTAB)))
@@ -221,7 +218,7 @@ createBWTSeqFromSAI(const struct bwtParam *params,
     case BWT_ON_BLOCK_ENC:
       seqIdx =
         createBWTSeqGeneric(
-          params, (indexCreateFunc)newBlockEncIdxSeqFromSAI, &sai, totalLen,
+          params, (indexCreateFunc)newBlockEncIdxSeqFromSAI, sai, totalLen,
           alphabet, GTAlphabetRangeHandling, SAIGetOrigSeqSym, sai, readSfxIdx,
           reportSAILongest, sai, err);
       break;

@@ -100,6 +100,12 @@ reportSAILongest(void *state);
  * @return alphabet
  */
 extern MRAEnc *
-newMRAEncFromSA(const void *state);
+newMRAEncFromSA(const Suffixarray *sa);
+
+static inline MRAEnc *
+newMRAEncFromSAI(const struct suffixarrayFileInterface *sai)
+{
+  return newMRAEncFromSA(sai->sa);
+}
 
 #endif
