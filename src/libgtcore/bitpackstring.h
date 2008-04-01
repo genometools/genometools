@@ -49,6 +49,13 @@ enum {
   bitElemBits = sizeof (BitElem)*CHAR_BIT,
 };
 
+/*
+ * Uglyness ahead: (uint32_t *)(void *) double-casts are necessary to prevent
+ * aliasing warnings on platforms that don't treat uint32_t as
+ * compatible to unsigned even though both are internally the same
+ * type (I'm looking at you Windows!)
+ */
+
 /** bits required to store an unsigned value ranging from 0..val */
 #define requiredUIntBits(val) requiredUInt32Bits(val)
 /** bits required to store int value val exactly */
@@ -65,35 +72,38 @@ enum {
   bsStoreInt32(str, offset, numBits, val)
 /** store array of unsigned ints in BitString */
 #define bsStoreUniformUIntArray(str, offset, numBits, numValues, val) \
-  bsStoreUniformUInt32Array(str, offset, numBits, numValues, val)
+  bsStoreUniformUInt32Array(str, offset, numBits, numValues, \
+                            (uint32_t *)(void *)val)
 /** store array of unsigned ints in BitString */
 #define bsStoreNonUniformUIntArray(str, offset, numValues, bitsTotal, \
                                    numBitsList, val)                  \
   bsStoreNonUniformUInt32Array(str, offset, numValues, bitsTotal, \
-                               numBitsList, val)
+                               numBitsList, (uint32_t *)(void *)val)
 /** store array of unsigned ints in BitString */
 #define bsStoreNonUniformIntArray(str, offset, numValues, bitsTotal, \
                                   numBitsList, val)                  \
   bsStoreNonUniformInt32Array(str, offset, numValues, bitsTotal, \
-                              numBitsList, val)
+                              numBitsList, (int32_t *)val)
 /** store array of ints in BitString */
 #define bsStoreUniformIntArray(str, offset, numBits, numValues, val) \
-  bsStoreUniformInt32Array(str, offset, numBits, numValues, val)
+  bsStoreUniformInt32Array(str, offset, numBits, numValues, (int32_t *)val)
 /** get array of unsigned ints from BitString */
 #define bsGetUniformUIntArray(str, offset, numBits, numValues, val) \
-  bsGetUniformUInt32Array(str, offset, numBits, numValues, val)
+  bsGetUniformUInt32Array(str, offset, numBits, numValues, \
+                          (uint32_t *)(void *)val)
 /** get array of unsigned ints from BitString */
 #define bsGetNonUniformUIntArray(str, offset, numValues, bitsTotal, \
                                  numBitsList, val)                      \
   bsGetNonUniformUInt32Array(str, offset, numValues, bitsTotal, \
-                             numBitsList, val)
+                             numBitsList, (uint32_t *)(void *)val)
 /** get array of ints from BitString */
 #define bsGetUniformIntArray(str, offset, numBits, numValues, val) \
-  bsGetUniformInt32Array(str, offset, numBits, numValues, val)
+  bsGetUniformInt32Array(str, offset, numBits, numValues, \
+                         (int32_t *)(void *)val)
 #define bsGetNonUniformIntArray(str, offset, numValues, bitsTotal, \
                                 numBitsList, val)                  \
   bsGetNonUniformInt32Array(str, offset, numValues, bitsTotal, \
-                             numBitsList, val)
+                             numBitsList, (int32_t *)(void *)val)
 
 /**
  * \brief Computes number of BitElem objects needed to store requested number
