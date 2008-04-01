@@ -137,12 +137,14 @@ struct Outlcpinfo
 
 typedef Seqpos Suffixptr;
 
-#undef FASTTQSORT
-#ifdef FASTTQSORT
+#define CMPCHARBYCHARPTR2INT(VAR,TMPVAR,I)\
+        VAR = (((cptr = *(I)+depth) < totallength &&\
+              ISNOTSPECIAL(TMPVAR = ACCESSCHAR(cptr))) ? ((Seqpos) TMPVAR)\
+                                                       : UNIQUEINT(cptr))
 
 typedef EndofTwobitencoding Sfxcmp;
 
-#define PTR2INT(VAR,TMPVAR,IDXPTR)\
+#define PTR2INT(VAR,IDXPTR)\
         {\
           Seqpos pos = *(IDXPTR);\
           if (fwd)\
@@ -180,25 +182,6 @@ typedef EndofTwobitencoding Sfxcmp;
 #define SfxcmpEQUAL(X,Y)      (ret##X##Y == 0)
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
 #define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
-
-#define COMMONUNITS           UNITSIN2BITENC
-
-#else
-
-typedef Seqpos Sfxcmp;
-
-#define PTR2INT(VAR,TMPVAR,I)\
-        VAR = (((cptr = *(I)+depth) < totallength &&\
-              ISNOTSPECIAL(TMPVAR = ACCESSCHAR(cptr))) ? ((Seqpos) TMPVAR)\
-                                                       : UNIQUEINT(cptr))
-
-#define Sfxdocompare(X,Y)     /* Nothing */
-#define SfxcmpEQUAL(X,Y)      ((X) == (Y))
-#define SfxcmpSMALLER(X,Y)    ((X) < (Y))
-#define SfxcmpGREATER(X,Y)    ((X) > (Y))
-#define COMMONUNITS           1
-
-#endif
 
 #ifdef SKDEBUG
 static void checksuffixrange(const Encodedsequence *encseq,
@@ -249,8 +232,36 @@ static void checksuffixrange(UNUSED const Encodedsequence *encseq,
 
 #endif
 
+static Suffixptr *medianof3cmpcharbychar(const Encodedsequence *encseq,
+                                         Readmode readmode,
+                                         Seqpos totallength,
+                                         Seqpos depth,
+                                         Suffixptr *a,
+                                         Suffixptr *b,
+                                         Suffixptr *c)
+{
+  Seqpos vala, valb, valc;
+  Suffixptr cptr;
+  Uchar tmpavar, tmpbvar;
+
+  CMPCHARBYCHARPTR2INT(vala,tmpavar,a);
+  CMPCHARBYCHARPTR2INT(valb,tmpbvar,b);
+  if (vala == valb)
+  {
+    return a;
+  }
+  CMPCHARBYCHARPTR2INT(valc,tmpavar,c);
+  if (vala == valc || valb == valc)
+  {
+    return c;
+  }
+  return vala < valb ?
+        (valb < valc ? b : (vala < valc ? c : a))
+      : (valb > valc ? b : (vala < valc ? a : c));
+}
+
 static Suffixptr *medianof3(const Encodedsequence *encseq,
-                            UNUSED Encodedsequencescanstate *esr1,
+                            Encodedsequencescanstate *esr1,
                             Readmode readmode,
                             Seqpos totallength,
                             Seqpos depth,
@@ -259,23 +270,18 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Suffixptr *c)
 {
   Sfxcmp vala, valb, valc;
-#ifdef FASTTQSORT
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
   int retvalavalb, retvalavalc, retvalbvalc;
-#else
-  Suffixptr cptr;
-  Uchar tmpavar, tmpbvar;
-#endif
 
-  PTR2INT(vala,tmpavar,a);
-  PTR2INT(valb,tmpbvar,b);
+  PTR2INT(vala,a);
+  PTR2INT(valb,b);
   Sfxdocompare(vala,valb);
   if (SfxcmpEQUAL(vala,valb))
   {
     return a;
   }
-  PTR2INT(valc,tmpavar,c);
+  PTR2INT(valc,c);
   Sfxdocompare(vala,valc);
   if (SfxcmpEQUAL(vala,valc))
   {
@@ -385,17 +391,16 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              bool cmpcharbychar)
 {
   Suffixptr *left, *right, *leftplusw;
+  Seqpos partvalcmpcharbychar = 0, valcmpcharbychar;
   Sfxcmp partval, val;
-  Seqpos w, depth, offset, doubleoffset, width;
+  Seqpos w, depth, offset, doubleoffset, width, commonunits;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
-#ifdef FASTTQSORT
   int retvalpartval;
-#else
   Uchar tmpvar;
-#endif
 
+  commonunits = cmpcharbychar ? 1 : UNITSIN2BITENC;
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
   {
@@ -417,57 +422,119 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     { /* On big arrays, pseudomedian of 9 */
       offset = DIV8(width);
       doubleoffset = MULT2(offset);
-      pl = medianof3(encseq,esr1,readmode,totallength,depth,
-                     pl,pl+offset,pl+doubleoffset);
-      pm = medianof3(encseq,esr1,readmode,totallength,depth,
-                     pm-offset,pm,pm+offset);
-      pr = medianof3(encseq,esr1,readmode,totallength,depth,
-                     pr-doubleoffset,pr-offset,pr);
+      if (cmpcharbychar)
+      {
+        pl = medianof3cmpcharbychar(encseq,readmode,totallength,depth,
+                       pl,pl+offset,pl+doubleoffset);
+        pm = medianof3cmpcharbychar(encseq,readmode,totallength,depth,
+                       pm-offset,pm,pm+offset);
+        pr = medianof3cmpcharbychar(encseq,readmode,totallength,depth,
+                       pr-doubleoffset,pr-offset,pr);
+      } else
+      {
+        pl = medianof3(encseq,esr1,readmode,totallength,depth,
+                       pl,pl+offset,pl+doubleoffset);
+        pm = medianof3(encseq,esr1,readmode,totallength,depth,
+                       pm-offset,pm,pm+offset);
+        pr = medianof3(encseq,esr1,readmode,totallength,depth,
+                       pr-doubleoffset,pr-offset,pr);
+      }
     }
-    pm = medianof3(encseq,esr1,readmode,totallength,depth,pl,pm,pr);
-    SWAP(left, pm);
-    PTR2INT(partval,tmpvar,left);
+    if (cmpcharbychar)
+    {
+      pm = medianof3cmpcharbychar(encseq,readmode,totallength,depth,pl,pm,pr);
+      SWAP(left, pm);
+      CMPCHARBYCHARPTR2INT(partvalcmpcharbychar,tmpvar,left);
+    } else
+    {
+      pm = medianof3(encseq,esr1,readmode,totallength,depth,pl,pm,pr);
+      SWAP(left, pm);
+      PTR2INT(partval,left);
+    }
     pa = pb = left + 1;
     pc = pd = right;
-    for (;;)
+    if (cmpcharbychar)
     {
-      while (pb <= pc)
+      for (;;)
       {
-        PTR2INT(val,tmpvar,pb);
-        Sfxdocompare(val,partval);
-        if (SfxcmpGREATER(val,partval))
+        while (pb <= pc)
+        {
+          CMPCHARBYCHARPTR2INT(valcmpcharbychar,tmpvar,pb);
+          if (valcmpcharbychar > partvalcmpcharbychar)
+          {
+            break;
+          }
+          if (valcmpcharbychar == partvalcmpcharbychar)
+          {
+            SWAP(pa, pb);
+            pa++;
+          }
+          pb++;
+        } 
+        while (pb <= pc)
+        {
+          CMPCHARBYCHARPTR2INT(valcmpcharbychar,tmpvar,pc);
+          if (valcmpcharbychar < partvalcmpcharbychar)
+          {
+            break;
+          }
+          if (valcmpcharbychar == partvalcmpcharbychar)
+          {
+            SWAP(pc, pd);
+            pd--;
+          }
+          pc--;
+        }
+        if (pb > pc)
         {
           break;
         }
-        if (SfxcmpEQUAL(val,partval))
-        {
-          SWAP(pa, pb);
-          pa++;
-        }
+        SWAP(pb, pc);
         pb++;
-      }
-      while (pb <= pc)
-      {
-        PTR2INT(val,tmpvar,pc);
-        Sfxdocompare(val,partval);
-        if (SfxcmpSMALLER(val,partval))
-        {
-          break;
-        }
-        if (SfxcmpEQUAL(val,partval))
-        {
-          SWAP(pc, pd);
-          pd--;
-        }
         pc--;
       }
-      if (pb > pc)
+    } else
+    {
+      for (;;)
       {
-        break;
+        while (pb <= pc)
+        {
+          PTR2INT(val,pb);
+          Sfxdocompare(val,partval);
+          if (SfxcmpGREATER(val,partval))
+          {
+            break;
+          }
+          if (SfxcmpEQUAL(val,partval))
+          {
+            SWAP(pa, pb);
+            pa++;
+          }
+          pb++;
+        }
+        while (pb <= pc)
+        {
+          PTR2INT(val,pc);
+          Sfxdocompare(val,partval);
+          if (SfxcmpSMALLER(val,partval))
+          {
+            break;
+          }
+          if (SfxcmpEQUAL(val,partval))
+          {
+            SWAP(pc, pd);
+            pd--;
+          }
+          pc--;
+        }
+        if (pb > pc)
+        {
+          break;
+        }
+        SWAP(pb, pc);
+        pb++;
+        pc--;
       }
-      SWAP(pb, pc);
-      pb++;
-      pc--;
     }
     assert(pa >= left);
     assert(pb >= pa);
@@ -496,7 +563,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       right -= (pd-pb);
       width = (Seqpos) (right-leftplusw);
-      SUBSORT(width,SMALLSIZE,leftplusw,right-1,depth+COMMONUNITS);
+      SUBSORT(width,SMALLSIZE,leftplusw,right-1,depth+commonunits);
     }
     if (w > 0)
     {
