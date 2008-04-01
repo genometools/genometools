@@ -28,7 +28,7 @@
 \section{Introduction}
 \label{Introduction}
 
-This document describes \LTRdigest , a software tool for identification and annotation of characteristic sequence features of LTR retrotransposons in predicted candidates, like those output by \emph{LTRharvest}\cite{EKW07}. In particular, \LTRdigest can be used to find
+This document describes \LTRdigest , a software tool for identification and annotation of characteristic sequence features of LTR retrotransposons in predicted candidates, like those reported by \emph{LTRharvest}\cite{EKW07}. In particular, \LTRdigest can be used to find
 \begin{itemize}
   \item polypurine tracts (PPT)
   \item primer binding sites (PBS) and
@@ -36,7 +36,7 @@ This document describes \LTRdigest , a software tool for identification and anno
 \end{itemize}
 inside a sequence region predicted to be a LTR retrotransposon.
 
-For this identification, \LTRdigest utilises a number of algorithms to create an annotation based on user-supplied constraints. For example, length and position values for possible features can be extensively parameterised, as can be algorithmic parameters like alignment scores and cutoffs.
+For this identification, \LTRdigest utilises a number of algorithms to create an annotation based on user-supplied constraints. For example, length and position values for possible features can be extensively parameterised, as can be algorithmic parameters like alignment scores and cut-off values.
 
 \LTRdigest computes the boundaries and attributes of the features that fit the user-supplied model and outputs them in GFF3 format\cite{gff3} (in addition to the existing LTR retrotransposon annotation), as well as the corresponding sequences in multiple FASTA format. In addition, a tab-separated summary file is created that can conveniently and quickly browsed for results.
 
@@ -87,9 +87,9 @@ All options can be specified only once.
 \\
 \Showoption{o}& specify file to output result GFF3 into
 \\
-\Showoption{gzip}& gzip-compress output file
+\Showoption{gzip}& gzip-compress GFF3 output file specified by \Showoption{o}
 \\
-\Showoption{bzip2}& bzip2-compress output file
+\Showoption{bzip2}& bzip2-compress GFF3 output file specified by \Showoption{o}
 \\
 \Showoption{force}& force output file to be overwritten
 \\
@@ -105,7 +105,7 @@ All options can be specified only once.
 \\
 \Showoption{pbsalilen}& specify a range of acceptable PBS lengths
 \\
-\Showoption{pbsoffset}& specify a range of acceptable PBS offsets from 5' LTR
+\Showoption{pbsoffset}& specify a range of acceptable PBS start distances from 3' end of 5' LTR
 \\
 \Showoption{pbstrnaoffset}& specify a range of acceptable tRNA/PBS alignment offsets from tRNA 3' end
 \\
@@ -168,7 +168,7 @@ If this option is given, a number of files containing further information will b
   \item \texttt{$<$prefix$>$\_conditions.csv} contains information about the parameters used in the current run for documentation purposes.
   \item \texttt{$<$prefix$>$\_pbs.fas} contains the PBS sequences identified in the current run in multiple FASTA format.
   \item \texttt{$<$prefix$>$\_ppt.fas} contains the PPT sequences identified in the current run in multiple FASTA format.
-  \item The files \texttt{$<$prefix$>$\_5ltr.fas} and \texttt{$<$prefix$>$\_3ltr.fas} contain the 5' and 3' LTR sequences identified in the current run in multiple FASTA format.
+  \item The files \texttt{$<$prefix$>$\_5ltr.fas} and \texttt{$<$prefix$>$\_3ltr.fas} contain the 5' and 3' LTR sequences identified in the current run in multiple FASTA format. Please note: If the direction of the retrotransposon could be predicted, the files will contain the corresponding 3' and 5' LTR sequences. If no direction could be predicted, forward direction with regard to the original sequence will be assumed, i.e. the 'left' LTR will be considered the 5' LTR.
    \item Additionally, one \texttt{$<$prefix$>$\_pdom\_$<$domainname$>$.fas} file will be created per protein domain model given. This file contains the FASTA DNA sequences of the HMM matches to the LTR retrotransposon.
 \end{itemize}
 In FASTA output files, each FASTA header contains position and sequence region information to match the hit to the corresponding LTR retrotransposon.
@@ -192,7 +192,7 @@ to $8$, \Showoptionarg{$L_{max}$} to 30.
 }
 
 \Option{uboxlen}{\Showoptionarg{$L_{min}$} \Showoptionarg{$L_{max}$}}{
-Specify the minimum and maximum allowed lengths for U-box predictions. If a uracil-rich region preceding a PPT shorter than \Showoptionarg{$L_{min}$} or longer than \Showoptionarg{$L_{max}$} is found, it will be skipped.\\
+Specify the minimum and maximum allowed lengths for U-box predictions. If a T-rich region preceding a PPT shorter than \Showoptionarg{$L_{min}$} or longer than \Showoptionarg{$L_{max}$} is found, it will be skipped.\\
 \Showoptionarg{$L_{min}$} and \Showoptionarg{$L_{min}$} have to be positive integers. If this
 option is not selected by the user, then \Showoptionarg{$L_{min}$} is set
 to $3$, \Showoptionarg{$L_{max}$} to 30.
@@ -224,7 +224,7 @@ to $11$, \Showoptionarg{$L_{max}$} to 30.
 }
 
 \Option{pbsoffset}{\Showoptionarg{$L_{min}$} \Showoptionarg{$L_{max}$}}{
-Specify the minimum and maximum allowed PBS offsets from the 5' LTR end positions. If a local alignment with an offset smaller than \Showoptionarg{$L_{min}$} or greater than \Showoptionarg{$L_{max}$} is found, it will be skipped.
+Specify the minimum and maximum allowed distance between the start of the PBS and the 3' end of the 5' LTR. If a local alignment with such a distance smaller than \Showoptionarg{$L_{min}$} or greater than \Showoptionarg{$L_{max}$} is found, it will be skipped.
 \\
 \Showoptionarg{$L_{min}$} and \Showoptionarg{$L_{min}$} have to be positive integers. If this
 option is not selected by the user, then \Showoptionarg{$L_{min}$} is set
@@ -282,7 +282,7 @@ option is not selected by the user, then \Showoptionarg{$score_i$} is set to -20
 \begin{Justshowoptions}
 
 \Option{hmms}{\Showoptionarg{$hmmfile_1, hmmfile_2, \dots, hmmfile_n$}}{
-Specify a list of pHMM files in HMMER2 format. The pHMMs must be defined for the amino acid alphabet and follow the Plan7 specification. For example, pHMMs defining protein domains taken from the Pfam database can be used here. Every file must exist and be readable, otherwise an error is reported. If this option is not given by the user, protein domain searching is skipped altogether.
+Specify a list of pHMM files in HMMER2 format. The pHMMs must be defined for the amino acid alphabet and follow the Plan7 specification. For example, pHMMs defining protein domains taken from the Pfam database can be used here. Every file must exist and be readable, otherwise an error is reported. If this option is not given by the user, protein domain searching is skipped altogether. Please note that shell globbing can be used here to specify large numbers of files, e.g. by using wildcards.
 }
 
 \Option{pdomevalcutoff}{\Showoptionarg{$c$}}{
@@ -333,7 +333,7 @@ L.~Stein.
 
 \bibitem{genometools}
 G.~Gremme.
-\newblock The \textsc{GenomeTools} genome analysis system.
+\newblock GenomeTools.
   \url{http://genometools.org}.
 
 \bibitem{pfam}
