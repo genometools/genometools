@@ -335,7 +335,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
         + EISSymTransformedRank(seqIdx, i - 1, len, hint);
     /* and finally place the 1-count for the terminator */
     count[i] = count[i - 1] + 1;
-#ifdef DEBUG
+#ifdef EIS_DEBUG
     fprintf(stderr, "count[alphabetSize]="FormatSeqpos
             ", len="FormatSeqpos"\n", count[alphabetSize], len);
     for (i = 0; i <= alphabetSize; ++i)

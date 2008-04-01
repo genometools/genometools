@@ -123,11 +123,11 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
 static void
 destructPermutationsList(struct permList *permutation);
 
-#if DEBUG > 1
+#if EIS_DEBUG > 1
 static void
 printComposition(FILE *fp, const unsigned *composition, Symbol numSyms,
                  unsigned blockSize);
-#endif /* DEBUG > 1 */
+#endif /* EIS_DEBUG > 1 */
 
 static inline BitOffset
 compListPermStartOffset(struct compList *list, unsigned numSyms)
@@ -191,9 +191,9 @@ initCompositionList(struct compList *newList, unsigned blockSize,
     initComposition(maxSym, blockSize, composition, &symRMNZ);
     do
     {
-#if DEBUG > 1
+#if EIS_DEBUG > 1
       printComposition(stderr, composition, alphabetSize, blockSize);
-#endif /* DEBUG > 1 */
+#endif /* EIS_DEBUG > 1 */
       bsStoreUniformUIntArray(newList->catCompsPerms, offset,
                               bitsPerCount, alphabetSize, composition);
       assert(cmpIdx > 1?(bsCompare(newList->catCompsPerms, offset, bitsPerComp,
@@ -266,7 +266,7 @@ deleteCompositionList(struct compList *clist)
   ma_free(clist);
 }
 
-#if DEBUG > 1
+#if EIS_DEBUG > 1
 /**
  * Compute number of digits a value would require when displayed in
  * selected number system (i.e. 2=binary, 10=decimal).
@@ -295,7 +295,7 @@ printComposition(FILE *fp, const unsigned *composition,
   }
   fputs("\n", fp);
 }
-#endif /* DEBUG > 1 */
+#endif /* EIS_DEBUG > 1 */
 
 static void
 initPermutation(Symbol *permutation, const unsigned *composition,
@@ -303,10 +303,10 @@ initPermutation(Symbol *permutation, const unsigned *composition,
 static inline void
 nextPermutation(Symbol *permutation, unsigned blockSize);
 
-#if DEBUG > 1
+#if EIS_DEBUG > 1
 static void
 printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize);
-#endif /* DEBUG > 1 */
+#endif /* EIS_DEBUG > 1 */
 
 static int
 initPermutationsList(const unsigned *composition, struct permList *permutation,
@@ -333,9 +333,9 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
     {
       bsStoreUniformSymbolArray(permStore, offset,
                                 bitsPerSymbol, blockSize, currentPermutation);
-#if DEBUG > 1
+#if EIS_DEBUG > 1
       printPermutation(stderr, currentPermutation, blockSize);
-#endif /* DEBUG > 1 */
+#endif /* EIS_DEBUG > 1 */
       assert(i > 0?(bsCompare(permStore, offset, bitsPerPermutation,
                               permStore,
                               offset - bitsPerPermutation,
@@ -417,7 +417,7 @@ nextPermutation(Symbol *permutation, unsigned blockSize)
   }
 }
 
-#if DEBUG > 1
+#if EIS_DEBUG > 1
 static void
 printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize)
 {
@@ -430,7 +430,7 @@ printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize)
   }
   fputs("\n", fp);
 }
-#endif /* DEBUG > 1 */
+#endif /* EIS_DEBUG > 1 */
 
 extern int
 block2IndexPair(const struct compList *compositionTable,

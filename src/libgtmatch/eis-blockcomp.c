@@ -554,13 +554,13 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                   < blockMapAlphabetSize))
             symCounts[bSym]
               += stats->symbolDistributionTable[i];
-#if DEBUG > 1
+#if EIS_DEBUG > 1
         for (i = 0; i < blockMapAlphabetSize; ++i)
         {
           fprintf(stderr, "symCount[%"PRIuSymbol"]="FormatSeqpos"\n", (Symbol)i,
                   stats->symbolDistributionTable[i]);
         }
-#endif /* DEBUG > 1 */
+#endif /* EIS_DEBUG > 1 */
         if (blockMapAlphabetSize)
         {
           newSeqIdx->partialSymSumBitsSums[0] = 0;
@@ -573,19 +573,19 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             newSeqIdx->partialSymSumBits[i]
               = requiredSeqposBits(symCounts[i]);
           }
-#ifdef DEBUG
+#ifdef EIS_DEBUG
           for (i = 0; i < blockMapAlphabetSize; ++i)
           {
             fprintf(stderr, "bitsPerSymSum[%"PRIuSymbol"]=%u\n", (Symbol)i,
                     newSeqIdx->partialSymSumBits[i]);
           }
-#endif  /* DEBUG */
+#endif  /* EIS_DEBUG */
           newSeqIdx->symSumBits
             = newSeqIdx->partialSymSumBitsSums[blockMapAlphabetSize - 1]
             + newSeqIdx->partialSymSumBits[blockMapAlphabetSize - 1];
-#ifdef DEBUG
+#ifdef EIS_DEBUG
           fprintf(stderr, "symSumBits total: %u\n", newSeqIdx->symSumBits);
-#endif  /* DEBUG */
+#endif  /* EIS_DEBUG */
         }
       }
       /* count special characters to estimate number of regions required */
@@ -603,7 +603,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                  < rangeMapAlphabetSize))
             regionSymCount += stats->symbolDistributionTable[i];
         regionsEstimate = regionSymCount/20;
-#ifdef DEBUG
+#ifdef EIS_DEBUG
         fprintf(stderr, "Expected "FormatSeqpos
                 " symbols to encode in regions.\n",
                 regionSymCount);
@@ -913,7 +913,7 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx)
     seqIdx->partialSymSumBitsSums[i] = seqIdx->partialSymSumBitsSums[i - 1]
       + (seqIdx->partialSymSumBits[i] = seqIdx->bitsPerSeqpos);
   seqIdx->symSumBits = blockMapAlphabetSize * seqIdx->bitsPerSeqpos;
-#ifdef DEBUG
+#ifdef EIS_DEBUG
   fprintf(stderr, "symSumBits=%u, blockMapAlphabetSize=%u\n",
           seqIdx->symSumBits, seqIdx->blockMapAlphabetSize);
 #endif
@@ -2295,7 +2295,7 @@ loadBlockEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
           {
             newSeqIdx->partialSymSumBits[0]= *(uint32_t *)(buf + offset + 8);
             newSeqIdx->partialSymSumBitsSums[0] = 0;
-#ifdef DEBUG
+#ifdef EIS_DEBUG
             fprintf(stderr, "partialSymSumBits[0]=%u\n",
                     newSeqIdx->partialSymSumBits[0]);
 #endif
@@ -2303,7 +2303,7 @@ loadBlockEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
             {
               newSeqIdx->partialSymSumBits[i]
                 = *(uint32_t *)(buf + offset + 8 + 4*i);
-#ifdef DEBUG
+#ifdef EIS_DEBUG
               fprintf(stderr, "partialSymSumBits[%"PRIuSymbol"]=%u\n",
                       (Symbol)i, newSeqIdx->partialSymSumBits[i]);
 #endif
