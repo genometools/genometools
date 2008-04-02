@@ -16,6 +16,8 @@
 */
 
 #include <string.h>
+#include <ctype.h>
+#include "libgtcore/log.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/range.h"
 #include "libgtcore/str.h"
@@ -45,12 +47,27 @@ struct LTRdigestStream {
 #define ltrdigest_stream_cast(GS)\
         genome_stream_cast(ltrdigest_stream_class(), GS)
 
+static void strip_gaps(char *out, char *in, size_t len)
+{
+  size_t i = 0;
+  while(i < len)
+  {
+    if(*in != '-')
+    {
+      *out++ = toupper(*in);
+    }
+    in++;
+    i++;
+  }
+}
+
 static int pdom_domain_attach_gff3(void *key, void *value, void *data,
                                    UNUSED Error *err)
 {
   struct plan7_s *model = (struct plan7_s *) key;
   LTRdigestStream  *ls = (LTRdigestStream *) data;
   PdomHit *hit = (PdomHit*) value;
+
   Range rng;
   Phase frame = phase_get(hit->best_hit->name[0]);
 
@@ -60,6 +77,47 @@ static int pdom_domain_attach_gff3(void *key, void *value, void *data,
 
   rng.start = hit->best_hit->sqfrom;
   rng.end = hit->best_hit->sqto;
+
+  if(log_enabled())
+  {
+    FILE *fp;
+    int i;
+    char out[BUFSIZ];
+
+    fp = fopen("RVT_seqout.fas","a+");
+    log_log("hits: %d, %d", hit->hits_fwd->num,hit->hits_rev->num);
+    if (genome_feature_get_strand(ls->element.mainnode) == STRAND_FORWARD)
+    {
+      for(i=0;i<hit->hits_fwd->num;i++)
+      {
+        log_log("%s: (%u %u) (%u %u) %d", hit->hits_fwd->hit[i]->name,
+                                     hit->hits_fwd->hit[i]->sqfrom,
+                                     hit->hits_fwd->hit[i]->sqto,
+                                     hit->hits_fwd->hit[i]->hmmfrom,
+                                     hit->hits_fwd->hit[i]->hmmto,
+                                     hit->hits_fwd->hit[i] == hit->best_hit);
+      }
+    }
+    else
+    {
+      for(i=0;i<hit->hits_rev->num;i++)
+      {
+        log_log("%s: (%u %u) (%u %u) %d", hit->hits_rev->hit[i]->name,
+                                     hit->hits_rev->hit[i]->sqfrom,
+                                     hit->hits_rev->hit[i]->sqto,
+                                     hit->hits_rev->hit[i]->hmmfrom,
+                                     hit->hits_rev->hit[i]->hmmto,
+                                     hit->hits_rev->hit[i] == hit->best_hit);
+      }
+    }
+    memset(out, 0, sizeof(char)*BUFSIZ);
+    strip_gaps(out, hit->best_hit->ali->aseq+3,
+                    strlen(hit->best_hit->ali->aseq+3));
+    fprintf(fp, ">seq\n");
+    fprintf(fp, "%s\n", out);
+    fclose(fp);
+  }
+
   pdom_convert_frame_position(&rng, frame);
   ltrelement_offset2pos(&ls->element, &rng, 0,
                         OFFSET_BEGIN_LEFT_LTR,
