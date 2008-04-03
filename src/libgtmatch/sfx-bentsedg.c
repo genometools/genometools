@@ -45,7 +45,11 @@
         ((Seqpos) VAR) : UNIQUEINT(PTR))
 
 #define LCPINDEX(I)       (Seqpos) ((I) - lcpsubtab->suftabbase)
-#define SETLCP(I,V)       lcpsubtab->spaceSeqpos[I] = V
+#define SETLCP(I,V)       {\
+                            printf("line %d: set lcp[%d]=%u\n",\
+                                    __LINE__,(int) (I)+baseptr,(int) V);\
+                            lcpsubtab->spaceSeqpos[I] = V;\
+                          }
 
 #define SWAP(A,B)\
         if ((A) != (B))\
@@ -80,8 +84,13 @@
         {\
           if ((WIDTH) <= (BORDER))\
           {\
-            insertionsort(encseq,esr1,esr2,lcpsubtab,readmode,totallength,\
-                          LEFT,RIGHT,DEPTH,maxdepth,cmpcharbychar);\
+            if ((LEFT) < (RIGHT))\
+            {\
+              printf("at offset %d\n",baseptr);\
+              insertionsort(encseq,esr1,esr2,baseptr,\
+                            lcpsubtab,readmode,totallength,\
+                            LEFT,RIGHT,DEPTH,maxdepth,cmpcharbychar);\
+            }\
           } else\
           {\
             PUSHMKVSTACK(LEFT,RIGHT,DEPTH);\
@@ -183,7 +192,8 @@ typedef EndofTwobitencoding Sfxcmp;
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
 #define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
 
-#ifdef SKDEBUG
+#define CHECKSUFFIXRANGE
+#ifdef CHECKSUFFIXRANGE
 static void checksuffixrange(const Encodedsequence *encseq,
                              bool fwd,
                              bool complement,
@@ -300,6 +310,7 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
 static void insertionsort(const Encodedsequence *encseq,
                           Encodedsequencescanstate *esr1,
                           Encodedsequencescanstate *esr2,
+                          Seqpos baseptr,
                           Lcpsubtab *lcpsubtab,
                           Readmode readmode,
                           Seqpos totallength,
@@ -307,7 +318,7 @@ static void insertionsort(const Encodedsequence *encseq,
                           Suffixptr *rightptr,
                           Seqpos depth,
                           const Definedunsignedint *maxdepth,
-                          bool cmpcharbychar)
+                          UNUSED bool cmpcharbychar)
 {
   Suffixptr *pi, *pj;
   Seqpos lcpindex, lcplen = 0;
@@ -316,6 +327,20 @@ static void insertionsort(const Encodedsequence *encseq,
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
 
+  printf("insertion sort of %d suffixes [%d,%d] at depth %d:\n",
+    (int) ((rightptr) - (leftptr) + 1),
+            (int) baseptr + LCPINDEX(leftptr),
+            (int) baseptr + LCPINDEX(rightptr),
+            (int) depth);
+  for (pi = leftptr; pi <= rightptr; pi++)
+  {
+    printf("suffix %d:",*pi);
+    showsequenceatstartpos(stdout,
+                          fwd,
+                            complement,
+                            encseq,
+                            *pi);
+  }
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
     for (pj = pi; pj > leftptr; pj--)
@@ -347,9 +372,23 @@ static void insertionsort(const Encodedsequence *encseq,
         }
       } else
       {
+        printf("compareEncseqsequences[%d,%d] at depth %d\n",
+                       (int) *(pj-1),(int) *pj,(int) depth);
+        showsequenceatstartpos(stdout,
+                            fwd,
+                            complement,
+                            encseq,
+                            *(pj-1));
+        showsequenceatstartpos(stdout,
+                            fwd,
+                            complement,
+                            encseq,
+                            *pj);
         retval = compareEncseqsequences(&lcplen,encseq,fwd,complement,
                                         esr1,esr2,*(pj-1),*pj,depth);
       }
+      printf("lcp of %d %d is %d, retval = %d\n",
+              (int) *(pj-1),(int) (*pj),(int) lcplen,retval);
       if (lcpsubtab != NULL)
       {
         lcpindex = LCPINDEX(pj);
@@ -383,6 +422,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Readmode readmode,
                              Seqpos totallength,
                              ArrayMKVstack *mkvauxstack,
+                             Suffixptr baseptr,
                              Suffixptr *l,
                              Suffixptr *r,
                              Seqpos d,
@@ -404,8 +444,12 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
   {
-    insertionsort(encseq,esr1,esr2,lcpsubtab,readmode,totallength,
-                  l,r,d,maxdepth,cmpcharbychar);
+    if (l < r)
+    {
+      printf("at offset %d\n",baseptr);
+      insertionsort(encseq,esr1,esr2,baseptr,lcpsubtab,readmode,totallength,
+                    l,r,d,maxdepth,cmpcharbychar);
+    }
     return;
   }
   left = l;
@@ -418,6 +462,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     pl = left;
     pm = left + DIV2(width);
     pr = right;
+    printf("partition value for [%d,%d] is",
+            (int) LCPINDEX(left) + baseptr,
+            (int) LCPINDEX(right) + baseptr);
     if (width > (Seqpos) 30)
     { /* On big arrays, pseudomedian of 9 */
       offset = DIV8(width);
@@ -450,6 +497,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       pm = medianof3(encseq,esr1,readmode,totallength,depth,pl,pm,pr);
       SWAP(left, pm);
       PTR2INT(partval,left);
+      printf(" %d\n",(int) *left);
     }
     pa = pb = left + 1;
     pc = pd = right;
@@ -551,7 +599,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       if (lcpsubtab != NULL)
       {
-        SETLCP(LCPINDEX(right-w+1),depth);
+        SETLCP(LCPINDEX(right-w+1),depth); /* This case is wrong */
       }
       SUBSORT(w,SMALLSIZE,right-w+1,right,depth);
     }
@@ -569,7 +617,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       if (lcpsubtab != NULL)
       {
-        SETLCP(LCPINDEX(leftplusw),depth);
+        SETLCP(LCPINDEX(leftplusw),depth); /* This case is wrong */
       }
       SUBSORT(w,SMALLSIZE,left,leftplusw-1,depth);
     }
@@ -924,6 +972,7 @@ void sortallbuckets(Seqpos *suftabptr,
   Seqpos lcpvalue;
   Lcpsubtab *lcpsubtab;
   Suffixwithcode firstsuffixofbucket;
+  Seqpos baseptr;
   Encodedsequencescanstate *esr1 = NULL,
                            *esr2 = NULL;
 
@@ -988,6 +1037,7 @@ void sortallbuckets(Seqpos *suftabptr,
                          readmode,
                          totallength,
                          &mkvauxstack,
+                         bucketspec.left,
                          suftabptr + bucketspec.left,
                          suftabptr + bucketspec.left +
                                      bucketspec.nonspecialsinbucket - 1,
@@ -1019,6 +1069,7 @@ void sortallbuckets(Seqpos *suftabptr,
           lcpvalue = 0;
         }
         assert(lcpsubtab != NULL);
+        baseptr = bucketspec.left;
         SETLCP(0,lcpvalue);
         /* all other lcp-values are computed and they can be output */
         multilcpvalue(outlcpinfo,

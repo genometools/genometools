@@ -265,10 +265,11 @@ void checkentiresuftab(const Encodedsequence *encseq,
                 (*ptr < totallength)
                 ? (unsigned int) getencodedchar(encseq,*ptr,readmode)
                 : SEPARATOR);
-        fprintf(stderr,", maxlcp = " FormatSeqpos " != " FormatSeqpos "\n",
+        fprintf(stderr,", maxlcp(bruteforce) = " FormatSeqpos " != " 
+                          FormatSeqpos "(fast)\n",
                     PRINTSeqposcast(maxlcp),
                     PRINTSeqposcast(currentlcp));
-        exit(EXIT_FAILURE); /* programming error */
+        /* exit(EXIT_FAILURE); programming error */
       }
     }
   }

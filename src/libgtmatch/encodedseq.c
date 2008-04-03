@@ -2567,7 +2567,7 @@ int compareEncseqsequences(Seqpos *lcp,
     }
   } while (retval == 0);
   *lcp = depth;
-#undef FASTCOMPAREDEBUG
+#define FASTCOMPAREDEBUG
 #ifdef FASTCOMPAREDEBUG
   {
     Seqpos lcp2 = 0;
@@ -2700,16 +2700,16 @@ static void extract2bitenc_bruteforce(bool fwd,
   }
 }
 
-static void showbufchar(bool complement,Uchar cc)
+static void showbufchar(FILE *fp,bool complement,Uchar cc)
 {
   if (cc == (Uchar) WILDCARD)
   {
-    fprintf(stderr,"$");
+    fprintf(fp,"$");
   } else
   {
     if (cc == (Uchar) SEPARATOR)
     {
-      fprintf(stderr,"#");
+      fprintf(fp,"#");
     } else
     {
       if (complement)
@@ -2717,28 +2717,30 @@ static void showbufchar(bool complement,Uchar cc)
         cc = COMPLEMENTBASE(cc);
       }
       assert(cc < (Uchar) 4);
-      fprintf(stderr,"%c","acgt"[cc]);
+      fprintf(fp,"%c","acgt"[cc]);
     }
   }
 }
 
-static void showsequenceatstartpos(bool fwd,
-                                   bool complement,
-                                   const Encodedsequence *encseq,
-                                   Seqpos startpos)
+/* remove this from the interface */
+void showsequenceatstartpos(FILE *fp,
+                            bool fwd,
+                            bool complement,
+                            const Encodedsequence *encseq,
+                            Seqpos startpos)
 {
   Seqpos pos, endpos;
   Uchar buffer[UNITSIN2BITENC];
 
-  fprintf(stderr,"          0123456789012345\n");
-  fprintf(stderr,"sequence=\"");
+  fprintf(fp,"          0123456789012345\n");
+  fprintf(fp,"sequence=\"");
   if (fwd)
   {
     endpos = MIN(startpos + UNITSIN2BITENC - 1,encseq->totallength-1);
     encseqextract(buffer,encseq,startpos,endpos);
     for (pos=0; pos<endpos - startpos + 1; pos++)
     {
-      showbufchar(complement,buffer[pos]);
+      showbufchar(fp,complement,buffer[pos]);
     }
   } else
   {
@@ -2752,10 +2754,10 @@ static void showsequenceatstartpos(bool fwd,
     encseqextract(buffer,encseq,endpos,startpos);
     for (pos=0; pos < startpos - endpos + 1; pos++)
     {
-      showbufchar(complement,buffer[pos]);
+      showbufchar(fp,complement,buffer[pos]);
     }
   }
-  fprintf(stderr,"\"\n");
+  fprintf(fp,"\"\n");
 }
 
 static bool checktbe(bool fwd,Twobitencoding tbe1,Twobitencoding tbe2,
@@ -2832,7 +2834,7 @@ void checkextractunitatpos(const Encodedsequence *encseq,
               complement ? "true" : "false",
               PRINTSeqposcast(startpos),
               ptbe1.unitsnotspecial,ptbe2.unitsnotspecial);
-      showsequenceatstartpos(fwd,complement,encseq,startpos);
+      showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
       exit(EXIT_FAILURE);
     }
     if (!checktbe(fwd,ptbe1.tbe,ptbe2.tbe,ptbe1.unitsnotspecial))
@@ -2841,7 +2843,7 @@ void checkextractunitatpos(const Encodedsequence *encseq,
                       fwd ? "true" : "false",
                       complement ? "true" : "false",
                       PRINTSeqposcast(startpos));
-      showsequenceatstartpos(fwd,complement,encseq,startpos);
+      showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
       exit(EXIT_FAILURE);
     }
     if (fwd)
@@ -2895,10 +2897,10 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
     fprintf(stderr,"ret1=%d, ret2=%d\n",ret1,ret2);
     fprintf(stderr,"commonunits1=%u, commonunits2=" FormatSeqpos "\n",
             commonunits1,PRINTSeqposcast(commonunits2));
-    showsequenceatstartpos(fwd,complement,encseq,pos1);
+    showsequenceatstartpos(stderr,fwd,complement,encseq,pos1);
     uint32_t2string(buf1,ptbe1.tbe);
     fprintf(stderr,"v1=%s(unitsnotspecial=%u)\n",buf1,ptbe1.unitsnotspecial);
-    showsequenceatstartpos(fwd,complement,encseq,pos2);
+    showsequenceatstartpos(stderr,fwd,complement,encseq,pos2);
     uint32_t2string(buf2,ptbe2.tbe);
     fprintf(stderr,"v2=%s(unitsnotspecial=%u)\n",buf2,ptbe2.unitsnotspecial);
     exit(EXIT_FAILURE);
