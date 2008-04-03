@@ -185,8 +185,8 @@ typedef EndofTwobitencoding Sfxcmp;
           }\
         }
 
-#define Sfxdocompare(X,Y)\
-        ret##X##Y = compareTwobitencodings(fwd,complement,NULL,&X,&Y)
+#define Sfxdocompare(COMMONUNITS,X,Y)\
+        ret##X##Y = compareTwobitencodings(fwd,complement,COMMONUNITS,&X,&Y)
 
 #define SfxcmpEQUAL(X,Y)      (ret##X##Y == 0)
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
@@ -286,18 +286,18 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
 
   PTR2INT(vala,a);
   PTR2INT(valb,b);
-  Sfxdocompare(vala,valb);
+  Sfxdocompare(NULL,vala,valb);
   if (SfxcmpEQUAL(vala,valb))
   {
     return a;
   }
   PTR2INT(valc,c);
-  Sfxdocompare(vala,valc);
+  Sfxdocompare(NULL,vala,valc);
   if (SfxcmpEQUAL(vala,valc))
   {
     return c;
   }
-  Sfxdocompare(valb,valc);
+  Sfxdocompare(NULL,valb,valc);
   if (SfxcmpEQUAL(valb,valc))
   {
     return c;
@@ -433,14 +433,16 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   Suffixptr *left, *right, *leftplusw;
   Seqpos partvalcmpcharbychar = 0, valcmpcharbychar;
   Sfxcmp partval, val;
-  Seqpos w, depth, offset, doubleoffset, width, commonunits;
+  const Seqpos commonunitsequal = cmpcharbychar ? 1 : UNITSIN2BITENC;
+  Seqpos w, depth, offset, doubleoffset, width, 
+         commonunits;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
   int retvalpartval;
   Uchar tmpvar;
+  DefinedSeqpos smallerlcp, largerlcp;
 
-  commonunits = cmpcharbychar ? 1 : UNITSIN2BITENC;
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
   {
@@ -499,42 +501,54 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       PTR2INT(partval,left);
       printf(" %d\n",(int) *left);
     }
+    smallerlcp.defined = false;
+    smallerlcp.valueseqpos = 0;
+    largerlcp.defined = false;
+    largerlcp.valueseqpos = 0;
+    /* now pivot element is at index left */
+    /* all elements to be compared are between pb and pc */
+    /* pa is the position at which the next element smaller than the 
+       pivot element is inserted at */
+    /* pd is the position at which the next element larger than the 
+       pivot element is inserted at */
     pa = pb = left + 1;
     pc = pd = right;
     if (cmpcharbychar)
     {
       for (;;)
       {
+        /* look for elements identical or smaller than pivot from left */
         while (pb <= pc)
         {
           CMPCHARBYCHARPTR2INT(valcmpcharbychar,tmpvar,pb);
           if (valcmpcharbychar > partvalcmpcharbychar)
-          {
+          { /* stop for elements > pivot */
             break;
           }
           if (valcmpcharbychar == partvalcmpcharbychar)
           {
-            SWAP(pa, pb);
+            SWAP(pa, pb); /* exchange equal element and element at index pa */
             pa++;
           }
           pb++;
         } 
+        /* look for elements identical or greater than pivot from right */
         while (pb <= pc)
         {
           CMPCHARBYCHARPTR2INT(valcmpcharbychar,tmpvar,pc);
           if (valcmpcharbychar < partvalcmpcharbychar)
-          {
+          { /* stop for elements < pivot */
             break;
           }
           if (valcmpcharbychar == partvalcmpcharbychar)
           {
-            SWAP(pc, pd);
+            SWAP(pc, pd);  /* exchange equal element and element at index pd */
             pd--;
           }
           pc--;
         }
         if (pb > pc)
-        {
+        { /* no elements to compare to pivot */
           break;
         }
         SWAP(pb, pc);
@@ -548,9 +562,14 @@ static void bentleysedgewick(const Encodedsequence *encseq,
         while (pb <= pc)
         {
           PTR2INT(val,pb);
-          Sfxdocompare(val,partval);
+          Sfxdocompare(&commonunits,val,partval);
           if (SfxcmpGREATER(val,partval))
           {
+            if (!largerlcp.defined || largerlcp.valueseqpos < commonunits)
+            {
+              largerlcp.defined = true;
+              largerlcp.valueseqpos = commonunits;
+            }
             break;
           }
           if (SfxcmpEQUAL(val,partval))
@@ -558,20 +577,35 @@ static void bentleysedgewick(const Encodedsequence *encseq,
             SWAP(pa, pb);
             pa++;
           }
+          if (!smallerlcp.defined || smallerlcp.valueseqpos < commonunits)
+          {
+            smallerlcp.defined = true;
+            smallerlcp.valueseqpos = commonunits;
+          }
           pb++;
         }
         while (pb <= pc)
         {
           PTR2INT(val,pc);
-          Sfxdocompare(val,partval);
+          Sfxdocompare(&commonunits,val,partval);
           if (SfxcmpSMALLER(val,partval))
           {
+            if (!smallerlcp.defined || smallerlcp.valueseqpos < commonunits)
+            {
+              smallerlcp.defined = true;
+              smallerlcp.valueseqpos = commonunits;
+            }
             break;
           }
           if (SfxcmpEQUAL(val,partval))
           {
             SWAP(pc, pd);
             pd--;
+          }
+          if (!largerlcp.defined || largerlcp.valueseqpos < commonunits)
+          {
+            largerlcp.defined = true;
+            largerlcp.valueseqpos = commonunits;
           }
           pc--;
         }
@@ -587,40 +621,67 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     assert(pa >= left);
     assert(pb >= pa);
     w = MIN((Seqpos) (pa-left),(Seqpos) (pb-pa));
+    /* move w elements at the left to the middle */
     VECSWAP(left,  pb-w, w);
     pr = right + 1;
     assert(pd >= pc);
     assert(pr > pd);
     w = MIN((Seqpos) (pd-pc), (Seqpos) (pr-pd-1));
+    /* move w elements at the right to the middle */
     VECSWAP(pb, pr-w, w);
+
+    /* all elements equal to the pivot are now in the middle namely in the
+       range [left + (pb-pa) and right - (pd-pc)] */
+    /* hence we have to sort the elements in the intervals
+       [left..left+(pb-pa)-1] and
+       [right-(pd-pc)+1..right] */
+
+    assert(pb >= pa);
+    if ((w = (Seqpos) (pb-pa)) > 0)
+    {
+      leftplusw = left + w;
+      if (lcpsubtab != NULL)
+      {
+        if (cmpcharbychar)
+        {
+          SETLCP(LCPINDEX(leftplusw),depth); /* This case is wrong */
+        } else
+        {
+          assert(smallerlcp.defined);
+          SETLCP(LCPINDEX(leftplusw),smallerlcp.valueseqpos);
+        }
+      }
+      /* use smallest lcp value for the left */
+      SUBSORT(w,SMALLSIZE,left,leftplusw-1,depth);
+    } else
+    {
+      leftplusw = left;
+    }
+
+    cptr = *leftplusw + depth;
+    if (ISNOTEND(cptr))
+    {
+      width = (Seqpos) (right-(pd-pb)-leftplusw);
+      SUBSORT(width,SMALLSIZE,leftplusw,right-(pd-pb)-1,depth+commonunitsequal);
+    }
 
     assert(pd >= pc);
     if ((w = (Seqpos) (pd-pc)) > 0)
     {
       if (lcpsubtab != NULL)
       {
-        SETLCP(LCPINDEX(right-w+1),depth); /* This case is wrong */
+        if (cmpcharbychar)
+        {
+          SETLCP(LCPINDEX(right-w+1),depth);
+        } else
+        {
+          assert(largerlcp.defined);
+          SETLCP(LCPINDEX(right-w+1),largerlcp.valueseqpos);
+        }
       }
       SUBSORT(w,SMALLSIZE,right-w+1,right,depth);
     }
-    assert(pb >= pa);
-    w = (Seqpos) (pb-pa);
-    leftplusw = left + w;
-    cptr = *leftplusw + depth;
-    if (ISNOTEND(cptr))
-    {
-      right -= (pd-pb);
-      width = (Seqpos) (right-leftplusw);
-      SUBSORT(width,SMALLSIZE,leftplusw,right-1,depth+commonunits);
-    }
-    if (w > 0)
-    {
-      if (lcpsubtab != NULL)
-      {
-        SETLCP(LCPINDEX(leftplusw),depth); /* This case is wrong */
-      }
-      SUBSORT(w,SMALLSIZE,left,leftplusw-1,depth);
-    }
+
     if (mkvauxstack->nextfreeMKVstack == 0)
     {
       break;
