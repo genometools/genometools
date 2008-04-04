@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -x
+
 if [ $# -lt 5 ]
 then
   echo "Usage: $0 <gt-bin> <bothdirections> <idir> <fmindex> <file1> [file2 file3 ..]"
@@ -28,7 +30,7 @@ cerr()
 
 suffixerator()
 {
-  cerr "${gtbin} suffixerator $*"
+  cerr "${gtbin} suffixerator -cmpcharbychar $*"
 }
 
 makesuftab()

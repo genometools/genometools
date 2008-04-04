@@ -243,7 +243,6 @@ static void checksuffixrange(UNUSED const Encodedsequence *encseq,
 {
   return;
 }
-
 #endif
 
 static Suffixptr *medianof3cmpcharbychar(const Encodedsequence *encseq,
@@ -590,11 +589,13 @@ static void bentleysedgewick(const Encodedsequence *encseq,
           {
             SWAP(pa, pb);
             pa++;
-          }
-          if (!smallerlcp.defined || smallerlcp.valueseqpos < commonunits)
+          } else
           {
-            smallerlcp.defined = true;
-            smallerlcp.valueseqpos = commonunits;
+            if (!smallerlcp.defined || smallerlcp.valueseqpos < commonunits)
+            {
+              smallerlcp.defined = true;
+              smallerlcp.valueseqpos = commonunits;
+            }
           }
           pb++;
         }
@@ -615,11 +616,13 @@ static void bentleysedgewick(const Encodedsequence *encseq,
           {
             SWAP(pc, pd);
             pd--;
-          }
-          if (!largerlcp.defined || largerlcp.valueseqpos < commonunits)
+          } else
           {
-            largerlcp.defined = true;
-            largerlcp.valueseqpos = commonunits;
+            if (!largerlcp.defined || largerlcp.valueseqpos < commonunits)
+            {
+              largerlcp.defined = true;
+              largerlcp.valueseqpos = commonunits;
+            }
           }
           pc--;
         }
@@ -658,7 +661,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       {
         if (cmpcharbychar)
         {
-          SETLCP(LCPINDEX(leftplusw),depth); /* This case is wrong */
+          SETLCP(LCPINDEX(leftplusw),depth);
         } else
         {
           assert(smallerlcp.defined);
