@@ -79,6 +79,8 @@
         checksuffixrange(encseq,\
                          fwd,\
                          complement,\
+                         baseptr,\
+                         lcpsubtab,\
                          LEFT,\
                          RIGHT,\
                          DEPTH,\
@@ -90,7 +92,7 @@
           {\
             if ((LEFT) < (RIGHT))\
             {\
-              /* printf("at offset %d\n",baseptr); */\
+              /*printf("insertion sort at offset %d\n",baseptr);*/\
               insertionsort(encseq,esr1,esr2,baseptr,\
                             lcpsubtab,readmode,totallength,\
                             LEFT,RIGHT,DEPTH,maxdepth,cmpcharbychar);\
@@ -175,6 +177,7 @@ typedef EndofTwobitencoding Sfxcmp;
             }\
           } else\
           {\
+            pos = REVERSEPOS(totallength,pos);\
             if (pos >= depth)\
             {\
               pos -= depth;\
@@ -196,11 +199,42 @@ typedef EndofTwobitencoding Sfxcmp;
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
 #define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
 
-#define CHECKSUFFIXRANGE
+/*
+static void showsuffixrange(const Encodedsequence *encseq,
+                            bool fwd,
+                            bool complement,
+                            Seqpos baseptr,
+                            const Lcpsubtab *lcpsubtab,
+                            const Suffixptr *leftptr,
+                            const Suffixptr *rightptr,
+                            Seqpos depth)
+{
+  const Suffixptr *pi;
+
+  printf("of %d suffixes [%d,%d] at depth %d:\n",
+         (int) ((rightptr) - (leftptr) + 1),
+         (int) baseptr + LCPINDEX(leftptr),
+         (int) baseptr + LCPINDEX(rightptr),
+         (int) depth);
+  for (pi = leftptr; pi <= rightptr; pi++)
+  {
+    printf("suffix %d:",*pi);
+    showsequenceatstartpos(stdout,
+                           fwd,
+                           complement,
+                           encseq,
+                           *pi);
+  }
+}
+*/
+
+#undef CHECKSUFFIXRANGE
 #ifdef CHECKSUFFIXRANGE
 static void checksuffixrange(const Encodedsequence *encseq,
                              bool fwd,
                              bool complement,
+                             Seqpos baseptr,
+                             const Lcpsubtab *lcpsubtab,
                              Seqpos *left,
                              Seqpos *right,
                              Seqpos depth,
@@ -208,6 +242,17 @@ static void checksuffixrange(const Encodedsequence *encseq,
 {
   Seqpos *sufptr, newdepth = depth;
 
+  /*
+  printf("checksuffixrange ");
+  showsuffixrange(encseq,
+                  fwd,
+                  complement,
+                  baseptr,
+                  lcpsubtab,
+                  left,
+                  right,
+                  depth);
+  */
   for (sufptr=left; sufptr<right; sufptr++)
   {
     (void) comparetwostrings(encseq,
@@ -236,6 +281,8 @@ static void checksuffixrange(const Encodedsequence *encseq,
 static void checksuffixrange(UNUSED const Encodedsequence *encseq,
                              UNUSED bool fwd,
                              UNUSED bool complement,
+                             UNUSED Seqpos baseptr,
+                             UNUSED const Lcpsubtab *lcpsubtab,
                              UNUSED Seqpos *left,
                              UNUSED Seqpos *right,
                              UNUSED Seqpos depth,
@@ -321,7 +368,7 @@ static void insertionsort(const Encodedsequence *encseq,
                           Suffixptr *rightptr,
                           Seqpos depth,
                           const Definedunsignedint *maxdepth,
-                          UNUSED bool cmpcharbychar)
+                          bool cmpcharbychar)
 {
   Suffixptr *pi, *pj;
   Seqpos lcpindex, lcplen = 0;
@@ -331,20 +378,9 @@ static void insertionsort(const Encodedsequence *encseq,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
 
   /*
-  printf("insertion sort of %d suffixes [%d,%d] at depth %d:\n",
-    (int) ((rightptr) - (leftptr) + 1),
-            (int) baseptr + LCPINDEX(leftptr),
-            (int) baseptr + LCPINDEX(rightptr),
-            (int) depth);
-  for (pi = leftptr; pi <= rightptr; pi++)
-  {
-    printf("suffix %d:",*pi);
-    showsequenceatstartpos(stdout,
-                          fwd,
-                            complement,
-                            encseq,
-                            *pi);
-  }
+  printf("insertion sort ");
+  showsuffixrange(encseq,fwd,complement,baseptr,lcpsubtab,leftptr,rightptr,
+                  depth);
   */
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
@@ -437,29 +473,26 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Seqpos d,
                              Lcpsubtab *lcpsubtab,
                              const Definedunsignedint *maxdepth,
-                             bool cmpcharbychar)
+                             UNUSED bool cmpcharbychar)
 {
   Suffixptr *left, *right, *leftplusw;
   Seqpos partvalcmpcharbychar = 0, valcmpcharbychar;
   Sfxcmp partval, val;
-  const Seqpos commonunitsequal = cmpcharbychar ? 1 : UNITSIN2BITENC;
-  Seqpos w, depth, offset, doubleoffset, width, 
-         commonunits;
+  Seqpos w, depth, offset, doubleoffset, width;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
   int retvalpartval;
   Uchar tmpvar;
-  DefinedSeqpos smallerlcp, largerlcp;
+  unsigned int commonunits, smallerlcp, largerlcp;
+  const int commonunitsequal = cmpcharbychar ? 1 : UNITSIN2BITENC;
 
   width = (Seqpos) (r - l + 1);
   if (width <= SMALLSIZE)
   {
     if (l < r)
     {
-      /*
-      printf("at offset %d\n",baseptr);
-      */
+      /*printf("insertionsort at offset %d\n",baseptr);*/
       insertionsort(encseq,esr1,esr2,baseptr,lcpsubtab,readmode,totallength,
                     l,r,d,maxdepth,cmpcharbychar);
     }
@@ -512,17 +545,15 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       pm = medianof3(encseq,esr1,readmode,totallength,depth,pl,pm,pr);
       SWAP(left, pm);
       PTR2INT(partval,left);
-      //printf(" %d\n",(int) *left);
     }
-    smallerlcp.defined = false;
-    smallerlcp.valueseqpos = 0;
-    largerlcp.defined = false;
-    largerlcp.valueseqpos = 0;
+    /*printf(" %d\n",(int) *left); */
+    smallerlcp = 0;
+    largerlcp = 0;
     /* now pivot element is at index left */
     /* all elements to be compared are between pb and pc */
-    /* pa is the position at which the next element smaller than the 
+    /* pa is the position at which the next element smaller than the
        pivot element is inserted at */
-    /* pd is the position at which the next element larger than the 
+    /* pd is the position at which the next element larger than the
        pivot element is inserted at */
     pa = pb = left + 1;
     pc = pd = right;
@@ -544,7 +575,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
             pa++;
           }
           pb++;
-        } 
+        }
         /* look for elements identical or greater than pivot from right */
         while (pb <= pc)
         {
@@ -578,10 +609,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
           Sfxdocompare(&commonunits,val,partval);
           if (SfxcmpGREATER(val,partval))
           {
-            if (!largerlcp.defined || largerlcp.valueseqpos < commonunits)
+            if (largerlcp < commonunits)
             {
-              largerlcp.defined = true;
-              largerlcp.valueseqpos = commonunits;
+              largerlcp = commonunits;
             }
             break;
           }
@@ -591,10 +621,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
             pa++;
           } else
           {
-            if (!smallerlcp.defined || smallerlcp.valueseqpos < commonunits)
+            if (smallerlcp < commonunits)
             {
-              smallerlcp.defined = true;
-              smallerlcp.valueseqpos = commonunits;
+              smallerlcp = commonunits;
             }
           }
           pb++;
@@ -605,10 +634,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
           Sfxdocompare(&commonunits,val,partval);
           if (SfxcmpSMALLER(val,partval))
           {
-            if (!smallerlcp.defined || smallerlcp.valueseqpos < commonunits)
+            if (smallerlcp < commonunits)
             {
-              smallerlcp.defined = true;
-              smallerlcp.valueseqpos = commonunits;
+              smallerlcp = commonunits;
             }
             break;
           }
@@ -618,10 +646,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
             pd--;
           } else
           {
-            if (!largerlcp.defined || largerlcp.valueseqpos < commonunits)
+            if (largerlcp < commonunits)
             {
-              largerlcp.defined = true;
-              largerlcp.valueseqpos = commonunits;
+              largerlcp = commonunits;
             }
           }
           pc--;
@@ -664,8 +691,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
           SETLCP(LCPINDEX(leftplusw),depth);
         } else
         {
-          assert(smallerlcp.defined);
-          SETLCP(LCPINDEX(leftplusw),depth + smallerlcp.valueseqpos);
+          SETLCP(LCPINDEX(leftplusw),depth + smallerlcp);
         }
       }
       /* use smallest lcp value for the left */
@@ -692,8 +718,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
           SETLCP(LCPINDEX(right-w+1),depth);
         } else
         {
-          assert(largerlcp.defined);
-          SETLCP(LCPINDEX(right-w+1),depth + largerlcp.valueseqpos);
+          SETLCP(LCPINDEX(right-w+1),depth + largerlcp);
         }
       }
       /* use smallest lcp value for the left */

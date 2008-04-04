@@ -91,13 +91,13 @@ int comparetwosuffixes(const Encodedsequence *encseq,
         if (pos1 < pos2)
         {
           *maxlcp = pos1  - start1;
-          retval = -1; /* a < b */
+          retval = ISDIRREVERSE(readmode) ? 1 : -1; /* a < b */
           break;
         }
         if (pos1 > pos2)
         {
           *maxlcp = pos1 - start1;
-          retval = 1; /* a > b */
+          retval = ISDIRREVERSE(readmode) ? -1 : 1; /* a > b */
           break;
         }
         *maxlcp = pos1 - start1 + 1;
