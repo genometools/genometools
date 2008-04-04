@@ -247,7 +247,7 @@ void ppt_clear_results(PPTResults *results)
     }
     array_delete(results->hits_fwd);
   }
-  if (results->hits_fwd)
+  if (results->hits_rev)
   {
     for (i=0;i<array_size(results->hits_rev);i++)
 
