@@ -217,7 +217,7 @@ end
 
 def createandcheckgreedyfwdmat(reffile,queryfile)
   run "#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}"
-  run "#{$bin}gt suffixerator -indexname sfx -cmpcharbychar -tis -suf -dna -v " +
+  run "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
            "-db #{reffile}"
   run "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
            "-dna -pl -bsize 10 -locfreq 32 -dir rev"

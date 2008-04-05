@@ -39,10 +39,10 @@ static void showlocalsuffix(FILE *fpout,
 
   if (depth == 0)
   {
-    end = MIN(maxshow,totallength);
+    end = MIN(start + maxshow,totallength);
   } else
   {
-    end = MIN(maxshow,MIN(totallength,start+depth-1));
+    end = MIN(start + maxshow,MIN(totallength,start+depth));
   }
   for (i = start; i <= end; i++)
   {

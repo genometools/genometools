@@ -233,14 +233,14 @@ static void showsuffixrange(const Encodedsequence *encseq,
 static void checksuffixrange(const Encodedsequence *encseq,
                              bool fwd,
                              bool complement,
-                             Seqpos baseptr,
-                             const Lcpsubtab *lcpsubtab,
+                             UNUSED Seqpos baseptr,
+                             UNUSED const Lcpsubtab *lcpsubtab,
                              Seqpos *left,
                              Seqpos *right,
                              Seqpos depth,
                              int line)
 {
-  Seqpos *sufptr, newdepth = depth;
+  Seqpos *sufptr, newdepth = depth, pos1, pos2;
 
   /*
   printf("checksuffixrange ");
@@ -255,12 +255,21 @@ static void checksuffixrange(const Encodedsequence *encseq,
   */
   for (sufptr=left; sufptr<right; sufptr++)
   {
+    if (fwd)
+    {
+      pos1 = *sufptr;
+      pos2 = *(sufptr+1);
+    } else
+    {
+      pos1 = REVERSEPOS(getencseqtotallength(encseq),*sufptr);
+      pos2 = REVERSEPOS(getencseqtotallength(encseq),*(sufptr+1));
+    }
     (void) comparetwostrings(encseq,
                              fwd,
                              complement,
                              &newdepth,
-                             *sufptr,
-                             *(sufptr+1));
+                             pos1,
+                             pos2);
     if (depth > newdepth)
     {
       fprintf(stderr,"line %d: "

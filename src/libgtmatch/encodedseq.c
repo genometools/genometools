@@ -2461,11 +2461,11 @@ int compareTwobitencodings(bool fwd,
       }
       if (ptbe1->position < ptbe2->position)
       {
-        return -1;
+        return fwd ? -1 : 1;
       }
       if (ptbe1->position > ptbe2->position)
       {
-        return 1;
+        return fwd ? 1 : -1;
       }
       if (ptbe1->position == ptbe2->position)
       {
@@ -2567,7 +2567,7 @@ int compareEncseqsequences(Seqpos *lcp,
     }
   } while (retval == 0);
   *lcp = depth;
-#define FASTCOMPAREDEBUG
+#undef FASTCOMPAREDEBUG
 #ifdef FASTCOMPAREDEBUG
   {
     Seqpos lcp2 = 0;
