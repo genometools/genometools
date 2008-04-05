@@ -207,7 +207,7 @@ int comparewithonespecial(const Encodedsequence *encseq,
                                depth,
                                totallength);
   assert(cc1 != cc2);
-  if (!fwd && cc1 >= COMPAREOFFSET && cc2 >= COMPAREOFFSET)
+  if (!fwd && cc1 >= (Seqpos) COMPAREOFFSET && cc2 >= (Seqpos) COMPAREOFFSET)
   {
     return cc1 > cc2 ? -1 : 1;
   }
@@ -290,7 +290,8 @@ int comparetwostrings(const Encodedsequence *encseq,
     *maxcommon = currentoffset;
     if (cc1 != cc2)
     {
-      if (!fwd && cc1 >= COMPAREOFFSET && cc2 >= COMPAREOFFSET)
+      if (!fwd && cc1 >= (Seqpos) COMPAREOFFSET
+               && cc2 >= (Seqpos) COMPAREOFFSET)
       {
         return cc1 > cc2 ? -1 : 1;
       }

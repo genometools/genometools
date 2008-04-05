@@ -47,14 +47,6 @@
 #define LCPINDEX(I)       (Seqpos) ((I) - lcpsubtab->suftabbase)
 #define SETLCP(I,V)       lcpsubtab->spaceSeqpos[I] = V
 
-/*
-#define SETLCP(I,V)       {\
-                            printf("line %d: set lcp[%d]=%u\n",\
-                                    __LINE__,(int) (I)+baseptr,(int) V);\
-                            lcpsubtab->spaceSeqpos[I] = V;\
-                          }
-*/
-
 #define SWAP(A,B)\
         if ((A) != (B))\
         {\
@@ -73,10 +65,10 @@
           *bptr++ = temp;\
         }
 
-#define SMALLSIZE (Seqpos) 6
+#define SMALLSIZE (Seqpos) 5
 
 #define SUBSORT(WIDTH,BORDER,LEFT,RIGHT,DEPTH)\
-        checksuffixrange(encseq,\
+        /*checksuffixrange(encseq,\
                          fwd,\
                          complement,\
                          baseptr,\
@@ -84,7 +76,7 @@
                          LEFT,\
                          RIGHT,\
                          DEPTH,\
-                         __LINE__);\
+                         __LINE__);*/\
         if (!maxdepth->defined ||\
             (DEPTH) < (Seqpos) maxdepth->valueunsignedint)\
         {\
@@ -92,8 +84,7 @@
           {\
             if ((LEFT) < (RIGHT))\
             {\
-              /*printf("insertion sort at offset %d\n",baseptr);*/\
-              insertionsort(encseq,esr1,esr2,baseptr,\
+              insertionsort(encseq,esr1,esr2,\
                             lcpsubtab,readmode,totallength,\
                             LEFT,RIGHT,DEPTH,maxdepth,cmpcharbychar);\
             }\
@@ -114,6 +105,16 @@
         R = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].right;\
         D = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].depth;\
         width = (Seqpos) ((R) - (L) + 1)
+
+#define UPDATELCP(MINVAL,MAXVAL)\
+        if ((MINVAL) > commonunits)\
+        {\
+          MINVAL = commonunits;\
+        }\
+        if ((MAXVAL) < commonunits)\
+        {\
+          MAXVAL = commonunits;\
+        }
 
 DECLAREARRAYSTRUCT(Largelcpvalue);
 
@@ -199,7 +200,8 @@ typedef EndofTwobitencoding Sfxcmp;
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
 #define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
 
-/*
+
+#ifdef SKDEBUG
 static void showsuffixrange(const Encodedsequence *encseq,
                             bool fwd,
                             bool complement,
@@ -226,15 +228,13 @@ static void showsuffixrange(const Encodedsequence *encseq,
                            *pi);
   }
 }
-*/
+#endif
 
 #undef CHECKSUFFIXRANGE
 #ifdef CHECKSUFFIXRANGE
 static void checksuffixrange(const Encodedsequence *encseq,
                              bool fwd,
                              bool complement,
-                             UNUSED Seqpos baseptr,
-                             UNUSED const Lcpsubtab *lcpsubtab,
                              Seqpos *left,
                              Seqpos *right,
                              Seqpos depth,
@@ -242,7 +242,7 @@ static void checksuffixrange(const Encodedsequence *encseq,
 {
   Seqpos *sufptr, newdepth = depth, pos1, pos2;
 
-  /*
+#ifdef SKDEBUG
   printf("checksuffixrange ");
   showsuffixrange(encseq,
                   fwd,
@@ -252,7 +252,7 @@ static void checksuffixrange(const Encodedsequence *encseq,
                   left,
                   right,
                   depth);
-  */
+#endif
   for (sufptr=left; sufptr<right; sufptr++)
   {
     if (fwd)
@@ -286,19 +286,6 @@ static void checksuffixrange(const Encodedsequence *encseq,
     }
   }
 }
-#else
-static void checksuffixrange(UNUSED const Encodedsequence *encseq,
-                             UNUSED bool fwd,
-                             UNUSED bool complement,
-                             UNUSED Seqpos baseptr,
-                             UNUSED const Lcpsubtab *lcpsubtab,
-                             UNUSED Seqpos *left,
-                             UNUSED Seqpos *right,
-                             UNUSED Seqpos depth,
-                             UNUSED int line)
-{
-  return;
-}
 #endif
 
 static Suffixptr *medianof3cmpcharbychar(const Encodedsequence *encseq,
@@ -331,7 +318,8 @@ static Suffixptr *medianof3cmpcharbychar(const Encodedsequence *encseq,
 
 static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Encodedsequencescanstate *esr1,
-                            Readmode readmode,
+                            bool fwd,
+                            bool complement,
                             Seqpos totallength,
                             Seqpos depth,
                             Suffixptr *a,
@@ -339,8 +327,6 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Suffixptr *c)
 {
   Sfxcmp vala, valb, valc;
-  bool fwd = ISDIRREVERSE(readmode) ? false : true,
-       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
   int retvalavalb, retvalavalc, retvalbvalc;
 
   PTR2INT(vala,a);
@@ -369,7 +355,6 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
 static void insertionsort(const Encodedsequence *encseq,
                           Encodedsequencescanstate *esr1,
                           Encodedsequencescanstate *esr2,
-                          UNUSED Seqpos baseptr,
                           Lcpsubtab *lcpsubtab,
                           Readmode readmode,
                           Seqpos totallength,
@@ -386,11 +371,11 @@ static void insertionsort(const Encodedsequence *encseq,
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  /*
+#ifdef SKDEBUG
   printf("insertion sort ");
   showsuffixrange(encseq,fwd,complement,baseptr,lcpsubtab,leftptr,rightptr,
                   depth);
-  */
+#endif
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
     for (pj = pi; pj > leftptr; pj--)
@@ -422,7 +407,7 @@ static void insertionsort(const Encodedsequence *encseq,
         }
       } else
       {
-        /*
+#ifdef SKDEBUG
         printf("compareEncseqsequences[%d,%d] at depth %d\n",
                        (int) *(pj-1),(int) *pj,(int) depth);
         showsequenceatstartpos(stdout,
@@ -435,14 +420,10 @@ static void insertionsort(const Encodedsequence *encseq,
                             complement,
                             encseq,
                             *pj);
-        */
+#endif
         retval = compareEncseqsequences(&lcplen,encseq,fwd,complement,
                                         esr1,esr2,*(pj-1),*pj,depth);
       }
-      /*
-      printf("lcp of %d %d is %d, retval = %d\n",
-              (int) *(pj-1),(int) (*pj),(int) lcplen,retval);
-      */
       if (lcpsubtab != NULL)
       {
         lcpindex = LCPINDEX(pj);
@@ -470,30 +451,33 @@ typedef struct
 
 DECLAREARRAYSTRUCT(MKVstack);
 
+static unsigned long quicksortsteps = 0;
+static unsigned long quicksortdiff = 0;
+
 static void bentleysedgewick(const Encodedsequence *encseq,
                              Encodedsequencescanstate *esr1,
                              Encodedsequencescanstate *esr2,
                              Readmode readmode,
                              Seqpos totallength,
                              ArrayMKVstack *mkvauxstack,
-                             Suffixptr baseptr,
                              Suffixptr *l,
                              Suffixptr *r,
                              Seqpos d,
                              Lcpsubtab *lcpsubtab,
                              const Definedunsignedint *maxdepth,
-                             UNUSED bool cmpcharbychar)
+                             bool cmpcharbychar)
 {
   Suffixptr *left, *right, *leftplusw;
-  Seqpos partvalcmpcharbychar = 0, valcmpcharbychar;
-  Sfxcmp partval, val;
+  Seqpos pivotcmpcharbychar = 0, valcmpcharbychar;
+  Sfxcmp pivot, val;
   Seqpos w, depth, offset, doubleoffset, width;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
-  int retvalpartval;
+  int retvalpivot;
   Uchar tmpvar;
-  unsigned int commonunits, smallerlcp, largerlcp;
+  unsigned int commonunits, smallermaxlcp, greatermaxlcp,
+               smallerminlcp, greaterminlcp;
   const int commonunitsequal = cmpcharbychar ? 1 : UNITSIN2BITENC;
 
   width = (Seqpos) (r - l + 1);
@@ -501,8 +485,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   {
     if (l < r)
     {
-      /*printf("insertionsort at offset %d\n",baseptr);*/
-      insertionsort(encseq,esr1,esr2,baseptr,lcpsubtab,readmode,totallength,
+      insertionsort(encseq,esr1,esr2,lcpsubtab,readmode,totallength,
                     l,r,d,maxdepth,cmpcharbychar);
     }
     return;
@@ -517,11 +500,6 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     pl = left;
     pm = left + DIV2(width);
     pr = right;
-    /*
-    printf("partition value for [%d,%d] is",
-            (int) LCPINDEX(left) + baseptr,
-            (int) LCPINDEX(right) + baseptr);
-    */
     if (width > (Seqpos) 30)
     { /* On big arrays, pseudomedian of 9 */
       offset = DIV8(width);
@@ -536,11 +514,11 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                        pr-doubleoffset,pr-offset,pr);
       } else
       {
-        pl = medianof3(encseq,esr1,readmode,totallength,depth,
+        pl = medianof3(encseq,esr1,fwd,complement,totallength,depth,
                        pl,pl+offset,pl+doubleoffset);
-        pm = medianof3(encseq,esr1,readmode,totallength,depth,
+        pm = medianof3(encseq,esr1,fwd,complement,totallength,depth,
                        pm-offset,pm,pm+offset);
-        pr = medianof3(encseq,esr1,readmode,totallength,depth,
+        pr = medianof3(encseq,esr1,fwd,complement,totallength,depth,
                        pr-doubleoffset,pr-offset,pr);
       }
     }
@@ -548,52 +526,48 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       pm = medianof3cmpcharbychar(encseq,readmode,totallength,depth,pl,pm,pr);
       SWAP(left, pm);
-      CMPCHARBYCHARPTR2INT(partvalcmpcharbychar,tmpvar,left);
+      CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,left);
     } else
     {
-      pm = medianof3(encseq,esr1,readmode,totallength,depth,pl,pm,pr);
+      pm = medianof3(encseq,esr1,fwd,complement,totallength,depth,pl,pm,pr);
       SWAP(left, pm);
-      PTR2INT(partval,left);
+      PTR2INT(pivot,left);
     }
-    /*printf(" %d\n",(int) *left); */
-    smallerlcp = 0;
-    largerlcp = 0;
     /* now pivot element is at index left */
     /* all elements to be compared are between pb and pc */
     /* pa is the position at which the next element smaller than the
        pivot element is inserted at */
-    /* pd is the position at which the next element larger than the
+    /* pd is the position at which the next element greater than the
        pivot element is inserted at */
     pa = pb = left + 1;
     pc = pd = right;
     if (cmpcharbychar)
     {
+      smallerminlcp = greaterminlcp = smallermaxlcp = greatermaxlcp = 0;
       for (;;)
       {
-        /* look for elements identical or smaller than pivot from left */
         while (pb <= pc)
         {
           CMPCHARBYCHARPTR2INT(valcmpcharbychar,tmpvar,pb);
-          if (valcmpcharbychar > partvalcmpcharbychar)
-          { /* stop for elements > pivot */
+          if (valcmpcharbychar > pivotcmpcharbychar)
+          {
             break;
           }
-          if (valcmpcharbychar == partvalcmpcharbychar)
+          if (valcmpcharbychar == pivotcmpcharbychar)
           {
-            SWAP(pa, pb); /* exchange equal element and element at index pa */
+            SWAP(pa, pb);
             pa++;
           }
           pb++;
         }
-        /* look for elements identical or greater than pivot from right */
         while (pb <= pc)
         {
           CMPCHARBYCHARPTR2INT(valcmpcharbychar,tmpvar,pc);
-          if (valcmpcharbychar < partvalcmpcharbychar)
+          if (valcmpcharbychar < pivotcmpcharbychar)
           { /* stop for elements < pivot */
             break;
           }
-          if (valcmpcharbychar == partvalcmpcharbychar)
+          if (valcmpcharbychar == pivotcmpcharbychar)
           {
             SWAP(pc, pd);  /* exchange equal element and element at index pd */
             pd--;
@@ -610,60 +584,52 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       }
     } else
     {
+      smallermaxlcp = greatermaxlcp = 0;
+      smallerminlcp = greaterminlcp = (unsigned int) UNITSIN2BITENC;
       for (;;)
       {
+        /* look for elements identical or smaller than pivot from left */
         while (pb <= pc)
         {
           PTR2INT(val,pb);
-          Sfxdocompare(&commonunits,val,partval);
-          if (SfxcmpGREATER(val,partval))
-          {
-            if (largerlcp < commonunits)
-            {
-              largerlcp = commonunits;
-            }
+          Sfxdocompare(&commonunits,val,pivot);
+          if (SfxcmpGREATER(val,pivot))
+          { /* stop for elements val > pivot */
+            UPDATELCP(greaterminlcp,greatermaxlcp);
             break;
           }
-          if (SfxcmpEQUAL(val,partval))
+          if (SfxcmpEQUAL(val,pivot))
           {
-            SWAP(pa, pb);
+            SWAP(pa, pb); /* exchange equal element and element at index pa */
             pa++;
-          } else
+          } else /* smaller */
           {
-            if (smallerlcp < commonunits)
-            {
-              smallerlcp = commonunits;
-            }
+            UPDATELCP(smallerminlcp,smallermaxlcp);
           }
           pb++;
         }
+        /* look for elements identical or greater than pivot from right */
         while (pb <= pc)
         {
           PTR2INT(val,pc);
-          Sfxdocompare(&commonunits,val,partval);
-          if (SfxcmpSMALLER(val,partval))
-          {
-            if (smallerlcp < commonunits)
-            {
-              smallerlcp = commonunits;
-            }
+          Sfxdocompare(&commonunits,val,pivot);
+          if (SfxcmpSMALLER(val,pivot))
+          { /* stop for elements val < pivot */
+            UPDATELCP(smallerminlcp,smallermaxlcp);
             break;
           }
-          if (SfxcmpEQUAL(val,partval))
+          if (SfxcmpEQUAL(val,pivot))
           {
-            SWAP(pc, pd);
+            SWAP(pc, pd); /* exchange equal element and element at index pa */
             pd--;
-          } else
+          } else /* greater */
           {
-            if (largerlcp < commonunits)
-            {
-              largerlcp = commonunits;
-            }
+            UPDATELCP(greaterminlcp,greatermaxlcp);
           }
           pc--;
         }
         if (pb > pc)
-        {
+        { /* interval is empty small */
           break;
         }
         SWAP(pb, pc);
@@ -676,12 +642,12 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     w = MIN((Seqpos) (pa-left),(Seqpos) (pb-pa));
     /* move w elements at the left to the middle */
     VECSWAP(left,  pb-w, w);
-    pr = right + 1;
+
     assert(pd >= pc);
-    assert(pr > pd);
-    w = MIN((Seqpos) (pd-pc), (Seqpos) (pr-pd-1));
+    assert(right >= pd);
+    w = MIN((Seqpos) (pd-pc), (Seqpos) (right-pd));
     /* move w elements at the right to the middle */
-    VECSWAP(pb, pr-w, w);
+    VECSWAP(pb, right+1-w, w);
 
     /* all elements equal to the pivot are now in the middle namely in the
        range [left + (pb-pa) and right - (pd-pc)] */
@@ -695,16 +661,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       leftplusw = left + w;
       if (lcpsubtab != NULL)
       {
-        if (cmpcharbychar)
-        {
-          SETLCP(LCPINDEX(leftplusw),depth);
-        } else
-        {
-          SETLCP(LCPINDEX(leftplusw),depth + smallerlcp);
-        }
+        SETLCP(LCPINDEX(leftplusw),depth + smallermaxlcp);
       }
-      /* use smallest lcp value for the left */
-      SUBSORT(w,SMALLSIZE,left,leftplusw-1,depth);
+      SUBSORT(w,SMALLSIZE,left,leftplusw-1,depth + smallerminlcp);
     } else
     {
       leftplusw = left;
@@ -722,18 +681,18 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       if (lcpsubtab != NULL)
       {
-        if (cmpcharbychar)
-        {
-          SETLCP(LCPINDEX(right-w+1),depth);
-        } else
-        {
-          SETLCP(LCPINDEX(right-w+1),depth + largerlcp);
-        }
+        SETLCP(LCPINDEX(right-w+1),depth + greatermaxlcp);
       }
-      /* use smallest lcp value for the left */
-      SUBSORT(w,SMALLSIZE,right-w+1,right,depth);
+      SUBSORT(w,SMALLSIZE,right-w+1,right,depth + greaterminlcp);
     }
-
+    quicksortsteps++;
+    if ((unsigned long) (pb-pa) < (unsigned long) (pd-pc))
+    {
+      quicksortdiff += (unsigned long) (pd-pc) - (unsigned long) (pb-pa);
+    } else
+    {
+      quicksortdiff += (unsigned long) (pb-pa) - (unsigned long) (pd-pc);
+    }
     if (mkvauxstack->nextfreeMKVstack == 0)
     {
       break;
@@ -1150,7 +1109,6 @@ void sortallbuckets(Seqpos *suftabptr,
                          readmode,
                          totallength,
                          &mkvauxstack,
-                         bucketspec.left,
                          suftabptr + bucketspec.left,
                          suftabptr + bucketspec.left +
                                      bucketspec.nonspecialsinbucket - 1,
@@ -1264,4 +1222,7 @@ void sortallbuckets(Seqpos *suftabptr,
     freeEncodedsequencescanstate(&esr2);
   }
   FREEARRAY(&mkvauxstack,MKVstack);
+  printf("# quicksortsteps: %lu, avg diff %.2f\n",
+          quicksortsteps,(double) quicksortdiff/quicksortsteps);
+
 }
