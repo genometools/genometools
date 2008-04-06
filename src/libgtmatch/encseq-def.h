@@ -241,10 +241,12 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
                                     Encodedsequencescanstate *esr2,
                                     Seqpos pos2);
 
+/*
 void showsequenceatstartpos(FILE *fp,
                             bool fwd,
                             bool complement,
                             const Encodedsequence *encseq,
                             Seqpos startpos);
+*/
 
 #endif

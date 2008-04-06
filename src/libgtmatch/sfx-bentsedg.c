@@ -65,7 +65,7 @@
           *bptr++ = temp;\
         }
 
-#define SMALLSIZE (Seqpos) 5
+#define SMALLSIZE (Seqpos) 6
 
 #define SUBSORT(WIDTH,BORDER,LEFT,RIGHT,DEPTH)\
         /*checksuffixrange(encseq,\
@@ -98,6 +98,9 @@
         CHECKARRAYSPACE(mkvauxstack,MKVstack,1024);\
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].left = L;\
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].right = R;\
+        mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].newpivot = 0;\
+        mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].\
+                     pivotdefined = false;\
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack++].depth = D
 
 #define POPMKVstack(L,R,D)\
@@ -107,6 +110,8 @@
         width = (Seqpos) ((R) - (L) + 1)
 
 #define UPDATELCP(MINVAL,MAXVAL)\
+        assert(commonunits < (unsigned int) UNITSIN2BITENC);\
+        lcpdistribution[commonunits]++;\
         if ((MINVAL) > commonunits)\
         {\
           MINVAL = commonunits;\
@@ -199,7 +204,6 @@ typedef EndofTwobitencoding Sfxcmp;
 #define SfxcmpEQUAL(X,Y)      (ret##X##Y == 0)
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
 #define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
-
 
 #ifdef SKDEBUG
 static void showsuffixrange(const Encodedsequence *encseq,
@@ -446,13 +450,16 @@ typedef struct
 {
   Suffixptr *left,
             *right;
-  Seqpos depth;
+  Seqpos depth,
+         newpivot;
+  bool pivotdefined;
 } MKVstack;
 
 DECLAREARRAYSTRUCT(MKVstack);
 
 static unsigned long quicksortsteps = 0;
 static unsigned long quicksortdiff = 0;
+static unsigned long lcpdistribution[UNITSIN2BITENC] = {0};
 
 static void bentleysedgewick(const Encodedsequence *encseq,
                              Encodedsequencescanstate *esr1,
@@ -697,7 +704,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       break;
     }
-    POPMKVstack(left,right,depth);
+    POPMKVstack(left,right,depth); /* new values for left, right, depth */
   }
 }
 
@@ -1222,7 +1229,21 @@ void sortallbuckets(Seqpos *suftabptr,
     freeEncodedsequencescanstate(&esr2);
   }
   FREEARRAY(&mkvauxstack,MKVstack);
+  /* The following output is for test purpose only */
   printf("# quicksortsteps: %lu, avg diff %.2f\n",
           quicksortsteps,(double) quicksortdiff/quicksortsteps);
+  {
+    int i;
+    unsigned long sumevents = 0;
 
+    for (i=0; i<UNITSIN2BITENC; i++)
+    {
+      sumevents += lcpdistribution[i];
+    }
+    for (i=0; i<UNITSIN2BITENC; i++)
+    {
+      printf("# lcpdist[%d]=%lu (%.4f)\n",i,lcpdistribution[i],
+                                      (double) lcpdistribution[i]/sumevents);
+    }
+  }
 }
