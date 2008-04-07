@@ -20,9 +20,8 @@
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
 /*
-  TODO:
-  - normalize use  of  seqIdx variable naming (seq, bseq etc.)
-  - split init/new functionality cleanly for all structs
+ * TODO:
+ * - normalize use  of  seqIdx variable naming (seq, bseq etc.)
  */
 
 #include <assert.h>
@@ -37,6 +36,7 @@
 #include "libgtcore/dataalign.h"
 #include "libgtcore/error.h"
 #include "libgtcore/fa.h"
+#include "libgtcore/log.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/str.h"
 #include "libgtcore/unused.h"
@@ -56,7 +56,8 @@
 #include "libgtmatch/eis-suffixarray-interface.h"
 
 struct encIdxSeq *
-newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
+newBlockEncIdxSeq(const Str *projectName, Verboseinfo *verbosity,
+                  const struct blockEncParams *params,
                   size_t numExtHeaders, uint16_t *headerIDs,
                   uint32_t *extHeaderSizes,
                   headerWriteFunc *extHeaderCallbacks, void **headerCBData,
@@ -66,17 +67,11 @@ newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
   Suffixarray suffixArray;
   struct encIdxSeq *newSeqIdx;
   Seqpos length;
-  Verboseinfo *verbosity;
   assert(projectName);
   /* map and interpret index project file */
-  /* FIXME: handle verbosity in a more sane fashion */
-  verbosity = newverboseinfo(false);
   if (streamsuffixarray(&suffixArray, &length,
                        SARR_SUFTAB | SARR_BWTTAB, projectName, verbosity, err))
-  {
-    freeverboseinfo(&verbosity);
     return NULL;
-  }
   ++length;
   newSeqIdx = newBlockEncIdxSeqFromSA(&suffixArray, length,
                                       projectName, params,
@@ -85,7 +80,6 @@ newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
                                       headerCBData, biFunc, cwExtBitsPerPos,
                                       maxVarExtBitsPerPos, cbState, err);
   freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity);
   return newSeqIdx;
 }
 
@@ -488,7 +482,6 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
   newSeqIdx->bitsPerSeqpos = requiredSeqposBits((newSeqIdx->baseClass.seqLen
                                                  = totalLen) - 1);
   newSeqIdx->baseClass.alphabet = alphabet;
-  /* TODO: improve guessing of number of necessary ranges */
   {
     size_t range, numAlphabetRanges = newSeqIdx->numModes =
       MRAEncGetNumRanges(alphabet);
@@ -512,8 +505,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
          * to improve orthogonality */
         break;
       default:
-        /* TODO: improve diagnostics */
-        fprintf(stderr, "Invalid encoding request.\n");
+        log_log("Invalid encoding request.\n");
         newBlockEncIdxSeqErrRet();
         break;
       }
@@ -557,7 +549,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
 #if EIS_DEBUG > 1
         for (i = 0; i < blockMapAlphabetSize; ++i)
         {
-          fprintf(stderr, "symCount[%"PRIuSymbol"]="FormatSeqpos"\n", (Symbol)i,
+          log_log("symCount[%"PRIuSymbol"]="FormatSeqpos"\n", (Symbol)i,
                   stats->symbolDistributionTable[i]);
         }
 #endif /* EIS_DEBUG > 1 */
@@ -576,7 +568,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
 #ifdef EIS_DEBUG
           for (i = 0; i < blockMapAlphabetSize; ++i)
           {
-            fprintf(stderr, "bitsPerSymSum[%"PRIuSymbol"]=%u\n", (Symbol)i,
+            log_log("bitsPerSymSum[%"PRIuSymbol"]=%u\n", (Symbol)i,
                     newSeqIdx->partialSymSumBits[i]);
           }
 #endif  /* EIS_DEBUG */
@@ -584,7 +576,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             = newSeqIdx->partialSymSumBitsSums[blockMapAlphabetSize - 1]
             + newSeqIdx->partialSymSumBits[blockMapAlphabetSize - 1];
 #ifdef EIS_DEBUG
-          fprintf(stderr, "symSumBits total: %u\n", newSeqIdx->symSumBits);
+          log_log("symSumBits total: %u\n", newSeqIdx->symSumBits);
 #endif  /* EIS_DEBUG */
         }
       }
@@ -604,8 +596,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             regionSymCount += stats->symbolDistributionTable[i];
         regionsEstimate = regionSymCount/20;
 #ifdef EIS_DEBUG
-        fprintf(stderr, "Expected "FormatSeqpos
-                " symbols to encode in regions.\n",
+        log_log("Expected "FormatSeqpos" symbols to encode in regions.\n",
                 regionSymCount);
 #endif
       }
@@ -914,7 +905,7 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx)
       + (seqIdx->partialSymSumBits[i] = seqIdx->bitsPerSeqpos);
   seqIdx->symSumBits = blockMapAlphabetSize * seqIdx->bitsPerSeqpos;
 #ifdef EIS_DEBUG
-  fprintf(stderr, "symSumBits=%u, blockMapAlphabetSize=%u\n",
+  log_log("symSumBits=%u, blockMapAlphabetSize=%u\n",
           seqIdx->symSumBits, seqIdx->blockMapAlphabetSize);
 #endif
   assert(seqIdx->partialSymSumBitsSums[i - 1] + seqIdx->bitsPerSeqpos
@@ -2166,25 +2157,22 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
 }
 
 struct encIdxSeq *
-loadBlockEncIdxSeq(const Str *projectName, int features, Error *err)
+loadBlockEncIdxSeq(const Str *projectName, int features,
+                   Verboseinfo *verbosity, Error *err)
 {
-  struct encIdxSeq *newSeqIdx;
+  struct encIdxSeq *newSeqIdx = NULL;
   Suffixarray suffixArray;
   Seqpos len;
-  Verboseinfo *verbosity;
-  /* FIXME: handle verbosity in a saner fashion */
-  verbosity = newverboseinfo(false);
-  if (streamsuffixarray(&suffixArray, &len,
-                        0, projectName, verbosity, err))
+  do
   {
-    freeverboseinfo(&verbosity);
-    return NULL;
-  }
-  ++len;
-  newSeqIdx = loadBlockEncIdxSeqForSA(&suffixArray, len, projectName,
-                                      features, err);
-  freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity);
+    if (streamsuffixarray(&suffixArray, &len,
+                          0, projectName, verbosity, err))
+      break;
+    ++len;
+    newSeqIdx = loadBlockEncIdxSeqForSA(&suffixArray, len, projectName,
+                                        features, err);
+    freesuffixarray(&suffixArray);
+  } while (0);
   return newSeqIdx;
 }
 
@@ -2296,7 +2284,7 @@ loadBlockEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
             newSeqIdx->partialSymSumBits[0]= *(uint32_t *)(buf + offset + 8);
             newSeqIdx->partialSymSumBitsSums[0] = 0;
 #ifdef EIS_DEBUG
-            fprintf(stderr, "partialSymSumBits[0]=%u\n",
+            log_log("partialSymSumBits[0]=%u\n",
                     newSeqIdx->partialSymSumBits[0]);
 #endif
             for (i = 1; i < blockMapAlphabetSize; ++i)
@@ -2304,7 +2292,7 @@ loadBlockEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
               newSeqIdx->partialSymSumBits[i]
                 = *(uint32_t *)(buf + offset + 8 + 4*i);
 #ifdef EIS_DEBUG
-              fprintf(stderr, "partialSymSumBits[%"PRIuSymbol"]=%u\n",
+              log_log("partialSymSumBits[%"PRIuSymbol"]=%u\n",
                       (Symbol)i, newSeqIdx->partialSymSumBits[i]);
 #endif
               newSeqIdx->partialSymSumBitsSums[i] =
@@ -2349,7 +2337,7 @@ loadBlockEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
         }
         else
         {
-          fprintf(stderr, "Unknown header field: %4s\n", buf + offset);
+          log_log("Unknown header field: %4s\n", buf + offset);
           loadBlockEncIdxSeqErrRet();
         }
       }
@@ -2385,8 +2373,7 @@ loadBlockEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
         /*< FIXME: insert proper code to process ranges */
         break;
       default:
-        /* TODO: improve diagnostics */
-        fprintf(stderr, "Invalid encoding request.\n");
+        log_log("Invalid encoding request.\n");
         loadBlockEncIdxSeqErrRet();
         break;
       }
@@ -2608,7 +2595,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
   assert(seqIdx && fp && hint);
   if (bucketBasePos(seqIdx, bucketNum) >= EISLength(&seqIdx->baseClass))
   {
-    fprintf(stderr, "warning: querying bucket "FormatSeqpos
+    log_log("warning: querying bucket "FormatSeqpos
             " beyond end of sequence!\n", bucketNum);
     bucketNum = lastBucket;
   }

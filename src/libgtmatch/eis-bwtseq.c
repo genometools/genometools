@@ -19,6 +19,7 @@
 
 #include "libgtcore/dataalign.h"
 #include "libgtcore/error.h"
+#include "libgtcore/log.h"
 #include "libgtcore/str.h"
 #include "libgtcore/unused.h"
 #include "libgtmatch/sarr-def.h"
@@ -45,53 +46,61 @@ static BWTSeq *
 newBWTSeq(struct encIdxSeq *seqIdx, MRAEnc *alphabet);
 
 extern BWTSeq *
-availBWTSeq(const struct bwtParam *params, Error *err)
+availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, Error *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
   Seqpos len;
-  Verboseinfo *verbosity;
   assert(params && err);
   error_check(err);
-  /* FIXME: handle verbosity in a more sane fashion */
-  verbosity = newverboseinfo(false);
-  if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB,
-                        params->projectName, verbosity, err))
+  if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB
+                        | SARR_ESQTAB, params->projectName, verbosity, err))
   {
-    freeverboseinfo(&verbosity);
-    return NULL;
+    error_unset(err);
+    if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_ESQTAB,
+                          params->projectName, verbosity, err))
+    {
+      error_unset(err);
+      if (streamsuffixarray(&suffixArray, &len, 0,
+                            params->projectName, verbosity, err))
+        return NULL;
+    }
   }
   ++len;
   bwtSeq = availBWTSeqFromSA(params, &suffixArray, len, err);
   freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity);
   return bwtSeq;
 }
 
 extern BWTSeq *
-trSuftab2BWTSeq(const struct bwtParam *params, Error *err)
+trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
+                Error *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
   Seqpos len;
-  Verboseinfo *verbosity;
   assert(params && err);
   error_check(err);
-  /* FIXME: handle verbosity in a more sane fashion */
-  verbosity = newverboseinfo(false);
-  if (streamsuffixarray(&suffixArray, &len,
-                        SARR_SUFTAB | SARR_BWTTAB | SARR_ESQTAB,
-                        params->projectName, verbosity, err)
-      && streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_ESQTAB,
-                           params->projectName, verbosity, err))
+  do
   {
-    freeverboseinfo(&verbosity);
-    return NULL;
-  }
-  ++len;
-  bwtSeq = createBWTSeqFromSA(params, &suffixArray, len, err);
-  freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity);
+    if (streamsuffixarray(&suffixArray, &len,
+                          SARR_SUFTAB | SARR_BWTTAB | SARR_ESQTAB,
+                          params->projectName, verbosity, err))
+    {
+      error_unset(err);
+      if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_ESQTAB,
+                            params->projectName, verbosity, err))
+      {
+        error_set(err, "suffix array project %s does not hold required suffix"
+                  " array (.suf) and encoded sequence (.esq) information!",
+                  str_get(params->projectName));
+        break;
+      }
+    }
+    ++len;
+    bwtSeq = createBWTSeqFromSA(params, &suffixArray, len, err);
+    freesuffixarray(&suffixArray);
+  } while (0);
   return bwtSeq;
 }
 
@@ -112,32 +121,30 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
     error_unset(err);
     bwtSeq = createBWTSeqFromSA(params, sa, totalLen, err);
   }
+  else
+  {
+    fputs("Using pre-computed sequence index.\n", stderr);
+  }
   return bwtSeq;
 }
 
 static int GTAlphabetRangeHandling[] = { NORMAL_RANGE, SPECIAL_RANGE };
 
 extern BWTSeq *
-loadBWTSeq(const Str *projectName, int BWTOptFlags, Error *err)
+loadBWTSeq(const Str *projectName, int BWTOptFlags, Verboseinfo *verbosity,
+           Error *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
   Seqpos len;
-  Verboseinfo *verbosity;
   assert(projectName && err);
   error_check(err);
-  /* FIXME: handle verbosity in a more sane fashion */
-  verbosity = newverboseinfo(false);
   if (mapsuffixarray(&suffixArray, &len, 0, projectName, verbosity, err))
-  {
-    freeverboseinfo(&verbosity);
     return NULL;
-  }
   ++len;
   bwtSeq = loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC, BWTOptFlags,
                            &suffixArray, len, err);
   freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity);
   return bwtSeq;
 }
 
@@ -160,7 +167,6 @@ loadBWTSeqForSA(const Str *projectName, enum seqBaseEncoding baseType,
     {
       if (!(bwtSeq = newBWTSeq(seqIdx, alphabet)))
         break;
-      fputs("Using pre-computed sequence index.\n", stderr);
     }
     break;
   default:
@@ -179,8 +185,7 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   BWTSeq *bwtSeq = NULL;
   if (!sa->longest.defined)
   {
-    fprintf(stderr,
-            "error: position of null-rotation/longest suffix not available"
+    log_log("error: position of null-rotation/longest suffix not available"
             " for project %s\n", str_get(params->projectName));
   }
   else
@@ -207,8 +212,8 @@ createBWTSeqFromSAI(const struct bwtParam *params,
       && !SDRIsValid(readSfxIdx
                                = SAIMakeReader(sai, SFX_REQUEST_SUFTAB)))
   {
-    fprintf(stderr, "error: locate sampling requested but not available"
-            " for project %s\n", str_get(params->projectName));
+    error_set(err, "error: locate sampling requested but not available"
+              " for project %s\n", str_get(params->projectName));
   }
   else
   {
@@ -305,8 +310,8 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
     if (!readLocateInfoHeader(seqIdx, &header)
         || !header.locateInterval)
     {
-      fputs("Index does not contain locate information.\n"
-            "Localization of matches will not be supported!\n", stderr);
+      log_log("Index does not contain locate information.\n"
+              "Localization of matches will not be supported!\n");
       bwtSeq->locateSampleInterval = 0;
     }
     else
@@ -336,10 +341,10 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
     /* and finally place the 1-count for the terminator */
     count[i] = count[i - 1] + 1;
 #ifdef EIS_DEBUG
-    fprintf(stderr, "count[alphabetSize]="FormatSeqpos
+    log_log("count[alphabetSize]="FormatSeqpos
             ", len="FormatSeqpos"\n", count[alphabetSize], len);
     for (i = 0; i <= alphabetSize; ++i)
-      fprintf(stderr, "count[%u]="FormatSeqpos"\n", (unsigned)i, count[i]);
+      log_log("count[%u]="FormatSeqpos"\n", (unsigned)i, count[i]);
 #endif
     assert(count[alphabetSize] == len);
   }
@@ -670,12 +675,11 @@ EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
 extern int
 BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
                       unsigned long tickPrint, FILE *fp,
-                      Error *err)
+                      Verboseinfo *verbosity, Error *err)
 {
   Suffixarray suffixArray;
   struct extBitsRetrieval extBits;
   bool suffixArrayIsInitialized = false, extBitsAreInitialized = false;
-  Verboseinfo *verbosity = NULL;
   enum verifyBWTSeqErrCode retval = VERIFY_BWTSEQ_NO_ERROR;
   do
   {
@@ -683,7 +687,6 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
     assert(bwtSeq && projectName && err);
     error_check(err);
 
-    verbosity = newverboseinfo(true);
     initExtBitsRetrieval(&extBits);
     if (mapsuffixarray(&suffixArray, &len,
                        SARR_SUFTAB | SARR_ESQTAB, projectName, verbosity, err))
@@ -691,7 +694,6 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       error_set(err, "Cannot load reference suffix array project with"
                     " demand for suffix table file and encoded sequence"
                     " for project: %s", str_get(projectName));
-      freeverboseinfo(&verbosity);
       retval = VERIFY_BWTSEQ_REFLOAD_ERROR;
       break;
     }
@@ -772,11 +774,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       }
     }
   } while (0);
-  if (suffixArrayIsInitialized)
-    freesuffixarray(&suffixArray);
-  if (verbosity)
-    freeverboseinfo(&verbosity);
-  if (extBitsAreInitialized)
-    destructExtBitsRetrieval(&extBits);
+  if (suffixArrayIsInitialized) freesuffixarray(&suffixArray);
+  if (extBitsAreInitialized) destructExtBitsRetrieval(&extBits);
   return retval;
 }

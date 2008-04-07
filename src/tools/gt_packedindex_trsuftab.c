@@ -16,7 +16,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "libgtcore/ensure.h"
 #include "libgtcore/error.h"
 #include "libgtcore/option.h"
 #include "libgtcore/str.h"
@@ -32,6 +31,7 @@
 struct trSufTabOptions
 {
   struct bwtOptions idx;
+  bool verboseOutput;
 };
 
 static OPrval
@@ -47,6 +47,7 @@ gt_packedindex_trsuftab(int argc, const char *argv[], Error *err)
   Str *inputProject = NULL;
   int parsedArgs;
   bool had_err = false;
+  Verboseinfo *verbosity = NULL;
   inputProject = str_new();
 
   do {
@@ -70,25 +71,26 @@ gt_packedindex_trsuftab(int argc, const char *argv[], Error *err)
         break;
     }
     str_set(inputProject, argv[parsedArgs]);
-    {
-      bwtSeq = trSuftab2BWTSeq(&params.idx.final, err);
-    }
-    ensure(had_err, bwtSeq);
+    verbosity = newverboseinfo(params.verboseOutput);
+    bwtSeq = trSuftab2BWTSeq(&params.idx.final, verbosity, err);
+    had_err = bwtSeq == NULL;
     if (had_err)
       break;
   } while (0);
   if (bwtSeq) deleteBWTSeq(bwtSeq);
+  if (verbosity) freeverboseinfo(&verbosity);
   if (inputProject) str_delete(inputProject);
   return had_err?-1:0;
 }
 
 static OPrval
 parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
-                   struct trSufTabOptions *params, const Str *projectName,
-                   Error *err)
+                     struct trSufTabOptions *params, const Str *projectName,
+                     Error *err)
 {
   OptionParser *op;
   OPrval oprval;
+  Option *option;
 
   error_check(err);
   op = option_parser_new("indexname",
@@ -96,6 +98,12 @@ parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
 
   registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
                              projectName);
+
+  option = option_new_bool("v",
+                           "print verbose progress information",
+                           &params->verboseOutput,
+                           false);
+  option_parser_add_option(op, option);
 
   option_parser_set_min_max_args(op, 1, 1);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);

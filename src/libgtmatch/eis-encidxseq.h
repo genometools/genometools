@@ -29,6 +29,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/seqpos-def.h"
+#include "libgtmatch/verbose-def.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-encidxseqparam.h"
 
@@ -139,7 +140,8 @@ typedef union EISHint *EISHint;
  * @param err genometools error object reference
  */
 extern EISeq *
-newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
+newBlockEncIdxSeq(const Str *projectName, Verboseinfo *verbosity,
+                  const struct blockEncParams *params,
                   size_t numExtHeaders, uint16_t *headerIDs,
                   uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
                   void **headerCBData,
@@ -154,7 +156,8 @@ newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
  * @param err genometools error object reference
  */
 extern EISeq *
-loadBlockEncIdxSeq(const Str *projectName, int features, Error *err);
+loadBlockEncIdxSeq(const Str *projectName, int features,
+                   Verboseinfo *verbosity, Error *err);
 
 /**
  * \brief Deallocate a previously loaded/created sequence object.
@@ -430,7 +433,8 @@ enum EISIntegrityCheckFlags
  */
 extern enum EISIntegrityCheckResults
 EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
-                   unsigned long tickPrint, FILE *fp, int chkFlags, Error *err);
+                   unsigned long tickPrint, FILE *fp, int chkFlags,
+                   Verboseinfo *verbosity, Error *err);
 
 /**
  * @brief Position file pointer at header written by upper layer.
