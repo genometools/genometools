@@ -24,6 +24,7 @@
 #include "libgtext/align.h"                     /* align module */
 #include "libgtext/alignment.h"                 /* alignment class */
 #include "libgtext/cds_stream.h"                /* CDS stream */
+#include "libgtext/chain.h"                /* chain class */
 #include "libgtext/consensus_sa.h"              /* consensus spl. align. mod. */
 #include "libgtext/csa_stream.h"                /* consensus spl. align. str. */
 #include "libgtext/coin_hmm.h"                  /* the coin HMM class */
@@ -35,6 +36,8 @@
 #include "libgtext/genome_stream.h"             /* genome stream class */
 #include "libgtext/gff3_in_stream.h"            /* GFF3 input stream class */
 #include "libgtext/gff3_out_stream.h"           /* GFF3 output stream class */
+#include "libgtext/globalchaining.h"           /* global chaining module */
+#include "libgtext/gtdata.h"                    /* gtdata/ module */
 #include "libgtext/gtf_in_stream.h"             /* GTF input stream class */
 #include "libgtext/gtf_out_stream.h"            /* GTF output stream class */
 #include "libgtext/hmm.h"                       /* HMM class */

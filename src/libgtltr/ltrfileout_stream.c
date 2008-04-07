@@ -17,12 +17,15 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <unistd.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/fasta.h"
+#include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/range.h"
 #include "libgtcore/str.h"
+#include "libgtcore/unused.h"
 #include "libgtext/genome_stream_rep.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
@@ -51,8 +54,89 @@ struct LTRFileOutStream {
   LTRElement element;
 };
 
+struct PdomOutInfo {
+  LTRFileOutStream *ls;
+  Seq *seq;
+  char *desc;
+};
+
 #define ltr_fileout_stream_cast(GS)\
         genome_stream_cast(ltr_fileout_stream_class(), GS)
+
+UNUSED static void strip_gaps(char *out, char *in, size_t len)
+{
+  size_t i = 0;
+  while (i < len)
+  {
+    if (*in != '-') *out++ = toupper(*in);
+    in++;
+    i++;
+  }
+}
+
+static int write_pdom(void *key, void *value, void *data, Error *e)
+{
+  struct PdomOutInfo *outinfo = (struct PdomOutInfo*) data;
+  LTRFileOutStream *ls = outinfo->ls;
+  const char *pdomname = (const char*) key;
+  Array* pdoms = (Array*) value;
+  unsigned long i = 0,
+                seq_length = 0;
+  Str *pdomnames = str_new();
+  Str *pdom_seq = str_new();
+  GenFile *genfile = NULL;
+
+  ltrelement_format_description(&ls->element, outinfo->desc, MAXFASTAHEADER-1);
+  if (STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
+    array_reverse(pdoms);
+
+  /* get protein domain output file */
+  genfile = (GenFile*) hashtable_get(ls->pdomout_files, pdomname);
+  if (genfile == NULL)
+  {
+    /* no file opened for this domain yet, do it */
+    char buffer[MAXFILENAMELEN];
+    snprintf(buffer, MAXFILENAMELEN-1, "%s_pdom_%s.fas",
+             ls->fileprefix, pdomname);
+    genfile = genfile_open(GFM_UNCOMPRESSED, buffer, "w+");
+    hashtable_add(ls->pdomout_files, cstr_dup(pdomname), genfile);
+  }
+
+  for (i=0;i<array_size(pdoms);i++)
+  {
+    Range pdom_rng;
+    GenomeFeature *gf = *(GenomeFeature**) array_get(pdoms, i);
+    char *tmpstr = NULL;
+
+    str_append_cstr(pdomnames, pdomname);
+    str_append_cstr(pdomnames,"(");
+    str_append_ulong(pdomnames, (unsigned long) genome_feature_get_phase(gf));
+    str_append_char(pdomnames, STRANDCHARS[genome_feature_get_strand(gf)]);
+    str_append_cstr(pdomnames,")");
+    if (i != array_size(pdoms)-1)
+      str_append_cstr(pdomnames, "/");
+
+    pdom_rng = genome_node_get_range((GenomeNode*) gf);
+    tmpstr =  ltrelement_get_sequence(pdom_rng.start,
+                                      pdom_rng.end,
+                                      genome_feature_get_strand(gf),
+                                      outinfo->seq, e);
+    str_append_cstr(pdom_seq, tmpstr);
+    seq_length += range_length(pdom_rng);
+    ma_free(tmpstr);
+  }
+  fasta_show_entry_generic(outinfo->desc,
+                           str_get(pdom_seq),
+                           seq_length,
+                           FSWIDTH,
+                           genfile);
+  /* write domains to tabular outfile */
+  genfile_xprintf(ls->tabout_file, "%s", str_get(pdomnames));
+  str_delete(pdomnames);
+  str_delete(pdom_seq);
+
+  return 0;   /* XXX: some more error checking? */
+}
 
 int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                Error *e)
@@ -60,7 +144,6 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   LTRFileOutStream *ls;
   Range lltr_rng, rltr_rng, rng, ppt_rng, pbs_rng;
   char *ppt_seq, *pbs_seq;
-  Str *pdoms;
   int had_err;
 
   error_check(e);
@@ -68,7 +151,6 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 
   /* initialize this element */
   memset(&ls->element, 0, sizeof (LTRElement));
-  ls->element.pdoms = array_new(sizeof (GenomeFeature*));
 
   /* get annotations from parser */
   had_err = genome_stream_next_tree(ls->in_stream, gn, e);
@@ -85,7 +167,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 
   if (ls->element.mainnode)
   {
-    unsigned long seqid, i;
+    unsigned long seqid;
     char *outseq,
          desc[MAXFASTAHEADER];
     Range ltr3_rng, ltr5_rng;
@@ -168,55 +250,13 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     } else genfile_xprintf(ls->tabout_file, "\t\t\t\t\t\t\t\t");
 
     /* output protein domains */
-    if (array_size(ls->element.pdoms) > 0)
+    if (ls->element.pdoms)
     {
-      pdoms = str_new();
-      ltrelement_format_description(&ls->element, desc, MAXFASTAHEADER-1);
-      if (STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
-        array_reverse(ls->element.pdoms);
-      for (i=0;i<array_size(ls->element.pdoms);i++)
-      {
-        GenFile *genfile = NULL;
-        Range pdom_rng;
-        GenomeFeature *gf = *(GenomeFeature**) array_get(ls->element.pdoms, i);
-        char *pdom_seq;
-        const char *pfamname = genome_feature_get_attribute((GenomeNode*)gf,
-                                                            "pfamname");
-        str_append_cstr(pdoms, pfamname);
-        str_append_cstr(pdoms,"(");
-        str_append_ulong(pdoms, (unsigned long) genome_feature_get_phase(gf));
-        str_append_char(pdoms, STRANDCHARS[genome_feature_get_strand(gf)]);
-        str_append_cstr(pdoms,")");
-        if (i != array_size(ls->element.pdoms)-1)
-          str_append_cstr(pdoms, "/");
-
-        /* get protein domain output file */
-        genfile = (GenFile*) hashtable_get(ls->pdomout_files, pfamname);
-        if (genfile == NULL)
-        {
-          /* no file opened for this domain yet, do it */
-          char buffer[MAXFILENAMELEN];
-          snprintf(buffer, MAXFILENAMELEN-1, "%s_pdom_%s.fas",
-                   ls->fileprefix, pfamname);
-          genfile = genfile_open(GFM_UNCOMPRESSED, buffer, "w+");
-          hashtable_add(ls->pdomout_files, cstr_dup(pfamname), genfile);
-        }
-        pdom_rng = genome_node_get_range((GenomeNode*) gf);
-        pdom_seq = ltrelement_get_sequence(pdom_rng.start,
-                                           pdom_rng.end,
-                                           genome_feature_get_strand(gf),
-                                           seq, e);
-        /* write out sequence to file */
-        fasta_show_entry_generic(desc,
-                                 pdom_seq,
-                                 range_length(pdom_rng),
-                                 FSWIDTH,
-                                 genfile);
-        ma_free(pdom_seq);
-      }
-      /* write domains to tabular outfile */
-      genfile_xprintf(ls->tabout_file, "%s", str_get(pdoms));
-      str_delete(pdoms);
+      struct PdomOutInfo outinfo;
+      outinfo.ls = ls;
+      outinfo.desc = desc;
+      outinfo.seq = seq;
+      hashtable_foreach_ao(ls->element.pdoms, write_pdom, &outinfo, e);
     }
 
     /* output LTRs (we just expect them to exist) */
@@ -254,7 +294,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     ma_free(outseq);
     genfile_xprintf(ls->tabout_file, "\n");
   }
-  array_delete(ls->element.pdoms);
+  hashtable_delete(ls->element.pdoms);
   return had_err;
 }
 
@@ -314,7 +354,8 @@ static void write_metadata(GenFile *metadata_file,
                        "tRNA library for PBS detection\t%s\n",
                        trnafilename);
     genfile_xprintf(metadata_file,
-                    "allowed PBS/tRNA alignment length range\t%lu-%lunt\t11-30nt\n",
+                    "allowed PBS/tRNA alignment length"
+                    " range\t%lu-%lunt\t11-30nt\n",
                     pbs_opts->alilen.start,
                     pbs_opts->alilen.end);
     genfile_xprintf(metadata_file,
@@ -325,7 +366,8 @@ static void write_metadata(GenFile *metadata_file,
                     pbs_opts->offsetlen.start,
                     pbs_opts->offsetlen.end);
     genfile_xprintf(metadata_file,
-                    "allowed PBS offset from 3' tRNA end range\t%lu-%lunt\t0-5nt\n",
+                    "allowed PBS offset from 3' tRNA end"
+                    " range\t%lu-%lunt\t0-5nt\n",
                     pbs_opts->trnaoffsetlen.start,
                     pbs_opts->trnaoffsetlen.end);
     genfile_xprintf(metadata_file,

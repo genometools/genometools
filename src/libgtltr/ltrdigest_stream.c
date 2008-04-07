@@ -16,7 +16,6 @@
 */
 
 #include <string.h>
-#include <ctype.h>
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/range.h"
@@ -47,95 +46,45 @@ struct LTRdigestStream {
 #define ltrdigest_stream_cast(GS)\
         genome_stream_cast(ltrdigest_stream_class(), GS)
 
-static void strip_gaps(char *out, char *in, size_t len)
+static int pdom_hit_attach_gff3(void *key, void *value, void *data,
+                                UNUSED Error *err)
 {
-  size_t i = 0;
-  while(i < len)
-  {
-    if(*in != '-')
-    {
-      *out++ = toupper(*in);
-    }
-    in++;
-    i++;
-  }
-}
-
-static int pdom_domain_attach_gff3(void *key, void *value, void *data,
-                                   UNUSED Error *err)
-{
+  unsigned long i;
+  Range rng;
   struct plan7_s *model = (struct plan7_s *) key;
   LTRdigestStream  *ls = (LTRdigestStream *) data;
   PdomHit *hit = (PdomHit*) value;
+  Strand strand = hit->strand;
 
-  Range rng;
-  Phase frame = phase_get(hit->best_hit->name[0]);
-
-  if (strand_get(hit->best_hit->name[1])
-         != genome_feature_get_strand(ls->element.mainnode))
+  if (strand != genome_feature_get_strand(ls->element.mainnode))
     return 0;
 
-  rng.start = hit->best_hit->sqfrom;
-  rng.end = hit->best_hit->sqto;
-
-  if(log_enabled())
+  for (i=0;i<array_size(hit->best_chain);i++)
   {
-    FILE *fp;
-    int i;
-    char out[BUFSIZ];
+    struct hit_s *singlehit = *(struct hit_s **) array_get(hit->best_chain, i);
+    Phase frame = phase_get(singlehit->name[0]);
+    rng.start = singlehit->sqfrom;
+    rng.end = singlehit->sqto;
+    pdom_convert_frame_position(&rng, frame);
 
-    fp = fopen("RVT_seqout.fas","a+");
-    log_log("hits: %d, %d", hit->hits_fwd->num,hit->hits_rev->num);
-    if (genome_feature_get_strand(ls->element.mainnode) == STRAND_FORWARD)
-    {
-      for(i=0;i<hit->hits_fwd->num;i++)
-      {
-        log_log("%s: (%u %u) (%u %u) %d", hit->hits_fwd->hit[i]->name,
-                                     hit->hits_fwd->hit[i]->sqfrom,
-                                     hit->hits_fwd->hit[i]->sqto,
-                                     hit->hits_fwd->hit[i]->hmmfrom,
-                                     hit->hits_fwd->hit[i]->hmmto,
-                                     hit->hits_fwd->hit[i] == hit->best_hit);
-      }
-    }
-    else
-    {
-      for(i=0;i<hit->hits_rev->num;i++)
-      {
-        log_log("%s: (%u %u) (%u %u) %d", hit->hits_rev->hit[i]->name,
-                                     hit->hits_rev->hit[i]->sqfrom,
-                                     hit->hits_rev->hit[i]->sqto,
-                                     hit->hits_rev->hit[i]->hmmfrom,
-                                     hit->hits_rev->hit[i]->hmmto,
-                                     hit->hits_rev->hit[i] == hit->best_hit);
-      }
-    }
-    memset(out, 0, sizeof(char)*BUFSIZ);
-    strip_gaps(out, hit->best_hit->ali->aseq+3,
-                    strlen(hit->best_hit->ali->aseq+3));
-    fprintf(fp, ">seq\n");
-    fprintf(fp, "%s\n", out);
-    fclose(fp);
-  }
-
-  pdom_convert_frame_position(&rng, frame);
-  ltrelement_offset2pos(&ls->element, &rng, 0,
-                        OFFSET_BEGIN_LEFT_LTR,
-                        strand_get(hit->best_hit->name[1]));
-  GenomeNode *gf = genome_feature_new(gft_protein_match,
-                                      rng,
-                                      strand_get(hit->best_hit->name[1]),
-                                      NULL,
-                                      UNDEF_ULONG);
-  genome_feature_set_source(gf, ls->ltrdigest_tag);
-  genome_feature_set_phase(gf, frame);
-  genome_feature_add_attribute((GenomeFeature*) gf,"pfamname", model->name);
-  genome_feature_add_attribute((GenomeFeature*) gf,"pfamid", model->acc);
-  genome_node_set_seqid((GenomeNode*) gf,
-                        genome_node_get_idstr(
+    ltrelement_offset2pos(&ls->element, &rng, 0,
+                          OFFSET_BEGIN_LEFT_LTR,
+                          strand);
+    GenomeNode *gf = genome_feature_new(gft_protein_match,
+                                        rng,
+                                        strand,
+                                        NULL,
+                                        UNDEF_ULONG);
+    genome_feature_set_source(gf, ls->ltrdigest_tag);
+    genome_feature_set_phase(gf, frame);
+    genome_feature_add_attribute((GenomeFeature*) gf,"pfamname", model->name);
+    genome_feature_add_attribute((GenomeFeature*) gf,"pfamid", model->acc);
+    genome_node_set_seqid((GenomeNode*) gf,
+                          genome_node_get_idstr(
                           (GenomeNode*) ls->element.mainnode));
 
-  genome_node_is_part_of_genome_node((GenomeNode*) ls->element.mainnode, gf);
+    genome_node_is_part_of_genome_node((GenomeNode*) ls->element.mainnode, gf);
+  }
   return 0;
 }
 
@@ -266,14 +215,14 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
       else
         genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
                                   STRAND_REVERSE);
+
       hashtable_foreach(pdom_results.domains,
-                        (Hashiteratorfunc) pdom_domain_attach_gff3,
+                        (Hashiteratorfunc) pdom_hit_attach_gff3,
                         ls,
                         err);
     }
     hashtable_delete(pdom_results.domains);
   }
-
   ma_free(rev_seq);
   ppt_clear_results(&ppt_results);
   pbs_clear_results(&pbs_results);

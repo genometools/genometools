@@ -30,16 +30,18 @@ typedef struct PdomOptions {
   StrArray *hmm_files;
   Array *plan7_ts;
   struct threshold_s thresh;
-  unsigned int nof_threads;
+  unsigned int nof_threads,
+               chain_max_gap_length;
 } PdomOptions;
 
 typedef struct PdomHit {
   struct tophit_s *hits_fwd, *hits_rev;
-  struct hit_s *best_hit;
+  Strand strand;
+  Array *best_chain;
 } PdomHit;
 
 typedef struct PdomResults {
-  Hashtable *domains;                  /* maps models to PdomHits */
+  Hashtable *domains;
   double combined_e_value_fwd,
          combined_e_value_rev;
   bool empty;

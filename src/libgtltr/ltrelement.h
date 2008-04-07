@@ -19,6 +19,7 @@
 #define LTRELEMENT_H
 
 #include "libgtcore/error.h"
+#include "libgtcore/hashtable.h"
 #include "libgtcore/range.h"
 #include "libgtcore/seq.h"
 #include "libgtcore/strand.h"
@@ -44,7 +45,7 @@ typedef struct LTRElement {
                 *ppt,
                 *pbs;
   unsigned long seqnr;
-  Array *pdoms;
+  Hashtable *pdoms;
 } LTRElement;
 
 unsigned long ltrelement_length(LTRElement *e);

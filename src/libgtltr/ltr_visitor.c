@@ -16,8 +16,11 @@
 */
 
 #include <assert.h>
-#include "libgtcore/unused.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/range.h"
+#include "libgtcore/unused.h"
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_visitor_rep.h"
 #include "libgtext/sequence_region.h"
@@ -38,6 +41,8 @@ static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   Range node_range;
   assert(lv);
   error_check(err);
+  Array *pdomarr = NULL;
+  const char* pfamname;
 
   switch (genome_feature_get_type(gf))
   {
@@ -85,8 +90,20 @@ static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       }
       break;
     case gft_protein_match:
-      if (lv->element->pdoms)
-        array_add(lv->element->pdoms, gf);
+      if (!lv->element->pdoms)
+      {
+        lv->element->pdoms = hashtable_new(HASH_STRING,
+                                           ma_free_func,
+                                           (FreeFunc) array_delete);
+      }
+      pfamname = genome_feature_get_attribute((GenomeNode*) gf,
+                                              "pfamname");
+      if (!(pdomarr = (Array*) hashtable_get(lv->element->pdoms, pfamname)))
+      {
+        pdomarr = array_new(sizeof (GenomeFeature*));
+        hashtable_add(lv->element->pdoms, cstr_dup(pfamname),pdomarr);
+      }
+      array_add(pdomarr, gf);
       break;
     default:
       break;

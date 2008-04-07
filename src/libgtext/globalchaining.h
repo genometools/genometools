@@ -28,6 +28,7 @@ typedef struct {
                 startpos2, /* start of fragment in second sequence */
                 endpos2;   /* end of fragment in second sequence */
   long weight;             /* weight of fragment */
+  void *data;              /* arbitrary data associated with fragment */
 } Fragment;
 
 typedef void (*ChainProc)(Chain*, Fragment*, void*);

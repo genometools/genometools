@@ -73,15 +73,16 @@ else
 endif
 
 # the default GenomeTools libraries which are build
+<<<<<<< HEAD:Makefile
 GTLIBS:=lib/libgtexercise.a\
+	lib/libhmmer.a\
+        lib/libgtltr.a\
         lib/libgtext.a\
         lib/libgtmgth.a\
         lib/libgtmatch.a\
         lib/libgtcore.a\
         lib/libgtlua.a\
         lib/libexpat.a
-        lib/libhmmer.a\
-        lib/libgtltr.a
 
 # the default GenomeThreader shared libraries which are build
 GTSHAREDLIBS:=lib/libgtcore$(SHARED_OBJ_NAME_EXT)\

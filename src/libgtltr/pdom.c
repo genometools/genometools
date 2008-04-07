@@ -24,6 +24,7 @@
 #include "libgtcore/ma.h"
 #include "libgtcore/translate.h"
 #include "libgtcore/unused.h"
+#include "libgtext/globalchaining.h"
 #include "libgtext/reverse.h"
 #include "libgtltr/pdom.h"
 
@@ -151,13 +152,43 @@ int pdom_load_hmm_files(PdomOptions *opts, Error *err)
   return had_err;
 }
 
+static void chainproc(Chain *c, Fragment *f, void *data)
+{
+  unsigned long i;
+  PdomHit *hit;
+  hit = (PdomHit *) data;
+
+  log_log("resulting chain has %ld fragments, score %ld", chain_size(c),
+                                                          chain_get_score(c));
+  for (i=0;i<chain_size(c);i++)
+  {
+    Fragment frag = f[chain_get_fragnum(c, i)];
+    log_log("(%lu %lu) (%lu %lu), %p", frag.startpos1, frag.endpos1,
+                                       frag.startpos2, frag.endpos2, frag.data);
+    array_add(hit->best_chain, frag.data);
+  }
+  log_log("\n");
+}
+
+static int fragcmp(const void *frag1, const void *frag2)
+{
+  Fragment *f1 = (Fragment*) frag1;
+  Fragment *f2 = (Fragment*) frag2;
+  if (f1->startpos2 == f2->startpos2)
+    return 0;
+  else return (f1->startpos2 < f2->startpos2 ? -1 : 1);
+}
+
 void* pdom_per_domain_worker_thread(void *data)
 {
   pdom_shared_s *shared;
   struct plan7_s *hmm;
   int rtn;
-  struct tophit_s *ghit;
+  struct tophit_s *ghit, *hits;
   bool best_fwd = TRUE;
+  unsigned long i;
+  Fragment *frags;
+  PdomHit *hit;
 
   shared = (pdom_shared_s *) data;
 
@@ -192,11 +223,11 @@ void* pdom_per_domain_worker_thread(void *data)
       exit(EXIT_FAILURE);
     }
 
-    PdomHit *hit = ma_malloc(sizeof (PdomHit));
+    hit = ma_malloc(sizeof (PdomHit));
     ghit = AllocTophits(20);
     hit->hits_fwd = AllocTophits(20);
     hit->hits_rev = AllocTophits(20);
-    hit->best_hit = NULL;
+    hit->best_chain = array_new(sizeof(struct hit_s*));
 
     hmmer_search(hmm,shared->fwd_fr1,strlen(shared->fwd_fr1),"0+",
                  &shared->opts->thresh,ghit, hit->hits_fwd, &shared->out_lock);
@@ -213,6 +244,8 @@ void* pdom_per_domain_worker_thread(void *data)
 
     FullSortTophits(hit->hits_fwd);
     FullSortTophits(hit->hits_rev);
+
+    /* check if there were any hits */
     if (hit->hits_fwd->num > 0 || hit->hits_rev->num > 0)
     {
       shared->results->empty = FALSE;
@@ -220,24 +253,52 @@ void* pdom_per_domain_worker_thread(void *data)
       {
         if (hit->hits_rev->num > 0)
         {
-          if (hit->hits_fwd->hit[0]->score > hit->hits_rev->hit[0]->score)
-            hit->best_hit = hit->hits_fwd->hit[0];
-          else
-          {
-            hit->best_hit = hit->hits_rev->hit[0];
+          if (!(hit->hits_fwd->hit[0]->score > hit->hits_rev->hit[0]->score))
             best_fwd = FALSE;
-          }
         }
-        else
-          hit->best_hit = hit->hits_fwd->hit[0];
       }
       else
-      {
-        hit->best_hit = hit->hits_rev->hit[0];
         best_fwd = FALSE;
-      }
 
-      assert(hit->best_hit);
+      /* determine best-scoring strand */
+      hits = (best_fwd ? hit->hits_fwd : hit->hits_rev);
+
+      /* no need to chain if there is only one hit */
+      if (hits->num > 1)
+      {
+        /* create fragment set for chaining */
+        frags = (Fragment*) ma_calloc(hits->num, sizeof (Fragment));
+        for (i=0;i<hits->num;i++)
+        {
+          frags[i].startpos1 = hits->hit[i]->hmmfrom;
+          frags[i].endpos1   = hits->hit[i]->hmmto;
+          frags[i].startpos2 = hits->hit[i]->sqfrom;
+          frags[i].endpos2   = hits->hit[i]->sqto;
+          /* let weight(f) be targetlength(f) multiplied by hmmerscore(f) */
+          frags[i].weight    = (hits->hit[i]->sqto - hits->hit[i]->sqfrom + 1)
+                                 * hits->hit[i]->score;
+          frags[i].data      = hits->hit[i];
+        }
+
+        /* sort fragments by position */
+        qsort(frags, hits->num, sizeof (Fragment), fragcmp);
+        for (i=0;i<hits->num;i++)
+        {
+          log_log("(%lu %lu) (%lu %lu) %p", frags[i].startpos1,
+                                         frags[i].endpos1,
+                                         frags[i].startpos2,
+                                         frags[i].endpos2,
+                                         frags[i].data);
+        }
+        log_log("chaining %d frags", hits->num);
+        /* do chaining */
+        globalchaining_max(frags, hits->num,
+                           shared->opts->chain_max_gap_length,
+                           chainproc, hit);
+        ma_free(frags);
+      }
+      else
+        array_add(hit->best_chain, hits->hit[0]);
 
       /* Lock results, we want to write to the result hashtable */
       if ((rtn = pthread_mutex_lock(&(shared->out_lock))) != 0)
@@ -249,9 +310,15 @@ void* pdom_per_domain_worker_thread(void *data)
       /* register results */
       hashtable_add(shared->results->domains, hmm, hit);
       if (best_fwd)
-        shared->results->combined_e_value_fwd *= hit->best_hit->pvalue;
+      {
+        shared->results->combined_e_value_fwd *= hit->hits_fwd->hit[0]->pvalue;
+        hit->strand = STRAND_FORWARD;
+      }
       else
-        shared->results->combined_e_value_rev *= hit->best_hit->pvalue;
+      {
+        shared->results->combined_e_value_rev *= hit->hits_rev->hit[0]->pvalue;
+        hit->strand = STRAND_REVERSE;
+      }
 
       /* unlock results */
       if ((rtn = pthread_mutex_unlock(&(shared->out_lock))) != 0)
@@ -369,12 +436,15 @@ void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
 
 void pdom_clear_domain_hit(void *value)
 {
+  PdomHit *hit;
   if (!value) return;
-  PdomHit *hit = (PdomHit*) value;
+  hit = (PdomHit*) value;
   if (hit->hits_fwd)
     FreeTophits(hit->hits_fwd);
   if (hit->hits_rev)
     FreeTophits(hit->hits_rev);
+  if (hit->best_chain)
+    array_delete(hit->best_chain);
   ma_free(hit);
 }
 
