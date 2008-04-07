@@ -18,52 +18,123 @@
 #include <string.h>
 #include "libgtcore/bioseq.h"
 #include "libgtcore/fasta.h"
+#include "libgtcore/fileutils.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/md5_fingerprint.h"
 #include "libgtcore/option.h"
+#include "libgtcore/progressbar.h"
+#include "libgtcore/seqiterator.h"
 #include "libgtcore/stringdistri.h"
 #include "libgtcore/unused.h"
 #include "tools/gt_sequniq.h"
 
-static OptionParser* gt_sequniq_option_parser_new(UNUSED
-                                                      void *tool_arguments)
+typedef struct {
+  bool seqit;
+} SequniqArguments;
+
+static void* gt_sequniq_arguments_new(void)
 {
+  return ma_calloc(1, sizeof (SequniqArguments));
+}
+
+static void gt_sequniq_arguments_delete(void *tool_arguments)
+{
+  SequniqArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  ma_free(arguments);
+}
+
+static OptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
+{
+  SequniqArguments *arguments = tool_arguments;
   OptionParser *op;
+  Option *o;
+  assert(arguments);
   op = option_parser_new("[option ...] sequence_file [...] ",
                          "Filter out repeated sequences in given in given "
                          "sequence_file(s).");
+  o = option_new_bool("seqit", "use sequence iterator", &arguments->seqit,
+                      false);
+  option_is_development_option(o);
+  option_parser_add_option(op, o);
   option_parser_set_min_args(op, 1);
   return op;
 }
 
 static int gt_sequniq_runner(int argc, const char **argv,
-                                 UNUSED void *tool_arguments, Error *err)
+                             void *tool_arguments, Error *err)
 {
+  SequniqArguments *arguments = tool_arguments;
   Bioseq *bs;
   StringDistri *sd;
-  unsigned long i, j;
   unsigned long long duplicates = 0, num_of_sequences = 0;
+  StrArray *files;
   int had_err = 0;
+  SeqIterator *seqit;
+  const Uchar *sequence;
+  char *desc;
+  unsigned long len;
+  off_t totalsize;
 
   error_check(err);
+  assert(arguments);
   sd = stringdistri_new();
 
-  for (i = 0; !had_err && i < argc; i++) {
-    if (!(bs = bioseq_new(argv[i], err)))
-      had_err = -1;
-    if (!had_err) {
-      for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
-        if (!stringdistri_get(sd, bioseq_get_md5_fingerprint(bs, j))) {
-          stringdistri_add(sd, bioseq_get_md5_fingerprint(bs, j));
-          fasta_show_entry(bioseq_get_description(bs, j),
-                           bioseq_get_sequence(bs, j),
-                           bioseq_get_sequence_length(bs, j), 0);
+  if (!arguments->seqit) {
+    unsigned long i, j;
+    for (i = 0; !had_err && i < argc; i++) {
+      if (!(bs = bioseq_new(argv[i], err)))
+        had_err = -1;
+      if (!had_err) {
+        for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
+          if (!stringdistri_get(sd, bioseq_get_md5_fingerprint(bs, j))) {
+            stringdistri_add(sd, bioseq_get_md5_fingerprint(bs, j));
+            fasta_show_entry(bioseq_get_description(bs, j),
+                             bioseq_get_sequence(bs, j),
+                             bioseq_get_sequence_length(bs, j), 0);
+          }
+          else
+            duplicates++;
+          num_of_sequences++;
         }
-        else
-          duplicates++;
-        num_of_sequences++;
       }
+      bioseq_delete(bs);
     }
-    bioseq_delete(bs);
+  }
+  else {
+    int i;
+    files = strarray_new();
+    for (i = 0; i < argc; i++)
+      strarray_add_cstr(files, argv[i]);
+    totalsize = files_estimate_total_size(files);
+    seqit = seqiterator_new(files, NULL, true);
+    if (true) { /* XXX */
+      progressbar_start(seqiterator_getcurrentcounter(seqit,
+                                                      (unsigned long long)
+                                                      totalsize),
+                                                      (unsigned long long)
+                                                      totalsize);
+    }
+    while (true)
+    {
+      char *md5;
+      if ((seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
+        break;
+      md5 = md5_fingerprint((const char*) sequence, (unsigned long) len);
+      if (!stringdistri_get(sd, md5)) {
+        stringdistri_add(sd, md5);
+        fasta_show_entry(desc, (const char*) sequence, len, 0);
+      }
+      else
+        duplicates++;
+      num_of_sequences++;
+      ma_free(desc);
+      ma_free(md5);
+    }
+    if (true) /* XXX */
+      progressbar_stop();
+    seqiterator_delete(seqit);
+    strarray_delete(files);
   }
 
   /* show statistics */
@@ -72,7 +143,6 @@ static int gt_sequniq_runner(int argc, const char **argv,
             duplicates, num_of_sequences,
             ((double) duplicates / num_of_sequences) * 100.0);
   }
-
   stringdistri_delete(sd);
 
   return had_err;
@@ -80,8 +150,8 @@ static int gt_sequniq_runner(int argc, const char **argv,
 
 Tool* gt_sequniq(void)
 {
-  return tool_new(NULL,
-                  NULL,
+  return tool_new(gt_sequniq_arguments_new,
+                  gt_sequniq_arguments_delete,
                   gt_sequniq_option_parser_new,
                   NULL,
                   gt_sequniq_runner);
