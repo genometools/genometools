@@ -21,6 +21,7 @@
 #include "libgtcore/fileutils.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/md5_fingerprint.h"
+#include "libgtcore/outputfile.h"
 #include "libgtcore/option.h"
 #include "libgtcore/progressbar.h"
 #include "libgtcore/seqiterator.h"
@@ -30,17 +31,22 @@
 
 typedef struct {
   bool seqit;
+  OutputFileInfo *ofi;
+  GenFile *outfp;
 } SequniqArguments;
 
 static void* gt_sequniq_arguments_new(void)
 {
-  return ma_calloc(1, sizeof (SequniqArguments));
+  SequniqArguments *arguments = ma_calloc(1, sizeof *arguments);
+  arguments->ofi = outputfileinfo_new();
+  return arguments;
 }
 
 static void gt_sequniq_arguments_delete(void *tool_arguments)
 {
   SequniqArguments *arguments = tool_arguments;
   if (!arguments) return;
+  outputfileinfo_delete(arguments->ofi);
   ma_free(arguments);
 }
 
@@ -57,6 +63,7 @@ static OptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
                       false);
   option_is_development_option(o);
   option_parser_add_option(op, o);
+  outputfile_register_options(op, &arguments->outfp, arguments->ofi);
   option_parser_set_min_args(op, 1);
   return op;
 }
@@ -89,9 +96,10 @@ static int gt_sequniq_runner(int argc, const char **argv,
         for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
           if (!stringdistri_get(sd, bioseq_get_md5_fingerprint(bs, j))) {
             stringdistri_add(sd, bioseq_get_md5_fingerprint(bs, j));
-            fasta_show_entry(bioseq_get_description(bs, j),
-                             bioseq_get_sequence(bs, j),
-                             bioseq_get_sequence_length(bs, j), 0);
+            fasta_show_entry_generic(bioseq_get_description(bs, j),
+                                     bioseq_get_sequence(bs, j),
+                                     bioseq_get_sequence_length(bs, j), 0,
+                                     arguments->outfp);
           }
           else
             duplicates++;
@@ -123,7 +131,8 @@ static int gt_sequniq_runner(int argc, const char **argv,
       md5 = md5_fingerprint((const char*) sequence, (unsigned long) len);
       if (!stringdistri_get(sd, md5)) {
         stringdistri_add(sd, md5);
-        fasta_show_entry(desc, (const char*) sequence, len, 0);
+        fasta_show_entry_generic(desc, (const char*) sequence, len, 0,
+                                 arguments->outfp);
       }
       else
         duplicates++;
