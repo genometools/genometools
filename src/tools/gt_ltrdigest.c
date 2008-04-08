@@ -84,23 +84,11 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 
   /* PPT search options */
 
-/*  o = option_new_uint("pptminlen",
-                      "minimal required PPT length",
-                      &arguments->ppt_opts.ppt_minlen,
-                      6);
-  option_parser_add_option(op, o); */
-
   o = option_new_range("pptlen",
                        "required PPT length range",
                        &arguments->ppt_opts.ppt_len,
                        &pptlen_defaults);
   option_parser_add_option(op, o);
-
-  /*o = option_new_uint("uboxminlen",
-                      "minimal required U-box length",
-                      &arguments->ppt_opts.ubox_minlen,
-                      3);
-  option_parser_add_option(op, o); */
 
   o = option_new_range("uboxlen",
                        "required U-box length range",
@@ -124,13 +112,6 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                           arguments->trna_lib);
   option_parser_add_option(op, ot);
   option_hide_default(ot);
-
-  /* o = option_new_uint("pbsaliminlen",
-                      "minimal required length of PBS/tRNA alignments",
-                      &arguments->pbs_opts.ali_min_len,
-                      11);
-  option_parser_add_option(op, o);
-  option_imply(o, ot); */
 
   o = option_new_range("pbsalilen",
                        "required PBS/tRNA alignment length range",
@@ -263,7 +244,6 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
   LTRdigestOptions *arguments = tool_arguments;
   int had_err  = 0;
 
-  /* TODO: more checks */
   /* -trnas */
   if (arguments->trna_lib
         && str_length(arguments->trna_lib) > 0)
