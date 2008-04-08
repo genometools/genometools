@@ -109,10 +109,6 @@ static int write_pdom(void *key, void *value, void *data, Error *e)
     char *tmpstr = NULL;
 
     str_append_cstr(pdomnames, pdomname);
-    str_append_cstr(pdomnames,"(");
-    str_append_ulong(pdomnames, (unsigned long) genome_feature_get_phase(gf));
-    str_append_char(pdomnames, STRANDCHARS[genome_feature_get_strand(gf)]);
-    str_append_cstr(pdomnames,")");
     if (i != array_size(pdoms)-1)
       str_append_cstr(pdomnames, "/");
 

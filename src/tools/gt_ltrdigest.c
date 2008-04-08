@@ -193,11 +193,12 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, o);
 
   o = option_new_uint("maxgaplen",
-                      "maximal gap length to allow when chaining pHMM "
-                      "hits for a protein domain",
+                      "maximal allowed gap size between fragments (in amino "
+                      "acids) when chaining pHMM hits for a protein domain",
                       &arguments->pdom_opts.chain_max_gap_length,
                       50);
   option_parser_add_option(op, o);
+  option_is_extended_option(o);
 
   /* Extended PBS options */
 
