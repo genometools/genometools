@@ -54,12 +54,6 @@ struct LTRFileOutStream {
   LTRElement element;
 };
 
-struct PdomOutInfo {
-  LTRFileOutStream *ls;
-  Seq *seq;
-  char *desc;
-};
-
 #define ltr_fileout_stream_cast(GS)\
         genome_stream_cast(ltr_fileout_stream_class(), GS)
 
@@ -74,21 +68,13 @@ UNUSED static void strip_gaps(char *out, char *in, size_t len)
   }
 }
 
-static int write_pdom(void *key, void *value, void *data, Error *e)
+static int write_pdom(LTRFileOutStream *ls, Array *pdoms,
+                      const char *pdomname, Seq *seq, char *desc, Error *e)
 {
-  struct PdomOutInfo *outinfo = (struct PdomOutInfo*) data;
-  LTRFileOutStream *ls = outinfo->ls;
-  const char *pdomname = (const char*) key;
-  Array* pdoms = (Array*) value;
+  GenFile *genfile;
   unsigned long i = 0,
                 seq_length = 0;
-  Str *pdomnames = str_new();
   Str *pdom_seq = str_new();
-  GenFile *genfile = NULL;
-
-  ltrelement_format_description(&ls->element, outinfo->desc, MAXFASTAHEADER-1);
-  if (STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
-    array_reverse(pdoms);
 
   /* get protein domain output file */
   genfile = (GenFile*) hashtable_get(ls->pdomout_files, pdomname);
@@ -102,35 +88,28 @@ static int write_pdom(void *key, void *value, void *data, Error *e)
     hashtable_add(ls->pdomout_files, cstr_dup(pdomname), genfile);
   }
 
+  /* write all domain fragment sequences one after another to FASTA */
   for (i=0;i<array_size(pdoms);i++)
   {
     Range pdom_rng;
     GenomeFeature *gf = *(GenomeFeature**) array_get(pdoms, i);
     char *tmpstr = NULL;
 
-    str_append_cstr(pdomnames, pdomname);
-    if (i != array_size(pdoms)-1)
-      str_append_cstr(pdomnames, "/");
-
     pdom_rng = genome_node_get_range((GenomeNode*) gf);
     tmpstr =  ltrelement_get_sequence(pdom_rng.start,
                                       pdom_rng.end,
                                       genome_feature_get_strand(gf),
-                                      outinfo->seq, e);
+                                      seq, e);
     str_append_cstr(pdom_seq, tmpstr);
     seq_length += range_length(pdom_rng);
     ma_free(tmpstr);
   }
-  fasta_show_entry_generic(outinfo->desc,
+  fasta_show_entry_generic(desc,
                            str_get(pdom_seq),
                            seq_length,
                            FSWIDTH,
                            genfile);
-  /* write domains to tabular outfile */
-  genfile_xprintf(ls->tabout_file, "%s", str_get(pdomnames));
-  str_delete(pdomnames);
   str_delete(pdom_seq);
-
   return 0;   /* XXX: some more error checking? */
 }
 
@@ -141,12 +120,14 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   Range lltr_rng, rltr_rng, rng, ppt_rng, pbs_rng;
   char *ppt_seq, *pbs_seq;
   int had_err;
+  unsigned long i=0;
 
   error_check(e);
   ls = ltr_fileout_stream_cast(gs);
 
   /* initialize this element */
   memset(&ls->element, 0, sizeof (LTRElement));
+  ls->element.pdomorder = array_new(sizeof (const char*));
 
   /* get annotations from parser */
   had_err = genome_stream_next_tree(ls->in_stream, gn, e);
@@ -173,7 +154,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                                      ls->element.mainnode));
     sscanf(sreg,"seq%lu", &seqid);
     Seq *seq = bioseq_get_seq(ls->bioseq, seqid);
-    ls->element.seqnr = seqid;
+    ls->element.seqid = seq_get_description(seq);
 
     ltrelement_format_description(&ls->element, desc, MAXFASTAHEADER-1);
 
@@ -182,10 +163,11 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     rltr_rng = genome_node_get_range((GenomeNode*) ls->element.rightLTR);
     rng = genome_node_get_range((GenomeNode*) ls->element.mainnode);
     genfile_xprintf(ls->tabout_file,
-                    "%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t",
+                    "%lu\t%lu\t%lu\t%s\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t",
                     rng.start,
                     rng.end,
                     ltrelement_length(&ls->element),
+                    ls->element.seqid,
                     lltr_rng.start,
                     lltr_rng.end,
                     ltrelement_leftltrlen(&ls->element),
@@ -248,11 +230,26 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     /* output protein domains */
     if (ls->element.pdoms)
     {
-      struct PdomOutInfo outinfo;
-      outinfo.ls = ls;
-      outinfo.desc = desc;
-      outinfo.seq = seq;
-      hashtable_foreach_ao(ls->element.pdoms, write_pdom, &outinfo, e);
+      Str *pdomorderstr = str_new();
+      for(i=0;i<array_size(ls->element.pdomorder);i++)
+      {
+        const char* key = *(const char**) array_get(ls->element.pdomorder, i);
+        Array *entry = (Array*) hashtable_get(ls->element.pdoms, key);
+        write_pdom(ls, entry, key, seq, desc, e);
+      }
+
+      if (STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
+        array_reverse(ls->element.pdomorder);
+
+      for(i=0;i<array_size(ls->element.pdomorder);i++)
+      {
+        const char* name = *(const char**) array_get(ls->element.pdomorder, i);
+        str_append_cstr(pdomorderstr, name);
+        if (i != array_size(ls->element.pdomorder)-1)
+          str_append_cstr(pdomorderstr, "/");
+      }
+      genfile_xprintf(ls->tabout_file, "%s", str_get(pdomorderstr));
+      str_delete(pdomorderstr);
     }
 
     /* output LTRs (we just expect them to exist) */
@@ -291,6 +288,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     genfile_xprintf(ls->tabout_file, "\n");
   }
   hashtable_delete(ls->element.pdoms);
+  array_delete(ls->element.pdomorder);
   return had_err;
 }
 
@@ -388,6 +386,11 @@ static void write_metadata(GenFile *metadata_file,
                     "pHMM e-value cutoff \t%g\t%g\n",
                     pdom_opts->evalue_cutoff,
                     0.000001);
+    genfile_xprintf(metadata_file,
+                    "maximal allowed gap length between fragments to chain"
+                    " \t%u\t%u\n",
+                    pdom_opts->chain_max_gap_length,
+                    50);
   }
   genfile_xprintf(metadata_file, "\n");
 }
@@ -484,7 +487,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
 
   /* print tabular outfile headline */
   genfile_xprintf(ls->tabout_file,
-              "element start\telement end\telement length\t"
+              "element start\telement end\telement length\tsequence\t"
               "lLTR start\tlLTR end\tlLTR length\t"
               "rLTR start\trLTR end\trLTR length\t"
               "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");

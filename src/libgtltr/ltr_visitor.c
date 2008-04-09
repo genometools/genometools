@@ -101,7 +101,9 @@ static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       if (!(pdomarr = (Array*) hashtable_get(lv->element->pdoms, pfamname)))
       {
         pdomarr = array_new(sizeof (GenomeFeature*));
-        hashtable_add(lv->element->pdoms, cstr_dup(pfamname),pdomarr);
+        char *pfamcpy = cstr_dup(pfamname);
+        hashtable_add(lv->element->pdoms, pfamcpy, pdomarr);
+        array_add(lv->element->pdomorder, pfamcpy);
       }
       array_add(pdomarr, gf);
       break;
