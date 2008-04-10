@@ -65,7 +65,7 @@
           *bptr++ = temp;\
         }
 
-#define SMALLSIZE (Seqpos) 6
+#define SMALLSIZE 6UL
 
 #define SUBSORT(WIDTH,BORDER,LEFT,RIGHT,DEPTH)\
         /*checksuffixrange(encseq,\
@@ -107,7 +107,7 @@
         L = mkvauxstack->spaceMKVstack[--mkvauxstack->nextfreeMKVstack].left;\
         R = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].right;\
         D = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].depth;\
-        width = (Seqpos) ((R) - (L) + 1)
+        width = (unsigned long) ((R) - (L) + 1)
 
 #define UPDATELCP(MINVAL,MAXVAL)\
         assert(commonunits < (unsigned int) UNITSIN2BITENC);\
@@ -463,15 +463,17 @@ typedef struct
 
 typedef Medianinfo MedianElem;
 
-#define MedianElemGREATER(A,B)\
-        (compareTwobitencodings(fwd,complement,&commonunits,\
-                                &((A)->etbe),&((B)->etbe)) > 0)
+#define DOCOMPARE(A,B)\
+        compareTwobitencodings(fwd,complement,&commonunits,\
+                               &((A)->etbe),&((B)->etbe))
 
-#define MedianElemSWAP(A,B)    {\
-                                 register MedianElem tmp = *(A);\
-                                                     *(A) = *(B);\
-                                                     *(B) = tmp;\
-                               }
+#define MedianElemGREATER(A,B)  (DOCOMPARE(A,B) > 0)
+
+#define MedianElemSWAP(A,B)     {\
+                                  register MedianElem tmp = *(A);\
+                                                      *(A) = *(B);\
+                                                      *(B) = tmp;\
+                                }
 
 /*
  *  This Quickselect routine is based on the algorithm described in
@@ -492,7 +494,7 @@ static MedianElem *quickmedian (bool fwd,bool complement,
   median = low + DIV2(width);
   for (;;)
   {
-   if (high <= low)                   /* One element only */
+    if (high <= low)                   /* One element only */
     {
       return median;
     }
@@ -557,6 +559,66 @@ static MedianElem *quickmedian (bool fwd,bool complement,
   }
 }
 
+static void checkmedian(bool fwd,
+                        bool complement,
+                        const Medianinfo *median,
+                        const Medianinfo *space,
+                        unsigned long width)
+{
+  unsigned long sum1, sum2, idx, smaller = 0, larger = 0, equal = 0, equalpart;
+  unsigned int commonunits;
+  int cmp;
+
+  for (idx = 0; idx < width; idx++)
+  {
+    cmp = DOCOMPARE(space + idx,median);
+    if (cmp > 0)
+    {
+     larger++;
+    } else
+    {
+      if (cmp < 0)
+      {
+        smaller++;
+      } else
+      {
+        equal++;
+      }
+    }
+  }
+  if (smaller == larger)
+  {
+    return;
+  }
+  for (equalpart = 0; equalpart < equal; equalpart++)
+  {
+    sum1 = smaller + equalpart;
+    sum2 = larger + (equal-1) - equalpart;
+    if (sum1 < sum2)
+    {
+      if (sum1 + 1 == sum2)
+      {
+        return;
+      }
+    } else
+    {
+      if (sum1 > sum2)
+      {
+        if (sum1 == sum2 + 1)
+        {
+          return;
+        }
+      } else
+      {
+        return;
+      }
+    }
+  }
+  fprintf(stderr,"problem with equal=%lu,smaller=%lu,larger=%lu\n",
+                  equal,smaller,larger);
+  exit(EXIT_FAILURE);
+}
+
 static Suffixptr *delivermedian(Medianinfo *space,
                                 const Encodedsequence *encseq,
                                 Encodedsequencescanstate *esr,
@@ -568,12 +630,13 @@ static Suffixptr *delivermedian(Medianinfo *space,
   Medianinfo *medianptr;
   unsigned long idx;
 
-  for(idx = 0; idx < width; idx++)
+  for (idx = 0; idx < width; idx++)
   {
     space[idx].suffixptr = left + idx;
     extract2bitenc(fwd,&(space[idx].etbe),encseq,esr,left[idx]);
   }
   medianptr = quickmedian(fwd,complement,space,width);
+  checkmedian(fwd,complement,medianptr,space,width);
   assert(medianptr != NULL);
   return medianptr->suffixptr;
 }
@@ -584,7 +647,8 @@ static unsigned long quicksortsteps = 0;
 static unsigned long quicksortdiff = 0;
 static unsigned long lcpdistribution[UNITSIN2BITENC] = {0};
 
-#define MAXFASTMEDIANWIDTH 16384
+/*#define MAXFASTMEDIANWIDTH 16384 */
+#define MAXFASTMEDIANWIDTH 6
 
 static void bentleysedgewick(const Encodedsequence *encseq,
                              Encodedsequencescanstate *esr1,
@@ -602,18 +666,19 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   Suffixptr *left, *right, *leftplusw;
   Seqpos pivotcmpcharbychar = 0, valcmpcharbychar;
   Sfxcmp pivot, val;
-  Seqpos w, depth, offset, doubleoffset, width;
+  Seqpos depth;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
   int retvalpivot;
   Uchar tmpvar;
+  unsigned long width, w, offset, doubleoffset;
   unsigned int commonunits, smallermaxlcp, greatermaxlcp,
                smallerminlcp, greaterminlcp;
   const int commonunitsequal = cmpcharbychar ? 1 : UNITSIN2BITENC;
   Medianinfo *medianinfospace = NULL;
 
-  width = (Seqpos) (r - l + 1);
+  width = (unsigned long) (r - l + 1);
   if (width <= SMALLSIZE)
   {
     if (l < r)
@@ -635,7 +700,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     pr = right;
     if (cmpcharbychar)
     {
-      if (width > (Seqpos) 30)
+      if (width > 30UL)
       { /* On big arrays, pseudomedian of 9 */
         offset = DIV8(width);
         doubleoffset = MULT2(offset);
@@ -651,9 +716,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,left);
     } else
     {
-      if (width > (Seqpos) 30)
-      { 
-        if (width > MAXFASTMEDIANWIDTH)
+      if (width > 30UL)
+      {
+        if (width > (unsigned long) MAXFASTMEDIANWIDTH)
         { /* On big arrays, pseudomedian of 9 */
           offset = DIV8(width);
           doubleoffset = MULT2(offset);
@@ -792,13 +857,13 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     }
     assert(pa >= left);
     assert(pb >= pa);
-    w = MIN((Seqpos) (pa-left),(Seqpos) (pb-pa));
+    w = MIN((unsigned long) (pa-left),(unsigned long) (pb-pa));
     /* move w elements at the left to the middle */
     VECSWAP(left,  pb-w, w);
 
     assert(pd >= pc);
     assert(right >= pd);
-    w = MIN((Seqpos) (pd-pc), (Seqpos) (right-pd));
+    w = MIN((unsigned long) (pd-pc), (unsigned long) (right-pd));
     /* move w elements at the right to the middle */
     VECSWAP(pb, right+1-w, w);
 
@@ -809,7 +874,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
        [right-(pd-pc)+1..right] */
 
     assert(pb >= pa);
-    if ((w = (Seqpos) (pb-pa)) > 0)
+    if ((w = (unsigned long) (pb-pa)) > 0)
     {
       leftplusw = left + w;
       if (lcpsubtab != NULL)
@@ -825,12 +890,12 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     cptr = *leftplusw + depth;
     if (ISNOTEND(cptr))
     {
-      width = (Seqpos) (right-(pd-pb)-leftplusw);
+      width = (unsigned long) (right-(pd-pb)-leftplusw);
       SUBSORT(width,SMALLSIZE,leftplusw,right-(pd-pb)-1,depth+commonunitsequal);
     }
 
     assert(pd >= pc);
-    if ((w = (Seqpos) (pd-pc)) > 0)
+    if ((w = (unsigned long) (pd-pc)) > 0)
     {
       if (lcpsubtab != NULL)
       {
