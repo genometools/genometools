@@ -156,7 +156,7 @@ static void chainproc(Chain *c, Fragment *f, void *data)
 {
   unsigned long i;
   PdomHit *hit;
-  hit = (PdomHit *) data;
+  hit = (PdomHit*) data;
 
   log_log("resulting chain has %ld fragments, score %ld", chain_size(c),
                                                           chain_get_score(c));
@@ -184,7 +184,7 @@ void* pdom_per_domain_worker_thread(void *data)
   pdom_shared_s *shared;
   struct plan7_s *hmm;
   int rtn;
-  struct tophit_s *ghit, *hits;
+  struct tophit_s *ghit = NULL, *hits = NULL;
   bool best_fwd = TRUE;
   unsigned long i;
   Fragment *frags;
@@ -224,9 +224,9 @@ void* pdom_per_domain_worker_thread(void *data)
     }
 
     hit = ma_malloc(sizeof (PdomHit));
-    ghit = AllocTophits(20);
-    hit->hits_fwd = AllocTophits(20);
-    hit->hits_rev = AllocTophits(20);
+    ghit = AllocTophits(50);
+    hit->hits_fwd = AllocTophits(50);
+    hit->hits_rev = AllocTophits(50);
     hit->best_chain = array_new(sizeof(struct hit_s*));
 
     hmmer_search(hmm,shared->fwd_fr1,strlen(shared->fwd_fr1),"0+",
@@ -253,15 +253,16 @@ void* pdom_per_domain_worker_thread(void *data)
       {
         if (hit->hits_rev->num > 0)
         {
-          if (!(hit->hits_fwd->hit[0]->score > hit->hits_rev->hit[0]->score))
+          if (hit->hits_fwd->hit[0]->score < hit->hits_rev->hit[0]->score)
             best_fwd = FALSE;
         }
+        else best_fwd = TRUE;
       }
-      else
-        best_fwd = FALSE;
+      else best_fwd = FALSE;
 
       /* determine best-scoring strand */
       hits = (best_fwd ? hit->hits_fwd : hit->hits_rev);
+      assert(hits);
 
       /* no need to chain if there is only one hit */
       if (hits->num > 1)
@@ -298,7 +299,9 @@ void* pdom_per_domain_worker_thread(void *data)
         ma_free(frags);
       }
       else
+      {
         array_add(hit->best_chain, hits->hit[0]);
+      }
 
       /* Lock results, we want to write to the result hashtable */
       if ((rtn = pthread_mutex_lock(&(shared->out_lock))) != 0)
