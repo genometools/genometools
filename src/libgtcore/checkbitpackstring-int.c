@@ -267,8 +267,7 @@ bitPackStringInt_unit_test(Error *err)
     {
       unsigned v = randSrc[0] & mask;
       unsigned r;
-      bsGetUniformUIntArray(bitStore, offsetStart,
-                                 numBits, 1, &r);
+      bsGetUniformUIntArray(bitStore, offsetStart, numBits, 1, &r);
       if (r != v)
       {
         log_log("Expected %""u"", got %""u"", seed = %lu,"

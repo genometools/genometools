@@ -144,7 +144,7 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
  * @param err genometools reference for core functions
  */
 extern EISeq *
-newBlockEncIdxSeqFromSAI(struct suffixarrayFileInterface *sai, MRAEnc *alphabet,
+newBlockEncIdxSeqFromSAI(struct suffixarrayFileInterface *sai,
                          Seqpos totalLen, const Str *projectName,
                          const struct blockEncParams *params,
                          size_t numExtHeaders, uint16_t *headerIDs,

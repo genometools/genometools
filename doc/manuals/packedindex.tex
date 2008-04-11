@@ -145,6 +145,10 @@ The following options are specific to the \packedindex
 \label{tab:packedindex:mkindex:options}
 \end{table}
 
+Except for the output options \Showoption{suf}, \Showoption{lcp}, and
+\Showoption{bwt}, all other options are the same as used for the
+\toolname{suffixerator} tool.
+
 %%%%
 \begin{Justshowoptions}
 
@@ -192,6 +196,25 @@ By default the optimal value in terms of space usage will be chosen.
 }
 \end{Justshowoptions}
 %%%%
+
+\subsubsection{Deriving packedindex files from a suffix array}
+\label{sec:packedindex:trsuftab}
+
+The \toolname{trsuftab} sub-tool will translate an index by reading
+suffix array and encoded sequence files. Thus the options specific to
+the packedindex properties are the same as previously
+shown~\ref{sec:packedindex:mkindex} but the suffixerator options are
+not available. Instead the latter are implicit in the properties of
+the suffix array and encoded sequence indices used as input for this
+tool.
+
+Thus to produce a packedindex with default options where a suffix
+array has already been created in chr01.\{prj$|$suf$|$esq\} use:
+\begin{footnotesize}
+\begin{verbatim}
+$ gt packedindex trsuftab chr01
+\end{verbatim}
+\end{footnotesize}
 
 \subsubsection{packedindex integrity check tool}
 \label{sec:packedindex:chkintegrity}
@@ -369,7 +392,7 @@ This index can then be verified or used in one of the tools supporting
 it. For integrity check use:
 \begin{footnotesize}
 \begin{verbatim}
-$ gt packedindex chr01
+$ gt packedindex chkintegrity chr01
 # Using index over sequence 230210 symbols long.
 [...]
 ..

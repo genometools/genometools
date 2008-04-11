@@ -45,6 +45,7 @@ initSuffixarrayFileInterface(struct suffixarrayFileInterface *sai,
 extern void
 destructSuffixarrayFileInterface(struct suffixarrayFileInterface *sai)
 {
+  destructSeqReaderSet(&sai->readerSet);
   destructSATaggedXltorStateList(&sai->xltorStates);
 }
 
@@ -205,11 +206,10 @@ reportSAILongest(void *state)
 }
 
 extern MRAEnc *
-newMRAEncFromSA(const void *state)
+newMRAEncFromSA(const Suffixarray *sa)
 {
   MRAEnc *alphabet;
-  const Suffixarray *sa = state;
-  assert(state);
+  assert(sa);
   alphabet = MRAEncGTAlphaNew(sa->alpha);
   MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
