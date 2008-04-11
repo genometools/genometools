@@ -162,7 +162,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
   assert(newList);
   newList->permutations = NULL;
   newList->catCompsPerms = NULL;
-  if (!(composition = ma_malloc(sizeof (composition[0]) * blockSize)))
+  if (!(composition = ma_malloc(sizeof (composition[0]) * alphabetSize)))
     initCompositionListErrRet();
   bitsPerComp = alphabetSize * (bitsPerCount = requiredUIntBits(blockSize));
   newList->bitsPerCount = bitsPerCount;

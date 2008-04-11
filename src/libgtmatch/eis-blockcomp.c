@@ -623,7 +623,12 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
   newSeqIdx->maxVarExtBitsPerBucket = maxVarExtBitsPerPos * bucketLen;
   if (!initCompositionList(&newSeqIdx->compositionTable, blockSize,
                            blockMapAlphabetSize))
+  {
+    error_set(err, "Insufficient memory for selected block size %u and "
+              "alphabet size %u, try smaller block size?\n", blockSize,
+              blockMapAlphabetSize);
     newBlockEncIdxSeqErrRet();
+  }
   bitsPerComposition = newSeqIdx->compositionTable.bitsPerCount
     * blockMapAlphabetSize;
   compositionIdxBits = newSeqIdx->compositionTable.compositionIdxBits;

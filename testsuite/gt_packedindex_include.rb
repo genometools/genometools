@@ -16,7 +16,7 @@ end
 
 def runAndCheckPackedIndex(indexName,dbFiles, extraParams=Hash.new)
   params = {
-    :create => { '-dna' => nil, '-tis' => nil, '-des' => nil },
+    :create => { '-tis' => nil, '-des' => nil },
     :timeOuts => { 'bdxcreat' => 100, 'suffixerator' => 100,
       'chkintegrity' => 400, 'chksearch' => 400, 'trsuftab' => 100 },
     :bdx => {}
@@ -62,6 +62,13 @@ Test do
                               "TTT-small.fna","trna_glutamine.fna",
                               "Random-Small.fna","Duplicate.fna"])
   runAndCheckPackedIndex('miniindex', allfiles)
+end
+
+Name "gt packedindex check tools for protein sample"
+Keywords "gt_packedindex"
+Test do
+  runAndCheckPackedIndex(nil, prependTestdata(['sw100K2.fsa']),
+                         :bdx => { '-bsize' => 1 })
 end
 
 Name "gt packedindex check tools for simple sequences, tr-mode"
