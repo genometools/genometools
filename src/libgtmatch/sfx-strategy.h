@@ -24,6 +24,7 @@
 typedef struct
 {
   Definedunsignedint maxdepth;
+  unsigned long maxwidthrealmedian;
   bool cmpcharbychar, /* compare suffixes character by character instead
                          of comparing entire words (only for two bit
                          encoding */
