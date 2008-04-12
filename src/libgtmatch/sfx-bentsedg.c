@@ -619,13 +619,14 @@ static void checkmedian(bool fwd,
   exit(EXIT_FAILURE);
 }
 
-static Suffixptr *delivermedian(Medianinfo *space,
-                                const Encodedsequence *encseq,
-                                Encodedsequencescanstate *esr,
-                                bool fwd,
-                                bool complement,
-                                Suffixptr *left,
-                                unsigned long width)
+static Suffixptr *realmedian(Medianinfo *space,
+                             const Encodedsequence *encseq,
+                             Encodedsequencescanstate *esr,
+                             bool fwd,
+                             bool complement,
+                             Suffixptr *left,
+                             Seqpos depth,
+                             unsigned long width)
 {
   Medianinfo *medianptr;
   unsigned long idx;
@@ -633,7 +634,8 @@ static Suffixptr *delivermedian(Medianinfo *space,
   for (idx = 0; idx < width; idx++)
   {
     space[idx].suffixptr = left + idx;
-    extract2bitenc(fwd,&(space[idx].etbe),encseq,esr,left[idx]);
+    /* Use PTR2INT */
+    extract2bitenc(fwd,&(space[idx].etbe),encseq,esr,left[idx] + depth);
   }
   medianptr = quickmedian(fwd,complement,space,width);
   checkmedian(fwd,complement,medianptr,space,width);
@@ -649,6 +651,136 @@ static unsigned long lcpdistribution[UNITSIN2BITENC] = {0};
 
 /*#define MAXFASTMEDIANWIDTH 16384 */
 #define MAXFASTMEDIANWIDTH 6
+
+static Suffixptr *cmpcharbychardelivermedian(const Encodedsequence *encseq,
+                                             Readmode readmode,
+                                             Seqpos *left, 
+                                             Seqpos *right,
+                                             Seqpos depth,
+                                             unsigned long width,
+                                             Seqpos totallength)
+{
+  Seqpos *pl = left, *pm = left + DIV2(width), *pr = right;
+
+  if (width > 30UL)
+  { /* On big arrays, pseudomedian of 9 */
+    unsigned long offset, doubleoffset;
+    offset = DIV8(width);
+    doubleoffset = MULT2(offset);
+    pl = medianof3cmpcharbychar(encseq,readmode,totallength,depth,
+                                pl,pl+offset,pl+doubleoffset);
+    pm = medianof3cmpcharbychar(encseq,readmode,totallength,depth,
+                                pm-offset,pm,pm+offset);
+    pr = medianof3cmpcharbychar(encseq,readmode,totallength,depth,
+                                pr-doubleoffset,pr-offset,pr);
+  }
+  return medianof3cmpcharbychar(encseq,readmode,totallength,depth,pl,pm,pr);
+}
+
+static Suffixptr *delivermedian(const Encodedsequence *encseq,
+                                Encodedsequencescanstate *esr,
+                                Medianinfo **medianinfospace,
+                                bool fwd,
+                                bool complement,
+                                Seqpos *left, 
+                                Seqpos *right,
+                                Seqpos depth,
+                                unsigned long width,
+                                Seqpos totallength)
+{
+  Suffixptr *pl = left, *pm = left + DIV2(width), *pr = right;
+
+  if (width > 30UL)
+  {
+    if (width > (unsigned long) MAXFASTMEDIANWIDTH)
+    { /* On big arrays, pseudomedian of 9 */
+      unsigned long offset, doubleoffset;
+      offset = DIV8(width);
+      doubleoffset = MULT2(offset);
+      pl = medianof3(encseq,esr,fwd,complement,totallength,depth,
+                     pl,pl+offset,pl+doubleoffset);
+      pm = medianof3(encseq,esr,fwd,complement,totallength,depth,
+                     pm-offset,pm,pm+offset);
+      pr = medianof3(encseq,esr,fwd,complement,totallength,depth,
+                     pr-doubleoffset,pr-offset,pr);
+      pm = medianof3(encseq,esr,fwd,complement,totallength,depth,pl,pm,pr);
+    } else
+    {
+      if (*medianinfospace == NULL)
+      {
+        ALLOCASSIGNSPACE(*medianinfospace,NULL,Medianinfo,
+                         MAXFASTMEDIANWIDTH+1);
+      }
+      pm = realmedian(*medianinfospace,
+                      encseq,
+                      esr,
+                      fwd,
+                      complement,
+                      left,
+                      depth,
+                      width);
+    }
+  } else
+  {
+    pm = medianof3(encseq,esr,fwd,complement,totallength,depth,pl,pm,pr);
+  }
+  return pm;
+}
+
+typedef struct
+{
+  Seqpos suffix;
+  unsigned int lcpwithpivot;
+} Countingsortinfo;
+
+static void sarrcountingsort(const Encodedsequence *encseq,
+                             Countingsortinfo *countsortinfo,
+                             Encodedsequencescanstate *esr1,
+                             bool fwd,
+                             bool complement,
+                             Seqpos *left, 
+                             Sfxcmp *pivot,
+                             Seqpos depth,
+                             unsigned long width)
+{
+  unsigned long idx, smaller = 0, larger = 0;
+  int cmp;
+  unsigned int commonunits;
+  EndofTwobitencoding etbecurrent;
+  unsigned long leftlcpdist[UNITSIN2BITENC] = {0},
+                rightlcpdist[UNITSIN2BITENC] = {0};
+
+  countsortinfo[0].suffix = *left;
+  countsortinfo[0].lcpwithpivot = UNITSIN2BITENC;
+  for (idx = 1; idx < width; idx++)
+  {
+    /* Use PTR2INT */
+    extract2bitenc(fwd,&etbecurrent,encseq,esr1,left[idx] + depth);
+    cmp = compareTwobitencodings(fwd,complement,&commonunits,
+                                 &etbecurrent,pivot);
+    countsortinfo[idx].suffix = left[idx];
+    countsortinfo[idx].lcpwithpivot = commonunits;
+    if (cmp > 0)
+    {
+      assert(commonunits < UNITSIN2BITENC);
+      rightlcpdist[commonunits]++;
+      larger++;
+    } else
+    {
+      if (cmp < 0)
+      {
+        assert(commonunits < UNITSIN2BITENC);
+        leftlcpdist[commonunits]++;
+        smaller++;
+      } else
+      {
+        assert(commonunits == UNITSIN2BITENC);
+      }
+    }
+  }
+}
+
+#define MAXCOUNTINGSORT 1024
 
 static void bentleysedgewick(const Encodedsequence *encseq,
                              Encodedsequencescanstate *esr1,
@@ -667,16 +799,17 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   Seqpos pivotcmpcharbychar = 0, valcmpcharbychar;
   Sfxcmp pivot, val;
   Seqpos depth;
-  Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
+  Suffixptr *pa, *pb, *pc, *pd, *pm, *aptr, *bptr, cptr, temp;
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
   int retvalpivot;
   Uchar tmpvar;
-  unsigned long width, w, offset, doubleoffset;
+  unsigned long width, w;
   unsigned int commonunits, smallermaxlcp, greatermaxlcp,
                smallerminlcp, greaterminlcp;
   const int commonunitsequal = cmpcharbychar ? 1 : UNITSIN2BITENC;
   Medianinfo *medianinfospace = NULL;
+  Countingsortinfo countsortinfo[MAXCOUNTINGSORT];
 
   width = (unsigned long) (r - l + 1);
   if (width <= SMALLSIZE)
@@ -695,61 +828,43 @@ static void bentleysedgewick(const Encodedsequence *encseq,
 
   for (;;)
   {
-    pl = left;
-    pm = left + DIV2(width);
-    pr = right;
     if (cmpcharbychar)
     {
-      if (width > 30UL)
-      { /* On big arrays, pseudomedian of 9 */
-        offset = DIV8(width);
-        doubleoffset = MULT2(offset);
-        pl = medianof3cmpcharbychar(encseq,readmode,totallength,depth,
-                       pl,pl+offset,pl+doubleoffset);
-        pm = medianof3cmpcharbychar(encseq,readmode,totallength,depth,
-                       pm-offset,pm,pm+offset);
-        pr = medianof3cmpcharbychar(encseq,readmode,totallength,depth,
-                       pr-doubleoffset,pr-offset,pr);
-      }
-      pm = medianof3cmpcharbychar(encseq,readmode,totallength,depth,pl,pm,pr);
+      pm = cmpcharbychardelivermedian(encseq,
+                                      readmode,
+                                      left, 
+                                      right,
+                                      depth,
+                                      width,
+                                      totallength);
       SWAP(left, pm);
       CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,left);
     } else
     {
-      if (width > 30UL)
-      {
-        if (width > (unsigned long) MAXFASTMEDIANWIDTH)
-        { /* On big arrays, pseudomedian of 9 */
-          offset = DIV8(width);
-          doubleoffset = MULT2(offset);
-          pl = medianof3(encseq,esr1,fwd,complement,totallength,depth,
-                         pl,pl+offset,pl+doubleoffset);
-          pm = medianof3(encseq,esr1,fwd,complement,totallength,depth,
-                         pm-offset,pm,pm+offset);
-          pr = medianof3(encseq,esr1,fwd,complement,totallength,depth,
-                         pr-doubleoffset,pr-offset,pr);
-          pm = medianof3(encseq,esr1,fwd,complement,totallength,depth,pl,pm,pr);
-        } else
-        {
-          if (medianinfospace == NULL)
-          {
-            ALLOCASSIGNSPACE(medianinfospace,NULL,Medianinfo,
-                             MAXFASTMEDIANWIDTH+1);
-          }
-          pm = delivermedian(medianinfospace,
-                             encseq,
-                             esr1,
-                             fwd,
-                             complement,
-                             left,
-                             width);
-        }
-      } else
-      {
-        pm = medianof3(encseq,esr1,fwd,complement,totallength,depth,pl,pm,pr);
-      }
+      pm = delivermedian(encseq,
+                         esr1,
+                         &medianinfospace,
+                         fwd,
+                         complement,
+                         left, 
+                         right,
+                         depth,
+                         width,
+                         totallength);
       SWAP(left, pm);
       PTR2INT(pivot,left);
+      if (width <= MAXCOUNTINGSORT && width >= 30)
+      {
+        sarrcountingsort(encseq,
+                         countsortinfo,
+                         esr1,
+                         fwd,
+                         complement,
+                         left,
+                         &pivot,
+                         depth,
+                         width);
+      }
     }
     /* now pivot element is at index left */
     /* all elements to be compared are between pb and pc */
