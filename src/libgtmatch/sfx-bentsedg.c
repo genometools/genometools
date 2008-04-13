@@ -68,15 +68,13 @@
 #define SMALLSIZE 6UL
 
 #define SUBSORT(WIDTH,BORDER,LEFT,RIGHT,DEPTH)\
-        /*checksuffixrange(encseq,\
+        checksuffixrange(encseq,\
                          fwd,\
                          complement,\
-                         baseptr,\
-                         lcpsubtab,\
                          LEFT,\
                          RIGHT,\
                          DEPTH,\
-                         __LINE__);*/\
+                         __LINE__);\
         if (!maxdepth->defined ||\
             (DEPTH) < (Seqpos) maxdepth->valueunsignedint)\
         {\
@@ -98,9 +96,6 @@
         CHECKARRAYSPACE(mkvauxstack,MKVstack,1024);\
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].left = L;\
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].right = R;\
-        mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].newpivot = 0;\
-        mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].\
-                     pivotdefined = false;\
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack++].depth = D
 
 #define POPMKVstack(L,R,D)\
@@ -234,7 +229,7 @@ static void showsuffixrange(const Encodedsequence *encseq,
 }
 #endif
 
-#undef CHECKSUFFIXRANGE
+#define CHECKSUFFIXRANGE
 #ifdef CHECKSUFFIXRANGE
 static void checksuffixrange(const Encodedsequence *encseq,
                              bool fwd,
@@ -251,8 +246,6 @@ static void checksuffixrange(const Encodedsequence *encseq,
   showsuffixrange(encseq,
                   fwd,
                   complement,
-                  baseptr,
-                  lcpsubtab,
                   left,
                   right,
                   depth);
@@ -450,9 +443,7 @@ typedef struct
 {
   Suffixptr *left,
             *right;
-  Seqpos depth,
-         newpivot;
-  bool pivotdefined;
+  Seqpos depth;
 } MKVstack;
 
 typedef struct
@@ -737,23 +728,30 @@ typedef struct
   char cmpresult;
 } Countingsortinfo;
 
-static void sarrcountingsort(const Encodedsequence *encseq,
+static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
+                             const Encodedsequence *encseq,
                              Countingsortinfo *countsortinfo,
                              Encodedsequencescanstate *esr1,
+                             Encodedsequencescanstate *esr2,
+                             Lcpsubtab *lcpsubtab,
+                             Readmode readmode,
                              bool fwd,
                              bool complement,
                              Seqpos *left,
                              Sfxcmp *pivot,
                              Seqpos depth,
                              unsigned long width,
+                             const Definedunsignedint *maxdepth,
                              Seqpos totallength)
 {
   int cmp;
   unsigned int commonunits;
   EndofTwobitencoding etbecurrent;
-  unsigned char leftlcpdist[UNITSIN2BITENC] = {0},
+  unsigned long idx, smaller = 0, larger = 0, largeroffset, 
+                insertindex, end, smalleroffset, currentwidth,
+                leftlcpdist[UNITSIN2BITENC] = {0},
                 rightlcpdist[UNITSIN2BITENC] = {0};
-  unsigned long idx, smaller = 0, larger = 0, largeroffset, insertindex;
+  const bool cmpcharbychar = false;
 
   countsortinfo[0].suffix = *left;
   countsortinfo[0].lcpwithpivot = (unsigned char) UNITSIN2BITENC;
@@ -792,6 +790,7 @@ static void sarrcountingsort(const Encodedsequence *encseq,
     rightlcpdist[idx] += rightlcpdist[idx-1];
   }
   largeroffset = width - larger;
+  smalleroffset = smaller;
   for (idx = 0; idx < width; idx++)
   {
     switch (countsortinfo[idx].cmpresult)
@@ -801,13 +800,54 @@ static void sarrcountingsort(const Encodedsequence *encseq,
         left[insertindex] = countsortinfo[idx].suffix;
         break;
       case 0:
-        left[smaller++] = countsortinfo[idx].suffix;
+        left[smalleroffset++] = countsortinfo[idx].suffix;
         break;
       case 1:
         insertindex = --rightlcpdist[countsortinfo[idx].lcpwithpivot];
         left[largeroffset + insertindex] = countsortinfo[idx].suffix;
         break;
     }
+  }
+  for (idx = 0; idx < (unsigned long) UNITSIN2BITENC; idx++)
+  {
+    if (idx < (unsigned long) (UNITSIN2BITENC-1))
+    {
+      end = leftlcpdist[idx+1];
+    } else
+    {
+      end = width;
+    }
+    if (leftlcpdist[idx] + 1 < end) /* at least two element */
+    {
+      currentwidth = end - leftlcpdist[idx];
+      SUBSORT(currentwidth,SMALLSIZE,
+              left + leftlcpdist[idx],left + end - 1,depth + idx);
+    }
+    leftlcpdist[idx] = 0;
+  }
+  if (width - smaller - larger > 1U)
+  {
+    currentwidth = width - smaller - larger;
+    SUBSORT(currentwidth,SMALLSIZE,left + smaller,left + width - larger - 1,
+            depth + UNITSIN2BITENC);
+  }
+  largeroffset = width - larger;
+  for (idx = 0; idx < (unsigned long) UNITSIN2BITENC; idx++)
+  {
+    if (idx < (unsigned long) (UNITSIN2BITENC-1))
+    {
+      end = rightlcpdist[idx+1];
+    } else
+    {
+      end = width;
+    }
+    if (rightlcpdist[idx] + 1 < end) /* at least two element */
+    {
+      currentwidth = end - rightlcpdist[idx];
+      SUBSORT(currentwidth,SMALLSIZE,left + largeroffset + rightlcpdist[idx],
+              left + largeroffset + end - 1,depth + idx);
+    }
+    rightlcpdist[idx] = 0;
   }
 }
 
@@ -888,15 +928,20 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       PTR2INT(pivot,left);
       if (width <= (unsigned long) MAXCOUNTINGSORT && width >= 30UL)
       {
-        sarrcountingsort(encseq,
+        sarrcountingsort(mkvauxstack,
+                         encseq,
                          countsortinfo,
                          esr1,
+                         esr2,
+                         lcpsubtab,
+                         readmode,
                          fwd,
                          complement,
                          left,
                          &pivot,
                          depth,
                          width,
+                         maxdepth,
                          totallength);
         POPMKVstack(left,right,depth); /* new values for left, right, depth */
         continue;
