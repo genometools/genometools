@@ -108,9 +108,7 @@ unsigned long sizeofbuckettable(unsigned int numofchars,
 
 #ifdef SKDEBUG
 void checkcountspecialcodes(const Bcktab *bcktab);
-#endif
 
-#ifdef SKDEBUG
 void consistencyofsuffix(int line,
                          const Encodedsequence *encseq,
                          Readmode readmode,

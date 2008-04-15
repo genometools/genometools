@@ -68,13 +68,14 @@
 #define SMALLSIZE 6UL
 
 #define SUBSORT(WIDTH,BORDER,LEFT,RIGHT,DEPTH)\
-        checksuffixrange(encseq,\
+        /*checksuffixrange(encseq,\
                          fwd,\
                          complement,\
+                         lcpsubtab,\
                          LEFT,\
                          RIGHT,\
                          DEPTH,\
-                         __LINE__);\
+                         __LINE__);*/\
         if (!maxdepth->defined ||\
             (DEPTH) < (Seqpos) maxdepth->valueunsignedint)\
         {\
@@ -132,6 +133,7 @@ typedef struct
   bool defined;
   Codetype code;
   unsigned int prefixindex;
+#undef SKDEBUG
 #ifdef SKDEBUG
   Seqpos startpos;
 #endif
@@ -200,11 +202,12 @@ typedef EndofTwobitencoding Sfxcmp;
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
 #define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
 
+static Seqpos baseptr;
+
 #ifdef SKDEBUG
 static void showsuffixrange(const Encodedsequence *encseq,
                             bool fwd,
                             bool complement,
-                            Seqpos baseptr,
                             const Lcpsubtab *lcpsubtab,
                             const Suffixptr *leftptr,
                             const Suffixptr *rightptr,
@@ -229,11 +232,12 @@ static void showsuffixrange(const Encodedsequence *encseq,
 }
 #endif
 
-#define CHECKSUFFIXRANGE
+#undef CHECKSUFFIXRANGE
 #ifdef CHECKSUFFIXRANGE
 static void checksuffixrange(const Encodedsequence *encseq,
                              bool fwd,
                              bool complement,
+                             UNUSED const Lcpsubtab *lcpsubtab,
                              Seqpos *left,
                              Seqpos *right,
                              Seqpos depth,
@@ -246,6 +250,7 @@ static void checksuffixrange(const Encodedsequence *encseq,
   showsuffixrange(encseq,
                   fwd,
                   complement,
+                  lcpsubtab,
                   left,
                   right,
                   depth);
@@ -370,7 +375,7 @@ static void insertionsort(const Encodedsequence *encseq,
 
 #ifdef SKDEBUG
   printf("insertion sort ");
-  showsuffixrange(encseq,fwd,complement,baseptr,lcpsubtab,leftptr,rightptr,
+  showsuffixrange(encseq,fwd,complement,lcpsubtab,leftptr,rightptr,
                   depth);
 #endif
   for (pi = leftptr + 1; pi <= rightptr; pi++)
@@ -728,6 +733,17 @@ typedef struct
   char cmpresult;
 } Countingsortinfo;
 
+/*
+static void showcountsortinfo(const Countingsortinfo *countsortinfo,
+                              unsigned long idx)
+{
+  printf("countsortinfo[%lu]=(%lu,",idx,
+          (unsigned long) countsortinfo[idx].suffix);
+  printf("%lu,",(unsigned long) countsortinfo[idx].lcpwithpivot);
+  printf("%d)\n",countsortinfo[idx].cmpresult);
+}
+*/
+
 static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              const Encodedsequence *encseq,
                              Countingsortinfo *countsortinfo,
@@ -742,26 +758,30 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              Seqpos depth,
                              unsigned long width,
                              const Definedunsignedint *maxdepth,
+                             unsigned long *leftlcpdist,
+                             unsigned long *rightlcpdist,
                              Seqpos totallength)
 {
   int cmp;
   unsigned int commonunits;
   EndofTwobitencoding etbecurrent;
-  unsigned long idx, smaller = 0, larger = 0, largeroffset, 
-                insertindex, end, smalleroffset, currentwidth,
-                leftlcpdist[UNITSIN2BITENC] = {0},
-                rightlcpdist[UNITSIN2BITENC] = {0};
+  unsigned long idx, smaller = 0, larger = 0,
+                insertindex, end, equaloffset, currentwidth;
   const bool cmpcharbychar = false;
 
-  countsortinfo[0].suffix = *left;
+  countsortinfo[0].suffix = left[0];
   countsortinfo[0].lcpwithpivot = (unsigned char) UNITSIN2BITENC;
   countsortinfo[0].cmpresult = (char) 0;
+  /*
+  showcountsortinfo(countsortinfo,0);
+  */
   for (idx = 1UL; idx < width; idx++)
   {
     PTR2INT(etbecurrent,left+idx);
     cmp = compareTwobitencodings(fwd,complement,&commonunits,
                                  &etbecurrent,pivot);
     countsortinfo[idx].suffix = left[idx];
+    assert(commonunits <= (unsigned int) UNITSIN2BITENC);
     countsortinfo[idx].lcpwithpivot = commonunits;
     if (cmp > 0)
     {
@@ -783,28 +803,55 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
         countsortinfo[idx].cmpresult = 0;
       }
     }
+    /*
+    showcountsortinfo(countsortinfo,idx);
+    */
   }
+  /*
+  printf("leftlcpdist[0]=%lu\n",leftlcpdist[0]);
+  */
   for (idx = 1UL; idx < (unsigned long) UNITSIN2BITENC; idx++)
   {
     leftlcpdist[idx] += leftlcpdist[idx-1];
     rightlcpdist[idx] += rightlcpdist[idx-1];
+    /*
+    printf("leftlcpdist[%lu]=%lu\n",idx,leftlcpdist[idx]);
+    */
   }
-  largeroffset = width - larger;
-  smalleroffset = smaller;
+  /*
+  printf("rightlcpdist[0]=%lu\n",rightlcpdist[0]);
+  for (idx = 1UL; idx < (unsigned long) UNITSIN2BITENC; idx++)
+  {
+    printf("rightlcpdist[%lu]=%lu\n",idx,rightlcpdist[idx]);
+  }
+  */
+  equaloffset = smaller;
   for (idx = 0; idx < width; idx++)
   {
     switch (countsortinfo[idx].cmpresult)
     {
       case -1:
         insertindex = --leftlcpdist[countsortinfo[idx].lcpwithpivot];
+#ifdef SKDEBUG
+        printf("left insert %lu at %u\n",insertindex,
+                                     (unsigned int) countsortinfo[idx].suffix);
+#endif
         left[insertindex] = countsortinfo[idx].suffix;
         break;
       case 0:
-        left[smalleroffset++] = countsortinfo[idx].suffix;
+#ifdef SKDEBUG
+        printf("mid insert %lu at %u\n",equaloffset,
+                                     (unsigned int) countsortinfo[idx].suffix);
+#endif
+        left[equaloffset++] = countsortinfo[idx].suffix;
         break;
       case 1:
         insertindex = --rightlcpdist[countsortinfo[idx].lcpwithpivot];
-        left[largeroffset + insertindex] = countsortinfo[idx].suffix;
+#ifdef SKDEBUG
+        printf("rightinsert %lu at %u\n",width-1-insertindex,
+                (unsigned int) countsortinfo[idx].suffix);
+#endif
+        left[width - 1 - insertindex] = countsortinfo[idx].suffix;
         break;
     }
   }
@@ -815,9 +862,9 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
       end = leftlcpdist[idx+1];
     } else
     {
-      end = width;
+      end = smaller;
     }
-    if (leftlcpdist[idx] + 1 < end) /* at least two element */
+    if (leftlcpdist[idx] + 1 < end) /* at least two elements */
     {
       currentwidth = end - leftlcpdist[idx];
       SUBSORT(currentwidth,SMALLSIZE,
@@ -831,7 +878,6 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     SUBSORT(currentwidth,SMALLSIZE,left + smaller,left + width - larger - 1,
             depth + UNITSIN2BITENC);
   }
-  largeroffset = width - larger;
   for (idx = 0; idx < (unsigned long) UNITSIN2BITENC; idx++)
   {
     if (idx < (unsigned long) (UNITSIN2BITENC-1))
@@ -839,13 +885,13 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
       end = rightlcpdist[idx+1];
     } else
     {
-      end = width;
+      end = larger;
     }
-    if (rightlcpdist[idx] + 1 < end) /* at least two element */
+    if (rightlcpdist[idx] + 1 < end) /* at least two elements */
     {
       currentwidth = end - rightlcpdist[idx];
-      SUBSORT(currentwidth,SMALLSIZE,left + largeroffset + rightlcpdist[idx],
-              left + largeroffset + end - 1,depth + idx);
+      SUBSORT(currentwidth,SMALLSIZE,left + width - end,
+              left + width - 1 - rightlcpdist[idx],depth + idx);
     }
     rightlcpdist[idx] = 0;
   }
@@ -877,6 +923,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   int retvalpivot;
   Uchar tmpvar;
   unsigned long width, w;
+  unsigned long leftlcpdist[UNITSIN2BITENC] = {0},
+                rightlcpdist[UNITSIN2BITENC] = {0};
   unsigned int commonunits, smallermaxlcp, greatermaxlcp,
                smallerminlcp, greaterminlcp;
   const int commonunitsequal = cmpcharbychar ? 1 : UNITSIN2BITENC;
@@ -926,7 +974,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                          maxwidthrealmedian);
       SWAP(left, pm);
       PTR2INT(pivot,left);
-      if (width <= (unsigned long) MAXCOUNTINGSORT && width >= 30UL)
+      if (width <= (unsigned long) MAXCOUNTINGSORT && width >= 90UL)
       {
         sarrcountingsort(mkvauxstack,
                          encseq,
@@ -942,6 +990,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                          depth,
                          width,
                          maxdepth,
+                         leftlcpdist,
+                         rightlcpdist,
                          totallength);
         POPMKVstack(left,right,depth); /* new values for left, right, depth */
         continue;
@@ -1208,6 +1258,7 @@ static void multilcpvalue(Outlcpinfo *outlcpinfo,
 }
 
 #ifdef SKDEBUG
+/*
 static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
 {
   char buffer[18+1];
@@ -1219,19 +1270,22 @@ static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
                   "acgt");
   fprintf(fp,"(startpos=%lu,code=%u,prefixindex=%u,\"%s\")",
               (unsigned long) suffix->startpos,
-              suffix->code,suffix->prefixindex,
+              (unsigned int) suffix->code,
+              suffix->prefixindex,
               buffer);
 }
+*/
 #endif
 
 #ifdef SKDEBUG
-static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
-                                   Readmode readmode,
-                                   const Suffixwithcode *previoussuffix,
-                                   const Suffixwithcode *currentsuffix,
-                                   unsigned int minchanged,
-                                   Encodedsequencescanstate *esr1,
-                                   Encodedsequencescanstate *esr2)
+/*
+static Seqpos bruteforcelcpvalue(const Encodedsequence *encseq,
+                                 Readmode readmode,
+                                 const Suffixwithcode *previoussuffix,
+                                 const Suffixwithcode *currentsuffix,
+                                 unsigned int minchanged,
+                                 Encodedsequencescanstate *esr1,
+                                 Encodedsequencescanstate *esr2)
 {
   Seqpos lcpvalue;
   unsigned int lcpvalue2;
@@ -1281,6 +1335,7 @@ static Seqpos computelocallcpvalue(const Encodedsequence *encseq,
   }
   return lcpvalue;
 }
+*/
 #endif
 
 static Seqpos computelocallcpvalue(const Suffixwithcode *previoussuffix,
@@ -1338,9 +1393,11 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
   firstspecialsuffixwithcode.prefixindex = maxprefixindex;
 #ifdef SKDEBUG
   firstspecialsuffixwithcode.startpos = firstspecialsuffix;
+  /*
   consistencyofsuffix(__LINE__,
                       encseq,readmode,bcktab,numofchars,
                       &firstspecialsuffixwithcode);
+  */
 #endif
   lcpvalue = computelocallcpvalue(previoussuffix,
                                   &firstspecialsuffixwithcode,
@@ -1463,7 +1520,6 @@ void sortallbuckets(Seqpos *suftabptr,
   Seqpos lcpvalue;
   Lcpsubtab *lcpsubtab;
   Suffixwithcode firstsuffixofbucket;
-  Seqpos baseptr;
   Encodedsequencescanstate *esr1 = NULL,
                            *esr2 = NULL;
 
@@ -1548,9 +1604,11 @@ void sortallbuckets(Seqpos *suftabptr,
           firstsuffixofbucket.prefixindex = prefixlength;
 #ifdef SKDEBUG
           firstsuffixofbucket.startpos = suftabptr[bucketspec.left];
+          /*
           consistencyofsuffix(__LINE__,
                               encseq,readmode,bcktab,numofchars,
                               &firstsuffixofbucket);
+          */
 #endif
           lcpvalue = computelocallcpvalue(&outlcpinfo->previoussuffix,
                                           &firstsuffixofbucket,
@@ -1573,9 +1631,11 @@ void sortallbuckets(Seqpos *suftabptr,
 #ifdef SKDEBUG
         outlcpinfo->previoussuffix.startpos
           = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
+        /*
         consistencyofsuffix(__LINE__,
                             encseq,readmode,bcktab,numofchars,
                             &outlcpinfo->previoussuffix);
+        */
 #endif
       }
     }
@@ -1601,9 +1661,11 @@ void sortallbuckets(Seqpos *suftabptr,
         outlcpinfo->previoussuffix.startpos
            = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket +
                                          bucketspec.specialsinbucket - 1];
+        /*
         consistencyofsuffix(__LINE__,
                             encseq,readmode,bcktab,numofchars,
                             &outlcpinfo->previoussuffix);
+        */
 #endif
       } else
       {
@@ -1617,9 +1679,11 @@ void sortallbuckets(Seqpos *suftabptr,
 #ifdef SKDEBUG
           outlcpinfo->previoussuffix.startpos
             = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
+          /*
           consistencyofsuffix(__LINE__,
                               encseq,readmode,bcktab,numofchars,
                               &outlcpinfo->previoussuffix);
+          */
 #endif
         }
       }

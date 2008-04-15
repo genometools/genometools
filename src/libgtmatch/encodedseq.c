@@ -2723,7 +2723,7 @@ static void showbufchar(FILE *fp,bool complement,Uchar cc)
 }
 
 /* remove this from the interface */
-static void showsequenceatstartpos(FILE *fp,
+void showsequenceatstartpos(FILE *fp,
                                    bool fwd,
                                    bool complement,
                                    const Encodedsequence *encseq,
