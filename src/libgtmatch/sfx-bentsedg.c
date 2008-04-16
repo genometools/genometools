@@ -237,7 +237,7 @@ static void showsuffixrange(const Encodedsequence *encseq,
 static void checksuffixrange(const Encodedsequence *encseq,
                              bool fwd,
                              bool complement,
-                             UNUSED const Lcpsubtab *lcpsubtab,
+                             const Lcpsubtab *lcpsubtab,
                              Seqpos *left,
                              Seqpos *right,
                              Seqpos depth,
@@ -735,19 +735,19 @@ typedef struct
 } Countingsortinfo;
 
 /*
-static void showcountsortinfo(const Countingsortinfo *countsortinfo,
+static void showcountingsortinfo(const Countingsortinfo *countingsortinfo,
                               unsigned long idx)
 {
-  printf("countsortinfo[%lu]=(%lu,",idx,
-          (unsigned long) countsortinfo[idx].suffix);
-  printf("%lu,",(unsigned long) countsortinfo[idx].lcpwithpivot);
-  printf("%d)\n",countsortinfo[idx].cmpresult);
+  printf("countingsortinfo[%lu]=(%lu,",idx,
+          (unsigned long) countingsortinfo[idx].suffix);
+  printf("%lu,",(unsigned long) countingsortinfo[idx].lcpwithpivot);
+  printf("%d)\n",countingsortinfo[idx].cmpresult);
 }
 */
 
 static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              const Encodedsequence *encseq,
-                             Countingsortinfo *countsortinfo,
+                             Countingsortinfo *countingsortinfo,
                              Encodedsequencescanstate *esr1,
                              Encodedsequencescanstate *esr2,
                              Lcpsubtab *lcpsubtab,
@@ -770,17 +770,17 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                 insertindex, end, equaloffset, currentwidth;
   const bool cmpcharbychar = false;
 
-  countsortinfo[0].suffix = left[0];
-  countsortinfo[0].lcpwithpivot = (unsigned char) UNITSIN2BITENC;
-  countsortinfo[0].cmpresult = (char) 0;
+  countingsortinfo[0].suffix = left[0];
+  countingsortinfo[0].lcpwithpivot = (unsigned char) UNITSIN2BITENC;
+  countingsortinfo[0].cmpresult = (char) 0;
   for (idx = 1UL; idx < width; idx++)
   {
     PTR2INT(etbecurrent,left+idx);
     cmp = compareTwobitencodings(fwd,complement,&commonunits,
                                  &etbecurrent,pivot);
-    countsortinfo[idx].suffix = left[idx];
+    countingsortinfo[idx].suffix = left[idx];
     assert(commonunits <= (unsigned int) UNITSIN2BITENC);
-    countsortinfo[idx].lcpwithpivot = commonunits;
+    countingsortinfo[idx].lcpwithpivot = commonunits;
     if (cmp > 0)
     {
       assert(commonunits < (unsigned int) UNITSIN2BITENC);
@@ -789,7 +789,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
       {
         maxlargerwithlcp = commonunits;
       }
-      countsortinfo[idx].cmpresult = (char) 1;
+      countingsortinfo[idx].cmpresult = (char) 1;
       larger++;
     } else
     {
@@ -801,12 +801,12 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
         {
           maxsmallerwithlcp = commonunits;
         }
-        countsortinfo[idx].cmpresult = (char) -1;
+        countingsortinfo[idx].cmpresult = (char) -1;
         smaller++;
       } else
       {
         assert(commonunits == (unsigned int) UNITSIN2BITENC);
-        countsortinfo[idx].cmpresult = 0;
+        countingsortinfo[idx].cmpresult = 0;
       }
     }
   }
@@ -821,18 +821,18 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
   equaloffset = smaller;
   for (idx = 0; idx < width; idx++)
   {
-    switch (countsortinfo[idx].cmpresult)
+    switch (countingsortinfo[idx].cmpresult)
     {
       case -1:
-        insertindex = --leftlcpdist[countsortinfo[idx].lcpwithpivot];
-        left[insertindex] = countsortinfo[idx].suffix;
+        insertindex = --leftlcpdist[countingsortinfo[idx].lcpwithpivot];
+        left[insertindex] = countingsortinfo[idx].suffix;
         break;
       case 0:
-        left[equaloffset++] = countsortinfo[idx].suffix;
+        left[equaloffset++] = countingsortinfo[idx].suffix;
         break;
       case 1:
-        insertindex = --rightlcpdist[countsortinfo[idx].lcpwithpivot];
-        left[width - 1 - insertindex] = countsortinfo[idx].suffix;
+        insertindex = --rightlcpdist[countingsortinfo[idx].lcpwithpivot];
+        left[width - 1 - insertindex] = countingsortinfo[idx].suffix;
         break;
     }
   }
@@ -886,8 +886,6 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
   }
 }
 
-#define MAXCOUNTINGSORT 1024
-
 static void bentleysedgewick(const Encodedsequence *encseq,
                              Encodedsequencescanstate *esr1,
                              Encodedsequencescanstate *esr2,
@@ -900,7 +898,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Lcpsubtab *lcpsubtab,
                              const Definedunsignedint *maxdepth,
                              bool cmpcharbychar,
-                             unsigned long maxwidthrealmedian)
+                             unsigned long maxwidthrealmedian,
+                             Countingsortinfo *countingsortinfo,
+                             unsigned long maxcountingsort)
 {
   Suffixptr *left, *right, *leftplusw;
   Seqpos pivotcmpcharbychar = 0, valcmpcharbychar;
@@ -914,7 +914,6 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   unsigned long width, w;
   unsigned long leftlcpdist[UNITSIN2BITENC] = {0},
                 rightlcpdist[UNITSIN2BITENC] = {0};
-  Countingsortinfo countsortinfo[MAXCOUNTINGSORT];
   unsigned int commonunits, smallermaxlcp, greatermaxlcp,
                smallerminlcp, greaterminlcp;
   const int commonunitsequal = cmpcharbychar ? 1 : UNITSIN2BITENC;
@@ -963,11 +962,11 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                          maxwidthrealmedian);
       SWAP(left, pm);
       PTR2INT(pivot,left);
-      if (width <= (unsigned long) MAXCOUNTINGSORT && width >= 90UL)
+      if (width <= (unsigned long) maxcountingsort && width >= 30UL)
       {
         sarrcountingsort(mkvauxstack,
                          encseq,
-                         countsortinfo,
+                         countingsortinfo,
                          esr1,
                          esr2,
                          lcpsubtab,
@@ -1523,6 +1522,8 @@ void sortallbuckets(Seqpos *suftabptr,
   Suffixwithcode firstsuffixofbucket;
   Encodedsequencescanstate *esr1 = NULL,
                            *esr2 = NULL;
+  Countingsortinfo *countingsortinfo;
+  unsigned long maxcountingsort;
 
   if (outlcpinfo == NULL)
   {
@@ -1550,6 +1551,8 @@ void sortallbuckets(Seqpos *suftabptr,
     lcpsubtab->smalllcpvalues = (Uchar *) lcpsubtab->spaceSeqpos;
   }
   INITARRAY(&mkvauxstack,MKVstack);
+  maxcountingsort = maxbucketsize;
+  ALLOCASSIGNSPACE(countingsortinfo,NULL,Countingsortinfo,maxcountingsort);
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;
@@ -1592,7 +1595,9 @@ void sortallbuckets(Seqpos *suftabptr,
                          lcpsubtab,
                          maxdepth,
                          cmpcharbychar,
-                         maxwidthrealmedian);
+                         maxwidthrealmedian,
+                         countingsortinfo,
+                         maxcountingsort);
       }
       if (outlcpinfo != NULL)
       {
@@ -1701,6 +1706,7 @@ void sortallbuckets(Seqpos *suftabptr,
       }
     }
   }
+  FREESPACE(countingsortinfo);
   if (!cmpcharbychar && hasspecialranges(encseq))
   {
     assert(esr1 != NULL);
