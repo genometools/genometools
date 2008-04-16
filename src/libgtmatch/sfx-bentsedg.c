@@ -100,6 +100,10 @@
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack++].depth = D
 
 #define POPMKVstack(L,R,D)\
+        if (mkvauxstack->nextfreeMKVstack == 0)\
+        {\
+          break;\
+        }\
         L = mkvauxstack->spaceMKVstack[--mkvauxstack->nextfreeMKVstack].left;\
         R = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].right;\
         D = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].depth;\
@@ -677,7 +681,7 @@ static Suffixptr *cmpcharbychardelivermedian(const Encodedsequence *encseq,
 
 static Suffixptr *delivermedian(const Encodedsequence *encseq,
                                 Encodedsequencescanstate *esr,
-                                Medianinfo **medianinfospace,
+                                Medianinfo *medianinfospace,
                                 bool fwd,
                                 bool complement,
                                 Seqpos *left,
@@ -705,12 +709,7 @@ static Suffixptr *delivermedian(const Encodedsequence *encseq,
       pm = medianof3(encseq,esr,fwd,complement,totallength,depth,pl,pm,pr);
     } else
     {
-      if (*medianinfospace == NULL)
-      {
-        ALLOCASSIGNSPACE(*medianinfospace,NULL,Medianinfo,
-                         maxwidthrealmedian+1);
-      }
-      pm = realmedian(*medianinfospace,
+      pm = realmedian(medianinfospace,
                       encseq,
                       esr,
                       fwd,
@@ -898,6 +897,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Lcpsubtab *lcpsubtab,
                              const Definedunsignedint *maxdepth,
                              bool cmpcharbychar,
+                             Medianinfo *medianinfospace,
                              unsigned long maxwidthrealmedian,
                              Countingsortinfo *countingsortinfo,
                              unsigned long maxcountingsort)
@@ -917,7 +917,6 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   unsigned int commonunits, smallermaxlcp, greatermaxlcp,
                smallerminlcp, greaterminlcp;
   const int commonunitsequal = cmpcharbychar ? 1 : UNITSIN2BITENC;
-  Medianinfo *medianinfospace = NULL;
 
   width = (unsigned long) (r - l + 1);
   if (width <= SMALLSIZE)
@@ -951,7 +950,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       pm = delivermedian(encseq,
                          esr1,
-                         &medianinfospace,
+                         medianinfospace,
                          fwd,
                          complement,
                          left,
@@ -1157,15 +1156,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       quicksortdiff += (unsigned long) (pb-pa) - (unsigned long) (pd-pc);
     }
-    if (mkvauxstack->nextfreeMKVstack == 0)
-    {
-      break;
-    }
     POPMKVstack(left,right,depth); /* new values for left, right, depth */
-  }
-  if (medianinfospace != NULL)
-  {
-    FREESPACE(medianinfospace);
   }
 }
 
@@ -1524,6 +1515,7 @@ void sortallbuckets(Seqpos *suftabptr,
                            *esr2 = NULL;
   Countingsortinfo *countingsortinfo;
   unsigned long maxcountingsort;
+  Medianinfo *medianinfospace;
 
   if (outlcpinfo == NULL)
   {
@@ -1553,6 +1545,7 @@ void sortallbuckets(Seqpos *suftabptr,
   INITARRAY(&mkvauxstack,MKVstack);
   maxcountingsort = maxbucketsize;
   ALLOCASSIGNSPACE(countingsortinfo,NULL,Countingsortinfo,maxcountingsort);
+  ALLOCASSIGNSPACE(medianinfospace,NULL,Medianinfo,maxwidthrealmedian);
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;
@@ -1595,6 +1588,7 @@ void sortallbuckets(Seqpos *suftabptr,
                          lcpsubtab,
                          maxdepth,
                          cmpcharbychar,
+                         medianinfospace,
                          maxwidthrealmedian,
                          countingsortinfo,
                          maxcountingsort);
@@ -1707,6 +1701,7 @@ void sortallbuckets(Seqpos *suftabptr,
     }
   }
   FREESPACE(countingsortinfo);
+  FREESPACE(medianinfospace);
   if (!cmpcharbychar && hasspecialranges(encseq))
   {
     assert(esr1 != NULL);
