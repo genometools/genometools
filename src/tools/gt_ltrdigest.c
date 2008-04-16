@@ -40,6 +40,7 @@ typedef struct LTRdigestOptions {
   bool verbose;
   OutputFileInfo *ofi;
   GenFile *outfp;
+  unsigned int seqnamelen;
 } LTRdigestOptions;
 
 static void* gt_ltrdigest_arguments_new(void)
@@ -225,6 +226,13 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, oto);
   option_hide_default(oto);
 
+  o = option_new_uint("seqnamelen",
+                      "set maximal length of sequence names in FASTA headers "
+                      "(e.g. for clustalw or similar tools)",
+                      &arguments->seqnamelen,
+                      20);
+  option_parser_add_option(op, o);
+
   /* verbosity */
   o = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, o);
@@ -335,7 +343,8 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                                               &arguments->pdom_opts,
                                               str_get(arguments->trna_lib),
                                               argv[1],
-                                              argv[0]);
+                                              argv[0],
+                                              arguments->seqnamelen);
       last_stream = tab_out_stream;
     }
     else

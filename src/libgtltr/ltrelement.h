@@ -58,8 +58,9 @@ void          ltrelement_offset2pos(LTRElement *e, Range *rng,
                                     unsigned long radius,
                                     enum Offset o,
                                     Strand strand);
-int           ltrelement_format_description(LTRElement *e, char *buf,
-                                            size_t buflen);
+int           ltrelement_format_description(LTRElement *e,
+                                            unsigned int seqnamelen,
+                                            char *buf, size_t buflen);
 
 int           ltrelement_unit_test(Error *err);
 #endif

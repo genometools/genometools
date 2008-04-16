@@ -36,6 +36,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
                                      PdomOptions *pdom_opts,
                                      const char *trnafilename,
                                      const char *seqfilename,
-                                     const char *gfffilename);
+                                     const char *gfffilename,
+                                     unsigned int seqnamelen);
 
 #endif

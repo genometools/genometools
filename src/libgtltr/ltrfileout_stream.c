@@ -51,6 +51,7 @@ struct LTRFileOutStream {
   Hashtable *pdomout_files;
   LTRVisitor *lv;
   int tests_to_run;
+  unsigned int seqnamelen;
   LTRElement element;
 };
 
@@ -156,7 +157,8 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     Seq *seq = bioseq_get_seq(ls->bioseq, seqid);
     ls->element.seqid = seq_get_description(seq);
 
-    ltrelement_format_description(&ls->element, desc, MAXFASTAHEADER-1);
+    ltrelement_format_description(&ls->element, ls->seqnamelen,
+                                  desc, MAXFASTAHEADER-1);
 
     /* output basic retrotransposon data */
     lltr_rng = genome_node_get_range((GenomeNode*) ls->element.leftLTR);
@@ -432,7 +434,8 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
                                      PdomOptions *pdom_opts,
                                      const char *trnafilename,
                                      const char *seqfilename,
-                                     const char *gfffilename)
+                                     const char *gfffilename,
+                                     unsigned int seqnamelen)
 {
   GenomeStream *gs;
   LTRFileOutStream *ls;
@@ -448,6 +451,7 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   ls->in_stream = genome_stream_ref(in_stream);
   ls->bioseq = bioseq;
   ls->tests_to_run = tests_to_run;
+  ls->seqnamelen = seqnamelen;
 
   /* open outfiles */
   ls->fileprefix = file_prefix;
