@@ -202,9 +202,9 @@ typedef EndofTwobitencoding Sfxcmp;
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
 #define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
 
+#ifdef SKDEBUG
 static Seqpos baseptr;
 
-#ifdef SKDEBUG
 static void showsuffixrange(const Encodedsequence *encseq,
                             bool fwd,
                             bool complement,
@@ -764,7 +764,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              Seqpos totallength)
 {
   int cmp;
-  unsigned int commonunits;
+  unsigned int commonunits, maxsmallerwithlcp = 0, maxlargerwithlcp = 0;
   EndofTwobitencoding etbecurrent;
   unsigned long idx, smaller = 0, larger = 0,
                 insertindex, end, equaloffset, currentwidth;
@@ -773,9 +773,6 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
   countsortinfo[0].suffix = left[0];
   countsortinfo[0].lcpwithpivot = (unsigned char) UNITSIN2BITENC;
   countsortinfo[0].cmpresult = (char) 0;
-  /*
-  showcountsortinfo(countsortinfo,0);
-  */
   for (idx = 1UL; idx < width; idx++)
   {
     PTR2INT(etbecurrent,left+idx);
@@ -788,6 +785,10 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     {
       assert(commonunits < (unsigned int) UNITSIN2BITENC);
       rightlcpdist[commonunits]++;
+      if (maxlargerwithlcp < commonunits)
+      {
+        maxlargerwithlcp = commonunits;
+      }
       countsortinfo[idx].cmpresult = (char) 1;
       larger++;
     } else
@@ -796,6 +797,10 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
       {
         assert(commonunits < (unsigned int) UNITSIN2BITENC);
         leftlcpdist[commonunits]++;
+        if (maxsmallerwithlcp < commonunits)
+        {
+          maxsmallerwithlcp = commonunits;
+        }
         countsortinfo[idx].cmpresult = (char) -1;
         smaller++;
       } else
@@ -804,28 +809,15 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
         countsortinfo[idx].cmpresult = 0;
       }
     }
-    /*
-    showcountsortinfo(countsortinfo,idx);
-    */
   }
-  /*
-  printf("leftlcpdist[0]=%lu\n",leftlcpdist[0]);
-  */
-  for (idx = 1UL; idx < (unsigned long) UNITSIN2BITENC; idx++)
+  for (idx = 1UL; idx <= (unsigned long) maxsmallerwithlcp; idx++)
   {
     leftlcpdist[idx] += leftlcpdist[idx-1];
-    rightlcpdist[idx] += rightlcpdist[idx-1];
-    /*
-    printf("leftlcpdist[%lu]=%lu\n",idx,leftlcpdist[idx]);
-    */
   }
-  /*
-  printf("rightlcpdist[0]=%lu\n",rightlcpdist[0]);
-  for (idx = 1UL; idx < (unsigned long) UNITSIN2BITENC; idx++)
+  for (idx = 1UL; idx <= (unsigned long) maxlargerwithlcp; idx++)
   {
-    printf("rightlcpdist[%lu]=%lu\n",idx,rightlcpdist[idx]);
+    rightlcpdist[idx] += rightlcpdist[idx-1];
   }
-  */
   equaloffset = smaller;
   for (idx = 0; idx < width; idx++)
   {
@@ -833,32 +825,20 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     {
       case -1:
         insertindex = --leftlcpdist[countsortinfo[idx].lcpwithpivot];
-#ifdef SKDEBUG
-        printf("left insert %lu at %u\n",insertindex,
-                                     (unsigned int) countsortinfo[idx].suffix);
-#endif
         left[insertindex] = countsortinfo[idx].suffix;
         break;
       case 0:
-#ifdef SKDEBUG
-        printf("mid insert %lu at %u\n",equaloffset,
-                                     (unsigned int) countsortinfo[idx].suffix);
-#endif
         left[equaloffset++] = countsortinfo[idx].suffix;
         break;
       case 1:
         insertindex = --rightlcpdist[countsortinfo[idx].lcpwithpivot];
-#ifdef SKDEBUG
-        printf("rightinsert %lu at %u\n",width-1-insertindex,
-                (unsigned int) countsortinfo[idx].suffix);
-#endif
         left[width - 1 - insertindex] = countsortinfo[idx].suffix;
         break;
     }
   }
-  for (idx = 0; idx < (unsigned long) UNITSIN2BITENC; idx++)
+  for (idx = 0; idx <= (unsigned long) maxsmallerwithlcp; idx++)
   {
-    if (idx < (unsigned long) (UNITSIN2BITENC-1))
+    if (idx < (unsigned long) maxsmallerwithlcp)
     {
       end = leftlcpdist[idx+1];
     } else
@@ -871,6 +851,10 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
       SUBSORT(currentwidth,SMALLSIZE,
               left + leftlcpdist[idx],left + end - 1,depth + idx);
     }
+    if (lcpsubtab != NULL && leftlcpdist[idx] < end) /* at least one element */
+    {
+      SETLCP(LCPINDEX(left + end),depth + idx);
+    }
     leftlcpdist[idx] = 0;
   }
   if (width - smaller - larger > 1UL)
@@ -879,9 +863,9 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     SUBSORT(currentwidth,SMALLSIZE,left + smaller,left + width - larger - 1,
             depth + UNITSIN2BITENC);
   }
-  for (idx = 0; idx < (unsigned long) UNITSIN2BITENC; idx++)
+  for (idx = 0; idx <= (unsigned long) maxlargerwithlcp; idx++)
   {
-    if (idx < (unsigned long) (UNITSIN2BITENC-1))
+    if (idx < (unsigned long) maxlargerwithlcp)
     {
       end = rightlcpdist[idx+1];
     } else
@@ -893,6 +877,10 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
       currentwidth = end - rightlcpdist[idx];
       SUBSORT(currentwidth,SMALLSIZE,left + width - end,
               left + width - 1 - rightlcpdist[idx],depth + idx);
+    }
+    if (lcpsubtab != NULL && rightlcpdist[idx] < end) /* at least one element */
+    {
+      SETLCP(LCPINDEX(left + width - end),depth + idx);
     }
     rightlcpdist[idx] = 0;
   }
@@ -926,11 +914,11 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   unsigned long width, w;
   unsigned long leftlcpdist[UNITSIN2BITENC] = {0},
                 rightlcpdist[UNITSIN2BITENC] = {0};
+  Countingsortinfo countsortinfo[MAXCOUNTINGSORT];
   unsigned int commonunits, smallermaxlcp, greatermaxlcp,
                smallerminlcp, greaterminlcp;
   const int commonunitsequal = cmpcharbychar ? 1 : UNITSIN2BITENC;
   Medianinfo *medianinfospace = NULL;
-  Countingsortinfo countsortinfo[MAXCOUNTINGSORT];
 
   width = (unsigned long) (r - l + 1);
   if (width <= SMALLSIZE)
@@ -1128,9 +1116,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       {
         /*
           left part has suffix with lcp up to length smallermaxlcp w.r.t.
-          to the pivot. This lcp belongs to a suffix on the left 
-          which is at a maximum distance to the pivot and thus to an
-          element in the initial part of the left side
+          to the pivot. This lcp belongs to a suffix on the left
+          which is at a minimum distance to the pivot and thus to an
+          element in the final part of the left side.
         */
         SETLCP(LCPINDEX(leftplusw),depth + smallermaxlcp);
       }
@@ -1154,11 +1142,10 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       {
         /*
           right part has suffix with lcp up to length largermaxlcp w.r.t.
-          to the pivot. This lcp belongs to a suffix on the right 
-          which is at a maximum distance to the pivot and thus to an
-          element in the last part of the right side.
+          to the pivot. This lcp belongs to a suffix on the right
+          which is at a minimum distance to the pivot and thus to an
+          element in the first part of the right side.
         */
-        /* Is this really necessary */
         SETLCP(LCPINDEX(right-w+1),depth + greatermaxlcp);
       }
       SUBSORT(w,SMALLSIZE,right-w+1,right,depth + greaterminlcp);
@@ -1562,7 +1549,6 @@ void sortallbuckets(Seqpos *suftabptr,
                      lcpsubtab->allocatedSeqpos);
     lcpsubtab->smalllcpvalues = (Uchar *) lcpsubtab->spaceSeqpos;
   }
-  printf("maxbucketsize=%lu\n",maxbucketsize);
   INITARRAY(&mkvauxstack,MKVstack);
   for (code = mincode; code <= maxcode; code++)
   {
@@ -1633,7 +1619,9 @@ void sortallbuckets(Seqpos *suftabptr,
           lcpvalue = 0;
         }
         assert(lcpsubtab != NULL);
+#ifdef SKDEBUG
         baseptr = bucketspec.left;
+#endif
         SETLCP(0,lcpvalue);
         /* all other lcp-values are computed and they can be output */
         multilcpvalue(outlcpinfo,
