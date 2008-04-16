@@ -426,10 +426,11 @@ static void insertionsort(const Encodedsequence *encseq,
         retval = compareEncseqsequences(&lcplen,encseq,fwd,complement,
                                         esr1,esr2,*(pj-1),*pj,depth);
       }
+      assert(retval != 0);
       if (lcpsubtab != NULL)
       {
         lcpindex = LCPINDEX(pj);
-        if (retval > 0 && pj < pi)
+        if (pj < pi && retval > 0)
         {
           SETLCP(lcpindex+1,lcpsubtab->spaceSeqpos[lcpindex]);
         }
@@ -872,7 +873,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     }
     leftlcpdist[idx] = 0;
   }
-  if (width - smaller - larger > 1U)
+  if (width - smaller - larger > 1UL)
   {
     currentwidth = width - smaller - larger;
     SUBSORT(currentwidth,SMALLSIZE,left + smaller,left + width - larger - 1,
@@ -1125,6 +1126,12 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       leftplusw = left + w;
       if (lcpsubtab != NULL)
       {
+        /*
+          left part has suffix with lcp up to length smallermaxlcp w.r.t.
+          to the pivot. This lcp belongs to a suffix on the left 
+          which is at a maximum distance to the pivot and thus to an
+          element in the initial part of the left side
+        */
         SETLCP(LCPINDEX(leftplusw),depth + smallermaxlcp);
       }
       SUBSORT(w,SMALLSIZE,left,leftplusw-1,depth + smallerminlcp);
@@ -1145,6 +1152,13 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       if (lcpsubtab != NULL)
       {
+        /*
+          right part has suffix with lcp up to length largermaxlcp w.r.t.
+          to the pivot. This lcp belongs to a suffix on the right 
+          which is at a maximum distance to the pivot and thus to an
+          element in the last part of the right side.
+        */
+        /* Is this really necessary */
         SETLCP(LCPINDEX(right-w+1),depth + greatermaxlcp);
       }
       SUBSORT(w,SMALLSIZE,right-w+1,right,depth + greaterminlcp);
