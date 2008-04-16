@@ -49,7 +49,22 @@ typedef size_t (*SeqposReadFunc)(void *src, Seqpos *dest, size_t len,
  * \brief generic method to access the original encoded sequence
  * @return actual number of symbols acquired
  */
-typedef size_t (*GetOrigSeqSym)(void *state, Symbol *dest, Seqpos pos,
-                                size_t len);
+typedef size_t (*accessSeqSubStr)(void *state, Symbol *dest, Seqpos pos,
+                                  size_t len);
+
+struct randomSeqAccessor
+{
+  accessSeqSubStr accessFunc;
+  void *state;
+};
+
+typedef struct randomSeqAccessor RandomSeqAccessor;
+
+static inline size_t
+accessSequence(RandomSeqAccessor accessor, Symbol *dest, Seqpos pos,
+               size_t len)
+{
+  return accessor.accessFunc(accessor.state, dest, pos, len);
+}
 
 #endif

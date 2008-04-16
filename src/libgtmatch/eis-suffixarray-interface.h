@@ -69,21 +69,6 @@ SAIMakeSufTabReader(struct suffixarrayFileInterface *sai);
 extern size_t
 SAIGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len);
 
-#if 0
-/**
- * @brief Read part of the suffix array starting from position after
- * last read.
- * @param src reference of a Suffixarray object
- * @param dest write suffix array values here
- * @param len length of part to read
- * @param err genometools error object reference
- * @return number of entries read, less than len if end of sequence
- * reached
- */
-extern size_t
-saReadSeqpos(void *src, Seqpos *dest, size_t len, Error *err);
-#endif
-
 /**
  * @brief Query position of suffix starting at position 0, can be
  * undefined if not yet encountered.

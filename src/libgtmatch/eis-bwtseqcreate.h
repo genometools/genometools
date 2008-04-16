@@ -70,10 +70,10 @@ typedef DefinedSeqpos (*reportLongest)(void *state);
  * @param err
  */
 extern EISeq *
-createBWTSeqGeneric(const struct bwtParam *params,
-                    indexCreateFunc createIndex, void *baseSrc, Seqpos totalLen,
+createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
+                    void *baseSrc, Seqpos totalLen,
                     const MRAEnc *alphabet, int *specialRanges,
-                    GetOrigSeqSym readOrigSeq, void *origSeqState,
+                    RandomSeqAccessor origSeqAccess,
                     SeqDataReader readNextSeqpos,
                     reportLongest lrepFunc, void *lrepState, Error *err);
 

@@ -220,11 +220,14 @@ createBWTSeqFromSAI(const struct bwtParam *params,
     EISeq *seqIdx = NULL;
     switch (params->baseType)
     {
+      RandomSeqAccessor origSeqRead;
     case BWT_ON_BLOCK_ENC:
+      origSeqRead.accessFunc = SAIGetOrigSeqSym;
+      origSeqRead.state = sai;
       seqIdx =
         createBWTSeqGeneric(
           params, (indexCreateFunc)newBlockEncIdxSeqFromSAI, sai, totalLen,
-          alphabet, GTAlphabetRangeHandling, SAIGetOrigSeqSym, sai, readSfxIdx,
+          alphabet, GTAlphabetRangeHandling, origSeqRead, readSfxIdx,
           reportSAILongest, sai, err);
       break;
     default:
@@ -261,11 +264,13 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
       return NULL;
   }
   alphabet = newMRAEncFromSfxI(sfxi);
-  seqIdx= createBWTSeqGeneric(
-    params, (indexCreateFunc)newBlockEncIdxSeqFromSfxI, sfxi, totalLen,
-    alphabet, GTAlphabetRangeHandling,
-    SfxIGetOrigSeq, sfxi, readSfxIdx,
-    (reportLongest)getSfxILongestPos, sfxi, err);
+  {
+    RandomSeqAccessor origSeqAccess = { SfxIGetOrigSeq, sfxi };
+    seqIdx= createBWTSeqGeneric(
+      params, (indexCreateFunc)newBlockEncIdxSeqFromSfxI, sfxi, totalLen,
+      alphabet, GTAlphabetRangeHandling, origSeqAccess, readSfxIdx,
+      (reportLongest)getSfxILongestPos, sfxi, err);
+  }
   if (seqIdx)
   {
     bwtSeq = newBWTSeq(seqIdx, alphabet);

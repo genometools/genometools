@@ -88,11 +88,10 @@ struct seqRevMapEntry
 struct addLocateInfoState
 {
   Seqpos seqLen;
-  void *origSeqState;
   const MRAEnc *alphabet;
   int *specialRanges;
   SeqDataReader readSeqpos;
-  GetOrigSeqSym readOrigSeq;
+  RandomSeqAccessor origSeqAccess;
   unsigned locateInterval, bitsPerOrigPos, bitsPerSeqpos;
   int featureToggles;
   size_t revMapCacheSize;
@@ -114,7 +113,7 @@ bitsPerPosUpperBound(struct addLocateInfoState *state)
 
 static void
 initAddLocateInfoState(struct addLocateInfoState *state,
-                       GetOrigSeqSym readOrigSeq, void *origSeqState,
+                       RandomSeqAccessor origSeqAccess,
                        SeqDataReader readSeqpos,
                        const MRAEnc *alphabet, int *specialRanges,
                        Seqpos srcLen, const struct bwtParam *params)
@@ -127,8 +126,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
   state->seqLen = srcLen;
   state->specialRanges = specialRanges;
   state->readSeqpos = readSeqpos;
-  state->readOrigSeq = readOrigSeq;
-  state->origSeqState = origSeqState;
+  state->origSeqAccess = origSeqAccess;
   state->featureToggles = params->featureToggles;
   aggregationExpVal = estimateSegmentSize(&params->seqParams,
                                           params->baseType);
@@ -160,6 +158,49 @@ destructAddLocateInfoState(struct addLocateInfoState *state)
   ma_free(state->revMapCache);
 }
 
+static inline int
+isSpecialRegularTransition(RandomSeqAccessor origSeqAccess, Seqpos seqLen,
+                           const MRAEnc *alphabet, int *specialRanges,
+                           Seqpos pos)
+{
+  Symbol syms[2];
+  if (pos > 0 && pos < seqLen - 1)
+  {
+#ifndef NDEBUG
+    int retcode =
+#endif
+      accessSequence(origSeqAccess, syms, pos - 1, 2);
+    assert(retcode == 2);
+  }
+  else if (pos == 0)
+  {
+#ifndef NDEBUG
+    int retcode =
+#endif
+      accessSequence(origSeqAccess, syms + 1, 0, 1);
+    assert(retcode == 1);
+    syms[0] = UNDEFBWTCHAR;
+  }
+  else /* pos == seqLen - 1 */
+  {
+#ifndef NDEBUG
+    int retcode =
+#endif
+      accessSequence(origSeqAccess, syms, seqLen - 2, 1);
+    assert(retcode == 1);
+    syms[1] = UNDEFBWTCHAR;
+  }
+  if (MRAEncSymbolIsInSelectedRanges(
+        alphabet, MRAEncMapSymbol(alphabet, syms[0]), SPECIAL_RANGE,
+        specialRanges)
+      && MRAEncSymbolIsInSelectedRanges(
+        alphabet, MRAEncMapSymbol(alphabet, syms[1]), NORMAL_RANGE,
+        specialRanges))
+    return 1;
+  else
+    return 0;
+}
+
 static BitOffset
 addLocateInfo(BitString cwDest, BitOffset cwOffset,
               BitString varDest, BitOffset varOffset,
@@ -187,54 +228,24 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
       locateBitmap = state->featureToggles & BWTLocateBitmap;
     for (i = 0; i < len; ++i)
     {
-      int specialRegularSymTransition = 0;
+      int insertExtraLocateMark = 0;
       /* 1.a read array index*/
       if ((retcode = SDRRead(state->readSeqpos, &mapVal, 1, err)) != 1)
         return (BitOffset)-1;
       /* 1.b find current symbol and compare to special ranges */
-      if (!properlySorted)
-      {
-        Symbol syms[2];
-        if (mapVal > 0 && mapVal < state->seqLen - 1)
-        {
-          if ((retcode = state->readOrigSeq(
-                 state->origSeqState, syms, mapVal - 1, 2)) != 2)
-            return (BitOffset)-1;
-        }
-        else if (mapVal == 0)
-        {
-          syms[0] = UNDEFBWTCHAR;
-          if ((retcode = state->readOrigSeq(
-                 state->origSeqState, syms + 1, 0, 1))!= 1)
-            return (BitOffset)-1;
-        }
-        else /* mapVal == seqLen - 1 */
-        {
-          if ((retcode = state->readOrigSeq(state->origSeqState,
-                                            syms, state->seqLen - 2, 1)) != 1)
-            return (BitOffset)-1;
-          syms[1] = UNDEFBWTCHAR;
-        }
-        if (MRAEncSymbolIsInSelectedRanges(
-              state->alphabet, MRAEncMapSymbol(state->alphabet, syms[0]),
-              SPECIAL_RANGE, state->specialRanges)
-            && MRAEncSymbolIsInSelectedRanges(
-              state->alphabet, MRAEncMapSymbol(state->alphabet, syms[1]),
-              NORMAL_RANGE, state->specialRanges))
-          specialRegularSymTransition = 1;
-        else
-          specialRegularSymTransition = 0;
-      }
+      insertExtraLocateMark = !properlySorted &&
+        isSpecialRegularTransition(state->origSeqAccess, state->seqLen,
+                                   state->alphabet, state->specialRanges,
+                                   mapVal);
       /* 1.c check wether the index into the original sequence is an
        * even multiple of the sampling interval, or we have just
        * walked from a special range to a regular symbol */
-      if (!(mapVal % state->locateInterval)
-          || (!properlySorted && specialRegularSymTransition))
+      if (!(mapVal % state->locateInterval) || insertExtraLocateMark)
       {
         /* 1.c.1 enter index into cache */
         state->revMapCache[revMapCacheLen].bwtPos = i;
         state->revMapCache[revMapCacheLen].origPos
-          = properlySorted?mapVal / state->locateInterval:mapVal;
+          = properlySorted ? mapVal/state->locateInterval : mapVal;
         ++revMapCacheLen;
         /* 1.c.2 mark position in bwt sequence */
         if (locateBitmap)
@@ -272,11 +283,10 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
 }
 
 extern EISeq *
-createBWTSeqGeneric(const struct bwtParam *params,
-                    indexCreateFunc createIndex, void *baseSrc,
-                    Seqpos totalLen,
+createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
+                    void *baseSrc, Seqpos totalLen,
                     const MRAEnc *alphabet, int *specialRanges,
-                    GetOrigSeqSym readOrigSeq, void *origSeqState,
+                    RandomSeqAccessor origSeqAccess,
                     SeqDataReader readNextSeqpos,
                     reportLongest lrepFunc, void *lrepState, Error *err)
 {
@@ -296,10 +306,8 @@ createBWTSeqGeneric(const struct bwtParam *params,
     uint32_t headerSizes[] = { LOCATE_HEADER_SIZE };
     headerWriteFunc headerFuncs[] = { writeLocateInfoHeader };
     error_unset(err);
-    initAddLocateInfoState(&varState,
-                           readOrigSeq, origSeqState,
-                           readNextSeqpos,
-                           alphabet, specialRanges,
+    initAddLocateInfoState(&varState, origSeqAccess,
+                           readNextSeqpos, alphabet, specialRanges,
                            totalLen, params);
     varStateIsInitialized = true;
     if (locateInterval)
