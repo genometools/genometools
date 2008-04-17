@@ -17,68 +17,76 @@
 
 #include "libgtcore/bioseq.h"
 #include "libgtcore/option.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/unused.h"
-#include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/align.h"
 #include "libgtext/alignment.h"
 #include "tools/gt_align.h"
 
-static OPrval parse_options(int *parsed_args, bool *all, int argc,
-                            const char **argv, Error *err)
+typedef struct {
+  bool all;
+} AlignArguments;
+
+static void* gt_align_arguments_new(void)
 {
+  return ma_calloc(1, sizeof (AlignArguments));
+}
+
+static void gt_align_arguments_delete(void *tool_arguments)
+{
+  AlignArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  ma_free(arguments);
+}
+
+static OptionParser* gt_align_option_parser_new(void *tool_arguments)
+{
+  AlignArguments *arguments = tool_arguments;
   OptionParser *op;
   Option *option;
-  OPrval oprval;
-  error_check(err);
+  assert(arguments);
+
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
                          "sequence in seq_file_2.");
   option = option_new_bool("all", "show all optimal alignments instead of just "
-                           "one", all, false);
+                           "one", &arguments->all, false);
   option_parser_add_option(op, option);
   option_parser_set_min_max_args(op, 2, 2);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
-void show_alignment(const Alignment *a, UNUSED void *data)
+static void show_alignment(const Alignment *a, UNUSED void *data)
 {
   assert(a && !data);
   alignment_show(a, stdout);
   xputchar('\n');
 }
 
-void show_aligns(unsigned long aligns, UNUSED void *data)
+static void show_aligns(unsigned long aligns, UNUSED void *data)
 {
   assert(aligns && !data);
   printf("number of optimal alignments: %lu\n\n", aligns);
 }
 
-int gt_align(int argc, const char **argv, Error *err)
+static int gt_align_runner(UNUSED int argc, const char **argv,
+                           void *tool_arguments, Error *err)
 {
+  AlignArguments *arguments = tool_arguments;
   Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;
-  int parsed_args, had_err = 0;
+  int had_err = 0;
   Alignment *a;
-  bool all;
   error_check(err);
-
-  /* option parsing */
-  switch (parse_options(&parsed_args, &all, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
-  }
-  assert(parsed_args+1 < argc);
+  assert(arguments);
 
   /* init */
-  bioseq_1 = bioseq_new(argv[parsed_args], err);
+  bioseq_1 = bioseq_new(argv[0], err);
   if (!bioseq_1)
     had_err = -1;
   if (!had_err) {
-    bioseq_2 = bioseq_new(argv[parsed_args+1], err);
+    bioseq_2 = bioseq_new(argv[1], err);
     if (!bioseq_2)
       had_err = -1;
   }
@@ -87,7 +95,7 @@ int gt_align(int argc, const char **argv, Error *err)
   if (!had_err) {
     for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
       for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-        if (all) {
+        if (arguments->all) {
           align_all(bioseq_get_sequence(bioseq_1, i),
                     bioseq_get_sequence_length(bioseq_1, i),
                     bioseq_get_sequence(bioseq_2, j),
@@ -112,4 +120,13 @@ int gt_align(int argc, const char **argv, Error *err)
   bioseq_delete(bioseq_1);
 
   return had_err;
+}
+
+Tool* gt_align(void)
+{
+  return tool_new(gt_align_arguments_new,
+                  gt_align_arguments_delete,
+                  gt_align_option_parser_new,
+                  NULL,
+                  gt_align_runner);
 }

@@ -44,7 +44,7 @@ static void* gt_exercise_arguments_new(void)
 {
   Toolbox *exercise_toolbox = toolbox_new();
   toolbox_add_tool(exercise_toolbox, "affinealign", gt_affinealign());
-  toolbox_add(exercise_toolbox, "align", gt_align);
+  toolbox_add_tool(exercise_toolbox, "align", gt_align());
   toolbox_add_tool(exercise_toolbox, "blastenv", gt_blastenv());
   toolbox_add(exercise_toolbox, "casino", gt_casino);
   toolbox_add(exercise_toolbox, "coin", gt_coin);
