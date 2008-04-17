@@ -59,7 +59,7 @@ static void* gt_exercise_arguments_new(void)
   toolbox_add(exercise_toolbox, "qgramdist", gt_qgramdist);
   toolbox_add_tool(exercise_toolbox, "scorefasta", gt_scorefasta());
   toolbox_add(exercise_toolbox, "scorematrix", gt_scorematrix);
-  toolbox_add(exercise_toolbox, "swalign", gt_swalign);
+  toolbox_add_tool(exercise_toolbox, "swalign", gt_swalign());
   toolbox_add(exercise_toolbox, "translate", gt_translate);
   toolbox_add(exercise_toolbox, "upgma", gt_upgma);
   return exercise_toolbox;
