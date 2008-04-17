@@ -47,7 +47,8 @@ struct LTRFileOutStream {
           *pbsout_file,
           *pptout_file,
           *ltr5out_file,
-          *ltr3out_file;
+          *ltr3out_file,
+          *elemout_file;
   Hashtable *pdomout_files;
   LTRVisitor *lv;
   int tests_to_run;
@@ -277,6 +278,18 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                              FSWIDTH,
                              ls->ltr5out_file);
     ma_free(outseq);
+    outseq = ltrelement_get_sequence(rng.start,
+                              rng.end,
+                              genome_feature_get_strand(ls->element.mainnode),
+                              seq, e);
+    fasta_show_entry_generic(desc,
+                             outseq,
+                             range_length(rng),
+                             FSWIDTH,
+                             ls->elemout_file);
+    ma_free(outseq);
+
+    /* output complete oriented element */
     outseq = ltrelement_get_sequence(ltr3_rng.start,
                               ltr3_rng.end,
                               genome_feature_get_strand(ls->element.mainnode),
@@ -412,6 +425,8 @@ void ltr_fileout_stream_free(GenomeStream *gs)
     genfile_close(ls->ltr5out_file);
   if (ls->ltr3out_file)
     genfile_close(ls->ltr3out_file);
+  if (ls->elemout_file)
+    genfile_close(ls->elemout_file);
   hashtable_delete(ls->pdomout_files);
   genome_visitor_delete((GenomeVisitor*) ls->lv);
   genome_stream_delete(ls->in_stream);
@@ -471,6 +486,8 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   ls->ltr5out_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
   snprintf(fn, MAXFILENAMELEN-1, "%s_3ltr.fas", file_prefix);
   ls->ltr3out_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
+  snprintf(fn, MAXFILENAMELEN-1, "%s_complete.fas", file_prefix);
+  ls->elemout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
   snprintf(fn, MAXFILENAMELEN-1, "%s_conditions.csv", file_prefix);
   ls->metadata_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
 
