@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,9 @@
 #ifndef GT_LINEARALIGN_H
 #define GT_LINEARALIGN_H
 
+#include "libgtcore/tool.h"
+
 /* the linear align tool */
-int gt_linearalign(int argc, const char **argv, Error*);
+Tool* gt_linearalign(void);
 
 #endif

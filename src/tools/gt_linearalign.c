@@ -17,50 +17,39 @@
 
 #include "libgtcore/bioseq.h"
 #include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/alignment.h"
 #include "libgtext/linearalign.h"
 #include "tools/gt_linearalign.h"
 
-static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+static OptionParser* gt_linearalign_option_parser_new(UNUSED
+                                                      void *tool_arguments)
 {
   OptionParser *op;
-  OPrval oprval;
-  error_check(err);
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
                          "sequence in seq_file_2.\nThe memory consumption of "
                          "the alignment procedure is linear.");
   option_parser_set_min_max_args(op, 2, 2);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
-int gt_linearalign(int argc, const char **argv, Error *err)
+static int gt_linearalign_runner(UNUSED int argc, const char **argv,
+                                 UNUSED void *tool_arguments, Error *err)
 {
   Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;
-  int parsed_args, had_err = 0;
+  int had_err = 0;
   Alignment *a;
   error_check(err);
 
-  /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
-  }
-  assert(parsed_args+1 < argc);
-
   /* init */
-  bioseq_1 = bioseq_new(argv[parsed_args], err);
+  bioseq_1 = bioseq_new(argv[0], err);
   if (!bioseq_1)
     had_err = -1;
   if (!had_err) {
-    bioseq_2 = bioseq_new(argv[parsed_args+1], err);
+    bioseq_2 = bioseq_new(argv[1], err);
     if (!bioseq_2)
       had_err = -1;
   }
@@ -85,4 +74,13 @@ int gt_linearalign(int argc, const char **argv, Error *err)
   bioseq_delete(bioseq_1);
 
   return had_err;
+}
+
+Tool *gt_linearalign(void)
+{
+  return tool_new(NULL,
+                  NULL,
+                  gt_linearalign_option_parser_new,
+                  NULL,
+                  gt_linearalign_runner);
 }

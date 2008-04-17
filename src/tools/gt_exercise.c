@@ -53,7 +53,7 @@ static void* gt_exercise_arguments_new(void)
   toolbox_add(exercise_toolbox, "msaparse", gt_msaparse);
   toolbox_add(exercise_toolbox, "msmatch", gt_multiset_matching);
   toolbox_add(exercise_toolbox, "multilcp", gt_multilcp);
-  toolbox_add(exercise_toolbox, "linearalign", gt_linearalign);
+  toolbox_add_tool(exercise_toolbox, "linearalign", gt_linearalign());
   toolbox_add(exercise_toolbox, "neighborjoining", gt_neighborjoining);
   toolbox_add(exercise_toolbox, "nussinov_rna_fold", gt_nussinov_rna_fold);
   toolbox_add(exercise_toolbox, "qgramdist", gt_qgramdist);
