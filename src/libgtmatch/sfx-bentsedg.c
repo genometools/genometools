@@ -30,6 +30,7 @@
 #include "esafileend.h"
 #include "sfx-outlcp.h"
 #include "bcktab.h"
+#include "blindtrie.h"
 
 #include "sfx-cmpsuf.pr"
 #include "opensfxfile.pr"
@@ -83,9 +84,15 @@
           {\
             if ((LEFT) < (RIGHT))\
             {\
-              insertionsort(encseq,esr1,esr2,\
-                            lcpsubtab,readmode,totallength,\
-                            LEFT,RIGHT,DEPTH,maxdepth,cmpcharbychar);\
+              if (cmpcharbychar)\
+              {\
+                blindtreesuffixsort(trierep,LEFT,WIDTH);\
+              }\
+              {\
+                insertionsort(encseq,esr1,esr2,\
+                              lcpsubtab,readmode,totallength,\
+                              LEFT,RIGHT,DEPTH,maxdepth,cmpcharbychar);\
+              }\
             }\
           } else\
           {\
@@ -760,7 +767,8 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              const Definedunsignedint *maxdepth,
                              unsigned long *leftlcpdist,
                              unsigned long *rightlcpdist,
-                             Seqpos totallength)
+                             Seqpos totallength,
+                             Blindtrierep *trierep)
 {
   int cmp;
   unsigned int commonunits, maxsmallerwithlcp = 0, maxlargerwithlcp = 0;
@@ -900,7 +908,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Medianinfo *medianinfospace,
                              unsigned long maxwidthrealmedian,
                              Countingsortinfo *countingsortinfo,
-                             unsigned long maxcountingsort)
+                             unsigned long maxcountingsort,
+                             Blindtrierep *trierep)
 {
   Suffixptr *left, *right, *leftplusw;
   Seqpos pivotcmpcharbychar = 0, valcmpcharbychar;
@@ -979,7 +988,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                          maxdepth,
                          leftlcpdist,
                          rightlcpdist,
-                         totallength);
+                         totallength,
+                         trierep);
         POPMKVstack(left,right,depth); /* new values for left, right, depth */
         continue;
       }
@@ -1516,6 +1526,7 @@ void sortallbuckets(Seqpos *suftabptr,
   Countingsortinfo *countingsortinfo;
   unsigned long maxcountingsort;
   Medianinfo *medianinfospace;
+  Blindtrierep *trierep;
 
   if (outlcpinfo == NULL)
   {
@@ -1546,6 +1557,7 @@ void sortallbuckets(Seqpos *suftabptr,
   maxcountingsort = maxbucketsize;
   ALLOCASSIGNSPACE(countingsortinfo,NULL,Countingsortinfo,maxcountingsort);
   ALLOCASSIGNSPACE(medianinfospace,NULL,Medianinfo,maxwidthrealmedian);
+  trierep = newblindtrienodetable(SMALLSIZE,encseq,readmode);
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;
@@ -1591,7 +1603,8 @@ void sortallbuckets(Seqpos *suftabptr,
                          medianinfospace,
                          maxwidthrealmedian,
                          countingsortinfo,
-                         maxcountingsort);
+                         maxcountingsort,
+                         trierep);
       }
       if (outlcpinfo != NULL)
       {
@@ -1702,6 +1715,7 @@ void sortallbuckets(Seqpos *suftabptr,
   }
   FREESPACE(countingsortinfo);
   FREESPACE(medianinfospace);
+  freeblindtrierep(&trierep);
   if (!cmpcharbychar && hasspecialranges(encseq))
   {
     assert(esr1 != NULL);

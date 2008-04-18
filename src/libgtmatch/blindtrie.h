@@ -20,9 +20,13 @@
 
 typedef struct Blindtrierep Blindtrierep;
 
-Blindtrierep *initblindtrienodetable(unsigned long numofsuffixes);
+Blindtrierep *newblindtrienodetable(unsigned long numofsuffixes,
+                                    const Encodedsequence *encseq,
+                                    Readmode readmode);
 
-void insertsuffixintoblindtrie(Blindtrierep *trierep,Seqpos startpos);
+void blindtreesuffixsort(Blindtrierep *trierep,
+                         Seqpos *suffixtable,
+                         unsigned long numberofsuffixes);
 
 void freeblindtrierep(Blindtrierep **trierep);
 

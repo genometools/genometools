@@ -23,7 +23,7 @@
 
 typedef struct Blindtrienode
 {
-  Seqpos startpos, 
+  Seqpos startpos,
          depth;
   struct Blindtrienode *firstchild,
                        *rightsibling;
@@ -31,7 +31,7 @@ typedef struct Blindtrienode
 
 struct Blindtrierep
 {
-  Encodedsequence *encseq;
+  const Encodedsequence *encseq;
   Readmode readmode;
   Blindtrienode *nodetable,
                 *root;
@@ -226,7 +226,7 @@ static bool hassuccessor(const Blindtrierep *trierep,
   return false;
 }
 
-void insertsuffixintoblindtrie(Blindtrierep *trierep,Seqpos startpos)
+static void insertsuffixintoblindtrie(Blindtrierep *trierep,Seqpos startpos)
 {
   if (trierep->root != NULL)
   {
@@ -316,7 +316,9 @@ void insertsuffixintoblindtrie(Blindtrierep *trierep,Seqpos startpos)
   }
 }
 
-Blindtrierep *initblindtrienodetable(unsigned long numofsuffixes)
+Blindtrierep *newblindtrienodetable(unsigned long numofsuffixes,
+                                    const Encodedsequence *encseq,
+                                    Readmode readmode)
 {
   Blindtrierep *trierep;
 
@@ -326,11 +328,59 @@ Blindtrierep *initblindtrienodetable(unsigned long numofsuffixes)
                    trierep->allocatedBlindtrienode);
   trierep->nextfreeBlindtrienode = 0;
   trierep->root = NULL;
+  trierep->encseq = encseq;
+  trierep->readmode = readmode;
   return trierep;
+}
+
+static void initblindtrienodetable(Blindtrierep *trierep)
+{
+  trierep->nextfreeBlindtrienode = 0;
+  trierep->root = NULL;
 }
 
 void freeblindtrierep(Blindtrierep **trierep)
 {
   FREESPACE((*trierep)->nodetable);
   FREESPACE(*trierep);
+}
+
+static unsigned long enumerateblindtrieleaves(Seqpos *suffixtable,
+                                              unsigned long nextfree,
+                                              const Blindtrierep *trierep,
+                                              const Blindtrienode *node)
+{
+  Blindtrienode *current;
+
+  for (current = node->firstchild;
+       current != NULL;
+       current = current->rightsibling)
+  {
+    if (ISLEAF(current))
+    {
+      suffixtable[nextfree] = current->startpos;
+    } else
+    {
+      nextfree = enumerateblindtrieleaves(suffixtable,nextfree+1,
+                                          trierep,current);
+    }
+  }
+  return nextfree;
+}
+
+void blindtreesuffixsort(Blindtrierep *trierep,
+                         Seqpos *suffixtable,
+                         unsigned long numberofsuffixes)
+{
+  unsigned long idx;
+
+  initblindtrienodetable(trierep);
+  for (idx=0; idx<numberofsuffixes; idx++)
+  {
+    insertsuffixintoblindtrie(trierep,suffixtable[idx]);
+  }
+  (void) enumerateblindtrieleaves(suffixtable,
+                                  0,
+                                  trierep,
+                                  trierep->root);
 }
