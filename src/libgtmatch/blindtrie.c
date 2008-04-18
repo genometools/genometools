@@ -15,28 +15,29 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "divmodmul.h"
 #include "seqpos-def.h"
+#include "spacedef.h"
 #include "encseq-def.h"
+#include "blindtrie.h"
 
 typedef struct Blindtrienode
 {
-  Seqpos startpos, depth;
+  Seqpos startpos, 
+         depth;
   struct Blindtrienode *firstchild,
-                       *rightsibling,
-                       *parent;
+                       *rightsibling;
 } Blindtrienode;
 
-typedef struct
+struct Blindtrierep
 {
   Encodedsequence *encseq;
   Readmode readmode;
   Blindtrienode *nodetable,
-                *root,
-                **unusedBlindtrienodes;
-  unsigned int nextunused,
-               allocatedBlindtrienode,
-               nextfreeBlindtrienode;
-} Blindtrierep;
+                *root;
+  unsigned long allocatedBlindtrienode,
+                nextfreeBlindtrienode;
+};
 
 typedef struct
 {
@@ -47,10 +48,6 @@ typedef struct
 #define ISLEAF(NODE) ((NODE)->firstchild == NULL)
 #define SETFIRSTCHILD(NODE,VALUE)\
         (NODE)->firstchild = VALUE;\
-        if ((VALUE) != NULL)\
-        {\
-          (VALUE)->parent = NODE;\
-        }
 
 #define SETFIRSTCHILDNULL(NODE)\
         (NODE)->firstchild = NULL
@@ -113,12 +110,7 @@ static int comparecharacters(Uchar cc1,Seqpos idx1,
 
 static Blindtrienode *newBlindtrienode(Blindtrierep *trierep)
 {
-  if (trierep->nextfreeBlindtrienode >= trierep->allocatedBlindtrienode)
-  {
-    assert(trierep->nextunused > 0);
-    trierep->nextunused--;
-    return trierep->unusedBlindtrienodes[trierep->nextunused];
-  }
+  assert(trierep->nextfreeBlindtrienode < trierep->allocatedBlindtrienode);
   return trierep->nodetable + trierep->nextfreeBlindtrienode++;
 }
 
@@ -138,7 +130,6 @@ static Blindtrienode *makeroot(Blindtrierep *trierep,Seqpos startpos)
   Blindtrienode *root, *newleaf;
 
   root = newBlindtrienode(trierep);
-  root->parent = NULL;
   root->startpos = startpos;
   root->depth = 0;
   root->rightsibling = NULL;
@@ -235,23 +226,17 @@ static bool hassuccessor(const Blindtrierep *trierep,
   return false;
 }
 
-void insertsuffixintoblindtrie(Blindtrierep *trierep,
-                               Blindtrienode *node,
-                               Seqpos startpos)
+void insertsuffixintoblindtrie(Blindtrierep *trierep,Seqpos startpos)
 {
-  if (trierep->root == NULL)
-  {
-    trierep->root = makeroot(trierep,startpos);
-  } else
+  if (trierep->root != NULL)
   {
     Seqpos currentdepth, lcpvalue, totallength;
     Blindtrienode *currentnode, *newleaf, *newbranch, *succ;
     Nodepair np;
     Uchar cc;
 
-    assert(!ISLEAF(node));
-    currentnode = node;
-    currentdepth = node->depth;
+    currentnode = trierep->root;
+    currentdepth = currentnode->depth;
     totallength = getencseqtotallength(trierep->encseq);
     while (true)
     {
@@ -325,5 +310,27 @@ void insertsuffixintoblindtrie(Blindtrierep *trierep,
       currentnode = succ;
       currentdepth = currentnode->depth;
     }
+  } else
+  {
+    trierep->root = makeroot(trierep,startpos);
   }
+}
+
+Blindtrierep *initblindtrienodetable(unsigned long numofsuffixes)
+{
+  Blindtrierep *trierep;
+
+  ALLOCASSIGNSPACE(trierep,NULL,Blindtrierep,1);
+  trierep->allocatedBlindtrienode = MULT2(numofsuffixes + 1) + 1;
+  ALLOCASSIGNSPACE(trierep->nodetable,NULL,Blindtrienode,
+                   trierep->allocatedBlindtrienode);
+  trierep->nextfreeBlindtrienode = 0;
+  trierep->root = NULL;
+  return trierep;
+}
+
+void freeblindtrierep(Blindtrierep **trierep)
+{
+  FREESPACE((*trierep)->nodetable);
+  FREESPACE(*trierep);
 }
