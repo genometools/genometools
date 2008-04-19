@@ -100,6 +100,10 @@ Option*        option_new_int_min(const char *option_str,
 Option*        option_new_int_max(const char *option_str,
                                   const char *description, int *value,
                                   int default_value, int max_value);
+Option*        option_new_int_min_max(const char *option_str,
+                                      const char *description,
+                                      int *value, int default_value,
+                                      int min_value, int max_value);
 Option*        option_new_uint(const char *option_str, const char *description,
                                unsigned int *value, unsigned int default_value);
 Option*        option_new_uint_min(const char *option_str,
