@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/arraydef.h"
 #include "divmodmul.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
@@ -226,7 +227,8 @@ static bool hassuccessor(const Blindtrierep *trierep,
   return false;
 }
 
-static void insertsuffixintoblindtrie(Blindtrierep *trierep,Seqpos startpos)
+static void insertsuffixintoblindtrie(Blindtrierep *trierep,
+                                      Seqpos startpos)
 {
   if (trierep->root != NULL)
   {
@@ -345,10 +347,12 @@ void freeblindtrierep(Blindtrierep **trierep)
   FREESPACE(*trierep);
 }
 
-static unsigned long enumerateblindtrieleaves(Seqpos *suffixtable,
-                                              unsigned long nextfree,
-                                              const Blindtrierep *trierep,
-                                              const Blindtrienode *node)
+/*
+static unsigned long rekenumerateblindtrieleaves(Seqpos *suffixtable,
+                                                 unsigned long nextfree,
+                                                 const Blindtrierep *trierep,
+                                                 const Blindtrienode *node,
+                                                 Seqpos depth)
 {
   Blindtrienode *current;
 
@@ -358,29 +362,104 @@ static unsigned long enumerateblindtrieleaves(Seqpos *suffixtable,
   {
     if (ISLEAF(current))
     {
-      suffixtable[nextfree] = current->startpos;
+      assert(current->startpos >= depth);
+      suffixtable[nextfree++] = current->startpos - depth;
     } else
     {
-      nextfree = enumerateblindtrieleaves(suffixtable,nextfree+1,
-                                          trierep,current);
+      nextfree = rekenumerateblindtrieleaves(suffixtable,nextfree,
+                                             trierep,current,depth);
     }
   }
   return nextfree;
 }
+*/
+
+typedef Blindtrienode * Blindtrienodeptr;
+
+DECLAREARRAYSTRUCT(Blindtrienodeptr);
+
+#define SETCURRENT(VAL)\
+        currentnode = VAL;\
+        currentnodeisleaf = ISLEAF(VAL) ? true : false
+
+static void enumerateblindtrieleaves (Seqpos *suffixtable,
+                                      Seqpos *lcpsubtab,
+                                      const Blindtrierep *trierep,
+                                      Seqpos depth)
+{
+  bool readyforpop = false, currentnodeisleaf;
+  Blindtrienode *siblval, *child, *lcpnode = NULL, *currentnode;
+  ArrayBlindtrienodeptr stack;
+  unsigned long nextfree = 0;
+
+  INITARRAY (&stack, Blindtrienodeptr);
+  STOREINARRAY (&stack, Blindtrienodeptr, 128, trierep->root);
+  assert (!ISLEAF (trierep->root));
+  SETCURRENT (trierep->root->firstchild);
+  for (;;)
+  {
+    if (currentnodeisleaf)
+    {
+      assert (currentnode->startpos >= depth);
+      if (lcpsubtab != NULL && nextfree > 0)
+      {
+        assert(lcpnode != NULL);
+        lcpsubtab[nextfree] = lcpnode->depth + depth;
+      }
+      suffixtable[nextfree++] = currentnode->startpos - depth;
+      siblval = currentnode->rightsibling;
+      if (siblval == NULL)
+      {
+        readyforpop = true;
+        currentnodeisleaf = false;
+      } else
+      {
+        SETCURRENT (siblval);          /* current comes from brother */
+        lcpnode = stack.spaceBlindtrienodeptr[stack.
+                                              nextfreeBlindtrienodeptr - 1];
+      }
+    } else
+    {
+      if (readyforpop)
+      {
+        if (stack.nextfreeBlindtrienodeptr == 1UL)
+        {
+          break;
+        }
+        stack.nextfreeBlindtrienodeptr--;
+        siblval = stack.spaceBlindtrienodeptr[stack.
+                                              nextfreeBlindtrienodeptr]->
+                                              rightsibling;
+        if (siblval != NULL)
+        {
+          SETCURRENT (siblval);        /* current comes from brother */
+          lcpnode = stack.spaceBlindtrienodeptr[stack.
+                                                nextfreeBlindtrienodeptr - 1];
+          readyforpop = false;
+        }
+      } else
+      {
+        STOREINARRAY (&stack, Blindtrienodeptr, 128, currentnode);
+        child = currentnode->firstchild;
+        SETCURRENT (child);            /* current comes from child */
+      }
+    }
+  }
+  FREEARRAY (&stack, Blindtrienodeptr);
+}
 
 void blindtreesuffixsort(Blindtrierep *trierep,
                          Seqpos *suffixtable,
-                         unsigned long numberofsuffixes)
+                         Seqpos *lcpsubtab,
+                         unsigned long numberofsuffixes,
+                         Seqpos depth)
 {
   unsigned long idx;
 
   initblindtrienodetable(trierep);
   for (idx=0; idx<numberofsuffixes; idx++)
   {
-    insertsuffixintoblindtrie(trierep,suffixtable[idx]);
+    insertsuffixintoblindtrie(trierep,suffixtable[idx]+depth);
   }
-  (void) enumerateblindtrieleaves(suffixtable,
-                                  0,
-                                  trierep,
-                                  trierep->root);
+  enumerateblindtrieleaves(suffixtable,lcpsubtab,trierep,depth);
 }

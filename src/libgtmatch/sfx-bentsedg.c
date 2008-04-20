@@ -86,8 +86,10 @@
             {\
               if (cmpcharbychar)\
               {\
-                blindtreesuffixsort(trierep,LEFT,WIDTH);\
-              }\
+                blindtreesuffixsort(trierep,LEFT,\
+                                    lcpsubtab == NULL ? NULL : lcpsubtab->spaceSeqpos + LCPINDEX(LEFT),\
+                                    WIDTH,DEPTH);\
+              } else\
               {\
                 insertionsort(encseq,esr1,esr2,\
                               lcpsubtab,readmode,totallength,\
