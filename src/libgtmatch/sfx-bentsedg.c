@@ -87,7 +87,9 @@
               if (cmpcharbychar)\
               {\
                 blindtreesuffixsort(trierep,LEFT,\
-                                    lcpsubtab == NULL ? NULL : lcpsubtab->spaceSeqpos + LCPINDEX(LEFT),\
+                                    lcpsubtab == NULL\
+                                     ? NULL \
+                                     : lcpsubtab->spaceSeqpos + LCPINDEX(LEFT),\
                                     WIDTH,DEPTH);\
               } else\
               {\
