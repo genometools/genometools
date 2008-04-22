@@ -109,8 +109,7 @@ parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   /* compute parameters currently not set from command-line or
    * determined indirectly */
-  computePackedIndexDefaults(&params->idx,
-                             BWTBaseFeatures & ~BWTProperlySorted);
+  computePackedIndexDefaults(&params->idx, BWTBaseFeatures);
 
   option_parser_delete(op);
 

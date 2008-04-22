@@ -38,17 +38,9 @@ struct BWTSeq
   Seqpos longest;
   Seqpos *count;
   int featureToggles;
+  unsigned bitsPerOrigRank;
+  enum rangeSortMode *rangeSort;
 };
-
-struct locateHeader
-{
-  Seqpos longest;
-  unsigned locateInterval;
-  int featureToggles;
-};
-
-extern int
-readLocateInfoHeader(EISeq *seqIdx, struct locateHeader *headerData);
 
 struct BWTSeqExactMatchesIterator
 {
@@ -64,5 +56,13 @@ BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
 extern Seqpos
 BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
                   struct extBitsRetrieval *extBits);
+
+extern Seqpos
+BWTSeqGetRankSort(const BWTSeq *bwtSeq, Seqpos pos, AlphabetRangeID range,
+                  struct extBitsRetrieval *extBits);
+
+extern void
+BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
+                         const enum rangeSortMode *defaultRangeSort);
 
 #endif

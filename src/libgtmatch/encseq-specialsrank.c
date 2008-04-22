@@ -26,7 +26,7 @@
 
 struct specialsRankTable
 {
-  Encodedsequence *encseq;
+  const Encodedsequence *encseq;
   Encodedsequencescanstate *scanState;
   Seqpos *rankSumSamples, numSamples, sampleInterval;
   Readmode readmode;
@@ -34,7 +34,7 @@ struct specialsRankTable
 };
 
 static inline struct specialsRankTable *
-allocSpecialsRankTable(Encodedsequence *encseq, Seqpos seqLen,
+allocSpecialsRankTable(const Encodedsequence *encseq, Seqpos seqLen,
                        unsigned sampleIntervalLog2, Readmode readmode)
 {
   struct specialsRankTable *rankTable;
@@ -56,7 +56,7 @@ allocSpecialsRankTable(Encodedsequence *encseq, Seqpos seqLen,
 }
 
 extern SpecialsRankTable *
-newSpecialsRankTable(Encodedsequence *encseq, Readmode readmode,
+newSpecialsRankTable(const Encodedsequence *encseq, Readmode readmode,
                      unsigned sampleIntervalLog2)
 {
   struct specialsRankTable *rankTable;
@@ -94,6 +94,7 @@ newSpecialsRankTable(Encodedsequence *encseq, Readmode readmode,
       *sample++ = sum;
       nextSamplePos += sampleInterval;
     }
+    freespecialrangeiterator(&sri);
   }
   else
   {
@@ -122,7 +123,7 @@ specialsRank(const SpecialsRankTable *rankTable, Seqpos pos)
     rankCount = rankTable->rankSumSamples[sampleIdx];
   }
   {
-    Encodedsequence *encseq = rankTable->encseq;
+    const Encodedsequence *encseq = rankTable->encseq;
     Encodedsequencescanstate *esr = rankTable->scanState;
     initEncodedsequencescanstate(esr, encseq,
                                  rankTable->readmode, samplePos);

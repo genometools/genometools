@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,26 +13,19 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#ifndef EIS_SUFFIXARRAY_INTERFACE_PRIV_H
+#define EIS_SUFFIXARRAY_INTERFACE_PRIV_H
 
-#ifndef ENCSEQ_SPECIALSRANK_H
-#define ENCSEQ_SPECIALSRANK_H
-
-#include "libgtmatch/encseq-def.h"
-#include "libgtmatch/seqpos-def.h"
-
-typedef struct specialsRankTable SpecialsRankTable;
-
-extern SpecialsRankTable *
-newSpecialsRankTable(const Encodedsequence *encseq, Readmode readmode,
-                     unsigned sampleIntervalLog2);
-
-extern void
-deleteSpecialsRankTable(SpecialsRankTable *table);
-
-extern Seqpos
-specialsRank(const SpecialsRankTable *rankTable, Seqpos pos);
+static inline MRAEnc *
+newMRAEncFromSAI(const SuffixarrayFileInterface *sai)
+{
+  return newMRAEncFromSA(sai->sa);
+}
 
 extern const Encodedsequence *
-SPRTGetOrigEncseq(const SpecialsRankTable *rankTable);
+SAIGetEncSeq(const SuffixarrayFileInterface *sai)
+{
+  return sai->sa->encseq;
+}
 
 #endif

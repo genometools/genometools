@@ -57,7 +57,7 @@ struct encSeqTrState
  * @brief Produce given length of symbols from the BWT by translating
  * an array of suffix indices, this version uses the values of
  * suffix array and encoded sequence instead of reading the BWT file.
- * @param state reference of a struct suffixarrayFileInterface
+ * @param state reference of a SuffixarrayFileInterface
  * @param dest write symbols here
  * @param src read suffix indices from here
  * @param len length of string to read

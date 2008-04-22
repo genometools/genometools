@@ -14,10 +14,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <limits.h>
+
 #include "libgtcore/error.h"
 #include "libgtcore/option.h"
-#include "libgtmatch/eis-bwtseq.h"
+#include "libgtmatch/seqpos-def.h"
 
+#include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-blockenc_params.h"
 #include "libgtmatch/eis-bwtconstruct_params.h"
 
@@ -47,6 +50,21 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
   option_parser_add_option(op, option);
   paramOutput->useLocateBitmapOption = option;
 
+  option = option_new_bool(
+    "sprank", "build rank table for special symbols\n"
+    "this produces an index which can be used to regenerate the "
+    "original sequence but increases the memory used during index creation",
+    &paramOutput->useSourceRank, false);
+  option_parser_add_option(op, option);
+
+  option = option_new_int_min_max(
+    "sprankilog", "specify the interval of rank sampling as log value\n"
+    "parameter i means that each 2^i-th position of source is sampled for "
+    "rank\nundefined => chooses default of log(log(sequence length))",
+    &paramOutput->final.sourceRankInterval, -1, -1,
+    sizeof (Seqpos) * CHAR_BIT - 1);
+  option_parser_add_option(op, option);
+
   paramOutput->final.projectName = projectName;
 
   paramOutput->defaultOptimizationFlags = defaultOptimizationFlags;
@@ -63,7 +81,7 @@ estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput)
     unsigned segmentLen = estimateSegmentSize(&paramOutput->final.seqParams,
                                               paramOutput->final.baseType);
     if (segmentLen > (segmentLen + 1) * requiredUIntBits(segmentLen)
-        / paramOutput->final.locateInterval)
+                     / paramOutput->final.locateInterval)
       return BWTLocateCount;
     else
       return BWTLocateBitmap;
@@ -79,6 +97,9 @@ computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles)
   else
     paramOutput->final.featureToggles
       |= estimateBestLocateTypeFeature(paramOutput);
+  if (paramOutput->final.sourceRankInterval >= 0
+      || paramOutput->useSourceRank)
+    paramOutput->final.featureToggles |= BWTReversiblySorted;
   paramOutput->final.featureToggles |= extraToggles;
   {
     int EISFeatureSet

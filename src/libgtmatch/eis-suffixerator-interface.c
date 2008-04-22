@@ -67,8 +67,8 @@ sfxIReadAdvance(sfxInterface *sfxi,
 #endif
 
 static SeqDataTranslator
-sfxIRequest2XltorFunc(UNUSED sfxInterface *sfxi,
-                      UNUSED enum sfxDataRequest request)
+sfxIRequest2XltorFunc(sfxInterface *sfxi,
+                      enum sfxDataRequest request)
 {
   SeqDataTranslator tr = { { NULL }, NULL };
   switch (request)
@@ -287,6 +287,12 @@ extern const Encodedsequence *
 SfxIGetEncSeq(const sfxInterface *si)
 {
   return si->encseq;
+}
+
+extern Readmode
+SfxIGetReadMode(const sfxInterface *si)
+{
+  return si->readmode;
 }
 
 extern SeqDataReader

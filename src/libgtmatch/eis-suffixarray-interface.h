@@ -42,25 +42,27 @@ struct suffixarrayFileInterface
   struct saTaggedXltorStateList xltorStates;
 };
 
+typedef struct suffixarrayFileInterface SuffixarrayFileInterface;
+
 extern void
-initSuffixarrayFileInterface(struct suffixarrayFileInterface *sai,
+initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
                              Suffixarray *sa);
 
 extern void
-destructSuffixarrayFileInterface(struct suffixarrayFileInterface *sai);
+destructSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
 
 extern SeqDataReader
-SAIMakeReader(struct suffixarrayFileInterface *sai, enum sfxDataRequest rtype);
+SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype);
 
 extern SeqDataReader
-SAIMakeBWTReader(struct suffixarrayFileInterface *sai);
+SAIMakeBWTReader(SuffixarrayFileInterface *sai);
 
 extern SeqDataReader
-SAIMakeSufTabReader(struct suffixarrayFileInterface *sai);
+SAIMakeSufTabReader(SuffixarrayFileInterface *sai);
 
 /**
  * @brief Gets symbols of original sequence at given position.
- * @param state reference of a struct suffixarrayFileInterface
+ * @param state SuffixarrayFileInterface reference
  * @param dest write symbols here
  * @param pos get symbols starting at this position in original sequence
  * @param len length of string to read
@@ -80,6 +82,15 @@ extern DefinedSeqpos
 reportSAILongest(void *state);
 
 /**
+ * \brief Get reference for original sequence object.
+ *
+ * @param sai SuffixarrayFileInterface reference
+ * @return reference of sequence object
+ */
+static inline const Encodedsequence *
+SAIGetEncSeq(const SuffixarrayFileInterface *sai);
+
+/**
  * @brief Query appropriate alphabet encoding for suffix array.
  * @param state reference of Suffixarray object
  * @return alphabet
@@ -88,9 +99,9 @@ extern MRAEnc *
 newMRAEncFromSA(const Suffixarray *sa);
 
 static inline MRAEnc *
-newMRAEncFromSAI(const struct suffixarrayFileInterface *sai)
-{
-  return newMRAEncFromSA(sai->sa);
-}
+newMRAEncFromSAI(const SuffixarrayFileInterface *sai);
+
+/* visible for the compiler, but not meant for users to depend upon */
+#include "eis-suffixarray-interface-priv.h"
 
 #endif

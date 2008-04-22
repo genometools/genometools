@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,25 +14,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ENCSEQ_SPECIALSRANK_H
-#define ENCSEQ_SPECIALSRANK_H
+#ifndef EIS_HEADERID_H
+#define EIS_HEADERID_H
 
-#include "libgtmatch/encseq-def.h"
-#include "libgtmatch/seqpos-def.h"
-
-typedef struct specialsRankTable SpecialsRankTable;
-
-extern SpecialsRankTable *
-newSpecialsRankTable(const Encodedsequence *encseq, Readmode readmode,
-                     unsigned sampleIntervalLog2);
-
-extern void
-deleteSpecialsRankTable(SpecialsRankTable *table);
-
-extern Seqpos
-specialsRank(const SpecialsRankTable *rankTable, Seqpos pos);
-
-extern const Encodedsequence *
-SPRTGetOrigEncseq(const SpecialsRankTable *rankTable);
+enum {
+  /* used by bwt sequence class */
+  LOCATE_INFO_IN_INDEX_HEADERID = 1111,
+  RANK_SORT_HEADERID            = 1112,
+};
 
 #endif
