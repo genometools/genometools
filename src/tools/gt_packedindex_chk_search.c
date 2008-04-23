@@ -104,13 +104,15 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
         break;
       }
     }
-
-    if ((had_err = !initEmptyEMIterator(&EMIter, bwtSeq)))
+    if (BWTSeqHasLocateInformation(bwtSeq))
     {
-      error_set(err, "Cannot create matches iterator for sequence index.");
-      break;
+      if ((had_err = !initEmptyEMIterator(&EMIter, bwtSeq)))
+      {
+        error_set(err, "Cannot create matches iterator for sequence index.");
+        break;
+      }
+      EMIterInitialized = true;
     }
-    EMIterInitialized = true;
     {
       Seqpos totalLen, dbstart;
       unsigned long trial, patternLen;

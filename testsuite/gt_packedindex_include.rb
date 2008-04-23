@@ -64,6 +64,16 @@ Test do
   runAndCheckPackedIndex('miniindex', allfiles)
 end
 
+Name "gt packedindex check tools for simple sequences w/o locate"
+Keywords "gt_packedindex"
+Test do
+  allfiles = prependTestdata(["RandomN.fna","Random.fna","Atinsert.fna",
+                              "TTT-small.fna","trna_glutamine.fna",
+                              "Random-Small.fna","Duplicate.fna"])
+  runAndCheckPackedIndex('miniindex', allfiles,
+                         :bdx => { '-locfreq' => 0 })
+end
+
 Name "gt packedindex check tools for protein sample"
 Keywords "gt_packedindex"
 Test do

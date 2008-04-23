@@ -318,6 +318,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
       log_log("Index does not contain locate information.\n"
               "Localization of matches will not be supported!\n");
       bwtSeq->locateSampleInterval = 0;
+      bwtSeq->featureToggles = BWTBaseFeatures;
     }
     else
     {
