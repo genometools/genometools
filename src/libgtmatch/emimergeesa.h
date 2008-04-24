@@ -20,7 +20,7 @@
 
 #include "seqpos-def.h"
 #include "sarr-def.h"
-#include "trieins-def.h"
+#include "merger-trie.h"
 
 #define SIZEOFMERGERESULTBUFFER BUFSIZ
 
@@ -48,7 +48,7 @@ typedef struct
                numofindexes;   /* number of indexes */
   Seqpos *nextpostable;        /* in the range [0..totallength single index] */
   Suflcpbuffer buf;
-  Trierep trierep;
+  Mergertrierep trierep;
   Suffixarray *suffixarraytable;
   Alphabet *alpha;
 } Emissionmergedesa;

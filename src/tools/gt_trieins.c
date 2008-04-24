@@ -18,7 +18,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
-#include "libgtmatch/test-trieins.pr"
+#include "libgtmatch/test-mtrieins.pr"
 #include "tools/gt_trieins.h"
 
 static OPrval parse_options(bool *onlyins,int *parsed_args,

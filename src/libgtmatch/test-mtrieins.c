@@ -18,13 +18,13 @@
 #include "libgtcore/unused.h"
 #include "spacedef.h"
 #include "sarr-def.h"
-#include "trieins-def.h"
+#include "merger-trie.h"
 #include "encseq-def.h"
 #include "alphadef.h"
 
 #include "esa-map.pr"
 
-static void maketrie(Trierep *trierep,
+static void maketrie(Mergertrierep *trierep,
                      UNUSED const Uchar *characters,
                      Seqpos len)
 {
@@ -38,7 +38,7 @@ static void maketrie(Trierep *trierep,
        suffixinfo.startpos <= len;
        suffixinfo.startpos++)
   {
-    insertsuffixintotrie(trierep,trierep->root,&suffixinfo);
+    insertsuffixintomergertrie(trierep,trierep->root,&suffixinfo);
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
     showtrie(trierep,characters);
@@ -48,12 +48,12 @@ static void maketrie(Trierep *trierep,
   }
 }
 
-static void successivelydeletesmallest(Trierep *trierep,
+static void successivelydeletesmallest(Mergertrierep *trierep,
                                        UNUSED Seqpos seqlen,
                                        UNUSED const Uchar *characters,
                                        UNUSED Error *err)
 {
-  Trienode *smallest;
+  Mergertrienode *smallest;
 #ifdef WITHTRIEIDENT
   unsigned int numberofleaves = (unsigned int) seqlen+1;
   unsigned int maxleafnum = (unsigned int) seqlen;
@@ -91,14 +91,14 @@ int test_trieins(bool onlyins,const Str *indexname,Error *err)
   }
   if (!haserr)
   {
-    Trierep trierep;
+    Mergertrierep trierep;
     const Uchar *characters;
 
     ALLOCASSIGNSPACE(trierep.encseqreadinfo,NULL,Encseqreadinfo,1);
     trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
     trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
     characters = getcharactersAlphabet(suffixarray.alpha);
-    inittrienodetable(&trierep,totallength,1U);
+    initmergertrienodetable(&trierep,totallength,1U);
     maketrie(&trierep,characters,totallength);
     if (onlyins)
     {
@@ -117,7 +117,7 @@ int test_trieins(bool onlyins,const Str *indexname,Error *err)
 #endif
       successivelydeletesmallest(&trierep,totallength,characters,err);
     }
-    freetrierep(&trierep);
+    freemergertrierep(&trierep);
   }
   freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;

@@ -23,7 +23,7 @@
 #include "divmodmul.h"
 #include "encseq-def.h"
 
-#include "trieins-def.h"
+#include "merger-trie.h"
 
 #define ISLEAF(NODE) ((NODE)->firstchild == NULL)
 #ifdef WITHTRIEIDENT
@@ -49,12 +49,12 @@
 
 typedef struct
 {
-  Trienode *previous,
+  Mergertrienode *previous,
            *current;
 } Nodepair;
 
-static Uchar getfirstedgechar(const Trierep *trierep,
-                              const Trienode *node,
+static Uchar getfirstedgechar(const Mergertrierep *trierep,
+                              const Mergertrienode *node,
                               Seqpos prevdepth)
 {
   Encseqreadinfo *eri = trierep->encseqreadinfo + node->suffixinfo.idx;
@@ -113,14 +113,14 @@ static int comparecharacters(Uchar cc1,unsigned int idx1,
 }
 
 #ifdef WITHTRIEIDENT
-static void showtrie2(const Trierep *trierep,
-                      const Uchar *characters,
-                      unsigned int level,
-                      const Trienode *node)
+static void showmergertrie2(const Mergertrierep *trierep,
+                            const Uchar *characters,
+                            unsigned int level,
+                            const Mergertrienode *node)
 {
   Uchar cc = 0;
   Seqpos pos, endpos;
-  Trienode *current;
+  Mergertrienode *current;
 
   for (current = node->firstchild;
        current != NULL;
@@ -129,8 +129,8 @@ static void showtrie2(const Trierep *trierep,
     printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
     if (ISLEAF(current))
     {
-      endpos = getencseqtotallength(
-                  trierep->encseqtable[current->suffixinfo.idx]);
+      endpos = getencseqtotallength(trierep->encseqtable[current->suffixinfo.
+                                                         idx]);
     } else
     {
       endpos = current->suffixinfo.startpos + current->depth;
@@ -162,17 +162,17 @@ static void showtrie2(const Trierep *trierep,
       printf(" d=" FormatSeqpos ",i=" Formatuint64_t "\n",
             PRINTSeqposcast(current->depth),
             PRINTuint64_tcast(current->suffixinfo.ident));
-      showtrie2(trierep,characters,level+1,current);
+      showmergertrie2(trierep,characters,level+1,current);
     }
   }
 }
 
-void showtrie(const Trierep *trierep,
-              const Uchar *characters)
+void showmergertrie(const Mergertrierep *trierep,
+                    const Uchar *characters)
 {
   if (trierep->root != NULL)
   {
-    showtrie2(trierep,characters,0,trierep->root);
+    showmergertrie2(trierep,characters,0,trierep->root);
   }
 }
 
@@ -186,13 +186,13 @@ void showtrie(const Trierep *trierep,
        incoming edge DONE
 */
 
-static void checktrie2(Trierep *trierep,
-                       Trienode *node,
-                       Trienode *father,
-                       Bitstring *leafused,
-                       unsigned int *numberofbitsset)
+static void checkmergertrie2(Mergertrierep *trierep,
+                             Mergertrienode *node,
+                             Mergertrienode *father,
+                             Bitstring *leafused,
+                             unsigned int *numberofbitsset)
 {
-  Trienode *current, *previous;
+  Mergertrienode *current, *previous;
 
   if (ISLEAF(node))
   {
@@ -236,14 +236,14 @@ static void checktrie2(Trierep *trierep,
           exit(EXIT_FAILURE); /* programming error */
         }
       }
-      checktrie2(trierep,current,node,leafused,numberofbitsset);
+      checkmergertrie2(trierep,current,node,leafused,numberofbitsset);
       previous = current;
     }
   }
 }
 
-void checktrie(Trierep *trierep,unsigned int numberofleaves,
-               unsigned int maxleafnum,Error *err)
+void checkmergertrie(Mergertrierep *trierep,unsigned int numberofleaves,
+                     unsigned int maxleafnum,Error *err)
 {
   error_check(err);
   if (trierep->root != NULL)
@@ -252,7 +252,7 @@ void checktrie(Trierep *trierep,unsigned int numberofleaves,
     unsigned int numberofbitsset = 0;
 
     INITBITTAB(leafused,maxleafnum+1);
-    checktrie2(trierep,trierep->root,NULL,leafused,&numberofbitsset);
+    checkmergertrie2(trierep,trierep->root,NULL,leafused,&numberofbitsset);
     if (numberofbitsset != numberofleaves)
     {
       fprintf(stderr,"numberofbitsset = %u != %u = numberofleaves\n",
@@ -265,7 +265,7 @@ void checktrie(Trierep *trierep,unsigned int numberofleaves,
 }
 
 #ifdef WITHTRIESHOW
-static void shownode(const Trienode *node)
+static void shownode(const Mergertrienode *node)
 {
   if (node == NULL)
   {
@@ -277,7 +277,7 @@ static void shownode(const Trienode *node)
   }
 }
 
-static void showsimplenoderelations(const Trienode *node)
+static void showsimplenoderelations(const Mergertrienode *node)
 {
   shownode(node);
   printf(".firstchild=");
@@ -289,15 +289,16 @@ static void showsimplenoderelations(const Trienode *node)
   printf("\n");
 }
 
-static void shownoderelations(int line,char *nodestring,const Trienode *node)
+static void shownoderelations(int line,char *nodestring,
+                              const Mergertrienode *node)
 {
   printf("l. %d: %s: ",line,nodestring);
   showsimplenoderelations(node);
 }
 
-void showallnoderelations(const Trienode *node)
+void showallnoderelations(const Mergertrienode *node)
 {
-  Trienode *tmp;
+  Mergertrienode *tmp;
 
   showsimplenoderelations(node);
   for (tmp = node->firstchild; tmp != NULL; tmp = tmp->rightsibling)
@@ -314,27 +315,28 @@ void showallnoderelations(const Trienode *node)
 #endif
 #endif
 
-static Trienode *newTrienode(Trierep *trierep)
+static Mergertrienode *newMergertrienode(Mergertrierep *trierep)
 {
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
   printf("# available trie nodes: %u; ",
-          trierep->allocatedTrienode - trierep->nextfreeTrienode);
+          trierep->allocatedMergertrienode - trierep->nextfreeMergertrienode);
   printf("unused trie nodes: %u\n",trierep->nextunused);
 #endif
 #endif
-  if (trierep->nextfreeTrienode >= trierep->allocatedTrienode)
+  if (trierep->nextfreeMergertrienode >= trierep->allocatedMergertrienode)
   {
     assert(trierep->nextunused > 0);
     trierep->nextunused--;
-    return trierep->unusedTrienodes[trierep->nextunused];
+    return trierep->unusedMergertrienodes[trierep->nextunused];
   }
-  return trierep->nodetable + trierep->nextfreeTrienode++;
+  return trierep->nodetable + trierep->nextfreeMergertrienode++;
 }
 
-static Trienode *makenewleaf(Trierep *trierep,Suffixinfo *suffixinfo)
+static Mergertrienode *makenewleaf(Mergertrierep *trierep,
+                                   Suffixinfo *suffixinfo)
 {
-  Trienode *newleaf;
+  Mergertrienode *newleaf;
 
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
@@ -342,7 +344,7 @@ static Trienode *makenewleaf(Trierep *trierep,Suffixinfo *suffixinfo)
          PRINTuint64_tcast(suffixinfo->ident));
 #endif
 #endif
-  newleaf = newTrienode(trierep);
+  newleaf = newMergertrienode(trierep);
   newleaf->suffixinfo = *suffixinfo;
   SETFIRSTCHILDNULL(newleaf);
   newleaf->rightsibling = NULL;
@@ -350,16 +352,16 @@ static Trienode *makenewleaf(Trierep *trierep,Suffixinfo *suffixinfo)
   return newleaf;
 }
 
-static Trienode *makeroot(Trierep *trierep,Suffixinfo *suffixinfo)
+static Mergertrienode *makeroot(Mergertrierep *trierep,Suffixinfo *suffixinfo)
 {
-  Trienode *root, *newleaf;
+  Mergertrienode *root, *newleaf;
 
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
   printf("makeroot(" Formatuint64_t ")\n",PRINTuint64_tcast(suffixinfo->ident));
 #endif
 #endif
-  root = newTrienode(trierep);
+  root = newMergertrienode(trierep);
   root->parent = NULL;
   root->suffixinfo = *suffixinfo;
   root->depth = 0;
@@ -370,7 +372,8 @@ static Trienode *makeroot(Trierep *trierep,Suffixinfo *suffixinfo)
   return root;
 }
 
-static void makesuccs(Trienode *newbranch,Trienode *first,Trienode *second)
+static void makesuccs(Mergertrienode *newbranch,Mergertrienode *first,
+                      Mergertrienode *second)
 {
   second->rightsibling = NULL;
   first->rightsibling = second;
@@ -380,12 +383,12 @@ static void makesuccs(Trienode *newbranch,Trienode *first,Trienode *second)
   SHOWNODERELATIONS(newbranch);
 }
 
-static Trienode *makenewbranch(Trierep *trierep,
-                               Suffixinfo *suffixinfo,
-                               Seqpos currentdepth,
-                               Trienode *oldnode)
+static Mergertrienode *makenewbranch(Mergertrierep *trierep,
+                                     Suffixinfo *suffixinfo,
+                                     Seqpos currentdepth,
+                                     Mergertrienode *oldnode)
 {
-  Trienode *newbranch, *newleaf;
+  Mergertrienode *newbranch, *newleaf;
   Uchar cc1, cc2;
   Encseqreadinfo *eri = trierep->encseqreadinfo + suffixinfo->idx;
 
@@ -395,7 +398,7 @@ static Trienode *makenewbranch(Trierep *trierep,
           PRINTuint64_tcast(suffixinfo->ident));
 #endif
 #endif
-  newbranch = newTrienode(trierep);
+  newbranch = newMergertrienode(trierep);
   newbranch->suffixinfo = *suffixinfo;
   newbranch->rightsibling = oldnode->rightsibling;
   cc1 = getfirstedgechar(trierep,oldnode,currentdepth);
@@ -441,10 +444,10 @@ static Seqpos getlcp(const Encodedsequence *encseq1,Readmode readmode1,
   return i1 - start1;
 }
 
-static bool hassuccessor(const Trierep *trierep,
+static bool hassuccessor(const Mergertrierep *trierep,
                          Nodepair *np,
                          Seqpos prevdepth,
-                         const Trienode *node,
+                         const Mergertrienode *node,
                          Uchar cc2,
                          unsigned int idx2)
 {
@@ -470,9 +473,9 @@ static bool hassuccessor(const Trierep *trierep,
   return false;
 }
 
-void insertsuffixintotrie(Trierep *trierep,
-                          Trienode *node,
-                          Suffixinfo *suffixinfo)
+void insertsuffixintomergertrie(Mergertrierep *trierep,
+                                Mergertrienode *node,
+                                Suffixinfo *suffixinfo)
 {
   if (trierep->root == NULL)
   {
@@ -480,7 +483,7 @@ void insertsuffixintotrie(Trierep *trierep,
   } else
   {
     Seqpos currentdepth, lcpvalue, totallength;
-    Trienode *currentnode, *newleaf, *newbranch, *succ;
+    Mergertrienode *currentnode, *newleaf, *newbranch, *succ;
     Nodepair np;
     Uchar cc;
     Encseqreadinfo *eri = trierep->encseqreadinfo + suffixinfo->idx;
@@ -580,9 +583,9 @@ void insertsuffixintotrie(Trierep *trierep,
   }
 }
 
-Trienode *findsmallestnodeintrie(const Trierep *trierep)
+Mergertrienode *findsmallestnodeintrie(const Mergertrierep *trierep)
 {
-  Trienode *node;
+  Mergertrienode *node;
 
   assert(trierep->root != NULL);
   for (node = trierep->root; node->firstchild != NULL; node = node->firstchild)
@@ -590,9 +593,9 @@ Trienode *findsmallestnodeintrie(const Trierep *trierep)
   return node;
 }
 
-void deletesmallestpath(Trienode *smallest,Trierep *trierep)
+void deletesmallestpath(Mergertrienode *smallest,Mergertrierep *trierep)
 {
-  Trienode *father, *son;
+  Mergertrienode *father, *son;
 
   for (son = smallest; son->parent != NULL; son = son->parent)
   {
@@ -621,31 +624,33 @@ void deletesmallestpath(Trienode *smallest,Trierep *trierep)
              PRINTuint64_tcast(son->suffixinfo.ident));
 #endif
 #endif
-    trierep->unusedTrienodes[trierep->nextunused++] = son;
+    trierep->unusedMergertrienodes[trierep->nextunused++] = son;
   }
   if (trierep->root->firstchild == NULL)
   {
-    trierep->unusedTrienodes[trierep->nextunused++] = trierep->root;
+    trierep->unusedMergertrienodes[trierep->nextunused++] = trierep->root;
     trierep->root = NULL;
   }
 }
 
-void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
-                       unsigned int numofindexes)
+void initmergertrienodetable(Mergertrierep *trierep,Seqpos numofsuffixes,
+                             unsigned int numofindexes)
 {
   trierep->numofindexes = numofindexes;
-  trierep->allocatedTrienode = (unsigned int) MULT2(numofsuffixes + 1) + 1;
-  ALLOCASSIGNSPACE(trierep->nodetable,NULL,Trienode,trierep->allocatedTrienode);
-  trierep->nextfreeTrienode = 0;
+  trierep->allocatedMergertrienode
+    = (unsigned int) MULT2(numofsuffixes + 1) + 1;
+  ALLOCASSIGNSPACE(trierep->nodetable,NULL,Mergertrienode,
+                   trierep->allocatedMergertrienode);
+  trierep->nextfreeMergertrienode = 0;
   trierep->root = NULL;
   trierep->nextunused = 0;
-  ALLOCASSIGNSPACE(trierep->unusedTrienodes,NULL,Trienodeptr,
-                   trierep->allocatedTrienode);
+  ALLOCASSIGNSPACE(trierep->unusedMergertrienodes,NULL,Mergertrienodeptr,
+                   trierep->allocatedMergertrienode);
 }
 
-void freetrierep(Trierep *trierep)
+void freemergertrierep(Mergertrierep *trierep)
 {
   FREESPACE(trierep->nodetable);
-  FREESPACE(trierep->unusedTrienodes);
+  FREESPACE(trierep->unusedMergertrienodes);
   FREESPACE(trierep->encseqreadinfo);
 }
