@@ -27,7 +27,6 @@ TMPFILE=`mktemp /tmp/skproto-all.XXXXXX` || exit 1
 cat << END_OF_TEXT > ${TMPFILE}
 alphabet.c
 bcktab.c
-blindtrie.c
 cutendpfx.c
 eis-blockcomp.c
 eis-blockenc_params.c
@@ -61,6 +60,7 @@ sfx-run.c
 sfx-suffixer.c
 substriter.c
 test-pairwise.c
+trie-ssort.c
 turnwheels.c
 uniquesub.c
 verbose.c

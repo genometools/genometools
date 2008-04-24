@@ -15,21 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BLINDTRIE_H
-#define BLINDTRIE_H
+#ifndef TRIE_SSORT_H
+#define TRIE_SSORT_H
 
-typedef struct Blindtrierep Blindtrierep;
+typedef struct Trierep Trierep;
 
-Blindtrierep *newblindtrienodetable(unsigned long numofsuffixes,
-                                    const Encodedsequence *encseq,
-                                    Readmode readmode);
+Trierep *newTrierep(unsigned long numofsuffixes,
+                    const Encodedsequence *encseq,
+                    Readmode readmode);
 
-void blindtreesuffixsort(Blindtrierep *trierep,
-                         Seqpos *suffixtable,
-                         Seqpos *lcpsubtab,
-                         unsigned long numberofsuffixes,
-                         Seqpos depth);
+void triesuffixsort(Trierep *trierep,
+                    Seqpos *suffixtable,
+                    Seqpos *lcpsubtab,
+                    unsigned long numberofsuffixes,
+                    Seqpos depth);
 
-void freeblindtrierep(Blindtrierep **trierep);
+void freeTrierep(Trierep **trierep);
 
 #endif
