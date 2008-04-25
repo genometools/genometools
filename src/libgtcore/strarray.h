@@ -26,6 +26,7 @@ typedef struct StrArray StrArray;
 StrArray*     strarray_new(void);
 StrArray*     strarray_new_file(const char *path);
 void          strarray_add_cstr(StrArray*, const char*);
+void          strarray_add(StrArray*, const Str*);
 const char*   strarray_get(const StrArray*, unsigned long strnum);
 /* returns an internal Str pointer (i.e., _not_ a new reference!) */
 Str*          strarray_get_str(const StrArray*, unsigned long strnum);

@@ -46,6 +46,51 @@ typedef struct {
   StrArray *md5_fingerprints;
 } BioseqFingerprints;
 
+struct Bioseq {
+  bool use_stdin;
+  Str *sequence_file;
+  Seq **seqs;
+  Array *descriptions,
+        *sequence_ranges;
+  char *raw_sequence;
+  size_t raw_sequence_length,
+         allocated;
+  Alpha *alpha;
+  BioseqFingerprints *fingerprints;
+};
+
+static bool read_fingerprints(StrArray *md5_fingerprints,
+                              Str  *fingerprints_filename,
+                              unsigned long num_of_seqs)
+{
+  bool reading_succeeded = true;
+  FILE *fingerprint_file = NULL;
+  assert(md5_fingerprints && fingerprints_filename);
+  /* open file */
+  if (file_exists(str_get(fingerprints_filename)))
+    fingerprint_file = fa_xfopen(str_get(fingerprints_filename), "r");
+  else
+    reading_succeeded = false;
+  /* reading file (each line contains a single MD5 sum) */
+  if (reading_succeeded) {
+    Str *line = str_new();
+    while (str_read_next_line(line, fingerprint_file) != EOF) {
+      strarray_add(md5_fingerprints, line);
+      str_reset(line);
+    }
+    str_delete(line);
+    if (strarray_size(md5_fingerprints) < num_of_seqs) {
+      /* premature end of file (e.g., due to aborted construction) */
+      reading_succeeded = false;
+      strarray_set_size(md5_fingerprints, 0);
+    }
+    else
+      assert(strarray_size(md5_fingerprints) == num_of_seqs);
+  }
+  fa_xfclose(fingerprint_file);
+  return reading_succeeded;
+}
+
 static void add_fingerprints(StrArray *md5_fingerprints, Bioseq *bs)
 {
   unsigned long i;
@@ -53,18 +98,49 @@ static void add_fingerprints(StrArray *md5_fingerprints, Bioseq *bs)
   for (i = 0; i < bioseq_number_of_sequences(bs); i++) {
     char *md5 = md5_fingerprint(bioseq_get_sequence(bs, i),
                                 bioseq_get_sequence_length(bs, i));
-    strarray_add_cstr(bsf->md5_fingerprints, md5);
+    strarray_add_cstr(md5_fingerprints, md5);
     ma_free(md5);
   }
+}
+
+static void strarray_dump_to_file(StrArray *sa, FILE *outfp)
+{
+  unsigned long i;
+  assert(sa && outfp);
+  for (i = 0; i < strarray_size(sa); i++) {
+    xfputs(strarray_get(sa, i), outfp);
+    xfputc('\n', outfp);
+  }
+}
+
+static void write_fingerprints(StrArray *md5_fingerprints,
+                               Str *fingerprints_filename)
+{
+  FILE *fingerprints_file;
+  assert(md5_fingerprints && fingerprints_filename);
+  fingerprints_file = fa_xfopen(str_get(fingerprints_filename), "w");
+  strarray_dump_to_file(md5_fingerprints, fingerprints_file);
+  fa_xfclose(fingerprints_file);
 }
 
 static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
 {
   BioseqFingerprints *bsf;
+  bool reading_succeeded;
+  Str *fingerprints_filename;
   assert(bs);
   bsf = ma_calloc(1, sizeof *bsf);
   bsf->md5_fingerprints = strarray_new();
-  add_fingerprints(bsf->md5_fingerprints, bs);
+  fingerprints_filename = str_clone(bs->sequence_file);
+  str_append_cstr(fingerprints_filename, GT_BIOSEQ_FINGERPRINTS);
+  reading_succeeded = read_fingerprints(bsf->md5_fingerprints,
+                                        fingerprints_filename,
+                                        bioseq_number_of_sequences(bs));
+  if (!reading_succeeded) {
+    add_fingerprints(bsf->md5_fingerprints, bs);
+    write_fingerprints(bsf->md5_fingerprints, fingerprints_filename);
+  }
+  str_delete(fingerprints_filename);
   return bsf;
 }
 
@@ -81,19 +157,6 @@ static const char* bioseq_fingerprints_get(BioseqFingerprints *bsf,
   assert(bsf);
   return strarray_get(bsf->md5_fingerprints, idx);
 }
-
-struct Bioseq {
-  bool use_stdin;
-  Str *sequence_file;
-  Seq **seqs;
-  Array *descriptions,
-        *sequence_ranges;
-  char *raw_sequence;
-  size_t raw_sequence_length,
-         allocated;
-  Alpha *alpha;
-  BioseqFingerprints *fingerprints;
-};
 
 typedef struct {
   FILE *bioseq_index,
