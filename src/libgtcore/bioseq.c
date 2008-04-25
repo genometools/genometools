@@ -46,19 +46,25 @@ typedef struct {
   StrArray *md5_fingerprints;
 } BioseqFingerprints;
 
-static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
+static void add_fingerprints(StrArray *md5_fingerprints, Bioseq *bs)
 {
-  BioseqFingerprints *bsf;
   unsigned long i;
-  assert(bs);
-  bsf = ma_calloc(1, sizeof *bsf);
-  bsf->md5_fingerprints = strarray_new();
+  assert(md5_fingerprints && bs);
   for (i = 0; i < bioseq_number_of_sequences(bs); i++) {
     char *md5 = md5_fingerprint(bioseq_get_sequence(bs, i),
                                 bioseq_get_sequence_length(bs, i));
     strarray_add_cstr(bsf->md5_fingerprints, md5);
     ma_free(md5);
   }
+}
+
+static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
+{
+  BioseqFingerprints *bsf;
+  assert(bs);
+  bsf = ma_calloc(1, sizeof *bsf);
+  bsf->md5_fingerprints = strarray_new();
+  add_fingerprints(bsf->md5_fingerprints, bs);
   return bsf;
 }
 
