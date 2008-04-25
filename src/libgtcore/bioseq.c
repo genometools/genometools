@@ -42,6 +42,40 @@
 #include "libgtcore/xansi.h"
 #include "libgtcore/xposix.h"
 
+typedef struct {
+  StrArray *md5_fingerprints;
+} BioseqFingerprints;
+
+static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
+{
+  BioseqFingerprints *bsf;
+  unsigned long i;
+  assert(bs);
+  bsf = ma_calloc(1, sizeof *bsf);
+  bsf->md5_fingerprints = strarray_new();
+  for (i = 0; i < bioseq_number_of_sequences(bs); i++) {
+    char *md5 = md5_fingerprint(bioseq_get_sequence(bs, i),
+                                bioseq_get_sequence_length(bs, i));
+    strarray_add_cstr(bsf->md5_fingerprints, md5);
+    ma_free(md5);
+  }
+  return bsf;
+}
+
+static void bioseq_fingerprints_delete(BioseqFingerprints *bsf)
+{
+  if (!bsf) return;
+  strarray_delete(bsf->md5_fingerprints);
+  ma_free(bsf);
+}
+
+static const char* bioseq_fingerprints_get(BioseqFingerprints *bsf,
+                                           unsigned long idx)
+{
+  assert(bsf);
+  return strarray_get(bsf->md5_fingerprints, idx);
+}
+
 struct Bioseq {
   bool use_stdin;
   Str *sequence_file;
@@ -52,7 +86,7 @@ struct Bioseq {
   size_t raw_sequence_length,
          allocated;
   Alpha *alpha;
-  char **md5_fingerprints;
+  BioseqFingerprints *fingerprints;
 };
 
 typedef struct {
@@ -373,11 +407,7 @@ void bioseq_delete(Bioseq *bs)
 {
   unsigned long i;
   if (!bs) return;
-  if (bs->md5_fingerprints) {
-    for (i = 0; i < array_size(bs->descriptions); i++)
-      ma_free(bs->md5_fingerprints[i]);
-    ma_free(bs->md5_fingerprints);
-  }
+  bioseq_fingerprints_delete(bs->fingerprints);
   str_delete(bs->sequence_file);
   if (bs->seqs) {
     for (i = 0; i < array_size(bs->descriptions); i++)
@@ -452,17 +482,10 @@ const char* bioseq_get_raw_sequence(Bioseq *bs)
 const char* bioseq_get_md5_fingerprint(Bioseq *bs, unsigned long idx)
 {
   assert(bs && idx < bioseq_number_of_sequences(bs));
-  if (!bs->md5_fingerprints) {
-    bs->md5_fingerprints = ma_calloc(bioseq_number_of_sequences(bs),
-                                     sizeof (char*));
-  }
-  if (!bs->md5_fingerprints[idx]) {
-    bs->md5_fingerprints[idx] = md5_fingerprint(bioseq_get_sequence(bs, idx),
-                                                bioseq_get_sequence_length(bs,
-                                                                          idx));
-  }
-  assert(bs->md5_fingerprints[idx]);
-  return bs->md5_fingerprints[idx];
+  if (!bs->fingerprints)
+    bs->fingerprints = bioseq_fingerprints_new(bs);
+  assert(bioseq_fingerprints_get(bs->fingerprints, idx));
+  return bioseq_fingerprints_get(bs->fingerprints, idx);
 }
 
 unsigned long bioseq_get_sequence_length(Bioseq *bs, unsigned long idx)
