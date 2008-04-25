@@ -47,6 +47,7 @@ static void gt_sequniq_arguments_delete(void *tool_arguments)
 {
   SequniqArguments *arguments = tool_arguments;
   if (!arguments) return;
+  genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
   ma_free(arguments);
 }
