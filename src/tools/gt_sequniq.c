@@ -30,7 +30,8 @@
 #include "tools/gt_sequniq.h"
 
 typedef struct {
-  bool seqit;
+  bool seqit,
+       verbose;
   OutputFileInfo *ofi;
   GenFile *outfp;
 } SequniqArguments;
@@ -54,15 +55,27 @@ static OptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
 {
   SequniqArguments *arguments = tool_arguments;
   OptionParser *op;
-  Option *o;
+  Option *seqit_option, *verbose_option;
   assert(arguments);
+
   op = option_parser_new("[option ...] sequence_file [...] ",
                          "Filter out repeated sequences in given in given "
                          "sequence_file(s).");
-  o = option_new_bool("seqit", "use sequence iterator", &arguments->seqit,
-                      false);
-  option_is_development_option(o);
-  option_parser_add_option(op, o);
+
+  /* -seqit */
+  seqit_option = option_new_bool("seqit", "use sequence iterator",
+                                 &arguments->seqit, false);
+  option_is_development_option(seqit_option);
+  option_parser_add_option(op, seqit_option);
+
+  /* -v */
+  verbose_option = option_new_verbose(&arguments->verbose);
+  option_is_development_option(verbose_option);
+  option_parser_add_option(op, verbose_option);
+
+  /* option implications */
+  option_imply(verbose_option, seqit_option);
+
   outputfile_register_options(op, &arguments->outfp, arguments->ofi);
   option_parser_set_min_args(op, 1);
   return op;
@@ -116,15 +129,14 @@ static int gt_sequniq_runner(int argc, const char **argv,
       strarray_add_cstr(files, argv[i]);
     totalsize = files_estimate_total_size(files);
     seqit = seqiterator_new(files, NULL, true);
-    if (true) { /* XXX */
+    if (arguments->verbose) {
       progressbar_start(seqiterator_getcurrentcounter(seqit,
                                                       (unsigned long long)
                                                       totalsize),
                                                       (unsigned long long)
                                                       totalsize);
     }
-    while (true)
-    {
+    for (;;) {
       char *md5;
       if ((seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
         break;
@@ -140,7 +152,7 @@ static int gt_sequniq_runner(int argc, const char **argv,
       ma_free(desc);
       ma_free(md5);
     }
-    if (true) /* XXX */
+    if (arguments->verbose)
       progressbar_stop();
     seqiterator_delete(seqit);
     strarray_delete(files);
