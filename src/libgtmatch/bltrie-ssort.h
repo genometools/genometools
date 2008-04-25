@@ -26,7 +26,6 @@ Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
 
 void blindtriesuffixsort(Blindtrierep *trierep,
                          Seqpos *suffixtable,
-                         Seqpos *lcpsubtab,
                          unsigned long numberofsuffixes,
                          Seqpos depth);
 
