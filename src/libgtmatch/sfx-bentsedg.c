@@ -30,7 +30,7 @@
 #include "esafileend.h"
 #include "sfx-outlcp.h"
 #include "bcktab.h"
-#include "trie-ssort.h"
+#include "bltrie-ssort.h"
 
 #include "sfx-cmpsuf.pr"
 #include "opensfxfile.pr"
@@ -86,11 +86,11 @@
             {\
               if (cmpcharbychar)\
               {\
-                triesuffixsort(trierep,LEFT,\
-                               lcpsubtab == NULL\
-                                 ? NULL \
-                                 : lcpsubtab->spaceSeqpos + LCPINDEX(LEFT),\
-                               WIDTH,DEPTH);\
+                blindtriesuffixsort(trierep,LEFT,\
+                                    lcpsubtab == NULL\
+                                      ? NULL \
+                                      : lcpsubtab->spaceSeqpos+LCPINDEX(LEFT),\
+                                    WIDTH,DEPTH);\
               } else\
               {\
                 insertionsort(encseq,esr1,esr2,\
@@ -772,7 +772,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              unsigned long *leftlcpdist,
                              unsigned long *rightlcpdist,
                              Seqpos totallength,
-                             Trierep *trierep)
+                             Blindtrierep *trierep)
 {
   int cmp;
   unsigned int commonunits, maxsmallerwithlcp = 0, maxlargerwithlcp = 0;
@@ -913,7 +913,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              unsigned long maxwidthrealmedian,
                              Countingsortinfo *countingsortinfo,
                              unsigned long maxcountingsort,
-                             Trierep *trierep)
+                             Blindtrierep *trierep)
 {
   Suffixptr *left, *right, *leftplusw;
   Seqpos pivotcmpcharbychar = 0, valcmpcharbychar;
@@ -1530,7 +1530,7 @@ void sortallbuckets(Seqpos *suftabptr,
   Countingsortinfo *countingsortinfo;
   unsigned long maxcountingsort;
   Medianinfo *medianinfospace;
-  Trierep *trierep;
+  Blindtrierep *trierep;
 
   if (outlcpinfo == NULL)
   {
@@ -1561,7 +1561,7 @@ void sortallbuckets(Seqpos *suftabptr,
   maxcountingsort = maxbucketsize;
   ALLOCASSIGNSPACE(countingsortinfo,NULL,Countingsortinfo,maxcountingsort);
   ALLOCASSIGNSPACE(medianinfospace,NULL,Medianinfo,maxwidthrealmedian);
-  trierep = newTrierep(SMALLSIZE,encseq,readmode);
+  trierep = newBlindtrierep(SMALLSIZE,encseq,readmode);
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;
@@ -1719,7 +1719,7 @@ void sortallbuckets(Seqpos *suftabptr,
   }
   FREESPACE(countingsortinfo);
   FREESPACE(medianinfospace);
-  freeTrierep(&trierep);
+  freeBlindtrierep(&trierep);
   if (!cmpcharbychar && hasspecialranges(encseq))
   {
     assert(esr1 != NULL);

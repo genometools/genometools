@@ -338,12 +338,6 @@ Trierep *newTrierep(unsigned long numofsuffixes,
   return trierep;
 }
 
-static void inittrienodetable(Trierep *trierep)
-{
-  trierep->nextfreeTrienode = 0;
-  trierep->root = NULL;
-}
-
 /*
 static unsigned long rekenumeratetrieleaves(Seqpos *suffixtable,
                                             unsigned long nextfree,
@@ -447,7 +441,8 @@ void triesuffixsort(Trierep *trierep,
 {
   unsigned long idx;
 
-  inittrienodetable(trierep);
+  trierep->nextfreeTrienode = 0;
+  trierep->root = NULL;
   for (idx=0; idx<numberofsuffixes; idx++)
   {
     insertsuffixintotrie(trierep,suffixtable[idx]+depth);
