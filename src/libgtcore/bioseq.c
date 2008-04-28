@@ -126,16 +126,22 @@ static void write_fingerprints(StrArray *md5_fingerprints,
 static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
 {
   BioseqFingerprints *bsf;
-  bool reading_succeeded;
+  bool reading_succeeded = false;
   Str *fingerprints_filename;
   assert(bs);
   bsf = ma_calloc(1, sizeof *bsf);
   bsf->md5_fingerprints = strarray_new();
   fingerprints_filename = str_clone(bs->sequence_file);
   str_append_cstr(fingerprints_filename, GT_BIOSEQ_FINGERPRINTS);
-  reading_succeeded = read_fingerprints(bsf->md5_fingerprints,
-                                        fingerprints_filename,
-                                        bioseq_number_of_sequences(bs));
+  if (file_exists(str_get(fingerprints_filename)) &&
+      !file_is_newer(str_get(bs->sequence_file),
+                     str_get(fingerprints_filename))) {
+    /* only try to read the fingerprint file if the sequence file was not
+       modified in the meantime */
+    reading_succeeded = read_fingerprints(bsf->md5_fingerprints,
+                                          fingerprints_filename,
+                                          bioseq_number_of_sequences(bs));
+  }
   if (!reading_succeeded) {
     add_fingerprints(bsf->md5_fingerprints, bs);
     write_fingerprints(bsf->md5_fingerprints, fingerprints_filename);
