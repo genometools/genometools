@@ -101,8 +101,8 @@ typedef struct {
                      num_of_sequences;
 } FingerprintInfo;
 
-static void show_duplicates(const char *fingerprint, unsigned long occurrences,
-                            UNUSED double probability, void *data)
+static void show_duplicate(const char *fingerprint, unsigned long occurrences,
+                           UNUSED double probability, void *data)
 {
   FingerprintInfo *info = data;
   if (occurrences > 1) {
@@ -112,6 +112,23 @@ static void show_duplicates(const char *fingerprint, unsigned long occurrences,
   info->num_of_sequences += occurrences;
 }
 
+static int show_duplicates(StringDistri *sd, Error *err)
+{
+  FingerprintInfo info;
+  error_check(err);
+  assert(sd);
+  info.duplicates = 0;
+  info.num_of_sequences = 0;
+  stringdistri_foreach(sd, show_duplicate, &info);
+  if (info.duplicates) {
+    error_set(err, "duplicates found: %llu out of %llu (%.3f%%)",
+              info.duplicates, info.num_of_sequences,
+              (((double) info.duplicates / info.num_of_sequences) * 100.0));
+    return -1;
+  }
+  return 0;
+}
+
 static int gt_fingerprint_runner(int argc, const char **argv,
                                  void *tool_arguments, Error *err)
 {
@@ -119,19 +136,19 @@ static int gt_fingerprint_runner(int argc, const char **argv,
   Bioseq *bs;
   StringDistri *sd;
   unsigned long i, j;
-  FingerprintInfo info;
   int had_err = 0;
 
   error_check(err);
   assert(arguments);
   sd = stringdistri_new();
 
+  /* process sequence files */
   for (i = 0; !had_err && i < argc; i++) {
     if (!(bs = bioseq_new(argv[i], err)))
       had_err = -1;
     if (!had_err) {
       for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
-        if (arguments->show_duplicates)
+        if (str_length(arguments->checklist) || arguments->show_duplicates)
           stringdistri_add(sd, bioseq_get_md5_fingerprint(bs, j));
         else if (str_length(arguments->extract)) {
           if (!strcmp(bioseq_get_md5_fingerprint(bs, j),
@@ -148,18 +165,8 @@ static int gt_fingerprint_runner(int argc, const char **argv,
     bioseq_delete(bs);
   }
 
-  info.duplicates = 0;
-  info.num_of_sequences = 0;
-
-  if (!had_err && arguments->show_duplicates) {
-    stringdistri_foreach(sd, show_duplicates, &info);
-    if (info.duplicates) {
-      error_set(err, "duplicates found: %llu out of %llu (%.3f%%)",
-                info.duplicates, info.num_of_sequences,
-                (((double) info.duplicates / info.num_of_sequences) * 100.0));
-      had_err = -1;
-    }
-  }
+  if (!had_err && arguments->show_duplicates)
+    had_err = show_duplicates(sd, err);
 
   stringdistri_delete(sd);
 
