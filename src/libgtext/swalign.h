@@ -18,7 +18,7 @@
 #ifndef SWALIGN_H
 #define SWALIGN_H
 
-#include "libgtcore/scorefunction.h"
+#include "libgtcore/score_function.h"
 #include "libgtcore/seq.h"
 #include "libgtext/alignment.h"
 

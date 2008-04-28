@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/ma.h"
-#include "libgtcore/scorefunction.h"
+#include "libgtcore/score_function.h"
 #include "libgtcore/xansi.h"
 
 struct ScoreFunction {
@@ -26,7 +26,7 @@ struct ScoreFunction {
       insertion_score;
 };
 
-ScoreFunction* scorefunction_new(ScoreMatrix *sm, int deletion_score,
+ScoreFunction* score_function_new(ScoreMatrix *sm, int deletion_score,
                                  int insertion_score)
 {
   ScoreFunction *sf;
@@ -38,32 +38,32 @@ ScoreFunction* scorefunction_new(ScoreMatrix *sm, int deletion_score,
   return sf;
 }
 
-int scorefunction_get_score(const ScoreFunction *sf,
+int score_function_get_score(const ScoreFunction *sf,
                             unsigned int idx1, unsigned int idx2)
 {
   assert(sf);
   return score_matrix_get_score(sf->sm, idx1, idx2);
 }
 
-const int** scorefunction_get_scores(const ScoreFunction *sf)
+const int** score_function_get_scores(const ScoreFunction *sf)
 {
   assert(sf);
   return score_matrix_get_scores(sf->sm);
 }
 
-int scorefunction_get_deletion_score(const ScoreFunction *sf)
+int score_function_get_deletion_score(const ScoreFunction *sf)
 {
   assert(sf);
   return sf->deletion_score;
 }
 
-int scorefunction_get_insertion_score(const ScoreFunction *sf)
+int score_function_get_insertion_score(const ScoreFunction *sf)
 {
   assert(sf);
   return sf->insertion_score;
 }
 
-void scorefunction_delete(ScoreFunction *sf)
+void score_function_delete(ScoreFunction *sf)
 {
   if (!sf) return;
   score_matrix_delete(sf->sm);

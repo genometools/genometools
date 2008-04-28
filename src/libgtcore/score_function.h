@@ -15,20 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SCOREFUNCTION_H
-#define SCOREFUNCTION_H
+#ifndef SCORE_FUNCTION_H
+#define SCORE_FUNCTION_H
 
 #include "libgtcore/score_matrix.h"
 
 typedef struct ScoreFunction ScoreFunction;
 
-ScoreFunction* scorefunction_new(ScoreMatrix*, /* takes ownership  */
+ScoreFunction* score_function_new(ScoreMatrix*, /* takes ownership  */
                                  int deletion_score, int insertion_score);
-int            scorefunction_get_score(const ScoreFunction*,
+int            score_function_get_score(const ScoreFunction*,
                                        unsigned int, unsigned int);
-const int**    scorefunction_get_scores(const ScoreFunction*);
-int            scorefunction_get_deletion_score(const ScoreFunction*);
-int            scorefunction_get_insertion_score(const ScoreFunction*);
-void           scorefunction_delete(ScoreFunction*);
+const int**    score_function_get_scores(const ScoreFunction*);
+int            score_function_get_deletion_score(const ScoreFunction*);
+int            score_function_get_insertion_score(const ScoreFunction*);
+void           score_function_delete(ScoreFunction*);
 
 #endif

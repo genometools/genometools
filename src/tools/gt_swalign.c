@@ -18,7 +18,7 @@
 #include "libgtcore/bioseq.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
-#include "libgtcore/scorefunction.h"
+#include "libgtcore/score_function.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/alignment.h"
@@ -65,7 +65,7 @@ static int gt_swalign_runner(UNUSED int argc, const char **argv,
 {
   SWAlignArguments *arguments = tool_arguments;
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
-  ScoreFunction *scorefunction = NULL;
+  ScoreFunction *score_function = NULL;
   ScoreMatrix *scorematrix;
   unsigned long i, j;
   int had_err = 0;
@@ -77,7 +77,7 @@ static int gt_swalign_runner(UNUSED int argc, const char **argv,
   /* XXX: make this more flexible */
   scorematrix  = score_matrix_new_read_protein(argv[0], err);
   if (scorematrix) {
-    scorefunction = scorefunction_new(scorematrix, arguments->indelscore,
+    score_function = score_function_new(scorematrix, arguments->indelscore,
                                                    arguments->indelscore);
     bioseq_1 = bioseq_new(argv[1], err);
     if (!bioseq_1)
@@ -93,7 +93,7 @@ static int gt_swalign_runner(UNUSED int argc, const char **argv,
       for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
         for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
           a = swalign(bioseq_get_seq(bioseq_1, i),
-                      bioseq_get_seq(bioseq_2, j), scorefunction);
+                      bioseq_get_seq(bioseq_2, j), score_function);
           if (a) {
             alignment_show(a, stdout);
             xputchar('\n');
@@ -107,7 +107,7 @@ static int gt_swalign_runner(UNUSED int argc, const char **argv,
   /* free */
   bioseq_delete(bioseq_2);
   bioseq_delete(bioseq_1);
-  scorefunction_delete(scorefunction);
+  score_function_delete(score_function);
 
   return had_err;
 }

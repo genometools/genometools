@@ -128,7 +128,7 @@ Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
   return smith_waterman_align(seq_get_orig(u), seq_get_orig(v),
                               seq_get_encoded(u), seq_get_encoded(v),
                               seq_length(u), seq_length(v),
-                              scorefunction_get_scores(sf),
-                              scorefunction_get_deletion_score(sf),
-                              scorefunction_get_insertion_score(sf));
+                              score_function_get_scores(sf),
+                              score_function_get_deletion_score(sf),
+                              score_function_get_insertion_score(sf));
 }
