@@ -44,7 +44,7 @@ typedef struct LTRElement {
                 *rightTSD,
                 *ppt,
                 *pbs;
-  const char *seqid;
+  char *seqid;
   Array *pdomorder;
   Hashtable *pdoms;
 } LTRElement;

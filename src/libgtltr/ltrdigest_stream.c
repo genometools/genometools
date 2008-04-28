@@ -107,6 +107,7 @@ static void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
                           NULL,
                           UNDEF_ULONG);
   genome_feature_set_source(gf, tag);
+  genome_feature_set_score((GenomeFeature*) gf, results->best_hit->score);
   genome_node_set_seqid((GenomeNode*) gf,
                         genome_node_get_idstr(
                           (GenomeNode*) element->mainnode));

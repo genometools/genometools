@@ -110,14 +110,17 @@ void ltrelement_offset2pos(LTRElement *e, Range *rng,
 int ltrelement_format_description(LTRElement *e, unsigned int seqnamelen,
                                   char *buf, size_t buflen)
 {
+  int ret;
+  char *tmpstr;
   assert(buf && e);
-  char *tmpstr = ma_malloc(sizeof (char) * (seqnamelen + 1));
+  tmpstr = ma_malloc(sizeof (char) * (seqnamelen + 1));
   memset(tmpstr,0,sizeof (char) * (seqnamelen + 1));
   snprintf(tmpstr, seqnamelen, "%s", e->seqid);
   cstr_rep(tmpstr, ' ', '_');
-  return snprintf(buf, buflen, "%s_%lu_%lu",
+  ret = snprintf(buf, buflen, "%s_%lu_%lu",
                   tmpstr, e->leftLTR_5, e->rightLTR_3);
   ma_free(tmpstr);
+  return ret;
 }
 
 int ltrelement_unit_test(Error *err)
