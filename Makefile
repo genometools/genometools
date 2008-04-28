@@ -594,6 +594,7 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 
 # read dependencies
 -include $(GTMAIN_DEP) \
+         $(EXAMPLE_DEP) \
          $(SKPROTO_DEP) \
 	 $(LIBGTCORE_DEP) \
 	 $(LIBGTEXT_C_DEP) \
