@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,8 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_H
-#define GT_H
+#ifndef GENOMETOOLS_H
+#define GENOMETOOLS_H
+
+/* the GenomeTools ``all-in-one'' header */
 
 #include "gtcore.h"  /* the core GenomeTools library (libgthcore) */
 #include "gtext.h"   /* include extended GenomeTools library (libgtext) */

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -26,9 +26,10 @@
 #include "libgtcore/bittab.h"        /* bittab class */
 #include "libgtcore/bitpackarray.h"  /* packed integer array class */
 #include "libgtcore/bitpackstring.h" /* packed integer module */
+#include "libgtcore/bsearch.h"       /* bsearch module */
 #include "libgtcore/countingsort.h"  /* countingsort module */
 #include "libgtcore/cstr.h"          /* C-string class */
-#include "libgtcore/disc_distri.h"   /* discrete distribution class */
+#include "libgtcore/discdistri.h"    /* discrete distribution class */
 #include "libgtcore/dlist.h"         /* double-linked list class */
 #include "libgtcore/ensure.h"        /* defines the ensure macro */
 #include "libgtcore/error.h"         /* error class */
@@ -48,9 +49,9 @@
 #include "libgtcore/progressbar.h"   /* progressbar module */
 #include "libgtcore/queue.h"         /* queue class */
 #include "libgtcore/range.h"         /* range class */
-#include "libgtcore/safeop.h"        /* safe operations module */
+#include "libgtcore/safearith.h"     /* safe arithmetics module */
 #include "libgtcore/scorefunction.h" /* score function class */
-#include "libgtcore/scorematrix.h"   /* score matrix class */
+#include "libgtcore/score_matrix.h"  /* score matrix class */
 #include "libgtcore/splitter.h"      /* splitter class */
 #include "libgtcore/str.h"           /* string class */
 #include "libgtcore/strand.h"        /* strand module */

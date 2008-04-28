@@ -92,6 +92,10 @@ GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c
 GTMAIN_OBJ:=$(GTMAIN_SRC:%.c=obj/%.o)
 GTMAIN_DEP:=$(GTMAIN_SRC:%.c=obj/%.d)
 
+EXAMPLE_SRC:=src/example.c
+EXAMPLE_OBJ:=$(EXAMPLE_SRC:%.c=obj/%.o)
+EXAMPLE_DEP:=$(EXAMPLE_SRC:%.c=obj/%.d)
+
 SKPROTO_SRC:=src/skproto.c src/tools/gt_skproto.c
 SKPROTO_OBJ:=$(SKPROTO_SRC:%.c=obj/%.o)
 SKPROTO_DEP:=$(SKPROTO_SRC:%.c=obj/%.d)
@@ -331,7 +335,7 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
-all: $(GTLIBS) $(GTSHAREDLIBS) bin/skproto bin/gt bin/lua bin/rnv
+all: $(GTLIBS) $(GTSHAREDLIBS) bin/skproto bin/gt bin/example bin/lua bin/rnv
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
@@ -487,6 +491,9 @@ $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) lib/libgtcore.a \
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) $(GTLIBS) \
                                         $(OVERRIDELIBS)))
+
+$(eval $(call PROGRAM_template, bin/example, $(EXAMPLE_OBJ) $(GTLIBS) \
+                                             $(OVERRIDELIBS)))
 
 bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
