@@ -133,7 +133,7 @@ static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
   bsf->md5_fingerprints = strarray_new();
   fingerprints_filename = str_clone(bs->sequence_file);
   str_append_cstr(fingerprints_filename, GT_BIOSEQ_FINGERPRINTS);
-  if (file_exists(str_get(fingerprints_filename)) &&
+  if (!bs->use_stdin && file_exists(str_get(fingerprints_filename)) &&
       !file_is_newer(str_get(bs->sequence_file),
                      str_get(fingerprints_filename))) {
     /* only try to read the fingerprint file if the sequence file was not
@@ -144,7 +144,8 @@ static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
   }
   if (!reading_succeeded) {
     add_fingerprints(bsf->md5_fingerprints, bs);
-    write_fingerprints(bsf->md5_fingerprints, fingerprints_filename);
+    if (!bs->use_stdin)
+      write_fingerprints(bsf->md5_fingerprints, fingerprints_filename);
   }
   str_delete(fingerprints_filename);
   return bsf;
