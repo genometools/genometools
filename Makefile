@@ -244,6 +244,7 @@ endif
 ifeq ($(cov),yes)
   export CCACHE_DISABLE # ccache cannot handle coverage objects
   GT_CFLAGS += -fprofile-arcs -ftest-coverage
+  GT_LDFLAGS += -fprofile-arcs -ftest-coverage
   STEST_FLAGS += -gcov
   opt=no
   # hacks to link shared libs with cov=yes
