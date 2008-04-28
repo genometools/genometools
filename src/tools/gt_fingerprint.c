@@ -21,6 +21,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/stringdistri.h"
 #include "libgtcore/unused.h"
+#include "libgtext/gtdatahelp.h"
 #include "tools/gt_fingerprint.h"
 
 typedef struct {
@@ -59,7 +60,11 @@ static OptionParser* gt_fingerprint_option_parser_new(UNUSED
   check_option = option_new_filename("check", "Compare all fingerprints "
                                      "contained in the given checklist file "
                                      "with checksums in given "
-                                     "sequence_files(s).",
+                                     "sequence_files(s). The comparison is "
+                                     "successful, if all fingerprints given in "
+                                     "checkfile can be found in the "
+                                     "sequence_file(s) in the exact same "
+                                     "quantity and vice versa.",
                                      arguments->checklist);
   option_parser_add_option(op, check_option);
 
@@ -73,6 +78,7 @@ static OptionParser* gt_fingerprint_option_parser_new(UNUSED
   /* option exclusions */
   option_exclude(check_option, duplicates_option);
 
+  option_parser_set_comment_func(op, gtdata_show_help, NULL);
   option_parser_set_min_args(op, 1);
   return op;
 }
