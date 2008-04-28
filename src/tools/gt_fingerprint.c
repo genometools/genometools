@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "libgtcore/bioseq.h"
+#include "libgtcore/fasta.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/stringdistri.h"
@@ -26,15 +27,16 @@
 #include "tools/gt_fingerprint.h"
 
 typedef struct {
-  bool check,
-       show_duplicates;
-  Str *checklist;
+  bool show_duplicates;
+  Str *checklist,
+      *extract;
 } FingerprintArguments;
 
 static void* gt_fingerprint_arguments_new(void)
 {
   FingerprintArguments *arguments = ma_calloc(1, sizeof *arguments);
   arguments->checklist = str_new();
+  arguments->extract = str_new();
   return arguments;
 }
 
@@ -42,6 +44,7 @@ static void gt_fingerprint_arguments_delete(void *tool_arguments)
 {
   FingerprintArguments *arguments = tool_arguments;
   if (!arguments) return;
+  str_delete(arguments->extract);
   str_delete(arguments->checklist);
   ma_free(arguments);
 }
@@ -51,7 +54,7 @@ static OptionParser* gt_fingerprint_option_parser_new(UNUSED
 {
   FingerprintArguments *arguments = tool_arguments;
   OptionParser *op;
-  Option *check_option, *duplicates_option;
+  Option *check_option, *duplicates_option, *extract_option;
   assert(arguments);
   op = option_parser_new("[option ...] sequence_file [...] ",
                          "Compute MD5 fingerprints for each sequence given "
@@ -76,8 +79,17 @@ static OptionParser* gt_fingerprint_option_parser_new(UNUSED
                                       &arguments->show_duplicates, false);
   option_parser_add_option(op, duplicates_option);
 
+  /* -extract */
+  extract_option = option_new_string("extract", "Extract the sequence(s) with "
+                                     "the given fingerprint from "
+                                     "sequence_file(s) and show them on "
+                                     "stdout.", arguments->extract, NULL);
+  option_parser_add_option(op, extract_option);
+
   /* option exclusions */
   option_exclude(check_option, duplicates_option);
+  option_exclude(extract_option, check_option);
+  option_exclude(extract_option, duplicates_option);
 
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
   option_parser_set_min_args(op, 1);
@@ -121,6 +133,14 @@ static int gt_fingerprint_runner(int argc, const char **argv,
       for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
         if (arguments->show_duplicates)
           stringdistri_add(sd, bioseq_get_md5_fingerprint(bs, j));
+        else if (str_length(arguments->extract)) {
+          if (!strcmp(bioseq_get_md5_fingerprint(bs, j),
+                      str_get(arguments->extract))) {
+            fasta_show_entry(bioseq_get_description(bs, j),
+                             bioseq_get_sequence(bs, j),
+                             bioseq_get_sequence_length(bs, j), 0);
+          }
+        }
         else
           xputs(bioseq_get_md5_fingerprint(bs, j));
       }
