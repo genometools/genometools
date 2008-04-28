@@ -22,6 +22,7 @@
 #include "encseq-def.h"
 #include "bltrie-ssort.h"
 
+/*
 #define NODE(N)         (trierep->spaceBlindtrienode[N])
 #define DEPTH(N)        (NODE(N).depth)
 #define EITHER(N)       (NODE(N).either)
@@ -30,25 +31,36 @@
 #define RIGHTSIBLING(N) (NODE(N).rightsibling)
 #define ISLEAF(N)       (NODE(N).isleaf)
 #define FIRSTCHAR(N)    (NODE(N).firstchar)
-#define ROOTNODE        0
+#define ROOTNODE        trierep->root
 #define BlindtrieNULL   (trierep->allocatedBlindtrienode)
+*/
 
-typedef unsigned int Nodenum;
+#define DEPTH(N)        ((N)->depth)
+#define EITHER(N)       ((N)->either)
+#define FIRSTCHILD(N)   (EITHER(N).firstchild)
+#define STARTPOS(N)     (EITHER(N).startpos)
+#define RIGHTSIBLING(N) ((N)->rightsibling)
+#define ISLEAF(N)       ((N)->isleaf)
+#define FIRSTCHAR(N)    ((N)->firstchar)
+#define ROOTNODE        trierep->root
+#define BlindtrieNULL   NULL
 
 typedef struct Blindtrienode
 {
   Seqpos depth;
-  Nodenum rightsibling;
+  struct Blindtrienode *rightsibling;
   union
   {
-    Nodenum firstchild;
+    struct Blindtrienode *firstchild;
     Seqpos startpos;
   } either;
   bool isleaf;
   Uchar firstchar;
 } Blindtrienode;
 
-DECLAREARRAYSTRUCT(Nodenum);
+typedef Blindtrienode * Nodeptr;
+
+DECLAREARRAYSTRUCT(Nodeptr);
 
 struct Blindtrierep
 {
@@ -56,24 +68,25 @@ struct Blindtrierep
   Readmode readmode;
   Seqpos totallength;
   Blindtrienode *spaceBlindtrienode;
-  Nodenum allocatedBlindtrienode,
-          nextfreeBlindtrienode;
-  ArrayNodenum stack;
+  Nodeptr root;
+  unsigned long allocatedBlindtrienode,
+                nextfreeBlindtrienode;
+  ArrayNodeptr stack;
 };
 
-static Nodenum newBlindtrienode(Blindtrierep *trierep)
+static Nodeptr newBlindtrienode(Blindtrierep *trierep)
 {
   assert(trierep->nextfreeBlindtrienode < trierep->allocatedBlindtrienode);
-  return trierep->nextfreeBlindtrienode++;
+  return trierep->spaceBlindtrienode + trierep->nextfreeBlindtrienode++;
 }
 
-static void makefirstleaf(Blindtrierep *trierep,Seqpos startpos,Seqpos depth)
+static Blindtrienode *makenewleaf(Blindtrierep *trierep,Seqpos startpos,
+                                  Seqpos depth)
 {
-  Nodenum newleaf;
+  Blindtrienode *newleaf;
 
   newleaf = newBlindtrienode(trierep);
-  ISLEAF(newleaf) = true;
-  DEPTH(newleaf) = 0;
+  STARTPOS(newleaf) = startpos;
   if (startpos + depth >= trierep->totallength)
   {
     FIRSTCHAR(newleaf) = (Uchar) SEPARATOR;
@@ -83,11 +96,28 @@ static void makefirstleaf(Blindtrierep *trierep,Seqpos startpos,Seqpos depth)
                                         startpos + depth,
                                         trierep->readmode);
   }
-  STARTPOS(newleaf) = startpos;
-  RIGHTSIBLING(newleaf) = BlindtrieNULL;
+  DEPTH(newleaf) = 0;
+  ISLEAF(newleaf) = true;
+  RIGHTSIBLING(newleaf) = NULL;
+  return newleaf;
 }
 
-static Nodenum extractleafnode(const Blindtrierep *trierep,Nodenum head)
+static Nodeptr makeroot(Blindtrierep *trierep,Seqpos startpos,
+                               Seqpos depth)
+{
+  Blindtrienode *root, *newleaf;
+
+  root = newBlindtrienode(trierep);
+  DEPTH(root) = 0;
+  FIRSTCHAR(root) = 0;
+  RIGHTSIBLING(root) = NULL;
+  ISLEAF(root) = false;
+  newleaf = makenewleaf(trierep,startpos,depth);
+  FIRSTCHILD(root) = newleaf;
+  return root;
+}
+
+static Nodeptr extractleafnode(Nodeptr head)
 {
   assert(!ISLEAF(head));
   do
@@ -97,16 +127,16 @@ static Nodenum extractleafnode(const Blindtrierep *trierep,Nodenum head)
   return head;
 }
 
-static Nodenum findcompanion(Blindtrierep *trierep,Seqpos startpos)
+static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos startpos)
 {
   Uchar cc;
-  Nodenum head, currentnodenum;
+  Nodeptr head, currentnodenum;
 
-  trierep->stack.nextfreeNodenum = 0;
+  trierep->stack.nextfreeNodeptr = 0;
   head = ROOTNODE;
   while (!ISLEAF(head))
   {
-    STOREINARRAY (&trierep->stack, Nodenum, 128, head);
+    STOREINARRAY (&trierep->stack, Nodeptr, 128, head);
     if (startpos + DEPTH(head) >= trierep->totallength)
     {
       cc = (Uchar) SEPARATOR;
@@ -118,7 +148,7 @@ static Nodenum findcompanion(Blindtrierep *trierep,Seqpos startpos)
     }
     if (ISSPECIAL(cc))
     {
-      return extractleafnode(trierep,head);
+      return extractleafnode(head);
     }
     currentnodenum = FIRSTCHILD(head);
     for (;;)
@@ -130,51 +160,36 @@ static Nodenum findcompanion(Blindtrierep *trierep,Seqpos startpos)
       }
       if (cc < FIRSTCHAR(currentnodenum)) /* no branch corresponding to c */
       {
-        return extractleafnode(trierep,head);
+        return extractleafnode(head);
       }
       currentnodenum = RIGHTSIBLING(currentnodenum);
       if (currentnodenum == BlindtrieNULL) /* no other branches: mismatch */
       {
-        return extractleafnode(trierep,head);
+        return extractleafnode(head);
       }
     }
   }
-  STOREINARRAY (&trierep->stack, Nodenum, 128, head);
+  STOREINARRAY (&trierep->stack, Nodeptr, 128, head);
   return head;
 }
 
 static void insertcurrentsuffix(Blindtrierep *trierep,Seqpos startpos,
-                                Seqpos lcp, Uchar mmchar)
+                                Seqpos lcp, Uchar mismatchchar,
+                                Nodeptr currentnode)
 {
-  unsigned long t;
-  Uchar cc;
-  Nodenum currentnode = ROOTNODE, p, *pp;
+  Uchar treecc;
+  Nodeptr p, *pp;
 
-  for (t=0;t<trierep->stack.nextfreeNodenum;t++)
-  {
-    currentnode = trierep->stack.spaceNodenum[t];
-    if (ISLEAF(currentnode) || DEPTH(currentnode) >= lcp)
-    {
-      break;
-    }
-  }
-  if (startpos + lcp >= trierep->totallength)
-  {
-    cc = (Uchar) SEPARATOR;
-  } else
-  {
-    cc = getencodedchar(trierep->encseq, /* Random access */
-                        startpos + lcp,
-                        trierep->readmode);
-  }
-  assert(ISSPECIAL(cc) || ISSPECIAL(mmchar) ||
-         cc != mmchar || ISLEAF(currentnode) || DEPTH(currentnode) == lcp);
+  treecc = FIRSTCHAR(currentnode);
+  assert(ISSPECIAL(treecc) || ISSPECIAL(mismatchchar) ||
+         treecc != mismatchchar || ISLEAF(currentnode) ||
+         DEPTH(currentnode) == lcp);
 
   /* insert a new node before node currentnode if necessary */
   if (DEPTH(currentnode) != lcp)
   {
     p = newBlindtrienode(trierep);
-    FIRSTCHAR(p) = mmchar;
+    FIRSTCHAR(p) = mismatchchar;
     DEPTH(p) = DEPTH(currentnode); /* p inherits depth+children of currentnode*/
     ISLEAF(p) = ISLEAF(currentnode);
     EITHER(p) = EITHER(currentnode);
@@ -189,7 +204,7 @@ static void insertcurrentsuffix(Blindtrierep *trierep,Seqpos startpos,
   pp = &FIRSTCHILD(currentnode);
   while ((*pp) != BlindtrieNULL)
   {
-    if (FIRSTCHAR(*pp) >= cc)
+    if (FIRSTCHAR(*pp) >= treecc)
     {
       break;
     }
@@ -199,7 +214,7 @@ static void insertcurrentsuffix(Blindtrierep *trierep,Seqpos startpos,
   p = newBlindtrienode(trierep);
   DEPTH(p) = 0;
   ISLEAF(p) = true;
-  FIRSTCHAR(p) = cc;
+  FIRSTCHAR(p) = treecc;
   RIGHTSIBLING(p) = *pp;
   *pp = p;
   STARTPOS(p) = startpos;
@@ -255,11 +270,11 @@ static void enumeratetrieleaves (Seqpos *suffixtable,
                                  Seqpos depth)
 {
   bool readyforpop = false, currentnodeisleaf;
-  Nodenum currentnode, siblval, child, lcpnode = 0;
+  Nodeptr currentnode, siblval, child, lcpnode = ROOTNODE;
   unsigned long nextfree = 0;
 
-  trierep->stack.nextfreeNodenum = 0;
-  STOREINARRAY (&trierep->stack, Nodenum, 128, ROOTNODE);
+  trierep->stack.nextfreeNodeptr = 0;
+  STOREINARRAY (&trierep->stack, Nodeptr, 128, ROOTNODE);
   SETCURRENT(FIRSTCHILD(ROOTNODE));
   for (;;)
   {
@@ -279,29 +294,29 @@ static void enumeratetrieleaves (Seqpos *suffixtable,
       } else
       {
         SETCURRENT (siblval);  /* current comes from brother */
-        lcpnode = trierep->stack.spaceNodenum[trierep->stack.nextfreeNodenum-1];
+        lcpnode = trierep->stack.spaceNodeptr[trierep->stack.nextfreeNodeptr-1];
       }
     } else
     {
       if (readyforpop)
       {
-        if (trierep->stack.nextfreeNodenum == 1UL)
+        if (trierep->stack.nextfreeNodeptr == 1UL)
         {
           break;
         }
-        trierep->stack.nextfreeNodenum--;
-        siblval = RIGHTSIBLING(trierep->stack.spaceNodenum[
-                               trierep->stack.nextfreeNodenum]);
+        trierep->stack.nextfreeNodeptr--;
+        siblval = RIGHTSIBLING(trierep->stack.spaceNodeptr[
+                               trierep->stack.nextfreeNodeptr]);
         if (siblval != BlindtrieNULL)
         {
           SETCURRENT (siblval);        /* current comes from brother */
-          lcpnode = trierep->stack.spaceNodenum[
-                             trierep->stack.nextfreeNodenum - 1];
+          lcpnode = trierep->stack.spaceNodeptr[
+                             trierep->stack.nextfreeNodeptr - 1];
           readyforpop = false;
         }
       } else
       {
-        STOREINARRAY (&trierep->stack, Nodenum, 128, currentnode);
+        STOREINARRAY (&trierep->stack, Nodeptr, 128, currentnode);
         child = FIRSTCHILD(currentnode);
         SETCURRENT (child);            /* current comes from child */
       }
@@ -316,53 +331,58 @@ Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
   Blindtrierep *trierep;
 
   ALLOCASSIGNSPACE(trierep,NULL,Blindtrierep,1);
-  trierep->allocatedBlindtrienode = (Nodenum) MULT2(numofsuffixes + 1) + 1;
+  trierep->allocatedBlindtrienode = MULT2(numofsuffixes + 1) + 1;
   ALLOCASSIGNSPACE(trierep->spaceBlindtrienode,NULL,Blindtrienode,
                    trierep->allocatedBlindtrienode);
   trierep->nextfreeBlindtrienode = 0;
   trierep->encseq = encseq;
   trierep->readmode = readmode;
+  trierep->root = NULL;
   trierep->totallength = getencseqtotallength(encseq);
-  INITARRAY (&trierep->stack, Nodenum);
+  INITARRAY (&trierep->stack, Nodeptr);
   return trierep;
 }
 
 void freeBlindtrierep(Blindtrierep **trierep)
 {
   FREESPACE((*trierep)->spaceBlindtrienode);
-  FREEARRAY (&(*trierep)->stack, Nodenum);
+  FREEARRAY (&(*trierep)->stack, Nodeptr);
   FREESPACE(*trierep);
 }
 
+#define NODENUM(PTR) (unsigned long) (RIGHTSIBLING(PTR) - \
+                                      trierep->spaceBlindtrienode)
+
 static void showleaf(const Blindtrierep *trierep,unsigned int level,
-                     Nodenum current)
+                     Nodeptr current)
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
-  printf("Leaf(add=%u,firstchar=%u,startpos=" FormatSeqpos
-         ",rightsibling=%u)\n",
-         current,
+  printf("Leaf(add=%lu,firstchar=%u,startpos=" FormatSeqpos
+         ",rightsibling=%lu)\n",
+         NODENUM(current),
          (unsigned int) FIRSTCHAR(current),
          PRINTSeqposcast(STARTPOS(current)),
-         RIGHTSIBLING(current));
+         NODENUM(RIGHTSIBLING(current)));
 }
 
 static void showintern(const Blindtrierep *trierep,unsigned int level,
-                       Nodenum current)
+                       Nodeptr current)
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
-  printf("Intern(add=%u,firstchar=%u,depth=" FormatSeqpos
-         ",rightsibling=%u)\n",
-          current,
+  printf("Intern(add=%lu,firstchar=%u,depth=" FormatSeqpos
+         ",firstchild=%lu,rightsibling=%lu)\n",
+          NODENUM(current),
           (unsigned int) FIRSTCHAR(current),
           PRINTSeqposcast(DEPTH(current)),
-          RIGHTSIBLING(current));
+          NODENUM(FIRSTCHILD(current)),
+          NODENUM(RIGHTSIBLING(current)));
 }
 
 static void showblindtrie2(const Blindtrierep *trierep,
                            unsigned int level,
-                           Nodenum node)
+                           Nodeptr node)
 {
-  Nodenum current;
+  Nodeptr current;
 
   for (current = FIRSTCHILD(node);
        current != BlindtrieNULL;
@@ -381,16 +401,7 @@ static void showblindtrie2(const Blindtrierep *trierep,
 
 static void showblindtrie(const Blindtrierep *trierep)
 {
-  if (trierep->nextfreeBlindtrienode == (Nodenum) 1)
-  {
-    assert(ISLEAF(ROOTNODE));
-    showleaf(trierep,1U,ROOTNODE);
-  } else
-  {
-    assert(!ISLEAF(ROOTNODE));
-    showintern(trierep,0,ROOTNODE);
-    showblindtrie2(trierep,1U,ROOTNODE);
-  }
+  showblindtrie2(trierep,0,ROOTNODE);
 }
 
 void blindtriesuffixsort(Blindtrierep *trierep,
@@ -399,13 +410,13 @@ void blindtriesuffixsort(Blindtrierep *trierep,
                          unsigned long numberofsuffixes,
                          Seqpos depth)
 {
-  unsigned long i;
-  Nodenum leafinsubtree;
+  unsigned long i, t;
+  Nodeptr leafinsubtree, currentnode;
   Seqpos lcp;
   Uchar mismatchchar;
 
   trierep->nextfreeBlindtrienode = 0;
-  makefirstleaf(trierep,suffixtable[0],depth);
+  trierep->root = makeroot(trierep,suffixtable[0],depth);
   printf("insert suffixes at depth " FormatSeqpos ":\n",PRINTSeqposcast(depth));
   for (i=0; i < numberofsuffixes; i++)
   {
@@ -421,7 +432,16 @@ void blindtriesuffixsort(Blindtrierep *trierep,
                          trierep->totallength,
                          suffixtable[i] + depth,
                          STARTPOS(leafinsubtree) + depth);
-    insertcurrentsuffix(trierep,suffixtable[i],lcp,mismatchchar);
+    currentnode = ROOTNODE;
+    for (t=0;t<trierep->stack.nextfreeNodeptr;t++)
+    {
+      currentnode = trierep->stack.spaceNodeptr[t];
+      if (ISLEAF(currentnode) || DEPTH(currentnode) >= lcp)
+      {
+        break;
+      }
+    }
+    insertcurrentsuffix(trierep,suffixtable[i],lcp,mismatchchar,currentnode);
     printf("step %lu\n",i);
     showblindtrie(trierep);
   }

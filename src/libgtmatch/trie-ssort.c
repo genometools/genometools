@@ -204,11 +204,11 @@ static Seqpos getlcp(const Encodedsequence *encseq,
   return idx1 - start1;
 }
 
-static bool hassuccessor(const Trierep *trierep,
-                         Nodepair *np,
-                         const Trienode *node,
-                         Uchar cc2,
-                         Seqpos startpos2)
+static bool hasccsuccessor(const Trierep *trierep,
+                           Nodepair *np,
+                           const Trienode *node,
+                           Uchar cc2,
+                           Seqpos startpos2)
 {
   Uchar cc1;
   int cmpresult;
@@ -255,13 +255,13 @@ static void insertsuffixintotrie(Trierep *trierep,Seqpos startpos)
       }
       assert(currentnode != NULL);
       assert(!ISLEAF(currentnode));
-      if (!hassuccessor(trierep,&np,currentnode,cc,startpos))
+      if (!hasccsuccessor(trierep,&np,currentnode,cc,startpos))
       {
         newleaf = makenewleaf(trierep,startpos);
         newleaf->rightsibling = np.current;
         if (np.previous == NULL)
         {
-          currentnode->firstchild =newleaf;
+          currentnode->firstchild = newleaf;
         } else
         {
           np.previous->rightsibling = newleaf;
