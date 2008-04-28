@@ -6,6 +6,10 @@ all sequences are shown on stdout.
 Examples:
 ---------
 
+Compute (unified) list of fingerprints:
+
+$ gt fingerprint U89959_ests.fas | sort | uniq > U89959_ests.checkfile
+
 Make sure a sequence file contains no duplicates (not the case here):
 
 $ gt fingerprint -duplicates U89959_ests.fas

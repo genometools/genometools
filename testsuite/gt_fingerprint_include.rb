@@ -1,3 +1,10 @@
+Name "fingerprint"
+Keywords "gt_fingerprint"
+Test do
+  run_test "#{$bin}gt fingerprint #{$testdata}U89959_ests.fas | sort | uniq"
+  run "diff #{$last_stdout} #{$testdata}U89959_ests.checkfile"
+end
+
 Name "fingerprint -duplicates (found)"
 Keywords "gt_fingerprint"
 Test do
