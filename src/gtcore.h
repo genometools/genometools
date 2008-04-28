@@ -58,6 +58,7 @@
 #include "libgtcore/tokenizer.h"      /* tokenizer class */
 #include "libgtcore/translate.h"      /* translate module */
 #include "libgtcore/undef.h"          /* undef module */
+#include "libgtcore/unused.h"         /* unused module */
 #include "libgtcore/versionfunc.h"    /* version module */
 #include "libgtcore/warning.h"        /* warning module */
 #include "libgtcore/xansi.h"          /* ANSI wrapper module */
