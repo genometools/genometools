@@ -23,7 +23,7 @@
 #include "libgtcore/bittab.h"
 #include "libgtcore/bsearch.h"
 #include "libgtcore/countingsort.h"
-#include "libgtcore/discdistri.h"
+#include "libgtcore/disc_distri.h"
 #include "libgtcore/dlist.h"
 #include "libgtcore/dynbittab.h"
 #include "libgtcore/getbasename.h"
@@ -135,7 +135,7 @@ Hashtable* gtt_unit_tests(void)
   hashtable_add(unit_tests, "bittab example", bittab_example);
   hashtable_add(unit_tests, "bsearch module", bsearch_unit_test);
   hashtable_add(unit_tests, "countingsort module", countingsort_unit_test);
-  hashtable_add(unit_tests, "disc distri class", discdistri_unit_test);
+  hashtable_add(unit_tests, "disc distri class", disc_distri_unit_test);
   hashtable_add(unit_tests, "dlist class", dlist_unit_test);
   hashtable_add(unit_tests, "dlist example", dlist_example);
   hashtable_add(unit_tests, "dynamic bittab class", dynbittab_unit_test);

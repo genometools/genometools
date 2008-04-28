@@ -19,7 +19,7 @@
 #include "libgtcore/array.h"
 #include "libgtcore/bioseq.h"
 #include "libgtcore/cstr.h"
-#include "libgtcore/discdistri.h"
+#include "libgtcore/disc_distri.h"
 #include "libgtcore/dynalloc.h"
 #include "libgtcore/error.h"
 #include "libgtcore/fa.h"
@@ -643,10 +643,10 @@ void bioseq_show_seqlengthdistri(Bioseq *bs)
   DiscDistri *d;
   unsigned long i;
   assert(bs);
-  d = discdistri_new();
+  d = disc_distri_new();
   for (i = 0; i < bioseq_number_of_sequences(bs); i++)
-    discdistri_add(d, bioseq_get_sequence_length(bs, i));
+    disc_distri_add(d, bioseq_get_sequence_length(bs, i));
   printf("sequence length distribution:\n");
-  discdistri_show(d);
-  discdistri_delete(d);
+  disc_distri_show(d);
+  disc_distri_delete(d);
 }

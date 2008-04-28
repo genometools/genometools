@@ -29,7 +29,7 @@
 #include "libgtcore/bsearch.h"        /* bsearch module */
 #include "libgtcore/countingsort.h"   /* countingsort module */
 #include "libgtcore/cstr.h"           /* C-string class */
-#include "libgtcore/discdistri.h"     /* discrete distribution class */
+#include "libgtcore/disc_distri.h"    /* discrete distribution class */
 #include "libgtcore/dlist.h"          /* double-linked list class */
 #include "libgtcore/ensure.h"         /* defines the ensure macro */
 #include "libgtcore/error.h"          /* error class */

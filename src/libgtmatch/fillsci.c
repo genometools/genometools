@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include "libgtcore/chardef.h"
-#include "libgtcore/discdistri.h"
+#include "libgtcore/disc_distri.h"
 #include "libgtcore/error.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/fastabuffer.h"
@@ -117,7 +117,7 @@ int fasta2sequencekeyvalues(
                          filelengthtab,
                          descqueue,
                          characterdistribution);
-    distspralen = discdistri_new();
+    distspralen = disc_distri_new();
     for (pos = 0; /* Nothing */; pos++)
     {
       retval = fastabuffer_next(fb,&charcode,err);
@@ -131,7 +131,7 @@ int fasta2sequencekeyvalues(
         if (lastspeciallength > 0)
         {
           idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-          discdistri_add(distspralen,idx);
+          disc_distri_add(distspralen,idx);
         }
         break;
       }
@@ -175,7 +175,7 @@ int fasta2sequencekeyvalues(
         if (lastspeciallength > 0)
         {
           idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-          discdistri_add(distspralen,idx);
+          disc_distri_add(distspralen,idx);
           lastspeciallength = 0;
         }
       }
@@ -203,14 +203,14 @@ int fasta2sequencekeyvalues(
     updatesumrangeinfo.realspecialrangesptr
       = &specialcharinfo->realspecialranges;
     updatesumrangeinfo.verboseinfo = verboseinfo;
-    discdistri_foreach(distspralen,updatesumranges,
+    disc_distri_foreach(distspralen,updatesumranges,
                        &updatesumrangeinfo);
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
     (*numofsequences)++;
     *totallength = pos;
   }
   fa_xfclose(desfp);
-  discdistri_delete(distspralen);
+  disc_distri_delete(distspralen);
   fastabuffer_delete(fb);
   queue_delete_with_contents(descqueue);
   return haserr ? -1 : 0;
@@ -232,7 +232,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-  distspralen = discdistri_new();
+  distspralen = disc_distri_new();
   for (pos = 0; pos < len; pos++)
   {
     charcode = seq[pos];
@@ -259,7 +259,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
       if (lastspeciallength > 0)
       {
         idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-        discdistri_add(distspralen,idx);
+        disc_distri_add(distspralen,idx);
         lastspeciallength = 0;
       }
     }
@@ -267,14 +267,14 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   if (lastspeciallength > 0)
   {
     idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-    discdistri_add(distspralen,idx);
+    disc_distri_add(distspralen,idx);
   }
   specialcharinfo->specialranges = 0;
   specialcharinfo->realspecialranges = 0;
   updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
   updatesumrangeinfo.realspecialrangesptr = &specialcharinfo->realspecialranges;
   updatesumrangeinfo.verboseinfo = verboseinfo;
-  discdistri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
+  disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-  discdistri_delete(distspralen);
+  disc_distri_delete(distspralen);
 }
