@@ -21,6 +21,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/stringdistri.h"
 #include "libgtcore/unused.h"
+#include "libgtcore/xansi.h"
 #include "libgtext/gtdatahelp.h"
 #include "tools/gt_fingerprint.h"
 
@@ -117,8 +118,12 @@ static int gt_fingerprint_runner(int argc, const char **argv,
     if (!(bs = bioseq_new(argv[i], err)))
       had_err = -1;
     if (!had_err) {
-      for (j = 0; j < bioseq_number_of_sequences(bs); j++)
-        stringdistri_add(sd, bioseq_get_md5_fingerprint(bs, j));
+      for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
+        if (arguments->show_duplicates)
+          stringdistri_add(sd, bioseq_get_md5_fingerprint(bs, j));
+        else
+          xputs(bioseq_get_md5_fingerprint(bs, j));
+      }
     }
     bioseq_delete(bs);
   }
