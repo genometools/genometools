@@ -21,7 +21,7 @@
 #include "libgtcore/fasta.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
-#include "libgtcore/stringdistri.h"
+#include "libgtcore/string_distri.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/gtdatahelp.h"
@@ -119,8 +119,8 @@ static int compare_fingerprints(StringDistri *sd, const char *checklist,
   line = str_new();
   /* process checklist */
   while (str_read_next_line(line, checkfile) != EOF) {
-    if (stringdistri_get(sd, str_get(line)))
-      stringdistri_sub(sd, str_get(line));
+    if (string_distri_get(sd, str_get(line)))
+      string_distri_sub(sd, str_get(line));
     else {
       printf("%s only in checklist\n", str_get(line));
       comparisons_failed = true;
@@ -130,7 +130,7 @@ static int compare_fingerprints(StringDistri *sd, const char *checklist,
   str_delete(line);
   fa_xfclose(checkfile);
   /* process remaining sequence_file(s) fingerprints */
-  stringdistri_foreach(sd, proc_superfluous_sequence, &comparisons_failed);
+  string_distri_foreach(sd, proc_superfluous_sequence, &comparisons_failed);
   if (comparisons_failed) {
     error_set(err, "fingerprint comparison failed");
     return -1;
@@ -161,7 +161,7 @@ static int show_duplicates(StringDistri *sd, Error *err)
   assert(sd);
   info.duplicates = 0;
   info.num_of_sequences = 0;
-  stringdistri_foreach(sd, show_duplicate, &info);
+  string_distri_foreach(sd, show_duplicate, &info);
   if (info.duplicates) {
     error_set(err, "duplicates found: %llu out of %llu (%.3f%%)",
               info.duplicates, info.num_of_sequences,
@@ -182,7 +182,7 @@ static int gt_fingerprint_runner(int argc, const char **argv,
 
   error_check(err);
   assert(arguments);
-  sd = stringdistri_new();
+  sd = string_distri_new();
 
   /* process sequence files */
   for (i = 0; !had_err && i < argc; i++) {
@@ -191,7 +191,7 @@ static int gt_fingerprint_runner(int argc, const char **argv,
     if (!had_err) {
       for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
         if (str_length(arguments->checklist) || arguments->show_duplicates)
-          stringdistri_add(sd, bioseq_get_md5_fingerprint(bs, j));
+          string_distri_add(sd, bioseq_get_md5_fingerprint(bs, j));
         else if (str_length(arguments->extract)) {
           if (!strcmp(bioseq_get_md5_fingerprint(bs, j),
                       str_get(arguments->extract))) {
@@ -214,7 +214,7 @@ static int gt_fingerprint_runner(int argc, const char **argv,
       had_err = show_duplicates(sd, err);
   }
 
-  stringdistri_delete(sd);
+  string_distri_delete(sd);
 
   return had_err;
 }

@@ -19,7 +19,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "libgtcore/fasta.h"
-#include "libgtcore/stringdistri.h"
+#include "libgtcore/string_distri.h"
 #include "libgtcore/translate.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/warning.h"
@@ -48,9 +48,9 @@ static void splicesiteinfo_visitor_free(GenomeVisitor *gv)
   assert(gv);
   splicesiteinfo_visitor = splicesiteinfo_visitor_cast(gv);
   region_mapping_delete(splicesiteinfo_visitor->region_mapping);
-  stringdistri_delete(splicesiteinfo_visitor->splicesites);
-  stringdistri_delete(splicesiteinfo_visitor->donorsites);
-  stringdistri_delete(splicesiteinfo_visitor->acceptorsites);
+  string_distri_delete(splicesiteinfo_visitor->splicesites);
+  string_distri_delete(splicesiteinfo_visitor->donorsites);
+  string_distri_delete(splicesiteinfo_visitor->acceptorsites);
 }
 
 static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
@@ -90,10 +90,10 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
           had_err = reverse_complement(site, 4, e);
         if (!had_err) {
           /* add site to distributions */
-          stringdistri_add(ssiv->splicesites, site);
-          stringdistri_add(ssiv->acceptorsites, site + 2);
+          string_distri_add(ssiv->splicesites, site);
+          string_distri_add(ssiv->acceptorsites, site + 2);
           site[2] = '\0';
-          stringdistri_add(ssiv->donorsites, site);
+          string_distri_add(ssiv->donorsites, site);
           ssiv->show = true;
         }
       }
@@ -144,9 +144,9 @@ GenomeVisitor* splicesiteinfo_visitor_new(RegionMapping *rm)
   gv = genome_visitor_create(splicesiteinfo_visitor_class());
   ssiv = splicesiteinfo_visitor_cast(gv);
   ssiv->region_mapping = rm;
-  ssiv->splicesites = stringdistri_new();
-  ssiv->acceptorsites = stringdistri_new();
-  ssiv->donorsites = stringdistri_new();
+  ssiv->splicesites = string_distri_new();
+  ssiv->acceptorsites = string_distri_new();
+  ssiv->donorsites = string_distri_new();
   return gv;
 }
 
@@ -178,17 +178,17 @@ bool splicesiteinfo_visitor_show(GenomeVisitor *gv)
   if (ssiv->show) {
     /* show splice sites */
     printf("splice site distribution (for introns >= 4bp)\n");
-    stringdistri_foreach(ssiv->splicesites, showsplicesite, NULL);
+    string_distri_foreach(ssiv->splicesites, showsplicesite, NULL);
     xputchar('\n');
 
     /* show donor sites */
     printf("donor site distribution (for introns >= 4bp)\n");
-    stringdistri_foreach(ssiv->donorsites, showsinglesite, NULL);
+    string_distri_foreach(ssiv->donorsites, showsinglesite, NULL);
     xputchar('\n');
 
     /* show acceptor sites */
     printf("acceptor site distribution (for introns >= 4bp)\n");
-    stringdistri_foreach(ssiv->acceptorsites, showsinglesite, NULL);
+    string_distri_foreach(ssiv->acceptorsites, showsinglesite, NULL);
   }
   return ssiv->intron_processed;
 }

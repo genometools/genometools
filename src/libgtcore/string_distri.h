@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef STRINGDISTRI_H
-#define STRINGDISTRI_H
+#ifndef STRING_DISTRI_H
+#define STRING_DISTRI_H
 
 #include "libgtcore/error.h"
 #include "libgtcore/genfile.h"
@@ -28,13 +28,13 @@ typedef void (*StringDistriIterFunc)(const char *string,
                                      unsigned long occurrences,
                                      double probability, void *data);
 
-StringDistri*      stringdistri_new(void);
-void               stringdistri_add(StringDistri*, const char*);
+StringDistri*      string_distri_new(void);
+void               string_distri_add(StringDistri*, const char*);
 /* <sd> must contain at least on element with given <key>. */
-void               stringdistri_sub(StringDistri *sd, const char *key);
-unsigned long      stringdistri_get(const StringDistri*, const char*);
-void               stringdistri_foreach(const StringDistri*,
+void               string_distri_sub(StringDistri *sd, const char *key);
+unsigned long      string_distri_get(const StringDistri*, const char*);
+void               string_distri_foreach(const StringDistri*,
                                         StringDistriIterFunc, void *data);
-void               stringdistri_delete(StringDistri*);
+void               string_distri_delete(StringDistri*);
 
 #endif

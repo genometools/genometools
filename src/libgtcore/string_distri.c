@@ -19,7 +19,7 @@
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
-#include "libgtcore/stringdistri.h"
+#include "libgtcore/string_distri.h"
 #include "libgtcore/unused.h"
 
 struct StringDistri {
@@ -27,7 +27,7 @@ struct StringDistri {
   unsigned long num_of_occurrences;
 };
 
-StringDistri* stringdistri_new(void)
+StringDistri* string_distri_new(void)
 {
   StringDistri *sd;
   sd = ma_malloc(sizeof *sd);
@@ -36,7 +36,7 @@ StringDistri* stringdistri_new(void)
   return sd;
 }
 
-void stringdistri_add(StringDistri *sd, const char *key)
+void string_distri_add(StringDistri *sd, const char *key)
 {
   unsigned long *valueptr;
   assert(sd && key);
@@ -51,10 +51,10 @@ void stringdistri_add(StringDistri *sd, const char *key)
   sd->num_of_occurrences++;
 }
 
-void stringdistri_sub(StringDistri *sd, const char *key)
+void string_distri_sub(StringDistri *sd, const char *key)
 {
   unsigned long *valueptr;
-  assert(sd && key && stringdistri_get(sd, key) && sd->num_of_occurrences);
+  assert(sd && key && string_distri_get(sd, key) && sd->num_of_occurrences);
   valueptr = hashtable_get(sd->hashdist, (void*) key);
   (*valueptr)--;
   if (!(*valueptr))
@@ -62,7 +62,7 @@ void stringdistri_sub(StringDistri *sd, const char *key)
   sd->num_of_occurrences--;
 }
 
-unsigned long stringdistri_get(const StringDistri *sd, const char *key)
+unsigned long string_distri_get(const StringDistri *sd, const char *key)
 {
   unsigned long *valueptr;
   assert(sd && key);
@@ -92,7 +92,7 @@ static int foreach_iterfunc(void *key, void *value, void *data,
   return 0;
 }
 
-void stringdistri_foreach(const StringDistri *sd, StringDistriIterFunc func,
+void string_distri_foreach(const StringDistri *sd, StringDistriIterFunc func,
                           void *data)
 {
   ForeachInfo info;
@@ -107,7 +107,7 @@ void stringdistri_foreach(const StringDistri *sd, StringDistriIterFunc func,
   }
 }
 
-void stringdistri_delete(StringDistri *sd)
+void string_distri_delete(StringDistri *sd)
 {
   if (!sd) return;
   hashtable_delete(sd->hashdist);

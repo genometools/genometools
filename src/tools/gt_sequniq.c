@@ -25,7 +25,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/progressbar.h"
 #include "libgtcore/seqiterator.h"
-#include "libgtcore/stringdistri.h"
+#include "libgtcore/string_distri.h"
 #include "libgtcore/unused.h"
 #include "tools/gt_sequniq.h"
 
@@ -99,7 +99,7 @@ static int gt_sequniq_runner(int argc, const char **argv,
 
   error_check(err);
   assert(arguments);
-  sd = stringdistri_new();
+  sd = string_distri_new();
 
   if (!arguments->seqit) {
     unsigned long i, j;
@@ -108,8 +108,8 @@ static int gt_sequniq_runner(int argc, const char **argv,
         had_err = -1;
       if (!had_err) {
         for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
-          if (!stringdistri_get(sd, bioseq_get_md5_fingerprint(bs, j))) {
-            stringdistri_add(sd, bioseq_get_md5_fingerprint(bs, j));
+          if (!string_distri_get(sd, bioseq_get_md5_fingerprint(bs, j))) {
+            string_distri_add(sd, bioseq_get_md5_fingerprint(bs, j));
             fasta_show_entry_generic(bioseq_get_description(bs, j),
                                      bioseq_get_sequence(bs, j),
                                      bioseq_get_sequence_length(bs, j), 0,
@@ -142,8 +142,8 @@ static int gt_sequniq_runner(int argc, const char **argv,
       if ((seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
         break;
       md5 = md5_fingerprint((const char*) sequence, (unsigned long) len);
-      if (!stringdistri_get(sd, md5)) {
-        stringdistri_add(sd, md5);
+      if (!string_distri_get(sd, md5)) {
+        string_distri_add(sd, md5);
         fasta_show_entry_generic(desc, (const char*) sequence, len, 0,
                                  arguments->outfp);
       }
@@ -165,7 +165,7 @@ static int gt_sequniq_runner(int argc, const char **argv,
             duplicates, num_of_sequences,
             ((double) duplicates / num_of_sequences) * 100.0);
   }
-  stringdistri_delete(sd);
+  string_distri_delete(sd);
 
   return had_err;
 }
