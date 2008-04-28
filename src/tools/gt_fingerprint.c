@@ -98,7 +98,7 @@ static OptionParser* gt_fingerprint_option_parser_new(UNUSED
 }
 
 static void proc_superfluous_sequence(const char *string,
-                                      unsigned long occurrences,
+                                      UNUSED unsigned long occurrences,
                                       UNUSED double probability, void *data)
 {
   bool *comparisons_failed = data;
