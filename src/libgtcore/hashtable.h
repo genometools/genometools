@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -32,7 +32,7 @@ typedef int (*Hashiteratorfunc)(void *key, void *value, void *data, Error*);
 Hashtable* hashtable_new(HashType, FreeFunc keyfree, FreeFunc valuefree);
 void*      hashtable_get(Hashtable*, const void*);
 void       hashtable_add(Hashtable*, void*, void*);
-void       hashtable_remove(Hashtable*, void*);
+void       hashtable_remove(Hashtable*, const void*);
 /* iterate over the hashtable in key order given by compare function <cmp> */
 int        hashtable_foreach_ordered(Hashtable*, Hashiteratorfunc, void *data,
                                      Compare cmp, Error*);
