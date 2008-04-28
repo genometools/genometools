@@ -129,9 +129,10 @@ static int gt_fingerprint_runner(int argc, const char **argv,
   if (!had_err && arguments->show_duplicates) {
     stringdistri_foreach(sd, show_duplicates, &info);
     if (info.duplicates) {
-      printf("total number of duplicates: %llu out of %llu (%.3f%%)\n",
-             info.duplicates, info.num_of_sequences,
-             (((double) info.duplicates / info.num_of_sequences) * 100.0));
+      error_set(err, "duplicates found: %llu out of %llu (%.3f%%)\n",
+                info.duplicates, info.num_of_sequences,
+                (((double) info.duplicates / info.num_of_sequences) * 100.0));
+      had_err = -1;
     }
   }
 
