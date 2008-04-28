@@ -8,7 +8,12 @@ Examples:
 
 Compute (unified) list of fingerprints:
 
-$ gt fingerprint U89959_ests.fas | sort | uniq > U89959_ests.checkfile
+$ gt fingerprint U89959_ests.fas | sort | uniq > U89959_ests.checklist_uniq
+
+Compare fingerprints:
+
+$ gt fingerprint -check U89959_ests.checklist_uniq U89959_ests.fas
+950b7715ab6cc030a8c810a0dba2dd33 only in sequence_file(s)
 
 Make sure a sequence file contains no duplicates (not the case here):
 

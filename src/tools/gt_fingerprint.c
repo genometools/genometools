@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "libgtcore/bioseq.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/fasta.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
@@ -96,6 +97,47 @@ static OptionParser* gt_fingerprint_option_parser_new(UNUSED
   return op;
 }
 
+static void proc_superfluous_sequence(const char *string,
+                                      unsigned long occurrences,
+                                      UNUSED double probability, void *data)
+{
+  bool *comparisons_failed = data;
+  assert(string && occurrences && comparisons_failed);
+  printf("%s only in sequence_file(s)\n", string);
+  *comparisons_failed = true;
+}
+
+static int compare_fingerprints(StringDistri *sd, const char *checklist,
+                                Error *err)
+{
+  bool comparisons_failed = false;
+  FILE *checkfile;
+  Str *line;
+  error_check(err);
+  assert(sd && checklist);
+  checkfile =fa_xfopen(checklist, "r");
+  line = str_new();
+  /* process checklist */
+  while (str_read_next_line(line, checkfile) != EOF) {
+    if (stringdistri_get(sd, str_get(line)))
+      stringdistri_sub(sd, str_get(line));
+    else {
+      printf("%s only in checklist\n", str_get(line));
+      comparisons_failed = true;
+    }
+    str_reset(line);
+  }
+  str_delete(line);
+  fa_xfclose(checkfile);
+  /* process remaining sequence_file(s) fingerprints */
+  stringdistri_foreach(sd, proc_superfluous_sequence, &comparisons_failed);
+  if (comparisons_failed) {
+    error_set(err, "fingerprint comparison failed");
+    return -1;
+  }
+  return 0;
+}
+
 typedef struct {
   unsigned long long duplicates,
                      num_of_sequences;
@@ -165,8 +207,12 @@ static int gt_fingerprint_runner(int argc, const char **argv,
     bioseq_delete(bs);
   }
 
-  if (!had_err && arguments->show_duplicates)
-    had_err = show_duplicates(sd, err);
+  if (!had_err) {
+    if (str_length(arguments->checklist))
+      had_err = compare_fingerprints(sd, str_get(arguments->checklist), err);
+    else if (arguments->show_duplicates)
+      had_err = show_duplicates(sd, err);
+  }
 
   stringdistri_delete(sd);
 

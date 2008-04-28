@@ -2,7 +2,32 @@ Name "fingerprint"
 Keywords "gt_fingerprint"
 Test do
   run_test "#{$bin}gt fingerprint #{$testdata}U89959_ests.fas | sort | uniq"
-  run "diff #{$last_stdout} #{$testdata}U89959_ests.checkfile"
+  run "diff #{$last_stdout} #{$testdata}U89959_ests.checklist_uniq"
+end
+
+Name "fingerprint -check (success)"
+Keywords "gt_fingerprint"
+Test do
+  run_test "#{$bin}gt fingerprint -check #{$testdata}U89959_ests.checklist " +
+           "#{$testdata}U89959_ests.fas"
+end
+
+Name "fingerprint -check (failure)"
+Keywords "gt_fingerprint"
+Test do
+  run_test("#{$bin}gt fingerprint -check " +
+           "#{$testdata}U89959_ests.checklist_uniq " +
+           "#{$testdata}U89959_ests.fas", :retval => 1)
+  grep $last_stderr, /fingerprint comparison failed/
+end
+
+Name "fingerprint -check (failure)"
+Keywords "gt_fingerprint"
+Test do
+  run_test("#{$bin}gt sequniq #{$testdata}U89959_ests.fas | #{$memcheck}" +
+           "#{$bin}gt fingerprint -check #{$testdata}U89959_ests.checklist -",
+           :retval => 1)
+  grep $last_stderr, /fingerprint comparison failed/
 end
 
 Name "fingerprint -duplicates (found)"
