@@ -23,13 +23,56 @@
 #include "libgtcore/unused.h"
 #include "tools/gt_fingerprint.h"
 
+typedef struct {
+  bool check,
+       show_duplicates;
+  Str *checklist;
+} FingerprintArguments;
+
+static void* gt_fingerprint_arguments_new(void)
+{
+  FingerprintArguments *arguments = ma_calloc(1, sizeof *arguments);
+  arguments->checklist = str_new();
+  return arguments;
+}
+
+static void gt_fingerprint_arguments_delete(void *tool_arguments)
+{
+  FingerprintArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  str_delete(arguments->checklist);
+  ma_free(arguments);
+}
+
 static OptionParser* gt_fingerprint_option_parser_new(UNUSED
                                                       void *tool_arguments)
 {
+  FingerprintArguments *arguments = tool_arguments;
   OptionParser *op;
+  Option *check_option, *duplicates_option;
+  assert(arguments);
   op = option_parser_new("[option ...] sequence_file [...] ",
-                         "Show duplicate fingerprints for each sequence given "
+                         "Compute MD5 fingerprints for each sequence given "
                          "in sequence_file(s).");
+
+  /* -check */
+  check_option = option_new_filename("check", "Compare all fingerprints "
+                                     "contained in the given checklist file "
+                                     "with checksums in given "
+                                     "sequence_files(s).",
+                                     arguments->checklist);
+  option_parser_add_option(op, check_option);
+
+  /* -duplicates */
+  duplicates_option = option_new_bool("duplicates", "Show duplicate "
+                                      "fingerprints from given "
+                                      "sequence_file(s).",
+                                      &arguments->show_duplicates, false);
+  option_parser_add_option(op, duplicates_option);
+
+  /* option exclusions */
+  option_exclude(check_option, duplicates_option);
+
   option_parser_set_min_args(op, 1);
   return op;
 }
@@ -51,8 +94,9 @@ static void show_duplicates(const char *fingerprint, unsigned long occurrences,
 }
 
 static int gt_fingerprint_runner(int argc, const char **argv,
-                                 UNUSED void *tool_arguments, Error *err)
+                                 void *tool_arguments, Error *err)
 {
+  FingerprintArguments *arguments = tool_arguments;
   Bioseq *bs;
   StringDistri *sd;
   unsigned long i, j;
@@ -60,6 +104,7 @@ static int gt_fingerprint_runner(int argc, const char **argv,
   int had_err = 0;
 
   error_check(err);
+  assert(arguments);
   sd = stringdistri_new();
 
   for (i = 0; !had_err && i < argc; i++) {
@@ -75,7 +120,7 @@ static int gt_fingerprint_runner(int argc, const char **argv,
   info.duplicates = 0;
   info.num_of_sequences = 0;
 
-  if (!had_err) {
+  if (!had_err && arguments->show_duplicates) {
     stringdistri_foreach(sd, show_duplicates, &info);
     if (info.duplicates) {
       printf("total number of duplicates: %llu out of %llu (%.3f%%)\n",
@@ -91,8 +136,8 @@ static int gt_fingerprint_runner(int argc, const char **argv,
 
 Tool* gt_fingerprint(void)
 {
-  return tool_new(NULL,
-                  NULL,
+  return tool_new(gt_fingerprint_arguments_new,
+                  gt_fingerprint_arguments_delete,
                   gt_fingerprint_option_parser_new,
                   NULL,
                   gt_fingerprint_runner);
