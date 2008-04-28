@@ -5,6 +5,12 @@ Test do
   run "diff #{$last_stdout} #{$testdata}U89959_ests.checklist_uniq"
 end
 
+Name "fingerprint (nonexistent file)"
+Keywords "gt_fingerprint"
+Test do
+  run_test("#{$bin}gt fingerprint #{$testdata}nonexistent_file", :retval=> 1)
+end
+
 Name "fingerprint -check (success)"
 Keywords "gt_fingerprint"
 Test do
