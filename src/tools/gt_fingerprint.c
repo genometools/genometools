@@ -106,7 +106,7 @@ static void show_duplicates(const char *fingerprint, unsigned long occurrences,
 {
   FingerprintInfo *info = data;
   if (occurrences > 1) {
-    printf("%s %lu\n", fingerprint, occurrences);
+    printf("%s\t%lu\n", fingerprint, occurrences);
     info->duplicates += occurrences - 1;
   }
   info->num_of_sequences += occurrences;
@@ -154,7 +154,7 @@ static int gt_fingerprint_runner(int argc, const char **argv,
   if (!had_err && arguments->show_duplicates) {
     stringdistri_foreach(sd, show_duplicates, &info);
     if (info.duplicates) {
-      error_set(err, "duplicates found: %llu out of %llu (%.3f%%)\n",
+      error_set(err, "duplicates found: %llu out of %llu (%.3f%%)",
                 info.duplicates, info.num_of_sequences,
                 (((double) info.duplicates / info.num_of_sequences) * 100.0));
       had_err = -1;

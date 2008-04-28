@@ -9,8 +9,8 @@ Examples:
 Make sure a sequence file contains no duplicates (not the case here):
 
 $ gt fingerprint -duplicates U89959_ests.fas
-97350772e29b7881b149afbedf09290d 2
-gt fingerprint: error: duplicates found: 1 out of 199 (0.503%)
+950b7715ab6cc030a8c810a0dba2dd33        2
+gt fingerprint: error: duplicates found: 1 out of 200 (0.500%)
 
 Extract sequence with given fingerprint:
 
