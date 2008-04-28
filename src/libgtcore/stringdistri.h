@@ -30,6 +30,8 @@ typedef void (*StringDistriIterFunc)(const char *string,
 
 StringDistri*      stringdistri_new(void);
 void               stringdistri_add(StringDistri*, const char*);
+/* <sd> must contain at least on element with given <key>. */
+void               stringdistri_sub(StringDistri *sd, const char *key);
 unsigned long      stringdistri_get(const StringDistri*, const char*);
 void               stringdistri_foreach(const StringDistri*,
                                         StringDistriIterFunc, void *data);

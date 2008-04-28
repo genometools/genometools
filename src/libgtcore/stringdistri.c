@@ -36,26 +36,37 @@ StringDistri* stringdistri_new(void)
   return sd;
 }
 
-void stringdistri_add(StringDistri *d, const char *key)
+void stringdistri_add(StringDistri *sd, const char *key)
 {
   unsigned long *valueptr;
-  assert(d && key);
-  valueptr = hashtable_get(d->hashdist, (void*) key);
+  assert(sd && key);
+  valueptr = hashtable_get(sd->hashdist, (void*) key);
   if (!valueptr) {
     valueptr = ma_malloc(sizeof *valueptr);
     *valueptr = 1;
-    hashtable_add(d->hashdist, cstr_dup(key), valueptr);
+    hashtable_add(sd->hashdist, cstr_dup(key), valueptr);
   }
   else
     (*valueptr)++;
-  d->num_of_occurrences++;
+  sd->num_of_occurrences++;
 }
 
-unsigned long stringdistri_get(const StringDistri *d, const char *key)
+void stringdistri_sub(StringDistri *sd, const char *key)
 {
   unsigned long *valueptr;
-  assert(d && key);
-  if ((valueptr = hashtable_get(d->hashdist, (void*) key)))
+  assert(sd && key && stringdistri_get(sd, key) && sd->num_of_occurrences);
+  valueptr = hashtable_get(sd->hashdist, (void*) key);
+  (*valueptr)--;
+  if (!(*valueptr))
+    hashtable_remove(sd->hashdist, key);
+  sd->num_of_occurrences--;
+}
+
+unsigned long stringdistri_get(const StringDistri *sd, const char *key)
+{
+  unsigned long *valueptr;
+  assert(sd && key);
+  if ((valueptr = hashtable_get(sd->hashdist, (void*) key)))
     return *valueptr;
   else
     return 0;
@@ -81,24 +92,24 @@ static int foreach_iterfunc(void *key, void *value, void *data,
   return 0;
 }
 
-void stringdistri_foreach(const StringDistri *d, StringDistriIterFunc func,
+void stringdistri_foreach(const StringDistri *sd, StringDistriIterFunc func,
                           void *data)
 {
   ForeachInfo info;
   int rval;
-  assert(d);
-  if (d->hashdist) {
+  assert(sd);
+  if (sd->hashdist) {
     info.func = func;
     info.data = data;
-    info.num_of_occurrences = d->num_of_occurrences;
-    rval = hashtable_foreach_ao(d->hashdist, foreach_iterfunc, &info, NULL);
+    info.num_of_occurrences = sd->num_of_occurrences;
+    rval = hashtable_foreach_ao(sd->hashdist, foreach_iterfunc, &info, NULL);
     assert(!rval); /* foreach_iterfunc() is sane */
   }
 }
 
-void stringdistri_delete(StringDistri *d)
+void stringdistri_delete(StringDistri *sd)
 {
-  if (!d) return;
-  hashtable_delete(d->hashdist);
-  ma_free(d);
+  if (!sd) return;
+  hashtable_delete(sd->hashdist);
+  ma_free(sd);
 }
