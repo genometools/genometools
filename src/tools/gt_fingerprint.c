@@ -110,12 +110,14 @@ static void proc_superfluous_sequence(const char *string,
 static int compare_fingerprints(StringDistri *sd, const char *checklist,
                                 Error *err)
 {
-  bool comparisons_failed = false;
+  bool comparisons_failed = false, use_stdin = false;
   FILE *checkfile;
   Str *line;
   error_check(err);
   assert(sd && checklist);
-  checkfile =fa_xfopen(checklist, "r");
+  if (!strcmp(checklist, "-"))
+    use_stdin = true;
+  checkfile = use_stdin ? stdin : fa_xfopen(checklist, "r");
   line = str_new();
   /* process checklist */
   while (str_read_next_line(line, checkfile) != EOF) {
@@ -128,7 +130,8 @@ static int compare_fingerprints(StringDistri *sd, const char *checklist,
     str_reset(line);
   }
   str_delete(line);
-  fa_xfclose(checkfile);
+  if (!use_stdin)
+    fa_xfclose(checkfile);
   /* process remaining sequence_file(s) fingerprints */
   string_distri_foreach(sd, proc_superfluous_sequence, &comparisons_failed);
   if (comparisons_failed) {

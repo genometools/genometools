@@ -18,6 +18,13 @@ Test do
            "#{$testdata}U89959_ests.fas"
 end
 
+Name "fingerprint -check (stdin)"
+Keywords "gt_fingerprint"
+Test do
+  run_test "cat #{$testdata}U89959_ests.checklist | #{$bin}gt fingerprint " +
+           "-check - #{$testdata}U89959_ests.fas"
+end
+
 Name "fingerprint -check (failure)"
 Keywords "gt_fingerprint"
 Test do
