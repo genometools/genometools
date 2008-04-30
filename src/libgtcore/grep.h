@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include "libgtcore/error.h"
 
-/* sets <match> to true if pattern matches line, to false otherwise */
+/* Sets <match> to true if <pattern> matches <line>, to false otherwise. */
 int  grep(bool *match, const char *pattern, const char *line, Error*);
 int  grep_unit_test(Error*);
 
