@@ -16,9 +16,9 @@ end
 
 def runAndCheckPackedIndex(indexName,dbFiles, extraParams=Hash.new)
   params = {
-    :create => { '-dna' => nil, '-tis' => nil, '-des' => nil },
-    :timeOuts => { 'bdxcreat' => 100, 'suffixerator' => 100,
-      'chkintegrity' => 400, 'chksearch' => 400, 'trsuftab' => 100 },
+    :create => { '-tis' => nil, '-des' => nil },
+    :timeOuts => { :bdxcreat => 100, :suffixerator => 100,
+      :chkintegrity => 400, :chksearch => 400, :trsuftab => 100 },
     :bdx => {}
   }
   extraParams.keys.each do |key|
@@ -29,30 +29,30 @@ def runAndCheckPackedIndex(indexName,dbFiles, extraParams=Hash.new)
   else
     indexName = dbFiles.compact[0].sub(/.*\//,'')
   end
-  #  puts('timeout: ', params[:timeOuts]['bdxcreat'])
+  #  puts('timeout: ', params[:timeOuts][:bdxcreat])
   if !extraParams.has_key?(:useSuftabTranslation) ||
       !extraParams[:useSuftabTranslation]
     run_test((["#{$bin}gt", 'packedindex', 'mkindex'] +
               paramList(params[:create]) + paramList(params[:bdx]) +
               ['-db'] + dbFiles).join(' '),
-             :maxtime => params[:timeOuts]['bdxcreat'])
+             :maxtime => params[:timeOuts][:bdxcreat])
   end
   run_test((["#{$bin}gt", 'suffixerator'] +
             paramList(params[:create]) +
             ['-bwt', '-suf', '-db'] + dbFiles).join(' '),
-           :maxtime => params[:timeOuts]['suffixerator'])
+           :maxtime => params[:timeOuts][:suffixerator])
   if extraParams.has_key?(:useSuftabTranslation) &&
       extraParams[:useSuftabTranslation]
     run_test((["#{$bin}gt", 'packedindex', 'trsuftab'] +
               paramList(params[:bdx]) + [indexName]).join(' '),
-             :maxtime => params[:timeOuts]['trsuftab'])
+             :maxtime => params[:timeOuts][:trsuftab])
   end
   run_test(["#{$bin}gt", 'packedindex', 'chkintegrity', '-ticks', '1000',
             indexName].join(' '),
-           :maxtime => params[:timeOuts]['chkintegrity'])
+           :maxtime => params[:timeOuts][:chkintegrity])
   run_test(["#{$bin}gt", 'packedindex', 'chksearch', '-chksfxarray',
             '-nsamples', '100', indexName].join(' '),
-           :maxtime => params[:timeOuts]['chksearch'])
+           :maxtime => params[:timeOuts][:chksearch])
 end
 
 Name "gt packedindex check tools for simple sequences"
@@ -62,6 +62,34 @@ Test do
                               "TTT-small.fna","trna_glutamine.fna",
                               "Random-Small.fna","Duplicate.fna"])
   runAndCheckPackedIndex('miniindex', allfiles)
+end
+
+Name "gt packedindex check tools for simple sequences w/o locate"
+Keywords "gt_packedindex"
+Test do
+  allfiles = prependTestdata(["RandomN.fna","Random.fna","Atinsert.fna",
+                              "TTT-small.fna","trna_glutamine.fna",
+                              "Random-Small.fna","Duplicate.fna"])
+  runAndCheckPackedIndex('miniindex', allfiles,
+                         :bdx => { '-locfreq' => 0 })
+end
+
+Name "gt packedindex check tools for simple sequences with sprank"
+Keywords "gt_packedindex"
+Test do
+  allfiles = prependTestdata(["RandomN.fna","Random.fna","Atinsert.fna",
+                              "TTT-small.fna","trna_glutamine.fna",
+                              "Random-Small.fna","Duplicate.fna"])
+  runAndCheckPackedIndex('miniindex', allfiles,
+                         :bdx => { '-sprank' => nil },
+                         :timeOuts => { :chksearch => 800 })
+end
+
+Name "gt packedindex check tools for protein sample"
+Keywords "gt_packedindex"
+Test do
+  runAndCheckPackedIndex(nil, prependTestdata(['sw100K2.fsa']),
+                         :bdx => { '-bsize' => 1 })
 end
 
 Name "gt packedindex check tools for simple sequences, tr-mode"
@@ -97,9 +125,9 @@ if $gttestdata then
   Keywords "gt_packedindex at1MB"
   Test do
     runAndCheckPackedIndex('at1MB', ["#{$gttestdata}Iowa/at1MB"],
-                           :timeOuts => { 'bdxcreat' => 400,
-                             'suffixerator' => 400,
-                             'chkintegrity' => 800, 'chksearch' => 400 })
+                           :timeOuts => { :bdxcreat => 400,
+                             :suffixerator => 400,
+                             :chkintegrity => 800, :chksearch => 400 })
   end
 
   dmelFiles = aPrefix("#{$gttestdata}ltrharvest/d_mel/",
@@ -124,8 +152,8 @@ if $gttestdata then
       runAndCheckPackedIndex('dmel',
                              [file],
                              :timeOuts =>
-                             { 'trsuftab' => 7200, 'suffixerator' => 7200,
-                               'chkintegrity' => 3200, 'chksearch' => 800 },
+                             { :trsuftab => 7200, :suffixerator => 7200,
+                               :chkintegrity => 3200, :chksearch => 800 },
                              :useSuftabTranslation => true)
     end
   end

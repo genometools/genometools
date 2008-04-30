@@ -20,11 +20,11 @@
  */
 
 #include "gt_packedindex_chk_integrity.h"
-#include "libgtcore/ensure.h"
 #include "libgtcore/error.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/eis-encidxseq.h"
+#include "libgtmatch/verbose-def.h"
 #include "tools/gt_packedindex_chk_integrity.h"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL
@@ -34,6 +34,7 @@ struct chkIndexOptions
   unsigned long skipCount;
   unsigned long progressInterval;
   int checkFlags;
+  bool verboseOutput;
 };
 
 static OPrval
@@ -44,13 +45,14 @@ extern int
 gt_packedindex_chk_integrity(int argc, const char *argv[], Error *err)
 {
   struct encIdxSeq *seq;
-  struct chkIndexOptions options;
+  struct chkIndexOptions params;
   Str *inputProject;
   int parsedArgs;
   int had_err = 0;
+  Verboseinfo *verbosity = NULL;
   error_check(err);
 
-  switch (parseChkIndexOptions(&parsedArgs, argc, argv, &options, err))
+  switch (parseChkIndexOptions(&parsedArgs, argc, argv, &params, err))
   {
     case OPTIONPARSER_OK:
       break;
@@ -61,9 +63,12 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Error *err)
   }
 
   inputProject = str_new_cstr(argv[parsedArgs]);
-  seq = loadBlockEncIdxSeq(inputProject, EIS_FEATURE_REGION_SUMS, err);
-  ensure(had_err, seq);
-  if (had_err)
+
+  verbosity = newverboseinfo(params.verboseOutput);
+
+  seq = loadBlockEncIdxSeq(inputProject, EIS_FEATURE_REGION_SUMS,
+                           verbosity, err);
+  if ((had_err = seq == NULL))
   {
     error_set(err, "Failed to load index: %s", str_get(inputProject));
   }
@@ -72,30 +77,27 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Error *err)
     fprintf(stderr, "# Using index over sequence "FormatSeqpos
             " symbols long.\n", EISLength(seq));
     {
-      int corrupt;
-      ensure(
-        had_err,
-        !(corrupt = EISVerifyIntegrity(seq, inputProject, options.skipCount,
-                                       options.progressInterval, stderr,
-                                       options.checkFlags, err)));
-      if (corrupt)
+      int corrupt
+        = EISVerifyIntegrity(seq, inputProject, params.skipCount,
+                             params.progressInterval, stderr,
+                             params.checkFlags, verbosity, err);
+      if ((had_err = corrupt != 0))
       {
-        fputs("Integrity check failed for index.\n", stderr);
-        fputs(EISIntegrityCheckResultStrings[corrupt], stderr);
-        fputs("\n", stderr);
+        fputs(error_get(err), stderr); fputs("\n", stderr);
+        error_set(err, "Integrity check failed for index: %s",
+                  EISIntegrityCheckResultStrings[corrupt]);
       }
     }
   }
-  if (seq)
-    deleteEncIdxSeq(seq);
-  if (inputProject)
-    str_delete(inputProject);
+  if (seq) deleteEncIdxSeq(seq);
+  if (inputProject) str_delete(inputProject);
+  if (verbosity) freeverboseinfo(&verbosity);
   return had_err?-1:0;
 }
 
 static OPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
-                     struct chkIndexOptions *param, Error *err)
+                     struct chkIndexOptions *params, Error *err)
 {
   OptionParser *op;
   Option *option;
@@ -106,12 +108,19 @@ parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
   op = option_parser_new("indexname",
                          "Map <indexname> block composition index"
                          "and bwt and check index integrity.");
+
+  option = option_new_bool("v",
+                           "print verbose progress information",
+                           &params->verboseOutput,
+                           false);
+  option_parser_add_option(op, option);
+
   option = option_new_ulong("skip", "number of symbols to skip",
-                            &param->skipCount, 0);
+                            &params->skipCount, 0);
   option_parser_add_option(op, option);
 
   option = option_new_ulong("ticks", "print dot after this many symbols"
-                            " tested okay", &param->progressInterval,
+                            " tested okay", &params->progressInterval,
                             DEFAULT_PROGRESS_INTERVAL);
   option_parser_add_option(op, option);
 
@@ -124,7 +133,7 @@ parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
   oprval = option_parser_parse(op, parsed_args, argc, (const char**) argv,
                                versionfunc, err);
   option_parser_delete(op);
-  param->checkFlags = EIS_VERIFY_BASIC
+  params->checkFlags = EIS_VERIFY_BASIC
     | (extRankCheck?EIS_VERIFY_EXT_RANK:0);
   return oprval;
 }

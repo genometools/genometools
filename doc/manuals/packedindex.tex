@@ -137,6 +137,12 @@ The following options are specific to the \packedindex
 \\
 \Showoption{locbitmap}& force/deny use of the bitmap tagging method
 \\
+\Showoption{sprank}& build source rank table so that regeneration of
+original sequence is possible without the usual gaps
+\\
+\Showoption{sprankilog}& define log of interval used for the
+intermediate table
+\\
 \hline
 \end{tabular}
 %\input{ltrprogoptions}
@@ -193,6 +199,25 @@ for a sequence of length $n$. If no locate bitmap is used, extra space usage
 will be $\frac{n}{f}\lceil\log_2uk\rceil$.
 
 By default the optimal value in terms of space usage will be chosen.
+}
+\Option{sprank}{\Showoptionarg{yes} or \Showoptionarg{no}}{
+Normally special characters (N/X, separators and terminator) are
+encoding so that the reverse mapping required for context regeneration
+cannot pass over such symbols. If this option is given, an in-memory
+structure will be built to facilitate queries which allow to
+store necessary extra information in the index so that full context
+(the entire original sequence actually) can be regenerated.
+}
+\Option{sprankilog}{\Showoptionarg{$s$}}{
+Set logarithm of interval used for the intermediate table (see
+\Showoption{sprank} option).
+Index creation might be faster if a lower value
+than the default $s = \log_2\log_2n$ is used and sufficient memory is
+available.
+
+Since every increment by 1 doubles the memory usage of the table
+(which is not stored itself in the index) during index construction
+two high values might actually slow index construction.
 }
 \end{Justshowoptions}
 %%%%
@@ -339,7 +364,11 @@ Generate $k$ patterns to search for, defaults to 1000.
 }
 
 \Option{chksfxarray}{\Showoptionarg{yes$\|$no}}{
-Verify integrity of stored suffix array positions.
+Verify integrity of stored suffix array positions and test the
+regenerated context functionality if the index was constructed in a
+reversible fashion (option \Showoption{sprank} on index construction).
+
+In the latter case the test will take considerable time.
 }
 
 \Option{ticks}{\Showoptionarg{$k$}}{

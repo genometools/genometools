@@ -160,12 +160,6 @@ MRAEncCopy(const MRAEnc *alpha)
   }
 }
 
-AlphabetRangeID
-MRAEncGetNumRanges(const MRAEnc *mralpha)
-{
-  return mralpha->numRanges;
-}
-
 extern AlphabetRangeSize
 MRAEncGetSize(const MRAEnc *mralpha)
 {
@@ -346,7 +340,7 @@ MRAEncSymbolsRevTransform(const MRAEnc *mralpha, Symbol *symbols,
   }
 }
 
-int
+extern int
 MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
                                int selection, const int *rangeSel)
 {

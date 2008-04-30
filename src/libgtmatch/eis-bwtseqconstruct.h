@@ -92,7 +92,7 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
  */
 extern BWTSeq *
 createBWTSeqFromSAI(const struct bwtParam *params,
-                    struct suffixarrayFileInterface *sai,
+                    SuffixarrayFileInterface *sai,
                     Seqpos totalLen, Error *err);
 
 #endif

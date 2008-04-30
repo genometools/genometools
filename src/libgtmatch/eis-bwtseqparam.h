@@ -48,6 +48,15 @@ struct bwtParam
                                    * locateInterval = 0, which implies
                                    * storing no locate information at
                                    * all */
+  int sourceRankInterval;         /**< makes ranges which are sorted in
+                                   * rank mode reversibly sorted:
+                                   * -1:
+                                   *     inactive
+                                   * 0...sizeof(Seqpos)*CHAR_BIT:
+                                   *     build accel table at
+                                   *     with 1<<SourceRankInterval
+                                   *     sampling interval
+                                   */
   const Str *projectName;         /**< base file name to derive name
                                    *   of suffixerator project from*/
 };
@@ -61,7 +70,7 @@ enum BWTFeatures
   BWTBaseFeatures      =      0,
   BWTLocateBitmap      = 1 << 0,
   BWTLocateCount       = 1 << 1,
-  BWTProperlySorted    = 1 << 2, /**< unless special symbols are fully sorted
+  BWTReversiblySorted  = 1 << 2, /**< unless special symbols are fully sorted
                                   * by suffixerator, there are two
                                   * restrictions for the use of the index:
                                   * - the bwt property is only true

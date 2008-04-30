@@ -16,12 +16,12 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "libgtcore/ensure.h"
 #include "libgtcore/error.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/option.h"
 #include "libgtcore/str.h"
 #include "libgtcore/versionfunc.h"
+#include "libgtmatch/eis-bwtconstruct_params.h"
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/enum-patt-def.h"
@@ -29,7 +29,7 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/sfx-apfxlen.pr"
-#include "libgtmatch/eis-bwtconstruct_params.h"
+#include "libgtmatch/verbose-def.h"
 #include "tools/gt_packedindex_chk_search.h"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL
@@ -39,7 +39,7 @@ struct chkSearchOptions
   struct bwtOptions idx;
   long minPatLen, maxPatLen;
   unsigned long numOfSamples, progressInterval;
-  bool checkSuffixArrayValues;
+  bool checkSuffixArrayValues, verboseOutput;
 };
 
 static OPrval
@@ -60,6 +60,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
   bool had_err = false;
   BWTSeqExactMatchesIterator EMIter;
   bool EMIterInitialized = false;
+  Verboseinfo *verbosity = NULL;
   inputProject = str_new();
 
   do {
@@ -83,18 +84,19 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
         break;
     }
     str_set(inputProject, argv[parsedArgs]);
-    {
-      bwtSeq = availBWTSeq(&params.idx.final, err);
-    }
-    ensure(had_err, bwtSeq);
-    if (had_err)
+
+    verbosity = newverboseinfo(params.verboseOutput);
+
+    bwtSeq = availBWTSeq(&params.idx.final, verbosity, err);
+    if ((had_err = bwtSeq == NULL))
       break;
+
     if (params.checkSuffixArrayValues)
     {
       enum verifyBWTSeqErrCode retval =
         BWTSeqVerifyIntegrity(bwtSeq, inputProject, params.progressInterval,
-                              stderr, err);
-      if (retval != VERIFY_BWTSEQ_NO_ERROR)
+                              stderr, verbosity, err);
+      if ((had_err = (retval != VERIFY_BWTSEQ_NO_ERROR)))
       {
         fprintf(stderr, "index integrity check failed: %s\n",
                 error_get(err));
@@ -102,28 +104,36 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
         break;
       }
     }
-    ensure(had_err, initEmptyEMIterator(&EMIter, bwtSeq));
-    if (had_err)
-      break;
-    EMIterInitialized = true;
+    if (BWTSeqHasLocateInformation(bwtSeq))
+    {
+      if ((had_err = !initEmptyEMIterator(&EMIter, bwtSeq)))
+      {
+        error_set(err, "Cannot create matches iterator for sequence index.");
+        break;
+      }
+      EMIterInitialized = true;
+    }
     {
       Seqpos totalLen, dbstart;
       unsigned long trial, patternLen;
-      ensure(had_err,
-             mapsuffixarray(&suffixarray, &totalLen,
-                            SARR_SUFTAB | SARR_ESQTAB,
-                            inputProject, NULL, err) == 0);
-      if (had_err)
+
+      if ((had_err =
+           mapsuffixarray(&suffixarray, &totalLen, SARR_SUFTAB | SARR_ESQTAB,
+                          inputProject, NULL, err) != 0))
       {
         error_set(err, "Can't load suffix array project with"
-                       " demand for encoded sequence and suffix table files\n");
+                  " demand for encoded sequence and suffix table files\n");
         break;
       }
       saIsLoaded = true;
-      ensure(had_err, params.minPatLen < 0L || params.maxPatLen < 0L
-             || params.minPatLen < params.maxPatLen);
-      if (had_err)
+      if ((had_err = (params.minPatLen >= 0L && params.maxPatLen >= 0L
+                      && params.minPatLen > params.maxPatLen)))
+      {
+        error_set(err, "Invalid pattern lengths selected: min=%ld, max=%ld;"
+                  " min <= max is required.", params.minPatLen,
+                  params.maxPatLen);
         break;
+      }
       if (params.minPatLen < 0 || params.maxPatLen < 0)
       {
         unsigned int numofchars = getnumofcharsAlphabet(suffixarray.alpha);
@@ -133,18 +143,24 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
           params.maxPatLen =
             MAX(params.minPatLen,
                 125 * recommendedprefixlength(numofchars, totalLen) / 100);
+        else
+          params.maxPatLen = MAX(params.maxPatLen, params.minPatLen);
       }
       fprintf(stderr, "Using patterns of lengths %lu to %lu\n",
               params.minPatLen, params.maxPatLen);
-      ensure(had_err, totalLen + 1 == BWTSeqLength(bwtSeq));
-
-      ensure(had_err,
-             (epi = newenumpatterniterator(params.minPatLen, params.maxPatLen,
-                                           suffixarray.encseq,
-                                           getnumofcharsAlphabet(
-                                              suffixarray.alpha),
-                                           err)));
-      if (had_err)
+      if ((had_err = totalLen + 1 != BWTSeqLength(bwtSeq)))
+      {
+        error_set(err, "base suffix array and index have diferrent lengths!"
+                  FormatSeqpos" vs. "FormatSeqpos,  totalLen + 1,
+                  BWTSeqLength(bwtSeq));
+        break;
+      }
+      if ((had_err =
+           (epi = newenumpatterniterator(params.minPatLen, params.maxPatLen,
+                                         suffixarray.encseq,
+                                         getnumofcharsAlphabet(
+                                           suffixarray.alpha),
+                                         err)) == NULL))
       {
         fputs("Creation of pattern iterator failed!\n", stderr);
         break;
@@ -164,9 +180,12 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
         if (BWTSeqHasLocateInformation(bwtSeq))
         {
           Seqpos numMatches;
-          ensure(had_err, reinitEMIterator(&EMIter, bwtSeq, pptr, patternLen));
-          if (had_err)
-            break;
+          if ((had_err = !reinitEMIterator(&EMIter, bwtSeq, pptr, patternLen)))
+          {
+            fputs("Internal error: failed to reinitialize pattern match"
+                  " iterator", stderr);
+            abort();
+          }
           numMatches = EMINumMatchesTotal(&EMIter);
           assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen));
           assert(EMINumMatchesTotal(&EMIter) == countmmsearchiterator(mmsi));
@@ -179,29 +198,25 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
           {
             Seqpos matchPos = 0;
             bool match = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
-            ensure(had_err, match);
-            if (had_err)
+            if ((had_err = !match))
             {
-              fputs("matches of fmindex expired before mmsearch!\n", stderr);
+              error_set(err, "matches of packedindex expired before mmsearch!");
               break;
             }
-            ensure(had_err, matchPos == dbstart);
-            if (had_err)
+            if ((had_err = matchPos != dbstart))
             {
-              fprintf(stderr, "fmindex match doesn't equal mmsearch match "
-                      "result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
-                      matchPos, dbstart);
-              had_err = true;
+              error_set(err, "packedindex match doesn't equal mmsearch match "
+                        "result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
+                        matchPos, dbstart);
             }
           }
           if (!had_err)
           {
             Seqpos matchPos;
             bool trailingMatch = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
-            ensure(had_err, !trailingMatch);
-            if (had_err)
+            if ((had_err = trailingMatch))
             {
-              fputs("matches of mmsearch expired before fmindex!\n", stderr);
+              error_set(err, "matches of mmsearch expired before fmindex!");
               break;
             }
           }
@@ -210,12 +225,11 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
         {
           Seqpos numFMIMatches = BWTSeqMatchCount(bwtSeq, pptr, patternLen),
             numMMSearchMatches = countmmsearchiterator(mmsi);
-          if ( numFMIMatches != numMMSearchMatches)
+          if ((had_err = numFMIMatches != numMMSearchMatches))
           {
-            fprintf(stderr, "Number of matches not equal for suffix array ("
-                    FormatSeqpos") and fmindex ("FormatSeqpos".\n",
-                    numFMIMatches, numMMSearchMatches);
-            had_err = true;
+            error_set(err, "Number of matches not equal for suffix array ("
+                      FormatSeqpos") and fmindex ("FormatSeqpos".\n",
+                      numFMIMatches, numMMSearchMatches);
           }
         }
         freemmsearchiterator(&mmsi);
@@ -232,6 +246,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
   if (saIsLoaded) freesuffixarray(&suffixarray);
   if (epi) freeEnumpatterniterator(&epi);
   if (bwtSeq) deleteBWTSeq(bwtSeq);
+  if (verbosity) freeverboseinfo(&verbosity);
   if (inputProject) str_delete(inputProject);
   return had_err?-1:0;
 }
@@ -281,12 +296,17 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                                     DEFAULT_PROGRESS_INTERVAL);
   option_parser_add_option(op, optionProgress);
 
+  option = option_new_bool("v",
+                           "print verbose progress information",
+                           &params->verboseOutput,
+                           false);
+  option_parser_add_option(op, option);
+
   option_parser_set_min_max_args(op, 1, 1);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   /* compute parameters currently not set from command-line or
    * determined indirectly */
-  computePackedIndexDefaults(&params->idx,
-                             BWTBaseFeatures & ~BWTProperlySorted);
+  computePackedIndexDefaults(&params->idx, BWTBaseFeatures);
 
   option_parser_delete(op);
 

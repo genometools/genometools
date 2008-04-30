@@ -25,6 +25,7 @@
 
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
+#include "libgtmatch/verbose-def.h"
 #include "libgtmatch/seqpos-def.h"
 
 #include "libgtmatch/eis-encidxseq.h"
@@ -34,6 +35,15 @@
 /* TODO:
  * - implement other index types
  */
+
+/**
+ * Defines mode by which to derive sort of symbols in particular ranges
+ */
+enum rangeSortMode {
+  SORTMODE_VALUE     = 0,
+  SORTMODE_UNDEFINED = 1,
+  SORTMODE_RANK      = 2,
+};
 
 /**
  * Stores column indices of the (virtual) matrix of rotations of the
@@ -61,7 +71,7 @@ typedef struct BWTSeqExactMatchesIterator BWTSeqExactMatchesIterator;
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-availBWTSeq(const struct bwtParam *params, Error *err);
+availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, Error *err);
 
 /**
  * \brief Creates an encoded indexed sequence object of the BWT
@@ -72,7 +82,8 @@ availBWTSeq(const struct bwtParam *params, Error *err);
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-trSuftab2BWTSeq(const struct bwtParam *params, Error *err);
+trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
+                Error *err);
 
 /**
  * \brief Loads an encoded indexed sequence object of the
@@ -84,7 +95,8 @@ trSuftab2BWTSeq(const struct bwtParam *params, Error *err);
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-loadBWTSeq(const Str *projectName, int BWTOptFlags, Error *err);
+loadBWTSeq(const Str *projectName, int BWTOptFlags, Verboseinfo *verbosity,
+           Error *err);
 
 /**
  * \brief Deallocate a previously loaded/created BWT sequence object.
@@ -198,10 +210,11 @@ BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
 
 /**
  * \brief Query BWT sequence for the number of occurences of all symbols in a
- * given alphabet range and BWT sequence prefix.
+ * given alphabet range and two BWT sequence prefixes.
  * @param bwtSeq reference of object to query
  * @param range range of symbols in alphabet to query
- * @param pos right bound of BWT prefix queried
+ * @param posA right bound of first BWT prefix queried
+ * @param posB right bound of second BWT prefix queried
  * @param rangeOccs occurrence counts for all symbols in range are written to
  * this array. The referenced memory must be sized appropriately to
  * accomodate two-times as many positions symbols as are in range
@@ -210,22 +223,21 @@ BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
  * MRAEncRevMapSymbol(alphabet, i + MRAEncGetRangeBase(alphabet, range))
  * up to position posA while the corresponding is true for
  * rangeOccs[rangeSize + i] concerning posB
- * @param hint provides cache and direction information for queries
- * based on previous queries
  */
 static inline void
-BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
-               Seqpos *rangeOccs);
+BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos posA,
+                      Seqpos posB, Seqpos *rangeOccs);
 
 /**
  * \brief Given a position in the L-column of the matrix of rotations,
  * find the corresponding row in the F-column.
  * @param bwtSeq reference of object to query
  * @param pos row index for L-column
+ * @param extBits modified in intermediate queries
  * @return index of corresponding row F-column
  */
 static inline Seqpos
-BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos);
+BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, struct extBitsRetrieval *extBits);
 
 /**
  * \brief Given a symbol, query the aggregate count of symbols with
@@ -315,7 +327,8 @@ enum verifyBWTSeqErrCode
  */
 extern enum verifyBWTSeqErrCode
 BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
-                      unsigned long tickPrint, FILE *fp, Error *err);
+                      unsigned long tickPrint, FILE *fp,
+                      Verboseinfo *verbosity, Error *err);
 
 /**
  * \brief Given a query string produce iterator for all matches in

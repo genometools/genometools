@@ -156,6 +156,14 @@ extern const Encodedsequence *
 SfxIGetEncSeq(const sfxInterface *si);
 
 /**
+ * @brief Get read mode used for suffix sorting.
+ * @param si suffixerator interface object reference
+ * @return read mode
+ */
+extern Readmode
+SfxIGetReadMode(const sfxInterface *si);
+
+/**
  * \brief Get original sequence substring.
  *
  * @param si reference of interface to suffixerator

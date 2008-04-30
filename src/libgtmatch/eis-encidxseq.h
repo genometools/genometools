@@ -29,8 +29,10 @@
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/seqpos-def.h"
-#include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/verbose-def.h"
 #include "libgtmatch/eis-encidxseqparam.h"
+#include "libgtmatch/eis-headerid.h"
+#include "libgtmatch/eis-mrangealphabet.h"
 
 /**
  * callback function to insert variable width data into encidx
@@ -109,6 +111,32 @@ struct seqStats
   enum sourceEncType sourceAlphaType;       /**< defines alphabet width */
 };
 
+struct varBitsEstimate
+{
+  BitOffset maxBitsPerPos,
+    maxBitsPerBucket,
+    maxBitsTotal;
+};
+
+struct segmentDesc
+{
+  Seqpos repeatCount;
+  size_t len;
+};
+
+/**
+ * @brief Provides estimate of extension bits required by higher layer bit
+ * insertion if segment size is known ahead of construction.
+ * @param cbState higher layer state reference
+ * @param segmentDescs describe segments used
+ * @param numSegmentDesc number of descriptions
+ * @return true if estimate is conclusive for maxVarExtBitsTotal and
+ * maxBitsPerBucket of result
+ */
+typedef bool (*varExtBitsEstimator)(void *cbState, struct segmentDesc *desc,
+                                    size_t numSegmentDesc,
+                                    struct varBitsEstimate *result);
+
 /** holds encoded indexed sequence object */
 typedef struct encIdxSeq EISeq;
 /** hints to speed up retrievals when accessing positions in sequence
@@ -133,18 +161,21 @@ typedef union EISHint *EISHint;
  * accumulated for a given region of sequence data
  * @param cwBitsPerPos exactly this many bits will be appended by
  * biFunc for each symbol of the input sequence
- * @param maxBitsPerPos at most this many bits will be appended to the
+ * @param biVarBitsEstimate tell how many bits will be appended to the
  * variable width part of the data
- * @param cbState will be passed on each call of biFunc
+ * @param cbState will be passed on each call of biFunc and biVarBits
  * @param err genometools error object reference
+ * @return new encoded indexed sequence object reference
  */
 extern EISeq *
-newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
+newBlockEncIdxSeq(const Str *projectName, Verboseinfo *verbosity,
+                  const struct blockEncParams *params,
                   size_t numExtHeaders, uint16_t *headerIDs,
                   uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
                   void **headerCBData,
                   bitInsertFunc biFunc, BitOffset cwBitsPerPos,
-                  BitOffset maxBitsPerPos, void *cbState, Error *err);
+                  varExtBitsEstimator biVarBits,
+                  void *cbState, Error *err);
 
 /**
  * \brief Load previously written block encoded sequence
@@ -152,9 +183,11 @@ newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
  * @param projectName base name of corresponding suffixerator project
  * @param features select optional in-memory data structures for speed-up
  * @param err genometools error object reference
+ * @return new encoded indexed sequence object reference
  */
 extern EISeq *
-loadBlockEncIdxSeq(const Str *projectName, int features, Error *err);
+loadBlockEncIdxSeq(const Str *projectName, int features,
+                   Verboseinfo *verbosity, Error *err);
 
 /**
  * \brief Deallocate a previously loaded/created sequence object.
@@ -430,7 +463,8 @@ enum EISIntegrityCheckFlags
  */
 extern enum EISIntegrityCheckResults
 EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
-                   unsigned long tickPrint, FILE *fp, int chkFlags, Error *err);
+                   unsigned long tickPrint, FILE *fp, int chkFlags,
+                   Verboseinfo *verbosity, Error *err);
 
 /**
  * @brief Position file pointer at header written by upper layer.

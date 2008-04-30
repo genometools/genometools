@@ -27,6 +27,12 @@ MRAEncUInt8New(AlphabetRangeID numRanges, AlphabetRangeSize symbolsPerRange[],
                                             mapping);
 }
 
+static inline AlphabetRangeID
+MRAEncGetNumRanges(const MRAEnc *mralpha)
+{
+  return mralpha->numRanges;
+}
+
 static inline AlphabetRangeSize
 MRAEncGetRangeSize(const MRAEnc *mralpha, AlphabetRangeID range)
 {
@@ -94,6 +100,16 @@ MRAEncSymbolHasValidMapping(const MRAEnc *mralpha, Symbol sym)
   default:
     abort();
   }
+}
+
+static inline AlphabetRangeID
+MRAEncGetRangeOfSymbol(const MRAEnc *mralpha, Symbol sym)
+{
+  AlphabetRangeID range = 0;
+  assert(mralpha && sym < MRAEncGetSize(mralpha));
+  while (sym >= mralpha->rangeEndIndices[range])
+    ++range;
+  return range;
 }
 
 #endif

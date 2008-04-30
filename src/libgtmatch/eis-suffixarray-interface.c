@@ -32,7 +32,7 @@ SAIgenerate(void *generatorState, void *backlogState,
             SeqDataTranslator xltor, Error *err);
 
 extern void
-initSuffixarrayFileInterface(struct suffixarrayFileInterface *sai,
+initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
                              Suffixarray *sa)
 {
   sai->sa = sa;
@@ -43,7 +43,7 @@ initSuffixarrayFileInterface(struct suffixarrayFileInterface *sai,
 }
 
 extern void
-destructSuffixarrayFileInterface(struct suffixarrayFileInterface *sai)
+destructSuffixarrayFileInterface(SuffixarrayFileInterface *sai)
 {
   destructSeqReaderSet(&sai->readerSet);
   destructSATaggedXltorStateList(&sai->xltorStates);
@@ -53,7 +53,7 @@ static size_t
 SAIReadBWT(void *state, Symbol *dest, size_t len, Error *err);
 
 extern struct seqDataReader
-SAIMakeBWTReader(struct suffixarrayFileInterface *sai)
+SAIMakeBWTReader(SuffixarrayFileInterface *sai)
 {
   struct seqDataReader reader = { NULL, NULL};
   if (!sai->sa->bwttabstream.fp || sai->numBWTFileReaders > 0)
@@ -91,7 +91,7 @@ SAIMakeBWTReader(struct suffixarrayFileInterface *sai)
 }
 
 extern struct seqDataReader
-SAIMakeSufTabReader(struct suffixarrayFileInterface *sai)
+SAIMakeSufTabReader(SuffixarrayFileInterface *sai)
 {
   struct seqDataReader reader = { NULL, NULL};
   if (sai->sa->suftabstream.fp)
@@ -111,7 +111,7 @@ SAIMakeSufTabReader(struct suffixarrayFileInterface *sai)
 }
 
 extern struct seqDataReader
-SAIMakeLCPTabReader(struct suffixarrayFileInterface *sai)
+SAIMakeLCPTabReader(SuffixarrayFileInterface *sai)
 {
   struct seqDataReader reader = { NULL, NULL};
   if (sai->sa->suftabstream.fp)
@@ -140,7 +140,7 @@ SAIMakeLCPTabReader(struct suffixarrayFileInterface *sai)
 }
 
 extern struct seqDataReader
-SAIMakeReader(struct suffixarrayFileInterface *sai, enum sfxDataRequest rtype)
+SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype)
 {
   struct seqDataReader reader = { NULL, NULL};
   switch (rtype)
@@ -165,7 +165,7 @@ SAIMakeReader(struct suffixarrayFileInterface *sai, enum sfxDataRequest rtype)
 /**
  * @brief Read given length of symbols from the BWT, starting after last
  * position read.
- * @param state reference of a struct suffixarrayFileInterface
+ * @param state reference of a SuffixarrayFileInterface
  * @param dest write symbols here
  * @param len length of string to read
  * @return actual number of symbols read
@@ -173,7 +173,7 @@ SAIMakeReader(struct suffixarrayFileInterface *sai, enum sfxDataRequest rtype)
 static size_t
 SAIReadBWT(void *state, Uchar *dest, size_t len, UNUSED Error *err)
 {
-  struct suffixarrayFileInterface *sai = state;
+  SuffixarrayFileInterface *sai = state;
   assert(state);
   return fread(dest, sizeof (Uchar), len, sai->sa->bwttabstream.fp);
 }
@@ -183,7 +183,7 @@ DECLAREREADFUNCTION(Seqpos)
 extern size_t
 SAIGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len)
 {
-  struct suffixarrayFileInterface *sai;
+  SuffixarrayFileInterface *sai;
   const Encodedsequence *encseq;
   Readmode readmode;
   size_t i;
@@ -200,7 +200,7 @@ SAIGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len)
 extern DefinedSeqpos
 reportSAILongest(void *state)
 {
-  struct suffixarrayFileInterface *sai = state;
+  SuffixarrayFileInterface *sai = state;
   assert(sai);
   return sai->sa->longest;
 }
@@ -222,7 +222,7 @@ SAIgenerate(void *generatorState, void *backlogState,
             SeqDataTranslator xltor, Error *err)
 {
   size_t i;
-  struct suffixarrayFileInterface *sai = generatorState;
+  SuffixarrayFileInterface *sai = generatorState;
   Suffixarray *sa;
   Seqpos buf[len];
   assert(sai);

@@ -69,7 +69,7 @@ newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
                           headerWriteFunc *extHeaderCallbacks,
                           void **headerCBData, bitInsertFunc biFunc,
                           BitOffset cwExtBitsPerPos,
-                          BitOffset maxVarExtBitsPerPos, void *cbState,
+                          varExtBitsEstimator biVarBits, void *cbState,
                           Error *err);
 
 /**
@@ -109,7 +109,7 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                         headerWriteFunc *extHeaderCallbacks,
                         void **headerCBData,
                         bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                        BitOffset maxVarExtBitsPerPos, void *cbState,
+                        varExtBitsEstimator biVarBits, void *cbState,
                         Error *err);
 
 /**
@@ -144,7 +144,7 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
  * @param err genometools reference for core functions
  */
 extern EISeq *
-newBlockEncIdxSeqFromSAI(struct suffixarrayFileInterface *sai,
+newBlockEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
                          Seqpos totalLen, const Str *projectName,
                          const struct blockEncParams *params,
                          size_t numExtHeaders, uint16_t *headerIDs,
@@ -152,7 +152,7 @@ newBlockEncIdxSeqFromSAI(struct suffixarrayFileInterface *sai,
                          headerWriteFunc *extHeaderCallbacks,
                          void **headerCBData,
                          bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                         BitOffset maxVarExtBitsPerPos, void *cbState,
+                         varExtBitsEstimator biVarBits, void *cbState,
                          Error *err);
 
 /**
