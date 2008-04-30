@@ -707,7 +707,7 @@ BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
 static inline BitOffset
 locateVarBits(const BWTSeq *bwtSeq, struct extBitsRetrieval *extBits)
 {
-  BitOffset numLocBits;
+  BitOffset numLocBits = 0;
   unsigned bitsPerBWTPos = requiredSeqposBits(extBits->len - 1),
     bitsPerOrigPos = requiredSeqposBits(
       ((bwtSeq->featureToggles & BWTReversiblySorted) ?
