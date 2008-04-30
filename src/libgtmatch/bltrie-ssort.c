@@ -45,6 +45,10 @@
 #define ROOTNODE        trierep->root
 #define BlindtrieNULL   NULL
 
+#define NODENUM(PTR)\
+        ((PTR) == NULL ? 99UL\
+                       : (unsigned long) ((PTR) - trierep->spaceBlindtrienode))
+
 typedef struct Blindtrienode
 {
   Seqpos depth;
@@ -119,6 +123,10 @@ static Nodeptr makeroot(Blindtrierep *trierep,Seqpos startpos)
     firstchar = getencodedchar(trierep->encseq, /* Random access */
                                startpos,
                                trierep->readmode);
+    if (firstchar == WILDCARD)
+    {
+      firstchar = (Uchar) SEPARATOR;
+    }
   }
   newleaf = makenewleaf(trierep,startpos,firstchar);
   FIRSTCHILD(root) = newleaf;
@@ -135,10 +143,30 @@ static Nodeptr extractleafnode(Nodeptr head)
   return head;
 }
 
+static Nodeptr findsucc(Nodeptr node,Uchar cc)
+{
+  for (;;)
+  {
+    if (cc == FIRSTCHAR(node))
+    {              /* found branch corresponding to cc */
+      return node;
+    }
+    if (cc < FIRSTCHAR(node)) /* no branch corresponding to c */
+    {
+      return NULL;
+    }
+    node = RIGHTSIBLING(node);
+    if (node == BlindtrieNULL) /* no other branches: mismatch */
+    {
+      return NULL;
+    }
+  }
+}
+
 static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos startpos)
 {
   Uchar cc;
-  Nodeptr head, currentnodenum;
+  Nodeptr head, succ;
 
   trierep->stack.nextfreeNodeptr = 0;
   head = ROOTNODE;
@@ -153,29 +181,21 @@ static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos startpos)
       cc = getencodedchar(trierep->encseq, /* Random access */
                           startpos + DEPTH(head),
                           trierep->readmode);
+      if (cc == WILDCARD)
+      {
+        cc = (Uchar) SEPARATOR;
+      }
     }
     if (ISSPECIAL(cc))
     {
       return extractleafnode(head);
     }
-    currentnodenum = FIRSTCHILD(head);
-    for (;;)
+    succ = findsucc(FIRSTCHILD(head),cc);
+    if (succ == NULL)
     {
-      if (cc == FIRSTCHAR(currentnodenum))
-      {              /* found branch corresponding to cc */
-        head = FIRSTCHILD(currentnodenum);
-        break;
-      }
-      if (cc < FIRSTCHAR(currentnodenum)) /* no branch corresponding to c */
-      {
-        return extractleafnode(head);
-      }
-      currentnodenum = RIGHTSIBLING(currentnodenum);
-      if (currentnodenum == BlindtrieNULL) /* no other branches: mismatch */
-      {
-        return extractleafnode(head);
-      }
+      return extractleafnode(head);
     }
+    head = succ;
   }
   STOREINARRAY (&trierep->stack, Nodeptr, 128, head);
   return head;
@@ -247,6 +267,10 @@ static Seqpos getlcp(Uchar *mm_oldsuffix,
     if (idx1 < totallength)
     {
       cc1 = getencodedchar(/*XXX*/ encseq,idx1,readmode);
+      if (cc1 == WILDCARD)
+      {
+        cc1 = (Uchar) SEPARATOR;
+      }
     } else
     {
       cc1 = (Uchar) SEPARATOR;
@@ -254,6 +278,10 @@ static Seqpos getlcp(Uchar *mm_oldsuffix,
     if (idx2 < totallength)
     {
       cc2 = getencodedchar(/*XXX*/ encseq,idx2,readmode);
+      if (cc2 == WILDCARD)
+      {
+        cc2 = (Uchar) SEPARATOR;
+      }
     } else
     {
       cc2 = (Uchar) SEPARATOR;
@@ -358,9 +386,7 @@ void freeBlindtrierep(Blindtrierep **trierep)
   FREESPACE(*trierep);
 }
 
-#define NODENUM(PTR) (unsigned long) (RIGHTSIBLING(PTR) - \
-                                      trierep->spaceBlindtrienode)
-
+#ifdef SKDEBUG
 static void showleaf(const Blindtrierep *trierep,unsigned int level,
                      Nodeptr current)
 {
@@ -411,11 +437,12 @@ static void showblindtrie(const Blindtrierep *trierep)
 {
   showblindtrie2(trierep,0,ROOTNODE);
 }
+#endif
 
 static int suffixcompare(const void *a, const void *b)
 {
-  assert(*((Seqpos *) b) != *((Seqpos *) a));
-  if (*((Seqpos *) b) < *((Seqpos *) a))
+  assert(*((Seqpos *) a) != *((Seqpos *) b));
+  if (*((Seqpos *) a) < *((Seqpos *) b))
   {
     return -1;
   }
@@ -436,6 +463,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
   qsort(suffixtable,numberofsuffixes, sizeof(Seqpos), suffixcompare);
   trierep->nextfreeBlindtrienode = 0;
   trierep->root = makeroot(trierep,suffixtable[0] + offset);
+#ifdef SKDEBUG
   printf("insert suffixes at offset " FormatSeqpos ":\n",
           PRINTSeqposcast(offset));
   for (i=0; i < numberofsuffixes; i++)
@@ -444,6 +472,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
   }
   printf("\nstep 0\n");
   showblindtrie(trierep);
+#endif
   for (i=1UL; i < numberofsuffixes; i++)
   {
     leafinsubtree = findcompanion(trierep, suffixtable[i] + offset);
@@ -468,8 +497,10 @@ void blindtriesuffixsort(Blindtrierep *trierep,
                               lcp,
                               mm_newsuffix,
                               suffixtable[i] + offset);
+#ifdef SKDEBUG
     printf("step %lu\n",i);
     showblindtrie(trierep);
+#endif
   }
   enumeratetrieleaves (suffixtable, lcpsubtab, trierep, offset);
 }
