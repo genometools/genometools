@@ -28,7 +28,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
                          Seqpos *suffixtable,
                          Seqpos *lcpsubtab,
                          unsigned long numberofsuffixes,
-                         Seqpos depth);
+                         Seqpos offset);
 
 void freeBlindtrierep(Blindtrierep **trierep);
 

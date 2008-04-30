@@ -87,23 +87,16 @@ static Nodeptr newBlindtrienode(Blindtrierep *trierep)
 }
 
 static Blindtrienode *makenewleaf(Blindtrierep *trierep,
-                                  Seqpos startpos,Seqpos firstcharpos)
+                                  Seqpos startpos,
+                                  Uchar firstchar)
 {
   Blindtrienode *newleaf;
 
   newleaf = newBlindtrienode(trierep);
   STARTPOS(newleaf) = startpos;
-  if (startpos + firstcharpos >= trierep->totallength)
-  {
-    FIRSTCHAR(newleaf) = (Uchar) SEPARATOR;
-  } else
-  {
-    FIRSTCHAR(newleaf) = getencodedchar(trierep->encseq, /* Random access */
-                                        startpos + firstcharpos,
-                                        trierep->readmode);
-  }
   DEPTH(newleaf) = 0;
   ISLEAF(newleaf) = true;
+  FIRSTCHAR(newleaf) = firstchar;
   RIGHTSIBLING(newleaf) = NULL;
   return newleaf;
 }
@@ -111,13 +104,23 @@ static Blindtrienode *makenewleaf(Blindtrierep *trierep,
 static Nodeptr makeroot(Blindtrierep *trierep,Seqpos startpos)
 {
   Blindtrienode *root, *newleaf;
+  Uchar firstchar;
 
   root = newBlindtrienode(trierep);
   DEPTH(root) = 0;
   FIRSTCHAR(root) = 0; /* undefined */
   RIGHTSIBLING(root) = BlindtrieNULL;
   ISLEAF(root) = false;
-  newleaf = makenewleaf(trierep,startpos,0);
+  if (startpos >= trierep->totallength)
+  {
+    firstchar = (Uchar) SEPARATOR;
+  } else
+  {
+    firstchar = getencodedchar(trierep->encseq, /* Random access */
+                               startpos,
+                               trierep->readmode);
+  }
+  newleaf = makenewleaf(trierep,startpos,firstchar);
   FIRSTCHILD(root) = newleaf;
   return root;
 }
@@ -178,91 +181,39 @@ static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos startpos)
   return head;
 }
 
-static void makesuccs(Blindtrienode *newbranch,Blindtrienode *first,
-                      Blindtrienode *second)
+static void  insertsuffixintoblindtrie(Blindtrierep *trierep,
+                                       Nodeptr oldnode,
+                                       Uchar mm_oldsuffix,
+                                       Seqpos lcp,
+                                       Uchar mm_newsuffix,
+                                       Seqpos currentstartpos)
 {
-  RIGHTSIBLING(second) = BlindtrieNULL;
-  RIGHTSIBLING(first) = second;
-  FIRSTCHILD(newbranch) = first;
-}
-
-static void findsplit(Nodepair *np,
-                      const Blindtrienode *node,
-                      Uchar cc_newsuffix)
-{
-  Uchar edgechar;
-
-  assert(!ISLEAF(node));
-  for (np->previous = NULL, np->current = FIRSTCHILD(node);
-       np->current != NULL;
-       np->current = RIGHTSIBLING(np->current))
-  {
-    edgechar = FIRSTCHAR(np->current);
-    assert(edgechar != cc_newsuffix || ISSPECIAL(cc_newsuffix));
-    if (cc_newsuffix < edgechar)
-    {
-      break;
-    }
-    np->previous = np->current;
-  }
-}
-
-static Blindtrienode *makenewbranch(Blindtrierep *trierep,
-                                    Seqpos currentstartpos,
-                                    Seqpos newdepth,
-                                    Uchar mm_oldsuffix,
-                                    Uchar mm_newsuffix,
-                                    Blindtrienode *oldnode)
-{
-  Blindtrienode *newbranch, *newleaf;
-
-  assert(mm_oldsuffix != mm_newsuffix || ISSPECIAL(mm_oldsuffix));
-  newbranch = newBlindtrienode(trierep);
-  RIGHTSIBLING(newbranch) = RIGHTSIBLING(oldnode);
-  newleaf = makenewleaf(trierep,currentstartpos,newdepth);
-  if (mm_oldsuffix < mm_newsuffix || ISSPECIAL(mm_newsuffix))
-  {
-    makesuccs(newbranch,oldnode,newleaf);
-  } else
-  {
-    makesuccs(newbranch,newleaf,oldnode);
-  }
-  DEPTH(newbranch) = newdepth;
-  return newbranch;
-}
-
-static void insertcurrentsuffix(Blindtrierep *trierep,Seqpos startpos,
-                                Seqpos lcp, Uchar mm_newsuffix,
-                                Nodeptr currentnode)
-{
-  Uchar treecc;
   Nodeptr p, *pp;
 
-  treecc = FIRSTCHAR(currentnode);
-  assert(ISSPECIAL(treecc) || ISSPECIAL(mm_newsuffix) ||
-         treecc != mm_newsuffix || ISLEAF(currentnode) ||
-         DEPTH(currentnode) == lcp);
+  assert(ISSPECIAL(mm_oldsuffix) || ISSPECIAL(mm_newsuffix) ||
+         mm_oldsuffix != mm_newsuffix || ISLEAF(oldnode) ||
+         DEPTH(oldnode) == lcp);
 
-  /* insert a new node before node currentnode if necessary */
-  if (DEPTH(currentnode) != lcp)
+  /* insert a new node before node oldnode if necessary */
+  if (DEPTH(oldnode) != lcp)
   {
     p = newBlindtrienode(trierep);
-    FIRSTCHAR(p) = mm_newsuffix;
-    DEPTH(p) = DEPTH(currentnode); /* p inherits depth+children of currentnode*/
-    ISLEAF(p) = ISLEAF(currentnode);
-    EITHER(p) = EITHER(currentnode);
+    FIRSTCHAR(p) = mm_oldsuffix;
+    DEPTH(p) = DEPTH(oldnode); /* p inherits depth+children of oldnode*/
+    ISLEAF(p) = ISLEAF(oldnode);
+    EITHER(p) = EITHER(oldnode);
     RIGHTSIBLING(p) = BlindtrieNULL;
-    DEPTH(currentnode) = lcp;
-    ISLEAF(currentnode) = false;
-    FIRSTCHILD(currentnode) = p;        /* now *h has p as the only child */
+    DEPTH(oldnode) = lcp;
+    ISLEAF(oldnode) = false;
+    FIRSTCHILD(oldnode) = p;        /* now *h has p as the only child */
   }
-  assert(DEPTH(currentnode) == lcp);
+  assert(DEPTH(oldnode) == lcp);
 
   /* search the position of s[n] among *h offsprings */
-  pp = &FIRSTCHILD(currentnode);
+  pp = &FIRSTCHILD(oldnode);
   while ((*pp) != BlindtrieNULL)
   {
-    if (FIRSTCHAR(*pp) >= treecc)
+    if (FIRSTCHAR(*pp) >= mm_newsuffix)
     {
       break;
     }
@@ -272,10 +223,10 @@ static void insertcurrentsuffix(Blindtrierep *trierep,Seqpos startpos,
   p = newBlindtrienode(trierep);
   DEPTH(p) = 0;
   ISLEAF(p) = true;
-  FIRSTCHAR(p) = treecc;
+  FIRSTCHAR(p) = mm_newsuffix;
   RIGHTSIBLING(p) = *pp;
   *pp = p;
-  STARTPOS(p) = startpos;
+  STARTPOS(p) = currentstartpos;
 }
 
 static Seqpos getlcp(Uchar *mm_oldsuffix,
@@ -461,6 +412,16 @@ static void showblindtrie(const Blindtrierep *trierep)
   showblindtrie2(trierep,0,ROOTNODE);
 }
 
+static int suffixcompare(const void *a, const void *b)
+{
+  assert(*((Seqpos *) b) != *((Seqpos *) a));
+  if (*((Seqpos *) b) < *((Seqpos *) a))
+  {
+    return -1;
+  }
+  return 1;
+}
+
 void blindtriesuffixsort(Blindtrierep *trierep,
                          Seqpos *suffixtable,
                          Seqpos *lcpsubtab,
@@ -472,6 +433,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
   Seqpos lcp;
   Uchar mm_oldsuffix, mm_newsuffix;
 
+  qsort(suffixtable,numberofsuffixes, sizeof(Seqpos), suffixcompare);
   trierep->nextfreeBlindtrienode = 0;
   trierep->root = makeroot(trierep,suffixtable[0] + offset);
   printf("insert suffixes at offset " FormatSeqpos ":\n",
@@ -500,8 +462,12 @@ void blindtriesuffixsort(Blindtrierep *trierep,
         break;
       }
     }
-    insertcurrentsuffix(trierep,suffixtable[i]+offset,
-                        lcp,mm_newsuffix,currentnode);
+    insertsuffixintoblindtrie(trierep,
+                              currentnode,
+                              mm_oldsuffix,
+                              lcp,
+                              mm_newsuffix,
+                              suffixtable[i] + offset);
     printf("step %lu\n",i);
     showblindtrie(trierep);
   }
