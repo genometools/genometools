@@ -567,9 +567,9 @@ $(1): $(2)
 	@echo "[compile $$(@F)]"
 	@test -d $$(@D) || mkdir -p $$(@D)
 	@$$(CC) -c $$< -o $$@ $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
-	  $$(GT_CFLAGS)
+	  $$(GT_CFLAGS) $(3)
 	@$$(CC) -c $$< -o $$(@:.o=.d) $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) \
-        $$(EXP_CFLAGS) -MM -MP -MT $$@
+        $$(EXP_CFLAGS) $$(3) -MM -MP -MT $$@
 endef
 
 $(eval $(call COMPILE_template, obj/%.o, %.c))
