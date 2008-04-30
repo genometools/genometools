@@ -681,7 +681,7 @@ install: all
           || mkdir -p $(prefix)/include/libgtext
 	cp src/gtext.h $(prefix)/include
 	cp src/libgtext/*.h $(prefix)/include/libgtext
-	cp src/gt.h $(prefix)/include
+	cp src/genometools.h $(prefix)/include
 	test -d $(prefix)/include/libgtmatch \
 	  || mkdir -p $(prefix)/include/libgtmatch
 	cp src/gtmatch.h $(prefix)/include
