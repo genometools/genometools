@@ -22,18 +22,10 @@
 #include "encseq-def.h"
 #include "bltrie-ssort.h"
 
-/*
-#define NODE(N)         (trierep->spaceBlindtrienode[N])
-#define DEPTH(N)        (NODE(N).depth)
-#define EITHER(N)       (NODE(N).either)
-#define FIRSTCHILD(N)   (EITHER(N).firstchild)
-#define STARTPOS(N)     (EITHER(N).startpos)
-#define RIGHTSIBLING(N) (NODE(N).rightsibling)
-#define ISLEAF(N)       (NODE(N).isleaf)
-#define FIRSTCHAR(N)    (NODE(N).firstchar)
-#define ROOTNODE        trierep->root
-#define BlindtrieNULL   (trierep->allocatedBlindtrienode)
-*/
+#undef SKDEBUG
+#ifdef SKDEBUG
+#include "sfx-cmpsuf.pr"
+#endif
 
 #define DEPTH(N)        ((N)->depth)
 #define EITHER(N)       ((N)->either)
@@ -123,7 +115,7 @@ static Nodeptr makeroot(Blindtrierep *trierep,Seqpos startpos)
     firstchar = getencodedchar(trierep->encseq, /* Random access */
                                startpos,
                                trierep->readmode);
-    if (firstchar == WILDCARD)
+    if (firstchar == (Uchar) WILDCARD)
     {
       firstchar = (Uchar) SEPARATOR;
     }
@@ -143,15 +135,34 @@ static Nodeptr extractleafnode(Nodeptr head)
   return head;
 }
 
-static Nodeptr findsucc(Nodeptr node,Uchar cc)
+static int comparecharacters(Uchar oldchar,Uchar newchar)
 {
+  if (oldchar < newchar)
+  {
+    return -1;
+  }
+  if (oldchar > newchar)
+  {
+    return 1;
+  }
+  if (ISSPECIAL(oldchar))
+  {
+    return -1;
+  }
+  return 0;
+}
+
+static Nodeptr findsucc(Nodeptr node,Uchar newchar)
+{
+  int retval;
   for (;;)
   {
-    if (cc == FIRSTCHAR(node))
-    {              /* found branch corresponding to cc */
+    retval = comparecharacters(FIRSTCHAR(node),newchar);
+    if (retval == 0)
+    {              /* found branch corresponding to newchar */
       return node;
     }
-    if (cc < FIRSTCHAR(node)) /* no branch corresponding to c */
+    if (retval == 1) /* found branch which is already greater than newchar */
     {
       return NULL;
     }
@@ -165,7 +176,7 @@ static Nodeptr findsucc(Nodeptr node,Uchar cc)
 
 static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos startpos)
 {
-  Uchar cc;
+  Uchar newchar;
   Nodeptr head, succ;
 
   trierep->stack.nextfreeNodeptr = 0;
@@ -175,22 +186,22 @@ static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos startpos)
     STOREINARRAY (&trierep->stack, Nodeptr, 128, head);
     if (startpos + DEPTH(head) >= trierep->totallength)
     {
-      cc = (Uchar) SEPARATOR;
+      newchar = (Uchar) SEPARATOR;
     } else
     {
-      cc = getencodedchar(trierep->encseq, /* Random access */
-                          startpos + DEPTH(head),
-                          trierep->readmode);
-      if (cc == WILDCARD)
+      newchar = getencodedchar(trierep->encseq, /* Random access */
+                               startpos + DEPTH(head),
+                               trierep->readmode);
+      if (newchar == (Uchar) WILDCARD)
       {
-        cc = (Uchar) SEPARATOR;
+        newchar = (Uchar) SEPARATOR;
       }
     }
-    if (ISSPECIAL(cc))
+    if (ISSPECIAL(newchar))
     {
       return extractleafnode(head);
     }
-    succ = findsucc(FIRSTCHILD(head),cc);
+    succ = findsucc(FIRSTCHILD(head),newchar);
     if (succ == NULL)
     {
       return extractleafnode(head);
@@ -201,14 +212,15 @@ static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos startpos)
   return head;
 }
 
-static void  insertsuffixintoblindtrie(Blindtrierep *trierep,
-                                       Nodeptr oldnode,
-                                       Uchar mm_oldsuffix,
-                                       Seqpos lcp,
-                                       Uchar mm_newsuffix,
-                                       Seqpos currentstartpos)
+static void insertsuffixintoblindtrie(Blindtrierep *trierep,
+                                      Nodeptr oldnode,
+                                      Uchar mm_oldsuffix,
+                                      Seqpos lcp,
+                                      Uchar mm_newsuffix,
+                                      Seqpos currentstartpos)
 {
   Nodeptr p, *pp;
+  int retval;
 
   assert(ISSPECIAL(mm_oldsuffix) || ISSPECIAL(mm_newsuffix) ||
          mm_oldsuffix != mm_newsuffix || ISLEAF(oldnode) ||
@@ -223,6 +235,14 @@ static void  insertsuffixintoblindtrie(Blindtrierep *trierep,
     ISLEAF(p) = ISLEAF(oldnode);
     EITHER(p) = EITHER(oldnode);
     RIGHTSIBLING(p) = BlindtrieNULL;
+    /*
+    printf("create split node (leaf=%s) with firstchar %u\n",
+            ISLEAF(p) ? "true" : "false", (unsigned int) FIRSTCHAR(p));
+    if (!ISLEAF(p))
+    {
+      printf("of depth %u\n",DEPTH(p));
+    }
+    */
     DEPTH(oldnode) = lcp;
     ISLEAF(oldnode) = false;
     FIRSTCHILD(oldnode) = p;        /* now *h has p as the only child */
@@ -233,7 +253,8 @@ static void  insertsuffixintoblindtrie(Blindtrierep *trierep,
   pp = &FIRSTCHILD(oldnode);
   while ((*pp) != BlindtrieNULL)
   {
-    if (FIRSTCHAR(*pp) >= mm_newsuffix)
+    retval = comparecharacters(FIRSTCHAR(*pp),mm_newsuffix);
+    if (retval >= 0)
     {
       break;
     }
@@ -244,6 +265,7 @@ static void  insertsuffixintoblindtrie(Blindtrierep *trierep,
   DEPTH(p) = 0;
   ISLEAF(p) = true;
   FIRSTCHAR(p) = mm_newsuffix;
+  /* printf("create leaf with firstchar %u\n",(unsigned int) FIRSTCHAR(p)); */
   RIGHTSIBLING(p) = *pp;
   *pp = p;
   STARTPOS(p) = currentstartpos;
@@ -260,14 +282,14 @@ static Seqpos getlcp(Uchar *mm_oldsuffix,
   Seqpos idx1, idx2;
   Uchar cc1, cc2;
 
-  for (idx1 = currentstartpos, idx2=leafpos;
+  for (idx1 = leafpos, idx2=currentstartpos;
        /* Nothing */;
        idx1++, idx2++)
   {
     if (idx1 < totallength)
     {
       cc1 = getencodedchar(/*XXX*/ encseq,idx1,readmode);
-      if (cc1 == WILDCARD)
+      if (cc1 == (Uchar) WILDCARD)
       {
         cc1 = (Uchar) SEPARATOR;
       }
@@ -278,7 +300,7 @@ static Seqpos getlcp(Uchar *mm_oldsuffix,
     if (idx2 < totallength)
     {
       cc2 = getencodedchar(/*XXX*/ encseq,idx2,readmode);
-      if (cc2 == WILDCARD)
+      if (cc2 == (Uchar) WILDCARD)
       {
         cc2 = (Uchar) SEPARATOR;
       }
@@ -293,17 +315,17 @@ static Seqpos getlcp(Uchar *mm_oldsuffix,
       break;
     }
   }
-  return idx1 - currentstartpos;
+  return idx1 - leafpos;
 }
 
 #define SETCURRENT(VAL)\
         currentnode = VAL;\
         currentnodeisleaf = ISLEAF(VAL) ? true : false
 
-static void enumeratetrieleaves (Seqpos *suffixtable,
-                                 Seqpos *lcpsubtab,
-                                 Blindtrierep *trierep,
-                                 Seqpos depth)
+static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
+                                          Seqpos *lcpsubtab,
+                                          Blindtrierep *trierep,
+                                          Seqpos offset)
 {
   bool readyforpop = false, currentnodeisleaf;
   Nodeptr currentnode, siblval, child, lcpnode = ROOTNODE;
@@ -316,12 +338,12 @@ static void enumeratetrieleaves (Seqpos *suffixtable,
   {
     if (currentnodeisleaf)
     {
-      assert (STARTPOS(currentnode) >= depth);
+      assert (STARTPOS(currentnode) >= offset);
       if (lcpsubtab != NULL && nextfree > 0)
       {
-        lcpsubtab[nextfree] = DEPTH(lcpnode) + depth;
+        lcpsubtab[nextfree] = DEPTH(lcpnode) + offset;
       }
-      suffixtable[nextfree++] = STARTPOS(currentnode) - depth;
+      suffixtable[nextfree++] = STARTPOS(currentnode) - offset;
       siblval = RIGHTSIBLING(currentnode);
       if (siblval == BlindtrieNULL)
       {
@@ -358,7 +380,40 @@ static void enumeratetrieleaves (Seqpos *suffixtable,
       }
     }
   }
+  return nextfree;
 }
+
+#ifdef SKDEBUG
+static void checkcurrentblindtrie(Blindtrierep *trierep,
+                                  Seqpos offset)
+{
+  Seqpos suffixtable[6];
+  unsigned long idx, numofsuffixes;
+  Seqpos maxcommon;
+  int retval;
+
+  numofsuffixes = enumeratetrieleaves (&suffixtable[0], NULL, trierep, offset);
+  for (idx=1UL; idx < numofsuffixes; idx++)
+  {
+    maxcommon = 0;
+    retval = comparetwostringsgeneric(trierep->encseq,
+                                      ISDIRREVERSE(trierep->readmode)
+                                        ? false : true,
+                                      ISDIRCOMPLEMENT(trierep->readmode)
+                                        ? true : false,
+                                      &maxcommon,
+                                      suffixtable[idx-1],
+                                      suffixtable[idx],
+                                      0);
+    if (retval >= 0)
+    {
+      fprintf(stderr,"retval = %d, maxcommon = %u for idx = %lu\n",
+              retval,maxcommon,idx);
+      assert(retval < 0);
+    }
+  }
+}
+#endif
 
 Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
                               const Encodedsequence *encseq,
@@ -391,6 +446,7 @@ static void showleaf(const Blindtrierep *trierep,unsigned int level,
                      Nodeptr current)
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
+  assert(current != NULL);
   printf("Leaf(add=%lu,firstchar=%u,startpos=" FormatSeqpos
          ",rightsibling=%lu)\n",
          NODENUM(current),
@@ -403,6 +459,7 @@ static void showintern(const Blindtrierep *trierep,unsigned int level,
                        Nodeptr current)
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
+  assert(current != NULL);
   printf("Intern(add=%lu,firstchar=%u,depth=" FormatSeqpos
          ",firstchild=%lu,rightsibling=%lu)\n",
           NODENUM(current),
@@ -460,7 +517,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
   Seqpos lcp;
   Uchar mm_oldsuffix, mm_newsuffix;
 
-  qsort(suffixtable,numberofsuffixes, sizeof(Seqpos), suffixcompare);
+  qsort(suffixtable,(size_t) numberofsuffixes, sizeof (Seqpos), suffixcompare);
   trierep->nextfreeBlindtrienode = 0;
   trierep->root = makeroot(trierep,suffixtable[0] + offset);
 #ifdef SKDEBUG
@@ -500,7 +557,8 @@ void blindtriesuffixsort(Blindtrierep *trierep,
 #ifdef SKDEBUG
     printf("step %lu\n",i);
     showblindtrie(trierep);
+    checkcurrentblindtrie(trierep,offset);
 #endif
   }
-  enumeratetrieleaves (suffixtable, lcpsubtab, trierep, offset);
+  (void) enumeratetrieleaves (suffixtable, lcpsubtab, trierep, offset);
 }
