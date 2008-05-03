@@ -520,6 +520,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
        sfi->storespecialcodes = false;
        sfi->maxdepth.defined = false;
        sfi->cmpcharbychar = possibletocmpbitwise(encseq) ? false : true;
+       sfi->maxwidthrealmedian = 1UL;
     }
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
