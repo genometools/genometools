@@ -21,7 +21,6 @@
 #include "spacedef.h"
 #include "encseq-def.h"
 #include "bltrie-ssort.h"
-#include "stamp.h"
 
 #undef SKDEBUG
 #ifdef SKDEBUG
@@ -93,6 +92,7 @@ static Nodeptr makeroot(Blindtrierep *trierep,Seqpos startpos)
   root->firstchar = 0; /* undefined */
   root->rightsibling = NULL;
   root->isleaf = false;
+  assert(startpos < trierep->totallength);
   if (startpos >= trierep->totallength)
   {
     firstchar = (Uchar) SEPARATOR;
@@ -296,8 +296,8 @@ static Seqpos getlcp(Uchar *mm_oldsuffix,
 }
 
 #define SETCURRENT(VAL)\
-        currentnode = VAL;\
-        currentnodeisleaf = (VAL)->isleaf ? true : false
+        currentnodeisleaf = (VAL)->isleaf ? true : false;\
+        currentnode = VAL
 
 static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
                                           Seqpos *lcpsubtab,
@@ -382,17 +382,11 @@ Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
 
 void freeBlindtrierep(Blindtrierep **trierep)
 {
-  STAMP;
   FREESPACE((*trierep)->spaceBlindtrienode);
-  STAMP;
   FREEARRAY(&(*trierep)->stack, Nodeptr);
-  STAMP;
   freeEncodedsequencescanstate(&((*trierep)->esr1));
-  STAMP;
   freeEncodedsequencescanstate(&((*trierep)->esr2));
-  STAMP;
   FREESPACE(*trierep);
-  STAMP;
 }
 
 #ifdef SKDEBUG
@@ -496,7 +490,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
                          unsigned long numberofsuffixes,
                          Seqpos offset)
 {
-  unsigned long i, t;
+  unsigned long idx, t;
   Nodeptr leafinsubtree, currentnode;
   Seqpos lcp;
   Uchar mm_oldsuffix, mm_newsuffix;
@@ -514,9 +508,13 @@ void blindtriesuffixsort(Blindtrierep *trierep,
   printf("\nstep 0\n");
   showblindtrie(trierep);
 #endif
-  for (i=1UL; i < numberofsuffixes; i++)
+  for (idx=1UL; idx < numberofsuffixes; idx++)
   {
-    leafinsubtree = findcompanion(trierep, suffixtable[i] + offset);
+    if (suffixtable[idx] + offset >= trierep->totallength)
+    {
+      break;
+    }
+    leafinsubtree = findcompanion(trierep, suffixtable[idx] + offset);
     assert(leafinsubtree->isleaf);
     lcp = getlcp(&mm_oldsuffix,&mm_newsuffix,
                  trierep->encseq,
@@ -525,7 +523,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
                  trierep->readmode,
                  trierep->totallength,
                  leafinsubtree->either.startpos,
-                 suffixtable[i] + offset);
+                 suffixtable[idx] + offset);
     currentnode = trierep->root;
     for (t=0;t<trierep->stack.nextfreeNodeptr;t++)
     {
@@ -540,7 +538,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
                               mm_oldsuffix,
                               lcp,
                               mm_newsuffix,
-                              suffixtable[i] + offset);
+                              suffixtable[idx] + offset);
 #ifdef SKDEBUG
     printf("step %lu\n",i);
     showblindtrie(trierep);
@@ -548,4 +546,11 @@ void blindtriesuffixsort(Blindtrierep *trierep,
 #endif
   }
   (void) enumeratetrieleaves (suffixtable, lcpsubtab, trierep, offset);
+  if (lcpsubtab != NULL)
+  {
+    while (idx < numberofsuffixes)
+    {
+      lcpsubtab[idx++] = 0;
+    }
+  }
 }
