@@ -550,7 +550,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
   {
     while (idx < numberofsuffixes)
     {
-      lcpsubtab[idx++] = 0;
+      lcpsubtab[idx++] = offset;
     }
   }
 }
