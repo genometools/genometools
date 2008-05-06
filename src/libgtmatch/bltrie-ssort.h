@@ -22,6 +22,7 @@ typedef struct Blindtrierep Blindtrierep;
 
 Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
                               const Encodedsequence *encseq,
+                              bool cmpcharbychar,
                               Readmode readmode);
 
 void blindtriesuffixsort(Blindtrierep *trierep,

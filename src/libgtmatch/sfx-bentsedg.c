@@ -84,18 +84,15 @@
           {\
             if ((LEFT) < (RIGHT))\
             {\
-              if (cmpcharbychar)\
+              blindtriesuffixsort(trierep,LEFT,\
+                                  lcpsubtab == NULL\
+                                    ? NULL \
+                                    : lcpsubtab->spaceSeqpos+LCPINDEX(LEFT),\
+                                  WIDTH,DEPTH);\
               {\
-                blindtriesuffixsort(trierep,LEFT,\
-                                    lcpsubtab == NULL\
-                                      ? NULL \
-                                      : lcpsubtab->spaceSeqpos+LCPINDEX(LEFT),\
-                                    WIDTH,DEPTH);\
-              } else\
-              {\
-                insertionsort(encseq,esr1,esr2,\
+                /*insertionsort(encseq,esr1,esr2,\
                               lcpsubtab,readmode,totallength,\
-                              LEFT,RIGHT,DEPTH,maxdepth,cmpcharbychar);\
+                              LEFT,RIGHT,DEPTH,maxdepth,cmpcharbychar);*/\
               }\
             }\
           } else\
@@ -759,9 +756,9 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              const Encodedsequence *encseq,
                              Countingsortinfo *countingsortinfo,
                              Encodedsequencescanstate *esr1,
-                             Encodedsequencescanstate *esr2,
+                             UNUSED Encodedsequencescanstate *esr2,
                              Lcpsubtab *lcpsubtab,
-                             Readmode readmode,
+                             UNUSED Readmode readmode,
                              bool fwd,
                              bool complement,
                              Seqpos *left,
@@ -779,7 +776,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
   EndofTwobitencoding etbecurrent;
   unsigned long idx, smaller = 0, larger = 0,
                 insertindex, end, equaloffset, currentwidth;
-  const bool cmpcharbychar = false;
+  /* const bool cmpcharbychar = false; */
 
   countingsortinfo[0].suffix = left[0];
   countingsortinfo[0].lcpwithpivot = (unsigned char) UNITSIN2BITENC;
@@ -1561,7 +1558,7 @@ void sortallbuckets(Seqpos *suftabptr,
   maxcountingsort = maxbucketsize;
   ALLOCASSIGNSPACE(countingsortinfo,NULL,Countingsortinfo,maxcountingsort);
   ALLOCASSIGNSPACE(medianinfospace,NULL,Medianinfo,maxwidthrealmedian);
-  trierep = newBlindtrierep(SMALLSIZE,encseq,readmode);
+  trierep = newBlindtrierep(SMALLSIZE,encseq,cmpcharbychar,readmode);
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;

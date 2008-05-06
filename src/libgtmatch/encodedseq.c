@@ -2493,7 +2493,8 @@ int compareEncseqsequences(Seqpos *lcp,
                            bool complement,
                            Encodedsequencescanstate *esr1,
                            Encodedsequencescanstate *esr2,
-                           Seqpos pos1,Seqpos pos2,
+                           Seqpos pos1,
+                           Seqpos pos2,
                            Seqpos depth)
 {
   EndofTwobitencoding ptbe1, ptbe2;

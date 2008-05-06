@@ -58,6 +58,7 @@ struct Blindtrierep
   Readmode readmode;
   Seqpos totallength;
   Nodeptr root;
+  bool cmpcharbychar;
   unsigned long allocatedBlindtrienode,
                 nextfreeBlindtrienode;
   Blindtrienode *spaceBlindtrienode;
@@ -250,15 +251,15 @@ static void insertsuffixintoblindtrie(Blindtrierep *trierep,
   newleaf->rightsibling = current;
 }
 
-static Seqpos getlcp(Uchar *mm_oldsuffix,
-                     Uchar *mm_newsuffix,
-                     const Encodedsequence *encseq,
-                     Encodedsequencescanstate *esr1,
-                     Encodedsequencescanstate *esr2,
-                     Readmode readmode,
-                     Seqpos totallength,
-                     Seqpos leafpos,
-                     Seqpos currentstartpos)
+static Seqpos cmpcharbychargetlcp(Uchar *mm_oldsuffix,
+                                  Uchar *mm_newsuffix,
+                                  const Encodedsequence *encseq,
+                                  Encodedsequencescanstate *esr1,
+                                  Encodedsequencescanstate *esr2,
+                                  Readmode readmode,
+                                  Seqpos totallength,
+                                  Seqpos leafpos,
+                                  Seqpos currentstartpos)
 {
   Seqpos idx1, idx2;
   Uchar cc1, cc2;
@@ -299,6 +300,56 @@ static Seqpos getlcp(Uchar *mm_oldsuffix,
     }
   }
   return idx1 - leafpos;
+}
+
+static Seqpos fastgetlcp(Uchar *mm_oldsuffix,
+                         Uchar *mm_newsuffix,
+                         const Encodedsequence *encseq,
+                         Encodedsequencescanstate *esr1,
+                         Encodedsequencescanstate *esr2,
+                         Readmode readmode,
+                         Seqpos totallength,
+                         Seqpos leafpos,
+                         Seqpos currentstartpos)
+{
+  Seqpos lcp;
+
+  (void) compareEncseqsequences(&lcp,
+                                encseq,
+                                ISDIRREVERSE(readmode) ? false : true,
+                                ISDIRCOMPLEMENT(readmode) ? true : false,
+                                esr1,
+                                esr2,
+                                leafpos,
+                                currentstartpos,
+                                0);
+  if (leafpos + lcp >= totallength)
+  {
+    *mm_oldsuffix = (Uchar) SEPARATOR;
+  } else
+  {
+    *mm_oldsuffix = getencodedchar(encseq, /* Random access */
+                                   leafpos + lcp,
+                                   readmode);
+    if (*mm_oldsuffix == (Uchar) WILDCARD)
+    {
+      *mm_oldsuffix = (Uchar) SEPARATOR;
+    }
+  }
+  if (currentstartpos + lcp >= totallength)
+  {
+    *mm_newsuffix = (Uchar) SEPARATOR;
+  } else
+  {
+    *mm_newsuffix = getencodedchar(encseq, /* Random access */
+                                   currentstartpos + lcp,
+                                   readmode);
+    if (*mm_newsuffix == (Uchar) WILDCARD)
+    {
+      *mm_newsuffix = (Uchar) SEPARATOR;
+    }
+  }
+  return lcp;
 }
 
 #define SETCURRENT(VAL)\
@@ -367,6 +418,7 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
 
 Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
                               const Encodedsequence *encseq,
+                              bool cmpcharbychar,
                               Readmode readmode)
 {
   Blindtrierep *trierep;
@@ -382,6 +434,7 @@ Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
   trierep->esr1 = newEncodedsequencescanstate();
   trierep->esr2 = newEncodedsequencescanstate();
   trierep->totallength = getencseqtotallength(encseq);
+  trierep->cmpcharbychar = cmpcharbychar;
   INITARRAY (&trierep->stack, Nodeptr);
   return trierep;
 }
@@ -496,7 +549,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
                          unsigned long numberofsuffixes,
                          Seqpos offset)
 {
-  unsigned long idx, t;
+  unsigned long idx, stackidx;
   Nodeptr leafinsubtree, currentnode;
   Seqpos lcp;
   Uchar mm_oldsuffix, mm_newsuffix;
@@ -522,18 +575,20 @@ void blindtriesuffixsort(Blindtrierep *trierep,
     }
     leafinsubtree = findcompanion(trierep, suffixtable[idx] + offset);
     assert(ISLEAF(leafinsubtree));
-    lcp = getlcp(&mm_oldsuffix,&mm_newsuffix,
-                 trierep->encseq,
-                 trierep->esr1,
-                 trierep->esr2,
-                 trierep->readmode,
-                 trierep->totallength,
-                 leafinsubtree->either.startpos,
-                 suffixtable[idx] + offset);
+    lcp = (trierep->cmpcharbychar ? cmpcharbychargetlcp : fastgetlcp)
+                             (&mm_oldsuffix,
+                              &mm_newsuffix,
+                              trierep->encseq,
+                              trierep->esr1,
+                              trierep->esr2,
+                              trierep->readmode,
+                              trierep->totallength,
+                              leafinsubtree->either.startpos,
+                              suffixtable[idx] + offset);
     currentnode = trierep->root;
-    for (t=0;t<trierep->stack.nextfreeNodeptr;t++)
+    for (stackidx=0;stackidx<trierep->stack.nextfreeNodeptr;stackidx++)
     {
-      currentnode = trierep->stack.spaceNodeptr[t];
+      currentnode = trierep->stack.spaceNodeptr[stackidx];
       if (ISLEAF(currentnode) || currentnode->depth >= lcp)
       {
         break;
