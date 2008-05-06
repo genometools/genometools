@@ -70,7 +70,7 @@ static void show_aligns(unsigned long aligns, UNUSED void *data)
   printf("number of optimal alignments: %lu\n\n", aligns);
 }
 
-static int gt_align_runner(UNUSED int argc, const char **argv,
+static int gt_align_runner(UNUSED int argc, const char **argv, int parsed_args,
                            void *tool_arguments, Error *err)
 {
   AlignArguments *arguments = tool_arguments;
@@ -82,11 +82,11 @@ static int gt_align_runner(UNUSED int argc, const char **argv,
   assert(arguments);
 
   /* init */
-  bioseq_1 = bioseq_new(argv[0], err);
+  bioseq_1 = bioseq_new(argv[parsed_args], err);
   if (!bioseq_1)
     had_err = -1;
   if (!had_err) {
-    bioseq_2 = bioseq_new(argv[1], err);
+    bioseq_2 = bioseq_new(argv[parsed_args+1], err);
     if (!bioseq_2)
       had_err = -1;
   }

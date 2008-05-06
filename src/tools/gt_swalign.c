@@ -61,7 +61,8 @@ static OptionParser* gt_swalign_opion_parser_new(void *tool_arguments)
 }
 
 static int gt_swalign_runner(UNUSED int argc, const char **argv,
-                             void *tool_arguments, Error *err)
+                             int parsed_args, void *tool_arguments,
+                             Error *err)
 {
   SWAlignArguments *arguments = tool_arguments;
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
@@ -75,15 +76,15 @@ static int gt_swalign_runner(UNUSED int argc, const char **argv,
 
   /* init */
   /* XXX: make this more flexible */
-  scorematrix  = score_matrix_new_read_protein(argv[0], err);
+  scorematrix  = score_matrix_new_read_protein(argv[parsed_args], err);
   if (scorematrix) {
     score_function = score_function_new(scorematrix, arguments->indelscore,
                                                    arguments->indelscore);
-    bioseq_1 = bioseq_new(argv[1], err);
+    bioseq_1 = bioseq_new(argv[parsed_args+1], err);
     if (!bioseq_1)
       had_err = -1;
     if (!had_err) {
-      bioseq_2 = bioseq_new(argv[2], err);
+      bioseq_2 = bioseq_new(argv[parsed_args+2], err);
       if (!bioseq_2)
         had_err = -1;
     }

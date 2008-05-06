@@ -82,7 +82,7 @@ static OptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_sequniq_runner(int argc, const char **argv,
+static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              void *tool_arguments, Error *err)
 {
   SequniqArguments *arguments = tool_arguments;
@@ -103,7 +103,7 @@ static int gt_sequniq_runner(int argc, const char **argv,
 
   if (!arguments->seqit) {
     unsigned long i, j;
-    for (i = 0; !had_err && i < argc; i++) {
+    for (i = parsed_args; !had_err && i < argc; i++) {
       if (!(bs = bioseq_new(argv[i], err)))
         had_err = -1;
       if (!had_err) {
@@ -126,7 +126,7 @@ static int gt_sequniq_runner(int argc, const char **argv,
   else {
     int i;
     files = strarray_new();
-    for (i = 0; i < argc; i++)
+    for (i = parsed_args; i < argc; i++)
       strarray_add_cstr(files, argv[i]);
     totalsize = files_estimate_total_size(files);
     seqit = seqiterator_new(files, NULL, true);

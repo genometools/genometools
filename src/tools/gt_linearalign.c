@@ -36,7 +36,8 @@ static OptionParser* gt_linearalign_option_parser_new(UNUSED
 }
 
 static int gt_linearalign_runner(UNUSED int argc, const char **argv,
-                                 UNUSED void *tool_arguments, Error *err)
+                                 int parsed_args, UNUSED void *tool_arguments,
+                                 Error *err)
 {
   Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;
@@ -45,11 +46,11 @@ static int gt_linearalign_runner(UNUSED int argc, const char **argv,
   error_check(err);
 
   /* init */
-  bioseq_1 = bioseq_new(argv[0], err);
+  bioseq_1 = bioseq_new(argv[parsed_args], err);
   if (!bioseq_1)
     had_err = -1;
   if (!had_err) {
-    bioseq_2 = bioseq_new(argv[1], err);
+    bioseq_2 = bioseq_new(argv[parsed_args+1], err);
     if (!bioseq_2)
       had_err = -1;
   }

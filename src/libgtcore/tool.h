@@ -29,8 +29,9 @@ typedef void          (*ToolArgumentsDelete)(void *tool_arguments);
 typedef OptionParser* (*ToolOptionParserNew)(void *tool_arguments);
 typedef int           (*ToolArgumentsCheck)(int rest_argc,
                                             void *tool_arguments, Error*);
-typedef int           (*ToolRunner)(int rest_argc, const char **rest_argv,
-                                    void *tool_arguments, Error*);
+typedef int           (*ToolRunner)(int argc, const char **argv,
+                                    int parsed_args, void *tool_arguments,
+                                    Error*);
 
 /* the type of a tool constructor */
 typedef Tool*         (*ToolConstructor)(void);
@@ -59,7 +60,7 @@ Tool* tool_new(ToolArgumentsNew tool_arguments_new,
   - Return upon error, continue otherwise.
   - Check the tool arguments, if necessary.
   - Return upon error, continue otherwise.
-  - Run the actual tool with the remaining arguments (the tool arguments object
+  - Run the actual tool with the given arguments (the tool arguments object
     is passed along).
   - Delete the tool arguments object, if one was created.
   Returns -1 and sets <err> on error, returns 0 otherwise.

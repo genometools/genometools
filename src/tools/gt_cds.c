@@ -73,7 +73,7 @@ static OptionParser* gt_cds_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_cds_runner(UNUSED int argc, const char **argv,
+static int gt_cds_runner(UNUSED int argc, const char **argv, int parsed_args,
                          void *tool_arguments, Error *err)
 {
   GenomeStream *gff3_in_stream, *cds_stream = NULL, *gff3_out_stream = NULL;
@@ -86,7 +86,8 @@ static int gt_cds_runner(UNUSED int argc, const char **argv,
   assert(arguments);
 
   /* create gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_sorted(argv[0], arguments->verbose);
+  gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
+                                             arguments->verbose);
 
   /* create region mapping */
   regionmapping = seqid2file_regionmapping_new(arguments->seqfile,

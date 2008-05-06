@@ -85,8 +85,8 @@ static OptionParser* gt_exercise_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_exercise_runner(int argc, const char **argv, void *tool_arguments,
-                              Error *err)
+static int gt_exercise_runner(int argc, const char **argv, int parsed_args,
+                             void *tool_arguments, Error *err)
 {
   Toolbox *exercise_toolbox = tool_arguments;
   Toolfunc toolfunc;
@@ -98,24 +98,25 @@ static int gt_exercise_runner(int argc, const char **argv, void *tool_arguments,
   assert(exercise_toolbox);
 
   /* get exercise */
-  if (!toolbox_has_tool(exercise_toolbox, argv[0])) {
+  if (!toolbox_has_tool(exercise_toolbox, argv[parsed_args])) {
     error_set(err, "exercise '%s' not found; option -help lists possible "
-                   "tools", argv[0]);
+                   "tools", argv[parsed_args]);
     had_err = -1;
   }
 
   /* call exercise */
   if (!had_err) {
-    if (!(toolfunc = toolbox_get(exercise_toolbox, argv[0]))) {
-      tool = toolbox_get_tool(exercise_toolbox, argv[0]);
+    if (!(toolfunc = toolbox_get(exercise_toolbox, argv[parsed_args]))) {
+      tool = toolbox_get_tool(exercise_toolbox, argv[parsed_args]);
       assert(tool);
     }
-    nargv = cstr_array_prefix_first(argv, error_get_progname(err));
+    nargv = cstr_array_prefix_first(argv + parsed_args,
+                                    error_get_progname(err));
     error_set_progname(err, nargv[0]);
     if (toolfunc)
-      had_err = toolfunc(argc, (const char**) nargv, err);
+      had_err = toolfunc(argc - parsed_args, (const char**) nargv, err);
     else
-      had_err = tool_run(tool, argc, (const char**) nargv, err);
+      had_err = tool_run(tool, argc - parsed_args, (const char**) nargv, err);
   }
 
   /* free */

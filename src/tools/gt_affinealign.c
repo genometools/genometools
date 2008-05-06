@@ -65,7 +65,8 @@ static OptionParser* gt_affinealign_option_parser_new(void *tool_arguments)
 }
 
 static int gt_affinealign_runner(UNUSED int argc, const char **argv,
-                                 void *tool_arguments, Error *err)
+                                 int parsed_args, void *tool_arguments,
+                                 Error *err)
 {
   Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;
@@ -77,11 +78,11 @@ static int gt_affinealign_runner(UNUSED int argc, const char **argv,
   assert(costs);
 
   /* init */
-  bioseq_1 = bioseq_new(argv[0], err);
+  bioseq_1 = bioseq_new(argv[parsed_args], err);
   if (!bioseq_1)
      had_err = -1;
   if (!had_err) {
-    bioseq_2 = bioseq_new(argv[1], err);
+    bioseq_2 = bioseq_new(argv[parsed_args+1], err);
     if (!bioseq_2)
       had_err = -1;
   }

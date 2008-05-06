@@ -174,7 +174,7 @@ static int show_duplicates(StringDistri *sd, Error *err)
   return 0;
 }
 
-static int gt_fingerprint_runner(int argc, const char **argv,
+static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
                                  void *tool_arguments, Error *err)
 {
   FingerprintArguments *arguments = tool_arguments;
@@ -188,7 +188,7 @@ static int gt_fingerprint_runner(int argc, const char **argv,
   sd = string_distri_new();
 
   /* process sequence files */
-  for (i = 0; !had_err && i < argc; i++) {
+  for (i = parsed_args; !had_err && i < argc; i++) {
     if (!(bs = bioseq_new(argv[i], err)))
       had_err = -1;
     if (!had_err) {

@@ -152,7 +152,7 @@ static void skproto(const char *filename, FILE *fpin)
   str_delete(line);
 }
 
-static int gt_skproto_runner(int argc, const char **argv,
+static int gt_skproto_runner(int argc, const char **argv, int parsed_args,
                              UNUSED void *tool_arguments,
                              UNUSED Error *err)
 {
@@ -168,7 +168,7 @@ static int gt_skproto_runner(int argc, const char **argv,
   if (!argc)
     skproto("(stdout)", stdin);
   else {
-    for (i = 0; i < argc; i++) {
+    for (i = parsed_args; i < argc; i++) {
       fpin = fa_xfopen(argv[i], "r");
       skproto(argv[i], fpin);
       fa_xfclose(fpin);
