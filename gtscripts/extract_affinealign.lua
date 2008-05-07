@@ -19,8 +19,8 @@ require 'extractor' -- contains all the classes necessary for the extracting
 
 function usage()
   io.stderr:write(string.format("Usage: %s gt_home\n", arg[0]))
-  io.stderr:write("Extract affinealign program from GenomeTools home directory " ..
-                  "gt_home.\n")
+  io.stderr:write("Extract affinealign program from GenomeTools home " ..
+                  "directory gt_home.\n")
   os.exit(1)
 end
 
