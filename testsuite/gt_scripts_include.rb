@@ -130,7 +130,7 @@ Name "extract_linearalign"
 Keywords "gt_scripts"
 Test do
   run_test "#{$bin}gt #{$testdata}../gtscripts/extract_linearalign.lua #{$cur}"
-  run "cd linearalign && ${MAKE:-make}"
+  run "cd linearalign && ${MAKE:-make} test"
   if not File.exists?("linearalign.tar.gz") then
     raise TestFailed, "file 'linearalign.tar.gz' does not exist"
   end

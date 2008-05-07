@@ -73,8 +73,41 @@ m:ma2xansi()
 p:add(m)
 
 -- add makefile
-mf = Makefile:new(name)
+mf = Makefile:new(name, true)
+mf:add_test("ruby -I. testsuite.rb")
 p:set_makefile(mf)
+
+-- add testsuite
+p:add_stest()
+testsuite = Testsuite:new("none_defined")
+testsuite:add_test("linearalign test 1", [[
+  run "#{$bin}linearalign ab bbabcccbababcccb"
+  run "diff #{$last_stdout} #{$bin}test1.out"
+]])
+testsuite:add_file("test1.out", [[
+--ab------------
+  ||            
+bbabcccbababcccb
+]])
+testsuite:add_test("linearalign test 2", [[
+  run "#{$bin}linearalign ccbaabac bbabcbabac"
+  run "diff #{$last_stdout} #{$bin}test2.out"
+]])
+testsuite:add_file("test2.out", [[
+ccba---abac
+  ||   ||||
+-bbabcbabac
+]])
+testsuite:add_test("linearalign test 3", [[
+  run "#{$bin}linearalign bbababbbaba b"
+  run "diff #{$last_stdout} #{$bin}test3.out"
+]])
+testsuite:add_file("test3.out", [[
+bbababbbaba
+|          
+b----------
+]])
+p:add(testsuite)
 
 -- add example program
 prog = Program:new("main")
@@ -101,7 +134,6 @@ prog:set_content([[
 
   alignment = linearalign(u, ulen, v, vlen);
   alignment_show(alignment, stdout);
-  printf("\n");
   alignment_delete(alignment);
 
 ]])
