@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdbool.h>
 #include "libgtcore/ma.h"
 #include "libgtext/linearalign.h"
 
