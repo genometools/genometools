@@ -25,8 +25,8 @@
   This module implements the counting sort algorithm. For a description see
   for example page 175 to page 177 of the book
 
-  T.H. Cormen, C.E. Leiserson and R.L. Rivest. Introduction to Algorithms. MIT
-  Press: Cambridge, MA, 1990.
+  T.H. Cormen, C.E. Leiserson and R.L. Rivest. Introduction to Algorithms.
+  MIT Press: Cambridge, MA, 1990.
 */
 
 /* Sort the array of elements pointed to by <in> containing <size> many elements
