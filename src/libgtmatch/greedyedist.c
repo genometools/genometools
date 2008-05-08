@@ -67,7 +67,7 @@ typedef struct
   Frontvalue *frontspace;
 } FrontResource;
 
-#ifdef DEBUG
+#ifdef SKDEBUG
 static void showfront(const FrontResource *gl,
                       const Frontspec *fspec,
                       long r)
@@ -104,7 +104,7 @@ static void frontspecparms(const FrontResource *gl,
     fspec->left = MAX(-gl->ulen,-p);
     fspec->width = MIN(gl->vlen,p) - fspec->left + 1;
   }
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("p=%ld,offset=%ld,left=%ld,width=%ld\n",p,
                                                  fspec->offset,
                                                  fspec->left,
@@ -139,17 +139,17 @@ static void evalentryforward(FrontResource *gl,
   Uchar a, b;
   Frontvalue *fptr;
 
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("evalentryforward(k=%ld)\n",k);
 #endif
   fptr = gl->frontspace + fspec->offset - fspec->left;
   t = accessfront(gl,fptr,fspec,k) + 1;         /* same diagonal */
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("same: access(k=%ld)=%ld\n",k,t-1);
 #endif
 
   value = accessfront(gl,fptr,fspec,k-1);       /* diagonal below */
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("below: access(k=%ld)=%ld\n",k-1,value);
 #endif
   if (t < value)
@@ -157,14 +157,14 @@ static void evalentryforward(FrontResource *gl,
     t = value;
   }
   value = accessfront(gl,fptr,fspec,k+1) + 1;     /* diagonal above */
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("above: access(k=%ld)=%ld\n",k+1,value-1);
 #endif
   if (t < value)
   {
     t = value;
   }
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("maximum: t=%ld\n",t);   /* the maximum over three values */
 #endif
   if (t < 0 || t+k < 0)             /* no negative value */
@@ -225,20 +225,20 @@ static bool evalfrontforward(FrontResource *gl,
       {
         defined = true;
       }
-#ifdef DEBUG
+#ifdef SKDEBUG
       printf("store front[k=%ld]=%ld ",k,ROWVALUE(fval));
       printf("at index %ld\n",(long) (fval-gl->frontspace));
 #endif
     } else
     {
-#ifdef DEBUG
+#ifdef SKDEBUG
       printf("store front[k=%ld]=MINUSINFINITYFRONT ",k);
       printf("at index %ld\n",(long) (fval-gl->frontspace));
 #endif
       STOREFRONT(gl,ROWVALUE(fval),MINUSINFINITYFRONT(gl));
     }
   }
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("frontvalues[r=%ld]=",r);
   showfront(gl,fspec,r);
 #endif
@@ -273,7 +273,7 @@ static void firstfrontforward(FrontResource *gl,Frontspec *fspec)
     }
     STOREFRONT(gl,ROWVALUE(&gl->frontspace[0]),(long) (uptr - gl->useq));
   }
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("forward front[0]=%ld\n",ROWVALUE(&gl->frontspace[0]));
 #endif
 }
@@ -292,7 +292,7 @@ unsigned long greedyunitedist(const Uchar *useq,
   unsigned long kval;
   long r;
 
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("unitedistcheckSEPgeneric(ulen=%lu,vlen=%lu)\n",ulenvalue,vlenvalue);
 #endif
   assert(ulenvalue < (unsigned long) LONG_MAX);
@@ -347,7 +347,7 @@ unsigned long greedyunitedist(const Uchar *useq,
       }
     }
   }
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("unitedistfrontSEP returns %ld\n",realdistance);
 #endif
   FREESPACE(gl.frontspace);

@@ -218,7 +218,8 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
         haserr = true;
       }
     }
-    if (suffixarray.prefixlength > 0 && !haserr)
+    if (!haserr && suffixarray.readmode == Forwardmode &&
+        suffixarray.prefixlength > 0)
     {
       showverbose(verboseinfo,"verifymappedstr");
       if (verifymappedstr(&suffixarray,err) != 0)
@@ -254,6 +255,7 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
       {
         freeSequentialsuffixarrayreader(&ssar);
       }
+      showverbose(verboseinfo,"okay");
     }
   }
   if (sfxmapoptions.inputdes && !haserr)

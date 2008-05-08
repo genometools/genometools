@@ -35,7 +35,7 @@ static int addmarkpos(ArraySeqpos *asp,
   initEncodedsequencescanstate(esr,encseq,Forwardmode,seqrange->leftpos);
   for (pos=seqrange->leftpos; pos<seqrange->rightpos; pos++)
   {
-    currentchar = sequentialgetencodedchar(encseq,esr,pos);
+    currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
     assert(ISSPECIAL(currentchar));
     if (currentchar == (Uchar) SEPARATOR)
     {
@@ -138,7 +138,7 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
   {
     len = (unsigned long) (right-left);
     mid = left + DIV2(len);
-#ifdef DEBUG
+#ifdef SKDEBUG
     printf("left=%lu,right = %lu\n",left,right);
     printf("mid=%lu\n",mid);
 #endif
@@ -191,7 +191,7 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
   {
     len = (unsigned long) (right-left);
     mid = left + DIV2(len);
-#ifdef DEBUG
+#ifdef SKDEBUG
     printf("left=%lu,right = %lu\n",left,right);
     printf("mid=%lu\n",mid);
 #endif
@@ -238,7 +238,7 @@ int checkmarkpos(const Encodedsequence *encseq,
     initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
     for (pos=0; pos<totallength; pos++)
     {
-      currentchar = sequentialgetencodedchar(encseq,esr,pos);
+      currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
       if (currentchar == (Uchar) SEPARATOR)
       {
         currentseqnum++;

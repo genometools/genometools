@@ -25,12 +25,13 @@
 #include "libgtcore/unused.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
+#include "intbits.h"
 #include "readmode-def.h"
 #include "verbose-def.h"
 
 #define REVERSEPOS(TOTALLENGTH,POS) ((TOTALLENGTH) - 1 - (POS))
 
-#ifdef DEBUG
+#ifdef SKDEBUG
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
         {\
           Uchar cctmp = getencodedchar(ENCSEQ,POS,READMODE);\
@@ -98,10 +99,17 @@ typedef struct
 #define getencodedcharnospecial(ENCSEQ,POS,RM)\
         getencodedchar(ENCSEQ,POS,RM)
 
-#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS)\
-        getencodedchar(ENCSEQ,POS,(ENCSEQSTATE)->readmode)
+#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS,READMODE)\
+        getencodedchar(ENCSEQ,POS,READMODE)
 
 #else
+
+typedef struct
+{
+  Twobitencoding tbe;           /* two bit encoding */
+  unsigned int unitsnotspecial; /* units which are not special */
+  Seqpos position;
+} EndofTwobitencoding;
 
 typedef struct Encodedsequence Encodedsequence;
 typedef struct Encodedsequencescanstate Encodedsequencescanstate;
@@ -118,7 +126,20 @@ Uchar getencodedcharnospecial(const Encodedsequence *encseq,
 
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
-                               Seqpos pos);
+                               Seqpos pos,
+                               Readmode readmode);
+
+void extract2bitenc(bool fwd,
+                    EndofTwobitencoding *ptbe,
+                    const Encodedsequence *encseq,
+                    Encodedsequencescanstate *esr,
+                    Seqpos startpos);
+
+int compareTwobitencodings(bool fwd,
+                           bool complement,
+                           unsigned int *commonunits,
+                           const EndofTwobitencoding *ptbe1,
+                           const EndofTwobitencoding *ptbe2);
 
 #endif
 
@@ -135,6 +156,11 @@ void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
                                   const Encodedsequence *encseq,
                                   Readmode readmode,
                                   Seqpos startpos);
+
+void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
+                                         const Encodedsequence *encseq,
+                                         bool moveforward,
+                                         Seqpos startpos);
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
 
@@ -185,30 +211,40 @@ void encseqextract(Uchar *buffer,
                    Seqpos frompos,
                    Seqpos topos);
 
-void checkextractunitatpos(const Encodedsequence *encseq,bool fwd);
+int multicharactercompare(const Encodedsequence *encseq,
+                          bool fwd,
+                          bool complement,
+                          Encodedsequencescanstate *esr1,
+                          Seqpos pos1,
+                          Encodedsequencescanstate *esr2,
+                          Seqpos pos2);
+
+int compareEncseqsequences(Seqpos *lcp,
+                           const Encodedsequence *encseq,
+                           bool fwd,
+                           bool complement,
+                           Encodedsequencescanstate *esr1,
+                           Encodedsequencescanstate *esr2,
+                           Seqpos pos1,Seqpos pos2,
+                           Seqpos depth);
+
+/* some check functions called in test-encseq.c */
+
+void checkextractunitatpos(const Encodedsequence *encseq,
+                           bool fwd,bool complement);
 
 void multicharactercompare_withtest(const Encodedsequence *encseq,
-                                    Readmode readmode,
+                                    bool fwd,
+                                    bool complement,
                                     Encodedsequencescanstate *esr1,
                                     Seqpos pos1,
                                     Encodedsequencescanstate *esr2,
                                     Seqpos pos2);
 
-int compareEncseqsequences(Seqpos *lcp,
-                           const Encodedsequence *encseq,
-                           Readmode readmode,
-                           Encodedsequencescanstate *esr1,
-                           Encodedsequencescanstate *esr2,
-                           Seqpos pos1,Seqpos pos2,
-                           Seqpos depth,
-                           UNUSED Seqpos totallength);
-
-int compareEncseqsequences_nolcp(const Encodedsequence *encseq,
-                                 Readmode readmode,
-                                 Encodedsequencescanstate *esr1,
-                                 Encodedsequencescanstate *esr2,
-                                 Seqpos pos1,Seqpos pos2,
-                                 Seqpos depth,
-                                 UNUSED Seqpos totallength);
+void showsequenceatstartpos(FILE *fp,
+                            bool fwd,
+                            bool complement,
+                            const Encodedsequence *encseq,
+                            Seqpos startpos);
 
 #endif

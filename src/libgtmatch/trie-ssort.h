@@ -15,20 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_STRATEGY_H
-#define SFX_STRATEGY_H
+#ifndef TRIE_SSORT_H
+#define TRIE_SSORT_H
 
-#include <stdbool.h>
-#include "defined-types.h"
+typedef struct Trierep Trierep;
 
-typedef struct
-{
-  Definedunsignedint maxdepth;
-  unsigned long maxwidthrealmedian;
-  bool cmpcharbychar, /* compare suffixes character by character instead
-                         of comparing entire words (only for two bit
-                         encoding */
-       storespecialcodes;
-} Sfxstrategy;
+Trierep *newTrierep(unsigned long numofsuffixes,
+                    const Encodedsequence *encseq,
+                    Readmode readmode);
+
+void triesuffixsort(Trierep *trierep,
+                    Seqpos *suffixtable,
+                    Seqpos *lcpsubtab,
+                    unsigned long numberofsuffixes,
+                    Seqpos depth);
+
+void freeTrierep(Trierep **trierep);
 
 #endif

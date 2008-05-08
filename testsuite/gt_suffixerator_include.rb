@@ -10,13 +10,10 @@ def trials()
   return "-scantrials 10 -multicharcmptrials 1000"
 end
 
-def checksfx(parts,pl,withsmap,sat,filelist)
-  if withsmap == 0
-    extra=""
-  elsif withsmap == 1
-    extra="-smap #{$transdir}TransDNA"
-  else
-    extra="-smap #{$transdir}TransProt11"
+def checksfx(parts,pl,withsmap,sat,cmp,filelist)
+  extra=withsmap
+  if cmp
+    extra=extra + " -cmpcharbychar"
   end
   filearg=""
   filelist.each do |filename|
@@ -139,33 +136,46 @@ end
 
 1.upto(3) do |parts|
   [0,2].each do |withsmap|
-    if withsmap == 0
-      extra="-smap #{$transdir}TransProt11"
-      extraname="-smap TransProt11"
-    else
-      extra=""
-      extraname=""
+    extra=""
+    if withsmap == 1
+      extra="-protein"
+      extraname="protein"
+    elsif withsmap == 2
+      extra="-smap TransProt11"
+      extraname="TransProt11"
     end
-    Name "gt sfxmap protein #{extraname} #{parts} parts"
+    Name "gt suffixerator+sfxmap protein #{extraname} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
-      checksfx(parts,3,extra,"direct",["sw100K1.fsa","sw100K2.fsa"])
+      checksfx(parts,3,extra,"direct",true,["sw100K1.fsa","sw100K2.fsa"])
     end
   end
 end
 
-
-1.upto(2) do |parts|
-  ["direct", "bit", "uchar", "ushort", "uint"].each do |sat|
-    Name "gt sfxmap dna #{sat} #{parts} parts"
-    Keywords "gt_suffixerator"
-    Test do
-      checksfx(parts,1,0,sat,["Random-Small.fna"])
-      checksfx(parts,3,0,sat,["Random.fna"])
-      checksfx(parts,3,0,sat,["RandomN.fna"])
-      checksfx(parts,2,0,sat,["trna_glutamine.fna"])
-      checksfx(parts,1,0,sat,["TTT-small.fna"])
-      checksfx(parts,3,0,sat,["RandomN.fna","Random.fna","Atinsert.fna"])
+[true,false].each do |cmp|
+  1.upto(2) do |parts|
+    ["direct", "bit", "uchar", "ushort", "uint"].each do |sat|
+      [0,2].each do |withsmap|
+        extra=""
+        if withsmap == 1
+          extra="-dna"
+          extraname="dna"
+        elsif withsmap == 2
+          extra="-smap TransDNA"
+          extraname="TransDNA"
+        end
+        Name "gt suffixerator+sfxmap dna #{extraname} #{sat} #{parts} parts"
+        Keywords "gt_suffixerator"
+        Test do
+          checksfx(parts,1,extra,sat,cmp,["Random-Small.fna"])
+          checksfx(parts,3,extra,sat,cmp,["Random.fna"])
+          checksfx(parts,3,extra,sat,cmp,["RandomN.fna"])
+          checksfx(parts,2,extra,sat,cmp,["trna_glutamine.fna"])
+          checksfx(parts,1,extra,sat,cmp,["TTT-small.fna"])
+          checksfx(parts,3,extra,sat,cmp,["RandomN.fna","Random.fna",
+                                          "Atinsert.fna"])
+        end
+      end
     end
   end
 end
@@ -273,6 +283,6 @@ if $gttestdata then
   Keywords "gt_greedyfwdmat gttestdata"
   Test do
     createandcheckgreedyfwdmat("#{$gttestdata}Iowa/at1MB",
-                            "#{$testdata}U89959_genomic.fas")
+                               "#{$testdata}U89959_genomic.fas")
   end
 end

@@ -52,7 +52,7 @@
             retcode = -1;\
             break;\
           }\
-          currentchar = sequentialgetencodedchar(dbencseq,esr,sidx);\
+          currentchar = sequentialgetencodedchar(dbencseq,esr,sidx,readmode);\
           retcode = (int) (query[LCPLEN] - currentchar);\
           if (retcode == 0)\
           {\
@@ -272,7 +272,7 @@ static unsigned long extendright(const Encodedsequence *dbencseq,
     {
       break;
     }
-    dbchar = sequentialgetencodedchar(dbencseq,esr,dbpos);
+    dbchar = sequentialgetencodedchar(dbencseq,esr,dbpos,readmode);
     if (dbchar != query[querypos] || ISSPECIAL(dbchar))
     {
       break;

@@ -27,7 +27,12 @@ typedef enum
   Reversecomplementmode
 } Readmode;
 
-#define ISDIRREVERSE(R) ((R) == Reversemode || (R) == Reversecomplementmode)
+#define ISDIRREVERSE(R)    ((R) == Reversemode ||\
+                            (R) == Reversecomplementmode)
+#define ISDIRCOMPLEMENT(R) ((R) == Complementmode ||\
+                            (R) == Reversecomplementmode)
+
+#define COMPLEMENTBASE(B) ((Uchar) 3 - (B))
 
 const char *showreadmode(Readmode readmode);
 

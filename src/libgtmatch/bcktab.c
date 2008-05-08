@@ -284,7 +284,7 @@ Bcktab *mapbcktab(const Str *indexname,
     setdistpfxidxptrs(bcktab->distpfxidx,bcktab->distpfxidx[0],
                       bcktab->basepower,bcktab->prefixlength);
   }
-#ifdef mydebug
+#ifdef SKDEBUG
   checkcountspecialcodes(bcktab);
 #endif
   return bcktab;
@@ -349,7 +349,7 @@ void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
     += (unsigned long) (specialcharacters + 1);
 }
 
-#ifdef mydebug
+#ifdef SKDEBUG
 static unsigned long fromcode2countspecialcodes(Codetype code,
                                                 const Bcktab *bcktab)
 {
@@ -608,7 +608,7 @@ Codetype bcktab_numofallcodes(const Bcktab *bcktab)
   return bcktab->numofallcodes;
 }
 
-#ifdef DEBUG
+#ifdef SKDEBUG
 #include "qgram2code.h"
 void consistencyofsuffix(int line,
                          const Encodedsequence *encseq,

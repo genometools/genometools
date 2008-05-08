@@ -112,8 +112,8 @@ const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
   initEncodedsequencescanstate(epi->esr,epi->sampleencseq,Forwardmode,start);
   for (j=0; j<*patternlen; j++)
   {
-    /* cc = sequentialgetencodedchar(epi->sampleencseq,epi->esr,start+j); */
-    cc = sequentialgetencodedchar(epi->sampleencseq,epi->esr,start+j);
+    cc = sequentialgetencodedchar(epi->sampleencseq,epi->esr,start+j,
+                                  Forwardmode);
     if (ISSPECIAL(cc))
     {
       cc = (Uchar) (drand48() * epi->alphasize);

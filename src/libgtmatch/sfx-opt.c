@@ -52,6 +52,7 @@ static OPrval parse_options(int *parsed_args,
          *optionsat,
          *optiondir,
          *optionstorespecialcodes,
+         *optionmaxwidthrealmedian,
          *optiondes;
   OPrval oprval;
   Str *dirarg = str_new();
@@ -131,6 +132,15 @@ static OPrval parse_options(int *parsed_args,
                          &so->sfxstrategy.cmpcharbychar,false);
   option_is_development_option(optioncmpcharbychar);
   option_parser_add_option(op, optioncmpcharbychar);
+
+  optionmaxwidthrealmedian = option_new_ulong(
+                                     "maxwidthrealmedian",
+                                     "compute real median for intervals of "
+                                     "at most the given widthprefixes",
+                                     &so->sfxstrategy.maxwidthrealmedian,
+                                     1U);
+  option_is_development_option(optionmaxwidthrealmedian);
+  option_parser_add_option(op, optionmaxwidthrealmedian);
 
   optionstorespecialcodes
     = option_new_bool("storespecialcodes",

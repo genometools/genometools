@@ -47,6 +47,7 @@ greedyfwdmat.c
 inl-encseq.c
 mapspec-gen.c
 measure-time.c
+merger-trie.c
 optionargmode.c
 overallseq.c
 sfx-bentsedg.c
@@ -59,7 +60,7 @@ sfx-run.c
 sfx-suffixer.c
 substriter.c
 test-pairwise.c
-trieins.c
+trie-ssort.c
 turnwheels.c
 uniquesub.c
 verbose.c

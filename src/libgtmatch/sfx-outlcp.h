@@ -50,6 +50,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     Outlcpinfo *outlcpinfo,
                     const Definedunsignedint *maxdepth,
                     bool cmpcharbychar,
+                    unsigned long maxwidthrealmedian,
                     unsigned long long *bucketiterstep);
 
 #endif

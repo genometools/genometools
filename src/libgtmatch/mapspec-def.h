@@ -30,13 +30,6 @@
         mapspecptr->numofunits = ELEMS;\
         mapspecptr->name = #PTR
 
-#define NEWTWOBITENCODING
-#ifdef NEWTWOBITENCODING
-typedef uint32_t Twobitencoding;
-#else
-typedef unsigned char Twobitencoding;
-#endif
-
 typedef unsigned long Unsignedlong;
 
 typedef enum
