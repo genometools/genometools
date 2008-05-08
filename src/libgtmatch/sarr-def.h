@@ -58,6 +58,10 @@ DECLAREBufferedfiletype(Uchar);
 
 DECLAREBufferedfiletype(Largelcpvalue);
 
+/*
+  XXX eliminate error_set in read function.
+*/
+
 #define DECLAREREADFUNCTION(TYPE)\
         static int readnext ## TYPE ## fromstream(TYPE *val,\
                                                   TYPE ## Bufferedfile *buf,\

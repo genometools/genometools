@@ -30,6 +30,9 @@
 #include "divmodmul.h"
 #include "format64.h"
 
+#define COMPLETE(VALUE)\
+        ((VALUE).frompos == 1UL && (VALUE).topos == 0)
+         
 /*
   XXX move this to the libgtcore.
 */
@@ -172,10 +175,14 @@ static Giquery *readginumberfile(bool verbose,
     giqueries[linenum].ginumber = (uint64_t) readint64;
     CHECKPOSITIVE(readlongfrompos,"%ld","second");
     giqueries[linenum].frompos = (unsigned long) readlongfrompos;
-    CHECKPOSITIVE(readlongfrompos,"%ld","third");
+    if (readlongfrompos != 1L || readlongtopos != 0)
+    {
+      CHECKPOSITIVE(readlongtopos,"%ld","third");
+    }
     giqueries[linenum].topos = (unsigned long) readlongtopos;
     giqueries[linenum].markhit = false;
-    if (giqueries[linenum].frompos > giqueries[linenum].topos)
+    if (!COMPLETE(giqueries[linenum]) &&
+        giqueries[linenum].frompos > giqueries[linenum].topos)
     {
       error_set(err,"file \"%s\", line %lu: illegal format: second value %lu "
                     "is larger than third value %lu",
@@ -246,16 +253,21 @@ static unsigned long findginumber(uint64_t ginumber,
 static void outputnonmarked(const Giquery *giqueries,
                             unsigned long numofqueries)
 {
-  unsigned long i, countmissing = 0;
+  unsigned long idx, countmissing = 0;
 
-  for (i=0; i<numofqueries; i++)
+  for (idx=0; idx<numofqueries; idx++)
   {
-    if (!giqueries[i].markhit)
+    if (!giqueries[idx].markhit)
     {
-      printf("unsatisfied " Formatuint64_t " %lu %lu\n",
-              PRINTuint64_tcast(giqueries[i].ginumber),
-              giqueries[i].frompos,
-              giqueries[i].topos);
+      printf("unsatisfied " Formatuint64_t,
+              PRINTuint64_tcast(giqueries[idx].ginumber));
+      if (COMPLETE(giqueries[idx]))
+      {
+        printf(" complete\n");
+      } else
+      {
+        printf(" %lu %lu\n",giqueries[idx].frompos,giqueries[idx].topos);
+      }
       countmissing++;
     }
   }
@@ -376,19 +388,32 @@ int extractginumbers(bool verbose,
                                            sizeof (*headerbufferspace)
                                            * headerbuffersize);
           }
-          (void) snprintf(headerbufferspace,headerbuffersize,Formatuint64_t
-                          " %lu %lu %s",
-                          PRINTuint64_tcast(referenceginumber),
-                          giqueries[ginumberhit].frompos,
-                          giqueries[ginumberhit].topos,
-                          desc);
-          fasta_show_entry_generic(headerbufferspace,
-                                   (const char *) (sequence +
-                                                   giqueries[ginumberhit].
-                                                   frompos - 1),
-                                   giqueries[ginumberhit].topos -
-                                   giqueries[ginumberhit].frompos+1,
-                                   width, outfp);
+          if (COMPLETE(giqueries[ginumberhit]))
+          {
+            (void) snprintf(headerbufferspace,headerbuffersize,Formatuint64_t
+                            " complete %s",
+                            PRINTuint64_tcast(referenceginumber),
+                            desc);
+            fasta_show_entry_generic(headerbufferspace,
+                                     (const char *) sequence,
+                                     len,
+                                     width, outfp);
+          } else
+          {
+            (void) snprintf(headerbufferspace,headerbuffersize,Formatuint64_t
+                            " %lu %lu %s",
+                            PRINTuint64_tcast(referenceginumber),
+                            giqueries[ginumberhit].frompos,
+                            giqueries[ginumberhit].topos,
+                            desc);
+            fasta_show_entry_generic(headerbufferspace,
+                                     (const char *) (sequence +
+                                                     giqueries[ginumberhit].
+                                                     frompos - 1),
+                                     giqueries[ginumberhit].topos -
+                                     giqueries[ginumberhit].frompos+1,
+                                     width, outfp);
+          }
           giqueries[ginumberhit].markhit = true;
           countmarkhit++;
           ginumberhit++;
