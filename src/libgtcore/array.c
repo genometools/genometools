@@ -259,7 +259,7 @@ int array_unit_test(Error *err)
   char_array_test = ma_malloc((MAX_SIZE + 1) * sizeof (char));
   int_array_test = ma_malloc(MAX_SIZE * sizeof (int));
 
-  for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
+  for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
     size = ((double) rand() / RAND_MAX) * MAX_SIZE;
 
     array_reset(char_array);
@@ -268,7 +268,7 @@ int array_unit_test(Error *err)
     ensure(had_err, array_size(char_array) == 0);
     ensure(had_err, array_size(int_array) == 0);
 
-    for (i = 0; i < size && !had_err; i++) {
+    for (i = 0; !had_err && i < size; i++) {
       cc = ((double) rand() / RAND_MAX) * CHAR_MAX;
       ci = ((double) rand() / RAND_MAX) * INT_MAX;
 
