@@ -83,10 +83,11 @@ struct Sfxiterator
   bool storespecialcodes;
   Definedunsignedint maxdepth;
   bool cmpcharbychar;
+  unsigned long maxwidthrealmedian;
   unsigned long long bucketiterstep; /* for progressbar */
 };
 
-#ifdef DEBUG
+#ifdef SKDEBUG
 static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
                                                const  Encodedsequence *encseq,
                                                Readmode readmode,
@@ -189,7 +190,7 @@ static void verifycodelistcomputation(
 }
 #endif
 
-#ifdef mydebug
+#ifdef SKDEBUG
 static Codetype getencseqcode(const Encodedsequence *encseq,
                               Readmode readmode,
                               Seqpos totallength,
@@ -258,7 +259,7 @@ static void updatekmercount(void *processinfo,
     }
   } else
   {
-#ifdef mydebug
+#ifdef SKDEBUG
     if (code == 0)
     {
       Codetype code2 = getencseqcode(sfi->encseq,
@@ -286,7 +287,7 @@ static void updatekmercount(void *processinfo,
 #endif
     sfi->leftborder[code]++;
   }
-#ifdef mydebug
+#ifdef SKDEBUG
   previouscode = code;
   previousfirstspecialdefined = firstspecial->defined;
   previousstorespecials = sfi->storespecials;
@@ -411,7 +412,7 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
 
 void freeSfxiterator(Sfxiterator **sfi)
 {
-#ifdef mydebug
+#ifdef SKDEBUG
   if ((*sfi)->bcktab != NULL)
   {
     checkcountspecialcodes((*sfi)->bcktab);
@@ -438,7 +439,7 @@ void freeSfxiterator(Sfxiterator **sfi)
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
-#ifdef mydebug
+#ifdef SKDEBUG
 static void showleftborder(const Seqpos *leftborder,
                            Codetype numofallcodes)
 {
@@ -506,18 +507,20 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     {
        sfi->storespecialcodes = sfxstrategy->storespecialcodes;
        sfi->maxdepth = sfxstrategy->maxdepth;
+       sfi->maxwidthrealmedian = sfxstrategy->maxwidthrealmedian;
        if (sfxstrategy->cmpcharbychar || !possibletocmpbitwise(encseq))
        {
          sfi->cmpcharbychar = true;
        } else
        {
-         sfi->cmpcharbychar = true; /* XXX false; */
+         sfi->cmpcharbychar = false;
        }
     } else
     {
        sfi->storespecialcodes = false;
        sfi->maxdepth.defined = false;
        sfi->cmpcharbychar = possibletocmpbitwise(encseq) ? false : true;
+       sfi->maxwidthrealmedian = 1UL;
     }
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
@@ -565,7 +568,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
       assert(realspecialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
       reversespecialcodes(sfi->spaceCodeatposition,sfi->nextfreeCodeatposition);
     }
-#ifdef DEBUG
+#ifdef SKDEBUG
     verifycodelistcomputation(encseq,
                               readmode,
                               realspecialranges,
@@ -575,7 +578,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               sfi->spaceCodeatposition);
 #endif
     assert(sfi->leftborder != NULL);
-#ifdef mydebug
+#ifdef SKDEBUG
     showleftborder(sfi->leftborder,sfi->numofallcodes);
 #endif
     for (optr = sfi->leftborder + 1;
@@ -672,6 +675,7 @@ static void preparethispart(Sfxiterator *sfi,
                    sfi->outlcpinfo,
                    &sfi->maxdepth,
                    sfi->cmpcharbychar,
+                   sfi->maxwidthrealmedian,
                    &sfi->bucketiterstep);
   }
   sfi->part++;

@@ -85,7 +85,7 @@ unsigned long applycheckfunctiontotext(const Uchar *text,
   unsigned long i;
   Checkcmppairfuntype checkfunction = (Checkcmppairfuntype) info;
 
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("%s\n",(char *) text);
 #endif
   for (i=0; i<=textlen/2; i++)
@@ -165,7 +165,7 @@ void checkgreedyunitedist(UNUSED bool forward,
 
   edist1 = greedyunitedist(useq,ulen,vseq,vlen);
   edist2 = squarededistunit (useq,ulen,vseq,vlen);
-#ifdef DEBUG
+#ifdef SKDEBUG
   printf("edist = %lu\n",edist1);
 #endif
   if (edist1 != edist2)

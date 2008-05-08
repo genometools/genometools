@@ -26,44 +26,56 @@
 
 #include "arrcmp.pr"
 
+static void runscanatpostrial(const Encodedsequence *encseq,
+                              Encodedsequencescanstate *esr,
+                              Readmode readmode,Seqpos startpos)
+{
+  Seqpos pos, totallength;
+  Uchar ccra, ccsr;
+
+  totallength = getencseqtotallength(encseq);
+  initEncodedsequencescanstate(esr,encseq,readmode,startpos);
+  for (pos=startpos; pos < totallength; pos++)
+  {
+    ccra = getencodedchar(encseq,pos,readmode); /* Random access */
+    ccsr = sequentialgetencodedchar(encseq,esr,pos,readmode);
+    if (ccra != ccsr)
+    {
+      fprintf(stderr,"startpos = " FormatSeqpos
+                     " access=%s, mode=%s: position=" FormatSeqpos
+                     ": random access (correct) = %u != %u = "
+                     " sequential read (wrong)",
+                     PRINTSeqposcast(startpos),
+                     encseqaccessname(encseq),
+                     showreadmode(readmode),
+                     PRINTSeqposcast(pos),
+                     (unsigned int) ccra,
+                     (unsigned int) ccsr);
+      exit(EXIT_FAILURE); /* programming error */
+    }
+  }
+}
+
 static void testscanatpos(const Encodedsequence *encseq,
                           Readmode readmode,
                           unsigned long scantrials)
 {
   Encodedsequencescanstate *esr = NULL;
-  Seqpos pos, startpos, totallength;
+  Seqpos startpos, totallength;
   unsigned long trial;
-  Uchar ccra, ccsr;
 
   totallength = getencseqtotallength(encseq);
   srand48(42349421);
+  esr = newEncodedsequencescanstate();
+  runscanatpostrial(encseq,esr,readmode,0);
+  runscanatpostrial(encseq,esr,readmode,totallength-1);
   for (trial = 0; trial < scantrials; trial++)
   {
     startpos = (Seqpos) (drand48() * (double) totallength);
     printf("trial %lu at " FormatSeqpos "\n",trial,PRINTSeqposcast(startpos));
-    esr = newEncodedsequencescanstate();
-    initEncodedsequencescanstate(esr,encseq,readmode,startpos);
-    for (pos=startpos; pos < totallength; pos++)
-    {
-      ccra = getencodedchar(encseq,pos,readmode); /* Random access */
-      ccsr = sequentialgetencodedchar(encseq,esr,pos);
-      if (ccra != ccsr)
-      {
-        fprintf(stderr,"startpos = " FormatSeqpos
-                       " access=%s, mode=%s: position=" FormatSeqpos
-                       ": random access (correct) = %u != %u = "
-                       " sequential read (wrong)",
-                       PRINTSeqposcast(startpos),
-                       encseqaccessname(encseq),
-                       showreadmode(readmode),
-                       PRINTSeqposcast(pos),
-                       (unsigned int) ccra,
-                       (unsigned int) ccsr);
-        exit(EXIT_FAILURE); /* programming error */
-      }
-    }
-    freeEncodedsequencescanstate(&esr);
+    runscanatpostrial(encseq,esr,readmode,startpos);
   }
+  freeEncodedsequencescanstate(&esr);
 }
 
 static void testmulticharactercompare(const Encodedsequence *encseq,
@@ -73,16 +85,26 @@ static void testmulticharactercompare(const Encodedsequence *encseq,
   Encodedsequencescanstate *esr1, *esr2;
   Seqpos pos1, pos2, totallength;
   unsigned long trial;
+  bool fwd = ISDIRREVERSE(readmode) ? false : true,
+       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
 
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
   totallength = getencseqtotallength(encseq);
   srand48(42349421);
+  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,0);
+  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,
+                                        totallength-1);
+  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,
+                                        totallength-1,esr2,0);
+  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,
+                                        totallength-1,esr2,totallength-1);
   for (trial = 0; trial < multicharcmptrials; trial++)
   {
     pos1 = (Seqpos) (drand48() * (double) totallength);
     pos2 = (Seqpos) (drand48() * (double) totallength);
-    (void) multicharactercompare_withtest(encseq,readmode,esr1,pos1,esr2,pos2);
+    (void) multicharactercompare_withtest(encseq,fwd,complement,
+                                          esr1,pos1,esr2,pos2);
   }
   freeEncodedsequencescanstate(&esr1);
   freeEncodedsequencescanstate(&esr2);
@@ -153,7 +175,7 @@ static int testfullscan(const StrArray *filenametab,
         break;
       }
     }
-    ccsr = sequentialgetencodedchar(encseq,esr,pos);
+    ccsr = sequentialgetencodedchar(encseq,esr,pos,readmode);
     if (ccra != ccsr)
     {
       error_set(err,"access=%s, mode=%s: position=" FormatSeqpos
@@ -193,13 +215,11 @@ int testencodedsequence(const StrArray *filenametab,
 {
   if (hasfastspecialrangeenumerator(encseq))
   {
-    if (readmode == Forwardmode || readmode == Reversemode)
-    {
-      checkextractunitatpos(encseq,ISDIRREVERSE(readmode) ? false : true);
-    }
+    checkextractunitatpos(encseq,ISDIRREVERSE(readmode) ? false : true,
+                          ISDIRCOMPLEMENT(readmode) ? true : false);
     if (multicharcmptrials > 0)
     {
-      testmulticharactercompare(encseq,Forwardmode,multicharcmptrials);
+      testmulticharactercompare(encseq,readmode,multicharcmptrials);
     }
   }
   if (scantrials > 0)

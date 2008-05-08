@@ -125,10 +125,11 @@ specialsRank(const SpecialsRankTable *rankTable, Seqpos pos)
   {
     const Encodedsequence *encseq = rankTable->encseq;
     Encodedsequencescanstate *esr = rankTable->scanState;
-    initEncodedsequencescanstate(esr, encseq,
-                                 rankTable->readmode, samplePos);
+    Readmode readmode = rankTable->readmode;
+    initEncodedsequencescanstate(esr, encseq, readmode, samplePos);
     while (samplePos < pos)
-      if (ISSPECIAL(sequentialgetencodedchar(encseq, esr, samplePos++)))
+      if (ISSPECIAL(sequentialgetencodedchar(encseq, esr, samplePos++,
+                                             readmode)))
         ++rankCount;
   }
   return rankCount;

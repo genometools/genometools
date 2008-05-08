@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TRIEINS_DEF_H
-#define TRIEINS_DEF_H
+#ifndef MERGER_TRIE_H
+#define MERGER_TRIE_H
 
 #include "libgtcore/arraydef.h"
 #include "seqpos-def.h"
@@ -33,18 +33,18 @@ typedef struct
 #endif
 } Suffixinfo;
 
-typedef struct _Trienode
+typedef struct Mergertrienode
 {
   Suffixinfo suffixinfo;
-  struct _Trienode *firstchild,
-                   *rightsibling,
-                   *parent;
+  struct Mergertrienode *firstchild,
+                        *rightsibling,
+                        *parent;
   Seqpos depth;
-} Trienode;
+} Mergertrienode;
 
-typedef Trienode * Trienodeptr;
+typedef Mergertrienode * Mergertrienodeptr;
 
-DECLAREARRAYSTRUCT(Trienodeptr);
+DECLAREARRAYSTRUCT(Mergertrienodeptr);
 
 typedef struct
 {
@@ -55,34 +55,34 @@ typedef struct
 typedef struct
 {
   Encseqreadinfo *encseqreadinfo;
-  Trienode *nodetable,
+  Mergertrienode *nodetable,
            *root;
-  Trienodeptr *unusedTrienodes;
+  Mergertrienodeptr *unusedMergertrienodes;
   unsigned int numofindexes,
                nextunused,
-               allocatedTrienode,
-               nextfreeTrienode;
-} Trierep;
+               allocatedMergertrienode,
+               nextfreeMergertrienode;
+} Mergertrierep;
 
-void showtrie(const Trierep *trierep,
-              const Uchar *characters);
+void showmergertrie(const Mergertrierep *trierep,
+                    const Uchar *characters);
 
-void checktrie(Trierep *trierep,unsigned int numberofleaves,
-               unsigned int maxleafnum,Error *err);
+void checkmergertrie(Mergertrierep *trierep,unsigned int numberofleaves,
+                     unsigned int maxleafnum,Error *err);
 
-void showallnoderelations(const Trienode *node);
+void showallnoderelations(const Mergertrienode *node);
 
-void insertsuffixintotrie(Trierep *trierep,
-                          Trienode *node,
-                          Suffixinfo *suffixinfo);
+void insertsuffixintomergertrie(Mergertrierep *trierep,
+                                Mergertrienode *node,
+                                Suffixinfo *suffixinfo);
 
-Trienode *findsmallestnodeintrie(const Trierep *trierep);
+Mergertrienode *findsmallestnodeintrie(const Mergertrierep *trierep);
 
-void deletesmallestpath(Trienode *smallest,Trierep *trierep);
+void deletesmallestpath(Mergertrienode *smallest,Mergertrierep *trierep);
 
-void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
+void initmergertrienodetable(Mergertrierep *trierep,Seqpos numofsuffixes,
                        unsigned int numofindexes);
 
-void freetrierep(Trierep *trierep);
+void freemergertrierep(Mergertrierep *trierep);
 
 #endif

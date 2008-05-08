@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,20 +15,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_STRATEGY_H
-#define SFX_STRATEGY_H
+#ifndef BLTRIE_SSORT_H
+#define BLTRIE_SSORT_H
 
-#include <stdbool.h>
-#include "defined-types.h"
+typedef struct Blindtrierep Blindtrierep;
 
-typedef struct
-{
-  Definedunsignedint maxdepth;
-  unsigned long maxwidthrealmedian;
-  bool cmpcharbychar, /* compare suffixes character by character instead
-                         of comparing entire words (only for two bit
-                         encoding */
-       storespecialcodes;
-} Sfxstrategy;
+Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
+                              const Encodedsequence *encseq,
+                              bool cmpcharbychar,
+                              Readmode readmode);
+
+void blindtriesuffixsort(Blindtrierep *trierep,
+                         Seqpos *suffixtable,
+                         Seqpos *lcpsubtab,
+                         unsigned long numberofsuffixes,
+                         Seqpos offset);
+
+void freeBlindtrierep(Blindtrierep **trierep);
 
 #endif

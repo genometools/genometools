@@ -22,7 +22,7 @@
 #include "spacedef.h"
 #include "emimergeesa.h"
 #include "encseq-def.h"
-#include "trieins-def.h"
+#include "merger-trie.h"
 #include "verbose-def.h"
 
 #include "esa-map.pr"
@@ -33,10 +33,10 @@
 
  DECLAREREADFUNCTION(Largelcpvalue);
 
-static void fillandinsert(Trierep *trierep,
+static void fillandinsert(Mergertrierep *trierep,
                           unsigned int idx,
                           Seqpos suftabvalue,
-                          Trienode *node,
+                          Mergertrienode *node,
                           UNUSED uint64_t ident)
 {
   Suffixinfo sinfo;
@@ -46,7 +46,7 @@ static void fillandinsert(Trierep *trierep,
 #ifdef WITHTRIEIDENT
   sinfo.ident = ident;
 #endif
-  insertsuffixintotrie(trierep,node,&sinfo);
+  insertsuffixintomergertrie(trierep,node,&sinfo);
 }
 
 static int inputthesequences(Alphabet **alpha,
@@ -84,7 +84,7 @@ static int inputthesequences(Alphabet **alpha,
   return 0;
 }
 
-static int insertfirstsuffixes(Trierep *trierep,
+static int insertfirstsuffixes(Mergertrierep *trierep,
                                Seqpos *nextpostable,
                                Suffixarray *suffixarraytable,
                                unsigned int numofindexes,
@@ -120,11 +120,12 @@ static int insertfirstsuffixes(Trierep *trierep,
   return 0;
 }
 
-/*@null@*/ static Trienode *findlargestnodeleqlcpvalue(Trienode *smallest,
-                                                       Seqpos lcpvalue,
-                                                       Error *err)
+/*@null@*/ static Mergertrienode *findlargestnodeleqlcpvalue(
+                                          Mergertrienode *smallest,
+                                          Seqpos lcpvalue,
+                                          Error *err)
 {
-  Trienode *tmp;
+  Mergertrienode *tmp;
 
   error_check(err);
   for (tmp = smallest->parent; tmp != NULL; tmp = tmp->parent)
@@ -141,7 +142,7 @@ static int insertfirstsuffixes(Trierep *trierep,
 
 int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Error *err)
 {
-  Trienode *tmpsmallestleaf, *tmplcpnode;
+  Mergertrienode *tmpsmallestleaf, *tmplcpnode;
   Largelcpvalue tmpexception;
   Uchar tmpsmalllcpvalue;
   int retval;
@@ -285,7 +286,8 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
       emmesa->trierep.encseqreadinfo[idx].readmode
         = emmesa->suffixarraytable[idx].readmode;
     }
-    inittrienodetable(&emmesa->trierep,(Seqpos) numofindexes,numofindexes);
+    initmergertrienodetable(&emmesa->trierep,(Seqpos) numofindexes,
+                            numofindexes);
     if (insertfirstsuffixes(&emmesa->trierep,
                            emmesa->nextpostable,
                            emmesa->suffixarraytable,
@@ -316,7 +318,7 @@ void wraptEmissionmergedesa(Emissionmergedesa *emmesa)
   FREESPACE(emmesa->trierep.encseqreadinfo);
   if (emmesa->numofindexes > 1U)
   {
-    freetrierep(&emmesa->trierep);
+    freemergertrierep(&emmesa->trierep);
   }
   FREESPACE(emmesa->nextpostable);
 }

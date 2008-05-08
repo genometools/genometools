@@ -29,7 +29,6 @@
 #include "libgtmatch/sfx-suftaborder.pr"
 #include "libgtmatch/test-encseq.pr"
 #include "libgtmatch/test-mappedstr.pr"
-#include "libgtmatch/test-trieins.pr"
 #include "libgtmatch/test-mergeesa.pr"
 #include "libgtmatch/pos2seqnum.pr"
 

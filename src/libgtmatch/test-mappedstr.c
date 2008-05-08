@@ -104,9 +104,16 @@ static void outkmeroccurrence(void *processinfo,
   STOREINARRAY(codelist,Codetype,1024,code);
 }
 
+/*
+   The function to collect the code from a stream of fasta files
+   can only produce the sequence of code in forward mode.
+   Hence we compute the corresponding sequence also in Forwardmode.
+   Thus we restrict the call for verifymappedstr to the case where
+   the suffix array is in readmode = Forwardmode.
+*/
+
 static void collectkmercode(ArrayCodetype *codelist,
                             const Encodedsequence *encseq,
-                            Readmode readmode,
                             unsigned int kmersize,
                             unsigned int numofchars,
                             Seqpos stringtotallength)
@@ -119,7 +126,7 @@ static void collectkmercode(ArrayCodetype *codelist,
     code = qgram2codefillspecial(numofchars,
                                  kmersize,
                                  encseq,
-                                 readmode,
+                                 Forwardmode,
                                  offset,
                                  stringtotallength);
     STOREINARRAY(codelist,Codetype,1024,code);
@@ -139,8 +146,7 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
   error_check(err);
   if (codeliststream->nextfreeCodetype != codeliststring->nextfreeCodetype)
   {
-    error_set(err,
-                  "length codeliststream= %lu != %lu =length codeliststring",
+    error_set(err,"length codeliststream= %lu != %lu =length codeliststring",
                   (unsigned long) codeliststream->nextfreeCodetype,
                   (unsigned long) codeliststring->nextfreeCodetype);
     return -1;
@@ -159,8 +165,7 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
                       numofchars,
                       kmersize,
                       characters);
-      error_set(err,
-                    "codeliststream[%lu] = " FormatCodetype " != "
+      error_set(err,"codeliststream[%lu] = " FormatCodetype " != "
                     FormatCodetype " = codeliststring[%lu]\n%s != %s",
                     i,
                     codeliststream->spaceCodetype[i],
@@ -175,7 +180,6 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
 }
 
 static int verifycodelists(const Encodedsequence *encseq,
-                           Readmode readmode,
                            const Uchar *characters,
                            unsigned int kmersize,
                            unsigned int numofchars,
@@ -190,7 +194,6 @@ static int verifycodelists(const Encodedsequence *encseq,
   INITARRAY(&codeliststring,Codetype);
   collectkmercode(&codeliststring,
                   encseq,
-                  readmode,
                   kmersize,
                   numofchars,
                   stringtotallength);
@@ -230,7 +233,6 @@ int verifymappedstr(const Suffixarray *suffixarray,Error *err)
   if (!haserr)
   {
     if (verifycodelists(suffixarray->encseq,
-                        suffixarray->readmode,
                         getcharactersAlphabet(suffixarray->alpha),
                         suffixarray->prefixlength,
                         numofchars,

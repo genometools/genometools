@@ -1,0 +1,27 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+void showmergertrie(const Mergertrierep *trierep,
+                    const Uchar *characters);
+
+void checkmergertrie(Mergertrierep *trierep,unsigned int numberofleaves,
+                     unsigned int maxleafnum,Error *err);
+
+void showallnoderelations(const Mergertrienode *node);
+
+void insertsuffixintomergertrie(Mergertrierep *trierep,
+                                Mergertrienode *node,
+                                Suffixinfo *suffixinfo);
+
+Mergertrienode *findsmallestnodeintrie(const Mergertrierep *trierep);
+
+void deletesmallestpath(Mergertrienode *smallest,Mergertrierep *trierep);
+
+void initmergertrienodetable(Mergertrierep *trierep,Seqpos numofsuffixes,
+                             unsigned int numofindexes);
+
+void freemergertrierep(Mergertrierep *trierep);
+
+#ifdef __cplusplus
+}
+#endif

@@ -30,7 +30,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
          posshiftbsizepow = pos >> (Seqpos) fm->log2bsize,
          posshiftsuperbsizepow = pos >> (Seqpos) fm->log2superbsize;
 
-#ifdef mydebug
+#ifdef SKDEBUG
   printf("bwtlength=%u,",(unsigned int) fm->bwtlength);
   printf("longestpos=%u,",(unsigned int) fm->longestsuffixpos);
   printf("bsize=%u,",(unsigned int) fm->bsize);
@@ -43,7 +43,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
   {                                    /* dollar in block */
     maxbfreqidx = ctimesnumofblocks + posshiftbsizepow;
     numofocc = fm->superbfreq[ctimesnumofsuperblocks + posshiftsuperbsizepow];
-#ifdef mydebug
+#ifdef SKDEBUG
     printf("case 0: numofocc = %u\n",numofocc);
 #endif
     for (idx = ctimesnumofblocks +
@@ -51,24 +51,24 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
          idx < maxbfreqidx; idx++)
     {
       numofocc += fm->bfreq[idx];
-#ifdef mydebug
+#ifdef SKDEBUG
       printf("case 1: numofocc = %u\n",numofocc);
 #endif
     }
     for (bwtidx = (pos & fm->negatebsizeones); bwtidx < pos; bwtidx++)
     {
-#ifdef mydebug
+#ifdef SKDEBUG
       printf("access(%u)=%u,cc=%u\n",bwtidx,ACCESSBWTTEXT(bwtidx),cc);
 #endif
       if (bwtidx != fm->longestsuffixpos && ACCESSBWTTEXT(bwtidx) == cc)
       {
         numofocc++;
-#ifdef mydebug
+#ifdef SKDEBUG
         printf("case 2: numofocc = %u\n",numofocc);
 #endif
       }
     }
-#ifdef mydebug
+#ifdef SKDEBUG
     printf("(0) return %u\n",numofocc);
 #endif
     return numofocc;
@@ -81,20 +81,20 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
                    fm->log2superbsizeminuslog2bsize);
     numofocc = fm->superbfreq[ctimesnumofsuperblocks +
                               posshiftsuperbsizepow + 1];
-#ifdef mydebug
+#ifdef SKDEBUG
     printf("case 3: numofocc %u\n",numofocc);
 #endif
     for (idx = ctimesnumofblocks + posshiftbsizepow; idx < maxbfreqidx; idx++)
     {
       numofocc -= fm->bfreq[idx];
-#ifdef mydebug
+#ifdef SKDEBUG
       printf("case 4: numofocc %u\n",numofocc);
 #endif
     }
     if (pos & fm->bsizehalve)            /* second halve of bucket */
     {
       numofocc += fm->bfreq[ctimesnumofblocks + posshiftbsizepow];
-#ifdef mydebug
+#ifdef SKDEBUG
       printf("case 5: numofocc %u\n",numofocc);
 #endif
       bwtlastidx = (posshiftbsizepow + 1) << (Seqpos) fm->log2bsize;
@@ -103,7 +103,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
         if (ACCESSBWTTEXT(bwtidx) == cc)
         {
           numofocc--;
-#ifdef mydebug
+#ifdef SKDEBUG
           printf("case 6: numofocc = %u\n",numofocc);
 #endif
         }
@@ -115,7 +115,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
         if (ACCESSBWTTEXT(bwtidx) == cc)
         {
           numofocc++;
-#ifdef mydebug
+#ifdef SKDEBUG
           printf("case 7: numofocc = %u\n",numofocc);
 #endif
         }
@@ -125,7 +125,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
   {
     maxbfreqidx = ctimesnumofblocks + posshiftbsizepow;
     numofocc = fm->superbfreq[ctimesnumofsuperblocks + posshiftsuperbsizepow];
-#ifdef mydebug
+#ifdef SKDEBUG
     printf("case 8: numofocc = %u\n",numofocc);
 #endif
     for (idx = ctimesnumofblocks +
@@ -133,7 +133,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
          idx < maxbfreqidx; idx++)
     {
       numofocc += fm->bfreq[idx];
-#ifdef mydebug
+#ifdef SKDEBUG
       printf("case 9: numofocc = %u\n",numofocc);
 #endif
     }
@@ -141,7 +141,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
         && (fm->bwtlength - pos > (Seqpos) fm->bsize))
     {
       numofocc += fm->bfreq[ctimesnumofblocks + posshiftbsizepow];
-#ifdef mydebug
+#ifdef SKDEBUG
       printf("case 10: numofocc = %u\n",numofocc);
 #endif
       bwtlastidx = (pos & fm->negatebsizeones) + fm->bsize;
@@ -150,7 +150,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
         if (ACCESSBWTTEXT(bwtidx) == cc)
         {
           numofocc--;
-#ifdef mydebug
+#ifdef SKDEBUG
           printf("case 11: numofocc = %u\n",numofocc);
 #endif
         }
@@ -162,14 +162,14 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
         if (ACCESSBWTTEXT(bwtidx) == cc)
         {
           numofocc++;
-#ifdef mydebug
+#ifdef SKDEBUG
           printf("case 12: numofocc = %u\n",numofocc);
 #endif
         }
       }
     }
   }
-#ifdef mydebug
+#ifdef SKDEBUG
   printf("(1) return %u\n",numofocc);
 #endif
   return numofocc;
