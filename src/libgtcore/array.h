@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -42,6 +42,10 @@ void          array_reset(Array*);
 size_t        array_elem_size(const Array*);
 unsigned long array_size(const Array*);
 void          array_sort(Array*, int(*compar)(const void*, const void*));
+/* Compare the content of <array_a> with the content of <array_b>.
+   <array_a> and <array_b> must have the same array_size() and
+   array_elem_size(). */
+int           array_cmp(const Array  *array_a, const Array *array_b);
 int           array_iterate(const Array*,
                             int(*iterfunc)(void *info, const void *value,
                                            Error*),

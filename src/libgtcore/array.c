@@ -179,6 +179,14 @@ void array_sort(Array *a, int(*compar)(const void*, const void*))
   qsort(a->space, a->next_free, a->size_of_elem, compar);
 }
 
+int array_cmp(const Array *array_a, const Array *array_b)
+{
+  assert(array_size(array_a) == array_size(array_b));
+  assert(array_elem_size(array_a) == array_elem_size(array_b));
+  return memcmp(array_a->space, array_b->space,
+                array_a->size_of_elem * array_a->next_free);
+}
+
 int array_iterate(const Array *a,
                   int(*iterfunc)(void *info, const void *value, Error *err),
                   void *info, Error *err)

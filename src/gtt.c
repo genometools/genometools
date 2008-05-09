@@ -37,6 +37,7 @@
 #include "libgtext/gff3_escaping.h"
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
+#include "libgtext/string_matching.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_chseqids.h"
@@ -153,6 +154,8 @@ Hashtable* gtt_unit_tests(void)
   hashtable_add(unit_tests, "splicedseq class", splicedseq_unit_test);
   hashtable_add(unit_tests, "splitter class", splitter_unit_test);
   hashtable_add(unit_tests, "string class", str_unit_test);
+  hashtable_add(unit_tests, "string matching module",
+                string_matching_unit_test);
   hashtable_add(unit_tests, "tokenizer class", tokenizer_unit_test);
 #ifdef LIBGTVIEW
   hashtable_add(unit_tests, "block class", block_unit_test);

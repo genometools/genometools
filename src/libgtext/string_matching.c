@@ -18,7 +18,13 @@
 #include <assert.h>
 #include <limits.h>
 #include "libgtcore/bittab.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/mathsupport.h"
 #include "libgtext/string_matching.h"
+
+#define NUM_OF_TESTS        500
+#define MAX_STRING_LENGTH   100000
+#define MAX_PATTERN_LENGTH  65
 
 void string_matching_bmh(const char *s, unsigned long n,
                          const char *p, unsigned long m,
@@ -69,6 +75,8 @@ void string_matching_shift_and(const char *s, unsigned long n,
     bittab_set_bit(D, 0);
     if (B[(unsigned) s[i]])
       bittab_and_equal(D, B[(unsigned) s[i]]);
+    else
+      bittab_unset(D);
     if (bittab_bit_is_set(D, m - 1) && process_match) {
       if (process_match(i - m + 1, data))
         break;
@@ -78,4 +86,78 @@ void string_matching_shift_and(const char *s, unsigned long n,
   for (i = 0; i < UCHAR_MAX; i++)
     bittab_delete(B[i]);
   bittab_delete(D);
+}
+
+void string_matching_brute_force(const char *s, unsigned long n,
+                                 const char *p, unsigned long m,
+                                 ProcessMatch process_match, void *data)
+{
+  unsigned long i;
+  assert(s && p);
+  if (m > n || !m || !n) /* no match possible */
+    return;
+  for (i = 0; i <= n - m; i++) {
+    unsigned long j = 0;
+    while (j < m && s[i+j] == p[j])
+      j++;
+    if (j == m && process_match) {
+      if (process_match(i, data))
+        break;
+    }
+  }
+}
+
+static bool store_match(unsigned long pos, void *data)
+{
+  Array *positions = data;
+  assert(positions);
+  array_add(positions, pos);
+  return false;
+}
+
+int string_matching_unit_test(Error *err)
+{
+  char s[MAX_STRING_LENGTH+1], p[MAX_PATTERN_LENGTH+1];
+  Array *brute_force_matches,
+        *bmh_matches,
+        *shift_and_matches;
+  unsigned long i;
+  int had_err = 0;
+
+  error_check(err);
+
+  brute_force_matches = array_new(sizeof (unsigned long));
+  bmh_matches = array_new(sizeof (unsigned long));
+  shift_and_matches = array_new(sizeof (unsigned long));
+
+  for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
+    unsigned long j, n, m;
+    /* generate random string and pattern */
+    n = rand_max(MAX_STRING_LENGTH);
+    m = rand_max(MAX_PATTERN_LENGTH);
+    for (j = 0; j < n; j++)
+      s[j] = rand_char();
+    for (j = 0; j < m; j++)
+      p[j] = rand_char();
+    /* matching */
+    string_matching_brute_force(s, n, p, m, store_match, brute_force_matches);
+    string_matching_bmh(s, n, p, m, store_match, bmh_matches);
+    string_matching_shift_and(s, n, p, m, store_match, shift_and_matches);
+    /* comparing */
+    ensure(had_err, array_size(brute_force_matches) == array_size(bmh_matches));
+    ensure(had_err, array_size(brute_force_matches) ==
+                    array_size(shift_and_matches));
+    ensure(had_err, !array_cmp(brute_force_matches, bmh_matches));
+    ensure(had_err, !array_cmp(brute_force_matches, shift_and_matches));
+    /* reset */
+    array_reset(brute_force_matches);
+    array_reset(bmh_matches);
+    array_reset(shift_and_matches);
+  }
+
+  array_delete(shift_and_matches);
+  array_delete(bmh_matches);
+  array_delete(brute_force_matches);
+
+  return had_err;
 }

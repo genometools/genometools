@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,16 +20,18 @@
 
 #include <stdbool.h>
 
-/* returns the log of the sum of two log probabilities */
+/* Returns the log of the sum of two log probabilities. */
 double        logsum(double p1, double p2);
 bool          double_equals_one(double);
 bool          double_equals_double(double, double);
 
-/* returns a random number between 0 and maximal_value (employs rand(3)) */
+/* Returns a random number between 0 and maximal_value (employs rand(3)). */
 unsigned long rand_max(unsigned long maximal_value);
-/* returns a random double between 0.0 and maximal_value (employs rand(3)) */
+/* Returns a random double between 0.0 and maximal_value (employs rand(3)). */
 double        rand_max_double(double maximal_value);
-/* returns a random double between 0.0 and 1.0 (employs rand(3)) */
+/* Returns a random double between 0.0 and 1.0 (employs rand(3)). */
 double        rand_0_to_1(void);
+/* Returns a random character from 'a' to 'z' (employs rand(3)). */
+char          rand_char(void);
 
 #endif
