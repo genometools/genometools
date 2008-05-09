@@ -40,6 +40,47 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_qgramdist_test_align.out"
 end
 
+Name "gt exercise assemblegreedy 1"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise assemblegreedy " +
+           "#{$testdata}gt_assemblegreedy_fragments_1.fas"
+  run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_1.assembly"
+end
+
+Name "gt exercise assemblegreedy 2"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise assemblegreedy " +
+           "#{$testdata}gt_assemblegreedy_fragments_2.fas"
+  run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_2.assembly"
+end
+
+Name "gt exercise assemblegreedy 2 (-minlength)"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise assemblegreedy -minlength 6 " +
+           "#{$testdata}gt_assemblegreedy_fragments_2.fas"
+  run "diff #{$last_stdout} " +
+       "#{$testdata}gt_assemblegreedy_fragments_2.assembly_minlength6"
+end
+
+Name "gt exercise assemblegreedy 1 (-showoverlaps)"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise assemblegreedy -showoverlaps " +
+           "#{$testdata}gt_assemblegreedy_fragments_1.fas"
+  run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_1.overlaps"
+end
+
+Name "gt exercise assemblegreedy 2 (-showoverlaps)"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise assemblegreedy -showoverlaps " +
+           "#{$testdata}gt_assemblegreedy_fragments_2.fas"
+  run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_2.overlaps"
+end
+
 Name "gt exercise blastenv (script)"
 Keywords "gt_exercise"
 Test do

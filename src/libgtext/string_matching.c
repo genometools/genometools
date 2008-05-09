@@ -75,9 +75,9 @@ static unsigned long* compute_prefixtab(const char *p, unsigned long m)
   return prefixtab;
 }
 
-void string_matching_kmp(const char *s, unsigned long n,
-                         const char *p, unsigned long m,
-                         ProcessMatch process_match, void *data)
+unsigned long string_matching_kmp(const char *s, unsigned long n,
+                                  const char *p, unsigned long m,
+                                  ProcessMatch process_match, void *data)
 {
   unsigned long *prefixtab,
                 j = 0,   /* position in s corresponding to the first character
@@ -85,8 +85,8 @@ void string_matching_kmp(const char *s, unsigned long n,
                 cpl = 0; /* length of common prefix of s[j]..s[n-1] and p */
   char b, c;
   assert(s && p);
-  if (m > n || !m || !n) /* no match possible */
-    return;
+  if (!m || !n) /* no match possible */
+    return 0;
   prefixtab = compute_prefixtab(p, m);
   while (j + cpl < n) {
     if (cpl == m) {                     /* case (1)  */
@@ -114,6 +114,7 @@ void string_matching_kmp(const char *s, unsigned long n,
     }
   }
   ma_free(prefixtab);
+  return cpl;
 }
 
 void string_matching_shift_and(const char *s, unsigned long n,

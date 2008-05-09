@@ -21,6 +21,7 @@
 #include "libgtext/toolbox.h"
 #include "tools/gt_affinealign.h"
 #include "tools/gt_align.h"
+#include "tools/gt_assemblegreedy.h"
 #include "tools/gt_blastenv.h"
 #include "tools/gt_casino.h"
 #include "tools/gt_coin.h"
@@ -45,6 +46,7 @@ static void* gt_exercise_arguments_new(void)
   Toolbox *exercise_toolbox = toolbox_new();
   toolbox_add_tool(exercise_toolbox, "affinealign", gt_affinealign());
   toolbox_add_tool(exercise_toolbox, "align", gt_align());
+  toolbox_add_tool(exercise_toolbox, "assemblegreedy", gt_assemblegreedy());
   toolbox_add_tool(exercise_toolbox, "blastenv", gt_blastenv());
   toolbox_add(exercise_toolbox, "casino", gt_casino);
   toolbox_add(exercise_toolbox, "coin", gt_coin);
