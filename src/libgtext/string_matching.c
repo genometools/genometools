@@ -19,12 +19,14 @@
 #include <limits.h>
 #include "libgtcore/bittab.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/mathsupport.h"
+#include "libgtcore/undef.h"
 #include "libgtext/string_matching.h"
 
 #define NUM_OF_TESTS        500
 #define MAX_STRING_LENGTH   100000
-#define MAX_PATTERN_LENGTH  65
+#define MAX_PATTERN_LENGTH  66
 
 void string_matching_bmh(const char *s, unsigned long n,
                          const char *p, unsigned long m,
@@ -51,6 +53,67 @@ void string_matching_bmh(const char *s, unsigned long n,
     }
     pos += d[(unsigned) s[pos+m-1]];
   }
+}
+
+static unsigned long* compute_prefixtab(const char *p, unsigned long m)
+{
+  unsigned long i, vlen = 0, *prefixtab;
+  char b;
+  assert(p);
+  prefixtab = ma_malloc(sizeof (unsigned long) * (m+1));
+  prefixtab[0] = UNDEF_ULONG; /* paranoia */
+  if (m)
+    prefixtab[1] = 0;
+  for (i = 2; i <= m; i++) {
+    b = p[i-1];
+    while (vlen > 0 && p[vlen] != b)
+      vlen = prefixtab[vlen];
+    if (p[vlen] == b)
+      vlen++;
+    prefixtab[i] = vlen;
+  }
+  return prefixtab;
+}
+
+void string_matching_kmp(const char *s, unsigned long n,
+                         const char *p, unsigned long m,
+                         ProcessMatch process_match, void *data)
+{
+  unsigned long *prefixtab,
+                j = 0,   /* position in s corresponding to the first character
+                            in p */
+                cpl = 0; /* length of common prefix of s[j]..s[n-1] and p */
+  char b, c;
+  assert(s && p);
+  if (m > n || !m || !n) /* no match possible */
+    return;
+  prefixtab = compute_prefixtab(p, m);
+  while (j + cpl < n) {
+    if (cpl == m) {                     /* case (1)  */
+      if (process_match) {
+        if (process_match(j, data))
+            break;
+      }
+      j = j + cpl - prefixtab[cpl];
+      cpl = prefixtab[cpl];
+    }
+    else {                              /* case (2)  */
+      b = s[j+cpl];
+      c = p[cpl];
+      if (b != c) {
+        if (cpl > 0) {
+          j = j + cpl - prefixtab[cpl]; /* case (2a) */
+          cpl = prefixtab[cpl];
+        }
+        else
+          j++;                          /* case (2b) */
+
+      }
+      else
+        cpl++;                          /* case (2c) */
+    }
+  }
+  ma_free(prefixtab);
 }
 
 void string_matching_shift_and(const char *s, unsigned long n,
@@ -120,6 +183,7 @@ int string_matching_unit_test(Error *err)
   char s[MAX_STRING_LENGTH+1], p[MAX_PATTERN_LENGTH+1];
   Array *brute_force_matches,
         *bmh_matches,
+        *kmp_matches,
         *shift_and_matches;
   unsigned long i;
   int had_err = 0;
@@ -128,6 +192,7 @@ int string_matching_unit_test(Error *err)
 
   brute_force_matches = array_new(sizeof (unsigned long));
   bmh_matches = array_new(sizeof (unsigned long));
+  kmp_matches = array_new(sizeof (unsigned long));
   shift_and_matches = array_new(sizeof (unsigned long));
 
   for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
@@ -142,21 +207,26 @@ int string_matching_unit_test(Error *err)
     /* matching */
     string_matching_brute_force(s, n, p, m, store_match, brute_force_matches);
     string_matching_bmh(s, n, p, m, store_match, bmh_matches);
+    string_matching_kmp(s, n, p, m, store_match, kmp_matches);
     string_matching_shift_and(s, n, p, m, store_match, shift_and_matches);
     /* comparing */
     ensure(had_err, array_size(brute_force_matches) == array_size(bmh_matches));
+    ensure(had_err, array_size(brute_force_matches) == array_size(kmp_matches));
     ensure(had_err, array_size(brute_force_matches) ==
                     array_size(shift_and_matches));
     ensure(had_err, !array_cmp(brute_force_matches, bmh_matches));
+    ensure(had_err, !array_cmp(brute_force_matches, kmp_matches));
     ensure(had_err, !array_cmp(brute_force_matches, shift_and_matches));
     /* reset */
     array_reset(brute_force_matches);
     array_reset(bmh_matches);
+    array_reset(kmp_matches);
     array_reset(shift_and_matches);
   }
 
   array_delete(shift_and_matches);
   array_delete(bmh_matches);
+  array_delete(kmp_matches);
   array_delete(brute_force_matches);
 
   return had_err;

@@ -23,8 +23,13 @@
 /* Gets called for every match. If it returns true, the matching is stopped. */
 typedef bool (*ProcessMatch)(unsigned long pos, void *data);
 
-/* Boyer-Moore-Horspool (O(n*m) time worst-case; sublinear on average). */
+/* Boyer-Moore-Horspool alg. (O(n*m) time worst-case; sublinear on average). */
 void string_matching_bmh(const char *s, unsigned long n,
+                         const char *p, unsigned long m,
+                         ProcessMatch, void *data);
+
+/* Knuth-Morris-Pratt algorithm (O(n+m) time). */
+void string_matching_kmp(const char *s, unsigned long n,
                          const char *p, unsigned long m,
                          ProcessMatch, void *data);
 
