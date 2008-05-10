@@ -561,6 +561,7 @@ $(HMMER_DIR)/config.h:
 	@echo '[create $(@F)]'
 	@cp $(HMMER_DIR)/config.h.in $(HMMER_DIR)/config.h
 	@sed  -i 's/#undef PACKAGE_VERSION/#define PACKAGE_VERSION "2.3.2"/' $@
+	@sed  -i 's/#undef HMMER_THREADS/#define HMMER_THREADS/' $@
 	@sed  -i 's/#undef PACKAGE_NAME/#define PACKAGE_NAME "HMMER"/' $@
 	@sed  -i 's/#undef PACKAGE_TARNAME/#define PACKAGE_TARNAME "hmmer"/' $@
 	@sed  -i 's/#undef PACKAGE_STRING/#define PACKAGE_STRING "HMMER 2.3.2"/' $@
