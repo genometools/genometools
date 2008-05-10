@@ -37,7 +37,6 @@
 #include "libgtext/gff3_in_stream.h"            /* GFF3 input stream class */
 #include "libgtext/gff3_out_stream.h"           /* GFF3 output stream class */
 #include "libgtext/globalchaining.h"           /* global chaining module */
-#include "libgtext/gtdata.h"                    /* gtdata/ module */
 #include "libgtext/gtf_in_stream.h"             /* GTF input stream class */
 #include "libgtext/gtf_out_stream.h"            /* GTF output stream class */
 #include "libgtext/hmm.h"                       /* HMM class */

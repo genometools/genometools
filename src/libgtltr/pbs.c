@@ -31,7 +31,7 @@ ScoreFunction* dna_scorefunc_new(Alpha *a, int match, int mismatch,
                                  int insertion, int deletion)
 {
   ScoreMatrix *sm = score_matrix_new(a);
-  ScoreFunction *sf = scorefunction_new(sm, insertion, deletion);
+  ScoreFunction *sf = score_function_new(sm, insertion, deletion);
   unsigned int m,n;
 
   for (m=0;m<5;m++)
@@ -166,7 +166,7 @@ void pbs_find(const char *seq,
   }
   seq_delete(seq_forward);
   seq_delete(seq_rev);
-  scorefunction_delete(sf);
+  score_function_delete(sf);
   alpha_delete(a);
 
   if (dlist_size(results->hits_fwd) > 0)

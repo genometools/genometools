@@ -267,7 +267,8 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
 }
 
 static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
-                               void *tool_arguments, Error *err)
+                               UNUSED int parsed_args, void *tool_arguments,
+                               Error *err)
 {
   LTRdigestOptions *arguments = tool_arguments;
   GenomeStream *gff3_in_stream   = NULL,

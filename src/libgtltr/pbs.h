@@ -23,7 +23,7 @@
 #include "libgtcore/dlist.h"
 #include "libgtcore/seq.h"
 #include "libgtcore/strand.h"
-#include "libgtcore/scorefunction.h"
+#include "libgtcore/score_function.h"
 #include "libgtext/alignment.h"
 #include "libgtltr/ltrelement.h"
 
