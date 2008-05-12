@@ -51,6 +51,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Definedunsignedint *maxdepth,
                     bool cmpcharbychar,
                     unsigned long maxwidthrealmedian,
+                    unsigned long maxbltriesort,
                     unsigned long long *bucketiterstep);
 
 #endif
