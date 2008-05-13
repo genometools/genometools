@@ -81,6 +81,21 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_2.overlaps"
 end
 
+Name "gt exercise assemblegreedy 2 (-showoverlaps)"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise assemblegreedy -showoverlaps " +
+           "#{$testdata}gt_assemblegreedy_fragments_2.fas"
+  run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_2.overlaps"
+end
+
+Name "gt exercise assemblegreedy nonexistent file"
+Keywords "gt_exercise"
+Test do
+  run_test("#{$bin}gt exercise assemblegreedy #{$testdata}nonexistent_file",
+           :retval => 1)
+end
+
 Name "gt exercise blastenv (script)"
 Keywords "gt_exercise"
 Test do

@@ -114,8 +114,7 @@ bool fragment_overlaps_are_sorted(const FragmentOverlaps *fo)
   for (i = 1; i < array_size(fo->overlaps); i++) {
     overlap_a = array_get(fo->overlaps, i-1);
     overlap_b = array_get(fo->overlaps, i);
-    if (overlap_b->weight < overlap_a->weight)
-      return false;
+    if (overlap_b->weight < overlap_a->weight) return false;
   }
   return true;
 }
