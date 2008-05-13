@@ -62,6 +62,7 @@
 #include "tools/gt_mutate.h"
 #include "tools/gt_seqfilter.h"
 #include "tools/gt_sequniq.h"
+#include "tools/gt_shredder.h"
 #include "tools/gt_splitfasta.h"
 #include "tools/gt_splicesiteinfo.h"
 #include "tools/gt_stat.h"
@@ -106,6 +107,7 @@ Toolbox* gtt_tools(void)
   toolbox_add(tools, "mutate", gt_mutate);
   toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
   toolbox_add_tool(tools, "sequniq", gt_sequniq());
+  toolbox_add_tool(tools, "shredder", gt_shredder());
   toolbox_add(tools, "splitfasta", gt_splitfasta);
   toolbox_add(tools, "splicesiteinfo", gt_splicesiteinfo);
   toolbox_add(tools, "stat", gt_stat);

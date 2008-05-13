@@ -116,6 +116,7 @@ end
 require 'gt_scripts_include'
 require 'gt_seqiterator_include'
 require 'gt_sequniq_include'
+require 'gt_shredder_include'
 require 'gt_splicesiteinfo_include'
 require 'gt_stat_include'
 require 'gt_suffixerator_include'
