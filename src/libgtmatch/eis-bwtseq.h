@@ -131,6 +131,14 @@ static inline const EISeq *
 BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq);
 
 /**
+ * \brief Retrieve Symbol at given position in BWT
+ * @param bwtSeq reference of object to query for index
+ * @return read-only reference of index containing the sequence
+ */
+static inline Symbol
+BWTSeqGetSym(const BWTSeq *bwtSeq, Seqpos pos);
+
+/**
  * \brief Query length of stored sequence.
  * @param bwtSeq reference of object to query
  * @return length of sequence

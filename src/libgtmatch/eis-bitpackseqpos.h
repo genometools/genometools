@@ -23,6 +23,7 @@
  */
 
 #include "libgtmatch/seqpos-def.h"
+#include "libgtcore/bitpackstring.h"
 
 #ifdef Seqposequalsunsignedint
 /** retrieve Seqpos from BitString */

@@ -193,7 +193,7 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos LPos,
     case SORTMODE_UNDEFINED:
     default:
 #ifndef _NDEBUG
-      fputs("Requesting LF-map for symbol from undefined sorting range.\n",
+      fputs("Requesting LF-map for symbol from range of undefined sorting.\n",
             stderr);
       abort();
 #endif
@@ -251,6 +251,13 @@ BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq)
 {
   assert(bwtSeq);
   return bwtSeq->seqIdx;
+}
+
+static inline Symbol
+BWTSeqGetSym(const BWTSeq *bwtSeq, Seqpos pos)
+{
+  assert(bwtSeq);
+  return EISGetSym(bwtSeq->seqIdx, pos, bwtSeq->hint);
 }
 
 static inline bool
