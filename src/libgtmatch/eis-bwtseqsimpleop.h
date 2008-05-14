@@ -31,6 +31,12 @@ BWTSeqLength(const BWTSeq *seq)
   return EISLength(seq->seqIdx);
 }
 
+static inline Seqpos
+BWTSeqTerminatorPos(const BWTSeq *bwtSeq)
+{
+  return bwtSeq->longest;
+}
+
 static inline bool
 BWTSeqHasLocateInformation(const BWTSeq *bwtSeq)
 {
@@ -51,11 +57,11 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos)
     return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint);
   else if (tsym == bwtSeq->bwtTerminatorFallback)
     return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint);
-/*       - ((pos > bwtSeq->longest)?1:0); */
+/*       - ((pos > BWTSeqTerminatorPos(bwtSeq))?1:0); */
   else /* tsym == not flattened terminator == alphabetSize - 1 */
   {
     assert(tsym == bwtSeq->alphabetSize - 1);
-    return (pos > bwtSeq->longest)?1:0;
+    return (pos > BWTSeqTerminatorPos(bwtSeq))?1:0;
   }
 }
 
@@ -77,13 +83,13 @@ BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
   else if (tSym == bwtSeq->bwtTerminatorFallback)
     return EISSymTransformedPosPairRank(bwtSeq->seqIdx, tSym, posA, posB,
                                         bwtSeq->hint);
-/*       - ((pos > bwtSeq->longest)?1:0); */
+/*       - ((pos > BWTSeqTerminatorPos(bwtSeq))?1:0); */
   else /* tSym == not flattened terminator == alphabetSize - 1 */
   {
     struct SeqposPair occ;
     assert(tSym == bwtSeq->alphabetSize - 1);
-    occ.a = (posA > bwtSeq->longest)?1:0;
-    occ.b = (posB > bwtSeq->longest)?1:0;
+    occ.a = (posA > BWTSeqTerminatorPos(bwtSeq))?1:0;
+    occ.b = (posB > BWTSeqTerminatorPos(bwtSeq))?1:0;
     return occ;
   }
 }
@@ -119,7 +125,7 @@ BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
       - MRAEncGetRangeBase(alphabet, range),
       fbIdx = MRAEncMapSymbol(alphabet, bwtSeq->bwtTerminatorFallback)
       - MRAEncGetRangeBase(alphabet, range);
-    if (pos > bwtSeq->longest)
+    if (pos > BWTSeqTerminatorPos(bwtSeq))
     {
       rangeOccs[termIdx] = 1;
       --(rangeOccs[fbIdx]);
@@ -148,11 +154,11 @@ BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos posA,
       - MRAEncGetRangeBase(alphabet, range);
     memmove(rangeOccs + termIdx, rangeOccs + termIdx + 1,
             sizeof (rangeOccs[0]) * (rSize - 1));
-    if (posB > bwtSeq->longest)
+    if (posB > BWTSeqTerminatorPos(bwtSeq))
     {
       rangeOccs[termIdx + rSize] = 1;
       --(rangeOccs[fbIdx + rSize]);
-      if (posA > bwtSeq->longest)
+      if (posA > BWTSeqTerminatorPos(bwtSeq))
       {
         rangeOccs[termIdx] = 1;
         --(rangeOccs[fbIdx]);
@@ -172,7 +178,7 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos LPos,
   Symbol tSym = EISGetTransformedSym(bwtSeq->seqIdx, LPos, bwtSeq->hint);
   Seqpos FPos;
   const MRAEnc *alphabet = BWTSeqGetAlphabet(bwtSeq);
-  if (LPos != bwtSeq->longest)
+  if (LPos != BWTSeqTerminatorPos(bwtSeq))
   {
     AlphabetRangeID range = MRAEncGetRangeOfSymbol(alphabet, tSym);
     switch (bwtSeq->rangeSort[range])

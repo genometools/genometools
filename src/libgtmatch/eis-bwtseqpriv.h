@@ -65,4 +65,8 @@ extern void
 BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
                          const enum rangeSortMode *defaultRangeSort);
 
+extern BWTSeq *
+newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
+          const enum rangeSortMode *defaultRangeSort);
+
 #endif

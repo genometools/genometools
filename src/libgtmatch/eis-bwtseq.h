@@ -139,6 +139,16 @@ static inline Seqpos
 BWTSeqLength(const BWTSeq *bwtSeq);
 
 /**
+ * @brief Query position of rotation 0 in suffix array (aka
+ * longest) which also is the position of the terminator symbol in the
+ * BWT.
+ * @param bwtSeq reference of object to query
+ * @return position of terminator
+ */
+static inline Seqpos
+BWTSeqTerminatorPos(const BWTSeq *bwtSeq);
+
+/**
  * \brief Query BWT sequence for the number of occurences of a symbol in a
  * given prefix.
  * @param bwtSeq reference of object to query
@@ -310,6 +320,8 @@ enum verifyBWTSeqErrCode
                                        * does not match the
                                        * corresponding symbol in the
                                        * encoded sequence */
+  VERIFY_BWTSEQ_TERMPOS_ERROR = -5, /**< the position of the
+                                     * 0-rotation does not match */
 };
 /**
  * \brief Perform various checks on the burrows wheeler transform
