@@ -7,13 +7,13 @@ the form
 
 g i j
 
-where g, i, and j are positive integers. g is interpreted as the
-gi number, i is the first position of the substring and j the
-last position of the substring to be extracted. The position are counted
+where g, i, and j are all positive integers or i is 1 and j is 0. g is 
+interpreted as the gi number, i is the first position of the substring and j the
+last position of the substring to be extracted. The positions are counted
 from 1. If g is a gi number which is identical to some gi number
-in the input file, then the correspoding substring is shown in
-fasta format. The header of the fasta formatted sequence in the output begins
-with
+in the input file, then the corresponding substring is shown in
+fasta format. In case i is 1 and j is 0, the entire sequence is shown.
+The header of the fasta formatted sequence in the output begins with
 
 >g i j
 

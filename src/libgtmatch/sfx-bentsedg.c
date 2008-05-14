@@ -68,6 +68,8 @@
 
 #define SMALLSIZE 6UL
 
+static unsigned long bltrieorder[3] = {0};
+
 #define SUBSORT(WIDTH,BORDER,LEFT,RIGHT,DEPTH)\
         /*checksuffixrange(encseq,\
                          fwd,\
@@ -84,6 +86,7 @@
           {\
             if ((LEFT) < (RIGHT))\
             {\
+              bltrieorder[checkstartpointorder(LEFT,RIGHT)]++;\
               blindtriesuffixsort(trierep,LEFT,\
                                   lcpsubtab == NULL\
                                     ? NULL \
@@ -302,6 +305,38 @@ static void checksuffixrange(const Encodedsequence *encseq,
 }
 #endif
 
+static unsigned int checkstartpointorder(const Seqpos *left,
+                                         const Seqpos *right)
+{
+  const Seqpos *ptr;
+  bool ascending;
+
+  assert(left < right);
+  assert(*left != *(left+1));
+  ascending = (*left < *(left+1)) ? true : false;
+  for(ptr = left+1; ptr < right; ptr++)
+  {
+    assert(*ptr != *(ptr+1));
+    if (*ptr < *(ptr+1))
+    {
+      if (!ascending)
+      {
+        return 0;
+      }
+    } else
+    {
+      if (*ptr > *(ptr+1))
+      {
+        if (ascending)
+        {
+          return 0;
+        }
+      }
+    }
+  }
+  return ascending ? 1U : 2U;
+}
+
 static Suffixptr *medianof3cmpcharbychar(const Encodedsequence *encseq,
                                          Readmode readmode,
                                          Seqpos totallength,
@@ -366,6 +401,7 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
       : (SfxcmpGREATER(valb,valc) ? b : (SfxcmpSMALLER(vala,valc) ? a : c));
 }
 
+#ifdef WITHINSERTIONSORT
 static void insertionsort(const Encodedsequence *encseq,
                           Encodedsequencescanstate *esr1,
                           Encodedsequencescanstate *esr2,
@@ -456,6 +492,7 @@ static void insertionsort(const Encodedsequence *encseq,
     }
   }
 }
+#endif
 
 typedef struct
 {
@@ -933,8 +970,15 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   {
     if (l < r)
     {
+      /*
       insertionsort(encseq,esr1,esr2,lcpsubtab,readmode,totallength,
                     l,r,d,maxdepth,cmpcharbychar);
+      */
+      bltrieorder[checkstartpointorder(l,r)]++;
+      blindtriesuffixsort(trierep,l,lcpsubtab == NULL
+                                    ? NULL
+                                    : lcpsubtab->spaceSeqpos+LCPINDEX(l),
+                                    width,d);
     }
     return;
   }
@@ -1742,4 +1786,8 @@ void sortallbuckets(Seqpos *suftabptr,
                                       (double) lcpdistribution[i]/sumevents);
     }
   }
+  printf("noorder=%lu,ascending=%lu,descending=%lu\n",
+         bltrieorder[0],
+         bltrieorder[1],
+         bltrieorder[2]);
 }

@@ -306,7 +306,8 @@ static void insertwithoutspecial(void *processinfo,
 
     if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
     {
-      sfi->suftabptr[--sfi->leftborder[code]] = position;
+      sfi->suftabptr[--sfi->leftborder[code]] = position; 
+      /* from right to left */
     }
   }
 }
@@ -347,6 +348,7 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
         {
           updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
           stidx = --sfi->leftborder[code];
+          /* from right to left */
           sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
                                   prefixindex;
         }
@@ -401,6 +403,7 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
             updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
             assert(code > 0);
             stidx = --sfi->leftborder[code];
+            /* from right to left */
             sfi->suftabptr[stidx] = specialcontext.position - prefixindex;
           }
         }
