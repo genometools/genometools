@@ -135,3 +135,10 @@ addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
   ++(saXltorStateList->numXltors);
   return &newSAXltorState->state;
 }
+
+extern SeqDataReader
+SASSGenericCreateReader(SASeqSrc *src, enum sfxDataRequest request)
+{
+  return seqReaderSetRegisterConsumer(&src->readerSet, request,
+                                      src->createTranslator(src, request));
+}

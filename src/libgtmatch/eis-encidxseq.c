@@ -218,15 +218,14 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
 }
 
 extern unsigned
-estimateSegmentSize(const union seqBaseEncParam *params,
-                    enum seqBaseEncoding encType)
+estimateSegmentSize(const struct seqBaseParam *params)
 {
   unsigned segmentLen = 0;
-  switch (encType)
+  switch (params->encType)
   {
   case BWT_ON_BLOCK_ENC:
     segmentLen =
-      blockEncIdxSeqSegmentLen(&params->blockEnc);
+      blockEncIdxSeqSegmentLen(&params->encParams.blockEnc);
     break;
   default:
     fputs("Illegal/unknown/unimplemented encoding requested!", stderr);

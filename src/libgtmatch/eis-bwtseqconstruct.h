@@ -52,7 +52,7 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-loadBWTSeqForSA(const Str *projectName, enum seqBaseEncoding baseType,
+loadBWTSeqForSA(const Str *projectName, enum seqBaseEncoding encType,
                 int BWTOptFlags, const Suffixarray *sa,
                 Seqpos totalLen, Error *err);
 
@@ -66,7 +66,7 @@ loadBWTSeqForSA(const Str *projectName, enum seqBaseEncoding baseType,
  */
 extern BWTSeq *
 createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
-                     Seqpos totalLen, Error *err);
+                     Error *err);
 
 /**
  * \brief Creates or loads an encoded indexed sequence object of the
@@ -93,6 +93,6 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
 extern BWTSeq *
 createBWTSeqFromSAI(const struct bwtParam *params,
                     SuffixarrayFileInterface *sai,
-                    Seqpos totalLen, Error *err);
+                    Error *err);
 
 #endif

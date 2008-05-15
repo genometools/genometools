@@ -36,50 +36,42 @@
 #include "libgtmatch/encseq-def.h"
 
 #include "libgtmatch/eis-encidxseq.h"
+#include "libgtmatch/eis-sa-common.h"
 #include "libgtmatch/eis-sequencemultiread.h"
 #include "libgtmatch/eis-suffixerator-interface.h"
 
 struct sfxInterface
 {
+  struct SASeqSrc baseClass;
   Readmode readmode;
   unsigned int prefixlength, numofparts;
   const Sfxstrategy *sfxstrategy;
   Measuretime *mtime;
-  Seqpos length;
   const Alphabet *alpha;
   const Encodedsequence *encseq;
   struct seqStats *stats;
   Sfxiterator *sfi;
-  DefinedSeqpos longest;
+  DefinedSeqpos rot0Pos;
   bool specialsuffixes;
   /* data relevant to holding portions of the suffix array */
   Seqpos lastGeneratedLen, lastGeneratedStart;
   const Seqpos *lastGeneratedSufTabSegment;
-  /* data relevant to listeners */
-  struct seqReaderSet readerSet;
-  struct saTaggedXltorStateList xltorStates;
 };
 
-#if 0
-static Seqpos
-sfxIReadAdvance(sfxInterface *sfxi,
-                Seqpos requestMaxPos);
-#endif
-
 static SeqDataTranslator
-sfxIRequest2XltorFunc(sfxInterface *sfxi,
-                      enum sfxDataRequest request)
+SfxIRequest2XltorFunc(sfxInterface *sfxi,
+                      enum sfxDataRequest rtype)
 {
   SeqDataTranslator tr = { { NULL }, NULL };
-  switch (request)
+  switch (rtype)
   {
     union saXltorState readState;
     struct saTaggedXltorState *stateStore;
   case SFX_REQUEST_BWTTAB:
     readState.encSeqTr.readmode = sfxi->readmode;
     readState.encSeqTr.encseq = sfxi->encseq;
-    stateStore = addSuffixarrayXltor(&sfxi->xltorStates,
-                                     request, readState);
+    stateStore = addSuffixarrayXltor(&sfxi->baseClass.xltorStates,
+                                     rtype, readState);
     tr.state.ref = &stateStore->state.encSeqTr;
     tr.translateData = (seqDataTranslateFunc)translateSuftab2BWT;
     break;
@@ -90,8 +82,8 @@ sfxIRequest2XltorFunc(sfxInterface *sfxi,
     readState.lcpState.readmode = sfxi->readmode;
     readState.lcpState.encseq = sfxi->encseq;
     readState.lcpState.lastSufIdx = -1;
-    stateStore = addSuffixarrayXltor(&sfxi->xltorStates,
-                                     request, readState);
+    stateStore = addSuffixarrayXltor(&sfxi->baseClass.xltorStates,
+                                     rtype, readState);
     tr.state.ref = &stateStore->state.lcpState;
     tr.translateData = (seqDataTranslateFunc)translateSuftab2LCP;
     break;
@@ -103,8 +95,59 @@ sfxIRequest2XltorFunc(sfxInterface *sfxi,
   return tr;
 }
 
+static inline sfxInterface *
+SASS2SfxI(SASeqSrc *baseClass)
+{
+  return (sfxInterface *)((char *)baseClass
+                          - offsetof(sfxInterface, baseClass));
+}
+
+extern struct SASeqSrc *
+SfxI2SASS(sfxInterface *sfxi)
+{
+  return &sfxi->baseClass;
+}
+
+static inline const sfxInterface *
+constSASS2SfxI(const SASeqSrc *baseClass)
+{
+  return (const sfxInterface *)((const char *)baseClass
+                                - offsetof(sfxInterface, baseClass));
+}
+
+static SeqDataTranslator
+SfxIBaseRequest2XltorFunc(SASeqSrc *baseClass,
+                          enum sfxDataRequest rtype)
+{
+  return SfxIRequest2XltorFunc(SASS2SfxI(baseClass), rtype);
+}
+
+static DefinedSeqpos
+SfxIBaseGetRot0Pos(const SASeqSrc *baseClass)
+{
+  return SfxIGetRot0Pos(constSASS2SfxI(baseClass));
+}
+
+static const struct seqStats *
+SfxIBaseGetSeqStats(const SASeqSrc *baseClass)
+{
+  return SfxIGetSeqStats(constSASS2SfxI(baseClass));
+}
+
+static MRAEnc *
+SfxIBaseNewMRAEnc(const SASeqSrc *baseClass)
+{
+  return SfxINewMRAEnc(constSASS2SfxI(baseClass));
+}
+
+static void
+deleteSfxInterfaceBase(SASeqSrc *baseClass)
+{
+  deleteSfxInterface(SASS2SfxI(baseClass));
+}
+
 static size_t
-sfxIGenerate(void *iface, void *backlogState,
+SfxIGenerate(void *iface, void *backlogState,
              move2BacklogFunc move2Backlog, void *output, Seqpos generateStart,
              size_t len, SeqDataTranslator xltor, Error *err);
 
@@ -189,12 +232,18 @@ newSfxInterfaceWithReaders(Readmode readmode,
   error_check(err);
 
   sfxi = ma_calloc(1, sizeof (*sfxi));
+  {
+    RandomSeqAccessor origSeqAccess = { SfxIGetOrigSeq, sfxi };
+    initSASeqSrc(&sfxi->baseClass, length, SfxIBaseRequest2XltorFunc, NULL,
+                 SfxIBaseGetRot0Pos, SfxIBaseGetSeqStats,
+                 origSeqAccess, deleteSfxInterfaceBase, SfxIBaseNewMRAEnc,
+                 SfxIGenerate, sfxi);
+  }
   sfxi->readmode = readmode;
   sfxi->mtime = mtime;
-  sfxi->length = length;
   sfxi->alpha = alpha;
   sfxi->encseq = encseq;
-  sfxi->stats = newSeqStatsFromCharDist(sfxi->alpha, sfxi->length,
+  sfxi->stats = newSeqStatsFromCharDist(sfxi->alpha, length,
                                          numofsequences,
                                          characterdistribution);
   if (!(sfxi->sfi = newSfxiterator(specialcharinfo->specialcharacters,
@@ -210,16 +259,11 @@ newSfxInterfaceWithReaders(Readmode readmode,
                                     sfxi->mtime,
                                     verbosity, err)))
     newSfxInterfaceWithReadersErrRet();
-  sfxi->longest.defined = false;
+  sfxi->rot0Pos.defined = false;
   sfxi->specialsuffixes = false;
 
   sfxi->lastGeneratedStart = sfxi->lastGeneratedLen = 0;
   sfxi->lastGeneratedSufTabSegment = NULL;
-
-  initEmptySeqReaderSet(&sfxi->readerSet, SFX_REQUEST_NONE, sizeof (Seqpos),
-                        sfxIGenerate, sfxi);
-
-  initSATaggedXltorStateList(&sfxi->xltorStates);
 
   {
     size_t i;
@@ -241,8 +285,7 @@ extern const Sfxiterator *SfxInterface2Sfxiterator(const sfxInterface *sfxi)
 extern void
 deleteSfxInterface(sfxInterface *sfxi)
 {
-  destructSATaggedXltorStateList(&sfxi->xltorStates);
-  destructSeqReaderSet(&sfxi->readerSet);
+  destructSASeqSrc(&sfxi->baseClass);
   freeSfxiterator(&sfxi->sfi);
   deleteSeqStats(sfxi->stats);
   ma_free(sfxi);
@@ -255,7 +298,7 @@ SfxIGetAlphabet(const sfxInterface *si)
 }
 
 extern MRAEnc *
-newMRAEncFromSfxI(const sfxInterface *si)
+SfxINewMRAEnc(const sfxInterface *si)
 {
   MRAEnc *alphabet;
   assert(si);
@@ -265,22 +308,22 @@ newMRAEncFromSfxI(const sfxInterface *si)
 }
 
 Seqpos
-getSfxILength(const sfxInterface *si)
+SfxIGetLength(const sfxInterface *si)
 {
   assert(si);
-  return si->length;
+  return si->baseClass.seqLen;
 }
 
 extern const struct seqStats *
-getSfxISeqStats(const sfxInterface *si)
+SfxIGetSeqStats(const sfxInterface *si)
 {
   return si->stats;
 }
 
 extern DefinedSeqpos
-getSfxILongestPos(const struct sfxInterface *si)
+SfxIGetRot0Pos(const struct sfxInterface *si)
 {
-  return si->longest;
+  return si->rot0Pos;
 }
 
 extern const Encodedsequence *
@@ -290,22 +333,22 @@ SfxIGetEncSeq(const sfxInterface *si)
 }
 
 extern Readmode
-SfxIGetReadMode(const sfxInterface *si)
+SfxIGetReadmode(const sfxInterface *si)
 {
   return si->readmode;
 }
 
 extern SeqDataReader
-SfxIRegisterReader(sfxInterface *sfxi, enum sfxDataRequest request)
+SfxIRegisterReader(sfxInterface *sfxi, enum sfxDataRequest rtype)
 {
   return seqReaderSetRegisterConsumer(
-    &sfxi->readerSet, request, sfxIRequest2XltorFunc(sfxi, request));
+    &sfxi->baseClass.readerSet, rtype, SfxIRequest2XltorFunc(sfxi, rtype));
 }
 
 extern size_t
-SfxIGetOrigSeq(void *state, Symbol *dest, Seqpos pos, size_t len)
+SfxIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
 {
-  struct sfxInterface *sfxi;
+  const struct sfxInterface *sfxi;
   size_t i;
   assert(state);
   sfxi = state;
@@ -317,14 +360,14 @@ SfxIGetOrigSeq(void *state, Symbol *dest, Seqpos pos, size_t len)
 /** writes substring of suffix table to output, puts older data into
  * cache if necessary */
 static size_t
-sfxIGenerate(void *iface, void *backlogState,
+SfxIGenerate(void *iface, void *backlogState,
              move2BacklogFunc move2Backlog, void *output, Seqpos generateStart,
              size_t len, SeqDataTranslator xltor, UNUSED Error *err)
 {
   sfxInterface *sfxi = iface;
   size_t elemsLeft = len;
   assert(sfxi && backlogState && move2Backlog && output);
-  assert(generateStart + len <= sfxi->length);
+  assert(generateStart + len <= SfxIGetLength(sfxi));
   do
   {
     if (generateStart < sfxi->lastGeneratedStart + sfxi->lastGeneratedLen)
@@ -353,13 +396,13 @@ sfxIGenerate(void *iface, void *backlogState,
          * than memory will hold anyway */
         size_t lastGeneratedLen = sfxi->lastGeneratedLen;
         const Seqpos *suftab = sfxi->lastGeneratedSufTabSegment;
-        if (!sfxi->longest.defined)
+        if (!sfxi->rot0Pos.defined)
           for (pos=0; pos < lastGeneratedLen; pos++)
           {
             if (suftab[pos] == 0)
             {
-              sfxi->longest.defined = true;
-              sfxi->longest.valueseqpos = sfxi->lastGeneratedStart + pos;
+              sfxi->rot0Pos.defined = true;
+              sfxi->rot0Pos.valueseqpos = sfxi->lastGeneratedStart + pos;
               break;
             }
           }

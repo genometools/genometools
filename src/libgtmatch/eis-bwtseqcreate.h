@@ -25,24 +25,22 @@
 #include "libgtmatch/encseq-specialsrank.h"
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqpriv.h"
-#include "libgtmatch/eis-construction-interface.h"
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-random-seqaccess.h"
+#include "libgtmatch/eis-sa-common.h"
 #include "libgtmatch/eis-seqdatasrc.h"
 
 /** The constructor for the base index must conform to this
  * signature. */
-typedef struct encIdxSeq *(*indexCreateFunc)
-  (void *src, Seqpos totalLen, const Str *projectName,
-   const union seqBaseEncParam *params, size_t numExtHeaders,
-   uint16_t *headerIDs, uint32_t *extHeaderSizes,
-   headerWriteFunc *extHeaderCallbacks,
-   void **headerCBData, bitInsertFunc biFunc, BitOffset cwBitsPerPos,
-   varExtBitsEstimator biVarBits, void *cbState, Error *err);
-
-/** There must be a function to report the position of the
- * null-rotation in the suffix array. */
-typedef DefinedSeqpos (*reportLongest)(void *state);
+typedef EISeq *(*indexCreateFunc)(
+  Seqpos totalLen, const Str *projectName, MRAEnc *alphabet,
+  const struct seqStats *stats, SeqDataReader BWTGenerator,
+  const struct seqBaseParam *params, size_t numExtHeaders,
+  const uint16_t *headerIDs, const uint32_t *extHeaderSizes,
+  headerWriteFunc *extHeaderCallbacks,
+  void **headerCBData, bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
+  varExtBitsEstimator biVarBits, void *cbState, Error *err);
 
 /**
  * To enrich a base index with the information required for a BWT
@@ -50,7 +48,7 @@ typedef DefinedSeqpos (*reportLongest)(void *state);
  * @param params holds all parameters for both, the BWT sequence
  * object and the base index
  * @param createIndex wrapped constructor
- * @param baseSrc passed to createIndex
+ * @param src passed to createIndex and used as source of suffix array
  * @param totalLen length of the sorted sequence plus terminator symbol
  * @param alphabet encoding to use for symbols of the input sequence
  * @param specialRanges one value describing for each range of
@@ -67,12 +65,9 @@ typedef DefinedSeqpos (*reportLongest)(void *state);
  */
 extern EISeq *
 createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
-                    void *baseSrc, Seqpos totalLen,
-                    const MRAEnc *alphabet, const struct seqStats *stats,
+                    SASeqSrc *src,
                     const enum rangeSortMode rangeSort[],
-                    RandomSeqAccessor origSeqAccess,
-                    SeqDataReader readNextSeqpos,
                     const SpecialsRankTable *sprTable,
-                    reportLongest lrepFunc, void *lrepState, Error *err);
+                    Error *err);
 
 #endif

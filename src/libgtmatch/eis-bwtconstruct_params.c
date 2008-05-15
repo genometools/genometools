@@ -21,7 +21,7 @@
 #include "libgtmatch/seqpos-def.h"
 
 #include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-blockenc_params.h"
+#include "libgtmatch/eis-encidxseqparam.h"
 #include "libgtmatch/eis-bwtconstruct_params.h"
 
 extern void
@@ -31,9 +31,7 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
 {
   Option *option;
 
-  registerBlockEncOptions(op, &paramOutput->final.seqParams.blockEnc);
-
-  paramOutput->final.baseType = BWT_ON_BLOCK_ENC;
+  registerEncIdxSeqOptions(op, &paramOutput->final.seqParams);
 
   paramOutput->final.featureToggles = BWTBaseFeatures;
 
@@ -78,8 +76,7 @@ estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput)
   {
     /* two cases: we store 1 bit per position or log(segmentlen) for
      * each marked position plus one to note the number of marked positions */
-    unsigned segmentLen = estimateSegmentSize(&paramOutput->final.seqParams,
-                                              paramOutput->final.baseType);
+    unsigned segmentLen = estimateSegmentSize(&paramOutput->final.seqParams);
     if (segmentLen > (segmentLen + 1) * requiredUIntBits(segmentLen)
                      / paramOutput->final.locateInterval)
       return BWTLocateCount;
@@ -101,18 +98,8 @@ computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles)
       || paramOutput->useSourceRank)
     paramOutput->final.featureToggles |= BWTReversiblySorted;
   paramOutput->final.featureToggles |= extraToggles;
-  {
-    int EISFeatureSet
-      = convertBWTOptFlags2EISFeatures(paramOutput->defaultOptimizationFlags);
-    switch (paramOutput->final.baseType)
-    {
-    case BWT_ON_BLOCK_ENC:
-      paramOutput->final.seqParams.blockEnc.EISFeatureSet = EISFeatureSet;
-      break;
-    default:
-      break;
-    }
-  }
+  paramOutput->final.seqParams.EISFeatureSet
+    = convertBWTOptFlags2EISFeatures(paramOutput->defaultOptimizationFlags);
 }
 
 extern int

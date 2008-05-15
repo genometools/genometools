@@ -34,7 +34,7 @@ BWTSeqLength(const BWTSeq *seq)
 static inline Seqpos
 BWTSeqTerminatorPos(const BWTSeq *bwtSeq)
 {
-  return bwtSeq->longest;
+  return bwtSeq->rot0Pos;
 }
 
 static inline bool
@@ -56,8 +56,8 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos)
            && tsym != bwtSeq->alphabetSize - 1)
     return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint);
   else if (tsym == bwtSeq->bwtTerminatorFallback)
-    return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint);
-/*       - ((pos > BWTSeqTerminatorPos(bwtSeq))?1:0); */
+    return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint)
+      - ((pos > BWTSeqTerminatorPos(bwtSeq))?1:0);
   else /* tsym == not flattened terminator == alphabetSize - 1 */
   {
     assert(tsym == bwtSeq->alphabetSize - 1);

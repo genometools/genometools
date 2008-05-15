@@ -23,7 +23,7 @@
 #include "libgtmatch/eis-bwtseqcreate.h"
 #include "libgtmatch/eis-bwtseqpriv.h"
 #include "libgtmatch/eis-encidxseq.h"
-#include "libgtmatch/eis-encidxseqconstruct.h"
+#include "libgtmatch/eis-encidxseq-construct.h"
 
 extern BWTSeq *
 availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, Error *err)
@@ -92,8 +92,8 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   assert(sa && params && err);
   error_check(err);
   /* try loading index */
-  bwtSeq = loadBWTSeqForSA(params->projectName, params->baseType,
-                           params->seqParams.blockEnc.EISFeatureSet,
+  bwtSeq = loadBWTSeqForSA(params->projectName, params->seqParams.encType,
+                           params->seqParams.EISFeatureSet,
                            sa, totalLen, err);
   /* if loading didn't work try on-demand creation */
   if (!bwtSeq)
@@ -138,7 +138,7 @@ loadBWTSeq(const Str *projectName, int BWTOptFlags, Verboseinfo *verbosity,
 }
 
 extern BWTSeq *
-loadBWTSeqForSA(const Str *projectName, enum seqBaseEncoding baseType,
+loadBWTSeqForSA(const Str *projectName, enum seqBaseEncoding encType,
                 int BWTOptFlags, const Suffixarray *sa,
                 Seqpos totalLen, Error *err)
 {
@@ -146,22 +146,18 @@ loadBWTSeqForSA(const Str *projectName, enum seqBaseEncoding baseType,
   EISeq *seqIdx = NULL;
   MRAEnc *alphabet = NULL;
   assert(projectName && sa && err);
-  alphabet = newMRAEncFromSA(sa);
-  switch (baseType)
+  alphabet = SANewMRAEnc(sa);
+  if ((seqIdx = loadEncIdxSeqForSA(
+         sa, totalLen, projectName, encType,
+         convertBWTOptFlags2EISFeatures(BWTOptFlags), err)))
+    bwtSeq = newBWTSeq(seqIdx, alphabet,
+                       GTAlphabetRangeSort[GT_ALPHABETHANDLING_DEFAULT]);
+  if (!bwtSeq)
   {
-  case BWT_ON_BLOCK_ENC:
-    if ((seqIdx = loadBlockEncIdxSeqForSA(
-           sa, totalLen, projectName,
-           convertBWTOptFlags2EISFeatures(BWTOptFlags), err)))
-      bwtSeq = newBWTSeq(seqIdx, alphabet,
-                         GTAlphabetRangeSort[GT_ALPHABETHANDLING_DEFAULT]);
-    break;
-  default:
-    error_set(err, "Illegal/unknown/unimplemented encoding requested!");
-    break;
+    MRAEncDelete(alphabet);
+    if (seqIdx)
+      deleteEncIdxSeq(seqIdx);
   }
-  if (!bwtSeq && seqIdx)
-    deleteEncIdxSeq(seqIdx);
   return bwtSeq;
 }
 
@@ -178,81 +174,21 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   else
   {
     SuffixarrayFileInterface sai;
-    initSuffixarrayFileInterface(&sai, sa);
-    bwtSeq = createBWTSeqFromSAI(params, &sai, totalLen, err);
+    initSuffixarrayFileInterface(&sai, totalLen, sa);
+    bwtSeq = createBWTSeqFromSAI(params, &sai, err);
     destructSuffixarrayFileInterface(&sai);
   }
   return bwtSeq;
 }
 
-extern BWTSeq *
-createBWTSeqFromSAI(const struct bwtParam *params,
-                    SuffixarrayFileInterface *sai,
-                    Seqpos totalLen, Error *err)
+static inline void
+buildSpRTable(const struct bwtParam *params,
+              Seqpos totalLen,
+              const Encodedsequence *encseq,
+              Readmode readmode,
+              SpecialsRankTable **sprTable,
+              const enum rangeSortMode **rangeSort)
 {
-  BWTSeq *bwtSeq = NULL;
-  MRAEnc *alphabet = NULL;
-  SeqDataReader readSfxIdx = { NULL, NULL };
-  assert(sai && err && params);
-  alphabet = newMRAEncFromSAI(sai);
-  if (params->locateInterval
-      && !SDRIsValid(readSfxIdx
-                               = SAIMakeReader(sai, SFX_REQUEST_SUFTAB)))
-  {
-    error_set(err, "error: locate sampling requested but not available"
-              " for project %s\n", str_get(params->projectName));
-  }
-  else
-  {
-    EISeq *seqIdx = NULL;
-    switch (params->baseType)
-    {
-      RandomSeqAccessor origSeqRead;
-    case BWT_ON_BLOCK_ENC:
-      origSeqRead.accessFunc = SAIGetOrigSeqSym;
-      origSeqRead.state = sai;
-      seqIdx =
-        createBWTSeqGeneric(
-          params, (indexCreateFunc)newBlockEncIdxSeqFromSAI, sai, totalLen,
-          alphabet, NULL, GTAlphabetRangeSort[GT_ALPHABETHANDLING_DEFAULT],
-          origSeqRead, readSfxIdx, NULL, reportSAILongest, sai, err);
-      break;
-    default:
-      error_set(err, "Illegal/unknown/unimplemented encoding requested!");
-      break;
-    }
-    if (seqIdx)
-      bwtSeq = newBWTSeq(seqIdx, alphabet,
-                         GTAlphabetRangeSort[GT_ALPHABETHANDLING_DEFAULT]);
-    if (!bwtSeq)
-    {
-      if (seqIdx)
-        deleteEncIdxSeq(seqIdx);
-      if (alphabet)
-        MRAEncDelete(alphabet);
-    }
-  }
-  return bwtSeq;
-}
-
-extern BWTSeq *
-createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
-                     Seqpos totalLen, Error *err)
-{
-  EISeq *seqIdx = NULL;
-  BWTSeq *bwtSeq = NULL;
-  MRAEnc *alphabet = NULL;
-  SeqDataReader readSfxIdx = { NULL, NULL };
-  SpecialsRankTable *sprTable = NULL;
-  const enum rangeSortMode *rangeSort;
-  assert(sfxi && params && err);
-  if (params->locateInterval)
-  {
-    if (!SDRIsValid(readSfxIdx
-                              = SfxIRegisterReader(sfxi,
-                                                   SFX_REQUEST_SUFTAB)))
-      return NULL;
-  }
   if (params->featureToggles & BWTReversiblySorted)
   {
     int sampleIntervalLog2 = params->sourceRankInterval;
@@ -261,29 +197,73 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
       sampleIntervalLog2
         = requiredUIntBits(requiredSeqposBits(totalLen));
     }
-    sprTable = newSpecialsRankTable(SfxIGetEncSeq(sfxi),
-                                    SfxIGetReadMode(sfxi),
-                                    sampleIntervalLog2);
+    *sprTable = newSpecialsRankTable(encseq, readmode, sampleIntervalLog2);
   }
-  rangeSort = GTAlphabetRangeSort[sprTable?
-                                  GT_ALPHABETHANDLING_W_RANK:
-                                  GT_ALPHABETHANDLING_DEFAULT];
-  alphabet = newMRAEncFromSfxI(sfxi);
-  {
-    RandomSeqAccessor origSeqAccess = { SfxIGetOrigSeq, sfxi };
-    seqIdx= createBWTSeqGeneric(
-      params, (indexCreateFunc)newBlockEncIdxSeqFromSfxI, sfxi, totalLen,
-      alphabet, getSfxISeqStats(sfxi), rangeSort,
-      origSeqAccess, readSfxIdx, sprTable, (reportLongest)getSfxILongestPos,
-      sfxi, err);
-  }
-  if (seqIdx)
-  {
-    bwtSeq = newBWTSeq(seqIdx, alphabet, rangeSort);
-  }
-  if (!bwtSeq && seqIdx)
-    deleteEncIdxSeq(seqIdx);
+  *rangeSort = GTAlphabetRangeSort[sprTable?
+                                   GT_ALPHABETHANDLING_W_RANK:
+                                   GT_ALPHABETHANDLING_DEFAULT];
+}
+
+static BWTSeq *
+createBWTSeqFromSASS(const struct bwtParam *params, SASeqSrc *src,
+                     SpecialsRankTable *sprTable,
+                     const enum rangeSortMode *rangeSort,
+                     Error *err);
+
+extern BWTSeq *
+createBWTSeqFromSAI(const struct bwtParam *params,
+                    SuffixarrayFileInterface *sai,
+                    Error *err)
+{
+  BWTSeq *bwtSeq;
+  SpecialsRankTable *sprTable = NULL;
+  const enum rangeSortMode *rangeSort;
+  assert(sai && err && params);
+  buildSpRTable(params, SAIGetLength(sai), SAIGetEncSeq(sai),
+                SAIGetReadmode(sai), &sprTable, &rangeSort);
+  bwtSeq = createBWTSeqFromSASS(params, SAI2SASS(sai), sprTable, rangeSort,
+                                err);
   if (sprTable)
     deleteSpecialsRankTable(sprTable);
+  return bwtSeq;
+}
+
+extern BWTSeq *
+createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
+                     Error *err)
+{
+  BWTSeq *bwtSeq;
+  SpecialsRankTable *sprTable = NULL;
+  const enum rangeSortMode *rangeSort;
+  assert(sfxi && params && err);
+  buildSpRTable(params, SfxIGetLength(sfxi), SfxIGetEncSeq(sfxi),
+                SfxIGetReadmode(sfxi), &sprTable, &rangeSort);
+  bwtSeq = createBWTSeqFromSASS(params, SfxI2SASS(sfxi), sprTable, rangeSort,
+                                err);
+  if (sprTable)
+    deleteSpecialsRankTable(sprTable);
+  return bwtSeq;
+}
+
+static BWTSeq *
+createBWTSeqFromSASS(const struct bwtParam *params, SASeqSrc *src,
+                     SpecialsRankTable *sprTable,
+                     const enum rangeSortMode *rangeSort,
+                     Error *err)
+{
+  EISeq *seqIdx = NULL;
+  BWTSeq *bwtSeq = NULL;
+  seqIdx = createBWTSeqGeneric(params, createEncIdxSeqGen, src,
+                               rangeSort, sprTable, err);
+  if (seqIdx)
+  {
+    MRAEnc *alphabet = SASSNewMRAEnc(src);
+    bwtSeq = newBWTSeq(seqIdx, alphabet, rangeSort);
+    if (!bwtSeq)
+    {
+      deleteEncIdxSeq(seqIdx);
+      MRAEncDelete(alphabet);
+    }
+  }
   return bwtSeq;
 }

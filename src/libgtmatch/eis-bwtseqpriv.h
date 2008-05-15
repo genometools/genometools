@@ -35,7 +35,7 @@ struct BWTSeq
                                   * flattened into this symbol for
                                   * storage reasons */
   AlphabetRangeID bwtTerminatorFallbackRange;
-  Seqpos longest;
+  Seqpos rot0Pos;
   Seqpos *count;
   int featureToggles;
   unsigned bitsPerOrigRank;

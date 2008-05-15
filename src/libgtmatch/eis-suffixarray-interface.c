@@ -24,29 +24,82 @@
 #include "libgtmatch/eis-sa-common.h"
 #include "libgtmatch/eis-seqdatasrc.h"
 #include "libgtmatch/eis-suffixarray-interface.h"
+#include "libgtmatch/eis-suffixarray-interface-priv.h"
+
+static void
+deleteSuffixarrayFileInterfaceBase(SASeqSrc *baseClass)
+{
+  deleteSuffixarrayFileInterface(SASS2SAI(baseClass));
+}
+
+static struct seqDataReader
+SAIBaseMakeReader(SASeqSrc *baseClass, enum sfxDataRequest rtype)
+{
+  return SAIMakeReader(SASS2SAI(baseClass), rtype);
+}
+
+static DefinedSeqpos
+SAIBaseGetRot0Pos(const SASeqSrc *baseClass)
+{
+  return SAIGetRot0Pos(constSASS2SAI(baseClass));
+}
+
+static inline size_t
+SAIBaseGetOrigSeq(const SASeqSrc *baseClass, Symbol *dest, Seqpos pos,
+                  size_t len)
+{
+  return SAIGetOrigSeq(constSASS2SAI(baseClass), dest, pos, len);
+}
+
+extern MRAEnc *
+SAIBaseNewMRAEnc(const SASeqSrc *baseClass)
+{
+  return SAINewMRAEnc(constSASS2SAI(baseClass));
+}
 
 static size_t
-SAIgenerate(void *generatorState, void *backlogState,
+SAIGenerate(void *generatorState, void *backlogState,
             move2BacklogFunc move2Backlog, void *output,
             Seqpos generateStart, size_t len,
             SeqDataTranslator xltor, Error *err);
 
 extern void
-initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
+initSuffixarrayFileInterface(SuffixarrayFileInterface *sai, Seqpos seqLen,
                              Suffixarray *sa)
 {
+  {
+    RandomSeqAccessor origSeqAccess = { SAIGetOrigSeq, sai };
+    initSASeqSrc(&sai->baseClass, seqLen, NULL, SAIBaseMakeReader,
+                 SAIBaseGetRot0Pos, NULL,
+                 origSeqAccess, deleteSuffixarrayFileInterfaceBase,
+                 SAIBaseNewMRAEnc,
+                 SAIGenerate, sai);
+  }
   sai->sa = sa;
-  initSeqReaderSet(&sai->readerSet, 0, 0, NULL, NULL, NULL, sizeof (Seqpos),
-                   SAIgenerate, sai);
   sai->numBWTFileReaders = 0;
   initSATaggedXltorStateList(&sai->xltorStates);
+}
+
+extern SuffixarrayFileInterface *
+newSuffixarrayFileInterface(Suffixarray *sa, Seqpos seqLen)
+{
+  SuffixarrayFileInterface *sai = ma_malloc(sizeof (*sai));
+  initSuffixarrayFileInterface(sai, seqLen, sa);
+  return sai;
 }
 
 extern void
 destructSuffixarrayFileInterface(SuffixarrayFileInterface *sai)
 {
-  destructSeqReaderSet(&sai->readerSet);
+  destructSASeqSrc(&sai->baseClass);
   destructSATaggedXltorStateList(&sai->xltorStates);
+}
+
+extern void
+deleteSuffixarrayFileInterface(SuffixarrayFileInterface *sai)
+{
+  destructSuffixarrayFileInterface(sai);
+  ma_free(sai);
 }
 
 static size_t
@@ -72,7 +125,7 @@ SAIMakeBWTReader(SuffixarrayFileInterface *sai)
         (seqDataTranslateFunc)translateSuftab2BWT
       };
 
-      reader = seqReaderSetRegisterConsumer(&sai->readerSet,
+      reader = seqReaderSetRegisterConsumer(&sai->baseClass.readerSet,
                                             SFX_REQUEST_BWTTAB, xltor);
     }
     else
@@ -99,7 +152,7 @@ SAIMakeSufTabReader(SuffixarrayFileInterface *sai)
     struct seqDataTranslator xltor = {
       { .elemSize = sizeof (Seqpos) }, NULL
     };
-    reader = seqReaderSetRegisterConsumer(&sai->readerSet,
+    reader = seqReaderSetRegisterConsumer(&sai->baseClass.readerSet,
                                           SFX_REQUEST_SUFTAB, xltor);
   }
   else
@@ -128,7 +181,7 @@ SAIMakeLCPTabReader(SuffixarrayFileInterface *sai)
       { .ref = &stateStore->state.lcpState },
       (seqDataTranslateFunc)translateSuftab2BWT
     };
-    reader = seqReaderSetRegisterConsumer(&sai->readerSet,
+    reader = seqReaderSetRegisterConsumer(&sai->baseClass.readerSet,
                                           SFX_REQUEST_LCPTAB, xltor);
   }
   else
@@ -181,9 +234,9 @@ SAIReadBWT(void *state, Uchar *dest, size_t len, UNUSED Error *err)
 DECLAREREADFUNCTION(Seqpos)
 
 extern size_t
-SAIGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len)
+SAIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
 {
-  SuffixarrayFileInterface *sai;
+  const SuffixarrayFileInterface *sai;
   const Encodedsequence *encseq;
   Readmode readmode;
   size_t i;
@@ -198,15 +251,15 @@ SAIGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len)
 }
 
 extern DefinedSeqpos
-reportSAILongest(void *state)
+SAIGetRot0Pos(const void *state)
 {
-  SuffixarrayFileInterface *sai = state;
+  const SuffixarrayFileInterface *sai = state;
   assert(sai);
   return sai->sa->longest;
 }
 
 extern MRAEnc *
-newMRAEncFromSA(const Suffixarray *sa)
+SANewMRAEnc(const Suffixarray *sa)
 {
   MRAEnc *alphabet;
   assert(sa);
@@ -216,7 +269,7 @@ newMRAEncFromSA(const Suffixarray *sa)
 }
 
 static size_t
-SAIgenerate(void *generatorState, void *backlogState,
+SAIGenerate(void *generatorState, void *backlogState,
             move2BacklogFunc move2Backlog, void *output,
             Seqpos generateStart, size_t len,
             SeqDataTranslator xltor, Error *err)

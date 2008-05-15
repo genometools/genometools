@@ -33,6 +33,7 @@
 #include "libgtmatch/eis-encidxseqparam.h"
 #include "libgtmatch/eis-headerid.h"
 #include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-seqdatasrc.h"
 
 /**
  * callback function to insert variable width data into encidx
@@ -142,52 +143,6 @@ typedef struct encIdxSeq EISeq;
 /** hints to speed up retrievals when accessing positions in sequence
  * (or at least close to one another) */
 typedef union EISHint *EISHint;
-
-/**
- * \brief Construct block-encoded indexed sequence object and write
- * corresponding representation to disk.
- * @param projectName base name of corresponding suffixerator project
- * @param params parameters for index construction
- * @param numExtHeaders number of extension headers to write via callbacks
- * @param headerIDs array of numExtHeaders ids to be used
- * for each extension header in turn
- * @param extHeaderSizes array of numExtHeaders sizes
- * representing the length of each extension header
- * @param extHeaderCallbacks array of numExtHeaders function pointers
- * each of which will be called once upon writing the header
- * @param headerCBData array of pointers passed as argument when the
- * corresponding header writing function is called
- * @param biFunc function to be called when a chunk of data has been
- * accumulated for a given region of sequence data
- * @param cwBitsPerPos exactly this many bits will be appended by
- * biFunc for each symbol of the input sequence
- * @param biVarBitsEstimate tell how many bits will be appended to the
- * variable width part of the data
- * @param cbState will be passed on each call of biFunc and biVarBits
- * @param err genometools error object reference
- * @return new encoded indexed sequence object reference
- */
-extern EISeq *
-newBlockEncIdxSeq(const Str *projectName, Verboseinfo *verbosity,
-                  const struct blockEncParams *params,
-                  size_t numExtHeaders, uint16_t *headerIDs,
-                  uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
-                  void **headerCBData,
-                  bitInsertFunc biFunc, BitOffset cwBitsPerPos,
-                  varExtBitsEstimator biVarBits,
-                  void *cbState, Error *err);
-
-/**
- * \brief Load previously written block encoded sequence
- * representation.
- * @param projectName base name of corresponding suffixerator project
- * @param features select optional in-memory data structures for speed-up
- * @param err genometools error object reference
- * @return new encoded indexed sequence object reference
- */
-extern EISeq *
-loadBlockEncIdxSeq(const Str *projectName, int features,
-                   Verboseinfo *verbosity, Error *err);
 
 /**
  * \brief Deallocate a previously loaded/created sequence object.

@@ -16,16 +16,44 @@
 #ifndef EIS_SUFFIXARRAY_INTERFACE_PRIV_H
 #define EIS_SUFFIXARRAY_INTERFACE_PRIV_H
 
-static inline MRAEnc *
-newMRAEncFromSAI(const SuffixarrayFileInterface *sai)
+#include "eis-suffixarray-interface.h"
+
+/**
+ * Used to pass suffixarray to read from and alphabet to encode with
+ * to readers.
+ */
+struct suffixarrayFileInterface
 {
-  return newMRAEncFromSA(sai->sa);
+  struct SASeqSrc baseClass;
+  struct saTaggedXltorStateList xltorStates;
+  Suffixarray *sa;                      /**< the suffix array to read from */
+  char numBWTFileReaders;
+};
+
+static inline SuffixarrayFileInterface *
+SASS2SAI(SASeqSrc *baseClass)
+{
+  return (SuffixarrayFileInterface *)
+    ((char *)baseClass - offsetof(SuffixarrayFileInterface, baseClass));
 }
 
-extern const Encodedsequence *
-SAIGetEncSeq(const SuffixarrayFileInterface *sai)
+static inline const SuffixarrayFileInterface *
+constSASS2SAI(const SASeqSrc *baseClass)
 {
-  return sai->sa->encseq;
+  return (const SuffixarrayFileInterface *)
+    ((const char *)baseClass - offsetof(SuffixarrayFileInterface, baseClass));
+}
+
+static inline SASeqSrc *
+SAI2SASS(SuffixarrayFileInterface *sai)
+{
+  return &sai->baseClass;
+}
+
+static inline const SASeqSrc *
+constSAI2SASS(const SuffixarrayFileInterface *sai)
+{
+  return &sai->baseClass;
 }
 
 #endif

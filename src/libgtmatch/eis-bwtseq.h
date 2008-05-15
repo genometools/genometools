@@ -460,7 +460,7 @@ extern Seqpos
 EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
 
 /**
- * \brief for packed index (given as void pointer), compute the longest
+ * @brief for packed index (given as void pointer), compute the longest
  * prefix of string in range between qstart and qend that occurs exactly
  * once in the index.
  * @param packed index (given as void pointer)

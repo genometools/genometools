@@ -96,12 +96,14 @@ MRAEncGTAlphaNew(const Alphabet *alpha)
   mappings = ma_malloc(sizeof (uint8_t) * (UINT8_MAX + 1));
   memset(mappings, UNDEF_UCHAR, UINT8_MAX+1);
   {
+    /* handle regular symbols */
     int i;
     for (i = 0; i < numSyms - 1; ++i)
       mappings[i] = i;
-    mappings[WILDCARD] = numSyms - 1;
+    symsPerRange[0] = numSyms - 1;
   }
-  symsPerRange[0] = numSyms - 1;
+  /* handle special symbols */
+  mappings[WILDCARD] = numSyms - 1;
   symsPerRange[1] = 1;
   result = newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings);
   ma_free(mappings);
@@ -218,7 +220,7 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
   return newAlpha;
 }
 
-void
+MRAEnc *
 MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range)
 {
   Symbol insertPos, numSyms;
@@ -260,6 +262,7 @@ MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range)
     abort();
     break;
   }
+  return mralpha;
 }
 
 /**

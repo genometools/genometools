@@ -13,8 +13,8 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_CONSTRUCTION_INTERFACE_H
-#define EIS_CONSTRUCTION_INTERFACE_H
+#ifndef EIS_RANDOM_SEQACCESS_H
+#define EIS_RANDOM_SEQACCESS_H
 
 /**
  * @file eis-construction-interface.h
@@ -32,24 +32,10 @@
 #include "libgtmatch/eis-mrangealphabet.h"
 
 /**
- * generic method to aquire next readLen symbols of e.g. BWT string
- * @return actual number of symbols acquired
- */
-typedef size_t (*SymReadFunc)(void *state, Symbol *dest, size_t readLen,
-                              Error *err);
-
-/**
- * generic method to aquire next Seqpos value from suffix array
- * @return actual number of values acquired
- */
-typedef size_t (*SeqposReadFunc)(void *src, Seqpos *dest, size_t len,
-                                 Error *err);
-
-/**
  * \brief generic method to access the original encoded sequence
  * @return actual number of symbols acquired
  */
-typedef size_t (*accessSeqSubStr)(void *state, Symbol *dest, Seqpos pos,
+typedef size_t (*accessSeqSubStr)(const void *state, Symbol *dest, Seqpos pos,
                                   size_t len);
 
 struct randomSeqAccessor

@@ -17,6 +17,8 @@
  * \file eis-suffixerator-interface.h
  * \brief Methods to call suffixerator functions through one object,
  * but have the same data available to multiple listeners.
+ * Conforms to the abstract interface defined in
+ * eis-sa-common.h for suffix array class objects (type SASeqSrc).
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
 #ifndef EIS_SUFFIXERATOR_INTERFACE_H
@@ -127,14 +129,23 @@ extern void
 deleteSfxInterface(sfxInterface *iface);
 
 /**
+ * @brief Dynamically cast to super class.
+ *
+ * @param sfxi reference to suffixerator interface object
+ * @return reference of object of base class
+ */
+extern SASeqSrc *
+SfxI2SASS(sfxInterface *sfxi);
+
+/**
  * \brief Constructs multiple range alphabet for sequence sorted by
- * suffixerator (i.e. alphabet includes separator and terminator symbols).
+ * suffixerator (i.e. alphabet includes separator symbol).
  *
  * @param si reference of interface to suffixerator
  * @return reference of newly created alphabet object
  */
 extern MRAEnc *
-newMRAEncFromSfxI(const sfxInterface *si);
+SfxINewMRAEnc(const sfxInterface *si);
 
 /**
  * \brief Get reference for alphabet used to encode original sequence
@@ -161,7 +172,7 @@ SfxIGetEncSeq(const sfxInterface *si);
  * @return read mode
  */
 extern Readmode
-SfxIGetReadMode(const sfxInterface *si);
+SfxIGetReadmode(const sfxInterface *si);
 
 /**
  * \brief Get original sequence substring.
@@ -173,7 +184,7 @@ SfxIGetReadMode(const sfxInterface *si);
  * @return number of symbols actually read
  */
 extern size_t
-SfxIGetOrigSeq(void *si, Symbol *dest, Seqpos pos, size_t len);
+SfxIGetOrigSeq(const void *si, Symbol *dest, Seqpos pos, size_t len);
 
 /**
  * \brief Query original sequence for statistics.
@@ -182,10 +193,10 @@ SfxIGetOrigSeq(void *si, Symbol *dest, Seqpos pos, size_t len);
  * @return reference of struct holding statistics (symbol counts)
  */
 extern const struct seqStats *
-getSfxISeqStats(const sfxInterface *si);
+SfxIGetSeqStats(const sfxInterface *si);
 
 /**
- * \brief Query length @f$l@f$ of sequence sorted by suffixerator, including
+ * @brief Query length @f$l@f$ of sequence sorted by suffixerator, including
  * the terminator and separator symbols (i.e.
  * @f[ l = \sum_{i=1}^n \left(|s_i| + 1\right)@f]
  * ).
@@ -194,10 +205,10 @@ getSfxISeqStats(const sfxInterface *si);
  * @return length of sequence
  */
 extern Seqpos
-getSfxILength(const sfxInterface *si);
+SfxIGetLength(const sfxInterface *si);
 
 /**
- * \brief Query position of suffix starting at position 0, can be
+ * @brief Query position of suffix starting at position 0, can be
  * undefined if not yet encountered.
  *
  * @param si reference of interface to suffixerator
@@ -205,7 +216,7 @@ getSfxILength(const sfxInterface *si);
  * known) or undefined value.
  */
 extern DefinedSeqpos
-getSfxILongestPos(const struct sfxInterface *si);
+SfxIGetRot0Pos(const struct sfxInterface *si);
 
 /**
  * @return >0 on success, 0 on error

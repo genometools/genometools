@@ -127,11 +127,12 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
  *
  * All successor ranges will therefore be shifted by one in the
  * resulting mapping.
- * @param mralpha alphabet to add mapping to
+ * @param mralpha alphabet object reference to add mapping to
  * @param sym input code to map
  * @param range number of range to insert new symbol into
+ * @return same reference as mralpha but after destructive change
  */
-extern void
+extern MRAEnc *
 MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range);
 
 /**

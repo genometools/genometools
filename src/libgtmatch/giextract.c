@@ -158,7 +158,7 @@ static Giquery *readginumberfile(bool verbose,
   {
     printf("# opened gi-queryfile \"%s\"\n",str_get(ginumberfile));
   }
-  giqueries = ma_malloc(sizeof(*giqueries) * (*numofqueries));
+  giqueries = ma_malloc(sizeof (*giqueries) * (*numofqueries));
   for (linenum = 0; !feof(fp); linenum++)
   {
     if (fscanf(fp,FormatScanint64_t " %ld %ld\n",
@@ -200,7 +200,7 @@ static Giquery *readginumberfile(bool verbose,
     ma_free(giqueries);
     return NULL;
   }
-  qsort(giqueries,(size_t) *numofqueries,sizeof(*giqueries),
+  qsort(giqueries,(size_t) *numofqueries,sizeof (*giqueries),
         compareginumbers);
   if (verbose)
   {

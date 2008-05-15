@@ -24,6 +24,8 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/eis-encidxseq.h"
+#include "libgtmatch/eis-encidxseqparam.h"
+#include "libgtmatch/eis-encidxseq-construct.h"
 #include "libgtmatch/verbose-def.h"
 #include "tools/gt_packedindex_chk_integrity.h"
 
@@ -35,6 +37,8 @@ struct chkIndexOptions
   unsigned long progressInterval;
   int checkFlags;
   bool verboseOutput;
+  enum seqBaseEncoding encType;
+  int EISFeatureSet;
 };
 
 static OPrval
@@ -66,8 +70,8 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Error *err)
 
   verbosity = newverboseinfo(params.verboseOutput);
 
-  seq = loadBlockEncIdxSeq(inputProject, EIS_FEATURE_REGION_SUMS,
-                           verbosity, err);
+  seq = loadEncIdxSeq(inputProject, params.encType, params.EISFeatureSet,
+                      verbosity, err);
   if ((had_err = seq == NULL))
   {
     error_set(err, "Failed to load index: %s", str_get(inputProject));
@@ -133,7 +137,8 @@ parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
   oprval = option_parser_parse(op, parsed_args, argc, (const char**) argv,
                                versionfunc, err);
   option_parser_delete(op);
-  params->checkFlags = EIS_VERIFY_BASIC
-    | (extRankCheck?EIS_VERIFY_EXT_RANK:0);
+  params->checkFlags = EIS_VERIFY_BASIC | (extRankCheck?EIS_VERIFY_EXT_RANK:0);
+  params->EISFeatureSet = EIS_FEATURE_REGION_SUMS;
+  params->encType = BWT_ON_BLOCK_ENC;
   return oprval;
 }

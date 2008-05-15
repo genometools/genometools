@@ -26,6 +26,7 @@
 #include "libgtmatch/eis-bwtseqpriv.h"
 #include "libgtmatch/eis-headerid.h"
 #include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-sa-common.h"
 
 /**
  * \file eis-bwtseqcreate.c generic methods for bwt index creation and
@@ -34,7 +35,7 @@
 
 struct locateHeader
 {
-  Seqpos longest;
+  Seqpos rot0Pos;
   unsigned locateInterval;
   int featureToggles;
 };
@@ -45,9 +46,8 @@ enum {
 
 struct locateHeaderWriteInfo
 {
+  SASeqSrc *src;
   unsigned locateInterval;
-  reportLongest getLongest;
-  void *getLongestState;
   int featureToggles;
 };
 
@@ -55,18 +55,18 @@ static int
 writeLocateInfoHeader(FILE *fp, void *cbData)
 {
   struct locateHeader headerData;
-  DefinedSeqpos longest;
+  DefinedSeqpos rot0Pos;
   const struct locateHeaderWriteInfo *headerSrc = cbData;
   assert(cbData);
   headerData.locateInterval = headerSrc->locateInterval;
-  longest = headerSrc->getLongest(headerSrc->getLongestState);
-  if (!longest.defined)
+  rot0Pos = SASSGetRot0Pos(headerSrc->src);
+  if (!rot0Pos.defined)
   {
     fputs("Invalid index construction: position of suffix 0 unknown!\n",
           stderr);
     abort();
   }
-  headerData.longest = longest.valueseqpos;
+  headerData.rot0Pos = rot0Pos.valueseqpos;
   headerData.featureToggles = headerSrc->featureToggles;
   return fwrite(&headerData, sizeof (headerData), 1, fp);
 }
@@ -266,8 +266,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
   state->readSeqpos = readSeqpos;
   state->origSeqAccess = origSeqAccess;
   state->featureToggles = params->featureToggles;
-  aggregationExpVal = estimateSegmentSize(&params->seqParams,
-                                          params->baseType);
+  aggregationExpVal = estimateSegmentSize(&params->seqParams);
   locateInterval = params->locateInterval;
   lastPos = srcLen - 1;
   state->locateInterval = locateInterval;
@@ -506,25 +505,22 @@ sortModeHeaderNeeded(const MRAEnc *alphabet,
 
 extern EISeq *
 createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
-                    void *baseSrc, Seqpos totalLen,
-                    const MRAEnc *alphabet, const struct seqStats *stats,
-                    const enum rangeSortMode *rangeSort,
-                    RandomSeqAccessor origSeqAccess,
-                    SeqDataReader readNextSeqpos,
+                    SASeqSrc *src,
+                    const enum rangeSortMode rangeSort[],
                     const SpecialsRankTable *sprTable,
-                    reportLongest lrepFunc, void *lrepState, Error *err)
+                    Error *err)
 {
   struct encIdxSeq *baseSeqIdx = NULL;
   struct addLocateInfoState varState;
   bool varStateIsInitialized = false;
   unsigned locateInterval;
-  assert(baseSrc && params && err);
+  assert(src && params && err);
   error_check(err);
   locateInterval = params->locateInterval;
   do
   {
     struct locateHeaderWriteInfo locHeaderData
-      = { locateInterval, lrepFunc, lrepState, params->featureToggles };
+      = { src, locateInterval, params->featureToggles };
     struct sortModeHeader sortModeHeader;
     void *p[] = { &locHeaderData , &sortModeHeader };
     uint16_t headerIDs[] = { LOCATE_INFO_IN_INDEX_HEADERID,
@@ -535,6 +531,9 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
                                       writeRankSortHeader };
     size_t numHeaders = 0;
     unsigned bitsPerOrigRank = 0;
+    Seqpos totalLen = SASSGetLength(src);
+    const MRAEnc *alphabet = SASSGetMRAEnc(src);
+    MRAEnc *baseAlphabet = SASSNewMRAEnc(src);
     if (locateInterval)
     {
       ++numHeaders;
@@ -551,14 +550,28 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
         headerSizes[1] = computeSortModeHeaderSize(alphabet);
         ++numHeaders;
       }
+      {
+        SeqDataReader readSfxIdx = SASSCreateReader(src, SFX_REQUEST_SUFTAB);
+        if (SDRIsValid(readSfxIdx))
+        {
+          initAddLocateInfoState(
+            &varState, SASSGetOrigSeqAccessor(src), readSfxIdx,
+            alphabet, SASSGetSeqStats(src), rangeSort, totalLen, params,
+            bitsPerOrigRank?sprTable:NULL, bitsPerOrigRank);
+          varStateIsInitialized = true;
+        }
+        else
+        {
+          error_set(err, "error: locate sampling requested but not available"
+                    " for project %s\n", str_get(params->projectName));
+        }
+
+      }
     }
-    initAddLocateInfoState(&varState, origSeqAccess,
-                           readNextSeqpos, alphabet, stats, rangeSort,
-                           totalLen, params,
-                           bitsPerOrigRank?sprTable:NULL, bitsPerOrigRank);
-    varStateIsInitialized = true;
     if (!(baseSeqIdx
-          = createIndex(baseSrc, totalLen, params->projectName,
+          = createIndex(totalLen, params->projectName, baseAlphabet,
+                        SASSGetSeqStats(src),
+                        SASSCreateReader(src, SFX_REQUEST_BWTTAB),
                         &params->seqParams, numHeaders,
                         headerIDs, headerSizes, headerFuncs, p,
                         locateInterval?addLocateInfo:NULL,
@@ -774,7 +787,7 @@ BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
   else
   {
     bwtSeq->locateSampleInterval = locHeader.locateInterval;
-    bwtSeq->longest = locHeader.longest;
+    bwtSeq->rot0Pos = locHeader.rot0Pos;
     /* FIXME: this really deserves its own header */
     bwtSeq->featureToggles = locHeader.featureToggles;
 

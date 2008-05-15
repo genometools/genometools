@@ -367,8 +367,8 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
 
   showverbose(verboseinfo, "run construction of packed index for:\n"
               "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
-              so->bwtIdxParams.final.seqParams.blockEnc.blockSize,
-              so->bwtIdxParams.final.seqParams.blockEnc.bucketBlocks,
+              so->bwtIdxParams.final.seqParams.encParams.blockEnc.blockSize,
+              so->bwtIdxParams.final.seqParams.encParams.blockEnc.bucketBlocks,
               so->bwtIdxParams.final.locateInterval);
   si = newSfxInterface(so->readmode,
                        prefixlength,
@@ -387,8 +387,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
     haserr = true;
   } else
   {
-    bwtSeq = createBWTSeqFromSfxI(&so->bwtIdxParams.final, si,
-                                  getSfxILength(si), err);
+    bwtSeq = createBWTSeqFromSfxI(&so->bwtIdxParams.final, si, err);
     if (bwtSeq == NULL)
     {
       deleteSfxInterface(si);
@@ -397,7 +396,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
     {
       deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
       /*
-        outfileinfo.longest = getSfxILongestPos(si);
+        outfileinfo.longest = SfxIGetRot0Pos(si);
       */
       sfi = SfxInterface2Sfxiterator(si);
       assert(sfi != NULL);

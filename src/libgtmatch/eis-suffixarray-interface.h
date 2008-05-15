@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (C) 2007,2008 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,8 +19,8 @@
 
 /**
  * \file eis-suffixarray-interface.h
- * Defines functions conforming to the signatures defined in
- * eis-construction-interface.h for suffix array objects.
+ * Defines an interface deriving the abstract interface defined in
+ * eis-sa-common.h for suffix array class objects (type SASeqSrc).
  */
 #include <stdlib.h>
 #include "libgtcore/error.h"
@@ -30,26 +30,20 @@
 #include "libgtmatch/eis-seqdatasrc.h"
 #include "libgtmatch/eis-sequencemultiread.h"
 
-/**
- * Used to pass suffixarray to read from and alphabet to encode with
- * to readers.
- */
-struct suffixarrayFileInterface
-{
-  Suffixarray *sa;              /**< the suffix array to read from */
-  struct seqReaderSet readerSet;
-  int numBWTFileReaders;
-  struct saTaggedXltorStateList xltorStates;
-};
-
 typedef struct suffixarrayFileInterface SuffixarrayFileInterface;
 
 extern void
-initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
+initSuffixarrayFileInterface(SuffixarrayFileInterface *sai, Seqpos seqLen,
                              Suffixarray *sa);
+
+extern SuffixarrayFileInterface *
+newSuffixarrayFileInterface(Suffixarray *sa, Seqpos seqLen);
 
 extern void
 destructSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
+
+extern void
+deleteSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
 
 extern SeqDataReader
 SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype);
@@ -69,7 +63,7 @@ SAIMakeSufTabReader(SuffixarrayFileInterface *sai);
  * @return actual number of symbols read
  */
 extern size_t
-SAIGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len);
+SAIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len);
 
 /**
  * @brief Query position of suffix starting at position 0, can be
@@ -79,7 +73,7 @@ SAIGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len);
  * @return
  */
 extern DefinedSeqpos
-reportSAILongest(void *state);
+SAIGetRot0Pos(const void *state);
 
 /**
  * \brief Get reference for original sequence object.
@@ -90,18 +84,27 @@ reportSAILongest(void *state);
 static inline const Encodedsequence *
 SAIGetEncSeq(const SuffixarrayFileInterface *sai);
 
+static inline Readmode
+SAIGetReadmode(const SuffixarrayFileInterface *sai);
+
+static inline Seqpos
+SAIGetLength(const SuffixarrayFileInterface *sai);
+
 /**
  * @brief Query appropriate alphabet encoding for suffix array.
  * @param state reference of Suffixarray object
  * @return alphabet
  */
 extern MRAEnc *
-newMRAEncFromSA(const Suffixarray *sa);
+SANewMRAEnc(const Suffixarray *sa);
 
 static inline MRAEnc *
-newMRAEncFromSAI(const SuffixarrayFileInterface *sai);
+SAINewMRAEnc(const SuffixarrayFileInterface *sai);
+
+static inline struct SASeqSrc *
+SAI2SASS(SuffixarrayFileInterface *sai);
 
 /* visible for the compiler, but not meant for users to depend upon */
-#include "eis-suffixarray-interface-priv.h"
+#include "eis-suffixarray-interface-siop.h"
 
 #endif

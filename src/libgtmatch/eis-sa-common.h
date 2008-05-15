@@ -22,9 +22,15 @@
 #ifndef EIS_SA_COMMON_H
 #define EIS_SA_COMMON_H
 
+#include <stdlib.h>
+
 #include "libgtcore/symboldef.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/seqpos-def.h"
+
+#include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-random-seqaccess.h"
+#include "libgtmatch/eis-seqdatasrc.h"
 
 /**
  * Describes what kind of information will be read by a requestor:
@@ -106,5 +112,36 @@ extern struct saTaggedXltorState *
 addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
                     enum sfxDataRequest request,
                     union saXltorState saXltorState);
+
+typedef struct SASeqSrc SASeqSrc;
+
+static inline SeqDataReader
+SASSCreateReader(SASeqSrc *src, enum sfxDataRequest request);
+
+static inline DefinedSeqpos
+SASSGetRot0Pos(const SASeqSrc *src);
+
+static inline Seqpos
+SASSGetLength(const SASeqSrc *src);
+
+static inline MRAEnc *
+SASSNewMRAEnc(const SASeqSrc *src);
+
+static inline const MRAEnc *
+SASSGetMRAEnc(SASeqSrc *src);
+
+static inline const struct seqStats *
+SASSGetSeqStats(const SASeqSrc *src);
+
+static inline size_t
+SASSAccessSequence(const SASeqSrc *src, Symbol *dest, Seqpos pos, size_t len);
+
+static inline RandomSeqAccessor
+SASSGetOrigSeqAccessor(const SASeqSrc *src);
+
+static inline void
+SASSDelete(SASeqSrc *src);
+
+#include "libgtmatch/eis-sa-commonsimpleop.h"
 
 #endif

@@ -40,147 +40,14 @@
 #include "libgtcore/minmax.h"
 #include "libgtcore/str.h"
 #include "libgtcore/unused.h"
-#include "libgtmatch/sarr-def.h"
 #include "libgtmatch/seqpos-def.h"
-#include "libgtmatch/esa-map.pr"
 
 #include "libgtmatch/eis-bitpackseqpos.h"
 #include "libgtmatch/eis-encidxseq.h"
-#include "libgtmatch/eis-encidxseqconstruct.h"
 #include "libgtmatch/eis-encidxseqpriv.h"
 #include "libgtmatch/eis-seqranges.h"
 #include "libgtmatch/eis-seqblocktranslate.h"
-#include "libgtmatch/eis-construction-interface.h"
 #include "libgtmatch/eis-seqdatasrc.h"
-#include "libgtmatch/eis-suffixerator-interface.h"
-#include "libgtmatch/eis-suffixarray-interface.h"
-
-struct encIdxSeq *
-newBlockEncIdxSeq(const Str *projectName, Verboseinfo *verbosity,
-                  const struct blockEncParams *params,
-                  size_t numExtHeaders, uint16_t *headerIDs,
-                  uint32_t *extHeaderSizes,
-                  headerWriteFunc *extHeaderCallbacks, void **headerCBData,
-                  bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                  varExtBitsEstimator biVarBits, void *cbState, Error *err)
-{
-  Suffixarray suffixArray;
-  struct encIdxSeq *newSeqIdx;
-  Seqpos length;
-  assert(projectName);
-  /* map and interpret index project file */
-  if (streamsuffixarray(&suffixArray, &length,
-                       SARR_SUFTAB | SARR_BWTTAB, projectName, verbosity, err))
-    return NULL;
-  ++length;
-  newSeqIdx = newBlockEncIdxSeqFromSA(&suffixArray, length,
-                                      projectName, params,
-                                      numExtHeaders, headerIDs,
-                                      extHeaderSizes, extHeaderCallbacks,
-                                      headerCBData, biFunc, cwExtBitsPerPos,
-                                      biVarBits, cbState, err);
-  freesuffixarray(&suffixArray);
-  return newSeqIdx;
-}
-
-static EISeq *
-newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
-                     MRAEnc *alphabet, const struct seqStats *stats,
-                     SeqDataReader BWTGenerator,
-                     const struct blockEncParams *params,
-                     size_t numExtHeaders, uint16_t *headerIDs,
-                     uint32_t *extHeaderSizes,
-                     headerWriteFunc *extHeaderCallbacks,
-                     void **headerCBData,
-                     bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                     varExtBitsEstimator biVarBits, void *cbState, Error *err);
-
-extern EISeq *
-newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
-                        const Str *projectName,
-                        const struct blockEncParams *params,
-                        size_t numExtHeaders, uint16_t *headerIDs,
-                        uint32_t *extHeaderSizes,
-                        headerWriteFunc *extHeaderCallbacks,
-                        void **headerCBData,
-                        bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                        varExtBitsEstimator biVarBits, void *cbState,
-                        Error *err)
-{
-  struct encIdxSeq *newSeqIdx;
-  SuffixarrayFileInterface sai;
-  assert(sa && projectName && err);
-  initSuffixarrayFileInterface(&sai, sa);
-  newSeqIdx = newBlockEncIdxSeqFromSAI(
-    &sai, totalLen, projectName, params, numExtHeaders, headerIDs,
-    extHeaderSizes, extHeaderCallbacks, headerCBData, biFunc, cwExtBitsPerPos,
-    biVarBits, cbState, err);
-  destructSuffixarrayFileInterface(&sai);
-  return newSeqIdx;
-}
-
-extern EISeq *
-newBlockEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
-                         Seqpos totalLen, const Str *projectName,
-                         const struct blockEncParams *params,
-                         size_t numExtHeaders, uint16_t *headerIDs,
-                         uint32_t *extHeaderSizes,
-                         headerWriteFunc *extHeaderCallbacks,
-                         void **headerCBData,
-                         bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                         varExtBitsEstimator biVarBits, void *cbState,
-                         Error *err)
-{
-  struct encIdxSeq *newSeqIdx;
-  SeqDataReader BWTGenerator;
-  MRAEnc *alphabet;
-  assert(sai && projectName && err);
-  BWTGenerator = SAIMakeBWTReader(sai);
-  alphabet = newMRAEncFromSAI(sai);
-  newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName, alphabet,
-                                   NULL, BWTGenerator, params,
-                                   numExtHeaders, headerIDs, extHeaderSizes,
-                                   extHeaderCallbacks, headerCBData, biFunc,
-                                   cwExtBitsPerPos, biVarBits, cbState, err);
-  if (!newSeqIdx)
-    MRAEncDelete(alphabet);
-  return newSeqIdx;
-}
-
-extern EISeq *
-newBlockEncIdxSeqFromSfxI(sfxInterface *sfxi,
-                          Seqpos totalLen, const Str *projectName,
-                          const struct blockEncParams *params,
-                          size_t numExtHeaders, uint16_t *headerIDs,
-                          uint32_t *extHeaderSizes,
-                          headerWriteFunc *extHeaderCallbacks,
-                          void **headerCBData, bitInsertFunc biFunc,
-                          BitOffset cwExtBitsPerPos,
-                          varExtBitsEstimator biVarBits, void *cbState,
-                          Error *err)
-{
-  struct encIdxSeq *newSeqIdx;
-  SeqDataReader readSfxBWTSym;
-  MRAEnc *alphabet;
-/*   struct sfxInterfaceReadState state; */
-  assert(sfxi && projectName && err);
-  /* register bwttab reader */
-  if (!SDRIsValid(readSfxBWTSym
-                  = SfxIRegisterReader(sfxi, SFX_REQUEST_BWTTAB)))
-    return NULL;
-  /* convert alphabet */
-  alphabet = newMRAEncFromSfxI(sfxi);
-  newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName,
-                                   alphabet, getSfxISeqStats(sfxi),
-                                   readSfxBWTSym, params,
-                                   numExtHeaders, headerIDs, extHeaderSizes,
-                                   extHeaderCallbacks, headerCBData, biFunc,
-                                   cwExtBitsPerPos, biVarBits,
-                                   cbState, err);
-  if (!newSeqIdx)
-    MRAEncDelete(alphabet);
-  return newSeqIdx;
-}
 
 struct onDiskBlockCompIdx
 {
@@ -232,8 +99,9 @@ struct blockCompositionSeq
 };
 
 static inline size_t
-blockEncIdxSeqHeaderLength(struct blockCompositionSeq *seqIdx,
-                           size_t numExtHeaders, uint32_t *extHeaderSizes);
+blockEncIdxSeqHeaderLength(const struct blockCompositionSeq *seqIdx,
+                           size_t numExtHeaders,
+                           const uint32_t *extHeaderSizes);
 
 static int
 openOnDiskData(const Str *projectName, struct onDiskBlockCompIdx *idx,
@@ -248,8 +116,9 @@ destructOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx);
 
 static size_t
 writeIdxHeader(struct blockCompositionSeq *seqIdx,
-               size_t numExtHeaders, uint16_t *headerIDs,
-               uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
+               size_t numExtHeaders, const uint16_t *headerIDs,
+               const uint32_t *extHeaderSizes,
+               headerWriteFunc *extHeaderCallbacks,
                void **headerCBData,
                Error *err);
 
@@ -446,17 +315,13 @@ writeOutputBuffer(struct blockCompositionSeq *newSeqIdx,
   ma_free(block);                                       \
   break
 
-/**
- * @param alphabet ownership of alphabet is transferred to the sequence
- * index produced unless NULL is returned
- */
-static EISeq *
+extern EISeq *
 newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
                      SeqDataReader BWTGenerator,
-                     const struct blockEncParams *params,
-                     size_t numExtHeaders, uint16_t *headerIDs,
-                     uint32_t *extHeaderSizes,
+                     const struct seqBaseParam *params,
+                     size_t numExtHeaders, const uint16_t *headerIDs,
+                     const uint32_t *extHeaderSizes,
                      headerWriteFunc *extHeaderCallbacks,
                      void **headerCBData,
                      bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
@@ -468,13 +333,15 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
   MRAEnc *blockMapAlphabet = NULL, *rangeMapAlphabet = NULL;
   BitOffset bitsPerComposition, bitsPerPermutation;
   unsigned compositionIdxBits, callBackDataOffsetBits,
-    blockSize = params->blockSize, bucketBlocks = params->bucketBlocks;
+    blockSize = params->encParams.blockEnc.blockSize,
+    bucketBlocks = params->encParams.blockEnc.bucketBlocks;
   size_t bucketLen = (size_t)bucketBlocks * blockSize;
   int *modesCopy = NULL;
   struct varBitsEstimate biMaxExtSize;
   enum rangeStoreMode modes[] = { BLOCK_COMPOSITION_INCLUDE,
                                   REGIONS_LIST };
   assert(projectName);
+  assert(params->encType == BWT_ON_BLOCK_ENC);
   assert(blockSize > 0);
   assert((biFunc && biVarBits) || (biFunc == NULL && biVarBits == NULL));
   error_check(err);
@@ -2026,7 +1893,7 @@ enum bdxHeader {
 static const char bdxHeader[] = "BDX";
 
 static inline off_t
-extHeadersSizeAggregate(size_t numExtHeaders, uint32_t *extHeaderSizes)
+extHeadersSizeAggregate(size_t numExtHeaders, const uint32_t *extHeaderSizes)
 {
   off_t len = 0, i;
   for (i = 0; i < numExtHeaders; ++i)
@@ -2035,8 +1902,8 @@ extHeadersSizeAggregate(size_t numExtHeaders, uint32_t *extHeaderSizes)
 }
 
 static inline size_t
-blockEncIdxSeqHeaderLength(struct blockCompositionSeq *seqIdx,
-                           size_t numExtHeaders, uint32_t *extHeaderSizes)
+blockEncIdxSeqHeaderLength(const struct blockCompositionSeq *seqIdx,
+                           size_t numExtHeaders, const uint32_t *extHeaderSizes)
 {
   size_t headerSize =
     4                           /* BDX identifier */
@@ -2100,8 +1967,9 @@ writeExtIdxHeader(FILE *fp, uint16_t headerID, size_t len,
  */
 static size_t
 writeIdxHeader(struct blockCompositionSeq *seqIdx,
-               size_t numExtHeaders, uint16_t *headerIDs,
-               uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
+               size_t numExtHeaders, const uint16_t *headerIDs,
+               const uint32_t *extHeaderSizes,
+               headerWriteFunc *extHeaderCallbacks,
                void **headerCBData, UNUSED Error *err)
 {
   FILE *fp;
@@ -2207,26 +2075,6 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
   return len;
 }
 
-struct encIdxSeq *
-loadBlockEncIdxSeq(const Str *projectName, int features,
-                   Verboseinfo *verbosity, Error *err)
-{
-  struct encIdxSeq *newSeqIdx = NULL;
-  Suffixarray suffixArray;
-  Seqpos len;
-  do
-  {
-    if (streamsuffixarray(&suffixArray, &len,
-                          0, projectName, verbosity, err))
-      break;
-    ++len;
-    newSeqIdx = loadBlockEncIdxSeqForSA(&suffixArray, len, projectName,
-                                        features, err);
-    freesuffixarray(&suffixArray);
-  } while (0);
-  return newSeqIdx;
-}
-
 #define loadBlockEncIdxSeqErrRet()                                      \
   do {                                                                  \
     if (newSeqIdx->externalData.idxFP)                                  \
@@ -2247,20 +2095,20 @@ loadBlockEncIdxSeq(const Str *projectName, int features,
     return NULL;                                                        \
   } while (0)
 
-struct encIdxSeq *
-loadBlockEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
-                        const Str *projectName, int features, Error *err)
+extern struct encIdxSeq *
+loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
+                      const Str *projectName, int features, Error *err)
 {
   struct blockCompositionSeq *newSeqIdx = NULL;
   Symbol blockMapAlphabetSize, totalAlphabetSize;
-  MRAEnc *alphabet = NULL, *blockMapAlphabet = NULL, *rangeMapAlphabet = NULL;
+  MRAEnc *blockMapAlphabet = NULL, *rangeMapAlphabet = NULL;
   size_t headerLen;
   int *modesCopy = NULL;
   char *buf = NULL;
   assert(projectName && err);
   newSeqIdx = ma_calloc(sizeof (struct blockCompositionSeq), 1);
   newSeqIdx->baseClass.seqLen = totalLen;
-  newSeqIdx->baseClass.alphabet = alphabet = newMRAEncFromSA(sa);
+  newSeqIdx->baseClass.alphabet = alphabet;
   newSeqIdx->baseClass.classInfo = &blockCompositionSeqClass;
 
   if (!openOnDiskData(projectName, &newSeqIdx->externalData, "rb"))

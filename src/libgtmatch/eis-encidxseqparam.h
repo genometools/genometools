@@ -17,6 +17,8 @@
 #ifndef EIS_ENCIDXSEQPARAM_H
 #define EIS_ENCIDXSEQPARAM_H
 
+#include "libgtcore/option.h"
+
 /**
  * @file eis-encidxseqparam.h
  * @brief Parameter definitions for index creation routines.
@@ -50,9 +52,6 @@ struct blockEncParams
                                * store partial symbol sums (lower
                                * values increase index size and
                                * decrease computations for lookup) */
-  int EISFeatureSet;          /**< bitwise or of EIS_FEATURE_NONE
-                               * and other features selectable via
-                               * enum EISFeatureBits (see eis-encidxseq.h) */
 };
 
 /**
@@ -84,6 +83,24 @@ union seqBaseEncParam
 /*   } waveletTreeParams; */
 };
 
+struct seqBaseParam
+{
+  enum seqBaseEncoding encType;  /**< encType selects the encoding
+                                   *   method of the sequence index *
+                                   *   storing the BWT sequence (see
+                                   *   enum seqBaseEncoding). */
+  int EISFeatureSet;              /**< bitwise or of EIS_FEATURE_NONE
+                                   * and other features selectable via enum
+                                   * EISFeatureBits (see eis-encidxseq.h) */
+  union seqBaseEncParam encParams;/**< a union holding extra parameter
+                                   *   information specific to the
+                                   *   type selected via parameter
+                                   *   encType */
+};
+
+extern void
+registerEncIdxSeqOptions(OptionParser *op, struct seqBaseParam *paramOutput);
+
 /**
  * @brief Given the construction parameters for a sequence index,
  * estimate how many symbols will be encoded together.
@@ -96,7 +113,6 @@ union seqBaseEncParam
  * @return number of symbols stored consecutively
  */
 extern unsigned
-estimateSegmentSize(const union seqBaseEncParam *params,
-                    enum seqBaseEncoding encType);
+estimateSegmentSize(const struct seqBaseParam *params);
 
 #endif
