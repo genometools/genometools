@@ -15,7 +15,68 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtmgth/mg_compute_gene_prediction.h"
+#include "mg_compute_gene_prediction.h"
+
+/* Funktion zur Berechnung der Start-Stop Informationen der genkodierenden
+   Bereiche sowie deren Leserahmen
+   Parameter: row, column, max-Wert der letzten Spalte der Opt-Path-Matrix,
+              Path-Matrix, CombinedScore-Matrix, Array des opt. Pfades
+              (Leserahmen), Hit-Information, Zeiger auf ParseStruct, Zeiger
+              auf RegionStruct, Zeiger auf den Speicherbereich zum
+              Abspeichern der beteiligten Hits an einem Ergebnis
+   Returnwert: void */
+static void gene_prediction(unsigned short,
+                            unsigned long,
+                            double,
+                            PathMatrixEntry **,
+                            CombinedScoreMatrixEntry **,
+                            Array *,
+                            HitInformation *,
+                            ParseStruct *,
+                            RegionStruct **, unsigned long *, Error *);
+
+/* Funktion zur Vereinigung von genkodierenden Bereichen innerhalb des
+   selben Leserahmen
+   Parameter: Zeiger auf ParseStruct, Zeiger auf RegionStruct,
+              der "reale" Leserahmen
+   Returnwert: void */
+static void genemergeprocessing(ParseStruct *, RegionStruct **, Error *);
+
+/* Funktion zur Identifizierung von Frameshifts
+   Parameter: Zeiger auf ParseStruct, Zeiger auf RegionStruct,
+              der "reale" Leserahmen
+   Returnwert: void */
+static int frameshiftprocessing(ParseStruct *, RegionStruct **, short, Error *);
+
+/* Funktion zur Ueberpruefung von Sequenzbereichen auf beinhaltende
+   Stop-Codons
+   Parameter: Zeiger auf ParseStruct, from-Wert, to-Wert,
+              aktueller Leserahmen
+   Returnwert: 0 - kein Stop-Codon; 1 - Stop-Codon */
+static int check_coding(ParseStruct *,
+                        unsigned long, unsigned long, short, Error *);
+
+/* Funktion zum sortierten Einfuegen neuer Bereichsgrenzen kodierender
+   Abschnitte in das real-Frame-Array
+   Parameter: Zeiger auf RegionStruct-Struktur, Arrays mit den From- und
+              To-Werten des real-Frames,Arrays mit den From- und To-Werten
+              der einzufuegenden Abschnitte, Index des Real-Frames,Index
+              des tmp-Frames, real-Frame, Zeilenindex;
+   Returnwert: void */
+static void merge_array(RegionStruct **,
+                        Array *,
+                        Array *,
+                        Array *,
+                        Array *,
+                        unsigned long,
+                        unsigned long, short, unsigned short);
+
+/* Funktion zum sortierten der Arrays mit den neu einzufuegenden
+   Bereichsgrenzen
+   Parameter: Arrays der sortierten From- und To-Werte, Arrays mit den
+              From- und To-Werten der zu sortierenden Arrays;
+   Returnwert: void */
+static void sort_realtmp(Array *, Array *, Array *, Array *);
 
 int mg_compute_gene_prediction(CombinedScoreMatrixEntry
                                **combinedscore_matrix,
@@ -105,10 +166,10 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
          moeglich? XXX */
       for (row_idx = 0; row_idx < 7; row_idx++)
       {
-        if ((*(frame_counter + row_idx) > real_frame_score)
+        if ((frame_counter[row_idx] > real_frame_score)
             && (array_size(regionmatrix[row_idx][0].from) > 0))
         {
-          real_frame_score = *(frame_counter + row_idx);
+          real_frame_score = frame_counter[row_idx];
           real_frame = row_idx;
         }
       }
@@ -176,7 +237,7 @@ static void gene_prediction(unsigned short row,
        frame_path-Array */
     array_add(frame_path_array, row);
     /* Zaehlen der Frame-Haeufigkeiten */
-    *(frame_counter + row) += 1.0;
+    frame_counter[row] += 1.0;
   }
   else if (column == str_length(MATRIXSTRUCT(query_dna)) - 2)
   {
@@ -187,7 +248,7 @@ static void gene_prediction(unsigned short row,
        frame_path-Array */
     array_add(frame_path_array, row);
     /* Zaehlen der Frame-Haeufigkeiten */
-    *(frame_counter + row) += 1.0;
+    frame_counter[row] += 1.0;
   }
   /* ab hier beginnt die eigentliche Bearbeitung des optimalen Pfades in
      der Combined-Score-Matrix - berechnet wird jeweils die Position
@@ -198,7 +259,7 @@ static void gene_prediction(unsigned short row,
        frame_path-Array */
     array_add(frame_path_array, row);
     /* Zaehlen der Frame-Haeufigkeiten */
-    *(frame_counter + row) += 1.0;
+    frame_counter[row] += 1.0;
 
     /* nur wenn der vorherige Matrixscore(column+2) hoeher ist als der
        Aktuelle(column+1) ist, handelt es sich bei Position column+2 um
@@ -422,9 +483,9 @@ static void gene_prediction(unsigned short row,
     GENEPREDSTRUCT(function_stop) = 0;
 }
 
-int frameshiftprocessing(ParseStruct *parsestruct_ptr,
-                         RegionStruct **regionmatrix,
-                         short real_frame, Error * err)
+static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
+                                RegionStruct **regionmatrix,
+                                short real_frame, Error * err)
 {
   int had_err = 0;
 
@@ -847,12 +908,12 @@ static int check_coding(ParseStruct *parsestruct_ptr,
       {
         /* DNA-Basen-Triplet einlesen */
 
-        *(contig_seq_tri) = tolower(*(contig_seq_ptr + startpoint));
-        *(contig_seq_tri + 1) =
-          tolower(*(contig_seq_ptr + startpoint + 1));
-        *(contig_seq_tri + 2) =
-          tolower(*(contig_seq_ptr + startpoint + 2));
-        *(contig_seq_tri + 3) = '\0';
+        contig_seq_tri[0] = tolower(contig_seq_ptr[startpoint]);
+        contig_seq_tri[1] =
+          tolower(contig_seq_ptr[startpoint + 1]);
+        contig_seq_tri[2] =
+          tolower(contig_seq_ptr[startpoint + 2]);
+        contig_seq_tri[3] = '\0';
 
         found = check_stopcodon(contig_seq_tri);
 

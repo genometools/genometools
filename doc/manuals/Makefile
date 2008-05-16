@@ -1,6 +1,7 @@
 ALL=ltrharvestman.pdf\
     uniquesub.pdf\
     matstat.pdf\
+    mgth.pdf\
     packedindex.pdf
 
 all:${ALL}

@@ -19,6 +19,7 @@
 
 #include "libgtcore/dataalign.h"
 #include "libgtcore/error.h"
+#include "libgtcore/log.h"
 #include "libgtcore/str.h"
 #include "libgtcore/unused.h"
 #include "libgtmatch/sarr-def.h"
@@ -39,32 +40,70 @@
 
 static int
 initBWTSeqFromEncSeqIdx(struct BWTSeq *bwtSeq, struct encIdxSeq *baseSeqIdx,
-                        MRAEnc *alphabet, Seqpos *counts);
+                        MRAEnc *alphabet, Seqpos *counts,
+                        enum rangeSortMode *rangeSort,
+                        const enum rangeSortMode *defaultRangeSort);
 
 static BWTSeq *
-newBWTSeq(struct encIdxSeq *seqIdx, MRAEnc *alphabet);
+newBWTSeq(struct encIdxSeq *seqIdx, MRAEnc *alphabet,
+          const enum rangeSortMode *defaultRangeSort);
 
 extern BWTSeq *
-availBWTSeq(const struct bwtParam *params, Error *err)
+availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, Error *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
   Seqpos len;
-  Verboseinfo *verbosity;
   assert(params && err);
   error_check(err);
-  /* FIXME: handle verbosity in a more sane fashion */
-  verbosity = newverboseinfo(false);
-  if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB,
-                        params->projectName, verbosity, err))
+  if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB
+                        | SARR_ESQTAB, params->projectName, verbosity, err))
   {
-    freeverboseinfo(&verbosity);
-    return NULL;
+    error_unset(err);
+    if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_ESQTAB,
+                          params->projectName, verbosity, err))
+    {
+      error_unset(err);
+      if (streamsuffixarray(&suffixArray, &len, 0,
+                            params->projectName, verbosity, err))
+        return NULL;
+    }
   }
   ++len;
   bwtSeq = availBWTSeqFromSA(params, &suffixArray, len, err);
   freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity);
+  return bwtSeq;
+}
+
+extern BWTSeq *
+trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
+                Error *err)
+{
+  struct BWTSeq *bwtSeq = NULL;
+  Suffixarray suffixArray;
+  Seqpos len;
+  assert(params && err);
+  error_check(err);
+  do
+  {
+    if (streamsuffixarray(&suffixArray, &len,
+                          SARR_SUFTAB | SARR_BWTTAB | SARR_ESQTAB,
+                          params->projectName, verbosity, err))
+    {
+      error_unset(err);
+      if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_ESQTAB,
+                            params->projectName, verbosity, err))
+      {
+        error_set(err, "suffix array project %s does not hold required suffix"
+                  " array (.suf) and encoded sequence (.esq) information!",
+                  str_get(params->projectName));
+        break;
+      }
+    }
+    ++len;
+    bwtSeq = createBWTSeqFromSA(params, &suffixArray, len, err);
+    freesuffixarray(&suffixArray);
+  } while (0);
   return bwtSeq;
 }
 
@@ -85,32 +124,39 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
     error_unset(err);
     bwtSeq = createBWTSeqFromSA(params, sa, totalLen, err);
   }
+  else
+  {
+    fputs("Using pre-computed sequence index.\n", stderr);
+  }
   return bwtSeq;
 }
 
-static int GTAlphabetRangeHandling[] = { NORMAL_RANGE, SPECIAL_RANGE };
+enum {
+  GT_ALPHABETHANDLING_DEFAULT = 0,
+  GT_ALPHABETHANDLING_W_RANK  = 1,
+};
+
+static const enum rangeSortMode GTAlphabetRangeSort[][2] =
+{
+  { SORTMODE_VALUE, SORTMODE_UNDEFINED },
+  { SORTMODE_VALUE, SORTMODE_RANK }
+};
 
 extern BWTSeq *
-loadBWTSeq(const Str *projectName, int BWTOptFlags, Error *err)
+loadBWTSeq(const Str *projectName, int BWTOptFlags, Verboseinfo *verbosity,
+           Error *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
   Seqpos len;
-  Verboseinfo *verbosity;
   assert(projectName && err);
   error_check(err);
-  /* FIXME: handle verbosity in a more sane fashion */
-  verbosity = newverboseinfo(false);
   if (mapsuffixarray(&suffixArray, &len, 0, projectName, verbosity, err))
-  {
-    freeverboseinfo(&verbosity);
     return NULL;
-  }
   ++len;
   bwtSeq = loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC, BWTOptFlags,
                            &suffixArray, len, err);
   freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity);
   return bwtSeq;
 }
 
@@ -130,11 +176,8 @@ loadBWTSeqForSA(const Str *projectName, enum seqBaseEncoding baseType,
     if ((seqIdx = loadBlockEncIdxSeqForSA(
            sa, totalLen, projectName,
            convertBWTOptFlags2EISFeatures(BWTOptFlags), err)))
-    {
-      if (!(bwtSeq = newBWTSeq(seqIdx, alphabet)))
-        break;
-      fputs("Using pre-computed sequence index.\n", stderr);
-    }
+      bwtSeq = newBWTSeq(seqIdx, alphabet,
+                         GTAlphabetRangeSort[GT_ALPHABETHANDLING_DEFAULT]);
     break;
   default:
     error_set(err, "Illegal/unknown/unimplemented encoding requested!");
@@ -150,37 +193,60 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                    Seqpos totalLen, Error *err)
 {
   BWTSeq *bwtSeq = NULL;
-  MRAEnc *alphabet = NULL;
-  if (params->locateInterval && !sa->suftabstream.fp)
+  if (!sa->longest.defined)
   {
-    fprintf(stderr, "error: locate sampling requested but not available"
-            " for project %s\n", str_get(params->projectName));
-  }
-  else if (!sa->longest.defined)
-  {
-    fprintf(stderr,
-            "error: position of null-rotation/longest suffix not available"
+    log_log("error: position of null-rotation/longest suffix not available"
             " for project %s\n", str_get(params->projectName));
   }
   else
   {
+    SuffixarrayFileInterface sai;
+    initSuffixarrayFileInterface(&sai, sa);
+    bwtSeq = createBWTSeqFromSAI(params, &sai, totalLen, err);
+    destructSuffixarrayFileInterface(&sai);
+  }
+  return bwtSeq;
+}
+
+extern BWTSeq *
+createBWTSeqFromSAI(const struct bwtParam *params,
+                    SuffixarrayFileInterface *sai,
+                    Seqpos totalLen, Error *err)
+{
+  BWTSeq *bwtSeq = NULL;
+  MRAEnc *alphabet = NULL;
+  SeqDataReader readSfxIdx = { NULL, NULL };
+  assert(sai && err && params);
+  alphabet = newMRAEncFromSAI(sai);
+  if (params->locateInterval
+      && !SDRIsValid(readSfxIdx
+                               = SAIMakeReader(sai, SFX_REQUEST_SUFTAB)))
+  {
+    error_set(err, "error: locate sampling requested but not available"
+              " for project %s\n", str_get(params->projectName));
+  }
+  else
+  {
     EISeq *seqIdx = NULL;
-    alphabet = newMRAEncFromSA(sa);
     switch (params->baseType)
     {
+      RandomSeqAccessor origSeqRead;
     case BWT_ON_BLOCK_ENC:
+      origSeqRead.accessFunc = SAIGetOrigSeqSym;
+      origSeqRead.state = sai;
       seqIdx =
         createBWTSeqGeneric(
-          params, (indexCreateFunc)newBlockEncIdxSeqFromSA, sa, totalLen,
-          alphabet, GTAlphabetRangeHandling, saGetOrigSeqSym, sa, saReadSeqpos,
-          sa, reportSALongest, sa, err);
+          params, (indexCreateFunc)newBlockEncIdxSeqFromSAI, sai, totalLen,
+          alphabet, NULL, GTAlphabetRangeSort[GT_ALPHABETHANDLING_DEFAULT],
+          origSeqRead, readSfxIdx, NULL, reportSAILongest, sai, err);
       break;
     default:
       error_set(err, "Illegal/unknown/unimplemented encoding requested!");
       break;
     }
     if (seqIdx)
-      bwtSeq = newBWTSeq(seqIdx, alphabet);
+      bwtSeq = newBWTSeq(seqIdx, alphabet,
+                         GTAlphabetRangeSort[GT_ALPHABETHANDLING_DEFAULT]);
     if (!bwtSeq)
     {
       if (seqIdx)
@@ -192,58 +258,56 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   return bwtSeq;
 }
 
-struct sfxIReadInfo
-{
-  sfxInterface *si;
-  listenerID id;
-};
-
-static int
-sfxIReadSeqpos(void *src, Seqpos *dest, size_t len, UNUSED Error *err)
-{
-  return readSfxISufTabRange(((struct sfxIReadInfo *)src)->si,
-                             ((struct sfxIReadInfo *)src)->id,
-                             len, dest) == len;
-}
-
-#if 0
-static int
-sfxIReadBWTSym(void *src, Symbol *dest, size_t len, Error *err)
-{
-  return readSfxIBWTRange(((struct sfxIReadInfo *)src)->si,
-                          ((struct sfxIReadInfo *)src)->id,
-                          len, dest) == len;
-}
-#endif
-
 extern BWTSeq *
-createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
+createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
                      Seqpos totalLen, Error *err)
 {
-  struct sfxIReadInfo siriSeqpos;
   EISeq *seqIdx = NULL;
   BWTSeq *bwtSeq = NULL;
   MRAEnc *alphabet = NULL;
-  assert(si && params && err);
-
+  SeqDataReader readSfxIdx = { NULL, NULL };
+  SpecialsRankTable *sprTable = NULL;
+  const enum rangeSortMode *rangeSort;
+  assert(sfxi && params && err);
   if (params->locateInterval)
   {
-    siriSeqpos.si = si;
-    if (!SfxIRegisterReader(si, &siriSeqpos.id, SFX_REQUEST_SUFTAB))
+    if (!SDRIsValid(readSfxIdx
+                              = SfxIRegisterReader(sfxi,
+                                                   SFX_REQUEST_SUFTAB)))
       return NULL;
   }
-  alphabet = newMRAEncFromSfxI(si);
-  seqIdx= createBWTSeqGeneric(
-    params, (indexCreateFunc)newBlockEncIdxSeqFromSfxI, si, totalLen,
-    alphabet, GTAlphabetRangeHandling,
-    SfxIGetOrigSeq, si, sfxIReadSeqpos, &siriSeqpos,
-    (reportLongest)getSfxILongestPos, si, err);
+  if (params->featureToggles & BWTReversiblySorted)
+  {
+    int sampleIntervalLog2 = params->sourceRankInterval;
+    if (sampleIntervalLog2 == -1)
+    {
+      sampleIntervalLog2
+        = requiredUIntBits(requiredSeqposBits(totalLen));
+    }
+    sprTable = newSpecialsRankTable(SfxIGetEncSeq(sfxi),
+                                    SfxIGetReadMode(sfxi),
+                                    sampleIntervalLog2);
+  }
+  rangeSort = GTAlphabetRangeSort[sprTable?
+                                  GT_ALPHABETHANDLING_W_RANK:
+                                  GT_ALPHABETHANDLING_DEFAULT];
+  alphabet = newMRAEncFromSfxI(sfxi);
+  {
+    RandomSeqAccessor origSeqAccess = { SfxIGetOrigSeq, sfxi };
+    seqIdx= createBWTSeqGeneric(
+      params, (indexCreateFunc)newBlockEncIdxSeqFromSfxI, sfxi, totalLen,
+      alphabet, getSfxISeqStats(sfxi), rangeSort,
+      origSeqAccess, readSfxIdx, sprTable, (reportLongest)getSfxILongestPos,
+      sfxi, err);
+  }
   if (seqIdx)
   {
-    bwtSeq = newBWTSeq(seqIdx, alphabet);
+    bwtSeq = newBWTSeq(seqIdx, alphabet, rangeSort);
   }
   if (!bwtSeq && seqIdx)
     deleteEncIdxSeq(seqIdx);
+  if (sprTable)
+    deleteSpecialsRankTable(sprTable);
   return bwtSeq;
 }
 
@@ -253,7 +317,9 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
  */
 static int
 initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
-                        MRAEnc *alphabet, Seqpos *counts)
+                        MRAEnc *alphabet, Seqpos *counts,
+                        enum rangeSortMode *rangeSort,
+                        const enum rangeSortMode *defaultRangeSort)
 {
   size_t alphabetSize;
   Symbol bwtTerminatorFlat;
@@ -267,32 +333,17 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
     return 0;
   /* FIXME: this should probably be handled in chardef.h to have a
    * unique mapping */
-  MRAEncAddSymbolToRange(alphabet, SEPARATOR - 3, 1);
+  /* FIXME: this assumes there is exactly two ranges */
+  MRAEncAddSymbolToRange(alphabet, bwtTerminatorSym, 1);
   assert(MRAEncGetSize(alphabet) ==  alphabetSize + 1);
   alphabetSize = MRAEncGetSize(alphabet);
   bwtSeq->bwtTerminatorFallback = bwtTerminatorFlat =
     MRAEncMapSymbol(alphabet, UNDEFBWTCHAR);
-
+  bwtSeq->bwtTerminatorFallbackRange = 1;
   bwtSeq->count = counts;
+  bwtSeq->rangeSort = rangeSort;
   bwtSeq->seqIdx = seqIdx;
   bwtSeq->alphabetSize = alphabetSize;
-  {
-    struct locateHeader header;
-    if (!readLocateInfoHeader(seqIdx, &header)
-        || !header.locateInterval)
-    {
-      fputs("Index does not contain locate information.\n"
-            "Localization of matches will not be supported!\n", stderr);
-      bwtSeq->locateSampleInterval = 0;
-    }
-    else
-    {
-      bwtSeq->locateSampleInterval = header.locateInterval;
-      bwtSeq->longest = header.longest;
-      /* FIXME: this really deserves its own header */
-      bwtSeq->featureToggles = header.featureToggles;
-    }
-  }
   bwtSeq->hint = hint = newEISHint(seqIdx);
   {
     Symbol i;
@@ -311,14 +362,15 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
         + EISSymTransformedRank(seqIdx, i - 1, len, hint);
     /* and finally place the 1-count for the terminator */
     count[i] = count[i - 1] + 1;
-#ifdef DEBUG
-    fprintf(stderr, "count[alphabetSize]="FormatSeqpos
+#ifdef EIS_DEBUG
+    log_log("count[alphabetSize]="FormatSeqpos
             ", len="FormatSeqpos"\n", count[alphabetSize], len);
     for (i = 0; i <= alphabetSize; ++i)
-      fprintf(stderr, "count[%u]="FormatSeqpos"\n", (unsigned)i, count[i]);
+      log_log("count[%u]="FormatSeqpos"\n", (unsigned)i, count[i]);
 #endif
     assert(count[alphabetSize] == len);
   }
+  BWTSeqInitLocateHandling(bwtSeq, defaultRangeSort);
   return 1;
 }
 
@@ -327,21 +379,29 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
  * sequence object if return value is non-NULL
  */
 static BWTSeq *
-newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet)
+newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
+          const enum rangeSortMode *defaultRangeSort)
 {
   BWTSeq *bwtSeq;
   Seqpos *counts;
+  size_t countsOffset, rangeSortOffset, totalSize;
+  enum rangeSortMode *rangeSort;
   unsigned alphabetSize;
   assert(seqIdx);
   /* alphabetSize is increased by one to handle the flattened
    * terminator symbol correctly */
   alphabetSize = MRAEncGetSize(alphabet) + 1;
-  bwtSeq = ma_malloc(offsetAlign(sizeof (struct BWTSeq), sizeof (Seqpos))
-                     + sizeof (Seqpos) * (alphabetSize + 1));
-  counts = (Seqpos *)((char  *)bwtSeq
-                      + offsetAlign(sizeof (struct BWTSeq),
-                                    sizeof (Seqpos)));
-  if (!initBWTSeqFromEncSeqIdx(bwtSeq, seqIdx, alphabet, counts))
+  countsOffset = offsetAlign(sizeof (struct BWTSeq), sizeof (Seqpos));
+  rangeSortOffset = offsetAlign(countsOffset
+                                + sizeof (Seqpos) * (alphabetSize + 1),
+                                sizeof (enum rangeSortMode));
+  totalSize = rangeSortOffset + sizeof (enum rangeSortMode)
+    * MRAEncGetNumRanges(alphabet);
+  bwtSeq = ma_malloc(totalSize);
+  counts = (Seqpos *)((char  *)bwtSeq + countsOffset);
+  rangeSort = (enum rangeSortMode *)((char *)bwtSeq + rangeSortOffset);
+  if (!initBWTSeqFromEncSeqIdx(bwtSeq, seqIdx, alphabet, counts, rangeSort,
+                               defaultRangeSort))
   {
     ma_free(bwtSeq);
     bwtSeq = NULL;
@@ -646,12 +706,11 @@ EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
 extern int
 BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
                       unsigned long tickPrint, FILE *fp,
-                      Error *err)
+                      Verboseinfo *verbosity, Error *err)
 {
   Suffixarray suffixArray;
   struct extBitsRetrieval extBits;
   bool suffixArrayIsInitialized = false, extBitsAreInitialized = false;
-  Verboseinfo *verbosity = NULL;
   enum verifyBWTSeqErrCode retval = VERIFY_BWTSEQ_NO_ERROR;
   do
   {
@@ -659,7 +718,6 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
     assert(bwtSeq && projectName && err);
     error_check(err);
 
-    verbosity = newverboseinfo(true);
     initExtBitsRetrieval(&extBits);
     if (mapsuffixarray(&suffixArray, &len,
                        SARR_SUFTAB | SARR_ESQTAB, projectName, verbosity, err))
@@ -667,7 +725,6 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       error_set(err, "Cannot load reference suffix array project with"
                     " demand for suffix table file and encoded sequence"
                     " for project: %s", str_get(projectName));
-      freeverboseinfo(&verbosity);
       retval = VERIFY_BWTSEQ_REFLOAD_ERROR;
       break;
     }
@@ -712,7 +769,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       fputs("Not checking suftab values (no locate information present)!\n",
             stderr);
     }
-    if ((bwtSeq->featureToggles & BWTProperlySorted)
+    if ((bwtSeq->featureToggles & BWTReversiblySorted)
         && suffixArray.longest.defined && len)
     {
       Seqpos nextLocate = suffixArray.longest.valueseqpos,
@@ -730,7 +787,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
           break;
         }
         --i;
-        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate);
+        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, &extBits);
       }
       while (i > 0)
       {
@@ -744,15 +801,11 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
           retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
           break;
         }
-        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate);
+        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, &extBits);
       }
     }
   } while (0);
-  if (suffixArrayIsInitialized)
-    freesuffixarray(&suffixArray);
-  if (verbosity)
-    freeverboseinfo(&verbosity);
-  if (extBitsAreInitialized)
-    destructExtBitsRetrieval(&extBits);
+  if (suffixArrayIsInitialized) freesuffixarray(&suffixArray);
+  if (extBitsAreInitialized) destructExtBitsRetrieval(&extBits);
   return retval;
 }

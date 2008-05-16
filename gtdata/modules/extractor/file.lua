@@ -64,10 +64,20 @@ end
 function File:remove_function(func)
   assert(func)
   if self.basename:match("%.h$") then -- header file
+    -- somewhat hackish way to remove function name with preceding comment,
+    -- because Lua doesn not support grouping patterns (to make the comment
+    -- optional). If the comment is not optional the non-greedy comment matcher
+    -- woudl ``eat to much''.
+    replacement = {}
+    replacement[func] = ''
+    self.filecontent = self.filecontent:gsub('\n/%*.-%*/' ..
+                                             '\n%S*%s?%S+%s+' .. '(%S+)' ..
+                                             '%(.-%);', replacement)
+    -- remove function name without preceding comment
     self.filecontent = self.filecontent:gsub('\n%S*%s?%S+%s+' .. func ..
                                              '%(.-%);', '')
   else -- C file
-    self.filecontent = self.filecontent:gsub('\n%S*%s?%S+%s+' .. func ..
+    self.filecontent = self.filecontent:gsub('\n%S*%s?%S+%s?%S+%s+' .. func ..
                                              '%(.-%)\n{.-\n}', '')
   end
   self.filecontent = self.filecontent:gsub('\n\n\n', '\n\n')

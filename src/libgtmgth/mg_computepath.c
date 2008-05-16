@@ -15,7 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtmgth/mg_computepath.h"
+#include "mg_computepath.h"
+
+/* Funktion zur Berechnung der erlaubten Vorgaenger-Leserahmen
+   Parameter: aktueller Leserahmen, Position in der Query-Sequence,
+   (Zeiger auf) Array der moeglichen Vorgaenger
+   Returnwert: void */
+static void compute_precursors(short, unsigned long, short *);
 
 int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
                    HitInformation *hit_information,
@@ -155,7 +161,7 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
 /* Methode zur Berechnung der moeglichen Vorgaengerleserahmen */
 static void compute_precursors(short current_frame,
                                unsigned long position,
-                               short precursors_fct[])
+                               short *precursors_fct)
 {
   short j = 0;
 

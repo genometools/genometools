@@ -15,8 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <expat.h>
 #include "libgtcore/unused.h"
-#include "libgtmgth/mg_xmlparser.h"
+#include "metagenomethreader.h"
+
+#ifdef CURLDEF
+#include <curl.h>
+#endif
+
+/* Expat-Funktion zur Verarbeitung des Textes zwischen XML-Tags
+   Parameter: void-Zeiger auf die (Nutzer)Daten - hier: parsestruct-Struktur;
+              Zeiger auf das erste Zeichen nach einem XML-Tag;
+              int-Wert der Laenge des Textes zwischen den XML-Tags
+   Returnwert: void */
+void textElement(void *, const XML_Char *, int);
 
 /* Expat-Funktion zur Behandlung oeffnender XML-Tags
    Parameter: void-Zeiger auf die (Nutzer)Daten - hier: parsestruct-Struktur;
@@ -81,7 +93,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
   /* Start- und Endelement Handler werden gesetzt */
   XML_SetElementHandler(parser, startElement, endElement);
   /* Text-Handler setzen */
-  XML_SetCharacterDataHandler(parser, text);
+  XML_SetCharacterDataHandler(parser, textElement);
 
   while ((str_read_next_line_generic(buf, fp_xmlfile) != EOF) && !had_err)
   {
@@ -118,7 +130,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
     had_err = -1;
   }
 
-  if (PARSESTRUCT(xml_tag_flag) && !(!had_err))
+  if (PARSESTRUCT(xml_tag_flag) && !(!had_err) && PARSESTRUCT(giexp_flag))
   {
     strarray_delete(MATRIXSTRUCT(hit_gi_nr));
     strarray_delete(MATRIXSTRUCT(hit_num));
@@ -205,7 +217,8 @@ static void XMLCALL endElement(void *data, const char *name)
     /* wurde das Iteration_hits XML-Tag erreicht wird die mg_combinedscore
        Methode aufgerufen und diverse Variablen fuer einen neuen Eintrag
        resetet bzw. geloescht */
-    if (strcmp(name, str_get(PARSESTRUCT(xml_tag))) == 0)
+    if (strcmp(name, str_get(PARSESTRUCT(xml_tag))) == 0
+                             && PARSESTRUCT(giexp_flag))
     {
       if (XMLPARSERSTRUCT(hit_counter) > 0)
       {
@@ -215,6 +228,7 @@ static void XMLCALL endElement(void *data, const char *name)
 
         /* Zaehler der Hits pro Hit-GI-Nr */
         XMLPARSERSTRUCT(hit_counter) = 0;
+        PARSESTRUCT(gi_flag) = 0;
 
         array_reset(MATRIXSTRUCT(query_from));
         array_reset(MATRIXSTRUCT(query_to));
@@ -230,11 +244,12 @@ static void XMLCALL endElement(void *data, const char *name)
       }
 
       strarray_delete(MATRIXSTRUCT(hit_gi_nr));
-      strarray_delete(MATRIXSTRUCT(hit_num));
-      strarray_delete(MATRIXSTRUCT(hit_dna));
       strarray_delete(MATRIXSTRUCT(hit_gi_def));
       strarray_delete(MATRIXSTRUCT(hit_acc));
       strarray_delete(MATRIXSTRUCT(fasta_row));
+      strarray_delete(MATRIXSTRUCT(hit_num));
+
+      strarray_delete(MATRIXSTRUCT(hit_dna));
       strarray_delete(MATRIXSTRUCT(hit_from));
       strarray_delete(MATRIXSTRUCT(hit_to));
       strarray_delete(MATRIXSTRUCT(hsp_qseq));
@@ -251,7 +266,8 @@ static void XMLCALL endElement(void *data, const char *name)
     {
       /* Anhand der Query-GI-Def kann mittels Hash-Table und
          Bioseq-Struktur die Query-DNA ausgelesen werden */
-      if (strcmp(name, strarray_get(PARSESTRUCT(query_array), 0)) == 0)
+      if (strcmp(name, strarray_get(PARSESTRUCT(query_array), 0)) == 0
+                                    && PARSESTRUCT(giexp_flag))
       {
         /* Query-DNA-Strings fuer die Sequenz und die Definition werden
            geloescht, bevor der neue Eintrag hineinkopiert wird */
@@ -343,12 +359,14 @@ static void XMLCALL endElement(void *data, const char *name)
         }
       }
       /* einlesen der hit_gi_def */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_array), 1)) == 0)
+      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_array), 1)) == 0
+                                         && PARSESTRUCT(giexp_flag))
       {
         str_set(PARSESTRUCT(gi_def_tmp), str_get(PARSESTRUCT(buf_ptr)));
       }
       /* einlesen der hit_acc_nr */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_array), 2)) == 0)
+      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_array), 2)) == 0
+                                         && PARSESTRUCT(giexp_flag))
       {
         str_set(PARSESTRUCT(gi_acc_tmp), str_get(PARSESTRUCT(buf_ptr)));
       }
@@ -357,7 +375,7 @@ static void XMLCALL endElement(void *data, const char *name)
          Hit-File und dient der Identifizierung der Hit-DNA-Sequenzen im
          XML-File */
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 0)) ==
-               0)
+               0 && PARSESTRUCT(giexp_flag))
       {
         /* Die GI-Nummer wird entsprechend ihrer Laenge gi_len
            abgespeichert */
@@ -377,7 +395,7 @@ static void XMLCALL endElement(void *data, const char *name)
       }
       /* Der Query-Start-Wert wird gespeichert */
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 1)) ==
-               0)
+               0 && PARSESTRUCT(giexp_flag))
       {
         /* Der Query-from Wert wird als Long-Wert gespeichert, dazu
            zunaechst Umwandlung des Strings mittels atol */
@@ -389,7 +407,7 @@ static void XMLCALL endElement(void *data, const char *name)
       /* Query-Stop-Wert wird gespeichert/Bearbeitung siehe
          Query-Start-Wert */
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 2)) ==
-               0)
+               0 && PARSESTRUCT(giexp_flag))
       {
         ulong_numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
         array_add_elem(MATRIXSTRUCT(query_to), &ulong_numb_buf,
@@ -399,23 +417,41 @@ static void XMLCALL endElement(void *data, const char *name)
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 3)) ==
                0)
       {
-        /* Speichern des Hit-from Wertes in der matrix_info Struktur
-           innerhalb der parsestruct-Struktur */
-        strarray_add_cstr(MATRIXSTRUCT(hit_from),
-                          str_get(PARSESTRUCT(buf_ptr)));
+        if (PARSESTRUCT(giexp_flag))
+        {
+          /* Speichern des Hit-from Wertes in der matrix_info Struktur
+             innerhalb der parsestruct-Struktur */
+          strarray_add_cstr(MATRIXSTRUCT(hit_from),
+                            str_get(PARSESTRUCT(buf_ptr)));
+        }
+        else
+        {
+          genfile_xprintf(HITFILEOUT, "%s ",
+                          str_get(PARSESTRUCT(hit_gi_nr_tmp)));
+          genfile_xprintf(HITFILEOUT, "%s ", str_get(PARSESTRUCT(buf_ptr)));
+        }
       }
       /* Hit-to XML-Tag - Bearbeitung siehe Hit-from-Tag */
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 4)) ==
                0)
       {
-        strarray_add_cstr(MATRIXSTRUCT(hit_to),
-                          str_get(PARSESTRUCT(buf_ptr)));
+        if (PARSESTRUCT(giexp_flag))
+        {
+          /* Speichern des Hit-from Wertes in der matrix_info Struktur
+             innerhalb der parsestruct-Struktur */
+          strarray_add_cstr(MATRIXSTRUCT(hit_to),
+                            str_get(PARSESTRUCT(buf_ptr)));
+        }
+        else
+        {
+          genfile_xprintf(HITFILEOUT, "%s \n", str_get(PARSESTRUCT(buf_ptr)));
+        }
       }
       /* Query-Frame XML-Tag; bei der Berechnung der Combined-Scores
          bilden die Hits Cluster entsprechend der Query-Frames;
          Speicherung der Frames erfolgt als Long-Wert */
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 5)) ==
-               0)
+               0 && PARSESTRUCT(giexp_flag))
       {
         /* abspeichern des query_frames fuer die FASTA-File Zeile im
            Hit-File als String */
@@ -430,7 +466,7 @@ static void XMLCALL endElement(void *data, const char *name)
       /* Hit-Frame XML-Tag/Bearbeitung siehe Query-Frame XML-Tag als
          String */
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 6)) ==
-               0)
+               0 && PARSESTRUCT(giexp_flag))
       {
         /* abspeichern des hit_frames fuer die FASTA-File Zeile im
            Hit-File */
@@ -445,100 +481,126 @@ static void XMLCALL endElement(void *data, const char *name)
         /* Wenn ein Hit-FASTA-File vorliegt existiert eine Bioseq-Struktur
            und eine Hashtabelle, ueber die die Hit-Sequenz-Informationen
            eingelesen werden */
-        if (ARGUMENTSSTRUCT(hitfile_bool))
+
+        unsigned long hit_nr = 0;
+
+        Str *hit_tmp;
+        Str *hit_dna_tmp;
+
+        hit_tmp = str_new();
+        hit_dna_tmp = str_new();
+
+        /* Die Fasta-Zeile im Hit-File besteht aus der Hit-Gi-Def, der
+           Accession-Nr, der Hit-Hsp-Nr, dem Hit-From und Hit-To Wert
+           sowie des Query- und Hit-Frames getrennt durch ein
+           Leerzeichen; Zeile muss eindeutig sein - durch diese
+           Kombination ist dies gewaehrleistet */
+
+        str_set(hit_tmp,
+                strarray_get(MATRIXSTRUCT(hit_gi_nr),
+                             XMLPARSERSTRUCT(hit_counter)));
+        str_append_cstr(hit_tmp, " ");
+        str_append_cstr(hit_tmp,
+                        strarray_get(MATRIXSTRUCT(hit_from),
+                                     XMLPARSERSTRUCT(hit_counter)));
+        str_append_cstr(hit_tmp, " ");
+        str_append_cstr(hit_tmp,
+                        strarray_get(MATRIXSTRUCT(hit_to),
+                                     XMLPARSERSTRUCT(hit_counter)));
+        str_append_cstr(hit_tmp, " ");
+        str_append_cstr(hit_tmp,
+                        strarray_get(MATRIXSTRUCT(fasta_row),
+                                     XMLPARSERSTRUCT(hit_counter)));
+        str_append_cstr(hit_tmp, " ");
+        str_append_cstr(hit_tmp,
+                        strarray_get(MATRIXSTRUCT(hit_gi_def),
+                                     XMLPARSERSTRUCT(hit_counter)));
+
+        /* Hit-Hashtabelle enthaelt den konstruierten Eintrag */
+        if (hashtable_get(PARSESTRUCT(hithash), str_get(hit_tmp)))
         {
-          unsigned long hit_nr = 0;
+          /* Positionsbestimmung des Eintrages in der Bioseq-Struktur */
+          hit_nr =
+            *(unsigned long *) hashtable_get(PARSESTRUCT(hithash),
+                                             str_get(hit_tmp));
 
-          Str *hit_tmp;
-          Str *hit_dna_tmp;
-
-          hit_tmp = str_new();
-          hit_dna_tmp = str_new();
-
-          /* Die Fasta-Zeile im Hit-File besteht aus der Hit-Gi-Def, der
-             Accession-Nr, der Hit-Hsp-Nr, dem Hit-From und Hit-To Wert
-             sowie des Query- und Hit-Frames getrennt durch ein
-             Leerzeichen; Zeile muss eindeutig sein - durch diese
-             Kombination ist dies gewaehrleistet */
-          str_set(hit_tmp,
-                  strarray_get(MATRIXSTRUCT(hit_gi_nr),
-                               XMLPARSERSTRUCT(hit_counter)));
-          str_append_cstr(hit_tmp, " ");
-          str_append_cstr(hit_tmp,
-                          strarray_get(MATRIXSTRUCT(hit_from),
-                                       XMLPARSERSTRUCT(hit_counter)));
-          str_append_cstr(hit_tmp, " ");
-          str_append_cstr(hit_tmp,
-                          strarray_get(MATRIXSTRUCT(hit_to),
-                                       XMLPARSERSTRUCT(hit_counter)));
-          str_append_cstr(hit_tmp, " ");
-          str_append_cstr(hit_tmp,
-                          strarray_get(MATRIXSTRUCT(fasta_row),
-                                       XMLPARSERSTRUCT(hit_counter)));
-          str_append_cstr(hit_tmp, " ");
-          str_append_cstr(hit_tmp,
-                          strarray_get(MATRIXSTRUCT(hit_gi_def),
-                                       XMLPARSERSTRUCT(hit_counter)));
-
-          /* Hit-Hashtabelle enthaelt den konstruierten Eintrag */
-          if (hashtable_get(PARSESTRUCT(hithash), str_get(hit_tmp)))
-          {
-            /* Positionsbestimmung des Eintrages in der Bioseq-Struktur */
-            hit_nr =
-              *(unsigned long *) hashtable_get(PARSESTRUCT(hithash),
-                                               str_get(hit_tmp));
-
-            /* auslesen der Sequenzinformation */
-            str_append_cstr_nt(hit_dna_tmp,
-                               bioseq_get_sequence(PARSESTRUCT(hitseq),
-                                                   hit_nr),
-                               bioseq_get_sequence_length(PARSESTRUCT
-                                                          (hitseq),
-                                                          hit_nr));
-            /* abspeichern der Hit-DNA in der Matrix-Info Struktur */
-            strarray_add_cstr(MATRIXSTRUCT(hit_dna), str_get(hit_dna_tmp));
-          }
-          /* Falls kein Eintrag in der Hashtabelle gefunden wurde,
-             Fehlercode setzen - falsche Hit-DNA-Datei als Parameter bei
-             Programmaufruf angegeben ? */
-          else
-          {
-            /* Hit-GI-Nr nicht in der Hashtabelle, also ueber cURL von
-               z.B. NCBI nachladen */
-#ifdef CURLDEF
-            PARSESTRUCT(had_err) =
-              mg_curl(parsestruct_ptr, XMLPARSERSTRUCT(hit_counter), err);
-#endif
-          }
-          str_delete(hit_tmp);
-          str_delete(hit_dna_tmp);
+          /* auslesen der Sequenzinformation */
+          str_append_cstr_nt(hit_dna_tmp,
+                             bioseq_get_sequence(PARSESTRUCT(hitseq),
+                                                 hit_nr),
+                             bioseq_get_sequence_length(PARSESTRUCT
+                                                        (hitseq),
+                                                        hit_nr));
+          /* abspeichern der Hit-DNA in der Matrix-Info Struktur */
+          strarray_add_cstr(MATRIXSTRUCT(hit_dna), str_get(hit_dna_tmp));
         }
-        /* sonst: Aufruf der mg_curl Methode zum Einlesen der Hit-DNA
-           Sequenzen per efetch; Uebergabeparameter: Hit-GI-Nummer,
-           Hit-from- und Hit-to-Wert eines Hits sowie die env-Variable */
+        /* Falls kein Eintrag in der Hashtabelle gefunden wurde,
+           Fehlercode setzen - falsche Hit-DNA-Datei als Parameter bei
+           Programmaufruf angegeben ? */
         else
         {
+          /* Hit-GI-Nr nicht in der Hashtabelle, also ueber cURL von
+             z.B. NCBI nachladen */
 #ifdef CURLDEF
           PARSESTRUCT(had_err) =
             mg_curl(parsestruct_ptr, XMLPARSERSTRUCT(hit_counter), err);
 #endif
+#ifndef CURLDEF
+          PARSESTRUCT(gi_flag) = 1;
+#endif
         }
+        str_delete(hit_tmp);
+        str_delete(hit_dna_tmp);
       }
       /* Einlesen der translatierten Query-DNA-Sequenz */
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 7)) ==
-               0)
+               0 && PARSESTRUCT(giexp_flag))
       {
         strarray_add_cstr(MATRIXSTRUCT(hsp_qseq),
                           str_get(PARSESTRUCT(buf_ptr)));
       }
       /* Einlesen der translatierten Hit-DNA-Sequenz */
       else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 8)) ==
-               0)
+               0 && PARSESTRUCT(giexp_flag))
       {
         strarray_add_cstr(MATRIXSTRUCT(hsp_hseq),
                           str_get(PARSESTRUCT(buf_ptr)));
         /* Zaehler fuer die Hits pro GI-Nummer wird um 1 erhoeht */
         XMLPARSERSTRUCT(hit_counter)++;
+
+        if (PARSESTRUCT(gi_flag))
+        {
+           PARSESTRUCT(gi_flag) = 0;
+
+           strarray_set_size(MATRIXSTRUCT(hit_gi_nr),
+                             strarray_size(MATRIXSTRUCT(hit_gi_nr))-1);
+           strarray_set_size(MATRIXSTRUCT(hit_gi_def),
+                             strarray_size(MATRIXSTRUCT(hit_gi_def))-1);
+           strarray_set_size(MATRIXSTRUCT(hit_acc),
+                             strarray_size(MATRIXSTRUCT(hit_acc))-1);
+           strarray_set_size(MATRIXSTRUCT(fasta_row),
+                             strarray_size(MATRIXSTRUCT(fasta_row))-1);
+           strarray_set_size(MATRIXSTRUCT(hit_num),
+                             strarray_size(MATRIXSTRUCT(hit_num))-1);
+           array_set_size(MATRIXSTRUCT(query_from),
+                          array_size(MATRIXSTRUCT(query_from))-1);
+           array_set_size(MATRIXSTRUCT(query_to),
+                          array_size(MATRIXSTRUCT(query_to))-1);
+           strarray_set_size(MATRIXSTRUCT(hit_from),
+                             strarray_size(MATRIXSTRUCT(hit_from))-1);
+           strarray_set_size(MATRIXSTRUCT(hit_to),
+                             strarray_size(MATRIXSTRUCT(hit_to))-1);
+           array_set_size(MATRIXSTRUCT(query_frame),
+                          array_size(MATRIXSTRUCT(query_frame))-1);
+           array_set_size(MATRIXSTRUCT(hit_frame),
+                          array_size(MATRIXSTRUCT(hit_frame))-1);
+           strarray_set_size(MATRIXSTRUCT(hsp_qseq),
+                             strarray_size(MATRIXSTRUCT(hsp_qseq))-1);
+           strarray_set_size(MATRIXSTRUCT(hsp_hseq),
+                             strarray_size(MATRIXSTRUCT(hsp_hseq))-1);
+
+           XMLPARSERSTRUCT(hit_counter)--;
+        }
       }
 
       /* Flagberechnungen */
@@ -578,7 +640,7 @@ static void XMLCALL endElement(void *data, const char *name)
   }
 }
 
-void text(void *data, const XML_Char * txt, int len)
+void textElement(void *data, const XML_Char *txt_element, int len)
 {
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;
 
@@ -586,11 +648,12 @@ void text(void *data, const XML_Char * txt, int len)
   {
     /* falls ein Flag gesetzt ist (relevanter XML-Tag Zwischenbereich),
        wird mit der Bearbeitung der Textpassage begonnen; dazu wird der
-       "aktuelle Text" txt an den bereits eingelesenen Text angehaengt */
+       "aktuelle Text" txt_element an den bereits eingelesenen Text angehaengt
+     */
     if (PARSESTRUCT(hit_flag) == SET || PARSESTRUCT(def_flag) == SET
         || PARSESTRUCT(hit_hsp_flag) == SET)
     {
-      str_append_cstr_nt(PARSESTRUCT(buf_ptr), txt, len);
+      str_append_cstr_nt(PARSESTRUCT(buf_ptr), txt_element, len);
     }
   }
 }

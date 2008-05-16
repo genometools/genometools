@@ -19,7 +19,7 @@
 #include "libgtcore/array.h"
 #include "libgtcore/bioseq.h"
 #include "libgtcore/cstr.h"
-#include "libgtcore/discdistri.h"
+#include "libgtcore/disc_distri.h"
 #include "libgtcore/dynalloc.h"
 #include "libgtcore/error.h"
 #include "libgtcore/fa.h"
@@ -42,6 +42,10 @@
 #include "libgtcore/xansi.h"
 #include "libgtcore/xposix.h"
 
+typedef struct {
+  StrArray *md5_fingerprints;
+} BioseqFingerprints;
+
 struct Bioseq {
   bool use_stdin;
   Str *sequence_file;
@@ -52,8 +56,114 @@ struct Bioseq {
   size_t raw_sequence_length,
          allocated;
   Alpha *alpha;
-  char **md5_fingerprints;
+  BioseqFingerprints *fingerprints;
 };
+
+static bool read_fingerprints(StrArray *md5_fingerprints,
+                              Str  *fingerprints_filename,
+                              unsigned long num_of_seqs)
+{
+  bool reading_succeeded = true;
+  FILE *fingerprint_file = NULL;
+  assert(md5_fingerprints && fingerprints_filename);
+  /* open file */
+  if (file_exists(str_get(fingerprints_filename)))
+    fingerprint_file = fa_xfopen(str_get(fingerprints_filename), "r");
+  else
+    reading_succeeded = false;
+  /* reading file (each line contains a single MD5 sum) */
+  if (reading_succeeded) {
+    Str *line = str_new();
+    while (str_read_next_line(line, fingerprint_file) != EOF) {
+      strarray_add(md5_fingerprints, line);
+      str_reset(line);
+    }
+    str_delete(line);
+    if (strarray_size(md5_fingerprints) < num_of_seqs) {
+      /* premature end of file (e.g., due to aborted construction) */
+      reading_succeeded = false;
+      strarray_set_size(md5_fingerprints, 0);
+    }
+    else
+      assert(strarray_size(md5_fingerprints) == num_of_seqs);
+  }
+  fa_xfclose(fingerprint_file);
+  return reading_succeeded;
+}
+
+static void add_fingerprints(StrArray *md5_fingerprints, Bioseq *bs)
+{
+  unsigned long i;
+  assert(md5_fingerprints && bs);
+  for (i = 0; i < bioseq_number_of_sequences(bs); i++) {
+    char *md5 = md5_fingerprint(bioseq_get_sequence(bs, i),
+                                bioseq_get_sequence_length(bs, i));
+    strarray_add_cstr(md5_fingerprints, md5);
+    ma_free(md5);
+  }
+}
+
+static void strarray_dump_to_file(StrArray *sa, FILE *outfp)
+{
+  unsigned long i;
+  assert(sa && outfp);
+  for (i = 0; i < strarray_size(sa); i++) {
+    xfputs(strarray_get(sa, i), outfp);
+    xfputc('\n', outfp);
+  }
+}
+
+static void write_fingerprints(StrArray *md5_fingerprints,
+                               Str *fingerprints_filename)
+{
+  FILE *fingerprints_file;
+  assert(md5_fingerprints && fingerprints_filename);
+  fingerprints_file = fa_xfopen(str_get(fingerprints_filename), "w");
+  strarray_dump_to_file(md5_fingerprints, fingerprints_file);
+  fa_xfclose(fingerprints_file);
+}
+
+static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
+{
+  BioseqFingerprints *bsf;
+  bool reading_succeeded = false;
+  Str *fingerprints_filename;
+  assert(bs);
+  bsf = ma_calloc(1, sizeof *bsf);
+  bsf->md5_fingerprints = strarray_new();
+  fingerprints_filename = str_clone(bs->sequence_file);
+  str_append_cstr(fingerprints_filename, GT_BIOSEQ_FINGERPRINTS);
+  if (!bs->use_stdin && file_exists(str_get(fingerprints_filename)) &&
+      !file_is_newer(str_get(bs->sequence_file),
+                     str_get(fingerprints_filename))) {
+    /* only try to read the fingerprint file if the sequence file was not
+       modified in the meantime */
+    reading_succeeded = read_fingerprints(bsf->md5_fingerprints,
+                                          fingerprints_filename,
+                                          bioseq_number_of_sequences(bs));
+  }
+  if (!reading_succeeded) {
+    add_fingerprints(bsf->md5_fingerprints, bs);
+    if (!bs->use_stdin)
+      write_fingerprints(bsf->md5_fingerprints, fingerprints_filename);
+  }
+  str_delete(fingerprints_filename);
+  return bsf;
+}
+
+static void bioseq_fingerprints_delete(BioseqFingerprints *bsf)
+{
+  if (!bsf) return;
+  strarray_delete(bsf->md5_fingerprints);
+  ma_free(bsf);
+}
+
+static const char* bioseq_fingerprints_get(BioseqFingerprints *bsf,
+                                           unsigned long idx)
+{
+  assert(bsf);
+  return strarray_get(bsf->md5_fingerprints, idx);
+}
 
 typedef struct {
   FILE *bioseq_index,
@@ -373,11 +483,7 @@ void bioseq_delete(Bioseq *bs)
 {
   unsigned long i;
   if (!bs) return;
-  if (bs->md5_fingerprints) {
-    for (i = 0; i < array_size(bs->descriptions); i++)
-      ma_free(bs->md5_fingerprints[i]);
-    ma_free(bs->md5_fingerprints);
-  }
+  bioseq_fingerprints_delete(bs->fingerprints);
   str_delete(bs->sequence_file);
   if (bs->seqs) {
     for (i = 0; i < array_size(bs->descriptions); i++)
@@ -452,17 +558,10 @@ const char* bioseq_get_raw_sequence(Bioseq *bs)
 const char* bioseq_get_md5_fingerprint(Bioseq *bs, unsigned long idx)
 {
   assert(bs && idx < bioseq_number_of_sequences(bs));
-  if (!bs->md5_fingerprints) {
-    bs->md5_fingerprints = ma_calloc(bioseq_number_of_sequences(bs),
-                                     sizeof (char*));
-  }
-  if (!bs->md5_fingerprints[idx]) {
-    bs->md5_fingerprints[idx] = md5_fingerprint(bioseq_get_sequence(bs, idx),
-                                                bioseq_get_sequence_length(bs,
-                                                                          idx));
-  }
-  assert(bs->md5_fingerprints[idx]);
-  return bs->md5_fingerprints[idx];
+  if (!bs->fingerprints)
+    bs->fingerprints = bioseq_fingerprints_new(bs);
+  assert(bioseq_fingerprints_get(bs->fingerprints, idx));
+  return bioseq_fingerprints_get(bs->fingerprints, idx);
 }
 
 unsigned long bioseq_get_sequence_length(Bioseq *bs, unsigned long idx)
@@ -544,10 +643,10 @@ void bioseq_show_seqlengthdistri(Bioseq *bs)
   DiscDistri *d;
   unsigned long i;
   assert(bs);
-  d = discdistri_new();
+  d = disc_distri_new();
   for (i = 0; i < bioseq_number_of_sequences(bs); i++)
-    discdistri_add(d, bioseq_get_sequence_length(bs, i));
+    disc_distri_add(d, bioseq_get_sequence_length(bs, i));
   printf("sequence length distribution:\n");
-  discdistri_show(d);
-  discdistri_delete(d);
+  disc_distri_show(d);
+  disc_distri_delete(d);
 }

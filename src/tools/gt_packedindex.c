@@ -23,6 +23,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/sfx-run.h"
 #include "tools/gt_packedindex.h"
+#include "tools/gt_packedindex_trsuftab.h"
 #include "tools/gt_packedindex_chk_integrity.h"
 #include "tools/gt_packedindex_chk_search.h"
 
@@ -36,6 +37,7 @@ static void* gt_packedindex_arguments_new(void)
 {
   Toolbox *packedindex_toolbox = toolbox_new();
   toolbox_add(packedindex_toolbox, "mkindex", gt_packedindex_make);
+  toolbox_add(packedindex_toolbox, "trsuftab", gt_packedindex_trsuftab);
   toolbox_add(packedindex_toolbox, "chkintegrity",
               gt_packedindex_chk_integrity );
   toolbox_add(packedindex_toolbox, "chksearch", gt_packedindex_chk_search);
@@ -61,41 +63,42 @@ static OptionParser* gt_packedindex_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_packedindex_runner(int argc, const char **argv,
+static int gt_packedindex_runner(int argc, const char **argv, int parsed_args,
                                  void *tool_arguments, Error *err)
 {
   Toolbox *index_toolbox = tool_arguments;
   Toolfunc toolfunc;
   Tool *tool = NULL;
-  bool had_err = false;
   char **nargv = NULL;
+  int had_err = 0;
 
   error_check(err);
   assert(index_toolbox);
 
   /* determine tool */
-  if (!toolbox_has_tool(index_toolbox, argv[0])) {
+  if (!toolbox_has_tool(index_toolbox, argv[parsed_args])) {
     error_set(err, "packedindex tool '%s' not found; option -help lists "
-                   "possible tools", argv[0]);
-    had_err = true;
+                   "possible tools", argv[parsed_args]);
+    had_err = -1;
   }
 
   /* call sub-tool */
   if (!had_err) {
-    if (!(toolfunc = toolbox_get(index_toolbox, argv[0]))) {
-      tool = toolbox_get_tool(index_toolbox, argv[0]);
+    if (!(toolfunc = toolbox_get(index_toolbox, argv[parsed_args]))) {
+      tool = toolbox_get_tool(index_toolbox, argv[parsed_args]);
       assert(tool);
     }
-    nargv = cstr_array_prefix_first(argv, error_get_progname(err));
+    nargv = cstr_array_prefix_first(argv + parsed_args,
+                                    error_get_progname(err));
     error_set_progname(err, nargv[0]);
     if (toolfunc)
-      had_err = toolfunc(argc, (const char**) nargv, err);
+      had_err = toolfunc(argc - parsed_args, (const char**) nargv, err);
     else
-      had_err = tool_run(tool, argc, (const char**) nargv, err);
+      had_err = tool_run(tool, argc - parsed_args, (const char**) nargv, err);
   }
 
   cstr_array_delete(nargv);
-  return had_err?-1:0;
+  return had_err;
 }
 
 Tool* gt_packedindex(void)

@@ -35,7 +35,7 @@ EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
 EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
-GT_CFLAGS:=-g -Wall -Werror -Wunused-parameter -pipe -fPIC
+GT_CFLAGS:=-g -Wall -Werror -Wunused-parameter -pipe -fPIC -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
 # lua needs -DLUA_USE_POSIX
 # rnv needs -DUNISTD_H="<unistd.h>" -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
@@ -91,6 +91,10 @@ OVERRIDELIBS:=lib/libbz2.a
 GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c
 GTMAIN_OBJ:=$(GTMAIN_SRC:%.c=obj/%.o)
 GTMAIN_DEP:=$(GTMAIN_SRC:%.c=obj/%.d)
+
+EXAMPLE_SRC:=src/example.c
+EXAMPLE_OBJ:=$(EXAMPLE_SRC:%.c=obj/%.o)
+EXAMPLE_DEP:=$(EXAMPLE_SRC:%.c=obj/%.d)
 
 SKPROTO_SRC:=src/skproto.c src/tools/gt_skproto.c
 SKPROTO_OBJ:=$(SKPROTO_SRC:%.c=obj/%.o)
@@ -244,6 +248,7 @@ endif
 ifeq ($(cov),yes)
   export CCACHE_DISABLE # ccache cannot handle coverage objects
   GT_CFLAGS += -fprofile-arcs -ftest-coverage
+  GT_LDFLAGS += -fprofile-arcs -ftest-coverage
   STEST_FLAGS += -gcov
   opt=no
   # hacks to link shared libs with cov=yes
@@ -330,7 +335,7 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
-all: $(GTLIBS) $(GTSHAREDLIBS) bin/skproto bin/gt bin/lua bin/rnv
+all: $(GTLIBS) $(GTSHAREDLIBS) bin/skproto bin/gt bin/example bin/lua bin/rnv
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
@@ -487,6 +492,9 @@ $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) lib/libgtcore.a \
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) $(GTLIBS) \
                                         $(OVERRIDELIBS)))
 
+$(eval $(call PROGRAM_template, bin/example, $(EXAMPLE_OBJ) $(GTLIBS) \
+                                             $(OVERRIDELIBS)))
+
 bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -561,7 +569,7 @@ $(1): $(2)
 	@$$(CC) -c $$< -o $$@ $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
 	  $$(GT_CFLAGS) $(3)
 	@$$(CC) -c $$< -o $$(@:.o=.d) $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) \
-        $$(EXP_CFLAGS) $$(3) -MM -MP -MT $$@
+        $(3) -MM -MP -MT $$@
 endef
 
 $(eval $(call COMPILE_template, obj/%.o, %.c))
@@ -586,6 +594,7 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 
 # read dependencies
 -include $(GTMAIN_DEP) \
+         $(EXAMPLE_DEP) \
          $(SKPROTO_DEP) \
 	 $(LIBGTCORE_DEP) \
 	 $(LIBGTEXT_C_DEP) \
@@ -611,7 +620,7 @@ ifeq ($(libgtview),yes)
 endif
 
 .SUFFIXES:
-.PHONY: dist srcdist release gt install docs installwww splint test clean cleanup
+.PHONY: dist srcdist release push gt install docs installwww splint test clean cleanup
 
 VERSION:="`cat $(CURDIR)/VERSION`"
 SYSTEMNAME:="$(SYSTEM)_$(MACHINE)"
@@ -646,6 +655,10 @@ release:
 	scp "genometools-`cat VERSION`.tar.gz" $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
 	git push --tags origin master
 
+push:
+	git push --tags origin master
+	git push --tags github master
+
 docs: bin/gt
 	bin/gt gtscripts/gtdoc.lua -html $(CURDIR) \
         > www/genometools.org/htdocs/docs.html
@@ -668,7 +681,7 @@ install: all
           || mkdir -p $(prefix)/include/libgtext
 	cp src/gtext.h $(prefix)/include
 	cp src/libgtext/*.h $(prefix)/include/libgtext
-	cp src/gt.h $(prefix)/include
+	cp src/genometools.h $(prefix)/include
 	test -d $(prefix)/include/libgtmatch \
 	  || mkdir -p $(prefix)/include/libgtmatch
 	cp src/gtmatch.h $(prefix)/include

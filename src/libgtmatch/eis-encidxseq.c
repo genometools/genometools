@@ -23,6 +23,11 @@
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-encidxseqpriv.h"
 
+enum {
+  AVG_RANGE_RANK_INTERVAL = 128, /**< do range rank queries
+                                  * approximately at this interval  */
+};
+
 void
 deleteEncIdxSeq(EISeq *seq)
 {
@@ -47,22 +52,25 @@ const char *EISIntegrityCheckResultStrings[] =
       fprintf(stderr, "Comparision failed at position "FormatSeqpos     \
               ", reference symbol: %u, symbol read: %u\n",              \
               pos, symOrig, symEnc);                                    \
+      error_set(err, "Invalid symbol encountered.");                    \
       break;                                                            \
     case EIS_INTEGRITY_CHECK_BWT_READ_ERROR:                            \
       fprintf(stderr, "Read of symbol failed at position "              \
               FormatSeqpos"\n", pos);                                   \
+      error_set(err, "Failed reading reference BWT source.");           \
       break;                                                            \
     case EIS_INTEGRITY_CHECK_RANK_FAILED:                               \
       fprintf(stderr, "At position "FormatSeqpos                        \
               ", rank operation yielded  wrong count: "FormatSeqpos     \
               ", expected "FormatSeqpos" for symbol %d\n",              \
-              pos, rankQueryResult, rankExpect, symEnc);                \
+              pos, rankQueryResult, rankExpect, rankCmpSym);            \
+      error_set(err, "Invalid rank result.");                           \
       break;                                                            \
     }                                                                   \
     EISPrintDiagsForPos(seqIdx, pos, stderr, hint);                     \
     retval = retcode;                                                   \
     break;                                                              \
-  }
+  } do {} while (0)
 
 /**
  * @param tickPrint if not zero, print a . every tickPrint symbols to
@@ -72,7 +80,8 @@ const char *EISIntegrityCheckResultStrings[] =
  */
 extern enum EISIntegrityCheckResults
 EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
-                   unsigned long tickPrint, FILE *fp, int chkFlags, Error *err)
+                   unsigned long tickPrint, FILE *fp, int chkFlags,
+                   Verboseinfo *verbosity, Error *err)
 {
   FILE *bwtFP;
   Seqpos pos = 0;
@@ -81,12 +90,10 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
   unsigned symEnc;
   EISHint hint;
   Seqpos seqLastPos, rankQueryResult, rankExpect;
-  Verboseinfo *verbosity;
   const MRAEnc *alphabet;
   AlphabetRangeSize alphabetSize;
   AlphabetRangeID numRanges;
   enum EISIntegrityCheckResults retval = EIS_INTEGRITY_CHECK_NO_ERROR;
-  verbosity = newverboseinfo(true);
   /* two part process: enumerate all positions of original sequence
    * and verify that the query functions return correct values */
   if (streamsuffixarray(&suffixArray, &seqLastPos,
@@ -94,7 +101,6 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
   {
     error_set(err, "Cannot load suffix array project with"
                   " demand for BWT file\n");
-    freeverboseinfo(&verbosity);
     return EIS_INTEGRITY_CHECK_SA_LOAD_ERROR;
   }
   bwtFP = suffixArray.bwttabstream.fp;
@@ -104,9 +110,13 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
   numRanges = MRAEncGetNumRanges(alphabet);
   do
   {
-    Seqpos rankTable[alphabetSize], rangeRanks[alphabetSize];
-    int symRead;
+    Seqpos rankTable[alphabetSize], rangeRanks[2][alphabetSize],
+      pairRangeRanks[2* alphabetSize], lastRangeRankPos = 0;
+    int symRead, rt = 0;
+    AlphabetRangeID lastRangeID = 0;
+    unsigned rankCmpSym;
     memset(rankTable, 0, sizeof (rankTable));
+    memset(rangeRanks, 0, sizeof (rangeRanks));
     if (skip > 0)
     {
       Seqpos len = EISLength(seqIdx);
@@ -116,7 +126,6 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
         showverbose(verbosity, "Invalid skip request: %lld,"
                     " too large for sequence length: "FormatSeqpos,
                     (long long)skip, len);
-        freeverboseinfo(&verbosity);
         return -1;
       }
       fseeko(bwtFP, skip, SEEK_SET);
@@ -139,40 +148,65 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
       ++rankTable[symOrig];
       if (chkFlags & EIS_VERIFY_EXT_RANK)
       {
-        unsigned sym;
-        for (sym = 0; sym < alphabetSize; ++sym)
-          if ((rankExpect = rankTable[sym])
+        for (rankCmpSym = 0; rankCmpSym < alphabetSize; ++rankCmpSym)
+          if ((rankExpect = rankTable[rankCmpSym])
               != (rankQueryResult
-                  = EISSymTransformedRank(seqIdx, sym, pos + 1, hint)))
+                  = EISSymTransformedRank(seqIdx, rankCmpSym, pos + 1, hint)))
             verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
       }
       else
       {
+        rankCmpSym = symEnc;
         if ((rankExpect = rankTable[symEnc])
             != (rankQueryResult = EISSymTransformedRank(seqIdx, symEnc,
                                                         pos + 1, hint)))
           verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
       }
       /* do rank for full range on some occasions */
-      if (!(random() % 128))
+      if (!(random() % AVG_RANGE_RANK_INTERVAL))
       {
         unsigned i;
-        AlphabetRangeSize numSymsInRange;
+        AlphabetRangeSize rangeSize;
         AlphabetRangeID range = random() % numRanges;
         Symbol rangeBase = MRAEncGetRangeBase(alphabet, range);
-        numSymsInRange = MRAEncGetRangeSize(alphabet, range);
-        EISRangeRank(seqIdx, range, pos + 1, rangeRanks, hint);
-        for (i = 0; i < numSymsInRange; ++i)
+        rangeSize = MRAEncGetRangeSize(alphabet, range);
+        EISRangeRank(seqIdx, range, pos + 1, rangeRanks[rt], hint);
+        for (i = 0; i < rangeSize; ++i)
         {
-          if ((rankQueryResult = rangeRanks[i])
-              != (rankExpect = rankTable[rangeBase + i]))
+          rankCmpSym = rangeBase + i;
+          if ((rankQueryResult = rangeRanks[rt][i])
+              != (rankExpect = rankTable[rankCmpSym]))
             verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
         }
+        if (retval)
+          break;
+        if (range == lastRangeID)
+        {
+          EISPosPairRangeRank(seqIdx, range, lastRangeRankPos, pos + 1,
+                              pairRangeRanks, hint);
+          for (i = 0; i < rangeSize; ++i)
+          {
+            rankCmpSym = rangeBase + i;
+            if ((rankQueryResult = pairRangeRanks[rangeSize + i])
+                != (rankExpect = rankTable[rankCmpSym]))
+              verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+            if ((rankQueryResult = pairRangeRanks[i])
+                != (rankExpect = rangeRanks[rt ^ 1][rankCmpSym]))
+              verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+          }
+          if (retval)
+            break;
+        }
+        lastRangeID =
+        lastRangeRankPos = pos + 1;
+        rt ^= 1;
       }
       ++pos;
       if (tickPrint && !(pos % tickPrint))
         putc('.', fp);
     }
+    if (retval)
+      break;
     if (tickPrint)
       putc('\n', fp);
     if (ferror(bwtFP))
@@ -180,7 +214,6 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
   } while (0);
   deleteEISHint(seqIdx, hint);
   freesuffixarray(&suffixArray);
-  freeverboseinfo(&verbosity);
   return retval;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,23 +15,25 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef STRINGDISTRI_H
-#define STRINGDISTRI_H
+#ifndef ENCSEQ_SPECIALSRANK_H
+#define ENCSEQ_SPECIALSRANK_H
 
-#include "libgtcore/error.h"
-#include "libgtcore/genfile.h"
+#include "libgtmatch/encseq-def.h"
+#include "libgtmatch/seqpos-def.h"
 
-/* A discrete distribution */
-typedef struct StringDistri StringDistri;
+typedef struct specialsRankTable SpecialsRankTable;
 
-typedef void (*StringDistriIterFunc)(const char *string,
-                                     unsigned long occurrences,
-                                     double probability, void *data);
+extern SpecialsRankTable *
+newSpecialsRankTable(const Encodedsequence *encseq, Readmode readmode,
+                     unsigned sampleIntervalLog2);
 
-StringDistri*      stringdistri_new(void);
-void               stringdistri_add(StringDistri*, const char*);
-void               stringdistri_foreach(const StringDistri*,
-                                        StringDistriIterFunc, void *data);
-void               stringdistri_delete(StringDistri*);
+extern void
+deleteSpecialsRankTable(SpecialsRankTable *table);
+
+extern Seqpos
+specialsRank(const SpecialsRankTable *rankTable, Seqpos pos);
+
+extern const Encodedsequence *
+SPRTGetOrigEncseq(const SpecialsRankTable *rankTable);
 
 #endif

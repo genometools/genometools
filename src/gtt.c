@@ -23,7 +23,7 @@
 #include "libgtcore/bittab.h"
 #include "libgtcore/bsearch.h"
 #include "libgtcore/countingsort.h"
-#include "libgtcore/discdistri.h"
+#include "libgtcore/disc_distri.h"
 #include "libgtcore/dlist.h"
 #include "libgtcore/dynbittab.h"
 #include "libgtcore/getbasename.h"
@@ -37,6 +37,7 @@
 #include "libgtext/gff3_escaping.h"
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
+#include "libgtext/string_matching.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_chseqids.h"
@@ -48,6 +49,7 @@
 #include "tools/gt_extractfeat.h"
 #include "tools/gt_extractseq.h"
 #include "tools/gt_filter.h"
+#include "tools/gt_fingerprint.h"
 #include "tools/gt_gff3.h"
 #include "tools/gt_gff3_to_gtf.h"
 #include "tools/gt_gtf_to_gff3.h"
@@ -59,6 +61,8 @@
 #include "tools/gt_mmapandread.h"
 #include "tools/gt_mutate.h"
 #include "tools/gt_seqfilter.h"
+#include "tools/gt_sequniq.h"
+#include "tools/gt_shredder.h"
 #include "tools/gt_splitfasta.h"
 #include "tools/gt_splicesiteinfo.h"
 #include "tools/gt_stat.h"
@@ -91,6 +95,7 @@ Toolbox* gtt_tools(void)
   toolbox_add_tool(tools, "extractfeat", gt_extractfeat());
   toolbox_add_tool(tools, "extractseq", gt_extractseq());
   toolbox_add_tool(tools, "filter", gt_filter());
+  toolbox_add_tool(tools, "fingerprint", gt_fingerprint());
   toolbox_add_tool(tools, "gff3", gt_gff3());
   toolbox_add(tools, "gff3_to_gtf", gt_gff3_to_gtf);
   toolbox_add(tools, "gtf_to_gff3", gt_gtf_to_gff3);
@@ -101,6 +106,8 @@ Toolbox* gtt_tools(void)
   toolbox_add(tools, "mmapandread", gt_mmapandread);
   toolbox_add(tools, "mutate", gt_mutate);
   toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
+  toolbox_add_tool(tools, "sequniq", gt_sequniq());
+  toolbox_add_tool(tools, "shredder", gt_shredder());
   toolbox_add(tools, "splitfasta", gt_splitfasta);
   toolbox_add(tools, "splicesiteinfo", gt_splicesiteinfo);
   toolbox_add(tools, "stat", gt_stat);
@@ -131,7 +138,7 @@ Hashtable* gtt_unit_tests(void)
   hashtable_add(unit_tests, "bittab example", bittab_example);
   hashtable_add(unit_tests, "bsearch module", bsearch_unit_test);
   hashtable_add(unit_tests, "countingsort module", countingsort_unit_test);
-  hashtable_add(unit_tests, "disc distri class", discdistri_unit_test);
+  hashtable_add(unit_tests, "disc distri class", disc_distri_unit_test);
   hashtable_add(unit_tests, "dlist class", dlist_unit_test);
   hashtable_add(unit_tests, "dlist example", dlist_example);
   hashtable_add(unit_tests, "dynamic bittab class", dynbittab_unit_test);
@@ -149,6 +156,8 @@ Hashtable* gtt_unit_tests(void)
   hashtable_add(unit_tests, "splicedseq class", splicedseq_unit_test);
   hashtable_add(unit_tests, "splitter class", splitter_unit_test);
   hashtable_add(unit_tests, "string class", str_unit_test);
+  hashtable_add(unit_tests, "string matching module",
+                string_matching_unit_test);
   hashtable_add(unit_tests, "tokenizer class", tokenizer_unit_test);
 #ifdef LIBGTVIEW
   hashtable_add(unit_tests, "block class", block_unit_test);

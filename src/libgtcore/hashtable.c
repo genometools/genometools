@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/array.h"
+#include "libgtcore/cstr.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
@@ -75,7 +76,7 @@ void hashtable_add(Hashtable *ht, void *key, void *value)
   (void) st_insert(ht->st_table, (st_data_t) key, (st_data_t) value);
 }
 
-void hashtable_remove(Hashtable *ht, void *key)
+void hashtable_remove(Hashtable *ht, const void *key)
 {
   st_data_t value = 0;
   st_data_t key_t = (st_data_t) key;
@@ -85,7 +86,7 @@ void hashtable_remove(Hashtable *ht, void *key)
   assert(value);
   (void) st_delete(ht->st_table, &key_t, NULL);
   if (ht->key_free)
-    ht->key_free(key);
+    ht->key_free((void*) key_t);
   if (ht->value_free)
     ht->value_free((void*) value);
 }
@@ -233,12 +234,30 @@ static int hashtable_test(HashType hash_type, Error *err)
   hashtable_delete(ht);
 
   /* hashes containing two elements */
-  ht = hashtable_new(hash_type, NULL, NULL);
-  hashtable_add(ht, s1, s2);
-  hashtable_add(ht, s2, s1);
-  ensure(had_err, hashtable_get(ht, s1) == s2);
-  ensure(had_err, hashtable_get(ht, s2) == s1);
-  hashtable_delete(ht);
+  if (!had_err) {
+    ht = hashtable_new(hash_type, NULL, NULL);
+    hashtable_add(ht, s1, s2);
+    hashtable_add(ht, s2, s1);
+    ensure(had_err, hashtable_get(ht, s1) == s2);
+    ensure(had_err, hashtable_get(ht, s2) == s1);
+    hashtable_remove(ht, s1); /* remove first element */
+    ensure(had_err, !hashtable_get(ht, s1));
+    ensure(had_err, hashtable_get(ht, s2) == s1);
+    hashtable_delete(ht);
+  }
+
+  /* hashes containing two elements (store key and value in hashtable) */
+  if (!had_err && hash_type == HASH_STRING) {
+    ht = hashtable_new(hash_type, ma_free_func, ma_free_func);
+    hashtable_add(ht, cstr_dup(s1), cstr_dup(s2));
+    hashtable_add(ht, cstr_dup(s2), cstr_dup(s1));
+    ensure(had_err, !strcmp(hashtable_get(ht, s1), s2));
+    ensure(had_err, !strcmp(hashtable_get(ht, s2), s1));
+    hashtable_remove(ht, s1); /* remove first element */
+    ensure(had_err, !hashtable_get(ht, s1));
+    ensure(had_err, !strcmp(hashtable_get(ht, s2),  s1));
+    hashtable_delete(ht);
+  }
 
   return had_err;
 }

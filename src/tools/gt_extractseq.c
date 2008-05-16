@@ -206,7 +206,7 @@ static int process_ginum(Str *ginum, int argc, const char **argv,
   return had_err;
 }
 
-static int gt_extractseq_runner(int argc, const char **argv,
+static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
                                 void *tool_arguments, Error *err)
 {
   ExtractSeqArguments *arguments = tool_arguments;
@@ -215,13 +215,14 @@ static int gt_extractseq_runner(int argc, const char **argv,
   error_check(err);
   assert(arguments);
   if (str_length(arguments->ginum)) {
-    had_err = process_ginum(arguments->ginum, argc, argv, arguments->width,
+    had_err = process_ginum(arguments->ginum, argc - parsed_args,
+                            argv + parsed_args, arguments->width,
                             arguments->outfp, err);
   }
   else {
     Bioseq *bs;
-    int arg = 0;
-    if (argc == 0) { /* no file given, use stdin */
+    int arg = parsed_args;
+    if (argc == parsed_args) { /* no file given, use stdin */
       if (!(bs = bioseq_new("-", err)))
         had_err = -1;
       if (!had_err) {

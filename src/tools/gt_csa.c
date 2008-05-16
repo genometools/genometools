@@ -77,7 +77,7 @@ static OptionParser* gt_csa_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_csa_runner(UNUSED int argc, const char **argv,
+static int gt_csa_runner(UNUSED int argc, const char **argv, int parsed_args,
                          void *tool_arguments, Error *err)
 {
   GenomeStream *gff3_in_stream,
@@ -91,7 +91,7 @@ static int gt_csa_runner(UNUSED int argc, const char **argv,
   assert(arguments);
 
   /* create the streams */
-  gff3_in_stream  = gff3_in_stream_new_sorted(argv[0],
+  gff3_in_stream  = gff3_in_stream_new_sorted(argv[parsed_args],
                                               arguments->verbose &&
                                               arguments->outfp);
   csa_stream      = csa_stream_new(gff3_in_stream, arguments->join_length);

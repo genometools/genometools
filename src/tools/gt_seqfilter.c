@@ -70,13 +70,14 @@ static OptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_seqfilter_runner(int argc, const char **argv,
+static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
                                void *tool_arguments, Error *err)
 {
   SeqFilterArguments *arguments = tool_arguments;
   Bioseq *bioseq;
   unsigned long i;
-  int arg = 0, had_err = 0;
+  unsigned long long duplicates = 0, num_of_sequences = 0;
+  int arg = parsed_args, had_err = 0;
 
   error_check(err);
   assert(tool_arguments);
@@ -95,11 +96,21 @@ static int gt_seqfilter_runner(int argc, const char **argv,
                          bioseq_get_sequence(bioseq, i),
                          bioseq_get_sequence_length(bioseq, i), 0);
       }
+      else
+        duplicates++;
+      num_of_sequences++;
     }
 
     bioseq_delete(bioseq);
 
     arg++;
+  }
+
+  /* show statistics */
+  if (!had_err) {
+    fprintf(stderr, "# %llu out of %llu sequences have been removed (%.3f%%)\n",
+            duplicates, num_of_sequences,
+            ((double) duplicates / num_of_sequences) * 100.0);
   }
 
   return had_err;

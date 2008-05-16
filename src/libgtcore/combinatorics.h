@@ -79,7 +79,7 @@ binomialCoeff(unsigned long n, unsigned long k)
  * @return \f$n\choose{k_1, k_2,\dots,k_m}\f$
  */
 static inline unsigned long
-multinomialCoeff(uint32_t n, size_t numBins, const uint32_t binSizes[])
+multinomialCoeff(unsigned n, size_t numBins, const unsigned binSizes[])
 {
   unsigned long accum = 1, nfac;
   size_t i, maxBin = 0, maxBinSize = 0;

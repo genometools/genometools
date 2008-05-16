@@ -92,7 +92,7 @@ static inline Seqpos
 BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos pos)
 {
   assert(bwtSeq);
-  Symbol tSym = MRAEncMapSymbol(bwtSeq->alphabet, sym);
+  Symbol tSym = MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), sym);
   return BWTSeqTransformedOcc(bwtSeq, tSym, pos);
 }
 
@@ -100,7 +100,7 @@ static inline struct SeqposPair
 BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos posA, Seqpos posB)
 {
   assert(bwtSeq);
-  Symbol tSym = MRAEncMapSymbol(bwtSeq->alphabet, sym);
+  Symbol tSym = MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), sym);
   return BWTSeqTransformedPosPairOcc(bwtSeq, tSym, posA, posB);
 }
 
@@ -108,22 +108,99 @@ static inline void
 BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
                Seqpos *rangeOccs)
 {
+  assert(bwtSeq && rangeOccs);
+  assert(range < MRAEncGetNumRanges(BWTSeqGetAlphabet(bwtSeq)));
   EISRangeRank(bwtSeq->seqIdx, range, pos, rangeOccs, bwtSeq->hint);
+  if (range == bwtSeq->bwtTerminatorFallbackRange)
+  {
+    const MRAEnc *alphabet = BWTSeqGetAlphabet(bwtSeq);
+    AlphabetRangeSize
+      termIdx = MRAEncMapSymbol(alphabet, bwtTerminatorSym)
+      - MRAEncGetRangeBase(alphabet, range),
+      fbIdx = MRAEncMapSymbol(alphabet, bwtSeq->bwtTerminatorFallback)
+      - MRAEncGetRangeBase(alphabet, range);
+    if (pos > bwtSeq->longest)
+    {
+      rangeOccs[termIdx] = 1;
+      --(rangeOccs[fbIdx]);
+    }
+    else
+      rangeOccs[termIdx] = 0;
+  }
+}
+
+static inline void
+BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos posA,
+                      Seqpos posB, Seqpos *rangeOccs)
+{
+  assert(bwtSeq && rangeOccs);
+  assert(posA <= posB);
+  assert(range < MRAEncGetNumRanges(BWTSeqGetAlphabet(bwtSeq)));
+  EISPosPairRangeRank(bwtSeq->seqIdx, range, posA, posB, rangeOccs,
+                      bwtSeq->hint);
+  if (range == bwtSeq->bwtTerminatorFallbackRange)
+  {
+    const MRAEnc *alphabet = BWTSeqGetAlphabet(bwtSeq);
+    AlphabetRangeSize rSize = MRAEncGetRangeSize(alphabet, range),
+      termIdx = MRAEncMapSymbol(alphabet, bwtTerminatorSym)
+      - MRAEncGetRangeBase(alphabet, range),
+      fbIdx = MRAEncMapSymbol(alphabet, bwtSeq->bwtTerminatorFallback)
+      - MRAEncGetRangeBase(alphabet, range);
+    memmove(rangeOccs + termIdx, rangeOccs + termIdx + 1,
+            sizeof (rangeOccs[0]) * (rSize - 1));
+    if (posB > bwtSeq->longest)
+    {
+      rangeOccs[termIdx + rSize] = 1;
+      --(rangeOccs[fbIdx + rSize]);
+      if (posA > bwtSeq->longest)
+      {
+        rangeOccs[termIdx] = 1;
+        --(rangeOccs[fbIdx]);
+      }
+      else
+        rangeOccs[termIdx] = 0;
+    }
+    else
+      rangeOccs[rSize + termIdx] = rangeOccs[termIdx] = 0;
+  }
 }
 
 static inline Seqpos
-BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos)
+BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos LPos,
+            struct extBitsRetrieval *extBits)
 {
-  Symbol tSym = EISGetTransformedSym(bwtSeq->seqIdx, pos, bwtSeq->hint);
-  if (pos != bwtSeq->longest)
+  Symbol tSym = EISGetTransformedSym(bwtSeq->seqIdx, LPos, bwtSeq->hint);
+  Seqpos FPos;
+  const MRAEnc *alphabet = BWTSeqGetAlphabet(bwtSeq);
+  if (LPos != bwtSeq->longest)
   {
-    return bwtSeq->count[tSym] + BWTSeqTransformedOcc(bwtSeq, tSym, pos);
+    AlphabetRangeID range = MRAEncGetRangeOfSymbol(alphabet, tSym);
+    switch (bwtSeq->rangeSort[range])
+    {
+    case SORTMODE_VALUE:
+      FPos = bwtSeq->count[tSym] + BWTSeqTransformedOcc(bwtSeq, tSym, LPos);
+      break;
+    case SORTMODE_RANK:
+      FPos = bwtSeq->count[MRAEncGetRangeBase(alphabet, range)]
+        + BWTSeqGetRankSort(bwtSeq, LPos, range, extBits);
+      break;
+    case SORTMODE_UNDEFINED:
+    default:
+#ifndef _NDEBUG
+      fputs("Requesting LF-map for symbol from undefined sorting range.\n",
+            stderr);
+      abort();
+#endif
+      FPos = (Seqpos)-1;
+      break;
+    }
   }
   else
   {
     assert(tSym == bwtSeq->bwtTerminatorFallback);
-    return bwtSeq->count[bwtSeq->alphabetSize - 1];
+    FPos = bwtSeq->count[bwtSeq->alphabetSize - 1];
   }
+  return FPos;
 }
 
 static inline Seqpos

@@ -19,13 +19,14 @@
 #define MG_COMBINEDSCORE_H
 
 #include "libgtcore/codon.h"
-#include "libgtmgth/mg_xmlparser.h"
-
-#define POSITION(query_from, hit_number, position, k)\
-           (*(long*)array_get((query_from), (hit_number)))+(position)+(k)-1
+#include "metagenomethreader.h"
+#include "mg_computepath.h"
 
 #define LONG_VALUE(VALUE, INDEX)\
                 *(long*)array_get((VALUE), (INDEX))
+
+#define POSITION(QUERY_FROM, HIT_NUMBER, POSITION, K)\
+           LONG_VALUE(QUERY_FROM, HIT_NUMBER)+(POSITION)+(K)-1
 
 /* Funktion zum Eintragen des Scores in die Combined-Score Matrix
    Parameter: Combined-Score-Matrix, Hit-AS, Query-AS, aktueller
@@ -46,8 +47,8 @@ static void fill_matrix(CombinedScoreMatrixEntry **,
                         unsigned long,
                         unsigned long,
                         ParseStruct *,
-                        double[],
-                        unsigned long[],
+                        double *,
+                        unsigned long *,
                         char *,
                         char *,
                         HitInformation *);
@@ -60,8 +61,8 @@ static void fill_matrix(CombinedScoreMatrixEntry **,
               stop-codon in Query- oder Hit-Sequence, Blast-Hit-Ende)
    Returnwert: void */
 static void add_scores(ParseStruct *,
-                       double[],
-                       unsigned long[],
+                       double *,
+                       unsigned long *,
                        short,
                        unsigned long,
                        unsigned long,

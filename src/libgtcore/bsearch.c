@@ -24,8 +24,8 @@ static void* bsearch_generic(Array *members, const void *key, const void *base,
                              size_t nmemb, size_t size, Compar compar,
                              void *data, Bittab *b)
 {
-  void *baseptr = (void*) base, *tmp_ptr,
-       *ptr; /* the current element we consider */
+  char *baseptr = (char *)base, *tmp_ptr,
+   *ptr; /* the current element we consider */
   int limit, rval;
 
   assert(key && size && compar);
@@ -41,22 +41,24 @@ static void* bsearch_generic(Array *members, const void *key, const void *base,
       else
         return ptr; /* because we got no <members> array */
       if (b)
-        bittab_set_bit(b, (ptr - base) / size); /* mark found element */
+        bittab_set_bit(b, (ptr - (char *)base) / size); /* mark found element */
       /* looking left for equal elements */
       for (tmp_ptr = ptr - size;
-           tmp_ptr >= base && !compar(key, tmp_ptr, data);
+           tmp_ptr >= (char *)base && !compar(key, tmp_ptr, data);
            tmp_ptr -= size) {
         array_add(members, tmp_ptr);
         if (b)
-          bittab_set_bit(b, (tmp_ptr - base) / size); /* mark found element */
+          bittab_set_bit(
+            b, (tmp_ptr - (char *)base) / size); /* mark found element */
       }
       /* looking right for equal elements */
       for (tmp_ptr = ptr + size;
-           tmp_ptr < base + nmemb * size && !compar(key, tmp_ptr, data);
+           tmp_ptr <(char *) base + nmemb * size && !compar(key, tmp_ptr, data);
            tmp_ptr += size) {
         array_add(members, tmp_ptr);
         if (b)
-          bittab_set_bit(b, (tmp_ptr - base) / size); /* mark found element */
+          bittab_set_bit(
+            b, (tmp_ptr - (char *)base) / size); /* mark found element */
       }
       return ptr;
     }

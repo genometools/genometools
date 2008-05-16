@@ -1,6 +1,6 @@
 --[[
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -41,6 +41,13 @@ function Project:add(file)
   assert(file)
   self.parts = self.parts or {}
   self.parts[#self.parts + 1] = file
+end
+
+function Project:add_stest()
+  local stest_file = File:new("testsuite/stest.rb")
+  p:add(stest_file)
+  stest_file = File:new("testsuite/stest_tests.rb")
+  p:add(stest_file)
 end
 
 function Project:set_makefile(makefile)

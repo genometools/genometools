@@ -26,10 +26,8 @@
 #ifndef MG_REVERSE_H
 #define MG_REVERSE_H
 
-#include "libgtmgth/metagenomethreader.h"
-
-//#include <gtcore.h>
 #include <assert.h>
+#include "metagenomethreader.h"
 
 /* reverse 'dna_seq' of length 'seqlen' in place */
 int mg_reverse_complement(char *dna_seq, unsigned long seqlen, Error *);

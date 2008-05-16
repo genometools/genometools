@@ -24,6 +24,7 @@ local extractormodules = { "extractor.file",
                            "extractor.makefile",
                            "extractor.module",
                            "extractor.program",
-                           "extractor.project" }
+                           "extractor.project",
+                           "extractor.testsuite" }
 
 gtmodulehelper.load_modules(extractormodules);

@@ -26,6 +26,8 @@ char *md5_fingerprint(const char *sequence, unsigned long seqlen)
   unsigned char output[16];
   char  *upper, *fingerprint;
   unsigned long i;
+  /* XXX: this could be done more memory efficient by applying md5 to a reused
+     buffer */
   upper = ma_malloc(seqlen * sizeof (char));
   for (i = 0; i < seqlen; i++)
     upper[i] = toupper(sequence[i]);

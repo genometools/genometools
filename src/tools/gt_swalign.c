@@ -16,9 +16,10 @@
 */
 
 #include "libgtcore/bioseq.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
-#include "libgtcore/scorefunction.h"
-#include "libgtcore/versionfunc.h"
+#include "libgtcore/score_function.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/alignment.h"
 #include "libgtext/swalign.h"
@@ -26,48 +27,59 @@
 
 #define DEFAULT_INDELSCORE  -3
 
-static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
-                            const char **argv, Error *err)
+typedef struct {
+  int indelscore;
+}  SWAlignArguments;
+
+static void* gt_swalign_arguments_new(void)
 {
+  return ma_calloc(1, sizeof (SWAlignArguments));
+}
+
+static void gt_swalign_arguments_delete(void *tool_arguments)
+{
+  SWAlignArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  ma_free(arguments);
+}
+
+static OptionParser* gt_swalign_opion_parser_new(void *tool_arguments)
+{
+  SWAlignArguments *arguments = tool_arguments;
   OptionParser *op;
   Option *o;
-  OPrval oprval;
-  error_check(err);
+  assert(arguments);
   op = option_parser_new("[option ...] scorematrix seq_file_1 seq_file_2",
                          "Locally align each sequence in seq_file_1 "
                          "with each sequence in seq_file_2.");
   o = option_new_int("indelscore", "set the score used for "
-                     "insertions/deletions", indelscore, DEFAULT_INDELSCORE);
+                     "insertions/deletions", &arguments->indelscore,
+                     DEFAULT_INDELSCORE);
   option_parser_add_option(op, o);
   option_parser_set_min_max_args(op, 3, 3);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
-int gt_swalign(int argc, const char **argv, Error *err)
+static int gt_swalign_runner(UNUSED int argc, const char **argv,
+                             int parsed_args, void *tool_arguments,
+                             Error *err)
 {
+  SWAlignArguments *arguments = tool_arguments;
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
-  ScoreFunction *scorefunction = NULL;
+  ScoreFunction *score_function = NULL;
   ScoreMatrix *scorematrix;
   unsigned long i, j;
-  int parsed_args, indelscore, had_err = 0;
+  int had_err = 0;
   Alignment *a;
   error_check(err);
-
-  /* option parsing */
-  switch (parse_options(&parsed_args, &indelscore, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
-  }
-  assert(parsed_args+2 < argc);
+  assert(arguments);
 
   /* init */
   /* XXX: make this more flexible */
   scorematrix  = score_matrix_new_read_protein(argv[parsed_args], err);
   if (scorematrix) {
-    scorefunction = scorefunction_new(scorematrix, indelscore, indelscore);
+    score_function = score_function_new(scorematrix, arguments->indelscore,
+                                                   arguments->indelscore);
     bioseq_1 = bioseq_new(argv[parsed_args+1], err);
     if (!bioseq_1)
       had_err = -1;
@@ -82,7 +94,7 @@ int gt_swalign(int argc, const char **argv, Error *err)
       for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
         for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
           a = swalign(bioseq_get_seq(bioseq_1, i),
-                      bioseq_get_seq(bioseq_2, j), scorefunction);
+                      bioseq_get_seq(bioseq_2, j), score_function);
           if (a) {
             alignment_show(a, stdout);
             xputchar('\n');
@@ -96,7 +108,16 @@ int gt_swalign(int argc, const char **argv, Error *err)
   /* free */
   bioseq_delete(bioseq_2);
   bioseq_delete(bioseq_1);
-  scorefunction_delete(scorefunction);
+  score_function_delete(score_function);
 
   return had_err;
+}
+
+Tool* gt_swalign(void)
+{
+  return tool_new(gt_swalign_arguments_new,
+                  gt_swalign_arguments_delete,
+                  gt_swalign_opion_parser_new,
+                  NULL,
+                  gt_swalign_runner);
 }

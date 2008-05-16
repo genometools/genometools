@@ -130,8 +130,8 @@ int tokenizer_unit_test(Error *err)
   error_check(err);
 
   /* empty file (except comment line) */
-  tmpfilename = str_new_cstr(XTMPFILE_TEMPLATE);
-  tmpfp = fa_xtmpfile(str_get(tmpfilename));
+  tmpfilename = str_new();
+  tmpfp = fa_xtmpfp(tmpfilename);
   fprintf(tmpfp, "# comment line\n");
   fa_xfclose(tmpfp);
   t = tokenizer_new(io_new(str_get(tmpfilename), "r"));
@@ -141,9 +141,7 @@ int tokenizer_unit_test(Error *err)
   xremove(str_get(tmpfilename));
 
   /* larger test */
-  str_reset(tmpfilename);
-  str_append_cstr(tmpfilename, XTMPFILE_TEMPLATE);
-  tmpfp = fa_xfopen(str_get(tmpfilename), "w");
+  tmpfp = fa_xtmpfp(tmpfilename);
   fprintf(tmpfp, " a bb ccc\ndddd -5");
   fa_xfclose(tmpfp);
   t = tokenizer_new(io_new(str_get(tmpfilename), "r"));

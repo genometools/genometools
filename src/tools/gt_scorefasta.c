@@ -56,7 +56,8 @@ static OptionParser* gt_scorefasta_option_parser_new(void *tool_arguments)
 }
 
 static int gt_scorefasta_runner(UNUSED int argc, const char **argv,
-                                void *tool_arguments, UNUSED Error *err)
+                                int parsed_args, void *tool_arguments,
+                                UNUSED Error *err)
 {
   ScorefastaArguments *arguments = tool_arguments;
   unsigned long ulen, wlen;
@@ -67,12 +68,12 @@ static int gt_scorefasta_runner(UNUSED int argc, const char **argv,
   assert(arguments);
 
   /* store database sequence u and query sequence w */
-  ulen = strlen(argv[0]);
-  wlen = strlen(argv[1]);
+  ulen = strlen(argv[parsed_args]);
+  wlen = strlen(argv[parsed_args+1]);
   u = ma_malloc(ulen+1);
   w = ma_malloc(wlen+1);
-  strcpy(u, argv[0]);
-  strcpy(w, argv[1]);
+  strcpy(u, argv[parsed_args]);
+  strcpy(w, argv[parsed_args+1]);
 
   /* assign DNA alphabet */
   alpha = alpha_new_dna();

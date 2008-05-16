@@ -58,6 +58,14 @@ void strarray_add_cstr(StrArray *sa, const char *cstr)
   array_add(sa->strings, str);
 }
 
+void strarray_add(StrArray *sa, const Str *str)
+{
+  Str *clone;
+  assert(sa && str);
+  clone = str_clone(str);
+  array_add(sa->strings, clone);
+}
+
 const char* strarray_get(const StrArray *sa, unsigned long strnum)
 {
   assert(sa && strnum < array_size(sa->strings));

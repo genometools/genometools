@@ -17,5 +17,5 @@
 #
 
 # the make call normally used for development
-make CFLAGS=-I/opt/local/include/cairo LDFLAGS=-L/opt/local/lib \
+make CPPFLAGS=-I/opt/local/include/cairo LDFLAGS=-L/opt/local/lib \
      libgtview=yes test

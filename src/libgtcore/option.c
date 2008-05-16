@@ -1169,6 +1169,18 @@ Option* option_new_int_max(const char *option_str, const char *description,
   return o;
 }
 
+Option* option_new_int_min_max(const char *option_str, const char *description,
+                               int *value, int default_value,
+                               int min_value, int max_value)
+{
+  Option *o = option_new_int(option_str, description, value, default_value);
+  o->min_value_set = true;
+  o->min_value.i = min_value;
+  o->max_value_set = true;
+  o->max_value.i = max_value;
+  return o;
+}
+
 Option* option_new_uint(const char *option_str, const char *description,
                         unsigned int *value, unsigned int default_value)
 {

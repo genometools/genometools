@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <zlib.h>
 #include "libgtcore/error.h"
+#include "libgtcore/str.h"
 
 /* the file allocator module */
 
@@ -56,10 +57,25 @@ BZFILE* fa_xbzopen_func(const char *path, const char *mode, const char*, int);
 void    fa_bzclose(BZFILE *stream);
 void    fa_xbzclose(BZFILE *stream);
 
-/* create a tmp file using <temp> as a template analog to mkstemp(3) */
-#define fa_xtmpfile(temp)\
-        fa_xtmpfile_func(temp, __FILE__, __LINE__)
-FILE*   fa_xtmpfile_func(char *temp, const char*, int);
+/* create a tmp file optionally using template analogous to mkstemp(3) */
+enum tmpfp_flags
+{
+  TMPFP_AUTOREMOVE    = 1 << 0, /**< otherwise template holds a valid
+                                 * path to (re-)open the temporary
+                                 * file created */
+  TMPFP_USETEMPLATE   = 1 << 1, /**< if set use string template
+                                 * given, otherwise the value of
+                                 * template is overwritten with an
+                                 * interval default */
+  TMPFP_OPENBINARY    = 1 << 2, /**< use stdio mode "w+b", "w+" otherwise */
+  TMPFP_DEFAULT_FLAGS = 0,
+};
+#define fa_xtmpfp_generic(template, flags) \
+        fa_xtmpfp_generic_func(template, TMPFP_DEFAULT_FLAGS, \
+                               __FILE__, __LINE__)
+FILE*   fa_xtmpfp_generic_func(Str *template, int flags, const char*, int);
+#define fa_xtmpfp(template)\
+        fa_xtmpfp_generic(template, TMPFP_DEFAULT_FLAGS)
 
 /* memory map functions */
 #define fa_mmap_read(path, len)\

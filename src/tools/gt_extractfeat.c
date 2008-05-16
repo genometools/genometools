@@ -116,7 +116,8 @@ static int gt_extractfeat_arguments_check(UNUSED int argc, void *tool_arguments,
 }
 
 static int gt_extractfeat_runner(UNUSED int argc, const char **argv,
-                                 void *tool_arguments, Error *err)
+                                 int parsed_args, void *tool_arguments,
+                                 Error *err)
 {
   GenomeStream *gff3_in_stream = NULL, *extract_feat_stream = NULL;
   GenomeNode *gn;
@@ -129,7 +130,8 @@ static int gt_extractfeat_runner(UNUSED int argc, const char **argv,
 
   if (!had_err) {
     /* create gff3 input stream */
-    gff3_in_stream = gff3_in_stream_new_sorted(argv[0], arguments->verbose);
+    gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
+                                               arguments->verbose);
 
     /* create region mapping */
     regionmapping = seqid2file_regionmapping_new(arguments->seqfile,

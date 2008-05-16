@@ -22,16 +22,13 @@
  * @brief Generic BWT index creation routines.
  */
 
+#include "libgtmatch/encseq-specialsrank.h"
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqpriv.h"
-#include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-construction-interface.h"
+#include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-mrangealphabet.h"
-
-enum {
-  NORMAL_RANGE  = 0,
-  SPECIAL_RANGE = 1,
-};
+#include "libgtmatch/eis-seqdatasrc.h"
 
 /** The constructor for the base index must conform to this
  * signature. */
@@ -41,7 +38,7 @@ typedef struct encIdxSeq *(*indexCreateFunc)
    uint16_t *headerIDs, uint32_t *extHeaderSizes,
    headerWriteFunc *extHeaderCallbacks,
    void **headerCBData, bitInsertFunc biFunc, BitOffset cwBitsPerPos,
-   BitOffset maxBitsPerPos, void *cbState, Error *err);
+   varExtBitsEstimator biVarBits, void *cbState, Error *err);
 
 /** There must be a function to report the position of the
  * null-rotation in the suffix array. */
@@ -69,11 +66,13 @@ typedef DefinedSeqpos (*reportLongest)(void *state);
  * @param err
  */
 extern EISeq *
-createBWTSeqGeneric(const struct bwtParam *params,
-                    indexCreateFunc createIndex, void *baseSrc, Seqpos totalLen,
-                    const MRAEnc *alphabet, int *specialRanges,
-                    GetOrigSeqSym readOrigSeq, void *origSeqState,
-                    SeqposReadFunc readNextSeqpos, void *spReadState,
+createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
+                    void *baseSrc, Seqpos totalLen,
+                    const MRAEnc *alphabet, const struct seqStats *stats,
+                    const enum rangeSortMode rangeSort[],
+                    RandomSeqAccessor origSeqAccess,
+                    SeqDataReader readNextSeqpos,
+                    const SpecialsRankTable *sprTable,
                     reportLongest lrepFunc, void *lrepState, Error *err);
 
 #endif

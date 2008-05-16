@@ -68,8 +68,8 @@ int bitPackArray_unit_test(Error *err)
       if (had_err)
       {
         log_log("bsStoreUInt32/bpaGetUInt32: "
-                "Expected %u, got %u, seed = %lu, i = %lu, bits=%u\n",
-                v & mask, r, seedval, (unsigned long)i, bits);
+                "Expected %"PRIu32", got %"PRIu32", seed = %lu, i = %lu,"
+                " bits=%u\n", v & mask, r, seedval, (unsigned long)i, bits);
         ma_free(randSrc);
         ma_free(randCmp);
         deleteBitPackArray(bitStore);

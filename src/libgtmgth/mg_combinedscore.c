@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtmgth/mg_combinedscore.h"
+#include "mg_combinedscore.h"
 
 int mg_combinedscore(ParseStruct *parsestruct_ptr,
                      unsigned long hit_counter, Error * err)
@@ -188,8 +188,8 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
       {
         if (contig_index < contig_len && hit_index < hit_len)
         {
-          contig_as = *(contig_as_ptr + j / 3);
-          hit_as = *(hit_as_ptr + j / 3);
+          contig_as = contig_as_ptr[j / 3];
+          hit_as = hit_as_ptr[j / 3];
 
           if (contig_as == '-')
           {
@@ -373,8 +373,8 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
                         unsigned long contig_len,
                         unsigned long hit_number,
                         ParseStruct *parsestruct_ptr,
-                        double matrix_row[],
-                        unsigned long count_row_fct[],
+                        double *matrix_row,
+                        unsigned long *count_row_fct,
                         char *contig_seq,
                         char *hit_seq, HitInformation *hit_information)
 {
@@ -448,8 +448,8 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
            ist Zeiger auf die erste DNA-Base der Sequenz position ist die
            aktuelle Position in der DNA-Sequenz und k die Position im
            aktuellen Triplet */
-        if (tolower(*(hit_seq + position_hit + k)) !=
-            tolower(*(contig_seq + position_contig + k)))
+        if (tolower(hit_seq[position_hit + k]) !=
+            tolower(contig_seq[position_contig + k]))
         {
           /* Bei Uebereinstimmung der AS und keiner Basen-Uebereinstimmung
              wird der Zaheler der Synonymen Basen-Austausche erhoeht, der
@@ -466,8 +466,8 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
       {
         /* Experimenteller Status - Suche nach Homologien statt
            Orieentierung an Synonymen-Basenaustauschen */
-        if (tolower(*(hit_seq + position_hit + k)) ==
-            tolower(*(contig_seq + position_contig + k)))
+        if (tolower(hit_seq[position_hit + k]) ==
+            tolower(contig_seq[position_contig + k]))
         {
           /* Bei Uebereinstimmung der AS und keiner Basen-Uebereinstimmung
              wird der Zaheler der Synonymen Basen-Austausche erhoeht, der
@@ -493,8 +493,8 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
          hit_seq ist Zeiger auf die erste DNA-Base der Sequenz position
          ist die aktuelle Position in der DNA-Sequenz und k die Position
          im aktuellen Triplet */
-      if (tolower(*(hit_seq + position_hit + k)) !=
-          tolower(*(contig_seq + position_contig + k)))
+      if (tolower(hit_seq[position_hit + k]) !=
+          tolower(contig_seq[position_contig + k]))
       {
         /* Bei Nicht-Uebereinstimmung der AS und keiner
            Basen-Uebereinstimmung wird der Zaheler der Nicht-Synonymen
@@ -560,8 +560,8 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
 }
 
 static void add_scores(ParseStruct *parsestruct_ptr,
-                       double matrix_row[],
-                       unsigned long count_row_fct[],
+                       double *matrix_row,
+                       unsigned long *count_row_fct,
                        short current_row_fct,
                        unsigned long hit_number,
                        unsigned long position,

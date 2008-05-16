@@ -21,7 +21,6 @@
 #include "libgtext/toolbox.h"
 #include "tools/gt_dev.h"
 #include "tools/gt_extracttarget.h"
-#include "tools/gt_fingerprint.h"
 #include "tools/gt_guessprot.h"
 #include "tools/gt_magicmatch.h"
 #include "tools/gt_maxpairs.h"
@@ -40,7 +39,6 @@ static void* gt_dev_arguments_new(void)
   /* add development tools here with a function call like this:
      toolbox_add(dev_toolbox, "devtool", gt_devtool); */
   toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
-  toolbox_add_tool(dev_toolbox, "fingerprint", gt_fingerprint());
   toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
   toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
   toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
@@ -75,8 +73,8 @@ static OptionParser* gt_dev_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_dev_runner(int argc, const char **argv, void *tool_arguments,
-                         Error *err)
+static int gt_dev_runner(int argc, const char **argv, int parsed_args,
+                         void *tool_arguments, Error *err)
 {
   Toolbox *dev_toolbox = tool_arguments;
   Toolfunc toolfunc;
@@ -88,24 +86,25 @@ static int gt_dev_runner(int argc, const char **argv, void *tool_arguments,
   assert(dev_toolbox);
 
   /* get development tools */
-  if (!toolbox_has_tool(dev_toolbox, argv[0])) {
+  if (!toolbox_has_tool(dev_toolbox, argv[parsed_args])) {
     error_set(err, "development tool '%s' not found; option -help lists "
-                   "possible tools", argv[0]);
+                   "possible tools", argv[parsed_args]);
     had_err = -1;
   }
 
   /* call development tool */
   if (!had_err) {
-    if (!(toolfunc = toolbox_get(dev_toolbox, argv[0]))) {
-      tool = toolbox_get_tool(dev_toolbox, argv[0]);
+    if (!(toolfunc = toolbox_get(dev_toolbox, argv[parsed_args]))) {
+      tool = toolbox_get_tool(dev_toolbox, argv[parsed_args]);
       assert(tool);
     }
-    nargv = cstr_array_prefix_first(argv, error_get_progname(err));
+    nargv = cstr_array_prefix_first(argv + parsed_args,
+                                    error_get_progname(err));
     error_set_progname(err, nargv[0]);
     if (toolfunc)
-      had_err = toolfunc(argc, (const char**) nargv, err);
+      had_err = toolfunc(argc - parsed_args , (const char**) nargv, err);
     else
-      had_err = tool_run(tool, argc, (const char**) nargv, err);
+      had_err = tool_run(tool, argc - parsed_args , (const char**) nargv, err);
   }
 
   /* free */

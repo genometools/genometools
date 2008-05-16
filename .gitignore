@@ -22,6 +22,7 @@
 *.polya.info
 *.gt_bsi
 *.gt_bsr
+*.gt_bsf
 *.orig
 *.swp
 /bin

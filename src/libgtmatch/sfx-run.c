@@ -396,21 +396,21 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
     } else
     {
       deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
+      /*
+        outfileinfo.longest = getSfxILongestPos(si);
+      */
+      sfi = SfxInterface2Sfxiterator(si);
+      assert(sfi != NULL);
+      if (outfpbcktab != NULL)
+      {
+        if (sfibcktab2file(outfpbcktab,sfi,err) != 0)
+        {
+          haserr = true;
+        }
+      }
+      deleteSfxInterface(si);
     }
   }
-  /*
-  outfileinfo.longest = getSfxILongestPos(si);
-  */
-  sfi = SfxInterface2Sfxiterator(si);
-  assert(sfi != NULL);
-  if (outfpbcktab != NULL)
-  {
-    if (sfibcktab2file(outfpbcktab,sfi,err) != 0)
-    {
-      haserr = true;
-    }
-  }
-  deleteSfxInterface(si);
   return haserr ? -1 : 0;
 }
 

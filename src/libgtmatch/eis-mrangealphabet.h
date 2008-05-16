@@ -139,7 +139,7 @@ MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range);
  * @param mralpha alphabet to query for number of ranges
  * @return number of ranges
  */
-extern AlphabetRangeID
+static inline AlphabetRangeID
 MRAEncGetNumRanges(const MRAEnc *mralpha);
 
 /**
@@ -237,14 +237,25 @@ MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
                                int selection, const int *rangeSel);
 
 /**
+ * @brief Query range for given symbol
+ * @param mralpha alphabet to query
+ * @param sym symbol to look-up range for (already transformed by
+ * mapping corresponding to alphabet)
+ * @return range id
+ */
+static inline AlphabetRangeID
+MRAEncGetRangeOfSymbol(const MRAEnc *mralpha, Symbol sym);
+
+/**
  * @brief Read symbols from file and transform according to
  * mapping.
  * @param mralpha
  * @param fp file pointer
  * @param numSyms read this many symbols
  * @param dest write converted symbols here
+ * @return number of symbols actually read
  */
-extern int
+extern size_t
 MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
                        size_t numSyms, Symbol *dest);
 

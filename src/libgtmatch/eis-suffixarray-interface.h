@@ -22,50 +22,54 @@
  * Defines functions conforming to the signatures defined in
  * eis-construction-interface.h for suffix array objects.
  */
+#include <stdlib.h>
+#include "libgtcore/error.h"
+#include "libgtmatch/sarr-def.h"
+#include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-seqdatasrc.h"
+#include "libgtmatch/eis-sequencemultiread.h"
 
 /**
  * Used to pass suffixarray to read from and alphabet to encode with
  * to readers.
  */
-struct suffixarrayReadState
+struct suffixarrayFileInterface
 {
   Suffixarray *sa;              /**< the suffix array to read from */
-  MRAEnc *alphabet;             /**< the alphabet to use for transformation */
+  struct seqReaderSet readerSet;
+  int numBWTFileReaders;
+  struct saTaggedXltorStateList xltorStates;
 };
 
-/**
- * @brief Read given length of symbols from the BWT, starting after last
- * position read.
- * @param state reference of a struct suffixarrayReadState
- * @param dest write symbols here
- * @param len length of string to read
- */
-extern int
-saReadBWT(void *state, Symbol *dest, size_t len, Error *err);
+typedef struct suffixarrayFileInterface SuffixarrayFileInterface;
+
+extern void
+initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
+                             Suffixarray *sa);
+
+extern void
+destructSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
+
+extern SeqDataReader
+SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype);
+
+extern SeqDataReader
+SAIMakeBWTReader(SuffixarrayFileInterface *sai);
+
+extern SeqDataReader
+SAIMakeSufTabReader(SuffixarrayFileInterface *sai);
 
 /**
  * @brief Gets symbols of original sequence at given position.
- * @param state reference of a struct suffixarrayReadState
+ * @param state SuffixarrayFileInterface reference
  * @param dest write symbols here
  * @param pos get symbols starting at this position in original sequence
  * @param len length of string to read
+ * @return actual number of symbols read
  */
-extern int
-saGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len);
-
-/**
- * @brief Read part of the suffix array starting from position after
- * last read.
- * @param src reference of a Suffixarray object
- * @param dest write suffix array values here
- * @param len length of part to read
- * @param err genometools error object reference
- * @return number of entries read, less than len if end of sequence
- * reached
- */
-extern int
-saReadSeqpos(void *src, Seqpos *dest, size_t len, Error *err);
+extern size_t
+SAIGetOrigSeqSym(void *state, Symbol *dest, Seqpos pos, size_t len);
 
 /**
  * @brief Query position of suffix starting at position 0, can be
@@ -75,7 +79,16 @@ saReadSeqpos(void *src, Seqpos *dest, size_t len, Error *err);
  * @return
  */
 extern DefinedSeqpos
-reportSALongest(void *state);
+reportSAILongest(void *state);
+
+/**
+ * \brief Get reference for original sequence object.
+ *
+ * @param sai SuffixarrayFileInterface reference
+ * @return reference of sequence object
+ */
+static inline const Encodedsequence *
+SAIGetEncSeq(const SuffixarrayFileInterface *sai);
 
 /**
  * @brief Query appropriate alphabet encoding for suffix array.
@@ -83,6 +96,12 @@ reportSALongest(void *state);
  * @return alphabet
  */
 extern MRAEnc *
-newMRAEncFromSA(const void *state);
+newMRAEncFromSA(const Suffixarray *sa);
+
+static inline MRAEnc *
+newMRAEncFromSAI(const SuffixarrayFileInterface *sai);
+
+/* visible for the compiler, but not meant for users to depend upon */
+#include "eis-suffixarray-interface-priv.h"
 
 #endif

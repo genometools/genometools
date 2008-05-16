@@ -60,7 +60,8 @@ static OptionParser* gt_blastenv_option_parser_new(void *tool_arguments)
 }
 
 static int gt_blastenv_runner(UNUSED int argc, const char **argv,
-                              void *tool_arguments, Error *err)
+                              int parsed_args, void *tool_arguments,
+                              Error *err)
 {
   ScorefastaArguments *arguments = tool_arguments;
   ScoreMatrix *score_matrix;
@@ -73,14 +74,14 @@ static int gt_blastenv_runner(UNUSED int argc, const char **argv,
   error_check(err);
   assert(arguments);
 
-  if (!(score_matrix = score_matrix_new_read_protein(argv[0], err)))
+  if (!(score_matrix = score_matrix_new_read_protein(argv[parsed_args], err)))
     had_err = -1;
 
   if (!had_err) {
     /* store query sequence w */
-    wlen = strlen(argv[1]);
+    wlen = strlen(argv[parsed_args+1]);
     w = ma_malloc(wlen+1);
-    strcpy(w, argv[1]);
+    strcpy(w, argv[parsed_args+1]);
 
     /* assign protein alphabet */
     alpha = alpha_new_protein();

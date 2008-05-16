@@ -157,8 +157,8 @@ static int gt_filter_arguments_check(UNUSED int rest_argc, void *tool_arguments,
   return had_err;
 }
 
-static int gt_filter_runner(int argc, const char **argv, void *tool_arguments,
-                            Error *err)
+static int gt_filter_runner(int argc, const char **argv, int parsed_args,
+                           void *tool_arguments, Error *err)
 {
   FilterArguments *arguments = tool_arguments;
   GenomeStream *gff3_in_stream, *filter_stream, *gff3_out_stream;
@@ -169,7 +169,8 @@ static int gt_filter_runner(int argc, const char **argv, void *tool_arguments,
   assert(arguments);
 
   /* create a gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_unsorted(argc, argv,
+  gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
+                                               argv + parsed_args,
                                                arguments->verbose &&
                                                arguments->outfp, false);
 

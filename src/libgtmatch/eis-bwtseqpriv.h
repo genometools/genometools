@@ -16,8 +16,13 @@
 #ifndef EIS_BWTSEQPRIV_H
 #define EIS_BWTSEQPRIV_H
 
+#include "libgtcore/chardef.h"
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-encidxseq.h"
+
+enum {
+  bwtTerminatorSym = SEPARATOR - 3,
+};
 
 struct BWTSeq
 {
@@ -29,20 +34,13 @@ struct BWTSeq
   Symbol bwtTerminatorFallback;  /**< the terminator symbol has been
                                   * flattened into this symbol for
                                   * storage reasons */
+  AlphabetRangeID bwtTerminatorFallbackRange;
   Seqpos longest;
   Seqpos *count;
   int featureToggles;
+  unsigned bitsPerOrigRank;
+  enum rangeSortMode *rangeSort;
 };
-
-struct locateHeader
-{
-  Seqpos longest;
-  unsigned locateInterval;
-  int featureToggles;
-};
-
-extern int
-readLocateInfoHeader(EISeq *seqIdx, struct locateHeader *headerData);
 
 struct BWTSeqExactMatchesIterator
 {
@@ -58,5 +56,13 @@ BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
 extern Seqpos
 BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
                   struct extBitsRetrieval *extBits);
+
+extern Seqpos
+BWTSeqGetRankSort(const BWTSeq *bwtSeq, Seqpos pos, AlphabetRangeID range,
+                  struct extBitsRetrieval *extBits);
+
+extern void
+BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
+                         const enum rangeSortMode *defaultRangeSort);
 
 #endif

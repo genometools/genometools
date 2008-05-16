@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DISCDISTRI_H
-#define DISCDISTRI_H
+#ifndef DISC_DISTRI_H
+#define DISC_DISTRI_H
 
 #include "libgtcore/error.h"
 #include "libgtcore/genfile.h"
@@ -28,16 +28,16 @@ typedef struct DiscDistri DiscDistri;
 typedef void (*DiscDistriIterFunc)(unsigned long key, unsigned long long value,
                                    void *data);
 
-DiscDistri*        discdistri_new(void);
-void               discdistri_add(DiscDistri*, unsigned long);
-void               discdistri_add_multi(DiscDistri*, unsigned long,
+DiscDistri*        disc_distri_new(void);
+void               disc_distri_add(DiscDistri*, unsigned long);
+void               disc_distri_add_multi(DiscDistri*, unsigned long,
                                         unsigned long long);
-unsigned long long discdistri_get(const DiscDistri*, unsigned long);
-void               discdistri_show(const DiscDistri*); /* on stdout */
-void               discdistri_show_generic(const DiscDistri*, GenFile*);
-void               discdistri_foreach(const DiscDistri*, DiscDistriIterFunc,
+unsigned long long disc_distri_get(const DiscDistri*, unsigned long);
+void               disc_distri_show(const DiscDistri*); /* on stdout */
+void               disc_distri_show_generic(const DiscDistri*, GenFile*);
+void               disc_distri_foreach(const DiscDistri*, DiscDistriIterFunc,
                                       void *data);
-int                discdistri_unit_test(Error*);
-void               discdistri_delete(DiscDistri*);
+int                disc_distri_unit_test(Error*);
+void               disc_distri_delete(DiscDistri*);
 
 #endif

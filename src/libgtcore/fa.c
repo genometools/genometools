@@ -15,6 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <unistd.h>
+
 #include "libgtcore/dynalloc.h"
 #include "libgtcore/genfile.h"
 #include "libgtcore/hashtable.h"
@@ -24,7 +26,6 @@
 #include "libgtcore/xansi.h"
 #include "libgtcore/xbzlib.h"
 #include "libgtcore/xposix.h"
-#include "libgtcore/xtmpfile.h"
 #include "libgtcore/xzlib.h"
 
 /* the file allocator class */
@@ -248,19 +249,53 @@ void fa_xbzclose(BZFILE *stream)
   xfclose_generic(stream, GFM_BZIP2, fa);
 }
 
-FILE* fa_xtmpfile_func(char *temp, const char *filename, int line)
+static const char genometools_tmptemplate[] = "/genometools.XXXXXXXXXX";
+
+FILE* fa_xtmpfp_generic_func(Str *template_arg, int flags,
+                             const char *filename, int line)
 {
-  FAFileInfo *fileinfo;
   FILE *fp;
-  assert(temp);
+  Str *template;
   if (!fa) fa_init();
   assert(fa);
-  fileinfo = ma_malloc(sizeof (FAFileInfo));
-  fileinfo->filename = filename;
-  fileinfo->line = line;
-  fp = xtmpfile(temp);
+  if (flags & TMPFP_USETEMPLATE)
+  {
+    assert(template_arg);
+    template = template_arg;
+  }
+  else
+  {
+    if (template_arg)
+      template = template_arg;
+    else
+      template = str_new();
+    {
+      const char *tmpdir = getenv("TMPDIR");
+      if (!tmpdir)
+        tmpdir = P_tmpdir;
+      str_set(template, tmpdir);
+    }
+    str_append_cstr(template, genometools_tmptemplate);
+  }
+  {
+    int fd = mkstemp(str_get(template));
+    char mode[] = { 'w', '+', flags & TMPFP_OPENBINARY?'b':'\0', '\0' };
+    fp = xfdopen(fd, mode);
+  }
   assert(fp);
-  hashtable_add(fa->file_pointer, fp, fileinfo);
+  if (flags & TMPFP_AUTOREMOVE)
+  {
+    xremove(str_get(template));
+  }
+  {
+    FAFileInfo *fileinfo;
+    fileinfo = ma_malloc(sizeof (FAFileInfo));
+    fileinfo->filename = filename;
+    fileinfo->line = line;
+    hashtable_add(fa->file_pointer, fp, fileinfo);
+  }
+  if (!template_arg)
+    str_delete(template);
   return fp;
 }
 

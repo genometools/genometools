@@ -55,6 +55,9 @@ struct bwtOptions
   bool useLocateBitmap;                 /**< did the user request to
                                          * store locate flags for
                                          * every sequence position? */
+  bool useSourceRank;                   /**< did the user request extra
+                                         * information for sort reversing of
+                                         * rank-sorted symbols? */
   Option *useLocateBitmapOption;        /**< used to query wether the
                                          * option was set or left
                                          * unspecified in which case a
