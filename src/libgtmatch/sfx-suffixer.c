@@ -306,7 +306,7 @@ static void insertwithoutspecial(void *processinfo,
 
     if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
     {
-      sfi->suftabptr[--sfi->leftborder[code]] = position; 
+      sfi->suftabptr[--sfi->leftborder[code]] = position;
       /* from right to left */
     }
   }

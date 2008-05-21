@@ -314,7 +314,7 @@ static unsigned int checkstartpointorder(const Seqpos *left,
   assert(left < right);
   assert(*left != *(left+1));
   ascending = (*left < *(left+1)) ? true : false;
-  for(ptr = left+1; ptr < right; ptr++)
+  for (ptr = left+1; ptr < right; ptr++)
   {
     assert(*ptr != *(ptr+1));
     if (*ptr < *(ptr+1))
