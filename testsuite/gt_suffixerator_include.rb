@@ -147,7 +147,7 @@ end
     Name "gt suffixerator+sfxmap protein #{extraname} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
-      checksfx(parts,3,extra,"direct",true,["sw100K1.fsa","sw100K2.fsa"])
+      checksfx(parts,2,extra,"direct",true,["sw100K1.fsa","sw100K2.fsa"])
     end
   end
 end
