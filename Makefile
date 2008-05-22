@@ -720,7 +720,8 @@ splint: obj/gt_config.h
 
 EISFILES=${shell ls ${CURDIR}/src/libgtmatch/*.c | grep eis-}\
          ${CURDIR}/src/libgtmatch/sfx-opt.c\
-         ${CURDIR}/src/libgtmatch/sfx-run.c
+         ${CURDIR}/src/libgtmatch/sfx-run.c\
+         ${CURDIR}/src/libgtmatch/encseq-specialsrank.c
 
 SKTOOLS=${filter-out src/tools/gt_greedyfwdmat.c,\
                      ${shell grep -l Kurtz src/tools/*.c}}
