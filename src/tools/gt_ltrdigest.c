@@ -267,7 +267,7 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
 }
 
 static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
-                               UNUSED int parsed_args, void *tool_arguments,
+                               int parsed_args, void *tool_arguments,
                                Error *err)
 {
   LTRdigestOptions *arguments = tool_arguments;
@@ -279,7 +279,8 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
   GenomeNode *gn;
 
   int had_err      = 0,
-      tests_to_run = 0;
+      tests_to_run = 0,
+      arg = parsed_args;
   error_check(err);
   assert(arguments);
 
@@ -292,7 +293,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
   arguments->pdom_opts.thresh.globE   = arguments->pdom_opts.evalue_cutoff;
 
   /* Open sequence file */
-  Bioseq *bioseq = bioseq_new(argv[1], err);
+  Bioseq *bioseq = bioseq_new(argv[arg+1], err);
   if (error_is_set(err))
     had_err = -1;
 
@@ -321,7 +322,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
   {
     /* set up stream flow
      * ------------------*/
-    gff3_in_stream  = gff3_in_stream_new_sorted(argv[0],
+    gff3_in_stream  = gff3_in_stream_new_sorted(argv[arg],
                                                 arguments->verbose &&
                                                 arguments->outfp);
 
