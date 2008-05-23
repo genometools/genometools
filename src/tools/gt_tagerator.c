@@ -21,20 +21,16 @@
 #include "libgtcore/unused.h"
 #include "libgtcore/tool.h"
 #include "tools/gt_tagerator.h"
-
-typedef struct {
-  StrArray *tagfiles;
-  Str *indexname;
-} TageratorArguments;
+#include "libgtmatch/tagerator.h"
 
 static void *gt_tagerator_arguments_new(void)
 {
-  return ma_malloc(sizeof (TageratorArguments));
+  return ma_malloc(sizeof (TageratorOptions));
 }
 
 static void gt_tagerator_arguments_delete(void *tool_arguments)
 {
-  TageratorArguments *arguments = tool_arguments;
+  TageratorOptions *arguments = tool_arguments;
 
   if (!arguments)
   {
@@ -47,7 +43,7 @@ static void gt_tagerator_arguments_delete(void *tool_arguments)
 
 static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
 {
-  TageratorArguments *arguments = tool_arguments;
+  TageratorOptions *arguments = tool_arguments;
   OptionParser *op;
   Option *option;
 
@@ -62,6 +58,11 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                              arguments->tagfiles);
   option_parser_add_option(op, option);
   option_is_mandatory(option);
+  option = option_new_ulong("k",
+                            "Specify the allowed number of difference",
+                            &arguments->maxdifferences,
+                            0);
+  option_parser_add_option(op, option);
 
   option = option_new_string("ii",
                              "Specify input index",
@@ -76,7 +77,7 @@ static int gt_tagerator_runner(UNUSED int argc,
                                int parsed_args,
                                void *tool_arguments, Error *err)
 {
-  TageratorArguments *arguments = tool_arguments;
+  TageratorOptions *arguments = tool_arguments;
   bool haserr = false;
   unsigned long idx;
 
@@ -86,9 +87,14 @@ static int gt_tagerator_runner(UNUSED int argc,
   assert(parsed_args == argc);
   for (idx=0; idx<strarray_size(arguments->tagfiles); idx++)
   {
-    printf("tagfile=%s\n",strarray_get(arguments->tagfiles,idx));
+    printf("# tagfile=%s\n",strarray_get(arguments->tagfiles,idx));
   }
-  printf("indexname=%s\n",str_get(arguments->indexname));
+  printf("# maxdifference=%lu\n",arguments->maxdifferences);
+  printf("# indexname=%s\n",str_get(arguments->indexname));
+  if (runtagerator(arguments,err) != 0)
+  {
+    haserr = true;
+  }
   return haserr ? -1 : 0;
 }
 
