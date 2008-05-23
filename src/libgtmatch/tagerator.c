@@ -26,17 +26,21 @@
 
 #include "libgtmatch/esa-map.pr"
 
+#define MAXTAGSIZE 64
+
 int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength;
-  bool haserr = false;
   SeqIterator *seqit;
-  const Uchar *sequence;
+  Uchar charcode;
+  bool haserr = false;
   char *desc;
   int retval;
-  unsigned long len;
+  unsigned long idx, len, tagnumber;
   unsigned int demand = SARR_SUFTAB | SARR_ESQTAB;
+  const Uchar *symbolmap, *currenttag;
+  Uchar transformedtag[MAXTAGSIZE];
 
   if (mapsuffixarray(&suffixarray,
                      &totallength,
@@ -47,13 +51,34 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   {
     haserr = true;
   }
+  symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
   seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
-  while (true)
+  for (tagnumber = 0; /* Nothing */; tagnumber++)
   {
-    retval = seqiterator_next(seqit, &sequence, &len, &desc, err);
+    retval = seqiterator_next(seqit, &currenttag, &len, &desc, err);
     if (retval != 1)
     {
       break;
+    }
+    if (len > (unsigned long) MAXTAGSIZE)
+    {
+      error_set(err,"tag of length %lu; tags must not be longer than %d",
+                     len,MAXTAGSIZE);
+      haserr = true;
+      break;
+    }
+    for (idx = 0; idx < len; idx++)
+    {
+      charcode = symbolmap[currenttag[idx]];
+      if (charcode == (Uchar) UNDEFCHAR)
+      {
+        error_set(err,"undefed character '%c' in tag number %lu",
+                  currenttag[idx],
+                  tagnumber);
+        haserr = true;
+        break;
+      }
+      transformedtag[idx] = charcode;
     }
     ma_free(desc);
   }
