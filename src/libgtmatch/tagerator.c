@@ -22,14 +22,16 @@
 #include "libgtcore/error.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/seqiterator.h"
-#include "libgtmatch/tagerator.h"
-#include "libgtmatch/sarr-def.h"
-#include "libgtmatch/esa-mmsearch-def.h"
+#include "tagerator.h"
+#include "sarr-def.h"
+#include "esa-mmsearch-def.h"
+#include "esa-limdfs.h"
+#include "intbits.h"
+#include "alphadef.h"
 
 #include "libgtmatch/esa-map.pr"
 
-#define MAXTAGSIZE 64
-#define UNDEFINDEX      ((short) (-1))
+#define MAXTAGSIZE INTWORDSIZE
 
 static void exactpatternmatching(const Encodedsequence *encseq,
                                  const Seqpos *suftab,
@@ -57,174 +59,7 @@ static void exactpatternmatching(const Encodedsequence *encseq,
   freemmsearchiterator(&mmsi);
 }
 
-typedef struct
-{
-  unsigned long *Eqs,         /* bit vector for reverse order match */
-                maxdistance,  /* distance threshold */
-                patternlength;   /* pattern length */
-} MyersBVinfo;
-
-#define SKDEBUG
-
-typedef struct
-{
-  unsigned long Pv,    /* the plus-vector for Myers Algorithm */
-                Mv;    /* the minus-vector for Myers Algorithm */
-  short maxleqk;       /* \(\max\{i\in[0,m]\mid D(i)\leq k\}\) where
-                          \(m\) is the length of the pattern, \(k\) is the
-                          distance threshold, and \(D\) is
-                          the current distance column */
-#ifdef SKDEBUG
-  unsigned long scorevalue;    /* the score for the given depth */
-#endif
-} MyersColumn;
-
 #ifdef APPROX
-
-#ifdef SKDEBUG
-static void verifycolumnvalues(unsigned long maxdistance,
-                               unsigned long patternlength,
-                               const MyersColumn *col,
-                               unsigned long startscore)
-{
-  unsigned long idx, score = startscore, minscore, mask;
-  short maxleqkindex;
-
-  if (score <= maxdistance)
-  {
-    maxleqkindex = 0;
-    minscore = score;
-  } else
-  {
-    maxleqkindex = UNDEFINDEX;
-    minscore = 0;
-  }
-  assert(patternlength <= (unsigned long) SHRT_MAX);
-  for (idx=1UL, mask = 1UL; idx <= patternlength; idx++, mask <<= 1)
-  {
-    if (col->Pv & mask)
-    {
-      score++;
-    } else
-    {
-      if (col->Mv & mask)
-      {
-        score--;
-      }
-    }
-    if (score <= maxdistance)
-    {
-      maxleqkindex = (short) idx;
-      minscore = score;
-    }
-  }
-  if (maxleqkindex != col->maxleqk)
-  {
-    fprintf(stderr,"correct maxleqkindex = %hd != %hd = col->maxleqk\n",
-                   maxleqkindex,
-                   col->maxleqk);
-    exit(EXIT_FAILURE);
-  }
-  if (maxleqkindex != UNDEFINDEX)
-  {
-    if (minscore != col->scorevalue)
-    {
-      fprintf(stderr,"correct score = %lu != %lu = col->score\n",
-                   minscore,
-                   col->scorevalue);
-      exit(EXIT_FAILURE);
-    }
-  }
-}
-#endif
-
-static void nextEDcolumn(MyersBVinfo *apminfo,
-                         MyersColumn *outcol,
-                         Uchar currentchar,
-                         MyersColumn *incol)
-{
-  unsigned long Eq, Xv, Xh, Ph, Mh, /* as in Myers Paper */
-                backmask;           /* only one bit is on */
-  short idx;                        /* a counter */
-  unsigned long score;              /* current score */
-
-  Eq = apminfo->Eqs[(unsigned long) currentchar];
-  Xv = Eq | incol->Mv;
-  Xh = (((Eq & incol->Pv) + incol->Pv) ^ incol->Pv) | Eq;
-
-  Ph = incol->Mv | ~ (Xh | incol->Pv);
-  Mh = incol->Pv & Xh;
-
-  Ph = (Ph << 1) | 1UL;
-  outcol->Pv = (Mh << 1) | ~ (Xv | Ph);
-  outcol->Mv = Ph & Xv;
-  /* printf("incol->maxleqk %ld\n",(Showsint) incol->maxleqk); */
-#ifdef SKDEBUG
-  if ((unsigned long) incol->maxleqk == apminfo->patternlength)
-  {
-    fprintf(stderr,"incol->maxleqk = %lu = patternlength not allowed\n",
-            apminfo->patternlength);
-    exit(EXIT_FAILURE);
-  }
-  if (incol->maxleqk == UNDEFINDEX)
-  {
-    fprintf(stderr,"incol->maxleqk = UNDEFINDEX not allowed\n");
-    exit(EXIT_FAILURE);
-  }
-#endif
-  backmask = 1UL << incol->maxleqk;
-  if (Eq & backmask || Mh & backmask)
-  {
-    outcol->maxleqk = incol->maxleqk + (short) 1;
-#ifdef SKDEBUG
-    outcol->scorevalue = incol->scorevalue;
-#endif
-  } else
-  {
-    if (Ph & backmask)
-    {
-      score = apminfo->maxdistance+1;
-      outcol->maxleqk = UNDEFINDEX;
-      for (idx = incol->maxleqk - (short) 1, backmask >>= 1;
-           idx >= 0;
-           idx--, backmask >>= 1)
-      {
-        if (outcol->Pv & backmask)
-        {
-          score--;
-          if (score <= apminfo->maxdistance)
-          {
-            outcol->maxleqk = idx;
-#ifdef SKDEBUG
-            outcol->scorevalue = score;
-#endif
-            break;
-          }
-        } else
-        {
-          if (outcol->Mv & backmask)
-          {
-            score++;
-          }
-        }
-      }
-    } else
-    {
-      outcol->maxleqk = incol->maxleqk;
-#ifdef SKDEBUG
-      outcol->scorevalue = incol->scorevalue;
-#endif
-    }
-  }
-}
-
-typedef struct
-{
-  unsigned long offset;
-  Seqpos left, right;
-  MyersColumn col;
-} Lcpintervalwithcolumn;
-
 static void approxpatternmatch(const Encodedsequence *encseq,
                                const Seqpos *suftab,
                                Readmode readmode,
@@ -246,6 +81,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   unsigned long idx, taglen, tagnumber;
   unsigned int demand = SARR_SUFTAB | SARR_ESQTAB;
   const Uchar *symbolmap, *currenttag;
+  Limdfsresources *limdfsresources = NULL;
   Uchar transformedtag[MAXTAGSIZE];
 
   if (mapsuffixarray(&suffixarray,
@@ -258,6 +94,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     haserr = true;
   }
   symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
+  if (tageratoroptions->maxdistance > 0)
+  {
+    limdfsresources = newLimdfsresources(getmapsizeAlphabet(suffixarray.alpha));
+  }
   seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
   for (tagnumber = 0; /* Nothing */; tagnumber++)
   {
@@ -295,8 +135,20 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                            totallength,
                            transformedtag,
                            taglen);
+    } else
+    {
+      esalimiteddfs(limdfsresources,
+                    suffixarray.encseq,
+                    suffixarray.suftab,
+                    transformedtag,
+                    taglen,
+                    tageratoroptions->maxdistance);
     }
     ma_free(desc);
+  }
+  if (limdfsresources != NULL)
+  {
+    freeLimdfsresources(&limdfsresources);
   }
   seqiterator_delete(seqit);
   freesuffixarray(&suffixarray);
