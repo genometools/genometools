@@ -60,7 +60,7 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   option_is_mandatory(option);
   option = option_new_ulong("k",
                             "Specify the allowed number of difference",
-                            &arguments->maxdifferences,
+                            &arguments->maxdistance,
                             0);
   option_parser_add_option(op, option);
 
@@ -89,7 +89,7 @@ static int gt_tagerator_runner(UNUSED int argc,
   {
     printf("# tagfile=%s\n",strarray_get(arguments->tagfiles,idx));
   }
-  printf("# maxdifference=%lu\n",arguments->maxdifferences);
+  printf("# maxdifference=%lu\n",arguments->maxdistance);
   printf("# indexname=%s\n",str_get(arguments->indexname));
   if (runtagerator(arguments,err) != 0)
   {

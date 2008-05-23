@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <limits.h>
 #include "libgtcore/unused.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/ma.h"
@@ -28,13 +29,14 @@
 #include "libgtmatch/esa-map.pr"
 
 #define MAXTAGSIZE 64
+#define UNDEFINDEX      ((short) (-1))
 
 static void exactpatternmatching(const Encodedsequence *encseq,
-                                   const Seqpos *suftab,
-                                   Readmode readmode,
-                                   Seqpos totallength,
-                                   const Uchar *pattern,
-                                   unsigned long patternlen)
+                                 const Seqpos *suftab,
+                                 Readmode readmode,
+                                 Seqpos totallength,
+                                 const Uchar *pattern,
+                                 unsigned long patternlength)
 {
   MMsearchiterator *mmsi;
   Seqpos dbstartpos;
@@ -46,14 +48,258 @@ static void exactpatternmatching(const Encodedsequence *encseq,
                              0, /* offset */
                              readmode,
                              pattern,
-                             patternlen);
-  while(nextmmsearchiterator(&dbstartpos,mmsi))
+                             patternlength);
+  while (nextmmsearchiterator(&dbstartpos,mmsi))
   {
     printf(" " FormatSeqpos,PRINTSeqposcast(dbstartpos));
   }
   printf("\n");
   freemmsearchiterator(&mmsi);
 }
+
+typedef struct
+{
+  unsigned long *Eqs,         /* bit vector for reverse order match */
+                maxdistance,  /* distance threshold */
+                patternlength;   /* pattern length */
+} MyersBVinfo;
+
+#define SKDEBUG
+
+typedef struct
+{
+  unsigned long Pv,    /* the plus-vector for Myers Algorithm */
+                Mv;    /* the minus-vector for Myers Algorithm */
+  short maxleqk;       /* \(\max\{i\in[0,m]\mid D(i)\leq k\}\) where
+                          \(m\) is the length of the pattern, \(k\) is the
+                          distance threshold, and \(D\) is
+                          the current distance column */
+#ifdef SKDEBUG
+  unsigned long scorevalue;    /* the score for the given depth */
+#endif
+} MyersColumn;
+
+#ifdef SKDEBUG
+static void verifycolumnvalues(unsigned long maxdistance,
+                               unsigned long patternlength,
+                               const MyersColumn *col,
+                               unsigned long startscore)
+{
+  unsigned long idx, score = startscore, minscore, mask;
+  short maxleqkindex;
+
+  if (score <= maxdistance)
+  {
+    maxleqkindex = 0;
+    minscore = score;
+  } else
+  {
+    maxleqkindex = UNDEFINDEX;
+    minscore = 0;
+  }
+  assert(patternlength <= (unsigned long) SHRT_MAX);
+  for (idx=1UL, mask = 1UL; idx <= patternlength; idx++, mask <<= 1)
+  {
+    if (col->Pv & mask)
+    {
+      score++;
+    } else
+    {
+      if (col->Mv & mask)
+      {
+        score--;
+      }
+    }
+    if (score <= maxdistance)
+    {
+      maxleqkindex = (short) idx;
+      minscore = score;
+    }
+  }
+  if (maxleqkindex != col->maxleqk)
+  {
+    fprintf(stderr,"correct maxleqkindex = %hd != %hd = col->maxleqk\n",
+                   maxleqkindex,
+                   col->maxleqk);
+    exit(EXIT_FAILURE);
+  }
+  if (maxleqkindex != UNDEFINDEX)
+  {
+    if (minscore != col->scorevalue)
+    {
+      fprintf(stderr,"correct score = %lu != %lu = col->score\n",
+                   minscore,
+                   col->scorevalue);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+#endif
+
+static void nextEDcolumn(MyersBVinfo *apminfo,
+                         MyersColumn *outcol,
+                         Uchar currentchar,
+                         MyersColumn *incol)
+{
+  unsigned long Eq, Xv, Xh, Ph, Mh, /* as in Myers Paper */
+                backmask;           /* only one bit is on */
+  short idx;                        /* a counter */
+  unsigned long score;              /* current score */
+
+  Eq = apminfo->Eqs[(unsigned long) currentchar];
+  Xv = Eq | incol->Mv;
+  Xh = (((Eq & incol->Pv) + incol->Pv) ^ incol->Pv) | Eq;
+
+  Ph = incol->Mv | ~ (Xh | incol->Pv);
+  Mh = incol->Pv & Xh;
+
+  Ph = (Ph << 1) | 1UL;
+  outcol->Pv = (Mh << 1) | ~ (Xv | Ph);
+  outcol->Mv = Ph & Xv;
+  /* printf("incol->maxleqk %ld\n",(Showsint) incol->maxleqk); */
+#ifdef SKDEBUG
+  if ((unsigned long) incol->maxleqk == apminfo->patternlength)
+  {
+    fprintf(stderr,"incol->maxleqk = %lu = patternlength not allowed\n",
+            apminfo->patternlength);
+    exit(EXIT_FAILURE);
+  }
+  if (incol->maxleqk == UNDEFINDEX)
+  {
+    fprintf(stderr,"incol->maxleqk = UNDEFINDEX not allowed\n");
+    exit(EXIT_FAILURE);
+  }
+#endif
+  backmask = 1UL << incol->maxleqk;
+  if (Eq & backmask || Mh & backmask)
+  {
+    outcol->maxleqk = incol->maxleqk + (short) 1;
+#ifdef SKDEBUG
+    outcol->scorevalue = incol->scorevalue;
+#endif
+  } else
+  {
+    if (Ph & backmask)
+    {
+      score = apminfo->maxdistance+1;
+      outcol->maxleqk = UNDEFINDEX;
+      for (idx = incol->maxleqk - (short) 1, backmask >>= 1;
+           idx >= 0;
+           idx--, backmask >>= 1)
+      {
+        if (outcol->Pv & backmask)
+        {
+          score--;
+          if (score <= apminfo->maxdistance)
+          {
+            outcol->maxleqk = idx;
+#ifdef SKDEBUG
+            outcol->scorevalue = score;
+#endif
+            break;
+          }
+        } else
+        {
+          if (outcol->Mv & backmask)
+          {
+            score++;
+          }
+        }
+      }
+    } else
+    {
+      outcol->maxleqk = incol->maxleqk;
+#ifdef SKDEBUG
+      outcol->scorevalue = incol->scorevalue;
+#endif
+    }
+  }
+}
+
+typedef struct
+{
+  unsigned long offset;
+  Seqpos left, right;
+  MyersColumn col;
+} Lcpintervalwithcolumn;
+
+#ifdef APPROX
+
+static void approxpatternmatch(const Encodedsequence *encseq,
+                               const Seqpos *suftab,
+                               Readmode readmode,
+                               Seqpos totallength,
+                               const Uchar *pattern,
+                               unsigned long patternlength,
+                               unsigned long maxdistance)
+{
+  Genericstack gstack;
+  Vbound *vbounds, *vboundsptr;
+  Scoredvnode scvnode, scvnodenew;
+  Uint l, r, vboundmaxsize, vboundscount, countprocessed = 0;
+
+  emptygenericStack(&gstack,UintConst(1024));
+  scvnode.score = (ProfScore) 0;
+  scvnode.offset = 0;
+  scvnode.left = 0;
+  scvnode.right = virtualtree->multiseq.totallength;
+  pushGenericstack(&gstack,scvnode);
+  vboundmaxsize = virtualtree->alpha.mapsize-1+1;
+  ALLOCASSIGNSPACE(vbounds,NULL,Vbound,vboundmaxsize);
+  while (!stackisempty(&gstack))
+  {
+    countprocessed++;
+    scvnode = popGenericstack(&gstack);
+    vboundscount = splitnodewithcharbinwithoutspecial(&virtualtree->multiseq,
+                                                      virtualtree->suftab,
+                                                      vbounds,
+                                                      vboundmaxsize,
+                                                      scvnode.offset,
+                                                      scvnode.left,
+                                                      scvnode.right);
+    for (vboundsptr = vbounds + vboundscount -1;
+         vboundsptr >= vbounds;
+         vboundsptr--)
+    {
+      l = vboundsptr->bound;
+      r = (vboundsptr+1)->bound-1;
+      if (ISSPECIAL(vboundsptr->inchar))
+      {
+        NOTSUPPOSED;
+      }
+      DEBUG4(2,"%lu-(%lu,%lu)%c",
+                (Showuint) vboundsptr->inchar,(Showuint) l,
+                (Showuint) r,(vboundsptr == vbounds + vboundscount - 1)
+                              ? '\n'
+                              : ' ');
+      if (l == r)
+      {
+        (void) evaluateedge(virtualtree,
+                            prof,
+                            results,
+                            NULL,
+                            l,r,
+                            scvnode.offset,
+                            scvnode.score);
+      } else
+      {
+        if (evaluateedge(virtualtree,
+                        prof,
+                        results,
+                        &scvnodenew,
+                        l,r,
+                        scvnode.offset,
+                        scvnode.score))
+        {
+          pushGenericstack(&gstack,scvnodenew);
+        }
+      }
+    }
+  }
+  wrapGenericstack(&gstack);
+  FREESPACE(vbounds);
+}
+#endif
 
 int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
 {
@@ -107,7 +353,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       }
       transformedtag[idx] = charcode;
     }
-    if (tageratoroptions->maxdifferences == 0)
+    if (tageratoroptions->maxdistance == 0)
     {
       printf("tag %lu:",tagnumber);
       exactpatternmatching(suffixarray.encseq,
