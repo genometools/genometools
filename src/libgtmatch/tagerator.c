@@ -79,6 +79,8 @@ typedef struct
 #endif
 } MyersColumn;
 
+#ifdef APPROX
+
 #ifdef SKDEBUG
 static void verifycolumnvalues(unsigned long maxdistance,
                                unsigned long patternlength,
@@ -222,8 +224,6 @@ typedef struct
   Seqpos left, right;
   MyersColumn col;
 } Lcpintervalwithcolumn;
-
-#ifdef APPROX
 
 static void approxpatternmatch(const Encodedsequence *encseq,
                                const Seqpos *suftab,

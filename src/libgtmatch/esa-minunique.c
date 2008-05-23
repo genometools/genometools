@@ -33,12 +33,12 @@ typedef struct
                              ? (Uchar) SEPARATOR\
                              : getencodedchar(ENCSEQ,POS,Forwardmode))
 
-static Seqpos findright(const Encodedsequence *encseq,
-                        const Seqpos *suftab,
-                        Uchar cc,
-                        unsigned long offset,
-                        Seqpos l,
-                        Seqpos r)
+static Seqpos lcpintervalfindright(const Encodedsequence *encseq,
+                                   const Seqpos *suftab,
+                                   Uchar cc,
+                                   unsigned long offset,
+                                   Seqpos l,
+                                   Seqpos r)
 {
   Seqpos pos, mid, totallength = getencseqtotallength(encseq);
   Uchar midcc;
@@ -59,7 +59,7 @@ static Seqpos findright(const Encodedsequence *encseq,
   return l;
 }
 
-static bool findcharintervalbin(const Encodedsequence *encseq,
+static bool lcpintervalfindchar(const Encodedsequence *encseq,
                                 const Seqpos *suftab,
                                 Simplelcpinterval *itv,
                                 Uchar cc,
@@ -81,7 +81,8 @@ static bool findcharintervalbin(const Encodedsequence *encseq,
     {
       break;
     }
-    rightbound = findright(encseq,suftab,leftcc,lcpvalue,leftbound,j);
+    rightbound = lcpintervalfindright(encseq,suftab,leftcc,
+                                      lcpvalue,leftbound,j);
     if (leftcc == cc)
     {
       itv->left = leftbound;
@@ -122,7 +123,7 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
     if (itv.left < itv.right)
     {
       if (qptr >= qend || ISSPECIAL(*qptr) ||
-          !findcharintervalbin(suffixarray->encseq,
+          !lcpintervalfindchar(suffixarray->encseq,
                                suffixarray->suftab,
                                &itv,
                                *qptr,
@@ -157,7 +158,7 @@ unsigned long suffixarraymstats (const void *genericindex,
   {
     assert(itv.left <= itv.right);
     if (qptr >= qend || ISSPECIAL(*qptr) ||
-        !findcharintervalbin(suffixarray->encseq,
+        !lcpintervalfindchar(suffixarray->encseq,
                              suffixarray->suftab,
                              &itv,
                              *qptr,
