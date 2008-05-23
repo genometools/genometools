@@ -85,6 +85,7 @@ Test do
            "-indexname sfx -dna -bck -suf -tis -pl"
   run_test "#{$bin}gt dev patternmatch -samples 10000 -minpl 10 -maxpl 15 " +
            " -bck -imm -ii sfx"
+  run_test "#{$bin}gt dev patternmatch -samples 10000 -ii sfx"
 end
 
 alldir.each do |dir|

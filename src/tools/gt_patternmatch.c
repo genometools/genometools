@@ -105,8 +105,15 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     int retval;
     Seqpos idx, maxlcp;
     Codetype code = 0;
-    const Codetype **multimappower = bcktab_multimappower(suffixarray.bcktab);
+    const Codetype **multimappower;
 
+    if (pmopt->usebcktab)
+    {
+      multimappower = bcktab_multimappower(suffixarray.bcktab);
+    } else 
+    {
+      multimappower = NULL;
+    }
     epi = newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
