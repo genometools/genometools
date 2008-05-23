@@ -17,11 +17,47 @@
 
 #include "libgtcore/unused.h"
 #include "libgtcore/strarray.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/error.h"
+#include "libgtcore/fileutils.h"
+#include "libgtcore/seqiterator.h"
 #include "libgtmatch/tagerator.h"
+#include "libgtmatch/sarr-def.h"
 
-int runtagerator(UNUSED const TageratorOptions *tageratoroptions,
-                 UNUSED Error *err)
+#include "libgtmatch/esa-map.pr"
+
+int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
 {
-  return 0;
+  Suffixarray suffixarray;
+  Seqpos totallength;
+  bool haserr = false;
+  SeqIterator *seqit;
+  const Uchar *sequence;
+  char *desc;
+  int retval;
+  unsigned long len;
+  unsigned int demand = SARR_SUFTAB | SARR_ESQTAB;
+
+  if (mapsuffixarray(&suffixarray,
+                     &totallength,
+                     demand,
+                     tageratoroptions->indexname,
+                     NULL,
+                     err) != 0)
+  {
+    haserr = true;
+  }
+  seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
+  while (true)
+  {
+    retval = seqiterator_next(seqit, &sequence, &len, &desc, err);
+    if (retval != 1)
+    {
+      break;
+    }
+    ma_free(desc);
+  }
+  seqiterator_delete(seqit);
+  freesuffixarray(&suffixarray);
+  return haserr ? -1 : 0;
 }
