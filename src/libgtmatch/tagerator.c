@@ -23,10 +23,37 @@
 #include "libgtcore/seqiterator.h"
 #include "libgtmatch/tagerator.h"
 #include "libgtmatch/sarr-def.h"
+#include "libgtmatch/esa-mmsearch-def.h"
 
 #include "libgtmatch/esa-map.pr"
 
 #define MAXTAGSIZE 64
+
+static void exactpatternmatching(const Encodedsequence *encseq,
+                                   const Seqpos *suftab,
+                                   Readmode readmode,
+                                   Seqpos totallength,
+                                   const Uchar *pattern,
+                                   unsigned long patternlen)
+{
+  MMsearchiterator *mmsi;
+  Seqpos dbstartpos;
+
+  mmsi = newmmsearchiterator(encseq,
+                             suftab,
+                             0,  /* leftbound */
+                             totallength, /* rightbound */
+                             0, /* offset */
+                             readmode,
+                             pattern,
+                             patternlen);
+  while(nextmmsearchiterator(&dbstartpos,mmsi))
+  {
+    printf(" " FormatSeqpos,PRINTSeqposcast(dbstartpos));
+  }
+  printf("\n");
+  freemmsearchiterator(&mmsi);
+}
 
 int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
 {
@@ -37,7 +64,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   bool haserr = false;
   char *desc;
   int retval;
-  unsigned long idx, len, tagnumber;
+  unsigned long idx, taglen, tagnumber;
   unsigned int demand = SARR_SUFTAB | SARR_ESQTAB;
   const Uchar *symbolmap, *currenttag;
   Uchar transformedtag[MAXTAGSIZE];
@@ -55,19 +82,19 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
   for (tagnumber = 0; /* Nothing */; tagnumber++)
   {
-    retval = seqiterator_next(seqit, &currenttag, &len, &desc, err);
+    retval = seqiterator_next(seqit, &currenttag, &taglen, &desc, err);
     if (retval != 1)
     {
       break;
     }
-    if (len > (unsigned long) MAXTAGSIZE)
+    if (taglen > (unsigned long) MAXTAGSIZE)
     {
       error_set(err,"tag of length %lu; tags must not be longer than %d",
-                     len,MAXTAGSIZE);
+                     taglen,MAXTAGSIZE);
       haserr = true;
       break;
     }
-    for (idx = 0; idx < len; idx++)
+    for (idx = 0; idx < taglen; idx++)
     {
       charcode = symbolmap[currenttag[idx]];
       if (charcode == (Uchar) UNDEFCHAR)
@@ -79,6 +106,16 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
         break;
       }
       transformedtag[idx] = charcode;
+    }
+    if (tageratoroptions->maxdifferences == 0)
+    {
+      printf("tag %lu:",tagnumber);
+      exactpatternmatching(suffixarray.encseq,
+                           suffixarray.suftab,
+                           suffixarray.readmode,
+                           totallength,
+                           transformedtag,
+                           taglen);
     }
     ma_free(desc);
   }
