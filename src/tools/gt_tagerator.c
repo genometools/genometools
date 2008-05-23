@@ -1,0 +1,102 @@
+/*
+  Copyright (c) 2006-2008 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+#include "libgtcore/option.h"
+#include "libgtcore/ma.h"
+#include "libgtcore/strarray.h"
+#include "libgtcore/unused.h"
+#include "libgtcore/tool.h"
+#include "tools/gt_tagerator.h"
+
+typedef struct {
+  StrArray *tagfiles;
+  Str *indexname;
+} TageratorArguments;
+
+static void *gt_tagerator_arguments_new(void)
+{
+  return ma_malloc(sizeof (TageratorArguments));
+}
+
+static void gt_tagerator_arguments_delete(void *tool_arguments)
+{
+  TageratorArguments *arguments = tool_arguments;
+
+  if (!arguments)
+  {
+    return;
+  }
+  str_delete(arguments->indexname);
+  strarray_delete(arguments->tagfiles);
+  ma_free(arguments);
+}
+
+static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
+{
+  TageratorArguments *arguments = tool_arguments;
+  OptionParser *op;
+  Option *option;
+
+  assert(arguments != NULL);
+  arguments->indexname = str_new();
+  arguments->tagfiles = strarray_new();
+  op = option_parser_new("[options] -t tagfile -ii indexname",
+                         "Map short sequence tags in given index.");
+  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  option = option_new_filenamearray("t",
+                             "Specify files containing the tags",
+                             arguments->tagfiles);
+  option_parser_add_option(op, option);
+  option_is_mandatory(option);
+
+  option = option_new_string("ii",
+                             "Specify input index",
+                             arguments->indexname, NULL);
+  option_parser_add_option(op, option);
+  option_is_mandatory(option);
+  return op;
+}
+
+static int gt_tagerator_runner(UNUSED int argc,
+                               UNUSED const char **argv,
+                               int parsed_args,
+                               void *tool_arguments, Error *err)
+{
+  TageratorArguments *arguments = tool_arguments;
+  bool haserr = false;
+  unsigned long idx;
+
+  error_check(err);
+  assert(arguments != NULL);
+
+  assert(parsed_args == argc);
+  for (idx=0; idx<strarray_size(arguments->tagfiles); idx++)
+  {
+    printf("tagfile=%s\n",strarray_get(arguments->tagfiles,idx));
+  }
+  printf("indexname=%s\n",str_get(arguments->indexname));
+  return haserr ? -1 : 0;
+}
+
+Tool* gt_tagerator(void)
+{
+  return tool_new(gt_tagerator_arguments_new,
+                  gt_tagerator_arguments_delete,
+                  gt_tagerator_option_parser_new,
+                  NULL,
+                  gt_tagerator_runner);
+}
