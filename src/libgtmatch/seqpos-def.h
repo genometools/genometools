@@ -93,4 +93,11 @@ typedef struct
   Seqpos valueseqpos;
 } DefinedSeqpos;
 
+typedef struct
+{
+  Seqpos offset,
+         left,
+         right;
+} Lcpinterval;
+
 #endif

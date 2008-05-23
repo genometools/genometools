@@ -27,7 +27,6 @@
 #include "sfx-suffixer.h"
 #include "measure-time-if.h"
 #include "format64.h"
-#include "bcktab.h"
 #include "stamp.h"
 
 #include "sfx-apfxlen.pr"

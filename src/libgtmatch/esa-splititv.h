@@ -38,16 +38,21 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   const Seqpos *suftab,
                                   Simplelcpinterval *itv,
                                   Uchar cc,
-                                  unsigned long lcpvalue,
+                                  Seqpos offset,
                                   Seqpos left,
                                   Seqpos right);
 
 unsigned long lcpintervalsplitwithoutspecial(Rightboundwithchar *rbwc,
-                                             unsigned long rboundsize,
+                                             Uchar rboundsize,
                                              const Encodedsequence *encseq,
                                              const Seqpos *suftab,
-                                             unsigned long lcpvalue,
+                                             Seqpos offset,
                                              Seqpos left,
                                              Seqpos right);
+
+Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
+                           const Seqpos *suftab,
+                           const Lcpinterval *lcpitv,
+                           Uchar alphasize);
 
 #endif
