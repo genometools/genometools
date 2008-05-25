@@ -186,7 +186,7 @@ void ppt_find(const char *seq,
    * -------------------------------- */
   ltrlen = ltrelement_rightltrlen(element);
   /* make sure that we do not cross the LTR boundary */
-  radius = MIN(o->radius, ltrlen);
+  radius = MIN(o->radius, ltrlen-1);
   /* encode sequence */
   encoded_seq = ma_malloc(sizeof (unsigned int) * seqlen);
   for (i=0;i<seqlen;i++)
@@ -194,7 +194,7 @@ void ppt_find(const char *seq,
     encoded_seq[i] = alpha_encode(alpha, seq[i]);
   }
   /* use Viterbi algorithm to decode emissions within radius */
-  decoded = ma_malloc(sizeof (unsigned int) * 2*radius+2);
+  decoded = ma_malloc(sizeof (unsigned int) * 2*radius+1);
   hmm_decode(hmm, decoded, encoded_seq+seqlen-ltrlen-radius+1, 2*radius);
   group_hits(decoded, results_fwd, o, radius, STRAND_FORWARD);
   highest_fwd = score_hits(results_fwd, seqlen, ltrlen, radius);
@@ -204,17 +204,21 @@ void ppt_find(const char *seq,
     tmp = *(PPT_Hit**) array_get(results_fwd, highest_fwd);
     results->best_hit = tmp;
   }
+  /* radius length may change in the next strand, so reallocate */
+  ma_free(decoded);
+
   /* do PPT finding on reverse strand
    * -------------------------------- */
   ltrlen = ltrelement_leftltrlen(element);
   /* make sure that we do not cross the LTR boundary */
-  radius = MIN(o->radius, ltrlen);
+  radius = MIN(o->radius, ltrlen-1);
   /* encode sequence */
   for (i=0;i<seqlen;i++)
   {
     encoded_seq[i] = alpha_encode(alpha, rev_seq[i]);
   }
   /* use Viterbi algorithm to decode emissions within radius */
+  decoded = ma_malloc(sizeof (unsigned int) * 2*radius+1);
   hmm_decode(hmm, decoded, encoded_seq+seqlen-ltrlen-radius, 2*radius);
   group_hits(decoded, results_rev, o, radius, STRAND_REVERSE);
   highest_rev = score_hits(results_rev, seqlen, ltrlen, radius);
