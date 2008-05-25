@@ -113,6 +113,12 @@ unsigned long lcpintervalsplitwithoutspecial(Rightboundwithchar *rbwc,
   while (true)
   {
     leftcc = SEQUENCE(encseq,suftab[leftbound]+offset);
+    if (rboundscount >= (unsigned long) rboundsize)
+    {
+      fprintf(stderr,"rboundscount = %lu >= %lu = rboundsize\n",
+                      rboundscount,(unsigned long) rboundsize);
+      exit(EXIT_FAILURE);
+    }
     assert(rboundscount < (unsigned long) rboundsize);
     if (ISSPECIAL(leftcc))
     {

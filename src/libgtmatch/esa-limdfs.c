@@ -43,23 +43,36 @@ typedef struct
 } Myerscolumn;
 
 #ifdef SKDEBUG
+
+static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
+                            unsigned long patternlength)
+{
+  if (maxleqk == UNDEFINDEX)
+  {
+    fprintf(fp,"undefined");
+  } else
+  {
+    fprintf(fp,"%lu",maxleqk);
+  }
+}
+
 static void verifycolumnvalues(unsigned long patternlength,
                                unsigned long maxdistance,
                                const Myerscolumn *col,
                                unsigned long startscore)
 {
-  unsigned long idx, score = startscore, minscore, mask;
-  unsigned long maxleqkindex;
+  unsigned long idx, score, minscore, mask, maxleqkindex;
 
-  if (score <= maxdistance)
+  if (startscore <= maxdistance)
   {
     maxleqkindex = 0;
-    minscore = score;
+    minscore = startscore;
   } else
   {
     maxleqkindex = UNDEFINDEX;
     minscore = 0;
   }
+  score = startscore;
   for (idx=1UL, mask = 1UL; idx <= patternlength; idx++, mask <<= 1)
   {
     if (col->Pv & mask)
@@ -80,9 +93,11 @@ static void verifycolumnvalues(unsigned long patternlength,
   }
   if (maxleqkindex != col->maxleqk)
   {
-    fprintf(stderr,"correct maxleqkindex = %lu != %lu = col->maxleqk\n",
-                   maxleqkindex,
-                   col->maxleqk);
+    fprintf(stderr,"correct maxleqkindex = ");
+    showmaxleqvalue(stderr,maxleqkindex,patternlength);
+    fprintf(stderr," != ");
+    showmaxleqvalue(stderr,col->maxleqk,patternlength);
+    fprintf(stderr," = col->maxleqk\n");
     exit(EXIT_FAILURE);
   }
   if (maxleqkindex != UNDEFINDEX)
@@ -119,6 +134,35 @@ static void initeqsvector(unsigned long *eqsvector,
     {
       eqsvector[(unsigned long) *uptr] |= shiftmask;
     }
+  }
+}
+
+static void showcolumn(const Myerscolumn *col,unsigned long score,
+                       unsigned long patternlength)
+{
+  if (col->maxleqk == UNDEFINDEX)
+  {
+    printf("[]");
+  } else
+  {
+    unsigned long idx, backmask;
+
+    printf("[%lu",score);
+    for(idx=1UL, backmask = 1UL; idx<=col->maxleqk; idx++, backmask <<= 1)
+    {
+      if(col->Pv & backmask)
+      {
+        score++;
+      } else
+      {
+        if(col->Mv & backmask)
+        {
+          score--;
+        }
+      }
+      printf(",%lu",score);
+    }
+    printf("]");
   }
 }
 
@@ -266,12 +310,18 @@ static bool possiblypush(Limdfsresources *limdfsresources,
   stackptr->lcpitv.offset = offset;
   stackptr->lcpitv.left = lbound;
   stackptr->lcpitv.right = rbound;
+  printf("nextEDcol(");
+  assert(offset > 0);
+  showcolumn(incol,(unsigned long) (offset-1),patternlength);
   nextEDcolumn(limdfsresources->eqsvector,
                patternlength,
                maxdistance,
                &stackptr->column,
                inchar,
                incol);
+  printf(",%u)=",(unsigned int) inchar);
+  showcolumn(&stackptr->column,(unsigned long) offset,patternlength);
+  printf("\n");
 #ifdef SKDEBUG
   verifycolumnvalues(patternlength,
                      maxdistance,
@@ -306,6 +356,8 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   Myerscolumn previouscolumn;
   bool remstack;
 
+  printf("# patternlength=%lu\n",patternlength);
+  printf("# maxdistance=%lu\n",maxdistance);
   limdfsresources->stack.nextfreeLcpintervalwithinfo = 0;
   assert(maxdistance < patternlength);
   previouscolumn.Pv = ~0UL;
@@ -318,7 +370,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   previouscolumn.scorevalue = maxdistance;
 #endif
   rboundscount = lcpintervalsplitwithoutspecial(limdfsresources->rbwc,
-                                                limdfsresources->alphasize,
+                                                limdfsresources->alphasize+1,
                                                 encseq,
                                                 suftab,
                                                 0,
@@ -331,7 +383,6 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
     assert(lbound <= rbound);
     if (lbound < rbound)
     {
-      assert(limdfsresources->stack.spaceLcpintervalwithinfo != NULL);
       GETNEXTFREEINARRAY(stackptr,&limdfsresources->stack,
                          Lcpintervalwithinfo,128);
       remstack = possiblypush(limdfsresources,
@@ -364,6 +415,10 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
     previouscolumn = stackptr->column;
     if (extendchar < limdfsresources->alphasize)
     {
+      printf("nextEDcol(");
+      showcolumn(&previouscolumn,
+                 (unsigned long) stackptr->lcpitv.offset,patternlength);
+      printf(",%u)=",(unsigned int) extendchar);
       nextEDcolumn(limdfsresources->eqsvector,
                    patternlength,
                    maxdistance,
@@ -371,6 +426,9 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                    extendchar,
                    &previouscolumn);
       stackptr->lcpitv.offset++;
+      showcolumn(&stackptr->column,
+                 (unsigned long) stackptr->lcpitv.offset,patternlength);
+      printf("\n");
 #ifdef SKDEBUG
       verifycolumnvalues(patternlength,
                          maxdistance,
@@ -379,18 +437,19 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
 #endif
     } else
     {
-      rboundscount = lcpintervalsplitwithoutspecial(limdfsresources->rbwc,
-                                                    limdfsresources->alphasize,
-                                                    encseq,
-                                                    suftab,
-                                                    stackptr->lcpitv.offset,
-                                                    stackptr->lcpitv.left,
-                                                    stackptr->lcpitv.right);
+      rboundscount = lcpintervalsplitwithoutspecial(
+                              limdfsresources->rbwc,
+                              limdfsresources->alphasize+1,
+                              encseq,
+                              suftab,
+                              stackptr->lcpitv.offset,
+                              stackptr->lcpitv.left,
+                              stackptr->lcpitv.right);
+      offset = stackptr->lcpitv.offset + 1;
       for (idx=0; idx < rboundscount; idx++)
       {
         lbound = limdfsresources->rbwc[idx].bound;
         rbound = limdfsresources->rbwc[idx+1].bound-1;
-        offset = stackptr->lcpitv.offset + 1;
         assert(lbound <= rbound);
         if (lbound < rbound)
         {
