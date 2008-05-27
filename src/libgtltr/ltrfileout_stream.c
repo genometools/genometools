@@ -158,7 +158,8 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     Seq *seq = bioseq_get_seq(ls->bioseq, seqid);
     ls->element.seqid = cstr_dup(seq_get_description(seq));
     cstr_rep(ls->element.seqid, ' ', '_');
-    ls->element.seqid[ls->seqnamelen-1] = '\0';
+    if(strlen(ls->element.seqid) > ls->seqnamelen)
+      ls->element.seqid[ls->seqnamelen-1] = '\0';
 
     ltrelement_format_description(&ls->element, ls->seqnamelen,
                                   desc, MAXFASTAHEADER-1);
