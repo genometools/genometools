@@ -222,6 +222,4 @@ extern struct seqRangeList *
 SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
                   enum SRLFeatures features, Error *err);
 
-#include "libgtmatch/eis-seqrangespriv.h"
-
 #endif

@@ -42,9 +42,9 @@
 #include "sfx-apfxlen.pr"
 
 #include "eis-encidxseq.h"
-#include "eis-bwtseqconstruct.h"
+#include "eis-bwtseq-construct.h"
+#include "eis-bwtseq-param.h"
 #include "eis-suffixerator-interface.h"
-#include "eis-bwtconstruct_params.h"
 
 #define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
         if (!haserr && (FLAG))\

@@ -24,7 +24,7 @@
 #include "readmode-def.h"
 #include "defined-types.h"
 #include "sfx-strategy.h"
-#include "eis-bwtconstruct_params.h"
+#include "eis-bwtseq-param.h"
 
 #define PREFIXLENGTH_AUTOMATIC 0
 #define MAXDEPTH_AUTOMATIC     0

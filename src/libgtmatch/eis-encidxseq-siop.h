@@ -14,14 +14,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef EIS_ENCIDXSEQSIMPLEOP_H
-#define EIS_ENCIDXSEQSIMPLEOP_H
+#ifndef EIS_ENCIDXSEQ_SIOP_H
+#define EIS_ENCIDXSEQ_SIOP_H
 
 #include <string.h>
 #include "libgtcore/ma.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-encidxseq.h"
-#include "libgtmatch/eis-encidxseqpriv.h"
+#include "libgtmatch/eis-encidxseq-priv.h"
 
 static inline Seqpos
 EISLength(const EISeq *seq)

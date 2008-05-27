@@ -13,25 +13,19 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_BLOCKENC_PARAMS_H
-#define EIS_BLOCKENC_PARAMS_H
-
-/**
- * @file eis-blockenc_params.h
- * @brief Call registerBlockEncOptions to add options for construction
- * of a block-compressed index to the option parser.
- */
 #include "libgtcore/option.h"
+#include "libgtmatch/eis-blockcomp-param.h"
 #include "libgtmatch/eis-encidxseq.h"
 
-/**
- * @brief Add options for construction of a block-compressed index to
- * the option parser.
- * @param op
- * @param paramOutput user provided values will be stored here
- * @param err
- */
 extern void
-registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput);
+registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput)
+{
+  Option *option;
 
-#endif
+  option = option_new_uint_min("bsize", "specify size of blocks",
+                               &paramOutput->blockSize, 8U, 1U);
+  option_parser_add_option(op, option);
+  option = option_new_uint_min("blbuck", "specify number of blocks per bucket",
+                               &paramOutput->bucketBlocks, 8U, 1U);
+  option_parser_add_option(op, option);
+}

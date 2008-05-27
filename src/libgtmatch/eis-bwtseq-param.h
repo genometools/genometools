@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (c) 2007,2008 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -13,16 +13,72 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_BWTCONSTRUCT_PARAMS_H
-#define EIS_BWTCONSTRUCT_PARAMS_H
+#ifndef EIS_BWTSEQ_PARAM_H
+#define EIS_BWTSEQ_PARAM_H
 
 /**
- * @file eis-bwtconstruct_params.h
- * @brief Routines to handle option processing for BWT index construction.
+ * @file eis-bwtseq-param.h
+ * @brief Routines to handle option processing for BWT index
+ * construction and declaration of parameter types and corresponding
+ * constant values.
  */
 
 #include "libgtcore/option.h"
-#include "libgtmatch/eis-bwtseqparam.h"
+
+#include "libgtmatch/eis-encidxseq-param.h"
+
+/**
+ * all parameters for building the BWT sequence index
+ */
+struct bwtParam
+{
+  struct seqBaseParam seqParams;  /**< holds extra parameter
+                                   *   information specific to the
+                                   *   base sequence storage */
+  int featureToggles;             /**< set of bittoggles composed
+                                   *   from enum BWTFeatures */
+  unsigned locateInterval;        /**< store locate information
+                                   * (mapping from BWT sequence to
+                                   * original sequence for every nth
+                                   * position in original sequence) at
+                                   * this frequency, unless
+                                   * locateInterval = 0, which implies
+                                   * storing no locate information at
+                                   * all */
+  int sourceRankInterval;         /**< makes ranges which are sorted in
+                                   * rank mode reversibly sorted:
+                                   * -1:
+                                   *     inactive
+                                   * 0...sizeof(Seqpos)*CHAR_BIT:
+                                   *     build accel table at
+                                   *     with 1<<SourceRankInterval
+                                   *     sampling interval
+                                   */
+  const Str *projectName;         /**< base file name to derive name
+                                   *   of suffixerator project from*/
+};
+
+/**
+ * Select specifics of how
+ * - the locate information is stored
+ */
+enum BWTFeatures
+{
+  BWTBaseFeatures      =      0,
+  BWTLocateBitmap      = 1 << 0,
+  BWTLocateCount       = 1 << 1,
+  BWTReversiblySorted  = 1 << 2, /**< unless special symbols are fully sorted
+                                  * by suffixerator, there are two
+                                  * restrictions for the use of the index:
+                                  * - the bwt property is only true
+                                  *   for subsequences without special
+                                  *   symbols of the original sequence
+                                  * - the regeneration of the original
+                                  *   sequence is impossible and a
+                                  *   reverse establishment of context
+                                  *   impossible.
+                                  */
+};
 
 /**
  * Describes features to tune the constructed BWT sequence index

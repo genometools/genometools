@@ -24,7 +24,7 @@
 #include "libgtcore/xansi.h"
 
 #include "libgtmatch/eis-seqranges.h"
-#include "libgtmatch/eis-seqrangespriv.h"
+#include "libgtmatch/eis-seqranges-priv.h"
 
 struct seqRangeList *
 newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,

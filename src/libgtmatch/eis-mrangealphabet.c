@@ -29,7 +29,7 @@
 #include "libgtmatch/alphadef.h"
 
 #include "libgtmatch/eis-mrangealphabet.h"
-#include "libgtmatch/eis-mrangealphabetpriv.h"
+#include "libgtmatch/eis-mrangealphabet-priv.h"
 
 MRAEnc *
 newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,

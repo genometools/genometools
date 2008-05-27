@@ -13,10 +13,10 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_BWTSEQCONTEXTPRIV_H
-#define EIS_BWTSEQCONTEXTPRIV_H
+#ifndef EIS_BWTSEQ_CONTEXT_PRIV_H
+#define EIS_BWTSEQ_CONTEXT_PRIV_H
 
-#include "libgtmatch/eis-bwtseqcontext.h"
+#include "libgtmatch/eis-bwtseq-context.h"
 
 struct BWTSeqContextRetriever
 {

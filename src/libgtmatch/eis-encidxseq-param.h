@@ -14,13 +14,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef EIS_ENCIDXSEQPARAM_H
-#define EIS_ENCIDXSEQPARAM_H
+#ifndef EIS_ENCIDXSEQ_PARAM_H
+#define EIS_ENCIDXSEQ_PARAM_H
 
 #include "libgtcore/option.h"
 
 /**
- * @file eis-encidxseqparam.h
+ * @file eis-encidxseq-param.h
  * @brief Parameter definitions for index creation routines.
  */
 

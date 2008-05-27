@@ -142,6 +142,6 @@ SASSGetOrigSeqAccessor(const SASeqSrc *src);
 static inline void
 SASSDelete(SASeqSrc *src);
 
-#include "libgtmatch/eis-sa-commonsimpleop.h"
+#include "libgtmatch/eis-sa-common-siop.h"
 
 #endif

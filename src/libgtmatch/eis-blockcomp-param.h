@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (c) 2007,2008 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -13,19 +13,25 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#ifndef EIS_BLOCKCOMP_PARAM_H
+#define EIS_BLOCKCOMP_PARAM_H
+
+/**
+ * @file eis-blockcomp-param.h
+ * @brief Call registerBlockEncOptions to add options for construction
+ * of a block-compressed index to the option parser.
+ */
 #include "libgtcore/option.h"
-#include "libgtmatch/eis-blockenc_params.h"
 #include "libgtmatch/eis-encidxseq.h"
 
+/**
+ * @brief Add options for construction of a block-compressed index to
+ * the option parser.
+ * @param op
+ * @param paramOutput user provided values will be stored here
+ * @param err
+ */
 extern void
-registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput)
-{
-  Option *option;
+registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput);
 
-  option = option_new_uint_min("bsize", "specify size of blocks",
-                               &paramOutput->blockSize, 8U, 1U);
-  option_parser_add_option(op, option);
-  option = option_new_uint_min("blbuck", "specify number of blocks per bucket",
-                               &paramOutput->bucketBlocks, 8U, 1U);
-  option_parser_add_option(op, option);
-}
+#endif

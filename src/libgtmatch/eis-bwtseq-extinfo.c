@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (C) 2007,2008 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,14 +22,14 @@
 #include "libgtmatch/encseq-specialsrank.h"
 #include "libgtmatch/eis-bitpackseqpos.h"
 #include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-bwtseqcreate.h"
-#include "libgtmatch/eis-bwtseqpriv.h"
+#include "libgtmatch/eis-bwtseq-extinfo.h"
+#include "libgtmatch/eis-bwtseq-priv.h"
 #include "libgtmatch/eis-headerid.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-sa-common.h"
 
 /**
- * \file eis-bwtseqcreate.c generic methods for bwt index creation and
+ * @file eis-bwtseq-extinfo.c generic methods for bwt index creation and
  * everything related to storing/retrieving locate information
  */
 

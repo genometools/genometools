@@ -44,7 +44,7 @@
 
 #include "libgtmatch/eis-bitpackseqpos.h"
 #include "libgtmatch/eis-encidxseq.h"
-#include "libgtmatch/eis-encidxseqpriv.h"
+#include "libgtmatch/eis-encidxseq-priv.h"
 #include "libgtmatch/eis-seqranges.h"
 #include "libgtmatch/eis-seqblocktranslate.h"
 #include "libgtmatch/eis-seqdatasrc.h"

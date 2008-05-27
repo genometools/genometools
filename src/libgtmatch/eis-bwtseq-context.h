@@ -13,11 +13,11 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_BWTSEQCONTEXT_H
-#define EIS_BWTSEQCONTEXT_H
+#ifndef EIS_BWTSEQ_CONTEXT_H
+#define EIS_BWTSEQ_CONTEXT_H
 
 /**
- * @file eis-bwtseqcontext.h
+ * @file eis-bwtseq-context.h
  * @brief interface for generating arbitrary context from a
  * packedindex object
  */
@@ -83,6 +83,6 @@ extern void
 BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
                      Seqpos start, size_t len, Symbol subseq[]);
 
-#include "libgtmatch/eis-bwtseqcontextsimpleop.h"
+#include "libgtmatch/eis-bwtseq-context-siop.h"
 
 #endif

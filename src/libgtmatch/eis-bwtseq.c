@@ -28,9 +28,9 @@
 
 #include "libgtmatch/eis-bitpackseqpos.h"
 #include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-bwtconstruct_params.h"
-#include "libgtmatch/eis-bwtseqpriv.h"
-#include "libgtmatch/eis-bwtseqcreate.h"
+#include "libgtmatch/eis-bwtseq-extinfo.h"
+#include "libgtmatch/eis-bwtseq-param.h"
+#include "libgtmatch/eis-bwtseq-priv.h"
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-suffixerator-interface.h"

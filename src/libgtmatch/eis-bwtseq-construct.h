@@ -13,11 +13,11 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_BWTSEQCONSTRUCT_H
-#define EIS_BWTSEQCONSTRUCT_H
+#ifndef EIS_BWTSEQ_CONSTRUCT_H
+#define EIS_BWTSEQ_CONSTRUCT_H
 
 /**
- * \file eis-bwtseqconstruct.h
+ * \file eis-bwtseq-construct.h
  * Interface definitions for construction of an indexed representation of the
  * BWT of a sequence as presented by Manzini and Ferragina (Compressed
  * Representations of Sequences and Full-Text Indexes, 2006)

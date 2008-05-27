@@ -13,10 +13,11 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_SEQRANGESPRIV_H
-#define EIS_SEQRANGESPRIV_H
+#ifndef EIS_SEQRANGES_PRIV_H
+#define EIS_SEQRANGES_PRIV_H
 
 #include "libgtmatch/eis-bitpackseqpos.h"
+#include "libgtmatch/eis-seqranges.h"
 
 typedef uint16_t regionLength;
 

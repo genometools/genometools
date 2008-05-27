@@ -13,11 +13,11 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_MRANGEALPHABETSIMPLEOP_H
-#define EIS_MRANGEALPHABETSIMPLEOP_H
+#ifndef EIS_MRANGEALPHABET_SIOP_H
+#define EIS_MRANGEALPHABET_SIOP_H
 
 #include "libgtmatch/eis-mrangealphabet.h"
-#include "libgtmatch/eis-mrangealphabetpriv.h"
+#include "libgtmatch/eis-mrangealphabet-priv.h"
 
 static inline MRAEnc *
 MRAEncUInt8New(AlphabetRangeID numRanges, AlphabetRangeSize symbolsPerRange[],

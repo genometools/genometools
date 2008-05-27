@@ -26,8 +26,8 @@
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/eis-bitpackseqpos.h"
 #include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-bwtseqcontext.h"
-#include "libgtmatch/eis-bwtseqcontextpriv.h"
+#include "libgtmatch/eis-bwtseq-context.h"
+#include "libgtmatch/eis-bwtseq-context-priv.h"
 #include "libgtmatch/eis-seqdatasrc.h"
 
 struct BWTSeqContextRetrieverFactory

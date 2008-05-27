@@ -30,7 +30,7 @@
 #include "libgtcore/str.h"
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/verbose-def.h"
-#include "libgtmatch/eis-encidxseqparam.h"
+#include "libgtmatch/eis-encidxseq-param.h"
 #include "libgtmatch/eis-headerid.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-seqdatasrc.h"
@@ -443,6 +443,6 @@ EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
 static inline int
 EISPrintDiagsForPos(const EISeq *seqIdx, Seqpos pos, FILE *fp, EISHint hint);
 
-#include "libgtmatch/eis-encidxseqsimpleop.h"
+#include "libgtmatch/eis-encidxseq-siop.h"
 
 #endif

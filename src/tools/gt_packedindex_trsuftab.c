@@ -23,7 +23,7 @@
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/sarr-def.h"
-#include "libgtmatch/eis-bwtconstruct_params.h"
+#include "libgtmatch/eis-bwtseq-param.h"
 #include "tools/gt_packedindex_trsuftab.h"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL

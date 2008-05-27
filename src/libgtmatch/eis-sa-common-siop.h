@@ -13,11 +13,11 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_SA_COMMONSIMPLEOP_H
-#define EIS_SA_COMMONSIMPLEOP_H
+#ifndef EIS_SA_COMMON_SIOP_H
+#define EIS_SA_COMMON_SIOP_H
 
 #include "libgtmatch/eis-sa-common.h"
-#include "libgtmatch/eis-sa-commonpriv.h"
+#include "libgtmatch/eis-sa-common-priv.h"
 
 static inline SeqDataReader
 SASSCreateReader(SASeqSrc *src, enum sfxDataRequest request)

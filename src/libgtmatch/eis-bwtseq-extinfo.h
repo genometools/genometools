@@ -14,17 +14,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef EIS_BWTSEQCREATE_H
-#define EIS_BWTSEQCREATE_H
+#ifndef EIS_BWTSEQ_EXTINFO_H
+#define EIS_BWTSEQ_EXTINFO_H
 
 /**
- * @file eis-bwtseqcreate.h
- * @brief Generic BWT index creation routines.
+ * @file eis-bwtseq-extinfo.h
+ * @brief Routines to add and query extension information embedded in
+ * the base sequence index.
+ * - generic BWT index creation routine
  */
 
 #include "libgtmatch/encseq-specialsrank.h"
 #include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-bwtseqpriv.h"
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-random-seqaccess.h"
@@ -69,5 +70,17 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
                     const enum rangeSortMode rangeSort[],
                     const SpecialsRankTable *sprTable,
                     Error *err);
+
+extern int
+BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
+                       struct extBitsRetrieval *extBits);
+
+extern Seqpos
+BWTSeqGetRankSort(const BWTSeq *bwtSeq, Seqpos pos, AlphabetRangeID range,
+                  struct extBitsRetrieval *extBits);
+
+extern void
+BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
+                         const enum rangeSortMode *defaultRangeSort);
 
 #endif

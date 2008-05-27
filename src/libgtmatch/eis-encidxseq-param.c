@@ -14,8 +14,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 #include "libgtcore/option.h"
-#include "libgtmatch/eis-encidxseqparam.h"
-#include "libgtmatch/eis-blockenc_params.h"
+#include "libgtmatch/eis-encidxseq-param.h"
+#include "libgtmatch/eis-blockcomp-param.h"
 
 extern void
 registerEncIdxSeqOptions(OptionParser *op, struct seqBaseParam *paramOutput)

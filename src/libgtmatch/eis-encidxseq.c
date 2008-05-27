@@ -21,7 +21,7 @@
 #include "libgtmatch/esa-map.pr"
 
 #include "libgtmatch/eis-encidxseq.h"
-#include "libgtmatch/eis-encidxseqpriv.h"
+#include "libgtmatch/eis-encidxseq-priv.h"
 
 enum {
   AVG_RANGE_RANK_INTERVAL = 128, /**< do range rank queries

@@ -24,7 +24,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/eis-encidxseq.h"
-#include "libgtmatch/eis-encidxseqparam.h"
+#include "libgtmatch/eis-encidxseq-param.h"
 #include "libgtmatch/eis-encidxseq-construct.h"
 #include "libgtmatch/verbose-def.h"
 #include "tools/gt_packedindex_chk_integrity.h"

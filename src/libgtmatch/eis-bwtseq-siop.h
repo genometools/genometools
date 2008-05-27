@@ -13,11 +13,13 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_BWTSEQSIMPLEOP_H
-#define EIS_BWTSEQSIMPLEOP_H
+#ifndef EIS_BWTSEQ_SIOP_H
+#define EIS_BWTSEQ_SIOP_H
+
+/* trivial operations on BWTSeq objects go here for speed */
 
 #include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-bwtseqpriv.h"
+#include "libgtmatch/eis-bwtseq-priv.h"
 
 static inline const MRAEnc *
 BWTSeqGetAlphabet(const BWTSeq *seq)

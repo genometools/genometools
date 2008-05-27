@@ -13,16 +13,16 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_BWTSEQCONTEXTSIMPLEOP_H
-#define EIS_BWTSEQCONTEXTSIMPLEOP_H
+#ifndef EIS_BWTSEQ_CONTEXT_SIOP_H
+#define EIS_BWTSEQ_CONTEXT_SIOP_H
 
 #include <stdio.h>
 #include <unistd.h>
 
 #include "libgtmatch/eis-bitpackseqpos.h"
 #include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-bwtseqcontext.h"
-#include "libgtmatch/eis-bwtseqcontextpriv.h"
+#include "libgtmatch/eis-bwtseq-context.h"
+#include "libgtmatch/eis-bwtseq-context-priv.h"
 #include "libgtmatch/eis-encidxseq.h"
 
 static inline Seqpos

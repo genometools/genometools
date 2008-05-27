@@ -21,8 +21,8 @@
 #include "libgtmatch/seqpos-def.h"
 
 #include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-encidxseqparam.h"
-#include "libgtmatch/eis-bwtconstruct_params.h"
+#include "libgtmatch/eis-bwtseq-param.h"
+#include "libgtmatch/eis-encidxseq-param.h"
 
 extern void
 registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,

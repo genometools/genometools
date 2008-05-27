@@ -13,11 +13,12 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_BWTSEQPRIV_H
-#define EIS_BWTSEQPRIV_H
+#ifndef EIS_BWTSEQ_PRIV_H
+#define EIS_BWTSEQ_PRIV_H
 
 #include "libgtcore/chardef.h"
 #include "libgtmatch/eis-bwtseq.h"
+#include "libgtmatch/eis-bwtseq-extinfo.h"
 #include "libgtmatch/eis-encidxseq.h"
 
 enum {
@@ -49,21 +50,9 @@ struct BWTSeqExactMatchesIterator
   struct extBitsRetrieval extBits;
 };
 
-extern int
-BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
-                       struct extBitsRetrieval *extBits);
-
 extern Seqpos
 BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
                   struct extBitsRetrieval *extBits);
-
-extern Seqpos
-BWTSeqGetRankSort(const BWTSeq *bwtSeq, Seqpos pos, AlphabetRangeID range,
-                  struct extBitsRetrieval *extBits);
-
-extern void
-BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
-                         const enum rangeSortMode *defaultRangeSort);
 
 extern BWTSeq *
 newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,

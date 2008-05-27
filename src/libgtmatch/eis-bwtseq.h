@@ -30,7 +30,7 @@
 
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-mrangealphabet.h"
-#include "libgtmatch/eis-bwtseqparam.h"
+#include "libgtmatch/eis-bwtseq-param.h"
 
 /* TODO:
  * - implement other index types
@@ -485,6 +485,6 @@ unsigned long packedindexmstatsforward(const void *genericindex,
                                        const Uchar *qstart,
                                        const Uchar *qend);
 
-#include "libgtmatch/eis-bwtseqsimpleop.h"
+#include "libgtmatch/eis-bwtseq-siop.h"
 
 #endif

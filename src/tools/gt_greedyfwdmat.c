@@ -30,9 +30,9 @@
 #include "libgtmatch/fmi-map.pr"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/esa-minunique.pr"
-#include "libgtmatch/eis-bwtconstruct_params.h"
+#include "libgtmatch/eis-bwtseq-param.h"
 #include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-bwtseqconstruct.h"
+#include "libgtmatch/eis-bwtseq-construct.h"
 #include "tools/gt_uniquesub.h"
 #include "tools/gt_matchingstatistics.h"
 
