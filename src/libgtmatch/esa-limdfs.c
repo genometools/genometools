@@ -61,15 +61,15 @@ static void verifycolumnvalues(unsigned long patternlength,
                                const Myerscolumn *col,
                                unsigned long startscore)
 {
-  unsigned long idx, score, minscore, mask, maxleqkindex;
+  unsigned long idx, score, minscore, mask, bfmaxleqk;
 
   if (startscore <= maxdistance)
   {
-    maxleqkindex = 0;
+    bfmaxleqk = 0;
     minscore = startscore;
   } else
   {
-    maxleqkindex = UNDEFINDEX;
+    bfmaxleqk = UNDEFINDEX;
     minscore = 0;
   }
   score = startscore;
@@ -87,28 +87,25 @@ static void verifycolumnvalues(unsigned long patternlength,
     }
     if (score <= maxdistance)
     {
-      maxleqkindex = idx;
+      bfmaxleqk = idx;
       minscore = score;
     }
   }
-  if (maxleqkindex != col->maxleqk)
+  if (bfmaxleqk != col->maxleqk)
   {
-    fprintf(stderr,"correct maxleqkindex = ");
-    showmaxleqvalue(stderr,maxleqkindex,patternlength);
+    fprintf(stderr,"correct maxleqk = ");
+    showmaxleqvalue(stderr,bfmaxleqk,patternlength);
     fprintf(stderr," != ");
     showmaxleqvalue(stderr,col->maxleqk,patternlength);
     fprintf(stderr," = col->maxleqk\n");
     exit(EXIT_FAILURE);
   }
-  if (maxleqkindex != UNDEFINDEX)
+  if (bfmaxleqk != UNDEFINDEX && minscore != col->scorevalue)
   {
-    if (minscore != col->scorevalue)
-    {
-      fprintf(stderr,"correct score = %lu != %lu = col->score\n",
-                   minscore,
-                   col->scorevalue);
-      exit(EXIT_FAILURE);
-    }
+    fprintf(stderr,"correct score = %lu != %lu = col->score\n",
+                 minscore,
+                 col->scorevalue);
+    exit(EXIT_FAILURE);
   }
 }
 #endif
@@ -162,7 +159,7 @@ static void showcolumn(const Myerscolumn *col,unsigned long score,
       }
       printf(",%lu",score);
     }
-    printf("]");
+    printf("] with maxleqk=%lu",col->maxleqk);
   }
 }
 
@@ -190,7 +187,7 @@ static void nextEDcolumn(const unsigned long *eqsvector,
   outcol->Mv = Ph & Xv;
   /* printf("incol->maxleqk %ld\n",(Showsint) incol->maxleqk); */
 #ifdef SKDEBUG
-  if ((unsigned long) incol->maxleqk == patternlength)
+  if (incol->maxleqk == patternlength)
   {
     fprintf(stderr,"incol->maxleqk = %lu = patternlength not allowed\n",
             patternlength);
@@ -400,7 +397,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
       }
     } else
     {
-      printf("singleton " FormatSeqpos "\n",PRINTSeqposcast(lbound));
+      printf("(2) singleton " FormatSeqpos "\n",PRINTSeqposcast(lbound));
     }
   }
   while (limdfsresources->stack.nextfreeLcpintervalwithinfo > 0)
@@ -408,6 +405,13 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
     assert(limdfsresources->stack.spaceLcpintervalwithinfo != NULL);
     stackptr = limdfsresources->stack.spaceLcpintervalwithinfo +
                limdfsresources->stack.nextfreeLcpintervalwithinfo - 1;
+    printf("top=(offset=%lu,%lu,%lu) with ",
+                (unsigned long) stackptr->lcpitv.offset,
+                (unsigned long) stackptr->lcpitv.left,
+                (unsigned long) stackptr->lcpitv.right);
+    showcolumn(&stackptr->column,
+               (unsigned long) stackptr->lcpitv.offset,patternlength);
+    printf("\n");
     extendchar = lcpintervalextendlcp(encseq,
                                       suftab,
                                       &stackptr->lcpitv,
@@ -446,6 +450,8 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                               stackptr->lcpitv.left,
                               stackptr->lcpitv.right);
       offset = stackptr->lcpitv.offset + 1;
+      assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
+      limdfsresources->stack.nextfreeLcpintervalwithinfo--;
       for (idx=0; idx < rboundscount; idx++)
       {
         lbound = limdfsresources->rbwc[idx].bound;
@@ -470,7 +476,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
           }
         } else
         {
-          printf("singleton " FormatSeqpos "\n",PRINTSeqposcast(lbound));
+          printf("(1) singleton " FormatSeqpos "\n",PRINTSeqposcast(lbound));
         }
       }
     }
