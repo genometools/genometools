@@ -110,7 +110,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
     if (pmopt->usebcktab)
     {
       multimappower = bcktab_multimappower(suffixarray.bcktab);
-    } else 
+    } else
     {
       multimappower = NULL;
     }
