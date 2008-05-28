@@ -277,7 +277,7 @@ Limdfsresources *newLimdfsresources(unsigned int mapsize)
 
   ALLOCASSIGNSPACE(limdfsresources,NULL,Limdfsresources,1);
   ALLOCASSIGNSPACE(limdfsresources->eqsvector,NULL,unsigned long,mapsize-1);
-  ALLOCASSIGNSPACE(limdfsresources->rbwc,NULL,Rightboundwithchar,mapsize-1);
+  ALLOCASSIGNSPACE(limdfsresources->rbwc,NULL,Rightboundwithchar,mapsize);
   INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   assert(mapsize-1 <= UCHAR_MAX);
   limdfsresources->alphasize = (Uchar) (mapsize-1);
@@ -430,6 +430,19 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                    extendchar,
                    &previouscolumn);
       stackptr->lcpitv.offset++;
+      if (stackptr->column.maxleqk == UNDEFINDEX)
+      {
+        assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
+        limdfsresources->stack.nextfreeLcpintervalwithinfo--;
+      }
+      if (stackptr->column.maxleqk == patternlength)
+      {
+        printf("success " FormatSeqpos " " FormatSeqpos "\n",
+                PRINTSeqposcast(stackptr->lcpitv.left),
+                PRINTSeqposcast(stackptr->lcpitv.right));
+        assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
+        limdfsresources->stack.nextfreeLcpintervalwithinfo--;
+      }
       showcolumn(&stackptr->column,
                  (unsigned long) stackptr->lcpitv.offset,patternlength);
       printf("\n");

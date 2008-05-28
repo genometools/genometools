@@ -249,11 +249,11 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
     {
       countA += accumulateastretch(distastretch,sequence,len);
     }
+    ma_free(desc);
     if (had_err != 1)
     {
       break;
     }
-    ma_free(desc);
   }
   if (seqiteroptions.verbose)
   {

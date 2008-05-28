@@ -104,6 +104,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     retval = seqiterator_next(seqit, &currenttag, &taglen, &desc, err);
     if (retval != 1)
     {
+      ma_free(desc);
       break;
     }
     if (taglen > (unsigned long) MAXTAGSIZE)
@@ -111,6 +112,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       error_set(err,"tag of length %lu; tags must not be longer than %d",
                      taglen,MAXTAGSIZE);
       haserr = true;
+      ma_free(desc);
       break;
     }
     for (idx = 0; idx < taglen; idx++)
@@ -122,6 +124,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                   currenttag[idx],
                   tagnumber);
         haserr = true;
+        ma_free(desc);
         break;
       }
       transformedtag[idx] = charcode;
