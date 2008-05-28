@@ -76,7 +76,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   SeqIterator *seqit;
   Uchar charcode;
   bool haserr = false;
-  char *desc;
+  char *desc = NULL;
   int retval;
   unsigned long idx, taglen, tagnumber;
   unsigned int demand = SARR_SUFTAB | SARR_ESQTAB;
@@ -104,7 +104,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     retval = seqiterator_next(seqit, &currenttag, &taglen, &desc, err);
     if (retval != 1)
     {
-      ma_free(desc);
+      if (retval < 0)
+      {
+        ma_free(desc);
+      }
       break;
     }
     if (taglen > (unsigned long) MAXTAGSIZE)

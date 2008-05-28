@@ -29,6 +29,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources);
 
 void esalimiteddfs(Limdfsresources *limdfsresources,
                    const Encodedsequence *encseq,
+                   Readmode readmode,
                    const Seqpos *suftab,
                    const Uchar *pattern,
                    unsigned long patternlength,
