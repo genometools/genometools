@@ -315,12 +315,14 @@ void* pdom_per_domain_worker_thread(void *data)
       hashtable_add(shared->results->domains, hmm, hit);
       if (best_fwd)
       {
-        shared->results->combined_e_value_fwd += log(hit->hits_fwd->hit[0]->pvalue);
+        shared->results->combined_e_value_fwd
+          += log(hit->hits_fwd->hit[0]->pvalue);
         hit->strand = STRAND_FORWARD;
       }
       else
       {
-        shared->results->combined_e_value_rev += log(hit->hits_rev->hit[0]->pvalue);
+        shared->results->combined_e_value_rev
+          += log(hit->hits_rev->hit[0]->pvalue);
         hit->strand = STRAND_REVERSE;
        }
 
