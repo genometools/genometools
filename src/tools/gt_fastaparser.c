@@ -32,7 +32,7 @@ static OptionParser* gt_fastaparser_option_parser_new(UNUSED
 
 static int gt_fastaparser_runner(UNUSED int argc, const char **argv,
                                  int parsed_args, UNUSED void *tool_arguments,
-                                 Error *err)
+                                 UNUSED Error *err)
 {
   unsigned long i;
   SimpleBioseq *simple_bioseq;
