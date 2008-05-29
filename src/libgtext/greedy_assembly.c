@@ -47,14 +47,13 @@ static void try_to_select_edge(GreedyAssembly *ga, const Overlap *edge,
   }
 }
 
-static void assemble(GreedyAssembly *ga, Bioseq *fragments,
-                     FragmentOverlaps *sorted_overlaps)
+static void assemble(GreedyAssembly *ga, FragmentOverlaps *sorted_overlaps)
 {
   unsigned long i, j, current_edge, selected = 0;
   Overlap zeroedge = { 0 };
   bool *inedges, *outedges;
   UnionFind *uf;
-  assert(ga && fragments && sorted_overlaps);
+  assert(ga && sorted_overlaps);
   /* init */
   inedges = ma_calloc(sizeof *inedges, ga->num_of_fragments);
   outedges = ma_calloc(sizeof *inedges, ga->num_of_fragments);
@@ -111,7 +110,7 @@ GreedyAssembly* greedy_assembly_new(Bioseq *fragments,
   ga->num_of_fragments = bioseq_number_of_sequences(fragments);
   ga->next_fragment = ma_calloc(ga->num_of_fragments, sizeof (unsigned long));
   ga->overlap = ma_calloc(ga->num_of_fragments, sizeof (unsigned long));
-  assemble(ga, fragments, sorted_overlaps);
+  assemble(ga, sorted_overlaps);
   return ga;
 }
 
