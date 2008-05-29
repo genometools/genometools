@@ -146,6 +146,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       esalimiteddfs(limdfsresources,
                     suffixarray.encseq,
                     suffixarray.suftab,
+                    suffixarray.readmode,
                     transformedtag,
                     taglen,
                     tageratoroptions->maxdistance);
