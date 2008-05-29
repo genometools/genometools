@@ -146,6 +146,24 @@ Test do
   run "diff #{$last_stdout} #{$testdata}t_coin_2.out"
 end
 
+1.upto(3) do |i|
+  Name "gt exercise fastaparser success #{i}"
+  Keywords "gt_exercise"
+  Test do
+    run_test "#{$bin}gt exercise fastaparser " +
+             "#{$testdata}gt_bioseq_succ_#{i}.fas"
+  end
+end
+
+1.upto(7) do |i|
+  Name "gt exercise fastaparser failure #{i}"
+  Keywords "gt_exercise"
+  Test do
+    run_test("#{$bin}gt exercise fastaparser " +
+             "#{$testdata}gt_bioseq_fail_#{i}.fas", :retval => 1)
+  end
+end
+
 if $gttestdata then # XXX: hack to avoid testing matchcount during normal runs
                     # (is quite expensive due to amount of calls)
   Name "gt exercise matchcount test"

@@ -27,6 +27,7 @@
 #include "tools/gt_coin.h"
 #include "tools/gt_consensus_sa.h"
 #include "tools/gt_exercise.h"
+#include "tools/gt_fastaparser.h"
 #include "tools/gt_linearalign.h"
 #include "tools/gt_matchcount.h"
 #include "tools/gt_msaparse.h"
@@ -51,6 +52,7 @@ static void* gt_exercise_arguments_new(void)
   toolbox_add(exercise_toolbox, "casino", gt_casino);
   toolbox_add(exercise_toolbox, "coin", gt_coin);
   toolbox_add(exercise_toolbox, "consensus_sa", gt_consensus_sa);
+  toolbox_add_tool(exercise_toolbox, "fastaparser", gt_fastaparser());
   toolbox_add(exercise_toolbox, "matchcount", gt_matchcount);
   toolbox_add(exercise_toolbox, "msaparse", gt_msaparse);
   toolbox_add(exercise_toolbox, "msmatch", gt_multiset_matching);
