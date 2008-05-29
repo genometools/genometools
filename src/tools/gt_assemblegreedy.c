@@ -24,7 +24,8 @@
 
 typedef struct {
   unsigned long minlength;
-  bool showoverlaps;
+  bool showoverlaps,
+       showpath;
 } AssemblegreedyArguments;
 
 static void* gt_assemblegreedy_arguments_new(void)
@@ -42,7 +43,7 @@ static void gt_assemblegreedy_arguments_delete(void *tool_arguments)
 static OptionParser* gt_assemblegreedy_option_parser_new(void *tool_arguments)
 {
   OptionParser *op;
-  Option *option;
+  Option *option, *showoverlaps_option, *showpath_option;
   AssemblegreedyArguments *arguments = tool_arguments;
   assert(arguments);
   op = option_parser_new("[option ...] fragment_file",
@@ -52,9 +53,15 @@ static OptionParser* gt_assemblegreedy_option_parser_new(void *tool_arguments)
                             "must have to be considered", &arguments->minlength,
                             5);
   option_parser_add_option(op, option);
-  option = option_new_bool("showoverlaps", "show only the overlaps between the "
-                           "fragments", &arguments->showoverlaps, false);
-  option_parser_add_option(op, option);
+  showoverlaps_option = option_new_bool("showoverlaps", "show only the "
+                                        "overlaps between the fragments",
+                                        &arguments->showoverlaps, false);
+  option_parser_add_option(op, showoverlaps_option);
+  showpath_option = option_new_bool("showpath", "show the assembled fragment "
+                                    "path instead of the assembled sequence",
+                                    &arguments->showpath, false);
+  option_parser_add_option(op, showpath_option);
+  option_exclude(showoverlaps_option, showpath_option);
   option_parser_set_min_max_args(op, 1, 1);
   return op;
 }
@@ -86,7 +93,10 @@ static int gt_assemblegreedy_runner(UNUSED int argc, const char **argv,
       GreedyAssembly *greedy_assembly;
       fragment_overlaps_sort(fragment_overlaps);
       greedy_assembly = greedy_assembly_new(fragments, fragment_overlaps);
-      greedy_assembly_show(greedy_assembly, fragments);
+      if (arguments->showpath)
+        greedy_assembly_show_path(greedy_assembly);
+      else
+        greedy_assembly_show(greedy_assembly, fragments);
       greedy_assembly_delete(greedy_assembly);
     }
     fragment_overlaps_delete(fragment_overlaps);

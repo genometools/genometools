@@ -18,6 +18,7 @@
 #include "libgtcore/fasta.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/greedy_assembly.h"
 #include "libgtext/union_find.h"
@@ -122,23 +123,49 @@ void greedy_assembly_delete(GreedyAssembly *ga)
   ma_free(ga);
 }
 
+typedef void (*ProcFragment)(unsigned long fragnum, unsigned long overlap,
+                             void *data);
+
+static void greedy_assembly_show_generic(const GreedyAssembly *ga,
+                                         ProcFragment proc_fragment, void *data)
+{
+  unsigned long i, current_frag;
+  assert(ga && proc_fragment);
+  current_frag = ga->first_fragment;
+  proc_fragment(current_frag, 0, data);
+  for (i = 1; i < ga->num_of_fragments; i++) {
+    current_frag = ga->next_fragment[current_frag];
+    proc_fragment(current_frag, ga->overlap[current_frag], data);
+  }
+}
+
+static void show_assembly_part(unsigned long fragnum, unsigned long overlap,
+                               void *data)
+{
+  Bioseq *fragments = data;
+  unsigned long i, fraglen;
+  const char *frag;
+  assert(fragments);
+  frag = bioseq_get_sequence(fragments, fragnum);
+  fraglen = bioseq_get_sequence_length(fragments, fragnum);
+  for (i = overlap; i < fraglen; i++)
+    xputchar(frag[i]);
+}
+
 void greedy_assembly_show(const GreedyAssembly *ga, Bioseq *fragments)
 {
-  unsigned long f, i, current_frag, fraglen;
-  const char *frag;
-  assert(ga && fragments);
-  current_frag = ga->first_fragment;
   printf("%cAssembled sequence\n", FASTA_SEPARATOR);
-  frag = bioseq_get_sequence(fragments, current_frag);
-  fraglen = bioseq_get_sequence_length(fragments, current_frag);
-  for (i = 0; i < fraglen; i++)
-    xputchar(frag[i]);
-  for (f = 1; f < ga->num_of_fragments; f++) {
-    current_frag = ga->next_fragment[current_frag];
-    frag = bioseq_get_sequence(fragments, current_frag);
-    fraglen = bioseq_get_sequence_length(fragments, current_frag);
-    for (i = ga->overlap[current_frag]; i < fraglen; i++)
-      xputchar(frag[i]);
-  }
+  greedy_assembly_show_generic(ga, show_assembly_part, fragments);
   xputchar('\n');
+}
+
+static void show_assebly_fragnum(unsigned long fragnum, unsigned long overlap,
+                                 UNUSED void *data)
+{
+  printf("%lu (overlap=%lu)\n", fragnum, overlap);
+}
+
+void greedy_assembly_show_path(const GreedyAssembly *ga)
+{
+  greedy_assembly_show_generic(ga, show_assebly_fragnum, NULL);
 }
