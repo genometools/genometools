@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,7 +25,7 @@
 
 void countingsort(void *out, const void *in, size_t elem_size,
                   unsigned long size, unsigned long max_elemvalue, void *data,
-                  unsigned long (*get_elemvalue)(const void *elem, void *data))
+                  GetElemvalue get_elemvalue)
 {
   unsigned long i, k, *c;
   assert(out && in && elem_size && size && max_elemvalue && get_elemvalue);
@@ -35,7 +35,7 @@ void countingsort(void *out, const void *in, size_t elem_size,
 
   /* count number of elements of a given value */
   for (i = 0; i < size; i++) {
-    k = get_elemvalue((const char *)in + elem_size * i, data);
+    k = get_elemvalue((const char*) in + elem_size * i, data);
     assert(k <= max_elemvalue);
     c[k]++;
   }
@@ -46,9 +46,9 @@ void countingsort(void *out, const void *in, size_t elem_size,
 
   /* sorting (stable) */
   for (i = size; i > 0; i--) {
-    k = get_elemvalue((const char *)in + elem_size * (i-1), data);
-    memcpy((char *)out + elem_size * (c[k] - 1),
-           (const char *)in + elem_size * (i-1), elem_size);
+    k = get_elemvalue((const char*) in + elem_size * (i-1), data);
+    memcpy((char*) out + elem_size * (c[k] - 1),
+           (const char*) in + elem_size * (i-1), elem_size);
     c[k]--;
   }
 
@@ -57,12 +57,11 @@ void countingsort(void *out, const void *in, size_t elem_size,
 
 unsigned long countingsort_get_max(const void *in, size_t elem_size,
                                    unsigned long size, void *data,
-                                   unsigned long (*get_elemvalue)
-                                                 (const void *elem, void *data))
+                                   GetElemvalue get_elemvalue)
 {
   unsigned long i, value, max_value = 0;
   for (i = 0; i < size; i++) {
-    value = get_elemvalue((const char *)in + elem_size * i, data);
+    value = get_elemvalue((const char*) in + elem_size * i, data);
     if (value > max_value)
       max_value = value;
   }
