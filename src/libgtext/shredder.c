@@ -23,6 +23,7 @@ struct Shredder {
   Bioseq *bioseq;
   unsigned long minlength,
                 maxlength,
+                overlap,
                 seqnum,
                 pos;
 };
@@ -44,6 +45,12 @@ void shredder_delete(Shredder *shredder)
   ma_free(shredder);
 }
 
+void shredder_set_overlap(Shredder *shredder, unsigned long overlap)
+{
+  assert(shredder);
+  shredder->overlap = overlap;
+}
+
 const char* shredder_shred(Shredder *shredder, unsigned long *fragment_length,
                            Str *desc)
 {
@@ -62,11 +69,16 @@ const char* shredder_shred(Shredder *shredder, unsigned long *fragment_length,
     *fragment_length = fraglen;
     str_append_cstr(desc, bioseq_get_description(shredder->bioseq,
                                                  shredder->seqnum));
-    shredder->pos += fraglen;
-    assert(shredder->pos <= seqlen);
-    if (shredder->pos == seqlen) {
+    assert(shredder->pos + fraglen <= seqlen);
+    if (shredder->pos + fraglen == seqlen) { /* last fragment */
       shredder->seqnum++;
       shredder->pos = 0;
+    }
+    else {
+      if (fraglen > shredder->overlap)
+        shredder->pos += fraglen - shredder->overlap;
+      else
+        shredder->pos++; /* go at least one base further each step */
     }
     return frag;
   }

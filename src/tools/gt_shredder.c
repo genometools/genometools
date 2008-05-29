@@ -26,7 +26,8 @@
 typedef struct {
   unsigned long coverage,
                 minlength,
-                maxlength;
+                maxlength,
+                overlap;
 } ShredderArguments;
 
 static void* gt_shredder_arguments_new(void)
@@ -60,6 +61,9 @@ static OptionParser* gt_shredder_option_parser_new(void *tool_arguments)
   o = option_new_ulong("maxlength", "Set the maximum length of the shreddered "
                        "fragments", &arguments->maxlength, 700);
   option_parser_add_option(op, o);
+  o = option_new_ulong("overlap", "Set the overlap between of consecutive "
+                       "pieces", &arguments->overlap, 0);
+  option_parser_add_option(op, o);
   option_parser_set_min_max_args(op, 1, 1);
   return op;
 }
@@ -84,10 +88,11 @@ static int gt_shredder_runner(UNUSED int argc, const char **argv,
 
   /* shredder */
   for (i = 0; !had_err && i < arguments->coverage; i++) {
-    Shredder *shredder = shredder_new(bioseq, arguments->minlength,
-                                      arguments->maxlength);
+    Shredder *shredder;
     unsigned long fragment_length;
     const char *fragment;
+    shredder = shredder_new(bioseq, arguments->minlength, arguments->maxlength);
+    shredder_set_overlap(shredder, arguments->overlap);
     while ((fragment = shredder_shred(shredder, &fragment_length, desc))) {
       str_append_cstr(desc, " [shreddered fragment]");
       fasta_show_entry(str_get(desc), fragment, fragment_length, 0);

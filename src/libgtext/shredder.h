@@ -27,6 +27,8 @@ typedef struct Shredder Shredder;
 Shredder*   shredder_new(Bioseq *bioseq, unsigned long minlength,
                                          unsigned long maxlength);
 void        shredder_delete(Shredder*);
+/* Set the <overlap> between shredded fragments, the default is 0. */
+void        shredder_set_overlap(Shredder*, unsigned long overlap);
 /* Return the next shredded fragment or NULL if no additional fragment is
    available. The length of the fragment is stored in <fragment_length> and the
    description of the corresponding sequence is appended to <desc>. */
