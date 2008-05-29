@@ -18,6 +18,7 @@
 #include <string.h>
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/mathsupport.h"
 #include "libgtcore/range.h"
 #include "libgtcore/str.h"
 #include "libgtcore/unused.h"
@@ -61,6 +62,7 @@ static int pdom_hit_attach_gff3(void *key, void *value, void *data,
 
   for (i=0;i<array_size(hit->best_chain);i++)
   {
+    GenomeNode *gf;
     struct hit_s *singlehit = *(struct hit_s **) array_get(hit->best_chain, i);
     Phase frame = phase_get(singlehit->name[0]);
     rng.start = singlehit->sqfrom;
@@ -70,11 +72,11 @@ static int pdom_hit_attach_gff3(void *key, void *value, void *data,
     ltrelement_offset2pos(&ls->element, &rng, 0,
                           OFFSET_BEGIN_LEFT_LTR,
                           strand);
-    GenomeNode *gf = genome_feature_new(gft_protein_match,
-                                        rng,
-                                        strand,
-                                        NULL,
-                                        UNDEF_ULONG);
+    gf = genome_feature_new(gft_protein_match,
+                            rng,
+                            strand,
+                            NULL,
+                            UNDEF_ULONG);
     genome_feature_set_source(gf, ls->ltrdigest_tag);
     genome_feature_set_phase(gf, frame);
     genome_feature_add_attribute((GenomeFeature*) gf,"pfamname", model->name);
@@ -113,11 +115,11 @@ static void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
                           (GenomeNode*) element->mainnode));
   genome_feature_add_attribute((GenomeFeature*) gf,"trna",
                                 results->best_hit->trna);
-  snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->tstart);
+  (void) snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->tstart);
   genome_feature_add_attribute((GenomeFeature*) gf,"trnaoffset", buffer);
-  snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->offset);
+  (void) snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->offset);
   genome_feature_add_attribute((GenomeFeature*) gf,"pbsoffset", buffer);
-  snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->edist);
+  (void) snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->edist);
   genome_feature_add_attribute((GenomeFeature*) gf,"edist", buffer);
   genome_node_is_part_of_genome_node((GenomeNode*) element->mainnode, gf);
 }
@@ -160,7 +162,7 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
   rev_seq = ma_malloc(sizeof (char) * seqlen+1);
   memcpy(rev_seq, base_seq, sizeof (char) * seqlen);
   rev_seq[seqlen] = '\0';
-  reverse_complement(rev_seq, seqlen, err);
+  (void) reverse_complement(rev_seq, seqlen, err);
 
   /* initialize results */
   memset(&ppt_results, 0, sizeof (PPTResults));
@@ -209,18 +211,22 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
     if (!pdom_results.empty)
     {
       /* determine most likely strand from protein domain results */
-      if (pdom_results.combined_e_value_fwd
-            < pdom_results.combined_e_value_rev)
+      if (double_compare(pdom_results.combined_e_value_fwd,
+           pdom_results.combined_e_value_rev) < 0)
+      {
         genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
                                   STRAND_FORWARD);
+      }
       else
+      {
         genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
                                   STRAND_REVERSE);
+      }
 
-      hashtable_foreach(pdom_results.domains,
-                        (Hashiteratorfunc) pdom_hit_attach_gff3,
-                        ls,
-                        err);
+      (void) hashtable_foreach(pdom_results.domains,
+                               (Hashiteratorfunc) pdom_hit_attach_gff3,
+                                ls,
+                                err);
     }
     hashtable_delete(pdom_results.domains);
   }
@@ -250,7 +256,7 @@ int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     /* fill LTRElement structure from GFF3 subgraph */
     gni = genome_node_iterator_new(*gn);
     for (mygn = *gn; mygn; mygn = genome_node_iterator_next(gni))
-      genome_node_accept(mygn, (GenomeVisitor*) ls->lv, e);
+      (void) genome_node_accept(mygn, (GenomeVisitor*) ls->lv, e);
     genome_node_iterator_delete(gni);
   }
 
@@ -258,11 +264,12 @@ int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   {
     unsigned long seqid;
     const char *sreg;
+    Seq *seq;
 
     /* TODO: use MD5 hashes to identify sequence */
     sreg = str_get(genome_node_get_seqid((GenomeNode*) ls->element.mainnode));
-    sscanf(sreg,"seq%lu", &seqid);
-    Seq *seq = bioseq_get_seq(ls->bioseq, seqid);
+    (void) sscanf(sreg,"seq%lu", &seqid);
+    seq = bioseq_get_seq(ls->bioseq, seqid);
 
     /* run LTRdigest core routine */
     run_ltrdigest(&ls->element, seq, ls, e);

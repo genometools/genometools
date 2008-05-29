@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <math.h>
 #include "libgtcore/ma.h"
+#include "libgtcore/mathsupport.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/array.h"
@@ -103,7 +104,7 @@ unsigned long score_hits(Array *results, unsigned long seqlen,
           /* this PPT has a U-box, handle accordingly */
           hit->ubox = uhit;
       }
-      if (hit->score > highest_score)
+      if (double_compare(hit->score, highest_score) > 0)
       {
         highest_index = i;
         highest_score = hit->score;
@@ -163,13 +164,11 @@ void ppt_find(const char *seq,
               PPTResults *results,
               PPTOptions *o)
 {
-  assert(seq && element && results && o);
   unsigned int *encoded_seq=NULL,
                *decoded=NULL;
-  const Alpha *alpha = alpha_new_dna();
-  HMM *hmm = ppt_hmm_new(alpha);
-  Array *results_fwd = array_new(sizeof (PPT_Hit*)),
-        *results_rev = array_new(sizeof (PPT_Hit*));
+  const Alpha *alpha;
+  HMM *hmm;
+  Array *results_fwd, *results_rev;
   unsigned long i = 0,
                 radius = 0,
                 seqlen = ltrelement_length(element),
@@ -179,6 +178,11 @@ void ppt_find(const char *seq,
   PPT_Hit *tmp;
 
   assert(seq && rev_seq && element && results && o);
+
+  results_fwd = array_new(sizeof (PPT_Hit*));
+  results_rev = array_new(sizeof (PPT_Hit*));
+  alpha = alpha_new_dna();
+  hmm = ppt_hmm_new(alpha);
 
   results->best_hit = NULL;
 
@@ -226,7 +230,7 @@ void ppt_find(const char *seq,
   if (highest_rev != UNDEF_ULONG)
   {
     tmp = *(PPT_Hit**) array_get(results_rev, highest_rev);
-    if (!results->best_hit || tmp->score > results->best_hit->score)
+    if (!results->best_hit || double_compare(tmp->score, results->best_hit->score) > 0)
       results->best_hit = tmp;
   }
 

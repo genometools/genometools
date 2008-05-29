@@ -22,6 +22,7 @@
 #include "libgtcore/codon.h"
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/mathsupport.h"
 #include "libgtcore/translate.h"
 #include "libgtcore/unused.h"
 #include "libgtext/globalchaining.h"
@@ -112,9 +113,9 @@ int pdom_load_hmm_files(PdomOptions *opts, Error *err)
 
   for (i=0;i<strarray_size(opts->hmm_files);i++)
   {
-    HMMFILE *hmmfp;
     struct plan7_s *hmm;
-    char *hmmfile = (char*)strarray_get(opts->hmm_files, i);
+    HMMFILE *hmmfp;
+    char *hmmfile = (char*) strarray_get(opts->hmm_files, i);
     if ((hmmfp = HMMFileOpen(hmmfile, "HMMERDB")) == NULL)
     {
       error_set(err, "Failed to open HMM file '%s'", hmmfile);
@@ -253,7 +254,7 @@ void* pdom_per_domain_worker_thread(void *data)
       {
         if (hit->hits_rev->num > 0)
         {
-          if (hit->hits_fwd->hit[0]->score < hit->hits_rev->hit[0]->score)
+          if (double_compare(hit->hits_fwd->hit[0]->score, hit->hits_rev->hit[0]->score) < 0)
             best_fwd = FALSE;
         }
         else best_fwd = TRUE;
@@ -314,14 +315,14 @@ void* pdom_per_domain_worker_thread(void *data)
       hashtable_add(shared->results->domains, hmm, hit);
       if (best_fwd)
       {
-        shared->results->combined_e_value_fwd *= hit->hits_fwd->hit[0]->pvalue;
+        shared->results->combined_e_value_fwd += log(hit->hits_fwd->hit[0]->pvalue);
         hit->strand = STRAND_FORWARD;
       }
       else
       {
-        shared->results->combined_e_value_rev *= hit->hits_rev->hit[0]->pvalue;
+        shared->results->combined_e_value_rev += log(hit->hits_rev->hit[0]->pvalue);
         hit->strand = STRAND_REVERSE;
-      }
+       }
 
       /* unlock results */
       if ((rtn = pthread_mutex_unlock(&(shared->out_lock))) != 0)
@@ -408,7 +409,7 @@ void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
   assert(seq && rev_seq && element && results && opts);
 
   results->empty = TRUE;
-  results->combined_e_value_fwd = results->combined_e_value_rev = 1.0;
+  results->combined_e_value_fwd = results->combined_e_value_rev = 0.0;
 
   /* create translations */
   translate_all_frames(&fwd_fr1,&fwd_fr2,&fwd_fr3,    seq,seqlen);

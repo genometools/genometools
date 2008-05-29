@@ -44,6 +44,23 @@ bool double_equals_double(double d1, double d2)
   return false;
 }
 
+int double_compare(double d1, double d2)
+{
+  if (d1 > d2) {
+    if ((d1 - d2) < fabs(d1 * EPSILON))
+      return 0;
+    else
+      return 1;
+  }
+  if (d1 < d2) {
+    if ((d2 - d1) < fabs(d2 * EPSILON))
+      return 0;
+    else
+      return -1;
+  }
+  return 0;
+}
+
 unsigned long rand_max(unsigned long maximal_value)
 {
   unsigned long r;

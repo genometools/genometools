@@ -37,12 +37,13 @@ struct LTRVisitor {
 static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                       UNUSED Error *err)
 {
-  LTRVisitor *lv = ltr_visitor_cast(gv);
+  LTRVisitor *lv;
   Range node_range;
-  assert(lv);
-  error_check(err);
   Array *pdomarr = NULL;
   const char* pfamname;
+  lv = ltr_visitor_cast(gv);
+  assert(lv);
+  error_check(err);
 
   switch (genome_feature_get_type(gf))
   {
@@ -100,8 +101,8 @@ static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                               "pfamname");
       if (!(pdomarr = (Array*) hashtable_get(lv->element->pdoms, pfamname)))
       {
-        pdomarr = array_new(sizeof (GenomeFeature*));
         char *pfamcpy = cstr_dup(pfamname);
+        pdomarr = array_new(sizeof (GenomeFeature*));
         hashtable_add(lv->element->pdoms, pfamcpy, pdomarr);
         array_add(lv->element->pdomorder, pfamcpy);
       }

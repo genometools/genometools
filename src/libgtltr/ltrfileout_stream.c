@@ -84,8 +84,8 @@ static int write_pdom(LTRFileOutStream *ls, Array *pdoms,
   {
     /* no file opened for this domain yet, do it */
     char buffer[MAXFILENAMELEN];
-    snprintf(buffer, MAXFILENAMELEN-1, "%s_pdom_%s.fas",
-             ls->fileprefix, pdomname);
+    (void) snprintf(buffer, MAXFILENAMELEN-1, "%s_pdom_%s.fas",
+                    ls->fileprefix, pdomname);
     genfile = genfile_open(GFM_UNCOMPRESSED, buffer, "w+");
     hashtable_add(ls->pdomout_files, cstr_dup(pdomname), genfile);
   }
@@ -140,7 +140,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     /* fill LTRElement structure from GFF3 subgraph */
     gni = genome_node_iterator_new(*gn);
     for (mygn = *gn; mygn; mygn = genome_node_iterator_next(gni))
-      genome_node_accept(mygn, (GenomeVisitor*) ls->lv, e);
+      (void) genome_node_accept(mygn, (GenomeVisitor*) ls->lv, e);
     genome_node_iterator_delete(gni);
   }
 
@@ -150,18 +150,19 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     char *outseq,
          desc[MAXFASTAHEADER];
     Range ltr3_rng, ltr5_rng;
+    Seq *seq;
 
     /* find sequence in Bioseq multifasta */
     const char *sreg = str_get(genome_node_get_seqid((GenomeNode*)
                                                      ls->element.mainnode));
-    sscanf(sreg,"seq%lu", &seqid);
-    Seq *seq = bioseq_get_seq(ls->bioseq, seqid);
+    (void) sscanf(sreg,"seq%lu", &seqid);
+    seq = bioseq_get_seq(ls->bioseq, seqid);
     ls->element.seqid = cstr_dup(seq_get_description(seq));
     cstr_rep(ls->element.seqid, ' ', '_');
     if(strlen(ls->element.seqid) > ls->seqnamelen)
       ls->element.seqid[ls->seqnamelen-1] = '\0';
 
-    ltrelement_format_description(&ls->element, ls->seqnamelen,
+    (void) ltrelement_format_description(&ls->element, ls->seqnamelen,
                                   desc, MAXFASTAHEADER-1);
 
     /* output basic retrotransposon data */
@@ -241,7 +242,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       {
         const char* key = *(const char**) array_get(ls->element.pdomorder, i);
         Array *entry = (Array*) hashtable_get(ls->element.pdoms, key);
-        write_pdom(ls, entry, key, seq, desc, e);
+        (void) write_pdom(ls, entry, key, seq, desc, e);
       }
 
       if (STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
@@ -474,25 +475,25 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
 
   /* open outfiles */
   ls->fileprefix = file_prefix;
-  snprintf(fn, MAXFILENAMELEN-1, "%s_tabout.csv", file_prefix);
+  (void) snprintf(fn, MAXFILENAMELEN-1, "%s_tabout.csv", file_prefix);
   ls->tabout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
   if (tests_to_run & LTRDIGEST_RUN_PPT)
   {
-    snprintf(fn, MAXFILENAMELEN-1, "%s_ppt.fas", file_prefix);
+    (void) snprintf(fn, MAXFILENAMELEN-1, "%s_ppt.fas", file_prefix);
     ls->pptout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
   }
   if (tests_to_run & LTRDIGEST_RUN_PBS)
   {
-    snprintf(fn, MAXFILENAMELEN-1, "%s_pbs.fas", file_prefix);
+    (void) snprintf(fn, MAXFILENAMELEN-1, "%s_pbs.fas", file_prefix);
     ls->pbsout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
   }
-  snprintf(fn, MAXFILENAMELEN-1, "%s_5ltr.fas", file_prefix);
+  (void) snprintf(fn, MAXFILENAMELEN-1, "%s_5ltr.fas", file_prefix);
   ls->ltr5out_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
-  snprintf(fn, MAXFILENAMELEN-1, "%s_3ltr.fas", file_prefix);
+  (void) snprintf(fn, MAXFILENAMELEN-1, "%s_3ltr.fas", file_prefix);
   ls->ltr3out_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
-  snprintf(fn, MAXFILENAMELEN-1, "%s_complete.fas", file_prefix);
+  (void) snprintf(fn, MAXFILENAMELEN-1, "%s_complete.fas", file_prefix);
   ls->elemout_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
-  snprintf(fn, MAXFILENAMELEN-1, "%s_conditions.csv", file_prefix);
+  (void) snprintf(fn, MAXFILENAMELEN-1, "%s_conditions.csv", file_prefix);
   ls->metadata_file = genfile_open(GFM_UNCOMPRESSED, fn, "w+");
 
   /* create hashtable to hold protein domain output files */

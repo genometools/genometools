@@ -24,6 +24,7 @@
 double        logsum(double p1, double p2);
 bool          double_equals_one(double);
 bool          double_equals_double(double, double);
+int           double_compare(double, double);
 
 /* Returns a random number between 0 and maximal_value. */
 unsigned long rand_max(unsigned long maximal_value);

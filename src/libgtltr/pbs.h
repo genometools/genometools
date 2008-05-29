@@ -64,7 +64,7 @@ void  pbs_find(const char *seq,
                const char *rev_seq,
                LTRElement *element,
                PBSResults *results,
-               PBSOptions *lo,
+               PBSOptions *o,
                Error *err);
 
 void  pbs_clear_results(PBSResults *results);

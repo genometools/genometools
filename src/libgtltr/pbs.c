@@ -19,6 +19,7 @@
 #include <math.h>
 #include "libgtcore/ma.h"
 #include "libgtcore/dlist.h"
+#include "libgtcore/mathsupport.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/array.h"
@@ -100,9 +101,7 @@ int pbs_hit_compare(const void *h1, const void *h2)
   PBS_Hit *hp1 = (PBS_Hit*) h1;
   PBS_Hit *hp2 = (PBS_Hit*) h2;
 
-  if (hp1->score == hp2->score)
-    return 0;
-  else return (hp1->score > hp2->score ? -1 : 1);
+  return (double_compare(hp2->score,hp1->score));
 }
 
 void pbs_find(const char *seq,
@@ -149,7 +148,7 @@ void pbs_find(const char *seq,
 
     trna_from3_full = ma_malloc(sizeof (char)*trna_seqlen);
     memcpy(trna_from3_full, seq_get_orig(trna_seq), sizeof (char)*trna_seqlen);
-    reverse_complement(trna_from3_full, trna_seqlen, err);
+    (void) reverse_complement(trna_from3_full, trna_seqlen, err);
     trna_from3 = seq_new_own(trna_from3_full, trna_seqlen, a);
 
     ali = swalign(seq_forward, trna_from3, sf);
@@ -181,7 +180,7 @@ void pbs_find(const char *seq,
     PBS_Hit *tmp;
     delem = dlist_first(results->hits_rev);
     tmp = (PBS_Hit*) dlistelem_get_data(delem);
-    if (!results->best_hit || tmp->score > results->best_hit->score)
+    if (!results->best_hit || double_compare(tmp->score, results->best_hit->score) > 0)
       results->best_hit = tmp;
   }
 }

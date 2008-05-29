@@ -48,7 +48,7 @@ char* ltrelement_get_sequence(unsigned long start, unsigned long end,
   out = ma_malloc(sizeof (char) * (len + 1));
   memcpy(out, seq_get_orig(seq)+start, sizeof (char) * len);
   if (strand == STRAND_REVERSE)
-    reverse_complement(out, len, err);
+    (void) reverse_complement(out, len, err);
   out[len]='\0';
   return out;
 }
@@ -115,7 +115,7 @@ int ltrelement_format_description(LTRElement *e, unsigned int seqnamelen,
   assert(buf && e);
   tmpstr = ma_malloc(sizeof (char) * (seqnamelen + 1));
   memset(tmpstr,0,sizeof (char) * (seqnamelen + 1));
-  snprintf(tmpstr, seqnamelen, "%s", e->seqid);
+  (void) snprintf(tmpstr, seqnamelen, "%s", e->seqid);
   cstr_rep(tmpstr, ' ', '_');
   ret = snprintf(buf, buflen, "%s_%lu_%lu",
                   tmpstr, e->leftLTR_5, e->rightLTR_3);
@@ -126,14 +126,14 @@ int ltrelement_format_description(LTRElement *e, unsigned int seqnamelen,
 int ltrelement_unit_test(Error *err)
 {
   int had_err = 0;
-  error_check(err);
-
   LTRElement element;
   Range rng1;
   Seq *seq;
   char *testseq = "ATCGAGGGGTCGAAT", *cseq;
   Alpha *alpha;
   unsigned long radius = 30;
+
+  error_check(err);
 
   alpha = alpha_new_dna();
   seq = seq_new(testseq, 15, alpha);
