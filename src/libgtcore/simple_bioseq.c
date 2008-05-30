@@ -117,6 +117,7 @@ void simple_bioseq_delete(SimpleBioseq *sbs)
     str_delete(fasta_entry->description);
     str_delete(fasta_entry->sequence);
   }
+  array_delete(sbs->entries);
   free(sbs);
 }
 
