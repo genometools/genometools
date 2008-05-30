@@ -217,9 +217,8 @@ int str_read_next_line(Str *s, FILE *fpin)
   assert(s && fpin);
   for (;;) {
     cc = xfgetc(fpin);
-    if (cc == EOF) {
+    if (cc == EOF)
       return EOF;
-    }
     if (cc == '\n') {
       if ((s->length+1) * sizeof (char) > s->allocated)
         s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+1)*sizeof (char));
@@ -240,9 +239,8 @@ int str_read_next_line_generic(Str *s, GenFile *fpin)
   assert(s);
   for (;;) {
     cc = genfile_getc(fpin); /* XXX: use xgetc */
-    if (cc == EOF) {
+    if (cc == EOF)
       return EOF;
-    }
     if (cc == '\n') {
       if ((s->length+1) * sizeof (char) > s->allocated)
         s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+1)*sizeof (char));
