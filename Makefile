@@ -559,15 +559,14 @@ $(SQUID_DIR)/squid.h:
 
 $(HMMER_DIR)/config.h:
 	@echo '[create $(@F)]'
-	@cp $(HMMER_DIR)/config.h.in $(HMMER_DIR)/config.h
-	@sed  -i 's/#undef PACKAGE_VERSION/#define PACKAGE_VERSION "2.3.2"/' $@
-	@sed  -i 's/#undef HMMER_THREADS/#define HMMER_THREADS/' $@
-	@sed  -i 's/#undef PACKAGE_NAME/#define PACKAGE_NAME "HMMER"/' $@
-	@sed  -i 's/#undef PACKAGE_TARNAME/#define PACKAGE_TARNAME "hmmer"/' $@
-	@sed  -i 's/#undef PACKAGE_STRING/#define PACKAGE_STRING "HMMER 2.3.2"/' $@
-	@sed  -i 's/#undef PACKAGE_DATE/#define PACKAGE_DATE "Oct 2003"/' $@
-	@sed  -i 's/#undef PACKAGE_COPYRIGHT/#define PACKAGE_COPYRIGHT "Copyright (C) 1992-2003 HHMI\/Washington University School of Medicine"/' $@
-	@sed  -i 's/#undef PACKAGE_LICENSE/#define PACKAGE_LICENSE "Freely distributed under the GNU General Public License (GPL)"/' $@
+	@sed  -e 's/#undef PACKAGE_VERSION/#define PACKAGE_VERSION "2.3.2"/'\
+	      -e 's/#undef HMMER_THREADS/#define HMMER_THREADS/'\
+	      -e 's/#undef PACKAGE_NAME/#define PACKAGE_NAME "HMMER"/'\
+	      -e 's/#undef PACKAGE_TARNAME/#define PACKAGE_TARNAME "hmmer"/'\
+	      -e 's/#undef PACKAGE_STRING/#define PACKAGE_STRING "HMMER 2.3.2"/'\
+	      -e 's/#undef PACKAGE_DATE/#define PACKAGE_DATE "Oct 2003"/'\
+	      -e 's/#undef PACKAGE_COPYRIGHT/#define PACKAGE_COPYRIGHT "Copyright (C) 1992-2003 HHMI\/Washington University School of Medicine"/'\
+	      -e 's/#undef PACKAGE_LICENSE/#define PACKAGE_LICENSE "Freely distributed under the GNU General Public License (GPL)"/' $(HMMER_DIR)/config.h.in  > $@
           
 obj/gt_config.h:
 	@echo '[create $@]'
