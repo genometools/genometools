@@ -56,6 +56,14 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_2.assembly"
 end
 
+Name "gt exercise assemblegreedy 3"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise assemblegreedy " +
+           "#{$testdata}gt_assemblegreedy_fragments_3.fas"
+  run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_3.assembly"
+end
+
 Name "gt exercise assemblegreedy 2 (-minlength)"
 Keywords "gt_exercise"
 Test do
