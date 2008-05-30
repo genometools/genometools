@@ -81,12 +81,20 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_2.overlaps"
 end
 
-Name "gt exercise assemblegreedy 2 (-showoverlaps)"
+Name "gt exercise assemblegreedy 1 (-showpath)"
 Keywords "gt_exercise"
 Test do
-  run_test "#{$bin}gt exercise assemblegreedy -showoverlaps " +
+  run_test "#{$bin}gt exercise assemblegreedy -showpath " +
+           "#{$testdata}gt_assemblegreedy_fragments_1.fas"
+  run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_1.path"
+end
+
+Name "gt exercise assemblegreedy 2 (-showpath)"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise assemblegreedy -showpath " +
            "#{$testdata}gt_assemblegreedy_fragments_2.fas"
-  run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_2.overlaps"
+  run "diff #{$last_stdout} #{$testdata}gt_assemblegreedy_fragments_2.path"
 end
 
 Name "gt exercise assemblegreedy nonexistent file"
