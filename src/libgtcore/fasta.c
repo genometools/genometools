@@ -16,6 +16,7 @@
 */
 
 #include "libgtcore/fasta.h"
+#include "libgtcore/fasta_separator.h"
 #include "libgtcore/xansi.h"
 
 void fasta_show_entry(const char *description, const char *sequence,

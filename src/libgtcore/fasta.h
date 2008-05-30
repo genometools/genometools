@@ -20,8 +20,6 @@
 
 #include "libgtcore/genfile.h"
 
-#define FASTA_SEPARATOR '>'
-
 /*
    Show a fasta entry with optional <description> and mandatory <sequence> on
    stdout. If <width> is != 0 the sequence is formatted accordingly.

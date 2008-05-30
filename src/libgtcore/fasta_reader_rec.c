@@ -16,9 +16,9 @@
 */
 
 #include <string.h>
-#include "libgtcore/fasta.h"
 #include "libgtcore/fasta_reader_rec.h"
 #include "libgtcore/fasta_reader_rep.h"
+#include "libgtcore/fasta_separator.h"
 #include "libgtcore/io.h"
 
 struct FastaReaderRec {

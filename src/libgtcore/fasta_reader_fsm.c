@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/fasta.h"
 #include "libgtcore/fasta_reader_fsm.h"
 #include "libgtcore/fasta_reader_rep.h"
+#include "libgtcore/fasta_separator.h"
 
 struct FastaReaderFSM {
   const FastaReader parent_instance;

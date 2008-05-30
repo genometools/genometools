@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/fasta.h"
+#include "libgtcore/fasta_separator.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"

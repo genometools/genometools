@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/fasta.h"
+#include "libgtcore/fasta_separator.h"
 #include "libgtcore/simple_bioseq.h"
 #include "libgtcore/unused.h"
 #include "tools/gt_fastaparser.h"
