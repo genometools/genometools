@@ -113,7 +113,7 @@ void simple_bioseq_delete(SimpleBioseq *sbs)
   unsigned long i;
   if (!sbs) return;
   for (i = 0; i < array_size(sbs->entries); i++) {
-    FastaEntry *fasta_entry = array_get(sbs->entries, i++);
+    FastaEntry *fasta_entry = array_get(sbs->entries, i);
     str_delete(fasta_entry->description);
     str_delete(fasta_entry->sequence);
   }
