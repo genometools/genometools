@@ -218,10 +218,6 @@ int str_read_next_line(Str *s, FILE *fpin)
   for (;;) {
     cc = xfgetc(fpin);
     if (cc == EOF) {
-      if (ferror(fpin)) {
-        perror("cannot read char");
-        exit(EXIT_FAILURE);
-      }
       return EOF;
     }
     if (cc == '\n') {
