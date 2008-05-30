@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -159,31 +159,25 @@ GenFileMode genfile_mode(GenFile *genfile)
   return genfile->mode;
 }
 
-static int bzgetc(BZFILE *bzfile)
-{
-  char c;
-  return BZ2_bzread(bzfile, &c, 1) == 1 ? (int) c : -1;
-}
-
-int genfile_getc(GenFile *genfile)
+int genfile_xfgetc(GenFile *genfile)
 {
   int c = -1;
   if (genfile) {
     switch (genfile->mode) {
       case GFM_UNCOMPRESSED:
-        c = fgetc(genfile->fileptr.file);
+        c = xfgetc(genfile->fileptr.file);
         break;
       case GFM_GZIP:
-        c = gzgetc(genfile->fileptr.gzfile);
+        c = xgzfgetc(genfile->fileptr.gzfile);
         break;
       case GFM_BZIP2:
-        c = bzgetc(genfile->fileptr.bzfile);
+        c = xbzfgetc(genfile->fileptr.bzfile);
         break;
       default: assert(0);
     }
   }
   else
-    c = fgetc(stdin);
+    c = xfgetc(stdin);
   return c;
 }
 

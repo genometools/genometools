@@ -237,7 +237,7 @@ int str_read_next_line_generic(Str *s, GenFile *fpin)
   char c;
   assert(s);
   for (;;) {
-    cc = genfile_getc(fpin); /* XXX: use xgetc */
+    cc = genfile_xfgetc(fpin);
     if (cc == EOF)
       return EOF;
     if (cc == '\n') {

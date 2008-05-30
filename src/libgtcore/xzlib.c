@@ -33,6 +33,12 @@ gzFile xgzopen(const char *path, const char *mode)
   return file;
 }
 
+int xgzfgetc(gzFile file)
+{
+  char c;
+  return xgzread(file, &c, 1) ? c : EOF;
+}
+
 void xgzfputc(int c, gzFile file)
 {
   int errnum;

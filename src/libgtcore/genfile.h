@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,45 +31,45 @@
 */
 typedef struct GenFile GenFile;
 
-typedef enum
-{
+typedef enum {
   GFM_UNCOMPRESSED,
   GFM_GZIP,
   GFM_BZIP2
 } GenFileMode;
 
-/* returns GFM_GZIP if file with <path> ends with '.gz', GFM_BZIP2 if it ends
-   with '.bz2', and GFM_UNCOMPRESSED otherwise */
+/* Returns GFM_GZIP if file with <path> ends with '.gz', GFM_BZIP2 if it ends
+   with '.bz2', and GFM_UNCOMPRESSED otherwise. */
 GenFileMode genfilemode_determine(const char *path);
 
-/* returns ".gz" if <mode> is GFM_GZIP, ".bz2" if <mode> is GFM_BZIP2, and ""
-   otherwise */
+/* Returns ".gz" if <mode> is GFM_GZIP, ".bz2" if <mode> is GFM_BZIP2, and ""
+   otherwise. */
 const char* genfilemode_suffix(GenFileMode mode);
 
-/* returns the length of the ``basename'' of <path>. That is, the length of path
-   without '.gz' or '.bz2' suffixes */
+/* Returns the length of the ``basename'' of <path>. That is, the length of path
+   without '.gz' or '.bz2' suffixes. */
 size_t      genfile_basename_length(const char *path);
 
-/* create a new GenFile object and open the underlying file handle, return NULL
-   if the file <path> does not exist */
+/* Create a new GenFile object and open the underlying file handle, return NULL
+   if the file <path> does not exist. */
 GenFile*    genfile_open(GenFileMode, const char *path, const char *mode);
 
-/* create a new GenFile object and open the underlying file handle, abort if the
-   file <path> does not exist, the GenFileMode has to be given explicitly */
+/* Create a new GenFile object and open the underlying file handle, abort if the
+   file <path> does not exist, the GenFileMode has to be given explicitly. */
 GenFile*    genfile_xopen_w_gfmode(GenFileMode, const char *path,
                                    const char *mode);
 
-/* create a new GenFile object and open the underlying file handle, abort if the
+/* Create a new GenFile object and open the underlying file handle, abort if the
    file <path> does not exist, the GenFileMode is determined automatically via
-   genfilemode_determine(path) */
+   genfilemode_determine(path). */
 GenFile*    genfile_xopen(const char *path, const char *mode);
 
-/* create a new GenFile object from a normal file pointer */
+/* Create a new GenFile object from a normal file pointer. */
 GenFile*    genfile_new(FILE*);
 
 GenFileMode genfile_mode(GenFile*);
 
-int         genfile_getc(GenFile*);
+/* Return next character from <genfile> of EOF, if end-of-file is reached. */
+int         genfile_xfgetc(GenFile *genfile);
 
 /* printf(3) for generic files */
 void        genfile_xprintf(GenFile*, const char *format, ...)
@@ -78,19 +78,19 @@ void        genfile_xprintf(GenFile*, const char *format, ...)
 void        genfile_xfputc(int c, GenFile*);
 void        genfile_xfputs(const char *str, GenFile*);
 
-/* read up to <nbytes> and store result in <buf>, returns bytes read */
+/* Read up to <nbytes> and store result in <buf>, returns bytes read. */
 int         genfile_xread(GenFile*, void *buf, size_t nbytes);
 
-/* write <nbytes> from <buf> to given generic file */
+/* Write <nbytes> from <buf> to given generic file. */
 void        genfile_xwrite(GenFile*, void *buf, size_t nbytes);
 
-/* rewind the file */
+/* Rewind the file. */
 void        genfile_xrewind(GenFile*);
 
-/* destroy the file handle object, but do not close the underlying handle */
+/* Destroy the file handle object, but do not close the underlying handle. */
 void        genfile_delete(GenFile*);
 
-/* close the underlying file handle and destroy the object */
+/* Close the underlying file handle and destroy the object. */
 void        genfile_close(GenFile*);
 
 #endif

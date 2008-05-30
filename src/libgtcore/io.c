@@ -58,7 +58,7 @@ int io_get_char(IO *io, char *c)
     io->unget_used = false;
     return 0;
   }
-  cc = genfile_getc(io->fp);
+  cc = genfile_xfgetc(io->fp);
   if (cc == '\n') {
     io->line_number++;
     io->line_start = true;

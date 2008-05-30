@@ -27,9 +27,11 @@
 */
 
 BZFILE* xbzopen(const char *path, const char *mode);
+/* Returns next character from <bzfile> or EOF, if end-of-file is reached. */
+int     xbzfgetc(BZFILE *bzfile);
 void    xbzfputc(int, BZFILE*);
 void    xbzfputs(const char*, BZFILE*);
-        /* returns num of read bytes */
+/* Returns num of read bytes. */
 int     xbzread(BZFILE*, void *buf, unsigned len);
 void    xbzwrite(BZFILE*, void *buf, unsigned len);
 void    xbzrewind(BZFILE**, const char *orig_path, const char *orig_mode);

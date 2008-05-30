@@ -33,6 +33,12 @@ BZFILE* xbzopen(const char *path, const char *mode)
   return file;
 }
 
+int xbzfgetc(BZFILE *bzfile)
+{
+  char c;
+  return xbzread(bzfile, &c, 1) ? c : EOF;
+}
+
 static int bzputc(int c, BZFILE *bzfile)
 {
   char cc = (char) c; /* required for big endian systems */
