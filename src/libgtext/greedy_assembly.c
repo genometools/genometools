@@ -47,10 +47,33 @@ static void try_to_select_edge(GreedyAssembly *ga, const Overlap *edge,
   }
 }
 
+static void add_zero_weight_edges(GreedyAssembly *ga, bool *inedges,
+                                  bool *outedges, UnionFind *uf,
+                                  unsigned long *selected)
+{
+  Overlap zeroedge = { 0 };
+  unsigned long i, j;
+  for (i = 0; i < ga->num_of_fragments; i++) {
+    for (j = i + 1; j < ga->num_of_fragments; j++) {
+      /* forward */
+      zeroedge.start = i;
+      zeroedge.end = j;
+      try_to_select_edge(ga, &zeroedge, inedges, outedges, uf, selected);
+      if (*selected + 1 == ga->num_of_fragments)
+        return;
+      /* reverse */
+      zeroedge.start = j;
+      zeroedge.end = i;
+      try_to_select_edge(ga, &zeroedge, inedges, outedges, uf, selected);
+      if (*selected + 1 == ga->num_of_fragments)
+        return;
+    }
+  }
+}
+
 static void assemble(GreedyAssembly *ga, FragmentOverlaps *sorted_overlaps)
 {
-  unsigned long i, j, current_edge, selected = 0;
-  Overlap zeroedge = { 0 };
+  unsigned long i, current_edge, selected = 0;
   bool *inedges, *outedges;
   UnionFind *uf;
   assert(ga && sorted_overlaps);
@@ -69,22 +92,9 @@ static void assemble(GreedyAssembly *ga, FragmentOverlaps *sorted_overlaps)
     current_edge--;
   }
   /* add missing edges with weight 0, if necessary */
-  for (i = 0; i < ga->num_of_fragments; i++) {
-    for (j = i + 1; j < ga->num_of_fragments; j++) {
-      /* forward */
-      zeroedge.start = i;
-      zeroedge.end = j;
-      try_to_select_edge(ga, &zeroedge, inedges, outedges, uf, &selected);
-      if (selected + 1 == ga->num_of_fragments)
-        break;
-      /* reverse */
-      zeroedge.start = j;
-      zeroedge.end = i;
-      try_to_select_edge(ga, &zeroedge, inedges, outedges, uf, &selected);
-      if (selected + 1 == ga->num_of_fragments)
-        break;
-    }
-  }
+  if (selected + 1 < ga->num_of_fragments)
+    add_zero_weight_edges(ga, inedges, outedges, uf, &selected);
+  assert(selected + 1 == ga->num_of_fragments);
   /* determine first fragment */
   for (i = 0; i < ga->num_of_fragments; i++) {
     if (!inedges[i]) {
