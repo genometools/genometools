@@ -209,7 +209,6 @@ Str* str_ref(Str *s)
   return s;
 }
 
-/* XXX: remove code duplication */
 int str_read_next_line(Str *s, FILE *fpin)
 {
   int cc;
