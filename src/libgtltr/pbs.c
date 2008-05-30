@@ -180,7 +180,8 @@ void pbs_find(const char *seq,
     PBS_Hit *tmp;
     delem = dlist_first(results->hits_rev);
     tmp = (PBS_Hit*) dlistelem_get_data(delem);
-    if (!results->best_hit || double_compare(tmp->score, results->best_hit->score) > 0)
+    if (!results->best_hit
+          || double_compare(tmp->score, results->best_hit->score) > 0)
       results->best_hit = tmp;
   }
 }

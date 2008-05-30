@@ -230,7 +230,8 @@ void ppt_find(const char *seq,
   if (highest_rev != UNDEF_ULONG)
   {
     tmp = *(PPT_Hit**) array_get(results_rev, highest_rev);
-    if (!results->best_hit || double_compare(tmp->score, results->best_hit->score) > 0)
+    if (!results->best_hit
+          || double_compare(tmp->score, results->best_hit->score) > 0)
       results->best_hit = tmp;
   }
 

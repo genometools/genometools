@@ -228,7 +228,7 @@ void* pdom_per_domain_worker_thread(void *data)
     ghit = AllocTophits(50);
     hit->hits_fwd = AllocTophits(50);
     hit->hits_rev = AllocTophits(50);
-    hit->best_chain = array_new(sizeof(struct hit_s*));
+    hit->best_chain = array_new(sizeof (struct hit_s*));
 
     hmmer_search(hmm,shared->fwd_fr1,strlen(shared->fwd_fr1),"0+",
                  &shared->opts->thresh,ghit, hit->hits_fwd, &shared->out_lock);
@@ -254,7 +254,8 @@ void* pdom_per_domain_worker_thread(void *data)
       {
         if (hit->hits_rev->num > 0)
         {
-          if (double_compare(hit->hits_fwd->hit[0]->score, hit->hits_rev->hit[0]->score) < 0)
+          if (double_compare(hit->hits_fwd->hit[0]->score,
+                             hit->hits_rev->hit[0]->score) < 0)
             best_fwd = FALSE;
         }
         else best_fwd = TRUE;

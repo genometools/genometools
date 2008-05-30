@@ -159,7 +159,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     seq = bioseq_get_seq(ls->bioseq, seqid);
     ls->element.seqid = cstr_dup(seq_get_description(seq));
     cstr_rep(ls->element.seqid, ' ', '_');
-    if(strlen(ls->element.seqid) > ls->seqnamelen)
+    if (strlen(ls->element.seqid) > ls->seqnamelen)
       ls->element.seqid[ls->seqnamelen-1] = '\0';
 
     (void) ltrelement_format_description(&ls->element, ls->seqnamelen,
@@ -238,7 +238,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     if (ls->element.pdoms)
     {
       Str *pdomorderstr = str_new();
-      for(i=0;i<array_size(ls->element.pdomorder);i++)
+      for (i=0;i<array_size(ls->element.pdomorder);i++)
       {
         const char* key = *(const char**) array_get(ls->element.pdomorder, i);
         Array *entry = (Array*) hashtable_get(ls->element.pdoms, key);
@@ -248,7 +248,7 @@ int ltr_fileout_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       if (STRAND_REVERSE == genome_feature_get_strand(ls->element.mainnode))
         array_reverse(ls->element.pdomorder);
 
-      for(i=0;i<array_size(ls->element.pdomorder);i++)
+      for (i=0;i<array_size(ls->element.pdomorder);i++)
       {
         const char* name = *(const char**) array_get(ls->element.pdomorder, i);
         str_append_cstr(pdomorderstr, name);

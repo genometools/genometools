@@ -256,7 +256,7 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
   if (arguments->trna_lib
         && str_length(arguments->trna_lib) > 0)
   {
-    if(!file_exists(str_get(arguments->trna_lib)))
+    if (!file_exists(str_get(arguments->trna_lib)))
     {
       error_set(err, "File '%s' does not exist!", str_get(arguments->trna_lib));
       had_err = -1;
@@ -318,7 +318,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                                   err);
   }
 
-  if(!had_err)
+  if (!had_err)
   {
     /* set up stream flow
      * ------------------*/

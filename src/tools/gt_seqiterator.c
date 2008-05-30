@@ -160,7 +160,7 @@ static void processastretches(const DiscDistri *distastretch,
   astretchinfo.maxvalue = 0;
   astretchinfo.minkey = 10UL;
   disc_distri_foreach(distastretch,showastretches,&astretchinfo);
-  astretchinfo.mmercount = ma_malloc(sizeof(*astretchinfo.mmercount) *
+  astretchinfo.mmercount = ma_malloc(sizeof (*astretchinfo.mmercount) *
                                     (astretchinfo.maxvalue+1));
   memset(astretchinfo.mmercount,0,sizeof (*astretchinfo.mmercount) *
                                   (astretchinfo.maxvalue+1));
