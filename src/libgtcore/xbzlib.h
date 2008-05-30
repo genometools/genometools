@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -27,7 +27,6 @@
 */
 
 BZFILE* xbzopen(const char *path, const char *mode);
-int     bzputc(int, BZFILE*); /* XXX: remove */
 void    xbzfputc(int, BZFILE*);
 void    xbzfputs(const char*, BZFILE*);
         /* returns num of read bytes */

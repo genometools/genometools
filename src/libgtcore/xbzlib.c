@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -33,7 +33,7 @@ BZFILE* xbzopen(const char *path, const char *mode)
   return file;
 }
 
-int bzputc(int c, BZFILE *bzfile)
+static int bzputc(int c, BZFILE *bzfile)
 {
   char cc = (char) c; /* required for big endian systems */
   return BZ2_bzwrite(bzfile, &cc, 1) == 1 ? cc : -1;
