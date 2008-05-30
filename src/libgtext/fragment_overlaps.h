@@ -18,6 +18,7 @@
 #ifndef FRAGMENT_OVERLAPS_H
 #define FRAGMENT_OVERLAPS_H
 
+#include <stdbool.h>
 #include "libgtcore/bioseq.h"
 
 typedef struct FragmentOverlaps FragmentOverlaps;

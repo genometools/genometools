@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <assert.h>
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtext/union_find.h"

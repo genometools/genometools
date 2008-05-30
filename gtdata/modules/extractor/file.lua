@@ -1,6 +1,6 @@
 --[[
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -101,6 +101,13 @@ function File:ma2xansi()
   self.filecontent = self.filecontent:gsub('ma_calloc', 'xcalloc')
   self.filecontent = self.filecontent:gsub('ma_realloc', 'xrealloc')
   self.filecontent = self.filecontent:gsub('ma_free', 'free')
+end
+
+function File:simple_bioseq()
+  self.filecontent = self.filecontent:gsub('#include "bioseq.h"',
+                                           '#include "simple_bioseq.h"')
+  self.filecontent = self.filecontent:gsub("Bioseq", "SimpleBioseq")
+  self.filecontent = self.filecontent:gsub("bioseq_", "simple_bioseq_")
 end
 
 function File:add_test(test)

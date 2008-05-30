@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdbool.h>
 #include "libgtcore/array.h"
 #include "libgtcore/fasta_separator.h"
 #include "libgtcore/simple_bioseq.h"

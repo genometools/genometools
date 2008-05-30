@@ -139,6 +139,17 @@ end
 Name "extract_assemblegreedy"
 Keywords "gt_scripts"
 Test do
+  run_test "#{$bin}gt #{$testdata}../gtscripts/extract_assemblegreedy.lua " +
+           "#{$cur}"
+  run "cd assemblegreedy && ${MAKE:-make} test"
+  if not File.exists?("assemblegreedy.tar.gz") then
+    raise TestFailed, "file 'assemblegreedy.tar.gz' does not exist"
+  end
+end
+
+Name "extract_assemblegreedy_scaffold"
+Keywords "gt_scripts"
+Test do
   run_test "#{$bin}gt " +
            "#{$testdata}../gtscripts/extract_assemblegreedy_scaffold.lua " +
            "#{$cur}"
