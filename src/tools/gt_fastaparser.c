@@ -44,6 +44,8 @@ static int gt_fastaparser_runner(UNUSED int argc, const char **argv,
     printf("%c%s\n%s\n", FASTA_SEPARATOR,
            simple_bioseq_get_description(simple_bioseq, i),
            simple_bioseq_get_sequence(simple_bioseq, i));
+    printf("sequence #%lu length: %lu\n", i,
+           simple_bioseq_get_sequence_length(simple_bioseq, i));
   }
   simple_bioseq_delete(simple_bioseq);
 
