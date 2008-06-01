@@ -119,6 +119,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                        &arguments->pbs_opts.alilen,
                        &pbsalilen_defaults);
   option_parser_add_option(op, o);
+  option_imply(o, ot);
 
   o = option_new_range("pbsoffset",
                        "allowed PBS offset from LTR boundary range",
