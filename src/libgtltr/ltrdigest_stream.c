@@ -265,6 +265,7 @@ int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     unsigned long seqid;
     const char *sreg;
     Seq *seq;
+    Range elemrng;
 
     /* TODO: use MD5 hashes to identify sequence */
     sreg = str_get(genome_node_get_seqid((GenomeNode*) ls->element.mainnode));
@@ -272,7 +273,17 @@ int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     seq = bioseq_get_seq(ls->bioseq, seqid);
 
     /* run LTRdigest core routine */
-    run_ltrdigest(&ls->element, seq, ls, e);
+    elemrng = genome_node_get_range((GenomeNode*) ls->element.mainnode);
+    /* do not process elements whose positions exceed sequence boundaries 
+       (obviously annotation and sequence do not match!) */
+    if(elemrng.end <= seq_length(seq))
+      run_ltrdigest(&ls->element, seq, ls, e);
+    else
+    {
+      error_set(e, "Element '%s' exceeds sequence boundaries!",
+            genome_feature_get_attribute((GenomeNode*) ls->element.mainnode, "ID"));
+      had_err = -1;
+    }
   }
   return had_err;
 }
