@@ -260,7 +260,7 @@ static void nextEDcolumn(const unsigned long *eqsvector,
 static void inplacenextEDcolumn(const unsigned long *eqsvector,
                                 unsigned long patternlength,
                                 unsigned long maxdistance,
-                                Myerscolumn *outcol,
+                                Myerscolumn *col,
                                 Uchar currentchar)
 {
   unsigned long Eq, Xv, Xh, Ph, Mh, /* as in Myers Paper */
@@ -268,59 +268,59 @@ static void inplacenextEDcolumn(const unsigned long *eqsvector,
   unsigned long idx;                /* a counter */
   unsigned long score;              /* current score */
 
-  Eq = eqsvector[(unsigned long) currentchar];
-  Xv = Eq | outcol->Mv;
-  Xh = (((Eq & outcol->Pv) + outcol->Pv) ^ outcol->Pv) | Eq;
-
-  Ph = outcol->Mv | ~ (Xh | outcol->Pv);
-  Mh = outcol->Pv & Xh;
-
-  Ph = (Ph << 1) | 1UL;
-  outcol->Pv = (Mh << 1) | ~ (Xv | Ph);
-  outcol->Mv = Ph & Xv;
 #ifdef SKDEBUG
-  if (outcol->maxleqk == patternlength)
+  if (col->maxleqk == patternlength)
   {
-    fprintf(stderr,"outcol->maxleqk = %lu = patternlength not allowed\n",
+    fprintf(stderr,"col->maxleqk = %lu = patternlength not allowed\n",
             patternlength);
     exit(EXIT_FAILURE);
   }
-  if (outcol->maxleqk == UNDEFINDEX)
+  if (col->maxleqk == UNDEFINDEX)
   {
-    fprintf(stderr,"outcol->maxleqk = UNDEFINDEX not allowed\n");
+    fprintf(stderr,"col->maxleqk = UNDEFINDEX not allowed\n");
     exit(EXIT_FAILURE);
   }
 #endif
-  backmask = 1UL << outcol->maxleqk;
+  Eq = eqsvector[(unsigned long) currentchar];
+  Xv = Eq | col->Mv;
+  Xh = (((Eq & col->Pv) + col->Pv) ^ col->Pv) | Eq;
+
+  Ph = col->Mv | ~ (Xh | col->Pv);
+  Mh = col->Pv & Xh;
+
+  Ph = (Ph << 1) | 1UL;
+  col->Pv = (Mh << 1) | ~ (Xv | Ph);
+  col->Mv = Ph & Xv;
+  backmask = 1UL << col->maxleqk;
   if (Eq & backmask || Mh & backmask)
   {
-    outcol->maxleqk++;
+    col->maxleqk++;
   } else
   {
     if (Ph & backmask)
     {
+      unsigned long tmpmaxleqk = UNDEFINDEX;
       score = maxdistance+1;
-      outcol->maxleqk = UNDEFINDEX;
-      if (outcol->maxleqk > 0)
+      if (col->maxleqk > 0)
       {
-        for (idx = outcol->maxleqk - 1, backmask >>= 1;
+        for (idx = col->maxleqk - 1, backmask >>= 1;
              /* Nothing */;
              backmask >>= 1)
         {
-          if (outcol->Pv & backmask)
+          if (col->Pv & backmask)
           {
             score--;
             if (score <= maxdistance)
             {
-              outcol->maxleqk = idx;
+              tmpmaxleqk = idx;
 #ifdef SKDEBUG
-              outcol->scorevalue = score;
+              col->scorevalue = score;
 #endif
               break;
             }
           } else
           {
-            if (outcol->Mv & backmask)
+            if (col->Mv & backmask)
             {
               score++;
             }
@@ -334,6 +334,7 @@ static void inplacenextEDcolumn(const unsigned long *eqsvector,
           }
         }
       }
+      col->maxleqk = tmpmaxleqk;
     }
   }
 }
@@ -370,7 +371,7 @@ static bool iternextEDcolumn(unsigned long *matchpref,
     }
     if (currentcol.maxleqk == patternlength)
     {
-      *matchpref = (unsigned long) (pos - startpos);
+      *matchpref = (unsigned long) (pos - startpos + 1);
       return true;
     }
   }
@@ -390,10 +391,11 @@ struct Limdfsresources
   unsigned long *eqsvector;
   Rightboundwithchar *rbwc;
   ArrayLcpintervalwithinfo stack;
+  const Seqpos *suftab;
   Uchar alphasize;
 };
 
-Limdfsresources *newLimdfsresources(unsigned int mapsize)
+Limdfsresources *newLimdfsresources(unsigned int mapsize,const Seqpos *suftab)
 {
   Limdfsresources *limdfsresources;
 
@@ -403,6 +405,7 @@ Limdfsresources *newLimdfsresources(unsigned int mapsize)
   INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   assert(mapsize-1 <= UCHAR_MAX);
   limdfsresources->alphasize = (Uchar) (mapsize-1);
+  limdfsresources->suftab = suftab;
   return limdfsresources;
 }
 
@@ -414,6 +417,18 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources)
   FREESPACE(limdfsresources->rbwc);
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(*ptrlimdfsresources);
+}
+
+static void showmatch(unsigned long patternlength,
+                      unsigned long maxdistance,
+                      Seqpos startpos, Seqpos offset, unsigned long matchpref)
+{
+  Seqpos matchlen = offset + matchpref;
+
+  printf("match " FormatSeqpos " " FormatSeqpos "+%lu\n",
+         PRINTSeqposcast(startpos), PRINTSeqposcast(offset), matchpref);
+  assert((Seqpos) (patternlength - maxdistance) <= matchlen &&
+         matchlen <= (Seqpos) (patternlength + maxdistance));
 }
 
 static bool possiblypush(Limdfsresources *limdfsresources,
@@ -455,9 +470,13 @@ static bool possiblypush(Limdfsresources *limdfsresources,
   }
   if (stackptr->column.maxleqk == patternlength)
   {
-    printf("success " FormatSeqpos " " FormatSeqpos "\n",
-            PRINTSeqposcast(stackptr->lcpitv.left),
-            PRINTSeqposcast(stackptr->lcpitv.right));
+    Seqpos idx;
+
+    for (idx = lbound; idx <= rbound; idx++)
+    {
+      showmatch(patternlength,maxdistance,limdfsresources->suftab[idx],
+                offset,0);
+    }
     return true;
   }
   return false;
@@ -465,7 +484,7 @@ static bool possiblypush(Limdfsresources *limdfsresources,
 
 void esalimiteddfs(Limdfsresources *limdfsresources,
                    const Encodedsequence *encseq,
-                   const Seqpos *suftab,
+                   const Alphabet *alpha,
                    Readmode readmode,
                    const Uchar *pattern,
                    unsigned long patternlength,
@@ -474,12 +493,16 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   Lcpintervalwithinfo *stackptr;
   unsigned long matchpref = 0, idx, rboundscount;
   Uchar extendchar;
-  Seqpos lbound, rbound, offset, totallength = getencseqtotallength(encseq);
+  Seqpos lbound, rbound, bound, offset,
+         totallength = getencseqtotallength(encseq);
   Myerscolumn previouscolumn;
   bool remstack;
 
   printf("# patternlength=%lu\n",patternlength);
   printf("# maxdistance=%lu\n",maxdistance);
+  printf("# tag=");
+  showsymbolstringgeneric(stdout,alpha,pattern,patternlength);
+  printf("\n");
   limdfsresources->stack.nextfreeLcpintervalwithinfo = 0;
   assert(maxdistance < patternlength);
   previouscolumn.Pv = ~0UL;
@@ -494,7 +517,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   rboundscount = lcpintervalsplitwithoutspecial(limdfsresources->rbwc,
                                                 limdfsresources->alphasize+1,
                                                 encseq,
-                                                suftab,
+                                                limdfsresources->suftab,
                                                 0,
                                                 0,
                                                 totallength);
@@ -533,13 +556,14 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                            patternlength,
                            maxdistance,
                            &previouscolumn,
-                           suftab[lbound] + 1,
+                           limdfsresources->suftab[lbound],
                            readmode,
                            encseq,
                            totallength))
       {
-        printf("match " FormatSeqpos " %lu+%lu\n",
-               PRINTSeqposcast(suftab[lbound]), matchpref,1UL);
+        showmatch(patternlength,maxdistance,
+                  limdfsresources->suftab[lbound],
+                  (Seqpos) 1,matchpref);
       }
     }
   }
@@ -558,7 +582,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
     printf("\n");
 #endif
     extendchar = lcpintervalextendlcp(encseq,
-                                      suftab,
+                                      limdfsresources->suftab,
                                       &stackptr->lcpitv,
                                       limdfsresources->alphasize);
     previouscolumn = stackptr->column;
@@ -584,9 +608,12 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
       }
       if (stackptr->column.maxleqk == patternlength)
       {
-        printf("success " FormatSeqpos " " FormatSeqpos "\n",
-                PRINTSeqposcast(stackptr->lcpitv.left),
-                PRINTSeqposcast(stackptr->lcpitv.right));
+        for (bound = stackptr->lcpitv.left; bound <= stackptr->lcpitv.right;
+             bound++)
+        {
+          showmatch(patternlength,maxdistance,
+                    limdfsresources->suftab[bound],stackptr->lcpitv.offset,0);
+        }
         assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
         limdfsresources->stack.nextfreeLcpintervalwithinfo--;
       }
@@ -605,11 +632,11 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                               limdfsresources->rbwc,
                               limdfsresources->alphasize+1,
                               encseq,
-                              suftab,
+                              limdfsresources->suftab,
                               stackptr->lcpitv.offset,
                               stackptr->lcpitv.left,
                               stackptr->lcpitv.right);
-      offset = stackptr->lcpitv.offset + 1;
+      offset = stackptr->lcpitv.offset;
       assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
       limdfsresources->stack.nextfreeLcpintervalwithinfo--;
       for (idx=0; idx < rboundscount; idx++)
@@ -625,7 +652,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                                   patternlength,
                                   maxdistance,
                                   stackptr,
-                                  offset,
+                                  offset+1,
                                   lbound,
                                   rbound,
                                   limdfsresources->rbwc[idx].inchar,
@@ -645,14 +672,13 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                                patternlength,
                                maxdistance,
                                &previouscolumn,
-                               suftab[lbound] + offset,
+                               limdfsresources->suftab[lbound] + offset,
                                readmode,
                                encseq,
                                totallength))
           {
-            printf("match " FormatSeqpos " %lu+" FormatSeqpos "\n",
-                   PRINTSeqposcast(suftab[lbound]), matchpref,
-                   PRINTSeqposcast(offset));
+            showmatch(patternlength,maxdistance,
+                      limdfsresources->suftab[lbound],offset,matchpref);
           }
         }
       }

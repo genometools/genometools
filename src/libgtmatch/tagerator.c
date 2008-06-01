@@ -96,7 +96,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
   if (tageratoroptions->maxdistance > 0)
   {
-    limdfsresources = newLimdfsresources(getmapsizeAlphabet(suffixarray.alpha));
+    limdfsresources = newLimdfsresources(getmapsizeAlphabet(suffixarray.alpha),
+                                         suffixarray.suftab);
   }
   seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
   for (tagnumber = 0; /* Nothing */; tagnumber++)
@@ -145,7 +146,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     {
       esalimiteddfs(limdfsresources,
                     suffixarray.encseq,
-                    suffixarray.suftab,
+                    suffixarray.alpha,
                     suffixarray.readmode,
                     transformedtag,
                     taglen,
