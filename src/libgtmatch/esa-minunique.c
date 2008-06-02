@@ -45,7 +45,7 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
                                         suffixarray->suftab,
                                         &itv,
                                         *qptr,
-                                        offset,
+                                        (Seqpos) offset,
                                         itv.left,itv.right))
       {
         break;
@@ -80,7 +80,7 @@ unsigned long suffixarraymstats (const void *genericindex,
                                       suffixarray->suftab,
                                       &itv,
                                       *qptr,
-                                      offset,
+                                      (Seqpos) offset,
                                       itv.left,itv.right))
     {
       if (witnessposition != NULL)
