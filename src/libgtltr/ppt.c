@@ -17,14 +17,97 @@
 
 #include <assert.h>
 #include <math.h>
+#include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/mathsupport.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/array.h"
+#include "libgtext/reverse.h"
 #include "libgtltr/ppt.h"
 
-HMM* ppt_hmm_new(const Alpha *alpha)
+
+/* This enumeration defines the states in the PPT detection HMM. */
+typedef enum {
+  PPT_IN,
+  PPT_OUT,
+  PPT_UBOX,
+  PPT_N,
+  PPT_NOF_STATES
+} PPT_States;
+
+struct PPTHit {
+  Range rng;
+  double score;
+  PPT_States state;
+  PPTHit *ubox;
+  Strand strand;
+  PPTResults *res;
+};
+
+struct PPTResults {
+  Array *hits;
+  PPTHit *best_hit;
+  LTRElement *elem;
+  PPTOptions *opts;
+};
+
+static PPTResults* ppt_results_new()
+{
+  PPTResults *res = ma_calloc(1, sizeof(PPTResults));
+  assert(res);
+  return res;
+}
+
+static PPTHit* ppt_hit_new(Strand strand, PPTResults *r)
+{
+  PPTHit *h = ma_calloc(1, sizeof(PPTHit));
+  assert(h);
+  h->strand = strand;
+  h->res = r;
+  h->score = 0.0;
+  return h;
+}
+
+Range ppt_hit_get_coords(PPTHit *h)
+{
+  Range r;
+  assert(h);
+  r.start = h->rng.start;
+  r.end = h->rng.end;
+  ltrelement_offset2pos(h->res->elem,
+                        &r,
+                        h->res->opts->radius,
+                        OFFSET_BEGIN_RIGHT_LTR,
+                        h->strand);
+  return r;
+}
+
+PPTHit* ppt_hit_get_ubox(PPTHit *h)
+{
+  assert(h);
+  return (h->ubox ? h->ubox : NULL);
+}
+
+Strand ppt_hit_get_strand(PPTHit *h)
+{
+  assert(h);
+  return h->strand;
+}
+
+unsigned long ppt_results_get_number_of_hits(PPTResults *r)
+{
+  assert(r);
+  return array_size(r->hits);
+}
+
+PPTHit* ppt_results_get_ranked_hit(PPTResults *r, unsigned long i)
+{
+  assert(r);
+  return *(PPTHit**) array_get(r->hits, i);
+}
+
+static HMM* ppt_hmm_new(const Alpha *alpha)
 {
   HMM *hmm;
 
@@ -70,117 +153,135 @@ HMM* ppt_hmm_new(const Alpha *alpha)
   return hmm;
 }
 
-double ppt_score(unsigned long posdiff, unsigned int width)
+static double ppt_score(unsigned long radius, unsigned long end)
 {
-  double score, optscore;
-  optscore = pow(width,4);
-  score = (-pow(posdiff,4))+optscore;
-  return score/optscore;
+  double ret;
+  unsigned long r2;
+  r2 = radius * radius;
+  ret = ((double) r2 - pow(abs((double) radius - (double) end),2))/(double) r2;
+  return ret;
 }
 
-unsigned long score_hits(Array *results, unsigned long seqlen,
-                         unsigned long ltrlen, unsigned int radius)
+static int ppt_hit_cmp(const void *h1, const void *h2)
 {
+  PPTHit* ph1 = *(PPTHit**) h1;
+  PPTHit* ph2 = *(PPTHit**) h2;
+  assert(h1 && h2);
+  return double_compare(ph2->score, ph1->score);
+}
+
+static bool ubox_ok(PPTHit *hit, Range uboxlen)
+{
+  assert(hit);
+  return (hit->state == PPT_UBOX
+           && hit->rng.end-hit->rng.start+1 >= uboxlen.start
+           && hit->rng.end-hit->rng.start+1 <= uboxlen.end);
+}
+
+static bool ppt_ok(PPTHit *hit, Range pptlen)
+{
+  assert(hit);
+  return (hit->state == PPT_IN
+           && hit->rng.end-hit->rng.start+1 >= pptlen.start
+           && hit->rng.end-hit->rng.start+1 <= pptlen.end);
+}
+
+static void group_hits(unsigned int *decoded, PPTResults *results,
+                       unsigned long radius, Strand strand)
+{
+  PPTHit *cur_hit = NULL,
+         *tmp = NULL;
   unsigned long i = 0,
-                highest_index = UNDEF_ULONG;
-  double highest_score = 0.0;
-
-  assert(results);
-
-  /* score and report PPTs */
-  for (i=0;i<array_size(results);i++)
-  {
-    PPT_Hit *hit = *(PPT_Hit**) array_get(results,i);
-    assert(hit->end >= hit->start);
-    if (hit->state == PPT_IN)
-    {
-      hit->score = ppt_score(abs((seqlen-ltrlen-1)
-                                 -(seqlen-ltrlen-1)-radius+hit->end),
-                            radius);
-      if (i>0)
-      {
-        PPT_Hit *uhit = *(PPT_Hit**) array_get(results,i-1);
-        if (uhit->state == PPT_UBOX)
-          /* this PPT has a U-box, handle accordingly */
-          hit->ubox = uhit;
-      }
-      if (double_compare(hit->score, highest_score) > 0)
-      {
-        highest_index = i;
-        highest_score = hit->score;
-      }
-    }
-  }
-  return highest_index;
-}
-
-void group_hits(unsigned int *decoded, Array *results, PPTOptions *o,
-                unsigned long radius, Strand strand)
-{
-  PPT_Hit *cur_hit;
-  unsigned long i = 0;
-
-  assert(decoded && results && o && strand != STRAND_UNKNOWN);
+                ltrlen = 0;
+  
+  assert(decoded && results && 	strand != STRAND_UNKNOWN);
 
   /* group hits into stretches */
-  cur_hit = ma_malloc(sizeof (PPT_Hit));
-  cur_hit->start = 0UL;
-  cur_hit->score = 0.0;
-  cur_hit->strand = strand;
-  cur_hit->ubox = NULL;
+  cur_hit = ppt_hit_new(strand, results);
   for (i=0;i<2*radius-1;i++)
   {
     cur_hit->state = decoded[i];
-    cur_hit->end=i;
+    cur_hit->rng.end=i;
     if (decoded[i+1] != decoded[i] || i+2==2*radius)
     {
-      if ((cur_hit->state == PPT_IN
-           && cur_hit->end-cur_hit->start+1 >= o->ppt_len.start
-           && cur_hit->end-cur_hit->start+1 <= o->ppt_len.end)
-          || (cur_hit->state == PPT_UBOX
-           && cur_hit->end-cur_hit->start+1 >= o->ubox_len.start
-           && cur_hit->end-cur_hit->start+1 <= o->ubox_len.end))
-        array_add(results, cur_hit);
-      else {
-        cur_hit->state = PPT_OUT;
-        array_add(results, cur_hit);
+      switch(cur_hit->state)
+      {
+        case PPT_UBOX:
+          if(ubox_ok(cur_hit, results->opts->ubox_len))
+            tmp = cur_hit;
+          else
+          {
+            ma_free(tmp);
+            tmp = NULL;
+            ma_free(cur_hit);
+            cur_hit = NULL;
+          }
+          break;
+        case PPT_IN:
+          if (ppt_ok(cur_hit, results->opts->ppt_len))
+          {
+            ltrlen = (cur_hit->strand == STRAND_FORWARD ?
+                             ltrelement_rightltrlen(results->elem) :
+                             ltrelement_leftltrlen(results->elem));
+            cur_hit->score = ppt_score(radius, cur_hit->rng.end);
+            array_add(results->hits, cur_hit);
+            if (tmp)
+            {
+              /* this PPT has a U-box, handle accordingly */
+              cur_hit->ubox = tmp;
+              tmp = NULL;
+            }
+          }
+          else
+          {
+            ma_free(tmp);
+            tmp = NULL;
+            ma_free(cur_hit);
+            cur_hit = NULL;
+          }
+          break;
+        default:
+          ma_free(tmp);
+          tmp = NULL;
+          ma_free(cur_hit);
+          cur_hit = NULL;
+          break;
       }
       if (i+2!=2*radius)
       {
-        cur_hit = ma_malloc(sizeof (PPT_Hit));
-        cur_hit->start = i+1;
-        cur_hit->score = 0.0;
-        cur_hit->strand = strand;
-        cur_hit->ubox = NULL;
+        cur_hit = ppt_hit_new(strand,results);
+        cur_hit->rng.start = i+1;
       }
     }
   }
-  cur_hit->end++;
+  if (cur_hit) 
+    cur_hit->rng.end++; 
+  ma_free(tmp);
+  tmp = NULL;
 }
 
-void ppt_find(const char *seq,
-              const char *rev_seq,
-              LTRElement *element,
-              PPTResults *results,
-              PPTOptions *o)
+PPTResults* ppt_find(const char *seq,
+                     const char *rev_seq,
+                     LTRElement *element,
+                     PPTOptions *o)
 {
   unsigned int *encoded_seq=NULL,
                *decoded=NULL;
   const Alpha *alpha;
   HMM *hmm;
-  Array *results_fwd, *results_rev;
+  PPTResults *results = NULL;
   unsigned long i = 0,
                 radius = 0,
                 seqlen = ltrelement_length(element),
-                highest_fwd,
-                highest_rev,
-                ltrlen;
-  PPT_Hit *tmp;
+                ltrlen = 0;
 
-  assert(seq && rev_seq && element && results && o);
-
-  results_fwd = array_new(sizeof (PPT_Hit*));
-  results_rev = array_new(sizeof (PPT_Hit*));
+  assert(seq && rev_seq && element && o);
+  
+  results = ppt_results_new();
+  results->elem = element;
+  results->opts = o;
+  results->hits = array_new(sizeof (PPTHit*));
+  
   alpha = alpha_new_dna();
   hmm = ppt_hmm_new(alpha);
 
@@ -200,19 +301,13 @@ void ppt_find(const char *seq,
   /* use Viterbi algorithm to decode emissions within radius */
   decoded = ma_malloc(sizeof (unsigned int) * 2*radius+1);
   hmm_decode(hmm, decoded, encoded_seq+seqlen-ltrlen-radius+1, 2*radius);
-  group_hits(decoded, results_fwd, o, radius, STRAND_FORWARD);
-  highest_fwd = score_hits(results_fwd, seqlen, ltrlen, radius);
-  results->hits_fwd = results_fwd;
-  if (highest_fwd != UNDEF_ULONG)
-  {
-    tmp = *(PPT_Hit**) array_get(results_fwd, highest_fwd);
-    results->best_hit = tmp;
-  }
+  group_hits(decoded, results, radius, STRAND_FORWARD);
   /* radius length may change in the next strand, so reallocate */
   ma_free(decoded);
 
   /* do PPT finding on reverse strand
    * -------------------------------- */
+   
   ltrlen = ltrelement_leftltrlen(element);
   /* make sure that we do not cross the LTR boundary */
   radius = MIN(o->radius, ltrlen-1);
@@ -224,46 +319,70 @@ void ppt_find(const char *seq,
   /* use Viterbi algorithm to decode emissions within radius */
   decoded = ma_malloc(sizeof (unsigned int) * 2*radius+1);
   hmm_decode(hmm, decoded, encoded_seq+seqlen-ltrlen-radius, 2*radius);
-  group_hits(decoded, results_rev, o, radius, STRAND_REVERSE);
-  highest_rev = score_hits(results_rev, seqlen, ltrlen, radius);
-  results->hits_rev = results_rev;
-  if (highest_rev != UNDEF_ULONG)
-  {
-    tmp = *(PPT_Hit**) array_get(results_rev, highest_rev);
-    if (!results->best_hit
-          || double_compare(tmp->score, results->best_hit->score) > 0)
-      results->best_hit = tmp;
-  }
+  group_hits(decoded, results, radius, STRAND_REVERSE);
 
+  /* rank hits by descending score */
+  array_sort(results->hits, ppt_hit_cmp);
+  
   ma_free(encoded_seq);
   ma_free(decoded);
   alpha_delete((Alpha*) alpha);
   hmm_delete(hmm);
+  
+  return results;
 }
 
-void ppt_clear_results(PPTResults *results)
+void ppt_results_delete(PPTResults *results)
 {
   unsigned long i;
 
   if (!results) return;
 
-  if (results->hits_fwd)
+  if (results->hits)
   {
-    for (i=0;i<array_size(results->hits_fwd);i++)
+    for (i=0;i<array_size(results->hits);i++)
     {
-      PPT_Hit * hit = *(PPT_Hit**) array_get(results->hits_fwd,i);
+      PPTHit * hit = *(PPTHit**) array_get(results->hits,i);
+      if (hit->ubox) 
+        ma_free(hit->ubox);
       ma_free(hit);
     }
-    array_delete(results->hits_fwd);
+    array_delete(results->hits);
   }
-  if (results->hits_rev)
-  {
-    for (i=0;i<array_size(results->hits_rev);i++)
+  ma_free(results);
+}
 
-    {
-      PPT_Hit * hit = *(PPT_Hit**) array_get(results->hits_rev,i);
-      ma_free(hit);
-    }
-    array_delete(results->hits_rev);
-  }
+int ppt_unit_test(Error *err)
+{
+  int had_err = 0;
+  PPTOptions o;
+  PPTResults *rs;
+  PPTHit *h;
+  LTRElement element;
+  Range rng;
+  const char *seq = "gatcagtcgactcgatcgactcgatcgactcgagcacggcgacgatgctggtcggctaactggggggggaggatcgacttcgactcgacgatcgactcga";
+  char *rev_seq = ma_malloc(strlen(seq)*sizeof(char*));
+  
+  memcpy(rev_seq, seq, sizeof (char) * strlen(seq));
+  reverse_complement(rev_seq,strlen(seq),err);
+  element.leftLTR_3 = 21;
+  element.leftLTR_5 = 0;
+  element.rightLTR_3 = 99;
+  element.rightLTR_5 = 72;
+  memset(&o, 0, sizeof(PPTOptions));
+  o.ppt_len.start = 5;
+  o.ppt_len.end = 15;
+  o.ubox_len.start = 2;
+  o.ubox_len.end = 15;
+  o.radius = 12;
+  rs = ppt_find(seq, rev_seq, &element, &o);
+ 
+  ensure(had_err, ppt_results_get_number_of_hits(rs));
+  h = ppt_results_get_ranked_hit(rs, 0);
+  ensure(had_err, h);
+  rng = ppt_hit_get_coords(h);
+  ensure(had_err, rng.start == 61);
+  ensure(had_err, rng.end == 72);
+  ma_free(rev_seq);
+  return had_err;
 }

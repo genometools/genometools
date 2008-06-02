@@ -40,6 +40,7 @@
 #include "libgtext/string_matching.h"
 #include "libgtext/union_find.h"
 #include "libgtltr/ltrelement.h"
+#include "libgtltr/ppt.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_chseqids.h"
@@ -159,6 +160,7 @@ Hashtable* gtt_unit_tests(void)
   hashtable_add(unit_tests, "hashtable class", hashtable_unit_test);
   hashtable_add(unit_tests, "hmm class", hmm_unit_test);
   hashtable_add(unit_tests, "ltrelement module", ltrelement_unit_test);
+  hashtable_add(unit_tests, "PPT module", ppt_unit_test);
   hashtable_add(unit_tests, "range class", range_unit_test);
   hashtable_add(unit_tests, "safearith module", safearith_unit_test);
   hashtable_add(unit_tests, "safearith example", safearith_example);

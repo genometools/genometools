@@ -40,7 +40,7 @@ static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   LTRVisitor *lv;
   Range node_range;
   Array *pdomarr = NULL;
-  const char* pfamname;
+  const char *pfamname;
   lv = ltr_visitor_cast(gv);
   assert(lv);
   error_check(err);

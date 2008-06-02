@@ -267,7 +267,7 @@ int gt_ltrdigest_arguments_check(UNUSED int rest_argc, void *tool_arguments,
   return had_err;
 }
 
-static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
+static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
                                int parsed_args, void *tool_arguments,
                                Error *err)
 {
@@ -323,11 +323,11 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
   {
     /* set up stream flow
      * ------------------*/
-    gff3_in_stream  = gff3_in_stream_new_sorted(argv[arg],
+    last_stream = gff3_in_stream  = gff3_in_stream_new_sorted(argv[arg],
                                                 arguments->verbose &&
                                                 arguments->outfp);
 
-    ltrdigest_stream = ltrdigest_stream_new(gff3_in_stream,
+    last_stream = ltrdigest_stream = ltrdigest_stream_new(last_stream,
                                             tests_to_run,
                                             bioseq,
                                             &arguments->pbs_opts,
@@ -337,7 +337,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
     /* attach tabular output stream, if requested */
     if (str_length(arguments->prefix) > 0)
     {
-      tab_out_stream = ltr_fileout_stream_new(ltrdigest_stream,
+      last_stream = tab_out_stream = ltr_fileout_stream_new(last_stream,
                                               tests_to_run,
                                               bioseq,
                                               str_get(arguments->prefix),
@@ -345,33 +345,30 @@ static int gt_ltrdigest_runner(UNUSED int argc, UNUSED const char **argv,
                                               &arguments->pbs_opts,
                                               &arguments->pdom_opts,
                                               str_get(arguments->trna_lib),
-                                              argv[1],
-                                              argv[0],
+                                              argv[arg+1],
+                                              argv[arg],
                                               arguments->seqnamelen);
-      last_stream = tab_out_stream;
     }
-    else
-    {
-      last_stream = ltrdigest_stream;
-     }
 
-    gff3_out_stream = gff3_out_stream_new(last_stream, arguments->outfp);
+    last_stream = gff3_out_stream = gff3_out_stream_new(last_stream,
+                                                        arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
-           gn) {
+    while (!(had_err = genome_stream_next_tree(last_stream, &gn, err)) &&
+           gn)
+    {
       genome_node_rec_delete(gn);
     }
-
+    
     genome_stream_delete(gff3_out_stream);
     genome_stream_delete(ltrdigest_stream);
     if (tab_out_stream)
-    {
       genome_stream_delete(tab_out_stream);
-    }
     genome_stream_delete(gff3_in_stream);
     pdom_clear_hmms(arguments->pdom_opts.plan7_ts);
   }
+  else
+     array_delete(arguments->pdom_opts.plan7_ts);
 
   bioseq_delete(bioseq);
   bioseq_delete(arguments->pbs_opts.trna_lib);

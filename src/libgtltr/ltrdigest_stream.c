@@ -124,24 +124,22 @@ static void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
   genome_node_is_part_of_genome_node((GenomeNode*) element->mainnode, gf);
 }
 
-static void ppt_attach_results_to_gff3(PPTResults *results, LTRElement *element,
-                                       Str *tag, unsigned int radius)
+static void ppt_attach_results_to_gff3(PPTResults *results,
+                                       LTRElement *element,
+                                       Str *tag)
 {
   Range ppt_range;
   GenomeNode *gf;
-  ppt_range.start = results->best_hit->start;
-  ppt_range.end   = results->best_hit->end;
-  ltrelement_offset2pos(element, &ppt_range, radius,
-                        OFFSET_BEGIN_RIGHT_LTR,
-                        results->best_hit->strand);
-  results->best_hit->start = ppt_range.start;
-  results->best_hit->end = ppt_range.end;
+  PPTHit* hit = ppt_results_get_ranked_hit(results, 0);
+  ppt_range = ppt_hit_get_coords(hit);
   gf = genome_feature_new(gft_RR_tract,
                           ppt_range,
-                          results->best_hit->strand,
+                          ppt_hit_get_strand(hit),
                           NULL,
                           UNDEF_ULONG);
   genome_feature_set_source(gf, tag);
+  genome_feature_set_strand((GenomeNode*) element->mainnode,
+                            ppt_hit_get_strand(hit));
   genome_node_set_seqid((GenomeNode*) gf,
                         genome_node_get_idstr(
                           (GenomeNode*) element->mainnode));
@@ -151,7 +149,7 @@ static void ppt_attach_results_to_gff3(PPTResults *results, LTRElement *element,
 static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
                           Error *err)
 {
-  PPTResults ppt_results;
+  PPTResults *ppt_results;
   PBSResults pbs_results;
   PdomResults pdom_results;
   char *rev_seq;
@@ -165,7 +163,6 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
   (void) reverse_complement(rev_seq, seqlen, err);
 
   /* initialize results */
-  memset(&ppt_results, 0, sizeof (PPTResults));
   memset(&pbs_results, 0, sizeof (PBSResults));
   memset(&pdom_results, 0, sizeof (PdomResults));
 
@@ -173,15 +170,14 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
    * -----------*/
   if (ls->tests_to_run & LTRDIGEST_RUN_PPT)
   {
-    ppt_find((const char*) base_seq, (const char*) rev_seq,
-             element, &ppt_results, ls->ppt_opts);
-    if (ppt_results.best_hit)
+    ppt_results = ppt_find((const char*) base_seq, (const char*) rev_seq,
+                            element, ls->ppt_opts);
+    if (ppt_results_get_number_of_hits(ppt_results) > 0)
     {
-      ppt_attach_results_to_gff3(&ppt_results, element,
-                                 ls->ltrdigest_tag, ls->pbs_opts->radius);
-      genome_feature_set_strand((GenomeNode *) ls->element.mainnode,
-                                  ppt_results.best_hit->strand);
+      ppt_attach_results_to_gff3(ppt_results, element,
+                                 ls->ltrdigest_tag);
     }
+    ppt_results_delete(ppt_results);
   }
 
   /* PBS finding
@@ -231,7 +227,6 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
     hashtable_delete(pdom_results.domains);
   }
   ma_free(rev_seq);
-  ppt_clear_results(&ppt_results);
   pbs_clear_results(&pbs_results);
 }
 
@@ -267,21 +262,21 @@ int ltrdigest_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
     Seq *seq;
     Range elemrng;
 
-    /* TODO: use MD5 hashes to identify sequence */
     sreg = str_get(genome_node_get_seqid((GenomeNode*) ls->element.mainnode));
     (void) sscanf(sreg,"seq%lu", &seqid);
     seq = bioseq_get_seq(ls->bioseq, seqid);
 
     /* run LTRdigest core routine */
     elemrng = genome_node_get_range((GenomeNode*) ls->element.mainnode);
-    /* do not process elements whose positions exceed sequence boundaries 
+    /* do not process elements whose positions exceed sequence boundaries
        (obviously annotation and sequence do not match!) */
-    if(elemrng.end <= seq_length(seq))
+    if (elemrng.end <= seq_length(seq))
       run_ltrdigest(&ls->element, seq, ls, e);
     else
     {
-      error_set(e, "Element '%s' exceeds sequence boundaries!",
-            genome_feature_get_attribute((GenomeNode*) ls->element.mainnode, "ID"));
+      error_set(e, "Element '%s' exceeds sequence boundaries! (%lu > %lu)",
+        genome_feature_get_attribute((GenomeNode*) ls->element.mainnode, "ID"),
+        elemrng.end, seq_length(seq));
       had_err = -1;
     }
   }
