@@ -113,8 +113,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     }
     if (taglen > (unsigned long) MAXTAGSIZE)
     {
-      error_set(err,"tag of length %lu; tags must not be longer than %d",
-                     taglen,MAXTAGSIZE);
+      error_set(err,"tag of length %lu; tags must not be longer than %lu",
+                     taglen, (unsigned long) MAXTAGSIZE);
       haserr = true;
       ma_free(desc);
       break;
