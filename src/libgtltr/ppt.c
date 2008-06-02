@@ -26,7 +26,6 @@
 #include "libgtext/reverse.h"
 #include "libgtltr/ppt.h"
 
-
 /* This enumeration defines the states in the PPT detection HMM. */
 typedef enum {
   PPT_IN,
@@ -54,14 +53,14 @@ struct PPTResults {
 
 static PPTResults* ppt_results_new()
 {
-  PPTResults *res = ma_calloc(1, sizeof(PPTResults));
+  PPTResults *res = ma_calloc(1, sizeof (PPTResults));
   assert(res);
   return res;
 }
 
 static PPTHit* ppt_hit_new(Strand strand, PPTResults *r)
 {
-  PPTHit *h = ma_calloc(1, sizeof(PPTHit));
+  PPTHit *h = ma_calloc(1, sizeof (PPTHit));
   assert(h);
   h->strand = strand;
   h->res = r;
@@ -193,8 +192,8 @@ static void group_hits(unsigned int *decoded, PPTResults *results,
          *tmp = NULL;
   unsigned long i = 0,
                 ltrlen = 0;
-  
-  assert(decoded && results && 	strand != STRAND_UNKNOWN);
+
+  assert(decoded && results && strand != STRAND_UNKNOWN);
 
   /* group hits into stretches */
   cur_hit = ppt_hit_new(strand, results);
@@ -204,10 +203,10 @@ static void group_hits(unsigned int *decoded, PPTResults *results,
     cur_hit->rng.end=i;
     if (decoded[i+1] != decoded[i] || i+2==2*radius)
     {
-      switch(cur_hit->state)
+      switch (cur_hit->state)
       {
         case PPT_UBOX:
-          if(ubox_ok(cur_hit, results->opts->ubox_len))
+          if (ubox_ok(cur_hit, results->opts->ubox_len))
             tmp = cur_hit;
           else
           {
@@ -254,8 +253,8 @@ static void group_hits(unsigned int *decoded, PPTResults *results,
       }
     }
   }
-  if (cur_hit) 
-    cur_hit->rng.end++; 
+  if (cur_hit)
+    cur_hit->rng.end++;
   ma_free(tmp);
   tmp = NULL;
 }
@@ -276,12 +275,12 @@ PPTResults* ppt_find(const char *seq,
                 ltrlen = 0;
 
   assert(seq && rev_seq && element && o);
-  
+
   results = ppt_results_new();
   results->elem = element;
   results->opts = o;
   results->hits = array_new(sizeof (PPTHit*));
-  
+
   alpha = alpha_new_dna();
   hmm = ppt_hmm_new(alpha);
 
@@ -307,7 +306,7 @@ PPTResults* ppt_find(const char *seq,
 
   /* do PPT finding on reverse strand
    * -------------------------------- */
-   
+
   ltrlen = ltrelement_leftltrlen(element);
   /* make sure that we do not cross the LTR boundary */
   radius = MIN(o->radius, ltrlen-1);
@@ -323,12 +322,12 @@ PPTResults* ppt_find(const char *seq,
 
   /* rank hits by descending score */
   array_sort(results->hits, ppt_hit_cmp);
-  
+
   ma_free(encoded_seq);
   ma_free(decoded);
   alpha_delete((Alpha*) alpha);
   hmm_delete(hmm);
-  
+
   return results;
 }
 
@@ -343,7 +342,7 @@ void ppt_results_delete(PPTResults *results)
     for (i=0;i<array_size(results->hits);i++)
     {
       PPTHit * hit = *(PPTHit**) array_get(results->hits,i);
-      if (hit->ubox) 
+      if (hit->ubox)
         ma_free(hit->ubox);
       ma_free(hit);
     }
@@ -360,23 +359,24 @@ int ppt_unit_test(Error *err)
   PPTHit *h;
   LTRElement element;
   Range rng;
-  const char *seq = "gatcagtcgactcgatcgactcgatcgactcgagcacggcgacgatgctggtcggctaactggggggggaggatcgacttcgactcgacgatcgactcga";
-  char *rev_seq = ma_malloc(strlen(seq)*sizeof(char*));
-  
+  const char *seq = "gatcagtcgactcgatcgactcgatcgactcgagcacggcgacgat"
+                    "gctggtcggctaactggggggggaggatcgacttcgactcgacgatcgactcga";
+  char *rev_seq = ma_malloc(strlen(seq)*sizeof (char*));
+
   memcpy(rev_seq, seq, sizeof (char) * strlen(seq));
   reverse_complement(rev_seq,strlen(seq),err);
   element.leftLTR_3 = 21;
   element.leftLTR_5 = 0;
   element.rightLTR_3 = 99;
   element.rightLTR_5 = 72;
-  memset(&o, 0, sizeof(PPTOptions));
+  memset(&o, 0, sizeof (PPTOptions));
   o.ppt_len.start = 5;
   o.ppt_len.end = 15;
   o.ubox_len.start = 2;
   o.ubox_len.end = 15;
   o.radius = 12;
   rs = ppt_find(seq, rev_seq, &element, &o);
- 
+
   ensure(had_err, ppt_results_get_number_of_hits(rs));
   h = ppt_results_get_ranked_hit(rs, 0);
   ensure(had_err, h);
