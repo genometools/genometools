@@ -25,7 +25,7 @@
 #include "libgtcore/undef.h"
 #include "libgtext/string_matching.h"
 
-#define NUM_OF_TESTS        500
+#define NUM_OF_TESTS        256
 #define MAX_STRING_LENGTH   100000
 #define MAX_PATTERN_LENGTH  66
 
