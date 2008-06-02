@@ -172,6 +172,14 @@ void string_matching_brute_force(const char *s, unsigned long n,
   }
 }
 
+static bool store_first_match(unsigned long pos, void *data)
+{
+  unsigned long *match = data;
+  assert(match);
+  *match = pos;
+  return true;
+}
+
 static bool store_match(unsigned long pos, void *data)
 {
   Array *positions = data;
@@ -187,7 +195,7 @@ int string_matching_unit_test(Error *err)
         *bmh_matches,
         *kmp_matches,
         *shift_and_matches;
-  unsigned long i;
+  unsigned long i, brute_force_match, bmh_match, kmp_match, shift_and_match;
   int had_err = 0;
 
   error_check(err);
@@ -219,12 +227,26 @@ int string_matching_unit_test(Error *err)
       s[j] = rand_char();
     for (j = 0; j < m; j++)
       p[j] = rand_char();
-    /* matching */
+    /* matching (first match) */
+    brute_force_match = UNDEF_ULONG;
+    bmh_match = UNDEF_ULONG;
+    kmp_match = UNDEF_ULONG;
+    shift_and_match = UNDEF_ULONG;
+    string_matching_brute_force(s, n, p, m, store_first_match,
+                                &brute_force_match);
+    string_matching_bmh(s, n, p, m, store_first_match, &bmh_match);
+    string_matching_kmp(s, n, p, m, store_first_match, &kmp_match);
+    string_matching_shift_and(s, n, p, m, store_first_match, &shift_and_match);
+    /* comparing (first match) */
+    ensure(had_err, brute_force_match == bmh_match);
+    ensure(had_err, brute_force_match == kmp_match);
+    ensure(had_err, brute_force_match == shift_and_match);
+    /* matching (all matches) */
     string_matching_brute_force(s, n, p, m, store_match, brute_force_matches);
     string_matching_bmh(s, n, p, m, store_match, bmh_matches);
     string_matching_kmp(s, n, p, m, store_match, kmp_matches);
     string_matching_shift_and(s, n, p, m, store_match, shift_and_matches);
-    /* comparing */
+    /* comparing (all matches) */
     ensure(had_err, array_size(brute_force_matches) == array_size(bmh_matches));
     ensure(had_err, array_size(brute_force_matches) == array_size(kmp_matches));
     ensure(had_err, array_size(brute_force_matches) ==
