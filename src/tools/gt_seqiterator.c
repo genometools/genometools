@@ -229,6 +229,7 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
   }
   while (true)
   {
+    desc = NULL;
     had_err = seqiterator_next(seqit, &sequence, &len, &desc, err);
     if (seqiteroptions.dodistlen)
     {
