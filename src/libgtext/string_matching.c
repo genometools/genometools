@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include <limits.h>
+#include <string.h>
 #include "libgtcore/bittab.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
@@ -181,7 +182,7 @@ static bool store_match(unsigned long pos, void *data)
 
 int string_matching_unit_test(Error *err)
 {
-  char s[MAX_STRING_LENGTH+1], p[MAX_PATTERN_LENGTH+1];
+  char s[MAX_STRING_LENGTH+1], p[MAX_PATTERN_LENGTH+1], *text = "foo";
   Array *brute_force_matches,
         *bmh_matches,
         *kmp_matches,
@@ -195,6 +196,19 @@ int string_matching_unit_test(Error *err)
   bmh_matches = array_new(sizeof (unsigned long));
   kmp_matches = array_new(sizeof (unsigned long));
   shift_and_matches = array_new(sizeof (unsigned long));
+
+  /* match the empty pattern */
+  string_matching_brute_force(text, strlen(text), "", 0, store_match,
+                              brute_force_matches);
+  string_matching_bmh(text, strlen(text), "", 0, store_match, bmh_matches);
+  string_matching_kmp(text, strlen(text), "", 0, store_match, kmp_matches);
+  string_matching_shift_and(text, strlen(text), "", 0, store_match,
+                            shift_and_matches);
+
+  ensure(had_err, !array_size(brute_force_matches));
+  ensure(had_err, !array_size(bmh_matches));
+  ensure(had_err, !array_size(kmp_matches));
+  ensure(had_err, !array_size(shift_and_matches));
 
   for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
     unsigned long j, n, m;
