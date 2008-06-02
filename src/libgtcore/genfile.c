@@ -43,15 +43,11 @@ GenFileMode genfilemode_determine(const char *path)
 
   assert(path);
   path_length = strlen(path);
-  
+
   if (path_length >= 4 && strcmp(".gz", path + path_length - 3) == 0)
-  {
     return GFM_GZIP;
-  }
   if (path_length >= 5 && strcmp(".bz2", path + path_length - 4) == 0)
-  {
     return GFM_BZIP2;
-  }
   return GFM_UNCOMPRESSED;
 }
 
@@ -79,14 +75,11 @@ size_t genfile_basename_length(const char *path)
 
   assert(path);
   path_length = strlen(path);
+
   if (path_length >= 4 && strcmp(".gz", path + path_length - 3) == 0)
-  {
     return path_length - 3;
-  }
-  if (path_length >= 5 && !strcmp(".bz2", path + path_length - 4) == 0)
-  {
+  if (path_length >= 5 && strcmp(".bz2", path + path_length - 4) == 0)
     return path_length - 4;
-  }
   return path_length;
 }
 
