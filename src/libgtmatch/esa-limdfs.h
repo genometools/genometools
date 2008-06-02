@@ -15,21 +15,25 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_STRATEGY_H
-#define SFX_STRATEGY_H
+#ifndef ESA_LIMDFS_H
+#define ESA_LIMDFS_H
 
-#include <stdbool.h>
-#include "defined-types.h"
+#include "seqpos-def.h"
+#include "alphadef.h"
+#include "encseq-def.h"
 
-typedef struct
-{
-  Definedunsignedint maxdepth;
-  unsigned long maxwidthrealmedian,
-                maxbltriesort;
-  bool cmpcharbychar, /* compare suffixes character by character instead
-                         of comparing entire words (only for two bit
-                         encoding */
-       storespecialcodes;
-} Sfxstrategy;
+typedef struct Limdfsresources Limdfsresources;
+
+Limdfsresources *newLimdfsresources(unsigned int mapsize,const Seqpos *suftab);
+
+void freeLimdfsresources(Limdfsresources **ptrlimdfsresources);
+
+void esalimiteddfs(Limdfsresources *limdfsresources,
+                   const Encodedsequence *encseq,
+                   const Alphabet *alpha,
+                   Readmode readmode,
+                   const Uchar *pattern,
+                   unsigned long patternlength,
+                   unsigned long maxdistance);
 
 #endif

@@ -33,13 +33,6 @@ typedef struct
                 specialsinbucket;
 } Bucketspecification;
 
-typedef struct
-{
-  Seqpos offset,
-         left,
-         right;
-} Lcpinterval;
-
 typedef struct Outlcpinfo Outlcpinfo;
 
 typedef struct Bcktab Bcktab;

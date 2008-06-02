@@ -16,92 +16,11 @@
 */
 
 #include "libgtcore/chardef.h"
-#include "libgtcore/minmax.h"
 #include "libgtcore/symboldef.h"
 #include "libgtcore/unused.h"
 #include "sarr-def.h"
 #include "seqpos-def.h"
-#include "divmodmul.h"
-
-typedef struct
-{
-  Seqpos left,
-         right;
-} Simplelcpinterval;
-
-#define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \
-                             ? (Uchar) SEPARATOR\
-                             : getencodedchar(ENCSEQ,POS,Forwardmode))
-
-static Seqpos findright(const Encodedsequence *encseq,
-                        const Seqpos *suftab,
-                        Uchar cc,
-                        unsigned long offset,
-                        Seqpos l,
-                        Seqpos r)
-{
-  Seqpos pos, mid, totallength = getencseqtotallength(encseq);
-  Uchar midcc;
-
-  while (r > l+1)
-  {
-    mid = DIV2(l+r);
-    pos = suftab[mid] + offset;
-    midcc = SEQUENCE(encseq,pos);
-    if (cc < midcc)
-    {
-      r = mid;
-    } else
-    {
-      l = mid;
-    }
-  }
-  return l;
-}
-
-static bool findcharintervalbin(const Encodedsequence *encseq,
-                                const Seqpos *suftab,
-                                Simplelcpinterval *itv,
-                                Uchar cc,
-                                unsigned long lcpvalue,
-                                Seqpos i,
-                                Seqpos j)
-{
-  Uchar leftcc, rightcc;
-  Seqpos pos, rightbound, leftbound = i,
-         totallength = getencseqtotallength(encseq);
-
-  pos = suftab[j] + lcpvalue;
-  rightcc = SEQUENCE(encseq,pos);
-  while (true)
-  {
-    pos = suftab[leftbound] + lcpvalue;
-    leftcc = SEQUENCE(encseq,pos);
-    if (leftcc == rightcc)
-    {
-      break;
-    }
-    rightbound = findright(encseq,suftab,leftcc,lcpvalue,leftbound,j);
-    if (leftcc == cc)
-    {
-      itv->left = leftbound;
-      itv->right = rightbound;
-      return true;
-    }
-    if (leftcc > cc)
-    {
-      return false;
-    }
-    leftbound = rightbound+1;
-  }
-  if (leftcc == cc)
-  {
-    itv->left = leftbound;
-    itv->right = j;
-    return true;
-  }
-  return false;
-}
+#include "esa-splititv.h"
 
 unsigned long suffixarrayuniqueforward (const void *genericindex,
                                         unsigned long offset,
@@ -122,12 +41,12 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
     if (itv.left < itv.right)
     {
       if (qptr >= qend || ISSPECIAL(*qptr) ||
-          !findcharintervalbin(suffixarray->encseq,
-                               suffixarray->suftab,
-                               &itv,
-                               *qptr,
-                               offset,
-                               itv.left,itv.right))
+          !lcpintervalfindcharchildintv(suffixarray->encseq,
+                                        suffixarray->suftab,
+                                        &itv,
+                                        *qptr,
+                                        offset,
+                                        itv.left,itv.right))
       {
         break;
       }
@@ -157,12 +76,12 @@ unsigned long suffixarraymstats (const void *genericindex,
   {
     assert(itv.left <= itv.right);
     if (qptr >= qend || ISSPECIAL(*qptr) ||
-        !findcharintervalbin(suffixarray->encseq,
-                             suffixarray->suftab,
-                             &itv,
-                             *qptr,
-                             offset,
-                             itv.left,itv.right))
+        !lcpintervalfindcharchildintv(suffixarray->encseq,
+                                      suffixarray->suftab,
+                                      &itv,
+                                      *qptr,
+                                      offset,
+                                      itv.left,itv.right))
     {
       if (witnessposition != NULL)
       {

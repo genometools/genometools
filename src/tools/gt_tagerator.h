@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,21 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_STRATEGY_H
-#define SFX_STRATEGY_H
+#ifndef GT_TAGERATOR_H
+#define GT_TAGERATOR_H
 
-#include <stdbool.h>
-#include "defined-types.h"
-
-typedef struct
-{
-  Definedunsignedint maxdepth;
-  unsigned long maxwidthrealmedian,
-                maxbltriesort;
-  bool cmpcharbychar, /* compare suffixes character by character instead
-                         of comparing entire words (only for two bit
-                         encoding */
-       storespecialcodes;
-} Sfxstrategy;
+/* the tagerator tool */
+Tool* gt_tagerator(void);
 
 #endif

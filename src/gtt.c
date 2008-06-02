@@ -61,6 +61,7 @@
 #include "tools/gt_mkfmindex.h"
 #include "tools/gt_mmapandread.h"
 #include "tools/gt_mutate.h"
+#include "tools/gt_packedindex.h"
 #include "tools/gt_seqfilter.h"
 #include "tools/gt_sequniq.h"
 #include "tools/gt_shredder.h"
@@ -68,7 +69,7 @@
 #include "tools/gt_splicesiteinfo.h"
 #include "tools/gt_stat.h"
 #include "tools/gt_suffixerator.h"
-#include "tools/gt_packedindex.h"
+#include "tools/gt_tagerator.h"
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 
@@ -106,6 +107,8 @@ Toolbox* gtt_tools(void)
   toolbox_add(tools, "mgth", gt_mgth);
   toolbox_add(tools, "mmapandread", gt_mmapandread);
   toolbox_add(tools, "mutate", gt_mutate);
+  toolbox_add(tools, "mkfmindex", gt_mkfmindex);
+  toolbox_add_tool(tools, "packedindex", gt_packedindex());
   toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
   toolbox_add_tool(tools, "sequniq", gt_sequniq());
   toolbox_add_tool(tools, "shredder", gt_shredder());
@@ -113,8 +116,7 @@ Toolbox* gtt_tools(void)
   toolbox_add(tools, "splicesiteinfo", gt_splicesiteinfo);
   toolbox_add(tools, "stat", gt_stat);
   toolbox_add(tools, "suffixerator", gt_suffixerator);
-  toolbox_add_tool(tools, "packedindex", gt_packedindex());
-  toolbox_add(tools, "mkfmindex", gt_mkfmindex);
+  toolbox_add_tool(tools, "tagerator", gt_tagerator());
   toolbox_add(tools, "uniq", gt_uniq);
   toolbox_add(tools, "uniquesub", gt_uniquesub);
 #ifdef LIBGTVIEW

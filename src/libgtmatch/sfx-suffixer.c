@@ -83,7 +83,8 @@ struct Sfxiterator
   bool storespecialcodes;
   Definedunsignedint maxdepth;
   bool cmpcharbychar;
-  unsigned long maxwidthrealmedian;
+  unsigned long maxwidthrealmedian,
+                maxbltriesort;
   unsigned long long bucketiterstep; /* for progressbar */
 };
 
@@ -511,6 +512,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
        sfi->storespecialcodes = sfxstrategy->storespecialcodes;
        sfi->maxdepth = sfxstrategy->maxdepth;
        sfi->maxwidthrealmedian = sfxstrategy->maxwidthrealmedian;
+       sfi->maxbltriesort = sfxstrategy->maxbltriesort;
        if (sfxstrategy->cmpcharbychar || !possibletocmpbitwise(encseq))
        {
          sfi->cmpcharbychar = true;
@@ -523,6 +525,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
        sfi->storespecialcodes = false;
        sfi->maxdepth.defined = false;
        sfi->cmpcharbychar = possibletocmpbitwise(encseq) ? false : true;
+       sfi->maxbltriesort = 10UL;
        sfi->maxwidthrealmedian = 1UL;
     }
     sfi->totallength = getencseqtotallength(encseq);
@@ -679,6 +682,7 @@ static void preparethispart(Sfxiterator *sfi,
                    &sfi->maxdepth,
                    sfi->cmpcharbychar,
                    sfi->maxwidthrealmedian,
+                   sfi->maxbltriesort,
                    &sfi->bucketiterstep);
   }
   sfi->part++;

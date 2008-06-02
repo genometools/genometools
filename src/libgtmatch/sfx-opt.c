@@ -53,6 +53,7 @@ static OPrval parse_options(int *parsed_args,
          *optiondir,
          *optionstorespecialcodes,
          *optionmaxwidthrealmedian,
+         *optionmaxbltriesort,
          *optiondes;
   OPrval oprval;
   Str *dirarg = str_new();
@@ -141,6 +142,15 @@ static OPrval parse_options(int *parsed_args,
                                      1U);
   option_is_development_option(optionmaxwidthrealmedian);
   option_parser_add_option(op, optionmaxwidthrealmedian);
+
+  optionmaxbltriesort = option_new_ulong("maxbltriesort",
+                                         "all intervals of specified size and "
+                                         "smaller are sorted by blind trie "
+                                         "sorting algorithm",
+                                         &so->sfxstrategy.maxbltriesort,
+                                         10U);
+  option_is_development_option(optionmaxbltriesort);
+  option_parser_add_option(op, optionmaxbltriesort);
 
   optionstorespecialcodes
     = option_new_bool("storespecialcodes",

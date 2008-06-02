@@ -62,6 +62,7 @@ substriter.c
 test-pairwise.c
 trie-ssort.c
 turnwheels.c
+tagerator.c
 uniquesub.c
 verbose.c
 END_OF_TEXT

@@ -15,21 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_STRATEGY_H
-#define SFX_STRATEGY_H
+#ifndef TAGERATOR_H
+#define TAGERATOR_H
+#include "libgtcore/strarray.h"
+#include "libgtcore/error.h"
 
-#include <stdbool.h>
-#include "defined-types.h"
+typedef struct {
+  StrArray *tagfiles;
+  Str *indexname;
+  unsigned long maxdistance;
+} TageratorOptions;
 
-typedef struct
-{
-  Definedunsignedint maxdepth;
-  unsigned long maxwidthrealmedian,
-                maxbltriesort;
-  bool cmpcharbychar, /* compare suffixes character by character instead
-                         of comparing entire words (only for two bit
-                         encoding */
-       storespecialcodes;
-} Sfxstrategy;
+int runtagerator(const TageratorOptions *tageratoroptions,Error *err);
 
 #endif
