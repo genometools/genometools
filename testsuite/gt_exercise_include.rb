@@ -115,7 +115,7 @@ end
 Name "gt exercise assemblegreedy large test"
 Keywords "gt_exercise"
 Test do
-  run_test "#{$bin}gt shredder -overlap 12 #{$testdata}U89959_genomic.fas"
+  run_test "#{$bin}gt shredder -overlap 20 #{$testdata}U89959_genomic.fas"
   run_test "#{$bin}gt exercise assemblegreedy #{$last_stdout}"
   run_test "#{$bin}gt bioseq -showfasta -width 70 #{$last_stdout}"
   run "tail -n 1529 #{$last_stdout} > assembly.txt"
