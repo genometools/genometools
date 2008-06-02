@@ -419,11 +419,13 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources)
   FREESPACE(*ptrlimdfsresources);
 }
 
-static void showmatch(unsigned long patternlength,
-                      unsigned long maxdistance,
+static void showmatch(UNUSED unsigned long patternlength,
+                      UNUSED unsigned long maxdistance,
                       Seqpos startpos, Seqpos offset, unsigned long matchpref)
 {
+#ifndef NDEBUG
   Seqpos matchlen = offset + matchpref;
+#endif
 
   printf("match " FormatSeqpos " " FormatSeqpos "+%lu\n",
          PRINTSeqposcast(startpos), PRINTSeqposcast(offset), matchpref);

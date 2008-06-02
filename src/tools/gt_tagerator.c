@@ -74,7 +74,7 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
 
 static int gt_tagerator_runner(UNUSED int argc,
                                UNUSED const char **argv,
-                               int parsed_args,
+                               UNUSED int parsed_args,
                                void *tool_arguments, Error *err)
 {
   TageratorOptions *arguments = tool_arguments;
