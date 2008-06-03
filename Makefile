@@ -22,7 +22,7 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/luafilesystem-1.3.0/src \
             -I$(CURDIR)/src/external/lpeg-0.7 \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
-            -I$(CURDIR)/src/external/bzip2-1.0.4 \
+            -I$(CURDIR)/src/external/bzip2-1.0.5 \
             -I$(CURDIR)/src/external/agg-2.4/include \
             -I$(CURDIR)/src/external/libpng-1.2.18 \
             -I$(CURDIR)/src/external/libtecla-1.6.1
@@ -222,7 +222,7 @@ RNVMAIN_SRC:=$(RNV_DIR)/xcl.c
 RNVMAIN_OBJ:=$(RNVMAIN_SRC:%.c=obj/%.o)
 RNVMAIN_DEP:=$(RNVMAIN_SRC:%.c=obj/%.d)
 
-BZ2_DIR:=src/external/bzip2-1.0.4
+BZ2_DIR:=src/external/bzip2-1.0.5
 LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
             $(BZ2_DIR)/randtable.c $(BZ2_DIR)/compress.c \
             $(BZ2_DIR)/decompress.c $(BZ2_DIR)/bzlib.c

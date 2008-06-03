@@ -29,6 +29,7 @@
 */
 
 #include "bzlib_private.h"
+#include "libgtcore/unused.h"
 
 
 /*---------------------------------------------------*/
@@ -99,14 +100,14 @@ int bz_config_ok ( void )
 
 /*---------------------------------------------------*/
 static
-void* default_bzalloc ( void* opaque, Int32 items, Int32 size )
+void* default_bzalloc (UNUSED void* opaque, Int32 items, Int32 size )
 {
    void* v = malloc ( items * size );
    return v;
 }
 
 static
-void default_bzfree ( void* opaque, void* addr )
+void default_bzfree (UNUSED void* opaque, void* addr )
 {
    if (addr != NULL) free ( addr );
 }
@@ -1503,7 +1504,7 @@ int BZ_API(BZ2_bzwrite) (BZFILE* b, void* buf, int len )
 
 
 /*---------------------------------------------------*/
-int BZ_API(BZ2_bzflush) (BZFILE *b)
+int BZ_API(BZ2_bzflush) (UNUSED BZFILE *b)
 {
    /* do nothing now... */
    return 0;
