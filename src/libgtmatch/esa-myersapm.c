@@ -102,7 +102,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
   const Readmode readmode = Reversemode;
 
   initeqsvectorrev(mor->eqsvectorrev,
-                   mor->alphasize,
+                   (unsigned long) mor->alphasize,
                    pattern,patternlength);
   Ebit = 1UL << (patternlength-1);
   score = patternlength;

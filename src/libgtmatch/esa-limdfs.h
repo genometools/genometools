@@ -19,7 +19,6 @@
 #define ESA_LIMDFS_H
 
 #include "seqpos-def.h"
-#include "alphadef.h"
 #include "encseq-def.h"
 
 typedef struct Limdfsresources Limdfsresources;
@@ -30,7 +29,6 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources);
 
 void esalimiteddfs(Limdfsresources *limdfsresources,
                    const Encodedsequence *encseq,
-                   const Alphabet *alpha,
                    Readmode readmode,
                    const Uchar *pattern,
                    unsigned long patternlength,

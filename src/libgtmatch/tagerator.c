@@ -25,9 +25,10 @@
 #include "tagerator.h"
 #include "sarr-def.h"
 #include "esa-mmsearch-def.h"
-#include "esa-limdfs.h"
 #include "intbits.h"
 #include "alphadef.h"
+#include "esa-myersapm.h"
+#include "esa-limdfs.h"
 
 #include "libgtmatch/esa-map.pr"
 
@@ -79,9 +80,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   char *desc = NULL;
   int retval;
   unsigned long idx, taglen, tagnumber;
-  unsigned int demand = SARR_SUFTAB | SARR_ESQTAB;
+  unsigned int mapsize, demand = SARR_SUFTAB | SARR_ESQTAB;
   const Uchar *symbolmap, *currenttag;
   Limdfsresources *limdfsresources = NULL;
+  Myersonlineresources *mor = NULL;
   Uchar transformedtag[MAXTAGSIZE];
 
   if (mapsuffixarray(&suffixarray,
@@ -94,10 +96,14 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     haserr = true;
   }
   symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
+  mapsize = getmapsizeAlphabet(suffixarray.alpha);
+  if (tageratoroptions->online)
+  {
+    mor = newMyersonlineresources(mapsize,suffixarray.encseq);
+  }
   if (tageratoroptions->maxdistance > 0)
   {
-    limdfsresources = newLimdfsresources(getmapsizeAlphabet(suffixarray.alpha),
-                                         suffixarray.suftab);
+    limdfsresources = newLimdfsresources(mapsize,suffixarray.suftab);
   }
   seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
   for (tagnumber = 0; /* Nothing */; tagnumber++)
@@ -133,30 +139,47 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       }
       transformedtag[idx] = charcode;
     }
-    if (tageratoroptions->maxdistance == 0)
+    printf("# patternlength=%lu\n",taglen);
+    printf("# maxdistance=%lu\n",tageratoroptions->maxdistance);
+    printf("# tag=");
+    showsymbolstringgeneric(stdout,suffixarray.alpha,transformedtag,taglen);
+    printf("\n");
+    if (tageratoroptions->online)
     {
-      printf("tag %lu:",tagnumber);
-      exactpatternmatching(suffixarray.encseq,
-                           suffixarray.suftab,
-                           suffixarray.readmode,
-                           totallength,
-                           transformedtag,
-                           taglen);
+      edistmyersbitvectorAPM(mor,
+                             transformedtag,
+                             taglen,
+                             tageratoroptions->maxdistance);
     } else
     {
-      esalimiteddfs(limdfsresources,
-                    suffixarray.encseq,
-                    suffixarray.alpha,
-                    suffixarray.readmode,
-                    transformedtag,
-                    taglen,
-                    tageratoroptions->maxdistance);
+      if (tageratoroptions->maxdistance == 0)
+      {
+        printf("tag %lu:",tagnumber);
+        exactpatternmatching(suffixarray.encseq,
+                             suffixarray.suftab,
+                             suffixarray.readmode,
+                             totallength,
+                             transformedtag,
+                             taglen);
+      } else
+      {
+        esalimiteddfs(limdfsresources,
+                      suffixarray.encseq,
+                      suffixarray.readmode,
+                      transformedtag,
+                      taglen,
+                      tageratoroptions->maxdistance);
+      }
     }
     ma_free(desc);
   }
   if (limdfsresources != NULL)
   {
     freeLimdfsresources(&limdfsresources);
+  }
+  if (mor != NULL)
+  {
+    freeMyersonlineresources(&mor);
   }
   seqiterator_delete(seqit);
   freesuffixarray(&suffixarray);

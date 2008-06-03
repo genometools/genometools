@@ -486,7 +486,6 @@ static bool possiblypush(Limdfsresources *limdfsresources,
 
 void esalimiteddfs(Limdfsresources *limdfsresources,
                    const Encodedsequence *encseq,
-                   const Alphabet *alpha,
                    Readmode readmode,
                    const Uchar *pattern,
                    unsigned long patternlength,
@@ -500,11 +499,6 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   Myerscolumn previouscolumn;
   bool remstack;
 
-  printf("# patternlength=%lu\n",patternlength);
-  printf("# maxdistance=%lu\n",maxdistance);
-  printf("# tag=");
-  showsymbolstringgeneric(stdout,alpha,pattern,patternlength);
-  printf("\n");
   limdfsresources->stack.nextfreeLcpintervalwithinfo = 0;
   assert(maxdistance < patternlength);
   previouscolumn.Pv = ~0UL;

@@ -53,9 +53,8 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   op = option_parser_new("[options] -t tagfile -ii indexname",
                          "Map short sequence tags in given index.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option = option_new_filenamearray("t",
-                             "Specify files containing the tags",
-                             arguments->tagfiles);
+  option = option_new_filenamearray("t","Specify files containing the tags",
+                                    arguments->tagfiles);
   option_parser_add_option(op, option);
   option_is_mandatory(option);
   option = option_new_ulong("k",
@@ -69,6 +68,10 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                              arguments->indexname, NULL);
   option_parser_add_option(op, option);
   option_is_mandatory(option);
+
+  option = option_new_bool("online","Perform online searches",
+                            &arguments->online, false);
+  option_parser_add_option(op, option);
   return op;
 }
 
