@@ -24,8 +24,14 @@
 
 typedef struct Myersonlineresources Myersonlineresources;
 
-Myersonlineresources *newMyersonlineresources(unsigned int mapsize);
+Myersonlineresources *newMyersonlineresources(unsigned int mapsize,
+                                              const Encodedsequence *encseq);
 
 void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources);
+
+void edistmyersbitvectorAPM(Myersonlineresources *mor,
+                            const Uchar *pattern,
+                            unsigned long patternlength,
+                            unsigned long maxdistance);
 
 #endif

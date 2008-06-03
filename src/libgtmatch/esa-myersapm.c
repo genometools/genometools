@@ -17,22 +17,21 @@
 
 #include "libgtcore/chardef.h"
 #include "libgtcore/symboldef.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/arraydef.h"
-#include "sarr-def.h"
 #include "seqpos-def.h"
-#include "esa-splititv.h"
 #include "spacedef.h"
-#include "esa-limdfs.h"
+#include "encseq-def.h"
+#include "esa-myersapm.h"
 
 struct Myersonlineresources
 {
   Encodedsequencescanstate *esr;
+  const Encodedsequence *encseq;
+  Seqpos totallength;
   unsigned long *eqsvectorrev;
   unsigned int alphasize;
 };
 
-static void initeqsvectorrev(unsigned long *eqsvector,
+static void initeqsvectorrev(unsigned long *eqsvectorrev,
                              unsigned long eqslen,
                              const Uchar *u,
                              unsigned long ulen)
@@ -40,18 +39,18 @@ static void initeqsvectorrev(unsigned long *eqsvector,
   unsigned long *vptr, shiftmask;
   const Uchar *uptr;
 
-  for (vptr = eqsvector; vptr < eqsvector + eqslen; vptr++)
+  for (vptr = eqsvectorrev; vptr < eqsvectorrev + eqslen; vptr++)
   {
     *vptr = 0;
   }
-  for (uptr = u, shiftmask = 1UL;
-       uptr < u + ulen && shiftmask != 0;
-       uptr++, shiftmask <<= 1)
+  for (uptr = u+ulen-1, shiftmask = 1UL;
+       uptr >= u && shiftmask != 0;
+       uptr--, shiftmask <<= 1)
   {
     assert (*uptr != (Uchar) SEPARATOR);
     if (*uptr != (Uchar) WILDCARD)
     {
-      eqsvector[(unsigned long) *uptr] |= shiftmask;
+      eqsvectorrev[(unsigned long) *uptr] |= shiftmask;
     }
   }
 }
@@ -61,8 +60,29 @@ static void showmatchonline(Seqpos startpos)
   printf("match " FormatSeqpos "\n",PRINTSeqposcast(startpos));
 }
 
+Myersonlineresources *newMyersonlineresources(unsigned int mapsize,
+                                              const Encodedsequence *encseq)
+{
+  Myersonlineresources *mor;
+
+  ALLOCASSIGNSPACE(mor,NULL,Myersonlineresources,1);
+  ALLOCASSIGNSPACE(mor->eqsvectorrev,NULL,unsigned long,mapsize-1);
+  mor->encseq = encseq;
+  assert(mapsize-1 <= UCHAR_MAX);
+  mor->alphasize = mapsize-1;
+  mor->totallength = getencseqtotallength(encseq);
+  return mor;
+}
+
+void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources)
+{
+  Myersonlineresources *myersonlineresources = *ptrmyersonlineresources;
+
+  FREESPACE(myersonlineresources->eqsvectorrev);
+  FREESPACE(*ptrmyersonlineresources);
+}
+
 void edistmyersbitvectorAPM(Myersonlineresources *mor,
-                            const Encodedsequence *encseq,
                             const Uchar *pattern,
                             unsigned long patternlength,
                             unsigned long maxdistance)
@@ -78,22 +98,21 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                 score;
 
   Uchar cc;
-  Seqpos pos, totallength;
+  Seqpos pos;
   const Readmode readmode = Reversemode;
 
-  totallength = getencseqtotallength(encseq);
   initeqsvectorrev(mor->eqsvectorrev,
-                   (unsigned long) mor->alphasize,
+                   mor->alphasize,
                    pattern,patternlength);
   Ebit = 1UL << (patternlength-1);
   score = patternlength;
   initEncodedsequencescanstate(mor->esr,
-                               encseq,
+                               mor->encseq,
                                readmode,
                                0);
-  for (pos = 0; pos < totallength; pos++)
+  for (pos = 0; pos < mor->totallength; pos++)
   {
-    cc = sequentialgetencodedchar(encseq,
+    cc = sequentialgetencodedchar(mor->encseq,
                                   mor->esr,
                                   pos,
                                   readmode);
@@ -127,7 +146,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
       Mv = Ph & Xv;                                   /* 18 */
       if (score <= maxdistance)
       {
-        showmatchonline(REVERSEPOS(totallength,pos));
+        showmatchonline(REVERSEPOS(mor->totallength,pos));
       }
     }
   }
