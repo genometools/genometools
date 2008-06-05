@@ -22,6 +22,7 @@
 #include "libgtcore/error.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/seqiterator.h"
+#include "libgtcore/arraydef.h"
 #include "tagerator.h"
 #include "sarr-def.h"
 #include "esa-mmsearch-def.h"
@@ -29,6 +30,7 @@
 #include "alphadef.h"
 #include "esa-myersapm.h"
 #include "esa-limdfs.h"
+#include "stamp.h"
 
 #include "libgtmatch/esa-map.pr"
 
@@ -39,7 +41,9 @@ static void exactpatternmatching(const Encodedsequence *encseq,
                                  Readmode readmode,
                                  Seqpos totallength,
                                  const Uchar *pattern,
-                                 unsigned long patternlength)
+                                 unsigned long patternlength,
+                                 void (*processmatch)(void *,Seqpos,Seqpos),
+                                 void *processmatchinfo)
 {
   MMsearchiterator *mmsi;
   Seqpos dbstartpos;
@@ -54,17 +58,41 @@ static void exactpatternmatching(const Encodedsequence *encseq,
                              patternlength);
   while (nextmmsearchiterator(&dbstartpos,mmsi))
   {
-    printf(" " FormatSeqpos,PRINTSeqposcast(dbstartpos));
+    processmatch(processmatchinfo,dbstartpos,(Seqpos) patternlength);
   }
-  printf("\n");
   freemmsearchiterator(&mmsi);
 }
 
-static void storematch(UNUSED void *processinfo,Seqpos startpos,Seqpos len)
+static void showmatch(UNUSED void *processinfo,Seqpos startpos,Seqpos len)
 {
   printf("match " FormatSeqpos " " FormatSeqpos "\n",
           PRINTSeqposcast(startpos),
           PRINTSeqposcast(len));
+}
+
+DECLAREARRAYSTRUCT(Seqpos);
+
+static void storematch(void *processinfo,Seqpos startpos,UNUSED Seqpos len)
+{
+  ArraySeqpos *storetab = (ArraySeqpos *) processinfo;
+
+  STOREINARRAY(storetab,Seqpos,32,startpos);
+}
+
+static int cmpdescend(const void *a,const void *b)
+{
+  Seqpos *valuea = (Seqpos *) a;
+  Seqpos *valueb = (Seqpos *) b;
+
+  if (*valuea < *valueb)
+  {
+    return 1;
+  }
+  if (*valuea > *valueb)
+  {
+    return -1;
+  }
+  return 0;
 }
 
 int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
@@ -82,6 +110,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   Limdfsresources *limdfsresources = NULL;
   Myersonlineresources *mor = NULL;
   Uchar transformedtag[MAXTAGSIZE];
+  void (*processmatch)(void *,Seqpos,Seqpos);
+  void *processmatchinfoonline, *processmatchinfooffline;
+  ArraySeqpos storeonline, storeoffline;
+  unsigned long countcompare = 0, identicalstartpos = 0;
 
   if (mapsuffixarray(&suffixarray,
                      &totallength,
@@ -92,13 +124,26 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   {
     haserr = true;
   }
+  INITARRAY(&storeonline,Seqpos);
+  INITARRAY(&storeoffline,Seqpos);
   symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
   mapsize = getmapsizeAlphabet(suffixarray.alpha);
-  if (tageratoroptions->online)
+  if (tageratoroptions->docompare)
+  {
+    processmatch = storematch;
+    processmatchinfoonline = &storeonline;
+    processmatchinfooffline = &storeoffline;
+  } else
+  {
+    processmatch = showmatch;
+    processmatchinfoonline = NULL;
+    processmatchinfooffline = NULL;
+  }
+  if (tageratoroptions->online || tageratoroptions->docompare)
   {
     mor = newMyersonlineresources(mapsize,suffixarray.encseq,
-                                  storematch,
-                                  NULL);
+                                  processmatch,
+                                  processmatchinfoonline);
   }
   if (tageratoroptions->maxdistance > 0)
   {
@@ -106,8 +151,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                          suffixarray.readmode,
                                          mapsize,
                                          suffixarray.suftab,
-                                         storematch,
-                                         NULL);
+                                         processmatch,
+                                         processmatchinfooffline);
   }
   seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
   for (tagnumber = 0; /* Nothing */; tagnumber++)
@@ -148,23 +193,27 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     printf("# tag=");
     showsymbolstringgeneric(stdout,suffixarray.alpha,transformedtag,taglen);
     printf("\n");
-    if (tageratoroptions->online)
+    storeoffline.nextfreeSeqpos = 0;
+    storeonline.nextfreeSeqpos = 0;
+    if (tageratoroptions->online || tageratoroptions->docompare)
     {
       edistmyersbitvectorAPM(mor,
                              transformedtag,
                              taglen,
                              tageratoroptions->maxdistance);
-    } else
+    }
+    if (!tageratoroptions->online || tageratoroptions->docompare)
     {
       if (tageratoroptions->maxdistance == 0)
       {
-        printf("tag %lu:",tagnumber);
         exactpatternmatching(suffixarray.encseq,
                              suffixarray.suftab,
                              suffixarray.readmode,
                              totallength,
                              transformedtag,
-                             taglen);
+                             taglen,
+                             processmatch,
+                             processmatchinfooffline);
       } else
       {
         esalimiteddfs(limdfsresources,
@@ -174,7 +223,25 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       }
     }
     ma_free(desc);
+    if (tageratoroptions->docompare)
+    {
+      unsigned long ss;
+      assert(storeoffline.nextfreeSeqpos == storeonline.nextfreeSeqpos);
+      qsort(storeoffline.spaceSeqpos,(size_t) storeoffline.nextfreeSeqpos,
+            sizeof (Seqpos),
+            cmpdescend);
+      for (ss=0; ss < storeoffline.nextfreeSeqpos; ss++)
+      {
+        assert(storeoffline.spaceSeqpos != NULL &&
+               storeonline.spaceSeqpos != NULL);
+        assert(storeoffline.spaceSeqpos[ss] == storeonline.spaceSeqpos[ss]);
+        identicalstartpos++;
+      }
+      countcompare++;
+    }
   }
+  FREEARRAY(&storeonline,Seqpos);
+  FREEARRAY(&storeoffline,Seqpos);
   if (limdfsresources != NULL)
   {
     freeLimdfsresources(&limdfsresources);
@@ -185,5 +252,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   }
   seqiterator_delete(seqit);
   freesuffixarray(&suffixarray);
+  printf("# %lu identical elements in successful array comparisons: %lu\n",
+        identicalstartpos,
+        countcompare);
   return haserr ? -1 : 0;
 }

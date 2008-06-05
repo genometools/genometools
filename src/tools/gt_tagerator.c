@@ -45,7 +45,7 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
 {
   TageratorOptions *arguments = tool_arguments;
   OptionParser *op;
-  Option *option;
+  Option *option, *optiononline, *optioncmp;
 
   assert(arguments != NULL);
   arguments->indexname = str_new();
@@ -69,9 +69,15 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, option);
   option_is_mandatory(option);
 
-  option = option_new_bool("online","Perform online searches",
+  optiononline = option_new_bool("online","Perform online searches",
                             &arguments->online, false);
-  option_parser_add_option(op, option);
+  option_parser_add_option(op, optiononline);
+
+  optioncmp = option_new_bool("cmp","compare results of offline and online "
+                                 "searches",
+                            &arguments->docompare, false);
+  option_parser_add_option(op, optioncmp);
+  option_exclude(optiononline,optioncmp);
   return op;
 }
 
