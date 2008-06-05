@@ -427,8 +427,12 @@ static void showmatch(UNUSED unsigned long patternlength,
   Seqpos matchlen = offset + matchpref;
 #endif
 
+  /*
   printf("match " FormatSeqpos " " FormatSeqpos "+%lu\n",
          PRINTSeqposcast(startpos), PRINTSeqposcast(offset), matchpref);
+  */
+  printf("match " FormatSeqpos "\n",
+         PRINTSeqposcast(startpos));
   assert((Seqpos) (patternlength - maxdistance) <= matchlen &&
          matchlen <= (Seqpos) (patternlength + maxdistance));
 }

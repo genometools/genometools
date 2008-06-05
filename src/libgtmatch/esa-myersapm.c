@@ -68,7 +68,7 @@ Myersonlineresources *newMyersonlineresources(unsigned int mapsize,
   ALLOCASSIGNSPACE(mor,NULL,Myersonlineresources,1);
   ALLOCASSIGNSPACE(mor->eqsvectorrev,NULL,unsigned long,mapsize-1);
   mor->encseq = encseq;
-  assert(mapsize-1 <= UCHAR_MAX);
+  assert(mapsize > 0 && mapsize-1 <= UCHAR_MAX);
   mor->alphasize = mapsize-1;
   mor->totallength = getencseqtotallength(encseq);
   return mor;
@@ -94,9 +94,8 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                 Xh,
                 Ph,
                 Mh,
-                Ebit,
                 score;
-
+  const unsigned long Ebit = 1UL << (patternlength-1);
   Uchar cc;
   Seqpos pos;
   const Readmode readmode = Reversemode;
@@ -104,7 +103,6 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
   initeqsvectorrev(mor->eqsvectorrev,
                    (unsigned long) mor->alphasize,
                    pattern,patternlength);
-  Ebit = 1UL << (patternlength-1);
   score = patternlength;
   initEncodedsequencescanstate(mor->esr,
                                mor->encseq,
@@ -123,20 +121,21 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
       score = patternlength;
     } else
     {
-      Eq = mor->eqsvectorrev[(unsigned int) cc];      /*  6 */
+      Eq = mor->eqsvectorrev[(unsigned long) cc];     /*  6 */
       Xv = Eq | Mv;                                   /*  7 */
       Xh = (((Eq & Pv) + Pv) ^ Pv) | Eq;              /*  8 */
 
       Ph = Mv | ~ (Xh | Pv);                          /*  9 */
       Mh = Pv & Xh;                                   /* 10 */
 
-      if (Pv & Ebit)
+      if (Ph & Ebit)
       {
         score++;
       } else
       {
-        if (Mv & Ebit)
+        if (Mh & Ebit)
         {
+          assert(score > 0);
           score--;
         }
       }
