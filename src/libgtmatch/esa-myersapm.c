@@ -29,6 +29,8 @@ struct Myersonlineresources
   Seqpos totallength;
   unsigned long *eqsvectorrev;
   unsigned int alphasize;
+  void (*processmatch)(void *,Seqpos,Seqpos);
+  void *processmatchinfo;
 };
 
 static void initeqsvectorrev(unsigned long *eqsvectorrev,
@@ -55,13 +57,11 @@ static void initeqsvectorrev(unsigned long *eqsvectorrev,
   }
 }
 
-static void showmatchonline(Seqpos startpos)
-{
-  printf("match " FormatSeqpos "\n",PRINTSeqposcast(startpos));
-}
-
-Myersonlineresources *newMyersonlineresources(unsigned int mapsize,
-                                              const Encodedsequence *encseq)
+Myersonlineresources *newMyersonlineresources(
+                            unsigned int mapsize,
+                            const Encodedsequence *encseq,
+                            void (*processmatch)(void *,Seqpos,Seqpos),
+                            void *processmatchinfo)
 {
   Myersonlineresources *mor;
 
@@ -71,6 +71,8 @@ Myersonlineresources *newMyersonlineresources(unsigned int mapsize,
   assert(mapsize > 0 && mapsize-1 <= UCHAR_MAX);
   mor->alphasize = mapsize-1;
   mor->totallength = getencseqtotallength(encseq);
+  mor->processmatch = processmatch;
+  mor->processmatchinfo = processmatchinfo;
   return mor;
 }
 
@@ -145,7 +147,9 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
       Mv = Ph & Xv;                                   /* 18 */
       if (score <= maxdistance)
       {
-        showmatchonline(REVERSEPOS(mor->totallength,pos));
+        mor->processmatch(mor->processmatchinfo,
+                          REVERSEPOS(mor->totallength,pos),
+                          0);
       }
     }
   }

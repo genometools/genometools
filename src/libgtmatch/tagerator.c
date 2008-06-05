@@ -60,15 +60,12 @@ static void exactpatternmatching(const Encodedsequence *encseq,
   freemmsearchiterator(&mmsi);
 }
 
-#ifdef APPROX
-static void approxpatternmatch(const Encodedsequence *encseq,
-                               const Seqpos *suftab,
-                               Readmode readmode,
-                               Seqpos totallength,
-                               const Uchar *pattern,
-                               unsigned long patternlength,
-                               unsigned long maxdistance)
-#endif
+static void storematch(UNUSED void *processinfo,Seqpos startpos,Seqpos len)
+{
+  printf("match " FormatSeqpos " " FormatSeqpos "\n",
+          PRINTSeqposcast(startpos),
+          PRINTSeqposcast(len));
+}
 
 int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
 {
@@ -99,11 +96,18 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   mapsize = getmapsizeAlphabet(suffixarray.alpha);
   if (tageratoroptions->online)
   {
-    mor = newMyersonlineresources(mapsize,suffixarray.encseq);
+    mor = newMyersonlineresources(mapsize,suffixarray.encseq,
+                                  storematch,
+                                  NULL);
   }
   if (tageratoroptions->maxdistance > 0)
   {
-    limdfsresources = newLimdfsresources(mapsize,suffixarray.suftab);
+    limdfsresources = newLimdfsresources(suffixarray.encseq,
+                                         suffixarray.readmode,
+                                         mapsize,
+                                         suffixarray.suftab,
+                                         storematch,
+                                         NULL);
   }
   seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
   for (tagnumber = 0; /* Nothing */; tagnumber++)
@@ -164,8 +168,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       } else
       {
         esalimiteddfs(limdfsresources,
-                      suffixarray.encseq,
-                      suffixarray.readmode,
                       transformedtag,
                       taglen,
                       tageratoroptions->maxdistance);

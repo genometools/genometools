@@ -23,13 +23,16 @@
 
 typedef struct Limdfsresources Limdfsresources;
 
-Limdfsresources *newLimdfsresources(unsigned int mapsize,const Seqpos *suftab);
+Limdfsresources *newLimdfsresources(const Encodedsequence *encseq,
+                                    Readmode readmode,
+                                    unsigned int mapsize,
+                                    const Seqpos *suftab,
+                                    void (*processmatch)(void *,Seqpos,Seqpos),
+                                    void *processmatchinfo);
 
 void freeLimdfsresources(Limdfsresources **ptrlimdfsresources);
 
 void esalimiteddfs(Limdfsresources *limdfsresources,
-                   const Encodedsequence *encseq,
-                   Readmode readmode,
                    const Uchar *pattern,
                    unsigned long patternlength,
                    unsigned long maxdistance);

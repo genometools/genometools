@@ -391,11 +391,20 @@ struct Limdfsresources
   unsigned long *eqsvector;
   Rightboundwithchar *rbwc;
   ArrayLcpintervalwithinfo stack;
+  const Encodedsequence *encseq;
+  Readmode readmode;
   const Seqpos *suftab;
   Uchar alphasize;
+  void (*processmatch)(void *,Seqpos,Seqpos);
+  void *processmatchinfo;
 };
 
-Limdfsresources *newLimdfsresources(unsigned int mapsize,const Seqpos *suftab)
+Limdfsresources *newLimdfsresources(const Encodedsequence *encseq,
+                                    Readmode readmode,
+                                    unsigned int mapsize,
+                                    const Seqpos *suftab,
+                                    void (*processmatch)(void *,Seqpos,Seqpos),
+                                    void *processmatchinfo)
 {
   Limdfsresources *limdfsresources;
 
@@ -405,7 +414,11 @@ Limdfsresources *newLimdfsresources(unsigned int mapsize,const Seqpos *suftab)
   INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   assert(mapsize-1 <= UCHAR_MAX);
   limdfsresources->alphasize = (Uchar) (mapsize-1);
+  limdfsresources->encseq = encseq;
+  limdfsresources->readmode = readmode;
   limdfsresources->suftab = suftab;
+  limdfsresources->processmatch = processmatch;
+  limdfsresources->processmatchinfo = processmatchinfo;
   return limdfsresources;
 }
 
@@ -417,24 +430,6 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources)
   FREESPACE(limdfsresources->rbwc);
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(*ptrlimdfsresources);
-}
-
-static void showmatch(UNUSED unsigned long patternlength,
-                      UNUSED unsigned long maxdistance,
-                      Seqpos startpos, Seqpos offset, unsigned long matchpref)
-{
-#ifndef NDEBUG
-  Seqpos matchlen = offset + matchpref;
-#endif
-
-  /*
-  printf("match " FormatSeqpos " " FormatSeqpos "+%lu\n",
-         PRINTSeqposcast(startpos), PRINTSeqposcast(offset), matchpref);
-  */
-  printf("match " FormatSeqpos "\n",
-         PRINTSeqposcast(startpos));
-  assert((Seqpos) (patternlength - maxdistance) <= matchlen &&
-         matchlen <= (Seqpos) (patternlength + maxdistance));
 }
 
 static bool possiblypush(Limdfsresources *limdfsresources,
@@ -480,8 +475,10 @@ static bool possiblypush(Limdfsresources *limdfsresources,
 
     for (idx = lbound; idx <= rbound; idx++)
     {
-      showmatch(patternlength,maxdistance,limdfsresources->suftab[idx],
-                offset,0);
+      limdfsresources->processmatch(
+               limdfsresources->processmatchinfo,
+               limdfsresources->suftab[idx],
+               offset);
     }
     return true;
   }
@@ -489,8 +486,6 @@ static bool possiblypush(Limdfsresources *limdfsresources,
 }
 
 void esalimiteddfs(Limdfsresources *limdfsresources,
-                   const Encodedsequence *encseq,
-                   Readmode readmode,
                    const Uchar *pattern,
                    unsigned long patternlength,
                    unsigned long maxdistance)
@@ -499,7 +494,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   unsigned long matchpref = 0, idx, rboundscount;
   Uchar extendchar;
   Seqpos lbound, rbound, bound, offset,
-         totallength = getencseqtotallength(encseq);
+         totallength = getencseqtotallength(limdfsresources->encseq);
   Myerscolumn previouscolumn;
   bool remstack;
 
@@ -516,7 +511,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
 #endif
   rboundscount = lcpintervalsplitwithoutspecial(limdfsresources->rbwc,
                                                 limdfsresources->alphasize+1,
-                                                encseq,
+                                                limdfsresources->encseq,
                                                 limdfsresources->suftab,
                                                 0,
                                                 0,
@@ -557,13 +552,14 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                            maxdistance,
                            &previouscolumn,
                            limdfsresources->suftab[lbound],
-                           readmode,
-                           encseq,
+                           limdfsresources->readmode,
+                           limdfsresources->encseq,
                            totallength))
       {
-        showmatch(patternlength,maxdistance,
+        limdfsresources->processmatch(
+                  limdfsresources->processmatchinfo,
                   limdfsresources->suftab[lbound],
-                  (Seqpos) 1,matchpref);
+                  (Seqpos) (matchpref+1UL));
       }
     }
   }
@@ -581,7 +577,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                (unsigned long) stackptr->lcpitv.offset,patternlength);
     printf("\n");
 #endif
-    extendchar = lcpintervalextendlcp(encseq,
+    extendchar = lcpintervalextendlcp(limdfsresources->encseq,
                                       limdfsresources->suftab,
                                       &stackptr->lcpitv,
                                       limdfsresources->alphasize);
@@ -611,8 +607,10 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
         for (bound = stackptr->lcpitv.left; bound <= stackptr->lcpitv.right;
              bound++)
         {
-          showmatch(patternlength,maxdistance,
-                    limdfsresources->suftab[bound],stackptr->lcpitv.offset,0);
+          limdfsresources->processmatch(
+                  limdfsresources->processmatchinfo,
+                  limdfsresources->suftab[bound],
+                  stackptr->lcpitv.offset);
         }
         assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
         limdfsresources->stack.nextfreeLcpintervalwithinfo--;
@@ -631,7 +629,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
       rboundscount = lcpintervalsplitwithoutspecial(
                               limdfsresources->rbwc,
                               limdfsresources->alphasize+1,
-                              encseq,
+                              limdfsresources->encseq,
                               limdfsresources->suftab,
                               stackptr->lcpitv.offset,
                               stackptr->lcpitv.left,
@@ -673,12 +671,14 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                                maxdistance,
                                &previouscolumn,
                                limdfsresources->suftab[lbound] + offset,
-                               readmode,
-                               encseq,
+                               limdfsresources->readmode,
+                               limdfsresources->encseq,
                                totallength))
           {
-            showmatch(patternlength,maxdistance,
-                      limdfsresources->suftab[lbound],offset,matchpref);
+            limdfsresources->processmatch(
+                  limdfsresources->processmatchinfo,
+                  limdfsresources->suftab[lbound],
+                  offset+matchpref);
           }
         }
       }
