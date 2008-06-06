@@ -177,6 +177,7 @@ static void nextEDcolumn(const unsigned long *eqsvector,
   unsigned long score;              /* current score */
 
   assert(incol->maxleqk != UNDEFINDEX && incol->maxleqk != patternlength);
+  assert(ISNOTSPECIAL(currentchar));
   Eq = eqsvector[(unsigned long) currentchar];
   Xv = Eq | incol->Mv;
   Xh = (((Eq & incol->Pv) + incol->Pv) ^ incol->Pv) | Eq;
@@ -391,7 +392,7 @@ DECLAREARRAYSTRUCT(Lcpintervalwithinfo);
 struct Limdfsresources
 {
   unsigned long *eqsvector;
-  Rightboundwithchar *rbwc;
+  Boundswithchar *bwc;
   ArrayLcpintervalwithinfo stack;
   Uchar alphasize;
   void (*processmatch)(void *,Seqpos,Seqpos);
@@ -413,7 +414,7 @@ Limdfsresources *newLimdfsresources(const Encodedsequence *encseq,
 
   ALLOCASSIGNSPACE(limdfsresources,NULL,Limdfsresources,1);
   ALLOCASSIGNSPACE(limdfsresources->eqsvector,NULL,unsigned long,mapsize-1);
-  ALLOCASSIGNSPACE(limdfsresources->rbwc,NULL,Rightboundwithchar,mapsize);
+  ALLOCASSIGNSPACE(limdfsresources->bwc,NULL,Boundswithchar,mapsize);
   INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   assert(mapsize-1 <= UCHAR_MAX);
   limdfsresources->alphasize = (Uchar) (mapsize-1);
@@ -430,7 +431,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources)
   Limdfsresources *limdfsresources = *ptrlimdfsresources;
 
   FREESPACE(limdfsresources->eqsvector);
-  FREESPACE(limdfsresources->rbwc);
+  FREESPACE(limdfsresources->bwc);
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(*ptrlimdfsresources);
 }
@@ -514,7 +515,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   previouscolumn.scorevalue = maxdistance;
 #endif
   /* splitting the interval */
-  rboundscount = lcpintervalsplitwithoutspecial(limdfsresources->rbwc,
+  rboundscount = lcpintervalsplitwithoutspecial(limdfsresources->bwc,
                                                 limdfsresources->alphasize+1,
                                                 limdfsresources->encseq,
                                                 totallength,
@@ -524,8 +525,8 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                                                 totallength);
   for (idx=0; idx < rboundscount; idx++)
   {
-    lbound = limdfsresources->rbwc[idx].bound;
-    rbound = limdfsresources->rbwc[idx+1].bound-1;
+    lbound = limdfsresources->bwc[idx].lbound;
+    rbound = limdfsresources->bwc[idx].rbound;
     assert(lbound <= rbound);
     if (lbound < rbound)
     {
@@ -538,7 +539,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                               (Seqpos) 1,
                               lbound,
                               rbound,
-                              limdfsresources->rbwc[idx].inchar,
+                              limdfsresources->bwc[idx].inchar,
                               &previouscolumn);
       if (remstack)
       {
@@ -638,7 +639,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
     {
       /* split interval */
       rboundscount = lcpintervalsplitwithoutspecial(
-                              limdfsresources->rbwc,
+                              limdfsresources->bwc,
                               limdfsresources->alphasize+1,
                               limdfsresources->encseq,
                               totallength,
@@ -651,8 +652,8 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
       limdfsresources->stack.nextfreeLcpintervalwithinfo--;
       for (idx=0; idx < rboundscount; idx++)
       {
-        lbound = limdfsresources->rbwc[idx].bound;
-        rbound = limdfsresources->rbwc[idx+1].bound-1;
+        lbound = limdfsresources->bwc[idx].lbound;
+        rbound = limdfsresources->bwc[idx].rbound;
         assert(lbound <= rbound);
         if (lbound < rbound)
         {
@@ -665,7 +666,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                                   offset+1,
                                   lbound,
                                   rbound,
-                                  limdfsresources->rbwc[idx].inchar,
+                                  limdfsresources->bwc[idx].inchar,
                                   &previouscolumn);
           if (remstack)
           {

@@ -30,9 +30,10 @@ typedef struct
 
 typedef struct
 {
-  Seqpos bound;
+  Seqpos lbound,
+         rbound;
   Uchar inchar;
-} Rightboundwithchar;
+} Boundswithchar;
 
 bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   Seqpos totallength,
@@ -43,8 +44,8 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   Seqpos left,
                                   Seqpos right);
 
-unsigned long lcpintervalsplitwithoutspecial(Rightboundwithchar *rbwc,
-                                             Uchar rboundsize,
+unsigned long lcpintervalsplitwithoutspecial(Boundswithchar *bwc,
+                                             Uchar boundsize,
                                              const Encodedsequence *encseq,
                                              Seqpos totallength,
                                              const Seqpos *suftab,

@@ -30,6 +30,15 @@ def checkgreedyfwdmat(queryfile,ms)
   run "diff tmp.pck tmp.fmi"
 end
 
+# XXX: check why tags from shreddered fragmenets are not correctly processed
+# XXX: check why tagerator segfaults if index does not exist.
+
+def checktagerator(queryfile,ms)
+  run "#{$bin}gt shredder -minlength 10 -maxlength 12 #{queryfile}"
+  run "sed -e \'s/^>.*/>/\' #{$last_stdout}"
+  run_test "#{$bin}gt tagerator -cmp -ii sfx -t #{$last_stdout}"
+end
+
 def createandcheckgreedyfwdmat(reffile,queryfile)
   run "#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}"
   run "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
@@ -38,7 +47,6 @@ def createandcheckgreedyfwdmat(reffile,queryfile)
            "-dna -pl -bsize 10 -locfreq 32 -dir rev"
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
-  run "rm -f sfx.* fmi.* pck.*"
 end
 
 allfiles.each do |reffile|
@@ -49,10 +57,13 @@ allfiles.each do |reffile|
       Test do
         createandcheckgreedyfwdmat("#{$testdata}/#{reffile}",
                                    "#{$testdata}/#{queryfile}")
+        checktagerator("#{$testdata}/#{reffile}",
+                       "#{$testdata}/#{queryfile}")
+        run "rm -f sfx.* fmi.* pck.*"
       end 
     end
   end
-end
+  end
 
 allfiles.each do |reffile|
   Name "gt packedindex #{reffile}"
@@ -71,5 +82,6 @@ if $gttestdata then
   Test do
     createandcheckgreedyfwdmat("#{$gttestdata}Iowa/at1MB",
                                "#{$testdata}U89959_genomic.fas")
+    run "rm -f sfx.* fmi.* pck.*"
   end
 end

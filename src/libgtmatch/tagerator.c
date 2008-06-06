@@ -226,10 +226,22 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     if (tageratoroptions->docompare)
     {
       unsigned long ss;
+
+      if (storeoffline.nextfreeSeqpos != storeonline.nextfreeSeqpos)
+      {
+        fprintf(stderr,"storeoffline.nextfreeSeqpos = %lu != %lu = "
+                       "storeonline.nextfreeSeqpos\n",
+                        storeoffline.nextfreeSeqpos,
+                        storeonline.nextfreeSeqpos);
+        exit(EXIT_FAILURE); /* programming error */
+      }
       assert(storeoffline.nextfreeSeqpos == storeonline.nextfreeSeqpos);
+      if (storeoffline.nextfreeSeqpos > 1UL)
+      {
       qsort(storeoffline.spaceSeqpos,(size_t) storeoffline.nextfreeSeqpos,
             sizeof (Seqpos),
             cmpdescend);
+      }
       for (ss=0; ss < storeoffline.nextfreeSeqpos; ss++)
       {
         assert(storeoffline.spaceSeqpos != NULL &&

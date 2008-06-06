@@ -123,7 +123,13 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
       score = patternlength;
     } else
     {
-      Eq = mor->eqsvectorrev[(unsigned long) cc];     /*  6 */
+      if (cc == (Uchar) WILDCARD)
+      {
+        Eq = 0;
+      } else
+      {
+        Eq = mor->eqsvectorrev[(unsigned long) cc];   /*  6 */
+      }
       Xv = Eq | Mv;                                   /*  7 */
       Xh = (((Eq & Pv) + Pv) ^ Pv) | Eq;              /*  8 */
 
