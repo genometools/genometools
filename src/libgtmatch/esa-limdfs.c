@@ -345,8 +345,8 @@ static bool iternextEDcolumn(unsigned long *matchpref,
                              unsigned long maxdistance,
                              const Myerscolumn *col,
                              Seqpos startpos,
-                             Readmode readmode,
                              const Encodedsequence *encseq,
+                             Readmode readmode,
                              Seqpos totallength)
 {
   Seqpos pos;
@@ -475,6 +475,7 @@ static bool possiblypush(Limdfsresources *limdfsresources,
 
     for (idx = lbound; idx <= rbound; idx++)
     {
+      /* enumerate the suffixes in the LCP-interval */
       limdfsresources->processmatch(
                limdfsresources->processmatchinfo,
                limdfsresources->suftab[idx],
@@ -493,7 +494,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   Lcpintervalwithinfo *stackptr;
   unsigned long matchpref = 0, idx, rboundscount;
   Uchar extendchar;
-  Seqpos lbound, rbound, bound, offset,
+  Seqpos lbound, rbound, bound, offset, startpos,
          totallength = getencseqtotallength(limdfsresources->encseq);
   Myerscolumn previouscolumn;
   bool remstack;
@@ -509,9 +510,11 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
   previouscolumn.scorevalue = maxdistance;
 #endif
+  /* splitting the interval */
   rboundscount = lcpintervalsplitwithoutspecial(limdfsresources->rbwc,
                                                 limdfsresources->alphasize+1,
                                                 limdfsresources->encseq,
+                                                totallength,
                                                 limdfsresources->suftab,
                                                 0,
                                                 0,
@@ -544,21 +547,22 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
       assert (previouscolumn.maxleqk != UNDEFINDEX &&
               previouscolumn.maxleqk != patternlength);
       /*
-      printf("(2) singleton " FormatSeqpos "\n",PRINTSeqposcast(lbound));
+      following a leaf edge
       */
+      startpos = limdfsresources->suftab[lbound];
       if (iternextEDcolumn(&matchpref,
                            limdfsresources->eqsvector,
                            patternlength,
                            maxdistance,
                            &previouscolumn,
-                           limdfsresources->suftab[lbound],
-                           limdfsresources->readmode,
+                           startpos,
                            limdfsresources->encseq,
+                           limdfsresources->readmode,
                            totallength))
       {
         limdfsresources->processmatch(
                   limdfsresources->processmatchinfo,
-                  limdfsresources->suftab[lbound],
+                  startpos,
                   (Seqpos) (matchpref+1UL));
       }
     }
@@ -577,7 +581,9 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                (unsigned long) stackptr->lcpitv.offset,patternlength);
     printf("\n");
 #endif
+    /* extend interval by one character */
     extendchar = lcpintervalextendlcp(limdfsresources->encseq,
+                                      totallength,
                                       limdfsresources->suftab,
                                       &stackptr->lcpitv,
                                       limdfsresources->alphasize);
@@ -607,6 +613,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
         for (bound = stackptr->lcpitv.left; bound <= stackptr->lcpitv.right;
              bound++)
         {
+          /* iterate over entire lcp interbal */
           limdfsresources->processmatch(
                   limdfsresources->processmatchinfo,
                   limdfsresources->suftab[bound],
@@ -626,10 +633,12 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
 #endif
     } else
     {
+      /* split interval */
       rboundscount = lcpintervalsplitwithoutspecial(
                               limdfsresources->rbwc,
                               limdfsresources->alphasize+1,
                               limdfsresources->encseq,
+                              totallength,
                               limdfsresources->suftab,
                               stackptr->lcpitv.offset,
                               stackptr->lcpitv.left,
@@ -662,22 +671,21 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
         } else
         {
           assert(lbound == rbound);
-          /*
-          printf("(1) singleton " FormatSeqpos "\n",PRINTSeqposcast(lbound));
-          */
+          /* following a leaf edge */
+          startpos = limdfsresources->suftab[lbound];
           if (iternextEDcolumn(&matchpref,
                                limdfsresources->eqsvector,
                                patternlength,
                                maxdistance,
                                &previouscolumn,
-                               limdfsresources->suftab[lbound] + offset,
-                               limdfsresources->readmode,
+                               startpos + offset,
                                limdfsresources->encseq,
+                               limdfsresources->readmode,
                                totallength))
           {
             limdfsresources->processmatch(
                   limdfsresources->processmatchinfo,
-                  limdfsresources->suftab[lbound],
+                  startpos,
                   offset+matchpref);
           }
         }
@@ -685,3 +693,11 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
     }
   }
 }
+
+/* 
+  Specification steve: only output sequences which occur at most 
+  t times, where t is a parameter given by the user.
+  Output all matches involving a prefix of the pattern and the current
+  path with up to k error (k=2 for tagsize around 25).
+  Output exakt matching statistics for each suffix of the pattern
+*/

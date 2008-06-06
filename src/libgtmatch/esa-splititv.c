@@ -26,13 +26,14 @@
                              : getencodedchar(ENCSEQ,POS,Forwardmode))
 
 static Seqpos lcpintervalfindrightbound(const Encodedsequence *encseq,
+                                        Seqpos totallength,
                                         const Seqpos *suftab,
                                         Uchar cc,
                                         Seqpos offset,
                                         Seqpos left,
                                         Seqpos right)
 {
-  Seqpos pos, mid, totallength = getencseqtotallength(encseq);
+  Seqpos pos, mid;
   Uchar midcc;
 
   while (right > left+1)
@@ -52,6 +53,7 @@ static Seqpos lcpintervalfindrightbound(const Encodedsequence *encseq,
 }
 
 bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
+                                  Seqpos totallength,
                                   const Seqpos *suftab,
                                   Simplelcpinterval *itv,
                                   Uchar cc,
@@ -60,8 +62,7 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   Seqpos right)
 {
   Uchar leftcc, rightcc;
-  Seqpos pos, rightbound, leftbound = left,
-         totallength = getencseqtotallength(encseq);
+  Seqpos pos, rightbound, leftbound = left;
 
   pos = suftab[right] + offset;
   rightcc = SEQUENCE(encseq,pos);
@@ -73,7 +74,7 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
     {
       break;
     }
-    rightbound = lcpintervalfindrightbound(encseq,suftab,leftcc,
+    rightbound = lcpintervalfindrightbound(encseq,totallength,suftab,leftcc,
                                            offset,leftbound,right);
     if (leftcc == cc)
     {
@@ -99,6 +100,7 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
 unsigned long lcpintervalsplitwithoutspecial(Rightboundwithchar *rbwc,
                                              Uchar rboundsize,
                                              const Encodedsequence *encseq,
+                                             Seqpos totallength,
                                              const Seqpos *suftab,
                                              Seqpos offset,
                                              Seqpos left,
@@ -106,8 +108,7 @@ unsigned long lcpintervalsplitwithoutspecial(Rightboundwithchar *rbwc,
 {
   Uchar leftcc, rightcc;
   unsigned long rboundscount = 0;
-  Seqpos rightbound = 0, leftbound = left,
-         totallength = getencseqtotallength(encseq);
+  Seqpos rightbound = 0, leftbound = left;
 
   rightcc = SEQUENCE(encseq,suftab[right]+offset);
   while (true)
@@ -131,8 +132,8 @@ unsigned long lcpintervalsplitwithoutspecial(Rightboundwithchar *rbwc,
     {
       break;
     }
-    rightbound = lcpintervalfindrightbound(encseq,suftab,leftcc,offset,
-                                           leftbound,right);
+    rightbound = lcpintervalfindrightbound(encseq,totallength,suftab,
+                                           leftcc,offset,leftbound,right);
     leftbound = rightbound+1;
   }
   assert(rboundscount < (unsigned long) rboundsize);
@@ -141,12 +142,12 @@ unsigned long lcpintervalsplitwithoutspecial(Rightboundwithchar *rbwc,
 }
 
 Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
+                           Seqpos totallength,
                            const Seqpos *suftab,
                            const Lcpinterval *lcpitv,
                            Uchar alphasize)
 {
   Uchar ccl, ccr;
-  Seqpos totallength = getencseqtotallength(encseq);
 
   ccl = SEQUENCE(encseq,suftab[lcpitv->left] + lcpitv->offset);
   ccr = SEQUENCE(encseq,suftab[lcpitv->right] + lcpitv->offset);

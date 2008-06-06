@@ -35,6 +35,7 @@ typedef struct
 } Rightboundwithchar;
 
 bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
+                                  Seqpos totallength,
                                   const Seqpos *suftab,
                                   Simplelcpinterval *itv,
                                   Uchar cc,
@@ -45,12 +46,14 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
 unsigned long lcpintervalsplitwithoutspecial(Rightboundwithchar *rbwc,
                                              Uchar rboundsize,
                                              const Encodedsequence *encseq,
+                                             Seqpos totallength,
                                              const Seqpos *suftab,
                                              Seqpos offset,
                                              Seqpos left,
                                              Seqpos right);
 
 Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
+                           Seqpos totallength,
                            const Seqpos *suftab,
                            const Lcpinterval *lcpitv,
                            Uchar alphasize);

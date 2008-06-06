@@ -491,7 +491,7 @@ unsigned long packedindexuniqueforward(const void *genericindex,
       return 0;
     }
     curSym = MRAEncMapSymbol(alphabet, cc);
-    seqpospair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym, 
+    seqpospair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym,
                                              bwtbound.start,bwtbound.end);
     bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
     bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
@@ -567,7 +567,7 @@ unsigned long packedindexmstatsforward(const void *genericindex,
       break;
     }
     curSym = MRAEncMapSymbol(alphabet, cc);
-    seqpospair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym, 
+    seqpospair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym,
                                              bwtbound.start,bwtbound.end);
     bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
     bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
