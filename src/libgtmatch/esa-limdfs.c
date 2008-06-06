@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -264,9 +264,9 @@ static void inplacenextEDcolumn(const unsigned long *eqsvector,
                                 Uchar currentchar)
 {
   unsigned long Eq, Xv, Xh, Ph, Mh, /* as in Myers Paper */
-                backmask;           /* only one bit is on */
-  unsigned long idx;                /* a counter */
-  unsigned long score;              /* current score */
+                backmask,           /* only one bit is on */
+                idx,                /* a counter */
+                score;              /* current score */
 
 #ifdef SKDEBUG
   if (col->maxleqk == patternlength)
@@ -356,23 +356,25 @@ static bool iternextEDcolumn(unsigned long *matchpref,
   for (pos = startpos; pos < totallength; pos++)
   {
     cc = getencodedchar(encseq,pos,readmode);
-    if (cc == (Uchar) SEPARATOR)
+    if (cc != (Uchar) SEPARATOR)
+    {
+      inplacenextEDcolumn(eqsvector,
+                          patternlength,
+                          maxdistance,
+                          &currentcol,
+                          cc);
+      if (currentcol.maxleqk == UNDEFINDEX)
+      {
+        break;
+      }
+      if (currentcol.maxleqk == patternlength)
+      {
+        *matchpref = (unsigned long) (pos - startpos + 1);
+        return true;
+      }
+    } else
     {
       break;
-    }
-    inplacenextEDcolumn(eqsvector,
-                        patternlength,
-                        maxdistance,
-                        &currentcol,
-                        cc);
-    if (currentcol.maxleqk == UNDEFINDEX)
-    {
-      break;
-    }
-    if (currentcol.maxleqk == patternlength)
-    {
-      *matchpref = (unsigned long) (pos - startpos + 1);
-      return true;
     }
   }
   return false;
@@ -391,12 +393,13 @@ struct Limdfsresources
   unsigned long *eqsvector;
   Rightboundwithchar *rbwc;
   ArrayLcpintervalwithinfo stack;
-  const Encodedsequence *encseq;
-  Readmode readmode;
-  const Seqpos *suftab;
   Uchar alphasize;
   void (*processmatch)(void *,Seqpos,Seqpos);
   void *processmatchinfo;
+  /* the folowing is index specific */
+  const Seqpos *suftab;
+  const Encodedsequence *encseq;
+  Readmode readmode;
 };
 
 Limdfsresources *newLimdfsresources(const Encodedsequence *encseq,
