@@ -33,15 +33,18 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
   Simplelcpinterval itv;
   const Uchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
+  Seqpos totallength;
 
   itv.left = left;
   itv.right = right;
+  totallength = getencseqtotallength(suffixarray->encseq);
   for (qptr = qstart; /* Nothing */; qptr++, offset++)
   {
     if (itv.left < itv.right)
     {
       if (qptr >= qend || ISSPECIAL(*qptr) ||
           !lcpintervalfindcharchildintv(suffixarray->encseq,
+                                        totallength,
                                         suffixarray->suftab,
                                         &itv,
                                         *qptr,
@@ -69,14 +72,17 @@ unsigned long suffixarraymstats (const void *genericindex,
   Simplelcpinterval itv;
   const Uchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
+  Seqpos totallength;
 
   itv.left = left;
   itv.right = right;
+  totallength = getencseqtotallength(suffixarray->encseq);
   for (qptr = qstart; /* Nothing */; qptr++, offset++)
   {
     assert(itv.left <= itv.right);
     if (qptr >= qend || ISSPECIAL(*qptr) ||
         !lcpintervalfindcharchildintv(suffixarray->encseq,
+                                      totallength,
                                       suffixarray->suftab,
                                       &itv,
                                       *qptr,

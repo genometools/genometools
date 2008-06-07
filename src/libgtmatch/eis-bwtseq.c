@@ -423,27 +423,22 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
               struct matchBound *match)
 {
   size_t i = queryLen;
-  const Seqpos *count;
   Symbol curSym;
   const MRAEnc *alphabet;
+
   assert(bwtSeq && query);
-  count = bwtSeq->count;
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   curSym = MRAEncMapSymbol(alphabet, query[--i]);
-  match->start = count[curSym];
-  match->end   = count[curSym + 1];
+  match->start = bwtSeq->count[curSym];
+  match->end   = bwtSeq->count[curSym + 1];
   while ((match->start <= match->end) && (i > 0))
   {
     struct SeqposPair occPair;
     curSym = MRAEncMapSymbol(alphabet, query[--i]);
     occPair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym, match->start,
                                           match->end);
-    match->start = count[curSym] + occPair.a;
-    match->end   = count[curSym] + occPair.b;
-/*     match->start = count[curSym] + BWTSeqTransformedOcc(bwtSeq, curSym,
- *     match->start); */
-/*     match->end = count[curSym] + BWTSeqTransformedOcc(bwtSeq, curSym,
- *     match->end); */
+    match->start = bwtSeq->count[curSym] + occPair.a;
+    match->end   = bwtSeq->count[curSym] + occPair.b;
   }
 }
 
@@ -458,6 +453,7 @@ unsigned long packedindexuniqueforward(const void *genericindex,
   Uchar cc;
   const Uchar *qptr;
   struct matchBound bwtbound;
+  struct SeqposPair seqpospair;
   const BWTSeq *bwtSeq = (BWTSeq *) genericindex;
   Symbol curSym;
   const MRAEnc *alphabet;
@@ -475,16 +471,16 @@ unsigned long packedindexuniqueforward(const void *genericindex,
     return 0;
   }
   curSym = MRAEncMapSymbol(alphabet, cc);
-  bwtbound.end = bwtSeq->count[curSym];
-  bwtbound.start = bwtSeq->count[curSym+1];
+  bwtbound.start = bwtSeq->count[curSym];
+  bwtbound.end = bwtSeq->count[curSym+1];
 #ifdef SKDEBUG
   printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
           "occurrences\n",
-         PRINTSeqposcast(bwtbound.end),
          PRINTSeqposcast(bwtbound.start),
-         PRINTSeqposcast(bwtbound.start - bwtbound.end));
+         PRINTSeqposcast(bwtbound.end),
+         PRINTSeqposcast(bwtbound.end - bwtbound.start));
 #endif
-  while (qptr < qend && bwtbound.end + 1 < bwtbound.start)
+  while (qptr < qend && bwtbound.start + 1 < bwtbound.end)
   {
     cc = *qptr;
 #ifdef SKDEBUG
@@ -495,26 +491,20 @@ unsigned long packedindexuniqueforward(const void *genericindex,
       return 0;
     }
     curSym = MRAEncMapSymbol(alphabet, cc);
-
-    bwtbound.end = bwtSeq->count[curSym] +
-                     BWTSeqOcc(bwtSeq, curSym, bwtbound.end);
-    bwtbound.start = bwtSeq->count[curSym] +
-                     BWTSeqOcc(bwtSeq, curSym, bwtbound.start);
-    /*
-      aber vorher keine Transformation;
-      BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym,
-                       Seqpos posA, Seqpos posB);
-    */
+    seqpospair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym,
+                                             bwtbound.start,bwtbound.end);
+    bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
+    bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
 #ifdef SKDEBUG
     printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
             "occurrences\n",
-           PRINTSeqposcast(bwtbound.end),
            PRINTSeqposcast(bwtbound.start),
-           PRINTSeqposcast(bwtbound.start - bwtbound.end));
+           PRINTSeqposcast(bwtbound.end),
+           PRINTSeqposcast(bwtbound.end - bwtbound.start));
 #endif
     qptr++;
   }
-  if (bwtbound.end + 1 == bwtbound.start)
+  if (bwtbound.start + 1 == bwtbound.end)
   {
     return (unsigned long) (qptr - qstart);
   }
@@ -533,6 +523,7 @@ unsigned long packedindexmstatsforward(const void *genericindex,
   const Uchar *qptr;
   Seqpos prevlbound;
   struct matchBound bwtbound;
+  struct SeqposPair seqpospair;
   const BWTSeq *bwtSeq = (BWTSeq *) genericindex;
   Symbol curSym;
   unsigned long matchlength;
@@ -551,20 +542,20 @@ unsigned long packedindexmstatsforward(const void *genericindex,
     return 0;
   }
   curSym = MRAEncMapSymbol(alphabet, cc);
-  bwtbound.end = bwtSeq->count[curSym];
-  bwtbound.start = bwtSeq->count[curSym+1];
-  if (bwtbound.end >= bwtbound.start)
+  bwtbound.start = bwtSeq->count[curSym];
+  bwtbound.end = bwtSeq->count[curSym+1];
+  if (bwtbound.start >= bwtbound.end)
   {
     return 0;
   }
 #ifdef SKDEBUG
   printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
           "occurrences\n",
-         PRINTSeqposcast(bwtbound.end),
          PRINTSeqposcast(bwtbound.start),
-         PRINTSeqposcast(bwtbound.start - bwtbound.end));
+         PRINTSeqposcast(bwtbound.end),
+         PRINTSeqposcast(bwtbound.end - bwtbound.start));
 #endif
-  prevlbound = bwtbound.end;
+  prevlbound = bwtbound.start;
   for (qptr++; qptr < qend; qptr++)
   {
     cc = *qptr;
@@ -576,22 +567,22 @@ unsigned long packedindexmstatsforward(const void *genericindex,
       break;
     }
     curSym = MRAEncMapSymbol(alphabet, cc);
-    bwtbound.end = bwtSeq->count[curSym] +
-                     BWTSeqOcc(bwtSeq, curSym, bwtbound.end);
-    bwtbound.start = bwtSeq->count[curSym] +
-                     BWTSeqOcc(bwtSeq, curSym, bwtbound.start);
+    seqpospair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym,
+                                             bwtbound.start,bwtbound.end);
+    bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
+    bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
 #ifdef SKDEBUG
     printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
             "occurrences\n",
-           PRINTSeqposcast(bwtbound.end),
            PRINTSeqposcast(bwtbound.start),
-           PRINTSeqposcast(bwtbound.start - bwtbound.end));
+           PRINTSeqposcast(bwtbound.end),
+           PRINTSeqposcast(bwtbound.end - bwtbound.start));
 #endif
-    if (bwtbound.end >= bwtbound.start)
+    if (bwtbound.start >= bwtbound.end)
     {
       break;
     }
-    prevlbound = bwtbound.end;
+    prevlbound = bwtbound.start;
   }
   matchlength = (unsigned long) (qptr - qstart);
   if (witnessposition != NULL)

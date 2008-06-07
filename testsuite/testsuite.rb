@@ -120,6 +120,7 @@ require 'gt_shredder_include'
 require 'gt_splicesiteinfo_include'
 require 'gt_stat_include'
 require 'gt_suffixerator_include'
+require 'gt_idxsearch_include'
 require 'gt_trieins_include'
 require 'gt_uniq_include'
 if $arguments["libgtview"] then

@@ -15,26 +15,26 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_LIMDFS_H
-#define ESA_LIMDFS_H
+#ifndef ESA_MYERSAPM_H
+#define ESA_MYERSAPM_H
 
 #include "seqpos-def.h"
+#include "alphadef.h"
 #include "encseq-def.h"
 
-typedef struct Limdfsresources Limdfsresources;
+typedef struct Myersonlineresources Myersonlineresources;
 
-Limdfsresources *newLimdfsresources(const Encodedsequence *encseq,
-                                    Readmode readmode,
-                                    unsigned int mapsize,
-                                    const Seqpos *suftab,
-                                    void (*processmatch)(void *,Seqpos,Seqpos),
-                                    void *processmatchinfo);
+Myersonlineresources *newMyersonlineresources(
+                        unsigned int mapsize,
+                        const Encodedsequence *encseq,
+                        void (*processmatch)(void *,Seqpos,Seqpos),
+                        void *processmatchinfo);
 
-void freeLimdfsresources(Limdfsresources **ptrlimdfsresources);
+void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources);
 
-void esalimiteddfs(Limdfsresources *limdfsresources,
-                   const Uchar *pattern,
-                   unsigned long patternlength,
-                   unsigned long maxdistance);
+void edistmyersbitvectorAPM(Myersonlineresources *mor,
+                            const Uchar *pattern,
+                            unsigned long patternlength,
+                            unsigned long maxdistance);
 
 #endif
