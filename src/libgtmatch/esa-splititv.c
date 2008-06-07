@@ -173,6 +173,5 @@ Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
 
 /*
   Seqpos rangeOccs[8];
-  
   BWTSeqPosPairRangeOcc(bwtSeq, 0, lbound, rbound,rangeOccs);
 */

@@ -527,6 +527,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   {
     lbound = limdfsresources->bwc[idx].lbound;
     rbound = limdfsresources->bwc[idx].rbound;
+    assert(rbound == limdfsresources->bwc[idx+1].lbound-1);
     assert(lbound <= rbound);
     if (lbound < rbound)
     {
@@ -654,6 +655,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
       {
         lbound = limdfsresources->bwc[idx].lbound;
         rbound = limdfsresources->bwc[idx].rbound;
+        assert(rbound == limdfsresources->bwc[idx+1].lbound-1);
         assert(lbound <= rbound);
         if (lbound < rbound)
         {
@@ -698,8 +700,8 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   }
 }
 
-/* 
-  Specification steve: only output sequences which occur at most 
+/*
+  Specification steve: only output sequences which occur at most
   t times, where t is a parameter given by the user.
   Output all matches involving a prefix of the pattern and the current
   path with up to k error (k=2 for tagsize around 25).
