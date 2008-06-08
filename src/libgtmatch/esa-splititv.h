@@ -18,6 +18,7 @@
 #ifndef ESA_SPLITITV_H
 #define ESA_SPLITITV_H
 
+#include "libgtcore/arraydef.h"
 #include "libgtcore/symboldef.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
@@ -35,6 +36,14 @@ typedef struct
   Uchar inchar;
 } Boundswithchar;
 
+DECLAREARRAYSTRUCT(Boundswithchar);
+
+typedef struct
+{
+  ArrayBoundswithchar bounds;
+  unsigned long specialsatend;
+} Boundswithcharinfo;
+
 bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   Seqpos totallength,
                                   const Seqpos *suftab,
@@ -44,14 +53,13 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   Seqpos left,
                                   Seqpos right);
 
-unsigned long lcpintervalsplitwithoutspecial(Boundswithchar *bwc,
-                                             Uchar boundsize,
-                                             const Encodedsequence *encseq,
-                                             Seqpos totallength,
-                                             const Seqpos *suftab,
-                                             Seqpos offset,
-                                             Seqpos left,
-                                             Seqpos right);
+void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
+                                    const Encodedsequence *encseq,
+                                    Seqpos totallength,
+                                    const Seqpos *suftab,
+                                    Seqpos offset,
+                                    Seqpos left,
+                                    Seqpos right);
 
 Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
                            Seqpos totallength,
