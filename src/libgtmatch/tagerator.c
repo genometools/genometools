@@ -155,7 +155,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                          processmatchinfooffline);
   }
   seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
-  for (tagnumber = 0; /* Nothing */; tagnumber++)
+  for (tagnumber = 0; !haserr; tagnumber++)
   {
     retval = seqiterator_next(seqit, &currenttag, &taglen, &desc, err);
     if (retval != 1)
@@ -179,14 +179,31 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       charcode = symbolmap[currenttag[idx]];
       if (charcode == (Uchar) UNDEFCHAR)
       {
-        error_set(err,"undefed character '%c' in tag number %lu",
+        error_set(err,"undefined character '%c' in tag number %lu",
                   currenttag[idx],
                   tagnumber);
         haserr = true;
         ma_free(desc);
         break;
       }
+      if (charcode == (Uchar) WILDCARD)
+      {
+        if (tageratoroptions->replacewildcard)
+        {
+          charcode = (Uchar) (drand48() * (mapsize-1));
+        } else
+        {
+          error_set(err,"wildcard in tag number %lu",tagnumber);
+          haserr = true;
+          ma_free(desc);
+          break;
+        }
+      }
       transformedtag[idx] = charcode;
+    }
+    if (haserr)
+    {
+      break;
     }
     printf("# patternlength=%lu\n",taglen);
     printf("# maxdistance=%lu\n",tageratoroptions->maxdistance);

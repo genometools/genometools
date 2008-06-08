@@ -36,7 +36,9 @@ end
 def checktagerator(queryfile,ms)
   run "#{$bin}gt shredder -minlength 10 -maxlength 12 #{queryfile}"
   run "sed -e \'s/^>.*/>/\' #{$last_stdout}"
-  run_test "#{$bin}gt tagerator -cmp -ii sfx -t #{$last_stdout}"
+  run "mv #{$last_stdout} patternfile"
+  run_test "#{$bin}gt tagerator -rw -cmp -ii sfx -t patternfile"
+  run_test "#{$bin}gt tagerator -rw -cmp -k 1 -ii sfx -t patternfile"
 end
 
 def createandcheckgreedyfwdmat(reffile,queryfile)

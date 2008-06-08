@@ -45,7 +45,7 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
 {
   TageratorOptions *arguments = tool_arguments;
   OptionParser *op;
-  Option *option, *optiononline, *optioncmp;
+  Option *option, *optionrw, *optiononline, *optioncmp;
 
   assert(arguments != NULL);
   arguments->indexname = str_new();
@@ -78,6 +78,12 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                             &arguments->docompare, false);
   option_parser_add_option(op, optioncmp);
   option_exclude(optiononline,optioncmp);
+
+  optionrw = option_new_bool("rw","Replace wildcard in tag by random char",
+                             &arguments->replacewildcard, false);
+  option_parser_add_option(op, optionrw);
+  option_is_development_option(optionrw);
+
   return op;
 }
 

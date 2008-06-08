@@ -68,6 +68,7 @@ Myersonlineresources *newMyersonlineresources(
   ALLOCASSIGNSPACE(mor,NULL,Myersonlineresources,1);
   ALLOCASSIGNSPACE(mor->eqsvectorrev,NULL,unsigned long,mapsize-1);
   mor->encseq = encseq;
+  mor->esr = newEncodedsequencescanstate();
   assert(mapsize > 0 && mapsize-1 <= UCHAR_MAX);
   mor->alphasize = mapsize-1;
   mor->totallength = getencseqtotallength(encseq);
@@ -78,9 +79,10 @@ Myersonlineresources *newMyersonlineresources(
 
 void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources)
 {
-  Myersonlineresources *myersonlineresources = *ptrmyersonlineresources;
+  Myersonlineresources *mor = *ptrmyersonlineresources;
 
-  FREESPACE(myersonlineresources->eqsvectorrev);
+  FREESPACE(mor->eqsvectorrev);
+  freeEncodedsequencescanstate(&mor->esr);
   FREESPACE(*ptrmyersonlineresources);
 }
 
