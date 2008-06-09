@@ -45,7 +45,7 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
 {
   TageratorOptions *arguments = tool_arguments;
   OptionParser *op;
-  Option *option;
+  Option *option, *optionrw, *optiononline, *optioncmp;
 
   assert(arguments != NULL);
   arguments->indexname = str_new();
@@ -53,9 +53,8 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   op = option_parser_new("[options] -t tagfile -ii indexname",
                          "Map short sequence tags in given index.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option = option_new_filenamearray("t",
-                             "Specify files containing the tags",
-                             arguments->tagfiles);
+  option = option_new_filenamearray("t","Specify files containing the tags",
+                                    arguments->tagfiles);
   option_parser_add_option(op, option);
   option_is_mandatory(option);
   option = option_new_ulong("k",
@@ -69,6 +68,22 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                              arguments->indexname, NULL);
   option_parser_add_option(op, option);
   option_is_mandatory(option);
+
+  optiononline = option_new_bool("online","Perform online searches",
+                            &arguments->online, false);
+  option_parser_add_option(op, optiononline);
+
+  optioncmp = option_new_bool("cmp","compare results of offline and online "
+                                 "searches",
+                            &arguments->docompare, false);
+  option_parser_add_option(op, optioncmp);
+  option_exclude(optiononline,optioncmp);
+
+  optionrw = option_new_bool("rw","Replace wildcard in tag by random char",
+                             &arguments->replacewildcard, false);
+  option_parser_add_option(op, optionrw);
+  option_is_development_option(optionrw);
+
   return op;
 }
 

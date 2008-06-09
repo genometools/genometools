@@ -15,18 +15,26 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TAGERATOR_H
-#define TAGERATOR_H
-#include "libgtcore/strarray.h"
-#include "libgtcore/error.h"
+#ifndef ESA_MYERSAPM_H
+#define ESA_MYERSAPM_H
 
-typedef struct {
-  StrArray *tagfiles;
-  Str *indexname;
-  unsigned long maxdistance;
-  bool online, docompare, replacewildcard;
-} TageratorOptions;
+#include "seqpos-def.h"
+#include "alphadef.h"
+#include "encseq-def.h"
 
-int runtagerator(const TageratorOptions *tageratoroptions,Error *err);
+typedef struct Myersonlineresources Myersonlineresources;
+
+Myersonlineresources *newMyersonlineresources(
+                        unsigned int mapsize,
+                        const Encodedsequence *encseq,
+                        void (*processmatch)(void *,Seqpos,Seqpos),
+                        void *processmatchinfo);
+
+void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources);
+
+void edistmyersbitvectorAPM(Myersonlineresources *mor,
+                            const Uchar *pattern,
+                            unsigned long patternlength,
+                            unsigned long maxdistance);
 
 #endif

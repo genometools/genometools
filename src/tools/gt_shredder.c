@@ -61,7 +61,7 @@ static OptionParser* gt_shredder_option_parser_new(void *tool_arguments)
   o = option_new_ulong("maxlength", "Set the maximum length of the shreddered "
                        "fragments", &arguments->maxlength, 700);
   option_parser_add_option(op, o);
-  o = option_new_ulong("overlap", "Set the overlap between of consecutive "
+  o = option_new_ulong("overlap", "Set the overlap between consecutive "
                        "pieces", &arguments->overlap, 0);
   option_parser_add_option(op, o);
   option_parser_set_min_max_args(op, 1, 1);
