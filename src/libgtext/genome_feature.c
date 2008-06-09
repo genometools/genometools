@@ -420,24 +420,42 @@ int genome_feature_foreach_attribute(GenomeFeature *gf,
   return had_err;
 }
 
-bool genome_feature_has_splice_site(const GenomeFeature *gf)
+static bool genome_feature_has_gft(const GenomeFeature *gf,
+                                   const GenomeFeatureType *gfts)
 {
   GenomeNodeIterator *gni;
-  GenomeFeatureType gft;
   GenomeNode *gn;
   bool has_splice_site = false;
-  assert(gf);
+  assert(gf && gfts && gfts[0] != undefined);
   gni = genome_node_iterator_new((GenomeNode*) gf);
   while ((gn = genome_node_iterator_next(gni))) {
-    gft = genome_feature_get_type((GenomeFeature*) gn);
-    if (gft == gft_five_prime_splice_site ||
-        gft == gft_three_prime_splice_site) {
-      has_splice_site = true;
-      break;
+    unsigned long i = 0;
+    GenomeFeatureType gft = genome_feature_get_type((GenomeFeature*) gn);
+    while (gfts[i] != undefined) {
+      if (gft == gfts[i]) {
+        has_splice_site = true;
+        break;
+      }
+      i++;
     }
+    if (has_splice_site)
+      break;
   }
   genome_node_iterator_delete(gni);
   return has_splice_site;
+}
+
+bool genome_feature_has_CDS(const GenomeFeature *gf)
+{
+  static GenomeFeatureType gfts[] = { gft_CDS, undefined };
+  return genome_feature_has_gft(gf, gfts);
+}
+
+bool genome_feature_has_splice_site(const GenomeFeature *gf)
+{
+  static GenomeFeatureType gfts[] = { gft_five_prime_splice_site,
+                                      gft_three_prime_splice_site, undefined };
+  return genome_feature_has_gft(gf, gfts);
 }
 
 double genome_feature_average_splice_site_prob(const GenomeFeature *gf)

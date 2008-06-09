@@ -1,7 +1,9 @@
 parsed feature trees: 3011
 sequence regions: 20 (total length: 713365500)
 genes: 2991
+protein-coding genes: 1332
 exons: 20154
+CDSs: 10072
 exon number distribution:
 1: 70 (prob=0.0234,cumulative=0.0234)
 2: 413 (prob=0.1381,cumulative=0.1615)

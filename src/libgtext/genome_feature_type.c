@@ -45,7 +45,8 @@ static const char *genome_feature_type_strings[] = { "CDS",
                                                      "target_site_duplication",
                                                      "three_prime_UTR",
                                                      "three_prime_splice_site",
-                                                     "transcript"
+                                                     "transcript",
+                                                     "undefined"
                                                    };
 
 int genome_feature_type_get(GenomeFeatureType *type, const char *gft_string)
@@ -53,6 +54,7 @@ int genome_feature_type_get(GenomeFeatureType *type, const char *gft_string)
   void *result;
 
   assert(type && gft_string);
+  assert(strcmp(gft_string, "undefined")); /* do not convert undefined string */
 
   result = bsearch(&gft_string,
                    genome_feature_type_strings,
@@ -72,6 +74,7 @@ int genome_feature_type_get(GenomeFeatureType *type, const char *gft_string)
 
 const char* genome_feature_type_get_cstr(GenomeFeatureType type)
 {
+  assert(type != undefined); /* do not convert undefined type */
   return genome_feature_type_strings[type];
 }
 

@@ -43,7 +43,8 @@ typedef enum {
   gft_target_site_duplication,
   gft_three_prime_UTR,
   gft_three_prime_splice_site,
-  gft_transcript
+  gft_transcript,
+  undefined /* to have an ``undef'' enum, not convertable to and from cstr! */
 } GenomeFeatureType;
 
 /* Determine a genome feature type <gft> from the string <gft_string>.

@@ -25,6 +25,7 @@ struct StatVisitor {
   const GenomeVisitor parent_instance;
   unsigned long number_of_sequence_regions,
                 number_of_genes,
+                number_of_protein_coding_genes,
                 number_of_mRNAs,
                 number_of_exons,
                 number_of_CDSs,
@@ -74,6 +75,8 @@ static int compute_statistics(GenomeNode *gn, void *data, Error *e)
   switch (genome_feature_get_type(gf)) {
     case gft_gene:
       stat_visitor->number_of_genes++;
+      if (genome_feature_has_CDS(gf))
+        stat_visitor->number_of_protein_coding_genes++;
       if (stat_visitor->gene_length_distribution) {
         disc_distri_add(stat_visitor->gene_length_distribution,
                        range_length(genome_node_get_range((GenomeNode*) gf)));
@@ -183,6 +186,10 @@ void stat_visitor_show_stats(GenomeVisitor *gv)
   }
   if (stat_visitor->number_of_genes)
     printf("genes: %lu\n", stat_visitor->number_of_genes);
+  if (stat_visitor->number_of_protein_coding_genes) {
+    printf("protein-coding genes: %lu\n",
+           stat_visitor->number_of_protein_coding_genes);
+  }
   if (stat_visitor->number_of_mRNAs)
     printf("mRNAs: %lu\n", stat_visitor->number_of_mRNAs);
   if (stat_visitor->number_of_exons)

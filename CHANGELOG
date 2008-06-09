@@ -2,7 +2,7 @@ changes in version 1.1.2 (2008-05-13)
 
 - new tool `gt fingerprint` has been added
 - new tool `gt shredder` has been added
-- `gt stat` shows number of CDSs
+- `gt stat` shows number of CDSs and protein-coding genes
 
 
 changes in version 1.1.1 (2008-04-11)

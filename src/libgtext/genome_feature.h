@@ -58,6 +58,7 @@ void                   genome_feature_add_attribute(GenomeFeature*,
 int                    genome_feature_foreach_attribute(GenomeFeature*,
                                                         AttributeIterFunc,
                                                         void *data, Error*);
+bool                   genome_feature_has_CDS(const GenomeFeature*);
 bool                   genome_feature_has_splice_site(const GenomeFeature*);
 double                 genome_feature_average_splice_site_prob(const
                                                                GenomeFeature*);
