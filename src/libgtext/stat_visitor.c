@@ -177,7 +177,7 @@ void stat_visitor_show_stats(GenomeVisitor *gv)
            stat_visitor->number_of_sequence_regions,
            stat_visitor->total_length_of_sequence_regions);
   }
-  if (stat_visitor->number_of_exons)
+  if (stat_visitor->number_of_genes)
     printf("genes: %lu\n", stat_visitor->number_of_genes);
   if (stat_visitor->number_of_mRNAs)
     printf("mRNAs: %lu\n", stat_visitor->number_of_mRNAs);
