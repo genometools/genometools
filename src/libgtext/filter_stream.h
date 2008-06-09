@@ -27,6 +27,7 @@ const GenomeStreamClass* filter_stream_class(void);
 GenomeStream*            filter_stream_new(GenomeStream*,
                                            Str *seqid, Str *typefilter,
                                            Range overlap_range, Strand,
+                                           bool has_CDS,
                                            unsigned long max_gene_length,
                                            unsigned long max_gene_num,
                                            double min_gene_score,

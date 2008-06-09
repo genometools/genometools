@@ -120,3 +120,12 @@ Test do
            "#{$testdata}splice_site_prob.gff3"
   run "diff #{$last_stdout} #{$testdata}splice_site_prob.gff3"
 end
+
+Name "gt filter test 17 (-hascds)"
+Keywords "gt_filter test"
+Test do
+  run_test "#{$bin}gt filter -hascds " +
+           "#{$testdata}encode_known_genes_Mar07.gff3 | " +
+           "#{$memcheck} #{$bin}gt stat"
+  run "diff #{$last_stdout} #{$testdata}gt_filter_encode.out"
+end

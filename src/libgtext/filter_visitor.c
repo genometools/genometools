@@ -29,6 +29,7 @@ struct FilterVisitor {
       *typefilter;
   Range overlap_range;
   Strand strand;
+  bool has_CDS;
   unsigned long max_gene_length,
                 gene_num,     /* the number of passed genes */
                 max_gene_num; /* the maximal number of genes which can pass */
@@ -71,6 +72,14 @@ static bool filter_strand(GenomeFeature *gf, Strand strand)
 {
   assert(gf);
   if (strand != NUM_OF_STRAND_TYPES && genome_feature_get_strand(gf) != strand)
+    return true;
+  return false;
+}
+
+static bool filter_has_CDS(GenomeFeature *gf, bool has_CDS)
+{
+  assert(gf);
+  if (has_CDS && !genome_feature_has_CDS(gf))
     return true;
   return false;
 }
@@ -125,6 +134,9 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
     filter_node = filter_strand(gf, fv->strand);
 
   if (!filter_node)
+    filter_node = filter_has_CDS(gf, fv->has_CDS);
+
+  if (!filter_node)
     filter_node = filter_min_average_ssp(gf, fv->min_average_splice_site_prob);
 
   if (filter_node)
@@ -163,6 +175,7 @@ const GenomeVisitorClass* filter_visitor_class()
 
 GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
                                   Range overlap_range, Strand strand,
+                                  bool has_CDS,
                                   unsigned long max_gene_length,
                                   unsigned long max_gene_num,
                                   double min_gene_score,
@@ -175,6 +188,7 @@ GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
   filter_visitor->typefilter = str_ref(typefilter);
   filter_visitor->overlap_range = overlap_range;
   filter_visitor->strand = strand;
+  filter_visitor->has_CDS = has_CDS;
   filter_visitor->max_gene_length = max_gene_length;
   filter_visitor->gene_num = 0;
   filter_visitor->max_gene_num = max_gene_num;

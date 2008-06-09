@@ -28,7 +28,8 @@
 #define STRAND_OPT  "strand"
 
 typedef struct {
-  bool verbose;
+  bool verbose,
+       has_CDS;
   Str *seqid,
       *typefilter,
       *strand_char;
@@ -101,6 +102,12 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
                              STRANDCHARS"')", arguments->strand_char, NULL);
   option_parser_add_option(op, option);
 
+  /* -hascds */
+  option = option_new_bool("hascds", "filter out all top-level features which "
+                           "do not have a CDS child", &arguments->has_CDS,
+                           false);
+  option_parser_add_option(op, option);
+
   /* -maxgenelength */
   option = option_new_ulong_min("maxgenelength", "the maximum length a gene "
                                 "can have to pass the filter",
@@ -121,7 +128,7 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
 
   /* -minaveragessp */
   option = option_new_probability("minaveragessp", "set the minimum average "
-                                  "splice site probability.",
+                                  "splice site probability",
                                   &arguments->min_average_splice_site_prob,
                                   UNDEF_DOUBLE);
   option_parser_add_option(op, option);
@@ -179,6 +186,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
                                     arguments->typefilter,
                                     arguments->overlap_range,
                                     arguments->strand,
+                                    arguments->has_CDS,
                                     arguments->max_gene_length,
                                     arguments->max_gene_num,
                                     arguments->min_gene_score,
