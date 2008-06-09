@@ -27,6 +27,7 @@ struct StatVisitor {
                 number_of_genes,
                 number_of_mRNAs,
                 number_of_exons,
+                number_of_CDSs,
                 number_of_LTR_retrotransposons,
                 exon_number_for_distri;
   unsigned long long total_length_of_sequence_regions;
@@ -91,6 +92,9 @@ static int compute_statistics(GenomeNode *gn, void *data, Error *e)
         disc_distri_add(stat_visitor->exon_length_distribution,
                        range_length(genome_node_get_range((GenomeNode*) gf)));
       }
+      break;
+    case gft_CDS:
+      stat_visitor->number_of_CDSs++;
       break;
     case gft_intron:
       if (stat_visitor->intron_length_distribution) {
@@ -183,6 +187,8 @@ void stat_visitor_show_stats(GenomeVisitor *gv)
     printf("mRNAs: %lu\n", stat_visitor->number_of_mRNAs);
   if (stat_visitor->number_of_exons)
     printf("exons: %lu\n", stat_visitor->number_of_exons);
+  if (stat_visitor->number_of_CDSs)
+    printf("CDSs: %lu\n", stat_visitor->number_of_CDSs);
   if (stat_visitor->number_of_LTR_retrotransposons) {
     printf("LTR_retrotransposons: %lu\n",
            stat_visitor->number_of_LTR_retrotransposons);
