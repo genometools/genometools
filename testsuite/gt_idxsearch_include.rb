@@ -38,7 +38,7 @@ def checktagerator(queryfile,ms)
   run "sed -e \'s/^>.*/>/\' #{$last_stdout}"
   run "mv #{$last_stdout} patternfile"
   run_test "#{$bin}gt tagerator -rw -cmp -ii sfx -t patternfile"
-  # run_test "#{$bin}gt tagerator -rw -cmp -k 1 -ii sfx -t patternfile"
+  run_test "#{$bin}gt tagerator -rw -cmp -k 1 -ii sfx -t patternfile"
 end
 
 def createandcheckgreedyfwdmat(reffile,queryfile)

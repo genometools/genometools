@@ -2725,10 +2725,10 @@ static void showbufchar(FILE *fp,bool complement,Uchar cc)
 
 /* remove this from the interface */
 void showsequenceatstartpos(FILE *fp,
-                                   bool fwd,
-                                   bool complement,
-                                   const Encodedsequence *encseq,
-                                   Seqpos startpos)
+                            bool fwd,
+                            bool complement,
+                            const Encodedsequence *encseq,
+                            Seqpos startpos)
 {
   Seqpos pos, endpos;
   Uchar buffer[UNITSIN2BITENC];

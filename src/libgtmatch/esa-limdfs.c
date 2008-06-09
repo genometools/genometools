@@ -171,14 +171,17 @@ static void nextEDcolumn(const unsigned long *eqsvector,
                          Uchar currentchar,
                          const Myerscolumn *incol)
 {
-  unsigned long Eq, Xv, Xh, Ph, Mh, /* as in Myers Paper */
-                backmask;           /* only one bit is on */
-  unsigned long idx;                /* a counter */
-  unsigned long score;              /* current score */
+  unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
+                backmask,               /* only one bit is on */
+                idx,                    /* a counter */
+                score;                  /* current score */
 
   assert(incol->maxleqk != UNDEFINDEX && incol->maxleqk != patternlength);
-  assert(ISNOTSPECIAL(currentchar));
-  Eq = eqsvector[(unsigned long) currentchar];
+  assert(currentchar != (Uchar) SEPARATOR);
+  if (currentchar != (Uchar) WILDCARD)
+  {
+    Eq = eqsvector[(unsigned long) currentchar];
+  }
   Xv = Eq | incol->Mv;
   Xh = (((Eq & incol->Pv) + incol->Pv) ^ incol->Pv) | Eq;
 
@@ -264,7 +267,7 @@ static void inplacenextEDcolumn(const unsigned long *eqsvector,
                                 Myerscolumn *col,
                                 Uchar currentchar)
 {
-  unsigned long Eq, Xv, Xh, Ph, Mh, /* as in Myers Paper */
+  unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
                 backmask,           /* only one bit is on */
                 idx,                /* a counter */
                 score;              /* current score */
@@ -282,7 +285,10 @@ static void inplacenextEDcolumn(const unsigned long *eqsvector,
     exit(EXIT_FAILURE);
   }
 #endif
-  Eq = eqsvector[(unsigned long) currentchar];
+  if (currentchar != (Uchar) WILDCARD)
+  {
+    Eq = eqsvector[(unsigned long) currentchar];
+  }
   Xv = Eq | col->Mv;
   Xh = (((Eq & col->Pv) + col->Pv) ^ col->Pv) | Eq;
 
@@ -484,6 +490,7 @@ static bool possiblypush(Limdfsresources *limdfsresources,
     for (idx = lbound; idx <= rbound; idx++)
     {
       /* enumerate the suffixes in the LCP-interval */
+      /* printf("case 3\n"); */
       limdfsresources->processmatch(
                limdfsresources->processmatchinfo,
                limdfsresources->suftab[idx],
@@ -501,8 +508,9 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
 {
   Lcpintervalwithinfo *stackptr;
   unsigned long matchpref = 0, idx;
-  Uchar extendchar;
-  Seqpos lbound, rbound, bound, offset, startpos,
+  Uchar extendchar, inchar;
+  Seqpos lbound, rbound, bound, offsetparent, leftparent, rightparent, startpos,
+         specialindex,
          totallength = getencseqtotallength(limdfsresources->encseq);
   Myerscolumn previouscolumn;
   bool remstack;
@@ -518,7 +526,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
   previouscolumn.scorevalue = maxdistance;
 #endif
-  /* splitting the interval */
+  /* splitting the interval at the root */
   lcpintervalsplitwithoutspecial(&limdfsresources->bwci,
                                  limdfsresources->encseq,
                                  totallength,
@@ -570,6 +578,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                            limdfsresources->readmode,
                            totallength))
       {
+        /* printf("case 4\n"); */
         limdfsresources->processmatch(
                   limdfsresources->processmatchinfo,
                   startpos,
@@ -624,6 +633,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
              bound++)
         {
           /* iterate over entire lcp interbal */
+          /* printf("case 1\n"); */
           limdfsresources->processmatch(
                   limdfsresources->processmatchinfo,
                   limdfsresources->suftab[bound],
@@ -651,16 +661,59 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                                      stackptr->lcpitv.offset,
                                      stackptr->lcpitv.left,
                                      stackptr->lcpitv.right);
-      offset = stackptr->lcpitv.offset;
+      offsetparent = stackptr->lcpitv.offset;
+      leftparent = stackptr->lcpitv.left;
+      rightparent = stackptr->lcpitv.right;
       assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
       limdfsresources->stack.nextfreeLcpintervalwithinfo--;
-      for (idx=0; idx < limdfsresources->bwci.bounds.nextfreeBoundswithchar;
-           idx++)
+      idx = 0;
+      /*
+      printf("split [%u,%u]: specialsatend=%u\n",
+                    (unsigned int) leftparent,
+                    (unsigned int) rightparent,
+                    (unsigned int) limdfsresources->bwci.specialsatend);
+      */
+      specialindex = leftparent;
+      while (true)
       {
-        lbound = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].lbound;
-        rbound = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].rbound;
-        assert(rbound == limdfsresources->bwci.bounds.
-                                          spaceBoundswithchar[idx+1].lbound-1);
+        if (idx < limdfsresources->bwci.bounds.nextfreeBoundswithchar)
+        {
+          lbound = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].lbound;
+          rbound = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].rbound;
+          inchar = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].inchar;
+          assert(rbound == limdfsresources->bwci.bounds.
+                                    spaceBoundswithchar[idx+1].lbound-1);
+          specialindex += (rbound-lbound+1);
+          idx++;
+        } else
+        {
+          if (specialindex <= rightparent)
+          {
+            lbound = rbound = specialindex;
+            startpos = limdfsresources->suftab[lbound] + offsetparent;
+            if (startpos >= totallength)
+            {
+              inchar = (Uchar) SEPARATOR;
+            } else
+            {
+              inchar = getencodedchar(limdfsresources->encseq,startpos,
+                                      Forwardmode);
+            }
+            /*
+            printf("specialindex %lu in [%u,%u] ",
+                    (unsigned long) specialindex,
+                    (unsigned int) leftparent,
+                    (unsigned int) rightparent);
+            printf("suffix at startpos %u with inchar %u\n",
+                    (unsigned int) limdfsresources->suftab[lbound],
+                    (unsigned int) inchar);
+            */
+            specialindex++;
+          } else
+          {
+            break;
+          }
+        }
         assert(lbound <= rbound);
         if (lbound < rbound)
         {
@@ -670,12 +723,10 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                                   patternlength,
                                   maxdistance,
                                   stackptr,
-                                  offset+1,
+                                  offsetparent+1,
                                   lbound,
                                   rbound,
-                                  limdfsresources->bwci.bounds.
-                                                   spaceBoundswithchar[idx].
-                                                   inchar,
+                                  inchar,
                                   &previouscolumn);
           if (remstack)
           {
@@ -683,23 +734,31 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
           }
         } else
         {
-          assert(lbound == rbound);
-          /* following a leaf edge */
-          startpos = limdfsresources->suftab[lbound];
-          if (iternextEDcolumn(&matchpref,
-                               limdfsresources->eqsvector,
-                               patternlength,
-                               maxdistance,
-                               &previouscolumn,
-                               startpos + offset,
-                               limdfsresources->encseq,
-                               limdfsresources->readmode,
-                               totallength))
+          if (inchar != (Uchar) SEPARATOR)
           {
-            limdfsresources->processmatch(
-                  limdfsresources->processmatchinfo,
-                  startpos,
-                  offset+matchpref);
+            assert(lbound == rbound);
+            /* following a leaf edge */
+            startpos = limdfsresources->suftab[lbound];
+            if (iternextEDcolumn(&matchpref,
+                                 limdfsresources->eqsvector,
+                                 patternlength,
+                                 maxdistance,
+                                 &previouscolumn,
+                                 startpos + offsetparent,
+                                 limdfsresources->encseq,
+                                 limdfsresources->readmode,
+                                 totallength))
+            {
+              /*
+              printf("case 2 with length %lu+%lu\n",
+                      (unsigned long) offsetparent,
+                      (unsigned long) matchpref);
+              */
+              limdfsresources->processmatch(
+                    limdfsresources->processmatchinfo,
+                    startpos,
+                    offsetparent+matchpref);
+            }
           }
         }
       }

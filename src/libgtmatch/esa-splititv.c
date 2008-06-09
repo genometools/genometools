@@ -135,7 +135,7 @@ void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
     {
       ADDPREVIOUSRBOUND(rightbound);
       ADDCURRENTLBOUND(rightbound+1);
-      bwci->specialsatend = (unsigned long) (right - leftbound + 1);
+      bwci->specialsatend = (unsigned long) (right - leftbound);
       return;
     }
     ADDPREVIOUSRBOUND(leftbound-1);

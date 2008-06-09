@@ -32,7 +32,8 @@
 #include "esa-limdfs.h"
 #include "stamp.h"
 
-#include "libgtmatch/esa-map.pr"
+#include "echoseq.pr"
+#include "esa-map.pr"
 
 #define MAXTAGSIZE INTWORDSIZE
 
@@ -244,6 +245,20 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     {
       unsigned long ss;
 
+      if (storeoffline.nextfreeSeqpos > storeonline.nextfreeSeqpos)
+      {
+        for (ss=0; ss < storeoffline.nextfreeSeqpos; ss++)
+        {
+          printf("match %lu: ",(unsigned long) storeoffline.spaceSeqpos[ss]);
+          encseq2symbolstring(stdout,
+                              suffixarray.alpha,
+                              suffixarray.encseq,
+                              Forwardmode,
+                              storeoffline.spaceSeqpos[ss],
+                              11UL,
+                              60);
+        }
+      }
       if (storeoffline.nextfreeSeqpos != storeonline.nextfreeSeqpos)
       {
         fprintf(stderr,"storeoffline.nextfreeSeqpos = %lu != %lu = "
@@ -255,9 +270,9 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       assert(storeoffline.nextfreeSeqpos == storeonline.nextfreeSeqpos);
       if (storeoffline.nextfreeSeqpos > 1UL)
       {
-      qsort(storeoffline.spaceSeqpos,(size_t) storeoffline.nextfreeSeqpos,
-            sizeof (Seqpos),
-            cmpdescend);
+        qsort(storeoffline.spaceSeqpos,(size_t) storeoffline.nextfreeSeqpos,
+              sizeof (Seqpos),
+              cmpdescend);
       }
       for (ss=0; ss < storeoffline.nextfreeSeqpos; ss++)
       {
