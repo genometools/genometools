@@ -15,26 +15,35 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/bioseq.h"
 #include "libgtcore/fa.h"
+#include "libgtcore/fasta.h"
+#include "libgtcore/fileutils.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
+#include "libgtcore/outputfile.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 #include "tools/gt_splitfasta.h"
 
 typedef struct {
   unsigned long max_filesize_in_MB;
+  Str *splitdesc;
+  bool force;
 } SplitfastaArguments;
 
 static void* gt_splitfasta_arguments_new(void)
 {
-  return ma_calloc(1, sizeof (SplitfastaArguments));
+  SplitfastaArguments *arguments = ma_calloc(1, sizeof *arguments);
+  arguments->splitdesc = str_new();
+  return arguments;
 }
 
 void gt_splitfasta_arguments_delete(void *tool_arguments)
 {
   SplitfastaArguments *arguments = tool_arguments;
   if (!arguments) return;
+  str_delete(arguments->splitdesc);
   ma_free(arguments);
 }
 
@@ -42,12 +51,23 @@ static OptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
 {
   SplitfastaArguments *arguments = tool_arguments;
   OptionParser *op;
-  Option *o;
+  Option *targetsize_option, *splitdesc_option, *o;
   assert(arguments);
   op = option_parser_new("[option ...] fastafile","Split the supplied fasta "
                          "file.");
-  o = option_new_ulong_min("targetsize", "set the target file size in MB",
-                           &arguments->max_filesize_in_MB, 50, 1);
+  targetsize_option = option_new_ulong_min("targetsize", "set the target file "
+                                           "size in MB",
+                                           &arguments->max_filesize_in_MB, 50,
+                                           1);
+  option_parser_add_option(op, targetsize_option);
+  splitdesc_option = option_new_string("splitdesc", "put every fasta entry in "
+                                       "a separate file named by its "
+                                       "description in the given directory",
+                                       arguments->splitdesc, NULL);
+  option_parser_add_option(op, splitdesc_option);
+  option_exclude(targetsize_option, splitdesc_option);
+  o = option_new_bool(FORCE_OPT_CSTR, "force writing to output file",
+                      &arguments->force, false);
   option_parser_add_option(op, o);
   option_parser_set_min_max_args(op, 1, 1);
   return op;
@@ -64,11 +84,60 @@ static unsigned long buf_contains_separator(char *buf)
   return 0;
 }
 
-static int split_fasta_file(const char *filename,
-                            unsigned long max_filesize_in_bytes, Error *err)
+static GenFile* genfile_xopen_forcecheck(const char *path, const char *mode,
+                                         bool force, Error *err)
 {
-  GenFile *srcfp = NULL;
-  FILE *destfp = NULL;
+  if (!force && file_exists(path)) {
+    error_set(err, "file \"%s\" exists already, use option -%s to overwrite",
+              path, FORCE_OPT_CSTR);
+    return NULL;
+  }
+  return genfile_xopen(path, mode);
+}
+
+static int split_description(const char *filename, Str *splitdesc, bool force,
+                             Error *err)
+{
+  unsigned long i;
+  Bioseq *bioseq;
+  Str *descname;
+  int had_err = 0;
+  error_check(err);
+  assert(filename && splitdesc && str_length(splitdesc));
+
+  descname = str_new();
+  if (!(bioseq = bioseq_new(filename, err)))
+    had_err = -1;
+
+  for (i = 0; !had_err && i < bioseq_number_of_sequences(bioseq); i++) {
+    GenFile *outfp;
+    str_reset(descname);
+    str_append_str(descname, splitdesc);
+    str_append_char(descname, '/');
+    str_append_cstr(descname, bioseq_get_description(bioseq, i));
+    str_append_cstr(descname, file_suffix(filename));
+    if (!(outfp = genfile_xopen_forcecheck(str_get(descname), "w", force,
+                                           err))) {
+      had_err = -1;
+      break;
+    }
+    fasta_show_entry_generic(bioseq_get_description(bioseq, i),
+                             bioseq_get_sequence(bioseq, i),
+                             bioseq_get_sequence_length(bioseq, i), 0, outfp);
+    genfile_close(outfp);
+  }
+
+  bioseq_delete(bioseq);
+  str_delete(descname);
+
+  return had_err;
+}
+
+static int split_fasta_file(const char *filename,
+                            unsigned long max_filesize_in_bytes, bool force,
+                            Error *err)
+{
+  GenFile *srcfp = NULL, *destfp = NULL;
   Str *destfilename = NULL;
   unsigned long filenum = 0, bytecount = 0, separator_pos;
   int read_bytes, had_err = 0;
@@ -100,32 +169,42 @@ static int split_fasta_file(const char *filename,
                        genfile_basename_length(filename));
     str_append_char(destfilename, '.');
     str_append_ulong(destfilename, ++filenum);
-    destfp = fa_xfopen(str_get(destfilename), "w");
-    xfwrite(buf, 1, read_bytes, destfp);
+    str_append_cstr(destfilename, genfilemode_suffix(genfile_mode(srcfp)));
+    if (!(destfp = genfile_xopen_forcecheck(str_get(destfilename), "w", force,
+                                            err))) {
+      had_err = -1;
+    }
+    if (!had_err)
+      genfile_xwrite(destfp, buf, read_bytes);
 
-    while ((read_bytes = genfile_xread(srcfp, buf, BUFSIZ)) != 0) {
+    while (!had_err && (read_bytes = genfile_xread(srcfp, buf, BUFSIZ)) != 0) {
       bytecount += read_bytes;
       if (bytecount > max_filesize_in_bytes &&
           (separator_pos = buf_contains_separator(buf))) {
         separator_pos--;
         assert(separator_pos < BUFSIZ);
         if (separator_pos)
-          xfwrite(buf, 1, separator_pos, destfp);
+          genfile_xwrite(destfp, buf, separator_pos);
         /* close current file */
-        fa_xfclose(destfp);
+        genfile_close(destfp);
         /* open new file */
         str_reset(destfilename);
         str_append_cstr_nt(destfilename, filename,
                            genfile_basename_length(filename));
         str_append_char(destfilename, '.');
         str_append_ulong(destfilename, ++filenum);
-        destfp = fa_xfopen(str_get(destfilename), "w");
+        str_append_cstr(destfilename, genfilemode_suffix(genfile_mode(srcfp)));
+        if (!(destfp = genfile_xopen_forcecheck(str_get(destfilename), "w",
+                                                force, err))) {
+          had_err = -1;
+          break;
+        }
         bytecount = 0;
         assert(buf[separator_pos] == '>');
-        xfwrite(buf+separator_pos, 1, read_bytes-separator_pos, destfp);
+        genfile_xwrite(destfp, buf+separator_pos, read_bytes-separator_pos);
       }
       else
-        xfwrite(buf, 1, read_bytes, destfp);
+        genfile_xwrite(destfp, buf, read_bytes);
     }
   }
 
@@ -133,7 +212,7 @@ static int split_fasta_file(const char *filename,
   str_delete(destfilename);
 
   /* close current file */
-  fa_xfclose(destfp);
+  genfile_close(destfp);
 
   /* close source file */
   genfile_close(srcfp);
@@ -153,7 +232,14 @@ static int gt_splitfasta_runner(UNUSED int argc, const char **argv,
 
   max_filesize_in_bytes = arguments->max_filesize_in_MB << 20;
 
-  had_err = split_fasta_file(argv[parsed_args], max_filesize_in_bytes, err);
+  if (str_length(arguments->splitdesc)) {
+    had_err = split_description(argv[parsed_args], arguments->splitdesc,
+                                arguments->force, err);
+  }
+  else {
+    had_err = split_fasta_file(argv[parsed_args], max_filesize_in_bytes,
+                               arguments->force, err);
+  }
 
   return had_err;
 }

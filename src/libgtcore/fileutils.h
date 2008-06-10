@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -26,16 +26,21 @@
 #include "libgtcore/strarray.h"
 
 bool           file_exists(const char*);
-/* returns true if the file with path <a> has a later modification time than the
+/* Returns true if the file with path <a> has a later modification time than the
    file with path <b>, false otherwise. */
 bool           file_is_newer(const char *a, const char *b);
 unsigned long  file_number_of_lines(const char*);
+/* Returns the suffix of <path>, if there is any. Returns "" otherwise
+   The suffix is the part after and including the last '.' but after the last
+   '/'. Except if <path> ends with ".gz" or ".bz2", then the suffix is the part
+   after and including the second last '.'. */
+const char*    file_suffix(const char *path);
 
-/* set <path> to the dirname of <file>, if it has one, to "" otherwise */
+/* Set <path> to the dirname of <file>, if it has one, to "" otherwise. */
 void           file_dirname(Str *path, const char *file);
 
-/* find 'file' in $PATH, if it has no dirname; set 'path' to dirname otherwise.
-   sets 'path' to the empty string if 'file' could not be found in $PATH. */
+/* Find <file> in $PATH, if it has no dirname; set <path> to dirname otherwise.
+   Sets <path> to the empty string if <file> could not be found in $PATH. */
 int            file_find_in_path(Str *path, const char *file, Error*);
 
 off_t          files_estimate_total_size(const StrArray *filenames);

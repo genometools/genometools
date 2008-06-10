@@ -63,6 +63,21 @@ unsigned long file_number_of_lines(const char *path)
   return number_of_lines;
 }
 
+const char* file_suffix(const char *path)
+{
+  const char *suffixptr;
+  assert(path);
+  suffixptr = path + genfile_basename_length(path) - 1;
+  while (suffixptr > path) {
+    if (*suffixptr == '/')
+      return "";
+    else if (*suffixptr == '.')
+      break;
+    suffixptr--;
+  }
+  return suffixptr;
+}
+
 void file_dirname(Str *path, const char *file)
 {
   long i;
