@@ -16,27 +16,41 @@
 */
 
 #include "libgtcore/fa.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
 #include "tools/gt_splitfasta.h"
 
-static OPrval parse_options(int *parsed_args, unsigned long *max_filesize_in_MB,
-                            int argc, const char **argv, Error *err)
+typedef struct {
+  unsigned long max_filesize_in_MB;
+} SplitfastaArguments;
+
+static void* gt_splitfasta_arguments_new(void)
 {
+  return ma_calloc(1, sizeof (SplitfastaArguments));
+}
+
+void gt_splitfasta_arguments_delete(void *tool_arguments)
+{
+  SplitfastaArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  ma_free(arguments);
+}
+
+static OptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
+{
+  SplitfastaArguments *arguments = tool_arguments;
   OptionParser *op;
   Option *o;
-  OPrval oprval;
-  error_check(err);
+  assert(arguments);
   op = option_parser_new("[option ...] fastafile","Split the supplied fasta "
                          "file.");
   o = option_new_ulong_min("targetsize", "set the target file size in MB",
-                           max_filesize_in_MB, 50, 1);
+                           &arguments->max_filesize_in_MB, 50, 1);
   option_parser_add_option(op, o);
   option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
 static unsigned long buf_contains_separator(char *buf)
@@ -50,25 +64,22 @@ static unsigned long buf_contains_separator(char *buf)
   return 0;
 }
 
-int gt_splitfasta(int argc, const char **argv, Error *err)
+static int gt_splitfasta_runner(UNUSED int argc, const char **argv,
+                                int parsed_args, void *tool_arguments,
+                                Error *err)
 {
+  SplitfastaArguments *arguments = tool_arguments;
   GenFile *srcfp = NULL;
   FILE *destfp = NULL;
   Str *destfilename = NULL;
   unsigned long filenum = 0, bytecount = 0, max_filesize_in_bytes,
-                max_filesize_in_MB, separator_pos;
-  int read_bytes, parsed_args, had_err = 0;
+                separator_pos;
+  int read_bytes, had_err = 0;
   char buf[BUFSIZ];
   error_check(err);
+  assert(arguments);
 
-  /* option parsing */
-  switch (parse_options(&parsed_args, &max_filesize_in_MB, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
-  }
-  assert(parsed_args + 1 == argc);
-  max_filesize_in_bytes = max_filesize_in_MB << 20;
+  max_filesize_in_bytes = arguments->max_filesize_in_MB << 20;
 
   /* open source file */
   srcfp = genfile_xopen(argv[parsed_args], "r");
@@ -133,4 +144,13 @@ int gt_splitfasta(int argc, const char **argv, Error *err)
   genfile_close(srcfp);
 
   return had_err;
+}
+
+Tool* gt_splitfasta(void)
+{
+  return tool_new(gt_splitfasta_arguments_new,
+                  gt_splitfasta_arguments_delete,
+                  gt_splitfasta_option_parser_new,
+                  NULL,
+                  gt_splitfasta_runner);
 }
