@@ -64,30 +64,25 @@ static unsigned long buf_contains_separator(char *buf)
   return 0;
 }
 
-static int gt_splitfasta_runner(UNUSED int argc, const char **argv,
-                                int parsed_args, void *tool_arguments,
-                                Error *err)
+static int split_fasta_file(const char *filename,
+                            unsigned long max_filesize_in_bytes, Error *err)
 {
-  SplitfastaArguments *arguments = tool_arguments;
   GenFile *srcfp = NULL;
   FILE *destfp = NULL;
   Str *destfilename = NULL;
-  unsigned long filenum = 0, bytecount = 0, max_filesize_in_bytes,
-                separator_pos;
+  unsigned long filenum = 0, bytecount = 0, separator_pos;
   int read_bytes, had_err = 0;
   char buf[BUFSIZ];
   error_check(err);
-  assert(arguments);
-
-  max_filesize_in_bytes = arguments->max_filesize_in_MB << 20;
+  assert(filename && max_filesize_in_bytes);
 
   /* open source file */
-  srcfp = genfile_xopen(argv[parsed_args], "r");
+  srcfp = genfile_xopen(filename, "r");
   assert(srcfp);
 
   /* read start characters */
   if ((read_bytes = genfile_xread(srcfp, buf, BUFSIZ)) == 0) {
-    error_set(err, "file \"%s\" is empty", argv[parsed_args]);
+    error_set(err, "file \"%s\" is empty", filename);
     had_err = -1;
   }
   bytecount += read_bytes;
@@ -101,8 +96,8 @@ static int gt_splitfasta_runner(UNUSED int argc, const char **argv,
   if (!had_err) {
     /* open destination file */
     destfilename = str_new();
-    str_append_cstr_nt(destfilename, argv[parsed_args],
-                       genfile_basename_length(argv[parsed_args]));
+    str_append_cstr_nt(destfilename, filename,
+                       genfile_basename_length(filename));
     str_append_char(destfilename, '.');
     str_append_ulong(destfilename, ++filenum);
     destfp = fa_xfopen(str_get(destfilename), "w");
@@ -120,8 +115,8 @@ static int gt_splitfasta_runner(UNUSED int argc, const char **argv,
         fa_xfclose(destfp);
         /* open new file */
         str_reset(destfilename);
-        str_append_cstr_nt(destfilename, argv[parsed_args],
-                           genfile_basename_length(argv[parsed_args]));
+        str_append_cstr_nt(destfilename, filename,
+                           genfile_basename_length(filename));
         str_append_char(destfilename, '.');
         str_append_ulong(destfilename, ++filenum);
         destfp = fa_xfopen(str_get(destfilename), "w");
@@ -142,6 +137,23 @@ static int gt_splitfasta_runner(UNUSED int argc, const char **argv,
 
   /* close source file */
   genfile_close(srcfp);
+
+  return had_err;
+}
+
+static int gt_splitfasta_runner(UNUSED int argc, const char **argv,
+                                int parsed_args, void *tool_arguments,
+                                Error *err)
+{
+  SplitfastaArguments *arguments = tool_arguments;
+  unsigned long max_filesize_in_bytes;
+  int had_err;
+  error_check(err);
+  assert(arguments);
+
+  max_filesize_in_bytes = arguments->max_filesize_in_MB << 20;
+
+  had_err = split_fasta_file(argv[parsed_args], max_filesize_in_bytes, err);
 
   return had_err;
 }
