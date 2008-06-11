@@ -78,3 +78,26 @@ Range sspliced_alignment_genomic_range(const SSplicedAlignment *sa)
   range.end   = ((Range*) array_get_last(sa->exons))->end;
   return range;
 }
+
+static int range_compare_long_first(Range range_a, Range range_b)
+{
+  assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
+
+  if ((range_a.start == range_b.start) && (range_a.end == range_b.end))
+    return 0; /* range_a == range_b */
+
+  if ((range_a.start < range_b.start) ||
+      ((range_a.start == range_b.start) && (range_a.end > range_b.end)))
+    return -1; /* range_a < range_b */
+
+  return 1; /* range_a > range_b */
+}
+
+int sspliced_alignment_compare_ptr(const SSplicedAlignment **sa_a,
+                                   const SSplicedAlignment **sa_b)
+{
+  Range range_a, range_b;
+  range_a = sspliced_alignment_genomic_range(*sa_a);
+  range_b = sspliced_alignment_genomic_range(*sa_b);
+  return range_compare_long_first(range_a, range_b);
+}

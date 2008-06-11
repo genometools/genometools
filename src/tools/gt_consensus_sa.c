@@ -17,6 +17,7 @@
 
 #include "libgtcore/array.h"
 #include "libgtcore/fa.h"
+#include "libgtcore/fptr.h"
 #include "libgtcore/option.h"
 #include "libgtcore/range.h"
 #include "libgtcore/str.h"
@@ -191,30 +192,6 @@ static void process_splice_form(Array *spliced_alignments_in_form,
   printf("]\n");
 }
 
-static int range_compare_long_first(Range range_a, Range range_b)
-{
-  assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
-
-  if ((range_a.start == range_b.start) && (range_a.end == range_b.end))
-    return 0; /* range_a == range_b */
-
-  if ((range_a.start < range_b.start) ||
-      ((range_a.start == range_b.start) && (range_a.end > range_b.end)))
-    return -1; /* range_a < range_b */
-
-  return 1; /* range_a > range_b */
-}
-
-static int compare_spliced_alignment(const void *a, const void *b)
-{
-  SSplicedAlignment *sa_a = *(SSplicedAlignment**) a,
-                    *sa_b = *(SSplicedAlignment**) b;
-  Range range_a, range_b;
-  range_a = sspliced_alignment_genomic_range(sa_a);
-  range_b = sspliced_alignment_genomic_range(sa_b);
-  return range_compare_long_first(range_a, range_b);
-}
-
 static OptionParser* gt_consensus_sa_option_parser_new(UNUSED
                                                        void *tool_arguments)
 {
@@ -243,7 +220,8 @@ static int gt_consensus_sa_runner(UNUSED int argc, const char **argv,
   if (!had_err) {
     /* sort spliced alignments */
     qsort(array_get_space(spliced_alignments), array_size(spliced_alignments),
-          array_elem_size(spliced_alignments), compare_spliced_alignment);
+          array_elem_size(spliced_alignments),
+          (Compare) sspliced_alignment_compare_ptr);
 
     /* compute the consensus spliced alignments */
     consensus_sa(array_get_space(spliced_alignments),

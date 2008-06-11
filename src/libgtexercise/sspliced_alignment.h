@@ -32,5 +32,7 @@ unsigned long      sspliced_alignment_num_of_exons(const SSplicedAlignment*);
 Range              sspliced_alignment_get_exon(const SSplicedAlignment*,
                                                unsigned long exon_number);
 Range              sspliced_alignment_genomic_range(const SSplicedAlignment*);
+int                sspliced_alignment_compare_ptr(const SSplicedAlignment**,
+                                                  const SSplicedAlignment**);
 
 #endif
