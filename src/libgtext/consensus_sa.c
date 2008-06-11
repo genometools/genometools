@@ -52,8 +52,8 @@ static bool set_of_sas_is_sorted(const void *set_of_sas,
   max_end = range_a.end;
 
   /* loop over the other ranges */
-  for (sa = (char *)set_of_sas + size_of_sa;
-       sa < (char *)set_of_sas + number_of_sas * size_of_sa;
+  for (sa = (char*) set_of_sas + size_of_sa;
+       sa < (char*) set_of_sas + number_of_sas * size_of_sa;
        sa = sa + size_of_sa) {
     /* get second range */
     range_b = get_genomic_range(sa);
@@ -74,14 +74,14 @@ static bool set_of_sas_is_sorted(const void *set_of_sas,
 static Range extract_genomic_range(const ConsensusSA *csa, unsigned long sa)
 {
   assert(csa && csa->set_of_sas && sa < csa->number_of_sas);
-  return csa->get_genomic_range((char *)csa->set_of_sas + csa->size_of_sa * sa);
+  return csa->get_genomic_range((char*) csa->set_of_sas + csa->size_of_sa * sa);
 }
 
 static Strand extract_strand(const ConsensusSA *csa, unsigned long sa)
 {
   Strand strand;
   assert(csa && csa->set_of_sas && sa < csa->number_of_sas);
-  strand = csa->get_strand((char *)csa->set_of_sas + csa->size_of_sa * sa);
+  strand = csa->get_strand((char*) csa->set_of_sas + csa->size_of_sa * sa);
   assert(strand == STRAND_FORWARD || strand == STRAND_REVERSE); /* XXX */
   return strand;
 }
@@ -90,7 +90,7 @@ static void extract_exons(const ConsensusSA *csa, Array *exon_ranges,
                           unsigned long sa)
 {
   assert(csa && exon_ranges && csa->set_of_sas && sa < csa->number_of_sas);
-  csa->get_exons(exon_ranges, (char *)csa->set_of_sas + csa->size_of_sa * sa);
+  csa->get_exons(exon_ranges, (char*) csa->set_of_sas + csa->size_of_sa * sa);
   assert(array_size(exon_ranges));
   assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));
 }
