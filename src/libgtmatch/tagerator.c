@@ -191,7 +191,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       {
         if (tageratoroptions->replacewildcard)
         {
-          charcode = (Uchar) (drand48() * (mapsize-1));
+          charcode = 0; /* (Uchar) (drand48() * (mapsize-1)); */
         } else
         {
           error_set(err,"wildcard in tag number %lu",tagnumber);
@@ -213,31 +213,34 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     printf("\n");
     storeoffline.nextfreeSeqpos = 0;
     storeonline.nextfreeSeqpos = 0;
-    if (tageratoroptions->online || tageratoroptions->docompare)
+    if (taglen > tageratoroptions->maxdistance) /* XXX remove this */
     {
-      edistmyersbitvectorAPM(mor,
-                             transformedtag,
-                             taglen,
-                             tageratoroptions->maxdistance);
-    }
-    if (!tageratoroptions->online || tageratoroptions->docompare)
-    {
-      if (tageratoroptions->maxdistance == 0)
+      if (tageratoroptions->online || tageratoroptions->docompare)
       {
-        exactpatternmatching(suffixarray.encseq,
-                             suffixarray.suftab,
-                             suffixarray.readmode,
-                             totallength,
-                             transformedtag,
-                             taglen,
-                             processmatch,
-                             processmatchinfooffline);
-      } else
+        edistmyersbitvectorAPM(mor,
+                               transformedtag,
+                               taglen,
+                               tageratoroptions->maxdistance);
+      }
+      if (!tageratoroptions->online || tageratoroptions->docompare)
       {
-        esalimiteddfs(limdfsresources,
-                      transformedtag,
-                      taglen,
-                      tageratoroptions->maxdistance);
+        if (tageratoroptions->maxdistance == 0)
+        {
+          exactpatternmatching(suffixarray.encseq,
+                               suffixarray.suftab,
+                               suffixarray.readmode,
+                               totallength,
+                               transformedtag,
+                               taglen,
+                               processmatch,
+                               processmatchinfooffline);
+        } else
+        {
+          esalimiteddfs(limdfsresources,
+                        transformedtag,
+                        taglen,
+                        tageratoroptions->maxdistance);
+        }
       }
     }
     ma_free(desc);

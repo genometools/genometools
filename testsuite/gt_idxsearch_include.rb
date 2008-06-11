@@ -34,11 +34,12 @@ end
 # XXX: check why tagerator segfaults if index does not exist.
 
 def checktagerator(queryfile,ms)
-  run "#{$bin}gt shredder -minlength 10 -maxlength 12 #{queryfile}"
+  run "#{$bin}gt shredder -minlength 12 -maxlength 15 #{queryfile}"
   run "sed -e \'s/^>.*/>/\' #{$last_stdout}"
   run "mv #{$last_stdout} patternfile"
   run_test "#{$bin}gt tagerator -rw -cmp -ii sfx -t patternfile"
   run_test "#{$bin}gt tagerator -rw -cmp -k 1 -ii sfx -t patternfile"
+  run_test "#{$bin}gt tagerator -rw -cmp -k 2 -ii sfx -t patternfile"
 end
 
 def createandcheckgreedyfwdmat(reffile,queryfile)
