@@ -159,6 +159,17 @@ Test do
   end
 end
 
+Name "extract_consensus_sa"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt " +
+           "#{$testdata}../gtscripts/extract_consensus_sa.lua #{$cur}"
+  run "cd consensus_sa && ${MAKE:-make}"
+  if not File.exists?("consensus_sa.tar.gz") then
+    raise TestFailed, "file 'consensus_sa.tar.gz' does not exist"
+  end
+end
+
 Name "LPeg library"
 Keywords "gt_scripts"
 Test do

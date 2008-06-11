@@ -18,6 +18,8 @@
 #ifndef SSPLICED_ALIGNMENT_PARSING_H
 #define SSPLICED_ALIGNMENT_PARSING_H
 
+#include "libgtcore/error.h"
+
 int sspliced_alignment_parse(Array *spliced_alignments, const char *filename,
                              Error*);
 

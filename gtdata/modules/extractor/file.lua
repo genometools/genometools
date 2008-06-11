@@ -94,12 +94,20 @@ function File:remove_unit_test()
   self:remove_function(prefix .. "unit_test")
 end
 
+function File:fa2xansi()
+  self.filecontent = self.filecontent:gsub('#include "fa.h"',
+                                           '#include "xansi.h"')
+  self.filecontent = self.filecontent:gsub('fa_xfopen', 'xfopen')
+  self.filecontent = self.filecontent:gsub('fa_xfclose', 'xfclose')
+end
+
 function File:ma2xansi()
   self.filecontent = self.filecontent:gsub('#include "ma.h"',
                                            '#include "xansi.h"')
   self.filecontent = self.filecontent:gsub('ma_malloc', 'xmalloc')
   self.filecontent = self.filecontent:gsub('ma_calloc', 'xcalloc')
   self.filecontent = self.filecontent:gsub('ma_realloc', 'xrealloc')
+  self.filecontent = self.filecontent:gsub('cstr_dup', 'xstrdup')
   self.filecontent = self.filecontent:gsub('ma_free', 'free')
 end
 
