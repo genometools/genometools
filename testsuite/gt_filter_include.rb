@@ -122,7 +122,7 @@ Test do
 end
 
 Name "gt filter test 17 (-hascds)"
-Keywords "gt_filter test"
+Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -hascds " +
            "#{$testdata}encode_known_genes_Mar07.gff3 | " +
