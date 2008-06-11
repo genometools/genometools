@@ -46,18 +46,18 @@ static void initSimpleSplicedAlignment(SimpleSplicedAlignment *sa)
 }
 
 static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
-                            unsigned long line_length, Error *e)
+                            unsigned long line_length, Error *err)
 {
   long leftpos, rightpos;
   unsigned long i = 0;
   Range exon;
-  error_check(e);
+  error_check(err);
 
 #define CHECKLINELENGTH\
-        if (i >= line_length) {                  \
-          error_set(e, "incomplete input line\n" \
-                       "line=%s", line);         \
-          return -1;                             \
+        if (i >= line_length) {                    \
+          error_set(err, "incomplete input line\n" \
+                       "line=%s", line);           \
+          return -1;                               \
         }
 
   /* parsing id */
@@ -84,15 +84,15 @@ static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
   else if (line[i] == REVERSESTRANDCHAR)
     alignment->forward = false;
   else {
-    error_set(e, "wrong formatted input line, orientation must be %c or %c\n"
-                 "line=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
+    error_set(err, "wrong formatted input line, orientation must be %c or %c\n"
+                   "line=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
     return -1;
   }
   i++;
   CHECKLINELENGTH;
 
   if (line[i] != DELIMITER) {
-    error_set(e, "incomplete input line\nline=%s", line);
+    error_set(err, "incomplete input line\nline=%s", line);
     return -1;
   }
 
@@ -101,7 +101,7 @@ static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
       i++;
       CHECKLINELENGTH;
       if (sscanf(line+i, "%ld-%ld", &leftpos, &rightpos) != 2) {
-        error_set(e, "incomplete input line\nline=%s", line);
+        error_set(err, "incomplete input line\nline=%s", line);
         return -1;
       }
       exon.start = leftpos;
@@ -122,13 +122,13 @@ static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
 }
 
 static int parse_input_file(Array *spliced_alignments,
-                             const char *file_name, Error *e)
+                            const char *file_name, Error *err)
 {
   FILE *input_file;
   SimpleSplicedAlignment sa;
   int had_err = 0;
   Str *line;
-  error_check(e);
+  error_check(err);
 
   line = str_new();
   input_file = fa_xfopen(file_name, "r");
@@ -137,7 +137,7 @@ static int parse_input_file(Array *spliced_alignments,
     /* init new spliced alignment */
     initSimpleSplicedAlignment(&sa);
     /* parse input line and save result in spliced alignment */
-    had_err = parse_input_line(&sa, str_get(line), str_length(line), e);
+    had_err = parse_input_line(&sa, str_get(line), str_length(line), err);
     if (!had_err) {
       /* store spliced alignment */
       array_add(spliced_alignments, sa);
