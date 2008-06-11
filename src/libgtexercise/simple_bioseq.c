@@ -18,9 +18,9 @@
 #include <stdbool.h>
 #include "libgtcore/array.h"
 #include "libgtcore/fasta_separator.h"
-#include "libgtcore/simple_bioseq.h"
 #include "libgtcore/str.h"
 #include "libgtcore/xansi.h"
+#include "libgtexercise/simple_bioseq.h"
 
 typedef struct {
   Str *description,

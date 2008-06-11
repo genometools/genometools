@@ -90,7 +90,7 @@ m:remove_function("iterate_fail_func")
 m:ma2xansi()
 p:add(m)
 
-m = Module:new("src/libgtcore/simple_bioseq")
+m = Module:new("src/libgtexercise/simple_bioseq")
 m:bare_includes()
 p:add(m)
 

@@ -71,7 +71,8 @@ else
 endif
 
 # the default GenomeTools libraries which are build
-GTLIBS:=lib/libgtext.a\
+GTLIBS:=lib/libgtexercise.a\
+        lib/libgtext.a\
         lib/libgtmgth.a\
         lib/libgtmatch.a\
         lib/libgtltr.a\
@@ -121,6 +122,11 @@ LIBGTEXT_CXX_SRC:=$(wildcard src/libgtext/*.cxx)
 LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
 LIBGTEXT_CXX_DEP:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.d)
 LIBGTEXT_LIBDEP=-lgtcore -lbz2 -lz
+
+# the exercise GenomeTools library
+LIBGTEXERCISE_SRC:=$(wildcard src/libgtexercise/*.c)
+LIBGTEXERCISE_OBJ:=$(LIBGTEXERCISE_SRC:%.c=obj/%.o)
+LIBGTEXERCISE_DEP:=$(LIBGTEXERCISE_SRC:%.c=obj/%.d)
 
 # the MetaGenomeThreader library
 LIBGTMGTH_SRC:=$(wildcard src/libgtmgth/*.c)
@@ -398,6 +404,14 @@ lib/libgtext$(SHARED_OBJ_NAME_EXT): $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) \
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTEXT_C_OBJ) \
           $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ) -o $@ $(LIBGTEXT_LIBDEP)
 
+lib/libgtexercise.a: $(LIBGTEXERCISE_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@ar ru $@ $(LIBGTEXERCISE_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 lib/libgtmgth.a: $(LIBGTMGTH_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -599,6 +613,7 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 	 $(LIBGTCORE_DEP) \
 	 $(LIBGTEXT_C_DEP) \
 	 $(LIBGTEXT_CXX_DEP) \
+	 $(LIBGTEXERCISE_DEP) \
 	 $(LIBGTMGTH_DEP) \
 	 $(LIBGTMATCH_DEP) \
 	 $(LIBGTLTR_DEP) \

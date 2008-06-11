@@ -16,8 +16,8 @@
 */
 
 #include "libgtcore/fasta_separator.h"
-#include "libgtcore/simple_bioseq.h"
 #include "libgtcore/unused.h"
+#include "libgtexercise/simple_bioseq.h"
 #include "tools/gt_fastaparser.h"
 
 static OptionParser* gt_fastaparser_option_parser_new(UNUSED
