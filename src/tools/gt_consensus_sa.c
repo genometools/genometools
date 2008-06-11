@@ -23,6 +23,7 @@
 #include "libgtcore/strand.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
+#include "libgtexercise/sspliced_alignment.h"
 #include "libgtext/consensus_sa.h"
 #include "tools/gt_consensus_sa.h"
 
@@ -30,37 +31,29 @@
 #define FORWARDSTRANDCHAR '+'
 #define REVERSESTRANDCHAR '-'
 
-typedef struct {
-  Str* id;
-  bool forward;
-  Array *exons; /* the exon ranges */
-} SimpleSplicedAlignment;
-
-static void initSimpleSplicedAlignment(SimpleSplicedAlignment *sa)
-{
-  assert(sa);
-  sa->id = str_new();
-  sa->forward = true;
-  sa->exons = array_new(sizeof (Range));
-}
-
-static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
+static int parse_input_line(SSplicedAlignment **alignment, const char *line,
                             unsigned long line_length, Error *err)
 {
   long leftpos, rightpos;
   unsigned long i = 0;
   Range exon;
+  Str *id;
+  int had_err = 0;
   error_check(err);
 
 #define CHECKLINELENGTH\
-        if (i >= line_length) {                    \
+        if (!had_err && i >= line_length) {        \
           error_set(err, "incomplete input line\n" \
                        "line=%s", line);           \
-          return -1;                               \
+          return had_err = -1;                     \
         }
 
+  /* init */
+  id = str_new();
+  *alignment = NULL;
+
   /* parsing id */
-  for (;;) {
+  while (!had_err) {
     CHECKLINELENGTH;
     if (line[i] == DELIMITER) {
       /* reference id has been saved, skip this character and break */
@@ -70,7 +63,7 @@ static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
     }
     else {
       /* save this character of the reference id */
-      str_append_char(alignment->id, line[i]);
+      str_append_char(id, line[i]);
     }
 
     /* increase counter */
@@ -79,52 +72,58 @@ static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
 
   /* parsing orientation */
   if (line[i] == FORWARDSTRANDCHAR)
-    alignment->forward = true;
+    *alignment = sspliced_alignment_new(str_get(id), true);
   else if (line[i] == REVERSESTRANDCHAR)
-    alignment->forward = false;
+    *alignment = sspliced_alignment_new(str_get(id), false);
   else {
     error_set(err, "wrong formatted input line, orientation must be %c or %c\n"
                    "line=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
-    return -1;
+    had_err = -1;
   }
   i++;
   CHECKLINELENGTH;
 
-  if (line[i] != DELIMITER) {
+  if (!had_err && line[i] != DELIMITER) {
     error_set(err, "incomplete input line\nline=%s", line);
-    return -1;
+    had_err = -1;
   }
 
-  for (;;) {
+  while (!had_err) {
     if (line[i] == DELIMITER) {
       i++;
       CHECKLINELENGTH;
-      if (sscanf(line+i, "%ld-%ld", &leftpos, &rightpos) != 2) {
+      if (!had_err && sscanf(line+i, "%ld-%ld", &leftpos, &rightpos) != 2) {
         error_set(err, "incomplete input line\nline=%s", line);
-        return -1;
+        had_err = -1;
       }
-      exon.start = leftpos;
-      exon.end   = rightpos;
-
-      /* save exon */
-      array_add(alignment->exons, exon);
+      if (!had_err) {
+        /* save exon */
+        exon.start = leftpos;
+        exon.end   = rightpos;
+        sspliced_alignment_add_exon(*alignment, exon);
+      }
     }
     i++;
     if (i >= line_length)
       break;
   }
 
-  /* alignment contains at least one exon */
-  assert(array_size(alignment->exons));
+  if (had_err)
+    sspliced_alignment_delete(*alignment);
+  else {
+    /* alignment contains at least one exon */
+    assert(sspliced_alignment_num_of_exons(*alignment));
+  }
+  str_delete(id);
 
-  return 0;
+  return had_err;
 }
 
 static int parse_input_file(Array *spliced_alignments,
                             const char *file_name, Error *err)
 {
   FILE *input_file;
-  SimpleSplicedAlignment sa;
+  SSplicedAlignment *sa;
   int had_err = 0;
   Str *line;
   error_check(err);
@@ -133,8 +132,6 @@ static int parse_input_file(Array *spliced_alignments,
   input_file = fa_xfopen(file_name, "r");
 
   while (!had_err && str_read_next_line(line, input_file) != EOF) {
-    /* init new spliced alignment */
-    initSimpleSplicedAlignment(&sa);
     /* parse input line and save result in spliced alignment */
     had_err = parse_input_line(&sa, str_get(line), str_length(line), err);
     if (!had_err) {
@@ -152,27 +149,29 @@ static int parse_input_file(Array *spliced_alignments,
 
 static Range get_genomic_range(const void *sa)
 {
-  SimpleSplicedAlignment *alignment = (SimpleSplicedAlignment*) sa;
-  Range range;
+  SSplicedAlignment *alignment = *(SSplicedAlignment**) sa;
   assert(alignment);
-  range.start = ((Range*) array_get_first(alignment->exons))->start;
-  range.end   = ((Range*) array_get_last(alignment->exons))->end;
-  return range;
+  return sspliced_alignment_genomic_range(alignment);
 }
 
 static Strand get_strand(const void *sa)
 {
-  SimpleSplicedAlignment *alignment = (SimpleSplicedAlignment*) sa;
-  if (alignment->forward)
+  SSplicedAlignment *alignment = *(SSplicedAlignment**) sa;
+  if (sspliced_alignment_is_forward(alignment))
     return STRAND_FORWARD;
   return STRAND_REVERSE;
 }
 
 static void get_exons(Array *exon_ranges, const void *sa)
 {
-  SimpleSplicedAlignment *alignment = (SimpleSplicedAlignment*) sa;
+  SSplicedAlignment *alignment = *(SSplicedAlignment**) sa;
+  Range exon;
+  unsigned long i;
   assert(alignment);
-  array_add_array(exon_ranges, alignment->exons);
+  for (i = 0; i < sspliced_alignment_num_of_exons(alignment); i++) {
+    exon = sspliced_alignment_get_exon(alignment, i);
+    array_add(exon_ranges, exon);
+  }
 }
 
 static void process_splice_form(Array *spliced_alignments_in_form,
@@ -208,13 +207,11 @@ static int range_compare_long_first(Range range_a, Range range_b)
 
 static int compare_spliced_alignment(const void *a, const void *b)
 {
-  SimpleSplicedAlignment *sa_a = (SimpleSplicedAlignment*) a,
-                         *sa_b = (SimpleSplicedAlignment*) b;
+  SSplicedAlignment *sa_a = *(SSplicedAlignment**) a,
+                    *sa_b = *(SSplicedAlignment**) b;
   Range range_a, range_b;
-  range_a.start = ((Range*) array_get_first(sa_a->exons))->start;
-  range_a.end   = ((Range*) array_get_last(sa_a->exons))->end;
-  range_b.start = ((Range*) array_get_first(sa_b->exons))->start;
-  range_b.end   = ((Range*) array_get_last(sa_b->exons))->end;
+  range_a = sspliced_alignment_genomic_range(sa_a);
+  range_b = sspliced_alignment_genomic_range(sa_b);
   return range_compare_long_first(range_a, range_b);
 }
 
@@ -234,32 +231,31 @@ static int gt_consensus_sa_runner(UNUSED int argc, const char **argv,
                                   Error *err)
 {
   Array *spliced_alignments;
-  SimpleSplicedAlignment *sa;
+  SSplicedAlignment *sa;
   unsigned long i;
   int had_err = 0;
   error_check(err);
 
   /* parse input file and store resuilts in the spliced alignment array */
-  spliced_alignments = array_new(sizeof (SimpleSplicedAlignment));
+  spliced_alignments = array_new(sizeof (SSplicedAlignment*));
   had_err = parse_input_file(spliced_alignments, argv[parsed_args], err);
 
   if (!had_err) {
     /* sort spliced alignments */
     qsort(array_get_space(spliced_alignments), array_size(spliced_alignments),
-          sizeof (SimpleSplicedAlignment), compare_spliced_alignment);
+          array_elem_size(spliced_alignments), compare_spliced_alignment);
 
     /* compute the consensus spliced alignments */
     consensus_sa(array_get_space(spliced_alignments),
                  array_size(spliced_alignments),
-                 sizeof (SimpleSplicedAlignment), get_genomic_range, get_strand,
-                 get_exons, process_splice_form, NULL);
+                 array_elem_size(spliced_alignments), get_genomic_range,
+                 get_strand, get_exons, process_splice_form, NULL);
   }
 
   /* free */
   for (i = 0; i < array_size(spliced_alignments); i++) {
-    sa = array_get(spliced_alignments, i);
-    str_delete(sa->id);
-    array_delete(sa->exons);
+    sa = *(SSplicedAlignment**) array_get(spliced_alignments, i);
+    sspliced_alignment_delete(sa);
   }
   array_delete(spliced_alignments);
 
