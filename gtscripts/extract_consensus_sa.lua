@@ -116,6 +116,26 @@ mf = Makefile:new(name, true)
 mf:add_test("ruby -I. testsuite.rb")
 p:set_makefile(mf)
 
+-- add testsuite
+p:add_stest()
+testsuite = Testsuite:new("none_defined")
+testsuite:add_directory("testdata/consensus_sa", "testdata")
+testsuite:add_content([[
+i = 1
+for infile in `ls #{$bin}testdata/*.in` do
+  Name "consensus_sa test #{i}"
+  Keywords "consensus_sa"
+  Test do
+    run "#{$bin}consensus_sa #{infile}"
+    outfile = `echo "#{infile}" | sed -e s/.in$/.out/`
+    run "diff #{$last_stdout} #{outfile}"
+  end
+  i += 1
+end
+]])
+--testsuite:
+p:add(testsuite)
+
 -- add example program
 prog = Program:new("assemblegreedy")
 prog:add_include('<stdio.h>')

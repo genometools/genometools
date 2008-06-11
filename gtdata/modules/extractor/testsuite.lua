@@ -28,6 +28,12 @@ function Testsuite:new(keywords)
   return o
 end
 
+function Testsuite:add_content(content)
+  assert(content)
+  self.contents = self.contents or {}
+  self.contents[#self.contents + 1] = content
+end
+
 function Testsuite:add_test(name, def)
   assert(name and def)
   self.tests = self.tests or {}
@@ -35,6 +41,15 @@ function Testsuite:add_test(name, def)
   test.name = name
   test.def = def
   self.tests[#self.tests + 1] = test
+end
+
+function Testsuite:add_directory(src, dest)
+  assert(src and dest)
+  self.directories = self.directories or {}
+  local dir = {}
+  dir.src = src
+  dir.dest = dest
+  self.directories[#self.directories + 1] = dir
 end
 
 function Testsuite:add_file(name, content)
@@ -48,7 +63,7 @@ end
 
 function Testsuite:write(dir)
   assert(dir)
-  if self.tests then
+  if self.tests or self.contents then
     local outfile = io.open(dir .. "/testsuite.rb", "w")
     outfile:write([[
 if $0 == __FILE__
@@ -60,14 +75,40 @@ end
 
 $bin=File.join(Dir.pwd, "")
 ]])
-    for _, test in ipairs(self.tests) do
-      outfile:write("Name \"" .. test.name .. "\"\n")
-      outfile:write("Keywords \"" .. self.keywords .. "\"\n")
-      outfile:write("Test do\n");
-      outfile:write(test.def)
-      outfile:write("end\n\n")
+    if self.tests then
+      for _, test in ipairs(self.tests) do
+        outfile:write("Name \"" .. test.name .. "\"\n")
+        outfile:write("Keywords \"" .. self.keywords .. "\"\n")
+        outfile:write("Test do\n");
+        outfile:write(test.def)
+        outfile:write("end\n\n")
+      end
+    end
+    if self.contents then
+      for _, content in ipairs(self.contents) do
+        outfile:write("\n")
+        outfile:write(content)
+      end
     end
     outfile:close()
+  end
+  if self.directories then
+    for _, directory in ipairs(self.directories) do
+      assert(lfs.mkdir(dir .. "/" .. directory.dest))
+      for file in lfs.dir(directory.src) do
+        if file ~= "." and file ~= ".." then
+          print(directory.src .. "/" .. file)
+          local infile = io.open(directory.src .. "/" .. file)
+          assert(infile, err)
+          local outfile, err = io.open(dir .. "/" .. directory.dest .. "/" ..
+                                       file, "w")
+          assert(outfile, err)
+          outfile:write(infile:read("*a"))
+          infile:close()
+          outfile:close()
+        end
+      end
+    end
   end
   if self.files then
     for _, file in ipairs(self.files) do
