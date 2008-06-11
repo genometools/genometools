@@ -22,7 +22,6 @@
 #include "libgtcore/str.h"
 #include "libgtcore/strand.h"
 #include "libgtcore/unused.h"
-#include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/consensus_sa.h"
 #include "tools/gt_consensus_sa.h"
@@ -219,40 +218,30 @@ static int compare_spliced_alignment(const void *a, const void *b)
   return range_compare_long_first(range_a, range_b);
 }
 
-static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+static OptionParser* gt_consensus_sa_option_parser_new(UNUSED
+                                                       void *tool_arguments)
 {
   OptionParser *op;
-  OPrval oprval;
-  error_check(err);
   op = option_parser_new("spliced_alignment_file", "Read file containing "
                          "spliced alingments, compute consensus spliced "
                          "alignments,\nand print them to stdout.");
   option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
-int gt_consensus_sa(int argc, const char **argv, Error *err)
+static int gt_consensus_sa_runner(UNUSED int argc, const char **argv,
+                                  int parsed_args, UNUSED void *tool_arguments,
+                                  Error *err)
 {
   Array *spliced_alignments;
   SimpleSplicedAlignment *sa;
   unsigned long i;
-  int parsed_args, had_err = 0;
+  int had_err = 0;
   error_check(err);
-
-  /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
-  }
-  assert(parsed_args == 1);
 
   /* parse input file and store resuilts in the spliced alignment array */
   spliced_alignments = array_new(sizeof (SimpleSplicedAlignment));
-  had_err = parse_input_file(spliced_alignments, argv[1], err);
+  had_err = parse_input_file(spliced_alignments, argv[parsed_args], err);
 
   if (!had_err) {
     /* sort spliced alignments */
@@ -275,4 +264,13 @@ int gt_consensus_sa(int argc, const char **argv, Error *err)
   array_delete(spliced_alignments);
 
   return had_err;
+}
+
+Tool* gt_consensus_sa(void)
+{
+  return tool_new(NULL,
+                  NULL,
+                  gt_consensus_sa_option_parser_new,
+                  NULL,
+                  gt_consensus_sa_runner);
 }
