@@ -19,7 +19,7 @@
 #define GREEDY_ASSEMBLY_H
 
 #include "libgtcore/bioseq.h"
-#include "libgtext/fragment_overlaps.h"
+#include "libgtexercise/fragment_overlaps.h"
 
 typedef struct GreedyAssembly GreedyAssembly;
 

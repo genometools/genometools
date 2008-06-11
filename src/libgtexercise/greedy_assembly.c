@@ -20,7 +20,7 @@
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
-#include "libgtext/greedy_assembly.h"
+#include "libgtexercise/greedy_assembly.h"
 #include "libgtext/union_find.h"
 
 struct GreedyAssembly {

@@ -19,7 +19,7 @@
 #include "libgtcore/countingsort.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/unused.h"
-#include "libgtext/fragment_overlaps.h"
+#include "libgtexercise/fragment_overlaps.h"
 #include "libgtext/string_matching.h"
 
 struct FragmentOverlaps{

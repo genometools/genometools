@@ -18,8 +18,8 @@
 #include "libgtcore/bioseq.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/unused.h"
-#include "libgtext/fragment_overlaps.h"
-#include "libgtext/greedy_assembly.h"
+#include "libgtexercise/fragment_overlaps.h"
+#include "libgtexercise/greedy_assembly.h"
 #include "tools/gt_assemblegreedy.h"
 
 typedef struct {
