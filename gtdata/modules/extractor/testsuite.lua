@@ -95,10 +95,11 @@ $bin=File.join(Dir.pwd, "")
   if self.directories then
     for _, directory in ipairs(self.directories) do
       assert(lfs.mkdir(dir .. "/" .. directory.dest))
-      for file in lfs.dir(directory.src) do
+      for file in lfs.dir(Extractor_project_home .. "/" .. directory.src) do
         if file ~= "." and file ~= ".." then
           print(directory.src .. "/" .. file)
-          local infile = io.open(directory.src .. "/" .. file)
+          local infile = io.open(Extractor_project_home .. "/" ..
+                                 directory.src .. "/" .. file)
           assert(infile, err)
           local outfile, err = io.open(dir .. "/" .. directory.dest .. "/" ..
                                        file, "w")
