@@ -210,7 +210,7 @@ static int range_compare_long_first(Range range_a, Range range_b)
 static int compare_spliced_alignment(const void *a, const void *b)
 {
   SimpleSplicedAlignment *sa_a = (SimpleSplicedAlignment*) a,
-                   *sa_b = (SimpleSplicedAlignment*) b;
+                         *sa_b = (SimpleSplicedAlignment*) b;
   Range range_a, range_b;
   range_a.start = ((Range*) array_get_first(sa_a->exons))->start;
   range_a.end   = ((Range*) array_get_last(sa_a->exons))->end;
