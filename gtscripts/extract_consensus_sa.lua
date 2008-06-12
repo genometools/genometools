@@ -40,6 +40,9 @@ f = File:new("src/libgtcore/fptr.h")
 f:bare_includes()
 p:add(f)
 
+f = File:new("src/libgtcore/undef.h")
+p:add(f)
+
 f = File:new("src/libgtcore/unused.h")
 p:add(f)
 
@@ -64,6 +67,14 @@ m:remove_function("iterate_fail_func")
 m:ma2xansi()
 p:add(m)
 
+m = Module:new("src/libgtcore/bittab")
+m:bare_includes()
+m:remove_unit_test()
+m:remove_function("bittab_example")
+m:ma2xansi()
+m:fa2xansi()
+p:add(m)
+
 m = Module:new("src/libgtcore/error")
 m:bare_includes()
 m:remove_include("cstr.h")
@@ -75,7 +86,6 @@ m:bare_includes()
 m:remove_include("minmax.h")
 m:remove_include("msort.h")
 m:remove_include("safearith.h")
-m:remove_include("undef.h")
 m:remove_function("range_compare_with_delta")
 m:remove_function("generic_ranges_uniq")
 m:remove_function("generic_ranges_uniq_in_place")
@@ -137,7 +147,7 @@ end
 p:add(testsuite)
 
 -- add example program
-prog = Program:new("assemblegreedy")
+prog = Program:new("consensus_sa")
 prog:add_include('<stdio.h>')
 prog:add_include('<stdlib.h>')
 prog:add_include('"array.h"')
