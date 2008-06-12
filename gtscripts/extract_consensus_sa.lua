@@ -137,7 +137,7 @@ for infile in `ls #{$bin}testdata/*.in` do
   Keywords "consensus_sa"
   Test do
     run "#{$bin}consensus_sa #{infile}"
-    outfile = `echo "#{infile}" | sed -e s/.in$/.out/`
+    outfile = infile.gsub(/\.in$/, ".out")
     run "diff #{$last_stdout} #{outfile}"
   end
   i += 1

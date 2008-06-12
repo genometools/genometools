@@ -533,7 +533,7 @@ for infile in `ls #{$testdata}/consensus_sa/*.in` do
   Keywords "gt_exercise gt_consensus_sa"
   Test do
     run_test "#{$bin}gt exercise consensus_sa #{infile}"
-    outfile = `echo "#{infile}" | sed -e s/.in$/.out/`
+    outfile = infile.gsub(/\.in$/, ".out")
     run "diff #{$last_stdout} #{outfile}"
   end
   i += 1
