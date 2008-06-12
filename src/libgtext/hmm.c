@@ -52,10 +52,10 @@ HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
   HMM *hmm;
   unsigned int i, j;
 
-  assert(num_of_states > 0 && num_of_symbols > 0);
+  assert(num_of_states && num_of_symbols);
 
   /* alloc */
-  hmm = ma_malloc(sizeof (HMM));
+  hmm = ma_malloc(sizeof *hmm);
   hmm->initial_state_prob = ma_malloc(sizeof (double) * num_of_states);
   array2dim_malloc(hmm->transition_prob, num_of_states, num_of_states);
   array2dim_malloc(hmm->emission_prob, num_of_states, num_of_symbols);
