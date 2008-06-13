@@ -550,6 +550,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
 #endif
     /* extend interval by one character */
     extendchar = lcpintervalextendlcp(limdfsresources->encseq,
+                                      limdfsresources->readmode,
                                       totallength,
                                       limdfsresources->suftab,
                                       &stackptr->lcpitv,
@@ -604,6 +605,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
       /* split interval */
       lcpintervalsplitwithoutspecial(&limdfsresources->bwci,
                                      limdfsresources->encseq,
+                                     limdfsresources->readmode,
                                      totallength,
                                      limdfsresources->suftab,
                                      parent.offset,

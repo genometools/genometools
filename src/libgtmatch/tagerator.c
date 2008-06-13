@@ -96,6 +96,48 @@ static int cmpdescend(const void *a,const void *b)
   return 0;
 }
 
+static int dotransformtag(Uchar *transformedtag,
+                          const Uchar *symbolmap,
+                          const Uchar *currenttag,
+                          unsigned long taglen,
+                          unsigned long tagnumber,
+                          bool replacewildcard,
+                          Error *err)
+{
+  unsigned long idx;
+  Uchar charcode;
+
+  for (idx = 0; idx < taglen; idx++)
+  {
+    charcode = symbolmap[currenttag[idx]];
+    if (charcode == (Uchar) UNDEFCHAR)
+    {
+      error_set(err,"undefined character '%c' in tag number %lu",
+		currenttag[idx],
+		tagnumber);
+      return -1;
+    }
+    if (charcode == (Uchar) WILDCARD)
+    {
+      if (replacewildcard)
+      {
+	charcode = 0; /* (Uchar) (drand48() * (mapsize-1)); */
+      } else
+      {
+	error_set(err,"wildcard in tag number %lu",tagnumber);
+        return -1;
+      }
+    }
+    transformedtag[idx] = charcode;
+  }
+  return 0;
+}
+
+/*
+  XXX add forward and reverse match in one iteration
+      transformedtag[taglen - 1 - idx] = MAKECOMPL(charcode); 
+*/
+
 int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
 {
   Suffixarray suffixarray;
@@ -117,17 +159,21 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   {
     haserr = true;
   }
+  if (suffixarray.readmode != Forwardmode)
+  {
+    error_set(err,"can only process index in forward mode");
+    haserr = true;
+  }
   INITARRAY(&storeonline,Seqpos);
   INITARRAY(&storeoffline,Seqpos);
   if (!haserr)
   {
-    unsigned long countcompare = 0, identicalstartpos = 0;
+    unsigned long countcompare = 0, identicalstartpos = 0,
+                  ss, taglen, tagnumber;
+    unsigned int mapsize;
     const Uchar *symbolmap, *currenttag;
     Uchar transformedtag[MAXTAGSIZE];
-    unsigned long idx, taglen, tagnumber;
     char *desc = NULL;
-    Uchar charcode;
-    unsigned int mapsize;
     void (*processmatch)(void *,Seqpos,Seqpos);
     void *processmatchinfoonline, *processmatchinfooffline;
 
@@ -179,35 +225,16 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
         ma_free(desc);
         break;
       }
-      for (idx = 0; idx < taglen; idx++)
+      if (dotransformtag(transformedtag,
+                         symbolmap,
+                         currenttag,
+                         taglen,
+                         tagnumber,
+                         tageratoroptions->replacewildcard,
+                         err) != 0)
       {
-        charcode = symbolmap[currenttag[idx]];
-        if (charcode == (Uchar) UNDEFCHAR)
-        {
-          error_set(err,"undefined character '%c' in tag number %lu",
-                    currenttag[idx],
-                    tagnumber);
-          haserr = true;
-          ma_free(desc);
-          break;
-        }
-        if (charcode == (Uchar) WILDCARD)
-        {
-          if (tageratoroptions->replacewildcard)
-          {
-            charcode = 0; /* (Uchar) (drand48() * (mapsize-1)); */
-          } else
-          {
-            error_set(err,"wildcard in tag number %lu",tagnumber);
-            haserr = true;
-            ma_free(desc);
-            break;
-          }
-        }
-        transformedtag[idx] = charcode;
-      }
-      if (haserr)
-      {
+        haserr = true;
+        ma_free(desc);
         break;
       }
       printf("# patternlength=%lu\n",taglen);

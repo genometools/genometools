@@ -23,9 +23,10 @@
 
 #define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \
                              ? (Uchar) SEPARATOR\
-                             : getencodedchar(ENCSEQ,POS,Forwardmode))
+                             : getencodedchar(ENCSEQ,POS,readmode))
 
 static Seqpos lcpintervalfindrightbound(const Encodedsequence *encseq,
+                                        Readmode readmode,
                                         Seqpos totallength,
                                         const Seqpos *suftab,
                                         Uchar cc,
@@ -53,6 +54,7 @@ static Seqpos lcpintervalfindrightbound(const Encodedsequence *encseq,
 }
 
 bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
+                                  Readmode readmode,
                                   Seqpos totallength,
                                   const Seqpos *suftab,
                                   Simplelcpinterval *itv,
@@ -74,7 +76,8 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
     {
       break;
     }
-    rightbound = lcpintervalfindrightbound(encseq,totallength,suftab,leftcc,
+    rightbound = lcpintervalfindrightbound(encseq,readmode,
+                                           totallength,suftab,leftcc,
                                            offset,leftbound,right);
     if (leftcc == cc)
     {
@@ -115,6 +118,7 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
 
 void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
                                     const Encodedsequence *encseq,
+                                    Readmode readmode,
                                     Seqpos totallength,
                                     const Seqpos *suftab,
                                     Seqpos offset,
@@ -135,7 +139,6 @@ void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
     {
       ADDPREVIOUSRBOUND(rightbound);
       ADDCURRENTLBOUND(rightbound+1);
-      bwci->specialsatend = (unsigned long) (right - leftbound);
       return;
     }
     ADDPREVIOUSRBOUND(leftbound-1);
@@ -145,7 +148,7 @@ void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
     {
       break;
     }
-    rightbound = lcpintervalfindrightbound(encseq,totallength,suftab,
+    rightbound = lcpintervalfindrightbound(encseq,readmode,totallength,suftab,
                                            leftcc,offset,leftbound,right);
     leftbound = rightbound+1;
   }
@@ -153,10 +156,10 @@ void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
          bwci->bounds.allocatedBoundswithchar);
   ADDPREVIOUSRBOUND(right);
   ADDCURRENTLBOUND(right+1);
-  bwci->specialsatend = 0;
 }
 
 Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
+                           Readmode readmode,
                            Seqpos totallength,
                            const Seqpos *suftab,
                            const Lcpinterval *lcpitv,
