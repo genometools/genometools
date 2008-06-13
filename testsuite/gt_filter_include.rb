@@ -124,8 +124,8 @@ end
 Name "gt filter test 17 (-hascds)"
 Keywords "gt_filter"
 Test do
-  run_test "#{$bin}gt filter -hascds " +
+  run_test("#{$bin}gt filter -hascds " +
            "#{$testdata}encode_known_genes_Mar07.gff3 | " +
-           "#{$memcheck} #{$bin}gt stat"
+           "#{$memcheck} #{$bin}gt stat", :maxtime => 20)
   run "diff #{$last_stdout} #{$testdata}gt_filter_encode.out"
 end

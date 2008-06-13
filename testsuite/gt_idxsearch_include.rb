@@ -20,12 +20,12 @@ def makegreedyfwdmatcall(queryfile,indexarg,ms)
 end
 
 def checkgreedyfwdmat(queryfile,ms)
-  run_test makegreedyfwdmatcall(queryfile,"-fmi fmi",ms), :maxtime => 600
+  run_test makegreedyfwdmatcall(queryfile,"-fmi fmi",ms), :maxtime => 1200
   run "mv #{$last_stdout} tmp.fmi"
-  run_test makegreedyfwdmatcall(queryfile,"-esa sfx",ms), :maxtime => 600
+  run_test makegreedyfwdmatcall(queryfile,"-esa sfx",ms), :maxtime => 1200
   run "mv #{$last_stdout} tmp.esa"
   run "diff tmp.esa tmp.fmi"
-  run_test makegreedyfwdmatcall(queryfile,"-pck pck",ms), :maxtime => 600
+  run_test makegreedyfwdmatcall(queryfile,"-pck pck",ms), :maxtime => 1200
   run "mv #{$last_stdout} tmp.pck"
   run "diff tmp.pck tmp.fmi"
 end
@@ -62,7 +62,7 @@ allfiles.each do |reffile|
         checktagerator("#{$testdata}/#{reffile}",
                        "#{$testdata}/#{queryfile}")
         run "rm -f sfx.* fmi.* pck.*"
-      end 
+      end
     end
   end
   end
