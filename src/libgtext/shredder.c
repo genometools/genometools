@@ -61,7 +61,7 @@ const char* shredder_shred(Shredder *shredder, unsigned long *fragment_length,
     seqlen = bioseq_get_sequence_length(shredder->bioseq, shredder->seqnum);
     fraglen = rand_max(shredder->maxlength - shredder->minlength)
               + shredder->minlength;
-    assert(fraglen);
+    assert(fraglen >= shredder->minlength);
     frag = bioseq_get_sequence(shredder->bioseq, shredder->seqnum)
            + shredder->pos;
     if (shredder->pos + fraglen > seqlen)
