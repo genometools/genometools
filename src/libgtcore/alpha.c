@@ -162,6 +162,13 @@ void alpha_encode_seq(const Alpha *a, char *out, char *in, unsigned long length)
   }
 }
 
+bool alpha_char_is_valid(const Alpha *a, char c)
+{
+  if (a->character_to_code_map[(int) c] == UNDEF_CHAR)
+    return false;
+  return true;
+}
+
 bool alpha_is_compatible_with_alpha(const Alpha *alpha_a,
                                             const Alpha *alpha_b)
 {

@@ -257,6 +257,14 @@ Test do
   run "diff #{$last_stdout} #{$testdata}script_example.out"
 end
 
+Name "gt exercise markovchain"
+Keywords "gt_exercise gt_markovchain"
+Test do
+  run_test "#{$bin}gt exercise markovchain " +
+           "#{$testdata}gt_markovchain_example.txt bACGTe"
+  run "diff #{$last_stdout} #{$testdata}gt_markovchain_example.out"
+end
+
 Name "gt exercise msaparse fail 1"
 Keywords "gt_exercise"
 Test do
