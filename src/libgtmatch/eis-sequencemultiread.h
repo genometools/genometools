@@ -35,7 +35,7 @@ typedef void (*move2BacklogFunc)(void *backlogState, const void *seqData,
 /**
  * basic idea: let this function write the required data to output
  * and also call the move2Backlog callback if any data will be
- * invalidated after this call
+ * invalidated after this call and is still required by other consumers
  * @return number of elements actually generated (might be short on eof etc.)
  */
 typedef size_t (*generatorFunc)(void *generatorState, void *backlogState,
@@ -47,9 +47,10 @@ typedef struct seqReaderSet SeqReaderSet;
 
 struct seqReaderSet
 {
-  int numConsumers;
+  int numConsumers, numAutoConsumers;
   int tagSuperSet;
   struct seqReaderState *consumerList;
+  struct seqSinkState *autoConsumerList;
   Seqpos backlogStartPos;
   size_t backlogSize, backlogLen, backlogElemSize;
   void *seqDataBacklog, *generatorState;
@@ -71,10 +72,21 @@ initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
                       void *generatorState);
 
 /**
- * @return readData field will be NULL on error */
+ * @return readData field will be NULL on error -> test with
+ * SDRIsValid */
 extern SeqDataReader
 seqReaderSetRegisterConsumer(SeqReaderSet *readerSet, int tag,
                              SeqDataTranslator xltor);
+
+/**
+ * @brief The registered writer will be called automatically for any
+ * data that is to be invalidated.
+ *
+ * @return false on error, true if successfully registered
+ */
+extern bool
+seqReaderSetRegisterAutoConsumer(SeqReaderSet *readerSet, int tag,
+                                 SeqDataWriter writer);
 
 extern void
 destructSeqReaderSet(SeqReaderSet *readerSet);

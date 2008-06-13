@@ -30,7 +30,17 @@ struct seqReaderState
                                  * or as bit set */
   SeqReaderSet *readerSet;
   consumerID id;
+  void *dest;
   SeqDataTranslator xltor;
+};
+
+struct seqSinkState
+{
+  int tag;                      /**< set of bits defined by
+                                 * application, can be used for value
+                                 * or as bit set */
+  consumerID id;
+  SeqDataWriter writer;
 };
 
 static inline Seqpos
@@ -80,13 +90,14 @@ initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
                       void *generatorState)
 {
   readerSet->tagSuperSet = initialSuperSet;
-  readerSet->numConsumers = 0;
+  readerSet->numAutoConsumers = readerSet->numConsumers = 0;
   readerSet->consumerList = NULL;
+  readerSet->autoConsumerList = NULL;
   readerSet->backlogStartPos = 0;
   readerSet->backlogLen = readerSet->backlogSize = 0;
   readerSet->backlogElemSize = seqElemSize;
   readerSet->seqDataBacklog = NULL; /* only allocate backlog when it's
-                                   * really needed! */
+                                     * really needed! */
   readerSet->generatorState = generatorState;
   readerSet->generator = generator;
 }
@@ -94,7 +105,6 @@ initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
 extern void
 destructSeqReaderSet(SeqReaderSet *readerSet)
 {
-  struct seqReaderState *p;
   assert(readerSet);
   ListDo(struct seqReaderState, readerSet->consumerList, ma_free(p));
   if (readerSet->autoConsumerList)
@@ -110,6 +120,7 @@ seqReaderSetRegisterConsumer(SeqReaderSet *readerSet, int tag,
   int availId = readerSet->numConsumers++;
   SeqDataReader reader;
   struct seqReaderState *state;
+  assert(readerSet);
   state = ma_malloc(sizeof (*state));
   state->readerSet = readerSet;
   state->id = availId;
@@ -124,6 +135,30 @@ seqReaderSetRegisterConsumer(SeqReaderSet *readerSet, int tag,
   reader.src = state;
   reader.readData = seqReaderSetRead;
   return reader;
+}
+
+extern bool
+seqReaderSetRegisterAutoConsumer(SeqReaderSet *readerSet, int tag,
+                                 SeqDataWriter writer)
+{
+  int availId = readerSet->numConsumers++;
+  assert(readerSet);
+  {
+    struct seqSinkState *temp;
+    if (!(temp = ma_realloc(readerSet->autoConsumerList,
+                            sizeof (*temp) * (availId + 1))))
+      return false;
+    readerSet->autoConsumerList = temp;
+  }
+  {
+    struct seqSinkState *state = readerSet->autoConsumerList + availId;
+    state->id = availId;
+    state->writer = writer;
+    state->tag = tag;
+
+    readerSet->tagSuperSet |= tag;
+  }
+  return true;
 }
 
 static size_t
@@ -214,7 +249,7 @@ seqReaderSetFindMinOpenRequest(SeqReaderSet *readerSet)
   p = readerSet->consumerList;
   while (p)
   {
-    min = MIN(min, p->nextReadPos);
+    min = MIN(min, seqReaderSetGetConsumerNextPos(p));
     p = p->next;
   }
   return min;
@@ -228,7 +263,14 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
   struct seqReaderSet *readerSet = backlogState;
   assert(backlogState && (requestLen?(seqData!=NULL):1));
   requestMinPos = seqReaderSetFindMinOpenRequest(readerSet);
-  /* 1. move still unread old values as far as possible to head of copy */
+  /* 1. pass all data to be invalidated to automatic sinks */
+  {
+    int i, numAutoConsumers = readerSet->numAutoConsumers;
+    struct seqSinkState *sinks = readerSet->autoConsumerList;
+    for (i = 0; i < numAutoConsumers; ++i)
+      SDWWrite(sinks[i].writer, seqData, requestLen);
+  }
+  /* 2. move still unread old values as far as possible to head of copy */
   assert(requestMinPos >= readerSet->backlogStartPos);
   if (requestMinPos < readerSet->backlogStartPos + readerSet->backlogLen)
   {
@@ -250,7 +292,7 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
   {
     Seqpos copyStartPos = MAX(requestMinPos, requestStart);
     size_t copyLen = requestLen - copyStartPos + requestStart;
-    /* 2. extend backlog to also accept all values in last region read */
+    /* 3. extend backlog to also accept all invalidated values still needed */
     if (copyLen)
     {
       size_t backlogSizeLeft

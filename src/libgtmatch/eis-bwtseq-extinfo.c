@@ -24,6 +24,7 @@
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseq-extinfo.h"
 #include "libgtmatch/eis-bwtseq-priv.h"
+#include "libgtmatch/eis-bwtseq-context.h"
 #include "libgtmatch/eis-headerid.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-sa-common.h"
@@ -163,6 +164,7 @@ struct addLocateInfoState
   struct seqRevMapEntry *revMapQueue;
   size_t origRanksQueueSize;
   Seqpos *origRanksQueue;
+  BWTSeqContextRetrieverFactory *ctxFactory;
 };
 
 static inline unsigned
@@ -254,7 +256,8 @@ initAddLocateInfoState(struct addLocateInfoState *state,
                        const enum rangeSortMode *rangeSort,
                        Seqpos srcLen, const struct bwtParam *params,
                        const SpecialsRankTable *sprTable,
-                       unsigned bitsPerOrigRank)
+                       unsigned bitsPerOrigRank,
+                       BWTSeqContextRetrieverFactory *ctxFactory)
 {
   Seqpos lastPos;
   unsigned aggregationExpVal;
@@ -323,6 +326,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
     state->origRanksQueue = NULL;
     state->revMapQueue = NULL;
   }
+  state->ctxFactory = ctxFactory;
 }
 
 static void
@@ -384,9 +388,11 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
   struct addLocateInfoState *state = cbState;
   unsigned bitsPerBWTPos, bitsPerOrigPos, bitsPerOrigRank;
   int retcode;
+  unsigned locateInterval;
   assert(varDest && cbState);
+  locateInterval = state->locateInterval;
   /* 0. resize caches if necessary */
-  if (len > state->revMapQueueSize)
+  if (locateInterval && len > state->revMapQueueSize)
   {
     state->revMapQueue = ma_realloc(state->revMapQueue,
                                     len * sizeof (state->revMapQueue[0]));
@@ -401,40 +407,46 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
   bitsPerBWTPos = requiredSeqposBits(len - 1);
   bitsPerOrigPos = state->bitsPerOrigPos;
   bitsPerOrigRank = state->bitsPerOrigRank;
-  /* 1. read rangeLen suffix array indices from suftab */
   {
     Seqpos i, mapVal;
     size_t revMapQueueLen = 0, origRanksQueueLen = 0;
     int reversiblySorted = state->featureToggles & BWTReversiblySorted,
       locateBitmap = state->featureToggles & BWTLocateBitmap;
+    /* read len suffix array indices from suftab */
+    /* TODO: decide  on reasonable buffering of mapVal */
     for (i = 0; i < len; ++i)
     {
-      int insertExtraLocateMark = 0;
-      /* 1.a read array index*/
-      if ((retcode = SDRRead(state->readSeqpos, &mapVal, 1, err)) != 1)
-        return (BitOffset)-1;
-      /* 1.b find current symbol and compare to special ranges */
-      insertExtraLocateMark = !reversiblySorted &&
-        isSortModeTransition(state->origSeqAccess, state->seqLen,
-                             state->alphabet, state->rangeSort,
-                             mapVal);
-      /* 1.c check wether the index into the original sequence is an
-       * even multiple of the sampling interval, or a not-reversible
-       * sort mode transition occurred */
-      if (!(mapVal % state->locateInterval) || insertExtraLocateMark)
+      /* add locate data if necessary */
+      if (locateInterval)
       {
-        /* 1.c.1 enter index into cache */
-        state->revMapQueue[revMapQueueLen].bwtPos = i;
-        state->revMapQueue[revMapQueueLen].origPos
-          = reversiblySorted ? mapVal/state->locateInterval : mapVal;
-        ++revMapQueueLen;
-        /* 1.c.2 mark position in bwt sequence */
-        if (locateBitmap)
-          bsSetBit(cwDest, cwOffset + i);
+        int insertExtraLocateMark = 0;
+        /* 1.a read array index*/
+        if ((retcode = SDRRead(state->readSeqpos, &mapVal, 1, err)) != 1)
+          return (BitOffset)-1;
+        /* 1.b find current symbol and compare to special ranges */
+        insertExtraLocateMark = !reversiblySorted &&
+          isSortModeTransition(state->origSeqAccess, state->seqLen,
+                               state->alphabet, state->rangeSort,
+                               mapVal);
+        /* 1.c check wether the index into the original sequence is an
+         * even multiple of the sampling interval, or a not-reversible
+         * sort mode transition occurred */
+        if (!(mapVal % locateInterval) || insertExtraLocateMark)
+        {
+          /* 1.c.1 enter index into cache */
+          state->revMapQueue[revMapQueueLen].bwtPos = i;
+          state->revMapQueue[revMapQueueLen].origPos
+            = reversiblySorted ? mapVal/state->locateInterval : mapVal;
+          ++revMapQueueLen;
+          /* 1.c.2 mark position in bwt sequence */
+          if (locateBitmap)
+            bsSetBit(cwDest, cwOffset + i);
+        }
+        else
+          if (locateBitmap)
+            bsClearBit(cwDest, cwOffset + i);
       }
-      else
-        if (locateBitmap)
-          bsClearBit(cwDest, cwOffset + i);
+      /* and add data for extra sort information */
       if (bitsPerOrigRank)
       {
         Symbol BWTSym;
@@ -452,8 +464,13 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
                          mapVal != 0 ? mapVal - 1 : state->seqLen - 1);
         }
       }
+      if (state->ctxFactory)
+      {
+        BWTSCRFMapAdvance(state->ctxFactory, &mapVal, 1);
+      }
     }
     /* 2. copy revMapQueue into output */
+    if (locateInterval)
     {
       int locateCount = state->featureToggles & BWTLocateCount;
       if (locateCount)
@@ -475,16 +492,16 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
                       state->revMapQueue[i].origPos);
         bitsWritten += bitsPerOrigPos;
       }
-      if (bitsPerOrigRank)
+    }
+    if (bitsPerOrigRank)
+    {
+      unsigned bitsPerOrigRank = state->bitsPerOrigRank;
+      if (origRanksQueueLen)
       {
-        unsigned bitsPerOrigRank = state->bitsPerOrigRank;
-        if (origRanksQueueLen)
-        {
-          bsStoreUniformSeqposArray(varDest, varOffset + bitsWritten,
-                                    bitsPerOrigRank, origRanksQueueLen,
-                                    state->origRanksQueue);
-          bitsWritten += bitsPerOrigRank * origRanksQueueLen;
-        }
+        bsStoreUniformSeqposArray(varDest, varOffset + bitsWritten,
+                                  bitsPerOrigRank, origRanksQueueLen,
+                                  state->origRanksQueue);
+        bitsWritten += bitsPerOrigRank * origRanksQueueLen;
       }
     }
   }
@@ -514,6 +531,7 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
   struct addLocateInfoState varState;
   bool varStateIsInitialized = false;
   unsigned locateInterval;
+  BWTSeqContextRetrieverFactory *buildContextMap = NULL;
   assert(src && params && err);
   error_check(err);
   locateInterval = params->locateInterval;
@@ -534,15 +552,23 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
     Seqpos totalLen = SASSGetLength(src);
     const MRAEnc *alphabet = SASSGetMRAEnc(src);
     MRAEnc *baseAlphabet = SASSNewMRAEnc(src);
+    /* FIXME: this  has to work also when locateInterval == 0 and
+     * sprTable != NULL */
+    if (params->ctxMapILog != CTX_MAP_ILOG_NOMAP)
+      buildContextMap = newBWTSeqContextRetrieverFactory(totalLen,
+                                                         params->ctxMapILog);
     if (locateInterval)
     {
       ++numHeaders;
       if (sortModeHeaderNeeded(alphabet, rangeSort, sprTable))
       {
-        Seqpos origSeqLen = getencseqtotallength(SPRTGetOrigEncseq(sprTable)),
+        Seqpos
+#ifndef NDEBUG
+          origSeqLen = getencseqtotallength(SPRTGetOrigEncseq(sprTable)),
+#endif
           maxRank;
         assert(origSeqLen == totalLen - 1);
-        maxRank = specialsRank(sprTable, origSeqLen);
+        maxRank = specialsRank(sprTable, totalLen - 1);
         bitsPerOrigRank = sortModeHeader.bitsPerOrigRank
           = requiredSeqposBits(maxRank);
         sortModeHeader.alphabet = alphabet;
@@ -557,7 +583,8 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
           initAddLocateInfoState(
             &varState, SASSGetOrigSeqAccessor(src), readSfxIdx,
             alphabet, SASSGetSeqStats(src), rangeSort, totalLen, params,
-            bitsPerOrigRank?sprTable:NULL, bitsPerOrigRank);
+            bitsPerOrigRank?sprTable:NULL, bitsPerOrigRank,
+            buildContextMap);
           varStateIsInitialized = true;
         }
         else
@@ -565,7 +592,6 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
           error_set(err, "error: locate sampling requested but not available"
                     " for project %s\n", str_get(params->projectName));
         }
-
       }
     }
     if (!(baseSeqIdx
@@ -580,7 +606,22 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
                         locateInterval?locBitsUpperBounds:NULL, &varState,
                         err)))
       break;
+    if (buildContextMap)
+    {
+      if (!BWTSCRFFinished(buildContextMap))
+      {
+        fputs("error: context table construction incomplete!\n", stderr);
+      }
+      else
+      {
+        BWTSeqContextRetriever *ctxRetrieve =
+          BWTSCRFGet(buildContextMap, NULL, params->projectName);
+        deleteBWTSeqCR(ctxRetrieve);
+      }
+    }
   } while (0);
+  if (buildContextMap)
+    deleteBWTSeqContextRetrieverFactory(buildContextMap);
   if (varStateIsInitialized)
     destructAddLocateInfoState(&varState);
   return baseSeqIdx;

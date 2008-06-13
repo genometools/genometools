@@ -31,6 +31,7 @@
 #include "libgtmatch/eis-bwtseq-extinfo.h"
 #include "libgtmatch/eis-bwtseq-param.h"
 #include "libgtmatch/eis-bwtseq-priv.h"
+#include "libgtmatch/eis-bwtseq-context.h"
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-suffixerator-interface.h"
@@ -419,8 +420,18 @@ EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
     return iter->bounds.end - iter->bounds.start;
 }
 
+enum
+{
+  MAX_CONTEXT_LEN = 1000,
+  MIN_CONTEXT_LEN = 1,
+  CONTEXT_FRACTION = 128,
+  MAX_NUM_CONTEXT_CHECKS = 1000,
+  CONTEXT_INTERVAL = 128,
+};
+
 extern int
 BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
+                      int checkFlags,
                       unsigned long tickPrint, FILE *fp,
                       Verboseinfo *verbosity, Error *err)
 {
@@ -454,7 +465,8 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       break;
     }
 
-    if (BWTSeqHasLocateInformation(bwtSeq))
+    if (checkFlags & VERIFY_BWTSEQ_SUFVAL
+        && BWTSeqHasLocateInformation(bwtSeq))
     {
       Seqpos i;
       for (i = 0; i < len && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
@@ -464,7 +476,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
           Seqpos sfxArrayValue = BWTSeqLocateMatch(bwtSeq, i, &extBits);
           if (sfxArrayValue != suffixArray.suftab[i])
           {
-            error_set(err, "Failed suffixarray value comparison"
+            error_set(err, "Failed suffix array value comparison"
                           " at position "FormatSeqpos": "FormatSeqpos" != "
                           FormatSeqpos,
                           i, sfxArrayValue, suffixArray.suftab[i]);
@@ -480,15 +492,21 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       if (retval != VERIFY_BWTSEQ_NO_ERROR)
         break;
     }
-    else
+    else if (checkFlags & VERIFY_BWTSEQ_SUFVAL)
     {
-      fputs("Not checking suftab values (no locate information present)!\n",
-            stderr);
+      error_set(err, "check of suffix array values was requested,"
+                " but index contains no  locate information!");
+      retval = VERIFY_BWTSEQ_SUFVAL_ERROR;
+      break;
     }
-    if ((bwtSeq->featureToggles & BWTReversiblySorted) && len)
+    else if (!(checkFlags & VERIFY_BWTSEQ_SUFVAL)
+             && BWTSeqHasLocateInformation(bwtSeq))
     {
-      Seqpos nextLocate = BWTSeqTerminatorPos(bwtSeq),
-        i = len;
+      fputs("Not checking suftab values.\n", stderr);
+    }
+    if (BWTSeqHasLocateInformation(bwtSeq))
+    {
+      Seqpos nextLocate = BWTSeqTerminatorPos(bwtSeq);
       if (suffixArray.longest.defined &&
           suffixArray.longest.valueseqpos != nextLocate)
       {
@@ -498,35 +516,101 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
         retval = VERIFY_BWTSEQ_TERMPOS_ERROR;
         break;
       }
-      /* handle first symbol specially because the encodedsequence
-       * will not return the terminator symbol */
+      if ((checkFlags & VERIFY_BWTSEQ_LFMAPWALK)
+          && (bwtSeq->featureToggles & BWTReversiblySorted))
       {
-        Symbol sym = EISGetSym(bwtSeq->seqIdx, nextLocate, bwtSeq->hint);
-        if (sym != UNDEFBWTCHAR)
+        Seqpos i = len;
+        /* handle first symbol specially because the encodedsequence
+         * will not return the terminator symbol */
         {
-          error_set(err, "symbol mismatch at position "FormatSeqpos": "
-                        "%d vs. reference symbol %d", i - 1, sym,
-                        UNDEFBWTCHAR);
-          retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
-          break;
+          Symbol sym = BWTSeqGetSym(bwtSeq, nextLocate);
+          if (sym != UNDEFBWTCHAR)
+          {
+            error_set(err, "symbol mismatch at position "FormatSeqpos": "
+                      "%d vs. reference symbol %d", i - 1, (int)sym,
+                      (int)UNDEFBWTCHAR);
+            retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
+            break;
+          }
+          --i;
+          nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, &extBits);
         }
-        --i;
-        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, &extBits);
+        while (i > 0)
+        {
+          Symbol symRef = getencodedchar(suffixArray.encseq,
+                                         --i, suffixArray.readmode);
+          Symbol symCmp = BWTSeqGetSym(bwtSeq, nextLocate);
+          if (symCmp != symRef)
+          {
+            error_set(err, "symbol mismatch at position "FormatSeqpos": "
+                      "%d vs. reference symbol %d", i, symCmp, symRef);
+            retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
+            break;
+          }
+          nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, &extBits);
+        }
+        if (retval != VERIFY_BWTSEQ_NO_ERROR)
+          break;
       }
-      while (i > 0)
+      else if ((checkFlags & VERIFY_BWTSEQ_LFMAPWALK)
+               && !(bwtSeq->featureToggles & BWTReversiblySorted))
       {
-        Symbol symRef = getencodedchar(suffixArray.encseq,
-                                       --i, suffixArray.readmode);
-        Symbol symCmp = EISGetSym(bwtSeq->seqIdx, nextLocate, bwtSeq->hint);
-        if (symCmp != symRef)
-        {
-          error_set(err, "symbol mismatch at position "FormatSeqpos": "
-                        "%d vs. reference symbol %d", i, symCmp, symRef);
-          retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
-          break;
-        }
-        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, &extBits);
+        error_set(err, "requested complete backwards regeneration in index"
+                  " without regeneration capability");
+        retval = VERIFY_BWTSEQ_LFMAPWALK_IMP_ERROR;
+        break;
       }
+    }
+    if (checkFlags & VERIFY_BWTSEQ_CONTEXT)
+    {
+      BWTSeqContextRetriever *bwtSeqCR =
+        BWTSeqCRLoad(bwtSeq, projectName, CTX_MAP_ILOG_AUTOSIZE);
+      if (!bwtSeqCR)
+      {
+        error_set(err, "cannot load BWT sequence context access table"
+                  " for project %s", str_get(projectName));
+        retval = VERIFY_BWTSEQ_CONTEXT_LOADFAIL;
+        break;
+      }
+      fputs("Checking context regeneration.\n", stderr);
+      {
+        Seqpos i, start, subSeqLen,
+          maxSubSeqLen = MIN(MAX(MIN_CONTEXT_LEN, len/CONTEXT_FRACTION),
+                             MAX_CONTEXT_LEN),
+          numTries = MIN(MAX_NUM_CONTEXT_CHECKS, MAX(2, len/CONTEXT_INTERVAL));
+        Symbol *contextBuf = ma_malloc(sizeof (Symbol) * MAX_CONTEXT_LEN);
+        Encodedsequencescanstate *esr = newEncodedsequencescanstate();
+        for (i = 0; i < numTries && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
+        {
+          Seqpos i, end;
+          subSeqLen = random()%(maxSubSeqLen + 1);
+          start = random()%(len - subSeqLen + 1);
+          end = start + subSeqLen;
+          BWTSeqCRAccessSubseq(bwtSeqCR, start, subSeqLen, contextBuf);
+          initEncodedsequencescanstate(esr, suffixArray.encseq,
+                                       suffixArray.readmode, start);
+          for (i = 0; i < subSeqLen; ++i)
+          {
+            Symbol symRef = sequentialgetencodedchar(suffixArray.encseq, esr,
+                                                     start + i,
+                                                     suffixArray.readmode);
+            Symbol symCmp = contextBuf[i];
+            if (symCmp != symRef)
+            {
+              error_set(err, "symbol mismatch at position "FormatSeqpos": "
+                        "%d vs. reference symbol %d", start + i, (int)symCmp,
+                        (int)symRef);
+              retval = VERIFY_BWTSEQ_CONTEXT_SYMFAIL;
+              break;
+            }
+          }
+        }
+        if (retval == VERIFY_BWTSEQ_NO_ERROR)
+          fputs("Context regeneration completed successfully.\n", stderr);
+        freeEncodedsequencescanstate(&esr);
+        ma_free(contextBuf);
+      }
+      deleteBWTSeqCR(bwtSeqCR);
     }
   } while (0);
   if (suffixArrayIsInitialized) freesuffixarray(&suffixArray);

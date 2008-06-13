@@ -18,8 +18,11 @@ def runAndCheckPackedIndex(indexName,dbFiles, extraParams=Hash.new)
   params = {
     :create => { '-tis' => nil, '-des' => nil },
     :timeOuts => { :bdxcreat => 100, :suffixerator => 100,
-      :chkintegrity => 400, :chksearch => 400, :trsuftab => 100 },
-    :bdx => {}
+      :chkintegrity => 400, :chksearch => 400, :trsuftab => 100,
+      :mkctxmap => 100 },
+    :bdx => {},
+    :chksearch => { '-chksfxarray' => nil, '-nsamples' => '100' },
+    :mkctxmap => { '-ctxilog' => -1 }
   }
   extraParams.keys.each do |key|
     params[key].merge!(extraParams[key]) if params.has_key?(key)
@@ -47,11 +50,17 @@ def runAndCheckPackedIndex(indexName,dbFiles, extraParams=Hash.new)
               paramList(params[:bdx]) + [indexName]).join(' '),
              :maxtime => params[:timeOuts][:trsuftab])
   end
+  if extraParams.has_key?(:mkctxmap) &&
+      extraParams[:mkctxmap]
+    run_test((["#{$bin}gt", 'packedindex', 'mkctxmap'] +
+              paramList(params[:mkctxmap]) + [indexName]).join(' '),
+             :maxtime => params[:timeOuts][:mkctxmap])    
+  end
   run_test(["#{$bin}gt", 'packedindex', 'chkintegrity', '-ticks', '1000',
             indexName].join(' '),
            :maxtime => params[:timeOuts][:chkintegrity])
-  run_test(["#{$bin}gt", 'packedindex', 'chksearch', '-chksfxarray',
-            '-nsamples', '100', indexName].join(' '),
+  run_test((["#{$bin}gt", 'packedindex', 'chksearch'] +
+            paramList(params[:chksearch]) + [indexName]).join(' '),
            :maxtime => params[:timeOuts][:chksearch])
 end
 
@@ -71,7 +80,8 @@ Test do
                               "TTT-small.fna","trna_glutamine.fna",
                               "Random-Small.fna","Duplicate.fna"])
   runAndCheckPackedIndex('miniindex', allfiles,
-                         :bdx => { '-locfreq' => 0 })
+                         :bdx => { '-locfreq' => 0 },
+                         :chksearch => { '-chksfxarray' => 'no' })
 end
 
 Name "gt packedindex check tools for simple sequences with sprank"
@@ -82,6 +92,19 @@ Test do
                               "Random-Small.fna","Duplicate.fna"])
   runAndCheckPackedIndex('miniindex', allfiles,
                          :bdx => { '-sprank' => nil },
+                         :chksearch => { '-full-lfmap' => nil },
+                         :timeOuts => { :chksearch => 800 })
+end
+
+Name "gt packedindex check tools for simple sequences with context"
+Keywords "gt_packedindex"
+Test do
+  allfiles = prependTestdata(["RandomN.fna","Random.fna","Atinsert.fna",
+                              "TTT-small.fna","trna_glutamine.fna",
+                              "Random-Small.fna","Duplicate.fna"])
+  runAndCheckPackedIndex('miniindex', allfiles,
+                         :bdx => { '-sprank' => nil, '-ctxilog' => -1 },
+                         :chksearch => { '-chkcontext' => nil },
                          :timeOuts => { :chksearch => 800 })
 end
 
@@ -99,7 +122,9 @@ Test do
                               "TTT-small.fna","trna_glutamine.fna",
                               "Random-Small.fna","Duplicate.fna"])
   runAndCheckPackedIndex('miniindex', allfiles,
-                         :useSuftabTranslation => true)
+                         :useSuftabTranslation => true,
+                         :bdx => { '-sprank' => nil },
+                         :mkctxmap => {})
 end
 
 Name "gt packedindex check tools for boundary-case sequences"

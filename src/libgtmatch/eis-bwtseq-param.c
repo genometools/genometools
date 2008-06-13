@@ -22,6 +22,7 @@
 
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseq-param.h"
+#include "libgtmatch/eis-bwtseq-context-param.h"
 #include "libgtmatch/eis-encidxseq-param.h"
 
 extern void
@@ -62,6 +63,8 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
     &paramOutput->final.sourceRankInterval, -1, -1,
     sizeof (Seqpos) * CHAR_BIT - 1);
   option_parser_add_option(op, option);
+
+  registerCtxMapOptions(op, &paramOutput->final.ctxMapILog);
 
   paramOutput->final.projectName = projectName;
 

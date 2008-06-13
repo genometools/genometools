@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (c) 2007,2008 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -328,9 +328,31 @@ enum verifyBWTSeqErrCode
                                        * does not match the
                                        * corresponding symbol in the
                                        * encoded sequence */
-  VERIFY_BWTSEQ_TERMPOS_ERROR = -5, /**< the position of the
+  VERIFY_BWTSEQ_LFMAPWALK_IMP_ERROR = -5, /**< original sequence
+                                           * regeneration was
+                                           * requested,
+                                           * but is impossible */
+  VERIFY_BWTSEQ_TERMPOS_ERROR = -6, /**< the position of the
                                      * 0-rotation does not match */
+  VERIFY_BWTSEQ_CONTEXT_SYMFAIL = -7, /**< context regeneration
+                                       * delivered an incorrect symbol */
+  VERIFY_BWTSEQ_CONTEXT_LOADFAIL = -8, /**< context regeneration
+                                        * is impossible because the
+                                        * context failed to load */
 };
+
+enum verifyBWTSeqFlags
+{
+  VERIFY_BWTSEQ_SUFVAL    = 1 << 0, /**< check stored suffix arrays */
+  VERIFY_BWTSEQ_LFMAPWALK = 1 << 1, /**< performs full backwards
+                                     * regeneration of original
+                                     * sequence (if possible)
+                                     */
+  VERIFY_BWTSEQ_CONTEXT   = 1 << 2, /**< try some random context
+                                     * regenerations
+                                     */
+};
+
 /**
  * \brief Perform various checks on the burrows wheeler transform
  *
@@ -347,6 +369,7 @@ enum verifyBWTSeqErrCode
  */
 extern enum verifyBWTSeqErrCode
 BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
+                      int checkFlags,
                       unsigned long tickPrint, FILE *fp,
                       Verboseinfo *verbosity, Error *err);
 

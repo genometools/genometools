@@ -39,7 +39,8 @@ struct chkSearchOptions
   struct bwtOptions idx;
   long minPatLen, maxPatLen;
   unsigned long numOfSamples, progressInterval;
-  bool checkSuffixArrayValues, verboseOutput;
+  int flags;
+  bool verboseOutput;
 };
 
 static OPrval
@@ -91,11 +92,10 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
     if ((had_err = bwtSeq == NULL))
       break;
 
-    if (params.checkSuffixArrayValues)
     {
       enum verifyBWTSeqErrCode retval =
-        BWTSeqVerifyIntegrity(bwtSeq, inputProject, params.progressInterval,
-                              stderr, verbosity, err);
+        BWTSeqVerifyIntegrity(bwtSeq, inputProject, params.flags,
+                              params.progressInterval, stderr, verbosity, err);
       if ((had_err = (retval != VERIFY_BWTSEQ_NO_ERROR)))
       {
         fprintf(stderr, "index integrity check failed: %s\n",
@@ -259,6 +259,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   OptionParser *op;
   OPrval oprval;
   Option *option, *optionProgress;
+  bool checkSuffixArrayValues, tryContextRetrieve, tryFullRegen;
 
   error_check(err);
   op = option_parser_new("indexname",
@@ -288,7 +289,17 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
 
   option = option_new_bool("chksfxarray",
                            "verify integrity of stored suffix array positions",
-                           &params->checkSuffixArrayValues, false);
+                           &checkSuffixArrayValues, false);
+  option_parser_add_option(op, option);
+
+  option = option_new_bool("full-lfmap",
+                           "verify complete backwards regeneration of "
+                           "original sequence", &tryFullRegen, false);
+  option_parser_add_option(op, option);
+
+  option = option_new_bool("chkcontext",
+                           "verify integrity of regenerated sequence context",
+                           &tryContextRetrieve, false);
   option_parser_add_option(op, option);
 
   optionProgress = option_new_ulong("ticks", "print dot after this many symbols"
@@ -304,6 +315,11 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
 
   option_parser_set_min_max_args(op, 1, 1);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+
+  /* condense boolean options to flags field */
+  params->flags = (checkSuffixArrayValues?VERIFY_BWTSEQ_SUFVAL:0)
+    | (tryFullRegen?VERIFY_BWTSEQ_LFMAPWALK:0)
+    | (tryContextRetrieve?VERIFY_BWTSEQ_CONTEXT:0);
   /* compute parameters currently not set from command-line or
    * determined indirectly */
   computePackedIndexDefaults(&params->idx, BWTBaseFeatures);

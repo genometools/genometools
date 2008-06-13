@@ -53,6 +53,25 @@ SDRRead(SeqDataReader sr, void *dest, size_t len, Error *err)
   return sr.readData(sr.src, dest, len, err);
 }
 
+/* while the above describes a data source, this is a corresponding sink */
+typedef void *SeqDataDest;
+typedef size_t (*seqDataWriteFunc)(SeqDataDest dest, const void *src,
+                                   size_t len);
+
+struct seqDataWriter
+{
+  SeqDataDest dest;
+  seqDataWriteFunc writeData;
+};
+
+typedef struct seqDataWriter SeqDataWriter;
+
+static inline size_t
+SDWWrite(SeqDataWriter sw, const void *src, size_t len)
+{
+  return sw.writeData(sw.dest, src, len);
+}
+
 /* generic data translator api */
 union translatorState
 {
@@ -80,6 +99,7 @@ SDRTranslate(SeqDataTranslator xltor, void *dest, const void *src, size_t len)
 {
   if (xltor.translateData)
     return xltor.translateData(xltor.state.ref, dest, src, len);
+  /* fall back to zero-translation i.e. verbatim copy */
   memcpy(dest, src, len * xltor.state.elemSize);
   return len * xltor.state.elemSize;
 }

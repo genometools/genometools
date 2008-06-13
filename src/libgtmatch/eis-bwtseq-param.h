@@ -26,6 +26,7 @@
 #include "libgtcore/option.h"
 
 #include "libgtmatch/eis-encidxseq-param.h"
+#include "libgtmatch/eis-bwtseq-context-param.h"
 
 /**
  * all parameters for building the BWT sequence index
@@ -50,9 +51,18 @@ struct bwtParam
                                    * -1:
                                    *     inactive
                                    * 0...sizeof(Seqpos)*CHAR_BIT:
-                                   *     build accel table at
+                                   *     build accel table
                                    *     with 1<<SourceRankInterval
                                    *     sampling interval
+                                   */
+  int ctxMapILog;                 /**< according to the value of
+                                   * ctxMapIlog:
+                                   * 0..sizeof(Seqpos)*CHAR_BIT:
+                                   *   a context map is produced with
+                                   *   interval 1 << ctxMapILog
+                                   * -1: use log(seqlen)
+                                   * -2: inactive,
+                                   * see enum ctxMapSize
                                    */
   const Str *projectName;         /**< base file name to derive name
                                    *   of suffixerator project from*/
