@@ -68,6 +68,19 @@ static OptionParser* gt_shredder_option_parser_new(void *tool_arguments)
   return op;
 }
 
+static int gt_shredder_arguments_check(UNUSED int rest_argc,
+                                       void *tool_arguments, Error *err)
+{
+  ShredderArguments *arguments = tool_arguments;
+  error_check(err);
+  assert(arguments);
+  if (arguments->minlength > arguments->maxlength) {
+    error_set(err, "-minlength must be <= than -maxlength");
+    return -1;
+  }
+  return 0;
+}
+
 static int gt_shredder_runner(UNUSED int argc, const char **argv,
                               int parsed_args, void *tool_arguments, Error *err)
 {
@@ -113,6 +126,6 @@ Tool* gt_shredder(void)
   return tool_new(gt_shredder_arguments_new,
                   gt_shredder_arguments_delete,
                   gt_shredder_option_parser_new,
-                  NULL,
+                  gt_shredder_arguments_check,
                   gt_shredder_runner);
 }
