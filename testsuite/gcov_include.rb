@@ -46,6 +46,7 @@ full_coverage_files = [ "src/libgtcore/array.c",
                         "src/tools/gt_multilcp.c",
                         "src/tools/gt_shredder.c",
                         "src/tools/gt_splicesiteinfo.c",
+                        "src/tools/gt_splitfasta.c",
                         "src/tools/gt_stat.c",
                         "src/tools/gt_uniq.c"
                       ]

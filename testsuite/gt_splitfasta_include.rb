@@ -49,6 +49,30 @@ Test do
   end
 end
 
+Name "gt splitfasta (-splitdesc, nonexistent file)"
+Keywords "gt_splitfasta"
+Test do
+  run_test("#{$bin}gt splitfasta -splitdesc . #{$testdata}nonexistent_file",
+           :retval => 1)
+  grep $last_stderr, /does not exist or is not readable/
+end
+
+Name "gt splitfasta (empty file)"
+Keywords "gt_splitfasta"
+Test do
+  run_test("#{$bin}gt splitfasta #{$testdata}empty_file", :retval => 1)
+  grep $last_stderr, /is empty/
+end
+
+
+Name "gt splitfasta (corrupt file)"
+Keywords "gt_splitfasta"
+Test do
+  run_test("#{$bin}gt splitfasta #{$testdata}gt_bioseq_fail_2.fas",
+           :retval => 1)
+  grep $last_stderr, /file is not in FASTA format/
+end
+
 Name "gt splitfasta (-splitdesc)"
 Keywords "gt_splitfasta"
 Test do
@@ -82,6 +106,7 @@ Test do
     raise TestFailed, "file 'bar.fas' does not exist"
   end
 end
+
 Name "gt splitfasta (-splitdesc, compressed file)"
 Keywords "gt_splitfasta"
 Test do
@@ -96,4 +121,39 @@ Test do
   end
 end
 
+if $gttestdata then
+  Name "gt splitfasta (large data, compressed)"
+  Keywords "gt_splitfasta"
+  Test do
+    run "cp #{$gttestdata}ltrharvest/s_cer/chrAll_before-1997-10-01.fsa.gz " +
+        "test.fas.gz"
+    run_test("#{$bin}gt splitfasta -targetsize 2 test.fas.gz", :maxtime => 20)
+    # check sample
+    if not File.exists?("test.fas.2.gz") then
+      raise TestFailed, "file 'test.fas.2.gz' does not exist"
+    end
+  end
 
+  Name "gt splitfasta (large data, uncompressed)"
+  Keywords "gt_splitfasta"
+  Test do
+    run "cp #{$gttestdata}ltrharvest/s_cer/chrAll_before-1997-10-01.fsa.gz " +
+        "test.fas.gz"
+    run "gunzip test.fas.gz"
+    run_test "#{$bin}gt splitfasta -targetsize 2 test.fas"
+    # check sample
+    if not File.exists?("test.fas.2") then
+      raise TestFailed, "file 'test.fas.2' does not exist"
+    end
+  end
+
+  Name "gt splitfasta (large data, file exists)"
+  Keywords "gt_splitfasta"
+  Test do
+    run "cp #{$gttestdata}ltrharvest/s_cer/chrAll_before-1997-10-01.fsa.gz " +
+        "test.fas.gz"
+    run "touch test.fas.2.gz"
+    run_test("#{$bin}gt splitfasta -targetsize 1 test.fas.gz", :retval => 1)
+    grep $last_stderr, /exists already/
+  end
+end
