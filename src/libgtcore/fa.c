@@ -313,12 +313,12 @@ void* fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
   if (hard_fail)
   {
     map = xmmap(0, len, mapwritable?PROT_WRITE:PROT_READ,
-                MAP_PRIVATE, fd, offset);
+                MAP_SHARED, fd, offset);
   }
   else
   {
     if ((map = mmap(0, len, mapwritable?PROT_WRITE:PROT_READ,
-                    MAP_PRIVATE, fd, offset)) == MAP_FAILED)
+                    MAP_SHARED, fd, offset)) == MAP_FAILED)
       map = NULL;
   }
 
