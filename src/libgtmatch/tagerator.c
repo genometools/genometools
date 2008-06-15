@@ -30,7 +30,7 @@
 #include "alphadef.h"
 #include "esa-myersapm.h"
 #include "esa-limdfs.h"
-#include "stamp.h"
+#include "format64.h"
 
 #include "echoseq.pr"
 #include "esa-map.pr"
@@ -38,8 +38,8 @@
 #define MAXTAGSIZE INTWORDSIZE
 
 static void exactpatternmatching(const Encodedsequence *encseq,
-                                 const Seqpos *suftab,
                                  Readmode readmode,
+                                 const Seqpos *suftab,
                                  Seqpos totallength,
                                  const Uchar *pattern,
                                  unsigned long patternlength,
@@ -100,31 +100,38 @@ static int dotransformtag(Uchar *transformedtag,
                           const Uchar *symbolmap,
                           const Uchar *currenttag,
                           unsigned long taglen,
-                          unsigned long tagnumber,
+                          uint64_t tagnumber,
                           bool replacewildcard,
                           Error *err)
 {
   unsigned long idx;
   Uchar charcode;
 
+  if (taglen > (unsigned long) MAXTAGSIZE)
+  {
+    error_set(err,"tag of length %lu; tags must not be longer than %lu",
+                   taglen, (unsigned long) MAXTAGSIZE);
+    return -1;
+  }
   for (idx = 0; idx < taglen; idx++)
   {
     charcode = symbolmap[currenttag[idx]];
     if (charcode == (Uchar) UNDEFCHAR)
     {
-      error_set(err,"undefined character '%c' in tag number %lu",
-		currenttag[idx],
-		tagnumber);
+      error_set(err,"undefined character '%c' in tag number " Formatuint64_t,
+                currenttag[idx],
+                PRINTuint64_tcast(tagnumber));
       return -1;
     }
     if (charcode == (Uchar) WILDCARD)
     {
       if (replacewildcard)
       {
-	charcode = 0; /* (Uchar) (drand48() * (mapsize-1)); */
+        charcode = 0; /* (Uchar) (drand48() * (mapsize-1)); */
       } else
       {
-	error_set(err,"wildcard in tag number %lu",tagnumber);
+        error_set(err,"wildcard in tag number " Formatuint64_t,
+                  PRINTuint64_tcast(tagnumber));
         return -1;
       }
     }
@@ -133,9 +140,80 @@ static int dotransformtag(Uchar *transformedtag,
   return 0;
 }
 
+static void performthesearch(const TageratorOptions *tageratoroptions,
+                             Myersonlineresources *mor,
+                             Limdfsresources *limdfsresources,
+                             const Encodedsequence *encseq,
+                             Readmode readmode,
+                             const Seqpos *suftab,
+                             Seqpos totallength,
+                             const Uchar *transformedtag,
+                             unsigned long taglen,
+                             void (*processmatch)(void *,Seqpos,Seqpos),
+                             void *processmatchinfooffline,
+                             UNUSED bool rcmatch)
+{
+  if (tageratoroptions->online || tageratoroptions->docompare)
+  {
+    edistmyersbitvectorAPM(mor,
+                           transformedtag,
+                           taglen,
+                           tageratoroptions->maxdistance);
+  }
+  if (!tageratoroptions->online || tageratoroptions->docompare)
+  {
+    if (tageratoroptions->maxdistance == 0)
+    {
+      exactpatternmatching(encseq,
+                           readmode,
+                           suftab,
+                           totallength,
+                           transformedtag,
+                           taglen,
+                           processmatch,
+                           processmatchinfooffline);
+    } else
+    {
+      esalimiteddfs(limdfsresources,
+                    transformedtag,
+                    taglen,
+                    tageratoroptions->maxdistance);
+    }
+  }
+}
+
+static void compareresults(const ArraySeqpos *storeonline,
+                           const ArraySeqpos *storeoffline)
+{
+  unsigned long ss;
+
+  assert(storeoffline->nextfreeSeqpos == storeonline->nextfreeSeqpos);
+  if (storeoffline->nextfreeSeqpos > 1UL)
+  {
+    qsort(storeoffline->spaceSeqpos,(size_t) storeoffline->nextfreeSeqpos,
+          sizeof (Seqpos),
+          cmpdescend);
+  }
+  for (ss=0; ss < storeoffline->nextfreeSeqpos; ss++)
+  {
+    assert(storeoffline->spaceSeqpos != NULL &&
+           storeonline->spaceSeqpos != NULL);
+    assert(storeoffline->spaceSeqpos[ss] == storeonline->spaceSeqpos[ss]);
+  }
+}
+
+static void complementtag(Uchar *transformedtag,unsigned long taglen)
+{
+  unsigned long idx;
+
+  for (idx = 0; idx < taglen; idx++)
+  {
+    transformedtag[taglen - 1 - idx] = COMPLEMENTBASE(transformedtag[idx]);
+  }
+}
+
 /*
   XXX add forward and reverse match in one iteration
-      transformedtag[taglen - 1 - idx] = MAKECOMPL(charcode); 
 */
 
 int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
@@ -168,8 +246,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   INITARRAY(&storeoffline,Seqpos);
   if (!haserr)
   {
-    unsigned long countcompare = 0, identicalstartpos = 0,
-                  ss, taglen, tagnumber;
+    unsigned long taglen;
+    uint64_t tagnumber;
     unsigned int mapsize;
     const Uchar *symbolmap, *currenttag;
     Uchar transformedtag[MAXTAGSIZE];
@@ -217,14 +295,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
         }
         break;
       }
-      if (taglen > (unsigned long) MAXTAGSIZE)
-      {
-        error_set(err,"tag of length %lu; tags must not be longer than %lu",
-                       taglen, (unsigned long) MAXTAGSIZE);
-        haserr = true;
-        ma_free(desc);
-        break;
-      }
       if (dotransformtag(transformedtag,
                          symbolmap,
                          currenttag,
@@ -246,57 +316,39 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       storeonline.nextfreeSeqpos = 0;
       if (taglen > tageratoroptions->maxdistance) /* XXX remove this */
       {
-        if (tageratoroptions->online || tageratoroptions->docompare)
+        int try;
+
+        for (try=0 ; try < 2; try++)
         {
-          edistmyersbitvectorAPM(mor,
-                                 transformedtag,
-                                 taglen,
-                                 tageratoroptions->maxdistance);
-        }
-        if (!tageratoroptions->online || tageratoroptions->docompare)
-        {
-          if (tageratoroptions->maxdistance == 0)
+          if ((try == 0 && tageratoroptions->fwdmatch) ||
+              (try == 1 && tageratoroptions->rcmatch))
           {
-            exactpatternmatching(suffixarray.encseq,
-                                 suffixarray.suftab,
-                                 suffixarray.readmode,
-                                 totallength,
-                                 transformedtag,
-                                 taglen,
-                                 processmatch,
-                                 processmatchinfooffline);
-          } else
-          {
-            esalimiteddfs(limdfsresources,
-                          transformedtag,
-                          taglen,
-                          tageratoroptions->maxdistance);
+            if (try == 1 && tageratoroptions->rcmatch)
+            {
+              complementtag(transformedtag,taglen);
+            }
+            performthesearch(tageratoroptions,
+                             mor,
+                             limdfsresources,
+                             suffixarray.encseq,
+                             suffixarray.readmode,
+                             suffixarray.suftab,
+                             totallength,
+                             transformedtag,
+                             taglen,
+                             processmatch,
+                             processmatchinfooffline,
+                             (try == 1 && tageratoroptions->rcmatch)
+                               ? true : false);
+            if (tageratoroptions->docompare)
+            {
+              compareresults(&storeonline,&storeoffline);
+            }
           }
         }
       }
       ma_free(desc);
-      if (tageratoroptions->docompare)
-      {
-        assert(storeoffline.nextfreeSeqpos == storeonline.nextfreeSeqpos);
-        if (storeoffline.nextfreeSeqpos > 1UL)
-        {
-          qsort(storeoffline.spaceSeqpos,(size_t) storeoffline.nextfreeSeqpos,
-                sizeof (Seqpos),
-                cmpdescend);
-        }
-        for (ss=0; ss < storeoffline.nextfreeSeqpos; ss++)
-        {
-          assert(storeoffline.spaceSeqpos != NULL &&
-                 storeonline.spaceSeqpos != NULL);
-          assert(storeoffline.spaceSeqpos[ss] == storeonline.spaceSeqpos[ss]);
-          identicalstartpos++;
-        }
-        countcompare++;
-      }
     }
-    printf("# %lu identical elements in successful array comparisons: %lu\n",
-          identicalstartpos,
-          countcompare);
   }
   FREEARRAY(&storeonline,Seqpos);
   FREEARRAY(&storeoffline,Seqpos);
