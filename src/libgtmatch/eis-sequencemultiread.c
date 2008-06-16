@@ -19,6 +19,7 @@
 #include "libgtcore/ma.h"
 #include "libgtcore/unused.h"
 #include "libgtmatch/eis-sequencemultiread.h"
+#include "libgtmatch/eis-list-do.h"
 
 struct seqReaderState
 {
@@ -95,13 +96,9 @@ destructSeqReaderSet(SeqReaderSet *readerSet)
 {
   struct seqReaderState *p;
   assert(readerSet);
-  p = readerSet->consumerList;
-  while (p)
-  {
-    struct seqReaderState *current = p;
-    p = p->next;
-    ma_free(current);
-  }
+  ListDo(struct seqReaderState, readerSet->consumerList, ma_free(p));
+  if (readerSet->autoConsumerList)
+    ma_free(readerSet->autoConsumerList);
   if (readerSet->seqDataBacklog)
     ma_free(readerSet->seqDataBacklog);
 }
