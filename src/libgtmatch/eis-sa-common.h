@@ -45,13 +45,15 @@ enum sfxDataRequest {
   SFX_REQUEST_ANY = SFX_REQUEST_ALL,             /**< used as bitmask  */
 };
 
+/**
+ * @return Symbol at position sufIdx or UNDEFBWTCHAR i.e. the terminator
+ */
 static inline Uchar
-sfxIdx2BWTSym(Seqpos sufIdx, const Encodedsequence *encseq, Readmode readmode)
-{
-  return sufIdx != 0
-    ? getencodedchar(encseq, sufIdx - 1, readmode)
-    : (Uchar) UNDEFBWTCHAR;
-}
+sfxIdx2BWTSym(Seqpos sufIdx, const Encodedsequence *encseq, Readmode readmode);
+
+static inline size_t
+EncSeqGetSubSeq(const Encodedsequence *encseq, Readmode readmode, Seqpos pos,
+                size_t len, Uchar *subStr);
 
 struct encSeqTrState
 {

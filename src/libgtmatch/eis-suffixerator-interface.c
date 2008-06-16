@@ -349,12 +349,9 @@ extern size_t
 SfxIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
 {
   const struct sfxInterface *sfxi;
-  size_t i;
   assert(state);
   sfxi = state;
-  for (i = 0; i < len; ++i)
-    dest[i] = getencodedchar(sfxi->encseq, pos + i, sfxi->readmode);
-  return len;
+  return EncSeqGetSubSeq(sfxi->encseq, sfxi->readmode, pos, len, dest);
 }
 
 /** writes substring of suffix table to output, puts older data into

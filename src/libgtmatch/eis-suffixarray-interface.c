@@ -237,17 +237,9 @@ extern size_t
 SAIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
 {
   const SuffixarrayFileInterface *sai;
-  const Encodedsequence *encseq;
-  Readmode readmode;
-  size_t i;
   assert(state);
   sai = state;
-  encseq = sai->sa->encseq;
-  assert(encseq);
-  readmode = sai->sa->readmode;
-  for (i = 0; i < len; ++i)
-    dest[i] = getencodedchar(encseq, pos + i, readmode);
-  return len;
+  return EncSeqGetSubSeq(sai->sa->encseq, sai->sa->readmode, pos, len, dest);
 }
 
 extern DefinedSeqpos

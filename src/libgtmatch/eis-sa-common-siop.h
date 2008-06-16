@@ -19,6 +19,25 @@
 #include "libgtmatch/eis-sa-common.h"
 #include "libgtmatch/eis-sa-common-priv.h"
 
+static inline Uchar
+sfxIdx2BWTSym(Seqpos sufIdx, const Encodedsequence *encseq, Readmode readmode)
+{
+  return sufIdx != 0
+    ? getencodedchar(encseq, sufIdx - 1, readmode)
+    : (Uchar) UNDEFBWTCHAR;
+}
+
+static inline size_t
+EncSeqGetSubSeq(const Encodedsequence *encseq, Readmode readmode, Seqpos pos,
+                size_t len, Uchar *subSeq)
+{
+  size_t i;
+  assert(encseq);
+  for (i = 0; i < len; ++i)
+    subSeq[i] = getencodedchar(encseq, pos + i, readmode);
+  return len;
+}
+
 static inline SeqDataReader
 SASSCreateReader(SASeqSrc *src, enum sfxDataRequest request)
 {
