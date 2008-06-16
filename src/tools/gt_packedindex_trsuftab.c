@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (c) 2008 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
