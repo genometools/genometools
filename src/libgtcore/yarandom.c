@@ -88,9 +88,10 @@ ya_random (void)
   return ret;
 }
 
-void
+unsigned int
 ya_rand_init(unsigned int seed)
 {
+  unsigned int generated_seed;
   int i;
   if (seed == 0)
     {
@@ -100,6 +101,7 @@ ya_rand_init(unsigned int seed)
       /* ignore overflow */
       seed = (999*tp.tv_sec) + (1001*tp.tv_usec) + (1003 * getpid());
     }
+  generated_seed = seed;
 
   a[0] += seed;
   for (i = 1; i < VectorSize; i++)
@@ -110,4 +112,5 @@ ya_rand_init(unsigned int seed)
 
   i1 = a[0] % VectorSize;
   i2 = (i1 + 024) % VectorSize;
+  return generated_seed;
 }

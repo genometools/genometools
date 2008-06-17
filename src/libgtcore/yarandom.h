@@ -22,7 +22,7 @@
 #undef RAND_MAX
 
 extern unsigned int ya_random (void);
-extern void ya_rand_init (unsigned int);
+extern unsigned int ya_rand_init (unsigned int);
 
 #define RAND_MAX   0x7FFFFFFF
 #define random()   ((long) (ya_random() & RAND_MAX))
