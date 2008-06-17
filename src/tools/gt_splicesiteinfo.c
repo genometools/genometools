@@ -60,7 +60,7 @@ static OPrval parse_options(int *parsed_args,
 
 int gt_splicesiteinfo(int argc, const char **argv, Error *err)
 {
-  GenomeStream *gff3_in_stream,
+  GenomeStream *gff3_in_stream = NULL,
                *add_introns_stream = NULL,
                *splice_site_info_stream = NULL;
   GenomeNode *gn;

@@ -781,7 +781,7 @@ test: all
 	bin/gt -test
 	cd testsuite && env -i GT_MEM_BOOKKEEPING=on MAKE=$(MAKE) PATH=$(PATH) \
           CCACHE_DISABLE=yes HOME=$(HOME) \
-          ruby -I. testsuite.rb \
+          $(RUBY) -I. testsuite.rb \
           -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin -cur $(CURDIR) \
           -gtruby $(CURDIR)/gtruby $(STEST_FLAGS)
 
