@@ -33,6 +33,7 @@
 #include "libgtcore/ma.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
+#include "libgtcore/yarandom.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/luahelper.h"
 #include "libgtlua/gt_lua.h"
@@ -46,6 +47,7 @@ struct GTR {
   bool test,
        interactive,
        debug;
+  unsigned int seed;
   Str *testspacepeak;
   Toolbox *tools;
   Hashtable *unit_tests;
@@ -136,6 +138,11 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   option_parser_add_option(op, o);
   o = option_new_debug(&gtr->debug);
   option_parser_add_option(op, o);
+  o = option_new_uint("seed", "set seed for random number generator manually\n"
+                      "0 generates a seed from current time and process id",
+                      &gtr->seed, 0);
+  option_is_development_option(o);
+  option_parser_add_option(op, o);
   o = option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
                           "file", gtr->testspacepeak);
   option_is_development_option(o);
@@ -201,6 +208,9 @@ static int run_tests(GTR *gtr, Error *err)
   ensure(had_err, sizeof (long long) == 8);
   ensure(had_err, sizeof (unsigned long long) == 8);
 
+  /* show seed */
+  printf("seed=%u\n", gtr->seed);
+
   if (gtr->unit_tests) {
     had_err = hashtable_foreach_ao(gtr->unit_tests, run_test, &test_err, err);
     assert(!had_err); /* cannot happen, run_test() is sane */
@@ -221,6 +231,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
   assert(gtr);
   if (gtr->debug)
     log_enable();
+  gtr->seed = ya_rand_init(gtr->seed);
   if (gtr->test) {
     return run_tests(gtr, err);
   }

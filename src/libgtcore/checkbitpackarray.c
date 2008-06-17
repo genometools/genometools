@@ -23,6 +23,7 @@
 #include "libgtcore/bitpackarray.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/log.h"
+#include "libgtcore/yarandom.h"
 
 enum {
 /*   MAX_RND_NUMS = 10, */
@@ -32,11 +33,7 @@ enum {
 int bitPackArray_unit_test(Error *err)
 {
   struct BitPackArray *bitStore = NULL;
-  unsigned long seedval;
-  struct timeval seed;
   int had_err = 0;
-  gettimeofday(&seed, NULL);
-  srandom(seedval = seed.tv_sec + seed.tv_usec);
   {
     uint32_t *randSrc = NULL; /*< create random ints here for input as bit
                                *  store */
@@ -51,7 +48,7 @@ int bitPackArray_unit_test(Error *err)
     else
       mask = ~((~(uint32_t)0)<<bits);
 
-    log_log("seedval = %lu, numRnd=%lu\n", seedval, (long unsigned)numRnd);
+    log_log("numRnd=%lu\n", (long unsigned)numRnd);
     randSrc = ma_malloc(sizeof (uint32_t)*numRnd);
     bitStore = newBitPackArray(bits, numRnd);
     randCmp = ma_malloc(sizeof (uint32_t)*numRnd);
@@ -68,8 +65,8 @@ int bitPackArray_unit_test(Error *err)
       if (had_err)
       {
         log_log("bsStoreUInt32/bpaGetUInt32: "
-                "Expected %"PRIu32", got %"PRIu32", seed = %lu, i = %lu,"
-                " bits=%u\n", v & mask, r, seedval, (unsigned long)i, bits);
+                "Expected %"PRIu32", got %"PRIu32", i = %lu, bits=%u\n",
+                v & mask, r, (unsigned long)i, bits);
         ma_free(randSrc);
         ma_free(randCmp);
         deleteBitPackArray(bitStore);
@@ -121,9 +118,9 @@ int bitPackArray_unit_test(Error *err)
       if (had_err)
       {
         log_log("bsStoreUInt64/bpaGetUInt64: "
-                "Expected %llu, got %llu, seed = %lu, i = %lu, bits=%u\n",
+                "Expected %llu, got %llu, i = %lu, bits=%u\n",
                 (unsigned long long)(v & mask),
-                (unsigned long long)r, seedval, (unsigned long)i, bits);
+                (unsigned long long)r, (unsigned long)i, bits);
         ma_free(randSrc);
         ma_free(randCmp);
         deleteBitPackArray(bitStore);

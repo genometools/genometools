@@ -19,6 +19,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "libgtcore/mathsupport.h"
+#include "libgtcore/yarandom.h"
 
 #define EPSILON  0.0000000000001
 
@@ -47,7 +48,7 @@ unsigned long rand_max(unsigned long maximal_value)
 {
   unsigned long r;
   assert(maximal_value);
-  r = ((double) rand() / ((double) RAND_MAX + 1) * (maximal_value + 1));
+  r = ((double) random() / ((double) RAND_MAX + 1) * (maximal_value + 1));
   assert(r <= maximal_value);
   return r;
 }
@@ -56,7 +57,7 @@ double rand_max_double(double maximal_value)
 {
   double r;
   assert(maximal_value);
-  r = ((double) rand() / RAND_MAX) * maximal_value; /* XXX */
+  r = ((double) random() / RAND_MAX) * maximal_value; /* XXX */
   assert(r >= 0.0 && r <= maximal_value);
   return r;
 }
@@ -64,7 +65,7 @@ double rand_max_double(double maximal_value)
 double rand_0_to_1(void)
 {
   double r;
-  r = (double) rand() / RAND_MAX;
+  r = (double) random() / RAND_MAX;
   assert(r >= 0.0 && r <= 1.0);
   return r;
 }

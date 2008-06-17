@@ -22,6 +22,7 @@
 #include "libgtcore/dynalloc.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/mathsupport.h"
 #include "libgtcore/range.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
@@ -268,7 +269,7 @@ int array_unit_test(Error *err)
   int_array_test = ma_malloc(MAX_SIZE * sizeof (int));
 
   for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
-    size = ((double) rand() / RAND_MAX) * MAX_SIZE;
+    size = rand_max(MAX_SIZE);
 
     array_reset(char_array);
     array_set_size(int_array, 0);
@@ -277,8 +278,8 @@ int array_unit_test(Error *err)
     ensure(had_err, array_size(int_array) == 0);
 
     for (i = 0; !had_err && i < size; i++) {
-      cc = ((double) rand() / RAND_MAX) * CHAR_MAX;
-      ci = ((double) rand() / RAND_MAX) * INT_MAX;
+      cc = rand_max(CHAR_MAX);
+      ci = rand_max(INT_MAX);
 
       array_add(char_array, cc);
       array_add(int_array, ci);

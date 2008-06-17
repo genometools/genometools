@@ -20,6 +20,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/mathsupport.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/xansi.h"
@@ -339,7 +340,7 @@ int bittab_unit_test(Error *err)
   error_check(err);
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
-    size = ((double) rand() / RAND_MAX) * MAX_SIZE + 1;
+    size = rand_max(MAX_SIZE) + 1;
     b = bittab_new(size);
     tmp = bittab_new(size);
     and = bittab_new(size);

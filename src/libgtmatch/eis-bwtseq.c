@@ -22,6 +22,7 @@
 #include "libgtcore/log.h"
 #include "libgtcore/str.h"
 #include "libgtcore/unused.h"
+#include "libgtcore/yarandom.h"
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-map.pr"

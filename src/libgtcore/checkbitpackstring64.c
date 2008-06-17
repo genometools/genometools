@@ -31,6 +31,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/yarandom.h"
 
 enum {
 /*   MAX_RND_NUMS = 10, */
@@ -82,17 +83,10 @@ bitPackStringInt64_unit_test(Error *err)
   unsigned *numBitsList = NULL;
   size_t i, numRnd;
   BitOffset offsetStart, offset;
-  unsigned long seedval;
   int had_err = 0;
-  {
-    struct timeval seed;
-    gettimeofday(&seed, NULL);
-    seedval = seed.tv_sec + seed.tv_usec;
-    srandom(seedval);
-  }
   offset = offsetStart = random()%(sizeof (uint64_t) * CHAR_BIT);
   numRnd = random() % (MAX_RND_NUMS + 1);
-  log_log("seedval = %lu, offset=%lu, numRnd=%lu\n", seedval,
+  log_log("offset=%lu, numRnd=%lu\n",
           (long unsigned)offsetStart, (long unsigned)numRnd);
   {
     BitOffset numBits = sizeof (uint64_t) * CHAR_BIT * numRnd + offsetStart;
@@ -123,9 +117,8 @@ bitPackStringInt64_unit_test(Error *err)
     ensure(had_err, r == v);
     if (had_err)
     {
-      log_log("Expected %"PRIu64", got %"PRIu64
-              ", seed = %lu, i = %lu\n",
-              v, r, seedval, (unsigned long)i);
+      log_log("Expected %"PRIu64", got %"PRIu64", i = %lu\n",
+              v, r, (unsigned long)i);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
@@ -147,8 +140,8 @@ bitPackStringInt64_unit_test(Error *err)
       ensure(had_err, lowBit == (r = bsGetBit(bitStore, --i)));
       if (had_err)
       {
-        log_log("Expected %d, got %d, seed = %lu, i = %llu\n",
-                    lowBit, (int)r, seedval, (unsigned long long)i);
+        log_log("Expected %d, got %d, i = %llu\n",
+                lowBit, (int)r, (unsigned long long)i);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -169,8 +162,7 @@ bitPackStringInt64_unit_test(Error *err)
     ensure(had_err, r == v);
     if (had_err)
     {
-      log_log("Expected %"PRIu64", got %"PRIu64
-              ", seed = %lu\n", v, r, seedval);
+      log_log("Expected %"PRIu64", got %"PRIu64"\n", v, r);
       freeResourcesAndReturn(had_err);
     }
     for (i = 0; i < numBits; ++i)
@@ -179,8 +171,7 @@ bitPackStringInt64_unit_test(Error *err)
     ensure(had_err, r == (v = (~v & mask)));
     if (had_err)
     {
-      log_log("Expected %"PRIu64", got %"PRIu64
-              ", seed = %lu\n", v, r, seedval);
+      log_log("Expected %"PRIu64", got %"PRIu64"\n", v, r);
       freeResourcesAndReturn(had_err);
     }
     log_log("passed\n");
@@ -210,10 +201,10 @@ bitPackStringInt64_unit_test(Error *err)
         {
           log_log("Expected v0 %s v1, got v0 %s v1,\n for v0=%"
                   PRIu64" and v1=%"PRIu64",\n"
-                  "seed = %lu, i = %lu, bits0=%u, bits1=%u\n",
+                  "i = %lu, bits0=%u, bits1=%u\n",
                   (v0 > v1?">":(v0 < v1?"<":"==")),
                   (result > 0?">":(result < 0?"<":"==")), v0, v1,
-                  seedval, (unsigned long)i, bits0, bits1);
+                  (unsigned long)i, bits0, bits1);
           freeResourcesAndReturn(had_err);
         }
         offset += bits0;
@@ -240,8 +231,7 @@ bitPackStringInt64_unit_test(Error *err)
       if (had_err)
       {
         log_log("Expected %"PRIu64", got %"PRIu64",\n"
-                "seed = %lu, i = %lu, bits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
+                "i = %lu, bits=%u\n", v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -257,9 +247,9 @@ bitPackStringInt64_unit_test(Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log( "Expected %"PRIu64", got %"PRIu64",\n seed = %lu,"
+        log_log( "Expected %"PRIu64", got %"PRIu64",\n"
                 " i = %lu, bits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
+                v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -271,9 +261,9 @@ bitPackStringInt64_unit_test(Error *err)
                                  numBits, 1, &r);
       if (r != v)
       {
-        log_log("Expected %"PRIu64", got %"PRIu64", seed = %lu,"
+        log_log("Expected %"PRIu64", got %"PRIu64","
                 " one value extraction\n",
-                v, r, seedval);
+                v, r);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -298,8 +288,8 @@ bitPackStringInt64_unit_test(Error *err)
     if (had_err)
     {
       log_log("Expected %"PRId64", got %"PRId64",\n"
-                  "seed = %lu, i = %lu, bits=%u\n",
-                  v, r, seedval, (unsigned long)i, bits);
+                  "i = %lu, bits=%u\n",
+                  v, r, (unsigned long)i, bits);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
@@ -323,8 +313,8 @@ bitPackStringInt64_unit_test(Error *err)
       if (had_err)
       {
         log_log("Expected %"PRId64", got %"PRId64",\n"
-                    "seed = %lu, i = %lu, numBits=%u\n",
-                    v, r, seedval, (unsigned long)i, numBits);
+                    "i = %lu, numBits=%u\n",
+                    v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -341,9 +331,8 @@ bitPackStringInt64_unit_test(Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log("Expected %"PRId64", got %"PRId64
-                ", seed = %lu, i = %lu\n",
-                v, r, seedval, (unsigned long)i);
+        log_log("Expected %"PRId64", got %"PRId64", i = %lu\n",
+                v, r, (unsigned long)i);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -358,8 +347,8 @@ bitPackStringInt64_unit_test(Error *err)
       if (had_err)
       {
         log_log("Expected %"PRId64", got %"PRId64
-                ", seed = %lu, one value extraction\n",
-                v, r, seedval);
+                ", one value extraction\n",
+                v, r);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -386,8 +375,8 @@ bitPackStringInt64_unit_test(Error *err)
       if (had_err)
       {
         log_log("Expected %"PRIu64", got %"PRIu64",\n"
-                "seed = %lu, i = %lu, bits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
+                "i = %lu, bits=%u\n",
+                v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -407,9 +396,9 @@ bitPackStringInt64_unit_test(Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log( "Expected %"PRIu64", got %"PRIu64",\n seed = %lu,"
+        log_log( "Expected %"PRIu64", got %"PRIu64",\n"
                 " i = %lu, bits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
+                v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -424,9 +413,9 @@ bitPackStringInt64_unit_test(Error *err)
                                      numBitsList, &r);
       if (r != v)
       {
-        log_log("Expected %"PRIu64", got %"PRIu64", seed = %lu,"
+        log_log("Expected %"PRIu64", got %"PRIu64", "
                 " one value extraction\n",
-                v, r, seedval);
+                v, r);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -455,8 +444,8 @@ bitPackStringInt64_unit_test(Error *err)
       if (had_err)
       {
         log_log("Expected %"PRId64", got %"PRId64",\n"
-                    "seed = %lu, i = %lu, numBits=%u\n",
-                    v, r, seedval, (unsigned long)i, numBits);
+                    "i = %lu, numBits=%u\n",
+                    v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -478,9 +467,8 @@ bitPackStringInt64_unit_test(Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log("Expected %"PRId64", got %"PRId64
-                ", seed = %lu, i = %lu\n",
-                v, r, seedval, (unsigned long)i);
+        log_log("Expected %"PRId64", got %"PRId64", i = %lu\n",
+                v, r, (unsigned long)i);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -498,8 +486,8 @@ bitPackStringInt64_unit_test(Error *err)
       if (had_err)
       {
         log_log("Expected %"PRId64", got %"PRId64
-                ", seed = %lu, one value extraction\n",
-                v, r, seedval);
+                ", one value extraction\n",
+                v, r);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -546,9 +534,9 @@ bitPackStringInt64_unit_test(Error *err)
       if (had_err)
       {
         log_log("Expected equality on bitstrings\n"
-                    "seed = %lu, offset = %llu, destOffset = %llu,"
+                    "offset = %llu, destOffset = %llu,"
                     " numCopyBits=%llu\n",
-                    seedval, (unsigned long long)offset,
+                    (unsigned long long)offset,
                     (unsigned long long)destOffset,
                     (unsigned long long)numCopyBits);
         /* FIXME: implement bitstring output function */
@@ -597,8 +585,8 @@ bitPackStringInt64_unit_test(Error *err)
           if (had_err)
           {
             log_log( "Expected %"PRId64", got %"PRId64",\n"
-                     "seed = %lu, i = %lu, numBits=%u\n",
-                     v, r, seedval, (unsigned long)i, numBits);
+                     "i = %lu, numBits=%u\n",
+                     v, r, (unsigned long)i, numBits);
             freeResourcesAndReturn(had_err);
           }
           offset += numBits;
@@ -610,8 +598,8 @@ bitPackStringInt64_unit_test(Error *err)
           if (had_err)
           {
             log_log("Expected %"PRId64", got %"PRId64",\n"
-                    "seed = %lu, i = %lu, numBits=%u\n",
-                    cmpVal, r, seedval, (unsigned long)i, numBits);
+                    "i = %lu, numBits=%u\n",
+                    cmpVal, r, (unsigned long)i, numBits);
             freeResourcesAndReturn(had_err);
           }
           offset += numBits;
@@ -624,8 +612,8 @@ bitPackStringInt64_unit_test(Error *err)
           if (had_err)
           {
             log_log("Expected %"PRId64", got %"PRId64",\n"
-                    "seed = %lu, i = %lu, numBits=%u\n",
-                    v, r, seedval, (unsigned long)i, numBits);
+                    "i = %lu, numBits=%u\n",
+                    v, r, (unsigned long)i, numBits);
             freeResourcesAndReturn(had_err);
           }
           offset += numBits;
@@ -671,8 +659,8 @@ bitPackStringInt64_unit_test(Error *err)
       if (had_err)
       {
         log_log("Expected %llu, got %llu,\n"
-                "seed = %lu, numBits=%u\n", (unsigned long long)bitCountRef,
-                (unsigned long long)bitCountCmp, seedval, numBits);
+                "numBits=%u\n", (unsigned long long)bitCountRef,
+                (unsigned long long)bitCountCmp, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;

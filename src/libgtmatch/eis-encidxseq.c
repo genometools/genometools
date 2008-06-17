@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "libgtcore/yarandom.h"
+
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-map.pr"
