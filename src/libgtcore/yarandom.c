@@ -6,7 +6,7 @@
  * the above copyright notice appear in all copies and that both that
  * copyright notice and this permission notice appear in supporting
  * documentation.  No representations are made about the suitability of this
- * software for any purpose.  It is provided "as is" without express or 
+ * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  */
 
@@ -24,15 +24,15 @@
    ---------------------------
    Note: xlockmore 4.03a10 uses this very simple RNG:
 
-	if ((seed = seed % 44488 * 48271 - seed / 44488 * 3399) < 0)
-	  seed += 2147483647;
-	return seed-1;
+        if ((seed = seed % 44488 * 48271 - seed / 44488 * 3399) < 0)
+          seed += 2147483647;
+        return seed-1;
 
    of which it says
 
-	``Dr. Park's algorithm published in the Oct. '88 ACM  "Random Number
-	  Generators: Good Ones Are Hard To Find" His version available at
-	  ftp://cs.wm.edu/pub/rngs.tar Present form by many authors.''
+        ``Dr. Park's algorithm published in the Oct. '88 ACM  "Random Number
+          Generators: Good Ones Are Hard To Find" His version available at
+          ftp://cs.wm.edu/pub/rngs.tar Present form by many authors.''
 
    Karlton says: ``the usual problem with that kind of RNG turns out to
    be unexepected short cycles for some word lengths.''
@@ -55,7 +55,6 @@
 
 #include "yarandom.h"
 # undef ya_rand_init
-
 
 /* The following 'random' numbers are taken from CRC, 18th Edition, page 622.
    Each array element was taken from the corresponding line in the table,
