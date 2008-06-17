@@ -1,8 +1,8 @@
-All code of GenomeTools except src/libgtcore/msort.[ch] and src/external/*
-is released under the following ICS license. It is functionally equivalent to a
-two-term BSD copyright with language removed that is made unnecessary by the
-Berne convention. See http://openbsd.org/policy.html for more information on
-copyrights.
+All code of GenomeTools except src/libgtcore/msort.[ch],
+src/libgtcore/yarandom.[ch], and src/external/* is released under the following
+ICS license. It is functionally equivalent to a two-term BSD copyright with
+language removed that is made unnecessary by the Berne convention.
+See http://openbsd.org/policy.html for more information on copyrights.
 
 Copyright (c) 2003-2008 Gordon Gremme, Stefan Kurtz, and CONTRIBUTORS
 Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
@@ -24,6 +24,20 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 The module src/libgtcore/msort.[ch] is covered by the GNU Lesser General Public
 License 2.1 given in the file doc/lgpl.txt.
+
+--------------------------------------------------------------------------------
+
+The module src/libgtcore/yarandom.[ch] is covered by the following license:
+
+Copyright (c) 1997, 1998, 2003 by Jamie Zawinski <jwz@jwz.org>
+
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.  No representations are made about the suitability of this
+software for any purpose.  It is provided "as is" without express or
+implied warranty.
 
 --------------------------------------------------------------------------------
 
