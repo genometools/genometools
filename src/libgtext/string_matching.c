@@ -114,6 +114,9 @@ unsigned long string_matching_kmp(const char *s, unsigned long n,
         cpl++;                          /* case (2c) */
     }
   }
+  /* do not miss match at the last possible position */
+  if (cpl == m && process_match)
+    process_match(j, data);
   ma_free(prefixtab);
   return cpl;
 }
@@ -225,8 +228,10 @@ int string_matching_unit_test(Error *err)
     m = rand_max(MAX_PATTERN_LENGTH);
     for (j = 0; j < n; j++)
       s[j] = rand_char();
+    s[n] = '\0';
     for (j = 0; j < m; j++)
       p[j] = rand_char();
+    p[m] = '\0';
     /* matching (first match) */
     brute_force_match = UNDEF_ULONG;
     bmh_match = UNDEF_ULONG;
