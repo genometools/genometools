@@ -204,7 +204,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 int gt_nussinov_rna_fold(int argc, const char **argv, Error *err)
 {
   unsigned long i, j, rna_length;
-  unsigned int l_min;
+  unsigned int l_min = 0;
   char *rna_sequence = NULL;
   int parsed_args, rval, had_err = 0;
   Alpha *dna_alpha;

@@ -775,6 +775,8 @@ obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
 	indent $@
 
+RUBY:=ruby
+
 test: all
 	bin/gt -test
 	cd testsuite && env -i GT_MEM_BOOKKEEPING=on MAKE=$(MAKE) PATH=$(PATH) \

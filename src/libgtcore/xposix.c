@@ -62,9 +62,11 @@ void xglob(const char *pattern, int flags,
       case GLOB_NOSPACE:
         fprintf(stderr, "out of memory");
         break;
+#ifdef GLOB_NOMATCH
       case GLOB_NOMATCH:
         fprintf(stderr, "pattern not found");
         break;
+#endif
       default:
         fprintf(stderr, "reason unknown");
     }

@@ -169,9 +169,9 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   double score_value;
   Phase phase_value;
   Range range;
-  char *id = NULL, *seqid = NULL, *source = NULL, *type, *start, *end, *score,
-       *strand = NULL, *phase = NULL, *attributes = NULL, *token, *tmp_token,
-       **tokens;
+  char *id = NULL, *seqid = NULL, *source = NULL, *type = NULL, *start = NULL,
+       *end = NULL, *score = NULL, *strand = NULL, *phase = NULL,
+       *attributes = NULL, *token, *tmp_token, **tokens;
   const char *filename;
   bool is_child = false, seqid_str_created = false;
   unsigned long i;
@@ -454,7 +454,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   char *tmpline, *tmplineend, *seqid = NULL;
   GenomeNode *gn;
   Str *changed_seqid = NULL;
-  SimpleSequenceRegion *ssr;
+  SimpleSequenceRegion *ssr = NULL;
   Range range;
   const char *filename;
   int rval, had_err = 0;

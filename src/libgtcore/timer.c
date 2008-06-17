@@ -65,9 +65,9 @@ void timer_show(Timer *t, FILE *fp)
     timer_stop(t);
   assert(t->state == TIMER_STOPPED);
   fprintf(fp, "%lds real %lds user %lds system\n",
-          t->stop_tv.tv_sec - t->start_tv.tv_sec,
-          t->stop_ru.ru_utime.tv_sec - t->stop_ru.ru_utime.tv_sec,
-          t->stop_ru.ru_stime.tv_sec - t->stop_ru.ru_stime.tv_sec);
+          (long)(t->stop_tv.tv_sec - t->start_tv.tv_sec),
+          (long)(t->stop_ru.ru_utime.tv_sec - t->stop_ru.ru_utime.tv_sec),
+          (long)(t->stop_ru.ru_stime.tv_sec - t->stop_ru.ru_stime.tv_sec));
 }
 
 void timer_del(Timer *t)

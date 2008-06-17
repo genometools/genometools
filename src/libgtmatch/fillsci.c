@@ -83,7 +83,7 @@ int fasta2sequencekeyvalues(
 {
   FastaBuffer *fb = NULL;
   Uchar charcode;
-  Seqpos pos;
+  Seqpos pos = 0;
   int retval;
   bool specialprefix = true;
   Seqpos lastspeciallength = 0;
