@@ -28,8 +28,8 @@
 extern unsigned int ya_random (void);
 extern void ya_rand_init (unsigned int);
 
-#define random()   ya_random()
-#define RAND_MAX   0xFFFFFFFF
+#define RAND_MAX   0x7FFFFFFF
+#define random()   ((long) (ya_random() & RAND_MAX))
 
 /*#define srandom(i) ya_rand_init(0)*/
 
