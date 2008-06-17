@@ -50,14 +50,7 @@
    Irix 6.2; Indy r5k; SGI cc version 6; gcc version 2.7.2.1.
  */
 
-
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>  /* for getpid() */
-#endif
+#include <unistd.h>  /* for getpid() */
 #include <sys/time.h> /* for gettimeofday() */
 
 #include "yarandom.h"
@@ -103,12 +96,8 @@ ya_rand_init(unsigned int seed)
   if (seed == 0)
     {
       struct timeval tp;
-#ifdef GETTIMEOFDAY_TWO_ARGS
       struct timezone tzp;
       gettimeofday(&tp, &tzp);
-#else
-      gettimeofday(&tp);
-#endif
       /* ignore overflow */
       seed = (999*tp.tv_sec) + (1001*tp.tv_usec) + (1003 * getpid());
     }
