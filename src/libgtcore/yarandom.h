@@ -21,10 +21,6 @@
 #undef frand
 #undef RAND_MAX
 
-#ifdef VMS
-# include "vms-gtod.h"
-#endif
-
 extern unsigned int ya_random (void);
 extern void ya_rand_init (unsigned int);
 
