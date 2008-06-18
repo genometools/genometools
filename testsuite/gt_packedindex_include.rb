@@ -35,31 +35,31 @@ def runAndCheckPackedIndex(indexName,dbFiles, extraParams=Hash.new)
   #  puts('timeout: ', params[:timeOuts][:bdxcreat])
   if !extraParams.has_key?(:useSuftabTranslation) ||
       !extraParams[:useSuftabTranslation]
-    run_test((["#{$bin}gt", 'packedindex', 'mkindex'] +
+    run_test((["#{$bin}gt", '-debug', 'packedindex', 'mkindex'] +
               paramList(params[:create]) + paramList(params[:bdx]) +
               ['-db'] + dbFiles).join(' '),
              :maxtime => params[:timeOuts][:bdxcreat])
   end
-  run_test((["#{$bin}gt", 'suffixerator'] +
+  run_test((["#{$bin}gt", '-debug', 'suffixerator'] +
             paramList(params[:create]) +
             ['-bwt', '-suf', '-db'] + dbFiles).join(' '),
            :maxtime => params[:timeOuts][:suffixerator])
   if extraParams.has_key?(:useSuftabTranslation) &&
       extraParams[:useSuftabTranslation]
-    run_test((["#{$bin}gt", 'packedindex', 'trsuftab'] +
+    run_test((["#{$bin}gt", '-debug', 'packedindex', 'trsuftab'] +
               paramList(params[:bdx]) + [indexName]).join(' '),
              :maxtime => params[:timeOuts][:trsuftab])
   end
   if extraParams.has_key?(:mkctxmap) &&
       extraParams[:mkctxmap]
-    run_test((["#{$bin}gt", 'packedindex', 'mkctxmap'] +
+    run_test((["#{$bin}gt", '-debug', 'packedindex', 'mkctxmap'] +
               paramList(params[:mkctxmap]) + [indexName]).join(' '),
              :maxtime => params[:timeOuts][:mkctxmap])    
   end
-  run_test(["#{$bin}gt", 'packedindex', 'chkintegrity', '-ticks', '1000',
-            indexName].join(' '),
+  run_test(["#{$bin}gt", '-debug', 'packedindex', 'chkintegrity',
+            '-ticks', '1000', indexName].join(' '),
            :maxtime => params[:timeOuts][:chkintegrity])
-  run_test((["#{$bin}gt", 'packedindex', 'chksearch'] +
+  run_test((["#{$bin}gt", '-debug', 'packedindex', 'chksearch'] +
             paramList(params[:chksearch]) + [indexName]).join(' '),
            :maxtime => params[:timeOuts][:chksearch])
 end

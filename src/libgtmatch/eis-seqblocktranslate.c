@@ -203,9 +203,11 @@ initCompositionList(struct compList *newList, unsigned blockSize,
                                newList->catCompsPerms, permOffset, blockSize,
                                alphabetSize, newList->bitsPerSymbol))
         initCompositionListErrRet();
-#ifndef NDEBUG
+#if EIS_DEBUG > 1 && !defined(NDEBUG)
       log_log("%lu",
               (unsigned long)newList->permutations[cmpIdx].numPermutations);
+#endif
+#ifndef NDEBUG
       permSum += newList->permutations[cmpIdx].numPermutations;
 #endif
       permOffset += newList->permutations[cmpIdx].numPermutations * bitsPerPerm;
@@ -220,7 +222,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
     } while (1);
     /* verify that the last composition is indeed the lexically maximally */
     assert(composition[0] == blockSize);
-#ifndef NDEBUG
+#if EIS_DEBUG > 1 && !defined(NDEBUG)
     log_log("permSum=%lu, alphabetSize=%lu, blockSize=%d, "
             "pow(alphabetSize, blockSize)=%f",
             (unsigned long)permSum, (unsigned long)alphabetSize, blockSize,

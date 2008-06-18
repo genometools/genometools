@@ -18,7 +18,7 @@ end
   Keywords "gt_csa"
   Test do
     run_test "#{$bin}gt -debug csa #{$testdata}gt_csa_prob_#{i}.in"
-    run "diff #{$last_stderr} #{$testdata}gt_csa_prob_#{i}.debug"
+    run "tail -n +2 #{$last_stderr} | diff - #{$testdata}gt_csa_prob_#{i}.debug"
   end
 end
 

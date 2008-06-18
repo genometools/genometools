@@ -232,6 +232,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
   if (gtr->debug)
     log_enable();
   gtr->seed = ya_rand_init(gtr->seed);
+  log_log("seed=%u", gtr->seed);
   if (gtr->test) {
     return run_tests(gtr, err);
   }
