@@ -26,7 +26,8 @@
 #include "libgtcore/option.h"
 
 #include "libgtmatch/eis-encidxseq-param.h"
-#include "libgtmatch/eis-bwtseq-context-param.h"
+/* #include "libgtmatch/eis-bwtseq-context-param.h" not neccessary remove
+ * Stefan */
 
 /**
  * all parameters for building the BWT sequence index

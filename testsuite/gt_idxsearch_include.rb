@@ -30,11 +30,8 @@ def checkgreedyfwdmat(queryfile,ms)
   run "diff tmp.pck tmp.fmi"
 end
 
-# XXX: check why tags from shreddered fragmenets are not correctly processed
-# XXX: check why tagerator segfaults if index does not exist.
-
 def checktagerator(queryfile,ms)
-  run "#{$bin}gt shredder -minlength 12 -maxlength 15 #{queryfile}"
+  run "#{$bin}gt shredder -minlength 12 -maxlength 15 #{queryfile} | #{$bin}gt seqfilter -minlength 12 -"
   run "sed -e \'s/^>.*/>/\' #{$last_stdout}"
   run "mv #{$last_stdout} patternfile"
   run_test "#{$bin}gt tagerator -rw -cmp -ii sfx -t patternfile"
@@ -47,7 +44,7 @@ def createandcheckgreedyfwdmat(reffile,queryfile)
   run "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
            "-db #{reffile}"
   run "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
-           "-dna -pl -bsize 10 -locfreq 32 -dir rev"
+           "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev"
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
 end
@@ -73,7 +70,7 @@ allfiles.each do |reffile|
   Keywords "gt_packedindex small"
   Test do
     run_test "#{$bin}gt packedindex mkindex -tis -indexname pck " +
-             " -db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
+             "-sprank -db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
              " -locfreq 32 -dir rev", 
              :maxtime => 600
   end
