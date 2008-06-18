@@ -91,7 +91,7 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
 
   /* -overlap */
   option = option_new_range("overlap", "filter out all features which do not "
-                            "overlap with the given range.",
+                            "overlap with the given range",
                             &arguments->overlap_range, NULL);
   option_parser_add_option(op, option);
 
