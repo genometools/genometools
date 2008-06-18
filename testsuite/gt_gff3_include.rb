@@ -276,11 +276,32 @@ Test do
   run "diff #{$last_stdout} #{$testdata}addintrons.out"
 end
 
-Name "gt gff3 test option -offset"
-Keywords "gt_gff3"
+Name "gt gff3 test option -offset 1000"
+Keywords "gt_gff3 offset"
 Test do
   run_test "#{$bin}gt gff3 -offset 1000 #{$testdata}gt_gff3_offset_test.gff3"
-  run "diff #{$last_stdout} #{$testdata}gt_gff3_offset_test.out"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_offset_test.out1000"
+end
+
+Name "gt gff3 test option -offset -1"
+Keywords "gt_gff3 offset"
+Test do
+  run_test "#{$bin}gt gff3 -offset -1 #{$testdata}gt_gff3_offset_test.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_offset_test.out-1"
+end
+
+Name "gt gff3 test option -offset -999"
+Keywords "gt_gff3 offset"
+Test do
+  run_test "#{$bin}gt gff3 -offset -999 #{$testdata}gt_gff3_offset_test.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_offset_test.out-999"
+end
+
+Name "gt gff3 test option -offset -1001 (overflow)"
+Keywords "gt_gff3 offset"
+Test do
+  run_test("#{$bin}gt gff3 -offset -1001 #{$testdata}gt_gff3_offset_test.gff3",
+           :retval => 1)
 end
 
 Name "gt gff3 test option -offsetfile"

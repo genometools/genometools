@@ -1,0 +1,5 @@
+##gff-version   3
+##sequence-region   seq1 999 8999
+##sequence-region   seq2 999 8999
+seq1	.	gene	999	8999	.	+	.	.
+seq2	.	gene	999	8999	.	+	.	.
