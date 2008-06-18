@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include "libgtcore/minmax.h"
 #include "libgtcore/queue.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
@@ -27,7 +28,8 @@ struct FilterVisitor {
   Queue *genome_node_buffer;
   Str *seqid,
       *typefilter;
-  Range overlap_range;
+  Range contain_range,
+        overlap_range;
   Strand strand;
   bool has_CDS;
   unsigned long max_gene_length,
@@ -58,11 +60,21 @@ static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,
   return 0;
 }
 
+static bool filter_contain_range(GenomeFeature *gf, Range contain_range)
+{
+  assert(gf);
+  if (contain_range.start != UNDEF_ULONG &&
+      !range_contains(contain_range, genome_node_get_range((GenomeNode*) gf))) {
+    return true;
+  }
+  return false;
+}
+
 static bool filter_overlap_range(GenomeFeature *gf, Range overlap_range)
 {
   assert(gf);
   if (overlap_range.start != UNDEF_ULONG &&
-      !range_overlap(genome_node_get_range((GenomeNode*) gf), overlap_range)) {
+      !range_overlap(overlap_range, genome_node_get_range((GenomeNode*) gf))) {
     return true;
   }
   return false;
@@ -128,6 +140,9 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
     filter_node = true;
 
   if (!filter_node)
+    filter_node = filter_contain_range(gf, fv->contain_range);
+
+  if (!filter_node)
     filter_node = filter_overlap_range(gf, fv->overlap_range);
 
   if (!filter_node)
@@ -156,6 +171,13 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   if (!str_length(filter_visitor->seqid) || /* no seqid was specified */
       !str_cmp(filter_visitor->seqid,    /* or seqids are equal */
                genome_node_get_seqid((GenomeNode*) sr))) {
+    if (filter_visitor->contain_range.start != UNDEF_ULONG) {
+      /* an contain range was defined -> update range of sequence region */
+      Range range = genome_node_get_range((GenomeNode*) sr);
+      range.start = MAX(range.start, filter_visitor->contain_range.start);
+      range.end = MIN(range.end, filter_visitor->contain_range.end);
+      genome_node_set_range((GenomeNode*) sr, range);
+    }
     queue_add(filter_visitor->genome_node_buffer, sr);
   }
   else
@@ -174,8 +196,8 @@ const GenomeVisitorClass* filter_visitor_class()
 }
 
 GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
-                                  Range overlap_range, Strand strand,
-                                  bool has_CDS,
+                                  Range contain_range, Range overlap_range,
+                                  Strand strand, bool has_CDS,
                                   unsigned long max_gene_length,
                                   unsigned long max_gene_num,
                                   double min_gene_score,
@@ -186,6 +208,7 @@ GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
   filter_visitor->genome_node_buffer = queue_new();
   filter_visitor->seqid = str_ref(seqid);
   filter_visitor->typefilter = str_ref(typefilter);
+  filter_visitor->contain_range = contain_range;
   filter_visitor->overlap_range = overlap_range;
   filter_visitor->strand = strand;
   filter_visitor->has_CDS = has_CDS;

@@ -1,9 +1,9 @@
-changes in version 1.1.2 (2008-05-13)
+changes in version 1.1.2 (2008-06-18)
 
 - new tool `gt fingerprint` has been added
 - new tool `gt shredder` has been added
 - `gt stat` shows number of CDSs and protein-coding genes
-- `gt filter` has new option -hascds
+- `gt filter` has new options -hascds and -contain
 - `gt splitfasta` has new options -splitdesc and -force
 
 

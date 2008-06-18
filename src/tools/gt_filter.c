@@ -33,7 +33,8 @@ typedef struct {
   Str *seqid,
       *typefilter,
       *strand_char;
-  Range overlap_range;
+  Range contain_range,
+        overlap_range;
   Strand strand;
   unsigned long max_gene_length,
                 max_gene_num;
@@ -70,7 +71,7 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
 {
   FilterArguments *arguments = tool_arguments;
   OptionParser *op;
-  Option *option;
+  Option *option, *contain_option, *overlap_option;
   assert(arguments);
 
   /* init */
@@ -89,11 +90,17 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
   option_is_development_option(option);
   option_parser_add_option(op, option);
 
+  /* -contain */
+  contain_option = option_new_range("contain", "filter out all features which "
+                                    "are not contained in the given range",
+                                    &arguments->contain_range, NULL);
+  option_parser_add_option(op, contain_option);
+
   /* -overlap */
-  option = option_new_range("overlap", "filter out all features which do not "
-                            "overlap with the given range",
-                            &arguments->overlap_range, NULL);
-  option_parser_add_option(op, option);
+  overlap_option = option_new_range("overlap", "filter out all features which "
+                                    "do not overlap with the given range",
+                                    &arguments->overlap_range, NULL);
+  option_parser_add_option(op, overlap_option);
 
   /* -strand */
   option = option_new_string(STRAND_OPT, "filter out all top-level features "
@@ -136,6 +143,9 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
   /* -v */
   option = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, option);
+
+  /* option exclusions */
+  option_exclude(contain_option, overlap_option);
 
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, arguments->ofi);
@@ -184,6 +194,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
   /* create a filter stream */
   filter_stream = filter_stream_new(gff3_in_stream, arguments->seqid,
                                     arguments->typefilter,
+                                    arguments->contain_range,
                                     arguments->overlap_range,
                                     arguments->strand,
                                     arguments->has_CDS,

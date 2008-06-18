@@ -129,3 +129,27 @@ Test do
            "#{$memcheck} #{$bin}gt stat", :maxtime => 20)
   run "diff #{$last_stdout} #{$testdata}gt_filter_encode.out"
 end
+
+Name "gt filter test 18 (-contain)"
+Keywords "gt_filter contain"
+Test do
+  run_test "#{$bin}gt filter -contain 1000 9000 " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_filter_test_contain.1000-9000"
+end
+
+Name "gt filter test 19 (-contain)"
+Keywords "gt_filter contain"
+Test do
+  run_test "#{$bin}gt filter -contain 1001 9000 " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_filter_test_contain.1001-9000"
+end
+
+Name "gt filter test 20 (-contain)"
+Keywords "gt_filter contain"
+Test do
+  run_test "#{$bin}gt filter -contain 1000 8999 " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_filter_test_contain.1000-8999"
+end

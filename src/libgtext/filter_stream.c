@@ -79,8 +79,8 @@ const GenomeStreamClass* filter_stream_class(void)
 
 GenomeStream* filter_stream_new(GenomeStream *in_stream,
                                 Str *seqid, Str *typefilter,
-                                Range overlap_range, Strand strand,
-                                bool has_CDS,
+                                Range contain_range, Range overlap_range,
+                                Strand strand, bool has_CDS,
                                 unsigned long max_gene_length,
                                 unsigned long max_gene_num,
                                 double min_gene_score,
@@ -92,6 +92,7 @@ GenomeStream* filter_stream_new(GenomeStream *in_stream,
   assert(in_stream);
   filter_stream->in_stream = genome_stream_ref(in_stream);
   filter_stream->filter_visitor = filter_visitor_new(seqid, typefilter,
+                                                     contain_range,
                                                      overlap_range, strand,
                                                      has_CDS,
                                                      max_gene_length,
