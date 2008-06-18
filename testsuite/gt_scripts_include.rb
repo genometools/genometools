@@ -95,7 +95,7 @@ Test do
 end
 
 Name "extract_swalign"
-Keywords "gt_scripts"
+Keywords "gt_scripts extract"
 Test do
   run_test "#{$bin}gt #{$testdata}../gtscripts/extract_swalign.lua #{$cur} " +
            "#{$testdata}BLOSUM62"
@@ -106,7 +106,7 @@ Test do
 end
 
 Name "extract_swalign -sol"
-Keywords "gt_scripts"
+Keywords "gt_scripts extract"
 Test do
   run_test "#{$bin}gt #{$testdata}../gtscripts/extract_swalign.lua -sol " +
            "#{$cur} #{$testdata}BLOSUM62"
@@ -117,7 +117,7 @@ Test do
 end
 
 Name "extract_affinealign"
-Keywords "gt_scripts"
+Keywords "gt_scripts extract"
 Test do
   run_test "#{$bin}gt #{$testdata}../gtscripts/extract_affinealign.lua #{$cur}"
   run "cd affinealign && ${MAKE:-make}"
@@ -127,7 +127,7 @@ Test do
 end
 
 Name "extract_linearalign"
-Keywords "gt_scripts"
+Keywords "gt_scripts extract"
 Test do
   run_test "#{$bin}gt #{$testdata}../gtscripts/extract_linearalign.lua #{$cur}"
   run "cd linearalign && ${MAKE:-make} test"
@@ -137,7 +137,7 @@ Test do
 end
 
 Name "extract_assemblegreedy"
-Keywords "gt_scripts"
+Keywords "gt_scripts extract"
 Test do
   run_test "#{$bin}gt #{$testdata}../gtscripts/extract_assemblegreedy.lua " +
            "#{$cur}"
@@ -148,7 +148,7 @@ Test do
 end
 
 Name "extract_assemblegreedy_scaffold"
-Keywords "gt_scripts"
+Keywords "gt_scripts extract"
 Test do
   run_test "#{$bin}gt " +
            "#{$testdata}../gtscripts/extract_assemblegreedy_scaffold.lua " +
@@ -160,7 +160,7 @@ Test do
 end
 
 Name "extract_consensus_sa"
-Keywords "gt_scripts"
+Keywords "gt_scripts extract"
 Test do
   run_test "#{$bin}gt " +
            "#{$testdata}../gtscripts/extract_consensus_sa.lua #{$cur}"
