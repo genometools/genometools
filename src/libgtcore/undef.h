@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -27,7 +27,7 @@
 #define UNDEF_INT        ~0
 #define UNDEF_UCHAR      UCHAR_MAX
 #define UNDEF_UINT       ~0U
-#define UNDEF_LONG       ~0L
+#define UNDEF_LONG       LONG_MIN
 #define UNDEF_ULONG      ~0UL
 
 #endif
