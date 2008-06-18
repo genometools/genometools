@@ -442,12 +442,14 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
   enum verifyBWTSeqErrCode retval = VERIFY_BWTSEQ_NO_ERROR;
   do
   {
-    Seqpos len;
+    Seqpos seqLen;
     assert(bwtSeq && projectName && err);
     error_check(err);
 
     initExtBitsRetrieval(&extBits);
-    if (mapsuffixarray(&suffixArray, &len,
+    extBitsAreInitialized = true;
+
+    if (mapsuffixarray(&suffixArray, &seqLen,
                        SARR_SUFTAB | SARR_ESQTAB, projectName, verbosity, err))
     {
       error_set(err, "Cannot load reference suffix array project with"
@@ -457,8 +459,8 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       break;
     }
     suffixArrayIsInitialized = true;
-    ++len;
-    if (BWTSeqLength(bwtSeq) != len)
+    ++seqLen;
+    if (BWTSeqLength(bwtSeq) != seqLen)
     {
       error_set(err, "length mismatch for suffix array project %s and "
                 "bwt sequence index", str_get(projectName));
@@ -470,7 +472,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
         && BWTSeqHasLocateInformation(bwtSeq))
     {
       Seqpos i;
-      for (i = 0; i < len && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
+      for (i = 0; i < seqLen && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
       {
         if (BWTSeqPosHasLocateInfo(bwtSeq, i, &extBits))
         {
@@ -520,7 +522,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       if ((checkFlags & VERIFY_BWTSEQ_LFMAPWALK)
           && (bwtSeq->featureToggles & BWTReversiblySorted))
       {
-        Seqpos i = len;
+        Seqpos i = seqLen;
         /* handle first symbol specially because the encodedsequence
          * will not return the terminator symbol */
         {
@@ -576,34 +578,50 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       fputs("Checking context regeneration.\n", stderr);
       {
         Seqpos i, start, subSeqLen,
-          maxSubSeqLen = MIN(MAX(MIN_CONTEXT_LEN, len/CONTEXT_FRACTION),
+          maxSubSeqLen = MIN(MAX(MIN_CONTEXT_LEN, seqLen/CONTEXT_FRACTION),
                              MAX_CONTEXT_LEN),
-          numTries = MIN(MAX_NUM_CONTEXT_CHECKS, MAX(2, len/CONTEXT_INTERVAL));
+          numTries = MIN(MAX_NUM_CONTEXT_CHECKS,
+                         MAX(2, seqLen/CONTEXT_INTERVAL));
         Symbol *contextBuf = ma_malloc(sizeof (Symbol) * MAX_CONTEXT_LEN);
         Encodedsequencescanstate *esr = newEncodedsequencescanstate();
         for (i = 0; i < numTries && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
         {
-          Seqpos i, end;
+          Seqpos j, end, inSubSeqLen;
           subSeqLen = random()%(maxSubSeqLen + 1);
-          start = random()%(len - subSeqLen + 1);
+          start = random()%(seqLen - subSeqLen + 1);
           end = start + subSeqLen;
+          inSubSeqLen = subSeqLen - ((end==seqLen)?1:0);
           BWTSeqCRAccessSubseq(bwtSeqCR, start, subSeqLen, contextBuf);
           initEncodedsequencescanstate(esr, suffixArray.encseq,
                                        suffixArray.readmode, start);
-          for (i = 0; i < subSeqLen; ++i)
+          for (j = 0; j < inSubSeqLen; ++j)
           {
             Symbol symRef = sequentialgetencodedchar(suffixArray.encseq, esr,
-                                                     start + i,
+                                                     start + j,
                                                      suffixArray.readmode);
-            Symbol symCmp = contextBuf[i];
+            Symbol symCmp = contextBuf[j];
             if (symCmp != symRef)
             {
               error_set(err, "symbol mismatch at position "FormatSeqpos": "
-                        "%d vs. reference symbol %d", start + i, (int)symCmp,
+                        "%d vs. reference symbol %d", start + j, (int)symCmp,
                         (int)symRef);
               retval = VERIFY_BWTSEQ_CONTEXT_SYMFAIL;
               break;
             }
+          }
+          while (j < subSeqLen)
+          {
+            Symbol symRef = UNDEFBWTCHAR;
+            Symbol symCmp = contextBuf[j];
+            if (symCmp != symRef)
+            {
+              error_set(err, "symbol mismatch at position "FormatSeqpos": "
+                        "%d vs. reference symbol %d", start + j, (int)symCmp,
+                        (int)symRef);
+              retval = VERIFY_BWTSEQ_CONTEXT_SYMFAIL;
+              break;
+            }
+            ++j;
           }
         }
         if (retval == VERIFY_BWTSEQ_NO_ERROR)

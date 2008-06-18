@@ -28,7 +28,7 @@
 static inline Seqpos
 numMapEntries(Seqpos seqLen, unsigned short mapIntervalLog2)
 {
-  return seqLen >> mapIntervalLog2;
+  return (seqLen + (1<<mapIntervalLog2) - 1)>> mapIntervalLog2;
 }
 
 static inline struct SeqMark

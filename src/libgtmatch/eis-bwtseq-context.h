@@ -63,6 +63,19 @@ extern BWTSeqContextRetriever *
 BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
            const Str *projectName);
 
+/**
+ * @brief Load context retriever that can be used to generate arbitrary
+ * subsequences of the original sequence.
+ * @param projectName base filename for which to load the retriever
+ * table
+ * @param bwtSeq reference to previously loaded BWT index object
+ * @param mapIntervalLog2 unless equal to CTX_MAP_ILOG_AUTOSIZE
+ * load map with interval 1<<mapIntervalLog2.  If equal
+ * CTX_MAP_ILOG_AUTOSIZE, uses largest table that can be successfully
+ * mapped.
+ * @return NULL in case of error (e.g. no corresponding table file or
+ * not enought memory for mmap).
+ */
 extern BWTSeqContextRetriever *
 BWTSeqCRLoad(const BWTSeq *bwtSeq, const Str *projectName,
              short mapIntervalLog2);
@@ -76,12 +89,19 @@ struct SeqMark
 };
 
 /**
- * Writes the retrieved symbols to seqseq which must accomodate for
+ * Writes the retrieved symbols to subseq which must accomodate for
  * len or more symbols.
  */
 extern void
 BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
                      Seqpos start, size_t len, Symbol subseq[]);
+
+/**
+ * @brief Compute next position in original sequence following pos
+ * that is marked for efficient retrieval.
+ */
+static inline struct SeqMark
+BWTSeqCRNextMark(const BWTSeqContextRetriever *bwtSeqCR, Seqpos pos);
 
 #include "libgtmatch/eis-bwtseq-context-siop.h"
 

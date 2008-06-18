@@ -16,6 +16,7 @@
 #ifndef EIS_BWTSEQ_CONTEXT_PRIV_H
 #define EIS_BWTSEQ_CONTEXT_PRIV_H
 
+#include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/eis-bwtseq-context.h"
 
 struct BWTSeqContextRetriever

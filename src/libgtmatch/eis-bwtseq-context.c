@@ -163,11 +163,12 @@ BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory, const Seqpos *src,
   currentSfxPos = factory->currentSfxPos;
   {
     size_t i;
-    Seqpos mask = factory->moduloMask;
+    Seqpos mask = factory->moduloMask,
+      seqLen = factory->seqLen;
     for (i = 0; i < len; ++i)
     {
-      if (!(src[i] & mask))
-        addMapVal(factory, currentSfxPos + i, src[i]);
+      if (!(((src[i] + seqLen - 1)%seqLen) & mask))
+        addMapVal(factory, currentSfxPos + i, ((src[i] + seqLen - 1)%seqLen));
     }
   }
   factory->currentSfxPos = currentSfxPos + len;
@@ -382,7 +383,7 @@ BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
   assert(start < BWTSeqLength(bwtSeqCR->bwtSeq));
   bwtSeq = bwtSeqCR->bwtSeq;
   {
-    Seqpos end = start + len;
+    Seqpos end = start + len - 1;
     currentPos = BWTSeqCRNextMark(bwtSeqCR, end);
     assert(currentPos.textPos >= end);
     while (currentPos.textPos > end)
@@ -403,5 +404,5 @@ BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
 #endif
     }
   }
-  assert(currentPos.textPos == start);
+  assert(currentPos.textPos + 1 == start);
 }
