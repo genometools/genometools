@@ -182,7 +182,7 @@ static void performthesearch(const TageratorOptions *tageratoroptions,
   }
 }
 
-static void compareresults(const ArraySeqpos *storeonline,
+static void compareresults(UNUSED const ArraySeqpos *storeonline,
                            const ArraySeqpos *storeoffline)
 {
   unsigned long ss;
