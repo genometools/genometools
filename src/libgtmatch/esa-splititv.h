@@ -41,10 +41,10 @@ DECLAREARRAYSTRUCT(Boundswithchar);
 typedef struct
 {
   ArrayBoundswithchar bounds;
-  unsigned long specialsatend;
 } Boundswithcharinfo;
 
 bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
+                                  Readmode readmode,
                                   Seqpos totallength,
                                   const Seqpos *suftab,
                                   Simplelcpinterval *itv,
@@ -55,6 +55,7 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
 
 void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
                                     const Encodedsequence *encseq,
+                                    Readmode readmode,
                                     Seqpos totallength,
                                     const Seqpos *suftab,
                                     Seqpos offset,
@@ -62,6 +63,7 @@ void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
                                     Seqpos right);
 
 Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
+                           Readmode readmode,
                            Seqpos totallength,
                            const Seqpos *suftab,
                            const Lcpinterval *lcpitv,
