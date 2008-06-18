@@ -172,13 +172,19 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
       !str_cmp(filter_visitor->seqid,    /* or seqids are equal */
                genome_node_get_seqid((GenomeNode*) sr))) {
     if (filter_visitor->contain_range.start != UNDEF_ULONG) {
-      /* an contain range was defined -> update range of sequence region */
       Range range = genome_node_get_range((GenomeNode*) sr);
-      range.start = MAX(range.start, filter_visitor->contain_range.start);
-      range.end = MIN(range.end, filter_visitor->contain_range.end);
-      genome_node_set_range((GenomeNode*) sr, range);
+      if (range_overlap(range, filter_visitor->contain_range)) {
+        /* an overlapping contain range was defined -> update range  */
+        range.start = MAX(range.start, filter_visitor->contain_range.start);
+        range.end = MIN(range.end, filter_visitor->contain_range.end);
+        genome_node_set_range((GenomeNode*) sr, range);
+        queue_add(filter_visitor->genome_node_buffer, sr);
+      }
+      else /* contain range does not overlap with <sr> range -> delete <sr> */
+        genome_node_delete((GenomeNode*) sr);
     }
-    queue_add(filter_visitor->genome_node_buffer, sr);
+    else
+      queue_add(filter_visitor->genome_node_buffer, sr);
   }
   else
     genome_node_rec_delete((GenomeNode*) sr);

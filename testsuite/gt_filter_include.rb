@@ -153,3 +153,11 @@ Test do
            "#{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_filter_test_contain.1000-8999"
 end
+
+Name "gt filter test 21 (-contain)"
+Keywords "gt_filter contain"
+Test do
+  run_test "#{$bin}gt filter -contain 1500000 1600000 " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}empty_file"
+end
