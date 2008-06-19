@@ -41,13 +41,12 @@ allocSpecialsRankTable(const Encodedsequence *encseq, Seqpos lastSeqPos,
   struct specialsRankLookup *ranker;
   Seqpos numSamples = (lastSeqPos >> sampleIntervalLog2) + 1;
 
-  ranker = ma_malloc(offsetAlign(sizeof (*ranker),
-                                 sizeof (Seqpos))
+  ranker = ma_malloc(offsetAlign(sizeof (*ranker), sizeof (Seqpos))
                      + numSamples * sizeof (Seqpos));
   rankTable = &ranker->implementationData.sampleTable;
   rankTable->rankSumSamples
-    = (Seqpos *)((char *)rankTable + offsetAlign(sizeof (SpecialsRankLookup),
-                                                 sizeof (Seqpos)));
+    = (Seqpos *)((char *)ranker + offsetAlign(sizeof (*ranker),
+                                              sizeof (Seqpos)));
   rankTable->sampleIntervalLog2 = sampleIntervalLog2;
   rankTable->sampleInterval = ((Seqpos)1) << sampleIntervalLog2;
   rankTable->readmode = readmode;
