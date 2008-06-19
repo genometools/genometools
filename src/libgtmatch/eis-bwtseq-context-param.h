@@ -21,7 +21,7 @@
 #include "libgtcore/minmax.h"
 #include "libgtcore/option.h"
 #include "libgtmatch/seqpos-def.h"
-#include "libgtcore/bitpackstring.h"
+/* #include "libgtcore/bitpackstring.h" Not necessary. Stefan */
 #include "libgtmatch/eis-bitpackseqpos.h"
 
 enum ctxMapSize {

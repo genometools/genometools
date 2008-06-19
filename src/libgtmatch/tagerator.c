@@ -222,7 +222,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   Seqpos totallength;
   SeqIterator *seqit = NULL;
   bool haserr = false;
-  int retval;
+  int retval, try;
   unsigned int demand = SARR_SUFTAB | SARR_ESQTAB;
   Limdfsresources *limdfsresources = NULL;
   Myersonlineresources *mor = NULL;
@@ -314,36 +314,32 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       printf("\n");
       storeoffline.nextfreeSeqpos = 0;
       storeonline.nextfreeSeqpos = 0;
-      if (taglen > tageratoroptions->maxdistance) /* XXX remove this */
+      assert(taglen > tageratoroptions->maxdistance);
+      for (try=0 ; try < 2; try++)
       {
-        int try;
-
-        for (try=0 ; try < 2; try++)
+        if ((try == 0 && tageratoroptions->fwdmatch) ||
+            (try == 1 && tageratoroptions->rcmatch))
         {
-          if ((try == 0 && tageratoroptions->fwdmatch) ||
-              (try == 1 && tageratoroptions->rcmatch))
+          if (try == 1 && tageratoroptions->rcmatch)
           {
-            if (try == 1 && tageratoroptions->rcmatch)
-            {
-              complementtag(transformedtag,taglen);
-            }
-            performthesearch(tageratoroptions,
-                             mor,
-                             limdfsresources,
-                             suffixarray.encseq,
-                             suffixarray.readmode,
-                             suffixarray.suftab,
-                             totallength,
-                             transformedtag,
-                             taglen,
-                             processmatch,
-                             processmatchinfooffline,
-                             (try == 1 && tageratoroptions->rcmatch)
-                               ? true : false);
-            if (tageratoroptions->docompare)
-            {
-              compareresults(&storeonline,&storeoffline);
-            }
+            complementtag(transformedtag,taglen);
+          }
+          performthesearch(tageratoroptions,
+                           mor,
+                           limdfsresources,
+                           suffixarray.encseq,
+                           suffixarray.readmode,
+                           suffixarray.suftab,
+                           totallength,
+                           transformedtag,
+                           taglen,
+                           processmatch,
+                           processmatchinfooffline,
+                           (try == 1 && tageratoroptions->rcmatch)
+                             ? true : false);
+          if (tageratoroptions->docompare)
+          {
+            compareresults(&storeonline,&storeoffline);
           }
         }
       }
