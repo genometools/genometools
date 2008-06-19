@@ -587,7 +587,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
         for (i = 0; i < numTries && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
         {
           Seqpos j, end, inSubSeqLen;
-          subSeqLen = random()%(maxSubSeqLen + 1);
+          subSeqLen = random()%maxSubSeqLen + 1;
           start = random()%(seqLen - subSeqLen + 1);
           end = start + subSeqLen;
           inSubSeqLen = subSeqLen - ((end==seqLen)?1:0);

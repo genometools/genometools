@@ -158,7 +158,7 @@ struct addLocateInfoState
   RandomSeqAccessor origSeqAccess;
   unsigned locateInterval, bitsPerOrigPos, bitsPerSeqpos,
     bitsPerOrigRank;
-  const SpecialsRankTable *sprTable;
+  const SpecialsRankLookup *sprTable;
   int featureToggles;
   size_t revMapQueueSize;
   struct seqRevMapEntry *revMapQueue;
@@ -255,7 +255,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
                        const MRAEnc *alphabet, const struct seqStats *stats,
                        const enum rangeSortMode *rangeSort,
                        Seqpos srcLen, const struct bwtParam *params,
-                       const SpecialsRankTable *sprTable,
+                       const SpecialsRankLookup *sprTable,
                        unsigned bitsPerOrigRank,
                        BWTSeqContextRetrieverFactory *ctxFactory)
 {
@@ -511,7 +511,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
 static inline int
 sortModeHeaderNeeded(const MRAEnc *alphabet,
                      const enum rangeSortMode *rangeSort,
-                     const SpecialsRankTable *sprTable)
+                     const SpecialsRankLookup *sprTable)
 {
   bool hasRankSortedRanges = false;
   AlphabetRangeID i, numRanges = MRAEncGetNumRanges(alphabet);
@@ -524,7 +524,7 @@ extern EISeq *
 createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
                     SASeqSrc *src,
                     const enum rangeSortMode rangeSort[],
-                    const SpecialsRankTable *sprTable,
+                    const SpecialsRankLookup *sprTable,
                     Error *err)
 {
   struct encIdxSeq *baseSeqIdx = NULL;

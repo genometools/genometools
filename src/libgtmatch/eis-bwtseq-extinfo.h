@@ -68,7 +68,7 @@ extern EISeq *
 createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
                     SASeqSrc *src,
                     const enum rangeSortMode rangeSort[],
-                    const SpecialsRankTable *sprTable,
+                    const SpecialsRankLookup *sprTable,
                     Error *err);
 
 extern int

@@ -187,7 +187,7 @@ buildSpRTable(const struct bwtParam *params,
               Seqpos totalLen,
               const Encodedsequence *encseq,
               Readmode readmode,
-              SpecialsRankTable **sprTable,
+              SpecialsRankLookup **sprTable,
               const enum rangeSortMode **rangeSort)
 {
   if (params->featureToggles & BWTReversiblySorted)
@@ -198,7 +198,7 @@ buildSpRTable(const struct bwtParam *params,
       sampleIntervalLog2
         = requiredUIntBits(requiredSeqposBits(totalLen));
     }
-    *sprTable = newSpecialsRankTable(encseq, readmode, sampleIntervalLog2);
+    *sprTable = newSpecialsRankLookup(encseq, readmode, sampleIntervalLog2);
   }
   *rangeSort = GTAlphabetRangeSort[sprTable?
                                    GT_ALPHABETHANDLING_W_RANK:
@@ -207,7 +207,7 @@ buildSpRTable(const struct bwtParam *params,
 
 static BWTSeq *
 createBWTSeqFromSASS(const struct bwtParam *params, SASeqSrc *src,
-                     SpecialsRankTable *sprTable,
+                     SpecialsRankLookup *sprTable,
                      const enum rangeSortMode *rangeSort,
                      Error *err);
 
@@ -217,7 +217,7 @@ createBWTSeqFromSAI(const struct bwtParam *params,
                     Error *err)
 {
   BWTSeq *bwtSeq;
-  SpecialsRankTable *sprTable = NULL;
+  SpecialsRankLookup *sprTable = NULL;
   const enum rangeSortMode *rangeSort;
   assert(sai && err && params);
   buildSpRTable(params, SAIGetLength(sai), SAIGetEncSeq(sai),
@@ -225,7 +225,7 @@ createBWTSeqFromSAI(const struct bwtParam *params,
   bwtSeq = createBWTSeqFromSASS(params, SAI2SASS(sai), sprTable, rangeSort,
                                 err);
   if (sprTable)
-    deleteSpecialsRankTable(sprTable);
+    deleteSpecialsRankLookup(sprTable);
   return bwtSeq;
 }
 
@@ -234,7 +234,7 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
                      Error *err)
 {
   BWTSeq *bwtSeq;
-  SpecialsRankTable *sprTable = NULL;
+  SpecialsRankLookup *sprTable = NULL;
   const enum rangeSortMode *rangeSort;
   assert(sfxi && params && err);
   buildSpRTable(params, SfxIGetLength(sfxi), SfxIGetEncSeq(sfxi),
@@ -242,13 +242,13 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
   bwtSeq = createBWTSeqFromSASS(params, SfxI2SASS(sfxi), sprTable, rangeSort,
                                 err);
   if (sprTable)
-    deleteSpecialsRankTable(sprTable);
+    deleteSpecialsRankLookup(sprTable);
   return bwtSeq;
 }
 
 static BWTSeq *
 createBWTSeqFromSASS(const struct bwtParam *params, SASeqSrc *src,
-                     SpecialsRankTable *sprTable,
+                     SpecialsRankLookup *sprTable,
                      const enum rangeSortMode *rangeSort,
                      Error *err)
 {

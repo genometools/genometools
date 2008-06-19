@@ -15,27 +15,35 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ENCSEQ_SPECIALSRANK_H
-#define ENCSEQ_SPECIALSRANK_H
+#ifndef ENCSEQ_SPECIALSRANK_PRIV_H
+#define ENCSEQ_SPECIALSRANK_PRIV_H
 
-#include "libgtmatch/encseq-def.h"
-#include "libgtmatch/seqpos-def.h"
+#include "libgtmatch/encseq-specialsrank.h"
 
-typedef struct specialsRankLookup SpecialsRankLookup;
+typedef Seqpos (*RankReportFunc)(const SpecialsRankLookup *ranker,
+                                 Seqpos pos);
 
-extern SpecialsRankLookup *
-newSpecialsRankLookup(const Encodedsequence *encseq, Readmode readmode,
-                     unsigned sampleIntervalLog2);
-
-extern void
-deleteSpecialsRankLookup(SpecialsRankLookup *table);
+struct specialsRankLookup
+{
+  RankReportFunc rankFunc;
+  const Encodedsequence *encseq;
+  union
+  {
+    struct specialsRankTable
+    {
+      Encodedsequencescanstate *scanState;
+      Seqpos *rankSumSamples, numSamples, sampleInterval;
+      Readmode readmode;
+      unsigned sampleIntervalLog2;
+    } sampleTable;
+    Seqpos lastSeqPos;
+  } implementationData;
+};
 
 static inline Seqpos
-specialsRank(const SpecialsRankLookup *rankTable, Seqpos pos);
-
-extern const Encodedsequence *
-SPRTGetOrigEncseq(const SpecialsRankLookup *rankTable);
-
-#include "libgtmatch/encseq-specialsrank-priv.h"
+specialsRank(const SpecialsRankLookup *ranker, Seqpos pos)
+{
+  return ranker->rankFunc(ranker, pos);
+}
 
 #endif

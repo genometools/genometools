@@ -23,55 +23,72 @@
 #include "libgtcore/minmax.h"
 
 #include "libgtmatch/encseq-specialsrank.h"
+#include "libgtmatch/encseq-specialsrank-priv.h"
 
-struct specialsRankTable
-{
-  const Encodedsequence *encseq;
-  Encodedsequencescanstate *scanState;
-  Seqpos *rankSumSamples, numSamples, sampleInterval;
-  Readmode readmode;
-  unsigned sampleIntervalLog2;
-};
+typedef struct specialsRankTable SpecialsRankTable;
 
-static inline struct specialsRankTable *
-allocSpecialsRankTable(const Encodedsequence *encseq, Seqpos seqLen,
+static Seqpos
+specialsRankFromSampleTable(const SpecialsRankLookup *rankTable, Seqpos pos);
+
+static Seqpos
+specialsRankFromTermPos(const SpecialsRankLookup *rankTable, Seqpos pos);
+
+static inline struct specialsRankLookup *
+allocSpecialsRankTable(const Encodedsequence *encseq, Seqpos lastSeqPos,
                        unsigned sampleIntervalLog2, Readmode readmode)
 {
   struct specialsRankTable *rankTable;
-  Seqpos numSamples = (seqLen >> sampleIntervalLog2) + 1;
+  struct specialsRankLookup *ranker;
+  Seqpos numSamples = (lastSeqPos >> sampleIntervalLog2) + 1;
 
-  rankTable = ma_malloc(offsetAlign(sizeof (SpecialsRankTable),
-                                    sizeof (Seqpos))
-                        + numSamples * sizeof (Seqpos));
+  ranker = ma_malloc(offsetAlign(sizeof (*ranker),
+                                 sizeof (Seqpos))
+                     + numSamples * sizeof (Seqpos));
+  rankTable = &ranker->implementationData.sampleTable;
   rankTable->rankSumSamples
-    = (Seqpos *)((char *)rankTable + offsetAlign(sizeof (SpecialsRankTable),
+    = (Seqpos *)((char *)rankTable + offsetAlign(sizeof (SpecialsRankLookup),
                                                  sizeof (Seqpos)));
   rankTable->sampleIntervalLog2 = sampleIntervalLog2;
   rankTable->sampleInterval = ((Seqpos)1) << sampleIntervalLog2;
   rankTable->readmode = readmode;
-  rankTable->encseq = encseq;
   rankTable->numSamples = numSamples;
   rankTable->scanState = newEncodedsequencescanstate();
-  return rankTable;
+  ranker->encseq = encseq;
+  ranker->rankFunc = specialsRankFromSampleTable;
+  return ranker;
 }
 
-extern SpecialsRankTable *
-newSpecialsRankTable(const Encodedsequence *encseq, Readmode readmode,
+static inline struct specialsRankLookup *
+allocEmptySpecialsRankLookup(const Encodedsequence *encseq, Seqpos lastSeqPos)
+{
+  struct specialsRankLookup *ranker;
+  ranker = ma_malloc(sizeof (*ranker));
+  ranker->implementationData.lastSeqPos = lastSeqPos;
+  ranker->rankFunc = specialsRankFromTermPos;
+  ranker->encseq = encseq;
+  return ranker;
+}
+
+extern SpecialsRankLookup *
+newSpecialsRankLookup(const Encodedsequence *encseq, Readmode readmode,
                      unsigned sampleIntervalLog2)
 {
-  struct specialsRankTable *rankTable;
-  Seqpos seqLen;
+  struct specialsRankLookup *ranker;
+  Seqpos lastSeqPos;
   Seqpos sampleInterval = ((Seqpos)1) << sampleIntervalLog2;
   assert(encseq);
   assert(sampleIntervalLog2 < sizeof (Seqpos) * CHAR_BIT);
-  seqLen = getencseqtotallength(encseq);
+  lastSeqPos = getencseqtotallength(encseq);
   if (hasspecialranges(encseq))
   {
+    /* this sequence has some special characters */
+    struct specialsRankTable *rankTable;
     Specialrangeiterator *sri;
     Seqpos *sample, *maxSample, sum = 0, pos = 0, nextSamplePos;
     Sequencerange range = { 0, 0 };
-    rankTable
-      = allocSpecialsRankTable(encseq, seqLen, sampleIntervalLog2, readmode);
+    ranker = allocSpecialsRankTable(encseq, lastSeqPos, sampleIntervalLog2,
+                                    readmode);
+    rankTable = &ranker->implementationData.sampleTable;
     sri = newspecialrangeiterator(encseq, !ISDIRREVERSE(readmode));
     sample = rankTable->rankSumSamples;
     maxSample = sample + rankTable->numSamples;
@@ -88,7 +105,7 @@ newSpecialsRankTable(const Encodedsequence *encseq, Readmode readmode,
         if (pos < nextSamplePos)
         {
           if (!nextspecialrangeiterator(&range, sri))
-            range.rightpos = range.leftpos = seqLen;
+            range.rightpos = range.leftpos = lastSeqPos;
         }
       }
       *sample++ = sum;
@@ -98,45 +115,59 @@ newSpecialsRankTable(const Encodedsequence *encseq, Readmode readmode,
   }
   else
   {
-    /* implementation pending */
-    abort();
+    /* While there is no special characters in this sequence, there
+     * is of course the terminator */
+    ranker = allocEmptySpecialsRankLookup(encseq, lastSeqPos);
   }
-  return rankTable;
+  return ranker;
 }
 
 extern void
-deleteSpecialsRankTable(SpecialsRankTable *table)
+deleteSpecialsRankLookup(SpecialsRankLookup *ranker)
 {
-  freeEncodedsequencescanstate(&table->scanState);
-  ma_free(table);
+  if (ranker->rankFunc == specialsRankFromSampleTable)
+    freeEncodedsequencescanstate(
+      &ranker->implementationData.sampleTable.scanState);
+  ma_free(ranker);
 }
 
-extern Seqpos
-specialsRank(const SpecialsRankTable *rankTable, Seqpos pos)
+static Seqpos
+specialsRankFromSampleTable(const SpecialsRankLookup *ranker, Seqpos pos)
 {
+  const SpecialsRankTable *rankTable = &ranker->implementationData.sampleTable;
   Seqpos rankCount, samplePos;
   assert(rankTable);
-  assert(pos <= getencseqtotallength(rankTable->encseq));
+  assert(pos <= getencseqtotallength(ranker->encseq));
   samplePos = pos & ~(rankTable->sampleInterval - 1);
   {
     size_t sampleIdx = pos >> rankTable->sampleIntervalLog2;
     rankCount = rankTable->rankSumSamples[sampleIdx];
   }
   {
-    const Encodedsequence *encseq = rankTable->encseq;
+    const Encodedsequence *encseq = ranker->encseq;
     Encodedsequencescanstate *esr = rankTable->scanState;
     Readmode readmode = rankTable->readmode;
-    initEncodedsequencescanstate(esr, encseq, readmode, samplePos);
-    while (samplePos < pos)
-      if (ISSPECIAL(sequentialgetencodedchar(encseq, esr, samplePos++,
-                                             readmode)))
-        ++rankCount;
+    if (samplePos < pos)
+    {
+      initEncodedsequencescanstate(esr, encseq, readmode, samplePos);
+      while (samplePos < pos)
+        if (ISSPECIAL(sequentialgetencodedchar(encseq, esr, samplePos++,
+                                               readmode)))
+          ++rankCount;
+    }
   }
   return rankCount;
 }
 
-extern const Encodedsequence *
-SPRTGetOrigEncseq(const SpecialsRankTable *rankTable)
+static Seqpos
+specialsRankFromTermPos(const SpecialsRankLookup *ranker, Seqpos pos)
 {
-  return rankTable->encseq;
+  assert(pos <= ranker->implementationData.lastSeqPos + 1);
+  return ((pos == ranker->implementationData.lastSeqPos + 1)?1:0);
+}
+
+extern const Encodedsequence *
+SPRTGetOrigEncseq(const SpecialsRankLookup *ranker)
+{
+  return ranker->encseq;
 }
