@@ -31,12 +31,14 @@ def checkgreedyfwdmat(queryfile,ms)
 end
 
 def checktagerator(queryfile,ms)
-  run "#{$bin}gt shredder -minlength 12 -maxlength 15 #{queryfile} | #{$bin}gt seqfilter -minlength 12 -"
-  run "sed -e \'s/^>.*/>/\' #{$last_stdout}"
-  run "mv #{$last_stdout} patternfile"
-  run_test "#{$bin}gt tagerator -rw -cmp -ii sfx -t patternfile"
-  run_test "#{$bin}gt tagerator -rw -cmp -k 1 -ii sfx -t patternfile"
-  run_test "#{$bin}gt tagerator -rw -cmp -k 2 -ii sfx -t patternfile"
+  run "#{$bin}gt shredder -minlength 12 -maxlength 15 #{queryfile} | " +
+      "#{$bin}gt seqfilter -minlength 12 - | " +
+      "sed -e \'s/^>.*/>/\' > patternfile"
+  if File.size("patternfile") > 0
+    run_test "#{$bin}gt tagerator -rw -cmp -ii sfx -t patternfile"
+    run_test "#{$bin}gt tagerator -rw -cmp -k 1 -ii sfx -t patternfile"
+    run_test "#{$bin}gt tagerator -rw -cmp -k 2 -ii sfx -t patternfile"
+  end
 end
 
 def createandcheckgreedyfwdmat(reffile,queryfile)
@@ -44,7 +46,7 @@ def createandcheckgreedyfwdmat(reffile,queryfile)
   run "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
            "-db #{reffile}"
   run "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
-           "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev"
+           "-dna -pl -bsize 10 -locfreq 32 -dir rev"
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
 end
@@ -63,14 +65,14 @@ allfiles.each do |reffile|
       end
     end
   end
-  end
+end
 
 allfiles.each do |reffile|
   Name "gt packedindex #{reffile}"
   Keywords "gt_packedindex small"
   Test do
     run_test "#{$bin}gt packedindex mkindex -tis -indexname pck " +
-             "-sprank -db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
+             "-db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
              " -locfreq 32 -dir rev", 
              :maxtime => 600
   end
