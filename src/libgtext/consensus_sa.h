@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -46,8 +46,7 @@ typedef void   (*ProcessSpliceFormFunc)(Array *spliced_alignments_in_form,
                                         void *userdata);
 
 void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
-                  size_t size_of_sa, GetGenomicRangeFunc get_genomic_range,
-                  GetStrandFunc get_strand, GetExonsFunc get_exons,
-                  ProcessSpliceFormFunc process_splice_form, void *userdata);
+                  size_t size_of_sa, GetGenomicRangeFunc, GetStrandFunc,
+                  GetExonsFunc, ProcessSpliceFormFunc, void *userdata);
 
 #endif
