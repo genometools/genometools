@@ -1,9 +1,7 @@
 debug: process cluster
 debug: -from 20552738
-debug: -to 20553188
 debug: csa number_of_sas=2
 debug: csa finished
 debug: -from 24280722
-debug: -to 24280936
 debug: csa number_of_sas=1
 debug: csa finished
