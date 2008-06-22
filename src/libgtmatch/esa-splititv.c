@@ -121,18 +121,18 @@ void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
                                     Readmode readmode,
                                     Seqpos totallength,
                                     const Seqpos *suftab,
-                                    Seqpos offset,
-                                    Seqpos left,
-                                    Seqpos right)
+                                    const Lcpinterval *parent)
 {
   Uchar leftcc, rightcc;
-  Seqpos rightbound = 0, leftbound = left;
+  Seqpos rightbound = 0, leftbound = parent->left;
 
+  /* call lcpintervalextendlcp and verify if interval can be extended by
+     some character */
   bwci->bounds.nextfreeBoundswithchar = 0;
-  rightcc = SEQUENCE(encseq,suftab[right]+offset);
+  rightcc = SEQUENCE(encseq,suftab[parent->right]+parent->offset);
   while (true)
   {
-    leftcc = SEQUENCE(encseq,suftab[leftbound]+offset);
+    leftcc = SEQUENCE(encseq,suftab[leftbound]+parent->offset);
     assert(bwci->bounds.nextfreeBoundswithchar <
            bwci->bounds.allocatedBoundswithchar);
     if (ISSPECIAL(leftcc))
@@ -149,19 +149,20 @@ void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
       break;
     }
     rightbound = lcpintervalfindrightbound(encseq,readmode,totallength,suftab,
-                                           leftcc,offset,leftbound,right);
+                                           leftcc,parent->offset,
+                                           leftbound,parent->right);
     leftbound = rightbound+1;
   }
   assert(bwci->bounds.nextfreeBoundswithchar <
          bwci->bounds.allocatedBoundswithchar);
-  ADDPREVIOUSRBOUND(right);
-  ADDCURRENTLBOUND(right+1);
+  ADDPREVIOUSRBOUND(parent->right);
+  ADDCURRENTLBOUND(parent->right+1);
 }
 
 Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
                            Readmode readmode,
-                           Seqpos totallength,
                            const Seqpos *suftab,
+                           Seqpos totallength,
                            const Lcpinterval *lcpitv,
                            Uchar alphasize)
 {
