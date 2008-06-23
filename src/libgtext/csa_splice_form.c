@@ -46,6 +46,7 @@ void csa_splice_form_delete(CSASpliceForm *splice_form)
   ma_free(splice_form);
 }
 
+#ifndef NDEBUG
 static unsigned long csa_splice_form_start(const CSASpliceForm *splice_form)
 {
   return splice_form
@@ -53,6 +54,7 @@ static unsigned long csa_splice_form_start(const CSASpliceForm *splice_form)
                              array_get(splice_form->spliced_alignments, 0))
          .start;
 }
+#endif
 
 void csa_splice_form_add_sa(CSASpliceForm *splice_form, void *spliced_alignment)
 {
