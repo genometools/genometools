@@ -68,7 +68,6 @@ void freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi)
   *bspi = NULL;
 }
 
-<<<<<<< HEAD:src/libgtmatch/eis-iterpos.c
 struct Bwtseqcontextiterator
 {
   struct extBitsRetrieval extBits;

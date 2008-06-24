@@ -508,8 +508,6 @@ unsigned long packedindexmstatsforward(const void *genericindex,
                                        const Uchar *qstart,
                                        const Uchar *qend);
 
-#ifndef S_SPLINT_S /* exclude for splinting */
 #include "libgtmatch/eis-bwtseq-siop.h"
-#endif
 
 #endif
