@@ -24,6 +24,7 @@
 #include "spacedef.h"
 #include "esa-splititv.h"
 #include "esa-limdfs.h"
+#include "eis-iterpos.h"
 
 #define UNDEFINDEX      (patternlength+1)
 
@@ -422,7 +423,8 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
 }
 
 static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
-                             Seqpos totallength,
+                             Seqpos left,
+                             Seqpos right,
                              UNUSED unsigned long maxdistance)
 {
   Lcpintervalwithinfo *stackptr;
@@ -430,8 +432,8 @@ static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
   stack->nextfreeLcpintervalwithinfo = 0;
   GETNEXTFREEINARRAY(stackptr,stack,Lcpintervalwithinfo,128);
   stackptr->lcpitv.offset = 0;
-  stackptr->lcpitv.left = 0;
-  stackptr->lcpitv.right = totallength;
+  stackptr->lcpitv.left = left;
+  stackptr->lcpitv.right = right;
   stackptr->column.Pv = ~0UL;
   stackptr->column.Mv = 0UL;
   stackptr->column.maxleqk = maxdistance;
@@ -467,6 +469,23 @@ static void esa_overinterval(Limdfsresources *limdfsresources,
   }
 }
 
+static void pck_overinterval(Limdfsresources *limdfsresources,
+                             const Lcpinterval *itv)
+{
+  Bwtseqpositioniterator *bspi;
+  Seqpos pos;
+
+  bspi = newBwtseqpositioniterator (limdfsresources->genericindex,
+                                    itv->left,itv->right);
+  while (nextBwtseqpositioniterator(&pos,bspi))
+  {
+    limdfsresources->processmatch(limdfsresources->processmatchinfo,
+                                  pos,
+                                  itv->offset);
+  }
+  freeBwtseqpositioniterator(&bspi);
+}
+
 /* maximize lcp value of lcp interval */
 
 static Uchar esa_extendlcp(Limdfsresources *limdfsresources,
@@ -481,6 +500,14 @@ static Uchar esa_extendlcp(Limdfsresources *limdfsresources,
                               limdfsresources->totallength,
                               itv,
                               limdfsresources->alphasize);
+}
+
+static Uchar pck_extendlcp(Limdfsresources *limdfsresources,
+                           const Lcpinterval *itv)
+{
+  return bwtseqintervalextendlcp(limdfsresources->genericindex,
+                                 itv,
+                                 limdfsresources->alphasize);
 }
 
 /* iterate myers algorithm over a sequence context */
@@ -555,7 +582,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
       esa_overinterval(limdfsresources,child);
     } else
     {
-      assert(false);
+      pck_overinterval(limdfsresources,child);
     }
     return true;
   }
@@ -671,7 +698,8 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   initeqsvector(limdfsresources->eqsvector,
                 (unsigned long) limdfsresources->alphasize,
                 pattern,patternlength);
-  initlcpinfostack(&limdfsresources->stack,limdfsresources->totallength,
+  initlcpinfostack(&limdfsresources->stack,
+                   0,limdfsresources->totallength,
                    maxdistance);
   while (limdfsresources->stack.nextfreeLcpintervalwithinfo > 0)
   {
@@ -685,7 +713,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
       extendchar = esa_extendlcp(limdfsresources,&stackptr->lcpitv);
     } else
     {
-      assert(false);
+      extendchar = pck_extendlcp(limdfsresources,&stackptr->lcpitv);
     }
     previouscolumn = stackptr->column;
     if (extendchar < limdfsresources->alphasize)
