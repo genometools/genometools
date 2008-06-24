@@ -23,8 +23,10 @@
 
 typedef struct Limdfsresources Limdfsresources;
 
-Limdfsresources *newLimdfsresources(const void *genericindex,
+Limdfsresources *newLimdfsresources(const Encodedsequence *encseq,
+                                    Readmode readmode,
                                     unsigned int mapsize,
+                                    const Seqpos *suftab,
                                     void (*processmatch)(void *,Seqpos,Seqpos),
                                     void *processmatchinfo);
 

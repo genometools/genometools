@@ -276,8 +276,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     }
     if (tageratoroptions->maxdistance > 0)
     {
-      limdfsresources = newLimdfsresources((void *) &suffixarray,
+      limdfsresources = newLimdfsresources(suffixarray.encseq,
+                                           suffixarray.readmode,
                                            mapsize,
+                                           suffixarray.suftab,
                                            processmatch,
                                            processmatchinfooffline);
     }
