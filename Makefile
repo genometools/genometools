@@ -778,7 +778,7 @@ obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
 RUBY:=ruby
 
 test: all
-	bin/gt -test
+	GT_MEM_BOOKKEEPING=on bin/gt -test
 	cd testsuite && env -i GT_MEM_BOOKKEEPING=on MAKE=$(MAKE) PATH=$(PATH) \
           CCACHE_DISABLE=yes HOME=$(HOME) \
           $(RUBY) -I. testsuite.rb \
