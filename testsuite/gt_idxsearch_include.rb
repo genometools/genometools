@@ -34,8 +34,10 @@ def checktagerator(queryfile,ms)
   run "#{$bin}gt shredder -minlength 12 -maxlength 15 #{queryfile} | #{$bin}gt seqfilter -minlength 12 -"
   run "sed -e \'s/^>.*/>/\' #{$last_stdout}"
   run "mv #{$last_stdout} patternfile"
-  run_test "#{$bin}gt tagerator -rw -cmp -ii sfx -t patternfile"
-  run_test "#{$bin}gt tagerator -rw -cmp -k 1 -ii sfx -t patternfile"
+  run_test("#{$bin}gt tagerator -rw -cmp -ii sfx -t patternfile",
+           :maxtime => 100)
+  run_test("#{$bin}gt tagerator -rw -cmp -k 1 -ii sfx -t patternfile",
+           :maxtime => 100)
   run_test "#{$bin}gt tagerator -rw -cmp -k 2 -ii sfx -t patternfile"
 end
 

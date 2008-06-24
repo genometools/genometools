@@ -192,11 +192,11 @@ def checkmapped(args)
   Keywords "gt_suffixerator gttestdata"
   Test do
     run_test "#{$bin}gt suffixerator #{outoptions()} -indexname sfxidx #{args}",
-             :maxtime => 600
+             :maxtime => 1200
     run_test "#{$bin}gt dev sfxmap #{outoptions()} #{trials()} -v sfxidx",
-             :maxtime => 600
+             :maxtime => 2400
     run_test "#{$bin}gt dev sfxmap #{outoptionsnobck()} -stream -v sfxidx",
-             :maxtime => 600
+             :maxtime => 1200
   end
 end
 

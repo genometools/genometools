@@ -126,7 +126,7 @@ Keywords "gt_filter"
 Test do
   run_test("#{$bin}gt filter -hascds " +
            "#{$testdata}encode_known_genes_Mar07.gff3 | " +
-           "#{$memcheck} #{$bin}gt stat", :maxtime => 20)
+           "#{$memcheck} #{$bin}gt stat", :maxtime => 80)
   run "diff #{$last_stdout} #{$testdata}gt_filter_encode.out"
 end
 
