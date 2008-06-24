@@ -57,6 +57,41 @@ void freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi)
   *bspi = NULL;
 }
 
+struct Bwtseqcontextiterator
+{
+  struct extBitsRetrieval extBits;
+  const BWTSeq *bwtSeq;
+  Seqpos bound;
+};
+
+Bwtseqcontextiterator *newBwtseqcontextiterator(const void *voidbwtSeq,
+                                                Seqpos bound)
+{
+  Bwtseqcontextiterator *bsci;
+
+  bsci = ma_malloc(sizeof (*bsci));
+  initExtBitsRetrieval(&bsci->extBits);
+  bsci->bwtSeq = (const BWTSeq *) voidbwtSeq;
+  bsci->bound = bound;
+  return bsci;
+}
+
+Uchar nextBwtseqcontextiterator(Bwtseqcontextiterator *bsci)
+{
+  Uchar cc;
+  /* how do I determine that we are at position totallength? */
+  cc = BWTSeqGetSym(bsci->bwtSeq, bsci->bound);
+  bsci->bound = BWTSeqLFMap(bsci->bwtSeq, bsci->bound, &bsci->extBits);
+  return cc;
+}
+
+void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci)
+{
+  destructExtBitsRetrieval(&(*bsci)->extBits);
+  ma_free(*bsci);
+  *bsci = NULL;
+}
+
 Uchar bwtseqintervalextendlcp(const void *voidBwtSeq,
                               const Lcpinterval *itv,
                               Uchar alphasize)

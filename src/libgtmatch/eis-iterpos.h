@@ -33,6 +33,15 @@ bool nextBwtseqpositioniterator(Seqpos *pos,Bwtseqpositioniterator *bspi);
 
 void freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi);
 
+typedef struct Bwtseqcontextiterator Bwtseqcontextiterator;
+
+Bwtseqcontextiterator *newBwtseqcontextiterator(const void *voidbwtSeq,
+                                                Seqpos bound);
+
+Uchar nextBwtseqcontextiterator(Bwtseqcontextiterator *bsci);
+
+void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci);
+
 Uchar bwtseqintervalextendlcp(const void *voidBwtSeq,
                               const Lcpinterval *itv,
                               Uchar alphasize);

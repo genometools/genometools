@@ -596,8 +596,8 @@ static void processchildinterval(Limdfsresources *limdfsresources,
                                  Uchar inchar,
                                  const Myerscolumn *previouscolumn)
 {
-  assert(child->left <= child->right);
-  if (child->left < child->right)
+  if (child->left < child->right || (limdfsresources->withesa &&
+                                     child->left == child->right))
   {
     Lcpintervalwithinfo *stackptr;
 
