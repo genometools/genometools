@@ -40,6 +40,7 @@ def checktagerator(queryfile,ms)
     run_test("#{$bin}gt tagerator -rw -cmp -k 1 -ii sfx -t patternfile",
              :maxtime => 100)
     run_test "#{$bin}gt tagerator -rw -cmp -k 2 -ii sfx -t patternfile"
+  end
 end
 
 def createandcheckgreedyfwdmat(reffile,queryfile)
