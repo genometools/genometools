@@ -22,6 +22,7 @@
 #include "libgtcore/unused.h"
 #include "libgtext/filter_visitor.h"
 #include "libgtext/genome_visitor_rep.h"
+#include "libgtext/gff3_parser.h"
 
 struct FilterVisitor {
   const GenomeVisitor parent_instance;
@@ -30,7 +31,8 @@ struct FilterVisitor {
       *typefilter;
   Range contain_range,
         overlap_range;
-  Strand strand;
+  Strand strand,
+         targetstrand;
   bool has_CDS;
   unsigned long max_gene_length,
                 gene_num,     /* the number of passed genes */
@@ -85,6 +87,27 @@ static bool filter_strand(GenomeFeature *gf, Strand strand)
   assert(gf);
   if (strand != NUM_OF_STRAND_TYPES && genome_feature_get_strand(gf) != strand)
     return true;
+  return false;
+}
+
+static bool filter_targetstrand(GenomeFeature *gf, Strand targetstrand)
+{
+  const char *target;
+  assert(gf);
+  if (targetstrand != NUM_OF_STRAND_TYPES &&
+      (target = genome_feature_get_attribute((GenomeNode*) gf, "Target"))) {
+    unsigned long num_of_targets;
+    Strand parsed_strand;
+    int had_err;
+    had_err = gff3parser_parse_target_attributes(target, &num_of_targets, NULL,
+                                                 NULL, &parsed_strand, "",
+                                                 UNDEF_ULONG, NULL);
+    assert(!had_err);
+    if (num_of_targets == 1 && parsed_strand != NUM_OF_STRAND_TYPES &&
+        parsed_strand != targetstrand) {
+      return true;
+    }
+  }
   return false;
 }
 
@@ -149,6 +172,9 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
     filter_node = filter_strand(gf, fv->strand);
 
   if (!filter_node)
+    filter_node = filter_targetstrand(gf, fv->targetstrand);
+
+  if (!filter_node)
     filter_node = filter_has_CDS(gf, fv->has_CDS);
 
   if (!filter_node)
@@ -203,8 +229,8 @@ const GenomeVisitorClass* filter_visitor_class()
 
 GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
                                   Range contain_range, Range overlap_range,
-                                  Strand strand, bool has_CDS,
-                                  unsigned long max_gene_length,
+                                  Strand strand, Strand targetstrand,
+                                  bool has_CDS, unsigned long max_gene_length,
                                   unsigned long max_gene_num,
                                   double min_gene_score,
                                   double min_average_splice_site_prob)
@@ -217,6 +243,7 @@ GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
   filter_visitor->contain_range = contain_range;
   filter_visitor->overlap_range = overlap_range;
   filter_visitor->strand = strand;
+  filter_visitor->targetstrand = targetstrand;
   filter_visitor->has_CDS = has_CDS;
   filter_visitor->max_gene_length = max_gene_length;
   filter_visitor->gene_num = 0;

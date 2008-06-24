@@ -161,3 +161,10 @@ Test do
            "#{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}empty_file"
 end
+
+Name "gt filter test 22 (-targetstrand)"
+Keywords "gt_filter targetstrand"
+Test do
+  run_test "#{$bin}gt filter -targetstrand - #{$testdata}U89959_sas.gff3"
+  run "diff #{$last_stdout} #{$testdata}U89959_sas.minus_targets"
+end

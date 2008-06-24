@@ -26,16 +26,19 @@
 #include "tools/gt_filter.h"
 
 #define STRAND_OPT  "strand"
+#define TARGETSTRAND_OPT  "targetstrand"
 
 typedef struct {
   bool verbose,
        has_CDS;
   Str *seqid,
       *typefilter,
-      *strand_char;
+      *strand_char,
+      *targetstrand_char;
   Range contain_range,
         overlap_range;
-  Strand strand;
+  Strand strand,
+         targetstrand;
   unsigned long max_gene_length,
                 max_gene_num;
   double min_gene_score,
@@ -51,6 +54,8 @@ static void* gt_filter_arguments_new(void)
   arguments->typefilter = str_new();
   arguments->strand_char = str_new();
   arguments->strand = NUM_OF_STRAND_TYPES;
+  arguments->targetstrand_char = str_new();
+  arguments->targetstrand = NUM_OF_STRAND_TYPES;
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -61,6 +66,7 @@ static void gt_filter_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
+  str_delete(arguments->targetstrand_char);
   str_delete(arguments->strand_char);
   str_delete(arguments->typefilter);
   str_delete(arguments->seqid);
@@ -109,6 +115,15 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
                              STRANDCHARS"')", arguments->strand_char, NULL);
   option_parser_add_option(op, option);
 
+  /* -targetstrand */
+  option = option_new_string(TARGETSTRAND_OPT, "filter out all top-level "
+                             "features (i.e., features without parents) which "
+                             "have exactly one target attribute whose strand "
+                             "is different from the given one (must be one of '"
+                             STRANDCHARS"')", arguments->targetstrand_char,
+                             NULL);
+  option_parser_add_option(op, option);
+
   /* -hascds */
   option = option_new_bool("hascds", "filter out all top-level features which "
                            "do not have a CDS child", &arguments->has_CDS,
@@ -153,23 +168,37 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
   return op;
 }
 
+static int process_strand_arg(Str *strand_char, Strand *strand,
+                              const char *optstr, Error *err)
+{
+  int had_err = 0;
+  error_check(err);
+  if (str_length(strand_char)) {
+    Strand tmpstrand = strand_get(str_get(strand_char)[0]);
+    if ((str_length(strand_char) > 1) || (tmpstrand == NUM_OF_STRAND_TYPES)) {
+      error_set(err, "argument to option -%s must be one of '"STRANDCHARS"'",
+                optstr);
+      had_err = -1;
+    }
+    if (!had_err)
+      *strand = tmpstrand;
+  }
+  return had_err;
+}
+
 static int gt_filter_arguments_check(UNUSED int rest_argc, void *tool_arguments,
                                      Error *err)
 {
   FilterArguments *arguments = tool_arguments;
-  int had_err = 0;
+  int had_err;
   error_check(err);
   assert(arguments);
-  if (str_length(arguments->strand_char)) {
-    Strand strand = strand_get(str_get(arguments->strand_char)[0]);
-    if ((str_length(arguments->strand_char) > 1) ||
-        (strand == NUM_OF_STRAND_TYPES)) {
-      error_set(err, "argument to option -"STRAND_OPT" must be one of '"
-                STRANDCHARS"'");
-      had_err = -1;
-    }
-    if (!had_err)
-      arguments->strand = strand;
+  had_err = process_strand_arg(arguments->strand_char, &arguments->strand,
+                               STRAND_OPT, err);
+  if (!had_err) {
+    had_err = process_strand_arg(arguments->targetstrand_char,
+                                 &arguments->targetstrand, TARGETSTRAND_OPT,
+                                 err);
   }
   return had_err;
 }
@@ -197,6 +226,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
                                     arguments->contain_range,
                                     arguments->overlap_range,
                                     arguments->strand,
+                                    arguments->targetstrand,
                                     arguments->has_CDS,
                                     arguments->max_gene_length,
                                     arguments->max_gene_num,
