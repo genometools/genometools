@@ -50,7 +50,8 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
                                         &itv,
                                         *qptr,
                                         (Seqpos) offset,
-                                        itv.left,itv.right))
+                                        itv.left,
+                                        itv.right))
       {
         break;
       }

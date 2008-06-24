@@ -58,14 +58,12 @@ void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
                                     Readmode readmode,
                                     Seqpos totallength,
                                     const Seqpos *suftab,
-                                    Seqpos offset,
-                                    Seqpos left,
-                                    Seqpos right);
+                                    const Lcpinterval *parent);
 
 Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
                            Readmode readmode,
-                           Seqpos totallength,
                            const Seqpos *suftab,
+                           Seqpos totallength,
                            const Lcpinterval *lcpitv,
                            Uchar alphasize);
 
