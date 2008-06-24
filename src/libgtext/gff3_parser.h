@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -33,6 +33,14 @@ typedef struct GFF3Parser GFF3Parser;
 GFF3Parser* gff3parser_new(bool checkids);
 void        gff3parser_set_offset(GFF3Parser*, long);
 int         gff3parser_set_offsetfile(GFF3Parser*, Str*, Error*);
+int         gff3parser_parse_target_attributes(const char *values,
+                                               unsigned long *num_of_targets,
+                                               Str *first_target_id,
+                                               Range *first_target_range,
+                                               Strand *first_target_strand,
+                                               const char *filename,
+                                               unsigned long line_number,
+                                               Error*);
 int         gff3parser_parse_genome_nodes(int *status_code, GFF3Parser*,
                                           Queue *genome_nodes,
                                           Str *filenamestr,

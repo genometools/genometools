@@ -31,6 +31,7 @@
 #include "libgtext/comment.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_node.h"
+#include "libgtext/gff3_escaping.h"
 #include "libgtext/gff3_parser.h"
 #include "libgtext/mapping.h"
 #include "libgtext/sequence_region.h"
@@ -154,6 +155,94 @@ static int add_offset_if_necessary(Range *range, GFF3Parser *gff3_parser,
   return had_err;
 }
 
+static int parse_target_attribute(const char *value, Str *target_id,
+                                  Range *target_range, Strand *target_strand,
+                                  const char *filename,
+                                  unsigned long line_number, Error *err)
+{
+  unsigned long num_of_tokens;
+  Str *unescaped_target;
+  char *escaped_target;
+  Strand parsed_strand;
+  Splitter *splitter;
+  Range parsed_range;
+  int had_err = 0;
+  error_check(err);
+  assert(value && filename);
+  splitter = splitter_new();
+  unescaped_target = str_new();
+  escaped_target = cstr_dup(value);
+  splitter_split(splitter, escaped_target, strlen(escaped_target), ' ');
+  num_of_tokens = splitter_size(splitter);
+  if (!(num_of_tokens == 3 || num_of_tokens == 4)) {
+    error_set(err, "Target attribute value '%s' on line %lu in file \"%s\" "
+              "must have 3 or 4 blank separated entries", value, line_number,
+              filename);
+    had_err = -1;
+  }
+  /* parse target id */
+  if (!had_err) {
+    had_err = gff3_unescape(unescaped_target, splitter_get_token(splitter, 0),
+                            strlen(splitter_get_token(splitter, 0)), err);
+  }
+  if (!had_err && target_id)
+    str_append_str(target_id, unescaped_target);
+  /* parse target range */
+  if (!had_err) {
+    had_err = parse_range(&parsed_range, splitter_get_token(splitter, 1),
+                          splitter_get_token(splitter, 2), line_number,
+                          filename, err);
+  }
+  if (!had_err && target_range)
+    *target_range = parsed_range;
+  /* parse target strand (if given) */
+  if (!had_err) {
+    if (splitter_size(splitter) == 4) {
+      had_err = parse_strand(&parsed_strand, splitter_get_token(splitter, 3),
+                             line_number, filename, err);
+      if (!had_err && target_strand)
+        *target_strand = parsed_strand;
+    }
+    else if (target_strand)
+      *target_strand = NUM_OF_STRAND_TYPES; /* undefined */
+  }
+  ma_free(escaped_target);
+  str_delete(unescaped_target);
+  splitter_delete(splitter);
+  return had_err;
+}
+
+int gff3parser_parse_target_attributes(const char *values,
+                                       unsigned long *num_of_targets,
+                                       Str *first_target_id,
+                                       Range *first_target_range,
+                                       Strand *first_target_strand,
+                                       const char *filename,
+                                       unsigned long line_number, Error *err)
+{
+  Splitter *splitter;
+  unsigned long i;
+  char *targets;
+  int had_err = 0;
+  error_check(err);
+  assert(values && filename);
+  targets = cstr_dup(values);
+  splitter = splitter_new();
+  splitter_split(splitter, targets, strlen(targets), ',');
+  if (num_of_targets)
+    *num_of_targets = splitter_size(splitter);
+  for (i = 0; !had_err && i < splitter_size(splitter); i++) {
+    had_err = parse_target_attribute(splitter_get_token(splitter, i),
+                                     i ? NULL : first_target_id,
+                                     i ? NULL : first_target_range,
+                                     i ? NULL : first_target_strand, filename,
+                                     line_number, err);
+  }
+  ma_free(targets);
+  splitter_delete(splitter);
+  return had_err;
+}
+
 static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                    char *line, size_t line_length,
                                    Str *filenamestr, unsigned long line_number,
@@ -247,6 +336,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   if (!had_err) {
     splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
     for (i = 0; i < splitter_size(attribute_splitter); i++) {
+      const char *attr_tag, *attr_value;
       token = splitter_get_token(attribute_splitter, i);
       if (strncmp(token, ".", 1) == 0) {
         if (splitter_size(attribute_splitter) > 1) {
@@ -300,11 +390,21 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         }
       }
       if (!had_err) {
+        attr_tag = splitter_get_token(tmp_splitter, 0);
+        attr_value = splitter_get_token(tmp_splitter, 1);
+        if (!strcmp(attr_tag, "Target")) {
+          /* the value of ``Target'' attributes have a special syntax which is
+             checked here */
+          had_err = gff3parser_parse_target_attributes(attr_value, NULL, NULL,
+                                                       NULL, NULL, filename,
+                                                       line_number, err);
+        }
+      }
+      if (!had_err) {
         /* save all attributes, although the ID and Parent attributes are
            generated */
-        genome_feature_add_attribute((GenomeFeature*) genome_feature,
-                                     splitter_get_token(tmp_splitter, 0),
-                                     splitter_get_token(tmp_splitter, 1));
+        genome_feature_add_attribute((GenomeFeature*) genome_feature, attr_tag,
+                                     attr_value);
       }
     }
   }
