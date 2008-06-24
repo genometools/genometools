@@ -106,6 +106,7 @@ int union_find_unit_test(Error *err)
       union_find_union(uf, 0, i);
     for (i = 1; !had_err && i < UNION_FIND_TEST_SIZE; i++)
       ensure(had_err, union_find_find(uf, 0) == union_find_find(uf, i));
+    union_find_delete(uf);
   }
 
   return had_err;
