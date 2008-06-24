@@ -224,7 +224,7 @@ locBitsUpperBounds(void *cbState, struct segmentDesc *desc,
            + state->bitsPerOrigPos);
       if (bitsPerOrigRank)
       {
-        Seqpos maxRank = specialsRank(state->sprTable, state->seqLen - 1);
+        Seqpos maxRank = specialsRank(state->sprTable, state->seqLen);
         /* rank values stored */
         maxBitsTotal += maxRank * bitsPerOrigRank;
       }
@@ -821,7 +821,7 @@ BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
       || !locHeader.locateInterval)
   {
     log_log("Index does not contain locate information.\n"
-            "Localization of matches will not be supported!\n");
+            "Localization of matches will not be supported!");
     bwtSeq->locateSampleInterval = 0;
     bwtSeq->featureToggles = BWTBaseFeatures;
   }

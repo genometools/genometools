@@ -68,16 +68,36 @@ allocEmptySpecialsRankLookup(const Encodedsequence *encseq, Seqpos lastSeqPos)
   return ranker;
 }
 
+static inline bool
+nextRange(Sequencerange *range, Specialrangeiterator *sri,
+          Readmode readmode, Seqpos seqLastPos)
+{
+  bool hasNextRange = nextspecialrangeiterator(range, sri);
+  if (hasNextRange)
+  {
+    if (ISDIRREVERSE(readmode))
+    {
+      Seqpos temp = range->rightpos;
+      range->rightpos = seqLastPos - range->leftpos;
+      range->leftpos = seqLastPos - temp;
+    }
+  }
+  else
+    range->rightpos = seqLastPos + 1, range->leftpos = seqLastPos;
+  return hasNextRange;
+}
+
 extern SpecialsRankLookup *
 newSpecialsRankLookup(const Encodedsequence *encseq, Readmode readmode,
                      unsigned sampleIntervalLog2)
 {
   struct specialsRankLookup *ranker;
-  Seqpos lastSeqPos;
+  Seqpos seqLastPos, seqLen;
   Seqpos sampleInterval = ((Seqpos)1) << sampleIntervalLog2;
   assert(encseq);
   assert(sampleIntervalLog2 < sizeof (Seqpos) * CHAR_BIT);
-  lastSeqPos = getencseqtotallength(encseq);
+  seqLastPos = getencseqtotallength(encseq);
+  seqLen = seqLastPos + 1;
   if (hasspecialranges(encseq))
   {
     /* this sequence has some special characters */
@@ -85,7 +105,7 @@ newSpecialsRankLookup(const Encodedsequence *encseq, Readmode readmode,
     Specialrangeiterator *sri;
     Seqpos *sample, *maxSample, sum = 0, pos = 0, nextSamplePos;
     Sequencerange range = { 0, 0 };
-    ranker = allocSpecialsRankTable(encseq, lastSeqPos, sampleIntervalLog2,
+    ranker = allocSpecialsRankTable(encseq, seqLen, sampleIntervalLog2,
                                     readmode);
     rankTable = &ranker->implementationData.sampleTable;
     sri = newspecialrangeiterator(encseq, !ISDIRREVERSE(readmode));
@@ -93,7 +113,7 @@ newSpecialsRankLookup(const Encodedsequence *encseq, Readmode readmode,
     maxSample = sample + rankTable->numSamples;
     *sample++ = sum;
     nextSamplePos = sampleInterval;
-    nextspecialrangeiterator(&range, sri);
+    nextRange(&range, sri, readmode, seqLastPos);
     while (sample < maxSample)
     {
       while (pos < nextSamplePos)
@@ -103,8 +123,7 @@ newSpecialsRankLookup(const Encodedsequence *encseq, Readmode readmode,
         pos = MIN(range.rightpos, nextSamplePos);
         if (pos < nextSamplePos)
         {
-          if (!nextspecialrangeiterator(&range, sri))
-            range.rightpos = range.leftpos = lastSeqPos;
+          nextRange(&range, sri, readmode, seqLastPos);
         }
       }
       *sample++ = sum;
@@ -116,7 +135,7 @@ newSpecialsRankLookup(const Encodedsequence *encseq, Readmode readmode,
   {
     /* While there is no special characters in this sequence, there
      * is of course the terminator */
-    ranker = allocEmptySpecialsRankLookup(encseq, lastSeqPos);
+    ranker = allocEmptySpecialsRankLookup(encseq, seqLastPos);
   }
   return ranker;
 }
@@ -134,9 +153,10 @@ static Seqpos
 specialsRankFromSampleTable(const SpecialsRankLookup *ranker, Seqpos pos)
 {
   const SpecialsRankTable *rankTable = &ranker->implementationData.sampleTable;
-  Seqpos rankCount, samplePos;
-  assert(rankTable);
-  assert(pos <= getencseqtotallength(ranker->encseq));
+  Seqpos rankCount, samplePos, encSeqLen;
+  assert(ranker);
+  encSeqLen = getencseqtotallength(ranker->encseq);
+  assert(pos <= encSeqLen + 1);
   samplePos = pos & ~(rankTable->sampleInterval - 1);
   {
     size_t sampleIdx = pos >> rankTable->sampleIntervalLog2;
@@ -146,14 +166,18 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, Seqpos pos)
     const Encodedsequence *encseq = ranker->encseq;
     Encodedsequencescanstate *esr = rankTable->scanState;
     Readmode readmode = rankTable->readmode;
-    if (samplePos < pos)
+    Seqpos encseqQueryMax = MIN(pos, encSeqLen);
+    if (samplePos < encseqQueryMax)
     {
       initEncodedsequencescanstate(esr, encseq, readmode, samplePos);
-      while (samplePos < pos)
+      do {
         if (ISSPECIAL(sequentialgetencodedchar(encseq, esr, samplePos++,
                                                readmode)))
           ++rankCount;
+      } while (samplePos < encseqQueryMax);
     }
+    if (pos == encSeqLen + 1)
+      ++rankCount;
   }
   return rankCount;
 }

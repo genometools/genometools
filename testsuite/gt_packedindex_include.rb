@@ -96,6 +96,17 @@ Test do
                          :timeOuts => { :chksearch => 800 })
 end
 
+Name "gt packedindex check tools for revcom sequence with sprank"
+Keywords "gt_packedindex"
+Test do
+  allfiles = prependTestdata(["Atinsert.fna"])
+  runAndCheckPackedIndex('miniindex', allfiles,
+                         :create => { '-dir' => 'rev' },
+                         :bdx => { '-sprank' => nil },
+                         :chksearch => { '-full-lfmap' => nil },
+                         :timeOuts => { :chksearch => 800 })
+end
+
 Name "gt packedindex check tools for simple sequences with context"
 Keywords "gt_packedindex"
 Test do
@@ -172,12 +183,12 @@ if $gttestdata then
     end
     Name 'gt packedindex check tools for d.melanogaster (' +
       shortFileName + ')'
-    Keywords 'gt_packedindex gt_notworking'
+    Keywords 'gt_packedindex'
     Test do
       runAndCheckPackedIndex('dmel',
                              [file],
                              :timeOuts =>
-                             { :trsuftab => 7200, :suffixerator => 7200,
+                             { :trsuftab => 7200, :suffixerator => 14400,
                                :chkintegrity => 3200, :chksearch => 800 },
                              :useSuftabTranslation => true)
     end
