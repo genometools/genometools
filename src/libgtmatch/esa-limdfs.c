@@ -56,6 +56,35 @@ static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
   }
 }
 
+static void showMyerscolumn(const Myerscolumn *col,unsigned long score,
+                       unsigned long patternlength)
+{
+  if (col->maxleqk == UNDEFINDEX)
+  {
+    printf("[]");
+  } else
+  {
+    unsigned long idx, backmask;
+
+    printf("[%lu",score);
+    for (idx=1UL, backmask = 1UL; idx<=col->maxleqk; idx++, backmask <<= 1)
+    {
+      if (col->Pv & backmask)
+      {
+        score++;
+      } else
+      {
+        if (col->Mv & backmask)
+        {
+          score--;
+        }
+      }
+      printf(",%lu",score);
+    }
+    printf("] with maxleqk=%lu",col->maxleqk);
+  }
+}
+
 static void verifycolumnvalues(unsigned long patternlength,
                                unsigned long maxdistance,
                                const Myerscolumn *col,
@@ -109,35 +138,6 @@ static void verifycolumnvalues(unsigned long patternlength,
   }
 }
 
-static void showcolumn(const Myerscolumn *col,unsigned long score,
-                       unsigned long patternlength)
-{
-  if (col->maxleqk == UNDEFINDEX)
-  {
-    printf("[]");
-  } else
-  {
-    unsigned long idx, backmask;
-
-    printf("[%lu",score);
-    for (idx=1UL, backmask = 1UL; idx<=col->maxleqk; idx++, backmask <<= 1)
-    {
-      if (col->Pv & backmask)
-      {
-        score++;
-      } else
-      {
-        if (col->Mv & backmask)
-        {
-          score--;
-        }
-      }
-      printf(",%lu",score);
-    }
-    printf("] with maxleqk=%lu",col->maxleqk);
-  }
-}
-
 #endif
 
 static void initeqsvector(unsigned long *eqsvector,
@@ -164,10 +164,24 @@ static void initeqsvector(unsigned long *eqsvector,
   }
 }
 
+#ifdef SKDEBUG
+#define SHOWSTACKTOP(STACKPTR)\
+        printf("top=(offset=%lu,%lu,%lu) with ",\
+                (unsigned long) STACKPTR->lcpitv.offset,\
+                (unsigned long) STACKPTR->lcpitv.left,\
+                (unsigned long) STACKPTR->lcpitv.right);\
+        showMyerscolumn(&STACKPTR->column,\
+               (unsigned long) STACKPTR->lcpitv.offset,patternlength);\
+        printf("\n")
+#else
+#define SHOWSTACKTOP(STACKPTR) /* Nothing */
+#endif
+
 static void nextEDcolumn(const unsigned long *eqsvector,
                          unsigned long patternlength,
                          unsigned long maxdistance,
                          Myerscolumn *outcol,
+                         UNUSED unsigned long startscore,
                          Uchar currentchar,
                          const Myerscolumn *incol)
 {
@@ -178,6 +192,11 @@ static void nextEDcolumn(const unsigned long *eqsvector,
 
   assert(incol->maxleqk != UNDEFINDEX && incol->maxleqk != patternlength);
   assert(currentchar != (Uchar) SEPARATOR);
+#ifdef SKDEBUG
+  printf("nextEDcol(");
+  showMyerscolumn(incol,startscore,patternlength);
+  printf(",%u)=",(unsigned int) currentchar);
+#endif
   if (currentchar != (Uchar) WILDCARD)
   {
     Eq = eqsvector[(unsigned long) currentchar];
@@ -259,6 +278,14 @@ static void nextEDcolumn(const unsigned long *eqsvector,
 #endif
     }
   }
+#ifdef SKDEBUG
+  showMyerscolumn(outcol,startscore+1,patternlength);
+  printf(",%u)=",(unsigned int) currentchar);
+  verifycolumnvalues(patternlength,
+                     maxdistance,
+                     outcol,
+                     startscore+1);
+#endif
 }
 
 static void inplacenextEDcolumn(const unsigned long *eqsvector,
@@ -364,9 +391,11 @@ struct Limdfsresources
   void (*processmatch)(void *,Seqpos,Seqpos);
   void *processmatchinfo;
   const void *genericindex;
+  bool withesa;
 };
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
+                                    bool withesa,
                                     unsigned int mapsize,
                                     Seqpos totallength,
                                     void (*processmatch)(void *,Seqpos,Seqpos),
@@ -388,7 +417,27 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->processmatchinfo = processmatchinfo;
   limdfsresources->genericindex = genericindex;
   limdfsresources->totallength = totallength;
+  limdfsresources->withesa = withesa;
   return limdfsresources;
+}
+
+static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
+                             Seqpos totallength,
+                             UNUSED unsigned long maxdistance)
+{
+  Lcpintervalwithinfo *stackptr;
+
+  stack->nextfreeLcpintervalwithinfo = 0;
+  GETNEXTFREEINARRAY(stackptr,stack,Lcpintervalwithinfo,128);
+  stackptr->lcpitv.offset = 0;
+  stackptr->lcpitv.left = 0;
+  stackptr->lcpitv.right = totallength;
+  stackptr->column.Pv = ~0UL;
+  stackptr->column.Mv = 0UL;
+  stackptr->column.maxleqk = maxdistance;
+#ifdef SKDEBUG
+  stackptr->column.scorevalue = maxdistance;
+#endif
 }
 
 void freeLimdfsresources(Limdfsresources **ptrlimdfsresources)
@@ -401,24 +450,27 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources)
   FREESPACE(*ptrlimdfsresources);
 }
 
+/* enumerate the suffixes in an LCP-interval */
+
 static void esa_overinterval(Limdfsresources *limdfsresources,
                              const Lcpinterval *itv)
 {
+  Seqpos idx;
   const Suffixarray *suffixarray
     = (const Suffixarray *) limdfsresources->genericindex;
-  Seqpos idx;
 
   for (idx = itv->left; idx <= itv->right; idx++)
   {
-    /* enumerate the suffixes in the LCP-interval */
     limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                   suffixarray->suftab[idx],
                                   itv->offset);
   }
 }
 
-static Uchar esa_lcpintervalextendlcp(Limdfsresources *limdfsresources,
-                                      const Lcpinterval *itv)
+/* maximize lcp value of lcp interval */
+
+static Uchar esa_extendlcp(Limdfsresources *limdfsresources,
+                           const Lcpinterval *itv)
 {
   const Suffixarray *suffixarray
     = (const Suffixarray *) limdfsresources->genericindex;
@@ -430,6 +482,8 @@ static Uchar esa_lcpintervalextendlcp(Limdfsresources *limdfsresources,
                               itv,
                               limdfsresources->alphasize);
 }
+
+/* iterate myers algorithm over a sequence context */
 
 static void esa_overcontext(Limdfsresources *limdfsresources,
                             unsigned long patternlength,
@@ -482,55 +536,30 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                                const Myerscolumn *incol)
 {
   stackptr->lcpitv = *child;
-#ifdef SKDEBUG
-  printf("nextEDcol(");
-  assert(child->offset > 0);
-  showcolumn(incol,(unsigned long) (child->offset-1),patternlength);
-#endif
+
   nextEDcolumn(limdfsresources->eqsvector,
                patternlength,
                maxdistance,
                &stackptr->column,
+               (unsigned long) (child->offset-1),
                inchar,
                incol);
-#ifdef SKDEBUG
-  printf(",%u)=",(unsigned int) inchar);
-  showcolumn(&stackptr->column,(unsigned long) child->offset,patternlength);
-  printf("\n");
-  verifycolumnvalues(patternlength,
-                     maxdistance,
-                     &stackptr->column,
-                     (unsigned long) child->offset);
-#endif
   if (stackptr->column.maxleqk == UNDEFINDEX)
   {
     return true;
   }
   if (stackptr->column.maxleqk == patternlength)
   {
-    esa_overinterval(limdfsresources,child);
+    if (limdfsresources->withesa)
+    {
+      esa_overinterval(limdfsresources,child);
+    } else
+    {
+      assert(false);
+    }
     return true;
   }
   return false;
-}
-
-static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
-                             Seqpos totallength,
-                             UNUSED unsigned long maxdistance)
-{
-  Lcpintervalwithinfo *stackptr;
-
-  stack->nextfreeLcpintervalwithinfo = 0;
-  GETNEXTFREEINARRAY(stackptr,stack,Lcpintervalwithinfo,128);
-  stackptr->lcpitv.offset = 0;
-  stackptr->lcpitv.left = 0;
-  stackptr->lcpitv.right = totallength;
-  stackptr->column.Pv = ~0UL;
-  stackptr->column.Mv = 0UL;
-  stackptr->column.maxleqk = maxdistance;
-#ifdef SKDEBUG
-  stackptr->column.scorevalue = maxdistance;
-#endif
 }
 
 static void processchildinterval(Limdfsresources *limdfsresources,
@@ -559,22 +588,27 @@ static void processchildinterval(Limdfsresources *limdfsresources,
     }
   } else
   {
-    esa_overcontext(limdfsresources,
-                    patternlength,
-                    maxdistance,
-                    previouscolumn,
-                    child->left,
-                    child->offset);
+    if (limdfsresources->withesa)
+    {
+      esa_overcontext(limdfsresources,
+                      patternlength,
+                      maxdistance,
+                      previouscolumn,
+                      child->left,
+                      child->offset);
+    } else
+    {
+      assert(false);
+    }
   }
 }
 
-static void esa_lcpsplitandprocess(Limdfsresources *limdfsresources,
-                                   unsigned long patternlength,
-                                   unsigned long maxdistance,
-                                   const Lcpinterval *parent,
-                                   const Myerscolumn *previouscolumn)
+static void esa_splitandprocess(Limdfsresources *limdfsresources,
+                                unsigned long patternlength,
+                                unsigned long maxdistance,
+                                const Lcpinterval *parent,
+                                const Myerscolumn *previouscolumn)
 {
-  Lcpinterval child;
   Seqpos bound, firstnonspecial;
   unsigned long idx;
   const Suffixarray *suffixarray
@@ -587,11 +621,13 @@ static void esa_lcpsplitandprocess(Limdfsresources *limdfsresources,
                                  suffixarray->suftab,
                                  parent);
   firstnonspecial = parent->left;
-  child.offset = parent->offset+1;
   for (idx = 0; idx < limdfsresources->bwci.bounds.nextfreeBoundswithchar;
        idx++)
   {
+    Lcpinterval child;
     Uchar inchar = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].inchar;
+
+    child.offset = parent->offset+1;
     child.left = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].lbound;
     child.right = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].rbound;
     assert(child.right == limdfsresources->bwci.bounds.
@@ -606,13 +642,18 @@ static void esa_lcpsplitandprocess(Limdfsresources *limdfsresources,
   }
   for (bound=firstnonspecial; bound <= parent->right; bound++)
   {
-    child.left = child.right = bound;
-    processchildinterval(limdfsresources,
-                         patternlength,
-                         maxdistance,
-                         &child,
-                         0, /* not used */
-                         previouscolumn);
+    if (limdfsresources->withesa)
+    {
+      esa_overcontext(limdfsresources,
+                      patternlength,
+                      maxdistance,
+                      previouscolumn,
+                      bound,
+                      parent->offset+1);
+    } else
+    {
+      assert(false);
+    }
   }
 }
 
@@ -637,30 +678,23 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
     assert(limdfsresources->stack.spaceLcpintervalwithinfo != NULL);
     stackptr = limdfsresources->stack.spaceLcpintervalwithinfo +
                limdfsresources->stack.nextfreeLcpintervalwithinfo - 1;
-#ifdef SKDEBUG
-    printf("top=(offset=%lu,%lu,%lu) with ",
-                (unsigned long) stackptr->lcpitv.offset,
-                (unsigned long) stackptr->lcpitv.left,
-                (unsigned long) stackptr->lcpitv.right);
-    showcolumn(&stackptr->column,
-               (unsigned long) stackptr->lcpitv.offset,patternlength);
-    printf("\n");
-#endif
+    SHOWSTACKTOP(stackptr);
     /* extend interval by one character */
-    extendchar = esa_lcpintervalextendlcp(limdfsresources,&stackptr->lcpitv);
+    if (limdfsresources->withesa)
+    {
+      extendchar = esa_extendlcp(limdfsresources,&stackptr->lcpitv);
+    } else
+    {
+      assert(false);
+    }
     previouscolumn = stackptr->column;
     if (extendchar < limdfsresources->alphasize)
     {
-#ifdef SKDEBUG
-      printf("nextEDcol(");
-      showcolumn(&previouscolumn,
-                 (unsigned long) stackptr->lcpitv.offset,patternlength);
-      printf(",%u)=",(unsigned int) extendchar);
-#endif
       nextEDcolumn(limdfsresources->eqsvector,
                    patternlength,
                    maxdistance,
                    &stackptr->column,
+                   (unsigned long) (stackptr->lcpitv.offset-1),
                    extendchar,
                    &previouscolumn);
       stackptr->lcpitv.offset++;
@@ -671,30 +705,27 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
       }
       if (stackptr->column.maxleqk == patternlength)
       {
-        esa_overinterval(limdfsresources,&stackptr->lcpitv);
+        if (limdfsresources->withesa)
+        {
+          esa_overinterval(limdfsresources,&stackptr->lcpitv);
+        } else
+        {
+          assert(false);
+        }
         assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
         limdfsresources->stack.nextfreeLcpintervalwithinfo--;
       }
-#ifdef SKDEBUG
-      showcolumn(&stackptr->column,
-                 (unsigned long) stackptr->lcpitv.offset,patternlength);
-      printf("\n");
-      verifycolumnvalues(patternlength,
-                         maxdistance,
-                         &stackptr->column,
-                         (unsigned long) stackptr->lcpitv.offset);
-#endif
     } else
     {
       parent = stackptr->lcpitv; /* save, since stackptr is changed in split */
       /* split interval */
       assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
       limdfsresources->stack.nextfreeLcpintervalwithinfo--;
-      esa_lcpsplitandprocess(limdfsresources,
-                             patternlength,
-                             maxdistance,
-                             &parent,
-                             &previouscolumn);
+      esa_splitandprocess(limdfsresources,
+                          patternlength,
+                          maxdistance,
+                          &parent,
+                          &previouscolumn);
     }
   }
 }

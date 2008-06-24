@@ -24,6 +24,7 @@
 typedef struct Limdfsresources Limdfsresources;
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
+                                    bool withesa,
                                     unsigned int mapsize,
                                     Seqpos totallength,
                                     void (*processmatch)(void *,Seqpos,Seqpos),

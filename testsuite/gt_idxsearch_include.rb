@@ -49,7 +49,7 @@ def createandcheckgreedyfwdmat(reffile,queryfile)
   run "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
            "-db #{reffile}"
   run "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
-           "-dna -pl -bsize 10 -locfreq 32 -dir rev"
+           "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev"
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
 end
@@ -75,7 +75,7 @@ allfiles.each do |reffile|
   Keywords "gt_packedindex small"
   Test do
     run_test "#{$bin}gt packedindex mkindex -tis -indexname pck " +
-             "-db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
+             "-sprank -db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
              " -locfreq 32 -dir rev", 
              :maxtime => 600
   end
