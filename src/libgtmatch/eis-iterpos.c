@@ -80,12 +80,12 @@ Uchar nextBwtseqcontextiterator(Bwtseqcontextiterator *bsci)
 {
   Uchar cc;
 
-  if (bsci->bound == BWTSeqTerminatorPos(bsci->bwtSeq))
+  if (bsci->bound != BWTSeqTerminatorPos(bsci->bwtSeq))
   {
-    cc = SEPARATOR;
-  } else
   {
     cc = BWTSeqGetSym(bsci->bwtSeq, bsci->bound);
+  } else
+    cc = SEPARATOR;
   }
   bsci->bound = BWTSeqLFMap(bsci->bwtSeq, bsci->bound, &bsci->extBits);
   return cc;
