@@ -97,7 +97,7 @@ Uchar nextBwtseqcontextiterator(Bwtseqcontextiterator *bsci)
   } else
   {
     cc = SEPARATOR;
-  }
+  } 
   bsci->bound = BWTSeqLFMap(bsci->bwtSeq, bsci->bound, &bsci->extBits);
   return cc;
 }
