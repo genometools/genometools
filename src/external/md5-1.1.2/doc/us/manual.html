@@ -64,7 +64,7 @@
 <p>
 MD5 offers basic cryptographic facilities for Lua 5.1:
 a hash (digest) function, a pair crypt/decrypt based on MD5 and CFB,
-and a pair crypt/decrypt based on DES with 56-bt keys.
+and a pair crypt/decrypt based on DES with 56-bit keys.
 </p>
 
 <p>
@@ -75,27 +75,43 @@ as Lua.
 <h2><a name="building"></a>Building</h2>
 
 <p>
-MD5 offers a Makefile and a separate configuration file, <code>config</code>,
-which should be edited to suit the particularities of the target platform
+If you are using Unix MD5 offers a Makefile and a separate configuration file,
+<code>config</code>, which should be edited to suit the particularities of the target platform
 before running <code>make</code>.
 The file has some definitions like paths to the external libraries,
 compiler options and the like. One important definition is the Lua version,
 which is not obtained from the installed software.
 </p>
 
+<p>
+If you want to build MD5 on Windows MD5 offers the equivalent <code>config.win</code>
+and <code>Makefile.win</code> files to be used with Microsoft Visual Studio 2005.
+</p>
+
 <h2><a name="installation"></a>Installation</h2>
 
 <p>
-There are two compiled binary files, core.so and des56.so. The first 
- should be copied to a directory called <code>md5</code>
-in your 
-<a href="http://www.lua.org/manual/5.1/manual.html#pdf-package.cpath">C path</a>.
+The easiest way to install MD5 is to use <a href="http://www.luarocks.org">LuaRocks</a>:
+</p>
+
+<pre class="example">
+luarocks install md5
+</pre>
+
+<p>
+If you prefer to install the files manually and are using Unix, the build generates
+two compiled binary files, <code>core.so</code> and <code>des56.so</code>.
+The first should be copied to a directory called <code>md5</code>
+in your <a href="http://www.lua.org/manual/5.1/manual.html#pdf-package.cpath">C path</a>.
 Just copy the second to a directory in your Lua C path.
+</p>
+
+<p>
 Windows users can use the binary version of MD5 available at
 <a href="http://luaforge.net/projects/md5/files">LuaForge</a>.</p>
 
 <p>
-The file <code>md5.lua</code> should be copied to a directory in your
+In both Unix and Windows systems the file <code>md5.lua</code> should be copied to a directory in your
 <a href="http://www.lua.org/manual/5.1/manual.html#pdf-package.path">Lua path</a>.
 </p>
 
@@ -189,7 +205,7 @@ The file <code>md5.lua</code> should be copied to a directory in your
     </dd>
 </dl>
 
-<p>The following function is declared in <code>des56.h</code></p>
+<p>The following function is declared in <code>ldes56.h</code></p>
     
 <dl>
     <dt><strong>int luaopen_des56 (lua_State *L)</strong></dt>
@@ -204,7 +220,7 @@ The file <code>md5.lua</code> should be copied to a directory in your
 
 <div id="about">
     <p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-    <p><small>$Id: manual.html,v 1.12 2007/10/30 13:17:53 carregal Exp $</small></p>
+    <p><small>$Id: manual.html,v 1.14 2008/05/12 20:51:27 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->

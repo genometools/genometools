@@ -179,7 +179,7 @@ end
 Name "MD5 library"
 Keywords "gt_scripts"
 Test do
-  run_test "#{$bin}gt #{$cur}/src/external/md5-1.1.1/tests/test.lua"
+  run_test "#{$bin}gt #{$cur}/src/external/md5-1.1.2/tests/test.lua"
 end
 
 Name "gtdoc"

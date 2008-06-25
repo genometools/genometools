@@ -1,5 +1,5 @@
 /**
-*  $Id: md5lib.c,v 1.9 2007/11/28 21:22:47 carregal Exp $
+*  $Id: md5lib.c,v 1.10 2008/05/12 20:51:27 carregal Exp $
 *  Cryptographic and Hash functions for Lua
 *  @author  Roberto Ierusalimschy
 */
@@ -175,13 +175,13 @@ static int decrypt (lua_State *L) {
 */
 static void set_info (lua_State *L) {
 	lua_pushliteral (L, "_COPYRIGHT");
-	lua_pushliteral (L, "Copyright (C) 2003-2007 PUC-Rio");
+	lua_pushliteral (L, "Copyright (C) 2003 PUC-Rio");
 	lua_settable (L, -3);
 	lua_pushliteral (L, "_DESCRIPTION");
 	lua_pushliteral (L, "Basic cryptographic facilities");
 	lua_settable (L, -3);
 	lua_pushliteral (L, "_VERSION");
-	lua_pushliteral (L, "MD5 1.1.1");
+	lua_pushliteral (L, "MD5 1.1.2");
 	lua_settable (L, -3);
 }
 
@@ -196,7 +196,7 @@ static struct luaL_reg md5lib[] = {
 
 
 int luaopen_md5_core (lua_State *L) {
-  luaL_openlib(L, "md5.core", md5lib, 0);
+  luaL_openlib(L, "md5", md5lib, 0);
   set_info (L);
   return 1;
 }

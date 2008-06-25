@@ -1,0 +1,35 @@
+# $Id: Makefile.win,v 1.13 2008/05/12 17:49:05 carregal Exp $
+
+include config.win
+
+MD5_OBJS= src\md5.obj src\md5lib.obj 
+MD5_LUAS= src\md5.lua
+MD5_LIBNAME = core.dll
+
+DES56_OBJS= src\des56.obj src\ldes56.obj
+DES56_LIBNAME= des56.dll
+
+all: src\$(MD5_LIBNAME) src\$(DES56_LIBNAME)
+
+.c.obj:
+	$(CC) /MD /c /Fo$@ $(CFLAGS) $<
+
+src\$(MD5_LIBNAME) : $(MD5_OBJS)
+	link /dll /def:src\md5.def /out:src\$(MD5_LIBNAME) $(MD5_OBJS) $(LUA_LIB)
+	IF EXIST src\core.dll.manifest mt -manifest src\core.dll.manifest -outputresource:src\core.dll;2
+
+src\$(DES56_LIBNAME) : $(DES56_OBJS)
+	link /dll /def:src\des56.def /out:src\$(DES56_LIBNAME) $(DES56_OBJS) $(LUA_LIB)
+	IF EXIST src\des56.dll.manifest mt -manifest src\des56.dll.manifest -outputresource:src\des56.dll;2
+
+install: src\$(MD5_LIBNAME) src\$(DES56_LIBNAME)
+	IF NOT EXIST "$(LUA_LIBDIR)\md5" mkdir "$(LUA_LIBDIR)\md5"
+	copy "src\$(MD5_LIBNAME)" "$(LUA_LIBDIR)\md5\core.dll"
+	IF NOT EXIST "$(LUA_DIR)" mkdir "$(LUA_DIR)"
+	copy "$(MD5_LUAS)" "$(LUA_DIR)"
+	copy "src\$(DES56_LIBNAME)" "$(LUA_LIBDIR)\"
+
+clean:
+	FOR %i in ($(MD5_OBJS)) DO del %i
+	FOR %i in ($(DES56_OBJS)) DO del %i
+	del "src\$(MD5_LIBNAME)" "src\$(DES56_LIBNAME)" src\core.lib src\core.exp src\des56.lib src\des56.exp

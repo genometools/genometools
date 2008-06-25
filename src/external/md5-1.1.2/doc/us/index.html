@@ -75,7 +75,7 @@ as Lua.
 
 <h2><a name="status"></a>Status</h2>
 
-<p>MD5 version 1.1.1 for Lua 5.1 is now available for
+<p>MD5 version 1.1.2 for Lua 5.1 is now available for
 <a href="#download">download</a>.</p>
 
 <h2><a name="download"></a>Download</h2>
@@ -84,13 +84,25 @@ as Lua.
 MD5 can be downloaded in source code from its
 <a href="http://luaforge.net/projects/md5/files">LuaForge</a>
 page. If you are using LuaBinaries 5.1.x, a Windows
-precompiled version of MD5 can also be found at the same LuaForge page. MD5 has
-been tested with Lua 5.1.2.
+precompiled version of MD5 can also be found at the same LuaForge page.
 </p>
+
+<p>You can also install MD5 using <a href="http://www.luarocks.org">LuaRocks</a>:</p>
+
+<pre class="example">
+luarocks install md5
+</pre>
 
 <h2><a name="history"></a>History</h2>
 
 <dl class="history">
+    <dt><strong>Version 1.1.2</strong> [12/May/2008]</dt>
+	<dd><ul>
+		<li>Fixed bug in 64-bit systems</li>
+		<li>Fixed the Windows makefile to accept longer directory names
+		(patch by Alessandro Hecht and Ignacio Burgue&ntilde;o).</li> 
+	</ul></dd>
+	
     <dt><strong>Version 1.1.1</strong> [28/Nov/2007]</dt>
     <dd>
     <ul>
@@ -151,7 +163,7 @@ Comments are welcome!</p>
 
 <div id="about">
     <p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-    <p><small>$Id: index.html,v 1.19 2007/11/28 22:05:20 carregal Exp $</small></p>
+    <p><small>$Id: index.html,v 1.20 2008/05/12 20:51:27 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->

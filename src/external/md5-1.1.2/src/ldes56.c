@@ -133,7 +133,7 @@ static void set_info (lua_State *L) {
 	lua_pushliteral (L, "DES 56 cryptographic facilities for Lua");
 	lua_settable (L, -3);
 	lua_pushliteral (L, "_VERSION");
-	lua_pushliteral (L, "DES56 1.1.1");
+	lua_pushliteral (L, "DES56 1.1.2");
 	lua_settable (L, -3);
 }
 

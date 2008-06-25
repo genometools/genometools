@@ -1,12 +1,12 @@
 MD5 - Cryptographic Library for Lua
-Copyright 2003-2007 PUC-Rio
+Copyright 2003 PUC-Rio
 http://www.keplerproject.org/md5
 
 MD5 offers basic cryptographic facilities for Lua 5.1: a hash (digest)
 function, a pair crypt/decrypt based on MD5 and CFB, and a pair crypt/decrypt based
 on DES with 56-bit keys.
 
-MD5 current version is 1.1.1.
+MD5 current version is 1.1.2.
 
 To install on Linux/OSX/BSD, please edit the config file and then call
 
@@ -14,6 +14,18 @@ make
 make install
 
 The last step may require root privileges.
+
+If you are using LuaRocks you can also install MD5 with:
+
+luarocks install md5
+
+History
+
+Version 1.1.2 [12/May/2008]
+* Fixed bug in 64-bit systems
+* Fixed the Windows makefile to accept longer directory names
+  (patch by Alessandro Hecht and Ignacio Burgueño).
+
 
 Please check the documentation at /doc/us/ for more information.
 
