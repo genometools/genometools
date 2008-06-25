@@ -731,15 +731,6 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
   }
 }
 
-static void pck_splitandprocess(UNUSED Limdfsresources *limdfsresources,
-                                UNUSED unsigned long patternlength,
-                                UNUSED unsigned long maxdistance,
-                                UNUSED const Lcpinterval *parent,
-                                UNUSED const Myerscolumn *previouscolumn)
-{
-  return;
-}
-
 void esalimiteddfs(Limdfsresources *limdfsresources,
                    const Uchar *pattern,
                    unsigned long patternlength,
