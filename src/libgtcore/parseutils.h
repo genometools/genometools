@@ -27,6 +27,10 @@
    returns 0 upon success and -1 upon failure */
 int parse_int(int *out, const char *nptr);
 
+/* parse unsigned integer from <nptr> and store result in <out>.
+   returns 0 upon success and -1 upon failure */
+int parse_uint(unsigned int *out, const char *nptr);
+
 /* parse long from <nptr> and store result in <out>.
    returns 0 upon success and -1 upon failure */
 int parse_long(long *out, const char *nptr);

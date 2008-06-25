@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <limits.h>
 #include <stdio.h>
 #include "libgtcore/array.h"
 #include "libgtcore/cstr.h"
@@ -576,6 +577,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                            Error *err)
 {
   int argnum, int_value;
+  unsigned int uint_value;
   unsigned long i;
   double double_value;
   HookInfo *hookinfo;
@@ -794,16 +796,17 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                                                err);
               if (!had_err) {
                 argnum++;
-                if (parse_int(&int_value, argv[argnum]) || int_value < 0) {
+                if (parse_uint(&uint_value, argv[argnum])) {
                   error_set(err, "argument to option \"-%s\" must be a "
-                                 "non-negative integer",
-                            str_get(option->option_str));
+                                 "non-negative integer <= %u",
+                            str_get(option->option_str), UINT_MAX);
                   had_err = -1;
                 }
               }
               if (!had_err) {
                 /* minimum value check */
-                if (option->min_value_set && int_value < option->min_value.ui) {
+                if (option->min_value_set
+                    && uint_value < option->min_value.ui) {
                   error_set(err, "argument to option \"-%s\" must be an "
                                  "integer >= %u", str_get(option->option_str),
                             option->min_value.ui);
@@ -812,7 +815,8 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
               }
               if (!had_err) {
                 /* maximum value check */
-                if (option->max_value_set && int_value > option->max_value.ui) {
+                if (option->max_value_set
+                    && uint_value > option->max_value.ui) {
                   error_set(err, "argument to option \"-%s\" must be an "
                                  "integer <= %u", str_get(option->option_str),
                             option->max_value.ui);
@@ -820,7 +824,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 }
               }
               if (!had_err) {
-                *(unsigned int*) option->value = int_value;
+                *(unsigned int*) option->value = uint_value;
                 option_parsed = true;
               }
               break;
