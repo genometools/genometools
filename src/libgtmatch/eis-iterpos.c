@@ -31,7 +31,7 @@ Bwtseqpositioniterator *newBwtseqpositioniterator(const void *voidbwtSeq,
 {
   Bwtseqpositioniterator *bspi;
 
-  bspi = ma_malloc(sizeof (Bwtseqpositioniterator));
+  bspi = ma_malloc(sizeof (*bspi));
   initExtBitsRetrieval(&bspi->extBits);
   bspi->bwtSeq = (const BWTSeq *) voidbwtSeq;
   bspi->currentbound = lowerbound;
@@ -79,8 +79,14 @@ Bwtseqcontextiterator *newBwtseqcontextiterator(const void *voidbwtSeq,
 Uchar nextBwtseqcontextiterator(Bwtseqcontextiterator *bsci)
 {
   Uchar cc;
-  /* how do I determine that we are at position totallength? */
-  cc = BWTSeqGetSym(bsci->bwtSeq, bsci->bound);
+
+  if (bsci->bound == BWTSeqTerminatorPos(bsci->bwtSeq))
+  {
+    cc = SEPARATOR;
+  } else
+  {
+    cc = BWTSeqGetSym(bsci->bwtSeq, bsci->bound);
+  }
   bsci->bound = BWTSeqLFMap(bsci->bwtSeq, bsci->bound, &bsci->extBits);
   return cc;
 }
