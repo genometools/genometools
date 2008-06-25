@@ -92,7 +92,7 @@ if $gttestdata then
   Name "gt eval test (gth rate 3)"
   Keywords "gt_eval"
   Test do
-    run_test("#{$bin}gt eval -nuc no #{$testdata}encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_3_minscr_0.90.gff3", :maxtime => 60)
+    run_test("#{$bin}gt eval -nuc no #{$testdata}encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_3_minscr_0.90.gff3", :maxtime => 240)
     run "diff #{$last_stdout} #{$gttestdata}eval/gth_analysis_rate_3_minscr_0.90.txt"
   end
 

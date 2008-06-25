@@ -39,7 +39,8 @@ def checktagerator(queryfile,ms)
              :maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -k 1 -ii sfx -t patternfile",
              :maxtime => 100)
-    run_test "#{$bin}gt tagerator -rw -cmp -k 2 -ii sfx -t patternfile"
+    run_test("#{$bin}gt tagerator -rw -cmp -k 2 -ii sfx -t patternfile",
+             :maxtime => 100)
   end
 end
 

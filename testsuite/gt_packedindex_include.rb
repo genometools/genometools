@@ -188,7 +188,7 @@ if $gttestdata then
       runAndCheckPackedIndex('dmel',
                              [file],
                              :timeOuts =>
-                             { :trsuftab => 7200, :suffixerator => 14400,
+                             { :trsuftab => 7200, :suffixerator => 28800,
                                :chkintegrity => 3200, :chksearch => 800 },
                              :useSuftabTranslation => true)
     end

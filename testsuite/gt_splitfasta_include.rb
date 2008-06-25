@@ -127,7 +127,7 @@ if $gttestdata then
   Test do
     run "cp #{$gttestdata}ltrharvest/s_cer/chrAll_before-1997-10-01.fsa.gz " +
         "test.fas.gz"
-    run_test("#{$bin}gt splitfasta -targetsize 2 test.fas.gz", :maxtime => 80)
+    run_test("#{$bin}gt splitfasta -targetsize 2 test.fas.gz", :maxtime => 160)
     # check sample
     if not File.exists?("test.fas.2.gz") then
       raise TestFailed, "file 'test.fas.2.gz' does not exist"

@@ -150,7 +150,7 @@ if $gttestdata then
   Name "gt ltrharvest test on chr2L Dmel"
   Keywords "gt_ltrharvest"
   Test do
-    run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/2L_genomic_dmel_RELEASE3-1.FASTA.gz -dna -suf -lcp -tis -des", :maxtime => 4000
+    run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/2L_genomic_dmel_RELEASE3-1.FASTA.gz -dna -suf -lcp -tis -des", :maxtime => 16000
     run_test "#{$bin}gt ltrharvest -index 2L_genomic_dmel_RELEASE3-1.FASTA.gz -seed 76 -minlenltr 116 -maxlenltr 800 -mindistltr 2280 -maxdistltr 8773 -similar 91 -mintsd 4 -maxtsd 20 -vic 60 -overlaps best -xdrop 7 -mat 2 -mis -2 -ins -3 -del -3 -v", :maxtime => 500
     run "diff #{$last_stdout} #{$gttestdata}ltrharvest/d_mel/chr2L.out"
   end
@@ -174,7 +174,7 @@ if $gttestdata then
   Name "gt ltrharvest test on chr3R Dmel"
   Keywords "gt_ltrharvest"
   Test do
-    run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/3R_genomic_dmel_RELEASE3-1.FASTA.gz -dna -suf -lcp -tis -des", :maxtime => 4000
+    run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/3R_genomic_dmel_RELEASE3-1.FASTA.gz -dna -suf -lcp -tis -des", :maxtime => 8000
     run_test "#{$bin}gt ltrharvest -index 3R_genomic_dmel_RELEASE3-1.FASTA.gz -seed 76 -minlenltr 116 -maxlenltr 800 -mindistltr 2280 -maxdistltr 8773 -similar 91 -mintsd 4 -maxtsd 20 -vic 60 -overlaps best -xdrop 7 -mat 2 -mis -2 -ins -3 -del -3 -v", :maxtime => 500
     run "diff #{$last_stdout} #{$gttestdata}ltrharvest/d_mel/chr3R.out"
   end
@@ -190,7 +190,7 @@ if $gttestdata then
   Name "gt ltrharvest test on chrX Dmel"
   Keywords "gt_ltrharvest"
   Test do
-    run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/X_genomic_dmel_RELEASE3-1.FASTA.gz -dna -suf -lcp -tis -des", :maxtime => 4000
+    run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/X_genomic_dmel_RELEASE3-1.FASTA.gz -dna -suf -lcp -tis -des", :maxtime => 8000
     run_test "#{$bin}gt ltrharvest -index X_genomic_dmel_RELEASE3-1.FASTA.gz -seed 76 -minlenltr 116 -maxlenltr 800 -mindistltr 2280 -maxdistltr 8773 -similar 91 -mintsd 4 -maxtsd 20 -vic 60 -overlaps best -xdrop 7 -mat 2 -mis -2 -ins -3 -del -3 -v", :maxtime => 500
     run "diff #{$last_stdout} #{$gttestdata}ltrharvest/d_mel/chrX.out"
   end
