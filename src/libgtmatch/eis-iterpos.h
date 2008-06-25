@@ -20,6 +20,8 @@
 
 #include "seqpos-def.h"
 
+Seqpos bwtseqfirstmatch(const void *voidbwtSeq,Seqpos bound);
+
 /** Iterator for positions defined by a lower and upper bound
  */
 

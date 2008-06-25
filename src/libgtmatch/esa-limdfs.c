@@ -554,6 +554,48 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   }
 }
 
+static void pck_overcontext(Limdfsresources *limdfsresources,
+                            unsigned long patternlength,
+                            unsigned long maxdistance,
+                            const Myerscolumn *col,
+                            Seqpos left,
+                            Seqpos offset)
+{
+  Uchar cc;
+  unsigned long matchlength;
+  Myerscolumn currentcol = *col;
+  Bwtseqcontextiterator *bsci
+    = newBwtseqcontextiterator(limdfsresources->genericindex,left);
+
+  for (matchlength = 0; /* nothing */; matchlength++)
+  {
+    cc = nextBwtseqcontextiterator(bsci);
+    if (cc != (Uchar) SEPARATOR)
+    {
+      inplacenextEDcolumn(limdfsresources->eqsvector,
+                          patternlength,
+                          maxdistance,
+                          &currentcol,
+                          cc);
+      if (currentcol.maxleqk == UNDEFINDEX)
+      {
+        break;
+      }
+      if (currentcol.maxleqk == patternlength)
+      {
+        Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,left);
+        limdfsresources->processmatch(limdfsresources->processmatchinfo,
+                                      startpos,
+                                      offset + matchlength);
+        break;
+      }
+    } else
+    {
+      break;
+    }
+  }
+}
+
 static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                                unsigned long patternlength,
                                unsigned long maxdistance,
@@ -625,7 +667,12 @@ static void processchildinterval(Limdfsresources *limdfsresources,
                       child->offset);
     } else
     {
-      assert(false);
+      pck_overcontext(limdfsresources,
+                      patternlength,
+                      maxdistance,
+                      previouscolumn,
+                      child->left,
+                      child->offset);
     }
   }
 }
@@ -684,13 +731,13 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
   }
 }
 
-static void pck_splitandprocess(Limdfsresources *limdfsresources,
-                                unsigned long patternlength,
-                                unsigned long maxdistance,
-                                const Lcpinterval *parent,
-                                const Myerscolumn *previouscolumn)
+static void pck_splitandprocess(UNUSED Limdfsresources *limdfsresources,
+                                UNUSED unsigned long patternlength,
+                                UNUSED unsigned long maxdistance,
+                                UNUSED const Lcpinterval *parent,
+                                UNUSED const Myerscolumn *previouscolumn)
 {
-  return
+  return;
 }
 
 void esalimiteddfs(Limdfsresources *limdfsresources,
@@ -747,7 +794,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
           esa_overinterval(limdfsresources,&stackptr->lcpitv);
         } else
         {
-          assert(false);
+          pck_overinterval(limdfsresources,&stackptr->lcpitv);
         }
         assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
         limdfsresources->stack.nextfreeLcpintervalwithinfo--;
@@ -758,11 +805,21 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
       /* split interval */
       assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
       limdfsresources->stack.nextfreeLcpintervalwithinfo--;
-      esa_splitandprocess(limdfsresources,
-                          patternlength,
-                          maxdistance,
-                          &parent,
-                          &previouscolumn);
+      if (limdfsresources->withesa)
+      {
+        esa_splitandprocess(limdfsresources,
+                            patternlength,
+                            maxdistance,
+                            &parent,
+                            &previouscolumn);
+      } else
+      {
+        pck_splitandprocess(limdfsresources,
+                            patternlength,
+                            maxdistance,
+                            &parent,
+                            &previouscolumn);
+      }
     }
   }
 }

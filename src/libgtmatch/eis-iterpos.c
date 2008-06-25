@@ -18,6 +18,17 @@
 #include "eis-bwtseq.h"
 #include "eis-iterpos.h"
 
+Seqpos bwtseqfirstmatch(const void *voidbwtSeq,Seqpos bound)
+{
+  struct extBitsRetrieval extBits;
+  Seqpos pos;
+
+  initExtBitsRetrieval(&extBits);
+  pos = BWTSeqLocateMatch((const BWTSeq *) voidbwtSeq,bound,&extBits);
+  destructExtBitsRetrieval(&extBits);
+  return pos;
+}
+
 struct Bwtseqpositioniterator
 {
   struct extBitsRetrieval extBits;
@@ -82,9 +93,9 @@ Uchar nextBwtseqcontextiterator(Bwtseqcontextiterator *bsci)
 
   if (bsci->bound != BWTSeqTerminatorPos(bsci->bwtSeq))
   {
-  {
     cc = BWTSeqGetSym(bsci->bwtSeq, bsci->bound);
   } else
+  {
     cc = SEPARATOR;
   }
   bsci->bound = BWTSeqLFMap(bsci->bwtSeq, bsci->bound, &bsci->extBits);
