@@ -110,6 +110,7 @@ struct Option {
                           option needs to be set */
         *exclusions;
   const Option *mandatory_either_option;
+  unsigned int reference_count;
 };
 
 static Option *option_new(const char *option_str, const char *description,
@@ -161,6 +162,13 @@ static Option* option_new_version(ShowVersionFunc versionfunc)
   Option *o = option_new("version", "display version information and exit",
                          versionfunc);
   o->option_type = OPTION_VERSION;
+  return o;
+}
+
+Option* option_ref(Option *o)
+{
+  assert(o);
+  o->reference_count++;
   return o;
 }
 
@@ -1449,6 +1457,10 @@ void option_delete(Option *o)
 {
   unsigned long i;
   if (!o) return;
+  if (o->reference_count) {
+    o->reference_count--;
+    return;
+  }
   str_delete(o->option_str);
   str_delete(o->description);
   for (i = 0; i < array_size(o->implications); i++)
