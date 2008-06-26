@@ -492,18 +492,11 @@ EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
  * @param err
  * @return 0 if not unique, otherwise length of minmum unique prefix.
  */
-unsigned long packedindexuniqueforward(const void *genericindex,
-                                       /*@unused@*/ unsigned long offset,
-                                       /*@unused@*/ Seqpos left,
-                                       /*@unused@*/ Seqpos right,
-                                       /*@unused@*/ Seqpos *witnessposition,
+unsigned long packedindexuniqueforward(const BWTSeq *bwtseq,
                                        const Uchar *qstart,
                                        const Uchar *qend);
 
-unsigned long packedindexmstatsforward(const void *genericindex,
-                                       /*@unused@*/ unsigned long offset,
-                                       /*@unused@*/ Seqpos left,
-                                       /*@unused@*/ Seqpos right,
+unsigned long packedindexmstatsforward(const BWTSeq *bwtseq,
                                        Seqpos *witnessposition,
                                        const Uchar *qstart,
                                        const Uchar *qend);

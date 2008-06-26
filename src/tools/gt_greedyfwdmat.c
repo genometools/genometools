@@ -30,9 +30,7 @@
 #include "libgtmatch/fmi-map.pr"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/esa-minunique.pr"
-#include "libgtmatch/eis-bwtseq-param.h"
-#include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-bwtseq-construct.h"
+#include "libgtmatch/eis-iterpos.h"
 #include "tools/gt_uniquesub.h"
 #include "tools/gt_matchingstatistics.h"
 
@@ -276,7 +274,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
   Gfmsubcallinfo gfmsubcallinfo;
   Fmindex fmindex;
   Suffixarray suffixarray;
-  BWTSeq *packedindex = NULL;
+  void *packedindex = NULL;
   Verboseinfo *verboseinfo;
   bool haserr = false;
   Alphabet *alphabet = NULL;
@@ -346,11 +344,9 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
     {
       if (gfmsubcallinfo.indextype == Packedindextype)
       {
-        packedindex = loadBWTSeqForSA(gfmsubcallinfo.indexname,
-                                      BWT_ON_BLOCK_ENC,
-                                      BWTDEFOPT_MULTI_QUERY,
-                                      &suffixarray,
-                                      totallength+1, err);
+        packedindex = loadvoidBWTSeqForSA(gfmsubcallinfo.indexname,
+                                          &suffixarray,
+                                          totallength+1, err);
         if (packedindex == NULL)
         {
           haserr = true;
@@ -391,10 +387,10 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
         theindex = (const void *) packedindex;
         if (doms)
         {
-          gmatchforwardfunction = packedindexmstatsforward;
+          gmatchforwardfunction = voidpackedindexmstatsforward;
         } else
         {
-          gmatchforwardfunction = packedindexuniqueforward;
+          gmatchforwardfunction = voidpackedindexuniqueforward;
         }
       }
     }
@@ -447,7 +443,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
   {
     if (gfmsubcallinfo.indextype == Packedindextype && packedindex != NULL)
     {
-      deleteBWTSeq(packedindex);
+      deletevoidBWTSeq(packedindex);
     }
     freesuffixarray(&suffixarray);
   }

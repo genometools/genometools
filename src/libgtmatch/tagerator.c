@@ -30,6 +30,7 @@
 #include "alphadef.h"
 #include "esa-myersapm.h"
 #include "esa-limdfs.h"
+#include "eis-iterpos.h"
 #include "format64.h"
 
 #include "echoseq.pr"
@@ -223,30 +224,46 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   SeqIterator *seqit = NULL;
   bool haserr = false;
   int retval, try;
-  unsigned int demand = SARR_SUFTAB | SARR_ESQTAB;
+  unsigned int demand;
   Limdfsresources *limdfsresources = NULL;
   Myersonlineresources *mor = NULL;
   ArraySeqpos storeonline, storeoffline;
+  void *packedindex = NULL;
+  bool withesa;
 
   if (str_length(tageratoroptions->esaindexname) > 0)
   {
-    if (mapsuffixarray(&suffixarray,
-                       &totallength,
-                       demand,
-                       tageratoroptions->esaindexname,
-                       NULL,
-                       err) != 0)
-    {
-      haserr = true;
-    }
-    if (suffixarray.readmode != Forwardmode)
-    {
-      error_set(err,"can only process index in forward mode");
-      haserr = true;
-    }
+    demand = SARR_SUFTAB | SARR_ESQTAB;
+    withesa = true;
   } else
   {
-    assert(str_length(tageratoroptions->pckindexname) > 0);
+    demand = 0;
+    withesa = false;
+  }
+  if (mapsuffixarray(&suffixarray,
+                     &totallength,
+                     demand,
+                     withesa ? tageratoroptions->esaindexname
+                             : tageratoroptions->pckindexname,
+                     NULL,
+                     err) != 0)
+  {
+    haserr = true;
+  }
+  if (!haserr && suffixarray.readmode != Forwardmode)
+  {
+    error_set(err,"can only process index in forward mode");
+    haserr = true;
+  }
+  if (!haserr && str_length(tageratoroptions->pckindexname) > 0)
+  {
+    packedindex = loadvoidBWTSeqForSA(tageratoroptions->pckindexname,
+                                      &suffixarray,
+                                      totallength+1, err);
+    if (packedindex == NULL)
+    {
+      haserr = true;
+    }
   }
   INITARRAY(&storeonline,Seqpos);
   INITARRAY(&storeoffline,Seqpos);
@@ -282,8 +299,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     }
     if (tageratoroptions->maxdistance > 0)
     {
-      limdfsresources = newLimdfsresources(&suffixarray,
-                                           true,
+      limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
+                                           withesa,
                                            mapsize,
                                            totallength,
                                            processmatch,
@@ -364,5 +381,9 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   }
   seqiterator_delete(seqit);
   freesuffixarray(&suffixarray);
+  if (packedindex != NULL)
+  {
+    deletevoidBWTSeq(packedindex);
+  }
   return haserr ? -1 : 0;
 }

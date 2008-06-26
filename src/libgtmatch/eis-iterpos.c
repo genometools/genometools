@@ -16,6 +16,7 @@
 */
 
 #include "eis-bwtseq.h"
+#include "eis-bwtseq-construct.h"
 #include "eis-iterpos.h"
 
 Seqpos bwtseqfirstmatch(const void *voidbwtSeq,Seqpos bound)
@@ -125,10 +126,54 @@ Uchar bwtseqintervalextendlcp(const void *voidBwtSeq,
   return ccl;
 }
 
+void *loadvoidBWTSeqForSA(const Str *indexname,
+                          const Suffixarray *suffixarray,
+                          Seqpos totallength,
+                          Error *err)
+{
+  return loadBWTSeqForSA(indexname,
+                         BWT_ON_BLOCK_ENC,
+                         BWTDEFOPT_MULTI_QUERY,
+                         suffixarray,
+                         totallength+1, err);
+}
+
 void bwtrangesplitwithoutspecial(Seqpos *rangeOccs,
                                  const void *voidBwtSeq,
                                  const Lcpinterval *parent)
 {
   BWTSeqPosPairRangeOcc((const BWTSeq *) voidBwtSeq, 0,
                         parent->left, parent->right,rangeOccs);
+}
+
+void deletevoidBWTSeq(void *packedindex)
+{
+  deleteBWTSeq((BWTSeq *) packedindex);
+}
+
+unsigned long voidpackedindexuniqueforward(const void *genericindex,
+                                           UNUSED unsigned long offset,
+                                           UNUSED Seqpos left,
+                                           UNUSED Seqpos right,
+                                           UNUSED Seqpos *witnessposition,
+                                           const Uchar *qstart,
+                                           const Uchar *qend)
+{
+  return packedindexuniqueforward((const BWTSeq *) genericindex,
+                                  qstart,
+                                  qend);
+}
+
+unsigned long voidpackedindexmstatsforward(const void *genericindex,
+                                           UNUSED unsigned long offset,
+                                           UNUSED Seqpos left,
+                                           UNUSED Seqpos right,
+                                           Seqpos *witnessposition,
+                                           const Uchar *qstart,
+                                           const Uchar *qend)
+{
+  return packedindexmstatsforward((const BWTSeq *) genericindex,
+                                  witnessposition,
+                                  qstart,
+                                  qend);
 }

@@ -738,8 +738,7 @@ EISFILES=${shell ls ${CURDIR}/src/libgtmatch/*.c | grep eis-}\
          ${CURDIR}/src/libgtmatch/sfx-run.c\
          ${CURDIR}/src/libgtmatch/encseq-specialsrank.c
 
-SKTOOLS=${filter-out src/tools/gt_greedyfwdmat.c,\
-                     ${shell grep -l Kurtz src/tools/*.c}}
+SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 
 spgt:${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/libgtmatch/*.c}}\
