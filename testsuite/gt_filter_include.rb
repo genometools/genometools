@@ -168,3 +168,11 @@ Test do
   run_test "#{$bin}gt filter -targetstrand - #{$testdata}U89959_sas.gff3"
   run "diff #{$last_stdout} #{$testdata}U89959_sas.minus_targets"
 end
+
+Name "gt filter test 23 (-targetstrand)"
+Keywords "gt_filter targetstrand test"
+Test do
+  run_test "#{$bin}gt filter -targetstrand + " +
+            "#{$testdata}target_attribute_without_strand.gff3"
+  run "diff #{$last_stdout} #{$testdata}target_attribute_without_strand.gff3"
+end

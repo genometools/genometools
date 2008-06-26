@@ -185,16 +185,14 @@ static int parse_target_attribute(const char *value, Str *target_id,
     had_err = gff3_unescape(unescaped_target, splitter_get_token(splitter, 0),
                             strlen(splitter_get_token(splitter, 0)), err);
   }
-  if (!had_err && target_id)
-    str_append_str(target_id, unescaped_target);
+  if (!had_err && target_id) str_append_str(target_id, unescaped_target);
   /* parse target range */
   if (!had_err) {
     had_err = parse_range(&parsed_range, splitter_get_token(splitter, 1),
                           splitter_get_token(splitter, 2), line_number,
                           filename, err);
   }
-  if (!had_err && target_range)
-    *target_range = parsed_range;
+  if (!had_err && target_range) *target_range = parsed_range;
   /* parse target strand (if given) */
   if (!had_err) {
     if (splitter_size(splitter) == 4) {
