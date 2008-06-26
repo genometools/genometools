@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,31 +23,31 @@
 #include "libgtcore/phase.h"
 #include "libgtcore/strand.h"
 
-/* parse integer from <nptr> and store result in <out>.
-   returns 0 upon success and -1 upon failure */
+/* Parse integer from <nptr> and store result in <out>.
+   Returns 0 upon success and -1 upon failure. */
 int parse_int(int *out, const char *nptr);
 
-/* parse unsigned integer from <nptr> and store result in <out>.
-   returns 0 upon success and -1 upon failure */
+/* Parse unsigned integer from <nptr> and store result in <out>.
+   Returns 0 upon success and -1 upon failure. */
 int parse_uint(unsigned int *out, const char *nptr);
 
-/* parse long from <nptr> and store result in <out>.
-   returns 0 upon success and -1 upon failure */
+/* Parse long from <nptr> and store result in <out>.
+   Returns 0 upon success and -1 upon failure. */
 int parse_long(long *out, const char *nptr);
 
-/* parse unsigned long from <nptr> and store result in <out>.
-   returns 0 upon success and -1 upon failure */
+/* Parse unsigned long from <nptr> and store result in <out>.
+   returns 0 upon success and -1 upon failure. */
 int parse_ulong(unsigned long *out, const char *nptr);
 
-/* parse double from <nptr> and store result in <out>.
-   returns 0 upon success and -1 upon failure */
+/* Parse double from <nptr> and store result in <out>.
+   Returns 0 upon success and -1 upon failure. */
 int parse_double(double *out, const char *nptr);
 
-/* enforces that start <= end */
+/* Enforces that <start> <= <end>. */
 int parse_range(Range*, const char *start, const char *end,
                 unsigned long line_number, const char *filename, Error*);
 
-/* sets 'score_value' to UNDEF_DOUBLE if strcmp(score, ".") == 0 */
+/* Sets <score_value> to UNDEF_DOUBLE if strcmp(score, ".") == 0. */
 int parse_score(double *score_value, const char *score,
                 unsigned long line_number, const char *filename, Error*);
 
