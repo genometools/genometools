@@ -22,6 +22,7 @@
 #include "sarr-def.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
+#include "divmodmul.h"
 #include "esa-splititv.h"
 #include "esa-limdfs.h"
 #include "eis-iterpos.h"
@@ -393,6 +394,7 @@ struct Limdfsresources
   void *processmatchinfo;
   const void *genericindex;
   bool withesa;
+  Seqpos *rangeOccs;
 };
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
@@ -419,6 +421,14 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->genericindex = genericindex;
   limdfsresources->totallength = totallength;
   limdfsresources->withesa = withesa;
+  if (withesa)
+  {
+    limdfsresources->rangeOccs = NULL;
+  } else
+  {
+    ALLOCASSIGNSPACE(limdfsresources->rangeOccs,NULL,Seqpos,
+                     MULT2(limdfsresources->alphasize));
+  }
   return limdfsresources;
 }
 
@@ -449,6 +459,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources)
   FREESPACE(limdfsresources->eqsvector);
   FREEARRAY(&limdfsresources->bwci.bounds,Boundswithchar);
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
+  FREESPACE(limdfsresources->rangeOccs);
   FREESPACE(*ptrlimdfsresources);
 }
 
@@ -716,17 +727,42 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
   }
   for (bound=firstnonspecial; bound <= parent->right; bound++)
   {
-    if (limdfsresources->withesa)
+    esa_overcontext(limdfsresources,
+                    patternlength,
+                    maxdistance,
+                    previouscolumn,
+                    bound,
+                    parent->offset+1);
+  }
+}
+
+static void pck_splitandprocess(Limdfsresources *limdfsresources,
+                                UNUSED unsigned long patternlength,
+                                UNUSED unsigned long maxdistance,
+                                const Lcpinterval *parent,
+                                UNUSED const Myerscolumn *previouscolumn)
+{
+  unsigned long idx;
+
+  bwtrangesplitwithoutspecial(limdfsresources->rangeOccs,
+                              limdfsresources->genericindex,parent);
+  for (idx = 0; idx < (unsigned long) limdfsresources->alphasize; idx += 2UL)
+  {
+    if (limdfsresources->rangeOccs[idx] < limdfsresources->rangeOccs[idx+1])
     {
-      esa_overcontext(limdfsresources,
-                      patternlength,
-                      maxdistance,
-                      previouscolumn,
-                      bound,
-                      parent->offset+1);
-    } else
-    {
-      assert(false);
+      Uchar inchar;
+      Lcpinterval child;
+
+      child.left = limdfsresources->rangeOccs[idx];
+      child.right = limdfsresources->rangeOccs[idx+1];
+      child.offset = parent->offset+1;
+      inchar = (Uchar) DIV2(idx);
+      processchildinterval(limdfsresources,
+                           patternlength,
+                           maxdistance,
+                           &child,
+                           inchar,
+                           previouscolumn);
     }
   }
 }

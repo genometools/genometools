@@ -36,7 +36,8 @@ static void gt_tagerator_arguments_delete(void *tool_arguments)
   {
     return;
   }
-  str_delete(arguments->indexname);
+  str_delete(arguments->esaindexname);
+  str_delete(arguments->pckindexname);
   strarray_delete(arguments->tagfiles);
   ma_free(arguments);
 }
@@ -45,12 +46,14 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
 {
   TageratorOptions *arguments = tool_arguments;
   OptionParser *op;
-  Option *option, *optionrw, *optiononline, *optioncmp;
+  Option *option, *optionrw, *optiononline, *optioncmp, *optionesaindex,
+         *optionpckindex;
 
   assert(arguments != NULL);
-  arguments->indexname = str_new();
+  arguments->esaindexname = str_new();
+  arguments->pckindexname = str_new();
   arguments->tagfiles = strarray_new();
-  op = option_parser_new("[options] -t tagfile -ii indexname",
+  op = option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   option = option_new_filenamearray("t","Specify files containing the tags",
@@ -63,11 +66,16 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                             0);
   option_parser_add_option(op, option);
 
-  option = option_new_string("ii",
-                             "Specify input index",
-                             arguments->indexname, NULL);
-  option_parser_add_option(op, option);
-  option_is_mandatory(option);
+  optionesaindex = option_new_string("esa",
+                                     "Specify index (enhanced suffix array)",
+                                     arguments->esaindexname, NULL);
+  option_parser_add_option(op, optionesaindex);
+
+  optionpckindex = option_new_string("pck",
+                                     "Specify index (packed index)",
+                                     arguments->pckindexname, NULL);
+  option_parser_add_option(op, optionpckindex);
+  option_exclude(optionesaindex,optionpckindex);
 
   optiononline = option_new_bool("online","Perform online searches",
                             &arguments->online, false);
@@ -114,7 +122,14 @@ static int gt_tagerator_runner(UNUSED int argc,
     printf("# tagfile=%s\n",strarray_get(arguments->tagfiles,idx));
   }
   printf("# maxdifference=%lu\n",arguments->maxdistance);
-  printf("# indexname=%s\n",str_get(arguments->indexname));
+  if (str_length(arguments->esaindexname) > 0)
+  {
+    printf("# indexname(esa)=%s\n",str_get(arguments->esaindexname));
+  } else
+  {
+    assert(str_length(arguments->pckindexname) > 0);
+    printf("# indexname(pck)=%s\n",str_get(arguments->pckindexname));
+  }
   if (runtagerator(arguments,err) != 0)
   {
     haserr = true;

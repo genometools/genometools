@@ -228,19 +228,25 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   Myersonlineresources *mor = NULL;
   ArraySeqpos storeonline, storeoffline;
 
-  if (mapsuffixarray(&suffixarray,
-                     &totallength,
-                     demand,
-                     tageratoroptions->indexname,
-                     NULL,
-                     err) != 0)
+  if (str_length(tageratoroptions->esaindexname) > 0)
   {
-    haserr = true;
-  }
-  if (suffixarray.readmode != Forwardmode)
+    if (mapsuffixarray(&suffixarray,
+                       &totallength,
+                       demand,
+                       tageratoroptions->esaindexname,
+                       NULL,
+                       err) != 0)
+    {
+      haserr = true;
+    }
+    if (suffixarray.readmode != Forwardmode)
+    {
+      error_set(err,"can only process index in forward mode");
+      haserr = true;
+    }
+  } else
   {
-    error_set(err,"can only process index in forward mode");
-    haserr = true;
+    assert(str_length(tageratoroptions->pckindexname) > 0);
   }
   INITARRAY(&storeonline,Seqpos);
   INITARRAY(&storeoffline,Seqpos);

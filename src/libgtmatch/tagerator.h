@@ -22,7 +22,7 @@
 
 typedef struct {
   StrArray *tagfiles;
-  Str *indexname;
+  Str *esaindexname, *pckindexname;
   unsigned long maxdistance;
   bool online, docompare, replacewildcard, fwdmatch, rcmatch;
 } TageratorOptions;

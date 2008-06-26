@@ -124,3 +124,11 @@ Uchar bwtseqintervalextendlcp(const void *voidBwtSeq,
   assert(ccl < alphasize);
   return ccl;
 }
+
+void bwtrangesplitwithoutspecial(Seqpos *rangeOccs,
+                                 const void *voidBwtSeq,
+                                 const Lcpinterval *parent)
+{
+  BWTSeqPosPairRangeOcc((const BWTSeq *) voidBwtSeq, 0,
+                        parent->left, parent->right,rangeOccs);
+}

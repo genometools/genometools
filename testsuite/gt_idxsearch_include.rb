@@ -35,11 +35,11 @@ def checktagerator(queryfile,ms)
       "#{$bin}gt seqfilter -minlength 12 - | " +
       "sed -e \'s/^>.*/>/\' > patternfile"
   if File.size("patternfile") > 0
-    run_test("#{$bin}gt tagerator -rw -cmp -ii sfx -t patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -esa sfx -t patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -k 1 -ii sfx -t patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -k 1 -esa sfx -t patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -k 2 -ii sfx -t patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -k 2 -esa sfx -t patternfile",
              :maxtime => 100)
   end
 end
