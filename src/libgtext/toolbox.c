@@ -103,7 +103,7 @@ static int show_tool_name(void *key, UNUSED void *value, UNUSED void *data,
 {
   error_check(err);
   assert(key && value);
-  if (strcmp(key, "dev"))
+  if (strcmp(key, "dev") && strcmp(key, "template"))
     xputs(key);
   return 0;
 }

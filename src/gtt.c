@@ -70,6 +70,7 @@
 #include "tools/gt_stat.h"
 #include "tools/gt_suffixerator.h"
 #include "tools/gt_tagerator.h"
+#include "tools/gt_template.h"
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 
@@ -117,6 +118,7 @@ Toolbox* gtt_tools(void)
   toolbox_add(tools, "stat", gt_stat);
   toolbox_add(tools, "suffixerator", gt_suffixerator);
   toolbox_add_tool(tools, "tagerator", gt_tagerator());
+  toolbox_add_tool(tools, "template", gt_template());
   toolbox_add(tools, "uniq", gt_uniq);
   toolbox_add(tools, "uniquesub", gt_uniquesub);
 #ifdef LIBGTVIEW
