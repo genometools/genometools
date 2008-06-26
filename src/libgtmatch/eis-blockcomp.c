@@ -1525,7 +1525,8 @@ blockCompSeqPosPairRangeRank(
                                       seqIdx->blockMapAlphabetSize, compIndex,
                                       rankCounts + rsize);,
           varDataMemOffset);
-        adjustRanksForBlock(seqIdx, sBlock, posB, blockSize, rankCounts,
+        adjustRanksForBlock(seqIdx, sBlock, posB, blockSize,
+                            rankCounts + rsize,
                             cwIdxMemOffset, varDataMemOffset);
         {
           Seqpos base = bucketBasePos(seqIdx, bucketNum);
