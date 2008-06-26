@@ -86,6 +86,7 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                             &arguments->docompare, false);
   option_parser_add_option(op, optioncmp);
   option_exclude(optiononline,optioncmp);
+  option_exclude(optiononline,optionpckindex);
 
   optionrw = option_new_bool("rw","Replace wildcard in tag by random char",
                              &arguments->replacewildcard, false);
@@ -136,19 +137,6 @@ static int gt_tagerator_runner(UNUSED int argc,
   }
   return haserr ? -1 : 0;
 }
-
-/*
-static int gt_tagerator_arguments_check(UNUSED int rest_argc,
-                                       void *tool_arguments, Error *err)
-{
-  TageratorOptions *arguments = tool_arguments;
-  error_check(err);
-  assert(arguments);
-  if (arguments->minlength > arguments->maxlength) {
-    error_set(err, "-minlength must be <= than -maxlength");
-    return -1;
-  }
-*/
 
 Tool* gt_tagerator(void)
 {
