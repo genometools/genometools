@@ -30,7 +30,7 @@
 #include "alphadef.h"
 #include "esa-myersapm.h"
 #include "esa-limdfs.h"
-#include "eis-iterpos.h"
+#include "eis-voiditf.h"
 #include "format64.h"
 
 #include "echoseq.pr"

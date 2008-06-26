@@ -30,7 +30,7 @@
 #include "libgtmatch/fmi-map.pr"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/esa-minunique.pr"
-#include "libgtmatch/eis-iterpos.h"
+#include "libgtmatch/eis-voiditf.h"
 #include "tools/gt_uniquesub.h"
 #include "tools/gt_matchingstatistics.h"
 

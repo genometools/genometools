@@ -17,7 +17,7 @@
 
 #include "eis-bwtseq.h"
 #include "eis-bwtseq-construct.h"
-#include "eis-iterpos.h"
+#include "eis-voiditf.h"
 
 Seqpos bwtseqfirstmatch(const void *voidbwtSeq,Seqpos bound)
 {

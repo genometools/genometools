@@ -25,7 +25,7 @@
 #include "divmodmul.h"
 #include "esa-splititv.h"
 #include "esa-limdfs.h"
-#include "eis-iterpos.h"
+#include "eis-voiditf.h"
 
 #define UNDEFINDEX      (patternlength+1)
 
