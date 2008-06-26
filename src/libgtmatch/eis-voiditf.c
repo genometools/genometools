@@ -18,6 +18,7 @@
 #include "eis-bwtseq.h"
 #include "eis-bwtseq-construct.h"
 #include "eis-voiditf.h"
+#include "stamp.h"
 
 Seqpos bwtseqfirstmatch(const void *voidbwtSeq,Seqpos bound)
 {
@@ -187,13 +188,18 @@ void pck_exactpatternmatching(const void *genericindex,
   BWTSeqExactMatchesIterator *bsemi;
   Seqpos dbstartpos;
 
+  STAMP;
   bsemi = newEMIterator((const BWTSeq *) genericindex,
                         pattern,(size_t) patternlength);
   assert(bsemi != NULL);
+  STAMP;
   while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) genericindex))
   {
+    STAMP;
     processmatch(processmatchinfo,dbstartpos,(Seqpos) patternlength);
+    STAMP;
   }
+  STAMP;
   if (bsemi != NULL)
   {
     deleteEMIterator(bsemi);
