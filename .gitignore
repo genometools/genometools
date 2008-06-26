@@ -18,6 +18,7 @@
 *.suf
 *.tis
 *.esq
+*.bdx
 *.polya
 *.polya.info
 *.gt_bsi

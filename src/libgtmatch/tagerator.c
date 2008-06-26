@@ -142,6 +142,7 @@ static int dotransformtag(Uchar *transformedtag,
 }
 
 static void performthesearch(const TageratorOptions *tageratoroptions,
+                             UNUSED bool withesa,
                              Myersonlineresources *mor,
                              Limdfsresources *limdfsresources,
                              const Encodedsequence *encseq,
@@ -250,10 +251,22 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   {
     haserr = true;
   }
-  if (!haserr && suffixarray.readmode != Forwardmode)
+  if (!haserr)
   {
-    error_set(err,"can only process index in forward mode");
-    haserr = true;
+    if (withesa && suffixarray.readmode != Forwardmode)
+    {
+      error_set(err,"using option -esa you can only process index "
+                    "in forward mode");
+      haserr = true;
+    } else
+    {
+      if (!withesa && suffixarray.readmode != Reversemode)
+      {
+        error_set(err,"with option -pck you can only process index "
+                      "in reverse mode");
+        haserr = true;
+      }
+    }
   }
   if (!haserr && str_length(tageratoroptions->pckindexname) > 0)
   {
@@ -348,6 +361,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
             complementtag(transformedtag,taglen);
           }
           performthesearch(tageratoroptions,
+                           withesa,
                            mor,
                            limdfsresources,
                            suffixarray.encseq,

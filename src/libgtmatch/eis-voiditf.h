@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef EIS_ITERPOS_H
-#define EIS_ITERPOS_H
+#ifndef EIS_VOIDITF_H
+#define EIS_VOIDITF_H
 
 #include "seqpos-def.h"
 #include "sarr-def.h"
