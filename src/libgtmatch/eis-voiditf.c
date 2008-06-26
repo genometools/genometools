@@ -177,3 +177,26 @@ unsigned long voidpackedindexmstatsforward(const void *genericindex,
                                   qstart,
                                   qend);
 }
+
+void pck_exactpatternmatching(const void *genericindex,
+                              const Uchar *pattern,
+                              unsigned long patternlength,
+                              void (*processmatch)(void *,Seqpos,Seqpos),
+                              void *processmatchinfo)
+{
+  BWTSeqExactMatchesIterator *bsemi;
+  Seqpos dbstartpos;
+
+  bsemi = newEMIterator((const BWTSeq *) genericindex,
+                        pattern,(size_t) patternlength);
+  assert(bsemi != NULL);
+  while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) genericindex))
+  {
+    processmatch(processmatchinfo,dbstartpos,(Seqpos) patternlength);
+  }
+  if (bsemi != NULL)
+  {
+    deleteEMIterator(bsemi);
+    bsemi = NULL;
+  }
+}

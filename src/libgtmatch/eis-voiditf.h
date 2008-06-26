@@ -76,4 +76,10 @@ unsigned long voidpackedindexmstatsforward(const void *genericindex,
                                            const Uchar *qstart,
                                            const Uchar *qend);
 
+void pck_exactpatternmatching(const void *genericindex,
+                              const Uchar *pattern,
+                              unsigned long patternlength,
+                              void (*processmatch)(void *,Seqpos,Seqpos),
+                              void *processmatchinfo);
+
 #endif

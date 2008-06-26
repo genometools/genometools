@@ -30,6 +30,8 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     void (*processmatch)(void *,Seqpos,Seqpos),
                                     void *processmatchinfo);
 
+const void *getgenericindexfromresource(Limdfsresources *limdfsresources);
+
 void freeLimdfsresources(Limdfsresources **ptrlimdfsresources);
 
 void esalimiteddfs(Limdfsresources *limdfsresources,

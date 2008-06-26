@@ -432,6 +432,11 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   return limdfsresources;
 }
 
+const void *getgenericindexfromresource(Limdfsresources *limdfsresources)
+{
+  return limdfsresources->genericindex;
+}
+
 static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
                              Seqpos left,
                              Seqpos right,

@@ -38,24 +38,22 @@
 
 #define MAXTAGSIZE INTWORDSIZE
 
-static void exactpatternmatching(const Encodedsequence *encseq,
-                                 Readmode readmode,
-                                 const Seqpos *suftab,
-                                 Seqpos totallength,
-                                 const Uchar *pattern,
-                                 unsigned long patternlength,
-                                 void (*processmatch)(void *,Seqpos,Seqpos),
-                                 void *processmatchinfo)
+static void esa_exactpatternmatching(const void *genericindex,
+                                     const Uchar *pattern,
+                                     unsigned long patternlength,
+                                     void (*processmatch)(void *,Seqpos,Seqpos),
+                                     void *processmatchinfo)
 {
+  const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
   MMsearchiterator *mmsi;
-  Seqpos dbstartpos;
+  Seqpos dbstartpos, totallength = getencseqtotallength(suffixarray->encseq);
 
-  mmsi = newmmsearchiterator(encseq,
-                             suftab,
+  mmsi = newmmsearchiterator(suffixarray->encseq,
+                             suffixarray->suftab,
                              0,  /* leftbound */
                              totallength, /* rightbound */
                              0, /* offset */
-                             readmode,
+                             suffixarray->readmode,
                              pattern,
                              patternlength);
   while (nextmmsearchiterator(&dbstartpos,mmsi))
@@ -142,13 +140,9 @@ static int dotransformtag(Uchar *transformedtag,
 }
 
 static void performthesearch(const TageratorOptions *tageratoroptions,
-                             UNUSED bool withesa,
+                             bool withesa,
                              Myersonlineresources *mor,
                              Limdfsresources *limdfsresources,
-                             const Encodedsequence *encseq,
-                             Readmode readmode,
-                             const Seqpos *suftab,
-                             Seqpos totallength,
                              const Uchar *transformedtag,
                              unsigned long taglen,
                              void (*processmatch)(void *,Seqpos,Seqpos),
@@ -166,14 +160,21 @@ static void performthesearch(const TageratorOptions *tageratoroptions,
   {
     if (tageratoroptions->maxdistance == 0)
     {
-      exactpatternmatching(encseq,
-                           readmode,
-                           suftab,
-                           totallength,
-                           transformedtag,
-                           taglen,
-                           processmatch,
-                           processmatchinfooffline);
+      if (withesa)
+      {
+        esa_exactpatternmatching(getgenericindexfromresource(limdfsresources),
+                                 transformedtag,
+                                 taglen,
+                                 processmatch,
+                                 processmatchinfooffline);
+      } else
+      {
+        pck_exactpatternmatching(getgenericindexfromresource(limdfsresources),
+                                 transformedtag,
+                                 taglen,
+                                 processmatch,
+                                 processmatchinfooffline);
+      }
     } else
     {
       esalimiteddfs(limdfsresources,
@@ -234,7 +235,11 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
 
   if (str_length(tageratoroptions->esaindexname) > 0)
   {
-    demand = SARR_SUFTAB | SARR_ESQTAB;
+    demand = SARR_ESQTAB;
+    if (!tageratoroptions->online)
+    {
+      demand |= SARR_SUFTAB;
+    }
     withesa = true;
   } else
   {
@@ -310,15 +315,12 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                     processmatch,
                                     processmatchinfoonline);
     }
-    if (tageratoroptions->maxdistance > 0)
-    {
-      limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
-                                           withesa,
-                                           mapsize,
-                                           totallength,
-                                           processmatch,
-                                           processmatchinfooffline);
-    }
+    limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
+                                         withesa,
+                                         mapsize,
+                                         totallength,
+                                         processmatch,
+                                         processmatchinfooffline);
     seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
     for (tagnumber = 0; !haserr; tagnumber++)
     {
@@ -364,10 +366,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                            withesa,
                            mor,
                            limdfsresources,
-                           suffixarray.encseq,
-                           suffixarray.readmode,
-                           suffixarray.suftab,
-                           totallength,
                            transformedtag,
                            taglen,
                            processmatch,
