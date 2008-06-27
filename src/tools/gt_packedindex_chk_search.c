@@ -180,14 +180,16 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
         if (BWTSeqHasLocateInformation(bwtSeq))
         {
           Seqpos numMatches;
-          if ((had_err = !reinitEMIterator(&EMIter, bwtSeq, pptr, patternLen)))
+          if ((had_err = !reinitEMIterator(&EMIter, bwtSeq, pptr, patternLen,
+                                           false)))
           {
             fputs("Internal error: failed to reinitialize pattern match"
                   " iterator", stderr);
             abort();
           }
           numMatches = EMINumMatchesTotal(&EMIter);
-          assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen));
+          assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen,
+                                                false));
           assert(EMINumMatchesTotal(&EMIter) == countmmsearchiterator(mmsi));
 /*        fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n" */
 /*                "pattern: ", trial, numMatches); */
@@ -223,7 +225,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
         }
         else
         {
-          Seqpos numFMIMatches = BWTSeqMatchCount(bwtSeq, pptr, patternLen),
+          Seqpos numFMIMatches = BWTSeqMatchCount(bwtSeq, pptr, patternLen,
+                                                  false),
             numMMSearchMatches = countmmsearchiterator(mmsi);
           if ((had_err = numFMIMatches != numMMSearchMatches))
           {

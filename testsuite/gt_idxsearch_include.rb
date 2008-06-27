@@ -20,12 +20,12 @@ def makegreedyfwdmatcall(queryfile,indexarg,ms)
 end
 
 def checkgreedyfwdmat(queryfile,ms)
-  run_test makegreedyfwdmatcall(queryfile,"-fmi fmi",ms), :maxtime => 1200
+  run_test(makegreedyfwdmatcall(queryfile,"-fmi fmi",ms), :maxtime => 1200)
   run "mv #{$last_stdout} tmp.fmi"
-  run_test makegreedyfwdmatcall(queryfile,"-esa sfx",ms), :maxtime => 1200
+  run_test(makegreedyfwdmatcall(queryfile,"-esa sfx",ms), :maxtime => 1200)
   run "mv #{$last_stdout} tmp.esa"
   run "diff tmp.esa tmp.fmi"
-  run_test makegreedyfwdmatcall(queryfile,"-pck pck",ms), :maxtime => 1200
+  run_test(makegreedyfwdmatcall(queryfile,"-pck pck",ms), :maxtime => 1200)
   run "mv #{$last_stdout} tmp.pck"
   run "diff tmp.pck tmp.fmi"
 end
@@ -74,10 +74,10 @@ allfiles.each do |reffile|
   Name "gt packedindex #{reffile}"
   Keywords "gt_packedindex small"
   Test do
-    run_test "#{$bin}gt packedindex mkindex -tis -indexname pck " +
+    run_test("#{$bin}gt packedindex mkindex -tis -indexname pck " +
              "-sprank -db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
              " -locfreq 32 -dir rev", 
-             :maxtime => 600
+             :maxtime => 600)
   end
 end
 

@@ -745,7 +745,10 @@ BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
                             BWTSeqLength(bwtSeq) - 1));
     while ((markOffset = searchLocateCountMark(bwtSeq, nextLocate,
                                                extBits)) == 0)
-      nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, extBits), ++locateOffset;
+    {
+      nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, extBits);
+      ++locateOffset;
+    }
     matchPos = bsGetSeqpos(extBits->varPart, markOffset, bitsPerOrigPos);
     if (bwtSeq->featureToggles & BWTReversiblySorted)
         matchPos = matchPos * bwtSeq->locateSampleInterval;

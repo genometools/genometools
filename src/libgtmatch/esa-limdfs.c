@@ -790,16 +790,13 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
   initlcpinfostack(&limdfsresources->stack,
                    0,limdfsresources->totallength,
                    maxdistance);
-  STAMP;
   while (limdfsresources->stack.nextfreeLcpintervalwithinfo > 0)
   {
-    STAMP;
     assert(limdfsresources->stack.spaceLcpintervalwithinfo != NULL);
     stackptr = limdfsresources->stack.spaceLcpintervalwithinfo +
                limdfsresources->stack.nextfreeLcpintervalwithinfo - 1;
     SHOWSTACKTOP(stackptr);
     /* extend interval by one character */
-    STAMP;
     if (limdfsresources->withesa)
     {
       extendchar = esa_extendlcp(limdfsresources,&stackptr->lcpitv);
@@ -859,7 +856,6 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
       }
     }
   }
-  STAMP;
 }
 
 /*

@@ -20,6 +20,7 @@
 
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseq-priv.h"
+#include "stamp.h"
 
 static inline const MRAEnc *
 BWTSeqGetAlphabet(const BWTSeq *seq)
@@ -268,8 +269,9 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, Seqpos *pos,
 {
   if (iter->nextMatchBWTPos < iter->bounds.end)
   {
+    /* printf("nextMatchBWTPos=%lu\n",(unsigned long) iter->nextMatchBWTPos);*/
     *pos = BWTSeqLocateMatch(bwtSeq, iter->nextMatchBWTPos, &iter->extBits);
-    ++iter->nextMatchBWTPos;
+    iter->nextMatchBWTPos++;
     return true;
   }
   else

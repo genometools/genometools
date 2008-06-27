@@ -147,26 +147,43 @@ deleteBWTSeq(BWTSeq *bwtSeq)
 
 static inline void
 getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
-              struct matchBound *match)
+              struct matchBound *match, bool forward)
 {
-  size_t i = queryLen;
+  const Symbol *qptr, *qend;
   Symbol curSym;
   const MRAEnc *alphabet;
 
   assert(bwtSeq && query);
   alphabet = BWTSeqGetAlphabet(bwtSeq);
-  curSym = MRAEncMapSymbol(alphabet, query[--i]);
+  if (forward)
+  {
+    qptr = query;
+    qend = query + queryLen;
+  } else
+  {
+    qptr = query + queryLen - 1;
+    qend = query - 1;
+  }
+  curSym = MRAEncMapSymbol(alphabet, *qptr);
+  /*printf("query[%lu]=%d\n",(unsigned long) (qptr-query),(int) *qptr); */
+  qptr = forward ? (qptr+1) : (qptr-1);
   match->start = bwtSeq->count[curSym];
   match->end   = bwtSeq->count[curSym + 1];
-  while ((match->start <= match->end) && (i > 0))
+  while (match->start <= match->end && qptr != qend)
   {
     struct SeqposPair occPair;
-    curSym = MRAEncMapSymbol(alphabet, query[--i]);
+    curSym = MRAEncMapSymbol(alphabet, *qptr);
+    /*printf("query[%lu]=%d\n",(unsigned long) (qptr-query),(int) *qptr); */
     occPair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym, match->start,
                                           match->end);
     match->start = bwtSeq->count[curSym] + occPair.a;
     match->end   = bwtSeq->count[curSym] + occPair.b;
+    qptr = forward ? (qptr+1) : (qptr-1);
   }
+  /*
+  printf("start=%lu, end = %lu\n",(unsigned long) match->start,
+                                  (unsigned long) match->end);
+  */
 }
 
 unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
@@ -313,11 +330,12 @@ unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
 }
 
 extern Seqpos
-BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen)
+BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+                 bool forward)
 {
   struct matchBound match;
   assert(bwtSeq && query);
-  getMatchBound(bwtSeq, query, queryLen, &match);
+  getMatchBound(bwtSeq, query, queryLen, &match, forward);
   if (match.end < match.start)
     return 0;
   else
@@ -326,7 +344,7 @@ BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen)
 
 extern bool
 initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
-               const Symbol *query, size_t queryLen)
+               const Symbol *query, size_t queryLen, bool forward)
 {
   assert(iter && bwtSeq && query);
   if (!bwtSeq->locateSampleInterval)
@@ -335,7 +353,7 @@ initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
           "Localization of matches impossible!", stderr);
     return false;
   }
-  getMatchBound(bwtSeq, query, queryLen, &iter->bounds);
+  getMatchBound(bwtSeq, query, queryLen, &iter->bounds, forward);
   iter->nextMatchBWTPos = iter->bounds.start;
   initExtBitsRetrieval(&iter->extBits);
   return true;
@@ -357,12 +375,13 @@ initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq)
 }
 
 struct BWTSeqExactMatchesIterator *
-newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen)
+newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+              bool forward)
 {
   struct BWTSeqExactMatchesIterator *iter;
   assert(bwtSeq && query);
   iter = ma_malloc(sizeof (*iter));
-  if (initEMIterator(iter, bwtSeq, query, queryLen))
+  if (initEMIterator(iter, bwtSeq, query, queryLen,forward))
     return iter;
   else
   {
@@ -373,9 +392,9 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen)
 
 extern bool
 reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
-                 const Symbol *query, size_t queryLen)
+                 const Symbol *query, size_t queryLen, bool forward)
 {
-  getMatchBound(bwtSeq, query, queryLen, &iter->bounds);
+  getMatchBound(bwtSeq, query, queryLen, &iter->bounds, forward);
   iter->nextMatchBWTPos = iter->bounds.start;
   return true;
 }

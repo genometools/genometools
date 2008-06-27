@@ -188,18 +188,13 @@ void pck_exactpatternmatching(const void *genericindex,
   BWTSeqExactMatchesIterator *bsemi;
   Seqpos dbstartpos;
 
-  STAMP;
   bsemi = newEMIterator((const BWTSeq *) genericindex,
-                        pattern,(size_t) patternlength);
+                        pattern,(size_t) patternlength, true);
   assert(bsemi != NULL);
-  STAMP;
   while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) genericindex))
   {
-    STAMP;
     processmatch(processmatchinfo,dbstartpos,(Seqpos) patternlength);
-    STAMP;
   }
-  STAMP;
   if (bsemi != NULL)
   {
     deleteEMIterator(bsemi);

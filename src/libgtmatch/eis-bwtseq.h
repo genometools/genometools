@@ -290,10 +290,12 @@ BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym);
  * @param bwtSeq reference of object to query
  * @param query symbol string to search matches for
  * @param queryLen length of query string
+ * @param forward direction of processing the query
  * @return number of matches
  */
 extern Seqpos
-BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen);
+BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+                 bool forward);
 
 /**
  * \brief Given a pair of limiting positions in the suffix array and a
@@ -386,11 +388,12 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
  * @param bwtSeq reference of bwt sequence object to use for matching
  * @param query symbol string to search matches for
  * @param queryLen length of query string
+ * @param forward direction of processing the query
  * @return true if successfully initialized, false on error
  */
 extern bool
 initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
-               const Symbol *query, size_t queryLen);
+               const Symbol *query, size_t queryLen, bool forward);
 
 /**
  * \brief Only initializes empty iterator for given
@@ -418,11 +421,12 @@ initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwt);
  * @param bwtSeq reference of bwt sequence object to use for matching
  * @param query symbol string to search matches for
  * @param queryLen length of query string
+ * @param forward direction of processing the query
  * @return true if successfully initialized, false on error
  */
 extern bool
 reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
-                 const Symbol *query, size_t queryLen);
+                 const Symbol *query, size_t queryLen, bool forward);
 /**
  * \brief Destruct resources of matches iterator. Does not free the
  * storage of iterator itself.
@@ -441,10 +445,12 @@ destructEMIterator(struct BWTSeqExactMatchesIterator *iter);
  * @param bwtSeq reference of bwt sequence object to use for matching
  * @param query symbol string to search matches for
  * @param queryLen length of query string
+ * @param forward direction of processing the query
  * @return reference of iterator object, NULL on error
  */
 extern BWTSeqExactMatchesIterator *
-newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen);
+newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+              bool forward);
 
 /**
  * \brief Deallocate an iterator object.
