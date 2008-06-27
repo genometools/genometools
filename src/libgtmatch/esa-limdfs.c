@@ -30,7 +30,7 @@
 
 #define UNDEFINDEX      (patternlength+1)
 
-#define SKDEBUG
+#undef SKDEBUG
 
 typedef struct
 {
@@ -804,7 +804,6 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
     {
       extendchar = pck_extendlcp(limdfsresources,&stackptr->lcpitv);
     }
-    STAMP;
     previouscolumn = stackptr->column;
     if (extendchar < limdfsresources->alphasize)
     {
