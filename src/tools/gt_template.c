@@ -64,7 +64,7 @@ static OptionParser* gt_template_option_parser_new(void *tool_arguments)
 }
 
 static int gt_template_arguments_check(UNUSED int rest_argc,
-                                       void *tool_arguments, Error *err)
+                                       void *tool_arguments, UNUSED Error *err)
 {
   TemplateArguments *arguments = tool_arguments;
   int had_err = 0;
@@ -73,12 +73,14 @@ static int gt_template_arguments_check(UNUSED int rest_argc,
 
   /* XXX: do some checking after the option have been parsed (usally this is not
      necessary and this function can be removed completely). */
+  if (str_length(arguments->str_option_template))
+    printf("%s\n", str_get(arguments->str_option_template));
 
   return had_err;
 }
 
 static int gt_template_runner(int argc, const char **argv, int parsed_args,
-                              void *tool_arguments, Error *err)
+                              void *tool_arguments, UNUSED Error *err)
 {
   TemplateArguments *arguments = tool_arguments;
   int had_err = 0;
@@ -87,8 +89,6 @@ static int gt_template_runner(int argc, const char **argv, int parsed_args,
   assert(arguments);
 
   /* XXX */
-  if (str_length(arguments->str_option_template))
-    printf("%s\n", str_get(arguments->str_option_template));
   if (arguments->bool_option_template)
     printf("argc=%d, parsed_args=%d\n", argc, parsed_args);
   printf("argv[0]=%s\n", argv[0]);
