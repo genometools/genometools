@@ -182,6 +182,7 @@ unsigned long voidpackedindexmstatsforward(const void *genericindex,
 void pck_exactpatternmatching(const void *genericindex,
                               const Uchar *pattern,
                               unsigned long patternlength,
+                              Seqpos totallength,
                               void (*processmatch)(void *,Seqpos,Seqpos),
                               void *processmatchinfo)
 {
@@ -193,9 +194,8 @@ void pck_exactpatternmatching(const void *genericindex,
   assert(bsemi != NULL);
   while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) genericindex))
   {
-    /* assert(limdfsresources->totallength >= dbstartpos + patternlength); */
-    /* dbstartpos = limdfsresources->totallength - (dbstartpos + patternlength);
-    */
+    assert(totallength >= dbstartpos + patternlength);
+    dbstartpos = totallength - (dbstartpos + patternlength);
     processmatch(processmatchinfo,dbstartpos,(Seqpos) patternlength);
   }
   if (bsemi != NULL)

@@ -145,6 +145,7 @@ static void performthesearch(const TageratorOptions *tageratoroptions,
                              Limdfsresources *limdfsresources,
                              const Uchar *transformedtag,
                              unsigned long taglen,
+                             Seqpos totallength,
                              void (*processmatch)(void *,Seqpos,Seqpos),
                              void *processmatchinfooffline,
                              UNUSED bool rcmatch)
@@ -172,6 +173,7 @@ static void performthesearch(const TageratorOptions *tageratoroptions,
         pck_exactpatternmatching(getgenericindexfromresource(limdfsresources),
                                  transformedtag,
                                  taglen,
+                                 totallength,
                                  processmatch,
                                  processmatchinfooffline);
       }
@@ -243,7 +245,13 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     withesa = true;
   } else
   {
-    demand = 0;
+    if (tageratoroptions->docompare || tageratoroptions->online)
+    {
+      demand = SARR_ESQTAB;
+    } else
+    {
+      demand = 0;
+    }
     withesa = false;
   }
   if (mapsuffixarray(&suffixarray,
@@ -311,6 +319,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     }
     if (tageratoroptions->online || tageratoroptions->docompare)
     {
+      assert(suffixarray.encseq != NULL);
       mor = newMyersonlineresources(mapsize,suffixarray.encseq,
                                     processmatch,
                                     processmatchinfoonline);
@@ -368,6 +377,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                            limdfsresources,
                            transformedtag,
                            taglen,
+                           totallength,
                            processmatch,
                            processmatchinfooffline,
                            (try == 1 && tageratoroptions->rcmatch)

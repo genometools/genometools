@@ -7,7 +7,7 @@ set -e -x
 
 #SPRANK="-sprank"
 
-bin/gt packedindex mkindex ${SPRANK} -dna -pl -bsize 10 -locfreq 32\
-                                     -dir rev -db ${AT}
+bin/gt packedindex mkindex ${SPRANK} -tis -dna -pl -bsize 10 -locfreq 32\
+                                     -dir rev -db ${U8}
 
 # bin/gt tagerator -t Q1 -pck pck
