@@ -30,7 +30,7 @@
 
 #define UNDEFINDEX      (patternlength+1)
 
-#undef SKDEBUG
+#define SKDEBUG
 
 typedef struct
 {
@@ -169,7 +169,7 @@ static void initeqsvector(unsigned long *eqsvector,
 
 #ifdef SKDEBUG
 #define SHOWSTACKTOP(STACKPTR)\
-        printf("top=(offset=%lu,%lu,%lu) with ",\
+        printf("top=(offset=%lu,%lu,%lu) column = ",\
                 (unsigned long) STACKPTR->lcpitv.offset,\
                 (unsigned long) STACKPTR->lcpitv.left,\
                 (unsigned long) STACKPTR->lcpitv.right);\
@@ -195,11 +195,6 @@ static void nextEDcolumn(const unsigned long *eqsvector,
 
   assert(incol->maxleqk != UNDEFINDEX && incol->maxleqk != patternlength);
   assert(currentchar != (Uchar) SEPARATOR);
-#ifdef SKDEBUG
-  printf("nextEDcol(");
-  showMyerscolumn(incol,startscore,patternlength);
-  printf(",%u)=",(unsigned int) currentchar);
-#endif
   if (currentchar != (Uchar) WILDCARD)
   {
     Eq = eqsvector[(unsigned long) currentchar];
@@ -282,8 +277,6 @@ static void nextEDcolumn(const unsigned long *eqsvector,
     }
   }
 #ifdef SKDEBUG
-  showMyerscolumn(outcol,startscore+1,patternlength);
-  printf(",%u)=",(unsigned int) currentchar);
   verifycolumnvalues(patternlength,
                      maxdistance,
                      outcol,
@@ -623,6 +616,11 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
 {
   stackptr->lcpitv = *child;
 
+#ifdef SKDEBUG
+  printf("(2) nextEDcol(");
+  showMyerscolumn(incol,(unsigned long) (child->offset-1),patternlength);
+  printf(",%u)=",(unsigned int) inchar);
+#endif
   nextEDcolumn(limdfsresources->eqsvector,
                patternlength,
                maxdistance,
@@ -630,6 +628,11 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                (unsigned long) (child->offset-1),
                inchar,
                incol);
+#ifdef SKDEBUG
+  showMyerscolumn(&stackptr->column,(unsigned long) child->offset,
+                  patternlength);
+  printf("\n");
+#endif
   if (stackptr->column.maxleqk == UNDEFINDEX)
   {
     return true;
@@ -807,13 +810,26 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
     previouscolumn = stackptr->column;
     if (extendchar < limdfsresources->alphasize)
     {
+#ifdef SKDEBUG
+      printf("(1) nextEDcol(");
+      showMyerscolumn(&previouscolumn,
+                      (unsigned long) stackptr->lcpitv.offset,
+                      patternlength);
+      printf(",%u)=",(unsigned int) extendchar);
+#endif
       nextEDcolumn(limdfsresources->eqsvector,
                    patternlength,
                    maxdistance,
                    &stackptr->column,
-                   (unsigned long) (stackptr->lcpitv.offset-1),
+                   (unsigned long) stackptr->lcpitv.offset,
                    extendchar,
                    &previouscolumn);
+#ifdef SKDEBUG
+      showMyerscolumn(&stackptr->column,
+                      (unsigned long) (stackptr->lcpitv.offset+1),
+                      patternlength);
+      printf("\n");
+#endif
       stackptr->lcpitv.offset++;
       if (stackptr->column.maxleqk == UNDEFINDEX)
       {
