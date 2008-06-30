@@ -672,7 +672,6 @@ release:
 
 push:
 	git push --tags origin master
-	git push --tags github master
 
 docs: bin/gt
 	bin/gt gtscripts/gtdoc.lua -html $(CURDIR) \
