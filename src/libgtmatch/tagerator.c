@@ -41,7 +41,8 @@
 static void esa_exactpatternmatching(const void *genericindex,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
-                                     void (*processmatch)(void *,Seqpos,Seqpos),
+                                     void (*processmatch)(void *,bool,
+                                                          Seqpos,Seqpos,Seqpos),
                                      void *processmatchinfo)
 {
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
@@ -58,13 +59,25 @@ static void esa_exactpatternmatching(const void *genericindex,
                              patternlength);
   while (nextmmsearchiterator(&dbstartpos,mmsi))
   {
-    processmatch(processmatchinfo,dbstartpos,(Seqpos) patternlength);
+    processmatch(processmatchinfo,true,totallength,
+                 dbstartpos,(Seqpos) patternlength);
   }
   freemmsearchiterator(&mmsi);
 }
 
-static void showmatch(UNUSED void *processinfo,Seqpos startpos,Seqpos len)
+static void showmatch(UNUSED void *processinfo,UNUSED bool withesa,
+                      UNUSED Seqpos totallength,Seqpos startpos,Seqpos len)
 {
+/*
+  if (!withesa)
+  {
+    printf("totallength=%lu,startpos=%lu,len=%lu\n",
+            (unsigned long) totallength,(unsigned long) startpos,
+            (unsigned long) len);
+    assert(totallength >= startpos + len);
+    startpos = totallength - (startpos + len);
+  }
+*/
   printf("match " FormatSeqpos " " FormatSeqpos "\n",
           PRINTSeqposcast(startpos),
           PRINTSeqposcast(len));
@@ -72,10 +85,16 @@ static void showmatch(UNUSED void *processinfo,Seqpos startpos,Seqpos len)
 
 DECLAREARRAYSTRUCT(Seqpos);
 
-static void storematch(void *processinfo,Seqpos startpos,UNUSED Seqpos len)
+static void storematch(void *processinfo,bool withesa,Seqpos totallength,
+                       Seqpos startpos,UNUSED Seqpos len)
 {
   ArraySeqpos *storetab = (ArraySeqpos *) processinfo;
 
+  if (!withesa)
+  {
+    assert(totallength >= startpos + len);
+    startpos = totallength - (startpos + len);
+  }
   STOREINARRAY(storetab,Seqpos,32,startpos);
 }
 
@@ -146,7 +165,8 @@ static void performthesearch(const TageratorOptions *tageratoroptions,
                              const Uchar *transformedtag,
                              unsigned long taglen,
                              Seqpos totallength,
-                             void (*processmatch)(void *,Seqpos,Seqpos),
+                             void (*processmatch)(void *,bool,Seqpos,
+                                                  Seqpos,Seqpos),
                              void *processmatchinfooffline,
                              UNUSED bool rcmatch)
 {
@@ -301,7 +321,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     const Uchar *symbolmap, *currenttag;
     Uchar transformedtag[MAXTAGSIZE];
     char *desc = NULL;
-    void (*processmatch)(void *,Seqpos,Seqpos);
+    void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos);
     void *processmatchinfoonline, *processmatchinfooffline;
 
     symbolmap = getsymbolmapAlphabet(suffixarray.alpha);

@@ -184,7 +184,8 @@ void pck_exactpatternmatching(const void *genericindex,
                               const Uchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
-                              void (*processmatch)(void *,Seqpos,Seqpos),
+                              void (*processmatch)(void *,bool,Seqpos,
+                                                   Seqpos,Seqpos),
                               void *processmatchinfo)
 {
   BWTSeqExactMatchesIterator *bsemi;
@@ -195,9 +196,8 @@ void pck_exactpatternmatching(const void *genericindex,
   assert(bsemi != NULL);
   while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) genericindex))
   {
-    assert(totallength >= dbstartpos + patternlength);
-    dbstartpos = totallength - (dbstartpos + patternlength);
-    processmatch(processmatchinfo,dbstartpos,(Seqpos) patternlength);
+    processmatch(processmatchinfo,false,totallength,
+                 dbstartpos,(Seqpos) patternlength);
   }
   if (bsemi != NULL)
   {

@@ -79,7 +79,8 @@ void pck_exactpatternmatching(const void *genericindex,
                               const Uchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
-                              void (*processmatch)(void *,Seqpos,Seqpos),
+                              void (*processmatch)(void *,bool,Seqpos,
+                                                   Seqpos,Seqpos),
                               void *processmatchinfo);
 
 #endif

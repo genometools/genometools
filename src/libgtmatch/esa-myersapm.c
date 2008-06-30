@@ -29,7 +29,7 @@ struct Myersonlineresources
   Seqpos totallength;
   unsigned long *eqsvectorrev;
   unsigned int alphasize;
-  void (*processmatch)(void *,Seqpos,Seqpos);
+  void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos);
   void *processmatchinfo;
 };
 
@@ -60,7 +60,8 @@ static void initeqsvectorrev(unsigned long *eqsvectorrev,
 Myersonlineresources *newMyersonlineresources(
                             unsigned int mapsize,
                             const Encodedsequence *encseq,
-                            void (*processmatch)(void *,Seqpos,Seqpos),
+                            void (*processmatch)(void *,bool,Seqpos,
+                                                 Seqpos,Seqpos),
                             void *processmatchinfo)
 {
   Myersonlineresources *mor;
@@ -156,6 +157,8 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
       if (score <= maxdistance)
       {
         mor->processmatch(mor->processmatchinfo,
+                          true,
+                          mor->totallength,
                           REVERSEPOS(mor->totallength,pos),
                           0);
       }

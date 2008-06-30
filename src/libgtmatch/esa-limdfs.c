@@ -175,8 +175,10 @@ static void showinterval(bool withesa,const Lcpinterval *itv)
 
   width = withesa ? (itv->right - itv->left + 1) : itv->right - itv->left;
   printf("(%lu,width=%lu)",(unsigned long) itv->offset,(unsigned long) width);
+  /*
   printf("(%lu,%lu)",(unsigned long) itv->left,
                      (unsigned long) (withesa ? itv->right : itv->right-1));
+  */
 }
 
 #define SHOWSTACKTOP(STACKPTR)\
@@ -393,7 +395,7 @@ struct Limdfsresources
   ArrayLcpintervalwithinfo stack;
   Uchar alphasize;
   Seqpos totallength;
-  void (*processmatch)(void *,Seqpos,Seqpos);
+  void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos);
   void *processmatchinfo;
   const void *genericindex;
   bool withesa;
@@ -404,7 +406,8 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     bool withesa,
                                     unsigned int mapsize,
                                     Seqpos totallength,
-                                    void (*processmatch)(void *,Seqpos,Seqpos),
+                                    void (*processmatch)(void *,bool,Seqpos,
+                                                         Seqpos,Seqpos),
                                     void *processmatchinfo)
 {
   Limdfsresources *limdfsresources;
@@ -483,6 +486,8 @@ static void esa_overinterval(Limdfsresources *limdfsresources,
   for (idx = itv->left; idx <= itv->right; idx++)
   {
     limdfsresources->processmatch(limdfsresources->processmatchinfo,
+                                  true,
+                                  limdfsresources->totallength,
                                   suffixarray->suftab[idx],
                                   itv->offset);
   }
@@ -492,14 +497,17 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
                              const Lcpinterval *itv)
 {
   Bwtseqpositioniterator *bspi;
-  Seqpos pos;
+  Seqpos dbstartpos;
 
   bspi = newBwtseqpositioniterator (limdfsresources->genericindex,
                                     itv->left,itv->right);
-  while (nextBwtseqpositioniterator(&pos,bspi))
+  while (nextBwtseqpositioniterator(&dbstartpos,bspi))
   {
+        STAMP;
     limdfsresources->processmatch(limdfsresources->processmatchinfo,
-                                  pos,
+                                  false,
+                                  limdfsresources->totallength,
+                                  dbstartpos,
                                   itv->offset);
   }
   freeBwtseqpositioniterator(&bspi);
@@ -521,11 +529,17 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
     = (const Suffixarray *) limdfsresources->genericindex;
 
   startpos = suffixarray->suftab[left];
+#ifdef SKDEBUG
+  printf("retrieve context of startpos=%lu\n",(unsigned long) startpos);
+#endif
   for (pos = startpos + offset - 1; pos < limdfsresources->totallength; pos++)
   {
     cc = getencodedchar(suffixarray->encseq,pos,suffixarray->readmode);
     if (cc != (Uchar) SEPARATOR)
     {
+#ifdef SKDEBUG
+      printf("cc=%u\n",cc);
+#endif
       inplacenextEDcolumn(limdfsresources->eqsvector,
                           patternlength,
                           maxdistance,
@@ -538,6 +552,8 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
       if (currentcol.maxleqk == patternlength)
       {
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
+                                      true,
+                                      limdfsresources->totallength,
                                       startpos,
                                       pos - startpos + 1);
         break;
@@ -553,20 +569,35 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                             unsigned long patternlength,
                             unsigned long maxdistance,
                             const Myerscolumn *col,
+                            Uchar inchar,
                             Seqpos left,
                             Seqpos offset)
 {
   Uchar cc;
   unsigned long matchlength;
   Myerscolumn currentcol = *col;
+  bool processinchar = true;
   Bwtseqcontextiterator *bsci
     = newBwtseqcontextiterator(limdfsresources->genericindex,left);
 
+#ifdef SKDEBUG
+  printf("retrieve context of left=%lu\n",(unsigned long) left);
+#endif
   for (matchlength = 0; /* nothing */; matchlength++)
   {
-    cc = nextBwtseqcontextiterator(bsci);
+    if (processinchar)
+    {
+      cc = inchar;
+      processinchar = false;
+    } else
+    {
+      cc = nextBwtseqcontextiterator(bsci);
+    }
     if (cc != (Uchar) SEPARATOR)
     {
+#ifdef SKDEBUG
+      printf("cc=%u\n",cc);
+#endif
       inplacenextEDcolumn(limdfsresources->eqsvector,
                           patternlength,
                           maxdistance,
@@ -579,7 +610,10 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       if (currentcol.maxleqk == patternlength)
       {
         Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,left);
+        STAMP;
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
+                                      false,
+                                      limdfsresources->totallength,
                                       startpos,
                                       offset + matchlength);
         break;
@@ -589,6 +623,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       break;
     }
   }
+  freeBwtseqcontextiterator(&bsci);
 }
 
 static bool pushandpossiblypop(Limdfsresources *limdfsresources,
@@ -676,6 +711,7 @@ static void processchildinterval(Limdfsresources *limdfsresources,
                       patternlength,
                       maxdistance,
                       previouscolumn,
+                      inchar,
                       child->left,
                       child->offset);
     }
