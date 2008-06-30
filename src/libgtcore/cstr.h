@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,14 +23,14 @@
 #include "libgtcore/genfile.h"
 
 char*         cstr_dup(const char*);
-/* replace each occurence of <f> in <cstr> to <t> */
+/* Replace each occurence of <f> in <cstr> to <t>. */
 void          cstr_rep(char *cstr, char f, char t);
 void          cstr_show(const char*, unsigned long length, FILE*);
-/* returns the length of the prefix of <cstr> ending just before <c>, if <cstr>
+/* Returns the length of the prefix of <cstr> ending just before <c>, if <cstr>
    does not contain <c>, strlen(cstr) is returned. */
 unsigned long cstr_length_up_to_char(const char *cstr, char c);
 
-/* use p and a blank as prefix for cstr_array[0] and return the result */
+/* Use p and a blank as prefix for cstr_array[0] and return the result. */
 char**        cstr_array_prefix_first(const char **cstr_array, const char *p);
 char**        cstr_array_preprend(const char **cstr_array, const char *p);
 void          cstr_array_show(char **cstr_array, FILE*);
