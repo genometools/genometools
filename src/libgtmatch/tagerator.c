@@ -356,6 +356,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     }
     limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
                                          withesa,
+                                         tageratoroptions->nospecials,
                                          mapsize,
                                          totallength,
                                          processmatch,

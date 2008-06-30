@@ -25,6 +25,7 @@ typedef struct Limdfsresources Limdfsresources;
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
                                     bool withesa,
+                                    bool nospecials,
                                     unsigned int mapsize,
                                     Seqpos totallength,
                                     void (*processmatch)(void *,bool,Seqpos,
@@ -39,5 +40,13 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                    const Uchar *pattern,
                    unsigned long patternlength,
                    unsigned long maxdistance);
+
+unsigned long esa_findshortestmatch(const Encodedsequence *encseq,
+                                    bool nospecials,
+                                    unsigned long alphasize,
+                                    const Uchar *pattern,
+                                    unsigned long patternlength,
+                                    unsigned long maxdistance,
+                                    Seqpos startpos);
 
 #endif

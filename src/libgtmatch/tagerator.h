@@ -24,7 +24,7 @@ typedef struct {
   StrArray *tagfiles;
   Str *esaindexname, *pckindexname;
   unsigned long maxdistance;
-  bool online, docompare, replacewildcard, fwdmatch, rcmatch;
+  bool online, docompare, replacewildcard, fwdmatch, rcmatch, nospecials;
 } TageratorOptions;
 
 int runtagerator(const TageratorOptions *tageratoroptions,Error *err);
