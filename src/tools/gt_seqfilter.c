@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "libgtcore/bioseq.h"
+#include "libgtcore/bioseq_iterator.h"
 #include "libgtcore/fasta.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
@@ -48,7 +48,7 @@ static OptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
   OptionParser *op;
   assert(arguments);
 
-  op = option_parser_new("[option ...] sequence_file [...]",
+  op = option_parser_new("[option ...] [sequence_file ...]",
                          "Filter the given sequence_file(s) and show the "
                          "results on stdout.");
 
@@ -64,9 +64,6 @@ static OptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
                             UNDEF_ULONG);
   option_parser_add_option(op, option);
 
-  /* set minimal arugments */
-  option_parser_set_min_args(op, 1);
-
   return op;
 }
 
@@ -74,19 +71,18 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
                                void *tool_arguments, Error *err)
 {
   SeqFilterArguments *arguments = tool_arguments;
+  BioseqIterator *bsi;
   Bioseq *bioseq;
   unsigned long i;
   unsigned long long duplicates = 0, num_of_sequences = 0;
-  int arg = parsed_args, had_err = 0;
+  int had_err = 0;
 
   error_check(err);
   assert(tool_arguments);
 
-  while (!had_err && arg < argc) {
-    bioseq = bioseq_new(argv[arg], err);
-    if (!bioseq)
-      had_err = -1;
+  bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
 
+  while (!(had_err = bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
     for (i = 0; i < bioseq_number_of_sequences(bioseq); i++) {
       if ((arguments->minlength == UNDEF_ULONG ||
            bioseq_get_sequence_length(bioseq, i) >= arguments->minlength) &&
@@ -100,10 +96,7 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
         duplicates++;
       num_of_sequences++;
     }
-
     bioseq_delete(bioseq);
-
-    arg++;
   }
 
   /* show statistics */
@@ -112,6 +105,8 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
             duplicates, num_of_sequences,
             ((double) duplicates / num_of_sequences) * 100.0);
   }
+
+  bioseq_iterator_delete(bsi);
 
   return had_err;
 }
