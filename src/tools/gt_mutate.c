@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
+#include "libgtcore/bioseq_iterator.h"
 #include "libgtcore/fasta.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
@@ -45,7 +45,7 @@ static OptionParser* gt_mutate_option_parser_new(void *tool_arguments)
   OptionParser *op;
   Option *o;
   assert(arguments);
-  op = option_parser_new("[option ...] sequence_file [...]",
+  op = option_parser_new("[option ...] [sequence_file ...]",
                          "Mutate the sequences of the given sequence_file(s) "
                          "and show them on stdout.");
   /* -rate */
@@ -55,7 +55,6 @@ static OptionParser* gt_mutate_option_parser_new(void *tool_arguments)
 
   /* parse */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  option_parser_set_min_args(op, 1);
   return op;
 }
 
@@ -63,32 +62,31 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
                             void *tool_arguments, Error *err)
 {
   MutateArguments *arguments = tool_arguments;
-  Bioseq *bioseq;
+  BioseqIterator *bsi;
   unsigned long i;
+  Bioseq *bioseq;
   Seq *mutated_seq;
-  int had_err = 0;
+  int had_err;
 
   error_check(err);
   assert(arguments);
 
-  while (!had_err && parsed_args < argc) {
-    bioseq = bioseq_new(argv[parsed_args], err);
-    if (!bioseq)
-      had_err = -1;
-    if (!had_err) {
-      for (i = 0; i < bioseq_number_of_sequences(bioseq); i++) {
-        mutated_seq = mutate(bioseq_get_description(bioseq, i),
-                             bioseq_get_sequence(bioseq, i),
-                             bioseq_get_sequence_length(bioseq, i),
-                             bioseq_get_alpha(bioseq), arguments->rate);
-        fasta_show_entry(seq_get_description(mutated_seq),
-                         seq_get_orig(mutated_seq), seq_length(mutated_seq), 0);
-        seq_delete(mutated_seq);
-      }
+  bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
+
+  while (!(had_err = bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
+    for (i = 0; i < bioseq_number_of_sequences(bioseq); i++) {
+      mutated_seq = mutate(bioseq_get_description(bioseq, i),
+                           bioseq_get_sequence(bioseq, i),
+                           bioseq_get_sequence_length(bioseq, i),
+                           bioseq_get_alpha(bioseq), arguments->rate);
+      fasta_show_entry(seq_get_description(mutated_seq),
+                       seq_get_orig(mutated_seq), seq_length(mutated_seq), 0);
+      seq_delete(mutated_seq);
     }
     bioseq_delete(bioseq);
-    parsed_args++;
   }
+
+  bioseq_iterator_delete(bsi);
 
   return had_err;
 }
