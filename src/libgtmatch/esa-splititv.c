@@ -101,22 +101,18 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
 }
 
 #define ADDCURRENTLBOUND(V)\
-        bwci->bounds.spaceBoundswithchar[bwci->bounds.\
-                                         nextfreeBoundswithchar].lbound = V
+        bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].lbound = V
 
 #define ADDPREVIOUSRBOUND(V)\
-        if (bwci->bounds.nextfreeBoundswithchar > 0)\
+        if (bwci->nextfreeBoundswithchar > 0)\
         {\
-          bwci->bounds.spaceBoundswithchar[bwci->bounds.\
-                                           nextfreeBoundswithchar-1].\
-                                              rbound = V;\
+          bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar-1].rbound = V;\
         }
 
 #define ADDCURRENTINCHAR(V)\
-        bwci->bounds.spaceBoundswithchar[bwci->bounds.\
-                                         nextfreeBoundswithchar++].inchar = V
+        bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar++].inchar = V
 
-void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
+void lcpintervalsplitwithoutspecial(ArrayBoundswithchar *bwci,
                                     const Encodedsequence *encseq,
                                     Readmode readmode,
                                     Seqpos totallength,
@@ -128,13 +124,12 @@ void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
 
   /* call lcpintervalextendlcp and verify if interval can be extended by
      some character */
-  bwci->bounds.nextfreeBoundswithchar = 0;
+  bwci->nextfreeBoundswithchar = 0;
   rightcc = SEQUENCE(encseq,suftab[parent->right]+parent->offset);
   while (true)
   {
     leftcc = SEQUENCE(encseq,suftab[leftbound]+parent->offset);
-    assert(bwci->bounds.nextfreeBoundswithchar <
-           bwci->bounds.allocatedBoundswithchar);
+    assert(bwci->nextfreeBoundswithchar < bwci->allocatedBoundswithchar);
     if (ISSPECIAL(leftcc))
     {
       ADDPREVIOUSRBOUND(rightbound);
@@ -153,8 +148,7 @@ void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
                                            leftbound,parent->right);
     leftbound = rightbound+1;
   }
-  assert(bwci->bounds.nextfreeBoundswithchar <
-         bwci->bounds.allocatedBoundswithchar);
+  assert(bwci->nextfreeBoundswithchar < bwci->allocatedBoundswithchar);
   ADDPREVIOUSRBOUND(parent->right);
   ADDCURRENTLBOUND(parent->right+1);
 }

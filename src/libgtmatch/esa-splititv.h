@@ -22,26 +22,13 @@
 #include "libgtcore/symboldef.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
+#include "splititv.h"
 
 typedef struct
 {
   Seqpos left,
          right;
 } Simplelcpinterval;
-
-typedef struct
-{
-  Seqpos lbound,
-         rbound;
-  Uchar inchar;
-} Boundswithchar;
-
-DECLAREARRAYSTRUCT(Boundswithchar);
-
-typedef struct
-{
-  ArrayBoundswithchar bounds;
-} Boundswithcharinfo;
 
 bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   Readmode readmode,
@@ -53,7 +40,7 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   Seqpos left,
                                   Seqpos right);
 
-void lcpintervalsplitwithoutspecial(Boundswithcharinfo *bwci,
+void lcpintervalsplitwithoutspecial(ArrayBoundswithchar *bwci,
                                     const Encodedsequence *encseq,
                                     Readmode readmode,
                                     Seqpos totallength,

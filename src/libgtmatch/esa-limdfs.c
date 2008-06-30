@@ -380,7 +380,7 @@ DECLAREARRAYSTRUCT(Lcpintervalwithinfo);
 struct Limdfsresources
 {
   unsigned long *eqsvector;
-  Boundswithcharinfo bwci;
+  ArrayBoundswithchar bwci;
   ArrayLcpintervalwithinfo stack;
   Uchar alphasize;
   Seqpos totallength;
@@ -402,10 +402,10 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
 
   ALLOCASSIGNSPACE(limdfsresources,NULL,Limdfsresources,1);
   ALLOCASSIGNSPACE(limdfsresources->eqsvector,NULL,unsigned long,mapsize-1);
-  ALLOCASSIGNSPACE(limdfsresources->bwci.bounds.spaceBoundswithchar,NULL,
+  ALLOCASSIGNSPACE(limdfsresources->bwci.spaceBoundswithchar,NULL,
                    Boundswithchar,mapsize);
-  limdfsresources->bwci.bounds.nextfreeBoundswithchar = 0;
-  limdfsresources->bwci.bounds.allocatedBoundswithchar
+  limdfsresources->bwci.nextfreeBoundswithchar = 0;
+  limdfsresources->bwci.allocatedBoundswithchar
     = (unsigned long) mapsize;
   INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   assert(mapsize-1 <= UCHAR_MAX);
@@ -456,7 +456,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources)
   Limdfsresources *limdfsresources = *ptrlimdfsresources;
 
   FREESPACE(limdfsresources->eqsvector);
-  FREEARRAY(&limdfsresources->bwci.bounds,Boundswithchar);
+  FREEARRAY(&limdfsresources->bwci,Boundswithchar);
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(limdfsresources->rangeOccs);
   FREESPACE(*ptrlimdfsresources);
@@ -732,16 +732,16 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
                                  suffixarray->suftab,
                                  parent);
   firstnonspecial = parent->left;
-  for (idx = 0; idx < limdfsresources->bwci.bounds.nextfreeBoundswithchar;
+  for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar;
        idx++)
   {
     Lcpinterval child;
-    Uchar inchar = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].inchar;
+    Uchar inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
 
     child.offset = parent->offset+1;
-    child.left = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].lbound;
-    child.right = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].rbound;
-    assert(child.right == limdfsresources->bwci.bounds.
+    child.left = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
+    child.right = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
+    assert(child.right == limdfsresources->bwci.
                           spaceBoundswithchar[idx+1].lbound-1);
 #ifdef SKDEBUG
     printf("%u-child of (offset=%lu,%lu,%lu) is (%lu,%lu,%lu)\n",
@@ -778,13 +778,11 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
                                 const Lcpinterval *parent,
                                 UNUSED const Myerscolumn *previouscolumn)
 {
-  unsigned long idx;
-  Seqpos left = 0;
-
   bwtrangesplitwithoutspecial(limdfsresources->rangeOccs,
                               (unsigned long) limdfsresources->alphasize,
                               limdfsresources->genericindex,
                               parent);
+  /*
   for (idx = 0; idx < (unsigned long) limdfsresources->alphasize; idx++)
   {
     if (limdfsresources->rangeOccs[idx] < limdfsresources->rangeOccs[idx+1])
@@ -805,6 +803,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
                            previouscolumn);
     }
   }
+  */
 }
 
 void esalimiteddfs(Limdfsresources *limdfsresources,
