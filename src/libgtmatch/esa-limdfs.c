@@ -168,11 +168,20 @@ static void initeqsvector(unsigned long *eqsvector,
 }
 
 #ifdef SKDEBUG
+
+static void showinterval(bool withesa,const Lcpinterval *itv)
+{
+  Seqpos width;
+
+  width = withesa ? (itv->right - itv->left + 1) : itv->right - itv->left;
+  printf("(%lu,width=%lu)",(unsigned long) itv->offset,(unsigned long) width);
+  printf("(%lu,%lu)",(unsigned long) itv->left,
+                     (unsigned long) (withesa ? itv->right : itv->right-1));
+}
+
 #define SHOWSTACKTOP(STACKPTR)\
-        printf("top=(offset=%lu,%lu,%lu) column = ",\
-                (unsigned long) STACKPTR->lcpitv.offset,\
-                (unsigned long) STACKPTR->lcpitv.left,\
-                (unsigned long) STACKPTR->lcpitv.right);\
+        printf("top=");\
+        showinterval(limdfsresources->withesa,&STACKPTR->lcpitv);\
         showMyerscolumn(&STACKPTR->column,\
                (unsigned long) STACKPTR->lcpitv.offset,patternlength);\
         printf("\n")
@@ -512,11 +521,9 @@ static Uchar esa_extendlcp(Limdfsresources *limdfsresources,
                             itv,
                             limdfsresources->alphasize);
 #ifdef SKDEBUG
-  printf("extendlcp(left=%lu,right=%lu,offset=%lu)=%u\n",
-           (unsigned long) itv->left,
-           (unsigned long) itv->right,
-           (unsigned long) itv->offset,
-           (unsigned int) cc);
+  printf("extendlcp");
+  showinterval(limdfsresources->withesa,itv);
+  printf("=%u\n",(unsigned int) cc);
 #endif
   return cc;
 }
@@ -528,11 +535,9 @@ static Uchar pck_extendlcp(Limdfsresources *limdfsresources,
                                      itv,
                                      limdfsresources->alphasize);
 #ifdef SKDEBUG
-  printf("extendlcp(left=%lu,right=%lu,offset=%lu)=%u\n",
-           (unsigned long) itv->left,
-           (unsigned long) itv->right,
-           (unsigned long) itv->offset,
-           (unsigned int) cc);
+  printf("extendlcp");
+  showinterval(limdfsresources->withesa,itv);
+  printf("=%u\n",(unsigned int) cc);
 #endif
   return cc;
 }
@@ -675,8 +680,8 @@ static void processchildinterval(Limdfsresources *limdfsresources,
                                  Uchar inchar,
                                  const Myerscolumn *previouscolumn)
 {
-  if (child->left < child->right || (limdfsresources->withesa &&
-                                     child->left == child->right))
+  if (child->left + 1 < child->right || (limdfsresources->withesa &&
+                                        child->left + 1 == child->right))
   {
     Lcpintervalwithinfo *stackptr;
 
@@ -744,14 +749,11 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     assert(child.right == limdfsresources->bwci.
                           spaceBoundswithchar[idx+1].lbound-1);
 #ifdef SKDEBUG
-    printf("%u-child of (offset=%lu,%lu,%lu) is (%lu,%lu,%lu)\n",
-            (unsigned int) inchar,
-            (unsigned long) parent->offset,
-            (unsigned long) parent->left,
-            (unsigned long) parent->right,
-            (unsigned long) child.offset,
-            (unsigned long) child.left,
-            (unsigned long) child.right);
+    printf("%u-child of ",(unsigned int) inchar);
+    showinterval(limdfsresources->withesa,parent);
+    printf(" is ");
+    showinterval(limdfsresources->withesa,&child);
+    printf("\n");
 #endif
     processchildinterval(limdfsresources,
                          patternlength,
@@ -795,14 +797,11 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     child.left = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
     child.right = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
 #ifdef SKDEBUG
-    printf("%u-child of (offset=%lu,%lu,%lu) is (%lu,%lu,%lu)\n",
-            (unsigned int) inchar,
-            (unsigned long) parent->offset,
-            (unsigned long) parent->left,
-            (unsigned long) parent->right,
-            (unsigned long) child.offset,
-            (unsigned long) child.left,
-            (unsigned long) child.right);
+    printf("%u-child of ",(unsigned int) inchar);
+    showinterval(limdfsresources->withesa,parent);
+    printf(" is ");
+    showinterval(limdfsresources->withesa,&child);
+    printf("\n");
 #endif
     processchildinterval(limdfsresources,
                          patternlength,

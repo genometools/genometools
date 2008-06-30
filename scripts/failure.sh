@@ -16,6 +16,7 @@ inputfile=$1
 #SPRANK="-sprank"
 
 gt suffixerator -tis -suf -dna -pl -db ${inputfile} -indexname esa-fwd
+gt suffixerator -tis -bwt -suf -dna -pl -db ${inputfile} -dir rev -indexname esa-rev
 gt tagerator -t Q1 -cmp -esa esa-fwd -k 1
 gt packedindex mkindex -tis -dna -pl -bsize 10 -locfreq 32\
                        -dir rev -db ${inputfile} -indexname pck-rev
