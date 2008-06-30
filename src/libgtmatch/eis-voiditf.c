@@ -18,6 +18,7 @@
 #include "eis-bwtseq.h"
 #include "eis-bwtseq-construct.h"
 #include "eis-voiditf.h"
+#include "splititv.h"
 #include "stamp.h"
 
 Seqpos bwtseqfirstmatch(const void *voidbwtSeq,Seqpos bound)
@@ -139,7 +140,8 @@ void *loadvoidBWTSeqForSA(const Str *indexname,
                          totallength+1, err);
 }
 
-void bwtrangesplitwithoutspecial(Seqpos *rangeOccs,
+void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
+                                 Seqpos *rangeOccs,
                                  unsigned long alphasize,
                                  const void *voidBwtSeq,
                                  const Lcpinterval *parent)
@@ -147,11 +149,18 @@ void bwtrangesplitwithoutspecial(Seqpos *rangeOccs,
   unsigned long idx;
   const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
 
+  bwci->nextfreeBoundswithchar = 0;
   BWTSeqPosPairRangeOcc(bwtseq, 0, parent->left, parent->right,rangeOccs);
   for (idx = 0; idx < alphasize; idx++)
   {
-    rangeOccs[idx] = bwtseq->count[idx] + rangeOccs[idx];
-    rangeOccs[alphasize+idx] = bwtseq->count[idx] + rangeOccs[alphasize+idx];
+    if (rangeOccs[idx] < rangeOccs[alphasize+idx])
+    {
+      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].inchar = idx;
+      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].lbound
+        = bwtseq->count[idx] + rangeOccs[idx];
+      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar++].rbound
+        = bwtseq->count[idx] + rangeOccs[alphasize+idx];
+    }
   }
 }
 

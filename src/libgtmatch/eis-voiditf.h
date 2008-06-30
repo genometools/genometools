@@ -20,6 +20,7 @@
 
 #include "seqpos-def.h"
 #include "sarr-def.h"
+#include "splititv.h"
 
 Seqpos bwtseqfirstmatch(const void *voidbwtSeq,Seqpos bound);
 
@@ -49,7 +50,8 @@ Uchar bwtseqintervalextendlcp(const void *voidBwtSeq,
                               const Lcpinterval *itv,
                               Uchar alphasize);
 
-void bwtrangesplitwithoutspecial(Seqpos *rangeOccs,
+void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
+                                 Seqpos *rangeOccs,
                                  unsigned long alphasize,
                                  const void *voidBwtSeq,
                                  const Lcpinterval *parent);

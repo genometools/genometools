@@ -778,32 +778,39 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
                                 const Lcpinterval *parent,
                                 UNUSED const Myerscolumn *previouscolumn)
 {
-  bwtrangesplitwithoutspecial(limdfsresources->rangeOccs,
+  unsigned long idx;
+
+  bwtrangesplitwithoutspecial(&limdfsresources->bwci,
+                              limdfsresources->rangeOccs,
                               (unsigned long) limdfsresources->alphasize,
                               limdfsresources->genericindex,
                               parent);
-  /*
-  for (idx = 0; idx < (unsigned long) limdfsresources->alphasize; idx++)
+  for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {
-    if (limdfsresources->rangeOccs[idx] < limdfsresources->rangeOccs[idx+1])
-    {
-      Uchar inchar;
-      Lcpinterval child;
+    Uchar inchar;
+    Lcpinterval child;
 
-      child.left = left;
-      child.right = left +
-                    limdfsresources->rangeOccs[limdfsresources->alphasize+idx];
-      child.offset = parent->offset+1;
-      inchar = (Uchar) DIV2(idx);
-      processchildinterval(limdfsresources,
-                           patternlength,
-                           maxdistance,
-                           &child,
-                           inchar,
-                           previouscolumn);
-    }
+    inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
+    child.offset = parent->offset+1;
+    child.left = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
+    child.right = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
+#ifdef SKDEBUG
+    printf("%u-child of (offset=%lu,%lu,%lu) is (%lu,%lu,%lu)\n",
+            (unsigned int) inchar,
+            (unsigned long) parent->offset,
+            (unsigned long) parent->left,
+            (unsigned long) parent->right,
+            (unsigned long) child.offset,
+            (unsigned long) child.left,
+            (unsigned long) child.right);
+#endif
+    processchildinterval(limdfsresources,
+                         patternlength,
+                         maxdistance,
+                         &child,
+                         inchar,
+                         previouscolumn);
   }
-  */
 }
 
 void esalimiteddfs(Limdfsresources *limdfsresources,
