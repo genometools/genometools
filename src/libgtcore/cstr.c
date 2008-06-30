@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -60,6 +60,19 @@ unsigned long cstr_length_up_to_char(const char *cstr, char c)
   if (suffix)
     return suffix - cstr;
   return strlen(cstr);
+}
+
+char** cstr_array_dup(const char **cstr_array)
+{
+  unsigned long i, size = 0;
+  char **copy;
+  assert(cstr_array);
+  while (cstr_array[size++]);
+  copy = ma_malloc(size * sizeof *copy);
+  for (i = 0; i < size - 1; i++)
+    copy[i] = cstr_dup(cstr_array[i]);
+  copy[size-1] = NULL;
+  return copy;
 }
 
 char** cstr_array_prefix_first(const char **cstr_array, const char *p)

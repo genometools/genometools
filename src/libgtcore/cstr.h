@@ -30,6 +30,8 @@ void          cstr_show(const char*, unsigned long length, FILE*);
    does not contain <c>, strlen(cstr) is returned. */
 unsigned long cstr_length_up_to_char(const char *cstr, char c);
 
+/* Return copy of <cstr_array>. */
+char**        cstr_array_dup(const char **cstr_array);
 /* Use p and a blank as prefix for cstr_array[0] and return the result. */
 char**        cstr_array_prefix_first(const char **cstr_array, const char *p);
 char**        cstr_array_preprend(const char **cstr_array, const char *p);
