@@ -91,7 +91,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
       if (strarray_size(is->files)) {
         if (strcmp(strarray_get(is->files, is->next_file), "-") == 0) {
           if (is->stdin_argument) {
-            error_set(e, "multiple specification of argument file \"-\"\n");
+            error_set(e, "multiple specification of argument file \"-\"");
             had_err = -1;
             break;
           }
