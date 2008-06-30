@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
+#include "libgtcore/bioseq_iterator.h"
 #include "libgtcore/fasta.h"
 #include "libgtcore/grep.h"
 #include "libgtcore/ma.h"
@@ -220,43 +220,22 @@ static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
                             arguments->outfp, err);
   }
   else {
+    BioseqIterator *bsi;
     Bioseq *bs;
-    int arg = parsed_args;
-    if (argc == parsed_args) { /* no file given, use stdin */
-      if (!(bs = bioseq_new("-", err)))
-        had_err = -1;
-      if (!had_err) {
-        if (arguments->frompos) {
-          had_err = extractseq_pos(arguments->outfp, bs, arguments->frompos,
-                                   arguments->topos, arguments->width, err);
-        }
-        else {
-          had_err = extractseq_match(arguments->outfp, bs,
-                                     str_get(arguments->pattern),
-                                     arguments->width, err);
-        }
+    bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
+    while (!had_err && !(had_err = bioseq_iterator_next(bsi, &bs, err)) && bs) {
+      if (arguments->frompos) {
+        had_err = extractseq_pos(arguments->outfp, bs, arguments->frompos,
+                                 arguments->topos, arguments->width, err);
+      }
+      else {
+        had_err = extractseq_match(arguments->outfp, bs,
+                                   str_get(arguments->pattern),
+                                   arguments->width, err);
       }
       bioseq_delete(bs);
     }
-
-    /* process all files */
-    while (!had_err && arg < argc) {
-      if (!(bs = bioseq_new(argv[arg], err)))
-        had_err = -1;
-      if (!had_err) {
-        if (arguments->frompos) {
-          had_err = extractseq_pos(arguments->outfp, bs, arguments->frompos,
-                                   arguments->topos, arguments->width, err);
-        }
-        else {
-          had_err = extractseq_match(arguments->outfp, bs,
-                                     str_get(arguments->pattern),
-                                     arguments->width, err);
-        }
-      }
-      bioseq_delete(bs);
-      arg++;
-    }
+    bioseq_iterator_delete(bsi);
   }
   return had_err;
 }
