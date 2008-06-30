@@ -17,8 +17,8 @@
 
 #include "libgtcore/bioseq.h"
 #include "libgtcore/fasta.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/mutate.h"
 #include "tools/gt_mutate.h"
@@ -27,13 +27,24 @@ typedef struct {
   unsigned int rate; /* the mutate rate */
 } MutateArguments;
 
-static OPrval parse_options(int *parsed_args, MutateArguments *arguments,
-                            int argc, const char **argv, Error *err)
+static void* gt_mutate_arguments_new(void)
 {
+  return ma_calloc(1, sizeof (MutateArguments));
+}
+
+static void gt_mutate_arguments_delete(void *tool_arguments)
+{
+  MutateArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  ma_free(arguments);
+}
+
+static OptionParser* gt_mutate_option_parser_new(void *tool_arguments)
+{
+  MutateArguments *arguments = tool_arguments;
   OptionParser *op;
   Option *o;
-  OPrval oprval;
-  error_check(err);
+  assert(arguments);
   op = option_parser_new("[option ...] sequence_file [...]",
                          "Mutate the sequences of the given sequence_file(s) "
                          "and show them on stdout.");
@@ -45,27 +56,20 @@ static OPrval parse_options(int *parsed_args, MutateArguments *arguments,
   /* parse */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
   option_parser_set_min_args(op, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
-int gt_mutate(int argc, const char **argv, Error *err)
+static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
+                            void *tool_arguments, Error *err)
 {
-  MutateArguments arguments;
+  MutateArguments *arguments = tool_arguments;
   Bioseq *bioseq;
   unsigned long i;
   Seq *mutated_seq;
-  int parsed_args, had_err = 0;
-  error_check(err);
+  int had_err = 0;
 
-  /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
-  }
-  assert(parsed_args < argc);
+  error_check(err);
+  assert(arguments);
 
   while (!had_err && parsed_args < argc) {
     bioseq = bioseq_new(argv[parsed_args], err);
@@ -76,7 +80,7 @@ int gt_mutate(int argc, const char **argv, Error *err)
         mutated_seq = mutate(bioseq_get_description(bioseq, i),
                              bioseq_get_sequence(bioseq, i),
                              bioseq_get_sequence_length(bioseq, i),
-                             bioseq_get_alpha(bioseq), arguments.rate);
+                             bioseq_get_alpha(bioseq), arguments->rate);
         fasta_show_entry(seq_get_description(mutated_seq),
                          seq_get_orig(mutated_seq), seq_length(mutated_seq), 0);
         seq_delete(mutated_seq);
@@ -87,4 +91,13 @@ int gt_mutate(int argc, const char **argv, Error *err)
   }
 
   return had_err;
+}
+
+Tool* gt_mutate(void)
+{
+  return tool_new(gt_mutate_arguments_new,
+                  gt_mutate_arguments_delete,
+                  gt_mutate_option_parser_new,
+                  NULL,
+                  gt_mutate_runner);
 }

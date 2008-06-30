@@ -107,7 +107,7 @@ Toolbox* gtt_tools(void)
   toolbox_add(tools, "merge", gt_merge);
   toolbox_add(tools, "mgth", gt_mgth);
   toolbox_add(tools, "mmapandread", gt_mmapandread);
-  toolbox_add(tools, "mutate", gt_mutate);
+  toolbox_add_tool(tools, "mutate", gt_mutate());
   toolbox_add(tools, "mkfmindex", gt_mkfmindex);
   toolbox_add_tool(tools, "packedindex", gt_packedindex());
   toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
