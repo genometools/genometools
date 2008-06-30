@@ -50,6 +50,7 @@ Uchar bwtseqintervalextendlcp(const void *voidBwtSeq,
                               Uchar alphasize);
 
 void bwtrangesplitwithoutspecial(Seqpos *rangeOccs,
+                                 unsigned long alphasize,
                                  const void *voidBwtSeq,
                                  const Lcpinterval *parent);
 

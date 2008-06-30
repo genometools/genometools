@@ -140,11 +140,19 @@ void *loadvoidBWTSeqForSA(const Str *indexname,
 }
 
 void bwtrangesplitwithoutspecial(Seqpos *rangeOccs,
+                                 unsigned long alphasize,
                                  const void *voidBwtSeq,
                                  const Lcpinterval *parent)
 {
-  BWTSeqPosPairRangeOcc((const BWTSeq *) voidBwtSeq, 0,
-                        parent->left, parent->right,rangeOccs);
+  unsigned long idx;
+  const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
+
+  BWTSeqPosPairRangeOcc(bwtseq, 0, parent->left, parent->right,rangeOccs);
+  for (idx = 0; idx < alphasize; idx++)
+  {
+    rangeOccs[idx] = bwtseq->count[idx] + rangeOccs[idx];
+    rangeOccs[alphasize+idx] = bwtseq->count[idx] + rangeOccs[alphasize+idx];
+  }
 }
 
 void deletevoidBWTSeq(void *packedindex)

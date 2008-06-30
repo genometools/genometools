@@ -501,23 +501,40 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
 static Uchar esa_extendlcp(Limdfsresources *limdfsresources,
                            const Lcpinterval *itv)
 {
+  Uchar cc;
   const Suffixarray *suffixarray
     = (const Suffixarray *) limdfsresources->genericindex;
 
-  return lcpintervalextendlcp(suffixarray->encseq,
-                              suffixarray->readmode,
-                              suffixarray->suftab,
-                              limdfsresources->totallength,
-                              itv,
-                              limdfsresources->alphasize);
+  cc = lcpintervalextendlcp(suffixarray->encseq,
+                            suffixarray->readmode,
+                            suffixarray->suftab,
+                            limdfsresources->totallength,
+                            itv,
+                            limdfsresources->alphasize);
+#ifdef SKDEBUG
+  printf("extendlcp(left=%lu,right=%lu,offset=%lu)=%u\n",
+           (unsigned long) itv->left,
+           (unsigned long) itv->right,
+           (unsigned long) itv->offset,
+           (unsigned int) cc);
+#endif
+  return cc;
 }
 
 static Uchar pck_extendlcp(Limdfsresources *limdfsresources,
                            const Lcpinterval *itv)
 {
-  return bwtseqintervalextendlcp(limdfsresources->genericindex,
-                                 itv,
-                                 limdfsresources->alphasize);
+  Uchar cc = bwtseqintervalextendlcp(limdfsresources->genericindex,
+                                     itv,
+                                     limdfsresources->alphasize);
+#ifdef SKDEBUG
+  printf("extendlcp(left=%lu,right=%lu,offset=%lu)=%u\n",
+           (unsigned long) itv->left,
+           (unsigned long) itv->right,
+           (unsigned long) itv->offset,
+           (unsigned int) cc);
+#endif
+  return cc;
 }
 
 /* iterate myers algorithm over a sequence context */
@@ -726,6 +743,16 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     child.right = limdfsresources->bwci.bounds.spaceBoundswithchar[idx].rbound;
     assert(child.right == limdfsresources->bwci.bounds.
                           spaceBoundswithchar[idx+1].lbound-1);
+#ifdef SKDEBUG
+    printf("%u-child of (offset=%lu,%lu,%lu) is (%lu,%lu,%lu)\n",
+            (unsigned int) inchar,
+            (unsigned long) parent->offset,
+            (unsigned long) parent->left,
+            (unsigned long) parent->right,
+            (unsigned long) child.offset,
+            (unsigned long) child.left,
+            (unsigned long) child.right);
+#endif
     processchildinterval(limdfsresources,
                          patternlength,
                          maxdistance,
@@ -752,18 +779,22 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
                                 UNUSED const Myerscolumn *previouscolumn)
 {
   unsigned long idx;
+  Seqpos left = 0;
 
   bwtrangesplitwithoutspecial(limdfsresources->rangeOccs,
-                              limdfsresources->genericindex,parent);
-  for (idx = 0; idx < (unsigned long) limdfsresources->alphasize; idx += 2UL)
+                              (unsigned long) limdfsresources->alphasize,
+                              limdfsresources->genericindex,
+                              parent);
+  for (idx = 0; idx < (unsigned long) limdfsresources->alphasize; idx++)
   {
     if (limdfsresources->rangeOccs[idx] < limdfsresources->rangeOccs[idx+1])
     {
       Uchar inchar;
       Lcpinterval child;
 
-      child.left = limdfsresources->rangeOccs[idx];
-      child.right = limdfsresources->rangeOccs[idx+1];
+      child.left = left;
+      child.right = left +
+                    limdfsresources->rangeOccs[limdfsresources->alphasize+idx];
       child.offset = parent->offset+1;
       inchar = (Uchar) DIV2(idx);
       processchildinterval(limdfsresources,
@@ -791,7 +822,10 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                 (unsigned long) limdfsresources->alphasize,
                 pattern,patternlength);
   initlcpinfostack(&limdfsresources->stack,
-                   0,limdfsresources->totallength,
+                   0,
+                   limdfsresources->withesa
+                     ? limdfsresources->totallength
+                     : limdfsresources->totallength+1,
                    maxdistance);
   while (limdfsresources->stack.nextfreeLcpintervalwithinfo > 0)
   {
