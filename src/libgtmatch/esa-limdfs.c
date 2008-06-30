@@ -30,7 +30,7 @@
 
 #define UNDEFINDEX      (patternlength+1)
 
-#define SKDEBUG
+#undef SKDEBUG
 
 typedef struct
 {
@@ -503,11 +503,10 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
                                     itv->left,itv->right);
   while (nextBwtseqpositioniterator(&dbstartpos,bspi))
   {
-        STAMP;
     limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                   false,
                                   limdfsresources->totallength,
-                                  dbstartpos,
+                                  dbstartpos + itv->offset,
                                   itv->offset);
   }
   freeBwtseqpositioniterator(&bspi);
@@ -610,11 +609,11 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       if (currentcol.maxleqk == patternlength)
       {
         Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,left);
-        STAMP;
+
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                       false,
                                       limdfsresources->totallength,
-                                      startpos,
+                                      startpos + offset,
                                       offset + matchlength);
         break;
       }
@@ -753,8 +752,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
                                    parent);
   }
   firstnonspecial = parent->left;
-  for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar;
-       idx++)
+  for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {
     Lcpinterval child;
     Uchar inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
@@ -856,8 +854,8 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                limdfsresources->stack.nextfreeLcpintervalwithinfo - 1;
     SHOWSTACKTOP(stackptr);
     previouscolumn = stackptr->column;
-      parent = stackptr->lcpitv; /* save, since stackptr is changed in split */
-      /* split interval */
+    parent = stackptr->lcpitv; /* save, since stackptr is changed in split */
+    /* split interval */
     assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
     limdfsresources->stack.nextfreeLcpintervalwithinfo--;
     if (limdfsresources->withesa)

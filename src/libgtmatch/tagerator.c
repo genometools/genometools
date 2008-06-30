@@ -65,37 +65,36 @@ static void esa_exactpatternmatching(const void *genericindex,
   freemmsearchiterator(&mmsi);
 }
 
-static void showmatch(UNUSED void *processinfo,UNUSED bool withesa,
-                      UNUSED Seqpos totallength,Seqpos startpos,Seqpos len)
+static Seqpos convertstartpos(bool withesa,Seqpos totallength,Seqpos startpos)
 {
-/*
-  if (!withesa)
+  if (withesa)
   {
-    printf("totallength=%lu,startpos=%lu,len=%lu\n",
-            (unsigned long) totallength,(unsigned long) startpos,
-            (unsigned long) len);
-    assert(totallength >= startpos + len);
-    startpos = totallength - (startpos + len);
+    return startpos;
   }
-*/
+  assert(totallength >= startpos);
+  return totallength - startpos;
+}
+
+static void showmatch(UNUSED void *processinfo,bool withesa,
+                      Seqpos totallength,Seqpos startpos,Seqpos len)
+{
   printf("match " FormatSeqpos " " FormatSeqpos "\n",
-          PRINTSeqposcast(startpos),
+          PRINTSeqposcast(convertstartpos(withesa,totallength,startpos)),
           PRINTSeqposcast(len));
 }
 
 DECLAREARRAYSTRUCT(Seqpos);
 
-static void storematch(void *processinfo,bool withesa,Seqpos totallength,
-                       Seqpos startpos,UNUSED Seqpos len)
+static void storematch(void *processinfo,
+                       bool withesa,
+                       Seqpos totallength,
+                       Seqpos startpos,
+                       UNUSED Seqpos len)
 {
   ArraySeqpos *storetab = (ArraySeqpos *) processinfo;
 
-  if (!withesa)
-  {
-    assert(totallength >= startpos + len);
-    startpos = totallength - (startpos + len);
-  }
-  STOREINARRAY(storetab,Seqpos,32,startpos);
+  STOREINARRAY(storetab,Seqpos,32,convertstartpos(withesa,totallength,
+                                                  startpos));
 }
 
 static int cmpdescend(const void *a,const void *b)
@@ -221,8 +220,19 @@ static void compareresults(UNUSED const ArraySeqpos *storeonline,
   }
   for (ss=0; ss < storeoffline->nextfreeSeqpos; ss++)
   {
-    assert(storeoffline->spaceSeqpos != NULL &&
-           storeonline->spaceSeqpos != NULL);
+    assert(storeonline->spaceSeqpos != NULL &&
+           storeoffline->spaceSeqpos != NULL);
+     /*
+    if (storeonline->spaceSeqpos[ss] != storeoffline->spaceSeqpos[ss])
+    {
+      fprintf(stderr,"storeonline->spaceSeqpos[%lu] = %lu != %lu "
+                     "= storeonline->spaceSeqpos[%lu]\n",
+                     ss,
+                     (unsigned long) storeonline->spaceSeqpos[ss],
+                     (unsigned long) storeoffline->spaceSeqpos[ss],
+                     ss);
+    }
+    */
     assert(storeoffline->spaceSeqpos[ss] == storeonline->spaceSeqpos[ss]);
   }
 }
