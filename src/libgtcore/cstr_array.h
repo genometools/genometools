@@ -15,17 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CSTR_H
-#define CSTR_H
+#ifndef CSTR_ARRAY_H
+#define CSTR_ARRAY_H
 
-#include <stdio.h>
+#include "libgtcore/genfile.h"
 
-char*         cstr_dup(const char*);
-/* Replace each occurence of <f> in <cstr> to <t>. */
-void          cstr_rep(char *cstr, char f, char t);
-void          cstr_show(const char*, unsigned long length, FILE*);
-/* Returns the length of the prefix of <cstr> ending just before <c>, if <cstr>
-   does not contain <c>, strlen(cstr) is returned. */
-unsigned long cstr_length_up_to_char(const char *cstr, char c);
+/* Return copy of <cstr_array>. */
+char**        cstr_array_dup(const char **cstr_array);
+/* Use p and a blank as prefix for cstr_array[0] and return the result. */
+char**        cstr_array_prefix_first(const char **cstr_array, const char *p);
+char**        cstr_array_preprend(const char **cstr_array, const char *p);
+void          cstr_array_show(char **cstr_array, FILE*);
+void          cstr_array_show_genfile(const char **cstr_array, GenFile*);
+unsigned long cstr_array_size(const char **cstr_array); /* O(n) */
+void          cstr_array_delete(char **cstr_array);
 
 #endif

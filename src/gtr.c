@@ -24,7 +24,7 @@
 #include "lpeg.h"
 #include "md5.h"
 #include "ldes56.h"
-#include "libgtcore/cstr.h"
+#include "libgtcore/cstr_array.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/fileutils.h"

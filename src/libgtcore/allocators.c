@@ -17,6 +17,7 @@
 
 #include "libgtcore/allocators.h"
 #include "libgtcore/cstr.h"
+#include "libgtcore/cstr_array.h"
 #include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"

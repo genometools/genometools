@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/cstr_array.h"
 #include "libgtcore/error.h"
 #include "libgtcore/option.h"
 #include "libgtcore/str.h"
-#include "libgtcore/cstr.h"
 #include "libgtext/toolbox.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/sfx-run.h"
