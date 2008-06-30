@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
+#include "libgtcore/bioseq_iterator.h"
 #include "libgtcore/fasta.h"
 #include "libgtcore/option.h"
 #include "libgtcore/ma.h"
@@ -49,7 +49,7 @@ static OptionParser* gt_shredder_option_parser_new(void *tool_arguments)
   OptionParser *op;
   Option *o;
   assert(arguments);
-  op = option_parser_new("[option ...] sequence_file",
+  op = option_parser_new("[option ...] [sequence_file ...]",
                          "Shredder sequence_file into consecutive pieces of "
                          "random length.");
   o = option_new_ulong_min("coverage", "Set the number of times the "
@@ -66,7 +66,6 @@ static OptionParser* gt_shredder_option_parser_new(void *tool_arguments)
                        "pieces", &arguments->overlap, 0);
   option_parser_add_option(op, o);
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  option_parser_set_min_max_args(op, 1, 1);
   return op;
 }
 
@@ -87,9 +86,10 @@ static int gt_shredder_runner(UNUSED int argc, const char **argv,
                               int parsed_args, void *tool_arguments, Error *err)
 {
   ShredderArguments *arguments = tool_arguments;
+  BioseqIterator *bsi;
   unsigned long i;
   Bioseq *bioseq;
-  int had_err = 0;
+  int had_err;
   Str *desc;
 
   error_check(err);
@@ -97,27 +97,29 @@ static int gt_shredder_runner(UNUSED int argc, const char **argv,
 
   /* init */
   desc = str_new();
-  bioseq = bioseq_new(argv[parsed_args], err);
-  if (!bioseq)
-    had_err = -1;
+  bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
 
   /* shredder */
-  for (i = 0; !had_err && i < arguments->coverage; i++) {
-    Shredder *shredder;
-    unsigned long fragment_length;
-    const char *fragment;
-    shredder = shredder_new(bioseq, arguments->minlength, arguments->maxlength);
-    shredder_set_overlap(shredder, arguments->overlap);
-    while ((fragment = shredder_shred(shredder, &fragment_length, desc))) {
-      str_append_cstr(desc, " [shreddered fragment]");
-      fasta_show_entry(str_get(desc), fragment, fragment_length, 0);
-      str_reset(desc);
+  while (!(had_err = bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
+    for (i = 0; i < arguments->coverage; i++) {
+      Shredder *shredder;
+      unsigned long fragment_length;
+      const char *fragment;
+      shredder = shredder_new(bioseq, arguments->minlength,
+                              arguments->maxlength);
+      shredder_set_overlap(shredder, arguments->overlap);
+      while ((fragment = shredder_shred(shredder, &fragment_length, desc))) {
+        str_append_cstr(desc, " [shreddered fragment]");
+        fasta_show_entry(str_get(desc), fragment, fragment_length, 0);
+        str_reset(desc);
+      }
+      shredder_delete(shredder);
     }
-    shredder_delete(shredder);
+    bioseq_delete(bioseq);
   }
 
   /* free */
-  bioseq_delete(bioseq);
+  bioseq_iterator_delete(bsi);
   str_delete(desc);
 
   return had_err;
