@@ -112,22 +112,6 @@ void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci)
   *bsci = NULL;
 }
 
-Uchar bwtseqintervalextendlcp(const void *voidBwtSeq,
-                              const Lcpinterval *itv,
-                              Uchar alphasize)
-{
-  Uchar ccl, ccr;
-
-  ccl = BWTSeqGetSym((const BWTSeq *) voidBwtSeq,itv->left);
-  ccr = BWTSeqGetSym((const BWTSeq *) voidBwtSeq,itv->right);
-  if (ccl != ccr || ISSPECIAL(ccl))
-  {
-    return alphasize;
-  }
-  assert(ccl < alphasize);
-  return ccl;
-}
-
 void *loadvoidBWTSeqForSA(const Str *indexname,
                           const Suffixarray *suffixarray,
                           Seqpos totallength,

@@ -46,10 +46,6 @@ Uchar nextBwtseqcontextiterator(Bwtseqcontextiterator *bsci);
 
 void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci);
 
-Uchar bwtseqintervalextendlcp(const void *voidBwtSeq,
-                              const Lcpinterval *itv,
-                              Uchar alphasize);
-
 void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
                                  Seqpos *rangeOccs,
                                  unsigned long alphasize,
