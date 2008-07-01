@@ -21,6 +21,8 @@
 #include "spacedef.h"
 #include "encseq-def.h"
 #include "esa-myersapm.h"
+#include "defined-types.h"
+#include "esa-limdfs.h" /* XXX import esa_findshortestmatch */
 
 struct Myersonlineresources
 {
@@ -29,6 +31,7 @@ struct Myersonlineresources
   Seqpos totallength;
   unsigned long *eqsvectorrev;
   unsigned int alphasize;
+  bool nospecials;
   void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos);
   void *processmatchinfo;
 };
@@ -59,6 +62,7 @@ static void initeqsvectorrev(unsigned long *eqsvectorrev,
 
 Myersonlineresources *newMyersonlineresources(
                             unsigned int mapsize,
+                            bool nospecials,
                             const Encodedsequence *encseq,
                             void (*processmatch)(void *,bool,Seqpos,
                                                  Seqpos,Seqpos),
@@ -73,6 +77,7 @@ Myersonlineresources *newMyersonlineresources(
   assert(mapsize > 0 && mapsize-1 <= UCHAR_MAX);
   mor->alphasize = mapsize-1;
   mor->totallength = getencseqtotallength(encseq);
+  mor->nospecials = nospecials;
   mor->processmatch = processmatch;
   mor->processmatchinfo = processmatchinfo;
   return mor;
@@ -156,11 +161,25 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
       Mv = Ph & Xv;                                   /* 18 */
       if (score <= maxdistance)
       {
-        mor->processmatch(mor->processmatchinfo,
-                          true,
-                          mor->totallength,
-                          REVERSEPOS(mor->totallength,pos),
-                          0);
+        Seqpos dbstartpos = REVERSEPOS(mor->totallength,pos);
+        Definedunsignedlong matchlength;
+
+        matchlength = esa_findshortestmatch(mor->encseq,
+                                            mor->nospecials,
+                                            (unsigned long) mor->alphasize,
+                                            pattern,
+                                            patternlength,
+                                            maxdistance,
+                                            dbstartpos);
+        assert (matchlength.defined || mor->nospecials);
+        if (matchlength.defined)
+        {
+          mor->processmatch(mor->processmatchinfo,
+                            true,
+                            mor->totallength,
+                            dbstartpos,
+                            (Seqpos) matchlength.valueunsignedlong);
+        }
       }
     }
   }

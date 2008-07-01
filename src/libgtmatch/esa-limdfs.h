@@ -20,6 +20,7 @@
 
 #include "seqpos-def.h"
 #include "encseq-def.h"
+#include "defined-types.h"
 
 typedef struct Limdfsresources Limdfsresources;
 
@@ -41,12 +42,12 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
                    unsigned long patternlength,
                    unsigned long maxdistance);
 
-unsigned long esa_findshortestmatch(const Encodedsequence *encseq,
-                                    bool nospecials,
-                                    unsigned long alphasize,
-                                    const Uchar *pattern,
-                                    unsigned long patternlength,
-                                    unsigned long maxdistance,
-                                    Seqpos startpos);
+Definedunsignedlong esa_findshortestmatch(const Encodedsequence *encseq,
+                                          bool nospecials,
+                                          unsigned long alphasize,
+                                          const Uchar *pattern,
+                                          unsigned long patternlength,
+                                          unsigned long maxdistance,
+                                          Seqpos startpos);
 
 #endif

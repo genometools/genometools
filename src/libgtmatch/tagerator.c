@@ -350,7 +350,9 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     if (tageratoroptions->online || tageratoroptions->docompare)
     {
       assert(suffixarray.encseq != NULL);
-      mor = newMyersonlineresources(mapsize,suffixarray.encseq,
+      mor = newMyersonlineresources(mapsize,
+                                    tageratoroptions->nospecials,
+                                    suffixarray.encseq,
                                     processmatch,
                                     processmatchinfoonline);
     }

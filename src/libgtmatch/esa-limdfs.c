@@ -26,6 +26,7 @@
 #include "esa-splititv.h"
 #include "esa-limdfs.h"
 #include "eis-voiditf.h"
+#include "defined-types.h"
 #include "stamp.h"
 
 #define UNDEFINDEX      (patternlength+1)
@@ -517,41 +518,52 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
   freeBwtseqpositioniterator(&bspi);
 }
 
-unsigned long esa_findshortestmatch(const Encodedsequence *encseq,
-                                    bool nospecials,
-                                    unsigned long alphasize,
-                                    const Uchar *pattern,
-                                    unsigned long patternlength,
-                                    unsigned long maxdistance,
-                                    Seqpos startpos)
+Definedunsignedlong esa_findshortestmatch(const Encodedsequence *encseq,
+                                          bool nospecials,
+                                          unsigned long alphasize,
+                                          const Uchar *pattern,
+                                          unsigned long patternlength,
+                                          unsigned long maxdistance,
+                                          Seqpos startpos)
 {
   Seqpos pos, totallength = getencseqtotallength(encseq);
   unsigned long *eqsvector;
   Myerscolumn currentcol;
   Uchar cc;
+  Definedunsignedlong result;
 
   ALLOCASSIGNSPACE(eqsvector,NULL,unsigned long,alphasize);
   initeqsvector(eqsvector,alphasize,pattern,patternlength);
   initMyerscolumn(&currentcol,maxdistance);
-  for (pos = startpos; pos < totallength; pos++)
+  result.defined = true;
+  for (pos = startpos; /* Nothing */; pos++)
   {
-    assert(startpos - pos <= (Seqpos) (patternlength + maxdistance));
+    assert(pos - startpos <= (Seqpos) (patternlength + maxdistance));
     cc = getencodedchar(encseq,pos,Forwardmode);
+    printf("cc=%u\n",(unsigned int) cc);
     assert (cc != (Uchar) SEPARATOR &&
             (!nospecials || cc != (Uchar) WILDCARD));
+    if (nospecials && cc == (Uchar) WILDCARD)
+    {
+      FREESPACE(eqsvector);
+      result.defined = false;
+      return result;
+    }
     inplacenextEDcolumn(eqsvector,
                         patternlength,
                         maxdistance,
                         &currentcol,
                         cc);
     assert (currentcol.maxleqk != UNDEFINDEX);
-    if (currentcol.maxleqk == patternlength)
+    if (currentcol.maxleqk == patternlength || pos == totallength+1)
     {
       break;
     }
   }
   FREESPACE(eqsvector);
-  return (unsigned long) (startpos - pos);
+  result.defined = true;
+  result.valueunsignedlong = (unsigned long) (pos - startpos);
+  return result;
 }
 
 /* iterate myers algorithm over a sequence context */
