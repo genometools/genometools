@@ -19,7 +19,7 @@ query=$2
 gt suffixerator -tis -suf -dna -pl -db ${reference} -indexname esa-fwd
 gt packedindex mkindex -sprank -tis -dna -pl -bsize 10 -locfreq 32\
                        -dir rev -db ${reference} -indexname pck-rev
-gt tagerator -t ${query} -cmp -esa esa-fwd -k 1
-gt tagerator -t ${query} -cmp -pck pck-rev -k 1
+gt tagerator -cmp -esa esa-fwd -k 1 -nospecials -t ${query}
+gt tagerator -cmp -pck pck-rev -k 1 -nospecials -t ${query} 
 
 # bin/gt tagerator -t Q1 -pck pck

@@ -38,6 +38,11 @@
 
 #define MAXTAGSIZE INTWORDSIZE
 
+typedef struct
+{
+  Seqpos dbstartpos, matchlength;
+} Simplematch;
+
 static void esa_exactpatternmatching(const void *genericindex,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
@@ -83,30 +88,32 @@ static void showmatch(UNUSED void *processinfo,bool withesa,
           PRINTSeqposcast(len));
 }
 
-DECLAREARRAYSTRUCT(Seqpos);
+DECLAREARRAYSTRUCT(Simplematch);
 
 static void storematch(void *processinfo,
                        bool withesa,
                        Seqpos totallength,
                        Seqpos startpos,
-                       UNUSED Seqpos len)
+                       Seqpos len)
 {
-  ArraySeqpos *storetab = (ArraySeqpos *) processinfo;
+  ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
+  Simplematch *match;
 
-  STOREINARRAY(storetab,Seqpos,32,convertstartpos(withesa,totallength,
-                                                  startpos));
+  GETNEXTFREEINARRAY(match,storetab,Simplematch,32);
+  match->dbstartpos = convertstartpos(withesa,totallength,startpos);
+  match->matchlength = len;
 }
 
 static int cmpdescend(const void *a,const void *b)
 {
-  Seqpos *valuea = (Seqpos *) a;
-  Seqpos *valueb = (Seqpos *) b;
+  Simplematch *valuea = (Simplematch *) a;
+  Simplematch *valueb = (Simplematch *) b;
 
-  if (*valuea < *valueb)
+  if (valuea->dbstartpos < valueb->dbstartpos)
   {
     return 1;
   }
-  if (*valuea > *valueb)
+  if (valuea->dbstartpos > valueb->dbstartpos)
   {
     return -1;
   }
@@ -206,34 +213,41 @@ static void performthesearch(const TageratorOptions *tageratoroptions,
   }
 }
 
-static void compareresults(UNUSED const ArraySeqpos *storeonline,
-                           const ArraySeqpos *storeoffline)
+static void compareresults(const ArraySimplematch *storeonline,
+                           const ArraySimplematch *storeoffline)
 {
   unsigned long ss;
 
-  assert(storeoffline->nextfreeSeqpos == storeonline->nextfreeSeqpos);
-  if (storeoffline->nextfreeSeqpos > 1UL)
+  assert(storeoffline->nextfreeSimplematch == storeonline->nextfreeSimplematch);
+  if (storeoffline->nextfreeSimplematch > 1UL)
   {
-    qsort(storeoffline->spaceSeqpos,(size_t) storeoffline->nextfreeSeqpos,
+    qsort(storeoffline->spaceSimplematch,(size_t)
+          storeoffline->nextfreeSimplematch,
           sizeof (Seqpos),
           cmpdescend);
   }
-  for (ss=0; ss < storeoffline->nextfreeSeqpos; ss++)
+  for (ss=0; ss < storeoffline->nextfreeSimplematch; ss++)
   {
-    assert(storeonline->spaceSeqpos != NULL &&
-           storeoffline->spaceSeqpos != NULL);
-     /*
-    if (storeonline->spaceSeqpos[ss] != storeoffline->spaceSeqpos[ss])
+    assert(storeonline->spaceSimplematch != NULL &&
+           storeoffline->spaceSimplematch != NULL);
+    if (storeonline->spaceSimplematch[ss].matchlength !=
+        storeoffline->spaceSimplematch[ss].matchlength)
     {
-      fprintf(stderr,"storeonline->spaceSeqpos[%lu] = %lu != %lu "
-                     "= storeonline->spaceSeqpos[%lu]\n",
+      fprintf(stderr,"matchlength: storeonline[%lu] = %lu != %lu "
+                     "= storeoffline[%lu]\n",
                      ss,
-                     (unsigned long) storeonline->spaceSeqpos[ss],
-                     (unsigned long) storeoffline->spaceSeqpos[ss],
+                     (unsigned long) 
+                     storeonline->spaceSimplematch[ss].matchlength,
+                     (unsigned long) 
+                     storeoffline->spaceSimplematch[ss].matchlength,
                      ss);
     }
+    assert(storeoffline->spaceSimplematch[ss].dbstartpos == 
+           storeonline->spaceSimplematch[ss].dbstartpos);
+    /*
+    assert(storeoffline->spaceSimplematch[ss].matchlength == 
+           storeonline->spaceSimplematch[ss].matchlength);
     */
-    assert(storeoffline->spaceSeqpos[ss] == storeonline->spaceSeqpos[ss]);
   }
 }
 
@@ -261,7 +275,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   unsigned int demand;
   Limdfsresources *limdfsresources = NULL;
   Myersonlineresources *mor = NULL;
-  ArraySeqpos storeonline, storeoffline;
+  ArraySimplematch storeonline, storeoffline;
   void *packedindex = NULL;
   bool withesa;
 
@@ -321,8 +335,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       haserr = true;
     }
   }
-  INITARRAY(&storeonline,Seqpos);
-  INITARRAY(&storeoffline,Seqpos);
+  INITARRAY(&storeonline,Simplematch);
+  INITARRAY(&storeoffline,Simplematch);
   if (!haserr)
   {
     unsigned long taglen;
@@ -392,8 +406,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       printf("# tag=");
       showsymbolstringgeneric(stdout,suffixarray.alpha,transformedtag,taglen);
       printf("\n");
-      storeoffline.nextfreeSeqpos = 0;
-      storeonline.nextfreeSeqpos = 0;
+      storeoffline.nextfreeSimplematch = 0;
+      storeonline.nextfreeSimplematch = 0;
       assert(taglen > tageratoroptions->maxdistance);
       for (try=0 ; try < 2; try++)
       {
@@ -424,8 +438,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       ma_free(desc);
     }
   }
-  FREEARRAY(&storeonline,Seqpos);
-  FREEARRAY(&storeoffline,Seqpos);
+  FREEARRAY(&storeonline,Simplematch);
+  FREEARRAY(&storeoffline,Simplematch);
   if (limdfsresources != NULL)
   {
     freeLimdfsresources(&limdfsresources);

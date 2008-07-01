@@ -535,18 +535,15 @@ Definedunsignedlong esa_findshortestmatch(const Encodedsequence *encseq,
   ALLOCASSIGNSPACE(eqsvector,NULL,unsigned long,alphasize);
   initeqsvector(eqsvector,alphasize,pattern,patternlength);
   initMyerscolumn(&currentcol,maxdistance);
-  result.defined = true;
   for (pos = startpos; /* Nothing */; pos++)
   {
     assert(pos - startpos <= (Seqpos) (patternlength + maxdistance));
     cc = getencodedchar(encseq,pos,Forwardmode);
-    printf("cc=%u\n",(unsigned int) cc);
-    assert (cc != (Uchar) SEPARATOR &&
-            (!nospecials || cc != (Uchar) WILDCARD));
     if (nospecials && cc == (Uchar) WILDCARD)
     {
       FREESPACE(eqsvector);
       result.defined = false;
+      result.valueunsignedlong = 0;
       return result;
     }
     inplacenextEDcolumn(eqsvector,
@@ -555,14 +552,14 @@ Definedunsignedlong esa_findshortestmatch(const Encodedsequence *encseq,
                         &currentcol,
                         cc);
     assert (currentcol.maxleqk != UNDEFINDEX);
-    if (currentcol.maxleqk == patternlength || pos == totallength+1)
+    if (currentcol.maxleqk == patternlength || pos == totallength-1)
     {
       break;
     }
   }
   FREESPACE(eqsvector);
   result.defined = true;
-  result.valueunsignedlong = (unsigned long) (pos - startpos);
+  result.valueunsignedlong = (unsigned long) (pos - startpos + 1);
   return result;
 }
 
