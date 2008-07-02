@@ -23,7 +23,7 @@ BEGIN {
 }
 
 our $cgi = new CGI;
-our $version = "1.5.4.2";
+our $version = "1.5.6.1";
 our $my_url = $cgi->url();
 our $my_uri = $cgi->url(-absolute => 1);
 
@@ -369,10 +369,15 @@ sub filter_snapshot_fmts {
 }
 
 our $GITWEB_CONFIG = $ENV{'GITWEB_CONFIG'} || "gitweb_config.perl";
-do $GITWEB_CONFIG if -e $GITWEB_CONFIG;
+if (-e $GITWEB_CONFIG) {
+	do $GITWEB_CONFIG;
+} else {
+	our $GITWEB_CONFIG_SYSTEM = $ENV{'GITWEB_CONFIG_SYSTEM'} || "/etc/gitweb.conf";
+	do $GITWEB_CONFIG_SYSTEM if -e $GITWEB_CONFIG_SYSTEM;
+}
 
 # version of the core git binary
-our $git_version = qx($GIT --version) =~ m/git version (.*)$/ ? $1 : "unknown";
+our $git_version = qx("$GIT" --version) =~ m/git version (.*)$/ ? $1 : "unknown";
 
 $projects_list ||= $projectroot;
 
@@ -472,13 +477,15 @@ if (defined $searchtype) {
 	}
 }
 
+our $search_use_regexp = $cgi->param('sr');
+
 our $searchtext = $cgi->param('s');
 our $search_regexp;
 if (defined $searchtext) {
 	if (length($searchtext) < 2) {
 		die_error(undef, "At least two characters are required for search parameter");
 	}
-	$search_regexp = quotemeta $searchtext;
+	$search_regexp = $search_use_regexp ? $searchtext : quotemeta $searchtext;
 }
 
 # now read PATH_INFO and use it as alternative to parameters
@@ -504,7 +511,7 @@ sub evaluate_path_info {
 	}
 	# do not change any parameters if an action is given using the query string
 	return if $action;
-	$path_info =~ s,^$project/*,,;
+	$path_info =~ s,^\Q$project\E/*,,;
 	my ($refname, $pathname) = split(/:/, $path_info, 2);
 	if (defined $pathname) {
 		# we got "project.git/branch:filename" or "project.git/branch:dir/"
@@ -585,7 +592,7 @@ exit;
 ## ======================================================================
 ## action links
 
-sub href(%) {
+sub href (%) {
 	my %params = @_;
 	# default is to use -absolute url() i.e. $my_uri
 	my $href = $params{-full} ? $my_url : $my_uri;
@@ -608,8 +615,11 @@ sub href(%) {
 		searchtype => "st",
 		snapshot_format => "sf",
 		extra_options => "opt",
+		search_use_regexp => "sr",
 	);
 	my %mapping = @mapping;
+
+	$params{'project'} = $project unless exists $params{'project'};
 
 	if ($params{-replay}) {
 		while (my ($name, $symbol) = each %mapping) {
@@ -620,12 +630,10 @@ sub href(%) {
 		}
 	}
 
-	$params{'project'} = $project unless exists $params{'project'};
-
 	my ($use_pathinfo) = gitweb_check_feature('pathinfo');
 	if ($use_pathinfo) {
 		# use PATH_INFO for project name
-		$href .= "/$params{'project'}" if defined $params{'project'};
+		$href .= "/".esc_url($params{'project'}) if defined $params{'project'};
 		delete $params{'project'};
 
 		# Summary just uses the project path URL
@@ -753,29 +761,40 @@ sub esc_path {
 # Make control characters "printable", using character escape codes (CEC)
 sub quot_cec {
 	my $cntrl = shift;
+	my %opts = @_;
 	my %es = ( # character escape codes, aka escape sequences
-		   "\t" => '\t',   # tab            (HT)
-		   "\n" => '\n',   # line feed      (LF)
-		   "\r" => '\r',   # carrige return (CR)
-		   "\f" => '\f',   # form feed      (FF)
-		   "\b" => '\b',   # backspace      (BS)
-		   "\a" => '\a',   # alarm (bell)   (BEL)
-		   "\e" => '\e',   # escape         (ESC)
-		   "\013" => '\v', # vertical tab   (VT)
-		   "\000" => '\0', # nul character  (NUL)
-		   );
+		"\t" => '\t',   # tab            (HT)
+		"\n" => '\n',   # line feed      (LF)
+		"\r" => '\r',   # carrige return (CR)
+		"\f" => '\f',   # form feed      (FF)
+		"\b" => '\b',   # backspace      (BS)
+		"\a" => '\a',   # alarm (bell)   (BEL)
+		"\e" => '\e',   # escape         (ESC)
+		"\013" => '\v', # vertical tab   (VT)
+		"\000" => '\0', # nul character  (NUL)
+	);
 	my $chr = ( (exists $es{$cntrl})
 		    ? $es{$cntrl}
 		    : sprintf('\%03o', ord($cntrl)) );
-	return "<span class=\"cntrl\">$chr</span>";
+	if ($opts{-nohtml}) {
+		return $chr;
+	} else {
+		return "<span class=\"cntrl\">$chr</span>";
+	}
 }
 
 # Alternatively use unicode control pictures codepoints,
 # Unicode "printable representation" (PR)
 sub quot_upr {
 	my $cntrl = shift;
+	my %opts = @_;
+
 	my $chr = sprintf('&#%04d;', 0x2400+ord($cntrl));
-	return "<span class=\"cntrl\">$chr</span>";
+	if ($opts{-nohtml}) {
+		return $chr;
+	} else {
+		return "<span class=\"cntrl\">$chr</span>";
+	}
 }
 
 # git may return quoted and escaped filenames
@@ -800,7 +819,7 @@ sub unquote {
 			return chr(oct($seq));
 		} elsif (exists $es{$seq}) {
 			# C escape sequence, aka character escape code
-			return $es{$seq}
+			return $es{$seq};
 		}
 		# quoted ordinary character
 		return $seq;
@@ -837,37 +856,82 @@ sub project_in_list {
 ## ----------------------------------------------------------------------
 ## HTML aware string manipulation
 
+# Try to chop given string on a word boundary between position
+# $len and $len+$add_len. If there is no word boundary there,
+# chop at $len+$add_len. Do not chop if chopped part plus ellipsis
+# (marking chopped part) would be longer than given string.
 sub chop_str {
 	my $str = shift;
 	my $len = shift;
 	my $add_len = shift || 10;
+	my $where = shift || 'right'; # 'left' | 'center' | 'right'
+
+	# Make sure perl knows it is utf8 encoded so we don't
+	# cut in the middle of a utf8 multibyte char.
+	$str = to_utf8($str);
 
 	# allow only $len chars, but don't cut a word if it would fit in $add_len
 	# if it doesn't fit, cut it if it's still longer than the dots we would add
-	$str =~ m/^(.{0,$len}[^ \/\-_:\.@]{0,$add_len})(.*)/;
-	my $body = $1;
-	my $tail = $2;
-	if (length($tail) > 4) {
-		$tail = " ...";
-		$body =~ s/&[^;]*$//; # remove chopped character entities
+	# remove chopped character entities entirely
+
+	# when chopping in the middle, distribute $len into left and right part
+	# return early if chopping wouldn't make string shorter
+	if ($where eq 'center') {
+		return $str if ($len + 5 >= length($str)); # filler is length 5
+		$len = int($len/2);
+	} else {
+		return $str if ($len + 4 >= length($str)); # filler is length 4
 	}
-	return "$body$tail";
+
+	# regexps: ending and beginning with word part up to $add_len
+	my $endre = qr/.{$len}\w{0,$add_len}/;
+	my $begre = qr/\w{0,$add_len}.{$len}/;
+
+	if ($where eq 'left') {
+		$str =~ m/^(.*?)($begre)$/;
+		my ($lead, $body) = ($1, $2);
+		if (length($lead) > 4) {
+			$body =~ s/^[^;]*;// if ($lead =~ m/&[^;]*$/);
+			$lead = " ...";
+		}
+		return "$lead$body";
+
+	} elsif ($where eq 'center') {
+		$str =~ m/^($endre)(.*)$/;
+		my ($left, $str)  = ($1, $2);
+		$str =~ m/^(.*?)($begre)$/;
+		my ($mid, $right) = ($1, $2);
+		if (length($mid) > 5) {
+			$left  =~ s/&[^;]*$//;
+			$right =~ s/^[^;]*;// if ($mid =~ m/&[^;]*$/);
+			$mid = " ... ";
+		}
+		return "$left$mid$right";
+
+	} else {
+		$str =~ m/^($endre)(.*)$/;
+		my $body = $1;
+		my $tail = $2;
+		if (length($tail) > 4) {
+			$body =~ s/&[^;]*$//;
+			$tail = "... ";
+		}
+		return "$body$tail";
+	}
 }
 
 # takes the same arguments as chop_str, but also wraps a <span> around the
 # result with a title attribute if it does get chopped. Additionally, the
 # string is HTML-escaped.
 sub chop_and_escape_str {
-	my $str = shift;
-	my $len = shift;
-	my $add_len = shift || 10;
+	my ($str) = @_;
 
-	my $chopped = chop_str($str, $len, $add_len);
+	my $chopped = chop_str(@_);
 	if ($chopped eq $str) {
 		return esc_html($chopped);
 	} else {
-		return qq{<span title="} . esc_html($str) . qq{">} .
-			esc_html($chopped) . qq{</span>};
+		$str =~ s/([[:cntrl:]])/?/g;
+		return $cgi->span({-title=>$str}, esc_html($chopped));
 	}
 }
 
@@ -1388,6 +1452,46 @@ sub format_snapshot_links {
 	}
 }
 
+## ......................................................................
+## functions returning values to be passed, perhaps after some
+## transformation, to other functions; e.g. returning arguments to href()
+
+# returns hash to be passed to href to generate gitweb URL
+# in -title key it returns description of link
+sub get_feed_info {
+	my $format = shift || 'Atom';
+	my %res = (action => lc($format));
+
+	# feed links are possible only for project views
+	return unless (defined $project);
+	# some views should link to OPML, or to generic project feed,
+	# or don't have specific feed yet (so they should use generic)
+	return if ($action =~ /^(?:tags|heads|forks|tag|search)$/x);
+
+	my $branch;
+	# branches refs uses 'refs/heads/' prefix (fullname) to differentiate
+	# from tag links; this also makes possible to detect branch links
+	if ((defined $hash_base && $hash_base =~ m!^refs/heads/(.*)$!) ||
+	    (defined $hash      && $hash      =~ m!^refs/heads/(.*)$!)) {
+		$branch = $1;
+	}
+	# find log type for feed description (title)
+	my $type = 'log';
+	if (defined $file_name) {
+		$type  = "history of $file_name";
+		$type .= "/" if ($action eq 'tree');
+		$type .= " on '$branch'" if (defined $branch);
+	} else {
+		$type = "log of $branch" if (defined $branch);
+	}
+
+	$res{-title} = $type;
+	$res{'hash'} = (defined $branch ? "refs/heads/$branch" : undef);
+	$res{'file_name'} = $file_name;
+
+	return %res;
+}
+
 ## ----------------------------------------------------------------------
 ## git utility subroutines, invoking git commands
 
@@ -1396,9 +1500,13 @@ sub git_cmd {
 	return $GIT, '--git-dir='.$git_dir;
 }
 
-# returns path to the core git executable and the --git-dir parameter as string
-sub git_cmd_str {
-	return join(' ', git_cmd());
+# quote the given arguments for passing them to the shell
+# quote_command("command", "arg 1", "arg with ' and ! characters")
+# => "'command' 'arg 1' 'arg with '\'' and '\!' characters'"
+# Try to avoid using this function wherever possible.
+sub quote_command {
+	return join(' ',
+		    map( { my $a = $_; $a =~ s/(['!])/'\\$1'/g; "'$a'" } @_ ));
 }
 
 # get HEAD ref of given project as hash
@@ -1620,7 +1728,7 @@ sub git_get_project_url_list {
 	my $path = shift;
 
 	$git_dir = "$projectroot/$path";
-	open my $fd, "$projectroot/$path/cloneurl"
+	open my $fd, "$git_dir/cloneurl"
 		or return wantarray ?
 		@{ config_to_multi(git_get_project_config('url')) } :
 		   config_to_multi(git_get_project_config('url'));
@@ -1759,6 +1867,7 @@ sub git_get_project_owner {
 	my $owner;
 
 	return undef unless $project;
+	$git_dir = "$projectroot/$project";
 
 	if (!defined $gitweb_project_owner) {
 		git_get_project_list_from_file();
@@ -1767,8 +1876,11 @@ sub git_get_project_owner {
 	if (exists $gitweb_project_owner->{$project}) {
 		$owner = $gitweb_project_owner->{$project};
 	}
+	if (!defined $owner){
+		$owner = git_get_project_config('owner');
+	}
 	if (!defined $owner) {
-		$owner = get_file_owner("$projectroot/$project");
+		$owner = get_file_owner("$git_dir");
 	}
 
 	return $owner;
@@ -2023,7 +2135,7 @@ sub parse_commit {
 }
 
 sub parse_commits {
-	my ($commit_id, $maxcount, $skip, $arg, $filename) = @_;
+	my ($commit_id, $maxcount, $skip, $filename, @args) = @_;
 	my @cos;
 
 	$maxcount ||= 1;
@@ -2033,7 +2145,7 @@ sub parse_commits {
 
 	open my $fd, "-|", git_cmd(), "rev-list",
 		"--header",
-		($arg ? ($arg) : ()),
+		@args,
 		("--max-count=" . $maxcount),
 		("--skip=" . $skip),
 		@extra_options,
@@ -2050,49 +2162,6 @@ sub parse_commits {
 	return wantarray ? @cos : \@cos;
 }
 
-# parse ref from ref_file, given by ref_id, with given type
-sub parse_ref {
-	my $ref_file = shift;
-	my $ref_id = shift;
-	my $type = shift || git_get_type($ref_id);
-	my %ref_item;
-
-	$ref_item{'type'} = $type;
-	$ref_item{'id'} = $ref_id;
-	$ref_item{'epoch'} = 0;
-	$ref_item{'age'} = "unknown";
-	if ($type eq "tag") {
-		my %tag = parse_tag($ref_id);
-		$ref_item{'comment'} = $tag{'comment'};
-		if ($tag{'type'} eq "commit") {
-			my %co = parse_commit($tag{'object'});
-			$ref_item{'epoch'} = $co{'committer_epoch'};
-			$ref_item{'age'} = $co{'age_string'};
-		} elsif (defined($tag{'epoch'})) {
-			my $age = time - $tag{'epoch'};
-			$ref_item{'epoch'} = $tag{'epoch'};
-			$ref_item{'age'} = age_string($age);
-		}
-		$ref_item{'reftype'} = $tag{'type'};
-		$ref_item{'name'} = $tag{'name'};
-		$ref_item{'refid'} = $tag{'object'};
-	} elsif ($type eq "commit"){
-		my %co = parse_commit($ref_id);
-		$ref_item{'reftype'} = "commit";
-		$ref_item{'name'} = $ref_file;
-		$ref_item{'title'} = $co{'title'};
-		$ref_item{'refid'} = $ref_id;
-		$ref_item{'epoch'} = $co{'committer_epoch'};
-		$ref_item{'age'} = $co{'age_string'};
-	} else {
-		$ref_item{'reftype'} = $type;
-		$ref_item{'name'} = $ref_file;
-		$ref_item{'refid'} = $ref_id;
-	}
-
-	return %ref_item;
-}
-
 # parse line of git-diff-tree "raw" output
 sub parse_difftree_raw_line {
 	my $line = shift;
@@ -2105,7 +2174,7 @@ sub parse_difftree_raw_line {
 		$res{'to_mode'} = $2;
 		$res{'from_id'} = $3;
 		$res{'to_id'} = $4;
-		$res{'status'} = $res{'status_str'} = $5;
+		$res{'status'} = $5;
 		$res{'similarity'} = $6;
 		if ($res{'status'} eq 'R' || $res{'status'} eq 'C') { # renamed or copied
 			($res{'from_file'}, $res{'to_file'}) = map { unquote($_) } split("\t", $7);
@@ -2121,7 +2190,6 @@ sub parse_difftree_raw_line {
 		$res{'to_mode'} = pop @{$res{'from_mode'}};
 		$res{'from_id'} = [ split(' ', $3) ];
 		$res{'to_id'} = pop @{$res{'from_id'}};
-		$res{'status_str'} = $4;
 		$res{'status'} = [ split('', $4) ];
 		$res{'to_file'} = unquote($5);
 	}
@@ -2373,12 +2441,8 @@ sub blob_mimetype {
 	# just in case
 	return $default_blob_plain_mimetype unless $fd;
 
-        # XXX: the following line replaced this if (-T $fd) {
-        # because for unknown reasons perl on OpenBSD returns this:
-        # -T and -B not implemented on filehandles
 	if (1) {
-		return 'text/plain' .
-		       ($default_text_plain_charset ? '; charset='.$default_text_plain_charset : '');
+		return 'text/plain';
 	} elsif (! $filename) {
 		return 'application/octet-stream';
 	} elsif ($filename =~ m/\.png$/i) {
@@ -2390,6 +2454,17 @@ sub blob_mimetype {
 	} else {
 		return 'application/octet-stream';
 	}
+}
+
+sub blob_contenttype {
+	my ($fd, $file_name, $type) = @_;
+
+	$type ||= blob_mimetype($fd, $file_name);
+	if ($type eq 'text/plain' && defined $default_text_plain_charset) {
+		$type .= "; charset=$default_text_plain_charset";
+	}
+
+	return $type;
 }
 
 ## ======================================================================
@@ -2450,30 +2525,49 @@ EOF
 		}
 	}
 	if (defined $project) {
-		printf('<link rel="alternate" title="%s log RSS feed" '.
-		       'href="%s" type="application/rss+xml" />'."\n",
-		       esc_param($project), href(action=>"rss"));
-		printf('<link rel="alternate" title="%s log RSS feed (no merges)" '.
-		       'href="%s" type="application/rss+xml" />'."\n",
-		       esc_param($project), href(action=>"rss",
-		                                 extra_options=>"--no-merges"));
-		printf('<link rel="alternate" title="%s log Atom feed" '.
-		       'href="%s" type="application/atom+xml" />'."\n",
-		       esc_param($project), href(action=>"atom"));
-		printf('<link rel="alternate" title="%s log Atom feed (no merges)" '.
-		       'href="%s" type="application/atom+xml" />'."\n",
-		       esc_param($project), href(action=>"atom",
-		                                 extra_options=>"--no-merges"));
+		my %href_params = get_feed_info();
+		if (!exists $href_params{'-title'}) {
+			$href_params{'-title'} = 'log';
+		}
+
+		foreach my $format qw(RSS Atom) {
+			my $type = lc($format);
+			my %link_attr = (
+				'-rel' => 'alternate',
+				'-title' => "$project - $href_params{'-title'} - $format feed",
+				'-type' => "application/$type+xml"
+			);
+
+			$href_params{'action'} = $type;
+			$link_attr{'-href'} = href(%href_params);
+			print "<link ".
+			      "rel=\"$link_attr{'-rel'}\" ".
+			      "title=\"$link_attr{'-title'}\" ".
+			      "href=\"$link_attr{'-href'}\" ".
+			      "type=\"$link_attr{'-type'}\" ".
+			      "/>\n";
+
+			$href_params{'extra_options'} = '--no-merges';
+			$link_attr{'-href'} = href(%href_params);
+			$link_attr{'-title'} .= ' (no merges)';
+			print "<link ".
+			      "rel=\"$link_attr{'-rel'}\" ".
+			      "title=\"$link_attr{'-title'}\" ".
+			      "href=\"$link_attr{'-href'}\" ".
+			      "type=\"$link_attr{'-type'}\" ".
+			      "/>\n";
+		}
+
 	} else {
 		printf('<link rel="alternate" title="%s projects list" '.
-		       'href="%s" type="text/plain; charset=utf-8"/>'."\n",
+		       'href="%s" type="text/plain; charset=utf-8" />'."\n",
 		       $site_name, href(project=>undef, action=>"project_index"));
 		printf('<link rel="alternate" title="%s projects feeds" '.
-		       'href="%s" type="text/x-opml"/>'."\n",
+		       'href="%s" type="text/x-opml" />'."\n",
 		       $site_name, href(project=>undef, action=>"opml"));
 	}
 	if (defined $favicon) {
-		print qq(<link rel="shortcut icon" href="$favicon" type="image/png"/>\n);
+		print qq(<link rel="shortcut icon" href="$favicon" type="image/png" />\n);
 	}
 
 	print "</head>\n" .
@@ -2500,7 +2594,7 @@ EOF
 	print "</div>\n";
 
 	my ($have_search) = gitweb_check_feature('search');
-	if ((defined $project) && ($have_search)) {
+	if (defined $project && $have_search) {
 		if (!defined $searchtext) {
 			$searchtext = "";
 		}
@@ -2515,45 +2609,58 @@ EOF
 		my $action = $my_uri;
 		my ($use_pathinfo) = gitweb_check_feature('pathinfo');
 		if ($use_pathinfo) {
-			$action .= "/$project";
-		} else {
-			$cgi->param("p", $project);
+			$action .= "/".esc_url($project);
 		}
-		$cgi->param("a", "search");
-		$cgi->param("h", $search_hash);
 		print $cgi->startform(-method => "get", -action => $action) .
 		      "<div class=\"search\">\n" .
-		      (!$use_pathinfo && $cgi->hidden(-name => "p") . "\n") .
-		      $cgi->hidden(-name => "a") . "\n" .
-		      $cgi->hidden(-name => "h") . "\n" .
+		      (!$use_pathinfo &&
+		      $cgi->input({-name=>"p", -value=>$project, -type=>"hidden"}) . "\n") .
+		      $cgi->input({-name=>"a", -value=>"search", -type=>"hidden"}) . "\n" .
+		      $cgi->input({-name=>"h", -value=>$search_hash, -type=>"hidden"}) . "\n" .
 		      $cgi->popup_menu(-name => 'st', -default => 'commit',
 		                       -values => ['commit', 'grep', 'author', 'committer', 'pickaxe']) .
 		      $cgi->sup($cgi->a({-href => href(action=>"search_help")}, "?")) .
 		      " search:\n",
 		      $cgi->textfield(-name => "s", -value => $searchtext) . "\n" .
+		      "<span title=\"Extended regular expression\">" .
+		      $cgi->checkbox(-name => 'sr', -value => 1, -label => 're',
+		                     -checked => $search_use_regexp) .
+		      "</span>" .
 		      "</div>" .
 		      $cgi->end_form() . "\n";
 	}
 }
 
 sub git_footer_html {
+	my $feed_class = 'rss_logo';
+
 	print "<div class=\"page_footer\">\n";
 	if (defined $project) {
 		my $descr = git_get_project_description($project);
 		if (defined $descr) {
 			print "<div class=\"page_footer_text\">" . esc_html($descr) . "</div>\n";
 		}
-		print $cgi->a({-href => href(action=>"rss"),
-		              -class => "rss_logo"}, "RSS") . " ";
-		print $cgi->a({-href => href(action=>"atom"),
-		              -class => "rss_logo"}, "Atom") . "\n";
+
+		my %href_params = get_feed_info();
+		if (!%href_params) {
+			$feed_class .= ' generic';
+		}
+		$href_params{'-title'} ||= 'log';
+
+		foreach my $format qw(RSS Atom) {
+			$href_params{'action'} = lc($format);
+			print $cgi->a({-href => href(%href_params),
+			              -title => "$href_params{'-title'} $format feed",
+			              -class => $feed_class}, $format)."\n";
+		}
+
 	} else {
 		print $cgi->a({-href => href(project=>undef, action=>"opml"),
-		              -class => "rss_logo"}, "OPML") . " ";
+		              -class => $feed_class}, "OPML") . " ";
 		print $cgi->a({-href => href(project=>undef, action=>"project_index"),
-		              -class => "rss_logo"}, "TXT") . "\n";
+		              -class => $feed_class}, "TXT") . "\n";
 	}
-	print "</div>\n" ;
+	print "</div>\n"; # class="page_footer"
 
 	if (-f $site_footer) {
 		open (my $fd, $site_footer);
@@ -2617,7 +2724,7 @@ sub git_print_page_nav {
 }
 
 sub format_paging_nav {
-	my ($action, $hash, $head, $page, $nrevs) = @_;
+	my ($action, $hash, $head, $page, $has_next_link) = @_;
 	my $paging_nav;
 
 
@@ -2635,7 +2742,7 @@ sub format_paging_nav {
 		$paging_nav .= " &sdot; prev";
 	}
 
-	if ($nrevs >= (100 * ($page+1)-1)) {
+	if ($has_next_link) {
 		$paging_nav .= " &sdot; " .
 			$cgi->a({-href => href(-replay=>1, page=>$page+1),
 			         -accesskey => "n", -title => "Alt-n"}, "next");
@@ -2942,7 +3049,7 @@ sub fill_from_file_info {
 sub is_deleted {
 	my $diffinfo = shift;
 
-	return $diffinfo->{'status_str'} =~ /D/;
+	return $diffinfo->{'to_id'} eq ('0' x 40);
 }
 
 # does patch correspond to [previous] difftree raw line
@@ -3772,18 +3879,24 @@ sub git_search_grep_body {
 		print "<td title=\"$co{'age_string_age'}\"><i>$co{'age_string_date'}</i></td>\n" .
 		      "<td><i>" . $author . "</i></td>\n" .
 		      "<td>" .
-		      $cgi->a({-href => href(action=>"commit", hash=>$co{'id'}), -class => "list subject"},
-			       chop_and_escape_str($co{'title'}, 50) . "<br/>");
+		      $cgi->a({-href => href(action=>"commit", hash=>$co{'id'}),
+		               -class => "list subject"},
+		              chop_and_escape_str($co{'title'}, 50) . "<br/>");
 		my $comment = $co{'comment'};
 		foreach my $line (@$comment) {
-			if ($line =~ m/^(.*)($search_regexp)(.*)$/i) {
-				my $lead = esc_html($1) || "";
-				$lead = chop_str($lead, 30, 10);
-				my $match = esc_html($2) || "";
-				my $trail = esc_html($3) || "";
-				$trail = chop_str($trail, 30, 10);
-				my $text = "$lead<span class=\"match\">$match</span>$trail";
-				print chop_str($text, 80, 5) . "<br/>\n";
+			if ($line =~ m/^(.*?)($search_regexp)(.*)$/i) {
+				my ($lead, $match, $trail) = ($1, $2, $3);
+				$match = chop_str($match, 70, 5, 'center');
+				my $contextlen = int((80 - length($match))/2);
+				$contextlen = 30 if ($contextlen > 30);
+				$lead  = chop_str($lead,  $contextlen, 10, 'left');
+				$trail = chop_str($trail, $contextlen, 10, 'right');
+
+				$lead  = esc_html($lead);
+				$match = esc_html($match);
+				$trail = esc_html($trail);
+
+				print "$lead<span class=\"match\">$match</span>$trail<br />";
 			}
 		}
 		print "</td>\n" .
@@ -4232,6 +4345,7 @@ sub git_heads {
 }
 
 sub git_blob_plain {
+	my $type = shift;
 	my $expires;
 
 	if (!defined $hash) {
@@ -4247,13 +4361,13 @@ sub git_blob_plain {
 		$expires = "+1d";
 	}
 
-	my $type = shift;
 	open my $fd, "-|", git_cmd(), "cat-file", "blob", $hash
-		or die_error(undef, "Couldn't cat $file_name, $hash");
+		or die_error(undef, "Open git-cat-file blob '$hash' failed");
 
-	$type ||= blob_mimetype($fd, $file_name);
+	# content-type (can include charset)
+	$type = blob_contenttype($fd, $file_name, $type);
 
-	# save as filename, even when no $file_name is given
+	# "save as" filename, even when no $file_name is given
 	my $save_as = "$hash";
 	if (defined $file_name) {
 		$save_as = $file_name;
@@ -4262,9 +4376,9 @@ sub git_blob_plain {
 	}
 
 	print $cgi->header(
-		-type => "$type",
-		-expires=>$expires,
-		-content_disposition => 'inline; filename="' . "$save_as" . '"');
+		-type => $type,
+		-expires => $expires,
+		-content_disposition => 'inline; filename="' . $save_as . '"');
 	undef $/;
 	binmode STDOUT, ':raw';
 	print <$fd>;
@@ -4480,7 +4594,6 @@ sub git_snapshot {
 		$hash = git_get_head_hash($project);
 	}
 
-	my $git_command = git_cmd_str();
 	my $name = $project;
 	$name =~ s,([^/])/*\.git$,$1,;
 	$name = basename($name);
@@ -4488,11 +4601,12 @@ sub git_snapshot {
 	$name =~ s/\047/\047\\\047\047/g;
 	my $cmd;
 	$filename .= "-$hash$known_snapshot_formats{$format}{'suffix'}";
-	$cmd = "$git_command archive " .
-		"--format=$known_snapshot_formats{$format}{'format'} " .
-		"--prefix=\'$name\'/ $hash";
+	$cmd = quote_command(
+		git_cmd(), 'archive',
+		"--format=$known_snapshot_formats{$format}{'format'}",
+		"--prefix=$name/", $hash);
 	if (exists $known_snapshot_formats{$format}{'compressor'}) {
-		$cmd .= ' | ' . join ' ', @{$known_snapshot_formats{$format}{'compressor'}};
+		$cmd .= ' | ' . quote_command(@{$known_snapshot_formats{$format}{'compressor'}});
 	}
 
 	print $cgi->header(
@@ -4520,7 +4634,7 @@ sub git_log {
 
 	my @commitlist = parse_commits($hash, 101, (100 * $page));
 
-	my $paging_nav = format_paging_nav('log', $hash, $head, $page, (100 * ($page+1)));
+	my $paging_nav = format_paging_nav('log', $hash, $head, $page, $#commitlist >= 100);
 
 	git_header_html();
 	git_print_page_nav('log','', $hash,undef,undef, $paging_nav);
@@ -4705,8 +4819,8 @@ sub git_object {
 	if ($hash || ($hash_base && !defined $file_name)) {
 		my $object_id = $hash || $hash_base;
 
-		my $git_command = git_cmd_str();
-		open my $fd, "-|", "$git_command cat-file -t $object_id 2>/dev/null"
+		open my $fd, "-|", quote_command(
+			git_cmd(), 'cat-file', '-t', $object_id) . ' 2> /dev/null'
 			or die_error('404 Not Found', "Object does not exist");
 		$type = <$fd>;
 		chomp $type;
@@ -5106,14 +5220,26 @@ sub git_history {
 	my $refs = git_get_references();
 	my $limit = sprintf("--max-count=%i", (100 * ($page+1)));
 
+	my @commitlist = parse_commits($hash_base, 101, (100 * $page),
+	                               $file_name, "--full-history");
+	if (!@commitlist) {
+		die_error('404 Not Found', "No such file or directory on given branch");
+	}
+
 	if (!defined $hash && defined $file_name) {
-		$hash = git_get_hash_by_path($hash_base, $file_name);
+		# some commits could have deleted file in question,
+		# and not have it in tree, but one of them has to have it
+		for (my $i = 0; $i <= @commitlist; $i++) {
+			$hash = git_get_hash_by_path($commitlist[$i]{'id'}, $file_name);
+			last if defined $hash;
+		}
 	}
 	if (defined $hash) {
 		$ftype = git_get_type($hash);
 	}
-
-	my @commitlist = parse_commits($hash_base, 101, (100 * $page), "--full-history", $file_name);
+	if (!defined $ftype) {
+		die_error(undef, "Unknown type of object");
+	}
 
 	my $paging_nav = '';
 	if ($page > 0) {
@@ -5195,14 +5321,17 @@ sub git_search {
 		} elsif ($searchtype eq 'committer') {
 			$greptype = "--committer=";
 		}
-		$greptype .= $search_regexp;
-		my @commitlist = parse_commits($hash, 101, (100 * $page), $greptype);
+		$greptype .= $searchtext;
+		my @commitlist = parse_commits($hash, 101, (100 * $page), undef,
+		                               $greptype, '--regexp-ignore-case',
+		                               $search_use_regexp ? '--extended-regexp' : '--fixed-strings');
 
 		my $paging_nav = '';
 		if ($page > 0) {
 			$paging_nav .=
 				$cgi->a({-href => href(action=>"search", hash=>$hash,
-				                       searchtext=>$searchtext, searchtype=>$searchtype)},
+				                       searchtext=>$searchtext,
+				                       searchtype=>$searchtype)},
 				        "first");
 			$paging_nav .= " &sdot; " .
 				$cgi->a({-href => href(-replay=>1, page=>$page-1),
@@ -5236,50 +5365,19 @@ sub git_search {
 		print "<table class=\"pickaxe search\">\n";
 		my $alternate = 1;
 		$/ = "\n";
-		my $git_command = git_cmd_str();
-		my $searchqtext = $searchtext;
-		$searchqtext =~ s/'/'\\''/;
-		open my $fd, "-|", "$git_command rev-list $hash | " .
-			"$git_command diff-tree -r --stdin -S\'$searchqtext\'";
+		open my $fd, '-|', git_cmd(), '--no-pager', 'log', @diff_opts,
+			'--pretty=format:%H', '--no-abbrev', '--raw', "-S$searchtext",
+			($search_use_regexp ? '--pickaxe-regex' : ());
 		undef %co;
 		my @files;
 		while (my $line = <$fd>) {
-			if (%co && $line =~ m/^:([0-7]{6}) ([0-7]{6}) ([0-9a-fA-F]{40}) ([0-9a-fA-F]{40}) (.)\t(.*)$/) {
-				my %set;
-				$set{'file'} = $6;
-				$set{'from_id'} = $3;
-				$set{'to_id'} = $4;
-				$set{'id'} = $set{'to_id'};
-				if ($set{'id'} =~ m/0{40}/) {
-					$set{'id'} = $set{'from_id'};
-				}
-				if ($set{'id'} =~ m/0{40}/) {
-					next;
-				}
-				push @files, \%set;
-			} elsif ($line =~ m/^([0-9a-fA-F]{40})$/){
+			chomp $line;
+			next unless $line;
+
+			my %set = parse_difftree_raw_line($line);
+			if (defined $set{'commit'}) {
+				# finish previous commit
 				if (%co) {
-					if ($alternate) {
-						print "<tr class=\"dark\">\n";
-					} else {
-						print "<tr class=\"light\">\n";
-					}
-					$alternate ^= 1;
-					my $author = chop_and_escape_str($co{'author_name'}, 15, 5);
-					print "<td title=\"$co{'age_string_age'}\"><i>$co{'age_string_date'}</i></td>\n" .
-					      "<td><i>" . $author . "</i></td>\n" .
-					      "<td>" .
-					      $cgi->a({-href => href(action=>"commit", hash=>$co{'id'}),
-					              -class => "list subject"},
-					              chop_and_escape_str($co{'title'}, 50) . "<br/>");
-					while (my $setref = shift @files) {
-						my %set = %$setref;
-						print $cgi->a({-href => href(action=>"blob", hash_base=>$co{'id'},
-						                             hash=>$set{'id'}, file_name=>$set{'file'}),
-						              -class => "list"},
-						              "<span class=\"match\">" . esc_path($set{'file'}) . "</span>") .
-						      "<br/>\n";
-					}
 					print "</td>\n" .
 					      "<td class=\"link\">" .
 					      $cgi->a({-href => href(action=>"commit", hash=>$co{'id'})}, "commit") .
@@ -5288,10 +5386,43 @@ sub git_search {
 					print "</td>\n" .
 					      "</tr>\n";
 				}
-				%co = parse_commit($1);
+
+				if ($alternate) {
+					print "<tr class=\"dark\">\n";
+				} else {
+					print "<tr class=\"light\">\n";
+				}
+				$alternate ^= 1;
+				%co = parse_commit($set{'commit'});
+				my $author = chop_and_escape_str($co{'author_name'}, 15, 5);
+				print "<td title=\"$co{'age_string_age'}\"><i>$co{'age_string_date'}</i></td>\n" .
+				      "<td><i>$author</i></td>\n" .
+				      "<td>" .
+				      $cgi->a({-href => href(action=>"commit", hash=>$co{'id'}),
+				              -class => "list subject"},
+				              chop_and_escape_str($co{'title'}, 50) . "<br/>");
+			} elsif (defined $set{'to_id'}) {
+				next if ($set{'to_id'} =~ m/^0{40}$/);
+
+				print $cgi->a({-href => href(action=>"blob", hash_base=>$co{'id'},
+				                             hash=>$set{'to_id'}, file_name=>$set{'to_file'}),
+				              -class => "list"},
+				              "<span class=\"match\">" . esc_path($set{'file'}) . "</span>") .
+				      "<br/>\n";
 			}
 		}
 		close $fd;
+
+		# finish last commit (warning: repetition!)
+		if (%co) {
+			print "</td>\n" .
+			      "<td class=\"link\">" .
+			      $cgi->a({-href => href(action=>"commit", hash=>$co{'id'})}, "commit") .
+			      " | " .
+			      $cgi->a({-href => href(action=>"tree", hash=>$co{'tree'}, hash_base=>$co{'id'})}, "tree");
+			print "</td>\n" .
+			      "</tr>\n";
+		}
 
 		print "</table>\n";
 	}
@@ -5304,7 +5435,9 @@ sub git_search {
 		my $alternate = 1;
 		my $matches = 0;
 		$/ = "\n";
-		open my $fd, "-|", git_cmd(), 'grep', '-n', '-i', '-E', $searchtext, $co{'tree'};
+		open my $fd, "-|", git_cmd(), 'grep', '-n',
+			$search_use_regexp ? ('-E', '-i') : '-F',
+			$searchtext, $co{'tree'};
 		my $lastfile = '';
 		while (my $line = <$fd>) {
 			chomp $line;
@@ -5334,7 +5467,7 @@ sub git_search {
 				print "<div class=\"binary\">Binary file</div>\n";
 			} else {
 				$ltext = untabify($ltext);
-				if ($ltext =~ m/^(.*)($searchtext)(.*)$/i) {
+				if ($ltext =~ m/^(.*)($search_regexp)(.*)$/i) {
 					$ltext = esc_html($1, -nbsp=>1);
 					$ltext .= '<span class="match">';
 					$ltext .= esc_html($2, -nbsp=>1);
@@ -5369,27 +5502,31 @@ sub git_search_help {
 	git_header_html();
 	git_print_page_nav('','', $hash,$hash,$hash);
 	print <<EOT;
+<p><strong>Pattern</strong> is by default a normal string that is matched precisely (but without
+regard to case, except in the case of pickaxe). However, when you check the <em>re</em> checkbox,
+the pattern entered is recognized as the POSIX extended
+<a href="http://en.wikipedia.org/wiki/Regular_expression">regular expression</a> (also case
+insensitive).</p>
 <dl>
 <dt><b>commit</b></dt>
-<dd>The commit messages and authorship information will be scanned for the given string.</dd>
+<dd>The commit messages and authorship information will be scanned for the given pattern.</dd>
 EOT
 	my ($have_grep) = gitweb_check_feature('grep');
 	if ($have_grep) {
 		print <<EOT;
 <dt><b>grep</b></dt>
 <dd>All files in the currently selected tree (HEAD unless you are explicitly browsing
-    a different one) are searched for the given
-<a href="http://en.wikipedia.org/wiki/Regular_expression">regular expression</a>
-(POSIX extended) and the matches are listed. On large
-trees, this search can take a while and put some strain on the server, so please use it with
-some consideration.</dd>
+    a different one) are searched for the given pattern. On large trees, this search can take
+a while and put some strain on the server, so please use it with some consideration. Note that
+due to git-grep peculiarity, currently if regexp mode is turned off, the matches are
+case-sensitive.</dd>
 EOT
 	}
 	print <<EOT;
 <dt><b>author</b></dt>
-<dd>Name and e-mail of the change author and date of birth of the patch will be scanned for the given string.</dd>
+<dd>Name and e-mail of the change author and date of birth of the patch will be scanned for the given pattern.</dd>
 <dt><b>committer</b></dt>
-<dd>Name and e-mail of the committer and date of commit will be scanned for the given string.</dd>
+<dd>Name and e-mail of the committer and date of commit will be scanned for the given pattern.</dd>
 EOT
 	my ($have_pickaxe) = gitweb_check_feature('pickaxe');
 	if ($have_pickaxe) {
@@ -5397,7 +5534,8 @@ EOT
 <dt><b>pickaxe</b></dt>
 <dd>All commits that caused the string to appear or disappear from any file (changes that
 added, removed or "modified" the string) will be listed. This search can take a while and
-takes a lot of strain on the server, so please use it wisely.</dd>
+takes a lot of strain on the server, so please use it wisely. Note that since you may be
+interested even in changes just changing the case as well, this search is case sensitive.</dd>
 EOT
 	}
 	print "</dl>\n";
@@ -5416,7 +5554,7 @@ sub git_shortlog {
 
 	my @commitlist = parse_commits($hash, 101, (100 * $page));
 
-	my $paging_nav = format_paging_nav('shortlog', $hash, $head, $page, (100 * ($page+1)));
+	my $paging_nav = format_paging_nav('shortlog', $hash, $head, $page, $#commitlist >= 100);
 	my $next_link = '';
 	if ($#commitlist >= 100) {
 		$next_link =
@@ -5448,7 +5586,7 @@ sub git_feed {
 
 	# log/feed of current (HEAD) branch, log of given branch, history of file/directory
 	my $head = $hash || 'HEAD';
-	my @commitlist = parse_commits($head, 150, 0, undef, $file_name);
+	my @commitlist = parse_commits($head, 150, 0, $file_name);
 
 	my %latest_commit;
 	my %latest_date;
@@ -5568,7 +5706,7 @@ XML
 			or next;
 
 		# print element (entry, item)
-		my $co_url = href(-full=>1, action=>"commit", hash=>$commit);
+		my $co_url = href(-full=>1, action=>"commitdiff", hash=>$commit);
 		if ($format eq 'rss') {
 			print "<item>\n" .
 			      "<title>" . esc_html($co{'title'}) . "</title>\n" .
