@@ -223,7 +223,7 @@ static void compareresults(const ArraySimplematch *storeonline,
   {
     qsort(storeoffline->spaceSimplematch,(size_t)
           storeoffline->nextfreeSimplematch,
-          sizeof (Seqpos),
+          sizeof (Simplematch),
           cmpdescend);
   }
   for (ss=0; ss < storeoffline->nextfreeSimplematch; ss++)
@@ -236,18 +236,16 @@ static void compareresults(const ArraySimplematch *storeonline,
       fprintf(stderr,"matchlength: storeonline[%lu] = %lu != %lu "
                      "= storeoffline[%lu]\n",
                      ss,
-                     (unsigned long) 
+                     (unsigned long)
                      storeonline->spaceSimplematch[ss].matchlength,
-                     (unsigned long) 
+                     (unsigned long)
                      storeoffline->spaceSimplematch[ss].matchlength,
                      ss);
     }
-    assert(storeoffline->spaceSimplematch[ss].dbstartpos == 
+    assert(storeoffline->spaceSimplematch[ss].dbstartpos ==
            storeonline->spaceSimplematch[ss].dbstartpos);
-    /*
-    assert(storeoffline->spaceSimplematch[ss].matchlength == 
+    assert(storeoffline->spaceSimplematch[ss].matchlength ==
            storeonline->spaceSimplematch[ss].matchlength);
-    */
   }
 }
 

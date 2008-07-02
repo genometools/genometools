@@ -197,7 +197,7 @@ void pck_exactpatternmatching(const void *genericindex,
   while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) genericindex))
   {
     processmatch(processmatchinfo,false,totallength,
-                 dbstartpos,(Seqpos) patternlength);
+                 dbstartpos + patternlength,(Seqpos) patternlength);
   }
   if (bsemi != NULL)
   {

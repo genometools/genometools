@@ -39,9 +39,13 @@ def checktagerator(queryfile,ms)
              :maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -pck pck -t patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -k 1 -esa sfx -t patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -k 1 -esa sfx -t patternfile -nospecials",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -k 2 -esa sfx -t patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -k 2 -esa sfx -t patternfile -nospecials",
+             :maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -k 1 -pck pck -t patternfile -nospecials",
+             :maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -k 2 -pck pck -t patternfile -nospecials",
              :maxtime => 100)
   end
 end
