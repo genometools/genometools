@@ -35,9 +35,9 @@
 
 typedef struct
 {
-  unsigned long Pv,    /* the plus-vector for Myers Algorithm */
-                Mv;    /* the minus-vector for Myers Algorithm */
-  unsigned long maxleqk;  /* \(\max\{i\in[0,m]\mid D(i)\leq k\}\) where
+  unsigned long Pv,       /* the plus-vector for Myers Algorithm */
+                Mv,       /* the minus-vector for Myers Algorithm */
+                maxleqk;  /* \(\max\{i\in[0,m]\mid D(i)\leq k\}\) where
                           \(m\) is the length of the pattern, \(k\) is the
                           distance threshold, and \(D\) is
                           the current distance column */
@@ -569,14 +569,12 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                             unsigned long patternlength,
                             unsigned long maxdistance,
                             const Myerscolumn *col,
-                            Uchar inchar,
                             Seqpos left,
                             Seqpos offset)
 {
   Seqpos pos, startpos;
   Uchar cc;
   Myerscolumn currentcol = *col;
-  bool processinchar = true;
   const Suffixarray *suffixarray
     = (const Suffixarray *) limdfsresources->genericindex;
 
@@ -586,14 +584,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 #endif
   for (pos = startpos + offset - 1; pos < limdfsresources->totallength; pos++)
   {
-    if (processinchar)
-    {
-      cc = inchar;
-      processinchar = false;
-    } else
-    {
-      cc = getencodedchar(suffixarray->encseq,pos,suffixarray->readmode);
-    }
+    cc = getencodedchar(suffixarray->encseq,pos,suffixarray->readmode);
     if (cc != (Uchar) SEPARATOR &&
         (!limdfsresources->nospecials || cc != (Uchar) WILDCARD))
     {
@@ -764,7 +755,6 @@ static void processchildinterval(Limdfsresources *limdfsresources,
                       patternlength,
                       maxdistance,
                       previouscolumn,
-                      inchar,
                       child->left,
                       child->offset);
     } else
@@ -848,7 +838,6 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
                       patternlength,
                       maxdistance,
                       previouscolumn,
-                      (Uchar) WILDCARD,
                       bound,
                       parent->offset+1);
     }
