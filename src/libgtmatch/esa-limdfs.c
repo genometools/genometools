@@ -507,6 +507,7 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
 
   bspi = newBwtseqpositioniterator (limdfsresources->genericindex,
                                     itv->left,itv->right);
+  assert(itv->left < itv->right);
   while (nextBwtseqpositioniterator(&dbstartpos,bspi))
   {
     limdfsresources->processmatch(limdfsresources->processmatchinfo,
