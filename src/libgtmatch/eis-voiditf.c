@@ -148,6 +148,20 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
   }
 }
 
+void bwtrangewithspecial(UNUSED ArrayBoundswithchar *bwci,
+                         Seqpos *rangeOccs,
+                         UNUSED unsigned long alphasize,
+                         const void *voidBwtSeq,
+                         const Lcpinterval *parent)
+{
+  const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
+
+  AlphabetRangeSize rangesize
+    = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),1);
+  assert(rangesize < (AlphabetRangeSize) 4);
+  BWTSeqPosPairRangeOcc(bwtseq, 1, parent->left, parent->right,rangeOccs);
+}
+
 void deletevoidBWTSeq(void *packedindex)
 {
   deleteBWTSeq((BWTSeq *) packedindex);

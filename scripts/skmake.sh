@@ -34,6 +34,8 @@ fi
 
 # skproto-all.sh
 
+# GPROF=-pg
+
 makecompilerflags()
 {
   printf "all:\n\t\${MAKE} curses=no"
@@ -47,7 +49,7 @@ makecompilerflags()
   then
     printf " 64bit=yes"
   fi
-  printf " CFLAGS='-O3 -m$1"
+  printf " CFLAGS='${GPROF} -O3 -m$1"
   # printf " -DINLINEDENCSEQ"
   # printf " -DINLINEDSequentialsuffixarrayreader"
   if test $2 -eq 1
@@ -59,7 +61,7 @@ makecompilerflags()
     printf " -wd1418,869,981,1338"
   fi
   printf "'"
-  printf " LDFLAGS='-m$1'"
+  printf " LDFLAGS='${GPROF} -m$1'"
   if test $3 -eq 1
   then
     printf " LD='icc' CXX='icc'"

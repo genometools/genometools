@@ -52,6 +52,12 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
                                  const void *voidBwtSeq,
                                  const Lcpinterval *parent);
 
+void bwtrangewithspecial(UNUSED ArrayBoundswithchar *bwci,
+                         Seqpos *rangeOccs,
+                         UNUSED unsigned long alphasize,
+                         const void *voidBwtSeq,
+                         const Lcpinterval *parent);
+
 void *loadvoidBWTSeqForSA(const Str *indexname,
                           const Suffixarray *suffixarray,
                           Seqpos totallength,

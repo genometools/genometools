@@ -29,7 +29,8 @@
 #include "defined-types.h"
 #include "stamp.h"
 
-#define UNDEFINDEX      (patternlength+1)
+#define UNDEFMAXLEQK      (patternlength+1)
+#define SUCCESSMAXLEQK    patternlength
 
 #undef SKDEBUG
 
@@ -51,7 +52,7 @@ typedef struct
 static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
                             unsigned long patternlength)
 {
-  if (maxleqk == UNDEFINDEX)
+  if (maxleqk == UNDEFMAXLEQK)
   {
     fprintf(fp,"undefined");
   } else
@@ -63,7 +64,7 @@ static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
 static void showMyerscolumn(const Myerscolumn *col,unsigned long score,
                        unsigned long patternlength)
 {
-  if (col->maxleqk == UNDEFINDEX)
+  if (col->maxleqk == UNDEFMAXLEQK)
   {
     printf("[]");
   } else
@@ -102,7 +103,7 @@ static void verifycolumnvalues(unsigned long patternlength,
     minscore = startscore;
   } else
   {
-    bfmaxleqk = UNDEFINDEX;
+    bfmaxleqk = UNDEFMAXLEQK;
     minscore = 0;
   }
   score = startscore;
@@ -133,7 +134,7 @@ static void verifycolumnvalues(unsigned long patternlength,
     fprintf(stderr," = col->maxleqk\n");
     exit(EXIT_FAILURE);
   }
-  if (bfmaxleqk != UNDEFINDEX && minscore != col->scorevalue)
+  if (bfmaxleqk != UNDEFMAXLEQK && minscore != col->scorevalue)
   {
     fprintf(stderr,"correct score = %lu != %lu = col->score\n",
                  minscore,
@@ -142,6 +143,24 @@ static void verifycolumnvalues(unsigned long patternlength,
   }
 }
 
+static void showinterval(bool withesa,const Lcpinterval *itv)
+{
+  Seqpos width;
+
+  width = withesa ? (itv->right - itv->left + 1) : itv->right - itv->left;
+  printf("(%lu,width=%lu)",(unsigned long) itv->offset,(unsigned long) width);
+  printf("(%lu,%lu)",(unsigned long) itv->left,
+                     (unsigned long) (withesa ? itv->right : itv->right-1));
+}
+
+#define SHOWSTACKTOP(STACKPTR)\
+        printf("top=");\
+        showinterval(limdfsresources->withesa,&STACKPTR->lcpitv);\
+        showMyerscolumn(&STACKPTR->column,\
+               (unsigned long) STACKPTR->lcpitv.offset,patternlength);\
+        printf("\n")
+#else
+#define SHOWSTACKTOP(STACKPTR) /* Nothing */
 #endif
 
 static void initeqsvector(unsigned long *eqsvector,
@@ -168,28 +187,6 @@ static void initeqsvector(unsigned long *eqsvector,
   }
 }
 
-#ifdef SKDEBUG
-
-static void showinterval(bool withesa,const Lcpinterval *itv)
-{
-  Seqpos width;
-
-  width = withesa ? (itv->right - itv->left + 1) : itv->right - itv->left;
-  printf("(%lu,width=%lu)",(unsigned long) itv->offset,(unsigned long) width);
-  printf("(%lu,%lu)",(unsigned long) itv->left,
-                     (unsigned long) (withesa ? itv->right : itv->right-1));
-}
-
-#define SHOWSTACKTOP(STACKPTR)\
-        printf("top=");\
-        showinterval(limdfsresources->withesa,&STACKPTR->lcpitv);\
-        showMyerscolumn(&STACKPTR->column,\
-               (unsigned long) STACKPTR->lcpitv.offset,patternlength);\
-        printf("\n")
-#else
-#define SHOWSTACKTOP(STACKPTR) /* Nothing */
-#endif
-
 static void nextEDcolumn(const unsigned long *eqsvector,
                          unsigned long patternlength,
                          unsigned long maxdistance,
@@ -203,7 +200,7 @@ static void nextEDcolumn(const unsigned long *eqsvector,
                 idx,                    /* a counter */
                 score;                  /* current score */
 
-  assert(incol->maxleqk != UNDEFINDEX && incol->maxleqk != patternlength);
+  assert(incol->maxleqk != UNDEFMAXLEQK && incol->maxleqk != SUCCESSMAXLEQK);
   assert(currentchar != (Uchar) SEPARATOR);
   if (currentchar != (Uchar) WILDCARD)
   {
@@ -218,20 +215,6 @@ static void nextEDcolumn(const unsigned long *eqsvector,
   Ph = (Ph << 1) | 1UL;
   outcol->Pv = (Mh << 1) | ~ (Xv | Ph);
   outcol->Mv = Ph & Xv;
-  /* printf("incol->maxleqk %ld\n",(Showsint) incol->maxleqk); */
-#ifdef SKDEBUG
-  if (incol->maxleqk == patternlength)
-  {
-    fprintf(stderr,"incol->maxleqk = %lu = patternlength not allowed\n",
-            patternlength);
-    exit(EXIT_FAILURE);
-  }
-  if (incol->maxleqk == UNDEFINDEX)
-  {
-    fprintf(stderr,"incol->maxleqk = UNDEFINDEX not allowed\n");
-    exit(EXIT_FAILURE);
-  }
-#endif
   backmask = 1UL << incol->maxleqk;
   if (Eq & backmask || Mh & backmask)
   {
@@ -244,7 +227,7 @@ static void nextEDcolumn(const unsigned long *eqsvector,
     if (Ph & backmask)
     {
       score = maxdistance+1;
-      outcol->maxleqk = UNDEFINDEX;
+      outcol->maxleqk = UNDEFMAXLEQK;
       if (incol->maxleqk > 0)
       {
         for (idx = incol->maxleqk - 1, backmask >>= 1;
@@ -305,19 +288,7 @@ static void inplacenextEDcolumn(const unsigned long *eqsvector,
                 idx,                /* a counter */
                 score;              /* current score */
 
-#ifdef SKDEBUG
-  if (col->maxleqk == patternlength)
-  {
-    fprintf(stderr,"col->maxleqk = %lu = patternlength not allowed\n",
-            patternlength);
-    exit(EXIT_FAILURE);
-  }
-  if (col->maxleqk == UNDEFINDEX)
-  {
-    fprintf(stderr,"col->maxleqk = UNDEFINDEX not allowed\n");
-    exit(EXIT_FAILURE);
-  }
-#endif
+  assert(col->maxleqk != UNDEFMAXLEQK && col->maxleqk != SUCCESSMAXLEQK);
   if (currentchar != (Uchar) WILDCARD)
   {
     Eq = eqsvector[(unsigned long) currentchar];
@@ -339,7 +310,7 @@ static void inplacenextEDcolumn(const unsigned long *eqsvector,
   {
     if (Ph & backmask)
     {
-      unsigned long tmpmaxleqk = UNDEFINDEX;
+      unsigned long tmpmaxleqk = UNDEFMAXLEQK;
       score = maxdistance+1;
       if (col->maxleqk > 0)
       {
@@ -552,8 +523,8 @@ Definedunsignedlong esa_findshortestmatch(const Encodedsequence *encseq,
                         maxdistance,
                         &currentcol,
                         cc);
-    assert (currentcol.maxleqk != UNDEFINDEX);
-    if (currentcol.maxleqk == patternlength || pos == totallength-1)
+    assert (currentcol.maxleqk != UNDEFMAXLEQK);
+    if (currentcol.maxleqk == SUCCESSMAXLEQK || pos == totallength-1)
     {
       break;
     }
@@ -597,11 +568,11 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                           maxdistance,
                           &currentcol,
                           cc);
-      if (currentcol.maxleqk == UNDEFINDEX)
+      if (currentcol.maxleqk == UNDEFMAXLEQK)
       {
         break;
       }
-      if (currentcol.maxleqk == patternlength)
+      if (currentcol.maxleqk == SUCCESSMAXLEQK)
       {
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                       true,
@@ -621,9 +592,9 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                             unsigned long patternlength,
                             unsigned long maxdistance,
                             const Myerscolumn *col,
-                            Uchar inchar,
                             Seqpos left,
-                            Seqpos offset)
+                            Seqpos offset,
+                            Uchar inchar)
 {
   Uchar cc;
   unsigned long matchlength;
@@ -632,9 +603,6 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
   Bwtseqcontextiterator *bsci
     = newBwtseqcontextiterator(limdfsresources->genericindex,left);
 
-#ifdef SKDEBUG
-  printf("retrieve context of left=%lu\n",(unsigned long) left);
-#endif
   for (matchlength = 0; /* nothing */; matchlength++)
   {
     if (processinchar)
@@ -648,19 +616,16 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
     if (cc != (Uchar) SEPARATOR &&
         (!limdfsresources->nospecials || cc != (Uchar) WILDCARD))
     {
-#ifdef SKDEBUG
-      printf("cc=%u\n",cc);
-#endif
       inplacenextEDcolumn(limdfsresources->eqsvector,
                           patternlength,
                           maxdistance,
                           &currentcol,
                           cc);
-      if (currentcol.maxleqk == UNDEFINDEX)
+      if (currentcol.maxleqk == UNDEFMAXLEQK) /* check for stop */
       {
         break;
       }
-      if (currentcol.maxleqk == patternlength)
+      if (currentcol.maxleqk == SUCCESSMAXLEQK) /* check for success */
       {
         Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,left);
 
@@ -706,11 +671,11 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                   patternlength);
   printf("\n");
 #endif
-  if (stackptr->column.maxleqk == UNDEFINDEX)
+  if (stackptr->column.maxleqk == UNDEFMAXLEQK)
   {
     return true;
   }
-  if (stackptr->column.maxleqk == patternlength)
+  if (stackptr->column.maxleqk == SUCCESSMAXLEQK)
   {
     if (limdfsresources->withesa)
     {
@@ -764,9 +729,9 @@ static void processchildinterval(Limdfsresources *limdfsresources,
                       patternlength,
                       maxdistance,
                       previouscolumn,
-                      inchar,
                       child->left,
-                      child->offset);
+                      child->offset,
+                      inchar);
     }
   }
 }
@@ -881,6 +846,13 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
                          inchar,
                          previouscolumn);
   }
+  /*
+  bwtrangewithspecial(&limdfsresources->bwci,
+                      limdfsresources->rangeOccs,
+                      (unsigned long) limdfsresources->alphasize,
+                      limdfsresources->genericindex,
+                      parent);
+  */
 }
 
 void esalimiteddfs(Limdfsresources *limdfsresources,
