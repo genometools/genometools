@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include <ctype.h>
 #include <string.h>
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
@@ -42,10 +43,13 @@ static char* mutate_description(const char *description, unsigned int rate)
   return mutated_description;
 }
 
-static char random_character(Alpha *alpha)
+static char random_character(Alpha *alpha, bool upper_case)
 {
   /* we do not want to get wildcard characters */
-  return alpha_decode(alpha, rand_max(alpha_size(alpha) - 1 - 1));
+  char random_char = alpha_decode(alpha, rand_max(alpha_size(alpha) - 1 - 1));
+  if (upper_case)
+    return toupper(random_char);
+  return tolower(random_char);
 }
 
 static char* mutate_seq(const char *seq, unsigned long len, Alpha *alpha,
@@ -53,28 +57,31 @@ static char* mutate_seq(const char *seq, unsigned long len, Alpha *alpha,
 {
   unsigned long i, j, allocated, substitution_events = 0, insertion_events = 0,
                 deletion_events = 0, total_events = 0;
-  unsigned int cc;
   double rand_prob, mutate_prob;
   char *mutated_seq;
+  bool was_upper;
   assert(seq && alpha);
   assert(rate <= 100);
   mutate_prob = (double) rate / 100.0;
   allocated = len * 2; /* XXX: possibly reduce this memory consumption */
   mutated_seq = ma_malloc(sizeof (char) * allocated);
   for (i = 0, j = 0; i < len; i++) {
-    cc = alpha_encode(alpha, seq[i]);
+    if (isupper(seq[i]))
+      was_upper = true;
+    else
+      was_upper = false;
     if (rand_0_to_1() <= mutate_prob) {
       /* mutate */
       rand_prob = rand_0_to_1();
       if (rand_prob <= 0.8) {
         /* substitution (80% probability) */
-        mutated_seq[j++] = random_character(alpha); /* add random character */
+        mutated_seq[j++] = random_character(alpha, was_upper);
         substitution_events++;
       }
       else if (rand_prob <= 0.9) {
         /* insertion (10% probability) */
-        mutated_seq[j++] = alpha_decode(alpha, cc); /* keep orig. character */
-        mutated_seq[j++] = random_character(alpha); /* add random character */
+        mutated_seq[j++] = seq[i]; /* keep orig. character */
+        mutated_seq[j++] = random_character(alpha, was_upper);
         insertion_events++;
       }
       else {
@@ -84,7 +91,7 @@ static char* mutate_seq(const char *seq, unsigned long len, Alpha *alpha,
       total_events++;
     }
     else
-      mutated_seq[j++] = alpha_decode(alpha, cc); /* keep original character */
+      mutated_seq[j++] = seq[i]; /* keep original character */
   }
   mutated_seq[j] = '\0'; /* terminate */
   log_log("total number of mutation events: %lu", total_events);
