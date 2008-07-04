@@ -29,7 +29,7 @@
 #define PROTEIN_WILDCARDS            "XUBZ*-"
 
 #define ALPHA_GUESS_MAX_LENGTH       5000
-#define ALPHA_GUESS_PROTEIN_CHARS    "LVIFKREDSQYWPHMlvifkredsqywphmXBZ*-"
+#define ALPHA_GUESS_PROTEIN_CHARS    "LIFEQPlifeqpXZ*-"
 
 struct Alpha {
   unsigned char code_to_character_map[UCHAR_MAX];
