@@ -35,6 +35,11 @@ Bwtseqpositioniterator *newBwtseqpositioniterator(const void *bwtSeq,
 
 bool nextBwtseqpositioniterator(Seqpos *pos,Bwtseqpositioniterator *bspi);
 
+bool nextBwtseqpositionwithoutSEPiterator(Seqpos *pos,
+                                          Bwtseqpositioniterator *bspi);
+
+Uchar bwtseqgetsymbol(Seqpos bound,const void *voidbwtSeq);
+
 void freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi);
 
 typedef struct Bwtseqcontextiterator Bwtseqcontextiterator;
@@ -48,15 +53,8 @@ void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci);
 
 void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
                                  Seqpos *rangeOccs,
-                                 unsigned long alphasize,
                                  const void *voidBwtSeq,
                                  const Lcpinterval *parent);
-
-void bwtrangewithspecial(UNUSED ArrayBoundswithchar *bwci,
-                         Seqpos *rangeOccs,
-                         UNUSED unsigned long alphasize,
-                         const void *voidBwtSeq,
-                         const Lcpinterval *parent);
 
 void *loadvoidBWTSeqForSA(const Str *indexname,
                           const Suffixarray *suffixarray,

@@ -64,6 +64,31 @@ bool nextBwtseqpositioniterator(Seqpos *pos,Bwtseqpositioniterator *bspi)
   return false;
 }
 
+bool nextBwtseqpositionwithoutSEPiterator(Seqpos *pos,
+                                          Bwtseqpositioniterator *bspi)
+{
+  while (bspi->currentbound < bspi->upperbound)
+  {
+    Uchar cc;
+
+    if (bspi->currentbound != BWTSeqTerminatorPos(bspi->bwtSeq))
+    {
+      cc = BWTSeqGetSym(bspi->bwtSeq, bspi->currentbound);
+    } else
+    {
+      cc = SEPARATOR;
+    }
+    if (cc != SEPARATOR)
+    {
+      *pos = BWTSeqLocateMatch(bspi->bwtSeq,bspi->currentbound,&bspi->extBits);
+      bspi->currentbound++;
+      return true;
+    }
+    bspi->currentbound++;
+  }
+  return false;
+}
+
 void freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi)
 {
   destructExtBitsRetrieval(&(*bspi)->extBits);
@@ -88,6 +113,15 @@ Bwtseqcontextiterator *newBwtseqcontextiterator(const void *voidbwtSeq,
   bsci->bwtSeq = (const BWTSeq *) voidbwtSeq;
   bsci->bound = bound;
   return bsci;
+}
+
+Uchar bwtseqgetsymbol(Seqpos bound,const void *voidbwtSeq)
+{
+  if (bound != BWTSeqTerminatorPos(voidbwtSeq))
+  {
+    return BWTSeqGetSym(voidbwtSeq, bound);
+  }
+  return SEPARATOR;
 }
 
 Uchar nextBwtseqcontextiterator(Bwtseqcontextiterator *bsci)
@@ -126,28 +160,30 @@ void *loadvoidBWTSeqForSA(const Str *indexname,
 
 void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
                                  Seqpos *rangeOccs,
-                                 unsigned long alphasize,
                                  const void *voidBwtSeq,
                                  const Lcpinterval *parent)
 {
   unsigned long idx;
   const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
+  AlphabetRangeSize rangesize
+    = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),0);
 
   bwci->nextfreeBoundswithchar = 0;
   BWTSeqPosPairRangeOcc(bwtseq, 0, parent->left, parent->right,rangeOccs);
-  for (idx = 0; idx < alphasize; idx++)
+  for (idx = 0; idx < rangesize; idx++)
   {
-    if (rangeOccs[idx] < rangeOccs[alphasize+idx])
+    if (rangeOccs[idx] < rangeOccs[rangesize+idx])
     {
       bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].inchar = idx;
       bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].lbound
         = bwtseq->count[idx] + rangeOccs[idx];
       bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar++].rbound
-        = bwtseq->count[idx] + rangeOccs[alphasize+idx];
+        = bwtseq->count[idx] + rangeOccs[rangesize+idx];
     }
   }
 }
 
+/*
 void bwtrangewithspecial(UNUSED ArrayBoundswithchar *bwci,
                          Seqpos *rangeOccs,
                          UNUSED unsigned long alphasize,
@@ -156,13 +192,20 @@ void bwtrangewithspecial(UNUSED ArrayBoundswithchar *bwci,
 {
   const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
 
-#ifndef NDEBUG
   AlphabetRangeSize rangesize
     = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),1);
   assert(rangesize < (AlphabetRangeSize) 4);
-#endif
   BWTSeqPosPairRangeOcc(bwtseq, 1, parent->left, parent->right,rangeOccs);
+    inchar = WILDCARD
+    bwtcode = MRAEncMapSymbol(EISGetAlphabet(bwtseq->seqIdx),WILDCARD);
+    idx = bwtcode -  MRAEncGetRangeBase(EISGetAlphabet(bwtseq->seqIdx),1);
+    if (rangeOccs[idx] < rangeOccs[rangesize+idx])
+    {
+      pos = BWTSeqLocateMatch((const BWTSeq *) voidbwtSeq,bound,&extBits);
+    }
+  }
 }
+*/
 
 void deletevoidBWTSeq(void *packedindex)
 {

@@ -102,6 +102,9 @@ static void storematch(void *processinfo,
   GETNEXTFREEINARRAY(match,storetab,Simplematch,32);
   match->dbstartpos = convertstartpos(withesa,totallength,startpos);
   match->matchlength = len;
+  printf("match " FormatSeqpos " " FormatSeqpos "\n",
+          PRINTSeqposcast(convertstartpos(withesa,totallength,startpos)),
+          PRINTSeqposcast(len));
 }
 
 static int cmpdescend(const void *a,const void *b)
@@ -220,7 +223,15 @@ static void compareresults(const ArraySimplematch *storeonline,
 {
   unsigned long ss;
 
-  assert(storeoffline->nextfreeSimplematch == storeonline->nextfreeSimplematch);
+  if (storeonline->nextfreeSimplematch != storeoffline->nextfreeSimplematch)
+  {
+    fprintf(stderr,"nextfreeSimplematch: storeonline = %lu != %lu "
+                   "storeoffline\n",
+                   storeonline->nextfreeSimplematch,
+                   storeoffline->nextfreeSimplematch);
+    exit(EXIT_FAILURE);
+  }
+  assert(storeonline->nextfreeSimplematch == storeoffline->nextfreeSimplematch);
   if (storeoffline->nextfreeSimplematch > 1UL)
   {
     qsort(storeoffline->spaceSimplematch,(size_t)

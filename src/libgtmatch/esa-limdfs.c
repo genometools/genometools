@@ -603,6 +603,9 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
   Bwtseqcontextiterator *bsci
     = newBwtseqcontextiterator(limdfsresources->genericindex,left);
 
+#ifdef SKDEBUG
+  printf("retrieve context column %lu\n",(unsigned long) left);
+#endif
   for (matchlength = 0; /* nothing */; matchlength++)
   {
     if (processinchar)
@@ -616,6 +619,9 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
     if (cc != (Uchar) SEPARATOR &&
         (!limdfsresources->nospecials || cc != (Uchar) WILDCARD))
     {
+#ifdef SKDEBUG
+      printf("cc=%u\n",cc);
+#endif
       inplacenextEDcolumn(limdfsresources->eqsvector,
                           patternlength,
                           maxdistance,
@@ -817,10 +823,10 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
                                 const Myerscolumn *previouscolumn)
 {
   unsigned long idx;
+  Seqpos sumwidth = 0;
 
   bwtrangesplitwithoutspecial(&limdfsresources->bwci,
                               limdfsresources->rangeOccs,
-                              (unsigned long) limdfsresources->alphasize,
                               limdfsresources->genericindex,
                               parent);
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
@@ -832,6 +838,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     child.offset = parent->offset+1;
     child.left = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
     child.right = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
+    sumwidth += child.right - child.left;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
     showinterval(limdfsresources->withesa,parent);
@@ -846,13 +853,25 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
                          inchar,
                          previouscolumn);
   }
-  /*
-  bwtrangewithspecial(&limdfsresources->bwci,
-                      limdfsresources->rangeOccs,
-                      (unsigned long) limdfsresources->alphasize,
-                      limdfsresources->genericindex,
-                      parent);
-  */
+  if (!limdfsresources->nospecials)
+  {
+    Seqpos bound;
+    for (bound = parent->left + sumwidth; bound < parent->right; bound++)
+    {
+      Uchar cc = bwtseqgetsymbol(bound,limdfsresources->genericindex);
+
+      if (cc != (Uchar) SEPARATOR)
+      {
+        pck_overcontext(limdfsresources,
+                        patternlength,
+                        maxdistance,
+                        previouscolumn,
+                        bound,
+                        parent->offset+1,
+                        cc);
+      }
+    }
+  }
 }
 
 void esalimiteddfs(Limdfsresources *limdfsresources,
