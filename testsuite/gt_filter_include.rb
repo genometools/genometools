@@ -170,7 +170,7 @@ Test do
 end
 
 Name "gt filter test 23 (-targetstrand)"
-Keywords "gt_filter targetstrand test"
+Keywords "gt_filter targetstrand"
 Test do
   run_test "#{$bin}gt filter -targetstrand + " +
             "#{$testdata}target_attribute_without_strand.gff3"
