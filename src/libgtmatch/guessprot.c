@@ -64,9 +64,13 @@ int guessifproteinsequencestream(const StrArray *filenametab,Error *err)
                 break;
       default:  break;
     }
+    if (countnonbases > 0)
+    {
+      break;
+    }
   }
   fastabuffer_delete(fb);
-  if (countnonbases > 0 && countnonbases >= currentposition/10)
+  if (countnonbases > 0)
   {
     return 1;
   }

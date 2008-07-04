@@ -156,9 +156,11 @@ void bwtrangewithspecial(UNUSED ArrayBoundswithchar *bwci,
 {
   const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
 
+#ifndef NDEBUG
   AlphabetRangeSize rangesize
     = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),1);
   assert(rangesize < (AlphabetRangeSize) 4);
+#endif
   BWTSeqPosPairRangeOcc(bwtseq, 1, parent->left, parent->right,rangeOccs);
 }
 

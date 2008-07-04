@@ -126,7 +126,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
       pptr = nextEnumpatterniterator(&patternlen,epi);
       if (pmopt->showpatt)
       {
-        showsymbolstring(suffixarray.alpha,pptr,patternlen);
+        printfsymbolstring(suffixarray.alpha,pptr,patternlen);
         printf("\n");
       }
       if (pmopt->usebcktab)

@@ -133,8 +133,10 @@ static int dotransformtag(Uchar *transformedtag,
 
   if (taglen > (unsigned long) MAXTAGSIZE)
   {
-    error_set(err,"tag of length %lu; tags must not be longer than %lu",
-                   taglen, (unsigned long) MAXTAGSIZE);
+    error_set(err,"tag \"%*.*s\" of length %lu; "
+                  "tags must not be longer than %lu",
+                   (int) taglen,(int) taglen,currenttag,taglen,
+                   (unsigned long) MAXTAGSIZE);
     return -1;
   }
   for (idx = 0; idx < taglen; idx++)
@@ -402,7 +404,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       printf("# patternlength=%lu\n",taglen);
       printf("# maxdistance=%lu\n",tageratoroptions->maxdistance);
       printf("# tag=");
-      showsymbolstringgeneric(stdout,suffixarray.alpha,transformedtag,taglen);
+      fprintfsymbolstring(stdout,suffixarray.alpha,transformedtag,taglen);
       printf("\n");
       storeoffline.nextfreeSimplematch = 0;
       storeonline.nextfreeSimplematch = 0;

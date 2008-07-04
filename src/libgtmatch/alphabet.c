@@ -578,8 +578,8 @@ void outputalphabet(FILE *fpout,const Alphabet *alpha)
   The output goes to the given file pointer.
  */
 
-void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
-                             const Uchar *w,unsigned long wlen)
+void fprintfsymbolstring(FILE *fpout,const Alphabet *alpha,
+                         const Uchar *w,unsigned long wlen)
 {
   unsigned long i;
 
@@ -587,6 +587,28 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
   {
     (void) putc((int) alpha->characters[(int) w[i]],fpout);
   }
+}
+
+/*
+  The following function is a special case of the previous
+  function showing the output on stdout.
+*/
+
+void printfsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen)
+{
+  fprintfsymbolstring(stdout,alpha,w,wlen);
+}
+
+void sprintfsymbolstring(char *buffer,const Alphabet *alpha,
+                          const Uchar *w,unsigned long wlen)
+{
+  unsigned long i;
+
+  for (i = 0; i < wlen; i++)
+  {
+    buffer[i] = (int) alpha->characters[(int) w[i]];
+  }
+  buffer[wlen] = '\0';
 }
 
 void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar)
@@ -617,16 +639,6 @@ Uchar getprettysymbol(const Alphabet *alpha,unsigned int currentchar)
 {
    assert(currentchar < alpha->mapsize-1);
    return alpha->characters[currentchar];
-}
-
-/*
-  The following function is a special case of the previous
-  function showing the output on stdout.
-*/
-
-void showsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen)
-{
-  showsymbolstringgeneric(stdout,alpha,w,wlen);
 }
 
 static unsigned int removelowercaseproteinchars(Uchar *domainbuf,

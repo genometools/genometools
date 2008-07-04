@@ -198,9 +198,7 @@ static void showifinlengthrange(const Alphabet *alphabet,
     if (rangespecinfo->showsequence)
     {
       (void) putchar(' ');
-      showsymbolstring(alphabet,
-                       start + querystart,
-                       gmatchlength);
+      printfsymbolstring(alphabet,start + querystart,gmatchlength);
     }
     (void) putchar('\n');
   }

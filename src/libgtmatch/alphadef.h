@@ -46,10 +46,14 @@ void freeAlphabet(Alphabet **alpha);
 
 void outputalphabet(FILE *fpout,const Alphabet *alpha);
 
-void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
-                             const Uchar *w,unsigned long wlen);
+void fprintfsymbolstring(FILE *fpout,const Alphabet *alpha,
+                         const Uchar *w,unsigned long wlen);
 
-void showsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen);
+void printfsymbolstring(const Alphabet *alpha,const Uchar *w,
+                        unsigned long wlen);
+
+void sprintfsymbolstring(char *buffer,const Alphabet *alpha,
+                         const Uchar *w,unsigned long wlen);
 
 void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar);
 

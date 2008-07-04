@@ -67,10 +67,10 @@ makecompilerflags()
     printf " LD='icc' CXX='icc'"
   fi
   # printf " -DWITHTRIEIDENT"
+  # printf " 'assert=no'"
   printf "\n"
 }
 
-# printf "NOASSERT='assert=no'"
 if test -r LocalMakefile
 then
   mv LocalMakefile LocalMakefile.previous
