@@ -26,6 +26,7 @@ struct Shredder {
                 overlap,
                 seqnum,
                 pos;
+  double sample_probability;
 };
 
 Shredder* shredder_new(Bioseq *bioseq, unsigned long minlength,
@@ -36,6 +37,7 @@ Shredder* shredder_new(Bioseq *bioseq, unsigned long minlength,
   shredder->bioseq = bioseq;
   shredder->minlength = minlength;
   shredder->maxlength = maxlength;
+  shredder->sample_probability = 1.0;
   return shredder;
 }
 
@@ -51,8 +53,15 @@ void shredder_set_overlap(Shredder *shredder, unsigned long overlap)
   shredder->overlap = overlap;
 }
 
-const char* shredder_shred(Shredder *shredder, unsigned long *fragment_length,
-                           Str *desc)
+void shredder_set_sample_probability(Shredder *shredder, double probability)
+{
+  assert(shredder);
+  assert(probability >= 0.0 && probability <= 1.0);
+  shredder->sample_probability = probability;
+}
+
+static const char* generate_fragment(Shredder *shredder,
+                                     unsigned long *fragment_length, Str *desc)
 {
   assert(shredder && fragment_length);
   if (shredder->seqnum < bioseq_number_of_sequences(shredder->bioseq)) {
@@ -68,6 +77,7 @@ const char* shredder_shred(Shredder *shredder, unsigned long *fragment_length,
     if (shredder->pos + fraglen > seqlen)
       fraglen = seqlen - shredder->pos;
     *fragment_length = fraglen;
+    str_reset(desc);
     str_append_cstr(desc, bioseq_get_description(shredder->bioseq,
                                                  shredder->seqnum));
     assert(shredder->pos + fraglen <= seqlen);
@@ -82,6 +92,20 @@ const char* shredder_shred(Shredder *shredder, unsigned long *fragment_length,
         shredder->pos++; /* go at least one base further each step */
     }
     return frag;
+  }
+  return NULL;
+}
+
+const char* shredder_shred(Shredder *shredder, unsigned long *fragment_length,
+                           Str *desc)
+{
+  const char *frag;
+  assert(shredder && fragment_length);
+  while ((frag = generate_fragment(shredder, fragment_length, desc))) {
+    if (shredder->sample_probability == 1.0 ||
+        rand_0_to_1() <= shredder->sample_probability) {
+      return frag;
+    }
   }
   return NULL;
 }

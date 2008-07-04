@@ -29,9 +29,11 @@ Shredder*   shredder_new(Bioseq *bioseq, unsigned long minlength,
 void        shredder_delete(Shredder*);
 /* Set the <overlap> between shredded fragments, the default is 0. */
 void        shredder_set_overlap(Shredder*, unsigned long overlap);
+/* Set the <probabilty> that a generated fragment is returned. */
+void        shredder_set_sample_probability(Shredder*, double probability);
 /* Return the next shredded fragment or NULL if no additional fragment is
-   available. The length of the fragment is stored in <fragment_length> and the
-   description of the corresponding sequence is appended to <desc>. */
+   available. The length of the fragment is stored in <fragment_length> and
+   <desc> is set to the description of the corresponding sequence. */
 const char* shredder_shred(Shredder*, unsigned long *fragment_length,
                            Str *desc);
 

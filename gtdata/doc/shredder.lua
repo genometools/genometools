@@ -18,4 +18,8 @@ Shredder an EST collection into pieces between 50 and 100 bp and get rid of all
 
 $ gt shredder -minlength 50 -maxlength 100 U89959_ests.fas \
   | gt seqfilter -minlength 50 - > fragments.fas
-# 130 out of 1260 sequences have been removed (10.317%)]])
+# 130 out of 1260 sequences have been removed (10.317%)
+
+Shredder an EST collection and show only random 10% of the resulting fragments
+
+$ gt shredder -sample 0.1 U89959_ests.fas]])

@@ -1,3 +1,8 @@
+changes in version 1.1.3 (2008-07-05)
+
+- `gt shredder` has new option -sample
+
+
 changes in version 1.1.2 (2008-07-04)
 
 - new tool `gt fingerprint` has been added

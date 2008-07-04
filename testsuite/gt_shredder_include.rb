@@ -16,6 +16,12 @@ Test do
   run_test "#{$bin}gt shredder -overlap 500 #{$testdata}U89959_genomic.fas"
 end
 
+Name "gt shredder (-sample)"
+Keywords "gt_shredder"
+Test do
+  run_test "#{$bin}gt shredder -sample 0.1 #{$testdata}U89959_ests.fas"
+end
+
 Name "gt shredder (nonexistent file)"
 Keywords "gt_shredder"
 Test do

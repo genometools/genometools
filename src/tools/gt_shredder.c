@@ -29,6 +29,7 @@ typedef struct {
                 minlength,
                 maxlength,
                 overlap;
+  double sample_probability;
 } ShredderArguments;
 
 static void* gt_shredder_arguments_new(void)
@@ -52,18 +53,22 @@ static OptionParser* gt_shredder_option_parser_new(void *tool_arguments)
   op = option_parser_new("[option ...] [sequence_file ...]",
                          "Shredder sequence_file into consecutive pieces of "
                          "random length.");
-  o = option_new_ulong_min("coverage", "Set the number of times the "
+  o = option_new_ulong_min("coverage", "set the number of times the "
                            "sequence_file is shreddered", &arguments->coverage,
                            1, 1);
   option_parser_add_option(op, o);
-  o = option_new_ulong("minlength", "Set the minimum length of the shreddered "
+  o = option_new_ulong("minlength", "set the minimum length of the shreddered "
                        "fragments", &arguments->minlength, 300);
   option_parser_add_option(op, o);
-  o = option_new_ulong("maxlength", "Set the maximum length of the shreddered "
+  o = option_new_ulong("maxlength", "set the maximum length of the shreddered "
                        "fragments", &arguments->maxlength, 700);
   option_parser_add_option(op, o);
-  o = option_new_ulong("overlap", "Set the overlap between consecutive "
+  o = option_new_ulong("overlap", "set the overlap between consecutive "
                        "pieces", &arguments->overlap, 0);
+  option_parser_add_option(op, o);
+  o = option_new_probability("sample", "take samples of the generated "
+                             "sequences pieces with the given probability",
+                             &arguments->sample_probability, 1.0);
   option_parser_add_option(op, o);
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
   return op;
@@ -108,10 +113,10 @@ static int gt_shredder_runner(UNUSED int argc, const char **argv,
       shredder = shredder_new(bioseq, arguments->minlength,
                               arguments->maxlength);
       shredder_set_overlap(shredder, arguments->overlap);
+      shredder_set_sample_probability(shredder, arguments->sample_probability);
       while ((fragment = shredder_shred(shredder, &fragment_length, desc))) {
         str_append_cstr(desc, " [shreddered fragment]");
         fasta_show_entry(str_get(desc), fragment, fragment_length, 0);
-        str_reset(desc);
       }
       shredder_delete(shredder);
     }
