@@ -96,8 +96,8 @@ Seqpos *bcktab_leftborder(Bcktab *bcktab);
 
 Codetype bcktab_numofallcodes(const Bcktab *bcktab);
 
-unsigned long sizeofbuckettable(unsigned int numofchars,
-                                unsigned int prefixlength);
+uint64_t sizeofbuckettable(unsigned int numofchars,
+                           unsigned int prefixlength);
 
 #ifdef SKDEBUG
 void checkcountspecialcodes(const Bcktab *bcktab);

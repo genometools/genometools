@@ -22,6 +22,7 @@
 #include "intcode-def.h"
 #include "encseq-def.h"
 #include "sfx-enumcodes.h"
+#include "stamp.h"
 
 #include "initbasepower.pr"
 

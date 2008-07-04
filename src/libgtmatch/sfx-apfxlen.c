@@ -52,12 +52,12 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
                                              unsigned int factor)
 {
   unsigned int prefixlength;
-  unsigned long sizeofrep;
+  uint64_t sizeofrep;
 
   for (prefixlength = 1U; /* Nothing */; prefixlength++)
   {
     sizeofrep = sizeofbuckettable(numofchars,prefixlength);
-    if ((Seqpos) (sizeofrep / factor) > maxbytes)
+    if ((sizeofrep / (uint64_t) factor) > (uint64_t) maxbytes)
     {
       return prefixlength-1;
     }
@@ -73,7 +73,6 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
   unsigned int prefixlength;
 
   prefixlength = prefixlengthwithmaxspace(numofchars,totallength,1U);
-  printf("prefixlengthwithmaxspace=%u\n",prefixlength);
   if (prefixlength == 0)
   {
     return 1U;
@@ -82,11 +81,9 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
     unsigned int mbp = maxbasepower(numofchars);
     if (mbp >= 1U)
     {
-      printf("return MIN(mbp=%u,prefixlength=%u)\n",mbp,prefixlength);
       return MIN(mbp,prefixlength);
     } else
     {
-      printf("prefixlength=%u\n",prefixlength);
       return prefixlength;
     }
   }
@@ -101,10 +98,8 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
   maxprefixlen = prefixlengthwithmaxspace(numofchars,totallength,
                                           (unsigned int)
                                           MAXMULTIPLIEROFTOTALLENGTH);
-  printf("prefixlengthwithmaxspace=%u\n",maxprefixlen);
   mbp = maxbasepower(numofchars);
   maxprefixlen = MIN(mbp,maxprefixlen);
-  printf("MIN(mpp,maxprefixlength)=%u\n",maxprefixlen);
   if (prefixlenbits > 0)
   {
     unsigned int tmplength;
@@ -113,13 +108,11 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
                                  (Seqpos)
                                  MAXREMAININGAFTERPREFIXLEN(prefixlenbits),
                                  1U);
-    printf("tmplength=%u\n",tmplength);
     if (tmplength > 0 && maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;
     }
     tmplength = MAXVALUEWITHBITS(prefixlenbits);
-    printf("MAXVALUEWITHBITS=%u\n",tmplength);
     if (tmplength > 0 && maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;

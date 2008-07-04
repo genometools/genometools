@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <math.h>
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/fa.h"
@@ -66,21 +67,28 @@ static unsigned long numofdistpfxidxcounters(const Codetype *basepower,
   return 0;
 }
 
-unsigned long sizeofbuckettable(unsigned int numofchars,
-                                unsigned int prefixlength)
+uint64_t sizeofbuckettable(unsigned int numofchars,
+                           unsigned int prefixlength)
 {
-  unsigned long sizeofrep;
-  Codetype *basepower, numofallcodes, numofspecialcodes;
+  
+  uint64_t sizeofrep;
+  double numofallcodes, numofspecialcodes;
+  Codetype *basepower;
 
-  basepower = initbasepower(numofchars,prefixlength);
-  numofallcodes = basepower[prefixlength];
-  numofspecialcodes = basepower[prefixlength-1];
+  numofallcodes = pow((double) numofchars,(double) prefixlength);
+  numofspecialcodes = pow((double) numofchars,(double) (prefixlength-1));
+  if (prefixlength >= 2U)
+  {
+    basepower = initbasepower(numofchars,prefixlength-2);
+  } else
+  {
+    basepower = NULL; 
+  }
   sizeofrep
-    = (unsigned long)
-      sizeof (Seqpos) * (numofallcodes + 1) +
+    = (uint64_t)
+      sizeof (Seqpos) * (numofallcodes + 1.0) +
       sizeof (Seqpos) * numofspecialcodes +
-      sizeof (unsigned long) * numofdistpfxidxcounters(basepower,
-                                                       prefixlength);
+      sizeof (unsigned long) * numofdistpfxidxcounters(basepower,prefixlength);
   FREESPACE(basepower);
   return sizeofrep;
 }
