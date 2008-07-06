@@ -70,7 +70,6 @@ static unsigned long numofdistpfxidxcounters(const Codetype *basepower,
 uint64_t sizeofbuckettable(unsigned int numofchars,
                            unsigned int prefixlength)
 {
-  
   uint64_t sizeofrep;
   double numofallcodes, numofspecialcodes;
   Codetype *basepower;
@@ -82,7 +81,7 @@ uint64_t sizeofbuckettable(unsigned int numofchars,
     basepower = initbasepower(numofchars,prefixlength-2);
   } else
   {
-    basepower = NULL; 
+    basepower = NULL;
   }
   sizeofrep
     = (uint64_t)
