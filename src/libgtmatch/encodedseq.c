@@ -615,7 +615,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          fprintf(stderr,"detsizeencseq(%d) undefined\n",(int) sat);
          exit(EXIT_FAILURE); /* programming error */
   }
-  return sum + 1 + sizeof(unsigned long) * (mapsize-1);
+  return sum + 1 + sizeof (unsigned long) * (mapsize-1);
 }
 
 static Positionaccesstype determinesmallestrep(Seqpos totallength,
