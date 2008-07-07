@@ -38,13 +38,14 @@
 #include "safecast-gen.h"
 #include "esafileend.h"
 #include "verbose-def.h"
+#include "stamp.h"
 
 #include "sfx-cmpsuf.pr"
 #include "opensfxfile.pr"
 #include "fillsci.pr"
 
 #define CHECKANDUPDATE(VAL)\
-        tmp = detsizeencseq(VAL,totallength,specialranges);\
+        tmp = detsizeencseq(VAL,totallength,specialranges,mapsize);\
         if (tmp < cmin)\
         {\
           cmin = tmp;\
@@ -147,6 +148,7 @@ typedef uint32_t Uint32;
   Uchar(*seqdeliverchar)(const Encodedsequence *,
                          Encodedsequencescanstate *,Seqpos);
   const char *seqdelivercharname;
+  unsigned long *characterdistribution;
 
   /* only for Viabitaccess,
               Viauchartables,
@@ -440,6 +442,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
     encseq->satcharptr[0] = (Uchar) encseq->sat;
   }
   NEWMAPSPEC(encseq->satcharptr,Uchar,1UL);
+  NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
+             (unsigned long) (encseq->mapsize-1));
   switch (encseq->sat)
   {
     case Viadirectaccess:
@@ -556,7 +560,8 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
 
 static uint64_t detsizeencseq(Positionaccesstype sat,
                               Seqpos totallength,
-                              Seqpos specialranges)
+                              Seqpos specialranges,
+                              unsigned int mapsize)
 {
   uint64_t sum,
            sizeoftwobitencoding
@@ -610,16 +615,17 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          fprintf(stderr,"detsizeencseq(%d) undefined\n",(int) sat);
          exit(EXIT_FAILURE); /* programming error */
   }
-  return sum + 1;
+  return sum + 1 + sizeof(unsigned long) * (mapsize-1);
 }
 
 static Positionaccesstype determinesmallestrep(Seqpos totallength,
-                                               Seqpos specialranges)
+                                               Seqpos specialranges,
+                                               unsigned int mapsize)
 {
   Positionaccesstype cret;
   uint64_t tmp, cmin;
 
-  cmin = detsizeencseq(Viabitaccess,totallength,specialranges);
+  cmin = detsizeencseq(Viabitaccess,totallength,specialranges,mapsize);
   cret = Viabitaccess;
   CHECKANDUPDATE(Viauchartables);
   CHECKANDUPDATE(Viaushorttables);
@@ -640,6 +646,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
     fa_xmunmap(encseq->mappedptr);
   } else
   {
+    FREESPACE(encseq->characterdistribution);
     switch (encseq->sat)
     {
       case Viadirectaccess:
@@ -1762,7 +1769,8 @@ static Encodedsequence *determineencseqkeyvalues(
                                               specialranges);
   encseq->totallength = totallength;
   encseq->sizeofrep = CALLCASTFUNC(uint64_t,unsigned_long,
-                                  detsizeencseq(sat,totallength,specialranges));
+                                   detsizeencseq(sat,totallength,
+                                                 specialranges,mapsize));
   encseq->name = accesstype2name(sat);
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
@@ -1783,6 +1791,7 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->ushortendspecialsubsUint = NULL;
   encseq->uint32specialpositions = NULL;
   encseq->uint32endspecialsubsUint = NULL;
+  encseq->characterdistribution = NULL;
 
   spaceinbitsperchar
     = (double) ((uint64_t) CHAR_BIT * (uint64_t) encseq->sizeofrep)/
@@ -1852,7 +1861,7 @@ static int determinesattype(const Str *indexname,
         sat = (Positionaccesstype) retcode;
       } else
       {
-        sat = determinesmallestrep(totallength,specialranges);
+        sat = determinesmallestrep(totallength,specialranges,mapsize);
       }
     } else
     {
@@ -1959,6 +1968,8 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                                   Seqpos specialranges,
                                                   const Alphabet *alphabet,
                                                   const char *str_sat,
+                                                  unsigned long
+                                                     *characterdistribution,
                                                   Verboseinfo *verboseinfo,
                                                   Error *err)
 {
@@ -1991,6 +2002,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     ALLASSIGNAPPENDFUNC;
     showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
     encseq->mappedptr = NULL;
+    encseq->characterdistribution = characterdistribution;
     assert(filenametab != NULL);
     fb = fastabuffer_new(filenametab,
                          plainformat ? NULL : getsymbolmapAlphabet(alphabet),

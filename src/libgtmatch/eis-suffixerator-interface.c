@@ -190,7 +190,7 @@ newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
   mapSize = getmapsizeAlphabet(alpha);
   for (i = 0; i < mapSize - 1; ++i)
     regularSymsSum +=
-      (stats->symbolDistributionTable[i] = characterdistribution[i]);
+      (stats->symbolDistributionTable[i] = (Seqpos) characterdistribution[i]);
   stats->symbolDistributionTable[WILDCARD] = len - regularSymsSum - numOfSeqs;
   stats->symbolDistributionTable[SEPARATOR] += numOfSeqs;
   stats->symbolDistributionTable[UNDEFBWTCHAR] += 1;

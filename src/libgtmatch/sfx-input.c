@@ -96,11 +96,8 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   }
   if (!haserr)
   {
-    if (!so->isplain)
-    {
-      sfxseqinfo->characterdistribution
-        = initcharacterdistribution(sfxseqinfo->alpha);
-    }
+    sfxseqinfo->characterdistribution
+      = initcharacterdistribution(sfxseqinfo->alpha);
     if (fasta2sequencekeyvalues(so->str_indexname,
                                 &sfxseqinfo->numofsequences,
                                 &totallength,
@@ -115,6 +112,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 err) != 0)
     {
       haserr = true;
+      FREESPACE(sfxseqinfo->characterdistribution);
     }
   }
   if (!haserr)
@@ -122,6 +120,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
     if (outal1file(so->str_indexname,sfxseqinfo->alpha,err) != 0)
     {
       haserr = true;
+      FREESPACE(sfxseqinfo->characterdistribution);
     }
   }
   if (!haserr)
@@ -140,11 +139,13 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                               str_length(so->str_sat) > 0
                                 ? str_get(so->str_sat)
                                 : NULL,
+                              sfxseqinfo->characterdistribution,
                               verboseinfo,
                               err);
     if (sfxseqinfo->encseq == NULL)
     {
       haserr = true;
+      FREESPACE(sfxseqinfo->characterdistribution);
     } else
     {
       if (so->outtistab)
@@ -197,7 +198,6 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
 
 void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo,bool mapped)
 {
-  FREESPACE(sfxseqinfo->characterdistribution);
   if (mapped)
   {
     if (sfxseqinfo->voidptr2suffixarray != NULL)

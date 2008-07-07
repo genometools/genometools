@@ -30,6 +30,7 @@
 #include "readmode-def.h"
 #include "verbose-def.h"
 #include "intcode-def.h"
+#include "spacedef.h"
 #include "stamp.h"
 #include "sfx-suffixer.h"
 #include "sfx-outlcp.h"
@@ -269,7 +270,8 @@ static void showcharacterdistribution(
 static void showsequencefeatures(Verboseinfo *verboseinfo,
                                  const Specialcharinfo *specialcharinfo,
                                  const Alphabet *alpha,
-                                 const unsigned long *characterdistribution)
+                                 const unsigned long
+                                   *characterdistribution)
 {
   showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
               PRINTSeqposcast(specialcharinfo->specialcharacters));
@@ -607,6 +609,12 @@ static int runsuffixerator(bool doesa,
   {
     freeoutlcptab(&outfileinfo.outlcpinfo);
   }
+  /*
+  if (haserr && sfxseqinfo.characterdistribution != NULL)
+  {
+    FREESPACE(sfxseqinfo.characterdistribution);
+  }
+  */
   freeSfxseqinfo(&sfxseqinfo,
                  (str_length(so->str_inputindex) > 0) ? true : false);
   if (mtime != NULL)

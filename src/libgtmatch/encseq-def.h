@@ -171,6 +171,8 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                                   Seqpos specialranges,
                                                   const Alphabet *alphabet,
                                                   const char *str_sat,
+                                                  unsigned long
+                                                    *characterdistribution,
                                                   Verboseinfo *verboseinfo,
                                                   Error *err);
 

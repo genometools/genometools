@@ -137,6 +137,8 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
                                                   const Alphabet *alphabet,
                                                   const char *str_sat,
                                                   Verboseinfo *verboseinfo,
+                                                  unsigned long
+                                                    *characterdistribution,
                                                   Error *err)
 {
   Encodedsequence *encseq;
