@@ -42,7 +42,50 @@ typedef struct
        inputbck;
   unsigned long scantrials,
                 multicharcmptrials;
+  unsigned long delspranges;
 } Sfxmapoptions;
+
+static void deletethespranges(const Encodedsequence *encseq,
+                              const Alphabet *alpha,
+                              unsigned long delspranges)
+{
+  Specialrangeiterator *sri;
+  Sequencerange range;
+  Seqpos rangewidth, nextpos = 0, totallength;
+  const unsigned long fastawidth = 70UL;
+
+  sri = newspecialrangeiterator(encseq,true);
+  printf(">\n");
+  while (nextspecialrangeiterator(&range,sri))
+  {
+    assert (range.rightpos > range.leftpos);
+    rangewidth = range.rightpos - range.leftpos;
+    if (rangewidth > (Seqpos) delspranges && range.leftpos > nextpos)
+    {
+      encseq2symbolstring(stdout,
+                          alpha,
+                          encseq,
+                          Forwardmode,
+                          nextpos,
+                          range.leftpos + delspranges - nextpos,
+                          fastawidth);
+      printf(">\n");
+      nextpos = range.rightpos;
+    }
+  }
+  totallength = getencseqtotallength(encseq);
+  if (nextpos < totallength-1)
+  {
+    encseq2symbolstring(stdout,
+                        alpha,
+                        encseq,
+                        Forwardmode,
+                        nextpos,
+                        totallength - nextpos,
+                        fastawidth);
+  }
+  freespecialrangeiterator(&sri);
+}
 
 static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                             int *parsed_args,
@@ -53,7 +96,8 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
   OptionParser *op;
   Option *optionstream, *optionverbose, *optionscantrials,
          *optionmulticharcmptrials, *optionbck, *optionsuf,
-         *optiondes, *optionbwt, *optionlcp, *optiontis;
+         *optiondes, *optionbwt, *optionlcp, *optiontis,
+         *optiondelspranges;
   OPrval oprval;
 
   error_check(err);
@@ -63,6 +107,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
   optionstream = option_new_bool("stream","stream the index",
                                  &sfxmapoptions->usestream,false);
   option_parser_add_option(op, optionstream);
+
 
   optionscantrials = option_new_ulong("scantrials",
                                       "specify number of scan trials",
@@ -74,6 +119,12 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                        "specify number of multichar cmp trials",
                        &sfxmapoptions->multicharcmptrials,0);
   option_parser_add_option(op, optionmulticharcmptrials);
+
+  optiondelspranges = option_new_ulong("delspranges",
+                                      "delete ranges of special values",
+                                       &sfxmapoptions->delspranges,
+                                       0);
+  option_parser_add_option(op, optiondelspranges);
 
   optiontis = option_new_bool("tis","input the transformed input sequence",
                               &sfxmapoptions->inputtis,
@@ -139,7 +190,7 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
 
   indexname = str_new_cstr(argv[parsed_args]);
   verboseinfo = newverboseinfo(sfxmapoptions.verbose);
-  if (sfxmapoptions.inputtis)
+  if (sfxmapoptions.inputtis || sfxmapoptions.delspranges > 0)
   {
     demand |= SARR_ESQTAB;
   }
@@ -175,87 +226,94 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
   }
   if (suffixarray.encseq != NULL)
   {
-    if (!haserr)
+    if (sfxmapoptions.delspranges > 0)
     {
-      int readmode;
+      deletethespranges(suffixarray.encseq,suffixarray.alpha,
+                        sfxmapoptions.delspranges);
+    } else
+    {
+      if (!haserr)
+      {
+	int readmode;
 
-      for (readmode = 0; readmode < 4; readmode++)
-      {
-        if (isdnaalphabet(suffixarray.alpha) ||
-           ((Readmode) readmode) == Forwardmode ||
-           ((Readmode) readmode) == Reversemode)
-        {
-          showverbose(verboseinfo,"testencodedsequence(readmode=%s)",
-                                  showreadmode((Readmode) readmode));
-          if (testencodedsequence(suffixarray.filenametab,
-                                  suffixarray.encseq,
-                                  (Readmode) readmode,
-                                  getsymbolmapAlphabet(suffixarray.alpha),
-                                  sfxmapoptions.scantrials,
-                                  sfxmapoptions.multicharcmptrials,
-                                  err) != 0)
-          {
-            haserr = true;
-            break;
-          }
-        }
+	for (readmode = 0; readmode < 4; readmode++)
+	{
+	  if (isdnaalphabet(suffixarray.alpha) ||
+	     ((Readmode) readmode) == Forwardmode ||
+	     ((Readmode) readmode) == Reversemode)
+	  {
+	    showverbose(verboseinfo,"testencodedsequence(readmode=%s)",
+				    showreadmode((Readmode) readmode));
+	    if (testencodedsequence(suffixarray.filenametab,
+				    suffixarray.encseq,
+				    (Readmode) readmode,
+				    getsymbolmapAlphabet(suffixarray.alpha),
+				    sfxmapoptions.scantrials,
+				    sfxmapoptions.multicharcmptrials,
+				    err) != 0)
+	    {
+	      haserr = true;
+	      break;
+	    }
+	  }
+	}
       }
-    }
-    if (!haserr)
-    {
-      showverbose(verboseinfo,"checkspecialrangesfast");
-      if (checkspecialrangesfast(suffixarray.encseq) != 0)
+      if (!haserr)
       {
-        haserr = true;
+	showverbose(verboseinfo,"checkspecialrangesfast");
+	if (checkspecialrangesfast(suffixarray.encseq) != 0)
+	{
+	  haserr = true;
+	}
       }
-    }
-    if (!haserr)
-    {
-      showverbose(verboseinfo,"checkmarkpos");
-      if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,
-                       err) != 0)
+      if (!haserr)
       {
-        haserr = true;
+	showverbose(verboseinfo,"checkmarkpos");
+	if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,
+			 err) != 0)
+	{
+	  haserr = true;
+	}
       }
-    }
-    if (!haserr && suffixarray.readmode == Forwardmode &&
-        suffixarray.prefixlength > 0)
-    {
-      showverbose(verboseinfo,"verifymappedstr");
-      if (verifymappedstr(&suffixarray,err) != 0)
+      if (!haserr && suffixarray.readmode == Forwardmode &&
+	  suffixarray.prefixlength > 0)
       {
-        haserr = true;
+	showverbose(verboseinfo,"verifymappedstr");
+	if (verifymappedstr(&suffixarray,err) != 0)
+	{
+	  haserr = true;
+	}
       }
-    }
-    if (!haserr && sfxmapoptions.inputsuf && !sfxmapoptions.usestream)
-    {
-      Sequentialsuffixarrayreader *ssar;
+      if (!haserr && sfxmapoptions.inputsuf && !sfxmapoptions.usestream)
+      {
+	Sequentialsuffixarrayreader *ssar;
 
-      if (sfxmapoptions.inputlcp)
-      {
-        ssar = newSequentialsuffixarrayreaderfromfile(indexname,
-                                                      SARR_LCPTAB,
-                                                      SEQ_scan,
-                                                      err);
-      } else
-      {
-        ssar = NULL;
+	if (sfxmapoptions.inputlcp)
+	{
+	  ssar = newSequentialsuffixarrayreaderfromfile(indexname,
+							SARR_LCPTAB,
+							SEQ_scan,
+							err);
+	} else
+	{
+	  ssar = NULL;
+	}
+	showverbose(verboseinfo,"checkentiresuftab");
+	checkentiresuftab(suffixarray.encseq,
+			  suffixarray.readmode,
+			  getcharactersAlphabet(suffixarray.alpha),
+			  suffixarray.suftab,
+			  ssar,
+			  false, /* specialsareequal  */
+			  false,  /* specialsareequalatdepth0 */
+			  0,
+			  err);
+	if (ssar != NULL)
+	{
+	  freeSequentialsuffixarrayreader(&ssar);
+	}
+	showverbose(verboseinfo,"okay");
       }
-      showverbose(verboseinfo,"checkentiresuftab");
-      checkentiresuftab(suffixarray.encseq,
-                        suffixarray.readmode,
-                        getcharactersAlphabet(suffixarray.alpha),
-                        suffixarray.suftab,
-                        ssar,
-                        false, /* specialsareequal  */
-                        false,  /* specialsareequalatdepth0 */
-                        0,
-                        err);
-      if (ssar != NULL)
-      {
-        freeSequentialsuffixarrayreader(&ssar);
-      }
-      showverbose(verboseinfo,"okay");
     }
   }
   if (sfxmapoptions.inputdes && !haserr)

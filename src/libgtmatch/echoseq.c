@@ -148,7 +148,7 @@ void encseq2symbolstring(FILE *fpout,
                          const Encodedsequence *encseq,
                          Readmode readmode,
                          Seqpos start,
-                         unsigned long wlen,
+                         Seqpos wlen,
                          unsigned long width)
 {
   unsigned long j;
@@ -195,7 +195,7 @@ void encseq2fastaoutput(FILE *fpout,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         Seqpos start,
-                        unsigned long wlen,
+                        Seqpos wlen,
                         unsigned long width)
 {
   assert(width > 0);

@@ -47,6 +47,7 @@ eis-sequencemultiread.c
 eis-suffixarray-interface.c
 eis-suffixerator-interface.c
 eis-suffixeratorreader.c
+eis-voiditf.c
 encodedseq.c
 encseq-specialsrank.c
 enum-patt.c
@@ -62,6 +63,7 @@ measure-time.c
 merger-trie.c
 optionargmode.c
 overallseq.c
+nullcols.c
 sfx-bentsedg.c
 sfx-enumcodes.c
 sfx-input.c

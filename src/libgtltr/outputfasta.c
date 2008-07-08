@@ -66,7 +66,7 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                          const Encodedsequence *encseq,
                          Readmode readmode,
                          Seqpos start,
-                         unsigned long wlen,
+                         Seqpos wlen,
                          unsigned long width)
 {
   Seqpos offset;
@@ -97,7 +97,7 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                        /* increase by one for output */
                        PRINTSeqposcast(start - offset + 1),
                        /* increase by one for output */
-                       PRINTSeqposcast(start - offset + (Seqpos)wlen) );
+                       PRINTSeqposcast(start - offset + wlen));
   encseq2symbolstring(fpout,
                       alpha,
                       encseq,
@@ -133,7 +133,7 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                       seqnum, destab_seqnum,
                       info->alpha, info->encseq,
                       Forwardmode, startpos,
-                      (unsigned long)len,
+                      len,
                       60UL);
   FREESPACE(destab_seqnum);
   return 0;
