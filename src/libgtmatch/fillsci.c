@@ -31,8 +31,8 @@
 
 #include "opensfxfile.pr"
 
-static unsigned long currentrangevalue(unsigned long len,
-                                       unsigned long occcount)
+static unsigned long currentspecialrangevalue(unsigned long len,
+                                              unsigned long occcount)
 {
   if (len <= (unsigned long) (UCHAR_MAX+1))
   {
@@ -59,7 +59,8 @@ static void updatesumranges(unsigned long key, unsigned long long value,
   Updatesumrangeinfo *updatesumrangeinfo = (Updatesumrangeinfo *) data;
 
   distvalue = (unsigned long) value; /* XXX: is this cast always OK? */
-  (*updatesumrangeinfo->specialrangesptr) += currentrangevalue(key,distvalue);
+  (*updatesumrangeinfo->specialrangesptr) 
+     += currentspecialrangevalue(key,distvalue);
   (*updatesumrangeinfo->realspecialrangesptr) += (unsigned long) distvalue;
   showverbose(updatesumrangeinfo->verboseinfo,
               "specialranges of length %lu: %lu",key,distvalue);

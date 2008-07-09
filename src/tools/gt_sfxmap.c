@@ -60,17 +60,25 @@ static void deletethespranges(const Encodedsequence *encseq,
   {
     assert (range.rightpos > range.leftpos);
     rangewidth = range.rightpos - range.leftpos;
-    if (rangewidth > (Seqpos) delspranges && range.leftpos > nextpos)
+    if (rangewidth > (Seqpos) delspranges)
     {
-      encseq2symbolstring(stdout,
-                          alpha,
-                          encseq,
-                          Forwardmode,
-                          nextpos,
-                          range.leftpos + delspranges - nextpos,
-                          fastawidth);
-      printf(">\n");
-      nextpos = range.rightpos;
+      if (range.leftpos == 0)
+      {
+        nextpos = range.rightpos;
+      } else
+      {
+        if (range.leftpos > nextpos)
+        {
+          encseq2symbolstring(stdout,
+                              alpha,
+                              encseq,
+                              Forwardmode,
+                              nextpos,
+                              range.leftpos + delspranges - nextpos,
+                              fastawidth);
+          nextpos = range.rightpos;
+        }
+      }
     }
   }
   totallength = getencseqtotallength(encseq);
