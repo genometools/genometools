@@ -1,87 +1,87 @@
-Name "gt filter test 1 (no filter)"
+Name "gt filter test (no filter)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
 end
 
-Name "gt filter test 2 (-seqid ctg123)"
+Name "gt filter test (-seqid ctg123)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -seqid ctg123 #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
 end
 
-Name "gt filter test 3 (-seqid undef)"
+Name "gt filter test (-seqid undef)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -seqid undef #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}empty_file"
 end
 
-Name "gt filter test 4 (-maxgenelength)"
+Name "gt filter test (-maxgenelength)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -maxgenelength 8001 #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
 end
 
-Name "gt filter test 5 (-maxgenelength)"
+Name "gt filter test (-maxgenelength)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -maxgenelength 8000 #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
 end
 
-Name "gt filter test 6 (-mingenescore)"
+Name "gt filter test (-mingenescore)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -mingenescore .5 #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
 end
 
-Name "gt filter test 7 (-mingenescore)"
+Name "gt filter test (-mingenescore)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -mingenescore .6 #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
 end
 
-Name "gt filter test 8 (-maxgenenum)"
+Name "gt filter test (-maxgenenum)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -maxgenenum 1 #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
 end
 
-Name "gt filter test 9 (-maxgenenum)"
+Name "gt filter test (-maxgenenum)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -maxgenenum 0 #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
 end
-Name "gt filter test 9 (-maxgenenum)"
+Name "gt filter test (-maxgenenum)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -maxgenenum 0 #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
 end
 
-Name "gt filter test 10 (-strand)"
+Name "gt filter test (-strand)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -strand + #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
 end
 
-Name "gt filter test 11 (-strand)"
+Name "gt filter test (-strand)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -strand - #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
 end
 
-Name "gt filter test 12 (-strand)"
+Name "gt filter test (-strand)"
 Keywords "gt_filter"
 Test do
   run_test("#{$bin}gt filter -strand foo #{$testdata}standard_gene_as_tree.gff3",
@@ -89,7 +89,7 @@ Test do
   grep $last_stderr, /must be one of/
 end
 
-Name "gt filter test 13 (-overlap)"
+Name "gt filter test (-overlap)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -overlap 2000 3000 " +
@@ -97,7 +97,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
 end
 
-Name "gt filter test 14 (-overlap)"
+Name "gt filter test (-overlap)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -overlap 9001 10000 " +
@@ -105,7 +105,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
 end
 
-Name "gt filter test 15 (-minaveragessp)"
+Name "gt filter test (-minaveragessp)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -minaveragessp 0.5 " +
@@ -113,7 +113,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}splice_site_prob.out"
 end
 
-Name "gt filter test 16 (-minaveragessp)"
+Name "gt filter test (-minaveragessp)"
 Keywords "gt_filter"
 Test do
   run_test "#{$bin}gt filter -minaveragessp 0.35 " +
@@ -121,7 +121,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}splice_site_prob.gff3"
 end
 
-Name "gt filter test 17 (-hascds)"
+Name "gt filter test (-hascds)"
 Keywords "gt_filter"
 Test do
   run_test("#{$bin}gt filter -hascds " +
@@ -130,7 +130,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_filter_encode.out"
 end
 
-Name "gt filter test 18 (-contain)"
+Name "gt filter test (-contain)"
 Keywords "gt_filter contain"
 Test do
   run_test "#{$bin}gt filter -contain 1000 9000 " +
@@ -138,7 +138,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_filter_test_contain.1000-9000"
 end
 
-Name "gt filter test 19 (-contain)"
+Name "gt filter test (-contain)"
 Keywords "gt_filter contain"
 Test do
   run_test "#{$bin}gt filter -contain 1001 9000 " +
@@ -146,7 +146,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_filter_test_contain.1001-9000"
 end
 
-Name "gt filter test 20 (-contain)"
+Name "gt filter test (-contain)"
 Keywords "gt_filter contain"
 Test do
   run_test "#{$bin}gt filter -contain 1000 8999 " +
@@ -154,7 +154,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_filter_test_contain.1000-8999"
 end
 
-Name "gt filter test 21 (-contain)"
+Name "gt filter test (-contain)"
 Keywords "gt_filter contain"
 Test do
   run_test "#{$bin}gt filter -contain 1500000 1600000 " +
@@ -162,14 +162,14 @@ Test do
   run "diff #{$last_stdout} #{$testdata}empty_file"
 end
 
-Name "gt filter test 22 (-targetstrand)"
+Name "gt filter test (-targetstrand)"
 Keywords "gt_filter targetstrand"
 Test do
   run_test "#{$bin}gt filter -targetstrand - #{$testdata}U89959_sas.gff3"
   run "diff #{$last_stdout} #{$testdata}U89959_sas.minus_targets"
 end
 
-Name "gt filter test 23 (-targetstrand)"
+Name "gt filter test (-targetstrand)"
 Keywords "gt_filter targetstrand"
 Test do
   run_test "#{$bin}gt filter -targetstrand + " +
@@ -177,7 +177,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}target_attribute_without_strand.gff3"
 end
 
-Name "gt filter test 24 (-targetbest, simple)"
+Name "gt filter test (-targetbest, simple)"
 Keywords "gt_filter targetbest"
 Test do
   run_test "#{$bin}gt filter -targetbest " +
@@ -185,7 +185,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}filter_targetbest_simple_test.out"
 end
 
-Name "gt filter test 25 (-targetbest, complex)"
+Name "gt filter test (-targetbest, complex)"
 Keywords "gt_filter targetbest"
 Test do
   run_test "#{$bin}gt filter -targetbest " +
@@ -193,7 +193,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}filter_targetbest_complex_test.out"
 end
 
-Name "gt filter test 26 (-targetbest, corrupt file)"
+Name "gt filter test (-targetbest, corrupt file)"
 Keywords "gt_filter targetbest"
 Test do
   run_test("#{$bin}gt filter -targetbest #{$testdata}corrupt_large.gff3",
@@ -201,7 +201,7 @@ Test do
   grep $last_stderr, "not a valid character"
 end
 
-Name "gt filter test 27 (-targetbest, multiple targets)"
+Name "gt filter test (-targetbest, multiple targets)"
 Keywords "gt_filter targetbest"
 Test do
   run_test "#{$bin}gt filter -targetbest " +
