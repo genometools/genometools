@@ -71,7 +71,7 @@ static void sort_stream_free(GenomeStream *gs)
 {
   unsigned long i;
   SortStream *sort_stream = sort_stream_cast(gs);
-  for (i = 0; i < array_size(sort_stream->trees); i++)
+  for (i = sort_stream->idx; i < array_size(sort_stream->trees); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(sort_stream->trees, i));
   array_delete(sort_stream->trees);
   genome_stream_delete(sort_stream->in_stream);
