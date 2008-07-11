@@ -36,7 +36,9 @@ struct FilterVisitor {
   bool has_CDS;
   unsigned long max_gene_length,
                 gene_num,     /* the number of passed genes */
-                max_gene_num; /* the maximal number of genes which can pass */
+                max_gene_num, /* the maximal number of genes which can pass */
+                current_feature,
+                feature_num;
   double min_gene_score,
          max_gene_score,
          min_average_splice_site_prob;
@@ -138,6 +140,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   bool filter_node = false;
   error_check(err);
   fv = filter_visitor_cast(gv);
+  fv->current_feature++;
   if (!str_length(fv->seqid) || /* no seqid was specified or seqids are equal */
       !str_cmp(fv->seqid, genome_node_get_seqid((GenomeNode*) gf))) {
     /* enforce maximum gene length */
@@ -158,6 +161,10 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       }
       else if (fv->max_gene_score != UNDEF_DOUBLE &&
                genome_feature_get_score(gf) > fv->max_gene_score) {
+        filter_node = true;
+      }
+      else if (fv->feature_num != UNDEF_ULONG &&
+               fv->feature_num != fv->current_feature) {
         filter_node = true;
       }
       if (!filter_node)
@@ -238,7 +245,8 @@ GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
                                   bool has_CDS, unsigned long max_gene_length,
                                   unsigned long max_gene_num,
                                   double min_gene_score, double max_gene_score,
-                                  double min_average_splice_site_prob)
+                                  double min_average_splice_site_prob,
+                                  unsigned long feature_num)
 {
   GenomeVisitor *gv = genome_visitor_create(filter_visitor_class());
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
@@ -256,6 +264,7 @@ GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
   filter_visitor->min_gene_score = min_gene_score;
   filter_visitor->max_gene_score = max_gene_score;
   filter_visitor->min_average_splice_site_prob = min_average_splice_site_prob;
+  filter_visitor->feature_num = feature_num;
   return gv;
 }
 

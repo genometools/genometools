@@ -33,6 +33,7 @@ GenomeStream*            filter_stream_new(GenomeStream*,
                                            unsigned long max_gene_num,
                                            double min_gene_score,
                                            double max_gene_score,
-                                           double min_average_splice_site_prob);
+                                           double min_average_splice_site_prob,
+                                           unsigned long feature_num);
 
 #endif

@@ -42,7 +42,8 @@ typedef struct {
   Strand strand,
          targetstrand;
   unsigned long max_gene_length,
-                max_gene_num;
+                max_gene_num,
+                feature_num;
   double min_gene_score,
          max_gene_score,
          min_average_splice_site_prob;
@@ -175,6 +176,13 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
                                   UNDEF_DOUBLE);
   option_parser_add_option(op, option);
 
+  /* -featurenum */
+  option = option_new_ulong_min("featurenum", "select feature tree occurring "
+                                "at given position in input",
+                                &arguments->feature_num, UNDEF_ULONG, 1);
+  option_is_development_option(option);
+  option_parser_add_option(op, option);
+
   /* -v */
   option = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, option);
@@ -253,7 +261,8 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
                                     arguments->max_gene_num,
                                     arguments->min_gene_score,
                                     arguments->max_gene_score,
-                                    arguments->min_average_splice_site_prob);
+                                    arguments->min_average_splice_site_prob,
+                                    arguments->feature_num);
 
   if (arguments->targetbest)
     targetbest_filter_stream = targetbest_filter_stream_new(filter_stream);
