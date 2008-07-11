@@ -34,14 +34,15 @@ struct SortStream
 static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
 {
   SortStream *sort_stream;
+  GenomeNode *node;
   int had_err = 0;
   error_check(err);
   sort_stream = sort_stream_cast(gs);
 
   if (!sort_stream->sorted) {
-    while (!(had_err = genome_stream_next_tree(sort_stream->in_stream, gn, err))
-           && *gn) {
-      array_add(sort_stream->trees, *gn);
+    while (!(had_err = genome_stream_next_tree(sort_stream->in_stream, &node,
+                                               err)) && node) {
+      array_add(sort_stream->trees, node);
     }
     if (!had_err) {
       genome_nodes_sort_stable(sort_stream->trees);
