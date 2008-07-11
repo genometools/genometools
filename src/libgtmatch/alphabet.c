@@ -44,7 +44,7 @@
                                      /* mapping to [0..mapsize-1] */
                mappedwildcards;      /* number of mapped wildcards */
   Uchar wildcardshow,
-        symbolmap[UCHAR_MAX+1],      /* mapping of the symbols */
+        symbolmap[MAXALPHABETCHARACTER+1], /* mapping of the symbols */
         *mapdomain,                  /* list of characters mapped */
         *characters;                 /* array of characters to show */
 };
@@ -148,7 +148,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
 
   error_check(err);
   alpha->domainsize = alpha->mapsize = alpha->mappedwildcards = 0;
-  for (cnum=0; cnum<=UCHAR_MAX; cnum++)
+  for (cnum=0; cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
   {
     alpha->symbolmap[cnum] = (Uchar) UNDEFCHAR;
   }
@@ -247,7 +247,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
   }
   if (!haserr)
   {
-    for (cnum=0;cnum<=UCHAR_MAX; cnum++)
+    for (cnum=0;cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
     {
       if (alpha->symbolmap[cnum] == (Uchar) (alpha->mapsize - 1))
       {
@@ -290,7 +290,7 @@ static void assignDNAsymbolmap(Uchar *symbolmap)
 {
   unsigned int cnum;
 
-  for (cnum=0; cnum<=(unsigned int) UCHAR_MAX; cnum++)
+  for (cnum=0; cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
   {
     symbolmap[cnum] = (Uchar) UNDEFCHAR;
   }
@@ -341,7 +341,7 @@ static void assignproteinsymbolmap(Uchar *symbolmap)
 {
   unsigned int cnum;
 
-  for (cnum=0; cnum<=(unsigned int) UCHAR_MAX; cnum++)
+  for (cnum=0; cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
   {
     symbolmap[cnum] = (Uchar) UNDEFCHAR;
   }
@@ -684,8 +684,8 @@ bool isproteinalphabet(const Alphabet *alpha)
   Alphabet proteinalphabet;
   unsigned int i, reduceddomainsize1, reduceddomainsize2;
   bool isprot = false;
-  Uchar domainbuf1[UCHAR_MAX+1],
-        domainbuf2[UCHAR_MAX+1];
+  Uchar domainbuf1[MAXALPHABETCHARACTER+1],
+        domainbuf2[MAXALPHABETCHARACTER+1];
 
   reduceddomainsize1 = removelowercaseproteinchars(&domainbuf1[0],alpha);
   assignProteinalphabet(&proteinalphabet);
@@ -755,7 +755,7 @@ bool isdnaalphabet(const Alphabet *alpha)
   }
   if (alpha->mapsize == MAPSIZEDNA)
   {
-    Uchar dnasymbolmap[UCHAR_MAX+1];
+    Uchar dnasymbolmap[MAXALPHABETCHARACTER+1];
 
     assignDNAsymbolmap(&dnasymbolmap[0]);
     if (checksymbolmap(alpha->symbolmap,&dnasymbolmap[0],"acgt"))

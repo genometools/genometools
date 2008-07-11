@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_LCPVAL_H
-#define SFX_LCPVAL_H
+#ifndef ESA_LCPVAL_H
+#define ESA_LCPVAL_H
 
 #include "seqpos-def.h"
 #include "readmode-def.h"

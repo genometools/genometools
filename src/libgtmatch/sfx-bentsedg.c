@@ -31,12 +31,13 @@
 #include "sfx-outlcp.h"
 #include "bcktab.h"
 #include "bltrie-ssort.h"
+#include "lcpoverflow.h"
 
 #include "sfx-cmpsuf.pr"
 #include "opensfxfile.pr"
 #include "kmer2string.pr"
 
-#define COMPAREOFFSET   (UCHAR_MAX + 1)
+#define COMPAREOFFSET   (MAXALPHABETCHARACTER + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
 #define ACCESSCHAR(POS) getencodedchar(encseq,POS,readmode) /* XXX */
 #define ISNOTEND(POS)   ((POS) < totallength && ISNOTSPECIAL(ACCESSCHAR(POS)))
@@ -1288,14 +1289,14 @@ static void multilcpvalue(Outlcpinfo *outlcpinfo,
     {
       outlcpinfo->maxbranchdepth = lcpvalue;
     }
-    if (lcpvalue >= (Seqpos) UCHAR_MAX)
+    if (lcpvalue >= (Seqpos) LCPOVERFLOW)
     {
       outlcpinfo->numoflargelcpvalues++;
       GETNEXTFREEINARRAY(largelcpvalueptr,&outlcpinfo->lcpsubtab.largelcpvalues,
                          Largelcpvalue,32);
       largelcpvalueptr->position = posoffset+i;
       largelcpvalueptr->value = lcpvalue;
-      outlcpinfo->lcpsubtab.smalllcpvalues[i] = (Uchar) UCHAR_MAX;
+      outlcpinfo->lcpsubtab.smalllcpvalues[i] = LCPOVERFLOW;
     } else
     {
       outlcpinfo->lcpsubtab.smalllcpvalues[i] = (Uchar) lcpvalue;

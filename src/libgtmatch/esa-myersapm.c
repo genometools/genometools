@@ -22,6 +22,7 @@
 #include "encseq-def.h"
 #include "esa-myersapm.h"
 #include "defined-types.h"
+#include "alphadef.h"
 #include "esa-limdfs.h" /* XXX import esa_findshortestmatch */
 
 struct Myersonlineresources
@@ -74,7 +75,7 @@ Myersonlineresources *newMyersonlineresources(
   ALLOCASSIGNSPACE(mor->eqsvectorrev,NULL,unsigned long,mapsize-1);
   mor->encseq = encseq;
   mor->esr = newEncodedsequencescanstate();
-  assert(mapsize > 0 && mapsize-1 <= UCHAR_MAX);
+  assert(mapsize > 0 && mapsize-1 <= MAXALPHABETCHARACTER);
   mor->alphasize = mapsize-1;
   mor->totallength = getencseqtotallength(encseq);
   mor->nospecials = nospecials;

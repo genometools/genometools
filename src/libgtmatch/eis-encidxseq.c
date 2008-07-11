@@ -131,7 +131,7 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
         return -1;
       }
       fseeko(bwtFP, skip, SEEK_SET);
-      for (sym = 0; sym <= UCHAR_MAX; ++sym)
+      for (sym = 0; sym <= (unsigned) MAXALPHABETCHARACTER; ++sym)
         if (MRAEncSymbolHasValidMapping(alphabet, sym))
           rankTable[sym] = EISRank(seqIdx, sym, skip, hint);
       pos = skip;

@@ -391,7 +391,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->bwci.allocatedBoundswithchar
     = (unsigned long) mapsize;
   INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
-  assert(mapsize-1 <= UCHAR_MAX);
+  assert(mapsize-1 <= MAXALPHABETCHARACTER);
   limdfsresources->alphasize = (Uchar) (mapsize-1);
   limdfsresources->processmatch = processmatch;
   limdfsresources->processmatchinfo = processmatchinfo;

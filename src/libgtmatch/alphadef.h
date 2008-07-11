@@ -18,9 +18,12 @@
 #ifndef ALPHADEF_H
 #define ALPHADEF_H
 
+#include <limits.h>
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
+
+#define MAXALPHABETCHARACTER UCHAR_MAX
 
 /*
   The following type is for storing alphabets.

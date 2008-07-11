@@ -18,6 +18,7 @@
 #include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
 #include "encseq-def.h"
+#include "lcpoverflow.h"
 
 int comparetwosuffixes(const Encodedsequence *encseq,
                        Readmode readmode,
@@ -132,7 +133,7 @@ int comparetwosuffixes(const Encodedsequence *encseq,
   return retval;
 }
 
-#define COMPAREOFFSET   (UCHAR_MAX + 1)
+#define COMPAREOFFSET   (LCPOVERFLOW + 1)
 
 static Seqpos extractsinglecharacter(const Encodedsequence *encseq,
                                      bool fwd,

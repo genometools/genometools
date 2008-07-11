@@ -28,28 +28,30 @@
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "safecast-gen.h"
+#include "stamp.h"
 
 #include "opensfxfile.pr"
 
-static unsigned long currentspecialrangevalue(unsigned long len,
-                                              unsigned long occcount)
+static unsigned long currentspecialrangevalue(
+                             unsigned long len,
+                             unsigned long occcount,
+                             unsigned long overflowspecialrangelength)
 {
-  if (len <= (unsigned long) (UCHAR_MAX+1))
+  if (len <= (unsigned long) (overflowspecialrangelength+1))
   {
     return occcount;
   }
-  if (len % (UCHAR_MAX+1) == 0)
+  if (len % (overflowspecialrangelength+1) == 0)
   {
-    return len/(UCHAR_MAX+1) * occcount;
+    return len/(overflowspecialrangelength+1) * occcount;
   }
-  return (1UL + len/(UCHAR_MAX+1)) * occcount;
+  return (1UL + len/(overflowspecialrangelength+1)) * occcount;
 }
 
 typedef struct
 {
   Verboseinfo *verboseinfo;
-  Seqpos *specialrangesptr,
-         *realspecialrangesptr;
+  Seqpos specialrangesUchar, realspecialranges;
 } Updatesumrangeinfo;
 
 static void updatesumranges(unsigned long key, unsigned long long value,
@@ -59,9 +61,9 @@ static void updatesumranges(unsigned long key, unsigned long long value,
   Updatesumrangeinfo *updatesumrangeinfo = (Updatesumrangeinfo *) data;
 
   distvalue = (unsigned long) value; /* XXX: is this cast always OK? */
-  (*updatesumrangeinfo->specialrangesptr) 
-     += currentspecialrangevalue(key,distvalue);
-  (*updatesumrangeinfo->realspecialrangesptr) += (unsigned long) distvalue;
+  updatesumrangeinfo->specialrangesUchar
+     += currentspecialrangevalue(key,distvalue,(unsigned long) UCHAR_MAX);
+  updatesumrangeinfo->realspecialranges += distvalue;
   showverbose(updatesumrangeinfo->verboseinfo,
               "specialranges of length %lu: %lu",key,distvalue);
 }
@@ -198,15 +200,13 @@ int fasta2sequencekeyvalues(
       (void) putc((int) '\n',desfp);
       FREESPACE(desc);
     }
-    specialcharinfo->specialranges = 0;
-    specialcharinfo->realspecialranges = 0;
-    updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
-    updatesumrangeinfo.realspecialrangesptr
-      = &specialcharinfo->realspecialranges;
+    updatesumrangeinfo.specialrangesUchar = 0;
+    updatesumrangeinfo.realspecialranges = 0;
     updatesumrangeinfo.verboseinfo = verboseinfo;
-    disc_distri_foreach(distspralen,updatesumranges,
-                       &updatesumrangeinfo);
+    disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
+    specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUchar;
+    specialcharinfo->realspecialranges = updatesumrangeinfo.realspecialranges;
     (*numofsequences)++;
     *totallength = pos;
   }
@@ -270,12 +270,12 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
     idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
     disc_distri_add(distspralen,idx);
   }
-  specialcharinfo->specialranges = 0;
-  specialcharinfo->realspecialranges = 0;
-  updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
-  updatesumrangeinfo.realspecialrangesptr = &specialcharinfo->realspecialranges;
+  updatesumrangeinfo.specialrangesUchar = 0;
+  updatesumrangeinfo.realspecialranges = 0;
   updatesumrangeinfo.verboseinfo = verboseinfo;
   disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
+  specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUchar;
+  specialcharinfo->realspecialranges = updatesumrangeinfo.realspecialranges;
   disc_distri_delete(distspralen);
 }

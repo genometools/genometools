@@ -154,6 +154,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
                        NULL);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->totallength = totallength;
+  encseq->overflowspecialrangelength = UCHAR_MAX;
   if (fillplainseq(encseq,fb,err) != 0)
   {
     freeEncodedsequence(&encseq);
@@ -183,6 +184,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
   str_delete(tmpfilename);
   encseq->hasownmemory = false;
   encseq->mappedfile = true;
+  encseq->overflowspecialrangelength = UCHAR_MAX;
   encseq->hasspecialcharacters = (specialranges > 0) ?  true : false;
   return encseq;
 }
@@ -215,7 +217,9 @@ Encodedsequence *plain2encodedsequence(
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,verboseinfo);
+  sequence2specialcharinfo(specialcharinfo,seqptr,len,
+                           (unsigned long) UCHAR_MAX,
+                           verboseinfo);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,1);
   encseq->plainseq = seqptr;
   encseq->mappedfile = false;

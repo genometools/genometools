@@ -19,7 +19,8 @@
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "esa-seqread.h"
-#include "sfx-lcpval.h"
+#include "esa-lcpval.h"
+#include "lcpoverflow.h"
 
 #include "esa-map.pr"
 
@@ -232,7 +233,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
         return 0;
       }
     }
-    if (tmpsmalllcpvalue == (Uchar) UCHAR_MAX)
+    if (tmpsmalllcpvalue == LCPOVERFLOW)
     {
       Largelcpvalue tmpexception;
 

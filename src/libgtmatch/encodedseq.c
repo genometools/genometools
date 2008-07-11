@@ -148,6 +148,7 @@ typedef uint32_t Uint32;
   Uchar(*seqdeliverchar)(const Encodedsequence *,
                          Encodedsequencescanstate *,Seqpos);
   const char *seqdelivercharname;
+  Uchar overflowspecialrangelength;
   unsigned long *characterdistribution;
 
   /* only for Viabitaccess,
@@ -1792,6 +1793,7 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->uint32specialpositions = NULL;
   encseq->uint32endspecialsubsUint = NULL;
   encseq->characterdistribution = NULL;
+  encseq->overflowspecialrangelength = (Uchar) UCHAR_MAX;
 
   spaceinbitsperchar
     = (double) ((uint64_t) CHAR_BIT * (uint64_t) encseq->sizeofrep)/
@@ -2108,7 +2110,8 @@ Encodedsequence *plain2encodedsequence(bool withrange,
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,verboseinfo);
+  sequence2specialcharinfo(specialcharinfo,seqptr,len,
+                           verboseinfo);
   encseq = determineencseqkeyvalues(sat,
                                     len,
                                     specialcharinfo->specialranges,

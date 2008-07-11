@@ -23,6 +23,7 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "sarr-def.h"
+#include "lcpoverflow.h"
 
 typedef enum
 {
@@ -50,7 +51,7 @@ typedef struct
         {\
           tmpsmalllcpvalue\
             = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
-          if (tmpsmalllcpvalue == (Uchar) UCHAR_MAX)\
+          if (tmpsmalllcpvalue == LCPOVERFLOW)\
           {\
             VALUE = (SSAR)->suffixarray->llvtab[\
                     (SSAR)->largelcpindex++].value;\

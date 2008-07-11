@@ -23,6 +23,7 @@
 #include "emimergeesa.h"
 #include "encseq-def.h"
 #include "merger-trie.h"
+#include "lcpoverflow.h"
 #include "verbose-def.h"
 
 #include "esa-map.pr"
@@ -183,7 +184,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Error *err)
                         "reading lcptab",__FILE__,__LINE__);
         return -2;
       }
-      if (tmpsmalllcpvalue == (Uchar) UCHAR_MAX)
+      if (tmpsmalllcpvalue == LCPOVERFLOW)
       {
         retval = readnextLargelcpvaluefromstream(
                                &tmpexception,

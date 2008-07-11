@@ -24,6 +24,7 @@
 #include "emimergeesa.h"
 #include "esafileend.h"
 #include "verbose-def.h"
+#include "lcpoverflow.h"
 
 #include "esa-merge.pr"
 #include "encseq2offset.pr"
@@ -108,7 +109,7 @@ static int outputsuflcpllv(void *processinfo,
     for (i=0; i<lastindex; i++)
     {
       lcpvalue = buf->lcptabstore[i];
-      if (lcpvalue < (Seqpos) UCHAR_MAX)
+      if (lcpvalue < (Seqpos) LCPOVERFLOW)
       {
         smallvalue = (Uchar) lcpvalue;
       } else
@@ -124,7 +125,7 @@ static int outputsuflcpllv(void *processinfo,
           haserr = true;
           break;
         }
-        smallvalue = (Uchar) UCHAR_MAX;
+        smallvalue = LCPOVERFLOW;
       }
       if (fwrite(&smallvalue,sizeof (Uchar),(size_t) 1,
                 mergeoutinfo->outlcp.fp) != (size_t) 1)

@@ -56,6 +56,7 @@ esa-mmsearch.c
 esa-myersapm.c
 esa-seqread.c
 esa-splititv.c
+esa-lcpval.c
 greedyfwdmat.c
 inl-encseq.c
 mapspec-gen.c

@@ -116,7 +116,6 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                                  &sfxmapoptions->usestream,false);
   option_parser_add_option(op, optionstream);
 
-
   optionscantrials = option_new_ulong("scantrials",
                                       "specify number of scan trials",
                                       &sfxmapoptions->scantrials,0);
@@ -242,85 +241,85 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
     {
       if (!haserr)
       {
-	int readmode;
+        int readmode;
 
-	for (readmode = 0; readmode < 4; readmode++)
-	{
-	  if (isdnaalphabet(suffixarray.alpha) ||
-	     ((Readmode) readmode) == Forwardmode ||
-	     ((Readmode) readmode) == Reversemode)
-	  {
-	    showverbose(verboseinfo,"testencodedsequence(readmode=%s)",
-				    showreadmode((Readmode) readmode));
-	    if (testencodedsequence(suffixarray.filenametab,
-				    suffixarray.encseq,
-				    (Readmode) readmode,
-				    getsymbolmapAlphabet(suffixarray.alpha),
-				    sfxmapoptions.scantrials,
-				    sfxmapoptions.multicharcmptrials,
-				    err) != 0)
-	    {
-	      haserr = true;
-	      break;
-	    }
-	  }
-	}
+        for (readmode = 0; readmode < 4; readmode++)
+        {
+          if (isdnaalphabet(suffixarray.alpha) ||
+             ((Readmode) readmode) == Forwardmode ||
+             ((Readmode) readmode) == Reversemode)
+          {
+            showverbose(verboseinfo,"testencodedsequence(readmode=%s)",
+                                    showreadmode((Readmode) readmode));
+            if (testencodedsequence(suffixarray.filenametab,
+                                    suffixarray.encseq,
+                                    (Readmode) readmode,
+                                    getsymbolmapAlphabet(suffixarray.alpha),
+                                    sfxmapoptions.scantrials,
+                                    sfxmapoptions.multicharcmptrials,
+                                    err) != 0)
+            {
+              haserr = true;
+              break;
+            }
+          }
+        }
       }
       if (!haserr)
       {
-	showverbose(verboseinfo,"checkspecialrangesfast");
-	if (checkspecialrangesfast(suffixarray.encseq) != 0)
-	{
-	  haserr = true;
-	}
+        showverbose(verboseinfo,"checkspecialrangesfast");
+        if (checkspecialrangesfast(suffixarray.encseq) != 0)
+        {
+          haserr = true;
+        }
       }
       if (!haserr)
       {
-	showverbose(verboseinfo,"checkmarkpos");
-	if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,
-			 err) != 0)
-	{
-	  haserr = true;
-	}
+        showverbose(verboseinfo,"checkmarkpos");
+        if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,
+                         err) != 0)
+        {
+          haserr = true;
+        }
       }
       if (!haserr && suffixarray.readmode == Forwardmode &&
-	  suffixarray.prefixlength > 0)
+          suffixarray.prefixlength > 0)
       {
-	showverbose(verboseinfo,"verifymappedstr");
-	if (verifymappedstr(&suffixarray,err) != 0)
-	{
-	  haserr = true;
-	}
+        showverbose(verboseinfo,"verifymappedstr");
+        if (verifymappedstr(&suffixarray,err) != 0)
+        {
+          haserr = true;
+        }
       }
       if (!haserr && sfxmapoptions.inputsuf && !sfxmapoptions.usestream)
       {
-	Sequentialsuffixarrayreader *ssar;
+        Sequentialsuffixarrayreader *ssar;
 
-	if (sfxmapoptions.inputlcp)
-	{
-	  ssar = newSequentialsuffixarrayreaderfromfile(indexname,
-							SARR_LCPTAB,
-							SEQ_scan,
-							err);
-	} else
-	{
-	  ssar = NULL;
-	}
-	showverbose(verboseinfo,"checkentiresuftab");
-	checkentiresuftab(suffixarray.encseq,
-			  suffixarray.readmode,
-			  getcharactersAlphabet(suffixarray.alpha),
-			  suffixarray.suftab,
-			  ssar,
-			  false, /* specialsareequal  */
-			  false,  /* specialsareequalatdepth0 */
-			  0,
-			  err);
-	if (ssar != NULL)
-	{
-	  freeSequentialsuffixarrayreader(&ssar);
-	}
-	showverbose(verboseinfo,"okay");
+        if (sfxmapoptions.inputlcp)
+        {
+          ssar = newSequentialsuffixarrayreaderfromfile(indexname,
+                                                        SARR_LCPTAB,
+                                                        SEQ_scan,
+                                                        err);
+        } else
+        {
+          ssar = NULL;
+        }
+        showverbose(verboseinfo,"checkentiresuftab");
+        checkentiresuftab(suffixarray.encseq,
+                          suffixarray.readmode,
+                          getcharactersAlphabet(suffixarray.alpha),
+                          suffixarray.suftab,
+                          ssar,
+                          false, /* specialsareequal  */
+                          false,  /* specialsareequalatdepth0 */
+                          0,
+                          err);
+        if (ssar != NULL)
+        {
+          freeSequentialsuffixarrayreader(&ssar);
+        }
+        showverbose(verboseinfo,"okay");
       }
     }
   }

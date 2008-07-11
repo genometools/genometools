@@ -17,7 +17,7 @@
 
 static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
                                       FastaBuffer *fb,
-                                      Error *e)
+                                      Error *err)
 {
   Uchar cc;
   unsigned long currentspecialchar = 0;
@@ -48,7 +48,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
 
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = fastabuffer_next(fb,&cc,e);
+    retval = fastabuffer_next(fb,&cc,err);
     if (retval < 0)
     {
       return -1;
@@ -82,12 +82,14 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
         lastspeciallength = (Uchar) 1;
       } else /* extend special range */
       {
-        if (lastspeciallength == (Uchar) UCHAR_MAX) /* already max length */
+        if (lastspeciallength == encseq->overflowspecialrangelength)
+            /* already at maximal length */
         {
           assert(currentspecialchar > 0);
-          encseq->specialrangelength[currentspecialchar-1] = (Uchar) UCHAR_MAX;
+          encseq->specialrangelength[currentspecialchar-1]
+            = encseq->overflowspecialrangelength;
 #ifndef NDEBUG
-          sumspecials += (Seqpos) (UCHAR_MAX+1);
+          sumspecials += (Seqpos) (encseq->overflowspecialrangelength+1);
 #endif
           lastspeciallength = 0;
         } else

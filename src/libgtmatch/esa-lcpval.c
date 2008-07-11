@@ -18,7 +18,7 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "spacedef.h"
-#include "sfx-lcpval.h"
+#include "esa-lcpval.h"
 
 #include "sfx-cmpsuf.pr"
 
