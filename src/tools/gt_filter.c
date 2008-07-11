@@ -44,6 +44,7 @@ typedef struct {
   unsigned long max_gene_length,
                 max_gene_num;
   double min_gene_score,
+         max_gene_score,
          min_average_splice_site_prob;
   OutputFileInfo *ofi;
   GenFile *outfp;
@@ -161,6 +162,12 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
                              &arguments->min_gene_score, UNDEF_DOUBLE);
   option_parser_add_option(op, option);
 
+  /* -maxgenescore */
+  option = option_new_double("maxgenescore", "the maximum score a gene can "
+                             "have to pass the filter",
+                             &arguments->max_gene_score, UNDEF_DOUBLE);
+  option_parser_add_option(op, option);
+
   /* -minaveragessp */
   option = option_new_probability("minaveragessp", "set the minimum average "
                                   "splice site probability",
@@ -245,6 +252,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
                                     arguments->max_gene_length,
                                     arguments->max_gene_num,
                                     arguments->min_gene_score,
+                                    arguments->max_gene_score,
                                     arguments->min_average_splice_site_prob);
 
   if (arguments->targetbest)

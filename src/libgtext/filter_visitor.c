@@ -38,6 +38,7 @@ struct FilterVisitor {
                 gene_num,     /* the number of passed genes */
                 max_gene_num; /* the maximal number of genes which can pass */
   double min_gene_score,
+         max_gene_score,
          min_average_splice_site_prob;
 };
 
@@ -155,6 +156,10 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                genome_feature_get_score(gf) < fv->min_gene_score) {
         filter_node = true;
       }
+      else if (fv->max_gene_score != UNDEF_DOUBLE &&
+               genome_feature_get_score(gf) > fv->max_gene_score) {
+        filter_node = true;
+      }
       if (!filter_node)
         fv->gene_num++; /* gene passed filter */
     }
@@ -232,7 +237,7 @@ GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
                                   Strand strand, Strand targetstrand,
                                   bool has_CDS, unsigned long max_gene_length,
                                   unsigned long max_gene_num,
-                                  double min_gene_score,
+                                  double min_gene_score, double max_gene_score,
                                   double min_average_splice_site_prob)
 {
   GenomeVisitor *gv = genome_visitor_create(filter_visitor_class());
@@ -249,6 +254,7 @@ GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
   filter_visitor->gene_num = 0;
   filter_visitor->max_gene_num = max_gene_num;
   filter_visitor->min_gene_score = min_gene_score;
+  filter_visitor->max_gene_score = max_gene_score;
   filter_visitor->min_average_splice_site_prob = min_average_splice_site_prob;
   return gv;
 }

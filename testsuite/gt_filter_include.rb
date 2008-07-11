@@ -47,6 +47,20 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
 end
 
+Name "gt filter test (-maxgenescore)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -maxgenescore .5 #{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
+end
+
+Name "gt filter test (-maxgenescore)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -maxgenescore .4 #{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
+end
+
 Name "gt filter test (-maxgenenum)"
 Keywords "gt_filter"
 Test do

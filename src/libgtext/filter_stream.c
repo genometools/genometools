@@ -83,7 +83,7 @@ GenomeStream* filter_stream_new(GenomeStream *in_stream,
                                 Strand strand, Strand targetstrand,
                                 bool has_CDS, unsigned long max_gene_length,
                                 unsigned long max_gene_num,
-                                double min_gene_score,
+                                double min_gene_score, double max_gene_score,
                                 double min_average_splice_site_prob)
 {
   GenomeStream *gs = genome_stream_create(filter_stream_class(),
@@ -98,6 +98,7 @@ GenomeStream* filter_stream_new(GenomeStream *in_stream,
                                                      max_gene_length,
                                                      max_gene_num,
                                                      min_gene_score,
+                                                     max_gene_score,
                                                   min_average_splice_site_prob);
   return gs;
 }
