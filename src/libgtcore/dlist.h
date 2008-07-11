@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,8 +21,8 @@
 #include "libgtcore/error.h"
 #include "libgtcore/fptr.h"
 
-/* a double-linked list which is sorted according to a qsort(3)-like compare
-   function (if one was supplied to the constructor) */
+/* A double-linked list which is sorted according to a qsort(3)-like compare
+   function (if one was supplied to the constructor). */
 typedef struct Dlist Dlist;
 typedef struct Dlistelem Dlistelem;
 
@@ -31,10 +31,10 @@ Dlistelem*    dlist_first(const Dlist*);
 Dlistelem*    dlist_last(const Dlist*);
 Dlistelem*    dlist_find(const Dlist*, void*); /* O(n) */
 unsigned long dlist_size(const Dlist*);
-/* usually: O(n) (O(1) if data is added in sorted order) */
+/* Usually O(n) (O(1) if data is added in sorted order). */
 void          dlist_add(Dlist*, void *data);
-/* frees the elem */
-void          dlist_remove(Dlist*, Dlistelem*);
+/* Remove <dlistelem> from <dlist> and free it. */
+void          dlist_remove(Dlist *dlist, Dlistelem *dlistelem);
 int           dlist_example(Error*);
 int           dlist_unit_test(Error*);
 void          dlist_delete(Dlist*);
