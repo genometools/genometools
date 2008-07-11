@@ -31,15 +31,15 @@ struct SortStream
 #define sort_stream_cast(GS)\
         genome_stream_cast(sort_stream_class(), GS);
 
-static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
+static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
 {
   SortStream *sort_stream;
   int had_err = 0;
-  error_check(e);
+  error_check(err);
   sort_stream = sort_stream_cast(gs);
 
   if (!sort_stream->sorted) {
-    while (!(had_err = genome_stream_next_tree(sort_stream->in_stream, gn, e))
+    while (!(had_err = genome_stream_next_tree(sort_stream->in_stream, gn, err))
            && *gn) {
       array_add(sort_stream->trees, *gn);
     }
