@@ -23,6 +23,7 @@
 #include "libgtext/filter_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
+#include "libgtext/targetbest_filter_stream.h"
 #include "tools/gt_filter.h"
 
 #define STRAND_OPT  "strand"
@@ -30,7 +31,8 @@
 
 typedef struct {
   bool verbose,
-       has_CDS;
+       has_CDS,
+       targetbest;
   Str *seqid,
       *typefilter,
       *strand_char,
@@ -124,6 +126,17 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
                              NULL);
   option_parser_add_option(op, option);
 
+  /* -targetbest */
+  option = option_new_bool("targetbest", "if multiple top-level features "
+                           "(i.e., features without parents) with exactly one "
+                           "target attribute have the same target_id, keep "
+                           "only the feature with the best score. If "
+                           "-"TARGETSTRAND_OPT" is used at the same time, this "
+                           "option is applied after -"TARGETSTRAND_OPT".\n"
+                           "Memory consumption is O(file_size).",
+                           &arguments->targetbest, false);
+  option_parser_add_option(op, option);
+
   /* -hascds */
   option = option_new_bool("hascds", "filter out all top-level features which "
                            "do not have a CDS child", &arguments->has_CDS,
@@ -207,7 +220,8 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
                            void *tool_arguments, Error *err)
 {
   FilterArguments *arguments = tool_arguments;
-  GenomeStream *gff3_in_stream, *filter_stream, *gff3_out_stream;
+  GenomeStream *gff3_in_stream, *filter_stream,
+               *targetbest_filter_stream = NULL, *gff3_out_stream;
   GenomeNode *gn;
   int had_err;
 
@@ -233,8 +247,14 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
                                     arguments->min_gene_score,
                                     arguments->min_average_splice_site_prob);
 
+  if (arguments->targetbest)
+    targetbest_filter_stream = targetbest_filter_stream_new(filter_stream);
+
   /* create a gff3 output stream */
-  gff3_out_stream = gff3_out_stream_new(filter_stream, arguments->outfp);
+  gff3_out_stream = gff3_out_stream_new(arguments->targetbest
+                                        ? targetbest_filter_stream
+                                        : filter_stream,
+                                        arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
@@ -245,6 +265,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
   /* free */
   genome_stream_delete(gff3_out_stream);
   genome_stream_delete(filter_stream);
+  genome_stream_delete(targetbest_filter_stream);
   genome_stream_delete(gff3_in_stream);
 
   return had_err;

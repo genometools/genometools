@@ -176,3 +176,36 @@ Test do
             "#{$testdata}target_attribute_without_strand.gff3"
   run "diff #{$last_stdout} #{$testdata}target_attribute_without_strand.gff3"
 end
+
+Name "gt filter test 24 (-targetbest, simple)"
+Keywords "gt_filter targetbest"
+Test do
+  run_test "#{$bin}gt filter -targetbest " +
+           "#{$testdata}filter_targetbest_simple_test.gff3"
+  run "diff #{$last_stdout} #{$testdata}filter_targetbest_simple_test.out"
+end
+
+Name "gt filter test 25 (-targetbest, complex)"
+Keywords "gt_filter targetbest"
+Test do
+  run_test "#{$bin}gt filter -targetbest " +
+           "#{$testdata}filter_targetbest_complex_test.gff3"
+  run "diff #{$last_stdout} #{$testdata}filter_targetbest_complex_test.out"
+end
+
+Name "gt filter test 26 (-targetbest, corrupt file)"
+Keywords "gt_filter targetbest"
+Test do
+  run_test("#{$bin}gt filter -targetbest #{$testdata}corrupt_large.gff3",
+           :retval => 1)
+  grep $last_stderr, "not a valid character"
+end
+
+Name "gt filter test 27 (-targetbest, multiple targets)"
+Keywords "gt_filter targetbest"
+Test do
+  run_test "#{$bin}gt filter -targetbest " +
+           "#{$testdata}filter_targetbest_multiple_test.gff3"
+  run      "diff #{$last_stdout} " +
+           "#{$testdata}filter_targetbest_multiple_test.gff3"
+end

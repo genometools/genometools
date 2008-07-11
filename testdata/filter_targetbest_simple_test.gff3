@@ -1,0 +1,4 @@
+##gff-version   3
+##sequence-region   ENm004 1 1700000
+ENm004	gth	gene	782472	795511	1.000	-	.	ID=gene39;Target=exon_35 1 2407 +
+ENm004	gth	gene	798635	953195	0.935	+	.	ID=gene41;Target=exon_35 1172 2407 +
