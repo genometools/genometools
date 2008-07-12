@@ -48,13 +48,15 @@ struct GTR {
        interactive,
        debug;
   unsigned int seed;
-  Str *testspacepeak;
+  Str *debugfp,
+      *testspacepeak;
   Toolbox *tools;
   Hashtable *unit_tests;
   lua_State *L;
 #ifdef LIBGTVIEW
   Config *config;
 #endif
+  FILE *logfp;
 };
 
 GTR* gtr_new(Error *err)
@@ -65,6 +67,7 @@ GTR* gtr_new(Error *err)
   Str *config_file = NULL;
 #endif
   gtr = ma_calloc(1, sizeof (GTR));
+  gtr->debugfp = str_new();
   gtr->testspacepeak = str_new();
   gtr->L = luaL_newstate();
   if (!gtr->L) {
@@ -120,7 +123,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                  Error *err)
 {
   OptionParser *op;
-  Option *o;
+  Option *o, *debug_option, *debugfp_option;
   OPrval oprval;
 
   error_check(err);
@@ -136,8 +139,19 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
   option_hide_default(o);
   option_parser_add_option(op, o);
-  o = option_new_debug(&gtr->debug);
-  option_parser_add_option(op, o);
+  debug_option = option_new_debug(&gtr->debug);
+  option_parser_add_option(op, debug_option);
+  debugfp_option = option_new_string("debugfp",
+                                     "set file pointer for debugging output\n"
+                                     "use ``stdout'' for standard output\n"
+                                     "use ``stderr'' for standard error\n"
+                                     "or any other string to use the "
+                                     "corresponding file (will be overwritten "
+                                     "without warning!)", gtr->debugfp,
+                                     "stderr");
+  option_is_development_option(debugfp_option);
+  option_parser_add_option(op, debugfp_option);
+  option_imply(debugfp_option, debug_option);
   o = option_new_uint("seed", "set seed for random number generator manually\n"
                       "0 generates a seed from current time and process id",
                       &gtr->seed, 0);
@@ -220,6 +234,19 @@ static int run_tests(GTR *gtr, Error *err)
   return EXIT_SUCCESS;
 }
 
+static void enable_logging(const char *debugfp, FILE **logfp)
+{
+  log_enable();
+  if (!strcmp(debugfp, "stdout"))
+    log_set_fp(stdout);
+  else if (!strcmp(debugfp, "stderr"))
+    log_set_fp(stderr);
+  else {
+    *logfp = fa_xfopen(debugfp, "w");
+    log_set_fp(*logfp);
+  }
+}
+
 int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
 {
   Toolfunc toolfunc;
@@ -230,7 +257,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
   error_check(err);
   assert(gtr);
   if (gtr->debug)
-    log_enable();
+    enable_logging(str_get(gtr->debugfp), &gtr->logfp);
   gtr->seed = ya_rand_init(gtr->seed);
   log_log("seed=%u", gtr->seed);
   if (gtr->test) {
@@ -298,7 +325,9 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
 void gtr_delete(GTR *gtr)
 {
   if (!gtr) return;
+  fa_fclose(gtr->logfp);
   str_delete(gtr->testspacepeak);
+  str_delete(gtr->debugfp);
   toolbox_delete(gtr->tools);
   hashtable_delete(gtr->unit_tests);
   if (gtr->L) lua_close(gtr->L);
