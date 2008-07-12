@@ -24,7 +24,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
   Seqpos pos;
   int retval;
   Twobitencoding bitwise = 0;
-  Uchar lastspeciallength = 0;
+  unsigned int lastspeciallength = 0;
 #ifndef NDEBUG
   Seqpos sumspecials = 0, countspecials = 0;
 #endif
@@ -36,7 +36,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
 
   ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,specialpositions),NULL,SPECIALTYPE,
                    encseq->numofspecialstostore);
-  ALLOCASSIGNSPACE(encseq->specialrangelength,NULL,Uchar,
+  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,specialrangelength),NULL,SPECIALTYPE,
                    encseq->numofspecialstostore);
 #ifndef NOENDPTR
   endspecialcells = (unsigned long) (encseq->totallength/MAXSPECIALTYPE + 1);
@@ -59,7 +59,8 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
       {
         /* note that we store one less than the length to prevent overflows */
         assert(currentspecialchar > 0);
-        encseq->specialrangelength[currentspecialchar-1] = lastspeciallength-1;
+        ACCESSENCSEQ(encseq,specialrangelength)[currentspecialchar-1]
+          = (SPECIALTYPE) (lastspeciallength-1);
 #ifndef NDEBUG
         sumspecials += (Seqpos) lastspeciallength;
 #endif
@@ -79,17 +80,17 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
 #else
           = pos;
 #endif
-        lastspeciallength = (Uchar) 1;
+        lastspeciallength = 1U;
       } else /* extend special range */
       {
-        if (lastspeciallength == encseq->overflowspecialrangelength)
+        if (lastspeciallength == MAXSPECIALTYPE)
             /* already at maximal length */
         {
           assert(currentspecialchar > 0);
-          encseq->specialrangelength[currentspecialchar-1]
-            = encseq->overflowspecialrangelength;
+          ACCESSENCSEQ(encseq,specialrangelength)[currentspecialchar-1]
+            = (SPECIALTYPE) MAXSPECIALTYPE;
 #ifndef NDEBUG
-          sumspecials += (Seqpos) (encseq->overflowspecialrangelength+1);
+          sumspecials += (1 + (Seqpos) MAXSPECIALTYPE);
 #endif
           lastspeciallength = 0;
         } else
@@ -101,7 +102,8 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
     {
       if (lastspeciallength > 0)
       {
-        encseq->specialrangelength[currentspecialchar-1] = lastspeciallength-1;
+        ACCESSENCSEQ(encseq,specialrangelength)[currentspecialchar-1]
+          = (SPECIALTYPE) (lastspeciallength-1);
 #ifndef NDEBUG
         sumspecials += (Seqpos) lastspeciallength;
 #endif
@@ -236,7 +238,8 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
       {
         Seqpos rangeend
                = (Seqpos) *found +
-                 (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)]
+                 (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)
+                                      [(Seqpos) (found - start)]
                           + 1;
         if (pos < rangeend)
         {
@@ -261,8 +264,9 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
         Seqpos rangeend
                = (Seqpos) ((MAXSPECIALTYPE+1) * pagenumber) +
                  (Seqpos) *found +
-                 (Seqpos) encseq->specialrangelength[(unsigned long)
-                                                     (found - start)] + 1;
+                 (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)
+                                      [(unsigned long) (found - start)]
+                 + 1;
         if (pos < rangeend)
         {
           return true;
@@ -273,12 +277,12 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
     {
       if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] > 1UL)
       {
-        unsigned long i;
+        unsigned long idx;
         Seqpos rangeend;
 
-        i = ACCESSENCSEQ(encseq,endspecialsubsUint)[0] - 1;
-        rangeend = (Seqpos) ACCESSENCSEQ(encseq,specialpositions)[i] +
-                   (Seqpos) encseq->specialrangelength[i] + 1;
+        idx = ACCESSENCSEQ(encseq,endspecialsubsUint)[0] - 1;
+        rangeend = (Seqpos) ACCESSENCSEQ(encseq,specialpositions)[idx] +
+                   (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)[idx] + 1;
         if (pos < rangeend)
         {
           return true;
@@ -289,13 +293,13 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
       if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-2] <
           ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1])
       {
-        unsigned long i;
+        unsigned long idx;
         Seqpos rangeend;
 
-        i = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] - 1;
+        idx = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] - 1;
         rangeend = (Seqpos) ((MAXSPECIALTYPE+1) * (pagenumber-1)) +
-                   (Seqpos) ACCESSENCSEQ(encseq,specialpositions)[i] +
-                   (Seqpos) encseq->specialrangelength[i] + 1;
+                   (Seqpos) ACCESSENCSEQ(encseq,specialpositions)[idx] +
+                   (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)[idx] + 1;
         if (pos < rangeend)
         {
           return true;
@@ -330,7 +334,8 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
   {
     Seqpos rangeend
              = (Seqpos) *found +
-               (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)]
+               (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)
+                                    [(Seqpos) (found - start)]
                         + 1;
     if (pos < rangeend)
     {

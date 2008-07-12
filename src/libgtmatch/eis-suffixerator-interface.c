@@ -247,17 +247,17 @@ newSfxInterfaceWithReaders(Readmode readmode,
                                          numofsequences,
                                          characterdistribution);
   if (!(sfxi->sfi = newSfxiterator(specialcharinfo->specialcharacters,
-                                    specialcharinfo->realspecialranges,
-                                    encseq,
-                                    readmode,
-                                    getnumofcharsAlphabet(alpha),
-                                    getcharactersAlphabet(alpha),
-                                    prefixlength,
-                                    numofparts,
-                                    NULL,
-                                    sfxstrategy,
-                                    sfxi->mtime,
-                                    verbosity, err)))
+                                   specialcharinfo->realspecialranges,
+                                   encseq,
+                                   readmode,
+                                   getnumofcharsAlphabet(alpha),
+                                   getcharactersAlphabet(alpha),
+                                   prefixlength,
+                                   numofparts,
+                                   NULL,
+                                   sfxstrategy,
+                                   sfxi->mtime,
+                                   verbosity, err)))
     newSfxInterfaceWithReadersErrRet();
   sfxi->rot0Pos.defined = false;
   sfxi->specialsuffixes = false;

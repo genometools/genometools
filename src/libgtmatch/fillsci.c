@@ -28,6 +28,7 @@
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "safecast-gen.h"
+#include "encseq-def.h"
 #include "stamp.h"
 
 #include "opensfxfile.pr"
@@ -35,23 +36,26 @@
 static unsigned long currentspecialrangevalue(
                              unsigned long len,
                              unsigned long occcount,
-                             unsigned long overflowspecialrangelength)
+                             unsigned long maxspecialtype)
 {
-  if (len <= (unsigned long) (overflowspecialrangelength+1))
+  if (len <= (unsigned long) (maxspecialtype+1))
   {
     return occcount;
   }
-  if (len % (overflowspecialrangelength+1) == 0)
+  if (len % (maxspecialtype+1) == 0)
   {
-    return len/(overflowspecialrangelength+1) * occcount;
+    return len/(maxspecialtype+1) * occcount;
   }
-  return (1UL + len/(overflowspecialrangelength+1)) * occcount;
+  return (1UL + len/(maxspecialtype+1)) * occcount;
 }
 
 typedef struct
 {
   Verboseinfo *verboseinfo;
-  Seqpos specialrangesUchar, realspecialranges;
+  Seqpos specialrangesUchar,
+         specialrangesUshort,
+         specialrangesUint32,
+         realspecialranges;
 } Updatesumrangeinfo;
 
 static void updatesumranges(unsigned long key, unsigned long long value,
@@ -63,12 +67,51 @@ static void updatesumranges(unsigned long key, unsigned long long value,
   distvalue = (unsigned long) value; /* XXX: is this cast always OK? */
   updatesumrangeinfo->specialrangesUchar
      += currentspecialrangevalue(key,distvalue,(unsigned long) UCHAR_MAX);
+  updatesumrangeinfo->specialrangesUshort
+     += currentspecialrangevalue(key,distvalue,(unsigned long) USHRT_MAX);
+  updatesumrangeinfo->specialrangesUint32
+     += currentspecialrangevalue(key,distvalue,(unsigned long) UINT32_MAX);
   updatesumrangeinfo->realspecialranges += distvalue;
   showverbose(updatesumrangeinfo->verboseinfo,
               "specialranges of length %lu: %lu",key,distvalue);
 }
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
+
+static void doupdatesumranges(Specialcharinfo *specialcharinfo,
+                              Seqpos totallength,
+                              unsigned int mapsize,
+                              DiscDistri *distspralen,
+                              Verboseinfo *verboseinfo)
+{
+  Updatesumrangeinfo updatesumrangeinfo;
+  uint64_t smallestsize, tmp;
+
+  updatesumrangeinfo.specialrangesUchar = 0;
+  updatesumrangeinfo.specialrangesUshort = 0;
+  updatesumrangeinfo.specialrangesUint32 = 0;
+  updatesumrangeinfo.realspecialranges = 0;
+  updatesumrangeinfo.verboseinfo = verboseinfo;
+  disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
+  smallestsize = detsizeencseq(0,totallength,
+                               updatesumrangeinfo.specialrangesUchar,mapsize);
+  specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUchar;
+  tmp = detsizeencseq(1,totallength,updatesumrangeinfo.specialrangesUshort,
+                      mapsize);
+  if (tmp < smallestsize)
+  {
+    smallestsize = tmp;
+    specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUshort;
+  }
+  tmp = detsizeencseq(2,totallength,
+                      updatesumrangeinfo.specialrangesUint32,mapsize);
+  if (tmp < smallestsize)
+  {
+    specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUint32;
+  }
+  specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUchar;
+  specialcharinfo->realspecialranges = updatesumrangeinfo.realspecialranges;
+}
 
 int fasta2sequencekeyvalues(
         const Str *indexname,
@@ -77,7 +120,7 @@ int fasta2sequencekeyvalues(
         Specialcharinfo *specialcharinfo,
         const StrArray *filenametab,
         Filelengthvalues **filelengthtab,
-        const Uchar *symbolmap,
+        const Alphabet *alpha,
         bool plainformat,
         bool withdestab,
         unsigned long *characterdistribution,
@@ -115,7 +158,7 @@ int fasta2sequencekeyvalues(
   if (!haserr)
   {
     fb = fastabuffer_new(filenametab,
-                         symbolmap,
+                         getsymbolmapAlphabet(alpha),
                          plainformat,
                          filelengthtab,
                          descqueue,
@@ -186,8 +229,6 @@ int fasta2sequencekeyvalues(
   }
   if (!haserr)
   {
-    Updatesumrangeinfo updatesumrangeinfo;
-
     if (desfp != NULL)
     {
       desc = queue_get(descqueue);
@@ -200,15 +241,11 @@ int fasta2sequencekeyvalues(
       (void) putc((int) '\n',desfp);
       FREESPACE(desc);
     }
-    updatesumrangeinfo.specialrangesUchar = 0;
-    updatesumrangeinfo.realspecialranges = 0;
-    updatesumrangeinfo.verboseinfo = verboseinfo;
-    disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
-    specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-    specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUchar;
-    specialcharinfo->realspecialranges = updatesumrangeinfo.realspecialranges;
-    (*numofsequences)++;
     *totallength = pos;
+    specialcharinfo->lengthofspecialsuffix = lastspeciallength;
+    doupdatesumranges(specialcharinfo,pos,
+                      getmapsizeAlphabet(alpha),distspralen,verboseinfo);
+    (*numofsequences)++;
   }
   fa_xfclose(desfp);
   disc_distri_delete(distspralen);
@@ -220,6 +257,7 @@ int fasta2sequencekeyvalues(
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
                               const Uchar *seq,
                               const Seqpos len,
+                              unsigned int mapsize,
                               Verboseinfo *verboseinfo)
 {
   Uchar charcode;
@@ -228,7 +266,6 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   Seqpos lastspeciallength = 0;
   DiscDistri *distspralen;
   unsigned long idx;
-  Updatesumrangeinfo updatesumrangeinfo;
 
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
@@ -270,12 +307,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
     idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
     disc_distri_add(distspralen,idx);
   }
-  updatesumrangeinfo.specialrangesUchar = 0;
-  updatesumrangeinfo.realspecialranges = 0;
-  updatesumrangeinfo.verboseinfo = verboseinfo;
-  disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-  specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUchar;
-  specialcharinfo->realspecialranges = updatesumrangeinfo.realspecialranges;
+  doupdatesumranges(specialcharinfo,len,mapsize,distspralen,verboseinfo);
   disc_distri_delete(distspralen);
 }

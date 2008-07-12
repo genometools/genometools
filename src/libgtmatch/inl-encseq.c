@@ -154,7 +154,6 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
                        NULL);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->totallength = totallength;
-  encseq->overflowspecialrangelength = UCHAR_MAX;
   if (fillplainseq(encseq,fb,err) != 0)
   {
     freeEncodedsequence(&encseq);
@@ -165,7 +164,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
 }
 
 /*@null@*/ Encodedsequence *mapencodedsequence(
-                                   /*@unused@*/ bool withrange,
+                                   UNUSED bool withrange,
                                    const Str *indexname,
                                    /*@unused@*/ Seqpos totallength,
                                    Seqpos specialranges,
@@ -184,19 +183,18 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
   str_delete(tmpfilename);
   encseq->hasownmemory = false;
   encseq->mappedfile = true;
-  encseq->overflowspecialrangelength = UCHAR_MAX;
   encseq->hasspecialcharacters = (specialranges > 0) ?  true : false;
   return encseq;
 }
 
 Encodedsequence *plain2encodedsequence(
-                         /*@unused@*/ bool withrange,
-                         /*@unused@*/ Specialcharinfo *specialcharinfo,
+                         UNUSED bool withrange,
+                         Specialcharinfo *specialcharinfo,
                          const Uchar *seq1,
                          Seqpos len1,
                          const Uchar *seq2,
                          unsigned long len2,
-                         /*@unused@*/ unsigned int mapsize,
+                         unsigned int mapsize,
                          Verboseinfo *verboseinfo)
 {
   Encodedsequence *encseq;
@@ -217,9 +215,7 @@ Encodedsequence *plain2encodedsequence(
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,
-                           (unsigned long) UCHAR_MAX,
-                           verboseinfo);
+  sequence2specialcharinfo(specialcharinfo,seqptr,len,mapsize,verboseinfo);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,1);
   encseq->plainseq = seqptr;
   encseq->mappedfile = false;

@@ -141,6 +141,11 @@ int compareTwobitencodings(bool fwd,
                            const EndofTwobitencoding *ptbe1,
                            const EndofTwobitencoding *ptbe2);
 
+uint64_t detsizeencseq(int kind,
+                       Seqpos totallength,
+                       Seqpos specialranges,
+                       unsigned int mapsize);
+
 #endif
 
 /* the functions with exactly the same interface for both implementation of
