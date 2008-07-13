@@ -38,7 +38,16 @@ static unsigned long currentspecialrangevalue(
                              unsigned long occcount,
                              unsigned long maxspecialtype)
 {
-  if (len <= (unsigned long) (maxspecialtype+1))
+/*
+  printf("len=%lu,occcount=%lu,maxspecialtype=%lu\n",
+           len,occcount,maxspecialtype);
+*/
+  if (maxspecialtype == UINT32_MAX)
+  {
+    assert(len - 1 <= UINT32_MAX);
+    return occcount;
+  }
+  if (len <= maxspecialtype+1)
   {
     return occcount;
   }

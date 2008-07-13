@@ -1033,7 +1033,8 @@ static void showallspecialpositionswithpages(const Encodedsequence *encseq)
     {
       showspecialpositionswithpages(encseq,pgnum,offset,endpos0,endpos1-1);
     }
-    offset += (Seqpos) (encseq->maxspecialtype+1);
+    offset += (Seqpos) encseq->maxspecialtype;
+    offset += 1;
   }
 }
 
@@ -1109,7 +1110,7 @@ static void determinerange(Sequencerange *range,
                            unsigned long cellnum)
 {
   range->leftpos = (Seqpos) transpagenum *
-                   (Seqpos) (encseq->maxspecialtype + 1) +
+                   (1 + (Seqpos) encseq->maxspecialtype) +
                    accessspecialpositions(encseq,cellnum);
   range->rightpos = range->leftpos +
                     accessspecialrangelength(encseq,cellnum) + 1;
@@ -1792,7 +1793,10 @@ static Encodedsequence *determineencseqkeyvalues(
 
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->sat = sat;
-  encseq->maxspecialtype = sat2maxspecialtype(sat);
+  if (sat == Viauchartables || sat == Viaushorttables || sat == Viauint32tables)
+  {
+    encseq->maxspecialtype = sat2maxspecialtype(sat);
+  }
   encseq->mapsize = mapsize;
   encseq->mappedptr = NULL;
   encseq->satcharptr = NULL;
