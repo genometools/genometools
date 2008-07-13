@@ -118,7 +118,16 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
   {
     specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUint32;
   }
-  specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUchar;
+  /*
+  printf("specialrangesUchar=%lu\n",
+         (unsigned long) updatesumrangeinfo.specialrangesUchar);
+  printf("specialrangesUshort=%lu\n",
+         (unsigned long) updatesumrangeinfo.specialrangesUshort);
+  printf("specialrangesUint32=%lu\n",
+         (unsigned long) updatesumrangeinfo.specialrangesUint32);
+  printf("specialranges%lu\n",
+         (unsigned long) specialcharinfo->specialranges);
+  */
   specialcharinfo->realspecialranges = updatesumrangeinfo.realspecialranges;
 }
 

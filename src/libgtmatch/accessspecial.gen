@@ -83,7 +83,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
         lastspeciallength = 1U;
       } else /* extend special range */
       {
-        if (lastspeciallength == MAXSPECIALTYPE)
+        if (lastspeciallength == (unsigned int) MAXSPECIALTYPE)
             /* already at maximal length */
         {
           assert(currentspecialchar > 0);

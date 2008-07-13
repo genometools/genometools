@@ -73,3 +73,9 @@ void maintainnullcols(const Charatpos *catpos,
     }
   }
 }
+
+/* 
+  define bitvector prefixofsuffix such that after processing a sequence v 
+  of length d we have: for all i\in[0,m]
+  prefixofsuffix[i] is 1 iff P[i..i+d-1] = v[0..d-1]
+*/
