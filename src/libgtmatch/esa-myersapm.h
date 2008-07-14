@@ -28,7 +28,8 @@ Myersonlineresources *newMyersonlineresources(
                         unsigned int mapsize,
                         bool nospecials,
                         const Encodedsequence *encseq,
-                        void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos),
+                        void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,
+                                             unsigned long),
                         void *processmatchinfo);
 
 void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources);

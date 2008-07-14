@@ -47,7 +47,8 @@ static void esa_exactpatternmatching(const void *genericindex,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      void (*processmatch)(void *,bool,
-                                                          Seqpos,Seqpos,Seqpos),
+                                                          Seqpos,Seqpos,Seqpos,
+                                                          unsigned long),
                                      void *processmatchinfo)
 {
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
@@ -65,7 +66,7 @@ static void esa_exactpatternmatching(const void *genericindex,
   while (nextmmsearchiterator(&dbstartpos,mmsi))
   {
     processmatch(processmatchinfo,true,totallength,
-                 dbstartpos,(Seqpos) patternlength);
+                 dbstartpos,(Seqpos) patternlength,patternlength);
   }
   freemmsearchiterator(&mmsi);
 }
@@ -81,7 +82,8 @@ static Seqpos convertstartpos(bool withesa,Seqpos totallength,Seqpos startpos)
 }
 
 static void showmatch(UNUSED void *processinfo,bool withesa,
-                      Seqpos totallength,Seqpos startpos,Seqpos len)
+                      Seqpos totallength,Seqpos startpos,Seqpos len,
+                      UNUSED unsigned long pprefixlen)
 {
   printf("match " FormatSeqpos " " FormatSeqpos "\n",
           PRINTSeqposcast(convertstartpos(withesa,totallength,startpos)),
@@ -94,7 +96,8 @@ static void storematch(void *processinfo,
                        bool withesa,
                        Seqpos totallength,
                        Seqpos startpos,
-                       Seqpos len)
+                       Seqpos len,
+                       UNUSED unsigned long pprefixlen)
 {
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
   Simplematch *match;
@@ -177,7 +180,8 @@ static void performthesearch(const TageratorOptions *tageratoroptions,
                              unsigned long taglen,
                              Seqpos totallength,
                              void (*processmatch)(void *,bool,Seqpos,
-                                                  Seqpos,Seqpos),
+                                                  Seqpos,Seqpos,
+                                                  unsigned long),
                              void *processmatchinfooffline,
                              UNUSED bool rcmatch)
 {
@@ -356,7 +360,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     const Uchar *symbolmap, *currenttag;
     Uchar transformedtag[MAXTAGSIZE];
     char *desc = NULL;
-    void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos);
+    void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
     void *processmatchinfoonline, *processmatchinfooffline;
 
     symbolmap = getsymbolmapAlphabet(suffixarray.alpha);

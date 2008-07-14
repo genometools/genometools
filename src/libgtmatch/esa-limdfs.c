@@ -48,8 +48,8 @@ typedef struct
 
 typedef struct
 {
-  unsigned long patternlength, 
-                maxdistance, 
+  unsigned long patternlength,
+                maxdistance,
                 *eqsvector;
 } Matchtaskinfo;
 
@@ -382,27 +382,20 @@ static void freeDfsinfo(void **dfsinfo)
   *dfsinfo = NULL;
 }
 
-typedef enum
-{
-  Limdfsfailure,
-  Limdfssuccess,
-  Limdfscontinue
-} Limdfsnext;
-
-static Limdfsnext limdfsnextstep(const Limdfsstate *limdfsstate,
-                                 const void *dfsconstinfo)
+static long limdfsnextstep(const Limdfsstate *limdfsstate,
+                           const void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
   if (limdfsstate->maxleqk == UNDEFMAXLEQK)
   {
-    return Limdfsfailure;
+    return -1L;
   }
   if (limdfsstate->maxleqk == SUCCESSMAXLEQK)
   {
-    return Limdfssuccess;
+    return (long) mti->patternlength;
   }
-  return Limdfscontinue;
+  return 0;
 }
 
 /* implement types Limdfsstate and all function appearing until here */
@@ -422,7 +415,7 @@ struct Limdfsresources
   ArrayLcpintervalwithinfo stack;
   Uchar alphasize;
   Seqpos totallength;
-  void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos);
+  void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
   void *processmatchinfo;
   const void *genericindex;
   bool withesa, nospecials;
@@ -435,7 +428,8 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     unsigned int mapsize,
                                     Seqpos totallength,
                                     void (*processmatch)(void *,bool,Seqpos,
-                                                         Seqpos,Seqpos),
+                                                         Seqpos,Seqpos,
+                                                         unsigned long),
                                     void *processmatchinfo)
 {
   Limdfsresources *limdfsresources;
@@ -502,7 +496,8 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources)
 /* enumerate the suffixes in an LCP-interval */
 
 static void esa_overinterval(Limdfsresources *limdfsresources,
-                             const Lcpinterval *itv)
+                             const Lcpinterval *itv,
+                             unsigned long pprefixlen)
 {
   Seqpos idx;
   const Suffixarray *suffixarray
@@ -514,12 +509,14 @@ static void esa_overinterval(Limdfsresources *limdfsresources,
                                   true,
                                   limdfsresources->totallength,
                                   suffixarray->suftab[idx],
-                                  itv->offset);
+                                  itv->offset,
+                                  pprefixlen);
   }
 }
 
 static void pck_overinterval(Limdfsresources *limdfsresources,
-                             const Lcpinterval *itv)
+                             const Lcpinterval *itv,
+                             unsigned long pprefixlen)
 {
   Bwtseqpositioniterator *bspi;
   Seqpos dbstartpos;
@@ -533,7 +530,8 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
                                   false,
                                   limdfsresources->totallength,
                                   dbstartpos + itv->offset,
-                                  itv->offset);
+                                  itv->offset,
+                                  pprefixlen);
   }
   freeBwtseqpositioniterator(&bspi);
 }
@@ -592,8 +590,8 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 {
   Seqpos pos, startpos;
   Uchar cc;
-  Limdfsnext nextstep;
   Limdfsstate currentdfsstate = *dfsstate;
+  long pprefixlen;
   const Suffixarray *suffixarray
     = (const Suffixarray *) limdfsresources->genericindex;
 
@@ -610,21 +608,21 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
 #endif
-      inplacenextDfsstate(limdfsresources->dfsconstinfo,
-                          &currentdfsstate,
-                          cc);
-      nextstep = limdfsnextstep(&currentdfsstate,limdfsresources->dfsconstinfo);
-      if (nextstep == Limdfsfailure)
+      inplacenextDfsstate(limdfsresources->dfsconstinfo,&currentdfsstate,cc);
+      pprefixlen = limdfsnextstep(&currentdfsstate,
+                                   limdfsresources->dfsconstinfo);
+      if (pprefixlen < 0) /* failure */
       {
         break;
       }
-      if (nextstep == Limdfssuccess)
+      if (pprefixlen > 0)
       {
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                       true,
                                       limdfsresources->totallength,
                                       startpos,
-                                      pos - startpos + 1);
+                                      pos - startpos + 1,
+                                      (unsigned long) pprefixlen);
         break;
       }
     } else
@@ -641,8 +639,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                             Uchar inchar)
 {
   Uchar cc;
-  unsigned long matchlength;
-  Limdfsnext nextstep;
+  unsigned long contextlength;
+  long pprefixlen;
   Limdfsstate currentdfsstate = *dfsstate;
   bool processinchar = true;
   Bwtseqcontextiterator *bsci
@@ -651,7 +649,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
   printf("retrieve context for left = %lu\n",(unsigned long) left);
 #endif
-  for (matchlength = 0; /* nothing */; matchlength++)
+  for (contextlength = 0; /* nothing */; contextlength++)
   {
     if (processinchar)
     {
@@ -668,12 +666,13 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       printf("cc=%u\n",(unsigned int) cc);
 #endif
       inplacenextDfsstate(limdfsresources->dfsconstinfo,&currentdfsstate,cc);
-      nextstep = limdfsnextstep(&currentdfsstate,limdfsresources->dfsconstinfo);
-      if (nextstep == Limdfsfailure)
+      pprefixlen = limdfsnextstep(&currentdfsstate,
+                                   limdfsresources->dfsconstinfo);
+      if (pprefixlen < 0)
       {
         break;
       }
-      if (nextstep == Limdfssuccess) /* check for success */
+      if (pprefixlen > 0) /* check for success */
       {
         Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,left);
 
@@ -681,7 +680,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                       false,
                                       limdfsresources->totallength,
                                       startpos + offset,
-                                      offset + matchlength);
+                                      offset + contextlength,
+                                      (unsigned long) pprefixlen);
         break;
       }
     } else
@@ -698,7 +698,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                                Uchar inchar,
                                const Limdfsstate *indfsstate)
 {
-  Limdfsnext nextstep;
+  long pprefixlen;
   stackptr->lcpitv = *child;
 
 #ifdef SKDEBUG
@@ -717,20 +717,16 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                   limdfsresources->dfsconstinfo);
   printf("\n");
 #endif
-  nextstep = limdfsnextstep(&stackptr->dfsstate,limdfsresources->dfsconstinfo);
-  if (nextstep == Limdfsfailure)
+  pprefixlen = limdfsnextstep(&stackptr->dfsstate,
+                               limdfsresources->dfsconstinfo);
+  if (pprefixlen < 0)
   {
     return true;
   }
-  if (nextstep == Limdfssuccess)
+  if (pprefixlen > 0)
   {
-    if (limdfsresources->withesa)
-    {
-      esa_overinterval(limdfsresources,child);
-    } else
-    {
-      pck_overinterval(limdfsresources,child);
-    }
+    (limdfsresources->withesa ? esa_overinterval : pck_overinterval)
+      (limdfsresources,child,(unsigned long) pprefixlen);
     return true;
   }
   return false;

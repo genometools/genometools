@@ -30,7 +30,8 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     unsigned int mapsize,
                                     Seqpos totallength,
                                     void (*processmatch)(void *,bool,Seqpos,
-                                                         Seqpos,Seqpos),
+                                                         Seqpos,Seqpos,
+                                                         unsigned long),
                                     void *processmatchinfo);
 
 const void *getgenericindexfromresource(Limdfsresources *limdfsresources);
