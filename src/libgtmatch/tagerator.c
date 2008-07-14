@@ -210,10 +210,10 @@ static void performthesearch(const TageratorOptions *tageratoroptions,
       }
     } else
     {
-      esalimiteddfs(limdfsresources,
-                    transformedtag,
-                    taglen,
-                    tageratoroptions->maxdistance);
+      indexbasedapproxpatternmatching(limdfsresources,
+                                      transformedtag,
+                                      taglen,
+                                      tageratoroptions->maxdistance);
     }
   }
 }

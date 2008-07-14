@@ -37,10 +37,10 @@ const void *getgenericindexfromresource(Limdfsresources *limdfsresources);
 
 void freeLimdfsresources(Limdfsresources **ptrlimdfsresources);
 
-void esalimiteddfs(Limdfsresources *limdfsresources,
-                   const Uchar *pattern,
-                   unsigned long patternlength,
-                   unsigned long maxdistance);
+void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
+                                     const Uchar *pattern,
+                                     unsigned long patternlength,
+                                     unsigned long maxdistance);
 
 Definedunsignedlong esa_findshortestmatch(const Encodedsequence *encseq,
                                           bool nospecials,
