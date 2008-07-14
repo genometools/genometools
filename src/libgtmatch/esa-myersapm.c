@@ -167,7 +167,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
 
         matchlength = esa_findshortestmatch(mor->encseq,
                                             mor->nospecials,
-                                            (unsigned long) mor->alphasize,
+                                            mor->alphasize,
                                             pattern,
                                             patternlength,
                                             maxdistance,

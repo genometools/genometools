@@ -44,7 +44,7 @@ void esalimiteddfs(Limdfsresources *limdfsresources,
 
 Definedunsignedlong esa_findshortestmatch(const Encodedsequence *encseq,
                                           bool nospecials,
-                                          unsigned long alphasize,
+                                          unsigned int alphasize,
                                           const Uchar *pattern,
                                           unsigned long patternlength,
                                           unsigned long maxdistance,

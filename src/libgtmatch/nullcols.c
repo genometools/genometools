@@ -74,34 +74,34 @@ void maintainnullcols(const Charatpos *catpos,
   }
 }
 
-/* 
-  define bitvector prefixofsuffix_{d} such that after processing a sequence v 
+/*
+  define bitvector prefixofsuffix_{d} such that after processing a sequence v
   of length d we have: for all i\in[0,m-1]
   prefixofsuffix_{d}[i] is 1 iff P[i..i+d-1] = v[0..d-1]
 
-  Let eqsvector_{a} be a vector of size m such that 
+  Let eqsvector_{a} be a vector of size m such that
   eqsvector_{a}[i]=1 if P[i]=a
 
-  Let d=0 (i.e. at the root). Then 
+  Let d=0 (i.e. at the root). Then
   P[i..i+d-1]=P[i..i-1]=\varepsilon=v[0..-1]=v[0..d-1] for all i \in[0..m-1]
   and hence prefixofsuffix_{d}[i]=1. In other words
   prefixofsuffix_{d} = 1^{m}.
 
   Now suppose d > 0 and assume we have computed
   prefixofsuffix_{d-1}. Then by definition
-  prefixofsuffix_{d}[i] 
+  prefixofsuffix_{d}[i]
     iff P[i..i+d-1] = v[0..d-1]
     iff P[i..i+d-2] = v[0..d-2] && P[i+d-1]=v[d-1]
     iff prefixofsuffix_{d-1][i]=1 && eqsvector_{v[d-1]}[i+d-1]=1
     iff prefixofsuffix_{d-1][i] & eqsvector_{v[d-1]}[i+d-1]
 
   All values in prefixofsuffix_{d} are independent and can be computed
-  in parallel by 
+  in parallel by
 
   prefixofsuffix_{d} = prefixofsuffix_{d-1} & (eqsvector_{a} << (d-1))
   where a=v[d-1]
 
-  prefixofsuffix_{d] = 0 and 
+  prefixofsuffix_{d] = 0 and
   prefixofsuffix_{d-1} != 0 then  for all i satisfying
   prefixofsuffix_{d-1][i] = 1 do:
     if mstats[i]<d then mstats[i]=d and store first suffixposition of current
