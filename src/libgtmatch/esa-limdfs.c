@@ -44,7 +44,7 @@ typedef struct
 #ifdef SKDEBUG
   unsigned long scorevalue;    /* the score for the given depth */
 #endif
-} Limdfsstate;
+} Myerscolumn;
 
 typedef struct
 {
@@ -55,13 +55,18 @@ typedef struct
 
 static size_t deliversizeofdfsstate(void)
 {
-  return sizeof (Limdfsstate);
+  return sizeof (Myerscolumn);
 }
+
+typedef unsigned long Aliasdfsstate;
+
+#define DECLAREPTRDFSSTATE(V)\
+        Aliasdfsstate * V
 
 #ifdef SKDEBUG
 
 static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
-                            unsigned long patternlength)
+                            const Matchtaskinfo *mti)
 {
   if (maxleqk == UNDEFMAXLEQK)
   {
@@ -72,9 +77,13 @@ static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
   }
 }
 
-static void showLimdfsstate(const Limdfsstate *col,unsigned long score,
-                            unsigned long patternlength)
+static void apm_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
+                                unsigned long score,
+                                const void *dfsconstinfo)
 {
+  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
+  const Myerscolumn *col = (const Myerscolumn *) aliascol;
+
   if (col->maxleqk == UNDEFMAXLEQK)
   {
     printf("[]");
@@ -102,7 +111,7 @@ static void showLimdfsstate(const Limdfsstate *col,unsigned long score,
 }
 
 static void verifycolumnvalues(const Matchtaskinfo *mti,
-                               const Limdfsstate *col,
+                               const Myerscolumn *col,
                                unsigned long startscore)
 {
   unsigned long idx, score, minscore, mask, bfmaxleqk;
@@ -117,7 +126,7 @@ static void verifycolumnvalues(const Matchtaskinfo *mti,
     minscore = 0;
   }
   score = startscore;
-  for (idx=1UL, mask = 1UL; idx <= patternlength; idx++, mask <<= 1)
+  for (idx=1UL, mask = 1UL; idx <= mti->patternlength; idx++, mask <<= 1)
   {
     if (col->Pv & mask)
     {
@@ -138,9 +147,9 @@ static void verifycolumnvalues(const Matchtaskinfo *mti,
   if (bfmaxleqk != col->maxleqk)
   {
     fprintf(stderr,"correct maxleqk = ");
-    showmaxleqvalue(stderr,bfmaxleqk,patternlength);
+    showmaxleqvalue(stderr,bfmaxleqk,mti);
     fprintf(stderr," != ");
-    showmaxleqvalue(stderr,col->maxleqk,patternlength);
+    showmaxleqvalue(stderr,col->maxleqk,mti);
     fprintf(stderr," = col->maxleqk\n");
     exit(EXIT_FAILURE);
   }
@@ -153,23 +162,13 @@ static void verifycolumnvalues(const Matchtaskinfo *mti,
   }
 }
 
-static void showinterval(bool withesa,const Lcpinterval *itv)
-{
-  Seqpos width;
-
-  width = withesa ? (itv->right - itv->left + 1) : itv->right - itv->left;
-  printf("(%lu,width=%lu)",(unsigned long) itv->offset,(unsigned long) width);
-  printf("(%lu,%lu)",(unsigned long) itv->left,
-                     (unsigned long) (withesa ? itv->right : itv->right-1));
-}
-
 #endif
 
-static void initdfsconstinfo(void *dfsconstinfo,
-                             unsigned int alphasize,
-                             const Uchar *pattern,
-                             unsigned long patternlength,
-                             unsigned long maxdistance)
+static void apm_initdfsconstinfo(void *dfsconstinfo,
+                                 unsigned int alphasize,
+                                 const Uchar *pattern,
+                                 unsigned long patternlength,
+                                 unsigned long maxdistance)
 {
   unsigned long *eptr, shiftmask;
   const Uchar *pptr;
@@ -193,27 +192,27 @@ static void initdfsconstinfo(void *dfsconstinfo,
   mti->maxdistance = maxdistance;
 }
 
-static void *allocatedfsconstinfo(unsigned int alphasize)
+static void *apm_allocatedfsconstinfo(unsigned int alphasize)
 {
   Matchtaskinfo *mti = ma_malloc(sizeof(Matchtaskinfo));
   mti->eqsvector = ma_malloc(sizeof(*mti->eqsvector) * alphasize);
   return mti;
 }
 
-static void freedfsconstinfo(void **dfsinfo)
+static void apm_freedfsconstinfo(void **dfsconstinfo)
 {
-  Matchtaskinfo *mti = (Matchtaskinfo *) *dfsinfo;
+  Matchtaskinfo *mti = (Matchtaskinfo *) *dfsconstinfo;
 
   ma_free(mti->eqsvector);
   ma_free(mti);
-  *dfsinfo = NULL;
+  *dfsconstinfo = NULL;
 }
 
-static unsigned long limdfsnextstep(const void *voidlimdfsstate,
-                                    const void *dfsconstinfo)
+static unsigned long apm_limdfsnextstep(const DECLAREPTRDFSSTATE(aliascolumn),
+                                        const void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
-  const Limdfsstate *limdfsstate = (const Limdfsstate *) voidlimdfsstate;
+  const Myerscolumn *limdfsstate = (const Myerscolumn *) aliascolumn;
 
   if (limdfsstate->maxleqk == UNDEFMAXLEQK)
   {
@@ -228,22 +227,19 @@ static unsigned long limdfsnextstep(const void *voidlimdfsstate,
 
 /* implement types Limdfsstate and all function appearing until here */
 
-#define DECLAREPTRDFSSTATE(V)\
-        char * V
-
-static void nextDfsstate(const void *dfsconstinfo,
-                         DECLAREPTRDFSSTATE(aliasoutcol),
-                         UNUSED unsigned long startscore,
-                         Uchar currentchar,
-                         const DECLAREPTRDFSSTATE(aliasincol))
+static void apm_nextDfsstate(const void *dfsconstinfo,
+                             DECLAREPTRDFSSTATE(aliasoutcol),
+                             UNUSED unsigned long startscore,
+                             Uchar currentchar,
+                             const DECLAREPTRDFSSTATE(aliasincol))
 {
   unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
                 backmask,               /* only one bit is on */
                 idx,                    /* a counter */
                 score;                  /* current score */
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
-  Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
-  Limdfsstate *incol = (Limdfsstate *) aliasincol;
+  Myerscolumn *outcol = (Myerscolumn *) aliasoutcol;
+  const Myerscolumn *incol = (const Myerscolumn *) aliasincol;
 
   assert(incol->maxleqk != UNDEFMAXLEQK && incol->maxleqk != SUCCESSMAXLEQK);
   assert(currentchar != (Uchar) SEPARATOR);
@@ -315,22 +311,20 @@ static void nextDfsstate(const void *dfsconstinfo,
     }
   }
 #ifdef SKDEBUG
-  verifycolumnvalues(mti,
-                     outcol,
-                     startscore+1);
+  verifycolumnvalues(mti,outcol,startscore+1);
 #endif
 }
 
-static void inplacenextDfsstate(const void *dfsconstinfo,
-                                void *limdfsstate,
-                                Uchar currentchar)
+static void apm_inplacenextDfsstate(const void *dfsconstinfo,
+                                    DECLAREPTRDFSSTATE(limdfsstate),
+                                    Uchar currentchar)
 {
   unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
                 backmask,           /* only one bit is on */
                 idx,                /* a counter */
                 score;              /* current score */
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
-  Limdfsstate *col = (Limdfsstate *) limdfsstate;
+  Myerscolumn *col = (Myerscolumn *) limdfsstate;
 
   assert(col->maxleqk != UNDEFMAXLEQK && col->maxleqk != SUCCESSMAXLEQK);
   if (currentchar != (Uchar) WILDCARD)
@@ -394,16 +388,16 @@ static void inplacenextDfsstate(const void *dfsconstinfo,
   }
 }
 
-static void copyDfsstate(DECLAREPTRDFSSTATE(als),
-                         const DECLAREPTRDFSSTATE(dfsstate))
+static void apm_copyDfsstate(DECLAREPTRDFSSTATE(aliasdest),
+                             const DECLAREPTRDFSSTATE(aliassrc))
 {
-  memcpy(als,dfsstate,sizeof(Limdfsstate));
+  memcpy(aliasdest,aliassrc,sizeof (Myerscolumn));
 }
 
-static void initlimdfsstate(DECLAREPTRDFSSTATE(aliasstate),
-                            const void *dfsconstinfo)
+static void apm_initlimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
+                                const void *dfsconstinfo)
 {
-  Limdfsstate *column = (Limdfsstate *) aliasstate;
+  Myerscolumn *column = (Myerscolumn *) aliascolumn;
 
   column->Pv = ~0UL;
   column->Mv = 0UL;
@@ -413,10 +407,8 @@ static void initlimdfsstate(DECLAREPTRDFSSTATE(aliasstate),
 #endif
 }
 
-#define MAXSIZEOFLIMDFSSTATE (4 * sizeof (unsigned long))
-
 #define DECLAREDFSSTATE(V)\
-        char V[MAXSIZEOFLIMDFSSTATE]
+        Aliasdfsstate V[4]
 
 typedef struct
 {
@@ -467,8 +459,8 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->withesa = withesa;
   limdfsresources->nospecials = nospecials;
   /* Application specific */
-  limdfsresources->dfsconstinfo = allocatedfsconstinfo((unsigned int)
-                                                  limdfsresources->alphasize);
+  limdfsresources->dfsconstinfo
+    = apm_allocatedfsconstinfo((unsigned int) limdfsresources->alphasize);
   if (withesa)
   {
     limdfsresources->rangeOccs = NULL;
@@ -497,14 +489,14 @@ static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
   stackptr->lcpitv.offset = 0;
   stackptr->lcpitv.left = left;
   stackptr->lcpitv.right = right;
-  initlimdfsstate(stackptr->aliasstate,dfsconstinfo);
+  apm_initlimdfsstate(stackptr->aliasstate,dfsconstinfo);
 }
 
 void freeLimdfsresources(Limdfsresources **ptrlimdfsresources)
 {
   Limdfsresources *limdfsresources = *ptrlimdfsresources;
 
-  freedfsconstinfo(&limdfsresources->dfsconstinfo);
+  apm_freedfsconstinfo(&limdfsresources->dfsconstinfo);
   FREEARRAY(&limdfsresources->bwci,Boundswithchar);
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(limdfsresources->rangeOccs);
@@ -565,33 +557,34 @@ Definedunsignedlong esa_findshortestmatch(const Encodedsequence *encseq,
   Seqpos pos, totallength = getencseqtotallength(encseq);
   void *dfsconstinfo;
   Matchtaskinfo *mti;
-  Limdfsstate currentcol;
+  Myerscolumn currentcol;
   Uchar cc;
   Definedunsignedlong result;
 
-  dfsconstinfo = allocatedfsconstinfo(alphasize);
+  dfsconstinfo = apm_allocatedfsconstinfo(alphasize);
   mti = (Matchtaskinfo *) dfsconstinfo;
-  initdfsconstinfo(dfsconstinfo,alphasize,pattern,patternlength,maxdistance);
-  initlimdfsstate((char *) &currentcol,dfsconstinfo);
+  apm_initdfsconstinfo(dfsconstinfo,alphasize,pattern,patternlength,
+                       maxdistance);
+  apm_initlimdfsstate((Aliasdfsstate *) &currentcol,dfsconstinfo);
   for (pos = startpos; /* Nothing */; pos++)
   {
     assert(pos - startpos <= (Seqpos) (patternlength + maxdistance));
     cc = getencodedchar(encseq,pos,Forwardmode);
     if (nospecials && cc == (Uchar) WILDCARD)
     {
-      freedfsconstinfo(&dfsconstinfo);
+      apm_freedfsconstinfo(&dfsconstinfo);
       result.defined = false;
       result.valueunsignedlong = 0;
       return result;
     }
-    inplacenextDfsstate(dfsconstinfo,&currentcol,cc);
+    apm_inplacenextDfsstate(dfsconstinfo,(Aliasdfsstate *) &currentcol,cc);
     assert (currentcol.maxleqk != UNDEFMAXLEQK);
     if (currentcol.maxleqk == SUCCESSMAXLEQK || pos == totallength-1)
     {
       break;
     }
   }
-  freedfsconstinfo(&dfsconstinfo);
+  apm_freedfsconstinfo(&dfsconstinfo);
   result.defined = true;
   result.valueunsignedlong = (unsigned long) (pos - startpos + 1);
   return result;
@@ -611,7 +604,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   const Suffixarray *suffixarray
     = (const Suffixarray *) limdfsresources->genericindex;
 
-  copyDfsstate(currentdfsstate,dfsstate);
+  apm_copyDfsstate(currentdfsstate,dfsstate);
   startpos = suffixarray->suftab[left];
 #ifdef SKDEBUG
   printf("retrieve context of startpos=%lu\n",(unsigned long) startpos);
@@ -625,9 +618,10 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
 #endif
-      inplacenextDfsstate(limdfsresources->dfsconstinfo,&currentdfsstate,cc);
-      pprefixlen = limdfsnextstep(&currentdfsstate,
-                                   limdfsresources->dfsconstinfo);
+      apm_inplacenextDfsstate(limdfsresources->dfsconstinfo,
+                              currentdfsstate,cc);
+      pprefixlen = apm_limdfsnextstep(currentdfsstate,
+                                      limdfsresources->dfsconstinfo);
       if (pprefixlen == 0) /* failure */
       {
         break;
@@ -662,7 +656,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
   Bwtseqcontextiterator *bsci
     = newBwtseqcontextiterator(limdfsresources->genericindex,left);
 
-  copyDfsstate(currentdfsstate,dfsstate);
+  apm_copyDfsstate(currentdfsstate,dfsstate);
 #ifdef SKDEBUG
   printf("retrieve context for left = %lu\n",(unsigned long) left);
 #endif
@@ -682,9 +676,10 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
 #endif
-      inplacenextDfsstate(limdfsresources->dfsconstinfo,currentdfsstate,cc);
-      pprefixlen = limdfsnextstep(currentdfsstate,
-                                  limdfsresources->dfsconstinfo);
+      apm_inplacenextDfsstate(limdfsresources->dfsconstinfo,
+                              currentdfsstate,cc);
+      pprefixlen = apm_limdfsnextstep(currentdfsstate,
+                                      limdfsresources->dfsconstinfo);
       if (pprefixlen == 0)
       {
         break;
@@ -719,23 +714,23 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
   stackptr->lcpitv = *child;
 
 #ifdef SKDEBUG
-  printf("(2) nextDfsstate(");
-  showLimdfsstate(indfsstate,(unsigned long) (child->offset-1),
-                  limdfsresources->dfsconstinfo);
+  printf("(2) apm_nextDfsstate(");
+  apm_showLimdfsstate(indfsstate,(unsigned long) (child->offset-1),
+                      limdfsresources->dfsconstinfo);
   printf(",%u)=",(unsigned int) inchar);
 #endif
-  nextDfsstate(limdfsresources->dfsconstinfo,
+  apm_nextDfsstate(limdfsresources->dfsconstinfo,
                stackptr->aliasstate,
                (unsigned long) (child->offset-1),
                inchar,
                indfsstate);
 #ifdef SKDEBUG
-  showLimdfsstate(&stackptr->dfsstate,(unsigned long) child->offset,
-                  limdfsresources->dfsconstinfo);
+  apm_showLimdfsstate(stackptr->aliasstate,(unsigned long) child->offset,
+                      limdfsresources->dfsconstinfo);
   printf("\n");
 #endif
-  pprefixlen = limdfsnextstep(stackptr->aliasstate,
-                              limdfsresources->dfsconstinfo);
+  pprefixlen = apm_limdfsnextstep(stackptr->aliasstate,
+                                  limdfsresources->dfsconstinfo);
   if (pprefixlen == 0)
   {
     return true;
@@ -788,6 +783,20 @@ static void processchildinterval(Limdfsresources *limdfsresources,
   }
 }
 
+#ifdef SKDEBUG
+
+static void showLCPinterval(bool withesa,const Lcpinterval *itv)
+{
+  Seqpos width;
+
+  width = withesa ? (itv->right - itv->left + 1) : itv->right - itv->left;
+  printf("(%lu,width=%lu)",(unsigned long) itv->offset,(unsigned long) width);
+  printf("(%lu,%lu)",(unsigned long) itv->left,
+                     (unsigned long) (withesa ? itv->right : itv->right-1));
+}
+
+#endif
+
 static void esa_splitandprocess(Limdfsresources *limdfsresources,
                                 const Lcpintervalwithinfo *parentwithinfo)
 {
@@ -831,9 +840,9 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     child.right = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
-    showinterval(limdfsresources->withesa,parent);
+    showLCPinterval(limdfsresources->withesa,parent);
     printf(" is ");
-    showinterval(limdfsresources->withesa,&child);
+    showLCPinterval(limdfsresources->withesa,&child);
     printf("\n");
 #endif
     processchildinterval(limdfsresources,
@@ -879,9 +888,9 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     sumwidth += child.right - child.left;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
-    showinterval(limdfsresources->withesa,parent);
+    showLCPinterval(limdfsresources->withesa,parent);
     printf(" is ");
-    showinterval(limdfsresources->withesa,&child);
+    showLCPinterval(limdfsresources->withesa,&child);
     printf("\n");
 #endif
     processchildinterval(limdfsresources,
@@ -911,9 +920,10 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
 #define SHOWSTACKTOP(STACKPTR)\
         printf("top=");\
-        showinterval(limdfsresources->withesa,&STACKPTR->lcpitv);\
-        showLimdfsstate(&STACKPTR->dfsstate,\
-               (unsigned long) STACKPTR->lcpitv.offset,patternlength);\
+        showLCPinterval(limdfsresources->withesa,&STACKPTR->lcpitv);\
+        apm_showLimdfsstate(STACKPTR->aliasstate,\
+                            (unsigned long) STACKPTR->lcpitv.offset,\
+                            limdfsresources->dfsconstinfo);\
         printf("\n")
 #else
 #define SHOWSTACKTOP(STACKPTR) /* Nothing */
@@ -926,11 +936,15 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
 {
   Lcpintervalwithinfo *stackptr, parentwithinfo;
 
-  assert(deliversizeofdfsstate() <= MAXSIZEOFLIMDFSSTATE);
+  printf("deliversizeofdfsstate()=%lu\n",
+          (unsigned long) deliversizeofdfsstate());
+  printf("sizeof (parentwithinfo.aliasstate)=%lu\n",
+          (unsigned long) sizeof (parentwithinfo.aliasstate));
+  assert(deliversizeofdfsstate() <= sizeof (parentwithinfo.aliasstate));
   assert(maxdistance < patternlength);
-  initdfsconstinfo(limdfsresources->dfsconstinfo,
-                   (unsigned int) limdfsresources->alphasize,
-                   pattern,patternlength,maxdistance);
+  apm_initdfsconstinfo(limdfsresources->dfsconstinfo,
+                       (unsigned int) limdfsresources->alphasize,
+                       pattern,patternlength,maxdistance);
   initlcpinfostack(&limdfsresources->stack,
                    0,
                    limdfsresources->withesa
