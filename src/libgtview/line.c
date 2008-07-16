@@ -60,6 +60,8 @@ Array* line_get_blocks(Line* line)
 
 int line_unit_test(Error *err)
 {
+  FeatureTypeFactory *feature_type_factory;
+  GenomeFeatureType *type;
   Range r1, r2, r3, r4, r_parent;
   Array* blocks;
   Str *seqid1, *seqid2, *seqid3;
@@ -73,6 +75,8 @@ int line_unit_test(Error *err)
   const char* foo = "foo";
   const char* bar = "bar";
   const char* blub = "blub";
+
+  feature_type_factory = feature_type_factory_new();
 
   if (!(cfg = config_new(false, err)))
     had_err = -1;
@@ -96,11 +100,15 @@ int line_unit_test(Error *err)
   seqid2 = str_new_cstr("test2");
   seqid3 = str_new_cstr("foo");
 
-  parent = genome_feature_new(gft_gene, r_parent, STRAND_FORWARD, NULL, 0);
-  gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0);
-  gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, NULL, 0);
-  gn3 = genome_feature_new(gft_exon, r3, STRAND_FORWARD, NULL, 0);
-  gn4 = genome_feature_new(gft_TF_binding_site, r4, STRAND_FORWARD, NULL, 0);
+  type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
+  parent = genome_feature_new(type, r_parent, STRAND_FORWARD, NULL, 0);
+  type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
+  gn1 = genome_feature_new(type, r1, STRAND_FORWARD, NULL, 0);
+  gn2 = genome_feature_new(type, r2, STRAND_FORWARD, NULL, 0);
+  gn3 = genome_feature_new(type, r3, STRAND_FORWARD, NULL, 0);
+  type = feature_type_factory_create_gft(feature_type_factory,
+                                         gft_TF_binding_site);
+  gn4 = genome_feature_new(type, r4, STRAND_FORWARD, NULL, 0);
 
   genome_node_set_seqid((GenomeNode*) parent, seqid1);
   genome_node_set_seqid((GenomeNode*) gn1, seqid3);
@@ -151,6 +159,7 @@ int line_unit_test(Error *err)
   genome_node_delete(gn2);
   genome_node_delete(gn3);
   genome_node_delete(gn4);
+  feature_type_factory_delete(feature_type_factory);
 
   return had_err;
 }

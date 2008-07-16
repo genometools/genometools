@@ -20,7 +20,7 @@
 #include "libgtext/region_mapping.h"
 #include "libgtext/reverse.h"
 
-static int extract_join_feature(GenomeNode *gn, GenomeFeatureType type,
+static int extract_join_feature(GenomeNode *gn, GenomeFeatureType *type,
                                 RegionMapping *region_mapping, Str *sequence,
                                 bool *reverse_strand, Error *err)
 {
@@ -56,8 +56,9 @@ static int extract_join_feature(GenomeNode *gn, GenomeFeatureType type,
   return had_err;
 }
 
-int extract_feat_sequence(Str *sequence, GenomeNode *gn, GenomeFeatureType type,
-                          bool join, RegionMapping *region_mapping, Error *err)
+int extract_feat_sequence(Str *sequence, GenomeNode *gn,
+                          GenomeFeatureType *type, bool join,
+                          RegionMapping *region_mapping, Error *err)
 {
   GenomeFeature *gf;
   Range range;

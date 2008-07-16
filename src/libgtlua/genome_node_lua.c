@@ -22,13 +22,15 @@
 #include "libgtext/luahelper.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/genome_visitor_lua.h"
+#include "libgtlua/gt_lua.h"
 #include "libgtlua/range_lua.h"
 #include "libgtlua/region_mapping_lua.h"
 
 static int genome_feature_lua_new(lua_State *L)
 {
+  FeatureTypeFactory *feature_type_factory;
   GenomeNode **gf;
-  GenomeFeatureType type;
+  GenomeFeatureType *type;
   Range *range;
   Strand strand;
   const char *type_str, *strand_str;
@@ -37,8 +39,10 @@ static int genome_feature_lua_new(lua_State *L)
   assert(L);
   /* get/check parameters */
   type_str = luaL_checkstring(L, 1);
-  luaL_argcheck(L, !genome_feature_type_get(&type, type_str), 1,
-                "invalid feature type");
+  feature_type_factory = lua_get_feature_type_factory_from_registry(L);
+  assert(feature_type_factory);
+  type = feature_type_factory_create_gft(feature_type_factory, type_str);
+  luaL_argcheck(L, type, 1, "invalid feature type");
   range = check_range(L, 2);
   strand_str = luaL_checklstring(L, 3, &length);
   luaL_argcheck(L, length == 1, 3, "strand string must have length 1");
@@ -229,7 +233,7 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   GenomeNode **gn;
   GenomeFeature *gf;
   const char *typestr;
-  GenomeFeatureType type;
+  GenomeFeatureType *type;
   bool join;
   RegionMapping **region_mapping;
   Str *sequence;
@@ -239,14 +243,15 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   gf = genome_node_cast(genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
   typestr = lua_tostring(L, 2);
-  luaL_argcheck(L, !genome_feature_type_get(&type, typestr), 2,
-                "not a valid type");
+  type = genome_feature_type_construct(NULL, typestr);
+  luaL_argcheck(L, !type, 2, "not a valid type");
   join = lua_toboolean(L, 3);
   region_mapping = check_region_mapping(L, 4);
   err = error_new();
   sequence = str_new();
   if (extract_feat_sequence(sequence, *gn, type, join, *region_mapping, err)) {
     str_delete(sequence);
+    genome_feature_type_delete(type);
     return lua_gt_error(L, err);
   }
   if (str_length(sequence))
@@ -255,6 +260,7 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
     lua_pushnil(L);
   str_delete(sequence);
   error_delete(err);
+  genome_feature_type_delete(type);
   return 1;
 }
 

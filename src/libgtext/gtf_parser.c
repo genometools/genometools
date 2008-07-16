@@ -37,6 +37,7 @@ struct GTF_parser {
             *gene_id_hash, /* map from gene_id to transcript_id hash */
             *seqid_to_str_mapping,
             *source_to_str_mapping;
+  FeatureTypeFactory *feature_type_factory;
 };
 
 typedef enum {
@@ -71,7 +72,7 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
   return -1;
 }
 
-GTF_parser* gtf_parser_new(void)
+GTF_parser* gtf_parser_new(FeatureTypeFactory *feature_type_factory)
 {
   GTF_parser *parser = ma_malloc(sizeof (GTF_parser));
   parser->sequence_region_to_range = hashtable_new(HASH_STRING,
@@ -83,6 +84,7 @@ GTF_parser* gtf_parser_new(void)
                                                (FreeFunc) str_delete);
   parser->source_to_str_mapping = hashtable_new(HASH_STRING, NULL,
                                                 (FreeFunc) str_delete);
+  parser->feature_type_factory = feature_type_factory;
   return parser;
 }
 
@@ -143,7 +145,12 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
   }
 
   if (!had_err) {
-    mRNA_node = genome_feature_new(gft_mRNA, mRNA_range, mRNA_strand, NULL, 0);
+    GenomeFeatureType *mRNA_type;
+    mRNA_type = genome_feature_create_gft(*(GenomeFeature**)
+                                          array_get_first(genome_node_array),
+                                          gft_mRNA);
+    assert(mRNA_type);
+    mRNA_node = genome_feature_new(mRNA_type, mRNA_range, mRNA_strand, NULL, 0);
     genome_node_set_seqid(mRNA_node, mRNA_seqid);
 
     /* register children */
@@ -177,6 +184,7 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
 
   had_err = hashtable_foreach(transcript_id_hash, construct_mRNAs, mRNAs, err);
   if (!had_err) {
+    GenomeFeatureType *gene_type;
     assert(array_size(mRNAs)); /* at least one mRNA constructed */
 
     /* determine the range and the strand of the gene */
@@ -192,7 +200,9 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
       assert(str_cmp(gene_seqid, genome_node_get_seqid(gn)) == 0);
     }
 
-    gene_node = genome_feature_new(gft_gene, gene_range, gene_strand, NULL, 0);
+    gene_type = genome_feature_create_gft((GenomeFeature*) gn, gft_gene);
+    assert(gene_type);
+    gene_node = genome_feature_new(gene_type, gene_range, gene_strand, NULL, 0);
     genome_node_set_seqid(gene_node, gene_seqid);
 
     /* register children */
@@ -242,8 +252,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
                                     nodes */
   Array *genome_node_array;
   GTF_feature_type gtf_feature_type;
-  /* abuse gft_TF_binding_site as an undefined value */
-  GenomeFeatureType gff_feature_type = gft_TF_binding_site;
+  GenomeFeatureType *gff_feature_type = NULL;
   const char *filename;
   int had_err = 0;
 
@@ -320,12 +329,16 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       switch (gtf_feature_type) {
         case GTF_CDS:
         case GTF_stop_codon:
-          gff_feature_type = gft_CDS;
+          gff_feature_type =
+            feature_type_factory_create_gft(parser->feature_type_factory,
+                                            gft_CDS);
           break;
         case GTF_exon:
-          gff_feature_type = gft_exon;
+          gff_feature_type =
+            feature_type_factory_create_gft(parser->feature_type_factory,
+                                            gft_exon);
       }
-      assert(gff_feature_type != gft_TF_binding_site);
+      assert(gff_feature_type);
 
       /* parse the range */
       had_err = parse_range(&range, start, end, line_number, filename, err);

@@ -21,6 +21,7 @@
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/unused.h"
+#include "libgtcore/string_distri.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_visitor_rep.h"
 #include "libgtext/gff3_output.h"
@@ -30,7 +31,7 @@
 struct GFF3Visitor {
   const GenomeVisitor parent_instance;
   bool version_string_shown;
-  unsigned long *id_counter;
+  StringDistri *id_counter;
   Hashtable *genome_feature_to_id_array,
             *genome_feature_to_unique_id_str;
   GenFile *outfp;
@@ -64,7 +65,7 @@ static void gff3_visitor_free(GenomeVisitor *gv)
 {
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
-  ma_free(gff3_visitor->id_counter);
+  string_distri_delete(gff3_visitor->id_counter);
   hashtable_delete(gff3_visitor->genome_feature_to_id_array);
   hashtable_delete(gff3_visitor->genome_feature_to_unique_id_str);
 }
@@ -172,7 +173,7 @@ static int store_ids(GenomeNode *gn, void *data, Error *e)
 {
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
-  GenomeFeatureType type;
+  GenomeFeatureType *type;
   Add_id_info add_id_info;
   int had_err = 0;
   Str *id;
@@ -183,11 +184,13 @@ static int store_ids(GenomeNode *gn, void *data, Error *e)
 
   if (genome_node_has_children(gn)) {
     /* increase id counter */
-    gff3_visitor->id_counter[type]++;
+    string_distri_add(gff3_visitor->id_counter,
+                      genome_feature_type_get_cstr(type));
 
     /* build id string */
     id = str_new_cstr(genome_feature_type_get_cstr(type));
-    str_append_ulong(id, gff3_visitor->id_counter[type]);
+    str_append_ulong(id, string_distri_get(gff3_visitor->id_counter,
+                                           genome_feature_type_get_cstr(type)));
 
     /* store (unique) id */
     hashtable_add(gff3_visitor->genome_feature_to_unique_id_str, gn, id);
@@ -274,8 +277,7 @@ GenomeVisitor* gff3_visitor_new(GenFile *outfp)
   GenomeVisitor *gv = genome_visitor_create(gff3_visitor_class());
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   gff3_visitor->version_string_shown = false;
-  gff3_visitor->id_counter = ma_calloc(genome_feature_type_num_of_features(),
-                                       sizeof (unsigned long));
+  gff3_visitor->id_counter = string_distri_new();
   gff3_visitor->genome_feature_to_id_array = hashtable_new(HASH_DIRECT, NULL,
                                                            (FreeFunc)
                                                            array_delete);

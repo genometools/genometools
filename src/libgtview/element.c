@@ -25,7 +25,7 @@
 #include "libgtview/element.h"
 
 struct Element {
-  GenomeFeatureType type;
+  GenomeFeatureType *type;
   Range range;
   bool mark;
 };
@@ -36,7 +36,7 @@ Element* element_new(GenomeNode *gn)
   GenomeFeature *gf = (GenomeFeature*) gn;
   assert(gn);
   element = element_new_empty();
-  element_set_type(element,genome_feature_get_type(gf));
+  element_set_type(element, genome_feature_get_type(gf));
   element_set_range(element, genome_node_get_range(gn));
   element->mark = genome_node_is_marked(gn);
   return element;
@@ -59,13 +59,13 @@ void element_set_range(Element *element, Range r)
   element->range = r;
 }
 
-GenomeFeatureType element_get_type(const Element *element)
+GenomeFeatureType* element_get_type(const Element *element)
 {
   assert(element);
   return element->type;
 }
 
-void element_set_type(Element *element, GenomeFeatureType type)
+void element_set_type(Element *element, GenomeFeatureType *type)
 {
   assert(element);
   element->type = type;
@@ -87,11 +87,15 @@ bool elements_are_equal(const Element *e1, const Element *e2)
 
 int element_unit_test(Error *err)
 {
+  FeatureTypeFactory *feature_type_factory;
+  GenomeFeatureType *type;
   Range r1, r2, r_temp;
   GenomeNode *gn, *gn2;
   Element *e, *e2, *e3;
   int had_err = 0;
   error_check(err);
+
+  feature_type_factory = feature_type_factory_new();
 
   r1.start = 10UL;
   r1.end = 50UL;
@@ -99,8 +103,9 @@ int element_unit_test(Error *err)
   r2.start = 20UL;
   r2.end = 50UL;
 
-  gn = genome_feature_new(gft_exon, r1, STRAND_BOTH, NULL, 0);
-  gn2 = genome_feature_new(gft_exon, r2, STRAND_BOTH, NULL, 0);
+  type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
+  gn = genome_feature_new(type, r1, STRAND_BOTH, NULL, 0);
+  gn2 = genome_feature_new(type, r2, STRAND_BOTH, NULL, 0);
 
   e = element_new(gn);
   e2 = element_new(gn);
@@ -112,11 +117,12 @@ int element_unit_test(Error *err)
   ensure(had_err, (1 == range_compare(r2, r_temp)));
 
   /* tests element_get_type and element_set_type*/
-  ensure(had_err, (gft_exon == element_get_type(e)));
-  ensure(had_err, (gft_intron != element_get_type(e)));
-  element_set_type(e, gft_intron);
-  ensure(had_err, (gft_intron == element_get_type(e)));
-  element_set_type(e2, gft_intron);
+  ensure(had_err, (type == element_get_type(e)));
+  type = feature_type_factory_create_gft(feature_type_factory, gft_intron);
+  ensure(had_err, (type != element_get_type(e)));
+  element_set_type(e, type);
+  ensure(had_err, (type == element_get_type(e)));
+  element_set_type(e2, type);
 
   /* tests elements_are_equal */
   ensure(had_err, elements_are_equal(e, e2));
@@ -128,6 +134,7 @@ int element_unit_test(Error *err)
   element_delete(e3);
   genome_node_delete(gn);
   genome_node_delete(gn2);
+  feature_type_factory_delete(feature_type_factory);
 
   return had_err;
 

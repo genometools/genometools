@@ -28,7 +28,7 @@ struct Block {
   Str *caption;
   bool show_caption;
   Strand strand;
-  GenomeFeatureType type;
+  GenomeFeatureType *type;
 };
 
 /* Compare function used to insert Elements into dlist, order by type */
@@ -37,19 +37,23 @@ static int elemcmp(const void *a, const void *b)
   Element *elem_a = (Element*) a;
   Element *elem_b = (Element*) b;
 
-  GenomeFeatureType ta = element_get_type(elem_a);
-  GenomeFeatureType tb = element_get_type(elem_b);
+  GenomeFeatureType *ta = element_get_type(elem_a);
+  GenomeFeatureType *tb = element_get_type(elem_b);
 
   if (ta == tb)
     return 0;
-  else return (ta < tb ? 1 : -1);
+  else if (strcmp(genome_feature_type_get_cstr(ta),
+                  genome_feature_type_get_cstr(tb)) < 0) {
+    return 1;
+  }
+  return -1;
 }
 
 Block* block_new(void)
 {
   Block *block;
   Range r;
-  block = ma_malloc(sizeof (Block));
+  block = ma_calloc(1, sizeof (Block));
   block->elements = dlist_new(elemcmp);
   r.start = 0;
   r.end = 0;
@@ -75,7 +79,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg)
 {
   Range gn_r;
   Element *e;
-  GenomeFeatureType gn_type;
+  GenomeFeatureType *gn_type;
 
   assert(block && gn && cfg);
 
@@ -153,13 +157,13 @@ Strand block_get_strand(const Block *block)
   return block->strand;
 }
 
-void block_set_type(Block *block, GenomeFeatureType type)
+void block_set_type(Block *block, GenomeFeatureType *type)
 {
   assert(block);
   block->type = type;
 }
 
-GenomeFeatureType block_get_type(const Block *block)
+GenomeFeatureType* block_get_type(const Block *block)
 {
   assert(block);
   return block->type;
@@ -173,6 +177,8 @@ Dlist* block_get_elements(const Block *block)
 
 int block_unit_test(Error *err)
 {
+  FeatureTypeFactory *feature_type_factory;
+  GenomeFeatureType *gft;
   Range r1, r2, r_temp, b_range;
   Dlist* elements;
   int had_err = 0;
@@ -180,10 +186,14 @@ int block_unit_test(Error *err)
   GenomeNode *gn1, *gn2;
   Element *e1, *e2, *elem;
   Block * b;
-  Str *caption1 = str_new_cstr("foo");
-  Str *caption2 = str_new_cstr("bar");
+  Str *caption1;
+  Str *caption2;
   Config *cfg;
   error_check(err);
+
+  feature_type_factory = feature_type_factory_new();
+  caption1 = str_new_cstr("foo");
+  caption2 = str_new_cstr("bar");
 
   if (!(cfg = config_new(false, err)))
     had_err = -1;
@@ -194,8 +204,10 @@ int block_unit_test(Error *err)
   r2.start = 40UL;
   r2.end = 50UL;
 
-  gn1 = genome_feature_new(gft_gene, r1, STRAND_FORWARD, NULL, 0);
-  gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, NULL, 0);
+  gft = feature_type_factory_create_gft(feature_type_factory, gft_gene);
+  gn1 = genome_feature_new(gft, r1, STRAND_FORWARD, NULL, 0);
+  gft = feature_type_factory_create_gft(feature_type_factory, gft_exon);
+  gn2 = genome_feature_new(gft, r2, STRAND_FORWARD, NULL, 0);
 
   e1 = element_new(gn1);
   e2 = element_new(gn2);
@@ -244,6 +256,7 @@ int block_unit_test(Error *err)
   block_delete(b);
   genome_node_delete(gn1);
   genome_node_delete(gn2);
+  feature_type_factory_delete(feature_type_factory);
 
   return had_err;
 }

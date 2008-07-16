@@ -31,7 +31,8 @@ typedef struct {
   Str *typestr,
       *seqfile,
       *regionmapping;
-  GenomeFeatureType type;
+  GenomeFeatureType *type;
+  FeatureTypeFactory *feature_type_factory;
 } ExtractFeatArguments;
 
 static void* gt_extractfeat_arguments_new(void)
@@ -40,6 +41,7 @@ static void* gt_extractfeat_arguments_new(void)
   arguments->typestr = str_new();
   arguments->seqfile = str_new();
   arguments->regionmapping = str_new();
+  arguments->feature_type_factory = feature_type_factory_new();
   return arguments;
 }
 
@@ -47,6 +49,7 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
 {
   ExtractFeatArguments *arguments = tool_arguments;
   if (!arguments) return;
+  feature_type_factory_delete(arguments->feature_type_factory);
   str_delete(arguments->regionmapping);
   str_delete(arguments->seqfile);
   str_delete(arguments->typestr);
@@ -105,8 +108,9 @@ static int gt_extractfeat_arguments_check(UNUSED int argc, void *tool_arguments,
   assert(arguments);
 
   /* determine type and make sure it is a valid one */
-  if (genome_feature_type_get(&arguments->type,
-                              str_get(arguments->typestr)) == -1) {
+  if (!(arguments->type =
+          feature_type_factory_create_gft(arguments->feature_type_factory,
+                                          str_get(arguments->typestr)))) {
     error_set(err, "\"%s\" is not a valid feature type",
               str_get(arguments->typestr));
     had_err = -1;
@@ -132,6 +136,8 @@ static int gt_extractfeat_runner(UNUSED int argc, const char **argv,
     /* create gff3 input stream */
     gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
                                                arguments->verbose);
+    gff3_in_stream_set_feature_type_factory(gff3_in_stream,
+                                            arguments->feature_type_factory);
 
     /* create region mapping */
     regionmapping = seqid2file_regionmapping_new(arguments->seqfile,

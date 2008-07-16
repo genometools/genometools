@@ -120,30 +120,26 @@ Array* feature_index_get_features_for_seqid(FeatureIndex *fi, const char *seqid)
 
 int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
                                          const char *seqid, Range qry_range,
-                                         Error *e)
+                                         Error *err)
 {
   Array* base;
-  GenomeNode* key;
   unsigned long i;
 
-  error_check(e);
+  error_check(err);
   assert(fi && results);
 
   base = feature_index_get_features_for_seqid(fi, seqid);
   if (!base) {
-    error_set(e, "feature index does not contain the given sequence id");
+    error_set(err, "feature index does not contain the given sequence id");
     return -1;
   }
   assert(fi && results && seqid && base && (qry_range.start < qry_range.end));
-  key = genome_feature_new(gft_gene, qry_range, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG);
   for (i = 0; i < array_size(base); i++) {
     GenomeNode *gn = *(GenomeNode**) array_get(base, i);
     Range r = genome_node_get_range(gn);
     if (range_overlap(r, qry_range))
       array_add(results, gn);
   }
-  genome_node_delete(key);
   array_delete(base);
   return 0;
 }
@@ -205,6 +201,8 @@ bool feature_index_has_seqid(const FeatureIndex *fi, const char *seqid)
 
 int feature_index_unit_test(Error *err)
 {
+  FeatureTypeFactory *feature_type_factory;
+  GenomeFeatureType *type;
   /* first we have to create some objects that we can use for testing */
   GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   FeatureIndex *fi;
@@ -215,6 +213,8 @@ int feature_index_unit_test(Error *err)
   Array *features = NULL;
   int had_err = 0;
   error_check(err);
+
+  feature_type_factory = feature_type_factory_new();
 
   /* generating some ranges */
   r1.start=100UL; r1.end=1000UL;
@@ -233,23 +233,26 @@ int feature_index_unit_test(Error *err)
 
   /* generate a new genome_feature with the property gft_gene and the range r1
      ... */
-  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
+  gn1 = genome_feature_new(type, r1, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   /* ... and assign a sequence id to the new genome_feature-object. */
   genome_node_set_seqid(gn1, seqid1);
 
-  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  gn2 = genome_feature_new(type, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   genome_node_set_seqid(gn2, seqid2);
 
-  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
+  ex1 = genome_feature_new(type, r2, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   genome_node_set_seqid(ex1, seqid1);
 
-  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  ex2 = genome_feature_new(type, r3, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   genome_node_set_seqid(ex2, seqid1);
 
-  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  ex3 = genome_feature_new(type, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   genome_node_set_seqid(ex3, seqid2);
 
-  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  type = feature_type_factory_create_gft(feature_type_factory, gft_CDS);
+  cds1 = genome_feature_new(type, r5, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   genome_node_set_seqid(cds1, seqid2);
 
   /* Determine the structure of our feature tree */
@@ -336,6 +339,7 @@ int feature_index_unit_test(Error *err)
   genome_node_rec_delete((GenomeNode*) sr2);
   str_delete(seqid1);
   str_delete(seqid2);
+  feature_type_factory_delete(feature_type_factory);
   return had_err;
 }
 

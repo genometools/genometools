@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,8 +18,13 @@
 #ifndef GT_LUA_H
 #define GT_LUA_H
 
+#include "libgtext/genome_feature_type.h"
 #include "lua.h"
 
-int  luaopen_gt(lua_State*); /* open all GenomeTools libraries in Lua */
+void                lua_put_feature_type_factory_in_registry(lua_State*,
+                                                           FeatureTypeFactory*);
+FeatureTypeFactory* lua_get_feature_type_factory_from_registry(lua_State*);
+int                 luaopen_gt(lua_State*); /* open all GenomeTools libraries in
+                                               Lua state */
 
 #endif

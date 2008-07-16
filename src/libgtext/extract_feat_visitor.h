@@ -28,7 +28,7 @@ typedef struct ExtractFeatVisitor ExtractFeatVisitor;
 const GenomeVisitorClass* extract_feat_visitor_class(void);
 /* takes ownership of <rm> */
 GenomeVisitor*            extract_feat_visitor_new(RegionMapping *rm,
-                                                   GenomeFeatureType, bool join,
-                                                   bool translate);
+                                                   GenomeFeatureType*,
+                                                   bool join, bool translate);
 
 #endif

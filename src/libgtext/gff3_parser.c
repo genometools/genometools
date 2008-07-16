@@ -46,6 +46,7 @@ struct GFF3Parser {
        checkids;
   long offset;
   Mapping *offset_mapping;
+  FeatureTypeFactory *feature_type_factory;
 };
 
 typedef struct {
@@ -96,9 +97,12 @@ static void simple_sequence_region_delete(SimpleSequenceRegion *ssr)
   ma_free(ssr);
 }
 
-GFF3Parser* gff3parser_new(bool checkids)
+GFF3Parser* gff3parser_new(bool checkids,
+                           FeatureTypeFactory *feature_type_factory)
 {
-  GFF3Parser *gff3_parser = ma_malloc(sizeof (GFF3Parser));
+  GFF3Parser *gff3_parser;
+  assert(feature_type_factory);
+  gff3_parser = ma_malloc(sizeof (GFF3Parser));
   gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING,
                                                          ma_free_func,
                                                          (FreeFunc)
@@ -114,6 +118,7 @@ GFF3Parser* gff3parser_new(bool checkids)
   gff3_parser->checkids = checkids;
   gff3_parser->offset = UNDEF_LONG;
   gff3_parser->offset_mapping = NULL;
+  gff3_parser->feature_type_factory = feature_type_factory;
   return gff3_parser;
 }
 
@@ -247,7 +252,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                    Error *err)
 {
   GenomeNode *gn = NULL, *genome_feature = NULL, *parent_gf;
-  GenomeFeatureType gft;
+  GenomeFeatureType *gft;
   Splitter *splitter, *attribute_splitter, *tmp_splitter, *parents_splitter;
   AutomaticSequenceRegion *auto_sr = NULL;
   Str *seqid_str = NULL, *source_str, *changed_seqid = NULL;
@@ -295,7 +300,9 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   }
 
   /* parse the feature type */
-  if (!had_err && genome_feature_type_get(&gft, type) == -1) {
+  if (!had_err &&
+      !(gft = feature_type_factory_create_gft(gff3_parser->feature_type_factory,
+                                              type))) {
     error_set(err, "type \"%s\" on line %lu in file \"%s\" is not a valid one",
               type, line_number, filename);
     had_err = -1;

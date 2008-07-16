@@ -29,28 +29,28 @@
    contains element objects. */
 typedef struct Block Block;
 
-Block*            block_new(void);
+Block*             block_new(void);
 /* Create a new Block object, setting block parameters (such as strand, range)
    from a given <node> template. */
-Block*            block_new_from_node(GenomeNode *node);
+Block*             block_new_from_node(GenomeNode *node);
 /* Insert <node> into block. */
-void              block_insert_element(Block*, GenomeNode *node, Config*);
-Range             block_get_range(const Block*);
-void              block_set_range(Block*, Range r);
+void               block_insert_element(Block*, GenomeNode *node, Config*);
+Range              block_get_range(const Block*);
+void               block_set_range(Block*, Range r);
 /* Checks whether a Block is occupied completely by a single element. */
-bool              block_has_only_one_fullsize_element(Block*);
+bool               block_has_only_one_fullsize_element(Block*);
 /* Set whether a block caption should be displayed or not. */
-void              block_set_caption_visibility(Block*, bool);
-bool              block_caption_is_visible(const Block*);
-void              block_set_caption(Block*, Str*);
-Str*              block_get_caption(const Block*);
-void              block_set_strand(Block*, Strand);
-Strand            block_get_strand(const Block*);
-void              block_set_type(Block*, GenomeFeatureType);
-GenomeFeatureType block_get_type(const Block*);
+void               block_set_caption_visibility(Block*, bool);
+bool               block_caption_is_visible(const Block*);
+void               block_set_caption(Block*, Str*);
+Str*               block_get_caption(const Block*);
+void               block_set_strand(Block*, Strand);
+Strand             block_get_strand(const Block*);
+void               block_set_type(Block*, GenomeFeatureType*);
+GenomeFeatureType* block_get_type(const Block*);
 /* Returns Dlist with Pointer to Element objects. */
-Dlist*            block_get_elements(const Block*);
-int               block_unit_test(Error*);
-void              block_delete(Block*);
+Dlist*             block_get_elements(const Block*);
+int                block_unit_test(Error*);
+void               block_delete(Block*);
 
 #endif

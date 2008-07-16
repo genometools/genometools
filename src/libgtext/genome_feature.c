@@ -32,7 +32,7 @@ struct GenomeFeature
   const GenomeNode parent_instance;
   Str *seqid,
       *source;
-  GenomeFeatureType type;
+  GenomeFeatureType *type;
   Range range;
   double score;
   Strand strand;
@@ -122,7 +122,7 @@ const GenomeNodeClass* genome_feature_class()
   return &gnc;
 }
 
-GenomeNode* genome_feature_new(GenomeFeatureType type, Range range,
+GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
                                Strand strand, Str *filename,
                                unsigned long line_number)
 {
@@ -143,108 +143,115 @@ GenomeNode* genome_feature_new(GenomeFeatureType type, Range range,
   return gn;
 }
 
-GenomeNode* genome_feature_new_standard_gene(void)
+GenomeNode* genome_feature_new_standard_gene(FeatureTypeFactory *ftf)
 {
   GenomeNode *gn, *child, *grandchild;
+  GenomeFeatureType *type;
   Range range;
   Str *seqid;
   seqid = str_new_cstr("ctg123");
 
   /* gene */
   range.start = 1000; range.end = 9000;
-  gn = genome_feature_new(gft_gene, range, STRAND_FORWARD, NULL, UNDEF_ULONG);
+  type = feature_type_factory_create_gft(ftf, gft_gene);
+  gn = genome_feature_new(type, range, STRAND_FORWARD, NULL, UNDEF_ULONG);
   genome_node_set_seqid(gn, seqid);
 
   /* TF binding site */
   range.start = 1000; range.end = 1012;
-  child = genome_feature_new(gft_TF_binding_site, range, STRAND_FORWARD, NULL,
-                             UNDEF_ULONG);
+  type = feature_type_factory_create_gft(ftf, gft_TF_binding_site);
+  child = genome_feature_new(type, range, STRAND_FORWARD, NULL, UNDEF_ULONG);
   genome_node_set_seqid(child, seqid);
   genome_node_is_part_of_genome_node(gn, child);
 
   /* first mRNA */
   range.start = 1050; range.end = 9000;
-  child = genome_feature_new(gft_mRNA, range, STRAND_FORWARD, NULL,
-                             UNDEF_ULONG);
+  type = feature_type_factory_create_gft(ftf, gft_mRNA);
+  child = genome_feature_new(type, range, STRAND_FORWARD, NULL, UNDEF_ULONG);
   genome_node_set_seqid(child, seqid);
   genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1050; range.end = 1500;
-  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+  type = feature_type_factory_create_gft(ftf, gft_exon);
+  grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                                   UNDEF_ULONG);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 3000; range.end = 3902;
-  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+  grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                                   UNDEF_ULONG);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 5000; range.end = 5500;
-  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+  grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                                   UNDEF_ULONG);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 7000; range.end = 9000;
-  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+  grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                                   UNDEF_ULONG);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   /* second mRNA */
   range.start = 1050; range.end = 9000;
-  child = genome_feature_new(gft_mRNA, range, STRAND_FORWARD, NULL,
+  type = feature_type_factory_create_gft(ftf, gft_mRNA);
+  child = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                              UNDEF_ULONG);
   genome_node_set_seqid(child, seqid);
   genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1050; range.end = 1500;
-  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+  type = feature_type_factory_create_gft(ftf, gft_exon);
+  grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                                   UNDEF_ULONG);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 5000; range.end = 5500;
-  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+  grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                                   UNDEF_ULONG);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 7000; range.end = 9000;
-  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+  grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                                   UNDEF_ULONG);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   /* third mRNA */
   range.start = 1300; range.end = 9000;
-  child = genome_feature_new(gft_mRNA, range, STRAND_FORWARD, NULL,
+  type = feature_type_factory_create_gft(ftf, gft_mRNA);
+  child = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                              UNDEF_ULONG);
   genome_node_set_seqid(child, seqid);
   genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1300; range.end = 1500;
-  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+  type = feature_type_factory_create_gft(ftf, gft_exon);
+  grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                                   UNDEF_ULONG);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 3000; range.end = 3902;
-  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+  grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                                   UNDEF_ULONG);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 5000; range.end = 5500;
-  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+  grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                                   UNDEF_ULONG);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 7000; range.end = 9000;
-  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+  grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
                                   UNDEF_ULONG);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
@@ -259,10 +266,23 @@ const char* genome_feature_get_source(GenomeFeature *gf)
   return gf->source ? str_get(gf->source) : ".";
 }
 
-GenomeFeatureType genome_feature_get_type(GenomeFeature *gf)
+GenomeFeatureType* genome_feature_get_type(GenomeFeature *gf)
 {
   assert(gf);
   return gf->type;
+}
+
+GenomeFeatureType* genome_feature_create_gft(GenomeFeature *gf,
+                                             const char *type)
+{
+  assert(gf && type);
+  return genome_feature_type_create_gft(gf->type, type);
+}
+
+bool genome_feature_has_type(GenomeFeature *gf, const char *type)
+{
+  assert(gf && type);
+  return genome_feature_type_is(gf->type, type);
 }
 
 double genome_feature_get_score(GenomeFeature *gf)
@@ -290,7 +310,7 @@ static int save_exon(GenomeNode *gn, void *data, UNUSED Error *err)
   error_check(err);
   gf = (GenomeFeature*) gn;
   assert(gf && exon_features);
-  if (genome_feature_get_type(gf) == gft_exon) {
+  if (genome_feature_has_type(gf, gft_exon)) {
     array_add(exon_features, gf);
   }
   return 0;
@@ -312,9 +332,9 @@ static int save_exons_and_cds(GenomeNode *gn, void *data, UNUSED Error *err)
   error_check(err);
   gf = (GenomeFeature*) gn;
   assert(gf && info);
-  if (genome_feature_get_type(gf) == gft_exon)
+  if (genome_feature_has_type(gf, gft_exon))
     array_add(info->exon_features, gf);
-  else if (genome_feature_get_type(gf) == gft_CDS)
+  else if (genome_feature_has_type(gf, gft_CDS))
     array_add(info->cds_features, gf);
   return 0;
 }
@@ -420,57 +440,55 @@ int genome_feature_foreach_attribute(GenomeFeature *gf,
   return had_err;
 }
 
-static bool genome_feature_has_gft(const GenomeFeature *gf,
-                                   const GenomeFeatureType *gfts)
+static bool genome_feature_has_gft(const GenomeFeature *gf, const char **gfts)
 {
   GenomeNodeIterator *gni;
   GenomeNode *gn;
-  bool has_splice_site = false;
-  assert(gf && gfts && gfts[0] != undefined);
+  bool has_gft = false;
+  assert(gf && gfts && gfts[0] != NULL);
   gni = genome_node_iterator_new((GenomeNode*) gf);
   while ((gn = genome_node_iterator_next(gni))) {
     unsigned long i = 0;
-    GenomeFeatureType gft = genome_feature_get_type((GenomeFeature*) gn);
-    while (gfts[i] != undefined) {
-      if (gft == gfts[i]) {
-        has_splice_site = true;
+    while (gfts[i] != NULL) {
+      if (genome_feature_has_type((GenomeFeature*) gn, gfts[i])) {
+        has_gft = true;
         break;
       }
       i++;
     }
-    if (has_splice_site)
+    if (has_gft)
       break;
   }
   genome_node_iterator_delete(gni);
-  return has_splice_site;
+  return has_gft;
 }
 
 bool genome_feature_has_CDS(const GenomeFeature *gf)
 {
-  static GenomeFeatureType gfts[] = { gft_CDS, undefined };
+  static const char *gfts[] = { gft_CDS, NULL };
   return genome_feature_has_gft(gf, gfts);
 }
 
 bool genome_feature_has_splice_site(const GenomeFeature *gf)
 {
-  static GenomeFeatureType gfts[] = { gft_five_prime_splice_site,
-                                      gft_three_prime_splice_site, undefined };
+  static const char *gfts[] = { gft_five_prime_splice_site,
+                                gft_three_prime_splice_site, NULL };
   return genome_feature_has_gft(gf, gfts);
 }
 
 double genome_feature_average_splice_site_prob(const GenomeFeature *gf)
 {
   GenomeNodeIterator *gni;
-  GenomeFeatureType gft;
   GenomeNode *gn;
   unsigned long num_of_splice_sites = 0;
   double averagessp = 0.0;
   assert(gf);
   gni = genome_node_iterator_new((GenomeNode*) gf);
   while ((gn = genome_node_iterator_next(gni))) {
-    gft = genome_feature_get_type((GenomeFeature*) gn);
-    if (gft == gft_five_prime_splice_site ||
-        gft == gft_three_prime_splice_site) {
+    if (genome_feature_has_type((GenomeFeature*) gn,
+                                gft_five_prime_splice_site) ||
+        genome_feature_has_type((GenomeFeature*) gn,
+                                gft_three_prime_splice_site)) {
       averagessp += genome_feature_get_score((GenomeFeature*) gn);
       num_of_splice_sites++;
     }

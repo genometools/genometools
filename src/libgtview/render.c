@@ -174,7 +174,7 @@ static void render_line(Render *r, Line *line)
          && draw_range.end-draw_range.start < min_len_block)
     {
       int arrow_status = ARROW_NONE;
-      GenomeFeatureType btype = block_get_type(block);
+      GenomeFeatureType *btype = block_get_type(block);
       Strand strand = block_get_strand(block);
       if (strand == STRAND_REVERSE || strand == STRAND_BOTH)
         arrow_status = ARROW_LEFT;

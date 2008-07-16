@@ -46,7 +46,7 @@ struct Diagram {
 
 /* holds a Block with associated type */
 typedef struct {
-  GenomeFeatureType gft;
+  GenomeFeatureType *gft;
   Block *block;
 } BlockTuple;
 
@@ -61,7 +61,7 @@ typedef struct {
   Diagram *diagram;
 } NodeTraverseInfo;
 
-static BlockTuple* blocktuple_new(GenomeFeatureType gft, Block *block)
+static BlockTuple* blocktuple_new(GenomeFeatureType *gft, Block *block)
 {
   BlockTuple *bt;
   assert(block);
@@ -85,7 +85,7 @@ static NodeInfoElement* get_or_create_node_info(Diagram *d, GenomeNode *node)
   return ni;
 }
 
-static Block* find_block_for_type(NodeInfoElement* ni, GenomeFeatureType gft)
+static Block* find_block_for_type(NodeInfoElement* ni, GenomeFeatureType *gft)
 {
   Block *block = NULL;
   unsigned long i;
@@ -325,7 +325,7 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Error* e)
   return 0;
 }
 
-static Str* track_key_new(const char *filename, GenomeFeatureType type)
+static Str* track_key_new(const char *filename, GenomeFeatureType *type)
 {
   Str *track_key;
   track_key = str_new_cstr(filename);
@@ -468,6 +468,8 @@ int diagram_get_number_of_tracks(const Diagram *diagram)
 
 int diagram_unit_test(Error *err)
 {
+  FeatureTypeFactory *feature_type_factory;
+  GenomeFeatureType *gene_type, *exon_type, *CDS_type;
   GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   FeatureIndex *fi;
   Range r1, r2, r3, r4, r5, dr1, rs;
@@ -477,6 +479,11 @@ int diagram_unit_test(Error *err)
   Config *cfg = NULL;
   Diagram *dia = NULL, *dia2 = NULL;
   error_check(err);
+
+  feature_type_factory = feature_type_factory_new();
+  gene_type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
+  exon_type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
+  CDS_type = feature_type_factory_create_gft(feature_type_factory, gft_CDS);
 
   /* generating some ranges */
   r1.start=100UL; r1.end=1000UL;
@@ -493,22 +500,22 @@ int diagram_unit_test(Error *err)
   sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0);
   sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0);
 
-  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  gn1 = genome_feature_new(gene_type, r1, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   genome_node_set_seqid((GenomeNode*) gn1, seqid1);
 
-  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  gn2 = genome_feature_new(gene_type, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   genome_node_set_seqid((GenomeNode*) gn2, seqid2);
 
-  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  ex1 = genome_feature_new(exon_type, r2, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   genome_node_set_seqid((GenomeNode*) ex1, seqid1);
 
-  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  ex2 = genome_feature_new(exon_type, r3, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   genome_node_set_seqid((GenomeNode*) ex2, seqid1);
 
-  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  ex3 = genome_feature_new(exon_type, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   genome_node_set_seqid((GenomeNode*) ex3, seqid2);
 
-  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  cds1 = genome_feature_new(CDS_type, r5, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   genome_node_set_seqid((GenomeNode*) cds1, seqid2);
 
   /* determine the structure of our feature tree */
@@ -548,14 +555,14 @@ int diagram_unit_test(Error *err)
   ensure(had_err, dia->range.end == 900UL);
   if (!had_err &&
       !config_cstr_in_list(dia->config,"collapse","to_parent","gene")) {
-    track_key = track_key_new("generated", gft_gene);
+    track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia->config,"collapse","to_parent","exon")) {
-    track_key = track_key_new("generated", gft_exon);
+    track_key = track_key_new("generated", exon_type);
     ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
   }
@@ -570,21 +577,21 @@ int diagram_unit_test(Error *err)
 
   if (!had_err &&
       !config_cstr_in_list(dia2->config,"collapse","to_parent","gene")) {
-    track_key = track_key_new("generated", gft_gene);
+    track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia2->config,"collapse","to_parent","exon")) {
-    track_key = track_key_new("generated", gft_exon);
+    track_key = track_key_new("generated", exon_type);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia2->config,"collapse","to_parent","CDS")) {
-    track_key = track_key_new("generated", gft_CDS);
+    track_key = track_key_new("generated", CDS_type);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
@@ -601,6 +608,7 @@ int diagram_unit_test(Error *err)
   genome_node_rec_delete((GenomeNode*) sr2);
   str_delete(seqid1);
   str_delete(seqid2);
+  feature_type_factory_delete(feature_type_factory);
 
   return had_err;
 }

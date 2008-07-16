@@ -26,6 +26,7 @@ struct GTFInStream
 {
   const GenomeStream parent_instance;
   Queue *genome_node_buffer;
+  FeatureTypeFactory *feature_type_factory;
 };
 
 #define gtf_in_stream_cast(GS)\
@@ -51,6 +52,7 @@ static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 static void gtf_in_stream_free(GenomeStream *gs)
 {
   GTFInStream *gtf_in_stream = gtf_in_stream_cast(gs);
+  feature_type_factory_delete(gtf_in_stream->feature_type_factory);
   queue_delete(gtf_in_stream->genome_node_buffer);
 }
 
@@ -76,9 +78,10 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   gs = genome_stream_create(gtf_in_stream_class(), false);
   gtf_in_stream = gtf_in_stream_cast(gs);
-  gtf_parser = gtf_parser_new();
-
   gtf_in_stream->genome_node_buffer = queue_new();
+  gtf_in_stream->feature_type_factory = feature_type_factory_new();
+
+  gtf_parser = gtf_parser_new(gtf_in_stream->feature_type_factory);
 
   /* open input file */
   if (filename)

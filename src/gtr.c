@@ -53,6 +53,7 @@ struct GTR {
   Toolbox *tools;
   Hashtable *unit_tests;
   lua_State *L;
+  FeatureTypeFactory *feature_type_factory; /* for gtlua */
 #ifdef LIBGTVIEW
   Config *config;
 #endif
@@ -75,6 +76,8 @@ GTR* gtr_new(Error *err)
     had_err = -1;
   }
   if (!had_err) {
+    gtr->feature_type_factory = feature_type_factory_new();
+    lua_put_feature_type_factory_in_registry(gtr->L, gtr->feature_type_factory);
     luaL_openlibs(gtr->L);    /* open the standard libraries */
     luaopen_gt(gtr->L);       /* open all GenomeTools libraries */
     luaopen_lfs(gtr->L);      /* open Lua filesystem */
@@ -330,6 +333,7 @@ void gtr_delete(GTR *gtr)
   str_delete(gtr->debugfp);
   toolbox_delete(gtr->tools);
   hashtable_delete(gtr->unit_tests);
+  feature_type_factory_delete(gtr->feature_type_factory);
   if (gtr->L) lua_close(gtr->L);
 #ifdef LIBGTVIEW
   config_delete_without_state(gtr->config);

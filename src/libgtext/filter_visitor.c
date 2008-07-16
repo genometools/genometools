@@ -145,7 +145,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       !str_cmp(fv->seqid, genome_node_get_seqid((GenomeNode*) gf))) {
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
-    if (gf && genome_feature_get_type(gf) == gft_gene) {
+    if (gf && genome_feature_has_type(gf, gft_gene)) {
       if (fv->max_gene_length != UNDEF_ULONG &&
           range_length(genome_node_get_range((GenomeNode*) gf)) >
           fv->max_gene_length) {

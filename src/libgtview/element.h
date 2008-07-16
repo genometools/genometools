@@ -27,16 +27,16 @@
 typedef struct Element Element;
 
 /* Creates a complete new Element object. */
-Element*          element_new(GenomeNode*);
+Element*           element_new(GenomeNode*);
 /* Creates an empty Element object. Range and type have to be set afterwards. */
-Element*          element_new_empty(void);
-Range             element_get_range(const Element*);
-void              element_set_range(Element*, Range);
-GenomeFeatureType element_get_type(const Element*);
-void              element_set_type(Element*, GenomeFeatureType);
-bool              element_is_marked(const Element*);
-bool              elements_are_equal(const Element*, const Element*);
-int               element_unit_test(Error*);
-void              element_delete(Element* element);
+Element*           element_new_empty(void);
+Range              element_get_range(const Element*);
+void               element_set_range(Element*, Range);
+GenomeFeatureType* element_get_type(const Element*);
+void               element_set_type(Element*, GenomeFeatureType*);
+bool               element_is_marked(const Element*);
+bool               elements_are_equal(const Element*, const Element*);
+int                element_unit_test(Error*);
+void               element_delete(Element* element);
 
 #endif

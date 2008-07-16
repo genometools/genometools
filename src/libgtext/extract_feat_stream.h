@@ -29,7 +29,7 @@ const GenomeStreamClass* extract_feat_stream_class(void);
 
 /* create a ExtractFeatStream, takes ownership of RegionMapping  */
 GenomeStream*            extract_feat_stream_new(GenomeStream*, RegionMapping*,
-                                                 GenomeFeatureType type,
+                                                 GenomeFeatureType *type,
                                                  bool join, bool translate);
 
 #endif

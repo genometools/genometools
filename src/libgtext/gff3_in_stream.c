@@ -33,10 +33,13 @@ struct GFF3InStream
   bool ensure_sorting,
        stdin_argument,
        file_is_open,
-       be_verbose;
+       be_verbose,
+       checkids,
+       own_factory;
   GenFile *fpin;
   unsigned long long line_number;
   Queue *genome_node_buffer;
+  FeatureTypeFactory *feature_type_factory;
   GFF3Parser *gff3_parser;
 };
 
@@ -184,6 +187,8 @@ static void gff3_in_stream_free(GenomeStream *gs)
     genome_node_rec_delete(queue_get(gff3_in_stream->genome_node_buffer));
   queue_delete(gff3_in_stream->genome_node_buffer);
   gff3parser_delete(gff3_in_stream->gff3_parser);
+  if (gff3_in_stream->own_factory)
+    feature_type_factory_delete(gff3_in_stream->feature_type_factory);
   genfile_close(gff3_in_stream->fpin);
 }
 
@@ -211,20 +216,42 @@ static GenomeStream* gff3_in_stream_new(StrArray *files, /* takes ownership */
   gff3_in_stream->fpin                   = NULL;
   gff3_in_stream->line_number            = 0;
   gff3_in_stream->genome_node_buffer     = queue_new();
-  gff3_in_stream->gff3_parser            = gff3parser_new(checkids);
+  gff3_in_stream->feature_type_factory   = feature_type_factory_new();
+  gff3_in_stream->own_factory            = true;
+  gff3_in_stream->checkids               = checkids;
+  gff3_in_stream->gff3_parser            = gff3parser_new(checkids,
+                                                          gff3_in_stream
+                                                        ->feature_type_factory);
   gff3_in_stream->be_verbose             = be_verbose;
   return gs;
+}
+
+void gff3_in_stream_set_feature_type_factory(GenomeStream *gs,
+                                             FeatureTypeFactory
+                                             *feature_type_factory)
+{
+  GFF3InStream *is = gff3_in_stream_cast(gs);
+  assert(is);
+  gff3parser_delete(is->gff3_parser);
+  if (is->own_factory) {
+    feature_type_factory_delete(is->feature_type_factory);
+    is->own_factory = false;
+  }
+  is->gff3_parser = gff3parser_new(is->checkids, feature_type_factory);
+  is->feature_type_factory = feature_type_factory;
 }
 
 void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
+  assert(is);
   gff3parser_set_offset(is->gff3_parser, offset);
 }
 
 int gff3_in_stream_set_offsetfile(GenomeStream *gs, Str *offsetfile, Error *err)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
+  assert(is);
   return gff3parser_set_offsetfile(is->gff3_parser, offsetfile, err);
 }
 
