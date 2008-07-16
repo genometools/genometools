@@ -23,7 +23,7 @@
 #include "esa-myersapm.h"
 #include "defined-types.h"
 #include "alphadef.h"
-#include "esa-limdfs.h" /* XXX import esa_findshortestmatch */
+#include "apmoveridx.h" /* XXX import esa_findshortestmatch */
 
 struct Myersonlineresources
 {
@@ -165,7 +165,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
         Seqpos dbstartpos = REVERSEPOS(mor->totallength,pos);
         Definedunsignedlong matchlength;
 
-        matchlength = esa_findshortestmatch(mor->encseq,
+        matchlength = apm_findshortestmatch(mor->encseq,
                                             mor->nospecials,
                                             mor->alphasize,
                                             pattern,

@@ -172,7 +172,8 @@ static int dotransformtag(Uchar *transformedtag,
   return 0;
 }
 
-static void performthesearch(const TageratorOptions *tageratoroptions,
+static void performthesearch(const AbstractDfstransformer *adfst,
+                             const TageratorOptions *tageratoroptions,
                              bool withesa,
                              Myersonlineresources *mor,
                              Limdfsresources *limdfsresources,
@@ -217,7 +218,8 @@ static void performthesearch(const TageratorOptions *tageratoroptions,
       indexbasedapproxpatternmatching(limdfsresources,
                                       transformedtag,
                                       taglen,
-                                      tageratoroptions->maxdistance);
+                                      tageratoroptions->maxdistance,
+                                      adfst);
     }
   }
 }
@@ -293,6 +295,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   ArraySimplematch storeonline, storeoffline;
   void *packedindex = NULL;
   bool withesa;
+  const AbstractDfstransformer *adfst = apm_AbstractDfstransformer();
 
   if (str_length(tageratoroptions->esaindexname) > 0)
   {
@@ -391,7 +394,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                          mapsize,
                                          totallength,
                                          processmatch,
-                                         processmatchinfooffline);
+                                         processmatchinfooffline,
+                                         adfst);
     seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
     for (tagnumber = 0; !haserr; tagnumber++)
     {
@@ -433,7 +437,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
           {
             complementtag(transformedtag,taglen);
           }
-          performthesearch(tageratoroptions,
+          performthesearch(adfst,
+                           tageratoroptions,
                            withesa,
                            mor,
                            limdfsresources,
@@ -457,7 +462,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   FREEARRAY(&storeoffline,Simplematch);
   if (limdfsresources != NULL)
   {
-    freeLimdfsresources(&limdfsresources);
+    freeLimdfsresources(&limdfsresources,adfst);
   }
   if (mor != NULL)
   {

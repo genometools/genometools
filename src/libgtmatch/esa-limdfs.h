@@ -19,8 +19,7 @@
 #define ESA_LIMDFS_H
 
 #include "seqpos-def.h"
-#include "encseq-def.h"
-#include "defined-types.h"
+#include "apmoveridx.h"
 
 typedef struct Limdfsresources Limdfsresources;
 
@@ -32,23 +31,19 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     void (*processmatch)(void *,bool,Seqpos,
                                                          Seqpos,Seqpos,
                                                          unsigned long),
-                                    void *processmatchinfo);
+                                    void *processmatchinfo,
+                                    const AbstractDfstransformer *adfst);
 
 const void *getgenericindexfromresource(Limdfsresources *limdfsresources);
 
-void freeLimdfsresources(Limdfsresources **ptrlimdfsresources);
+void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
+                         const AbstractDfstransformer *adfst);
 
 void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
-                                     unsigned long maxdistance);
-
-Definedunsignedlong esa_findshortestmatch(const Encodedsequence *encseq,
-                                          bool nospecials,
-                                          unsigned int alphasize,
-                                          const Uchar *pattern,
-                                          unsigned long patternlength,
-                                          unsigned long maxdistance,
-                                          Seqpos startpos);
+                                     unsigned long maxdistance,
+                                     const AbstractDfstransformer *adfst);
 
 #endif
+
