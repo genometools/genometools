@@ -384,5 +384,7 @@ int ppt_unit_test(Error *err)
   ensure(had_err, rng.start == 61);
   ensure(had_err, rng.end == 72);
   ma_free(rev_seq);
+
+  ppt_results_delete(rs);
   return had_err;
 }
