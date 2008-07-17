@@ -67,16 +67,26 @@ if $gttestdata then
   # positive test for all D.mel chromosomes -> must match reference
   chromosomes_dmel = ["2L","2R","3L","3R","4","X"]
   chromosomes_dmel.each do |chr|
+  if $arguments["hmmer"] then
     Name "gt ltrdigest D. melanogaster chromosome #{chr} basic test w/ RT"
     Keywords "gt_ltrdigest"
     Test do
-      run_test "#{$bin}gt ltrdigest -trnas #{$gttestdata}/ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}/ltrdigest/hmms/RVT_1_fs.hmm -- 	#{$gttestdata}/ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{$gttestdata}/ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz",\
+      run_test "#{$bin}gt ltrdigest -trnas #{$gttestdata}/ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}/ltrdigest/hmms/RVT_1_fs.hmm --  #{$gttestdata}/ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{$gttestdata}/ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz",\
        :retval => 0, :maxtime => 500
       run "diff #{$last_stdout} #{$gttestdata}/ltrdigest/#{chr}_ref.gff3"
     end
+  else
+    Name "gt ltrdigest D. mel. chromosome #{chr} basic test, no HMM"
+    Keywords "gt_ltrdigest"
+    Test do
+        run_test "#{$bin}gt ltrdigest -trnas #{$gttestdata}/ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}/ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{$gttestdata}/ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz",\
+       :retval => 0, :maxtime => 500
+        run "diff #{$last_stdout} #{$gttestdata}/ltrdigest/#{chr}_ref_noHMM.gff3"
+    end
   end
+end
 
-# XXX:disabled for now due to unexplained memleak  
+# XXX:disabled for now due to unexplained memleak
 #  Name "gt ltrdigest GFF and FASTA do not match"
 #  Keywords "gt_ltrdigest"
 #  Test do

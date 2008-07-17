@@ -363,6 +363,7 @@ ifeq ($(with-hmmer),yes)
   GT_CPPFLAGS +=  -I$(CURDIR)/src/external/hmmer-2.3.2/src \
                   -I$(CURDIR)/src/external/hmmer-2.3.2/squid
   EXP_LDLIBS += -lhmmer -lpthread
+  STEST_FLAGS += -hmmer
 endif
 
 ifeq ($(libgtview),yes)
