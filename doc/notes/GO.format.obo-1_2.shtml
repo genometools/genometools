@@ -1,0 +1,1768 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en"><head>
+
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>The OBO Flat File Format Specification, version 1.2</title> 
+    <link rel="stylesheet" href="GO.format.obo-1_2-Dateien/stylesheet.css" type="text/css">
+<script src="GO.format.obo-1_2-Dateien/enhancer.js" type="text/javascript"></script> 
+</head><body>
+<div id="header">
+	<form title="Search the GO database or the GO website" action="http://www.geneontology.org/cgi-bin/chooser.cgi" method="get" name="searchBox">
+		<div class="floatR R" id="topSrchDiv">
+			<fieldset>
+			<label for="topSrchInput" accesskey="4" title="Search GO; access key 4" class="b">Search</label><input id="topSrchInput" name="query" title="Enter a search phrase" class="textBox" type="text">
+			</fieldset>
+			<label for="topSrchSelect" class="noDisplay">Search type </label>
+			<select id="topSrchSelect" name="search">
+				<option title="Search the GO database for a gene product" value="gp" selected="selected">
+					gene or protein name 
+				</option>
+				<option title="Search the GO database for a GO term or ID" value="terms">
+					GO term or ID 
+				</option>
+				<option title="Search the GO website" value="website">
+					GO website 
+				</option>
+			</select>
+			<input title="Submit your query" value="go!" class="button" type="submit">
+			</div>
+	</form>
+	<h1 id="top"> the Gene Ontology </h1> 
+</div>
+
+<div id="bg" class="menuBg">
+      <div id="navBox">
+
+	<div id="navLeft" class="docs">
+<ul><li class="link"><a href="http://www.geneontology.org/GO.format.obo-1_2.shtml?all" title="Open menus">Open menus</a></li><li class="link"><a href="http://www.geneontology.org/index.shtml" title="GO home page">Home</a></li><li class="link"><a href="http://wiki.geneontology.org/index.php/GO_FAQ" title="Frequently Asked Questions">FAQ</a></li><li class="dl head"><a href="http://www.geneontology.org/GO.downloads.shtml" title="Downloads">Downloads</a></li><li class="dl sub"><a href="http://www.geneontology.org/GO.downloads.ontology.shtml" title="Download GO ontology files">Ontologies</a></li><li class="dl sub"><a href="http://www.geneontology.org/GO.current.annotations.shtml" title="Download GO annotations">Annotations</a></li><li class="dl sub"><a href="http://www.geneontology.org/GO.downloads.database.shtml" title="Download the GO database">Database</a></li><li class="dl sub"><a href="http://www.geneontology.org/GO.indices.shtml" title="Download mappings of other classification systems to GO">Mappings to GO</a></li><li class="dl sub"><a href="http://www.geneontology.org/GO.teaching.resources.shtml" title="Download GO tutorials, posters and presentations">Teaching Resources</a></li><li class="dl sub"><a href="http://www.geneontology.org/GO.downloads.files.shtml" title="Download other useful GO-related files">Other files</a></li><li class="dl sub"><a href="http://www.geneontology.org/GO.downloads.ftp.cvs.shtml" title="Downloads via FTP and CVS">FTP and CVS downloads</a></li><li class="tools head"><a href="http://www.geneontology.org/GO.tools.shtml" title="GO tools">Tools</a></li><li class="tools sub"><a href="http://www.geneontology.org/GO.tools.browsers.shtml" title="Tools for browsing GO">Browsers</a></li><li class="tools sub"><a href="http://www.geneontology.org/GO.tools.microarray.shtml" title="Tools for microarray analysis">Microarray tools</a></li><li class="tools sub"><a href="http://www.geneontology.org/GO.tools.annotation.shtml" title="Tools for annotating using GO">Annotation tools</a></li><li class="tools sub"><a href="http://www.geneontology.org/GO.tools.other.shtml" title="Miscellaneous GO-related tools">Other tools</a></li><li class="tools sub"><a href="http://www.geneontology.org/GO.tools.add.shtml" title="Submit your GO-related tool">Submit New Tools</a></li><li class="docs head"><a href="http://www.geneontology.org/GO.contents.doc.shtml" title="Documentation on the GO project">Documentation</a></li><li class="docs sub"><a href="http://www.geneontology.org/GO.doc.shtml" title="An Introduction to the Gene Ontology">Introduction</a></li><li class="docs sub"><a href="http://www.geneontology.org/GO.annotation.shtml" title="Documentation on annotating using GO">Annotation Guide</a></li><li class="docs sub"><a href="http://www.geneontology.org/GO.evidence.shtml" title="Documentation on GO evidence codes">Evidence Code Guide</a></li><li class="docs sub"><a href="http://www.geneontology.org/GO.component.guidelines.shtml" title="Documentation on the cellular component ontology">Component Ontology</a></li><li class="docs sub"><a href="http://www.geneontology.org/GO.function.guidelines.shtml" title="Documentation on the molecular function ontology">Function Ontology</a></li><li class="docs sub"><a href="http://www.geneontology.org/GO.process.guidelines.shtml" title="Documentation on the biological process ontology">Process Ontology</a></li><li class="docs sub"><a href="http://www.geneontology.org/GO.format.shtml" title="Documentation on GO file formats">File Format Guide</a></li><li class="docs sub"><a href="http://www.geneontology.org/GO.database.shtml" title="Documentation on the GO database">GO Database Guide</a></li><li class="docs sub"><a href="http://www.geneontology.org/GO.slims.shtml" title="Documentation on GO slims">GO Slim Guide</a></li><li class="docs sub"><a href="http://www.geneontology.org/GO.meetings.shtml" title="Minutes from GO meetings">Meeting minutes</a></li><li class="docs sub"><a href="http://www.geneontology.org/GO.usage.shtml" title="Documentation on style conventions in GO">Editorial Style Guide</a></li><li class="abt head"><a href="http://www.geneontology.org/GO.contents.about.go.shtml" title="About the Gene Ontology and the Gene Ontology consortium">About GO</a></li><li class="abt sub"><a href="http://www.geneontology.org/GO.consortiumlist.shtml" title="GO consortium members and GO associates">GO Consortium</a></li><li class="abt sub"><a href="http://www.geneontology.org/cgi-bin/biblio.cgi" title="GO bibliography">Publications</a></li><li class="abt sub"><a href="http://www.geneontology.org/GO.cite.shtml" title="GO citation policy">Citation Policy</a></li><li class="abt sub"><a href="http://www.geneontology.org/GO.mailing.lists.shtml" title="GO mailing lists">Mailing lists</a></li><li class="abt sub"><a href="http://www.geneontology.org/GO.interests.shtml" title="Groups interested in areas within GO">Interest Groups</a></li><li class="abt sub"><a href="http://www.geneontology.org/GO.people.shtml" title="People involved in the GO project">GO People</a></li><li class="abt sub"><a href="http://www.geneontology.org/GO.funding.shtml" title="Funding sources for the GO project">Funding</a></li><li class="abt sub"><a href="http://www.geneontology.org/GO.acknowledgements.shtml" title="Acknowledgements and thanks">Acknowledgements</a></li><!--<li class="abt sub"><a
+href="GO.conference.announce.shtml" title="Upcoming conferences">Conference Announcements</a></li><li class="abt sub"><a
+href="GO.positions.shtml" title="Job opportunities within the GO consortium">Job Opportunities</a></li>--><li class="abt sub"><a href="http://www.geneontology.org/GO.newsletter.shtml" title="GO quarterly newsletter">Newsletter</a></li><li class="proj head"><a href="http://www.geneontology.org/GO.contents.projects.shtml" title="Projects within or involving the GO Consortium">Projects</a></li><li class="proj sub"><a href="http://www.geneontology.org/GO.cardio.shtml" title="GO cardiovascular annotation">Cardiovascular</a></li><li class="proj sub"><a href="http://www.geneontology.org/GO.immunology.shtml" title="GO annotation for the immune system">Immunology</a></li><li class="proj sub"><a href="http://www.geneontology.org/GO.refgenome.shtml" title="The Reference Genomes project">Reference Genomes</a></li><li class="link"><a href="http://www.geneontology.org/GO.contacts.shtml" title="Contact the GO helpdesk">Contact GO</a></li><li class="link"><a href="http://www.geneontology.org/GO.site.map.shtml" title="GO site map">Site Map</a></li></ul>
+
+	  </div>
+
+	</div>
+<!-- page content starts here -->
+      <div id="main">
+	<h1>The OBO Flat File Format Specification, version&nbsp;1.2</h1> 
+	<p>
+	  <span id="author">John Day-Richter</span> 
+	  <br>
+	  <span id="email"><code>&lt;<a href="mailto:john.richter@aya.yale.edu" title="John Day-Richter">john.richter@aya.yale.edu</a>&gt;</code></span> 
+	  <br>
+	  <span id="revision">version 1.2,</span> November 16, 2004 
+	  <br>
+	  last revision: May 2nd, 2006 
+	  </p>
+	<p>
+	        OBO format is the text file format used by <a href="http://www.oboedit.org/" title="OBO-Edit [external website]">OBO-Edit <img alt="external link" src="GO.format.obo-1_2-Dateien/icon-external.png"></a>, the open source, platform-independent application for viewing and editing ontologies. See also the <a href="http://www.geneontology.org/GO.java.obo.parser.shtml" title="Java OBO parser guide">Java OBO parser guide</a>, which gives details of the OBO parser implemented as part of OBO-Edit, and how to use it, and the <a href="http://www.geneontology.org/GO.format.obo-1_0.shtml" title="OBO 1.0 file format guide">OBO 1.0 file format guide</a>.
+	  </p>
+	<div id="navPage">
+	  <ul>
+	    <li class="h2">
+	      <a href="#S.0" title="About this file">About this file</a> 
+	      </li>
+	    <li class="h2">
+	      <a href="#S.1" title="OBO Syntax">OBO Syntax</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.1.1" title="OBO Document Structure">OBO Document Structure</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.1.2" title="Comments">Comments</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.1.3" title="Tag-Value Pairs">Tag-Value Pairs</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.1.4" title="Trailing Modifiers">Trailing Modifiers</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.1.5" title="Escape characters">Escape characters</a> 
+	      </li>
+	    <li class="h2">
+	      <a href="#S.2" title="Built-in OBO Semantics">Built-in OBO Semantics</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.2.1" title="Document Header Tags">Document Header Tags</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.2.2" title="Stanzas">Stanzas</a> 
+	      </li>
+	    <li class="h2">
+	      <a href="#S.3" title="Parsers and Serializers">Parsers and Serializers</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.3.1" title="General Behavior">General Behavior</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.3.2" title="Handling Unrecognized Tags">Handling Unrecognized Tags</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.3.3" title="Non-Roundtripping Header Tags">Non-Roundtripping Header Tags</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.3.4" title="Dangling References">Dangling References</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.3.5" title="Serializer Conventions">Serializer Conventions</a> 
+	      </li>
+	    <li class="h2">
+	      <a href="#S.4" title="Changes in version 1.2">Changes in version 1.2</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.4.10" title="May 2nd, 2006 revision">May 2nd, 2006 revision</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.4.9" title="March 14th, 2006 revision">March 14th, 2006 revision</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.4.8" title="February 9th, 2006 revision">February 9th, 2006 revision</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.4.7" title="November 9th, 2005 revision">November 9th, 2005 revision</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.4.6" title="June 30, 2005 revision">June 30, 2005 revision</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.4.5" title="June 23, 2005 revision">June 23, 2005 revision</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.4.4" title="June 6, 2005 revision">June 6, 2005 revision</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.4.3" title="February 2, 2005 revision">February 2, 2005 revision</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.4.2" title="January 31, 2005 revision">January 31, 2005 revision</a> 
+	      </li>
+	    <li class="h3">
+	      <a href="#S.4.1" title="Initial 1.2 release">Initial 1.2 release</a> 
+	      </li>
+	    </ul>
+	  </div>
+	<div class="block">
+	  <h2>Abstract</h2> 
+	  <p>
+The OBO flat file format is an ontology representation language. The
+concepts it models represent a subset of the concepts in the OWL
+description logic language, with several extensions for meta-data
+modelling and the modelling of concepts that are no supported in DL
+languages. </p>
+	  <p>
+	    The format itself attempts to achieve the following goals: 
+	    </p>
+	  <ul>
+	    <li>
+	      Human readability 
+	      </li>
+	    <li>
+	      Ease of parsing 
+	      </li>
+	    <li>
+	      Extensibility 
+	      </li>
+	    <li>
+	      Minimal redundancy 
+	      </li>
+	    </ul>
+	  <p class="toTop">
+	    <a href="#top" title="Back to the top of the page">Back to top</a> 
+	    </p>
+	  </div>
+	<div class="block">
+	  <h2 id="S.0"> About this file</h2> 
+	  <p>
+	    This file is maintained in asciidoc format in the Gene Ontology cvs repository at <a href="http://geneontology.cvs.sourceforge.net/geneontology/" title="geneontology.cvs.sourceforge.net">geneontology.cvs.sourceforge.net</a>, in <a href="http://geneontology.cvs.sourceforge.net/geneontology/go-dev/doc/obo_format_spec.txt" title="go-dev/doc/obo_format_spec.txt">go-dev/doc/obo_format_spec.txt</a>. For information about asciidoc, go to <a href="http://www.methods.co.nz/asciidoc/" title="http://www.methods.co.nz/asciidoc/ [external website]">http://www.methods.co.nz/asciidoc/ <img alt="external link" src="GO.format.obo-1_2-Dateien/icon-external.png"></a>. 
+	    </p>
+	  <p class="toTop">
+	    <a href="#top" title="Back to the top of the page">Back to top</a> 
+	    </p>
+	  </div>
+	<div class="block">
+	  <h2 id="S.1">OBO Syntax</h2> 
+	  <p>
+The format is similar to the tag-value format of the GO definitions
+file, with a few modifications. One important difference is that <em>unrecognized tags in any context do not necessarily generate fatal errors</em> (although some parsers may decide to do so; see <a href="#S.2" title="Parser Requirements">Parser Requirements</a> below). This allows parsers to read files that contain information not used by a particular tool. 
+	    </p>
+	  <h3 id="S.1.1">OBO Document Structure</h3> 
+	  <p>
+	    An OBO document is structured as follows: 
+	    </p>
+	  <div class="fmt"><p><code>
+		&lt;header&gt; 
+		<br>
+		<br>
+		&lt;stanza&gt; 
+		<br>
+		&lt;stanza&gt; 
+		<br>
+		... 
+		</code></p></div>
+	  <p>
+	    Blank lines are ignored. 
+	    </p>
+	  <p>
+	    The header is an unlabeled section at the beginning of the document containing <a href="#S.1.3" title="tag-value pairs">tag-value pairs</a>. The header ends when the first stanza is encountered. 
+	    </p>
+	  <p>
+A stanza is a labeled section of the document, indicating that an
+object of a particular type is being described. Stanzas consist of a
+stanza name in square brackets, and a series of <a href="#S.1.3" title="tag-value pairs">tag-value pairs</a>, structured as follows: 
+	    </p>
+	  <div class="fmt"><p><code>
+		[&lt;Stanza name&gt;] 
+		<br>
+		&lt;tag-value pair&gt; 
+		<br>
+		&lt;tag-value pair&gt; 
+		<br>
+		&lt;tag-value pair&gt; 
+		</code></p></div>
+	  <h3 id="S.1.2"> Comments</h3> 
+	  <p>
+	    An OBO file may contain any number of lines beginning with <code>!</code>, at any point in the file. These lines are ignored by parsers. 
+	    </p>
+	  <p>
+	    Further, any line may end with a <code>!</code> comment. Parsers that encounter an unescaped <code>!</code> will ignore the <code>!</code> and all data until the end of the line. <code>\&lt;newline&gt;</code> sequences are not allowed in <code>!</code> comments (see <a href="#S.1.5" title="escape characters">escape characters</a>). 
+	    </p>
+	  <h3 id="S.1.3"> Tag-Value Pairs</h3> 
+	  <p>
+	    Tag-value pairs consist of a tag name, an unescaped colon, the tag value, and a newline: 
+	    </p>
+	  <div class="fmt"><p><code>
+		&lt;tag&gt;: &lt;value&gt; {&lt;trailing modifiers&gt;} ! &lt;comment&gt; 
+		</code></p></div>
+	  <p>
+The tag name is always a string. The value is always a string, but the
+value string may require special parsing depending on the tag with
+which it is associated. </p>
+	  <p>
+	    In general, tag-value pairs occur on a single line. Multi-line values are possible using escape characters (see <a href="#S.1.5" title="escape characters">escape characters</a>). 
+	    </p>
+	  <p>
+	    In general, each stanza type expects a particular set of pre-defined tags. However, a stanza may contain <em>any</em>
+tag. If a parser does not recognize a tag name for a particular stanza,
+no error will be generated. This allows new experimental tags to be
+added without breaking existing parsers. See <a href="#S.3.2" title="handling unrecognized tags">handling unrecognized tags</a> for specifics. 
+	    </p>
+	  <h3 id="S.1.4"> Trailing Modifiers</h3> 
+	  <p>
+Any tag-value pair may be followed by a trailing modifier. Trailing
+modifiers have been introduced into the OBO 1.2 Specification to allow
+the graceful addition of new features to existing tags. </p>
+	  <p>
+	    A trailing modifier has the following structure: 
+	    </p>
+	  <div class="fmt"><p><code>
+		{&lt;name&gt;=&lt;value&gt;, &lt;name=value&gt;, &lt;name=value&gt;} 
+		</code></p></div>
+	  <p>
+	    That is, trailing modifiers are lists of name-value pairs. 
+	    </p>
+	  <p>
+	    Parser implementations may choose to decode and/or round-trip these trailing modifiers. However, this is <strong>not</strong> required. A parser may choose to ignore or strip away trailing modifiers. 
+	    </p>
+	  <p>
+	    For this reason, trailing modifiers should only include information that is optional or experimental. 
+	    </p>
+	  <p>
+	    Trailing modifiers may also occur within dbxref definitions (see <a href="#S.2.2.3" title="dbxref formatting">dbxref formatting</a>). 
+	    </p>
+	  <h3 id="S.1.5"> Escape characters</h3> 
+	  <p>
+	    Tag names and values may contain the following escape characters: 
+	    </p>
+	  <dl class="tableMid codeList">
+	    <dt>
+	      \n 
+	      </dt>
+	    <dd>
+	      newline 
+	      </dd>
+	    <dt>
+	      \W 
+	      </dt>
+	    <dd>
+	      single space 
+	      </dd>
+	    <dt>
+	      \t 
+	      </dt>
+	    <dd>
+	      tab 
+	      </dd>
+	    <dt>
+	      \: 
+	      </dt>
+	    <dd>
+	      colon 
+	      </dd>
+	    <dt>
+	      \, 
+	      </dt>
+	    <dd>
+	      comma 
+	      </dd>
+	    <dt>
+	      \" 
+	      </dt>
+	    <dd>
+	      double quote 
+	      </dd>
+	    <dt>
+	      \\ 
+	      </dt>
+	    <dd>
+	      backslash 
+	      </dd>
+	    <dt>
+	      \( 
+	      </dt>
+	    <dd>
+	      open parenthesis 
+	      </dd>
+	    <dt>
+	      \) 
+	      </dt>
+	    <dd>
+	      close parenthesis 
+	      </dd>
+	    <dt>
+	      \[ 
+	      </dt>
+	    <dd>
+	      open bracket 
+	      </dd>
+	    <dt>
+	      \] 
+	      </dt>
+	    <dd>
+	      close bracket 
+	      </dd>
+	    <dt>
+	      { 
+	      </dt>
+	    <dd>
+	      open brace 
+	      </dd>
+	    <dt>
+	      } 
+	      </dt>
+	    <dd>
+	      close brace 
+	      </dd>
+	    <dt>
+	      \&lt;newline&gt; 
+	      </dt>
+	    <dd>
+	      &lt;no value&gt; 
+	      </dd>
+	    </dl>
+	  <p>
+Escaped characters should only be used when a literal character is
+needed (that is, a character that the parser should not interpret as
+having a special meaning when parsing). Some tag values may contain
+unescaped colons, brackets, quotes, etc., that have meaning in decoding
+the tag value. Unescaped spaces between the separator colon and the
+start of the value tag are discarded. </p>
+	  <p>
+	    OBO parser implementations may support only these escape characters, or they may assume that <em>any</em> character following a backslash is an escaped character. Parsers that choose the latter approach will translate <code>\a</code> and <code>\?</code> to "a" and "?" respectively. 
+	    </p>
+	  <p class="toTop">
+	    <a href="#top" title="Back to the top of the page">Back to top</a> 
+	    </p>
+	  </div>
+	<div class="block">
+	  <h2 id="S.2"> Built-in OBO Semantics</h2> <h3 id="S.2.1"> Document Header Tags</h3> 
+	  <p class="semi-title">
+	    Required tags: 
+	    </p>
+	  <dl class="tableWide codeList">
+	    <dt>
+	      format-version 
+	      </dt>
+	    <dd>
+Gives the OBO specification version that this file uses. This is useful
+if tag semantics change from one OBO specification version to the next.
+</dd>
+	    </dl>
+	  <p class="semi-title">
+	    Optional tags: 
+	    </p>
+	  <dl class="tableWide codeList">
+	    <dt>
+	      data-version 
+	      </dt>
+	    <dd>
+	      Gives the version of the current ontology. 
+	      </dd>
+	    <dt>
+	      version 
+	      </dt>
+	    <dd>
+	      Deprecated. Use <code>data-version</code> instead. 
+	      </dd>
+	    <dt>
+	      date 
+	      </dt>
+	    <dd>
+	      The current date in dd:MM:yyyy HH:mm format. 
+	      </dd>
+	    <dt>
+	      saved-by 
+	      </dt>
+	    <dd>
+The username of the person to last save this file. The meaning of
+"username" is entirely up to the application that generated the file. </dd>
+	    <dt>
+	      auto-generated-by 
+	      </dt>
+	    <dd>
+	      The program that generated the file. 
+	      </dd>
+	    <dt>
+	      subsetdef 
+	      </dt>
+	    <dd>
+A description of a term subset. The value for this tag should contain a
+subset name, a space, and a quote enclosed subset description, as
+follows: <div class="fmt"><p><code>
+		    subsetdef: GO_SLIM "GO Slim" 
+		    </code></p></div>
+	      </dd>
+	    <dt>
+	      import 
+	      </dt>
+	    <dd>
+A url pointing to another OBO document. The contents of the target
+document will be appended to this document at parse time. If the target
+document also contains import statements, they will be resolved. This
+tag replaces the <code>typeref</code> tag from earlier versions of the OBO spec. 
+	      </dd>
+	    <dt>
+	      synonymtypedef 
+	      </dt>
+	    <dd>
+A description of a user-defined synonym type. The value for this tag
+should contain a synonym type name, a space, a quote enclosed
+description, and an optional scope specifier, as follows: <div class="fmt"><p><code>
+		    synonymtypedef: UK_SPELLING "British spelling" EXACT 
+		    </code></p></div>
+	      <p>
+		The scope specifier indicates the default scope for any synonym that has this type. See the synonym section of <a href="#S.2.2.2" title="tags in a term stanza">tags in a term stanza</a> for more information on the scope specifier. 
+		</p>
+	      </dd>
+	    <dt>
+	      idspace 
+	      </dt>
+	    <dd>
+A mapping between a "local" ID space and a "global" ID space. The value
+for this tag should be a local idspace, a space, a URI, optionally
+followed by a quote-enclosed description, like this: <div class="fmt"><p><code>
+		    idspace: GO urn:lsid:bioontology.org:GO: "gene ontology terms" 
+		    </code></p></div>
+	      </dd>
+	    <dt>
+	      default-relationship-id-prefix 
+	      </dt>
+	    <dd>
+	      Any relationship lacking an ID space will be prefixed with the value of this tag. For example: 
+	      <div class="fmt"><p><code>
+		    default-relationship-id-prefix: OBO_REL 
+		    </code></p></div>
+	      <p>
+The above will make sure that all relations referred to in the current
+file come from the OBO relations ontology, unless otherwise specified. </p>
+	      <p>
+		The scope of this tag is within the current file only. See also <code>id-mapping</code>, below 
+		</p>
+	      </dd>
+	    <dt>
+	      id-mapping 
+	      </dt>
+	    <dd>
+Maps a Term or Typedef ID to another Term or Typedef ID. The main
+reason for this tag is to increase interoperability between different
+OBO ontologies. <div class="fmt"><p><code>
+		    id-mapping: part_of OBO_REL:part_of 
+		    </code></p></div>
+	      <p>
+		This maps all cases of the unqualified relationship <code>part_of</code> to the ID <code>OBO_REL:part_of</code> defined in the OBO relations ontology 
+		</p>
+	      <p>
+		The scope of this tag is within the current file only. Note that the <code>default-relationship-id-prefix</code> tag takes precedence over this tag 
+		</p>
+	      </dd>
+	    <dt>
+	      remark 
+	      </dt>
+	    <dd>
+	      General comments for this file. This tag is differentiated from a <code>!</code> comment in that the contents of a <code>remark</code> tag are guaranteed to be preserved by a parser. 
+	      </dd>
+	    </dl>
+	  <h3 id="S.2.2"> Stanzas</h3> 
+	  <p>
+	    At present, every OBO stanza always begins with an <code>id</code> tag. The value of the <code>id</code>
+tag announces the object to which the rest of the tags in the stanza
+refer. Normal, non-anonymous ids have global scope. An object has the
+same id in every file, and in every namespace. </p>
+	  <p>
+	    The <code>id</code> tag may be optionally followed by an <code>is_anonymous tag</code>. If the value of <code>is_anonymous</code>
+is true, the object is anonymous. The id of an anonymous object is not
+fixed; if the ontology is parsed and then reserialized, the id may
+change. Anonymous ids have local scope; they are only valid in the file
+from which they were loaded. The same anonymous id in two different
+files refers to <em>a different object</em> in each file. 
+	    </p>
+	  <p>
+	    Any given stanza <em>does not</em>
+have to contain all the required tags. A file (or collection of files)
+may contain multiple stanzas that describe different aspects of an
+object. A "required" tag must be specified at least once for each
+object in a given set of files. This makes it possible for optional
+information to be stored in a seperate file, and only loaded when
+necessary. </p>
+	  <p> This means that parsers must wait until the end of
+the parse batch to check whether required information is missing.
+Multiple descriptions may produce parse errors if: </p>
+	  <ol>
+	    <li> A stanza contains tags that contradict a
+previous stanza (ie one term description gives a different term name
+than another description) </li>
+	    <li> A parser has processed all the files in a
+batch, but an object is still missing some required value (such as a
+term name). </li>
+	    </ol>
+	  <p>
+	    There are currently three supported stanza types: <code>[Term]</code>, <code>[Typedef]</code>, and <code>[Instance]</code>. Parsers/serializers will round-trip (successfully load and save) unrecognized stanzas. 
+	    </p>
+	  <h4 id="S.2.2.1"> Legal IDs and Special Identifiers</h4> 
+	  <p>
+	    Any string is a legal <code>id</code>, as long as it is not one of the built in identifiers. Four of these are defined by the OBO spec: 
+	    </p>
+	  <dl class="tableWide codeList">
+	    <dt>
+	      OBO:TYPE 
+	      </dt>
+	    <dd>
+	      Refers to any type 
+	      </dd>
+	    <dt>
+	      OBO:TERM 
+	      </dt>
+	    <dd>
+	      Refers to any term 
+	      </dd>
+	    <dt>
+	      OBO:TERM_OR_TYPE 
+	      </dt>
+	    <dd>
+	      Refers to any term or type 
+	      </dd>
+	    <dt>
+	      OBO:INSTANCE 
+	      </dt>
+	    <dd>
+	      Refers to any instance 
+	      </dd>
+	    </dl>
+	  <p>
+	    The others are primitive types specified by <a href="http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html" title="XML-Schema [external website]">XML-Schema <img alt="external link" src="GO.format.obo-1_2-Dateien/icon-external.png"></a>. 
+	    </p>
+	  <p>
+	    These are the only XML-Schema primitives supported by OBO. 
+	    </p>
+	  <dl class="tableWide codeList">
+	    <dt>
+	      xsd:simpleType 
+	      </dt>
+	    <dd>
+	      Indicates any primitive type (abstract) 
+	      </dd>
+	    <dt>
+	      xsd:string 
+	      </dt>
+	    <dd>
+	      A string 
+	      </dd>
+	    <dt>
+	      xsd:integer 
+	      </dt>
+	    <dd>
+	      Any integer 
+	      </dd>
+	    <dt>
+	      xsd:decimal 
+	      </dt>
+	    <dd>
+	      Any real number 
+	      </dd>
+	    <dt>
+	      xsd:negativeInteger 
+	      </dt>
+	    <dd>
+	      Any negative integer 
+	      </dd>
+	    <dt>
+	      xsd:positiveInteger 
+	      </dt>
+	    <dd>
+	      Any integer &gt; 0 
+	      </dd>
+	    <dt>
+	      xsd:nonNegativeInteger 
+	      </dt>
+	    <dd>
+	      Any integer &gt;= 0 
+	      </dd>
+	    <dt>
+	      xsd:nonPositiveInteger 
+	      </dt>
+	    <dd>
+	      Any integer &lt; 0 
+	      </dd>
+	    <dt>
+	      xsd:boolean 
+	      </dt>
+	    <dd>
+	      True or false 
+	      </dd>
+	    <dt>
+	      xsd:date 
+	      </dt>
+	    <dd>
+	      An XML-Schema date 
+	      </dd>
+	    </dl>
+	  <p>
+	    These reserved identifiers are <strong>only</strong> legal for domain and range constraints or as a datatype specifier in a <code>property_value</code> statement. They may have special uses within applications that use OBO. See <a href="#S.2.2.4" title="typedef tags">typedef tags</a> and <a href="#S.2.2.5" title="instance tags">instance tags</a> for more information. 
+	    </p>
+	  <p>
+Many tags require one or more object ids as their target values. It is
+up to the parser implementation to decide whether it is legal for a tag
+to reference an id for an object that has not been loaded. See <a href="#S.3.4" title="dangling references">dangling references</a> for information on how to handle dangling references. 
+	    </p>
+	  <h4 id="S.2.2.2"> Tags in a [Term] Stanza</h4> 
+	  <p class="semi-title">
+	    Required tags 
+	    </p>
+	  <dl class="tableWide codeList">
+	    <dt>
+	      id 
+	      </dt>
+	    <dd>
+	      The unique id of the current term. 
+	      </dd>
+	    <dt>
+	      name 
+	      </dt>
+	    <dd>
+	      The term name. Any term may have only <strong>one</strong> name defined. If multiple term names are defined, it is a parse error. 
+	      </dd>
+	    </dl>
+	  <p class="semi-title">
+	    Optional tags 
+	    </p>
+	  <dl class="tableWide codeList">
+	    <dt>
+	      is_anonymous 
+	      </dt>
+	    <dd>
+	      Whether or not the current object has an anonymous id 
+	      </dd>
+	    <dt>
+	      alt_id 
+	      </dt>
+	    <dd>
+	      Defines an alternate id for this term. A term may have any number of alternate ids. 
+	      </dd>
+	    <dt>
+	      def 
+	      </dt>
+	    <dd>
+The definition of the current term. There must be zero or one instances
+of this tag per term description. More than one definition for a term
+generates a parse error. The value of this tag should be the quote
+enclosed definition text, followed by a dbxref list containing dbxrefs
+that describe the origin of this definition (see <a href="#S.2.2.3" title="dbxref formatting">dbxref formatting</a> for information on how dbxref lists are encoded). An example of this tag would look like this: 
+	      <div class="fmt"><p><code>
+definition: "The breakdown into simpler components of (+)-camphor, a
+bicyclic monoterpene ketone." [UM-BBD:pathway "",
+http://umbbd.ahc.umn.edu/cam/cam_map.html ""] </code></p></div>
+	      </dd>
+	    <dt>
+	      comment 
+	      </dt>
+	    <dd>
+A comment for this term. There must be zero or one instances of this
+tag per term description. More than one comment for a term generates a
+parse error. </dd>
+	    <dt>
+	      subset 
+	      </dt>
+	    <dd>
+	      This tag indicates a term subset to which this term belongs. The value of this tag must be a subset name as defined in a <code>subsetdef</code> tag in the file header. If the value of this tag is not mentioned in a <code>subsetdef</code> tag, a parse error will be generated. A term may belong to any number of subsets. 
+	      </dd>
+	    <dt>
+	      synonym 
+	      </dt>
+	    <dd>
+This tag gives a synonym for this term, some xrefs to describe the
+origins of the synonym, and may indicate a synonym category or scope
+information. <p> The value consists of a quote enclosed synonym text, an
+optional scope identifier, an optional synonym type name, and an
+optional dbxref list, like this: </p>
+	      <div class="fmt"><p><code>
+		    synonym: "The other white meat" EXACT MARKETING_SLOGAN [MEAT:00324, BACONBASE:03021] 
+		    </code></p></div>
+	      <p>
+		The synonym scope may be one of four values: <code>EXACT</code>, <code>BROAD</code>, <code>NARROW</code>, <code>RELATED</code>. If the first form is used to specify a synonym, the scope is assumed to be <code>RELATED</code>. 
+		</p>
+	      <p>
+		The synonym type must be the id of a synonym type defined by a <code>synonymtypedef</code>
+line in the header. If the synonym type has a default scope, that scope
+is used regardless of any scope declaration given by a synonym tag. </p>
+	      <p>
+		The dbxref list is formatted as specified in <a href="#S.2.2.3" title="dbxref formatting">dbxref formatting</a>. A term may have any number of synonyms. 
+		</p>
+	      </dd>
+	    <dt>
+	      exact_synonym 
+	      </dt>
+	    <dd>
+	      Deprecated. An alias for the <code>synonym</code> tag with the scope modifier set to <code>EXACT</code>. 
+	      </dd>
+	    <dt>
+	      narrow_synonym 
+	      </dt>
+	    <dd>
+	      Deprecated. An alias for the <code>synonym</code> tag with the scope modifier set to <code>NARROW</code>. 
+	      </dd>
+	    <dt>
+	      broad_synonym 
+	      </dt>
+	    <dd>
+	      Deprecated. An alias for the <code>synonym</code> tag with the scope modifier set to <code>BROAD</code>. 
+	      </dd>
+	    <dt>
+	      xref 
+	      </dt>
+	    <dd>
+	      A dbxref that describes an analagous term in another vocabulary (see <a href="#S.2.2.3" title="dbxref formatting">dbxref formatting</a> for information about how the value of this tag must be formatted). A term may have any number of xrefs. 
+	      </dd>
+	    <dt>
+	      xref_analog 
+	      </dt>
+	    <dd>
+	      Deprecated. An alias for the <code>xref</code> tag. 
+	      </dd>
+	    <dt>
+	      xref_unk 
+	      </dt>
+	    <dd>
+	      Deprecated. An alias for the <code>xref</code> tag. 
+	      </dd>
+	    <dt>
+	      is_a 
+	      </dt>
+	    <dd>
+This tag describes a subclassing relationship between one term and
+another. The value is the id of the term of which this term is a
+subclass. A term may have any number of <code>is_a</code> relationships. 
+	      <p>
+		Parsers which support trailing modifiers may optionally parse the following trailing modifier tags for <code>is_a</code>: 
+		</p>
+	      <div class="fmt"><p><code>
+		    namespace &lt;any namespace id&gt; 
+		    <br>
+		    derived true OR false 
+		    </code></p></div>
+	      <p>
+		The <code>namespace</code> modifier allows the <code>is_a</code> relationship to be assigned its own namespace (independent of the namespace of the superclass or subclass of this <code>is_a</code> relationship). 
+		</p>
+	      <p>
+		The <code>derived</code> modifier indicates that the <code>is_a</code>
+relationship was not explicitly defined by a human ontology designer,
+but was created automatically by a reasoner, and could be re-derived
+using the non-derived relationships in the ontology. </p>
+	      <p>
+		This tag previously supported the <code>completes</code> trailing modifier. This modifier is now deprecated. Use the <code>intersection_of</code> tag instead. 
+		</p>
+	      </dd>
+	    <dt>
+	      intersection_of 
+	      </dt>
+	    <dd>
+This tag indicates that this term represents the intersection of
+several other terms. The value is either a term id, or a relationship
+type id, a space, and a term id. For example: <div class="fmt"><p><code>
+		    intersection_of: GO:00001 
+		    <br>
+		    intersection_of: part_of GO:00002 
+		    </code></p></div>
+	      <p>
+This means that the term is equivalent to any term that is both a
+subclass of GO:00001 and has a part_of relationship to GO:00002 </p>
+	      <p>
+		If any <code>intersection_of</code> tags are specified for a term, at least 2 <code>intersection_of</code> tags need to be present or it is a parse error. The full intersection for the term is the set of <strong>all</strong> ids specified by <strong>all</strong> intersection_of tags for that term. 
+		</p>
+	      <p>
+		This tag may not be applied to relationship types. 
+		</p>
+	      <p>
+		Parsers which support trailing modifiers may optionally parse the following trailing modifier tag for <code>disjoint_from</code>: 
+		</p>
+	      <div class="fmt"><p><code>
+		    namespace &lt;any namespace id&gt; 
+		    </code></p></div>
+	      </dd>
+	    <dt>
+	      union_of 
+	      </dt>
+	    <dd>
+This tag indicates that this term represents the union of several other
+terms. The value is the id of one of the other terms of which this term
+is a union. <p>
+		If any <code>union_of</code> tags are specified for a term, at least 2 <code>union_of</code> tags need to be present or it is a parse error. The full union for the term is the set of <strong>all</strong> ids specified by <strong>all</strong> union_of tags for that term. 
+		</p>
+	      <p>
+		This tag may not be applied to relationship types. 
+		</p>
+	      <p>
+		Parsers which support trailing modifiers may optionally parse the following trailing modifier tag for <code>disjoint_from</code>: 
+		</p>
+	      <div class="fmt"><p><code>
+		    namespace &lt;any namespace id&gt; 
+		    </code></p></div>
+	      </dd>
+	    <dt>
+	      disjoint_from 
+	      </dt>
+	    <dd>
+This tag indicates that a term is disjoint from another, meaning that
+the two terms have no instances or subclasses in common. The value is
+the id of the term from which the current term is disjoint. This tag
+may not be applied to relationship types. <p>
+		Parsers which support trailing modifiers may optionally parse the following trailing modifier tag for <code>disjoint_from</code>: 
+		</p>
+	      <div class="fmt"><p><code>
+		    namespace &lt;any namespace id&gt; 
+		    <br>
+		    derived true OR false 
+		    </code></p></div>
+	      <p>
+		The <code>namespace</code> modifier allows the <code>disjoint_from</code> relationship to be assigned its own namespace. 
+		</p>
+	      <p>
+		The derived modifier indicates that the <code>disjoint_from</code>
+relationship was not explicitly defined by a human ontology designer,
+but was created automatically by a reasoner, and could be re-derived
+using the non-derived relationships in the ontology. </p>
+	      </dd>
+	    <dt>
+	      relationship 
+	      </dt>
+	    <dd>
+This tag describes a typed relationship between this term and another
+term. The value of this tag should be the relationship type id, and
+then the id of the target term. The relationship type name must be a
+relationship type name as defined in a typedef tag stanza. The <code>[Typedef]</code>
+must either occur in a document in the current parse batch, or in a
+file imported via an import header tag. If the relationship type name
+is undefined, a parse error will be generated. If the id of the target
+term cannot be resolved by the end of parsing the current batch of
+files, this tag describes a "dangling reference"; see <a href="#S.3.4" title="the parser requirements section">the parser requirements section</a> for information about how a parser may handle dangling references. If a relationship is specified for a term with an <code>is_obsolete</code> value of true, a parse error will be generated. 
+	      <p>
+		Parsers which support trailing modifiers may optionally parse the following trailing modifier tags for relationships: 
+		</p>
+	      <div class="fmt"><p><code>
+		    not_necessary true OR false 
+		    <br>
+		    inverse_necessary true OR false 
+		    <br>
+		    namespace &lt;any namespace id&gt; 
+		    <br>
+		    derived true OR false 
+		    <br>
+		    cardinality any non-negative integer 
+		    <br>
+		    maxCardinality any non-negative integer 
+		    <br>
+		    minCardinality any non-negative integer 
+		    </code></p></div>
+	      <p>
+		The <code>necessary</code> modifier allows a relationship to be marked as "not necessarily true". The <code>inverse_necessary</code> modifier allows the inverse of a relationship to be marked "necessarily true". 
+		</p>
+	      <p>
+		The <code>namespace</code>
+modifier allows the relationship to be assigned its own namespace
+(independant of the namespace of the parent, child, or type of the
+relationship). </p>
+	      <p>
+		The <code>derived</code> modifier indicates that
+the relationship was not explicitly defined by a human ontology
+designer, but was created automatically by a reasoner, and could be
+re-derived using the non-derived relationships in the ontology. </p>
+	      <p> The various cardinality constraints specify the
+number of relationships of a given type that may be defined for
+instances of this term. </p>
+	      <p>
+		This tag previously supported the <code>completes</code> trailing modifier. This modifier is now deprecated. Use the <code>intersection_of</code> tag instead. 
+		</p>
+	      </dd>
+	    <dt>
+	      is_obsolete 
+	      </dt>
+	    <dd>
+Whether or not this term is obsolete. Allowable values are "true" and
+"false" (false is assumed if this tag is not present). Obsolete terms
+must have <strong>no</strong> relationships, and no defined <code>is_a</code>, <code>inverse_of</code>, <code>disjoint_from</code>, <code>union_of</code>, or <code>intersection_of</code> tags. 
+	      </dd>
+	    <dt>
+	      replaced_by 
+	      </dt>
+	    <dd>
+Gives a term which replaces an obsolete term. The value is the id of
+the replacement term. The value of this tag can safely be used to
+automatically reassign instances whose <code>instance_of</code> property points to an obsolete term. 
+	      </dd>
+	    <dd>
+	      The <code>replaced_by</code> tag may only be specified for obsolete terms. A single obsolete term may have more than one <code>replaced_by</code> tag. This tag can be used in conjunction with the <code>consider</code> tag. 
+	      </dd>
+	    <dt>
+	      consider 
+	      </dt>
+	    <dd>
+Gives a term which may be an appropriate substitute for an obsolete
+term, but needs to be looked at carefully by a human expert before the
+replacement is done. </dd>
+	    <dd>
+	      This tag may only be specified for obsolete terms. A single obsolete term may have many <code>consider</code> tags. This tag can be used in conjunction with <code>replaced_by</code>. 
+	      </dd>
+	    <dt>
+	      use_term 
+	      </dt>
+	    <dd>
+	      Deprecated. Equivalent to <code>consider</code>. 
+	      </dd>
+	    <dt>
+	      builtin 
+	      </dt>
+	    <dd>
+Whether or not this term or relation is built in to the OBO format.
+Allowable values are "true" and "false" (false assumed as default).
+Rarely used. One example of where this is used is the OBO relations
+ontology, which provides a stanza for the <span class="rel">is_a</span> relation, even though this relation is axiomatic to the language. 
+	      </dd>
+	    </dl>
+	  <h4 id="S.2.2.3"> Dbxref Formatting</h4> 
+	  <p>
+	    Dbxref definitions take the following form: 
+	    </p>
+	  <div class="fmt"><p><code>
+		&lt;dbxref name&gt; {optional-trailing-modifier} 
+		</code></p></div>
+	  <p>
+	    or 
+	    </p>
+	  <div class="fmt"><p><code>
+		&lt;dbxref name&gt; "&lt;dbxref description&gt;" {optional-trailing-modifier} 
+		</code></p></div>
+	  <p>
+By convention, the dbxref name is a colon separated key-value pair, but
+this is not a requirement. If provided, the dbxref description is a
+string of zero or more characters describing the dbxref. An example of
+a dbxref would be: </p>
+	  <div class="fmt"><p><code>
+		GO:ma "Sprung whole from the head of Michael, like Athena" 
+		</code></p></div>
+	  <p>
+	    Dbxref lists are used when a tag value must contain several dbxrefs. Dbxref lists take the following form: 
+	    </p>
+	  <div class="fmt"><p><code>
+		[&lt;dbxref definition&gt;, &lt;dbxref definition&gt;, ...] 
+		</code></p></div>
+	  <p>
+	    The brackets may contain zero or more comma separated dbxref definitions. An example of a dbxref list would be: 
+	    </p>
+	  <div class="fmt"><p><code>
+		[GO:ma, GO:midori "Midori was drinking and came up with this", GO:john {namespace=johnsirrelevantdbxrefs}] 
+		</code></p></div>
+	  <p>
+Note that the trailing modifiers (like all trailing modifiers) do not
+need to be decoded or round-tripped by parsers; trailing modifiers can
+always be optionally ignored. However, all parsers must be able to
+gracefully ignore trailing modifiers. It is important to recognize that
+lines which accept a dbxref list may have a trailing modifier for each
+dbxref in the list, and <em>another</em> trailing modifier for the line itself. 
+	    </p>
+	  <h4 id="S.2.2.4"> Tags in [Typedef] Stanza</h4> 
+	  <p>
+	    <code>[Typedef]</code> stanzas support almost all the same tags as a <code>[Term]</code> stanza. 
+	    </p>
+	  <p>
+	    The following tags are not allowed in a <code>[Typedef]</code> stanza: 
+	    </p>
+	  <ul>
+	    <li>
+	      union_of 
+	      </li>
+	    <li>
+	      intersection_of 
+	      </li>
+	    <li>
+	      disjoint_from 
+	      </li>
+	    </ul>
+	  <p>
+	    The following additional tags are <em>only</em> allowed in a <code>[Typedef]</code> stanza: 
+	    </p>
+	  <dl class="tableWide codeList">
+	    <dt>
+	      domain 
+	      </dt>
+	    <dd>
+The id of a term, or a special reserved identifier, which indicates the
+domain for this relationship type. If a property P has domain D, then
+any term T that has a relationship of type P to another term is a
+subclass of D. Note that this does <strong>not</strong>
+mean that the domain restricts which classes of terms can have a
+relationship of type P to another term. Rather, it means that any term
+that has a relationship of type P to another term is <em>by definition</em> a subclass of D. 
+	      </dd>
+	    <dt>
+	      range 
+	      </dt>
+	    <dd>
+The id of a term, or a special reserved identifier, which indicates
+acceptable range for this relationship type. If a property P has range
+R, then any term T that is the target of a relationship of type P is a
+subclass of R. Note that this does <strong>not</strong>
+mean that the range restricts which classes of terms can be the target
+of relationships of type P. Rather, it means that any term that is the
+target of a relationship of type P is <em>by definition</em> a subclass of R. 
+	      </dd>
+	    <dt>
+	      inverse_of 
+	      </dt>
+	    <dd>
+The id of another relationship type that is the inverse of this
+relationship type. If relation A is the inverse_of type B, and instance
+X has relationship A to instance Y, then it is implied that instance Y
+has relation B to instance X. Note that this applies at the instance
+level. If a particular relationship tag has a <code>true</code> trailing qualifier then the inverse applies at the term level. 
+	      </dd>
+	    <dt>
+	      transitive_over 
+	      </dt>
+	    <dd>
+The id of another relationship type that this relationship type is
+transitive over. If P is transitive over Q, and the ontology has X P Y
+and Y Q Z then it follows that X P Z (term/type level). </dd>
+	    <dt>
+	      is_cyclic 
+	      </dt>
+	    <dd>
+Whether or not a cycle can be made from this relationship type. If a
+relationship type is non-cyclic, it is illegal for an ontology to
+contain a cycle made from user-defined <em>or</em> implied relationships of this type. Allowed values: true or false 
+	      </dd>
+	    <dt>
+	      is_reflexive 
+	      </dt>
+	    <dd>
+Whether this relationship is reflexive. All reflexive relationships are
+also cyclic. Allowed values: true or false. Term/type level. </dd>
+	    <dt>
+	      is_symmetric 
+	      </dt>
+	    <dd>
+Whether this relationship is symmetric. All symmetric relationships are
+also cyclic. Allowed values: true or false. Term/type level. </dd>
+	    <dt>
+	      is_anti_symmetric 
+	      </dt>
+	    <dd>
+	      Whether this relationship is anti-symmetric. Allowed values: true or false. Term/type level. 
+	      </dd>
+	    <dt>
+	      is_transitive 
+	      </dt>
+	    <dd>
+	      Whether this relationship is transitive. Allowed values: true or false. Term/type level. 
+	      </dd>
+	    <dt>
+	      is_metadata_tag 
+	      </dt>
+	    <dd>
+Whether this relationship is a metadata tag. Properties that are marked
+as metadata tags are used to record object metadata. Object metadata is
+additional information about an object that is useful to track, but
+does not impact the definition of the object or how it should be
+treated by a reasoner. Metadata tags might be used to record special
+term synonyms or structured notes about a term, for example. </dd>
+	    </dl>
+	  <h4 id="S.2.2.5"> Tags in an [Instance] Stanza</h4> 
+	  <p class="semi-title">
+	    Required tags 
+	    </p>
+	  <dl class="tableWide codeList">
+	    <dt>
+	      id 
+	      </dt>
+	    <dd>
+	      The unique id of the current term. 
+	      </dd>
+	    <dt>
+	      name 
+	      </dt>
+	    <dd>
+	      The instance name. Any instance may have only <strong>one</strong> name defined. 
+	      </dd>
+	    <dt>
+	      instance_of 
+	      </dt>
+	    <dd>
+	      The term id that gives the class of which this is an instance. 
+	      </dd>
+	    </dl>
+	  <p class="semi-title">
+	    Optional tags 
+	    </p>
+	  <dl class="tableWide codeList">
+	    <dt>
+	      property_value 
+	      </dt>
+	    <dd>
+This tag binds a property to a value in this instance. The value of
+this tag is a relationship type id, a space, and a value specifier. The
+value specifier may have one of two forms; in the first form, it is
+just the id of some other instance, relationship type or term. In the
+second form, the value is given by a quoted string, a space, and
+datatype identifier. See <a href="#S.2.2.1" title="Legal IDs and special identifiers">Legal IDs and special identifiers</a> for more information on legal datatype identifiers. 
+	      <div class="fmt"><p><code>
+		    [Instance] 
+		    <br>
+		    id: john 
+		    <br>
+		    name: John Day-Richter 
+		    <br>
+		    instance_of: boy 
+		    <br>
+		    property_value: married_to heather 
+		    <br>
+		    property_value: shoe_size "8" xsd:positiveInteger 
+		    </code></p></div>
+	      </dd>
+	    </dl>
+	  <p>
+The following optional tags are also allowable for instances. They have
+exactly the same syntax and semantics as defined in <a href="#S.2.2.2" title="tags in a term stanza">tags in a term stanza</a>: 
+	    </p>
+	  <ul>
+	    <li>
+	      is_anonymous 
+	      </li>
+	    <li>
+	      namespace 
+	      </li>
+	    <li>
+	      alt_id 
+	      </li>
+	    <li>
+	      comment 
+	      </li>
+	    <li>
+	      xref 
+	      </li>
+	    <li>
+	      synonym 
+	      </li>
+	    <li>
+	      is_obsolete 
+	      </li>
+	    <li>
+	      replaced_by 
+	      </li>
+	    <li>
+	      consider 
+	      </li>
+	    </ul>
+	  <p>
+	    The <code>replaced_by</code> and <code>consider</code>
+tags are also allowable for obsolete instances, but they must refer to
+another instance, rather than another term, to use as a replacement. </p>
+	  <h4 id="S.2.2.6"> Built-In Objects</h4> 
+	  <p>
+	    By default, every OBO ontology contains the following objects: 
+	    </p>
+	  <div class="fmt"><p><code>
+		[Typedef] 
+		<br>
+		id: is_a 
+		<br>
+		name: is_a 
+		<br>
+		range: OBO:TERM_OR_TYPE 
+		<br>
+		domain: OBO:TERM_OR_TYPE 
+		<br>
+		definition: The basic subclassing relationship [OBO:defs] 
+		<br>
+		<br>
+		[Typedef] 
+		<br>
+		id: disjoint_from 
+		<br>
+		name: disjoint_from 
+		<br>
+		range: OBO:TERM 
+		<br>
+		domain: OBO:TERM 
+		<br>
+		definition: Indicates that two classes are disjoint [OBO:defs] 
+		<br>
+		<br>
+		[Typedef] 
+		<br>
+		id: instance_of 
+		<br>
+		name: instance_of 
+		<br>
+		range: OBO:TERM 
+		<br>
+		domain: OBO:INSTANCE 
+		<br>
+		definition: Indicates the type of an instance [OBO:defs] 
+		<br>
+		<br>
+		[Typedef] 
+		<br>
+		id: inverse_of 
+		<br>
+		name: inverse_of 
+		<br>
+		range: OBO:TYPE 
+		<br>
+		domain: OBO:TYPE 
+		<br>
+		definition: Indicates that one relationship type is the inverse of another [OBO:defs] 
+		<br>
+		<br>
+		[Typedef] 
+		<br>
+		id: union_of 
+		<br>
+		name: union_of 
+		<br>
+		range: OBO:TERM 
+		<br>
+		domain: OBO:TERM 
+		<br>
+		definition: Indicates that a term is the union of several others [OBO:defs] 
+		<br>
+		<br>
+		[Typedef] 
+		<br>
+		id: intersection_of 
+		<br>
+		name: intersection_of 
+		<br>
+		range: OBO:TERM 
+		<br>
+		domain: OBO:TERM 
+		<br>
+		definition: Indicates that a term is the intersection of several others [OBO:defs] 
+		</code></p></div>
+	  <p class="toTop">
+	    <a href="#top" title="Back to the top of the page">Back to top</a> 
+	    </p>
+	  </div>
+	<div class="block">
+	  <h2 id="S.3"> Parsers and Serializers</h2> <h3 id="S.3.1"> General Behavior</h3> 
+	  <p>
+All parsers should be capable of failing gracefully and generating
+errors explaining the failure. Parsers may optionally be capable of
+generating warnings, if the file being read contains non-fatal errors. </p>
+	  <h3 id="S.3.2"> Handling Unrecognized Tags</h3> 
+	  <p>
+	    A parser may do one of several things when an unrecognized tag is found: 
+	    </p>
+	  <ul class="sampList">
+	    <li>
+	      <samp>FAIL</samp>: report a fatal error and terminate parsing 
+	      </li>
+	    <li>
+	      <samp>WARN</samp>: report a warning, but continue parsing and ignore the unrecognized tag 
+	      </li>
+	    <li>
+	      <samp>WARN_AND_RECORD</samp>: report a warning, but record the unrecognized tag for later serialization 
+	      </li>
+	    <li>
+	      <samp>IGNORE</samp>: silently ignore the unrecognized tag 
+	      </li>
+	    <li>
+	      <samp>RECORD</samp>: record the unrecognized tag for later serialization <em>(recommended)</em>
+	      </li>
+	    </ul>
+	  <h3 id="S.3.3"> Non-Roundtripping Header Tags</h3> 
+	  <p>
+	    The following optional header tags need not survive round-tripping: 
+	    </p>
+	  <ul>
+	    <li>
+	      format-version 
+	      </li>
+	    <li>
+	      version 
+	      </li>
+	    <li>
+	      date 
+	      </li>
+	    <li>
+	      saved-by 
+	      </li>
+	    <li>
+	      auto-generated-by 
+	      </li>
+	    </ul>
+	  <p>
+	    They do not need to be round tripped, because the correct values will change when the file is saved. 
+	    </p>
+	  <h3 id="S.3.4"> Dangling References</h3> 
+	  <p>
+	    There are several options when a dangling reference is encountered 
+	    </p>
+	  <ul class="sampList">
+	    <li>
+	      <samp>FAIL</samp>: report a fatal error and terminate parsing 
+	      </li>
+	    <li>
+	      <samp>WARN_AND_IGNORE</samp>: report a fatal error and ignore the dangling reference 
+	      </li>
+	    <li>
+	      <samp>WARN_AND_READ</samp>: report a warning and read in the dangling reference, storing it in a form suitable for round-tripping 
+	      </li>
+	    <li>
+	      <samp>READ</samp>: silently read and store the dangling relationship <em>(recommended)</em>
+	      </li>
+	    </ul>
+	  <h3 id="S.3.5"> Serializer Conventions</h3> 
+	  <p>
+Any parser should be able to read correctly formatted files in any
+layout. However, it is suggested that serializers obey the following
+conventions to ensure consistency. </p>
+	  <h4 id="S.3.5.1"> General Conventions</h4> 
+	  <ul>
+	    <li>
+Within a single file, all tags relating to a single entity should
+appear in the same stanza (thereby minimizing the total number of
+stanzas and keeping all tags regarding a single entity in the same
+place) </li>
+	    <li> In any case where the correct ordering of tags
+is ambiguous (for example, if there are two tags with the same name, or
+the ordering is not given in this document), tags should be ordered
+alphabetically, first on the tag name, then on the tag value. </li>
+	    </ul>
+	  <h4 id="S.3.5.2"> Stanza Conventions</h4> 
+	  <p>
+	    All new stanza declarations should be preceded by a blank line. <code>[Typedef]</code> stanzas should appear before <code>[Term]</code> stanzas, and <code>[Instance]</code> stanzas should appear after <code>[Term]</code> stanzas. All other stanza types should appear after <code>[Instance]</code> stanzas, in alphabetical order on the stanza name. 
+	    </p>
+	  <h4 id="S.3.5.3"> Header Tags</h4> 
+	  <p>
+	    Header tags should appear in the following order: 
+	    </p>
+	  <div class="fmt">
+	    <ol class="code">
+	      <li>
+		format-version 
+		</li>
+	      <li>
+		data-version 
+		</li>
+	      <li>
+		date 
+		</li>
+	      <li>
+		saved-by 
+		</li>
+	      <li>
+		auto-generated-by 
+		</li>
+	      <li>
+		import 
+		</li>
+	      <li>
+		subsetdef 
+		</li>
+	      <li>
+		synonymtypedef 
+		</li>
+	      <li>
+		default-namespace 
+		</li>
+	      <li>
+		remark 
+		</li>
+	      </ol>
+	    </div>
+	  <h4 id="S.3.5.4"> Ordering Term and Typedef stanzas</h4> 
+	  <p>
+	    <code>[Term]</code>, <code>[Typdef]</code>, and <code>[Instance]</code> stanzas should be serialized in alphabetical order on the value of their id tag. 
+	    </p>
+	  <h4 id="S.3.5.5"> Ordering Term and Typedef tags</h4> 
+	  <p>
+	    Term tags should appear in the following order: 
+	    </p>
+	  <div class="fmt">
+	    <ol class="code">
+	      <li>
+		id 
+		</li>
+	      <li>
+		is_anonymous 
+		</li>
+	      <li>
+		name 
+		</li>
+	      <li>
+		namespace 
+		</li>
+	      <li>
+		alt_id 
+		</li>
+	      <li>
+		def 
+		</li>
+	      <li>
+		comment 
+		</li>
+	      <li>
+		subset 
+		</li>
+	      <li>
+		synonym 
+		</li>
+	      <li>
+		xref 
+		</li>
+	      <li>
+		is_a 
+		</li>
+	      <li>
+		intersection_of 
+		</li>
+	      <li>
+		union_of 
+		</li>
+	      <li>
+		disjoint_from 
+		</li>
+	      <li>
+		relationship 
+		</li>
+	      <li>
+		is_obsolete 
+		</li>
+	      <li>
+		replaced_by 
+		</li>
+	      <li>
+		consider 
+		</li>
+	      </ol></div>
+	  <p>
+	    Typedef tags should appear in the following order: 
+	    </p>
+	  <div class="fmt"><ol class="code">
+	      <li>
+		id 
+		</li>
+	      <li>
+		is_anonymous 
+		</li>
+	      <li>
+		name 
+		</li>
+	      <li>
+		namespace 
+		</li>
+	      <li>
+		alt_id 
+		</li>
+	      <li>
+		def 
+		</li>
+	      <li>
+		comment 
+		</li>
+	      <li>
+		subset 
+		</li>
+	      <li>
+		synonym 
+		</li>
+	      <li>
+		xref 
+		</li>
+	      <li>
+		domain 
+		</li>
+	      <li>
+		range 
+		</li>
+	      <li>
+		is_anti_symmetric 
+		</li>
+	      <li>
+		is_cyclic 
+		</li>
+	      <li>
+		is_reflexive 
+		</li>
+	      <li>
+		is_symmetric 
+		</li>
+	      <li>
+		is_transitive 
+		</li>
+	      <li>
+		is_a 
+		</li>
+	      <li>
+		inverse_of 
+		</li>
+	      <li>
+		transitive_over 
+		</li>
+	      <li>
+		relationship 
+		</li>
+	      <li>
+		is_obsolete 
+		</li>
+	      <li>
+		replaced_by 
+		</li>
+	      <li>
+		consider 
+		</li>
+	      </ol></div>
+	  <p>
+	    Instance tags should appear in the following order: 
+	    </p>
+	  <div class="fmt"><ol class="code">
+	      <li>
+		id 
+		</li>
+	      <li>
+		is_anonymous 
+		</li>
+	      <li>
+		name 
+		</li>
+	      <li>
+		namespace 
+		</li>
+	      <li>
+		alt_id 
+		</li>
+	      <li>
+		comment 
+		</li>
+	      <li>
+		synonym 
+		</li>
+	      <li>
+		xref 
+		</li>
+	      <li>
+		instance_of 
+		</li>
+	      <li>
+		property_value 
+		</li>
+	      <li>
+		is_obsolete 
+		</li>
+	      <li>
+		replaced_by 
+		</li>
+	      <li>
+		consider 
+		</li>
+	      </ol></div>
+	  <p>
+	    If the same tag appears multiple times in a stanza, the tags should be ordered alphabetically on the tag value. 
+	    </p>
+	  <h4 id="S.3.5.6"> Dbxref lists</h4> 
+	  <p>
+	    Values in dbxref lists should be ordered alphabetically on the dbxref name. 
+	    </p>
+	  <p class="toTop">
+	    <a href="#top" title="Back to the top of the page">Back to top</a> 
+	    </p>
+	  </div>
+	<div class="block">
+	  <h2 id="S.4"> Changes in version 1.2</h2> <h3 id="S.4.10"> May 2nd, 2006 revision</h3> 
+	  <ul>
+	    <li>
+	      Added is_metadata_tag tag for properties 
+	      </li>
+	    <li>
+	      Revised bad definitions of range and domain from old, closed-world definitions to correct open-world definitions 
+	      </li>
+	    </ul>
+	  <h3 id="S.4.9"> March 14th, 2006 revision</h3> 
+	  <ul>
+	    <li>
+	      added builtin 
+	      </li>
+	    <li>
+clarified meaning of relation property tags (is_transitive,
+is_symmetric, is_anti_symmetric, is_reflexive) - these tags apply at
+the type level </li>
+	    </ul>
+	  <h3 id="S.4.8"> February 9th, 2006 revision</h3> 
+	  <ul>
+	    <li>
+	      Added transitive_over 
+	      </li>
+	    <li>
+	      Added is_anti_symmetric 
+	      </li>
+	    <li>
+	      Specified allowed values (true/false) for typedef boolean tags 
+	      </li>
+	    </ul>
+	  <h3 id="S.4.7"> November 9th, 2005 revision</h3> 
+	  <ul>
+	    <li>
+	      Fixed out-of-date "last revised" date in this document 
+	      </li>
+	    <li>
+	      Added id-mapping tag 
+	      </li>
+	    <li>
+	      Added default-relationship-id-prefix tag 
+	      </li>
+	    <li>
+	      Added idspace tag 
+	      </li>
+	    <li>
+	      Fixed some mistakes in tag examples 
+	      </li>
+	    </ul>
+	  <h3 id="S.4.6"> June 30, 2005 revision</h3> 
+	  <ul>
+	    <li>
+	      Deprecated xref_analog tag. All xrefs are now of the same type. 
+	      </li>
+	    </ul>
+	  <h3 id="S.4.5"> June 23, 2005 revision</h3> 
+	  <ul>
+	    <li>
+	      Changed name of UNSPECIFIED scope modifier to RELATED 
+	      </li>
+	    </ul>
+	  <h3 id="S.4.4"> June 6, 2005 revision</h3> 
+	  <ul>
+	    <li>
+	      Changed name of propertyValue tag to property_value for consistency. 
+	      </li>
+	    <li>
+	      Fixed some omissions and typos in section <a href="#S.3.5.5" title="Ordering Term and Typedef tags">Ordering Term and Typedef tags</a> 
+	      </li>
+	    </ul>
+	  <h3 id="S.4.3"> February 2, 2005 revision</h3> 
+	  <ul>
+	    <li>
+	      Added namespace as an allowable instance tag 
+	      </li>
+	    <li>
+	      Changed name of xref_unk tag to xref. Deprecated xref_unk 
+	      </li>
+	    </ul>
+	  <h3 id="S.4.2"> January 31, 2005 revision</h3> 
+	  <ul>
+	    <li>
+Changed property_value tag syntax with quoted values. Now a primitive
+datatype identifier is required following the quoted value. The
+datatype identifier gives the datatype of the quoted value. (see <a href="#S.2.2.1" title="special identifiers">special identifiers</a> and <a href="#S.2.2.5" title="instance tags">instance tags</a>) 
+	      </li>
+	    <li>
+	      Removed xsd:duration and xsd:number from primitive type listing (see <a href="#S.2.2.1" title="special identifiers">special identifiers</a>) 
+	      </li>
+	    <li>
+	      Added section numbers for revision information 
+	      </li>
+	    <li>
+	      Added <a href="#S.0" title="About this file">About this file</a> section 
+	      </li>
+	    </ul>
+	  <h3 id="S.4.1"> Initial 1.2 release</h3> 
+	  <ul>
+	    <li>
+Nested trailing modifier values are no longer allowed. Trailing
+modifiers are now a list of simple name value pairs. (see <a href="#S.1.4" title="[S.1.4]">[S.1.4]</a>). 
+	      </li>
+	    <li>
+	      Added synonymtypedef header tag (see <a href="#S.2.1" title="[S.2.1]">[S.2.1]</a>). 
+	      </li>
+	    <li>
+	      Deprecated typeref tag. Use import instead (see <a href="#S.2.1" title="[S.2.1]">[S.2.1]</a>) 
+	      </li>
+	    <li>
+	      Added reserved identifiers for specifying non-term range and domain values (see <a href="#S.2.2.1" title="[S.2.2.1]">[S.2.2.1]</a>, <a href="#S.2.2.4" title="[S.2.2.4]">[S.2.2.4]</a>) 
+	      </li>
+	    <li>
+	      Deprecated exact_synonym, narrow_synonym, broad_synonym. Use synonym tag instead (see <a href="#S.2.2.2" title="[S.2.2.2]">[S.2.2.2]</a>). 
+	      </li>
+	    <li>
+	      Added additional parsing options for synonyms (see <a href="#S.2.2.2" title="[S.2.2.2]">[S.2.2.2]</a>). 
+	      </li>
+	    <li>
+	      Deprecated use_term tag. Use "consider" instead (see <a href="#S.2.2.2" title="[S.2.2.2]">[S.2.2.2]</a>). 
+	      </li>
+	    <li>
+	      The "completes" trailing modifier for isa is now deprecated. Use intersection_of instead. (see <a href="#S.2.2.2" title="[S.2.2.2]">[S.2.2.2]</a>) 
+	      </li>
+	    <li>
+	      Added intersection_of, union_of, inverse_of, and disjoint_from tags. (see <a href="#S.2.2.2" title="[S.2.2.2]">[S.2.2.2]</a> and <a href="#S.2.2.4" title="[S.2.2.4]">[S.2.2.4]</a>) 
+	      </li>
+	    <li>
+	      Added "derived" trailing modifier to is_a, inverse_of, disjoint_from and relationship. (see <a href="#S.2.2.2" title="[S.2.2.2]">[S.2.2.2]</a> and <a href="#S.2.2.4" title="[S.2.2.4]">[S.2.2.4]</a>) 
+	      </li>
+	    <li>
+	      Added instances (see <a href="#S.2.2.5" title="[S.2.2.5]">[S.2.2.5]</a>) 
+	      </li>
+	    </ul>
+	  <p class="toTop">
+	    <a href="#top" title="Back to the top of the page">Back to top</a> 
+	    </p>
+	  </div>
+	</div>
+      <hr class="clearL">
+</div>
+
+<div id="footer">
+	<div id="oboLogo">
+		<a class="img" href="http://obo.sourceforge.net/" title="Open Biomedical Ontologies website"><img src="GO.format.obo-1_2-Dateien/logo-obo.gif" alt="Open Biomedical Ontologies logo" title="Open Biomedical Ontologies website" height="45" width="115"></a>
+	</div>
+	<p>
+		Last modified Monday, 26-Nov-2007 15:40:09 PST
+		<br>
+		<a href="http://www.geneontology.org/GO.cite.shtml" title="How to cite the GO project">Cite GO</a> • <a href="http://www.geneontology.org/GO.cite.shtml" title="Terms of use for the GO project">Terms of use</a> • <a href="http://www.geneontology.org/GO.contacts.shtml" title="Contact the GO helpdesk">GO helpdesk</a> 
+		<br>
+
+		Copyright © 1999-Thursday, 17-Jul-2008 11:21:17 PDT <a href="http://www.geneontology.org/index.shtml" title="The Gene Ontology project website">the Gene Ontology</a> 
+	</p>
+</div>
+<script src="GO.format.obo-1_2-Dateien/urchin.js" type="text/javascript">
+</script> <script type="text/javascript">
+_uacct = "UA-440742-2";
+urchinTracker();
+</script> 
+</body></html>
