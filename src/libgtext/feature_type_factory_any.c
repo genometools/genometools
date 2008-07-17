@@ -32,22 +32,22 @@ struct FeatureTypeFactoryAny {
 
 static void feature_type_factory_any_free(FeatureTypeFactory *ftf)
 {
-  FeatureTypeFactoryAny *ftfb = feature_type_factory_any_cast(ftf);
-  hashtable_delete(ftfb->genome_feature_types);
+  FeatureTypeFactoryAny *ftfa = feature_type_factory_any_cast(ftf);
+  hashtable_delete(ftfa->genome_feature_types);
 }
 
 static GenomeFeatureType*
 feature_type_factory_any_create_gft(FeatureTypeFactory *ftf,
                                         const char *type)
 {
-  FeatureTypeFactoryAny *ftfb;
+  FeatureTypeFactoryAny *ftfa;
   GenomeFeatureType *gft = NULL;
   assert(ftf && type);
-  ftfb = feature_type_factory_any_cast(ftf);
-  if (!(gft = hashtable_get(ftfb->genome_feature_types, type))) {
+  ftfa = feature_type_factory_any_cast(ftf);
+  if (!(gft = hashtable_get(ftfa->genome_feature_types, type))) {
     char *type_dup = cstr_dup(type);
     gft = genome_feature_type_construct(ftf, type_dup);
-    hashtable_add(ftfb->genome_feature_types, type_dup, gft);
+    hashtable_add(ftfa->genome_feature_types, type_dup, gft);
   }
   return gft;
 }
@@ -63,11 +63,11 @@ const FeatureTypeFactoryClass* feature_type_factory_any_class(void)
 
 FeatureTypeFactory* feature_type_factory_any_new(void)
 {
-  FeatureTypeFactoryAny *ftfb;
+  FeatureTypeFactoryAny *ftfa;
   FeatureTypeFactory *ftf;
   ftf = feature_type_factory_create(feature_type_factory_any_class());
-  ftfb = feature_type_factory_any_cast(ftf);
-  ftfb->genome_feature_types = hashtable_new(HASH_STRING, ma_free_func,
+  ftfa = feature_type_factory_any_cast(ftf);
+  ftfa->genome_feature_types = hashtable_new(HASH_STRING, ma_free_func,
                                              (FreeFunc)
                                              genome_feature_type_delete);
   return ftf;
