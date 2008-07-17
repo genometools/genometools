@@ -71,7 +71,6 @@ else
 endif
 
 # the default GenomeTools libraries which are build
-<<<<<<< HEAD:Makefile
 GTLIBS:=lib/libgtexercise.a\
         lib/libgtltr.a\
         lib/libgtext.a\
