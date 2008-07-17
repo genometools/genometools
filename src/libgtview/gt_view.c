@@ -26,6 +26,7 @@
 #include "libgtcore/undef.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/add_introns_stream.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtview/config.h"
@@ -164,7 +165,7 @@ int gt_view(int argc, const char **argv, Error *err)
   png_file = argv[parsed_args];
 
   /* create feature type factory */
-  feature_type_factory = feature_type_factory_new();
+  feature_type_factory = feature_type_factory_builtin_new();
 
   /* check for correct order: range end < range start */
   if (!had_err &&

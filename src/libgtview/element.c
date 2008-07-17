@@ -20,6 +20,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/strand.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
 #include "libgtview/element.h"
@@ -95,7 +96,7 @@ int element_unit_test(Error *err)
   int had_err = 0;
   error_check(err);
 
-  feature_type_factory = feature_type_factory_new();
+  feature_type_factory = feature_type_factory_builtin_new();
 
   r1.start = 10UL;
   r1.end = 50UL;

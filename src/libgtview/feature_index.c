@@ -26,8 +26,9 @@
 #include "libgtcore/range.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
-#include "libgtview/feature_index.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/genome_node.h"
+#include "libgtview/feature_index.h"
 
 struct FeatureIndex {
   Hashtable *regions;
@@ -214,7 +215,7 @@ int feature_index_unit_test(Error *err)
   int had_err = 0;
   error_check(err);
 
-  feature_type_factory = feature_type_factory_new();
+  feature_type_factory = feature_type_factory_builtin_new();
 
   /* generating some ranges */
   r1.start=100UL; r1.end=1000UL;

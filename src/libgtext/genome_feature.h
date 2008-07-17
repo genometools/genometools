@@ -24,6 +24,7 @@ typedef struct GenomeFeature GenomeFeature;
 #include "libgtcore/range.h"
 #include "libgtcore/phase.h"
 #include "libgtcore/strand.h"
+#include "libgtext/feature_type_factory.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/transcript_feature_type.h"

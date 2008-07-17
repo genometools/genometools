@@ -26,6 +26,7 @@
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/warning.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
@@ -480,7 +481,7 @@ int diagram_unit_test(Error *err)
   Diagram *dia = NULL, *dia2 = NULL;
   error_check(err);
 
-  feature_type_factory = feature_type_factory_new();
+  feature_type_factory = feature_type_factory_builtin_new();
   gene_type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
   exon_type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
   CDS_type = feature_type_factory_create_gft(feature_type_factory, gft_CDS);

@@ -18,19 +18,22 @@
 #ifndef FEATURE_TYPE_FACTORY_H
 #define FEATURE_TYPE_FACTORY_H
 
-/* The FeatureTypeFactory is used to create GenomeFeatureTypes.
-   Since the FeatureTypeFactory owns all GenomeFeatureTypes it creates, you have
+#include "libgtext/genome_feature_type.h"
+
+/* The FeatureTypeFactory interface. Implementations of the FeatureTypeFactory
+   interface are used to create GenomeFeatureTypes.
+   Since a FeatureTypeFactory owns all GenomeFeatureTypes it creates, you have
    to make sure to keep it around until all references to the created
    GenomeFeatureTypes have been removed.
 */
 
+typedef struct FeatureTypeFactoryClass FeatureTypeFactoryClass;
 typedef struct FeatureTypeFactory FeatureTypeFactory;
 
-FeatureTypeFactory* feature_type_factory_new();
-void                feature_type_factory_delete(FeatureTypeFactory*);
 /* Uses the factory to create a new genome feature type object of the given
    <type>. Returns NULL, if <type> is not a valid type. */
 GenomeFeatureType*  feature_type_factory_create_gft(FeatureTypeFactory*,
                                                     const char *type);
+void                feature_type_factory_delete(FeatureTypeFactory*);
 
 #endif

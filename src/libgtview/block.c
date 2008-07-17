@@ -19,6 +19,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtview/block.h"
 #include "libgtview/element.h"
 
@@ -190,7 +191,7 @@ int block_unit_test(Error *err)
   Str *caption2;
   error_check(err);
 
-  feature_type_factory = feature_type_factory_new();
+  feature_type_factory = feature_type_factory_builtin_new();
   caption1 = str_new_cstr("foo");
   caption2 = str_new_cstr("bar");
 

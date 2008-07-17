@@ -34,6 +34,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/yarandom.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/luahelper.h"
 #include "libgtlua/gt_lua.h"
@@ -76,7 +77,7 @@ GTR* gtr_new(Error *err)
     had_err = -1;
   }
   if (!had_err) {
-    gtr->feature_type_factory = feature_type_factory_new();
+    gtr->feature_type_factory = feature_type_factory_builtin_new();
     lua_put_feature_type_factory_in_registry(gtr->L, gtr->feature_type_factory);
     luaL_openlibs(gtr->L);    /* open the standard libraries */
     luaopen_gt(gtr->L);       /* open all GenomeTools libraries */

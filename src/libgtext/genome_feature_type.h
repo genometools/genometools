@@ -51,13 +51,8 @@
 
 typedef struct GenomeFeatureType GenomeFeatureType;
 
-#include "libgtext/feature_type_factory.h"
-
-GenomeFeatureType* genome_feature_type_construct(FeatureTypeFactory*,
-                                                 const char *type);
 GenomeFeatureType* genome_feature_type_create_gft(GenomeFeatureType*,
                                                   const char *type);
-void               genome_feature_type_delete(GenomeFeatureType*);
 bool               genome_feature_type_is(GenomeFeatureType*, const char *type);
 const char*        genome_feature_type_get_cstr(const GenomeFeatureType*);
 

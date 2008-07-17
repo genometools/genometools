@@ -19,6 +19,7 @@
 #include <string.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/ma.h"
+#include "libgtext/feature_type_factory.h"
 #include "libgtext/genome_feature_type.h"
 
 struct GenomeFeatureType {

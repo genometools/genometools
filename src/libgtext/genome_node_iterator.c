@@ -18,6 +18,7 @@
 #include "libgtcore/ma.h"
 #include "libgtext/genome_node_iterator.h"
 #include "libgtext/genome_node_rep.h"
+#include "libgtext/feature_type_factory_builtin.h"
 
 struct GenomeNodeIterator {
   GenomeNode *gn;
@@ -88,7 +89,7 @@ int genome_node_iterator_example(void)
   FeatureTypeFactory *feature_type_factory;
   GenomeNodeIterator *gni;
   GenomeNode *gn, *node;
-  feature_type_factory = feature_type_factory_new();
+  feature_type_factory = feature_type_factory_builtin_new();
   gn = genome_feature_new_standard_gene(feature_type_factory);
 
   /* an example genome node iterator use case */

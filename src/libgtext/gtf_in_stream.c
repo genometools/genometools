@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "libgtcore/fa.h"
 #include "libgtcore/unused.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/genome_stream_rep.h"
 #include "libgtext/gtf_in_stream.h"
 #include "libgtext/gtf_parser.h"
@@ -79,7 +80,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   gs = genome_stream_create(gtf_in_stream_class(), false);
   gtf_in_stream = gtf_in_stream_cast(gs);
   gtf_in_stream->genome_node_buffer = queue_new();
-  gtf_in_stream->feature_type_factory = feature_type_factory_new();
+  gtf_in_stream->feature_type_factory = feature_type_factory_builtin_new();
 
   gtf_parser = gtf_parser_new(gtf_in_stream->feature_type_factory);
 

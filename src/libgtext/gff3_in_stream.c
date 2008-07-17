@@ -20,6 +20,7 @@
 #include "libgtcore/fileutils.h"
 #include "libgtcore/progressbar.h"
 #include "libgtcore/strarray.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/genome_stream_rep.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_parser.h"
@@ -216,7 +217,7 @@ static GenomeStream* gff3_in_stream_new(StrArray *files, /* takes ownership */
   gff3_in_stream->fpin                   = NULL;
   gff3_in_stream->line_number            = 0;
   gff3_in_stream->genome_node_buffer     = queue_new();
-  gff3_in_stream->feature_type_factory   = feature_type_factory_new();
+  gff3_in_stream->feature_type_factory   = feature_type_factory_builtin_new();
   gff3_in_stream->own_factory            = true;
   gff3_in_stream->checkids               = checkids;
   gff3_in_stream->gff3_parser            = gff3parser_new(checkids,

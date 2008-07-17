@@ -18,6 +18,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/range.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtview/block.h"
 #include "libgtview/line.h"
 
@@ -75,7 +76,7 @@ int line_unit_test(Error *err)
   const char* bar = "bar";
   const char* blub = "blub";
 
-  feature_type_factory = feature_type_factory_new();
+  feature_type_factory = feature_type_factory_builtin_new();
 
   r_parent.start = 10UL;
   r_parent.end = 80UL;
