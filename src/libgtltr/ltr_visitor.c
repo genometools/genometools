@@ -42,76 +42,75 @@ static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   Range node_range;
   Array *pdomarr = NULL;
   const char *pfamname;
+  GenomeFeatureType *gft;
   lv = ltr_visitor_cast(gv);
   assert(lv);
   error_check(err);
 
-  switch (genome_feature_get_type(gf))
+  gft = genome_feature_get_type(gf);
+
+  if(genome_feature_type_is(gft,"LTR_retrotransposon"))
   {
-    case gft_LTR_retrotransposon:
-      lv->element->mainnode = gf;
-      break;
-    case gft_long_terminal_repeat:
-      /* XXX: check order if unsorted! */
-      if (lv->element->leftLTR == NULL)
-      {
-        node_range = genome_node_get_range((GenomeNode*) gf);
-        lv->element->leftLTR = gf;
-        lv->element->leftLTR_5 = node_range.start;
-        lv->element->leftLTR_3 = node_range.end;
-      }
-      else
-      {
-        node_range = genome_node_get_range((GenomeNode*) gf);
-        lv->element->rightLTR = gf;
-        lv->element->rightLTR_5 = node_range.start;
-        lv->element->rightLTR_3 = node_range.end;
-      }
-      break;
-    case gft_target_site_duplication:
-      /* XXX: check order if unsorted! */
-      if (lv->element->leftTSD == NULL)
-      {
-        lv->element->leftTSD = gf;
-      }
-      else
-      {
-        lv->element->rightTSD = gf;
-      }
-      break;
-    case gft_RR_tract:
-      if (lv->element->ppt == NULL)
-      {
-        lv->element->ppt = gf;
-      }
-      break;
-    case gft_primer_binding_site:
-      if (lv->element->pbs == NULL)
-      {
-        lv->element->pbs = gf;
-      }
-      break;
-    case gft_protein_match:
-      if (!lv->element->pdoms)
-      {
-        lv->element->pdoms = hashtable_new(HASH_STRING,
-                                           ma_free_func,
-                                           (FreeFunc) array_delete);
-      }
-      pfamname = genome_feature_get_attribute((GenomeNode*) gf,
-                                              "pfamname");
-      if (!(pdomarr = (Array*) hashtable_get(lv->element->pdoms, pfamname)))
-      {
-        char *pfamcpy = cstr_dup(pfamname);
-        pdomarr = array_new(sizeof (GenomeFeature*));
-        hashtable_add(lv->element->pdoms, pfamcpy, pdomarr);
-        if(lv->element->pdomorder)
-          array_add(lv->element->pdomorder, pfamcpy);
-      }
-      array_add(pdomarr, gf);
-      break;
-    default:
-      break;
+    lv->element->mainnode = gf;
+  } else if(genome_feature_type_is(gft,"long_terminal_repeat"))
+  {
+    /* XXX: check order if unsorted! */
+    if (lv->element->leftLTR == NULL)
+    {
+      node_range = genome_node_get_range((GenomeNode*) gf);
+      lv->element->leftLTR = gf;
+      lv->element->leftLTR_5 = node_range.start;
+      lv->element->leftLTR_3 = node_range.end;
+    }
+    else
+    {
+      node_range = genome_node_get_range((GenomeNode*) gf);
+      lv->element->rightLTR = gf;
+      lv->element->rightLTR_5 = node_range.start;
+      lv->element->rightLTR_3 = node_range.end;
+    }
+  } else if(genome_feature_type_is(gft,"target_site_duplication"))
+  {
+    /* XXX: check order if unsorted! */
+    if (lv->element->leftTSD == NULL)
+    {
+      lv->element->leftTSD = gf;
+    }
+    else
+    {
+      lv->element->rightTSD = gf;
+    }
+  } else if(genome_feature_type_is(gft,"RR_tract"))
+  {
+    if (lv->element->ppt == NULL)
+    {
+      lv->element->ppt = gf;
+    }
+  } else if(genome_feature_type_is(gft,"primer_binding_site"))
+  {
+    if (lv->element->pbs == NULL)
+    {
+      lv->element->pbs = gf;
+    }
+  } else if(genome_feature_type_is(gft,"protein_match"))
+  {
+    if (!lv->element->pdoms)
+    {
+      lv->element->pdoms = hashtable_new(HASH_STRING,
+                                         ma_free_func,
+                                         (FreeFunc) array_delete);
+    }
+    pfamname = genome_feature_get_attribute((GenomeNode*) gf,
+                                            "pfamname");
+    if (!(pdomarr = (Array*) hashtable_get(lv->element->pdoms, pfamname)))
+    {
+      char *pfamcpy = cstr_dup(pfamname);
+      pdomarr = array_new(sizeof (GenomeFeature*));
+      hashtable_add(lv->element->pdoms, pfamcpy, pdomarr);
+      if(lv->element->pdomorder)
+        array_add(lv->element->pdomorder, pfamcpy);
+    }
+    array_add(pdomarr, gf);
   }
   return 0;
 }

@@ -66,6 +66,7 @@ static int pdom_hit_attach_gff3(void *key, void *value, void *data,
   for (i=0;i<array_size(hit->best_chain);i++)
   {
     GenomeNode *gf;
+    GenomeFeatureType *gft, *oldgft;
     struct hit_s *singlehit = *(struct hit_s **) array_get(hit->best_chain, i);
     Phase frame = phase_get(singlehit->name[0]);
     rng.start = singlehit->sqfrom;
@@ -75,7 +76,10 @@ static int pdom_hit_attach_gff3(void *key, void *value, void *data,
     ltrelement_offset2pos(&ls->element, &rng, 0,
                           OFFSET_BEGIN_LEFT_LTR,
                           strand);
-    gf = genome_feature_new(gft_protein_match,
+
+    oldgft = genome_feature_get_type(ls->element.mainnode);
+    gft = genome_feature_type_create_gft(oldgft, "protein_match");
+    gf = genome_feature_new(gft,
                             rng,
                             strand,
                             NULL,
@@ -99,6 +103,7 @@ static void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
 {
   Range pbs_range;
   GenomeNode *gf;
+  GenomeFeatureType *gft, *oldgft;
   char buffer[BUFSIZ];
   pbs_range.start = results->best_hit->start;
   pbs_range.end   = results->best_hit->end;
@@ -107,7 +112,10 @@ static void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
                         results->best_hit->strand);
   results->best_hit->start = pbs_range.start;
   results->best_hit->end = pbs_range.end;
-  gf = genome_feature_new(gft_primer_binding_site,
+
+  oldgft = genome_feature_get_type(element->mainnode);
+  gft = genome_feature_type_create_gft(oldgft, "primer_binding_site");
+  gf = genome_feature_new(gft,
                           pbs_range,
                           results->best_hit->strand,
                           NULL,
@@ -134,9 +142,13 @@ static void ppt_attach_results_to_gff3(PPTResults *results,
 {
   Range ppt_range;
   GenomeNode *gf;
+  GenomeFeatureType *gft, *oldgft;
   PPTHit* hit = ppt_results_get_ranked_hit(results, 0);
   ppt_range = ppt_hit_get_coords(hit);
-  gf = genome_feature_new(gft_RR_tract,
+
+  oldgft = genome_feature_get_type(element->mainnode);
+  gft = genome_feature_type_create_gft(oldgft, "RR_tract");
+  gf = genome_feature_new(gft,
                           ppt_range,
                           ppt_hit_get_strand(hit),
                           NULL,
@@ -315,9 +327,9 @@ GenomeStream* ltrdigest_stream_new(GenomeStream *in_stream,
                                    PBSOptions *pbs_opts,
                                    PPTOptions *ppt_opts
 #ifdef HAVE_HMMER
-				   ,PdomOptions *pdom_opts
+           ,PdomOptions *pdom_opts
 #endif
-				   )
+           )
 {
   GenomeStream *gs;
   LTRdigestStream *ls;
