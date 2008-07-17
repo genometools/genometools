@@ -37,7 +37,9 @@ struct LTRdigestStream {
   Bioseq *bioseq;
   PBSOptions *pbs_opts;
   PPTOptions *ppt_opts;
+#ifdef HAVE_HMMER
   PdomOptions *pdom_opts;
+#endif
   LTRVisitor *lv;
   Str *ltrdigest_tag;
   int tests_to_run;
@@ -47,6 +49,7 @@ struct LTRdigestStream {
 #define ltrdigest_stream_cast(GS)\
         genome_stream_cast(ltrdigest_stream_class(), GS)
 
+#ifdef HAVE_HMMER
 static int pdom_hit_attach_gff3(void *key, void *value, void *data,
                                 UNUSED Error *err)
 {
@@ -89,6 +92,7 @@ static int pdom_hit_attach_gff3(void *key, void *value, void *data,
   }
   return 0;
 }
+#endif
 
 static void pbs_attach_results_to_gff3(PBSResults *results, LTRElement *element,
                                        Str *tag, unsigned int radius)
@@ -151,7 +155,9 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
 {
   PPTResults *ppt_results;
   PBSResults pbs_results;
+#ifdef HAVE_HMMER
   PdomResults pdom_results;
+#endif
   char *rev_seq;
   const char *base_seq = seq_get_orig(seq)+element->leftLTR_5;
   unsigned long seqlen = ltrelement_length(element);
@@ -164,7 +170,9 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
 
   /* initialize results */
   memset(&pbs_results, 0, sizeof (PBSResults));
+#ifdef HAVE_HMMER
   memset(&pdom_results, 0, sizeof (PdomResults));
+#endif
 
   /* PPT finding
    * -----------*/
@@ -195,6 +203,7 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
      }
   }
 
+#ifdef HAVE_HMMER
   /* Protein domain finding
    * ----------------------*/
   if (ls->tests_to_run & LTRDIGEST_RUN_PDOM)
@@ -226,6 +235,7 @@ static void run_ltrdigest(LTRElement *element, Seq *seq, LTRdigestStream *ls,
     }
     hashtable_delete(pdom_results.domains);
   }
+#endif
   ma_free(rev_seq);
   pbs_clear_results(&pbs_results);
 }
@@ -303,8 +313,11 @@ GenomeStream* ltrdigest_stream_new(GenomeStream *in_stream,
                                    int tests_to_run,
                                    Bioseq *bioseq,
                                    PBSOptions *pbs_opts,
-                                   PPTOptions *ppt_opts,
-                                   PdomOptions *pdom_opts)
+                                   PPTOptions *ppt_opts
+#ifdef HAVE_HMMER
+				   ,PdomOptions *pdom_opts
+#endif
+				   )
 {
   GenomeStream *gs;
   LTRdigestStream *ls;
@@ -313,7 +326,9 @@ GenomeStream* ltrdigest_stream_new(GenomeStream *in_stream,
   ls->in_stream = genome_stream_ref(in_stream);
   ls->ppt_opts = ppt_opts;
   ls->pbs_opts = pbs_opts;
+#ifdef HAVE_HMMER
   ls->pdom_opts = pdom_opts;
+#endif
   ls->tests_to_run = tests_to_run;
   ls->bioseq = bioseq;
   ls->ltrdigest_tag = str_new_cstr("LTRdigest");

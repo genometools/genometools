@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include <string.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
@@ -104,7 +105,8 @@ static int ltr_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
         char *pfamcpy = cstr_dup(pfamname);
         pdomarr = array_new(sizeof (GenomeFeature*));
         hashtable_add(lv->element->pdoms, pfamcpy, pdomarr);
-        array_add(lv->element->pdomorder, pfamcpy);
+        if(lv->element->pdomorder)
+          array_add(lv->element->pdomorder, pfamcpy);
       }
       array_add(pdomarr, gf);
       break;

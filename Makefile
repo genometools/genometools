@@ -25,8 +25,6 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/bzip2-1.0.5 \
             -I$(CURDIR)/src/external/agg-2.4/include \
             -I$(CURDIR)/src/external/libpng-1.2.18 \
-            -I$(CURDIR)/src/external/hmmer-2.3.2/src \
-            -I$(CURDIR)/src/external/hmmer-2.3.2/squid \
             -I$(CURDIR)/src/external/libtecla-1.6.1
 # these variables are exported by the configuration script
 CC:=gcc
@@ -35,7 +33,7 @@ EXP_CFLAGS:=$(CFLAGS)
 EXP_LDFLAGS:=$(LDFLAGS)
 EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
-EXP_LDLIBS:=$(LIBS) -lm -lhmmer -lpthread
+EXP_LDLIBS:=$(LIBS) -lm 
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Werror -Wunused-parameter -pipe -fPIC -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
@@ -75,7 +73,6 @@ endif
 # the default GenomeTools libraries which are build
 <<<<<<< HEAD:Makefile
 GTLIBS:=lib/libgtexercise.a\
-	lib/libhmmer.a\
         lib/libgtltr.a\
         lib/libgtext.a\
         lib/libgtmgth.a\
@@ -359,6 +356,14 @@ endif
 ifeq ($(m64),yes)
   GT_CFLAGS += -m64
   GT_LDFLAGS += -m64
+endif
+
+ifeq ($(with-hmmer),yes)
+  GTLIBS := lib/libhmmer.a ${GTLIBS}
+  EXP_CPPFLAGS += -DHAVE_HMMER
+  GT_CPPFLAGS +=  -I$(CURDIR)/src/external/hmmer-2.3.2/src \
+                  -I$(CURDIR)/src/external/hmmer-2.3.2/squid
+  EXP_LDLIBS += -lhmmer -lpthread
 endif
 
 ifeq ($(libgtview),yes)

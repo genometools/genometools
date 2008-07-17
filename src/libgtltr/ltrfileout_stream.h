@@ -33,7 +33,9 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
                                      char *file_prefix,
                                      PPTOptions *ppt_opts,
                                      PBSOptions *pbs_opts,
+#ifdef HAVE_HMMER
                                      PdomOptions *pdom_opts,
+#endif
                                      const char *trnafilename,
                                      const char *seqfilename,
                                      const char *gfffilename,

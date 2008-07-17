@@ -22,7 +22,9 @@
 #include "libgtext/genome_stream.h"
 #include "libgtltr/pbs.h"
 #include "libgtltr/ppt.h"
+#ifdef HAVE_HMMER
 #include "libgtltr/pdom.h"
+#endif
 
 /* implements the ``genome_stream'' interface */
 typedef struct LTRdigestStream LTRdigestStream;
@@ -33,7 +35,10 @@ GenomeStream* ltrdigest_stream_new(GenomeStream *in_stream,
                                    int tests_to_run,
                                    Bioseq *bioseq,
                                    PBSOptions *pbs_opts,
-                                   PPTOptions *ppt_opts,
-                                   PdomOptions *pdom_opts);
+                                   PPTOptions *ppt_opts
+#ifdef HAVE_HMMER
+				   ,PdomOptions *pdom_opts
+#endif
+				   );
 
 #endif

@@ -15,6 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifdef HAVE_HMMER
+
 #include <string.h>
 #include <ctype.h>
 #include <float.h>
@@ -465,3 +467,5 @@ void pdom_clear_hmms(Array *hmms)
   }
   array_delete(hmms);
 }
+
+#endif

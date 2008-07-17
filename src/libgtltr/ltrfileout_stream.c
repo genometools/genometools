@@ -316,12 +316,13 @@ static void write_metadata(GenFile *metadata_file,
                            int tests_to_run,
                            PPTOptions *ppt_opts,
                            PBSOptions *pbs_opts,
+#ifdef HAVE_HMMER
                            PdomOptions *pdom_opts,
+#endif
                            const char *trnafilename,
                            const char *seqfilename,
                            const char *gfffilename)
 {
-  unsigned long i;
   char buffer[PATH_MAX+1];
   bool has_cwd;
 
@@ -388,8 +389,10 @@ static void write_metadata(GenFile *metadata_file,
                     "PBS search radius\t%d\t30\n", pbs_opts->radius);
   }
 
+#ifdef HAVE_HMMER
   if (tests_to_run & LTRDIGEST_RUN_PDOM)
   {
+    unsigned long i;
     genfile_xprintf(metadata_file,
                     "Protein domains\t%lu (",
                     array_size(pdom_opts->plan7_ts));
@@ -413,6 +416,7 @@ static void write_metadata(GenFile *metadata_file,
                     50);
   }
   genfile_xprintf(metadata_file, "\n");
+#endif
 }
 
 void ltr_fileout_stream_free(GenomeStream *gs)
@@ -451,7 +455,9 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
                                      char *file_prefix,
                                      PPTOptions *ppt_opts,
                                      PBSOptions *pbs_opts,
+#ifdef HAVE_HMMER
                                      PdomOptions *pdom_opts,
+#endif
                                      const char *trnafilename,
                                      const char *seqfilename,
                                      const char *gfffilename,
@@ -462,7 +468,11 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   char fn[MAXFILENAMELEN];
 
   assert(file_prefix && in_stream && bioseq && ppt_opts
-          && pbs_opts && pdom_opts);
+          && pbs_opts 
+#ifdef HAVE_HMMER
+	  && pdom_opts
+#endif
+	  );
 
   gs = genome_stream_create(ltr_fileout_stream_class(), true);
   ls = ltr_fileout_stream_cast(gs);
@@ -506,7 +516,9 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
                  tests_to_run,
                  ppt_opts,
                  pbs_opts,
+#ifdef HAVE_HMMER
                  pdom_opts,
+#endif
                  trnafilename,
                  seqfilename,
                  gfffilename);
@@ -521,8 +533,10 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
     genfile_xprintf(ls->tabout_file,
               "\tPBS start\tPBS end\tPBS strand\ttRNA\ttRNA motif\tPBS offset\t"
               "tRNA offset\tPBS/tRNA edist");
+#ifdef HAVE_HMMER
   if (tests_to_run & LTRDIGEST_RUN_PDOM)
     genfile_xprintf(ls->tabout_file, "\tProtein domain hits");
+#endif
   genfile_xprintf(ls->tabout_file, "\n");
 
   /* create visitor */

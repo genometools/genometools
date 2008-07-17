@@ -34,7 +34,9 @@
 typedef struct LTRdigestOptions {
   PBSOptions  pbs_opts;
   PPTOptions  ppt_opts;
+#ifdef HAVE_HMMER
   PdomOptions pdom_opts;
+#endif
   Str *trna_lib;
   Str *prefix;
   bool verbose;
@@ -47,7 +49,9 @@ static void* gt_ltrdigest_arguments_new(void)
 {
   LTRdigestOptions *arguments = ma_calloc(1, sizeof *arguments);
   memset(arguments, 0, sizeof *arguments);
+#ifdef HAVE_HMMER
   arguments->pdom_opts.hmm_files = strarray_new();
+#endif
   arguments->trna_lib = str_new();
   arguments->prefix = str_new();
   arguments->ofi = outputfileinfo_new();
@@ -58,7 +62,9 @@ static void gt_ltrdigest_arguments_delete(void *tool_arguments)
 {
   LTRdigestOptions *arguments = tool_arguments;
   if (!arguments) return;
+#ifdef HAVE_HMMER
   strarray_delete(arguments->pdom_opts.hmm_files);
+#endif
   str_delete(arguments->trna_lib);
   str_delete(arguments->prefix);
   genfile_close(arguments->outfp);
@@ -70,7 +76,10 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 {
   LTRdigestOptions *arguments = tool_arguments;
   OptionParser *op;
-  Option *o, *ot, *oh, *oto;
+  Option *o, *ot, *oto;
+#ifdef HAVE_HMMER
+  Option *oh;
+#endif
   static Range pptlen_defaults           = { 8, 30},
                uboxlen_defaults          = { 3, 30},
                pbsalilen_defaults        = {11, 30},
@@ -151,7 +160,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   option_imply(o, ot);
 
  /* Protein domain search options */
-
+#ifdef HAVE_HMMER
   oh = option_new_filenamearray("hmms",
                                "profile HMM models for domain detection "
                                "(separate by spaces, finish with --) in HMMER"
@@ -182,6 +191,7 @@ static OptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                       50);
   option_parser_add_option(op, o);
   option_is_extended_option(o);
+#endif
 
   /* Extended PBS options */
 
@@ -285,6 +295,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
   error_check(err);
   assert(arguments);
 
+#ifdef HAVE_HMMER
   /* set additional arguments/options */
   arguments->pdom_opts.thresh.globT   = -FLT_MAX;
   arguments->pdom_opts.thresh.domT    = -FLT_MAX;
@@ -292,6 +303,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
   arguments->pdom_opts.thresh.autocut = CUT_NONE;
   arguments->pdom_opts.thresh.Z       = 1;
   arguments->pdom_opts.thresh.globE   = arguments->pdom_opts.evalue_cutoff;
+#endif
 
   /* Open sequence file */
   Bioseq *bioseq = bioseq_new(argv[arg+1], err);
@@ -310,6 +322,8 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
     if (error_is_set(err))
       had_err = -1;
   }
+
+#ifdef HAVE_HMMER
   /* Open HMMER files if given. */
   if (!had_err && strarray_size(arguments->pdom_opts.hmm_files) > 0)
   {
@@ -318,6 +332,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
     had_err = pdom_load_hmm_files(&arguments->pdom_opts,
                                   err);
   }
+#endif
 
   if (!had_err)
   {
@@ -331,8 +346,11 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
                                             tests_to_run,
                                             bioseq,
                                             &arguments->pbs_opts,
-                                            &arguments->ppt_opts,
-                                            &arguments->pdom_opts);
+                                            &arguments->ppt_opts
+#ifdef HAVE_HMMER
+                                            ,&arguments->pdom_opts
+#endif
+					    );
 
     /* attach tabular output stream, if requested */
     if (str_length(arguments->prefix) > 0)
@@ -343,7 +361,9 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
                                               str_get(arguments->prefix),
                                               &arguments->ppt_opts,
                                               &arguments->pbs_opts,
+#ifdef HAVE_HMMER
                                               &arguments->pdom_opts,
+#endif
                                               str_get(arguments->trna_lib),
                                               argv[arg+1],
                                               argv[arg],
@@ -365,10 +385,14 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
     if (tab_out_stream)
       genome_stream_delete(tab_out_stream);
     genome_stream_delete(gff3_in_stream);
+#ifdef HAVE_HMMER
     pdom_clear_hmms(arguments->pdom_opts.plan7_ts);
+#endif
   }
+#ifdef HAVE_HMMER
   else
      array_delete(arguments->pdom_opts.plan7_ts);
+#endif
 
   bioseq_delete(bioseq);
   bioseq_delete(arguments->pbs_opts.trna_lib);

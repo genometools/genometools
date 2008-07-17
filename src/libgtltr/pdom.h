@@ -18,6 +18,8 @@
 #ifndef PDOM_H
 #define PDOM_H
 
+#ifdef HAVE_HMMER
+
 #include "libgtcore/array.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/strand.h"
@@ -54,4 +56,5 @@ void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
 void pdom_clear_hmms(Array*);
 void pdom_clear_domain_hit(void*);
 
+#endif
 #endif
