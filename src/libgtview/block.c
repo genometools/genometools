@@ -75,13 +75,13 @@ Block* block_new_from_node(GenomeNode *node)
   return block;
 }
 
-void block_insert_element(Block *block, GenomeNode *gn, Config *cfg)
+void block_insert_element(Block *block, GenomeNode *gn)
 {
   Range gn_r;
   Element *e;
   GenomeFeatureType *gn_type;
 
-  assert(block && gn && cfg);
+  assert(block && gn);
 
   gn_r = genome_node_get_range(gn);
   gn_type = genome_feature_get_type((GenomeFeature*) gn);
@@ -188,15 +188,11 @@ int block_unit_test(Error *err)
   Block * b;
   Str *caption1;
   Str *caption2;
-  Config *cfg;
   error_check(err);
 
   feature_type_factory = feature_type_factory_new();
   caption1 = str_new_cstr("foo");
   caption2 = str_new_cstr("bar");
-
-  if (!(cfg = config_new(false, err)))
-    had_err = -1;
 
   r1.start = 10UL;
   r1.end = 50UL;
@@ -216,9 +212,9 @@ int block_unit_test(Error *err)
 
   /* test block_insert_elements */
   ensure(had_err, (0UL == dlist_size(block_get_elements(b))));
-  block_insert_element(b, gn1, cfg);
+  block_insert_element(b, gn1);
   ensure(had_err, (1UL == dlist_size(block_get_elements(b))));
-  block_insert_element(b, gn2, cfg);
+  block_insert_element(b, gn2);
   ensure(had_err, (2UL == dlist_size(block_get_elements(b))));
 
   /* test block_get_elements */
@@ -249,7 +245,6 @@ int block_unit_test(Error *err)
   s = block_get_strand(b);
   ensure(had_err, (STRAND_FORWARD == s));
 
-  config_delete(cfg);
   str_delete(caption2);
   element_delete(e1);
   element_delete(e2);

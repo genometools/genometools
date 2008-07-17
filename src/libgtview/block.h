@@ -23,7 +23,6 @@
 #include "libgtcore/array.h"
 #include "libgtext/genome_node.h"
 #include "libgtview/element.h"
-#include "libgtview/config.h"
 
 /* A block has a range, a caption, a parent caption, a strand, and a type and it
    contains element objects. */
@@ -34,7 +33,7 @@ Block*             block_new(void);
    from a given <node> template. */
 Block*             block_new_from_node(GenomeNode *node);
 /* Insert <node> into block. */
-void               block_insert_element(Block*, GenomeNode *node, Config*);
+void               block_insert_element(Block*, GenomeNode *node);
 Range              block_get_range(const Block*);
 void               block_set_range(Block*, Range r);
 /* Checks whether a Block is occupied completely by a single element. */

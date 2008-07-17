@@ -141,7 +141,7 @@ static void add_to_current(Diagram *d, GenomeNode *node, GenomeNode *parent)
   str_append_cstr(caption, get_node_name_or_id(node));
   block_set_caption(block, caption);
   /* insert node into block */
-  block_insert_element(block, node, d->config);
+  block_insert_element(block, node);
   bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node), block);
   array_add(ni->blocktuples, bt);
 }
@@ -192,7 +192,7 @@ static void add_to_parent(Diagram *d, GenomeNode *node, GenomeNode* parent)
                 genome_feature_get_attribute(parent, "ID" ));
   }
   /* now we have a block to insert into */
-  block_insert_element(block, node, d->config);
+  block_insert_element(block, node);
 }
 
 static void add_recursive(Diagram *d, GenomeNode *node,
@@ -226,7 +226,7 @@ static void add_recursive(Diagram *d, GenomeNode *node,
                           block);
       array_add(ni->blocktuples, bt);
     }
-    block_insert_element(block, original_node, d->config);
+    block_insert_element(block, original_node);
   }
   else {
     /* not at target type block yet, set up reverse entry and follow */

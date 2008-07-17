@@ -66,7 +66,6 @@ int line_unit_test(Error *err)
   Array* blocks;
   Str *seqid1, *seqid2, *seqid3;
   int had_err = 0;
-  Config *cfg;
   GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
   Line *l1, *l2;
   Block *b1, *b2;
@@ -77,9 +76,6 @@ int line_unit_test(Error *err)
   const char* blub = "blub";
 
   feature_type_factory = feature_type_factory_new();
-
-  if (!(cfg = config_new(false, err)))
-    had_err = -1;
 
   r_parent.start = 10UL;
   r_parent.end = 80UL;
@@ -128,8 +124,8 @@ int line_unit_test(Error *err)
   b1 = block_new();
   b2 = block_new();
 
-  block_insert_element(b1, gn1, cfg);
-  block_insert_element(b2, gn2, cfg);
+  block_insert_element(b1, gn1);
+  block_insert_element(b2, gn2);
   block_set_range(b1, r1);
   block_set_range(b2, r2);
 
@@ -148,7 +144,6 @@ int line_unit_test(Error *err)
   blocks = line_get_blocks(l1);
   ensure(had_err, (2 == array_size(blocks)));
 
-  config_delete(cfg);
   str_delete(seqid1);
   str_delete(seqid2);
   str_delete(seqid3);
