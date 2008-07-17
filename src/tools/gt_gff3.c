@@ -23,6 +23,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtext/add_introns_stream.h"
 #include "libgtext/feature_type_factory_any.h"
+#include "libgtext/feature_type_factory_obo.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtext/gtdatahelp.h"
@@ -69,7 +70,6 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   OptionParser *op;
   Option *sort_option, *mergefeat_option, *addintrons_option, *offset_option,
          *offsetfile_option, *option;
-  static const char *typechecker[] = { "any", "built-in", NULL };
   assert(arguments);
 
   /* init */
@@ -118,9 +118,9 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   option_exclude(offset_option, offsetfile_option);
 
   /* -typechecker */
-  option = option_new_choice("typechecker", "set GFF3 type checker\n"
-                             "choose any|built-in", arguments->typechecker,
-                             typechecker[1], typechecker);
+  option = option_new_string("typechecker", "set GFF3 type checker\n"
+                             "choose any|built-in|OBO_file_path",
+                             arguments->typechecker, "built-in");
   option_is_development_option(option);
   option_parser_add_option(op, option);
 
@@ -140,7 +140,7 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                           void *tool_arguments, Error *err)
 {
-  FeatureTypeFactory *feature_type_factory = NULL;
+  FeatureTypeFactory *ftf = NULL;
   GenomeStream *gff3_in_stream,
                *sort_stream = NULL,
                *mergefeat_stream = NULL,
@@ -163,18 +163,27 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   last_stream = gff3_in_stream;
 
   /* set different type checker if necessary */
-  if (!strcmp(str_get(arguments->typechecker), "any")) {
-    feature_type_factory = feature_type_factory_any_new();
-    gff3_in_stream_set_feature_type_factory(gff3_in_stream,
-                                            feature_type_factory);
+  if (strcmp(str_get(arguments->typechecker), "built-in")) {
+    if (!strcmp(str_get(arguments->typechecker), "any")) {
+      ftf = feature_type_factory_any_new();
+      gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
+    }
+    else {
+      if (!(ftf = feature_type_factory_obo_new(str_get(arguments->typechecker),
+                                               err))) {
+        had_err = -1;
+      }
+      if (!had_err)
+        gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
+    }
   }
 
   /* set offset (if necessary) */
-  if (arguments->offset != UNDEF_LONG)
+  if (!had_err && arguments->offset != UNDEF_LONG)
     gff3_in_stream_set_offset(gff3_in_stream, arguments->offset);
 
   /* set offsetfile (if necessary) */
-  if (str_length(arguments->offsetfile)) {
+  if (!had_err && str_length(arguments->offsetfile)) {
     had_err = gff3_in_stream_set_offsetfile(gff3_in_stream,
                                             arguments->offsetfile, err);
   }
@@ -217,7 +226,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   genome_stream_delete(mergefeat_stream);
   genome_stream_delete(add_introns_stream);
   genome_stream_delete(gff3_in_stream);
-  feature_type_factory_delete(feature_type_factory);
+  feature_type_factory_delete(ftf);
 
   return had_err;
 }
