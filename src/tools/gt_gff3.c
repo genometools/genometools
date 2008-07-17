@@ -15,12 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/outputfile.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/add_introns_stream.h"
+#include "libgtext/feature_type_factory_any.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtext/gtdatahelp.h"
@@ -35,7 +37,8 @@ typedef struct {
        addintrons,
        verbose;
   long offset;
-  Str *offsetfile;
+  Str *offsetfile,
+      *typechecker;
   OutputFileInfo *ofi;
   GenFile *outfp;
 } GFF3Arguments;
@@ -44,6 +47,7 @@ static void* gt_gff3_arguments_new(void)
 {
   GFF3Arguments *arguments = ma_calloc(1, sizeof *arguments);
   arguments->offsetfile = str_new();
+  arguments->typechecker = str_new();
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -54,6 +58,7 @@ static void gt_gff3_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
+  str_delete(arguments->typechecker);
   str_delete(arguments->offsetfile);
   ma_free(arguments);
 }
@@ -64,6 +69,7 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   OptionParser *op;
   Option *sort_option, *mergefeat_option, *addintrons_option, *offset_option,
          *offsetfile_option, *option;
+  static const char *typechecker[] = { "any", "built-in", NULL };
   assert(arguments);
 
   /* init */
@@ -111,6 +117,13 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, offsetfile_option);
   option_exclude(offset_option, offsetfile_option);
 
+  /* -typechecker */
+  option = option_new_choice("typechecker", "set GFF3 type checker\n"
+                             "choose any|built-in", arguments->typechecker,
+                             typechecker[1], typechecker);
+  option_is_development_option(option);
+  option_parser_add_option(op, option);
+
   /* -v */
   option = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, option);
@@ -127,6 +140,7 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                           void *tool_arguments, Error *err)
 {
+  FeatureTypeFactory *feature_type_factory = NULL;
   GenomeStream *gff3_in_stream,
                *sort_stream = NULL,
                *mergefeat_stream = NULL,
@@ -147,6 +161,13 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                                                arguments->outfp,
                                                arguments->checkids);
   last_stream = gff3_in_stream;
+
+  /* set different type checker if necessary */
+  if (!strcmp(str_get(arguments->typechecker), "any")) {
+    feature_type_factory = feature_type_factory_any_new();
+    gff3_in_stream_set_feature_type_factory(gff3_in_stream,
+                                            feature_type_factory);
+  }
 
   /* set offset (if necessary) */
   if (arguments->offset != UNDEF_LONG)
@@ -196,6 +217,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   genome_stream_delete(mergefeat_stream);
   genome_stream_delete(add_introns_stream);
   genome_stream_delete(gff3_in_stream);
+  feature_type_factory_delete(feature_type_factory);
 
   return had_err;
 }
