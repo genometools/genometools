@@ -24,6 +24,7 @@
 #include "libgtcore/outputfile.h"
 #include "libgtcore/safearith.h"
 #include "libgtcore/unused.h"
+#include "libgtext/feature_type_factory_any.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtltr/ltrdigest_def.h"
@@ -282,6 +283,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
                                Error *err)
 {
   LTRdigestOptions *arguments = tool_arguments;
+  FeatureTypeFactory *ftf = feature_type_factory_any_new();
   GenomeStream *gff3_in_stream   = NULL,
                *gff3_out_stream  = NULL,
                *ltrdigest_stream = NULL,
@@ -341,6 +343,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
     last_stream = gff3_in_stream  = gff3_in_stream_new_sorted(argv[arg],
                                                 arguments->verbose &&
                                                 arguments->outfp);
+    gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
 
     last_stream = ltrdigest_stream = ltrdigest_stream_new(last_stream,
                                             tests_to_run,
@@ -350,7 +353,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
 #ifdef HAVE_HMMER
                                             ,&arguments->pdom_opts
 #endif
-					    );
+              );
 
     /* attach tabular output stream, if requested */
     if (str_length(arguments->prefix) > 0)
@@ -379,7 +382,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
     {
       genome_node_rec_delete(gn);
     }
-    
+    feature_type_factory_delete(ftf);
     genome_stream_delete(gff3_out_stream);
     genome_stream_delete(ltrdigest_stream);
     if (tab_out_stream)
