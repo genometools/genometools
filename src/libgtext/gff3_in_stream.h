@@ -25,6 +25,10 @@
 typedef struct GFF3InStream GFF3InStream;
 
 const GenomeStreamClass* gff3_in_stream_class(void);
+/* Does not take ownership of <feature_type_factory>. */
+void                     gff3_in_stream_set_feature_type_factory(GenomeStream*,
+                                                         FeatureTypeFactory
+                                                         *feature_type_factory);
 void                     gff3_in_stream_set_offset(GenomeStream*, long);
 int                      gff3_in_stream_set_offsetfile(GenomeStream*, Str*,
                                                        Error*);

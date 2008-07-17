@@ -426,99 +426,95 @@ static int process_real_feature(GenomeNode *gn, void *data, UNUSED Error *err)
   assert(gn && data);
   gf = (GenomeFeature*) gn;
 
-  switch (genome_feature_get_type(gf)) {
-    case gft_gene:
-      switch (genome_feature_get_strand(gf)) {
-        case STRAND_FORWARD:
-          gn_ref = genome_node_rec_ref(gn);
-          array_add(info->slot->genes_forward, gn_ref);
-          break;
-        case STRAND_REVERSE:
-          gn_ref = genome_node_rec_ref(gn);
-          array_add(info->slot->genes_reverse, gn_ref);
-          break;
-        default:
-          if (info->verbose) {
-            fprintf(stderr, "skipping real gene with unknown orientation "
-                    "(line %lu)\n", genome_node_get_line_number(gn));
-          }
-      }
-      break;
-    case gft_mRNA:
-      switch (genome_feature_get_strand(gf)) {
-        case STRAND_FORWARD:
-          gn_ref = genome_node_rec_ref(gn);
-          array_add(info->slot->mRNAs_forward, gn_ref);
-          break;
-        case STRAND_REVERSE:
-          gn_ref = genome_node_rec_ref(gn);
-          array_add(info->slot->mRNAs_reverse, gn_ref);
-          break;
-        default:
-          if (info->verbose) {
-            fprintf(stderr, "skipping real mRNA with unknown orientation "
-                    "(line %lu)\n", genome_node_get_line_number(gn));
-          }
-      }
-      break;
-    case gft_LTR_retrotransposon:
-      gn_ref = genome_node_rec_ref(gn);
-      array_add(info->slot->LTRs, gn_ref);
-      break;
-    case gft_CDS:
-      range = genome_node_get_range(gn);
-      switch (genome_feature_get_strand(gf)) {
-        case STRAND_FORWARD:
-          add_real_exon(info->slot->CDS_exons_forward, range, gn);
-          /* nucleotide level */
-          if (info->nuceval) {
-            add_nucleotide_exon(info->slot->real_CDS_nucleotides_forward, range,
-                                info->slot->real_range, NULL);
-          }
-          break;
-        case STRAND_REVERSE:
-          add_real_exon(info->slot->CDS_exons_reverse, range, gn);
-          /* nucleotide level */
-          if (info->nuceval) {
-            add_nucleotide_exon(info->slot->real_CDS_nucleotides_reverse, range,
-                                info->slot->real_range, NULL);
-          }
-          break;
-        default:
-          if (info->verbose) {
-            fprintf(stderr, "skipping real CDS exon with unknown orientation "
-                    "(line %lu)\n", genome_node_get_line_number(gn));
-          }
-      }
-      break;
-    case gft_exon:
-      range = genome_node_get_range(gn);
-      switch (genome_feature_get_strand(gf)) {
-        case STRAND_FORWARD:
-          add_real_exon(info->slot->mRNA_exons_forward, range, gn);
-          /* nucleotide level */
-          if (info->nuceval) {
-            add_nucleotide_exon(info->slot->real_mRNA_nucleotides_forward,
-                                range, info->slot->real_range, NULL);
-          }
-          break;
-        case STRAND_REVERSE:
-          add_real_exon(info->slot->mRNA_exons_reverse, range, gn);
-          /* nucleotide level */
-          if (info->nuceval) {
-            add_nucleotide_exon(info->slot->real_mRNA_nucleotides_reverse,
-                                range, info->slot->real_range, NULL);
-          }
-          break;
-        default:
-          if (info->verbose) {
-            fprintf(stderr, "skipping real mRNA exon with unknown orientation "
-                    "(line %lu)\n", genome_node_get_line_number(gn));
-          }
-      }
-      break;
-    default:
-      assert(1); /* shut up compiler */
+  if (genome_feature_has_type(gf, gft_gene)) {
+    switch (genome_feature_get_strand(gf)) {
+      case STRAND_FORWARD:
+        gn_ref = genome_node_rec_ref(gn);
+        array_add(info->slot->genes_forward, gn_ref);
+        break;
+      case STRAND_REVERSE:
+        gn_ref = genome_node_rec_ref(gn);
+        array_add(info->slot->genes_reverse, gn_ref);
+        break;
+      default:
+        if (info->verbose) {
+          fprintf(stderr, "skipping real gene with unknown orientation "
+                  "(line %lu)\n", genome_node_get_line_number(gn));
+        }
+    }
+  }
+  else if (genome_feature_has_type(gf, gft_mRNA)) {
+    switch (genome_feature_get_strand(gf)) {
+      case STRAND_FORWARD:
+        gn_ref = genome_node_rec_ref(gn);
+        array_add(info->slot->mRNAs_forward, gn_ref);
+        break;
+      case STRAND_REVERSE:
+        gn_ref = genome_node_rec_ref(gn);
+        array_add(info->slot->mRNAs_reverse, gn_ref);
+        break;
+      default:
+        if (info->verbose) {
+          fprintf(stderr, "skipping real mRNA with unknown orientation "
+                  "(line %lu)\n", genome_node_get_line_number(gn));
+        }
+    }
+  }
+  else if (genome_feature_has_type(gf, gft_LTR_retrotransposon)) {
+    gn_ref = genome_node_rec_ref(gn);
+    array_add(info->slot->LTRs, gn_ref);
+  }
+  else if (genome_feature_has_type(gf, gft_CDS)) {
+    range = genome_node_get_range(gn);
+    switch (genome_feature_get_strand(gf)) {
+      case STRAND_FORWARD:
+        add_real_exon(info->slot->CDS_exons_forward, range, gn);
+        /* nucleotide level */
+        if (info->nuceval) {
+          add_nucleotide_exon(info->slot->real_CDS_nucleotides_forward, range,
+                              info->slot->real_range, NULL);
+        }
+        break;
+      case STRAND_REVERSE:
+        add_real_exon(info->slot->CDS_exons_reverse, range, gn);
+        /* nucleotide level */
+        if (info->nuceval) {
+          add_nucleotide_exon(info->slot->real_CDS_nucleotides_reverse, range,
+                              info->slot->real_range, NULL);
+        }
+        break;
+      default:
+        if (info->verbose) {
+          fprintf(stderr, "skipping real CDS exon with unknown orientation "
+                  "(line %lu)\n", genome_node_get_line_number(gn));
+        }
+    }
+  }
+  else if (genome_feature_has_type(gf, gft_exon)) {
+    range = genome_node_get_range(gn);
+    switch (genome_feature_get_strand(gf)) {
+      case STRAND_FORWARD:
+        add_real_exon(info->slot->mRNA_exons_forward, range, gn);
+        /* nucleotide level */
+        if (info->nuceval) {
+          add_nucleotide_exon(info->slot->real_mRNA_nucleotides_forward,
+                              range, info->slot->real_range, NULL);
+        }
+        break;
+      case STRAND_REVERSE:
+        add_real_exon(info->slot->mRNA_exons_reverse, range, gn);
+        /* nucleotide level */
+        if (info->nuceval) {
+          add_nucleotide_exon(info->slot->real_mRNA_nucleotides_reverse,
+                              range, info->slot->real_range, NULL);
+        }
+        break;
+      default:
+        if (info->verbose) {
+          fprintf(stderr, "skipping real mRNA exon with unknown orientation "
+                  "(line %lu)\n", genome_node_get_line_number(gn));
+        }
+    }
   }
   return 0;
 }
@@ -531,7 +527,7 @@ static int store_exon(GenomeNode *gn, void *data, UNUSED Error *err)
   error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && exons);
-  if (genome_feature_get_type(gf) == gft_exon) {
+  if (genome_feature_has_type(gf, gft_exon)) {
     range = genome_node_get_range(gn);
     array_add(exons, range);
   }
@@ -585,16 +581,12 @@ static int store_gene_feature(GenomeNode *gn, void *data, UNUSED Error *err)
   error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && info);
-  switch (genome_feature_get_type(gf)) {
-    case gft_mRNA:
-      array_add(info->mRNAs, gf);
-      break;
-    case gft_exon:
-      range = genome_node_get_range(gn);
-      array_add(info->exons, range);
-      break;
-    default:
-      assert(1);
+  if (genome_feature_has_type(gf, gft_mRNA)) {
+    array_add(info->mRNAs, gf);
+  }
+  else if (genome_feature_has_type(gf, gft_exon)) {
+    range = genome_node_get_range(gn);
+    array_add(info->exons, range);
   }
   return 0;
 }
@@ -886,263 +878,260 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
   predicted_strand = genome_feature_get_strand((GenomeFeature*) gn);
   real_genome_nodes = array_new(sizeof (GenomeNode**));
 
-  switch (genome_feature_get_type((GenomeFeature*) gn)) {
-    case gft_gene:
-      /* store predicted gene */
-      evaluator_add_predicted(info->gene_evaluator, 1);
-      /* determine true gene */
-      switch (predicted_strand) {
-        case STRAND_FORWARD:
-        case STRAND_REVERSE:
-          bsearch_all_mark(real_genome_nodes, &gn,
-                           predicted_strand == STRAND_FORWARD
-                           ? array_get_space(info->slot->genes_forward)
-                           : array_get_space(info->slot->genes_reverse),
-                           predicted_strand == STRAND_FORWARD
-                           ? array_size(info->slot->genes_forward)
-                           : array_size(info->slot->genes_reverse),
-                           sizeof (GenomeNode*),
-                           (CompareWithData) genome_node_compare_with_data,
-                           NULL,
-                           predicted_strand == STRAND_FORWARD
-                           ? info->slot->overlapped_genes_forward
-                           : info->slot->overlapped_genes_reverse);
-          if (array_size(real_genome_nodes)) {
-            /* gene(s) with the same range found -> check if they are equal */
-            for (i = 0; i < array_size(real_genome_nodes); i++) {
-              real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
-              if (genes_are_equal(gn, *real_gn)) {
-                if (predicted_strand == STRAND_FORWARD) {
-                  num = real_gn - (GenomeNode**)
-                        array_get_space(info->slot->genes_forward);
-                  if (!bittab_bit_is_set(info->slot->true_genes_forward, num)) {
-                    bittab_set_bit(info->slot->true_genes_forward, num);
-                    evaluator_add_true(info->gene_evaluator);
-                    /*@loopbreak@*/
-                    break;
-                  }
+  if (genome_feature_has_type((GenomeFeature*) gn, gft_gene)) {
+    /* store predicted gene */
+    evaluator_add_predicted(info->gene_evaluator, 1);
+    /* determine true gene */
+    switch (predicted_strand) {
+      case STRAND_FORWARD:
+      case STRAND_REVERSE:
+        bsearch_all_mark(real_genome_nodes, &gn,
+                         predicted_strand == STRAND_FORWARD
+                         ? array_get_space(info->slot->genes_forward)
+                         : array_get_space(info->slot->genes_reverse),
+                         predicted_strand == STRAND_FORWARD
+                         ? array_size(info->slot->genes_forward)
+                         : array_size(info->slot->genes_reverse),
+                         sizeof (GenomeNode*),
+                         (CompareWithData) genome_node_compare_with_data,
+                         NULL,
+                         predicted_strand == STRAND_FORWARD
+                         ? info->slot->overlapped_genes_forward
+                         : info->slot->overlapped_genes_reverse);
+        if (array_size(real_genome_nodes)) {
+          /* gene(s) with the same range found -> check if they are equal */
+          for (i = 0; i < array_size(real_genome_nodes); i++) {
+            real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
+            if (genes_are_equal(gn, *real_gn)) {
+              if (predicted_strand == STRAND_FORWARD) {
+                num = real_gn - (GenomeNode**)
+                      array_get_space(info->slot->genes_forward);
+                if (!bittab_bit_is_set(info->slot->true_genes_forward, num)) {
+                  bittab_set_bit(info->slot->true_genes_forward, num);
+                  evaluator_add_true(info->gene_evaluator);
+                  /*@loopbreak@*/
+                  break;
                 }
-                else {
-                  num = real_gn - (GenomeNode**)
-                        array_get_space(info->slot->genes_reverse);
-                  if (!bittab_bit_is_set(info->slot->true_genes_reverse, num)) {
-                    bittab_set_bit(info->slot->true_genes_reverse, num);
-                    evaluator_add_true(info->gene_evaluator);
-                    /*@loopbreak@*/
-                    break;
-                  }
+              }
+              else {
+                num = real_gn - (GenomeNode**)
+                      array_get_space(info->slot->genes_reverse);
+                if (!bittab_bit_is_set(info->slot->true_genes_reverse, num)) {
+                  bittab_set_bit(info->slot->true_genes_reverse, num);
+                  evaluator_add_true(info->gene_evaluator);
+                  /*@loopbreak@*/
+                  break;
                 }
               }
             }
           }
-          else {
-            /* no gene with the same range found -> check if this is a wrong
-               gene */
-            if (!genome_node_overlaps_nodes_mark(gn,
-                                      predicted_strand == STRAND_FORWARD
-                                      ? info->slot->genes_forward
-                                      : info->slot->genes_reverse,
-                                      predicted_strand == STRAND_FORWARD
-                                      ? info->slot->overlapped_genes_forward
-                                      : info->slot->overlapped_genes_reverse)) {
-              (*info->wrong_genes)++;
-            }
+        }
+        else {
+          /* no gene with the same range found -> check if this is a wrong
+             gene */
+          if (!genome_node_overlaps_nodes_mark(gn,
+                                    predicted_strand == STRAND_FORWARD
+                                    ? info->slot->genes_forward
+                                    : info->slot->genes_reverse,
+                                    predicted_strand == STRAND_FORWARD
+                                    ? info->slot->overlapped_genes_forward
+                                    : info->slot->overlapped_genes_reverse)) {
+            (*info->wrong_genes)++;
           }
-          break;
-        default:
-          if (info->verbose) {
-            fprintf(stderr, "skipping predicted gene with unknown orientation "
-                    "(line %lu)\n", genome_node_get_line_number(gn));
-          }
-      }
-      break;
-    case gft_mRNA:
-      /* store predicted mRNA */
-      evaluator_add_predicted(info->mRNA_evaluator, 1);
-      /* determine true mRNA */
-      switch (predicted_strand) {
-        case STRAND_FORWARD:
-        case STRAND_REVERSE:
-          bsearch_all_mark(real_genome_nodes, &gn,
-                           predicted_strand == STRAND_FORWARD
-                           ? array_get_space(info->slot->mRNAs_forward)
-                           : array_get_space(info->slot->mRNAs_reverse),
-                           predicted_strand == STRAND_FORWARD
-                           ? array_size(info->slot->mRNAs_forward)
-                           : array_size(info->slot->mRNAs_reverse),
-                           sizeof (GenomeNode*),
-                           (CompareWithData) genome_node_compare_with_data,
-                           NULL,
-                           predicted_strand == STRAND_FORWARD
-                           ? info->slot->overlapped_mRNAs_forward
-                           : info->slot->overlapped_mRNAs_reverse);
-          if (array_size(real_genome_nodes)) {
-            /* mRNA(s) with the same range found -> check if they are equal */
-            for (i = 0; i < array_size(real_genome_nodes); i++) {
-              real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
-              if (mRNAs_are_equal(gn, *real_gn)) {
-                if (predicted_strand == STRAND_FORWARD) {
-                  num = real_gn - (GenomeNode**)
-                        array_get_space(info->slot->mRNAs_forward);
-                  if (!bittab_bit_is_set(info->slot->true_mRNAs_forward, num)) {
-                    bittab_set_bit(info->slot->true_mRNAs_forward, num);
-                    evaluator_add_true(info->mRNA_evaluator);
-                    /*@loopbreak@*/
-                    break;
-                  }
+        }
+        break;
+      default:
+        if (info->verbose) {
+          fprintf(stderr, "skipping predicted gene with unknown orientation "
+                  "(line %lu)\n", genome_node_get_line_number(gn));
+        }
+    }
+  }
+  else if (genome_feature_has_type((GenomeFeature*) gn, gft_mRNA)) {
+    /* store predicted mRNA */
+    evaluator_add_predicted(info->mRNA_evaluator, 1);
+    /* determine true mRNA */
+    switch (predicted_strand) {
+      case STRAND_FORWARD:
+      case STRAND_REVERSE:
+        bsearch_all_mark(real_genome_nodes, &gn,
+                         predicted_strand == STRAND_FORWARD
+                         ? array_get_space(info->slot->mRNAs_forward)
+                         : array_get_space(info->slot->mRNAs_reverse),
+                         predicted_strand == STRAND_FORWARD
+                         ? array_size(info->slot->mRNAs_forward)
+                         : array_size(info->slot->mRNAs_reverse),
+                         sizeof (GenomeNode*),
+                         (CompareWithData) genome_node_compare_with_data,
+                         NULL,
+                         predicted_strand == STRAND_FORWARD
+                         ? info->slot->overlapped_mRNAs_forward
+                         : info->slot->overlapped_mRNAs_reverse);
+        if (array_size(real_genome_nodes)) {
+          /* mRNA(s) with the same range found -> check if they are equal */
+          for (i = 0; i < array_size(real_genome_nodes); i++) {
+            real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
+            if (mRNAs_are_equal(gn, *real_gn)) {
+              if (predicted_strand == STRAND_FORWARD) {
+                num = real_gn - (GenomeNode**)
+                      array_get_space(info->slot->mRNAs_forward);
+                if (!bittab_bit_is_set(info->slot->true_mRNAs_forward, num)) {
+                  bittab_set_bit(info->slot->true_mRNAs_forward, num);
+                  evaluator_add_true(info->mRNA_evaluator);
+                  /*@loopbreak@*/
+                  break;
                 }
-                else {
-                  num = real_gn - (GenomeNode**)
-                        array_get_space(info->slot->mRNAs_reverse);
-                  if (!bittab_bit_is_set(info->slot->true_mRNAs_reverse, num)) {
-                    bittab_set_bit(info->slot->true_mRNAs_reverse, num);
-                    evaluator_add_true(info->mRNA_evaluator);
-                    /*@loopbreak@*/
-                    break;
-                  }
+              }
+              else {
+                num = real_gn - (GenomeNode**)
+                      array_get_space(info->slot->mRNAs_reverse);
+                if (!bittab_bit_is_set(info->slot->true_mRNAs_reverse, num)) {
+                  bittab_set_bit(info->slot->true_mRNAs_reverse, num);
+                  evaluator_add_true(info->mRNA_evaluator);
+                  /*@loopbreak@*/
+                  break;
                 }
               }
             }
           }
-          else {
-            /* no mRNA with the same range found -> check if this is a wrong
-               mRNA */
-            if (!genome_node_overlaps_nodes_mark(gn,
-                                      predicted_strand == STRAND_FORWARD
-                                      ? info->slot->mRNAs_forward
-                                      : info->slot->mRNAs_reverse,
-                                      predicted_strand == STRAND_FORWARD
-                                      ? info->slot->overlapped_mRNAs_forward
-                                      : info->slot->overlapped_mRNAs_reverse)) {
-              (*info->wrong_mRNAs)++;
-            }
-          }
-          break;
-        default:
-          if (info->verbose) {
-            fprintf(stderr, "skipping predicted mRNA with unknown orientation "
-                    "(line %lu)\n", genome_node_get_line_number(gn));
-          }
-      }
-      break;
-    case gft_LTR_retrotransposon:
-      /* store predicted LTR */
-      evaluator_add_predicted(info->LTR_evaluator, 1);
-      /* determine true LTR */
-      bsearch_all_mark(real_genome_nodes, &gn,
-                       array_get_space(info->slot->LTRs),
-                       array_size(info->slot->LTRs), sizeof (GenomeNode*),
-                       (CompareWithData) genome_node_compare_delta,
-                       &info->LTRdelta, info->slot->overlapped_LTRs);
-
-      if (array_size(real_genome_nodes)) {
-        for (i = 0; i < array_size(real_genome_nodes); i++) {
-          real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
-          num = real_gn - (GenomeNode**) array_get_space(info->slot->LTRs);
-          if (!bittab_bit_is_set(info->slot->true_LTRs, num)) {
-            bittab_set_bit(info->slot->true_LTRs, num);
-            evaluator_add_true(info->LTR_evaluator);
-            /*@loopbreak@*/
-            break;
+        }
+        else {
+          /* no mRNA with the same range found -> check if this is a wrong
+             mRNA */
+          if (!genome_node_overlaps_nodes_mark(gn,
+                                    predicted_strand == STRAND_FORWARD
+                                    ? info->slot->mRNAs_forward
+                                    : info->slot->mRNAs_reverse,
+                                    predicted_strand == STRAND_FORWARD
+                                    ? info->slot->overlapped_mRNAs_forward
+                                    : info->slot->overlapped_mRNAs_reverse)) {
+            (*info->wrong_mRNAs)++;
           }
         }
-      }
-      else {
-        /* no LTR with the same range found -> check if this is a wrong LTR */
-        if (!genome_node_overlaps_nodes_mark(gn, info->slot->LTRs,
-                                             info->slot->overlapped_LTRs)) {
-          (*info->wrong_LTRs)++;
+        break;
+      default:
+        if (info->verbose) {
+          fprintf(stderr, "skipping predicted mRNA with unknown orientation "
+                  "(line %lu)\n", genome_node_get_line_number(gn));
+        }
+    }
+  }
+  else if (genome_feature_has_type((GenomeFeature*) gn,
+                                   gft_LTR_retrotransposon)) {
+    /* store predicted LTR */
+    evaluator_add_predicted(info->LTR_evaluator, 1);
+    /* determine true LTR */
+    bsearch_all_mark(real_genome_nodes, &gn,
+                     array_get_space(info->slot->LTRs),
+                     array_size(info->slot->LTRs), sizeof (GenomeNode*),
+                     (CompareWithData) genome_node_compare_delta,
+                     &info->LTRdelta, info->slot->overlapped_LTRs);
+
+    if (array_size(real_genome_nodes)) {
+      for (i = 0; i < array_size(real_genome_nodes); i++) {
+        real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
+        num = real_gn - (GenomeNode**) array_get_space(info->slot->LTRs);
+        if (!bittab_bit_is_set(info->slot->true_LTRs, num)) {
+          bittab_set_bit(info->slot->true_LTRs, num);
+          evaluator_add_true(info->LTR_evaluator);
+          /*@loopbreak@*/
+          break;
         }
       }
-      break;
-    case gft_exon:
-      /* store predicted exon (mRNA level)*/
-      store_predicted_exon(info->mRNA_exon_evaluators, gn);
-
-      /* store predicted exon (mRNA level, collapsed) */
-      store_predicted_exon_collapsed(predicted_strand == STRAND_FORWARD
-                                     ? info->slot->used_mRNA_exons_forward
-                                     : info->slot->used_mRNA_exons_reverse,
-                                     &predicted_range,
-                                     info->mRNA_exon_evaluators_collapsed, gn);
-
-      /* determine true exon (mRNA level)*/
-      switch (predicted_strand) {
-        case STRAND_FORWARD:
-        case STRAND_REVERSE:
-          store_true_exon(gn, predicted_strand, &predicted_range,
-                          info->exondiff,
-                          info->slot->mRNA_exons_forward,
-                          info->slot->mRNA_exons_reverse,
-                          info->slot->mRNA_counts_forward,
-                          info->slot->mRNA_counts_reverse,
-                          info->slot->mRNA_exon_bittabs_forward,
-                          info->slot->mRNA_exon_bittabs_reverse,
-                          info->mRNA_exon_evaluators,
-                          info->mRNA_exon_evaluators_collapsed);
-          /* nucleotide level */
-          if (info->nuceval) {
-            add_nucleotide_exon(predicted_strand == STRAND_FORWARD
-                                ? info->slot->pred_mRNA_nucleotides_forward
-                                : info->slot->pred_mRNA_nucleotides_reverse,
-                                predicted_range, info->slot->real_range,
-                                predicted_strand == STRAND_FORWARD
-                                ? &info->slot->FP_mRNA_nucleotides_forward
-                                : &info->slot->FP_mRNA_nucleotides_reverse);
-          }
-          break;
-        default:
-          if (info->verbose) {
-            fprintf(stderr, "skipping predicted exon with unknown orientation "
-                    "(line %lu)\n", genome_node_get_line_number(gn));
-          }
+    }
+    else {
+      /* no LTR with the same range found -> check if this is a wrong LTR */
+      if (!genome_node_overlaps_nodes_mark(gn, info->slot->LTRs,
+                                           info->slot->overlapped_LTRs)) {
+        (*info->wrong_LTRs)++;
       }
-      break;
-    case gft_CDS:
-      /* store predicted exon (CDS level)*/
-      store_predicted_exon(info->CDS_exon_evaluators, gn);
+    }
+  }
+  else if (genome_feature_has_type((GenomeFeature*) gn, gft_exon)) {
+    /* store predicted exon (mRNA level)*/
+    store_predicted_exon(info->mRNA_exon_evaluators, gn);
 
-      /* store predicted exon (CDS level, collapsed) */
-      store_predicted_exon_collapsed(predicted_strand == STRAND_FORWARD
-                                     ? info->slot->used_CDS_exons_forward
-                                     : info->slot->used_CDS_exons_reverse,
-                                     &predicted_range,
-                                     info->CDS_exon_evaluators_collapsed, gn);
+    /* store predicted exon (mRNA level, collapsed) */
+    store_predicted_exon_collapsed(predicted_strand == STRAND_FORWARD
+                                   ? info->slot->used_mRNA_exons_forward
+                                   : info->slot->used_mRNA_exons_reverse,
+                                   &predicted_range,
+                                   info->mRNA_exon_evaluators_collapsed, gn);
 
-      /* determine true exon (CDS level) */
-      switch (predicted_strand) {
-        case STRAND_FORWARD:
-        case STRAND_REVERSE:
-          store_true_exon(gn, predicted_strand, &predicted_range,
-                          info->exondiff,
-                          info->slot->CDS_exons_forward,
-                          info->slot->CDS_exons_reverse,
-                          info->slot->CDS_counts_forward,
-                          info->slot->CDS_counts_reverse,
-                          info->slot->CDS_exon_bittabs_forward,
-                          info->slot->CDS_exon_bittabs_reverse,
-                          info->CDS_exon_evaluators,
-                          info->CDS_exon_evaluators_collapsed);
-          /* nucleotide level */
-          if (info->nuceval) {
-            add_nucleotide_exon(predicted_strand == STRAND_FORWARD
-                                ? info->slot->pred_CDS_nucleotides_forward
-                                : info->slot->pred_CDS_nucleotides_reverse,
-                                predicted_range, info->slot->real_range,
-                                predicted_strand == STRAND_FORWARD
-                                ? &info->slot->FP_CDS_nucleotides_forward
-                                : &info->slot->FP_CDS_nucleotides_reverse);
-          }
-          break;
-        default:
-          if (info->verbose) {
-            fprintf(stderr, "skipping predicted exon with unknown orientation "
-                    "(line %lu)\n", genome_node_get_line_number(gn));
-          }
+    /* determine true exon (mRNA level)*/
+    switch (predicted_strand) {
+      case STRAND_FORWARD:
+      case STRAND_REVERSE:
+        store_true_exon(gn, predicted_strand, &predicted_range,
+                        info->exondiff,
+                        info->slot->mRNA_exons_forward,
+                        info->slot->mRNA_exons_reverse,
+                        info->slot->mRNA_counts_forward,
+                        info->slot->mRNA_counts_reverse,
+                        info->slot->mRNA_exon_bittabs_forward,
+                        info->slot->mRNA_exon_bittabs_reverse,
+                        info->mRNA_exon_evaluators,
+                        info->mRNA_exon_evaluators_collapsed);
+        /* nucleotide level */
+        if (info->nuceval) {
+          add_nucleotide_exon(predicted_strand == STRAND_FORWARD
+                              ? info->slot->pred_mRNA_nucleotides_forward
+                              : info->slot->pred_mRNA_nucleotides_reverse,
+                              predicted_range, info->slot->real_range,
+                              predicted_strand == STRAND_FORWARD
+                              ? &info->slot->FP_mRNA_nucleotides_forward
+                              : &info->slot->FP_mRNA_nucleotides_reverse);
         }
-      break;
-    default:
-      assert(1); /* shut up compiler */
+        break;
+      default:
+        if (info->verbose) {
+          fprintf(stderr, "skipping predicted exon with unknown orientation "
+                  "(line %lu)\n", genome_node_get_line_number(gn));
+        }
+    }
+  }
+  else if (genome_feature_has_type((GenomeFeature*) gn, gft_CDS)) {
+    /* store predicted exon (CDS level)*/
+    store_predicted_exon(info->CDS_exon_evaluators, gn);
+
+    /* store predicted exon (CDS level, collapsed) */
+    store_predicted_exon_collapsed(predicted_strand == STRAND_FORWARD
+                                   ? info->slot->used_CDS_exons_forward
+                                   : info->slot->used_CDS_exons_reverse,
+                                   &predicted_range,
+                                   info->CDS_exon_evaluators_collapsed, gn);
+
+    /* determine true exon (CDS level) */
+    switch (predicted_strand) {
+      case STRAND_FORWARD:
+      case STRAND_REVERSE:
+        store_true_exon(gn, predicted_strand, &predicted_range,
+                        info->exondiff,
+                        info->slot->CDS_exons_forward,
+                        info->slot->CDS_exons_reverse,
+                        info->slot->CDS_counts_forward,
+                        info->slot->CDS_counts_reverse,
+                        info->slot->CDS_exon_bittabs_forward,
+                        info->slot->CDS_exon_bittabs_reverse,
+                        info->CDS_exon_evaluators,
+                        info->CDS_exon_evaluators_collapsed);
+        /* nucleotide level */
+        if (info->nuceval) {
+          add_nucleotide_exon(predicted_strand == STRAND_FORWARD
+                              ? info->slot->pred_CDS_nucleotides_forward
+                              : info->slot->pred_CDS_nucleotides_reverse,
+                              predicted_range, info->slot->real_range,
+                              predicted_strand == STRAND_FORWARD
+                              ? &info->slot->FP_CDS_nucleotides_forward
+                              : &info->slot->FP_CDS_nucleotides_reverse);
+        }
+        break;
+      default:
+        if (info->verbose) {
+          fprintf(stderr, "skipping predicted exon with unknown orientation "
+                  "(line %lu)\n", genome_node_get_line_number(gn));
+        }
+      }
   }
   array_delete(real_genome_nodes);
   return 0;

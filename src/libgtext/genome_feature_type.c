@@ -16,73 +16,52 @@
 */
 
 #include <assert.h>
-#include <stdlib.h>
 #include <string.h>
-#include "libgtext/compare.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/ma.h"
+#include "libgtext/feature_type_factory.h"
 #include "libgtext/genome_feature_type.h"
 
-/*
-  Keep in sync with ``genome_feature_type'' in ``genome_feature.h''!
-  The feature types have to be sorted. We assume ASCII encoding.
-*/
+struct GenomeFeatureType {
+  FeatureTypeFactory *feature_type_factory;
+  const char *type;
+};
 
-static const char *genome_feature_type_strings[] = { "CDS",
-                                                     "EST_match",
-                                                     "LTR_retrotransposon",
-                                                     "RR_tract",
-                                                     "SNP",
-                                                     "TF_binding_site",
-                                                     "cDNA_match",
-                                                     "exon",
-                                                     "five_prime_UTR",
-                                                     "five_prime_splice_site",
-                                                     "gene",
-                                                     "intron",
-                                                     "inverted_repeat",
-                                                     "long_terminal_repeat",
-                                                     "mRNA",
-                                                     "primer_binding_site",
-                                                     "protein_match",
-                                                     "repeat_region",
-                                                     "tRNA",
-                                                     "target_site_duplication",
-                                                     "three_prime_UTR",
-                                                     "three_prime_splice_site",
-                                                     "transcript",
-                                                     "undefined"
-                                                   };
-
-int genome_feature_type_get(GenomeFeatureType *type, const char *gft_string)
+GenomeFeatureType* genome_feature_type_construct(FeatureTypeFactory
+                                                 *feature_type_factory,
+                                                 const char *type)
 {
-  void *result;
-
-  assert(type && gft_string);
-  assert(strcmp(gft_string, "undefined")); /* do not convert undefined string */
-
-  result = bsearch(&gft_string,
-                   genome_feature_type_strings,
-                   sizeof (genome_feature_type_strings) /
-                   sizeof (genome_feature_type_strings[0]),
-                   sizeof (char*),
-                   compare);
-
-  if (result) {
-    *type = (GenomeFeatureType)
-            ((char**) result - (char**) genome_feature_type_strings);
-    return 0;
-  }
-  /* else type not found */
-  return -1;
+  GenomeFeatureType *gft;
+  assert(feature_type_factory && type);
+  gft = ma_calloc(1, sizeof *gft);
+  gft->feature_type_factory = feature_type_factory;
+  gft->type = type;
+  return gft;
 }
 
-const char* genome_feature_type_get_cstr(GenomeFeatureType type)
+GenomeFeatureType* genome_feature_type_create_gft(GenomeFeatureType *gft,
+                                                  const char *type)
 {
-  assert(type != undefined); /* do not convert undefined type */
-  return genome_feature_type_strings[type];
+  assert(gft && type);
+  return feature_type_factory_create_gft(gft->feature_type_factory, type);
 }
 
-unsigned long genome_feature_type_num_of_features(void)
+void genome_feature_type_delete(GenomeFeatureType *gft)
 {
-  return sizeof (genome_feature_type_strings) /
-         sizeof (genome_feature_type_strings[0]);
+  if (!gft) return;
+  ma_free(gft);
+}
+
+bool genome_feature_type_is(GenomeFeatureType *gft, const char *type)
+{
+  if (gft == feature_type_factory_create_gft(gft->feature_type_factory, type))
+    return true;
+  return false;
+  return strcmp(gft->type, type) == 0;
+}
+
+const char* genome_feature_type_get_cstr(const GenomeFeatureType *gft)
+{
+  assert(gft);
+  return gft->type;
 }

@@ -18,6 +18,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/range.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtview/block.h"
 #include "libgtview/line.h"
 
@@ -60,11 +61,12 @@ Array* line_get_blocks(Line* line)
 
 int line_unit_test(Error *err)
 {
+  FeatureTypeFactory *feature_type_factory;
+  GenomeFeatureType *type;
   Range r1, r2, r3, r4, r_parent;
   Array* blocks;
   Str *seqid1, *seqid2, *seqid3;
   int had_err = 0;
-  Config *cfg;
   GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
   Line *l1, *l2;
   Block *b1, *b2;
@@ -74,8 +76,7 @@ int line_unit_test(Error *err)
   const char* bar = "bar";
   const char* blub = "blub";
 
-  if (!(cfg = config_new(false, err)))
-    had_err = -1;
+  feature_type_factory = feature_type_factory_builtin_new();
 
   r_parent.start = 10UL;
   r_parent.end = 80UL;
@@ -96,11 +97,15 @@ int line_unit_test(Error *err)
   seqid2 = str_new_cstr("test2");
   seqid3 = str_new_cstr("foo");
 
-  parent = genome_feature_new(gft_gene, r_parent, STRAND_FORWARD, NULL, 0);
-  gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0);
-  gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, NULL, 0);
-  gn3 = genome_feature_new(gft_exon, r3, STRAND_FORWARD, NULL, 0);
-  gn4 = genome_feature_new(gft_TF_binding_site, r4, STRAND_FORWARD, NULL, 0);
+  type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
+  parent = genome_feature_new(type, r_parent, STRAND_FORWARD, NULL, 0);
+  type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
+  gn1 = genome_feature_new(type, r1, STRAND_FORWARD, NULL, 0);
+  gn2 = genome_feature_new(type, r2, STRAND_FORWARD, NULL, 0);
+  gn3 = genome_feature_new(type, r3, STRAND_FORWARD, NULL, 0);
+  type = feature_type_factory_create_gft(feature_type_factory,
+                                         gft_TF_binding_site);
+  gn4 = genome_feature_new(type, r4, STRAND_FORWARD, NULL, 0);
 
   genome_node_set_seqid((GenomeNode*) parent, seqid1);
   genome_node_set_seqid((GenomeNode*) gn1, seqid3);
@@ -120,8 +125,8 @@ int line_unit_test(Error *err)
   b1 = block_new();
   b2 = block_new();
 
-  block_insert_element(b1, gn1, cfg);
-  block_insert_element(b2, gn2, cfg);
+  block_insert_element(b1, gn1);
+  block_insert_element(b2, gn2);
   block_set_range(b1, r1);
   block_set_range(b2, r2);
 
@@ -140,7 +145,6 @@ int line_unit_test(Error *err)
   blocks = line_get_blocks(l1);
   ensure(had_err, (2 == array_size(blocks)));
 
-  config_delete(cfg);
   str_delete(seqid1);
   str_delete(seqid2);
   str_delete(seqid3);
@@ -151,6 +155,7 @@ int line_unit_test(Error *err)
   genome_node_delete(gn2);
   genome_node_delete(gn3);
   genome_node_delete(gn4);
+  feature_type_factory_delete(feature_type_factory);
 
   return had_err;
 }

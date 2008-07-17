@@ -18,43 +18,42 @@
 #ifndef GENOME_FEATURE_TYPE_H
 #define GENOME_FEATURE_TYPE_H
 
-/*
-  Keep in sync with `genome_feature_type_strings' in `genome_feature_type.c'!
-  The feature types have to be sorted. We assume ASCII encoding.
+#include <stdbool.h>
+
+/* The GenomeFeatureType represents the feature type mainly used in
+   GenomeFeatures and corresponds to the type column in GFF3 files.
+   To create new GenomeFeatureTypes a FeatureTypeFactory or an already existing
+   GenomeFeatureType (which internally uses the FeatureTypeFactory it was
+   created from) should be used!
 */
 
-typedef enum {
-  gft_CDS,
-  gft_EST_match,
-  gft_LTR_retrotransposon,
-  gft_RR_tract,
-  gft_SNP,
-  gft_TF_binding_site,
-  gft_cDNA_match,
-  gft_exon,
-  gft_five_prime_UTR,
-  gft_five_prime_splice_site,
-  gft_gene,
-  gft_intron,
-  gft_inverted_repeat,
-  gft_long_terminal_repeat,
-  gft_mRNA,
-  gft_primer_binding_site,
-  gft_protein_match,
-  gft_repeat_region,
-  gft_tRNA,
-  gft_target_site_duplication,
-  gft_three_prime_UTR,
-  gft_three_prime_splice_site,
-  gft_transcript,
-  undefined /* to have an ``undef'' enum, not convertable to and from cstr! */
-} GenomeFeatureType;
+/* Some predefined (genome feature) type strings. */
+#define gft_CDS                      "CDS"
+#define gft_EST_match                "EST_match"
+#define gft_LTR_retrotransposon      "LTR_retrotransposon"
+#define gft_SNP                      "SNP"
+#define gft_TF_binding_site          "TF_binding_site"
+#define gft_cDNA_match               "cDNA_match"
+#define gft_exon                     "exon"
+#define gft_five_prime_UTR           "five_prime_UTR"
+#define gft_five_prime_splice_site   "five_prime_splice_site"
+#define gft_gene                     "gene"
+#define gft_intron                   "intron"
+#define gft_inverted_repeat          "inverted_repeat"
+#define gft_long_terminal_repeat     "long_terminal_repeat"
+#define gft_mRNA                     "mRNA"
+#define gft_protein_match            "protein_match"
+#define gft_repeat_region            "repeat_region"
+#define gft_target_site_duplication  "target_site_duplication"
+#define gft_three_prime_UTR          "three_prime_UTR"
+#define gft_three_prime_splice_site  "three_prime_splice_site"
+#define gft_transcript               "transcript"
 
-/* Determine a genome feature type <gft> from the string <gft_string>.
-   If such a feature does not exits, -1 is returned. */
-int           genome_feature_type_get(GenomeFeatureType *gft,
-                                      const char *gft_string);
-const char*   genome_feature_type_get_cstr(GenomeFeatureType);
-unsigned long genome_feature_type_num_of_features(void);
+typedef struct GenomeFeatureType GenomeFeatureType;
+
+GenomeFeatureType* genome_feature_type_create_gft(GenomeFeatureType*,
+                                                  const char *type);
+bool               genome_feature_type_is(GenomeFeatureType*, const char *type);
+const char*        genome_feature_type_get_cstr(const GenomeFeatureType*);
 
 #endif

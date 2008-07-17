@@ -58,14 +58,12 @@ static int gtf_visitor_comment(GenomeVisitor *gv, Comment *c, UNUSED Error *err)
 static int save_exon_node(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   GTFVisitor *gtf_visitor;
-  GenomeFeatureType gft;
   error_check(err);
   assert(gn && data);
   gtf_visitor = (GTFVisitor*) data;
-  gft = genome_feature_get_type((GenomeFeature*) gn);
-  if (gft == gft_exon)
+  if (genome_feature_has_type((GenomeFeature*) gn, gft_exon))
     array_add(gtf_visitor->exon_features, gn);
-  else if (gft == gft_CDS)
+  else if (genome_feature_has_type((GenomeFeature*) gn, gft_CDS))
     array_add(gtf_visitor->CDS_features, gn);
   return 0;
 }
@@ -122,24 +120,21 @@ static int gtf_show_transcript(GenomeNode *gn, GTFVisitor *gtf_visitor,
 static int gtf_show_genome_feature(GenomeNode *gn, void *data, Error *e)
 {
   GTFVisitor *gtf_visitor = (GTFVisitor*) data;
-  GenomeFeatureType gft;
+  GenomeFeature *gf = (GenomeFeature*) gn;
   int had_err = 0;
-  switch ((gft = genome_feature_get_type((GenomeFeature*) gn))) {
-    case gft_gene:
+  if (genome_feature_has_type(gf, gft_gene)) {
       gtf_visitor->gene_id++;
       gtf_visitor->transcript_id = 0;
       had_err = gtf_show_transcript(gn, gtf_visitor, e);
-      break;
-    case gft_mRNA:
-      had_err = gtf_show_transcript(gn, gtf_visitor, e);
-      break;
-    case gft_CDS:
-    case gft_exon:
-      /* nothing do do */
-      break;
-    default:
+  }
+  else if (genome_feature_has_type(gf, gft_mRNA)) {
+    had_err = gtf_show_transcript(gn, gtf_visitor, e);
+  }
+  else if (!(genome_feature_has_type(gf, gft_CDS) ||
+             genome_feature_has_type(gf, gft_exon))) {
       warning("skipping GFF3 feature of type \"%s\" (from line %lu in file "
-              "\"%s\")", genome_feature_type_get_cstr(gft),
+              "\"%s\")",
+              genome_feature_type_get_cstr(genome_feature_get_type(gf)),
               genome_node_get_line_number(gn), genome_node_get_filename(gn));
   }
   return had_err;

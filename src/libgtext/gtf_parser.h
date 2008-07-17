@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -35,7 +35,7 @@
 
 typedef struct GTF_parser GTF_parser;
 
-GTF_parser* gtf_parser_new(void);
+GTF_parser* gtf_parser_new(FeatureTypeFactory*);
 int         gtf_parser_parse(GTF_parser*, Queue *genome_nodes,
                              Str *filenamestr, FILE*, unsigned int be_tolerant,
                              Error*);

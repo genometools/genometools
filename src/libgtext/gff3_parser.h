@@ -30,7 +30,7 @@
 
 typedef struct GFF3Parser GFF3Parser;
 
-GFF3Parser* gff3parser_new(bool checkids);
+GFF3Parser* gff3parser_new(bool checkids, FeatureTypeFactory*);
 void        gff3parser_set_offset(GFF3Parser*, long);
 int         gff3parser_set_offsetfile(GFF3Parser*, Str*, Error*);
 int         gff3parser_parse_target_attributes(const char *values,
@@ -47,7 +47,7 @@ int         gff3parser_parse_genome_nodes(int *status_code, GFF3Parser*,
                                           unsigned long long *line_number,
                                           GenFile *fpin, Error*);
 /* resets the GFF3 parser (necessary if the processed input file is switched) */
-void         gff3parser_reset(GFF3Parser*);
-void         gff3parser_delete(GFF3Parser*);
+void        gff3parser_reset(GFF3Parser*);
+void        gff3parser_delete(GFF3Parser*);
 
 #endif

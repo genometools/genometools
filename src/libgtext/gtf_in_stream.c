@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "libgtcore/fa.h"
 #include "libgtcore/unused.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/genome_stream_rep.h"
 #include "libgtext/gtf_in_stream.h"
 #include "libgtext/gtf_parser.h"
@@ -26,6 +27,7 @@ struct GTFInStream
 {
   const GenomeStream parent_instance;
   Queue *genome_node_buffer;
+  FeatureTypeFactory *feature_type_factory;
 };
 
 #define gtf_in_stream_cast(GS)\
@@ -51,6 +53,7 @@ static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 static void gtf_in_stream_free(GenomeStream *gs)
 {
   GTFInStream *gtf_in_stream = gtf_in_stream_cast(gs);
+  feature_type_factory_delete(gtf_in_stream->feature_type_factory);
   queue_delete(gtf_in_stream->genome_node_buffer);
 }
 
@@ -63,7 +66,7 @@ const GenomeStreamClass* gtf_in_stream_class(void)
 }
 
 GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
-                                Error *e)
+                                Error *err)
 {
   GenomeStream *gs;
   GTFInStream *gtf_in_stream;
@@ -72,13 +75,14 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   int had_err;
   FILE *fpin;
 
-  error_check(e);
+  error_check(err);
 
   gs = genome_stream_create(gtf_in_stream_class(), false);
   gtf_in_stream = gtf_in_stream_cast(gs);
-  gtf_parser = gtf_parser_new();
-
   gtf_in_stream->genome_node_buffer = queue_new();
+  gtf_in_stream->feature_type_factory = feature_type_factory_builtin_new();
+
+  gtf_parser = gtf_parser_new(gtf_in_stream->feature_type_factory);
 
   /* open input file */
   if (filename)
@@ -89,7 +93,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   /* parse input file */
   filenamestr = str_new_cstr(filename ? filename : "stdin");
   had_err = gtf_parser_parse(gtf_parser, gtf_in_stream->genome_node_buffer,
-                             filenamestr, fpin, be_tolerant, e);
+                             filenamestr, fpin, be_tolerant, err);
   str_delete(filenamestr);
 
   /* close input file, if necessary */

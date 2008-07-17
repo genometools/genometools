@@ -56,7 +56,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 
-  if (genome_feature_get_type(gf) == gft_exon &&
+  if (genome_feature_has_type(gf, gft_exon) &&
       (genome_feature_get_strand(gf) == STRAND_FORWARD ||
        genome_feature_get_strand(gf) == STRAND_REVERSE)) {
     had_err = region_mapping_get_raw_sequence(v->region_mapping, &raw_sequence,
@@ -116,6 +116,7 @@ static Array* determine_ORFs_for_all_three_frames(Splicedseq *ss)
 static void create_CDS_features_for_ORF(Range orf, CDSVisitor *v,
                                         GenomeNode *gn)
 {
+  GenomeFeatureType *cds_type;
   GenomeNode *cds_feature;
   unsigned long i;
   Range cds;
@@ -127,7 +128,9 @@ static void create_CDS_features_for_ORF(Range orf, CDSVisitor *v,
                              ? orf.start : orf.end) + 1;
   cds.end = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
                            ? orf.end : orf.start) + 1;
-  cds_feature = genome_feature_new(gft_CDS, cds,
+  cds_type = genome_feature_create_gft((GenomeFeature*) gn, gft_CDS);
+  assert(cds_type);
+  cds_feature = genome_feature_new(cds_type, cds,
                                    genome_feature_get_strand((GenomeFeature*)
                                                              gn), NULL,
                                    UNDEF_ULONG);
@@ -150,7 +153,7 @@ static void create_CDS_features_for_ORF(Range orf, CDSVisitor *v,
                                  ? orf.start : orf.end) + 1;
       cds.end = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
                                ? orf.end : orf.start) + 1;
-      cds_feature = genome_feature_new(gft_CDS, cds,
+      cds_feature = genome_feature_new(cds_type, cds,
                                  genome_feature_get_strand((GenomeFeature*) gn),
                                        NULL, UNDEF_ULONG);
       genome_feature_set_source(cds_feature, v->source);

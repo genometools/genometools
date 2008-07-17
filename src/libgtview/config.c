@@ -407,8 +407,8 @@ bool config_get_verbose(const Config *cfg)
   return cfg->verbose;
 }
 
-DominateStatus config_dominates(Config* cfg, GenomeFeatureType gft1,
-                                GenomeFeatureType gft2)
+DominateStatus config_dominates(Config* cfg, GenomeFeatureType *gft1,
+                                GenomeFeatureType *gft2)
 {
   char *fts1, *fts2;
 
@@ -421,9 +421,9 @@ DominateStatus config_dominates(Config* cfg, GenomeFeatureType gft1,
   if (fts1 == NULL || fts2 == NULL)
     return DOMINATES_UNKNOWN_TYPE;
   else {
-    if (config_cstr_in_list(cfg, "dominate",fts1, fts2))
+    if (config_cstr_in_list(cfg, "dominate", fts1, fts2))
       return DOMINATES_FIRST;
-    else if (config_cstr_in_list(cfg, "dominate",fts2, fts1))
+    else if (config_cstr_in_list(cfg, "dominate", fts2, fts1))
       return DOMINATES_SECOND;
     else
       return DOMINATES_NOT_SPECIFIED;

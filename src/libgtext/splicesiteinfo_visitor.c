@@ -119,7 +119,7 @@ static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
   assert(ssiv->region_mapping);
   gni = genome_node_iterator_new((GenomeNode*) gf);
   while (!had_err && (node = genome_node_iterator_next(gni))) {
-    if (genome_feature_get_type((GenomeFeature*) node) == gft_intron)
+    if (genome_feature_has_type((GenomeFeature*) node, gft_intron))
       had_err = process_intron(ssiv, node, e);
   }
   genome_node_iterator_delete(gni);

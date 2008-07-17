@@ -24,6 +24,7 @@ typedef struct GenomeFeature GenomeFeature;
 #include "libgtcore/range.h"
 #include "libgtcore/phase.h"
 #include "libgtcore/strand.h"
+#include "libgtext/feature_type_factory.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/transcript_feature_type.h"
@@ -32,15 +33,17 @@ typedef int (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                  void *data, Error*);
 
 const GenomeNodeClass* genome_feature_class(void);
-GenomeNode*            genome_feature_new(GenomeFeatureType, Range, Strand,
+GenomeNode*            genome_feature_new(GenomeFeatureType*, Range, Strand,
                                           Str *filename,
                                           unsigned long line_number);
 /* return the ``standard gene'' (mainly for testing purposes) */
-GenomeNode*            genome_feature_new_standard_gene(void);
+GenomeNode*            genome_feature_new_standard_gene(FeatureTypeFactory*);
 const char*            genome_feature_get_source(GenomeFeature*);
 const char*            genome_feature_get_attribute(GenomeNode *gn,
                                                     const char *attr_name);
-GenomeFeatureType      genome_feature_get_type(GenomeFeature*);
+GenomeFeatureType*     genome_feature_get_type(GenomeFeature*);
+GenomeFeatureType*     genome_feature_create_gft(GenomeFeature*, const char*);
+bool                   genome_feature_has_type(GenomeFeature*, const char*);
 double                 genome_feature_get_score(GenomeFeature*);
 Strand                 genome_feature_get_strand(GenomeFeature*);
 Phase                  genome_feature_get_phase(GenomeFeature*);

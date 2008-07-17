@@ -21,7 +21,7 @@
 #include "libgtext/genome_node.h"
 #include "libgtext/region_mapping.h"
 
-int extract_feat_sequence(Str *sequence, GenomeNode*, GenomeFeatureType,
+int extract_feat_sequence(Str *sequence, GenomeNode*, GenomeFeatureType*,
                           bool join, RegionMapping*, Error*);
 
 #endif
