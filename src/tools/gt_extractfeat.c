@@ -19,7 +19,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/unused.h"
 #include "libgtext/extract_feat_stream.h"
-#include "libgtext/feature_type_factory_builtin.h"
+#include "libgtext/feature_type_factory_any.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/seqid2file.h"
@@ -42,7 +42,7 @@ static void* gt_extractfeat_arguments_new(void)
   arguments->typestr = str_new();
   arguments->seqfile = str_new();
   arguments->regionmapping = str_new();
-  arguments->feature_type_factory = feature_type_factory_builtin_new();
+  arguments->feature_type_factory = feature_type_factory_any_new();
   return arguments;
 }
 
