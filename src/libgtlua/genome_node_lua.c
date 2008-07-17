@@ -230,6 +230,7 @@ static int genome_feature_lua_get_type(lua_State *L)
 
 static int genome_feature_lua_extract_sequence(lua_State *L)
 {
+  FeatureTypeFactory *feature_type_factory;
   GenomeNode **gn;
   GenomeFeature *gf;
   const char *typestr;
@@ -243,15 +244,16 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   gf = genome_node_cast(genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
   typestr = lua_tostring(L, 2);
-  type = genome_feature_type_construct(NULL, typestr);
-  luaL_argcheck(L, !type, 2, "not a valid type");
+  feature_type_factory = lua_get_feature_type_factory_from_registry(L);
+  assert(feature_type_factory);
+  type = feature_type_factory_create_gft(feature_type_factory, typestr);
+  luaL_argcheck(L, type, 2, "not a valid type");
   join = lua_toboolean(L, 3);
   region_mapping = check_region_mapping(L, 4);
   err = error_new();
   sequence = str_new();
   if (extract_feat_sequence(sequence, *gn, type, join, *region_mapping, err)) {
     str_delete(sequence);
-    genome_feature_type_delete(type);
     return lua_gt_error(L, err);
   }
   if (str_length(sequence))
@@ -260,7 +262,6 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
     lua_pushnil(L);
   str_delete(sequence);
   error_delete(err);
-  genome_feature_type_delete(type);
   return 1;
 }
 
