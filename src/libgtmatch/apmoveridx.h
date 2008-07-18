@@ -25,40 +25,37 @@ typedef unsigned long Aliasdfsstate;
 #define DECLAREPTRDFSSTATE(V)\
         Aliasdfsstate * V
 
-#define DECLAREDFSSTATE(V)\
-        Aliasdfsstate V[4]
-
 #undef SKDEBUG
 
 typedef struct
 {
-  size_t (*deliversizeofdfsstate)(void);
-#ifdef SKDEBUG
-  void (*showLimdfsstate)(const DECLAREPTRDFSSTATE(aliascol),
-                          unsigned long score,
-                          const void *dfsconstinfo);
-#endif
+  size_t sizeofdfsstate;
   void (*initdfsconstinfo)(void *dfsconstinfo,
                            unsigned int alphasize,
                            const Uchar *pattern,
                            unsigned long patternlength,
-                           unsigned long maxdistance);
+                           unsigned long maxdistance,
+                           Seqpos maxintervalwidth);
   void *(*allocatedfsconstinfo)(unsigned int alphasize);
   void (*freedfsconstinfo)(void **dfsconstinfo);
   unsigned long (*limdfsnextstep)(const DECLAREPTRDFSSTATE(aliascolumn),
+                                  Seqpos width,
                                   const void *dfsconstinfo);
   void (*nextDfsstate)(const void *dfsconstinfo,
-                       DECLAREPTRDFSSTATE(aliasoutcol),
+                       DECLAREPTRDFSSTATE(aliasoutstate),
                        UNUSED unsigned long startscore,
                        Uchar currentchar,
-                       const DECLAREPTRDFSSTATE(aliasincol));
+                       const DECLAREPTRDFSSTATE(aliasinstate));
   void (*inplacenextDfsstate)(const void *dfsconstinfo,
-                              DECLAREPTRDFSSTATE(limdfsstate),
+                              DECLAREPTRDFSSTATE(aliasstate),
                               Uchar currentchar);
-  void (*copyDfsstate)(DECLAREPTRDFSSTATE(aliasdest),
-                       const DECLAREPTRDFSSTATE(aliassrc));
-  void (*initlimdfsstate)(DECLAREPTRDFSSTATE(aliascolumn),
+  void (*initLimdfsstate)(DECLAREPTRDFSSTATE(aliasstate),
                           const void *dfsconstinfo);
+#ifdef SKDEBUG
+  void (*showLimdfsstate)(const DECLAREPTRDFSSTATE(aliasstate),
+                          unsigned long score,
+                          const void *dfsconstinfo);
+#endif
 } AbstractDfstransformer;
 
 const AbstractDfstransformer *apm_AbstractDfstransformer(void);
@@ -70,6 +67,5 @@ Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
                                           unsigned long patternlength,
                                           unsigned long maxdistance,
                                           Seqpos startpos);
-
 
 #endif

@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/symboldef.h"
 #include "libgtcore/unused.h"
@@ -27,6 +28,9 @@
 #include "eis-voiditf.h"
 #include "defined-types.h"
 #include "esa-limdfs.h"
+
+#define DECLAREDFSSTATE(V)\
+        Aliasdfsstate V[4]
 
 typedef struct
 {
@@ -47,6 +51,7 @@ struct Limdfsresources
   void *processmatchinfo;
   const void *genericindex;
   bool withesa, nospecials;
+  DECLAREDFSSTATE(currentdfsstate);
   Seqpos *rangeOccs;
 };
 
@@ -109,7 +114,7 @@ static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
   stackptr->lcpitv.offset = 0;
   stackptr->lcpitv.left = left;
   stackptr->lcpitv.right = right;
-  adfst->initlimdfsstate(stackptr->aliasstate,dfsconstinfo);
+  adfst->initLimdfsstate(stackptr->aliasstate,dfsconstinfo);
 }
 
 void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
@@ -177,12 +182,11 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 {
   Seqpos pos, startpos;
   Uchar cc;
-  DECLAREDFSSTATE(currentdfsstate);
   unsigned long pprefixlen;
   const Suffixarray *suffixarray
     = (const Suffixarray *) limdfsresources->genericindex;
 
-  adfst->copyDfsstate(currentdfsstate,dfsstate);
+  memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
   startpos = suffixarray->suftab[left];
 #ifdef SKDEBUG
   printf("retrieve context of startpos=%lu\n",(unsigned long) startpos);
@@ -197,8 +201,9 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
       printf("cc=%u\n",(unsigned int) cc);
 #endif
       adfst->inplacenextDfsstate(limdfsresources->dfsconstinfo,
-                                 currentdfsstate,cc);
-      pprefixlen = adfst->limdfsnextstep(currentdfsstate,
+                                 limdfsresources->currentdfsstate,cc);
+      pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
+                                         (Seqpos) 1,
                                          limdfsresources->dfsconstinfo);
       if (pprefixlen == 0) /* failure */
       {
@@ -230,12 +235,11 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 {
   Uchar cc;
   unsigned long contextlength, pprefixlen;
-  DECLAREDFSSTATE(currentdfsstate);
   bool processinchar = true;
   Bwtseqcontextiterator *bsci
     = newBwtseqcontextiterator(limdfsresources->genericindex,left);
 
-  adfst->copyDfsstate(currentdfsstate,dfsstate);
+  memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
 #ifdef SKDEBUG
   printf("retrieve context for left = %lu\n",(unsigned long) left);
 #endif
@@ -256,8 +260,9 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       printf("cc=%u\n",(unsigned int) cc);
 #endif
       adfst->inplacenextDfsstate(limdfsresources->dfsconstinfo,
-                              currentdfsstate,cc);
-      pprefixlen = adfst->limdfsnextstep(currentdfsstate,
+                                 limdfsresources->currentdfsstate,cc);
+      pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
+                                         (Seqpos) 1,
                                          limdfsresources->dfsconstinfo);
       if (pprefixlen == 0)
       {
@@ -291,6 +296,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                                const AbstractDfstransformer *adfst)
 {
   unsigned long pprefixlen;
+  Seqpos width;
   stackptr->lcpitv = *child;
 
 #ifdef SKDEBUG
@@ -309,7 +315,15 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                          limdfsresources->dfsconstinfo);
   printf("\n");
 #endif
+  if (limdfsresources->withesa)
+  {
+    width = child->right - child->left + 1;
+  } else
+  {
+    width = child->right - child->left;
+  }
   pprefixlen = adfst->limdfsnextstep(stackptr->aliasstate,
+                                     width,
                                      limdfsresources->dfsconstinfo);
   if (pprefixlen == 0)
   {
@@ -523,21 +537,22 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
+                                     Seqpos maxintervalwidth,
                                      const AbstractDfstransformer *adfst)
 {
   Lcpintervalwithinfo *stackptr, parentwithinfo;
 
   /*
-  printf("deliversizeofdfsstate()=%lu\n",
-          (unsigned long) adfst->deliversizeofdfsstate());
+  printf("sizeofdfsstate()=%lu\n",(unsigned long) adfst->sizeofdfsstate);
   printf("sizeof (parentwithinfo.aliasstate)=%lu\n",
           (unsigned long) sizeof (parentwithinfo.aliasstate));
   */
-  assert(adfst->deliversizeofdfsstate() <= sizeof (parentwithinfo.aliasstate));
+  assert(adfst->sizeofdfsstate <= sizeof (parentwithinfo.aliasstate));
   assert(maxdistance < patternlength);
   adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
                           (unsigned int) limdfsresources->alphasize,
-                          pattern,patternlength,maxdistance);
+                          pattern,patternlength,maxdistance,
+                          maxintervalwidth);
   initlcpinfostack(&limdfsresources->stack,
                    0,
                    limdfsresources->withesa

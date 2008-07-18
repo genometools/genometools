@@ -101,6 +101,10 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                              &arguments->rcmatch, false);
   option_parser_add_option(op, option);
 
+  option = option_new_ulong("maxocc","specify max number of match-occurrencs",
+                           &arguments->maxintervalwidth,0);
+  option_parser_add_option(op, option);
+
   option = option_new_bool("nospecials","do not output matches containing "
                            "wildcard characters (e.g. N)",
                            &arguments->nospecials, false);

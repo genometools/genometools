@@ -42,15 +42,11 @@ typedef struct
 
 typedef struct
 {
+  Seqpos maxintervalwidth;
   unsigned long patternlength,
                 maxdistance,
                 *eqsvector;
 } Matchtaskinfo;
-
-static size_t apm_deliversizeofdfsstate(void)
-{
-  return sizeof (Myerscolumn);
-}
 
 #ifdef SKDEBUG
 
@@ -157,7 +153,8 @@ static void apm_initdfsconstinfo(void *dfsconstinfo,
                                  unsigned int alphasize,
                                  const Uchar *pattern,
                                  unsigned long patternlength,
-                                 unsigned long maxdistance)
+                                 unsigned long maxdistance,
+                                 Seqpos maxintervalwidth)
 {
   unsigned long *eptr, shiftmask;
   const Uchar *pptr;
@@ -179,6 +176,7 @@ static void apm_initdfsconstinfo(void *dfsconstinfo,
   }
   mti->patternlength = patternlength;
   mti->maxdistance = maxdistance;
+  mti->maxintervalwidth = maxintervalwidth;
 }
 
 static void *apm_allocatedfsconstinfo(unsigned int alphasize)
@@ -197,21 +195,33 @@ static void apm_freedfsconstinfo(void **dfsconstinfo)
   *dfsconstinfo = NULL;
 }
 
-static unsigned long apm_limdfsnextstep(const DECLAREPTRDFSSTATE(aliascolumn),
-                                        const void *dfsconstinfo)
+static unsigned long apm_nextstepfullmatches(
+                              const DECLAREPTRDFSSTATE(aliascolumn),
+                              Seqpos width,
+                              const void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
   const Myerscolumn *limdfsstate = (const Myerscolumn *) aliascolumn;
 
   if (limdfsstate->maxleqk == UNDEFMAXLEQK)
   {
-    return 0;
+    return 0; /* stop depth first traversal */
   }
-  if (limdfsstate->maxleqk == SUCCESSMAXLEQK)
+  if (mti->maxintervalwidth == 0)
   {
-    return mti->patternlength+1;
+    if (limdfsstate->maxleqk == SUCCESSMAXLEQK)
+    {
+      return mti->patternlength+1; /* success with match of length plen */
+    }
+  } else
+  {
+    if (width <= mti->maxintervalwidth)
+    {
+      assert(limdfsstate->maxleqk > 0);
+      return limdfsstate->maxleqk+1;
+    }
   }
-  return 1UL;
+  return 1UL; /* continue with depth first traversal */
 }
 
 /* implement types Limdfsstate and all function appearing until here */
@@ -230,7 +240,8 @@ static void apm_nextDfsstate(const void *dfsconstinfo,
   Myerscolumn *outcol = (Myerscolumn *) aliasoutcol;
   const Myerscolumn *incol = (const Myerscolumn *) aliasincol;
 
-  assert(incol->maxleqk != UNDEFMAXLEQK && incol->maxleqk != SUCCESSMAXLEQK);
+  assert(incol->maxleqk != UNDEFMAXLEQK);
+  assert(mti->maxintervalwidth > 0 || incol->maxleqk != SUCCESSMAXLEQK);
   assert(currentchar != (Uchar) SEPARATOR);
   if (currentchar != (Uchar) WILDCARD)
   {
@@ -315,7 +326,8 @@ static void apm_inplacenextDfsstate(const void *dfsconstinfo,
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Myerscolumn *col = (Myerscolumn *) limdfsstate;
 
-  assert(col->maxleqk != UNDEFMAXLEQK && col->maxleqk != SUCCESSMAXLEQK);
+  assert(col->maxleqk != UNDEFMAXLEQK);
+  assert(mti->maxintervalwidth > 0 || col->maxleqk != SUCCESSMAXLEQK);
   if (currentchar != (Uchar) WILDCARD)
   {
     Eq = mti->eqsvector[(unsigned long) currentchar];
@@ -377,13 +389,7 @@ static void apm_inplacenextDfsstate(const void *dfsconstinfo,
   }
 }
 
-static void apm_copyDfsstate(DECLAREPTRDFSSTATE(aliasdest),
-                             const DECLAREPTRDFSSTATE(aliassrc))
-{
-  memcpy(aliasdest,aliassrc,sizeof (Myerscolumn));
-}
-
-static void apm_initlimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
+static void apm_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
                                 const void *dfsconstinfo)
 {
   Myerscolumn *column = (Myerscolumn *) aliascolumn;
@@ -414,8 +420,8 @@ Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
   dfsconstinfo = apm_allocatedfsconstinfo(alphasize);
   mti = (Matchtaskinfo *) dfsconstinfo;
   apm_initdfsconstinfo(dfsconstinfo,alphasize,pattern,patternlength,
-                       maxdistance);
-  apm_initlimdfsstate((Aliasdfsstate *) &currentcol,dfsconstinfo);
+                       maxdistance,0);
+  apm_initLimdfsstate((Aliasdfsstate *) &currentcol,dfsconstinfo);
   for (pos = startpos; /* Nothing */; pos++)
   {
     assert(pos - startpos <= (Seqpos) (patternlength + maxdistance));
@@ -440,23 +446,21 @@ Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
   return result;
 }
 
-static AbstractDfstransformer apm_adfst = 
-{
-  apm_deliversizeofdfsstate,
-#ifdef SKDEBUG
-  apm_showLimdfsstate,
-#endif
-  apm_initdfsconstinfo,
-  apm_allocatedfsconstinfo,
-  apm_freedfsconstinfo,
-  apm_limdfsnextstep,
-  apm_nextDfsstate,
-  apm_inplacenextDfsstate,
-  apm_copyDfsstate,
-  apm_initlimdfsstate
-};
-
 const AbstractDfstransformer *apm_AbstractDfstransformer(void)
 {
+  static const AbstractDfstransformer apm_adfst =
+  {
+    sizeof (Myerscolumn),
+    apm_initdfsconstinfo,
+    apm_allocatedfsconstinfo,
+    apm_freedfsconstinfo,
+    apm_nextstepfullmatches,
+    apm_nextDfsstate,
+    apm_inplacenextDfsstate,
+    apm_initLimdfsstate
+#ifdef SKDEBUG
+    apm_showLimdfsstate,
+#endif
+  };
   return &apm_adfst;
 }

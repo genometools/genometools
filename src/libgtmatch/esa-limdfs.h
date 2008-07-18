@@ -43,7 +43,7 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
+                                     Seqpos maxintervalwidth,
                                      const AbstractDfstransformer *adfst);
 
 #endif
-

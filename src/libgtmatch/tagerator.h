@@ -20,11 +20,13 @@
 #include "libgtcore/strarray.h"
 #include "libgtcore/error.h"
 
-typedef struct {
+typedef struct
+{
   StrArray *tagfiles;
   Str *esaindexname, *pckindexname;
   unsigned long maxdistance;
   bool online, docompare, replacewildcard, fwdmatch, rcmatch, nospecials;
+  unsigned long maxintervalwidth;
 } TageratorOptions;
 
 int runtagerator(const TageratorOptions *tageratoroptions,Error *err);
