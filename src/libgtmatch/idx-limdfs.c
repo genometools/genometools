@@ -27,7 +27,7 @@
 #include "esa-splititv.h"
 #include "eis-voiditf.h"
 #include "defined-types.h"
-#include "esa-limdfs.h"
+#include "idx-limdfs.h"
 
 #define DECLAREDFSSTATE(V)\
         Aliasdfsstate V[4]

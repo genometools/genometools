@@ -29,7 +29,7 @@
 #include "intbits.h"
 #include "alphadef.h"
 #include "esa-myersapm.h"
-#include "esa-limdfs.h"
+#include "idx-limdfs.h"
 #include "eis-voiditf.h"
 #include "format64.h"
 

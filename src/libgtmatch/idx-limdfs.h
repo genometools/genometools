@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_LIMDFS_H
-#define ESA_LIMDFS_H
+#ifndef IDX_LIMDFS_H
+#define IDX_LIMDFS_H
 
 #include "seqpos-def.h"
 #include "apmoveridx.h"
