@@ -29,8 +29,13 @@
 #include "defined-types.h"
 #include "idx-limdfs.h"
 
+#ifdef SKDEBUG
 #define DECLAREDFSSTATE(V)\
         Aliasdfsstate V[4]
+#else
+#define DECLAREDFSSTATE(V)\
+        Aliasdfsstate V[3]
+#endif
 
 typedef struct
 {

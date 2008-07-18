@@ -24,6 +24,7 @@
 #include "defined-types.h"
 #include "alphadef.h"
 #include "apmoveridx.h" /* XXX import esa_findshortestmatch */
+#include "initeqsvec.h"
 
 struct Myersonlineresources
 {
@@ -36,30 +37,6 @@ struct Myersonlineresources
   void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
   void *processmatchinfo;
 };
-
-static void initeqsvectorrev(unsigned long *eqsvectorrev,
-                             unsigned long eqslen,
-                             const Uchar *u,
-                             unsigned long ulen)
-{
-  unsigned long *vptr, shiftmask;
-  const Uchar *uptr;
-
-  for (vptr = eqsvectorrev; vptr < eqsvectorrev + eqslen; vptr++)
-  {
-    *vptr = 0;
-  }
-  for (uptr = u+ulen-1, shiftmask = 1UL;
-       uptr >= u && shiftmask != 0;
-       uptr--, shiftmask <<= 1)
-  {
-    assert (*uptr != (Uchar) SEPARATOR);
-    if (*uptr != (Uchar) WILDCARD)
-    {
-      eqsvectorrev[(unsigned long) *uptr] |= shiftmask;
-    }
-  }
-}
 
 Myersonlineresources *newMyersonlineresources(
                             unsigned int mapsize,

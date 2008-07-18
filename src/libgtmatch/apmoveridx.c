@@ -23,6 +23,7 @@
 #include "encseq-def.h"
 #include "defined-types.h"
 #include "apmoveridx.h"
+#include "initeqsvec.h"
 
 #define UNDEFMAXLEQK      (mti->patternlength+1)
 #define SUCCESSMAXLEQK    mti->patternlength
@@ -156,24 +157,9 @@ static void apm_initdfsconstinfo(void *dfsconstinfo,
                                  unsigned long maxdistance,
                                  Seqpos maxintervalwidth)
 {
-  unsigned long *eptr, shiftmask;
-  const Uchar *pptr;
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
-  for (eptr = mti->eqsvector; eptr < mti->eqsvector + alphasize; eptr++)
-  {
-    *eptr = 0;
-  }
-  for (pptr = pattern, shiftmask = 1UL;
-       pptr < pattern + patternlength && shiftmask != 0;
-       pptr++, shiftmask <<= 1)
-  {
-    assert (*pptr != (Uchar) SEPARATOR);
-    if (*pptr != (Uchar) WILDCARD)
-    {
-      mti->eqsvector[(unsigned long) *pptr] |= shiftmask;
-    }
-  }
+  initeqsvector(mti->eqsvector,(unsigned long) alphasize,pattern,patternlength);
   mti->patternlength = patternlength;
   mti->maxdistance = maxdistance;
   mti->maxintervalwidth = maxintervalwidth;
