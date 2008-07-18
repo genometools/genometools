@@ -37,7 +37,7 @@ typedef struct
 
 #ifdef SKDEBUG
 
-static void apm_showParallelmstats(const DECLAREPTRDFSSTATE(aliascol),
+static void pms_showParallelmstats(const DECLAREPTRDFSSTATE(aliascol),
                                    unsigned long depth,
                                    const void *dfsconstinfo)
 {
@@ -66,3 +66,16 @@ static void apm_showParallelmstats(const DECLAREPTRDFSSTATE(aliascol),
 }
 
 #endif
+
+void pms_initdfsconstinfo(void *dfsconstinfo,
+                                 unsigned int alphasize,
+                                 const Uchar *pattern,
+                                 unsigned long patternlength,
+                                 UNUSED unsigned long maxdistance,
+                                 UNUSED Seqpos maxintervalwidth)
+{
+  Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
+
+  initeqsvector(mti->eqsvector,(unsigned long) alphasize,pattern,patternlength);
+  mti->patternlength = patternlength;
+}
