@@ -27,6 +27,7 @@
 #include "esa-splititv.h"
 #include "eis-voiditf.h"
 #include "defined-types.h"
+#include "absdfstrans-imp.h"
 #include "idx-limdfs.h"
 
 #ifdef SKDEBUG

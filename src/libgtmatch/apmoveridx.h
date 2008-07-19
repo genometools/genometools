@@ -19,44 +19,7 @@
 #define APMOVERIDX_H
 #include "libgtcore/unused.h"
 #include "defined-types.h"
-
-typedef unsigned long Aliasdfsstate;
-
-#define DECLAREPTRDFSSTATE(V)\
-        Aliasdfsstate * V
-
-#undef SKDEBUG
-
-typedef struct
-{
-  size_t sizeofdfsstate;
-  void (*initdfsconstinfo)(void *dfsconstinfo,
-                           unsigned int alphasize,
-                           const Uchar *pattern,
-                           unsigned long patternlength,
-                           unsigned long maxdistance,
-                           Seqpos maxintervalwidth);
-  void *(*allocatedfsconstinfo)(unsigned int alphasize);
-  void (*freedfsconstinfo)(void **dfsconstinfo);
-  unsigned long (*limdfsnextstep)(const DECLAREPTRDFSSTATE(aliascolumn),
-                                  Seqpos width,
-                                  const void *dfsconstinfo);
-  void (*nextDfsstate)(const void *dfsconstinfo,
-                       DECLAREPTRDFSSTATE(aliasoutstate),
-                       UNUSED unsigned long startscore,
-                       Uchar currentchar,
-                       const DECLAREPTRDFSSTATE(aliasinstate));
-  void (*inplacenextDfsstate)(const void *dfsconstinfo,
-                              DECLAREPTRDFSSTATE(aliasstate),
-                              Uchar currentchar);
-  void (*initLimdfsstate)(DECLAREPTRDFSSTATE(aliasstate),
-                          const void *dfsconstinfo);
-#ifdef SKDEBUG
-  void (*showLimdfsstate)(const DECLAREPTRDFSSTATE(aliasstate),
-                          unsigned long score,
-                          const void *dfsconstinfo);
-#endif
-} AbstractDfstransformer;
+#include "absdfstrans-def.h"
 
 const AbstractDfstransformer *apm_AbstractDfstransformer(void);
 

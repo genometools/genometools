@@ -219,7 +219,7 @@ static void performthesearch(const AbstractDfstransformer *adfst,
                                       transformedtag,
                                       taglen,
                                       tageratoroptions->maxdistance,
-                                      (Seqpos) 
+                                      (Seqpos)
                                           tageratoroptions->maxintervalwidth,
                                       adfst);
     }

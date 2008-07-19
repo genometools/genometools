@@ -22,11 +22,14 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "defined-types.h"
+#include "absdfstrans-imp.h"
 #include "initeqsvec.h"
 
 typedef struct
 {
-  unsigned long prefixofsuffix;
+  unsigned long prefixofsuffix,
+                currentdepth,
+                mstatlength[INTWORDSIZE];
 } Parallelmstats;
 
 typedef struct
@@ -67,7 +70,14 @@ static void pms_showParallelmstats(const DECLAREPTRDFSSTATE(aliascol),
 
 #endif
 
-void pms_initdfsconstinfo(void *dfsconstinfo,
+static void *pms_allocatedfsconstinfo(unsigned int alphasize)
+{
+  Matchtaskinfo *mti = ma_malloc(sizeof(Matchtaskinfo));
+  mti->eqsvector = ma_malloc(sizeof(*mti->eqsvector) * alphasize);
+  return mti;
+}
+
+static void pms_initdfsconstinfo(void *dfsconstinfo,
                                  unsigned int alphasize,
                                  const Uchar *pattern,
                                  unsigned long patternlength,
@@ -79,3 +89,144 @@ void pms_initdfsconstinfo(void *dfsconstinfo,
   initeqsvector(mti->eqsvector,(unsigned long) alphasize,pattern,patternlength);
   mti->patternlength = patternlength;
 }
+
+static void pms_freedfsconstinfo(void **dfsconstinfo)
+{
+  Matchtaskinfo *mti = (Matchtaskinfo *) *dfsconstinfo;
+
+  ma_free(mti->eqsvector);
+  ma_free(mti);
+  *dfsconstinfo = NULL;
+}
+
+static unsigned long zerosontheright(unsigned long v)
+{
+  unsigned long c;     /* c will be the number of zero bits on the right,
+                         so if v is 1101000 (base 2), then c will be 3 */
+  assert(v > 0);
+  assert(sizeof(unsigned long) == 4);
+  if (v & 0x1)
+  {
+    c = 0; /* special case for odd v (assumed to happen half of the time) */
+  } else
+  {
+    c = 1;
+    if ((v & 0xffff) == 0)
+    {
+      v >>= 16;
+      c += 16;
+    }
+    if ((v & 0xff) == 0)
+    {
+      v >>= 8;
+      c += 8;
+    }
+    if ((v & 0xf) == 0)
+    {
+      v >>= 4;
+      c += 4;
+    }
+    if ((v & 0x3) == 0)
+    {
+      v >>= 2;
+      c += 2;
+    }
+    c -= v & 0x1;
+  }
+  return c;
+}
+
+static void pms_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
+                                const void *dfsconstinfo)
+{
+  Parallelmstats *column = (Parallelmstats *) aliascolumn;
+  const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
+  unsigned long idx;
+
+  column->prefixofsuffix = ~0UL;
+  column->currentdepth = 0;
+  assert(mti->patternlength <= INTWORDSIZE);
+  for (idx = 0; idx<mti->patternlength; idx++)
+  {
+    column->mstatlength[idx] = 0;
+  }
+}
+
+static unsigned long pms_nextstepfullmatches(
+                              DECLAREPTRDFSSTATE(aliascolumn),
+                              UNUSED Seqpos width,
+                              UNUSED const void *dfsconstinfo)
+{
+  Parallelmstats *limdfsstate = (Parallelmstats *) aliascolumn;
+  unsigned long tmp, bitindex = INTWORDSIZE-1, first1;
+
+  if (limdfsstate->prefixofsuffix == 0)
+  {
+    return 0; /* stop depth first traversal */
+  }
+  tmp = limdfsstate->prefixofsuffix;
+  while (tmp != 0)
+  {
+    first1 = zerosontheright(tmp);
+    bitindex -= first1;
+    if (limdfsstate->mstatlength[bitindex] < limdfsstate->currentdepth)
+    {
+      limdfsstate->mstatlength[bitindex] = limdfsstate->currentdepth;
+    }
+    tmp >>= (first1+1);
+  }
+  return 1UL; /* continue with depth first traversal */
+}
+
+const AbstractDfstransformer *pms_AbstractDfstransformer(void)
+{
+  static const AbstractDfstransformer pms_adfst =
+  {
+    sizeof (Parallelmstats),
+    pms_allocatedfsconstinfo,
+    pms_initdfsconstinfo,
+    pms_freedfsconstinfo,
+    pms_initLimdfsstate,
+    pms_nextstepfullmatches,
+    NULL,
+    NULL,
+#ifdef SKDEBUG
+    pms_showParallelmstats,
+#endif
+  };
+  return &pms_adfst;
+}
+
+/*
+  define bitvector prefixofsuffix_{d} such that after processing a sequence v
+  of length d we have: for all i\in[0,m-1]
+  prefixofsuffix_{d}[i] is 1 iff P[i..i+d-1] = v[0..d-1]
+
+  Let eqsvector_{a} be a vector of size m such that
+  eqsvector_{a}[i]=1 if P[i]=a
+
+  Let d=0 (i.e. at the root). Then
+  P[i..i+d-1]=P[i..i-1]=\varepsilon=v[0..-1]=v[0..d-1] for all i \in[0..m-1]
+  and hence prefixofsuffix_{d}[i]=1. In other words
+  prefixofsuffix_{d} = 1^{m}.
+
+  Now suppose d > 0 and assume we have computed
+  prefixofsuffix_{d-1}. Then by definition
+  prefixofsuffix_{d}[i]
+    iff P[i..i+d-1] = v[0..d-1]
+    iff P[i..i+d-2] = v[0..d-2] && P[i+d-1]=v[d-1]
+    iff prefixofsuffix_{d-1][i]=1 && eqsvector_{v[d-1]}[i+d-1]=1
+    iff prefixofsuffix_{d-1][i] & eqsvector_{v[d-1]}[i+d-1]
+
+  All values in prefixofsuffix_{d} are independent and can be computed
+  in parallel by
+
+  prefixofsuffix_{d} = prefixofsuffix_{d-1} & (eqsvector_{a} << (d-1))
+  where a=v[d-1]
+
+  prefixofsuffix_{d] = 0 and
+  prefixofsuffix_{d-1} != 0 then  for all i satisfying
+  prefixofsuffix_{d-1][i] = 1 do:
+    if mstats[i]<d then mstats[i]=d and store first suffixposition of current
+    interval.
+*/

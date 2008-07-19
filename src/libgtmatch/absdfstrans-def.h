@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,19 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef INITEQSVEC_H
-#define INITEQSVEC_H
+#ifndef ABSDFSTRANS_DEF_H
+#define ABSDFSTRANS_DEF_H
 
-#include "libgtcore/symboldef.h"
-
-void initeqsvector(unsigned long *eqsvector,
-                   unsigned long eqslen,
-                   const Uchar *pattern,
-                   unsigned long patternlength);
-
-void initeqsvectorrev(unsigned long *eqsvectorrev,
-                      unsigned long eqslen,
-                      const Uchar *pattern,
-                      unsigned long patternlength);
+typedef struct AbstractDfstransformer AbstractDfstransformer;
 
 #endif

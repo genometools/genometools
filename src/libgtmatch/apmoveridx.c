@@ -23,6 +23,7 @@
 #include "encseq-def.h"
 #include "defined-types.h"
 #include "apmoveridx.h"
+#include "absdfstrans-imp.h"
 #include "initeqsvec.h"
 
 #define UNDEFMAXLEQK      (mti->patternlength+1)
@@ -181,8 +182,21 @@ static void apm_freedfsconstinfo(void **dfsconstinfo)
   *dfsconstinfo = NULL;
 }
 
+static void apm_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
+                                const void *dfsconstinfo)
+{
+  Myerscolumn *column = (Myerscolumn *) aliascolumn;
+
+  column->Pv = ~0UL;
+  column->Mv = 0UL;
+  column->maxleqk = ((Matchtaskinfo *) dfsconstinfo)->maxdistance;
+#ifdef SKDEBUG
+  column->scorevalue = ((Matchtaskinfo *) dfsconstinfo)->maxdistance;
+#endif
+}
+
 static unsigned long apm_nextstepfullmatches(
-                              const DECLAREPTRDFSSTATE(aliascolumn),
+                              DECLAREPTRDFSSTATE(aliascolumn),
                               Seqpos width,
                               const void *dfsconstinfo)
 {
@@ -375,19 +389,6 @@ static void apm_inplacenextDfsstate(const void *dfsconstinfo,
   }
 }
 
-static void apm_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                const void *dfsconstinfo)
-{
-  Myerscolumn *column = (Myerscolumn *) aliascolumn;
-
-  column->Pv = ~0UL;
-  column->Mv = 0UL;
-  column->maxleqk = ((Matchtaskinfo *) dfsconstinfo)->maxdistance;
-#ifdef SKDEBUG
-  column->scorevalue = ((Matchtaskinfo *) dfsconstinfo)->maxdistance;
-#endif
-}
-
 Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
                                           bool nospecials,
                                           unsigned int alphasize,
@@ -437,13 +438,13 @@ const AbstractDfstransformer *apm_AbstractDfstransformer(void)
   static const AbstractDfstransformer apm_adfst =
   {
     sizeof (Myerscolumn),
-    apm_initdfsconstinfo,
     apm_allocatedfsconstinfo,
+    apm_initdfsconstinfo,
     apm_freedfsconstinfo,
+    apm_initLimdfsstate,
     apm_nextstepfullmatches,
     apm_nextDfsstate,
     apm_inplacenextDfsstate,
-    apm_initLimdfsstate
 #ifdef SKDEBUG
     apm_showLimdfsstate,
 #endif
