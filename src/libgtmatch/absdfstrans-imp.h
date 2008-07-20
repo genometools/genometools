@@ -40,10 +40,11 @@ struct AbstractDfstransformer
                            Seqpos maxintervalwidth);
   void (*freedfsconstinfo)(void **dfsconstinfo);
   void (*initLimdfsstate)(DECLAREPTRDFSSTATE(aliasstate),
-                          const void *dfsconstinfo);
+                          void *dfsconstinfo);
   unsigned long (*limdfsnextstep)(DECLAREPTRDFSSTATE(aliascolumn),
                                   Seqpos width,
-                                  const void *dfsconstinfo);
+                                  Seqpos currentdepth,
+                                  void *dfsconstinfo);
   void (*nextDfsstate)(const void *dfsconstinfo,
                        DECLAREPTRDFSSTATE(aliasoutstate),
                        UNUSED unsigned long startscore,

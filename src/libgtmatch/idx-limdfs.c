@@ -110,7 +110,7 @@ const void *getgenericindexfromresource(Limdfsresources *limdfsresources)
 static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
                              Seqpos left,
                              Seqpos right,
-                             const void *dfsconstinfo,
+                             void *dfsconstinfo,
                              const AbstractDfstransformer *adfst)
 {
   Lcpintervalwithinfo *stackptr;
@@ -210,6 +210,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                                  limdfsresources->currentdfsstate,cc);
       pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
                                          (Seqpos) 1,
+                                         pos - startpos + 1,
                                          limdfsresources->dfsconstinfo);
       if (pprefixlen == 0) /* failure */
       {
@@ -269,6 +270,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                  limdfsresources->currentdfsstate,cc);
       pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
                                          (Seqpos) 1,
+                                         offset + contextlength,
                                          limdfsresources->dfsconstinfo);
       if (pprefixlen == 0)
       {
@@ -330,6 +332,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
   }
   pprefixlen = adfst->limdfsnextstep(stackptr->aliasstate,
                                      width,
+                                     child->offset,
                                      limdfsresources->dfsconstinfo);
   if (pprefixlen == 0)
   {

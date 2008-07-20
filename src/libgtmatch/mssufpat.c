@@ -27,14 +27,13 @@
 
 typedef struct
 {
-  unsigned long prefixofsuffix,
-                currentdepth,
-                mstatlength[INTWORDSIZE];
+  unsigned long prefixofsuffix;
 } Parallelmstats;
 
 typedef struct
 {
   unsigned long patternlength,
+                mstatlength[INTWORDSIZE],
                 *eqsvector;
 } Matchtaskinfo;
 
@@ -104,78 +103,98 @@ static unsigned long zerosontheright(unsigned long v)
   unsigned long c;     /* c will be the number of zero bits on the right,
                          so if v is 1101000 (base 2), then c will be 3 */
   assert(v > 0);
-  assert(sizeof(unsigned long) == 4);
+  assert(sizeof (unsigned long) == (size_t) 4);
   if (v & 0x1)
   {
     c = 0; /* special case for odd v (assumed to happen half of the time) */
   } else
   {
-    c = 1;
+    c = 1UL;
     if ((v & 0xffff) == 0)
     {
       v >>= 16;
-      c += 16;
+      c += 16UL;
     }
     if ((v & 0xff) == 0)
     {
       v >>= 8;
-      c += 8;
+      c += 8UL;
     }
     if ((v & 0xf) == 0)
     {
       v >>= 4;
-      c += 4;
+      c += 4UL;
     }
     if ((v & 0x3) == 0)
     {
       v >>= 2;
-      c += 2;
+      c += 2UL;
     }
     c -= v & 0x1;
   }
   return c;
 }
 
-static void pms_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                const void *dfsconstinfo)
+static void pms_initParallelmstats(DECLAREPTRDFSSTATE(aliascolumn),
+                                   void *dfsconstinfo)
 {
   Parallelmstats *column = (Parallelmstats *) aliascolumn;
-  const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
+  Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
   unsigned long idx;
 
   column->prefixofsuffix = ~0UL;
-  column->currentdepth = 0;
-  assert(mti->patternlength <= INTWORDSIZE);
+  assert(mti->patternlength <= (unsigned long) INTWORDSIZE);
   for (idx = 0; idx<mti->patternlength; idx++)
   {
-    column->mstatlength[idx] = 0;
+    mti->mstatlength[idx] = 0;
   }
 }
 
 static unsigned long pms_nextstepfullmatches(
                               DECLAREPTRDFSSTATE(aliascolumn),
                               UNUSED Seqpos width,
-                              UNUSED const void *dfsconstinfo)
+                              Seqpos currentdepth,
+                              void *dfsconstinfo)
 {
   Parallelmstats *limdfsstate = (Parallelmstats *) aliascolumn;
-  unsigned long tmp, bitindex = INTWORDSIZE-1, first1;
 
   if (limdfsstate->prefixofsuffix == 0)
   {
     return 0; /* stop depth first traversal */
-  }
-  tmp = limdfsstate->prefixofsuffix;
-  while (tmp != 0)
+  } else
   {
-    first1 = zerosontheright(tmp);
-    bitindex -= first1;
-    if (limdfsstate->mstatlength[bitindex] < limdfsstate->currentdepth)
+    Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
+    unsigned long tmp, bitindex, first1;
+    tmp = limdfsstate->prefixofsuffix;
+    bitindex = (unsigned long) (INTWORDSIZE-1);
+    do
     {
-      limdfsstate->mstatlength[bitindex] = limdfsstate->currentdepth;
-    }
-    tmp >>= (first1+1);
+      first1 = zerosontheright(tmp);
+      assert(bitindex >= first1);
+      bitindex -= first1;
+      assert(bitindex < (unsigned long) INTWORDSIZE);
+      if (mti->mstatlength[bitindex] < (unsigned long) currentdepth)
+      {
+        mti->mstatlength[bitindex] = (unsigned long) currentdepth;
+      }
+      tmp >>= (first1+1);
+    } while (tmp != 0);
   }
   return 1UL; /* continue with depth first traversal */
+}
+
+static void pms_nextParallelmstats(const void *dfsconstinfo,
+                                   DECLAREPTRDFSSTATE(aliasoutcol),
+                                   unsigned long previousdepth,
+                                   Uchar currentchar,
+                                   const DECLAREPTRDFSSTATE(aliasincol))
+{
+  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
+  Parallelmstats *outcol = (Parallelmstats *) aliasoutcol;
+  const Parallelmstats *incol = (const Parallelmstats *) aliasincol;
+
+  outcol->prefixofsuffix
+    = incol->prefixofsuffix & (mti->eqsvector[currentchar] << previousdepth);
 }
 
 const AbstractDfstransformer *pms_AbstractDfstransformer(void)
@@ -186,9 +205,9 @@ const AbstractDfstransformer *pms_AbstractDfstransformer(void)
     pms_allocatedfsconstinfo,
     pms_initdfsconstinfo,
     pms_freedfsconstinfo,
-    pms_initLimdfsstate,
+    pms_initParallelmstats,
     pms_nextstepfullmatches,
-    NULL,
+    pms_nextParallelmstats,
     NULL,
 #ifdef SKDEBUG
     pms_showParallelmstats,

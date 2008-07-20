@@ -64,7 +64,7 @@ static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
   }
 }
 
-static void apm_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
+static void apm_showMyerscolumn(const DECLAREPTRDFSSTATE(aliascol),
                                 unsigned long score,
                                 const void *dfsconstinfo)
 {
@@ -182,8 +182,8 @@ static void apm_freedfsconstinfo(void **dfsconstinfo)
   *dfsconstinfo = NULL;
 }
 
-static void apm_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                const void *dfsconstinfo)
+static void apm_initMyerscolumn(DECLAREPTRDFSSTATE(aliascolumn),
+                                void *dfsconstinfo)
 {
   Myerscolumn *column = (Myerscolumn *) aliascolumn;
 
@@ -198,10 +198,11 @@ static void apm_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
 static unsigned long apm_nextstepfullmatches(
                               DECLAREPTRDFSSTATE(aliascolumn),
                               Seqpos width,
-                              const void *dfsconstinfo)
+                              UNUSED Seqpos currentdepth,
+                              void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
-  const Myerscolumn *limdfsstate = (const Myerscolumn *) aliascolumn;
+  Myerscolumn *limdfsstate = (Myerscolumn *) aliascolumn;
 
   if (limdfsstate->maxleqk == UNDEFMAXLEQK)
   {
@@ -226,11 +227,11 @@ static unsigned long apm_nextstepfullmatches(
 
 /* implement types Limdfsstate and all function appearing until here */
 
-static void apm_nextDfsstate(const void *dfsconstinfo,
-                             DECLAREPTRDFSSTATE(aliasoutcol),
-                             UNUSED unsigned long startscore,
-                             Uchar currentchar,
-                             const DECLAREPTRDFSSTATE(aliasincol))
+static void apm_nextMyercolumn(const void *dfsconstinfo,
+                               DECLAREPTRDFSSTATE(aliasoutcol),
+                               UNUSED unsigned long startscore,
+                               Uchar currentchar,
+                               const DECLAREPTRDFSSTATE(aliasincol))
 {
   unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
                 backmask,               /* only one bit is on */
@@ -315,9 +316,9 @@ static void apm_nextDfsstate(const void *dfsconstinfo,
 #endif
 }
 
-static void apm_inplacenextDfsstate(const void *dfsconstinfo,
-                                    DECLAREPTRDFSSTATE(limdfsstate),
-                                    Uchar currentchar)
+static void apm_inplacenextMyercolumn(const void *dfsconstinfo,
+                                      DECLAREPTRDFSSTATE(limdfsstate),
+                                      Uchar currentchar)
 {
   unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
                 backmask,           /* only one bit is on */
@@ -408,7 +409,7 @@ Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
   mti = (Matchtaskinfo *) dfsconstinfo;
   apm_initdfsconstinfo(dfsconstinfo,alphasize,pattern,patternlength,
                        maxdistance,0);
-  apm_initLimdfsstate((Aliasdfsstate *) &currentcol,dfsconstinfo);
+  apm_initMyerscolumn((Aliasdfsstate *) &currentcol,dfsconstinfo);
   for (pos = startpos; /* Nothing */; pos++)
   {
     assert(pos - startpos <= (Seqpos) (patternlength + maxdistance));
@@ -420,7 +421,7 @@ Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
       result.valueunsignedlong = 0;
       return result;
     }
-    apm_inplacenextDfsstate(dfsconstinfo,(Aliasdfsstate *) &currentcol,cc);
+    apm_inplacenextMyercolumn(dfsconstinfo,(Aliasdfsstate *) &currentcol,cc);
     assert (currentcol.maxleqk != UNDEFMAXLEQK);
     if (currentcol.maxleqk == SUCCESSMAXLEQK || pos == totallength-1)
     {
@@ -441,12 +442,12 @@ const AbstractDfstransformer *apm_AbstractDfstransformer(void)
     apm_allocatedfsconstinfo,
     apm_initdfsconstinfo,
     apm_freedfsconstinfo,
-    apm_initLimdfsstate,
+    apm_initMyerscolumn,
     apm_nextstepfullmatches,
-    apm_nextDfsstate,
-    apm_inplacenextDfsstate,
+    apm_nextMyercolumn,
+    apm_inplacenextMyercolumn,
 #ifdef SKDEBUG
-    apm_showLimdfsstate,
+    apm_showMyerscolumn,
 #endif
   };
   return &apm_adfst;
