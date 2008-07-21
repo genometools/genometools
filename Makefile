@@ -235,8 +235,9 @@ LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
 LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
 LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.d)
 
-HMMER_DIR:=src/external/hmmer-2.3.2/src
-SQUID_DIR:=src/external/hmmer-2.3.2/squid
+HMMER_BASE:=src/external/hmmer-2.3.2
+HMMER_DIR:=$(HMMER_BASE)/src
+SQUID_DIR:=$(HMMER_BASE)/squid
 HMMER_SRC:=$(HMMER_DIR)/alphabet.c \
            $(HMMER_DIR)/core_algorithms.c $(HMMER_DIR)/debug.c \
            $(HMMER_DIR)/display.c $(HMMER_DIR)/emit.c \
@@ -357,19 +358,19 @@ ifeq ($(m64),yes)
   GT_LDFLAGS += -m64
 endif
 
-ifeq ($(with-hmmer),yes)
-  GTLIBS := lib/libhmmer.a ${GTLIBS}
+ifeq ($(with-hmmer),yes) 
+  GTLIBS := lib/libhmmer.a $(GTLIBS)
   EXP_CPPFLAGS += -DHAVE_HMMER
-  GT_CPPFLAGS +=  -I$(CURDIR)/src/external/hmmer-2.3.2/src \
-                  -I$(CURDIR)/src/external/hmmer-2.3.2/squid
+  GT_CPPFLAGS +=  -I$(CURDIR)/$(HMMER_DIR) \
+                  -I$(CURDIR)/$(SQUID_DIR)
   EXP_LDLIBS += -lhmmer -lpthread
   STEST_FLAGS += -hmmer
 endif
 
 ifeq ($(libgtview),yes)
-  GTLIBS := $(GTLIBS) lib/libgtview.a
+  GTLIBS := $(GTLIBS)lib/libgtview.a
   GTSHAREDLIB_OBJ := $(GTSHAREDLIB_OBJ) $(LIBGTVIEW_C_OBJ)
-  GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lcairo
+  GTSHAREDLIB_LIBDEP := $(GTSHAREDLIB_LIBDEP) -lcairo
   EXP_CPPFLAGS += -DLIBGTVIEW
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
@@ -408,7 +409,7 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libhmmer.a: $(HMMER_DIR)/config.h $(SQUID_DIR)/squidconf.h \
+lib/libhmmer.a: hmmer_get $(HMMER_DIR)/config.h.in $(HMMER_DIR)/config.h $(SQUID_DIR)/squidconf.h \
            $(SQUID_DIR)/squid.h $(HMMER_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -472,6 +473,7 @@ ifdef RANLIB
 endif
 
 lib/libgtltr.a: $(LIBGTLTR_OBJ)
+
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTLTR_OBJ)
@@ -562,7 +564,7 @@ $(SQUID_DIR)/squid.h:
 	@echo '[create $(@F)]'
 	@scripts/generate_hmmer_squid_h  $(SQUID_DIR)/squid.h.in > $@
 
-$(HMMER_DIR)/config.h:
+$(HMMER_DIR)/config.h: $(HMMER_DIR)/config.h.in
 	@echo '[create $(@F)]'
 	@sed  -e 's/#undef PACKAGE_VERSION/#define PACKAGE_VERSION "2.3.2"/'\
 	      -e 's/#undef HMMER_THREADS/#define HMMER_THREADS/'\
@@ -630,15 +632,21 @@ src/libgtcore/checkbitpackstring-int.c: \
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl '-int' $<
 
+$(SQUID_DIR)/%.c: $(HMMER_DIR)/config.h
+	@true	
+
+$(HMMER_DIR)/%.c: $(HMMER_DIR)/config.h
+	@true
+
 # HMMER will not compile without warnings, so no GT_CFLAGS
-obj/src/external/hmmer-2.3.2/squid/%.o: src/external/hmmer-2.3.2/squid/%.c
+obj/$(SQUID_DIR)/%.o: $(SQUID_DIR)/%.c
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) $(3)
 	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(3) -MM -MP \
 	  -MT $@
 
-obj/src/external/hmmer-2.3.2/src/%.o: src/external/hmmer-2.3.2/src/%.c
+obj/$(HMMER_DIR)/%.o: $(HMMER_DIR)/%.c
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) $(3)
@@ -704,8 +712,9 @@ ifeq ($(libgtview),yes)
 -include $(LIBGTVIEW_C_DEP) $(LIBGTVIEW_CXX_DEP)
 endif
 
+.PRECIOUS: $(HMMER_DIR)/%.c $(SQUID_DIR)/%.c $(HMMER_DIR)/%.h.in $(SQUID_DIR)/%.h.in
 .SUFFIXES:
-.PHONY: dist srcdist release gt install docs installwww splint test clean cleanup
+.PHONY: dist srcdist release gt install docs installwww splint test clean cleanup hmmer_get
 
 VERSION:="`cat $(CURDIR)/VERSION`"
 SYSTEMNAME:="$(SYSTEM)_$(MACHINE)"
@@ -857,3 +866,12 @@ clean:
 
 cleanup: clean
 	rm -rf lib bin
+
+hmmer_get:
+	@echo "[check for HMMER source distribution]"
+	@test ! -f "$(HMMER_DIR)/config.h.in" && \
+	  cd src/external && \
+	  echo "[retrieve HMMER source distribution]" && \
+	  wget -q http://www.zbh.uni-hamburg.de/research/GI/resources/hmmer-2.3.2.tar.gz && \
+	  tar -xzvf hmmer-2.3.2.tar.gz > /dev/null && \
+	  rm hmmer-2.3.2.tar.gz || true
