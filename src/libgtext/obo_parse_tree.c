@@ -19,6 +19,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtext/obo_parse_tree.h"
 
 typedef struct {
@@ -71,8 +72,8 @@ struct OBOParseTree {
   Array *stanzas;
 };
 
-static int parse_obo_file(OBOParseTree *obo_parse_tree, FILE *obo_file,
-                          Error *err)
+static int parse_obo_file(UNUSED OBOParseTree *obo_parse_tree,
+                          UNUSED FILE *obo_file, UNUSED Error *err)
 {
   int had_err = 0;
   error_check(err);
