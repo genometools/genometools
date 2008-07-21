@@ -205,7 +205,7 @@ static void XMLCALL endElement(void *data, const char *name)
     /* Temp-Variablen zum Zwischenspeichern der Query-Start- bzw.
        -End-Werte sowie der Frame-Informationen */
     unsigned long ulong_numb_buf = 0,
-      query_nr = 0;
+      query_nr = 0, **query_nr_p;
     long numb_buf = 0;
 
     /* Zeiger auf die erste Zahl der GI-Nr in einem Hit-ID-XML-Eintrag */
@@ -296,15 +296,11 @@ static void XMLCALL endElement(void *data, const char *name)
            Strings angelegt und nicht geloescht wurden */
         PARSESTRUCT(xml_tag_flag) = SET;
 
-        if (hashtable_get
-            (PARSESTRUCT(queryhash), str_get(PARSESTRUCT(buf_ptr))))
+        /* Auslesen der Eintrags-Nr aus der Hashtabelle */
+        if ((query_nr_p = cstr_nofree_ulp_hashmap_get(
+               PARSESTRUCT(queryhash), str_get(PARSESTRUCT(buf_ptr)))))
         {
-          /* Auslesen der Eintrags-Nr aus der Hashtabelle */
-          query_nr =
-            *(unsigned long *) hashtable_get(PARSESTRUCT(queryhash),
-                                             str_get(PARSESTRUCT
-                                                     (buf_ptr)));
-
+          query_nr = **query_nr_p;
           /* Abspeichern der zur Query-Def passenden Query-DNA */
           str_append_cstr_nt(MATRIXSTRUCT(query_dna),
                              bioseq_get_sequence(PARSESTRUCT(queryseq),
@@ -517,12 +513,11 @@ static void XMLCALL endElement(void *data, const char *name)
                                      XMLPARSERSTRUCT(hit_counter)));
 
         /* Hit-Hashtabelle enthaelt den konstruierten Eintrag */
-        if (hashtable_get(PARSESTRUCT(hithash), str_get(hit_tmp)))
+        if ((query_nr_p = cstr_nofree_ulp_hashmap_get(
+               PARSESTRUCT(hithash), str_get(hit_tmp))))
         {
           /* Positionsbestimmung des Eintrages in der Bioseq-Struktur */
-          hit_nr =
-            *(unsigned long *) hashtable_get(PARSESTRUCT(hithash),
-                                             str_get(hit_tmp));
+          hit_nr = **query_nr_p;
 
           /* auslesen der Sequenzinformation */
           str_append_cstr_nt(hit_dna_tmp,

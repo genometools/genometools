@@ -53,7 +53,7 @@ struct GTR {
   Str *debugfp,
       *testspacepeak;
   Toolbox *tools;
-  Hashtable *unit_tests;
+  Hashmap *unit_tests;
   lua_State *L;
   FeatureTypeFactory *feature_type_factory; /* for gtlua */
 #ifdef LIBGTVIEW
@@ -182,19 +182,18 @@ void gtr_register_components(GTR *gtr)
   toolbox_delete(gtr->tools);
   gtr->tools = gtt_tools();
   /* add unit tests */
-  hashtable_delete(gtr->unit_tests);
+  hashmap_delete(gtr->unit_tests);
   gtr->unit_tests = gtt_unit_tests();
 }
 
-int run_test(void *key, void *value, void *data, Error *err)
+static int
+run_test(void *key, void *value, void *data, Error *err)
 {
-  const char *testname;
-  int (*test)(Error*);
   int had_err, *had_errp;
+  char *testname = key;
+  UnitTestFunc test = value;
   error_check(err);
-  assert(key && value && data);
-  testname = (const char*) key;
-  test = (int (*)(Error*)) value;
+  assert(testname && test && data);
   had_errp = (int*) data;
   printf("%s...", testname);
   xfflush(stdout);
@@ -240,9 +239,10 @@ static int run_tests(GTR *gtr, Error *err)
 
   /* show seed */
   printf("seed=%u\n", gtr->seed);
-
+  hashmap_unit_test(err);
   if (gtr->unit_tests) {
-    had_err = hashtable_foreach_ao(gtr->unit_tests, run_test, &test_err, err);
+    had_err = hashmap_foreach_in_key_order(
+      gtr->unit_tests, run_test, &test_err, err);
     assert(!had_err); /* cannot happen, run_test() is sane */
   }
   if (test_err)
@@ -346,7 +346,7 @@ void gtr_delete(GTR *gtr)
   str_delete(gtr->testspacepeak);
   str_delete(gtr->debugfp);
   toolbox_delete(gtr->tools);
-  hashtable_delete(gtr->unit_tests);
+  hashmap_delete(gtr->unit_tests);
   feature_type_factory_delete(gtr->feature_type_factory);
   if (gtr->L) lua_close(gtr->L);
 #ifdef LIBGTVIEW

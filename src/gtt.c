@@ -28,6 +28,7 @@
 #include "libgtcore/dynbittab.h"
 #include "libgtcore/getbasename.h"
 #include "libgtcore/grep.h"
+#include "libgtcore/hashmap.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/interval_tree.h"
 #include "libgtcore/queue.h"
@@ -137,57 +138,56 @@ Toolbox* gtt_tools(void)
   return tools;
 }
 
-Hashtable* gtt_unit_tests(void)
+Hashmap* gtt_unit_tests(void)
 {
-  Hashtable *unit_tests = hashtable_new(HASH_STRING, NULL, NULL);
+  Hashmap *unit_tests = hashmap_new(HASH_STRING, NULL, NULL);
 
   /* add unit tests */
-  hashtable_add(unit_tests, "alignment class", alignment_unit_test);
-  hashtable_add(unit_tests, "array class", array_unit_test);
-  hashtable_add(unit_tests, "array example", array_example);
-  hashtable_add(unit_tests, "array2dim example", array2dim_example);
-  hashtable_add(unit_tests, "bit pack array class", bitPackArray_unit_test);
-  hashtable_add(unit_tests, "bit pack string module", bitPackString_unit_test);
-  hashtable_add(unit_tests, "bittab class", bittab_unit_test);
-  hashtable_add(unit_tests, "bittab example", bittab_example);
-  hashtable_add(unit_tests, "bsearch module", bsearch_unit_test);
-  hashtable_add(unit_tests, "countingsort module", countingsort_unit_test);
-  hashtable_add(unit_tests, "disc distri class", disc_distri_unit_test);
-  hashtable_add(unit_tests, "dlist class", dlist_unit_test);
-  hashtable_add(unit_tests, "dlist example", dlist_example);
-  hashtable_add(unit_tests, "dynamic bittab class", dynbittab_unit_test);
-  hashtable_add(unit_tests, "evaluator class", evaluator_unit_test);
-  hashtable_add(unit_tests, "genome feature class", genome_feature_unit_test);
-  hashtable_add(unit_tests, "genome node iterator example",
-                genome_node_iterator_example);
-  hashtable_add(unit_tests, "getbasename module", getbasename_unit_test);
-  hashtable_add(unit_tests, "gff3 escaping module", gff3_escaping_unit_test);
-  hashtable_add(unit_tests, "grep module", grep_unit_test);
-  hashtable_add(unit_tests, "hashtable class", hashtable_unit_test);
-  hashtable_add(unit_tests, "hmm class", hmm_unit_test);
-  hashtable_add(unit_tests, "interval tree class", interval_tree_unit_test);
-  hashtable_add(unit_tests, "Lua serializer", lua_serializer_unit_test);
-  hashtable_add(unit_tests, "queue class", queue_unit_test);
-  hashtable_add(unit_tests, "range class", range_unit_test);
-  hashtable_add(unit_tests, "safearith module", safearith_unit_test);
-  hashtable_add(unit_tests, "safearith example", safearith_example);
-  hashtable_add(unit_tests, "splicedseq class", splicedseq_unit_test);
-  hashtable_add(unit_tests, "splitter class", splitter_unit_test);
-  hashtable_add(unit_tests, "string class", str_unit_test);
-  hashtable_add(unit_tests, "string matching module",
-                string_matching_unit_test);
-  hashtable_add(unit_tests, "tag value map example", tag_value_map_example);
-  hashtable_add(unit_tests, "tokenizer class", tokenizer_unit_test);
-  hashtable_add(unit_tests, "union find class", union_find_unit_test);
+  hashmap_add(unit_tests, "alignment class", alignment_unit_test);
+  hashmap_add(unit_tests, "array class", array_unit_test);
+  hashmap_add(unit_tests, "array example", array_example);
+  hashmap_add(unit_tests, "array2dim example", array2dim_example);
+  hashmap_add(unit_tests, "bit pack array class", bitPackArray_unit_test);
+  hashmap_add(unit_tests, "bit pack string module", bitPackString_unit_test);
+  hashmap_add(unit_tests, "bittab class", bittab_unit_test);
+  hashmap_add(unit_tests, "bittab example", bittab_example);
+  hashmap_add(unit_tests, "bsearch module", bsearch_unit_test);
+  hashmap_add(unit_tests, "countingsort module", countingsort_unit_test);
+  hashmap_add(unit_tests, "disc distri class", disc_distri_unit_test);
+  hashmap_add(unit_tests, "dlist class", dlist_unit_test);
+  hashmap_add(unit_tests, "dlist example", dlist_example);
+  hashmap_add(unit_tests, "dynamic bittab class", dynbittab_unit_test);
+  hashmap_add(unit_tests, "evaluator class", evaluator_unit_test);
+  hashmap_add(unit_tests, "genome feature class", genome_feature_unit_test);
+  hashmap_add(unit_tests, "genome node iterator example",
+              genome_node_iterator_example);
+  hashmap_add(unit_tests, "getbasename module", getbasename_unit_test);
+  hashmap_add(unit_tests, "gff3 escaping module", gff3_escaping_unit_test);
+  hashmap_add(unit_tests, "grep module", grep_unit_test);
+  hashmap_add(unit_tests, "hashmap class", hashmap_unit_test);
+  hashmap_add(unit_tests, "hashtable class", hashtable_unit_test);
+  hashmap_add(unit_tests, "hmm class", hmm_unit_test);
+  hashmap_add(unit_tests, "interval tree class", interval_tree_unit_test);
+  hashmap_add(unit_tests, "queue class", queue_unit_test);
+  hashmap_add(unit_tests, "range class", range_unit_test);
+  hashmap_add(unit_tests, "safearith module", safearith_unit_test);
+  hashmap_add(unit_tests, "safearith example", safearith_example);
+  hashmap_add(unit_tests, "splicedseq class", splicedseq_unit_test);
+  hashmap_add(unit_tests, "splitter class", splitter_unit_test);
+  hashmap_add(unit_tests, "string class", str_unit_test);
+  hashmap_add(unit_tests, "string matching module", string_matching_unit_test);
+  hashmap_add(unit_tests, "tag value map example", tag_value_map_example);
+  hashmap_add(unit_tests, "tokenizer class", tokenizer_unit_test);
+  hashmap_add(unit_tests, "union find class", union_find_unit_test);
 #ifdef LIBGTVIEW
-  hashtable_add(unit_tests, "block class", block_unit_test);
-  hashtable_add(unit_tests, "config class", config_unit_test);
-  hashtable_add(unit_tests, "diagram class", diagram_unit_test);
-  hashtable_add(unit_tests, "element class", element_unit_test);
-  hashtable_add(unit_tests, "feature index class", feature_index_unit_test);
-  hashtable_add(unit_tests, "imageinfo class", image_info_unit_test);
-  hashtable_add(unit_tests, "line class", line_unit_test);
-  hashtable_add(unit_tests, "track class", track_unit_test);
+  hashmap_add(unit_tests, "block class", block_unit_test);
+  hashmap_add(unit_tests, "config class", config_unit_test);
+  hashmap_add(unit_tests, "diagram class", diagram_unit_test);
+  hashmap_add(unit_tests, "element class", element_unit_test);
+  hashmap_add(unit_tests, "feature index class", feature_index_unit_test);
+  hashmap_add(unit_tests, "imageinfo class", image_info_unit_test);
+  hashmap_add(unit_tests, "line class", line_unit_test);
+  hashmap_add(unit_tests, "track class", track_unit_test);
 #endif
 
   return unit_tests;

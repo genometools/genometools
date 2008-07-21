@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/hashmap.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/str.h"
 #include "libgtview/line_breaker_captions.h"
@@ -23,7 +24,7 @@
 struct LineBreakerCaptions {
   const LineBreaker parent_instance;
   Canvas *canvas;
-  Hashtable *linepositions;
+  Hashmap *linepositions;
 };
 
 #define line_breaker_captions_cast(LB)\
@@ -56,7 +57,7 @@ bool line_breaker_captions_is_line_occupied(LineBreaker* lb,
   assert(lb && block && line);
   lbcap = line_breaker_captions_cast(lb);
   dr = calculate_drawing_range(lbcap, block);
-  if (!(num = hashtable_get(lbcap->linepositions, line)))
+  if (!(num = hashmap_get(lbcap->linepositions, line)))
     return false;
   else
     return (dr.start < *num);
@@ -71,10 +72,10 @@ void line_breaker_captions_register_block(LineBreaker *lb,
   unsigned long *num;
   assert(lb && block && line);
   lbcap = line_breaker_captions_cast(lb);
-  if (!(num = hashtable_get(lbcap->linepositions, line)))
+  if (!(num = hashmap_get(lbcap->linepositions, line)))
   {
     num = ma_malloc(sizeof (unsigned long));
-    hashtable_add(lbcap->linepositions, line, num);
+    hashmap_add(lbcap->linepositions, line, num);
   }
   dr = calculate_drawing_range(lbcap, block);
   *num = dr.end + 1;
@@ -85,7 +86,7 @@ void line_breaker_captions_delete(LineBreaker *lb)
   LineBreakerCaptions *lbcap;
   if (!lb) return;
   lbcap = line_breaker_captions_cast(lb);
-  hashtable_delete(lbcap->linepositions);
+  hashmap_delete(lbcap->linepositions);
 }
 
 const LineBreakerClass* line_breaker_captions_class(void)
@@ -106,6 +107,6 @@ LineBreaker* line_breaker_captions_new(Canvas *canvas)
   lb = line_breaker_create(line_breaker_captions_class());
   lbcap = line_breaker_captions_cast(lb);
   lbcap->canvas = canvas;
-  lbcap->linepositions = hashtable_new(HASH_DIRECT, NULL, ma_free_func);
+  lbcap->linepositions = hashmap_new(HASH_DIRECT, NULL, ma_free_func);
   return lb;
 }

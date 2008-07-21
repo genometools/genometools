@@ -18,11 +18,9 @@
 #ifndef FPTR_H
 #define FPTR_H
 
-#include "libgtcore/error.h"
-
 /* the generic function pointers */
 typedef int  (*Compare)(const void*, const void*);
-typedef int  (*CompareWithData)(const void*, const void*, const void*);
+typedef int  (*CompareWithData)(const void*, const void*, void *data);
 typedef void (*FreeFunc)(void*);
 
 #endif

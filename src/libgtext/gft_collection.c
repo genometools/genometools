@@ -16,29 +16,28 @@
 */
 
 #include "libgtcore/cstr.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/unused.h"
 #include "libgtext/genome_feature_type_imp.h"
 #include "libgtext/gft_collection.h"
 
 struct GFTCollection {
-  Hashtable *genome_feature_types;
+  Hashmap *genome_feature_types;
 };
 
 GFTCollection* gft_collection_new(void)
 {
   GFTCollection *gftc = ma_malloc(sizeof (GFTCollection));
-  gftc->genome_feature_types = hashtable_new(HASH_STRING, ma_free_func,
-                                             (FreeFunc)
-                                             genome_feature_type_delete);
+  gftc->genome_feature_types = hashmap_new(
+    HASH_STRING, ma_free_func, (FreeFunc)genome_feature_type_delete);
   return gftc;
 }
 
 void gft_collection_delete(GFTCollection *gftc)
 {
   if (!gftc) return;
-  hashtable_delete(gftc->genome_feature_types);
+  hashmap_delete(gftc->genome_feature_types);
   ma_free(gftc);
 }
 
@@ -46,13 +45,13 @@ void gft_collection_add(GFTCollection *gftc, const char *type,
                          GenomeFeatureType *gft)
 {
   assert(gftc && type && gft);
-  hashtable_add(gftc->genome_feature_types, cstr_dup(type), gft);
+  hashmap_add(gftc->genome_feature_types, cstr_dup(type), gft);
 }
 
 GenomeFeatureType* gft_collection_get(GFTCollection *gftc, const char *type)
 {
   assert(gftc && type);
-  return hashtable_get(gftc->genome_feature_types, type);
+  return hashmap_get(gftc->genome_feature_types, type);
 }
 
 static int store_type(void *key, UNUSED void *value, void *data,
@@ -70,8 +69,8 @@ StrArray* gft_collection_get_types(const GFTCollection *gftc)
   int had_err;
   assert(gftc);
   types = strarray_new();
-  had_err = hashtable_foreach_ao(gftc->genome_feature_types, store_type, types,
-                                 NULL);
+  had_err = hashmap_foreach_in_key_order(gftc->genome_feature_types,
+                                         store_type, types, NULL);
   assert(!had_err);
   return types;
 }

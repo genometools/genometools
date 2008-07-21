@@ -249,7 +249,12 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   list_of_children = array_new(sizeof (GenomeNode*));
 
   if (traverse_only_once)
-    traversed_nodes = hashtable_new(HASH_DIRECT, NULL, NULL);
+  {
+    static const HashElemInfo node_hashtype
+      = { ht_ptr_elem_hash, { ht_dummy_free_func }, sizeof (GenomeNode *),
+          ht_ptr_elem_cmp, NULL, ht_dummy_free_func };
+    traversed_nodes = hashtable_new(node_hashtype);
+  }
 
   while ((depth_first ? array_size(node_stack) : queue_size(node_queue))) {
     if (depth_first)
@@ -286,7 +291,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
         child_feature = *(GenomeNode**) array_get(list_of_children, i);
       }
       if (!traverse_only_once ||
-          !hashtable_get(traversed_nodes, child_feature)) {
+          !hashtable_get(traversed_nodes, &child_feature)) {
         /* feature has not been traversed or has to be traversed multiple
            times */
         if (depth_first)
@@ -294,7 +299,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
         else
           queue_add(node_queue, child_feature);
         if (traverse_only_once)
-          hashtable_add(traversed_nodes, child_feature, child_feature);
+          hashtable_add(traversed_nodes, &child_feature);
       }
     }
   }

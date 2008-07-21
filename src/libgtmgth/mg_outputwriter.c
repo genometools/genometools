@@ -16,6 +16,7 @@
 */
 
 #include "libgtcore/unused.h"
+#include "libgtcore/hashmap.h"
 #include "mg_outputwriter.h"
 
 /* Funktion, die nacheinander die erforderlichen Funktionen zur Erstellung
@@ -140,7 +141,8 @@ static int as_coding(const ParseStruct *,
                      unsigned long,
                      unsigned long, unsigned short, Error *);
 
-static int newmemory_hash(void *, void *, void *, Error *);
+static enum iterator_op
+newmemory_hash(char *key, unsigned long *value, void *data, Error * err);
 
 /* Funktion zum Schreiben des Statistic-Headers
    Parameter: Zeiger auf die ParseStruct-Struktur
@@ -760,7 +762,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                 atoi(strarray_get(hit_information->hit_to, seq_index));
 
               /* ueberpruefen, ob der aktuelle Hit bereits erfasst wurde */
-              if (!hashtable_get
+              if (!cstr_nofree_ulp_hashmap_get
                   (parsestruct_ptr->resulthits,
                    str_get(parsestruct_ptr->result_hits)))
               {
@@ -784,9 +786,9 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                   memory_tmp = HITSTRUCT(memory);
 
                   array_reset(parsestruct_ptr->value_tmp);
-                  (void) hashtable_foreach(parsestruct_ptr->resulthits,
-                                           newmemory_hash, parsestruct_ptr,
-                                           err);
+                  (void) cstr_nofree_ulp_hashmap_foreach(
+                    parsestruct_ptr->resulthits,
+                    newmemory_hash, parsestruct_ptr, err);
 
                   /* Speichergroesse erhoehen */
                   parsestruct_ptr->hits_memory =
@@ -807,7 +809,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                        hash_index < array_size(parsestruct_ptr->value_tmp);
                        hash_index++)
                   {
-                    hashtable_add(parsestruct_ptr->resulthits,
+                    cstr_nofree_ulp_hashmap_add(parsestruct_ptr->resulthits,
                                   (char *)
                                   strarray_get(HITSTRUCT(hits_statistic),
                                                *(unsigned long *)
@@ -827,7 +829,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                 *(HITSTRUCT(memory + tmp_var)) = tmp_var;
                 *(HITSTRUCT(hitsnum + tmp_var)) = hit_to - hit_from + 1;
 
-                hashtable_add(parsestruct_ptr->resulthits,
+                cstr_nofree_ulp_hashmap_add(parsestruct_ptr->resulthits,
                               (char *)
                               strarray_get(HITSTRUCT(hits_statistic),
                                            string_number),
@@ -838,11 +840,9 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                 HITSTRUCT(hitsnumber) =
                   HITSTRUCT(hitsnumber) + hit_to - hit_from + 1;
                 tmp_var =
-                  *(unsigned long *) hashtable_get(parsestruct_ptr->
-                                                   resulthits,
-                                                   str_get
-                                                   (parsestruct_ptr->
-                                                    result_hits));
+                  **cstr_nofree_ulp_hashmap_get(
+                    parsestruct_ptr->resulthits,
+                    str_get(parsestruct_ptr->result_hits));
 
                 *(HITSTRUCT(hitsnum) + tmp_var) =
                   *(HITSTRUCT(hitsnum) + tmp_var) + hit_to - hit_from + 1;;
@@ -1279,15 +1279,15 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
   return had_err;
 }
 
-static int newmemory_hash(UNUSED void *key,
-                          void *value, void *data,
-                          UNUSED Error * err)
+static enum iterator_op
+newmemory_hash(UNUSED char *key, unsigned long *value, void *data,
+               UNUSED Error * err)
 {
   /* Parsestruct-Struktur */
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;
 
   /* Position des aktuell betrachteten Schluessels */
-  HITSTRUCT(stat_pos) = *(unsigned long *) value;
+  HITSTRUCT(stat_pos) = *value;
 
   error_check(err);
 

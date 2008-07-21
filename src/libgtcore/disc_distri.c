@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c)      2008 Thomas Jahns <Thomas.Jahns@gmx.net>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -20,7 +21,7 @@
 #include <stdio.h>
 #include "libgtcore/disc_distri.h"
 #include "libgtcore/ensure.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap-generic.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/unused.h"
 
@@ -39,20 +40,23 @@ void disc_distri_add(DiscDistri *d, unsigned long key)
   disc_distri_add_multi(d, key, 1);
 }
 
+DECLARE_HASHMAP(unsigned long, ul, unsigned long long, ull, static, inline)
+DEFINE_HASHMAP(unsigned long, ul, unsigned long long, ull, ht_ul_elem_hash,
+               ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
+               inline)
+
 void disc_distri_add_multi(DiscDistri *d, unsigned long key,
-                          unsigned long long occurrences)
+                           unsigned long long occurrences)
 {
   unsigned long long *valueptr;
   assert(d);
 
   if (!d->hashdist)
-    d->hashdist = hashtable_new(HASH_DIRECT, NULL, ma_free_func);
+    d->hashdist = ul_ull_hashmap_new();
 
-  valueptr = hashtable_get(d->hashdist, (void*) key);
+  valueptr = ul_ull_hashmap_get(d->hashdist, key);
   if (!valueptr) {
-    valueptr = ma_malloc(sizeof *valueptr);
-    *valueptr = occurrences;
-    hashtable_add(d->hashdist, (void*) key, valueptr);
+    ul_ull_hashmap_add(d->hashdist, key, occurrences);
   }
   else
     (*valueptr) += occurrences;
@@ -64,7 +68,7 @@ unsigned long long disc_distri_get(const DiscDistri *d, unsigned long key)
 {
   unsigned long long *valueptr;
   assert(d);
-  if (!d->hashdist || !(valueptr = hashtable_get(d->hashdist, (void*) key)))
+  if (!d->hashdist || !(valueptr = ul_ull_hashmap_get(d->hashdist, key)))
     return 0;
   return *valueptr;
 }
@@ -81,26 +85,22 @@ typedef struct {
   GenFile *genfile;
 } ShowValueInfo;
 
-static int showvalue(void *key, void *value, void *data, UNUSED Error *err)
+static enum iterator_op
+showvalue(unsigned long key, unsigned long long occurrences,
+          void *data, UNUSED Error *err)
 {
-  unsigned long long occurrences;
   double probability;
   ShowValueInfo *info;
 
   error_check(err);
-  assert(key && value && data);
-
-  occurrences = *(unsigned long long*) value;
-  assert(occurrences);
+  assert(data && occurrences);
   info = (ShowValueInfo*) data;
 
   probability = (double) occurrences / info->num_of_occurrences;
   info->cumulative_probability += probability;
   genfile_xprintf(info->genfile, "%lu: %llu (prob=%.4f,cumulative=%.4f)\n",
-                  (unsigned long) key, occurrences, probability,
-                  info->cumulative_probability);
-
-  return 0;
+                  key, occurrences, probability, info->cumulative_probability);
+  return CONTINUE_ITERATION;
 }
 
 void disc_distri_show_generic(const DiscDistri *d, GenFile *genfile)
@@ -114,7 +114,8 @@ void disc_distri_show_generic(const DiscDistri *d, GenFile *genfile)
     showvalueinfo.cumulative_probability = 0.0;
     showvalueinfo.num_of_occurrences = d->num_of_occurrences;
     showvalueinfo.genfile = genfile;
-    rval = hashtable_foreach_no(d->hashdist, showvalue, &showvalueinfo, NULL);
+    rval = ul_ull_hashmap_foreach_in_default_order(d->hashdist, showvalue,
+                                                   &showvalueinfo, NULL);
     assert(!rval); /* showvalue() is sane */
   }
 }
@@ -124,15 +125,16 @@ typedef struct {
   void *data;
 } ForeachInfo;
 
-static int foreach_iterfunc(void *key, void *value, void *data,
-                            UNUSED Error *err)
+static enum iterator_op
+foreach_iterfunc(unsigned long key, unsigned long long occurrences, void *data,
+                 UNUSED Error *err)
 {
   ForeachInfo *info;
   error_check(err);
-  assert(value && data);
+  assert(data);
   info = (ForeachInfo*) data;
-  info->func((unsigned long) key, *(unsigned long long*) value, info->data);
-  return 0;
+  info->func(key, occurrences, info->data);
+  return CONTINUE_ITERATION;
 }
 
 void disc_distri_foreach(const DiscDistri *d, DiscDistriIterFunc func,
@@ -144,7 +146,9 @@ void disc_distri_foreach(const DiscDistri *d, DiscDistriIterFunc func,
   if (d->hashdist) {
     info.func = func;
     info.data = data;
-    rval = hashtable_foreach_no(d->hashdist, foreach_iterfunc, &info, NULL);
+    rval = ul_ull_hashmap_foreach_in_default_order(d->hashdist,
+                                                   foreach_iterfunc, &info,
+                                                   NULL);
     assert(!rval); /* foreach_iterfunc() is sane */
   }
 }

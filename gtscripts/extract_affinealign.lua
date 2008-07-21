@@ -43,6 +43,9 @@ f:remove_example()
 f:ma2xansi()
 p:add(f)
 
+f = File:new("src/libgtcore/fptr.h")
+p:add(f)
+
 f = File:new("src/libgtcore/minmax.h")
 p:add(f)
 

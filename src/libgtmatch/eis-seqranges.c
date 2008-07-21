@@ -214,7 +214,7 @@ SRLInitListSearchHint(struct seqRangeList *rangeList,
 }
 
 static int
-posSeqRangeOverlapCompare(const void *key, const void *elem, const void *data)
+posSeqRangeOverlapCompare(const void *key, const void *elem, void *data)
 {
   Seqpos pos;
   const struct seqRange *range;
@@ -271,7 +271,7 @@ SRLOverlapsPosition(struct seqRangeList *rangeList, Seqpos pos,
 }
 
 static int
-posSeqRangeNextCompare(const void *key, const void *elem, const void *data)
+posSeqRangeNextCompare(const void *key, const void *elem, void *data)
 {
   Seqpos pos;
   const struct seqRange *range;

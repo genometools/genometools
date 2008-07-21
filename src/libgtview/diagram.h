@@ -33,7 +33,7 @@ typedef struct TracklineInfo {
 #include "libgtview/feature_index.h"
 #include "libgtcore/array.h"
 #include "libgtcore/range.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
 
@@ -43,7 +43,7 @@ Diagram*    diagram_new(FeatureIndex *feature_index, const char *seqid,
                         const Range*, Config*);
 Range       diagram_get_range(Diagram*);
 void        diagram_set_config(Diagram*, Config*);
-Hashtable*  diagram_get_tracks(const Diagram*);
+Hashmap*    diagram_get_tracks(const Diagram*);
 void        diagram_get_lineinfo(const Diagram*, TracklineInfo*);
 int         diagram_get_number_of_tracks(const Diagram*);
 /* Render <diagram> on the given <canvas>. */

@@ -134,11 +134,11 @@ void array_add_elem(Array *a, void *elem, UNUSED size_t size_of_elem)
   /* make sure we have enough space */
   if ((a->next_free + 1) * a->size_of_elem > a->allocated) {
     a->space = dynalloc(a->space, &a->allocated,
-                        (a->next_free + 1) * a->size_of_elem);
+                        (a->next_free + 1) * size_of_elem);
   }
   /* add */
-  memcpy((char*) a->space + a->next_free * a->size_of_elem, elem,
-         a->size_of_elem);
+  memcpy((char*) a->space + a->next_free * size_of_elem, elem,
+         size_of_elem);
   a->next_free++;
 }
 

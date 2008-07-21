@@ -16,6 +16,7 @@
 */
 
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtext/genome_node_iterator.h"
 #include "libgtext/genome_node_rep.h"
 #include "libgtext/feature_type_factory_builtin.h"
@@ -97,7 +98,7 @@ GenomeNode* genome_node_iterator_next(GenomeNodeIterator *gni)
   return gn;
 }
 
-int genome_node_iterator_example(void)
+int genome_node_iterator_example(UNUSED Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeNodeIterator *gni;

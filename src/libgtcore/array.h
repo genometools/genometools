@@ -19,6 +19,7 @@
 #define ARRAY_H
 
 #include <stdlib.h>
+#include "libgtcore/fptr.h"
 #include "libgtcore/error.h"
 
 typedef struct Array Array;
@@ -43,7 +44,7 @@ void          array_set_size(Array*, unsigned long);
 void          array_reset(Array*);
 size_t        array_elem_size(const Array*);
 unsigned long array_size(const Array*);
-void          array_sort(Array*, int(*compar)(const void*, const void*));
+void          array_sort(Array*, Compare compar);
 /* Compare the content of <array_a> with the content of <array_b>.
    <array_a> and <array_b> must have the same array_size() and
    array_elem_size(). */

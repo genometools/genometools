@@ -18,12 +18,14 @@
 #include "libgtcore/fileutils.h"
 #include "libgtcore/unused.h"
 #include "libgtmatch/giextract.pr"
+#include "libgtcore/hashmap-generic.h"
 #include "metagenomethreader.h"
-
 /* Funktion zur Ausgabe des Statistikbereichs
    Parameter: Schluessel, Value, User-Data, Env-Variable
    Returnwert: 0 */
-static int printout_hits(void *, void *, void *, Error *);
+static enum iterator_op
+printout_hits(UNUSED char *key,
+              unsigned long *value, void *data, Error * err);
 
 /* Funktion zum Aufruf des XML-Parsers
    Parameter: Zeiger auf ParseStruct-Struktur, Zeiger auf die XML-Datei,
@@ -229,6 +231,9 @@ static OPrval parse_options(int *parsed_args,
   return oprval;
 }
 
+DEFINE_HASHMAP(char *, cstr_nofree, unsigned long *, ulp, ht_cstr_elem_hash,
+               ht_cstr_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,,)
+
 int metagenomethreader(int argc, const char **argv, Error * err)
 {
   int had_err = 0,
@@ -433,7 +438,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
     querynum = ma_calloc(nrofseq, sizeof (unsigned long));
     /* Hash erzeugen - Eintraege: Key - Query-FASTA-Def; Value - Zeiger
        auf deren Indices in der Bioseq - Struktur */
-    parsestruct.queryhash = hashtable_new(HASH_STRING, NULL, NULL);
+    parsestruct.queryhash = cstr_nofree_ulp_hashmap_new();
 
     for (loop_index = 0; loop_index < nrofseq; loop_index++)
     {
@@ -446,9 +451,9 @@ int metagenomethreader(int argc, const char **argv, Error * err)
 
       /* Dem aktuellen Schluessel Zeige auf die Position in der Bioseq
          zuordnen */
-      if (!hashtable_get(parsestruct.queryhash, descr_ptr_query))
-        hashtable_add(parsestruct.queryhash, descr_ptr_query,
-                      querynum + loop_index);
+      if (!cstr_nofree_ulp_hashmap_get(parsestruct.queryhash, descr_ptr_query))
+        cstr_nofree_ulp_hashmap_add(parsestruct.queryhash, descr_ptr_query,
+                                   querynum + loop_index);
     }
 
     /* nur wenn die Option hitfile_bool auf TRUE gesetzt ist, muss die
@@ -463,7 +468,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
       hitnum = ma_calloc(nrofseq, sizeof (unsigned long));
       /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile; Value - Zeiger
          auf deren Indices in der Bioseq - Struktur */
-      parsestruct.hithash = hashtable_new(HASH_STRING, NULL, NULL);
+      parsestruct.hithash = cstr_nofree_ulp_hashmap_new();
 
       /* Hit-Fasta-File zeilenweise abarbeiten */
       for (loop_index = 0; loop_index < nrofseq; loop_index++)
@@ -476,14 +481,14 @@ int metagenomethreader(int argc, const char **argv, Error * err)
 
         /* Dem aktuellen Schluessel Zeige auf die Position in der Bioseq
            zuordnen */
-        if (!hashtable_get(parsestruct.hithash, descr_ptr_hit))
-          hashtable_add(parsestruct.hithash, descr_ptr_hit,
-                        hitnum + loop_index);
+        if (!cstr_nofree_ulp_hashmap_get(parsestruct.hithash, descr_ptr_hit))
+          cstr_nofree_ulp_hashmap_add(parsestruct.hithash, descr_ptr_hit,
+                                     hitnum + loop_index);
       }
     }
 
     /* Hashtabelle fuer die Statistik anlegen */
-    parsestruct.resulthits = hashtable_new(HASH_STRING, NULL, NULL);
+    parsestruct.resulthits = cstr_nofree_ulp_hashmap_new();
 
     /* konstruieren des Output-Filenames aus angegebenen Filename und dem
        angegebenen Format */
@@ -581,7 +586,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
             /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile;
                Value - Zeiger
                auf deren Indices in der Bioseq - Struktur */
-            parsestruct.hithash = hashtable_new(HASH_STRING, NULL, NULL);
+            parsestruct.hithash = cstr_nofree_ulp_hashmap_new();
 
             /* Hit-Fasta-File zeilenweise abarbeiten */
             for (loop_index = 0; loop_index < nrofseq; loop_index++)
@@ -594,9 +599,10 @@ int metagenomethreader(int argc, const char **argv, Error * err)
 
              /* Dem aktuellen Schluessel Zeige auf die Position in der Bioseq
                 zuordnen */
-            if (!hashtable_get(parsestruct.hithash, descr_ptr_hit))
-                hashtable_add(parsestruct.hithash, descr_ptr_hit,
-                               hitnum + loop_index);
+              if (!cstr_nofree_ulp_hashmap_get(parsestruct.hithash,
+                                              descr_ptr_hit))
+                cstr_nofree_ulp_hashmap_add(parsestruct.hithash, descr_ptr_hit,
+                                           hitnum + loop_index);
             }
           }
         }
@@ -629,8 +635,8 @@ int metagenomethreader(int argc, const char **argv, Error * err)
 
       /* Ausgeben der verwendeten Hit-Def, in dem die Hashtabelle einmal
          vollstaendig durchlaufen wird */
-      (void) hashtable_foreach(parsestruct.resulthits, printout_hits,
-                               &parsestruct, err);
+      (void) cstr_nofree_ulp_hashmap_foreach(parsestruct.resulthits,
+                                            printout_hits, &parsestruct, err);
 
       /* Schreiben des Ausgabe-Footers */
       mg_outputwriter(parsestruct_ptr, NULL, NULL, NULL, 'f', err);
@@ -689,8 +695,9 @@ int metagenomethreader(int argc, const char **argv, Error * err)
   return had_err;
 }
 
-static int printout_hits(UNUSED void *key,
-                         void *value, void *data, Error * err)
+static enum iterator_op
+printout_hits(UNUSED char *key,
+              unsigned long *value, void *data, Error * err)
 {
   /* Parsestruct-Struktur */
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;
@@ -698,7 +705,7 @@ static int printout_hits(UNUSED void *key,
   error_check(err);
 
   /* Position des aktuell betrachteten Schluessels */
-  HITSTRUCT(stat_pos) = *(unsigned long *) value;
+  HITSTRUCT(stat_pos) = *value;
 
   /* Ausgabe erfolgt nur, wenn der Anteil des Hits ueber dem Wert des
      Metagenomethreader-Argumentes liegt */

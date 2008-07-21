@@ -19,7 +19,7 @@
 #include "libgtcore/array.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/fa.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap.h"
 #include "libgtcore/io.h"
 #include "libgtcore/ma.h"
 #include "libgtext/obo_parse_tree.h"
@@ -104,7 +104,7 @@ static int obo_header_validate(OBOHeader *obo_header, const char *obo_file_name,
 
 typedef struct {
   char *type;
-  Hashtable *content;
+  Hashmap *content;
   unsigned long line;
   Str *filename;
 } OBOStanza;
@@ -114,7 +114,7 @@ static OBOStanza* obo_stanza_new(const char *type, unsigned long line,
 {
   OBOStanza *obo_stanza = ma_malloc(sizeof *obo_stanza);
   obo_stanza->type = cstr_dup(type);
-  obo_stanza->content = hashtable_new(HASH_STRING, ma_free_func, ma_free_func);
+  obo_stanza->content = hashmap_new(HASH_STRING, ma_free_func, ma_free_func);
   obo_stanza->line = line;
   obo_stanza->filename = str_ref(filename);
   return obo_stanza;
@@ -124,7 +124,7 @@ static void obo_stanza_delete(OBOStanza *obo_stanza)
 {
   if (!obo_stanza) return;
   str_delete(obo_stanza->filename);
-  hashtable_delete(obo_stanza->content);
+  hashmap_delete(obo_stanza->content);
   ma_free(obo_stanza->type);
   ma_free(obo_stanza);
 }
@@ -134,8 +134,8 @@ static void obo_stanza_add(OBOStanza *obo_stanza,
 {
   assert(obo_stanza && tag && value);
   /* XXX: currently duplicate tags are silently skipped */
-  if (!hashtable_get(obo_stanza->content, tag))
-    hashtable_add(obo_stanza->content, cstr_dup(tag), cstr_dup(value));
+  if (!hashmap_get(obo_stanza->content, tag))
+    hashmap_add(obo_stanza->content, cstr_dup(tag), cstr_dup(value));
 }
 
 static const char* obo_stanza_get_type(const OBOStanza *obo_stanza)
@@ -148,7 +148,7 @@ static const char* obo_stanza_get_value(const OBOStanza *obo_stanza,
                                         const char *stanza_key)
 {
   assert(obo_stanza);
-  return hashtable_get(obo_stanza->content, stanza_key);
+  return hashmap_get(obo_stanza->content, stanza_key);
 }
 
 struct OBOParseTree {

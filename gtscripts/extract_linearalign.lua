@@ -36,6 +36,9 @@ p = Project:new(gt_home)
 p:set_name(name)
 
 -- add all dependencies
+f = File:new("src/libgtcore/fptr.h")
+p:add(f)
+
 f = File:new("src/libgtcore/unused.h")
 p:add(f)
 

@@ -26,7 +26,7 @@
 #include "libgtcore/array2dim.h"
 #include "libgtcore/bioseq.h"
 #include "libgtcore/error.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap-generic.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/str.h"
@@ -217,6 +217,10 @@ typedef struct
   XMLparser_static xmlparser_static;
   GenePrediction_static geneprediction_static;
 } ParseStruct;
+
+/* specific access mode of queryhash */
+DECLARE_HASHMAP(char *, cstr_nofree, unsigned long *, ulp,,)
+DECLARE_SAFE_DEREF(unsigned long *, ulp)
 
 /* Funktion, mit der der Metagenomethreader gestartet wird
    Parameter: Anzahl der Kommandozeilenargumente, Zeiger auf die

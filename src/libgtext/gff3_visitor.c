@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "libgtcore/fasta.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/string_distri.h"
@@ -34,14 +34,14 @@ struct GFF3Visitor {
   bool version_string_shown,
        fasta_directive_shown;
   StringDistri *id_counter;
-  Hashtable *genome_feature_to_id_array,
+  Hashmap *genome_feature_to_id_array,
             *genome_feature_to_unique_id_str;
   unsigned long fasta_width;
   GenFile *outfp;
 };
 
 typedef struct {
-  Hashtable *genome_feature_to_id_array;
+  Hashmap *genome_feature_to_id_array;
   const char *id;
 } Add_id_info;
 
@@ -69,8 +69,8 @@ static void gff3_visitor_free(GenomeVisitor *gv)
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
   string_distri_delete(gff3_visitor->id_counter);
-  hashtable_delete(gff3_visitor->genome_feature_to_id_array);
-  hashtable_delete(gff3_visitor->genome_feature_to_unique_id_str);
+  hashmap_delete(gff3_visitor->genome_feature_to_id_array);
+  hashmap_delete(gff3_visitor->genome_feature_to_unique_id_str);
 }
 
 static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
@@ -91,10 +91,10 @@ static int add_id(GenomeNode *gn, void *data, UNUSED Error *err)
   Array *parent_features = NULL;
   error_check(err);
   assert(gn && info && info->genome_feature_to_id_array && info->id);
-  parent_features = hashtable_get(info->genome_feature_to_id_array, gn);
+  parent_features = hashmap_get(info->genome_feature_to_id_array, gn);
   if (!parent_features) {
     parent_features = array_new(sizeof (char*));
-    hashtable_add(info->genome_feature_to_id_array, gn, parent_features);
+    hashmap_add(info->genome_feature_to_id_array, gn, parent_features);
   }
   array_add(parent_features, info->id);
   return 0;
@@ -132,13 +132,13 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data,
   gff3_output_leading(gf, gff3_visitor->outfp);
 
   /* show unique id part of attributes */
-  if ((id = hashtable_get(gff3_visitor->genome_feature_to_unique_id_str, gn))) {
+  if ((id = hashmap_get(gff3_visitor->genome_feature_to_unique_id_str, gn))) {
     genfile_xprintf(gff3_visitor->outfp, "%s=%s", ID_STRING, str_get(id));
     part_shown = true;
   }
 
   /* show parent part of attributes */
-  parent_features = hashtable_get(gff3_visitor->genome_feature_to_id_array,
+  parent_features = hashmap_get(gff3_visitor->genome_feature_to_id_array,
                                   gn);
   if (array_size(parent_features)) {
     if (part_shown)
@@ -184,7 +184,7 @@ static Str* create_unique_id(GFF3Visitor *gff3_visitor, GenomeFeature *gf)
   str_append_ulong(id, string_distri_get(gff3_visitor->id_counter,
                                         genome_feature_type_get_cstr(type)));
   /* store (unique) id */
-  hashtable_add(gff3_visitor->genome_feature_to_unique_id_str, gf, id);
+  hashmap_add(gff3_visitor->genome_feature_to_unique_id_str, gf, id);
 
   return id;
 }
@@ -202,21 +202,21 @@ static int store_ids(GenomeNode *gn, void *data, Error *err)
 
   if (genome_node_has_children(gn) || genome_feature_is_multi(gf)) {
     if (genome_feature_is_multi(gf)) {
-      id = hashtable_get(gff3_visitor->genome_feature_to_unique_id_str,
-                         genome_feature_get_multi_representative(gf));
+      id = hashmap_get(gff3_visitor->genome_feature_to_unique_id_str,
+                       genome_feature_get_multi_representative(gf));
       if (!id) { /* the representative does not have its own id */
         id = create_unique_id(gff3_visitor,
                               genome_feature_get_multi_representative(gf));
       }
       if (genome_feature_get_multi_representative(gf) != gf) {
-        hashtable_add(gff3_visitor->genome_feature_to_unique_id_str, gf,
-                      str_ref(id));
+        hashmap_add(gff3_visitor->genome_feature_to_unique_id_str, gf,
+                    str_ref(id));
       }
     }
     else
       id = create_unique_id(gff3_visitor, gf);
 
-    /* for each child -> store the parent feature in the hash table */
+    /* for each child -> store the parent feature in the hash map */
     add_id_info.genome_feature_to_id_array =
       gff3_visitor->genome_feature_to_id_array,
     add_id_info.id = str_get(id);
@@ -254,9 +254,9 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
     }
   }
 
-  /* reset hashtables */
-  hashtable_reset(gff3_visitor->genome_feature_to_id_array);
-  hashtable_reset(gff3_visitor->genome_feature_to_unique_id_str);
+  /* reset hashmaps */
+  hashmap_reset(gff3_visitor->genome_feature_to_id_array);
+  hashmap_reset(gff3_visitor->genome_feature_to_unique_id_str);
 
   /* show terminator, if the feature has children (otherwise it is clear that
      the feature is complete, because no ID attribute has been shown) */
@@ -320,13 +320,10 @@ GenomeVisitor* gff3_visitor_new(GenFile *outfp)
   gff3_visitor->version_string_shown = false;
   gff3_visitor->fasta_directive_shown = false;
   gff3_visitor->id_counter = string_distri_new();
-  gff3_visitor->genome_feature_to_id_array = hashtable_new(HASH_DIRECT, NULL,
-                                                           (FreeFunc)
-                                                           array_delete);
-  gff3_visitor->genome_feature_to_unique_id_str = hashtable_new(HASH_DIRECT,
-                                                                NULL,
-                                                                (FreeFunc)
-                                                                str_delete);
+  gff3_visitor->genome_feature_to_id_array = hashmap_new(
+    HASH_DIRECT, NULL, (FreeFunc)array_delete);
+  gff3_visitor->genome_feature_to_unique_id_str = hashmap_new(
+    HASH_DIRECT, NULL, (FreeFunc)str_delete);
   gff3_visitor->fasta_width = 0;
   gff3_visitor->outfp = outfp;
   return gv;

@@ -20,6 +20,7 @@
 #include "libgtcore/cstr.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/getbasename.h"
+#include "libgtcore/hashmap.h"
 #include "libgtcore/log.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/str.h"
@@ -42,13 +43,13 @@
 
 struct Diagram {
   /* Tracks indexed by track keys */
-  Hashtable *tracks;
+  Hashmap *tracks;
   /* Block lists indexed by track keys */
-  Hashtable *blocks;
+  Hashmap *blocks;
   /* Reverse lookup structure (per node) */
-  Hashtable *nodeinfo;
+  Hashmap *nodeinfo;
   /* Cache tables for configuration data */
-  Hashtable *collapsingtypes, *caption_display_status;
+  Hashmap *collapsingtypes, *caption_display_status;
   int nof_tracks;
   Config *config;
   Range range;
@@ -90,11 +91,11 @@ static NodeInfoElement* get_or_create_node_info(Diagram *d, GenomeNode *node)
 {
   NodeInfoElement *ni;
   assert(d && node);
-  ni = hashtable_get(d->nodeinfo, node);
+  ni = hashmap_get(d->nodeinfo, node);
   if (ni == NULL) {
     NodeInfoElement *new_ni = ma_malloc(sizeof (NodeInfoElement));
     new_ni->blocktuples = array_new(sizeof (BlockTuple*));
-    hashtable_add(d->nodeinfo, node, new_ni);
+    hashmap_add(d->nodeinfo, node, new_ni);
     ni = new_ni;
   }
   return ni;
@@ -133,7 +134,7 @@ static bool get_caption_display_status(Diagram *d, GenomeFeatureType *gft)
   assert(d && gft);
   bool *status;
 
-  status = (bool*) hashtable_get(d->caption_display_status, gft);
+  status = (bool*) hashmap_get(d->caption_display_status, gft);
   if (!status)
   {
     unsigned long threshold;
@@ -154,7 +155,7 @@ static bool get_caption_display_status(Diagram *d, GenomeFeatureType *gft)
       else
         *status = (range_length(d->range) <= threshold);
     }
-    hashtable_add(d->caption_display_status, gft, status);
+    hashmap_add(d->caption_display_status, gft, status);
   }
   return *status;
 }
@@ -302,7 +303,7 @@ static void add_recursive(Diagram *d, GenomeNode *node,
     /* set up reverse entry */
     ni->parent = parent;
     /* recursively call with parent node and its parent */
-    parent_ni = hashtable_get(d->nodeinfo, parent);
+    parent_ni = hashmap_get(d->nodeinfo, parent);
     if (parent_ni)
       add_recursive(d, parent, parent_ni->parent, original_node);
   }
@@ -351,14 +352,14 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
     parent = NULL;
 
   /* check if this is a collapsing type, cache result */
-  if ((collapse = (bool*) hashtable_get(d->collapsingtypes,
+  if ((collapse = (bool*) hashmap_get(d->collapsingtypes,
                                         feature_type)) == NULL)
   {
     collapse = ma_malloc(sizeof (bool));
     if (!config_get_bool(d->config, feature_type, "collapse_to_parent",
                         collapse))
       *collapse = false;
-    hashtable_add(d->collapsingtypes, (char*) feature_type, collapse);
+    hashmap_add(d->collapsingtypes, (char*) feature_type, collapse);
   }
 
   /* check if direct children overlap */
@@ -392,7 +393,7 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
 
   /* we can now assume that this node has been processed into the reverse
      lookup structure */
-  assert(hashtable_get(d->nodeinfo, node));
+  assert(hashmap_get(d->nodeinfo, node));
 }
 
 static int diagram_add_tracklines(UNUSED void *key, void *value, void *data,
@@ -445,11 +446,11 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
   for (i = 0; i < array_size(ni->blocktuples); i++) {
     Array *list;
     BlockTuple *bt = *(BlockTuple**) array_get(ni->blocktuples, i);
-    list = (Array*) hashtable_get(diagram->blocks, bt->gft);
+    list = (Array*) hashmap_get(diagram->blocks, bt->gft);
     if (!list)
     {
       list = array_new(sizeof (Block*));
-      hashtable_add(diagram->blocks, bt->gft, list);
+      hashmap_add(diagram->blocks, bt->gft, list);
     }
     assert(list);
     array_add(list, bt->block);
@@ -485,8 +486,8 @@ static void diagram_build(Diagram *diagram, Array *features)
   genome_node_children.diagram = diagram;
 
   /* initialise caches */
-  diagram->collapsingtypes = hashtable_new(HASH_STRING, NULL, ma_free_func);
-  diagram->caption_display_status = hashtable_new(HASH_DIRECT,
+  diagram->collapsingtypes = hashmap_new(HASH_STRING, NULL, ma_free_func);
+  diagram->caption_display_status = hashmap_new(HASH_DIRECT,
                                                   NULL, ma_free_func);
 
   /* do node traversal for each root feature */
@@ -495,13 +496,13 @@ static void diagram_build(Diagram *diagram, Array *features)
     traverse_genome_nodes(current_root, &genome_node_children);
   }
   /* collect blocks from nodeinfo structures and create the tracks */
-  had_err = hashtable_foreach_ordered(diagram->nodeinfo, collect_blocks,
+  had_err = hashmap_foreach_ordered(diagram->nodeinfo, collect_blocks,
                                       diagram, (Compare) genome_node_cmp, NULL);
   assert(!had_err); /* collect_blocks() is sane */
 
   /* clear caches */
-  hashtable_delete(diagram->collapsingtypes);
-  hashtable_delete(diagram->caption_display_status);
+  hashmap_delete(diagram->collapsingtypes);
+  hashmap_delete(diagram->caption_display_status);
 }
 
 static int blocklist_delete(void *value)
@@ -521,11 +522,11 @@ Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
   Array *features = array_new(sizeof (GenomeNode*));
   int had_err;
   diagram = ma_malloc(sizeof (Diagram));
-  diagram->tracks = hashtable_new(HASH_STRING, ma_free_func,
-                                  (FreeFunc) track_delete);
-  diagram->blocks = hashtable_new(HASH_DIRECT, NULL,
+  diagram->tracks = hashmap_new(HASH_STRING, ma_free_func,
+                                (FreeFunc) track_delete);
+  diagram->blocks = hashmap_new(HASH_DIRECT, NULL,
                                   (FreeFunc) blocklist_delete);
-  diagram->nodeinfo = hashtable_new(HASH_DIRECT, NULL, NULL);
+  diagram->nodeinfo = hashmap_new(HASH_DIRECT, NULL, NULL);
   diagram->nof_tracks = 0;
   diagram->config = config;
   diagram->range = *range;
@@ -549,7 +550,7 @@ void diagram_set_config(Diagram *diagram, Config *config)
   diagram->config = config;
 }
 
-Hashtable* diagram_get_tracks(const Diagram *diagram)
+Hashmap* diagram_get_tracks(const Diagram *diagram)
 {
   assert(diagram);
   return diagram->tracks;
@@ -559,7 +560,7 @@ void diagram_get_lineinfo(const Diagram *diagram, TracklineInfo *tli)
 {
   int had_err;
   assert(diagram);
-  had_err = hashtable_foreach(diagram->tracks, diagram_add_tracklines,
+  had_err = hashmap_foreach(diagram->tracks, diagram_add_tracklines,
                               tli, NULL);
   assert(!had_err); /* diagram_add_tracklines() is sane */
 }
@@ -626,7 +627,7 @@ static int layout_tracks(void *key, void *value, void *data,
     block = *(Block**) array_get(list, i);
     track_insert_block(track, block);
   }
-  hashtable_add(tti->dia->tracks, cstr_dup(str_get(track_key)), track);
+  hashmap_add(tti->dia->tracks, cstr_dup(str_get(track_key)), track);
   str_delete(track_key);
   return 0;
 }
@@ -650,13 +651,12 @@ int diagram_render(Diagram *dia, Canvas *canvas)
   tti.dia = dia;
   tti.canvas = canvas;
   canvas_visit_diagram_pre(canvas, dia);
-  hashtable_reset(dia->tracks);
+  hashmap_reset(dia->tracks);
   dia->nof_tracks = 0;
-  (void) hashtable_foreach(dia->blocks, layout_tracks,
-                           &tti, NULL);
+  (void) hashmap_foreach(dia->blocks, layout_tracks, &tti, NULL);
   canvas_visit_diagram_post(canvas, dia);
-  had_err = hashtable_foreach_ao(dia->tracks, render_tracks,
-                                 &tti, NULL);
+  had_err = hashmap_foreach_in_key_order(dia->tracks, render_tracks,
+                                         &tti, NULL);
 
   log_log("finished rendering!\n");
   return had_err;
@@ -755,14 +755,14 @@ int diagram_unit_test(Error *err)
   if (!had_err &&
       !config_get_bool(dia->config, "gene", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", gene_type);
-    ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
+    ensure(had_err, hashmap_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
       !config_get_bool(dia->config, "exon", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", exon_type);
-    ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
+    ensure(had_err, hashmap_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
@@ -778,21 +778,21 @@ int diagram_unit_test(Error *err)
       !config_get_bool(dia2->config, "gene", "collapse_to_parent", false)) {
     diagram_render(dia2, canvas);
     track_key = track_key_new("generated", gene_type);
-    ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
+    ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
       !config_get_bool(dia2->config, "exon", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", exon_type);
-    ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
+    ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
       !config_get_bool(dia2->config, "CDS", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", CDS_type);
-    ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
+    ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
@@ -817,8 +817,8 @@ int diagram_unit_test(Error *err)
 void diagram_delete(Diagram *diagram)
 {
   if (!diagram) return;
-  hashtable_delete(diagram->tracks);
-  hashtable_delete(diagram->blocks);
-  hashtable_delete(diagram->nodeinfo);
+  hashmap_delete(diagram->tracks);
+  hashmap_delete(diagram->blocks);
+  hashmap_delete(diagram->nodeinfo);
   ma_free(diagram);
 }

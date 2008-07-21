@@ -23,7 +23,7 @@
 
 struct LineBreakerBases {
   const LineBreaker parent_instance;
-  Hashtable *itrees;
+  Hashmap *itrees;
 };
 
 #define line_breaker_bases_cast(LB)\
@@ -39,7 +39,7 @@ bool line_breaker_bases_is_line_occupied(LineBreaker* lb,
   assert(lb && block && line);
   r = block_get_range(block);
   lbb = line_breaker_bases_cast(lb);
-  if (!(t = hashtable_get(lbb->itrees, line)))
+  if (!(t = hashmap_get(lbb->itrees, line)))
     return false;
   else
     return (interval_tree_find_first_overlapping(t, r.start, r.end));
@@ -57,10 +57,10 @@ void line_breaker_bases_register_block(LineBreaker *lb,
   lbb = line_breaker_bases_cast(lb);
   rng = block_get_range_ptr(block);
   new_node = interval_tree_node_new(rng, rng->start, rng->end);
-  if (!(t = hashtable_get(lbb->itrees, line)))
+  if (!(t = hashmap_get(lbb->itrees, line)))
   {
     t = interval_tree_new(NULL);
-    hashtable_add(lbb->itrees, line, t);
+    hashmap_add(lbb->itrees, line, t);
   }
   interval_tree_insert(t, new_node);
 }
@@ -70,7 +70,7 @@ void line_breaker_bases_delete(LineBreaker *lb)
   LineBreakerBases *lbb;
   if (!lb) return;
   lbb = line_breaker_bases_cast(lb);
-  hashtable_delete(lbb->itrees);
+  hashmap_delete(lbb->itrees);
 }
 
 const LineBreakerClass* line_breaker_bases_class(void)
@@ -89,7 +89,6 @@ LineBreaker* line_breaker_bases_new()
   LineBreaker *lb;
   lb = line_breaker_create(line_breaker_bases_class());
   lbb = line_breaker_bases_cast(lb);
-  lbb->itrees = hashtable_new(HASH_DIRECT, NULL,
-                              (FreeFunc) interval_tree_delete);
+  lbb->itrees = hashmap_new(HASH_DIRECT, NULL, (FreeFunc) interval_tree_delete);
   return lb;
 }

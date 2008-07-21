@@ -16,7 +16,7 @@
 */
 
 #include <assert.h>
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
 #include "libgtext/mergefeat_visitor.h"
@@ -25,7 +25,7 @@
 struct MergefeatVisitor {
   const GenomeVisitor parent_instance;
   GenomeNode *current_tree;
-  Hashtable *ht; /* type -> previous node */
+  Hashmap *hm; /* type -> previous node */
   Array *nodes_to_remove;
 };
 
@@ -36,7 +36,7 @@ static void mergefeat_visitor_free(GenomeVisitor *gv)
 {
   MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   assert(mergefeat_visitor);
-  hashtable_delete(mergefeat_visitor->ht);
+  hashmap_delete(mergefeat_visitor->hm);
   array_delete(mergefeat_visitor->nodes_to_remove);
 }
 
@@ -48,7 +48,7 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, UNUSED Error *err)
   error_check(err);
   current_feature = genome_node_cast(genome_feature_class(), gn);
   assert(current_feature);
-  if ((previous_feature = hashtable_get(v->ht, genome_feature_type_get_cstr(
+  if ((previous_feature = hashmap_get(v->hm, genome_feature_type_get_cstr(
                                   genome_feature_get_type(current_feature))))) {
     /* previous feature found -> check if merging is necessary */
     assert(genome_feature_get_type(previous_feature) ==
@@ -65,11 +65,11 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, UNUSED Error *err)
       array_add(v->nodes_to_remove, current_feature);
     }
     /* remove previous feature */
-    hashtable_remove(v->ht, (char*) genome_feature_type_get_cstr(
+    hashmap_remove(v->hm, (char*) genome_feature_type_get_cstr(
                      genome_feature_get_type(previous_feature)));
   }
   /* add current feature */
-  hashtable_add(v->ht, (char*) genome_feature_type_get_cstr(
+  hashmap_add(v->hm, (char*) genome_feature_type_get_cstr(
                 genome_feature_get_type(current_feature)), current_feature);
   return 0;
 }
@@ -82,7 +82,7 @@ static int mergefeat_if_necessary(GenomeNode *gn, void *data, Error *err)
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   v->current_tree = gn;
-  hashtable_reset(v->ht);
+  hashmap_reset(v->hm);
   return genome_node_traverse_direct_children(gn, v, mergefeat_in_children,
                                               err);
 }
@@ -124,7 +124,7 @@ GenomeVisitor* mergefeat_visitor_new(void)
 {
   GenomeVisitor *gv = genome_visitor_create(mergefeat_visitor_class());
   MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
-  mergefeat_visitor->ht = hashtable_new(HASH_STRING, NULL, NULL);
+  mergefeat_visitor->hm = hashmap_new(HASH_STRING, NULL, NULL);
   mergefeat_visitor->nodes_to_remove = array_new(sizeof (GenomeNode*));
   return gv;
 }

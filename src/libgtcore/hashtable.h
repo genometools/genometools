@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,33 +18,133 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
+#include <inttypes.h>
+#include <stdlib.h>
+
+#include "libgtcore/error.h"
 #include "libgtcore/fptr.h"
 
 typedef struct Hashtable Hashtable;
 
-typedef enum {
-  HASH_DIRECT,
-  HASH_STRING
-} HashType;
+enum iterator_op
+{
+  CONTINUE_ITERATION,
+  STOP_ITERATION,
+  DELETED_ELEM,
+  MODIFIED_KEY,
+  REDO_ITERATION,
+};
 
-typedef int (*Hashiteratorfunc)(void *key, void *value, void *data, Error*);
+typedef enum iterator_op (*Elemvisitfunc)(void *elem, void *data,
+                                             Error *err);
 
-Hashtable* hashtable_new(HashType, FreeFunc keyfree, FreeFunc valuefree);
-void*      hashtable_get(Hashtable*, const void*);
-void       hashtable_add(Hashtable*, void*, void*);
-void       hashtable_remove(Hashtable*, const void*);
-/* iterate over the hashtable in key order given by compare function <cmp> */
-int        hashtable_foreach_ordered(Hashtable*, Hashiteratorfunc, void *data,
-                                     Compare cmp, Error*);
-int        hashtable_foreach(Hashtable*, Hashiteratorfunc, void*, Error*);
-/* iterate over the hashtable in alphabetical order. Requires that the hashtable
-   has the HashType HASH_STRING. */
-int        hashtable_foreach_ao(Hashtable*, Hashiteratorfunc, void*, Error*);
-/* iterate over the hashtable in numerical order. Requires that the hashtable
-   has the HashType HASH_DIRECT and unsigned longs have been used as keys. */
-int        hashtable_foreach_no(Hashtable*, Hashiteratorfunc, void*, Error*);
+typedef void (*FreeFuncWData)(void *elem, void *table_data);
+
+typedef uint32_t htsize_t;
+typedef htsize_t (*HashFunc)(const void *elem);
+
+struct HashElemInfo
+{
+  HashFunc keyhash;
+  union
+  {
+    FreeFunc free_elem;
+    FreeFuncWData free_elem_with_data;
+  } free_op;
+  size_t elem_size;
+  Compare cmp;
+  void *table_data;             /**< per table data, passed to
+                                 * free_elem_with_data */
+  FreeFunc table_data_free;
+};
+
+typedef struct HashElemInfo HashElemInfo;
+
+extern Hashtable *
+hashtable_new(HashElemInfo);
+extern Hashtable *
+hashtable_new_with_start_size(HashElemInfo htype, unsigned short size_log);
+void*      hashtable_get(Hashtable*, const void *elem);
+/**
+ * @return 1 if add succeeded, 0 if elem is already in table.
+ */
+int        hashtable_add(Hashtable*, const void *elem);
+int        hashtable_remove(Hashtable*, const void *elem);
+/**
+ * @brief iterate over the hashtable in key order given by compare
+ * function <cmp>
+ * @return 0 => no error, -1 => error occured
+ */
+extern int
+hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
+                          Compare cmp, Error *err);
+/**
+ * @brief iterate over the hashtable in implementation-defined order
+ * @return 0 => no error, -1 => error occured
+ */
+extern int
+hashtable_foreach(Hashtable *ht, Elemvisitfunc iter, void *data,
+                  Error *err);
+/* iterate over the hashtable in default order. Requires that the hashtable
+   was constructed with an ordering compare function. */
+extern int
+hashtable_foreach_in_default_order(Hashtable*, Elemvisitfunc, void *data,
+                                   Error *err);
+size_t
+hashtable_fill(Hashtable *);
 void       hashtable_reset(Hashtable*);
 int        hashtable_unit_test(Error*);
 void       hashtable_delete(Hashtable*);
+
+/*
+ * helper functions for users constructing their own HashElemInfos
+ */
+static inline uint32_t
+uint32_key_mul_hash(uint32_t key);
+
+/**
+ * @brief Hash pointer by address value
+ * @param elem treated as a void ** so that *(void **)elem is used as
+ * key to hash
+ */
+extern uint32_t
+ht_ptr_elem_hash(const void *elem);
+
+/**
+ * @brief Hash unsigned long by value
+ * @param elem *(unsigned long *)elem is used as key to hash
+ */
+extern uint32_t
+ht_ul_elem_hash(const void *elem);
+
+/**
+ * @brief Hash string by mixing hash value of characters
+ *
+ * @param elem *(char **)elem is used as key to hash
+ */
+extern uint32_t
+ht_cstr_elem_hash(const void *elem);
+/**
+ * @brief hash binary data
+ */
+extern uint32_t
+uint32_data_hash(const void *data, size_t length);
+extern int
+ht_ptr_elem_cmp(const void *elemA, const void *elemB);
+static inline int
+ht_ul_cmp(unsigned long a, unsigned long b);
+extern int
+ht_ul_elem_cmp(const void *elemA, const void *elemB);
+extern int
+ht_cstr_elem_cmp(const void *elemA, const void *elemB);
+
+/**
+ * @brief dummy free function that fullfills the interface but doesn't
+ * do anything.
+ */
+extern void
+ht_dummy_free_func(void *elem);
+
+#include "libgtcore/hashtable-siop.h"
 
 #endif

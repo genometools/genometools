@@ -39,7 +39,7 @@ p:set_name(name)
 f = File:new("src/libgtcore/fasta_separator.h")
 p:add(f)
 
-f = File:new("src/libgtcore/unused.h")
+f = File:new("src/libgtcore/fptr.h")
 p:add(f)
 
 f = File:new("src/libgtcore/unused.h")

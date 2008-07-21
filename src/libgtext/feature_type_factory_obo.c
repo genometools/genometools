@@ -46,7 +46,7 @@ feature_type_factory_obo_create_gft(FeatureTypeFactory *ftf, const char *type)
   assert(ftf && type);
   ftfo = feature_type_factory_obo_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
-    if (hashtable_get(ftfo->genome_feature_types, type)) {
+    if (hashtable_get(ftfo->genome_feature_types, &type)) {
       gft = genome_feature_type_construct(ftf, type);
       gft_collection_add(ftf->used_types, type, gft);
     }
@@ -68,13 +68,16 @@ static void add_genome_feature_from_tree(FeatureTypeFactoryOBO *ftfo,
                                          unsigned long stanza_num,
                                          const char *stanza_key)
 {
-  char *value;
+  const char *value;
   assert(ftfo && obo_parse_tree && stanza_key);
-  value = cstr_dup(obo_parse_tree_get_stanza_value(obo_parse_tree, stanza_num,
-                                                   stanza_key));
+  value = obo_parse_tree_get_stanza_value(obo_parse_tree, stanza_num,
+                                          stanza_key);
   /* do not add values multiple times (possible for "name" values) */
-  if (!hashtable_get(ftfo->genome_feature_types, value))
-    hashtable_add(ftfo->genome_feature_types, value, value);
+  if (!hashtable_get(ftfo->genome_feature_types, &value))
+  {
+    value = cstr_dup(value);
+    hashtable_add(ftfo->genome_feature_types, &value);
+  }
 }
 
 static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
@@ -102,16 +105,24 @@ static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
   return -1;
 }
 
+static void free_feature_type_entry(void *feature_type)
+{
+  ma_free(*(char **)feature_type);
+}
+
 FeatureTypeFactory* feature_type_factory_obo_new(const char *obo_file_path,
                                                  Error *err)
 {
   FeatureTypeFactoryOBO *ftfo;
   FeatureTypeFactory *ftf;
+  HashElemInfo cstr_presence_map = {
+    ht_cstr_elem_hash, { free_feature_type_entry }, sizeof (char *),
+    ht_cstr_elem_cmp, NULL, ht_dummy_free_func };
   error_check(err);
   assert(obo_file_path);
   ftf = feature_type_factory_create(feature_type_factory_obo_class());
   ftfo = feature_type_factory_obo_cast(ftf);
-  ftfo->genome_feature_types = hashtable_new(HASH_STRING, ma_free_func, NULL);
+  ftfo->genome_feature_types = hashtable_new(cstr_presence_map);
   if (create_genome_features(ftfo, obo_file_path, err)) {
     feature_type_factory_delete(ftf);
     return NULL;

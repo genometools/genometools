@@ -18,27 +18,27 @@
 #ifndef BSEARCH_H
 #define BSEARCH_H
 
+#include "libgtcore/fptr.h"
 #include "libgtcore/array.h"
 #include "libgtcore/bittab.h"
 
-typedef int (*Compar)(const void*, const void*, const void *data);
-
-/* similar interface to bsearch(3), except that the Compar function gets an
-   additional <data> pointer */
+/* similar interface to bsearch(3), except that the CompareWithData
+   function gets an additional <data> pointer */
 void* bsearch_data(const void *key, const void *base, size_t nmemb, size_t size,
-                   Compar, void *data);
+                   CompareWithData, void *data);
 
 /* similar interface to bsearch_data(), except that all members which compare as
    equal are stored in the <members> array. The order in which the elements
    are added is undefined */
 void  bsearch_all(Array *members, const void *key, const void *base,
-                  size_t nmemb, size_t size, Compar, void *data);
+                  size_t nmemb, size_t size, CompareWithData, void *data);
 
 /* similar interface to bsearch_all(). Additionally, if a bittab is given (which
    must be of size <nmemb>), the bits corresponding to the found elements are
    marked (i.e., set) */
 void  bsearch_all_mark(Array *members, const void *key, const void *base,
-                       size_t nmemb, size_t size, Compar, void *data, Bittab*);
+                       size_t nmemb, size_t size, CompareWithData,
+                       void *data, Bittab*);
 
 int   bsearch_unit_test(Error*);
 

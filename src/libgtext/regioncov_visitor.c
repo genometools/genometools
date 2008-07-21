@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/cstr.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/unused.h"
@@ -27,7 +27,7 @@
 struct RegionCovVisitor {
   const GenomeVisitor parent_instance;
   unsigned long max_feature_dist;
-  Hashtable *region2rangelist;
+  Hashmap *region2rangelist;
 };
 
 #define regioncov_visitor_cast(GV)\
@@ -36,7 +36,7 @@ struct RegionCovVisitor {
 static void regioncov_visitor_free(GenomeVisitor *gv)
 {
   RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
-  hashtable_delete(regioncov_visitor->region2rangelist);
+  hashmap_delete(regioncov_visitor->region2rangelist);
 }
 
 static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
@@ -48,8 +48,8 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
   RegionCovVisitor *regioncov_visitor;
   error_check(err);
   regioncov_visitor = regioncov_visitor_cast(gv);
-  ranges = hashtable_get(regioncov_visitor->region2rangelist,
-                         str_get(genome_node_get_seqid((GenomeNode*) gf)));
+  ranges = hashmap_get(regioncov_visitor->region2rangelist,
+                       str_get(genome_node_get_seqid((GenomeNode*) gf)));
   assert(ranges);
   new_range = genome_node_get_range((GenomeNode*) gf);
   if (!array_size(ranges))
@@ -76,9 +76,9 @@ static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
   error_check(err);
   regioncov_visitor = regioncov_visitor_cast(gv);
   rangelist = array_new(sizeof (Range));
-  hashtable_add(regioncov_visitor->region2rangelist,
-                cstr_dup(str_get(genome_node_get_seqid((GenomeNode*) sr))),
-                rangelist);
+  hashmap_add(regioncov_visitor->region2rangelist,
+              cstr_dup(str_get(genome_node_get_seqid((GenomeNode*) sr))),
+              rangelist);
   return 0;
 }
 
@@ -98,9 +98,9 @@ GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist)
   GenomeVisitor *gv = genome_visitor_create(regioncov_visitor_class());
   RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
   regioncov_visitor->max_feature_dist = max_feature_dist;
-  regioncov_visitor->region2rangelist = hashtable_new(HASH_STRING,
-                                                      ma_free_func,
-                                                      (FreeFunc) array_delete);
+  regioncov_visitor->region2rangelist = hashmap_new(HASH_STRING,
+                                                    ma_free_func,
+                                                    (FreeFunc) array_delete);
   return gv;
 }
 
@@ -128,7 +128,7 @@ void regioncov_visitor_show_coverage(GenomeVisitor *gv)
 {
   RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
   int had_err;
-  had_err = hashtable_foreach_ao(regioncov_visitor->region2rangelist,
-                                 show_rangelist, NULL, NULL);
+  had_err = hashmap_foreach_in_key_order(regioncov_visitor->region2rangelist,
+                                         show_rangelist, NULL, NULL);
   assert(!had_err); /* show_rangelist() is sane */
 }

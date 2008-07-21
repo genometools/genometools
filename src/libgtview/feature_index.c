@@ -19,7 +19,7 @@
 
 #include <string.h>
 #include "libgtcore/ensure.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap.h"
 #include "libgtcore/interval_tree.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
@@ -31,7 +31,7 @@
 #include "libgtview/feature_index.h"
 
 struct FeatureIndex {
-  Hashtable *regions;
+  Hashmap *regions;
   char *firstseqid;
   unsigned int nof_sequence_regions,
                reference_count;
@@ -55,7 +55,7 @@ FeatureIndex* feature_index_new(void)
 {
   FeatureIndex *fi;
   fi = ma_calloc(1, sizeof (FeatureIndex));
-  fi->regions = hashtable_new(HASH_STRING, NULL, (FreeFunc) region_info_delete);
+  fi->regions = hashmap_new(HASH_STRING, NULL, (FreeFunc) region_info_delete);
   return fi;
 }
 
@@ -72,13 +72,13 @@ void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr)
   RegionInfo *info;
   assert(fi && sr);
   seqid = str_get(genome_node_get_seqid((GenomeNode*) sr));
-  if (!hashtable_get(fi->regions, seqid)) {
-    info = ma_calloc(1, sizeof (RegionInfo));
+  if (!hashmap_get(fi->regions, seqid)) {
+    info = ma_malloc(sizeof (RegionInfo));
     info->region = (SequenceRegion*) genome_node_ref((GenomeNode*) sr);
     info->features = interval_tree_new((FreeFunc) genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
-    hashtable_add(fi->regions, seqid, info);
+    hashmap_add(fi->regions, seqid, info);
     if (fi->nof_sequence_regions++ == 0)
       fi->firstseqid = seqid;
   }
@@ -97,7 +97,7 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf)
   /* get information about seqid and range */
   node_range = genome_node_get_range(gn);
   seqid = str_get(genome_node_get_seqid(gn));
-  info = (RegionInfo*) hashtable_get(fi->regions, seqid);
+  info = (RegionInfo*) hashmap_get(fi->regions, seqid);
 
   /* If the seqid was encountered for the first time, no sequence
      region nodes have been visited before. We therefore must create a new
@@ -109,7 +109,7 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf)
     info->features = interval_tree_new((FreeFunc) genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
-    hashtable_add(fi->regions, seqid, info);
+    hashmap_add(fi->regions, seqid, info);
     if (fi->nof_sequence_regions++ == 0)
       fi->firstseqid = seqid;
   }
@@ -138,7 +138,7 @@ Array* feature_index_get_features_for_seqid(FeatureIndex *fi, const char *seqid)
   Array *a;
   assert(fi && seqid);
   a = array_new(sizeof (GenomeFeature*));
-  ri = (RegionInfo*) hashtable_get(fi->regions, seqid);
+  ri = (RegionInfo*) hashmap_get(fi->regions, seqid);
   if (ri)
     had_err = interval_tree_traverse(ri->features,
                                      collect_features_from_itree,
@@ -163,7 +163,7 @@ int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
   error_check(err);
   assert(fi && results);
 
-  ri = (RegionInfo*) hashtable_get(fi->regions, seqid);
+  ri = (RegionInfo*) hashmap_get(fi->regions, seqid);
   if (!ri) {
     error_set(err, "feature index does not contain the given sequence id");
     return -1;
@@ -195,7 +195,7 @@ StrArray* feature_index_get_seqids(const FeatureIndex *fi)
   int rval;
   assert(fi);
   seqids = strarray_new();
-  rval = hashtable_foreach_ao(fi->regions, store_seqid, seqids, NULL);
+  rval = hashmap_foreach_in_key_order(fi->regions, store_seqid, seqids, NULL);
   assert(!rval); /* store_seqid() is sane */
   return seqids;
 }
@@ -205,7 +205,7 @@ Range feature_index_get_range_for_seqid(FeatureIndex *fi, const char *seqid)
   Range ret = {0,0};
   RegionInfo *info;
   assert(fi);
-  info = (RegionInfo*) hashtable_get(fi->regions, seqid);
+  info = (RegionInfo*) hashmap_get(fi->regions, seqid);
   assert(info);
 
   if (info->dyn_range.start != ~0UL && info->dyn_range.end != 0)
@@ -228,7 +228,7 @@ void feature_index_get_rangeptr_for_seqid(FeatureIndex *fi, Range *range,
 bool feature_index_has_seqid(const FeatureIndex *fi, const char *seqid)
 {
   assert(fi);
-  return (hashtable_get(fi->regions, seqid));
+  return (hashmap_get(fi->regions, seqid));
 }
 
 int feature_index_unit_test(Error *err)
@@ -382,6 +382,6 @@ void feature_index_delete(FeatureIndex *fi)
     fi->reference_count--;
     return;
   }
-  hashtable_delete(fi->regions);
+  hashmap_delete(fi->regions);
   ma_free(fi);
 }

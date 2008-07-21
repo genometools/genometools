@@ -29,7 +29,7 @@ GenomeNodeIterator* genome_node_iterator_new(GenomeNode *genome_node);
    <genome_node> (without <genome_node> itself). */
 GenomeNodeIterator* genome_node_iterator_new_direct(GenomeNode *genome_node);
 GenomeNode*         genome_node_iterator_next(GenomeNodeIterator*);
-int                 genome_node_iterator_example(void);
+int                 genome_node_iterator_example(Error *);
 void                genome_node_iterator_delete(GenomeNodeIterator*);
 
 #endif

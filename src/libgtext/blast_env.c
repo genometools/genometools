@@ -18,7 +18,7 @@
 #include <limits.h>
 #include <math.h>
 #include "libgtcore/bittab.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap-generic.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/blast_env.h"
@@ -29,11 +29,17 @@ typedef struct {
   Hashtable *mapping;
 } Pos;
 
+DECLARE_HASHMAP(unsigned long, ul, Array *, array, static, inline)
+DEFINE_HASHMAP(unsigned long, ul, Array *, array, ht_ul_elem_hash,
+               ht_ul_elem_cmp, NULL_DESTRUCTOR, array_delete, static,
+               inline)
+DECLARE_SAFE_DEREF(Array *,array)
+
 /* Return a new Pos object. */
 Pos* pos_new(void)
 {
   Pos *pos = ma_malloc(sizeof *pos);
-  pos->mapping = hashtable_new(HASH_DIRECT, NULL, (FreeFunc) array_delete);
+  pos->mapping = ul_array_hashmap_new();
   return pos;
 }
 
@@ -50,11 +56,11 @@ void pos_add(Pos *pos, unsigned long code, unsigned long position)
 {
   Array *position_list;
   assert(pos && pos->mapping);
-  position_list = hashtable_get(pos->mapping, (void*) code);
+  position_list = array_safe_deref(ul_array_hashmap_get(pos->mapping, code));
   if (!position_list) {
     position_list = array_new(sizeof (unsigned long));
     array_add(position_list, position);
-    hashtable_add(pos->mapping, (void*) code, position_list);
+    ul_array_hashmap_add(pos->mapping, code, position_list);
   }
   else
     array_add(position_list, position);
@@ -64,7 +70,7 @@ void pos_add(Pos *pos, unsigned long code, unsigned long position)
 Array* pos_get(Pos *pos, unsigned long code)
 {
   assert(pos && pos->mapping);
-  return hashtable_get(pos->mapping, (void*) code);
+  return array_safe_deref(ul_array_hashmap_get(pos->mapping, code));
 }
 
 /*

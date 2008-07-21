@@ -18,7 +18,7 @@
 #include <assert.h>
 #include <string.h>
 #include "libgtcore/cstr.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/parseutils.h"
 #include "libgtcore/splitter.h"
@@ -33,10 +33,10 @@
 #define TRANSCRIPT_ID_ATTRIBUTE "transcript_id"
 
 struct GTF_parser {
-  Hashtable *sequence_region_to_range, /* map from sequence regions to ranges */
-            *gene_id_hash, /* map from gene_id to transcript_id hash */
-            *seqid_to_str_mapping,
-            *source_to_str_mapping;
+  Hashmap *sequence_region_to_range, /* map from sequence regions to ranges */
+          *gene_id_hash, /* map from gene_id to transcript_id hash */
+          *seqid_to_str_mapping,
+          *source_to_str_mapping;
   FeatureTypeFactory *feature_type_factory;
 };
 
@@ -75,15 +75,14 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
 GTF_parser* gtf_parser_new(FeatureTypeFactory *feature_type_factory)
 {
   GTF_parser *parser = ma_malloc(sizeof (GTF_parser));
-  parser->sequence_region_to_range = hashtable_new(HASH_STRING,
-                                                   ma_free_func,
-                                                   ma_free_func);
-  parser->gene_id_hash = hashtable_new(HASH_STRING, ma_free_func,
-                                       (FreeFunc) hashtable_delete);
-  parser->seqid_to_str_mapping = hashtable_new(HASH_STRING, NULL,
-                                               (FreeFunc) str_delete);
-  parser->source_to_str_mapping = hashtable_new(HASH_STRING, NULL,
-                                                (FreeFunc) str_delete);
+  parser->sequence_region_to_range = hashmap_new(HASH_STRING,
+                                                 ma_free_func, ma_free_func);
+  parser->gene_id_hash = hashmap_new(HASH_STRING, ma_free_func,
+                                     (FreeFunc) hashmap_delete);
+  parser->seqid_to_str_mapping = hashmap_new(HASH_STRING, NULL,
+                                             (FreeFunc) str_delete);
+  parser->source_to_str_mapping = hashmap_new(HASH_STRING, NULL,
+                                              (FreeFunc) str_delete);
   parser->feature_type_factory = feature_type_factory;
   return parser;
 }
@@ -169,7 +168,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
 static int construct_genes(UNUSED void *key, void *value, void *data,
                            Error *err)
 {
-  Hashtable *transcript_id_hash = (Hashtable*) value;
+  Hashmap *transcript_id_hash = (Hashmap*) value;
   Queue *genome_nodes = (Queue*) data;
   Array *mRNAs = array_new(sizeof (GenomeNode*));
   GenomeNode *gene_node, *gn;
@@ -182,7 +181,7 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
   error_check(err);
   assert(key && value && data);
 
-  had_err = hashtable_foreach(transcript_id_hash, construct_mRNAs, mRNAs, err);
+  had_err = hashmap_foreach(transcript_id_hash, construct_mRNAs, mRNAs, err);
   if (!had_err) {
     GenomeFeatureType *gene_type;
     assert(array_size(mRNAs)); /* at least one mRNA constructed */
@@ -248,7 +247,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
        *gene_id,
        *transcript_id,
        **tokens;
-  Hashtable *transcript_id_hash; /* map from transcript id to array of genome
+  Hashmap *transcript_id_hash; /* map from transcript id to array of genome
                                     nodes */
   Array *genome_node_array;
   GTF_feature_type gtf_feature_type;
@@ -347,8 +346,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       HANDLE_ERROR;
 
       /* process seqname (we have to do it here because we need the range) */
-      if ((rangeptr = hashtable_get(parser->sequence_region_to_range,
-                                    seqname))) {
+      if ((rangeptr = hashmap_get(parser->sequence_region_to_range,
+                                  seqname))) {
         /* sequence region is already defined -> update range */
         *rangeptr = range_join(range, *rangeptr);
       }
@@ -356,8 +355,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         /* sequence region is not already defined -> define it */
         rangeptr = ma_malloc(sizeof (Range));
         *rangeptr = range;
-        hashtable_add(parser->sequence_region_to_range, cstr_dup(seqname),
-                      rangeptr);
+        hashmap_add(parser->sequence_region_to_range, cstr_dup(seqname),
+                    rangeptr);
       }
 
       /* parse the score */
@@ -421,20 +420,20 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       HANDLE_ERROR;
 
       /* process the mandatory attributes */
-      if (!(transcript_id_hash = hashtable_get(parser->gene_id_hash,
-                                               gene_id))) {
-        transcript_id_hash = hashtable_new(HASH_STRING, ma_free_func,
-                                           (FreeFunc) array_delete);
-        hashtable_add(parser->gene_id_hash, cstr_dup(gene_id),
-                      transcript_id_hash);
+      if (!(transcript_id_hash = hashmap_get(parser->gene_id_hash,
+                                             gene_id))) {
+        transcript_id_hash = hashmap_new(HASH_STRING, ma_free_func,
+                                         (FreeFunc) array_delete);
+        hashmap_add(parser->gene_id_hash, cstr_dup(gene_id),
+                    transcript_id_hash);
       }
       assert(transcript_id_hash);
 
-      if (!(genome_node_array = hashtable_get(transcript_id_hash,
-                                              transcript_id))) {
+      if (!(genome_node_array = hashmap_get(transcript_id_hash,
+                                            transcript_id))) {
         genome_node_array = array_new(sizeof (GenomeNode*));
-        hashtable_add(transcript_id_hash, cstr_dup(transcript_id),
-                      genome_node_array);
+        hashmap_add(transcript_id_hash, cstr_dup(transcript_id),
+                    genome_node_array);
       }
       assert(genome_node_array);
 
@@ -443,21 +442,21 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       genome_node_set_origin(gn, filenamestr, line_number);
 
       /* set seqid */
-      seqid_str = hashtable_get(parser->seqid_to_str_mapping, seqname);
+      seqid_str = hashmap_get(parser->seqid_to_str_mapping, seqname);
       if (!seqid_str) {
         seqid_str = str_new_cstr(seqname);
-        hashtable_add(parser->seqid_to_str_mapping, str_get(seqid_str),
-                      seqid_str);
+        hashmap_add(parser->seqid_to_str_mapping, str_get(seqid_str),
+                    seqid_str);
       }
       assert(seqid_str);
       genome_node_set_seqid(gn, seqid_str);
 
       /* set source */
-      source_str = hashtable_get(parser->source_to_str_mapping, source);
+      source_str = hashmap_get(parser->source_to_str_mapping, source);
       if (!source_str) {
         source_str = str_new_cstr(source);
-        hashtable_add(parser->source_to_str_mapping, str_get(source_str),
-                      source_str);
+        hashmap_add(parser->source_to_str_mapping, str_get(source_str),
+                    source_str);
       }
       assert(source_str);
       genome_feature_set_source(gn, source_str);
@@ -474,15 +473,15 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 
   /* process all comments features */
   if (!had_err) {
-    had_err = hashtable_foreach(parser->sequence_region_to_range,
-                                construct_sequence_regions, genome_nodes, NULL);
+    had_err = hashmap_foreach(parser->sequence_region_to_range,
+                              construct_sequence_regions, genome_nodes, NULL);
     assert(!had_err); /* construct_sequence_regions() is sane */
   }
 
   /* process all genome_features */
   if (!had_err) {
-    had_err = hashtable_foreach(parser->gene_id_hash, construct_genes,
-                                genome_nodes, err);
+    had_err = hashmap_foreach(parser->gene_id_hash, construct_genes,
+                              genome_nodes, err);
   }
 
   /* free */
@@ -496,9 +495,9 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 void gtf_parser_delete(GTF_parser *parser)
 {
   if (!parser) return;
-  hashtable_delete(parser->sequence_region_to_range);
-  hashtable_delete(parser->gene_id_hash);
-  hashtable_delete(parser->seqid_to_str_mapping);
-  hashtable_delete(parser->source_to_str_mapping);
+  hashmap_delete(parser->sequence_region_to_range);
+  hashmap_delete(parser->gene_id_hash);
+  hashmap_delete(parser->seqid_to_str_mapping);
+  hashmap_delete(parser->source_to_str_mapping);
   ma_free(parser);
 }

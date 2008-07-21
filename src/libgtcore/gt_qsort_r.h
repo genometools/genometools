@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,20 +14,15 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#ifndef GT_QSORT_R_H
+#define GT_QSORT_R_H
 
-#ifndef GTT_H
-#define GTT_H
+#include <stdlib.h>
 
 #include "libgtcore/fptr.h"
-#include "libgtcore/hashmap.h"
-#include "libgtext/toolbox.h"
 
-/* The GenomeTools toolbox (gtt) module */
-
-Toolbox*   gtt_tools(void);      /* return all GenomeTools tools */
-
-typedef int  (*UnitTestFunc)(Error *);
-
-Hashmap* gtt_unit_tests(void); /* return all GenomeTools unit tests */
+void
+gt_qsort_r(void *a, size_t n, size_t es, void *data,
+           CompareWithData cmp);
 
 #endif

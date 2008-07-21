@@ -21,7 +21,7 @@
 #include "libgtcore/unused.h"
 
 static void* bsearch_generic(Array *members, const void *key, const void *base,
-                             size_t nmemb, size_t size, Compar compar,
+                             size_t nmemb, size_t size, CompareWithData compar,
                              void *data, Bittab *b)
 {
   char *baseptr = (char *)base, *tmp_ptr,
@@ -71,27 +71,27 @@ static void* bsearch_generic(Array *members, const void *key, const void *base,
 }
 
 void* bsearch_data(const void *key, const void *base, size_t nmemb, size_t size,
-                   Compar compar, void *data)
+                   CompareWithData compar, void *data)
 {
   return bsearch_generic(NULL, key, base, nmemb, size, compar, data, NULL);
 }
 
 void bsearch_all(Array *members, const void *key, const void *base,
-                 size_t nmemb, size_t size, Compar compar, void *data)
+                 size_t nmemb, size_t size, CompareWithData compar, void *data)
 {
   assert(members);
   bsearch_generic(members, key, base, nmemb, size, compar, data, NULL);
 }
 
 void bsearch_all_mark(Array *members, const void *key, const void *base,
-                      size_t nmemb, size_t size, Compar compar, void *data,
-                      Bittab *b)
+                      size_t nmemb, size_t size, CompareWithData compar,
+                      void *data, Bittab *b)
 {
   assert(members);
   bsearch_generic(members, key, base, nmemb, size, compar, data, b);
 }
 
-static int cmp(const void *a_ptr, const void *b_ptr, UNUSED const void *unsused)
+static int cmp(const void *a_ptr, const void *b_ptr, UNUSED void *unused)
 {
   int a, b;
   assert(a_ptr && b_ptr);

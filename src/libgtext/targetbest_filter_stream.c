@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/dlist.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/hashmap.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtext/genome_stream_rep.h"
@@ -31,7 +31,7 @@ struct TargetbestFilterStream
   GenomeStream *in_stream;
   Dlist *trees;
   Dlistelem *next;
-  Hashtable *target_to_elem; /* maps the target ids to Dlist elements */
+  Hashmap *target_to_elem; /* maps the target ids to Dlist elements */
   bool in_stream_processed;
 };
 
@@ -47,32 +47,32 @@ static void build_key(Str *key, GenomeFeature *feature, Str *target_id)
   str_append_str(key, target_id);
 }
 
-static void include_feature(Dlist *trees, Hashtable *target_to_elem,
+static void include_feature(Dlist *trees, Hashmap *target_to_elem,
                             GenomeFeature *feature, Str *key)
 {
   dlist_add(trees, feature);
-  hashtable_add(target_to_elem, cstr_dup(str_get(key)), dlist_last(trees));
+  hashmap_add(target_to_elem, cstr_dup(str_get(key)), dlist_last(trees));
 }
 
 static void remove_elem(Dlistelem *elem, Dlist *trees,
-                        Hashtable *target_to_elem, Str *key)
+                        Hashmap *target_to_elem, Str *key)
 {
   GenomeNode *node = dlistelem_get_data(elem);
   genome_node_rec_delete(node);
   dlist_remove(trees, elem);
-  hashtable_remove(target_to_elem, str_get(key));
+  hashmap_remove(target_to_elem, str_get(key));
 }
 
 static void replace_previous_elem(Dlistelem *previous_elem,
                                   GenomeFeature *current_feature, Dlist *trees,
-                                  Hashtable *target_to_elem, Str *key)
+                                  Hashmap *target_to_elem, Str *key)
 {
   remove_elem(previous_elem, trees, target_to_elem, key);
   include_feature(trees, target_to_elem, current_feature, key);
 }
 
 static void filter_targetbest(GenomeFeature *current_feature, Dlist *trees,
-                              Hashtable *target_to_elem)
+                              Hashmap *target_to_elem)
 {
   unsigned long num_of_targets;
   Dlistelem *previous_elem;
@@ -91,7 +91,7 @@ static void filter_targetbest(GenomeFeature *current_feature, Dlist *trees,
   if (num_of_targets == 1) {
     Str *key = str_new();
     build_key(key, current_feature, first_target_id);
-    if (!(previous_elem = hashtable_get(target_to_elem, str_get(key)))) {
+    if (!(previous_elem = hashmap_get(target_to_elem, str_get(key)))) {
       /* element with this target_id not included yet -> include it */
       include_feature(trees, target_to_elem, current_feature, key);
     }
@@ -158,7 +158,7 @@ static void targetbest_filter_stream_free(GenomeStream *gs)
   for (; tfs->next != NULL; tfs->next = dlistelem_next(tfs->next))
     genome_node_rec_delete(dlistelem_get_data(tfs->next));
   dlist_delete(tfs->trees);
-  hashtable_delete(tfs->target_to_elem);
+  hashmap_delete(tfs->target_to_elem);
   genome_stream_delete(tfs->in_stream);
 }
 
@@ -181,6 +181,6 @@ GenomeStream* targetbest_filter_stream_new(GenomeStream *in_stream)
   tfs->in_stream = genome_stream_ref(in_stream);
   tfs->in_stream_processed = false;
   tfs->trees = dlist_new(NULL);
-  tfs->target_to_elem = hashtable_new(HASH_STRING, ma_free_func, NULL);
+  tfs->target_to_elem = hashmap_new(HASH_STRING, ma_free_func, NULL);
   return gs;
 }
