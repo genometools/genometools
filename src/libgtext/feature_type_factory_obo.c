@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
@@ -79,8 +80,10 @@ static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
   assert(ftfo && obo_file_path);
   if ((obo_parse_tree = obo_parse_tree_new(obo_file_path, err))) {
     for (i = 0; i < obo_parse_tree_num_of_stanzas(obo_parse_tree); i++) {
-     add_genome_feature_from_tree(ftfo, obo_parse_tree, i, "id");
-     add_genome_feature_from_tree(ftfo, obo_parse_tree, i, "name");
+      if (!strcmp(obo_parse_tree_get_stanza_type(obo_parse_tree, i), "type")) {
+        add_genome_feature_from_tree(ftfo, obo_parse_tree, i, "id");
+        add_genome_feature_from_tree(ftfo, obo_parse_tree, i, "name");
+      }
     }
     obo_parse_tree_delete(obo_parse_tree);
     return 0;

@@ -41,13 +41,15 @@ static void obo_header_delete(OBOHeader *obo_header)
 }
 
 typedef struct {
+  char *type;
   Hashtable *content;
 } OBOStanza;
 
 #if 0
-static OBOStanza* obo_stanza_new(void)
+static OBOStanza* obo_stanza_new(type)
 {
   OBOStanza *obo_stanza = ma_malloc(sizeof *obo_stanza);
+  obo_stanza->type = cstr_dup(type);
   obo_stanza->content = hashtable_new(HASH_STRING, ma_free_func, ma_free_func);
   return obo_stanza;
 }
@@ -57,7 +59,14 @@ static void obo_stanza_delete(OBOStanza *obo_stanza)
 {
   if (!obo_stanza) return;
   hashtable_delete(obo_stanza->content);
+  ma_free(obo_stanza->type);
   ma_free(obo_stanza);
+}
+
+static const char* obo_stanza_get_type(const OBOStanza *obo_stanza)
+{
+  assert(obo_stanza);
+  return obo_stanza->type;
 }
 
 static const char* obo_stanza_get_value(const OBOStanza *obo_stanza,
@@ -110,6 +119,14 @@ void obo_parse_tree_delete(OBOParseTree *obo_parse_tree)
   array_delete(obo_parse_tree->stanzas);
   obo_header_delete(obo_parse_tree->obo_header);
   ma_free(obo_parse_tree);
+}
+
+const char* obo_parse_tree_get_stanza_type(OBOParseTree *obo_parse_tree,
+                                           unsigned long stanza_num)
+{
+  assert(obo_parse_tree);
+  return obo_stanza_get_type(*(OBOStanza**)
+                             array_get(obo_parse_tree->stanzas, stanza_num));
 }
 
 const char* obo_parse_tree_get_stanza_value(OBOParseTree *obo_parse_tree,
