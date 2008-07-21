@@ -29,9 +29,12 @@
 #include "intbits.h"
 #include "alphadef.h"
 #include "esa-myersapm.h"
-#include "idx-limdfs.h"
 #include "eis-voiditf.h"
 #include "format64.h"
+#include "idx-limdfs.h"
+#include "apmoveridx.h"
+#include "mssufpat.h"
+#include "stamp.h"
 
 #include "echoseq.pr"
 #include "esa-map.pr"
@@ -172,7 +175,7 @@ static int dotransformtag(Uchar *transformedtag,
   return 0;
 }
 
-static void performpatternsearch(const AbstractDfstransformer *adfst,
+static void performpatternsearch(const AbstractDfstransformer *dfst,
                                  const TageratorOptions *tageratoroptions,
                                  bool withesa,
                                  Myersonlineresources *mor,
@@ -186,7 +189,6 @@ static void performpatternsearch(const AbstractDfstransformer *adfst,
                                  void *processmatchinfooffline,
                                  UNUSED bool rcmatch)
 {
-  assert (tageratoroptions->maxdistance >= 0);
   if (tageratoroptions->online || tageratoroptions->docompare)
   {
     edistmyersbitvectorAPM(mor,
@@ -219,10 +221,13 @@ static void performpatternsearch(const AbstractDfstransformer *adfst,
       indexbasedapproxpatternmatching(limdfsresources,
                                       transformedtag,
                                       taglen,
-                                      tageratoroptions->maxdistance,
+                                      (tageratoroptions->maxdistance < 0) 
+                                        ?  0 
+                                        : (unsigned long) 
+                                          tageratoroptions->maxdistance,
                                       (Seqpos)
                                           tageratoroptions->maxintervalwidth,
-                                      adfst);
+                                      dfst);
     }
   }
 }
@@ -298,8 +303,15 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   ArraySimplematch storeonline, storeoffline;
   void *packedindex = NULL;
   bool withesa;
-  const AbstractDfstransformer *adfst = apm_AbstractDfstransformer();
+  const AbstractDfstransformer *dfst;
 
+  if (tageratoroptions->maxdistance >= 0)
+  {
+    dfst = apm_AbstractDfstransformer();
+  } else
+  {
+    dfst = pms_AbstractDfstransformer();
+  }
   if (str_length(tageratoroptions->esaindexname) > 0)
   {
     demand = SARR_ESQTAB;
@@ -398,7 +410,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                          totallength,
                                          processmatch,
                                          processmatchinfooffline,
-                                         adfst);
+                                         dfst);
     seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
     for (tagnumber = 0; !haserr; tagnumber++)
     {
@@ -440,7 +452,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
           {
             complementtag(transformedtag,taglen);
           }
-          performpatternsearch(adfst,
+          performpatternsearch(dfst,
                                tageratoroptions,
                                withesa,
                                mor,
@@ -465,7 +477,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   FREEARRAY(&storeoffline,Simplematch);
   if (limdfsresources != NULL)
   {
-    freeLimdfsresources(&limdfsresources,adfst);
+    freeLimdfsresources(&limdfsresources,dfst);
   }
   if (mor != NULL)
   {

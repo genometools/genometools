@@ -26,7 +26,7 @@ typedef struct
   Str *esaindexname, *pckindexname;
   long maxdistance;
   bool online, docompare, replacewildcard, fwdmatch, rcmatch, 
-       nospecials, domstats;
+       nospecials;
   unsigned long maxintervalwidth;
 } TageratorOptions;
 

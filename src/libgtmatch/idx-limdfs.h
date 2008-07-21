@@ -19,7 +19,7 @@
 #define IDX_LIMDFS_H
 
 #include "seqpos-def.h"
-#include "apmoveridx.h"
+#include "absdfstrans-def.h"
 
 typedef struct Limdfsresources Limdfsresources;
 

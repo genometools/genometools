@@ -60,15 +60,11 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                                     arguments->tagfiles);
   option_parser_add_option(op, option);
   option_is_mandatory(option);
+
   option = option_new_long("k",
                            "Specify the allowed number of differences",
                            &arguments->maxdistance,
                            -1L);
-  option_parser_add_option(op, option);
-
-  option = option_new_bool("ms","compute matching statistics for each "
-                           "suffix of the pattern",
-                           &arguments->domstats,false);
   option_parser_add_option(op, option);
 
   optionesaindex = option_new_string("esa",
@@ -81,6 +77,7 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                                      arguments->pckindexname, NULL);
   option_parser_add_option(op, optionpckindex);
   option_exclude(optionesaindex,optionpckindex);
+  option_is_mandatory_either(optionesaindex,optionpckindex);
 
   optiononline = option_new_bool("online","Perform online searches",
                             &arguments->online, false);
@@ -102,9 +99,10 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, option);
 
   option = option_new_bool("p","Compute palindromic "
-                           "(i.e. reverse complemented matches)",
+                           "(i.e. reverse complemented matches. DOES NOT WORK)",
                              &arguments->rcmatch, false);
   option_parser_add_option(op, option);
+  option_is_development_option(optionrw);
 
   option = option_new_ulong("maxocc","specify max number of match-occurrencs",
                            &arguments->maxintervalwidth,0);
@@ -156,11 +154,42 @@ static int gt_tagerator_runner(UNUSED int argc,
   return haserr ? -1 : 0;
 }
 
+static int gt_tagerator_arguments_check(UNUSED int rest_argc,
+                                        void *tool_arguments, 
+                                        Error *err)
+{
+  TageratorOptions *arguments = tool_arguments;
+
+  if (arguments->maxdistance < 0)
+  {
+    if (arguments->online)
+    {
+      error_set(err,"option -online requires option -k");
+      return -1;
+    }
+    if (arguments->docompare)
+    {
+      error_set(err,"option -cmp requires option -k");
+      return -1;
+    }
+    if (!arguments->nospecials)
+    {
+      arguments->nospecials = true;
+    }
+    if (arguments->maxintervalwidth > 0)
+    {
+      error_set(err,"if option -k is used then option -maxocc is not possible");
+      return -1;
+    }
+  }
+  return 0;
+}
+
 Tool* gt_tagerator(void)
 {
   return tool_new(gt_tagerator_arguments_new,
                   gt_tagerator_arguments_delete,
                   gt_tagerator_option_parser_new,
-                  NULL,
+                  gt_tagerator_arguments_check,
                   gt_tagerator_runner);
 }
