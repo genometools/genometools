@@ -39,7 +39,7 @@ typedef struct {
        verbose;
   long offset;
   Str *offsetfile,
-      *typechecker;
+      *typecheck;
   OutputFileInfo *ofi;
   GenFile *outfp;
 } GFF3Arguments;
@@ -48,7 +48,7 @@ static void* gt_gff3_arguments_new(void)
 {
   GFF3Arguments *arguments = ma_calloc(1, sizeof *arguments);
   arguments->offsetfile = str_new();
-  arguments->typechecker = str_new();
+  arguments->typecheck = str_new();
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -59,7 +59,7 @@ static void gt_gff3_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
-  str_delete(arguments->typechecker);
+  str_delete(arguments->typecheck);
   str_delete(arguments->offsetfile);
   ma_free(arguments);
 }
@@ -117,10 +117,10 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, offsetfile_option);
   option_exclude(offset_option, offsetfile_option);
 
-  /* -typechecker */
-  option = option_new_string("typechecker", "set GFF3 type checker\n"
+  /* -typecheck */
+  option = option_new_string("typecheck", "set GFF3 type checker\n"
                              "choose any|built-in|OBO_file_path",
-                             arguments->typechecker, "any");
+                             arguments->typecheck, "any");
   option_is_development_option(option);
   option_parser_add_option(op, option);
 
@@ -163,13 +163,13 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   last_stream = gff3_in_stream;
 
   /* set different type checker if necessary */
-  if (strcmp(str_get(arguments->typechecker), "any")) {
-    if (!strcmp(str_get(arguments->typechecker), "built-in")) {
+  if (strcmp(str_get(arguments->typecheck), "any")) {
+    if (!strcmp(str_get(arguments->typecheck), "built-in")) {
       ftf = feature_type_factory_builtin_new();
       gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
     }
     else {
-      if (!(ftf = feature_type_factory_obo_new(str_get(arguments->typechecker),
+      if (!(ftf = feature_type_factory_obo_new(str_get(arguments->typecheck),
                                                err))) {
         had_err = -1;
       }
