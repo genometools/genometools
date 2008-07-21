@@ -207,7 +207,9 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
       printf("cc=%u\n",(unsigned int) cc);
 #endif
       adfst->inplacenextDfsstate(limdfsresources->dfsconstinfo,
-                                 limdfsresources->currentdfsstate,cc);
+                                 limdfsresources->currentdfsstate,
+                                 pos - startpos + 1,
+                                 cc);
       pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
                                          (Seqpos) 1,
                                          pos - startpos + 1,
@@ -267,7 +269,9 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       printf("cc=%u\n",(unsigned int) cc);
 #endif
       adfst->inplacenextDfsstate(limdfsresources->dfsconstinfo,
-                                 limdfsresources->currentdfsstate,cc);
+                                 limdfsresources->currentdfsstate,
+                                 offset + contextlength,
+                                 cc);
       pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
                                          (Seqpos) 1,
                                          offset + contextlength,
@@ -315,7 +319,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
 #endif
   adfst->nextDfsstate(limdfsresources->dfsconstinfo,
                       stackptr->aliasstate,
-                      (unsigned long) (child->offset-1),
+                      (unsigned long) child->offset,
                       inchar,
                       indfsstate);
 #ifdef SKDEBUG

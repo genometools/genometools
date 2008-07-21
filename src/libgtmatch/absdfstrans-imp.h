@@ -17,7 +17,6 @@
 
 #ifndef ABSDFSTRANS_IMP_H
 #define ABSDFSTRANS_IMP_H
-#include "libgtcore/unused.h"
 #include "defined-types.h"
 #include "absdfstrans-def.h"
 
@@ -43,15 +42,16 @@ struct AbstractDfstransformer
                           void *dfsconstinfo);
   unsigned long (*limdfsnextstep)(DECLAREPTRDFSSTATE(aliascolumn),
                                   Seqpos width,
-                                  Seqpos currentdepth,
+                                  unsigned long currentdepth,
                                   void *dfsconstinfo);
   void (*nextDfsstate)(const void *dfsconstinfo,
                        DECLAREPTRDFSSTATE(aliasoutstate),
-                       UNUSED unsigned long startscore,
+                       unsigned long currentdepth,
                        Uchar currentchar,
                        const DECLAREPTRDFSSTATE(aliasinstate));
   void (*inplacenextDfsstate)(const void *dfsconstinfo,
                               DECLAREPTRDFSSTATE(aliasstate),
+                              unsigned long currentdepth,
                               Uchar currentchar);
 #ifdef SKDEBUG
   void (*showLimdfsstate)(const DECLAREPTRDFSSTATE(aliasstate),

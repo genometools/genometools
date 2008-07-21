@@ -153,7 +153,7 @@ static void pms_initParallelmstats(DECLAREPTRDFSSTATE(aliascolumn),
 static unsigned long pms_nextstepfullmatches(
                               DECLAREPTRDFSSTATE(aliascolumn),
                               UNUSED Seqpos width,
-                              Seqpos currentdepth,
+                              unsigned long currentdepth,
                               void *dfsconstinfo)
 {
   Parallelmstats *limdfsstate = (Parallelmstats *) aliascolumn;
@@ -173,9 +173,9 @@ static unsigned long pms_nextstepfullmatches(
       assert(bitindex >= first1);
       bitindex -= first1;
       assert(bitindex < (unsigned long) INTWORDSIZE);
-      if (mti->mstatlength[bitindex] < (unsigned long) currentdepth)
+      if (mti->mstatlength[bitindex] < currentdepth)
       {
-        mti->mstatlength[bitindex] = (unsigned long) currentdepth;
+        mti->mstatlength[bitindex] = currentdepth;
       }
       tmp >>= (first1+1);
     } while (tmp != 0);
@@ -185,7 +185,7 @@ static unsigned long pms_nextstepfullmatches(
 
 static void pms_nextParallelmstats(const void *dfsconstinfo,
                                    DECLAREPTRDFSSTATE(aliasoutcol),
-                                   unsigned long previousdepth,
+                                   unsigned long currentdepth,
                                    Uchar currentchar,
                                    const DECLAREPTRDFSSTATE(aliasincol))
 {
@@ -193,8 +193,22 @@ static void pms_nextParallelmstats(const void *dfsconstinfo,
   Parallelmstats *outcol = (Parallelmstats *) aliasoutcol;
   const Parallelmstats *incol = (const Parallelmstats *) aliasincol;
 
-  outcol->prefixofsuffix
-    = incol->prefixofsuffix & (mti->eqsvector[currentchar] << previousdepth);
+  assert(ISNOTSPECIAL(currentchar));
+  assert(currentdepth > 0);
+  outcol->prefixofsuffix = incol->prefixofsuffix &
+                           (mti->eqsvector[currentchar] << (currentdepth-1));
+}
+
+static void pms_inplacenextParallelmstats(const void *dfsconstinfo,
+                                          DECLAREPTRDFSSTATE(aliascol),
+                                          unsigned long currentdepth,
+                                          Uchar currentchar)
+{
+  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
+  Parallelmstats *col = (Parallelmstats *) aliascol;
+
+  assert(ISNOTSPECIAL(currentchar));
+  col->prefixofsuffix &= (mti->eqsvector[currentchar] << (currentdepth-1));
 }
 
 const AbstractDfstransformer *pms_AbstractDfstransformer(void)
@@ -208,7 +222,7 @@ const AbstractDfstransformer *pms_AbstractDfstransformer(void)
     pms_initParallelmstats,
     pms_nextstepfullmatches,
     pms_nextParallelmstats,
-    NULL,
+    pms_inplacenextParallelmstats,
 #ifdef SKDEBUG
     pms_showParallelmstats,
 #endif

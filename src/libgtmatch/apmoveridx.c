@@ -195,22 +195,21 @@ static void apm_initMyerscolumn(DECLAREPTRDFSSTATE(aliascolumn),
 #endif
 }
 
-static unsigned long apm_nextstepfullmatches(
-                              DECLAREPTRDFSSTATE(aliascolumn),
-                              Seqpos width,
-                              UNUSED Seqpos currentdepth,
-                              void *dfsconstinfo)
+static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
+                                             Seqpos width,
+                                             UNUSED unsigned long currentdepth,
+                                             void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
-  Myerscolumn *limdfsstate = (Myerscolumn *) aliascolumn;
+  Myerscolumn *col = (Myerscolumn *) aliascolumn;
 
-  if (limdfsstate->maxleqk == UNDEFMAXLEQK)
+  if (col->maxleqk == UNDEFMAXLEQK)
   {
     return 0; /* stop depth first traversal */
   }
   if (mti->maxintervalwidth == 0)
   {
-    if (limdfsstate->maxleqk == SUCCESSMAXLEQK)
+    if (col->maxleqk == SUCCESSMAXLEQK)
     {
       return mti->patternlength+1; /* success with match of length plen */
     }
@@ -218,8 +217,8 @@ static unsigned long apm_nextstepfullmatches(
   {
     if (width <= mti->maxintervalwidth)
     {
-      assert(limdfsstate->maxleqk > 0);
-      return limdfsstate->maxleqk+1;
+      assert(col->maxleqk > 0);
+      return col->maxleqk+1;
     }
   }
   return 1UL; /* continue with depth first traversal */
@@ -229,7 +228,7 @@ static unsigned long apm_nextstepfullmatches(
 
 static void apm_nextMyercolumn(const void *dfsconstinfo,
                                DECLAREPTRDFSSTATE(aliasoutcol),
-                               UNUSED unsigned long startscore,
+                               UNUSED unsigned long currentdepth,
                                Uchar currentchar,
                                const DECLAREPTRDFSSTATE(aliasincol))
 {
@@ -317,7 +316,8 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
 }
 
 static void apm_inplacenextMyercolumn(const void *dfsconstinfo,
-                                      DECLAREPTRDFSSTATE(limdfsstate),
+                                      DECLAREPTRDFSSTATE(aliascol),
+                                      UNUSED unsigned long currentdepth,
                                       Uchar currentchar)
 {
   unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
@@ -325,7 +325,7 @@ static void apm_inplacenextMyercolumn(const void *dfsconstinfo,
                 idx,                /* a counter */
                 score;              /* current score */
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
-  Myerscolumn *col = (Myerscolumn *) limdfsstate;
+  Myerscolumn *col = (Myerscolumn *) aliascol;
 
   assert(col->maxleqk != UNDEFMAXLEQK);
   assert(mti->maxintervalwidth > 0 || col->maxleqk != SUCCESSMAXLEQK);
@@ -421,7 +421,9 @@ Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
       result.valueunsignedlong = 0;
       return result;
     }
-    apm_inplacenextMyercolumn(dfsconstinfo,(Aliasdfsstate *) &currentcol,cc);
+    apm_inplacenextMyercolumn(dfsconstinfo,(Aliasdfsstate *) &currentcol,
+                              (unsigned long) (startpos - pos),
+                              cc);
     assert (currentcol.maxleqk != UNDEFMAXLEQK);
     if (currentcol.maxleqk == SUCCESSMAXLEQK || pos == totallength-1)
     {
