@@ -443,6 +443,7 @@ const AbstractDfstransformer *apm_AbstractDfstransformer(void)
     sizeof (Myerscolumn),
     apm_allocatedfsconstinfo,
     apm_initdfsconstinfo,
+    NULL, /* no extractdfsconstinfo */
     apm_freedfsconstinfo,
     apm_initMyerscolumn,
     apm_nextstepfullmatches,

@@ -585,6 +585,10 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
     (limdfsresources->withesa ? esa_splitandprocess : pck_splitandprocess)
         (limdfsresources,&parentwithinfo,adfst);
   }
+  if (adfst->extractdfsconstinfo != NULL)
+  {
+    adfst->extractdfsconstinfo(&limdfsresources->dfsconstinfo);
+  }
 }
 
 /*

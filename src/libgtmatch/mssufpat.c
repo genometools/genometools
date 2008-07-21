@@ -89,6 +89,21 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
   mti->patternlength = patternlength;
 }
 
+static void pms_extractdfsconstinfo(void *dfsconstinfo)
+{
+  unsigned long idx;
+  Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
+
+  for (idx=0; idx<mti->patternlength; idx++)
+  {
+    if (mti->mstatlength[idx] > 0)
+    {
+      printf("%lu->%lu ",idx,mti->mstatlength[idx]);
+    }
+  }
+  printf("\n");
+}
+
 static void pms_freedfsconstinfo(void **dfsconstinfo)
 {
   Matchtaskinfo *mti = (Matchtaskinfo *) *dfsconstinfo;
@@ -218,6 +233,7 @@ const AbstractDfstransformer *pms_AbstractDfstransformer(void)
     sizeof (Parallelmstats),
     pms_allocatedfsconstinfo,
     pms_initdfsconstinfo,
+    pms_extractdfsconstinfo,
     pms_freedfsconstinfo,
     pms_initParallelmstats,
     pms_nextstepfullmatches,
