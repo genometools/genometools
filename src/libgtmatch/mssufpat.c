@@ -84,12 +84,23 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
                                  UNUSED Seqpos maxintervalwidth)
 {
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
+#ifdef SKDEBUG
+  int a;
+#endif
 
   initeqsvector(mti->eqsvector,(unsigned long) alphasize,pattern,patternlength);
+#ifdef SKDEBUG
+  for (a=0; a<4; a++)
+  {
+    char buffer[32+1];
+    uint32_t2string(buffer,mti->eqsvector[a]);
+    printf("# %d->%s\n",a,buffer);
+  }
+#endif
   mti->patternlength = patternlength;
 }
 
-static void pms_extractdfsconstinfo(void *dfsconstinfo)
+static void pms_extractdfsconstinfo(UNUSED void *dfsconstinfo)
 {
   unsigned long idx;
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
@@ -181,18 +192,17 @@ static unsigned long pms_nextstepfullmatches(
     Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
     unsigned long tmp, bitindex, first1;
     tmp = limdfsstate->prefixofsuffix;
-    bitindex = (unsigned long) (INTWORDSIZE-1);
+    bitindex = 0;
     do
     {
       first1 = zerosontheright(tmp);
-      assert(bitindex >= first1);
-      bitindex -= first1;
-      assert(bitindex < (unsigned long) INTWORDSIZE);
-      if (mti->mstatlength[bitindex] < currentdepth)
+      assert(bitindex + first1 < mti->patternlength);
+      if (mti->mstatlength[bitindex+first1] < currentdepth)
       {
-        mti->mstatlength[bitindex] = currentdepth;
+        mti->mstatlength[bitindex+first1] = currentdepth;
       }
       tmp >>= (first1+1);
+      bitindex += (first1+1);
     } while (tmp != 0);
   }
   return 1UL; /* continue with depth first traversal */
@@ -204,14 +214,24 @@ static void pms_nextParallelmstats(const void *dfsconstinfo,
                                    Uchar currentchar,
                                    const DECLAREPTRDFSSTATE(aliasincol))
 {
+#ifdef SKDEBUG
+  char buffer1[32+1], buffer2[32+1];
+#endif
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Parallelmstats *outcol = (Parallelmstats *) aliasoutcol;
   const Parallelmstats *incol = (const Parallelmstats *) aliasincol;
 
   assert(ISNOTSPECIAL(currentchar));
   assert(currentdepth > 0);
+
   outcol->prefixofsuffix = incol->prefixofsuffix &
                            (mti->eqsvector[currentchar] << (currentdepth-1));
+#ifdef SKDEBUG
+  uint32_t2string(buffer1,(uint32_t) incol->prefixofsuffix);
+  uint32_t2string(buffer2,(uint32_t) outcol->prefixofsuffix);
+  printf("next(%s,%u,depth=%lu)->%s\n",buffer1,currentchar,
+                                       currentdepth,buffer2);
+#endif
 }
 
 static void pms_inplacenextParallelmstats(const void *dfsconstinfo,
@@ -219,11 +239,22 @@ static void pms_inplacenextParallelmstats(const void *dfsconstinfo,
                                           unsigned long currentdepth,
                                           Uchar currentchar)
 {
+#ifdef SKDEBUG
+  char buffer1[32+1], buffer2[32+1];
+#endif
+  unsigned long tmp;
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Parallelmstats *col = (Parallelmstats *) aliascol;
 
   assert(ISNOTSPECIAL(currentchar));
+  tmp = col->prefixofsuffix;
   col->prefixofsuffix &= (mti->eqsvector[currentchar] << (currentdepth-1));
+#ifdef DEBUG
+  uint32_t2string(buffer1,(uint32_t) tmp);
+  uint32_t2string(buffer2,(uint32_t) col->prefixofsuffix);
+  printf("inplacenext(%s,%u,%lu)->%s\n",buffer1,currentchar,currentdepth,
+                                        buffer2);
+#endif
 }
 
 const AbstractDfstransformer *pms_AbstractDfstransformer(void)

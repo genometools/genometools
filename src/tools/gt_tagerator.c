@@ -155,7 +155,7 @@ static int gt_tagerator_runner(UNUSED int argc,
 }
 
 static int gt_tagerator_arguments_check(UNUSED int rest_argc,
-                                        void *tool_arguments, 
+                                        void *tool_arguments,
                                         Error *err)
 {
   TageratorOptions *arguments = tool_arguments;

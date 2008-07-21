@@ -587,7 +587,7 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
   }
   if (adfst->extractdfsconstinfo != NULL)
   {
-    adfst->extractdfsconstinfo(&limdfsresources->dfsconstinfo);
+    adfst->extractdfsconstinfo(limdfsresources->dfsconstinfo);
   }
 }
 

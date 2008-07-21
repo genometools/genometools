@@ -221,9 +221,9 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
       indexbasedapproxpatternmatching(limdfsresources,
                                       transformedtag,
                                       taglen,
-                                      (tageratoroptions->maxdistance < 0) 
-                                        ?  0 
-                                        : (unsigned long) 
+                                      (tageratoroptions->maxdistance < 0)
+                                        ?  0
+                                        : (unsigned long)
                                           tageratoroptions->maxdistance,
                                       (Seqpos)
                                           tageratoroptions->maxintervalwidth,
