@@ -22,7 +22,7 @@
 #include "libgtcore/undef.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/add_introns_stream.h"
-#include "libgtext/feature_type_factory_any.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/feature_type_factory_obo.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
@@ -120,7 +120,7 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   /* -typechecker */
   option = option_new_string("typechecker", "set GFF3 type checker\n"
                              "choose any|built-in|OBO_file_path",
-                             arguments->typechecker, "built-in");
+                             arguments->typechecker, "any");
   option_is_development_option(option);
   option_parser_add_option(op, option);
 
@@ -163,9 +163,9 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   last_stream = gff3_in_stream;
 
   /* set different type checker if necessary */
-  if (strcmp(str_get(arguments->typechecker), "built-in")) {
-    if (!strcmp(str_get(arguments->typechecker), "any")) {
-      ftf = feature_type_factory_any_new();
+  if (strcmp(str_get(arguments->typechecker), "any")) {
+    if (!strcmp(str_get(arguments->typechecker), "built-in")) {
+      ftf = feature_type_factory_builtin_new();
       gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
     }
     else {
