@@ -60,10 +60,15 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                                     arguments->tagfiles);
   option_parser_add_option(op, option);
   option_is_mandatory(option);
-  option = option_new_ulong("k",
-                            "Specify the allowed number of difference",
-                            &arguments->maxdistance,
-                            0);
+  option = option_new_long("k",
+                           "Specify the allowed number of differences",
+                           &arguments->maxdistance,
+                           -1L);
+  option_parser_add_option(op, option);
+
+  option = option_new_bool("ms","compute matching statistics for each "
+                           "suffix of the pattern",
+                           &arguments->domstats,false);
   option_parser_add_option(op, option);
 
   optionesaindex = option_new_string("esa",
@@ -129,7 +134,13 @@ static int gt_tagerator_runner(UNUSED int argc,
   {
     printf("# tagfile=%s\n",strarray_get(arguments->tagfiles,idx));
   }
-  printf("# maxdifference=%lu\n",arguments->maxdistance);
+  if (arguments->maxdistance == -1L)
+  {
+    printf("# maxdistance=undefined\n");
+  } else
+  {
+    printf("# maxdistance=%ld\n",arguments->maxdistance);
+  }
   if (str_length(arguments->esaindexname) > 0)
   {
     printf("# indexname(esa)=%s\n",str_get(arguments->esaindexname));

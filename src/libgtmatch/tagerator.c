@@ -172,26 +172,27 @@ static int dotransformtag(Uchar *transformedtag,
   return 0;
 }
 
-static void performthesearch(const AbstractDfstransformer *adfst,
-                             const TageratorOptions *tageratoroptions,
-                             bool withesa,
-                             Myersonlineresources *mor,
-                             Limdfsresources *limdfsresources,
-                             const Uchar *transformedtag,
-                             unsigned long taglen,
-                             Seqpos totallength,
-                             void (*processmatch)(void *,bool,Seqpos,
-                                                  Seqpos,Seqpos,
-                                                  unsigned long),
-                             void *processmatchinfooffline,
-                             UNUSED bool rcmatch)
+static void performpatternsearch(const AbstractDfstransformer *adfst,
+                                 const TageratorOptions *tageratoroptions,
+                                 bool withesa,
+                                 Myersonlineresources *mor,
+                                 Limdfsresources *limdfsresources,
+                                 const Uchar *transformedtag,
+                                 unsigned long taglen,
+                                 Seqpos totallength,
+                                 void (*processmatch)(void *,bool,Seqpos,
+                                                      Seqpos,Seqpos,
+                                                      unsigned long),
+                                 void *processmatchinfooffline,
+                                 UNUSED bool rcmatch)
 {
+  assert (tageratoroptions->maxdistance >= 0);
   if (tageratoroptions->online || tageratoroptions->docompare)
   {
     edistmyersbitvectorAPM(mor,
                            transformedtag,
                            taglen,
-                           tageratoroptions->maxdistance);
+                           (unsigned long) tageratoroptions->maxdistance);
   }
   if (!tageratoroptions->online || tageratoroptions->docompare)
   {
@@ -423,13 +424,13 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
         break;
       }
       printf("# patternlength=%lu\n",taglen);
-      printf("# maxdistance=%lu\n",tageratoroptions->maxdistance);
       printf("# tag=");
       fprintfsymbolstring(stdout,suffixarray.alpha,transformedtag,taglen);
       printf("\n");
       storeoffline.nextfreeSimplematch = 0;
       storeonline.nextfreeSimplematch = 0;
-      assert(taglen > tageratoroptions->maxdistance);
+      assert(tageratoroptions->maxdistance < 0 ||
+             taglen > (unsigned long) tageratoroptions->maxdistance);
       for (try=0 ; try < 2; try++)
       {
         if ((try == 0 && tageratoroptions->fwdmatch) ||
@@ -439,18 +440,18 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
           {
             complementtag(transformedtag,taglen);
           }
-          performthesearch(adfst,
-                           tageratoroptions,
-                           withesa,
-                           mor,
-                           limdfsresources,
-                           transformedtag,
-                           taglen,
-                           totallength,
-                           processmatch,
-                           processmatchinfooffline,
-                           (try == 1 && tageratoroptions->rcmatch)
-                             ? true : false);
+          performpatternsearch(adfst,
+                               tageratoroptions,
+                               withesa,
+                               mor,
+                               limdfsresources,
+                               transformedtag,
+                               taglen,
+                               totallength,
+                               processmatch,
+                               processmatchinfooffline,
+                               (try == 1 && tageratoroptions->rcmatch)
+                                 ? true : false);
           if (tageratoroptions->docompare)
           {
             compareresults(&storeonline,&storeoffline);

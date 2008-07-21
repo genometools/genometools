@@ -208,11 +208,11 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 #endif
       adfst->inplacenextDfsstate(limdfsresources->dfsconstinfo,
                                  limdfsresources->currentdfsstate,
-                                 pos - startpos + 1,
+                                 (unsigned long) (pos - startpos + 1),
                                  cc);
       pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
                                          (Seqpos) 1,
-                                         pos - startpos + 1,
+                                         (unsigned long) (pos - startpos + 1),
                                          limdfsresources->dfsconstinfo);
       if (pprefixlen == 0) /* failure */
       {
@@ -270,11 +270,11 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 #endif
       adfst->inplacenextDfsstate(limdfsresources->dfsconstinfo,
                                  limdfsresources->currentdfsstate,
-                                 offset + contextlength,
+                                 (unsigned long) (offset + contextlength),
                                  cc);
       pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
                                          (Seqpos) 1,
-                                         offset + contextlength,
+                                         (unsigned long) (offset+contextlength),
                                          limdfsresources->dfsconstinfo);
       if (pprefixlen == 0)
       {
@@ -336,7 +336,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
   }
   pprefixlen = adfst->limdfsnextstep(stackptr->aliasstate,
                                      width,
-                                     child->offset,
+                                     (unsigned long) child->offset,
                                      limdfsresources->dfsconstinfo);
   if (pprefixlen == 0)
   {

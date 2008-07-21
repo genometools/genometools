@@ -17,7 +17,6 @@
 
 #ifndef APMOVERIDX_H
 #define APMOVERIDX_H
-#include "libgtcore/unused.h"
 #include "defined-types.h"
 #include "absdfstrans-def.h"
 

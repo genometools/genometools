@@ -15,21 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TAGERATOR_H
-#define TAGERATOR_H
-#include "libgtcore/strarray.h"
-#include "libgtcore/error.h"
+#ifndef MSSUFPAT_H
+#define MSSUFPAT_H
+#include "absdfstrans-def.h"
 
-typedef struct
-{
-  StrArray *tagfiles;
-  Str *esaindexname, *pckindexname;
-  long maxdistance;
-  bool online, docompare, replacewildcard, fwdmatch, rcmatch, 
-       nospecials, domstats;
-  unsigned long maxintervalwidth;
-} TageratorOptions;
-
-int runtagerator(const TageratorOptions *tageratoroptions,Error *err);
+const AbstractDfstransformer *pms_AbstractDfstransformer(void);
 
 #endif
