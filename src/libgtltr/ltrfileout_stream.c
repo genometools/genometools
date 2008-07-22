@@ -529,13 +529,11 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
               "lLTR start\tlLTR end\tlLTR length\t"
               "rLTR start\trLTR end\trLTR length\t"
               "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");
-  if (tests_to_run & LTRDIGEST_RUN_PBS)
-    genfile_xprintf(ls->tabout_file,
+  genfile_xprintf(ls->tabout_file,
               "\tPBS start\tPBS end\tPBS strand\ttRNA\ttRNA motif\tPBS offset\t"
               "tRNA offset\tPBS/tRNA edist");
 #ifdef HAVE_HMMER
-  if (tests_to_run & LTRDIGEST_RUN_PDOM)
-    genfile_xprintf(ls->tabout_file, "\tProtein domain hits");
+  genfile_xprintf(ls->tabout_file, "\tProtein domain hits");
 #endif
   genfile_xprintf(ls->tabout_file, "\n");
 
