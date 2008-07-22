@@ -51,6 +51,7 @@ else
 end
 
 $transdir=File.join(Dir.pwd, "..", "gtdata" , "trans", "")
+$obodir=File.join(Dir.pwd, "..", "gtdata" , "obo_files", "")
 
 $scriptsdir=File.join(Dir.pwd, "..", "scripts", "")
 

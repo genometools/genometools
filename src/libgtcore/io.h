@@ -20,6 +20,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include "libgtcore/str.h"
 
 /* the I/O class */
 typedef struct IO IO;
@@ -30,8 +31,11 @@ int           io_get_char(IO*, char*); /* returns -1 if no char is left,
 void          io_unget_char(IO*, char); /* can only be used once at a time */
 bool          io_line_start(const IO*);
 bool          io_has_char(IO*);
+char          io_peek(IO*);
+char          io_next(IO*);
 unsigned long io_get_line_number(const IO*);
 const char*   io_get_filename(const IO*);
+Str*          io_get_filename_str(const IO*);
 void          io_delete(IO*);
 
 #endif

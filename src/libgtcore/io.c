@@ -24,7 +24,8 @@
 
 struct IO {
   GenFile *fp;
-  char unget_char, *path;
+  char unget_char;
+  Str *path;
   unsigned long line_number;
   bool unget_used, line_start;
 };
@@ -37,11 +38,11 @@ IO* io_new(const char *path, const char *mode)
   io = ma_malloc(sizeof (IO));
   if (path) {
     io->fp = genfile_xopen(path, mode);
-    io->path = cstr_dup(path);
+    io->path = str_new_cstr(path);
   }
   else {
     io->fp = NULL;
-    io->path = cstr_dup("stdin");
+    io->path = str_new_cstr("stdin");
   }
   io->line_number = 1;
   io->unget_used = false;
@@ -56,6 +57,8 @@ int io_get_char(IO *io, char *c)
   if (io->unget_used) {
     *c = io->unget_char;
     io->unget_used = false;
+    if (io->unget_char == EOF)
+      return -1;
     return 0;
   }
   cc = genfile_xfgetc(io->fp);
@@ -65,9 +68,9 @@ int io_get_char(IO *io, char *c)
   }
   else
     io->line_start = false;
+  *c = cc;
   if (cc == EOF)
     return -1; /* no character left */
-  *c = cc;
   return 0;
 }
 
@@ -95,6 +98,23 @@ bool io_has_char(IO *io)
   return rval ? false : true;
 }
 
+char io_peek(IO *io)
+{
+  char c;
+  assert(io);
+  io_get_char(io, &c);
+  io_unget_char(io, c);
+  return c;
+}
+
+char io_next(IO *io)
+{
+  char c;
+  assert(io);
+  io_get_char(io, &c);
+  return c;
+}
+
 unsigned long io_get_line_number(const IO *io)
 {
   assert(io);
@@ -104,6 +124,12 @@ unsigned long io_get_line_number(const IO *io)
 const char* io_get_filename(const IO *io)
 {
   assert(io && io->path);
+  return str_get(io->path);
+}
+
+Str* io_get_filename_str(const IO *io)
+{
+  assert(io && io->path);
   return io->path;
 }
 
@@ -111,6 +137,6 @@ void io_delete(IO *io)
 {
   if (!io) return;
   genfile_close(io->fp);
-  ma_free(io->path);
+  str_delete(io->path);
   ma_free(io);
 }

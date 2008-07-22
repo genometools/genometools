@@ -28,10 +28,10 @@ typedef struct OBOParseTree OBOParseTree;
 OBOParseTree* obo_parse_tree_new(const char *obo_file_path, Error *err);
 void          obo_parse_tree_delete(OBOParseTree*);
 /* Return the type of stanza number <stanza_number>. */
-const char*   obo_parse_tree_get_stanza_type(OBOParseTree*,
+const char*   obo_parse_tree_get_stanza_type(const OBOParseTree*,
                                              unsigned long stanza_num);
 /* Return the value of entry <stanza_key> in stanza number <stanza_number>. */
-const char*   obo_parse_tree_get_stanza_value(OBOParseTree*,
+const char*   obo_parse_tree_get_stanza_value(const OBOParseTree*,
                                               unsigned long stanza_num,
                                               const char *stanza_key);
 /* Return the number of stanzas. */

@@ -390,3 +390,139 @@ Test do
            :retval => 1)
   grep $last_stderr, "must have 3 or 4 blank separated entries"
 end
+
+# test OBO file parsing
+obo_gff3_file="#{$testdata}standard_gene_as_tree.gff3"
+
+Name "gt gff3 -typecheck empty file"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck #{$testdata}empty_file #{obo_gff3_file}",
+           :retval => 1)
+  grep $last_stderr, "unexpected end-of-file"
+end
+
+Name "gt gff3 -typecheck blank line"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck #{$testdata}obo_files/blank_line.obo " +
+           "#{obo_gff3_file}", :retval => 1)
+  grep $last_stderr, "unexpected end-of-file"
+end
+
+Name "gt gff3 -typecheck comment line"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck #{$testdata}obo_files/comment_line.obo " +
+           "#{obo_gff3_file}", :retval => 1)
+  grep $last_stderr, "unexpected end-of-file"
+end
+
+Name "gt gff3 -typecheck blank-comment line"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck " +
+           "#{$testdata}obo_files/blank_comment_line.obo #{obo_gff3_file}",
+           :retval => 1)
+  grep $last_stderr, "unexpected end-of-file"
+end
+
+Name "gt gff3 -typecheck tag only"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck " +
+           "#{$testdata}obo_files/tag_only.obo #{obo_gff3_file}",
+           :retval => 1)
+  grep $last_stderr, "expected character ':'"
+end
+
+Name "gt gff3 -typecheck missing value"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck " +
+           "#{$testdata}obo_files/missing_value.obo #{obo_gff3_file}",
+           :retval => 1)
+  grep $last_stderr, "unexpected newline"
+end
+
+Name "gt gff3 -typecheck minimal header"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test "#{$bin}gt gff3 -typecheck " +
+           "#{$testdata}obo_files/minimal_header.obo #{$testdata}empty_file"
+end
+
+Name "gt gff3 -typecheck corrupt header"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck " +
+           "#{$testdata}obo_files/corrupt_header.obo #{obo_gff3_file}",
+           :retval => 1)
+  grep $last_stderr, "does not contain \"format-version\" tag"
+end
+
+Name "gt gff3 -typecheck minimal stanza"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test "#{$bin}gt gff3 -typecheck " +
+           "#{$testdata}obo_files/minimal_stanza.obo #{$testdata}empty_file"
+end
+
+Name "gt gff3 -typecheck corrupt term stanza"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck " +
+           "#{$testdata}obo_files/corrupt_term_stanza.obo #{obo_gff3_file}",
+           :retval => 1)
+  grep $last_stderr, "lacks required \"name\" tag"
+end
+
+Name "gt gff3 -typecheck corrupt typedef stanza"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck " +
+           "#{$testdata}obo_files/corrupt_typedef_stanza.obo #{obo_gff3_file}",
+           :retval => 1)
+  grep $last_stderr, "lacks required \"name\" tag"
+end
+
+Name "gt gff3 -typecheck corrupt instance stanza"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck " +
+           "#{$testdata}obo_files/corrupt_instance_stanza.obo #{obo_gff3_file}",
+           :retval => 1)
+  grep $last_stderr, "lacks required \"instance_of\" tag"
+end
+
+Name "gt gff3 -typecheck windows newline"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test "#{$bin}gt gff3 -typecheck " +
+           "#{$testdata}obo_files/windows_newline.obo #{$testdata}empty_file"
+end
+
+Name "gt gff3 -typecheck comment in stanza"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test "#{$bin}gt gff3 -typecheck " +
+           "#{$testdata}obo_files/comment_in_stanza.obo #{$testdata}empty_file"
+end
+
+Name "gt gff3 -typecheck sofa.obo"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test"#{$bin}gt gff3 -typecheck #{$obodir}sofa.obo #{obo_gff3_file}"
+end
+
+Name "gt gff3 -typecheck so.obo"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test"#{$bin}gt gff3 -typecheck #{$obodir}so.obo #{obo_gff3_file}"
+end
+
+Name "gt gff3 -typecheck so-xp.obo"
+Keywords "gt_gff3 typecheck"
+Test do
+  run_test"#{$bin}gt gff3 -typecheck #{$obodir}so-xp.obo #{obo_gff3_file}"
+end
