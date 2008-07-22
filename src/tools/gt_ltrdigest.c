@@ -382,7 +382,6 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
     {
       genome_node_rec_delete(gn);
     }
-    feature_type_factory_delete(ftf);
     genome_stream_delete(gff3_out_stream);
     genome_stream_delete(ltrdigest_stream);
     if (tab_out_stream)
@@ -397,6 +396,7 @@ static int gt_ltrdigest_runner(UNUSED int argc, const char **argv,
      array_delete(arguments->pdom_opts.plan7_ts);
 #endif
 
+  feature_type_factory_delete(ftf);
   bioseq_delete(bioseq);
   bioseq_delete(arguments->pbs_opts.trna_lib);
 
