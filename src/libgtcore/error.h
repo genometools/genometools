@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -40,7 +40,7 @@ void        error_delete(Error*);
 /* make sure that the error is not set, should be used at the beginning of
    every routine which has an Error* argument */
 
-#define error_check(e)\
-        assert(!e|| !error_is_set(e))
+#define error_check(err)\
+        assert(!err || !error_is_set(err))
 
 #endif

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -32,39 +32,39 @@ Error* error_new(void)
   return ma_calloc(1, sizeof (Error));
 }
 
-void error_set(Error *e, const char *format, ...)
+void error_set(Error *err, const char *format, ...)
 {
   va_list ap;
-  if (!e) return;
+  if (!err) return;
   va_start(ap, format);
-  error_vset(e, format, ap);
+  error_vset(err, format, ap);
   va_end(ap);
 }
 
-void error_vset(Error *e, const char *format, va_list ap)
+void error_vset(Error *err, const char *format, va_list ap)
 {
-  assert(e && format);
-  e->error_is_set = true;
-  (void) vsnprintf(e->error_string, sizeof (e->error_string), format, ap);
+  assert(err && format);
+  err->error_is_set = true;
+  (void) vsnprintf(err->error_string, sizeof (err->error_string), format, ap);
 }
 
-bool error_is_set(const Error *e)
+bool error_is_set(const Error *err)
 {
-  assert(e);
-  return e->error_is_set;
+  assert(err);
+  return err->error_is_set;
 }
 
-void error_unset(Error *e)
+void error_unset(Error *err)
 {
-  assert(e);
-  e->error_is_set = false;
-  e->error_string[0] = '\0';
+  assert(err);
+  err->error_is_set = false;
+  err->error_string[0] = '\0';
 }
 
-const char* error_get(const Error *e)
+const char* error_get(const Error *err)
 {
-  assert(e && e->error_is_set);
-  return e->error_string;
+  assert(err && err->error_is_set);
+  return err->error_string;
 }
 
 void error_set_progname(Error *e, const char *progname)
