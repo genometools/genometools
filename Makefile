@@ -368,7 +368,7 @@ ifeq ($(with-hmmer),yes)
 endif
 
 ifeq ($(libgtview),yes)
-  GTLIBS := $(GTLIBS)lib/libgtview.a
+  GTLIBS := $(GTLIBS) lib/libgtview.a
   GTSHAREDLIB_OBJ := $(GTSHAREDLIB_OBJ) $(LIBGTVIEW_C_OBJ)
   GTSHAREDLIB_LIBDEP := $(GTSHAREDLIB_LIBDEP) -lcairo
   EXP_CPPFLAGS += -DLIBGTVIEW

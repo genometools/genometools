@@ -415,8 +415,8 @@ static void write_metadata(GenFile *metadata_file,
                     pdom_opts->chain_max_gap_length,
                     50);
   }
-  genfile_xprintf(metadata_file, "\n");
 #endif
+  genfile_xprintf(metadata_file, "\n");
 }
 
 void ltr_fileout_stream_free(GenomeStream *gs)
@@ -468,11 +468,11 @@ GenomeStream* ltr_fileout_stream_new(GenomeStream *in_stream,
   char fn[MAXFILENAMELEN];
 
   assert(file_prefix && in_stream && bioseq && ppt_opts
-          && pbs_opts 
+          && pbs_opts
 #ifdef HAVE_HMMER
-	  && pdom_opts
+    && pdom_opts
 #endif
-	  );
+    );
 
   gs = genome_stream_create(ltr_fileout_stream_class(), true);
   ls = ltr_fileout_stream_cast(gs);
