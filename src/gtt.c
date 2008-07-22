@@ -81,7 +81,9 @@
 #include "libgtview/diagram.h"
 #include "libgtview/feature_index.h"
 #include "libgtview/gt_view.h"
+#include "libgtview/imageinfo.h"
 #include "libgtview/track.h"
+#include "libgtview/recmap.h"
 #endif
 
 Toolbox* gtt_tools(void)
@@ -175,6 +177,7 @@ Hashtable* gtt_unit_tests(void)
   hashtable_add(unit_tests, "diagram class", diagram_unit_test);
   hashtable_add(unit_tests, "element class", element_unit_test);
   hashtable_add(unit_tests, "feature index class", feature_index_unit_test);
+  hashtable_add(unit_tests, "imageinfo class", image_info_unit_test);
   hashtable_add(unit_tests, "line class", line_unit_test);
   hashtable_add(unit_tests, "track class", track_unit_test);
 #endif
