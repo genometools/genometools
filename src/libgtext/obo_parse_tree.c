@@ -400,12 +400,11 @@ static int header(OBOParseTree *obo_parse_tree, IO *obo_file, Error *err)
   return had_err;
 }
 
-static int stanza_line(OBOParseTree *obo_parse_tree, IO *obo_file, Str *type,
-                       Error *err)
+static int stanza_line(IO *obo_file, Str *type, Error *err)
 {
   int had_err;
   error_check(err);
-  assert(obo_parse_tree && obo_file && type);
+  assert(obo_file && type);
   had_err = expect(obo_file, STANZA_OPEN_CHAR, err);
   if (!had_err) {
     do {
@@ -430,7 +429,7 @@ static int stanza(OBOParseTree *obo_parse_tree, IO *obo_file, Error *err)
   tag = str_new();
   value = str_new();
   stanza_line_number = io_get_line_number(obo_file);
-  had_err = stanza_line(obo_parse_tree, obo_file, type, err);
+  had_err = stanza_line(obo_file, type, err);
   if (!had_err) {
     OBOStanza *obo_stanza = obo_stanza_new(str_get(type), stanza_line_number,
                                            io_get_filename_str(obo_file));
