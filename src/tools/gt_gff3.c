@@ -37,7 +37,8 @@ typedef struct {
        mergefeat,
        addintrons,
        verbose,
-       typecheck_built_in;
+       typecheck_built_in,
+       tidy;
   long offset;
   Str *offsetfile,
       *typecheck;
@@ -133,6 +134,12 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, built_in_option);
   option_exclude(typecheck_option, built_in_option);
 
+  /* -tidy */
+  option = option_new_bool("tidy", "try to tidy the file", &arguments->tidy,
+                           false);
+  option_is_development_option(option);
+  option_parser_add_option(op, option);
+
   /* -v */
   option = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, option);
@@ -194,6 +201,10 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
     had_err = gff3_in_stream_set_offsetfile(gff3_in_stream,
                                             arguments->offsetfile, err);
   }
+
+  /* enable tidy mode (if necessary) */
+  if (!had_err && arguments->tidy)
+    gff3_in_stream_enable_tidy_mode(gff3_in_stream);
 
   /* create sort stream (if necessary) */
   if (!had_err && arguments->sort) {

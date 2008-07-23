@@ -43,7 +43,8 @@ struct GFF3Parser {
             *undefined_sequence_regions; /* contains all (automatically created)
                                             sequence regions */
   bool incomplete_node, /* at least on node is potentially incomplete */
-       checkids;
+       checkids,
+       tidy;
   long offset;
   Mapping *offset_mapping;
   FeatureTypeFactory *feature_type_factory;
@@ -116,6 +117,7 @@ GFF3Parser* gff3parser_new(bool checkids,
                               (FreeFunc) automatic_sequence_region_delete);
   gff3_parser->incomplete_node = false;
   gff3_parser->checkids = checkids;
+  gff3_parser->tidy = false;
   gff3_parser->offset = UNDEF_LONG;
   gff3_parser->offset_mapping = NULL;
   gff3_parser->feature_type_factory = feature_type_factory;
@@ -141,6 +143,12 @@ int gff3parser_set_offsetfile(GFF3Parser *gff3_parser, Str *offsetfile,
     return 0;
   return -1;
 
+}
+
+void gff3parser_enable_tidy_mode(GFF3Parser *gff3_parser)
+{
+  assert(gff3_parser);
+  gff3_parser->tidy = true;
 }
 
 static int add_offset_if_necessary(Range *range, GFF3Parser *gff3_parser,
@@ -486,10 +494,17 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   if (!had_err && id) {
     if ((gn = hashtable_get(gff3_parser->id_to_genome_node_mapping, id))) {
       /* this id has been used already -> raise error */
-      error_set(err, "the %s \"%s\" on line %lu in file \"%s\" has been used "
+      if (!gff3_parser->tidy) {
+        error_set(err, "the %s \"%s\" on line %lu in file \"%s\" has been used "
                 "already for the feature defined on line %lu", ID_STRING, id,
                 line_number, filename, genome_node_get_line_number(gn));
-      had_err = -1;
+        had_err = -1;
+      }
+      else {
+        warning("the %s \"%s\" on line %lu in file \"%s\" has been used "
+                "already for the feature defined on line %lu", ID_STRING, id,
+                line_number, filename, genome_node_get_line_number(gn));
+      }
       ma_free(id);
     }
     else {
@@ -506,11 +521,19 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       parent_gf = hashtable_get(gff3_parser->id_to_genome_node_mapping,
                                 splitter_get_token(parents_splitter, i));
       if (!parent_gf) {
-        error_set(err, "%s \"%s\" on line %lu in file \"%s\" has not been "
+        if (!gff3_parser->tidy) {
+          error_set(err, "%s \"%s\" on line %lu in file \"%s\" has not been "
+                    "previously defined (via \"%s=\")", PARENT_STRING,
+                    splitter_get_token(parents_splitter, i), line_number,
+                    filename, ID_STRING);
+          had_err = -1;
+        }
+        else {
+          warning("%s \"%s\" on line %lu in file \"%s\" has not been "
                   "previously defined (via \"%s=\")", PARENT_STRING,
                   splitter_get_token(parents_splitter, i), line_number,
                   filename, ID_STRING);
-        had_err = -1;
+        }
       }
       else if (str_cmp(genome_node_get_seqid(parent_gf),
                        genome_node_get_seqid(genome_feature))) {

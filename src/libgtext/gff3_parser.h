@@ -33,6 +33,7 @@ typedef struct GFF3Parser GFF3Parser;
 GFF3Parser* gff3parser_new(bool checkids, FeatureTypeFactory*);
 void        gff3parser_set_offset(GFF3Parser*, long);
 int         gff3parser_set_offsetfile(GFF3Parser*, Str*, Error*);
+void        gff3parser_enable_tidy_mode(GFF3Parser*);
 int         gff3parser_parse_target_attributes(const char *values,
                                                unsigned long *num_of_targets,
                                                Str *first_target_id,

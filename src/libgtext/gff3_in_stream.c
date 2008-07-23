@@ -256,6 +256,13 @@ int gff3_in_stream_set_offsetfile(GenomeStream *gs, Str *offsetfile, Error *err)
   return gff3parser_set_offsetfile(is->gff3_parser, offsetfile, err);
 }
 
+void gff3_in_stream_enable_tidy_mode(GenomeStream *gs)
+{
+  GFF3InStream *is = gff3_in_stream_cast(gs);
+  assert(is);
+  gff3parser_enable_tidy_mode(is->gff3_parser);
+}
+
 GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
                                           const char **filenames,
                                           bool be_verbose, bool checkids)
