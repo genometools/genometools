@@ -500,11 +500,13 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                 line_number, filename, genome_node_get_line_number(gn));
         had_err = -1;
       }
+#if 0
       else {
         warning("the %s \"%s\" on line %lu in file \"%s\" has been used "
                 "already for the feature defined on line %lu", ID_STRING, id,
                 line_number, filename, genome_node_get_line_number(gn));
       }
+#endif
       ma_free(id);
     }
     else {
@@ -528,12 +530,14 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                     filename, ID_STRING);
           had_err = -1;
         }
+#if 0
         else {
           warning("%s \"%s\" on line %lu in file \"%s\" has not been "
                   "previously defined (via \"%s=\")", PARENT_STRING,
                   splitter_get_token(parents_splitter, i), line_number,
                   filename, ID_STRING);
         }
+#endif
       }
       else if (str_cmp(genome_node_get_seqid(parent_gf),
                        genome_node_get_seqid(genome_feature))) {
