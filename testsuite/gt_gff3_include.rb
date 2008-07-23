@@ -154,12 +154,11 @@ Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_3.gff3"
 end
 
-
-# make sure the -typecheck built-in option works (for tests below!) 
-Name "gt gff3 -typecheck built-in"
+# make sure the -typecheck-built-in option works (for tests below!)
+Name "gt gff3 -typecheck-built-in"
 Keywords "gt_gff3"
 Test do
-  run_test("#{$bin}gt gff3 -typecheck built-in " +
+  run_test("#{$bin}gt gff3 -typecheck-built-in " +
            "#{$testdata}standard_gene_as_tree.gff3")
 end
 
@@ -167,7 +166,7 @@ end
   Name "gt gff3 test #{i}"
   Keywords "gt_gff3"
   Test do
-    run_test("#{$bin}gt gff3 -typecheck built-in " +
+    run_test("#{$bin}gt gff3 -typecheck-built-in " +
              "#{$testdata}/gt_gff3_test_#{i}.gff3", :retval => 1)
   end
 end

@@ -36,7 +36,8 @@ typedef struct {
        checkids,
        mergefeat,
        addintrons,
-       verbose;
+       verbose,
+       typecheck_built_in;
   long offset;
   Str *offsetfile,
       *typecheck;
@@ -69,7 +70,7 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   GFF3Arguments *arguments = tool_arguments;
   OptionParser *op;
   Option *sort_option, *mergefeat_option, *addintrons_option, *offset_option,
-         *offsetfile_option, *option;
+         *offsetfile_option, *typecheck_option, *built_in_option, *option;
   assert(arguments);
 
   /* init */
@@ -118,11 +119,19 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   option_exclude(offset_option, offsetfile_option);
 
   /* -typecheck */
-  option = option_new_string("typecheck", "set GFF3 type checker\n"
-                             "choose any|built-in|OBO_file_path",
-                             arguments->typecheck, "any");
-  option_is_development_option(option);
-  option_parser_add_option(op, option);
+  typecheck_option = option_new_filename("typecheck", "check GFF3 types "
+                                         "against \"id\" and \"name\" tags "
+                                         "in given OBO file",
+                                         arguments->typecheck);
+  option_parser_add_option(op, typecheck_option);
+
+  /* -typecheck-built-in */
+  built_in_option = option_new_bool("typecheck-built-in", "use built-in type "
+                                    "checker", &arguments->typecheck_built_in,
+                                    false);
+  option_is_development_option(built_in_option);
+  option_parser_add_option(op, built_in_option);
+  option_exclude(typecheck_option, built_in_option);
 
   /* -v */
   option = option_new_verbose(&arguments->verbose);
@@ -163,19 +172,17 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   last_stream = gff3_in_stream;
 
   /* set different type checker if necessary */
-  if (strcmp(str_get(arguments->typecheck), "any")) {
-    if (!strcmp(str_get(arguments->typecheck), "built-in")) {
+  if (arguments->typecheck_built_in) {
       ftf = feature_type_factory_builtin_new();
       gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
-    }
-    else {
-      if (!(ftf = feature_type_factory_obo_new(str_get(arguments->typecheck),
-                                               err))) {
+  }
+  if (str_length(arguments->typecheck)) {
+    if (!(ftf = feature_type_factory_obo_new(str_get(arguments->typecheck),
+                                             err))) {
         had_err = -1;
-      }
-      if (!had_err)
-        gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
     }
+    if (!had_err)
+      gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
   }
 
   /* set offset (if necessary) */
