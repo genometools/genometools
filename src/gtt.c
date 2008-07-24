@@ -38,6 +38,7 @@
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
 #include "libgtext/string_matching.h"
+#include "libgtext/tag_value_map.h"
 #include "libgtext/union_find.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
@@ -163,6 +164,7 @@ Hashtable* gtt_unit_tests(void)
   hashtable_add(unit_tests, "string class", str_unit_test);
   hashtable_add(unit_tests, "string matching module",
                 string_matching_unit_test);
+  hashtable_add(unit_tests, "tag value map example", tag_value_map_example);
   hashtable_add(unit_tests, "tokenizer class", tokenizer_unit_test);
   hashtable_add(unit_tests, "union find class", union_find_unit_test);
 #ifdef LIBGTVIEW
