@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
@@ -62,6 +63,8 @@ static void genome_feature_free(GenomeNode *gn)
 const char* genome_feature_get_attribute(GenomeNode *gn, const char *attr_name)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
+  /* the "Parent" attribute is not stored to save space */
+  assert(strcmp(attr_name, "Parent"));
   if (!gf->attributes)
     return NULL;
   return hashtable_get(gf->attributes, attr_name);
