@@ -29,8 +29,8 @@ typedef struct GenomeFeature GenomeFeature;
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/transcript_feature_type.h"
 
-typedef int (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
-                                 void *data, Error*);
+typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
+                                  void *data);
 
 const GenomeNodeClass* genome_feature_class(void);
 GenomeNode*            genome_feature_new(GenomeFeatureType*, Range, Strand,
@@ -58,9 +58,9 @@ void                   genome_feature_set_score(GenomeFeature*, double);
 void                   genome_feature_add_attribute(GenomeFeature*,
                                                     const char *attr_name,
                                                     const char *attr_value);
-int                    genome_feature_foreach_attribute(GenomeFeature*,
+void                   genome_feature_foreach_attribute(GenomeFeature*,
                                                         AttributeIterFunc,
-                                                        void *data, Error*);
+                                                        void *data);
 bool                   genome_feature_has_CDS(const GenomeFeature*);
 bool                   genome_feature_has_splice_site(const GenomeFeature*);
 double                 genome_feature_average_splice_site_prob(const

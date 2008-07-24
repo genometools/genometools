@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "libgtcore/cstr.h"
-#include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
@@ -27,6 +26,7 @@
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_node_iterator.h"
 #include "libgtext/genome_node_rep.h"
+#include "libgtext/tag_value_map.h"
 
 struct GenomeFeature
 {
@@ -38,8 +38,8 @@ struct GenomeFeature
   double score;
   Strand strand;
   Phase phase;
-  Hashtable *attributes; /* stores the additional attributes besides 'Parent';
-                            created on demand */
+  TagValueMap attributes; /* stores the additional attributes besides 'Parent';
+                             created on demand */
   TranscriptFeatureType transcripttype;
 };
 
@@ -57,7 +57,7 @@ static void genome_feature_free(GenomeNode *gn)
   assert(gf);
   str_delete(gf->seqid);
   str_delete(gf->source);
-  hashtable_delete(gf->attributes);
+  tag_value_map_delete(gf->attributes);
 }
 
 const char* genome_feature_get_attribute(GenomeNode *gn, const char *attr_name)
@@ -67,7 +67,7 @@ const char* genome_feature_get_attribute(GenomeNode *gn, const char *attr_name)
   assert(strcmp(attr_name, "Parent"));
   if (!gf->attributes)
     return NULL;
-  return hashtable_get(gf->attributes, attr_name);
+  return tag_value_map_get(gf->attributes, attr_name);
 }
 
 static Str* genome_feature_get_seqid(GenomeNode *gn)
@@ -427,22 +427,19 @@ void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,
   assert(strlen(attr_name)); /* attribute name cannot be empty */
   assert(strlen(attr_value)); /* attribute value cannot be empty */
   if (!gf->attributes)
-    gf->attributes = hashtable_new(HASH_STRING, ma_free_func, ma_free_func);
-  hashtable_add(gf->attributes, cstr_dup(attr_name), cstr_dup(attr_value));
+    gf->attributes = tag_value_map_new(attr_name, attr_value);
+  else
+    tag_value_map_add(&gf->attributes, attr_name, attr_value);
 }
 
-int genome_feature_foreach_attribute(GenomeFeature *gf,
-                                     AttributeIterFunc iterfunc, void *data,
-                                     Error *e)
+void genome_feature_foreach_attribute(GenomeFeature *gf,
+                                      AttributeIterFunc iterfunc, void *data)
 {
-  int had_err = 0;
-  error_check(e);
   assert(gf && iterfunc);
   if (gf->attributes) {
-    had_err = hashtable_foreach_ao(gf->attributes, (Hashiteratorfunc) iterfunc,
-                                   data, e);
+    tag_value_map_foreach(gf->attributes, (TagValueMapIteratorFunc) iterfunc,
+                          data);
   }
-  return had_err;
 }
 
 static bool genome_feature_has_gft(const GenomeFeature *gf, const char **gfts)

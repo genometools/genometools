@@ -97,11 +97,10 @@ static int add_id(GenomeNode *gn, void *data, UNUSED Error *err)
   return 0;
 }
 
-static int show_attribute(const char *attr_name, const char *attr_value,
-                          void *data, UNUSED Error *err)
+static void show_attribute(const char *attr_name, const char *attr_value,
+                           void *data)
 {
   ShowAttributeInfo *info = (ShowAttributeInfo*) data;
-  error_check(err);
   assert(attr_name && attr_value && info);
   if (strcmp(attr_name, ID_STRING) && strcmp(attr_name, PARENT_STRING)) {
     if (*info->attribute_shown)
@@ -110,7 +109,6 @@ static int show_attribute(const char *attr_name, const char *attr_value,
       *info->attribute_shown = true;
     genfile_xprintf(info->outfp, "%s=%s", attr_name, attr_value);
   }
-  return 0;
 }
 
 static int gff3_show_genome_feature(GenomeNode *gn, void *data,
@@ -122,7 +120,6 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data,
   Array *parent_features = NULL;
   ShowAttributeInfo info;
   unsigned long i;
-  int had_err;
   Str *id;
 
   error_check(err);
@@ -156,8 +153,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data,
   /* show missing part of attributes */
   info.attribute_shown = &part_shown;
   info.outfp = gff3_visitor->outfp;
-  had_err = genome_feature_foreach_attribute(gf, show_attribute, &info, NULL);
-  assert(!had_err); /* show_attribute() is sane */
+  genome_feature_foreach_attribute(gf, show_attribute, &info);
 
   /* show dot if no attributes have been shown */
   if (!part_shown)
@@ -166,7 +162,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data,
   /* show terminal newline */
   genfile_xfputc('\n', gff3_visitor->outfp);
 
-  return had_err;
+  return 0;
 }
 
 static int store_ids(GenomeNode *gn, void *data, Error *e)
