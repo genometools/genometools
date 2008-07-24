@@ -204,8 +204,6 @@ int gt_view(int argc, const char **argv, Error *err)
         genome_node_rec_delete(gn);
       }
 
-
-
       if (!argv[parsed_args]) /* no GFF3 file was given at all */
         break;
       parsed_args++;
