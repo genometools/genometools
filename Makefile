@@ -872,6 +872,6 @@ hmmer_get:
 	@test ! -f "$(HMMER_DIR)/config.h.in" && \
 	  cd src/external && \
 	  echo "[retrieve HMMER source distribution]" && \
-	  wget -q http://www.zbh.uni-hamburg.de/research/GI/resources/hmmer-2.3.2.tar.gz && \
-	  tar -xzvf hmmer-2.3.2.tar.gz > /dev/null && \
+	  wget -q ftp://selab.janelia.org/pub/software/hmmer/CURRENT/hmmer-2.3.2.tar.gz && \
+	  tar -xzf hmmer-2.3.2.tar.gz && \
 	  rm hmmer-2.3.2.tar.gz || true
