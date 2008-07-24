@@ -75,7 +75,7 @@ static const char* get_value(const TagValueMap map, const char *tag,
 
 void tag_value_map_add(TagValueMap *map, const char *tag, const char *value)
 {
-  size_t tag_len, value_len, map_len;
+  size_t tag_len, value_len, map_len = 0;
   const char *tag_already_used;
   assert(map && *map && tag && value);
   tag_len = strlen(tag);
