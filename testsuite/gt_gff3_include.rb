@@ -390,6 +390,43 @@ Test do
   grep $last_stderr, "must have 3 or 4 blank separated entries"
 end
 
+Name "gt gff3 empty attribute"
+Keywords "gt_gff3 gff3_attribute"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}empty_attribute.gff3", :retval => 1)
+  grep $last_stderr, "has no tag"
+end
+
+Name "gt gff3 empty attribute name"
+Keywords "gt_gff3 gff3_attribute"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}empty_attribute_name.gff3", :retval => 1)
+  grep $last_stderr, "has no tag"
+end
+
+Name "gt gff3 empty id attribute"
+Keywords "gt_gff3 gff3_attribute"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}empty_id_attribute.gff3", :retval => 1)
+  grep $last_stderr, "has no value"
+end
+
+Name "gt gff3 empty other attribute"
+Keywords "gt_gff3 gff3_attribute"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}empty_other_attribute.gff3",
+           :retval => 1)
+  grep $last_stderr, "has no value"
+end
+
+Name "gt gff3 empty parent attribute"
+Keywords "gt_gff3 gff3_attribute"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}empty_parent_attribute.gff3",
+           :retval => 1)
+  grep $last_stderr, "has no value"
+end
+
 # test OBO file parsing
 obo_gff3_file="#{$testdata}standard_gene_as_tree.gff3"
 

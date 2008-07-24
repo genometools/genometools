@@ -424,6 +424,8 @@ void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,
                                   const char *attr_value)
 {
   assert(gf && attr_name && attr_value);
+  assert(strlen(attr_name)); /* attribute name cannot be empty */
+  assert(strlen(attr_value)); /* attribute value cannot be empty */
   if (!gf->attributes)
     gf->attributes = hashtable_new(HASH_STRING, ma_free_func, ma_free_func);
   hashtable_add(gf->attributes, cstr_dup(attr_name), cstr_dup(attr_value));

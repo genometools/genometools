@@ -405,6 +405,18 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       if (!had_err) {
         attr_tag = splitter_get_token(tmp_splitter, 0);
         attr_value = splitter_get_token(tmp_splitter, 1);
+        if (!strlen(attr_tag)) {
+          error_set(err, "attribute \"=%s\" on line %lu in file \"%s\" has no "
+                         "tag", attr_value, line_number, filename);
+          had_err = -1;
+        }
+      }
+      if (!had_err && !strlen(attr_value)) {
+        error_set(err, "attribute \"%s=\" on line %lu in file \"%s\" has no "
+                       "value", attr_tag, line_number, filename);
+        had_err = -1;
+      }
+      if (!had_err) {
         if (!strcmp(attr_tag, "Target")) {
           /* the value of ``Target'' attributes have a special syntax which is
              checked here */
