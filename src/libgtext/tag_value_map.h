@@ -20,7 +20,7 @@
 
 #include "libgtcore/error.h"
 
-/* A very simple tag value map absolutely optimized for space (i.e., memory
+/* A very simple tag/value map absolutely optimized for space (i.e., memory
    consumption) on the cost of time. Basically, each read/write access costs
    O(n) time, whereas n denotes the accumulated length of all tags and values
    contained in the map. Tags and values cannot have length 0.
