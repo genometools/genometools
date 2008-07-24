@@ -26,7 +26,6 @@
 #include "libgtcore/undef.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/add_introns_stream.h"
-#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtview/config.h"
@@ -128,7 +127,6 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
 
 int gt_view(int argc, const char **argv, Error *err)
 {
-  FeatureTypeFactory *feature_type_factory = NULL;
   GenomeStream *gff3_in_stream = NULL,
                *add_introns_stream = NULL,
                *gff3_out_stream = NULL,
@@ -164,9 +162,6 @@ int gt_view(int argc, const char **argv, Error *err)
   /* save name of PNG file */
   png_file = argv[parsed_args];
 
-  /* create feature type factory */
-  feature_type_factory = feature_type_factory_builtin_new();
-
   /* check for correct order: range end < range start */
   if (!had_err &&
       arguments.start != UNDEF_ULONG &&
@@ -186,8 +181,6 @@ int gt_view(int argc, const char **argv, Error *err)
       /* create a gff3 input stream */
       gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
                                                  arguments.verbose);
-      gff3_in_stream_set_feature_type_factory(gff3_in_stream,
-                                              feature_type_factory);
       last_stream = gff3_in_stream;
 
       /* create add introns stream if -addintrons was used */
@@ -281,7 +274,6 @@ int gt_view(int argc, const char **argv, Error *err)
   str_delete(arguments.seqid);
   array_delete(results);
   feature_index_delete(features);
-  feature_type_factory_delete(feature_type_factory);
 
   return had_err;
 }
