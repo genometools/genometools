@@ -38,8 +38,8 @@ struct GenomeFeature
   double score;
   Strand strand;
   Phase phase;
-  Hashtable *attributes; /* stores additional the attributes besides 'Parent'
-                            and 'ID'; created on demand */
+  Hashtable *attributes; /* stores the additional attributes besides 'Parent';
+                            created on demand */
   TranscriptFeatureType transcripttype;
 };
 
