@@ -349,7 +349,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   if (!had_err) {
     splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
     for (i = 0; i < splitter_size(attribute_splitter); i++) {
-      const char *attr_tag, *attr_value;
+      const char *attr_tag = NULL, *attr_value = NULL;
       token = splitter_get_token(attribute_splitter, i);
       if (strncmp(token, ".", 1) == 0) {
         if (splitter_size(attribute_splitter) > 1) {
