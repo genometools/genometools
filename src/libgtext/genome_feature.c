@@ -28,10 +28,12 @@
 #include "libgtext/genome_node_rep.h"
 #include "libgtext/tag_value_map.h"
 
-#define STRAND_OFFSET  5
-#define STRAND_MASK    0x7
-#define PHASE_OFFSET   8
-#define PHASE_MASK     0x3
+#define STRAND_OFFSET                   5
+#define STRAND_MASK                     0x7
+#define PHASE_OFFSET                    8
+#define PHASE_MASK                      0x3
+#define TRANSCRIPT_FEATURE_TYPE_OFFSET  10
+#define TRANSCRIPT_FEATURE_TYPE_MASK    0x3
 
 struct GenomeFeature
 {
@@ -41,7 +43,6 @@ struct GenomeFeature
   GenomeFeatureType *type;
   Range range;
   float score;
-  TranscriptFeatureType transcripttype;
   TagValueMap attributes; /* stores the additional attributes besides 'Parent';
                              created on demand */
 };
@@ -128,6 +129,14 @@ const GenomeNodeClass* genome_feature_class()
   return &gnc;
 }
 
+static void set_transcriptfeaturetype(GenomeNode *gn, TranscriptFeatureType tft)
+{
+  assert(gn);
+  gn->bit_field &= ~(TRANSCRIPT_FEATURE_TYPE_MASK <<
+                     TRANSCRIPT_FEATURE_TYPE_OFFSET);
+  gn->bit_field |= tft << TRANSCRIPT_FEATURE_TYPE_OFFSET;
+}
+
 GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
                                Strand strand, Str *filename,
                                unsigned int line_number)
@@ -144,7 +153,7 @@ GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
   gf->range          = range;
   gn->bit_field     |= strand << STRAND_OFFSET;
   genome_feature_set_phase(gn, PHASE_UNDEFINED);
-  gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_UNDETERMINED;
+  set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_UNDETERMINED);
   gf->attributes     = NULL;
   return gn;
 }
@@ -351,23 +360,23 @@ static int save_exons_and_cds(GenomeNode *gn, void *data, UNUSED Error *err)
 
 static void set_transcript_types(Array *features)
 {
-  GenomeFeature *gf;
+  GenomeNode *gn;
   unsigned long i;
   assert(features);
   if (array_size(features)) {
     if (array_size(features) == 1) {
-      gf = *(GenomeFeature**) array_get(features, 0);
-      gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_SINGLE;
+      gn = *(GenomeNode**) array_get(features, 0);
+      set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_SINGLE);
     }
     else {
-      gf = *(GenomeFeature**) array_get(features, 0);
-      gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_INITIAL;
+      gn = *(GenomeNode**) array_get(features, 0);
+      set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_INITIAL);
       for (i = 1; i < array_size(features) - 1; i++) {
-        gf = *(GenomeFeature**) array_get(features, i);
-        gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_INTERNAL;
+        gn = *(GenomeNode**) array_get(features, i);
+        set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_INTERNAL);
       }
-      gf = *(GenomeFeature**) array_get(features, array_size(features) - 1);
-      gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_TERMINAL;
+      gn = *(GenomeNode**) array_get(features, array_size(features) - 1);
+      set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_TERMINAL);
     }
   }
 }
@@ -411,8 +420,10 @@ void genome_feature_determine_transcripttypes(GenomeFeature *gf)
 TranscriptFeatureType genome_feature_get_transcriptfeaturetype(GenomeFeature
                                                                *gf)
 {
-  assert(gf);
-  return gf->transcripttype;
+  GenomeNode *gn = (GenomeNode*) gf;
+  assert(gn);
+  return (gn->bit_field >> TRANSCRIPT_FEATURE_TYPE_OFFSET) &
+         TRANSCRIPT_FEATURE_TYPE_MASK;
 }
 
 void genome_feature_set_end(GenomeFeature *gf, unsigned long end)
