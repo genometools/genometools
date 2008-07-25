@@ -30,6 +30,8 @@
 
 #define STRAND_OFFSET  5
 #define STRAND_MASK    0x7
+#define PHASE_OFFSET   8
+#define PHASE_MASK     0x3
 
 struct GenomeFeature
 {
@@ -39,7 +41,6 @@ struct GenomeFeature
   GenomeFeatureType *type;
   Range range;
   float score;
-  Phase phase;
   TranscriptFeatureType transcripttype;
   TagValueMap attributes; /* stores the additional attributes besides 'Parent';
                              created on demand */
@@ -101,9 +102,9 @@ void genome_feature_set_source(GenomeNode *gn, Str *source)
 
 void genome_feature_set_phase(GenomeNode *gn, Phase phase)
 {
-  GenomeFeature *gf = genome_feature_cast(gn);
-  assert(gf && gf->phase == PHASE_UNDEFINED);
-  gf->phase = phase;
+  assert(gn);
+  gn->bit_field &= ~(PHASE_MASK << PHASE_OFFSET);
+  gn->bit_field |= phase << PHASE_OFFSET;
 }
 
 static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Error *e)
@@ -142,7 +143,7 @@ GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
   gf->score          = UNDEF_FLOAT;
   gf->range          = range;
   gn->bit_field     |= strand << STRAND_OFFSET;
-  gf->phase          = PHASE_UNDEFINED;
+  genome_feature_set_phase(gn, PHASE_UNDEFINED);
   gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_UNDETERMINED;
   gf->attributes     = NULL;
   return gn;
@@ -307,8 +308,9 @@ Strand genome_feature_get_strand(GenomeFeature *gf)
 
 Phase genome_feature_get_phase(GenomeFeature *gf)
 {
+  GenomeNode *gn = (GenomeNode*) gn;
   assert(gf);
-  return gf->phase;
+  return (gn->bit_field >> PHASE_OFFSET) & PHASE_MASK;
 }
 
 static int save_exon(GenomeNode *gn, void *data, UNUSED Error *err)
