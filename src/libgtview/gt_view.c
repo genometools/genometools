@@ -28,12 +28,13 @@
 #include "libgtext/add_introns_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
+#include "libgtview/canvas.h"
 #include "libgtview/config.h"
 #include "libgtview/diagram.h"
 #include "libgtview/feature_index.h"
 #include "libgtview/feature_stream.h"
 #include "libgtview/gt_view.h"
-#include "libgtview/render.h"
+#include "libgtview/imageinfo.h"
 
 typedef struct {
   bool pipe,
@@ -97,7 +98,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
 
   /* -width */
   option = option_new_uint_min("width", "target image width", &arguments->width,
-                               DEFAULT_RENDER_WIDTH, 1);
+                               800, 1);
   option_parser_add_option(op, option);
 
   /* -addintrons */
@@ -143,7 +144,8 @@ int gt_view(int argc, const char **argv, Error *err)
   Str *config_file = NULL;
   Str *prog;
   Diagram *d = NULL;
-  Render *r = NULL;
+  ImageInfo* ii = NULL;
+  Canvas *canvas = NULL;
 
   error_check(err);
 
@@ -257,8 +259,19 @@ int gt_view(int argc, const char **argv, Error *err)
   if (!had_err) {
     /* create and write image file */
     d = diagram_new(features, seqid, &qry_range, cfg);
-    r = render_new(cfg);
-    had_err = render_to_png(r, d, png_file, arguments.width, err);
+    ii = image_info_new();
+    canvas = canvas_new(cfg, arguments.width, ii);
+    diagram_render(d, canvas);
+/*  RecMap *rm;
+    int i=0;
+    for(i=0;i<image_info_num_of_recmaps(ii);i++)
+    {
+      char buf[BUFSIZ];
+      rm = image_info_get_recmap(ii, i);
+      recmap_format_html_imagemap_coords(rm, buf, BUFSIZ);
+      printf("%s\n", buf);
+    } */
+    had_err = canvas_to_png(canvas, png_file, err);
   }
 
   /* free */
@@ -267,7 +280,8 @@ int gt_view(int argc, const char **argv, Error *err)
   genome_stream_delete(add_introns_stream);
   genome_stream_delete(gff3_in_stream);
 
-  render_delete(r);
+  canvas_delete(canvas);
+  image_info_delete(ii);
   config_delete(cfg);
   str_delete(config_file);
   diagram_delete(d);

@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,19 +19,20 @@
 #ifndef LINE_H
 #define LINE_H
 
-#include "libgtcore/array.h"
-#include "libgtext/genome_node.h"
-#include "libgtview/config.h"
-#include "libgtview/block.h"
-
 /* A line contains block objects. */
 typedef struct Line Line;
+
+#include "libgtcore/array.h"
+#include "libgtext/genome_node.h"
+#include "libgtview/canvas.h"
+#include "libgtview/config.h"
+#include "libgtview/block.h"
 
 Line*  line_new(void);
 void   line_insert_block(Line*, Block*); /* takes ownership */
 bool   line_is_occupied(const Line*, Range);
-/* Returns Array containing Pointers to Block objects. */
 Array* line_get_blocks(Line*);
+int    line_render(Line*, Canvas*);
 int    line_unit_test(Error*);
 void   line_delete(Line*);
 

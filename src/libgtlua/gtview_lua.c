@@ -30,6 +30,6 @@ int luaopen_gtview(lua_State *L)
   luaopen_feature_index(L);
   luaopen_feature_stream(L);
   luaopen_feature_visitor(L);
-  luaopen_render(L);
+  /*luaopen_render(L);*/
   return 1;
 }

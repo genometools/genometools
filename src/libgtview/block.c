@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -174,6 +175,23 @@ Dlist* block_get_elements(const Block *block)
 {
   assert(block);
   return block->elements;
+}
+
+int block_render(Block *block, Canvas *canvas)
+{
+ int had_err = 0;
+ Dlistelem *delem;
+ assert(block && canvas);
+ /* if resulting block was too short,
+    do not traverse this feature tree further */
+ if (-1 == canvas_visit_block(canvas, block))
+   return had_err;
+ for (delem = dlist_first(block->elements); delem;
+       delem = dlistelem_next(delem)) {
+    Element* elem = (Element*) dlistelem_get_data(delem);
+    element_render(elem, canvas);
+  }
+  return had_err;
 }
 
 int block_unit_test(Error *err)

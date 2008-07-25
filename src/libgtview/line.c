@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -57,6 +58,20 @@ Array* line_get_blocks(Line* line)
 {
   assert(line);
   return line->blocks;
+}
+
+int line_render(Line *line, Canvas *canvas)
+{
+  int i = 0;
+  assert(line && canvas);
+  canvas_visit_line_pre(canvas, line);
+  for (i = 0; i < array_size(line->blocks); i++) {
+    Block *block;
+    block = *(Block**) array_get(line->blocks, i);
+    block_render(block, canvas);
+  }
+  canvas_visit_line_post(canvas, line);
+  return 0;
 }
 
 int line_unit_test(Error *err)

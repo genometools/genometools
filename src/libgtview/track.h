@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,21 +19,22 @@
 #ifndef TRACK_H
 #define TRACK_H
 
-#include "libgtcore/str.h"
-#include "libgtcore/array.h"
-#include "libgtext/genome_node.h"
-#include "libgtview/config.h"
-#include "libgtview/line.h"
-
 /* A track has a title and a type und contains line objects. */
 typedef struct Track Track;
+
+#include "gtview.h"
+#include "libgtcore/array.h"
+#include "libgtext/genome_node.h"
+#include "libgtview/canvas.h"
+#include "libgtview/config.h"
+#include "libgtview/line.h"
 
 Track* track_new(Str* title);
 void   track_insert_block(Track*, Block*);
 Str*   track_get_title(const Track*);
-/* Returns Array containing Pointers to Line objects. */
 Array* track_get_lines(const Track*);
 int    track_get_number_of_lines(const Track*);
+int    track_render(Track*, Canvas*);
 int    track_unit_test(Error*);
 void   track_delete(Track*);
 

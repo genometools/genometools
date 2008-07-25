@@ -20,6 +20,8 @@
 #ifndef DIAGRAM_H
 #define DIAGRAM_H
 
+typedef struct Diagram Diagram;
+
 #include "libgtview/config.h"
 #include "libgtview/block.h"
 #include "libgtview/feature_index.h"
@@ -28,8 +30,6 @@
 #include "libgtcore/hashtable.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
-
-typedef struct Diagram Diagram;
 
 /* Create a new diagram object representing the genome nodes in
    FeatureIndex in region <seqid> overlapping with <range>. */
@@ -40,6 +40,7 @@ void        diagram_set_config(Diagram*, Config*);
 Hashtable*  diagram_get_tracks(const Diagram*);
 int         diagram_get_total_lines(const Diagram*);
 int         diagram_get_number_of_tracks(const Diagram*);
+int         diagram_render(Diagram*, Canvas*);
 int         diagram_unit_test(Error*);
 void        diagram_delete(Diagram*);
 

@@ -30,6 +30,7 @@
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
+#include "libgtview/canvas.h"
 #include "libgtview/diagram.h"
 #include "libgtview/feature_index.h"
 #include "libgtview/track.h"
@@ -61,6 +62,11 @@ typedef struct {
   GenomeNode *parent;
   Diagram *diagram;
 } NodeTraverseInfo;
+
+typedef struct {
+  Canvas *canvas;
+  Diagram *dia;
+} TrackTraverseInfo;
 
 static BlockTuple* blocktuple_new(GenomeFeatureType *gft, Block *block)
 {
@@ -465,6 +471,28 @@ int diagram_get_number_of_tracks(const Diagram *diagram)
 {
   assert(diagram);
   return diagram->nof_tracks;
+}
+
+static int render_tracks(UNUSED void *key, void *value, void *data,
+                     UNUSED Error *err)
+{
+  int had_err = 0;
+  TrackTraverseInfo *tti;
+  tti = (TrackTraverseInfo*) data;
+  had_err = track_render((Track*) value, tti->canvas);
+  return had_err;
+}
+
+int diagram_render(Diagram *dia, Canvas *canvas)
+{
+  int had_err = 0;
+  TrackTraverseInfo tti;
+  tti.dia = dia;
+  tti.canvas = canvas;
+  canvas_visit_diagram(canvas, dia);
+  had_err = hashtable_foreach_ao(dia->tracks, render_tracks,
+                                 &tti, NULL);
+  return had_err;
 }
 
 int diagram_unit_test(Error *err)

@@ -1,8 +1,6 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Malte Mader <mmader@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,23 +15,28 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTVIEW_H
-#define GTVIEW_H
+#ifndef CANVAS_H
+#define CANVAS_H
 
-/* The GenomeTools viewer library (libgtview) header */
+typedef struct Canvas Canvas;
+
 #include "libgtview/block.h"
-#include "libgtview/canvas.h"
-#include "libgtview/color.h"
 #include "libgtview/config.h"
 #include "libgtview/diagram.h"
 #include "libgtview/element.h"
-#include "libgtview/feature_index.h"
-#include "libgtview/feature_stream.h"
-#include "libgtview/feature_visitor.h"
-#include "libgtview/graphics.h"
-#include "libgtview/imageinfo.h"
 #include "libgtview/line.h"
-#include "libgtview/recmap.h"
+#include "libgtview/imageinfo.h"
 #include "libgtview/track.h"
+
+Canvas*      canvas_new(Config*, unsigned int width, ImageInfo*);
+unsigned int canvas_get_height(Canvas*);
+int          canvas_visit_diagram(Canvas*, Diagram*);
+int          canvas_visit_track(Canvas*, Track*);
+int          canvas_visit_line_pre(Canvas*, Line*);
+int          canvas_visit_line_post(Canvas*, Line*);
+int          canvas_visit_block(Canvas*, Block*);
+int          canvas_visit_element(Canvas*, Element*);
+int          canvas_to_png(Canvas*, const char*, Error*);
+void         canvas_delete(Canvas*);
 
 #endif

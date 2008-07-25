@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -84,6 +85,19 @@ int track_get_number_of_lines(const Track *track)
   assert(track);
   nof_tracks = (int) array_size(track->lines);
   return nof_tracks;
+}
+
+int track_render(Track* track, Canvas *canvas)
+{
+  int i = 0;
+  assert(track && canvas);
+  canvas_visit_track(canvas, track);
+  for (i = 0; i < array_size(track->lines); i++) {
+    Line *line;
+    line = *(Line**) array_get(track->lines, i);
+    line_render(line, canvas);
+  }
+  return 0;
 }
 
 int track_unit_test(Error *err)

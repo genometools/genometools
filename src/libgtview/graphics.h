@@ -47,6 +47,8 @@ void      graphics_draw_colored_text(Graphics*, double x, double y, Color,
                                      const char*);
 double    graphics_get_text_height(Graphics*);
 double    graphics_get_text_width(Graphics*, const char *text);
+double    graphics_get_image_width(Graphics*);
+double    graphics_get_image_height(Graphics*);
 /* Set margins (space to the image boundaries that are clear of elements)
    in the graphics.
    <margin_x> denotes the Margin to the left and right, in pixels.

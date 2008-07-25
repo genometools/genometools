@@ -97,6 +97,18 @@ void graphics_draw_colored_text(Graphics *g, double x, double y, Color color,
   cairo_show_text(g->cr, text);
 }
 
+double graphics_get_image_height(Graphics *g)
+{
+  assert(g);
+  return g->height;
+}
+
+double graphics_get_image_width(Graphics *g)
+{
+  assert(g);
+  return g->width;
+}
+
 double graphics_get_text_height(Graphics *g)
 {
   cairo_text_extents_t ext;

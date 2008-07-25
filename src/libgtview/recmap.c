@@ -38,7 +38,7 @@ RecMap* recmap_create(double nw_x, double nw_y,
 int recmap_format_html_imagemap_coords(RecMap *rm, char *buf, size_t n)
 {
   assert(rm && buf);
-  return snprintf(buf, n, "%.1f,%.1f,%.1f,%.1f", rm->nw_x, rm->nw_y,
+  return snprintf(buf, n, "%.0f,%.0f,%.0f,%.0f", rm->nw_x, rm->nw_y,
                                                  rm->se_x, rm->se_y);
 }
 

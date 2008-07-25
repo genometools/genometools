@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,15 +19,17 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
+/* A block has a range, a caption, a parent caption, a strand, and a type and it
+   contains element objects. */
+typedef struct Block Block;
+
 #include "libgtcore/dlist.h"
 #include "libgtcore/range.h"
 #include "libgtcore/array.h"
 #include "libgtext/genome_node.h"
+#include "libgtview/canvas.h"
+#include "libgtview/diagram.h"
 #include "libgtview/element.h"
-
-/* A block has a range, a caption, a parent caption, a strand, and a type and it
-   contains element objects. */
-typedef struct Block Block;
 
 Block*             block_new(void);
 /* Create a new Block object, setting block parameters (such as strand, range)
@@ -49,6 +52,7 @@ void               block_set_type(Block*, GenomeFeatureType*);
 GenomeFeatureType* block_get_type(const Block*);
 /* Returns Dlist with Pointer to Element objects. */
 Dlist*             block_get_elements(const Block*);
+int                block_render(Block*, Canvas*);
 int                block_unit_test(Error*);
 void               block_delete(Block*);
 

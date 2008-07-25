@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -27,6 +28,8 @@
 
 struct Element {
   GenomeFeatureType *type;
+  Strand strand;
+  GenomeNode *gn;
   Range range;
   bool mark;
 };
@@ -39,7 +42,9 @@ Element* element_new(GenomeNode *gn)
   element = element_new_empty();
   element_set_type(element, genome_feature_get_type(gf));
   element_set_range(element, genome_node_get_range(gn));
+  element->strand = genome_feature_get_strand(gf);
   element->mark = genome_node_is_marked(gn);
+  element->gn = genome_node_ref(gn);
   return element;
 }
 
@@ -72,6 +77,11 @@ void element_set_type(Element *element, GenomeFeatureType *type)
   element->type = type;
 }
 
+Strand element_get_strand(const Element *element)
+{
+  assert(element);
+  return element->strand;
+}
 bool element_is_marked(const Element *element)
 {
   assert(element);
@@ -84,6 +94,20 @@ bool elements_are_equal(const Element *e1, const Element *e2)
   if (e1->type == e2->type && !range_compare(e1->range, e2->range))
     return true;
   return false;
+}
+
+int element_render(Element *elem, Canvas *canvas)
+{
+  int had_err = 0;
+  assert(elem && canvas);
+  canvas_visit_element(canvas, elem);
+  return had_err;
+}
+
+GenomeNode* element_get_node_ref(const Element *elem)
+{
+  assert(elem);
+  return elem->gn;
 }
 
 int element_unit_test(Error *err)
@@ -144,5 +168,7 @@ int element_unit_test(Error *err)
 void element_delete(Element *element)
 {
   if (!element) return;
+  if (element->gn)
+    genome_node_delete(element->gn);
   ma_free(element);
 }

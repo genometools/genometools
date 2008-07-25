@@ -27,6 +27,7 @@
 
 struct ImageInfo {
   Array* recmaps;
+  unsigned int height;
 };
 
 ImageInfo* image_info_new()
@@ -43,7 +44,7 @@ void image_info_delete(ImageInfo *ii)
 {
   unsigned long i;
   if (!ii) return;
-  for(i=0;i<image_info_num_of_elems(ii);i++)
+  for(i=0;i<image_info_num_of_recmaps(ii);i++)
   {
     RecMap *rm = *(RecMap**) array_get(ii->recmaps, i);
     recmap_delete(rm);
@@ -58,7 +59,19 @@ void image_info_add_recmap(ImageInfo *ii, RecMap *rm)
   array_add(ii->recmaps, rm);
 }
 
-unsigned long image_info_num_of_elems(ImageInfo *ii)
+void image_info_set_height(ImageInfo *ii, unsigned int height)
+{
+  assert(ii);
+  ii->height = height;
+}
+
+unsigned int image_info_get_height(ImageInfo *ii)
+{
+  assert(ii);
+  return ii->height;
+}
+
+unsigned long image_info_num_of_recmaps(ImageInfo *ii)
 {
   assert(ii);
   return array_size(ii->recmaps);
@@ -100,7 +113,7 @@ int image_info_unit_test(Error *err)
                            rand_max_double(100.0),
                            gfs[i]);
     image_info_add_recmap(ii, rms[i]);
-    ensure(had_err, image_info_num_of_elems(ii) == i+1);
+    ensure(had_err, image_info_num_of_recmaps(ii) == i+1);
     ensure(had_err, (rm = image_info_get_recmap(ii, i)) == rms[i]);
     ensure(had_err, rm->gf == rms[i]->gf);
     genome_node_delete((GenomeNode*) gfs[i]);

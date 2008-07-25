@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,13 +19,15 @@
 #ifndef ELEMENT_H
 #define ELEMENT_H
 
-#include "libgtcore/range.h"
-#include "libgtext/genome_node.h"
-#include "libgtext/genome_feature_type.h"
-#include "libgtview/config.h"
-
 /* An element has a type, a range and a config object. */
 typedef struct Element Element;
+
+#include "libgtcore/range.h"
+#include "libgtcore/strand.h"
+#include "libgtext/genome_node.h"
+#include "libgtext/genome_feature_type.h"
+#include "libgtview/canvas.h"
+#include "libgtview/config.h"
 
 /* Creates a complete new Element object. */
 Element*           element_new(GenomeNode*);
@@ -34,8 +37,11 @@ Range              element_get_range(const Element*);
 void               element_set_range(Element*, Range);
 GenomeFeatureType* element_get_type(const Element*);
 void               element_set_type(Element*, GenomeFeatureType*);
+Strand             element_get_strand(const Element*);
+GenomeNode*        element_get_node_ref(const Element*);
 bool               element_is_marked(const Element*);
 bool               elements_are_equal(const Element*, const Element*);
+int                element_render(Element*, Canvas*);
 int                element_unit_test(Error*);
 void               element_delete(Element* element);
 

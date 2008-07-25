@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#if 0
 #ifdef LIBGTVIEW
 
 #include "lauxlib.h"
@@ -56,7 +57,7 @@ static int render_lua_to_png(lua_State *L)
   else
     width = DEFAULT_RENDER_WIDTH;
   err = error_new();
-  if (render_to_png(*render, *diagram, filename, width, err))
+  if (render_to_png(*render, *diagram, filename, NULL, width, err))
     return lua_gt_error(L, err);
   error_delete(err);
   return 0;
@@ -96,4 +97,5 @@ int luaopen_render(lua_State *L)
   return 1;
 }
 
+#endif
 #endif
