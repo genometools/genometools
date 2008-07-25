@@ -40,7 +40,7 @@ struct GenomeNode
 {
   const GenomeNodeClass *c_class;
   Str *filename;
-  unsigned long line_number;
+  unsigned int line_number;
   Dlist *children;
   unsigned int reference_count;
   GenomeNodeInfo info;
@@ -48,6 +48,6 @@ struct GenomeNode
 };
 
 GenomeNode* genome_node_create(const GenomeNodeClass*, Str *filename,
-                               unsigned long line_number);
+                               unsigned int line_number);
 
 #endif

@@ -378,7 +378,7 @@ static void add_real_exon(TranscriptExons *te, Range range, GenomeNode *gn)
   switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
       warning("type of feature (single, initial, internal, or terminal) given "
-              "on line %lu in file \"%s\" could not be determined, because the "
+              "on line %u in file \"%s\" could not be determined, because the "
               "feature has no Parent attribute. Treating it as single.",
               genome_node_get_line_number(gn), genome_node_get_filename(gn));
       /*@fallthrough@*/
@@ -439,7 +439,7 @@ static int process_real_feature(GenomeNode *gn, void *data, UNUSED Error *err)
       default:
         if (info->verbose) {
           fprintf(stderr, "skipping real gene with unknown orientation "
-                  "(line %lu)\n", genome_node_get_line_number(gn));
+                  "(line %u)\n", genome_node_get_line_number(gn));
         }
     }
   }
@@ -456,7 +456,7 @@ static int process_real_feature(GenomeNode *gn, void *data, UNUSED Error *err)
       default:
         if (info->verbose) {
           fprintf(stderr, "skipping real mRNA with unknown orientation "
-                  "(line %lu)\n", genome_node_get_line_number(gn));
+                  "(line %u)\n", genome_node_get_line_number(gn));
         }
     }
   }
@@ -486,7 +486,7 @@ static int process_real_feature(GenomeNode *gn, void *data, UNUSED Error *err)
       default:
         if (info->verbose) {
           fprintf(stderr, "skipping real CDS exon with unknown orientation "
-                  "(line %lu)\n", genome_node_get_line_number(gn));
+                  "(line %u)\n", genome_node_get_line_number(gn));
         }
     }
   }
@@ -512,7 +512,7 @@ static int process_real_feature(GenomeNode *gn, void *data, UNUSED Error *err)
       default:
         if (info->verbose) {
           fprintf(stderr, "skipping real mRNA exon with unknown orientation "
-                  "(line %lu)\n", genome_node_get_line_number(gn));
+                  "(line %u)\n", genome_node_get_line_number(gn));
         }
     }
   }
@@ -654,7 +654,7 @@ static void store_predicted_exon(TranscriptEvaluators *te, GenomeNode *gn)
   switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
       warning("type of feature (single, initial, internal, or terminal) given "
-              "on line %lu in file \"%s\" could not be determined, because the "
+              "on line %u in file \"%s\" could not be determined, because the "
               "feature has no Parent attribute. Treating it as single.",
               genome_node_get_line_number(gn), genome_node_get_filename(gn));
       /*@fallthrough@*/
@@ -943,7 +943,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
       default:
         if (info->verbose) {
           fprintf(stderr, "skipping predicted gene with unknown orientation "
-                  "(line %lu)\n", genome_node_get_line_number(gn));
+                  "(line %u)\n", genome_node_get_line_number(gn));
         }
     }
   }
@@ -1012,7 +1012,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
       default:
         if (info->verbose) {
           fprintf(stderr, "skipping predicted mRNA with unknown orientation "
-                  "(line %lu)\n", genome_node_get_line_number(gn));
+                  "(line %u)\n", genome_node_get_line_number(gn));
         }
     }
   }
@@ -1086,7 +1086,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
       default:
         if (info->verbose) {
           fprintf(stderr, "skipping predicted exon with unknown orientation "
-                  "(line %lu)\n", genome_node_get_line_number(gn));
+                  "(line %u)\n", genome_node_get_line_number(gn));
         }
     }
   }
@@ -1129,7 +1129,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
       default:
         if (info->verbose) {
           fprintf(stderr, "skipping predicted exon with unknown orientation "
-                  "(line %lu)\n", genome_node_get_line_number(gn));
+                  "(line %u)\n", genome_node_get_line_number(gn));
         }
       }
   }

@@ -59,7 +59,7 @@ static int buffer_is_sorted(void *elem, void *info, Error *err)
 
   if (*last_node && genome_node_compare(last_node, &current_node) > 0) {
     assert(*last_node);
-    error_set(err, "the file %s is not sorted (example: line %lu and %lu)",
+    error_set(err, "the file %s is not sorted (example: line %u and %u)",
               genome_node_get_filename(*last_node),
               genome_node_get_line_number(*last_node),
               genome_node_get_line_number(current_node));

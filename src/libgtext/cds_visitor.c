@@ -133,7 +133,7 @@ static void create_CDS_features_for_ORF(Range orf, CDSVisitor *v,
   cds_feature = genome_feature_new(cds_type, cds,
                                    genome_feature_get_strand((GenomeFeature*)
                                                              gn), NULL,
-                                   UNDEF_ULONG);
+                                   UNDEF_LINE_NUMBER);
   genome_feature_set_source(cds_feature, v->source);
   genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
   genome_feature_set_phase(cds_feature, PHASE_ZERO);
@@ -155,7 +155,7 @@ static void create_CDS_features_for_ORF(Range orf, CDSVisitor *v,
                                ? orf.end : orf.start) + 1;
       cds_feature = genome_feature_new(cds_type, cds,
                                  genome_feature_get_strand((GenomeFeature*) gn),
-                                       NULL, UNDEF_ULONG);
+                                       NULL, UNDEF_LINE_NUMBER);
       genome_feature_set_source(cds_feature, v->source);
       genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
       /* XXX correct this */

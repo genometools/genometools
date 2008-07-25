@@ -79,7 +79,7 @@ static int compare_genome_nodes_with_delta(GenomeNode *gn_a, GenomeNode *gn_b,
 }
 
 GenomeNode* genome_node_create(const GenomeNodeClass *gnc, Str *filename,
-                               unsigned long line_number)
+                               unsigned int line_number)
 {
   GenomeNode *gn;
   assert(gnc && gnc->size);
@@ -284,7 +284,7 @@ const char* genome_node_get_filename(const GenomeNode *gn)
   return str_get(gn->filename);
 }
 
-unsigned long genome_node_get_line_number(const GenomeNode *gn)
+unsigned int genome_node_get_line_number(const GenomeNode *gn)
 {
   assert(gn);
   return gn->line_number;

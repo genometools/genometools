@@ -287,7 +287,7 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
       genome_feature_new(exon_type,
                          genome_node_get_range((GenomeNode*)
                                                exons_from_sa_feature),
-                         gene_strand, NULL, UNDEF_ULONG);
+                         gene_strand, NULL, UNDEF_LINE_NUMBER);
     genome_node_set_seqid(new_feature, seqid);
     genome_feature_set_score((GenomeFeature*) new_feature,
                              genome_feature_get_score(exons_from_sa_feature));
@@ -353,7 +353,7 @@ static GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
   mRNA_feature = genome_feature_new(mRNA_type,
                                  csa_splice_form_genomic_range(csa_splice_form),
                                     csa_splice_form_strand(csa_splice_form),
-                                    NULL, UNDEF_ULONG);
+                                    NULL, UNDEF_LINE_NUMBER);
   seqid = genome_node_get_seqid(*(GenomeNode**)
                                csa_splice_form_get_representative(
                                                               csa_splice_form));
@@ -396,7 +396,7 @@ static GenomeNode* create_gene_feature(CSAGene *csa_gene,
   /* create top-level gene feature */
   gene_feature = genome_feature_new(gene_type, csa_gene_genomic_range(csa_gene),
                                     csa_gene_strand(csa_gene), NULL,
-                                    UNDEF_ULONG);
+                                    UNDEF_LINE_NUMBER);
   genome_node_set_seqid(gene_feature,
                         genome_node_get_seqid(*(GenomeNode**)
                                               csa_gene_get_representative(

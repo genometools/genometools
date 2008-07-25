@@ -46,7 +46,7 @@ int           genome_node_traverse_direct_children(GenomeNode*, void*,
                                                    GenomeNodeTraverseFunc,
                                                    Error*);
 const char*   genome_node_get_filename(const GenomeNode*);
-unsigned long genome_node_get_line_number(const GenomeNode*);
+unsigned int  genome_node_get_line_number(const GenomeNode*);
 unsigned long genome_node_number_of_children(const GenomeNode*);
 Str*          genome_node_get_seqid(GenomeNode*);
 Str*          genome_node_get_idstr(GenomeNode*); /* used to sort nodes */

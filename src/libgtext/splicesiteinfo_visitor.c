@@ -99,7 +99,7 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
       }
       else {
         warning("skipping intron with unknown orientation "
-                "(file '%s', line %lu)", genome_node_get_filename(intron),
+                "(file '%s', line %u)", genome_node_get_filename(intron),
                 genome_node_get_line_number(intron));
       }
     }

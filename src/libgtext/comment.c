@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -79,7 +79,7 @@ const GenomeNodeClass* comment_class()
 }
 
 GenomeNode* comment_new(const char *comment, Str *filename,
-                        unsigned long line_number)
+                        unsigned int line_number)
 {
   GenomeNode *gn = genome_node_create(comment_class(), filename, line_number);
   Comment *c = comment_cast(gn);

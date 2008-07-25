@@ -134,7 +134,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
     mRNA_strand = strand_join(mRNA_strand,
                               genome_feature_get_strand((GenomeFeature*) gn));
     if (str_cmp(mRNA_seqid, genome_node_get_seqid(gn))) {
-      error_set(err, "The features on lines %lu and %lu refer to different "
+      error_set(err, "The features on lines %u and %u refer to different "
                 "genomic sequences (``seqname''), although they have the same "
                 "gene IDs (``gene_id'') which must be globally unique",
                 genome_node_get_line_number(first_node),

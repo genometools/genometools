@@ -511,7 +511,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       /* this id has been used already -> raise error */
       if (!gff3_parser->tidy) {
         error_set(err, "the %s \"%s\" on line %lu in file \"%s\" has been used "
-                "already for the feature defined on line %lu", ID_STRING, id,
+                "already for the feature defined on line %u", ID_STRING, id,
                 line_number, filename, genome_node_get_line_number(gn));
         had_err = -1;
       }
@@ -556,8 +556,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       }
       else if (str_cmp(genome_node_get_seqid(parent_gf),
                        genome_node_get_seqid(genome_feature))) {
-        error_set(err, "child on line %lu in file \"%s\" has different "
-                  "sequence id than its parent on line %lu ('%s' vs. '%s')",
+        error_set(err, "child on line %u in file \"%s\" has different "
+                  "sequence id than its parent on line %u ('%s' vs. '%s')",
                   genome_node_get_line_number(genome_feature), filename,
                   genome_node_get_line_number(parent_gf),
                   str_get(genome_node_get_seqid(genome_feature)),

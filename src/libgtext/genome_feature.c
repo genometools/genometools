@@ -127,7 +127,7 @@ const GenomeNodeClass* genome_feature_class()
 
 GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
                                Strand strand, Str *filename,
-                               unsigned long line_number)
+                               unsigned int line_number)
 {
   GenomeNode *gn;
   GenomeFeature *gf;
@@ -157,45 +157,47 @@ GenomeNode* genome_feature_new_standard_gene(FeatureTypeFactory *ftf)
   /* gene */
   range.start = 1000; range.end = 9000;
   type = feature_type_factory_create_gft(ftf, gft_gene);
-  gn = genome_feature_new(type, range, STRAND_FORWARD, NULL, UNDEF_ULONG);
+  gn = genome_feature_new(type, range, STRAND_FORWARD, NULL, UNDEF_LINE_NUMBER);
   genome_node_set_seqid(gn, seqid);
 
   /* TF binding site */
   range.start = 1000; range.end = 1012;
   type = feature_type_factory_create_gft(ftf, gft_TF_binding_site);
-  child = genome_feature_new(type, range, STRAND_FORWARD, NULL, UNDEF_ULONG);
+  child = genome_feature_new(type, range, STRAND_FORWARD, NULL,
+                             UNDEF_LINE_NUMBER);
   genome_node_set_seqid(child, seqid);
   genome_node_is_part_of_genome_node(gn, child);
 
   /* first mRNA */
   range.start = 1050; range.end = 9000;
   type = feature_type_factory_create_gft(ftf, gft_mRNA);
-  child = genome_feature_new(type, range, STRAND_FORWARD, NULL, UNDEF_ULONG);
+  child = genome_feature_new(type, range, STRAND_FORWARD, NULL,
+                             UNDEF_LINE_NUMBER);
   genome_node_set_seqid(child, seqid);
   genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1050; range.end = 1500;
   type = feature_type_factory_create_gft(ftf, gft_exon);
   grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                                  UNDEF_ULONG);
+                                  UNDEF_LINE_NUMBER);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 3000; range.end = 3902;
   grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                                  UNDEF_ULONG);
+                                  UNDEF_LINE_NUMBER);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 5000; range.end = 5500;
   grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                                  UNDEF_ULONG);
+                                  UNDEF_LINE_NUMBER);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 7000; range.end = 9000;
   grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                                  UNDEF_ULONG);
+                                  UNDEF_LINE_NUMBER);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
@@ -203,26 +205,26 @@ GenomeNode* genome_feature_new_standard_gene(FeatureTypeFactory *ftf)
   range.start = 1050; range.end = 9000;
   type = feature_type_factory_create_gft(ftf, gft_mRNA);
   child = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                             UNDEF_ULONG);
+                             UNDEF_LINE_NUMBER);
   genome_node_set_seqid(child, seqid);
   genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1050; range.end = 1500;
   type = feature_type_factory_create_gft(ftf, gft_exon);
   grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                                  UNDEF_ULONG);
+                                  UNDEF_LINE_NUMBER);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 5000; range.end = 5500;
   grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                                  UNDEF_ULONG);
+                                  UNDEF_LINE_NUMBER);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 7000; range.end = 9000;
   grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                                  UNDEF_ULONG);
+                                  UNDEF_LINE_NUMBER);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
@@ -230,32 +232,32 @@ GenomeNode* genome_feature_new_standard_gene(FeatureTypeFactory *ftf)
   range.start = 1300; range.end = 9000;
   type = feature_type_factory_create_gft(ftf, gft_mRNA);
   child = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                             UNDEF_ULONG);
+                             UNDEF_LINE_NUMBER);
   genome_node_set_seqid(child, seqid);
   genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1300; range.end = 1500;
   type = feature_type_factory_create_gft(ftf, gft_exon);
   grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                                  UNDEF_ULONG);
+                                  UNDEF_LINE_NUMBER);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 3000; range.end = 3902;
   grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                                  UNDEF_ULONG);
+                                  UNDEF_LINE_NUMBER);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 5000; range.end = 5500;
   grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                                  UNDEF_ULONG);
+                                  UNDEF_LINE_NUMBER);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 7000; range.end = 9000;
   grandchild = genome_feature_new(type, range, STRAND_FORWARD, NULL,
-                                  UNDEF_ULONG);
+                                  UNDEF_LINE_NUMBER);
   genome_node_set_seqid(grandchild, seqid);
   genome_node_is_part_of_genome_node(child, grandchild);
 

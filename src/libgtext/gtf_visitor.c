@@ -132,7 +132,7 @@ static int gtf_show_genome_feature(GenomeNode *gn, void *data, Error *e)
   }
   else if (!(genome_feature_has_type(gf, gft_CDS) ||
              genome_feature_has_type(gf, gft_exon))) {
-      warning("skipping GFF3 feature of type \"%s\" (from line %lu in file "
+      warning("skipping GFF3 feature of type \"%s\" (from line %u in file "
               "\"%s\")",
               genome_feature_type_get_cstr(genome_feature_get_type(gf)),
               genome_node_get_line_number(gn), genome_node_get_filename(gn));
