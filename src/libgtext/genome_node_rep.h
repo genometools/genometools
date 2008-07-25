@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include "libgtcore/dlist.h"
-#include "libgtext/bitfield.h"
 #include "libgtext/genome_node.h"
 
 /* the ``genome node'' interface */
@@ -40,23 +39,20 @@ struct GenomeNode
 {
   const GenomeNodeClass *c_class;
   Str *filename;
-  unsigned int line_number;
   Dlist *children;
-  unsigned int reference_count;
-  Bitfield bitfield; /* uses the first 5 bits:
-                        0: mark
-                        1: one parent
-                        2: multiple parents
-                        3: tree status set
-                        4: is tree
-                      */
+  unsigned int line_number,
+               reference_count,
+               bit_field; /* uses the first 5 bits:
+                             0:   mark
+                             1-2: parent status
+                             3-4: tree status
+                          */
 };
 
-#define MARK_BIT              0
-#define ONE_PARENT_BIT        1
-#define MULTIPLE_PARENTS_BIT  2
-#define TREE_STATUS_SET_BIT   3
-#define IS_TREE_BIT           4
+#define PARENT_STATUS_OFFSET  1
+#define PARENT_STATUS_MASK    0x3
+#define TREE_STATUS_OFFSET    3
+#define TREE_STATUS_MASK      0x3
 
 GenomeNode* genome_node_create(const GenomeNodeClass*, Str *filename,
                                unsigned int line_number);

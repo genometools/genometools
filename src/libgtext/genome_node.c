@@ -25,6 +25,12 @@
 #include "libgtext/genome_node_rep.h"
 
 typedef enum {
+  NO_PARENT,
+  ONE_PARENT,
+  MULTIPLE_PARENTS
+} ParentStatus;
+
+typedef enum {
   TREE_STATUS_UNDETERMINED,
   IS_TREE,
   IS_NOT_A_TREE
@@ -84,42 +90,48 @@ static int compare_genome_nodes_with_delta(GenomeNode *gn_a, GenomeNode *gn_b,
                                   genome_node_get_range(gn_b), delta);
 }
 
-static void set_tree_status(Bitfield *bitfield, TreeStatus tree_status)
+static void set_tree_status(unsigned int *bit_field, TreeStatus tree_status)
 {
-  switch (tree_status) {
-    case TREE_STATUS_UNDETERMINED:
-      bitfield_unset_bit(bitfield, TREE_STATUS_SET_BIT);
+  *bit_field &= ~(TREE_STATUS_MASK << TREE_STATUS_OFFSET);
+  *bit_field |= tree_status << TREE_STATUS_OFFSET;
+}
+
+static TreeStatus get_tree_status(unsigned int bit_field)
+{
+  return (bit_field >> TREE_STATUS_OFFSET) & TREE_STATUS_MASK;
+}
+
+static void set_parent_status(unsigned int *bit_field,
+                              ParentStatus parent_status)
+{
+  *bit_field &= ~(PARENT_STATUS_MASK << PARENT_STATUS_OFFSET);
+  *bit_field |= parent_status << PARENT_STATUS_OFFSET;
+}
+
+static ParentStatus get_parent_status(unsigned int bit_field)
+{
+  return (bit_field >> PARENT_STATUS_OFFSET) & PARENT_STATUS_MASK;
+}
+
+static bool multiple_parents(unsigned int bit_field)
+{
+  if (get_parent_status(bit_field) == MULTIPLE_PARENTS)
+    return true;
+  return false;
+}
+
+static void add_parent(unsigned int *bit_field)
+{
+  switch (get_parent_status(*bit_field)) {
+    case NO_PARENT:
+      set_parent_status(bit_field, ONE_PARENT);
       break;
-    case IS_TREE:
-      bitfield_set_bit(bitfield, TREE_STATUS_SET_BIT);
-      bitfield_set_bit(bitfield, IS_TREE_BIT);
+    case ONE_PARENT:
+      set_parent_status(bit_field, MULTIPLE_PARENTS);
       break;
-    case IS_NOT_A_TREE:
-      bitfield_set_bit(bitfield, TREE_STATUS_SET_BIT);
-      bitfield_unset_bit(bitfield, IS_TREE_BIT);
+    case MULTIPLE_PARENTS:
+      break;
   }
-}
-
-static TreeStatus get_tree_status(Bitfield bitfield)
-{
-  if (!bitfield_bit_is_set(bitfield, TREE_STATUS_SET_BIT))
-    return TREE_STATUS_UNDETERMINED;
-  if (bitfield_bit_is_set(bitfield, IS_TREE_BIT))
-    return IS_TREE;
-  return IS_NOT_A_TREE;
-}
-
-static bool multiple_parents(Bitfield bitfield)
-{
-  return bitfield_bit_is_set(bitfield, MULTIPLE_PARENTS_BIT);
-}
-
-static void add_parent(Bitfield *bitfield)
-{
-  if (!bitfield_bit_is_set(*bitfield, ONE_PARENT_BIT))
-    bitfield_set_bit(bitfield, ONE_PARENT_BIT);
-  else
-    bitfield_set_bit(bitfield, MULTIPLE_PARENTS_BIT);
 }
 
 GenomeNode* genome_node_create(const GenomeNodeClass *gnc, Str *filename,
@@ -134,8 +146,8 @@ GenomeNode* genome_node_create(const GenomeNodeClass *gnc, Str *filename,
   gn->line_number     = line_number;
   gn->children        = NULL; /* the children list is created on demand */
   gn->reference_count = 0;
-  gn->bitfield        = 0;
-  set_tree_status(&gn->bitfield, IS_TREE);
+  gn->bit_field       = 0;
+  set_tree_status(&gn->bit_field, IS_TREE);
   return gn;
 }
 
@@ -225,7 +237,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
       }
     }
     /* store the implications of <gn> to the tree status of <genome_node> */
-    if (multiple_parents(gn->bitfield))
+    if (multiple_parents(gn->bit_field))
       has_node_with_multiple_parents = true;
     /* call traverse function */
     if (traverse) {
@@ -260,12 +272,12 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   /* save the tree status of the genome node */
   if (!had_err) {
     if (has_node_with_multiple_parents) {
-      set_tree_status(&gn_ref->bitfield, IS_NOT_A_TREE);
-      assert(get_tree_status(gn_ref->bitfield) == IS_NOT_A_TREE);
+      set_tree_status(&gn_ref->bit_field, IS_NOT_A_TREE);
+      assert(get_tree_status(gn_ref->bit_field) == IS_NOT_A_TREE);
     }
     else {
-      set_tree_status(&gn_ref->bitfield, IS_TREE);
-      assert(get_tree_status(gn_ref->bitfield) ==IS_TREE);
+      set_tree_status(&gn_ref->bit_field, IS_TREE);
+      assert(get_tree_status(gn_ref->bit_field) ==IS_TREE);
     }
   }
 
@@ -395,9 +407,9 @@ void genome_node_is_part_of_genome_node(GenomeNode *parent, GenomeNode *child)
     parent->children = dlist_new((Compare) genome_node_cmp);
   dlist_add(parent->children, child); /* XXX: check for circles */
   /* update tree status of <parent> */
-  set_tree_status(&parent->bitfield, TREE_STATUS_UNDETERMINED);
+  set_tree_status(&parent->bit_field, TREE_STATUS_UNDETERMINED);
   /* update parent info of <child> */
-  add_parent(&child->bitfield);
+  add_parent(&child->bit_field);
 }
 
 static int remove_leaf(GenomeNode *node, void *data, UNUSED Error *err)
@@ -430,13 +442,13 @@ void genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn)
 void genome_node_mark(GenomeNode *gn)
 {
   assert(gn);
-  bitfield_set_bit(&gn->bitfield, MARK_BIT);
+  gn->bit_field |= 1;
 }
 
 bool genome_node_is_marked(const GenomeNode *gn)
 {
   assert(gn);
-  return bitfield_bit_is_set(gn->bitfield, MARK_BIT);
+  return gn->bit_field & 1 ? true : false;
 }
 
 static int check_marked_status(GenomeNode *gn, void *data, UNUSED Error *err)
@@ -522,7 +534,7 @@ bool genome_node_is_tree(GenomeNode *gn)
 {
   bool status = false;
   assert(gn);
-  switch (get_tree_status(gn->bitfield)) {
+  switch (get_tree_status(gn->bit_field)) {
     case IS_TREE:
       status = true;
       break;
