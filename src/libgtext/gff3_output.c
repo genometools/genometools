@@ -37,7 +37,7 @@ void gff3_output_leading(GenomeFeature *gf, GenFile *outfp)
                   genome_node_get_start(gn),
                   genome_node_get_end(gn));
   score = genome_feature_get_score(gf);
-  if (score == UNDEF_DOUBLE)
+  if (score == UNDEF_SCORE)
     genfile_xfputc('.', outfp);
   else
     genfile_xprintf(outfp, "%.3f", score);

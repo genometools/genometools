@@ -234,7 +234,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   Phase phase_value;
   Strand strand_value;
   Splitter *splitter, *attribute_splitter;
-  double score_value;
+  float score_value;
   char *seqname,
        *source,
        *feature,
@@ -459,7 +459,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(source_str);
       genome_feature_set_source(gn, source_str);
 
-      if (score_value != UNDEF_DOUBLE)
+      if (score_value != UNDEF_SCORE)
         genome_feature_set_score((GenomeFeature*) gn, score_value);
       if (phase_value != PHASE_UNDEFINED)
         genome_feature_set_phase(gn, phase_value);

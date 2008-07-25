@@ -266,7 +266,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   Str *seqid_str = NULL, *source_str, *changed_seqid = NULL;
   SimpleSequenceRegion *ssr;
   Strand strand_value;
-  double score_value;
+  float score_value;
   Phase phase_value;
   Range range;
   char *id = NULL, *seqid = NULL, *source = NULL, *type = NULL, *start = NULL,
@@ -500,7 +500,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     genome_feature_set_source(genome_feature, source_str);
   }
 
-  if (!had_err && score_value != UNDEF_DOUBLE)
+  if (!had_err && score_value != UNDEF_SCORE)
     genome_feature_set_score((GenomeFeature*) genome_feature, score_value);
   if (!had_err && phase_value != PHASE_UNDEFINED)
     genome_feature_set_phase(genome_feature, phase_value);

@@ -35,7 +35,7 @@ struct GenomeFeature
       *source;
   GenomeFeatureType *type;
   Range range;
-  double score;
+  float score;
   Strand strand;
   Phase phase;
   TagValueMap attributes; /* stores the additional attributes besides 'Parent';
@@ -137,7 +137,7 @@ GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
   gf->seqid          = NULL;
   gf->source         = NULL;
   gf->type           = type;
-  gf->score          = UNDEF_DOUBLE;
+  gf->score          = UNDEF_FLOAT;
   gf->range          = range;
   gf->strand         = strand;
   gf->phase          = PHASE_UNDEFINED;
@@ -288,7 +288,7 @@ bool genome_feature_has_type(GenomeFeature *gf, const char *type)
   return genome_feature_type_is(gf->type, type);
 }
 
-double genome_feature_get_score(GenomeFeature *gf)
+float genome_feature_get_score(GenomeFeature *gf)
 {
   assert(gf);
   return gf->score;
@@ -414,7 +414,7 @@ void genome_feature_set_end(GenomeFeature *gf, unsigned long end)
   gf->range.end = end;
 }
 
-void genome_feature_set_score(GenomeFeature *gf, double score)
+void genome_feature_set_score(GenomeFeature *gf, float score)
 {
   assert(gf);
   gf->score = score;

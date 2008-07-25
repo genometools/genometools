@@ -44,7 +44,7 @@ const char*            genome_feature_get_attribute(GenomeNode *gn,
 GenomeFeatureType*     genome_feature_get_type(GenomeFeature*);
 GenomeFeatureType*     genome_feature_create_gft(GenomeFeature*, const char*);
 bool                   genome_feature_has_type(GenomeFeature*, const char*);
-double                 genome_feature_get_score(GenomeFeature*);
+float                  genome_feature_get_score(GenomeFeature*);
 Strand                 genome_feature_get_strand(GenomeFeature*);
 Phase                  genome_feature_get_phase(GenomeFeature*);
 void                   genome_feature_get_exons(GenomeFeature*,
@@ -54,7 +54,7 @@ TranscriptFeatureType  genome_feature_get_transcriptfeaturetype(GenomeFeature*);
 void                   genome_feature_set_source(GenomeNode*, Str *source);
 void                   genome_feature_set_phase(GenomeNode*, Phase);
 void                   genome_feature_set_end(GenomeFeature*, unsigned long);
-void                   genome_feature_set_score(GenomeFeature*, double);
+void                   genome_feature_set_score(GenomeFeature*, float);
 void                   genome_feature_add_attribute(GenomeFeature*,
                                                     const char *attr_name,
                                                     const char *attr_value);

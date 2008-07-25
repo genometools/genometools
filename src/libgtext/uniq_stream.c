@@ -62,14 +62,14 @@ static bool nodes_are_equal_feature_trees(GenomeNode *first_node,
 
 static bool uniq(GenomeNode **first_node, GenomeNode **second_node)
 {
-  double first_score, second_score;
+  float first_score, second_score;
   assert(*first_node && *second_node);
   if (nodes_are_equal_feature_trees(*first_node, *second_node)) {
     first_score = genome_feature_get_score((GenomeFeature*) *first_node);
     second_score = genome_feature_get_score((GenomeFeature*) *second_node);
-    if ((first_score == UNDEF_DOUBLE && second_score == UNDEF_DOUBLE) ||
-        (first_score != UNDEF_DOUBLE && second_score == UNDEF_DOUBLE) ||
-        (first_score != UNDEF_DOUBLE && second_score != UNDEF_DOUBLE &&
+    if ((first_score == UNDEF_SCORE && second_score == UNDEF_SCORE) ||
+        (first_score != UNDEF_SCORE && second_score == UNDEF_SCORE) ||
+        (first_score != UNDEF_SCORE && second_score != UNDEF_SCORE &&
          first_score >= second_score)) {
       /* keep first node */
       genome_node_rec_delete(*second_node);
