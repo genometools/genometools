@@ -28,6 +28,9 @@
 #include "libgtext/genome_node_rep.h"
 #include "libgtext/tag_value_map.h"
 
+#define STRAND_OFFSET  5
+#define STRAND_MASK    0x7
+
 struct GenomeFeature
 {
   const GenomeNode parent_instance;
@@ -36,7 +39,6 @@ struct GenomeFeature
   GenomeFeatureType *type;
   Range range;
   float score;
-  Strand strand;
   Phase phase;
   TranscriptFeatureType transcripttype;
   TagValueMap attributes; /* stores the additional attributes besides 'Parent';
@@ -139,7 +141,7 @@ GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
   gf->type           = type;
   gf->score          = UNDEF_FLOAT;
   gf->range          = range;
-  gf->strand         = strand;
+  gn->bit_field     |= strand << STRAND_OFFSET;
   gf->phase          = PHASE_UNDEFINED;
   gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_UNDETERMINED;
   gf->attributes     = NULL;
@@ -298,8 +300,9 @@ float genome_feature_get_score(GenomeFeature *gf)
 
 Strand genome_feature_get_strand(GenomeFeature *gf)
 {
+  GenomeNode *gn = (GenomeNode*) gf;
   assert(gf);
-  return gf->strand;
+  return (gn->bit_field >> STRAND_OFFSET) & STRAND_MASK;
 }
 
 Phase genome_feature_get_phase(GenomeFeature *gf)
