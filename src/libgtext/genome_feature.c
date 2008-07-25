@@ -33,7 +33,7 @@
 #define PHASE_OFFSET                    8
 #define PHASE_MASK                      0x3
 #define TRANSCRIPT_FEATURE_TYPE_OFFSET  10
-#define TRANSCRIPT_FEATURE_TYPE_MASK    0x3
+#define TRANSCRIPT_FEATURE_TYPE_MASK    0x7
 
 struct GenomeFeature
 {
@@ -317,8 +317,8 @@ Strand genome_feature_get_strand(GenomeFeature *gf)
 
 Phase genome_feature_get_phase(GenomeFeature *gf)
 {
-  GenomeNode *gn = (GenomeNode*) gn;
-  assert(gf);
+  GenomeNode *gn = (GenomeNode*) gf;
+  assert(gn);
   return (gn->bit_field >> PHASE_OFFSET) & PHASE_MASK;
 }
 
