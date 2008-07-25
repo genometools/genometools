@@ -67,12 +67,10 @@ void str_set(Str *s, const char *cstr)
 
 void str_append_str(Str *dest, const Str* src)
 {
-  unsigned long i;
   assert(dest && src);
   dest->cstr = dynalloc(dest->cstr, &dest->allocated,
                         (dest->length + src->length + 1) * sizeof (char));
-  for (i = 0; i < src->length; i++)
-    dest->cstr[dest->length + i] = src->cstr[i];
+  memcpy(dest->cstr + dest->length, src->cstr, src->length);
   dest->length += src->length;
 }
 
@@ -92,14 +90,10 @@ void str_append_cstr(Str *dest, const char *cstr)
 
 void str_append_cstr_nt(Str *dest, const char *cstr, unsigned long length)
 {
-  unsigned long i;
-  char *destptr;
   assert(dest && cstr);
   dest->cstr = dynalloc(dest->cstr, &dest->allocated,
                         (dest->length + length + 1) * sizeof (char));
-  destptr = dest->cstr + dest->length;
-  for (i = 0; i < length; i++)
-    *destptr++ = *cstr++;
+  memcpy(dest->cstr + dest->length, cstr, length);
   dest->length += length;
 }
 
