@@ -313,7 +313,8 @@ int canvas_visit_track(Canvas *canvas, Track *track)
 
   /* draw track title */
   graphics_draw_colored_text(canvas->g,
-                             config_get_num(canvas->cfg, "format", "margins", 10),
+                             config_get_num(canvas->cfg,
+                                            "format", "margins", 10),
                              canvas->y,
                              config_get_color(canvas->cfg, "track_title"),
                              str_get(track_get_title(track)));
@@ -520,7 +521,8 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
                          elem_width,
                          bar_height,
                          arrow_status,
-                         config_get_num(canvas->cfg, "format", "arrow_width", 6),
+                         config_get_num(canvas->cfg,
+                                        "format", "arrow_width", 6),
                          stroke_width,
                          elem_color);
   }

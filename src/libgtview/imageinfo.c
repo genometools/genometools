@@ -44,7 +44,7 @@ void image_info_delete(ImageInfo *ii)
 {
   unsigned long i;
   if (!ii) return;
-  for(i=0;i<image_info_num_of_recmaps(ii);i++)
+  for (i=0;i<image_info_num_of_recmaps(ii);i++)
   {
     RecMap *rm = *(RecMap**) array_get(ii->recmaps, i);
     recmap_delete(rm);
@@ -99,7 +99,7 @@ int image_info_unit_test(Error *err)
   ftf = feature_type_factory_builtin_new();
   gft = feature_type_factory_create_gft(ftf, "test");
 
-  for(i=0;i<20;i++)
+  for (i=0;i<20;i++)
   {
     RecMap* rm;
     unsigned long rbase;

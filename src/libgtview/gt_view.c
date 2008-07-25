@@ -264,7 +264,7 @@ int gt_view(int argc, const char **argv, Error *err)
     diagram_render(d, canvas);
 /*  RecMap *rm;
     int i=0;
-    for(i=0;i<image_info_num_of_recmaps(ii);i++)
+    for (i=0;i<image_info_num_of_recmaps(ii);i++)
     {
       char buf[BUFSIZ];
       rm = image_info_get_recmap(ii, i);
