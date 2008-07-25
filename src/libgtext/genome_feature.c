@@ -38,9 +38,9 @@ struct GenomeFeature
   float score;
   Strand strand;
   Phase phase;
+  TranscriptFeatureType transcripttype;
   TagValueMap attributes; /* stores the additional attributes besides 'Parent';
                              created on demand */
-  TranscriptFeatureType transcripttype;
 };
 
 typedef struct {
@@ -141,8 +141,8 @@ GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
   gf->range          = range;
   gf->strand         = strand;
   gf->phase          = PHASE_UNDEFINED;
-  gf->attributes     = NULL;
   gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_UNDETERMINED;
+  gf->attributes     = NULL;
   return gn;
 }
 
