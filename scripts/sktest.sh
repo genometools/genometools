@@ -87,7 +87,7 @@ fi
 if test ! "X${GTTESTDATA}" = "X"
 then
   AT=${GTTESTDATA}/Iowa/at1MB
-  U8=${GTTESTDATA}/Iowa/U89959.fna
+  U8=../testdata/U89959_genomic.fas
   ATK=${GTTESTDATA}/Iowa/at100K1
   GRUMBACH=${GTTESTDATA}/DNA-mix/Grumbach.fna
   ../scripts/rununique.sh ../bin/gt 10 20 ${U8} ${AT}
@@ -97,4 +97,5 @@ then
   done
   ../scripts/cmpdbfile.sh ${outoptions} -pl -db ${ATK} ${AT} ${GRUMBACH}/*.fna
 fi
+
 cd ..

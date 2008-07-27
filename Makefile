@@ -709,6 +709,8 @@ endif
 	  >$(prefix)/bin/genometools-config
 	chmod 755 $(prefix)/bin/genometools-config
 
+cflags:
+	@echo ${GT_CFLAGS}
 
 splint: obj/gt_config.h
 	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) \
