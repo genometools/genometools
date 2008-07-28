@@ -27,7 +27,8 @@ struct Queue
   void **contents;
   unsigned long front, /* f */
                 back;  /* b */
-  size_t allocated;
+  size_t size,
+         allocated;
 };
 
 /*
@@ -88,31 +89,33 @@ void queue_delete_with_contents(Queue *q)
 
 static void check_space(Queue *q)
 {
-  if (!q->allocated) /* empty queue without allocated memory */
+  if (!q->allocated) { /* empty queue without allocated memory */
     q->contents = dynalloc(q->contents, &q->allocated, sizeof (void*));
+    q->size = q->allocated / sizeof (void*);
+  }
   else if (q->front < q->back) { /* no wraparound */
-    if (q->back * sizeof (void*) == q->allocated) {
+    if (q->back == q->size) {
       if (q->front)
         q->back = 0; /* perform wraparound */
       else { /* extend contents buffer */
         q->contents = dynalloc(q->contents, &q->allocated,
                                q->allocated + sizeof (void*));
+        q->size = q->allocated / sizeof (void*);
       }
     }
   }
   else if (q->back && (q->back == q->front)) { /* wraparound */
-    size_t old_size = q->allocated / sizeof (void*);
     q->contents = dynalloc(q->contents, &q->allocated,
                            q->allocated + q->front * sizeof (void*));
-    memcpy(q->contents + old_size,
-           q->contents, q->front * sizeof (void*));
+    memcpy(q->contents + q->size, q->contents, q->front * sizeof (void*));
     /* dynalloc() always doubles the already allocated memory region, which
        means we always have some additional space after the copied memory region
        left to set the back pointer to (otherwise we would have to reset the
        back pointer to 0).
      */
-    assert(q->front + old_size < q->allocated / sizeof (void*));
-    q->back = q->front + old_size;
+    assert(q->front + q->size < q->allocated / sizeof (void*));
+    q->back = q->front + q->size;
+    q->size = q->allocated / sizeof (void*);
   }
 }
 
@@ -130,10 +133,9 @@ void* queue_get(Queue *q)
   /* get contents */
   contents = q->contents[q->front++];
   /* adjust indices */
-  if (q->front == q->back) {
+  if (q->front == q->back)
     q->front = q->back = 0; /* reset */
-  }
-  else if (q->front * sizeof (void*) == q->allocated)
+  else if (q->front == q->size)
     q->front = 0; /* wraparound */
   return contents;
 }
@@ -158,7 +160,7 @@ int queue_iterate(Queue *q, QueueProcessor queueprocessor, void *info,
       }
     }
     else { /* wraparound */
-      for (i = q->front; i < q->allocated / sizeof (void*); i++) {
+      for (i = q->front; i < q->size; i++) {
         if (queueprocessor(q->contents[i], info, err))
           return -1;
       }
@@ -175,7 +177,7 @@ unsigned long queue_size(const Queue *q)
   assert(q);
   if ((q->front < q->back) || ((q->front == 0) && (q->back == 0)))
     return q->back - q->front; /* no wraparound */
-  return q->allocated / sizeof (void*) - (q->front - q->back); /* wraparound */
+  return q->size - (q->front - q->back); /* wraparound */
 }
 
 static int check_queue(void *elem, void *info, Error *err)
