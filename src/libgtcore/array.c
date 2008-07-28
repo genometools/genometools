@@ -210,11 +210,8 @@ static int iterate_test_func(void *info, const void *value, UNUSED Error *err)
   error_check(err);
   i = (unsigned long*) info;
   range = *(Range*) value;
-  /* XXX: uncomment */
-#if 0
   ensure(had_err, range.start == *i + 1);
   ensure(had_err, range.end == *i + 101);
-#endif
   (*i)++;
   return had_err;
 }
@@ -335,7 +332,7 @@ int array_unit_test(Error *err)
   if (!had_err) {
     array_reverse(a);
     i = 0;
-    ensure(had_err, !array_iterate(a, iterate_test_func, &i, err));
+    had_err = array_iterate(a, iterate_test_func, &i, err);
     ensure(had_err, array_iterate(a, iterate_fail_func, NULL, err));
   }
   if (!had_err) {
