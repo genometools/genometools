@@ -49,8 +49,8 @@ const char* genfilemode_suffix(GenFileMode mode);
    without '.gz' or '.bz2' suffixes. */
 size_t      genfile_basename_length(const char *path);
 
-/* Create a new GenFile object and open the underlying file handle, return NULL
-   if the file <path> does not exist. */
+/* Create a new GenFile object and open the underlying file handle, returns NULL
+   if the file <path> could not be opened. */
 GenFile*    genfile_open(GenFileMode, const char *path, const char *mode);
 
 /* Create a new GenFile object and open the underlying file handle, abort if the
@@ -58,9 +58,9 @@ GenFile*    genfile_open(GenFileMode, const char *path, const char *mode);
 GenFile*    genfile_xopen_w_gfmode(GenFileMode, const char *path,
                                    const char *mode);
 
-/* Create a new GenFile object and open the underlying file handle, abort if the
-   file <path> does not exist, the GenFileMode is determined automatically via
-   genfilemode_determine(path). */
+/* Create a new GenFile object and open the underlying file handle. Aborts if
+   the file <path> could not be opened. The GenFileMode is determined
+   automatically via genfilemode_determine(path). */
 GenFile*    genfile_xopen(const char *path, const char *mode);
 
 /* Create a new GenFile object from a normal file pointer. */
