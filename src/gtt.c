@@ -29,6 +29,7 @@
 #include "libgtcore/getbasename.h"
 #include "libgtcore/grep.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/queue.h"
 #include "libgtcore/splitter.h"
 #include "libgtcore/tokenizer.h"
 #include "libgtext/alignment.h"
@@ -156,6 +157,7 @@ Hashtable* gtt_unit_tests(void)
   hashtable_add(unit_tests, "grep module", grep_unit_test);
   hashtable_add(unit_tests, "hashtable class", hashtable_unit_test);
   hashtable_add(unit_tests, "hmm class", hmm_unit_test);
+  hashtable_add(unit_tests, "queue class", queue_unit_test);
   hashtable_add(unit_tests, "range class", range_unit_test);
   hashtable_add(unit_tests, "safearith module", safearith_unit_test);
   hashtable_add(unit_tests, "safearith example", safearith_example);

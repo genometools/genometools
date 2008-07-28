@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -26,12 +26,13 @@ typedef struct Queue Queue;
 typedef int (*QueueProcessor)(void *elem, void *info, Error*);
 
 Queue*        queue_new(void);
+void          queue_delete(Queue*);
+void          queue_delete_with_contents(Queue*);
 void          queue_add(Queue*, void*);
 void*         queue_get(Queue*);
 void*         queue_head(Queue*);
 int           queue_iterate(Queue*, QueueProcessor, void *info, Error*);
 unsigned long queue_size(const Queue*);
-void          queue_delete_with_contents(Queue*);
-void          queue_delete(Queue*);
+int           queue_unit_test(Error*);
 
 #endif
