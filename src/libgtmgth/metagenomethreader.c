@@ -506,23 +506,17 @@ int metagenomethreader(int argc, const char **argv, Error * err)
 
     /* Der Name des XML-Files mit den Blast-Hits ist das erste Argument
        nach dem Programmnamen */
-    fp_xmlfile =
-      genfile_open(genfilemode_determine(argv[parsed_args]), argv[parsed_args],
-                   "r");
+    fp_xmlfile = genfile_xopen(argv[parsed_args], "r");
 
     if (file_exists(str_get(outputfilename)))
     {
-      parsestruct.fp_outputfile =
-        genfile_open(genfilemode_determine(str_get(outputfilename)),
-                     str_get(outputfilename), "w+");
+      parsestruct.fp_outputfile = genfile_xopen(str_get(outputfilename), "w+");
       genfile_close(parsestruct.fp_outputfile);
     }
 
     /* Der Name des Outputfiles wird den eingegebenen Optionen entnommen
        oder der default-Wert output.txt verwendet */
-    parsestruct.fp_outputfile =
-      genfile_open(genfilemode_determine(str_get(outputfilename)),
-                   str_get(outputfilename), "a+");
+    parsestruct.fp_outputfile = genfile_xopen(str_get(outputfilename), "a+");
 
     if (!ARGUMENTS(hitfile_bool))
     {
@@ -538,10 +532,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
       }
 
       /* Datei fuer die GI-Nr. des XML-Files  */
-      parsestruct.fp_giexp_file =
-        genfile_open(genfilemode_determine
-                     (str_get(gi_numbers_txt)),
-                     str_get(gi_numbers_txt), "w+");
+      parsestruct.fp_giexp_file = genfile_xopen(str_get(gi_numbers_txt), "w+");
 
       had_err = mg_xmlparser(parsestruct_ptr, fp_xmlfile, err);
 
@@ -554,9 +545,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
 
         /* Die Hit-Datei wird mit dem Modus w+ geoeffnet */
         parsestruct.fp_blasthit_file =
-          genfile_open(genfilemode_determine
-                       (str_get(parsestruct.hit_fastafile)),
-                       str_get(parsestruct.hit_fastafile), "w+");
+          genfile_xopen(str_get(parsestruct.hit_fastafile), "w+");
 
         had_err = extractginumbers(true,
                                    parsestruct.fp_blasthit_file,
@@ -622,9 +611,7 @@ int metagenomethreader(int argc, const char **argv, Error * err)
       {
         /* Der Name des XML-Files mit den Blast-Hits ist das erste Argument
            nach dem Programmnamen */
-        fp_xmlfile =
-          genfile_open(genfilemode_determine(argv[parsed_args]),
-                       argv[parsed_args], "r");
+        fp_xmlfile = genfile_xopen(argv[parsed_args], "r");
       }
       parsestruct.giexp_flag = 1;
 
