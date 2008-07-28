@@ -1708,7 +1708,7 @@ openOnDiskData(const Str *projectName, struct onDiskBlockCompIdx *idx,
 {
   Str *bdxName = str_clone(projectName);
   str_append_cstr(bdxName, ".bdx");
-  idx->idxFP = fa_fopen(str_get(bdxName), mode);
+  idx->idxFP = fa_fopen(str_get(bdxName), mode, NULL);
   str_delete(bdxName);
   if (!idx->idxFP)
     return 0;

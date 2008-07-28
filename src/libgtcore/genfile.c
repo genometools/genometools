@@ -84,29 +84,30 @@ size_t genfile_basename_length(const char *path)
 }
 
 GenFile* genfile_open(GenFileMode genfilemode, const char *path,
-                      const char *mode)
+                      const char *mode, Error *err)
 {
   GenFile *genfile;
+  error_check(err);
   assert(path && mode);
   genfile = ma_calloc(1, sizeof (GenFile));
   genfile->mode = genfilemode;
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
-      genfile->fileptr.file = fa_fopen(path, mode);
+      genfile->fileptr.file = fa_fopen(path, mode, err);
       if (!genfile->fileptr.file) {
         genfile_delete(genfile);
         return NULL;
       }
       break;
     case GFM_GZIP:
-      genfile->fileptr.gzfile = fa_gzopen(path, mode);
+      genfile->fileptr.gzfile = fa_gzopen(path, mode, err);
       if (!genfile->fileptr.gzfile) {
         genfile_delete(genfile);
         return NULL;
       }
       break;
     case GFM_BZIP2:
-      genfile->fileptr.bzfile = fa_bzopen(path, mode);
+      genfile->fileptr.bzfile = fa_bzopen(path, mode, err);
       if (!genfile->fileptr.bzfile) {
         genfile_delete(genfile);
         return NULL;

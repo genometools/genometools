@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinforfatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinforfatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -28,9 +28,10 @@
 /* the file allocator module */
 
 /* functions for normal file pointer */
-#define fa_fopen(path, mode)\
-        fa_fopen_func(path, mode, __FILE__, __LINE__)
-FILE*   fa_fopen_func(const char *path, const char *mode, const char*, int);
+#define fa_fopen(path, mode, err)\
+        fa_fopen_func(path, mode, __FILE__, __LINE__, err)
+FILE*   fa_fopen_func(const char *path, const char *mode, const char*, int,
+                      Error*);
 #define fa_xfopen(path, mode)\
         fa_xfopen_func(path, mode, __FILE__, __LINE__)
 FILE*   fa_xfopen_func(const char *path, const char *mode, const char*, int);
@@ -38,9 +39,10 @@ void    fa_fclose(FILE *stream);
 void    fa_xfclose(FILE *stream);
 
 /* functions for gzip file pointer */
-#define fa_gzopen(path, mode)\
-        fa_gzopen_func(path, mode, __FILE__, __LINE__)
-gzFile  fa_gzopen_func(const char *path, const char *mode, const char*, int);
+#define fa_gzopen(path, mode, err)\
+        fa_gzopen_func(path, mode, __FILE__, __LINE__, err)
+gzFile  fa_gzopen_func(const char *path, const char *mode, const char*, int,
+                       Error*);
 #define fa_xgzopen(path, mode)\
         fa_xgzopen_func(path, mode, __FILE__, __LINE__)
 gzFile  fa_xgzopen_func(const char *path, const char *mode, const char*, int);
@@ -48,9 +50,10 @@ void    fa_gzclose(gzFile stream);
 void    fa_xgzclose(gzFile stream);
 
 /* functions for bzip2 file pointer */
-#define fa_bzopen(path, mode)\
-        fa_bzopen_func(path, mode, __FILE__, __LINE__)
-BZFILE* fa_bzopen_func(const char *path, const char *mode, const char*, int);
+#define fa_bzopen(path, mode, err)\
+        fa_bzopen_func(path, mode, __FILE__, __LINE__, err)
+BZFILE* fa_bzopen_func(const char *path, const char *mode, const char*, int,
+                       Error*);
 #define fa_xbzopen(path, mode)\
         fa_xbzopen_func(path, mode, __FILE__, __LINE__)
 BZFILE* fa_xbzopen_func(const char *path, const char *mode, const char*, int);

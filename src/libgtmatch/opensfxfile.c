@@ -35,13 +35,7 @@
   error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,suffix);
-  fp = fa_fopen(str_get(tmpfilename),mode);
-  if (fp == NULL)
-  {
-    error_set(err,"fa_fopen: cannot open file \"%s\": %s",
-                  str_get(tmpfilename),
-                  strerror(errno));
-  }
+  fp = fa_fopen(str_get(tmpfilename),mode,err);
   str_delete(tmpfilename);
   return fp;
 }

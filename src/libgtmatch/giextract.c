@@ -146,12 +146,9 @@ static Giquery *readginumberfile(bool verbose,
     error_set(err,"empty file \"%s\" not allowed",str_get(ginumberfile));
     return NULL;
   }
-  fp = fa_fopen(str_get(ginumberfile),"r");
+  fp = fa_fopen(str_get(ginumberfile),"r",err);
   if (fp == NULL)
   {
-    error_set(err,"fa_fopen: cannot open file \"%s\": %s",
-                  str_get(ginumberfile),
-                  strerror(errno));
     return NULL;
   }
   if (verbose)

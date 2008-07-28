@@ -278,7 +278,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
         /* write header information, for reference to verify noone
          * toyed with the file name */
         BitElem headerBuf[headerBitElems];
-        if (!(mapFile = fa_fopen(str_get(mapName), "w+b")))
+        if (!(mapFile = fa_fopen(str_get(mapName), "w+b", NULL)))
           break;
         bsStoreUInt16(headerBuf, 0, HEADER_ENTRY_BITS, mapIntervalLog2);
         bsStoreUInt16(headerBuf, HEADER_ENTRY_BITS, HEADER_ENTRY_BITS,
@@ -298,7 +298,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
         /* read header information, for reference to verify noone
          * toyed with the file name */
         BitElem headerBuf[headerBitElems];
-        if (!(mapFile = fa_fopen(str_get(mapName), "rb")))
+        if (!(mapFile = fa_fopen(str_get(mapName), "rb", NULL)))
           break;
         if (fread(headerBuf,  sizeof (headerBuf), 1, mapFile) != 1)
           break;

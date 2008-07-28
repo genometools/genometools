@@ -51,12 +51,9 @@ static int initNameandFILE(NameandFILE *nf,
   error_check(err);
   nf->outfilename = str_clone(outindex);
   str_append_cstr(nf->outfilename,suffix);
-  nf->fp = fa_fopen(str_get(nf->outfilename),"wb");
+  nf->fp = fa_fopen(str_get(nf->outfilename),"wb",err);
   if (nf->fp == NULL)
   {
-    error_set(err,"fa_fopen: cannot open file \"%s\": %s",
-                  str_get(nf->outfilename),
-                  strerror(errno));
     return -1;
   }
   return 0;

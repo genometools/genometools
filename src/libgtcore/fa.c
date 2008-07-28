@@ -18,6 +18,9 @@
 #include <unistd.h>
 
 #include "libgtcore/dynalloc.h"
+#include "libgtcore/eansi.h"
+#include "libgtcore/ebzlib.h"
+#include "libgtcore/ezlib.h"
 #include "libgtcore/genfile.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/fa.h"
@@ -75,23 +78,24 @@ static void fa_init(void)
 
 static void* fileopen_generic(FA *fa, const char *path, const char *mode,
                               GenFileMode genfilemode, bool x,
-                              const char *filename, int line)
+                              const char *filename, int line, Error *err)
 {
   void  *fp = NULL;
   FAFileInfo *fileinfo;
+  error_check(err);
   assert(fa && path && mode);
   fileinfo = ma_malloc(sizeof (FAFileInfo));
   fileinfo->filename = filename;
   fileinfo->line = line;
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
-      fp = x ? xfopen(path, mode) : fopen(path, mode);
+      fp = x ? xfopen(path, mode) : efopen(path, mode, err);
       break;
     case GFM_GZIP:
-      fp = x ? xgzopen(path, mode) : gzopen(path, mode);
+      fp = x ? xgzopen(path, mode) : egzopen(path, mode, err);
       break;
     case GFM_BZIP2:
-      fp = x ? xbzopen(path, mode) : BZ2_bzopen(path, mode);
+      fp = x ? xbzopen(path, mode) : ebzopen(path, mode, err);
       break;
     default: assert(0);
   }
@@ -145,13 +149,14 @@ static void xfclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
 }
 
 FILE* fa_fopen_func(const char *path, const char *mode,
-                    const char *filename, int line)
+                    const char *filename, int line, Error *err)
 {
+  error_check(err);
   assert(path && mode);
   if (!fa) fa_init();
   assert(fa);
   return fileopen_generic(fa, path, mode, GFM_UNCOMPRESSED, false, filename,
-                          line);
+                          line, err);
 }
 
 FILE* fa_xfopen_func(const char *path, const char *mode,
@@ -161,7 +166,7 @@ FILE* fa_xfopen_func(const char *path, const char *mode,
   if (!fa) fa_init();
   assert(fa);
   return fileopen_generic(fa, path, mode, GFM_UNCOMPRESSED, true, filename,
-                          line);
+                          line, NULL);
 }
 
 void fa_fclose(FILE *stream)
@@ -181,12 +186,13 @@ void fa_xfclose(FILE *stream)
 }
 
 gzFile fa_gzopen_func(const char *path, const char *mode,
-                      const char *filename, int line)
+                      const char *filename, int line, Error *err)
 {
+  error_check(err);
   assert(path && mode);
   if (!fa) fa_init();
   assert(fa);
-  return fileopen_generic(fa, path, mode, GFM_GZIP, false, filename, line);
+  return fileopen_generic(fa, path, mode, GFM_GZIP, false, filename, line, err);
 }
 
 gzFile fa_xgzopen_func(const char *path, const char *mode,
@@ -195,7 +201,7 @@ gzFile fa_xgzopen_func(const char *path, const char *mode,
   assert(path && mode);
   if (!fa) fa_init();
   assert(fa);
-  return fileopen_generic(fa, path, mode, GFM_GZIP, true, filename, line);
+  return fileopen_generic(fa, path, mode, GFM_GZIP, true, filename, line, NULL);
 }
 
 void fa_gzclose(gzFile stream)
@@ -215,12 +221,14 @@ void fa_xgzclose(gzFile stream)
 }
 
 BZFILE* fa_bzopen_func(const char *path, const char *mode,
-                       const char *filename, int line)
+                       const char *filename, int line, Error *err)
 {
+  error_check(err);
   assert(path && mode);
   if (!fa) fa_init();
   assert(fa);
-  return fileopen_generic(fa, path, mode, GFM_BZIP2, false, filename, line);
+  return fileopen_generic(fa, path, mode, GFM_BZIP2, false, filename, line,
+                          err);
 
 }
 
@@ -230,7 +238,8 @@ BZFILE* fa_xbzopen_func(const char *path, const char *mode,
   assert(path && mode);
   if (!fa) fa_init();
   assert(fa);
-  return fileopen_generic(fa, path, mode, GFM_BZIP2, true, filename, line);
+  return fileopen_generic(fa, path, mode, GFM_BZIP2, true, filename, line,
+                          NULL);
 }
 
 void fa_bzclose(BZFILE *stream)
