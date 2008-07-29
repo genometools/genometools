@@ -66,8 +66,6 @@ static void genome_feature_free(GenomeNode *gn)
 const char* genome_feature_get_attribute(GenomeNode *gn, const char *attr_name)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
-  /* the "Parent" attribute is not stored to save space */
-  assert(strcmp(attr_name, "Parent"));
   if (!gf->attributes)
     return NULL;
   return tag_value_map_get(gf->attributes, attr_name);
