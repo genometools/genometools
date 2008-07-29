@@ -426,13 +426,10 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         }
       }
       if (!had_err) {
-        /* save all attributes (except the Parent attribute to save space),
-           although the ID attribute is generated (it is used e.g. in
-           libgtview) */
-        if (strcmp(attr_tag, PARENT_STRING)) {
-          genome_feature_add_attribute((GenomeFeature*) genome_feature,
-                                       attr_tag, attr_value);
-        }
+        /* save all attributes, although the Parent and ID attribute is
+           newly in GFF3 output */
+        genome_feature_add_attribute((GenomeFeature*) genome_feature, attr_tag,
+                                     attr_value);
       }
     }
   }

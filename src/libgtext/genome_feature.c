@@ -43,8 +43,7 @@ struct GenomeFeature
   GenomeFeatureType *type;
   Range range;
   float score;
-  TagValueMap attributes; /* stores the additional attributes besides 'Parent';
-                             created on demand */
+  TagValueMap attributes; /* stores the attributes; created on demand */
 };
 
 typedef struct {
