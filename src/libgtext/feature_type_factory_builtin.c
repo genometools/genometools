@@ -61,12 +61,12 @@ static const char* find_type(const char *gft_string)
   void *result;
   assert(gft_string);
   assert(strcmp(gft_string, "undefined")); /* do not convert undefined string */
-  result =  bsearch(&gft_string,
-                    genome_feature_type_strings,
-                    sizeof (genome_feature_type_strings) /
-                    sizeof (genome_feature_type_strings[0]),
-                    sizeof (char*),
-                    compare);
+  result = bsearch(&gft_string,
+                   genome_feature_type_strings,
+                   sizeof (genome_feature_type_strings) /
+                   sizeof (genome_feature_type_strings[0]),
+                   sizeof (char*),
+                   compare);
   if (result)
     return *(char**) result;
   return NULL;

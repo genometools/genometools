@@ -30,8 +30,8 @@ FeatureTypeFactory* feature_type_factory_create(const FeatureTypeFactoryClass
   return ftf;
 }
 
-GenomeFeatureType*  feature_type_factory_create_gft(FeatureTypeFactory *ftf,
-                                                    const char *type)
+GenomeFeatureType* feature_type_factory_create_gft(FeatureTypeFactory *ftf,
+                                                   const char *type)
 {
   assert(ftf && ftf->c_class && ftf->c_class->create_gft);
   return ftf->c_class->create_gft(ftf, type);
