@@ -42,9 +42,16 @@ static GenomeFeatureType*
 feature_type_factory_obo_create_gft(FeatureTypeFactory *ftf, const char *type)
 {
   FeatureTypeFactoryOBO *ftfo;
+  GenomeFeatureType *gft;
   assert(ftf && type);
   ftfo = feature_type_factory_obo_cast(ftf);
-  return hashtable_get(ftfo->genome_feature_types, type);
+  if (!(gft = gft_collection_get(ftf->used_types, type))) {
+    if (hashtable_get(ftfo->genome_feature_types, type)) {
+      gft = genome_feature_type_construct(ftf, type);
+      gft_collection_add(ftf->used_types, type, gft);
+    }
+  }
+  return gft;
 }
 
 const FeatureTypeFactoryClass* feature_type_factory_obo_class(void)
@@ -61,15 +68,13 @@ static void add_genome_feature_from_tree(FeatureTypeFactoryOBO *ftfo,
                                          unsigned long stanza_num,
                                          const char *stanza_key)
 {
-  GenomeFeatureType *type;
   char *value;
   assert(ftfo && obo_parse_tree && stanza_key);
   value = cstr_dup(obo_parse_tree_get_stanza_value(obo_parse_tree, stanza_num,
                                                    stanza_key));
-  type = genome_feature_type_construct((FeatureTypeFactory*) ftfo, value);
   /* do not add values multiple times (possible for "name" values) */
   if (!hashtable_get(ftfo->genome_feature_types, value))
-    hashtable_add(ftfo->genome_feature_types, value, type);
+    hashtable_add(ftfo->genome_feature_types, value, value);
 }
 
 static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
@@ -106,9 +111,7 @@ FeatureTypeFactory* feature_type_factory_obo_new(const char *obo_file_path,
   assert(obo_file_path);
   ftf = feature_type_factory_create(feature_type_factory_obo_class());
   ftfo = feature_type_factory_obo_cast(ftf);
-  ftfo->genome_feature_types = hashtable_new(HASH_STRING, ma_free_func,
-                                             (FreeFunc)
-                                             genome_feature_type_delete);
+  ftfo->genome_feature_types = hashtable_new(HASH_STRING, ma_free_func, NULL);
   if (create_genome_features(ftfo, obo_file_path, err)) {
     feature_type_factory_delete(ftf);
     return NULL;

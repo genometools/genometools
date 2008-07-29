@@ -27,6 +27,7 @@ FeatureTypeFactory* feature_type_factory_create(const FeatureTypeFactoryClass
   assert(ftfc && ftfc->size);
   ftf = ma_calloc(1, ftfc->size);
   ftf->c_class = ftfc;
+  ftf->used_types = gft_collection_new();
   return ftf;
 }
 
@@ -37,11 +38,18 @@ GenomeFeatureType* feature_type_factory_create_gft(FeatureTypeFactory *ftf,
   return ftf->c_class->create_gft(ftf, type);
 }
 
+StrArray* feature_type_factory_get_used_types(const FeatureTypeFactory *ftf)
+{
+  return gft_collection_get_types(ftf->used_types);
+}
+
 void feature_type_factory_delete(FeatureTypeFactory *ftf)
 {
   if (!ftf) return;
-  assert(ftf->c_class && ftf->c_class->free);
-  ftf->c_class->free(ftf);
+  assert(ftf->c_class);
+  if (ftf->c_class->free)
+    ftf->c_class->free(ftf);
+  gft_collection_delete(ftf->used_types);
   ma_free(ftf);
 }
 

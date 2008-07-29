@@ -24,7 +24,7 @@
 
 struct GenomeFeatureType {
   FeatureTypeFactory *feature_type_factory;
-  const char *type;
+  char *type;
 };
 
 GenomeFeatureType* genome_feature_type_construct(FeatureTypeFactory
@@ -35,7 +35,7 @@ GenomeFeatureType* genome_feature_type_construct(FeatureTypeFactory
   assert(feature_type_factory && type);
   gft = ma_calloc(1, sizeof *gft);
   gft->feature_type_factory = feature_type_factory;
-  gft->type = type;
+  gft->type = cstr_dup(type);
   return gft;
 }
 
@@ -49,6 +49,7 @@ GenomeFeatureType* genome_feature_type_create_gft(GenomeFeatureType *gft,
 void genome_feature_type_delete(GenomeFeatureType *gft)
 {
   if (!gft) return;
+  ma_free(gft->type);
   ma_free(gft);
 }
 

@@ -242,6 +242,13 @@ void gff3_in_stream_set_feature_type_factory(GenomeStream *gs,
   is->feature_type_factory = feature_type_factory;
 }
 
+StrArray* gff3_in_stream_get_used_types(GenomeStream *gs)
+{
+  GFF3InStream *is = gff3_in_stream_cast(gs);
+  assert(is);
+  return feature_type_factory_get_used_types(is->feature_type_factory);
+}
+
 void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);

@@ -15,27 +15,24 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_TYPE_FACTORY_REP_H
-#define FEATURE_TYPE_FACTORY_REP_H
+#ifndef GFT_COLLECTION_H
+#define GFT_COLLECTION_H
 
-#include <stdio.h>
-#include "libgtext/feature_type_factory.h"
+#include "libgtcore/strarray.h"
 #include "libgtext/genome_feature_type.h"
-#include "libgtext/gft_collection.h"
 
-struct FeatureTypeFactoryClass {
-  size_t size;
-  GenomeFeatureType* (*create_gft)(FeatureTypeFactory*, const char *type);
-  void               (*free)(FeatureTypeFactory*);
-};
+/* A genome feature type collection. */
+typedef struct GFTCollection GFTCollection;
 
-struct FeatureTypeFactory {
-  const FeatureTypeFactoryClass *c_class;
-  GFTCollection *used_types;
-};
-
-FeatureTypeFactory* feature_type_factory_create(const FeatureTypeFactoryClass*);
-void*               feature_type_factory_cast(const FeatureTypeFactoryClass*,
-                                              FeatureTypeFactory*);
+GFTCollection*     gft_collection_new(void);
+void               gft_collection_delete(GFTCollection*);
+/* Takes ownership of <gft>. */
+void               gft_collection_add(GFTCollection*, const char *type,
+                                      GenomeFeatureType *gft);
+GenomeFeatureType* gft_collection_get(GFTCollection*, const char *type);
+/* Returns a StrArray which contains all type names in alphabetical order which
+   are stored in this colleciton. The caller is responsible to free it! */
+StrArray*          gft_collection_get_types(const GFTCollection
+                                            *gft_collection);
 
 #endif

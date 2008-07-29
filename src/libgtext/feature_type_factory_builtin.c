@@ -27,7 +27,6 @@
 
 struct FeatureTypeFactoryBuiltin {
   const FeatureTypeFactory parent_instance;
-  Hashtable *genome_feature_types;
 };
 
 #define feature_type_factory_builtin_cast(FTF)\
@@ -72,12 +71,6 @@ static const char* find_type(const char *gft_string)
   return NULL;
 }
 
-static void feature_type_factory_builtin_free(FeatureTypeFactory *ftf)
-{
-  FeatureTypeFactoryBuiltin *ftfb = feature_type_factory_builtin_cast(ftf);
-  hashtable_delete(ftfb->genome_feature_types);
-}
-
 static GenomeFeatureType*
 feature_type_factory_builtin_create_gft(FeatureTypeFactory *ftf,
                                         const char *type)
@@ -86,11 +79,10 @@ feature_type_factory_builtin_create_gft(FeatureTypeFactory *ftf,
   GenomeFeatureType *gft = NULL;
   assert(ftf && type);
   ftfb = feature_type_factory_builtin_cast(ftf);
-  if (!(gft = hashtable_get(ftfb->genome_feature_types, type))) {
-    const char *static_type;
-    if ((static_type = find_type(type))) {
-      gft = genome_feature_type_construct(ftf, static_type);
-      hashtable_add(ftfb->genome_feature_types, (char*) static_type, gft);
+  if (!(gft = gft_collection_get(ftf->used_types, type))) {
+    if ((find_type(type))) {
+      gft = genome_feature_type_construct(ftf, type);
+      gft_collection_add(ftf->used_types, type, gft);
     }
   }
   return gft;
@@ -101,7 +93,7 @@ const FeatureTypeFactoryClass* feature_type_factory_builtin_class(void)
   static const FeatureTypeFactoryClass feature_type_factory_class =
     { sizeof (FeatureTypeFactoryBuiltin),
       feature_type_factory_builtin_create_gft,
-      feature_type_factory_builtin_free };
+      NULL };
   return &feature_type_factory_class;
 }
 
@@ -111,8 +103,5 @@ FeatureTypeFactory* feature_type_factory_builtin_new(void)
   FeatureTypeFactory *ftf;
   ftf = feature_type_factory_create(feature_type_factory_builtin_class());
   ftfb = feature_type_factory_builtin_cast(ftf);
-  ftfb->genome_feature_types = hashtable_new(HASH_STRING, NULL,
-                                             (FreeFunc)
-                                             genome_feature_type_delete);
   return ftf;
 }
