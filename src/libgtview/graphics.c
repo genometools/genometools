@@ -50,7 +50,7 @@ void graphics_initialize(Graphics *g, GraphicsOutType type,
                          unsigned int width, unsigned int height)
 {
   g->outbuf = str_new();
-  switch(type)
+  switch (type)
   {
     case GRAPHICS_PDF:
 #ifdef CAIRO_HAS_PDF_SURFACE
@@ -452,7 +452,7 @@ int graphics_save_to_file(const Graphics *g, const char *filename, Error *err)
   GenFile *outfile;
   assert(g && filename);
 
-  switch(g->type)
+  switch (g->type)
   {
     case GRAPHICS_PNG:
       rval = cairo_surface_write_to_png(g->surf, filename);

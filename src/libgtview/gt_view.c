@@ -125,7 +125,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
 #ifdef CAIRO_HAS_PS_SURFACE
                                        "|ps"
 #endif
-                                       ,
+                                       "",
                              arguments->format, formats[0], formats);
   option_parser_add_option(op, option);
 
