@@ -48,9 +48,11 @@ range = feature_index.get_range_for_seqid(seqid)
 
 config = GT::Config.new()
 diagram = GT::Diagram.new(feature_index, seqid, range, config)
-render = GT::Render.new(config)
+ii = GT::ImageInfo.new()
+canvas = GT::Canvas.new(config, 700, ii)
+diagram.render(canvas)
 
-pngstream = render.to_png_stream(diagram) # takes optional width argument!
+pngstream = canvas.to_stream
 outfile = File.new(pngfile, "w")
 outfile.write(pngstream)
 outfile.close

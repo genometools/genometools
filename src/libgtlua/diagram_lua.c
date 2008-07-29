@@ -19,12 +19,14 @@
 
 #include "lauxlib.h"
 #include "libgtext/luahelper.h"
+#include "libgtlua/canvas_lua.h"
 #include "libgtlua/diagram_lua.h"
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/range_lua.h"
-#include "libgtview/feature_index.h"
+#include "libgtview/canvas.h"
 #include "libgtview/diagram.h"
+#include "libgtview/feature_index.h"
 #include "libgtview/luaconfig.h"
 
 static int diagram_lua_new(lua_State *L)
@@ -52,6 +54,15 @@ static int diagram_lua_new(lua_State *L)
   return 1;
 }
 
+static int diagram_lua_render(lua_State *L)
+{
+  Diagram **diagram;
+  Canvas **canvas;
+  diagram = check_diagram(L,1);
+  canvas = check_canvas(L,2);
+  return diagram_render(*diagram, *canvas);
+}
+
 static int diagram_lua_delete(lua_State *L)
 {
   Diagram **diagram;
@@ -62,6 +73,11 @@ static int diagram_lua_delete(lua_State *L)
 
 static const struct luaL_Reg diagram_lib_f [] = {
   { "diagram_new", diagram_lua_new },
+  { NULL, NULL }
+};
+
+static const struct luaL_Reg diagram_lib_m [] = {
+  { "render", diagram_lua_render },
   { NULL, NULL }
 };
 
@@ -77,6 +93,7 @@ int luaopen_diagram(lua_State *L)
   lua_pushcfunction(L, diagram_lua_delete);
   lua_settable(L, -3);
   /* register functions */
+  luaL_register(L, NULL, diagram_lib_m);
   luaL_register(L, "gt", diagram_lib_f);
   return 1;
 }

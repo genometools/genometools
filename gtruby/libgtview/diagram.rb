@@ -23,6 +23,7 @@ module GT
   gtdlload "libgt"
   extern "Diagram* diagram_new(FeatureIndex*, const char*, const Range*, " +
                               "Config*)"
+  extern "int diagram_render(Diagram*, Canvas*)"
   extern "void diagram_delete(Diagram*)"
 
   class Diagram
@@ -34,6 +35,10 @@ module GT
       @diagram = GT.diagram_new(feature_index.feature_index, seqid, range,
                                 config.config)
       @diagram.free = GT::symbol("diagram_delete", "0P")
+    end
+
+    def render(canvas)
+      return GT.diagram_render(@diagram, canvas.to_ptr)
     end
   end
 end

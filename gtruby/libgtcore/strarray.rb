@@ -44,5 +44,9 @@ module GT
       end
       strings
     end
+
+    def to_ptr
+      @strarray
+    end
   end
 end

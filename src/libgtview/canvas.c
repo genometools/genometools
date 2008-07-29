@@ -33,6 +33,7 @@ struct Canvas {
   unsigned int width, height, margins;
   Config *cfg;
   Graphics *g;
+  GraphicsOutType type;
   ImageInfo *ii;
 };
 
@@ -252,13 +253,16 @@ void mark_caption_collisions(Canvas *canvas, Line *line)
   }
 }
 
-Canvas* canvas_new(Config *cfg, unsigned int width, ImageInfo *ii)
+Canvas* canvas_new(Config *cfg, GraphicsOutType type,
+                   unsigned int width, ImageInfo *ii)
 {
+  assert(cfg && width > 0);
   Canvas *canvas;
   canvas = ma_malloc(sizeof (Canvas));
   canvas->cfg = cfg;
   canvas->ii = ii;
   canvas->width = width;
+  canvas->type = type;
   return canvas;
 }
 
@@ -292,7 +296,7 @@ int canvas_visit_diagram(Canvas *canvas, Diagram *dia)
   if (config_get_verbose(canvas->cfg))
     fprintf(stderr, "scaling factor is %f\n", canvas->factor);
 
-  canvas->g = graphics_new(canvas->width, canvas->height);
+  canvas->g = graphics_new(canvas->type, canvas->width, canvas->height);
   graphics_set_margins(canvas->g, canvas->margins, 0);
 
   /* Add ruler/scale to the image */
@@ -464,7 +468,7 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   {
     RecMap *rm = recmap_create(elem_start, canvas->y,
                                elem_start+elem_width, canvas->y+bar_height,
-                               (GenomeFeature*) element_get_node_ref(elem));
+                               element_get_node_ref(elem));
     image_info_add_recmap(canvas->ii, rm);
   }
 
@@ -564,7 +568,7 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   return had_err;
 }
 
-int canvas_to_png(Canvas *canvas, const char *filename, Error *err)
+int canvas_to_file(Canvas *canvas, const char *filename, Error *err)
 {
   int had_err = 0;
   assert(canvas && filename && err);
@@ -573,12 +577,15 @@ int canvas_to_png(Canvas *canvas, const char *filename, Error *err)
   if (canvas->g)
     had_err = graphics_save_to_file(canvas->g, filename, err);
   else
+  {
+    error_set(err, "No graphics has been created yet!");
     had_err = -1;
+  }
 
   return had_err;
 }
 
-int canvas_to_png_stream(Canvas *canvas, Str *stream)
+int canvas_to_stream(Canvas *canvas, Str *stream)
 {
   int had_err = 0;
   assert(canvas && stream);

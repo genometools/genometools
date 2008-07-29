@@ -53,6 +53,7 @@ Range         feature_index_get_range_for_seqid(FeatureIndex*, const char*);
    apparently 'dl/import' cannot handle returned structs. */
 void          feature_index_get_rangeptr_for_seqid(FeatureIndex*, Range*,
                                                    const char *);
+void          feature_index_get_types_in_index(FeatureIndex*, StrArray*, Error*);
 bool          feature_index_has_seqid(const FeatureIndex*, const char*);
 int           feature_index_unit_test(Error*);
 void          feature_index_delete(FeatureIndex*);

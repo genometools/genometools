@@ -18,7 +18,6 @@
 */
 
 #include <string.h>
-#include "libgtcore/bsearch.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
@@ -49,7 +48,8 @@ static void region_info_delete(RegionInfo *info)
   for (i = 0; i < array_size(info->features); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(info->features, i));
   array_delete(info->features);
-  genome_node_rec_delete((GenomeNode*)info->region);
+  if (info->region)
+    genome_node_delete((GenomeNode*)info->region);
   ma_free(info);
 }
 
@@ -76,7 +76,7 @@ void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr)
   seqid = str_get(genome_node_get_seqid((GenomeNode*) sr));
   if (!hashtable_get(fi->regions, seqid)) {
     info = ma_malloc(sizeof (RegionInfo));
-    info->region = (SequenceRegion*) genome_node_rec_ref((GenomeNode*) sr);
+    info->region = (SequenceRegion*) genome_node_ref((GenomeNode*) sr);
     info->features = array_new(sizeof (GenomeNode*));
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;

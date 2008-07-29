@@ -83,10 +83,21 @@ RecMap* image_info_get_recmap(ImageInfo *ii, unsigned long n)
   return *(RecMap**) array_get(ii->recmaps, n);
 }
 
+void image_info_get_recmap_ptr(ImageInfo *ii, RecMap *rm,  unsigned long n)
+{
+  RecMap* own_rm = *(RecMap**) array_get(ii->recmaps, n);
+  assert(ii && rm);
+  rm->nw_x = own_rm->nw_x;
+  rm->nw_y = own_rm->nw_y;
+  rm->se_x = own_rm->se_x;
+  rm->se_y = own_rm->se_y;
+  rm->gn = own_rm->gn;
+}
+
 int image_info_unit_test(Error *err)
 {
   RecMap* rms[20];
-  GenomeFeature* gfs[20];
+  GenomeNode* gfs[20];
   FeatureTypeFactory *ftf;
   GenomeFeatureType *gft;
   ImageInfo *ii;
@@ -105,8 +116,8 @@ int image_info_unit_test(Error *err)
     unsigned long rbase;
     rbase = rand_max(10);
     Range r = {rbase,rbase+rand_max(20)};
-    gfs[i] = (GenomeFeature*) genome_feature_new(gft, r, STRAND_FORWARD,
-                                                 NULL, 0);
+    gfs[i] = (GenomeNode*) genome_feature_new(gft, r, STRAND_FORWARD,
+                                              NULL, 0);
     rms[i] = recmap_create(rand_max_double(100.0),
                            rand_max_double(100.0),
                            rand_max_double(100.0),
@@ -115,7 +126,7 @@ int image_info_unit_test(Error *err)
     image_info_add_recmap(ii, rms[i]);
     ensure(had_err, image_info_num_of_recmaps(ii) == i+1);
     ensure(had_err, (rm = image_info_get_recmap(ii, i)) == rms[i]);
-    ensure(had_err, rm->gf == rms[i]->gf);
+    ensure(had_err, rm->gn == rms[i]->gn);
     genome_node_delete((GenomeNode*) gfs[i]);
   }
 

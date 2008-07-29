@@ -18,6 +18,7 @@
 */
 
 #include <string.h>
+#include <cairo.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/gtdatapath.h"
@@ -40,7 +41,7 @@ typedef struct {
   bool pipe,
        verbose,
        addintrons;
-  Str *seqid;
+  Str *seqid, *format;
   unsigned long start,
                 end;
   unsigned int width;
@@ -53,6 +54,17 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   Option  *option, *option2;
   OPrval oprval;
   bool force;
+  static const char *formats[] = { "png",
+#ifdef CAIRO_HAS_PDF_SURFACE
+  "pdf",
+#endif
+#ifdef CAIRO_HAS_SVG_SURFACE
+  "svg",
+#endif
+#ifdef CAIRO_HAS_PS_SURFACE
+  "ps",
+#endif
+  NULL };
   error_check(err);
 
   /* init */
@@ -101,6 +113,22 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
                                800, 1);
   option_parser_add_option(op, option);
 
+  /* -format */
+  option = option_new_choice("format", "output graphics format\n"
+                                       "choose from png"
+#ifdef CAIRO_HAS_PDF_SURFACE
+                                       "|pdf"
+#endif
+#ifdef CAIRO_HAS_SVG_SURFACE
+                                       "|svg"
+#endif
+#ifdef CAIRO_HAS_PS_SURFACE
+                                       "|ps"
+#endif
+                                       ,
+                             arguments->format, formats[0], formats);
+  option_parser_add_option(op, option);
+
   /* -addintrons */
   option = option_new_bool("addintrons", "add intron features between "
                            "existing exon features (before drawing)",
@@ -137,7 +165,7 @@ int gt_view(int argc, const char **argv, Error *err)
   GenomeNode *gn = NULL;
   FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
-  const char *png_file, *seqid = NULL;
+  const char *file, *seqid = NULL;
   Range qry_range, sequence_region_range;
   Array *results = NULL;
   Config *cfg = NULL;
@@ -151,18 +179,21 @@ int gt_view(int argc, const char **argv, Error *err)
 
   /* option parsing */
   arguments.seqid = str_new();
+  arguments.format = str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.seqid);
+      str_delete(arguments.format);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
       str_delete(arguments.seqid);
+      str_delete(arguments.format);
       return 0;
   }
 
-  /* save name of PNG file */
-  png_file = argv[parsed_args];
+  /* save name of output file */
+  file = argv[parsed_args];
 
   /* check for correct order: range end < range start */
   if (!had_err &&
@@ -260,7 +291,14 @@ int gt_view(int argc, const char **argv, Error *err)
     /* create and write image file */
     d = diagram_new(features, seqid, &qry_range, cfg);
     ii = image_info_new();
-    canvas = canvas_new(cfg, arguments.width, ii);
+    if (strcmp(str_get(arguments.format),"pdf")==0)
+      canvas = canvas_new(cfg, GRAPHICS_PDF, arguments.width, ii);
+    else if (strcmp(str_get(arguments.format),"ps")==0)
+      canvas = canvas_new(cfg, GRAPHICS_PS, arguments.width, ii);
+    else if (strcmp(str_get(arguments.format),"svg")==0)
+      canvas = canvas_new(cfg, GRAPHICS_SVG, arguments.width, ii);
+    else
+      canvas = canvas_new(cfg, GRAPHICS_PNG, arguments.width, ii);
     diagram_render(d, canvas);
 /*  RecMap *rm;
     int i=0;
@@ -271,7 +309,7 @@ int gt_view(int argc, const char **argv, Error *err)
       recmap_format_html_imagemap_coords(rm, buf, BUFSIZ);
       printf("%s\n", buf);
     } */
-    had_err = canvas_to_png(canvas, png_file, err);
+    had_err = canvas_to_file(canvas, file, err);
   }
 
   /* free */
@@ -286,6 +324,7 @@ int gt_view(int argc, const char **argv, Error *err)
   str_delete(config_file);
   diagram_delete(d);
   str_delete(arguments.seqid);
+  str_delete(arguments.format);
   array_delete(results);
   feature_index_delete(features);
 

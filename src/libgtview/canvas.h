@@ -24,11 +24,13 @@ typedef struct Canvas Canvas;
 #include "libgtview/config.h"
 #include "libgtview/diagram.h"
 #include "libgtview/element.h"
+#include "libgtview/graphics.h"
 #include "libgtview/line.h"
 #include "libgtview/imageinfo.h"
 #include "libgtview/track.h"
 
-Canvas*      canvas_new(Config*, unsigned int width, ImageInfo*);
+Canvas*      canvas_new(Config*, GraphicsOutType,
+                        unsigned int width, ImageInfo*);
 unsigned int canvas_get_height(Canvas*);
 int          canvas_visit_diagram(Canvas*, Diagram*);
 int          canvas_visit_track(Canvas*, Track*);
@@ -36,7 +38,8 @@ int          canvas_visit_line_pre(Canvas*, Line*);
 int          canvas_visit_line_post(Canvas*, Line*);
 int          canvas_visit_block(Canvas*, Block*);
 int          canvas_visit_element(Canvas*, Element*);
-int          canvas_to_png(Canvas*, const char*, Error*);
+int          canvas_to_file(Canvas*, const char*, Error*);
+int          canvas_to_stream(Canvas*, Str*);
 void         canvas_delete(Canvas*);
 
 #endif

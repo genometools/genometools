@@ -30,5 +30,6 @@ void          image_info_set_height(ImageInfo*, unsigned int);
 void          image_info_add_recmap(ImageInfo*, RecMap*); /* takes ownership */
 unsigned long image_info_num_of_recmaps(ImageInfo*);
 RecMap*       image_info_get_recmap(ImageInfo*, unsigned long);
+void          image_info_get_recmap_ptr(ImageInfo*, RecMap*, unsigned long);
 int           image_info_unit_test(Error *e);
 #endif

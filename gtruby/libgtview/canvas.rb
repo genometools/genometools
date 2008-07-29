@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -15,47 +15,39 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'gtdlload'
+require 'dl/import'
+require 'gthelper'
+require 'libgtcore/str'
 
 module GT
   extend DL::Importable
   gtdlload "libgt"
-  extern "Str* str_new()"
-  extern "Str* str_new_cstr(const char*)"
-  extern "void* str_get_mem(const Str*)"
-  extern "void str_append_str(Str*, const Str*)"
-  extern "char* str_get(const Str*)"
-  extern "unsigned long str_length(const Str*)"
-  extern "void str_delete(Str*)"
+  extern "Canvas* canvas_new(Config*, int, unsigned int, "+
+                             "ImageInfo*)"
+  extern "int canvas_to_file(Canvas*, const char*, Error*)"
+  extern "int canvas_to_stream(Canvas*, Str*)"
+  extern "void canvas_delete(Canvas*)"
 
-  class Str
-    def initialize(cstr)
-      if cstr
-        @str = GT.str_new_cstr(cstr)
-      else
-        @str = GT.str_new()
-      end
-      @str.free = GT::symbol("str_delete", "0P")
+  class Canvas
+    def initialize(config, width, ii)
+      @canvas = GT.canvas_new(config.config, 0, width, ii.to_ptr)
+      @canvas.free = GT::symbol("canvas_delete", "0P")
     end
 
-    def append_str(str)
-      GT.str_append_str(@str, str)
+    def to_file(filename)
+      err = GT::Error.new()
+      rval = GT.canvas_to_file(@canvas, filename, err.to_ptr)
+      if rval != 0 then GT.gterror(err) end
     end
 
-    def to_s
-      GT.str_get(@str)
-    end
-
-    def get_mem
-      GT.str_get_mem(@str)
+    def to_stream()
+      str = GT::Str.new(nil)
+      GT.canvas_to_stream(@canvas, str.to_ptr)
+      str.get_mem.to_s(str.length)
     end
 
     def to_ptr
-      @str
-    end
-
-    def length
-      GT.str_length(@str)
+      @canvas
     end
   end
 end

@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include "libgtlua/canvas_lua.h"
 #include "libgtlua/diagram_lua.h"
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/feature_stream_lua.h"
@@ -26,10 +27,10 @@
 int luaopen_gtview(lua_State *L)
 {
   assert(L);
+  luaopen_canvas(L);
   luaopen_diagram(L);
   luaopen_feature_index(L);
   luaopen_feature_stream(L);
   luaopen_feature_visitor(L);
-  /*luaopen_render(L);*/
   return 1;
 }

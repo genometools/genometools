@@ -15,35 +15,26 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/ma.h"
-#include "libgtext/genome_node.h"
-#include "libgtview/recmap.h"
+#ifndef CANVAS_LUA_H
+#define CANVAS_LUA_H
 
-RecMap* recmap_create(double nw_x, double nw_y,
-                      double se_x, double se_y,
-                      GenomeNode *gn)
-{
-  RecMap *rm;
-  rm = ma_calloc(1, sizeof (RecMap));
-  assert(rm);
-  rm->nw_x = nw_x;
-  rm->nw_y = nw_y;
-  rm->se_x = se_x;
-  rm->se_y = se_y;
-  rm->gn = genome_node_ref(gn);
-  return rm;
-}
+#include "lua.h"
 
-int recmap_format_html_imagemap_coords(RecMap *rm, char *buf, size_t n)
-{
-  assert(rm && buf);
-  return snprintf(buf, n, "%.0f,%.0f,%.0f,%.0f", rm->nw_x, rm->nw_y,
-                                                 rm->se_x, rm->se_y);
-}
+/* exports the Canvas class to Lua:
 
-void recmap_delete(RecMap *rm)
-{
-  if (!rm) return;
-  genome_node_delete(rm->gn);
-  ma_free(rm);
-}
+   -- Return a Canvas object which acts as a drawing surface of width <width>
+   -- to be passed to rendering functions as a visitor. An <imageinfo> object
+   -- is filled with element coordinate information if given.
+   function canvas_new_png(width, imageinfo)
+
+   -- Creates an image file with the given <filename> which contains the
+   -- contents of the canvas.
+   function canvas:to_file(filename)
+*/
+int luaopen_canvas(lua_State*);
+
+#define CANVAS_METATABLE  "GenomeTools.canvas"
+#define check_canvas(L, POS) \
+              (Canvas**) luaL_checkudata(L, POS, CANVAS_METATABLE)
+
+#endif

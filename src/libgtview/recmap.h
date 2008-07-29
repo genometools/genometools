@@ -25,11 +25,11 @@ typedef struct RecMap {
          nw_y,
          se_x,
          se_y;
-  GenomeFeature *gf;
+  GenomeNode *gn;
 } RecMap;
 
 RecMap* recmap_create(double nw_x, double nw_y, double se_x, double se_y,
-                      GenomeFeature*);
+                      GenomeNode*);
 int     recmap_format_html_imagemap_coords(RecMap*, char*, size_t);
 void    recmap_delete(RecMap*);
 

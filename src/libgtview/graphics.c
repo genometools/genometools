@@ -19,19 +19,69 @@
 #include <cairo.h>
 #include <cairo-pdf.h>
 #include <cairo-ps.h>
+#ifdef CAIRO_HAS_SVG_SURFACE
+#include <cairo-svg.h>
+#endif
+#include "libgtcore/fileutils.h"
+#include "libgtcore/genfile.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
-#include "libgtcore/fileutils.h"
+#include "libgtcore/str.h"
 #include "libgtview/graphics.h"
 
 struct Graphics {
   cairo_t *cr;
   cairo_surface_t *surf;
+  Str *outbuf;
+  GraphicsOutType type;
   double margin_x, margin_y, height, width;
 };
 
-void graphics_initialize(Graphics *g, unsigned int width, unsigned int height)
+static cairo_status_t str_write_func(void *closure, const unsigned char *data,
+                                     unsigned int length)
 {
+  Str *stream = closure;
+  assert(stream);
+  str_append_cstr_nt(stream, (char*) data, length);
+  return CAIRO_STATUS_SUCCESS;
+}
+
+void graphics_initialize(Graphics *g, GraphicsOutType type,
+                         unsigned int width, unsigned int height)
+{
+  g->outbuf = str_new();
+  switch(type)
+  {
+    case GRAPHICS_PDF:
+#ifdef CAIRO_HAS_PDF_SURFACE
+      g->surf = cairo_pdf_surface_create_for_stream(str_write_func,
+                                                    g->outbuf,
+                                                    width,
+                                                    height);
+#endif
+      break;
+    case GRAPHICS_PS:
+#ifdef CAIRO_HAS_PS_SURFACE
+      g->surf = cairo_ps_surface_create_for_stream(str_write_func,
+                                                   g->outbuf,
+                                                   width,
+                                                   height);
+#endif
+      break;
+    case GRAPHICS_SVG:
+#ifdef CAIRO_HAS_SVG_SURFACE
+      g->surf = cairo_svg_surface_create_for_stream(str_write_func,
+                                                    g->outbuf,
+                                                    width,
+                                                    height);
+#endif
+      break;
+    case GRAPHICS_PNG:
+    default:
+      g->surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+      break;
+  }
+  assert(g->surf && cairo_surface_status(g->surf) == CAIRO_STATUS_SUCCESS);
   g->cr = cairo_create(g->surf);
   assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
   g->width = width;
@@ -41,14 +91,26 @@ void graphics_initialize(Graphics *g, unsigned int width, unsigned int height)
   cairo_paint(g->cr);
   cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
+  cairo_select_font_face(g->cr, "sans", CAIRO_FONT_SLANT_NORMAL,
+                         CAIRO_FONT_WEIGHT_NORMAL);
+  g->type = type;
 }
 
-Graphics* graphics_new(unsigned int width, unsigned int height)
+Graphics* graphics_new(GraphicsOutType type,
+                       unsigned int width, unsigned int height)
 {
-  Graphics *g = ma_malloc(sizeof (Graphics));
-  g->surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
-  graphics_initialize(g, width, height);
+  Graphics *g = ma_calloc(1, sizeof (Graphics));
+  graphics_initialize(g, type, width, height);
   return g;
+}
+
+void graphics_set_font(Graphics *g, const char *family,
+                       FontSlant slant, FontWeight weight)
+{
+  assert(g && family);
+  cairo_select_font_face(g->cr, family,
+                         (cairo_font_slant_t) slant,
+                         (cairo_font_weight_t) weight);
 }
 
 void graphics_draw_text(Graphics *g, double x, double y, const char *text)
@@ -387,32 +449,42 @@ int graphics_save_to_file(const Graphics *g, const char *filename, Error *err)
 {
   cairo_status_t rval;
   error_check(err);
+  GenFile *outfile;
   assert(g && filename);
 
-  rval = cairo_surface_write_to_png(g->surf, filename);
-  assert(rval == CAIRO_STATUS_SUCCESS || rval == CAIRO_STATUS_WRITE_ERROR);
-  if (rval == CAIRO_STATUS_WRITE_ERROR) {
-    error_set(err, "an I/O error occurred while attempting to write image file "
-                   "\"%s\"", filename);
-    return -1;
+  switch(g->type)
+  {
+    case GRAPHICS_PNG:
+      rval = cairo_surface_write_to_png(g->surf, filename);
+      assert(rval == CAIRO_STATUS_SUCCESS || rval == CAIRO_STATUS_WRITE_ERROR);
+      if (rval == CAIRO_STATUS_WRITE_ERROR)
+      {
+        error_set(err, "an I/O error occurred while attempting "
+                       "to write image file \"%s\"", filename);
+        return -1;
+      }
+      break;
+    default:
+      cairo_show_page(g->cr);
+      cairo_surface_flush(g->surf);
+      cairo_surface_finish(g->surf);
+      outfile = genfile_open(GFM_UNCOMPRESSED, filename, "w+", err);
+      if (!error_is_set(err))
+      {
+        genfile_xwrite(outfile, str_get_mem(g->outbuf), str_length(g->outbuf));
+        genfile_close(outfile);
+      } else return -1;
+      break;
   }
   return 0;
-}
-
-static cairo_status_t png_write_func(void *closure, const unsigned char *data,
-                                     unsigned int length)
-{
-  Str *stream = closure;
-  str_append_cstr_nt(stream, (char*) data, length);
-  return CAIRO_STATUS_SUCCESS;
 }
 
 void graphics_save_to_stream(const Graphics *g, Str *stream)
 {
   cairo_status_t rval;
   assert(g && stream);
-  rval = cairo_surface_write_to_png_stream(g->surf, png_write_func, stream);
-  assert(rval == CAIRO_STATUS_SUCCESS); /* png_write_func() is sane */
+  rval = cairo_surface_write_to_png_stream(g->surf, str_write_func, stream);
+  assert(rval == CAIRO_STATUS_SUCCESS); /* str_write_func() is sane */
 }
 
 void graphics_delete(Graphics *g)
@@ -420,5 +492,7 @@ void graphics_delete(Graphics *g)
   if (!g) return;
   cairo_surface_destroy(g->surf); /* reference counted */
   cairo_destroy(g->cr);
+  if (g->outbuf)
+    str_delete(g->outbuf);
   ma_free(g);
 }

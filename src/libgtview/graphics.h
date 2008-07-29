@@ -30,13 +30,31 @@ typedef enum
   ARROW_NONE
 } ArrowStatus;
 
+typedef enum
+{
+  SLANT_NORMAL,
+  SLANT_ITALIC
+} FontSlant;
+
+typedef enum
+{
+  WEIGHT_NORMAL,
+  WEIGHT_BOLD
+} FontWeight;
+
+typedef enum {
+  GRAPHICS_PDF,
+  GRAPHICS_PNG,
+  GRAPHICS_PS,
+  GRAPHICS_SVG
+} GraphicsOutType;
+
 typedef struct Graphics Graphics;
 
 /* Create a new Graphics object, which is an abstraction of a drawing surface on
-   which several relevant primitives can be drawn.
-   This constructor creates a Graphics that can be written out as an image file
-   <filename>. */
-Graphics* graphics_new(unsigned int width, unsigned int height);
+   which several relevant primitives can be drawn. */
+Graphics* graphics_new(GraphicsOutType, unsigned int width,
+                       unsigned int height);
 void      graphics_draw_text(Graphics*, double x, double y, const char*);
 #define   graphics_draw_text_left(g,x,y,t) \
           graphics_draw_text(g,x,y,t);
@@ -47,6 +65,8 @@ void      graphics_draw_colored_text(Graphics*, double x, double y, Color,
                                      const char*);
 double    graphics_get_text_height(Graphics*);
 double    graphics_get_text_width(Graphics*, const char *text);
+void      graphics_set_font(Graphics *g, const char *family,
+                            FontSlant slant, FontWeight weight);
 double    graphics_get_image_width(Graphics*);
 double    graphics_get_image_height(Graphics*);
 /* Set margins (space to the image boundaries that are clear of elements)
@@ -79,9 +99,9 @@ void      graphics_draw_rectangle(Graphics*, double x, double y,
                                   double width);
 void      graphics_draw_arrowhead(Graphics*, double x, double y, Color,
                                   ArrowStatus);
-/* Write out the Graphic as PNG to the given file with <filename>. */
+/* Write out the Graphic to the given file with <filename>. */
 int       graphics_save_to_file(const Graphics*, const char *filename, Error*);
-/* Write out the Graphic as PNG to the given <stream>. */
+/* Write out the Graphic to the given <stream>. */
 void      graphics_save_to_stream(const Graphics*, Str *stream);
 
 void      graphics_delete(Graphics*);

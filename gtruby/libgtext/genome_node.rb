@@ -17,24 +17,54 @@
 
 require 'gtdlload'
 require 'gthelper'
+require 'libgtcore/range'
 
 module GT
   extend DL::Importable
   gtdlload "libgt"
   extern "int genome_node_accept(GenomeNode*, GenomeVisitor*, Error*)"
   extern "GenomeNode* genome_node_rec_ref(GenomeNode*)"
+  extern "GenomeNode* genome_node_ref(GenomeNode*)"
+  extern "Str* genome_node_get_idstr(GenomeNode*)"
+  extern "Str* genome_node_get_seqid(GenomeNode*)"
+  extern "int genome_node_is_marked(const GenomeNode*)"
+  extern "unsigned long genome_node_get_start(GenomeNode*)"
+  extern "unsigned long genome_node_get_end(GenomeNode*)"
+  extern "const char* genome_node_get_filename(GenomeNode*)"
   extern "void genome_node_rec_delete(GenomeNode*)"
+  extern "void genome_node_delete(GenomeNode*)"
 
   class GenomeNode
     attr_reader :genome_node
-    def initialize(node_ptr)
-      @genome_node = node_ptr
-      @genome_node.free = GT::symbol("genome_node_rec_delete", "0P")
+    def initialize(node_ptr, single=false)
+      # use 'single' if not referencing root nodes
+      if single then
+        @genome_node = GT.genome_node_ref(node_ptr)
+        @genome_node.free = GT::symbol("genome_node_delete", "0P")
+      else
+        @genome_node = node_ptr
+        @genome_node.free = GT::symbol("genome_node_rec_delete", "0P")
+      end
+    end
+
+    def get_range
+      r = GT::Range.malloc
+      r.start = GT.genome_node_get_start(@genome_node)
+      r.end = GT.genome_node_get_end(@genome_node)
+      r
+    end
+
+    def is_marked
+      GT.genome_node_is_marked(@genome_node)
+    end
+
+    def get_filename
+      GT.genome_node_get_filename(@genome_node)
     end
 
     def accept(visitor)
       err = GT::Error.new()
-      rval = GT.genome_node_accept(self.genome_node, visitor.genome_visitor,
+      rval = GT.genome_node_accept(@genome_node, visitor.genome_visitor,
                                    err.to_ptr)
       if rval != 0
         GT.gterror(err)
