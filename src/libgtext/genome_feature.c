@@ -149,7 +149,7 @@ GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
   gf->seqid          = NULL;
   gf->source         = NULL;
   gf->type           = type;
-  gf->score          = UNDEF_FLOAT;
+  gf->score          = UNDEF_SCORE;
   gf->range          = range;
   gn->bit_field     |= strand << STRAND_OFFSET;
   genome_feature_set_phase(gn, PHASE_UNDEFINED);
@@ -300,6 +300,14 @@ bool genome_feature_has_type(GenomeFeature *gf, const char *type)
 {
   assert(gf && type);
   return genome_feature_type_is(gf->type, type);
+}
+
+bool genome_feature_score_is_defined(const GenomeFeature *gf)
+{
+  assert(gf);
+  if (gf->score != UNDEF_SCORE)
+    return  true;
+  return false;
 }
 
 float genome_feature_get_score(GenomeFeature *gf)

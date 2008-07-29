@@ -44,6 +44,7 @@ const char*            genome_feature_get_attribute(GenomeNode *gn,
 GenomeFeatureType*     genome_feature_get_type(GenomeFeature*);
 GenomeFeatureType*     genome_feature_create_gft(GenomeFeature*, const char*);
 bool                   genome_feature_has_type(GenomeFeature*, const char*);
+bool                   genome_feature_score_is_defined(const GenomeFeature*);
 float                  genome_feature_get_score(GenomeFeature*);
 Strand                 genome_feature_get_strand(GenomeFeature*);
 Phase                  genome_feature_get_phase(GenomeFeature*);

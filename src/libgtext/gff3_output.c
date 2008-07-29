@@ -23,7 +23,6 @@ void gff3_output_leading(GenomeFeature *gf, GenFile *outfp)
 {
   GenomeNode *gn;
   GenomeFeatureType *type;
-  double score;
 
   assert(gf);
 
@@ -36,11 +35,10 @@ void gff3_output_leading(GenomeFeature *gf, GenFile *outfp)
                   genome_feature_type_get_cstr(type),
                   genome_node_get_start(gn),
                   genome_node_get_end(gn));
-  score = genome_feature_get_score(gf);
-  if (score == UNDEF_SCORE)
-    genfile_xfputc('.', outfp);
+  if (genome_feature_score_is_defined(gf))
+    genfile_xprintf(outfp, "%.3f", genome_feature_get_score(gf));
   else
-    genfile_xprintf(outfp, "%.3f", score);
+    genfile_xfputc('.', outfp);
   genfile_xprintf(outfp, "\t%c\t%c\t",
                   STRANDCHARS[genome_feature_get_strand(gf)],
                   PHASECHARS[genome_feature_get_phase(gf)]);
