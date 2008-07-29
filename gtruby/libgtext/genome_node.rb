@@ -25,9 +25,6 @@ module GT
   extern "int genome_node_accept(GenomeNode*, GenomeVisitor*, Error*)"
   extern "GenomeNode* genome_node_rec_ref(GenomeNode*)"
   extern "GenomeNode* genome_node_ref(GenomeNode*)"
-  extern "Str* genome_node_get_idstr(GenomeNode*)"
-  extern "Str* genome_node_get_seqid(GenomeNode*)"
-  extern "int genome_node_is_marked(const GenomeNode*)"
   extern "unsigned long genome_node_get_start(GenomeNode*)"
   extern "unsigned long genome_node_get_end(GenomeNode*)"
   extern "const char* genome_node_get_filename(GenomeNode*)"
@@ -52,10 +49,6 @@ module GT
       r.start = GT.genome_node_get_start(@genome_node)
       r.end = GT.genome_node_get_end(@genome_node)
       r
-    end
-
-    def is_marked
-      GT.genome_node_is_marked(@genome_node)
     end
 
     def get_filename

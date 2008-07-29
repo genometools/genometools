@@ -23,12 +23,14 @@ require 'libgtext/genome_node'
 module GT
   extend DL::Importable
   gtdlload "libgt"
+  typealias "bool", "ibool"
   extern "const GenomeNodeClass* genome_feature_class(void)"
   extern "void* genome_node_cast(const GenomeNodeClass*, GenomeNode*)"
   extern "GenomeFeatureType* genome_feature_get_type(GenomeFeature*)"
   extern "int genome_feature_get_strand(GenomeFeature*)"
   extern "int genome_feature_get_phase(GenomeFeature*)"
-  extern "double genome_feature_get_score(GenomeFeature*)"
+  extern "float genome_feature_get_score(GenomeFeature*)"
+  extern "bool genome_feature_score_is_defined(const GenomeFeature*)"
   extern "const char* genome_feature_type_get_cstr(const GenomeFeatureType*)"
   extern "const char* genome_feature_get_attribute(GenomeNode*,const char*)"
   extern "void genome_feature_foreach_attribute(GenomeFeature*, void*, void*)"
@@ -66,7 +68,11 @@ module GT
     end
 
     def get_score
-      GT.genome_feature_get_score(@genome_node)
+      if GT.genome_feature_score_is_defined(@genome_node) then
+        GT.genome_feature_get_score(@genome_node)
+      else
+        nil
+      end
     end
 
     def get_attribute(attrib)
