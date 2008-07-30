@@ -117,7 +117,7 @@ int parse_range(Range *range, const char *start, const char *end,
   errno = 0;
   start_val = strtol(start, &ep, 10);
   if (start[0] == '\0' || *ep != '\0') {
-    error_set(err, "could not parse number '%s$' on line %u in file '%s'",
+    error_set(err, "could not parse number '%s' on line %u in file '%s'",
               start, line_number, filename);
     return -1;
   }
@@ -136,7 +136,7 @@ int parse_range(Range *range, const char *start, const char *end,
   errno = 0;
   end_val = strtol(end, &ep, 10);
   if (end[0] == '\0' || *ep != '\0') {
-    error_set(err, "could not parse number '%s$' on line %u in file '%s'", end,
+    error_set(err, "could not parse number '%s' on line %u in file '%s'", end,
               line_number, filename);
     return -1;
   }
