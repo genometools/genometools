@@ -255,27 +255,307 @@ int gff3parser_parse_target_attributes(const char *values,
   return had_err;
 }
 
+static int set_seqid(GenomeNode *genome_feature, const char *seqid, Range range,
+                     AutomaticSequenceRegion **auto_sr, GFF3Parser *gff3_parser,
+                     const char *filename, unsigned int line_number, Error *err)
+{
+  bool seqid_str_created = false;
+  SimpleSequenceRegion *ssr;
+  Str *seqid_str = NULL;
+  int had_err = 0;
+
+  error_check(err);
+  assert(genome_feature);
+
+  ssr = hashtable_get(gff3_parser->seqid_to_ssr_mapping, seqid);
+  if (!ssr) {
+    /* sequence region has not been previously introduced -> check if one has
+       already been created automatically */
+    *auto_sr = hashtable_get(gff3_parser->undefined_sequence_regions, seqid);
+    if (!*auto_sr) {
+      /* sequence region has not been createad automatically -> do it now */
+      warning("seqid \"%s\" on line %u in file \"%s\" has not been "
+              "previously introduced with a \"%s\" line, create such a line "
+              "automatically", seqid, line_number, filename,
+              GFF_SEQUENCE_REGION);
+      *auto_sr = automatic_sequence_region_new();
+      seqid_str = str_new_cstr(seqid);
+      seqid_str_created = true;
+      (*auto_sr)->sequence_region = sequence_region_new(seqid_str, range, NULL,
+                                                        0);
+      hashtable_add(gff3_parser->undefined_sequence_regions,
+                    str_get(seqid_str), *auto_sr);
+    }
+    else {
+      /* get seqid string */
+      seqid_str = genome_node_get_seqid((*auto_sr)->sequence_region);
+      /* update the range of the sequence region */
+      genome_node_set_range((*auto_sr)->sequence_region,
+                            range_join(range,
+                                       genome_node_get_range((*auto_sr)
+                                                         ->sequence_region)));
+    }
+  }
+  else {
+    seqid_str = ssr->seqid_str;
+    /* perform range check */
+    if (!range_contains(ssr->range, range)) {
+      error_set(err, "range (%lu,%lu) of feature on line %u in file \"%s\" "
+                "is not contained in range (%lu,%lu) of corresponding "
+                "sequence region on line %u", range.start, range.end,
+                line_number, filename, ssr->range.start, ssr->range.end,
+                ssr->line_number);
+      had_err = -1;
+    }
+  }
+  if (!had_err) {
+    assert(seqid_str);
+    genome_node_set_seqid(genome_feature, seqid_str);
+  }
+  if (seqid_str_created)
+    str_delete(seqid_str);
+
+  return had_err;
+}
+
+static int store_id(char *id, GenomeNode *genome_feature,
+                    GFF3Parser *gff3_parser, const char *filename,
+                    unsigned int line_number, Error *err)
+{
+  GenomeNode *gn;
+  int had_err = 0;
+
+  error_check (err);
+
+  if (id) {
+    if ((gn = hashtable_get(gff3_parser->id_to_genome_node_mapping, id))) {
+      /* this id has been used already -> raise error */
+      if (!gff3_parser->tidy) {
+        error_set(err, "the %s \"%s\" on line %u in file \"%s\" has been used "
+                "already for the feature defined on line %u", ID_STRING, id,
+                line_number, filename, genome_node_get_line_number(gn));
+        had_err = -1;
+      }
+      else {
+        warning("the %s \"%s\" on line %u in file \"%s\" has been used "
+                "already for the feature defined on line %u", ID_STRING, id,
+                line_number, filename, genome_node_get_line_number(gn));
+      }
+      ma_free(id);
+    }
+    else {
+      gff3_parser->incomplete_node = true;
+      hashtable_add(gff3_parser->id_to_genome_node_mapping, id,
+                    genome_node_ref(genome_feature));
+    }
+  }
+
+  return had_err;
+}
+
+static int process_parents(Splitter *parents_splitter,
+                           GenomeNode *genome_feature, bool *is_child,
+                           GFF3Parser *gff3_parser, const char *filename,
+                           unsigned int line_number, Error *err)
+{
+  unsigned long i;
+  int had_err = 0;
+
+  error_check(err);
+
+  for (i = 0; i < splitter_size(parents_splitter); i++) {
+    GenomeNode* parent_gf = hashtable_get(gff3_parser
+                                          ->id_to_genome_node_mapping,
+                                          splitter_get_token(parents_splitter,
+                                                             i));
+    if (!parent_gf) {
+      if (!gff3_parser->tidy) {
+        error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
+                  "previously defined (via \"%s=\")", PARENT_STRING,
+                  splitter_get_token(parents_splitter, i), line_number,
+                  filename, ID_STRING);
+        had_err = -1;
+      }
+      else {
+        warning("%s \"%s\" on line %u in file \"%s\" has not been "
+                "previously defined (via \"%s=\")", PARENT_STRING,
+                splitter_get_token(parents_splitter, i), line_number,
+                filename, ID_STRING);
+      }
+    }
+    else if (str_cmp(genome_node_get_seqid(parent_gf),
+                     genome_node_get_seqid(genome_feature))) {
+      error_set(err, "child on line %u in file \"%s\" has different "
+                "sequence id than its parent on line %u ('%s' vs. '%s')",
+                genome_node_get_line_number(genome_feature), filename,
+                genome_node_get_line_number(parent_gf),
+                str_get(genome_node_get_seqid(genome_feature)),
+                str_get(genome_node_get_seqid(parent_gf)));
+      had_err = -1;
+    }
+    else {
+      assert(gff3_parser->incomplete_node);
+      genome_node_is_part_of_genome_node(parent_gf, genome_feature);
+      *is_child = true;
+    }
+  }
+
+  return had_err;
+}
+
+static int parse_attributes(char *attributes, GenomeNode *genome_feature,
+                            bool *is_child, GFF3Parser *gff3_parser,
+                            const char *filename, unsigned int line_number,
+                            Error *err)
+{
+  Splitter *attribute_splitter, *tmp_splitter, *parents_splitter;
+  unsigned long i;
+  char *id = NULL;
+  int had_err = 0;
+
+  error_check(err);
+  assert(attributes);
+
+  attribute_splitter = splitter_new();
+  tmp_splitter = splitter_new();
+  parents_splitter = splitter_new();
+  splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
+
+  for (i = 0; i < splitter_size(attribute_splitter); i++) {
+    const char *attr_tag = NULL, *attr_value = NULL;
+    char *tmp_token, *token = splitter_get_token(attribute_splitter, i);
+    if (strncmp(token, ".", 1) == 0) {
+      if (splitter_size(attribute_splitter) > 1) {
+        error_set(err, "more than one attribute token defined on line %u in "
+                  "file \"%s\", altough the first one is '.'", line_number,
+                  filename);
+        had_err = -1;
+      }
+      if (!had_err)
+        break; /* no attributes to parse */
+    }
+    else if (strncmp(token, ID_STRING, strlen(ID_STRING)) == 0) {
+      if (id) {
+        error_set(err, "more then one %s token on line %u in file \"%s\"",
+                  ID_STRING, line_number, filename);
+        had_err = -1;
+        break;
+      }
+      splitter_reset(tmp_splitter);
+      splitter_split(tmp_splitter, token, strlen(token), '=');
+      if (splitter_size(tmp_splitter) != 2) {
+        error_set(err, "token \"%s\" on line %u in file \"%s\" does not "
+                  "contain exactly one '='", token, line_number, filename);
+        had_err = -1;
+        break;
+      }
+      id = cstr_dup(splitter_get_token(tmp_splitter, 1));
+    }
+    else if (strncmp(token, PARENT_STRING, strlen(PARENT_STRING)) == 0) {
+      splitter_reset(tmp_splitter);
+      splitter_split(tmp_splitter, token, strlen(token), '=');
+      if (splitter_size(tmp_splitter) != 2) {
+        error_set(err, "token \"%s\" on line %u in file \"%s\" does not "
+                  "contain exactly one '='", token, line_number, filename);
+        had_err = -1;
+        break;
+      }
+      tmp_token = splitter_get_token(tmp_splitter, 1);
+      splitter_split(parents_splitter, tmp_token, strlen(tmp_token), ',');
+      assert(splitter_size(parents_splitter));
+    }
+    else {
+      /* add other attributes here */
+      splitter_reset(tmp_splitter);
+      splitter_split(tmp_splitter, token, strlen(token), '=');
+      if (splitter_size(tmp_splitter) != 2) {
+        error_set(err, "token \"%s\" on line %u in file \"%s\" does not "
+                  "contain exactly one '='", token, line_number, filename);
+        had_err = -1;
+        break;
+      }
+    }
+    if (!had_err) {
+      attr_tag = splitter_get_token(tmp_splitter, 0);
+      attr_value = splitter_get_token(tmp_splitter, 1);
+      if (!strlen(attr_tag)) {
+        error_set(err, "attribute \"=%s\" on line %u in file \"%s\" has no "
+                       "tag", attr_value, line_number, filename);
+        had_err = -1;
+      }
+    }
+    if (!had_err && !strlen(attr_value)) {
+      error_set(err, "attribute \"%s=\" on line %u in file \"%s\" has no "
+                     "value", attr_tag, line_number, filename);
+      had_err = -1;
+    }
+    if (!had_err) {
+      if (!strcmp(attr_tag, "Target")) {
+        /* the value of ``Target'' attributes have a special syntax which is
+           checked here */
+        had_err = gff3parser_parse_target_attributes(attr_value, NULL, NULL,
+                                                     NULL, NULL, filename,
+                                                     line_number, err);
+      }
+    }
+    if (!had_err) {
+      /* save all attributes, although the Parent and ID attribute is
+         newly in GFF3 output */
+      genome_feature_add_attribute((GenomeFeature*) genome_feature, attr_tag,
+                                   attr_value);
+    }
+  }
+
+  if (!had_err) {
+    had_err = store_id(id, genome_feature, gff3_parser, filename, line_number,
+                       err);
+  }
+
+  if (!had_err) {
+    had_err = process_parents(parents_splitter, genome_feature, is_child,
+                              gff3_parser, filename, line_number, err);
+  }
+
+  splitter_delete(parents_splitter);
+  splitter_delete(tmp_splitter);
+  splitter_delete(attribute_splitter);
+
+  return had_err;
+}
+
+static void set_source(GenomeNode *genome_feature, const char *source,
+                      Hashtable *source_to_str_mapping)
+{
+  Str *source_str;
+  assert(genome_feature && source && source_to_str_mapping);
+  source_str = hashtable_get(source_to_str_mapping, source);
+  if (!source_str) {
+    source_str = str_new_cstr(source);
+    hashtable_add(source_to_str_mapping, str_get(source_str), source_str);
+  }
+  assert(source_str);
+  genome_feature_set_source(genome_feature, source_str);
+}
+
 static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                    char *line, size_t line_length,
                                    Str *filenamestr, unsigned int line_number,
                                    Error *err)
 {
-  GenomeNode *gn = NULL, *genome_feature = NULL, *parent_gf;
+  GenomeNode *gn = NULL, *genome_feature = NULL;
   GenomeFeatureType *gft;
-  Splitter *splitter, *attribute_splitter, *tmp_splitter, *parents_splitter;
+  Splitter *splitter;
   AutomaticSequenceRegion *auto_sr = NULL;
-  Str *seqid_str = NULL, *source_str, *changed_seqid = NULL;
-  SimpleSequenceRegion *ssr;
+  Str *changed_seqid = NULL;
   Strand strand_value;
   float score_value;
   Phase phase_value;
   Range range;
-  char *id = NULL, *seqid = NULL, *source = NULL, *type = NULL, *start = NULL,
+  char *seqid = NULL, *source = NULL, *type = NULL, *start = NULL,
        *end = NULL, *score = NULL, *strand = NULL, *phase = NULL,
-       *attributes = NULL, *token, *tmp_token, **tokens;
+       *attributes = NULL, **tokens;
   const char *filename;
-  bool is_child = false, seqid_str_created = false;
-  unsigned long i;
+  bool is_child = false;
   int had_err = 0;
 
   error_check(err);
@@ -284,9 +564,6 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 
   /* create splitter */
   splitter = splitter_new();
-  attribute_splitter = splitter_new();
-  tmp_splitter = splitter_new();
-  parents_splitter = splitter_new();
 
   /* parse */
   splitter_split(splitter, line, line_length, '\t');
@@ -346,225 +623,26 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                         line_number);
   }
 
-  /* parse the unique id and the parents */
-  if (!had_err) {
-    splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
-    for (i = 0; i < splitter_size(attribute_splitter); i++) {
-      const char *attr_tag = NULL, *attr_value = NULL;
-      token = splitter_get_token(attribute_splitter, i);
-      if (strncmp(token, ".", 1) == 0) {
-        if (splitter_size(attribute_splitter) > 1) {
-          error_set(err, "more than one attribute token defined on line %u in "
-                    "file \"%s\", altough the first one is '.'", line_number,
-                    filename);
-          had_err = -1;
-        }
-        if (!had_err)
-          break; /* no attributes to parse */
-      }
-      else if (strncmp(token, ID_STRING, strlen(ID_STRING)) == 0) {
-        if (id) {
-          error_set(err, "more then one %s token on line %u in file \"%s\"",
-                    ID_STRING, line_number, filename);
-          had_err = -1;
-          break;
-        }
-        splitter_reset(tmp_splitter);
-        splitter_split(tmp_splitter, token, strlen(token), '=');
-        if (splitter_size(tmp_splitter) != 2) {
-          error_set(err, "token \"%s\" on line %u in file \"%s\" does not "
-                    "contain exactly one '='", token, line_number, filename);
-          had_err = -1;
-          break;
-        }
-        id = cstr_dup(splitter_get_token(tmp_splitter, 1));
-      }
-      else if (strncmp(token, PARENT_STRING, strlen(PARENT_STRING)) == 0) {
-        splitter_reset(tmp_splitter);
-        splitter_split(tmp_splitter, token, strlen(token), '=');
-        if (splitter_size(tmp_splitter) != 2) {
-          error_set(err, "token \"%s\" on line %u in file \"%s\" does not "
-                    "contain exactly one '='", token, line_number, filename);
-          had_err = -1;
-          break;
-        }
-        tmp_token = splitter_get_token(tmp_splitter, 1);
-        splitter_split(parents_splitter, tmp_token, strlen(tmp_token), ',');
-        assert(splitter_size(parents_splitter));
-      }
-      else {
-        /* add other attributes here */
-        splitter_reset(tmp_splitter);
-        splitter_split(tmp_splitter, token, strlen(token), '=');
-        if (splitter_size(tmp_splitter) != 2) {
-          error_set(err, "token \"%s\" on line %u in file \"%s\" does not "
-                    "contain exactly one '='", token, line_number, filename);
-          had_err = -1;
-          break;
-        }
-      }
-      if (!had_err) {
-        attr_tag = splitter_get_token(tmp_splitter, 0);
-        attr_value = splitter_get_token(tmp_splitter, 1);
-        if (!strlen(attr_tag)) {
-          error_set(err, "attribute \"=%s\" on line %u in file \"%s\" has no "
-                         "tag", attr_value, line_number, filename);
-          had_err = -1;
-        }
-      }
-      if (!had_err && !strlen(attr_value)) {
-        error_set(err, "attribute \"%s=\" on line %u in file \"%s\" has no "
-                       "value", attr_tag, line_number, filename);
-        had_err = -1;
-      }
-      if (!had_err) {
-        if (!strcmp(attr_tag, "Target")) {
-          /* the value of ``Target'' attributes have a special syntax which is
-             checked here */
-          had_err = gff3parser_parse_target_attributes(attr_value, NULL, NULL,
-                                                       NULL, NULL, filename,
-                                                       line_number, err);
-        }
-      }
-      if (!had_err) {
-        /* save all attributes, although the Parent and ID attribute is
-           newly in GFF3 output */
-        genome_feature_add_attribute((GenomeFeature*) genome_feature, attr_tag,
-                                     attr_value);
-      }
-    }
-  }
-
   /* set seqid */
   if (!had_err) {
-    ssr = hashtable_get(gff3_parser->seqid_to_ssr_mapping, seqid);
-    if (!ssr) {
-      /* sequence region has not been previously introduced -> check if one has
-         already been created automatically */
-      auto_sr = hashtable_get(gff3_parser->undefined_sequence_regions, seqid);
-      if (!auto_sr) {
-        /* sequence region has not been createad automatically -> do it now */
-        warning("seqid \"%s\" on line %u in file \"%s\" has not been "
-                "previously introduced with a \"%s\" line, create such a line "
-                "automatically", seqid, line_number, filename,
-                GFF_SEQUENCE_REGION);
-        auto_sr = automatic_sequence_region_new();
-        seqid_str = str_new_cstr(seqid);
-        seqid_str_created = true;
-        auto_sr->sequence_region = sequence_region_new(seqid_str, range, NULL,
-                                                       0);
-        hashtable_add(gff3_parser->undefined_sequence_regions,
-                      str_get(seqid_str), auto_sr);
-      }
-      else {
-        /* get seqid string */
-        seqid_str = genome_node_get_seqid(auto_sr->sequence_region);
-        /* update the range of the sequence region */
-        genome_node_set_range(auto_sr->sequence_region,
-                              range_join(range,
-                                         genome_node_get_range(auto_sr
-                                                           ->sequence_region)));
-      }
-    }
-    else {
-      seqid_str = ssr->seqid_str;
-      /* perform range check */
-      if (!range_contains(ssr->range, range)) {
-        error_set(err, "range (%lu,%lu) of feature on line %u in file \"%s\" "
-                  "is not contained in range (%lu,%lu) of corresponding "
-                  "sequence region on line %u", range.start, range.end,
-                  line_number, filename, ssr->range.start, ssr->range.end,
-                  ssr->line_number);
-        had_err = -1;
-      }
-    }
+    had_err = set_seqid(genome_feature, seqid, range,
+                        &auto_sr, gff3_parser, filename, line_number, err);
   }
+
+  /* parse the attributes */
   if (!had_err) {
-    assert(seqid_str);
-    genome_node_set_seqid(genome_feature, seqid_str);
+    had_err = parse_attributes(attributes, genome_feature, &is_child,
+                               gff3_parser, filename, line_number, err);
   }
-  if (seqid_str_created)
-    str_delete(seqid_str);
 
   /* set source */
-  if (!had_err) {
-    source_str = hashtable_get(gff3_parser->source_to_str_mapping, source);
-    if (!source_str) {
-      source_str = str_new_cstr(source);
-      hashtable_add(gff3_parser->source_to_str_mapping, str_get(source_str),
-                    source_str);
-    }
-    assert(source_str);
-    genome_feature_set_source(genome_feature, source_str);
-  }
+  if (!had_err)
+    set_source(genome_feature, source, gff3_parser->source_to_str_mapping);
 
   if (!had_err && score_value != UNDEF_SCORE)
     genome_feature_set_score((GenomeFeature*) genome_feature, score_value);
   if (!had_err && phase_value != PHASE_UNDEFINED)
     genome_feature_set_phase(genome_feature, phase_value);
-
-  /* store id */
-  if (!had_err && id) {
-    if ((gn = hashtable_get(gff3_parser->id_to_genome_node_mapping, id))) {
-      /* this id has been used already -> raise error */
-      if (!gff3_parser->tidy) {
-        error_set(err, "the %s \"%s\" on line %u in file \"%s\" has been used "
-                "already for the feature defined on line %u", ID_STRING, id,
-                line_number, filename, genome_node_get_line_number(gn));
-        had_err = -1;
-      }
-      else {
-        warning("the %s \"%s\" on line %u in file \"%s\" has been used "
-                "already for the feature defined on line %u", ID_STRING, id,
-                line_number, filename, genome_node_get_line_number(gn));
-      }
-      ma_free(id);
-    }
-    else {
-      gff3_parser->incomplete_node = true;
-      hashtable_add(gff3_parser->id_to_genome_node_mapping, id,
-                    genome_node_ref(genome_feature));
-    }
-  }
-  else
-    ma_free(id);
-
-  if (!had_err) {
-    for (i = 0; i < splitter_size(parents_splitter); i++) {
-      parent_gf = hashtable_get(gff3_parser->id_to_genome_node_mapping,
-                                splitter_get_token(parents_splitter, i));
-      if (!parent_gf) {
-        if (!gff3_parser->tidy) {
-          error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
-                    "previously defined (via \"%s=\")", PARENT_STRING,
-                    splitter_get_token(parents_splitter, i), line_number,
-                    filename, ID_STRING);
-          had_err = -1;
-        }
-        else {
-          warning("%s \"%s\" on line %u in file \"%s\" has not been "
-                  "previously defined (via \"%s=\")", PARENT_STRING,
-                  splitter_get_token(parents_splitter, i), line_number,
-                  filename, ID_STRING);
-        }
-      }
-      else if (str_cmp(genome_node_get_seqid(parent_gf),
-                       genome_node_get_seqid(genome_feature))) {
-        error_set(err, "child on line %u in file \"%s\" has different "
-                  "sequence id than its parent on line %u ('%s' vs. '%s')",
-                  genome_node_get_line_number(genome_feature), filename,
-                  genome_node_get_line_number(parent_gf),
-                  str_get(genome_node_get_seqid(genome_feature)),
-                  str_get(genome_node_get_seqid(parent_gf)));
-        had_err = -1;
-      }
-      else {
-        assert(gff3_parser->incomplete_node);
-        genome_node_is_part_of_genome_node(parent_gf, genome_feature);
-        is_child = true;
-      }
-    }
-  }
 
   if (!had_err) {
     gn = (is_child || auto_sr) ? NULL : genome_feature;
@@ -580,9 +658,6 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   /* free */
   str_delete(changed_seqid);
   splitter_delete(splitter);
-  splitter_delete(attribute_splitter);
-  splitter_delete(tmp_splitter);
-  splitter_delete(parents_splitter);
 
   return had_err;
 }
