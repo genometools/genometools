@@ -30,7 +30,7 @@ module GT
 
   class Canvas
     def initialize(config, width, ii)
-      @canvas = GT.canvas_new(config.config, 0, width, ii.to_ptr)
+      @canvas = GT.canvas_new(config.config, 1, width, ii.to_ptr)
       @canvas.free = GT::symbol("canvas_delete", "0P")
     end
 
