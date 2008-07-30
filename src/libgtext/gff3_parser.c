@@ -353,7 +353,7 @@ static int store_id(char *id, GenomeNode *genome_feature,
   return had_err;
 }
 
-static int process_parents(Splitter *parents_splitter,
+static int process_parents(Splitter *parent_splitter,
                            GenomeNode *genome_feature, bool *is_child,
                            GFF3Parser *gff3_parser, const char *filename,
                            unsigned int line_number, Error *err)
@@ -363,23 +363,23 @@ static int process_parents(Splitter *parents_splitter,
 
   error_check(err);
 
-  for (i = 0; i < splitter_size(parents_splitter); i++) {
+  for (i = 0; i < splitter_size(parent_splitter); i++) {
     GenomeNode* parent_gf = hashtable_get(gff3_parser
                                           ->id_to_genome_node_mapping,
-                                          splitter_get_token(parents_splitter,
+                                          splitter_get_token(parent_splitter,
                                                              i));
     if (!parent_gf) {
       if (!gff3_parser->tidy) {
         error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
                   "previously defined (via \"%s=\")", PARENT_STRING,
-                  splitter_get_token(parents_splitter, i), line_number,
+                  splitter_get_token(parent_splitter, i), line_number,
                   filename, ID_STRING);
         had_err = -1;
       }
       else {
         warning("%s \"%s\" on line %u in file \"%s\" has not been "
                 "previously defined (via \"%s=\")", PARENT_STRING,
-                splitter_get_token(parents_splitter, i), line_number,
+                splitter_get_token(parent_splitter, i), line_number,
                 filename, ID_STRING);
       }
     }
@@ -408,7 +408,7 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
                             const char *filename, unsigned int line_number,
                             Error *err)
 {
-  Splitter *attribute_splitter, *tmp_splitter, *parents_splitter;
+  Splitter *attribute_splitter, *tmp_splitter, *parent_splitter;
   unsigned long i;
   char *id = NULL;
   int had_err = 0;
@@ -418,7 +418,7 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
 
   attribute_splitter = splitter_new();
   tmp_splitter = splitter_new();
-  parents_splitter = splitter_new();
+  parent_splitter = splitter_new();
   splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
 
   for (i = 0; i < splitter_size(attribute_splitter); i++) {
@@ -461,8 +461,8 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
         break;
       }
       tmp_token = splitter_get_token(tmp_splitter, 1);
-      splitter_split(parents_splitter, tmp_token, strlen(tmp_token), ',');
-      assert(splitter_size(parents_splitter));
+      splitter_split(parent_splitter, tmp_token, strlen(tmp_token), ',');
+      assert(splitter_size(parent_splitter));
     }
     else {
       /* add other attributes here */
@@ -512,11 +512,11 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
   }
 
   if (!had_err) {
-    had_err = process_parents(parents_splitter, genome_feature, is_child,
+    had_err = process_parents(parent_splitter, genome_feature, is_child,
                               gff3_parser, filename, line_number, err);
   }
 
-  splitter_delete(parents_splitter);
+  splitter_delete(parent_splitter);
   splitter_delete(tmp_splitter);
   splitter_delete(attribute_splitter);
 
