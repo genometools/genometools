@@ -103,8 +103,8 @@ static bool filter_targetstrand(GenomeFeature *gf, Strand targetstrand)
     Strand parsed_strand;
     int had_err;
     had_err = gff3parser_parse_target_attributes(target, &num_of_targets, NULL,
-                                                 NULL, &parsed_strand, "",
-                                                 UNDEF_ULONG, NULL);
+                                                 NULL, &parsed_strand, "", 0,
+                                                 NULL);
     assert(!had_err);
     if (num_of_targets == 1 && parsed_strand != NUM_OF_STRAND_TYPES &&
         parsed_strand != targetstrand) {
