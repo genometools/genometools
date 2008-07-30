@@ -70,5 +70,6 @@ double                 genome_feature_average_splice_site_prob(const
    strand, and phase */
 bool                   genome_features_are_similar(GenomeFeature*,
                                                    GenomeFeature*);
+int                    genome_feature_unit_test(Error*);
 
 #endif

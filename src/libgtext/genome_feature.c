@@ -19,9 +19,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "libgtcore/cstr.h"
+#include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
+#include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_node_iterator.h"
@@ -537,4 +539,28 @@ bool genome_features_are_similar(GenomeFeature *gf_a, GenomeFeature *gf_b)
     return true;
   }
   return false;
+}
+
+int genome_feature_unit_test(Error *err)
+{
+  FeatureTypeFactory *feature_type_factory;
+  GenomeFeatureType *type;
+  GenomeNode *gf;
+  Range range;
+  int had_err = 0;
+
+  error_check(err);
+
+  feature_type_factory = feature_type_factory_builtin_new();
+  type = feature_type_factory_create_gft(feature_type_factory, "gene");
+  range.start = 1;
+  range.end = 1000;
+  gf = genome_feature_new(type, range, STRAND_FORWARD, NULL, 0);
+
+  ensure(had_err, !genome_feature_score_is_defined((GenomeFeature*) gf));
+
+  genome_node_delete(gf);
+  feature_type_factory_delete(feature_type_factory);
+
+  return had_err;
 }

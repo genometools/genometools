@@ -34,6 +34,7 @@
 #include "libgtcore/tokenizer.h"
 #include "libgtext/alignment.h"
 #include "libgtext/evaluator.h"
+#include "libgtext/genome_feature.h"
 #include "libgtext/genome_node_iterator.h"
 #include "libgtext/gff3_escaping.h"
 #include "libgtext/hmm.h"
@@ -152,6 +153,7 @@ Hashtable* gtt_unit_tests(void)
   hashtable_add(unit_tests, "dlist example", dlist_example);
   hashtable_add(unit_tests, "dynamic bittab class", dynbittab_unit_test);
   hashtable_add(unit_tests, "evaluator class", evaluator_unit_test);
+  hashtable_add(unit_tests, "genome feature class", genome_feature_unit_test);
   hashtable_add(unit_tests, "genome node iterator example",
                 genome_node_iterator_example);
   hashtable_add(unit_tests, "getbasename module", getbasename_unit_test);
