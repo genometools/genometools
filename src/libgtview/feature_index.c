@@ -235,25 +235,25 @@ int feature_index_unit_test(Error *err)
   /* generate a new genome_feature with the property gft_gene and the range r1
      ... */
   type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
-  gn1 = genome_feature_new(type, r1, STRAND_UNKNOWN, NULL, UNDEF_LINE_NUMBER);
+  gn1 = genome_feature_new(type, r1, STRAND_UNKNOWN, NULL, 0);
   /* ... and assign a sequence id to the new genome_feature-object. */
   genome_node_set_seqid(gn1, seqid1);
 
-  gn2 = genome_feature_new(type, r4, STRAND_UNKNOWN, NULL, UNDEF_LINE_NUMBER);
+  gn2 = genome_feature_new(type, r4, STRAND_UNKNOWN, NULL, 0);
   genome_node_set_seqid(gn2, seqid2);
 
   type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  ex1 = genome_feature_new(type, r2, STRAND_UNKNOWN, NULL, UNDEF_LINE_NUMBER);
+  ex1 = genome_feature_new(type, r2, STRAND_UNKNOWN, NULL, 0);
   genome_node_set_seqid(ex1, seqid1);
 
-  ex2 = genome_feature_new(type, r3, STRAND_UNKNOWN, NULL, UNDEF_LINE_NUMBER);
+  ex2 = genome_feature_new(type, r3, STRAND_UNKNOWN, NULL, 0);
   genome_node_set_seqid(ex2, seqid1);
 
-  ex3 = genome_feature_new(type, r4, STRAND_UNKNOWN, NULL, UNDEF_LINE_NUMBER);
+  ex3 = genome_feature_new(type, r4, STRAND_UNKNOWN, NULL, 0);
   genome_node_set_seqid(ex3, seqid2);
 
   type = feature_type_factory_create_gft(feature_type_factory, gft_CDS);
-  cds1 = genome_feature_new(type, r5, STRAND_UNKNOWN, NULL, UNDEF_LINE_NUMBER);
+  cds1 = genome_feature_new(type, r5, STRAND_UNKNOWN, NULL, 0);
   genome_node_set_seqid(cds1, seqid2);
 
   /* Determine the structure of our feature tree */
