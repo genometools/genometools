@@ -179,7 +179,7 @@ static void draw_ruler(Canvas *canvas)
                                     convert_point(canvas, tick),
                                     40,
                                     gridcol,
-                                    canvas->height);
+                                    canvas->height-40-15);
       graphics_draw_vertical_line(canvas->g,
                                   convert_point(canvas, tick),
                                   35,
