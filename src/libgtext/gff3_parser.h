@@ -40,7 +40,7 @@ int         gff3parser_parse_target_attributes(const char *values,
                                                Range *first_target_range,
                                                Strand *first_target_strand,
                                                const char *filename,
-                                               unsigned long line_number,
+                                               unsigned int line_number,
                                                Error*);
 int         gff3parser_parse_genome_nodes(int *status_code, GFF3Parser*,
                                           Queue *genome_nodes,
