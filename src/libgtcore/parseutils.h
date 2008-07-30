@@ -45,19 +45,19 @@ int parse_double(double *out, const char *nptr);
 
 /* Enforces that <start> <= <end>. */
 int parse_range(Range*, const char *start, const char *end,
-                unsigned long line_number, const char *filename, Error*);
+                unsigned int line_number, const char *filename, Error*);
 
 /* Sets <score_value> to UNDEF_DOUBLE if strcmp(score, ".") == 0. */
 int parse_score(float *score_value, const char *score,
-                unsigned long line_number, const char *filename, Error*);
+                unsigned int line_number, const char *filename, Error*);
 
 int parse_strand(Strand*, const char *strand,
-                 unsigned long line_number, const char *filename, Error*);
+                 unsigned int line_number, const char *filename, Error*);
 
 int parse_phase(Phase*, const char *phase,
-               unsigned long line_number, const char *filename, Error*);
+               unsigned int line_number, const char *filename, Error*);
 
 int parse_int_line(int*, const char *integer,
-                   unsigned long line_number, const char *filename, Error*);
+                   unsigned int line_number, const char *filename, Error*);
 
 #endif
