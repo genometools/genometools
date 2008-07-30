@@ -534,7 +534,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
        *end = NULL, *score = NULL, *strand = NULL, *phase = NULL,
        *attributes = NULL, **tokens;
   const char *filename;
-  bool is_child = false;
+  bool score_is_defined, is_child = false;
   int had_err = 0;
 
   error_check(err);
@@ -585,8 +585,10 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     had_err = add_offset_if_necessary(&range, gff3_parser, seqid, err);
 
   /* parse the score */
-  if (!had_err)
-    had_err = parse_score(&score_value, score, line_number, filename, err);
+  if (!had_err) {
+    had_err = parse_score(&score_is_defined, &score_value, score, line_number,
+                          filename, err);
+  }
 
   /* parse the strand */
   if (!had_err)
@@ -618,7 +620,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   if (!had_err)
     set_source(genome_feature, source, gff3_parser->source_to_str_mapping);
 
-  if (!had_err && score_value != UNDEF_SCORE)
+  if (!had_err && score_is_defined)
     genome_feature_set_score((GenomeFeature*) genome_feature, score_value);
   if (!had_err && phase_value != PHASE_UNDEFINED)
     genome_feature_set_phase(genome_feature, phase_value);

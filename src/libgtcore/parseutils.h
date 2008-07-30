@@ -47,8 +47,10 @@ int parse_double(double *out, const char *nptr);
 int parse_range(Range*, const char *start, const char *end,
                 unsigned int line_number, const char *filename, Error*);
 
-/* Sets <score_value> to UNDEF_DOUBLE if strcmp(score, ".") == 0. */
-int parse_score(float *score_value, const char *score,
+/* Sets <score_is_defined> to false if !strcmp(score, ".").
+   Otherwise <score_is_defined> is set to true and the parsed score is stored
+   in <score_value>. */
+int parse_score(bool *score_is_defined, float *score_value, const char *score,
                 unsigned int line_number, const char *filename, Error*);
 
 int parse_strand(Strand*, const char *strand,

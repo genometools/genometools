@@ -36,6 +36,8 @@
 #define PHASE_MASK                      0x3
 #define TRANSCRIPT_FEATURE_TYPE_OFFSET  10
 #define TRANSCRIPT_FEATURE_TYPE_MASK    0x7
+#define SCORE_IS_DEFINED_OFFSET         13
+#define SCORE_IS_DEFINED_MASK           0x1
 
 struct GenomeFeature
 {
@@ -148,7 +150,7 @@ GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
   gf->seqid          = NULL;
   gf->source         = NULL;
   gf->type           = type;
-  gf->score          = UNDEF_SCORE;
+  gf->score          = UNDEF_FLOAT;
   gf->range          = range;
   gn->bit_field     |= strand << STRAND_OFFSET;
   genome_feature_set_phase(gn, PHASE_UNDEFINED);
@@ -288,15 +290,17 @@ bool genome_feature_has_type(GenomeFeature *gf, const char *type)
 
 bool genome_feature_score_is_defined(const GenomeFeature *gf)
 {
-  assert(gf);
-  if (gf->score != UNDEF_SCORE)
-    return  true;
+  GenomeNode *gn = (GenomeNode*) gf;
+  assert(gn);
+  if ((gn->bit_field >> SCORE_IS_DEFINED_OFFSET) & SCORE_IS_DEFINED_MASK)
+    return true;
   return false;
 }
 
 float genome_feature_get_score(GenomeFeature *gf)
 {
   assert(gf);
+  assert(genome_feature_score_is_defined(gf));
   return gf->score;
 }
 
@@ -426,8 +430,18 @@ void genome_feature_set_end(GenomeFeature *gf, unsigned long end)
 
 void genome_feature_set_score(GenomeFeature *gf, float score)
 {
+  GenomeNode *gn = (GenomeNode*) gf;
   assert(gf);
+  gn->bit_field |= 1 << SCORE_IS_DEFINED_OFFSET;
   gf->score = score;
+}
+
+void genome_feature_unset_score(GenomeFeature *gf)
+{
+  GenomeNode *gn = (GenomeNode*) gf;
+  assert(gf);
+  gn->bit_field &= ~(1 << SCORE_IS_DEFINED_OFFSET);
+  gf->score = UNDEF_FLOAT;
 }
 
 void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,

@@ -254,6 +254,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   GTF_feature_type gtf_feature_type;
   GenomeFeatureType *gff_feature_type = NULL;
   const char *filename;
+  bool score_is_defined;
   int had_err = 0;
 
   assert(parser && genome_nodes && fpin);
@@ -359,7 +360,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       }
 
       /* parse the score */
-      had_err = parse_score(&score_value, score, line_number, filename, err);
+      had_err = parse_score(&score_is_defined, &score_value, score, line_number,
+                            filename, err);
       HANDLE_ERROR;
 
       /* parse the strand */
@@ -459,7 +461,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(source_str);
       genome_feature_set_source(gn, source_str);
 
-      if (score_value != UNDEF_SCORE)
+      if (score_is_defined)
         genome_feature_set_score((GenomeFeature*) gn, score_value);
       if (phase_value != PHASE_UNDEFINED)
         genome_feature_set_phase(gn, phase_value);

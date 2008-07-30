@@ -60,7 +60,7 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, UNUSED Error *err)
       /* merge nodes */
       genome_feature_set_end(previous_feature, current_range.end);
       /* XXX: compute average score ? */
-      genome_feature_set_score(previous_feature, UNDEF_SCORE);
+      genome_feature_unset_score(previous_feature);
       assert(!genome_node_number_of_children((GenomeNode*) current_feature));
       array_add(v->nodes_to_remove, current_feature);
     }

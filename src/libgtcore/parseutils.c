@@ -165,7 +165,7 @@ int parse_range(Range *range, const char *start, const char *end,
   return 0;
 }
 
-int parse_score(float *score_value, const char *score,
+int parse_score(bool *score_is_defined, float *score_value, const char *score,
                 unsigned int line_number, const char *filename, Error *err)
 {
   int rval;
@@ -174,12 +174,14 @@ int parse_score(float *score_value, const char *score,
   error_check(err);
 
   if (strlen(score) == 1 && score[0] == '.')
-    *score_value = UNDEF_SCORE;
+    *score_is_defined = false;
   else if ((rval = sscanf(score, "%f", score_value)) != 1) {
     error_set(err, "could not parse score '%s' on line %u in file '%s'", score,
               line_number, filename);
     return -1;
   }
+  else
+    *score_is_defined = true;
 
   return 0;
 }

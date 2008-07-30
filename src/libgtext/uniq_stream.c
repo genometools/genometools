@@ -62,14 +62,21 @@ static bool nodes_are_equal_feature_trees(GenomeNode *first_node,
 
 static bool uniq(GenomeNode **first_node, GenomeNode **second_node)
 {
-  float first_score, second_score;
+  bool first_score_is_defined, second_score_is_defined;
+  float first_score = 0.0, second_score;
   assert(*first_node && *second_node);
   if (nodes_are_equal_feature_trees(*first_node, *second_node)) {
-    first_score = genome_feature_get_score((GenomeFeature*) *first_node);
-    second_score = genome_feature_get_score((GenomeFeature*) *second_node);
-    if ((first_score == UNDEF_SCORE && second_score == UNDEF_SCORE) ||
-        (first_score != UNDEF_SCORE && second_score == UNDEF_SCORE) ||
-        (first_score != UNDEF_SCORE && second_score != UNDEF_SCORE &&
+    if ((first_score_is_defined =
+           genome_feature_score_is_defined((GenomeFeature*) *first_node))) {
+      first_score = genome_feature_get_score((GenomeFeature*) *first_node);
+    }
+    if ((second_score_is_defined =
+           genome_feature_score_is_defined((GenomeFeature*) *second_node))) {
+      second_score = genome_feature_get_score((GenomeFeature*) *second_node);
+    }
+    if ((!first_score_is_defined && !second_score_is_defined) ||
+        (first_score_is_defined && !second_score_is_defined) ||
+        (first_score_is_defined && second_score_is_defined &&
          first_score >= second_score)) {
       /* keep first node */
       genome_node_rec_delete(*second_node);

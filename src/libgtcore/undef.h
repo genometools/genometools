@@ -31,6 +31,4 @@
 #define UNDEF_LONG         LONG_MIN
 #define UNDEF_ULONG        ~0UL
 
-#define UNDEF_SCORE        UNDEF_FLOAT
-
 #endif

@@ -56,6 +56,7 @@ void                   genome_feature_set_source(GenomeNode*, Str *source);
 void                   genome_feature_set_phase(GenomeNode*, Phase);
 void                   genome_feature_set_end(GenomeFeature*, unsigned long);
 void                   genome_feature_set_score(GenomeFeature*, float);
+void                   genome_feature_unset_score(GenomeFeature*);
 void                   genome_feature_add_attribute(GenomeFeature*,
                                                     const char *attr_name,
                                                     const char *attr_value);
