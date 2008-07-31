@@ -38,6 +38,7 @@ Block*             block_new_from_node(GenomeNode *node);
 /* Insert <node> into block. */
 void               block_insert_element(Block*, GenomeNode *node);
 Range              block_get_range(const Block*);
+Range*             block_get_range_ptr(const Block *block);
 void               block_set_range(Block*, Range r);
 /* Checks whether a Block is occupied completely by a single element. */
 bool               block_has_only_one_fullsize_element(Block*);

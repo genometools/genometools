@@ -17,6 +17,7 @@
 */
 
 #include "libgtcore/ensure.h"
+#include "libgtcore/interval_tree.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/range.h"
 #include "libgtext/feature_type_factory_builtin.h"
@@ -24,6 +25,7 @@
 #include "libgtview/line.h"
 
 struct Line {
+  IntervalTree *block_tree;
   Array *blocks;
 };
 
@@ -31,6 +33,7 @@ Line* line_new(void)
 {
   Line *line;
   line = ma_malloc(sizeof (Line));
+  line->block_tree = interval_tree_new();
   line->blocks = array_new(sizeof (Block*));
   return line;
 }
@@ -38,20 +41,19 @@ Line* line_new(void)
 void line_insert_block(Line *line, Block *block)
 {
   assert(line && block);
+  IntervalTreeNode *new_node;
+  Range *rng;
+  rng = block_get_range_ptr(block);
+  new_node = interval_tree_node_new(rng, rng->start, rng->end, NULL);
+  interval_tree_insert(line->block_tree, new_node);
   array_add(line->blocks, block);
 }
 
 bool line_is_occupied(const Line *line, Range r)
 {
-  unsigned long i;
-  Range r1;
   assert(line);
-  for (i = 0; i < array_size(line->blocks); i++) {
-    r1 = block_get_range(*(Block**) array_get(line->blocks, i));
-    if (range_overlap(r1, r))
-      return true;
-  }
-  return false;
+  return (interval_tree_find_first_overlapping(line->block_tree,
+                                               r.start, r.end));
 }
 
 Array* line_get_blocks(Line* line)
@@ -182,5 +184,6 @@ void line_delete(Line *line)
   for (i = 0; i < array_size(line->blocks); i++)
     block_delete(*(Block**) array_get(line->blocks, i));
   array_delete(line->blocks);
+  interval_tree_delete(line->block_tree);
   ma_free(line);
 }

@@ -102,6 +102,12 @@ Range block_get_range(const Block *block)
    return block->range;
 }
 
+Range* block_get_range_ptr(const Block *block)
+{
+   assert(block);
+   return (Range*) &(block->range);
+}
+
 void block_set_range(Block *block, Range r)
 {
   assert(block && r.start <= r.end);
