@@ -1,0 +1,16 @@
+x1=10, y1=105, x2=11, y2=120, gn.type=TF_binding_site
+x1=39, y1=260, x2=58, y2=275, gn.type=exon
+x1=14, y1=180, x2=58, y2=195, gn.type=exon
+x1=14, y1=220, x2=58, y2=235, gn.type=exon
+x1=399, y1=260, x2=448, y2=275, gn.type=exon
+x1=399, y1=180, x2=448, y2=195, gn.type=exon
+x1=399, y1=220, x2=448, y2=235, gn.type=exon
+x1=204, y1=180, x2=293, y2=195, gn.type=exon
+x1=204, y1=260, x2=293, y2=275, gn.type=exon
+x1=594, y1=220, x2=790, y2=235, gn.type=exon
+x1=594, y1=180, x2=790, y2=195, gn.type=exon
+x1=594, y1=260, x2=790, y2=275, gn.type=exon
+x1=39, y1=490, x2=790, y2=505, gn.type=mRNA
+x1=14, y1=410, x2=790, y2=425, gn.type=mRNA
+x1=14, y1=450, x2=790, y2=465, gn.type=mRNA
+x1=10, y1=335, x2=790, y2=350, gn.type=gene

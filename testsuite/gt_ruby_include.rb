@@ -71,4 +71,12 @@ if $arguments["libgtview"] then
              "#{$testdata}standard_gene_as_tree.gff3"
     run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.types"
   end
+
+  Name "gtruby: show_recmaps"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/show_recmaps.rb " +
+             "#{$testdata}standard_gene_as_tree.gff3"
+    run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
+  end
 end
