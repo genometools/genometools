@@ -48,8 +48,8 @@ module GT
     def each_hotspot()
       if @hotspots.nil? then
         @hotspots = []
+        rm = GT::RecMap.malloc
         0.upto(self.num_of_recmaps()-1) do |i|
-          rm = GT::RecMap.malloc
           GT.image_info_get_recmap_ptr(@imageinfo, rm, i)
           gf = GT::GenomeFeature.new(rm.gn, true)  #refcount only this GF!
           @hotspots.push([rm.nw_x.to_i, rm.nw_y.to_i, rm.se_x.to_i, rm.se_y.to_i, gf])
