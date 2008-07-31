@@ -31,16 +31,17 @@ typedef struct Diagram Diagram;
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
 
-/* Create a new diagram object representing the genome nodes in
-   FeatureIndex in region <seqid> overlapping with <range>. */
-Diagram*    diagram_new(FeatureIndex*, const char *seqid, const Range*,
-                        Config*);
+/* Create a new Diagram object representing the genome nodes in
+   <feature_index> in region <seqid> overlapping with <range>. */
+Diagram*    diagram_new(FeatureIndex *feature_index, const char *seqid,
+                        const Range*, Config*);
 Range       diagram_get_range(Diagram*);
 void        diagram_set_config(Diagram*, Config*);
 Hashtable*  diagram_get_tracks(const Diagram*);
 int         diagram_get_total_lines(const Diagram*);
 int         diagram_get_number_of_tracks(const Diagram*);
-int         diagram_render(Diagram*, Canvas*);
+/* Render <diagram> on the given <canvas>. */
+int         diagram_render(Diagram *diagram, Canvas *canvas);
 int         diagram_unit_test(Error*);
 void        diagram_delete(Diagram*);
 
