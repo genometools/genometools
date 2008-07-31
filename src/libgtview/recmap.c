@@ -29,6 +29,7 @@ RecMap* recmap_create(double nw_x, double nw_y,
   rm->se_x = se_x;
   rm->se_y = se_y;
   rm->gn = genome_node_ref(gn);
+  rm->has_omitted_children = false;
   return rm;
 }
 

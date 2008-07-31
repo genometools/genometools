@@ -18,11 +18,13 @@
 require 'dl/struct'
 
 module GT
+  typealias "bool", "ibool"
   RecMap = struct [
     "double nw_x",
     "double nw_y",
     "double se_x",
     "double se_y",
-    "GenomeNode *gn"
+    "GenomeNode *gn",
+    "bool has_omitted_children"
   ]
 end

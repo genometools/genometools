@@ -48,6 +48,7 @@ bool               block_caption_is_visible(const Block*);
 void               block_set_caption(Block*, Str*);
 Str*               block_get_caption(const Block*);
 void               block_set_strand(Block*, Strand);
+GenomeNode*        block_get_top_level_feature(Block*);
 Strand             block_get_strand(const Block*);
 void               block_set_type(Block*, GenomeFeatureType*);
 GenomeFeatureType* block_get_type(const Block*);

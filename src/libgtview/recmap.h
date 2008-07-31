@@ -26,6 +26,7 @@ typedef struct RecMap {
          se_x,
          se_y;
   GenomeNode *gn;
+  bool has_omitted_children;
 } RecMap;
 
 RecMap* recmap_create(double nw_x, double nw_y, double se_x, double se_y,

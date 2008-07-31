@@ -31,6 +31,7 @@ struct Block {
   bool show_caption;
   Strand strand;
   GenomeFeatureType *type;
+  GenomeNode *top_level_feature;
 };
 
 /* Compare function used to insert Elements into dlist, order by type */
@@ -63,6 +64,7 @@ Block* block_new(void)
   block->caption = NULL;
   block->show_caption = true;
   block->strand = STRAND_UNKNOWN;
+  block->top_level_feature = NULL;
   return block;
 }
 
@@ -71,9 +73,10 @@ Block* block_new_from_node(GenomeNode *node)
   Block *block;
   assert(node);
   block = block_new();
-  block_set_range(block, genome_node_get_range(node));
-  block_set_strand(block, genome_feature_get_strand((GenomeFeature*) node));
-  block_set_type(block, genome_feature_get_type((GenomeFeature*) node));
+  block->range = genome_node_get_range(node);
+  block->strand = genome_feature_get_strand((GenomeFeature*) node);
+  block->type = genome_feature_get_type((GenomeFeature*) node);
+  block->top_level_feature = node;
   return block;
 }
 
@@ -94,6 +97,12 @@ void block_insert_element(Block *block, GenomeNode *gn)
 
   e = element_new(gn);
   dlist_add(block->elements, e);
+}
+
+GenomeNode* block_get_top_level_feature(Block *block)
+{
+  assert(block);
+  return block->top_level_feature;
 }
 
 Range block_get_range(const Block *block)

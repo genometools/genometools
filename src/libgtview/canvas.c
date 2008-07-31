@@ -408,6 +408,15 @@ int canvas_visit_block(Canvas *canvas, Block *block)
                                 canvas->y+((bar_height-8)/2),
                                 grey,
                                 ARROW_RIGHT);
+    /* register coordinates in ImageInfo object if available */
+    if (canvas->ii)
+    {
+      RecMap *rm = recmap_create(draw_range.start, canvas->y,
+                                 draw_range.end, canvas->y+bar_height,
+                                 block_get_top_level_feature(block));
+      image_info_add_recmap(canvas->ii, rm);
+      rm->has_omitted_children = true;
+    }
     return -1;
   }
 
