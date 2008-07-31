@@ -23,9 +23,7 @@ RecMap* recmap_create(double nw_x, double nw_y,
                       double se_x, double se_y,
                       GenomeNode *gn)
 {
-  RecMap *rm;
-  rm = ma_calloc(1, sizeof (RecMap));
-  assert(rm);
+  RecMap *rm = ma_malloc(sizeof *rm);
   rm->nw_x = nw_x;
   rm->nw_y = nw_y;
   rm->se_x = se_x;
