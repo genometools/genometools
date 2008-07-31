@@ -566,7 +566,7 @@ end
 # XXX: fix this bug from TODO list
 =begin
 Name "gt gff3 multiple top-level parents"
-Keywords "gt_gff3 bug"
+Keywords "gt_gff3"
 Test do
   run_test"#{$bin}gt gff3 #{$testdata}multiple_top_level_parents.gff3"
 end
