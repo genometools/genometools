@@ -17,6 +17,7 @@
 
 require 'gtdlload'
 require 'gthelper'
+require 'libgtcore/strarray'
 require 'libgtext/genome_stream'
 
 module GT
@@ -24,6 +25,7 @@ module GT
   gtdlload "libgt"
   typealias "bool", "ibool"
   extern "GenomeStream* gff3_in_stream_new_sorted(const char *, bool)"
+  extern "StrArray* gff3_in_stream_get_used_types(GenomeStream*)"
 
   class GFF3InStream
     include GenomeStream
@@ -34,6 +36,12 @@ module GT
       end
       @genome_stream = GT.gff3_in_stream_new_sorted(filename, false)
       @genome_stream.free = GT::symbol("genome_stream_delete", "0P")
+    end
+
+    def get_used_types
+      strarray_ptr = GT.gff3_in_stream_get_used_types(@genome_stream)
+      used_types = GT::StrArray.new(strarray_ptr)
+      used_types.to_a
     end
   end
 end
