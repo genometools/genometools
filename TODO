@@ -1,6 +1,8 @@
 bugs:
 -----
 
+- fix multiple top-level parents bug (see unused test in gt_gff3_include.rb)
+
 
 feature requests:
 -----------------
@@ -10,20 +12,16 @@ feature requests:
 - replace the st (hashtable) implementation with own implementation
 - replace sscanf calls
 - consensus_sa: fuzzlength, undetermined strand
-- glob() -> fnmatch()
-- coverage tests
+- add more coverage tests
 - use tool from tridge to find functions which are are not used
 - write check script to check for error_check()
 - EXIT_SUCCESS und EXIT_FAILURE only in gtr.c and gt.c
 - no exit() calls inside library
 - update design.html, describe interface inheritance
-- check random number generation
 - check for circles
-- `gt eval`: measure nucleotide level
 - write proper memory allocator
 - function similary to option_new_choice(), but which allows to set multiple
   strings from the given set
-- replace genfile_getc() with genfile_xfgetc()
 - make sure that exons and mRNAs of a gene lie in the range defined by the gene
 - compute the phase correctly (in cds_visitor?)
 - establish naming conventions and use them throughout entire codebase
@@ -46,7 +44,6 @@ merge libgtcore and libgtmatch:
   guesprot.c
 
 - merge Timer und measure-time.c (Ereignis, formatierter String)
-- queue unit test (Stefan)
 
 
 view tool:

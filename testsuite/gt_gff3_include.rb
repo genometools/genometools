@@ -562,3 +562,12 @@ Keywords "gt_gff3 typecheck"
 Test do
   run_test"#{$bin}gt gff3 -typecheck #{$obodir}so-xp.obo #{obo_gff3_file}"
 end
+
+# XXX: fix this bug from TODO list
+=begin
+Name "gt gff3 multiple top-level parents"
+Keywords "gt_gff3 bug"
+Test do
+  run_test"#{$bin}gt gff3 #{$testdata}multiple_top_level_parents.gff3"
+end
+=end
