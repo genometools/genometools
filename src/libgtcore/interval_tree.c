@@ -314,8 +314,19 @@ void interval_tree_insert(IntervalTree *it, IntervalTreeNode *n)
 
 static int range_ptr_compare(const void *r1p, const void *r2p)
 {
+  int ret;
   assert(r1p && r2p);
-  return range_compare(**(Range**) r1p,**(Range**) r2p);
+  ret = range_compare(**(Range**) r1p,**(Range**) r2p);
+  /* It could be that two identical ranges with different pointers are
+     present. If so, compare pointers instead to get a canonical ordering. */
+  if (ret == 0 && *(Range**) r1p != *(Range**) r2p)
+  {
+    if (*(Range**) r1p < *(Range**) r2p)
+      ret = -1;
+    else
+      ret = 1;
+  }
+  return ret;
 }
 
 int interval_tree_unit_test(UNUSED Error *err)
