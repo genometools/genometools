@@ -73,7 +73,7 @@ if $arguments["libgtview"] then
   end
 
   Name "gtruby: show_recmaps"
-  Keywords "gt_ruby"
+  Keywords "gt_ruby showrecmaps"
   Test do
     run_ruby "#{$testdata}gtruby/show_recmaps.rb " +
              "#{$testdata}standard_gene_as_tree.gff3"
