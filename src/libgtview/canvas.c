@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include <string.h>
+#include "libgtcore/bittab.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
@@ -30,8 +31,9 @@
 struct Canvas {
   Range viewrange;
   double factor, y;
-  unsigned int width, height, margins;
+  unsigned long width, height, margins;
   Config *cfg;
+  Bittab *bt;
   Graphics *g;
   GraphicsOutType type;
   ImageInfo *ii;
@@ -52,18 +54,18 @@ typedef struct
 } DrawingRange;
 
 /* Calculate the final height of the image to be created. */
-static unsigned int calculate_height(Canvas *canvas, Diagram *dia)
+static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
 {
-  unsigned int lines = diagram_get_total_lines(dia);
-  unsigned int height;
-  unsigned int line_height;
+  unsigned long lines = diagram_get_total_lines(dia);
+  unsigned long height;
+  unsigned long line_height;
   assert(dia && canvas);
   /* obtain line height and spacer from configuration settings */
-  line_height = ((unsigned int) config_get_num(canvas->cfg,
+  line_height = ((unsigned long) config_get_num(canvas->cfg,
                                                "format",
                                                "bar_height",
                                                15)) +
-                ((unsigned int) config_get_num(canvas->cfg,
+                ((unsigned long) config_get_num(canvas->cfg,
                                                "format",
                                                "bar_vspace",
                                                10)) + 15;
@@ -76,7 +78,7 @@ static unsigned int calculate_height(Canvas *canvas, Diagram *dia)
   /* add header space and footer */
   height += 70 + 20;
   if (config_get_verbose(canvas->cfg))
-    fprintf(stderr, "calculated height: %u\n", height);
+    fprintf(stderr, "calculated height: %lu\n", height);
   return height;
 }
 
@@ -254,7 +256,7 @@ void mark_caption_collisions(Canvas *canvas, Line *line)
 }
 
 Canvas* canvas_new(Config *cfg, GraphicsOutType type,
-                   unsigned int width, ImageInfo *ii)
+                   unsigned long width, ImageInfo *ii)
 {
   assert(cfg && width > 0);
   Canvas *canvas;
@@ -262,11 +264,12 @@ Canvas* canvas_new(Config *cfg, GraphicsOutType type,
   canvas->cfg = cfg;
   canvas->ii = ii;
   canvas->width = width;
+  canvas->bt = NULL;
   canvas->type = type;
   return canvas;
 }
 
-unsigned int canvas_get_height(Canvas *canvas)
+unsigned long canvas_get_height(Canvas *canvas)
 {
   assert(canvas);
   return canvas->height;
@@ -334,6 +337,7 @@ int canvas_visit_line_pre(Canvas *canvas, Line *line)
 {
   int had_err = 0;
   assert(canvas && line);
+  canvas->bt = bittab_new(canvas->width);
   mark_caption_collisions(canvas, line);
   return had_err;
 }
@@ -344,6 +348,8 @@ int canvas_visit_line_post(Canvas *canvas, Line *line)
   assert(canvas && line);
   canvas->y += config_get_num(canvas->cfg, "format", "bar_height", 15) +
                config_get_num(canvas->cfg, "format", "bar_vspace", 10) + 15;
+  bittab_delete(canvas->bt);
+  canvas->bt = NULL;
   return had_err;
 }
 
@@ -472,6 +478,21 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   elem_start = draw_range.start;
   elem_width = draw_range.end - draw_range.start;
 
+  if (draw_range.end-draw_range.start <= 1.1)
+  {
+    if (bittab_bit_is_set(canvas->bt, (unsigned long) draw_range.start))
+    {
+      return had_err;
+    }
+
+    graphics_draw_vertical_line(canvas->g,
+                                draw_range.start,
+                                canvas->y,
+                                elem_color,
+                                bar_height);
+    bittab_set_bit(canvas->bt, (unsigned long) draw_range.start);
+  }
+
   /* register coordinates in ImageInfo object if available */
   if (canvas->ii)
   {
@@ -479,6 +500,11 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
                                elem_start+elem_width, canvas->y+bar_height,
                                element_get_node_ref(elem));
     image_info_add_recmap(canvas->ii, rm);
+  }
+
+  if (draw_range.end-draw_range.start <= 1.5)
+  {
+    return had_err;
   }
 
   if (config_get_verbose(canvas->cfg))
@@ -611,6 +637,8 @@ void canvas_delete(Canvas *canvas)
   if (!canvas) return;
   if (canvas->g)
     graphics_delete(canvas->g);
+  if (canvas->bt)
+    bittab_delete(canvas->bt);
   ma_free(canvas);
   canvas = NULL;
 }

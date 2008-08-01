@@ -32,27 +32,27 @@ typedef struct Canvas Canvas;
 /* Create a new Canvas object with given <output_type> and <width> using the
    configuration given in <config>. The optional <image_info> is filled when
    the created Config object is used to render a Diagram object. */
-Canvas*      canvas_new(Config *config, GraphicsOutType output_type,
-                        unsigned int width, ImageInfo *image_info);
+Canvas*       canvas_new(Config *config, GraphicsOutType output_type,
+                         unsigned long width, ImageInfo *image_info);
 /* Returns the height of the given <canvas>. */
-unsigned int canvas_get_height(Canvas *canvas);
+unsigned long canvas_get_height(Canvas *canvas);
 /* Callback function for Diagram rendering. */
-int          canvas_visit_diagram(Canvas*, Diagram*);
+int           canvas_visit_diagram(Canvas*, Diagram*);
 /* Callback function for Diagram rendering. */
-int          canvas_visit_track(Canvas*, Track*);
+int           canvas_visit_track(Canvas*, Track*);
 /* Callback function for Diagram rendering. */
-int          canvas_visit_line_pre(Canvas*, Line*);
+int           canvas_visit_line_pre(Canvas*, Line*);
 /* Callback function for Diagram rendering. */
-int          canvas_visit_line_post(Canvas*, Line*);
+int           canvas_visit_line_post(Canvas*, Line*);
 /* Callback function for Diagram rendering. */
-int          canvas_visit_block(Canvas*, Block*);
+int           canvas_visit_block(Canvas*, Block*);
 /* Callback function for Diagram rendering. */
-int          canvas_visit_element(Canvas*, Element*);
+int           canvas_visit_element(Canvas*, Element*);
 /* Write rendered <canvas> to file with name <filename>. */
-int          canvas_to_file(Canvas *canvas, const char *filename, Error*);
+int           canvas_to_file(Canvas *canvas, const char *filename, Error*);
 /* Append rendered <canvas> to given <stream>. */
-int          canvas_to_stream(Canvas *canvas, Str *stream);
+int           canvas_to_stream(Canvas *canvas, Str *stream);
 /* Delete the given <canvas>. */
-void         canvas_delete(Canvas *canvas);
+void          canvas_delete(Canvas *canvas);
 
 #endif
