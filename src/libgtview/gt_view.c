@@ -40,7 +40,8 @@
 typedef struct {
   bool pipe,
        verbose,
-       addintrons;
+       addintrons,
+       showrecmaps;
   Str *seqid, *format;
   unsigned long start,
                 end;
@@ -134,6 +135,12 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option = option_new_bool("addintrons", "add intron features between "
                            "existing exon features (before drawing)",
                            &arguments->addintrons, false);
+  option_parser_add_option(op, option);
+
+  /* -showrecmaps */
+  option = option_new_bool("showrecmaps", "show RecMaps after image creation",
+                           &arguments->showrecmaps, false);
+  option_is_development_option(option);
   option_parser_add_option(op, option);
 
   /* set contact mailaddress */
@@ -301,15 +308,18 @@ int gt_view(int argc, const char **argv, Error *err)
     else
       canvas = canvas_new(cfg, GRAPHICS_PNG, arguments.width, ii);
     diagram_render(d, canvas);
-/*  RecMap *rm;
-    int i=0;
-    for (i=0;i<image_info_num_of_recmaps(ii);i++)
-    {
-      char buf[BUFSIZ];
-      rm = image_info_get_recmap(ii, i);
-      recmap_format_html_imagemap_coords(rm, buf, BUFSIZ);
-      printf("%s\n", buf);
-    } */
+    if (arguments.showrecmaps) {
+      unsigned long i;
+      RecMap *rm;
+      for (i = 0; i < image_info_num_of_recmaps(ii) ;i++) {
+        GenomeFeatureType *type;
+        char buf[BUFSIZ];
+        rm = image_info_get_recmap(ii, i);
+        recmap_format_html_imagemap_coords(rm, buf, BUFSIZ);
+        type = genome_feature_get_type((GenomeFeature*) rm->gn);
+        printf("%s, %s\n", buf, genome_feature_type_get_cstr(type));
+      }
+    }
     had_err = canvas_to_file(canvas, file, err);
   }
 
