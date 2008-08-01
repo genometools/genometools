@@ -339,6 +339,7 @@ int interval_tree_unit_test(UNUSED Error *err)
   int num_find_all_samples = 10000;
   int range_max_basepos = 90000;
   int width = 700;
+  int query_width = 5000;
 
   Range *res_rng = NULL, qrange;
   Array *arr;
@@ -405,7 +406,7 @@ int interval_tree_unit_test(UNUSED Error *err)
   {
     unsigned long start = rand_max(range_max_basepos);
     qrange.start = start;
-    qrange.end = start + rand_max(width);
+    qrange.end = start + rand_max(query_width);
     Array *res = array_new(sizeof (Range*));
     interval_tree_find_all_overlapping(it, qrange.start, qrange.end, res);
     if (res)
