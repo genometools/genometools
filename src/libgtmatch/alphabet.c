@@ -582,10 +582,18 @@ void fprintfsymbolstring(FILE *fpout,const Alphabet *alpha,
                          const Uchar *w,unsigned long wlen)
 {
   unsigned long i;
+  const Uchar *characters;
 
+  if (alpha == NULL)
+  {
+    characters = (const Uchar *) "acgt";
+  } else
+  {
+    characters = alpha->characters;
+  }
   for (i = 0; i < wlen; i++)
   {
-    (void) putc((int) alpha->characters[(int) w[i]],fpout);
+    (void) putc((int) characters[(int) w[i]],fpout);
   }
 }
 

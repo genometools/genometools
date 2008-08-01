@@ -100,17 +100,20 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
   mti->patternlength = patternlength;
 }
 
-static void pms_extractdfsconstinfo(UNUSED void *dfsconstinfo)
+static void pms_extractdfsconstinfo(void (*processresult)(void *,
+                                                          const void *,
+                                                          unsigned long,
+                                                          unsigned long),
+                                    void *processinfo,
+                                    const void *patterninfo,
+                                    void *dfsconstinfo)
 {
   unsigned long idx;
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
   for (idx=0; idx<mti->patternlength; idx++)
   {
-    if (mti->mstatlength[idx] > 0)
-    {
-      printf("%lu->%lu ",idx,mti->mstatlength[idx]);
-    }
+    processresult(processinfo,patterninfo,idx,mti->mstatlength[idx]);
   }
   printf("\n");
 }

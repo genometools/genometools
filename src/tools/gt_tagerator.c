@@ -167,11 +167,6 @@ static int gt_tagerator_arguments_check(UNUSED int rest_argc,
       error_set(err,"option -online requires option -k");
       return -1;
     }
-    if (arguments->docompare)
-    {
-      error_set(err,"option -cmp requires option -k");
-      return -1;
-    }
     if (!arguments->nospecials)
     {
       arguments->nospecials = true;

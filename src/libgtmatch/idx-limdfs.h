@@ -32,9 +32,18 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                                          Seqpos,Seqpos,
                                                          unsigned long),
                                     void *processmatchinfo,
+                                    void (*processresult)(void *,
+                                                          const void *,
+                                                          unsigned long,
+                                                          unsigned long),
+                                    void *patterninfo,
                                     const AbstractDfstransformer *adfst);
 
-const void *getgenericindexfromresource(Limdfsresources *limdfsresources);
+const void *getgenericindexfromresource(const Limdfsresources *limdfsresources);
+
+bool getwithesafromresource(const Limdfsresources *limdfsresources);
+
+Seqpos gettotallengthfromresource(const Limdfsresources *limdfsresources);
 
 void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
                          const AbstractDfstransformer *adfst);

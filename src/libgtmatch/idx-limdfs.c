@@ -55,6 +55,8 @@ struct Limdfsresources
   Seqpos totallength;
   void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
   void *processmatchinfo;
+  void (*processresult)(void *,const void *,unsigned long,unsigned long);
+  void *patterninfo;
   const void *genericindex;
   bool withesa, nospecials;
   DECLAREDFSSTATE(currentdfsstate);
@@ -70,6 +72,11 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                                          Seqpos,Seqpos,
                                                          unsigned long),
                                     void *processmatchinfo,
+                                    void (*processresult)(void *,
+                                                          const void *,
+                                                          unsigned long,
+                                                          unsigned long),
+                                    void *patterninfo,
                                     const AbstractDfstransformer *adfst)
 {
   Limdfsresources *limdfsresources;
@@ -84,6 +91,8 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->alphasize = (Uchar) (mapsize-1);
   limdfsresources->processmatch = processmatch;
   limdfsresources->processmatchinfo = processmatchinfo;
+  limdfsresources->processresult = processresult;
+  limdfsresources->patterninfo = patterninfo;
   limdfsresources->genericindex = genericindex;
   limdfsresources->totallength = totallength;
   limdfsresources->withesa = withesa;
@@ -102,9 +111,19 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   return limdfsresources;
 }
 
-const void *getgenericindexfromresource(Limdfsresources *limdfsresources)
+const void *getgenericindexfromresource(const Limdfsresources *limdfsresources)
 {
   return limdfsresources->genericindex;
+}
+
+bool getwithesafromresource(const Limdfsresources *limdfsresources)
+{
+  return limdfsresources->withesa;
+}
+
+Seqpos gettotallengthfromresource(const Limdfsresources *limdfsresources)
+{
+  return limdfsresources->totallength;
 }
 
 static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
@@ -587,7 +606,10 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
   }
   if (adfst->extractdfsconstinfo != NULL)
   {
-    adfst->extractdfsconstinfo(limdfsresources->dfsconstinfo);
+    adfst->extractdfsconstinfo(limdfsresources->processresult,
+                               limdfsresources,
+                               limdfsresources->patterninfo,
+                               limdfsresources->dfsconstinfo);
   }
 }
 

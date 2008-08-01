@@ -38,6 +38,7 @@
 
 #include "echoseq.pr"
 #include "esa-map.pr"
+#include "esa-minunique.pr"
 
 #define MAXTAGSIZE INTWORDSIZE
 
@@ -45,6 +46,12 @@ typedef struct
 {
   Seqpos dbstartpos, matchlength;
 } Simplematch;
+
+typedef struct
+{
+  Uchar transformedtag[MAXTAGSIZE];
+  unsigned long taglen;
+} Tagwithlength;
 
 static void esa_exactpatternmatching(const void *genericindex,
                                      const Uchar *pattern,
@@ -91,6 +98,52 @@ static void showmatch(UNUSED void *processinfo,bool withesa,
   printf("match " FormatSeqpos " " FormatSeqpos "\n",
           PRINTSeqposcast(convertstartpos(withesa,totallength,startpos)),
           PRINTSeqposcast(len));
+}
+
+static void checkmstats(void *processinfo,
+                        const void *patterninfo,
+                        unsigned long idx,
+                        unsigned long value)
+{
+  bool withesa = getwithesafromresource((const Limdfsresources *) processinfo);
+  Seqpos totallength;
+  const void *genericindex;
+  Tagwithlength *twl = (Tagwithlength *) patterninfo;
+
+  genericindex = getgenericindexfromresource((const Limdfsresources *)
+                                             processinfo);
+  totallength = gettotallengthfromresource((const Limdfsresources *)
+                                           processinfo);
+  if (withesa)
+  {
+    unsigned long mstatlength
+                    = suffixarraymstats (genericindex,
+                                         0,
+                                         0,
+                                         totallength,
+                                         NULL,
+                                         &twl->transformedtag[idx],
+                                         &twl->transformedtag[twl->taglen]);
+    if (value != mstatlength)
+    {
+      fprintfsymbolstring(stderr,NULL,twl->transformedtag,
+                          twl->taglen);
+      fprintf(stderr,"idx = %lu: value = %lu != %lu = mstatlength\n",
+                      idx,value,mstatlength);
+      exit(EXIT_FAILURE);
+    }
+  } else
+  {
+    assert(false);
+  }
+}
+
+static void showmstats(UNUSED void *processinfo,
+                       UNUSED const void *patterninfo,
+                       unsigned long idx,
+                       unsigned long value)
+{
+  printf("%lu->%lu\n",idx,value);
 }
 
 DECLAREARRAYSTRUCT(Simplematch);
@@ -189,7 +242,8 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                                  void *processmatchinfooffline,
                                  UNUSED bool rcmatch)
 {
-  if (tageratoroptions->online || tageratoroptions->docompare)
+  if (tageratoroptions->online || (tageratoroptions->maxdistance >= 0 &&
+                                   tageratoroptions->docompare))
   {
     edistmyersbitvectorAPM(mor,
                            transformedtag,
@@ -372,11 +426,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   INITARRAY(&storeoffline,Simplematch);
   if (!haserr)
   {
-    unsigned long taglen;
+    Tagwithlength twl;
     uint64_t tagnumber;
     unsigned int mapsize;
     const Uchar *symbolmap, *currenttag;
-    Uchar transformedtag[MAXTAGSIZE];
     char *desc = NULL;
     void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
     void *processmatchinfoonline, *processmatchinfooffline;
@@ -410,11 +463,15 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                          totallength,
                                          processmatch,
                                          processmatchinfooffline,
+                                         tageratoroptions->docompare
+                                           ? checkmstats
+                                           : showmstats,
+                                         &twl, /* refer to uninit structure */
                                          dfst);
     seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
     for (tagnumber = 0; !haserr; tagnumber++)
     {
-      retval = seqiterator_next(seqit, &currenttag, &taglen, &desc, err);
+      retval = seqiterator_next(seqit, &currenttag, &twl.taglen, &desc, err);
       if (retval != 1)
       {
         if (retval < 0)
@@ -423,10 +480,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
         }
         break;
       }
-      if (dotransformtag(transformedtag,
+      if (dotransformtag(&twl.transformedtag[0],
                          symbolmap,
                          currenttag,
-                         taglen,
+                         twl.taglen,
                          tagnumber,
                          tageratoroptions->replacewildcard,
                          err) != 0)
@@ -435,14 +492,15 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
         ma_free(desc);
         break;
       }
-      printf("# patternlength=%lu\n",taglen);
+      printf("# patternlength=%lu\n",twl.taglen);
       printf("# tag=");
-      fprintfsymbolstring(stdout,suffixarray.alpha,transformedtag,taglen);
+      fprintfsymbolstring(stdout,suffixarray.alpha,twl.transformedtag,
+                          twl.taglen);
       printf("\n");
       storeoffline.nextfreeSimplematch = 0;
       storeonline.nextfreeSimplematch = 0;
       assert(tageratoroptions->maxdistance < 0 ||
-             taglen > (unsigned long) tageratoroptions->maxdistance);
+             twl.taglen > (unsigned long) tageratoroptions->maxdistance);
       for (try=0 ; try < 2; try++)
       {
         if ((try == 0 && tageratoroptions->fwdmatch) ||
@@ -450,15 +508,15 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
         {
           if (try == 1 && tageratoroptions->rcmatch)
           {
-            complementtag(transformedtag,taglen);
+            complementtag(twl.transformedtag,twl.taglen);
           }
           performpatternsearch(dfst,
                                tageratoroptions,
                                withesa,
                                mor,
                                limdfsresources,
-                               transformedtag,
-                               taglen,
+                               twl.transformedtag,
+                               twl.taglen,
                                totallength,
                                processmatch,
                                processmatchinfooffline,

@@ -37,7 +37,12 @@ struct AbstractDfstransformer
                            unsigned long patternlength,
                            unsigned long maxdistance,
                            Seqpos maxintervalwidth);
-  void (*extractdfsconstinfo)(void *dfsconstinfo);
+  void (*extractdfsconstinfo)(void (*processresult)(void *,const void *,
+                                                    unsigned long,
+                                                    unsigned long),
+                              void *processinfo,
+                              const void *patterninfo,
+                              void *dfsconstinfo);
   void (*freedfsconstinfo)(void **dfsconstinfo);
   void (*initLimdfsstate)(DECLAREPTRDFSSTATE(aliasstate),
                           void *dfsconstinfo);
