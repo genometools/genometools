@@ -58,3 +58,11 @@ Test do
   run_test "#{$bin}gt view -pipe out.png in.gff3 > out.gff3"
   run "diff in.gff3 out.gff3"
 end
+
+Name "gt view -showrecmaps"
+Keywords "gt_view showrecmaps"
+Test do
+  run_test "#{$bin}gt view -showrecmaps out.png " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
+end
