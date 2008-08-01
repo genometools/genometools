@@ -41,6 +41,7 @@
 struct Diagram {
   Hashtable *tracks;
   Hashtable *nodeinfo;
+  Hashtable *collapsingtypes;
   int nof_tracks;
   Config *config;
   Range range;
@@ -249,7 +250,7 @@ static void add_recursive(Diagram *d, GenomeNode *node,
 static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
 {
   Range elem_range;
-  bool collapse, do_not_overlap=false;
+  bool *collapse, do_not_overlap=false;
   const char *feature_type;
 
   assert(d && node);
@@ -259,10 +260,17 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
   if (!range_overlap(d->range, elem_range))
     return;
 
-  /* check if this is a collapsing type */
+  /* check if this is a collapsing type, cache result */
   feature_type = genome_feature_type_get_cstr(
                    genome_feature_get_type((GenomeFeature*) node));
-  collapse = config_cstr_in_list(d->config,"collapse","to_parent",feature_type);
+  if ((collapse = (bool*) hashtable_get(d->collapsingtypes,
+                                        feature_type)) == NULL)
+  {
+    collapse = ma_malloc(sizeof (bool));
+    *collapse = config_cstr_in_list(d->config,
+                                   "collapse","to_parent",feature_type);
+    hashtable_add(d->collapsingtypes, (char*) feature_type, collapse);
+  }
 
   /* check if direct children overlap */
   if (parent)
@@ -273,7 +281,7 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
           genome_feature_get_attribute(node, "ID" ));
 
   /* decide how to continue: */
-  if (collapse) {
+  if (*collapse) {
     /* collapsing features recursively search their target blocks */
     if (!do_not_overlap)
       warning("collapsing %s features overlap "
@@ -408,6 +416,9 @@ static void diagram_build(Diagram *diagram, Array *features)
   int had_err;
   NodeTraverseInfo genome_node_children;
   genome_node_children.diagram = diagram;
+
+  diagram->collapsingtypes = hashtable_new(HASH_STRING, NULL, NULL);
+
   /* do node traversal for each root feature */
   for (i = 0; i < array_size(features); i++) {
     GenomeNode *current_root = *(GenomeNode**) array_get(features,i);
@@ -417,6 +428,7 @@ static void diagram_build(Diagram *diagram, Array *features)
   had_err = hashtable_foreach_ordered(diagram->nodeinfo, collect_blocks,
                                       diagram, (Compare) genome_node_cmp, NULL);
   assert(!had_err); /* collect_blocks() is sane */
+  hashtable_delete(diagram->collapsingtypes);
 }
 
 Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
