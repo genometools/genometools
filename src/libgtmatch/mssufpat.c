@@ -44,12 +44,12 @@ static void pms_showParallelmstats(const DECLAREPTRDFSSTATE(aliascol),
                                    const void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
-  const Myerscolumn *col = (const Myerscolumn *) aliascol;
+  const Parallelmstats *col = (const Parallelmstats *) aliascol;
   bool first = true;
 
   unsigned long idx, backmask;
 
-  printf("[");
+  printf("at depth %lu: [",depth);
   for (idx=0, backmask = 1UL; idx<mti->patternlength; idx++, backmask <<= 1)
   {
     if (col->prefixofsuffix & backmask)
@@ -64,7 +64,7 @@ static void pms_showParallelmstats(const DECLAREPTRDFSSTATE(aliascol),
       }
     }
   }
-  printf("\n");
+  printf("]\n");
 }
 
 #endif
@@ -93,7 +93,7 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
   for (a=0; a<4; a++)
   {
     char buffer[32+1];
-    uint32_t2string(buffer,mti->eqsvector[a]);
+    uint32_t2string(buffer,(uint32_t) mti->eqsvector[a]);
     printf("# %d->%s\n",a,buffer);
   }
 #endif
@@ -115,7 +115,6 @@ static void pms_extractdfsconstinfo(void (*processresult)(void *,
   {
     processresult(processinfo,patterninfo,idx,mti->mstatlength[idx]);
   }
-  printf("\n");
 }
 
 static void pms_freedfsconstinfo(void **dfsconstinfo)
@@ -193,15 +192,14 @@ static unsigned long pms_nextstepfullmatches(
   } else
   {
     Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
-    unsigned long tmp, bitindex, first1;
-    tmp = limdfsstate->prefixofsuffix;
-    bitindex = 0;
+    unsigned long bitindex = 0, first1, tmp = limdfsstate->prefixofsuffix;
     do
     {
       first1 = zerosontheright(tmp);
       assert(bitindex + first1 < mti->patternlength);
       if (mti->mstatlength[bitindex+first1] < currentdepth)
       {
+        /* printf("set mstatlength[%lu]=%lu\n",bitindex+first1,currentdepth);*/
         mti->mstatlength[bitindex+first1] = currentdepth;
       }
       tmp >>= (first1+1);
@@ -228,11 +226,11 @@ static void pms_nextParallelmstats(const void *dfsconstinfo,
   assert(currentdepth > 0);
 
   outcol->prefixofsuffix = incol->prefixofsuffix &
-                           (mti->eqsvector[currentchar] << (currentdepth-1));
+                           (mti->eqsvector[currentchar] >> (currentdepth-1));
 #ifdef SKDEBUG
   uint32_t2string(buffer1,(uint32_t) incol->prefixofsuffix);
   uint32_t2string(buffer2,(uint32_t) outcol->prefixofsuffix);
-  printf("next(%s,%u,depth=%lu)->%s\n",buffer1,currentchar,
+  printf("next(%s,%u,depth=%lu)->%s\n",buffer1,(unsigned int) currentchar,
                                        currentdepth,buffer2);
 #endif
 }
@@ -251,12 +249,12 @@ static void pms_inplacenextParallelmstats(const void *dfsconstinfo,
 
   assert(ISNOTSPECIAL(currentchar));
   tmp = col->prefixofsuffix;
-  col->prefixofsuffix &= (mti->eqsvector[currentchar] << (currentdepth-1));
-#ifdef DEBUG
+  col->prefixofsuffix &= (mti->eqsvector[currentchar] >> (currentdepth-1));
+#ifdef SKDEBUG
   uint32_t2string(buffer1,(uint32_t) tmp);
   uint32_t2string(buffer2,(uint32_t) col->prefixofsuffix);
-  printf("inplacenext(%s,%u,%lu)->%s\n",buffer1,currentchar,currentdepth,
-                                        buffer2);
+  printf("inplacenext(%s,%u,%lu)->%s\n",buffer1,(unsigned int) currentchar,
+                                        currentdepth,buffer2);
 #endif
 }
 

@@ -311,7 +311,7 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
     }
   }
 #ifdef SKDEBUG
-  verifycolumnvalues(mti,outcol,startscore+1);
+  verifycolumnvalues(mti,outcol,currentdepth+1);
 #endif
 }
 

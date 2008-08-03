@@ -108,33 +108,26 @@ static void checkmstats(void *processinfo,
   bool withesa = getwithesafromresource((const Limdfsresources *) processinfo);
   Seqpos totallength;
   const void *genericindex;
+  unsigned long mstatlength;
   Tagwithlength *twl = (Tagwithlength *) patterninfo;
 
   genericindex = getgenericindexfromresource((const Limdfsresources *)
                                              processinfo);
   totallength = gettotallengthfromresource((const Limdfsresources *)
                                            processinfo);
-  if (withesa)
+  mstatlength = (withesa ? suffixarraymstats : voidpackedindexmstatsforward)
+                     (genericindex,
+                      0,
+                      0,
+                      totallength,
+                      NULL,
+                      &twl->transformedtag[idx],
+                      &twl->transformedtag[twl->taglen]);
+  if (value != mstatlength)
   {
-    unsigned long mstatlength
-                    = suffixarraymstats (genericindex,
-                                         0,
-                                         0,
-                                         totallength,
-                                         NULL,
-                                         &twl->transformedtag[idx],
-                                         &twl->transformedtag[twl->taglen]);
-    if (value != mstatlength)
-    {
-      fprintfsymbolstring(stderr,NULL,twl->transformedtag,
-                          twl->taglen);
-      fprintf(stderr,"idx = %lu: value = %lu != %lu = mstatlength\n",
-                      idx,value,mstatlength);
-      exit(EXIT_FAILURE);
-    }
-  } else
-  {
-    assert(false);
+    fprintf(stderr,"idx = %lu: value = %lu != %lu = mstatlength\n",
+                    idx,value,mstatlength);
+    exit(EXIT_FAILURE);
   }
 }
 

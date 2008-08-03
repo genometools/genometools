@@ -109,7 +109,8 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, option);
 
   option = option_new_bool("nospecials","do not output matches containing "
-                           "wildcard characters (e.g. N)",
+                           "wildcard characters (e.g. N); only relevant for "
+                           "approximate matching",
                            &arguments->nospecials, false);
   option_parser_add_option(op, option);
   return op;
