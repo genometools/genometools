@@ -207,7 +207,7 @@ static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
   {
     return 0; /* stop depth first traversal */
   }
-  if (mti->maxintervalwidth == 0)
+  if (mti->maxintervalwidth == 0 || width == (Seqpos) 1)
   {
     if (col->maxleqk == SUCCESSMAXLEQK)
     {
@@ -218,7 +218,7 @@ static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
     if (width <= mti->maxintervalwidth)
     {
       assert(col->maxleqk > 0);
-      return col->maxleqk+1;
+      return col->maxleqk+1; /* success with match of length maxleqk */
     }
   }
   return 1UL; /* continue with depth first traversal */

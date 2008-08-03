@@ -174,7 +174,7 @@ static int gt_tagerator_arguments_check(UNUSED int rest_argc,
     }
     if (arguments->maxintervalwidth > 0)
     {
-      error_set(err,"if option -k is used then option -maxocc is not possible");
+      error_set(err,"option -maxocc requires to also use option -k");
       return -1;
     }
   }
