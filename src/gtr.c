@@ -47,7 +47,8 @@
 struct GTR {
   bool test,
        interactive,
-       debug;
+       debug,
+       check64bit;
   unsigned int seed;
   Str *debugfp,
       *testspacepeak;
@@ -161,6 +162,10 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                       &gtr->seed, 0);
   option_is_development_option(o);
   option_parser_add_option(op, o);
+  o = option_new_bool("64bit", "exit with code 0 if this is a 64bit binary, "
+                      "with 1 otherwise", &gtr->check64bit, false);
+  option_is_development_option(o);
+  option_parser_add_option(op, o);
   o = option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
                           "file", gtr->testspacepeak);
   option_is_development_option(o);
@@ -205,6 +210,13 @@ int run_test(void *key, void *value, void *data, Error *e)
     xputs("ok");
   xfflush(stdout);
   return 0;
+}
+
+static int check64bit(void)
+{
+  if (sizeof (unsigned long) == 8)
+    return EXIT_SUCCESS;
+  return EXIT_FAILURE;
 }
 
 static int run_tests(GTR *gtr, Error *err)
@@ -264,9 +276,10 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
     enable_logging(str_get(gtr->debugfp), &gtr->logfp);
   gtr->seed = ya_rand_init(gtr->seed);
   log_log("seed=%u", gtr->seed);
-  if (gtr->test) {
+  if (gtr->check64bit)
+    return check64bit();
+  if (gtr->test)
     return run_tests(gtr, err);
-  }
   if (str_length(gtr->testspacepeak)) {
     mem = ma_malloc(1 << 26); /* alloc 64 MB */;
     map = fa_mmap_read(str_get(gtr->testspacepeak), NULL);
