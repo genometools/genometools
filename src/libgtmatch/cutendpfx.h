@@ -22,7 +22,6 @@
 #include <errno.h>
 #include <stdbool.h>
 #include "libgtcore/symboldef.h"
-#include "intcode-def.h"
 #include "seqpos-def.h"
 #include "bcktab.h"
 

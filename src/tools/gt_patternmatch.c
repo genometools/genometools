@@ -25,7 +25,6 @@
 #include "libgtmatch/enum-patt-def.h"
 #include "libgtmatch/esa-mmsearch-def.h"
 #include "libgtmatch/qgram2code.h"
-#include "libgtmatch/bcktab.h"
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/cutendpfx.h"
 
