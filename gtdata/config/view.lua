@@ -15,7 +15,7 @@ config =
     split_lines        = true,
     -- Caption options
     max_capt_show_width= nil,
-    -- Display whis track only if the viewport is not wider than this
+    -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
     -- Limit the number of tracks
@@ -33,7 +33,7 @@ config =
     split_lines        = true,
     -- Caption options
     max_capt_show_width= nil,
-    -- Display whis track only if the viewport is not wider than this
+    -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
     -- Limit the number of tracks
@@ -51,7 +51,7 @@ config =
     split_lines        = true,
     -- Caption options
     max_capt_show_width= nil,
-    -- Display whis track only if the viewport is not wider than this
+    -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
     -- Limit the number of tracks
@@ -69,7 +69,7 @@ config =
     split_lines        = true,
     -- Caption options
     max_capt_show_width= nil,
-    -- Display whis track only if the viewport is not wider than this
+    -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
     -- Limit the number of tracks
@@ -87,7 +87,7 @@ config =
     split_lines        = true,
     -- Caption options
     max_capt_show_width= nil,
-    -- Display whis track only if the viewport is not wider than this
+    -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
     -- Limit the number of tracks
@@ -105,7 +105,7 @@ config =
     split_lines        = true,
     -- Caption options
     max_capt_show_width= nil,
-    -- Display whis track only if the viewport is not wider than this
+    -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
     -- Limit the number of tracks
@@ -123,7 +123,7 @@ config =
     split_lines        = true,
     -- Caption options
     max_capt_show_width= nil,
-    -- Display whis track only if the viewport is not wider than this
+    -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
     -- Limit the number of tracks
@@ -141,7 +141,7 @@ config =
     split_lines        = true,
     -- Caption options
     max_capt_show_width= nil,
-    -- Display whis track only if the viewport is not wider than this
+    -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
     -- Limit the number of tracks
@@ -161,7 +161,7 @@ config =
     split_lines        = true,
     -- Caption options
     max_capt_show_width= nil,
-    -- Display whis track only if the viewport is not wider than this
+    -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
     -- Limit the number of tracks
