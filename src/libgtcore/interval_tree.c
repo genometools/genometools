@@ -84,17 +84,15 @@ void interval_tree_node_delete(IntervalTreeNode *n)
 
 static void interval_tree_node_rec_delete(IntervalTreeNode *n)
 {
-  if (n)
-  {
-    interval_tree_node_rec_delete(n->left);
-    interval_tree_node_rec_delete(n->right);
-    interval_tree_node_delete(n);
-  }
+  if (!n) return;
+  interval_tree_node_rec_delete(n->left);
+  interval_tree_node_rec_delete(n->right);
+  interval_tree_node_delete(n);
 }
 
 void interval_tree_delete(IntervalTree *it)
 {
-  assert(it);
+  if (!it) return;
   interval_tree_node_rec_delete(it->root);
   ma_free(it);
 }
