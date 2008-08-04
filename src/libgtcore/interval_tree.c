@@ -80,7 +80,6 @@ void interval_tree_node_delete(IntervalTreeNode *n)
   if (n->data && n->free_func)
     n->free_func(n->data);
   ma_free(n);
-  n = NULL;
 }
 
 static void interval_tree_node_rec_delete(IntervalTreeNode *n)
@@ -98,7 +97,6 @@ void interval_tree_delete(IntervalTree *it)
   assert(it);
   interval_tree_node_rec_delete(it->root);
   ma_free(it);
-  it = NULL;
 }
 
 static IntervalTreeNode* interval_tree_search_internal(IntervalTreeNode *node,
