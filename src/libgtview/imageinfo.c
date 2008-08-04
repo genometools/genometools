@@ -34,7 +34,6 @@ ImageInfo* image_info_new()
 {
   ImageInfo *ii;
   ii = ma_calloc(1, sizeof (ImageInfo));
-  assert(ii);
   ii->recmaps = array_new(sizeof (RecMap*));
   assert(ii->recmaps);
   return ii;

@@ -52,7 +52,6 @@ IntervalTreeNode* interval_tree_node_new(void *data,
 {
   IntervalTreeNode* n;
   n = ma_calloc(1, sizeof (IntervalTreeNode));
-  assert(n);
   n->low = low;
   n->high = high;
   n->data = data;
@@ -64,7 +63,6 @@ IntervalTree* interval_tree_new(void)
 {
   IntervalTree *it;
   it = ma_calloc(1, sizeof (IntervalTree));
-  assert(it);
   return it;
 }
 
