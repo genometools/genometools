@@ -210,7 +210,7 @@ static void add_to_parent(Diagram *d, GenomeNode *node, GenomeNode* parent)
   /* no fitting block was found, create a new one */
   if (block == NULL) {
     BlockTuple *bt;
-    Str *caption;
+    Str *caption = NULL;
     block = block_new_from_node(parent);
     /* assign block caption */
     nnid_p = get_node_name_or_id(parent);
