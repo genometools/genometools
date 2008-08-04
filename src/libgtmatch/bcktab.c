@@ -297,10 +297,29 @@ Bcktab *mapbcktab(const Str *indexname,
   return bcktab;
 }
 
+void showbcktab(const Bcktab *bcktab)
+{
+  unsigned int prefixindex;
+
+  for (prefixindex=1U; prefixindex < bcktab->prefixlength-1; prefixindex++)
+  {
+    Codetype code;
+    unsigned long sum = 0;
+    for (code = 0; code < bcktab->basepower[prefixindex]; code++)
+    {
+      sum += bcktab->distpfxidx[prefixindex-1][code];
+      printf("distpfxidex[%u][%lu]=%lu\n",
+              prefixindex,code,bcktab->distpfxidx[prefixindex-1][code]);
+    }
+    printf("sum %lu\n",sum);
+  }
+}
+
 void freebcktab(Bcktab **bcktab)
 {
   Bcktab *bcktabptr = *bcktab;
 
+  /* showbcktab(bcktabptr); */
   if (bcktabptr->mappedptr != NULL) /* use mapped file */
   {
     fa_xmunmap(bcktabptr->mappedptr);
