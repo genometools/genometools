@@ -52,7 +52,7 @@ static Line* get_next_free_line(Track *track, Range r)
     if (!line_is_occupied(line, r))
       return line;
   }
-  if(track->max_num_lines != UNDEF_ULONG
+  if (track->max_num_lines != UNDEF_ULONG
        && array_size(track->lines) == track->max_num_lines)
     return NULL;
   line = line_new();
@@ -96,7 +96,7 @@ unsigned long track_get_number_of_lines_with_captions(const Track *track)
 {
   unsigned long i = 0, nof_tracks = 0;
   assert(track);
-  for(i=0; i<array_size(track->lines); i++)
+  for (i=0; i<array_size(track->lines); i++)
   {
     if (line_has_captions(*(Line**) array_get(track->lines, i))) nof_tracks++;
   }
