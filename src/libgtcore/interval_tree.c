@@ -37,7 +37,7 @@ struct IntervalTreeNode {
   IntervalTreeNode *parent;
   IntervalTreeNode *left;
   IntervalTreeNode *right;
-  IntervalTreeDataFreeFunc free_func;
+  FreeFunc free_func;
   void *data;
   IntervalTreeNodeColor color;
   unsigned long low;
@@ -48,14 +48,14 @@ struct IntervalTreeNode {
 IntervalTreeNode* interval_tree_node_new(void *data,
                                          unsigned long low,
                                          unsigned long high,
-                                         IntervalTreeDataFreeFunc func)
+                                         FreeFunc free_func)
 {
   IntervalTreeNode* n;
   n = ma_calloc(1, sizeof (IntervalTreeNode));
   n->low = low;
   n->high = high;
   n->data = data;
-  n->free_func = func;
+  n->free_func = free_func;
   return n;
 }
 

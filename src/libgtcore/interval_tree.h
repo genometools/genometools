@@ -18,6 +18,10 @@
 #ifndef INTERVAL_TREE_H
 #define INTERVAL_TREE_H
 
+#include "libgtcore/array.h"
+#include "libgtcore/error.h"
+#include "libgtcore/fptr.h"
+
 /* Interval tree data structure, implemented according to
    Cormen et al., Introduction to Algorithms, 2nd edition, MIT Press,
    Cambridge, MA, USA, 2001 */
@@ -25,17 +29,12 @@
 typedef struct IntervalTree IntervalTree;
 typedef struct IntervalTreeNode IntervalTreeNode;
 
-#include "libgtcore/array.h"
-#include "libgtcore/error.h"
-
-typedef void (*IntervalTreeDataFreeFunc)(void*);
-
 /* transfers ownership of <data> to interval tree
    if IntervalTreeDataFreeFunc is given */
 IntervalTreeNode* interval_tree_node_new(void *data,
                                          unsigned long low,
                                          unsigned long high,
-                                         IntervalTreeDataFreeFunc);
+                                         FreeFunc);
 void*             interval_tree_node_get_data(IntervalTreeNode* n);
 
 IntervalTree*     interval_tree_new(void);
