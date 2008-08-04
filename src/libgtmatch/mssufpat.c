@@ -131,13 +131,19 @@ static unsigned long zerosontheright(unsigned long v)
   unsigned long c;     /* c will be the number of zero bits on the right,
                          so if v is 1101000 (base 2), then c will be 3 */
   assert(v > 0);
-  assert(sizeof (unsigned long) == (size_t) 4);
   if (v & 0x1)
   {
     c = 0; /* special case for odd v (assumed to happen half of the time) */
   } else
   {
     c = 1UL;
+#ifdef _LP64
+    if ((v & 0xffffffff) == 0)
+    {
+      v >>= 32;
+      c+= 32UL;
+    }
+#endif
     if ((v & 0xffff) == 0)
     {
       v >>= 16;
