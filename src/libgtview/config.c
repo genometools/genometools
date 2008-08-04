@@ -144,15 +144,16 @@ static int config_find_section_for_getting(const Config *cfg,
   return depth;
 }
 
-Color config_get_color(const Config *cfg, const char *key)
+Color config_get_color(const Config *cfg, const char *section,
+                       const char *key)
 {
   Color color;
   int i = 0;
   assert(cfg && key);
   /* set default colors */
-  color.red=0.8; color.green = 0.8; color.blue=0.8;
+  color.red=0.5; color.green = 0.5; color.blue=0.5;
   /* get section */
-  i = config_find_section_for_getting(cfg, "colors");
+  i = config_find_section_for_getting(cfg, section);
   /* could not get section, return default */
   if (i < 0) {
     lua_pop(cfg->L, i);
@@ -197,17 +198,19 @@ Color config_get_color(const Config *cfg, const char *key)
   return color;
 }
 
-void config_get_colorptr(const Config *cfg, Color *color, const char *key)
+void config_get_colorptr(const Config *cfg, Color *color, const char *section,
+                         const char *key)
 {
   assert(cfg && color && key);
-  *color = config_get_color(cfg, key);
+  *color = config_get_color(cfg, section, key);
 }
 
-void config_set_color(Config *cfg, const char *key, Color *color)
+void config_set_color(Config *cfg, const char *section, const char *key,
+                      Color *color)
 {
   int i = 0;
   assert(cfg && key);
-  i = config_find_section_for_setting(cfg, "colors");
+  i = config_find_section_for_setting(cfg, section);
   lua_getfield(cfg->L, -1, key);
   i++;
   if (lua_isnil(cfg->L, -1)) {
@@ -303,6 +306,46 @@ void config_set_num(Config *cfg, const char *section, const char *key,
   i = config_find_section_for_setting(cfg, section);
   lua_pushstring(cfg->L, key);
   lua_pushnumber(cfg->L, number);
+  lua_settable(cfg->L, -3);
+  lua_pop(cfg->L, i);
+}
+
+bool config_get_bool(const Config *cfg, const char *section, const char *key,
+                     double deflt)
+{
+  bool ret = deflt;
+  int i = 0;
+  assert(cfg && key && section);
+  /* get section */
+  i = config_find_section_for_getting(cfg, section);
+  /* could not get section, return default */
+  if (i < 0) {
+    lua_pop(cfg->L, i);
+    return deflt;
+  }
+  /* lookup entry for given key */
+  lua_getfield(cfg->L, -1, key);
+  if (lua_isnil(cfg->L, -1) || !lua_isboolean(cfg->L, -1)) {
+    if (cfg->verbose) warning("no or non-boolean value found for key '%s'",
+                              key);
+    lua_pop(cfg->L, i+1);
+    return deflt;
+  } else i++;
+  /* retrieve value */
+  ret = lua_toboolean(cfg->L, -1);
+  /* reset stack to original state for subsequent calls */
+  lua_pop(cfg->L, i);
+  return ret;
+}
+
+void config_set_bool(Config *cfg, const char *section, const char *key,
+                     bool flag)
+{
+  int i = 0;
+  assert(cfg && section && key);
+  i = config_find_section_for_setting(cfg, section);
+  lua_pushstring(cfg->L, key);
+  lua_pushboolean(cfg->L, flag);
   lua_settable(cfg->L, -3);
   lua_pop(cfg->L, i);
 }
@@ -445,18 +488,18 @@ int config_unit_test(Error *err)
   col1.red=.1;col1.green=.2;col1.blue=.3;
   col2.red=.4;col2.green=.5;col2.blue=.6;
   col.red=1.0;col.green=1.0;col.blue=1.0;
-  defcol.red=.8;defcol.green=.8;defcol.blue=.8;
+  defcol.red=.5;defcol.green=.5;defcol.blue=.5;
 
   /* instantiate new config object */
   if (!(cfg = config_new(false, err)))
     had_err = -1;
 
   /* at the beginning, all values are defaults, since nothing is defined */
-  tmpcol = config_get_color(cfg, "exon");
+  tmpcol = config_get_color(cfg, "exon", "fill");
   ensure(had_err, color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "cds");
+  tmpcol = config_get_color(cfg, "cds", "fill");
   ensure(had_err, color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "foo");
+  tmpcol = config_get_color(cfg, "foo", "fill");
   ensure(had_err, color_equals(tmpcol,defcol));
   num = config_get_num(cfg,"format", "margins", 10.0);
   ensure(had_err, num == 10.0);
@@ -464,14 +507,14 @@ int config_unit_test(Error *err)
   ensure(had_err, (strcmp(str,"")==0));
 
   /* change some values... */
-  config_set_color(cfg, "exon", &col);
+  config_set_color(cfg, "exon", "fill", &col);
   config_set_num(cfg,"format", "margins", 11.0);
   config_set_num(cfg,"format", "foo", 2.0);
 
   /* is it saved correctly? */
-  tmpcol = config_get_color(cfg, "exon");
+  tmpcol = config_get_color(cfg, "exon", "fill");
   ensure(had_err, !color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "exon");
+  tmpcol = config_get_color(cfg, "exon", "fill");
   ensure(had_err, color_equals(tmpcol,col));
   num = config_get_num(cfg,"format", "margins", 10.0);
   ensure(had_err, num == 11.0);
@@ -479,13 +522,13 @@ int config_unit_test(Error *err)
   ensure(had_err, num == 2.0);
 
   /* create a new color definition */
-  config_set_color(cfg, "foo", &col);
+  config_set_color(cfg, "foo", "fill", &col);
   config_set_cstr(cfg, "bar", "baz", test1);
 
   /* is it saved correctly? */
-  tmpcol = config_get_color(cfg, "foo");
+  tmpcol = config_get_color(cfg, "foo", "fill");
   ensure(had_err, !color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "foo");
+  tmpcol = config_get_color(cfg, "foo", "fill");
   ensure(had_err, color_equals(tmpcol,col));
   str = config_get_cstr(cfg, "bar", "baz", "");
   ensure(had_err, (strcmp(str,"")!=0));

@@ -22,6 +22,12 @@
 
 typedef struct Diagram Diagram;
 
+typedef struct TracklineInfo {
+  unsigned long total_lines,
+                total_captionlines;
+} TracklineInfo;
+
+#include "libgtview/canvas.h"
 #include "libgtview/config.h"
 #include "libgtview/block.h"
 #include "libgtview/feature_index.h"
@@ -38,7 +44,7 @@ Diagram*    diagram_new(FeatureIndex *feature_index, const char *seqid,
 Range       diagram_get_range(Diagram*);
 void        diagram_set_config(Diagram*, Config*);
 Hashtable*  diagram_get_tracks(const Diagram*);
-int         diagram_get_total_lines(const Diagram*);
+void        diagram_get_lineinfo(const Diagram*, TracklineInfo*);
 int         diagram_get_number_of_tracks(const Diagram*);
 /* Render <diagram> on the given <canvas>. */
 int         diagram_render(Diagram *diagram, Canvas *canvas);

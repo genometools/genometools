@@ -26,6 +26,7 @@
 
 struct Line {
   IntervalTree *block_tree;
+  bool has_captions;
   Array *blocks;
 };
 
@@ -35,6 +36,7 @@ Line* line_new(void)
   line = ma_malloc(sizeof (Line));
   line->block_tree = interval_tree_new();
   line->blocks = array_new(sizeof (Block*));
+  line->has_captions = false;
   return line;
 }
 
@@ -43,6 +45,8 @@ void line_insert_block(Line *line, Block *block)
   assert(line && block);
   IntervalTreeNode *new_node;
   Range *rng;
+  if (!line->has_captions && block_get_caption(block) != NULL)
+    line->has_captions = true;
   rng = block_get_range_ptr(block);
   new_node = interval_tree_node_new(rng, rng->start, rng->end, NULL);
   interval_tree_insert(line->block_tree, new_node);
@@ -54,6 +58,12 @@ bool line_is_occupied(const Line *line, Range r)
   assert(line);
   return (interval_tree_find_first_overlapping(line->block_tree,
                                                r.start, r.end));
+}
+
+bool line_has_captions(const Line *line)
+{
+  assert(line);
+  return line->has_captions;
 }
 
 Array* line_get_blocks(Line* line)

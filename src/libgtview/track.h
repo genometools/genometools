@@ -24,18 +24,20 @@ typedef struct Track Track;
 
 #include "gtview.h"
 #include "libgtcore/array.h"
+#include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_node.h"
 #include "libgtview/canvas.h"
 #include "libgtview/config.h"
 #include "libgtview/line.h"
 
-Track* track_new(Str* title);
-void   track_insert_block(Track*, Block*);
-Str*   track_get_title(const Track*);
-Array* track_get_lines(const Track*);
-int    track_get_number_of_lines(const Track*);
-int    track_render(Track*, Canvas*);
-int    track_unit_test(Error*);
-void   track_delete(Track*);
+Track*             track_new(Str *title, unsigned long max_num_lines);
+void               track_insert_block(Track*, Block*);
+Str*               track_get_title(const Track*);
+Array*             track_get_lines(const Track*);
+unsigned long      track_get_number_of_lines(const Track*);
+unsigned long      track_get_number_of_lines_with_captions(const Track *track);
+int                track_render(Track*, Canvas*);
+int                track_unit_test(Error*);
+void               track_delete(Track*);
 
 #endif

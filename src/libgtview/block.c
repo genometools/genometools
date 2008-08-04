@@ -147,12 +147,12 @@ void block_set_caption_visibility(Block *block, bool val)
 bool block_caption_is_visible(const Block *block)
 {
   assert(block);
-  return block->show_caption;
+  return (block->caption && block->show_caption);
 }
 
 void block_set_caption(Block *block, Str *caption)
 {
-  assert(block && caption);
+  assert(block);
   block->caption = caption;
 }
 
@@ -299,7 +299,8 @@ void block_delete(Block *block)
     Element* elem = (Element*) dlistelem_get_data(delem);
     element_delete(elem);
   }
-  str_delete(block->caption);
+  if (block->caption)
+    str_delete(block->caption);
   dlist_delete(block->elements);
   ma_free(block);
 }

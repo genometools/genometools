@@ -56,10 +56,15 @@ typedef struct
 /* Calculate the final height of the image to be created. */
 static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
 {
-  unsigned long lines = diagram_get_total_lines(dia);
+  TracklineInfo lines;
   unsigned long height;
   unsigned long line_height;
   assert(dia && canvas);
+
+  /* get line information for height calculation */
+  lines.total_captionlines = lines.total_lines = 0;
+  diagram_get_lineinfo(dia, &lines);
+
   /* obtain line height and spacer from configuration settings */
   line_height = ((unsigned long) config_get_num(canvas->cfg,
                                                "format",
@@ -68,10 +73,11 @@ static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
                 ((unsigned long) config_get_num(canvas->cfg,
                                                "format",
                                                "bar_vspace",
-                                               10)) + 15;
+                                               10));
 
   /* get total height of all lines */
-  height = lines * line_height;
+  height  = lines.total_lines * line_height;
+  height += lines.total_captionlines * 15;
   /* add track caption height and spacer */
   height += diagram_get_number_of_tracks(dia)
             * ((config_get_num(canvas->cfg, "format","track_vspace", 20))+15);
@@ -123,10 +129,26 @@ DrawingRange convert_coords(Canvas *canvas, Range node_range)
 }
 
 /* Formats a given position number for short display in the ruler. */
-static void format_ruler_label(char *txt, long pos, size_t buflen)
+static void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
 {
   assert(txt);
-  (void) snprintf(txt, buflen, "%li", pos);
+  double fpos;
+  if (pos > 1000000000)
+  {
+    fpos = (double) pos / 1000000000;
+    (void) snprintf(txt, buflen, "%.2fG", fpos);
+  }
+  else if (pos > 1000000)
+  {
+    fpos = (double) pos / 1000000;
+    (void) snprintf(txt, buflen, "%.2fM", fpos);
+  }
+  else if (pos > 1000)
+  {
+    fpos = (double) pos / 1000;
+    (void) snprintf(txt, buflen, "%.2fK", fpos);
+  } else
+    (void) snprintf(txt, buflen, "%li", pos);
 }
 
 /* Renders a ruler with dynamic scale labeling and optional grid. */
@@ -177,11 +199,13 @@ static void draw_ruler(Canvas *canvas)
       if (tick < canvas->viewrange.start) continue;
       if (strcmp(config_get_cstr(canvas->cfg, "format","show_grid", "no"),
                  "yes") == 0)
+      {
         graphics_draw_vertical_line(canvas->g,
                                     convert_point(canvas, tick),
                                     40,
                                     gridcol,
                                     canvas->height-40-15);
+      }
       graphics_draw_vertical_line(canvas->g,
                                   convert_point(canvas, tick),
                                   35,
@@ -308,7 +332,7 @@ int canvas_visit_diagram(Canvas *canvas, Diagram *dia)
   return had_err;
 }
 
-int canvas_visit_track(Canvas *canvas, Track *track)
+int canvas_visit_track_pre(Canvas *canvas, Track *track)
 {
   int had_err = 0;
 
@@ -323,14 +347,21 @@ int canvas_visit_track(Canvas *canvas, Track *track)
                              config_get_num(canvas->cfg,
                                             "format", "margins", 10),
                              canvas->y,
-                             config_get_color(canvas->cfg, "track_title"),
+                             config_get_color(canvas->cfg,
+                                              "format",
+                                              "track_title_color"),
                              str_get(track_get_title(track)));
   canvas->y += 15;
 
+  return had_err;
+}
+
+int canvas_visit_track_post(Canvas *canvas, Track *track)
+{
+  assert(canvas && track);
   /* put track spacer after track, except if at last track */
   canvas->y += config_get_num(canvas->cfg, "format", "track_vspace", 20);
-
-  return had_err;
+  return 0;
 }
 
 int canvas_visit_line_pre(Canvas *canvas, Line *line)
@@ -338,7 +369,11 @@ int canvas_visit_line_pre(Canvas *canvas, Line *line)
   int had_err = 0;
   assert(canvas && line);
   canvas->bt = bittab_new(canvas->width);
-  mark_caption_collisions(canvas, line);
+  if (line_has_captions(line))
+  {
+    mark_caption_collisions(canvas, line);
+    canvas->y += 15;
+  }
   return had_err;
 }
 
@@ -347,7 +382,8 @@ int canvas_visit_line_post(Canvas *canvas, Line *line)
   int had_err = 0;
   assert(canvas && line);
   canvas->y += config_get_num(canvas->cfg, "format", "bar_height", 15) +
-               config_get_num(canvas->cfg, "format", "bar_vspace", 10) + 15;
+               config_get_num(canvas->cfg, "format", "bar_vspace", 10);
+
   bittab_delete(canvas->bt);
   canvas->bt = NULL;
   return had_err;
@@ -377,11 +413,13 @@ int canvas_visit_block(Canvas *canvas, Block *block)
   draw_range = convert_coords(canvas, block_range);
   if (block_caption_is_visible(block)) {
     caption = str_get(block_get_caption(block));
-    if (!caption) caption = "";
-    graphics_draw_text(canvas->g,
-                       MAX(canvas->margins, draw_range.start),
-                       canvas->y-6,
-                       caption);
+    if (caption)
+    {
+      graphics_draw_text(canvas->g,
+                         MAX(canvas->margins, draw_range.start),
+                         canvas->y-6,
+                         caption);
+    }
   }
 
   /* do not draw further details in very small blocks */
@@ -395,11 +433,14 @@ int canvas_visit_block(Canvas *canvas, Block *block)
                       draw_range.end-draw_range.start+1,
                       bar_height,
                       config_get_color(canvas->cfg,
-                                       genome_feature_type_get_cstr(btype)),
+                                       genome_feature_type_get_cstr(btype),
+                                       "fill"),
                       arrow_status,
                       config_get_num(canvas->cfg, "format", "arrow_width", 6),
                       1,
-                      config_get_color(canvas->cfg, "stroke"),
+                      config_get_color(canvas->cfg,
+                                       genome_feature_type_get_cstr(btype),
+                                       "stroke"),
                       true);
     /* draw arrowheads at clipped margins */
     if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
@@ -438,7 +479,8 @@ int canvas_visit_block(Canvas *canvas, Block *block)
                                       "arrow_width", 6),
                        config_get_num(canvas->cfg, "format",
                                       "stroke_width", 1),
-                       config_get_color(canvas->cfg, "stroke"));
+                       config_get_color(canvas->cfg, "format",
+                                        "default_stroke_color"));
   return had_err;
 }
 
@@ -478,13 +520,20 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   elem_start = draw_range.start;
   elem_width = draw_range.end - draw_range.start;
 
+  if (element_is_marked(elem)) {
+    elem_color = config_get_color(canvas->cfg, type, "stroke_marked");
+    stroke_width = config_get_num(canvas->cfg, "format", "stroke_marked_width",
+                                  1);
+  }
+  else {
+    elem_color = config_get_color(canvas->cfg, type, "stroke");
+    stroke_width = config_get_num(canvas->cfg, "format", "stroke_width", 1);
+  }
+
   if (draw_range.end-draw_range.start <= 1.1)
   {
     if (bittab_bit_is_set(canvas->bt, (unsigned long) draw_range.start))
-    {
       return had_err;
-    }
-
     graphics_draw_vertical_line(canvas->g,
                                 draw_range.start,
                                 canvas->y,
@@ -502,7 +551,7 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
     image_info_add_recmap(canvas->ii, rm);
   }
 
-  if (draw_range.end-draw_range.start <= 1.5)
+  if (draw_range.end-draw_range.start <= 1.1)
   {
     return had_err;
   }
@@ -514,17 +563,7 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
             arrow_status);
 
   /* draw each element according to style set in the config */
-  style = config_get_cstr(canvas->cfg, "feature_styles", type, "box");
-
-  if (element_is_marked(elem)) {
-    elem_color = config_get_color(canvas->cfg, "stroke_marked");
-    stroke_width = config_get_num(canvas->cfg, "format", "stroke_marked_width",
-                                  1);
-  }
-  else {
-    elem_color = config_get_color(canvas->cfg, "stroke");
-    stroke_width = config_get_num(canvas->cfg, "format", "stroke_width", 1);
-  }
+  style = config_get_cstr(canvas->cfg, type, "style", "box");
 
   if (strcmp(style, "box")==0)
   {
@@ -533,7 +572,7 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
                       canvas->y,
                       elem_width,
                       bar_height,
-                      config_get_color(canvas->cfg, type),
+                      config_get_color(canvas->cfg, type, "fill"),
                       arrow_status,
                       config_get_num(canvas->cfg, "format", "arrow_width", 6),
                       stroke_width,
@@ -579,7 +618,7 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
                        canvas->y,
                        elem_width,
                        bar_height,
-                       config_get_color(canvas->cfg, type),
+                       config_get_color(canvas->cfg, type, "fill"),
                        arrow_status,
                        config_get_num(canvas->cfg, "format", "arrow_width", 6),
                        stroke_width,

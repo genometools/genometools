@@ -51,13 +51,16 @@ int            config_load_file(Config*, Str *filename, Error*);
 /* Reload the Lua configuration file. */
 void           config_reload(Config*);
 /* Retrieve a color value from the configuration for <key> (i.e., feature). */
-Color          config_get_color(const Config*, const char *key);
+Color          config_get_color(const Config*, const char *section,
+                                const char *key);
 /* Similar to previous function. Necessary for Ruby bindings, because
    apparently 'dl/import' cannot handle returned structs. */
-void           config_get_colorptr(const Config*, Color*, const char *key);
+void           config_get_colorptr(const Config*, Color*, const char *section,
+                                   const char *key);
 /* Sets a color value in the configuration for <key> (i.e., feature) to a
    certain value. */
-void           config_set_color(Config*, const char *key, Color*);
+void           config_set_color(Config*, const char *section,
+                                const char *key, Color*);
 /* Retrieve string value of <key> in <section>.
    If not set, <deflt> is returned. */
 const char*    config_get_cstr(const Config*, const char *section,
@@ -72,6 +75,13 @@ double         config_get_num(const Config*, const char *section,
 /* Set numeric value of <key> in <section> to <number>. */
 void           config_set_num(Config*, const char *section, const char *key,
                               double number);
+/* Retrieve boolean value of <key> in <section>.
+   If not set, <deflt> is returned.*/
+bool           config_get_bool(const Config*, const char *section,
+                               const char *key, double deflt);
+/* Set boolean value of <key> in <section> to <number>. */
+void           config_set_bool(Config*, const char *section, const char *key,
+                               bool flag);
 /* Retrieve a list of string (as StrArray) for <key> in <section>, returns NULL
    on error. */
 StrArray*      config_get_cstr_list(const Config*, const char *section,

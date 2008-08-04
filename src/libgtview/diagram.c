@@ -42,6 +42,7 @@ struct Diagram {
   Hashtable *tracks;
   Hashtable *nodeinfo;
   Hashtable *collapsingtypes;
+  Hashtable *caption_display_status;
   int nof_tracks;
   Config *config;
   Range range;
@@ -113,12 +114,33 @@ static Block* find_block_for_type(NodeInfoElement* ni, GenomeFeatureType *gft)
 static const char* get_node_name_or_id(GenomeNode *gn)
 {
   const char *ret;
-  assert(gn);
+  if (!gn) return NULL;
   if (!(ret = genome_feature_get_attribute(gn, "Name"))) {
     if (!(ret = genome_feature_get_attribute(gn, "ID")))
-      ret = "-";
+      ret = NULL;
   }
   return ret;
+}
+
+static bool get_caption_display_status(Diagram *d, GenomeFeatureType *gft)
+{
+  assert(d && gft);
+  bool *status;
+
+  status = (bool*) hashtable_get(d->caption_display_status, gft);
+  if (!status)
+  {
+    unsigned long threshold;
+    status = ma_malloc(sizeof (bool*));
+    threshold = config_get_num(d->config, genome_feature_type_get_cstr(gft),
+                             "max_capt_show_width", UNDEF_ULONG);
+    if (threshold == UNDEF_ULONG)
+      *status = true;
+    else
+      *status = (range_length(d->range) <= threshold);
+    hashtable_add(d->caption_display_status, gft, status);
+  }
+  return *status;
 }
 
 static void add_to_current(Diagram *d, GenomeNode *node, GenomeNode *parent)
@@ -126,7 +148,8 @@ static void add_to_current(Diagram *d, GenomeNode *node, GenomeNode *parent)
   NodeInfoElement *ni;
   Block *block;
   BlockTuple *bt;
-  Str *caption;
+  Str *caption = NULL;
+  const char *nnid_p = NULL, *nnid_n = NULL;
 
   log_log("  calling add_to_current");
 
@@ -138,15 +161,22 @@ static void add_to_current(Diagram *d, GenomeNode *node, GenomeNode *parent)
   /* create new Block tuple and add to node info */
   block = block_new_from_node(node);
   /* assign block caption */
-  caption = str_new_cstr("");
-  if (parent) {
-    if (genome_node_has_children(parent))
-      str_append_cstr(caption, get_node_name_or_id(parent));
-    else
-      str_append_cstr(caption, "-");
-    str_append_cstr(caption, "/");
+  nnid_p = get_node_name_or_id(parent);
+  nnid_n = get_node_name_or_id(node);
+  if ((nnid_p || nnid_n) && get_caption_display_status(d,
+                genome_feature_get_type((GenomeFeature*) node)))
+  {
+    caption = str_new_cstr("");
+    if (parent) {
+      if (genome_node_has_children(parent))
+        str_append_cstr(caption, nnid_p);
+      else
+        str_append_cstr(caption, "-");
+      str_append_cstr(caption, "/");
+    }
+    if (nnid_n)
+      str_append_cstr(caption, nnid_n);
   }
-  str_append_cstr(caption, get_node_name_or_id(node));
   block_set_caption(block, caption);
   /* insert node into block */
   block_insert_element(block, node);
@@ -158,8 +188,11 @@ static void add_to_parent(Diagram *d, GenomeNode *node, GenomeNode* parent)
 {
   Block *block = NULL;
   NodeInfoElement *par_ni, *ni;
+  const char *nnid_p = NULL, *nnid_n = NULL;
 
-  assert(d && parent && node);
+  assert(d && node);
+
+  if (!parent) return;
 
   log_log("  calling add_to_parent: %s -> %s",
           genome_feature_type_get_cstr(
@@ -179,14 +212,23 @@ static void add_to_parent(Diagram *d, GenomeNode *node, GenomeNode* parent)
     BlockTuple *bt;
     Str *caption;
     block = block_new_from_node(parent);
-    /* assign caption */
-    caption = str_new_cstr("");
-    if (genome_node_has_children(parent))
-      str_append_cstr(caption, get_node_name_or_id(parent));
-    else
-      str_append_cstr(caption, "-");
-    str_append_cstr(caption, "/");
-    str_append_cstr(caption, get_node_name_or_id(node));
+    /* assign block caption */
+    nnid_p = get_node_name_or_id(parent);
+    nnid_n = get_node_name_or_id(node);
+    if ((nnid_p || nnid_n) && get_caption_display_status(d,
+                  genome_feature_get_type((GenomeFeature*) node)))
+    {
+      caption = str_new_cstr("");
+      if (parent) {
+        if (genome_node_has_children(parent))
+          str_append_cstr(caption, nnid_p);
+        else
+          str_append_cstr(caption, "-");
+        str_append_cstr(caption, "/");
+      }
+      if (nnid_n)
+        str_append_cstr(caption, nnid_n);
+    }
     block_set_caption(block, caption);
     /* add block to nodeinfo */
     bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node), block);
@@ -209,7 +251,9 @@ static void add_recursive(Diagram *d, GenomeNode *node,
   NodeInfoElement *ni;
 
   assert(d && node &&
-           parent && original_node);
+          original_node);
+
+  if (!parent) return;
 
   log_log("  calling add_recursive: %s (%s) -> %s (%s)",
               genome_feature_type_get_cstr(
@@ -243,7 +287,8 @@ static void add_recursive(Diagram *d, GenomeNode *node,
     ni->parent = parent;
     /* recursively call with parent node and its parent */
     parent_ni = hashtable_get(d->nodeinfo, parent);
-    add_recursive(d, parent, parent_ni->parent, original_node);
+    if (parent_ni)
+      add_recursive(d, parent, parent_ni->parent, original_node);
   }
 }
 
@@ -251,24 +296,41 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
 {
   Range elem_range;
   bool *collapse, do_not_overlap=false;
-  const char *feature_type;
+  const char *feature_type = NULL, *parent_gft = NULL;
+  unsigned long max_show_width = UNDEF_ULONG,
+                par_max_show_width = UNDEF_ULONG;
 
   assert(d && node);
+
+  feature_type = genome_feature_type_get_cstr(
+                        genome_feature_get_type((GenomeFeature*) node));
+  if (parent)
+    parent_gft = genome_feature_type_get_cstr(
+                        genome_feature_get_type((GenomeFeature*) parent));
 
   /* discard elements that do not overlap with visible range */
   elem_range = genome_node_get_range(node);
   if (!range_overlap(d->range, elem_range))
     return;
 
+  max_show_width = config_get_num(d->config, feature_type, "max_show_width",
+                                  UNDEF_ULONG);
+  if (parent)
+    par_max_show_width = config_get_num(d->config, parent_gft, "max_show_width",
+                                        UNDEF_ULONG);
+  if (max_show_width != UNDEF_ULONG && range_length(d->range) > max_show_width)
+    return;
+  if (parent && par_max_show_width != UNDEF_ULONG
+        && range_length(d->range) > par_max_show_width)
+    parent = NULL;
+
   /* check if this is a collapsing type, cache result */
-  feature_type = genome_feature_type_get_cstr(
-                   genome_feature_get_type((GenomeFeature*) node));
   if ((collapse = (bool*) hashtable_get(d->collapsingtypes,
                                         feature_type)) == NULL)
   {
     collapse = ma_malloc(sizeof (bool));
-    *collapse = config_cstr_in_list(d->config,
-                                   "collapse","to_parent",feature_type);
+    *collapse = config_get_bool(d->config, feature_type,
+                                "collapse_to_parent", 0);
     hashtable_add(d->collapsingtypes, (char*) feature_type, collapse);
   }
 
@@ -281,7 +343,7 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
           genome_feature_get_attribute(node, "ID" ));
 
   /* decide how to continue: */
-  if (*collapse) {
+  if (*collapse && parent) {
     /* collapsing features recursively search their target blocks */
     if (!do_not_overlap)
       warning("collapsing %s features overlap "
@@ -290,7 +352,8 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
               genome_feature_get_attribute(parent, "ID" ));
     add_recursive(d, node, parent, node);
   }
-  else if (do_not_overlap && genome_node_number_of_children(parent) > 1)
+  else if (do_not_overlap
+            && genome_node_number_of_children(parent) > 1)
   {
     /* group non-overlapping child nodes of a non-collapsing type by parent */
     add_to_parent(d, node, parent);
@@ -308,8 +371,10 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
 static int diagram_add_tracklines(UNUSED void *key, void *value, void *data,
                                   UNUSED Error *err)
 {
-  int *add = (int*) data;
-  *add += track_get_number_of_lines((Track*) value);
+  TracklineInfo *add = (TracklineInfo*) data;
+  add->total_lines += track_get_number_of_lines((Track*) value);
+  add->total_captionlines += track_get_number_of_lines_with_captions(
+                                                               (Track*) value);
   return 0;
 }
 
@@ -357,11 +422,6 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
   Diagram *diagram = (Diagram*) data;
   unsigned long i = 0;
 
-  if (array_size(ni->blocktuples) > 0) {
-    log_log("collecting blocks from %lu tuples...",
-            array_size(ni->blocktuples));
-  }
-
   for (i = 0; i < array_size(ni->blocktuples); i++) {
     Track *track;
     char *filename;
@@ -376,15 +436,16 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
     track = hashtable_get(diagram->tracks, str_get(track_key));
 
     if (track == NULL) {
-      track = track_new(track_key);
+      const char* type = genome_feature_type_get_cstr(bt->gft);
+      track = track_new(track_key,
+                        config_get_num(diagram->config, type,
+                                       "max_num_lines", UNDEF_ULONG));
       hashtable_add(diagram->tracks, cstr_dup(str_get(track_key)), track);
       diagram->nof_tracks++;
       log_log("created track: %s, diagram has now %d tracks",
               str_get(track_key), diagram_get_number_of_tracks(diagram));
     }
     track_insert_block(track, bt->block);
-    log_log("inserted block %s into track %s",
-            str_get(block_get_caption(bt->block)), str_get(track_key));
     str_delete(track_key);
     ma_free(bt);
   }
@@ -417,7 +478,10 @@ static void diagram_build(Diagram *diagram, Array *features)
   NodeTraverseInfo genome_node_children;
   genome_node_children.diagram = diagram;
 
-  diagram->collapsingtypes = hashtable_new(HASH_STRING, NULL, NULL);
+  /* initialise caches */
+  diagram->collapsingtypes = hashtable_new(HASH_STRING, NULL, ma_free_func);
+  diagram->caption_display_status = hashtable_new(HASH_DIRECT,
+                                                  NULL, ma_free_func);
 
   /* do node traversal for each root feature */
   for (i = 0; i < array_size(features); i++) {
@@ -428,7 +492,10 @@ static void diagram_build(Diagram *diagram, Array *features)
   had_err = hashtable_foreach_ordered(diagram->nodeinfo, collect_blocks,
                                       diagram, (Compare) genome_node_cmp, NULL);
   assert(!had_err); /* collect_blocks() is sane */
+
+  /* clear caches */
   hashtable_delete(diagram->collapsingtypes);
+  hashtable_delete(diagram->caption_display_status);
 }
 
 Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
@@ -469,14 +536,13 @@ Hashtable* diagram_get_tracks(const Diagram *diagram)
   return diagram->tracks;
 }
 
-int diagram_get_total_lines(const Diagram *diagram)
+void diagram_get_lineinfo(const Diagram *diagram, TracklineInfo *tli)
 {
-  int total_lines = 0, had_err;
+  int had_err;
   assert(diagram);
   had_err = hashtable_foreach(diagram->tracks, diagram_add_tracklines,
-                              &total_lines, NULL);
+                              tli, NULL);
   assert(!had_err); /* diagram_add_tracklines() is sane */
-  return total_lines;
 }
 
 int diagram_get_number_of_tracks(const Diagram *diagram)
@@ -504,6 +570,7 @@ int diagram_render(Diagram *dia, Canvas *canvas)
   canvas_visit_diagram(canvas, dia);
   had_err = hashtable_foreach_ao(dia->tracks, render_tracks,
                                  &tti, NULL);
+  log_log("finished rendering!\n");
   return had_err;
 }
 

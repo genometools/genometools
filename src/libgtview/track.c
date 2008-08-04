@@ -19,20 +19,23 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/undef.h"
 #include "libgtview/track.h"
 
 struct Track {
   Str *title;
+  unsigned long max_num_lines;
   Array *lines;
 };
 
-Track* track_new(Str *title)
+Track* track_new(Str *title, unsigned long max_num_lines)
 {
   Track *track;
   assert(title);
   track = ma_malloc(sizeof (Track));
   track->title = str_ref(title);
   track->lines = array_new(sizeof (Line*));
+  track->max_num_lines = max_num_lines;
   assert(track);
   return track;
 }
@@ -49,6 +52,9 @@ static Line* get_next_free_line(Track *track, Range r)
     if (!line_is_occupied(line, r))
       return line;
   }
+  if(track->max_num_lines != UNDEF_ULONG
+       && array_size(track->lines) == track->max_num_lines)
+    return NULL;
   line = line_new();
   array_add(track->lines, line);
 
@@ -64,7 +70,8 @@ void track_insert_block(Track *track, Block *block)
   assert(track && block);
   r = block_get_range(block);
   line = get_next_free_line(track, r);
-  line_insert_block(line, block);
+  if (line)
+    line_insert_block(line, block);
 }
 
 Str* track_get_title(const Track *track)
@@ -79,11 +86,20 @@ Array* track_get_lines(const Track *track)
   return track->lines;
 }
 
-int track_get_number_of_lines(const Track *track)
+unsigned long track_get_number_of_lines(const Track *track)
 {
-  int nof_tracks;
   assert(track);
-  nof_tracks = (int) array_size(track->lines);
+  return array_size(track->lines);
+}
+
+unsigned long track_get_number_of_lines_with_captions(const Track *track)
+{
+  unsigned long i = 0, nof_tracks = 0;
+  assert(track);
+  for(i=0; i<array_size(track->lines); i++)
+  {
+    if (line_has_captions(*(Line**) array_get(track->lines, i))) nof_tracks++;
+  }
   return nof_tracks;
 }
 
@@ -91,12 +107,13 @@ int track_render(Track* track, Canvas *canvas)
 {
   int i = 0;
   assert(track && canvas);
-  canvas_visit_track(canvas, track);
+  canvas_visit_track_pre(canvas, track);
   for (i = 0; i < array_size(track->lines); i++) {
     Line *line;
     line = *(Line**) array_get(track->lines, i);
     line_render(line, canvas);
   }
+  canvas_visit_track_post(canvas, track);
   return 0;
 }
 
@@ -125,7 +142,7 @@ int track_unit_test(Error *err)
   b4 = block_new();
   block_set_range(b4, r4);
 
-  track = track_new(title);
+  track = track_new(title, UNDEF_ULONG);
   ensure(had_err, track);
   ensure(had_err, track_get_title(track) == title);
 

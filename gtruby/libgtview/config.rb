@@ -36,6 +36,10 @@ module GT
                                "const char*, double)"
   extern "void config_set_num(const Config*, const char*, " +
                              "const char*, double)"
+  extern "bool config_get_bool(const Config*, const char*, " +
+                               "const char*, bool)"
+  extern "void config_set_bool(const Config*, const char*, " +
+                             "const char*, bool)"
   extern "StrArray* config_get_cstr_list(const Config*, const char*, " +
                                         "const char*)"
   extern "void config_set_cstr_list(const Config*, const char*, " +
@@ -82,6 +86,14 @@ module GT
 
     def set_num(section, key, number)
       GT.config_set_num(@config, section, key, number)
+    end
+
+    def get_bool(section, key)
+      GT.config_get_num(@config, section, key, false)
+    end
+
+    def set_bool(section, key, val)
+      GT.config_set_num(@config, section, key, val)
     end
 
     def get_cstr_list(section, key)

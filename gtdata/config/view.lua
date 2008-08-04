@@ -4,61 +4,210 @@
 
 config =
 {
-  -- Defines a color for a certain feature type.
-  -- The items in the 'colors' section must be given in
-  -- the following form:
-  --      <name> = {red=<val>,green=<val>,blue=<val>}
-  -- where <val> is a decimal value between 0 and 1.
-  colors =
-  {
-    stroke               = {red=0.0, green=0.0, blue=0.0},
-    stroke_marked        = {red=1.0, green=0.0, blue=0.0},
-    track_title          = {red=0.6, green=0.6, blue=0.7},
-    exon                 = {red=0.6, green=0.6, blue=0.9},
-    CDS                  = {red=0.9, green=0.9, blue=0.2},
-    mRNA                 = {red=0.4, green=0.5, blue=0.6},
-    TF_binding_site      = {red=0.8, green=0.6, blue=0.6},
-    gene                 = {red=0.9, green=0.9, blue=1.0},
-    intron               = {red=0.2, green=0.2, blue=0.6},
-    repeat_region        = {red=0.8, green=0.3, blue=0.3},
-    long_terminal_repeat = {red=0.9, green=0.9, blue=0.4},
-    LTR_retrotransposon  = {red=0.8, green=0.5, blue=0.5},
+  gene = {
+    -- Color definitions
+    stroke             = {red=0.0, green=0.0, blue=0.0},
+    stroke_marked      = {red=1.0, green=0.0, blue=0.0},
+    fill               = {red=0.9, green=0.9, blue=1.0},
+    style              = "box",
+    -- Collapsing options
+    collapse_to_parent = false,
+    split_lines        = true,
+    -- Caption options
+    max_capt_show_width= nil,
+    -- Display whis track only if the viewport is not wider than this
+    -- number of nucleotides. Set to 0 to disable type track.
+    max_show_width     = nil,
+    -- Limit the number of tracks
+    max_num_lines      = 10,
   },
-  -- Defines how a feature is drawn.
-  -- Possible choices: "line", "box", "caret", "dashes"
-  feature_styles =
-  {
-    exon            = "box",
-    CDS             = "box",
-    TF_binding_site = "box",
-    mRNA            = "box",
-    gene            = "box",
-    intron          = "caret",
+--------------------------------------
+  mRNA = {
+    -- Color definitions
+    stroke             = {red=0.0, green=0.0, blue=0.0},
+    stroke_marked      = {red=1.0, green=0.0, blue=0.0},
+    fill               = {red=0.4, green=0.5, blue=0.6},
+    style              = "box",
+    -- Collapsing options
+    collapse_to_parent = false,
+    split_lines        = true,
+    -- Caption options
+    max_capt_show_width= nil,
+    -- Display whis track only if the viewport is not wider than this
+    -- number of nucleotides. Set to 0 to disable type track.
+    max_show_width     = nil,
+    -- Limit the number of tracks
+    max_num_lines      = 10,
   },
-  -- Defines which feature types are displayed in their parent
-  -- feature's track. It is possible here to specify type chains,
-  -- e.g. {"exon","mRNA"} will make the exon features collapse into
-  -- the mRNA features, which in turn collapse into their parents.
-  collapse =
-  {
-    to_parent = {"CDS","exon","intron","long_terminal_repeat",
-                 "LTR_retrotransposon","inverted_repeat",
-                 "target_site_duplication", "five_prime_splice_site",
-                 "three_prime_splice_site" },
+--------------------------------------
+  exon = {
+    -- Color definitions
+    stroke             = {red=0.0, green=0.0, blue=0.0},
+    stroke_marked      = {red=1.0, green=0.0, blue=0.0},
+    fill               = {red=0.6, green=0.6, blue=0.9},
+    style              = "box",
+    -- Collapsing options
+    collapse_to_parent = true,
+    split_lines        = true,
+    -- Caption options
+    max_capt_show_width= nil,
+    -- Display whis track only if the viewport is not wider than this
+    -- number of nucleotides. Set to 0 to disable type track.
+    max_show_width     = nil,
+    -- Limit the number of tracks
+    max_num_lines      = 10,
   },
-  -- Defines precedence of same level feature types when overlapping
-  -- in a collapsed track.
-  -- read "=" as ">" or "dominates"
-  dominate =
-  {
-    CDS = {"exon","intron","mRNA","gene"},
-    five_prime_splice_site = {"intron", "mRNA", "gene"},
-    three_prime_splice_site = {"intron", "mRNA", "gene"},
-    exon = {"mRNA","gene"},
-    intron = {"mRNA", "gene"},
-    mRNA = {"gene"},
-    long_terminal_repeat = {"LTR_retrotransposon","repeat_region"},
-    inverted_repeat= {"repeat_region","LTR_retrotransposon"},
+--------------------------------------
+  CDS = {
+    -- Color definitions
+    stroke             = {red=0.0, green=0.0, blue=0.0},
+    stroke_marked      = {red=1.0, green=0.0, blue=0.0},
+    fill               = {red=0.9, green=0.9, blue=0.2},
+    style              = "box",
+    -- Collapsing options
+    collapse_to_parent = true,
+    split_lines        = true,
+    -- Caption options
+    max_capt_show_width= nil,
+    -- Display whis track only if the viewport is not wider than this
+    -- number of nucleotides. Set to 0 to disable type track.
+    max_show_width     = nil,
+    -- Limit the number of tracks
+    max_num_lines      = 10,
+  },
+--------------------------------------
+  TF_binding_site = {
+    -- Color definitions
+    stroke             = {red=0.0, green=0.0, blue=0.0},
+    stroke_marked      = {red=1.0, green=0.0, blue=0.0},
+    fill               = {red=0.8, green=0.6, blue=0.6},
+    style              = "box",
+    -- Collapsing options
+    collapse_to_parent = false,
+    split_lines        = true,
+    -- Caption options
+    max_capt_show_width= nil,
+    -- Display whis track only if the viewport is not wider than this
+    -- number of nucleotides. Set to 0 to disable type track.
+    max_show_width     = nil,
+    -- Limit the number of tracks
+    max_num_lines      = 10,
+  },
+--------------------------------------
+  intron = {
+    -- Color definitions
+    stroke             = {red=0.0, green=0.0, blue=0.0},
+    stroke_marked      = {red=1.0, green=0.0, blue=0.0},
+    fill               = {red=1.0, green=1.0, blue=1.0},
+    style              = "caret",
+    -- Collapsing options
+    collapse_to_parent = true,
+    split_lines        = true,
+    -- Caption options
+    max_capt_show_width= nil,
+    -- Display whis track only if the viewport is not wider than this
+    -- number of nucleotides. Set to 0 to disable type track.
+    max_show_width     = nil,
+    -- Limit the number of tracks
+    max_num_lines      = 10,
+  },
+--------------------------------------
+  repeat_region = {
+    -- Color definitions
+    stroke             = {red=0.0, green=0.0, blue=0.0},
+    stroke_marked      = {red=1.0, green=0.0, blue=0.0},
+    fill               = {red=0.8, green=0.3, blue=0.3},
+    style              = "box",
+    -- Collapsing options
+    collapse_to_parent = false,
+    split_lines        = true,
+    -- Caption options
+    max_capt_show_width= nil,
+    -- Display whis track only if the viewport is not wider than this
+    -- number of nucleotides. Set to 0 to disable type track.
+    max_show_width     = nil,
+    -- Limit the number of tracks
+    max_num_lines      = 10,
+  },
+--------------------------------------
+  LTR_retrotransposon = {
+    -- Color definitions
+    stroke             = {red=0.0, green=0.0, blue=0.0},
+    stroke_marked      = {red=1.0, green=0.0, blue=0.0},
+    fill               = {red=0.8, green=0.5, blue=0.5},
+    style              = "box",
+    -- Collapsing options
+    collapse_to_parent = true,
+    split_lines        = true,
+    -- Caption options
+    max_capt_show_width= nil,
+    -- Display whis track only if the viewport is not wider than this
+    -- number of nucleotides. Set to 0 to disable type track.
+    max_show_width     = nil,
+    -- Limit the number of tracks
+    max_num_lines      = 10,
+  },
+--------------------------------------
+  long_terminal_repeat = {
+    -- Color definitions
+    -- RGB triplets {red=<val>,green=<val>,blue=<val>}
+    -- where <val> is a decimal value between 0 and 1.
+    stroke             = {red=0.0, green=0.0, blue=0.0},
+    stroke_marked      = {red=1.0, green=0.0, blue=0.0},
+    fill               = {red=0.9, green=0.9, blue=0.4},
+    style              = "box",
+    -- Collapsing options
+    collapse_to_parent = true,
+    split_lines        = true,
+    -- Caption options
+    max_capt_show_width= nil,
+    -- Display whis track only if the viewport is not wider than this
+    -- number of nucleotides. Set to 0 to disable type track.
+    max_show_width     = nil,
+    -- Limit the number of tracks
+    max_num_lines      = 10,
+  },
+--------------------------------------
+  five_prime_splice_site = {
+    collapse_to_parent = true,
+  },
+--------------------------------------
+  three_prime_splice_site = {
+    collapse_to_parent = true,
+  },
+--------------------------------------
+  expressed_sequence_match = {
+    fill               = {red=0.2, green=0.2, blue=0.8},
+    max_show_width     = 10000,
+    max_num_lines      = 10,
+    max_capt_show_width= 5000,
+  },
+--------------------------------------
+  binding_site = {
+    fill               = {red=0.7, green=0.2, blue=0.8},
+    max_show_width     = 10000,
+    max_num_lines      = 10,
+    max_capt_show_width= 10000,
+  },
+--------------------------------------
+  SNP = {
+    fill               = {red=0.1, green=0.8, blue=0.8},
+    max_show_width     = 10000,
+    max_num_lines      = 10,
+    max_capt_show_width= 10000,
+  },
+--------------------------------------
+  chromosome = {
+    fill               = {red=0.1, green=0.8, blue=0.8},
+    max_show_width     = nil,
+    max_num_lines      = 10,
+  },
+--------------------------------------
+  substitution = {
+    fill               = {red=1.0, green=0.1, blue=0.05},
+    max_show_width     = nil,
+    max_num_lines      = 10,
+    max_capt_show_width= 1000,
   },
   -- Defines various format options for drawing.
   format =
@@ -74,5 +223,7 @@ config =
     stroke_marked_width = 1.5, -- width of outlines for marked elements, in pixels
     show_grid = "yes", -- shows light vertical lines for orientation
     min_len_block = 40, -- minimum length of a block in which single elements are shown
+    track_title_color     = {red=0.7, green=0.7, blue=0.7},
+    default_stroke_color  = {red=0.1, green=0.1, blue=0.1},
   },
 }

@@ -39,7 +39,9 @@ unsigned long canvas_get_height(Canvas *canvas);
 /* Callback function for Diagram rendering. */
 int           canvas_visit_diagram(Canvas*, Diagram*);
 /* Callback function for Diagram rendering. */
-int           canvas_visit_track(Canvas*, Track*);
+int           canvas_visit_track_pre(Canvas*, Track*);
+/* Callback function for Diagram rendering. */
+int           canvas_visit_track_post(Canvas*, Track*);
 /* Callback function for Diagram rendering. */
 int           canvas_visit_line_pre(Canvas*, Line*);
 /* Callback function for Diagram rendering. */
