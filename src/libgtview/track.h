@@ -30,7 +30,8 @@ typedef struct Track Track;
 #include "libgtview/config.h"
 #include "libgtview/line.h"
 
-Track*             track_new(Str *title, unsigned long max_num_lines);
+Track*             track_new(Str *title, unsigned long max_num_lines,
+                             bool split_lines);
 void               track_insert_block(Track*, Block*);
 Str*               track_get_title(const Track*);
 Array*             track_get_lines(const Track*);

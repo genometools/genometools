@@ -437,9 +437,12 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
 
     if (track == NULL) {
       const char* type = genome_feature_type_get_cstr(bt->gft);
+      bool split = config_get_bool(diagram->config, type,
+                                   "split_lines", true);
       track = track_new(track_key,
                         config_get_num(diagram->config, type,
-                                       "max_num_lines", UNDEF_ULONG));
+                                       "max_num_lines", UNDEF_ULONG),
+                        split);
       hashtable_add(diagram->tracks, cstr_dup(str_get(track_key)), track);
       diagram->nof_tracks++;
       log_log("created track: %s, diagram has now %d tracks",

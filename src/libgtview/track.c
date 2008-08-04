@@ -25,18 +25,20 @@
 struct Track {
   Str *title;
   unsigned long max_num_lines;
+  bool split;
   Array *lines;
 };
 
-Track* track_new(Str *title, unsigned long max_num_lines)
+Track* track_new(Str *title, unsigned long max_num_lines, bool split)
 {
   Track *track;
   assert(title);
   track = ma_malloc(sizeof (Track));
+  assert(track);
   track->title = str_ref(title);
   track->lines = array_new(sizeof (Line*));
   track->max_num_lines = max_num_lines;
-  assert(track);
+  track->split = split;
   return track;
 }
 
@@ -47,17 +49,34 @@ static Line* get_next_free_line(Track *track, Range r)
 
   assert(track);
 
+  /* find unoccupied line -- may need optimisation */
   for (i = 0; i < array_size(track->lines); i++) {
     line = *(Line**) array_get(track->lines, i);
     if (!line_is_occupied(line, r))
       return line;
   }
+  /* if line limit is hit, do not create any more lines! */
   if (track->max_num_lines != UNDEF_ULONG
        && array_size(track->lines) == track->max_num_lines)
     return NULL;
-  line = line_new();
-  array_add(track->lines, line);
 
+  /* make sure there is only one line if 'split_lines' is set to false */
+  if (!track->split)
+  {
+    if (array_size(track->lines) < 1)
+    {
+      line = line_new();
+      array_add(track->lines, line);
+    }
+    else
+      line = *(Line**) array_get(track->lines, 0);
+    assert(array_size(track->lines) == 1);
+  }
+  else
+  {
+    line = line_new();
+    array_add(track->lines, line);
+  }
   assert(line);
   return line;
 }
@@ -142,7 +161,7 @@ int track_unit_test(Error *err)
   b4 = block_new();
   block_set_range(b4, r4);
 
-  track = track_new(title, UNDEF_ULONG);
+  track = track_new(title, UNDEF_ULONG, true);
   ensure(had_err, track);
   ensure(had_err, track_get_title(track) == title);
 
