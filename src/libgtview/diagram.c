@@ -316,8 +316,8 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
   max_show_width = config_get_long(d->config, feature_type, "max_show_width",
                                   UNDEF_ULONG);
   if (parent)
-    par_max_show_width = config_get_long(d->config, parent_gft, "max_show_width",
-                                        UNDEF_ULONG);
+    par_max_show_width = config_get_long(d->config, parent_gft,
+                                         "max_show_width", UNDEF_ULONG);
   if (max_show_width != UNDEF_ULONG && range_length(d->range) > max_show_width)
     return;
   if (parent && par_max_show_width != UNDEF_ULONG

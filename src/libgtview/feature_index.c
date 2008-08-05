@@ -105,7 +105,8 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf)
   /* add node to the appropriate array in the hashtable */
   IntervalTreeNode *new_node = interval_tree_node_new(gn, node_range.start,
                                                       node_range.end,
-                                                      (FreeFunc) genome_node_rec_delete);
+                                                      (FreeFunc)
+                                                        genome_node_rec_delete);
   interval_tree_insert(info->features, new_node);
   /* update dynamic range */
   info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);

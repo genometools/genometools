@@ -350,7 +350,6 @@ void config_set_long(Config *cfg, const char *section, const char *key,
   lua_pop(cfg->L, i);
 }
 
-
 bool config_get_bool(const Config *cfg, const char *section, const char *key,
                      double deflt)
 {
