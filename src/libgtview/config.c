@@ -479,6 +479,7 @@ int config_unit_test(Error *err)
   Config *cfg;
   const char* test1 = "mRNA";
   const char* str = NULL;
+  bool val;
   Str *luafile = str_new_cstr("config.lua");
   Color col1, col2, col, defcol, tmpcol;
   double num;
@@ -503,8 +504,8 @@ int config_unit_test(Error *err)
   ensure(had_err, color_equals(tmpcol,defcol));
   num = config_get_num(cfg,"format", "margins", 10.0);
   ensure(had_err, num == 10.0);
-  str = config_get_cstr(cfg, "collapse", "exon", "");
-  ensure(had_err, (strcmp(str,"")==0));
+  val = config_get_bool(cfg, "exon", "collapse_to_parent", false);
+  ensure(had_err, !val);
 
   /* change some values... */
   config_set_color(cfg, "exon", "fill", &col);
@@ -514,7 +515,6 @@ int config_unit_test(Error *err)
   /* is it saved correctly? */
   tmpcol = config_get_color(cfg, "exon", "fill");
   ensure(had_err, !color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "exon", "fill");
   ensure(had_err, color_equals(tmpcol,col));
   num = config_get_num(cfg,"format", "margins", 10.0);
   ensure(had_err, num == 11.0);
