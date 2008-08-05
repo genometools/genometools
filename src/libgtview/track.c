@@ -91,6 +91,8 @@ void track_insert_block(Track *track, Block *block)
   line = get_next_free_line(track, r);
   if (line)
     line_insert_block(line, block);
+  else
+    block_delete(block);
 }
 
 Str* track_get_title(const Track *track)
