@@ -64,3 +64,9 @@ const char* genome_feature_type_get_cstr(const GenomeFeatureType *gft)
   assert(gft);
   return gft->type;
 }
+
+FeatureTypeFactory* genome_feature_type_get_ftf(const GenomeFeatureType *gft)
+{
+  assert(gft);
+  return gft->feature_type_factory;
+}

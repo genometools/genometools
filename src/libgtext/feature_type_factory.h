@@ -18,9 +18,6 @@
 #ifndef FEATURE_TYPE_FACTORY_H
 #define FEATURE_TYPE_FACTORY_H
 
-#include "libgtcore/strarray.h"
-#include "libgtext/genome_feature_type.h"
-
 /* The FeatureTypeFactory interface. Implementations of the FeatureTypeFactory
    interface are used to create GenomeFeatureTypes.
    Since a FeatureTypeFactory owns all GenomeFeatureTypes it creates, you have
@@ -31,6 +28,12 @@
 typedef struct FeatureTypeFactoryClass FeatureTypeFactoryClass;
 typedef struct FeatureTypeFactory FeatureTypeFactory;
 
+#include "libgtcore/strarray.h"
+#include "libgtext/genome_feature_type.h"
+
+/* Return a new reference to <feature_type_factory>. */
+FeatureTypeFactory* feature_type_factory_ref(FeatureTypeFactory
+                                             *feature_type_factory);
 /* Uses the factory to create a new genome feature type object of the given
    <type>. Returns NULL, if <type> is not a valid type. */
 GenomeFeatureType*  feature_type_factory_create_gft(FeatureTypeFactory*,

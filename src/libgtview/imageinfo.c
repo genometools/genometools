@@ -107,7 +107,7 @@ int image_info_unit_test(Error *err)
 
   ii = image_info_new();
   ftf = feature_type_factory_builtin_new();
-  gft = feature_type_factory_create_gft(ftf, "test");
+  gft = feature_type_factory_create_gft(ftf, "gene");
 
   for (i=0;i<20;i++)
   {

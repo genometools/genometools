@@ -24,5 +24,6 @@
 GenomeFeatureType* genome_feature_type_construct(FeatureTypeFactory*,
                                                  const char *type);
 void               genome_feature_type_delete(GenomeFeatureType*);
+FeatureTypeFactory* genome_feature_type_get_ftf(const GenomeFeatureType*);
 
 #endif

@@ -32,6 +32,7 @@ struct FeatureTypeFactoryClass {
 struct FeatureTypeFactory {
   const FeatureTypeFactoryClass *c_class;
   GFTCollection *used_types;
+  unsigned int reference_count;
 };
 
 FeatureTypeFactory* feature_type_factory_create(const FeatureTypeFactoryClass*);

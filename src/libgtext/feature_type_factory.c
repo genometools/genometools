@@ -31,6 +31,13 @@ FeatureTypeFactory* feature_type_factory_create(const FeatureTypeFactoryClass
   return ftf;
 }
 
+FeatureTypeFactory* feature_type_factory_ref(FeatureTypeFactory *ftf)
+{
+  assert(ftf);
+  ftf->reference_count++;
+  return ftf;
+}
+
 GenomeFeatureType* feature_type_factory_create_gft(FeatureTypeFactory *ftf,
                                                    const char *type)
 {
@@ -46,6 +53,10 @@ StrArray* feature_type_factory_get_used_types(const FeatureTypeFactory *ftf)
 void feature_type_factory_delete(FeatureTypeFactory *ftf)
 {
   if (!ftf) return;
+  if (ftf->reference_count) {
+    ftf->reference_count--;
+    return;
+  }
   assert(ftf->c_class);
   if (ftf->c_class->free)
     ftf->c_class->free(ftf);

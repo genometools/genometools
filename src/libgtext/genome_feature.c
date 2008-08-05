@@ -23,9 +23,11 @@
 #include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
+#include "libgtext/feature_type_factory.h"
 #include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
+#include "libgtext/genome_feature_type_imp.h"
 #include "libgtext/genome_node_iterator.h"
 #include "libgtext/genome_node_rep.h"
 #include "libgtext/tag_value_map.h"
@@ -44,6 +46,7 @@ struct GenomeFeature
   const GenomeNode parent_instance;
   Str *seqid,
       *source;
+  FeatureTypeFactory *ftf;
   GenomeFeatureType *type;
   Range range;
   float score;
@@ -64,6 +67,7 @@ static void genome_feature_free(GenomeNode *gn)
   assert(gf);
   str_delete(gf->seqid);
   str_delete(gf->source);
+  feature_type_factory_delete(gf->ftf);
   tag_value_map_delete(gf->attributes);
 }
 
@@ -144,15 +148,17 @@ GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
 {
   GenomeNode *gn;
   GenomeFeature *gf;
+  assert(type);
   assert(range.start <= range.end);
   gn = genome_node_create(genome_feature_class(), filename, line_number);
   gf = genome_feature_cast(gn);
-  gf->seqid          = NULL;
-  gf->source         = NULL;
-  gf->type           = type;
-  gf->score          = UNDEF_FLOAT;
-  gf->range          = range;
-  gn->bit_field     |= strand << STRAND_OFFSET;
+  gf->seqid     = NULL;
+  gf->source    = NULL;
+  gf->ftf       = feature_type_factory_ref(genome_feature_type_get_ftf(type));
+  gf->type      = type;
+  gf->score     = UNDEF_FLOAT;
+  gf->range     = range;
+  gn->bit_field |= strand << STRAND_OFFSET;
   genome_feature_set_phase(gn, PHASE_UNDEFINED);
   set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_UNDETERMINED);
   gf->attributes     = NULL;
