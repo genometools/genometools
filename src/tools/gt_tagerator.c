@@ -56,13 +56,14 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   op = option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option = option_new_filenamearray("t","Specify files containing the tags",
+  option = option_new_filenamearray("query",
+                                    "Specify files containing the short sequence tags",
                                     arguments->tagfiles);
   option_parser_add_option(op, option);
   option_is_mandatory(option);
 
-  option = option_new_long("k",
-                           "Specify the allowed number of differences",
+  option = option_new_long("e",
+                           "Specify the allowed number of differences (insertions/indels)",
                            &arguments->maxdistance,
                            -1L);
   option_parser_add_option(op, option);
@@ -165,7 +166,7 @@ static int gt_tagerator_arguments_check(UNUSED int rest_argc,
   {
     if (arguments->online)
     {
-      error_set(err,"option -online requires option -k");
+      error_set(err,"option -online requires option -e");
       return -1;
     }
     if (!arguments->nospecials)
@@ -174,7 +175,7 @@ static int gt_tagerator_arguments_check(UNUSED int rest_argc,
     }
     if (arguments->maxintervalwidth > 0)
     {
-      error_set(err,"option -maxocc requires to also use option -k");
+      error_set(err,"option -maxocc requires to also use option -e");
       return -1;
     }
   }

@@ -16,6 +16,6 @@ query=$2
 # mkvtree.x -db ${reference} -indexname esa-mkv -dna -pl -lcp -suf -tis 
 # vstree2tex.x -tis -suf -s esa-mkv > tmp.tex
 gt suffixerator -tis -suf -dna -pl -db ${reference} -indexname esa-fwd
-gt tagerator -k 2 -maxocc 20 -nospecials -rw -esa esa-fwd -t ${query}
+gt tagerator -e 2 -maxocc 20 -nospecials -rw -esa esa-fwd -query ${query}
 gt packedindex mkindex -tis -indexname pck-rev -db ${reference} -sprank -dna -pl -bsize 10 -locfreq 32 -dir rev
-gt tagerator -k 2 -maxocc 20 -nospecials -rw -pck pck-rev -t ${query}
+gt tagerator -e 2 -maxocc 20 -nospecials -rw -pck pck-rev -query ${query}
