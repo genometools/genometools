@@ -24,7 +24,7 @@
  }
  for all lcp-values lcptab[j]
  {
-   for(idx=lcptab[j]; idx<=maxdepth; idx++)
+   for (idx=lcptab[j]; idx<=maxdepth; idx++)
    {
      bucket[idx][nextcode[idx]++] = j - start[idx];
      start[idx] = j;

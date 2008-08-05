@@ -57,13 +57,15 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                          "Map short sequence tags in given index.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   option = option_new_filenamearray("query",
-                                    "Specify files containing the short sequence tags",
+                                    "Specify files containing the short "
+                                    "sequence tags",
                                     arguments->tagfiles);
   option_parser_add_option(op, option);
   option_is_mandatory(option);
 
   option = option_new_long("e",
-                           "Specify the allowed number of differences (insertions/indels)",
+                           "Specify the allowed number of differences "
+                           "(replacements/insertions/deletions)",
                            &arguments->maxdistance,
                            -1L);
   option_parser_add_option(op, option);
@@ -83,12 +85,14 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   optiononline = option_new_bool("online","Perform online searches",
                             &arguments->online, false);
   option_parser_add_option(op, optiononline);
+  option_is_development_option(optiononline);
 
   optioncmp = option_new_bool("cmp","compare results of offline and online "
-                                 "searches",
+                              "searches",
                             &arguments->docompare, false);
   option_parser_add_option(op, optioncmp);
   option_exclude(optiononline,optioncmp);
+  option_is_development_option(optioncmp);
 
   optionrw = option_new_bool("rw","Replace wildcard in tag by random char",
                              &arguments->replacewildcard, false);
@@ -132,14 +136,33 @@ static int gt_tagerator_runner(UNUSED int argc,
   assert(parsed_args == argc);
   for (idx=0; idx<strarray_size(arguments->tagfiles); idx++)
   {
-    printf("# tagfile=%s\n",strarray_get(arguments->tagfiles,idx));
+    printf("# queryfile=%s\n",strarray_get(arguments->tagfiles,idx));
   }
   if (arguments->maxdistance == -1L)
   {
-    printf("# maxdistance=undefined\n");
+    printf("# computing matching statistics\n");
   } else
   {
-    printf("# maxdistance=%ld\n",arguments->maxdistance);
+    if (arguments->maxintervalwidth == 0)
+    {
+      printf("# computing complete matches ");
+    } else
+    {
+      printf("# computing prefix matches ");
+    }
+    if (arguments->maxdistance == 0)
+    {
+      printf(" without differences (exact matches)");
+    } else
+    {
+      printf(" with up to %ld differences",arguments->maxdistance);
+    }
+    if (arguments->maxintervalwidth > 0)
+    {
+      printf(" and at most %lu occurrences in the subject sequences",
+             arguments->maxintervalwidth);
+    }
+    printf("\n");
   }
   if (str_length(arguments->esaindexname) > 0)
   {
