@@ -17,7 +17,6 @@
 
 require 'gtdlload'
 require 'gthelper'
-require 'libgtcore/range'
 
 module GT
   extend DL::Importable
@@ -45,10 +44,8 @@ module GT
     end
 
     def get_range
-      r = GT::Range.malloc
-      r.start = GT.genome_node_get_start(@genome_node)
-      r.end = GT.genome_node_get_end(@genome_node)
-      r
+      Range.new(GT.genome_node_get_start(@genome_node),
+                GT.genome_node_get_end(@genome_node))
     end
 
     def get_filename
