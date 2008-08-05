@@ -75,6 +75,13 @@ double         config_get_num(const Config*, const char *section,
 /* Set numeric value of <key> in <section> to <number>. */
 void           config_set_num(Config*, const char *section, const char *key,
                               double number);
+/* Retrieve long numeric value of <key> in <section>.
+   If not set, <deflt> is returned.*/
+unsigned long  config_get_long(const Config*, const char *section,
+                              const char *key, unsigned long deflt);
+/* Set long numeric value of <key> in <section> to <number>. */
+void           config_set_long(Config*, const char *section, const char *key,
+                              unsigned long number);
 /* Retrieve boolean value of <key> in <section>.
    If not set, <deflt> is returned.*/
 bool           config_get_bool(const Config*, const char *section,

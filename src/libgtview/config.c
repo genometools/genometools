@@ -298,6 +298,34 @@ double config_get_num(const Config *cfg, const char *section, const char *key,
   return num;
 }
 
+unsigned long config_get_long(const Config *cfg, const char *section,
+                             const char *key, unsigned long deflt)
+{
+  unsigned long num = deflt;
+  int i = 0;
+  assert(cfg && key && section);
+  /* get section */
+  i = config_find_section_for_getting(cfg, section);
+  /* could not get section, return default */
+  if (i < 0) {
+    lua_pop(cfg->L, i);
+    return deflt;
+  }
+  /* lookup entry for given key */
+  lua_getfield(cfg->L, -1, key);
+  if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1)) {
+    if (cfg->verbose) warning("no or non-numeric value found for key '%s'",
+                              key);
+    lua_pop(cfg->L, i+1);
+    return deflt;
+  } else i++;
+  /* retrieve value */
+  num = lua_tonumber(cfg->L, -1);
+  /* reset stack to original state for subsequent calls */
+  lua_pop(cfg->L, i);
+  return num;
+}
+
 void config_set_num(Config *cfg, const char *section, const char *key,
                     double number)
 {
@@ -309,6 +337,19 @@ void config_set_num(Config *cfg, const char *section, const char *key,
   lua_settable(cfg->L, -3);
   lua_pop(cfg->L, i);
 }
+
+void config_set_long(Config *cfg, const char *section, const char *key,
+                     unsigned long number)
+{
+  int i = 0;
+  assert(cfg && section && key);
+  i = config_find_section_for_setting(cfg, section);
+  lua_pushstring(cfg->L, key);
+  lua_pushnumber(cfg->L, number);
+  lua_settable(cfg->L, -3);
+  lua_pop(cfg->L, i);
+}
+
 
 bool config_get_bool(const Config *cfg, const char *section, const char *key,
                      double deflt)
