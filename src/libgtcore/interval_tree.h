@@ -29,7 +29,7 @@
 typedef struct IntervalTree IntervalTree;
 typedef struct IntervalTreeNode IntervalTreeNode;
 
-typedef int *(IntervalTreeIteratorFunc)(IntervalTreeNode*, void*);
+typedef int (*IntervalTreeIteratorFunc)(IntervalTreeNode*, void*);
 
 /* transfers ownership of <data> to interval tree
    if IntervalTreeDataFreeFunc is given */

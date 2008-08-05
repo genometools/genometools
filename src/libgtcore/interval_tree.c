@@ -131,7 +131,7 @@ static int interval_tree_traverse_internal(IntervalTreeNode *node,
   if (!had_err)
     had_err = interval_tree_traverse_internal(node->right, func, data);
   if (!had_err)
-    had_err = (int) func(node, data);
+    had_err = func(node, data);
   return had_err;
 }
 

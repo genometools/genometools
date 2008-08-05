@@ -129,7 +129,7 @@ Array* feature_index_get_features_for_seqid(FeatureIndex *fi, const char *seqid)
   a = array_new(sizeof (GenomeFeature*));
   ri = (RegionInfo*) hashtable_get(fi->regions, seqid);
   had_err = interval_tree_traverse(ri->features,
-                                   (IntervalTreeIteratorFunc*) collect_features_from_itree,
+                                   collect_features_from_itree,
                                    a);
   assert(!had_err);   /* collect_features_from_itree() is sane */
   return a;
