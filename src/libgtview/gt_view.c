@@ -245,6 +245,11 @@ int gt_view(int argc, const char **argv, Error *err)
         genome_node_rec_delete(gn);
       }
 
+      genome_stream_delete(feature_stream);
+      genome_stream_delete(gff3_out_stream);
+      genome_stream_delete(add_introns_stream);
+      genome_stream_delete(gff3_in_stream);
+
       if (!argv[parsed_args]) /* no GFF3 file was given at all */
         break;
       parsed_args++;
@@ -324,11 +329,6 @@ int gt_view(int argc, const char **argv, Error *err)
   }
 
   /* free */
-  genome_stream_delete(feature_stream);
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(add_introns_stream);
-  genome_stream_delete(gff3_in_stream);
-
   canvas_delete(canvas);
   image_info_delete(ii);
   config_delete(cfg);
