@@ -29,6 +29,8 @@
 typedef struct IntervalTree IntervalTree;
 typedef struct IntervalTreeNode IntervalTreeNode;
 
+typedef int *(IntervalTreeIteratorFunc)(IntervalTreeNode*, void*);
+
 /* transfers ownership of <data> to interval tree
    if IntervalTreeDataFreeFunc is given */
 IntervalTreeNode* interval_tree_node_new(void *data,
@@ -38,6 +40,7 @@ IntervalTreeNode* interval_tree_node_new(void *data,
 void*             interval_tree_node_get_data(IntervalTreeNode* n);
 
 IntervalTree*     interval_tree_new(void);
+unsigned long     interval_tree_size(IntervalTree*);
 IntervalTreeNode* interval_tree_find_first_overlapping(IntervalTree*,
                                                        unsigned long start,
                                                        unsigned long end);
@@ -47,6 +50,9 @@ void              interval_tree_find_all_overlapping(IntervalTree*,
                                                      unsigned long start,
                                                      unsigned long end,
                                                      Array*);
+int               interval_tree_traverse(IntervalTree *it,
+                                         IntervalTreeIteratorFunc func,
+                                         void *data);
 void              interval_tree_delete(IntervalTree*);
 int               interval_tree_unit_test(Error*);
 

@@ -20,6 +20,7 @@
 #include <string.h>
 #include "libgtcore/ensure.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/interval_tree.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/range.h"
@@ -37,17 +38,14 @@ struct FeatureIndex {
 };
 
 typedef struct {
-  Array *features;
+  IntervalTree *features;
   SequenceRegion *region;
   Range dyn_range;
 } RegionInfo;
 
 static void region_info_delete(RegionInfo *info)
 {
-  unsigned long i;
-  for (i = 0; i < array_size(info->features); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(info->features, i));
-  array_delete(info->features);
+  interval_tree_delete(info->features);
   if (info->region)
     genome_node_delete((GenomeNode*)info->region);
   ma_free(info);
@@ -77,7 +75,7 @@ void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr)
   if (!hashtable_get(fi->regions, seqid)) {
     info = ma_malloc(sizeof (RegionInfo));
     info->region = (SequenceRegion*) genome_node_ref((GenomeNode*) sr);
-    info->features = array_new(sizeof (GenomeNode*));
+    info->features = interval_tree_new();
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     hashtable_add(fi->regions, seqid, info);
@@ -105,43 +103,53 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf)
   assert(feature_index_has_seqid(fi, seqid));
   info = (RegionInfo*) hashtable_get(fi->regions, seqid);
   /* add node to the appropriate array in the hashtable */
-  array_add(info->features, gf_new);
+  IntervalTreeNode *new_node = interval_tree_node_new(gn, node_range.start,
+                                                      node_range.end,
+                                                      (FreeFunc) genome_node_rec_delete);
+  interval_tree_insert(info->features, new_node);
   /* update dynamic range */
   info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);
   info->dyn_range.end = MAX(info->dyn_range.end, node_range.end);
 }
 
+static int collect_features_from_itree(IntervalTreeNode *node, void *data)
+{
+  Array *a = (Array*) data;
+  GenomeNode *gn = (GenomeNode*) interval_tree_node_get_data(node);
+  array_add(a, gn);
+  return 0;
+}
+
 Array* feature_index_get_features_for_seqid(FeatureIndex *fi, const char *seqid)
 {
-  RegionInfo *res;
-  assert(fi);
-  res = (RegionInfo*) hashtable_get(fi->regions, seqid);
-  return (res ? array_ref(res->features) : NULL);
+  RegionInfo *ri;
+  int had_err = 0;
+  Array *a;
+  assert(fi && seqid);
+  a = array_new(sizeof (GenomeFeature*));
+  ri = (RegionInfo*) hashtable_get(fi->regions, seqid);
+  had_err = interval_tree_traverse(ri->features,
+                                   (IntervalTreeIteratorFunc*) collect_features_from_itree,
+                                   a);
+  assert(!had_err);   /* collect_features_from_itree() is sane */
+  return a;
 }
 
 int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
                                          const char *seqid, Range qry_range,
                                          Error *err)
 {
-  Array* base;
-  unsigned long i;
-
+  RegionInfo *ri;
   error_check(err);
   assert(fi && results);
 
-  base = feature_index_get_features_for_seqid(fi, seqid);
-  if (!base) {
+  ri = (RegionInfo*) hashtable_get(fi->regions, seqid);
+  if (!ri) {
     error_set(err, "feature index does not contain the given sequence id");
     return -1;
   }
-  assert(fi && results && seqid && base && (qry_range.start < qry_range.end));
-  for (i = 0; i < array_size(base); i++) {
-    GenomeNode *gn = *(GenomeNode**) array_get(base, i);
-    Range r = genome_node_get_range(gn);
-    if (range_overlap(r, qry_range))
-      array_add(results, gn);
-  }
-  array_delete(base);
+  interval_tree_find_all_overlapping(ri->features, qry_range.start,
+                                     qry_range.end, results);
   return 0;
 }
 
@@ -329,7 +337,6 @@ int feature_index_unit_test(Error *err)
     features = feature_index_get_features_for_seqid(fi, "test1");
   ensure(had_err, features);
   array_delete(features);
-  ensure(had_err, feature_index_get_features_for_seqid(fi, "noexist") == NULL);
 
   /* delete all generated objects */
   strarray_delete(seqids);

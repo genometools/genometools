@@ -31,6 +31,7 @@ typedef enum IntervalTreeNodeColor {
 
 struct IntervalTree {
   IntervalTreeNode *root;
+  unsigned long size;
 };
 
 struct IntervalTreeNode {
@@ -64,6 +65,12 @@ IntervalTree* interval_tree_new(void)
   IntervalTree *it;
   it = ma_calloc(1, sizeof (IntervalTree));
   return it;
+}
+
+unsigned long interval_tree_size(IntervalTree *it)
+{
+  assert(it);
+  return it->size;
 }
 
 void* interval_tree_node_get_data(IntervalTreeNode *n)
@@ -111,6 +118,29 @@ IntervalTreeNode* interval_tree_find_first_overlapping(IntervalTree *it,
   if (!it->root)
     return NULL;
   return interval_tree_search_internal(it->root, low, high);
+}
+
+static int interval_tree_traverse_internal(IntervalTreeNode *node,
+                                           IntervalTreeIteratorFunc func,
+                                           void *data)
+{
+  int had_err = 0;
+  if (!node) return 0;
+  if (!had_err)
+    had_err = interval_tree_traverse_internal(node->left, func, data);
+  if (!had_err)
+    had_err = interval_tree_traverse_internal(node->right, func, data);
+  if (!had_err)
+    had_err = (int) func(node, data);
+  return had_err;
+}
+
+int interval_tree_traverse(IntervalTree *it, IntervalTreeIteratorFunc func,
+                           void *data)
+{
+  if (!it->root)
+    return 0;
+  return interval_tree_traverse_internal(it->root, func, data);
 }
 
 static void interval_tree_find_all_internal(IntervalTreeNode *node,
@@ -295,6 +325,7 @@ void interval_tree_insert(IntervalTree *it, IntervalTreeNode *n)
   {
     it->root = n;
   } else interval_tree_insert_internal(&(it->root), n);
+  it->size++;
 }
 
 void interval_tree_delete(IntervalTree *it)
@@ -361,6 +392,8 @@ int interval_tree_unit_test(UNUSED Error *err)
     new_node = interval_tree_node_new(rng, rng->start, rng->end, ma_free_func);
     interval_tree_insert(it, new_node);
   }
+
+  ensure(had_err, interval_tree_size(it) == num_testranges);
 
   /* perform test queries */
   for (i = 0; i < num_samples && !had_err; i++)
