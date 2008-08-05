@@ -34,7 +34,7 @@ config = GT::Config.new()
 config.load_file(configfile)
 
 # get color
-color = config.get_color("exon")
+color = config.get_color("exon", "fill")
 raise if not color
 
 # set color
@@ -42,14 +42,14 @@ color = GT::Color.malloc
 color.red   = 0.3
 color.green = 0.4
 color.blue  = 0.3
-config.set_color("exon", color)
+config.set_color("exon", "fill", color)
 
 # get string
-str = config.get_cstr("feature_styles", "exon")
+str = config.get_cstr("exon", "style")
 raise if str != "box"
 
 # set string
-config.set_cstr("feature_styles", "exon", "line")
+config.set_cstr("exon", "style", "line")
 
 # get number
 num = config.get_num("format", "margins")
@@ -57,11 +57,6 @@ raise if num != 30
 
 # set number
 config.set_num("format", "margins", 20.0)
-
-# get string list
-strarray = config.get_cstr_list("collapse", "to_parent")
-list = strarray.to_a # convert StrArray C object to Ruby array of strings
-puts list
 
 # set string list
 list = [ "mRNA", "gene" ]

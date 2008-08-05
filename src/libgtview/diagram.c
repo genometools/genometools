@@ -665,14 +665,14 @@ int diagram_unit_test(Error *err)
   ensure(had_err, dia->range.start == 400UL);
   ensure(had_err, dia->range.end == 900UL);
   if (!had_err &&
-      !config_cstr_in_list(dia->config,"collapse","to_parent","gene")) {
+      !config_get_bool(dia->config, "gene", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
-      !config_cstr_in_list(dia->config,"collapse","to_parent","exon")) {
+      !config_get_bool(dia->config, "exon", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", exon_type);
     ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
@@ -687,21 +687,21 @@ int diagram_unit_test(Error *err)
   }
 
   if (!had_err &&
-      !config_cstr_in_list(dia2->config,"collapse","to_parent","gene")) {
+      !config_get_bool(dia2->config, "gene", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
-      !config_cstr_in_list(dia2->config,"collapse","to_parent","exon")) {
+      !config_get_bool(dia2->config, "exon", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", exon_type);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
-      !config_cstr_in_list(dia2->config,"collapse","to_parent","CDS")) {
+      !config_get_bool(dia2->config, "CDS", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", CDS_type);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);

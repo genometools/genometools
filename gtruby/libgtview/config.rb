@@ -26,8 +26,8 @@ module GT
   typealias "bool", "ibool"
   extern "Config* config_new(bool, Error*)"
   extern "int config_load_file(Config*, Str*, Error*)"
-  extern "void config_get_colorptr(Config*, Color*, const char*)"
-  extern "void config_set_color(Config*, const char*, Color*)"
+  extern "void config_get_colorptr(Config*, Color*, const char*, const char*)"
+  extern "void config_set_color(Config*, const char*, const char*, Color*)"
   extern "const char* config_get_cstr(const Config*, const char*, " +
                                      "const char*, const char*)"
   extern "void config_set_cstr(const Config*, const char*, " +
@@ -62,14 +62,14 @@ module GT
       if rval != 0 then GT.gterror(err) end
     end
 
-    def get_color(key)
+    def get_color(section, key)
       color = GT::Color.malloc
-      GT.config_get_colorptr(@config, color, key)
+      GT.config_get_colorptr(@config, color, section, key)
       color
     end
 
-    def set_color(key, color)
-      GT.config_set_color(@config, key, color)
+    def set_color(section, key, color)
+      GT.config_set_color(@config, section, key, color)
     end
 
     def get_cstr(section, key)
