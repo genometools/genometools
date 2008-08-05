@@ -16,7 +16,6 @@
 */
 
 #include <assert.h>
-#include <string.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/ma.h"
 #include "libgtext/feature_type_factory.h"
@@ -58,7 +57,6 @@ bool genome_feature_type_is(GenomeFeatureType *gft, const char *type)
   if (gft == feature_type_factory_create_gft(gft->feature_type_factory, type))
     return true;
   return false;
-  return strcmp(gft->type, type) == 0;
 }
 
 const char* genome_feature_type_get_cstr(const GenomeFeatureType *gft)
