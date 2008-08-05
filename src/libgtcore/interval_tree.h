@@ -38,7 +38,6 @@ IntervalTreeNode* interval_tree_node_new(void *data,
 void*             interval_tree_node_get_data(IntervalTreeNode* n);
 
 IntervalTree*     interval_tree_new(void);
-void              interval_tree_delete(IntervalTree*);
 IntervalTreeNode* interval_tree_find_first_overlapping(IntervalTree*,
                                                        unsigned long start,
                                                        unsigned long end);
@@ -48,6 +47,7 @@ void              interval_tree_find_all_overlapping(IntervalTree*,
                                                      unsigned long start,
                                                      unsigned long end,
                                                      Array*);
+void              interval_tree_delete(IntervalTree*);
 int               interval_tree_unit_test(Error*);
 
 #endif

@@ -88,13 +88,6 @@ static void interval_tree_node_rec_delete(IntervalTreeNode *n)
   interval_tree_node_delete(n);
 }
 
-void interval_tree_delete(IntervalTree *it)
-{
-  if (!it) return;
-  interval_tree_node_rec_delete(it->root);
-  ma_free(it);
-}
-
 static IntervalTreeNode* interval_tree_search_internal(IntervalTreeNode *node,
                                                        unsigned long low,
                                                        unsigned long high)
@@ -125,9 +118,8 @@ static void interval_tree_find_all_internal(IntervalTreeNode *node,
                                             unsigned long high, Array *a)
 {
   IntervalTreeNode* x;
+  if (!node) return;
   x = node;
-  if (!x) return;
-
   if (low <= x->high && x->low <= high)
     array_add(a, x->data);
   /* recursively search left and right subtrees */
@@ -212,8 +204,7 @@ static void interval_tree_right_rotate(IntervalTreeNode **root,
 /* this is the insert routine from Cormen et al, p. 280*/
 static void tree_insert(IntervalTreeNode **root, IntervalTreeNode *z)
 {
-  IntervalTreeNode *x;
-  IntervalTreeNode *y;
+  IntervalTreeNode *x, *y;
   y = NULL;
   x = *root;
   z->max = z->high;
@@ -304,6 +295,13 @@ void interval_tree_insert(IntervalTree *it, IntervalTreeNode *n)
   {
     it->root = n;
   } else interval_tree_insert_internal(&(it->root), n);
+}
+
+void interval_tree_delete(IntervalTree *it)
+{
+  if (!it) return;
+  interval_tree_node_rec_delete(it->root);
+  ma_free(it);
 }
 
 static int range_ptr_compare(const void *r1p, const void *r2p)
