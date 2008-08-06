@@ -297,7 +297,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       }
       if (pprefixlen > 1UL) /* check for success */
       {
-        Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,bound);
+        Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,left);
 
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                       false,
