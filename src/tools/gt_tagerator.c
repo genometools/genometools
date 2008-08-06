@@ -134,10 +134,6 @@ static int gt_tagerator_runner(UNUSED int argc,
   assert(arguments != NULL);
 
   assert(parsed_args == argc);
-  for (idx=0; idx<strarray_size(arguments->tagfiles); idx++)
-  {
-    printf("# queryfile=%s\n",strarray_get(arguments->tagfiles,idx));
-  }
   if (arguments->maxdistance == -1L)
   {
     printf("# computing matching statistics\n");
@@ -145,10 +141,10 @@ static int gt_tagerator_runner(UNUSED int argc,
   {
     if (arguments->maxintervalwidth == 0)
     {
-      printf("# computing complete matches ");
+      printf("# computing complete matches");
     } else
     {
-      printf("# computing prefix matches ");
+      printf("# computing prefix matches");
     }
     if (arguments->maxdistance == 0)
     {
@@ -171,6 +167,10 @@ static int gt_tagerator_runner(UNUSED int argc,
   {
     assert(str_length(arguments->pckindexname) > 0);
     printf("# indexname(pck)=%s\n",str_get(arguments->pckindexname));
+  }
+  for (idx=0; idx<strarray_size(arguments->tagfiles); idx++)
+  {
+    printf("# queryfile=%s\n",strarray_get(arguments->tagfiles,idx));
   }
   if (runtagerator(arguments,err) != 0)
   {

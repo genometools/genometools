@@ -213,7 +213,7 @@ unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
   bwtbound.start = bwtSeq->count[curSym];
   bwtbound.end = bwtSeq->count[curSym+1];
 #ifdef SKDEBUG
-  printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
+  printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqpos
           "occurrences\n",
          PRINTSeqposcast(bwtbound.start),
          PRINTSeqposcast(bwtbound.end),
@@ -235,7 +235,7 @@ unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
     bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
     bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
 #ifdef SKDEBUG
-    printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
+    printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqpos
             "occurrences\n",
            PRINTSeqposcast(bwtbound.start),
            PRINTSeqposcast(bwtbound.end),
@@ -251,7 +251,7 @@ unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
 }
 
 unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
-                                       Seqpos *witnessposition,
+                                       Seqpos *witnessleftbound,
                                        const Uchar *qstart,
                                        const Uchar *qend)
 {
@@ -284,7 +284,7 @@ unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
     return 0;
   }
 #ifdef SKDEBUG
-  printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
+  printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqpos
           "occurrences\n",
          PRINTSeqposcast(bwtbound.start),
          PRINTSeqposcast(bwtbound.end),
@@ -307,7 +307,7 @@ unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
     bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
     bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
 #ifdef SKDEBUG
-    printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
+    printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqpos
             "occurrences\n",
            PRINTSeqposcast(bwtbound.start),
            PRINTSeqposcast(bwtbound.end),
@@ -320,11 +320,9 @@ unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
     prevlbound = bwtbound.start;
   }
   matchlength = (unsigned long) (qptr - qstart);
-  if (witnessposition != NULL)
+  if (witnessleftbound != NULL)
   {
-    Seqpos startpos = pckfindfirstmatch(bwtSeq,prevlbound);
-    assert((bwtSeq->seqIdx->seqLen-1) >= (startpos + matchlength));
-    *witnessposition = (bwtSeq->seqIdx->seqLen - 1) - (startpos + matchlength);
+    *witnessleftbound = prevlbound;
   }
   return matchlength;
 }

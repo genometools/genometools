@@ -25,7 +25,6 @@
 #include "libgtcore/arraydef.h"
 #include "tagerator.h"
 #include "sarr-def.h"
-#include "esa-mmsearch-def.h"
 #include "intbits.h"
 #include "alphadef.h"
 #include "esa-myersapm.h"
@@ -38,7 +37,6 @@
 
 #include "echoseq.pr"
 #include "esa-map.pr"
-#include "esa-minunique.pr"
 
 #define MAXTAGSIZE INTWORDSIZE
 
@@ -53,34 +51,6 @@ typedef struct
   unsigned long taglen;
 } Tagwithlength;
 
-static void esa_exactpatternmatching(const void *genericindex,
-                                     const Uchar *pattern,
-                                     unsigned long patternlength,
-                                     void (*processmatch)(void *,bool,
-                                                          Seqpos,Seqpos,Seqpos,
-                                                          unsigned long),
-                                     void *processmatchinfo)
-{
-  const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
-  MMsearchiterator *mmsi;
-  Seqpos dbstartpos, totallength = getencseqtotallength(suffixarray->encseq);
-
-  mmsi = newmmsearchiterator(suffixarray->encseq,
-                             suffixarray->suftab,
-                             0,  /* leftbound */
-                             totallength, /* rightbound */
-                             0, /* offset */
-                             suffixarray->readmode,
-                             pattern,
-                             patternlength);
-  while (nextmmsearchiterator(&dbstartpos,mmsi))
-  {
-    processmatch(processmatchinfo,true,totallength,
-                 dbstartpos,(Seqpos) patternlength,patternlength);
-  }
-  freemmsearchiterator(&mmsi);
-}
-
 static Seqpos convertstartpos(bool withesa,Seqpos totallength,Seqpos startpos)
 {
   if (withesa)
@@ -91,52 +61,71 @@ static Seqpos convertstartpos(bool withesa,Seqpos totallength,Seqpos startpos)
   return totallength - startpos;
 }
 
-static void showmatch(UNUSED void *processinfo,bool withesa,
+static void showmatch(void *processinfo,bool withesa,
                       Seqpos totallength,Seqpos startpos,Seqpos len,
-                      UNUSED unsigned long pprefixlen)
+                      unsigned long pprefixlen)
 {
-  printf("match " FormatSeqpos " " FormatSeqpos "\n",
-          PRINTSeqposcast(convertstartpos(withesa,totallength,startpos)),
-          PRINTSeqposcast(len));
+  printf(FormatSeqpos,PRINTSeqposcast(len));
+  printf(" " FormatSeqpos,
+         PRINTSeqposcast(convertstartpos(withesa,totallength,startpos)));
+  if (processinfo != NULL && *((unsigned long *) processinfo) > 0)
+  {
+    printf(" %lu",pprefixlen);
+  }
+  printf("\n");
 }
 
 static void checkmstats(void *processinfo,
                         const void *patterninfo,
-                        unsigned long idx,
-                        unsigned long value)
+                        unsigned long patternstartpos,
+                        unsigned long mstatlength,
+                        Seqpos leftbound)
 {
-  bool withesa = getwithesafromresource((const Limdfsresources *) processinfo);
-  Seqpos totallength;
-  const void *genericindex;
-  unsigned long mstatlength;
+  unsigned long realmstatlength;
   Tagwithlength *twl = (Tagwithlength *) patterninfo;
+  Seqpos witnessposition;
+  unsigned long idx;
 
-  genericindex = getgenericindexfromresource((const Limdfsresources *)
-                                             processinfo);
-  totallength = gettotallengthfromresource((const Limdfsresources *)
-                                           processinfo);
-  mstatlength = (withesa ? suffixarraymstats : voidpackedindexmstatsforward)
-                     (genericindex,
-                      0,
-                      0,
-                      totallength,
-                      NULL,
-                      &twl->transformedtag[idx],
-                      &twl->transformedtag[twl->taglen]);
-  if (value != mstatlength)
+  realmstatlength = genericmstats((const Limdfsresources *) processinfo,
+                                  &twl->transformedtag[patternstartpos],
+                                  &twl->transformedtag[twl->taglen]);
+  if (mstatlength != realmstatlength)
   {
-    fprintf(stderr,"idx = %lu: value = %lu != %lu = mstatlength\n",
-                    idx,value,mstatlength);
+    fprintf(stderr,"patternstartpos = %lu: mstatlength = %lu != %lu "
+                   " = realmstatlength\n",
+                    patternstartpos,mstatlength,realmstatlength);
     exit(EXIT_FAILURE);
+  }
+  witnessposition = bound2startpos((const Limdfsresources *) processinfo,
+                                   leftbound,mstatlength);
+  for (idx = patternstartpos; idx < patternstartpos + mstatlength; idx++)
+  {
+    Uchar cc = limdfsgetencodedchar((const Limdfsresources *) processinfo,
+                                    witnessposition + idx - patternstartpos,
+                                    Forwardmode);
+    if (twl->transformedtag[idx] != cc)
+    {
+      fprintf(stderr,"patternstartpos = %lu: pattern[%lu] = %u != %u = "
+                     "sequence[%lu]\n",
+                      patternstartpos,
+                      idx,
+                      (unsigned int) twl->transformedtag[idx],
+                      (unsigned int) cc,
+                      (unsigned long) (witnessposition+idx-patternstartpos));
+      exit(EXIT_FAILURE);
+    }
   }
 }
 
-static void showmstats(UNUSED void *processinfo,
+static void showmstats(void *processinfo,
                        UNUSED const void *patterninfo,
-                       unsigned long idx,
-                       unsigned long value)
+                       UNUSED unsigned long idx,
+                       unsigned long value,
+                       Seqpos leftbound)
 {
-  printf("%lu->%lu\n",idx,value);
+  Seqpos witnessposition = bound2startpos((const Limdfsresources *) processinfo,
+                                          leftbound,value);
+  printf("%lu " FormatSeqpos "\n",value,PRINTSeqposcast(witnessposition));
 }
 
 DECLAREARRAYSTRUCT(Simplematch);
@@ -154,9 +143,6 @@ static void storematch(void *processinfo,
   GETNEXTFREEINARRAY(match,storetab,Simplematch,32);
   match->dbstartpos = convertstartpos(withesa,totallength,startpos);
   match->matchlength = len;
-  printf("match " FormatSeqpos " " FormatSeqpos "\n",
-          PRINTSeqposcast(convertstartpos(withesa,totallength,startpos)),
-          PRINTSeqposcast(len));
 }
 
 static int cmpdescend(const void *a,const void *b)
@@ -223,12 +209,10 @@ static int dotransformtag(Uchar *transformedtag,
 
 static void performpatternsearch(const AbstractDfstransformer *dfst,
                                  const TageratorOptions *tageratoroptions,
-                                 bool withesa,
                                  Myersonlineresources *mor,
                                  Limdfsresources *limdfsresources,
                                  const Uchar *transformedtag,
                                  unsigned long taglen,
-                                 Seqpos totallength,
                                  void (*processmatch)(void *,bool,Seqpos,
                                                       Seqpos,Seqpos,
                                                       unsigned long),
@@ -247,22 +231,11 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
   {
     if (tageratoroptions->maxdistance == 0)
     {
-      if (withesa)
-      {
-        esa_exactpatternmatching(getgenericindexfromresource(limdfsresources),
-                                 transformedtag,
-                                 taglen,
-                                 processmatch,
-                                 processmatchinfooffline);
-      } else
-      {
-        pck_exactpatternmatching(getgenericindexfromresource(limdfsresources),
-                                 transformedtag,
-                                 taglen,
-                                 totallength,
-                                 processmatch,
-                                 processmatchinfooffline);
-      }
+      indexbasedexactpatternmatching(limdfsresources,
+                                     transformedtag,
+                                     taglen,
+                                     processmatch,
+                                     processmatchinfooffline);
     } else
     {
       indexbasedapproxpatternmatching(limdfsresources,
@@ -438,7 +411,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     {
       processmatch = showmatch;
       processmatchinfoonline = NULL;
-      processmatchinfooffline = NULL;
+      processmatchinfooffline = (void *) &tageratoroptions->maxintervalwidth;
     }
     if (tageratoroptions->online || tageratoroptions->docompare)
     {
@@ -450,6 +423,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                     processmatchinfoonline);
     }
     limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
+                                         suffixarray.encseq,
                                          withesa,
                                          tageratoroptions->nospecials,
                                          mapsize,
@@ -485,8 +459,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
         ma_free(desc);
         break;
       }
-      printf("# patternlength=%lu\n",twl.taglen);
-      printf("# tag=");
+      printf("# %lu ",twl.taglen);
       fprintfsymbolstring(stdout,suffixarray.alpha,twl.transformedtag,
                           twl.taglen);
       printf("\n");
@@ -505,12 +478,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
           }
           performpatternsearch(dfst,
                                tageratoroptions,
-                               withesa,
                                mor,
                                limdfsresources,
                                twl.transformedtag,
                                twl.taglen,
-                               totallength,
                                processmatch,
                                processmatchinfooffline,
                                (try == 1 && tageratoroptions->rcmatch)

@@ -47,7 +47,7 @@ typedef struct Bwtseqcontextiterator Bwtseqcontextiterator;
 Bwtseqcontextiterator *newBwtseqcontextiterator(const void *voidbwtSeq,
                                                 Seqpos bound);
 
-Uchar nextBwtseqcontextiterator(Bwtseqcontextiterator *bsci);
+Uchar nextBwtseqcontextiterator(Seqpos *bound,Bwtseqcontextiterator *bsci);
 
 void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci);
 
@@ -63,7 +63,7 @@ void *loadvoidBWTSeqForSA(const Str *indexname,
 
 void deletevoidBWTSeq(void *packedindex);
 
-unsigned long voidpackedindexuniqueforward(const void *genericindex,
+unsigned long voidpackedindexuniqueforward(const void *voidbwtseq,
                                            UNUSED unsigned long offset,
                                            UNUSED Seqpos left,
                                            UNUSED Seqpos right,
@@ -71,7 +71,7 @@ unsigned long voidpackedindexuniqueforward(const void *genericindex,
                                            const Uchar *qstart,
                                            const Uchar *qend);
 
-unsigned long voidpackedindexmstatsforward(const void *genericindex,
+unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
                                            UNUSED unsigned long offset,
                                            UNUSED Seqpos left,
                                            UNUSED Seqpos right,
@@ -79,7 +79,7 @@ unsigned long voidpackedindexmstatsforward(const void *genericindex,
                                            const Uchar *qstart,
                                            const Uchar *qend);
 
-void pck_exactpatternmatching(const void *genericindex,
+void pck_exactpatternmatching(const void *voidbwtseq,
                               const Uchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
@@ -87,5 +87,9 @@ void pck_exactpatternmatching(const void *genericindex,
                                                    Seqpos,Seqpos,
                                                    unsigned long),
                               void *processmatchinfo);
+
+Seqpos voidpackedfindfirstmatchconvert(const void *voidbwtseq,
+                                       Seqpos witnessbound,
+                                       unsigned long matchlength);
 
 #endif

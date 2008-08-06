@@ -27,8 +27,11 @@
 #include "esa-splititv.h"
 #include "eis-voiditf.h"
 #include "defined-types.h"
+#include "esa-mmsearch-def.h"
 #include "absdfstrans-imp.h"
 #include "idx-limdfs.h"
+#include "esa-minunique.pr"
+#include "stamp.h"
 
 #ifdef SKDEBUG
 #define DECLAREDFSSTATE(V)\
@@ -55,15 +58,17 @@ struct Limdfsresources
   Seqpos totallength;
   void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
   void *processmatchinfo;
-  void (*processresult)(void *,const void *,unsigned long,unsigned long);
+  void (*processresult)(void *,const void *,unsigned long,unsigned long,Seqpos);
   void *patterninfo;
   const void *genericindex;
   bool withesa, nospecials;
   DECLAREDFSSTATE(currentdfsstate);
   Seqpos *rangeOccs;
+  const Encodedsequence *encseq;
 };
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
+                                    const Encodedsequence *encseq,
                                     bool withesa,
                                     bool nospecials,
                                     unsigned int mapsize,
@@ -75,7 +80,8 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     void (*processresult)(void *,
                                                           const void *,
                                                           unsigned long,
-                                                          unsigned long),
+                                                          unsigned long,
+                                                          Seqpos),
                                     void *patterninfo,
                                     const AbstractDfstransformer *adfst)
 {
@@ -97,6 +103,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->totallength = totallength;
   limdfsresources->withesa = withesa;
   limdfsresources->nospecials = nospecials;
+  limdfsresources->encseq = encseq;
   /* Application specific */
   limdfsresources->dfsconstinfo
     = adfst->allocatedfsconstinfo((unsigned int) limdfsresources->alphasize);
@@ -109,21 +116,6 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                      MULT2(limdfsresources->alphasize));
   }
   return limdfsresources;
-}
-
-const void *getgenericindexfromresource(const Limdfsresources *limdfsresources)
-{
-  return limdfsresources->genericindex;
-}
-
-bool getwithesafromresource(const Limdfsresources *limdfsresources)
-{
-  return limdfsresources->withesa;
-}
-
-Seqpos gettotallengthfromresource(const Limdfsresources *limdfsresources)
-{
-  return limdfsresources->totallength;
 }
 
 static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
@@ -230,6 +222,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                                  (unsigned long) (pos - startpos + 1),
                                  cc);
       pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
+                                         left,
                                          (Seqpos) 1,
                                          (unsigned long) (pos - startpos + 1),
                                          limdfsresources->dfsconstinfo);
@@ -264,12 +257,14 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
   Uchar cc;
   unsigned long contextlength, pprefixlen;
   bool processinchar = true;
-  Bwtseqcontextiterator *bsci
-    = newBwtseqcontextiterator(limdfsresources->genericindex,left);
+  Seqpos bound = left;
+  Bwtseqcontextiterator *bsci;
+
+  bsci = newBwtseqcontextiterator(limdfsresources->genericindex,bound);
 
   memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
 #ifdef SKDEBUG
-  printf("retrieve context for left = %lu\n",(unsigned long) left);
+  printf("retrieve context for bound = %lu\n",(unsigned long) bound);
 #endif
   for (contextlength = 0; /* nothing */; contextlength++)
   {
@@ -279,7 +274,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       processinchar = false;
     } else
     {
-      cc = nextBwtseqcontextiterator(bsci);
+      cc = nextBwtseqcontextiterator(&bound,bsci);
     }
     if (cc != (Uchar) SEPARATOR &&
         (!limdfsresources->nospecials || cc != (Uchar) WILDCARD))
@@ -292,6 +287,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                  (unsigned long) (offset + contextlength),
                                  cc);
       pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
+                                         bound,
                                          (Seqpos) 1,
                                          (unsigned long) (offset+contextlength),
                                          limdfsresources->dfsconstinfo);
@@ -301,7 +297,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       }
       if (pprefixlen > 1UL) /* check for success */
       {
-        Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,left);
+        Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,bound);
 
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                       false,
@@ -354,6 +350,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
     width = child->right - child->left;
   }
   pprefixlen = adfst->limdfsnextstep(stackptr->aliasstate,
+                                     child->left,
                                      width,
                                      (unsigned long) child->offset,
                                      limdfsresources->dfsconstinfo);
@@ -611,6 +608,97 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                limdfsresources->patterninfo,
                                limdfsresources->dfsconstinfo);
   }
+}
+
+unsigned long genericmstats(const Limdfsresources *limdfsresources,
+                            const Uchar *qstart,
+                            const Uchar *qend)
+{
+  return (limdfsresources->withesa ?
+             suffixarraymstats : voidpackedindexmstatsforward)
+                     (limdfsresources->genericindex,
+                      0,
+                      0,
+                      limdfsresources->totallength,
+                      NULL,
+                      qstart,
+                      qend);
+}
+
+static void esa_exactpatternmatching(const void *genericindex,
+                                     const Uchar *pattern,
+                                     unsigned long patternlength,
+                                     void (*processmatch)(void *,bool,
+                                                          Seqpos,Seqpos,Seqpos,
+                                                          unsigned long),
+                                     void *processmatchinfo)
+{
+  const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
+  MMsearchiterator *mmsi;
+  Seqpos dbstartpos, totallength = getencseqtotallength(suffixarray->encseq);
+
+  mmsi = newmmsearchiterator(suffixarray->encseq,
+                             suffixarray->suftab,
+                             0,  /* leftbound */
+                             totallength, /* rightbound */
+                             0, /* offset */
+                             suffixarray->readmode,
+                             pattern,
+                             patternlength);
+  while (nextmmsearchiterator(&dbstartpos,mmsi))
+  {
+    processmatch(processmatchinfo,true,totallength,
+                 dbstartpos,(Seqpos) patternlength,patternlength);
+  }
+  freemmsearchiterator(&mmsi);
+}
+
+void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
+                                    const Uchar *pattern,
+                                    unsigned long patternlength,
+                                    void (*processmatch)(void *,bool,
+                                                         Seqpos,Seqpos,Seqpos,
+                                                         unsigned long),
+                                    void *processmatchinfo)
+{
+  if (limdfsresources->withesa)
+  {
+    esa_exactpatternmatching(limdfsresources->genericindex,
+                             pattern,
+                             patternlength,
+                             processmatch,
+                             processmatchinfo);
+  } else
+  {
+    pck_exactpatternmatching(limdfsresources->genericindex,
+                             pattern,
+                             patternlength,
+                             limdfsresources->totallength,
+                             processmatch,
+                             processmatchinfo);
+  }
+}
+
+Seqpos bound2startpos(const Limdfsresources *limdfsresources,
+                      Seqpos bound,unsigned long matchlength)
+{
+  if (limdfsresources->withesa)
+  {
+    const Suffixarray *suffixarray
+      = (const Suffixarray *) limdfsresources->genericindex;
+    return suffixarray->suftab[bound];
+  }
+  return voidpackedfindfirstmatchconvert(limdfsresources->genericindex,
+                                         bound,matchlength);
+}
+
+Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
+                           Seqpos pos,
+                           Readmode readmode)
+{
+  assert(limdfsresources->encseq != NULL);
+
+  return getencodedchar(limdfsresources->encseq,pos,readmode);
 }
 
 /*

@@ -4,11 +4,9 @@
 \usepackage{alltt}
 \usepackage{xspace}
 \usepackage{times}
-\usepackage{listings}
 \usepackage{bbm}
 \usepackage{verbatim}
 \usepackage{ifthen}
-\usepackage{comment}
 \usepackage{optionman}
 
 \newcommand{\Substring}[3]{#1[#2..#3]}
@@ -53,14 +51,18 @@ respectively. Both indices are constructed from a given set of subject
 sequences. 
 
 \Program maps each short sequence tag, say \(p\) of length \(m\)
-against the given index. The program runs in three basic modes:
+against the given index. The length of the pattern is limited by the
+size of a pointer. If \texttt{gt} is a 32-bit binary, then \(m\) must be
+smaller or equal to 32. If \texttt{gt} is a 64-bit binary, \(m\) must be 
+smaller or equal to 64. The program runs in three basic modes:
 \begin{description}
 \item[ms]
-For all \(i\in[1,m]\) it can compute the length of the longest common prefix 
-of \(\Substring{w}{i}{m}\) matching any substring of \(S\).
-In addition it reports a start position of such a prefix in \(S\).
+For all \(i\in[1,m]\) it can compute the length \(\ell\) of the longest common 
+prefix of \(\Substring{w}{i}{m}\) matching any substring of \(S\).
+In addition it reports a start position, say \(j\), of such a prefix in \(S\).
 As this mode basically computes the well known matching statistics, we denote 
-it by \textit{ms}.
+it by \textit{ms}. The length value \(\ell\) is the matching statistics length
+and the position value \(j\) is a matching statistics position.
 \item[cdiff]
 It computes all start positions of approximate matches with up to \(k\)
 differences in \(S\). For each start position of an approximate match,
@@ -116,7 +118,7 @@ Specify the maximum number of occurrences of approximate prefix matches.
 }
 
 \Option{nospecials}{}{
-Do not output matches cont containing wildcard characters (e.g. N). This
+Do not output matches containing wildcard characters (e.g. N). This
 option is not relevant for the \textit{ms}-mode.
 }
 
@@ -163,68 +165,107 @@ in multiple \Fasta format. In a first call we run \Program in \textit{ms}-mode:
 
 \begin{Output}
 gt tagerator -query Q1.gz -pck pck-human
-# queryfile=Q1.gz
 # computing matching statistics
 # indexname(pck)=pck-human
-# patternlength=15
-# tag=aagcttgctgctgca
-0->10
-1->9
-2->8
-3->12
-4->11
-5->10
-6->9
-7->8
-8->7
-9->6
-10->5
-11->4
-12->3
-13->2
-14->1
+# queryfile=Q1.gz
+# 15 aagcttgctgctgca
+10 88693
+9 88694
+8 88695
+12 470064
+11 470065
+10 729958
+9 772093
+8 403975
+7 544167
+6 680243
+5 714382
+4 313675
+3 185058
+2 739095
+1 274
 ...
 \end{Output}
-The first
-\end{document}
+The first line shortly reports the kind of computation performed. The second
+and third line give the name of the index containing the subject sequences.
+It is reported if it is a packed index or an enhanced suffix array. Then for
+each tag its length, say \(m\), and the tag \(p\) itself is shown, followed by 
+a block of \(m\) lines each containing two integers. For all \(i\in[1,m]\), 
+the first number in the \(i\)th line is the matching statistics length,
+and the second number in the \(i\)th line is a matching statistics position.
+So for example, the sequence \texttt{gcttgctg} of length 8 is the longest 
+prefix of \texttt{gcttgctgctgca} that occurs as a substring in the index.
+It, for example, occurs at position 88695.
 
-For all short sequence tag in the multiple \Fasta file \texttt{queryfile.fna},
-a line is shown, reporting the number of the unit and the original \Fasta
-header. Also, all for positions \(i\) in \(s\) satisfying 
-\(20\leq \Mup{i}\leq 30\), \(i\) and \(\Mup{i}\) is reported.
-
-The first column is the relative position in the unit sequence (counting
-from 0). The second column shows the length value.
-
-To additionally report the sequence content of the
-minimum unique prefixes we add the keyword \Showoptionkey{sequence} to option
-\Showoption{output}:
+In a second call, we run \Program in \textit{cdiff}-mode:
 
 \begin{Output}
-gt uniquesub -output querypos sequence -min 20 -max 30 
-             -query queryfile.fna -pck human-all
-unit 0 (Mus musculus, chr 1, complete sequence)
-1007 20 ctgacagtttttttttttta
-1010 22 acagttttttttttttacttta
-1011 22 cagttttttttttttactttat
-1012 21 agttttttttttttactttat
-1013 21 gttttttttttttactttata
+gt tagerator -query Q1.gz -pck pck-human -e 2
+# computing complete matches with up to 2 differences
+# indexname(pck)=pck-human
+# queryfile=Q1.gz
+# 15 aagcttgctgctgca
+14 363967
+13 576657
+13 501200
+13 158315
+13 180391
+15 464011
+14 88697
+13 576546
+15 191866
+15 135753
+15 668839
+13 576656
+13 501199
+14 471053
+14 78690
+14 104932
+14 463357
+14 317582
+15 576655
+15 501198
+15 317582
+...
+\end{Output}
+The first line shortly reports the kind of computation performed. The second
+and third line are as in the previous example. Then for
+each tag its length and the tag itself is shown, followed by 
+a block of lines each containing a pair of integers. Each such pair
+reports the length of an approximate match and its start position. For each
+start position only the shortest length is reported. If there are no
+approximate matches, then no such line appears.
+
+Our third example concerns the \textit{pdiff}-mode:
+
+\begin{Output}
+# computing prefix matches with up to 1 differences and at most 5 occurrences in the subject sequences
+# indexname(pck)=pck-human
+# queryfile=Q1.gz
+# 15 aagcttgctgctgca
+8 507736 8
+8 213544 8
+8 289017 8
+9 274066 8
+9 427225 8
+9 632436 9
+9 590998 9
+9 411370 9
+9 281698 9
+9 367734 9
+9 331595 9
+9 342090 9
+8 616567 7
+8 507735 7
+8 591679 7
+9 88694 10
 ...
 \end{Output}
 
-\begin{Output}
-gt matstat -output subjectpos querypos sequence -min 20 -max 30 
-           -query queryfile.fna -pck human-all
-unit 0 (Mus musculus, chr 1, complete sequence)
-22 20 390765125 actgtatctcaaaatataaa
-253 21 258488266 gggaataaacatgtcattgag
-254 20 258488267 ggaataaacatgtcattgag
-275 20 900483549 taattctatttttctttctt
-480 20 1008274536 gcttgaagatcatgatccag
-..
-\end{Output}
-Here, the first column shows the relative positions in unit 0 for which the
-length of the matching statistics is between 20 and 30. The second column is
-the corresponding length value. The third column shows position of the
-matching sequence in the index, and the fourth shows the sequence content.
+The output is similar as in the previous example, except that each match
+is reported by three integers. The first number reports the length of the
+approximate match, the second reports the start position of the approximate
+match and the third reports the length of the prefix of the tag
+involved in the approximate match. Note that in some cases,
+the two length values are different.
 \end{document}

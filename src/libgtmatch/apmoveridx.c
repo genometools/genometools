@@ -196,6 +196,7 @@ static void apm_initMyerscolumn(DECLAREPTRDFSSTATE(aliascolumn),
 }
 
 static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
+                                             UNUSED Seqpos leftbound,
                                              Seqpos width,
                                              UNUSED unsigned long currentdepth,
                                              void *dfsconstinfo)

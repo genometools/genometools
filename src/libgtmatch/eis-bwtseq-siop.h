@@ -269,24 +269,13 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, Seqpos *pos,
 {
   if (iter->nextMatchBWTPos < iter->bounds.end)
   {
-    /* printf("nextMatchBWTPos=%lu\n",(unsigned long) iter->nextMatchBWTPos);*/
+    /*printf("nextMatchBWTPos=%lu\n",(unsigned long) iter->nextMatchBWTPos);*/
     *pos = BWTSeqLocateMatch(bwtSeq, iter->nextMatchBWTPos, &iter->extBits);
     iter->nextMatchBWTPos++;
     return true;
   }
   else
     return false;
-}
-
-static inline Seqpos pckfindfirstmatch(const BWTSeq *bwtSeq,Seqpos lowerbound)
-{
-  struct extBitsRetrieval extBits;
-  Seqpos pos;
-
-  initExtBitsRetrieval(&extBits);
-  pos = BWTSeqLocateMatch(bwtSeq,lowerbound,&extBits);
-  destructExtBitsRetrieval(&extBits);
-  return pos;
 }
 
 #endif

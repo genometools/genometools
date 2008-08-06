@@ -19,11 +19,13 @@
 #define IDX_LIMDFS_H
 
 #include "seqpos-def.h"
+#include "readmode-def.h"
 #include "absdfstrans-def.h"
 
 typedef struct Limdfsresources Limdfsresources;
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
+                                    const Encodedsequence *encseq,
                                     bool withesa,
                                     bool nospecials,
                                     unsigned int mapsize,
@@ -35,15 +37,10 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     void (*processresult)(void *,
                                                           const void *,
                                                           unsigned long,
-                                                          unsigned long),
+                                                          unsigned long,
+                                                          Seqpos),
                                     void *patterninfo,
                                     const AbstractDfstransformer *adfst);
-
-const void *getgenericindexfromresource(const Limdfsresources *limdfsresources);
-
-bool getwithesafromresource(const Limdfsresources *limdfsresources);
-
-Seqpos gettotallengthfromresource(const Limdfsresources *limdfsresources);
 
 void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
                          const AbstractDfstransformer *adfst);
@@ -54,5 +51,24 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      unsigned long maxdistance,
                                      Seqpos maxintervalwidth,
                                      const AbstractDfstransformer *adfst);
+
+unsigned long genericmstats(const Limdfsresources *limdfsresources,
+                            const Uchar *qstart,
+                            const Uchar *qend);
+
+void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
+                                    const Uchar *pattern,
+                                    unsigned long patternlength,
+                                    void (*processmatch)(void *,bool,
+                                                         Seqpos,Seqpos,Seqpos,
+                                                         unsigned long),
+                                    void *processmatchinfo);
+
+Seqpos bound2startpos(const Limdfsresources *limdfsresources,
+                      Seqpos bound,unsigned long matchlength);
+
+Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
+                           Seqpos pos,
+                           Readmode readmode);
 
 #endif

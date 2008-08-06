@@ -35,6 +35,7 @@ typedef struct
   unsigned long patternlength,
                 mstatlength[INTWORDSIZE],
                 *eqsvector;
+  Seqpos mstatwitness[INTWORDSIZE];
 } Matchtaskinfo;
 
 #ifdef SKDEBUG
@@ -103,7 +104,8 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
 static void pms_extractdfsconstinfo(void (*processresult)(void *,
                                                           const void *,
                                                           unsigned long,
-                                                          unsigned long),
+                                                          unsigned long,
+                                                          Seqpos),
                                     void *processinfo,
                                     const void *patterninfo,
                                     void *dfsconstinfo)
@@ -113,7 +115,8 @@ static void pms_extractdfsconstinfo(void (*processresult)(void *,
 
   for (idx=0; idx<mti->patternlength; idx++)
   {
-    processresult(processinfo,patterninfo,idx,mti->mstatlength[idx]);
+    processresult(processinfo,patterninfo,idx,mti->mstatlength[idx],
+                                              mti->mstatwitness[idx]);
   }
 }
 
@@ -181,21 +184,20 @@ static void pms_initParallelmstats(DECLAREPTRDFSSTATE(aliascolumn),
   for (idx = 0; idx<mti->patternlength; idx++)
   {
     mti->mstatlength[idx] = 0;
+    mti->mstatwitness[idx] = 0;
   }
 }
 
 static unsigned long pms_nextstepfullmatches(
                               DECLAREPTRDFSSTATE(aliascolumn),
+                              Seqpos leftbound,
                               UNUSED Seqpos width,
                               unsigned long currentdepth,
                               void *dfsconstinfo)
 {
   Parallelmstats *limdfsstate = (Parallelmstats *) aliascolumn;
 
-  if (limdfsstate->prefixofsuffix == 0)
-  {
-    return 0; /* stop depth first traversal */
-  } else
+  if (limdfsstate->prefixofsuffix > 0)
   {
     Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
     unsigned long bitindex = 0, first1, tmp = limdfsstate->prefixofsuffix;
@@ -205,14 +207,20 @@ static unsigned long pms_nextstepfullmatches(
       assert(bitindex + first1 < mti->patternlength);
       if (mti->mstatlength[bitindex+first1] < currentdepth)
       {
-        /* printf("set mstatlength[%lu]=%lu\n",bitindex+first1,currentdepth);*/
+        /*
+        printf("set mstatlength[%lu]=%lu\n",bitindex+first1,currentdepth);
+        printf("set mstatwitness[%lu]=%lu\n",bitindex+first1,
+                                             (unsigned long) leftbound);
+        */
         mti->mstatlength[bitindex+first1] = currentdepth;
+        mti->mstatwitness[bitindex+first1] = leftbound;
       }
       tmp >>= (first1+1);
       bitindex += (first1+1);
     } while (tmp != 0);
+    return 1UL; /* continue with depth first traversal */
   }
-  return 1UL; /* continue with depth first traversal */
+  return 0; /* stop depth first traversal */
 }
 
 static void pms_nextParallelmstats(const void *dfsconstinfo,
@@ -231,8 +239,14 @@ static void pms_nextParallelmstats(const void *dfsconstinfo,
   assert(ISNOTSPECIAL(currentchar));
   assert(currentdepth > 0);
 
-  outcol->prefixofsuffix = incol->prefixofsuffix &
-                           (mti->eqsvector[currentchar] >> (currentdepth-1));
+  if (currentdepth > 1UL)
+  {
+    outcol->prefixofsuffix = incol->prefixofsuffix &
+                             (mti->eqsvector[currentchar] >> (currentdepth-1));
+  } else
+  {
+    outcol->prefixofsuffix = mti->eqsvector[currentchar];
+  }
 #ifdef SKDEBUG
   uint32_t2string(buffer1,(uint32_t) incol->prefixofsuffix);
   uint32_t2string(buffer2,(uint32_t) outcol->prefixofsuffix);
@@ -248,13 +262,15 @@ static void pms_inplacenextParallelmstats(const void *dfsconstinfo,
 {
 #ifdef SKDEBUG
   char buffer1[32+1], buffer2[32+1];
-#endif
   unsigned long tmp;
+#endif
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Parallelmstats *col = (Parallelmstats *) aliascol;
 
   assert(ISNOTSPECIAL(currentchar));
+#ifdef SKDEBUG
   tmp = col->prefixofsuffix;
+#endif
   col->prefixofsuffix &= (mti->eqsvector[currentchar] >> (currentdepth-1));
 #ifdef SKDEBUG
   uint32_t2string(buffer1,(uint32_t) tmp);
