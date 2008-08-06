@@ -75,7 +75,7 @@ void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr)
   if (!hashtable_get(fi->regions, seqid)) {
     info = ma_malloc(sizeof (RegionInfo));
     info->region = (SequenceRegion*) genome_node_ref((GenomeNode*) sr);
-    info->features = interval_tree_new();
+    info->features = interval_tree_new((FreeFunc) genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     hashtable_add(fi->regions, seqid, info);
@@ -104,9 +104,7 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf)
   info = (RegionInfo*) hashtable_get(fi->regions, seqid);
   /* add node to the appropriate array in the hashtable */
   IntervalTreeNode *new_node = interval_tree_node_new(gn, node_range.start,
-                                                      node_range.end,
-                                                      (FreeFunc)
-                                                        genome_node_rec_delete);
+                                                      node_range.end);
   interval_tree_insert(info->features, new_node);
   /* update dynamic range */
   info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);

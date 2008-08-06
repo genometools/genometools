@@ -34,7 +34,7 @@ Line* line_new(void)
 {
   Line *line;
   line = ma_malloc(sizeof (Line));
-  line->block_tree = interval_tree_new();
+  line->block_tree = interval_tree_new(NULL);
   line->blocks = array_new(sizeof (Block*));
   line->has_captions = false;
   return line;
@@ -48,7 +48,7 @@ void line_insert_block(Line *line, Block *block)
   if (!line->has_captions && block_get_caption(block) != NULL)
     line->has_captions = true;
   rng = block_get_range_ptr(block);
-  new_node = interval_tree_node_new(rng, rng->start, rng->end, NULL);
+  new_node = interval_tree_node_new(rng, rng->start, rng->end);
   interval_tree_insert(line->block_tree, new_node);
   array_add(line->blocks, block);
 }

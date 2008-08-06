@@ -32,38 +32,33 @@ typedef enum IntervalTreeNodeColor {
 struct IntervalTree {
   IntervalTreeNode *root;
   unsigned long size;
+  FreeFunc free_func;
 };
 
 struct IntervalTreeNode {
-  IntervalTreeNode *parent;
-  IntervalTreeNode *left;
-  IntervalTreeNode *right;
-  FreeFunc free_func;
+  IntervalTreeNode *parent, *left, *right;
   void *data;
   IntervalTreeNodeColor color;
-  unsigned long low;
-  unsigned long high;
-  unsigned long max;
+  unsigned long low, high, max;
 };
 
 IntervalTreeNode* interval_tree_node_new(void *data,
                                          unsigned long low,
-                                         unsigned long high,
-                                         FreeFunc free_func)
+                                         unsigned long high)
 {
   IntervalTreeNode* n;
   n = ma_calloc(1, sizeof (IntervalTreeNode));
   n->low = low;
   n->high = high;
   n->data = data;
-  n->free_func = free_func;
   return n;
 }
 
-IntervalTree* interval_tree_new(void)
+IntervalTree* interval_tree_new(FreeFunc func)
 {
   IntervalTree *it;
   it = ma_calloc(1, sizeof (IntervalTree));
+  it->free_func = func;
   return it;
 }
 
@@ -79,20 +74,20 @@ void* interval_tree_node_get_data(IntervalTreeNode *n)
   return n->data;
 }
 
-void interval_tree_node_delete(IntervalTreeNode *n)
+void interval_tree_node_delete(IntervalTree *it, IntervalTreeNode *n)
 {
   if (!n) return;
-  if (n->data && n->free_func)
-    n->free_func(n->data);
+  if (n->data && it->free_func)
+    it->free_func(n->data);
   ma_free(n);
 }
 
-static void interval_tree_node_rec_delete(IntervalTreeNode *n)
+static void interval_tree_node_rec_delete(IntervalTree *it, IntervalTreeNode *n)
 {
   if (!n) return;
-  interval_tree_node_rec_delete(n->left);
-  interval_tree_node_rec_delete(n->right);
-  interval_tree_node_delete(n);
+  interval_tree_node_rec_delete(it, n->left);
+  interval_tree_node_rec_delete(it, n->right);
+  interval_tree_node_delete(it, n);
 }
 
 static IntervalTreeNode* interval_tree_search_internal(IntervalTreeNode *node,
@@ -331,7 +326,7 @@ void interval_tree_insert(IntervalTree *it, IntervalTreeNode *n)
 void interval_tree_delete(IntervalTree *it)
 {
   if (!it) return;
-  interval_tree_node_rec_delete(it->root);
+  interval_tree_node_rec_delete(it, it->root);
   ma_free(it);
 }
 
@@ -381,7 +376,7 @@ int interval_tree_unit_test(UNUSED Error *err)
     array_add(arr, rng);
   }
 
-  it = interval_tree_new();
+  it = interval_tree_new(ma_free_func);
 
   /* insert ranges */
   for (i = 0; i < num_testranges && !had_err; i++)
@@ -389,7 +384,7 @@ int interval_tree_unit_test(UNUSED Error *err)
     IntervalTreeNode *new_node;
     Range *rng;
     rng = *(Range**) array_get(arr, i);
-    new_node = interval_tree_node_new(rng, rng->start, rng->end, ma_free_func);
+    new_node = interval_tree_node_new(rng, rng->start, rng->end);
     interval_tree_insert(it, new_node);
   }
 

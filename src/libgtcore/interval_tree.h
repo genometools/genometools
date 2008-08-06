@@ -35,11 +35,10 @@ typedef int (*IntervalTreeIteratorFunc)(IntervalTreeNode*, void*);
    if IntervalTreeDataFreeFunc is given */
 IntervalTreeNode* interval_tree_node_new(void *data,
                                          unsigned long low,
-                                         unsigned long high,
-                                         FreeFunc);
+                                         unsigned long high);
 void*             interval_tree_node_get_data(IntervalTreeNode* n);
 
-IntervalTree*     interval_tree_new(void);
+IntervalTree*     interval_tree_new(FreeFunc);
 unsigned long     interval_tree_size(IntervalTree*);
 IntervalTreeNode* interval_tree_find_first_overlapping(IntervalTree*,
                                                        unsigned long start,
