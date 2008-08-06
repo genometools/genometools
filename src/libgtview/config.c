@@ -144,20 +144,19 @@ static int config_find_section_for_getting(const Config *cfg,
   return depth;
 }
 
-Color config_get_color(const Config *cfg, const char *section,
-                       const char *key)
+bool config_get_color(const Config *cfg, const char *section,
+                      const char *key, Color *color)
 {
-  Color color;
   int i = 0;
-  assert(cfg && key);
+  assert(cfg && key && color);
   /* set default colors */
-  color.red=0.5; color.green = 0.5; color.blue=0.5;
+  color->red=0.5; color->green = 0.5; color->blue=0.5;
   /* get section */
   i = config_find_section_for_getting(cfg, section);
   /* could not get section, return default */
   if (i < 0) {
     lua_pop(cfg->L, i);
-    return color;
+    return false;
   }
   /* lookup color entry for given feature */
   lua_getfield(cfg->L, -1, key);
@@ -166,7 +165,7 @@ Color config_get_color(const Config *cfg, const char *section,
                                "will use defaults.",
                                key);
     lua_pop(cfg->L, 3);
-    return color;
+    return false;
   } else i++;
   /* update color struct */
   lua_getfield(cfg->L, -1, "red");
@@ -175,7 +174,7 @@ Color config_get_color(const Config *cfg, const char *section,
                                " not numeric, using default","red", key);
   }
   else
-    color.red = lua_tonumber(cfg->L,-1);
+    color->red = lua_tonumber(cfg->L,-1);
   lua_pop(cfg->L, 1);
   lua_getfield(cfg->L, -1, "green");
   if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1)) {
@@ -183,7 +182,7 @@ Color config_get_color(const Config *cfg, const char *section,
                                " not numeric, using default","green", key);
   }
   else
-    color.green = lua_tonumber(cfg->L,-1);
+    color->green = lua_tonumber(cfg->L,-1);
   lua_pop(cfg->L, 1);
   lua_getfield(cfg->L, -1, "blue");
   if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1)) {
@@ -191,25 +190,18 @@ Color config_get_color(const Config *cfg, const char *section,
                                " not numeric, using default","blue", key);
   }
   else
-    color.blue = lua_tonumber(cfg->L,-1);
+    color->blue = lua_tonumber(cfg->L,-1);
   lua_pop(cfg->L, 1);
   /* reset stack to original state for subsequent calls */
   lua_pop(cfg->L, i);
-  return color;
-}
-
-void config_get_colorptr(const Config *cfg, Color *color, const char *section,
-                         const char *key)
-{
-  assert(cfg && color && key);
-  *color = config_get_color(cfg, section, key);
+  return true;
 }
 
 void config_set_color(Config *cfg, const char *section, const char *key,
                       Color *color)
 {
   int i = 0;
-  assert(cfg && key);
+  assert(cfg && key && color);
   i = config_find_section_for_setting(cfg, section);
   lua_getfield(cfg->L, -1, key);
   i++;
@@ -230,10 +222,9 @@ void config_set_color(Config *cfg, const char *section, const char *key,
   lua_pop(cfg->L, i);
 }
 
-const char* config_get_cstr(const Config *cfg, const char *section,
-                            const char *key, const char *deflt)
+bool config_get_str(const Config *cfg, const char *section,
+                     const char *key, Str *text)
 {
-  const char *str = deflt;
   int i = 0;
   assert(cfg && key && section);
   /* get section */
@@ -241,7 +232,7 @@ const char* config_get_cstr(const Config *cfg, const char *section,
   /* could not get section, return default */
   if (i < 0) {
     lua_pop(cfg->L, i);
-    return deflt;
+    return false;
   }
   /* lookup entry for given key */
   lua_getfield(cfg->L, -1, key);
@@ -249,39 +240,38 @@ const char* config_get_cstr(const Config *cfg, const char *section,
     if (cfg->verbose) warning("no value is defined for key '%s'",
                                key);
     lua_pop(cfg->L, i+1);
-    return deflt;
+    return false;
   } else i++;
   /* retrieve string */
-  str = lua_tostring(cfg->L, -1);
+  str_set(text, lua_tostring(cfg->L, -1));
   /* reset stack to original state for subsequent calls */
   lua_pop(cfg->L, i);
-  return str;
+  return true;
 }
 
-void config_set_cstr(Config *cfg, const char *section, const char *key,
-                     const char *str)
+void config_set_str(Config *cfg, const char *section, const char *key,
+                     Str *str)
 {
   int i = 0;
-  assert(cfg && section && key);
+  assert(cfg && section && key && str);
   i = config_find_section_for_setting(cfg, section);
   lua_pushstring(cfg->L, key);
-  lua_pushstring(cfg->L, str);
+  lua_pushstring(cfg->L, str_get(str));
   lua_settable(cfg->L, -3);
   lua_pop(cfg->L, i);
 }
 
-double config_get_num(const Config *cfg, const char *section, const char *key,
-                      double deflt)
+bool config_get_num(const Config *cfg, const char *section, const char *key,
+                    double *val)
 {
-  double num = deflt;
   int i = 0;
-  assert(cfg && key && section);
+  assert(cfg && key && section && val);
   /* get section */
   i = config_find_section_for_getting(cfg, section);
   /* could not get section, return default */
   if (i < 0) {
     lua_pop(cfg->L, i);
-    return deflt;
+    return false;
   }
   /* lookup entry for given key */
   lua_getfield(cfg->L, -1, key);
@@ -289,41 +279,13 @@ double config_get_num(const Config *cfg, const char *section, const char *key,
     if (cfg->verbose) warning("no or non-numeric value found for key '%s'",
                               key);
     lua_pop(cfg->L, i+1);
-    return deflt;
+    return false;
   } else i++;
   /* retrieve value */
-  num = lua_tonumber(cfg->L, -1);
+  *val = lua_tonumber(cfg->L, -1);
   /* reset stack to original state for subsequent calls */
   lua_pop(cfg->L, i);
-  return num;
-}
-
-unsigned long config_get_long(const Config *cfg, const char *section,
-                             const char *key, unsigned long deflt)
-{
-  unsigned long num = deflt;
-  int i = 0;
-  assert(cfg && key && section);
-  /* get section */
-  i = config_find_section_for_getting(cfg, section);
-  /* could not get section, return default */
-  if (i < 0) {
-    lua_pop(cfg->L, i);
-    return deflt;
-  }
-  /* lookup entry for given key */
-  lua_getfield(cfg->L, -1, key);
-  if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1)) {
-    if (cfg->verbose) warning("no or non-numeric value found for key '%s'",
-                              key);
-    lua_pop(cfg->L, i+1);
-    return deflt;
-  } else i++;
-  /* retrieve value */
-  num = lua_tonumber(cfg->L, -1);
-  /* reset stack to original state for subsequent calls */
-  lua_pop(cfg->L, i);
-  return num;
+  return true;
 }
 
 void config_set_num(Config *cfg, const char *section, const char *key,
@@ -338,22 +300,9 @@ void config_set_num(Config *cfg, const char *section, const char *key,
   lua_pop(cfg->L, i);
 }
 
-void config_set_long(Config *cfg, const char *section, const char *key,
-                     unsigned long number)
-{
-  int i = 0;
-  assert(cfg && section && key);
-  i = config_find_section_for_setting(cfg, section);
-  lua_pushstring(cfg->L, key);
-  lua_pushnumber(cfg->L, number);
-  lua_settable(cfg->L, -3);
-  lua_pop(cfg->L, i);
-}
-
 bool config_get_bool(const Config *cfg, const char *section, const char *key,
-                     double deflt)
+                     bool *val)
 {
-  bool ret = deflt;
   int i = 0;
   assert(cfg && key && section);
   /* get section */
@@ -361,7 +310,7 @@ bool config_get_bool(const Config *cfg, const char *section, const char *key,
   /* could not get section, return default */
   if (i < 0) {
     lua_pop(cfg->L, i);
-    return deflt;
+    return false;
   }
   /* lookup entry for given key */
   lua_getfield(cfg->L, -1, key);
@@ -369,13 +318,13 @@ bool config_get_bool(const Config *cfg, const char *section, const char *key,
     if (cfg->verbose) warning("no or non-boolean value found for key '%s'",
                               key);
     lua_pop(cfg->L, i+1);
-    return deflt;
+    return false;
   } else i++;
   /* retrieve value */
-  ret = lua_toboolean(cfg->L, -1);
+  *val = lua_toboolean(cfg->L, -1);
   /* reset stack to original state for subsequent calls */
   lua_pop(cfg->L, i);
-  return ret;
+  return true;
 }
 
 void config_set_bool(Config *cfg, const char *section, const char *key,
@@ -390,12 +339,11 @@ void config_set_bool(Config *cfg, const char *section, const char *key,
   lua_pop(cfg->L, i);
 }
 
-StrArray* config_get_cstr_list(const Config *cfg, const char *section,
-                               const char *key)
+bool config_get_cstr_list(const Config *cfg, const char *section,
+                          const char *key, StrArray *arr)
 {
-  StrArray *list = NULL;
   int i, had_err = 0;
-  assert(cfg && section && key);
+  assert(cfg && section && key && arr);
   i = config_find_section_for_getting(cfg, section);
   if (i < 0)
     had_err = -1;
@@ -408,23 +356,21 @@ StrArray* config_get_cstr_list(const Config *cfg, const char *section,
   /* build list */
   if (!had_err) {
     lua_Integer i = 0;
-    list = strarray_new();
     for (;;) {
       lua_pushinteger(cfg->L, ++i);
       lua_gettable(cfg->L, -2);
       if (lua_isnil(cfg->L, -1))
         break;
       if (lua_isstring(cfg->L, -1))
-        strarray_add_cstr(list, lua_tostring(cfg->L, -1));
+        strarray_add_cstr(arr, lua_tostring(cfg->L, -1));
       lua_pop(cfg->L, 1);
     }
   }
   /* return result */
   if (had_err) {
-    strarray_delete(list);
-    return NULL;
+    return false;
   }
-  return list;
+  return true;
 }
 
 void config_set_cstr_list(Config *cfg,  const char *section, const char *key,
@@ -517,10 +463,10 @@ int config_unit_test(Error *err)
 {
   int had_err = 0;
   Config *cfg;
-  const char* test1 = "mRNA";
-  const char* str = NULL;
   bool val;
-  Str *luafile = str_new_cstr("config.lua");
+  Str *luafile = str_new_cstr("config.lua"),
+      *test1   = str_new_cstr("mRNA"),
+      *str     = str_new();
   Color col1, col2, col, defcol, tmpcol;
   double num;
   error_check(err);
@@ -536,48 +482,55 @@ int config_unit_test(Error *err)
     had_err = -1;
 
   /* at the beginning, all values are defaults, since nothing is defined */
-  tmpcol = config_get_color(cfg, "exon", "fill");
+  config_get_color(cfg, "exon", "fill", &tmpcol);
   ensure(had_err, color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "cds", "fill");
+  config_get_color(cfg, "cds", "fill", &tmpcol);
   ensure(had_err, color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "foo", "fill");
+  config_get_color(cfg, "foo", "fill", &tmpcol);
   ensure(had_err, color_equals(tmpcol,defcol));
-  num = config_get_num(cfg,"format", "margins", 10.0);
+  if (!config_get_num(cfg, "format", "margins", &num))
+    num = 10.0;
   ensure(had_err, num == 10.0);
-  val = config_get_bool(cfg, "exon", "collapse_to_parent", false);
+  if (!config_get_bool(cfg, "exon", "collapse_to_parent", &val))
+    val = false;
   ensure(had_err, !val);
 
   /* change some values... */
   config_set_color(cfg, "exon", "fill", &col);
-  config_set_num(cfg,"format", "margins", 11.0);
-  config_set_num(cfg,"format", "foo", 2.0);
+  config_set_num(cfg, "format", "margins", 11.0);
+  config_set_num(cfg, "format", "foo", 2.0);
 
   /* is it saved correctly? */
-  tmpcol = config_get_color(cfg, "exon", "fill");
+  config_get_color(cfg, "exon", "fill", &tmpcol);
   ensure(had_err, !color_equals(tmpcol,defcol));
   ensure(had_err, color_equals(tmpcol,col));
-  num = config_get_num(cfg,"format", "margins", 10.0);
+  if (!config_get_num(cfg, "format", "margins", &num))
+    num = 10.0;
   ensure(had_err, num == 11.0);
-  num = config_get_num(cfg,"format", "foo", 10.0);
+  if (!config_get_num(cfg, "format", "foo", &num))
+    num = 2.0;
   ensure(had_err, num == 2.0);
 
   /* create a new color definition */
   config_set_color(cfg, "foo", "fill", &col);
-  config_set_cstr(cfg, "bar", "baz", test1);
+  config_set_str(cfg, "bar", "baz", test1);
 
   /* is it saved correctly? */
-  tmpcol = config_get_color(cfg, "foo", "fill");
+  config_get_color(cfg, "foo", "fill", &tmpcol);
   ensure(had_err, !color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "foo", "fill");
   ensure(had_err, color_equals(tmpcol,col));
-  str = config_get_cstr(cfg, "bar", "baz", "");
-  ensure(had_err, (strcmp(str,"")!=0));
-  ensure(had_err, (strcmp(str,test1)==0));
-  str = config_get_cstr(cfg, "bar", "test", "");
-  ensure(had_err, (strcmp(str,"")==0));
+  if (!config_get_str(cfg, "bar", "baz", str))
+    str_set(str, "");
+  ensure(had_err, (strcmp(str_get(str),"")!=0));
+  ensure(had_err, (str_cmp(str,test1)==0));
+  if (!config_get_str(cfg, "bar", "test", str))
+    str_set(str, "");
+  ensure(had_err, (strcmp(str_get(str),"")==0));
 
   /* mem cleanup */
   str_delete(luafile);
+  str_delete(test1);
+  str_delete(str);
   config_delete(cfg);
 
   return had_err;

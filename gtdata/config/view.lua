@@ -221,7 +221,7 @@ config =
     arrow_width = 6,   -- width of feature arrowheads, in pixels
     stroke_width = .5, -- width of outlines, in pixels
     stroke_marked_width = 1.5, -- width of outlines for marked elements, in pixels
-    show_grid = "yes", -- shows light vertical lines for orientation
+    show_grid = true, -- shows light vertical lines for orientation
     min_len_block = 40, -- minimum length of a block in which single elements are shown
     track_title_color     = {red=0.7, green=0.7, blue=0.7},
     default_stroke_color  = {red=0.1, green=0.1, blue=0.1},

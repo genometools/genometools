@@ -50,52 +50,42 @@ Config*        config_new_with_state(lua_State*);
 int            config_load_file(Config*, Str *filename, Error*);
 /* Reload the Lua configuration file. */
 void           config_reload(Config*);
-/* Retrieve a color value from the configuration for <key> (i.e., feature). */
-Color          config_get_color(const Config*, const char *section,
-                                const char *key);
-/* Similar to previous function. Necessary for Ruby bindings, because
-   apparently 'dl/import' cannot handle returned structs. */
-void           config_get_colorptr(const Config*, Color*, const char *section,
-                                   const char *key);
+/* Retrieve a color value from the configuration for <key> (i.e., feature).
+   If not set, false is returned and a default color is written. */
+bool           config_get_color(const Config*, const char *section,
+                                const char *key, Color*);
 /* Sets a color value in the configuration for <key> (i.e., feature) to a
    certain value. */
 void           config_set_color(Config*, const char *section,
                                 const char *key, Color*);
 /* Retrieve string value of <key> in <section>.
-   If not set, <deflt> is returned. */
-const char*    config_get_cstr(const Config*, const char *section,
-                               const char *key, const char *deflt);
+   If not set, false is returned. */
+bool           config_get_str(const Config*, const char *section,
+                               const char *key, Str*);
 /* Set string <key> in <section> to <value>. */
-void           config_set_cstr(Config*, const char *section, const char *key,
-                               const char *value);
+void           config_set_str(Config*, const char *section, const char *key,
+                               Str *value);
 /* Retrieve numeric value of <key> in <section>.
-   If not set, <deflt> is returned.*/
-double         config_get_num(const Config*, const char *section,
-                              const char *key, double deflt);
+   If not set, false is returned.*/
+bool           config_get_num(const Config*, const char *section,
+                              const char *key, double*);
 /* Set numeric value of <key> in <section> to <number>. */
 void           config_set_num(Config*, const char *section, const char *key,
                               double number);
-/* Retrieve long numeric value of <key> in <section>.
-   If not set, <deflt> is returned.*/
-unsigned long  config_get_long(const Config*, const char *section,
-                              const char *key, unsigned long deflt);
-/* Set long numeric value of <key> in <section> to <number>. */
-void           config_set_long(Config*, const char *section, const char *key,
-                              unsigned long number);
 /* Retrieve boolean value of <key> in <section>.
    If not set, <deflt> is returned.*/
 bool           config_get_bool(const Config*, const char *section,
-                               const char *key, double deflt);
+                               const char *key, bool*);
 /* Set boolean value of <key> in <section> to <number>. */
 void           config_set_bool(Config*, const char *section, const char *key,
-                               bool flag);
+                               bool);
 /* Retrieve a list of string (as StrArray) for <key> in <section>, returns NULL
    on error. */
-StrArray*      config_get_cstr_list(const Config*, const char *section,
-                                    const char *key);
+bool           config_get_cstr_list(const Config*, const char *section,
+                                    const char *key, StrArray*);
 /* Set <key> in <section> to <list> of strings. */
 void           config_set_cstr_list(Config*, const char *section,
-                                    const char *key, StrArray *list);
+                                    const char *key, StrArray*);
 /* Check if <checkstr> appears in list of strings named <key> in <section>. */
 bool           config_cstr_in_list(const Config*, const char *section,
                                    const char *key, const char *checkstr);

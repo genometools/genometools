@@ -131,9 +131,13 @@ static bool get_caption_display_status(Diagram *d, GenomeFeatureType *gft)
   if (!status)
   {
     unsigned long threshold;
+    double tmp;
     status = ma_malloc(sizeof (bool*));
-    threshold = config_get_long(d->config, genome_feature_type_get_cstr(gft),
-                                "max_capt_show_width", UNDEF_ULONG);
+    if (config_get_num(d->config, genome_feature_type_get_cstr(gft),
+                       "max_capt_show_width", &tmp))
+      threshold = tmp;
+    else
+      threshold = UNDEF_ULONG;
     if (threshold == UNDEF_ULONG)
       *status = true;
     else
@@ -297,6 +301,7 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
   Range elem_range;
   bool *collapse, do_not_overlap=false;
   const char *feature_type = NULL, *parent_gft = NULL;
+  double tmp;
   unsigned long max_show_width = UNDEF_ULONG,
                 par_max_show_width = UNDEF_ULONG;
 
@@ -313,11 +318,20 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
   if (!range_overlap(d->range, elem_range))
     return;
 
-  max_show_width = config_get_long(d->config, feature_type, "max_show_width",
-                                  UNDEF_ULONG);
+  /* get maximal view widths in nucleotides to show this type */
+  if (config_get_num(d->config, feature_type, "max_show_width", &tmp))
+    max_show_width = tmp;
+  else
+    max_show_width = UNDEF_ULONG;
   if (parent)
-    par_max_show_width = config_get_long(d->config, parent_gft,
-                                         "max_show_width", UNDEF_ULONG);
+  {
+    if (config_get_num(d->config, parent_gft, "max_show_width", &tmp))
+    par_max_show_width = tmp;
+  else
+    par_max_show_width = UNDEF_ULONG;
+
+  }
+  /* check if this type is to be displayed */
   if (max_show_width != UNDEF_ULONG && range_length(d->range) > max_show_width)
     return;
   if (parent && par_max_show_width != UNDEF_ULONG
@@ -329,8 +343,9 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
                                         feature_type)) == NULL)
   {
     collapse = ma_malloc(sizeof (bool));
-    *collapse = config_get_bool(d->config, feature_type,
-                                "collapse_to_parent", 0);
+    if(!config_get_bool(d->config, feature_type, "collapse_to_parent",
+                        collapse))
+      *collapse = false;
     hashtable_add(d->collapsingtypes, (char*) feature_type, collapse);
   }
 
@@ -437,11 +452,15 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
 
     if (track == NULL) {
       const char* type = genome_feature_type_get_cstr(bt->gft);
-      bool split = config_get_bool(diagram->config, type,
-                                   "split_lines", true);
+      bool split;
+      double max;
+
+      if (!config_get_bool(diagram->config, type, "split_lines", &split))
+        split = true;
+      if (!config_get_num(diagram->config, type, "max_num_lines", &max))
+        max = UNDEF_ULONG;
       track = track_new(track_key,
-                        config_get_long(diagram->config, type,
-                                       "max_num_lines", UNDEF_ULONG),
+                        max,
                         split);
       hashtable_add(diagram->tracks, cstr_dup(str_get(track_key)), track);
       diagram->nof_tracks++;

@@ -23,25 +23,30 @@ require 'libgtview/color'
 module GT
   extend DL::Importable
   gtdlload "libgt"
+
+  DoubleArg = struct [
+    "double val"
+  ]
+
   typealias "bool", "ibool"
   extern "Config* config_new(bool, Error*)"
   extern "int config_load_file(Config*, Str*, Error*)"
-  extern "void config_get_colorptr(Config*, Color*, const char*, const char*)"
+  extern "void config_get_color(Config*, const char*, const char*, Color*)"
   extern "void config_set_color(Config*, const char*, const char*, Color*)"
-  extern "const char* config_get_cstr(const Config*, const char*, " +
-                                     "const char*, const char*)"
-  extern "void config_set_cstr(const Config*, const char*, " +
-                              "const char*, const char*)"
-  extern "double config_get_num(const Config*, const char*, " +
-                               "const char*, double)"
+  extern "bool config_get_str(const Config*, const char*, " +
+                             "const char*, Str*)"
+  extern "void config_set_str(const Config*, const char*, " +
+                             "const char*, Str*)"
+  extern "bool config_get_num(const Config*, const char*, " +
+                             "const char*, double*)"
   extern "void config_set_num(const Config*, const char*, " +
                              "const char*, double)"
   extern "bool config_get_bool(const Config*, const char*, " +
-                               "const char*, bool)"
+                               "const char*, bool*)"
   extern "void config_set_bool(const Config*, const char*, " +
-                             "const char*, bool)"
-  extern "StrArray* config_get_cstr_list(const Config*, const char*, " +
-                                        "const char*)"
+                              "const char*, bool*)"
+  extern "bool config_get_cstr_list(const Config*, const char*, " +
+                                   "const char*, StrArray*)"
   extern "void config_set_cstr_list(const Config*, const char*, " +
                                    "const char*, StrArray*)"
   extern "void config_delete(Config*)"
@@ -64,7 +69,7 @@ module GT
 
     def get_color(section, key)
       color = GT::Color.malloc
-      GT.config_get_colorptr(@config, color, section, key)
+      GT.config_get_color(@config, section, key, color)
       color
     end
 
@@ -73,15 +78,26 @@ module GT
     end
 
     def get_cstr(section, key)
-      GT.config_get_cstr(@config, section, key, "undefined")
+      str = GT::Str.new(nil)
+      if GT.config_get_str(@config, section, key, str)
+        str.to_s
+      else
+        "undefined"
+      end
     end
 
     def set_cstr(section, key, value)
-      GT.config_set_cstr(@config, section, key, value)
+      str = GT::Str.new(value)
+      GT.config_set_str(@config, section, key, str)
     end
 
     def get_num(section, key)
-      GT.config_get_num(@config, section, key, -9999.9)
+      double = DoubleArg.malloc
+      if GT.config_get_num(@config, section, key, double)
+        double.val
+      else
+        -9999.99
+      end
     end
 
     def set_num(section, key, number)
@@ -89,7 +105,9 @@ module GT
     end
 
     def get_bool(section, key)
-      GT.config_get_num(@config, section, key, false)
+      ret = false
+      GT.config_get_num(@config, section, key, ret)
+      ret
     end
 
     def set_bool(section, key, val)
@@ -97,8 +115,9 @@ module GT
     end
 
     def get_cstr_list(section, key)
-      strarray = GT.config_get_cstr_list(@config, section, key)
-      if strarray then GT::StrArray.new(strarray) else nil end
+      strarr = GT::StrArray.new()
+      GT.config_get_cstr_list(@config, section, key, strarr.strarray)
+      strarr.to_a
     end
 
     def set_cstr_list(section, key, list)

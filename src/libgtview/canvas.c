@@ -57,6 +57,7 @@ typedef struct
 static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
 {
   TracklineInfo lines;
+  double tmp;
   unsigned long height;
   unsigned long line_height;
   assert(dia && canvas);
@@ -66,21 +67,25 @@ static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
   diagram_get_lineinfo(dia, &lines);
 
   /* obtain line height and spacer from configuration settings */
-  line_height = ((unsigned long) config_get_num(canvas->cfg,
-                                               "format",
-                                               "bar_height",
-                                               15)) +
-                ((unsigned long) config_get_num(canvas->cfg,
-                                               "format",
-                                               "bar_vspace",
-                                               10));
+  if (config_get_num(canvas->cfg, "format", "bar_height", &tmp))
+    line_height = tmp;
+  else
+    line_height = 15;
+  if (config_get_num(canvas->cfg, "format", "bar_vspace", &tmp))
+    line_height += tmp;
+  else
+    line_height += 10;
 
   /* get total height of all lines */
   height  = lines.total_lines * line_height;
   height += lines.total_captionlines * 15;
   /* add track caption height and spacer */
-  height += diagram_get_number_of_tracks(dia)
-            * ((config_get_num(canvas->cfg, "format","track_vspace", 20))+15);
+  if (config_get_num(canvas->cfg, "format","track_vspace", &tmp))
+    height += diagram_get_number_of_tracks(dia) * tmp;
+  else
+    height += diagram_get_number_of_tracks(dia) * 20;
+  height += 15;
+
   /* add header space and footer */
   height += 70 + 20;
   if (config_get_verbose(canvas->cfg))
@@ -92,7 +97,7 @@ static double convert_point(Canvas *canvas, long pos)
 {
   return (double) ((canvas->factor *
                       MAX(0,(pos-(long) canvas->viewrange.start)))
-                      + config_get_num(canvas->cfg, "format", "margins", 10));
+                      + canvas->margins);
 }
 
 /* Converts base range <node_range> into a pixel range.
@@ -158,12 +163,17 @@ static void draw_ruler(Canvas *canvas)
   long base_length, tick;
   Color rulercol, gridcol;
   char str[BUFSIZ];
+  bool showgrid;
 
   assert(canvas);
 
+  margins = canvas->margins;
+
+  if(!(config_get_bool(canvas->cfg, "format","show_grid", &showgrid)))
+    showgrid = true;
+
   rulercol.red = rulercol.green = rulercol.blue = .2;
   gridcol.red = gridcol.green = gridcol.blue = .9;
-  margins = config_get_num(canvas->cfg, "format", "margins", 10);
 
   /* determine range and step of the scale */
   base_length = range_length(canvas->viewrange);
@@ -197,8 +207,7 @@ static void draw_ruler(Canvas *canvas)
     for (tick = vminor; tick <= canvas->viewrange.end; tick += minorstep)
     {
       if (tick < canvas->viewrange.start) continue;
-      if (strcmp(config_get_cstr(canvas->cfg, "format","show_grid", "no"),
-                 "yes") == 0)
+      if (showgrid)
       {
         graphics_draw_vertical_line(canvas->g,
                                     convert_point(canvas, tick),
@@ -217,9 +226,7 @@ static void draw_ruler(Canvas *canvas)
   graphics_draw_horizontal_line(canvas->g,
                                 canvas->margins,
                                 40,
-                                canvas->width-2*config_get_num(canvas->cfg,
-                                                       "format",
-                                                       "margins", 10));
+                                canvas->width-2*margins);
   /* put 3' and 5' captions at the ends */
   graphics_draw_text_centered(canvas->g,
                               canvas->margins-10,
@@ -302,10 +309,15 @@ unsigned long canvas_get_height(Canvas *canvas)
 int canvas_visit_diagram(Canvas *canvas, Diagram *dia)
 {
   int had_err = 0;
+  double margins;
 
   assert(canvas && dia);
 
-  canvas->margins = config_get_num(canvas->cfg, "format", "margins", 10);
+  if (config_get_num(canvas->cfg, "format", "margins", &margins))
+    canvas->margins = margins;
+  else
+    canvas->margins = 10;
+
 
   /* set initial image-specific values */
   canvas->y = 70;
@@ -335,8 +347,11 @@ int canvas_visit_diagram(Canvas *canvas, Diagram *dia)
 int canvas_visit_track_pre(Canvas *canvas, Track *track)
 {
   int had_err = 0;
+  Color color;
 
   assert(canvas && track);
+
+  config_get_color(canvas->cfg, "format", "track_title_color", &color);
 
   /* debug */
   if (config_get_verbose(canvas->cfg))
@@ -344,12 +359,9 @@ int canvas_visit_track_pre(Canvas *canvas, Track *track)
 
   /* draw track title */
   graphics_draw_colored_text(canvas->g,
-                             config_get_num(canvas->cfg,
-                                            "format", "margins", 10),
+                             canvas->margins,
                              canvas->y,
-                             config_get_color(canvas->cfg,
-                                              "format",
-                                              "track_title_color"),
+                             color,
                              str_get(track_get_title(track)));
   canvas->y += 15;
 
@@ -358,9 +370,13 @@ int canvas_visit_track_pre(Canvas *canvas, Track *track)
 
 int canvas_visit_track_post(Canvas *canvas, Track *track)
 {
+  double vspace;
   assert(canvas && track);
   /* put track spacer after track, except if at last track */
-  canvas->y += config_get_num(canvas->cfg, "format", "track_vspace", 20);
+  if (config_get_num(canvas->cfg, "format", "track_vspace", &vspace))
+    canvas->y += vspace;
+  else
+    canvas->y += 20;
   return 0;
 }
 
@@ -380,10 +396,16 @@ int canvas_visit_line_pre(Canvas *canvas, Line *line)
 int canvas_visit_line_post(Canvas *canvas, Line *line)
 {
   int had_err = 0;
+  double tmp;
   assert(canvas && line);
-  canvas->y += config_get_num(canvas->cfg, "format", "bar_height", 15) +
-               config_get_num(canvas->cfg, "format", "bar_vspace", 10);
-
+  if (config_get_num(canvas->cfg, "format", "bar_height", &tmp))
+    canvas->y += tmp;
+  else
+    canvas->y += 15;
+  if (config_get_num(canvas->cfg, "format", "bar_vspace", &tmp))
+    canvas->y += tmp;
+  else
+    canvas->y += 10;
   bittab_delete(canvas->bt);
   canvas->bt = NULL;
   return had_err;
@@ -392,17 +414,26 @@ int canvas_visit_line_post(Canvas *canvas, Line *line)
 int canvas_visit_block(Canvas *canvas, Block *block)
 {
   int had_err = 0, arrow_status = ARROW_NONE;
-  Range block_range = block_get_range(block);
+  Range block_range;
   DrawingRange draw_range;
-  Color grey;
-  double bar_height = config_get_num(canvas->cfg, "format", "bar_height", 15),
-         min_len_block = config_get_num(canvas->cfg,
-                                        "format", "min_len_block", 40);
+  Color grey, fillcolor, strokecolor;
+  double bar_height, min_len_block, arrow_width, stroke_width;
   const char* caption;
-  Strand strand = block_get_strand(block);
-  grey.red = grey.green = grey.blue = .85;
+  Strand strand;
 
   assert(canvas && block);
+
+  grey.red = grey.green = grey.blue = .85;
+  strand = block_get_strand(block);
+  block_range = block_get_range(block);
+  if(!config_get_num(canvas->cfg, "format", "bar_height", &bar_height))
+    bar_height = 15;
+  if(!config_get_num(canvas->cfg, "format", "min_len_block", &min_len_block))
+    min_len_block = 40;
+  if(!config_get_num(canvas->cfg, "format", "arrow_width", &arrow_width))
+    arrow_width = 6;
+  if(!config_get_num(canvas->cfg, "format", "stroke_width", &stroke_width))
+    stroke_width = 0.6;
 
   if (strand == STRAND_REVERSE || strand == STRAND_BOTH)
     arrow_status = ARROW_LEFT;
@@ -427,20 +458,20 @@ int canvas_visit_block(Canvas *canvas, Block *block)
        && draw_range.end-draw_range.start < min_len_block)
   {
     GenomeFeatureType *btype = block_get_type(block);
+    config_get_color(canvas->cfg, genome_feature_type_get_cstr(btype),
+                           "fill", &fillcolor);
+    config_get_color(canvas->cfg, genome_feature_type_get_cstr(btype),
+                           "stroke", &strokecolor);
     graphics_draw_box(canvas->g,
                       draw_range.start,
                       canvas->y,
                       draw_range.end-draw_range.start+1,
                       bar_height,
-                      config_get_color(canvas->cfg,
-                                       genome_feature_type_get_cstr(btype),
-                                       "fill"),
+                      fillcolor,
                       arrow_status,
-                      config_get_num(canvas->cfg, "format", "arrow_width", 6),
+                      arrow_width,
                       1,
-                      config_get_color(canvas->cfg,
-                                       genome_feature_type_get_cstr(btype),
-                                       "stroke"),
+                      strokecolor,
                       true);
     /* draw arrowheads at clipped margins */
     if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
@@ -467,20 +498,18 @@ int canvas_visit_block(Canvas *canvas, Block *block)
     return -1;
   }
 
+  config_get_color(canvas->cfg, "format", "default_stroke_color", &strokecolor);
+
   /* draw parent block boundaries */
   graphics_draw_dashes(canvas->g,
                        draw_range.start,
                        canvas->y,
                        draw_range.end - draw_range.start,
-                       config_get_num(canvas->cfg, "format",
-                                      "bar_height", 15),
+                       bar_height,
                        ARROW_NONE,
-                       config_get_num(canvas->cfg, "format",
-                                      "arrow_width", 6),
-                       config_get_num(canvas->cfg, "format",
-                                      "stroke_width", 1),
-                       config_get_color(canvas->cfg, "format",
-                                        "default_stroke_color"));
+                       arrow_width,
+                       stroke_width,
+                       strokecolor);
   return had_err;
 }
 
@@ -489,12 +518,10 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   int had_err = 0, arrow_status = ARROW_NONE;
   Range elem_range = element_get_range(elem);
   DrawingRange draw_range;
-  double elem_start, elem_width, stroke_width,
-         bar_height = config_get_num(canvas->cfg, "format", "bar_height", 15);
-  Color elem_color, grey;
-  grey.red = grey.green = grey.blue = .85;
-  const char *style,
-             *type = genome_feature_type_get_cstr(element_get_type(elem));
+  double elem_start, elem_width, stroke_width, bar_height, arrow_width;
+  Color elem_color, grey, fill_color;
+  const char *type;
+  Str *style;
   Strand strand = element_get_strand(elem);
 
   assert(canvas && elem);
@@ -502,6 +529,13 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   /* This shouldn't happen. */
   if (!range_overlap(elem_range, canvas->viewrange))
     return -1;
+
+  type = (char*) genome_feature_type_get_cstr(element_get_type(elem));
+  grey.red = grey.green = grey.blue = .85;
+  if(!config_get_num(canvas->cfg, "format", "bar_height", &bar_height))
+    bar_height = 15;
+  if(!config_get_num(canvas->cfg, "format", "arrow_width", &arrow_width))
+    arrow_width = 6;
 
   if ((strand == STRAND_REVERSE || strand == STRAND_BOTH)
          /*&& delem == dlist_first(elems)*/)
@@ -521,14 +555,17 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   elem_width = draw_range.end - draw_range.start;
 
   if (element_is_marked(elem)) {
-    elem_color = config_get_color(canvas->cfg, type, "stroke_marked");
-    stroke_width = config_get_num(canvas->cfg, "format", "stroke_marked_width",
-                                  1);
+    config_get_color(canvas->cfg, type, "stroke_marked", &elem_color);
+    if(!config_get_num(canvas->cfg, "format", "stroke_marked_width",
+                       &stroke_width))
+    stroke_width = 0.6;
   }
   else {
-    elem_color = config_get_color(canvas->cfg, type, "stroke");
-    stroke_width = config_get_num(canvas->cfg, "format", "stroke_width", 1);
+    config_get_color(canvas->cfg, type, "stroke", &elem_color);
+    if(!config_get_num(canvas->cfg, "format", "stroke_width", &stroke_width))
+    stroke_width = 0.6;
   }
+  config_get_color(canvas->cfg, type, "fill", &fill_color);
 
   if (draw_range.end-draw_range.start <= 1.1)
   {
@@ -563,23 +600,25 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
             arrow_status);
 
   /* draw each element according to style set in the config */
-  style = config_get_cstr(canvas->cfg, type, "style", "box");
+  style = str_new();
+  if(!config_get_str(canvas->cfg, type, "style", style))
+    str_set(style, "box");
 
-  if (strcmp(style, "box")==0)
+  if (strcmp(str_get(style), "box")==0)
   {
     graphics_draw_box(canvas->g,
                       elem_start,
                       canvas->y,
                       elem_width,
                       bar_height,
-                      config_get_color(canvas->cfg, type, "fill"),
+                      fill_color,
                       arrow_status,
-                      config_get_num(canvas->cfg, "format", "arrow_width", 6),
+                      arrow_width,
                       stroke_width,
                       elem_color,
                       false);
   }
-  else if (strcmp(style, "caret")==0)
+  else if (strcmp(str_get(style), "caret")==0)
   {
     graphics_draw_caret(canvas->g,
                         elem_start,
@@ -587,11 +626,11 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
                         elem_width,
                         bar_height,
                         ARROW_NONE,
-                        config_get_num(canvas->cfg, "format", "arrow_width", 6),
+                        arrow_width,
                         stroke_width,
                         elem_color);
   }
-  else if (strcmp(style, "dashes")==0)
+  else if (strcmp(str_get(style), "dashes")==0)
   {
     graphics_draw_dashes(canvas->g,
                          elem_start,
@@ -599,12 +638,11 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
                          elem_width,
                          bar_height,
                          arrow_status,
-                         config_get_num(canvas->cfg,
-                                        "format", "arrow_width", 6),
+                         arrow_width,
                          stroke_width,
                          elem_color);
   }
-  else if (strcmp(style, "line")==0)
+  else if (strcmp(str_get(style), "line")==0)
   {
     graphics_draw_horizontal_line(canvas->g,
                                   elem_start,
@@ -618,13 +656,14 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
                        canvas->y,
                        elem_width,
                        bar_height,
-                       config_get_color(canvas->cfg, type, "fill"),
+                       fill_color,
                        arrow_status,
-                       config_get_num(canvas->cfg, "format", "arrow_width", 6),
+                       arrow_width,
                        stroke_width,
                        elem_color,
                        false);
   }
+  str_delete(style);
 
   /* draw arrowheads at clipped margins */
   if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)

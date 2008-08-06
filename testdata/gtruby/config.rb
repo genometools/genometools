@@ -43,6 +43,10 @@ color.red   = 0.3
 color.green = 0.4
 color.blue  = 0.3
 config.set_color("exon", "fill", color)
+color2 = config.get_color("exon", "fill")
+raise if color2.red != color.red \
+	and color2.green != color.green \
+	and color2.blue != color.blue
 
 # get string
 str = config.get_cstr("exon", "style")
@@ -50,6 +54,12 @@ raise if str != "box"
 
 # set string
 config.set_cstr("exon", "style", "line")
+str = config.get_cstr("exon", "style")
+raise if str != "line"
+
+# get undefined string
+str = config.get_cstr("undefined", "undefined")
+raise if str != "undefined"
 
 # get number
 num = config.get_num("format", "margins")
@@ -57,7 +67,15 @@ raise if num != 30
 
 # set number
 config.set_num("format", "margins", 20.0)
+num = config.get_num("format", "margins")
+raise if num != 20
+
+#get undefined number
+num = config.get_num("undefined", "undefined")
+raise if num != -9999.99
 
 # set string list
 list = [ "mRNA", "gene" ]
 config.set_cstr_list("dominate", "exon", list)
+testarr = config.get_cstr_list("dominate","exon")
+raise if !list.eql?(testarr)
