@@ -453,11 +453,14 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
     if (track == NULL) {
       const char* type = genome_feature_type_get_cstr(bt->gft);
       bool split;
-      double max;
+      unsigned long max;
+      double tmp;
 
       if (!config_get_bool(diagram->config, type, "split_lines", &split))
         split = true;
-      if (!config_get_num(diagram->config, type, "max_num_lines", &max))
+      if (config_get_num(diagram->config, type, "max_num_lines", &tmp))
+        max = tmp;
+      else
         max = UNDEF_ULONG;
       track = track_new(track_key,
                         max,
