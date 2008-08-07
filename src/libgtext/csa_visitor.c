@@ -242,8 +242,10 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
             genome_feature_set_end(exon_feature,
                                    genome_node_get_end((GenomeNode*)
                                                        exons_from_sa_feature));
-            genome_feature_set_score(exon_feature,
+            if (genome_feature_score_is_defined(exons_from_sa_feature)) {
+              genome_feature_set_score(exon_feature,
                                genome_feature_get_score(exons_from_sa_feature));
+            }
           }
           exons_from_sa_index++;
         }
@@ -252,8 +254,12 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
       case 0:
         assert(range_overlap(exon_feature_range, exons_from_sa_range));
         /* update score if necessary */
-        if (genome_feature_get_score(exon_feature) <
-            genome_feature_get_score(exons_from_sa_feature)) {
+        if ((genome_feature_score_is_defined(exon_feature) &&
+             genome_feature_score_is_defined(exons_from_sa_feature) &&
+             genome_feature_get_score(exon_feature) <
+             genome_feature_get_score(exons_from_sa_feature)) ||
+            (!genome_feature_score_is_defined(exon_feature) &&
+             genome_feature_score_is_defined(exons_from_sa_feature))) {
           genome_feature_set_score(exon_feature,
                                genome_feature_get_score(exons_from_sa_feature));
         }
@@ -270,8 +276,10 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
           genome_feature_set_end(exon_feature,
                                  genome_node_get_end((GenomeNode*)
                                                      exons_from_sa_feature));
-          genome_feature_set_score(exon_feature,
+          if (genome_feature_score_is_defined(exons_from_sa_feature)) {
+            genome_feature_set_score(exon_feature,
                                genome_feature_get_score(exons_from_sa_feature));
+          }
         }
         exon_feature_index++;
         exons_from_sa_index++;
@@ -289,8 +297,10 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
                                                exons_from_sa_feature),
                          gene_strand, NULL, 0);
     genome_node_set_seqid(new_feature, seqid);
-    genome_feature_set_score((GenomeFeature*) new_feature,
-                             genome_feature_get_score(exons_from_sa_feature));
+    if (genome_feature_score_is_defined(exons_from_sa_feature)) {
+      genome_feature_set_score((GenomeFeature*) new_feature,
+                               genome_feature_get_score(exons_from_sa_feature));
+    }
     genome_feature_set_source(new_feature, gt_csa_source_str);
     array_add(exon_nodes, new_feature);
   }
