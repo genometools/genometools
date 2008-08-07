@@ -24,11 +24,19 @@ module GT
   extend DL::Importable
   gtdlload "libgt"
 
+  # looks weird, but apparently the way to pass proper pointers to external
+  # functions
   DoubleArg = struct [
     "double val"
   ]
 
   typealias "bool", "ibool"
+
+  # same as above
+  BoolArg = struct [
+    "bool val"
+  ]
+
   extern "Config* config_new(bool, Error*)"
   extern "int config_load_file(Config*, Str*, Error*)"
   extern "void config_get_color(Config*, const char*, const char*, Color*)"
@@ -44,7 +52,7 @@ module GT
   extern "bool config_get_bool(const Config*, const char*, " +
                                "const char*, bool*)"
   extern "void config_set_bool(const Config*, const char*, " +
-                              "const char*, bool*)"
+                              "const char*, bool)"
   extern "bool config_get_cstr_list(const Config*, const char*, " +
                                    "const char*, StrArray*)"
   extern "void config_set_cstr_list(const Config*, const char*, " +
@@ -101,17 +109,21 @@ module GT
     end
 
     def set_num(section, key, number)
-      GT.config_set_num(@config, section, key, number)
+      num = number.to_f
+      GT.config_set_num(@config, section, key, num)
     end
 
     def get_bool(section, key)
-      ret = false
-      GT.config_get_num(@config, section, key, ret)
-      ret
+      bool = BoolArg.malloc
+      if GT.config_get_bool(@config, section, key, bool)
+        bool.val
+      else
+        false
+      end
     end
 
     def set_bool(section, key, val)
-      GT.config_set_num(@config, section, key, val)
+      GT.config_set_bool(@config, section, key, val)
     end
 
     def get_cstr_list(section, key)

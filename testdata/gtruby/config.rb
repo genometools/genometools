@@ -66,7 +66,7 @@ num = config.get_num("format", "margins")
 raise if num != 30
 
 # set number
-config.set_num("format", "margins", 20.0)
+config.set_num("format", "margins", 20)
 num = config.get_num("format", "margins")
 raise if num != 20
 
@@ -79,3 +79,12 @@ list = [ "mRNA", "gene" ]
 config.set_cstr_list("dominate", "exon", list)
 testarr = config.get_cstr_list("dominate","exon")
 raise if !list.eql?(testarr)
+
+# get boolean
+bool = config.get_bool("format", "show_grid")
+raise if not bool
+
+# set boolean
+config.set_bool("format", "show_grid", false)
+bool = config.get_bool("format", "show_grid")
+raise if bool
