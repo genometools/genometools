@@ -25,7 +25,6 @@ if ARGV.size != 2 then
   exit(1)
 end
 
-
 pngfile  = ARGV[0]
 gff3file = ARGV[1]
 

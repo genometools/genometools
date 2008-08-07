@@ -169,7 +169,7 @@ static void draw_ruler(Canvas *canvas)
 
   margins = canvas->margins;
 
-  if(!(config_get_bool(canvas->cfg, "format","show_grid", &showgrid)))
+  if (!(config_get_bool(canvas->cfg, "format","show_grid", &showgrid)))
     showgrid = true;
 
   rulercol.red = rulercol.green = rulercol.blue = .2;
@@ -318,7 +318,6 @@ int canvas_visit_diagram(Canvas *canvas, Diagram *dia)
   else
     canvas->margins = 10;
 
-
   /* set initial image-specific values */
   canvas->y = 70;
   canvas->width = canvas->width;
@@ -426,13 +425,13 @@ int canvas_visit_block(Canvas *canvas, Block *block)
   grey.red = grey.green = grey.blue = .85;
   strand = block_get_strand(block);
   block_range = block_get_range(block);
-  if(!config_get_num(canvas->cfg, "format", "bar_height", &bar_height))
+  if (!config_get_num(canvas->cfg, "format", "bar_height", &bar_height))
     bar_height = 15;
-  if(!config_get_num(canvas->cfg, "format", "min_len_block", &min_len_block))
+  if (!config_get_num(canvas->cfg, "format", "min_len_block", &min_len_block))
     min_len_block = 40;
-  if(!config_get_num(canvas->cfg, "format", "arrow_width", &arrow_width))
+  if (!config_get_num(canvas->cfg, "format", "arrow_width", &arrow_width))
     arrow_width = 6;
-  if(!config_get_num(canvas->cfg, "format", "stroke_width", &stroke_width))
+  if (!config_get_num(canvas->cfg, "format", "stroke_width", &stroke_width))
     stroke_width = 0.6;
 
   if (strand == STRAND_REVERSE || strand == STRAND_BOTH)
@@ -532,9 +531,9 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
 
   type = (char*) genome_feature_type_get_cstr(element_get_type(elem));
   grey.red = grey.green = grey.blue = .85;
-  if(!config_get_num(canvas->cfg, "format", "bar_height", &bar_height))
+  if (!config_get_num(canvas->cfg, "format", "bar_height", &bar_height))
     bar_height = 15;
-  if(!config_get_num(canvas->cfg, "format", "arrow_width", &arrow_width))
+  if (!config_get_num(canvas->cfg, "format", "arrow_width", &arrow_width))
     arrow_width = 6;
 
   if ((strand == STRAND_REVERSE || strand == STRAND_BOTH)
@@ -556,13 +555,13 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
 
   if (element_is_marked(elem)) {
     config_get_color(canvas->cfg, type, "stroke_marked", &elem_color);
-    if(!config_get_num(canvas->cfg, "format", "stroke_marked_width",
+    if (!config_get_num(canvas->cfg, "format", "stroke_marked_width",
                        &stroke_width))
     stroke_width = 0.6;
   }
   else {
     config_get_color(canvas->cfg, type, "stroke", &elem_color);
-    if(!config_get_num(canvas->cfg, "format", "stroke_width", &stroke_width))
+    if (!config_get_num(canvas->cfg, "format", "stroke_width", &stroke_width))
     stroke_width = 0.6;
   }
   config_get_color(canvas->cfg, type, "fill", &fill_color);
@@ -601,7 +600,7 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
 
   /* draw each element according to style set in the config */
   style = str_new();
-  if(!config_get_str(canvas->cfg, type, "style", style))
+  if (!config_get_str(canvas->cfg, type, "style", style))
     str_set(style, "box");
 
   if (strcmp(str_get(style), "box")==0)

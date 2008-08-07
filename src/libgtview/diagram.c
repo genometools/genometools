@@ -343,7 +343,7 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
                                         feature_type)) == NULL)
   {
     collapse = ma_malloc(sizeof (bool));
-    if(!config_get_bool(d->config, feature_type, "collapse_to_parent",
+    if (!config_get_bool(d->config, feature_type, "collapse_to_parent",
                         collapse))
       *collapse = false;
     hashtable_add(d->collapsingtypes, (char*) feature_type, collapse);
