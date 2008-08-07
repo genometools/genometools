@@ -38,7 +38,7 @@ static void store_splice_form(Array *spliced_alignments_in_form,
   sa = *(unsigned long*) array_get(spliced_alignments_in_form, 0);
   splice_form = csa_splice_form_new((char*) set_of_sas + sa * size_of_sa,
                                     info->get_genomic_range, info->get_strand);
-  for (i = 0; i < array_size(spliced_alignments_in_form); i++) {
+  for (i = 1; i < array_size(spliced_alignments_in_form); i++) {
     sa = *(unsigned long*) array_get(spliced_alignments_in_form, i);
     csa_splice_form_add_sa(splice_form, (char*) set_of_sas + sa * size_of_sa);
   }
