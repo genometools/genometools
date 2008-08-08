@@ -30,15 +30,16 @@ typedef struct Track Track;
 #include "libgtview/config.h"
 #include "libgtview/line.h"
 
-Track*             track_new(Str *title, unsigned long max_num_lines,
-                             bool split_lines);
-void               track_insert_block(Track*, Block*);
-Str*               track_get_title(const Track*);
-Array*             track_get_lines(const Track*);
-unsigned long      track_get_number_of_lines(const Track*);
-unsigned long      track_get_number_of_lines_with_captions(const Track *track);
-int                track_render(Track*, Canvas*);
-int                track_unit_test(Error*);
-void               track_delete(Track*);
+Track*        track_new(Str *title, unsigned long max_num_lines,
+                        bool split_lines);
+void          track_insert_block(Track*, Block*);
+Str*          track_get_title(const Track*);
+Array*        track_get_lines(const Track*);
+unsigned long track_get_number_of_lines(const Track*);
+unsigned long track_get_number_of_lines_with_captions(const Track *track);
+unsigned long track_get_number_of_discarded_blocks(Track *track);
+int           track_render(Track*, Canvas*);
+int           track_unit_test(Error*);
+void          track_delete(Track*);
 
 #endif

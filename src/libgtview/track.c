@@ -24,7 +24,7 @@
 
 struct Track {
   Str *title;
-  unsigned long max_num_lines;
+  unsigned long max_num_lines, discarded_blocks;
   bool split;
   Array *lines;
 };
@@ -33,7 +33,7 @@ Track* track_new(Str *title, unsigned long max_num_lines, bool split)
 {
   Track *track;
   assert(title);
-  track = ma_malloc(sizeof (Track));
+  track = ma_calloc(1, sizeof (Track));
   assert(track);
   track->title = str_ref(title);
   track->lines = array_new(sizeof (Line*));
@@ -58,7 +58,10 @@ static Line* get_next_free_line(Track *track, Range r)
   /* if line limit is hit, do not create any more lines! */
   if (track->max_num_lines != UNDEF_ULONG
        && array_size(track->lines) == track->max_num_lines)
+  {
+    track->discarded_blocks++;
     return NULL;
+  }
 
   /* make sure there is only one line if 'split_lines' is set to false */
   if (!track->split)
@@ -79,6 +82,12 @@ static Line* get_next_free_line(Track *track, Range r)
   }
   assert(line);
   return line;
+}
+
+unsigned long track_get_number_of_discarded_blocks(Track *track)
+{
+  assert(track);
+  return track->discarded_blocks;
 }
 
 void track_insert_block(Track *track, Block *block)

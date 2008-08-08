@@ -366,6 +366,7 @@ int canvas_visit_diagram(Canvas *canvas, Diagram *dia)
 int canvas_visit_track_pre(Canvas *canvas, Track *track)
 {
   int had_err = 0;
+  unsigned long exceeded;
   Color color;
 
   assert(canvas && track);
@@ -382,6 +383,26 @@ int canvas_visit_track_pre(Canvas *canvas, Track *track)
                              canvas->y,
                              color,
                              str_get(track_get_title(track)));
+
+  /* draw 'line maximum exceeded' message */
+  if ((exceeded = track_get_number_of_discarded_blocks(track)) > 0)
+  {
+    char buf[BUFSIZ];
+    double width;
+    Color red;
+    red.red   = 0.6;
+    red.green = red.blue  = 0.4;
+    snprintf(buf, BUFSIZ, "(%lu blocks not shown because the configured "
+                          "line limit was exceeded)",
+                          exceeded);
+    width = graphics_get_text_width(canvas->g, str_get(track_get_title(track)));
+    graphics_draw_colored_text(canvas->g,
+                               canvas->margins+width+10.0,
+                               canvas->y,
+                               red,
+                               buf);
+  }
+
   canvas->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
 
   return had_err;
