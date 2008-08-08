@@ -193,7 +193,7 @@ static void draw_ruler(Canvas *canvas)
     showgrid = true;
 
   rulercol.red = rulercol.green = rulercol.blue = .2;
-  gridcol.red = gridcol.green = gridcol.blue = .9;
+  gridcol.red = gridcol.green = gridcol.blue = .93;
 
   /* determine range and step of the scale */
   base_length = range_length(canvas->viewrange);
