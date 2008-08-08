@@ -28,6 +28,20 @@
 #include "libgtview/graphics.h"
 #include "libgtview/line.h"
 
+#define MARGINS_DEFAULT           10
+#define BAR_HEIGHT_DEFAULT        15
+#define BAR_VSPACE_DEFAULT        10
+#define TOY_TEXT_HEIGHT          8.0
+#define TRACK_VSPACE_DEFAULT      20
+#define CAPTION_BAR_SPACE_DEFAULT  7
+#define MIN_LEN_BLOCK_DEFAULT     30
+#define ARROW_WIDTH_DEFAULT        6
+#define STROKE_WIDTH_DEFAULT     0.6
+#define FONT_SIZE_DEFAULT         10
+
+#define HEADER_SPACE              70
+#define FOOTER_SPACE              20
+
 struct Canvas {
   Range viewrange;
   double factor, y;
@@ -70,24 +84,30 @@ static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
   if (config_get_num(canvas->cfg, "format", "bar_height", &tmp))
     line_height = tmp;
   else
-    line_height = 15;
+    line_height = BAR_HEIGHT_DEFAULT;
   if (config_get_num(canvas->cfg, "format", "bar_vspace", &tmp))
     line_height += tmp;
   else
-    line_height += 10;
+    line_height += BAR_VSPACE_DEFAULT;
 
   /* get total height of all lines */
   height  = lines.total_lines * line_height;
-  height += lines.total_captionlines * 15;
+  height += lines.total_captionlines * (TOY_TEXT_HEIGHT
+                                          + CAPTION_BAR_SPACE_DEFAULT);
   /* add track caption height and spacer */
   if (config_get_num(canvas->cfg, "format","track_vspace", &tmp))
-    height += diagram_get_number_of_tracks(dia) * tmp;
+    height += diagram_get_number_of_tracks(dia)
+                * (TOY_TEXT_HEIGHT
+                    + CAPTION_BAR_SPACE_DEFAULT
+                    + tmp);
   else
-    height += diagram_get_number_of_tracks(dia) * 20;
-  height += 15;
+    height += diagram_get_number_of_tracks(dia)
+                * (TOY_TEXT_HEIGHT
+                    + CAPTION_BAR_SPACE_DEFAULT
+                    + TRACK_VSPACE_DEFAULT);
 
   /* add header space and footer */
-  height += 70 + 20;
+  height += HEADER_SPACE + FOOTER_SPACE;
   if (config_get_verbose(canvas->cfg))
     fprintf(stderr, "calculated height: %lu\n", height);
   return height;
@@ -180,7 +200,7 @@ static void draw_ruler(Canvas *canvas)
 
   /* determine tick steps */
   step = pow(10,ceil(log10(base_length))-1);
-  minorstep = step/4.0;
+  minorstep = step/10.0;
 
   /* calculate starting positions */
   vminor = (double) (floor(canvas->viewrange.start / minorstep))*minorstep;
@@ -230,11 +250,11 @@ static void draw_ruler(Canvas *canvas)
   /* put 3' and 5' captions at the ends */
   graphics_draw_text_centered(canvas->g,
                               canvas->margins-10,
-                              45-(graphics_get_text_height(canvas->g)/2),
+                              45-(TOY_TEXT_HEIGHT/2),
                               "5'");
   graphics_draw_text_centered(canvas->g,
                               canvas->width-canvas->margins+10,
-                              45-(graphics_get_text_height(canvas->g)/2),
+                              45-(TOY_TEXT_HEIGHT/2),
                               "3'");
 }
 
@@ -316,10 +336,10 @@ int canvas_visit_diagram(Canvas *canvas, Diagram *dia)
   if (config_get_num(canvas->cfg, "format", "margins", &margins))
     canvas->margins = margins;
   else
-    canvas->margins = 10;
+    canvas->margins = MARGINS_DEFAULT;
 
   /* set initial image-specific values */
-  canvas->y = 70;
+  canvas->y = HEADER_SPACE;
   canvas->width = canvas->width;
   canvas->viewrange = diagram_get_range(dia);
   canvas->height = calculate_height(canvas, dia);
@@ -362,7 +382,7 @@ int canvas_visit_track_pre(Canvas *canvas, Track *track)
                              canvas->y,
                              color,
                              str_get(track_get_title(track)));
-  canvas->y += 15;
+  canvas->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
 
   return had_err;
 }
@@ -371,11 +391,11 @@ int canvas_visit_track_post(Canvas *canvas, Track *track)
 {
   double vspace;
   assert(canvas && track);
-  /* put track spacer after track, except if at last track */
+  /* put track spacer after track */
   if (config_get_num(canvas->cfg, "format", "track_vspace", &vspace))
     canvas->y += vspace;
   else
-    canvas->y += 20;
+    canvas->y += TRACK_VSPACE_DEFAULT;
   return 0;
 }
 
@@ -387,7 +407,7 @@ int canvas_visit_line_pre(Canvas *canvas, Line *line)
   if (line_has_captions(line))
   {
     mark_caption_collisions(canvas, line);
-    canvas->y += 15;
+    canvas->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
   }
   return had_err;
 }
@@ -400,11 +420,11 @@ int canvas_visit_line_post(Canvas *canvas, Line *line)
   if (config_get_num(canvas->cfg, "format", "bar_height", &tmp))
     canvas->y += tmp;
   else
-    canvas->y += 15;
+    canvas->y += BAR_HEIGHT_DEFAULT;
   if (config_get_num(canvas->cfg, "format", "bar_vspace", &tmp))
     canvas->y += tmp;
   else
-    canvas->y += 10;
+    canvas->y += BAR_VSPACE_DEFAULT;
   bittab_delete(canvas->bt);
   canvas->bt = NULL;
   return had_err;
@@ -426,13 +446,13 @@ int canvas_visit_block(Canvas *canvas, Block *block)
   strand = block_get_strand(block);
   block_range = block_get_range(block);
   if (!config_get_num(canvas->cfg, "format", "bar_height", &bar_height))
-    bar_height = 15;
+    bar_height = BAR_HEIGHT_DEFAULT;
   if (!config_get_num(canvas->cfg, "format", "min_len_block", &min_len_block))
-    min_len_block = 40;
+    min_len_block = MIN_LEN_BLOCK_DEFAULT;
   if (!config_get_num(canvas->cfg, "format", "arrow_width", &arrow_width))
-    arrow_width = 6;
+    arrow_width = ARROW_WIDTH_DEFAULT;
   if (!config_get_num(canvas->cfg, "format", "stroke_width", &stroke_width))
-    stroke_width = 0.6;
+    stroke_width = STROKE_WIDTH_DEFAULT;
 
   if (strand == STRAND_REVERSE || strand == STRAND_BOTH)
     arrow_status = ARROW_LEFT;
@@ -447,7 +467,7 @@ int canvas_visit_block(Canvas *canvas, Block *block)
     {
       graphics_draw_text(canvas->g,
                          MAX(canvas->margins, draw_range.start),
-                         canvas->y-6,
+                         canvas->y -CAPTION_BAR_SPACE_DEFAULT,
                          caption);
     }
   }
@@ -532,9 +552,9 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   type = (char*) genome_feature_type_get_cstr(element_get_type(elem));
   grey.red = grey.green = grey.blue = .85;
   if (!config_get_num(canvas->cfg, "format", "bar_height", &bar_height))
-    bar_height = 15;
+    bar_height = BAR_HEIGHT_DEFAULT;
   if (!config_get_num(canvas->cfg, "format", "arrow_width", &arrow_width))
-    arrow_width = 6;
+    arrow_width = ARROW_WIDTH_DEFAULT;
 
   if ((strand == STRAND_REVERSE || strand == STRAND_BOTH)
          /*&& delem == dlist_first(elems)*/)
@@ -557,12 +577,12 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
     config_get_color(canvas->cfg, type, "stroke_marked", &elem_color);
     if (!config_get_num(canvas->cfg, "format", "stroke_marked_width",
                        &stroke_width))
-    stroke_width = 0.6;
+    stroke_width = STROKE_WIDTH_DEFAULT;
   }
   else {
     config_get_color(canvas->cfg, type, "stroke", &elem_color);
     if (!config_get_num(canvas->cfg, "format", "stroke_width", &stroke_width))
-    stroke_width = 0.6;
+    stroke_width = STROKE_WIDTH_DEFAULT;
   }
   config_get_color(canvas->cfg, type, "fill", &fill_color);
 

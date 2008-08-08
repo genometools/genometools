@@ -171,15 +171,6 @@ double graphics_get_image_width(Graphics *g)
   return g->width;
 }
 
-double graphics_get_text_height(Graphics *g)
-{
-  cairo_text_extents_t ext;
-  assert(g);
-  /* get text extents */
-  cairo_text_extents(g->cr, "A", &ext);
-  return ext.height;
-}
-
 void graphics_set_margins(Graphics *g, double margin_x, double margin_y)
 {
   assert(g);
@@ -216,6 +207,14 @@ double graphics_get_text_width(Graphics *g, const char* text)
   /* get text extents */
   cairo_text_extents(g->cr, text, &ext);
   return ext.width;
+}
+
+double graphics_get_text_height(Graphics *g)
+{
+  cairo_font_extents_t ext;
+  assert(g);
+  cairo_font_extents(g->cr, &ext);
+  return ext.height;
 }
 
 void graphics_draw_box(Graphics *g, double x, double y, double width,
