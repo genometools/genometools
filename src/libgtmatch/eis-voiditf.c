@@ -249,7 +249,7 @@ unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
   unsigned long matchlength;
 
   matchlength = packedindexmstatsforward(bwtseq,witnessposition,qstart,qend);
-  if (witnessposition != NULL)
+  if (matchlength > 0 && witnessposition != NULL)
   {
     *witnessposition = voidpackedfindfirstmatchconvert(voidbwtseq,
                                                        *witnessposition,
