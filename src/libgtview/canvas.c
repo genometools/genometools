@@ -317,6 +317,7 @@ Canvas* canvas_new(Config *cfg, GraphicsOutType type,
   canvas->width = width;
   canvas->bt = NULL;
   canvas->type = type;
+  canvas->y = 0.5; /* 0.5 displacement to eliminate fuzzy horizontal lines */
   return canvas;
 }
 
@@ -339,7 +340,7 @@ int canvas_visit_diagram(Canvas *canvas, Diagram *dia)
     canvas->margins = MARGINS_DEFAULT;
 
   /* set initial image-specific values */
-  canvas->y = HEADER_SPACE;
+  canvas->y += HEADER_SPACE;
   canvas->width = canvas->width;
   canvas->viewrange = diagram_get_range(dia);
   canvas->height = calculate_height(canvas, dia);
