@@ -18,8 +18,8 @@
 #include "eis-bwtseq.h"
 #include "eis-bwtseq-construct.h"
 #include "eis-voiditf.h"
+#include "divmodmul.h"
 #include "splititv.h"
-#include "stamp.h"
 
 Seqpos bwtseqfirstmatch(const void *voidbwtseq,Seqpos bound)
 {
@@ -161,7 +161,8 @@ void *loadvoidBWTSeqForSA(const Str *indexname,
 void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
                                  Seqpos *rangeOccs,
                                  const void *voidBwtSeq,
-                                 const Lcpinterval *parent)
+                                 Seqpos lbound,
+                                 Seqpos ubound)
 {
   unsigned long idx;
   const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
@@ -169,7 +170,7 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
     = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),0);
 
   bwci->nextfreeBoundswithchar = 0;
-  BWTSeqPosPairRangeOcc(bwtseq, 0, parent->left, parent->right,rangeOccs);
+  BWTSeqPosPairRangeOcc(bwtseq, 0, lbound, ubound,rangeOccs);
   for (idx = 0; idx < rangesize; idx++)
   {
     if (rangeOccs[idx] < rangeOccs[rangesize+idx])
@@ -283,4 +284,69 @@ void pck_exactpatternmatching(const void *voidbwtseq,
     deleteEMIterator(bsemi);
     bsemi = NULL;
   }
+}
+
+typedef struct
+{
+  Seqpos lowerbound,
+         upperbound;
+  unsigned long depth;
+} Boundsatdepth;
+
+DECLAREARRAYSTRUCT(Boundsatdepth);
+
+void pck_precomputebounds(Matchbound *boundsarray,
+                          unsigned long numofbounds,
+                          const void *voidbwtseq,
+                          unsigned int alphasize,
+                          Seqpos totallength,
+                          unsigned long maxdepth)
+{
+  const BWTSeq *bwtseq = (const BWTSeq *) voidbwtseq;
+  ArrayBoundsatdepth stack;
+  Boundsatdepth *stackptr, parent, child;
+  unsigned long idx;
+  Seqpos *rangeOccs;
+  Matchbound *bptr;
+  AlphabetRangeSize rangesize;
+
+  rangesize = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),0);
+  INITARRAY(&stack,Boundsatdepth);
+  GETNEXTFREEINARRAY(stackptr,&stack,Boundsatdepth,128);
+  stackptr->lowerbound = 0;
+  stackptr->upperbound = totallength+1;
+  stackptr->depth = 0;
+  rangeOccs = ma_malloc(sizeof(*rangeOccs) * MULT2(alphasize));
+  bptr = boundsarray;
+  while (stack.nextfreeBoundsatdepth > 0)
+  {
+    parent = stack.spaceBoundsatdepth[--stack.nextfreeBoundsatdepth];
+    BWTSeqPosPairRangeOcc(bwtseq, 0,
+                          parent.lowerbound,parent.upperbound,rangeOccs);
+    for (idx = 0; idx < rangesize; idx++)
+    {
+      if (rangeOccs[idx] < rangeOccs[rangesize+idx])
+      {
+        child.lowerbound = bwtseq->count[idx] + rangeOccs[idx];
+        child.upperbound = bwtseq->count[idx] + rangeOccs[rangesize+idx];
+      } else
+      {
+        child.lowerbound = child.upperbound = 0;
+      }
+      child.depth = parent.depth + 1;
+      if (child.depth == maxdepth)
+      {
+        assert(bptr < boundsarray + numofbounds);
+        bptr->lowerbound = child.lowerbound;
+        bptr->upperbound = child.upperbound;
+        bptr++;
+      } else
+      {
+        GETNEXTFREEINARRAY(stackptr,&stack,Boundsatdepth,128);
+        *stackptr = child;
+      }
+    }
+  }
+  FREEARRAY(&stack,Boundsatdepth);
+  ma_free(rangeOccs);
 }

@@ -506,7 +506,8 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   bwtrangesplitwithoutspecial(&limdfsresources->bwci,
                               limdfsresources->rangeOccs,
                               limdfsresources->genericindex,
-                              parent);
+                              parent->left,
+                              parent->right);
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {
     Uchar inchar;

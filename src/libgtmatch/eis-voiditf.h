@@ -54,7 +54,8 @@ void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci);
 void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
                                  Seqpos *rangeOccs,
                                  const void *voidBwtSeq,
-                                 const Lcpinterval *parent);
+                                 Seqpos lbound,
+                                 Seqpos ubound);
 
 void *loadvoidBWTSeqForSA(const Str *indexname,
                           const Suffixarray *suffixarray,
@@ -91,5 +92,17 @@ void pck_exactpatternmatching(const void *voidbwtseq,
 Seqpos voidpackedfindfirstmatchconvert(const void *voidbwtseq,
                                        Seqpos witnessbound,
                                        unsigned long matchlength);
+
+typedef struct
+{
+  Seqpos lowerbound, upperbound;
+} Matchbound;
+
+void pck_precomputebounds(Matchbound *boundsarray,
+                          unsigned long numofbounds,
+                          const void *voidbwtseq,
+                          unsigned int alphasize,
+                          Seqpos totallength,
+                          unsigned long maxdepth);
 
 #endif
