@@ -35,21 +35,21 @@ def checktagerator(queryfile,ms)
       "#{$bin}gt seqfilter -minlength 12 - | " +
       "sed -e \'s/^>.*/>/\' > patternfile"
   if File.size("patternfile") > 0
-    run_test("#{$bin}gt tagerator -rw -cmp -e 0 -esa sfx -query patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -e 0 -esa sfx -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 0 -pck pck -query patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -e 0 -pck pck -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -esa sfx -query patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -esa sfx -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -esa sfx -query patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -esa sfx -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -query patternfile -nospecials",
+    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -q patternfile -nospecials",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -pck pck -query patternfile -nospecials",
+    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -pck pck -q patternfile -nospecials",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -esa sfx -query patternfile -nospecials",
+    run_test("#{$bin}gt tagerator -rw -cmp -esa sfx -q patternfile -nospecials",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -pck pck -query patternfile -nospecials",
+    run_test("#{$bin}gt tagerator -rw -cmp -pck pck -q patternfile -nospecials",
              :maxtime => 100)
   end
 end

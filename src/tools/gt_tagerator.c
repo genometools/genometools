@@ -56,7 +56,7 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   op = option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option = option_new_filenamearray("query",
+  option = option_new_filenamearray("q",
                                     "Specify files containing the short "
                                     "sequence tags",
                                     arguments->tagfiles);
