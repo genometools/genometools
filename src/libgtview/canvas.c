@@ -274,6 +274,7 @@ void mark_caption_collisions(Canvas *canvas, Line *line)
       Range block_range = block_get_range(this_block);
       const char *caption;
       Range cur_range;
+      if (!block_get_caption(this_block)) continue;
       caption = str_get(block_get_caption(this_block));
       if (!caption) caption = "";
       cur_range.start = MAX(canvas->margins,
@@ -283,6 +284,7 @@ void mark_caption_collisions(Canvas *canvas, Line *line)
       for (j = i-1; j >= 0; j--) {
         Block *left_block = *(Block**) array_get(blocks, j);
         Range chk_range = block_get_range(left_block);
+        if (!block_get_caption(left_block)) continue;
         caption = str_get(block_get_caption(left_block));
         if (!caption) caption = "";
         chk_range.start = convert_point(canvas, chk_range.start);
@@ -294,6 +296,7 @@ void mark_caption_collisions(Canvas *canvas, Line *line)
       for (j = i+1; j < array_size(blocks); j++) {
         Block *right_block = *(Block**) array_get(blocks, j);
         Range chk_range = block_get_range(right_block);
+        if (!block_get_caption(right_block)) continue;
         caption = str_get(block_get_caption(right_block));
         if (!caption) caption = "";
         chk_range.start = convert_point(canvas, chk_range.start);
