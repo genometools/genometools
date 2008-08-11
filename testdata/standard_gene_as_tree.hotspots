@@ -3,9 +3,9 @@ x1=39, y1=255, x2=58, y2=270, gn.type=exon
 x1=14, y1=175, x2=58, y2=190, gn.type=exon
 x1=14, y1=215, x2=58, y2=230, gn.type=exon
 x1=399, y1=255, x2=448, y2=270, gn.type=exon
-x1=399, y1=215, x2=448, y2=230, gn.type=exon
 x1=399, y1=175, x2=448, y2=190, gn.type=exon
-x1=204, y1=215, x2=293, y2=230, gn.type=exon
+x1=399, y1=215, x2=448, y2=230, gn.type=exon
+x1=204, y1=175, x2=293, y2=190, gn.type=exon
 x1=204, y1=255, x2=293, y2=270, gn.type=exon
 x1=594, y1=215, x2=790, y2=230, gn.type=exon
 x1=594, y1=175, x2=790, y2=190, gn.type=exon
