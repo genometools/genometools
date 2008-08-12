@@ -67,6 +67,7 @@
 #include "tools/gt_mmapandread.h"
 #include "tools/gt_mutate.h"
 #include "tools/gt_packedindex.h"
+#include "tools/gt_prebwt.h"
 #include "tools/gt_seqfilter.h"
 #include "tools/gt_sequniq.h"
 #include "tools/gt_shredder.h"
@@ -117,6 +118,7 @@ Toolbox* gtt_tools(void)
   toolbox_add_tool(tools, "mutate", gt_mutate());
   toolbox_add(tools, "mkfmindex", gt_mkfmindex);
   toolbox_add_tool(tools, "packedindex", gt_packedindex());
+  toolbox_add_tool(tools, "prebwt", gt_prebwt());
   toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
   toolbox_add_tool(tools, "sequniq", gt_sequniq());
   toolbox_add_tool(tools, "shredder", gt_shredder());

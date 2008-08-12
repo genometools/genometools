@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_TAGERATOR_H
-#define GT_TAGERATOR_H
+#ifndef GT_PREBWT_H
+#define GT_PREBWT_H
 
 #include "libgtcore/tool.h"
 
 /* the tagerator tool */
-Tool* gt_tagerator(void);
+Tool* gt_prebwt(void);
 
 #endif

@@ -16,6 +16,7 @@
 */
 
 #include <math.h>
+#include "libgtcore/tool.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/eis-voiditf.h"
@@ -27,12 +28,57 @@ typedef struct
   unsigned long maxdepth;
 } Prebwtoptions;
 
-int runprebwt(const Prebwtoptions *prebwtoptions,Error *err)
+static void *gt_prebwt_arguments_new(void)
+{
+  return ma_malloc(sizeof (Prebwtoptions));
+}
+
+static void gt_prebwt_arguments_delete(void *tool_arguments)
+{
+  Prebwtoptions *arguments = tool_arguments;
+
+  if (!arguments)
+  {
+    return;
+  }
+  str_delete(arguments->indexname);
+  ma_free(arguments);
+}
+
+static OptionParser* gt_prebwt_option_parser_new(void *tool_arguments)
+{
+  Prebwtoptions *arguments = tool_arguments;
+  OptionParser *op;
+  Option *option, *optionpck;
+
+  assert(arguments != NULL);
+  arguments->indexname = str_new();
+  op = option_parser_new("[options] -pck indexname",
+                         "Precompute bwt-bounds for some prefix length.");
+  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+
+  optionpck = option_new_string("pck","Specify index (packed index)",
+                             arguments->indexname, NULL);
+  option_parser_add_option(op, optionpck);
+  option_is_mandatory(optionpck);
+
+  option = option_new_ulong("maxdepth","specify maximum depth",
+                            &arguments->maxdepth,0);
+  option_parser_add_option(op, option);
+
+  return op;
+}
+
+static int gt_prebwt_runner(UNUSED int argc,
+                            UNUSED const char **argv,
+                            UNUSED int parsed_args,
+                            void *tool_arguments, Error *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength;
   void *packedindex = NULL;
   bool haserr = false;
+  Prebwtoptions *prebwtoptions = (Prebwtoptions *) tool_arguments;
 
   if (mapsuffixarray(&suffixarray,
                      &totallength,
@@ -68,6 +114,7 @@ int runprebwt(const Prebwtoptions *prebwtoptions,Error *err)
                          alphasize,
                          totallength,
                          prebwtoptions->maxdepth);
+    ma_free(boundsarray);
   }
   freesuffixarray(&suffixarray);
   if (packedindex != NULL)
@@ -75,4 +122,13 @@ int runprebwt(const Prebwtoptions *prebwtoptions,Error *err)
     deletevoidBWTSeq(packedindex);
   }
   return haserr ? -1 : 0;
+}
+
+Tool* gt_prebwt(void)
+{
+  return tool_new(gt_prebwt_arguments_new,
+                  gt_prebwt_arguments_delete,
+                  gt_prebwt_option_parser_new,
+                  NULL,
+                  gt_prebwt_runner);
 }
