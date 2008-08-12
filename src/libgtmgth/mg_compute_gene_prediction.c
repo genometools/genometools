@@ -14,6 +14,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#include <ctype.h>
 
 #include "mg_compute_gene_prediction.h"
 
@@ -846,11 +847,9 @@ static int check_coding(ParseStruct *parsestruct_ptr,
   Str *query_seq;
 
   char *contig_seq_ptr = NULL,
-    *contig_seq_tri = NULL;
+    contig_seq_tri[4] = { '\0', '\0', '\0', '\0' };
 
   error_check(err);
-
-  contig_seq_tri = ma_calloc(4, sizeof (char));
 
   /* Start- und Endsequenzpositionen der in AS umzuwandelnden Sequenz */
   startpoint = from;
@@ -913,7 +912,6 @@ static int check_coding(ParseStruct *parsestruct_ptr,
           tolower(contig_seq_ptr[startpoint + 1]);
         contig_seq_tri[2] =
           tolower(contig_seq_ptr[startpoint + 2]);
-        contig_seq_tri[3] = '\0';
 
         found = check_stopcodon(contig_seq_tri);
 
@@ -927,7 +925,6 @@ static int check_coding(ParseStruct *parsestruct_ptr,
     }
   }
   str_delete(query_seq);
-  ma_free(contig_seq_tri);
 
   return found;
 

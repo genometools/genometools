@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <ctype.h>
 #include "mg_combinedscore.h"
 
 int mg_combinedscore(ParseStruct *parsestruct_ptr,
@@ -317,50 +318,16 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
 /* Funktion zur Bestimmung der dem Leserahmen entsprechenden Matrix-Zeile */
 short get_matrix_row(long frame_fct)
 {
-  switch (frame_fct)
-  {
-    case -3:
-      return 6;
-    case -2:
-      return 5;
-    case -1:
-      return 4;
-    case 0:
-      return 3;
-    case 1:
-      return 2;
-    case 2:
-      return 1;
-    case 3:
-      return 0;
-    default:
-      return 0;
-  }
+  assert(frame_fct >= -3 && frame_fct <= 3);
+  return 3 - frame_fct;         /* [-3..3] -> [6..0] */
 }
 
 /* Umkehrfunktion zu get_matrix_row - aus der Matrix-Zeile wird der Leserahmen
    bestimmt */
 short get_current_frame(long row_fct)
 {
-  switch (row_fct)
-  {
-    case 6:
-      return -3;
-    case 5:
-      return -2;
-    case 4:
-      return -1;
-    case 3:
-      return 0;
-    case 2:
-      return 1;
-    case 1:
-      return 2;
-    case 0:
-      return 3;
-    default:
-      return 0;
-  }
+  assert(row_fct >= 0 && row_fct <= 6);
+  return 3 - row_fct;           /* [0..6] -> [3..-3] */
 }
 
 static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,

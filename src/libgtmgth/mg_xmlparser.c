@@ -15,7 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <ctype.h>
 #include <expat.h>
+#include "mg_xmlparser.h"
 #include "libgtcore/unused.h"
 #include "metagenomethreader.h"
 
@@ -28,7 +30,7 @@
               Zeiger auf das erste Zeichen nach einem XML-Tag;
               int-Wert der Laenge des Textes zwischen den XML-Tags
    Returnwert: void */
-void textElement(void *, const XML_Char *, int);
+static void textElement(void *, const XML_Char *, int);
 
 /* Expat-Funktion zur Behandlung oeffnender XML-Tags
    Parameter: void-Zeiger auf die (Nutzer)Daten - hier: parsestruct-Struktur;
@@ -635,7 +637,7 @@ static void XMLCALL endElement(void *data, const char *name)
   }
 }
 
-void textElement(void *data, const XML_Char *txt_element, int len)
+static void textElement(void *data, const XML_Char *txt_element, int len)
 {
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;
 

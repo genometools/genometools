@@ -23,6 +23,10 @@
    Returnwert: void */
 static void compute_precursors(short, unsigned long, short *);
 
+enum {
+  NUM_PRECURSORS = 3,
+};
+
 int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
                    HitInformation *hit_information,
                    unsigned long rows,
@@ -46,11 +50,11 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
   unsigned long column_index = 0;
 
   /* Variablen fuer den aktuellen Frame, den vorherigen Frame(speichert
-     einen Wert aus precursors[3], die Zeile des vorherigen Frames, Array
+     einen Wert aus precursors[], die Zeile des vorherigen Frames, Array
      mit den Precursors-Frames */
   short current_frame = 0,
     precursors_frame = 0,
-    precursors[3];
+    precursors[NUM_PRECURSORS];
 
   /* q ist der Wert, der bei Aus- oder Eintreten in ein Gen auf dem
      Forward- bzw. Reverse-Strang berechnet wird */
@@ -87,9 +91,11 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
                          column_index,
                          precursors);
 
-      precursor_index = 0;
       /* der max-Wert der moeglichen Vorgaenger wird berechnet */
-      while ((precursors[precursor_index] != UNDEFINED) && precursor_index < 3)
+      for (precursor_index = 0;
+           precursor_index < NUM_PRECURSORS
+             && (precursors[precursor_index] != UNDEFINED);
+           ++precursor_index)
       {
         /* aktueller Vorgaengerleserahmen - es gibt max. 3 moegliche
            Vorgaenger */
@@ -132,7 +138,6 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
             max_old = max_new;
             maxpath_frame = precursors_row;
         }
-        precursor_index++;
       }
 
       /* Speichern des Max-Wertes und der "Vorgaenger"-Zeile;
@@ -167,7 +172,7 @@ static void compute_precursors(short current_frame,
 
   /* Formel zur Bestimmung moeglicher Vorgaengerleserahmen anhand der
      aktuellen Position in der Query-DNA */
-  j = (position)%3 + 1;
+  j = (position)%NUM_PRECURSORS + 1;
 
   /* 3 Faelle zur Bestimmung der Vorgaengermenge */
   if (current_frame == 0)

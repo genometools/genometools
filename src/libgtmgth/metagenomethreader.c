@@ -16,9 +16,10 @@
 */
 
 #include "libgtcore/fileutils.h"
+#include "libgtcore/hashmap-generic.h"
 #include "libgtcore/unused.h"
 #include "libgtmatch/giextract.pr"
-#include "libgtcore/hashmap-generic.h"
+#include "mg_xmlparser.h"
 #include "metagenomethreader.h"
 /* Funktion zur Ausgabe des Statistikbereichs
    Parameter: Schluessel, Value, User-Data, Env-Variable
@@ -26,12 +27,6 @@
 static enum iterator_op
 printout_hits(UNUSED char *key,
               unsigned long *value, void *data, Error * err);
-
-/* Funktion zum Aufruf des XML-Parsers
-   Parameter: Zeiger auf ParseStruct-Struktur, Zeiger auf die XML-Datei,
-              Env-Variable
-   Returnwert: had_err */
-int mg_xmlparser(ParseStruct *, GenFile *, Error *);
 
 static OPrval parse_options(int *parsed_args,
                             MetagenomeThreaderArguments

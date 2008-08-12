@@ -228,19 +228,8 @@ DECLARE_SAFE_DEREF(unsigned long *, ulp)
    Returnwert: Fehlercode */
 int metagenomethreader(int argc, const char **argv, Error *);
 
-/* Funktion zur Umwandlung eines Zeichen in einen kleinbuchstaben
-   Parameter:  Zeichen als int-Wert
-   Returnwert: das Zeichen als Kleinbuchstabe - int-Wert */
-int tolower(int);
-
-/* Funktion zur Ueberpruefung, ob ein Zeichen ein Buchstabe ist
-   Parameter: Zeichen
-   Returnwert: Buchstabe: von 0 verschiedener Wert, sonst 0 */
-int isalpha(int);
-
 /* Funktion zur Ueberpruefung auf ein Stop-Codon
-   Parameter:  Zeiger auf ParseStruct-Struktur, Zeiger auf ein Triplet
-               von Zeichen
+   Parameter:  Zeiger auf ein Triplet von Zeichen
    Returnwert: 0 = kein Stop-Codon, 1 = Stop-Codon */
 short check_stopcodon(char *);
 
