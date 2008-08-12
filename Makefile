@@ -631,17 +631,18 @@ GTDISTBASENAME:="gt-$(VERSION)-$(SYSTEMNAME)-${BIT}"
 DISTDIR:="$(CURDIR)/dist/$(SYSTEMNAME)"
 GTDISTDIR:="$(DISTDIR)/$(GTDISTBASENAME)"
 
-dist: all
+dist: all manuals
 	@echo "[build distribution]"
 	@rm -rf $(GTDISTDIR)
 	@rm -rf $(DISTDIR)/$(GTDISTBASENAME).tar.gz
-	@mkdir -p $(GTDISTDIR)/bin
+	@mkdir -p $(GTDISTDIR)/bin $(GTDISTDIR)/doc
 	@cp $(CURDIR)/doc/dist_readme.txt $(GTDISTDIR)/README
 	@cp $(CURDIR)/LICENSE $(GTDISTDIR)
 	@cp $(CURDIR)/CONTRIBUTORS $(GTDISTDIR)
 	@cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
 	@cp $(CURDIR)/bin/gt $(GTDISTDIR)/bin
 	@strip $(GTDISTDIR)/bin/gt
+	@cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
 	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
 	@cd $(DISTDIR) && tar cf $(GTDISTBASENAME).tar $(GTDISTBASENAME)
 	@cd $(DISTDIR) && gzip -f -9 $(GTDISTBASENAME).tar
