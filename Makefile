@@ -623,7 +623,7 @@ ifeq ($(libgtview),yes)
 endif
 
 .SUFFIXES:
-.PHONY: dist srcdist release gt install docs installwww splint test clean cleanup
+.PHONY: dist srcdist release gt install docs manuals installwww splint test clean cleanup
 
 VERSION:="`cat $(CURDIR)/VERSION`"
 SYSTEMNAME:="$(SYSTEM)_$(MACHINE)"
@@ -661,6 +661,10 @@ release:
 docs: bin/gt
 	bin/gt gtscripts/gtdoc.lua -html $(CURDIR) \
         > www/genometools.org/htdocs/docs.html
+
+manuals:
+	$(MAKE) -C $(CURDIR)/doc/manuals
+
 
 installwww:
 # install genometools.org website
