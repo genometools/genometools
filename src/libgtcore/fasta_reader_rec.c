@@ -155,7 +155,7 @@ FastaReader* fasta_reader_rec_new(Str *sequence_filename)
   FastaReader *fr = fasta_reader_create(fasta_reader_rec_class());
   FastaReaderRec *fasta_reader_rec = fasta_reader_rec_cast(fr);
   fasta_reader_rec->seqio = io_new(sequence_filename
-                                   ?  str_get(sequence_filename) : NULL,
+                                   ? str_get(sequence_filename) : NULL,
                                    "r");
   return fr;
 }
