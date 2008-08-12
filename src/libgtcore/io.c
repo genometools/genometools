@@ -24,10 +24,9 @@
 
 struct IO {
   GenFile *fp;
-  char unget_char;
   Str *path;
   unsigned long line_number;
-  bool unget_used, line_start;
+  bool line_start;
 };
 
 IO* io_new(const char *path, const char *mode)
@@ -36,16 +35,9 @@ IO* io_new(const char *path, const char *mode)
   assert(mode);
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
   io = ma_malloc(sizeof (IO));
-  if (path) {
-    io->fp = genfile_xopen(path, mode);
-    io->path = str_new_cstr(path);
-  }
-  else {
-    io->fp = NULL;
-    io->path = str_new_cstr("stdin");
-  }
+  io->fp = genfile_xopen(path, mode);
+  io->path = path ? str_new_cstr(path) : str_new_cstr("stdin");
   io->line_number = 1;
-  io->unget_used = false;
   io->line_start = true;
   return io;
 }
@@ -54,13 +46,6 @@ int io_get_char(IO *io, char *c)
 {
   int cc;
   assert(io && c);
-  if (io->unget_used) {
-    *c = io->unget_char;
-    io->unget_used = false;
-    if (io->unget_char == EOF)
-      return -1;
-    return 0;
-  }
   cc = genfile_xfgetc(io->fp);
   if (cc == '\n') {
     io->line_number++;
@@ -77,9 +62,7 @@ int io_get_char(IO *io, char *c)
 void io_unget_char(IO *io, char c)
 {
   assert(io);
-  assert(!io->unget_used); /* only one char can be unget at a time */
-  io->unget_char = c;
-  io->unget_used = true;
+  genfile_unget_char(io->fp, c);
 }
 
 bool io_line_start(const IO *io)

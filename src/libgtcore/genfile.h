@@ -73,6 +73,10 @@ GenFileMode genfile_mode(GenFile*);
 /* Return next character from <genfile> of EOF, if end-of-file is reached. */
 int         genfile_xfgetc(GenFile *genfile);
 
+/* Unget character <c> to <genfile> (which obviously cannot be NULL).
+   Can only be used once at a time. */
+void        genfile_unget_char(GenFile *genfile, char c);
+
 /* printf(3) for generic files */
 void        genfile_xprintf(GenFile*, const char *format, ...)
   __attribute__ ((format (printf, 2, 3)));

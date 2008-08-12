@@ -100,7 +100,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
             had_err = -1;
             break;
           }
-          is->fpin = NULL;
+          is->fpin = genfile_xopen(NULL, "r");
           is->file_is_open = true;
           is->stdin_argument = true;
         }

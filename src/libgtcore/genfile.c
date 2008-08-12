@@ -34,16 +34,18 @@ struct GenFile {
     BZFILE *bzfile;
   } fileptr;
   char *orig_path,
-       *orig_mode;
+       *orig_mode,
+       unget_char;
+  bool is_stdin,
+       unget_used;
 };
 
 GenFileMode genfilemode_determine(const char *path)
 {
   size_t path_length;
-
-  assert(path);
+  if (!path)
+    return GFM_UNCOMPRESSED;
   path_length = strlen(path);
-
   if (path_length >= 4 && strcmp(".gz", path + path_length - 3) == 0)
     return GFM_GZIP;
   if (path_length >= 5 && strcmp(".bz2", path + path_length - 4) == 0)
@@ -88,34 +90,41 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
 {
   GenFile *genfile;
   error_check(err);
-  assert(path && mode);
+  assert(mode);
   genfile = ma_calloc(1, sizeof (GenFile));
   genfile->mode = genfilemode;
-  switch (genfilemode) {
-    case GFM_UNCOMPRESSED:
-      genfile->fileptr.file = fa_fopen(path, mode, err);
-      if (!genfile->fileptr.file) {
-        genfile_delete(genfile);
-        return NULL;
-      }
-      break;
-    case GFM_GZIP:
-      genfile->fileptr.gzfile = fa_gzopen(path, mode, err);
-      if (!genfile->fileptr.gzfile) {
-        genfile_delete(genfile);
-        return NULL;
-      }
-      break;
-    case GFM_BZIP2:
-      genfile->fileptr.bzfile = fa_bzopen(path, mode, err);
-      if (!genfile->fileptr.bzfile) {
-        genfile_delete(genfile);
-        return NULL;
-      }
-      genfile->orig_path = cstr_dup(path);
-      genfile->orig_mode = cstr_dup(path);
-      break;
-    default: assert(0);
+  if (path) {
+    switch (genfilemode) {
+      case GFM_UNCOMPRESSED:
+        genfile->fileptr.file = fa_fopen(path, mode, err);
+        if (!genfile->fileptr.file) {
+          genfile_delete(genfile);
+          return NULL;
+        }
+        break;
+      case GFM_GZIP:
+        genfile->fileptr.gzfile = fa_gzopen(path, mode, err);
+        if (!genfile->fileptr.gzfile) {
+          genfile_delete(genfile);
+          return NULL;
+        }
+        break;
+      case GFM_BZIP2:
+        genfile->fileptr.bzfile = fa_bzopen(path, mode, err);
+        if (!genfile->fileptr.bzfile) {
+          genfile_delete(genfile);
+          return NULL;
+        }
+        genfile->orig_path = cstr_dup(path);
+        genfile->orig_mode = cstr_dup(path);
+        break;
+      default: assert(0);
+    }
+  }
+  else {
+    assert(genfilemode == GFM_UNCOMPRESSED);
+    genfile->fileptr.file = stdin;
+    genfile->is_stdin = true;
   }
   return genfile;
 }
@@ -124,29 +133,36 @@ GenFile* genfile_xopen_w_gfmode(GenFileMode genfilemode, const char *path,
                                 const char *mode)
 {
   GenFile *genfile;
-  assert(path && mode);
+  assert(mode);
   genfile = ma_calloc(1, sizeof (GenFile));
   genfile->mode = genfilemode;
-  switch (genfilemode) {
-    case GFM_UNCOMPRESSED:
-      genfile->fileptr.file = fa_xfopen(path, mode);
-      break;
-    case GFM_GZIP:
-      genfile->fileptr.gzfile = fa_xgzopen(path, mode);
-      break;
-    case GFM_BZIP2:
-      genfile->fileptr.bzfile = fa_xbzopen(path, mode);
-      genfile->orig_path = cstr_dup(path);
-      genfile->orig_mode = cstr_dup(path);
-      break;
-    default: assert(0);
+  if (path) {
+    switch (genfilemode) {
+      case GFM_UNCOMPRESSED:
+        genfile->fileptr.file = fa_xfopen(path, mode);
+        break;
+      case GFM_GZIP:
+        genfile->fileptr.gzfile = fa_xgzopen(path, mode);
+        break;
+      case GFM_BZIP2:
+        genfile->fileptr.bzfile = fa_xbzopen(path, mode);
+        genfile->orig_path = cstr_dup(path);
+        genfile->orig_mode = cstr_dup(path);
+        break;
+      default: assert(0);
+    }
+  }
+  else {
+    assert(genfilemode == GFM_UNCOMPRESSED);
+    genfile->fileptr.file = stdin;
+    genfile->is_stdin = true;
   }
   return genfile;
 }
 
 GenFile* genfile_xopen(const char *path, const char *mode)
 {
-  assert(path && mode);
+  assert(mode);
   return genfile_xopen_w_gfmode(genfilemode_determine(path), path, mode);
 }
 
@@ -170,22 +186,36 @@ int genfile_xfgetc(GenFile *genfile)
 {
   int c = -1;
   if (genfile) {
-    switch (genfile->mode) {
-      case GFM_UNCOMPRESSED:
-        c = xfgetc(genfile->fileptr.file);
-        break;
-      case GFM_GZIP:
-        c = xgzfgetc(genfile->fileptr.gzfile);
-        break;
-      case GFM_BZIP2:
-        c = xbzfgetc(genfile->fileptr.bzfile);
-        break;
-      default: assert(0);
+    if (genfile->unget_used) {
+      c = genfile->unget_char;
+      genfile->unget_used = false;
+    }
+    else {
+      switch (genfile->mode) {
+        case GFM_UNCOMPRESSED:
+          c = xfgetc(genfile->fileptr.file);
+          break;
+        case GFM_GZIP:
+          c = xgzfgetc(genfile->fileptr.gzfile);
+          break;
+        case GFM_BZIP2:
+          c = xbzfgetc(genfile->fileptr.bzfile);
+          break;
+        default: assert(0);
+      }
     }
   }
   else
     c = xfgetc(stdin);
   return c;
+}
+
+void genfile_unget_char(GenFile *genfile, char c)
+{
+  assert(genfile);
+  assert(!genfile->unget_used); /* only one char can be unget at a time */
+  genfile->unget_char = c;
+  genfile->unget_used = true;
 }
 
 static int vgzprintf(gzFile file, const char *format, va_list va)
@@ -349,7 +379,8 @@ void genfile_close(GenFile *genfile)
   if (!genfile) return;
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
-        fa_fclose(genfile->fileptr.file);
+        if (!genfile->is_stdin)
+          fa_fclose(genfile->fileptr.file);
       break;
     case GFM_GZIP:
         fa_gzclose(genfile->fileptr.gzfile);
