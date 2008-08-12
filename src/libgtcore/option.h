@@ -46,6 +46,8 @@ typedef int  (*OptionParserHookFunc)(void *data, Error*);
 OptionParser* option_parser_new(const char *synopsis, const char *one_liner);
 /* takes ownership */
 void          option_parser_add_option(OptionParser*, Option*);
+/* refer to manual at the end of help output */
+void          option_parser_refer_to_manual(OptionParser*);
 void          option_parser_set_comment_func(OptionParser*, ShowCommentFunc,
                                              void* data);
 /* set the mailadress used in the final ``Report bugs to'' line of the -help

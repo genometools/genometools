@@ -61,7 +61,8 @@ struct OptionParser {
        *one_liner;
   Array *options,
         *hooks;
-  bool parser_called;
+  bool parser_called,
+       refer_to_manual;
   ShowCommentFunc comment_func;
   void *comment_func_data;
   const char *mailaddress;
@@ -185,6 +186,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner)
   op->options = array_new(sizeof (Option*));
   op->hooks = NULL;
   op->parser_called = false;
+  op->refer_to_manual = false;
   op->comment_func = NULL;
   op->comment_func_data = NULL;
   op->mailaddress = NULL;
@@ -197,6 +199,12 @@ void option_parser_add_option(OptionParser *op, Option *o)
 {
   assert(op && o);
   array_add(op->options, o);
+}
+
+void option_parser_refer_to_manual(OptionParser *op)
+{
+  assert(op);
+  op->refer_to_manual = true;
 }
 
 void option_parser_set_comment_func(OptionParser *op,
@@ -393,6 +401,10 @@ static int show_help(OptionParser *op, OptionType optiontype, Error *err)
   if (op->comment_func)
     had_err = op->comment_func(op->progname, op->comment_func_data, err);
   if (!had_err) {
+    if (op->refer_to_manual) {
+      printf("\nFor detailed information, please refer to the manual of%s.",
+             op->progname + cstr_length_up_to_char(op->progname, ' '));
+    }
     printf("\nReport bugs to %s.\n",
            op->mailaddress ? op->mailaddress : MAILADDRESS);
   }

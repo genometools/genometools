@@ -434,6 +434,7 @@ static OPrval parse_options(int *parsed_args,
 
   option_imply_either_2(optionlongoutput, optionmintsd, optionmotif);
 
+  option_parser_refer_to_manual(op);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc,
                                err);
   lo->vicinityforcorrectboundaries = (Seqpos) vicinityforcorrectboundaries;

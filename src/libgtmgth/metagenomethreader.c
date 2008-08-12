@@ -219,6 +219,7 @@ static OPrval parse_options(int *parsed_args,
 
   option_parser_set_mailaddress(op, "<dschmitz@zbh.uni-hamburg.de>");
   option_parser_set_min_max_args(op, 3, 3);
+  option_parser_refer_to_manual(op);
 
   /* es werden die Parameter XML-File, Query-Fasta-File und Hit-FASTA-File
      erwartet, Min und Max. der Anzahl an Parametern ist also 3 */

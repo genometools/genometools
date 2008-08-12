@@ -151,6 +151,7 @@ static OPrval parsegfmsub(bool doms,
     gfmsubcallinfo->verifywitnesspos = false;
   }
 
+  option_parser_refer_to_manual(op);
   oprval = option_parser_parse(op, &parsed_args, argc, argv,
                                versionfunc,err);
 
