@@ -548,19 +548,19 @@ end
 Name "gt gff3 -typecheck sofa.obo"
 Keywords "gt_gff3 typecheck"
 Test do
-  run_test"#{$bin}gt gff3 -typecheck #{$obodir}sofa.obo #{obo_gff3_file}"
+  run_test "#{$bin}gt gff3 -typecheck #{$obodir}sofa.obo #{obo_gff3_file}"
 end
 
 Name "gt gff3 -typecheck so.obo"
 Keywords "gt_gff3 typecheck"
 Test do
-  run_test"#{$bin}gt gff3 -typecheck #{$obodir}so.obo #{obo_gff3_file}"
+  run_test "#{$bin}gt gff3 -typecheck #{$obodir}so.obo #{obo_gff3_file}"
 end
 
 Name "gt gff3 -typecheck so-xp.obo"
 Keywords "gt_gff3 typecheck"
 Test do
-  run_test"#{$bin}gt gff3 -typecheck #{$obodir}so-xp.obo #{obo_gff3_file}"
+  run_test "#{$bin}gt gff3 -typecheck #{$obodir}so-xp.obo #{obo_gff3_file}"
 end
 
 # XXX: fix this bug from TODO list
