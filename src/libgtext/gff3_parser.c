@@ -643,6 +643,32 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   return had_err;
 }
 
+static int parse_first_gff3_line(const char *line, const char *filename,
+                                 Error *err)
+{
+  int version, had_err = 0;
+  error_check(err);
+  assert(line && filename);
+  if (strncmp(line, GFF_VERSION_PREFIX, strlen(GFF_VERSION_PREFIX))) {
+    error_set(err, "line 1 in file \"%s\" does not begin with \"%s\"", filename,
+              GFF_VERSION_PREFIX);
+    had_err = -1;
+  }
+  if (!had_err) {
+    line += strlen(GFF_VERSION_PREFIX);
+    /* skip blanks */
+    while (line[0] == ' ')
+      line++;
+    had_err = parse_int_line(&version, line, 1, filename, err);
+  }
+  if (!had_err && version != GFF_VERSION) {
+    error_set(err, "GFF version %d does not equal required version %u ",
+              version, GFF_VERSION);
+    had_err = -1;
+  }
+  return had_err;
+}
+
 static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                 char *line, size_t line_length,
                                 Str *filenamestr, unsigned int line_number,
@@ -808,7 +834,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
   Str *line_buffer;
   char *line;
   const char *filename;
-  int rval, version, had_err = 0;
+  int rval, had_err = 0;
 
   error_check(err);
 
@@ -823,30 +849,8 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     (*line_number)++;
 
     if (*line_number == 1) {
-      if (strncmp(line, GFF_VERSION_PREFIX, strlen(GFF_VERSION_PREFIX))) {
-        error_set(err, "line %llu in file \"%s\" does not begin with \"%s\"",
-                  *line_number, filename, GFF_VERSION_PREFIX);
-        had_err = -1;
+      if ((had_err = parse_first_gff3_line(line, filename, err)))
         break;
-      }
-      if (!had_err) {
-        line += strlen(GFF_VERSION_PREFIX);
-        /* skip blanks */
-        while (line[0] == ' ')
-          line++;
-        if (parse_int_line(&version, line, *line_number, filename, err)) {
-          had_err = -1;
-          break;
-        }
-      }
-      if (!had_err) {
-        if (version != GFF_VERSION) {
-          error_set(err, "GFF version %d does not equal required version %u ",
-                    version, GFF_VERSION);
-          had_err = -1;
-          break;
-        }
-      }
     }
     else if (line_length == 0) {
       warning("skipping blank line %llu in file \"%s\"", *line_number,
