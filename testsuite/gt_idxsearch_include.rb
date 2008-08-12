@@ -46,10 +46,10 @@ def checktagerator(queryfile,ms)
              :maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -e 0 -pck pck -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -q patternfile -nowildcards",
-             :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -pck pck -q patternfile -nowildcards",
-             :maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -q patternfile" +
+             " -nowildcards", :maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -pck pck -q patternfile" +
+             " -nowildcards", :maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -pck pck -q patternfile " +
              " -nowildcards -maxocc 10",
              :maxtime => 100)
@@ -57,11 +57,12 @@ def checktagerator(queryfile,ms)
 end
 
 def createandcheckgreedyfwdmat(reffile,queryfile)
-  run "#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}"
+  run("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}",
+      :maxtime => 100)
   run "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
            "-db #{reffile}"
-  run "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
-           "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev"
+  run("#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
+      "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev", :maxtime => 100)
   run "#{$bin}gt prebwt -maxdepth 4 -pck pck"
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
@@ -90,7 +91,7 @@ allfiles.each do |reffile|
     run_test("#{$bin}gt packedindex mkindex -tis -indexname pck " +
              "-sprank -db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
              " -locfreq 32 -dir rev", 
-             :maxtime => 600)
+             :maxtime => 1200)
   end
 end
 

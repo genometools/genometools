@@ -97,8 +97,8 @@ end
 Name "extract_swalign"
 Keywords "gt_scripts extract"
 Test do
-  run_test "#{$bin}gt #{$testdata}../gtscripts/extract_swalign.lua #{$cur} " +
-           "#{$testdata}BLOSUM62"
+  run_test("#{$bin}gt #{$testdata}../gtscripts/extract_swalign.lua #{$cur} " +
+           "#{$testdata}BLOSUM62", :maxtime => 100)
   run "cd swalign && ${MAKE:-make}"
   if not File.exists?("swalign.tar.gz") then
     raise TestFailed, "file 'swalign.tar.gz' does not exist"
@@ -110,7 +110,7 @@ Keywords "gt_scripts extract"
 Test do
   run_test "#{$bin}gt #{$testdata}../gtscripts/extract_swalign.lua -sol " +
            "#{$cur} #{$testdata}BLOSUM62"
-  run "cd swalign && ${MAKE:-make} test"
+  run("cd swalign && ${MAKE:-make} test", :maxtime => 100)
   if not File.exists?("swalign.tar.gz") then
     raise TestFailed, "file 'swalign.tar.gz' does not exist"
   end
@@ -129,7 +129,8 @@ end
 Name "extract_linearalign"
 Keywords "gt_scripts extract"
 Test do
-  run_test "#{$bin}gt #{$testdata}../gtscripts/extract_linearalign.lua #{$cur}"
+  run_test("#{$bin}gt #{$testdata}../gtscripts/extract_linearalign.lua #{$cur}",
+           :maxtime => 100)
   run "cd linearalign && ${MAKE:-make} test"
   if not File.exists?("linearalign.tar.gz") then
     raise TestFailed, "file 'linearalign.tar.gz' does not exist"
@@ -139,8 +140,8 @@ end
 Name "extract_assemblegreedy"
 Keywords "gt_scripts extract"
 Test do
-  run_test "#{$bin}gt #{$testdata}../gtscripts/extract_assemblegreedy.lua " +
-           "#{$cur}"
+  run_test("#{$bin}gt #{$testdata}../gtscripts/extract_assemblegreedy.lua " +
+           "#{$cur}", :maxtime => 100)
   run "cd assemblegreedy && ${MAKE:-make} test"
   if not File.exists?("assemblegreedy.tar.gz") then
     raise TestFailed, "file 'assemblegreedy.tar.gz' does not exist"
@@ -162,8 +163,9 @@ end
 Name "extract_consensus_sa"
 Keywords "gt_scripts extract"
 Test do
-  run_test "#{$bin}gt " +
-           "#{$testdata}../gtscripts/extract_consensus_sa.lua #{$cur}"
+  run_test("#{$bin}gt " +
+           "#{$testdata}../gtscripts/extract_consensus_sa.lua #{$cur}",
+           :maxtime => 100)
   run "cd consensus_sa && ${MAKE:-make}"
   if not File.exists?("consensus_sa.tar.gz") then
     raise TestFailed, "file 'consensus_sa.tar.gz' does not exist"
