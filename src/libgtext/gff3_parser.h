@@ -22,6 +22,7 @@
 
 #define GFF_VERSION         3
 #define GFF_VERSION_PREFIX  "##gff-version"
+#define GFF_FASTA_DIRECTIVE "##FASTA"
 #define GFF_SEQUENCE_REGION "##sequence-region"
 #define GFF_TERMINATOR      "###"
 

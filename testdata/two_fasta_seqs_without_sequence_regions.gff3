@@ -1,0 +1,8 @@
+##gff-version   3
+seq1	.	gene	1	10	.	+	.	.
+seq2	.	gene	1	10	.	+	.	.
+##FASTA
+>seq1
+cttctgggcg
+>seq2
+tgttcattgc

@@ -563,6 +563,43 @@ Test do
   run_test "#{$bin}gt gff3 -typecheck #{$obodir}so-xp.obo #{obo_gff3_file}"
 end
 
+Name "gt gff3 minimal fasta file"
+Keywords "gt_gff3 fasta"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}minimal_fasta.gff3"
+end
+
+Name "gt gff3 minimal fasta file (without directive)"
+Keywords "gt_gff3 fasta"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}minimal_fasta_without_directive.gff3"
+end
+
+Name "gt gff3 standard fasta example"
+Keywords "gt_gff3 fasta"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}standard_fasta_example.gff3"
+end
+
+Name "gt gff3 two fasta sequences"
+Keywords "gt_gff3 fasta"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}two_fasta_seqs.gff3"
+end
+
+Name "gt gff3 fasta without sequence region"
+Keywords "gt_gff3 fasta"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}fasta_without_sequence_region.gff3"
+end
+
+Name "gt gff3 two fasta sequences without sequence region"
+Keywords "gt_gff3 fasta"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}two_fasta_seqs_without_sequence_regions.gff3"
+end
+
+
 # XXX: fix this bug from TODO list
 =begin
 Name "gt gff3 multiple top-level parents"
