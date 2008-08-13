@@ -261,7 +261,6 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
   Bwtseqcontextiterator *bsci;
 
   bsci = newBwtseqcontextiterator(limdfsresources->genericindex,bound);
-
   memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
 #ifdef SKDEBUG
   printf("retrieve context for bound = %lu\n",(unsigned long) bound);
@@ -298,7 +297,6 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       if (pprefixlen > 1UL) /* check for success */
       {
         Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,left);
-
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                       false,
                                       limdfsresources->totallength,

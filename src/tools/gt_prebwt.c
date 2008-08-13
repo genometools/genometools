@@ -17,8 +17,10 @@
 
 #include <math.h>
 #include "libgtcore/tool.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/sarr-def.h"
+#include "libgtmatch/pckbucket.h"
 #include "libgtmatch/eis-voiditf.h"
 #include "libgtmatch/esa-map.pr"
 

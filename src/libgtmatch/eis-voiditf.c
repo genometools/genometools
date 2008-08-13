@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,8 +20,6 @@
 #include "eis-voiditf.h"
 #include "divmodmul.h"
 #include "splititv.h"
-
-#include "initbasepower.pr"
 
 Seqpos bwtseqfirstmatch(const void *voidbwtseq,Seqpos bound)
 {
@@ -186,6 +184,32 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
   }
 }
 
+unsigned long bwtrangesplitallwithoutspecial(Matchbound *mbtab,
+                                             Seqpos *rangeOccs,
+                                             const void *voidBwtSeq,
+                                             Seqpos lbound,
+                                             Seqpos ubound)
+{
+  unsigned long idx;
+  const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
+  AlphabetRangeSize rangesize
+    = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),0);
+
+  BWTSeqPosPairRangeOcc(bwtseq, 0, lbound, ubound,rangeOccs);
+  for (idx = 0; idx < rangesize; idx++)
+  {
+    if (rangeOccs[idx] < rangeOccs[rangesize+idx])
+    {
+      mbtab[idx].lowerbound = bwtseq->count[idx] + rangeOccs[idx];
+      mbtab[idx].upperbound = bwtseq->count[idx] + rangeOccs[rangesize+idx];
+    } else
+    {
+      mbtab[idx].lowerbound = mbtab[idx].upperbound = 0;
+    }
+  }
+  return rangesize;
+}
+
 /*
 void bwtrangewithspecial(UNUSED ArrayBoundswithchar *bwci,
                          Seqpos *rangeOccs,
@@ -286,135 +310,4 @@ void pck_exactpatternmatching(const void *voidbwtseq,
     deleteEMIterator(bsemi);
     bsemi = NULL;
   }
-}
-
-typedef struct
-{
-  Seqpos lowerbound,
-         upperbound;
-  unsigned long depth;
-  Codetype code;
-} Boundsatdepth;
-
-DECLAREARRAYSTRUCT(Boundsatdepth);
-
-typedef struct
-{
-  Seqpos lowerbound, upperbound;
-} Matchbound;
-
-struct Pckbuckettable
-{
-  Matchbound **mbtab;
-  unsigned int maxdepth;
-  unsigned long numofvalues;
-  Codetype *basepower, maxnumofvalues;
-};
-
-static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
-                                                  unsigned int maxdepth)
-{
-  Matchbound *cptr;
-  unsigned int idx;
-  Pckbuckettable *pckbt;
-
-  pckbt = ma_malloc(sizeof(Pckbuckettable));
-  pckbt->basepower = initbasepower(numofchars,maxdepth);
-  pckbt->maxdepth = maxdepth;
-  pckbt->maxnumofvalues = pckbt->numofvalues = 0;
-  for (idx=0; idx <= maxdepth; idx++)
-  {
-    pckbt->maxnumofvalues += pckbt->basepower[idx];
-  }
-  pckbt->mbtab = ma_malloc(sizeof(Matchbound *) * (maxdepth+1));
-  pckbt->mbtab[0] = ma_malloc(sizeof(Matchbound) * pckbt->maxnumofvalues);
-  for (cptr = pckbt->mbtab[0];
-       cptr < pckbt->mbtab[0] + pckbt->maxnumofvalues; cptr++)
-  {
-    cptr->lowerbound = cptr->upperbound = 0;
-  }
-  for (idx=0; idx<maxdepth; idx++)
-  {
-    pckbt->mbtab[idx+1] = pckbt->mbtab[idx] + pckbt->basepower[idx];
-  }
-  return pckbt;
-}
-
-void pckbuckettable_free(Pckbuckettable *pckbt)
-{
-  ma_free(pckbt->mbtab[0]);
-  ma_free(pckbt->mbtab);
-  ma_free(pckbt->basepower);
-  ma_free(pckbt);
-}
-
-static void storeBoundsatdepth(Pckbuckettable *pckbt,const Boundsatdepth *bd)
-{
-  assert(bd->depth <= pckbt->maxdepth);
-  assert(bd->code <= pckbt->basepower[bd->depth]);
-  assert(pckbt->mbtab[bd->depth][bd->code].lowerbound == 0 &&
-         pckbt->mbtab[bd->depth][bd->code].upperbound == 0);
-  assert(pckbt->numofvalues < pckbt->maxnumofvalues);
-  pckbt->numofvalues++;
-  pckbt->mbtab[bd->depth][bd->code].lowerbound = bd->lowerbound;
-  pckbt->mbtab[bd->depth][bd->code].upperbound = bd->upperbound;
-}
-
-Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
-                                   unsigned int numofchars,
-                                   Seqpos totallength,
-                                   unsigned int maxdepth)
-{
-  const BWTSeq *bwtseq = (const BWTSeq *) voidbwtseq;
-  ArrayBoundsatdepth stack;
-  Boundsatdepth parent, child;
-  unsigned long idx;
-  Seqpos *rangeOccs;
-  AlphabetRangeSize rangesize;
-  Pckbuckettable *pckbt;
-
-  rangesize = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),0);
-  INITARRAY(&stack,Boundsatdepth);
-  child.lowerbound = 0;
-  child.upperbound = totallength+1;
-  child.depth = 0;
-  child.code = (Codetype) 0;
-  STOREINARRAY(&stack,Boundsatdepth,128,child);
-  rangeOccs = ma_malloc(sizeof(*rangeOccs) * MULT2(numofchars));
-  pckbt = allocandinitpckbuckettable(numofchars,maxdepth);
-  while (stack.nextfreeBoundsatdepth > 0)
-  {
-    parent = stack.spaceBoundsatdepth[--stack.nextfreeBoundsatdepth];
-    assert(parent.lowerbound < parent.upperbound);
-    BWTSeqPosPairRangeOcc(bwtseq,0,parent.lowerbound,parent.upperbound,
-                          rangeOccs);
-    for (idx = 0; idx < rangesize; idx++)
-    {
-      if (rangeOccs[idx] < rangeOccs[rangesize+idx])
-      {
-        child.lowerbound = bwtseq->count[idx] + rangeOccs[idx];
-        child.upperbound = bwtseq->count[idx] + rangeOccs[rangesize+idx];
-      } else
-      {
-        child.lowerbound = child.upperbound = 0;
-      }
-      child.depth = parent.depth + 1;
-      assert(child.depth <= (unsigned long) maxdepth);
-      child.code = parent.code * numofchars + idx;
-      /*
-      printf("depth=%lu code=%lu: %lu %lu\n",
-             child.depth,child.code,(unsigned long) child.lowerbound,
-                                    (unsigned long) child.upperbound);
-      */
-      storeBoundsatdepth(pckbt,&child);
-      if (child.depth < (unsigned long) maxdepth &&
-          child.lowerbound + 1 < child.upperbound)
-      {
-        STOREINARRAY(&stack,Boundsatdepth,128,child);
-      }
-    }
-  }
-  FREEARRAY(&stack,Boundsatdepth);
-  ma_free(rangeOccs);
-  return pckbt;
 }
