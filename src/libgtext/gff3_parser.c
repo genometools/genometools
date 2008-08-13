@@ -411,6 +411,16 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
   return had_err;
 }
 
+static bool is_blank_attribute(const char *attribute)
+{
+  while (*attribute != '\0') {
+    if (*attribute != ' ')
+      return false;
+    attribute++;
+  }
+  return true;
+}
+
 static int parse_attributes(char *attributes, GenomeNode *genome_feature,
                             bool *is_child, GFF3Parser *gff3_parser,
                             const char *filename, unsigned int line_number,
@@ -441,6 +451,8 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
       else
         break; /* no attributes to parse */
     }
+    else if (is_blank_attribute(token))
+      continue;
     else {
       splitter_reset(tmp_splitter);
       splitter_split(tmp_splitter, token, strlen(token), '=');

@@ -563,6 +563,12 @@ Test do
   run_test "#{$bin}gt gff3 -typecheck #{$obodir}so-xp.obo #{obo_gff3_file}"
 end
 
+Name "gt gff3 blank attributes"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}blank_attributes.gff3"
+end
+
 Name "gt gff3 minimal fasta file"
 Keywords "gt_gff3 fasta"
 Test do
