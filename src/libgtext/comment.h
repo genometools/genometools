@@ -28,6 +28,6 @@ typedef struct Comment Comment;
 const GenomeNodeClass* comment_class(void);
 GenomeNode*            comment_new(const char *comment, Str *filename,
                                    unsigned int line_number);
-const char*            comment_get_comment(Comment *c);
+const char*            comment_get_comment(const Comment*);
 
 #endif

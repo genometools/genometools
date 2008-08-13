@@ -89,7 +89,7 @@ GenomeNode* comment_new(const char *comment, Str *filename,
   return gn;
 }
 
-const char* comment_get_comment(Comment *c)
+const char* comment_get_comment(const Comment *c)
 {
   assert(c && c->comment);
   return c->comment;
