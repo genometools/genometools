@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,12 +25,14 @@ typedef struct GenomeVisitor GenomeVisitor;
 #include "libgtext/comment.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/sequence_region.h"
+#include "libgtext/sequence_node.h"
 
 int  genome_visitor_visit_comment(GenomeVisitor*, Comment*, Error*);
 int  genome_visitor_visit_genome_feature(GenomeVisitor*, GenomeFeature*,
                                          Error*);
 int  genome_visitor_visit_sequence_region(GenomeVisitor*, SequenceRegion*,
                                           Error*);
+int  genome_visitor_visit_sequence_node(GenomeVisitor*, SequenceNode*, Error*);
 void genome_visitor_delete(GenomeVisitor *gv);
 
 #endif
