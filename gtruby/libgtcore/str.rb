@@ -24,7 +24,10 @@ module GT
   extern "Str* str_new_cstr(const char*)"
   extern "void* str_get_mem(const Str*)"
   extern "void str_append_str(Str*, const Str*)"
-  extern "char* str_get(const Str*)"
+  # we declare the return value as const char* instead of char*, because
+  # otherwise dl/import wrongly assumes that it has responsibility for the
+  # returned memory region (which leads to a double free())
+  extern "const char* str_get(const Str*)"
   extern "unsigned long str_length(const Str*)"
   extern "void str_delete(Str*)"
 
