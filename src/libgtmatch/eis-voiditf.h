@@ -93,16 +93,13 @@ Seqpos voidpackedfindfirstmatchconvert(const void *voidbwtseq,
                                        Seqpos witnessbound,
                                        unsigned long matchlength);
 
-typedef struct
-{
-  Seqpos lowerbound, upperbound;
-} Matchbound;
+typedef struct Pckbuckettable Pckbuckettable;
 
-void pck_precomputebounds(Matchbound *boundsarray,
-                          unsigned long numofbounds,
-                          const void *voidbwtseq,
-                          unsigned int alphasize,
-                          Seqpos totallength,
-                          unsigned long maxdepth);
+void pckbuckettable_free(Pckbuckettable *pckbt);
+
+Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
+                                   unsigned int alphasize,
+                                   Seqpos totallength,
+                                   unsigned int maxdepth);
 
 #endif

@@ -25,7 +25,7 @@
 typedef struct
 {
   Str *indexname;
-  unsigned long maxdepth;
+  unsigned int maxdepth;
 } Prebwtoptions;
 
 static void *gt_prebwt_arguments_new(void)
@@ -62,10 +62,9 @@ static OptionParser* gt_prebwt_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, optionpck);
   option_is_mandatory(optionpck);
 
-  option = option_new_ulong("maxdepth","specify maximum depth",
-                            &arguments->maxdepth,0);
+  option = option_new_uint_min("maxdepth","specify maximum depth (value > 0)",
+                                &arguments->maxdepth,0,1U);
   option_parser_add_option(op, option);
-
   return op;
 }
 
@@ -101,20 +100,14 @@ static int gt_prebwt_runner(UNUSED int argc,
   }
   if (!haserr)
   {
-    Matchbound *boundsarray;
-    unsigned int alphasize = getnumofcharsAlphabet(suffixarray.alpha);
-    unsigned long numofbounds;
+    unsigned int numofchars = getnumofcharsAlphabet(suffixarray.alpha);
+    Pckbuckettable *pckbt;
 
-    numofbounds = (unsigned long) pow((double) alphasize,
-                                      (double) prebwtoptions->maxdepth);
-    boundsarray = ma_malloc(sizeof(*boundsarray) * numofbounds);
-    pck_precomputebounds(boundsarray,
-                         numofbounds,
-                         (const void *) packedindex,
-                         alphasize,
-                         totallength,
-                         prebwtoptions->maxdepth);
-    ma_free(boundsarray);
+    pckbt = pckbuckettable_new((const void *) packedindex,
+                               numofchars,
+                               totallength,
+                               prebwtoptions->maxdepth);
+    pckbuckettable_free(pckbt);
   }
   freesuffixarray(&suffixarray);
   if (packedindex != NULL)
