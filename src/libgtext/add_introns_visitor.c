@@ -109,6 +109,7 @@ const GenomeVisitorClass* add_introns_visitor_class()
                                           NULL,
                                           NULL,
                                           add_introns_visitor_genome_feature,
+                                          NULL,
                                           NULL };
   return &gvc;
 }

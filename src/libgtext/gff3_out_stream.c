@@ -65,3 +65,11 @@ GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, GenFile *outfp)
   gff3_out_stream->gff3_visitor = gff3_visitor_new(outfp);
   return gs;
 }
+
+void gff3_out_stream_set_fasta_width(GenomeStream *gs,
+                                     unsigned long fasta_width)
+{
+  GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
+  assert(gff3_out_stream);
+  gff3_visitor_set_fasta_width(gff3_out_stream->gff3_visitor, fasta_width);
+}

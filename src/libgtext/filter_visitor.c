@@ -207,7 +207,7 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   error_check(err);
   filter_visitor = filter_visitor_cast(gv);
   if (!str_length(filter_visitor->seqid) || /* no seqid was specified */
-      !str_cmp(filter_visitor->seqid,    /* or seqids are equal */
+      !str_cmp(filter_visitor->seqid,       /* or seqids are equal */
                genome_node_get_seqid((GenomeNode*) sr))) {
     if (filter_visitor->contain_range.start != UNDEF_ULONG) {
       Range range = genome_node_get_range((GenomeNode*) sr);
@@ -229,13 +229,30 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   return 0;
 }
 
+static int filter_visitor_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
+                                        UNUSED Error *err)
+{
+  FilterVisitor *filter_visitor;
+  error_check(err);
+  filter_visitor = filter_visitor_cast(gv);
+  if (!str_length(filter_visitor->seqid) || /* no seqid was specified */
+      !str_cmp(filter_visitor->seqid,       /* or seqids are equal */
+               genome_node_get_seqid((GenomeNode*) sn))) {
+    queue_add(filter_visitor->genome_node_buffer, sn);
+  }
+  else
+    genome_node_rec_delete((GenomeNode*) sn);
+  return 0;
+}
+
 const GenomeVisitorClass* filter_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (FilterVisitor),
                                           filter_visitor_free,
                                           filter_visitor_comment,
                                           filter_visitor_genome_feature,
-                                          filter_visitor_sequence_region };
+                                          filter_visitor_sequence_region,
+                                          filter_visitor_sequence_node };
   return &gvc;
 }
 

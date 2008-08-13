@@ -20,16 +20,13 @@
 
 #include "libgtcore/genfile.h"
 
-/*
-   Show a fasta entry with optional <description> and mandatory <sequence> on
-   stdout. If <width> is != 0 the sequence is formatted accordingly.
- */
+/* Show a fasta entry with optional <description> and mandatory <sequence> on
+   stdout. If <width> is != 0 the sequence is formatted accordingly. */
 void fasta_show_entry(const char *description, const char *sequence,
                       unsigned long sequence_length, unsigned long width);
-/*
-   Print a fasta entry with optional <description> and mandatory <sequence> to
-   <outfp>. If <width> is != 0 the sequence is formatted accordingly.
-*/
+
+/* Print a fasta entry with optional <description> and mandatory <sequence> to
+   <outfp>. If <width> is != 0 the sequence is formatted accordingly. */
 void fasta_show_entry_generic(const char *description, const char *sequence,
                               unsigned long sequence_length,
                               unsigned long width, GenFile *outfp);

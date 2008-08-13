@@ -42,6 +42,7 @@ typedef struct {
   long offset;
   Str *offsetfile,
       *typecheck;
+  unsigned long width;
   OutputFileInfo *ofi;
   GenFile *outfp;
 } GFF3Arguments;
@@ -144,6 +145,12 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   option = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, option);
 
+  /* -width */
+  option = option_new_ulong("width", "set output width for showing of embedded "
+                            "FASTA sequences\n(0 disables formatting)",
+                            &arguments->width, 0);
+  option_parser_add_option(op, option);
+
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
@@ -227,8 +234,10 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   }
 
   /* create gff3 output stream */
-  if (!had_err)
+  if (!had_err) {
     gff3_out_stream = gff3_out_stream_new(last_stream, arguments->outfp);
+    gff3_out_stream_set_fasta_width(gff3_out_stream, arguments->width);
+  }
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err) {

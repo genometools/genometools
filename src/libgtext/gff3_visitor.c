@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include "libgtcore/fasta.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/unused.h"
@@ -30,10 +31,12 @@
 
 struct GFF3Visitor {
   const GenomeVisitor parent_instance;
-  bool version_string_shown;
+  bool version_string_shown,
+       fasta_directive_shown;
   StringDistri *id_counter;
   Hashtable *genome_feature_to_id_array,
             *genome_feature_to_unique_id_str;
+  unsigned long fasta_width;
   GenFile *outfp;
 };
 
@@ -258,13 +261,32 @@ static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   return 0;
 }
 
+static int gff3_visitor_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
+                                      UNUSED Error *err)
+{
+  GFF3Visitor *gff3_visitor;
+  error_check(err);
+  gff3_visitor = gff3_visitor_cast(gv);
+  assert(gv && sn);
+  if (!gff3_visitor->fasta_directive_shown) {
+    genfile_xprintf(gff3_visitor->outfp, "%s\n", GFF_FASTA_DIRECTIVE);
+    gff3_visitor->fasta_directive_shown = true;
+  }
+  fasta_show_entry_generic(sequence_node_get_description(sn),
+                           sequence_node_get_sequence(sn),
+                           sequence_node_get_sequence_length(sn),
+                           gff3_visitor->fasta_width, gff3_visitor->outfp);
+  return 0;
+}
+
 const GenomeVisitorClass* gff3_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (GFF3Visitor),
                                           gff3_visitor_free,
                                           gff3_visitor_comment,
                                           gff3_visitor_genome_feature,
-                                          gff3_visitor_sequence_region };
+                                          gff3_visitor_sequence_region,
+                                          gff3_visitor_sequence_node };
   return &gvc;
 }
 
@@ -273,6 +295,7 @@ GenomeVisitor* gff3_visitor_new(GenFile *outfp)
   GenomeVisitor *gv = genome_visitor_create(gff3_visitor_class());
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   gff3_visitor->version_string_shown = false;
+  gff3_visitor->fasta_directive_shown = false;
   gff3_visitor->id_counter = string_distri_new();
   gff3_visitor->genome_feature_to_id_array = hashtable_new(HASH_DIRECT, NULL,
                                                            (FreeFunc)
@@ -281,6 +304,14 @@ GenomeVisitor* gff3_visitor_new(GenFile *outfp)
                                                                 NULL,
                                                                 (FreeFunc)
                                                                 str_delete);
+  gff3_visitor->fasta_width = 0;
   gff3_visitor->outfp = outfp;
   return gv;
+}
+
+void gff3_visitor_set_fasta_width(GenomeVisitor *gv, unsigned long fasta_width)
+{
+  GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
+  assert(gv);
+  gff3_visitor->fasta_width = fasta_width;
 }

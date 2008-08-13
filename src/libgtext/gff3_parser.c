@@ -671,7 +671,8 @@ static int parse_first_gff3_line(const char *line, const char *filename,
   return had_err;
 }
 
-static int parse_fasta_entry(const char *line, unsigned int line_number,
+static int parse_fasta_entry(Queue *genome_nodes, const char *line,
+                             Str *filename, unsigned int line_number,
                              GenFile *fpin, Error *err)
 {
   int had_err = 0;
@@ -682,7 +683,8 @@ static int parse_fasta_entry(const char *line, unsigned int line_number,
     had_err = -1;
   }
   if (!had_err) {
-    Str *entry = str_new();
+    GenomeNode *sequence_node;
+    Str *sequence = str_new();
     int cc;
     while ((cc = genfile_xfgetc(fpin)) != EOF) {
       if (cc == '>') {
@@ -690,10 +692,10 @@ static int parse_fasta_entry(const char *line, unsigned int line_number,
         break;
       }
       if (cc != '\n' && cc != '\r' && cc != ' ')
-        str_append_char(entry, cc);
+        str_append_char(sequence, cc);
     }
-    warning("skipping FASTA entry (and possibly more): %s", line + 1);
-    str_delete(entry);
+    sequence_node = sequence_node_new(line+1, sequence, filename, line_number);
+    queue_add(genome_nodes, sequence_node);
   }
   return had_err;
 }
@@ -900,7 +902,8 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
                                     add_auto_sr_to_queue, genome_nodes, NULL);
         assert(!had_err); /* add_auto_sr_to_queue() is sane */
       }
-      had_err = parse_fasta_entry(line, *line_number, fpin, err);
+      had_err = parse_fasta_entry(genome_nodes, line, filenamestr, *line_number,
+                                  fpin, err);
       break;
     }
     else if (line[0] == '#') {

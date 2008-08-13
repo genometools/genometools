@@ -132,6 +132,7 @@ const GenomeVisitorClass* splicesiteinfo_visitor_class()
                                           splicesiteinfo_visitor_free,
                                           NULL,
                                           splicesiteinfo_visitor_genome_feature,
+                                          NULL,
                                           NULL };
   return &gvc;
 }

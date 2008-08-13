@@ -158,6 +158,7 @@ const GenomeVisitorClass* gtf_visitor_class()
                                           gtf_visitor_free,
                                           gtf_visitor_comment,
                                           gtf_visitor_genome_feature,
+                                          NULL,
                                           NULL };
   return &gvc;
 }

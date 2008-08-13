@@ -62,7 +62,8 @@ const GenomeVisitorClass* feature_visitor_class()
                                           feature_visitor_free,
                                           NULL,
                                           feature_visitor_genome_feature,
-                                          feature_visitor_sequence_region };
+                                          feature_visitor_sequence_region,
+                                          NULL };
   return &gvc;
 }
 

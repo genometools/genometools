@@ -114,6 +114,7 @@ const GenomeVisitorClass* mergefeat_visitor_class()
                                           mergefeat_visitor_free,
                                           NULL,
                                           mergefeat_visitor_genome_feature,
+                                          NULL,
                                           NULL };
   return &gvc;
 }

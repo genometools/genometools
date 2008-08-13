@@ -113,6 +113,7 @@ const GenomeVisitorClass* extract_feat_visitor_class()
                                           extract_feat_visitor_free,
                                           NULL,
                                           extract_feat_visitor_genome_feature,
+                                          NULL,
                                           NULL };
   return &gvc;
 }

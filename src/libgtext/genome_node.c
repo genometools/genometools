@@ -43,8 +43,9 @@ typedef struct {
 
 static int compare_genome_node_type(GenomeNode *gn_a, GenomeNode *gn_b)
 {
-  void *sr_a, *sr_b;
+  void *sr_a, *sr_b, *sn_a, *sn_b;
 
+  /* sequence regions first */
   sr_a = genome_node_cast(sequence_region_class(), gn_a);
   sr_b = genome_node_cast(sequence_region_class(), gn_b);
 
@@ -52,6 +53,16 @@ static int compare_genome_node_type(GenomeNode *gn_a, GenomeNode *gn_b)
     return -1;
   if (!sr_a && sr_b)
     return 1;
+
+  /* sequence nodes last */
+  sn_a = genome_node_cast(sequence_node_class(), gn_a);
+  sn_b = genome_node_cast(sequence_node_class(), gn_b);
+
+  if (sn_a && !sn_b)
+    return 1;
+  if (!sn_a && sn_b)
+    return -1;
+
   return 0;
 }
 
@@ -59,8 +70,8 @@ int genome_node_cmp(GenomeNode *gn_a, GenomeNode *gn_b)
 {
   int rval;
   assert(gn_a && gn_b);
-  /* ensure that sequence regions come first, otherwise we don't get a valid
-     gff3 stream */
+  /* ensure that sequence regions come first and sequence nodes come last,
+     otherwise we don't get a valid GFF3 stream */
   if ((rval = compare_genome_node_type(gn_a, gn_b)))
     return rval;
 

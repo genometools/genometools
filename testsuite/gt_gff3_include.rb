@@ -566,13 +566,16 @@ end
 Name "gt gff3 minimal fasta file"
 Keywords "gt_gff3 fasta"
 Test do
-  run_test "#{$bin}gt gff3 #{$testdata}minimal_fasta.gff3"
+  run_test "#{$bin}gt gff3 -width 50 #{$testdata}minimal_fasta.gff3"
+  run "diff #{$last_stdout} #{$testdata}minimal_fasta.gff3"
 end
 
 Name "gt gff3 minimal fasta file (without directive)"
 Keywords "gt_gff3 fasta"
 Test do
-  run_test "#{$bin}gt gff3 #{$testdata}minimal_fasta_without_directive.gff3"
+  run_test "#{$bin}gt gff3 -width 50 " +
+           "#{$testdata}minimal_fasta_without_directive.gff3"
+  run "diff #{$last_stdout} #{$testdata}minimal_fasta.gff3"
 end
 
 Name "gt gff3 standard fasta example"
@@ -585,18 +588,14 @@ Name "gt gff3 two fasta sequences"
 Keywords "gt_gff3 fasta"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}two_fasta_seqs.gff3"
-end
-
-Name "gt gff3 fasta without sequence region"
-Keywords "gt_gff3 fasta"
-Test do
-  run_test "#{$bin}gt gff3 #{$testdata}fasta_without_sequence_region.gff3"
+  run "diff #{$last_stdout} #{$testdata}two_fasta_seqs.gff3"
 end
 
 Name "gt gff3 two fasta sequences without sequence region"
 Keywords "gt_gff3 fasta"
 Test do
-  run_test "#{$bin}gt gff3 #{$testdata}two_fasta_seqs_without_sequence_regions.gff3"
+  run_test "#{$bin}gt gff3 -sort #{$testdata}two_fasta_seqs_without_sequence_regions.gff3"
+  run "diff #{$last_stdout} #{$testdata}two_fasta_seqs.gff3"
 end
 
 

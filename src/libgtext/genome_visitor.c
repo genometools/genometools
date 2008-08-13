@@ -64,6 +64,16 @@ int genome_visitor_visit_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   return 0;
 }
 
+int genome_visitor_visit_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
+                                       Error *err)
+{
+  error_check(err);
+  assert(gv && sn && gv->c_class);
+  if (gv->c_class->sequence_node)
+    return gv->c_class->sequence_node(gv, sn, err);
+  return 0;
+}
+
 void genome_visitor_delete(GenomeVisitor *gv)
 {
   if (!gv) return;
