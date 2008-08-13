@@ -379,8 +379,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
       for (i = 0; i < splitter_size(attribute_splitter); i++) {
         token = splitter_get_token(attribute_splitter, i);
-        /* skip blank newline, if necessary and possible */
-        if (i && token[0])
+        /* skip leading blanks */
+        while (*token == ' ')
           token++;
         /* look for the two mandatory attributes */
         if (strncmp(token, GENE_ID_ATTRIBUTE, strlen(GENE_ID_ATTRIBUTE)) == 0) {
