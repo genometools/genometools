@@ -61,7 +61,7 @@ void           config_set_color(Config*, const char *section,
 /* Retrieve string value of <key> in <section>.
    If not set, false is returned. */
 bool           config_get_str(const Config*, const char *section,
-                               const char *key, Str*);
+                              const char *key, Str*);
 /* Set string <key> in <section> to <value>. */
 void           config_set_str(Config*, const char *section, const char *key,
                                Str *value);
