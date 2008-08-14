@@ -604,12 +604,20 @@ Test do
   run "diff #{$last_stdout} #{$testdata}two_fasta_seqs.gff3"
 end
 
-
 # XXX: fix this bug from TODO list
 =begin
 Name "gt gff3 multiple top-level parents"
 Keywords "gt_gff3"
 Test do
-  run_test"#{$bin}gt gff3 #{$testdata}multiple_top_level_parents.gff3"
+  run_test "#{$bin}gt gff3 #{$testdata}multiple_top_level_parents.gff3"
+end
+=end
+
+# XXX: implement multi-features
+=begin
+Name "gt gff3 multi-feature"
+Keywords "gt_gff3 multi-feature"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}standard_fasta_example_with_id.gff3"
 end
 =end
