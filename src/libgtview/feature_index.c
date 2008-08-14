@@ -87,7 +87,6 @@ void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr)
 void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf)
 {
   GenomeNode *gn;
-  GenomeFeature *gf_new;
   char* seqid;
   Range node_range;
   RegionInfo *info;
@@ -95,7 +94,6 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf)
   assert(fi && gf);
 
   gn = genome_node_rec_ref((GenomeNode*) gf);
-  gf_new = (GenomeFeature*) gn;
   /* get information about seqid and range */
   node_range = genome_node_get_range(gn);
   seqid = str_get(genome_node_get_seqid(gn));
