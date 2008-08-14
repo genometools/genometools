@@ -32,6 +32,7 @@ struct Block {
   Strand strand;
   GenomeFeatureType *type;
   GenomeNode *top_level_feature;
+  unsigned long reference_count;
 };
 
 /* Compare function used to insert Elements into dlist, order by type */
@@ -52,15 +53,18 @@ static int elemcmp(const void *a, const void *b)
   return -1;
 }
 
+Block* block_ref(Block *block)
+{
+  assert(block);
+  block->reference_count++;
+  return block;
+}
+
 Block* block_new(void)
 {
   Block *block;
-  Range r;
   block = ma_calloc(1, sizeof (Block));
   block->elements = dlist_new(elemcmp);
-  r.start = 0;
-  r.end = 0;
-  block->range = r;
   block->caption = NULL;
   block->show_caption = true;
   block->strand = STRAND_UNKNOWN;
@@ -87,14 +91,10 @@ void block_insert_element(Block *block, GenomeNode *gn)
   GenomeFeatureType *gn_type;
 
   assert(block && gn);
-
   gn_r = genome_node_get_range(gn);
   gn_type = genome_feature_get_type((GenomeFeature*) gn);
-
-  log_log("inserting %s (%lu-%lu) into block",
-          genome_feature_type_get_cstr(gn_type),
-          gn_r.start, gn_r.end);
-
+  if (!block->top_level_feature)
+    block->top_level_feature = gn;
   e = element_new(gn);
   dlist_add(block->elements, e);
 }
@@ -186,10 +186,10 @@ GenomeFeatureType* block_get_type(const Block *block)
   return block->type;
 }
 
-Dlist* block_get_elements(const Block *block)
+unsigned long block_get_size(Block *block)
 {
-  assert(block);
-  return block->elements;
+  assert(block && block->elements);
+  return dlist_size(block->elements);
 }
 
 int block_render(Block *block, Canvas *canvas)
@@ -214,11 +214,10 @@ int block_unit_test(Error *err)
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *gft;
   Range r1, r2, r_temp, b_range;
-  Dlist* elements;
   int had_err = 0;
   Strand s;
   GenomeNode *gn1, *gn2;
-  Element *e1, *e2, *elem;
+  Element *e1, *e2;
   Block * b;
   Str *caption1;
   Str *caption2;
@@ -245,20 +244,11 @@ int block_unit_test(Error *err)
   b = block_new();
 
   /* test block_insert_elements */
-  ensure(had_err, (0UL == dlist_size(block_get_elements(b))));
+  ensure(had_err, (0UL == block_get_size(b)));
   block_insert_element(b, gn1);
-  ensure(had_err, (1UL == dlist_size(block_get_elements(b))));
+  ensure(had_err, (1UL == block_get_size(b)));
   block_insert_element(b, gn2);
-  ensure(had_err, (2UL == dlist_size(block_get_elements(b))));
-
-  /* test block_get_elements */
-  elements = block_get_elements(b);
-  elem = (Element*) dlistelem_get_data(dlist_first(elements));
-  ensure(had_err, elements_are_equal(e1, elem));
-  ensure(had_err, !elements_are_equal(e2, (Element*) dlist_first(elements)));
-  elem = (Element*) dlistelem_get_data(dlist_last(elements));
-  ensure(had_err, !elements_are_equal(e1, elem));
-  ensure(had_err, elements_are_equal(e2, elem));
+  ensure(had_err, (2UL == block_get_size(b)));
 
   /* test block_set_range & block_get_range */
   r_temp = range_join(r1, r2);
@@ -294,6 +284,10 @@ void block_delete(Block *block)
 {
   Dlistelem *delem;
   if (!block) return;
+  if (block->reference_count) {
+    block->reference_count--;
+    return;
+  }
   for (delem = dlist_first(block->elements); delem;
        delem = dlistelem_next(delem)) {
     Element* elem = (Element*) dlistelem_get_data(delem);

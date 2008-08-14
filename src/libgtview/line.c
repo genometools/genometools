@@ -25,7 +25,6 @@
 #include "libgtview/line.h"
 
 struct Line {
-  IntervalTree *block_tree;
   bool has_captions;
   Array *blocks;
 };
@@ -34,7 +33,6 @@ Line* line_new(void)
 {
   Line *line;
   line = ma_malloc(sizeof (Line));
-  line->block_tree = interval_tree_new(NULL);
   line->blocks = array_new(sizeof (Block*));
   line->has_captions = false;
   return line;
@@ -43,21 +41,9 @@ Line* line_new(void)
 void line_insert_block(Line *line, Block *block)
 {
   assert(line && block);
-  IntervalTreeNode *new_node;
-  Range *rng;
   if (!line->has_captions && block_get_caption(block) != NULL)
     line->has_captions = true;
-  rng = block_get_range_ptr(block);
-  new_node = interval_tree_node_new(rng, rng->start, rng->end);
-  interval_tree_insert(line->block_tree, new_node);
   array_add(line->blocks, block);
-}
-
-bool line_is_occupied(const Line *line, Range r)
-{
-  assert(line);
-  return (interval_tree_find_first_overlapping(line->block_tree,
-                                               r.start, r.end));
 }
 
 bool line_has_captions(const Line *line)
@@ -164,10 +150,6 @@ int line_unit_test(Error *err)
   line_insert_block(l1, b2);
   ensure(had_err,  (2 == array_size(line_get_blocks(l1))));
 
-  /* test line_is_occupied */
-  ensure(had_err, !line_is_occupied(l2, r3));
-  ensure(had_err, line_is_occupied(l1, r3));
-
   /* test line_get_blocks */
   blocks = line_get_blocks(l1);
   ensure(had_err, (2 == array_size(blocks)));
@@ -194,6 +176,5 @@ void line_delete(Line *line)
   for (i = 0; i < array_size(line->blocks); i++)
     block_delete(*(Block**) array_get(line->blocks, i));
   array_delete(line->blocks);
-  interval_tree_delete(line->block_tree);
   ma_free(line);
 }

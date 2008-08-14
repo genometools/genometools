@@ -19,9 +19,6 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include "libgtview/color.h"
-#include "libgtcore/error.h"
-
 typedef enum
 {
   ARROW_LEFT,
@@ -50,6 +47,9 @@ typedef enum {
 } GraphicsOutType;
 
 typedef struct Graphics Graphics;
+
+#include "libgtview/color.h"
+#include "libgtcore/error.h"
 
 /* Create a new Graphics object, which is an abstraction of a drawing surface on
    which several relevant primitives can be drawn. */

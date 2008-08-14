@@ -29,12 +29,12 @@ typedef struct Track Track;
 #include "libgtview/canvas.h"
 #include "libgtview/config.h"
 #include "libgtview/line.h"
+#include "libgtview/line_breaker.h"
 
 Track*        track_new(Str *title, unsigned long max_num_lines,
-                        bool split_lines);
+                        bool split_lines, LineBreaker*);
 void          track_insert_block(Track*, Block*);
 Str*          track_get_title(const Track*);
-Array*        track_get_lines(const Track*);
 unsigned long track_get_number_of_lines(const Track*);
 unsigned long track_get_number_of_lines_with_captions(const Track *track);
 unsigned long track_get_number_of_discarded_blocks(Track *track);

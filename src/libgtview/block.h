@@ -35,6 +35,7 @@ Block*             block_new(void);
 /* Create a new Block object, setting block parameters (such as strand, range)
    from a given <node> template. */
 Block*             block_new_from_node(GenomeNode *node);
+Block*             block_ref(Block*);
 /* Insert <node> into block. */
 void               block_insert_element(Block*, GenomeNode *node);
 Range              block_get_range(const Block*);
@@ -52,8 +53,7 @@ GenomeNode*        block_get_top_level_feature(Block*);
 Strand             block_get_strand(const Block*);
 void               block_set_type(Block*, GenomeFeatureType*);
 GenomeFeatureType* block_get_type(const Block*);
-/* Returns Dlist with Pointer to Element objects. */
-Dlist*             block_get_elements(const Block*);
+unsigned long      block_get_size(Block*);
 int                block_render(Block*, Canvas*);
 int                block_unit_test(Error*);
 void               block_delete(Block*);

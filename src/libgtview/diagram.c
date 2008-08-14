@@ -33,16 +33,22 @@
 #include "libgtview/canvas.h"
 #include "libgtview/diagram.h"
 #include "libgtview/feature_index.h"
+#include "libgtview/line_breaker_captions.h"
+#include "libgtview/line_breaker_bases.h"
 #include "libgtview/track.h"
 
 /* used to separate a filename from the type in a track name */
 #define FILENAME_TYPE_SEPARATOR  '|'
 
 struct Diagram {
+  /* Tracks indexed by track keys */
   Hashtable *tracks;
+  /* Block lists indexed by track keys */
+  Hashtable *blocks;
+  /* Reverse lookup structure (per node) */
   Hashtable *nodeinfo;
-  Hashtable *collapsingtypes;
-  Hashtable *caption_display_status;
+  /* Cache tables for configuration data */
+  Hashtable *collapsingtypes, *caption_display_status;
   int nof_tracks;
   Config *config;
   Range range;
@@ -393,13 +399,6 @@ static int diagram_add_tracklines(UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-static int diagram_track_delete(UNUSED void *key, void *value,
-                                UNUSED void *data, UNUSED Error *err)
-{
-  track_delete((Track*) value);
-  return 0;
-}
-
 static int visit_child(GenomeNode* gn, void* genome_node_children, Error* e)
 {
   NodeTraverseInfo* genome_node_info;
@@ -429,7 +428,7 @@ static Str* track_key_new(const char *filename, GenomeFeatureType *type)
   return track_key;
 }
 
-/* Create Tracks for all Blocks in the diagram. */
+/* Create lists of all Blocks in the diagram. */
 static int collect_blocks(UNUSED void *key, void *value, void *data,
                           UNUSED Error *err)
 {
@@ -438,40 +437,16 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
   unsigned long i = 0;
 
   for (i = 0; i < array_size(ni->blocktuples); i++) {
-    Track *track;
-    char *filename;
-    Str *track_key;
+    Array *list;
     BlockTuple *bt = *(BlockTuple**) array_get(ni->blocktuples, i);
-    /* we take the basename of the filename to have nicer output in the
-       generated graphic. this might lead to ``collapsed'' tracks, if two files
-       with different paths have the same basename. */
-    filename = getbasename(genome_node_get_filename(ni->parent));
-    track_key = track_key_new(filename, bt->gft);
-    ma_free(filename);
-    track = hashtable_get(diagram->tracks, str_get(track_key));
-
-    if (track == NULL) {
-      const char* type = genome_feature_type_get_cstr(bt->gft);
-      bool split;
-      unsigned long max;
-      double tmp;
-
-      if (!config_get_bool(diagram->config, type, "split_lines", &split))
-        split = true;
-      if (config_get_num(diagram->config, type, "max_num_lines", &tmp))
-        max = tmp;
-      else
-        max = UNDEF_ULONG;
-      track = track_new(track_key,
-                        max,
-                        split);
-      hashtable_add(diagram->tracks, cstr_dup(str_get(track_key)), track);
-      diagram->nof_tracks++;
-      log_log("created track: %s, diagram has now %d tracks",
-              str_get(track_key), diagram_get_number_of_tracks(diagram));
+    list = (Array*) hashtable_get(diagram->blocks, bt->gft);
+    if (!list)
+    {
+      list = array_new(sizeof (Block*));
+      hashtable_add(diagram->blocks, bt->gft, list);
     }
-    track_insert_block(track, bt->block);
-    str_delete(track_key);
+    assert(list);
+    array_add(list, bt->block);
     ma_free(bt);
   }
   array_delete(ni->blocktuples);
@@ -479,7 +454,7 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-/* Traverse a genome node tree with depth first search. */
+/* Traverse a genome node graph with depth first search. */
 static void traverse_genome_nodes(GenomeNode *gn, void *genome_node_children)
 {
   NodeTraverseInfo* genome_node_info;
@@ -523,6 +498,16 @@ static void diagram_build(Diagram *diagram, Array *features)
   hashtable_delete(diagram->caption_display_status);
 }
 
+static int blocklist_delete(void *value)
+{
+  unsigned long i;
+  Array *a = (Array*) value;
+  for(i=0;i<array_size(a);i++)
+    block_delete(*(Block**) array_get(a, i));
+  array_delete(a);
+  return 0;
+}
+
 Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
                      Config *config)
 {
@@ -530,7 +515,8 @@ Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
   Array *features = array_new(sizeof (GenomeNode*));
   int had_err;
   diagram = ma_malloc(sizeof (Diagram));
-  diagram->tracks = hashtable_new(HASH_STRING, ma_free_func, NULL);
+  diagram->tracks = hashtable_new(HASH_STRING, ma_free_func, (FreeFunc) track_delete);
+  diagram->blocks = hashtable_new(HASH_DIRECT, NULL, (FreeFunc) blocklist_delete);
   diagram->nodeinfo = hashtable_new(HASH_DIRECT, NULL, NULL);
   diagram->nof_tracks = 0;
   diagram->config = config;
@@ -576,12 +562,63 @@ int diagram_get_number_of_tracks(const Diagram *diagram)
   return diagram->nof_tracks;
 }
 
+static int layout_tracks(UNUSED void *key, void *value, void *data,
+                     UNUSED Error *err)
+{
+  unsigned long i, max;
+  Track *track;
+  TrackTraverseInfo *tti = (TrackTraverseInfo*) data;
+  GenomeFeatureType *gft = (GenomeFeatureType*) key;
+  Array *list = (Array*) value;
+  char *filename;
+  Str *track_key;
+  const char *type;
+  Block *block;
+  bool split;
+  double tmp;
+  assert(gft && list);
+
+  /* we take the basename of the filename to have nicer output in the
+     generated graphic. this might lead to ``collapsed'' tracks, if two files
+     with different paths have the same basename. */
+  block = *(Block**) array_get(list, 0);
+  filename = getbasename(genome_node_get_filename(
+                                 block_get_top_level_feature(block)));
+  track_key = track_key_new(filename, gft);
+  ma_free(filename);
+  type = genome_feature_type_get_cstr(gft);
+  log_log("layouting track %s", type);
+
+  if (!config_get_bool(tti->dia->config, type, "split_lines", &split))
+    split = true;
+  if (config_get_num(tti->dia->config, type, "max_num_lines", &tmp))
+    max = tmp;
+  else
+    max = 50;
+  /* For now, use the captions line breaker */
+  track = track_new(track_key, max, split,
+                    line_breaker_captions_new(tti->canvas));
+  tti->dia->nof_tracks++;
+  log_log("created track: %s, diagram has now %d tracks",
+          str_get(track_key), diagram_get_number_of_tracks(tti->dia));
+  for (i=0;i<array_size(list);i++)
+  {
+    block = *(Block**) array_get(list, i);
+    track_insert_block(track, block);
+  }
+  hashtable_add(tti->dia->tracks, cstr_dup(str_get(track_key)), track);
+  str_delete(track_key);
+  return 0;
+}
+
 static int render_tracks(UNUSED void *key, void *value, void *data,
                      UNUSED Error *err)
 {
+  TrackTraverseInfo *tti = (TrackTraverseInfo*) data;
+  Track *track = (Track*) value;
   int had_err = 0;
-  TrackTraverseInfo *tti;
-  tti = (TrackTraverseInfo*) data;
+  assert(tti && track);
+  log_log("rendering track");
   had_err = track_render((Track*) value, tti->canvas);
   return had_err;
 }
@@ -592,9 +629,15 @@ int diagram_render(Diagram *dia, Canvas *canvas)
   TrackTraverseInfo tti;
   tti.dia = dia;
   tti.canvas = canvas;
-  canvas_visit_diagram(canvas, dia);
+  canvas_visit_diagram_pre(canvas, dia);
+  hashtable_reset(dia->tracks);
+  dia->nof_tracks = 0;
+  (void) hashtable_foreach(dia->blocks, layout_tracks,
+                           &tti, NULL);
+  canvas_visit_diagram_post(canvas, dia);
   had_err = hashtable_foreach_ao(dia->tracks, render_tracks,
                                  &tti, NULL);
+
   log_log("finished rendering!\n");
   return had_err;
 }
@@ -611,6 +654,7 @@ int diagram_unit_test(Error *err)
   int had_err=0;
   Config *cfg = NULL;
   Diagram *dia = NULL, *dia2 = NULL;
+  Canvas *canvas = NULL;
   error_check(err);
 
   feature_type_factory = feature_type_factory_builtin_new();
@@ -686,6 +730,13 @@ int diagram_unit_test(Error *err)
   ensure(had_err, dia->config);
   ensure(had_err, dia->range.start == 400UL);
   ensure(had_err, dia->range.end == 900UL);
+
+  if (!had_err)
+  {
+    canvas = canvas_new(cfg, GRAPHICS_PDF, 600, NULL);
+    diagram_render(dia, canvas);
+  }
+
   if (!had_err &&
       !config_get_bool(dia->config, "gene", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", gene_type);
@@ -710,6 +761,7 @@ int diagram_unit_test(Error *err)
 
   if (!had_err &&
       !config_get_bool(dia2->config, "gene", "collapse_to_parent", false)) {
+    diagram_render(dia2, canvas);
     track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
@@ -734,6 +786,7 @@ int diagram_unit_test(Error *err)
   config_delete(cfg);
   diagram_delete(dia);
   diagram_delete(dia2);
+  canvas_delete(canvas);
   feature_index_delete(fi);
   genome_node_rec_delete(gn1);
   genome_node_rec_delete(gn2);
@@ -749,8 +802,8 @@ int diagram_unit_test(Error *err)
 void diagram_delete(Diagram *diagram)
 {
   if (!diagram) return;
-  (void) hashtable_foreach(diagram->tracks, diagram_track_delete, NULL, NULL);
   hashtable_delete(diagram->tracks);
+  hashtable_delete(diagram->blocks);
   hashtable_delete(diagram->nodeinfo);
   ma_free(diagram);
 }

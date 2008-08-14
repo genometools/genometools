@@ -1,7 +1,6 @@
 /*
-  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
-  Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,26 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LINE_H
-#define LINE_H
+#ifndef LINE_BREAKER_H
+#define LINE_BREAKER_H
 
-/* A line contains block objects. */
-typedef struct Line Line;
+/* The LineBreaker interface. */
+typedef struct LineBreakerClass LineBreakerClass;
+typedef struct LineBreaker LineBreaker;
 
-#include "libgtcore/array.h"
-#include "libgtcore/range.h"
-#include "libgtext/genome_node.h"
 #include "libgtview/block.h"
-#include "libgtview/canvas.h"
-#include "libgtview/config.h"
-#include "libgtview/drawing_range.h"
+#include "libgtview/line.h"
 
-Line*  line_new(void);
-void   line_insert_block(Line*, Block*); /* takes ownership */
-bool   line_has_captions(const Line*);
-Array* line_get_blocks(Line*);
-int    line_render(Line*, Canvas*);
-int    line_unit_test(Error*);
-void   line_delete(Line*);
+LineBreaker* line_breaker_ref(LineBreaker*);
+bool         line_breaker_line_is_occupied(LineBreaker *lb,
+                                           Line *line, Block *block);
+void         line_breaker_register_block(LineBreaker *lb,
+                                         Line *line, Block *block);
+void         line_breaker_delete(LineBreaker*);
 
 #endif
