@@ -15,10 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/fa.h"
+#include "libgtcore/xansi.h"
 #include "divmodmul.h"
 #include "eis-voiditf.h"
 #include "pckbucket.h"
 #include "initbasepower.pr"
+#include "opensfxfile.pr"
 
 typedef struct
 {
@@ -32,15 +35,17 @@ DECLAREARRAYSTRUCT(Boundsatdepth);
 
 struct Pckbuckettable
 {
-  Matchbound **mbtab;
   unsigned int numofchars;
+  unsigned long numofvalues, maxnumofvalues;
   unsigned int maxdepth;
-  unsigned long numofvalues;
-  Codetype *basepower, maxnumofvalues;
+  Matchbound **mbtab;
+  void *mapptr;
+  Codetype *basepower;
 };
 
 static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
-                                                  unsigned int maxdepth)
+                                                  unsigned int maxdepth,
+                                                  bool writemode)
 {
   Matchbound *cptr;
   unsigned int idx;
@@ -56,22 +61,32 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
     pckbt->maxnumofvalues += pckbt->basepower[idx];
   }
   pckbt->mbtab = ma_malloc(sizeof(Matchbound *) * (maxdepth+1));
-  pckbt->mbtab[0] = ma_malloc(sizeof(Matchbound) * pckbt->maxnumofvalues);
-  for (cptr = pckbt->mbtab[0];
-       cptr < pckbt->mbtab[0] + pckbt->maxnumofvalues; cptr++)
-  {
-    cptr->lowerbound = cptr->upperbound = 0;
-  }
   for (idx=0; idx<maxdepth; idx++)
   {
     pckbt->mbtab[idx+1] = pckbt->mbtab[idx] + pckbt->basepower[idx];
+  }
+  if (writemode)
+  {
+    pckbt->mapptr = NULL;
+    pckbt->mbtab[0] = ma_malloc(sizeof(Matchbound) * pckbt->maxnumofvalues);
+    for (cptr = pckbt->mbtab[0];
+         cptr < pckbt->mbtab[0] + pckbt->maxnumofvalues; cptr++)
+    {
+      cptr->lowerbound = cptr->upperbound = 0;
+    }
   }
   return pckbt;
 }
 
 void pckbuckettable_free(Pckbuckettable *pckbt)
 {
-  ma_free(pckbt->mbtab[0]);
+  if (pckbt->mapptr == NULL)
+  {
+    ma_free(pckbt->mbtab[0]);
+  } else
+  {
+    fa_xmunmap(pckbt->mapptr);
+  }
   pckbt->mbtab[0] = NULL;
   ma_free(pckbt->mbtab);
   pckbt->mbtab = NULL;
@@ -139,7 +154,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
   STOREINARRAY(&stack,Boundsatdepth,128,child);
   rangeOccs = ma_malloc(sizeof(*rangeOccs) * MULT2(numofchars));
   tmpmbtab = ma_malloc(sizeof(*tmpmbtab) * numofchars);
-  pckbt = allocandinitpckbuckettable(numofchars,maxdepth);
+  pckbt = allocandinitpckbuckettable(numofchars,maxdepth,true);
   while (stack.nextfreeBoundsatdepth > 0)
   {
     parent = stack.spaceBoundsatdepth[--stack.nextfreeBoundsatdepth];
@@ -149,7 +164,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
                                                voidbwtseq,
                                                parent.lowerbound,
                                                parent.upperbound);
-    assert(rangesize <= numofchars);
+    assert(rangesize <= (unsigned long) numofchars);
     for (idx = 0; idx < rangesize; idx++)
     {
       child.lowerbound = tmpmbtab[idx].lowerbound;
@@ -181,4 +196,60 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
   printf("filled: %lu (%.2f)\n",pckbt->numofvalues,
                         (double) pckbt->numofvalues/pckbt->maxnumofvalues);
   return pckbt;
+}
+
+#define PCKBUCKETTABLE ".pbt"
+
+int pckbucket2file(const Str *indexname,const Pckbuckettable *pckbuckettable,
+                   Error *err)
+{
+  FILE *fp;
+  Seqpos seqposmaxdepth;
+
+  error_check(err);
+  fp = opensfxfile(indexname,PCKBUCKETTABLE,"wb",err);
+  if (fp == NULL)
+  {
+    return -1;
+  }
+  seqposmaxdepth = (Seqpos) pckbuckettable->maxdepth;
+  xfwrite(&seqposmaxdepth,sizeof (Seqpos),(size_t) 1,fp);
+  xfwrite(pckbuckettable->mbtab[0],sizeof (Matchbound),
+          (size_t) pckbuckettable->maxnumofvalues,fp);
+  xfclose(fp);
+  return 0;
+}
+
+Pckbuckettable *mappckbuckettable(const Str *indexname,
+                                  unsigned int numofchars,
+                                  Error *err)
+{
+  Str *tmpfilename;
+  size_t numofbytes;
+  bool haserr = false;
+  void *mapptr;
+  unsigned int maxdepth;
+  Pckbuckettable *pckbt;
+
+  error_check(err);
+  tmpfilename = str_clone(indexname);
+  str_append_cstr(tmpfilename,PCKBUCKETTABLE);
+  mapptr = fa_mmap_read(str_get(tmpfilename),&numofbytes);
+  if (mapptr == NULL)
+  {
+    error_set(err,"could not map datafile %s",str_get(tmpfilename));
+    haserr = true;
+  }
+  str_delete(tmpfilename);
+  if (!haserr)
+  {
+    assert(mapptr != NULL);
+    maxdepth = (unsigned int) ((Seqpos *) mapptr)[0];
+    pckbt = allocandinitpckbuckettable(numofchars,maxdepth,false);
+    pckbt->mapptr = mapptr;
+    pckbt->mbtab[0] = (Matchbound *) (((Seqpos *) mapptr) + 1);
+    assert(numofbytes ==
+           sizeof (Seqpos) + sizeof (Matchbound) * pckbt->maxnumofvalues);
+  }
+  return haserr ? NULL : pckbt;
 }

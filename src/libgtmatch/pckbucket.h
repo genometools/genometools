@@ -18,6 +18,10 @@
 #ifndef PCKBUCKET_H
 #define PCKBUCKET_H
 
+#include "libgtcore/str.h"
+#include "libgtcore/error.h"
+#include "seqpos-def.h"
+
 typedef struct Pckbuckettable Pckbuckettable;
 
 void pckbuckettable_free(Pckbuckettable *pckbt);
@@ -26,5 +30,12 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
                                    unsigned int numofchars,
                                    Seqpos totallength,
                                    unsigned int maxdepth);
+
+int pckbucket2file(const Str *indexname,const Pckbuckettable *pckbuckettable,
+                   Error *err);
+
+Pckbuckettable *mappckbuckettable(const Str *indexname,
+                                  unsigned int numofchars,
+                                  Error *err);
 
 #endif

@@ -109,6 +109,12 @@ static int gt_prebwt_runner(UNUSED int argc,
                                numofchars,
                                totallength,
                                prebwtoptions->maxdepth);
+    /*
+    if (pckbucket2file(prebwtoptions->indexname,pckbt,err) != 0)
+    {
+      haserr = true;
+    }
+    */
     pckbuckettable_free(pckbt);
   }
   freesuffixarray(&suffixarray);
