@@ -34,6 +34,8 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
 int pckbucket2file(const Str *indexname,const Pckbuckettable *pckbuckettable,
                    Error *err);
 
+bool pckbuckettableexists(const Str *indexname);
+
 Pckbuckettable *mappckbuckettable(const Str *indexname,
                                   unsigned int numofchars,
                                   Error *err);

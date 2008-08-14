@@ -17,6 +17,7 @@
 
 #include "libgtcore/fa.h"
 #include "libgtcore/xansi.h"
+#include "libgtcore/fileutils.h"
 #include "divmodmul.h"
 #include "eis-voiditf.h"
 #include "pckbucket.h"
@@ -70,7 +71,6 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
   {
     /*printf("basepower[%u]=%lu\n",idx,pckbt->basepower[idx]); */
     pckbt->maxnumofvalues += pckbt->basepower[idx];
-   
   }
   pckbt->mbtab = ma_malloc(sizeof(Matchbound *) * (maxdepth+1));
   if (writemode)
@@ -233,6 +233,18 @@ int pckbucket2file(const Str *indexname,const Pckbuckettable *pckbuckettable,
           (size_t) pckbuckettable->maxnumofvalues,fp);
   xfclose(fp);
   return 0;
+}
+
+bool pckbuckettableexists(const Str *indexname)
+{
+  Str *tmpfilename;
+  bool retval;
+
+  tmpfilename = str_clone(indexname);
+  str_append_cstr(tmpfilename,PCKBUCKETTABLE);
+  retval = file_exists(str_get(tmpfilename));
+  str_delete(tmpfilename);
+  return retval;
 }
 
 Pckbuckettable *mappckbuckettable(const Str *indexname,

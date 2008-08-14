@@ -149,13 +149,51 @@ void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci)
 void *loadvoidBWTSeqForSA(const Str *indexname,
                           const Suffixarray *suffixarray,
                           Seqpos totallength,
+                          bool withpckbt,
                           Error *err)
 {
-  return loadBWTSeqForSA(indexname,
-                         BWT_ON_BLOCK_ENC,
-                         BWTDEFOPT_MULTI_QUERY,
-                         suffixarray,
-                         totallength+1, err);
+  BWTSeq *bwtseq;
+  bool haserr = false;
+
+  bwtseq = loadBWTSeqForSA(indexname,
+                           BWT_ON_BLOCK_ENC,
+                           BWTDEFOPT_MULTI_QUERY,
+                           suffixarray,
+                           totallength+1, err);
+  if (bwtseq == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    if (withpckbt)
+    {
+      if (pckbuckettableexists(indexname))
+      {
+        unsigned int numofchars = getnumofcharsAlphabet(suffixarray->alpha);
+        bwtseq->pckbuckettable = mappckbuckettable(indexname,numofchars,err);
+        if (bwtseq->pckbuckettable == NULL)
+        {
+          haserr = true;
+        }
+      } else
+      {
+        bwtseq->pckbuckettable = NULL;
+      }
+    } else
+    {
+      bwtseq->pckbuckettable = NULL;
+    }
+  }
+  if (haserr)
+  {
+    if (bwtseq != NULL)
+    {
+      deletevoidBWTSeq(bwtseq);
+      bwtseq = NULL;
+    }
+  }
+  return haserr ? NULL : bwtseq;
 }
 
 void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
@@ -234,9 +272,16 @@ void bwtrangewithspecial(UNUSED ArrayBoundswithchar *bwci,
 }
 */
 
-void deletevoidBWTSeq(void *packedindex)
+void deletevoidBWTSeq(void *voidbwtseq)
 {
-  deleteBWTSeq((BWTSeq *) packedindex);
+  BWTSeq *bwtseq = (BWTSeq *) voidbwtseq;
+
+  if (bwtseq->pckbuckettable != NULL)
+  {
+    pckbuckettable_free(bwtseq->pckbuckettable);
+    bwtseq->pckbuckettable = NULL;
+  }
+  deleteBWTSeq(bwtseq);
 }
 
 unsigned long voidpackedindexuniqueforward(const void *voidbwtseq,

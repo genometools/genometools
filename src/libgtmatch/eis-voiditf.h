@@ -60,6 +60,7 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
 void *loadvoidBWTSeqForSA(const Str *indexname,
                           const Suffixarray *suffixarray,
                           Seqpos totallength,
+                          bool withpckbt,
                           Error *err);
 
 void deletevoidBWTSeq(void *packedindex);

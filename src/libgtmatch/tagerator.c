@@ -382,7 +382,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   {
     packedindex = loadvoidBWTSeqForSA(tageratoroptions->pckindexname,
                                       &suffixarray,
-                                      totallength, err);
+                                      totallength, true, err);
     if (packedindex == NULL)
     {
       haserr = true;

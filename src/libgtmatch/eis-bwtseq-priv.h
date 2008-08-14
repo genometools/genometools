@@ -20,6 +20,7 @@
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseq-extinfo.h"
 #include "libgtmatch/eis-encidxseq.h"
+#include "libgtmatch/pckbucket.h"
 
 enum {
   bwtTerminatorSym = SEPARATOR - 3,
@@ -41,6 +42,7 @@ struct BWTSeq
   int featureToggles;
   unsigned bitsPerOrigRank;
   enum rangeSortMode *rangeSort;
+  Pckbuckettable *pckbuckettable;
 };
 
 struct BWTSeqExactMatchesIterator

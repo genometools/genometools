@@ -94,7 +94,7 @@ static int gt_prebwt_runner(UNUSED int argc,
   {
     packedindex = loadvoidBWTSeqForSA(prebwtoptions->indexname,
                                       &suffixarray,
-                                      totallength, err);
+                                      totallength, false, err);
     if (packedindex == NULL)
     {
       haserr = true;
@@ -109,12 +109,10 @@ static int gt_prebwt_runner(UNUSED int argc,
                                numofchars,
                                totallength,
                                prebwtoptions->maxdepth);
-    /*
     if (pckbucket2file(prebwtoptions->indexname,pckbt,err) != 0)
     {
       haserr = true;
     }
-    */
     pckbuckettable_free(pckbt);
   }
   freesuffixarray(&suffixarray);

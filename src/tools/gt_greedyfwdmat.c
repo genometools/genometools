@@ -347,7 +347,9 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
       {
         packedindex = loadvoidBWTSeqForSA(gfmsubcallinfo.indexname,
                                           &suffixarray,
-                                          totallength, err);
+                                          totallength,
+                                          false,
+                                          err);
         if (packedindex == NULL)
         {
           haserr = true;
