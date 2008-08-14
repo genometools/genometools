@@ -43,6 +43,16 @@ struct Pckbuckettable
   Codetype *basepower;
 };
 
+static void setbcktaboffsets(Pckbuckettable *pckbt)
+{
+  unsigned int idx;
+
+  for (idx=0; idx<pckbt->maxdepth; idx++)
+  {
+    pckbt->mbtab[idx+1] = pckbt->mbtab[idx] + pckbt->basepower[idx];
+  }
+}
+
 static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
                                                   unsigned int maxdepth,
                                                   bool writemode)
@@ -58,22 +68,24 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
   pckbt->maxnumofvalues = pckbt->numofvalues = 0;
   for (idx=0; idx <= maxdepth; idx++)
   {
+    /*printf("basepower[%u]=%lu\n",idx,pckbt->basepower[idx]); */
     pckbt->maxnumofvalues += pckbt->basepower[idx];
+   
   }
   pckbt->mbtab = ma_malloc(sizeof(Matchbound *) * (maxdepth+1));
-  for (idx=0; idx<maxdepth; idx++)
-  {
-    pckbt->mbtab[idx+1] = pckbt->mbtab[idx] + pckbt->basepower[idx];
-  }
   if (writemode)
   {
     pckbt->mapptr = NULL;
     pckbt->mbtab[0] = ma_malloc(sizeof(Matchbound) * pckbt->maxnumofvalues);
+    /*
+    printf("allocated = %u * %lu\n",sizeof(Matchbound),pckbt->maxnumofvalues);
+    */
     for (cptr = pckbt->mbtab[0];
          cptr < pckbt->mbtab[0] + pckbt->maxnumofvalues; cptr++)
     {
       cptr->lowerbound = cptr->upperbound = 0;
     }
+    setbcktaboffsets(pckbt);
   }
   return pckbt;
 }
@@ -100,6 +112,9 @@ static void storeBoundsatdepth(Pckbuckettable *pckbt,
 {
   assert(bd->depth <= pckbt->maxdepth);
   assert(bd->code <= pckbt->basepower[bd->depth]);
+  /*
+  printf("bd->depth=%u,bd->code=%lu\n",bd->depth,bd->code);
+  */
   assert(pckbt->mbtab[bd->depth][bd->code].lowerbound == 0 &&
          pckbt->mbtab[bd->depth][bd->code].upperbound == 0);
   assert(pckbt->numofvalues < pckbt->maxnumofvalues);
@@ -248,6 +263,7 @@ Pckbuckettable *mappckbuckettable(const Str *indexname,
     pckbt = allocandinitpckbuckettable(numofchars,maxdepth,false);
     pckbt->mapptr = mapptr;
     pckbt->mbtab[0] = (Matchbound *) (((Seqpos *) mapptr) + 1);
+    setbcktaboffsets(pckbt);
     assert(numofbytes ==
            sizeof (Seqpos) + sizeof (Matchbound) * pckbt->maxnumofvalues);
   }
