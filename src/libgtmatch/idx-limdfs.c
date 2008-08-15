@@ -43,7 +43,14 @@
 
 typedef struct
 {
-  Lcpinterval lcpitv;
+  Seqpos offset,
+         left,
+         right;
+} Indexbounds;
+
+typedef struct
+{
+  Indexbounds lcpitv;
   DECLAREDFSSTATE(aliasstate);
 } Lcpintervalwithinfo;
 
@@ -149,7 +156,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
 /* enumerate the suffixes in an LCP-interval */
 
 static void esa_overinterval(Limdfsresources *limdfsresources,
-                             const Lcpinterval *itv,
+                             const Indexbounds *itv,
                              unsigned long pprefixlen)
 {
   Seqpos idx;
@@ -168,7 +175,7 @@ static void esa_overinterval(Limdfsresources *limdfsresources,
 }
 
 static void pck_overinterval(Limdfsresources *limdfsresources,
-                             const Lcpinterval *itv,
+                             const Indexbounds *itv,
                              unsigned long pprefixlen)
 {
   Bwtseqpositioniterator *bspi;
@@ -315,7 +322,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 
 static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                                Lcpintervalwithinfo *stackptr,
-                               const Lcpinterval *child,
+                               const Indexbounds *child,
                                Uchar inchar,
                                const DECLAREPTRDFSSTATE(indfsstate),
                                const AbstractDfstransformer *adfst)
@@ -366,7 +373,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
 }
 
 static void processchildinterval(Limdfsresources *limdfsresources,
-                                 const Lcpinterval *child,
+                                 const Indexbounds *child,
                                  Uchar inchar,
                                  const DECLAREPTRDFSSTATE(previousdfsstate),
                                  const AbstractDfstransformer *adfst)
@@ -410,7 +417,7 @@ static void processchildinterval(Limdfsresources *limdfsresources,
 
 #ifdef SKDEBUG
 
-static void showLCPinterval(bool withesa,const Lcpinterval *itv)
+static void showLCPinterval(bool withesa,const Indexbounds *itv)
 {
   Seqpos width;
 
@@ -431,14 +438,16 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
   unsigned long idx;
   const Suffixarray *suffixarray
     = (const Suffixarray *) limdfsresources->genericindex;
-  const Lcpinterval *parent = &parentwithinfo->lcpitv;
+  const Indexbounds *parent = &parentwithinfo->lcpitv;
 
   extendchar = lcpintervalextendlcp(suffixarray->encseq,
                                     suffixarray->readmode,
                                     suffixarray->suftab,
                                     limdfsresources->totallength,
-                                    parent,
-                                    limdfsresources->alphasize);
+                                    limdfsresources->alphasize,
+                                    parent->offset,
+                                    parent->left,
+                                    parent->right);
   if (extendchar < limdfsresources->alphasize)
   {
     limdfsresources->bwci.spaceBoundswithchar[0].lbound = parent->left;
@@ -453,12 +462,14 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
                                    suffixarray->readmode,
                                    limdfsresources->totallength,
                                    suffixarray->suftab,
-                                   parent);
+                                   parent->offset,
+                                   parent->left,
+                                   parent->right);
   }
   firstnonspecial = parent->left;
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {
-    Lcpinterval child;
+    Indexbounds child;
     Uchar inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
 
     child.offset = parent->offset+1;
@@ -499,7 +510,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
 {
   unsigned long idx;
   Seqpos sumwidth = 0;
-  const Lcpinterval *parent = &parentwithinfo->lcpitv;
+  const Indexbounds *parent = &parentwithinfo->lcpitv;
 
   bwtrangesplitwithoutspecial(&limdfsresources->bwci,
                               limdfsresources->rangeOccs,
@@ -509,7 +520,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {
     Uchar inchar;
-    Lcpinterval child;
+    Indexbounds child;
 
     inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
     child.offset = parent->offset+1;

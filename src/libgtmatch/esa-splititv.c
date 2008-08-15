@@ -117,18 +117,20 @@ void lcpintervalsplitwithoutspecial(ArrayBoundswithchar *bwci,
                                     Readmode readmode,
                                     Seqpos totallength,
                                     const Seqpos *suftab,
-                                    const Lcpinterval *parent)
+                                    Seqpos parentoffset,
+                                    Seqpos parentleft,
+                                    Seqpos parentright)
 {
   Uchar leftcc, rightcc;
-  Seqpos rightbound = 0, leftbound = parent->left;
+  Seqpos rightbound = 0, leftbound = parentleft;
 
   /* call lcpintervalextendlcp and verify if interval can be extended by
      some character */
   bwci->nextfreeBoundswithchar = 0;
-  rightcc = SEQUENCE(encseq,suftab[parent->right]+parent->offset);
+  rightcc = SEQUENCE(encseq,suftab[parentright] + parentoffset);
   while (true)
   {
-    leftcc = SEQUENCE(encseq,suftab[leftbound]+parent->offset);
+    leftcc = SEQUENCE(encseq,suftab[leftbound] + parentoffset);
     assert(bwci->nextfreeBoundswithchar < bwci->allocatedBoundswithchar);
     if (ISSPECIAL(leftcc))
     {
@@ -144,26 +146,28 @@ void lcpintervalsplitwithoutspecial(ArrayBoundswithchar *bwci,
       break;
     }
     rightbound = lcpintervalfindrightbound(encseq,readmode,totallength,suftab,
-                                           leftcc,parent->offset,
-                                           leftbound,parent->right);
+                                           leftcc,parentoffset,
+                                           leftbound,parentright);
     leftbound = rightbound+1;
   }
   assert(bwci->nextfreeBoundswithchar < bwci->allocatedBoundswithchar);
-  ADDPREVIOUSRBOUND(parent->right);
-  ADDCURRENTLBOUND(parent->right+1);
+  ADDPREVIOUSRBOUND(parentright);
+  ADDCURRENTLBOUND(parentright+1);
 }
 
 Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
                            Readmode readmode,
                            const Seqpos *suftab,
                            Seqpos totallength,
-                           const Lcpinterval *lcpitv,
-                           Uchar alphasize)
+                           Uchar alphasize,
+                           Seqpos parentoffset,
+                           Seqpos parentleft,
+                           Seqpos parentright)
 {
   Uchar ccl, ccr;
 
-  ccl = SEQUENCE(encseq,suftab[lcpitv->left] + lcpitv->offset);
-  ccr = SEQUENCE(encseq,suftab[lcpitv->right] + lcpitv->offset);
+  ccl = SEQUENCE(encseq,suftab[parentleft] + parentoffset);
+  ccr = SEQUENCE(encseq,suftab[parentright] + parentoffset);
   if (ccl != ccr || ISSPECIAL(ccl))
   {
     return alphasize;
