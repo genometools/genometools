@@ -231,7 +231,7 @@ int pckbucket2file(const Str *indexname,const Pckbuckettable *pckbuckettable,
   xfwrite(&seqposmaxdepth,sizeof (Seqpos),(size_t) 1,fp);
   xfwrite(pckbuckettable->mbtab[0],sizeof (Matchbound),
           (size_t) pckbuckettable->maxnumofvalues,fp);
-  xfclose(fp);
+  fa_fclose(fp);
   return 0;
 }
 
