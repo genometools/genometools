@@ -31,7 +31,6 @@
 #include "absdfstrans-imp.h"
 #include "idx-limdfs.h"
 #include "esa-minunique.pr"
-#include "stamp.h"
 
 #ifdef SKDEBUG
 #define DECLAREDFSSTATE(V)\
@@ -46,6 +45,7 @@ typedef struct
   Seqpos offset,
          leftbound,
          rightbound;
+  Codetype code;
 } Indexbounds;
 
 typedef struct
@@ -71,10 +71,12 @@ struct Limdfsresources
   bool withesa, nospecials;
   DECLAREDFSSTATE(currentdfsstate);
   Seqpos *rangeOccs;
+  unsigned int maxdepth;
   const Encodedsequence *encseq;
 };
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
+                                    unsigned int maxdepth,
                                     const Encodedsequence *encseq,
                                     bool withesa,
                                     bool nospecials,
@@ -111,6 +113,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->withesa = withesa;
   limdfsresources->nospecials = nospecials;
   limdfsresources->encseq = encseq;
+  limdfsresources->maxdepth = maxdepth;
   /* Application specific */
   limdfsresources->dfsconstinfo
     = adfst->allocatedfsconstinfo((unsigned int) limdfsresources->alphasize);
@@ -138,6 +141,7 @@ static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
   stackptr->lcpitv.offset = 0;
   stackptr->lcpitv.leftbound = leftbound;
   stackptr->lcpitv.rightbound = rightbound;
+  stackptr->lcpitv.code = 0;
   adfst->initLimdfsstate(stackptr->aliasstate,dfsconstinfo);
 }
 
@@ -477,6 +481,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     child.offset = parent->offset+1;
     child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
+    child.code = 0; /* not used, but we better defined it */
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
     showLCPinterval(limdfsresources->withesa,parent);
@@ -519,6 +524,17 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
                               limdfsresources->genericindex,
                               parent->leftbound,
                               parent->rightbound);
+  if (parent->offset < (Seqpos) limdfsresources->maxdepth)
+  {
+    ArrayBoundswithchar localbwci;
+
+    INITARRAY(&localbwci,Boundswithchar);
+    smalldepthbwtrangesplitwithoutspecial(&localbwci,
+                                          limdfsresources->genericindex,
+                                          parent->code,
+                                          (unsigned long) (parent->offset + 1));
+    FREEARRAY(&localbwci,Boundswithchar);
+  }
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {
     Uchar inchar;
@@ -528,6 +544,8 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     child.offset = parent->offset+1;
     child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
+    assert(inchar < limdfsresources->alphasize);
+    child.code = parent->code * limdfsresources->alphasize + inchar;
     sumwidth += child.rightbound - child.leftbound;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);

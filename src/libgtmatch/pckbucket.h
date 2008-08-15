@@ -21,6 +21,8 @@
 #include "libgtcore/str.h"
 #include "libgtcore/error.h"
 #include "seqpos-def.h"
+#include "splititv.h"
+#include "intcode-def.h"
 
 typedef struct Pckbuckettable Pckbuckettable;
 
@@ -39,5 +41,12 @@ bool pckbuckettableexists(const Str *indexname);
 Pckbuckettable *mappckbuckettable(const Str *indexname,
                                   unsigned int numofchars,
                                   Error *err);
+
+void enumlowlevelchildintervals(ArrayBoundswithchar *bwci,
+                                const Pckbuckettable *pcktb,
+                                Codetype parentcode,
+                                unsigned long childdepth);
+
+unsigned int pcktb2maxdepth(const Pckbuckettable *pckbuckettable);
 
 #endif

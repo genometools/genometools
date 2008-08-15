@@ -20,6 +20,7 @@
 #include "eis-voiditf.h"
 #include "divmodmul.h"
 #include "splititv.h"
+#include "pckbucket.h"
 
 Seqpos bwtseqfirstmatch(const void *voidbwtseq,Seqpos bound)
 {
@@ -220,6 +221,22 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
         = bwtseq->count[idx] + rangeOccs[rangesize+idx];
     }
   }
+}
+
+void smalldepthbwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
+                                           const void *voidbwtseq,
+                                           Codetype parentcode,
+                                           unsigned long childdepth)
+{
+  enumlowlevelchildintervals(bwci,
+                             ((const BWTSeq *) voidbwtseq)->pckbuckettable,
+                             parentcode,
+                             childdepth);
+}
+
+unsigned int bwtseq2maxdepth(const void *voidbwtseq)
+{
+  return pcktb2maxdepth(((const BWTSeq *) voidbwtseq)->pckbuckettable);
 }
 
 unsigned long bwtrangesplitallwithoutspecial(Matchbound *mbtab,

@@ -20,6 +20,7 @@
 
 #include "seqpos-def.h"
 #include "sarr-def.h"
+#include "intcode-def.h"
 #include "splititv.h"
 
 Seqpos bwtseqfirstmatch(const void *voidbwtSeq,Seqpos bound);
@@ -56,6 +57,11 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
                                  const void *voidBwtSeq,
                                  Seqpos lbound,
                                  Seqpos ubound);
+
+void smalldepthbwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
+                                           const void *voidbwtseq,
+                                           Codetype parentcode,
+                                           unsigned long childdepth);
 
 void *loadvoidBWTSeqForSA(const Str *indexname,
                           const Suffixarray *suffixarray,
@@ -104,5 +110,7 @@ unsigned long bwtrangesplitallwithoutspecial(Matchbound *mbtab,
                                              const void *voidBwtSeq,
                                              Seqpos lbound,
                                              Seqpos ubound);
+
+unsigned int bwtseq2maxdepth(const void *voidbwtseq);
 
 #endif

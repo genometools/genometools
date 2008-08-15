@@ -423,6 +423,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                     processmatchinfoonline);
     }
     limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
+                                         withesa ? 0
+                                                 : bwtseq2maxdepth(packedindex),
                                          suffixarray.encseq,
                                          withesa,
                                          tageratoroptions->nospecials,
