@@ -60,6 +60,7 @@ def createandcheckgreedyfwdmat(reffile,queryfile)
            "-db #{reffile}"
   run "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
            "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev"
+  run "#{$bin}gt prebwt -maxdepth 3 -pck pck"
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
 end
