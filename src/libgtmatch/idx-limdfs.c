@@ -44,8 +44,8 @@
 typedef struct
 {
   Seqpos offset,
-         left,
-         right;
+         leftbound,
+         rightbound;
 } Indexbounds;
 
 typedef struct
@@ -126,8 +126,8 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
 }
 
 static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
-                             Seqpos left,
-                             Seqpos right,
+                             Seqpos leftbound,
+                             Seqpos rightbound,
                              void *dfsconstinfo,
                              const AbstractDfstransformer *adfst)
 {
@@ -136,8 +136,8 @@ static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
   stack->nextfreeLcpintervalwithinfo = 0;
   GETNEXTFREEINARRAY(stackptr,stack,Lcpintervalwithinfo,128);
   stackptr->lcpitv.offset = 0;
-  stackptr->lcpitv.left = left;
-  stackptr->lcpitv.right = right;
+  stackptr->lcpitv.leftbound = leftbound;
+  stackptr->lcpitv.rightbound = rightbound;
   adfst->initLimdfsstate(stackptr->aliasstate,dfsconstinfo);
 }
 
@@ -163,7 +163,7 @@ static void esa_overinterval(Limdfsresources *limdfsresources,
   const Suffixarray *suffixarray
     = (const Suffixarray *) limdfsresources->genericindex;
 
-  for (idx = itv->left; idx <= itv->right; idx++)
+  for (idx = itv->leftbound; idx <= itv->rightbound; idx++)
   {
     limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                   true,
@@ -182,8 +182,8 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
   Seqpos dbstartpos;
 
   bspi = newBwtseqpositioniterator (limdfsresources->genericindex,
-                                    itv->left,itv->right);
-  assert(itv->left < itv->right);
+                                    itv->leftbound,itv->rightbound);
+  assert(itv->leftbound < itv->rightbound);
   while (nextBwtseqpositioniterator(&dbstartpos,bspi))
   {
     limdfsresources->processmatch(limdfsresources->processmatchinfo,
@@ -200,7 +200,7 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
 
 static void esa_overcontext(Limdfsresources *limdfsresources,
                             const DECLAREPTRDFSSTATE(dfsstate),
-                            Seqpos left,
+                            Seqpos leftbound,
                             Seqpos offset,
                             const AbstractDfstransformer *adfst)
 {
@@ -211,7 +211,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
     = (const Suffixarray *) limdfsresources->genericindex;
 
   memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
-  startpos = suffixarray->suftab[left];
+  startpos = suffixarray->suftab[leftbound];
 #ifdef SKDEBUG
   printf("retrieve context of startpos=%lu\n",(unsigned long) startpos);
 #endif
@@ -229,7 +229,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                                  (unsigned long) (pos - startpos + 1),
                                  cc);
       pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
-                                         left,
+                                         leftbound,
                                          (Seqpos) 1,
                                          (unsigned long) (pos - startpos + 1),
                                          limdfsresources->dfsconstinfo);
@@ -256,7 +256,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 
 static void pck_overcontext(Limdfsresources *limdfsresources,
                             const DECLAREPTRDFSSTATE(dfsstate),
-                            Seqpos left,
+                            Seqpos leftbound,
                             Seqpos offset,
                             Uchar inchar,
                             const AbstractDfstransformer *adfst)
@@ -264,7 +264,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
   Uchar cc;
   unsigned long contextlength, pprefixlen;
   bool processinchar = true;
-  Seqpos bound = left;
+  Seqpos bound = leftbound;
   Bwtseqcontextiterator *bsci;
 
   bsci = newBwtseqcontextiterator(limdfsresources->genericindex,bound);
@@ -303,7 +303,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       }
       if (pprefixlen > 1UL) /* check for success */
       {
-        Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,left);
+        Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,
+                                           leftbound);
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                       false,
                                       limdfsresources->totallength,
@@ -349,13 +350,13 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
 #endif
   if (limdfsresources->withesa)
   {
-    width = child->right - child->left + 1;
+    width = child->rightbound - child->leftbound + 1;
   } else
   {
-    width = child->right - child->left;
+    width = child->rightbound - child->leftbound;
   }
   pprefixlen = adfst->limdfsnextstep(stackptr->aliasstate,
-                                     child->left,
+                                     child->leftbound,
                                      width,
                                      (unsigned long) child->offset,
                                      limdfsresources->dfsconstinfo);
@@ -378,8 +379,8 @@ static void processchildinterval(Limdfsresources *limdfsresources,
                                  const DECLAREPTRDFSSTATE(previousdfsstate),
                                  const AbstractDfstransformer *adfst)
 {
-  if (child->left + 1 < child->right || (limdfsresources->withesa &&
-                                        child->left + 1 == child->right))
+  if (child->leftbound + 1 < child->rightbound ||
+      (limdfsresources->withesa && child->leftbound + 1 == child->rightbound))
   {
     Lcpintervalwithinfo *stackptr;
 
@@ -400,14 +401,14 @@ static void processchildinterval(Limdfsresources *limdfsresources,
     {
       esa_overcontext(limdfsresources,
                       previousdfsstate,
-                      child->left,
+                      child->leftbound,
                       child->offset,
                       adfst);
     } else
     {
       pck_overcontext(limdfsresources,
                       previousdfsstate,
-                      child->left,
+                      child->leftbound,
                       child->offset,
                       inchar,
                       adfst);
@@ -421,9 +422,10 @@ static void showLCPinterval(bool withesa,const Indexbounds *itv)
 {
   Seqpos width;
 
-  width = withesa ? (itv->right - itv->left + 1) : itv->right - itv->left;
+  width = withesa ? (itv->rightbound - itv->leftbound + 1)
+                  : itv->rightbound - itv->leftbound;
   printf("(%lu,width=%lu)",(unsigned long) itv->offset,(unsigned long) width);
-  printf("(%lu,%lu)",(unsigned long) itv->left,
+  printf("(%lu,%lu)",(unsigned long) itv->leftbound,
                      (unsigned long) (withesa ? itv->right : itv->right-1));
 }
 
@@ -446,12 +448,12 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
                                     limdfsresources->totallength,
                                     limdfsresources->alphasize,
                                     parent->offset,
-                                    parent->left,
-                                    parent->right);
+                                    parent->leftbound,
+                                    parent->rightbound);
   if (extendchar < limdfsresources->alphasize)
   {
-    limdfsresources->bwci.spaceBoundswithchar[0].lbound = parent->left;
-    limdfsresources->bwci.spaceBoundswithchar[0].rbound = parent->right;
+    limdfsresources->bwci.spaceBoundswithchar[0].lbound = parent->leftbound;
+    limdfsresources->bwci.spaceBoundswithchar[0].rbound = parent->rightbound;
     limdfsresources->bwci.spaceBoundswithchar[0].inchar = extendchar;
     limdfsresources->bwci.nextfreeBoundswithchar = 1UL;
   } else
@@ -463,18 +465,18 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
                                    limdfsresources->totallength,
                                    suffixarray->suftab,
                                    parent->offset,
-                                   parent->left,
-                                   parent->right);
+                                   parent->leftbound,
+                                   parent->rightbound);
   }
-  firstnonspecial = parent->left;
+  firstnonspecial = parent->leftbound;
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {
     Indexbounds child;
     Uchar inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
 
     child.offset = parent->offset+1;
-    child.left = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
-    child.right = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
+    child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
+    child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
     showLCPinterval(limdfsresources->withesa,parent);
@@ -487,13 +489,13 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
                          inchar,
                          parentwithinfo->aliasstate,
                          adfst);
-    firstnonspecial = child.right+1;
+    firstnonspecial = child.rightbound+1;
   }
   if (!limdfsresources->nospecials)
   {
     Seqpos bound;
 
-    for (bound=firstnonspecial; bound <= parent->right; bound++)
+    for (bound=firstnonspecial; bound <= parent->rightbound; bound++)
     {
       esa_overcontext(limdfsresources,
                       parentwithinfo->aliasstate,
@@ -515,8 +517,8 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   bwtrangesplitwithoutspecial(&limdfsresources->bwci,
                               limdfsresources->rangeOccs,
                               limdfsresources->genericindex,
-                              parent->left,
-                              parent->right);
+                              parent->leftbound,
+                              parent->rightbound);
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {
     Uchar inchar;
@@ -524,9 +526,9 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
 
     inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
     child.offset = parent->offset+1;
-    child.left = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
-    child.right = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
-    sumwidth += child.right - child.left;
+    child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
+    child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
+    sumwidth += child.rightbound - child.leftbound;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
     showLCPinterval(limdfsresources->withesa,parent);
@@ -543,7 +545,8 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   if (!limdfsresources->nospecials)
   {
     Seqpos bound;
-    for (bound = parent->left + sumwidth; bound < parent->right; bound++)
+    for (bound = parent->leftbound + sumwidth;
+         bound < parent->rightbound; bound++)
     {
       Uchar cc = bwtseqgetsymbol(bound,limdfsresources->genericindex);
 
