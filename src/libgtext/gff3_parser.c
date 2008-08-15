@@ -523,6 +523,17 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
       }
       else {
         attr_tag = splitter_get_token(tmp_splitter, 0);
+        /* Skip leading blanks of attribute tag.
+           Iit is not mentioned in the GFF3 spec that attribute tags cannot
+           start with blanks, but if a Parent or ID attribute is prepended by a
+           blank (e.g. '; Parent=' instead of ';Parent=') the parent-child
+           relations do not get reconstructed correctly, because then '; Parent'
+           would be treated as an attribute without special meaning.
+           Therefore we decided to skip leading blanks and do _not_ consider
+           them as part of the attribute but rather as an artefact of the GFF3
+           construction. */
+        while (attr_tag[0] == ' ')
+          attr_tag++;
         attr_value = splitter_get_token(tmp_splitter, 1);
       }
     }
