@@ -45,6 +45,14 @@ GenomeFeatureType*     genome_feature_get_type(GenomeFeature*);
 GenomeFeatureType*     genome_feature_create_gft(GenomeFeature*, const char*);
 bool                   genome_feature_has_type(GenomeFeature*, const char*);
 bool                   genome_feature_score_is_defined(const GenomeFeature*);
+bool                   genome_feature_is_multi(const GenomeFeature*);
+void                   genome_feature_make_multi_representative(const
+                                                                GenomeFeature*);
+void                   genome_feature_set_multi_representative(GenomeFeature*,
+                                                               const
+                                                               GenomeFeature*);
+const GenomeFeature*   genome_feature_get_multi_representative(const
+                                                               GenomeFeature*);
 float                  genome_feature_get_score(GenomeFeature*);
 Strand                 genome_feature_get_strand(GenomeFeature*);
 Phase                  genome_feature_get_phase(GenomeFeature*);

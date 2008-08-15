@@ -49,6 +49,7 @@ struct GFF3Parser {
   long offset;
   Mapping *offset_mapping;
   FeatureTypeFactory *feature_type_factory;
+  unsigned int last_terminator; /* line number of the last terminator */
 };
 
 typedef struct {
@@ -124,6 +125,7 @@ GFF3Parser* gff3parser_new(bool checkids,
   gff3_parser->offset = UNDEF_LONG;
   gff3_parser->offset_mapping = NULL;
   gff3_parser->feature_type_factory = feature_type_factory;
+  gff3_parser->last_terminator = 0;
   return gff3_parser;
 }
 
@@ -327,28 +329,37 @@ static int store_id(const char *id, GenomeNode *genome_feature,
   GenomeNode *gn;
   int had_err = 0;
 
-  error_check (err);
-  assert(id);
+  error_check(err);
+  assert(id && genome_feature && gff3_parser);
 
   if ((gn = hashtable_get(gff3_parser->id_to_genome_node_mapping, id))) {
-    /* this id has been used already -> raise error */
-    if (!gff3_parser->tidy) {
-      error_set(err, "the %s \"%s\" on line %u in file \"%s\" has been used "
-                "already for the feature defined on line %u", ID_STRING, id,
-                line_number, filename, genome_node_get_line_number(gn));
+    /* this id has been used already -> try to make this a multi-feature */
+    if (genome_node_get_line_number(gn) < gff3_parser->last_terminator) {
+      error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
+                "\"%s\" is separated from its counterpart on line %u by "
+                "terminator %s on line %u", ID_STRING, id, line_number,
+                filename, genome_node_get_line_number(gn), GFF_TERMINATOR,
+                gff3_parser->last_terminator);
       had_err = -1;
     }
-    else {
-      warning("the %s \"%s\" on line %u in file \"%s\" has been used already "
-             "for the feature defined on line %u", ID_STRING, id, line_number,
-             filename, genome_node_get_line_number(gn));
+    if (!had_err) {
+      if (!genome_feature_is_multi((GenomeFeature*) gn))
+        genome_feature_make_multi_representative((GenomeFeature*) gn);
+      else {
+        assert(genome_feature_get_multi_representative((GenomeFeature*) gn) ==
+               (GenomeFeature*) gn);
+      }
+      genome_feature_set_multi_representative((GenomeFeature*) genome_feature,
+                                              (GenomeFeature*) gn);
     }
   }
   else {
-    gff3_parser->incomplete_node = true;
     hashtable_add(gff3_parser->id_to_genome_node_mapping, cstr_dup(id),
                   genome_node_ref(genome_feature));
   }
+
+  if (!had_err)
+    gff3_parser->incomplete_node = true;
 
   return had_err;
 }
@@ -419,6 +430,54 @@ static bool is_blank_attribute(const char *attribute)
     attribute++;
   }
   return true;
+}
+
+static int check_multi_feature_constrains(GenomeNode *new_gf,
+                                          GenomeNode *old_gf, const char *id,
+                                          const char *filename,
+                                          unsigned int line_number, Error *err)
+{
+  int had_err = 0;
+  error_check(err);
+  assert(new_gf && old_gf);
+  /* check seqid */
+  if (str_cmp(genome_node_get_seqid(new_gf), genome_node_get_seqid(old_gf))) {
+    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+              "has a different sequence id than its counterpart on line %u",
+              ID_STRING, id, line_number, filename,
+              genome_node_get_line_number(old_gf));
+    had_err = -1;
+  }
+  /* check source */
+  if (!had_err && strcmp(genome_feature_get_source((GenomeFeature*) new_gf),
+                         genome_feature_get_source((GenomeFeature*) old_gf))) {
+    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+              "has a different source than its counterpart on line %u",
+              ID_STRING, id, line_number, filename,
+              genome_node_get_line_number(old_gf));
+    had_err = -1;
+  }
+  /* check type */
+  if (!had_err && genome_feature_get_type((GenomeFeature*) new_gf) !=
+                  genome_feature_get_type((GenomeFeature*) old_gf)) {
+    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+              "has a different type than its counterpart on line %u",
+              ID_STRING, id, line_number, filename,
+              genome_node_get_line_number(old_gf));
+    had_err = -1;
+  }
+  /* check strand */
+  if (!had_err && genome_feature_get_strand((GenomeFeature*) new_gf) !=
+                  genome_feature_get_strand((GenomeFeature*) old_gf)) {
+    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+              "has a different strand than its counterpart on line %u",
+              ID_STRING, id, line_number, filename,
+              genome_node_get_line_number(old_gf));
+    had_err = -1;
+  }
+  /* check attributes (for target attribute only the name) */
+  /* XXX */
+  return had_err;
 }
 
 static int parse_attributes(char *attributes, GenomeNode *genome_feature,
@@ -507,6 +566,15 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
                                                      line_number, err);
       }
     }
+  }
+
+  if (!had_err && genome_feature_is_multi((GenomeFeature*) genome_feature)) {
+    had_err = check_multi_feature_constrains(genome_feature,
+                        (GenomeNode*)
+                        genome_feature_get_multi_representative((GenomeFeature*)
+                                                                genome_feature),
+                        genome_feature_get_attribute(genome_feature, ID_STRING),
+                        filename, line_number, err);
   }
 
   splitter_delete(parent_splitter);
@@ -624,15 +692,15 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                         &auto_sr, gff3_parser, filename, line_number, err);
   }
 
+  /* set source */
+  if (!had_err)
+    set_source(genome_feature, source, gff3_parser->source_to_str_mapping);
+
   /* parse the attributes */
   if (!had_err) {
     had_err = parse_attributes(attributes, genome_feature, &is_child,
                                gff3_parser, filename, line_number, err);
   }
-
-  /* set source */
-  if (!had_err)
-    set_source(genome_feature, source, gff3_parser->source_to_str_mapping);
 
   if (!had_err && score_is_defined)
     genome_feature_set_score((GenomeFeature*) genome_feature, score_value);
@@ -867,6 +935,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     gff3_parser->incomplete_node = false;
     if (!gff3_parser->checkids)
       hashtable_reset(gff3_parser->id_to_genome_node_mapping);
+    gff3_parser->last_terminator = line_number;
   }
   else {
     warning("skipping unknown meta line %u in file \"%s\": %s", line_number,
@@ -967,6 +1036,7 @@ void gff3parser_reset(GFF3Parser *gff3_parser)
   hashtable_reset(gff3_parser->seqid_to_ssr_mapping);
   hashtable_reset(gff3_parser->source_to_str_mapping);
   hashtable_reset(gff3_parser->undefined_sequence_regions);
+  gff3_parser->last_terminator = 0;
 }
 
 void gff3parser_delete(GFF3Parser *gff3_parser)

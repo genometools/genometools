@@ -181,18 +181,30 @@ static int store_ids(GenomeNode *gn, void *data, Error *err)
   assert(gn && gf && gff3_visitor);
   type = genome_feature_get_type(gf);
 
-  if (genome_node_has_children(gn)) {
-    /* increase id counter */
-    string_distri_add(gff3_visitor->id_counter,
-                      genome_feature_type_get_cstr(type));
+  if (genome_node_has_children(gn) || genome_feature_is_multi(gf)) {
+    if (!genome_feature_is_multi(gf) ||
+        genome_feature_get_multi_representative(gf) == gf) {
+      /* increase id counter */
+      string_distri_add(gff3_visitor->id_counter,
+                        genome_feature_type_get_cstr(type));
 
-    /* build id string */
-    id = str_new_cstr(genome_feature_type_get_cstr(type));
-    str_append_ulong(id, string_distri_get(gff3_visitor->id_counter,
+      /* build id string */
+      id = str_new_cstr(genome_feature_type_get_cstr(type));
+      str_append_ulong(id, string_distri_get(gff3_visitor->id_counter,
                                            genome_feature_type_get_cstr(type)));
 
-    /* store (unique) id */
-    hashtable_add(gff3_visitor->genome_feature_to_unique_id_str, gn, id);
+      /* store (unique) id */
+      hashtable_add(gff3_visitor->genome_feature_to_unique_id_str, gn, id);
+    }
+    else {
+      /* multi-feature which is not the representative ->
+         reuse id from representative */
+      id = hashtable_get(gff3_visitor->genome_feature_to_unique_id_str,
+                         genome_feature_get_multi_representative(gf));
+      assert(id);
+      hashtable_add(gff3_visitor->genome_feature_to_unique_id_str, gf,
+                    str_ref(id));
+    }
 
     /* for each child -> store the parent feature in the hash table */
     add_id_info.genome_feature_to_id_array =

@@ -121,7 +121,7 @@ Name "gt gff3 prob 12 (-checkids)"
 Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 -checkids #{$testdata}gt_gff3_prob_12.gff3", :retval => 1)
-  grep $last_stderr, "has been used already for the feature defined on line"
+  grep $last_stderr, "is separated from its counterpart on line 5 by terminator"
 end
 
 Name "gt gff3 test 1.1"
@@ -602,6 +602,13 @@ Keywords "gt_gff3 fasta"
 Test do
   run_test "#{$bin}gt gff3 -sort #{$testdata}two_fasta_seqs_without_sequence_regions.gff3"
   run "diff #{$last_stdout} #{$testdata}two_fasta_seqs.gff3"
+end
+
+Name "gt gff3 simple multi-feature (round-trip)"
+Keywords "gt_gff3 multi-feature"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}multi_feature_simple.gff3"
+  run "diff #{$last_stdout} #{$testdata}multi_feature_simple.gff3"
 end
 
 # XXX: fix this bug from TODO list

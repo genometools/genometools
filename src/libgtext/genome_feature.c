@@ -40,6 +40,8 @@
 #define TRANSCRIPT_FEATURE_TYPE_MASK    0x7
 #define SCORE_IS_DEFINED_OFFSET         13
 #define SCORE_IS_DEFINED_MASK           0x1
+#define MULTI_FEATURE_OFFSET            14
+#define MULTI_FEATURE_MASK              0x1
 
 struct GenomeFeature
 {
@@ -51,6 +53,7 @@ struct GenomeFeature
   Range range;
   float score;
   TagValueMap attributes; /* stores the attributes; created on demand */
+  const GenomeFeature *representative;
 };
 
 typedef struct {
@@ -162,6 +165,7 @@ GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
   genome_feature_set_phase(gn, PHASE_UNDEFINED);
   set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_UNDETERMINED);
   gf->attributes     = NULL;
+  gf->representative = NULL;
   return gn;
 }
 
@@ -301,6 +305,51 @@ bool genome_feature_score_is_defined(const GenomeFeature *gf)
   if ((gn->bit_field >> SCORE_IS_DEFINED_OFFSET) & SCORE_IS_DEFINED_MASK)
     return true;
   return false;
+}
+
+bool genome_feature_is_multi(const GenomeFeature *gf)
+{
+  GenomeNode *gn = (GenomeNode*) gf;
+  assert(gn);
+  if ((gn->bit_field >> MULTI_FEATURE_OFFSET) & MULTI_FEATURE_MASK)
+    return true;
+  return false;
+}
+
+static void genome_feature_set_multi(const GenomeFeature *gf)
+{
+  GenomeNode *gn;
+  assert(gf && !genome_feature_is_multi(gf));
+  gn = (GenomeNode*) gf;
+  gn->bit_field |= 1 << MULTI_FEATURE_OFFSET;
+}
+
+void genome_feature_make_multi_representative(const GenomeFeature *gf)
+{
+  assert(gf && !genome_feature_is_multi(gf));
+  genome_feature_set_multi(gf);
+}
+
+void genome_feature_set_multi_representative(GenomeFeature *gf,
+                                             const GenomeFeature *rep)
+{
+  assert(gf && !genome_feature_is_multi(gf));
+  assert(rep && genome_feature_is_multi(rep));
+  genome_feature_set_multi(gf);
+  gf->representative = rep;
+}
+
+const GenomeFeature* genome_feature_get_multi_representative(const
+                                                             GenomeFeature *gf)
+{
+  assert(gf && genome_feature_is_multi(gf));
+  if (gf->representative) {
+    assert(genome_feature_is_multi(gf->representative));
+    assert(genome_feature_get_multi_representative(gf->representative) ==
+           gf->representative);
+    return gf->representative;
+  }
+  return gf; /* is itself the representative */
 }
 
 float genome_feature_get_score(GenomeFeature *gf)
