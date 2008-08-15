@@ -168,7 +168,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data,
   return 0;
 }
 
-static int store_ids(GenomeNode *gn, void *data, Error *e)
+static int store_ids(GenomeNode *gn, void *data, Error *err)
 {
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
@@ -177,7 +177,7 @@ static int store_ids(GenomeNode *gn, void *data, Error *e)
   int had_err = 0;
   Str *id;
 
-  error_check(e);
+  error_check(err);
   assert(gn && gf && gff3_visitor);
   type = genome_feature_get_type(gf);
 
@@ -198,28 +198,29 @@ static int store_ids(GenomeNode *gn, void *data, Error *e)
     add_id_info.genome_feature_to_id_array =
       gff3_visitor->genome_feature_to_id_array,
     add_id_info.id = str_get(id);
-    had_err = genome_node_traverse_direct_children(gn, &add_id_info, add_id, e);
+    had_err = genome_node_traverse_direct_children(gn, &add_id_info, add_id,
+                                                   err);
   }
   return had_err;
 }
 
 static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                       Error *e)
+                                       Error *err)
 {
   GFF3Visitor *gff3_visitor;
   int had_err;
-  error_check(e);
+  error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
 
   gff3_version_string(gv);
 
   had_err = genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
-                                          store_ids, true, e);
+                                          store_ids, true, err);
   if (!had_err) {
     if (genome_node_is_tree((GenomeNode*) gf)) {
       had_err = genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
                                               gff3_show_genome_feature, true,
-                                              e);
+                                              err);
     }
     else {
       /* got a DAG -> traverse bin breadth first fashion to make sure that the
@@ -227,7 +228,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       had_err = genome_node_traverse_children_breadth((GenomeNode*) gf,
                                                       gff3_visitor,
                                                       gff3_show_genome_feature,
-                                                      true, e);
+                                                      true, err);
     }
   }
 
