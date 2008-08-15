@@ -618,6 +618,14 @@ Test do
   run "diff #{$last_stdout} #{$testdata}multi_feature_simple.gff3"
 end
 
+Name "gt gff3 simple multi-feature (undefined parent)"
+Keywords "gt_gff3 multi-feature"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}multi_feature_undefined_parent.gff3",
+           :retval => 1)
+  grep $last_stderr, "has not been previously defined"
+end
+
 # XXX: fix this bug from TODO list
 =begin
 Name "gt gff3 multiple top-level parents"
