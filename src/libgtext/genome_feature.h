@@ -49,10 +49,8 @@ bool                   genome_feature_is_multi(const GenomeFeature*);
 void                   genome_feature_make_multi_representative(const
                                                                 GenomeFeature*);
 void                   genome_feature_set_multi_representative(GenomeFeature*,
-                                                               const
                                                                GenomeFeature*);
-const GenomeFeature*   genome_feature_get_multi_representative(const
-                                                               GenomeFeature*);
+GenomeFeature*         genome_feature_get_multi_representative(GenomeFeature*);
 float                  genome_feature_get_score(GenomeFeature*);
 Strand                 genome_feature_get_strand(GenomeFeature*);
 Phase                  genome_feature_get_phase(GenomeFeature*);

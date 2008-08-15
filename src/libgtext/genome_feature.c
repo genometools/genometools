@@ -53,7 +53,7 @@ struct GenomeFeature
   Range range;
   float score;
   TagValueMap attributes; /* stores the attributes; created on demand */
-  const GenomeFeature *representative;
+  GenomeFeature *representative;
 };
 
 typedef struct {
@@ -331,7 +331,7 @@ void genome_feature_make_multi_representative(const GenomeFeature *gf)
 }
 
 void genome_feature_set_multi_representative(GenomeFeature *gf,
-                                             const GenomeFeature *rep)
+                                             GenomeFeature *rep)
 {
   assert(gf && !genome_feature_is_multi(gf));
   assert(rep && genome_feature_is_multi(rep));
@@ -339,8 +339,7 @@ void genome_feature_set_multi_representative(GenomeFeature *gf,
   gf->representative = rep;
 }
 
-const GenomeFeature* genome_feature_get_multi_representative(const
-                                                             GenomeFeature *gf)
+GenomeFeature* genome_feature_get_multi_representative(GenomeFeature *gf)
 {
   assert(gf && genome_feature_is_multi(gf));
   if (gf->representative) {
