@@ -18,5 +18,5 @@ query=$2
 # gt suffixerator -tis -suf -dna -pl -db ${reference} -indexname esa-fwd
 # gt tagerator -e 2 -maxocc 20 -nospecials -rw -esa esa-fwd -q ${query}
 gt packedindex mkindex -tis -indexname pck-rev -db ${reference} -sprank -dna -pl -bsize 10 -locfreq 32 -dir rev
-#tagerator gt tagerator -e 2 -maxocc 20 -nospecials -rw -pck pck-rev -q ${query}
 gt prebwt -maxdepth 4 -pck pck-rev
+gt tagerator -e 2 -maxocc 20 -nospecials -rw -pck pck-rev -q ${query}
