@@ -528,11 +528,30 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   {
     ArrayBoundswithchar localbwci;
 
-    INITARRAY(&localbwci,Boundswithchar);
+    ALLOCASSIGNSPACE(localbwci.spaceBoundswithchar,NULL,
+                     Boundswithchar,limdfsresources->alphasize + 1);
+    localbwci.nextfreeBoundswithchar = 0;
+    localbwci.allocatedBoundswithchar
+      = (unsigned long) limdfsresources->alphasize + 1;
     smalldepthbwtrangesplitwithoutspecial(&localbwci,
                                           limdfsresources->genericindex,
                                           parent->code,
                                           (unsigned long) (parent->offset + 1));
+    assert(localbwci.nextfreeBoundswithchar 
+           == limdfsresources->bwci.nextfreeBoundswithchar);
+    {
+      unsigned long i;
+
+      for (i=0; i<localbwci.nextfreeBoundswithchar; i++)
+      {
+        assert(localbwci.spaceBoundswithchar[i].lbound ==
+               limdfsresources->bwci.spaceBoundswithchar[i].lbound);
+        assert(localbwci.spaceBoundswithchar[i].rbound ==
+               limdfsresources->bwci.spaceBoundswithchar[i].rbound);
+        assert(localbwci.spaceBoundswithchar[i].inchar ==
+               limdfsresources->bwci.spaceBoundswithchar[i].inchar);
+      }
+    }
     FREEARRAY(&localbwci,Boundswithchar);
   }
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
