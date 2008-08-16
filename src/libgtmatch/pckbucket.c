@@ -300,7 +300,7 @@ void enumlowlevelchildintervals(ArrayBoundswithchar *bwci,
     if (mbptr->lowerbound < mbptr->upperbound)
     {
       bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].inchar
-        = (Uchar) (pcktb->mbtab[childdepth] + childcode - mbptr);
+        = (Uchar) (mbptr - (pcktb->mbtab[childdepth] + childcode));
       bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].lbound
         = mbptr->lowerbound;
       bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar++].rbound

@@ -519,40 +519,19 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   Seqpos sumwidth = 0;
   const Indexbounds *parent = &parentwithinfo->lcpitv;
 
-  bwtrangesplitwithoutspecial(&limdfsresources->bwci,
-                              limdfsresources->rangeOccs,
-                              limdfsresources->genericindex,
-                              parent->leftbound,
-                              parent->rightbound);
   if (parent->offset < (Seqpos) limdfsresources->maxdepth)
   {
-    ArrayBoundswithchar localbwci;
-
-    ALLOCASSIGNSPACE(localbwci.spaceBoundswithchar,NULL,
-                     Boundswithchar,limdfsresources->alphasize + 1);
-    localbwci.nextfreeBoundswithchar = 0;
-    localbwci.allocatedBoundswithchar
-      = (unsigned long) limdfsresources->alphasize + 1;
-    smalldepthbwtrangesplitwithoutspecial(&localbwci,
+    smalldepthbwtrangesplitwithoutspecial(&limdfsresources->bwci,
                                           limdfsresources->genericindex,
                                           parent->code,
                                           (unsigned long) (parent->offset + 1));
-    assert(localbwci.nextfreeBoundswithchar 
-           == limdfsresources->bwci.nextfreeBoundswithchar);
-    {
-      unsigned long i;
-
-      for (i=0; i<localbwci.nextfreeBoundswithchar; i++)
-      {
-        assert(localbwci.spaceBoundswithchar[i].lbound ==
-               limdfsresources->bwci.spaceBoundswithchar[i].lbound);
-        assert(localbwci.spaceBoundswithchar[i].rbound ==
-               limdfsresources->bwci.spaceBoundswithchar[i].rbound);
-        assert(localbwci.spaceBoundswithchar[i].inchar ==
-               limdfsresources->bwci.spaceBoundswithchar[i].inchar);
-      }
-    }
-    FREEARRAY(&localbwci,Boundswithchar);
+  } else
+  {
+    bwtrangesplitwithoutspecial(&limdfsresources->bwci,
+                                limdfsresources->rangeOccs,
+                                limdfsresources->genericindex,
+                                parent->leftbound,
+                                parent->rightbound);
   }
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {

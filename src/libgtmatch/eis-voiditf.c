@@ -236,6 +236,10 @@ void smalldepthbwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
 
 unsigned int bwtseq2maxdepth(const void *voidbwtseq)
 {
+  if (((const BWTSeq *) voidbwtseq)->pckbuckettable == NULL)
+  {
+    return 0;
+  }
   return pcktb2maxdepth(((const BWTSeq *) voidbwtseq)->pckbuckettable);
 }
 
