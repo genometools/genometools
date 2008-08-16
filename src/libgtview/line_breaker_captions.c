@@ -77,7 +77,7 @@ void line_breaker_captions_register_block(LineBreaker *lb,
     hashtable_add(lbcap->linepositions, line, num);
   }
   dr = calculate_drawing_range(lbcap, block);
-  *num = dr.end + 2;
+  *num = dr.end + 1;
 }
 
 void line_breaker_captions_delete(LineBreaker *lb)

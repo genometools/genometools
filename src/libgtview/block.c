@@ -53,6 +53,16 @@ static int elemcmp(const void *a, const void *b)
   return -1;
 }
 
+int block_compare(const Block *block1, const Block *block2)
+{
+  int ret;
+  assert(block1 && block2);
+  ret = range_compare(block_get_range(block1), block_get_range(block2));
+  if (ret == 0 && block1 != block2)
+    ret = (block1 < block2 ? -1 : 1);
+  return ret;
+}
+
 Block* block_ref(Block *block)
 {
   assert(block);
@@ -99,7 +109,7 @@ void block_insert_element(Block *block, GenomeNode *gn)
   dlist_add(block->elements, e);
 }
 
-GenomeNode* block_get_top_level_feature(Block *block)
+GenomeNode* block_get_top_level_feature(const Block *block)
 {
   assert(block);
   return block->top_level_feature;
@@ -123,7 +133,7 @@ void block_set_range(Block *block, Range r)
   block->range = r;
 }
 
-bool block_has_only_one_fullsize_element(Block *block)
+bool block_has_only_one_fullsize_element(const Block *block)
 {
   bool ret = false;
   assert(block);
@@ -186,7 +196,7 @@ GenomeFeatureType* block_get_type(const Block *block)
   return block->type;
 }
 
-unsigned long block_get_size(Block *block)
+unsigned long block_get_size(const Block *block)
 {
   assert(block && block->elements);
   return dlist_size(block->elements);

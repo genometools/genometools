@@ -42,19 +42,20 @@ Range              block_get_range(const Block*);
 Range*             block_get_range_ptr(const Block *block);
 void               block_set_range(Block*, Range r);
 /* Checks whether a Block is occupied completely by a single element. */
-bool               block_has_only_one_fullsize_element(Block*);
+bool               block_has_only_one_fullsize_element(const Block*);
 /* Set whether a block caption should be displayed or not. */
 void               block_set_caption_visibility(Block*, bool);
 bool               block_caption_is_visible(const Block*);
 void               block_set_caption(Block*, Str*);
 Str*               block_get_caption(const Block*);
 void               block_set_strand(Block*, Strand);
-GenomeNode*        block_get_top_level_feature(Block*);
+GenomeNode*        block_get_top_level_feature(const Block*);
 Strand             block_get_strand(const Block*);
 void               block_set_type(Block*, GenomeFeatureType*);
 GenomeFeatureType* block_get_type(const Block*);
-unsigned long      block_get_size(Block*);
+unsigned long      block_get_size(const Block*);
 int                block_render(Block*, Canvas*);
+int                block_compare(const Block*, const Block*);
 int                block_unit_test(Error*);
 void               block_delete(Block*);
 

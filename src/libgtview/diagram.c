@@ -502,7 +502,7 @@ static int blocklist_delete(void *value)
 {
   unsigned long i;
   Array *a = (Array*) value;
-  for(i=0;i<array_size(a);i++)
+  for (i=0;i<array_size(a);i++)
     block_delete(*(Block**) array_get(a, i));
   array_delete(a);
   return 0;
@@ -515,8 +515,10 @@ Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
   Array *features = array_new(sizeof (GenomeNode*));
   int had_err;
   diagram = ma_malloc(sizeof (Diagram));
-  diagram->tracks = hashtable_new(HASH_STRING, ma_free_func, (FreeFunc) track_delete);
-  diagram->blocks = hashtable_new(HASH_DIRECT, NULL, (FreeFunc) blocklist_delete);
+  diagram->tracks = hashtable_new(HASH_STRING, ma_free_func,
+                                  (FreeFunc) track_delete);
+  diagram->blocks = hashtable_new(HASH_DIRECT, NULL,
+                                  (FreeFunc) blocklist_delete);
   diagram->nodeinfo = hashtable_new(HASH_DIRECT, NULL, NULL);
   diagram->nof_tracks = 0;
   diagram->config = config;
@@ -562,8 +564,14 @@ int diagram_get_number_of_tracks(const Diagram *diagram)
   return diagram->nof_tracks;
 }
 
-static int layout_tracks(UNUSED void *key, void *value, void *data,
-                     UNUSED Error *err)
+static int blocklist_block_compare(const void *item1, const void *item2)
+{
+  assert(item1 && item2);
+  return block_compare(*(Block**) item1, *(Block**) item2);
+}
+
+static int layout_tracks(void *key, void *value, void *data,
+                         UNUSED Error *err)
 {
   unsigned long i, max;
   Track *track;
@@ -578,6 +586,8 @@ static int layout_tracks(UNUSED void *key, void *value, void *data,
   double tmp;
   assert(gft && list);
 
+  /* to get a deterministic layout, we sort the Blocks for each type */
+  array_sort(list, blocklist_block_compare);
   /* we take the basename of the filename to have nicer output in the
      generated graphic. this might lead to ``collapsed'' tracks, if two files
      with different paths have the same basename. */

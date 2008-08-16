@@ -136,16 +136,13 @@ int track_render(Track* track, Canvas *canvas)
   int i = 0;
   assert(track && canvas);
   canvas_visit_track_pre(canvas, track);
-  for (i = 0; i < array_size(track->lines); i++) {
-    Line *line;
-    line = *(Line**) array_get(track->lines, i);
-    line_render(line, canvas);
-  }
+  for (i = 0; i < array_size(track->lines); i++)
+    line_render(*(Line**) array_get(track->lines, i), canvas);
   canvas_visit_track_post(canvas, track);
   return 0;
 }
 
-int track_unit_test(UNUSED Error *err)
+int track_unit_test(Error *err)
 {
   int had_err = 0;
   Block *b1, *b2, *b3, *b4;
