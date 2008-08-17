@@ -5,5 +5,5 @@ bin/gt packedindex mkindex -sprank -tis -dna -pl -bsize 10 -locfreq 32 -dir rev\
                        -indexname pck-yeast
 
 env -i GT_MEM_BOOKKEEPING=off time bin/gt tagerator -rw -pck pck-yeast -k 2\
-    -nospecials -t yeast.1000 > tmp.prot
+    -nowildcards -t yeast.1000 > tmp.prot
 gprof bin/gt gmon.out

@@ -68,7 +68,7 @@ struct Limdfsresources
   void (*processresult)(void *,const void *,unsigned long,unsigned long,Seqpos);
   void *patterninfo;
   const void *genericindex;
-  bool withesa, nospecials;
+  bool withesa, nowildcards;
   DECLAREDFSSTATE(currentdfsstate);
   Seqpos *rangeOccs;
   unsigned int maxdepth;
@@ -79,7 +79,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     unsigned int maxdepth,
                                     const Encodedsequence *encseq,
                                     bool withesa,
-                                    bool nospecials,
+                                    bool nowildcards,
                                     unsigned int mapsize,
                                     Seqpos totallength,
                                     void (*processmatch)(void *,bool,Seqpos,
@@ -111,7 +111,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->genericindex = genericindex;
   limdfsresources->totallength = totallength;
   limdfsresources->withesa = withesa;
-  limdfsresources->nospecials = nospecials;
+  limdfsresources->nowildcards = nowildcards;
   limdfsresources->encseq = encseq;
   limdfsresources->maxdepth = maxdepth;
   /* Application specific */
@@ -223,7 +223,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   {
     cc = getencodedchar(suffixarray->encseq,pos,suffixarray->readmode);
     if (cc != (Uchar) SEPARATOR &&
-        (!limdfsresources->nospecials || cc != (Uchar) WILDCARD))
+        (!limdfsresources->nowildcards || cc != (Uchar) WILDCARD))
     {
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
@@ -287,7 +287,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       cc = nextBwtseqcontextiterator(&bound,bsci);
     }
     if (cc != (Uchar) SEPARATOR &&
-        (!limdfsresources->nospecials || cc != (Uchar) WILDCARD))
+        (!limdfsresources->nowildcards || cc != (Uchar) WILDCARD))
     {
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
@@ -496,7 +496,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
                          adfst);
     firstnonspecial = child.rightbound+1;
   }
-  if (!limdfsresources->nospecials)
+  if (!limdfsresources->nowildcards)
   {
     Seqpos bound;
 
@@ -558,7 +558,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
                          parentwithinfo->aliasstate,
                          adfst);
   }
-  if (!limdfsresources->nospecials)
+  if (!limdfsresources->nowildcards)
   {
     Seqpos bound;
     for (bound = parent->leftbound + sumwidth;

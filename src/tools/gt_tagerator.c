@@ -20,8 +20,29 @@
 #include "libgtcore/strarray.h"
 #include "libgtcore/unused.h"
 #include "libgtcore/tool.h"
-#include "tools/gt_tagerator.h"
 #include "libgtmatch/tagerator.h"
+#include "tools/gt_tagerator.h"
+
+/*
+  Remark Gordon from July 2008: How to have access to an option in the
+  Tool argument parser framework:
+
+  typedef struct
+  {
+    Option *foo;
+  } Arguments;
+
+  foo = option_parser_new();
+  optionparseraddoption(op,foo);
+  arguments->foo = option_ref(foo);
+
+  ...
+
+  arguments_delete()
+  {
+    option_delete(arguments_foo);
+  }
+*/
 
 static void *gt_tagerator_arguments_new(void)
 {
@@ -113,10 +134,10 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                            &arguments->maxintervalwidth,0);
   option_parser_add_option(op, option);
 
-  option = option_new_bool("nospecials","do not output matches containing "
+  option = option_new_bool("nowildcards","do not output matches containing "
                            "wildcard characters (e.g. N); only relevant for "
                            "approximate matching",
-                           &arguments->nospecials, false);
+                           &arguments->nowildcards, false);
   option_parser_add_option(op, option);
   return op;
 }
@@ -192,9 +213,9 @@ static int gt_tagerator_arguments_check(UNUSED int rest_argc,
       error_set(err,"option -online requires option -e");
       return -1;
     }
-    if (!arguments->nospecials)
+    if (!arguments->nowildcards)
     {
-      arguments->nospecials = true;
+      arguments->nowildcards = true;
     }
     if (arguments->maxintervalwidth > 0)
     {

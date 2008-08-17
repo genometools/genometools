@@ -392,7 +392,7 @@ static void apm_inplacenextMyercolumn(const void *dfsconstinfo,
 }
 
 Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
-                                          bool nospecials,
+                                          bool nowildcards,
                                           unsigned int alphasize,
                                           const Uchar *pattern,
                                           unsigned long patternlength,
@@ -415,7 +415,7 @@ Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
   {
     assert(pos - startpos <= (Seqpos) (patternlength + maxdistance));
     cc = getencodedchar(encseq,pos,Forwardmode);
-    if (nospecials && cc == (Uchar) WILDCARD)
+    if (nowildcards && cc == (Uchar) WILDCARD)
     {
       apm_freedfsconstinfo(&dfsconstinfo);
       result.defined = false;

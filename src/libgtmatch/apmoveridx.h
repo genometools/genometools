@@ -23,7 +23,7 @@
 const AbstractDfstransformer *apm_AbstractDfstransformer(void);
 
 Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
-                                          bool nospecials,
+                                          bool nowildcards,
                                           unsigned int alphasize,
                                           const Uchar *pattern,
                                           unsigned long patternlength,

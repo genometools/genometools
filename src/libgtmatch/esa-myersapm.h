@@ -26,7 +26,7 @@ typedef struct Myersonlineresources Myersonlineresources;
 
 Myersonlineresources *newMyersonlineresources(
                         unsigned int mapsize,
-                        bool nospecials,
+                        bool nowildcards,
                         const Encodedsequence *encseq,
                         void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,
                                              unsigned long),

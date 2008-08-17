@@ -417,7 +417,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     {
       assert(suffixarray.encseq != NULL);
       mor = newMyersonlineresources(mapsize,
-                                    tageratoroptions->nospecials,
+                                    tageratoroptions->nowildcards,
                                     suffixarray.encseq,
                                     processmatch,
                                     processmatchinfoonline);
@@ -427,7 +427,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                                  : bwtseq2maxdepth(packedindex),
                                          suffixarray.encseq,
                                          withesa,
-                                         tageratoroptions->nospecials,
+                                         tageratoroptions->nowildcards,
                                          mapsize,
                                          totallength,
                                          processmatch,

@@ -17,17 +17,23 @@
 
 #ifndef TAGERATOR_H
 #define TAGERATOR_H
+#include <stdbool.h>
 #include "libgtcore/strarray.h"
 #include "libgtcore/error.h"
 
 typedef struct
 {
   StrArray *tagfiles;
-  Str *esaindexname, *pckindexname;
+  Str *esaindexname, 
+      *pckindexname;
   long maxdistance;
-  bool online, docompare, replacewildcard, fwdmatch, rcmatch,
-       nospecials;
-  unsigned long maxintervalwidth;
+  bool online,  /* perform online search, for testing */
+       docompare, /* compare results with online search */
+       replacewildcard, /* replace wildcards by random symbol */
+       fwdmatch, /* perform match on forward strand, default */
+       rcmatch, /* perform match on reverse complemented strand */
+       nowildcards; /* ignore matches containing wildcards */
+  unsigned long maxintervalwidth; /* max width of interval */
 } TageratorOptions;
 
 int runtagerator(const TageratorOptions *tageratoroptions,Error *err);

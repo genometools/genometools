@@ -33,14 +33,14 @@ struct Myersonlineresources
   Seqpos totallength;
   unsigned long *eqsvectorrev;
   unsigned int alphasize;
-  bool nospecials;
+  bool nowildcards;
   void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
   void *processmatchinfo;
 };
 
 Myersonlineresources *newMyersonlineresources(
                             unsigned int mapsize,
-                            bool nospecials,
+                            bool nowildcards,
                             const Encodedsequence *encseq,
                             void (*processmatch)(void *,bool,Seqpos,
                                                  Seqpos,Seqpos,unsigned long),
@@ -55,7 +55,7 @@ Myersonlineresources *newMyersonlineresources(
   assert(mapsize > 0 && mapsize-1 <= MAXALPHABETCHARACTER);
   mor->alphasize = mapsize-1;
   mor->totallength = getencseqtotallength(encseq);
-  mor->nospecials = nospecials;
+  mor->nowildcards = nowildcards;
   mor->processmatch = processmatch;
   mor->processmatchinfo = processmatchinfo;
   return mor;
@@ -143,13 +143,13 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
         Definedunsignedlong matchlength;
 
         matchlength = apm_findshortestmatch(mor->encseq,
-                                            mor->nospecials,
+                                            mor->nowildcards,
                                             mor->alphasize,
                                             pattern,
                                             patternlength,
                                             maxdistance,
                                             dbstartpos);
-        assert (matchlength.defined || mor->nospecials);
+        assert (matchlength.defined || mor->nowildcards);
         if (matchlength.defined)
         {
           mor->processmatch(mor->processmatchinfo,
