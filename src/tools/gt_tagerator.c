@@ -103,6 +103,13 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   option_exclude(optionesaindex,optionpckindex);
   option_is_mandatory_either(optionesaindex,optionpckindex);
 
+  option = option_new_int("maxdepth",
+                          "Use the data in the .pbt file only up "
+                          "to this depth (only relevant with option -pck)",
+                          &arguments->userdefinedmaxdepth,
+                          -1);
+  option_parser_add_option(op, option);
+
   optiononline = option_new_bool("online","Perform online searches",
                             &arguments->online, false);
   option_parser_add_option(op, optiononline);
@@ -121,7 +128,7 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   option_is_development_option(optionrw);
 
   option = option_new_bool("d","Compute direct matches (default)",
-                             &arguments->fwdmatch, true);
+                           &arguments->fwdmatch, true);
   option_parser_add_option(op, option);
 
   option = option_new_bool("p","Compute palindromic "
