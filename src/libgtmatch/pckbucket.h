@@ -49,4 +49,6 @@ void enumlowlevelchildintervals(ArrayBoundswithchar *bwci,
 
 unsigned int pcktb2maxdepth(const Pckbuckettable *pckbuckettable);
 
+const void *pcktb2mbtab(const Pckbuckettable *pckbuckettable);
+
 #endif

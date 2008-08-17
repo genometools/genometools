@@ -25,6 +25,7 @@
 typedef struct Limdfsresources Limdfsresources;
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
+                                    const Matchbound **mbtab,
                                     unsigned int maxdepth,
                                     const Encodedsequence *encseq,
                                     bool withesa,

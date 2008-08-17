@@ -68,7 +68,7 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   TageratorOptions *arguments = tool_arguments;
   OptionParser *op;
   Option *option, *optionrw, *optiononline, *optioncmp, *optionesaindex,
-         *optionpckindex;
+         *optionpckindex, *optionmaxdepth;
 
   assert(arguments != NULL);
   arguments->esaindexname = str_new();
@@ -103,12 +103,13 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   option_exclude(optionesaindex,optionpckindex);
   option_is_mandatory_either(optionesaindex,optionpckindex);
 
-  option = option_new_int("maxdepth",
-                          "Use the data in the .pbt file only up "
-                          "to this depth (only relevant with option -pck)",
-                          &arguments->userdefinedmaxdepth,
-                          -1);
-  option_parser_add_option(op, option);
+  optionmaxdepth = option_new_int("maxdepth",
+                                  "Use the data in the .pbt file only up to "
+                                  "this depth (only relevant with option -pck)",
+                                  &arguments->userdefinedmaxdepth,
+                                  -1);
+  option_parser_add_option(op, optionmaxdepth);
+  option_is_development_option(optionmaxdepth);
 
   optiononline = option_new_bool("online","Perform online searches",
                             &arguments->online, false);

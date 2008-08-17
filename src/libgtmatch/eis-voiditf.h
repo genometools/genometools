@@ -58,11 +58,6 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
                                  Seqpos lbound,
                                  Seqpos ubound);
 
-void smalldepthbwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
-                                           const void *voidbwtseq,
-                                           Codetype parentcode,
-                                           unsigned long childdepth);
-
 void *loadvoidBWTSeqForSA(const Str *indexname,
                           const Suffixarray *suffixarray,
                           Seqpos totallength,
@@ -112,5 +107,7 @@ unsigned long bwtrangesplitallwithoutspecial(Matchbound *mbtab,
                                              Seqpos ubound);
 
 unsigned int bwtseq2maxdepth(const void *voidbwtseq);
+
+const Matchbound **bwtseq2mbtab(const void *voidbwtseq);
 
 #endif

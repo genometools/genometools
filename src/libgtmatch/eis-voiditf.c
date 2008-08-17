@@ -223,15 +223,14 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
   }
 }
 
-void smalldepthbwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
-                                           const void *voidbwtseq,
-                                           Codetype parentcode,
-                                           unsigned long childdepth)
+const Matchbound **bwtseq2mbtab(const void *voidbwtseq)
 {
-  enumlowlevelchildintervals(bwci,
-                             ((const BWTSeq *) voidbwtseq)->pckbuckettable,
-                             parentcode,
-                             childdepth);
+  if (((const BWTSeq *) voidbwtseq)->pckbuckettable == NULL)
+  {
+    return NULL;
+  }
+  return (const Matchbound **)
+         pcktb2mbtab(((const BWTSeq *) voidbwtseq)->pckbuckettable);
 }
 
 unsigned int bwtseq2maxdepth(const void *voidbwtseq)

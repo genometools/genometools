@@ -282,34 +282,12 @@ Pckbuckettable *mappckbuckettable(const Str *indexname,
   return haserr ? NULL : pckbt;
 }
 
-void enumlowlevelchildintervals(ArrayBoundswithchar *bwci,
-                                const Pckbuckettable *pcktb,
-                                Codetype parentcode,
-                                unsigned long childdepth)
-{
-  Codetype childcode;
-  Matchbound *mbptr;
-
-  assert(childdepth > 0);
-  bwci->nextfreeBoundswithchar = 0;
-  childcode = parentcode * pcktb->numofchars;
-  for (mbptr = pcktb->mbtab[childdepth] + childcode;
-       mbptr < pcktb->mbtab[childdepth] + childcode + pcktb->numofchars;
-       mbptr++)
-  {
-    if (mbptr->lowerbound < mbptr->upperbound)
-    {
-      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].inchar
-        = (Uchar) (mbptr - (pcktb->mbtab[childdepth] + childcode));
-      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].lbound
-        = mbptr->lowerbound;
-      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar++].rbound
-        = mbptr->upperbound;
-    }
-  }
-}
-
 unsigned int pcktb2maxdepth(const Pckbuckettable *pckbuckettable)
 {
   return pckbuckettable->maxdepth;
+}
+
+const void *pcktb2mbtab(const Pckbuckettable *pckbuckettable)
+{
+  return (const void *) pckbuckettable->mbtab;
 }

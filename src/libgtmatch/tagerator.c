@@ -397,6 +397,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     unsigned int mapsize;
     const Uchar *symbolmap, *currenttag;
     char *desc = NULL;
+    const Matchbound **mbtab;
+    unsigned int maxdepth;
     void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
     void *processmatchinfoonline, *processmatchinfooffline;
 
@@ -422,9 +424,23 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                     processmatch,
                                     processmatchinfoonline);
     }
+    if (withesa)
+    {
+      mbtab = NULL;
+      maxdepth = 0;
+    } else
+    {
+      mbtab = bwtseq2mbtab(packedindex);
+      maxdepth = bwtseq2maxdepth(packedindex);
+      if (tageratoroptions->userdefinedmaxdepth >= 0 &&
+          maxdepth > (unsigned int) tageratoroptions->userdefinedmaxdepth)
+      {
+        maxdepth = (unsigned int) tageratoroptions->userdefinedmaxdepth;
+      }
+    }
     limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
-                                         withesa ? 0
-                                                 : bwtseq2maxdepth(packedindex),
+                                         mbtab,
+                                         maxdepth,
                                          suffixarray.encseq,
                                          withesa,
                                          tageratoroptions->nowildcards,
