@@ -47,14 +47,14 @@ struct GFF3InStream
 #define gff3_in_stream_cast(GS)\
         genome_stream_cast(gff3_in_stream_class(), GS)
 
-static int buffer_is_sorted(void *elem, void *info, Error *err)
+static int buffer_is_sorted(void **elem, void *info, Error *err)
 {
   GenomeNode *current_node, **last_node;
 
   error_check(err);
   assert(elem && info);
 
-  current_node = elem,
+  current_node = *(GenomeNode**) elem,
   last_node = info;
 
   if (*last_node && genome_node_compare(last_node, &current_node) > 0) {

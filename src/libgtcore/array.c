@@ -188,21 +188,21 @@ int array_cmp(const Array *array_a, const Array *array_b)
                 array_a->size_of_elem * array_a->next_free);
 }
 
-int array_iterate(const Array *a,
-                  int(*iterfunc)(void *info, const void *value, Error *err),
-                  void *info, Error *err)
+int array_iterate(Array *a, ArrayProcessor array_processor, void *info,
+                  Error *err)
 {
   unsigned long idx;
+  int rval;
   error_check(err);
-  assert(a && iterfunc);
+  assert(a && array_processor);
   for (idx = 0; idx < array_size(a); idx++) {
-    if (iterfunc(info, array_get(a, idx), err))
-      return -1;
+    if ((rval = array_processor(array_get(a, idx), info, err)))
+      return rval;
   }
   return 0;
 }
 
-static int iterate_test_func(void *info, const void *value, UNUSED Error *err)
+static int iterate_test_func(void *value, void *info, UNUSED Error *err)
 {
   unsigned long *i;
   Range range;
@@ -216,7 +216,7 @@ static int iterate_test_func(void *info, const void *value, UNUSED Error *err)
   return had_err;
 }
 
-static int iterate_fail_func(UNUSED void *info, UNUSED const void *value,
+static int iterate_fail_func(UNUSED void *value, UNUSED void *info,
                              UNUSED Error *err)
 {
   return -1;

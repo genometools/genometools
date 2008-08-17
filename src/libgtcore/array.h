@@ -23,6 +23,8 @@
 
 typedef struct Array Array;
 
+typedef int (*ArrayProcessor)(void *elem, void *info, Error*);
+
 Array*        array_new(size_t);
 Array*        array_clone(const Array*);
 Array*        array_ref(Array*);
@@ -46,10 +48,12 @@ void          array_sort(Array*, int(*compar)(const void*, const void*));
    <array_a> and <array_b> must have the same array_size() and
    array_elem_size(). */
 int           array_cmp(const Array  *array_a, const Array *array_b);
-int           array_iterate(const Array*,
-                            int(*iterfunc)(void *info, const void *value,
-                                           Error*),
-                            void *info, Error*);
+/* Iterate over all elements in <array> and call <array_processor> with them.
+   <info> and <err> are passed to <array_processor>.
+   If <array_processor> returns a value != 0, the iteration is stopped and the
+   return value of <array_processor> is returned. */
+int           array_iterate(Array *array, ArrayProcessor array_processor,
+                            void *info, Error *err);
 int           array_example(Error*);
 int           array_unit_test(Error*);
 void          array_delete(Array*);

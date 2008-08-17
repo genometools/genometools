@@ -146,26 +146,27 @@ void* queue_head(Queue *q)
   return q->contents[q->front];
 }
 
-int queue_iterate(Queue *q, QueueProcessor queueprocessor, void *info,
+int queue_iterate(Queue *q, QueueProcessor queue_processor, void *info,
                   Error *err)
 {
   unsigned long i;
+  int rval;
   error_check(err);
-  assert(q && queueprocessor);
+  assert(q && queue_processor);
   if (queue_size(q)) {
     if (q->front < q->back) { /* no wraparound */
       for (i = q->front; i < q->back; i++) {
-        if (queueprocessor(q->contents[i], info, err))
-          return -1;
+        if ((rval = queue_processor(q->contents + i, info, err)))
+          return rval;
       }
     }
     else { /* wraparound */
       for (i = q->front; i < q->size; i++) {
-        if (queueprocessor(q->contents[i], info, err))
-          return -1;
+        if ((rval = queue_processor(q->contents + i, info, err)))
+          return rval;
       }
       for (i = 0; i < q->back; i++) {
-        if (queueprocessor(q->contents[i], info, err)) return -1;
+        if ((rval = queue_processor(q->contents + i, info, err))) return rval;
       }
     }
   }
@@ -180,19 +181,19 @@ unsigned long queue_size(const Queue *q)
   return q->size - (q->front - q->back); /* wraparound */
 }
 
-static int check_queue(void *elem, void *info, Error *err)
+static int check_queue(void **elem, void *info, Error *err)
 {
   unsigned long *check_counter = info;
   int had_err = 0;
   error_check(err);
   assert(check_counter);
-  ensure(had_err, *check_counter == (unsigned long) elem);
+  ensure(had_err, *check_counter == *(unsigned long*) elem);
   if (!had_err)
     (*check_counter)++;
   return had_err;
 }
 
-static int fail_func(UNUSED void *elem, UNUSED void *info, UNUSED Error *err)
+static int fail_func(UNUSED void **elem, UNUSED void *info, UNUSED Error *err)
 {
   return -1;
 }

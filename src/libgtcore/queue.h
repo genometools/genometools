@@ -23,7 +23,7 @@
 
 typedef struct Queue Queue;
 
-typedef int (*QueueProcessor)(void *elem, void *info, Error*);
+typedef int (*QueueProcessor)(void **elem, void *info, Error*);
 
 Queue*        queue_new(void);
 void          queue_delete(Queue*);
@@ -31,7 +31,12 @@ void          queue_delete_with_contents(Queue*);
 void          queue_add(Queue*, void*);
 void*         queue_get(Queue*);
 void*         queue_head(Queue*);
-int           queue_iterate(Queue*, QueueProcessor, void *info, Error*);
+/* Iterate over all elements in <queue> and call <queue_processor> with them.
+   <info> and <err> are passed to <queue_processor>.
+   If <queue_processor> returns a value != 0, the iteration is stopped and the
+   return value of <queue_processor> is returned. */
+int           queue_iterate(Queue *queue, QueueProcessor queue_processor,
+                            void *info, Error *err);
 unsigned long queue_size(const Queue*);
 int           queue_unit_test(Error*);
 
