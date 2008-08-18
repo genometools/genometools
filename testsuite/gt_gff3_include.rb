@@ -626,6 +626,14 @@ Test do
   grep $last_stderr, "has not been previously defined"
 end
 
+Name "gt gff3 multi-feature (with pseudo-feature)"
+Keywords "gt_gff3 multi-feature pseudo-feature"
+Test do
+  run_test "#{$bin}gt gff3 -width 50 " +
+           "#{$testdata}standard_fasta_example_with_id.gff3"
+  run "diff #{$last_stdout} #{$testdata}standard_fasta_example_with_id.out"
+end
+
 Name "gt gff3 pseudo-feature minimal"
 Keywords "gt_gff3 pseudo-feature"
 Test do
@@ -639,14 +647,5 @@ Name "gt gff3 multiple top-level parents"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}multiple_top_level_parents.gff3"
-end
-=end
-
-# XXX: implement multi-features
-=begin
-Name "gt gff3 multi-feature"
-Keywords "gt_gff3 multi-feature"
-Test do
-  run_test "#{$bin}gt gff3 #{$testdata}standard_fasta_example_with_id.gff3"
 end
 =end
