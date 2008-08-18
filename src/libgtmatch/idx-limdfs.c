@@ -433,7 +433,8 @@ static void showLCPinterval(bool withesa,const Indexbounds *itv)
                   : itv->rightbound - itv->leftbound;
   printf("(%lu,width=%lu)",(unsigned long) itv->offset,(unsigned long) width);
   printf("(%lu,%lu)",(unsigned long) itv->leftbound,
-                     (unsigned long) (withesa ? itv->right : itv->right-1));
+                     (unsigned long) 
+                     (withesa ? itv->rightbound : itv->rightbound-1));
 }
 
 #endif

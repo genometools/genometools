@@ -103,6 +103,7 @@ static void verifycolumnvalues(const Matchtaskinfo *mti,
 {
   unsigned long idx, score, minscore, mask, bfmaxleqk;
 
+  printf("startscore = %lu, maxdistance=%lu\n",startscore,mti->maxdistance);
   if (startscore <= mti->maxdistance)
   {
     bfmaxleqk = 0;
@@ -312,7 +313,7 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
     }
   }
 #ifdef SKDEBUG
-  verifycolumnvalues(mti,outcol,currentdepth+1);
+  verifycolumnvalues(mti,outcol,currentdepth);
 #endif
 }
 
