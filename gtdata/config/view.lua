@@ -19,7 +19,7 @@ config =
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
     -- Limit the number of tracks
-    max_num_lines      = 10,
+--    max_num_lines      = 10,
   },
 --------------------------------------
   mRNA = {
@@ -217,6 +217,13 @@ config =
     max_capt_show_width= 10000,
   },
 --------------------------------------
+  deletion = {
+    fill               = {red=0.1, green=0.8, blue=0.8},
+    max_show_width     = nil,
+    max_num_lines      = 10,
+    max_capt_show_width= 10000,
+  },
+--------------------------------------
   chromosome = {
     fill               = {red=0.1, green=0.8, blue=0.8},
     max_show_width     = nil,
@@ -225,7 +232,7 @@ config =
 --------------------------------------
   substitution = {
     fill               = {red=1.0, green=0.1, blue=0.05},
-    max_show_width     = nil,
+    max_show_width     = 10000,
     max_num_lines      = 10,
     max_capt_show_width= 1000,
   },
@@ -242,7 +249,7 @@ config =
     stroke_width = .5, -- width of outlines, in pixels
     stroke_marked_width = 1.5, -- width of outlines for marked elements, in pixels
     show_grid = true, -- shows light vertical lines for orientation
-    min_len_block = 5, -- minimum length of a block in which single elements are shown
+    min_len_block = 30 , -- minimum length of a block in which single elements are shown
     track_title_color     = {red=0.7, green=0.7, blue=0.7},
     default_stroke_color  = {red=0.1, green=0.1, blue=0.1},
   },

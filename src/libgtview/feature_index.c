@@ -132,6 +132,14 @@ Array* feature_index_get_features_for_seqid(FeatureIndex *fi, const char *seqid)
   return a;
 }
 
+static int genome_node_cmp_range_start(const void *v1, const void *v2)
+{
+  GenomeNode *n1, *n2;
+  n1 = *(GenomeNode**) v1;
+  n2 = *(GenomeNode**) v2;
+  return genome_node_compare(&n1, &n2);
+}
+
 int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
                                          const char *seqid, Range qry_range,
                                          Error *err)
@@ -147,6 +155,7 @@ int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
   }
   interval_tree_find_all_overlapping(ri->features, qry_range.start,
                                      qry_range.end, results);
+  array_sort(results, genome_node_cmp_range_start);
   return 0;
 }
 

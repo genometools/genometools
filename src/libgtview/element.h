@@ -28,6 +28,7 @@ typedef struct Element Element;
 #include "libgtext/genome_feature_type.h"
 #include "libgtview/canvas.h"
 #include "libgtview/config.h"
+#include "libgtview/drawing_range.h"
 
 /* Creates a complete new Element object. */
 Element*           element_new(GenomeNode*);
@@ -35,6 +36,7 @@ Element*           element_new(GenomeNode*);
 Element*           element_new_empty(void);
 Range              element_get_range(const Element*);
 void               element_set_range(Element*, Range);
+DrawingRange       element_calculate_drawing_range(Element*, Canvas*);
 GenomeFeatureType* element_get_type(const Element*);
 void               element_set_type(Element*, GenomeFeatureType*);
 Strand             element_get_strand(const Element*);

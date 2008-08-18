@@ -61,12 +61,6 @@ typedef enum
   CLIPPED_BOTH
 } ClipType;
 
-typedef struct
-{
-  double start, end;
-  ClipType clip;
-} DrawingRange;
-
 /* Calculate the final height of the image to be created. */
 static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
 {
@@ -113,6 +107,13 @@ static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
   return height;
 }
 
+double canvas_get_text_width(Canvas *canvas, const char *text)
+{
+  assert(canvas);
+  if (!text) return 0.0;
+  return graphics_get_text_width(canvas->g, text);
+}
+
 static double convert_point(Canvas *canvas, long pos)
 {
   return (double) ((canvas->factor *
@@ -122,7 +123,7 @@ static double convert_point(Canvas *canvas, long pos)
 
 /* Converts base range <node_range> into a pixel range.
    If the range exceeds visibility boundaries, clipping info is set. */
-DrawingRange convert_coords(Canvas *canvas, Range node_range)
+DrawingRange canvas_convert_coords(Canvas *canvas, Range node_range)
 {
   DrawingRange converted_range;
   converted_range.clip = CLIPPED_NONE;
@@ -258,60 +259,12 @@ static void draw_ruler(Canvas *canvas)
                               "3'");
 }
 
-/* This function disables captions for blocks if they overlap with
-   neighboring captions. */
-void mark_caption_collisions(Canvas *canvas, Line *line)
-{
-  int i, j;
-  Array *blocks;
-
-  assert(canvas && line);
-
-  blocks = line_get_blocks(line);
-  for (i = 0; i < array_size(blocks)-1; i++) {
-    Block *this_block = *(Block**) array_get(blocks, i);
-    if (block_caption_is_visible(this_block)) {
-      Range block_range = block_get_range(this_block);
-      const char *caption;
-      Range cur_range;
-      caption = str_get(block_get_caption(this_block));
-      if (!caption) caption = "";
-      cur_range.start = MAX(canvas->margins,
-                            convert_point(canvas, block_range.start));
-      cur_range.end   = cur_range.start
-                          + graphics_get_text_width(canvas->g, caption);
-      for (j = i-1; j >= 0; j--) {
-        Block *left_block = *(Block**) array_get(blocks, j);
-        Range chk_range = block_get_range(left_block);
-        caption = str_get(block_get_caption(left_block));
-        if (!caption) caption = "";
-        chk_range.start = convert_point(canvas, chk_range.start);
-        chk_range.end   = chk_range.start
-                            + graphics_get_text_width(canvas->g, caption);
-        if (range_overlap(chk_range, cur_range))
-          block_set_caption_visibility(left_block, false);
-      }
-      for (j = i+1; j < array_size(blocks); j++) {
-        Block *right_block = *(Block**) array_get(blocks, j);
-        Range chk_range = block_get_range(right_block);
-        caption = str_get(block_get_caption(right_block));
-        if (!caption) caption = "";
-        chk_range.start = convert_point(canvas, chk_range.start);
-        chk_range.end   = chk_range.start
-                            + graphics_get_text_width(canvas->g, caption);
-        if (range_overlap(chk_range, cur_range))
-          block_set_caption_visibility(right_block, false);
-      }
-    }
-  }
-}
-
 Canvas* canvas_new(Config *cfg, GraphicsOutType type,
                    unsigned long width, ImageInfo *ii)
 {
   assert(cfg && width > 0);
   Canvas *canvas;
-  canvas = ma_malloc(sizeof (Canvas));
+  canvas = ma_calloc(1, sizeof (Canvas));
   canvas->cfg = cfg;
   canvas->ii = ii;
   canvas->width = width;
@@ -327,9 +280,8 @@ unsigned long canvas_get_height(Canvas *canvas)
   return canvas->height;
 }
 
-int canvas_visit_diagram(Canvas *canvas, Diagram *dia)
+int canvas_visit_diagram_pre(Canvas *canvas, Diagram *dia)
 {
-  int had_err = 0;
   double margins;
 
   assert(canvas && dia);
@@ -339,22 +291,37 @@ int canvas_visit_diagram(Canvas *canvas, Diagram *dia)
   else
     canvas->margins = MARGINS_DEFAULT;
 
-  /* set initial image-specific values */
-  canvas->y += HEADER_SPACE;
-  canvas->width = canvas->width;
   canvas->viewrange = diagram_get_range(dia);
-  canvas->height = calculate_height(canvas, dia);
-  if (canvas->ii)
-    image_info_set_height(canvas->ii, canvas->height);
+  if (canvas->g)
+  {
+    graphics_delete(canvas->g);
+    canvas->g = NULL;
+  }
+  canvas->g = graphics_new(canvas->type, canvas->width, 1);
 
   /* calculate scaling factor */
   canvas->factor = ((double) canvas->width
                      -(2*canvas->margins))
                     / range_length(canvas->viewrange);
+  return 0;
+}
 
-  if (config_get_verbose(canvas->cfg))
-    fprintf(stderr, "scaling factor is %f\n", canvas->factor);
+int canvas_visit_diagram_post(Canvas *canvas, Diagram *dia)
+{
+  int had_err = 0;
 
+  assert(canvas && dia);
+
+  /* set initial image-specific values */
+  canvas->y += HEADER_SPACE;
+  canvas->height = calculate_height(canvas, dia);
+  if (canvas->ii)
+    image_info_set_height(canvas->ii, canvas->height);
+  if (canvas->g)
+  {
+    graphics_delete(canvas->g);
+    canvas->g = NULL;
+  }
   canvas->g = graphics_new(canvas->type, canvas->width, canvas->height);
   graphics_set_margins(canvas->g, canvas->margins, 0);
 
@@ -389,13 +356,18 @@ int canvas_visit_track_pre(Canvas *canvas, Track *track)
   if ((exceeded = track_get_number_of_discarded_blocks(track)) > 0)
   {
     char buf[BUFSIZ];
+    const char *msg;
     double width;
     Color red;
-    red.red   = 0.6;
+    red.red   = 0.7;
     red.green = red.blue  = 0.4;
-    snprintf(buf, BUFSIZ, "(%lu blocks not shown because the configured "
-                          "line limit was exceeded)",
-                          exceeded);
+    if (exceeded == 1)
+      msg = "(1 block not shown due to exceeded line limit)";
+    else
+    {
+      msg = "(%lu blocks not shown due to exceeded line limit)";
+      snprintf(buf, BUFSIZ, msg, exceeded);
+    }
     width = graphics_get_text_width(canvas->g, str_get(track_get_title(track)));
     graphics_draw_colored_text(canvas->g,
                                canvas->margins+width+10.0,
@@ -403,7 +375,6 @@ int canvas_visit_track_pre(Canvas *canvas, Track *track)
                                red,
                                buf);
   }
-
   canvas->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
 
   return had_err;
@@ -427,10 +398,7 @@ int canvas_visit_line_pre(Canvas *canvas, Line *line)
   assert(canvas && line);
   canvas->bt = bittab_new(canvas->width);
   if (line_has_captions(line))
-  {
-    mark_caption_collisions(canvas, line);
     canvas->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
-  }
   return had_err;
 }
 
@@ -482,7 +450,7 @@ int canvas_visit_block(Canvas *canvas, Block *block)
     arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
   /* draw block caption */
-  draw_range = convert_coords(canvas, block_range);
+  draw_range = canvas_convert_coords(canvas, block_range);
   if (block_caption_is_visible(block)) {
     caption = str_get(block_get_caption(block));
     if (caption)
@@ -591,7 +559,7 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
             elem_range.end,
             (int) strand);
 
-  draw_range = convert_coords(canvas, elem_range);
+  draw_range = canvas_convert_coords(canvas, elem_range);
   elem_start = draw_range.start;
   elem_width = draw_range.end - draw_range.start;
 

@@ -20,29 +20,34 @@
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/unused.h"
+#include "libgtview/line_breaker_bases.h"
 #include "libgtview/track.h"
 
 struct Track {
   Str *title;
   unsigned long max_num_lines, discarded_blocks;
+  LineBreaker *lb;
   bool split;
   Array *lines;
 };
 
-Track* track_new(Str *title, unsigned long max_num_lines, bool split)
+Track* track_new(Str *title, unsigned long max_num_lines, bool split,
+                 LineBreaker *lb)
 {
   Track *track;
-  assert(title);
+  assert(title && lb);
   track = ma_calloc(1, sizeof (Track));
   assert(track);
   track->title = str_ref(title);
   track->lines = array_new(sizeof (Line*));
   track->max_num_lines = max_num_lines;
   track->split = split;
+  track->lb = lb;
   return track;
 }
 
-static Line* get_next_free_line(Track *track, Range r)
+static Line* get_next_free_line(Track *track, Block *block)
 {
   unsigned long i;
   Line* line;
@@ -52,7 +57,7 @@ static Line* get_next_free_line(Track *track, Range r)
   /* find unoccupied line -- may need optimisation */
   for (i = 0; i < array_size(track->lines); i++) {
     line = *(Line**) array_get(track->lines, i);
-    if (!line_is_occupied(line, r))
+    if (!line_breaker_line_is_occupied(track->lb, line, block))
       return line;
   }
   /* if line limit is hit, do not create any more lines! */
@@ -62,7 +67,6 @@ static Line* get_next_free_line(Track *track, Range r)
     track->discarded_blocks++;
     return NULL;
   }
-
   /* make sure there is only one line if 'split_lines' is set to false */
   if (!track->split)
   {
@@ -92,28 +96,22 @@ unsigned long track_get_number_of_discarded_blocks(Track *track)
 
 void track_insert_block(Track *track, Block *block)
 {
-  Range r;
   Line *line;
 
   assert(track && block);
-  r = block_get_range(block);
-  line = get_next_free_line(track, r);
+  line = get_next_free_line(track, block);
+  block = block_ref(block);
   if (line)
+  {
     line_insert_block(line, block);
-  else
-    block_delete(block);
+    line_breaker_register_block(track->lb, line, block);
+  } else block_delete(block);
 }
 
 Str* track_get_title(const Track *track)
 {
   assert(track && track->title);
   return track->title;
-}
-
-Array* track_get_lines(const Track *track)
-{
-  assert(track && track->lines);
-  return track->lines;
 }
 
 unsigned long track_get_number_of_lines(const Track *track)
@@ -138,11 +136,8 @@ int track_render(Track* track, Canvas *canvas)
   int i = 0;
   assert(track && canvas);
   canvas_visit_track_pre(canvas, track);
-  for (i = 0; i < array_size(track->lines); i++) {
-    Line *line;
-    line = *(Line**) array_get(track->lines, i);
-    line_render(line, canvas);
-  }
+  for (i = 0; i < array_size(track->lines); i++)
+    line_render(*(Line**) array_get(track->lines, i), canvas);
   canvas_visit_track_post(canvas, track);
   return 0;
 }
@@ -155,6 +150,7 @@ int track_unit_test(Error *err)
   Track *track;
   Str *title;
   error_check(err);
+  LineBreaker *lb;
 
   title = str_new_cstr("test");
 
@@ -172,7 +168,9 @@ int track_unit_test(Error *err)
   b4 = block_new();
   block_set_range(b4, r4);
 
-  track = track_new(title, UNDEF_ULONG, true);
+  lb = line_breaker_bases_new();
+
+  track = track_new(title, UNDEF_ULONG, true, lb);
   ensure(had_err, track);
   ensure(had_err, track_get_title(track) == title);
 
@@ -188,6 +186,10 @@ int track_unit_test(Error *err)
 
   track_delete(track);
   str_delete(title);
+  block_delete(b1);
+  block_delete(b2);
+  block_delete(b3);
+  block_delete(b4);
 
   return had_err;
 }
@@ -196,6 +198,8 @@ void track_delete(Track *track)
 {
   unsigned long i;
   if (!track) return;
+  if (track->lb)
+    line_breaker_delete(track->lb);
   for (i = 0; i < array_size(track->lines); i++)
     line_delete(*(Line**) array_get(track->lines, i));
   array_delete(track->lines);

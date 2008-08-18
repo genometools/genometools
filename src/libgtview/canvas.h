@@ -20,9 +20,11 @@
 
 typedef struct Canvas Canvas;
 
+#include "libgtcore/range.h"
 #include "libgtview/block.h"
 #include "libgtview/config.h"
 #include "libgtview/diagram.h"
+#include "libgtview/drawing_range.h"
 #include "libgtview/element.h"
 #include "libgtview/graphics.h"
 #include "libgtview/line.h"
@@ -34,10 +36,17 @@ typedef struct Canvas Canvas;
    the created Config object is used to render a Diagram object. */
 Canvas*       canvas_new(Config *config, GraphicsOutType output_type,
                          unsigned long width, ImageInfo *image_info);
+/* Returns a pixel-based range for a nucleotide-based range
+   using the scaling factor defined for the given <canvas> */
+DrawingRange  canvas_convert_coords(Canvas* canvas, Range);
 /* Returns the height of the given <canvas>. */
 unsigned long canvas_get_height(Canvas *canvas);
+/* Returns rendered width in pixels of the given text. */
+double        canvas_get_text_width(Canvas*, const char *text);
 /* Callback function for Diagram rendering. */
-int           canvas_visit_diagram(Canvas*, Diagram*);
+int           canvas_visit_diagram_pre(Canvas*, Diagram*);
+/* Callback function for Diagram rendering. */
+int           canvas_visit_diagram_post(Canvas*, Diagram*);
 /* Callback function for Diagram rendering. */
 int           canvas_visit_track_pre(Canvas*, Track*);
 /* Callback function for Diagram rendering. */

@@ -31,6 +31,7 @@ struct Element {
   Strand strand;
   GenomeNode *gn;
   Range range;
+  DrawingRange drange;
   bool mark;
 };
 
@@ -51,6 +52,13 @@ Element* element_new(GenomeNode *gn)
 Element* element_new_empty(void)
 {
   return ma_calloc(1, sizeof (Element));
+}
+
+DrawingRange element_calculate_drawing_range(Element *element, Canvas *canvas)
+{
+  assert(element && canvas);
+  element->drange = canvas_convert_coords(canvas, element->range);
+  return element->drange;
 }
 
 Range element_get_range(const Element *element)
