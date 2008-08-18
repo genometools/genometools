@@ -187,21 +187,12 @@ GenomeNode* genome_node_ref(GenomeNode *gn)
   return gn;
 }
 
-GenomeNode* genome_node_rec_ref(GenomeNode *gn)
-{
-  int had_err;
-  assert(gn);
-  had_err = genome_node_traverse_children(gn, NULL, increase_reference_count,
-                                          true, NULL);
-  assert(!had_err); /* cannot happen, increase_reference_count() is sane */
-  return gn;
-}
-
 int genome_node_traverse_children_generic(GenomeNode *genome_node,
                                           void *data,
                                           GenomeNodeTraverseFunc traverse,
                                           bool traverse_only_once,
-                                          bool depth_first, Error *err)
+                                          bool depth_first, bool with_pseudo,
+                                          Error *err)
 {
   Array *node_stack = NULL, *list_of_children;
   Queue *node_queue = NULL;
@@ -221,7 +212,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
 
   if (depth_first) {
     node_stack = array_new(sizeof (GenomeNode*));
-    if (genome_node_cast(genome_feature_class(), genome_node) &&
+    if (!with_pseudo && genome_node_cast(genome_feature_class(), genome_node) &&
         genome_feature_is_pseudo((GenomeFeature*) genome_node)) {
       /* add the children backwards to traverse in order */
       for (dlistelem = dlist_last(genome_node->children); dlistelem != NULL;
@@ -236,7 +227,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   }
   else {
     node_queue = queue_new();
-    if (genome_node_cast(genome_feature_class(), genome_node) &&
+    if (!with_pseudo && genome_node_cast(genome_feature_class(), genome_node) &&
         genome_feature_is_pseudo((GenomeFeature*) genome_node)) {
       for (dlistelem = dlist_first(genome_node->children); dlistelem != NULL;
            dlistelem = dlistelem_next(dlistelem)) {
@@ -324,12 +315,36 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   return had_err;
 }
 
+static int genome_node_traverse_children_with_pseudo(GenomeNode *genome_node,
+                                                     void *data,
+                                                     GenomeNodeTraverseFunc
+                                                     traverse,
+                                                     bool traverse_only_once,
+                                                     Error *err)
+{
+  return genome_node_traverse_children_generic(genome_node, data, traverse,
+                                               traverse_only_once, true, true,
+                                               err);
+}
+
+GenomeNode* genome_node_rec_ref(GenomeNode *gn)
+{
+  int had_err;
+  assert(gn);
+  had_err = genome_node_traverse_children_with_pseudo(gn, NULL,
+                                                      increase_reference_count,
+                                                      true, NULL);
+  assert(!had_err); /* cannot happen, increase_reference_count() is sane */
+  return gn;
+}
+
 int genome_node_traverse_children(GenomeNode *genome_node, void *data,
                                   GenomeNodeTraverseFunc traverse,
                                   bool traverse_only_once, Error *err)
 {
   return genome_node_traverse_children_generic(genome_node, data, traverse,
-                                               traverse_only_once, true, err);
+                                               traverse_only_once, true, false,
+                                               err);
 }
 
 int genome_node_traverse_children_breadth(GenomeNode *genome_node, void *data,
@@ -337,7 +352,8 @@ int genome_node_traverse_children_breadth(GenomeNode *genome_node, void *data,
                                           bool traverse_only_once, Error *err)
 {
   return genome_node_traverse_children_generic(genome_node, data, traverse,
-                                               traverse_only_once, false, err);
+                                               traverse_only_once, false, false,
+                                               err);
 }
 
 int genome_node_traverse_direct_children(GenomeNode *gn,
@@ -662,8 +678,9 @@ void genome_node_rec_delete(GenomeNode *gn)
 {
   int had_err;
   if (!gn) return;
-  had_err = genome_node_traverse_children(gn, NULL, free_genome_node, true,
-                                          NULL);
+  had_err = genome_node_traverse_children_with_pseudo(gn, NULL,
+                                                      free_genome_node, true,
+                                                      NULL);
   assert(!had_err); /* cannot happen, free_genome_node() is sane */
 }
 
