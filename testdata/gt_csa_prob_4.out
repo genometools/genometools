@@ -6,7 +6,7 @@ NC_003070	gt csa	exon	10472279	10472330	0.788	+	.	Parent=mRNA1
 NC_003070	gt csa	exon	10473721	10473759	0.667	+	.	Parent=mRNA1
 NC_003070	gt csa	exon	10475053	10475534	0.869	+	.	Parent=mRNA1
 NC_003070	gt csa	mRNA	10472500	10472941	.	+	.	ID=mRNA2;Parent=gene1
-NC_003070	gt csa	exon	10472500	10472941	1.000	+	.	Parent=mRNA2
+NC_003070	gt csa	exon	10472500	10472941	1	+	.	Parent=mRNA2
 NC_003070	gt csa	mRNA	10474921	10475416	.	+	.	ID=mRNA3;Parent=gene1
-NC_003070	gt csa	exon	10474921	10475416	1.000	+	.	Parent=mRNA3
+NC_003070	gt csa	exon	10474921	10475416	1	+	.	Parent=mRNA3
 ###

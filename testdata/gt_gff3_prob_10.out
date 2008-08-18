@@ -2,7 +2,7 @@
 #
 #
 ##sequence-region   chr8 3922 472078
-chr8	AUGUSTUS	gene	3922	44514	1.000	-	.	ID=gene1
+chr8	AUGUSTUS	gene	3922	44514	1	-	.	ID=gene1
 chr8	AUGUSTUS	CDS	3922	4093	.	-	1	Parent=gene1
 chr8	AUGUSTUS	CDS	6417	6577	.	-	0	Parent=gene1
 chr8	AUGUSTUS	CDS	12072	12161	.	-	0	Parent=gene1
@@ -13,13 +13,13 @@ chr8	AUGUSTUS	CDS	34644	34751	.	-	0	Parent=gene1
 chr8	AUGUSTUS	CDS	36308	36401	.	-	1	Parent=gene1
 chr8	AUGUSTUS	CDS	44465	44514	.	-	0	Parent=gene1
 ###
-chr8	AUGUSTUS	gene	309281	310246	1.000	-	.	ID=gene2
+chr8	AUGUSTUS	gene	309281	310246	1	-	.	ID=gene2
 chr8	AUGUSTUS	CDS	309281	310246	.	-	0	Parent=gene2
 ###
-chr8	AUGUSTUS	gene	310605	311468	1.000	+	.	ID=gene3
+chr8	AUGUSTUS	gene	310605	311468	1	+	.	ID=gene3
 chr8	AUGUSTUS	CDS	310605	310617	.	+	0	Parent=gene3
 chr8	AUGUSTUS	CDS	310822	311468	.	+	2	Parent=gene3
 ###
-chr8	AUGUSTUS	gene	471665	472078	1.000	-	.	ID=gene4
+chr8	AUGUSTUS	gene	471665	472078	1	-	.	ID=gene4
 chr8	AUGUSTUS	CDS	471665	472078	.	-	0	Parent=gene4
 ###

@@ -36,7 +36,7 @@ void gff3_output_leading(GenomeFeature *gf, GenFile *outfp)
                   genome_node_get_start(gn),
                   genome_node_get_end(gn));
   if (genome_feature_score_is_defined(gf))
-    genfile_xprintf(outfp, "%.3f", genome_feature_get_score(gf));
+    genfile_xprintf(outfp, "%.3g", genome_feature_get_score(gf));
   else
     genfile_xfputc('.', outfp);
   genfile_xprintf(outfp, "\t%c\t%c\t",
