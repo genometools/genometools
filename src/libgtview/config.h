@@ -73,7 +73,7 @@ bool           config_get_num(const Config*, const char *section,
 void           config_set_num(Config*, const char *section, const char *key,
                               double number);
 /* Retrieve boolean value of <key> in <section>.
-   If not set, <deflt> is returned.*/
+   If not set, false is returned.*/
 bool           config_get_bool(const Config*, const char *section,
                                const char *key, bool*);
 /* Set boolean value of <key> in <section> to <number>. */
