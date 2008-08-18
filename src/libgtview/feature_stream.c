@@ -29,15 +29,16 @@ struct FeatureStream {
 #define feature_stream_cast(GS)\
         genome_stream_cast(feature_stream_class(), GS)
 
-static int feature_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
+static int feature_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
+                                    Error *err)
 {
   FeatureStream *feature_stream;
   int had_err;
-  error_check(e);
+  error_check(err);
   feature_stream = feature_stream_cast(gs);
-  had_err = genome_stream_next_tree(feature_stream->in_stream, gn, e);
+  had_err = genome_stream_next_tree(feature_stream->in_stream, gn, err);
   if (!had_err && *gn)
-    had_err = genome_node_accept(*gn, feature_stream->feature_visitor, e);
+    had_err = genome_node_accept(*gn, feature_stream->feature_visitor, err);
   return had_err;
 }
 

@@ -109,21 +109,21 @@ static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn,
   return 0;
 }
 
-static int csa_visitor_comment(GenomeVisitor *gv, Comment *c, Error *e)
+static int csa_visitor_comment(GenomeVisitor *gv, Comment *c, Error *err)
 {
-  return csa_visitor_default_func(gv, (GenomeNode*) c, e);
+  return csa_visitor_default_func(gv, (GenomeNode*) c, err);
 }
 
 static int csa_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                       Error *e)
+                                       Error *err)
 {
-  return csa_visitor_default_func(gv, (GenomeNode*) sr, e);
+  return csa_visitor_default_func(gv, (GenomeNode*) sr, err);
 }
 
 static int csa_visitor_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
-                                     Error *e)
+                                     Error *err)
 {
-  return csa_visitor_default_func(gv, (GenomeNode*) sn, e);
+  return csa_visitor_default_func(gv, (GenomeNode*) sn, err);
 }
 
 const GenomeVisitorClass* csa_visitor_class()

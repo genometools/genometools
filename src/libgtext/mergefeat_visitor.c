@@ -74,30 +74,31 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, UNUSED Error *err)
   return 0;
 }
 
-static int mergefeat_if_necessary(GenomeNode *gn, void *data, Error *e)
+static int mergefeat_if_necessary(GenomeNode *gn, void *data, Error *err)
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GenomeFeature *gf;
-  error_check(e);
+  error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   v->current_tree = gn;
   hashtable_reset(v->ht);
-  return genome_node_traverse_direct_children(gn, v, mergefeat_in_children, e);
+  return genome_node_traverse_direct_children(gn, v, mergefeat_in_children,
+                                              err);
 }
 
 static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
-                                            GenomeFeature *gf, Error *e)
+                                            GenomeFeature *gf, Error *err)
 {
   MergefeatVisitor *v;
   GenomeNode *leaf;
   unsigned long i;
   int had_err = 0;
-  error_check(e);
+  error_check(err);
   v = mergefeat_visitor_cast(gv);
   array_reset(v->nodes_to_remove);
   had_err = genome_node_traverse_children((GenomeNode*) gf, v,
-                                          mergefeat_if_necessary, false, e);
+                                          mergefeat_if_necessary, false, err);
   if (!had_err) {
     for (i = 0; i < array_size(v->nodes_to_remove); i++) {
       leaf = *(GenomeNode**) array_get(v->nodes_to_remove, i);

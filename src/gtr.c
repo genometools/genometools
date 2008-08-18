@@ -186,24 +186,24 @@ void gtr_register_components(GTR *gtr)
   gtr->unit_tests = gtt_unit_tests();
 }
 
-int run_test(void *key, void *value, void *data, Error *e)
+int run_test(void *key, void *value, void *data, Error *err)
 {
   const char *testname;
   int (*test)(Error*);
   int had_err, *had_errp;
-  error_check(e);
+  error_check(err);
   assert(key && value && data);
   testname = (const char*) key;
   test = (int (*)(Error*)) value;
   had_errp = (int*) data;
   printf("%s...", testname);
   xfflush(stdout);
-  had_err = test(e);
+  had_err = test(err);
   if (had_err) {
     xputs("error");
     *had_errp = had_err;
-    fprintf(stderr, "first error: %s\n", error_get(e));
-    error_unset(e);
+    fprintf(stderr, "first error: %s\n", error_get(err));
+    error_unset(err);
     xfflush(stderr);
   }
   else

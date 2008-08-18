@@ -92,18 +92,18 @@ static bool uniq(GenomeNode **first_node, GenomeNode **second_node)
   return false;
 }
 
-static int uniq_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
+static int uniq_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
 {
   UniqStream *us;
   int had_err;
-  error_check(e);
+  error_check(err);
   us = uniq_stream_cast(gs);
 
   assert(!us->second_node); /* the second buffer is always empty when this
                                function is called */
   if (!us->first_node) {
     /* both buffers are empty */
-    had_err = genome_stream_next_tree(us->in_stream, &us->first_node, e);
+    had_err = genome_stream_next_tree(us->in_stream, &us->first_node, err);
     if (had_err)
       return had_err;
     if (!us->first_node) {
@@ -115,7 +115,7 @@ static int uniq_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
   /* uniq loop */
   for (;;) {
     assert(us->first_node && !us->second_node);
-    had_err = genome_stream_next_tree(us->in_stream, &us->second_node, e);
+    had_err = genome_stream_next_tree(us->in_stream, &us->second_node, err);
     if (!had_err && us->second_node) {
       if (!uniq(&us->first_node, &us->second_node))
         break; /* no uniq possible */

@@ -866,18 +866,18 @@ static Uchar delivercharViauint32tablesSpecialrange(
   return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,Error *e)
+static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,Error *err)
 {
   Seqpos pos;
   int retval;
   Uchar cc;
 
-  error_check(e);
+  error_check(err);
   ALLOCASSIGNSPACE(encseq->plainseq,NULL,Uchar,encseq->totallength);
   encseq->plainseqptr = false;
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = fastabuffer_next(fb,&cc,e);
+    retval = fastabuffer_next(fb,&cc,err);
     if (retval < 0)
     {
       FREESPACE(encseq->plainseq);
@@ -894,7 +894,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,Error *e)
 
 static int fillbitaccesstab(Encodedsequence *encseq,
                             FastaBuffer *fb,
-                            Error *e)
+                            Error *err)
 {
   Uchar cc;
   Seqpos pos;
@@ -902,11 +902,11 @@ static int fillbitaccesstab(Encodedsequence *encseq,
   Twobitencoding bitwise = 0;
   DECLARESEQBUFFER(encseq->twobitencoding);
 
-  error_check(e);
+  error_check(err);
   INITBITTAB(encseq->specialbits,encseq->totallength);
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = fastabuffer_next(fb,&cc,e);
+    retval = fastabuffer_next(fb,&cc,err);
     if (retval < 0)
     {
       return -1;

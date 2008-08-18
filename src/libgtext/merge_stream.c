@@ -31,7 +31,7 @@ struct MergeStream {
 #define merge_stream_cast(GS)\
         genome_stream_cast(merge_stream_class(), GS)
 
-int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
+int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
 {
   MergeStream *ms;
   GenomeNode *min_node = NULL;
@@ -39,7 +39,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
   unsigned int genome_node_consolidated;
   int had_err = 0;
 
-  error_check(e);
+  error_check(err);
 
   ms = merge_stream_cast(gs);
 
@@ -48,7 +48,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
     if (!ms->buffer[i]) {
       had_err = genome_stream_next_tree(*(GenomeStream**)
                                         array_get(ms->genome_streams, i),
-                                        ms->buffer + i, e);
+                                        ms->buffer + i, err);
       if (had_err)
         break;
     }

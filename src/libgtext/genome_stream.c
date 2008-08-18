@@ -52,17 +52,17 @@ void genome_stream_delete(GenomeStream *gs)
   ma_free(gs);
 }
 
-int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
+int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
 {
   GenomeNode *new_node = NULL;
   int had_err = 0;
   assert(gs && gs->c_class && gs->c_class->next_tree);
-  error_check(e);
+  error_check(err);
   /* filling */
   if (!gs->buffer)
-    had_err = gs->c_class->next_tree(gs, &gs->buffer, e);
+    had_err = gs->c_class->next_tree(gs, &gs->buffer, err);
   if (!had_err && gs->buffer)
-    had_err = gs->c_class->next_tree(gs, &new_node, e);
+    had_err = gs->c_class->next_tree(gs, &new_node, err);
 #ifndef NDEBUG
   /* checking */
   if (!had_err && gs->ensure_sorting && gs->buffer && new_node) {

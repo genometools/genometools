@@ -69,17 +69,17 @@ static int save_exon_node(GenomeNode *gn, void *data, UNUSED Error *err)
 }
 
 static int gtf_show_transcript(GenomeNode *gn, GTFVisitor *gtf_visitor,
-                               Error *e)
+                               Error *err)
 {
   GenomeFeature *gf;
   unsigned long i;
   int had_err;
-  error_check(e);
+  error_check(err);
   assert(gn && gtf_visitor);
   array_reset(gtf_visitor->exon_features);
   array_reset(gtf_visitor->CDS_features);
   had_err = genome_node_traverse_direct_children(gn, gtf_visitor,
-                                                 save_exon_node, e);
+                                                 save_exon_node, err);
   if (array_size(gtf_visitor->exon_features)) {
     /* sort exon features */
     qsort(array_get_space(gtf_visitor->exon_features),
@@ -117,7 +117,7 @@ static int gtf_show_transcript(GenomeNode *gn, GTFVisitor *gtf_visitor,
   return had_err;
 }
 
-static int gtf_show_genome_feature(GenomeNode *gn, void *data, Error *e)
+static int gtf_show_genome_feature(GenomeNode *gn, void *data, Error *err)
 {
   GTFVisitor *gtf_visitor = (GTFVisitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
@@ -125,10 +125,10 @@ static int gtf_show_genome_feature(GenomeNode *gn, void *data, Error *e)
   if (genome_feature_has_type(gf, gft_gene)) {
       gtf_visitor->gene_id++;
       gtf_visitor->transcript_id = 0;
-      had_err = gtf_show_transcript(gn, gtf_visitor, e);
+      had_err = gtf_show_transcript(gn, gtf_visitor, err);
   }
   else if (genome_feature_has_type(gf, gft_mRNA)) {
-    had_err = gtf_show_transcript(gn, gtf_visitor, e);
+    had_err = gtf_show_transcript(gn, gtf_visitor, err);
   }
   else if (!(genome_feature_has_type(gf, gft_CDS) ||
              genome_feature_has_type(gf, gft_exon))) {
@@ -141,14 +141,14 @@ static int gtf_show_genome_feature(GenomeNode *gn, void *data, Error *e)
 }
 
 static int gtf_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                      Error *e)
+                                      Error *err)
 {
   GTFVisitor *gtf_visitor;
   int had_err;
-  error_check(e);
+  error_check(err);
   gtf_visitor = gtf_visitor_cast(gv);
   had_err = genome_node_traverse_children((GenomeNode*) gf, gtf_visitor,
-                                          gtf_show_genome_feature, false, e);
+                                          gtf_show_genome_feature, false, err);
   return had_err;
 }
 

@@ -124,12 +124,12 @@ void genome_feature_set_phase(GenomeNode *gn, Phase phase)
   gn->bit_field |= phase << PHASE_OFFSET;
 }
 
-static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Error *e)
+static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Error *err)
 {
   GenomeFeature *gf;
-  error_check(e);
+  error_check(err);
   gf = genome_feature_cast(gn);
-  return genome_visitor_visit_genome_feature(gv, gf, e);
+  return genome_visitor_visit_genome_feature(gv, gf, err);
 }
 
 const GenomeNodeClass* genome_feature_class()

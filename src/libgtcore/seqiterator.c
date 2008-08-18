@@ -62,7 +62,7 @@ int seqiterator_next(SeqIterator *seqit,
                      const Uchar **sequence,
                      unsigned long *len,
                      char **desc,
-                     Error *e)
+                     Error *err)
 {
   Uchar charcode;
   int retval;
@@ -77,7 +77,7 @@ int seqiterator_next(SeqIterator *seqit,
   }
   while (true)
   {
-    retval = fastabuffer_next(seqit->fb,&charcode,e);
+    retval = fastabuffer_next(seqit->fb,&charcode,err);
     if (retval < 0)
     {
       haserr = true;
@@ -96,7 +96,7 @@ int seqiterator_next(SeqIterator *seqit,
     {
       if (seqit->sequencebuffer.nextfreeUchar == 0 && seqit->withsequence)
       {
-        error_set(e,"sequence %llu is empty", seqit->unitnum);
+        error_set(err,"sequence %llu is empty", seqit->unitnum);
         haserr = true;
         break;
       }

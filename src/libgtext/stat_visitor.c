@@ -63,12 +63,12 @@ static int add_exon_number(GenomeNode *gn, void *data, UNUSED Error *err)
   return 0;
 }
 
-static int compute_statistics(GenomeNode *gn, void *data, Error *e)
+static int compute_statistics(GenomeNode *gn, void *data, Error *err)
 {
   StatVisitor *stat_visitor;
   GenomeFeature *gf;
   int rval;
-  error_check(e);
+  error_check(err);
   assert(data);
   stat_visitor = (StatVisitor*) data;
   gf = (GenomeFeature*) gn;
@@ -110,7 +110,7 @@ static int compute_statistics(GenomeNode *gn, void *data, Error *e)
   if (stat_visitor->exon_number_distribution) {
     stat_visitor->exon_number_for_distri = 0;
     rval = genome_node_traverse_direct_children(gn, stat_visitor,
-                                                add_exon_number, e);
+                                                add_exon_number, err);
     assert(!rval); /* add_exon_number() is sane */
     if (stat_visitor->exon_number_for_distri) {
       disc_distri_add(stat_visitor->exon_number_distribution,
@@ -121,13 +121,13 @@ static int compute_statistics(GenomeNode *gn, void *data, Error *e)
 }
 
 static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                       Error *e)
+                                       Error *err)
 {
   StatVisitor *stat_visitor;
-  error_check(e);
+  error_check(err);
   stat_visitor = stat_visitor_cast(gv);
   return genome_node_traverse_children((GenomeNode*) gf, stat_visitor,
-                                       compute_statistics, false, e);
+                                       compute_statistics, false, err);
 }
 
 static int stat_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,

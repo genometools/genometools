@@ -54,7 +54,7 @@ static void splicesiteinfo_visitor_free(GenomeVisitor *gv)
 }
 
 static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
-                          Error *e)
+                          Error *err)
 {
   const char *sequence;
   unsigned long seqlen;
@@ -63,7 +63,7 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
   char site[5];
   Str *seqid;
   int had_err = 0;
-  error_check(e);
+  error_check(err);
   assert(ssiv && intron);
   ssiv->intron_processed = true;
   range = genome_node_get_range(intron);
@@ -71,10 +71,10 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
   if (range_length(range) >= 4) {
     seqid = genome_node_get_seqid(intron);
     had_err = region_mapping_get_raw_sequence(ssiv->region_mapping, &sequence,
-                                              seqid, e);
+                                              seqid, err);
     if (!had_err) {
       had_err = region_mapping_get_raw_sequence_length(ssiv->region_mapping,
-                                                       &seqlen, seqid, e);
+                                                       &seqlen, seqid, err);
     }
     if (!had_err) {
       assert(range.end <= seqlen);
@@ -87,7 +87,7 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
         site[3] = tolower(sequence[range.end-1]);
         site[4] = '\0';
         if (strand == STRAND_REVERSE)
-          had_err = reverse_complement(site, 4, e);
+          had_err = reverse_complement(site, 4, err);
         if (!had_err) {
           /* add site to distributions */
           string_distri_add(ssiv->splicesites, site);
@@ -108,19 +108,19 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
 }
 
 static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
-                                                 GenomeFeature *gf, Error *e)
+                                                 GenomeFeature *gf, Error *err)
 {
   SpliceSiteInfoVisitor *ssiv;
   GenomeNodeIterator *gni;
   GenomeNode *node;
   int had_err = 0;
-  error_check(e);
+  error_check(err);
   ssiv = splicesiteinfo_visitor_cast(gv);
   assert(ssiv->region_mapping);
   gni = genome_node_iterator_new((GenomeNode*) gf);
   while (!had_err && (node = genome_node_iterator_next(gni))) {
     if (genome_feature_has_type((GenomeFeature*) node, gft_intron))
-      had_err = process_intron(ssiv, node, e);
+      had_err = process_intron(ssiv, node, err);
   }
   genome_node_iterator_delete(gni);
   return had_err;

@@ -163,13 +163,13 @@ static int genome_node_lua_accept(lua_State *L)
 {
   GenomeNode **gn;
   GenomeVisitor **gv;
-  Error *e;
+  Error *err;
   gn = check_genome_node(L, 1);
   gv = check_genome_visitor(L, 2);
-  e = error_new();
-  if (genome_node_accept(*gn, *gv, e))
-    return lua_gt_error(L, e);
-  error_delete(e);
+  err = error_new();
+  if (genome_node_accept(*gn, *gv, err))
+    return lua_gt_error(L, err);
+  error_delete(err);
   return 0;
 }
 

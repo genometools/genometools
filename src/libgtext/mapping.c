@@ -32,11 +32,11 @@ struct Mapping {
 };
 
 Mapping* mapping_new(Str *mapping_file, const char *global_name,
-                     MappingType type, Error *e)
+                     MappingType type, Error *err)
 {
   Mapping *m;
   int had_err = 0;
-  error_check(e);
+  error_check(err);
   assert(mapping_file && global_name);
   /* alloc */
   m = ma_malloc(sizeof (Mapping));
@@ -46,7 +46,7 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
   /* create new lua state (i.e., interpreter) */
   m->L = luaL_newstate();
   if (!m->L) {
-    error_set(e, "out of memory (cannot create new lua state)");
+    error_set(err, "out of memory (cannot create new lua state)");
     had_err = -1;
   }
   /* load the standard libs into the lua interpreter */
@@ -56,7 +56,7 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
   if (!had_err) {
     if (luaL_loadfile(m->L, str_get(mapping_file)) ||
         lua_pcall(m->L, 0, 0, 0)) {
-      error_set(e, "cannot run file: %s", lua_tostring(m->L, -1));
+      error_set(err, "cannot run file: %s", lua_tostring(m->L, -1));
       had_err = -1;
     }
   }
@@ -64,7 +64,7 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
   if (!had_err) {
     lua_getglobal(m->L, global_name);
     if (lua_isnil(m->L, -1)) {
-      error_set(e, "'%s' is not defined in \"%s\"", global_name,
+      error_set(err, "'%s' is not defined in \"%s\"", global_name,
                 str_get(mapping_file));
       had_err = -1;
     }
@@ -72,8 +72,8 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
   /* make sure it is either a table or a function */
   if (!had_err) {
     if (!(lua_istable(m->L, -1) || lua_isfunction(m->L, -1))) {
-      error_set(e, "'%s' must be either a table or a function (defined "
-                   "in \"%s\")", global_name, str_get(mapping_file));
+      error_set(err, "'%s' must be either a table or a function (defined "
+                     "in \"%s\")", global_name, str_get(mapping_file));
       had_err = -1;
     }
   }
@@ -95,10 +95,10 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
 }
 
 static int map_table(Mapping *m, Str **stroutput, long *integeroutput,
-                     const char *input, Error *e)
+                     const char *input, Error *err)
 {
   int had_err = 0;
-  error_check(e);
+  error_check(err);
   assert(m && input);
   assert((m->type == MAPPINGTYPE_STRING  && stroutput) ||
          (m->type == MAPPINGTYPE_INTEGER && integeroutput));
@@ -106,7 +106,7 @@ static int map_table(Mapping *m, Str **stroutput, long *integeroutput,
   lua_gettable(m->L, -2); /* get global[input] */
   /* make sure global[input] is defined */
   if (lua_isnil(m->L, -1)) {
-    error_set(e, "%s[%s] is nil (defined in \"%s\")", m->global, input,
+    error_set(err, "%s[%s] is nil (defined in \"%s\")", m->global, input,
               str_get(m->mapping_file)); had_err = -1;
   }
   if (!had_err) {
@@ -114,8 +114,8 @@ static int map_table(Mapping *m, Str **stroutput, long *integeroutput,
       case MAPPINGTYPE_STRING:
         /* make sure global[input] is a string */
         if (!(lua_isstring(m->L, -1))) {
-          error_set(e, "%s[%s] is not a string (defined in \"%s\")", m->global,
-                    input, str_get(m->mapping_file)); had_err = -1;
+          error_set(err, "%s[%s] is not a string (defined in \"%s\")",
+                    m->global, input, str_get(m->mapping_file)); had_err = -1;
         }
         if (!had_err)
           *stroutput = str_new_cstr(lua_tostring(m->L, -1));
@@ -123,7 +123,7 @@ static int map_table(Mapping *m, Str **stroutput, long *integeroutput,
       case MAPPINGTYPE_INTEGER:
         /* make sure global[input] is an integer */
         if (!(lua_isnumber(m->L, -1))) {
-          error_set(e, "%s[%s] is not an integer (defined in \"%s\")",
+          error_set(err, "%s[%s] is not an integer (defined in \"%s\")",
                     m->global, input, str_get(m->mapping_file)); had_err = -1;
         }
         if (!had_err)
@@ -136,10 +136,10 @@ static int map_table(Mapping *m, Str **stroutput, long *integeroutput,
 }
 
 static int map_function(Mapping *m, Str **stroutput, long *integeroutput,
-                        const char *input, Error *e)
+                        const char *input, Error *err)
 {
   int had_err = 0;
-  error_check(e);
+  error_check(err);
   assert(m && input);
   assert((m->type == MAPPINGTYPE_STRING  && stroutput) ||
          (m->type == MAPPINGTYPE_INTEGER && integeroutput));
@@ -147,7 +147,7 @@ static int map_function(Mapping *m, Str **stroutput, long *integeroutput,
   lua_pushstring(m->L, input);
   /* call function */
   if (lua_pcall(m->L, 1, 1, 0)) {
-    error_set(e, "running function '%s': %s", m->global,
+    error_set(err, "running function '%s': %s", m->global,
               lua_tostring(m->L, -1));
     had_err = -1;
   }
@@ -156,8 +156,8 @@ static int map_function(Mapping *m, Str **stroutput, long *integeroutput,
     switch (m->type) {
       case MAPPINGTYPE_STRING:
         if (!lua_isstring(m->L, -1)) {
-          error_set(e, "function '%s' must return a string (defined in \"%s\")",
-                    m->global, str_get(m->mapping_file));
+          error_set(err, "function '%s' must return a string (defined in "
+                         "\"%s\")", m->global, str_get(m->mapping_file));
           had_err = -1;
         }
         if (!had_err)
@@ -165,7 +165,7 @@ static int map_function(Mapping *m, Str **stroutput, long *integeroutput,
          break;
        case MAPPINGTYPE_INTEGER:
         if (!lua_isnumber(m->L, -1)) {
-          error_set(e, "function '%s' must return an integer) (defined in "
+          error_set(err, "function '%s' must return an integer) (defined in "
                        "\"%s\")", m->global, str_get(m->mapping_file));
           had_err = -1;
         }
@@ -179,29 +179,29 @@ static int map_function(Mapping *m, Str **stroutput, long *integeroutput,
 }
 
 static int map_generic(Mapping *m, Str **stroutput, long *integeroutput,
-                       const char *input, Error *e)
+                       const char *input, Error *err)
 {
-  error_check(e);
+  error_check(err);
   assert(m && input);
   assert((m->type == MAPPINGTYPE_STRING  && stroutput) ||
          (m->type == MAPPINGTYPE_INTEGER && integeroutput));
   if (m->is_table)
-    return map_table(m, stroutput, integeroutput, input, e);
-  return map_function(m, stroutput, integeroutput, input, e);
+    return map_table(m, stroutput, integeroutput, input, err);
+  return map_function(m, stroutput, integeroutput, input, err);
 }
 
-Str* mapping_map_string(Mapping *m, const char *input, Error *e)
+Str* mapping_map_string(Mapping *m, const char *input, Error *err)
 {
   Str *output = NULL;
-  error_check(e);
-  map_generic(m, &output, NULL, input, e);
+  error_check(err);
+  map_generic(m, &output, NULL, input, err);
   return output;
 }
 
-int mapping_map_integer(Mapping *m, long *output, const char *input, Error *e)
+int mapping_map_integer(Mapping *m, long *output, const char *input, Error *err)
 {
-  error_check(e);
-  return map_generic(m, NULL, output, input, e);
+  error_check(err);
+  return map_generic(m, NULL, output, input, err);
 }
 
 void mapping_delete(Mapping *m)

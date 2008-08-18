@@ -1227,7 +1227,7 @@ int compute_nucleotides_values(UNUSED void *key, void *value, void *data,
 }
 
 int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
-                              GenomeVisitor *gv, Error *e)
+                              GenomeVisitor *gv, Error *err)
 {
   GenomeNode *gn;
   SequenceRegion *sr;
@@ -1237,7 +1237,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   ProcessPredictedFeatureInfo predicted_info;
   int had_err;
 
-  error_check(e);
+  error_check(err);
   assert(se);
 
   /* init */
@@ -1261,7 +1261,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   predicted_info.wrong_LTRs  = &se->wrong_LTRs;
 
   /* process the reality stream completely */
-  while (!(had_err = genome_stream_next_tree(se->reality, &gn, e)) && gn) {
+  while (!(had_err = genome_stream_next_tree(se->reality, &gn, err)) && gn) {
     sr = genome_node_cast(sequence_region_class(), gn);
     if (sr) {
       /* each sequence region gets its own ``slot'' */
@@ -1289,7 +1289,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       assert(!had_err); /* cannot happen, process_real_feature() is sane */
     }
     if (gv)
-      genome_node_accept(gn, gv, e);
+      genome_node_accept(gn, gv, err);
     genome_node_rec_delete(gn);
   }
 
@@ -1301,7 +1301,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* process the prediction stream */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(se->prediction, &gn, e)) &&
+    while (!(had_err = genome_stream_next_tree(se->prediction, &gn, err)) &&
            gn) {
       gf = genome_node_cast(genome_feature_class(), gn);
       /* we consider only genome features */
@@ -1324,7 +1324,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
         }
       }
       if (gv)
-        had_err = genome_node_accept(gn, gv, e);
+        had_err = genome_node_accept(gn, gv, err);
       genome_node_rec_delete(gn);
     }
   }

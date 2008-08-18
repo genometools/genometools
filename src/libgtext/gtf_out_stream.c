@@ -28,15 +28,16 @@ struct GTFOutStream {
 #define gtf_out_stream_cast(GS)\
         genome_stream_cast(gtf_out_stream_class(), GS);
 
-static int gtf_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
+static int gtf_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
+                                    Error *err)
 {
   GTFOutStream *gtf_out_stream;
   int had_err;
-  error_check(e);
+  error_check(err);
   gtf_out_stream = gtf_out_stream_cast(gs);
-  had_err = genome_stream_next_tree(gtf_out_stream->in_stream, gn, e);
+  had_err = genome_stream_next_tree(gtf_out_stream->in_stream, gn, err);
   if (!had_err && *gn)
-    had_err = genome_node_accept(*gn, gtf_out_stream->gtf_visitor, e);
+    had_err = genome_node_accept(*gn, gtf_out_stream->gtf_visitor, err);
   return had_err;
 }
 

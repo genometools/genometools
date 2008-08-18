@@ -73,13 +73,13 @@ static inline int ownbuffergenfile_getc(FastaBuffer *fb,GenFile *inputstream)
   return fb->inputbuffer[fb->currentinpos++];
 }
 
-static int advancefastabufferstate(FastaBuffer *fb, Error *e)
+static int advancefastabufferstate(FastaBuffer *fb, Error *err)
 {
   int currentchar;
   unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
   Uchar charcode;
 
-  error_check(e);
+  error_check(err);
   while (true)
   {
     if (currentoutpos >= (unsigned long) OUTPUTFILEBUFFERSIZE)
@@ -185,7 +185,8 @@ static int advancefastabufferstate(FastaBuffer *fb, Error *e)
                 charcode = fb->symbolmap[(unsigned int) currentchar];
                 if (charcode == (Uchar) UNDEFCHAR)
                 {
-                  error_set(e,"illegal character '%c': file \"%s\", line %llu",
+                  error_set(err,
+                            "illegal character '%c': file \"%s\", line %llu",
                             currentchar,
                             strarray_get(fb->filenametab, fb->filenum),
                             (unsigned long long) fb->linenum);
@@ -216,7 +217,7 @@ static int advancefastabufferstate(FastaBuffer *fb, Error *e)
   }
   if (fb->firstoverallseq)
   {
-    error_set(e,"no sequences in multiple fasta file(s) %s ...",
+    error_set(err,"no sequences in multiple fasta file(s) %s ...",
               strarray_get(fb->filenametab,0));
     return -2;
   }
@@ -224,15 +225,15 @@ static int advancefastabufferstate(FastaBuffer *fb, Error *e)
   return 0;
 }
 
-static int advancePlainbufferstate(FastaBuffer *fb, Error *e)
+static int advancePlainbufferstate(FastaBuffer *fb, Error *err)
 {
   int currentchar;
   unsigned long currentoutpos = 0, currentfileread = 0;
 
-  error_check(e);
+  error_check(err);
   if (fb->descptr != NULL)
   {
-    error_set(e, "no headers in plain sequence file");
+    error_set(err, "no headers in plain sequence file");
     return -1;
   }
   while (true)
@@ -293,7 +294,7 @@ static int advancePlainbufferstate(FastaBuffer *fb, Error *e)
   }
   if (currentoutpos == 0)
   {
-    error_set(e, "no characters in plain file(s) %s ...",
+    error_set(err, "no characters in plain file(s) %s ...",
               strarray_get(fb->filenametab,0));
     return -2;
   }
@@ -301,14 +302,14 @@ static int advancePlainbufferstate(FastaBuffer *fb, Error *e)
   return 0;
 }
 
-int advanceformatbufferstate(FastaBuffer *fb, Error *e)
+int advanceformatbufferstate(FastaBuffer *fb, Error *err)
 {
-  error_check(e);
+  error_check(err);
   if (fb->plainformat)
   {
-    return advancePlainbufferstate(fb, e);
+    return advancePlainbufferstate(fb, err);
   }
-  return advancefastabufferstate(fb, e);
+  return advancefastabufferstate(fb, err);
 }
 
 void fastabuffer_delete(FastaBuffer *fb)

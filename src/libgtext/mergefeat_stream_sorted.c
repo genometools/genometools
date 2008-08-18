@@ -31,12 +31,12 @@ struct MergefeatStreamSorted {
         genome_stream_cast(mergefeat_stream_sorted_class(), GS)
 
 static int mergefeat_stream_sorted_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                             Error *e)
+                                             Error *err)
 {
   MergefeatStreamSorted *mfs;
-  error_check(e);
+  error_check(err);
   mfs = mergefeat_stream_sorted_cast(gs);
-  return genome_stream_next_tree(mfs->sort_stream, gn, e);
+  return genome_stream_next_tree(mfs->sort_stream, gn, err);
 }
 
 static void mergefeat_stream_sorted_free(GenomeStream *gs)

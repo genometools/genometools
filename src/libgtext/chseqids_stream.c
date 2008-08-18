@@ -42,19 +42,19 @@ static int change_sequence_id(GenomeNode *gn, void *data, UNUSED Error *err)
   return 0;
 }
 
-int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
+int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
 {
   ChseqidsStream *cs;
   GenomeNode *node, **gn_a, **gn_b;
   Str *changed_seqid;
   unsigned long i;
   int rval, had_err = 0;
-  error_check(e);
+  error_check(err);
   cs = chseqids_stream_cast(gs);
 
   if (!cs->sequence_regions_processed) {
     while (!had_err) {
-      if (!(had_err = genome_stream_next_tree(cs->in_stream, &node, e))) {
+      if (!(had_err = genome_stream_next_tree(cs->in_stream, &node, err))) {
         if (node)
           array_add(cs->genome_node_buffer, node);
         else
@@ -70,9 +70,9 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
       if (genome_node_get_seqid(node)) {
         if  ((changed_seqid = mapping_map_string(cs->chseqids_mapping,
                                            str_get(genome_node_get_seqid(node)),
-                                                 e))) {
+                                                 err))) {
           rval = genome_node_traverse_children(node, changed_seqid,
-                                               change_sequence_id, true, e);
+                                               change_sequence_id, true, err);
           assert(!rval); /* change_sequence_id() is sane */
           str_delete(changed_seqid);
         }
@@ -107,16 +107,16 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
   }
 
   if (!had_err)
-    had_err = genome_stream_next_tree(cs->in_stream, gn, e);
+    had_err = genome_stream_next_tree(cs->in_stream, gn, err);
   if (!had_err && *gn) {
     if (genome_node_get_seqid(*gn)) {
       changed_seqid = mapping_map_string(cs->chseqids_mapping,
                                          str_get(genome_node_get_seqid(*gn)),
-                                         e);
+                                         err);
       assert(changed_seqid); /* is always defined, because an undefined mapping
                                 would be catched earlier */
       rval = genome_node_traverse_children(*gn, changed_seqid,
-                                           change_sequence_id, true, e);
+                                           change_sequence_id, true, err);
       assert(!rval); /* change_sequence_id() is sane */
       str_delete(changed_seqid);
     }
@@ -148,18 +148,18 @@ const GenomeStreamClass* chseqids_stream_class(void)
 }
 
 GenomeStream* chseqids_stream_new(GenomeStream *in_stream, Str *chseqids_file,
-                                  Error *e)
+                                  Error *err)
 {
   GenomeStream *gs;
   ChseqidsStream *cs;
-  error_check(e);
+  error_check(err);
   assert(in_stream && chseqids_file);
   assert(genome_stream_is_sorted(in_stream));
   gs = genome_stream_create(chseqids_stream_class(), false);
   cs = chseqids_stream_cast(gs);
   cs->in_stream = genome_stream_ref(in_stream);
   cs->chseqids_mapping = mapping_new(chseqids_file, "chseqids",
-                                     MAPPINGTYPE_STRING, e);
+                                     MAPPINGTYPE_STRING, err);
   if (!cs->chseqids_mapping) {
     genome_stream_delete(gs);
     return NULL;

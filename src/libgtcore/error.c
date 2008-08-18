@@ -67,22 +67,22 @@ const char* error_get(const Error *err)
   return err->error_string;
 }
 
-void error_set_progname(Error *e, const char *progname)
+void error_set_progname(Error *err, const char *progname)
 {
-  assert(e && progname);
-  ma_free(e->progname);
-  e->progname = cstr_dup(progname);
+  assert(err && progname);
+  ma_free(err->progname);
+  err->progname = cstr_dup(progname);
 }
 
-const char* error_get_progname(const Error *e)
+const char* error_get_progname(const Error *err)
 {
-  assert(e);
-  return e->progname;
+  assert(err);
+  return err->progname;
 }
 
-void error_delete(Error *e)
+void error_delete(Error *err)
 {
-  if (!e) return;
-  ma_free(e->progname);
-  ma_free(e);
+  if (!err) return;
+  ma_free(err->progname);
+  ma_free(err);
 }

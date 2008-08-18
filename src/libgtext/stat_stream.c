@@ -31,18 +31,18 @@ struct StatStream
 #define stat_stream_cast(GS)\
         genome_stream_cast(stat_stream_class(), GS)
 
-static int stat_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
+static int stat_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
 {
   StatStream *stat_stream;
   int had_err;
-  error_check(e);
+  error_check(err);
   stat_stream = stat_stream_cast(gs);
-  had_err = genome_stream_next_tree(stat_stream->in_stream, gn, e);
+  had_err = genome_stream_next_tree(stat_stream->in_stream, gn, err);
   if (!had_err) {
     assert(stat_stream->stat_visitor);
     if (*gn) {
       stat_stream->number_of_trees++;
-      had_err = genome_node_accept(*gn, stat_stream->stat_visitor, e);
+      had_err = genome_node_accept(*gn, stat_stream->stat_visitor, err);
       assert(!had_err); /* the status visitor is sane */
     }
   }

@@ -29,15 +29,15 @@ struct GFF3OutStream {
         genome_stream_cast(gff3_out_stream_class(), GS);
 
 static int gff3_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                     Error *e)
+                                     Error *err)
 {
   GFF3OutStream *gff3_out_stream;
   int had_err;
-  error_check(e);
+  error_check(err);
   gff3_out_stream = gff3_out_stream_cast(gs);
-  had_err = genome_stream_next_tree(gff3_out_stream->in_stream, gn, e);
+  had_err = genome_stream_next_tree(gff3_out_stream->in_stream, gn, err);
   if (!had_err && *gn)
-    had_err = genome_node_accept(*gn, gff3_out_stream->gff3_visitor, e);
+    had_err = genome_node_accept(*gn, gff3_out_stream->gff3_visitor, err);
   return had_err;
 }
 

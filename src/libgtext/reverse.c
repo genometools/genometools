@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,9 +18,9 @@
 #include <assert.h>
 #include "libgtext/reverse.h"
 
-static int complement(char *reverse_char, char dna_char, Error *e)
+static int complement(char *reverse_char, char dna_char, Error *err)
 {
-  error_check(e);
+  error_check(err);
   switch (dna_char) {
     case 'A': *reverse_char = 'T'; return 0;
     case 'C': *reverse_char = 'G'; return 0;
@@ -32,23 +32,23 @@ static int complement(char *reverse_char, char dna_char, Error *e)
     case 't': *reverse_char = 'a'; return 0;
     case 'n': *reverse_char = 'n'; return 0;
     default:
-      error_set(e, "complement of DNA character '%c' not defined", dna_char);
+      error_set(err, "complement of DNA character '%c' not defined", dna_char);
       return -1;
   }
 }
 
-int reverse_complement(char *dna_seq, unsigned long seqlen, Error *e)
+int reverse_complement(char *dna_seq, unsigned long seqlen, Error *err)
 {
   char *front_char, *back_char, tmp_char;
   int had_err = 0;
-  error_check(e);
+  error_check(err);
   assert(dna_seq);
   for (front_char = dna_seq, back_char = dna_seq + seqlen - 1;
        front_char <= back_char;
        front_char++, back_char--) {
-    had_err = complement(&tmp_char, *front_char, e);
+    had_err = complement(&tmp_char, *front_char, err);
     if (!had_err)
-      had_err = complement(front_char, *back_char, e);
+      had_err = complement(front_char, *back_char, err);
     if (!had_err)
       *back_char = tmp_char;
     if (had_err)

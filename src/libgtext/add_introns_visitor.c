@@ -80,27 +80,27 @@ static int add_introns_in_children(GenomeNode *gn, void *data,
   return 0;
 }
 
-static int add_introns_if_necessary(GenomeNode *gn, void *data, Error *e)
+static int add_introns_if_necessary(GenomeNode *gn, void *data, Error *err)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GenomeFeature *gf;
-  error_check(e);
+  error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   v->parent_feature = gf;
   v->previous_exon_feature = NULL;
   return genome_node_traverse_direct_children(gn, v, add_introns_in_children,
-                                              e);
+                                              err);
 }
 
 static int add_introns_visitor_genome_feature(GenomeVisitor *gv,
-                                             GenomeFeature *gf, Error *e)
+                                             GenomeFeature *gf, Error *err)
 {
   AddIntronsVisitor *v;
-  error_check(e);
+  error_check(err);
   v = add_introns_visitor_cast(gv);
   return genome_node_traverse_children((GenomeNode*) gf, v,
-                                       add_introns_if_necessary, false, e);
+                                       add_introns_if_necessary, false, err);
 }
 
 const GenomeVisitorClass* add_introns_visitor_class()

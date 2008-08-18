@@ -434,16 +434,16 @@ delete_never(key, value, never)
     return ST_CONTINUE;
 }
 
-void st_cleanup_safe(st_table *table, st_data_t never, Error *e)
+void st_cleanup_safe(st_table *table, st_data_t never, Error *err)
 {
     int num_entries = table->num_entries;
 
-    (void) st_foreach(table, delete_never, never, e);
+    (void) st_foreach(table, delete_never, never, err);
     table->num_entries = num_entries;
 }
 
 int
-st_foreach(st_table *table, st_iterfunc_type func, st_data_t arg, Error *e)
+st_foreach(st_table *table, st_iterfunc_type func, st_data_t arg, Error *err)
 {
     st_table_entry *ptr, *last, *tmp;
     enum st_retval retval;
@@ -453,7 +453,7 @@ st_foreach(st_table *table, st_iterfunc_type func, st_data_t arg, Error *e)
         last = 0;
         for (ptr = table->bins[i]; ptr != 0;) {
             retval = func((void*) ptr->key, (void*) ptr->record, (void*) arg,
-                          e);
+                          err);
             switch (retval) {
             case ST_CHECK:      /* check if hash is modified during iteration */
                 tmp = 0;
