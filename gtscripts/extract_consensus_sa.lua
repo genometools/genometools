@@ -65,6 +65,7 @@ m:remove_unit_test()
 m:remove_function("array_iterate")
 m:remove_function("iterate_test_func")
 m:remove_function("iterate_fail_func")
+m:remove_function_typedef("ArrayProcessor")
 m:ma2xansi()
 p:add(m)
 

@@ -94,6 +94,13 @@ function File:remove_unit_test()
   self:remove_function(prefix .. "unit_test")
 end
 
+function File:remove_function_typedef(name)
+  assert(name)
+  self.filecontent = self.filecontent:gsub('typedef %S* %(%*' .. name ..
+                                           '%)%(.-%);\n', '')
+  self.filecontent = self.filecontent:gsub('\n\n\n', '\n\n')
+end
+
 function File:fa2xansi()
   self.filecontent = self.filecontent:gsub('#include "fa.h"',
                                            '#include "xansi.h"')
