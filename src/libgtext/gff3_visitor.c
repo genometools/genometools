@@ -261,7 +261,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   /* show terminator, if the feature has children (otherwise it is clear that
      the feature is complete, because no ID attribute has been shown) */
   if (genome_node_has_children((GenomeNode*) gf))
-    genfile_xfputs("###\n", gff3_visitor->outfp);
+    genfile_xprintf(gff3_visitor->outfp, "%s\n", GFF_TERMINATOR);
 
   return had_err;
 }
