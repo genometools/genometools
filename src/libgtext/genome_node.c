@@ -221,18 +221,39 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
 
   if (depth_first) {
     node_stack = array_new(sizeof (GenomeNode*));
-    array_add(node_stack, genome_node);
+    if (genome_node_cast(genome_feature_class(), genome_node) &&
+        genome_feature_is_pseudo((GenomeFeature*) genome_node)) {
+      /* add the children backwards to traverse in order */
+      for (dlistelem = dlist_last(genome_node->children); dlistelem != NULL;
+           dlistelem = dlistelem_previous(dlistelem)) {
+        child_feature = (GenomeNode*) dlistelem_get_data(dlistelem);
+        array_add(node_stack, child_feature);
+      }
+    }
+    else
+      array_add(node_stack, genome_node);
+    assert(array_size(node_stack));
   }
   else {
     node_queue = queue_new();
-    queue_add(node_queue, genome_node);
+    if (genome_node_cast(genome_feature_class(), genome_node) &&
+        genome_feature_is_pseudo((GenomeFeature*) genome_node)) {
+      for (dlistelem = dlist_first(genome_node->children); dlistelem != NULL;
+           dlistelem = dlistelem_next(dlistelem)) {
+        child_feature = (GenomeNode*) dlistelem_get_data(dlistelem);
+        queue_add(node_queue, child_feature);
+      }
+    }
+    else
+      queue_add(node_queue, genome_node);
+    assert(queue_size(node_queue));
   }
   list_of_children = array_new(sizeof (GenomeNode*));
 
   if (traverse_only_once)
     traversed_nodes = hashtable_new(HASH_DIRECT, NULL, NULL);
 
-  while ((depth_first ? array_size(node_stack): queue_size(node_queue))) {
+  while ((depth_first ? array_size(node_stack) : queue_size(node_queue))) {
     if (depth_first)
       gn = *(GenomeNode**) array_pop(node_stack);
     else
@@ -413,6 +434,12 @@ int genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, Error *e)
 void genome_node_is_part_of_genome_node(GenomeNode *parent, GenomeNode *child)
 {
   assert(parent && child);
+#ifndef NDEBUG
+  if (genome_node_cast(genome_feature_class(), child)) {
+    /* pseudo-features have to be top-level */
+    assert(!genome_feature_is_pseudo((GenomeFeature*) child));
+  }
+#endif
   /* create children list on demand */
   if (!parent->children)
     parent->children = dlist_new((Compare) genome_node_cmp);

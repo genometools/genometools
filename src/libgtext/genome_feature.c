@@ -42,6 +42,8 @@
 #define SCORE_IS_DEFINED_MASK           0x1
 #define MULTI_FEATURE_OFFSET            14
 #define MULTI_FEATURE_MASK              0x1
+#define PSEUDO_FEATURE_OFFSET           15
+#define PSEUDO_FEATURE_MASK             0x1
 
 struct GenomeFeature
 {
@@ -94,6 +96,12 @@ static Range genome_feature_get_range(GenomeNode *gn)
   return gf->range;
 }
 
+static void genome_feature_set_range(GenomeNode *gn, Range range)
+{
+  GenomeFeature *gf = genome_feature_cast(gn);
+  gf->range = range;
+}
+
 static void genome_feature_set_seqid(GenomeNode *gn, Str *seqid)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
@@ -131,7 +139,7 @@ const GenomeNodeClass* genome_feature_class()
                                        genome_feature_get_seqid,
                                        genome_feature_get_seqid,
                                        genome_feature_get_range,
-                                       NULL,
+                                       genome_feature_set_range,
                                        genome_feature_set_seqid,
                                        genome_feature_accept };
   return &gnc;
@@ -167,6 +175,23 @@ GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
   gf->attributes     = NULL;
   gf->representative = NULL;
   return gn;
+}
+
+GenomeNode* genome_feature_new_pseudo(GenomeFeature *gf)
+{
+  GenomeFeature *pf;
+  GenomeNode *pn;
+  assert(gf);
+  pn = genome_feature_new(genome_feature_get_type(gf),
+                          genome_feature_get_range((GenomeNode*) gf),
+                          genome_feature_get_strand(gf), NULL, 0);
+  pf = genome_feature_cast(pn);
+  pf->type = NULL; /* pseudo features do not have a type */
+  genome_node_set_seqid(pn, genome_node_get_seqid((GenomeNode*) gf));
+  genome_feature_set_source(pn, gf->source);
+  pn->bit_field |= 1 << PSEUDO_FEATURE_OFFSET;
+  pf->representative = gf;
+  return pn;
 }
 
 GenomeNode* genome_feature_new_standard_gene(FeatureTypeFactory *ftf)
@@ -311,8 +336,21 @@ bool genome_feature_is_multi(const GenomeFeature *gf)
 {
   GenomeNode *gn = (GenomeNode*) gf;
   assert(gn);
-  if ((gn->bit_field >> MULTI_FEATURE_OFFSET) & MULTI_FEATURE_MASK)
+  if ((gn->bit_field >> MULTI_FEATURE_OFFSET) & MULTI_FEATURE_MASK) {
+    assert(!genome_feature_is_pseudo(gf));
     return true;
+  }
+  return false;
+}
+
+bool genome_feature_is_pseudo(const GenomeFeature *gf)
+{
+  GenomeNode *gn = (GenomeNode*) gf;
+  assert(gn);
+  if ((gn->bit_field >> PSEUDO_FEATURE_OFFSET) & PSEUDO_FEATURE_MASK) {
+    assert(!genome_feature_is_multi(gf));
+    return true;
+  }
   return false;
 }
 
@@ -341,7 +379,7 @@ void genome_feature_set_multi_representative(GenomeFeature *gf,
 
 GenomeFeature* genome_feature_get_multi_representative(GenomeFeature *gf)
 {
-  assert(gf && genome_feature_is_multi(gf));
+  assert(gf && genome_feature_is_multi(gf) && !genome_feature_is_pseudo(gf));
   if (gf->representative) {
     assert(genome_feature_is_multi(gf->representative));
     assert(genome_feature_get_multi_representative(gf->representative) ==
@@ -349,6 +387,13 @@ GenomeFeature* genome_feature_get_multi_representative(GenomeFeature *gf)
     return gf->representative;
   }
   return gf; /* is itself the representative */
+}
+
+GenomeFeature* genome_feature_get_pseudo_representative(GenomeFeature *gf)
+{
+  assert(gf && !genome_feature_is_multi(gf) && genome_feature_is_pseudo(gf));
+  assert(gf->representative);
+  return gf->representative;
 }
 
 float genome_feature_get_score(GenomeFeature *gf)

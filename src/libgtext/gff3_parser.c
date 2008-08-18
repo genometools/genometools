@@ -322,8 +322,61 @@ static int set_seqid(GenomeNode *genome_feature, const char *seqid, Range range,
   return had_err;
 }
 
-static int store_id(const char *id, GenomeNode *genome_feature,
-                    GFF3Parser *gff3_parser, const char *filename,
+typedef struct {
+  GenomeNode *genome_node,
+             *pseudo_node;
+} ReplaceInfo;
+
+static int replace_func(void **elem, void *info, UNUSED Error *err)
+{
+  ReplaceInfo *replace_info = info;
+  GenomeNode **node = (GenomeNode**) elem;
+  error_check(err);
+  assert(node && replace_info);
+  if (*node == replace_info->genome_node) {
+    *node = replace_info->pseudo_node;
+    return 1;
+  }
+  return 0;
+}
+
+static void replace_node(GenomeNode *genome_node, GenomeNode *pseudo_node,
+                         const char *id, GFF3Parser *gff3_parser,
+                         Queue *genome_nodes, AutomaticSequenceRegion *auto_sr)
+{
+  ReplaceInfo replace_info;
+  int rval;
+  assert(genome_node && pseudo_node && id && gff3_parser && genome_nodes);
+  hashtable_remove(gff3_parser->id_to_genome_node_mapping, id);
+  hashtable_add(gff3_parser->id_to_genome_node_mapping, cstr_dup(id),
+                genome_node_ref(pseudo_node));
+  replace_info.genome_node = genome_node;
+  replace_info.pseudo_node = pseudo_node;
+  if (auto_sr) {
+    rval = array_iterate(auto_sr->genome_features,
+                         (ArrayProcessor) replace_func, &replace_info, NULL);
+    assert(rval == 1);
+  }
+  else {
+    rval = queue_iterate(genome_nodes, replace_func, &replace_info, NULL);
+    assert(rval == 1);
+  }
+}
+
+static void update_pseudo_node_range(GenomeNode *pseudo_node,
+                                     GenomeNode *genome_feature)
+{
+  assert(pseudo_node && genome_feature);
+  assert(genome_feature_is_pseudo((GenomeFeature*) pseudo_node));
+  assert(!genome_feature_is_pseudo((GenomeFeature*) genome_feature));
+  genome_node_set_range(pseudo_node,
+                        range_join(genome_node_get_range(pseudo_node),
+                                   genome_node_get_range(genome_feature)));
+}
+
+static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
+                    GFF3Parser *gff3_parser, Queue *genome_nodes,
+                    AutomaticSequenceRegion *auto_sr, const char *filename,
                     unsigned int line_number, Error *err)
 {
   GenomeNode *gn;
@@ -343,9 +396,35 @@ static int store_id(const char *id, GenomeNode *genome_feature,
       had_err = -1;
     }
     if (!had_err) {
-      if (!genome_feature_is_multi((GenomeFeature*) gn))
-        genome_feature_make_multi_representative((GenomeFeature*) gn);
+      bool has_parent, is_pseudo;
+      has_parent = genome_feature_get_attribute(gn, PARENT_STRING)
+                   ? true : false;
+      is_pseudo = genome_feature_is_pseudo((GenomeFeature*) gn);
+      if (!genome_feature_is_multi((GenomeFeature*) gn)) {
+        if (!is_pseudo) {
+          genome_feature_make_multi_representative((GenomeFeature*) gn);
+          if (!has_parent) { /* create pseudo node */
+            GenomeNode *pseudo_node = genome_feature_new_pseudo((GenomeFeature*)
+                                                                gn);
+            genome_node_is_part_of_genome_node(pseudo_node, gn);
+            replace_node(gn, pseudo_node, id, gff3_parser, genome_nodes,
+                         auto_sr);
+            genome_node_is_part_of_genome_node(pseudo_node, genome_feature);
+            *is_child = true;
+          }
+        }
+        else {
+          update_pseudo_node_range(gn, genome_feature);
+          assert(genome_feature_get_pseudo_representative((GenomeFeature*) gn)
+                 != (GenomeFeature*) gn);
+          genome_node_is_part_of_genome_node(gn, genome_feature);
+          *is_child = true;
+          gn = (GenomeNode*)
+               genome_feature_get_pseudo_representative((GenomeFeature*) gn);
+        }
+      }
       else {
+        assert(has_parent);
         assert(genome_feature_get_multi_representative((GenomeFeature*) gn) ==
                (GenomeFeature*) gn);
       }
@@ -440,6 +519,8 @@ static int check_multi_feature_constrains(GenomeNode *new_gf,
   int had_err = 0;
   error_check(err);
   assert(new_gf && old_gf);
+  assert(!genome_feature_is_pseudo((GenomeFeature*) new_gf));
+  assert(!genome_feature_is_pseudo((GenomeFeature*) old_gf));
   /* check seqid */
   if (str_cmp(genome_node_get_seqid(new_gf), genome_node_get_seqid(old_gf))) {
     error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
@@ -482,6 +563,8 @@ static int check_multi_feature_constrains(GenomeNode *new_gf,
 
 static int parse_attributes(char *attributes, GenomeNode *genome_feature,
                             bool *is_child, GFF3Parser *gff3_parser,
+                            Queue *genome_nodes,
+                            AutomaticSequenceRegion *auto_sr,
                             const char *filename, unsigned int line_number,
                             Error *err)
 {
@@ -562,8 +645,8 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
     /* some attributes require special care */
     if (!had_err) {
       if (!strcmp(attr_tag, ID_STRING)) {
-        had_err = store_id(attr_value, genome_feature, gff3_parser, filename,
-                           line_number, err);
+        had_err = store_id(attr_value, genome_feature, is_child, gff3_parser,
+                           genome_nodes, auto_sr, filename, line_number, err);
       }
       else if (!strcmp(attr_tag, PARENT_STRING)) {
         had_err = process_parent_attr(attr_value, genome_feature, is_child,
@@ -710,7 +793,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   /* parse the attributes */
   if (!had_err) {
     had_err = parse_attributes(attributes, genome_feature, &is_child,
-                               gff3_parser, filename, line_number, err);
+                               gff3_parser, genome_nodes, auto_sr, filename,
+                               line_number, err);
   }
 
   if (!had_err && score_is_defined)

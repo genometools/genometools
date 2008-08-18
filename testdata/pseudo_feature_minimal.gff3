@@ -1,0 +1,6 @@
+##gff-version   3
+##sequence-region   ctg123 1 1497228
+ctg123	.	cDNA_match	1050	1500	5.8e-42	+	.	ID=cDNA_match1;Target=cdna0123 12 462
+ctg123	.	cDNA_match	5000	5500	8.1e-43	+	.	ID=cDNA_match1;Target=cdna0123 463 963
+ctg123	.	cDNA_match	7000	9000	1.4e-40	+	.	ID=cDNA_match1;Target=cdna0123 964 2964
+###

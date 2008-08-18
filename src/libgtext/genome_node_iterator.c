@@ -39,9 +39,22 @@ static GenomeNodeIterator* genome_node_iterator_new_base(GenomeNode *gn)
 GenomeNodeIterator* genome_node_iterator_new(GenomeNode *gn)
 {
   GenomeNodeIterator *gni;
+  GenomeNode *child_feature;
+  Dlistelem *dlistelem;
   assert(gn);
   gni = genome_node_iterator_new_base(gn);
-  array_add(gni->node_stack, gni->gn);
+  if (genome_node_cast(genome_feature_class(), gn) &&
+      genome_feature_is_pseudo((GenomeFeature*) gn)) {
+    /* add the children backwards to traverse in order */
+    for (dlistelem = dlist_last(gn->children); dlistelem != NULL;
+         dlistelem = dlistelem_previous(dlistelem)) {
+      child_feature = (GenomeNode*) dlistelem_get_data(dlistelem);
+      array_add(gni->node_stack, child_feature);
+    }
+  }
+  else
+    array_add(gni->node_stack, gni->gn);
+  assert(array_size(gni->node_stack));
   gni->direct = false;
   return gni;
 }

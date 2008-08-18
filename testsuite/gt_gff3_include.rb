@@ -626,6 +626,13 @@ Test do
   grep $last_stderr, "has not been previously defined"
 end
 
+Name "gt gff3 pseudo-feature minimal"
+Keywords "gt_gff3 pseudo-feature"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}pseudo_feature_minimal.gff3"
+  run "diff #{$last_stdout} #{$testdata}pseudo_feature_minimal.gff3"
+end
+
 # XXX: fix this bug from TODO list
 =begin
 Name "gt gff3 multiple top-level parents"

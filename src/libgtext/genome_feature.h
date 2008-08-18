@@ -36,6 +36,7 @@ const GenomeNodeClass* genome_feature_class(void);
 GenomeNode*            genome_feature_new(GenomeFeatureType*, Range, Strand,
                                           Str *filename,
                                           unsigned int line_number);
+GenomeNode*            genome_feature_new_pseudo(GenomeFeature*);
 /* return the ``standard gene'' (mainly for testing purposes) */
 GenomeNode*            genome_feature_new_standard_gene(FeatureTypeFactory*);
 const char*            genome_feature_get_source(GenomeFeature*);
@@ -46,11 +47,13 @@ GenomeFeatureType*     genome_feature_create_gft(GenomeFeature*, const char*);
 bool                   genome_feature_has_type(GenomeFeature*, const char*);
 bool                   genome_feature_score_is_defined(const GenomeFeature*);
 bool                   genome_feature_is_multi(const GenomeFeature*);
+bool                   genome_feature_is_pseudo(const GenomeFeature*);
 void                   genome_feature_make_multi_representative(const
                                                                 GenomeFeature*);
 void                   genome_feature_set_multi_representative(GenomeFeature*,
                                                                GenomeFeature*);
 GenomeFeature*         genome_feature_get_multi_representative(GenomeFeature*);
+GenomeFeature*         genome_feature_get_pseudo_representative(GenomeFeature*);
 float                  genome_feature_get_score(GenomeFeature*);
 Strand                 genome_feature_get_strand(GenomeFeature*);
 Phase                  genome_feature_get_phase(GenomeFeature*);
