@@ -49,6 +49,7 @@ typedef struct
 {
   Uchar transformedtag[MAXTAGSIZE];
   unsigned long taglen;
+  bool rcdir;
 } Tagwithlength;
 
 static void showmatch(void *processinfo,Seqpos startpos,Seqpos len,
@@ -228,7 +229,7 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                                  void (*processmatch)(void *,Seqpos,Seqpos,
                                                       unsigned long),
                                  void *processmatchinfooffline,
-                                 UNUSED bool rcmatch)
+                                 bool rcmatch)
 {
   if (tageratoroptions->online || (tageratoroptions->maxdistance >= 0 &&
                                    tageratoroptions->docompare))
@@ -245,6 +246,7 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
       indexbasedexactpatternmatching(limdfsresources,
                                      transformedtag,
                                      taglen,
+                                     rcmatch,
                                      processmatch,
                                      processmatchinfooffline);
     } else
@@ -306,7 +308,7 @@ static void compareresults(const ArraySimplematch *storeonline,
   }
 }
 
-static void complementtag(Uchar *transformedtag,unsigned long taglen)
+static void reversecomplementtag(Uchar *transformedtag,unsigned long taglen)
 {
   unsigned long idx;
 
@@ -488,6 +490,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
         ma_free(desc);
         break;
       }
+      twl.rcdir = false;
       printf("# %lu ",twl.taglen);
       fprintfsymbolstring(stdout,suffixarray.alpha,twl.transformedtag,
                           twl.taglen);
@@ -503,7 +506,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
         {
           if (try == 1 && tageratoroptions->rcmatch)
           {
-            complementtag(twl.transformedtag,twl.taglen);
+            reversecomplementtag(twl.transformedtag,twl.taglen);
+            twl.rcdir = true;
           }
           performpatternsearch(dfst,
                                tageratoroptions,
@@ -513,8 +517,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                twl.taglen,
                                processmatch,
                                processmatchinfooffline,
-                               (try == 1 && tageratoroptions->rcmatch)
-                                 ? true : false);
+                               twl.rcdir);
           if (tageratoroptions->docompare)
           {
             compareresults(&storeonline,&storeoffline);
