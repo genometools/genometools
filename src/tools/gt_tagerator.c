@@ -138,8 +138,9 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, option);
   option_is_development_option(optionrw);
 
-  option = option_new_ulong("maxocc","specify max number of match-occurrencs",
-                           &arguments->maxintervalwidth,0);
+  option = option_new_ulong_min("maxocc",
+                                "specify max number of match-occurrencs",
+                                &arguments->maxintervalwidth,0,1UL);
   option_parser_add_option(op, option);
 
   option = option_new_bool("nowildcards","do not output matches containing "
@@ -225,9 +226,9 @@ static int gt_tagerator_arguments_check(UNUSED int rest_argc,
     {
       arguments->nowildcards = true;
     }
-    if (arguments->maxintervalwidth > 0)
+    if (arguments->maxintervalwidth == 0)
     {
-      error_set(err,"option -maxocc requires to also use option -e");
+      error_set(err,"if option -e is not used then option -maxocc is required");
       return -1;
     }
   }

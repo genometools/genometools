@@ -44,8 +44,8 @@ typedef struct
 
 typedef struct
 {
-  Seqpos maxintervalwidth;
-  unsigned long patternlength,
+  unsigned long maxintervalwidth,
+                patternlength,
                 maxdistance,
                 *eqsvector;
 } Matchtaskinfo;
@@ -156,7 +156,7 @@ static void apm_initdfsconstinfo(void *dfsconstinfo,
                                  const Uchar *pattern,
                                  unsigned long patternlength,
                                  unsigned long maxdistance,
-                                 Seqpos maxintervalwidth)
+                                 unsigned long maxintervalwidth)
 {
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
@@ -217,7 +217,7 @@ static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
     }
   } else
   {
-    if (width <= mti->maxintervalwidth)
+    if (width <= (Seqpos) mti->maxintervalwidth)
     {
       assert(col->maxleqk > 0);
       return col->maxleqk+1; /* success with match of length maxleqk */

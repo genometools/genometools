@@ -36,7 +36,7 @@ struct AbstractDfstransformer
                            const Uchar *pattern,
                            unsigned long patternlength,
                            unsigned long maxdistance,
-                           Seqpos maxintervalwidth);
+                           unsigned long maxintervalwidth);
   void (*extractdfsconstinfo)(void (*processresult)(void *,
                                                     const void *,
                                                     unsigned long,

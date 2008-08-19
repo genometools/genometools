@@ -30,6 +30,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     const Encodedsequence *encseq,
                                     bool withesa,
                                     bool nowildcards,
+                                    unsigned long maxintervalwidth,
                                     unsigned int mapsize,
                                     Seqpos totallength,
                                     void (*processmatch)(void *,bool,Seqpos,
@@ -52,7 +53,7 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
-                                     Seqpos maxintervalwidth,
+                                     unsigned long maxintervalwidth,
                                      const AbstractDfstransformer *adfst);
 
 unsigned long genericmstats(const Limdfsresources *limdfsresources,
@@ -75,5 +76,8 @@ Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
                            Readmode readmode);
 
 Seqpos getlastbound(const Limdfsresources *limdfsresources,Seqpos rightbound);
+
+bool intervalwidthleq(const Limdfsresources *limdfsresources,
+                      Seqpos leftbound,Seqpos rightbound);
 
 #endif

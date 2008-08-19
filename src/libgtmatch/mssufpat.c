@@ -83,7 +83,7 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
                                  const Uchar *pattern,
                                  unsigned long patternlength,
                                  UNUSED unsigned long maxdistance,
-                                 UNUSED Seqpos maxintervalwidth)
+                                 UNUSED unsigned long maxintervalwidth)
 {
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 #ifdef SKDEBUG

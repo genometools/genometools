@@ -70,6 +70,7 @@ struct Limdfsresources
   void *patterninfo;
   const void *genericindex;
   bool withesa, nowildcards;
+  unsigned long maxintervalwidth;
   DECLAREDFSSTATE(currentdfsstate);
   Seqpos *rangeOccs;
   unsigned int maxdepth;
@@ -83,6 +84,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     const Encodedsequence *encseq,
                                     bool withesa,
                                     bool nowildcards,
+                                    unsigned long maxintervalwidth,
                                     unsigned int mapsize,
                                     Seqpos totallength,
                                     void (*processmatch)(void *,bool,Seqpos,
@@ -119,6 +121,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->encseq = encseq;
   limdfsresources->maxdepth = maxdepth;
   limdfsresources->mbtab = mbtab;
+  limdfsresources->maxintervalwidth = maxintervalwidth;
   /* Application specific */
   limdfsresources->dfsconstinfo
     = adfst->allocatedfsconstinfo((unsigned int) limdfsresources->alphasize);
@@ -635,7 +638,7 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
-                                     Seqpos maxintervalwidth,
+                                     unsigned long maxintervalwidth,
                                      const AbstractDfstransformer *adfst)
 {
   Lcpintervalwithinfo *stackptr, parentwithinfo;
@@ -777,6 +780,37 @@ Seqpos getlastbound(const Limdfsresources *limdfsresources,Seqpos rightbound)
     return rightbound;
   }
   return rightbound - 1;
+}
+
+bool intervalwidthleq(const Limdfsresources *limdfsresources,
+                      Seqpos leftbound,Seqpos rightbound)
+{
+  Seqpos width;
+
+  if (limdfsresources->withesa)
+  {
+    if (leftbound > rightbound)
+    {
+      width = 0;
+    } else
+    {
+      width = rightbound - leftbound + 1;
+    }
+  } else
+  {
+    if (leftbound >= rightbound)
+    {
+      width = 0;
+    } else
+    {
+      width = rightbound - leftbound;
+    }
+  }
+  if (width > 0 && width <= (Seqpos) limdfsresources->maxintervalwidth)
+  {
+    return true;
+  }
+  return false;
 }
 
 /*
