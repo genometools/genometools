@@ -1,0 +1,4 @@
+##gff-version 3
+##sequence-region 2L 1 23011544
+2L	blastp_Dmel_proteomic	match	11344	11483	.	-	.	ID=proteomic_PAp00018945_HIT_Dmel_proteomic;Name=proteomic_PAp00018945_HIT;program=blastp;programversion=1.0;sourcename=Dmel_proteomic;Target=proteomic_PAp00018945_hsp_0 2 74 -
+2L	blastp_Dmel_proteomic	match_part	11344	11344	0.97	-	.	Name=proteomic_PAp00018945_hsp_0;Parent=proteomic_PAp00018945_HIT_Dmel_proteomic;target_type=match;Target=proteomic_PAp00018945_hsp_0 2 1 -

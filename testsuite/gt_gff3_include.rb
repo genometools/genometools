@@ -390,6 +390,14 @@ Test do
   grep $last_stderr, "must have 3 or 4 blank separated entries"
 end
 
+Name "gt gff3 target attribute with swapped range"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}target_attribute_swapped_range.gff3",
+           :retval => 1)
+  grep $last_stderr, "start '2' is larger then end '1' on line"
+end
+
 Name "gt gff3 empty attribute"
 Keywords "gt_gff3 gff3_attribute"
 Test do
