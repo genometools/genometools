@@ -90,7 +90,7 @@ module GT
       if GT.config_get_str(@config, section, key, str)
         str.to_s
       else
-        "undefined"
+        nil
       end
     end
 
@@ -104,7 +104,7 @@ module GT
       if GT.config_get_num(@config, section, key, double)
         double.val
       else
-        -9999.99
+        nil
       end
     end
 
@@ -118,7 +118,7 @@ module GT
       if GT.config_get_bool(@config, section, key, bool)
         bool.val
       else
-        false
+        nil
       end
     end
 

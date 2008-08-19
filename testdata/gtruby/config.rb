@@ -59,7 +59,7 @@ raise if str != "line"
 
 # get undefined string
 str = config.get_cstr("undefined", "undefined")
-raise if str != "undefined"
+raise if not str.nil?
 
 # get number
 num = config.get_num("format", "margins")
@@ -72,17 +72,21 @@ raise if num != 20
 
 #get undefined number
 num = config.get_num("undefined", "undefined")
-raise if num != -9999.99
+raise if not num.nil?
 
 # set string list
 list = [ "mRNA", "gene" ]
 config.set_cstr_list("dominate", "exon", list)
-testarr = config.get_cstr_list("dominate","exon")
+testarr = config.get_cstr_list("dominate", "exon")
 raise if !list.eql?(testarr)
 
 # get boolean
 bool = config.get_bool("format", "show_grid")
 raise if not bool
+
+# get undefined boolean
+bool = config.get_bool("undefined", "undefined")
+raise if not bool.nil?
 
 # set boolean
 config.set_bool("format", "show_grid", false)
