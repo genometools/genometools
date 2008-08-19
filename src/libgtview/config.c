@@ -43,7 +43,7 @@ static void config_lua_new_table(lua_State *L, const char *key)
 
 static const luaL_Reg luasecurelibs[] = {
   /* Think very hard before adding additional Lua libraries to this list, it
-     might compromise the security of web-applications like GenomeViewer!
+     might compromise the security of web applications like GenomeViewer!
      Do not add the 'io', 'os', or 'debug' library under any circumstances! */
   {"", luaopen_base},
   {LUA_TABLIBNAME, luaopen_table},
