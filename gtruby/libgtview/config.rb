@@ -43,16 +43,13 @@ module GT
   extern "void config_set_color(Config*, const char*, const char*, Color*)"
   extern "bool config_get_str(const Config*, const char*, " +
                              "const char*, Str*)"
-  extern "void config_set_str(const Config*, const char*, " +
-                             "const char*, Str*)"
+  extern "void config_set_str(Config*, const char*, const char*, Str*)"
   extern "bool config_get_num(const Config*, const char*, " +
                              "const char*, double*)"
-  extern "void config_set_num(const Config*, const char*, " +
-                             "const char*, double)"
+  extern "void config_set_num(Config*, const char*, const char*, double)"
   extern "bool config_get_bool(const Config*, const char*, " +
                                "const char*, bool*)"
-  extern "void config_set_bool(const Config*, const char*, " +
-                              "const char*, bool)"
+  extern "void config_set_bool(Config*, const char*, const char*, bool)"
   extern "void config_delete(Config*)"
 
   class Config
