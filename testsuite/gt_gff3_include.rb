@@ -649,6 +649,22 @@ Test do
   run "diff #{$last_stdout} #{$testdata}pseudo_feature_minimal.gff3"
 end
 
+Name "gt gff3 negative sequence region start"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}sequence_region_negative_start.gff3",
+           :retval => 1)
+  grep $last_stderr, "start '-1' is negative"
+end
+
+Name "gt gff3 negative sequence region end"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}sequence_region_negative_end.gff3",
+           :retval => 1)
+  grep $last_stderr, "end '-1497228' is negative"
+end
+
 # XXX: fix this bug from TODO list
 =begin
 Name "gt gff3 multiple top-level parents"

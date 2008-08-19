@@ -901,13 +901,13 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                 Str *filenamestr, unsigned int line_number,
                                 Error *err)
 {
-  char *tmpline, *tmplineend, *seqid = NULL;
+  char *tmpline, *tmplineend, *seqstart, *seqid = NULL;
   GenomeNode *gn;
   Str *changed_seqid = NULL;
   SimpleSequenceRegion *ssr = NULL;
   Range range;
   const char *filename;
-  int rval, had_err = 0;
+  int had_err = 0;
 
   error_check(err);
   assert(line[0] == '#');
@@ -957,23 +957,16 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                   "\"%s\"", line_number, filename);
         had_err = -1;
       }
+      else
+        seqstart = tmpline;
     }
-    if (!had_err) {
-      if ((rval = sscanf(tmpline, "%lu", &range.start)) != 1) {
-        error_set(err, "could not parse region start on line %u in file "
-                  "\"%s\"", line_number, filename);
-        had_err = -1;
-      }
-    }
-    if (!had_err  && range.start == 0) {
-      error_set(err, "illegal region start 0 on line %u in file \"%s\" "
-                "(GFF3 files are 1-based)", line_number, filename);
-      had_err = -1;
-    }
+
     if (!had_err) {
       /* skip non-blanks */
       while (tmpline <= tmplineend && !(tmpline[0] == ' '))
         tmpline++;
+      /* terminate seqstart */
+      *tmpline++ = '\0';
       /* skip blanks */
       while (tmpline < tmplineend && tmpline[0] == ' ')
         tmpline++;
@@ -983,20 +976,18 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         had_err = -1;
       }
     }
-    if (!had_err && (rval = sscanf(tmpline, "%lu", &range.end)) != 1) {
-      error_set(err, "could not parse region end on line %u in file \"%s\"",
-                line_number, filename);
-      had_err = -1;
+    if (!had_err) {
+      had_err = parse_range(&range, seqstart, tmpline, line_number, filename,
+                            err);
     }
-    if (!had_err && (range.start > range.end)) {
-      error_set(err, "region start %lu is larger then region end %lu on line "
-                "%u in file \"%s\"", range.start, range.end, line_number,
-                filename);
+    if (!had_err  && range.start == 0) {
+      error_set(err, "illegal region start 0 on line %u in file \"%s\" "
+                "(GFF3 files are 1-based)", line_number, filename);
       had_err = -1;
     }
     if (!had_err)
       had_err = add_offset_if_necessary(&range, gff3_parser, seqid, err);
-   if (!had_err) {
+    if (!had_err) {
       if (hashtable_get(gff3_parser->undefined_sequence_regions, seqid)) {
         error_set(err, "genome feature with id \"%s\" has been defined before "
                   "the corresponding \"%s\" definition on line %u in file "
