@@ -35,7 +35,8 @@ typedef struct
   unsigned long patternlength,
                 mstatlength[INTWORDSIZE],
                 *eqsvector;
-  Seqpos mstatwitness[INTWORDSIZE];
+  Seqpos mstatwitnessleftbound[INTWORDSIZE],
+         mstatwitnessrightbound[INTWORDSIZE];
 } Matchtaskinfo;
 
 #ifdef SKDEBUG
@@ -105,6 +106,7 @@ static void pms_extractdfsconstinfo(void (*processresult)(void *,
                                                           const void *,
                                                           unsigned long,
                                                           unsigned long,
+                                                          Seqpos,
                                                           Seqpos),
                                     void *processinfo,
                                     const void *patterninfo,
@@ -116,7 +118,8 @@ static void pms_extractdfsconstinfo(void (*processresult)(void *,
   for (idx=0; idx<mti->patternlength; idx++)
   {
     processresult(processinfo,patterninfo,idx,mti->mstatlength[idx],
-                                              mti->mstatwitness[idx]);
+                                              mti->mstatwitnessleftbound[idx],
+                                              mti->mstatwitnessrightbound[idx]);
   }
 }
 
@@ -184,13 +187,15 @@ static void pms_initParallelmstats(DECLAREPTRDFSSTATE(aliascolumn),
   for (idx = 0; idx<mti->patternlength; idx++)
   {
     mti->mstatlength[idx] = 0;
-    mti->mstatwitness[idx] = 0;
+    mti->mstatwitnessleftbound[idx] = 0;
+    mti->mstatwitnessrightbound[idx] = 0;
   }
 }
 
 static unsigned long pms_nextstepfullmatches(
                               DECLAREPTRDFSSTATE(aliascolumn),
                               Seqpos leftbound,
+                              Seqpos rightbound,
                               UNUSED Seqpos width,
                               unsigned long currentdepth,
                               void *dfsconstinfo)
@@ -209,11 +214,12 @@ static unsigned long pms_nextstepfullmatches(
       {
         /*
         printf("set mstatlength[%lu]=%lu\n",bitindex+first1,currentdepth);
-        printf("set mstatwitness[%lu]=%lu\n",bitindex+first1,
-                                             (unsigned long) leftbound);
+        printf("set mstatwitnessleftbound[%lu]=%lu\n",bitindex+first1,
+                                                 (unsigned long) leftbound);
         */
         mti->mstatlength[bitindex+first1] = currentdepth;
-        mti->mstatwitness[bitindex+first1] = leftbound;
+        mti->mstatwitnessleftbound[bitindex+first1] = leftbound;
+        mti->mstatwitnessrightbound[bitindex+first1] = rightbound;
       }
       tmp >>= (first1+1);
       bitindex += (first1+1);

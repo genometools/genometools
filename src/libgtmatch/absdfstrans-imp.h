@@ -37,9 +37,11 @@ struct AbstractDfstransformer
                            unsigned long patternlength,
                            unsigned long maxdistance,
                            Seqpos maxintervalwidth);
-  void (*extractdfsconstinfo)(void (*processresult)(void *,const void *,
+  void (*extractdfsconstinfo)(void (*processresult)(void *,
+                                                    const void *,
                                                     unsigned long,
                                                     unsigned long,
+                                                    Seqpos,
                                                     Seqpos),
                               void *processinfo,
                               const void *patterninfo,
@@ -49,6 +51,7 @@ struct AbstractDfstransformer
                           void *dfsconstinfo);
   unsigned long (*limdfsnextstep)(DECLAREPTRDFSSTATE(aliascolumn),
                                   Seqpos left,
+                                  Seqpos right,
                                   Seqpos width,
                                   unsigned long currentdepth,
                                   void *dfsconstinfo);

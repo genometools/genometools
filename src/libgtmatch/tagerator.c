@@ -79,11 +79,12 @@ static void checkmstats(void *processinfo,
                         const void *patterninfo,
                         unsigned long patternstartpos,
                         unsigned long mstatlength,
-                        Seqpos leftbound)
+                        Seqpos leftbound,
+                        UNUSED Seqpos rightbound)
 {
   unsigned long realmstatlength;
   Tagwithlength *twl = (Tagwithlength *) patterninfo;
-  Seqpos witnessposition;
+  Seqpos bound, lastbound;
   unsigned long idx;
 
   realmstatlength = genericmstats((const Limdfsresources *) processinfo,
@@ -96,23 +97,28 @@ static void checkmstats(void *processinfo,
                     patternstartpos,mstatlength,realmstatlength);
     exit(EXIT_FAILURE);
   }
-  witnessposition = bound2startpos((const Limdfsresources *) processinfo,
-                                   leftbound,mstatlength);
-  for (idx = patternstartpos; idx < patternstartpos + mstatlength; idx++)
+  lastbound = getlastbound((const Limdfsresources *) processinfo,rightbound);
+  for (bound = leftbound; bound <= lastbound; bound++)
   {
-    Uchar cc = limdfsgetencodedchar((const Limdfsresources *) processinfo,
-                                    witnessposition + idx - patternstartpos,
-                                    Forwardmode);
-    if (twl->transformedtag[idx] != cc)
+    Seqpos witnessposition
+             = bound2startpos((const Limdfsresources *) processinfo,
+                                     bound,mstatlength);
+    for (idx = patternstartpos; idx < patternstartpos + mstatlength; idx++)
     {
-      fprintf(stderr,"patternstartpos = %lu: pattern[%lu] = %u != %u = "
-                     "sequence[%lu]\n",
-                      patternstartpos,
-                      idx,
-                      (unsigned int) twl->transformedtag[idx],
-                      (unsigned int) cc,
-                      (unsigned long) (witnessposition+idx-patternstartpos));
-      exit(EXIT_FAILURE);
+      Uchar cc = limdfsgetencodedchar((const Limdfsresources *) processinfo,
+                                      witnessposition + idx - patternstartpos,
+                                      Forwardmode);
+      if (twl->transformedtag[idx] != cc)
+      {
+        fprintf(stderr,"patternstartpos = %lu: pattern[%lu] = %u != %u = "
+                       "sequence[%lu]\n",
+                        patternstartpos,
+                        idx,
+                        (unsigned int) twl->transformedtag[idx],
+                        (unsigned int) cc,
+                        (unsigned long) (witnessposition+idx-patternstartpos));
+        exit(EXIT_FAILURE);
+      }
     }
   }
 }
@@ -121,7 +127,8 @@ static void showmstats(void *processinfo,
                        UNUSED const void *patterninfo,
                        UNUSED unsigned long idx,
                        unsigned long value,
-                       Seqpos leftbound)
+                       Seqpos leftbound,
+                       UNUSED Seqpos rightbound)
 {
   Seqpos witnessposition = bound2startpos((const Limdfsresources *) processinfo,
                                           leftbound,value);

@@ -40,6 +40,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                                           const void *,
                                                           unsigned long,
                                                           unsigned long,
+                                                          Seqpos,
                                                           Seqpos),
                                     void *patterninfo,
                                     const AbstractDfstransformer *adfst);
@@ -72,5 +73,7 @@ Seqpos bound2startpos(const Limdfsresources *limdfsresources,
 Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
                            Seqpos pos,
                            Readmode readmode);
+
+Seqpos getlastbound(const Limdfsresources *limdfsresources,Seqpos rightbound);
 
 #endif

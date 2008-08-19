@@ -103,7 +103,6 @@ static void verifycolumnvalues(const Matchtaskinfo *mti,
 {
   unsigned long idx, score, minscore, mask, bfmaxleqk;
 
-  printf("startscore = %lu, maxdistance=%lu\n",startscore,mti->maxdistance);
   if (startscore <= mti->maxdistance)
   {
     bfmaxleqk = 0;
@@ -198,6 +197,7 @@ static void apm_initMyerscolumn(DECLAREPTRDFSSTATE(aliascolumn),
 
 static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
                                              UNUSED Seqpos leftbound,
+                                             UNUSED Seqpos rightbound,
                                              Seqpos width,
                                              UNUSED unsigned long currentdepth,
                                              void *dfsconstinfo)

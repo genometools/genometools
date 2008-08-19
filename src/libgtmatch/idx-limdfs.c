@@ -65,7 +65,8 @@ struct Limdfsresources
   Seqpos totallength;
   void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
   void *processmatchinfo;
-  void (*processresult)(void *,const void *,unsigned long,unsigned long,Seqpos);
+  void (*processresult)(void *,const void *,unsigned long,unsigned long,
+                        Seqpos,Seqpos);
   void *patterninfo;
   const void *genericindex;
   bool withesa, nowildcards;
@@ -92,6 +93,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                                           const void *,
                                                           unsigned long,
                                                           unsigned long,
+                                                          Seqpos,
                                                           Seqpos),
                                     void *patterninfo,
                                     const AbstractDfstransformer *adfst)
@@ -237,6 +239,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                                  cc);
       pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
                                          leftbound,
+                                         leftbound,
                                          (Seqpos) 1,
                                          (unsigned long) (pos - startpos + 1),
                                          limdfsresources->dfsconstinfo);
@@ -301,6 +304,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                  cc);
       pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
                                          bound,
+                                         bound+1,
                                          (Seqpos) 1,
                                          (unsigned long) (offset+contextlength),
                                          limdfsresources->dfsconstinfo);
@@ -364,6 +368,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
   }
   pprefixlen = adfst->limdfsnextstep(stackptr->aliasstate,
                                      child->leftbound,
+                                     child->rightbound,
                                      width,
                                      (unsigned long) child->offset,
                                      limdfsresources->dfsconstinfo);
@@ -433,7 +438,7 @@ static void showLCPinterval(bool withesa,const Indexbounds *itv)
                   : itv->rightbound - itv->leftbound;
   printf("(%lu,width=%lu)",(unsigned long) itv->offset,(unsigned long) width);
   printf("(%lu,%lu)",(unsigned long) itv->leftbound,
-                     (unsigned long) 
+                     (unsigned long)
                      (withesa ? itv->rightbound : itv->rightbound-1));
 }
 
@@ -763,6 +768,15 @@ Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
   assert(limdfsresources->encseq != NULL);
 
   return getencodedchar(limdfsresources->encseq,pos,readmode);
+}
+
+Seqpos getlastbound(const Limdfsresources *limdfsresources,Seqpos rightbound)
+{
+  if (limdfsresources->withesa)
+  {
+    return rightbound;
+  }
+  return rightbound - 1;
 }
 
 /*
