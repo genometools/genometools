@@ -48,6 +48,15 @@ raise if color2.red != color.red \
 	and color2.green != color.green \
 	and color2.blue != color.blue
 
+# unset color
+config.unset("exon", "fill")
+color2 = config.get_color("exon", "fill")
+raise if not color2.nil?
+
+# get undefined color
+color = config.get_color("undefined", "undefined")
+raise if not color.nil?
+
 # get string
 str = config.get_cstr("exon", "style")
 raise if str != "box"

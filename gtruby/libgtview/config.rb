@@ -39,7 +39,7 @@ module GT
 
   extern "Config* config_new(bool, Error*)"
   extern "int config_load_file(Config*, Str*, Error*)"
-  extern "void config_get_color(Config*, const char*, const char*, Color*)"
+  extern "bool config_get_color(Config*, const char*, const char*, Color*)"
   extern "void config_set_color(Config*, const char*, const char*, Color*)"
   extern "bool config_get_str(const Config*, const char*, " +
                              "const char*, Str*)"
@@ -71,8 +71,11 @@ module GT
 
     def get_color(section, key)
       color = GT::Color.malloc
-      GT.config_get_color(@config, section, key, color)
-      color
+      if GT.config_get_color(@config, section, key, color)
+        color
+      else
+        nil
+      end
     end
 
     def set_color(section, key, color)
