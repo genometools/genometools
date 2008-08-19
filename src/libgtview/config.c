@@ -492,19 +492,19 @@ int config_unit_test(Error *err)
   /* clone a Config object */
   new_cfg = config_clone(cfg, err);
   error_check(err);
-    if (!error_is_set(err))
+  if (!error_is_set(err))
   {
-  /* check again */
-  config_get_color(new_cfg, "foo", "fill", &tmpcol);
-  ensure(had_err, !color_equals(tmpcol,defcol));
-  ensure(had_err, color_equals(tmpcol,col2));
-  if (!config_get_str(new_cfg, "bar", "baz", str))
-    str_set(str, "");
-  ensure(had_err, (strcmp(str_get(str),"")!=0));
-  ensure(had_err, (str_cmp(str,test1)==0));
-  if (!config_get_str(new_cfg, "bar", "test", str))
-    str_set(str, "");
-  ensure(had_err, (strcmp(str_get(str),"")==0));
+    /* check again */
+    config_get_color(new_cfg, "foo", "fill", &tmpcol);
+    ensure(had_err, !color_equals(tmpcol,defcol));
+    ensure(had_err, color_equals(tmpcol,col2));
+    if (!config_get_str(new_cfg, "bar", "baz", str))
+      str_set(str, "");
+    ensure(had_err, (strcmp(str_get(str),"")!=0));
+    ensure(had_err, (str_cmp(str,test1)==0));
+    if (!config_get_str(new_cfg, "bar", "test", str))
+      str_set(str, "");
+    ensure(had_err, (strcmp(str_get(str),"")==0));
   }
   /* mem cleanup */
   str_delete(luafile);
