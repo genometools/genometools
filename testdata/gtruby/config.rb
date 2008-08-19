@@ -74,12 +74,6 @@ raise if num != 20
 num = config.get_num("undefined", "undefined")
 raise if not num.nil?
 
-# set string list
-list = [ "mRNA", "gene" ]
-config.set_cstr_list("dominate", "exon", list)
-testarr = config.get_cstr_list("dominate", "exon")
-raise if !list.eql?(testarr)
-
 # get boolean
 bool = config.get_bool("format", "show_grid")
 raise if not bool

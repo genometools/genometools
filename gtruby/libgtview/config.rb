@@ -53,10 +53,6 @@ module GT
                                "const char*, bool*)"
   extern "void config_set_bool(const Config*, const char*, " +
                               "const char*, bool)"
-  extern "bool config_get_cstr_list(const Config*, const char*, " +
-                                   "const char*, StrArray*)"
-  extern "void config_set_cstr_list(const Config*, const char*, " +
-                                   "const char*, StrArray*)"
   extern "void config_delete(Config*)"
 
   class Config
@@ -124,18 +120,6 @@ module GT
 
     def set_bool(section, key, val)
       GT.config_set_bool(@config, section, key, val)
-    end
-
-    def get_cstr_list(section, key)
-      strarr = GT::StrArray.new()
-      GT.config_get_cstr_list(@config, section, key, strarr.strarray)
-      strarr.to_a
-    end
-
-    def set_cstr_list(section, key, list)
-      strarray = GT::StrArray.new()
-      strarray.add_list(list)
-      GT.config_set_cstr_list(@config, section, key, strarray.strarray)
     end
   end
 end

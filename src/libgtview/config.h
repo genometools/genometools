@@ -25,18 +25,6 @@
 #include "libgtview/color.h"
 #include "libgtext/genome_feature_type.h"
 
-/* Represents domination status of an ordered pair.
-   Used when two different types collapse into the same parent
-   to determine splitting precedence. */
-typedef enum
-{
-  DOMINATES_FIRST,
-  DOMINATES_SECOND,
-  DOMINATES_EQUAL,
-  DOMINATES_NOT_SPECIFIED,
-  DOMINATES_UNKNOWN_TYPE
-} DominateStatus;
-
 /* Holds configuration info for the libgtview classes. */
 typedef struct Config Config;
 
@@ -79,24 +67,9 @@ bool           config_get_bool(const Config*, const char *section,
 /* Set boolean value of <key> in <section> to <number>. */
 void           config_set_bool(Config*, const char *section, const char *key,
                                bool);
-/* Retrieve a list of string (as StrArray) for <key> in <section>, returns NULL
-   on error. */
-bool           config_get_cstr_list(const Config*, const char *section,
-                                    const char *key, StrArray*);
-/* Set <key> in <section> to <list> of strings. */
-void           config_set_cstr_list(Config*, const char *section,
-                                    const char *key, StrArray*);
-/* Check if <checkstr> appears in list of strings named <key> in <section>. */
-bool           config_cstr_in_list(const Config*, const char *section,
-                                   const char *key, const char *checkstr);
 /* Returns verbosity status. */
 bool           config_get_verbose(const Config*);
 
-/* Compares two GenomeFeatureTypes <gft1> and <gft2> w.r.t. their splitting
-   precendence as defined in the config object.
-   If a type dominates, it will be drawn on top of the other in the image. */
-DominateStatus config_dominates(Config*, GenomeFeatureType *gft1,
-                                GenomeFeatureType *gft2);
 int            config_unit_test(Error*);
 /* Deletes a Config object but leaves the internal Lua state intact. */
 void           config_delete_without_state(Config*);
