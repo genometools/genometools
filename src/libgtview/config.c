@@ -148,7 +148,7 @@ bool config_get_color(const Config *cfg, const char *section,
                       const char *key, Color *color)
 {
   int i = 0;
-  assert(cfg && key && color);
+  assert(cfg && section && key && color);
   /* set default colors */
   color->red=0.5; color->green = 0.5; color->blue=0.5;
   /* get section */
@@ -201,7 +201,7 @@ void config_set_color(Config *cfg, const char *section, const char *key,
                       Color *color)
 {
   int i = 0;
-  assert(cfg && key && color);
+  assert(cfg && section && key && color);
   i = config_find_section_for_setting(cfg, section);
   lua_getfield(cfg->L, -1, key);
   i++;
