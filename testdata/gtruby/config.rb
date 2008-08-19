@@ -57,6 +57,11 @@ config.set_cstr("exon", "style", "line")
 str = config.get_cstr("exon", "style")
 raise if str != "line"
 
+# unset string
+config.unset("exon", "style")
+str = config.get_cstr("exon", "style")
+raise if not str.nil?
+
 # get undefined string
 str = config.get_cstr("undefined", "undefined")
 raise if not str.nil?
@@ -69,6 +74,11 @@ raise if num != 30
 config.set_num("format", "margins", 20)
 num = config.get_num("format", "margins")
 raise if num != 20
+
+# unset number
+config.unset("format", "margins");
+num = config.get_num("format", "margins")
+raise if not num.nil?
 
 #get undefined number
 num = config.get_num("undefined", "undefined")
@@ -86,3 +96,8 @@ raise if not bool.nil?
 config.set_bool("format", "show_grid", false)
 bool = config.get_bool("format", "show_grid")
 raise if bool
+
+# unset boolean
+config.unset("format", "show_grid")
+bool = config.get_bool("format", "show_grid")
+raise if not bool.nil?

@@ -50,6 +50,7 @@ module GT
   extern "bool config_get_bool(const Config*, const char*, " +
                                "const char*, bool*)"
   extern "void config_set_bool(Config*, const char*, const char*, bool)"
+  extern "void config_unset(Config*, const char*, const char*)"
   extern "void config_delete(Config*)"
 
   class Config
@@ -117,6 +118,10 @@ module GT
 
     def set_bool(section, key, val)
       GT.config_set_bool(@config, section, key, val)
+    end
+
+    def unset(section, key)
+      GT.config_unset(@config, section, key)
     end
   end
 end

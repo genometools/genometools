@@ -339,6 +339,22 @@ void config_set_bool(Config *cfg, const char *section, const char *key,
   lua_pop(cfg->L, i);
 }
 
+void config_unset(Config *cfg, const char *section, const char *key)
+{
+  assert(cfg && section && key);
+  lua_getglobal(cfg->L, "config");
+  if (!lua_isnil(cfg->L, -1)) {
+    assert(lua_istable(cfg->L, -1));
+    lua_getfield(cfg->L, -1, section);
+    if (!lua_isnil(cfg->L, -1)) {
+      assert(lua_istable(cfg->L, -1));
+      lua_pushstring(cfg->L, key);
+      lua_pushnil(cfg->L);
+      lua_settable(cfg->L, -3);
+    }
+  }
+}
+
 bool config_get_verbose(const Config *cfg)
 {
   assert(cfg);

@@ -67,6 +67,8 @@ bool           config_get_bool(const Config*, const char *section,
 /* Set boolean value of <key> in <section> to <number>. */
 void           config_set_bool(Config*, const char *section, const char *key,
                                bool);
+/* Unset value of <key> in <section>. */
+void           config_unset(Config*, const char *section, const char *key);
 /* Returns verbosity status. */
 bool           config_get_verbose(const Config*);
 
