@@ -61,12 +61,13 @@ smaller or equal to 64. The program runs in three basic modes:
 In the \textit{ms}-mode, it computes for all \(i\in[1,m]\) the length \(\ell\) 
 of the longest prefix of \(\Substring{w}{i}{m}\) matching any substring of 
 \(S\).
-In addition, it reports a start position, say \(j\), of such a prefix in \(S\).
+In addition, it reports start positions of such a prefix in \(S\).
 As these values make up the well known matching statistics, we denote 
 it by \textit{ms}. The length value \(\ell\) is the matching statistics length
-and the position value \(j\) is a matching statistics position.
-While the matching statistics length is uniquely determined, the 
-matching statistics position is not.
+and the position values are the matching statistics positions.
+Both, the matching statistics length and the matching statistics position
+is uniquely determined. The matching statistics mode requires to specify 
+a maximum number of occurrences, see option \Showoption{maxocc}.
 \item
 In the \textit{cdiff}-mode, it computes all start positions of approximate 
 matches with up to \(k\) differences in \(S\). For each start position of 
@@ -81,7 +82,8 @@ prefix matches with up to \(k\) differences and at most \(t\) occurrences in
 reports the minimum integers \(i\) and \(\ell\) such that 
 \(edist(\Substring{p}{1}{i},\Substring{S}{j}{j+\ell-1})\leq k\). Since this 
 mode matches a prefix of \(p\) with some differences, we call this mode 
-\textit{pdiff}.
+\textit{pdiff}.  This mode requires to specify a maximum number of 
+occurrences, see option \Showoption{maxocc}.
 \end{itemize}
 
 The following options are available in \Program:
@@ -103,7 +105,7 @@ to map the short sequence tags.
 }
 
 \Option{e}{$\Showoptionarg{k}$}{
-Specify the number of differences allowed. \(k\) must be a non-negative number
+Specify the number of differences allowed. \(k\) must be a non-negative number.
 \(k=0\) means that no differences are allowed (exact matching) and \(k>0\)
 means a positive number of differences. If this option is not used, then
 the program runs in \textit{ms}-mode, i.e.\ it computes the matching statistics
@@ -118,7 +120,8 @@ Compute palindromic matches, i.e.\ reverse complemented matches.
 This option does not work currently.}
 
 \Option{maxocc}{$\Showoptionarg{t}$}{
-Specify the maximum number of occurrences of approximate prefix matches.
+Specify the maximum number of occurrences of exact prefix matches (in case of
+the matching statistics) or approximate prefix matches.
 }
 
 \Option{nowildcards}{}{
@@ -169,38 +172,45 @@ Suppose that the compressed file \texttt{Q1.gz} contains short sequence tags
 in multiple \Fasta format. In a first call we run \Program in \textit{ms}-mode:
 
 \begin{Output}
-gt tagerator -q Q1.gz -pck pck-human
+gt tagerator -q Q1.gz -maxocc 10 -pck pck-human
 # computing matching statistics
-# indexname(pck)=pck-human
+# indexname(pck)=pck-rev
 # queryfile=Q1.gz
 # 15 aagcttgctgctgca
 10 88693
-9 88694
-8 88695
+9 88694 213545
+8 25583 88695 213546 281700 325202 451235 747565
 12 470064
 11 470065
-10 729958
-9 772093
-8 403975
-7 544167
-6 680243
-5 714382
-4 313675
-3 185058
-2 739095
-1 274
+10 158315 363967 470066 501203 576660 729958
+9
+8
+7
+6
+5
+4
+3
+2
+1
 ...
 \end{Output}
 The first line shortly reports the kind of computation performed. The second
 and third line give the name of the index containing the subject sequences.
-It is reported wether it is a packed index or an enhanced suffix array. Then for
+It is reported whether it is a packed index or an enhanced suffix array. 
+Then for
 each tag its length, say \(m\), and the tag \(p\) itself is shown, followed by 
 a block of \(m\) lines each containing two integers. For all \(i\in[1,m]\), 
-the first number in the \(i\)th line is the matching statistics length,
-and the second number in the \(i\)th line is a matching statistics position.
+the first number in the \(i\)th line is the matching statistics length, say
+\(l\). This means that \(\Substring{p}{i}{i+l-1}\) is the maximum length prefix
+of \(\Substring{p}{i}{m}\) that occurs as a substring in the index. 
+If the number
+of occurrences of \(\Substring{p}{i}{i+l-1}\) is smaller than the maximum
+occurrence parameter \(10\), then all matching statistics positions are 
+reported in ascending order of their length.
 So, for example, the sequence \texttt{gcttgctg} of length 8 starting at tag
 position 3 is the longest prefix of \texttt{gcttgctgctgca} that occurs as 
-a substring in the index. It, for example, occurs at position 88695.
+a substring in the index. It, occurs at the positions 25583, 88695, 213546,
+etc.
 
 In a second call, we run \Program in \textit{cdiff}-mode:
 
@@ -210,31 +220,31 @@ gt tagerator -q Q1.gz -pck pck-human -e 2 -nowildcards
 # indexname(pck)=pck-human
 # queryfile=Q1.gz
 # 15 aagcttgctgctgca
-14 363967
+14 363963
 13 576657
 13 501200
-13 158315
-13 180391
-15 464011
-14 88697
-13 576546
+13 158312
+13 180388
+15 464008
+14 88693
+13 576544
 15 191866
 15 135753
-15 668839
+15 668836
 13 576656
 13 501199
-14 471053
+14 471049
 14 78690
 14 104932
-14 463357
-14 317582
+14 463353
+14 317578
 15 576655
 15 501198
-15 317582
+15 317577
 ...
 \end{Output}
 The first line shortly reports the kind of computation performed. The second
-and third line are as in the previous example. Then for
+and third line are as in the previous example. Then, for
 each tag its length and the tag itself is shown, followed by 
 a block of lines each containing a pair of integers. Each such pair
 reports the length of an approximate match and its start position in the
@@ -245,6 +255,7 @@ approximate matches, then no such line appears.
 Our third example concerns the \textit{pdiff}-mode:
 
 \begin{Output}
+gt tagerator -q Q1.gz -pck pck-human -e 1 -nowildcards -maxocc 5
 # computing prefix matches <= 1 differences and at most 5 occurrences in the subject sequences
 # indexname(pck)=pck-human
 # queryfile=Q1.gz
