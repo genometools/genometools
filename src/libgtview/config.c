@@ -41,6 +41,27 @@ static void config_lua_new_table(lua_State *L, const char *key)
   lua_settable(L, -3);
 }
 
+static const luaL_Reg luasecurelibs[] = {
+  /* Think very hard before adding additional Lua libraries to this list, it
+     might compromise the security of web-applications like GenomeViewer!
+     Do not add the 'io', 'os', or 'debug' library under any circumstances! */
+  {"", luaopen_base},
+  {LUA_TABLIBNAME, luaopen_table},
+  {LUA_STRLIBNAME, luaopen_string},
+  {LUA_MATHLIBNAME, luaopen_math},
+  {NULL, NULL}
+};
+
+static void luaL_opensecurelibs(lua_State *L)
+{
+  const luaL_Reg *lib = luasecurelibs;
+  for (; lib->func; lib++) {
+    lua_pushcfunction(L, lib->func);
+    lua_pushstring(L, lib->name);
+    lua_call(L, 1, 0);
+  }
+}
+
 Config* config_new(bool verbose, Error *err)
 {
   Config *cfg;
@@ -50,9 +71,9 @@ Config* config_new(bool verbose, Error *err)
   cfg->verbose = verbose;
   cfg->L = luaL_newstate();
   if (!cfg->L)
-  {
     error_set(err, "out of memory (cannot create new lua state)");
-  } else luaL_openlibs(cfg->L);
+  else
+    luaL_opensecurelibs(cfg->L); /* do not replace with luaL_openlibs()! */
   return cfg;
 }
 
