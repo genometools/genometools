@@ -76,6 +76,7 @@ struct Limdfsresources
   unsigned int maxdepth;
   const Matchbound **mbtab;
   const Encodedsequence *encseq;
+  ArraySeqpos mstatspos;
 };
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
@@ -133,6 +134,12 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
     ALLOCASSIGNSPACE(limdfsresources->rangeOccs,NULL,Seqpos,
                      MULT2(limdfsresources->alphasize));
   }
+  INITARRAY(&limdfsresources->mstatspos,Seqpos);
+  if (maxintervalwidth > 0)
+  {
+    ALLOCASSIGNSPACE(limdfsresources->mstatspos.spaceSeqpos,NULL,Seqpos,
+                     maxintervalwidth);
+  }
   return limdfsresources;
 }
 
@@ -162,50 +169,114 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
   FREEARRAY(&limdfsresources->bwci,Boundswithchar);
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(limdfsresources->rangeOccs);
+  FREEARRAY(&limdfsresources->mstatspos,Seqpos);
   FREESPACE(*ptrlimdfsresources);
 }
 
 /* enumerate the suffixes in an LCP-interval */
 
+static void gen_esa_overinterval(const void *voidsuffixarray,
+                                 void (*processmatch)(void *,bool,
+                                                      Seqpos,Seqpos,Seqpos,
+                                                      unsigned long),
+                                 void *processmatchinfo,
+                                 const Indexbounds *itv,
+                                 unsigned long pprefixlen,
+                                 Seqpos totallength)
+{
+  const Suffixarray *suffixarray = (const Suffixarray *) voidsuffixarray;
+  Seqpos idx;
+
+  for (idx = itv->leftbound; idx <= itv->rightbound; idx++)
+  {
+    processmatch(processmatchinfo,
+                 true,
+                 totallength,
+                 suffixarray->suftab[idx],
+                 itv->offset,
+                 pprefixlen);
+  }
+}
+
 static void esa_overinterval(Limdfsresources *limdfsresources,
                              const Indexbounds *itv,
                              unsigned long pprefixlen)
 {
-  Seqpos idx;
-  const Suffixarray *suffixarray
-    = (const Suffixarray *) limdfsresources->genericindex;
+  gen_esa_overinterval((const Suffixarray *) limdfsresources->genericindex,
+                       limdfsresources->processmatch,
+                       limdfsresources->processmatchinfo,
+                       itv,
+                       pprefixlen,
+                       limdfsresources->totallength);
+}
 
-  for (idx = itv->leftbound; idx <= itv->rightbound; idx++)
+static void gen_pck_overinterval(const void *voidbwtseq,
+                                 void (*processmatch)(void *,bool,
+                                                      Seqpos,Seqpos,Seqpos,
+                                                      unsigned long),
+                                 void *processmatchinfo,
+                                 const Indexbounds *itv,
+                                 unsigned long pprefixlen,
+                                 Seqpos totallength)
+{
+  Bwtseqpositioniterator *bspi;
+  Seqpos dbstartpos;
+
+  assert(itv->leftbound < itv->rightbound);
+  bspi = newBwtseqpositioniterator (voidbwtseq,itv->leftbound,itv->rightbound);
+  while (nextBwtseqpositioniterator(&dbstartpos,bspi))
   {
-    limdfsresources->processmatch(limdfsresources->processmatchinfo,
-                                  true,
-                                  limdfsresources->totallength,
-                                  suffixarray->suftab[idx],
-                                  itv->offset,
-                                  pprefixlen);
+    processmatch(processmatchinfo,
+                 false,
+                 totallength,
+                 dbstartpos + itv->offset,
+                 itv->offset,
+                 pprefixlen);
   }
+  freeBwtseqpositioniterator(&bspi);
 }
 
 static void pck_overinterval(Limdfsresources *limdfsresources,
                              const Indexbounds *itv,
                              unsigned long pprefixlen)
 {
-  Bwtseqpositioniterator *bspi;
-  Seqpos dbstartpos;
+  gen_pck_overinterval(limdfsresources->genericindex,
+                       limdfsresources->processmatch,
+                       limdfsresources->processmatchinfo,
+                       itv,
+                       pprefixlen,
+                       limdfsresources->totallength);
+}
 
-  bspi = newBwtseqpositioniterator (limdfsresources->genericindex,
-                                    itv->leftbound,itv->rightbound);
-  assert(itv->leftbound < itv->rightbound);
-  while (nextBwtseqpositioniterator(&dbstartpos,bspi))
-  {
-    limdfsresources->processmatch(limdfsresources->processmatchinfo,
-                                  false,
-                                  limdfsresources->totallength,
-                                  dbstartpos + itv->offset,
-                                  itv->offset,
-                                  pprefixlen);
-  }
-  freeBwtseqpositioniterator(&bspi);
+static void storemstatsposition(void *processinfo,
+                                UNUSED bool withesa,
+                                UNUSED Seqpos totallength,
+                                Seqpos startpos,
+                                UNUSED Seqpos len,
+                                UNUSED unsigned long pprefixlen)
+{
+  ArraySeqpos *mstatspos = (ArraySeqpos *) processinfo;
+
+  STOREINARRAY(mstatspos,Seqpos,32,startpos);
+}
+
+ArraySeqpos *fromitv2matchpositions(Limdfsresources *limdfsresources,
+                                    Seqpos leftbound,
+                                    Seqpos rightbound,
+                                    unsigned long pprefixlen)
+{
+  Indexbounds itv;
+
+  itv.leftbound = leftbound;
+  itv.rightbound = rightbound;
+  (limdfsresources->withesa ? gen_esa_overinterval : gen_pck_overinterval)
+    (limdfsresources->genericindex,
+     storemstatsposition,
+     &limdfsresources->mstatspos,
+     &itv,
+     pprefixlen,
+     limdfsresources->totallength);
+  return &limdfsresources->mstatspos;
 }
 
 /* iterate myers algorithm over a sequence context */

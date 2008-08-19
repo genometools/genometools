@@ -18,6 +18,7 @@
 #ifndef IDX_LIMDFS_H
 #define IDX_LIMDFS_H
 
+#include "libgtcore/arraydef.h"
 #include "seqpos-def.h"
 #include "readmode-def.h"
 #include "absdfstrans-def.h"
@@ -79,5 +80,12 @@ Seqpos getlastbound(const Limdfsresources *limdfsresources,Seqpos rightbound);
 
 bool intervalwidthleq(const Limdfsresources *limdfsresources,
                       Seqpos leftbound,Seqpos rightbound);
+
+DECLAREARRAYSTRUCT(Seqpos);
+
+ArraySeqpos *fromitv2matchpositions(Limdfsresources *limdfsresources,
+                                    Seqpos leftbound,
+                                    Seqpos rightbound,
+                                    unsigned long pprefixlen);
 
 #endif

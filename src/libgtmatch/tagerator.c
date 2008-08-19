@@ -136,22 +136,18 @@ static void showmstats(void *processinfo,
                        Seqpos leftbound,
                        Seqpos rightbound)
 {
+  printf("%lu",mstatlength);
   if (intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
   {
-    Seqpos bound, lastbound;
-
-    printf("%lu",mstatlength);
-    lastbound = getlastbound((const Limdfsresources *) processinfo,rightbound);
-    for (bound = leftbound; bound <= lastbound; bound++)
-    {
-      Seqpos witnessposition
-               = bound2startpos((const Limdfsresources *) processinfo,
-                                bound,mstatlength);
-      printf(" " FormatSeqpos,PRINTSeqposcast(witnessposition));
-    }
-    printf("\n");
+    unsigned long idx;
+    ArraySeqpos *mstatspos = fromitv2matchpositions(
+                                  (Limdfsresources *) processinfo,
+                                  leftbound,
+                                  rightbound,mstatlength);
+    for (idx = 0; idx<mstatpos->
   }
+  printf("\n");
 }
 
 DECLAREARRAYSTRUCT(Simplematch);
