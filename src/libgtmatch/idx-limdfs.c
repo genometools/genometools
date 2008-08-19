@@ -63,7 +63,7 @@ struct Limdfsresources
   ArrayLcpintervalwithinfo stack;
   Uchar alphasize;
   Seqpos totallength;
-  void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
+  void (*processmatch)(void *,Seqpos,Seqpos,unsigned long);
   void *processmatchinfo;
   void (*processresult)(void *,const void *,unsigned long,unsigned long,
                         Seqpos,Seqpos);
@@ -88,7 +88,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     unsigned long maxintervalwidth,
                                     unsigned int mapsize,
                                     Seqpos totallength,
-                                    void (*processmatch)(void *,bool,Seqpos,
+                                    void (*processmatch)(void *,
                                                          Seqpos,Seqpos,
                                                          unsigned long),
                                     void *processmatchinfo,
@@ -139,6 +139,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   {
     ALLOCASSIGNSPACE(limdfsresources->mstatspos.spaceSeqpos,NULL,Seqpos,
                      maxintervalwidth);
+    limdfsresources->mstatspos.allocatedSeqpos = maxintervalwidth;
   }
   return limdfsresources;
 }
@@ -176,13 +177,13 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
 /* enumerate the suffixes in an LCP-interval */
 
 static void gen_esa_overinterval(const void *voidsuffixarray,
-                                 void (*processmatch)(void *,bool,
-                                                      Seqpos,Seqpos,Seqpos,
+                                 void (*processmatch)(void *,
+                                                      Seqpos,Seqpos,
                                                       unsigned long),
                                  void *processmatchinfo,
                                  const Indexbounds *itv,
                                  unsigned long pprefixlen,
-                                 Seqpos totallength)
+                                 UNUSED Seqpos totallength)
 {
   const Suffixarray *suffixarray = (const Suffixarray *) voidsuffixarray;
   Seqpos idx;
@@ -190,8 +191,6 @@ static void gen_esa_overinterval(const void *voidsuffixarray,
   for (idx = itv->leftbound; idx <= itv->rightbound; idx++)
   {
     processmatch(processmatchinfo,
-                 true,
-                 totallength,
                  suffixarray->suftab[idx],
                  itv->offset,
                  pprefixlen);
@@ -211,8 +210,8 @@ static void esa_overinterval(Limdfsresources *limdfsresources,
 }
 
 static void gen_pck_overinterval(const void *voidbwtseq,
-                                 void (*processmatch)(void *,bool,
-                                                      Seqpos,Seqpos,Seqpos,
+                                 void (*processmatch)(void *,
+                                                      Seqpos,Seqpos,
                                                       unsigned long),
                                  void *processmatchinfo,
                                  const Indexbounds *itv,
@@ -226,10 +225,9 @@ static void gen_pck_overinterval(const void *voidbwtseq,
   bspi = newBwtseqpositioniterator (voidbwtseq,itv->leftbound,itv->rightbound);
   while (nextBwtseqpositioniterator(&dbstartpos,bspi))
   {
+    assert(totallength >= (dbstartpos + itv->offset));
     processmatch(processmatchinfo,
-                 false,
-                 totallength,
-                 dbstartpos + itv->offset,
+                 totallength - (dbstartpos + itv->offset),
                  itv->offset,
                  pprefixlen);
   }
@@ -249,8 +247,6 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
 }
 
 static void storemstatsposition(void *processinfo,
-                                UNUSED bool withesa,
-                                UNUSED Seqpos totallength,
                                 Seqpos startpos,
                                 UNUSED Seqpos len,
                                 UNUSED unsigned long pprefixlen)
@@ -260,22 +256,36 @@ static void storemstatsposition(void *processinfo,
   STOREINARRAY(mstatspos,Seqpos,32,startpos);
 }
 
-ArraySeqpos *fromitv2matchpositions(Limdfsresources *limdfsresources,
-                                    Seqpos leftbound,
-                                    Seqpos rightbound,
-                                    unsigned long pprefixlen)
+static int comparepositions(const void *a, const void *b)
+{
+  if (*((Seqpos *) a) < *((Seqpos *) b))
+  {
+    return -1;
+  }
+  return 1;
+}
+
+ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
+                                          Seqpos leftbound,
+                                          Seqpos rightbound,
+                                          unsigned long offset)
 {
   Indexbounds itv;
 
+  limdfsresources->mstatspos.nextfreeSeqpos = 0;
   itv.leftbound = leftbound;
   itv.rightbound = rightbound;
+  itv.offset = (Seqpos) offset;
   (limdfsresources->withesa ? gen_esa_overinterval : gen_pck_overinterval)
     (limdfsresources->genericindex,
      storemstatsposition,
      &limdfsresources->mstatspos,
      &itv,
-     pprefixlen,
+     offset,
      limdfsresources->totallength);
+  qsort(limdfsresources->mstatspos.spaceSeqpos,
+        (size_t) limdfsresources->mstatspos.nextfreeSeqpos,
+        sizeof (Seqpos), comparepositions);
   return &limdfsresources->mstatspos;
 }
 
@@ -324,8 +334,6 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
       if (pprefixlen > 1UL)
       {
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
-                                      true,
-                                      limdfsresources->totallength,
                                       startpos,
                                       pos - startpos + 1,
                                       pprefixlen-1);
@@ -391,9 +399,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
         Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,
                                            leftbound);
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
-                                      false,
-                                      limdfsresources->totallength,
-                                      startpos + offset,
+                                      limdfsresources->totallength -
+                                           (startpos + offset),
                                       offset + contextlength,
                                       pprefixlen-1);
         break;
@@ -771,8 +778,8 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
 static void esa_exactpatternmatching(const void *genericindex,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
-                                     void (*processmatch)(void *,bool,
-                                                          Seqpos,Seqpos,Seqpos,
+                                     void (*processmatch)(void *,
+                                                          Seqpos,Seqpos,
                                                           unsigned long),
                                      void *processmatchinfo)
 {
@@ -790,8 +797,8 @@ static void esa_exactpatternmatching(const void *genericindex,
                              patternlength);
   while (nextmmsearchiterator(&dbstartpos,mmsi))
   {
-    processmatch(processmatchinfo,true,totallength,
-                 dbstartpos,(Seqpos) patternlength,patternlength);
+    processmatch(processmatchinfo,dbstartpos,
+                 (Seqpos) patternlength,patternlength);
   }
   freemmsearchiterator(&mmsi);
 }
@@ -799,8 +806,8 @@ static void esa_exactpatternmatching(const void *genericindex,
 void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const Uchar *pattern,
                                     unsigned long patternlength,
-                                    void (*processmatch)(void *,bool,
-                                                         Seqpos,Seqpos,Seqpos,
+                                    void (*processmatch)(void *,
+                                                         Seqpos,Seqpos,
                                                          unsigned long),
                                     void *processmatchinfo)
 {

@@ -51,23 +51,11 @@ typedef struct
   unsigned long taglen;
 } Tagwithlength;
 
-static Seqpos convertstartpos(bool withesa,Seqpos totallength,Seqpos startpos)
-{
-  if (withesa)
-  {
-    return startpos;
-  }
-  assert(totallength >= startpos);
-  return totallength - startpos;
-}
-
-static void showmatch(void *processinfo,bool withesa,
-                      Seqpos totallength,Seqpos startpos,Seqpos len,
+static void showmatch(void *processinfo,Seqpos startpos,Seqpos len,
                       unsigned long pprefixlen)
 {
   printf(FormatSeqpos,PRINTSeqposcast(len));
-  printf(" " FormatSeqpos,
-         PRINTSeqposcast(convertstartpos(withesa,totallength,startpos)));
+  printf(" " FormatSeqpos,PRINTSeqposcast(startpos));
   if (processinfo != NULL && *((unsigned long *) processinfo) > 0)
   {
     printf(" %lu",pprefixlen);
@@ -140,12 +128,16 @@ static void showmstats(void *processinfo,
   if (intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
   {
-    unsigned long idx;
-    ArraySeqpos *mstatspos = fromitv2matchpositions(
+    unsigned long i;
+    ArraySeqpos *mstatspos = fromitv2sortedmatchpositions(
                                   (Limdfsresources *) processinfo,
                                   leftbound,
-                                  rightbound,mstatlength);
-    for (idx = 0; idx<mstatpos->
+                                  rightbound,
+                                  mstatlength);
+    for (i = 0; i<mstatspos->nextfreeSeqpos; i++)
+    {
+      printf(" " FormatSeqpos,PRINTSeqposcast(mstatspos->spaceSeqpos[i]));
+    }
   }
   printf("\n");
 }
@@ -153,8 +145,6 @@ static void showmstats(void *processinfo,
 DECLAREARRAYSTRUCT(Simplematch);
 
 static void storematch(void *processinfo,
-                       bool withesa,
-                       Seqpos totallength,
                        Seqpos startpos,
                        Seqpos len,
                        UNUSED unsigned long pprefixlen)
@@ -163,7 +153,7 @@ static void storematch(void *processinfo,
   Simplematch *match;
 
   GETNEXTFREEINARRAY(match,storetab,Simplematch,32);
-  match->dbstartpos = convertstartpos(withesa,totallength,startpos);
+  match->dbstartpos = startpos;
   match->matchlength = len;
 }
 
@@ -235,8 +225,7 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                                  Limdfsresources *limdfsresources,
                                  const Uchar *transformedtag,
                                  unsigned long taglen,
-                                 void (*processmatch)(void *,bool,Seqpos,
-                                                      Seqpos,Seqpos,
+                                 void (*processmatch)(void *,Seqpos,Seqpos,
                                                       unsigned long),
                                  void *processmatchinfooffline,
                                  UNUSED bool rcmatch)
@@ -420,7 +409,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     char *desc = NULL;
     const Matchbound **mbtab;
     unsigned int maxdepth;
-    void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
+    void (*processmatch)(void *,Seqpos,Seqpos,unsigned long);
     void *processmatchinfoonline, *processmatchinfooffline;
 
     symbolmap = getsymbolmapAlphabet(suffixarray.alpha);

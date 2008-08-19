@@ -20,3 +20,4 @@ query=$2
 gt packedindex mkindex -tis -indexname pck-rev -db ${reference} -sprank -dna -pl -bsize 10 -locfreq 32 -dir rev
 gt prebwt -maxdepth 4 -pck pck-rev
 gt tagerator -e 2 -maxocc 20 -nowildcards -rw -pck pck-rev -q ${query}
+gt tagerator -maxocc 10 -nowildcards -rw -pck pck-rev -q ${query}

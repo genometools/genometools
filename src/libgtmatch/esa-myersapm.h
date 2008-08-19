@@ -28,7 +28,7 @@ Myersonlineresources *newMyersonlineresources(
                         unsigned int mapsize,
                         bool nowildcards,
                         const Encodedsequence *encseq,
-                        void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,
+                        void (*processmatch)(void *,Seqpos,Seqpos,
                                              unsigned long),
                         void *processmatchinfo);
 

@@ -34,7 +34,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     unsigned long maxintervalwidth,
                                     unsigned int mapsize,
                                     Seqpos totallength,
-                                    void (*processmatch)(void *,bool,Seqpos,
+                                    void (*processmatch)(void *,
                                                          Seqpos,Seqpos,
                                                          unsigned long),
                                     void *processmatchinfo,
@@ -64,8 +64,8 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
 void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const Uchar *pattern,
                                     unsigned long patternlength,
-                                    void (*processmatch)(void *,bool,
-                                                         Seqpos,Seqpos,Seqpos,
+                                    void (*processmatch)(void *,
+                                                         Seqpos,Seqpos,
                                                          unsigned long),
                                     void *processmatchinfo);
 
@@ -83,9 +83,9 @@ bool intervalwidthleq(const Limdfsresources *limdfsresources,
 
 DECLAREARRAYSTRUCT(Seqpos);
 
-ArraySeqpos *fromitv2matchpositions(Limdfsresources *limdfsresources,
-                                    Seqpos leftbound,
-                                    Seqpos rightbound,
-                                    unsigned long pprefixlen);
+ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
+                                          Seqpos leftbound,
+                                          Seqpos rightbound,
+                                          unsigned long offset);
 
 #endif

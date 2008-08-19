@@ -354,7 +354,7 @@ void pck_exactpatternmatching(const void *voidbwtseq,
                               const Uchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
-                              void (*processmatch)(void *,bool,Seqpos,
+                              void (*processmatch)(void *,
                                                    Seqpos,Seqpos,unsigned long),
                               void *processmatchinfo)
 {
@@ -366,8 +366,9 @@ void pck_exactpatternmatching(const void *voidbwtseq,
   assert(bsemi != NULL);
   while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) voidbwtseq))
   {
-    processmatch(processmatchinfo,false,totallength,
-                 dbstartpos + patternlength,(Seqpos) patternlength,
+    processmatch(processmatchinfo,
+                 totallength - (dbstartpos + patternlength),
+                 (Seqpos) patternlength,
                  patternlength);
   }
   if (bsemi != NULL)

@@ -34,7 +34,7 @@ struct Myersonlineresources
   unsigned long *eqsvectorrev;
   unsigned int alphasize;
   bool nowildcards;
-  void (*processmatch)(void *,bool,Seqpos,Seqpos,Seqpos,unsigned long);
+  void (*processmatch)(void *,Seqpos,Seqpos,unsigned long);
   void *processmatchinfo;
 };
 
@@ -42,7 +42,7 @@ Myersonlineresources *newMyersonlineresources(
                             unsigned int mapsize,
                             bool nowildcards,
                             const Encodedsequence *encseq,
-                            void (*processmatch)(void *,bool,Seqpos,
+                            void (*processmatch)(void *,
                                                  Seqpos,Seqpos,unsigned long),
                             void *processmatchinfo)
 {
@@ -153,8 +153,6 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
         if (matchlength.defined)
         {
           mor->processmatch(mor->processmatchinfo,
-                            true,
-                            mor->totallength,
                             dbstartpos,
                             (Seqpos) matchlength.valueunsignedlong,
                             patternlength);
