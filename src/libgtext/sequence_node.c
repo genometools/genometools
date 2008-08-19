@@ -79,11 +79,9 @@ const GenomeNodeClass* sequence_node_class()
   return &gnc;
 }
 
-GenomeNode* sequence_node_new(const char *description, Str *sequence,
-                              Str *filename, unsigned int line_number)
+GenomeNode* sequence_node_new(const char *description, Str *sequence)
 {
-  GenomeNode *gn = genome_node_create(sequence_node_class(), filename,
-                                      line_number);
+  GenomeNode *gn = genome_node_create(sequence_node_class());
   SequenceNode *sn = sequence_node_cast(gn);
   assert(description && sequence);
   sn->description = str_new_cstr(description);

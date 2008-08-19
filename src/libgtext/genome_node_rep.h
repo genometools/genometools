@@ -54,7 +54,6 @@ struct GenomeNode
 #define TREE_STATUS_OFFSET    3
 #define TREE_STATUS_MASK      0x3
 
-GenomeNode* genome_node_create(const GenomeNodeClass*, Str *filename,
-                               unsigned int line_number);
+GenomeNode* genome_node_create(const GenomeNodeClass*);
 
 #endif

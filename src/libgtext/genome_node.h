@@ -30,6 +30,8 @@ typedef struct GenomeNode GenomeNode;
 
 typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Error*);
 
+void          genome_node_set_origin(GenomeNode*,
+                                     Str *filename, unsigned int line_number);
 GenomeNode*   genome_node_ref(GenomeNode*);
 GenomeNode*   genome_node_rec_ref(GenomeNode*);
 void*         genome_node_cast(const GenomeNodeClass*, GenomeNode*);

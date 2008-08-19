@@ -26,8 +26,7 @@ typedef struct Comment Comment;
 #include "libgtext/genome_node.h"
 
 const GenomeNodeClass* comment_class(void);
-GenomeNode*            comment_new(const char *comment, Str *filename,
-                                   unsigned int line_number);
+GenomeNode*            comment_new(const char *comment);
 const char*            comment_get_comment(const Comment*);
 
 #endif

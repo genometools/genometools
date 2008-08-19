@@ -84,11 +84,9 @@ const GenomeNodeClass* sequence_region_class()
   return &gnc;
 }
 
-GenomeNode* sequence_region_new(Str *seqid, Range range, Str *filename,
-                                unsigned int line_number)
+GenomeNode* sequence_region_new(Str *seqid, Range range)
 {
-  GenomeNode *gn = genome_node_create(sequence_region_class(), filename,
-                                      line_number);
+  GenomeNode *gn = genome_node_create(sequence_region_class());
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(seqid);
   sr->seqid = str_ref(seqid);

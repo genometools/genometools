@@ -244,9 +244,9 @@ int block_unit_test(Error *err)
   r2.end = 50UL;
 
   gft = feature_type_factory_create_gft(feature_type_factory, gft_gene);
-  gn1 = genome_feature_new(gft, r1, STRAND_FORWARD, NULL, 0);
+  gn1 = genome_feature_new(gft, r1, STRAND_FORWARD);
   gft = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn2 = genome_feature_new(gft, r2, STRAND_FORWARD, NULL, 0);
+  gn2 = genome_feature_new(gft, r2, STRAND_FORWARD);
 
   e1 = element_new(gn1);
   e2 = element_new(gn2);

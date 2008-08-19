@@ -26,9 +26,7 @@ typedef struct SequenceNode SequenceNode;
 
 const GenomeNodeClass* sequence_node_class(void);
 GenomeNode*            sequence_node_new(const char *description,
-                                         Str *sequence, /* takes ownership */
-                                         Str *filename,
-                                         unsigned int line_number);
+                                         Str *sequence); /* takes ownership */
 const char*            sequence_node_get_description(const SequenceNode*);
 const char*            sequence_node_get_sequence(const SequenceNode*);
 unsigned long          sequence_node_get_sequence_length(const SequenceNode*);

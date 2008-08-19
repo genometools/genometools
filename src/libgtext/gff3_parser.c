@@ -285,8 +285,7 @@ static int set_seqid(GenomeNode *genome_feature, const char *seqid, Range range,
       *auto_sr = automatic_sequence_region_new();
       seqid_str = str_new_cstr(seqid);
       seqid_str_created = true;
-      (*auto_sr)->sequence_region = sequence_region_new(seqid_str, range, NULL,
-                                                        0);
+      (*auto_sr)->sequence_region = sequence_region_new(seqid_str, range);
       hashtable_add(gff3_parser->undefined_sequence_regions,
                     str_get(seqid_str), *auto_sr);
     }
@@ -776,8 +775,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 
   /* create the feature */
   if (!had_err) {
-    genome_feature = genome_feature_new(gft, range, strand_value, filenamestr,
-                                        line_number);
+    genome_feature = genome_feature_new(gft, range, strand_value);
+    genome_node_set_origin(genome_feature, filenamestr, line_number);
   }
 
   /* set seqid */
@@ -869,7 +868,8 @@ static int parse_fasta_entry(Queue *genome_nodes, const char *line,
       if (cc != '\n' && cc != '\r' && cc != ' ')
         str_append_char(sequence, cc);
     }
-    sequence_node = sequence_node_new(line+1, sequence, filename, line_number);
+    sequence_node = sequence_node_new(line+1, sequence);
+    genome_node_set_origin(sequence_node, filename, line_number);
     queue_add(genome_nodes, sequence_node);
   }
   return had_err;
@@ -916,7 +916,8 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 
   if (line_length == 1 || line[1] != '#') {
     /* storing comment */
-    gn = comment_new(line+1, filenamestr, line_number);
+    gn = comment_new(line+1);
+    genome_node_set_origin(gn, filenamestr, line_number);
     queue_add(genome_nodes, gn);
   }
   else if (strcmp(line, GFF_FASTA_DIRECTIVE) == 0) {
@@ -1021,7 +1022,8 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     }
     if (!had_err) {
       assert(ssr);
-      gn = sequence_region_new(ssr->seqid_str, range, filenamestr, line_number);
+      gn = sequence_region_new(ssr->seqid_str, range);
+      genome_node_set_origin(gn, filenamestr, line_number);
       queue_add(genome_nodes, gn);
     }
   }

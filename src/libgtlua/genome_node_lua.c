@@ -35,7 +35,6 @@ static int genome_feature_lua_new(lua_State *L)
   Strand strand;
   const char *type_str, *strand_str;
   size_t length;
-  Str *filename;
   assert(L);
   /* get/check parameters */
   type_str = luaL_checkstring(L, 1);
@@ -50,9 +49,7 @@ static int genome_feature_lua_new(lua_State *L)
                 3, "invalid strand");
   /* construct object */
   gf = lua_newuserdata(L, sizeof (GenomeNode*));
-  filename = str_new_cstr("Lua");
-  *gf = genome_feature_new(type, *range, strand, filename, 0);
-  str_delete(filename);
+  *gf = genome_feature_new(type, *range, strand);
   assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
   lua_setmetatable(L, -2);
@@ -63,7 +60,7 @@ static int sequence_region_lua_new(lua_State *L)
 {
   GenomeNode **sr;
   const char *seqid;
-  Str *seqid_str, *filename;
+  Str *seqid_str;
   Range *range;
   assert(L);
   /* get_check parameters */
@@ -72,9 +69,7 @@ static int sequence_region_lua_new(lua_State *L)
   /* construct object */
   sr = lua_newuserdata(L, sizeof (GenomeNode*));
   seqid_str = str_new_cstr(seqid);
-  filename = str_new_cstr("Lua");
-  *sr = sequence_region_new(seqid_str, *range, filename, 0);
-  str_delete(filename);
+  *sr = sequence_region_new(seqid_str, *range);
   str_delete(seqid_str);
   assert(*sr);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);

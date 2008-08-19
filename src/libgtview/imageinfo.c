@@ -115,8 +115,7 @@ int image_info_unit_test(Error *err)
     unsigned long rbase;
     rbase = rand_max(10);
     Range r = {rbase,rbase+rand_max(20)};
-    gfs[i] = (GenomeNode*) genome_feature_new(gft, r, STRAND_FORWARD,
-                                              NULL, 0);
+    gfs[i] = (GenomeNode*) genome_feature_new(gft, r, STRAND_FORWARD);
     rms[i] = recmap_create(rand_max_double(100.0),
                            rand_max_double(100.0),
                            rand_max_double(100.0),

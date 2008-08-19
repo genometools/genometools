@@ -137,8 +137,8 @@ int element_unit_test(Error *err)
   r2.end = 50UL;
 
   type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn = genome_feature_new(type, r1, STRAND_BOTH, NULL, 0);
-  gn2 = genome_feature_new(type, r2, STRAND_BOTH, NULL, 0);
+  gn = genome_feature_new(type, r1, STRAND_BOTH);
+  gn2 = genome_feature_new(type, r2, STRAND_BOTH);
 
   e = element_new(gn);
   e2 = element_new(gn);

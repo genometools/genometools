@@ -99,7 +99,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   assert(key && value && data);
   seqid = str_new_cstr(key);
   range = *(Range*) value;
-  gn = sequence_region_new(seqid, range, NULL, 0);
+  gn = sequence_region_new(seqid, range);
   queue_add(genome_nodes, gn);
   str_delete(seqid);
   return 0;
@@ -150,7 +150,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
                                           array_get_first(genome_node_array),
                                           gft_mRNA);
     assert(mRNA_type);
-    mRNA_node = genome_feature_new(mRNA_type, mRNA_range, mRNA_strand, NULL, 0);
+    mRNA_node = genome_feature_new(mRNA_type, mRNA_range, mRNA_strand);
     genome_node_set_seqid(mRNA_node, mRNA_seqid);
 
     /* register children */
@@ -202,7 +202,7 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
 
     gene_type = genome_feature_create_gft((GenomeFeature*) gn, gft_gene);
     assert(gene_type);
-    gene_node = genome_feature_new(gene_type, gene_range, gene_strand, NULL, 0);
+    gene_node = genome_feature_new(gene_type, gene_range, gene_strand);
     genome_node_set_seqid(gene_node, gene_seqid);
 
     /* register children */
@@ -292,7 +292,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       warning("skipping blank line %lu in file \"%s\"", line_number, filename);
     else if (line[0] == '#') {
       /* storing comment */
-      gn = comment_new(line+1, filenamestr, line_number);
+      gn = comment_new(line+1);
+      genome_node_set_origin(gn, filenamestr, line_number);
       queue_add(genome_nodes, gn);
     }
     else {
@@ -438,8 +439,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(genome_node_array);
 
       /* construct the new feature */
-      gn = genome_feature_new(gff_feature_type, range, strand_value,
-                              filenamestr, line_number);
+      gn = genome_feature_new(gff_feature_type, range, strand_value);
+      genome_node_set_origin(gn, filenamestr, line_number);
 
       /* set seqid */
       seqid_str = hashtable_get(parser->seqid_to_str_mapping, seqname);

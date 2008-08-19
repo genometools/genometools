@@ -51,7 +51,7 @@ assert(parent:contains_marked(parent))
 -- testing genome_node:get_filename
 rval, fn = pcall(gn.get_filename, gn)
 assert(rval)
-assert(string.find(fn, "^Lua$"))
+assert(string.find(fn, "^generated$"))
 
 -- testing gt.sequence_region_new
 range = gt.range_new(1, 100)

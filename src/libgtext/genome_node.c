@@ -145,21 +145,28 @@ static void add_parent(unsigned int *bit_field)
   }
 }
 
-GenomeNode* genome_node_create(const GenomeNodeClass *gnc, Str *filename,
-                               unsigned int line_number)
+GenomeNode* genome_node_create(const GenomeNodeClass *gnc)
 {
   GenomeNode *gn;
   assert(gnc && gnc->size);
   gn                  = ma_malloc(gnc->size);
   gn->c_class         = gnc;
-  gn->filename        = filename ? str_ref(filename)
-                                 : str_new_cstr("generated");
-  gn->line_number     = line_number;
+  gn->filename        = NULL; /* means the node is generated */
+  gn->line_number     = 0;
   gn->children        = NULL; /* the children list is created on demand */
   gn->reference_count = 0;
   gn->bit_field       = 0;
   set_tree_status(&gn->bit_field, IS_TREE);
   return gn;
+}
+
+void genome_node_set_origin(GenomeNode *gn,
+                            Str *filename, unsigned int line_number)
+{
+  assert(gn && filename && line_number);
+  str_delete(gn->filename);
+  gn->filename = str_ref(filename);
+  gn->line_number =line_number;
 }
 
 void* genome_node_cast(const GenomeNodeClass *gnc, GenomeNode *gn)
@@ -381,7 +388,9 @@ int genome_node_traverse_direct_children(GenomeNode *gn,
 const char* genome_node_get_filename(const GenomeNode *gn)
 {
   assert(gn);
-  return str_get(gn->filename);
+  if (gn->filename)
+    return str_get(gn->filename);
+  return "generated";
 }
 
 unsigned int genome_node_get_line_number(const GenomeNode *gn)

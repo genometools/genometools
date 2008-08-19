@@ -111,14 +111,14 @@ int line_unit_test(Error *err)
   seqid3 = str_new_cstr("foo");
 
   type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
-  parent = genome_feature_new(type, r_parent, STRAND_FORWARD, NULL, 0);
+  parent = genome_feature_new(type, r_parent, STRAND_FORWARD);
   type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn1 = genome_feature_new(type, r1, STRAND_FORWARD, NULL, 0);
-  gn2 = genome_feature_new(type, r2, STRAND_FORWARD, NULL, 0);
-  gn3 = genome_feature_new(type, r3, STRAND_FORWARD, NULL, 0);
+  gn1 = genome_feature_new(type, r1, STRAND_FORWARD);
+  gn2 = genome_feature_new(type, r2, STRAND_FORWARD);
+  gn3 = genome_feature_new(type, r3, STRAND_FORWARD);
   type = feature_type_factory_create_gft(feature_type_factory,
                                          gft_TF_binding_site);
-  gn4 = genome_feature_new(type, r4, STRAND_FORWARD, NULL, 0);
+  gn4 = genome_feature_new(type, r4, STRAND_FORWARD);
 
   genome_node_set_seqid((GenomeNode*) parent, seqid1);
   genome_node_set_seqid((GenomeNode*) gn1, seqid3);
