@@ -44,6 +44,7 @@ typedef struct
 
 typedef struct
 {
+  bool skpp;
   unsigned long maxintervalwidth,
                 patternlength,
                 maxdistance,
@@ -156,7 +157,8 @@ static void apm_initdfsconstinfo(void *dfsconstinfo,
                                  const Uchar *pattern,
                                  unsigned long patternlength,
                                  unsigned long maxdistance,
-                                 unsigned long maxintervalwidth)
+                                 unsigned long maxintervalwidth,
+                                 bool skpp)
 {
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
@@ -164,6 +166,7 @@ static void apm_initdfsconstinfo(void *dfsconstinfo,
   mti->patternlength = patternlength;
   mti->maxdistance = maxdistance;
   mti->maxintervalwidth = maxintervalwidth;
+  mti->skpp = skpp;
 }
 
 static void *apm_allocatedfsconstinfo(unsigned int alphasize)
@@ -186,10 +189,18 @@ static void apm_initMyerscolumn(DECLAREPTRDFSSTATE(aliascolumn),
                                 void *dfsconstinfo)
 {
   Myerscolumn *column = (Myerscolumn *) aliascolumn;
+  const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
-  column->Pv = ~0UL;
   column->Mv = 0UL;
-  column->maxleqk = ((Matchtaskinfo *) dfsconstinfo)->maxdistance;
+  if (mti->skpp)
+  {
+    column->Pv = 0UL; /* first column consists of 0 => skip pattern prefix */
+    column->maxleqk = mti->patternlength;
+  } else
+  {
+    column->Pv = ~0UL; /* first column: 0 1 2 ... m */
+    column->maxleqk = mti->maxdistance;
+  }
 #ifdef SKDEBUG
   column->scorevalue = ((Matchtaskinfo *) dfsconstinfo)->maxdistance;
 #endif
@@ -410,7 +421,7 @@ Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
   dfsconstinfo = apm_allocatedfsconstinfo(alphasize);
   mti = (Matchtaskinfo *) dfsconstinfo;
   apm_initdfsconstinfo(dfsconstinfo,alphasize,pattern,patternlength,
-                       maxdistance,0);
+                       maxdistance,false,0);
   apm_initMyerscolumn((Aliasdfsstate *) &currentcol,dfsconstinfo);
   for (pos = startpos; /* Nothing */; pos++)
   {

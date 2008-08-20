@@ -744,6 +744,7 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
                                      unsigned long maxintervalwidth,
+                                     bool skpp,
                                      const AbstractDfstransformer *adfst)
 {
   Lcpintervalwithinfo *stackptr, parentwithinfo;
@@ -758,7 +759,8 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
   adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
                           (unsigned int) limdfsresources->alphasize,
                           pattern,patternlength,maxdistance,
-                          maxintervalwidth);
+                          maxintervalwidth,
+                          skpp);
   initlcpinfostack(&limdfsresources->stack,
                    0,
                    limdfsresources->withesa

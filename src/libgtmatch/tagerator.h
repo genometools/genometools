@@ -31,7 +31,8 @@ typedef struct
        replacewildcard, /* replace wildcards by random symbol */
        nofwdmatch, /* do not perform matching on forward strand */
        norcmatch, /* do not perform matching on reverse complemented strand */
-       nowildcards; /* ignore matches containing wildcards */
+       nowildcards, /* ignore matches containing wildcards */
+       skpp; /* Skip prefix of pattern without counting errors */
   long maxdistance; /* maximal number of allowed differences >= 0 */
   int userdefinedmaxdepth;   /* use pckbuckets only up to this depth */
   unsigned long maxintervalwidth; /* max width of interval */

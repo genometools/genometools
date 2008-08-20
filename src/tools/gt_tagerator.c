@@ -142,6 +142,10 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                                 &arguments->maxintervalwidth,0,1UL);
   option_parser_add_option(op, option);
 
+  option = option_new_bool("skpp","Skip prefix of pattern (only in pdiff mode)",
+                           &arguments->skpp, false);
+  option_parser_add_option(op, option);
+
   option = option_new_bool("nowildcards","do not output matches containing "
                            "wildcard characters (e.g. N); only relevant for "
                            "approximate matching",
@@ -228,6 +232,14 @@ static int gt_tagerator_arguments_check(UNUSED int rest_argc,
     if (arguments->maxintervalwidth == 0)
     {
       error_set(err,"if option -e is not used then option -maxocc is required");
+      return -1;
+    }
+  } else
+  {
+    if (arguments->skpp &&
+        (arguments->maxdistance == 0 || arguments->maxintervalwidth == 0))
+    {
+      error_set(err,"option -skpp only works in pdiff mode");
       return -1;
     }
   }

@@ -284,6 +284,7 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                                         : (unsigned long)
                                           tageratoroptions->maxdistance,
                                       tageratoroptions->maxintervalwidth,
+                                      tageratoroptions->skpp,
                                       dfst);
     }
   }
