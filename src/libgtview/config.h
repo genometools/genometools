@@ -28,17 +28,25 @@
 /* Holds configuration info for the libgtview classes. */
 typedef struct Config Config;
 
-/* Create a new Config object with given verbosity. If set, warnings will be
+/* Creates a new Config object with given verbosity. If set, warnings will be
    given. */
 Config*        config_new(bool verbose, Error*);
-/* Create a Config object wich reuses the given Lua state. */
+/* Creates a Config object wich reuses the given Lua state. */
 Config*        config_new_with_state(lua_State*);
-/* Load and executes a Lua configuration file with given <filename>.
+/* Creates a deep copy of the given Config object. */
+Config*        config_clone(const Config*, Error*);
+/* Loads and executes a Lua configuration file with given <filename>.
    This file must contain a global table called 'config'. */
 int            config_load_file(Config*, Str *filename, Error*);
-/* Reload the Lua configuration file. */
+/* Loads and executes a Lua configuration code from the given String <instr>.
+   This code must contain a global table called 'config'. */
+int            config_load_str(Config*, Str *instr);
+/* Generates Lua code which represents the given Config object and
+   writes it into the String object <outstr>.*/
+int            config_to_str(const Config*, Str *outstr);
+/* Reloads the Lua configuration file. */
 void           config_reload(Config*);
-/* Retrieve a color value from the configuration for <key> (i.e., feature).
+/* Retrieves a color value from the configuration for <key>.
    If not set, false is returned and a default color is written. */
 bool           config_get_color(const Config*, const char *section,
                                 const char *key, Color*);

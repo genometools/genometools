@@ -39,6 +39,8 @@ module GT
 
   extern "Config* config_new(bool, Error*)"
   extern "int config_load_file(Config*, Str*, Error*)"
+  extern "int config_load_str(Config*, Str*)"
+  extern "int config_to_str(const Config*, Str*)"
   extern "bool config_get_color(Config*, const char*, const char*, Color*)"
   extern "void config_set_color(Config*, const char*, const char*, Color*)"
   extern "bool config_get_str(const Config*, const char*, " +
@@ -67,6 +69,28 @@ module GT
       str = GT::Str.new(filename)
       rval = GT.config_load_file(@config, str.to_ptr, err.to_ptr)
       if rval != 0 then GT.gterror(err) end
+    end
+
+    def load_str(str)
+      str = GT::Str.new(str)
+      rval = GT.config_load_str(@config, str.to_ptr)
+      if rval != 0 then GT.gterror(err) end
+    end
+
+    def to_str()
+      str = GT::Str.new(nil)
+      if GT.config_to_str(@config, str.to_ptr) == 0
+        str.to_s
+      else
+        nil
+      end
+    end
+
+    def clone
+      cfg = GT::Config.new()
+      str = self.to_str()
+      cfg.load_str(str)
+      cfg
     end
 
     def get_color(section, key)

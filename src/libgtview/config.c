@@ -23,6 +23,7 @@
 #include "libgtcore/warning.h"
 #include "libgtext/luahelper.h"
 #include "libgtview/config.h"
+#include "libgtview/luaserialize.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -382,14 +383,52 @@ bool config_get_verbose(const Config *cfg)
   return cfg->verbose;
 }
 
+int config_to_str(const Config *cfg, Str *outstr)
+{
+  int had_err = 0;
+  assert(cfg && outstr);
+  lua_getglobal(cfg->L, "config");
+  str_append_cstr(outstr, "config = {\n");
+  had_err = lua_table_to_str(cfg->L, outstr, -1);
+  str_append_cstr(outstr, "}");
+  lua_pop(cfg->L, 1);
+  return had_err;
+}
+
+int config_load_str(Config *cfg, Str *instr)
+{
+  int had_err = 0;
+  assert(cfg && instr);
+  had_err = luaL_loadbuffer(cfg->L, str_get(instr), str_length(instr), "str") ||
+              lua_pcall(cfg->L, 0, 0, 0);
+  return had_err;
+}
+
+Config* config_clone(const Config *cfg, Error *err)
+{
+  int had_err = 0;
+  Str *cfg_buffer = str_new();
+  Config *new_cfg = NULL;
+  assert(cfg);
+  new_cfg = config_new(config_get_verbose(cfg), err);
+  had_err = config_to_str(cfg, cfg_buffer);
+  if (!had_err)
+    had_err = config_load_str(new_cfg, cfg_buffer);
+  if (had_err)
+      error_set(err, "An error occurred trying to clone Config object %p", cfg);
+  str_delete(cfg_buffer);
+  return new_cfg;
+}
+
 int config_unit_test(Error *err)
 {
   int had_err = 0;
-  Config *cfg;
+  Config *cfg = NULL, *new_cfg = NULL;
   bool val;
   Str *luafile = str_new_cstr("config.lua"),
       *test1   = str_new_cstr("mRNA"),
-      *str     = str_new();
+      *str     = str_new(),
+      *cfg_buffer = str_new();
   Color col1, col2, col, defcol, tmpcol;
   double num;
   error_check(err);
@@ -419,14 +458,14 @@ int config_unit_test(Error *err)
   ensure(had_err, !val);
 
   /* change some values... */
-  config_set_color(cfg, "exon", "fill", &col);
+  config_set_color(cfg, "exon", "fill", &col1);
   config_set_num(cfg, "format", "margins", 11.0);
   config_set_num(cfg, "format", "foo", 2.0);
 
   /* is it saved correctly? */
   config_get_color(cfg, "exon", "fill", &tmpcol);
   ensure(had_err, !color_equals(tmpcol,defcol));
-  ensure(had_err, color_equals(tmpcol,col));
+  ensure(had_err, color_equals(tmpcol,col1));
   if (!config_get_num(cfg, "format", "margins", &num))
     num = 10.0;
   ensure(had_err, num == 11.0);
@@ -435,13 +474,13 @@ int config_unit_test(Error *err)
   ensure(had_err, num == 2.0);
 
   /* create a new color definition */
-  config_set_color(cfg, "foo", "fill", &col);
+  config_set_color(cfg, "foo", "fill", &col2);
   config_set_str(cfg, "bar", "baz", test1);
 
   /* is it saved correctly? */
   config_get_color(cfg, "foo", "fill", &tmpcol);
   ensure(had_err, !color_equals(tmpcol,defcol));
-  ensure(had_err, color_equals(tmpcol,col));
+  ensure(had_err, color_equals(tmpcol,col2));
   if (!config_get_str(cfg, "bar", "baz", str))
     str_set(str, "");
   ensure(had_err, (strcmp(str_get(str),"")!=0));
@@ -450,11 +489,30 @@ int config_unit_test(Error *err)
     str_set(str, "");
   ensure(had_err, (strcmp(str_get(str),"")==0));
 
+  /* clone a Config object */
+  new_cfg = config_clone(cfg, err);
+  error_check(err);
+  if (!error_is_set(err))
+  {
+    /* check again */
+    config_get_color(new_cfg, "foo", "fill", &tmpcol);
+    ensure(had_err, !color_equals(tmpcol,defcol));
+    ensure(had_err, color_equals(tmpcol,col2));
+    if (!config_get_str(new_cfg, "bar", "baz", str))
+      str_set(str, "");
+    ensure(had_err, (strcmp(str_get(str),"")!=0));
+    ensure(had_err, (str_cmp(str,test1)==0));
+    if (!config_get_str(new_cfg, "bar", "test", str))
+      str_set(str, "");
+    ensure(had_err, (strcmp(str_get(str),"")==0));
+  }
   /* mem cleanup */
   str_delete(luafile);
   str_delete(test1);
   str_delete(str);
+  str_delete(cfg_buffer);
   config_delete(cfg);
+  config_delete(new_cfg);
 
   return had_err;
 }

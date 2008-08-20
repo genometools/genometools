@@ -45,8 +45,8 @@ color.blue  = 0.3
 config.set_color("exon", "fill", color)
 color2 = config.get_color("exon", "fill")
 raise if color2.red != color.red \
-	and color2.green != color.green \
-	and color2.blue != color.blue
+  and color2.green != color.green \
+  and color2.blue != color.blue
 
 # unset color
 config.unset("exon", "fill")
@@ -110,3 +110,40 @@ raise if bool
 config.unset("format", "show_grid")
 bool = config.get_bool("format", "show_grid")
 raise if not bool.nil?
+
+# serialise Config to Lua code
+config.set_num("format", "margins", 20)
+config.set_bool("format", "show_grid", true)
+color = GT::Color.malloc
+color.red   = 0.3
+color.green = 0.4
+color.blue  = 0.3
+config.set_color("exon", "fill", color)
+luacode = config.to_str
+raise if luacode.nil? or luacode.length == 0
+
+# load config from Lua code
+config.load_str(luacode)
+num = config.get_num("format", "margins")
+raise if num != 20
+bool = config.get_bool("format", "show_grid")
+raise if not bool
+color2 = config.get_color("exon", "fill")
+raise if color2.red != color.red \
+  and color2.green != color.green \
+  and color2.blue != color.blue
+
+# clone Config from existing copy
+config2 = config.clone
+num = config2.get_num("format", "margins")
+raise if num != 20
+bool = config2.get_bool("format", "show_grid")
+raise if not bool
+color2 = config2.get_color("exon", "fill")
+raise if color2.red != color.red \
+  and color2.green != color.green \
+  and color2.blue != color.blue
+config2.set_num("format", "margins", 30)
+raise if config2.get_num("format", "margins") != 30
+raise if config.get_num("format", "margins")\
+           == config2.get_num("format", "margins")

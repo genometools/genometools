@@ -86,6 +86,7 @@
 #include "libgtview/imageinfo.h"
 #include "libgtview/track.h"
 #include "libgtview/recmap.h"
+#include "libgtview/luaserialize.h"
 #endif
 
 Toolbox* gtt_tools(void)
@@ -163,6 +164,7 @@ Hashtable* gtt_unit_tests(void)
   hashtable_add(unit_tests, "hashtable class", hashtable_unit_test);
   hashtable_add(unit_tests, "hmm class", hmm_unit_test);
   hashtable_add(unit_tests, "interval tree class", interval_tree_unit_test);
+  hashtable_add(unit_tests, "Lua serializer", lua_serializer_unit_test);
   hashtable_add(unit_tests, "queue class", queue_unit_test);
   hashtable_add(unit_tests, "range class", range_unit_test);
   hashtable_add(unit_tests, "safearith module", safearith_unit_test);
