@@ -23,6 +23,7 @@
 #include "myersapm.h"
 #include "defined-types.h"
 #include "alphadef.h"
+#include "procmatch.h"
 #include "apmoveridx.h" /* import esa_findshortestmatchforward */
 #include "initeqsvec.h"
 
@@ -34,7 +35,7 @@ struct Myersonlineresources
   unsigned long *eqsvectorrev;
   unsigned int alphasize;
   bool nowildcards;
-  void (*processmatch)(void *,bool,Seqpos,Seqpos,unsigned long);
+  Processmatch processmatch;
   void *processmatchinfo;
 };
 
@@ -42,8 +43,7 @@ Myersonlineresources *newMyersonlineresources(
                             unsigned int mapsize,
                             bool nowildcards,
                             const Encodedsequence *encseq,
-                            void (*processmatch)(void *,bool,
-                                                 Seqpos,Seqpos,unsigned long),
+                            Processmatch processmatch,
                             void *processmatchinfo)
 {
   Myersonlineresources *mor;

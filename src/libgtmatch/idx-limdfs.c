@@ -63,10 +63,9 @@ struct Limdfsresources
   ArrayLcpintervalwithinfo stack;
   Uchar alphasize;
   Seqpos totallength;
-  void (*processmatch)(void *,bool,Seqpos,Seqpos,unsigned long);
+  Processmatch processmatch;
   void *processmatchinfo;
-  void (*processresult)(void *,const void *,unsigned long,unsigned long,
-                        Seqpos,Seqpos);
+  Processresult processresult;
   void *patterninfo;
   const void *genericindex;
   bool withesa, nowildcards;
@@ -77,6 +76,8 @@ struct Limdfsresources
   const Matchbound **mbtab;
   const Encodedsequence *encseq;
   ArraySeqpos mstatspos;
+  Uchar *currentpathspace;
+  unsigned long maxpathlength;
 };
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
@@ -88,16 +89,10 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     unsigned long maxintervalwidth,
                                     unsigned int mapsize,
                                     Seqpos totallength,
-                                    void (*processmatch)(void *,bool,
-                                                         Seqpos,Seqpos,
-                                                         unsigned long),
+                                    unsigned long maxpathlength,
+                                    Processmatch processmatch,
                                     void *processmatchinfo,
-                                    void (*processresult)(void *,
-                                                          const void *,
-                                                          unsigned long,
-                                                          unsigned long,
-                                                          Seqpos,
-                                                          Seqpos),
+                                    Processresult processresult,
                                     void *patterninfo,
                                     const AbstractDfstransformer *adfst)
 {
@@ -123,6 +118,15 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->maxdepth = maxdepth;
   limdfsresources->mbtab = mbtab;
   limdfsresources->maxintervalwidth = maxintervalwidth;
+  limdfsresources->maxpathlength = maxpathlength;
+  if (maxpathlength > 0)
+  {
+    ALLOCASSIGNSPACE(limdfsresources->currentpathspace,NULL,Uchar,
+                     maxpathlength);
+  } else
+  {
+    limdfsresources->currentpathspace = NULL;
+  }
   /* Application specific */
   limdfsresources->dfsconstinfo
     = adfst->allocatedfsconstinfo((unsigned int) limdfsresources->alphasize);
@@ -170,6 +174,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
   FREEARRAY(&limdfsresources->bwci,Boundswithchar);
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(limdfsresources->rangeOccs);
+  FREESPACE(limdfsresources->currentpathspace);
   FREEARRAY(&limdfsresources->mstatspos,Seqpos);
   FREESPACE(*ptrlimdfsresources);
 }
@@ -177,9 +182,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
 /* enumerate the suffixes in an LCP-interval */
 
 static void gen_esa_overinterval(const void *voidsuffixarray,
-                                 void (*processmatch)(void *,bool,
-                                                      Seqpos,Seqpos,
-                                                      unsigned long),
+                                 Processmatch processmatch,
                                  void *processmatchinfo,
                                  bool rcmatch,
                                  const Indexbounds *itv,
@@ -214,9 +217,7 @@ static void esa_overinterval(Limdfsresources *limdfsresources,
 }
 
 static void gen_pck_overinterval(const void *voidbwtseq,
-                                 void (*processmatch)(void *,bool,
-                                                      Seqpos,Seqpos,
-                                                      unsigned long),
+                                 Processmatch processmatch,
                                  void *processmatchinfo,
                                  bool rcmatch,
                                  const Indexbounds *itv,
@@ -689,6 +690,8 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
     assert(inchar < limdfsresources->alphasize);
     child.code = startcode + inchar;
+    assert(parent->offset < (Seqpos) limdfsresources->maxpathlength);
+    limdfsresources->currentpathspace[parent->offset] = inchar;
     sumwidth += child.rightbound - child.leftbound;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
@@ -809,9 +812,7 @@ static void esa_exactpatternmatching(const void *genericindex,
                                      bool rcmatch,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
-                                     void (*processmatch)(void *,bool,
-                                                          Seqpos,Seqpos,
-                                                          unsigned long),
+                                     Processmatch processmatch,
                                      void *processmatchinfo)
 {
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
@@ -838,9 +839,7 @@ void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     bool rcmatch,
                                     const Uchar *pattern,
                                     unsigned long patternlength,
-                                    void (*processmatch)(void *,bool,
-                                                         Seqpos,Seqpos,
-                                                         unsigned long),
+                                    Processmatch processmatch,
                                     void *processmatchinfo)
 {
   if (limdfsresources->withesa)
@@ -868,9 +867,7 @@ Seqpos bound2startpos(const Limdfsresources *limdfsresources,
 {
   if (limdfsresources->withesa)
   {
-    const Suffixarray *suffixarray
-      = (const Suffixarray *) limdfsresources->genericindex;
-    return suffixarray->suftab[bound];
+    return ((const Suffixarray *) limdfsresources->genericindex)->suftab[bound];
   }
   return voidpackedfindfirstmatchconvert(limdfsresources->genericindex,
                                          bound,matchlength);

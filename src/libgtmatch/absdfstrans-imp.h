@@ -19,6 +19,7 @@
 #define ABSDFSTRANS_IMP_H
 #include "defined-types.h"
 #include "absdfstrans-def.h"
+#include "procmatch.h"
 
 typedef unsigned long Aliasdfsstate;
 
@@ -39,12 +40,7 @@ struct AbstractDfstransformer
                            unsigned long maxintervalwidth,
                            bool skpp,
                            bool doreverse);
-  void (*extractdfsconstinfo)(void (*processresult)(void *,
-                                                    const void *,
-                                                    unsigned long,
-                                                    unsigned long,
-                                                    Seqpos,
-                                                    Seqpos),
+  void (*extractdfsconstinfo)(Processresult processresult,
                               void *processinfo,
                               const void *patterninfo,
                               void *dfsconstinfo);

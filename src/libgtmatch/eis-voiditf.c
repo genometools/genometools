@@ -20,6 +20,7 @@
 #include "eis-voiditf.h"
 #include "divmodmul.h"
 #include "splititv.h"
+#include "procmatch.h"
 #include "pckbucket.h"
 
 Seqpos bwtseqfirstmatch(const void *voidbwtseq,Seqpos bound)
@@ -355,8 +356,7 @@ void pck_exactpatternmatching(const void *voidbwtseq,
                               const Uchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
-                              void (*processmatch)(void *,bool,
-                                                   Seqpos,Seqpos,unsigned long),
+                              Processmatch processmatch,
                               void *processmatchinfo)
 {
   BWTSeqExactMatchesIterator *bsemi;

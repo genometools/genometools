@@ -368,10 +368,6 @@ static void reversecomplementtag(Uchar *transformedtag,unsigned long taglen)
   }
 }
 
-/*
-  XXX add forward and reverse match in one iteration
-*/
-
 int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
 {
   Suffixarray suffixarray;
@@ -461,6 +457,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     char *desc = NULL;
     const Matchbound **mbtab;
     unsigned int maxdepth;
+    unsigned long maxpathlength;
     void (*processmatch)(void *,bool,Seqpos,Seqpos,unsigned long);
     void *processmatchinfoonline, *processmatchinfooffline;
 
@@ -500,6 +497,14 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
         maxdepth = (unsigned int) tageratoroptions->userdefinedmaxdepth;
       }
     }
+    if (tageratoroptions->maxdistance >= 0)
+    {
+      maxpathlength = (unsigned long) (MAXTAGSIZE +
+                                       tageratoroptions->maxdistance);
+    } else
+    {
+      maxpathlength = (unsigned long) MAXTAGSIZE;
+    }
     limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
                                          mbtab,
                                          maxdepth,
@@ -509,6 +514,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                          tageratoroptions->maxintervalwidth,
                                          mapsize,
                                          totallength,
+                                         maxpathlength,
                                          processmatch,
                                          processmatchinfooffline,
                                          tageratoroptions->docompare

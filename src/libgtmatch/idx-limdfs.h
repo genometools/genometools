@@ -21,6 +21,7 @@
 #include "libgtcore/arraydef.h"
 #include "seqpos-def.h"
 #include "readmode-def.h"
+#include "procmatch.h"
 #include "absdfstrans-def.h"
 
 typedef struct Limdfsresources Limdfsresources;
@@ -34,16 +35,10 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     unsigned long maxintervalwidth,
                                     unsigned int mapsize,
                                     Seqpos totallength,
-                                    void (*processmatch)(void *,bool,
-                                                         Seqpos,Seqpos,
-                                                         unsigned long),
+                                    unsigned long maxpathlength,
+                                    Processmatch processmatch,
                                     void *processmatchinfo,
-                                    void (*processresult)(void *,
-                                                          const void *,
-                                                          unsigned long,
-                                                          unsigned long,
-                                                          Seqpos,
-                                                          Seqpos),
+                                    Processresult processresult,
                                     void *patterninfo,
                                     const AbstractDfstransformer *adfst);
 
@@ -67,9 +62,7 @@ void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     bool rcmatch,
                                     const Uchar *pattern,
                                     unsigned long patternlength,
-                                    void (*processmatch)(void *,bool,
-                                                         Seqpos,Seqpos,
-                                                         unsigned long),
+                                    Processmatch processmatch,
                                     void *processmatchinfo);
 
 Seqpos bound2startpos(const Limdfsresources *limdfsresources,

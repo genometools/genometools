@@ -104,12 +104,7 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
   mti->patternlength = patternlength;
 }
 
-static void pms_extractdfsconstinfo(void (*processresult)(void *,
-                                                          const void *,
-                                                          unsigned long,
-                                                          unsigned long,
-                                                          Seqpos,
-                                                          Seqpos),
+static void pms_extractdfsconstinfo(Processresult processresult,
                                     void *processinfo,
                                     const void *patterninfo,
                                     void *dfsconstinfo)

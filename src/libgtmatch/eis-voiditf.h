@@ -22,6 +22,7 @@
 #include "sarr-def.h"
 #include "intcode-def.h"
 #include "splititv.h"
+#include "procmatch.h"
 
 Seqpos bwtseqfirstmatch(const void *voidbwtSeq,Seqpos bound);
 
@@ -87,9 +88,7 @@ void pck_exactpatternmatching(const void *voidbwtseq,
                               const Uchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
-                              void (*processmatch)(void *,bool,
-                                                   Seqpos,Seqpos,
-                                                   unsigned long),
+                              Processmatch processmatch,
                               void *processmatchinfo);
 
 Seqpos voidpackedfindfirstmatchconvert(const void *voidbwtseq,
