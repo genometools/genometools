@@ -158,11 +158,13 @@ static void apm_initdfsconstinfo(void *dfsconstinfo,
                                  unsigned long patternlength,
                                  unsigned long maxdistance,
                                  unsigned long maxintervalwidth,
-                                 bool skpp)
+                                 bool skpp,
+                                 bool doreverse)
 {
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
-  initeqsvector(mti->eqsvector,(unsigned long) alphasize,pattern,patternlength);
+  (doreverse ? initeqsvectorrev : initeqsvector)
+      (mti->eqsvector,(unsigned long) alphasize,pattern,patternlength);
   mti->patternlength = patternlength;
   mti->maxdistance = maxdistance;
   mti->maxintervalwidth = maxintervalwidth;
@@ -403,6 +405,26 @@ static void apm_inplacenextMyercolumn(const void *dfsconstinfo,
   }
 }
 
+const AbstractDfstransformer *apm_AbstractDfstransformer(void)
+{
+  static const AbstractDfstransformer apm_adfst =
+  {
+    sizeof (Myerscolumn),
+    apm_allocatedfsconstinfo,
+    apm_initdfsconstinfo,
+    NULL, /* no extractdfsconstinfo */
+    apm_freedfsconstinfo,
+    apm_initMyerscolumn,
+    apm_nextstepfullmatches,
+    apm_nextMyercolumn,
+    apm_inplacenextMyercolumn,
+#ifdef SKDEBUG
+    apm_showMyerscolumn,
+#endif
+  };
+  return &apm_adfst;
+}
+
 Definedunsignedlong apm_findshortestmatchforward(const Encodedsequence *encseq,
                                                  bool nowildcards,
                                                  unsigned int alphasize,
@@ -421,7 +443,7 @@ Definedunsignedlong apm_findshortestmatchforward(const Encodedsequence *encseq,
   dfsconstinfo = apm_allocatedfsconstinfo(alphasize);
   mti = (Matchtaskinfo *) dfsconstinfo;
   apm_initdfsconstinfo(dfsconstinfo,alphasize,pattern,patternlength,
-                       maxdistance,0,false);
+                       maxdistance,0,false,false);
   apm_initMyerscolumn((Aliasdfsstate *) &currentcol,dfsconstinfo);
   for (pos = startpos; /* Nothing */; pos++)
   {
@@ -449,22 +471,45 @@ Definedunsignedlong apm_findshortestmatchforward(const Encodedsequence *encseq,
   return result;
 }
 
-const AbstractDfstransformer *apm_AbstractDfstransformer(void)
+Definedunsignedlong apm_findshortestmatchreverse(const Uchar *vseq,
+                                                 unsigned long vlen,
+                                                 bool nowildcards,
+                                                 unsigned int alphasize,
+                                                 const Uchar *pattern,
+                                                 unsigned long patternlength,
+                                                 unsigned long maxdistance)
 {
-  static const AbstractDfstransformer apm_adfst =
+  unsigned long len;
+  const Uchar *vptr;
+  void *dfsconstinfo;
+  Matchtaskinfo *mti;
+  Myerscolumn currentcol;
+  Definedunsignedlong result;
+
+  dfsconstinfo = apm_allocatedfsconstinfo(alphasize);
+  mti = (Matchtaskinfo *) dfsconstinfo;
+  apm_initdfsconstinfo(dfsconstinfo,alphasize,pattern,patternlength,
+                       maxdistance,0,false,true);
+  apm_initMyerscolumn((Aliasdfsstate *) &currentcol,dfsconstinfo);
+  for (vptr = vseq + vlen -1, len = 0; vptr >= vseq; vptr--, len++)
   {
-    sizeof (Myerscolumn),
-    apm_allocatedfsconstinfo,
-    apm_initdfsconstinfo,
-    NULL, /* no extractdfsconstinfo */
-    apm_freedfsconstinfo,
-    apm_initMyerscolumn,
-    apm_nextstepfullmatches,
-    apm_nextMyercolumn,
-    apm_inplacenextMyercolumn,
-#ifdef SKDEBUG
-    apm_showMyerscolumn,
-#endif
-  };
-  return &apm_adfst;
+    if (nowildcards && *vptr == (Uchar) WILDCARD)
+    {
+      apm_freedfsconstinfo(&dfsconstinfo);
+      result.defined = false;
+      result.valueunsignedlong = 0;
+      return result;
+    }
+    apm_inplacenextMyercolumn(dfsconstinfo,(Aliasdfsstate *) &currentcol,
+                              len,*vptr);
+    assert (currentcol.maxleqk != UNDEFMAXLEQK);
+    if (currentcol.maxleqk == SUCCESSMAXLEQK)
+    {
+      break;
+    }
+  }
+  apm_freedfsconstinfo(&dfsconstinfo);
+  result.defined = true;
+  result.valueunsignedlong = len;
+  return result;
 }

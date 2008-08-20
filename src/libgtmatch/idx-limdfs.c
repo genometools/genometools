@@ -760,7 +760,8 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                           (unsigned int) limdfsresources->alphasize,
                           pattern,patternlength,maxdistance,
                           maxintervalwidth,
-                          skpp);
+                          skpp,
+                          false);
   initlcpinfostack(&limdfsresources->stack,
                    0,
                    limdfsresources->withesa

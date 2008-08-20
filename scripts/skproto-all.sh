@@ -52,7 +52,6 @@ encodedseq.c
 encseq-specialsrank.c
 enum-patt.c
 esa-mmsearch.c
-esa-myersapm.c
 esa-seqread.c
 esa-splititv.c
 esa-lcpval.c
@@ -62,6 +61,7 @@ inl-encseq.c
 mapspec-gen.c
 measure-time.c
 merger-trie.c
+myersapm.c
 optionargmode.c
 overallseq.c
 nullcols.c

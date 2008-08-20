@@ -84,7 +84,8 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
                                  unsigned long patternlength,
                                  UNUSED unsigned long maxdistance,
                                  UNUSED unsigned long maxintervalwidth,
-                                 UNUSED bool skpp)
+                                 UNUSED bool skpp,
+                                 UNUSED bool doreverse)
 {
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 #ifdef SKDEBUG

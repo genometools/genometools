@@ -27,7 +27,7 @@
 #include "sarr-def.h"
 #include "intbits.h"
 #include "alphadef.h"
-#include "esa-myersapm.h"
+#include "myersapm.h"
 #include "eis-voiditf.h"
 #include "format64.h"
 #include "idx-limdfs.h"

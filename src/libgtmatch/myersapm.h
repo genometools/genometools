@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_MYERSAPM_H
-#define ESA_MYERSAPM_H
+#ifndef MYERSAPM_H
+#define MYERSAPM_H
 
 #include "seqpos-def.h"
 #include "alphadef.h"

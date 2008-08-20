@@ -20,7 +20,7 @@
 #include "seqpos-def.h"
 #include "spacedef.h"
 #include "encseq-def.h"
-#include "esa-myersapm.h"
+#include "myersapm.h"
 #include "defined-types.h"
 #include "alphadef.h"
 #include "apmoveridx.h" /* import esa_findshortestmatchforward */
