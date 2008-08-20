@@ -28,6 +28,12 @@ void encseq2symbolstring(FILE *fpout,
                          Seqpos wlen,
                          unsigned long width);
 
+void fprintfencseq(FILE *fpout,
+                   const Alphabet *alpha,
+                   const Encodedsequence *encseq,
+                   Seqpos start,
+                   Seqpos wlen);
+
 void encseq2fastaoutput(FILE *fpout,
                         const char *desc,
                         const Alphabet *alpha,

@@ -189,6 +189,23 @@ void encseq2symbolstring(FILE *fpout,
   freeEncodedsequencescanstate(&esr);
 }
 
+void fprintfencseq(FILE *fpout,
+                   const Alphabet *alpha,
+                   const Encodedsequence *encseq,
+                   Seqpos start,
+                   Seqpos wlen)
+{
+  Seqpos idx;
+  Uchar currentchar;
+
+  for (idx = start; idx < start + wlen; idx++)
+  {
+    currentchar = getencodedchar(encseq,idx,Forwardmode);
+    assert(ISNOTSPECIAL(currentchar));
+    echoprettysymbol(fpout,alpha,currentchar);
+  }
+}
+
 void encseq2fastaoutput(FILE *fpout,
                         const char *desc,
                         const Alphabet *alpha,

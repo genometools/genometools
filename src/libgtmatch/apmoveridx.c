@@ -491,7 +491,7 @@ Definedunsignedlong apm_findshortestmatchreverse(const Uchar *vseq,
   apm_initdfsconstinfo(dfsconstinfo,alphasize,pattern,patternlength,
                        maxdistance,0,false,true);
   apm_initMyerscolumn((Aliasdfsstate *) &currentcol,dfsconstinfo);
-  for (vptr = vseq + vlen -1, len = 0; vptr >= vseq; vptr--, len++)
+  for (vptr = vseq + vlen - 1, len = 0; vptr >= vseq; vptr--, len++)
   {
     if (nowildcards && *vptr == (Uchar) WILDCARD)
     {

@@ -88,6 +88,7 @@ void pck_exactpatternmatching(const void *voidbwtseq,
                               const Uchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
+                              const Uchar *dbsubstring,
                               Processmatch processmatch,
                               void *processmatchinfo);
 

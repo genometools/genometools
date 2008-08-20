@@ -356,6 +356,7 @@ void pck_exactpatternmatching(const void *voidbwtseq,
                               const Uchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
+                              const Uchar *dbsubstring,
                               Processmatch processmatch,
                               void *processmatchinfo)
 {
@@ -372,6 +373,7 @@ void pck_exactpatternmatching(const void *voidbwtseq,
                  rcmatch,
                  totallength - (dbstartpos + patternlength),
                  (Seqpos) patternlength,
+                 dbsubstring,
                  patternlength);
   }
   if (bsemi != NULL)

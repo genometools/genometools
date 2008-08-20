@@ -46,6 +46,7 @@ typedef struct
          leftbound,
          rightbound;
   Codetype code;
+  Uchar inchar;
 } Indexbounds;
 
 typedef struct
@@ -187,7 +188,8 @@ static void gen_esa_overinterval(const void *voidsuffixarray,
                                  bool rcmatch,
                                  const Indexbounds *itv,
                                  unsigned long pprefixlen,
-                                 UNUSED Seqpos totallength)
+                                 UNUSED Seqpos totallength,
+                                 const Uchar *dbsubstring)
 {
   const Suffixarray *suffixarray = (const Suffixarray *) voidsuffixarray;
   Seqpos idx;
@@ -198,6 +200,7 @@ static void gen_esa_overinterval(const void *voidsuffixarray,
                  rcmatch,
                  suffixarray->suftab[idx],
                  itv->offset,
+                 dbsubstring,
                  pprefixlen);
   }
 }
@@ -213,7 +216,8 @@ static void esa_overinterval(Limdfsresources *limdfsresources,
                        rcmatch,
                        itv,
                        pprefixlen,
-                       limdfsresources->totallength);
+                       limdfsresources->totallength,
+                       limdfsresources->currentpathspace);
 }
 
 static void gen_pck_overinterval(const void *voidbwtseq,
@@ -222,7 +226,8 @@ static void gen_pck_overinterval(const void *voidbwtseq,
                                  bool rcmatch,
                                  const Indexbounds *itv,
                                  unsigned long pprefixlen,
-                                 Seqpos totallength)
+                                 Seqpos totallength,
+                                 const Uchar *dbsubstring)
 {
   Bwtseqpositioniterator *bspi;
   Seqpos dbstartpos;
@@ -236,6 +241,7 @@ static void gen_pck_overinterval(const void *voidbwtseq,
                  rcmatch,
                  totallength - (dbstartpos + itv->offset),
                  itv->offset,
+                 dbsubstring,
                  pprefixlen);
   }
   freeBwtseqpositioniterator(&bspi);
@@ -252,18 +258,20 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
                        rcmatch,
                        itv,
                        pprefixlen,
-                       limdfsresources->totallength);
+                       limdfsresources->totallength,
+                       limdfsresources->currentpathspace);
 }
 
 static void storemstatsposition(void *processinfo,
                                 UNUSED bool rcmatch,
-                                Seqpos startpos,
-                                UNUSED Seqpos len,
+                                Seqpos dbstartpos,
+                                UNUSED Seqpos dblen,
+                                UNUSED const Uchar *dbsubstring,
                                 UNUSED unsigned long pprefixlen)
 {
   ArraySeqpos *mstatspos = (ArraySeqpos *) processinfo;
 
-  STOREINARRAY(mstatspos,Seqpos,32,startpos);
+  STOREINARRAY(mstatspos,Seqpos,32,dbstartpos);
 }
 
 static int comparepositions(const void *a, const void *b)
@@ -294,7 +302,8 @@ ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
      rcmatch,
      &itv,
      offset,
-     limdfsresources->totallength);
+     limdfsresources->totallength,
+     limdfsresources->currentpathspace);
   qsort(limdfsresources->mstatspos.spaceSeqpos,
         (size_t) limdfsresources->mstatspos.nextfreeSeqpos,
         sizeof (Seqpos), comparepositions);
@@ -350,6 +359,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                                       rcmatch,
                                       startpos,
                                       pos - startpos + 1,
+                                      limdfsresources->currentpathspace,
                                       pprefixlen-1);
         break;
       }
@@ -389,6 +399,9 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
     {
       cc = nextBwtseqcontextiterator(&bound,bsci);
     }
+    assert(offset - 1 + contextlength
+           < (Seqpos) limdfsresources->maxpathlength);
+    limdfsresources->currentpathspace[offset-1+contextlength] = cc;
     if (cc != (Uchar) SEPARATOR &&
         (!limdfsresources->nowildcards || cc != (Uchar) WILDCARD))
     {
@@ -418,6 +431,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                       limdfsresources->totallength -
                                            (startpos + offset),
                                       offset + contextlength,
+                                      limdfsresources->currentpathspace,
                                       pprefixlen-1);
         break;
       }
@@ -594,6 +608,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
     child.code = 0; /* not used, but we better defined it */
+    child.inchar = inchar;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
     showLCPinterval(limdfsresources->withesa,parent);
@@ -670,6 +685,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
                                           limdfsresources->alphasize,
                                           parent->code,
                                           (unsigned long) (parent->offset + 1));
+    startcode = parent->code * limdfsresources->alphasize;
   } else
   {
     bwtrangesplitwithoutspecial(&limdfsresources->bwci,
@@ -677,8 +693,8 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
                                 limdfsresources->genericindex,
                                 parent->leftbound,
                                 parent->rightbound);
+    startcode = 0;
   }
-  startcode = parent->code * limdfsresources->alphasize;
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {
     Uchar inchar;
@@ -690,8 +706,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
     assert(inchar < limdfsresources->alphasize);
     child.code = startcode + inchar;
-    assert(parent->offset < (Seqpos) limdfsresources->maxpathlength);
-    limdfsresources->currentpathspace[parent->offset] = inchar;
+    child.inchar = inchar;
     sumwidth += child.rightbound - child.leftbound;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
@@ -779,6 +794,13 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                limdfsresources->stack.nextfreeLcpintervalwithinfo - 1;
     SHOWSTACKTOP(stackptr);
     parentwithinfo = *stackptr; /* make a copy */
+    if (parentwithinfo.lcpitv.offset > 0)
+    {
+      assert(parentwithinfo.lcpitv.offset-1 <
+             (Seqpos) limdfsresources->maxpathlength);
+      limdfsresources->currentpathspace[parentwithinfo.lcpitv.offset-1]
+                     = parentwithinfo.lcpitv.inchar;
+    }
     assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
     limdfsresources->stack.nextfreeLcpintervalwithinfo--;
     (limdfsresources->withesa ? esa_splitandprocess : pck_splitandprocess)
@@ -812,6 +834,7 @@ static void esa_exactpatternmatching(const void *genericindex,
                                      bool rcmatch,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
+                                     const Uchar *dbsubstring,
                                      Processmatch processmatch,
                                      void *processmatchinfo)
 {
@@ -830,7 +853,7 @@ static void esa_exactpatternmatching(const void *genericindex,
   while (nextmmsearchiterator(&dbstartpos,mmsi))
   {
     processmatch(processmatchinfo,rcmatch,dbstartpos,
-                 (Seqpos) patternlength,patternlength);
+                 (Seqpos) patternlength,dbsubstring,patternlength);
   }
   freemmsearchiterator(&mmsi);
 }
@@ -848,6 +871,7 @@ void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                              rcmatch,
                              pattern,
                              patternlength,
+                             limdfsresources->currentpathspace,
                              processmatch,
                              processmatchinfo);
   } else
@@ -857,6 +881,7 @@ void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                              pattern,
                              patternlength,
                              limdfsresources->totallength,
+                             limdfsresources->currentpathspace,
                              processmatch,
                              processmatchinfo);
   }

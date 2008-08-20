@@ -21,6 +21,7 @@
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "encseq-def.h"
+#include "procmatch.h"
 
 typedef struct Myersonlineresources Myersonlineresources;
 
@@ -28,8 +29,7 @@ Myersonlineresources *newMyersonlineresources(
                         unsigned int mapsize,
                         bool nowildcards,
                         const Encodedsequence *encseq,
-                        void (*processmatch)(void *,bool,Seqpos,Seqpos,
-                                             unsigned long),
+                        Processmatch processmatch,
                         void *processmatchinfo);
 
 void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources);

@@ -157,6 +157,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                             rcmatch,
                             dbstartpos,
                             (Seqpos) matchlength.valueunsignedlong,
+                            NULL,
                             patternlength);
         }
       }

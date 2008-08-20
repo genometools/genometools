@@ -31,8 +31,8 @@
 #include "eis-voiditf.h"
 #include "format64.h"
 #include "idx-limdfs.h"
-#include "apmoveridx.h"
 #include "mssufpat.h"
+#include "apmoveridx.h" /* import esa_findshortestmatchreverse */
 #include "stamp.h"
 
 #include "echoseq.pr"
@@ -54,17 +54,53 @@ typedef struct
   bool rcdir;
 } Tagwithlength;
 
+typedef struct
+{
+  const TageratorOptions *tageratoroptions;
+  unsigned int alphasize;
+  const Uchar *tagptr;
+  const Encodedsequence *encseq;
+  const Alphabet *alpha;
+} Showmatchinfo;
+
 static void showmatch(void *processinfo,
                       bool rcmatch,
-                      Seqpos startpos,
-                      Seqpos len,
+                      Seqpos dbstartpos,
+                      Seqpos dblen,
+                      UNUSED const Uchar *dbsubstring,
                       unsigned long pprefixlen)
 {
-  printf(FormatSeqpos,PRINTSeqposcast(len));
-  printf(" %c " FormatSeqpos,rcmatch ? '-' : '+',PRINTSeqposcast(startpos));
-  if (processinfo != NULL && *((unsigned long *) processinfo) > 0)
+  Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
+
+  printf(FormatSeqpos,PRINTSeqposcast(dblen));
+  printf(" %c " FormatSeqpos,rcmatch ? '-' : '+',PRINTSeqposcast(dbstartpos));
+  if (showmatchinfo->tageratoroptions != NULL &&
+      showmatchinfo->tageratoroptions->maxintervalwidth > 0)
   {
-    printf(" %lu",pprefixlen);
+    Definedunsignedlong result;
+
+    printf(" ");
+    fprintfencseq(stdout,
+                  showmatchinfo->alpha,
+                  showmatchinfo->encseq,
+                  dbstartpos,
+                  dblen);
+    result = apm_findshortestmatchreverse(
+                            dbsubstring,
+                            (unsigned long) dblen,
+                            showmatchinfo->tageratoroptions->nowildcards,
+                            showmatchinfo->alphasize,
+                            showmatchinfo->tagptr,
+                            pprefixlen,
+                            (unsigned long)
+                            showmatchinfo->tageratoroptions->maxdistance);
+    assert(result.defined &&
+           pprefixlen >= result.valueunsignedlong);
+    printf(" %lu %lu ",result.valueunsignedlong,
+                       pprefixlen - result.valueunsignedlong);
+    printfsymbolstring(NULL,showmatchinfo->tagptr +
+                            (pprefixlen - result.valueunsignedlong),
+                            result.valueunsignedlong);
   }
   printf("\n");
 }
@@ -73,16 +109,17 @@ DECLAREARRAYSTRUCT(Simplematch);
 
 static void storematch(void *processinfo,
                        bool rcmatch,
-                       Seqpos startpos,
-                       Seqpos len,
+                       Seqpos dbstartpos,
+                       Seqpos dblen,
+                       UNUSED const Uchar *dbsubstring,
                        UNUSED unsigned long pprefixlen)
 {
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
   Simplematch *match;
 
   GETNEXTFREEINARRAY(match,storetab,Simplematch,32);
-  match->dbstartpos = startpos;
-  match->matchlength = len;
+  match->dbstartpos = dbstartpos;
+  match->matchlength = dblen;
   match->rcmatch = rcmatch;
 }
 
@@ -147,7 +184,7 @@ static void checkmstats(void *processinfo,
 
 static void showmstats(void *processinfo,
                        const void *patterninfo,
-                       UNUSED unsigned long idx,
+                       UNUSED unsigned long patternstartpos,
                        unsigned long mstatlength,
                        Seqpos leftbound,
                        Seqpos rightbound)
@@ -158,16 +195,16 @@ static void showmstats(void *processinfo,
   if (intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
   {
-    unsigned long i;
+    unsigned long idx;
     ArraySeqpos *mstatspos = fromitv2sortedmatchpositions(
                                   (Limdfsresources *) processinfo,
                                   twl->rcdir,
                                   leftbound,
                                   rightbound,
                                   mstatlength);
-    for (i = 0; i<mstatspos->nextfreeSeqpos; i++)
+    for (idx = 0; idx<mstatspos->nextfreeSeqpos; idx++)
     {
-      printf(" " FormatSeqpos,PRINTSeqposcast(mstatspos->spaceSeqpos[i]));
+      printf(" " FormatSeqpos,PRINTSeqposcast(mstatspos->spaceSeqpos[idx]));
     }
   }
   printf("\n");
@@ -250,8 +287,7 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                                  const Uchar *transformedtag,
                                  unsigned long taglen,
                                  bool rcmatch,
-                                 void (*processmatch)(void *,bool,Seqpos,Seqpos,
-                                                      unsigned long),
+                                 Processmatch processmatch,
                                  void *processmatchinfooffline)
 {
   if (tageratoroptions->online || (tageratoroptions->maxdistance >= 0 &&
@@ -360,11 +396,14 @@ static void compareresults(const ArraySimplematch *storeonline,
 
 static void reversecomplementtag(Uchar *transformedtag,unsigned long taglen)
 {
-  unsigned long idx;
+  Uchar tmp, *frontptr, *backptr;
 
-  for (idx = 0; idx < taglen; idx++)
+  for (frontptr = transformedtag, backptr = transformedtag + taglen - 1;
+       frontptr < backptr; frontptr++, backptr--)
   {
-    transformedtag[taglen - 1 - idx] = COMPLEMENTBASE(transformedtag[idx]);
+    tmp = *frontptr;
+    *frontptr = COMPLEMENTBASE(*backptr);
+    *backptr = COMPLEMENTBASE(tmp);
   }
 }
 
@@ -382,6 +421,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   void *packedindex = NULL;
   bool withesa;
   const AbstractDfstransformer *dfst;
+  Showmatchinfo showmatchinfo;
 
   if (tageratoroptions->maxdistance >= 0)
   {
@@ -406,6 +446,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     } else
     {
       demand = 0;
+      demand = SARR_ESQTAB;  /* XXX only for tests */
     }
     withesa = false;
   }
@@ -458,7 +499,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     const Matchbound **mbtab;
     unsigned int maxdepth;
     unsigned long maxpathlength;
-    void (*processmatch)(void *,bool,Seqpos,Seqpos,unsigned long);
+    Processmatch processmatch;
     void *processmatchinfoonline, *processmatchinfooffline;
 
     symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
@@ -472,7 +513,12 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     {
       processmatch = showmatch;
       processmatchinfoonline = NULL;
-      processmatchinfooffline = (void *) &tageratoroptions->maxintervalwidth;
+      showmatchinfo.tageratoroptions = tageratoroptions;
+      showmatchinfo.alphasize = (unsigned int) (mapsize-1);
+      showmatchinfo.tagptr = &twl.transformedtag[0];
+      showmatchinfo.encseq = suffixarray.encseq;
+      showmatchinfo.alpha = suffixarray.alpha;
+      processmatchinfooffline = &showmatchinfo;
     }
     if (tageratoroptions->online || tageratoroptions->docompare)
     {
@@ -499,11 +545,11 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     }
     if (tageratoroptions->maxdistance >= 0)
     {
-      maxpathlength = (unsigned long) (MAXTAGSIZE +
+      maxpathlength = (unsigned long) (1+ MAXTAGSIZE +
                                        tageratoroptions->maxdistance);
     } else
     {
-      maxpathlength = (unsigned long) MAXTAGSIZE;
+      maxpathlength = (unsigned long) (1+MAXTAGSIZE);
     }
     limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
                                          mbtab,

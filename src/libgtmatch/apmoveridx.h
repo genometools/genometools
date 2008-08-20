@@ -30,4 +30,12 @@ Definedunsignedlong apm_findshortestmatchforward(const Encodedsequence *encseq,
                                                  unsigned long maxdistance,
                                                  Seqpos startpos);
 
+Definedunsignedlong apm_findshortestmatchreverse(const Uchar *vseq,
+                                                 unsigned long vlen,
+                                                 bool nowildcards,
+                                                 unsigned int alphasize,
+                                                 const Uchar *pattern,
+                                                 unsigned long patternlength,
+                                                 unsigned long maxdistance);
+
 #endif
