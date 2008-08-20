@@ -46,7 +46,7 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
   /* create new lua state (i.e., interpreter) */
   m->L = luaL_newstate();
   if (!m->L) {
-    error_set(err, "out of memory (cannot create new lua state)");
+    error_set(err, "out of memory (cannot create new Lua state)");
     had_err = -1;
   }
   /* load the standard libs into the lua interpreter */

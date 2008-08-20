@@ -52,7 +52,7 @@ int gtdata_show_help(const char *progname, UNUSED void *unused, Error *err)
     /* create Lua & push gtdata_doc_dir to Lua */
     L = luaL_newstate();
     if (!L) {
-      error_set(err, "out of memory (cannot create new lua state)");
+      error_set(err, "out of memory (cannot create new Lua state)");
       had_err = -1;
     }
   }

@@ -72,7 +72,7 @@ Config* config_new(bool verbose, Error *err)
   cfg->verbose = verbose;
   cfg->L = luaL_newstate();
   if (!cfg->L) {
-    error_set(err, "out of memory (cannot create new lua state)");
+    error_set(err, "out of memory (cannot create new Lua state)");
     ma_free(cfg);
     return NULL;
   }
