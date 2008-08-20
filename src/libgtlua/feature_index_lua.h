@@ -28,7 +28,8 @@
    -- Add <sequence_region> to <feature_index>.
    function feature_index:add_sequence_region(sequence_region)
 
-   -- Add <genome_feature> to <feature_index>.
+   -- Add <genome_feature> to <feature_index>, implicitly creating sequence
+   -- region if not present before.
    function feature_index:add_genome_feature(genome_feature)
 
    -- Returns the genome features for sequence ID <seqid> in an array.

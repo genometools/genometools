@@ -73,7 +73,7 @@ void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr)
   assert(fi && sr);
   seqid = str_get(genome_node_get_seqid((GenomeNode*) sr));
   if (!hashtable_get(fi->regions, seqid)) {
-    info = ma_malloc(sizeof (RegionInfo));
+    info = ma_calloc(1, sizeof (RegionInfo));
     info->region = (SequenceRegion*) genome_node_ref((GenomeNode*) sr);
     info->features = interval_tree_new((FreeFunc) genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
@@ -97,9 +97,23 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf)
   /* get information about seqid and range */
   node_range = genome_node_get_range(gn);
   seqid = str_get(genome_node_get_seqid(gn));
-  /* entry for the seqid must already exist */
-  assert(feature_index_has_seqid(fi, seqid));
   info = (RegionInfo*) hashtable_get(fi->regions, seqid);
+
+  /* If the seqid was encountered for the first time, no sequence
+     region nodes have been visited before. We therefore must create a new
+     index entry and maintain our own Range. */
+  if (!info)
+  {
+    info = ma_calloc(1, sizeof (RegionInfo));
+    info->region = NULL;
+    info->features = interval_tree_new((FreeFunc) genome_node_rec_delete);
+    info->dyn_range.start = ~0UL;
+    info->dyn_range.end   = 0;
+    hashtable_add(fi->regions, seqid, info);
+    if (fi->nof_sequence_regions++ == 0)
+      fi->firstseqid = seqid;
+  }
+
   /* add node to the appropriate array in the hashtable */
   IntervalTreeNode *new_node = interval_tree_node_new(gn, node_range.start,
                                                       node_range.end);
@@ -125,9 +139,10 @@ Array* feature_index_get_features_for_seqid(FeatureIndex *fi, const char *seqid)
   assert(fi && seqid);
   a = array_new(sizeof (GenomeFeature*));
   ri = (RegionInfo*) hashtable_get(fi->regions, seqid);
-  had_err = interval_tree_traverse(ri->features,
-                                   collect_features_from_itree,
-                                   a);
+  if (ri)
+    had_err = interval_tree_traverse(ri->features,
+                                     collect_features_from_itree,
+                                     a);
   assert(!had_err);   /* collect_features_from_itree() is sane */
   return a;
 }
@@ -187,16 +202,18 @@ StrArray* feature_index_get_seqids(const FeatureIndex *fi)
 
 Range feature_index_get_range_for_seqid(FeatureIndex *fi, const char *seqid)
 {
-  Range ret;
+  Range ret = {0,0};
   RegionInfo *info;
   assert(fi);
   info = (RegionInfo*) hashtable_get(fi->regions, seqid);
   assert(info);
-  if (info && (info->dyn_range.start != ~0UL && info->dyn_range.end != 0)) {
+
+  if (info->dyn_range.start != ~0UL && info->dyn_range.end != 0)
+  {
     ret.start = info->dyn_range.start;
     ret.end = info->dyn_range.end;
   }
-  else
+  else if (info->region)
     return genome_node_get_range((GenomeNode*) info->region);
   return ret;
 }
@@ -218,7 +235,6 @@ int feature_index_unit_test(Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *type;
-  /* first we have to create some objects that we can use for testing */
   GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   FeatureIndex *fi;
   Range r1, r2, r3, r4, r5, check_range, rs;
@@ -246,8 +262,7 @@ int feature_index_unit_test(Error *err)
   sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs);
   sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs);
 
-  /* generate a new genome_feature with the property gft_gene and the range r1
-     ... */
+  /* generate a new genome_feature with the type gft_gene and the range r1 */
   type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
   gn1 = genome_feature_new(type, r1, STRAND_UNKNOWN);
   /* ... and assign a sequence id to the new genome_feature-object. */
@@ -276,20 +291,20 @@ int feature_index_unit_test(Error *err)
   genome_node_is_part_of_genome_node(gn2, ex3);
   genome_node_is_part_of_genome_node(gn2, cds1);
 
-  /* create a new feature index on which we can perfom some tests */
+  /* create a new feature index on which we can perform some tests */
   fi = feature_index_new();
 
   ensure(had_err, fi);
   ensure(had_err, !feature_index_has_seqid(fi, "test1"));
   ensure(had_err, !feature_index_has_seqid(fi, "test2"));
 
-  /* add a sequence region to the feature index and test if it has really been
-     added */
+  /* add a sequence region directly and check if it has been added */
   feature_index_add_sequence_region(fi, sr1);
   ensure(had_err, feature_index_has_seqid(fi, "test1"));
+  ensure(had_err, !feature_index_has_seqid(fi, "test2"));
 
-  feature_index_add_sequence_region(fi, sr2);
-  ensure(had_err, feature_index_has_seqid(fi, "test2"));
+  check_range = feature_index_get_range_for_seqid(fi, "test1");
+  ensure(had_err, check_range.start == 100UL && check_range.end == 1200UL);
 
   /* tests if we get a empty data structure for every added sequence region*/
   if (!had_err)
@@ -338,6 +353,9 @@ int feature_index_unit_test(Error *err)
 
   check_range = feature_index_get_range_for_seqid(fi, "test1");
   ensure(had_err, check_range.start == 100UL && check_range.end == 1000UL);
+
+  check_range = feature_index_get_range_for_seqid(fi, "test2");
+  ensure(had_err, check_range.start == 600UL && check_range.end == 1200UL);
 
   if (!had_err)
     features = feature_index_get_features_for_seqid(fi, "test1");

@@ -721,13 +721,8 @@ int diagram_unit_test(Error *err)
   genome_node_is_part_of_genome_node(gn2, ex3);
   genome_node_is_part_of_genome_node(gn2, cds1);
 
-  /* create a new feature index on which we can perfom some tests */
+  /* create a new feature index on which we can perform some tests */
   fi = feature_index_new();
-
-  /* add a sequence region the feature index and test if it has really been
-     added */
-  feature_index_add_sequence_region(fi, sr1);
-  feature_index_add_sequence_region(fi, sr2);
 
   /* add features to every sequence region */
   feature_index_add_genome_feature(fi, (GenomeFeature*) gn1);
@@ -753,7 +748,7 @@ int diagram_unit_test(Error *err)
 
   if (!had_err)
   {
-    canvas = canvas_new(cfg, GRAPHICS_PDF, 600, NULL);
+    canvas = canvas_new(cfg, GRAPHICS_PNG, 600, NULL);
     diagram_render(dia, canvas);
   }
 
