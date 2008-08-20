@@ -71,8 +71,11 @@ Config* config_new(bool verbose, Error *err)
   cfg->filename = NULL;
   cfg->verbose = verbose;
   cfg->L = luaL_newstate();
-  if (!cfg->L)
+  if (!cfg->L) {
     error_set(err, "out of memory (cannot create new lua state)");
+    ma_free(cfg);
+    return NULL;
+  }
   else
     luaL_opensecurelibs(cfg->L); /* do not replace with luaL_openlibs()! */
   return cfg;
@@ -410,8 +413,10 @@ Config* config_clone(const Config *cfg, Error *err)
   Str *cfg_buffer = str_new();
   Config *new_cfg = NULL;
   assert(cfg);
-  new_cfg = config_new(config_get_verbose(cfg), err);
-  had_err = config_to_str(cfg, cfg_buffer);
+  if (!(new_cfg = config_new(config_get_verbose(cfg), err)))
+    had_err = -1;
+  if (!had_err)
+    had_err = config_to_str(cfg, cfg_buffer);
   if (!had_err)
     had_err = config_load_str(new_cfg, cfg_buffer);
   if (had_err)
