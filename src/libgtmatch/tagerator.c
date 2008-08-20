@@ -546,6 +546,18 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       printf("\n");
       storeoffline.nextfreeSimplematch = 0;
       storeonline.nextfreeSimplematch = 0;
+      if (tageratoroptions->maxdistance > 0 &&
+          twl.taglen <= (unsigned long) tageratoroptions->maxdistance)
+      {
+        error_set(err,"tag \"%*.*s\" of length %lu; "
+                  "tags must be longer than the allowed number of errors "
+                  "(which is %ld)",
+                   (int) twl.taglen,(int) twl.taglen,currenttag,twl.taglen,
+                   tageratoroptions->maxdistance);
+        haserr = true;
+        ma_free(desc);
+        break;
+      }
       assert(tageratoroptions->maxdistance < 0 ||
              twl.taglen > (unsigned long) tageratoroptions->maxdistance);
       for (try=0 ; try < 2; try++)
