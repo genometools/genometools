@@ -239,6 +239,10 @@ config =
   -- Defines various format options for drawing.
   format =
   {
+    -- Set the following three settings to 'false' to globally disable them.
+    split_lines = true, -- generally enable splitting
+    show_block_captions = true, -- generally show captions
+    show_track_captions = true,-- generally show track captions
     margins = 30,      -- space left and right of diagram, in pixels
     bar_height = 15,   -- height of a feature bar, in pixels
     bar_vspace = 10,   -- space between feature bars, in pixels

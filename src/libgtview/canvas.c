@@ -47,6 +47,7 @@ struct Canvas {
   double factor, y;
   unsigned long width, height, margins;
   Config *cfg;
+  bool show_track_captions;
   Bittab *bt;
   Graphics *g;
   GraphicsOutType type;
@@ -89,16 +90,19 @@ static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
   height += lines.total_captionlines * (TOY_TEXT_HEIGHT
                                           + CAPTION_BAR_SPACE_DEFAULT);
   /* add track caption height and spacer */
-  if (config_get_num(canvas->cfg, "format","track_vspace", &tmp))
-    height += diagram_get_number_of_tracks(dia)
-                * (TOY_TEXT_HEIGHT
-                    + CAPTION_BAR_SPACE_DEFAULT
-                    + tmp);
-  else
-    height += diagram_get_number_of_tracks(dia)
-                * (TOY_TEXT_HEIGHT
-                    + CAPTION_BAR_SPACE_DEFAULT
-                    + TRACK_VSPACE_DEFAULT);
+  if (canvas->show_track_captions)
+  {
+    if (config_get_num(canvas->cfg, "format", "track_vspace", &tmp))
+      height += diagram_get_number_of_tracks(dia)
+                  * (TOY_TEXT_HEIGHT
+                      + CAPTION_BAR_SPACE_DEFAULT
+                      + tmp);
+    else
+      height += diagram_get_number_of_tracks(dia)
+                  * (TOY_TEXT_HEIGHT
+                      + CAPTION_BAR_SPACE_DEFAULT
+                      + TRACK_VSPACE_DEFAULT);
+  }
 
   /* add header space and footer */
   height += HEADER_SPACE + FOOTER_SPACE;
@@ -291,6 +295,10 @@ int canvas_visit_diagram_pre(Canvas *canvas, Diagram *dia)
   else
     canvas->margins = MARGINS_DEFAULT;
 
+  if (!config_get_bool(canvas->cfg, "format", "show_track_captions",
+                       &canvas->show_track_captions))
+    canvas->show_track_captions = true;
+
   canvas->viewrange = diagram_get_range(dia);
   if (canvas->g)
   {
@@ -345,38 +353,40 @@ int canvas_visit_track_pre(Canvas *canvas, Track *track)
   if (config_get_verbose(canvas->cfg))
     fprintf(stderr, "processing track %s\n", str_get(track_get_title(track)));
 
-  /* draw track title */
-  graphics_draw_colored_text(canvas->g,
-                             canvas->margins,
-                             canvas->y,
-                             color,
-                             str_get(track_get_title(track)));
-
-  /* draw 'line maximum exceeded' message */
-  if ((exceeded = track_get_number_of_discarded_blocks(track)) > 0)
+  if (canvas->show_track_captions)
   {
-    char buf[BUFSIZ];
-    const char *msg;
-    double width;
-    Color red;
-    red.red   = 0.7;
-    red.green = red.blue  = 0.4;
-    if (exceeded == 1)
-      msg = "(1 block not shown due to exceeded line limit)";
-    else
-    {
-      msg = "(%lu blocks not shown due to exceeded line limit)";
-      snprintf(buf, BUFSIZ, msg, exceeded);
-    }
-    width = graphics_get_text_width(canvas->g, str_get(track_get_title(track)));
+    /* draw track title */
     graphics_draw_colored_text(canvas->g,
-                               canvas->margins+width+10.0,
+                               canvas->margins,
                                canvas->y,
-                               red,
-                               buf);
-  }
-  canvas->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+                               color,
+                               str_get(track_get_title(track)));
 
+    /* draw 'line maximum exceeded' message */
+    if ((exceeded = track_get_number_of_discarded_blocks(track)) > 0)
+    {
+      char buf[BUFSIZ];
+      const char *msg;
+      double width;
+      Color red;
+      red.red   = 0.7;
+      red.green = red.blue  = 0.4;
+      if (exceeded == 1)
+        msg = "(1 block not shown due to exceeded line limit)";
+      else
+      {
+        msg = "(%lu blocks not shown due to exceeded line limit)";
+        snprintf(buf, BUFSIZ, msg, exceeded);
+      }
+      width = graphics_get_text_width(canvas->g, str_get(track_get_title(track)));
+      graphics_draw_colored_text(canvas->g,
+                                 canvas->margins+width+10.0,
+                                 canvas->y,
+                                 red,
+                                 buf);
+    }
+    canvas->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+  }
   return had_err;
 }
 
