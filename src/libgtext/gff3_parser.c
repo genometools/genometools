@@ -29,6 +29,7 @@
 #include "libgtcore/unused.h"
 #include "libgtcore/warning.h"
 #include "libgtext/comment.h"
+#include "libgtext/feature_info.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/gff3_escaping.h"
@@ -37,8 +38,8 @@
 #include "libgtext/sequence_region.h"
 
 struct GFF3Parser {
-  Hashtable *id_to_genome_node,
-            *seqid_to_ssr_mapping, /* maps seqids to simple sequence regions */
+  FeatureInfo *feature_info;
+  Hashtable *seqid_to_ssr_mapping, /* maps seqids to simple sequence regions */
             *source_to_str_mapping,
             *undefined_sequence_regions; /* contains all (automatically created)
                                             sequence regions */
@@ -107,8 +108,7 @@ GFF3Parser* gff3parser_new(bool checkids,
   GFF3Parser *parser;
   assert(feature_type_factory);
   parser = ma_malloc(sizeof (GFF3Parser));
-  parser->id_to_genome_node = hashtable_new(HASH_STRING, ma_free_func,
-                                            (FreeFunc) genome_node_delete);
+  parser->feature_info = feature_info_new();
   parser->seqid_to_ssr_mapping = hashtable_new(HASH_STRING, NULL,
                                                (FreeFunc)
                                                simple_sequence_region_delete);
@@ -342,9 +342,6 @@ static void replace_node(GenomeNode *genome_node, GenomeNode *pseudo_node,
   ReplaceInfo replace_info;
   int rval;
   assert(genome_node && pseudo_node && id && parser && genome_nodes);
-  hashtable_remove(parser->id_to_genome_node, id);
-  hashtable_add(parser->id_to_genome_node, cstr_dup(id),
-                genome_node_ref(pseudo_node));
   replace_info.genome_node = genome_node;
   replace_info.pseudo_node = pseudo_node;
   if (auto_sr) {
@@ -380,7 +377,7 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
   error_check(err);
   assert(id && genome_feature && parser);
 
-  if ((gn = hashtable_get(parser->id_to_genome_node, id))) {
+  if ((gn = feature_info_get(parser->feature_info, id))) {
     /* this id has been used already -> try to make this a multi-feature */
     if (genome_node_get_line_number(gn) < parser->last_terminator) {
       error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
@@ -391,30 +388,37 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
       had_err = -1;
     }
     if (!had_err) {
-      bool has_parent, is_pseudo;
+      GenomeNode *pseudo_parent;
+      bool has_parent ;
       has_parent = genome_feature_get_attribute(gn, PARENT_STRING)
                    ? true : false;
-      is_pseudo = genome_feature_is_pseudo((GenomeFeature*) gn);
-      if (!genome_feature_is_multi((GenomeFeature*) gn)) {
-        if (!is_pseudo) {
+      assert(!genome_feature_is_pseudo((GenomeFeature*) gn));
+      pseudo_parent = feature_info_get_pseudo_parent(parser->feature_info, id);
+      if (pseudo_parent || !genome_feature_is_multi((GenomeFeature*) gn)) {
+        if (!pseudo_parent) {
           genome_feature_make_multi_representative((GenomeFeature*) gn);
           if (!has_parent) { /* create pseudo node */
             GenomeNode *pseudo_node = genome_feature_new_pseudo((GenomeFeature*)
                                                                 gn);
             genome_node_is_part_of_genome_node(pseudo_node, gn);
             replace_node(gn, pseudo_node, id, parser, genome_nodes, auto_sr);
+            feature_info_add_pseudo_parent(parser->feature_info, id,
+                                           pseudo_node);
             genome_node_is_part_of_genome_node(pseudo_node, genome_feature);
             *is_child = true;
           }
         }
         else {
-          update_pseudo_node_range(gn, genome_feature);
-          assert(genome_feature_get_pseudo_representative((GenomeFeature*) gn)
-                 != (GenomeFeature*) gn);
-          genome_node_is_part_of_genome_node(gn, genome_feature);
+          assert(pseudo_parent);
+          update_pseudo_node_range(pseudo_parent, genome_feature);
+          assert(genome_feature_get_pseudo_representative((GenomeFeature*)
+                                                          pseudo_parent) !=
+                 (GenomeFeature*) pseudo_parent);
+          genome_node_is_part_of_genome_node(pseudo_parent, genome_feature);
           *is_child = true;
-          gn = (GenomeNode*)
-               genome_feature_get_pseudo_representative((GenomeFeature*) gn);
+          assert(gn == (GenomeNode*)
+               genome_feature_get_pseudo_representative((GenomeFeature*)
+                        pseudo_parent));
         }
       }
       else {
@@ -426,10 +430,8 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
                                               (GenomeFeature*) gn);
     }
   }
-  else {
-    hashtable_add(parser->id_to_genome_node, cstr_dup(id),
-                  genome_node_ref(genome_feature));
-  }
+  else
+    feature_info_add(parser->feature_info, id, genome_feature);
 
   if (!had_err)
     parser->incomplete_node = true;
@@ -459,6 +461,7 @@ static const char* find_root(const char *parent, Hashtable *id_to_genome_node)
   return parent;
 }
 
+#if 0
 static StrArray* find_roots(Splitter *parent_splitter,
                             Hashtable *id_to_genome_node)
 {
@@ -490,6 +493,7 @@ static bool roots_differ(StrArray *roots)
   }
   return false;
 }
+#endif
 
 static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
                                bool *is_child, GFF3Parser *parser,
@@ -510,7 +514,7 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
   for (i = 0; i < splitter_size(parent_splitter); i++) {
     GenomeNode* parent_gf;
     const char *parent = splitter_get_token(parent_splitter, i);
-    parent_gf = hashtable_get(parser->id_to_genome_node, parent);
+    parent_gf = feature_info_get(parser->feature_info, parent);
     if (!parent_gf) {
       if (!parser->tidy) {
         error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
@@ -542,11 +546,13 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
   }
 
   /* make sure all parents have the same (pseudo-)root */
+#if 0
   if (splitter_size(parent_splitter) >= 2) {
     StrArray *roots = find_roots(parent_splitter, parser->id_to_genome_node);
-    assert(!roots_differ(roots)); /* XXX: not implemented */
+    assert(!roots_differ(roots));
     strarray_delete(roots);
   }
+#endif
 
   splitter_delete(parent_splitter);
 
@@ -1075,7 +1081,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
     /* now all nodes are complete */
     parser->incomplete_node = false;
     if (!parser->checkids)
-      hashtable_reset(parser->id_to_genome_node);
+      feature_info_reset(parser->feature_info);
     parser->last_terminator = line_number;
   }
   else {
@@ -1167,9 +1173,9 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *parser,
 
 void gff3parser_reset(GFF3Parser *parser)
 {
-  assert(parser && parser->id_to_genome_node);
+  assert(parser);
   parser->fasta_parsing = false;
-  hashtable_reset(parser->id_to_genome_node);
+  feature_info_reset(parser->feature_info);
   hashtable_reset(parser->seqid_to_ssr_mapping);
   hashtable_reset(parser->source_to_str_mapping);
   hashtable_reset(parser->undefined_sequence_regions);
@@ -1179,8 +1185,7 @@ void gff3parser_reset(GFF3Parser *parser)
 void gff3parser_delete(GFF3Parser *parser)
 {
   if (!parser) return;
-  assert(parser->id_to_genome_node);
-  hashtable_delete(parser->id_to_genome_node);
+  feature_info_delete(parser->feature_info);
   hashtable_delete(parser->seqid_to_ssr_mapping);
   hashtable_delete(parser->source_to_str_mapping);
   hashtable_delete(parser->undefined_sequence_regions);
