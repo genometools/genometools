@@ -189,7 +189,6 @@ GenomeNode* genome_feature_new_pseudo(GenomeFeature *gf)
   genome_node_set_seqid(pn, genome_node_get_seqid((GenomeNode*) gf));
   genome_feature_set_source(pn, gf->source);
   pn->bit_field |= 1 << PSEUDO_FEATURE_OFFSET;
-  pf->representative = gf;
   return pn;
 }
 
@@ -386,13 +385,6 @@ GenomeFeature* genome_feature_get_multi_representative(GenomeFeature *gf)
     return gf->representative;
   }
   return gf; /* is itself the representative */
-}
-
-GenomeFeature* genome_feature_get_pseudo_representative(GenomeFeature *gf)
-{
-  assert(gf && !genome_feature_is_multi(gf) && genome_feature_is_pseudo(gf));
-  assert(gf->representative);
-  return gf->representative;
 }
 
 float genome_feature_get_score(GenomeFeature *gf)

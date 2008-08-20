@@ -411,14 +411,8 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
         else {
           assert(pseudo_parent);
           update_pseudo_node_range(pseudo_parent, genome_feature);
-          assert(genome_feature_get_pseudo_representative((GenomeFeature*)
-                                                          pseudo_parent) !=
-                 (GenomeFeature*) pseudo_parent);
           genome_node_is_part_of_genome_node(pseudo_parent, genome_feature);
           *is_child = true;
-          assert(gn == (GenomeNode*)
-               genome_feature_get_pseudo_representative((GenomeFeature*)
-                        pseudo_parent));
         }
       }
       else {
