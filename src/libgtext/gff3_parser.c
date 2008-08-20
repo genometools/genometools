@@ -433,61 +433,34 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
   return had_err;
 }
 
-static const char* find_root(const char *parent, Hashtable *id_to_genome_node)
+static Array* find_roots(Splitter *parent_splitter,
+                            FeatureInfo *feature_info)
 {
-  GenomeNode *parent_feature;
-  const char *delim, *grandparents;
-  assert(parent && id_to_genome_node);
-  /* determine parent feature */
-  delim = strchr(parent, ';');
-  if (delim) {
-    char *first_parent = cstr_dup_nt(parent, delim - parent);
-    parent_feature = hashtable_get(id_to_genome_node, first_parent);
-    ma_free(first_parent);
-  }
-  else
-    parent_feature = hashtable_get(id_to_genome_node, parent);
-  assert(parent_feature);
-  /* recursion */
-  grandparents = genome_feature_get_attribute(parent_feature, PARENT_STRING);
-  if (grandparents)
-    return find_root(grandparents, id_to_genome_node);
-  return parent;
-}
-
-#if 0
-static StrArray* find_roots(Splitter *parent_splitter,
-                            Hashtable *id_to_genome_node)
-{
-  StrArray *roots;
+  Array *roots;
   unsigned long i;
   assert(parent_splitter);
-  roots = strarray_new();
+  roots = array_new(sizeof (GenomeNode*));
   for (i = 0; i < splitter_size(parent_splitter); i++) {
-    const char *root, *delim, *parent = splitter_get_token(parent_splitter, i);
-    root = find_root(parent, id_to_genome_node);
-    delim = strchr(root, ';');
-    if (delim)
-      strarray_add_cstr_nt(roots, root, delim - root);
-    else
-      strarray_add_cstr(roots, root);
+    GenomeNode *root;
+    const char *parent = splitter_get_token(parent_splitter, i);
+    root = feature_info_find_root(feature_info, parent);
+    array_add(roots, root);
   }
   return roots;
 }
 
-static bool roots_differ(StrArray *roots)
+static bool roots_differ(Array *roots)
 {
-  const char *first_root;
+  GenomeNode *first_root;
   unsigned long i;
   assert(roots);
-  first_root = strarray_get(roots, 0);
-  for (i = 1; i < strarray_size(roots); i++) {
-    if (strcmp(first_root, strarray_get(roots, i)))
+  first_root = *(GenomeNode**) array_get(roots, 0);
+  for (i = 1; i < array_size(roots); i++) {
+    if (first_root != *(GenomeNode**) array_get(roots, i))
       return true;
   }
   return false;
 }
-#endif
 
 static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
                                bool *is_child, GFF3Parser *parser,
@@ -540,13 +513,11 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
   }
 
   /* make sure all parents have the same (pseudo-)root */
-#if 0
-  if (splitter_size(parent_splitter) >= 2) {
-    StrArray *roots = find_roots(parent_splitter, parser->id_to_genome_node);
+  if (!had_err && splitter_size(parent_splitter) >= 2) {
+    Array *roots = find_roots(parent_splitter, parser->feature_info);
     assert(!roots_differ(roots));
-    strarray_delete(roots);
+    array_delete(roots);
   }
-#endif
 
   splitter_delete(parent_splitter);
 

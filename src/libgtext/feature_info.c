@@ -15,11 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/ma.h"
 #include "libgtext/feature_info.h"
 #include "libgtext/genome_node.h"
+#include "libgtext/gff3_parser.h"
 
 struct FeatureInfo {
   Hashtable *id_to_genome_node,
@@ -78,4 +80,39 @@ void feature_info_add_pseudo_parent(FeatureInfo *fi, const char *id,
   assert(genome_feature_is_pseudo((GenomeFeature*) pseudo_parent));
   hashtable_add(fi->id_to_pseudo_parent, cstr_dup(id),
                 genome_node_ref(pseudo_parent));
+}
+
+static GenomeNode* find_root(const FeatureInfo *fi, const char *id)
+{
+  const char *delim, *parents;
+  GenomeNode *this_feature, *parent_pseudo_feature;
+  assert(fi && id);
+  /* get feature */
+  delim = strchr(id, ';');
+  if (delim) {
+    char *first_parent = cstr_dup_nt(id, delim - id);
+    this_feature = hashtable_get(fi->id_to_genome_node, first_parent);
+    parent_pseudo_feature = hashtable_get(fi->id_to_pseudo_parent,
+                                          first_parent);
+    ma_free(first_parent);
+  }
+  else {
+    this_feature = hashtable_get(fi->id_to_genome_node, id);
+    parent_pseudo_feature = hashtable_get(fi->id_to_pseudo_parent, id);
+  }
+  assert(this_feature);
+  /* recursion */
+  parents = genome_feature_get_attribute(this_feature, PARENT_STRING);
+  if (parents)
+    return find_root(fi, parents);
+  else if (parent_pseudo_feature)
+    return parent_pseudo_feature;
+  return this_feature;
+}
+
+GenomeNode* feature_info_find_root(const FeatureInfo *fi, const char *id)
+{
+  assert(fi && id);
+  assert(feature_info_get(fi, id));
+  return find_root(fi, id);
 }
