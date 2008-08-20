@@ -34,7 +34,7 @@ Config*        config_new(bool verbose, Error*);
 /* Creates a Config object wich reuses the given Lua state. */
 Config*        config_new_with_state(lua_State*);
 /* Creates a deep copy of the given Config object. */
-Config*        config_clone(Config*, Error*);
+Config*        config_clone(const Config*, Error*);
 /* Loads and executes a Lua configuration file with given <filename>.
    This file must contain a global table called 'config'. */
 int            config_load_file(Config*, Str *filename, Error*);
@@ -43,7 +43,7 @@ int            config_load_file(Config*, Str *filename, Error*);
 int            config_load_str(Config*, Str *instr);
 /* Generates Lua code which represents the given Config object and
    writes it into the String object <outstr>.*/
-int            config_to_str(Config*, Str *outstr);
+int            config_to_str(const Config*, Str *outstr);
 /* Reloads the Lua configuration file. */
 void           config_reload(Config*);
 /* Retrieves a color value from the configuration for <key>.

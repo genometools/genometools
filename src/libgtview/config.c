@@ -383,7 +383,7 @@ bool config_get_verbose(const Config *cfg)
   return cfg->verbose;
 }
 
-int config_to_str(Config *cfg, Str *outstr)
+int config_to_str(const Config *cfg, Str *outstr)
 {
   int had_err = 0;
   assert(cfg && outstr);
@@ -404,7 +404,7 @@ int config_load_str(Config *cfg, Str *instr)
   return had_err;
 }
 
-Config* config_clone(Config *cfg, Error *err)
+Config* config_clone(const Config *cfg, Error *err)
 {
   int had_err = 0;
   Str *cfg_buffer = str_new();
