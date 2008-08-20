@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 char*         cstr_dup(const char*);
+char*         cstr_dup_nt(const char*, unsigned long);
 /* Replace each occurence of <f> in <cstr> to <t>. */
 void          cstr_rep(char *cstr, char f, char t);
 void          cstr_show(const char*, unsigned long length, FILE*);

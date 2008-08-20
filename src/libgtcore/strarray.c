@@ -58,6 +58,15 @@ void strarray_add_cstr(StrArray *sa, const char *cstr)
   array_add(sa->strings, str);
 }
 
+void strarray_add_cstr_nt(StrArray *sa, const char *cstr, unsigned long length)
+{
+  Str *str;
+  assert(sa && cstr);
+  str = str_new();
+  str_append_cstr_nt(str, cstr, length);
+  array_add(sa->strings, str);
+}
+
 void strarray_add(StrArray *sa, const Str *str)
 {
   Str *clone;

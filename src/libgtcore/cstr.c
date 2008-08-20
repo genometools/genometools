@@ -32,6 +32,16 @@ char* cstr_dup(const char *cstr)
   return copy;
 }
 
+char* cstr_dup_nt(const char *cstr, unsigned long length)
+{
+  char *copy;
+  assert(cstr);
+  copy = ma_malloc(length+1);
+  memcpy(copy, cstr, length);
+  copy[length] = '\0';
+  return copy;
+}
+
 void cstr_rep(char *cstr, char f, char t)
 {
   char *cc;
