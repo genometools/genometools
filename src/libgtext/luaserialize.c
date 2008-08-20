@@ -23,10 +23,12 @@
 #include "libgtcore/ensure.h"
 #include "libgtext/luaserialize.h"
 
-static int format_scalar(lua_State *L, Str *out, int index, bool table_key)
+static int format_scalar(lua_State *L, Str *out, int index, bool table_key,
+                         Error *err)
 {
   int had_err = 0;
-  assert(!lua_istable(L ,index));
+  error_check(err);
+  assert(!lua_istable(L, index));
   if (lua_isboolean(L, index))
   {
     int val;
@@ -61,15 +63,19 @@ static int format_scalar(lua_State *L, Str *out, int index, bool table_key)
     str_append_cstr(out, str);
     if (table_key)
       str_append_cstr(out, "]");
-  } else had_err = -1;
+  }
+  else {
+    error_set(err, "expected boolean, number, or string");
+    had_err = -1;
+  }
   return had_err;
 }
 
-static int parse_table(lua_State *L, Str *out, int index, int level)
+static int parse_table(lua_State *L, Str *out, int index, int level, Error *err)
 {
-  int had_err = 0;
-  if (!lua_istable(L, index))
-    return -1;
+  int rval, had_err = 0;
+  error_check(err);
+  assert(lua_istable(L, index));
   lua_pushnil(L);
   if (index < 0)
     index--;
@@ -78,19 +84,20 @@ static int parse_table(lua_State *L, Str *out, int index, int level)
     int i;
     for (i=0;i<level;i++)
       str_append_cstr(out, "  ");
-    format_scalar(L, out, -2, true);
+    rval = format_scalar(L, out, -2, true, NULL);
+    assert(!rval); /* cannot happen */
     str_append_cstr(out, " = ");
     if (lua_istable(L, -1))
     {
       str_append_cstr(out, "{\n");
-      had_err = parse_table(L, out, -1, level+1);
+      had_err = parse_table(L, out, -1, level+1, err);
       for (i=0;i<level;i++)
         str_append_cstr(out, "  ");
       str_append_cstr(out, "},\n");
     }
     else
     {
-      had_err = format_scalar(L, out, -1, false);
+      had_err = format_scalar(L, out, -1, false, err);
       str_append_cstr(out, ",\n");
     }
     lua_pop(L, 1);
@@ -98,12 +105,11 @@ static int parse_table(lua_State *L, Str *out, int index, int level)
   return had_err;
 }
 
-int lua_table_to_str(lua_State *L, Str *out, int index)
+int lua_table_to_str(lua_State *L, Str *out, int index, Error *err)
 {
-  int had_err = 0;
-  assert(L && out);
-  had_err = parse_table(L, out, index, 1);
-  return had_err;
+  error_check(err);
+  assert(L && out && lua_istable(L, index));
+  return parse_table(L, out, index, 1, err);
 }
 
 int lua_serializer_unit_test(Error *err)
@@ -143,7 +149,7 @@ int lua_serializer_unit_test(Error *err)
   {
     lua_getglobal(L, "config");
     str_append_cstr(outstr, "config = {\n");
-    lua_table_to_str(L, outstr, -1);
+    lua_table_to_str(L, outstr, -1, err);
     str_append_cstr(outstr, "}");
     had_err = luaL_loadbuffer(L, str_get(outstr), str_length(outstr), "t2") ||
                 lua_pcall(L, 0, 0, 0);

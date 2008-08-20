@@ -386,24 +386,35 @@ bool config_get_verbose(const Config *cfg)
   return cfg->verbose;
 }
 
-int config_to_str(const Config *cfg, Str *outstr)
+int config_to_str(const Config *cfg, Str *outstr, Error *err)
 {
-  int had_err = 0;
+  int had_err;
+  error_check(err);
   assert(cfg && outstr);
   lua_getglobal(cfg->L, "config");
   str_append_cstr(outstr, "config = {\n");
-  had_err = lua_table_to_str(cfg->L, outstr, -1);
+  if (lua_istable(cfg->L, -1))
+    had_err = lua_table_to_str(cfg->L, outstr, -1, err);
+  else {
+    error_set(err, "'config' must be a table");
+    had_err = -1;
+  }
   str_append_cstr(outstr, "}");
   lua_pop(cfg->L, 1);
   return had_err;
 }
 
-int config_load_str(Config *cfg, Str *instr)
+int config_load_str(Config *cfg, Str *instr, Error *err)
 {
   int had_err = 0;
+  error_check(err);
   assert(cfg && instr);
-  had_err = luaL_loadbuffer(cfg->L, str_get(instr), str_length(instr), "str") ||
-              lua_pcall(cfg->L, 0, 0, 0);
+  if (luaL_loadbuffer(cfg->L, str_get(instr), str_length(instr), "str") ||
+      lua_pcall(cfg->L, 0, 0, 0)) {
+    error_set(err, "cannot run configuration buffer: %s",
+              lua_tostring(cfg->L, -1));
+    had_err = -1;
+  }
   return had_err;
 }
 
@@ -411,16 +422,14 @@ Config* config_clone(const Config *cfg, Error *err)
 {
   int had_err = 0;
   Str *cfg_buffer = str_new();
-  Config *new_cfg = NULL;
+  Config *new_cfg;
   assert(cfg);
   if (!(new_cfg = config_new(config_get_verbose(cfg), err)))
     had_err = -1;
   if (!had_err)
-    had_err = config_to_str(cfg, cfg_buffer);
+    had_err = config_to_str(cfg, cfg_buffer, err);
   if (!had_err)
-    had_err = config_load_str(new_cfg, cfg_buffer);
-  if (had_err)
-      error_set(err, "An error occurred trying to clone Config object %p", cfg);
+    had_err = config_load_str(new_cfg, cfg_buffer, err);
   str_delete(cfg_buffer);
   return new_cfg;
 }

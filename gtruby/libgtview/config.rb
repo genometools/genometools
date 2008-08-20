@@ -39,8 +39,8 @@ module GT
 
   extern "Config* config_new(bool, Error*)"
   extern "int config_load_file(Config*, Str*, Error*)"
-  extern "int config_load_str(Config*, Str*)"
-  extern "int config_to_str(const Config*, Str*)"
+  extern "int config_load_str(Config*, Str*, Error*)"
+  extern "int config_to_str(const Config*, Str*, Error*)"
   extern "bool config_get_color(Config*, const char*, const char*, Color*)"
   extern "void config_set_color(Config*, const char*, const char*, Color*)"
   extern "bool config_get_str(const Config*, const char*, " +
@@ -72,17 +72,19 @@ module GT
     end
 
     def load_str(str)
+      err = GT::Error.new()
       str = GT::Str.new(str)
-      rval = GT.config_load_str(@config, str.to_ptr)
+      rval = GT.config_load_str(@config, str.to_ptr, err.to_ptr)
       if rval != 0 then GT.gterror(err) end
     end
 
     def to_str()
+      err = GT::Error.new()
       str = GT::Str.new(nil)
-      if GT.config_to_str(@config, str.to_ptr) == 0
+      if GT.config_to_str(@config, str.to_ptr, err.to_ptr) == 0
         str.to_s
       else
-        nil
+        GT.gterror(err)
       end
     end
 
