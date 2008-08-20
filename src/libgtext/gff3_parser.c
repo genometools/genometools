@@ -459,23 +459,20 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
   assert(splitter_size(parent_splitter));
 
   for (i = 0; i < splitter_size(parent_splitter); i++) {
-    GenomeNode* parent_gf = hashtable_get(gff3_parser
-                                          ->id_to_genome_node_mapping,
-                                          splitter_get_token(parent_splitter,
-                                                             i));
+    GenomeNode* parent_gf;
+    const char *parent = splitter_get_token(parent_splitter, i);
+    parent_gf = hashtable_get(gff3_parser->id_to_genome_node_mapping, parent);
     if (!parent_gf) {
       if (!gff3_parser->tidy) {
         error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
-                  "previously defined (via \"%s=\")", PARENT_STRING,
-                  splitter_get_token(parent_splitter, i), line_number,
-                  filename, ID_STRING);
+                  "previously defined (via \"%s=\")", PARENT_STRING, parent,
+                  line_number, filename, ID_STRING);
         had_err = -1;
       }
       else {
         warning("%s \"%s\" on line %u in file \"%s\" has not been "
-                "previously defined (via \"%s=\")", PARENT_STRING,
-                splitter_get_token(parent_splitter, i), line_number,
-                filename, ID_STRING);
+                "previously defined (via \"%s=\")", PARENT_STRING, parent,
+                line_number, filename, ID_STRING);
       }
     }
     else if (str_cmp(genome_node_get_seqid(parent_gf),
