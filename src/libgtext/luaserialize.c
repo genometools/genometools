@@ -21,8 +21,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "libgtcore/ensure.h"
-#include "libgtcore/unused.h"
-#include "libgtview/luaserialize.h"
+#include "libgtext/luaserialize.h"
 
 static int format_scalar(lua_State *L, Str *out, int index, bool table_key)
 {

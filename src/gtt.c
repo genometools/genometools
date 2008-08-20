@@ -39,6 +39,7 @@
 #include "libgtext/genome_node_iterator.h"
 #include "libgtext/gff3_escaping.h"
 #include "libgtext/hmm.h"
+#include "libgtext/luaserialize.h"
 #include "libgtext/splicedseq.h"
 #include "libgtext/string_matching.h"
 #include "libgtext/tag_value_map.h"
@@ -86,7 +87,6 @@
 #include "libgtview/imageinfo.h"
 #include "libgtview/track.h"
 #include "libgtview/recmap.h"
-#include "libgtview/luaserialize.h"
 #endif
 
 Toolbox* gtt_tools(void)
