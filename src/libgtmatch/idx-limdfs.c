@@ -399,15 +399,15 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
     {
       cc = nextBwtseqcontextiterator(&bound,bsci);
     }
-    assert(offset - 1 + contextlength
-           < (Seqpos) limdfsresources->maxpathlength);
-    limdfsresources->currentpathspace[offset-1+contextlength] = cc;
     if (cc != (Uchar) SEPARATOR &&
         (!limdfsresources->nowildcards || cc != (Uchar) WILDCARD))
     {
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
 #endif
+      assert(offset - 1 + contextlength
+             < (Seqpos) limdfsresources->maxpathlength);
+      limdfsresources->currentpathspace[offset-1+contextlength] = cc;
       adfst->inplacenextDfsstate(limdfsresources->dfsconstinfo,
                                  limdfsresources->currentdfsstate,
                                  (unsigned long) (offset + contextlength),

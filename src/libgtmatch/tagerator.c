@@ -59,7 +59,6 @@ typedef struct
   const TageratorOptions *tageratoroptions;
   unsigned int alphasize;
   const Uchar *tagptr;
-  const Encodedsequence *encseq;
   const Alphabet *alpha;
 } Showmatchinfo;
 
@@ -80,11 +79,7 @@ static void showmatch(void *processinfo,
     Definedunsignedlong result;
 
     printf(" ");
-    fprintfencseq(stdout,
-                  showmatchinfo->alpha,
-                  showmatchinfo->encseq,
-                  dbstartpos,
-                  dblen);
+    printfsymbolstring(showmatchinfo->alpha,dbsubstring,(unsigned long) dblen);
     result = apm_findshortestmatchreverse(
                             dbsubstring,
                             (unsigned long) dblen,
@@ -446,7 +441,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     } else
     {
       demand = 0;
-      demand = SARR_ESQTAB;  /* XXX only for tests */
     }
     withesa = false;
   }
@@ -516,7 +510,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       showmatchinfo.tageratoroptions = tageratoroptions;
       showmatchinfo.alphasize = (unsigned int) (mapsize-1);
       showmatchinfo.tagptr = &twl.transformedtag[0];
-      showmatchinfo.encseq = suffixarray.encseq;
       showmatchinfo.alpha = suffixarray.alpha;
       processmatchinfooffline = &showmatchinfo;
     }
