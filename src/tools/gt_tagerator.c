@@ -128,15 +128,14 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, optionrw);
   option_is_development_option(optionrw);
 
-  option = option_new_bool("d","Compute direct matches (default)",
-                           &arguments->fwdmatch, true);
+  option = option_new_bool("nod","Do not compute direct matches",
+                           &arguments->nofwdmatch, false);
   option_parser_add_option(op, option);
 
-  option = option_new_bool("p","Compute palindromic "
-                           "(i.e. reverse complemented matches. DOES NOT WORK)",
-                             &arguments->rcmatch, false);
+  option = option_new_bool("nop","Do not compute palindromic matches "
+                           "(i.e. no reverse complemented matches.)",
+                             &arguments->norcmatch, false);
   option_parser_add_option(op, option);
-  option_is_development_option(optionrw);
 
   option = option_new_ulong_min("maxocc",
                                 "specify max number of match-occurrencs",

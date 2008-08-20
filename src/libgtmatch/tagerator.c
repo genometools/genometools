@@ -42,7 +42,9 @@
 
 typedef struct
 {
-  Seqpos dbstartpos, matchlength;
+  Seqpos dbstartpos,
+         matchlength;
+  bool rcmatch;
 } Simplematch;
 
 typedef struct
@@ -52,16 +54,36 @@ typedef struct
   bool rcdir;
 } Tagwithlength;
 
-static void showmatch(void *processinfo,Seqpos startpos,Seqpos len,
+static void showmatch(void *processinfo,
+                      bool rcmatch,
+                      Seqpos startpos,
+                      Seqpos len,
                       unsigned long pprefixlen)
 {
   printf(FormatSeqpos,PRINTSeqposcast(len));
-  printf(" " FormatSeqpos,PRINTSeqposcast(startpos));
+  printf(" %c " FormatSeqpos,rcmatch ? '-' : '+',PRINTSeqposcast(startpos));
   if (processinfo != NULL && *((unsigned long *) processinfo) > 0)
   {
     printf(" %lu",pprefixlen);
   }
   printf("\n");
+}
+
+DECLAREARRAYSTRUCT(Simplematch);
+
+static void storematch(void *processinfo,
+                       bool rcmatch,
+                       Seqpos startpos,
+                       Seqpos len,
+                       UNUSED unsigned long pprefixlen)
+{
+  ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
+  Simplematch *match;
+
+  GETNEXTFREEINARRAY(match,storetab,Simplematch,32);
+  match->dbstartpos = startpos;
+  match->matchlength = len;
+  match->rcmatch = rcmatch;
 }
 
 static void checkmstats(void *processinfo,
@@ -87,20 +109,25 @@ static void checkmstats(void *processinfo,
   if (intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
   {
-    Seqpos bound, lastbound;
+    Uchar cc;
+    Seqpos *sptr, witnessposition;
     unsigned long idx;
-
-    lastbound = getlastbound((const Limdfsresources *) processinfo,rightbound);
-    for (bound = leftbound; bound <= lastbound; bound++)
+    ArraySeqpos *mstatspos = fromitv2sortedmatchpositions(
+                                  (Limdfsresources *) processinfo,
+                                  twl->rcdir,
+                                  leftbound,
+                                  rightbound,
+                                  mstatlength);
+    for (sptr = mstatspos->spaceSeqpos; sptr < mstatspos->spaceSeqpos +
+                                               mstatspos->nextfreeSeqpos;
+         sptr++)
     {
-      Seqpos witnessposition
-               = bound2startpos((const Limdfsresources *) processinfo,
-                                bound,mstatlength);
+      witnessposition = *sptr;
       for (idx = patternstartpos; idx < patternstartpos + mstatlength; idx++)
       {
-        Uchar cc = limdfsgetencodedchar((const Limdfsresources *) processinfo,
-                                      witnessposition + idx - patternstartpos,
-                                      Forwardmode);
+        cc = limdfsgetencodedchar((const Limdfsresources *) processinfo,
+                                  witnessposition + idx - patternstartpos,
+                                  Forwardmode);
         if (twl->transformedtag[idx] != cc)
         {
           fprintf(stderr,"patternstartpos = %lu: pattern[%lu] = %u != %u = "
@@ -119,19 +146,22 @@ static void checkmstats(void *processinfo,
 }
 
 static void showmstats(void *processinfo,
-                       UNUSED const void *patterninfo,
+                       const void *patterninfo,
                        UNUSED unsigned long idx,
                        unsigned long mstatlength,
                        Seqpos leftbound,
                        Seqpos rightbound)
 {
-  printf("%lu",mstatlength);
+  Tagwithlength *twl = (Tagwithlength *) patterninfo;
+
+  printf("%lu %c",mstatlength,twl->rcdir ? '-' : '+');
   if (intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
   {
     unsigned long i;
     ArraySeqpos *mstatspos = fromitv2sortedmatchpositions(
                                   (Limdfsresources *) processinfo,
+                                  twl->rcdir,
                                   leftbound,
                                   rightbound,
                                   mstatlength);
@@ -143,26 +173,19 @@ static void showmstats(void *processinfo,
   printf("\n");
 }
 
-DECLAREARRAYSTRUCT(Simplematch);
-
-static void storematch(void *processinfo,
-                       Seqpos startpos,
-                       Seqpos len,
-                       UNUSED unsigned long pprefixlen)
-{
-  ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
-  Simplematch *match;
-
-  GETNEXTFREEINARRAY(match,storetab,Simplematch,32);
-  match->dbstartpos = startpos;
-  match->matchlength = len;
-}
-
 static int cmpdescend(const void *a,const void *b)
 {
   Simplematch *valuea = (Simplematch *) a;
   Simplematch *valueb = (Simplematch *) b;
 
+  if (!valuea->rcmatch && valueb->rcmatch)
+  {
+    return -1;
+  }
+  if (valuea->rcmatch && !valueb->rcmatch)
+  {
+    return 1;
+  }
   if (valuea->dbstartpos < valueb->dbstartpos)
   {
     return 1;
@@ -226,10 +249,10 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                                  Limdfsresources *limdfsresources,
                                  const Uchar *transformedtag,
                                  unsigned long taglen,
-                                 void (*processmatch)(void *,Seqpos,Seqpos,
+                                 bool rcmatch,
+                                 void (*processmatch)(void *,bool,Seqpos,Seqpos,
                                                       unsigned long),
-                                 void *processmatchinfooffline,
-                                 bool rcmatch)
+                                 void *processmatchinfooffline)
 {
   if (tageratoroptions->online || (tageratoroptions->maxdistance >= 0 &&
                                    tageratoroptions->docompare))
@@ -237,6 +260,7 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
     edistmyersbitvectorAPM(mor,
                            transformedtag,
                            taglen,
+                           rcmatch,
                            (unsigned long) tageratoroptions->maxdistance);
   }
   if (!tageratoroptions->online || tageratoroptions->docompare)
@@ -244,14 +268,15 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
     if (tageratoroptions->maxdistance == 0)
     {
       indexbasedexactpatternmatching(limdfsresources,
+                                     rcmatch,
                                      transformedtag,
                                      taglen,
-                                     rcmatch,
                                      processmatch,
                                      processmatchinfooffline);
     } else
     {
       indexbasedapproxpatternmatching(limdfsresources,
+                                      rcmatch,
                                       transformedtag,
                                       taglen,
                                       (tageratoroptions->maxdistance < 0)
@@ -289,22 +314,46 @@ static void compareresults(const ArraySimplematch *storeonline,
   {
     assert(storeonline->spaceSimplematch != NULL &&
            storeoffline->spaceSimplematch != NULL);
+    if (storeonline->spaceSimplematch[ss].rcmatch &&
+        !storeoffline->spaceSimplematch[ss].rcmatch)
+    {
+      fprintf(stderr,"rcmatch: storeonline[%lu] = p != d "
+                     "= storeoffline[%lu]\n",ss,ss);
+      exit(EXIT_FAILURE);
+    }
+    if (!storeonline->spaceSimplematch[ss].rcmatch &&
+        storeoffline->spaceSimplematch[ss].rcmatch)
+    {
+      fprintf(stderr,"rcmatch: storeonline[%lu] = d != p "
+                     "= storeoffline[%lu]\n",ss,ss);
+      exit(EXIT_FAILURE);
+    }
     if (storeonline->spaceSimplematch[ss].matchlength !=
         storeoffline->spaceSimplematch[ss].matchlength)
     {
-      fprintf(stderr,"matchlength: storeonline[%lu] = %lu != %lu "
-                     "= storeoffline[%lu]\n",
+      fprintf(stderr,"matchlength: storeonline[%lu] = " FormatSeqpos
+                     " != " FormatSeqpos "= storeoffline[%lu]\n",
                      ss,
-                     (unsigned long)
-                     storeonline->spaceSimplematch[ss].matchlength,
-                     (unsigned long)
-                     storeoffline->spaceSimplematch[ss].matchlength,
+                     PRINTSeqposcast(storeonline->spaceSimplematch[ss].
+                                     matchlength),
+                     PRINTSeqposcast(storeoffline->spaceSimplematch[ss].
+                                     matchlength),
                      ss);
+      exit(EXIT_FAILURE);
     }
-    assert(storeoffline->spaceSimplematch[ss].dbstartpos ==
-           storeonline->spaceSimplematch[ss].dbstartpos);
-    assert(storeoffline->spaceSimplematch[ss].matchlength ==
-           storeonline->spaceSimplematch[ss].matchlength);
+    if (storeonline->spaceSimplematch[ss].dbstartpos !=
+        storeoffline->spaceSimplematch[ss].dbstartpos)
+    {
+      fprintf(stderr,"dbstartpos: storeonline[%lu] = " FormatSeqpos
+                     " != " FormatSeqpos "= storeoffline[%lu]\n",
+                     ss,
+                     PRINTSeqposcast(storeonline->spaceSimplematch[ss].
+                                     dbstartpos),
+                     PRINTSeqposcast(storeoffline->spaceSimplematch[ss].
+                                     dbstartpos),
+                     ss);
+      exit(EXIT_FAILURE);
+    }
   }
 }
 
@@ -411,7 +460,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
     char *desc = NULL;
     const Matchbound **mbtab;
     unsigned int maxdepth;
-    void (*processmatch)(void *,Seqpos,Seqpos,unsigned long);
+    void (*processmatch)(void *,bool,Seqpos,Seqpos,unsigned long);
     void *processmatchinfoonline, *processmatchinfooffline;
 
     symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
@@ -501,10 +550,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
              twl.taglen > (unsigned long) tageratoroptions->maxdistance);
       for (try=0 ; try < 2; try++)
       {
-        if ((try == 0 && tageratoroptions->fwdmatch) ||
-            (try == 1 && tageratoroptions->rcmatch))
+        if ((try == 0 && !tageratoroptions->nofwdmatch) ||
+            (try == 1 && !tageratoroptions->norcmatch))
         {
-          if (try == 1 && tageratoroptions->rcmatch)
+          if (try == 1 && !tageratoroptions->norcmatch)
           {
             reversecomplementtag(twl.transformedtag,twl.taglen);
             twl.rcdir = true;
@@ -515,9 +564,9 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
                                limdfsresources,
                                twl.transformedtag,
                                twl.taglen,
+                               twl.rcdir,
                                processmatch,
-                               processmatchinfooffline,
-                               twl.rcdir);
+                               processmatchinfooffline);
           if (tageratoroptions->docompare)
           {
             compareresults(&storeonline,&storeoffline);

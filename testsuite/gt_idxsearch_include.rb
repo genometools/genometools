@@ -37,18 +37,18 @@ def checktagerator(queryfile,ms)
   if File.size("patternfile") > 0
     run_test("#{$bin}gt tagerator -rw -cmp -e 0 -esa sfx -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 0 -pck pck -q patternfile",
-             :maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -e 1 -esa sfx -q patternfile",
              :maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -e 2 -esa sfx -q patternfile",
              :maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -esa sfx -q patternfile " +
+             " -nowildcards -maxocc 10",
+             :maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -e 0 -pck pck -q patternfile",
+             :maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -q patternfile -nowildcards",
              :maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -e 2 -pck pck -q patternfile -nowildcards",
-             :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -esa sfx -q patternfile " +
-             " -nowildcards -maxocc 10",
              :maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -pck pck -q patternfile " +
              " -nowildcards -maxocc 10",

@@ -29,8 +29,8 @@ typedef struct
   bool online,  /* perform online search, for testing */
        docompare, /* compare results with online search */
        replacewildcard, /* replace wildcards by random symbol */
-       fwdmatch, /* perform match on forward strand, default */
-       rcmatch, /* perform match on reverse complemented strand */
+       nofwdmatch, /* do not perform matching on forward strand */
+       norcmatch, /* do not perform matching on reverse complemented strand */
        nowildcards; /* ignore matches containing wildcards */
   long maxdistance; /* maximal number of allowed differences >= 0 */
   int userdefinedmaxdepth;   /* use pckbuckets only up to this depth */

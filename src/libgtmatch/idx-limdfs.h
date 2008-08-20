@@ -34,7 +34,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     unsigned long maxintervalwidth,
                                     unsigned int mapsize,
                                     Seqpos totallength,
-                                    void (*processmatch)(void *,
+                                    void (*processmatch)(void *,bool,
                                                          Seqpos,Seqpos,
                                                          unsigned long),
                                     void *processmatchinfo,
@@ -51,6 +51,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
                          const AbstractDfstransformer *adfst);
 
 void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
+                                     bool rcmatch,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
@@ -62,10 +63,10 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const Uchar *qend);
 
 void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
+                                    bool rcmatch,
                                     const Uchar *pattern,
                                     unsigned long patternlength,
-                                    bool rcmatch,
-                                    void (*processmatch)(void *,
+                                    void (*processmatch)(void *,bool,
                                                          Seqpos,Seqpos,
                                                          unsigned long),
                                     void *processmatchinfo);
@@ -85,6 +86,7 @@ bool intervalwidthleq(const Limdfsresources *limdfsresources,
 DECLAREARRAYSTRUCT(Seqpos);
 
 ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
+                                          bool rcmatch,
                                           Seqpos leftbound,
                                           Seqpos rightbound,
                                           unsigned long offset);

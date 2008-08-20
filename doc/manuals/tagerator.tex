@@ -112,12 +112,15 @@ the program runs in \textit{ms}-mode, i.e.\ it computes the matching statistics
 for each short sequence tag.
 }
 
-\Option{d}{}{
-Compute direct matches. This is the default case}
+\Option{nod}{}{
+Do not compute direct matches, i.e.\ matches on the forward strand. If
+this option is not used, then matches are computed on the forward strand.}
 
-\Option{p}{}{
-Compute palindromic matches, i.e.\ reverse complemented matches.
-This option does not work currently.}
+\Option{nop}{}{
+Do not compute palindromic matches, i.e.\ matches on the 
+reverse complemented strand.  If
+this option is not used, then matches are computed on the reverse complemented
+strand.}
 
 \Option{maxocc}{$\Showoptionarg{t}$}{
 Specify the maximum number of occurrences of exact prefix matches (in case of
@@ -177,21 +180,25 @@ gt tagerator -q Q1.gz -maxocc 10 -pck pck-human
 # indexname(pck)=pck-rev
 # queryfile=Q1.gz
 # 15 aagcttgctgctgca
-10 88693
-9 88694 213545
-8 25583 88695 213546 281700 325202 451235 747565
-12 470064
-11 470065
-10 158315 363967 470066 501203 576660 729958
-9
-8
-7
-6
-5
-4
-3
-2
-1
+10 + 88693
+9 + 88694 213545
+8 + 25583 88695 213546 281700 325202 451235 747565
+12 + 470064
+11 + 470065
+10 + 158315 363967 470066 501203 576660 729958
+9 +
+8 +
+7 +
+6 +
+5 +
+4 +
+3 +
+2 +
+1 +
+11 - 662728
+10 - 662729
+9 - 662730 678998 753601
+12 - 725297
 ...
 \end{Output}
 The first line shortly reports the kind of computation performed. The second
@@ -202,15 +209,21 @@ each tag its length, say \(m\), and the tag \(p\) itself is shown, followed by
 a block of \(m\) lines each containing two integers. For all \(i\in[1,m]\), 
 the first number in the \(i\)th line is the matching statistics length, say
 \(l\). This means that \(\Substring{p}{i}{i+l-1}\) is the maximum length prefix
-of \(\Substring{p}{i}{m}\) that occurs as a substring in the index. 
-If the number
-of occurrences of \(\Substring{p}{i}{i+l-1}\) is smaller than the maximum
-occurrence parameter \(10\), then all matching statistics positions are 
-reported in ascending order of their length.
+of \(\Substring{p}{i}{m}\) that occurs as a substring in the index.  The
+second column gives the strand of the match: a \texttt{+} stands for the
+forward strand and a \texttt{-} for the reverse strand.
+If the number of occurrences of \(\Substring{p}{i}{i+l-1}\) is smaller than 
+the maximum
+occurrence parameter (\(10\) in the above case), then all matching statistics 
+positions are reported in ascending order. If it is larger than the maximum
+occurrence parameter, no positions are shown.
 So, for example, the sequence \texttt{gcttgctg} of length 8 starting at tag
 position 3 is the longest prefix of \texttt{gcttgctgctgca} that occurs as 
-a substring in the index. It, occurs at the positions 25583, 88695, 213546,
-etc.
+a substring in the index. It occurs at the positions 25583, 88695, 213546,
+etc. Note that the matching statistics lines for the forward strand are
+followed by the matching statistics block on the reverse strand. Note however,
+that the matching statistics positions are always reported with respect to the
+forward strand.
 
 In a second call, we run \Program in \textit{cdiff}-mode:
 
@@ -220,37 +233,40 @@ gt tagerator -q Q1.gz -pck pck-human -e 2 -nowildcards
 # indexname(pck)=pck-human
 # queryfile=Q1.gz
 # 15 aagcttgctgctgca
-14 363963
-13 576657
-13 501200
-13 158312
-13 180388
-15 464008
-14 88693
-13 576544
-15 191866
-15 135753
-15 668836
-13 576656
-13 501199
-14 471049
-14 78690
-14 104932
-14 463353
-14 317578
-15 576655
-15 501198
-15 317577
+14 + 363963
+13 + 576657
+13 + 501200
+13 + 158312
+13 + 180388
+15 + 464008
+14 + 88693
+13 + 576656
+13 + 501199
+14 + 471049
+14 + 78690
+14 + 104932
+14 + 463353
+14 + 317578
+15 + 576655
+15 + 501198
+15 + 317577
+16 - 635853
+16 - 347779
+13 - 639578
+15 - 259681
+15 - 213639
 ...
 \end{Output}
 The first line shortly reports the kind of computation performed. The second
 and third line are as in the previous example. Then, for
 each tag its length and the tag itself is shown, followed by 
-a block of lines each containing a pair of integers. Each such pair
-reports the length of an approximate match and its start position in the
-subject sequence \(S\). For each
+a block of lines each containing a pair of integers separated by the
+symbols \texttt{+} or \texttt{-}, denoting the strand of the match.
+Each such pair reports the length of an approximate match and its start 
+position in the subject sequence \(S\). For each
 start position only the shortest length is reported. If there are no
-approximate matches, then no such line appears.
+approximate matches, then no such line appears. Note that the match always
+refers to the complete pattern.
 
 Our third example concerns the \textit{pdiff}-mode:
 
@@ -260,27 +276,29 @@ gt tagerator -q Q1.gz -pck pck-human -e 1 -nowildcards -maxocc 5
 # indexname(pck)=pck-human
 # queryfile=Q1.gz
 # 15 aagcttgctgctgca
-8 507736 8
-8 213544 8
-8 289017 8
-9 274066 8
-9 427225 8
-9 632436 9
-9 590998 9
-9 411370 9
-9 281698 9
-9 367734 9
-9 331595 9
-9 342090 9
-8 616567 7
-8 507735 7
-8 591679 7
-9 88694 10
+8 + 507736 8
+8 + 213544 8
+8 + 289017 8
+9 + 274066 8
+9 + 427225 8
+9 + 632436 9
+9 + 590998 9
+9 + 411370 9
+8 + 616567 7
+8 - 14443 8
+8 - 79251 8
+8 - 606034 8
+8 - 604316 8
+10 - 176215 9
+10 - 662727 9
+9 - 333528 9
+9 - 92052 9
 ...
 \end{Output}
 
 The output is similar as in the previous example, except that each match
-is reported by three integers. The first number reports the length of the
+is reported by three integers with a sign between the first and the
+second. The first number reports the length of the
 approximate match, the second reports the start position of the approximate
 match in the subject sequence and the third reports the length of the prefix 
 of the tag involved in the approximate match. Note that in some cases,

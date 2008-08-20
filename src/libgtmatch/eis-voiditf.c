@@ -351,11 +351,11 @@ unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
 }
 
 void pck_exactpatternmatching(const void *voidbwtseq,
+                              bool rcmatch,
                               const Uchar *pattern,
                               unsigned long patternlength,
-                              UNUSED bool rcmatch,
                               Seqpos totallength,
-                              void (*processmatch)(void *,
+                              void (*processmatch)(void *,bool,
                                                    Seqpos,Seqpos,unsigned long),
                               void *processmatchinfo)
 {
@@ -367,7 +367,9 @@ void pck_exactpatternmatching(const void *voidbwtseq,
   assert(bsemi != NULL);
   while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) voidbwtseq))
   {
+    assert(totallength >= (dbstartpos + patternlength));
     processmatch(processmatchinfo,
+                 rcmatch,
                  totallength - (dbstartpos + patternlength),
                  (Seqpos) patternlength,
                  patternlength);

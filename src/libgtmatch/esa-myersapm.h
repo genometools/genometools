@@ -28,7 +28,7 @@ Myersonlineresources *newMyersonlineresources(
                         unsigned int mapsize,
                         bool nowildcards,
                         const Encodedsequence *encseq,
-                        void (*processmatch)(void *,Seqpos,Seqpos,
+                        void (*processmatch)(void *,bool,Seqpos,Seqpos,
                                              unsigned long),
                         void *processmatchinfo);
 
@@ -37,6 +37,7 @@ void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources);
 void edistmyersbitvectorAPM(Myersonlineresources *mor,
                             const Uchar *pattern,
                             unsigned long patternlength,
+                            bool rcmatch,
                             unsigned long maxdistance);
 
 #endif

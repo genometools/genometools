@@ -63,7 +63,7 @@ struct Limdfsresources
   ArrayLcpintervalwithinfo stack;
   Uchar alphasize;
   Seqpos totallength;
-  void (*processmatch)(void *,Seqpos,Seqpos,unsigned long);
+  void (*processmatch)(void *,bool,Seqpos,Seqpos,unsigned long);
   void *processmatchinfo;
   void (*processresult)(void *,const void *,unsigned long,unsigned long,
                         Seqpos,Seqpos);
@@ -88,7 +88,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     unsigned long maxintervalwidth,
                                     unsigned int mapsize,
                                     Seqpos totallength,
-                                    void (*processmatch)(void *,
+                                    void (*processmatch)(void *,bool,
                                                          Seqpos,Seqpos,
                                                          unsigned long),
                                     void *processmatchinfo,
@@ -177,10 +177,11 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
 /* enumerate the suffixes in an LCP-interval */
 
 static void gen_esa_overinterval(const void *voidsuffixarray,
-                                 void (*processmatch)(void *,
+                                 void (*processmatch)(void *,bool,
                                                       Seqpos,Seqpos,
                                                       unsigned long),
                                  void *processmatchinfo,
+                                 bool rcmatch,
                                  const Indexbounds *itv,
                                  unsigned long pprefixlen,
                                  UNUSED Seqpos totallength)
@@ -191,6 +192,7 @@ static void gen_esa_overinterval(const void *voidsuffixarray,
   for (idx = itv->leftbound; idx <= itv->rightbound; idx++)
   {
     processmatch(processmatchinfo,
+                 rcmatch,
                  suffixarray->suftab[idx],
                  itv->offset,
                  pprefixlen);
@@ -198,22 +200,25 @@ static void gen_esa_overinterval(const void *voidsuffixarray,
 }
 
 static void esa_overinterval(Limdfsresources *limdfsresources,
+                             bool rcmatch,
                              const Indexbounds *itv,
                              unsigned long pprefixlen)
 {
   gen_esa_overinterval((const Suffixarray *) limdfsresources->genericindex,
                        limdfsresources->processmatch,
                        limdfsresources->processmatchinfo,
+                       rcmatch,
                        itv,
                        pprefixlen,
                        limdfsresources->totallength);
 }
 
 static void gen_pck_overinterval(const void *voidbwtseq,
-                                 void (*processmatch)(void *,
+                                 void (*processmatch)(void *,bool,
                                                       Seqpos,Seqpos,
                                                       unsigned long),
                                  void *processmatchinfo,
+                                 bool rcmatch,
                                  const Indexbounds *itv,
                                  unsigned long pprefixlen,
                                  Seqpos totallength)
@@ -227,6 +232,7 @@ static void gen_pck_overinterval(const void *voidbwtseq,
   {
     assert(totallength >= (dbstartpos + itv->offset));
     processmatch(processmatchinfo,
+                 rcmatch,
                  totallength - (dbstartpos + itv->offset),
                  itv->offset,
                  pprefixlen);
@@ -235,18 +241,21 @@ static void gen_pck_overinterval(const void *voidbwtseq,
 }
 
 static void pck_overinterval(Limdfsresources *limdfsresources,
+                             bool rcmatch,
                              const Indexbounds *itv,
                              unsigned long pprefixlen)
 {
   gen_pck_overinterval(limdfsresources->genericindex,
                        limdfsresources->processmatch,
                        limdfsresources->processmatchinfo,
+                       rcmatch,
                        itv,
                        pprefixlen,
                        limdfsresources->totallength);
 }
 
 static void storemstatsposition(void *processinfo,
+                                UNUSED bool rcmatch,
                                 Seqpos startpos,
                                 UNUSED Seqpos len,
                                 UNUSED unsigned long pprefixlen)
@@ -266,6 +275,7 @@ static int comparepositions(const void *a, const void *b)
 }
 
 ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
+                                          bool rcmatch,
                                           Seqpos leftbound,
                                           Seqpos rightbound,
                                           unsigned long offset)
@@ -280,6 +290,7 @@ ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
     (limdfsresources->genericindex,
      storemstatsposition,
      &limdfsresources->mstatspos,
+     rcmatch,
      &itv,
      offset,
      limdfsresources->totallength);
@@ -292,6 +303,7 @@ ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
 /* iterate myers algorithm over a sequence context */
 
 static void esa_overcontext(Limdfsresources *limdfsresources,
+                            bool rcmatch,
                             const DECLAREPTRDFSSTATE(dfsstate),
                             Seqpos leftbound,
                             Seqpos offset,
@@ -334,6 +346,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
       if (pprefixlen > 1UL)
       {
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
+                                      rcmatch,
                                       startpos,
                                       pos - startpos + 1,
                                       pprefixlen-1);
@@ -347,6 +360,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 }
 
 static void pck_overcontext(Limdfsresources *limdfsresources,
+                            bool rcmatch,
                             const DECLAREPTRDFSSTATE(dfsstate),
                             Seqpos leftbound,
                             Seqpos offset,
@@ -399,6 +413,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
         Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,
                                            leftbound);
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
+                                      rcmatch,
                                       limdfsresources->totallength -
                                            (startpos + offset),
                                       offset + contextlength,
@@ -414,6 +429,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 }
 
 static bool pushandpossiblypop(Limdfsresources *limdfsresources,
+                               bool rcmatch,
                                Lcpintervalwithinfo *stackptr,
                                const Indexbounds *child,
                                Uchar inchar,
@@ -460,13 +476,14 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
   if (pprefixlen > 1UL)
   {
     (limdfsresources->withesa ? esa_overinterval : pck_overinterval)
-      (limdfsresources,child,pprefixlen-1);
+      (limdfsresources,rcmatch,child,pprefixlen-1);
     return true;
   }
   return false;
 }
 
 static void processchildinterval(Limdfsresources *limdfsresources,
+                                 bool rcmatch,
                                  const Indexbounds *child,
                                  Uchar inchar,
                                  const DECLAREPTRDFSSTATE(previousdfsstate),
@@ -480,6 +497,7 @@ static void processchildinterval(Limdfsresources *limdfsresources,
     GETNEXTFREEINARRAY(stackptr,&limdfsresources->stack,
                        Lcpintervalwithinfo,128);
     if (pushandpossiblypop(limdfsresources,
+                           rcmatch,
                            stackptr,
                            child,
                            inchar,
@@ -493,6 +511,7 @@ static void processchildinterval(Limdfsresources *limdfsresources,
     if (limdfsresources->withesa)
     {
       esa_overcontext(limdfsresources,
+                      rcmatch,
                       previousdfsstate,
                       child->leftbound,
                       child->offset,
@@ -500,6 +519,7 @@ static void processchildinterval(Limdfsresources *limdfsresources,
     } else
     {
       pck_overcontext(limdfsresources,
+                      rcmatch,
                       previousdfsstate,
                       child->leftbound,
                       child->offset,
@@ -526,6 +546,7 @@ static void showLCPinterval(bool withesa,const Indexbounds *itv)
 #endif
 
 static void esa_splitandprocess(Limdfsresources *limdfsresources,
+                                bool rcmatch,
                                 const Lcpintervalwithinfo *parentwithinfo,
                                 const AbstractDfstransformer *adfst)
 {
@@ -580,6 +601,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     printf("\n");
 #endif
     processchildinterval(limdfsresources,
+                         rcmatch,
                          &child,
                          inchar,
                          parentwithinfo->aliasstate,
@@ -593,6 +615,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     for (bound=firstnonspecial; bound <= parent->rightbound; bound++)
     {
       esa_overcontext(limdfsresources,
+                      rcmatch,
                       parentwithinfo->aliasstate,
                       bound,
                       parent->offset+1,
@@ -630,6 +653,7 @@ static void smalldepthbwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
 }
 
 static void pck_splitandprocess(Limdfsresources *limdfsresources,
+                                bool rcmatch,
                                 const Lcpintervalwithinfo *parentwithinfo,
                                 const AbstractDfstransformer *adfst)
 {
@@ -674,6 +698,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     printf("\n");
 #endif
     processchildinterval(limdfsresources,
+                         rcmatch,
                          &child,
                          inchar,
                          parentwithinfo->aliasstate,
@@ -690,6 +715,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
       if (cc != (Uchar) SEPARATOR)
       {
         pck_overcontext(limdfsresources,
+                        rcmatch,
                         parentwithinfo->aliasstate,
                         bound,
                         parent->offset+1,
@@ -713,6 +739,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
 #endif
 
 void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
+                                     bool rcmatch,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
@@ -749,7 +776,7 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
     assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
     limdfsresources->stack.nextfreeLcpintervalwithinfo--;
     (limdfsresources->withesa ? esa_splitandprocess : pck_splitandprocess)
-        (limdfsresources,&parentwithinfo,adfst);
+        (limdfsresources,rcmatch,&parentwithinfo,adfst);
   }
   if (adfst->extractdfsconstinfo != NULL)
   {
@@ -776,10 +803,10 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
 }
 
 static void esa_exactpatternmatching(const void *genericindex,
+                                     bool rcmatch,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
-                                     UNUSED bool rcmatch,
-                                     void (*processmatch)(void *,
+                                     void (*processmatch)(void *,bool,
                                                           Seqpos,Seqpos,
                                                           unsigned long),
                                      void *processmatchinfo)
@@ -798,17 +825,17 @@ static void esa_exactpatternmatching(const void *genericindex,
                              patternlength);
   while (nextmmsearchiterator(&dbstartpos,mmsi))
   {
-    processmatch(processmatchinfo,dbstartpos,
+    processmatch(processmatchinfo,rcmatch,dbstartpos,
                  (Seqpos) patternlength,patternlength);
   }
   freemmsearchiterator(&mmsi);
 }
 
 void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
+                                    bool rcmatch,
                                     const Uchar *pattern,
                                     unsigned long patternlength,
-                                    bool rcmatch,
-                                    void (*processmatch)(void *,
+                                    void (*processmatch)(void *,bool,
                                                          Seqpos,Seqpos,
                                                          unsigned long),
                                     void *processmatchinfo)
@@ -816,17 +843,17 @@ void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
   if (limdfsresources->withesa)
   {
     esa_exactpatternmatching(limdfsresources->genericindex,
+                             rcmatch,
                              pattern,
                              patternlength,
-                             rcmatch,
                              processmatch,
                              processmatchinfo);
   } else
   {
     pck_exactpatternmatching(limdfsresources->genericindex,
+                             rcmatch,
                              pattern,
                              patternlength,
-                             rcmatch,
                              limdfsresources->totallength,
                              processmatch,
                              processmatchinfo);
