@@ -37,7 +37,7 @@
 #include "libgtext/sequence_region.h"
 
 struct GFF3Parser {
-  Hashtable *id_to_genome_node_mapping,
+  Hashtable *id_to_genome_node,
             *seqid_to_ssr_mapping, /* maps seqids to simple sequence regions */
             *source_to_str_mapping,
             *undefined_sequence_regions; /* contains all (automatically created)
@@ -107,10 +107,8 @@ GFF3Parser* gff3parser_new(bool checkids,
   GFF3Parser *gff3_parser;
   assert(feature_type_factory);
   gff3_parser = ma_malloc(sizeof (GFF3Parser));
-  gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING,
-                                                         ma_free_func,
-                                                         (FreeFunc)
-                                                         genome_node_delete);
+  gff3_parser->id_to_genome_node = hashtable_new(HASH_STRING, ma_free_func,
+                                                 (FreeFunc) genome_node_delete);
   gff3_parser->seqid_to_ssr_mapping = hashtable_new(HASH_STRING, NULL,
                                                     (FreeFunc)
                                                  simple_sequence_region_delete);
@@ -346,8 +344,8 @@ static void replace_node(GenomeNode *genome_node, GenomeNode *pseudo_node,
   ReplaceInfo replace_info;
   int rval;
   assert(genome_node && pseudo_node && id && gff3_parser && genome_nodes);
-  hashtable_remove(gff3_parser->id_to_genome_node_mapping, id);
-  hashtable_add(gff3_parser->id_to_genome_node_mapping, cstr_dup(id),
+  hashtable_remove(gff3_parser->id_to_genome_node, id);
+  hashtable_add(gff3_parser->id_to_genome_node, cstr_dup(id),
                 genome_node_ref(pseudo_node));
   replace_info.genome_node = genome_node;
   replace_info.pseudo_node = pseudo_node;
@@ -384,7 +382,7 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
   error_check(err);
   assert(id && genome_feature && gff3_parser);
 
-  if ((gn = hashtable_get(gff3_parser->id_to_genome_node_mapping, id))) {
+  if ((gn = hashtable_get(gff3_parser->id_to_genome_node, id))) {
     /* this id has been used already -> try to make this a multi-feature */
     if (genome_node_get_line_number(gn) < gff3_parser->last_terminator) {
       error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
@@ -432,7 +430,7 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
     }
   }
   else {
-    hashtable_add(gff3_parser->id_to_genome_node_mapping, cstr_dup(id),
+    hashtable_add(gff3_parser->id_to_genome_node, cstr_dup(id),
                   genome_node_ref(genome_feature));
   }
 
@@ -461,7 +459,7 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
   for (i = 0; i < splitter_size(parent_splitter); i++) {
     GenomeNode* parent_gf;
     const char *parent = splitter_get_token(parent_splitter, i);
-    parent_gf = hashtable_get(gff3_parser->id_to_genome_node_mapping, parent);
+    parent_gf = hashtable_get(gff3_parser->id_to_genome_node, parent);
     if (!parent_gf) {
       if (!gff3_parser->tidy) {
         error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
@@ -1019,7 +1017,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     /* now all nodes are complete */
     gff3_parser->incomplete_node = false;
     if (!gff3_parser->checkids)
-      hashtable_reset(gff3_parser->id_to_genome_node_mapping);
+      hashtable_reset(gff3_parser->id_to_genome_node);
     gff3_parser->last_terminator = line_number;
   }
   else {
@@ -1115,9 +1113,9 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
 
 void gff3parser_reset(GFF3Parser *gff3_parser)
 {
-  assert(gff3_parser && gff3_parser->id_to_genome_node_mapping);
+  assert(gff3_parser && gff3_parser->id_to_genome_node);
   gff3_parser->fasta_parsing = false;
-  hashtable_reset(gff3_parser->id_to_genome_node_mapping);
+  hashtable_reset(gff3_parser->id_to_genome_node);
   hashtable_reset(gff3_parser->seqid_to_ssr_mapping);
   hashtable_reset(gff3_parser->source_to_str_mapping);
   hashtable_reset(gff3_parser->undefined_sequence_regions);
@@ -1127,8 +1125,8 @@ void gff3parser_reset(GFF3Parser *gff3_parser)
 void gff3parser_delete(GFF3Parser *gff3_parser)
 {
   if (!gff3_parser) return;
-  assert(gff3_parser->id_to_genome_node_mapping);
-  hashtable_delete(gff3_parser->id_to_genome_node_mapping);
+  assert(gff3_parser->id_to_genome_node);
+  hashtable_delete(gff3_parser->id_to_genome_node);
   hashtable_delete(gff3_parser->seqid_to_ssr_mapping);
   hashtable_delete(gff3_parser->source_to_str_mapping);
   hashtable_delete(gff3_parser->undefined_sequence_regions);
