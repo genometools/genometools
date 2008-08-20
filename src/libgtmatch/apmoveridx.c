@@ -403,13 +403,13 @@ static void apm_inplacenextMyercolumn(const void *dfsconstinfo,
   }
 }
 
-Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
-                                          bool nowildcards,
-                                          unsigned int alphasize,
-                                          const Uchar *pattern,
-                                          unsigned long patternlength,
-                                          unsigned long maxdistance,
-                                          Seqpos startpos)
+Definedunsignedlong apm_findshortestmatchforward(const Encodedsequence *encseq,
+                                                 bool nowildcards,
+                                                 unsigned int alphasize,
+                                                 const Uchar *pattern,
+                                                 unsigned long patternlength,
+                                                 unsigned long maxdistance,
+                                                 Seqpos startpos)
 {
   Seqpos pos, totallength = getencseqtotallength(encseq);
   void *dfsconstinfo;
@@ -421,7 +421,7 @@ Definedunsignedlong apm_findshortestmatch(const Encodedsequence *encseq,
   dfsconstinfo = apm_allocatedfsconstinfo(alphasize);
   mti = (Matchtaskinfo *) dfsconstinfo;
   apm_initdfsconstinfo(dfsconstinfo,alphasize,pattern,patternlength,
-                       maxdistance,false,0);
+                       maxdistance,0,false);
   apm_initMyerscolumn((Aliasdfsstate *) &currentcol,dfsconstinfo);
   for (pos = startpos; /* Nothing */; pos++)
   {
