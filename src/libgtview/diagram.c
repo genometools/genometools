@@ -139,15 +139,21 @@ static bool get_caption_display_status(Diagram *d, GenomeFeatureType *gft)
     unsigned long threshold;
     double tmp;
     status = ma_malloc(sizeof (bool*));
-    if (config_get_num(d->config, genome_feature_type_get_cstr(gft),
-                       "max_capt_show_width", &tmp))
-      threshold = tmp;
-    else
-      threshold = UNDEF_ULONG;
-    if (threshold == UNDEF_ULONG)
+    if (!config_get_bool(d->config, "format", "show_block_captions",
+                       status))
       *status = true;
-    else
-      *status = (range_length(d->range) <= threshold);
+    if (*status)
+    {
+      if (config_get_num(d->config, genome_feature_type_get_cstr(gft),
+                         "max_capt_show_width", &tmp))
+        threshold = tmp;
+      else
+        threshold = UNDEF_ULONG;
+      if (threshold == UNDEF_ULONG)
+        *status = true;
+      else
+        *status = (range_length(d->range) <= threshold);
+    }
     hashtable_add(d->caption_display_status, gft, status);
   }
   return *status;
@@ -599,12 +605,16 @@ static int layout_tracks(void *key, void *value, void *data,
   type = genome_feature_type_get_cstr(gft);
   log_log("layouting track %s", type);
 
-  if (!config_get_bool(tti->dia->config, type, "split_lines", &split))
+  if (!config_get_bool(tti->dia->config, "format", "split_lines", &split))
     split = true;
+  if (split)
+    if (!config_get_bool(tti->dia->config, type, "split_lines", &split))
+      split = true;
   if (config_get_num(tti->dia->config, type, "max_num_lines", &tmp))
     max = tmp;
   else
     max = 50;
+
   /* For now, use the captions line breaker */
   track = track_new(track_key, max, split,
                     line_breaker_captions_new(tti->canvas));
