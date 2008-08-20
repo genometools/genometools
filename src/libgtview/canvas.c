@@ -378,7 +378,8 @@ int canvas_visit_track_pre(Canvas *canvas, Track *track)
         msg = "(%lu blocks not shown due to exceeded line limit)";
         snprintf(buf, BUFSIZ, msg, exceeded);
       }
-      width = graphics_get_text_width(canvas->g, str_get(track_get_title(track)));
+      width = graphics_get_text_width(canvas->g,
+                                      str_get(track_get_title(track)));
       graphics_draw_colored_text(canvas->g,
                                  canvas->margins+width+10.0,
                                  canvas->y,
