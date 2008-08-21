@@ -336,12 +336,11 @@ static int replace_func(void **elem, void *info, UNUSED Error *err)
 }
 
 static void replace_node(GenomeNode *genome_node, GenomeNode *pseudo_node,
-                         const char *id, GFF3Parser *parser,
                          Queue *genome_nodes, AutomaticSequenceRegion *auto_sr)
 {
   ReplaceInfo replace_info;
   int rval;
-  assert(genome_node && pseudo_node && id && parser && genome_nodes);
+  assert(genome_node && pseudo_node && genome_nodes);
   replace_info.genome_node = genome_node;
   replace_info.pseudo_node = pseudo_node;
   if (auto_sr) {
@@ -401,7 +400,7 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
             GenomeNode *pseudo_node = genome_feature_new_pseudo((GenomeFeature*)
                                                                 gn);
             genome_node_is_part_of_genome_node(pseudo_node, gn);
-            replace_node(gn, pseudo_node, id, parser, genome_nodes, auto_sr);
+            replace_node(gn, pseudo_node, genome_nodes, auto_sr);
             feature_info_add_pseudo_parent(parser->feature_info, id,
                                            pseudo_node);
             genome_node_is_part_of_genome_node(pseudo_node, genome_feature);
@@ -449,6 +448,7 @@ static Array* find_roots(Splitter *parent_splitter,
   return roots;
 }
 
+#ifndef NDEBUG
 static bool roots_differ(Array *roots)
 {
   GenomeNode *first_root;
@@ -461,6 +461,7 @@ static bool roots_differ(Array *roots)
   }
   return false;
 }
+#endif
 
 static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
                                bool *is_child, GFF3Parser *parser,
