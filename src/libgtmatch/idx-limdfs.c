@@ -34,10 +34,10 @@
 
 #ifdef SKDEBUG
 #define DECLAREDFSSTATE(V)\
-        Aliasdfsstate V[4]
+        Aliasdfsstate V[5]
 #else
 #define DECLAREDFSSTATE(V)\
-        Aliasdfsstate V[3]
+        Aliasdfsstate V[4]
 #endif
 
 typedef struct
@@ -370,6 +370,13 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   }
 }
 
+static void addpathchar(Limdfsresources *limdfsresources,unsigned long idx,
+                        Uchar cc)
+{
+  assert(idx < (Seqpos) limdfsresources->maxpathlength);
+  limdfsresources->currentpathspace[idx] = cc;
+}
+
 static void pck_overcontext(Limdfsresources *limdfsresources,
                             bool rcmatch,
                             const DECLAREPTRDFSSTATE(dfsstate),
@@ -405,9 +412,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
 #endif
-      assert(offset - 1 + contextlength
-             < (Seqpos) limdfsresources->maxpathlength);
-      limdfsresources->currentpathspace[offset-1+contextlength] = cc;
+      addpathchar(limdfsresources,offset - 1 + contextlength,cc);
       adfst->inplacenextDfsstate(limdfsresources->dfsconstinfo,
                                  limdfsresources->currentdfsstate,
                                  (unsigned long) (offset + contextlength),
@@ -707,6 +712,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     assert(inchar < limdfsresources->alphasize);
     child.code = startcode + inchar;
     child.inchar = inchar;
+    addpathchar(limdfsresources,parent->offset,inchar);
     sumwidth += child.rightbound - child.leftbound;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
@@ -796,10 +802,8 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
     parentwithinfo = *stackptr; /* make a copy */
     if (parentwithinfo.lcpitv.offset > 0)
     {
-      assert(parentwithinfo.lcpitv.offset-1 <
-             (Seqpos) limdfsresources->maxpathlength);
-      limdfsresources->currentpathspace[parentwithinfo.lcpitv.offset-1]
-                     = parentwithinfo.lcpitv.inchar;
+      addpathchar(limdfsresources,parentwithinfo.lcpitv.offset-1,
+                  parentwithinfo.lcpitv.inchar);
     }
     assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
     limdfsresources->stack.nextfreeLcpintervalwithinfo--;

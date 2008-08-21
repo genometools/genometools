@@ -37,9 +37,7 @@ typedef struct
                           \(m\) is the length of the pattern, \(k\) is the
                           distance threshold, and \(D\) is
                           the current distance column */
-#ifdef SKDEBUG
   unsigned long scorevalue;    /* the score for the given depth */
-#endif
 } Myerscolumn;
 
 typedef struct
@@ -198,14 +196,13 @@ static void apm_initMyerscolumn(DECLAREPTRDFSSTATE(aliascolumn),
   {
     column->Pv = 0UL; /* first column consists of 0 => skip pattern prefix */
     column->maxleqk = mti->patternlength;
+    column->scorevalue = 0;
   } else
   {
     column->Pv = ~0UL; /* first column: 0 1 2 ... m */
     column->maxleqk = mti->maxdistance;
+    column->scorevalue = ((Matchtaskinfo *) dfsconstinfo)->maxdistance;
   }
-#ifdef SKDEBUG
-  column->scorevalue = ((Matchtaskinfo *) dfsconstinfo)->maxdistance;
-#endif
 }
 
 static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
@@ -275,9 +272,7 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
   if (Eq & backmask || Mh & backmask)
   {
     outcol->maxleqk = incol->maxleqk + 1UL;
-#ifdef SKDEBUG
     outcol->scorevalue = incol->scorevalue;
-#endif
   } else
   {
     if (Ph & backmask)
@@ -296,9 +291,7 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
             if (score <= mti->maxdistance)
             {
               outcol->maxleqk = idx;
-#ifdef SKDEBUG
               outcol->scorevalue = score;
-#endif
               break;
             }
           } else
@@ -320,9 +313,7 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
     } else
     {
       outcol->maxleqk = incol->maxleqk;
-#ifdef SKDEBUG
       outcol->scorevalue = incol->scorevalue;
-#endif
     }
   }
 #ifdef SKDEBUG
@@ -379,9 +370,7 @@ static void apm_inplacenextMyercolumn(const void *dfsconstinfo,
             if (score <= mti->maxdistance)
             {
               tmpmaxleqk = idx;
-#ifdef SKDEBUG
               col->scorevalue = score;
-#endif
               break;
             }
           } else
@@ -508,6 +497,7 @@ Definedunsignedlong apm_findshortestmatchreverse(const Uchar *vseq,
       break;
     }
   }
+  assert (currentcol.scorevalue == maxdistance);
   apm_freedfsconstinfo(&dfsconstinfo);
   result.defined = true;
   result.valueunsignedlong = len;

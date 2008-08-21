@@ -66,7 +66,7 @@ static void showmatch(void *processinfo,
                       bool rcmatch,
                       Seqpos dbstartpos,
                       Seqpos dblen,
-                      UNUSED const Uchar *dbsubstring,
+                      const Uchar *dbsubstring,
                       unsigned long pprefixlen)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
@@ -76,11 +76,13 @@ static void showmatch(void *processinfo,
   if (showmatchinfo->tageratoroptions != NULL &&
       showmatchinfo->tageratoroptions->maxintervalwidth > 0)
   {
-    Definedunsignedlong result;
-
     printf(" ");
     printfsymbolstring(showmatchinfo->alpha,dbsubstring,(unsigned long) dblen);
-    result = apm_findshortestmatchreverse(
+    if (showmatchinfo->tageratoroptions->skpp)
+    {
+      Definedunsignedlong result;
+
+      result = apm_findshortestmatchreverse(
                             dbsubstring,
                             (unsigned long) dblen,
                             showmatchinfo->tageratoroptions->nowildcards,
@@ -89,13 +91,18 @@ static void showmatch(void *processinfo,
                             pprefixlen,
                             (unsigned long)
                             showmatchinfo->tageratoroptions->maxdistance);
-    assert(result.defined &&
-           pprefixlen >= result.valueunsignedlong);
-    printf(" %lu %lu ",result.valueunsignedlong,
-                       pprefixlen - result.valueunsignedlong);
-    printfsymbolstring(NULL,showmatchinfo->tagptr +
-                            (pprefixlen - result.valueunsignedlong),
-                            result.valueunsignedlong);
+      assert(result.defined);
+      assert(pprefixlen >= result.valueunsignedlong);
+      printf(" %lu %lu ",result.valueunsignedlong,
+                         pprefixlen - result.valueunsignedlong);
+      printfsymbolstring(NULL,showmatchinfo->tagptr +
+                              (pprefixlen - result.valueunsignedlong),
+                              result.valueunsignedlong);
+    } else
+    {
+      printf(" %lu 0 ",pprefixlen);
+      printfsymbolstring(NULL,showmatchinfo->tagptr, pprefixlen);
+    }
   }
   printf("\n");
 }
