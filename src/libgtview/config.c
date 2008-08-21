@@ -163,7 +163,7 @@ static int config_find_section_for_getting(const Config *cfg,
   lua_getfield(cfg->L, -1, section);
   if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1)) {
     if (cfg->verbose) warning("section '%s' is not defined", section);
-    lua_pop(cfg->L, 1);
+    lua_pop(cfg->L, 2);
     return -1;
   } else depth++;
   return depth;
@@ -180,7 +180,6 @@ bool config_get_color(const Config *cfg, const char *section,
   i = config_find_section_for_getting(cfg, section);
   /* could not get section, return default */
   if (i < 0) {
-    lua_pop(cfg->L, i);
     return false;
   }
   /* lookup color entry for given feature */
@@ -256,7 +255,6 @@ bool config_get_str(const Config *cfg, const char *section,
   i = config_find_section_for_getting(cfg, section);
   /* could not get section, return default */
   if (i < 0) {
-    lua_pop(cfg->L, i);
     return false;
   }
   /* lookup entry for given key */
@@ -295,7 +293,6 @@ bool config_get_num(const Config *cfg, const char *section, const char *key,
   i = config_find_section_for_getting(cfg, section);
   /* could not get section, return default */
   if (i < 0) {
-    lua_pop(cfg->L, i);
     return false;
   }
   /* lookup entry for given key */
@@ -334,7 +331,6 @@ bool config_get_bool(const Config *cfg, const char *section, const char *key,
   i = config_find_section_for_getting(cfg, section);
   /* could not get section, return default */
   if (i < 0) {
-    lua_pop(cfg->L, i);
     return false;
   }
   /* lookup entry for given key */
