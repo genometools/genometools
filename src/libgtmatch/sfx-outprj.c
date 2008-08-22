@@ -29,7 +29,7 @@
 #include "defined-types.h"
 #include "format64.h"
 #include "spacedef.h"
-#include "esafileend.h"
+#include "esa-fileend.h"
 #include "readmode-def.h"
 #include "stamp.h"
 

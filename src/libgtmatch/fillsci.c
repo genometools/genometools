@@ -23,7 +23,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
-#include "esafileend.h"
+#include "esa-fileend.h"
 #include "seqpos-def.h"
 #include "verbose-def.h"
 #include "spacedef.h"

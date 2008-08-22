@@ -26,7 +26,7 @@
 #include "sfx-optdef.h"
 #include "encseq-def.h"
 #include "measure-time-if.h"
-#include "esafileend.h"
+#include "esa-fileend.h"
 #include "readmode-def.h"
 #include "verbose-def.h"
 #include "intcode-def.h"

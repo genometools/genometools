@@ -36,7 +36,7 @@
 #include "mapspec-def.h"
 #include "encseq-def.h"
 #include "safecast-gen.h"
-#include "esafileend.h"
+#include "esa-fileend.h"
 #include "verbose-def.h"
 #include "stamp.h"
 

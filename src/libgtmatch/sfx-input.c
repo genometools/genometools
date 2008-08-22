@@ -26,7 +26,7 @@
 #include "sfx-optdef.h"
 #include "encseq-def.h"
 #include "measure-time-if.h"
-#include "esafileend.h"
+#include "esa-fileend.h"
 #include "verbose-def.h"
 #include "sarr-def.h"
 #include "stamp.h"

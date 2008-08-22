@@ -18,7 +18,7 @@
 #include "libgtcore/chardef.h"
 #include "libgtcore/fa.h"
 #include "emimergeesa.h"
-#include "esafileend.h"
+#include "esa-fileend.h"
 #include "fmindex.h"
 #include "divmodmul.h"
 #include "spacedef.h"

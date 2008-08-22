@@ -27,7 +27,7 @@
 #include "spacedef.h"
 #include "encseq-def.h"
 #include "turnwheels.h"
-#include "esafileend.h"
+#include "esa-fileend.h"
 #include "sfx-outlcp.h"
 #include "bcktab.h"
 #include "bltrie-ssort.h"

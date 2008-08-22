@@ -31,7 +31,7 @@
 #include "libgtcore/unused.h"
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/verbose-def.h"
-#include "libgtmatch/esafileend.h"
+#include "libgtmatch/esa-fileend.h"
 #include "libgtmatch/intcode-def.h"
 #include "libgtmatch/encseq-def.h"
 

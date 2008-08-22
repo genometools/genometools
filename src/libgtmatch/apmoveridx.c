@@ -33,11 +33,11 @@ typedef struct
 {
   unsigned long Pv,       /* the plus-vector for Myers Algorithm */
                 Mv,       /* the minus-vector for Myers Algorithm */
-                maxleqk;  /* \(\max\{i\in[0,m]\mid D(i)\leq k\}\) where
+                maxleqk,  /* \(\max\{i\in[0,m]\mid D(i)\leq k\}\) where
                           \(m\) is the length of the pattern, \(k\) is the
                           distance threshold, and \(D\) is
                           the current distance column */
-  unsigned long scorevalue;    /* the score for the given depth */
+                lastscorevalue;   /* the score for the given depth */
 } Myerscolumn;
 
 typedef struct
@@ -139,11 +139,11 @@ static void verifycolumnvalues(const Matchtaskinfo *mti,
     fprintf(stderr," = col->maxleqk\n");
     exit(EXIT_FAILURE);
   }
-  if (bfmaxleqk != UNDEFMAXLEQK && minscore != col->scorevalue)
+  if (bfmaxleqk != UNDEFMAXLEQK && minscore != col->lastscorevalue)
   {
     fprintf(stderr,"correct score = %lu != %lu = col->score\n",
                  minscore,
-                 col->scorevalue);
+                 col->lastscorevalue);
     exit(EXIT_FAILURE);
   }
 }
@@ -196,12 +196,12 @@ static void apm_initMyerscolumn(DECLAREPTRDFSSTATE(aliascolumn),
   {
     column->Pv = 0UL; /* first column consists of 0 => skip pattern prefix */
     column->maxleqk = mti->patternlength;
-    column->scorevalue = 0;
+    column->lastscorevalue = 0;
   } else
   {
     column->Pv = ~0UL; /* first column: 0 1 2 ... m */
     column->maxleqk = mti->maxdistance;
-    column->scorevalue = ((Matchtaskinfo *) dfsconstinfo)->maxdistance;
+    column->lastscorevalue = mti->maxdistance;
   }
 }
 
@@ -272,7 +272,7 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
   if (Eq & backmask || Mh & backmask)
   {
     outcol->maxleqk = incol->maxleqk + 1UL;
-    outcol->scorevalue = incol->scorevalue;
+    outcol->lastscorevalue = incol->lastscorevalue;
   } else
   {
     if (Ph & backmask)
@@ -291,7 +291,7 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
             if (score <= mti->maxdistance)
             {
               outcol->maxleqk = idx;
-              outcol->scorevalue = score;
+              outcol->lastscorevalue = score;
               break;
             }
           } else
@@ -313,7 +313,7 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
     } else
     {
       outcol->maxleqk = incol->maxleqk;
-      outcol->scorevalue = incol->scorevalue;
+      outcol->lastscorevalue = incol->lastscorevalue;
     }
   }
 #ifdef SKDEBUG
@@ -370,7 +370,7 @@ static void apm_inplacenextMyercolumn(const void *dfsconstinfo,
             if (score <= mti->maxdistance)
             {
               tmpmaxleqk = idx;
-              col->scorevalue = score;
+              col->lastscorevalue = score;
               break;
             }
           } else
@@ -491,13 +491,14 @@ Definedunsignedlong apm_findshortestmatchreverse(const Uchar *vseq,
     }
     apm_inplacenextMyercolumn(dfsconstinfo,(Aliasdfsstate *) &currentcol,
                               len,*vptr);
+    printf("processed %u->score %lu\n",*vptr,currentcol.lastscorevalue);
     assert (currentcol.maxleqk != UNDEFMAXLEQK);
     if (currentcol.maxleqk == SUCCESSMAXLEQK)
     {
       break;
     }
   }
-  assert (currentcol.scorevalue == maxdistance);
+  assert (currentcol.lastscorevalue == maxdistance);
   apm_freedfsconstinfo(&dfsconstinfo);
   result.defined = true;
   result.valueunsignedlong = len;

@@ -22,7 +22,7 @@
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "emimergeesa.h"
-#include "esafileend.h"
+#include "esa-fileend.h"
 #include "verbose-def.h"
 #include "lcpoverflow.h"
 

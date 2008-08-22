@@ -23,7 +23,7 @@
 #include "libgtcore/fa.h"
 #include "libgtcore/symboldef.h"
 #include "libgtcore/chardef.h"
-#include "esafileend.h"
+#include "esa-fileend.h"
 #include "mapspec-def.h"
 #include "spacedef.h"
 #include "bcktab.h"

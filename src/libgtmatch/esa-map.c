@@ -27,7 +27,7 @@
 #include "format64.h"
 #include "sarr-def.h"
 #include "encseq-def.h"
-#include "esafileend.h"
+#include "esa-fileend.h"
 #include "sfx-ri-def.h"
 #include "intcode-def.h"
 #include "spacedef.h"

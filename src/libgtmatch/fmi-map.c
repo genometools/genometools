@@ -23,7 +23,7 @@
 #include "libgtcore/array.h"
 #include "libgtcore/str.h"
 #include "sfx-ri-def.h"
-#include "esafileend.h"
+#include "esa-fileend.h"
 #include "fmindex.h"
 #include "sarr-def.h"
 #include "verbose-def.h"
