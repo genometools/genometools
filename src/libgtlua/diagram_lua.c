@@ -60,8 +60,7 @@ static int diagram_lua_render(lua_State *L)
   Canvas **canvas;
   diagram = check_diagram(L,1);
   canvas = check_canvas(L,2);
-  diagram_render(*diagram, *canvas);
-  return 0;
+  return diagram_render(*diagram, *canvas);
 }
 
 static int diagram_lua_delete(lua_State *L)
