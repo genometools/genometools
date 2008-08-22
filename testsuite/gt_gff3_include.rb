@@ -671,3 +671,32 @@ Test do
   run_test "#{$bin}gt gff3 #{$testdata}multiple_top_level_parents.gff3"
   run "diff #{$last_stdout} #{$testdata}multiple_top_level_parents.gff3"
 end
+
+def large_gff3_test(name, file)
+  Name "gt gff3 #{name}"
+  Keywords "gt_gff3"
+  Test do
+    run_test "#{$bin}gt gff3 #{$gttestdata}gff3/#{file}"
+  end
+
+  Name "gt gff3 #{name} (-sort)"
+  Keywords "gt_gff3"
+  Test do
+    run_test "#{$bin}gt gff3 -sort -width 80 " + "#{$gttestdata}gff3/#{file}"
+    run      "diff #{$last_stdout} #{$gttestdata}gff3/#{file}.sorted"
+  end
+
+  Name "gt gff3 #{name} (sorted)"
+  Keywords "gt_gff3"
+  Test do
+    run_test "#{$bin}gt gff3 -width 80 #{$gttestdata}gff3/#{file}.sorted"
+    run      "diff #{$last_stdout} #{$gttestdata}gff3/#{file}.sorted"
+  end
+end
+
+if $gttestdata then
+  large_gff3_test("Saccharomyces cerevisiae", "saccharomyces_cerevisiae.gff")
+  large_gff3_test("Aaegypti", "aaegypti.BASEFEATURES-AaegL1.1.gff3")
+  large_gff3_test("Drosophila melanogaster",
+                  "Drosophila_melanogaster.BDGP5.4.50.gff3")
+end
