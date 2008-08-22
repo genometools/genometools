@@ -39,7 +39,7 @@ static int diagram_lua_new(lua_State *L)
   /* get feature index */
   feature_index = check_feature_index(L, 1);
   /* get seqid */
-  seqid       = luaL_checkstring(L, 2);
+  seqid = luaL_checkstring(L, 2);
   luaL_argcheck(L, feature_index_has_seqid(*feature_index, seqid),
                 2, "feature index does not contain the given sequence id");
   /* get range */
@@ -77,7 +77,7 @@ static const struct luaL_Reg diagram_lib_f [] = {
 };
 
 static const struct luaL_Reg diagram_lib_m [] = {
-  { "render", diagram_lua_render },
+  { "render",      diagram_lua_render },
   { NULL, NULL }
 };
 

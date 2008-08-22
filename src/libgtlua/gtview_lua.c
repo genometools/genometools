@@ -22,7 +22,6 @@
 #include "libgtlua/feature_stream_lua.h"
 #include "libgtlua/feature_visitor_lua.h"
 #include "libgtlua/gtview_lua.h"
-#include "libgtlua/render_lua.h"
 
 int luaopen_gtview(lua_State *L)
 {
