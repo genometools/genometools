@@ -672,6 +672,12 @@ Test do
   run "diff #{$last_stdout} #{$testdata}multiple_top_level_parents.gff3"
 end
 
+Name "gt gff3 undefined parent (one of two)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}undefined_parent.gff3"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3"

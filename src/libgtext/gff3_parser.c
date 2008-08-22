@@ -475,17 +475,15 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
   return had_err;
 }
 
-static Array* find_roots(Splitter *parent_splitter,
-                            FeatureInfo *feature_info)
+static Array* find_roots(StrArray *parents, FeatureInfo *feature_info)
 {
   Array *roots;
   unsigned long i;
-  assert(parent_splitter);
+  assert(parents);
   roots = array_new(sizeof (GenomeNode*));
-  for (i = 0; i < splitter_size(parent_splitter); i++) {
-    GenomeNode *root;
-    const char *parent = splitter_get_token(parent_splitter, i);
-    root = feature_info_find_root(feature_info, parent);
+  for (i = 0; i < strarray_size(parents); i++) {
+    GenomeNode *root = feature_info_find_root(feature_info,
+                                              strarray_get(parents, i));
     array_add(roots, root);
   }
   return roots;
@@ -611,12 +609,14 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
                                Error *err)
 {
   Splitter *parent_splitter;
+  StrArray *valid_parents;
   unsigned long i;
   int had_err = 0;
 
   error_check(err);
   assert(parent_attr);
 
+  valid_parents = strarray_new();
   parent_splitter = splitter_new();
   splitter_split(parent_splitter, parent_attr, strlen(parent_attr), ',');
   assert(splitter_size(parent_splitter));
@@ -652,18 +652,25 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
       assert(parser->incomplete_node);
       genome_node_is_part_of_genome_node(parent_gf, genome_feature);
       *is_child = true;
+      strarray_add_cstr(valid_parents, parent);
     }
   }
 
-  /* make sure all parents have the same (pseudo-)root */
-  if (!had_err && splitter_size(parent_splitter) >= 2) {
-    Array *roots = find_roots(parent_splitter, parser->feature_info);
+  if (!had_err && !parser->tidy) {
+    assert(splitter_size(parent_splitter) == strarray_size(valid_parents));
+  }
+
+  splitter_delete(parent_splitter);
+
+  /* make sure all (valid) parents have the same (pseudo-)root */
+  if (!had_err && strarray_size(valid_parents) >= 2) {
+    Array *roots = find_roots(valid_parents, parser->feature_info);
     if (roots_differ(roots))
         join_roots(roots, parser->feature_info, genome_nodes, auto_sr);
     array_delete(roots);
   }
 
-  splitter_delete(parent_splitter);
+  strarray_delete(valid_parents);
 
   return had_err;
 }
