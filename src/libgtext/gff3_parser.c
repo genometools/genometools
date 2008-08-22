@@ -319,8 +319,8 @@ static int set_seqid(GenomeNode *genome_feature, const char *seqid, Range range,
 }
 
 typedef struct {
-  GenomeNode *genome_node,
-             *pseudo_node;
+  GenomeNode *node_to_replace,
+             *replacing_node;
 } ReplaceInfo;
 
 static int replace_func(void **elem, void *info, UNUSED Error *err)
@@ -329,22 +329,22 @@ static int replace_func(void **elem, void *info, UNUSED Error *err)
   GenomeNode **node = (GenomeNode**) elem;
   error_check(err);
   assert(node && replace_info);
-  if (*node == replace_info->genome_node) {
-    *node = replace_info->pseudo_node;
+  if (*node == replace_info->node_to_replace) {
+    *node = replace_info->replacing_node;
     return 1;
   }
   return 0;
 }
 
-/* XXX: change variable names */
-static void replace_node(GenomeNode *genome_node, GenomeNode *pseudo_node,
-                         Queue *genome_nodes, AutomaticSequenceRegion *auto_sr)
+static void replace_node(GenomeNode *node_to_replace,
+                         GenomeNode *replacing_node, Queue *genome_nodes,
+                         AutomaticSequenceRegion *auto_sr)
 {
   ReplaceInfo replace_info;
   int rval;
-  assert(genome_node && pseudo_node && genome_nodes);
-  replace_info.genome_node = genome_node;
-  replace_info.pseudo_node = pseudo_node;
+  assert(node_to_replace && replacing_node && genome_nodes);
+  replace_info.node_to_replace = node_to_replace;
+  replace_info.replacing_node = replacing_node;
   if (auto_sr) {
     rval = array_iterate(auto_sr->genome_features,
                          (ArrayProcessor) replace_func, &replace_info, NULL);
