@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include <limits.h>
 #include "libgtcore/chardef.h"
 #include "initeqsvec.h"
 
@@ -27,6 +28,7 @@ void initeqsvector(unsigned long *eqsvector,
   unsigned long *eptr, shiftmask;
   const Uchar *pptr;
 
+  assert(patternlength <= (unsigned long) (CHAR_BIT * sizeof (unsigned long)));
   for (eptr = eqsvector; eptr < eqsvector + eqslen; eptr++)
   {
     *eptr = 0;
@@ -51,6 +53,7 @@ void initeqsvectorrev(unsigned long *eqsvectorrev,
   unsigned long *eptr, shiftmask;
   const Uchar *pptr;
 
+  assert(patternlength <= (unsigned long) (CHAR_BIT * sizeof (unsigned long)));
   for (eptr = eqsvectorrev; eptr < eqsvectorrev + eqslen; eptr++)
   {
     *eptr = 0;

@@ -32,7 +32,8 @@
 #include "format64.h"
 #include "idx-limdfs.h"
 #include "mssufpat.h"
-#include "apmoveridx.h" /* import esa_findshortestmatchreverse */
+#include "apmoveridx.h"
+#include "dist-short.h"
 #include "stamp.h"
 
 #include "echoseq.pr"
@@ -60,6 +61,7 @@ typedef struct
   unsigned int alphasize;
   const Uchar *tagptr;
   const Alphabet *alpha;
+  unsigned long *eqsvector;
 } Showmatchinfo;
 
 static void showmatch(void *processinfo,
@@ -80,24 +82,20 @@ static void showmatch(void *processinfo,
     printfsymbolstring(showmatchinfo->alpha,dbsubstring,(unsigned long) dblen);
     if (showmatchinfo->tageratoroptions->skpp)
     {
-      Definedunsignedlong result;
-
-      result = apm_findshortestmatchreverse(
-                            dbsubstring,
-                            (unsigned long) dblen,
-                            showmatchinfo->tageratoroptions->nowildcards,
-                            showmatchinfo->alphasize,
-                            showmatchinfo->tagptr,
-                            pprefixlen,
-                            (unsigned long)
-                            showmatchinfo->tageratoroptions->maxdistance);
-      assert(result.defined);
-      assert(pprefixlen >= result.valueunsignedlong);
-      printf(" %lu %lu ",result.valueunsignedlong,
-                         pprefixlen - result.valueunsignedlong);
+      unsigned long suffixlength
+        = reversesuffixmatch(showmatchinfo->eqsvector,
+                             showmatchinfo->alphasize,
+                             dbsubstring,
+                             (unsigned long) dblen,
+                             showmatchinfo->tagptr,
+                             pprefixlen,
+                             (unsigned long) showmatchinfo->tageratoroptions
+                                                         ->maxdistance);
+      assert(pprefixlen >= suffixlength);
+      printf(" %lu %lu ",suffixlength,pprefixlen - suffixlength);
       printfsymbolstring(NULL,showmatchinfo->tagptr +
-                              (pprefixlen - result.valueunsignedlong),
-                              result.valueunsignedlong);
+                              (pprefixlen - suffixlength),
+                              suffixlength);
     } else
     {
       printf(" %lu 0 ",pprefixlen);
@@ -518,6 +516,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       showmatchinfo.alphasize = (unsigned int) (mapsize-1);
       showmatchinfo.tagptr = &twl.transformedtag[0];
       showmatchinfo.alpha = suffixarray.alpha;
+      showmatchinfo.eqsvector = ma_malloc(sizeof(*showmatchinfo.eqsvector) *
+                                          showmatchinfo.alphasize);
       processmatchinfooffline = &showmatchinfo;
     }
     if (tageratoroptions->online || tageratoroptions->docompare)
@@ -653,6 +653,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
   }
   seqiterator_delete(seqit);
   freesuffixarray(&suffixarray);
+  ma_free(showmatchinfo.eqsvector);
   if (packedindex != NULL)
   {
     deletevoidBWTSeq(packedindex);

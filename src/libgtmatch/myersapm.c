@@ -24,7 +24,7 @@
 #include "defined-types.h"
 #include "alphadef.h"
 #include "procmatch.h"
-#include "apmoveridx.h" /* import esa_findshortestmatchforward */
+#include "dist-short.h"
 #include "initeqsvec.h"
 
 struct Myersonlineresources
@@ -32,7 +32,8 @@ struct Myersonlineresources
   Encodedsequencescanstate *esr;
   const Encodedsequence *encseq;
   Seqpos totallength;
-  unsigned long *eqsvectorrev;
+  unsigned long *eqsvectorrev,
+                *eqsvector;
   unsigned int alphasize;
   bool nowildcards;
   Processmatch processmatch;
@@ -50,6 +51,7 @@ Myersonlineresources *newMyersonlineresources(
 
   ALLOCASSIGNSPACE(mor,NULL,Myersonlineresources,1);
   ALLOCASSIGNSPACE(mor->eqsvectorrev,NULL,unsigned long,mapsize-1);
+  ALLOCASSIGNSPACE(mor->eqsvector,NULL,unsigned long,mapsize-1);
   mor->encseq = encseq;
   mor->esr = newEncodedsequencescanstate();
   assert(mapsize > 0 && mapsize-1 <= MAXALPHABETCHARACTER);
@@ -66,6 +68,7 @@ void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources)
   Myersonlineresources *mor = *ptrmyersonlineresources;
 
   FREESPACE(mor->eqsvectorrev);
+  FREESPACE(mor->eqsvector);
   freeEncodedsequencescanstate(&mor->esr);
   FREESPACE(*ptrmyersonlineresources);
 }
@@ -143,6 +146,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
         Seqpos dbstartpos = REVERSEPOS(mor->totallength,pos);
         Definedunsignedlong matchlength;
 
+        /*
         matchlength = apm_findshortestmatchforward(mor->encseq,
                                                    mor->nowildcards,
                                                    mor->alphasize,
@@ -150,6 +154,15 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                                                    patternlength,
                                                    maxdistance,
                                                    dbstartpos);
+        */
+        matchlength = forwardprefixmatch(mor->encseq,
+                                         mor->alphasize,
+                                         dbstartpos,
+                                         mor->nowildcards,
+                                         mor->eqsvector,
+                                         pattern,
+                                         patternlength,
+                                         maxdistance);
         assert (matchlength.defined || mor->nowildcards);
         if (matchlength.defined)
         {

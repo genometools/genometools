@@ -19,7 +19,10 @@
 #include <assert.h>
 #include "libgtcore/symboldef.h"
 #include "libgtcore/chardef.h"
+#include "encseq-def.h"
+#include "defined-types.h"
 #include "initeqsvec.h"
+#include "dist-short.h"
 
 #define DECLARELOCALVARS\
         unsigned long Pv = ~0UL,\
@@ -29,14 +32,12 @@
                       Xh,\
                       Ph,\
                       Mh,\
-                      Ebit = (1UL << (ulen-1));\
-        unsigned long distval = ulen;\
-        const Uchar *vptr;\
-        assert(ulen <= (unsigned long) (CHAR_BIT * sizeof (unsigned long)))
+                      Ebit = (1UL << (ulen-1)),\
+                      distval = ulen
 
-#define COMPUTENEWDIST\
-        assert(*vptr != (Uchar) SEPARATOR);\
-        Eq = eqsvector[(unsigned long) *vptr];\
+#define COMPUTENEWDIST(CC)\
+        assert((CC) != (Uchar) SEPARATOR);\
+        Eq = eqsvector[(unsigned long) (CC)];\
         Xv = Eq | Mv;\
         Xh = (((Eq & Pv) + Pv) ^ Pv) | Eq;\
         Ph = Mv | ~ (Xh | Pv);\
@@ -62,40 +63,81 @@
         Mv = Ph & Xv
 
 unsigned long distanceofshortstrings(unsigned long *eqsvector,
-                                     unsigned long alphasize,
+                                     unsigned int alphasize,
                                      const Uchar *useq,
                                      unsigned long ulen,
                                      const Uchar *vseq,
                                      unsigned long vlen)
 {
   DECLARELOCALVARS;
-  initeqsvector(eqsvector,alphasize,useq,ulen);
+  const Uchar *vptr;
+
+  initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
   for (vptr = vseq; vptr < vseq + vlen; vptr++)
   {
-    COMPUTENEWDIST;
+    COMPUTENEWDIST(*vptr);
   }
   return distval;
 }
 
 unsigned long reversesuffixmatch(unsigned long *eqsvector,
-                                 unsigned long alphasize,
+                                 unsigned int alphasize,
                                  const Uchar *useq,
                                  unsigned long ulen,
                                  const Uchar *vseq,
                                  unsigned long vlen,
-                                 unsigned long maxdist)
+                                 unsigned long maxdistance)
 {
   DECLARELOCALVARS;
-  initeqsvectorrev(eqsvector,alphasize,useq,ulen);
-  assert(maxdist > 0);
+  const Uchar *vptr;
+
+  initeqsvectorrev(eqsvector,(unsigned long) alphasize,useq,ulen);
+  assert(maxdistance > 0);
   for (vptr = vseq + vlen - 1; vptr >= vseq; vptr--)
   {
-    COMPUTENEWDIST;
-    if (distval <= maxdist)
+    COMPUTENEWDIST(*vptr);
+    if (distval <= maxdistance)
     {
       break;
     }
   }
-  assert(distval <= maxdist);
-  return vseq + vlen - 1 - vptr;
+  assert(distval <= maxdistance);
+  return (unsigned long) (vseq + vlen - vptr);
+}
+
+Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
+                                       unsigned int alphasize,
+                                       Seqpos startpos,
+                                       bool nowildcards,
+                                       unsigned long *eqsvector,
+                                       const Uchar *useq,
+                                       unsigned long ulen,
+                                       unsigned long maxdistance)
+{
+  DECLARELOCALVARS;
+  Seqpos pos, totallength = getencseqtotallength(encseq);
+  Uchar cc;
+  Definedunsignedlong result;
+
+  initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
+  assert(maxdistance > 0);
+  for (pos = startpos; /* Nothing */; pos++)
+  {
+    assert(pos - startpos <= (Seqpos) (ulen + maxdistance));
+    cc = getencodedchar(encseq,pos,Forwardmode);
+    if (nowildcards && cc == (Uchar) WILDCARD)
+    {
+      result.defined = false;
+      result.valueunsignedlong = 0;
+      return result;
+    }
+    COMPUTENEWDIST(cc);
+    if (distval <= maxdistance || pos == totallength-1)
+    {
+      break;
+    }
+  }
+  result.defined = true;
+  result.valueunsignedlong = (unsigned long) (pos - startpos + 1);
+  return result;
 }
