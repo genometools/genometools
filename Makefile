@@ -18,7 +18,7 @@
 INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/zlib-1.2.3 \
             -I$(CURDIR)/src/external/md5-1.1.2/src \
-            -I$(CURDIR)/src/external/lua-5.1.3/src \
+            -I$(CURDIR)/src/external/lua-5.1.4/src \
             -I$(CURDIR)/src/external/luafilesystem-1.4.1/src \
             -I$(CURDIR)/src/external/lpeg-0.7 \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
@@ -164,7 +164,7 @@ LIBEXPAT_SRC:=$(EXPAT_DIR)/xmlparse.c $(EXPAT_DIR)/xmlrole.c \
 LIBEXPAT_OBJ:=$(LIBEXPAT_SRC:%.c=obj/%.o)
 LIBEXPAT_DEP:=$(LIBEXPAT_SRC:%.c=obj/%.d)
 
-LUA_DIR:=src/external/lua-5.1.3/src
+LUA_DIR:=src/external/lua-5.1.4/src
 LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
            $(LUA_DIR)/ldo.c $(LUA_DIR)/ldump.c $(LUA_DIR)/lfunc.c \
            $(LUA_DIR)/lgc.c $(LUA_DIR)/llex.c $(LUA_DIR)/lmem.c \
