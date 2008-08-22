@@ -32,6 +32,7 @@
 #include "libgtext/feature_info.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_node.h"
+#include "libgtext/genome_node_iterator.h"
 #include "libgtext/gff3_escaping.h"
 #include "libgtext/gff3_parser.h"
 #include "libgtext/mapping.h"
@@ -335,6 +336,7 @@ static int replace_func(void **elem, void *info, UNUSED Error *err)
   return 0;
 }
 
+/* XXX: change variable names */
 static void replace_node(GenomeNode *genome_node, GenomeNode *pseudo_node,
                          Queue *genome_nodes, AutomaticSequenceRegion *auto_sr)
 {
@@ -351,6 +353,34 @@ static void replace_node(GenomeNode *genome_node, GenomeNode *pseudo_node,
   else {
     rval = queue_iterate(genome_nodes, replace_func, &replace_info, NULL);
     assert(rval == 1);
+  }
+}
+
+static void remove_node(GenomeNode *genome_node, Queue *genome_nodes,
+                        AutomaticSequenceRegion *auto_sr)
+{
+  unsigned long i;
+  assert(genome_node && genome_nodes);
+  if (auto_sr) {
+    for (i = 0; i < array_size(auto_sr->genome_features); i++) {
+      if (genome_node == *(GenomeNode**) array_get(auto_sr->genome_features, i))
+        break;
+    }
+    assert(i < array_size(auto_sr->genome_features));
+    array_rem(auto_sr->genome_features, i);
+  }
+  else {
+    /* XXX: use proper queue_rem() method */
+    Queue *tmp_queue = queue_new();
+    while (queue_size(genome_nodes)) {
+      GenomeNode *gn = queue_get(genome_nodes);
+      if (gn != genome_node)
+        queue_add(tmp_queue, gn);
+    }
+    assert(!queue_size(genome_nodes));
+    while (queue_size(tmp_queue))
+      queue_add(genome_nodes, queue_get(tmp_queue));
+    queue_delete(tmp_queue);
   }
 }
 
@@ -448,7 +478,6 @@ static Array* find_roots(Splitter *parent_splitter,
   return roots;
 }
 
-#ifndef NDEBUG
 static bool roots_differ(Array *roots)
 {
   GenomeNode *first_root;
@@ -461,10 +490,121 @@ static bool roots_differ(Array *roots)
   }
   return false;
 }
-#endif
+
+static GenomeNode* merge_pseudo_roots(GenomeNode *pseudo_a,
+                                      GenomeNode *pseudo_b,
+                                      FeatureInfo *feature_info,
+                                      Queue *genome_nodes,
+                                      AutomaticSequenceRegion *auto_sr)
+{
+  GenomeNodeIterator *gni;
+  GenomeNode *child;
+  assert(pseudo_a && genome_feature_is_pseudo((GenomeFeature*) pseudo_a));
+  assert(pseudo_b && genome_feature_is_pseudo((GenomeFeature*) pseudo_b));
+  assert(feature_info && genome_nodes);
+  /* add children of pseudo node b to pseudo node a */
+  gni = genome_node_iterator_new_direct(pseudo_b);
+  while ((child = genome_node_iterator_next(gni))) {
+    genome_node_is_part_of_genome_node(pseudo_a, child);
+    feature_info_replace_pseudo_parent(feature_info, child, pseudo_a);
+  }
+  genome_node_iterator_delete(gni);
+  /* remove pseudo node b from buffer */
+  remove_node(pseudo_b, genome_nodes, auto_sr);
+  genome_node_delete(pseudo_b);
+  return pseudo_a;
+}
+
+static GenomeNode* add_node_to_pseudo_node(GenomeNode *pseudo_node,
+                                           GenomeNode *normal_node,
+                                           FeatureInfo *feature_info,
+                                           Queue *genome_nodes,
+                                           AutomaticSequenceRegion *auto_sr)
+{
+  const char *id;
+  assert(pseudo_node && genome_feature_is_pseudo((GenomeFeature*) pseudo_node));
+  assert(normal_node &&
+         !genome_feature_is_pseudo((GenomeFeature*) normal_node));
+  assert(feature_info && genome_nodes);
+  genome_node_is_part_of_genome_node(pseudo_node, normal_node);
+  id = genome_feature_get_attribute(normal_node, ID_STRING);
+  assert(id);
+  feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
+  remove_node(normal_node, genome_nodes, auto_sr);
+  return pseudo_node;
+}
+
+static GenomeNode* create_pseudo_node(GenomeNode *node_a, GenomeNode *node_b,
+                                      FeatureInfo *feature_info,
+                                      Queue *genome_nodes,
+                                      AutomaticSequenceRegion *auto_sr)
+{
+  GenomeNode *pseudo_node;
+  const char *id;
+  assert(node_a && !genome_feature_is_pseudo((GenomeFeature*) node_a));
+  assert(node_b && !genome_feature_is_pseudo((GenomeFeature*) node_b));
+  assert(feature_info && genome_nodes);
+  pseudo_node = genome_feature_new_pseudo((GenomeFeature*) node_a);
+  genome_node_is_part_of_genome_node(pseudo_node, node_a);
+  id = genome_feature_get_attribute(node_a, ID_STRING);
+  assert(id);
+  feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
+  genome_node_is_part_of_genome_node(pseudo_node, node_b);
+  id = genome_feature_get_attribute(node_b, ID_STRING);
+  assert(id);
+  feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
+  replace_node(node_a, pseudo_node, genome_nodes, auto_sr);
+  remove_node(node_b, genome_nodes, auto_sr);
+  return pseudo_node;
+}
+
+static GenomeNode* join_root_pair(GenomeNode *root_a, GenomeNode *root_b,
+                                  FeatureInfo *feature_info,
+                                  Queue *genome_nodes,
+                                  AutomaticSequenceRegion *auto_sr)
+{
+  bool root_a_is_pseudo, root_b_is_pseudo;
+  GenomeNode *master_root;
+  assert(root_a && root_b && feature_info && genome_nodes);
+  root_a_is_pseudo = genome_feature_is_pseudo((GenomeFeature*) root_a);
+  root_b_is_pseudo = genome_feature_is_pseudo((GenomeFeature*) root_b);
+  if (root_a_is_pseudo && root_b_is_pseudo) {
+    master_root = merge_pseudo_roots(root_a, root_b, feature_info, genome_nodes,
+                                     auto_sr);
+  }
+  else if (root_a_is_pseudo) { /* !root_b_is_pseudo */
+    master_root = add_node_to_pseudo_node(root_a, root_b, feature_info,
+                                          genome_nodes, auto_sr);
+  }
+  else if (root_b_is_pseudo) { /* !root_a_is_pseudo */
+    master_root = add_node_to_pseudo_node(root_b, root_a, feature_info,
+                                          genome_nodes, auto_sr);
+  }
+  else { /* !root_a_is_pseudo && !root_b_is_pseudo */
+    master_root =  create_pseudo_node(root_a, root_b, feature_info,
+                                      genome_nodes, auto_sr);
+  }
+  return master_root;
+}
+
+static void join_roots(Array *roots, FeatureInfo *feature_info,
+                       Queue *genome_nodes, AutomaticSequenceRegion *auto_sr)
+{
+  GenomeNode *master_root;
+  unsigned long i;
+  assert(roots && feature_info && genome_nodes);
+  master_root = *(GenomeNode**) array_get(roots, 0);
+  for (i = 1; i < array_size(roots); i++) {
+    master_root = join_root_pair(master_root,
+                                 *(GenomeNode**) array_get(roots, i),
+                                 feature_info, genome_nodes, auto_sr);
+  }
+}
 
 static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
                                bool *is_child, GFF3Parser *parser,
+                               Queue *genome_nodes,
+                               AutomaticSequenceRegion *auto_sr,
                                const char *filename, unsigned int line_number,
                                Error *err)
 {
@@ -516,7 +656,8 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
   /* make sure all parents have the same (pseudo-)root */
   if (!had_err && splitter_size(parent_splitter) >= 2) {
     Array *roots = find_roots(parent_splitter, parser->feature_info);
-    assert(!roots_differ(roots));
+    if (roots_differ(roots))
+        join_roots(roots, parser->feature_info, genome_nodes, auto_sr);
     array_delete(roots);
   }
 
@@ -674,7 +815,8 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
       }
       else if (!strcmp(attr_tag, PARENT_STRING)) {
         had_err = process_parent_attr(attr_value, genome_feature, is_child,
-                                      parser, filename, line_number, err);
+                                      parser, genome_nodes, auto_sr, filename,
+                                      line_number, err);
       }
       else if (!strcmp(attr_tag, "Target")) {
         /* the value of ``Target'' attributes have a special syntax which is

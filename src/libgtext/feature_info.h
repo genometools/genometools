@@ -30,6 +30,8 @@ void         feature_info_add(FeatureInfo*, const char *id, GenomeNode*);
 GenomeNode*  feature_info_get_pseudo_parent(const FeatureInfo*, const char *id);
 void         feature_info_add_pseudo_parent(FeatureInfo*, const char *id,
                                             GenomeNode *pseudo_parent);
+void         feature_info_replace_pseudo_parent(FeatureInfo*, GenomeNode *child,
+                                                GenomeNode *new_pseudo_parent);
 GenomeNode*  feature_info_find_root(const FeatureInfo*, const char *id);
 
 #endif

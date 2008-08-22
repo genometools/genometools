@@ -82,6 +82,18 @@ void feature_info_add_pseudo_parent(FeatureInfo *fi, const char *id,
                 genome_node_ref(pseudo_parent));
 }
 
+void feature_info_replace_pseudo_parent(FeatureInfo *fi, GenomeNode *child,
+                                        GenomeNode *new_pseudo_parent)
+{
+  const char *id;
+  assert(fi && child && new_pseudo_parent);
+  assert(genome_feature_is_pseudo((GenomeFeature*) new_pseudo_parent));
+  id = genome_feature_get_attribute(child, ID_STRING);
+  assert(id);
+  hashtable_remove(fi->id_to_pseudo_parent, id);
+  feature_info_add_pseudo_parent(fi, id, new_pseudo_parent);
+}
+
 static GenomeNode* find_root(const FeatureInfo *fi, const char *id)
 {
   const char *delim, *parents;

@@ -1,9 +1,3 @@
-bugs:
------
-
-- fix multiple top-level parents bug (see unused test in gt_gff3_include.rb)
-
-
 feature requests:
 -----------------
 

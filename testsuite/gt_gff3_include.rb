@@ -665,11 +665,9 @@ Test do
   grep $last_stderr, "end '-1497228' is negative"
 end
 
-# XXX: fix this bug from TODO list
-=begin
 Name "gt gff3 multiple top-level parents"
-Keywords "gt_gff3"
+Keywords "gt_gff3 pseudo-feature"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}multiple_top_level_parents.gff3"
+  run "diff #{$last_stdout} #{$testdata}multiple_top_level_parents.gff3"
 end
-=end
