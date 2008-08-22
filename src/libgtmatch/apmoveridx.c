@@ -491,7 +491,6 @@ Definedunsignedlong apm_findshortestmatchreverse(const Uchar *vseq,
     }
     apm_inplacenextMyercolumn(dfsconstinfo,(Aliasdfsstate *) &currentcol,
                               len,*vptr);
-    printf("processed %u->score %lu\n",*vptr,currentcol.lastscorevalue);
     assert (currentcol.maxleqk != UNDEFMAXLEQK);
     if (currentcol.maxleqk == SUCCESSMAXLEQK)
     {

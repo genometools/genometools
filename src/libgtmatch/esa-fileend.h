@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESAFILEEND_H
-#define ESAFILEEND_H
+#ifndef ESA_FILEEND_H
+#define ESA_FILEEND_H
 
 /*
   The following defines the suffix of an indexname to be used for an
