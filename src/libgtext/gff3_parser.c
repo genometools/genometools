@@ -395,6 +395,20 @@ static void update_pseudo_node_range(GenomeNode *pseudo_node,
                                    genome_node_get_range(genome_feature)));
 }
 
+static void genome_node_is_part_of_pseudo_node(GenomeNode *pseudo_node,
+                                               GenomeNode *child,
+                                               FeatureInfo *feature_info)
+{
+  const char *id;
+  assert(pseudo_node && genome_feature_is_pseudo((GenomeFeature*) pseudo_node));
+  assert(child && !genome_feature_is_pseudo((GenomeFeature*) child));
+  assert(feature_info);
+  genome_node_is_part_of_genome_node(pseudo_node, child);
+  id = genome_feature_get_attribute(child, ID_STRING);
+  assert(id);
+  feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
+}
+
 static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
                     GFF3Parser *parser, Queue *genome_nodes,
                     AutomaticSequenceRegion *auto_sr, const char *filename,
@@ -429,10 +443,9 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
           if (!has_parent) { /* create pseudo node */
             GenomeNode *pseudo_node = genome_feature_new_pseudo((GenomeFeature*)
                                                                 gn);
-            genome_node_is_part_of_genome_node(pseudo_node, gn);
+            genome_node_is_part_of_pseudo_node(pseudo_node, gn,
+                                               parser->feature_info);
             replace_node(gn, pseudo_node, genome_nodes, auto_sr);
-            feature_info_add_pseudo_parent(parser->feature_info, id,
-                                           pseudo_node);
             genome_node_is_part_of_genome_node(pseudo_node, genome_feature);
             *is_child = true;
           }
@@ -521,15 +534,11 @@ static GenomeNode* add_node_to_pseudo_node(GenomeNode *pseudo_node,
                                            Queue *genome_nodes,
                                            AutomaticSequenceRegion *auto_sr)
 {
-  const char *id;
   assert(pseudo_node && genome_feature_is_pseudo((GenomeFeature*) pseudo_node));
   assert(normal_node &&
          !genome_feature_is_pseudo((GenomeFeature*) normal_node));
   assert(feature_info && genome_nodes);
-  genome_node_is_part_of_genome_node(pseudo_node, normal_node);
-  id = genome_feature_get_attribute(normal_node, ID_STRING);
-  assert(id);
-  feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
+  genome_node_is_part_of_pseudo_node(pseudo_node, normal_node, feature_info);
   remove_node(normal_node, genome_nodes, auto_sr);
   return pseudo_node;
 }
@@ -540,19 +549,12 @@ static GenomeNode* create_pseudo_node(GenomeNode *node_a, GenomeNode *node_b,
                                       AutomaticSequenceRegion *auto_sr)
 {
   GenomeNode *pseudo_node;
-  const char *id;
   assert(node_a && !genome_feature_is_pseudo((GenomeFeature*) node_a));
   assert(node_b && !genome_feature_is_pseudo((GenomeFeature*) node_b));
   assert(feature_info && genome_nodes);
   pseudo_node = genome_feature_new_pseudo((GenomeFeature*) node_a);
-  genome_node_is_part_of_genome_node(pseudo_node, node_a);
-  id = genome_feature_get_attribute(node_a, ID_STRING);
-  assert(id);
-  feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
-  genome_node_is_part_of_genome_node(pseudo_node, node_b);
-  id = genome_feature_get_attribute(node_b, ID_STRING);
-  assert(id);
-  feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
+  genome_node_is_part_of_pseudo_node(pseudo_node, node_a, feature_info);
+  genome_node_is_part_of_pseudo_node(pseudo_node, node_b, feature_info);
   replace_node(node_a, pseudo_node, genome_nodes, auto_sr);
   remove_node(node_b, genome_nodes, auto_sr);
   return pseudo_node;
