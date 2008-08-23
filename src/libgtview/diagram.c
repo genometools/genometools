@@ -636,7 +636,7 @@ static int render_tracks(UNUSED void *key, void *value, void *data,
                      UNUSED Error *err)
 {
   TrackTraverseInfo *tti = (TrackTraverseInfo*) data;
-  Track *track = (Track*) value;
+  UNUSED Track *track = (Track*) value;
   int had_err = 0;
   assert(tti && track);
   log_log("rendering track");

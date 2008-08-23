@@ -483,7 +483,10 @@ hashtable_foreach(Hashtable *ht, Elemvisitfunc visitor, void *data,
           {
             /* elem now belongs to new chain */
             /* FIXME: handle deferred move */
+            fprintf(stderr, "Feature MODIFIED_KEY not implemented yet"
+                    " (%s:%d).\n", __FILE__, __LINE__);
             /* push idx */
+            abort();
           }
           break;
         case REDO_ITERATION:

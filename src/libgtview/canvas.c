@@ -391,7 +391,7 @@ int canvas_visit_track_pre(Canvas *canvas, Track *track)
   return had_err;
 }
 
-int canvas_visit_track_post(Canvas *canvas, Track *track)
+int canvas_visit_track_post(Canvas *canvas, UNUSED Track *track)
 {
   double vspace;
   assert(canvas && track);
@@ -413,7 +413,7 @@ int canvas_visit_line_pre(Canvas *canvas, Line *line)
   return had_err;
 }
 
-int canvas_visit_line_post(Canvas *canvas, Line *line)
+int canvas_visit_line_post(Canvas *canvas, UNUSED Line *line)
 {
   int had_err = 0;
   double tmp;
