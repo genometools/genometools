@@ -193,13 +193,13 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
                 != (rankExpect = rankTable[rankCmpSym]))
               verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
             if ((rankQueryResult = pairRangeRanks[i])
-                != (rankExpect = rangeRanks[rt ^ 1][rankCmpSym]))
+                != (rankExpect = rangeRanks[rt ^ 1][i]))
               verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
           }
           if (retval)
             break;
         }
-        lastRangeID =
+        lastRangeID = range;
         lastRangeRankPos = pos + 1;
         rt ^= 1;
       }
