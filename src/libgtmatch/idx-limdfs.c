@@ -34,10 +34,10 @@
 
 #ifdef SKDEBUG
 #define DECLAREDFSSTATE(V)\
-        Aliasdfsstate V[5]
+        Aliasdfsstate V[4]
 #else
 #define DECLAREDFSSTATE(V)\
-        Aliasdfsstate V[4]
+        Aliasdfsstate V[5]
 #endif
 
 typedef struct
@@ -785,8 +785,7 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                           (unsigned int) limdfsresources->alphasize,
                           pattern,patternlength,maxdistance,
                           maxintervalwidth,
-                          skpp,
-                          false);
+                          skpp);
   initlcpinfostack(&limdfsresources->stack,
                    0,
                    limdfsresources->withesa

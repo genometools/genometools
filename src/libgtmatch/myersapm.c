@@ -146,15 +146,6 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
         Seqpos dbstartpos = REVERSEPOS(mor->totallength,pos);
         Definedunsignedlong matchlength;
 
-        /*
-        matchlength = apm_findshortestmatchforward(mor->encseq,
-                                                   mor->nowildcards,
-                                                   mor->alphasize,
-                                                   pattern,
-                                                   patternlength,
-                                                   maxdistance,
-                                                   dbstartpos);
-        */
         if (maxdistance > 0)
         {
           matchlength = forwardprefixmatch(mor->encseq,

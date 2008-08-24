@@ -17,17 +17,8 @@
 
 #ifndef APMOVERIDX_H
 #define APMOVERIDX_H
-#include "defined-types.h"
 #include "absdfstrans-def.h"
 
 const AbstractDfstransformer *apm_AbstractDfstransformer(void);
-
-Definedunsignedlong apm_findshortestmatchforward(const Encodedsequence *encseq,
-                                                 bool nowildcards,
-                                                 unsigned int alphasize,
-                                                 const Uchar *pattern,
-                                                 unsigned long patternlength,
-                                                 unsigned long maxdistance,
-                                                 Seqpos startpos);
 
 #endif

@@ -37,17 +37,23 @@
 
 #define COMPUTENEWDIST(CC)\
         assert((CC) != (Uchar) SEPARATOR);\
-        Eq = eqsvector[(unsigned long) (CC)];\
+        if ((CC) != (Uchar) WILDCARD)\
+        {\
+          Eq = eqsvector[(unsigned long) (CC)];\
+        } else\
+        {\
+          Eq = 0;\
+        }\
         Xv = Eq | Mv;\
         Xh = (((Eq & Pv) + Pv) ^ Pv) | Eq;\
         Ph = Mv | ~ (Xh | Pv);\
         Mh = Pv & Xh;\
-        if (Pv & Ebit)\
+        if (Ph & Ebit)\
         {\
           distval++;\
         } else\
         {\
-          if (Mv & Ebit)\
+          if (Mh & Ebit)\
           {\
             distval--;\
           }\
@@ -123,7 +129,6 @@ Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
   assert(maxdistance > 0);
   for (pos = startpos; /* Nothing */; pos++)
   {
-    /*
     if (pos - startpos > (Seqpos) (ulen + maxdistance))
     {
       fprintf(stderr,"pos=%lu,startpos=%lu,ulen=%lu,maxdistance=%lu\n",
@@ -131,7 +136,6 @@ Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
       exit(EXIT_FAILURE);
     }
     assert(pos - startpos <= (Seqpos) (ulen + maxdistance));
-    */
     cc = getencodedchar(encseq,pos,Forwardmode);
     if (nowildcards && cc == (Uchar) WILDCARD)
     {
