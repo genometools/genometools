@@ -155,14 +155,21 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                                                    maxdistance,
                                                    dbstartpos);
         */
-        matchlength = forwardprefixmatch(mor->encseq,
-                                         mor->alphasize,
-                                         dbstartpos,
-                                         mor->nowildcards,
-                                         mor->eqsvector,
-                                         pattern,
-                                         patternlength,
-                                         maxdistance);
+        if (maxdistance > 0)
+        {
+          matchlength = forwardprefixmatch(mor->encseq,
+                                           mor->alphasize,
+                                           dbstartpos,
+                                           mor->nowildcards,
+                                           mor->eqsvector,
+                                           pattern,
+                                           patternlength,
+                                           maxdistance);
+        } else
+        {
+          matchlength.defined = true;
+          matchlength.valueunsignedlong = patternlength;
+        }
         assert (matchlength.defined || mor->nowildcards);
         if (matchlength.defined)
         {

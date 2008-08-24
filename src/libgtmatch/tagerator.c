@@ -508,6 +508,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,Error *err)
       processmatch = storematch;
       processmatchinfoonline = &storeonline;
       processmatchinfooffline = &storeoffline;
+      showmatchinfo.eqsvector = NULL;
     } else
     {
       processmatch = showmatch;
