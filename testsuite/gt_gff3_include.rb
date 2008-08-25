@@ -680,22 +680,24 @@ end
 
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
-  Keywords "gt_gff3"
+  Keywords "gt_gff3 large_gff3"
   Test do
-    run_test "#{$bin}gt gff3 #{$gttestdata}gff3/#{file}"
+    run_test("#{$bin}gt gff3 #{$gttestdata}gff3/#{file}", :maxtime => 90)
   end
 
   Name "gt gff3 #{name} (-sort)"
-  Keywords "gt_gff3"
+  Keywords "gt_gff3 large_gff3"
   Test do
-    run_test "#{$bin}gt gff3 -sort -width 80 " + "#{$gttestdata}gff3/#{file}"
+    run_test("#{$bin}gt gff3 -sort -width 80 " + "#{$gttestdata}gff3/#{file}",
+             :maxtime => 90)
     run      "diff #{$last_stdout} #{$gttestdata}gff3/#{file}.sorted"
   end
 
   Name "gt gff3 #{name} (sorted)"
-  Keywords "gt_gff3"
+  Keywords "gt_gff3 large_gff3"
   Test do
-    run_test "#{$bin}gt gff3 -width 80 #{$gttestdata}gff3/#{file}.sorted"
+    run_test("#{$bin}gt gff3 -width 80 #{$gttestdata}gff3/#{file}.sorted",
+             :matime => 90)
     run      "diff #{$last_stdout} #{$gttestdata}gff3/#{file}.sorted"
   end
 end
