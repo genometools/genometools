@@ -1,7 +1,8 @@
 Name "gt csa test"
 Keywords "gt_csa"
 Test do
-  run_test("#{$bin}gt csa #{$testdata}gt_csa_test_1", :retval => 1)
+  run_test("#{$bin}gt csa #{$testdata}gt_csa_test_1.in", :retval => 1)
+  grep $last_stderr, "is not sorted"
 end
 
 1.upto(6) do |i|
