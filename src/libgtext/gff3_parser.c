@@ -871,7 +871,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
                                    Error *err)
 {
   GenomeNode *gn = NULL, *genome_feature = NULL;
-  GenomeFeatureType *gft;
+  GenomeFeatureType *gft = NULL;
   Splitter *splitter;
   AutomaticSequenceRegion *auto_sr = NULL;
   Str *changed_seqid = NULL;
