@@ -126,19 +126,18 @@ void* array_get_space(const Array *a)
   return a->space;
 }
 
-void array_add_elem(Array *a, void *elem, UNUSED size_t size_of_elem)
+void array_add_elem(Array *a, void *elem, size_t size_of_elem)
 {
   assert(a && elem);
   assert(a->size_of_elem == size_of_elem);
   assert(a->next_free <= a->allocated);
   /* make sure we have enough space */
-  if ((a->next_free + 1) * a->size_of_elem > a->allocated) {
+  if ((a->next_free + 1) * size_of_elem > a->allocated) {
     a->space = dynalloc(a->space, &a->allocated,
                         (a->next_free + 1) * size_of_elem);
   }
   /* add */
-  memcpy((char*) a->space + a->next_free * size_of_elem, elem,
-         size_of_elem);
+  memcpy((char*) a->space + a->next_free * size_of_elem, elem, size_of_elem);
   a->next_free++;
 }
 
