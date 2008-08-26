@@ -44,8 +44,8 @@
 
 struct Canvas {
   Range viewrange;
-  double factor, y;
-  unsigned long width, height, margins;
+  double factor, y, margins;
+  unsigned long width, height;
   Config *cfg;
   bool show_track_captions;
   Bittab *bt;
@@ -137,7 +137,7 @@ DrawingRange canvas_convert_coords(Canvas *canvas, Range node_range)
   if ((long) node_range.start < (long) canvas->viewrange.start )
   {
     converted_range.clip = CLIPPED_LEFT;
-    converted_range.start = MAX(0, canvas->margins-5);
+    converted_range.start = MAX(0.0, canvas->margins - 5);
   }
   else
   {
@@ -149,7 +149,7 @@ DrawingRange canvas_convert_coords(Canvas *canvas, Range node_range)
     converted_range.clip = (converted_range.clip == CLIPPED_LEFT ?
                                                       CLIPPED_BOTH :
                                                       CLIPPED_RIGHT);
-    converted_range.end = (double) canvas->width - canvas->margins+5;
+    converted_range.end = (double) canvas->width - canvas->margins + 5;
   }
   else
   {
