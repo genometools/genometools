@@ -50,12 +50,15 @@ struct HashElemInfo
   {
     FreeFunc free_elem;
     FreeFuncWData free_elem_with_data;
-  } free_op;
+  } free_op;                           /**< either of these can be
+                                        * used for the individual
+                                        * destructors or set to NULL */
   size_t elem_size;
   Compare cmp;
   void *table_data;             /**< per table data, passed to
                                  * free_elem_with_data */
-  FreeFunc table_data_free;
+  FreeFunc table_data_free;     /**< called on hashtable_delete with
+                                 * table_data as argument if != NULL */
 };
 
 typedef struct HashElemInfo HashElemInfo;
@@ -137,13 +140,6 @@ extern int
 ht_ul_elem_cmp(const void *elemA, const void *elemB);
 extern int
 ht_cstr_elem_cmp(const void *elemA, const void *elemB);
-
-/**
- * @brief dummy free function that fullfills the interface but doesn't
- * do anything.
- */
-extern void
-ht_dummy_free_func(void *elem);
 
 #include "libgtcore/hashtable-siop.h"
 

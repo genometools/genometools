@@ -19,7 +19,12 @@
 #define FPTR_H
 
 /* the generic function pointers */
-typedef int  (*Compare)(const void*, const void*);
+/* @return less than 0 if *a < *b,
+ * 0 if *a == *b, and
+ * greater 0 if *a > * b
+ * DO NOT COUNT ON THESE FUNCTIONS TO RETURN -1, 0, OR 1 !
+ */
+typedef int  (*Compare)(const void *a, const void *b);
 typedef int  (*CompareWithData)(const void*, const void*, void *data);
 typedef void (*FreeFunc)(void*);
 

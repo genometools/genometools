@@ -251,8 +251,8 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   if (traverse_only_once)
   {
     static const HashElemInfo node_hashtype
-      = { ht_ptr_elem_hash, { ht_dummy_free_func }, sizeof (GenomeNode *),
-          ht_ptr_elem_cmp, NULL, ht_dummy_free_func };
+      = { ht_ptr_elem_hash, { NULL }, sizeof (GenomeNode *),
+          ht_ptr_elem_cmp, NULL, NULL };
     traversed_nodes = hashtable_new(node_hashtype);
   }
 

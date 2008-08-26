@@ -117,7 +117,7 @@ FeatureTypeFactory* feature_type_factory_obo_new(const char *obo_file_path,
   FeatureTypeFactory *ftf;
   HashElemInfo cstr_presence_map = {
     ht_cstr_elem_hash, { free_feature_type_entry }, sizeof (char *),
-    ht_cstr_elem_cmp, NULL, ht_dummy_free_func };
+    ht_cstr_elem_cmp, NULL, NULL };
   error_check(err);
   assert(obo_file_path);
   ftf = feature_type_factory_create(feature_type_factory_obo_class());

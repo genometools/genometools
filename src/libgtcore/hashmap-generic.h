@@ -171,7 +171,7 @@
     keyhash,                                                  \
     { keytag##_##valuetag##_destruct },                       \
     sizeof (keytag##_##valuetag##_map_entry),                 \
-    keycmp, NULL, ht_dummy_free_func                          \
+    keycmp, NULL, NULL                                        \
   };                                                          \
                                                               \
   typedef struct {                                            \

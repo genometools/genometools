@@ -381,8 +381,9 @@ ht_remove(Hashtable *ht, const void *elem)
       HT_SET_LINK(ht, chain_next, free_mark);
       remove_pos = cp_dest_idx;
     }
-    ht->table_info.free_op.free_elem_with_data(ht_elem_ptr(ht, remove_pos),
-                                               ht->table_info.table_data);
+    if (ht->table_info.free_op.free_elem_with_data)
+      ht->table_info.free_op.free_elem_with_data(ht_elem_ptr(ht, remove_pos),
+                                                 ht->table_info.table_data);
     HT_SET_LINK(ht, remove_pos, free_mark);
     --ht->current_fill;
     return remove_pos;
@@ -514,21 +515,18 @@ hashtable_fill(Hashtable *ht)
   return ht->current_fill;
 }
 
-#define ht_all_free(ht,foreach)                                 \
+#define ht_internal_foreach(ht,visitcode)                       \
   do {                                                          \
     htsize_t i, table_size = ht->table_mask + 1;                \
     void *table_data = ht->table_info.table_data;               \
     void *elem = ht->table;                                     \
     size_t elem_size = ht->table_info.elem_size;                \
-    FreeFuncWData free_elem_with_data =                         \
-      ht->table_info.free_op.free_elem_with_data;               \
     if (ht->current_fill)                                       \
       for (i = 0; i < table_size; ++i)                          \
       {                                                         \
         if (HT_GET_LINK(ht, i) != free_mark)                    \
         {                                                       \
-          foreach;                                              \
-          free_elem_with_data(elem, table_data);                \
+          visitcode;                                            \
         }                                                       \
         elem = (char *)elem + elem_size;                        \
       }                                                         \
@@ -538,7 +536,10 @@ extern void
 hashtable_reset(Hashtable *ht)
 {
   assert(ht);
-  ht_all_free(ht,);
+  FreeFuncWData free_elem_with_data =
+    ht->table_info.free_op.free_elem_with_data;
+  if (free_elem_with_data)
+    ht_internal_foreach(ht, free_elem_with_data(elem, table_data));
   ht->current_fill = 0;
   ht_reinit(ht, ht->table_info, MIN_SIZE_LOG, DEFAULT_HIGH_MUL,
             DEFAULT_LOW_MUL);
@@ -549,9 +550,13 @@ hashtable_delete(Hashtable *ht)
 {
   if (ht)
   {
-    ht_all_free(ht,);
+    FreeFuncWData free_elem_with_data =
+      ht->table_info.free_op.free_elem_with_data;
+    if (free_elem_with_data)
+      ht_internal_foreach(ht, free_elem_with_data(elem, table_data));
     ht_destruct(ht);
-    ht->table_info.table_data_free(ht->table_info.table_data);
+    if (ht->table_info.table_data_free)
+      ht->table_info.table_data_free(ht->table_info.table_data);
     ma_free(ht);
   }
 }
@@ -689,11 +694,6 @@ ht_set_table_link(Hashtable *ht, htsize_t idx, htsize_t link)
   ht->links.table[idx] = link;
 }
 
-extern void
-ht_dummy_free_func(UNUSED void *elem)
-{
-}
-
 struct ht_elem_2cstr
 {
   char *key, *value;
@@ -730,7 +730,7 @@ hashtable_test(HashElemInfo table_info)
   Hashtable *ht;
   int had_err = 0;
   struct ht_elem_2cstr elemA = { s1, s2 }, elemB = { s2, s1 };
-  table_info.free_op.free_elem = ht_dummy_free_func;
+  table_info.free_op.free_elem = NULL;
   do {
     struct ht_elem_2cstr *elem_p;
     /* empty hash */
@@ -807,14 +807,10 @@ int hashtable_unit_test(UNUSED Error *err)
   int had_err;
   error_check(err);
   static const HashElemInfo
-    hash_ptr = { ht_ptr_elem_hash,
-                 { .free_elem = ht_dummy_free_func },
-                 sizeof (struct ht_elem_2cstr), ht_ptr_elem_cmp,
-                 NULL, ht_dummy_free_func },
-    hash_str = { ht_cstr_elem_hash,
-                 { .free_elem = ht_dummy_free_func },
-                 sizeof (struct ht_elem_2cstr), ht_cstr_elem_cmp,
-                 NULL, ht_dummy_free_func };
+    hash_ptr = { ht_ptr_elem_hash, { NULL }, sizeof (struct ht_elem_2cstr),
+                 ht_ptr_elem_cmp, NULL, NULL },
+    hash_str = { ht_cstr_elem_hash, { NULL }, sizeof (struct ht_elem_2cstr),
+                 ht_cstr_elem_cmp, NULL, NULL };
   /* hash key as string */
   had_err = hashtable_test(hash_str);
 
