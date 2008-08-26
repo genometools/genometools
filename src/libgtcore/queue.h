@@ -37,6 +37,11 @@ void*         queue_head(Queue*);
    return value of <queue_processor> is returned. */
 int           queue_iterate(Queue *queue, QueueProcessor queue_processor,
                             void *info, Error *err);
+/* Similar to <queue_iterate>, except that the <queue> is traversed in reverse
+   order. */
+int           queue_iterate_reverse(Queue *queue,
+                                    QueueProcessor queue_processor, void *info,
+                                    Error *err);
 unsigned long queue_size(const Queue*);
 int           queue_unit_test(Error*);
 

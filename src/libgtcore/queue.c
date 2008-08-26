@@ -173,6 +173,34 @@ int queue_iterate(Queue *q, QueueProcessor queue_processor, void *info,
   return 0;
 }
 
+int queue_iterate_reverse(Queue *q, QueueProcessor queue_processor, void *info,
+                          Error *err)
+{
+  long i;
+  int rval;
+  error_check(err);
+  assert(q && queue_processor);
+  if (queue_size(q)) {
+    if (q->front < q->back) { /* no wraparound */
+      for (i = q->back-1; i >= q->front; i--) {
+        if ((rval = queue_processor(q->contents + i, info, err)))
+          return rval;
+      }
+    }
+    else { /* wraparound */
+      for (i = q->back-1; i >= 0; i--) {
+        if ((rval = queue_processor(q->contents + i, info, err)))
+          return rval;
+      }
+      for (i = q->size-1; i >= q->front; i--) {
+        if ((rval = queue_processor(q->contents +i, info, err)))
+          return rval;
+      }
+    }
+  }
+  return 0;
+}
+
 unsigned long queue_size(const Queue *q)
 {
   assert(q);

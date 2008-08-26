@@ -201,6 +201,20 @@ int array_iterate(Array *a, ArrayProcessor array_processor, void *info,
   return 0;
 }
 
+int array_iterate_reverse(Array *a, ArrayProcessor array_processor, void *info,
+                          Error *err)
+{
+  unsigned long idx;
+  int rval;
+  error_check(err);
+  assert(a && array_processor);
+  for (idx = array_size(a); idx > 0; idx--) {
+    if ((rval = array_processor(array_get(a, idx-1), info, err)))
+      return rval;
+  }
+  return 0;
+}
+
 static int iterate_test_func(void *value, void *info, UNUSED Error *err)
 {
   unsigned long *i;

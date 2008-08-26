@@ -343,13 +343,17 @@ static void replace_node(GenomeNode *node_to_replace,
   assert(node_to_replace && replacing_node && genome_nodes);
   replace_info.node_to_replace = node_to_replace;
   replace_info.replacing_node = replacing_node;
+  /* we go backwards in both cases, because we expect that the <node_to_replace>
+     is near the end of the queue */
   if (auto_sr) {
-    rval = array_iterate(auto_sr->genome_features,
-                         (ArrayProcessor) replace_func, &replace_info, NULL);
+    rval = array_iterate_reverse(auto_sr->genome_features,
+                                 (ArrayProcessor) replace_func, &replace_info,
+                                 NULL);
     assert(rval == 1);
   }
   else {
-    rval = queue_iterate(genome_nodes, replace_func, &replace_info, NULL);
+    rval = queue_iterate_reverse(genome_nodes, replace_func, &replace_info,
+                                 NULL);
     assert(rval == 1);
   }
 }

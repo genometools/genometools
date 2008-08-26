@@ -55,6 +55,11 @@ int           array_cmp(const Array  *array_a, const Array *array_b);
    return value of <array_processor> is returned. */
 int           array_iterate(Array *array, ArrayProcessor array_processor,
                             void *info, Error *err);
+/* Similar to <array_iterate>, except that the <array> is traversed in reverse
+   order. */
+int           array_iterate_reverse(Array *array,
+                                    ArrayProcessor array_processor, void *info,
+                                    Error *err);
 int           array_example(Error*);
 int           array_unit_test(Error*);
 void          array_delete(Array*);
