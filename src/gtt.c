@@ -23,6 +23,7 @@
 #include "libgtcore/bittab.h"
 #include "libgtcore/bsearch.h"
 #include "libgtcore/countingsort.h"
+#include "libgtcore/cstr_table.h"
 #include "libgtcore/disc_distri.h"
 #include "libgtcore/dlist.h"
 #include "libgtcore/dynbittab.h"
@@ -153,6 +154,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "bittab example", bittab_example);
   hashmap_add(unit_tests, "bsearch module", bsearch_unit_test);
   hashmap_add(unit_tests, "countingsort module", countingsort_unit_test);
+  hashmap_add(unit_tests, "cstr table class", cstr_table_unit_test);
   hashmap_add(unit_tests, "disc distri class", disc_distri_unit_test);
   hashmap_add(unit_tests, "dlist class", dlist_unit_test);
   hashmap_add(unit_tests, "dlist example", dlist_example);
