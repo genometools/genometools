@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "libgtcore/cstr.h"
-#include "libgtcore/hashtable.h"
+#include "libgtcore/cstr_table.h"
 #include "libgtcore/ma.h"
 #include "libgtext/genome_feature_type_imp.h"
 #include "libgtext/feature_type_factory_obo.h"
@@ -26,7 +26,7 @@
 
 struct FeatureTypeFactoryOBO {
   const FeatureTypeFactory parent_instance;
-  Hashtable *genome_feature_types;
+  CstrTable *genome_feature_types;
 };
 
 #define feature_type_factory_obo_cast(FTF)\
@@ -35,7 +35,7 @@ struct FeatureTypeFactoryOBO {
 static void feature_type_factory_obo_free(FeatureTypeFactory *ftf)
 {
   FeatureTypeFactoryOBO *ftfo = feature_type_factory_obo_cast(ftf);
-  hashtable_delete(ftfo->genome_feature_types);
+  cstr_table_delete(ftfo->genome_feature_types);
 }
 
 static GenomeFeatureType*
@@ -46,7 +46,7 @@ feature_type_factory_obo_create_gft(FeatureTypeFactory *ftf, const char *type)
   assert(ftf && type);
   ftfo = feature_type_factory_obo_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
-    if (hashtable_get(ftfo->genome_feature_types, &type)) {
+    if (cstr_table_get(ftfo->genome_feature_types, type)) {
       gft = genome_feature_type_construct(ftf, type);
       gft_collection_add(ftf->used_types, type, gft);
     }
@@ -73,11 +73,8 @@ static void add_genome_feature_from_tree(FeatureTypeFactoryOBO *ftfo,
   value = obo_parse_tree_get_stanza_value(obo_parse_tree, stanza_num,
                                           stanza_key);
   /* do not add values multiple times (possible for "name" values) */
-  if (!hashtable_get(ftfo->genome_feature_types, &value))
-  {
-    value = cstr_dup(value);
-    hashtable_add(ftfo->genome_feature_types, &value);
-  }
+  if (!cstr_table_get(ftfo->genome_feature_types, value))
+    cstr_table_add(ftfo->genome_feature_types, value);
 }
 
 static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
@@ -105,24 +102,16 @@ static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
   return -1;
 }
 
-static void free_feature_type_entry(void *feature_type)
-{
-  ma_free(*(char **)feature_type);
-}
-
 FeatureTypeFactory* feature_type_factory_obo_new(const char *obo_file_path,
                                                  Error *err)
 {
   FeatureTypeFactoryOBO *ftfo;
   FeatureTypeFactory *ftf;
-  HashElemInfo cstr_presence_map = {
-    ht_cstr_elem_hash, { free_feature_type_entry }, sizeof (char *),
-    ht_cstr_elem_cmp, NULL, NULL };
   error_check(err);
   assert(obo_file_path);
   ftf = feature_type_factory_create(feature_type_factory_obo_class());
   ftfo = feature_type_factory_obo_cast(ftf);
-  ftfo->genome_feature_types = hashtable_new(cstr_presence_map);
+  ftfo->genome_feature_types = cstr_table_new();
   if (create_genome_features(ftfo, obo_file_path, err)) {
     feature_type_factory_delete(ftf);
     return NULL;
