@@ -361,29 +361,20 @@ static void replace_node(GenomeNode *node_to_replace,
 static void remove_node(GenomeNode *genome_node, Queue *genome_nodes,
                         AutomaticSequenceRegion *auto_sr)
 {
-  unsigned long i;
   assert(genome_node && genome_nodes);
   if (auto_sr) {
-    for (i = 0; i < array_size(auto_sr->genome_features); i++) {
+    long i;
+    /* we go backwards, because we expect that the <genome_node> is near the end
+       of the array */
+    for (i = array_size(auto_sr->genome_features) - 1; i >= 0; i--) {
       if (genome_node == *(GenomeNode**) array_get(auto_sr->genome_features, i))
         break;
     }
     assert(i < array_size(auto_sr->genome_features));
     array_rem(auto_sr->genome_features, i);
   }
-  else {
-    /* XXX: use proper queue_rem() method */
-    Queue *tmp_queue = queue_new();
-    while (queue_size(genome_nodes)) {
-      GenomeNode *gn = queue_get(genome_nodes);
-      if (gn != genome_node)
-        queue_add(tmp_queue, gn);
-    }
-    assert(!queue_size(genome_nodes));
-    while (queue_size(tmp_queue))
-      queue_add(genome_nodes, queue_get(tmp_queue));
-    queue_delete(tmp_queue);
-  }
+  else
+    queue_remove(genome_nodes, genome_node); /* traverses in reverse order */
 }
 
 static void update_pseudo_node_range(GenomeNode *pseudo_node,

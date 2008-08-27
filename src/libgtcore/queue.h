@@ -31,6 +31,10 @@ void          queue_delete_with_contents(Queue*);
 void          queue_add(Queue*, void*);
 void*         queue_get(Queue*);
 void*         queue_head(Queue*);
+/* Remove <elem> from <queue> (<elem> has to be in <queue>).
+   Thereby <queue> is traversed in reverse order, leading to O(queue_size)
+   worst-case running time. */
+void          queue_remove(Queue *queue, void *elem);
 /* Iterate over all elements in <queue> and call <queue_processor> with them.
    <info> and <err> are passed to <queue_processor>.
    If <queue_processor> returns a value != 0, the iteration is stopped and the

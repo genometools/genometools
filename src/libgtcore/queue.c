@@ -25,10 +25,10 @@
 struct Queue
 {
   void **contents;
-  unsigned long front, /* f */
-                back;  /* b */
-  size_t size,
-         allocated;
+  long front, /* f */
+       back,  /* b */
+       size;
+  size_t allocated;
 };
 
 /*
@@ -113,7 +113,7 @@ static void check_space(Queue *q)
        left to set the back pointer to (otherwise we would have to reset the
        back pointer to 0).
      */
-    assert(q->front + q->size < q->allocated / sizeof (void*));
+    assert((size_t) q->front + q->size < q->allocated / sizeof (void*));
     q->back = q->front + q->size;
     q->size = q->allocated / sizeof (void*);
   }
@@ -146,10 +146,60 @@ void* queue_head(Queue *q)
   return q->contents[q->front];
 }
 
+void queue_remove(Queue *q, void *elem)
+{
+  long i, elemidx;
+  assert(q &&  queue_size(q));
+  if (q->front < q->back) { /* no wraparound */
+    for (i = q->back-1; i >= q->front; i--) {
+      if (q->contents[i] == elem)
+        break;
+    }
+    elemidx = i;
+    assert(elemidx >= q->front); /* valid element found */
+    for (i = elemidx+1; i < q->back; i++)
+      q->contents[i-1] = q->contents[i];
+    q->contents[q->back-1] = NULL;
+    q->back--;
+    if (q->front == q->back)
+      q->front = q->back = 0; /* reset */
+  }
+  else { /* wraparound */
+    for (i = q->back-1; i >= 0; i--) {
+      if (q->contents[i] == elem)
+        break;
+    }
+    elemidx = i;
+    if (elemidx >= 0) { /* element found */
+      for (i = elemidx+1; i < q->back; i++)
+        q->contents[i-1] = q->contents[i];
+      q->contents[q->back-1] = NULL;
+      q->back--;
+      if (q->back == 0) q->back = q->size;
+      return;
+    }
+    for (i = q->size-1; i >= q->front; i--) {
+      if (q->contents[i] == elem)
+        break;
+    }
+    elemidx = i;
+    assert(elemidx >= q->front); /* valid element found */
+    for (i = elemidx+1; i < q->size; i++)
+      q->contents[i-1] = q->contents[i];
+    q->contents[q->size-1] = q->contents[0];
+    for (i = 1; i < q->back; i++)
+      q->contents[i-1] = q->contents[i];
+    q->contents[q->back-1] = NULL;
+    q->back--;
+    if (q->back == 0)
+      q->back = q->size;
+  }
+}
+
 int queue_iterate(Queue *q, QueueProcessor queue_processor, void *info,
                   Error *err)
 {
-  unsigned long i;
+  long i;
   int rval;
   error_check(err);
   assert(q && queue_processor);
@@ -193,8 +243,7 @@ int queue_iterate_reverse(Queue *q, QueueProcessor queue_processor, void *info,
           return rval;
       }
       for (i = q->size-1; i >= q->front; i--) {
-        if ((rval = queue_processor(q->contents +i, info, err)))
-          return rval;
+        if ((rval = queue_processor(q->contents +i, info, err))) return rval;
       }
     }
   }
@@ -211,13 +260,25 @@ unsigned long queue_size(const Queue *q)
 
 static int check_queue(void **elem, void *info, Error *err)
 {
-  unsigned long *check_counter = info;
+  long *check_counter = info;
   int had_err = 0;
   error_check(err);
   assert(check_counter);
-  ensure(had_err, *check_counter == *(unsigned long*) elem);
+  ensure(had_err, *check_counter == *(long*) elem);
   if (!had_err)
     (*check_counter)++;
+  return had_err;
+}
+
+static int check_queue_reverse(void **elem, void *info, Error *err)
+{
+  long *check_counter_reverse = info;
+  int had_err = 0;
+  error_check(err);
+  assert(check_counter_reverse);
+  ensure(had_err, *check_counter_reverse == *(long*) elem);
+  if (!had_err)
+    (*check_counter_reverse)--;
   return had_err;
 }
 
@@ -228,7 +289,7 @@ static int fail_func(UNUSED void **elem, UNUSED void *info, UNUSED Error *err)
 
 int queue_unit_test(Error *err)
 {
-  unsigned long check_counter = 0;
+  long check_counter = 0, check_counter_reverse = 1023;
   unsigned long i;
   int had_err = 0;
   Queue *q;
@@ -244,9 +305,17 @@ int queue_unit_test(Error *err)
   }
   if (!had_err)
     had_err = queue_iterate(q, check_queue, &check_counter, err);
-  if (!had_err)
-    ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
-  for (i = 0; !had_err && i < 1024; i++) {
+  if (!had_err) {
+    had_err = queue_iterate_reverse(q, check_queue_reverse,
+                                    &check_counter_reverse, err);
+  }
+  ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
+  ensure(had_err, queue_iterate_reverse(q, fail_func, NULL, NULL));
+  if (!had_err) {
+    queue_remove(q, (void*) 0);
+    ensure(had_err, queue_size(q) == 1023);
+  }
+  for (i = 1; !had_err && i < 1024; i++) {
     ensure(had_err, queue_head(q) == (void*) i);
     ensure(had_err, queue_get(q) == (void*) i);
     ensure(had_err, queue_size(q) == 1024 - i - 1);
@@ -263,10 +332,15 @@ int queue_unit_test(Error *err)
       ensure(had_err, queue_size(q) == i + 1);
     }
     check_counter = 0;
+    check_counter_reverse = 1023;
     if (!had_err)
       had_err = queue_iterate(q, check_queue, &check_counter, err);
-    if (!had_err)
-      ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
+    ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
+    ensure(had_err, queue_iterate_reverse(q, fail_func, NULL, NULL));
+    if (!had_err) {
+      had_err = queue_iterate_reverse(q, check_queue_reverse,
+                                      &check_counter_reverse, err);
+    }
     for (i = 0; !had_err && i < 512; i++) {
       ensure(had_err, queue_head(q) == (void*) i);
       ensure(had_err, queue_get(q) == (void*) i);
@@ -277,11 +351,20 @@ int queue_unit_test(Error *err)
       ensure(had_err, queue_size(q) == 512 + i + 1);
     }
     check_counter = 512;
+    check_counter_reverse = 1535;
     if (!had_err)
       had_err = queue_iterate(q, check_queue, &check_counter, err);
-    if (!had_err)
-      ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
-    for (i = 0; !had_err && i < 1024; i++) {
+    if (!had_err) {
+      had_err = queue_iterate_reverse(q, check_queue_reverse,
+                                      &check_counter_reverse, err);
+    }
+    ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
+    ensure(had_err, queue_iterate_reverse(q, fail_func, NULL, NULL));
+    if (!had_err) {
+      queue_remove(q, (void*) 512);
+      ensure(had_err, queue_size(q) == 1023);
+    }
+    for (i = 1; !had_err && i < 1024; i++) {
       ensure(had_err, queue_head(q) == (void*) (512 + i));
       ensure(had_err, queue_get(q) == (void*) (512 + i));
       ensure(had_err, queue_size(q) == 1024 - i - 1);
@@ -299,10 +382,15 @@ int queue_unit_test(Error *err)
       ensure(had_err, queue_size(q) == i + 1);
     }
     check_counter = 0;
+    check_counter_reverse = 1023;
     if (!had_err)
       had_err = queue_iterate(q, check_queue, &check_counter, err);
-    if (!had_err)
-      ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
+    if (!had_err) {
+      had_err = queue_iterate_reverse(q, check_queue_reverse,
+                                      &check_counter_reverse, err);
+    }
+    ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
+    ensure(had_err, queue_iterate_reverse(q, fail_func, NULL, NULL));
     for (i = 0; !had_err && i < 512; i++) {
       ensure(had_err, queue_head(q) == (void*) i);
       ensure(had_err, queue_get(q) == (void*) i);
@@ -313,11 +401,20 @@ int queue_unit_test(Error *err)
       ensure(had_err, queue_size(q) == 512 + i + 1);
     }
     check_counter = 512;
+    check_counter_reverse = 2047;
     if (!had_err)
       had_err = queue_iterate(q, check_queue, &check_counter, err);
-    if (!had_err)
-      ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
-    for (i = 0; !had_err && i < 1536; i++) {
+    if (!had_err) {
+      had_err = queue_iterate_reverse(q, check_queue_reverse,
+                                      &check_counter_reverse, err);
+    }
+    ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
+    ensure(had_err, queue_iterate_reverse(q, fail_func, NULL, NULL));
+    if (!had_err) {
+      queue_remove(q, (void*) 512);
+      ensure(had_err, queue_size(q) == 1535);
+    }
+    for (i = 1; !had_err && i < 1536; i++) {
       ensure(had_err, queue_head(q) == (void*) (512 + i));
       ensure(had_err, queue_get(q) == (void*) (512 + i));
       ensure(had_err, queue_size(q) == 1536 - i - 1);
@@ -352,6 +449,35 @@ int queue_unit_test(Error *err)
       queue_add(q, (void*) 1);
     ensure(had_err, queue_size(q) == 1);
     ensure(had_err, queue_get(q));
+    ensure(had_err, queue_size(q) == 0);
+    queue_delete(q);
+  }
+
+  /* queue_remove() corner case */
+  if (!had_err) {
+    q = queue_new();
+    queue_add(q, (void*) 1);
+    ensure(had_err, queue_size(q) == 1);
+    queue_remove(q, (void*) 1);
+    ensure(had_err, queue_size(q) == 0);
+    queue_delete(q);
+  }
+
+  /* queue_remove() corner case */
+  if (!had_err) {
+    q = queue_new();
+    queue_add(q, (void*) 0);
+    queue_add(q, (void*) 1);
+    queue_add(q, (void*) 2);
+    queue_add(q, (void*) 3);
+    ensure(had_err, queue_get(q) == (void*) 0);
+    ensure(had_err, queue_get(q) == (void*) 1);
+    queue_add(q, (void*) 4);
+    queue_add(q, (void*) 5);
+    queue_remove(q, (void*) 4);
+    queue_remove(q, (void*) 2);
+    queue_remove(q, (void*) 5);
+    queue_remove(q, (void*) 3);
     ensure(had_err, queue_size(q) == 0);
     queue_delete(q);
   }
