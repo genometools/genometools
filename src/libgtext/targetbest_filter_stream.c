@@ -81,7 +81,7 @@ static void filter_targetbest(GenomeFeature *current_feature, Dlist *trees,
   int had_err;
   assert(current_feature && trees);
   target = genome_feature_get_attribute((GenomeNode*) current_feature,
-                                        "Target");
+                                        TARGET_STRING);
   assert(target);
   first_target_id = str_new();
   had_err = gff3parser_parse_target_attributes(target, &num_of_targets,

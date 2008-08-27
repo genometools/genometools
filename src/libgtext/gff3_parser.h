@@ -28,6 +28,7 @@
 
 #define ID_STRING           "ID"
 #define PARENT_STRING       "Parent"
+#define TARGET_STRING       "Target"
 
 typedef struct GFF3Parser GFF3Parser;
 

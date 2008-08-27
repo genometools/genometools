@@ -84,6 +84,22 @@ const char* genome_feature_get_attribute(GenomeNode *gn, const char *attr_name)
   return tag_value_map_get(gf->attributes, attr_name);
 }
 
+static void store_attribute(const char *attr_name,
+                            UNUSED const char *attr_value, void *data)
+{
+  StrArray *list = data;
+  assert(attr_name && attr_value && data);
+  strarray_add_cstr(list, attr_name);
+}
+
+StrArray* genome_feature_get_attribute_list(GenomeFeature *gf)
+{
+  StrArray *list = strarray_new();
+  if (gf->attributes)
+    tag_value_map_foreach(gf->attributes, store_attribute, list);
+  return list;
+}
+
 static Str* genome_feature_get_seqid(GenomeNode *gn)
 {
   GenomeFeature *gf = genome_feature_cast(gn);

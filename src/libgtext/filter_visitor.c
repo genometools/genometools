@@ -98,7 +98,8 @@ static bool filter_targetstrand(GenomeFeature *gf, Strand targetstrand)
   const char *target;
   assert(gf);
   if (targetstrand != NUM_OF_STRAND_TYPES &&
-      (target = genome_feature_get_attribute((GenomeNode*) gf, "Target"))) {
+      (target = genome_feature_get_attribute((GenomeNode*) gf,
+                                             TARGET_STRING))) {
     unsigned long num_of_targets;
     Strand parsed_strand;
     int had_err;

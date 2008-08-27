@@ -678,6 +678,86 @@ static bool is_blank_attribute(const char *attribute)
   return true;
 }
 
+static int check_missing_attributes(GenomeNode *this_feature,
+                                    StrArray *this_attributes,
+                                    GenomeNode *other_feature, const char *id,
+                                    const char *filename, Error *err)
+{
+  unsigned long i;
+  int had_err = 0;
+  error_check(err);
+  assert(this_feature && this_attributes && other_feature);
+  for (i = 0; !had_err && i < strarray_size(this_attributes); i++) {
+    if (!genome_feature_get_attribute(other_feature,
+                                      strarray_get(this_attributes, i))) {
+      error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
+                "\"%s\" does not have a '%s' attribute which is present in its "
+                "counterpart on line %u", ID_STRING, id,
+                genome_node_get_line_number(other_feature), filename,
+                strarray_get(this_attributes, i),
+                genome_node_get_line_number(this_feature));
+      had_err = -1;
+      break;
+    }
+  }
+  return had_err;
+}
+
+static int compare_target_attribute(GenomeNode *new_gf, GenomeNode *old_gf,
+                                    const char *id, Error *err)
+{
+  unsigned long new_target_num, old_target_num;
+  Str *new_target_str, *old_target_str;
+  const char *new_target, *old_target;
+  int had_err;
+  error_check(err);
+  assert(new_gf && old_gf);
+  new_target = genome_feature_get_attribute(new_gf, TARGET_STRING);
+  old_target = genome_feature_get_attribute(old_gf, TARGET_STRING);
+  new_target_str = str_new();
+  old_target_str = str_new();
+  had_err = gff3parser_parse_target_attributes(new_target, &new_target_num,
+                                               new_target_str, NULL, NULL, "",
+                                               0, NULL);
+  assert(!had_err); /* has been parsed already */
+  had_err = gff3parser_parse_target_attributes(old_target, &old_target_num,
+                                               old_target_str, NULL, NULL, "",
+                                               0, NULL);
+  assert(!had_err); /* has been parsed already */
+  if (str_cmp(new_target_str, old_target_str)) {
+    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+              "has a different %s name than its counterpart on line %u",
+              ID_STRING, id, genome_node_get_line_number(new_gf),
+              genome_node_get_filename(new_gf), TARGET_STRING,
+              genome_node_get_line_number(old_gf));
+    had_err = -1;
+  }
+  str_delete(old_target_str);
+  str_delete(new_target_str);
+  return had_err;
+}
+
+static int compare_other_attribute(const char *attr_name, GenomeNode *new_gf,
+                                   GenomeNode *old_gf, const char *id,
+                                   Error *err)
+{
+  error_check(err);
+  assert(attr_name && new_gf && old_gf);
+  if (strcmp(genome_feature_get_attribute(new_gf, attr_name),
+              genome_feature_get_attribute(old_gf, attr_name))) {
+    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+              "has a different attribute '%s' than its counterpart on line %u "
+              "('%s' vs. '%s')",
+              ID_STRING, id, genome_node_get_line_number(new_gf),
+              genome_node_get_filename(new_gf), attr_name,
+              genome_node_get_line_number(old_gf),
+              genome_feature_get_attribute(new_gf, attr_name),
+              genome_feature_get_attribute(old_gf, attr_name));
+    return -1;
+  }
+  return 0;
+}
+
 static int check_multi_feature_constrains(GenomeNode *new_gf,
                                           GenomeNode *old_gf, const char *id,
                                           const char *filename,
@@ -724,7 +804,30 @@ static int check_multi_feature_constrains(GenomeNode *new_gf,
     had_err = -1;
   }
   /* check attributes (for target attribute only the name) */
-  /* XXX */
+  if (!had_err) {
+    StrArray *new_attributes, *old_attributes;
+    new_attributes = genome_feature_get_attribute_list((GenomeFeature*) new_gf);
+    old_attributes = genome_feature_get_attribute_list((GenomeFeature*)old_gf);
+    had_err = check_missing_attributes(new_gf, new_attributes, old_gf, id,
+                                       filename, err);
+    if (!had_err) {
+      had_err = check_missing_attributes(old_gf, old_attributes, new_gf, id,
+                                         filename, err);
+    }
+    if (!had_err) {
+      unsigned long i;
+      assert(strarray_size(new_attributes) == strarray_size(old_attributes));
+      for (i = 0; !had_err && i < strarray_size(new_attributes); i++) {
+        const char *attr_name = strarray_get(new_attributes, i);
+        if (!strcmp(attr_name, TARGET_STRING))
+          had_err = compare_target_attribute(new_gf, old_gf, id, err);
+        else
+          had_err = compare_other_attribute(attr_name, new_gf, old_gf, id, err);
+      }
+    }
+    strarray_delete(new_attributes);
+    strarray_delete(old_attributes);
+  }
   return had_err;
 }
 
@@ -820,7 +923,7 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
                                       parser, genome_nodes, auto_sr, filename,
                                       line_number, err);
       }
-      else if (!strcmp(attr_tag, "Target")) {
+      else if (!strcmp(attr_tag, TARGET_STRING)) {
         /* the value of ``Target'' attributes have a special syntax which is
            checked here */
         had_err = gff3parser_parse_target_attributes(attr_value, NULL, NULL,
