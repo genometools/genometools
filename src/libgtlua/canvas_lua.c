@@ -21,13 +21,14 @@
 #include "libgtcore/error.h"
 #include "libgtext/luahelper.h"
 #include "libgtlua/canvas_lua.h"
+#include "libgtlua/imageinfo_lua.h"
 #include "libgtview/canvas.h"
 #include "libgtview/luaconfig.h"
 
-static int canvas_lua_new_png(lua_State *L)
+static int canvas_lua_new_generic(lua_State *L, GraphicsOutType t)
 {
   Canvas **canvas;
-  /* ImageInfo **ii; */
+  ImageInfo **ii;
   unsigned int width;
   Config *config;
   width = luaL_checkint(L, 1);
@@ -35,11 +36,37 @@ static int canvas_lua_new_png(lua_State *L)
   config = lua_get_config_from_registry(L);
   canvas = lua_newuserdata(L, sizeof (Canvas*));
   assert(canvas);
-  /* TODO: ImageInfo */
-  *canvas = canvas_new(config, GRAPHICS_PNG, width, NULL);
+  /* if a imageinfo object is passed, it must be correct type */
+  if (lua_isnil(L, 2))
+    *canvas = canvas_new(config, t, width, NULL);
+  else
+  {
+    ii = check_imageinfo(L, 2);
+   *canvas = canvas_new(config, t, width, *ii);
+  }
   luaL_getmetatable(L, CANVAS_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
+}
+
+static int canvas_lua_new_pdf(lua_State *L)
+{
+  return canvas_lua_new_generic(L, GRAPHICS_PDF);
+}
+
+static int canvas_lua_new_png(lua_State *L)
+{
+  return canvas_lua_new_generic(L, GRAPHICS_PNG);
+}
+
+static int canvas_lua_new_svg(lua_State *L)
+{
+  return canvas_lua_new_generic(L, GRAPHICS_SVG);
+}
+
+static int canvas_lua_new_ps(lua_State *L)
+{
+  return canvas_lua_new_generic(L, GRAPHICS_PS);
 }
 
 static int canvas_lua_to_file(lua_State *L)
@@ -69,6 +96,9 @@ static int canvas_lua_delete(lua_State *L)
 
 static const struct luaL_Reg canvas_lib_f [] = {
   { "canvas_new_png", canvas_lua_new_png },
+  { "canvas_new_pdf", canvas_lua_new_pdf },
+  { "canvas_new_ps", canvas_lua_new_ps },
+  { "canvas_new_svg", canvas_lua_new_svg },
   { NULL, NULL }
 };
 

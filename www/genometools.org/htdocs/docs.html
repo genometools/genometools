@@ -63,6 +63,8 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
   <li><a href="#CSAStream">CSAStream</a>
 
+  <li><a href="#Canvas">Canvas</a>
+
   <li><a href="#Diagram">Diagram</a>
 
   <li><a href="#FeatureIndex">FeatureIndex</a>
@@ -77,11 +79,11 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
   <li><a href="#GenomeStream">GenomeStream</a>
 
+  <li><a href="#Imageinfo">Imageinfo</a>
+
   <li><a href="#Range">Range</a>
 
   <li><a href="#RegionMapping">RegionMapping</a>
-
-  <li><a href="#Render">Render</a>
 
   <li><a href="#ScoreMatrix">ScoreMatrix</a>
 
@@ -89,6 +91,26 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
 </ul>
 <h2>Sole functions</h2>
+<code>translate_dna(dna)</code>
+<p>
+Returns translated <code>dna</code>.
+</p>
+<hr>
+<code>gff3_visitor_new()</code>
+<p>
+Returns a new GFF3 visitor.
+</p>
+<hr>
+<code>ranges_sort(range_array)</code>
+<p>
+Returns an array containing the ranges from array <code>range_array</code> in sorted order.
+</p>
+<hr>
+<code>ranges_are_sorted(range_array)</code>
+<p>
+Returns true if the ranges in array <code>range_array</code> are sorted, false otherwise.
+</p>
+<hr>
 <code>genome_feature_new(type, range, strand)</code>
 <p>
 Returns a new genome feature of <code>type</code> spanning <code>range</code> on <code>strand</code>.
@@ -137,26 +159,6 @@ Returns a new GFF3 input stream object for <code>filename</code>. The file <code
 <code>gff3_out_stream_new(genome_stream)</code>
 <p>
 Returns a new GFF3 output stream which pulls its features from <code>genome_stream</code>.
-</p>
-<hr>
-<code>gff3_visitor_new()</code>
-<p>
-Returns a new GFF3 visitor.
-</p>
-<hr>
-<code>ranges_sort(range_array)</code>
-<p>
-Returns an array containing the ranges from array <code>range_array</code> in sorted order.
-</p>
-<hr>
-<code>ranges_are_sorted(range_array)</code>
-<p>
-Returns true if the ranges in array <code>range_array</code> are sorted, false otherwise.
-</p>
-<hr>
-<code>translate_dna(dna)</code>
-<p>
-Returns translated <code>dna</code>.
 </p>
 <hr>
 <code>reload()</code>
@@ -287,6 +289,33 @@ Returns a new CDS (coding sequence) stream object (a genome stream) which uses g
 Returns a new CSA (consensus spliced alignment) stream object (a genome stream) which uses genome stream <code>in_stream</code> as input. The CSA stream replaces spliced alignments with computed consensus spliced alignments. The optional <code>join</code> parameters sets the length for the spliced alignment clustering (default: 300).
 </p>
 <hr>
+<a name="Canvas"></a>
+<h2>Class Canvas</h2>
+<code>canvas_new_png(width, imageinfo)</code>
+<p>
+Return a Canvas object which acts as a PNG drawing surface of width <code>width</code> to be passed to rendering functions as a visitor. An <code>imageinfo</code> object is filled with coordinate information if given. If not needed, pass nil as <code>imageinfo</code>.
+</p>
+<hr>
+<code>canvas_new_pdf(width, imageinfo)</code>
+<p>
+Return a Canvas object which acts as a PDF drawing surface of width <code>width</code> to be passed to rendering functions as a visitor. An <code>imageinfo</code> object is filled with coordinate information if given.
+</p>
+<hr>
+<code>canvas_new_ps(width, imageinfo)</code>
+<p>
+Return a Canvas object which acts as a PS drawing surface of width <code>width</code> to be passed to rendering functions as a visitor. An <code>imageinfo</code> object is filled with coordinate information if given.
+</p>
+<hr>
+<code>canvas_new_svg(width, imageinfo)</code>
+<p>
+Return a Canvas object which acts as a SVG drawing surface of width <code>width</code> to be passed to rendering functions as a visitor. An <code>imageinfo</code> object is filled with coordinate information if given.
+</p>
+<hr>
+<code>canvas:to_file(filename)</code>
+<p>
+Creates an image file with the given <code>filename</code> which contains the contents of the canvas.
+</p>
+<hr>
 <a name="Diagram"></a>
 <h2>Class Diagram</h2>
 <code>diagram_new(feature_index, range, seqid)</code>
@@ -308,7 +337,7 @@ Add <code>sequence_region</code> to <code>feature_index</code>.
 <hr>
 <code>feature_index:add_genome_feature(genome_feature)</code>
 <p>
-Add <code>genome_feature</code> to <code>feature_index</code>.
+Add <code>genome_feature</code> to <code>feature_index</code>, implicitly creating sequence region if not present before.
 </p>
 <hr>
 <code>feature_index:get_features_for_seqid(seqid)</code>
@@ -456,6 +485,18 @@ Returns the next genome node for <code>genome_node_iterator</code> or nil.
 Returns the next genome node for <code>genome_stream</code> or nil.
 </p>
 <hr>
+<a name="Imageinfo"></a>
+<h2>Class Imageinfo</h2>
+<code>imageinfo_new()</code>
+<p>
+returns a new ImageInfo object.
+</p>
+<hr>
+<code>imageinfo:get_recmaps()</code>
+<p>
+returns a list of tables with the fields "nw_x","nw_y","se_x","se_y" and "feature_ref" with the top left and bottom right coordinated in pixels or points and a GenomeNode reference per element drawn.
+</p>
+<hr>
 <a name="Range"></a>
 <h2>Class Range</h2>
 <code>range_new(startpos, endpos)</code>
@@ -488,18 +529,6 @@ Show range on stdout.
 <code>region_mapping_new_seqfile(seqfile)</code>
 <p>
 Returns a new region mapping which maps everything onto sequence file <code>seqfile</code>.
-</p>
-<hr>
-<a name="Render"></a>
-<h2>Class Render</h2>
-<code>render_new()</code>
-<p>
-Returns a new render object.
-</p>
-<hr>
-<code>render:to_png(diagram, filename, width)</code>
-<p>
-Uses <code>render</code> to render the given <code>diagram</code> as PNG to <code>filename</code>. The optional <code>width</code> parameter sets the width of the PNG (default: 800).
 </p>
 <hr>
 <a name="ScoreMatrix"></a>
@@ -539,7 +568,7 @@ Show result of <code>stream_evaluator</code> on stdout.
 <div id="footer">
 Copyright &copy; 2008
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2008-02-28
+Last update: 2008-08-28
 </div>
 </div>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">

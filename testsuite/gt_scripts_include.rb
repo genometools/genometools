@@ -217,10 +217,23 @@ if $arguments["libgtview"] then
     run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{$last_stdout} -"
   end
 
-  Name "libgtview bindings"
+  Name "libgtview (general bindings)"
   Keywords "gt_scripts"
   Test do
     run_test "#{$bin}gt #{$testdata}/gtscripts/view.lua test.png #{$testdata}gff3_file_1_short.txt"
+  end
+
+  Name "libgtview (recmaps)"
+  Keywords "gt_scripts"
+  Test do
+    run_test "#{$bin}gt #{$testdata}/gtscripts/recmap.lua #{$testdata}gff3_file_1_short.txt"
+    run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
+  end
+
+  Name "libgtview (invalid ImageInfo object)"
+  Keywords "gt_scripts"
+  Test do
+    run_test("#{$bin}gt #{$testdata}/gtscripts/ii_fail.lua #{$testdata}gff3_file_1_short.txt", :retval => 1)
   end
 
   Name "show_seqids"

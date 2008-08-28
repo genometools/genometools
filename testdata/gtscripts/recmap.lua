@@ -23,9 +23,8 @@ function usage()
   os.exit(1)
 end
 
-if #arg == 2 then
-  pngfile  = arg[1]
-  gff3file = arg[2]
+if #arg == 1 then
+  gff3file = arg[1]
 else
   usage()
 end
@@ -47,15 +46,11 @@ ii = gt.imageinfo_new()
 
 diagram = gt.diagram_new(feature_index, seqid, range)
 canvas = gt.canvas_new_png(800, ii)
-canvas2 = gt.canvas_new_png(800, nil)  -- nil as ImageInfo parameter must be ok
-
--- test rendering with image info
 diagram:render(canvas)
-canvas:to_file(pngfile)
 if #(ii:get_recmaps()) ~= 16 then
   os.exit(1)
 end
+for _,v in pairs(ii:get_recmaps()) do
+    print(string.format("%.0f,%.0f,%.0f,%.0f, %s",v.nw_x, v.nw_y, v.se_x, v.se_y, v.feature_ref:get_type()))
+end
 
--- and without
-diagram:render(canvas2)
-canvas2:to_file(pngfile)

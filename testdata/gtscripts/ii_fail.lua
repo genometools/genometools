@@ -1,4 +1,4 @@
-/*
+--[[
   Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
@@ -13,25 +13,37 @@
   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-*/
+]]
 
-#include <assert.h>
-#include "libgtlua/canvas_lua.h"
-#include "libgtlua/diagram_lua.h"
-#include "libgtlua/feature_index_lua.h"
-#include "libgtlua/feature_stream_lua.h"
-#include "libgtlua/feature_visitor_lua.h"
-#include "libgtlua/imageinfo_lua.h"
-#include "libgtlua/gtview_lua.h"
+-- testing the Lua bindings for libgtview (similar to the view tool)
 
-int luaopen_gtview(lua_State *L)
-{
-  assert(L);
-  luaopen_canvas(L);
-  luaopen_diagram(L);
-  luaopen_feature_index(L);
-  luaopen_feature_stream(L);
-  luaopen_feature_visitor(L);
-  luaopen_imageinfo(L);
-  return 1;
-}
+function usage()
+  io.stderr:write(string.format("Usage: %s PNG_file GFF3_file\n", arg[0]))
+  io.stderr:write("Create PNG representation of GFF3 annotation file.\n")
+  os.exit(1)
+end
+
+if #arg == 1 then
+  gff3file = arg[1]
+else
+  usage()
+end
+
+in_stream = gt.gff3_in_stream_new_sorted(gff3file)
+feature_index = gt.feature_index_new()
+feature_stream = gt.feature_stream_new(in_stream, feature_index)
+in_stream = nil; collectgarbage() -- being nasty
+gn = feature_stream:next_tree()
+-- fill feature index
+while (gn) do
+  gn = feature_stream:next_tree()
+end
+
+seqid = feature_index:get_first_seqid()
+range = feature_index:get_range_for_seqid(seqid)
+
+ii = {}
+
+diagram = gt.diagram_new(feature_index, seqid, range)
+canvas = gt.canvas_new_png(800, ii)
+diagram:render(canvas)
