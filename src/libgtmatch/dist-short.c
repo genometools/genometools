@@ -68,12 +68,12 @@
         Pv = (Mh << 1) | ~ (Xv | Ph);\
         Mv = Ph & Xv
 
-unsigned long distanceofshortstrings(unsigned long *eqsvector,
-                                     unsigned int alphasize,
-                                     const Uchar *useq,
-                                     unsigned long ulen,
-                                     const Uchar *vseq,
-                                     unsigned long vlen)
+unsigned long distanceofshortstringsbytearray(unsigned long *eqsvector,
+                                              unsigned int alphasize,
+                                              const Uchar *useq,
+                                              unsigned long ulen,
+                                              const Uchar *vseq,
+                                              unsigned long vlen)
 {
   DECLARELOCALVARS;
   const Uchar *vptr;
@@ -82,6 +82,27 @@ unsigned long distanceofshortstrings(unsigned long *eqsvector,
   for (vptr = vseq; vptr < vseq + vlen; vptr++)
   {
     COMPUTENEWDIST(*vptr);
+  }
+  return distval;
+}
+
+unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
+                                           unsigned int alphasize,
+                                           const Uchar *useq,
+                                           unsigned long ulen,
+                                           const Encodedsequence *encseq,
+                                           Seqpos vstartpos,
+                                           Seqpos vlen)
+{
+  DECLARELOCALVARS;
+  Uchar cc;
+  Seqpos pos;
+
+  initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
+  for (pos = vstartpos; pos < vstartpos + vlen; pos++)
+  {
+    cc = getencodedchar(encseq,pos,Forwardmode);
+    COMPUTENEWDIST(cc);
   }
   return distval;
 }

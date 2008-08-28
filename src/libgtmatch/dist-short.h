@@ -20,12 +20,20 @@
 #include "libgtcore/symboldef.h"
 #include "defined-types.h"
 
-unsigned long distanceofshortstrings(unsigned long *eqsvector,
+unsigned long distanceofshortstringsbytearray(unsigned long *eqsvector,
                                      unsigned int alphasize,
                                      const Uchar *useq,
                                      unsigned long ulen,
                                      const Uchar *vseq,
                                      unsigned long vlen);
+
+unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
+                                           unsigned int alphasize,
+                                           const Uchar *useq,
+                                           unsigned long ulen,
+                                           const Encodedsequence *encseq,
+                                           Seqpos vstartpos,
+                                           Seqpos vlen);
 
 unsigned long reversesuffixmatch(unsigned long *eqsvector,
                                  unsigned int alphasize,
