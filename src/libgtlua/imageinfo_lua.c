@@ -105,10 +105,10 @@ static int imageinfo_lua_recmaps_as_table(lua_State *L)
   ii = check_imageinfo(L, 1);
   assert(ii);
   num = image_info_num_of_recmaps(*ii);
-  if(num>0)
+  if (num>0)
   {
     lua_newtable(L);
-    for(i=0;i<num;i++)
+    for (i=0;i<num;i++)
     {
       lua_pushnumber(L, i+1);
       push_recmap_as_table(L, image_info_get_recmap(*ii, i));
