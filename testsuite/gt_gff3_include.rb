@@ -704,7 +704,6 @@ end
 
 if $gttestdata then
   large_gff3_test("Saccharomyces cerevisiae", "saccharomyces_cerevisiae.gff")
-  large_gff3_test("Aaegypti", "aaegypti.BASEFEATURES-AaegL1.1.gff3")
   large_gff3_test("Drosophila melanogaster",
                   "Drosophila_melanogaster.BDGP5.4.50.gff3")
 end
