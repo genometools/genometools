@@ -59,6 +59,7 @@
 #include "tools/gt_filter.h"
 #include "tools/gt_fingerprint.h"
 #include "tools/gt_gff3.h"
+#include "tools/gt_gff3validator.h"
 #include "tools/gt_gff3_to_gtf.h"
 #include "tools/gt_gtf_to_gff3.h"
 #include "tools/gt_ltrharvest.h"
@@ -110,6 +111,7 @@ Toolbox* gtt_tools(void)
   toolbox_add_tool(tools, "filter", gt_filter());
   toolbox_add_tool(tools, "fingerprint", gt_fingerprint());
   toolbox_add_tool(tools, "gff3", gt_gff3());
+  toolbox_add_tool(tools, "gff3validator", gt_gff3validator());
   toolbox_add(tools, "gff3_to_gtf", gt_gff3_to_gtf);
   toolbox_add(tools, "gtf_to_gff3", gt_gtf_to_gff3);
   toolbox_add(tools, "ltrharvest", gt_ltrharvest);
