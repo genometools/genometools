@@ -343,6 +343,11 @@ int array_unit_test(Error *err)
     array_delete(aref);
   }
   if (!had_err) {
+    i = 0;
+    had_err = array_iterate_reverse(a, iterate_test_func, &i, err);
+    ensure(had_err, array_iterate_reverse(a, iterate_fail_func, NULL, err));
+  }
+  if (!had_err) {
     array_reverse(a);
     i = 0;
     had_err = array_iterate(a, iterate_test_func, &i, err);
