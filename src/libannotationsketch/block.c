@@ -89,7 +89,7 @@ Block* block_new_from_node(GenomeNode *node)
   block->range = genome_node_get_range(node);
   block->strand = genome_feature_get_strand((GenomeFeature*) node);
   block->type = genome_feature_get_type((GenomeFeature*) node);
-  block->top_level_feature = node;
+  block->top_level_feature = genome_node_ref(node);
   return block;
 }
 
@@ -98,7 +98,7 @@ void block_insert_element(Block *block, GenomeNode *gn)
   Element *element;
   assert(block && gn);
   if (!block->top_level_feature)
-    block->top_level_feature = gn;
+    block->top_level_feature = genome_node_ref(gn);
   element = element_new(gn);
   dlist_add(block->elements, element);
 }
@@ -300,5 +300,7 @@ void block_delete(Block *block)
   if (block->caption)
     str_delete(block->caption);
   dlist_delete(block->elements);
+  if (block->top_level_feature)
+    genome_node_delete(block->top_level_feature);
   ma_free(block);
 }

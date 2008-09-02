@@ -21,7 +21,7 @@
 #include "libgtlua/gt_lua.h"
 
 #ifdef LIBANNOTATIONSKETCH
-#include "libgtlua/gtview_lua.h"
+#include "libgtlua/annotationsketch_lua.h"
 #endif
 
 /* key used to store the FeatureTypeFactory object in the Lua registry */
@@ -55,7 +55,7 @@ int luaopen_gt(lua_State *L)
   luaopen_gtcore(L); /* open core library */
   luaopen_gtext(L);  /* open extended library */
 #ifdef LIBANNOTATIONSKETCH
-  luaopen_gtview(L); /* open view library */
+  luaopen_annotationsketch(L); /* open annotationsketch library */
 #endif
   return 1;
 }

@@ -239,8 +239,8 @@ ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
 ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
 ZLIB_DEP:=$(ZLIB_SRC:%.c=obj/%.d)
 
-# the objects which are included into the single GenomeThreader shared library
-GTSHAREDLIB_OBJ:=$(LIBGTCORE_OBJ) $(LIBGTEXT_C_OBJ) $(LIBLUA_OBJ)
+# the objects which are included into the single GenomeTools shared library
+GTSHAREDLIB_OBJ:=$(LIBGTCORE_OBJ) $(LIBGTEXT_C_OBJ) $(LIBGTLUA_C_OBJ) $(LIBLUA_OBJ)
 GTSHAREDLIB_LIBDEP:=$(LIBGTCORE_LIBDEP)
 
 SERVER=gordon@genometools.org

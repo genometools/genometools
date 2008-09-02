@@ -137,12 +137,12 @@ static bool get_caption_display_status(Diagram *d, GenomeFeatureType *gft)
     double tmp;
     status = ma_malloc(sizeof (bool*));
     if (!style_get_bool(d->style, "format", "show_block_captions",
-                       status))
+                       status, NULL))
       *status = true;
     if (*status)
     {
       if (style_get_num(d->style, genome_feature_type_get_cstr(gft),
-                         "max_capt_show_width", &tmp))
+                         "max_capt_show_width", &tmp, NULL))
         threshold = tmp;
       else
         threshold = UNDEF_ULONG;
@@ -171,21 +171,30 @@ static void add_to_current(Diagram *d, GenomeNode *node, GenomeNode *parent)
   /* create new Block tuple and add to node info */
   block = block_new_from_node(node);
   /* assign block caption */
-  nnid_p = get_node_name_or_id(parent);
-  nnid_n = get_node_name_or_id(node);
-  if ((nnid_p || nnid_n) && get_caption_display_status(d,
-                genome_feature_get_type((GenomeFeature*) node)))
+
+  caption = str_new();
+  if (!style_get_str(d->style,
+                     genome_feature_type_get_cstr(
+                         genome_feature_get_type((GenomeFeature*) node)),
+                     "block_caption",
+                     caption,
+                     node))
   {
-    caption = str_new_cstr("");
-    if (parent) {
-      if (genome_node_has_children(parent))
-        str_append_cstr(caption, nnid_p);
-      else
-        str_append_cstr(caption, "-");
-      str_append_cstr(caption, "/");
+    nnid_p = get_node_name_or_id(parent);
+    nnid_n = get_node_name_or_id(node);
+    if ((nnid_p || nnid_n) && get_caption_display_status(d,
+                  genome_feature_get_type((GenomeFeature*) node)))
+    {
+      if (parent) {
+        if (genome_node_has_children(parent))
+          str_append_cstr(caption, nnid_p);
+        else
+          str_append_cstr(caption, "-");
+        str_append_cstr(caption, "/");
+      }
+      if (nnid_n)
+        str_append_cstr(caption, nnid_n);
     }
-    if (nnid_n)
-      str_append_cstr(caption, nnid_n);
   }
   block_set_caption(block, caption);
   /* insert node into block */
@@ -302,13 +311,13 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
     return;
 
   /* get maximal view widths in nucleotides to show this type */
-  if (style_get_num(d->style, feature_type, "max_show_width", &tmp))
+  if (style_get_num(d->style, feature_type, "max_show_width", &tmp, NULL))
     max_show_width = tmp;
   else
     max_show_width = UNDEF_ULONG;
   if (parent)
   {
-    if (style_get_num(d->style, parent_gft, "max_show_width", &tmp))
+    if (style_get_num(d->style, parent_gft, "max_show_width", &tmp, NULL))
     par_max_show_width = tmp;
   else
     par_max_show_width = UNDEF_ULONG;
@@ -327,7 +336,7 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
   {
     collapse = ma_malloc(sizeof (bool));
     if (!style_get_bool(d->style, feature_type, "collapse_to_parent",
-                        collapse))
+                        collapse, NULL))
       *collapse = false;
     hashmap_add(d->collapsingtypes, (char*) feature_type, collapse);
   }
@@ -567,12 +576,12 @@ static int layout_tracks(void *key, void *value, void *data,
   ma_free(filename);
   type = genome_feature_type_get_cstr(gft);
 
-  if (!style_get_bool(tti->dia->style, "format", "split_lines", &split))
+  if (!style_get_bool(tti->dia->style, "format", "split_lines", &split, NULL))
     split = true;
   if (split)
-    if (!style_get_bool(tti->dia->style, type, "split_lines", &split))
+    if (!style_get_bool(tti->dia->style, type, "split_lines", &split, NULL))
       split = true;
-  if (style_get_num(tti->dia->style, type, "max_num_lines", &tmp))
+  if (style_get_num(tti->dia->style, type, "max_num_lines", &tmp, NULL))
     max = tmp;
   else
     max = 50;
@@ -710,14 +719,16 @@ int diagram_unit_test(Error *err)
   }
 
   if (!had_err &&
-      !style_get_bool(dia->style, "gene", "collapse_to_parent", false)) {
+      !style_get_bool(dia->style, "gene", "collapse_to_parent", false, NULL))
+  {
     track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashmap_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
-      !style_get_bool(dia->style, "exon", "collapse_to_parent", false)) {
+      !style_get_bool(dia->style, "exon", "collapse_to_parent", false, NULL))
+  {
     track_key = track_key_new("generated", exon_type);
     ensure(had_err, hashmap_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
@@ -732,7 +743,8 @@ int diagram_unit_test(Error *err)
   }
 
   if (!had_err &&
-      !style_get_bool(dia2->style, "gene", "collapse_to_parent", false)) {
+      !style_get_bool(dia2->style, "gene", "collapse_to_parent", false, NULL))
+  {
     diagram_render(dia2, canvas);
     track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
@@ -740,14 +752,16 @@ int diagram_unit_test(Error *err)
   }
 
   if (!had_err &&
-      !style_get_bool(dia2->style, "exon", "collapse_to_parent", false)) {
+      !style_get_bool(dia2->style, "exon", "collapse_to_parent", false, NULL))
+  {
     track_key = track_key_new("generated", exon_type);
     ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
-      !style_get_bool(dia2->style, "CDS", "collapse_to_parent", false)) {
+      !style_get_bool(dia2->style, "CDS", "collapse_to_parent", false, NULL))
+  {
     track_key = track_key_new("generated", CDS_type);
     ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);

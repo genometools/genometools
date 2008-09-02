@@ -52,6 +52,10 @@ module GT
       GT.genome_node_get_filename(@genome_node)
     end
 
+    def to_ptr
+      @genome_node
+    end
+
     def accept(visitor)
       err = GT::Error.new()
       rval = GT.genome_node_accept(@genome_node, visitor.genome_visitor,

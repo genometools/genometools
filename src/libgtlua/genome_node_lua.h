@@ -48,6 +48,12 @@
    -- Returns the source of <genome_feature>.
    function genome_feature:get_source()
 
+   -- Returns the score of <genome_feature>.
+   function genome_feature:get_score()
+
+   -- Returns the <attrib> attribute of <genome_feature>.
+   function genome_feature:get_attribute(attrib)
+
    -- Set the source of <genome_feature> to <source>.
    function genome_feature:set_source(source)
 

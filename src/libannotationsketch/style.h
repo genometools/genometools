@@ -24,6 +24,7 @@
 #include "libgtcore/strarray.h"
 #include "libannotationsketch/color.h"
 #include "libgtext/genome_feature_type.h"
+#include "libgtext/genome_node.h"
 
 /* Holds configuration information. */
 typedef struct Style Style;
@@ -49,7 +50,7 @@ void           style_reload(Style*);
 /* Retrieves a color value from the Style for <key>.
    If not set, false is returned and a default color is written. */
 bool           style_get_color(const Style*, const char *section,
-                                const char *key, Color*);
+                                const char *key, Color*, GenomeNode*);
 /* Sets a color value in the Style for <key> (i.e., feature) to a
    certain value. */
 void           style_set_color(Style*, const char *section,
@@ -57,21 +58,21 @@ void           style_set_color(Style*, const char *section,
 /* Retrieve string value of <key> in <section>.
    If not set, false is returned. */
 bool           style_get_str(const Style*, const char *section,
-                              const char *key, Str*);
+                              const char *key, Str*, GenomeNode*);
 /* Set string <key> in <section> to <value>. */
 void           style_set_str(Style*, const char *section, const char *key,
                                Str *value);
 /* Retrieve numeric value of <key> in <section>.
    If not set, false is returned.*/
 bool           style_get_num(const Style*, const char *section,
-                              const char *key, double*);
+                              const char *key, double*, GenomeNode*);
 /* Set numeric value of <key> in <section> to <number>. */
 void           style_set_num(Style*, const char *section, const char *key,
                               double number);
 /* Retrieve boolean value of <key> in <section>.
    If not set, false is returned.*/
 bool           style_get_bool(const Style*, const char *section,
-                               const char *key, bool*);
+                               const char *key, bool*, GenomeNode*);
 /* Set boolean value of <key> in <section> to <number>. */
 void           style_set_bool(Style*, const char *section, const char *key,
                                bool);

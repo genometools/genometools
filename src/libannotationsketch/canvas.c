@@ -76,11 +76,11 @@ static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
   diagram_get_lineinfo(dia, &lines);
 
   /* obtain line height and spacer from style */
-  if (style_get_num(canvas->sty, "format", "bar_height", &tmp))
+  if (style_get_num(canvas->sty, "format", "bar_height", &tmp, NULL))
     line_height = tmp;
   else
     line_height = BAR_HEIGHT_DEFAULT;
-  if (style_get_num(canvas->sty, "format", "bar_vspace", &tmp))
+  if (style_get_num(canvas->sty, "format", "bar_vspace", &tmp, NULL))
     line_height += tmp;
   else
     line_height += BAR_VSPACE_DEFAULT;
@@ -92,7 +92,7 @@ static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
   /* add track caption height and spacer */
   if (canvas->show_track_captions)
   {
-    if (style_get_num(canvas->sty, "format", "track_vspace", &tmp))
+    if (style_get_num(canvas->sty, "format", "track_vspace", &tmp, NULL))
       height += diagram_get_number_of_tracks(dia)
                   * (TOY_TEXT_HEIGHT
                       + CAPTION_BAR_SPACE_DEFAULT
@@ -194,7 +194,7 @@ static void draw_ruler(Canvas *canvas)
 
   margins = canvas->margins;
 
-  if (!(style_get_bool(canvas->sty, "format","show_grid", &showgrid)))
+  if (!(style_get_bool(canvas->sty, "format","show_grid", &showgrid, NULL)))
     showgrid = true;
 
   rulercol.red = rulercol.green = rulercol.blue = .2;
@@ -290,13 +290,13 @@ int canvas_visit_diagram_pre(Canvas *canvas, Diagram *dia)
 
   assert(canvas && dia);
 
-  if (style_get_num(canvas->sty, "format", "margins", &margins))
+  if (style_get_num(canvas->sty, "format", "margins", &margins, NULL))
     canvas->margins = margins;
   else
     canvas->margins = MARGINS_DEFAULT;
 
   if (!style_get_bool(canvas->sty, "format", "show_track_captions",
-                       &canvas->show_track_captions))
+                       &canvas->show_track_captions, NULL))
     canvas->show_track_captions = true;
 
   canvas->viewrange = diagram_get_range(dia);
@@ -347,7 +347,7 @@ int canvas_visit_track_pre(Canvas *canvas, Track *track)
 
   assert(canvas && track);
 
-  style_get_color(canvas->sty, "format", "track_title_color", &color);
+  style_get_color(canvas->sty, "format", "track_title_color", &color, NULL);
 
   /* debug */
   if (style_get_verbose(canvas->sty))
@@ -396,7 +396,7 @@ int canvas_visit_track_post(Canvas *canvas, UNUSED Track *track)
   double vspace;
   assert(canvas && track);
   /* put track spacer after track */
-  if (style_get_num(canvas->sty, "format", "track_vspace", &vspace))
+  if (style_get_num(canvas->sty, "format", "track_vspace", &vspace, NULL))
     canvas->y += vspace;
   else
     canvas->y += TRACK_VSPACE_DEFAULT;
@@ -418,11 +418,11 @@ int canvas_visit_line_post(Canvas *canvas, UNUSED Line *line)
   int had_err = 0;
   double tmp;
   assert(canvas && line);
-  if (style_get_num(canvas->sty, "format", "bar_height", &tmp))
+  if (style_get_num(canvas->sty, "format", "bar_height", &tmp, NULL))
     canvas->y += tmp;
   else
     canvas->y += BAR_HEIGHT_DEFAULT;
-  if (style_get_num(canvas->sty, "format", "bar_vspace", &tmp))
+  if (style_get_num(canvas->sty, "format", "bar_vspace", &tmp, NULL))
     canvas->y += tmp;
   else
     canvas->y += BAR_VSPACE_DEFAULT;
@@ -446,13 +446,15 @@ int canvas_visit_block(Canvas *canvas, Block *block)
   grey.red = grey.green = grey.blue = .85;
   strand = block_get_strand(block);
   block_range = block_get_range(block);
-  if (!style_get_num(canvas->sty, "format", "bar_height", &bar_height))
+  if (!style_get_num(canvas->sty, "format", "bar_height", &bar_height, NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
-  if (!style_get_num(canvas->sty, "format", "min_len_block", &min_len_block))
+  if (!style_get_num(canvas->sty, "format", "min_len_block", &min_len_block,
+                     NULL))
     min_len_block = MIN_LEN_BLOCK_DEFAULT;
-  if (!style_get_num(canvas->sty, "format", "arrow_width", &arrow_width))
+  if (!style_get_num(canvas->sty, "format", "arrow_width", &arrow_width, NULL))
     arrow_width = ARROW_WIDTH_DEFAULT;
-  if (!style_get_num(canvas->sty, "format", "stroke_width", &stroke_width))
+  if (!style_get_num(canvas->sty, "format", "stroke_width", &stroke_width,
+                     NULL))
     stroke_width = STROKE_WIDTH_DEFAULT;
 
   if (strand == STRAND_REVERSE || strand == STRAND_BOTH)
@@ -479,9 +481,11 @@ int canvas_visit_block(Canvas *canvas, Block *block)
   {
     GenomeFeatureType *btype = block_get_type(block);
     style_get_color(canvas->sty, genome_feature_type_get_cstr(btype),
-                           "fill", &fillcolor);
+                           "fill", &fillcolor,
+                           block_get_top_level_feature(block));
     style_get_color(canvas->sty, genome_feature_type_get_cstr(btype),
-                           "stroke", &strokecolor);
+                           "stroke", &strokecolor,
+                           block_get_top_level_feature(block));
     graphics_draw_box(canvas->g,
                       draw_range.start,
                       canvas->y,
@@ -518,7 +522,8 @@ int canvas_visit_block(Canvas *canvas, Block *block)
     return -1;
   }
 
-  style_get_color(canvas->sty, "format", "default_stroke_color", &strokecolor);
+  style_get_color(canvas->sty, "format", "default_stroke_color", &strokecolor,
+                  NULL);
 
   /* draw parent block boundaries */
   graphics_draw_dashes(canvas->g,
@@ -552,9 +557,9 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
 
   type = genome_feature_type_get_cstr(element_get_type(elem));
   grey.red = grey.green = grey.blue = .85;
-  if (!style_get_num(canvas->sty, "format", "bar_height", &bar_height))
+  if (!style_get_num(canvas->sty, "format", "bar_height", &bar_height, NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
-  if (!style_get_num(canvas->sty, "format", "arrow_width", &arrow_width))
+  if (!style_get_num(canvas->sty, "format", "arrow_width", &arrow_width, NULL))
     arrow_width = ARROW_WIDTH_DEFAULT;
 
   if ((strand == STRAND_REVERSE || strand == STRAND_BOTH)
@@ -575,17 +580,19 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   elem_width = draw_range.end - draw_range.start;
 
   if (element_is_marked(elem)) {
-    style_get_color(canvas->sty, type, "stroke_marked", &elem_color);
+    style_get_color(canvas->sty, type, "stroke_marked", &elem_color, NULL);
     if (!style_get_num(canvas->sty, "format", "stroke_marked_width",
-                       &stroke_width))
+                       &stroke_width, element_get_node_ref(elem)))
     stroke_width = STROKE_WIDTH_DEFAULT;
   }
   else {
-    style_get_color(canvas->sty, type, "stroke", &elem_color);
-    if (!style_get_num(canvas->sty, "format", "stroke_width", &stroke_width))
+    style_get_color(canvas->sty, type, "stroke", &elem_color, NULL);
+    if (!style_get_num(canvas->sty, "format", "stroke_width", &stroke_width,
+                       element_get_node_ref(elem)))
     stroke_width = STROKE_WIDTH_DEFAULT;
   }
-  style_get_color(canvas->sty, type, "fill", &fill_color);
+  style_get_color(canvas->sty, type, "fill", &fill_color,
+                  element_get_node_ref(elem));
 
   if (draw_range.end-draw_range.start <= 1.1)
   {
@@ -621,7 +628,8 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
 
   /* draw each element according to style set in the style */
   style = str_new();
-  if (!style_get_str(canvas->sty, type, "style", style))
+  if (!style_get_str(canvas->sty, type, "style", style,
+                     element_get_node_ref(elem)))
     str_set(style, "box");
 
   if (strcmp(str_get(style), "box")==0)

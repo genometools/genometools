@@ -18,15 +18,18 @@
 
 #include <assert.h>
 #include <string.h>
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
+#include "libgtcore/unused.h"
 #include "libgtcore/warning.h"
 #include "libgtext/luahelper.h"
 #include "libgtext/luaserialize.h"
 #include "libannotationsketch/style.h"
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
+#include "libgtlua/genome_node_lua.h"
+#include "libgtlua/gt_lua.h"
 
 struct Style
 {
@@ -50,6 +53,7 @@ static const luaL_Reg luasecurelibs[] = {
   {LUA_TABLIBNAME, luaopen_table},
   {LUA_STRLIBNAME, luaopen_string},
   {LUA_MATHLIBNAME, luaopen_math},
+  {"gt", luaopen_gt},              /* we open GenomeTools libs for callbacks */
   {NULL, NULL}
 };
 
@@ -150,7 +154,7 @@ static int style_find_section_for_setting(Style* sty, const char *section)
 /* Searches for <section> inside the config table, returning -1 if it is not
    found. Otherwise the number of items pushed onto the stack is returned. */
 static int style_find_section_for_getting(const Style *sty,
-                                           const char *section)
+                                          const char *section)
 {
   int depth = 0;
   assert(sty && section);
@@ -170,7 +174,7 @@ static int style_find_section_for_getting(const Style *sty,
 }
 
 bool style_get_color(const Style *sty, const char *section,
-                      const char *key, Color *color)
+                     const char *key, Color *color, GenomeNode *gn)
 {
   int i = 0;
   assert(sty && section && key && color);
@@ -184,6 +188,19 @@ bool style_get_color(const Style *sty, const char *section,
   }
   /* lookup color entry for given feature */
   lua_getfield(sty->L, -1, key);
+
+  /* execute callback if function is given */
+  if (lua_isfunction(sty->L, -1) && gn)
+  {
+    GenomeNode *gn_lua = genome_node_rec_ref(gn);
+    genome_node_lua_push(sty->L, gn_lua);
+    if (lua_pcall(sty->L, 1, 1, 0) != 0)
+    {
+      lua_pop(sty->L, 3);
+      return false;
+    }
+  }
+
   if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
     if (sty->verbose) warning("no colors are defined for type '%s', "
                                "will use defaults.",
@@ -222,7 +239,7 @@ bool style_get_color(const Style *sty, const char *section,
 }
 
 void style_set_color(Style *sty, const char *section, const char *key,
-                      Color *color)
+                     Color *color)
 {
   int i = 0;
   assert(sty && section && key && color);
@@ -247,7 +264,7 @@ void style_set_color(Style *sty, const char *section, const char *key,
 }
 
 bool style_get_str(const Style *sty, const char *section,
-                     const char *key, Str *text)
+                     const char *key, Str *text, GenomeNode *gn)
 {
   int i = 0;
   assert(sty && key && section);
@@ -259,6 +276,19 @@ bool style_get_str(const Style *sty, const char *section,
   }
   /* lookup entry for given key */
   lua_getfield(sty->L, -1, key);
+
+  /* execute callback if function is given */
+  if (lua_isfunction(sty->L, -1) && gn)
+  {
+    GenomeNode *gn_lua = genome_node_rec_ref(gn);
+    genome_node_lua_push(sty->L, gn_lua);
+    if (lua_pcall(sty->L, 1, 1, 0) != 0)
+    {
+      lua_pop(sty->L, 3);
+      return false;
+    }
+  }
+
   if (lua_isnil(sty->L, -1) || !lua_isstring(sty->L, -1)) {
     if (sty->verbose) warning("no value is defined for key '%s'",
                                key);
@@ -285,7 +315,7 @@ void style_set_str(Style *sty, const char *section, const char *key,
 }
 
 bool style_get_num(const Style *sty, const char *section, const char *key,
-                    double *val)
+                    double *val, UNUSED GenomeNode *gn)
 {
   int i = 0;
   assert(sty && key && section && val);
@@ -297,6 +327,19 @@ bool style_get_num(const Style *sty, const char *section, const char *key,
   }
   /* lookup entry for given key */
   lua_getfield(sty->L, -1, key);
+
+  /* execute callback if function is given */
+  if (lua_isfunction(sty->L, -1) && gn)
+  {
+    GenomeNode *gn_lua = genome_node_rec_ref(gn);
+    genome_node_lua_push(sty->L, gn_lua);
+    if (lua_pcall(sty->L, 1, 1, 0) != 0)
+    {
+      lua_pop(sty->L, 3);
+      return false;
+    }
+  }
+
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
     if (sty->verbose) warning("no or non-numeric value found for key '%s'",
                               key);
@@ -323,7 +366,7 @@ void style_set_num(Style *sty, const char *section, const char *key,
 }
 
 bool style_get_bool(const Style *sty, const char *section, const char *key,
-                     bool *val)
+                     bool *val, UNUSED GenomeNode *gn)
 {
   int i = 0;
   assert(sty && key && section);
@@ -454,16 +497,16 @@ int style_unit_test(Error *err)
     had_err = -1;
 
   /* at the beginning, all values are defaults, since nothing is defined */
-  style_get_color(sty, "exon", "fill", &tmpcol);
+  style_get_color(sty, "exon", "fill", &tmpcol, NULL);
   ensure(had_err, color_equals(tmpcol,defcol));
-  style_get_color(sty, "cds", "fill", &tmpcol);
+  style_get_color(sty, "cds", "fill", &tmpcol, NULL);
   ensure(had_err, color_equals(tmpcol,defcol));
-  style_get_color(sty, "foo", "fill", &tmpcol);
+  style_get_color(sty, "foo", "fill", &tmpcol, NULL);
   ensure(had_err, color_equals(tmpcol,defcol));
-  if (!style_get_num(sty, "format", "margins", &num))
+  if (!style_get_num(sty, "format", "margins", &num, NULL))
     num = 10.0;
   ensure(had_err, num == 10.0);
-  if (!style_get_bool(sty, "exon", "collapse_to_parent", &val))
+  if (!style_get_bool(sty, "exon", "collapse_to_parent", &val, NULL))
     val = false;
   ensure(had_err, !val);
 
@@ -473,13 +516,13 @@ int style_unit_test(Error *err)
   style_set_num(sty, "format", "foo", 2.0);
 
   /* is it saved correctly? */
-  style_get_color(sty, "exon", "fill", &tmpcol);
+  style_get_color(sty, "exon", "fill", &tmpcol, NULL);
   ensure(had_err, !color_equals(tmpcol,defcol));
   ensure(had_err, color_equals(tmpcol,col1));
-  if (!style_get_num(sty, "format", "margins", &num))
+  if (!style_get_num(sty, "format", "margins", &num, NULL))
     num = 10.0;
   ensure(had_err, num == 11.0);
-  if (!style_get_num(sty, "format", "foo", &num))
+  if (!style_get_num(sty, "format", "foo", &num, NULL))
     num = 2.0;
   ensure(had_err, num == 2.0);
 
@@ -488,14 +531,14 @@ int style_unit_test(Error *err)
   style_set_str(sty, "bar", "baz", test1);
 
   /* is it saved correctly? */
-  style_get_color(sty, "foo", "fill", &tmpcol);
+  style_get_color(sty, "foo", "fill", &tmpcol, NULL);
   ensure(had_err, !color_equals(tmpcol,defcol));
   ensure(had_err, color_equals(tmpcol,col2));
-  if (!style_get_str(sty, "bar", "baz", str))
+  if (!style_get_str(sty, "bar", "baz", str, NULL))
     str_set(str, "");
   ensure(had_err, (strcmp(str_get(str),"")!=0));
   ensure(had_err, (str_cmp(str,test1)==0));
-  if (!style_get_str(sty, "bar", "test", str))
+  if (!style_get_str(sty, "bar", "test", str, NULL))
     str_set(str, "");
   ensure(had_err, (strcmp(str_get(str),"")==0));
 
@@ -505,14 +548,14 @@ int style_unit_test(Error *err)
   if (!error_is_set(err))
   {
     /* check again */
-    style_get_color(new_sty, "foo", "fill", &tmpcol);
+    style_get_color(new_sty, "foo", "fill", &tmpcol, NULL);
     ensure(had_err, !color_equals(tmpcol,defcol));
     ensure(had_err, color_equals(tmpcol,col2));
-    if (!style_get_str(new_sty, "bar", "baz", str))
+    if (!style_get_str(new_sty, "bar", "baz", str, NULL))
       str_set(str, "");
     ensure(had_err, (strcmp(str_get(str),"")!=0));
     ensure(had_err, (str_cmp(str,test1)==0));
-    if (!style_get_str(new_sty, "bar", "test", str))
+    if (!style_get_str(new_sty, "bar", "test", str, NULL))
       str_set(str, "");
     ensure(had_err, (strcmp(str_get(str),"")==0));
   }

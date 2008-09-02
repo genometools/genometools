@@ -15,11 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTVIEW_LUA_H
-#define GTVIEW_LUA_H
+#include <assert.h>
+#include "libgtlua/canvas_lua.h"
+#include "libgtlua/diagram_lua.h"
+#include "libgtlua/feature_index_lua.h"
+#include "libgtlua/feature_stream_lua.h"
+#include "libgtlua/feature_visitor_lua.h"
+#include "libgtlua/image_info_lua.h"
+#include "libgtlua/annotationsketch_lua.h"
 
-#include "lua.h"
-
-int luaopen_gtview(lua_State*); /* open view library in Lua */
-
-#endif
+int luaopen_annotationsketch(lua_State *L)
+{
+  assert(L);
+  luaopen_canvas(L);
+  luaopen_diagram(L);
+  luaopen_feature_index(L);
+  luaopen_feature_stream(L);
+  luaopen_feature_visitor(L);
+  luaopen_imageinfo(L);
+  return 1;
+}
