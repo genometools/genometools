@@ -25,8 +25,8 @@
    -- returns a new ImageInfo object.
    function imageinfo_new()
 
-   -- returns a list of tables with the fields "nw_x","nw_y","se_x","se_y" and
-   -- "feature_ref" with the top left and bottom right coordinated in pixels or
+   -- returns an array of tables with the fields "nw_x","nw_y","se_x","se_y" and
+   -- "feature_ref" with the top left and bottom right coordinates in pixels or
    -- points and a GenomeNode reference per element drawn.
    function imageinfo:get_recmaps()
 */
