@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,16 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOMETOOLS_H
-#define GENOMETOOLS_H
+#ifndef FEATURE_VISITOR_H
+#define FEATURE_VISITOR_H
 
-/* the GenomeTools ``all-in-one'' header */
+/* implements the ``genome visitor'' interface */
+typedef struct FeatureVisitor FeatureVisitor;
 
-#include "gtcore.h"  /* the core GenomeTools library (libgthcore) */
-#include "gtext.h"   /* include extended GenomeTools library (libgtext) */
-#include "gtmatch.h" /* include GenomeTools matching library (libgtmatch) */
-#ifdef LIBANNOTATIONSKETCH
-#include "gtview.h"  /* include GenomeTools Viewer library (libannotationsketch) */
-#endif
+#include "libgtext/genome_visitor.h"
+#include "libannotationsketch/feature_index.h"
+
+const GenomeVisitorClass* feature_visitor_class(void);
+GenomeVisitor*            feature_visitor_new(FeatureIndex*);
 
 #endif

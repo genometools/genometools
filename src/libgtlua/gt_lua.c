@@ -20,7 +20,7 @@
 #include "libgtlua/gtext_lua.h"
 #include "libgtlua/gt_lua.h"
 
-#ifdef LIBGTVIEW
+#ifdef LIBANNOTATIONSKETCH
 #include "libgtlua/gtview_lua.h"
 #endif
 
@@ -54,7 +54,7 @@ int luaopen_gt(lua_State *L)
   assert(L);
   luaopen_gtcore(L); /* open core library */
   luaopen_gtext(L);  /* open extended library */
-#ifdef LIBGTVIEW
+#ifdef LIBANNOTATIONSKETCH
   luaopen_gtview(L); /* open view library */
 #endif
   return 1;

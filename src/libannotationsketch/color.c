@@ -1,7 +1,5 @@
 /*
   Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Malte Mader <mmader@stud.zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -17,23 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTVIEW_H
-#define GTVIEW_H
-
-/* The GenomeTools viewer library (libannotationsketch) header */
-#include "libannotationsketch/block.h"
-#include "libannotationsketch/canvas.h"
 #include "libannotationsketch/color.h"
-#include "libannotationsketch/diagram.h"
-#include "libannotationsketch/element.h"
-#include "libannotationsketch/feature_index.h"
-#include "libannotationsketch/feature_stream.h"
-#include "libannotationsketch/feature_visitor.h"
-#include "libannotationsketch/graphics.h"
-#include "libannotationsketch/image_info.h"
-#include "libannotationsketch/line.h"
-#include "libannotationsketch/recmap.h"
-#include "libannotationsketch/style.h"
-#include "libannotationsketch/track.h"
 
-#endif
+bool color_equals(Color c1, Color c2)
+{
+  return ((c1.red == c2.red) && (c1.green == c2.green) && (c1.blue == c2.blue));
+}

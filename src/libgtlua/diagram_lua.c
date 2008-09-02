@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifdef LIBGTVIEW
+#ifdef LIBANNOTATIONSKETCH
 
 #include "lauxlib.h"
 #include "libgtext/luahelper.h"
@@ -24,10 +24,10 @@
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/range_lua.h"
-#include "libgtview/canvas.h"
-#include "libgtview/diagram.h"
-#include "libgtview/feature_index.h"
-#include "libgtview/luastyle.h"
+#include "libannotationsketch/canvas.h"
+#include "libannotationsketch/diagram.h"
+#include "libannotationsketch/feature_index.h"
+#include "libannotationsketch/luastyle.h"
 
 static int diagram_lua_new(lua_State *L)
 {

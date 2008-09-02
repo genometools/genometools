@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,16 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOMETOOLS_H
-#define GENOMETOOLS_H
+#ifndef LUASTYLE_H
+#define LUASTYLE_H
 
-/* the GenomeTools ``all-in-one'' header */
+#include "lua.h"
+#include "libannotationsketch/style.h"
 
-#include "gtcore.h"  /* the core GenomeTools library (libgthcore) */
-#include "gtext.h"   /* include extended GenomeTools library (libgtext) */
-#include "gtmatch.h" /* include GenomeTools matching library (libgtmatch) */
-#ifdef LIBANNOTATIONSKETCH
-#include "gtview.h"  /* include GenomeTools Viewer library (libannotationsketch) */
-#endif
+void   lua_put_style_in_registry(lua_State*, Style*);
+Style* lua_get_style_from_registry(lua_State*);
 
 #endif

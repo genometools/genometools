@@ -208,7 +208,7 @@ Test do
   run_test "#{$bin}gt #{$testdata}../gtscripts/gtdoc.lua -html -v #{$cur}"
 end
 
-if $arguments["libgtview"] then
+if $arguments["libannotationsketch"] then
   Name "feature_index and feature_stream bindings"
   Keywords "gt_scripts"
   Test do
@@ -217,20 +217,20 @@ if $arguments["libgtview"] then
     run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{$last_stdout} -"
   end
 
-  Name "libgtview (general bindings)"
+  Name "libannotationsketch (general bindings)"
   Keywords "gt_scripts"
   Test do
     run_test "#{$bin}gt #{$testdata}/gtscripts/view.lua test.png #{$testdata}gff3_file_1_short.txt"
   end
 
-  Name "libgtview (recmaps)"
+  Name "libannotationsketch (recmaps)"
   Keywords "gt_scripts"
   Test do
     run_test "#{$bin}gt #{$testdata}/gtscripts/recmap.lua #{$testdata}gff3_file_1_short.txt"
     run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
   end
 
-  Name "libgtview (invalid ImageInfo object)"
+  Name "libannotationsketch (invalid ImageInfo object)"
   Keywords "gt_scripts"
   Test do
     run_test("#{$bin}gt #{$testdata}/gtscripts/ii_fail.lua #{$testdata}gff3_file_1_short.txt", :retval => 1)

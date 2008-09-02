@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,16 +15,26 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOMETOOLS_H
-#define GENOMETOOLS_H
+#ifndef LINE_BREAKER_REP_H
+#define LINE_BREAKER_REP_H
 
-/* the GenomeTools ``all-in-one'' header */
+#include <stdio.h>
+#include "libannotationsketch/line_breaker.h"
 
-#include "gtcore.h"  /* the core GenomeTools library (libgthcore) */
-#include "gtext.h"   /* include extended GenomeTools library (libgtext) */
-#include "gtmatch.h" /* include GenomeTools matching library (libgtmatch) */
-#ifdef LIBANNOTATIONSKETCH
-#include "gtview.h"  /* include GenomeTools Viewer library (libannotationsketch) */
-#endif
+struct LineBreakerClass {
+  size_t size;
+  bool    (*is_occupied)(LineBreaker*, Line*, Block*);
+  void (*register_block)(LineBreaker*, Line*, Block*);
+  void           (*free)(LineBreaker*);
+};
+
+struct LineBreaker {
+  const LineBreakerClass *c_class;
+  unsigned int reference_count;
+};
+
+LineBreaker* line_breaker_create(const LineBreakerClass*);
+void*        line_breaker_cast(const LineBreakerClass*,
+                               LineBreaker*);
 
 #endif

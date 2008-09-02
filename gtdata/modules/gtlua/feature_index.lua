@@ -19,7 +19,7 @@ module(..., package.seeall)
 
 require "gtlua.genome_features"
 
--- XXX: remove if statement if libgtview is always compiled in
+-- XXX: remove if statement if libannotationsketch is always compiled in
 if GenomeTools_feature_index then
   -- Computes the coverage for the sequence ID <seqid>. The optional <maxdist>
   -- parameter denotes the maximal distance two features can be apart without

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifdef LIBGTVIEW
+#ifdef LIBANNOTATIONSKETCH
 
 #include <float.h>
 #include <limits.h>
@@ -24,8 +24,8 @@
 #include "libgtext/luahelper.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/image_info_lua.h"
-#include "libgtview/image_info.h"
-#include "libgtview/recmap.h"
+#include "libannotationsketch/image_info.h"
+#include "libannotationsketch/recmap.h"
 
 static int imageinfo_lua_new(lua_State *L)
 {

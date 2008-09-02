@@ -22,4 +22,4 @@ ctags -w src/*.[ch]            \
          src/libgtext/*.[ch]   \
          src/libgtltr/*.[ch]   \
          src/libgtmatch/*.[ch] \
-         src/libgtview/*.[ch]  \
+         src/libannotationsketch/*.[ch]  \

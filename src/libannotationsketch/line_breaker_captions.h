@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,16 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOMETOOLS_H
-#define GENOMETOOLS_H
+#ifndef LINE_BREAKER_CAPTIONS_H
+#define LINE_BREAKER_CAPTIONS_H
 
-/* the GenomeTools ``all-in-one'' header */
+#include "libgtcore/range.h"
+#include "libannotationsketch/drawing_range.h"
+#include "libannotationsketch/line_breaker.h"
 
-#include "gtcore.h"  /* the core GenomeTools library (libgthcore) */
-#include "gtext.h"   /* include extended GenomeTools library (libgtext) */
-#include "gtmatch.h" /* include GenomeTools matching library (libgtmatch) */
-#ifdef LIBANNOTATIONSKETCH
-#include "gtview.h"  /* include GenomeTools Viewer library (libannotationsketch) */
-#endif
+/* Implements the LineBreaker interface; breaks Lines if captions overlap. */
+typedef struct LineBreakerCaptions LineBreakerCaptions;
+
+const LineBreakerClass* line_breaker_captions_class(void);
+LineBreaker*            line_breaker_captions_new(Canvas *canvas);
 
 #endif

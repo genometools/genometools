@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ]]
 
--- testing the Lua bindings for libgtview (similar to the view tool)
+-- testing the Lua bindings for AnnotationSketch (similar to the sketch tool)
 
 function usage()
   io.stderr:write(string.format("Usage: %s PNG_file GFF3_file\n", arg[0]))

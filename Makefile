@@ -139,11 +139,11 @@ LIBGTLTR_SRC:=$(wildcard src/libgtltr/*.c)
 LIBGTLTR_OBJ:=$(LIBGTLTR_SRC:%.c=obj/%.o)
 LIBGTLTR_DEP:=$(LIBGTLTR_SRC:%.c=obj/%.d)
 
-# the GenomeTools view library
-LIBGTVIEW_C_SRC:=$(wildcard src/libgtview/*.c)
-LIBGTVIEW_C_OBJ:=$(LIBGTVIEW_C_SRC:%.c=obj/%.o)
-LIBGTVIEW_C_DEP:=$(LIBGTVIEW_C_SRC:%.c=obj/%.d)
-LIBGTVIEW_LIBDEP=-lcairo -lgtext -lgtcore -lbz2 -lz
+# the GenomeTools AnnotationSketch library
+LIBANNOTATIONSKETCH_C_SRC:=$(wildcard src/libannotationsketch/*.c)
+LIBANNOTATIONSKETCH_C_OBJ:=$(LIBANNOTATIONSKETCH_C_SRC:%.c=obj/%.o)
+LIBANNOTATIONSKETCH_C_DEP:=$(LIBANNOTATIONSKETCH_C_SRC:%.c=obj/%.d)
+LIBANNOTATIONSKETCH_LIBDEP=-lcairo -lgtext -lgtcore -lbz2 -lz
 
 # the GenomeTools Lua library
 LIBGTLUA_C_SRC:=$(wildcard src/libgtlua/*.c)
@@ -327,14 +327,14 @@ ifeq ($(m64),yes)
   GT_LDFLAGS += -m64
 endif
 
-ifeq ($(libgtview),yes)
-  GTLIBS := lib/libgtview.a $(GTLIBS)
-  GTSHAREDLIB_OBJ := $(GTSHAREDLIB_OBJ) $(LIBGTVIEW_C_OBJ)
+ifeq ($(libannotationsketch),yes)
+  GTLIBS := lib/libannotationsketch.a $(GTLIBS)
+  GTSHAREDLIB_OBJ := $(GTSHAREDLIB_OBJ) $(LIBANNOTATIONSKETCH_C_OBJ)
   GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lcairo
-  EXP_CPPFLAGS += -DLIBGTVIEW
+  EXP_CPPFLAGS += -DLIBANNOTATIONSKETCH
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
-  STEST_FLAGS += -libgtview
+  STEST_FLAGS += -libannotationsketch
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
 endif
@@ -432,10 +432,10 @@ ifdef RANLIB
 endif
 
 
-lib/libgtview.a: $(LIBGTVIEW_C_OBJ)
+lib/libannotationsketch.a: $(LIBANNOTATIONSKETCH_C_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTVIEW_C_OBJ)
+	@ar ru $@ $(LIBANNOTATIONSKETCH_C_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -618,8 +618,8 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 	 $(LIBBZ2_DEP) \
 	 $(ZLIB_DEP)
 
-ifeq ($(libgtview),yes)
--include $(LIBGTVIEW_C_DEP) $(LIBGTVIEW_CXX_DEP)
+ifeq ($(libannotationsketch),yes)
+-include $(LIBANNOTATIONSKETCH_C_DEP) $(LIBANNOTATIONSKETCH_CXX_DEP)
 endif
 
 .SUFFIXES:

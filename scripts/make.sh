@@ -18,4 +18,4 @@
 
 # the make call normally used for development
 make CPPFLAGS=-I/opt/local/include/cairo LDFLAGS=-L/opt/local/lib \
-     libgtview=yes test $*
+     libannotationsketch=yes test $*

@@ -123,8 +123,8 @@ require 'gt_suffixerator_include'
 require 'gt_idxsearch_include'
 require 'gt_trieins_include'
 require 'gt_uniq_include'
-if $arguments["libgtview"] then
-  require 'gt_view_include'
+if $arguments["libannotationsketch"] then
+  require 'gt_sketch_include'
 end
 require 'gt_env_options_include'
 require 'scripts_include'

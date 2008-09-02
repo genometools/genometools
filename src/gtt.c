@@ -83,14 +83,14 @@
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 
-#ifdef LIBGTVIEW
-#include "libgtview/block.h"
-#include "libgtview/diagram.h"
-#include "libgtview/feature_index.h"
-#include "libgtview/gt_view.h"
-#include "libgtview/image_info.h"
-#include "libgtview/track.h"
-#include "libgtview/recmap.h"
+#ifdef LIBANNOTATIONSKETCH
+#include "libannotationsketch/block.h"
+#include "libannotationsketch/diagram.h"
+#include "libannotationsketch/feature_index.h"
+#include "libannotationsketch/gt_sketch.h"
+#include "libannotationsketch/image_info.h"
+#include "libannotationsketch/track.h"
+#include "libannotationsketch/recmap.h"
 #endif
 
 Toolbox* gtt_tools(void)
@@ -134,8 +134,8 @@ Toolbox* gtt_tools(void)
   toolbox_add_tool(tools, "template", gt_template());
   toolbox_add(tools, "uniq", gt_uniq);
   toolbox_add(tools, "uniquesub", gt_uniquesub);
-#ifdef LIBGTVIEW
-  toolbox_add(tools, "view", gt_view);
+#ifdef LIBANNOTATIONSKETCH
+  toolbox_add(tools, "sketch", gt_sketch);
 #endif
 
   return tools;
@@ -184,7 +184,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "tag value map example", tag_value_map_example);
   hashmap_add(unit_tests, "tokenizer class", tokenizer_unit_test);
   hashmap_add(unit_tests, "union find class", union_find_unit_test);
-#ifdef LIBGTVIEW
+#ifdef LIBANNOTATIONSKETCH
   hashmap_add(unit_tests, "block class", block_unit_test);
   hashmap_add(unit_tests, "style class", style_unit_test);
   hashmap_add(unit_tests, "diagram class", diagram_unit_test);
