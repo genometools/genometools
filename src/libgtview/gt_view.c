@@ -35,7 +35,7 @@
 #include "libgtview/feature_index.h"
 #include "libgtview/feature_stream.h"
 #include "libgtview/gt_view.h"
-#include "libgtview/imageinfo.h"
+#include "libgtview/image_info.h"
 
 typedef struct {
   bool pipe,

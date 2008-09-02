@@ -21,7 +21,7 @@
 #include "libgtcore/error.h"
 #include "libgtext/luahelper.h"
 #include "libgtlua/canvas_lua.h"
-#include "libgtlua/imageinfo_lua.h"
+#include "libgtlua/image_info_lua.h"
 #include "libgtview/canvas.h"
 #include "libgtview/luaconfig.h"
 

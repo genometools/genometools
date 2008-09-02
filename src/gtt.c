@@ -88,7 +88,7 @@
 #include "libgtview/diagram.h"
 #include "libgtview/feature_index.h"
 #include "libgtview/gt_view.h"
-#include "libgtview/imageinfo.h"
+#include "libgtview/image_info.h"
 #include "libgtview/track.h"
 #include "libgtview/recmap.h"
 #endif

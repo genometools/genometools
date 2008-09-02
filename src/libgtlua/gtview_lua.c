@@ -21,7 +21,7 @@
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/feature_stream_lua.h"
 #include "libgtlua/feature_visitor_lua.h"
-#include "libgtlua/imageinfo_lua.h"
+#include "libgtlua/image_info_lua.h"
 #include "libgtlua/gtview_lua.h"
 
 int luaopen_gtview(lua_State *L)

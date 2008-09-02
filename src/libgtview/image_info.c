@@ -23,7 +23,7 @@
 #include "libgtcore/strand.h"
 #include "libgtcore/unused.h"
 #include "libgtext/feature_type_factory_builtin.h"
-#include "libgtview/imageinfo.h"
+#include "libgtview/image_info.h"
 
 struct ImageInfo {
   Array* recmaps;

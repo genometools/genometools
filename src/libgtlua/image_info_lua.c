@@ -22,9 +22,9 @@
 #include "lauxlib.h"
 #include "libgtcore/error.h"
 #include "libgtext/luahelper.h"
-#include "libgtlua/imageinfo_lua.h"
 #include "libgtlua/genome_node_lua.h"
-#include "libgtview/imageinfo.h"
+#include "libgtlua/image_info_lua.h"
+#include "libgtview/image_info.h"
 #include "libgtview/recmap.h"
 #include "libgtview/luaconfig.h"
 

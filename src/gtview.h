@@ -31,7 +31,7 @@
 #include "libgtview/feature_stream.h"
 #include "libgtview/feature_visitor.h"
 #include "libgtview/graphics.h"
-#include "libgtview/imageinfo.h"
+#include "libgtview/image_info.h"
 #include "libgtview/line.h"
 #include "libgtview/recmap.h"
 #include "libgtview/track.h"

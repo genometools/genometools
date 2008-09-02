@@ -28,7 +28,7 @@ typedef struct Canvas Canvas;
 #include "libgtview/element.h"
 #include "libgtview/graphics.h"
 #include "libgtview/line.h"
-#include "libgtview/imageinfo.h"
+#include "libgtview/image_info.h"
 #include "libgtview/track.h"
 
 /* Create a new Canvas object with given <output_type> and <width> using the

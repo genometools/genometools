@@ -15,21 +15,25 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef IMAGEINFO_H
-#define IMAGEINFO_H
+#ifndef IMAGE_INFO_LUA_H
+#define IMAGE_INFO_LUA_H
 
-#include "libgtcore/error.h"
-#include "libgtview/recmap.h"
+#include "lua.h"
 
-typedef struct ImageInfo ImageInfo;
+/* exports the Imageinfo class to Lua:
 
-ImageInfo*    image_info_new();
-void          image_info_delete(ImageInfo*);
-unsigned int  image_info_get_height(ImageInfo*);
-void          image_info_set_height(ImageInfo*, unsigned int);
-void          image_info_add_recmap(ImageInfo*, RecMap*); /* takes ownership */
-unsigned long image_info_num_of_recmaps(ImageInfo*);
-RecMap*       image_info_get_recmap(ImageInfo*, unsigned long);
-void          image_info_get_recmap_ptr(ImageInfo*, RecMap*, unsigned long);
-int           image_info_unit_test(Error*);
+   -- returns a new ImageInfo object.
+   function imageinfo_new()
+
+   -- returns a list of tables with the fields "nw_x","nw_y","se_x","se_y" and
+   -- "feature_ref" with the top left and bottom right coordinated in pixels or
+   -- points and a GenomeNode reference per element drawn.
+   function imageinfo:get_recmaps()
+*/
+int luaopen_imageinfo(lua_State*);
+
+#define IMAGEINFO_METATABLE  "GenomeTools.imageinfo"
+#define check_imageinfo(L, POS) \
+              (ImageInfo**) luaL_checkudata(L, POS, IMAGEINFO_METATABLE)
+
 #endif
