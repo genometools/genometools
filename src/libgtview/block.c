@@ -72,8 +72,7 @@ Block* block_ref(Block *block)
 
 Block* block_new(void)
 {
-  Block *block;
-  block = ma_calloc(1, sizeof (Block));
+  Block *block = ma_calloc(1, sizeof (Block));
   block->elements = dlist_new(elemcmp);
   block->caption = NULL;
   block->show_caption = true;
@@ -207,7 +206,7 @@ int block_render(Block *block, Canvas *canvas)
  if (-1 == canvas_visit_block(canvas, block))
    return had_err;
  for (delem = dlist_first(block->elements); delem;
-       delem = dlistelem_next(delem)) {
+      delem = dlistelem_next(delem)) {
     Element* elem = (Element*) dlistelem_get_data(delem);
     element_render(elem, canvas);
   }
