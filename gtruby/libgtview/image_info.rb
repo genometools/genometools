@@ -31,18 +31,18 @@ module GT
   extern "void image_info_delete(ImageInfo*)"
 
   class ImageInfo
-    attr_reader :imageinfo
+    attr_reader :image_info
     def initialize()
-      @imageinfo = GT.image_info_new()
-      @imageinfo.free = GT::symbol("image_info_delete", "0P")
+      @image_info = GT.image_info_new()
+      @image_info.free = GT::symbol("image_info_delete", "0P")
     end
 
     def get_height()
-      GT.image_info_get_height(@imageinfo)
+      GT.image_info_get_height(@image_info)
     end
 
     def num_of_recmaps()
-      GT.image_info_num_of_recmaps(@imageinfo)
+      GT.image_info_num_of_recmaps(@image_info)
     end
 
     def each_hotspot()
@@ -50,7 +50,7 @@ module GT
         @hotspots = []
         rm = GT::RecMap.malloc
         0.upto(self.num_of_recmaps()-1) do |i|
-          GT.image_info_get_recmap_ptr(@imageinfo, rm, i)
+          GT.image_info_get_recmap_ptr(@image_info, rm, i)
           gf = GT::GenomeFeature.new(rm.gn, true)  #refcount only this GF!
           @hotspots.push([rm.nw_x.to_i, rm.nw_y.to_i, rm.se_x.to_i, rm.se_y.to_i, gf])
         end
@@ -62,7 +62,7 @@ module GT
     end
 
     def to_ptr
-      @imageinfo
+      @image_info
     end
   end
 end
