@@ -48,7 +48,8 @@ typedef struct {
   unsigned int width;
 } AnnotationSketch_arguments;
 
-static OPrval parse_options(int *parsed_args, AnnotationSketch_arguments *arguments,
+static OPrval parse_options(int *parsed_args,
+                            AnnotationSketch_arguments *arguments,
                             int argc, const char **argv, Error *err)
 {
   OptionParser *op;

@@ -41,6 +41,7 @@ typedef struct TracklineInfo {
    <feature_index> in region <seqid> overlapping with <range>. */
 Diagram*    diagram_new(FeatureIndex *feature_index, const char *seqid,
                         const Range*, Style*);
+Diagram*    diagram_new_from_array(Array *features, const Range*, Style*);
 Range       diagram_get_range(Diagram*);
 void        diagram_set_config(Diagram*, Style*);
 Hashmap*    diagram_get_tracks(const Diagram*);

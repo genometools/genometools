@@ -486,12 +486,10 @@ static int blocklist_delete(void *value)
   return 0;
 }
 
-Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
-                     Style *style)
+static Diagram* diagram_new_generic(Array *features, const Range *range,
+                                    Style *style)
 {
   Diagram *diagram;
-  Array *features = array_new(sizeof (GenomeNode*));
-  int had_err;
   diagram = ma_malloc(sizeof (Diagram));
   diagram->tracks = hashmap_new(HASH_STRING, ma_free_func,
                                 (FreeFunc) track_delete);
@@ -501,12 +499,30 @@ Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
   diagram->nof_tracks = 0;
   diagram->style = style;
   diagram->range = *range;
+  diagram_build(diagram, features);
+  return diagram;
+}
+
+Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
+                     Style *style)
+{
+  Diagram *diagram;
+  int had_err = 0;
+  Array *features = array_new(sizeof (GenomeNode*));
+  assert(features && seqid && range && style);
   had_err = feature_index_get_features_for_range(fi, features, seqid, *range,
                                                  NULL);
   assert(!had_err); /* <fi> must contain <seqid> */
-  diagram_build(diagram, features);
+  diagram = diagram_new_generic(features, range, style);
   array_delete(features);
   return diagram;
+}
+
+Diagram* diagram_new_from_array(Array *features, const Range *range,
+                                Style *style)
+{
+  assert(features && range && style);
+  return diagram_new_generic(features, range, style);
 }
 
 Range diagram_get_range(Diagram* diagram)
@@ -639,7 +655,8 @@ int diagram_unit_test(Error *err)
   SequenceRegion *sr1, *sr2;
   int had_err=0;
   Style *sty = NULL;
-  Diagram *dia = NULL, *dia2 = NULL;
+  Diagram *dia = NULL, *dia2 = NULL, *dia3 = NULL;
+  Array *features;
   Canvas *canvas = NULL;
   error_check(err);
 
@@ -768,10 +785,37 @@ int diagram_unit_test(Error *err)
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
+  features = array_new(sizeof (GenomeNode*));
+  array_add(features, gn1);
+  array_add(features, gn2);
+  dia3 = diagram_new_from_array(features, &rs, sty);
+
+  ensure(had_err, dia3->style);
+
+  if (!had_err &&
+      !style_get_bool(dia3->style, "gene", "collapse_to_parent", false, NULL))
+  {
+    diagram_render(dia3, canvas);
+    track_key = track_key_new("generated", gene_type);
+    ensure(had_err, hashmap_get(dia3->tracks, str_get(track_key)));
+    str_delete(track_key);
+  }
+
+  if (!had_err &&
+      !style_get_bool(dia3->style, "exon", "collapse_to_parent", false, NULL))
+  {
+    track_key = track_key_new("generated", exon_type);
+    ensure(had_err, hashmap_get(dia3->tracks, str_get(track_key)));
+    str_delete(track_key);
+  }
+  ensure(had_err, range_compare(diagram_get_range(dia3),rs) == 0);
+
   /* delete all generated objects */
   style_delete(sty);
+  array_delete(features);
   diagram_delete(dia);
   diagram_delete(dia2);
+  diagram_delete(dia3);
   canvas_delete(canvas);
   feature_index_delete(fi);
   genome_node_rec_delete(gn1);
