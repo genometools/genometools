@@ -550,7 +550,7 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   if (!range_overlap(elem_range, canvas->viewrange))
     return -1;
 
-  type = (char*) genome_feature_type_get_cstr(element_get_type(elem));
+  type = genome_feature_type_get_cstr(element_get_type(elem));
   grey.red = grey.green = grey.blue = .85;
   if (!config_get_num(canvas->cfg, "format", "bar_height", &bar_height))
     bar_height = BAR_HEIGHT_DEFAULT;
