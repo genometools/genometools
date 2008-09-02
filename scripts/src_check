@@ -140,6 +140,11 @@ for i, fn in ipairs(arg) do -- iterate over all files
       err(fn, ln, "wrong tool include (<...>), use \"...\" instead")
     end
 
+    -- check for carriage return
+    if string.find(l, "\r") then
+      err(fn, ln, "contains carriage return (Windows newline?)")
+    end
+
     -- check for two empty lines in a row
     if string.find(l, "^$") then
       if (empty_line_found) then
