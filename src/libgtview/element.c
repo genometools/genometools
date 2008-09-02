@@ -25,6 +25,7 @@
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
 #include "libgtview/element.h"
+#include "libgtview/style.h"
 
 struct Element {
   GenomeFeatureType *type;

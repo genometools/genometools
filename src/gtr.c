@@ -41,7 +41,7 @@
 #include "libgtlua/interactive.h"
 
 #ifdef LIBGTVIEW
-#include "libgtview/luaconfig.h"
+#include "libgtview/luastyle.h"
 #endif
 
 struct GTR {
@@ -57,7 +57,7 @@ struct GTR {
   lua_State *L;
   FeatureTypeFactory *feature_type_factory; /* for gtlua */
 #ifdef LIBGTVIEW
-  Config *config;
+  Style *style;
 #endif
   FILE *logfp;
 };
@@ -67,7 +67,7 @@ GTR* gtr_new(Error *err)
   GTR *gtr;
   int had_err = 0;
 #ifdef LIBGTVIEW
-  Str *config_file = NULL;
+  Str *style_file = NULL;
 #endif
   gtr = ma_calloc(1, sizeof (GTR));
   gtr->debugfp = str_new();
@@ -90,23 +90,23 @@ GTR* gtr_new(Error *err)
   }
 #ifdef LIBGTVIEW
   if (!had_err) {
-    if (!(gtr->config = config_new_with_state(gtr->L)))
+    if (!(gtr->style = style_new_with_state(gtr->L)))
       had_err = -1;
   }
   if (!had_err) {
-    if (!(config_file = gtdata_get_path(error_get_progname(err), err)))
+    if (!(style_file = gtdata_get_path(error_get_progname(err), err)))
       had_err = -1;
   }
   if (!had_err) {
-    str_append_cstr(config_file, "/config/view.lua");
-    if (file_exists(str_get(config_file))) {
-      if (config_load_file(gtr->config, config_file, err))
+    str_append_cstr(style_file, "/config/view.lua");
+    if (file_exists(str_get(style_file))) {
+      if (style_load_file(gtr->style, style_file, err))
         had_err = -1;
       else
-        lua_put_config_in_registry(gtr->L, gtr->config);
+        lua_put_style_in_registry(gtr->L, gtr->style);
     }
   }
-  str_delete(config_file);
+  str_delete(style_file);
 #endif
   if (had_err) {
     ma_free(gtr);
@@ -350,7 +350,7 @@ void gtr_delete(GTR *gtr)
   feature_type_factory_delete(gtr->feature_type_factory);
   if (gtr->L) lua_close(gtr->L);
 #ifdef LIBGTVIEW
-  config_delete_without_state(gtr->config);
+  style_delete_without_state(gtr->style);
 #endif
   ma_free(gtr);
 }

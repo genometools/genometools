@@ -23,26 +23,26 @@
 #include "libgtlua/canvas_lua.h"
 #include "libgtlua/image_info_lua.h"
 #include "libgtview/canvas.h"
-#include "libgtview/luaconfig.h"
+#include "libgtview/luastyle.h"
 
 static int canvas_lua_new_generic(lua_State *L, GraphicsOutType t)
 {
   Canvas **canvas;
   ImageInfo **ii;
   unsigned int width;
-  Config *config;
+  Style *style;
   width = luaL_checkint(L, 1);
   /* create canvas */
-  config = lua_get_config_from_registry(L);
+  style = lua_get_style_from_registry(L);
   canvas = lua_newuserdata(L, sizeof (Canvas*));
   assert(canvas);
   /* if a imageinfo object is passed, it must be correct type */
   if (lua_isnil(L, 2))
-    *canvas = canvas_new(config, t, width, NULL);
+    *canvas = canvas_new(style, t, width, NULL);
   else
   {
     ii = check_imageinfo(L, 2);
-   *canvas = canvas_new(config, t, width, *ii);
+   *canvas = canvas_new(style, t, width, *ii);
   }
   luaL_getmetatable(L, CANVAS_METATABLE);
   lua_setmetatable(L, -2);

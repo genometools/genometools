@@ -27,7 +27,6 @@ typedef struct Line Line;
 #include "libgtext/genome_node.h"
 #include "libgtview/block.h"
 #include "libgtview/canvas.h"
-#include "libgtview/config.h"
 #include "libgtview/drawing_range.h"
 
 Line*  line_new(void);

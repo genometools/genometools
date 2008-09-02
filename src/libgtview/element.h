@@ -27,7 +27,6 @@ typedef struct Element Element;
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_feature_type.h"
 #include "libgtview/canvas.h"
-#include "libgtview/config.h"
 #include "libgtview/drawing_range.h"
 
 /* Creates a complete new Element object. */

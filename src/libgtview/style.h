@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef STYLE_H
+#define STYLE_H
 
 #include "lua.h"
 #include "libgtcore/str.h"
@@ -25,64 +25,64 @@
 #include "libgtview/color.h"
 #include "libgtext/genome_feature_type.h"
 
-/* Holds configuration info for the libgtview classes. */
-typedef struct Config Config;
+/* Holds configuration information. */
+typedef struct Style Style;
 
-/* Creates a new Config object with given verbosity. If set, warnings will be
+/* Creates a new Style object with given verbosity. If set, warnings will be
    given. */
-Config*        config_new(bool verbose, Error*);
-/* Creates a Config object wich reuses the given Lua state. */
-Config*        config_new_with_state(lua_State*);
-/* Creates a deep copy of the given Config object. */
-Config*        config_clone(const Config*, Error*);
-/* Loads and executes a Lua configuration file with given <filename>.
-   This file must contain a global table called 'config'. */
-int            config_load_file(Config*, Str *filename, Error*);
-/* Loads and executes a Lua configuration code from the given String <instr>.
-   This code must contain a global table called 'config'. */
-int            config_load_str(Config*, Str *instr, Error*);
-/* Generates Lua code which represents the given Config object and
+Style*        style_new(bool verbose, Error*);
+/* Creates a Style object wich reuses the given Lua state. */
+Style*        style_new_with_state(lua_State*);
+/* Creates a deep copy of the given Style object. */
+Style*        style_clone(const Style*, Error*);
+/* Loads and executes Lua style file with given <filename>.
+   This file must contain a global table called 'Style'. */
+int            style_load_file(Style*, Str *filename, Error*);
+/* Loads and executes Lua style code from the given String <instr>.
+   This code must contain a global table called 'Style'. */
+int            style_load_str(Style*, Str *instr, Error*);
+/* Generates Lua code which represents the given Style object and
    writes it into the String object <outstr>.*/
-int            config_to_str(const Config*, Str *outstr, Error*);
-/* Reloads the Lua configuration file. */
-void           config_reload(Config*);
-/* Retrieves a color value from the configuration for <key>.
+int            style_to_str(const Style*, Str *outstr, Error*);
+/* Reloads the Lua style file. */
+void           style_reload(Style*);
+/* Retrieves a color value from the Style for <key>.
    If not set, false is returned and a default color is written. */
-bool           config_get_color(const Config*, const char *section,
+bool           style_get_color(const Style*, const char *section,
                                 const char *key, Color*);
-/* Sets a color value in the configuration for <key> (i.e., feature) to a
+/* Sets a color value in the Style for <key> (i.e., feature) to a
    certain value. */
-void           config_set_color(Config*, const char *section,
+void           style_set_color(Style*, const char *section,
                                 const char *key, Color*);
 /* Retrieve string value of <key> in <section>.
    If not set, false is returned. */
-bool           config_get_str(const Config*, const char *section,
+bool           style_get_str(const Style*, const char *section,
                               const char *key, Str*);
 /* Set string <key> in <section> to <value>. */
-void           config_set_str(Config*, const char *section, const char *key,
+void           style_set_str(Style*, const char *section, const char *key,
                                Str *value);
 /* Retrieve numeric value of <key> in <section>.
    If not set, false is returned.*/
-bool           config_get_num(const Config*, const char *section,
+bool           style_get_num(const Style*, const char *section,
                               const char *key, double*);
 /* Set numeric value of <key> in <section> to <number>. */
-void           config_set_num(Config*, const char *section, const char *key,
+void           style_set_num(Style*, const char *section, const char *key,
                               double number);
 /* Retrieve boolean value of <key> in <section>.
    If not set, false is returned.*/
-bool           config_get_bool(const Config*, const char *section,
+bool           style_get_bool(const Style*, const char *section,
                                const char *key, bool*);
 /* Set boolean value of <key> in <section> to <number>. */
-void           config_set_bool(Config*, const char *section, const char *key,
+void           style_set_bool(Style*, const char *section, const char *key,
                                bool);
 /* Unset value of <key> in <section>. */
-void           config_unset(Config*, const char *section, const char *key);
+void           style_unset(Style*, const char *section, const char *key);
 /* Returns verbosity status. */
-bool           config_get_verbose(const Config*);
+bool           style_get_verbose(const Style*);
 
-int            config_unit_test(Error*);
-/* Deletes a Config object but leaves the internal Lua state intact. */
-void           config_delete_without_state(Config*);
-void           config_delete(Config*);
+int            style_unit_test(Error*);
+/* Deletes a Style object but leaves the internal Lua state intact. */
+void           style_delete_without_state(Style*);
+void           style_delete(Style*);
 
 #endif

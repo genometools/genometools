@@ -26,7 +26,6 @@
 #include "libgtlua/image_info_lua.h"
 #include "libgtview/image_info.h"
 #include "libgtview/recmap.h"
-#include "libgtview/luaconfig.h"
 
 static int imageinfo_lua_new(lua_State *L)
 {

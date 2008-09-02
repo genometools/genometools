@@ -186,7 +186,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "union find class", union_find_unit_test);
 #ifdef LIBGTVIEW
   hashmap_add(unit_tests, "block class", block_unit_test);
-  hashmap_add(unit_tests, "config class", config_unit_test);
+  hashmap_add(unit_tests, "style class", style_unit_test);
   hashmap_add(unit_tests, "diagram class", diagram_unit_test);
   hashmap_add(unit_tests, "element class", element_unit_test);
   hashmap_add(unit_tests, "feature index class", feature_index_unit_test);

@@ -24,7 +24,6 @@
 #include "libgtview/block.h"
 #include "libgtview/canvas.h"
 #include "libgtview/color.h"
-#include "libgtview/config.h"
 #include "libgtview/diagram.h"
 #include "libgtview/element.h"
 #include "libgtview/feature_index.h"
@@ -34,6 +33,7 @@
 #include "libgtview/image_info.h"
 #include "libgtview/line.h"
 #include "libgtview/recmap.h"
+#include "libgtview/style.h"
 #include "libgtview/track.h"
 
 #endif

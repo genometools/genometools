@@ -27,7 +27,7 @@
 #include "libgtview/canvas.h"
 #include "libgtview/diagram.h"
 #include "libgtview/feature_index.h"
-#include "libgtview/luaconfig.h"
+#include "libgtview/luastyle.h"
 
 static int diagram_lua_new(lua_State *L)
 {
@@ -35,7 +35,7 @@ static int diagram_lua_new(lua_State *L)
   FeatureIndex **feature_index;
   Range *range;
   const char *seqid;
-  Config *config;
+  Style *style;
   /* get feature index */
   feature_index = check_feature_index(L, 1);
   /* get seqid */
@@ -45,10 +45,10 @@ static int diagram_lua_new(lua_State *L)
   /* get range */
   range = check_range(L, 3);
   /* create diagram */
-  config = lua_get_config_from_registry(L);
+  style = lua_get_style_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (Diagram*));
   assert(diagram);
-  *diagram = diagram_new(*feature_index, seqid, range, config);
+  *diagram = diagram_new(*feature_index, seqid, range, style);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;

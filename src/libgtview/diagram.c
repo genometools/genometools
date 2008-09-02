@@ -51,7 +51,7 @@ struct Diagram {
   /* Cache tables for configuration data */
   Hashmap *collapsingtypes, *caption_display_status;
   int nof_tracks;
-  Config *config;
+  Style *style;
   Range range;
 };
 
@@ -140,12 +140,12 @@ static bool get_caption_display_status(Diagram *d, GenomeFeatureType *gft)
     unsigned long threshold;
     double tmp;
     status = ma_malloc(sizeof (bool*));
-    if (!config_get_bool(d->config, "format", "show_block_captions",
+    if (!style_get_bool(d->style, "format", "show_block_captions",
                        status))
       *status = true;
     if (*status)
     {
-      if (config_get_num(d->config, genome_feature_type_get_cstr(gft),
+      if (style_get_num(d->style, genome_feature_type_get_cstr(gft),
                          "max_capt_show_width", &tmp))
         threshold = tmp;
       else
@@ -332,13 +332,13 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
     return;
 
   /* get maximal view widths in nucleotides to show this type */
-  if (config_get_num(d->config, feature_type, "max_show_width", &tmp))
+  if (style_get_num(d->style, feature_type, "max_show_width", &tmp))
     max_show_width = tmp;
   else
     max_show_width = UNDEF_ULONG;
   if (parent)
   {
-    if (config_get_num(d->config, parent_gft, "max_show_width", &tmp))
+    if (style_get_num(d->style, parent_gft, "max_show_width", &tmp))
     par_max_show_width = tmp;
   else
     par_max_show_width = UNDEF_ULONG;
@@ -356,7 +356,7 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
                                         feature_type)) == NULL)
   {
     collapse = ma_malloc(sizeof (bool));
-    if (!config_get_bool(d->config, feature_type, "collapse_to_parent",
+    if (!style_get_bool(d->style, feature_type, "collapse_to_parent",
                         collapse))
       *collapse = false;
     hashmap_add(d->collapsingtypes, (char*) feature_type, collapse);
@@ -516,7 +516,7 @@ static int blocklist_delete(void *value)
 }
 
 Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
-                     Config *config)
+                     Style *style)
 {
   Diagram *diagram;
   Array *features = array_new(sizeof (GenomeNode*));
@@ -528,7 +528,7 @@ Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
                                   (FreeFunc) blocklist_delete);
   diagram->nodeinfo = hashmap_new(HASH_DIRECT, NULL, NULL);
   diagram->nof_tracks = 0;
-  diagram->config = config;
+  diagram->style = style;
   diagram->range = *range;
   had_err = feature_index_get_features_for_range(fi, features, seqid, *range,
                                                  NULL);
@@ -544,10 +544,10 @@ Range diagram_get_range(Diagram* diagram)
   return diagram->range;
 }
 
-void diagram_set_config(Diagram *diagram, Config *config)
+void diagram_set_style(Diagram *diagram, Style *style)
 {
-  assert(diagram && config);
-  diagram->config = config;
+  assert(diagram && style);
+  diagram->style = style;
 }
 
 Hashmap* diagram_get_tracks(const Diagram *diagram)
@@ -606,12 +606,12 @@ static int layout_tracks(void *key, void *value, void *data,
   type = genome_feature_type_get_cstr(gft);
   log_log("layouting track %s", type);
 
-  if (!config_get_bool(tti->dia->config, "format", "split_lines", &split))
+  if (!style_get_bool(tti->dia->style, "format", "split_lines", &split))
     split = true;
   if (split)
-    if (!config_get_bool(tti->dia->config, type, "split_lines", &split))
+    if (!style_get_bool(tti->dia->style, type, "split_lines", &split))
       split = true;
-  if (config_get_num(tti->dia->config, type, "max_num_lines", &tmp))
+  if (style_get_num(tti->dia->style, type, "max_num_lines", &tmp))
     max = tmp;
   else
     max = 50;
@@ -672,7 +672,7 @@ int diagram_unit_test(Error *err)
   Str *seqid1, *seqid2, *track_key;
   SequenceRegion *sr1, *sr2;
   int had_err=0;
-  Config *cfg = NULL;
+  Style *sty = NULL;
   Diagram *dia = NULL, *dia2 = NULL;
   Canvas *canvas = NULL;
   error_check(err);
@@ -732,35 +732,35 @@ int diagram_unit_test(Error *err)
   dr1.start = 400UL;
   dr1.end   = 900UL;
 
-  /* create a config object */
+  /* create a style object */
   if (!had_err) {
-    if (!(cfg = config_new(false, err)))
+    if (!(sty = style_new(false, err)))
       had_err = -1;
   }
 
   /* create a diagram object and test it */
   if (!had_err)
-    dia = diagram_new(fi, "test1", &dr1, cfg);
+    dia = diagram_new(fi, "test1", &dr1, sty);
 
-  ensure(had_err, dia->config);
+  ensure(had_err, dia->style);
   ensure(had_err, dia->range.start == 400UL);
   ensure(had_err, dia->range.end == 900UL);
 
   if (!had_err)
   {
-    canvas = canvas_new(cfg, GRAPHICS_PNG, 600, NULL);
+    canvas = canvas_new(sty, GRAPHICS_PNG, 600, NULL);
     diagram_render(dia, canvas);
   }
 
   if (!had_err &&
-      !config_get_bool(dia->config, "gene", "collapse_to_parent", false)) {
+      !style_get_bool(dia->style, "gene", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashmap_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
-      !config_get_bool(dia->config, "exon", "collapse_to_parent", false)) {
+      !style_get_bool(dia->style, "exon", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", exon_type);
     ensure(had_err, hashmap_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
@@ -769,13 +769,13 @@ int diagram_unit_test(Error *err)
 
   /* create a diagram object and test it */
   if (!had_err) {
-    dia2 = diagram_new(fi, "test2", &dr1, cfg);
+    dia2 = diagram_new(fi, "test2", &dr1, sty);
     ensure(had_err, dia->range.start == 400UL);
     ensure(had_err, dia->range.end == 900UL);
   }
 
   if (!had_err &&
-      !config_get_bool(dia2->config, "gene", "collapse_to_parent", false)) {
+      !style_get_bool(dia2->style, "gene", "collapse_to_parent", false)) {
     diagram_render(dia2, canvas);
     track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
@@ -783,14 +783,14 @@ int diagram_unit_test(Error *err)
   }
 
   if (!had_err &&
-      !config_get_bool(dia2->config, "exon", "collapse_to_parent", false)) {
+      !style_get_bool(dia2->style, "exon", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", exon_type);
     ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
-      !config_get_bool(dia2->config, "CDS", "collapse_to_parent", false)) {
+      !style_get_bool(dia2->style, "CDS", "collapse_to_parent", false)) {
     track_key = track_key_new("generated", CDS_type);
     ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
@@ -798,7 +798,7 @@ int diagram_unit_test(Error *err)
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
   /* delete all generated objects */
-  config_delete(cfg);
+  style_delete(sty);
   diagram_delete(dia);
   diagram_delete(dia2);
   canvas_delete(canvas);

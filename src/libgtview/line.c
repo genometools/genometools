@@ -23,6 +23,7 @@
 #include "libgtext/feature_type_factory_builtin.h"
 #include "libgtview/block.h"
 #include "libgtview/line.h"
+#include "libgtview/style.h"
 
 struct Line {
   bool has_captions;

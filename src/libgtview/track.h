@@ -27,7 +27,6 @@ typedef struct Track Track;
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_node.h"
 #include "libgtview/canvas.h"
-#include "libgtview/config.h"
 #include "libgtview/line.h"
 #include "libgtview/line_breaker.h"
 

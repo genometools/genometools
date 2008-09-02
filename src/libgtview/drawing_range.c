@@ -37,8 +37,6 @@ int drawing_range_compare(DrawingRange range_a, DrawingRange range_b)
 
 bool drawing_range_overlap(DrawingRange range_a, DrawingRange range_b)
 {
-  assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
-
   if (range_a.start <= range_b.end && range_a.end >= range_b.start)
     return true;
   return false;
@@ -46,8 +44,6 @@ bool drawing_range_overlap(DrawingRange range_a, DrawingRange range_b)
 
 bool drawing_range_contains(DrawingRange range_a, DrawingRange range_b)
 {
-  assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
-
   if (range_a.start <= range_b.start && range_a.end >= range_b.end)
     return true;
   return false;
@@ -55,6 +51,5 @@ bool drawing_range_contains(DrawingRange range_a, DrawingRange range_b)
 
 double drawing_range_length(DrawingRange range)
 {
-  assert(range.start <= range.end);
   return range.end - range.start;
 }

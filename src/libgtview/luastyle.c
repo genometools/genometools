@@ -15,27 +15,28 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtview/config.h"
+#include "lua.h"
+#include "libgtview/style.h"
 
-/* key used to store the Config object in the Lua registry */
-#define CONFIG_KEY config_new
+/* key used to store the Style object in the Lua registry */
+#define STYLE_KEY style_new
 
-void lua_put_config_in_registry(lua_State *L, Config *config)
+void lua_put_style_in_registry(lua_State *L, Style *style)
 {
-  assert(L && config);
-  lua_pushlightuserdata(L, CONFIG_KEY);
-  lua_pushlightuserdata(L, config);
+  assert(L && style);
+  lua_pushlightuserdata(L, STYLE_KEY);
+  lua_pushlightuserdata(L, style);
   lua_rawset(L, LUA_REGISTRYINDEX);
 }
 
-Config* lua_get_config_from_registry(lua_State *L)
+Style* lua_get_style_from_registry(lua_State *L)
 {
-  Config *config;
+  Style *style;
   assert(L);
-  lua_pushlightuserdata(L, CONFIG_KEY);
+  lua_pushlightuserdata(L, STYLE_KEY);
   lua_rawget(L, LUA_REGISTRYINDEX);
   assert(lua_islightuserdata(L, -1));
-  config = lua_touserdata(L, -1);
+  style = lua_touserdata(L, -1);
   lua_pop(L, 1);
-  return config;
+  return style;
 }

@@ -37,51 +37,51 @@ module GT
     "bool val"
   ]
 
-  extern "Config* config_new(bool, Error*)"
-  extern "int config_load_file(Config*, Str*, Error*)"
-  extern "int config_load_str(Config*, Str*, Error*)"
-  extern "int config_to_str(const Config*, Str*, Error*)"
-  extern "bool config_get_color(Config*, const char*, const char*, Color*)"
-  extern "void config_set_color(Config*, const char*, const char*, Color*)"
-  extern "bool config_get_str(const Config*, const char*, " +
+  extern "Style* style_new(bool, Error*)"
+  extern "int style_load_file(Style*, Str*, Error*)"
+  extern "int style_load_str(Style*, Str*, Error*)"
+  extern "int style_to_str(const Style*, Str*, Error*)"
+  extern "bool style_get_color(Style*, const char*, const char*, Color*)"
+  extern "void style_set_color(Style*, const char*, const char*, Color*)"
+  extern "bool style_get_str(const Style*, const char*, " +
                              "const char*, Str*)"
-  extern "void config_set_str(Config*, const char*, const char*, Str*)"
-  extern "bool config_get_num(const Config*, const char*, " +
+  extern "void style_set_str(Style*, const char*, const char*, Str*)"
+  extern "bool style_get_num(const Style*, const char*, " +
                              "const char*, double*)"
-  extern "void config_set_num(Config*, const char*, const char*, double)"
-  extern "bool config_get_bool(const Config*, const char*, " +
+  extern "void style_set_num(Style*, const char*, const char*, double)"
+  extern "bool style_get_bool(const Style*, const char*, " +
                                "const char*, bool*)"
-  extern "void config_set_bool(Config*, const char*, const char*, bool)"
-  extern "void config_unset(Config*, const char*, const char*)"
-  extern "void config_delete(Config*)"
+  extern "void style_set_bool(Style*, const char*, const char*, bool)"
+  extern "void style_unset(Style*, const char*, const char*)"
+  extern "void style_delete(Style*)"
 
   class Config
     attr_reader :config
     def initialize
       err = GT::Error.new()
-      @config = GT.config_new(false, err.to_ptr)
+      @config = GT.style_new(false, err.to_ptr)
       if not @config then GT.gterror(err) end
-      @config.free = GT::symbol("config_delete", "0P")
+      @config.free = GT::symbol("style_delete", "0P")
     end
 
     def load_file(filename)
       err = GT::Error.new()
       str = GT::Str.new(filename)
-      rval = GT.config_load_file(@config, str.to_ptr, err.to_ptr)
+      rval = GT.style_load_file(@config, str.to_ptr, err.to_ptr)
       if rval != 0 then GT.gterror(err) end
     end
 
     def load_str(str)
       err = GT::Error.new()
       str = GT::Str.new(str)
-      rval = GT.config_load_str(@config, str.to_ptr, err.to_ptr)
+      rval = GT.style_load_str(@config, str.to_ptr, err.to_ptr)
       if rval != 0 then GT.gterror(err) end
     end
 
     def to_str()
       err = GT::Error.new()
       str = GT::Str.new(nil)
-      if GT.config_to_str(@config, str.to_ptr, err.to_ptr) == 0
+      if GT.style_to_str(@config, str.to_ptr, err.to_ptr) == 0
         str.to_s
       else
         GT.gterror(err)
@@ -97,7 +97,7 @@ module GT
 
     def get_color(section, key)
       color = GT::Color.malloc
-      if GT.config_get_color(@config, section, key, color)
+      if GT.style_get_color(@config, section, key, color)
         color
       else
         nil
@@ -105,12 +105,12 @@ module GT
     end
 
     def set_color(section, key, color)
-      GT.config_set_color(@config, section, key, color)
+      GT.style_set_color(@config, section, key, color)
     end
 
     def get_cstr(section, key)
       str = GT::Str.new(nil)
-      if GT.config_get_str(@config, section, key, str)
+      if GT.style_get_str(@config, section, key, str)
         str.to_s
       else
         nil
@@ -119,12 +119,12 @@ module GT
 
     def set_cstr(section, key, value)
       str = GT::Str.new(value)
-      GT.config_set_str(@config, section, key, str)
+      GT.style_set_str(@config, section, key, str)
     end
 
     def get_num(section, key)
       double = DoubleArg.malloc
-      if GT.config_get_num(@config, section, key, double)
+      if GT.style_get_num(@config, section, key, double)
         double.val
       else
         nil
@@ -133,12 +133,12 @@ module GT
 
     def set_num(section, key, number)
       num = number.to_f
-      GT.config_set_num(@config, section, key, num)
+      GT.style_set_num(@config, section, key, num)
     end
 
     def get_bool(section, key)
       bool = BoolArg.malloc
-      if GT.config_get_bool(@config, section, key, bool)
+      if GT.style_get_bool(@config, section, key, bool)
         bool.val
       else
         nil
@@ -146,11 +146,11 @@ module GT
     end
 
     def set_bool(section, key, val)
-      GT.config_set_bool(@config, section, key, val)
+      GT.style_set_bool(@config, section, key, val)
     end
 
     def unset(section, key)
-      GT.config_unset(@config, section, key)
+      GT.style_unset(@config, section, key)
     end
   end
 end

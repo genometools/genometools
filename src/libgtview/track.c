@@ -22,6 +22,7 @@
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
 #include "libgtview/line_breaker_bases.h"
+#include "libgtview/style.h"
 #include "libgtview/track.h"
 
 struct Track {

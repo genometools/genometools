@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LUACONFIG_H
-#define LUACONFIG_H
+#ifndef LUASTYLE_H
+#define LUASTYLE_H
 
 #include "lua.h"
-#include "libgtview/config.h"
+#include "libgtview/style.h"
 
-void    lua_put_config_in_registry(lua_State*, Config*);
-Config* lua_get_config_from_registry(lua_State*);
+void   lua_put_style_in_registry(lua_State*, Style*);
+Style* lua_get_style_from_registry(lua_State*);
 
 #endif

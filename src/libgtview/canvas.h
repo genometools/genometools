@@ -22,19 +22,19 @@ typedef struct Canvas Canvas;
 
 #include "libgtcore/range.h"
 #include "libgtview/block.h"
-#include "libgtview/config.h"
 #include "libgtview/diagram.h"
 #include "libgtview/drawing_range.h"
 #include "libgtview/element.h"
 #include "libgtview/graphics.h"
 #include "libgtview/line.h"
 #include "libgtview/image_info.h"
+#include "libgtview/style.h"
 #include "libgtview/track.h"
 
 /* Create a new Canvas object with given <output_type> and <width> using the
-   configuration given in <config>. The optional <image_info> is filled when
-   the created Config object is used to render a Diagram object. */
-Canvas*       canvas_new(Config *config, GraphicsOutType output_type,
+   configuration given in <style>. The optional <image_info> is filled when
+   the created Canvas object is used to render a Diagram object. */
+Canvas*       canvas_new(Style *style, GraphicsOutType output_type,
                          unsigned long width, ImageInfo *image_info);
 /* Returns a pixel-based range for a nucleotide-based range
    using the scaling factor defined for the given <canvas> */

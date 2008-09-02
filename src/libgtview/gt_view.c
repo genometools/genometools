@@ -30,12 +30,12 @@
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtview/canvas.h"
-#include "libgtview/config.h"
 #include "libgtview/diagram.h"
 #include "libgtview/feature_index.h"
 #include "libgtview/feature_stream.h"
 #include "libgtview/gt_view.h"
 #include "libgtview/image_info.h"
+#include "libgtview/style.h"
 
 typedef struct {
   bool pipe,
@@ -176,8 +176,8 @@ int gt_view(int argc, const char **argv, Error *err)
   const char *file, *seqid = NULL;
   Range qry_range, sequence_region_range;
   Array *results = NULL;
-  Config *cfg = NULL;
-  Str *config_file = NULL;
+  Style *sty = NULL;
+  Str *style_file = NULL;
   Str *prog;
   Diagram *d = NULL;
   ImageInfo* ii = NULL;
@@ -288,30 +288,30 @@ int gt_view(int argc, const char **argv, Error *err)
     if (arguments.verbose)
       fprintf(stderr, "# of results: %lu\n", array_size(results));
 
-    /* find and load configuration file */
+    /* find and load styleuration file */
     prog = str_new();
     str_append_cstr_nt(prog, argv[0], cstr_length_up_to_char(argv[0], ' '));
-    config_file = gtdata_get_path(str_get(prog), err);
+    style_file = gtdata_get_path(str_get(prog), err);
     str_delete(prog);
-    str_append_cstr(config_file, "/config/view.lua");
-    if (!(cfg = config_new(arguments.verbose, err)))
+    str_append_cstr(style_file, "/style/view.lua");
+    if (!(sty = style_new(arguments.verbose, err)))
       had_err = -1;
-    if (!had_err && file_exists(str_get(config_file)))
-      had_err = config_load_file(cfg, config_file, err);
+    if (!had_err && file_exists(str_get(style_file)))
+      had_err = style_load_file(sty, style_file, err);
   }
 
   if (!had_err) {
     /* create and write image file */
-    d = diagram_new(features, seqid, &qry_range, cfg);
+    d = diagram_new(features, seqid, &qry_range, sty);
     ii = image_info_new();
     if (strcmp(str_get(arguments.format),"pdf")==0)
-      canvas = canvas_new(cfg, GRAPHICS_PDF, arguments.width, ii);
+      canvas = canvas_new(sty, GRAPHICS_PDF, arguments.width, ii);
     else if (strcmp(str_get(arguments.format),"ps")==0)
-      canvas = canvas_new(cfg, GRAPHICS_PS, arguments.width, ii);
+      canvas = canvas_new(sty, GRAPHICS_PS, arguments.width, ii);
     else if (strcmp(str_get(arguments.format),"svg")==0)
-      canvas = canvas_new(cfg, GRAPHICS_SVG, arguments.width, ii);
+      canvas = canvas_new(sty, GRAPHICS_SVG, arguments.width, ii);
     else
-      canvas = canvas_new(cfg, GRAPHICS_PNG, arguments.width, ii);
+      canvas = canvas_new(sty, GRAPHICS_PNG, arguments.width, ii);
     diagram_render(d, canvas);
     if (arguments.showrecmaps) {
       unsigned long i;
@@ -331,8 +331,8 @@ int gt_view(int argc, const char **argv, Error *err)
   /* free */
   canvas_delete(canvas);
   image_info_delete(ii);
-  config_delete(cfg);
-  str_delete(config_file);
+  style_delete(sty);
+  str_delete(style_file);
   diagram_delete(d);
   str_delete(arguments.seqid);
   str_delete(arguments.format);
