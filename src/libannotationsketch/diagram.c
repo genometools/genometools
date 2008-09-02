@@ -21,12 +21,10 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/getbasename.h"
 #include "libgtcore/hashmap.h"
-#include "libgtcore/log.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/str.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
-#include "libgtcore/warning.h"
 #include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_feature.h"
@@ -109,8 +107,6 @@ static Block* find_block_for_type(NodeInfoElement* ni, GenomeFeatureType *gft)
   for (i = 0; i < array_size(ni->blocktuples); i++) {
     BlockTuple *bt = *(BlockTuple**) array_get(ni->blocktuples, i);
     if (bt->gft == gft) {
-      log_log("    found root block with type %s, inserting...",
-              genome_feature_type_get_cstr(bt->gft));
       block = bt->block;
       break;
     }
@@ -167,9 +163,6 @@ static void add_to_current(Diagram *d, GenomeNode *node, GenomeNode *parent)
   BlockTuple *bt;
   Str *caption = NULL;
   const char *nnid_p = NULL, *nnid_n = NULL;
-
-  log_log("  calling add_to_current");
-
   assert(d && node);
 
   /* Lookup node info and set itself as parent */
@@ -211,12 +204,6 @@ static void add_to_parent(Diagram *d, GenomeNode *node, GenomeNode* parent)
 
   if (!parent) return;
 
-  log_log("  calling add_to_parent: %s -> %s",
-          genome_feature_type_get_cstr(
-            genome_feature_get_type((GenomeFeature*) node)),
-          genome_feature_type_get_cstr(
-            genome_feature_get_type((GenomeFeature*) parent)));
-
   par_ni = get_or_create_node_info(d, parent);
   ni = get_or_create_node_info(d, node);
   ni->parent = parent;
@@ -250,13 +237,6 @@ static void add_to_parent(Diagram *d, GenomeNode *node, GenomeNode* parent)
     /* add block to nodeinfo */
     bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node), block);
     array_add(par_ni->blocktuples, bt);
-
-    log_log("    added %s to (%s) block for node %s",
-                genome_feature_type_get_cstr(
-                  genome_feature_get_type((GenomeFeature*) node)),
-                genome_feature_type_get_cstr(
-                  genome_feature_get_type((GenomeFeature*) parent)),
-                genome_feature_get_attribute(parent, "ID" ));
   }
   /* now we have a block to insert into */
   block_insert_element(block, node);
@@ -267,18 +247,8 @@ static void add_recursive(Diagram *d, GenomeNode *node,
 {
   NodeInfoElement *ni;
 
-  assert(d && node &&
-          original_node);
-
+  assert(d && node && original_node);
   if (!parent) return;
-
-  log_log("  calling add_recursive: %s (%s) -> %s (%s)",
-              genome_feature_type_get_cstr(
-                genome_feature_get_type((GenomeFeature*) node)),
-              genome_feature_get_attribute(node,"ID"),
-              genome_feature_type_get_cstr(
-                genome_feature_get_type((GenomeFeature*) parent)),
-              genome_feature_get_attribute(parent,"ID"));
 
   ni = get_or_create_node_info(d, node);
 
@@ -367,17 +337,9 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent)
     do_not_overlap =
       genome_node_direct_children_do_not_overlap_st(parent, node);
 
-  log_log("processing node: %s (%s)", feature_type,
-          genome_feature_get_attribute(node, "ID" ));
-
   /* decide how to continue: */
   if (*collapse && parent) {
     /* collapsing features recursively search their target blocks */
-    if (!do_not_overlap)
-      warning("collapsing %s features overlap "
-              "and will be missing in the %s block!",
-              feature_type,
-              genome_feature_get_attribute(parent, "ID" ));
     add_recursive(d, node, parent, node);
   }
   else if (do_not_overlap
@@ -604,7 +566,6 @@ static int layout_tracks(void *key, void *value, void *data,
   track_key = track_key_new(filename, gft);
   ma_free(filename);
   type = genome_feature_type_get_cstr(gft);
-  log_log("layouting track %s", type);
 
   if (!style_get_bool(tti->dia->style, "format", "split_lines", &split))
     split = true;
@@ -620,8 +581,6 @@ static int layout_tracks(void *key, void *value, void *data,
   track = track_new(track_key, max, split,
                     line_breaker_captions_new(tti->canvas));
   tti->dia->nof_tracks++;
-  log_log("created track: %s, diagram has now %d tracks",
-          str_get(track_key), diagram_get_number_of_tracks(tti->dia));
   for (i=0;i<array_size(list);i++)
   {
     block = *(Block**) array_get(list, i);
@@ -639,7 +598,6 @@ static int render_tracks(UNUSED void *key, void *value, void *data,
   UNUSED Track *track = (Track*) value;
   int had_err = 0;
   assert(tti && track);
-  log_log("rendering track");
   had_err = track_render((Track*) value, tti->canvas);
   return had_err;
 }
@@ -658,7 +616,6 @@ int diagram_render(Diagram *dia, Canvas *canvas)
   had_err = hashmap_foreach_in_key_order(dia->tracks, render_tracks,
                                          &tti, NULL);
 
-  log_log("finished rendering!\n");
   return had_err;
 }
 
