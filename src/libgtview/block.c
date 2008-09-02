@@ -96,17 +96,12 @@ Block* block_new_from_node(GenomeNode *node)
 
 void block_insert_element(Block *block, GenomeNode *gn)
 {
-  Range gn_r;
-  Element *e;
-  GenomeFeatureType *gn_type;
-
+  Element *element;
   assert(block && gn);
-  gn_r = genome_node_get_range(gn);
-  gn_type = genome_feature_get_type((GenomeFeature*) gn);
   if (!block->top_level_feature)
     block->top_level_feature = gn;
-  e = element_new(gn);
-  dlist_add(block->elements, e);
+  element = element_new(gn);
+  dlist_add(block->elements, element);
 }
 
 GenomeNode* block_get_top_level_feature(const Block *block)
