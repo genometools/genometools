@@ -24,7 +24,7 @@
 #include "gtext.h"   /* include extended GenomeTools library (libgtext) */
 #include "gtmatch.h" /* include GenomeTools matching library (libgtmatch) */
 #ifdef LIBANNOTATIONSKETCH
-#include "gtview.h"  /* include GenomeTools Viewer library (libannotationsketch) */
+#include "annotationsketch.h"  /* include AnnotationSketch library */
 #endif
 
 #endif

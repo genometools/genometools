@@ -17,10 +17,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTVIEW_H
-#define GTVIEW_H
+#ifndef ANNOTATIONSKETCH_H
+#define ANNOTATIONSKETCH_H
 
-/* The GenomeTools viewer library (libannotationsketch) header */
+/* The AnnotationSketch (libannotationsketch) header */
 #include "libannotationsketch/block.h"
 #include "libannotationsketch/canvas.h"
 #include "libannotationsketch/color.h"

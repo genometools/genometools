@@ -22,7 +22,7 @@
 /* A track has a title and a type und contains line objects. */
 typedef struct Track Track;
 
-#include "gtview.h"
+#include "annotationsketch.h"
 #include "libgtcore/array.h"
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_node.h"
