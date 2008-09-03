@@ -580,13 +580,15 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   elem_width = draw_range.end - draw_range.start;
 
   if (element_is_marked(elem)) {
-    style_get_color(canvas->sty, type, "stroke_marked", &elem_color, NULL);
+    style_get_color(canvas->sty, type, "stroke_marked", &elem_color,
+                    element_get_node_ref(elem));
     if (!style_get_num(canvas->sty, "format", "stroke_marked_width",
                        &stroke_width, element_get_node_ref(elem)))
     stroke_width = STROKE_WIDTH_DEFAULT;
   }
   else {
-    style_get_color(canvas->sty, type, "stroke", &elem_color, NULL);
+    style_get_color(canvas->sty, type, "stroke", &elem_color,
+                    element_get_node_ref(elem));
     if (!style_get_num(canvas->sty, "format", "stroke_width", &stroke_width,
                        element_get_node_ref(elem)))
     stroke_width = STROKE_WIDTH_DEFAULT;
