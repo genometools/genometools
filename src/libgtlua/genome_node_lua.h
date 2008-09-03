@@ -54,6 +54,9 @@
    -- Returns the <attrib> attribute of <genome_feature>.
    function genome_feature:get_attribute(attrib)
 
+   -- Returns an array containing the exons of <genome_feature>.
+   function genome_feature:get_exons()
+
    -- Set the source of <genome_feature> to <source>.
    function genome_feature:set_source(source)
 
