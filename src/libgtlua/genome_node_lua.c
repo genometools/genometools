@@ -191,7 +191,6 @@ static int genome_feature_lua_get_exons(lua_State *L)
   return 1;
 }
 
-
 static int genome_feature_lua_set_source(lua_State *L)
 {
   const char *source;
