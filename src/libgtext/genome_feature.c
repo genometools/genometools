@@ -118,7 +118,7 @@ static void genome_feature_set_range(GenomeNode *gn, Range range)
   gf->range = range;
 }
 
-static void genome_feature_set_seqid(GenomeNode *gn, Str *seqid)
+static void genome_feature_change_seqid(GenomeNode *gn, Str *seqid)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(gf && seqid);
@@ -156,7 +156,7 @@ const GenomeNodeClass* genome_feature_class()
                                        genome_feature_get_seqid,
                                        genome_feature_get_range,
                                        genome_feature_set_range,
-                                       genome_feature_set_seqid,
+                                       genome_feature_change_seqid,
                                        genome_feature_accept };
   return &gnc;
 }

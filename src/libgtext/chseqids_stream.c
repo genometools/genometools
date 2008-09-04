@@ -38,7 +38,7 @@ static int change_sequence_id(GenomeNode *gn, void *data, UNUSED Error *err)
   Str *changed_seqid = data;
   error_check(err);
   assert(changed_seqid);
-  genome_node_set_seqid(gn, changed_seqid);
+  genome_node_change_seqid(gn, changed_seqid);
   return 0;
 }
 

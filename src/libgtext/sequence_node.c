@@ -50,7 +50,7 @@ static Range sequence_node_get_range(UNUSED GenomeNode *gn)
   return range;
 }
 
-static void sequence_node_set_seqid(GenomeNode *gn, Str *seqid)
+static void sequence_node_change_seqid(GenomeNode *gn, Str *seqid)
 {
   SequenceNode *sn = sequence_node_cast(gn);
   assert(sn && seqid);
@@ -74,7 +74,7 @@ const GenomeNodeClass* sequence_node_class()
                                        sequence_node_get_seqid,
                                        sequence_node_get_range,
                                        NULL,
-                                       sequence_node_set_seqid,
+                                       sequence_node_change_seqid,
                                        sequence_node_accept };
   return &gnc;
 }

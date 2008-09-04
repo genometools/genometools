@@ -448,10 +448,10 @@ void genome_node_set_range(GenomeNode *gn, Range range)
   gn->c_class->set_range(gn, range);
 }
 
-void genome_node_set_seqid(GenomeNode *gn, Str *seqid)
+void genome_node_change_seqid(GenomeNode *gn, Str *seqid)
 {
-  assert(gn && gn->c_class && gn->c_class->set_seqid && seqid);
-  gn->c_class->set_seqid(gn, seqid);
+  assert(gn && gn->c_class && gn->c_class->change_seqid && seqid);
+  gn->c_class->change_seqid(gn, seqid);
 }
 
 int genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, Error *err)

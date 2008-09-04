@@ -55,7 +55,7 @@ static void sequence_region_set_range(GenomeNode *gn, Range range)
   sr->range = range;
 }
 
-static void sequence_region_set_seqid(GenomeNode *gn, Str *seqid)
+static void sequence_region_change_seqid(GenomeNode *gn, Str *seqid)
 {
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(sr && seqid);
@@ -79,7 +79,7 @@ const GenomeNodeClass* sequence_region_class()
                                        sequence_region_get_seqid,
                                        sequence_region_get_range,
                                        sequence_region_set_range,
-                                       sequence_region_set_seqid,
+                                       sequence_region_change_seqid,
                                        sequence_region_accept };
   return &gnc;
 }
