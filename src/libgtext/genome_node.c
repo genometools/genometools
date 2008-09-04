@@ -464,6 +464,8 @@ int genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, Error *err)
 void genome_node_is_part_of_genome_node(GenomeNode *parent, GenomeNode *child)
 {
   assert(parent && child);
+  /* <parent> and <child> have the same seqid */
+  assert(!str_cmp(genome_node_get_seqid(parent), genome_node_get_seqid(child)));
 #ifndef NDEBUG
   if (genome_node_cast(genome_feature_class(), child)) {
     /* pseudo-features have to be top-level */
