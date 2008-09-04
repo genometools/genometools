@@ -66,3 +66,10 @@ Test do
            "#{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
 end
+
+Name "sketch_constructed"
+Keywords "gt_sketch annotationsketch"
+Test do
+  run_test "#{$bin}sketch_constructed #{$cur}/gtdata/config/view.lua " +
+           "sketch_constructed.png"
+end
