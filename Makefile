@@ -336,6 +336,7 @@ ifeq ($(libannotationsketch),yes)
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   STEST_FLAGS += -libannotationsketch
+  ANNOTATIONSKETCH_EXAMPLES := bin/sketch_constructed
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
 endif
@@ -344,7 +345,7 @@ endif
 prefix ?= /usr/local
 
 all: $(GTLIBS) lib/libgt$(SHARED_OBJ_NAME_EXT) bin/skproto bin/gt \
-     bin/example bin/lua bin/rnv
+     bin/example bin/lua bin/rnv $(ANNOTATIONSKETCH_EXAMPLES)
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
@@ -497,6 +498,10 @@ $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) $(GTLIBS) \
 
 $(eval $(call PROGRAM_template, bin/example, $(EXAMPLE_OBJ) $(GTLIBS) \
                                              $(OVERRIDELIBS)))
+
+$(eval $(call PROGRAM_template, bin/sketch_constructed, \
+                                obj/src/annotationsketch/sketch_constructed.o \
+                                $(GTLIBS) $(OVERRIDELIBS)))
 
 bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
