@@ -21,6 +21,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
+#include "libgtcore/cstr.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/unused.h"
@@ -34,7 +35,7 @@
 struct Style
 {
   lua_State *L;
-  Str *filename;
+  char *filename;
   bool verbose;
 };
 
@@ -93,16 +94,15 @@ Style* style_new_with_state(lua_State *L)
   return sty;
 }
 
-int style_load_file(Style *sty, Str *fn, Error *err)
+int style_load_file(Style *sty, const char *filename, Error *err)
 {
   int had_err = 0;
   error_check(err);
-  assert(sty && sty->L && fn);
-  sty->filename = str_ref(fn);
+  assert(sty && sty->L && filename);
+  sty->filename = cstr_dup(filename);
   if (style_get_verbose(sty))
-    fprintf(stderr, "Trying to load style file: %s...\n", str_get(fn));
-  if (luaL_loadfile(sty->L, str_get(fn)) ||
-      lua_pcall(sty->L, 0, 0, 0)) {
+    fprintf(stderr, "Trying to load style file: %s...\n", filename);
+  if (luaL_loadfile(sty->L, filename) || lua_pcall(sty->L, 0, 0, 0)) {
     error_set(err, "cannot run style file: %s",
               lua_tostring(sty->L, -1));
     had_err = -1;
@@ -111,7 +111,7 @@ int style_load_file(Style *sty, Str *fn, Error *err)
     lua_getglobal(sty->L, "config");
     if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
       error_set(err, "'config' is not defined or not a table in \"%s\"",
-                str_get(fn));
+                filename);
     }
     lua_pop(sty->L, 1);
   }
@@ -573,7 +573,7 @@ int style_unit_test(Error *err)
 void style_delete_without_state(Style *sty)
 {
   if (!sty) return;
-  str_delete(sty->filename);
+  ma_free(sty->filename);
   ma_free(sty);
 }
 

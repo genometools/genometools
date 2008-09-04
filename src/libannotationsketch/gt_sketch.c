@@ -298,7 +298,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
     if (!(sty = style_new(arguments.verbose, err)))
       had_err = -1;
     if (!had_err && file_exists(str_get(style_file)))
-      had_err = style_load_file(sty, style_file, err);
+      had_err = style_load_file(sty, str_get(style_file), err);
   }
 
   if (!had_err) {

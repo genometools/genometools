@@ -101,7 +101,7 @@ GTR* gtr_new(Error *err)
   if (!had_err) {
     str_append_cstr(style_file, "/config/view.lua");
     if (file_exists(str_get(style_file))) {
-      if (style_load_file(gtr->style, style_file, err))
+      if (style_load_file(gtr->style, str_get(style_file), err))
         had_err = -1;
       else
         lua_put_style_in_registry(gtr->L, gtr->style);

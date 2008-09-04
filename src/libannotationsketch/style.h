@@ -35,7 +35,7 @@ Style*        style_new(bool verbose, Error*);
 Style*        style_clone(const Style*, Error*);
 /* Loads and executes Lua style file with given <filename>.
    This file must contain a global table called 'Style'. */
-int            style_load_file(Style*, Str *filename, Error*);
+int            style_load_file(Style*, const char *filename, Error*);
 /* Loads and executes Lua style code from the given String <instr>.
    This code must contain a global table called 'Style'. */
 int            style_load_str(Style*, Str *instr, Error*);
