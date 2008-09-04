@@ -42,6 +42,7 @@
 
 #ifdef LIBANNOTATIONSKETCH
 #include "libannotationsketch/luastyle.h"
+#include "libannotationsketch/style_with_state.h"
 #endif
 
 struct GTR {

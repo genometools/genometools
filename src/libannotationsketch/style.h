@@ -19,7 +19,6 @@
 #ifndef STYLE_H
 #define STYLE_H
 
-#include "lua.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 #include "libannotationsketch/color.h"
@@ -32,8 +31,6 @@ typedef struct Style Style;
 /* Creates a new Style object with given verbosity. If set, warnings will be
    given. */
 Style*        style_new(bool verbose, Error*);
-/* Creates a Style object wich reuses the given Lua state. */
-Style*        style_new_with_state(lua_State*);
 /* Creates a deep copy of the given Style object. */
 Style*        style_clone(const Style*, Error*);
 /* Loads and executes Lua style file with given <filename>.

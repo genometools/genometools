@@ -31,6 +31,7 @@
 #include "libgtext/dice_hmm.h"                  /* the dice HMM class */
 #include "libgtext/extract_feat_stream.h"       /* extract feat. stream class */
 #include "libgtext/evaluator.h"                 /* evaluator class */
+#include "libgtext/feature_type_factory_any.h"  /* feature type factory class */
 #include "libgtext/filter_stream.h"             /* filter stream class */
 #include "libgtext/genome_stream.h"             /* genome stream class */
 #include "libgtext/gff3_in_stream.h"            /* GFF3 input stream class */
