@@ -964,7 +964,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   GenomeFeatureType *gft = NULL;
   Splitter *splitter;
   AutomaticSequenceRegion *auto_sr = NULL;
-  Str *seqid_str = NULL, *changed_seqid = NULL;
+  Str *seqid_str = NULL;
   Strand strand_value;
   float score_value;
   Phase phase_value;
@@ -1079,7 +1079,6 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 
   /* free */
   str_delete(seqid_str);
-  str_delete(changed_seqid);
   splitter_delete(splitter);
 
   return had_err;
