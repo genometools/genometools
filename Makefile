@@ -288,6 +288,7 @@ endif
 
 ifneq ($(curses),no)
   GTLIBS := $(GTLIBS) lib/libtecla.a
+  GTSHAREDLIB_OBJ := $(GTSHAREDLIB_OBJ) lib/libtecla.a
   EXP_CPPFLAGS += -DCURSES
   EXP_LDLIBS += -lncurses
 endif
