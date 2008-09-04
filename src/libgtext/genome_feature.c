@@ -169,16 +169,16 @@ static void set_transcriptfeaturetype(GenomeNode *gn, TranscriptFeatureType tft)
   gn->bit_field |= tft << TRANSCRIPT_FEATURE_TYPE_OFFSET;
 }
 
-GenomeNode* genome_feature_new(GenomeFeatureType *type, Range range,
+GenomeNode* genome_feature_new(Str *seqid, GenomeFeatureType *type, Range range,
                                Strand strand)
 {
   GenomeNode *gn;
   GenomeFeature *gf;
-  assert(type);
+  assert(seqid && type);
   assert(range.start <= range.end);
   gn = genome_node_create(genome_feature_class());
   gf = genome_feature_cast(gn);
-  gf->seqid     = NULL;
+  gf->seqid     = str_ref(seqid);
   gf->source    = NULL;
   gf->ftf       = feature_type_factory_ref(genome_feature_type_get_ftf(type));
   gf->type      = type;
@@ -197,12 +197,12 @@ GenomeNode* genome_feature_new_pseudo(GenomeFeature *gf)
   GenomeFeature *pf;
   GenomeNode *pn;
   assert(gf);
-  pn = genome_feature_new(genome_feature_get_type(gf),
+  pn = genome_feature_new(genome_feature_get_seqid((GenomeNode*) gf),
+                          genome_feature_get_type(gf),
                           genome_feature_get_range((GenomeNode*) gf),
                           genome_feature_get_strand(gf));
   pf = genome_feature_cast(pn);
   pf->type = NULL; /* pseudo features do not have a type */
-  genome_node_set_seqid(pn, genome_node_get_seqid((GenomeNode*) gf));
   genome_feature_set_source(pn, gf->source);
   pn->bit_field |= 1 << PSEUDO_FEATURE_OFFSET;
   return pn;
@@ -219,93 +219,77 @@ GenomeNode* genome_feature_new_standard_gene(FeatureTypeFactory *ftf)
   /* gene */
   range.start = 1000; range.end = 9000;
   type = feature_type_factory_create_gft(ftf, gft_gene);
-  gn = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(gn, seqid);
+  gn = genome_feature_new(seqid, type, range, STRAND_FORWARD);
 
   /* TF binding site */
   range.start = 1000; range.end = 1012;
   type = feature_type_factory_create_gft(ftf, gft_TF_binding_site);
-  child = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(child, seqid);
+  child = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(gn, child);
 
   /* first mRNA */
   range.start = 1050; range.end = 9000;
   type = feature_type_factory_create_gft(ftf, gft_mRNA);
-  child = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(child, seqid);
+  child = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1050; range.end = 1500;
   type = feature_type_factory_create_gft(ftf, gft_exon);
-  grandchild = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(grandchild, seqid);
+  grandchild = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 3000; range.end = 3902;
-  grandchild = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(grandchild, seqid);
+  grandchild = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 5000; range.end = 5500;
-  grandchild = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(grandchild, seqid);
+  grandchild = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 7000; range.end = 9000;
-  grandchild = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(grandchild, seqid);
+  grandchild = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   /* second mRNA */
   range.start = 1050; range.end = 9000;
   type = feature_type_factory_create_gft(ftf, gft_mRNA);
-  child = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(child, seqid);
+  child = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1050; range.end = 1500;
   type = feature_type_factory_create_gft(ftf, gft_exon);
-  grandchild = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(grandchild, seqid);
+  grandchild = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 5000; range.end = 5500;
-  grandchild = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(grandchild, seqid);
+  grandchild = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 7000; range.end = 9000;
-  grandchild = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(grandchild, seqid);
+  grandchild = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   /* third mRNA */
   range.start = 1300; range.end = 9000;
   type = feature_type_factory_create_gft(ftf, gft_mRNA);
-  child = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(child, seqid);
+  child = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1300; range.end = 1500;
   type = feature_type_factory_create_gft(ftf, gft_exon);
-  grandchild = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(grandchild, seqid);
+  grandchild = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 3000; range.end = 3902;
-  grandchild = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(grandchild, seqid);
+  grandchild = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 5000; range.end = 5500;
-  grandchild = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(grandchild, seqid);
+  grandchild = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   range.start = 7000; range.end = 9000;
-  grandchild = genome_feature_new(type, range, STRAND_FORWARD);
-  genome_node_set_seqid(grandchild, seqid);
+  grandchild = genome_feature_new(seqid, type, range, STRAND_FORWARD);
   genome_node_is_part_of_genome_node(child, grandchild);
 
   str_delete(seqid);
@@ -652,20 +636,23 @@ int genome_feature_unit_test(Error *err)
   GenomeFeatureType *type;
   GenomeNode *gf;
   Range range;
+  Str *seqid;
   int had_err = 0;
 
   error_check(err);
 
+  seqid = str_new_cstr("seqid");
   feature_type_factory = feature_type_factory_builtin_new();
   type = feature_type_factory_create_gft(feature_type_factory, "gene");
   range.start = 1;
   range.end = 1000;
-  gf = genome_feature_new(type, range, STRAND_FORWARD);
+  gf = genome_feature_new(seqid, type, range, STRAND_FORWARD);
 
   ensure(had_err, !genome_feature_score_is_defined((GenomeFeature*) gf));
 
   genome_node_delete(gf);
   feature_type_factory_delete(feature_type_factory);
+  str_delete(seqid);
 
   return had_err;
 }

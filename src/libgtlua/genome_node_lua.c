@@ -33,23 +33,27 @@ static int genome_feature_lua_new(lua_State *L)
   GenomeFeatureType *type;
   Range *range;
   Strand strand;
-  const char *type_str, *strand_str;
+  const char *seqid, *type_str, *strand_str;
   size_t length;
+  Str *seqid_str;
   assert(L);
   /* get/check parameters */
-  type_str = luaL_checkstring(L, 1);
+  seqid = luaL_checkstring(L, 1);
+  type_str = luaL_checkstring(L, 2);
   feature_type_factory = lua_get_feature_type_factory_from_registry(L);
   assert(feature_type_factory);
   type = feature_type_factory_create_gft(feature_type_factory, type_str);
-  luaL_argcheck(L, type, 1, "invalid feature type");
-  range = check_range(L, 2);
-  strand_str = luaL_checklstring(L, 3, &length);
-  luaL_argcheck(L, length == 1, 3, "strand string must have length 1");
+  luaL_argcheck(L, type, 2, "invalid feature type");
+  range = check_range(L, 3);
+  strand_str = luaL_checklstring(L, 4, &length);
+  luaL_argcheck(L, length == 1, 4, "strand string must have length 1");
   luaL_argcheck(L, (strand = strand_get(strand_str[0])) != NUM_OF_STRAND_TYPES,
-                3, "invalid strand");
+                4, "invalid strand");
   /* construct object */
   gf = lua_newuserdata(L, sizeof (GenomeNode*));
-  *gf = genome_feature_new(type, *range, strand);
+  seqid_str = str_new_cstr(seqid);
+  *gf = genome_feature_new(seqid_str, type, *range, strand);
+  str_delete(seqid_str);
   assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
   lua_setmetatable(L, -2);
@@ -99,18 +103,6 @@ static int genome_node_lua_get_seqid(lua_State *L)
   else
     lua_pushnil(L);
   return 1;
-}
-
-static int genome_node_lua_set_seqid(lua_State *L)
-{
-  const char *seqid;
-  Str *seqid_str;
-  GenomeNode **gn = check_genome_node(L, 1);
-  seqid = luaL_checkstring(L, 2);
-  seqid_str = str_new_cstr(seqid);
-  genome_node_set_seqid(*gn, seqid_str);
-  str_delete(seqid_str);
-  return 0;
 }
 
 static int genome_feature_lua_get_strand(lua_State *L)
@@ -331,7 +323,6 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_filename", genome_node_lua_get_filename },
   { "get_range", genome_node_lua_get_range },
   { "get_seqid", genome_node_lua_get_seqid },
-  { "set_seqid", genome_node_lua_set_seqid },
   { "get_strand", genome_feature_lua_get_strand },
   { "get_source", genome_feature_lua_get_source },
   { "set_source", genome_feature_lua_set_source },

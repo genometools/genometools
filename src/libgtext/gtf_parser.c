@@ -149,8 +149,8 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
                                           array_get_first(genome_node_array),
                                           gft_mRNA);
     assert(mRNA_type);
-    mRNA_node = genome_feature_new(mRNA_type, mRNA_range, mRNA_strand);
-    genome_node_set_seqid(mRNA_node, mRNA_seqid);
+    mRNA_node = genome_feature_new(mRNA_seqid, mRNA_type, mRNA_range,
+                                   mRNA_strand);
 
     /* register children */
     for (i = 0; i < array_size(genome_node_array); i++) {
@@ -201,8 +201,8 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
 
     gene_type = genome_feature_create_gft((GenomeFeature*) gn, gft_gene);
     assert(gene_type);
-    gene_node = genome_feature_new(gene_type, gene_range, gene_strand);
-    genome_node_set_seqid(gene_node, gene_seqid);
+    gene_node = genome_feature_new(gene_seqid, gene_type, gene_range,
+                                   gene_strand);
 
     /* register children */
     for (i = 0; i < array_size(mRNAs); i++) {
@@ -437,11 +437,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       }
       assert(genome_node_array);
 
-      /* construct the new feature */
-      gn = genome_feature_new(gff_feature_type, range, strand_value);
-      genome_node_set_origin(gn, filenamestr, line_number);
-
-      /* set seqid */
+      /* get seqid */
       seqid_str = hashmap_get(parser->seqid_to_str_mapping, seqname);
       if (!seqid_str) {
         seqid_str = str_new_cstr(seqname);
@@ -449,7 +445,10 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
                     seqid_str);
       }
       assert(seqid_str);
-      genome_node_set_seqid(gn, seqid_str);
+
+      /* construct the new feature */
+      gn = genome_feature_new(seqid_str, gff_feature_type, range, strand_value);
+      genome_node_set_origin(gn, filenamestr, line_number);
 
       /* set source */
       source_str = hashmap_get(parser->source_to_str_mapping, source);

@@ -223,11 +223,11 @@ int block_unit_test(Error *err)
   GenomeNode *gn1, *gn2;
   Element *e1, *e2;
   Block * b;
-  Str *caption1;
-  Str *caption2;
+  Str *seqid, *caption1, *caption2;
   error_check(err);
 
   feature_type_factory = feature_type_factory_builtin_new();
+  seqid = str_new_cstr("seqid");
   caption1 = str_new_cstr("foo");
   caption2 = str_new_cstr("bar");
 
@@ -238,9 +238,9 @@ int block_unit_test(Error *err)
   r2.end = 50UL;
 
   gft = feature_type_factory_create_gft(feature_type_factory, gft_gene);
-  gn1 = genome_feature_new(gft, r1, STRAND_FORWARD);
+  gn1 = genome_feature_new(seqid, gft, r1, STRAND_FORWARD);
   gft = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn2 = genome_feature_new(gft, r2, STRAND_FORWARD);
+  gn2 = genome_feature_new(seqid, gft, r2, STRAND_FORWARD);
 
   e1 = element_new(gn1);
   e2 = element_new(gn2);
@@ -274,6 +274,7 @@ int block_unit_test(Error *err)
   ensure(had_err, (STRAND_FORWARD == s));
 
   str_delete(caption2);
+  str_delete(seqid);
   element_delete(e1);
   element_delete(e2);
   block_delete(b);

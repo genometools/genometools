@@ -101,10 +101,12 @@ int image_info_unit_test(Error *err)
   GenomeFeatureType *gft;
   ImageInfo *ii;
   unsigned long i;
+  Str *seqid;
   int had_err = 0;
   assert(err);
   error_check(err);
 
+  seqid = str_new_cstr("seqid");
   ii = image_info_new();
   ftf = feature_type_factory_builtin_new();
   gft = feature_type_factory_create_gft(ftf, "gene");
@@ -115,7 +117,7 @@ int image_info_unit_test(Error *err)
     unsigned long rbase;
     rbase = rand_max(10);
     Range r = {rbase,rbase+rand_max(20)};
-    gfs[i] = (GenomeNode*) genome_feature_new(gft, r, STRAND_FORWARD);
+    gfs[i] = (GenomeNode*) genome_feature_new(seqid, gft, r, STRAND_FORWARD);
     rms[i] = recmap_create(rand_max_double(100.0),
                            rand_max_double(100.0),
                            rand_max_double(100.0),
@@ -130,5 +132,7 @@ int image_info_unit_test(Error *err)
 
   image_info_delete(ii);
   feature_type_factory_delete(ftf);
+  str_delete(seqid);
+
   return had_err;
 }

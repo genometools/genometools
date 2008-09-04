@@ -299,11 +299,10 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
   for (i = exons_from_sa_index; i < array_size(exons_from_sa); i++) {
     exons_from_sa_feature = *(GenomeFeature**) array_get(exons_from_sa, i);
     new_feature =
-      genome_feature_new(exon_type,
+      genome_feature_new(seqid, exon_type,
                          genome_node_get_range((GenomeNode*)
                                                exons_from_sa_feature),
                          gene_strand);
-    genome_node_set_seqid(new_feature, seqid);
     if (genome_feature_score_is_defined(exons_from_sa_feature)) {
       genome_feature_set_score((GenomeFeature*) new_feature,
                                genome_feature_get_score(exons_from_sa_feature));
@@ -367,13 +366,12 @@ static GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
 
   /* create the mRNA feature itself */
   strand = csa_splice_form_strand(csa_splice_form),
-  mRNA_feature = genome_feature_new(mRNA_type,
-                                 csa_splice_form_genomic_range(csa_splice_form),
-                                    csa_splice_form_strand(csa_splice_form));
   seqid = genome_node_get_seqid(*(GenomeNode**)
                                csa_splice_form_get_representative(
                                                               csa_splice_form));
-  genome_node_set_seqid(mRNA_feature, seqid);
+  mRNA_feature = genome_feature_new(seqid, mRNA_type,
+                                 csa_splice_form_genomic_range(csa_splice_form),
+                                    csa_splice_form_strand(csa_splice_form));
   genome_feature_set_source(mRNA_feature, gt_csa_source_str);
   mRNA_set_target_attribute((GenomeFeature*) mRNA_feature, csa_splice_form);
 
@@ -410,12 +408,10 @@ static GenomeNode* create_gene_feature(CSAGene *csa_gene,
   assert(csa_gene && gt_csa_source_str);
 
   /* create top-level gene feature */
-  gene_feature = genome_feature_new(gene_type, csa_gene_genomic_range(csa_gene),
+  gene_feature = genome_feature_new(genome_node_get_seqid(*(GenomeNode**)
+                                         csa_gene_get_representative(csa_gene)),
+                                    gene_type, csa_gene_genomic_range(csa_gene),
                                     csa_gene_strand(csa_gene));
-  genome_node_set_seqid(gene_feature,
-                        genome_node_get_seqid(*(GenomeNode**)
-                                              csa_gene_get_representative(
-                                                                    csa_gene)));
   genome_feature_set_source(gene_feature, gt_csa_source_str);
 
   /* create mRNA features representing the splice forms */

@@ -33,7 +33,8 @@ typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
 
 const GenomeNodeClass* genome_feature_class(void);
-GenomeNode*            genome_feature_new(GenomeFeatureType*, Range, Strand);
+GenomeNode*            genome_feature_new(Str *seqid, GenomeFeatureType*, Range,
+                                          Strand);
 GenomeNode*            genome_feature_new_pseudo(GenomeFeature*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
 GenomeNode*            genome_feature_new_standard_gene(FeatureTypeFactory*);

@@ -126,6 +126,7 @@ int element_unit_test(Error *err)
   Range r1, r2, r_temp;
   GenomeNode *gn, *gn2;
   Element *e, *e2, *e3;
+  Str *seqid;
   int had_err = 0;
   error_check(err);
 
@@ -137,9 +138,10 @@ int element_unit_test(Error *err)
   r2.start = 20UL;
   r2.end = 50UL;
 
+  seqid = str_new_cstr("seqid");
   type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn = genome_feature_new(type, r1, STRAND_BOTH);
-  gn2 = genome_feature_new(type, r2, STRAND_BOTH);
+  gn = genome_feature_new(seqid, type, r1, STRAND_BOTH);
+  gn2 = genome_feature_new(seqid, type, r2, STRAND_BOTH);
 
   e = element_new(gn);
   e2 = element_new(gn);
@@ -169,6 +171,7 @@ int element_unit_test(Error *err)
   genome_node_delete(gn);
   genome_node_delete(gn2);
   feature_type_factory_delete(feature_type_factory);
+  str_delete(seqid);
 
   return had_err;
 

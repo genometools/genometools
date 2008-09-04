@@ -23,7 +23,8 @@
 
 /* exports the GenomeNode interface and its implementors to Lua:
 
-   -- Returns a new genome feature of <type> spanning <range> on <strand>.
+   -- Returns a new genome feature refering to sequence with id <seqid> of
+   -- <type> spanning <range> on <strand>.
    function genome_feature_new(type, range, strand)
 
    -- Returns a new sequence region for sequence id <seqid> spanning <range>.
@@ -38,9 +39,6 @@
 
    -- Returns the sequence id of <genome_node>.
    function genome_node:get_seqid()
-
-   -- Set the sequence id of <genome_node> to <seqid>.
-   function genome_node:set_seqid(seqid)
 
    -- Returns the strand of <genome_feature>.
    function genome_feature:get_strand()

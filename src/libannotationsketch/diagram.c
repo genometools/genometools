@@ -680,23 +680,17 @@ int diagram_unit_test(Error *err)
   sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs);
   sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs);
 
-  gn1 = genome_feature_new(gene_type, r1, STRAND_UNKNOWN);
-  genome_node_set_seqid((GenomeNode*) gn1, seqid1);
+  gn1 = genome_feature_new(seqid1, gene_type, r1, STRAND_UNKNOWN);
 
-  gn2 = genome_feature_new(gene_type, r4, STRAND_UNKNOWN);
-  genome_node_set_seqid((GenomeNode*) gn2, seqid2);
+  gn2 = genome_feature_new(seqid2, gene_type, r4, STRAND_UNKNOWN);
 
-  ex1 = genome_feature_new(exon_type, r2, STRAND_UNKNOWN);
-  genome_node_set_seqid((GenomeNode*) ex1, seqid1);
+  ex1 = genome_feature_new(seqid1, exon_type, r2, STRAND_UNKNOWN);
 
-  ex2 = genome_feature_new(exon_type, r3, STRAND_UNKNOWN);
-  genome_node_set_seqid((GenomeNode*) ex2, seqid1);
+  ex2 = genome_feature_new(seqid1, exon_type, r3, STRAND_UNKNOWN);
 
-  ex3 = genome_feature_new(exon_type, r4, STRAND_UNKNOWN);
-  genome_node_set_seqid((GenomeNode*) ex3, seqid2);
+  ex3 = genome_feature_new(seqid2, exon_type, r4, STRAND_UNKNOWN);
 
-  cds1 = genome_feature_new(CDS_type, r5, STRAND_UNKNOWN);
-  genome_node_set_seqid((GenomeNode*) cds1, seqid2);
+  cds1 = genome_feature_new(seqid2, CDS_type, r5, STRAND_UNKNOWN);
 
   /* determine the structure of our feature tree */
   genome_node_is_part_of_genome_node(gn1, ex1);

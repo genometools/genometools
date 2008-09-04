@@ -130,11 +130,10 @@ static void create_CDS_features_for_ORF(Range orf, CDSVisitor *v,
                            ? orf.end : orf.start) + 1;
   cds_type = genome_feature_create_gft((GenomeFeature*) gn, gft_CDS);
   assert(cds_type);
-  cds_feature = genome_feature_new(cds_type, cds,
+  cds_feature = genome_feature_new(genome_node_get_seqid(gn), cds_type, cds,
                                    genome_feature_get_strand((GenomeFeature*)
                                                              gn));
   genome_feature_set_source(cds_feature, v->source);
-  genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
   genome_feature_set_phase(cds_feature, PHASE_ZERO);
   /* all CDS features in between */
   for (i = strand == STRAND_FORWARD ? orf.start : orf.end;
@@ -152,10 +151,9 @@ static void create_CDS_features_for_ORF(Range orf, CDSVisitor *v,
                                  ? orf.start : orf.end) + 1;
       cds.end = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
                                ? orf.end : orf.start) + 1;
-      cds_feature = genome_feature_new(cds_type, cds,
+      cds_feature = genome_feature_new(genome_node_get_seqid(gn), cds_type, cds,
                                 genome_feature_get_strand((GenomeFeature*) gn));
       genome_feature_set_source(cds_feature, v->source);
-      genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
       /* XXX correct this */
       genome_feature_set_phase(cds_feature, (Phase)
                                splicedseq_map(v->splicedseq, orf.start) % 3);
