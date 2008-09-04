@@ -254,17 +254,15 @@ int gff3parser_parse_target_attributes(const char *values,
   return had_err;
 }
 
-static int set_seqid(GenomeNode *genome_feature, const char *seqid, Range range,
-                     AutomaticSequenceRegion **auto_sr, GFF3Parser *parser,
-                     const char *filename, unsigned int line_number, Error *err)
+static int get_seqid_str(Str **seqid_str, const char *seqid, Range range,
+                         AutomaticSequenceRegion **auto_sr, GFF3Parser *parser,
+                         const char *filename, unsigned int line_number,
+                         Error *err)
 {
-  bool seqid_str_created = false;
   SimpleSequenceRegion *ssr;
-  Str *seqid_str = NULL;
   int had_err = 0;
 
   error_check(err);
-  assert(genome_feature);
 
   ssr = hashmap_get(parser->seqid_to_ssr_mapping, seqid);
   if (!ssr) {
@@ -278,15 +276,14 @@ static int set_seqid(GenomeNode *genome_feature, const char *seqid, Range range,
               "automatically", seqid, line_number, filename,
               GFF_SEQUENCE_REGION);
       *auto_sr = automatic_sequence_region_new();
-      seqid_str = str_new_cstr(seqid);
-      seqid_str_created = true;
-      (*auto_sr)->sequence_region = sequence_region_new(seqid_str, range);
-      hashmap_add(parser->undefined_sequence_regions, str_get(seqid_str),
+      *seqid_str = str_new_cstr(seqid);
+      (*auto_sr)->sequence_region = sequence_region_new(*seqid_str, range);
+      hashmap_add(parser->undefined_sequence_regions, str_get(*seqid_str),
                   *auto_sr);
     }
     else {
       /* get seqid string */
-      seqid_str = genome_node_get_seqid((*auto_sr)->sequence_region);
+      *seqid_str = str_ref(genome_node_get_seqid((*auto_sr)->sequence_region));
       /* update the range of the sequence region */
       genome_node_set_range((*auto_sr)->sequence_region,
                             range_join(range,
@@ -295,7 +292,6 @@ static int set_seqid(GenomeNode *genome_feature, const char *seqid, Range range,
     }
   }
   else {
-    seqid_str = ssr->seqid_str;
     /* perform range check */
     if (!range_contains(ssr->range, range)) {
       error_set(err, "range (%lu,%lu) of feature on line %u in file \"%s\" "
@@ -305,13 +301,9 @@ static int set_seqid(GenomeNode *genome_feature, const char *seqid, Range range,
                 ssr->line_number);
       had_err = -1;
     }
+    else
+      *seqid_str = str_ref(ssr->seqid_str);
   }
-  if (!had_err) {
-    assert(seqid_str);
-    genome_node_set_seqid(genome_feature, seqid_str);
-  }
-  if (seqid_str_created)
-    str_delete(seqid_str);
 
   return had_err;
 }
@@ -972,7 +964,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   GenomeFeatureType *gft = NULL;
   Splitter *splitter;
   AutomaticSequenceRegion *auto_sr = NULL;
-  Str *changed_seqid = NULL;
+  Str *seqid_str = NULL, *changed_seqid = NULL;
   Strand strand_value;
   float score_value;
   Phase phase_value;
@@ -1045,16 +1037,17 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   if (!had_err)
     had_err = parse_phase(&phase_value, phase, line_number, filename, err);
 
+  /* get seqid */
+  if (!had_err) {
+    had_err = get_seqid_str(&seqid_str, seqid, range, &auto_sr, parser,
+                            filename, line_number, err);
+  }
+
   /* create the feature */
   if (!had_err) {
     genome_feature = genome_feature_new(gft, range, strand_value);
+    genome_node_set_seqid(genome_feature, seqid_str);
     genome_node_set_origin(genome_feature, filenamestr, line_number);
-  }
-
-  /* set seqid */
-  if (!had_err) {
-    had_err = set_seqid(genome_feature, seqid, range, &auto_sr, parser,
-                        filename, line_number, err);
   }
 
   /* set source */
@@ -1085,6 +1078,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
     queue_add(genome_nodes, gn);
 
   /* free */
+  str_delete(seqid_str);
   str_delete(changed_seqid);
   splitter_delete(splitter);
 
