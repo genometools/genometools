@@ -74,17 +74,16 @@ end
 local function create_gene_from_mRNA(mRNA)
   assert(mRNA)
   assert(mRNA:get_type() == "mRNA")
-  local gene = gt.genome_feature_new("gene", mRNA:get_range(),
+  local gene = gt.genome_feature_new(mRNA:get_seqid(), "gene", mRNA:get_range(),
                                      mRNA:get_strand())
-  gene:set_seqid(mRNA:get_seqid())
   gene:set_source(mRNA:get_source())
   local gni = gt.genome_node_iterator_new_direct(mRNA)
   local old_child = gni:next()
   while (old_child) do
-    local new_child = gt.genome_feature_new(old_child:get_type(),
+    local new_child = gt.genome_feature_new(old_child:get_seqid(),
+                                            old_child:get_type(),
                                             old_child:get_range(),
                                             old_child:get_strand())
-    new_child:set_seqid(old_child:get_seqid())
     new_child:set_source(old_child:get_source())
     gene:is_part_of_genome_node(new_child)
     old_child = gni:next()
