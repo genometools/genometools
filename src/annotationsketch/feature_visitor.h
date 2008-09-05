@@ -15,19 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_STREAM_H
-#define FEATURE_STREAM_H
+#ifndef FEATURE_VISITOR_H
+#define FEATURE_VISITOR_H
 
-#include <stdio.h>
-#include "libgtext/genome_stream.h"
-#include "libannotationsketch/feature_index.h"
+/* implements the ``genome visitor'' interface */
+typedef struct FeatureVisitor FeatureVisitor;
 
-/* implements the ``genome_stream'' interface */
-typedef struct FeatureStream FeatureStream;
+#include "annotationsketch/feature_index.h"
+#include "libgtext/genome_visitor.h"
 
-const GenomeStreamClass* feature_stream_class(void);
-
-/* create a FeatureStream which writes to FeatureIndex */
-GenomeStream*            feature_stream_new(GenomeStream*, FeatureIndex*);
+const GenomeVisitorClass* feature_visitor_class(void);
+GenomeVisitor*            feature_visitor_new(FeatureIndex*);
 
 #endif

@@ -20,7 +20,7 @@
 #define STYLE_WITH_STATE_H
 
 #include "lua.h"
-#include "libannotationsketch/style.h"
+#include "annotationsketch/style.h"
 
 /* Creates a Style object wich reuses the given Lua state. */
 Style*        style_new_with_state(lua_State*);

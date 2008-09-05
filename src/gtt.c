@@ -84,13 +84,13 @@
 #include "tools/gt_uniquesub.h"
 
 #ifdef LIBANNOTATIONSKETCH
-#include "libannotationsketch/block.h"
-#include "libannotationsketch/diagram.h"
-#include "libannotationsketch/feature_index.h"
-#include "libannotationsketch/gt_sketch.h"
-#include "libannotationsketch/image_info.h"
-#include "libannotationsketch/track.h"
-#include "libannotationsketch/recmap.h"
+#include "annotationsketch/block.h"
+#include "annotationsketch/diagram.h"
+#include "annotationsketch/feature_index.h"
+#include "annotationsketch/gt_sketch.h"
+#include "annotationsketch/image_info.h"
+#include "annotationsketch/track.h"
+#include "annotationsketch/recmap.h"
 #endif
 
 Toolbox* gtt_tools(void)

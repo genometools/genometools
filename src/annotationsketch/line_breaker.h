@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,21 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef IMAGE_INFO_H
-#define IMAGE_INFO_H
+#ifndef LINE_BREAKER_H
+#define LINE_BREAKER_H
 
-#include "libgtcore/error.h"
-#include "libannotationsketch/recmap.h"
+/* The LineBreaker interface. */
+typedef struct LineBreakerClass LineBreakerClass;
+typedef struct LineBreaker LineBreaker;
 
-typedef struct ImageInfo ImageInfo;
+#include "annotationsketch/block.h"
+#include "annotationsketch/line.h"
 
-ImageInfo*    image_info_new();
-void          image_info_delete(ImageInfo*);
-unsigned int  image_info_get_height(ImageInfo*);
-void          image_info_set_height(ImageInfo*, unsigned int);
-void          image_info_add_recmap(ImageInfo*, RecMap*); /* takes ownership */
-unsigned long image_info_num_of_recmaps(ImageInfo*);
-RecMap*       image_info_get_recmap(ImageInfo*, unsigned long);
-void          image_info_get_recmap_ptr(ImageInfo*, RecMap*, unsigned long);
-int           image_info_unit_test(Error*);
+LineBreaker* line_breaker_ref(LineBreaker*);
+bool         line_breaker_line_is_occupied(LineBreaker *lb,
+                                           Line *line, Block *block);
+void         line_breaker_register_block(LineBreaker *lb,
+                                         Line *line, Block *block);
+void         line_breaker_delete(LineBreaker*);
+
 #endif

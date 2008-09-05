@@ -20,20 +20,20 @@
 #ifndef ANNOTATIONSKETCH_H
 #define ANNOTATIONSKETCH_H
 
-/* The AnnotationSketch (libannotationsketch) header */
-#include "libannotationsketch/block.h"
-#include "libannotationsketch/canvas.h"
-#include "libannotationsketch/color.h"
-#include "libannotationsketch/diagram.h"
-#include "libannotationsketch/element.h"
-#include "libannotationsketch/feature_index.h"
-#include "libannotationsketch/feature_stream.h"
-#include "libannotationsketch/feature_visitor.h"
-#include "libannotationsketch/graphics.h"
-#include "libannotationsketch/image_info.h"
-#include "libannotationsketch/line.h"
-#include "libannotationsketch/recmap.h"
-#include "libannotationsketch/style.h"
-#include "libannotationsketch/track.h"
+/* The AnnotationSketch  header */
+#include "annotationsketch/block.h"
+#include "annotationsketch/canvas.h"
+#include "annotationsketch/color.h"
+#include "annotationsketch/diagram.h"
+#include "annotationsketch/element.h"
+#include "annotationsketch/feature_index.h"
+#include "annotationsketch/feature_stream.h"
+#include "annotationsketch/feature_visitor.h"
+#include "annotationsketch/graphics.h"
+#include "annotationsketch/image_info.h"
+#include "annotationsketch/line.h"
+#include "annotationsketch/recmap.h"
+#include "annotationsketch/style.h"
+#include "annotationsketch/track.h"
 
 #endif

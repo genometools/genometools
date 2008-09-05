@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,16 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_VISITOR_H
-#define FEATURE_VISITOR_H
+#ifndef LUASTYLE_H
+#define LUASTYLE_H
 
-/* implements the ``genome visitor'' interface */
-typedef struct FeatureVisitor FeatureVisitor;
+#include "lua.h"
+#include "annotationsketch/style.h"
 
-#include "libgtext/genome_visitor.h"
-#include "libannotationsketch/feature_index.h"
-
-const GenomeVisitorClass* feature_visitor_class(void);
-GenomeVisitor*            feature_visitor_new(FeatureIndex*);
+void   lua_put_style_in_registry(lua_State*, Style*);
+Style* lua_get_style_from_registry(lua_State*);
 
 #endif

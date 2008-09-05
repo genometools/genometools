@@ -20,12 +20,12 @@
 #include <float.h>
 #include <limits.h>
 #include "lauxlib.h"
+#include "annotationsketch/image_info.h"
+#include "annotationsketch/recmap.h"
 #include "libgtcore/error.h"
 #include "libgtext/luahelper.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/image_info_lua.h"
-#include "libannotationsketch/image_info.h"
-#include "libannotationsketch/recmap.h"
 
 static int imageinfo_lua_new(lua_State *L)
 {

@@ -18,12 +18,12 @@
 #ifdef LIBANNOTATIONSKETCH
 
 #include "lauxlib.h"
+#include "annotationsketch/canvas.h"
+#include "annotationsketch/luastyle.h"
 #include "libgtcore/error.h"
 #include "libgtext/luahelper.h"
 #include "libgtlua/canvas_lua.h"
 #include "libgtlua/image_info_lua.h"
-#include "libannotationsketch/canvas.h"
-#include "libannotationsketch/luastyle.h"
 
 static int canvas_lua_new_generic(lua_State *L, GraphicsOutType t)
 {

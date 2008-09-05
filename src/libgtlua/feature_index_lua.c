@@ -16,11 +16,11 @@
 */
 
 #include "lauxlib.h"
+#include "annotationsketch/feature_index.h"
 #include "libgtext/luahelper.h"
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/range_lua.h"
-#include "libannotationsketch/feature_index.h"
 
 static int feature_index_lua_new(lua_State *L)
 {

@@ -19,9 +19,9 @@
 #ifndef STYLE_H
 #define STYLE_H
 
+#include "annotationsketch/color.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
-#include "libannotationsketch/color.h"
 #include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_node.h"
 

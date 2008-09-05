@@ -22,12 +22,12 @@
 /* An element has a type, a range and a config object. */
 typedef struct Element Element;
 
+#include "annotationsketch/canvas.h"
+#include "annotationsketch/drawing_range.h"
 #include "libgtcore/range.h"
 #include "libgtcore/strand.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_feature_type.h"
-#include "libannotationsketch/canvas.h"
-#include "libannotationsketch/drawing_range.h"
 
 /* Creates a complete new Element object. */
 Element*           element_new(GenomeNode*);

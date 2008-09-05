@@ -20,16 +20,16 @@
 
 typedef struct Canvas Canvas;
 
+#include "annotationsketch/block.h"
+#include "annotationsketch/diagram.h"
+#include "annotationsketch/drawing_range.h"
+#include "annotationsketch/element.h"
+#include "annotationsketch/graphics.h"
+#include "annotationsketch/line.h"
+#include "annotationsketch/image_info.h"
+#include "annotationsketch/style.h"
+#include "annotationsketch/track.h"
 #include "libgtcore/range.h"
-#include "libannotationsketch/block.h"
-#include "libannotationsketch/diagram.h"
-#include "libannotationsketch/drawing_range.h"
-#include "libannotationsketch/element.h"
-#include "libannotationsketch/graphics.h"
-#include "libannotationsketch/line.h"
-#include "libannotationsketch/image_info.h"
-#include "libannotationsketch/style.h"
-#include "libannotationsketch/track.h"
 
 /* Create a new Canvas object with given <output_type> and <width> using the
    configuration given in <style>. The optional <image_info> is filled when

@@ -27,10 +27,10 @@ typedef struct TracklineInfo {
                 total_captionlines;
 } TracklineInfo;
 
-#include "libannotationsketch/canvas.h"
-#include "libannotationsketch/style.h"
-#include "libannotationsketch/block.h"
-#include "libannotationsketch/feature_index.h"
+#include "annotationsketch/canvas.h"
+#include "annotationsketch/style.h"
+#include "annotationsketch/block.h"
+#include "annotationsketch/feature_index.h"
 #include "libgtcore/array.h"
 #include "libgtcore/range.h"
 #include "libgtcore/hashmap.h"

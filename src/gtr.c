@@ -41,8 +41,8 @@
 #include "libgtlua/gt_lua.h"
 
 #ifdef LIBANNOTATIONSKETCH
-#include "libannotationsketch/luastyle.h"
-#include "libannotationsketch/style_with_state.h"
+#include "annotationsketch/luastyle.h"
+#include "annotationsketch/style_with_state.h"
 #endif
 
 struct GTR {

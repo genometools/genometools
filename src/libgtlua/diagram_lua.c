@@ -18,16 +18,16 @@
 #ifdef LIBANNOTATIONSKETCH
 
 #include "lauxlib.h"
+#include "annotationsketch/canvas.h"
+#include "annotationsketch/diagram.h"
+#include "annotationsketch/feature_index.h"
+#include "annotationsketch/luastyle.h"
 #include "libgtext/luahelper.h"
 #include "libgtlua/canvas_lua.h"
 #include "libgtlua/diagram_lua.h"
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/range_lua.h"
-#include "libannotationsketch/canvas.h"
-#include "libannotationsketch/diagram.h"
-#include "libannotationsketch/feature_index.h"
-#include "libannotationsketch/luastyle.h"
 
 static int diagram_lua_new(lua_State *L)
 {

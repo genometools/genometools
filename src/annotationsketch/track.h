@@ -16,25 +16,29 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LINE_H
-#define LINE_H
+#ifndef TRACK_H
+#define TRACK_H
 
-/* A line contains block objects. */
-typedef struct Line Line;
+/* A track has a title and a type und contains line objects. */
+typedef struct Track Track;
 
+#include "annotationsketch/canvas.h"
+#include "annotationsketch/line.h"
+#include "annotationsketch/line_breaker.h"
+#include "annotationsketch.h"
 #include "libgtcore/array.h"
-#include "libgtcore/range.h"
+#include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_node.h"
-#include "libannotationsketch/block.h"
-#include "libannotationsketch/canvas.h"
-#include "libannotationsketch/drawing_range.h"
 
-Line*  line_new(void);
-void   line_insert_block(Line*, Block*); /* takes ownership */
-bool   line_has_captions(const Line*);
-Array* line_get_blocks(Line*);
-int    line_sketch(Line*, Canvas*);
-int    line_unit_test(Error*);
-void   line_delete(Line*);
+Track*        track_new(Str *title, unsigned long max_num_lines,
+                        bool split_lines, LineBreaker*);
+void          track_insert_block(Track*, Block*);
+Str*          track_get_title(const Track*);
+unsigned long track_get_number_of_lines(const Track*);
+unsigned long track_get_number_of_lines_with_captions(const Track *track);
+unsigned long track_get_number_of_discarded_blocks(Track *track);
+int           track_sketch(Track*, Canvas*);
+int           track_unit_test(Error*);
+void          track_delete(Track*);
 
 #endif

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,13 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LUASTYLE_H
-#define LUASTYLE_H
+#ifndef FEATURE_STREAM_H
+#define FEATURE_STREAM_H
 
-#include "lua.h"
-#include "libannotationsketch/style.h"
+#include <stdio.h>
+#include "annotationsketch/feature_index.h"
+#include "libgtext/genome_stream.h"
 
-void   lua_put_style_in_registry(lua_State*, Style*);
-Style* lua_get_style_from_registry(lua_State*);
+/* implements the ``genome_stream'' interface */
+typedef struct FeatureStream FeatureStream;
+
+const GenomeStreamClass* feature_stream_class(void);
+
+/* create a FeatureStream which writes to FeatureIndex */
+GenomeStream*            feature_stream_new(GenomeStream*, FeatureIndex*);
 
 #endif

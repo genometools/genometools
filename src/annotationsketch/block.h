@@ -23,13 +23,13 @@
    contains element objects. */
 typedef struct Block Block;
 
+#include "annotationsketch/canvas.h"
+#include "annotationsketch/diagram.h"
+#include "annotationsketch/element.h"
 #include "libgtcore/dlist.h"
 #include "libgtcore/range.h"
 #include "libgtcore/array.h"
 #include "libgtext/genome_node.h"
-#include "libannotationsketch/canvas.h"
-#include "libannotationsketch/diagram.h"
-#include "libannotationsketch/element.h"
 
 Block*             block_new(void);
 /* Create a new Block object, setting block parameters (such as strand, range)

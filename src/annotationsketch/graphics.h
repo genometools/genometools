@@ -48,7 +48,7 @@ typedef enum {
 
 typedef struct Graphics Graphics;
 
-#include "libannotationsketch/color.h"
+#include "annotationsketch/color.h"
 #include "libgtcore/error.h"
 
 /* Create a new Graphics object, which is an abstraction of a drawing surface on
