@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MATCH_H
-#define MATCH_H
+#ifndef MATCHING_H
+#define MATCHING_H
 
 /* The GenomeTools matching library  header */
 #include "match/esa-seqread.h"
