@@ -336,7 +336,8 @@ ifeq ($(libannotationsketch),yes)
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   STEST_FLAGS += -libannotationsketch
-  ANNOTATIONSKETCH_EXAMPLES := bin/sketch_constructed bin/sketch_parsed
+# XXX
+# ANNOTATIONSKETCH_EXAMPLES := bin/sketch_constructed bin/sketch_parsed
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
 endif
