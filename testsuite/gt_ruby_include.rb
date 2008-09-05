@@ -54,7 +54,7 @@ if $arguments["libannotationsketch"] then
   Name "gtruby: libannotationsketch bindings (config)"
   Keywords "gt_ruby"
   Test do
-    run_ruby "#{$testdata}gtruby/config.rb #{$cur}/gtdata/config/view.lua"
+    run_ruby "#{$testdata}gtruby/config.rb #{$cur}/gtdata/sketch/default.style"
   end
 
   Name "gtruby: show_seqids"

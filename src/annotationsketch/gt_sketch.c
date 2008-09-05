@@ -290,7 +290,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
     str_append_cstr_nt(prog, argv[0], cstr_length_up_to_char(argv[0], ' '));
     style_file = gtdata_get_path(str_get(prog), err);
     str_delete(prog);
-    str_append_cstr(style_file, "/config/view.lua");
+    str_append_cstr(style_file, "/sketch/default.style");
     if (!(sty = style_new(arguments.verbose, err)))
       had_err = -1;
     if (!had_err && file_exists(str_get(style_file)))

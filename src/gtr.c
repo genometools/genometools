@@ -99,7 +99,7 @@ GTR* gtr_new(Error *err)
       had_err = -1;
   }
   if (!had_err) {
-    str_append_cstr(style_file, "/config/view.lua");
+    str_append_cstr(style_file, "/sketch/default.style");
     if (file_exists(str_get(style_file))) {
       if (style_load_file(gtr->style, str_get(style_file), err))
         had_err = -1;
