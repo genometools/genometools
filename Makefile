@@ -48,7 +48,8 @@ GT_LDFLAGS:=-Llib
 STEST_FLAGS:=
 EXP_LDFLAGS+=$(foreach dir, \
 	$(shell test -d /usr/local/lib && echo /usr/local/lib ; \
-	test -d /usr/X11R6/lib && echo /usr/X11R6/lib),-L$(dir))
+	        test -d /usr/X11R6/lib && echo /usr/X11R6/lib ; \
+                test -d /opt/local/lib && echo /opt/local/lib),-L$(dir))
 BUILDSTAMP:=$(shell date +'"%Y-%m-%d %H:%M:%S"')
 
 # try to set RANLIB automatically
@@ -258,7 +259,8 @@ LIBGENOMETOOLS_DIRS:= src/core \
 ifeq ($(libannotationsketch),yes)
   GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lcairo
   EXP_CPPFLAGS += -DLIBANNOTATIONSKETCH
-  GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
+  GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo \
+                 -I/opt/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   STEST_FLAGS += -libannotationsketch
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
