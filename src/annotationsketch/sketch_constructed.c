@@ -91,7 +91,7 @@ static void draw_example_features(Array *features, const char *style_file,
   canvas = canvas_new(style, GRAPHICS_PNG, 800 /* width */, NULL);
 
   /* sketch diagram on canvas */
-  diagram_render(diagram, canvas);
+  diagram_sketch(diagram, canvas);
 
   /* write canvas to file */
   if (canvas_to_file(canvas, output_file, err))

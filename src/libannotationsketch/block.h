@@ -54,7 +54,7 @@ Strand             block_get_strand(const Block*);
 void               block_set_type(Block*, GenomeFeatureType*);
 GenomeFeatureType* block_get_type(const Block*);
 unsigned long      block_get_size(const Block*);
-int                block_render(Block*, Canvas*);
+int                block_sketch(Block*, Canvas*);
 int                block_compare(const Block*, const Block*);
 int                block_unit_test(Error*);
 void               block_delete(Block*);

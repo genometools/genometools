@@ -42,7 +42,7 @@ Strand             element_get_strand(const Element*);
 GenomeNode*        element_get_node_ref(const Element*);
 bool               element_is_marked(const Element*);
 bool               elements_are_equal(const Element*, const Element*);
-int                element_render(Element*, Canvas*);
+int                element_sketch(Element*, Canvas*);
 int                element_unit_test(Error*);
 void               element_delete(Element* element);
 

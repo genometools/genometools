@@ -37,7 +37,7 @@ Str*          track_get_title(const Track*);
 unsigned long track_get_number_of_lines(const Track*);
 unsigned long track_get_number_of_lines_with_captions(const Track *track);
 unsigned long track_get_number_of_discarded_blocks(Track *track);
-int           track_render(Track*, Canvas*);
+int           track_sketch(Track*, Canvas*);
 int           track_unit_test(Error*);
 void          track_delete(Track*);
 

@@ -49,13 +49,13 @@ diagram = gt.diagram_new(feature_index, seqid, range)
 canvas = gt.canvas_new_png(800, ii)
 canvas2 = gt.canvas_new_png(800, nil)  -- nil as ImageInfo parameter must be ok
 
--- test rendering with image info
-diagram:render(canvas)
+-- test sketching with image info
+diagram:sketch(canvas)
 canvas:to_file(pngfile)
 if #(ii:get_recmaps()) ~= 16 then
   os.exit(1)
 end
 
 -- and without
-diagram:render(canvas2)
+diagram:sketch(canvas2)
 canvas2:to_file(pngfile)

@@ -43,7 +43,7 @@ config = GT::Config.new()
 diagram = GT::Diagram.new(feature_index, seqid, range, config)
 image_info = GT::ImageInfo.new()
 canvas = GT::Canvas.new(config, 800, image_info)
-diagram.render(canvas)
+diagram.sketch(canvas)
 
 image_info.each_hotspot do |x1, y1, x2, y2, gn|
   puts "x1=#{x1}, y1=#{y1}, x2=#{x2}, y2=#{y2}, gn.type=#{gn.get_type}"

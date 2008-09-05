@@ -196,7 +196,7 @@ unsigned long block_get_size(const Block *block)
   return dlist_size(block->elements);
 }
 
-int block_render(Block *block, Canvas *canvas)
+int block_sketch(Block *block, Canvas *canvas)
 {
  int had_err = 0;
  Dlistelem *delem;
@@ -208,7 +208,7 @@ int block_render(Block *block, Canvas *canvas)
  for (delem = dlist_first(block->elements); delem;
       delem = dlistelem_next(delem)) {
     Element* elem = (Element*) dlistelem_get_data(delem);
-    element_render(elem, canvas);
+    element_sketch(elem, canvas);
   }
   return had_err;
 }

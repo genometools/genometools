@@ -46,4 +46,4 @@ ii = {}
 
 diagram = gt.diagram_new(feature_index, seqid, range)
 canvas = gt.canvas_new_png(800, ii)
-diagram:render(canvas)
+diagram:sketch(canvas)

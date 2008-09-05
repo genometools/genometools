@@ -48,7 +48,7 @@ Hashmap*    diagram_get_tracks(const Diagram*);
 void        diagram_get_lineinfo(const Diagram*, TracklineInfo*);
 int         diagram_get_number_of_tracks(const Diagram*);
 /* Render <diagram> on the given <canvas>. */
-int         diagram_render(Diagram *diagram, Canvas *canvas);
+int         diagram_sketch(Diagram *diagram, Canvas *canvas);
 int         diagram_unit_test(Error*);
 void        diagram_delete(Diagram*);
 

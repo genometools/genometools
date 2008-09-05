@@ -105,7 +105,7 @@ bool elements_are_equal(const Element *e1, const Element *e2)
   return false;
 }
 
-int element_render(Element *elem, Canvas *canvas)
+int element_sketch(Element *elem, Canvas *canvas)
 {
   int had_err = 0;
   assert(elem && canvas);

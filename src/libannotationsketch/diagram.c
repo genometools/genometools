@@ -623,11 +623,11 @@ static int render_tracks(UNUSED void *key, void *value, void *data,
   UNUSED Track *track = (Track*) value;
   int had_err = 0;
   assert(tti && track);
-  had_err = track_render((Track*) value, tti->canvas);
+  had_err = track_sketch((Track*) value, tti->canvas);
   return had_err;
 }
 
-int diagram_render(Diagram *dia, Canvas *canvas)
+int diagram_sketch(Diagram *dia, Canvas *canvas)
 {
   int had_err = 0;
   TrackTraverseInfo tti;
@@ -726,7 +726,7 @@ int diagram_unit_test(Error *err)
   if (!had_err)
   {
     canvas = canvas_new(sty, GRAPHICS_PNG, 600, NULL);
-    diagram_render(dia, canvas);
+    diagram_sketch(dia, canvas);
   }
 
   if (!had_err &&
@@ -756,7 +756,7 @@ int diagram_unit_test(Error *err)
   if (!had_err &&
       !style_get_bool(dia2->style, "gene", "collapse_to_parent", false, NULL))
   {
-    diagram_render(dia2, canvas);
+    diagram_sketch(dia2, canvas);
     track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
@@ -789,7 +789,7 @@ int diagram_unit_test(Error *err)
   if (!had_err &&
       !style_get_bool(dia3->style, "gene", "collapse_to_parent", false, NULL))
   {
-    diagram_render(dia3, canvas);
+    diagram_sketch(dia3, canvas);
     track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashmap_get(dia3->tracks, str_get(track_key)));
     str_delete(track_key);

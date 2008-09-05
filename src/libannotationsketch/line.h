@@ -33,7 +33,7 @@ Line*  line_new(void);
 void   line_insert_block(Line*, Block*); /* takes ownership */
 bool   line_has_captions(const Line*);
 Array* line_get_blocks(Line*);
-int    line_render(Line*, Canvas*);
+int    line_sketch(Line*, Canvas*);
 int    line_unit_test(Error*);
 void   line_delete(Line*);
 

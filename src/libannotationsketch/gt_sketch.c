@@ -309,7 +309,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
       canvas = canvas_new(sty, GRAPHICS_SVG, arguments.width, ii);
     else
       canvas = canvas_new(sty, GRAPHICS_PNG, arguments.width, ii);
-    diagram_render(d, canvas);
+    diagram_sketch(d, canvas);
     if (arguments.showrecmaps) {
       unsigned long i;
       RecMap *rm;

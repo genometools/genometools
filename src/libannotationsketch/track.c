@@ -132,13 +132,13 @@ unsigned long track_get_number_of_lines_with_captions(const Track *track)
   return nof_tracks;
 }
 
-int track_render(Track* track, Canvas *canvas)
+int track_sketch(Track* track, Canvas *canvas)
 {
   int i = 0;
   assert(track && canvas);
   canvas_visit_track_pre(canvas, track);
   for (i = 0; i < array_size(track->lines); i++)
-    line_render(*(Line**) array_get(track->lines, i), canvas);
+    line_sketch(*(Line**) array_get(track->lines, i), canvas);
   canvas_visit_track_post(canvas, track);
   return 0;
 }
