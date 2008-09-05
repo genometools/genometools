@@ -77,9 +77,8 @@ GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c src/interactive.c
 GTMAIN_OBJ:=$(GTMAIN_SRC:%.c=obj/%.o)
 GTMAIN_DEP:=$(GTMAIN_SRC:%.c=obj/%.d)
 
-EXAMPLE_SRC:=src/example.c
-EXAMPLE_OBJ:=$(EXAMPLE_SRC:%.c=obj/%.o)
-EXAMPLE_DEP:=$(EXAMPLE_SRC:%.c=obj/%.d)
+EXAMPLES_SRC:=src/example.c
+EXAMPLES_DEP:=$(EXAMPLES_SRC:%.c=obj/%.d)
 
 SKPROTO_SRC:=src/skproto.c src/tools/gt_skproto.c
 SKPROTO_OBJ:=$(SKPROTO_SRC:%.c=obj/%.o)
@@ -262,8 +261,8 @@ ifeq ($(libannotationsketch),yes)
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   STEST_FLAGS += -libannotationsketch
-# XXX
-# ANNOTATIONSKETCH_EXAMPLES := bin/sketch_constructed bin/sketch_parsed
+  ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
+                               bin/examples/sketch_parsed
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/libannotationsketch
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
@@ -282,8 +281,8 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
 prefix ?= /usr/local
 
 all: lib/libgenometools.a lib/libgenometools$(SHARED_OBJ_NAME_EXT) \
-     bin/skproto bin/gt \
-     bin/example bin/lua bin/rnv $(ANNOTATIONSKETCH_EXAMPLES)
+     bin/skproto bin/gt bin/lua bin/rnv \
+     bin/examples/noop $(ANNOTATIONSKETCH_EXAMPLES)
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
@@ -363,16 +362,17 @@ $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
                                         lib/libgenometools.a $(GTLIBS) \
                                         $(OVERRIDELIBS)))
 
-$(eval $(call PROGRAM_template, bin/example, $(EXAMPLE_OBJ) \
-                                             lib/libgenometools.a \
-                                             $(OVERRIDELIBS)))
+$(eval $(call PROGRAM_template, bin/examples/noop, \
+                                obj/src/examples/noop.o \
+                                lib/libgenometools.a \
+                                $(OVERRIDELIBS)))
 
-$(eval $(call PROGRAM_template, bin/sketch_constructed, \
-                                obj/src/annotationsketch/sketch_constructed.o \
+$(eval $(call PROGRAM_template, bin/examples/sketch_constructed, \
+                                obj/src/examples/sketch_constructed.o \
                                 lib/libgenometools.a $(OVERRIDELIBS)))
 
-$(eval $(call PROGRAM_template, bin/sketch_parsed, \
-                                obj/src/annotationsketch/sketch_parsed.o \
+$(eval $(call PROGRAM_template, bin/examples/sketch_parsed, \
+                                obj/src/examples/sketch_parsed.o \
                                 lib/libgenometools.a $(OVERRIDELIBS)))
 
 bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
@@ -474,7 +474,7 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 
 # read dependencies
 -include $(GTMAIN_DEP) \
-         $(EXAMPLE_DEP) \
+         $(EXAMPLES_DEP) \
          $(SKPROTO_DEP) \
 	 $(TOOLS_DEP) \
          $(LUAMAIN_DEP) \

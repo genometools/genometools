@@ -70,14 +70,15 @@ end
 Name "sketch_constructed"
 Keywords "gt_sketch annotationsketch"
 Test do
-  run_test "#{$bin}sketch_constructed #{$cur}/gtdata/config/view.lua " +
-           "sketch_constructed.png"
+  run_test "#{$bin}examples/sketch_constructed " +
+           "#{$cur}/gtdata/config/view.lua sketch_constructed.png"
 end
 
 Name "sketch_parsed"
 Keywords "gt_sketch annotationsketch"
 Test do
-  run_test "#{$bin}sketch_parsed #{$cur}/gtdata/config/view.lua " +
+  run_test "#{$bin}examples/sketch_parsed " +
+           "#{$cur}/gtdata/config/view.lua " +
            "#{$testdata}standard_gene_with_introns_as_tree.gff3 " +
            "sketch_parsed.png"
 end
