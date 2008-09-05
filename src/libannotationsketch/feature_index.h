@@ -31,25 +31,27 @@ typedef struct FeatureIndex FeatureIndex;
 FeatureIndex* feature_index_new(void);
 FeatureIndex* feature_index_ref(FeatureIndex*);
 void          feature_index_add_sequence_region(FeatureIndex*, SequenceRegion*);
-/* add a GenomeFeature to the index, associating it with a sequence region
-   denoted by its identifier string */
-void          feature_index_add_genome_feature(FeatureIndex*, GenomeFeature*);
-/* returns an array of GenomeFeatures associated with a given sequence region
-   identifier */
-Array*        feature_index_get_features_for_seqid(FeatureIndex*, const char*);
-/* look up genome features for sequence region <seqid> in <range> and store them
-   in <results> */
-int           feature_index_get_features_for_range(FeatureIndex*,
+/* Add <genome_feature> to <feature_index>, associating it with a sequence
+   region denoted by its identifier string. */
+void          feature_index_add_genome_feature(FeatureIndex *feature_index,
+                                               GenomeFeature *genome_feature);
+/* Returns an array of GenomeFeatures associated with a given sequence region
+   identifier <seqid>. */
+Array*        feature_index_get_features_for_seqid(FeatureIndex*,
+                                                   const char *seqid);
+/* Look up genome features in <feature_index> for sequence region <seqid> in
+   <range> and store them in <results>. */
+int           feature_index_get_features_for_range(FeatureIndex *feature_index,
                                                    Array *results,
                                                    const char *seqid, Range,
                                                    Error*);
-/* returns the first sequence region identifier added to the index */
-const char*   feature_index_get_first_seqid(const FeatureIndex*);
-/* returns a StrArray of all sequence region identifiers contained in the index
-   (in alphabetical order) */
-StrArray*     feature_index_get_seqids(const FeatureIndex*);
+/* Returns the first sequence region identifier added to <feature_index>. */
+const char*   feature_index_get_first_seqid(const FeatureIndex *feature_index);
+/* Returns a StrArray of all sequence region identifiers contained in
+   <feature_index> (in alphabetical order). */
+StrArray*     feature_index_get_seqids(const FeatureIndex *feature_index);
 Range         feature_index_get_range_for_seqid(FeatureIndex*, const char*);
-/* similar to previous function. Necessary for Ruby bindings, because
+/* Similar to previous function. Necessary for Ruby bindings, because
    apparently 'dl/import' cannot handle returned structs. */
 void          feature_index_get_rangeptr_for_seqid(FeatureIndex*, Range*,
                                                    const char *);
