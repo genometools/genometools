@@ -471,7 +471,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         }
       }
 
-      /* check for the manadatory attributes */
+      /* check for the mandatory attributes */
       if (!gene_id) {
         error_set(err, "missing attribute \"%s\" on line %lu in file \"%s\"",
                   GENE_ID_ATTRIBUTE, line_number, filename);
