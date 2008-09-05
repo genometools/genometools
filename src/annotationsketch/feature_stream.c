@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libannotationsketch/feature_stream.h"
-#include "libannotationsketch/feature_visitor.h"
-#include "libannotationsketch/feature_index.h"
-#include "libgtext/genome_stream_rep.h"
+#include "annotationsketch/feature_stream.h"
+#include "annotationsketch/feature_visitor.h"
+#include "annotationsketch/feature_index.h"
+#include "extended/genome_stream_rep.h"
 
 struct FeatureStream {
   const GenomeStream parent_instance;

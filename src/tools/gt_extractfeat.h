@@ -18,7 +18,7 @@
 #ifndef GT_EXTRACTFEAT_H
 #define GT_EXTRACTFEAT_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the extract feature tool */
 Tool* gt_extractfeat(void);

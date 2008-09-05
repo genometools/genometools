@@ -16,11 +16,11 @@
 */
 
 #include <string.h>
-#include "libgtcore/bioseq.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/unused.h"
-#include "libgtext/gtdatahelp.h"
+#include "core/bioseq.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/unused.h"
+#include "extended/gtdatahelp.h"
 #include "tools/gt_magicmatch.h"
 
 typedef struct {

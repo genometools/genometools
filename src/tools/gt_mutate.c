@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq_iterator.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/mutate.h"
+#include "core/bioseq_iterator.h"
+#include "core/fasta.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "extended/gtdatahelp.h"
+#include "extended/mutate.h"
 #include "tools/gt_mutate.h"
 
 typedef struct {

@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/ma.h"
-#include "libgtext/genome_node.h"
-#include "libannotationsketch/recmap.h"
+#include "core/ma.h"
+#include "extended/genome_node.h"
+#include "annotationsketch/recmap.h"
 
 RecMap* recmap_create(double nw_x, double nw_y,
                       double se_x, double se_y,

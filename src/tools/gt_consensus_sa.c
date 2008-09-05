@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/fptr.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/xansi.h"
-#include "libgtexercise/sspliced_alignment.h"
-#include "libgtexercise/sspliced_alignment_parsing.h"
-#include "libgtext/consensus_sa.h"
+#include "core/fptr.h"
+#include "core/unused.h"
+#include "core/xansi.h"
+#include "exercise/sspliced_alignment.h"
+#include "exercise/sspliced_alignment_parsing.h"
+#include "extended/consensus_sa.h"
 #include "tools/gt_consensus_sa.h"
 
 static Range get_genomic_range(const void *sa)

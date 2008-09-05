@@ -16,11 +16,11 @@
 */
 
 #include <ctype.h>
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/xansi.h"
-#include "libgtext/coin_hmm.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "core/xansi.h"
+#include "extended/coin_hmm.h"
 #include "tools/gt_coin.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,

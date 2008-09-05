@@ -16,11 +16,11 @@
 */
 
 #include <string.h>
-#include "libgtcore/bioseq_iterator.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/undef.h"
+#include "core/bioseq_iterator.h"
+#include "core/fasta.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/undef.h"
 #include "tools/gt_seqfilter.h"
 
 typedef struct {

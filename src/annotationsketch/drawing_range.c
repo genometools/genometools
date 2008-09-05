@@ -16,8 +16,8 @@
 */
 
 #include <assert.h>
-#include "libgtcore/mathsupport.h"
-#include "libannotationsketch/drawing_range.h"
+#include "core/mathsupport.h"
+#include "annotationsketch/drawing_range.h"
 
 int drawing_range_compare(DrawingRange range_a, DrawingRange range_b)
 {

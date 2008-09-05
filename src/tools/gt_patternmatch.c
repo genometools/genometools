@@ -16,20 +16,20 @@
 */
 
 #include <inttypes.h>
-#include "libgtcore/error.h"
-#include "libgtcore/str.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/sarr-def.h"
-#include "libgtmatch/stamp.h"
-#include "libgtmatch/enum-patt-def.h"
-#include "libgtmatch/esa-mmsearch-def.h"
-#include "libgtmatch/qgram2code.h"
-#include "libgtmatch/spacedef.h"
-#include "libgtmatch/cutendpfx.h"
+#include "core/error.h"
+#include "core/str.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "match/sarr-def.h"
+#include "match/stamp.h"
+#include "match/enum-patt-def.h"
+#include "match/esa-mmsearch-def.h"
+#include "match/qgram2code.h"
+#include "match/spacedef.h"
+#include "match/cutendpfx.h"
 
-#include "libgtmatch/esa-map.pr"
-#include "libgtmatch/sfx-cmpsuf.pr"
+#include "match/esa-map.pr"
+#include "match/sfx-cmpsuf.pr"
 
 #include "tools/gt_patternmatch.h"
 

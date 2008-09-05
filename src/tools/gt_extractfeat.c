@@ -15,14 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/unused.h"
-#include "libgtext/extract_feat_stream.h"
-#include "libgtext/feature_type_factory_any.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/seqid2file.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/unused.h"
+#include "extended/extract_feat_stream.h"
+#include "extended/feature_type_factory_any.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/gtdatahelp.h"
+#include "extended/seqid2file.h"
 #include "tools/gt_extractfeat.h"
 
 typedef struct {

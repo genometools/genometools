@@ -22,12 +22,12 @@
 #ifdef CAIRO_HAS_SVG_SURFACE
 #include <cairo-svg.h>
 #endif
-#include "libgtcore/fileutils.h"
-#include "libgtcore/genfile.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/minmax.h"
-#include "libgtcore/str.h"
-#include "libannotationsketch/graphics.h"
+#include "core/fileutils.h"
+#include "core/genfile.h"
+#include "core/ma.h"
+#include "core/minmax.h"
+#include "core/str.h"
+#include "annotationsketch/graphics.h"
 
 struct Graphics {
   cairo_t *cr;

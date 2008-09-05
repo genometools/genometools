@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/ma.h"
-#include "libgtcore/unused.h"
+#include "core/ma.h"
+#include "core/unused.h"
 #include "tools/gt_template.h"
 
 typedef struct {

@@ -18,7 +18,7 @@
 #ifndef GT_EXERCISE_H
 #define GT_EXERCISE_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the exercise tool */
 Tool* gt_exercise(void);

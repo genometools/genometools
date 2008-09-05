@@ -16,13 +16,13 @@
 */
 
 #include <math.h>
-#include "libgtcore/tool.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/str.h"
-#include "libgtmatch/sarr-def.h"
-#include "libgtmatch/pckbucket.h"
-#include "libgtmatch/eis-voiditf.h"
-#include "libgtmatch/esa-map.pr"
+#include "core/tool.h"
+#include "core/ma.h"
+#include "core/str.h"
+#include "match/sarr-def.h"
+#include "match/pckbucket.h"
+#include "match/eis-voiditf.h"
+#include "match/esa-map.pr"
 
 typedef struct
 {

@@ -16,10 +16,10 @@
 */
 
 #include <string.h>
-#include "libgtcore/array2dim.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/multilcp.h"
+#include "core/array2dim.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "extended/multilcp.h"
 #include "tools/gt_multilcp.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,

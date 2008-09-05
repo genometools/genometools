@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/strarray.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/tool.h"
-#include "libgtmatch/tagerator.h"
+#include "core/option.h"
+#include "core/ma.h"
+#include "core/strarray.h"
+#include "core/unused.h"
+#include "core/tool.h"
+#include "match/tagerator.h"
 #include "tools/gt_tagerator.h"
 
 /*

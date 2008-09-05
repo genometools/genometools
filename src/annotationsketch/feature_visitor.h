@@ -22,7 +22,7 @@
 typedef struct FeatureVisitor FeatureVisitor;
 
 #include "annotationsketch/feature_index.h"
-#include "libgtext/genome_visitor.h"
+#include "extended/genome_visitor.h"
 
 const GenomeVisitorClass* feature_visitor_class(void);
 GenomeVisitor*            feature_visitor_new(FeatureIndex*);

@@ -15,14 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/outputfile.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/chseqids_stream.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/gff3_out_stream.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/sort_stream.h"
+#include "core/option.h"
+#include "core/outputfile.h"
+#include "core/versionfunc.h"
+#include "extended/chseqids_stream.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/gff3_out_stream.h"
+#include "extended/gtdatahelp.h"
+#include "extended/sort_stream.h"
 #include "tools/gt_chseqids.h"
 
 #define DEFAULT_JOINLENGTH 300

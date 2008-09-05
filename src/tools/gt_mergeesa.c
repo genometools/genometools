@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/verbose-def.h"
-#include "libgtmatch/test-mergeesa.pr"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "match/verbose-def.h"
+#include "match/test-mergeesa.pr"
 #include "tools/gt_mergeesa.h"
 
 static OPrval parse_options(Str *indexname,StrArray *indexnametab,

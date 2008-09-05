@@ -18,12 +18,12 @@
 
 #include <ctype.h>
 #include <string.h>
-#include "libgtcore/fa.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/warning.h"
+#include "core/fa.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/unused.h"
+#include "core/versionfunc.h"
+#include "core/warning.h"
 #include "tools/gt_skproto.h"
 
 #define MAX_LINE_LENGTH  80

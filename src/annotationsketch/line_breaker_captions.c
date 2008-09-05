@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/hashmap.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/str.h"
-#include "libannotationsketch/line_breaker_captions.h"
-#include "libannotationsketch/line_breaker_rep.h"
+#include "core/hashmap.h"
+#include "core/ma.h"
+#include "core/str.h"
+#include "annotationsketch/line_breaker_captions.h"
+#include "annotationsketch/line_breaker_rep.h"
 
 struct LineBreakerCaptions {
   const LineBreaker parent_instance;

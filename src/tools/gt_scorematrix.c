@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/score_matrix.h"
-#include "libgtcore/versionfunc.h"
+#include "core/option.h"
+#include "core/score_matrix.h"
+#include "core/versionfunc.h"
 #include "tools/gt_scorematrix.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,

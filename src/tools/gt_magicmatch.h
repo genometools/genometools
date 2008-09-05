@@ -18,7 +18,7 @@
 #ifndef GT_MAGICMATCH_H
 #define GT_MAGICMATCH_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the MagicMatch tool */
 Tool* gt_magicmatch(void);

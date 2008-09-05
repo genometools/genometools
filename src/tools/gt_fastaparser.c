@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/fasta_separator.h"
-#include "libgtcore/unused.h"
-#include "libgtexercise/simple_bioseq.h"
+#include "core/fasta_separator.h"
+#include "core/unused.h"
+#include "exercise/simple_bioseq.h"
 #include "tools/gt_fastaparser.h"
 
 static OptionParser* gt_fastaparser_option_parser_new(UNUSED

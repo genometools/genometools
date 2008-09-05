@@ -16,17 +16,17 @@
 */
 
 #include <string.h>
-#include "libgtcore/bioseq.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/fileutils.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/md5_fingerprint.h"
-#include "libgtcore/outputfile.h"
-#include "libgtcore/option.h"
-#include "libgtcore/progressbar.h"
-#include "libgtcore/seqiterator.h"
-#include "libgtcore/string_distri.h"
-#include "libgtcore/unused.h"
+#include "core/bioseq.h"
+#include "core/fasta.h"
+#include "core/fileutils.h"
+#include "core/ma.h"
+#include "core/md5_fingerprint.h"
+#include "core/outputfile.h"
+#include "core/option.h"
+#include "core/progressbar.h"
+#include "core/seqiterator.h"
+#include "core/string_distri.h"
+#include "core/unused.h"
 #include "tools/gt_sequniq.h"
 
 typedef struct {

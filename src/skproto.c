@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/tooldriver.h"
+#include "core/tooldriver.h"
 #include "tools/gt_skproto.h"
 
 int main(int argc, char *argv[])

@@ -25,9 +25,9 @@ typedef struct Line Line;
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/drawing_range.h"
-#include "libgtcore/array.h"
-#include "libgtcore/range.h"
-#include "libgtext/genome_node.h"
+#include "core/array.h"
+#include "core/range.h"
+#include "extended/genome_node.h"
 
 Line*  line_new(void);
 void   line_insert_block(Line*, Block*); /* takes ownership */

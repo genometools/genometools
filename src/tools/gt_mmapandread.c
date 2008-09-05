@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/progressbar.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/xposix.h"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/progressbar.h"
+#include "core/versionfunc.h"
+#include "core/xposix.h"
 #include "tools/gt_mmapandread.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,

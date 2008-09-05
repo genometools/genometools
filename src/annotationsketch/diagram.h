@@ -31,11 +31,11 @@ typedef struct TracklineInfo {
 #include "annotationsketch/style.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/feature_index.h"
-#include "libgtcore/array.h"
-#include "libgtcore/range.h"
-#include "libgtcore/hashmap.h"
-#include "libgtext/genome_feature.h"
-#include "libgtext/genome_feature_type.h"
+#include "core/array.h"
+#include "core/range.h"
+#include "core/hashmap.h"
+#include "extended/genome_feature.h"
+#include "extended/genome_feature_type.h"
 
 /* Create a new Diagram object representing the genome nodes in
    <feature_index> in region <seqid> overlapping with <range>. */

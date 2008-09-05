@@ -18,7 +18,7 @@
 #ifndef GT_EXTRACTSEQ_H
 #define GT_EXTRACTSEQ_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the extract sequence tool */
 Tool* gt_extractseq(void);

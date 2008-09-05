@@ -14,18 +14,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/str.h"
-#include "libgtcore/versionfunc.h"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/str.h"
+#include "core/versionfunc.h"
 
-#include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-bwtseq-construct.h"
-#include "libgtmatch/eis-bwtseq-context-param.h"
-#include "libgtmatch/eis-bwtseq-sass.h"
-#include "libgtmatch/seqpos-def.h"
-#include "libgtmatch/sarr-def.h"
-#include "libgtmatch/esa-map.pr"
+#include "match/eis-bwtseq.h"
+#include "match/eis-bwtseq-construct.h"
+#include "match/eis-bwtseq-context-param.h"
+#include "match/eis-bwtseq-sass.h"
+#include "match/seqpos-def.h"
+#include "match/sarr-def.h"
+#include "match/esa-map.pr"
 
 #include "tools/gt_packedindex_mkctxmap.h"
 

@@ -17,12 +17,12 @@
 */
 
 #include <string.h>
-#include "libgtcore/ensure.h"
-#include "libgtcore/log.h"
-#include "libgtcore/ma.h"
-#include "libgtext/feature_type_factory_builtin.h"
-#include "libannotationsketch/block.h"
-#include "libannotationsketch/element.h"
+#include "core/ensure.h"
+#include "core/log.h"
+#include "core/ma.h"
+#include "extended/feature_type_factory_builtin.h"
+#include "annotationsketch/block.h"
+#include "annotationsketch/element.h"
 
 struct Block {
   Dlist *elements;

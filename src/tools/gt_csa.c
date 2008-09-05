@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/outputfile.h"
-#include "libgtcore/unused.h"
-#include "libgtext/csa_stream.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/gff3_out_stream.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/outputfile.h"
+#include "core/unused.h"
+#include "extended/csa_stream.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/gff3_out_stream.h"
 #include "tools/gt_csa.h"
 
 typedef struct {

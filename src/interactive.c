@@ -28,9 +28,9 @@
 #include "interactive.h"
 #include "lauxlib.h"
 #include "libtecla.h"
-#include "libgtcore/cstr.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/unused.h"
+#include "core/cstr.h"
+#include "core/ma.h"
+#include "core/unused.h"
 
 static lua_State *globalL = NULL;
 

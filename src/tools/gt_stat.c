@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/stat_stream.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/stat_stream.h"
 #include "tools/gt_stat.h"
 
 typedef struct {

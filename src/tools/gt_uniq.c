@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/outputfile.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/gff3_out_stream.h"
-#include "libgtext/uniq_stream.h"
+#include "core/option.h"
+#include "core/outputfile.h"
+#include "core/versionfunc.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/gff3_out_stream.h"
+#include "extended/uniq_stream.h"
 #include "tools/gt_uniq.h"
 
 typedef struct {

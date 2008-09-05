@@ -15,14 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/warning.h"
-#include "libgtext/add_introns_stream.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/splice_site_info_stream.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/seqid2file.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "core/warning.h"
+#include "extended/add_introns_stream.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/splice_site_info_stream.h"
+#include "extended/gtdatahelp.h"
+#include "extended/seqid2file.h"
 #include "tools/gt_splicesiteinfo.h"
 
 typedef struct {

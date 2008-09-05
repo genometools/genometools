@@ -26,10 +26,10 @@ typedef struct Block Block;
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/element.h"
-#include "libgtcore/dlist.h"
-#include "libgtcore/range.h"
-#include "libgtcore/array.h"
-#include "libgtext/genome_node.h"
+#include "core/dlist.h"
+#include "core/range.h"
+#include "core/array.h"
+#include "extended/genome_node.h"
 
 Block*             block_new(void);
 /* Create a new Block object, setting block parameters (such as strand, range)

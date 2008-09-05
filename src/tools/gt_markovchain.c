@@ -17,8 +17,8 @@
 
 #include <math.h>
 #include <string.h>
-#include "libgtcore/unused.h"
-#include "libgtexercise/markov_chain_parsing.h"
+#include "core/unused.h"
+#include "exercise/markov_chain_parsing.h"
 #include "tools/gt_markovchain.h"
 
 static OptionParser* gt_markovchain_option_parser_new(UNUSED

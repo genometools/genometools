@@ -16,14 +16,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/ensure.h"
-#include "libgtcore/hashtable.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/undef.h"
-#include "libgtcore/unused.h"
-#include "libannotationsketch/line_breaker_bases.h"
-#include "libannotationsketch/style.h"
-#include "libannotationsketch/track.h"
+#include "core/ensure.h"
+#include "core/hashtable.h"
+#include "core/ma.h"
+#include "core/undef.h"
+#include "core/unused.h"
+#include "annotationsketch/line_breaker_bases.h"
+#include "annotationsketch/style.h"
+#include "annotationsketch/track.h"
 
 struct Track {
   Str *title;

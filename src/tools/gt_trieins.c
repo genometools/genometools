@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/test-mtrieins.pr"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "match/test-mtrieins.pr"
 #include "tools/gt_trieins.h"
 
 static OPrval parse_options(bool *onlyins,int *parsed_args,

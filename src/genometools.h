@@ -20,9 +20,9 @@
 
 /* the GenomeTools ``all-in-one'' header */
 
-#include "gtcore.h"  /* the core GenomeTools library (libgthcore) */
-#include "gtext.h"   /* include extended GenomeTools library (libgtext) */
-#include "gtmatch.h" /* include GenomeTools matching library (libgtmatch) */
+#include "core.h"     /* the core of the GenomeTools library */
+#include "extended.h" /* extended part of the GenomeTools library  */
+#include "match.h"    /* include the GenomeTools matching library */
 #ifdef LIBANNOTATIONSKETCH
 #include "annotationsketch.h"  /* include AnnotationSketch library */
 #endif

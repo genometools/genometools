@@ -15,19 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/sarr-def.h"
-#include "libgtmatch/verbose-def.h"
-#include "libgtmatch/stamp.h"
-#include "libgtmatch/esa-seqread.h"
-#include "libgtmatch/esa-map.pr"
-#include "libgtmatch/test-encseq.pr"
-#include "libgtmatch/pos2seqnum.pr"
-#include "libgtmatch/test-mappedstr.pr"
-#include "libgtmatch/sfx-suftaborder.pr"
-#include "libgtmatch/echoseq.pr"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "match/sarr-def.h"
+#include "match/verbose-def.h"
+#include "match/stamp.h"
+#include "match/esa-seqread.h"
+#include "match/esa-map.pr"
+#include "match/test-encseq.pr"
+#include "match/pos2seqnum.pr"
+#include "match/test-mappedstr.pr"
+#include "match/sfx-suftaborder.pr"
+#include "match/echoseq.pr"
 #include "tools/gt_sfxmap.h"
 
 typedef struct

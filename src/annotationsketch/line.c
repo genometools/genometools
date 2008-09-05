@@ -16,14 +16,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/ensure.h"
-#include "libgtcore/interval_tree.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/range.h"
-#include "libgtext/feature_type_factory_builtin.h"
-#include "libannotationsketch/block.h"
-#include "libannotationsketch/line.h"
-#include "libannotationsketch/style.h"
+#include "core/ensure.h"
+#include "core/interval_tree.h"
+#include "core/ma.h"
+#include "core/range.h"
+#include "extended/feature_type_factory_builtin.h"
+#include "annotationsketch/block.h"
+#include "annotationsketch/line.h"
+#include "annotationsketch/style.h"
 
 struct Line {
   bool has_captions;

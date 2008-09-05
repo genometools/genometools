@@ -18,7 +18,7 @@
 #ifndef GT_FILTER_H
 #define GT_FILTER_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the filter tool */
 Tool* gt_filter(void);

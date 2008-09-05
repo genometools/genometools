@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
-#include "libgtcore/option.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/xansi.h"
-#include "libgtext/alignment.h"
-#include "libgtext/linearalign.h"
+#include "core/bioseq.h"
+#include "core/option.h"
+#include "core/unused.h"
+#include "core/xansi.h"
+#include "extended/alignment.h"
+#include "extended/linearalign.h"
 #include "tools/gt_linearalign.h"
 
 static OptionParser* gt_linearalign_option_parser_new(UNUSED

@@ -16,10 +16,10 @@
 */
 
 #include <string.h>
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/matchcount.h"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "extended/matchcount.h"
 #include "tools/gt_matchcount.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,

@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
-#include "libgtcore/cstr.h"
-#include "libgtcore/fileutils.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/xansi.h"
-#include "libgtext/qgramdist.h"
+#include "core/bioseq.h"
+#include "core/cstr.h"
+#include "core/fileutils.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "core/xansi.h"
+#include "extended/qgramdist.h"
 #include "tools/gt_qgramdist.h"
 
 static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,

@@ -16,12 +16,12 @@
 */
 
 #include <string.h>
-#include "libgtcore/bioseq.h"
-#include "libgtcore/option.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/linearedist.h"
-#include "libgtext/neighborjoining.h"
+#include "core/bioseq.h"
+#include "core/option.h"
+#include "core/unused.h"
+#include "core/versionfunc.h"
+#include "extended/linearedist.h"
+#include "extended/neighborjoining.h"
 #include "tools/gt_neighborjoining.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,

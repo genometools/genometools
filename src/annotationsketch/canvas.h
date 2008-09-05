@@ -29,7 +29,7 @@ typedef struct Canvas Canvas;
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
-#include "libgtcore/range.h"
+#include "core/range.h"
 
 /* Create a new Canvas object with given <output_type> and <width> using the
    configuration given in <style>. The optional <image_info> is filled when

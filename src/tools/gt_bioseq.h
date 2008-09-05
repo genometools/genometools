@@ -18,7 +18,7 @@
 #ifndef GT_BIOSEQ_H
 #define GT_BIOSEQ_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the biosequence tool */
 Tool* gt_bioseq(void);

@@ -16,7 +16,7 @@
 */
 
 #include "lua.h"
-#include "libannotationsketch/luastyle.h"
+#include "annotationsketch/luastyle.h"
 
 /* key used to store the Style object in the Lua registry */
 #define STYLE_KEY style_new

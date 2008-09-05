@@ -20,13 +20,13 @@
  */
 
 #include "gt_packedindex_chk_integrity.h"
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/eis-encidxseq.h"
-#include "libgtmatch/eis-encidxseq-param.h"
-#include "libgtmatch/eis-encidxseq-construct.h"
-#include "libgtmatch/verbose-def.h"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "match/eis-encidxseq.h"
+#include "match/eis-encidxseq-param.h"
+#include "match/eis-encidxseq-construct.h"
+#include "match/verbose-def.h"
 #include "tools/gt_packedindex_chk_integrity.h"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL

@@ -15,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/array.h"
-#include "libgtcore/ensure.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/mathsupport.h"
-#include "libgtcore/range.h"
-#include "libgtcore/strand.h"
-#include "libgtcore/unused.h"
-#include "libgtext/feature_type_factory_builtin.h"
-#include "libannotationsketch/image_info.h"
+#include "core/array.h"
+#include "core/ensure.h"
+#include "core/ma.h"
+#include "core/mathsupport.h"
+#include "core/range.h"
+#include "core/strand.h"
+#include "core/unused.h"
+#include "extended/feature_type_factory_builtin.h"
+#include "annotationsketch/image_info.h"
 
 struct ImageInfo {
   Array* recmaps;

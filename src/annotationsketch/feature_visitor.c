@@ -16,11 +16,11 @@
 */
 
 #include <assert.h>
-#include "libgtcore/unused.h"
-#include "libgtext/genome_visitor_rep.h"
-#include "libgtext/sequence_region.h"
-#include "libannotationsketch/feature_index.h"
-#include "libannotationsketch/feature_visitor.h"
+#include "core/unused.h"
+#include "extended/genome_visitor_rep.h"
+#include "extended/sequence_region.h"
+#include "annotationsketch/feature_index.h"
+#include "annotationsketch/feature_visitor.h"
 
 struct FeatureVisitor {
   const GenomeVisitor parent_instance;

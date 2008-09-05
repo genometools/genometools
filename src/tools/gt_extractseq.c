@@ -15,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq_iterator.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/grep.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/outputfile.h"
-#include "libgtcore/unused.h"
-#include "libgtmatch/giextract.pr"
-#include "libgtext/gtdatahelp.h"
+#include "core/bioseq_iterator.h"
+#include "core/fasta.h"
+#include "core/grep.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/outputfile.h"
+#include "core/unused.h"
+#include "match/giextract.pr"
+#include "extended/gtdatahelp.h"
 #include "tools/gt_extractseq.h"
 
 #define FROMPOS_OPTION_STR  "frompos"

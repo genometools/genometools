@@ -19,21 +19,21 @@
 */
 
 #include <string.h>
-#include "libannotationsketch/feature_index.h"
-#include "libannotationsketch/feature_stream.h"
-#include "libannotationsketch/feature_visitor.h"
-#include "libgtcore/ensure.h"
-#include "libgtcore/hashmap.h"
-#include "libgtcore/interval_tree.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/minmax.h"
-#include "libgtcore/queue.h"
-#include "libgtcore/range.h"
-#include "libgtcore/undef.h"
-#include "libgtcore/unused.h"
-#include "libgtext/feature_type_factory_builtin.h"
-#include "libgtext/genome_node.h"
-#include "libgtext/gff3_in_stream.h"
+#include "annotationsketch/feature_index.h"
+#include "annotationsketch/feature_stream.h"
+#include "annotationsketch/feature_visitor.h"
+#include "core/ensure.h"
+#include "core/hashmap.h"
+#include "core/interval_tree.h"
+#include "core/ma.h"
+#include "core/minmax.h"
+#include "core/queue.h"
+#include "core/range.h"
+#include "core/undef.h"
+#include "core/unused.h"
+#include "extended/feature_type_factory_builtin.h"
+#include "extended/genome_node.h"
+#include "extended/gff3_in_stream.h"
 
 struct FeatureIndex {
   Hashmap *regions;

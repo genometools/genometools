@@ -19,7 +19,7 @@
 #define LINE_BREAKER_REP_H
 
 #include <stdio.h>
-#include "libannotationsketch/line_breaker.h"
+#include "annotationsketch/line_breaker.h"
 
 struct LineBreakerClass {
   size_t size;

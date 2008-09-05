@@ -18,9 +18,9 @@
 #ifndef LINE_BREAKER_CAPTIONS_H
 #define LINE_BREAKER_CAPTIONS_H
 
-#include "libgtcore/range.h"
-#include "libannotationsketch/drawing_range.h"
-#include "libannotationsketch/line_breaker.h"
+#include "core/range.h"
+#include "annotationsketch/drawing_range.h"
+#include "annotationsketch/line_breaker.h"
 
 /* Implements the LineBreaker interface; breaks Lines if captions overlap. */
 typedef struct LineBreakerCaptions LineBreakerCaptions;

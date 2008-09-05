@@ -18,7 +18,7 @@
 #ifndef RECMAP_H
 #define RECMAP_H
 
-#include "libgtext/genome_feature.h"
+#include "extended/genome_feature.h"
 
 typedef struct RecMap {
   double nw_x,

@@ -18,9 +18,9 @@
 #ifndef GTT_H
 #define GTT_H
 
-#include "libgtcore/fptr.h"
-#include "libgtcore/hashmap.h"
-#include "libgtext/toolbox.h"
+#include "core/fptr.h"
+#include "core/hashmap.h"
+#include "extended/toolbox.h"
 
 /* The GenomeTools toolbox (gtt) module */
 

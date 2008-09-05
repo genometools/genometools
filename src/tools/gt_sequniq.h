@@ -18,7 +18,7 @@
 #ifndef GT_SEQUNIQ_H
 #define GT_SEQUNIQ_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the sequniq tool */
 Tool* gt_sequniq(void);

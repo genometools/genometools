@@ -16,10 +16,10 @@
 */
 
 #include <string.h>
-#include "libgtcore/option.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/translate.h"
-#include "libgtcore/versionfunc.h"
+#include "core/option.h"
+#include "core/ma.h"
+#include "core/translate.h"
+#include "core/versionfunc.h"
 #include "tools/gt_translate.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,

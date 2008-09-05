@@ -16,19 +16,19 @@
 */
 
 #include <string.h>
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/outputfile.h"
-#include "libgtcore/undef.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/add_introns_stream.h"
-#include "libgtext/feature_type_factory_builtin.h"
-#include "libgtext/feature_type_factory_obo.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/gff3_out_stream.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/mergefeat_stream_sorted.h"
-#include "libgtext/sort_stream.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/outputfile.h"
+#include "core/undef.h"
+#include "core/versionfunc.h"
+#include "extended/add_introns_stream.h"
+#include "extended/feature_type_factory_builtin.h"
+#include "extended/feature_type_factory_obo.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/gff3_out_stream.h"
+#include "extended/gtdatahelp.h"
+#include "extended/mergefeat_stream_sorted.h"
+#include "extended/sort_stream.h"
 #include "tools/gt_gff3.h"
 
 typedef struct {

@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/ma.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/feature_type_factory_obo.h"
+#include "core/ma.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/feature_type_factory_obo.h"
 #include "tools/gt_gff3validator.h"
 
 typedef struct {

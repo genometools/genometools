@@ -247,13 +247,13 @@ ifeq ($(m64),yes)
   GT_LDFLAGS += -m64
 endif
 
-LIBGENOMETOOLS_DIRS:= src/libgtcore \
-                      src/libgtext \
-                      src/libgtexercise \
-                      src/libgtmatch \
-                      src/libgtlua \
-                      src/libgtltr \
-                      src/libgtmgth
+LIBGENOMETOOLS_DIRS:= src/core \
+                      src/extended \
+                      src/exercise \
+                      src/match \
+                      src/gtlua \
+                      src/ltr \
+                      src/mgth
 
 ifeq ($(libannotationsketch),yes)
   GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lcairo
@@ -263,7 +263,7 @@ ifeq ($(libannotationsketch),yes)
   STEST_FLAGS += -libannotationsketch
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
                                bin/examples/sketch_parsed
-  LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/libannotationsketch
+  LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
 endif
@@ -591,27 +591,27 @@ splint: obj/gt_config.h
         $(CURDIR)/src/libgtext/*.c \
         $(CURDIR)/src/tools/*.c
 
-EISFILES=${shell ls ${CURDIR}/src/libgtmatch/*.c | grep eis-}\
-         ${CURDIR}/src/libgtmatch/sfx-opt.c\
-         ${CURDIR}/src/libgtmatch/sfx-run.c\
-         ${CURDIR}/src/libgtmatch/encseq-specialsrank.c
+EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}\
+         ${CURDIR}/src/match/sfx-opt.c\
+         ${CURDIR}/src/match/sfx-run.c\
+         ${CURDIR}/src/match/encseq-specialsrank.c
 
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 
 spgt:${addprefix obj/,${notdir ${subst .c,.splint,\
-	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/libgtmatch/*.c}}\
+	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
                      ${wildcard ${CURDIR}/src/libgtltr/*.c}\
                                 ${SKTOOLS}}}}
 
 scgt:
-	src_check src/libgtmatch/*
-	src_check src/libgtltr/*
+	src_check src/match/*
+	src_check src/ltr/*
 	src_check src/tools/*
 
 splintclean:
 	find obj -name '*.splint' | xargs rm -f
 
-obj/%.splint: ${CURDIR}/src/libgtmatch/%.c
+obj/%.splint: ${CURDIR}/src/match/%.c
 	@echo "splint $<"
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
@@ -626,7 +626,7 @@ obj/%.splint: ${CURDIR}/src/libgtltr/%.c
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
-obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
+obj/%.prepro: ${CURDIR}/src/match/%.c
 	@echo "[generate $@]"
 	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3

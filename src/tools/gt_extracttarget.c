@@ -16,18 +16,18 @@
 */
 
 #include <string.h>
-#include "libgtcore/bioseq.h"
-#include "libgtcore/cstr.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/splitter.h"
-#include "libgtcore/unused.h"
-#include "libgtext/genome_node.h"
-#include "libgtext/genome_node_iterator.h"
-#include "libgtext/gff3_escaping.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/string_matching.h"
+#include "core/bioseq.h"
+#include "core/cstr.h"
+#include "core/fasta.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/splitter.h"
+#include "core/unused.h"
+#include "extended/genome_node.h"
+#include "extended/genome_node_iterator.h"
+#include "extended/gff3_escaping.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/string_matching.h"
 #include "tools/gt_extracttarget.h"
 
 typedef struct {

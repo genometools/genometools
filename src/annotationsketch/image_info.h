@@ -19,7 +19,7 @@
 #define IMAGE_INFO_H
 
 #include "annotationsketch/recmap.h"
-#include "libgtcore/error.h"
+#include "core/error.h"
 
 typedef struct ImageInfo ImageInfo;
 

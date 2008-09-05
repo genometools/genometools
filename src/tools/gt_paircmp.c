@@ -17,13 +17,13 @@
 
 #include <string.h>
 #include <inttypes.h>
-#include "libgtcore/error.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/option.h"
-#include "libgtcore/str.h"
-#include "libgtcore/symboldef.h"
-#include "libgtmatch/spacedef.h"
-#include "libgtmatch/test-pairwise.h"
+#include "core/error.h"
+#include "core/versionfunc.h"
+#include "core/option.h"
+#include "core/str.h"
+#include "core/symboldef.h"
+#include "match/spacedef.h"
+#include "match/test-pairwise.h"
 #include "tools/gt_paircmp.h"
 
 typedef struct

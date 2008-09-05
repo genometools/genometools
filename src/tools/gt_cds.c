@@ -15,14 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/unused.h"
-#include "libgtext/cds_stream.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/gff3_out_stream.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/seqid2file.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/unused.h"
+#include "extended/cds_stream.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/gff3_out_stream.h"
+#include "extended/gtdatahelp.h"
+#include "extended/seqid2file.h"
 #include "tools/gt_cds.h"
 
 #define GT_CDS_SOURCE_TAG "gt cds"

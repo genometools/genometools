@@ -16,18 +16,18 @@
 */
 
 #include <inttypes.h>
-#include "libgtcore/error.h"
-#include "libgtcore/str.h"
-#include "libgtcore/option.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/esa-seqread.h"
-#include "libgtmatch/esa-mmsearch-def.h"
-#include "libgtmatch/format64.h"
-#include "libgtmatch/verbose-def.h"
+#include "core/error.h"
+#include "core/str.h"
+#include "core/option.h"
+#include "core/unused.h"
+#include "core/versionfunc.h"
+#include "match/esa-seqread.h"
+#include "match/esa-mmsearch-def.h"
+#include "match/format64.h"
+#include "match/verbose-def.h"
 
-#include "libgtmatch/esa-maxpairs.pr"
-#include "libgtmatch/test-maxpairs.pr"
+#include "match/esa-maxpairs.pr"
+#include "match/test-maxpairs.pr"
 
 #include "tools/gt_maxpairs.h"
 

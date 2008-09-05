@@ -17,15 +17,15 @@
 */
 
 #include <string.h>
-#include "libgtcore/array.h"
-#include "libgtcore/ensure.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/strand.h"
-#include "libgtext/feature_type_factory_builtin.h"
-#include "libgtext/genome_feature.h"
-#include "libgtext/genome_feature_type.h"
-#include "libannotationsketch/element.h"
-#include "libannotationsketch/style.h"
+#include "core/array.h"
+#include "core/ensure.h"
+#include "core/ma.h"
+#include "core/strand.h"
+#include "extended/feature_type_factory_builtin.h"
+#include "extended/genome_feature.h"
+#include "extended/genome_feature_type.h"
+#include "annotationsketch/element.h"
+#include "annotationsketch/style.h"
 
 struct Element {
   GenomeFeatureType *type;

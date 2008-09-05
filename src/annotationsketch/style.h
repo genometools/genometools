@@ -20,10 +20,10 @@
 #define STYLE_H
 
 #include "annotationsketch/color.h"
-#include "libgtcore/str.h"
-#include "libgtcore/strarray.h"
-#include "libgtext/genome_feature_type.h"
-#include "libgtext/genome_node.h"
+#include "core/str.h"
+#include "core/strarray.h"
+#include "extended/genome_feature_type.h"
+#include "extended/genome_node.h"
 
 /* Holds configuration information. */
 typedef struct Style Style;

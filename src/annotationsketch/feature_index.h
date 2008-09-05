@@ -21,11 +21,11 @@
 #ifndef FEATURE_INDEX_H
 #define FEATURE_INDEX_H
 
-#include "libgtcore/array.h"
-#include "libgtcore/str.h"
-#include "libgtcore/strarray.h"
-#include "libgtext/sequence_region.h"
-#include "libgtext/genome_feature.h"
+#include "core/array.h"
+#include "core/str.h"
+#include "core/strarray.h"
+#include "extended/sequence_region.h"
+#include "extended/genome_feature.h"
 
 typedef struct FeatureIndex FeatureIndex;
 

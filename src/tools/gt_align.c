@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
-#include "libgtcore/option.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/xansi.h"
-#include "libgtext/align.h"
-#include "libgtext/alignment.h"
+#include "core/bioseq.h"
+#include "core/option.h"
+#include "core/ma.h"
+#include "core/unused.h"
+#include "core/xansi.h"
+#include "extended/align.h"
+#include "extended/alignment.h"
 #include "tools/gt_align.h"
 
 typedef struct {

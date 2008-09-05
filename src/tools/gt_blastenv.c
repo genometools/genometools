@@ -16,13 +16,13 @@
 */
 
 #include <string.h>
-#include "libgtcore/alpha.h"
-#include "libgtcore/error.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/score_matrix.h"
-#include "libgtcore/unused.h"
-#include "libgtext/blast_env.h"
+#include "core/alpha.h"
+#include "core/error.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/score_matrix.h"
+#include "core/unused.h"
+#include "extended/blast_env.h"
 #include "tools/gt_blastenv.h"
 
 typedef struct {

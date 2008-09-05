@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/cstr_array.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/toolbox.h"
+#include "core/cstr_array.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "extended/toolbox.h"
 #include "tools/gt_dev.h"
 #include "tools/gt_extracttarget.h"
 #include "tools/gt_guessprot.h"

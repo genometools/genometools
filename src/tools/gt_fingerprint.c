@@ -16,15 +16,15 @@
 */
 
 #include <string.h>
-#include "libgtcore/bioseq.h"
-#include "libgtcore/fa.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/string_distri.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/xansi.h"
-#include "libgtext/gtdatahelp.h"
+#include "core/bioseq.h"
+#include "core/fa.h"
+#include "core/fasta.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/string_distri.h"
+#include "core/unused.h"
+#include "core/xansi.h"
+#include "extended/gtdatahelp.h"
 #include "tools/gt_fingerprint.h"
 
 typedef struct {

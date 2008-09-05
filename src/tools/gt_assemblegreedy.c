@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/unused.h"
-#include "libgtexercise/fragment_overlaps.h"
-#include "libgtexercise/greedy_assembly.h"
+#include "core/bioseq.h"
+#include "core/ma.h"
+#include "core/unused.h"
+#include "exercise/fragment_overlaps.h"
+#include "exercise/greedy_assembly.h"
 #include "tools/gt_assemblegreedy.h"
 
 typedef struct {

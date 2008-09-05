@@ -24,10 +24,10 @@ typedef struct Element Element;
 
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/drawing_range.h"
-#include "libgtcore/range.h"
-#include "libgtcore/strand.h"
-#include "libgtext/genome_node.h"
-#include "libgtext/genome_feature_type.h"
+#include "core/range.h"
+#include "core/strand.h"
+#include "extended/genome_node.h"
+#include "extended/genome_feature_type.h"
 
 /* Creates a complete new Element object. */
 Element*           element_new(GenomeNode*);

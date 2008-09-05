@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libannotationsketch/color.h"
+#include "annotationsketch/color.h"
 
 bool color_equals(Color c1, Color c2)
 {

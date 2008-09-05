@@ -18,7 +18,7 @@
 #ifndef GT_PREBWT_H
 #define GT_PREBWT_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the tagerator tool */
 Tool* gt_prebwt(void);

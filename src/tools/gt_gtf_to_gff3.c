@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/gff3_out_stream.h"
-#include "libgtext/gtf_in_stream.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "extended/gff3_out_stream.h"
+#include "extended/gtf_in_stream.h"
 #include "tools/gt_gtf_to_gff3.h"
 
 static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,

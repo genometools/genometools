@@ -15,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/outputfile.h"
-#include "libgtcore/undef.h"
-#include "libgtcore/unused.h"
-#include "libgtext/filter_stream.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/gff3_out_stream.h"
-#include "libgtext/targetbest_filter_stream.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/outputfile.h"
+#include "core/undef.h"
+#include "core/unused.h"
+#include "extended/filter_stream.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/gff3_out_stream.h"
+#include "extended/targetbest_filter_stream.h"
 #include "tools/gt_filter.h"
 
 #define STRAND_OPT  "strand"

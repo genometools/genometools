@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/cstr_array.h"
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/str.h"
-#include "libgtext/toolbox.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/sfx-run.h"
+#include "core/cstr_array.h"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/str.h"
+#include "extended/toolbox.h"
+#include "core/versionfunc.h"
+#include "match/sfx-run.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_packedindex_mkctxmap.h"
 #include "tools/gt_packedindex_trsuftab.h"

@@ -46,7 +46,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "lfs.h"
-#include "libgtcore/unused.h"
+#include "core/unused.h"
 
 /* Define 'strerror' for systems that do not implement it */
 #ifdef NO_STRERROR

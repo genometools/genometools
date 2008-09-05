@@ -18,17 +18,17 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "libgtcore/fileutils.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/seqiterator.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/xposix.h"
-#include "libgtcore/progressbar.h"
-#include "libgtcore/disc_distri.h"
-#include "libgtmatch/format64.h"
-#include "libgtmatch/stamp.h"
+#include "core/fileutils.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/seqiterator.h"
+#include "core/unused.h"
+#include "core/versionfunc.h"
+#include "core/xposix.h"
+#include "core/progressbar.h"
+#include "core/disc_distri.h"
+#include "match/format64.h"
+#include "match/stamp.h"
 #include "tools/gt_seqiterator.h"
 
 #define BUCKETSIZE 100

@@ -18,7 +18,7 @@
 #ifndef GT_SFXMAP_H
 #define GT_SFXMAP_H
 
-#include "libgtcore/error.h"
+#include "core/error.h"
 
 /* the sfxmap tool */
 int gt_sfxmap(int argc, const char **argv, Error*);

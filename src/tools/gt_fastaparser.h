@@ -18,7 +18,7 @@
 #ifndef GT_FASTAPARSER_H
 #define GT_FASTAPARSER_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the fasta parser tool */
 Tool* gt_fastaparser(void);

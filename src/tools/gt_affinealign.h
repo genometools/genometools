@@ -18,7 +18,7 @@
 #ifndef GT_AFFINEALIGN_H
 #define GT_AFFINEALIGN_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the align tool (affine gap costs) */
 Tool* gt_affinealign(void);

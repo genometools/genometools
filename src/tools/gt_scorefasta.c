@@ -16,13 +16,13 @@
 */
 
 #include <string.h>
-#include "libgtcore/alpha.h"
-#include "libgtcore/error.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/scorefasta.h"
+#include "core/alpha.h"
+#include "core/error.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/unused.h"
+#include "core/versionfunc.h"
+#include "extended/scorefasta.h"
 #include "tools/gt_scorefasta.h"
 
 typedef struct {

@@ -26,9 +26,9 @@ typedef struct Track Track;
 #include "annotationsketch/line.h"
 #include "annotationsketch/line_breaker.h"
 #include "annotationsketch.h"
-#include "libgtcore/array.h"
-#include "libgtext/genome_feature_type.h"
-#include "libgtext/genome_node.h"
+#include "core/array.h"
+#include "extended/genome_feature_type.h"
+#include "extended/genome_node.h"
 
 Track*        track_new(Str *title, unsigned long max_num_lines,
                         bool split_lines, LineBreaker*);

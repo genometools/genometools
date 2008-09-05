@@ -29,7 +29,7 @@
 */
 
 #include "bzlib_private.h"
-#include "libgtcore/unused.h"
+#include "core/unused.h"
 
 
 /*---------------------------------------------------*/

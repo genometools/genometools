@@ -19,9 +19,9 @@
 #define GTR_H
 
 #include <stdio.h>
-#include "libgtcore/allocators.h"
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
+#include "core/allocators.h"
+#include "core/error.h"
+#include "core/option.h"
 
 /* The GenomeTools runtime (gtr) */
 typedef struct GTR GTR;

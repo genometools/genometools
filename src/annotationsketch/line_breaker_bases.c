@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/interval_tree.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/unused.h"
-#include "libannotationsketch/line_breaker_bases.h"
-#include "libannotationsketch/line_breaker_rep.h"
+#include "core/interval_tree.h"
+#include "core/ma.h"
+#include "core/unused.h"
+#include "annotationsketch/line_breaker_bases.h"
+#include "annotationsketch/line_breaker_rep.h"
 
 struct LineBreakerBases {
   const LineBreaker parent_instance;

@@ -16,10 +16,10 @@
 */
 
 #include <string.h>
-#include "libgtcore/bioseq.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/undef.h"
+#include "core/bioseq.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/undef.h"
 #include "tools/gt_bioseq.h"
 
 typedef struct {

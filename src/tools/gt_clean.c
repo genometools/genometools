@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/xposix.h"
+#include "core/bioseq.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "core/xposix.h"
 #include "tools/gt_clean.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,

@@ -16,11 +16,11 @@
 */
 
 #include <string.h>
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/xansi.h"
-#include "libgtext/dice_hmm.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "core/xansi.h"
+#include "extended/dice_hmm.h"
 #include "tools/gt_casino.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,

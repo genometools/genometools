@@ -17,16 +17,16 @@
 
 #include <math.h>
 #include <string.h>
-#include "libgtcore/bittab.h"
-#include "libgtcore/ensure.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/minmax.h"
-#include "libgtcore/range.h"
-#include "libgtcore/unused.h"
-#include "libannotationsketch/block.h"
-#include "libannotationsketch/canvas.h"
-#include "libannotationsketch/graphics.h"
-#include "libannotationsketch/line.h"
+#include "core/bittab.h"
+#include "core/ensure.h"
+#include "core/ma.h"
+#include "core/minmax.h"
+#include "core/range.h"
+#include "core/unused.h"
+#include "annotationsketch/block.h"
+#include "annotationsketch/canvas.h"
+#include "annotationsketch/graphics.h"
+#include "annotationsketch/line.h"
 
 #define MARGINS_DEFAULT           10
 #define BAR_HEIGHT_DEFAULT        15

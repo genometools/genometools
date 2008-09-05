@@ -18,7 +18,7 @@
 #ifndef GT_BLASTENV_H
 #define GT_BLASTENV_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the blastenv tool */
 Tool* gt_blastenv(void);

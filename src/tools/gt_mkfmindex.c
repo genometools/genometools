@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
-#include "libgtmatch/fmi-mkindex.pr"
+#include "core/error.h"
+#include "match/fmi-mkindex.pr"
 #include "tools/gt_mkfmindex.h"
 
 int gt_mkfmindex(int argc, const char **argv, Error *err)

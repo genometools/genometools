@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
-#include "libgtltr/ltrharvest-run.h"
+#include "core/error.h"
+#include "ltr/ltrharvest-run.h"
 #include "tools/gt_ltrharvest.h"
 
 int gt_ltrharvest(int argc, const char **argv, Error *err)

@@ -15,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
-#include "libgtcore/fa.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/fileutils.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/outputfile.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/xansi.h"
+#include "core/bioseq.h"
+#include "core/fa.h"
+#include "core/fasta.h"
+#include "core/fileutils.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/outputfile.h"
+#include "core/unused.h"
+#include "core/xansi.h"
 #include "tools/gt_splitfasta.h"
 
 typedef struct {

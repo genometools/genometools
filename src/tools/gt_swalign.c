@@ -15,14 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/score_function.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/xansi.h"
-#include "libgtext/alignment.h"
-#include "libgtext/swalign.h"
+#include "core/bioseq.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/score_function.h"
+#include "core/unused.h"
+#include "core/xansi.h"
+#include "extended/alignment.h"
+#include "extended/swalign.h"
 #include "tools/gt_swalign.h"
 
 #define DEFAULT_INDELSCORE  -3

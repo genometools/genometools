@@ -16,14 +16,14 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/str.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/encseq-def.h"
-#include "libgtmatch/sarr-def.h"
-#include "libgtmatch/eis-bwtseq-param.h"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/str.h"
+#include "core/versionfunc.h"
+#include "match/eis-bwtseq.h"
+#include "match/encseq-def.h"
+#include "match/sarr-def.h"
+#include "match/eis-bwtseq-param.h"
 #include "tools/gt_packedindex_trsuftab.h"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL

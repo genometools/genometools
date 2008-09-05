@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq_iterator.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/option.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/unused.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/shredder.h"
+#include "core/bioseq_iterator.h"
+#include "core/fasta.h"
+#include "core/option.h"
+#include "core/ma.h"
+#include "core/unused.h"
+#include "extended/gtdatahelp.h"
+#include "extended/shredder.h"
 #include "tools/gt_shredder.h"
 
 typedef struct {

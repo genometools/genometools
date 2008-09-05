@@ -18,7 +18,7 @@
 #ifndef GT_TAGERATOR_H
 #define GT_TAGERATOR_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the tagerator tool */
 Tool* gt_tagerator(void);
