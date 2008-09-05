@@ -29,16 +29,27 @@
 #include "extended/genome_node.h"
 #include "extended/gtf_parser.h"
 
-#define GENE_ID_ATTRIBUTE       "gene_id"
-#define TRANSCRIPT_ID_ATTRIBUTE "transcript_id"
+#define GENE_ID_ATTRIBUTE         "gene_id"
+#define GENE_NAME_ATTRIBUTE       "gene_name"
+#define TRANSCRIPT_ID_ATTRIBUTE   "transcript_id"
+#define TRANSCRIPT_NAME_ATTRIBUTE "transcript_name"
 
 struct GTF_parser {
   Hashmap *sequence_region_to_range, /* map from sequence regions to ranges */
           *gene_id_hash, /* map from gene_id to transcript_id hash */
           *seqid_to_str_mapping,
-          *source_to_str_mapping;
+          *source_to_str_mapping,
+          *gene_id_to_name_mapping,
+          *transcript_id_to_name_mapping;
   FeatureTypeFactory *feature_type_factory;
 };
+
+typedef struct {
+  Queue *genome_nodes;
+  Array *mRNAs;
+  Hashmap *gene_id_to_name_mapping,
+          *transcript_id_to_name_mapping;
+} ConstructionInfo;
 
 typedef enum {
   GTF_CDS,
@@ -83,6 +94,10 @@ GTF_parser* gtf_parser_new(FeatureTypeFactory *feature_type_factory)
                                              (FreeFunc) str_delete);
   parser->source_to_str_mapping = hashmap_new(HASH_STRING, NULL,
                                               (FreeFunc) str_delete);
+  parser->gene_id_to_name_mapping = hashmap_new(HASH_STRING, ma_free_func,
+                                                ma_free_func);
+  parser->transcript_id_to_name_mapping = hashmap_new(HASH_STRING, ma_free_func,
+                                                      ma_free_func);
   parser->feature_type_factory = feature_type_factory;
   return parser;
 }
@@ -107,9 +122,11 @@ static int construct_sequence_regions(void *key, void *value, void *data,
 static int construct_mRNAs(UNUSED void *key, void *value, void *data,
                            Error *err)
 {
+  ConstructionInfo *cinfo = (ConstructionInfo*) data;
   Array *genome_node_array = (Array*) value,
-        *mRNAs = (Array*) data;
+        *mRNAs = (Array*) cinfo->mRNAs;
   GenomeNode *mRNA_node, *first_node, *gn;
+  const char *tname;
   Strand mRNA_strand;
   Range mRNA_range;
   Str *mRNA_seqid;
@@ -152,6 +169,12 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
     mRNA_node = genome_feature_new(mRNA_seqid, mRNA_type, mRNA_range,
                                    mRNA_strand);
 
+    if ((tname = hashmap_get(cinfo->transcript_id_to_name_mapping,
+                              (const char*) key)))
+    {
+      genome_feature_add_attribute((GenomeFeature*) mRNA_node, "Name", tname);
+    }
+
     /* register children */
     for (i = 0; i < array_size(genome_node_array); i++) {
       gn = *(GenomeNode**) array_get(genome_node_array, i);
@@ -169,7 +192,9 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
                            Error *err)
 {
   Hashmap *transcript_id_hash = (Hashmap*) value;
-  Queue *genome_nodes = (Queue*) data;
+  ConstructionInfo *cinfo = (ConstructionInfo*) data;
+  Queue *genome_nodes = cinfo->genome_nodes;
+  const char *gname;
   Array *mRNAs = array_new(sizeof (GenomeNode*));
   GenomeNode *gene_node, *gn;
   Strand gene_strand;
@@ -180,8 +205,8 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
 
   error_check(err);
   assert(key && value && data);
-
-  had_err = hashmap_foreach(transcript_id_hash, construct_mRNAs, mRNAs, err);
+  cinfo->mRNAs = mRNAs;
+  had_err = hashmap_foreach(transcript_id_hash, construct_mRNAs, cinfo, err);
   if (!had_err) {
     GenomeFeatureType *gene_type;
     assert(array_size(mRNAs)); /* at least one mRNA constructed */
@@ -203,6 +228,12 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
     assert(gene_type);
     gene_node = genome_feature_new(gene_seqid, gene_type, gene_range,
                                    gene_strand);
+
+    if ((gname = hashmap_get(cinfo->gene_id_to_name_mapping,
+                              (const char*) key)))
+    {
+      genome_feature_add_attribute((GenomeFeature*) gene_node, "Name", gname);
+    }
 
     /* register children */
     for (i = 0; i < array_size(mRNAs); i++) {
@@ -245,11 +276,14 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
        *attributes,
        *token,
        *gene_id,
+       *gene_name = NULL,
        *transcript_id,
+       *transcript_name = NULL,
        **tokens;
   Hashmap *transcript_id_hash; /* map from transcript id to array of genome
                                     nodes */
   Array *genome_node_array;
+  ConstructionInfo cinfo;
   GTF_feature_type gtf_feature_type;
   GenomeFeatureType *gff_feature_type = NULL;
   const char *filename;
@@ -403,6 +437,38 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
           HANDLE_ERROR;
           transcript_id = token + strlen(TRANSCRIPT_ID_ATTRIBUTE) + 1;
         }
+        else if (strncmp(token, GENE_NAME_ATTRIBUTE,
+                         strlen(GENE_NAME_ATTRIBUTE)) == 0) {
+          if (strlen(token) + 2 < strlen(GENE_NAME_ATTRIBUTE)) {
+            error_set(err, "missing value to attribute \"%s\" on line %lu in "
+                      "file \"%s\"", GENE_NAME_ATTRIBUTE, line_number,
+                      filename);
+            had_err = -1;
+          }
+          HANDLE_ERROR;
+          gene_name = token + strlen(GENE_NAME_ATTRIBUTE) + 1;
+          /* for output we want to strip quotes */
+          if (*gene_name == '"')
+            gene_name++;
+          if (gene_name[strlen(gene_name)-1] == '"')
+            gene_name[strlen(gene_name)-1] = '\0';
+        }
+        else if (strncmp(token, TRANSCRIPT_NAME_ATTRIBUTE,
+                         strlen(TRANSCRIPT_NAME_ATTRIBUTE)) == 0) {
+          if (strlen(token) + 2 < strlen(TRANSCRIPT_NAME_ATTRIBUTE)) {
+            error_set(err, "missing value to attribute \"%s\" on line %lu in "
+                      "file \"%s\"", TRANSCRIPT_NAME_ATTRIBUTE, line_number,
+                      filename);
+            had_err = -1;
+          }
+          HANDLE_ERROR;
+          transcript_name = token + strlen(TRANSCRIPT_NAME_ATTRIBUTE) + 1;
+          /* for output we want to strip quotes */
+          if (*transcript_name == '"')
+            transcript_name++;
+          if (transcript_name[strlen(transcript_name)-1] == '"')
+            transcript_name[strlen(transcript_name)-1] = '\0';
+        }
       }
 
       /* check for the manadatory attributes */
@@ -437,6 +503,20 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       }
       assert(genome_node_array);
 
+      /* save optional gene_name and transcript_name attributes */
+      if (transcript_name && !hashmap_get(parser->transcript_id_to_name_mapping,
+                             transcript_id)) {
+        hashmap_add(parser->transcript_id_to_name_mapping,
+                    cstr_dup(transcript_id),
+                    cstr_dup(transcript_name));
+      }
+      if (gene_name && !hashmap_get(parser->gene_id_to_name_mapping,
+                                    gene_id)) {
+        hashmap_add(parser->gene_id_to_name_mapping,
+                    cstr_dup(gene_id),
+                    cstr_dup(gene_name));
+      }
+
       /* get seqid */
       seqid_str = hashmap_get(parser->seqid_to_str_mapping, seqname);
       if (!seqid_str) {
@@ -462,6 +542,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 
       if (score_is_defined)
         genome_feature_set_score((GenomeFeature*) gn, score_value);
+      if (score_is_defined)
+        genome_feature_set_score((GenomeFeature*) gn, score_value);
       if (phase_value != PHASE_UNDEFINED)
         genome_feature_set_phase(gn, phase_value);
       array_add(genome_node_array, gn);
@@ -478,9 +560,12 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   }
 
   /* process all genome_features */
+  cinfo.genome_nodes = genome_nodes;
+  cinfo.gene_id_to_name_mapping = parser->gene_id_to_name_mapping;
+  cinfo.transcript_id_to_name_mapping = parser->transcript_id_to_name_mapping;
   if (!had_err) {
     had_err = hashmap_foreach(parser->gene_id_hash, construct_genes,
-                              genome_nodes, err);
+                              &cinfo, err);
   }
 
   /* free */
@@ -498,5 +583,7 @@ void gtf_parser_delete(GTF_parser *parser)
   hashmap_delete(parser->gene_id_hash);
   hashmap_delete(parser->seqid_to_str_mapping);
   hashmap_delete(parser->source_to_str_mapping);
+  hashmap_delete(parser->transcript_id_to_name_mapping);
+  hashmap_delete(parser->gene_id_to_name_mapping);
   ma_free(parser);
 }
