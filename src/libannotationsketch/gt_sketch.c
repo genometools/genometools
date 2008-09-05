@@ -219,42 +219,38 @@ int gt_sketch(int argc, const char **argv, Error *err)
     /* create feature index */
     features = feature_index_new();
     parsed_args++;
-    do {
-      /* create a gff3 input stream */
-      gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                                 arguments.verbose);
-      last_stream = gff3_in_stream;
 
-      /* create add introns stream if -addintrons was used */
-      if (arguments.addintrons) {
-        add_introns_stream = add_introns_stream_new(last_stream);
-        last_stream = add_introns_stream;
-      }
+    /* create a gff3 input stream */
+    gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
+                                                 argv + parsed_args,
+                                                 arguments.verbose, false);
+    last_stream = gff3_in_stream;
 
-      /* create gff3 output stream if -pipe was used */
-      if (arguments.pipe) {
-        gff3_out_stream = gff3_out_stream_new(last_stream, NULL);
-        last_stream = gff3_out_stream;
-      }
+    /* create add introns stream if -addintrons was used */
+    if (arguments.addintrons) {
+      add_introns_stream = add_introns_stream_new(last_stream);
+      last_stream = add_introns_stream;
+    }
 
-      /* create feature stream */
-      feature_stream = feature_stream_new(last_stream, features);
+    /* create gff3 output stream if -pipe was used */
+    if (arguments.pipe) {
+      gff3_out_stream = gff3_out_stream_new(last_stream, NULL);
+      last_stream = gff3_out_stream;
+    }
 
-      /* pull the features through the stream and free them afterwards */
-      while (!(had_err = genome_stream_next_tree(feature_stream, &gn, err)) &&
-             gn) {
-        genome_node_rec_delete(gn);
-      }
+    /* create feature stream */
+    feature_stream = feature_stream_new(last_stream, features);
 
-      genome_stream_delete(feature_stream);
-      genome_stream_delete(gff3_out_stream);
-      genome_stream_delete(add_introns_stream);
-      genome_stream_delete(gff3_in_stream);
+    /* pull the features through the stream and free them afterwards */
+    while (!(had_err = genome_stream_next_tree(feature_stream, &gn, err)) &&
+           gn) {
+      genome_node_rec_delete(gn);
+    }
 
-      if (!argv[parsed_args]) /* no GFF3 file was given at all */
-        break;
-      parsed_args++;
-    } while (!had_err && argv[parsed_args]);
+    genome_stream_delete(feature_stream);
+    genome_stream_delete(gff3_out_stream);
+    genome_stream_delete(add_introns_stream);
+    genome_stream_delete(gff3_in_stream);
   }
 
   /* if seqid is empty, take first one added to index */
