@@ -544,32 +544,25 @@ install: all
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
 	cp bin/gt $(prefix)/bin
 	cp -r gtdata $(prefix)/bin
-	test -d $(prefix)/include/libgtcore \
-	  || mkdir -p $(prefix)/include/libgtcore
-	cp src/gtcore.h obj/gt_config.h $(prefix)/include
-	cp src/libgtcore/*.h $(prefix)/include/libgtcore
-	test -d $(prefix)/include/libgtext \
-          || mkdir -p $(prefix)/include/libgtext
-	cp src/gtext.h $(prefix)/include
-	cp src/libgtext/*.h $(prefix)/include/libgtext
-	cp src/genometools.h $(prefix)/include
-	test -d $(prefix)/include/libgtmatch \
-	  || mkdir -p $(prefix)/include/libgtmatch
-	cp src/gtmatch.h $(prefix)/include
-	cp src/libgtmatch/*.h src/libgtmatch/*.pr $(prefix)/include/libgtmatch
+	test -d $(prefix)/include/genometools/core \
+	  || mkdir -p $(prefix)/include/genometools/core
+	cp src/core.h obj/gt_config.h $(prefix)/include/genometools
+	cp src/core/*.h $(prefix)/include/genometools/core
+	test -d $(prefix)/include/genometools/extended \
+          || mkdir -p $(prefix)/include/genometools/extended
+	cp src/extended.h $(prefix)/include/genometools
+	cp src/extended/*.h $(prefix)/include/genometools/extended
+	cp src/genometools.h $(prefix)/include/genometools
+	test -d $(prefix)/include/match \
+	  || mkdir -p $(prefix)/include/genometools/match
+	cp src/match.h $(prefix)/include/genometools
+	cp src/match/*.h src/match/*.pr $(prefix)/include/genometools/match
 	test -d $(prefix)/lib || mkdir -p $(prefix)/lib
-	cp lib/libgtcore.a $(prefix)/lib
+	cp lib/libgenometools.a $(prefix)/lib
 ifdef RANLIB
-	$(RANLIB) $(prefix)/lib/libgtcore.a
+	$(RANLIB) $(prefix)/lib/libgenometools.a
 endif
-	cp lib/libgtext.a $(prefix)/lib
-ifdef RANLIB
-	$(RANLIB) $(prefix)/lib/libgtext.a
-endif
-	cp lib/libgtmatch.a $(prefix)/lib
-ifdef RANLIB
-	$(RANLIB) $(prefix)/lib/libgtmatch.a
-endif
+	cp lib/libgenometools$(SHARED_OBJ_NAME_EXT) $(prefix)/lib
 	@echo '[build config script $(@F)]'
 	sed -e 's!@CC@!$(CC)!' -e 's!@CFLAGS@!$(EXP_CFLAGS)!' \
 	  -e 's!@CPPFLAGS@!$(subst ",\\",-I"$(prefix)/include" $(EXP_CPPFLAGS))!' \
