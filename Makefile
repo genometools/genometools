@@ -23,8 +23,6 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/lpeg-0.7 \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
             -I$(CURDIR)/src/external/bzip2-1.0.5 \
-            -I$(CURDIR)/src/external/agg-2.4/include \
-            -I$(CURDIR)/src/external/libpng-1.2.18 \
             -I$(CURDIR)/src/external/libtecla-1.6.1
 # these variables are exported by the configuration script
 CC:=gcc
@@ -91,10 +89,6 @@ TOOLS_SRC:=$(wildcard src/tools/*.c)
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
 TOOLS_DEP:=$(TOOLS_SRC:%.c=obj/%.d)
 
-LIBAGG_SRC:=$(wildcard src/external/agg-2.4/src/*.cpp src/external/agg-2.4/src/ctrl/*.cpp)
-LIBAGG_OBJ:=$(LIBAGG_SRC:%.cpp=obj/%.o)
-LIBAGG_DEP:=$(LIBAGG_SRC:%.cpp=obj/%.d)
-
 EXPAT_DIR:=src/external/expat-2.0.1/lib
 LIBEXPAT_SRC:=$(EXPAT_DIR)/xmlparse.c $(EXPAT_DIR)/xmlrole.c \
               $(EXPAT_DIR)/xmltok.c
@@ -124,15 +118,6 @@ LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 LUAMAIN_SRC:=$(LUA_DIR)/lua.c
 LUAMAIN_OBJ:=$(LUAMAIN_SRC:%.c=obj/%.o)
 LUAMAIN_DEP:=$(LUAMAIN_SRC:%.c=obj/%.d)
-
-PNG_DIR:=src/external/libpng-1.2.18
-LIBPNG_SRC:=$(PNG_DIR)/png.c $(PNG_DIR)/pngset.c $(PNG_DIR)/pngget.c \
-            $(PNG_DIR)/pngrutil.c $(PNG_DIR)/pngtrans.c $(PNG_DIR)/pngwutil.c \
-            $(PNG_DIR)/pngread.c $(PNG_DIR)/pngrio.c $(PNG_DIR)/pngwio.c \
-            $(PNG_DIR)/pngwrite.c $(PNG_DIR)/pngrtran.c $(PNG_DIR)/pngwtran.c \
-            $(PNG_DIR)/pngmem.c $(PNG_DIR)/pngerror.c $(PNG_DIR)/pngpread.c
-LIBPNG_OBJ:=$(LIBPNG_SRC:%.c=obj/%.o)
-LIBPNG_DEP:=$(LIBPNG_SRC:%.c=obj/%.d)
 
 TECLA_DIR:=src/external/libtecla-1.6.1
 LIBTECLA_SRC:=$(TECLA_DIR)/chrqueue.c $(TECLA_DIR)/cplfile.c \
@@ -305,14 +290,6 @@ lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBEXPAT_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libagg.a: $(LIBAGG_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBAGG_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -501,11 +478,9 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
          $(EXAMPLE_DEP) \
          $(SKPROTO_DEP) \
 	 $(TOOLS_DEP) \
-	 $(LIBAGG_DEP) \
 	 $(LIBEXPAT_DEP) \
 	 $(LIBLUA_DEP) \
          $(LUAMAIN_DEP) \
-	 $(LIBPNG_DEP) \
 	 $(LIBTECLA_DEP) \
 	 $(LIBRNV_DEP) \
 	 $(RNVMAIN_DEP) \
