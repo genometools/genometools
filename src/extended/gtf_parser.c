@@ -542,8 +542,6 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 
       if (score_is_defined)
         genome_feature_set_score((GenomeFeature*) gn, score_value);
-      if (score_is_defined)
-        genome_feature_set_score((GenomeFeature*) gn, score_value);
       if (phase_value != PHASE_UNDEFINED)
         genome_feature_set_phase(gn, phase_value);
       array_add(genome_node_array, gn);
