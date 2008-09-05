@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>LPeg.re - Regex syntax for LPEG</title>
+    <link rel="stylesheet" href="http://www.keplerproject.org/doc.css" type="text/css"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<!-- $Id: re.html,v 1.3 2008/03/07 14:20:55 roberto Exp $ -->
+
+<div id="container">
+	
+<div id="product">
+  <div id="product_logo">
+    <a href="http://www.inf.puc-rio.br/~roberto/lpeg/">
+    <img alt="LPeg logo" src="lpeg-128.gif"/>
+    </a>
+  </div>
+  <div id="product_name"><big><strong>LPeg.re</strong></big></div>
+  <div id="product_description">
+     Regex syntax for LPEG
+  </div>
+</div> <!-- id="product" -->
+
+<div id="main">
+	
+<div id="navigation">
+<h1>re</h1>
+
+<ul>
+  <li><a href="#basic">Basic Constructions</a></li>
+  <li><a href="#func">Functions</a></li>
+  <li><a href="#ex">Some Examples</a></li>
+  <li><a href="#license">License</a></li>
+  </ul>
+  </li>
+</ul>
+</div> <!-- id="navigation" -->
+
+<div id="content">
+
+<h2><a name="basic"></a>The <code>re</code> Module</h2>
+
+<p>
+The <code>re</code> Module
+(provided by file <code>re.lua</code> in the distribution)
+supports a somewhat conventional regex syntax
+for pattern usage within <a href="lpeg.html">LPeg</a>.
+</p>
+
+<p>
+The next table summarizes <code>re</code>'s syntax.
+A <code>p</code> represents an arbitrary pattern;
+<code>num</code> represents a number (<code>[0-9]+</code>);
+<code>name</code> represents an identifier
+(<code>[a-zA-Z][a-zA-Z0-9]*</code>).
+Constructions are listed in order of decreasing precedence.
+<table border="1">
+<tbody><tr><td><b>Syntax</b></td><td><b>Description</b></td></tr>
+<tr><td><code>( p )</code></td> <td>grouping</td></tr>
+<tr><td><code>'string'</code></td> <td>literal string</td></tr>
+<tr><td><code>"string"</code></td> <td>literal string</td></tr>
+<tr><td><code>[class]</code></td> <td>character class</td></tr>
+<tr><td><code>.</code></td> <td>any character</td></tr>
+<tr><td><code>%name</code></td>
+  <td>pattern <code>defs[name] or pre-defined</code></td></tr>
+<tr><td><code>&lt;name&gt;</code></td><td>non terminal</td></tr>
+<tr><td><code>{}</code></td> <td>position capture</td></tr>
+<tr><td><code>{ p }</code></td> <td>simple capture</td></tr>
+<tr><td><code>{~ p ~}</code></td> <td>substitution capture</td></tr>
+<tr><td><code>%num</code></td> <td>back reference
+<font color="red"><em>(experimental)</em></font>
+</td></tr>
+<tr><td><code>p?</code></td> <td>optional match</td></tr>
+<tr><td><code>p*</code></td> <td>zero or more repetitions</td></tr>
+<tr><td><code>p+</code></td> <td>one or more repetitions</td></tr>
+<tr><td><code>p^num</code></td> <td>exactly <code>n</code> repetitions</td></tr>
+<tr><td><code>p^+num</code></td>
+      <td>at least <code>n</code> repetitions</td></tr>
+<tr><td><code>p^-num</code></td>
+      <td>at most <code>n</code> repetitions</td></tr>
+<tr><td><code>p -&gt; 'string'</code></td> <td>string capture</td></tr>
+<tr><td><code>p -&gt; "string"</code></td> <td>string capture</td></tr>
+<tr><td><code>p -&gt; {}</code></td> <td>table capture</td></tr>
+<tr><td><code>p -&gt; name</code></td> <td>function/query/string capture
+equivalent to <code>p / defs[name]</code></td></tr>
+<tr><td><code>p =&gt; name</code></td> <td>match-time capture
+equivalent to <code>lpeg.Cmt(p, defs[name])</code></td></tr>
+<tr><td><code>&p</code></td> <td>and predicate</td></tr>
+<tr><td><code>!p</code></td> <td>not predicate</td></tr>
+<tr><td><code>p1 p2</code></td> <td>concatenation</td></tr>
+<tr><td><code>p1 / p2</code></td> <td>ordered choice</td></tr>
+<tr><td>(<code>name &lt;- p</code>)<sup>+</sup></td> <td>grammar</td></tr>
+</tbody></table>
+<p>
+Any space appearing in a syntax description can be
+replaced by zero or more space characters and Lua-style comments
+(<code>--</code> until end of line).
+</p>
+
+<p>
+Character classes define sets of characters.
+An initial <code>^</code> complements the resulting set.
+A range <em>x</em><code>-</code><em>y</em> includes in the set
+all characters with codes between the codes of <em>x</em> and <em>y</em>.
+A pre-defined class <code>%</code><em>name</em> includes all
+characters of that class.
+A simple character includes itself in the set.
+The only special characters inside a class are <code>^</code>
+(special only if it is the first character);
+<code>]</code>
+(can be included in the set as the first character,
+after the optional <code>^</code>);
+<code>%</code> (special only if followed by a letter);
+and <code>-</code>
+(can be included in the set as the first or the last character).
+</p>
+
+<p>
+Currently the pre-defined classes are similar to those from the
+Lua's string library
+(<code>%a</code> for letters,
+<code>%A</code> for non letters, etc.),
+but they do not follow the localle.
+</p>
+
+
+<h2><a name="func">Functions</a></h2>
+
+<h3><code>re.compile (string, [, defs])</code></h3>
+<p>
+Compiles the given string and
+returns an equivalent LPeg pattern.
+The given string may define either an expression or a grammar.
+The optional <code>defs</code> table provides extra Lua values
+to be used by the pattern.
+</p>
+
+<h3><code>re.find (subject, pattern [, init])</code></h3>
+<p>
+Searches the given pattern in the given subject.
+If it finds a match,
+returns the index where this occurrence starts,
+plus the captures made by the pattern (if any).
+Otherwise, returns nil.
+</p>
+
+<h3><code>re.match (subject, pattern)</code></h3>
+<p>
+Matches the given pattern against the given subject.
+</p>
+
+
+<h2><a name="ex">Some Examples</a></h2>
+
+<p>
+As a simple example,
+the following call will produce the same pattern produced by the
+Lua expression in the <a href="#balanced">balanced parentheses</a> example:
+</p>
+<pre class="example">
+b = re.compile[[  balanced &lt;- "(" ([^()] / &lt;balanced&gt;)* ")"  ]]
+</pre>
+
+<p>
+The next example replicates the <a href="#CSV">CSV decoder</a>:
+</p>
+<pre class="example">
+record = re.compile[[
+  record &lt;- ( &lt;field&gt; (',' &lt;field&gt;)* ) -&gt; {} ('\n' / !.)
+  field &lt;- &lt;escaped&gt; / &lt;nonescaped&gt;
+  nonescaped &lt;- { [^,"\n]* }
+  escaped &lt;- '"' {~ ([^"] / '""' -&gt; '"')* ~} '"'
+]]
+</pre>
+
+<p>
+The next example mathes Lua long strings:
+</p>
+<pre class="example">
+c = re.compile([[
+  longstring &lt;- ('[' { '='* } '[' &lt;close&gt;) =&gt; void
+  close &lt;- ']' %1 ']' / . &lt;close&gt;
+]], {void = function () return true end})
+
+print(c:match'[==[]]===]]]]==]===[]')   --&gt; 17
+</pre>
+
+
+
+
+<h2><a name="license">License</a></h2>
+
+<p>
+Copyright &copy; 2008 Lua.org, PUC-Rio.
+</p>
+<p>
+Permission is hereby granted, free of charge,
+to any person obtaining a copy of this software and
+associated documentation files (the "Software"),
+to deal in the Software without restriction,
+including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software,
+and to permit persons to whom the Software is
+furnished to do so,
+subject to the following conditions:
+</p>
+
+<p>
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions of the Software.
+</p>
+
+<p>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+</p>
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+<p><small>
+$Id: re.html,v 1.3 2008/03/07 14:20:55 roberto Exp $
+</small></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+
+</body>
+</html> 

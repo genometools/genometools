@@ -8,19 +8,19 @@
 </head>
 <body>
 
-<!-- $Id: doc.html,v 1.41 2007/10/10 18:56:44 roberto Exp $ -->
+<!-- $Id: lpeg.html,v 1.46 2008/03/07 14:20:55 roberto Exp roberto $ -->
 
 <div id="container">
 	
 <div id="product">
   <div id="product_logo">
-    <a href="http://www.inf.puc-rio.br/~roberto/lpeg.html">
+    <a href="http://www.inf.puc-rio.br/~roberto/lpeg/">
     <img alt="LPeg logo" src="lpeg-128.gif"/>
     </a>
   </div>
   <div id="product_name"><big><strong>LPeg</strong></big></div>
   <div id="product_description">
-     Parsing Expression Grammars For Lua, version 0.7
+     Parsing Expression Grammars For Lua, version 0.8
   </div>
 </div> <!-- id="product" -->
 
@@ -33,11 +33,12 @@
   <li><strong>Home</strong>
   <ul>
     <li><a href="#intro">Introduction</a></li>
+    <li><a href="#func">Functions</a></li>
     <li><a href="#basic">Basic Constructions</a></li>
     <li><a href="#grammar">Grammars</a></li>
     <li><a href="#captures">Captures</a></li>
     <li><a href="#ex">Some Examples</a></li>
-    <li><a href="#re">The <code>re</code> Module</a></li>
+    <li><a href="re.html">The <code>re</code> Module</a></li>
     <li><a href="#download">Download</a></li>
     <li><a href="#license">License</a></li>
   </ul>
@@ -122,6 +123,8 @@ for creating patterns:
   <td>Matches <code>patt1</code> if <code>patt2</code> does not match</td></tr>
 <tr><td><code>-patt</code></td>
   <td>Equivalent to <code>"" - patt</code></td></tr>
+<tr><td><code>#patt</code></td>
+  <td>Matches <code>patt</code> but consumes no input</td></tr>
 </tbody></table>
 
 <p>As a very simple example, <code>lpeg.R("09")^1</code> matches
@@ -136,28 +139,15 @@ so, it succeeds only at the subject's end.
 
 <p>
 Those not convinced by the previous syntax
-can try the <a href="#re"><code>re</code> module</a>,
+can try the <a href="re.html"><code>re</code> module</a>,
 which implements patterns following a regular-expression style
 (e.g., <code>[09]+</code>).
-(This module is less than 100 lines of Lua code,
+(This module is 200 lines of Lua code,
 and of course uses LPeg to parse regular expressions.)
-This library currently supports only very basic captures.
-But it provides a good source for those looking for
-extended examples of LPeg definitions.
 </p>
 
 
-
-<h2><a name="basic">Basic Constructions</a></h2>
-
-<p>
-Most of the following operations build patterns.
-All operations that expect a pattern as an argument
-may receive also strings, tables, numbers, booleans, or functions,
-which are translated to patterns according to
-the rules of function <a href="#lpeg"><code>lpeg.P</code></a>.
-</p>
-
+<h2><a name="func">Functions</a></h2>
 
 <h3><code>lpeg.match (pattern, subject [, init])</code></h3>
 <p>
@@ -188,6 +178,30 @@ matches anywhere.
 This second approach is easy and quite efficient;
 see <a href="#ex">examples</a>.
 </p>
+
+<h3><code>lpeg.type (value)</code></h3>
+<p>
+If the given value is a pattern,
+returns the string <code>"pattern"</code>.
+Otherwise returns nil.
+</p>
+
+<h3><code>lpeg.version ()</code></h3>
+<p>
+Returns a string with the running version of LPEG.
+</p>
+
+
+<h2><a name="basic">Basic Constructions</a></h2>
+
+<p>
+The following operations build patterns.
+All operations that expect a pattern as an argument
+may receive also strings, tables, numbers, booleans, or functions,
+which are translated to patterns according to
+the rules of function <a href="#lpeg"><code>lpeg.P</code></a>.
+</p>
+
 
 
 <h3><a name="lpeg"><code>lpeg.P (value)</code></a></h3>
@@ -233,17 +247,8 @@ it is interpreted as a grammar
 
 <li><p>
 If the argument is a function,
-returns a pattern that matches as follows. 
-Each time there is an attempt for a match against this pattern,
-the function is called,
-always with two arguments:
-the original subject string,
-and the current position in the subject.
-If the call returns a <em>valid</em> number,
-the match succeeds
-and the returned number becomes the new current position.
-If the call returns <b>false</b>, <b>nil</b>, or an invalid number,
-the match fails.
+returns a pattern equivalent to a
+<a href="#matchtime">match-time capture</a> over the empty string.
 </p>
 
 <p>
@@ -314,6 +319,11 @@ but without consuming any input,
 independently of success or failure.
 </p>
 
+<p>
+When it succeeds,
+<code>#patt</code> produces all captures produced by <code>patt</code>.
+</p>.
+
 
 <h3><code>-patt</code></h3>
 <p>
@@ -328,6 +338,13 @@ independently of success or failure.
 <p>
 As an example, the pattern
 <code>-1</code> matches only the end of string.
+</p>
+
+<p>
+This pattern never produces any captures,
+because either <code>patt</code> fails
+or <code>-patt</code> fails.
+(A failing pattern produces no captures.)
 </p>
 
 
@@ -481,58 +498,83 @@ equalcount = lpeg.P{
 } * -1
 </pre>
 
+
 <h2><a name="captures">Captures</a></h2>
 
 <p>
 Captures specify what a match operation should return
 (the so called <em>semantic information</em>).
 LPeg offers several kinds of captures,
-which build values based on matches and combine them to
-create new values.
+which produces values based on matches and combine them to
+produce new values.
 </p>
 
 <p>
 The following table summarizes the basic captures:
 </p>
 <table border="1">
-<tbody><tr><td><b>Operation</b></td><td><b>What is Captured</b></td></tr>
+<tbody><tr><td><b>Operation</b></td><td><b>What it Produces</b></td></tr>
 <tr><td><code>lpeg.C(patt)</code></td>
   <td>the match for <code>patt</code></td></tr>
 <tr><td><code>lpeg.Cc(values)</code></td>
     <td>the given values (matches the empty string)</td></tr>
 <tr><td><code>lpeg.Cp()</code></td>
     <td>the current position (matches the empty string)</td></tr>
+<tr><td><code>lpeg.Cb(n)</code></td>
+    <td>the value produced by the n<sup>th</sup> previous
+        capture (matches the empty string)</td></tr>
+<tr><td><code>lpeg.Carg(n)</code></td>
+    <td>the value of the n<sup>th</sup> extra argument to
+        <code>lpeg.match</code> (matches the empty string)</td></tr>
 <tr><td><code>lpeg.Cs(patt)</code></td>
   <td>the match for <code>patt</code>
-      with nested captures replacing their matches</td></tr>
+      with the values from nested captures replacing their matches</td></tr>
 <tr><td><code>lpeg.Ct(patt)</code></td>
   <td>a table with all captures from <code>patt</code></td></tr>
 <tr><td><code>lpeg.Ca(patt)</code></td>
   <td>an <em>accumulation</em> (or <em>folding</em>) of the
       captures from <code>patt</code></td></tr>
-<tr><td><code>patt / function</code></td>
-  <td>the returns of <code>function</code> applied to the captures
+<tr><td><code>patt / string</code></td>
+  <td><code>string</code>, with some marks replaced by captures
       of <code>patt</code></td></tr>
 <tr><td><code>patt / table</code></td>
   <td><code>table[c]</code>, where <code>c</code> is the (first)
       capture of <code>patt</code></td></tr>
-<tr><td><code>patt / string</code></td>
-  <td><code>string</code>, with some marks replaced by captures
+<tr><td><code>patt / function</code></td>
+  <td>the returns of <code>function</code> applied to the captures
       of <code>patt</code></td></tr>
+<tr><td><code>lpeg.Cmt(patt, function)</code></td>
+  <td>(see <a href="#matchtime">match-time capture</a>)</code></td></tr>
 </tbody></table>
 
 <p>
-A capture pattern captures a value every time it succeeds.
+A capture pattern produces its values every time it succeeds.
 For instance,
-a capture inside a loop generates as many values as matched by the loop.
-A capture generates a value only when it succeeds.
+a capture inside a loop produces as many values as matched by the loop.
+A capture produces a value only when it succeeds.
 For instance,
-the pattern <code>lpeg.C(lpeg.P'a'^-1)</code>
-captures the empty string when there is no <code>'a'</code>
-(because the pattern <code>'a'?</code> succeeds),
-while the pattern <code>lpeg.C('a')^-1</code>
-does not capture any value when there is no <code>'a'</code>
-(because the pattern <code>'a'</code> fails).
+the pattern <code>lpeg.C(lpeg.P"a"^-1)</code>
+produces the empty string when there is no <code>"a"</code>
+(because the pattern <code>"a"?</code> succeeds),
+while the pattern <code>lpeg.C("a")^-1</code>
+does not produce any value when there is no <code>"a"</code>
+(because the pattern <code>"a"</code> fails).
+</p>
+
+<p>
+Usually,
+LPEG evaluates all captures only after (and if) the entire match succeeds.
+At <em>match time</em> it only gathers enough information
+to produce the capture values later.
+As a particularly important consequence,
+most captures cannot affect the way a pattern matches a subject.
+The only exception to this rule is the
+so-called <a href="#matchtime"><em>match-time capture</em></a>.
+When a match-time capture matches,
+it forces the immediate evaluation of all its nested captures
+and then calls its corresponding function,
+which tells whether the match succeeds and also
+what values are produced.
 </p>
 
 <h3><code>lpeg.C (patt)</code></h3>
@@ -581,11 +623,59 @@ print(list:match("10,30,43"))   --&gt; 83
 </pre>
 
 
+<h3><code>lpeg.Carg (n)</code></h3>
+<p>
+Creates an <em>argument capture</em>.
+This pattern matches the empty string and
+produces the value given as the n<sup>th</sup> extra
+argument given in the call to <code>lpeg.match</code>.
+</p>
+
+
+<h3><code>lpeg.Cb (n)</code></h3>
+<p>
+Creates a <em>back capture</em>.
+This pattern matches the empty string and
+produces the values produced by the n<sup>th</sup> previous capture.
+</p>
+
+<p>
+Captures are numbered dynamically.
+So, the first previous capture is the last capture to match
+before the current one.
+The numbering includes only complete captures;
+so, if the back capture is inside another capture,
+this enclosing capture is ignored
+(because it is not complete when the back capture is seen).
+Numbering does not count nested captures.
+Numbering counts captures,
+not the values produced by them;
+it does not matter whether a capture produces zero or many values,
+it counts as one.
+</p>
+
+<p>
+<font color="red"><em>
+This is an experimental feature.
+It probably will be changed or even removed in future releases.
+</em></font>
+</p>
+
+
 <h3><code>lpeg.Cc ({value})</code></h3>
 <p>
 Creates a <em>constant capture</em>.
 This pattern matches the empty string and
 produces all given values as its captured values.
+</p>
+
+
+<h3><code>lpeg.Cp ()</code></h3>
+<p>
+Creates a <em>position capture</em>.
+It matches the empty string and
+captures the position in the subject where the match occurs.
+The captured value is a number.
 </p>
 
 
@@ -602,15 +692,6 @@ The capture values from <code>patt</code> are not returned independently
 </p>
 
 
-<h3><code>lpeg.Cp ()</code></h3>
-<p>
-Creates a <em>position capture</em>.
-It matches the empty string and
-captures the position in the subject where the match occurs.
-The captured value is a number.
-</p>
-
-
 <h3><code>lpeg.Ct (patt)</code></h3>
 <p>
 Creates a <em>table capture</em>.
@@ -623,22 +704,6 @@ starting at 1.
 The captured value is only this table.
 The captures made by <code>patt</code> are not
 returned independently (only as table elements).
-</p>
-
-
-<h3><code>patt / function</code></h3>
-<p>
-Creates a <em>function capture</em>.
-It calls the given function passing all captures made by
-<code>patt</code> as arguments,
-or the whole match if <code>patt</code> made no capture.
-The values returned by the function
-are the final values of the capture.
-(This capture may create multiple values.)
-In particular,
-if <code>function</code> returns no value,
-there is no captured value;
-everything works as if there was no capture.
 </p>
 
 
@@ -663,12 +728,58 @@ It indexes the given table using as key the value of the first capture
 of <code>patt</code>,
 or the whole match if <code>patt</code> made no capture.
 The value at that index is the final value of the capture.
-</p>
-
-<p>
 If the table does not have that key,
 there is no captured value.
 Everything works as if there was no capture.
+</p>
+
+
+<h3><code>patt / function</code></h3>
+<p>
+Creates a <em>function capture</em>.
+It calls the given function passing all captures made by
+<code>patt</code> as arguments,
+or the whole match if <code>patt</code> made no capture.
+The values returned by the function
+are the final values of the capture.
+(This capture may create multiple values.)
+In particular,
+if <code>function</code> returns no value,
+there is no captured value;
+everything works as if there was no capture.
+</p>
+
+
+<h3><a name="matchtime"><code>lpeg.Cmt(patt, function)</code></a></h3>
+<p>
+Creates a <em>match-time capture</em>.
+Unlike all other captures,
+this one is evaluated immediately when a match occurs.
+It forces the immediate evaluation of all its nested captures
+and then calls <code>function</code>.
+</p>
+
+<p>
+The function gets as arguments the entire subject,
+the current position (after the match of <code>patt</code>),
+plus any capture values produced by <code>patt</code>.
+</p>
+
+<p>
+The first value returned by <code>function</code>
+defines how the match happens.
+If the call returns a number,
+the match succeeds
+and the returned number becomes the new current position.
+(Assuming a subject <em>s</em> and current position <em>i</em>,
+the returned number must be in the range <em>[i, len(s) + 1]</em>.)
+If the call returns <b>false</b>, <b>nil</b>, or no value,
+the match fails.
+</p>
+
+<p>
+Any extra values returned by the function become the
+values produced by the capture.
 </p>
 
 
@@ -849,46 +960,6 @@ ending with a newline or the string end (-1).
 </p>
 
 
-<h3>Lua's Long Strings</h3>
-<p>
-This example matches long strings in Lua.
-Probably there is no pure PEG grammar that matches that syntax
-(as there is no Context-Free Grammar for it),
-so we resort to Lua:
-</p>
-<pre class="example">
-local start = "[" * lpeg.P"="^0 * "["
-longstring = lpeg.P(function (s, i)
-  local l = lpeg.match(start, s, i)
-  if not l then return nil end
-  local p = lpeg.P("]" .. string.rep("=", l - i - 2) .. "]")
-  p = (1 - p)^0 * p
-  return lpeg.match(p, s, l)
-end)
-</pre>
-<p>
-The function first checks whether there is a long string starting
-at position <code>i</code>, using the <code>start</code> pattern.
-If so, it builds a pattern <code>p</code>
-that matches an ending bracket with the correct number of equal signs
-and then looks for this pattern.
-</p>
-
-<p>
-Lua-function patterns are not efficient.
-So, it may be worth the use of an and-predicate
-to pre-analyze the subject before calling Lua:
-</p>
-<pre class="example">
-longstring = #("[" * lpeg.S"[=") * longstring
-</pre>
-<p>
-In this example, the pattern only calls Lua if the current position
-matches an open bracket followed by either another open bracket or
-an equal sign (so that the only valid token there is a long string).
-</p>
-
-
 <h3>UTF-8 and Latin 1</h3>
 <p>
 It is not difficult to use LPeg to convert a string from
@@ -972,6 +1043,53 @@ local utf8 = lpeg.R("\0\127") / string.byte
 
 local decode_pattern = lpeg.Ct(utf8^0) * -1
 </pre>
+
+
+<h3>Lua's Long Strings</h3>
+<p>
+A long string in Lua starts with the pattern <code>[=*[</code>
+and ends at the first occurrence of <code>]=*]</code> with
+exactly the same number of equal signs.
+If the opening brackets are followed by a newline,
+this newline is discharged
+(that is, it is not part of the string).
+</p>
+
+<p>
+To match a long string in Lua,
+the pattern must capture the first repetition of equal signs and then,
+whenever it finds a candidate for closing the string,
+check whether it has the same number of equal signs.
+</p>
+
+<pre class="example">
+open = "[" * lpeg.C(lpeg.P"="^0) * "[" * lpeg.P"\n"^-1
+close = "]" * lpeg.C(lpeg.P"="^0) * "]"
+closeeq = lpeg.Cmt(close * lpeg.Cb(2), function (s, i, a, b) return a == b end)
+string = open * m.C((lpeg.P(1) - closeeq)^0) * close /
+  function (o, s) return s end
+</pre>
+
+<p>
+The <code>open</code> pattern matches <code>[=*[</code>,
+capturing the repetitions of equal signs for later use;
+it also discharges an optional newline, if present.
+The <code>close</code> pattern matches <code>]=*]</code>.
+The <code>closeeq</code> pattern first matches <code>close</code>;
+then it uses a back capture to recover the capture made
+by the previous <code>open</code>
+(the immediate previous capture is the one just made by <code>close</code>,
+so it must get the second previous capture);
+finally it uses a match-time capture to check
+whether both captures are equal.
+The <code>string</code> pattern starts with an <code>open</code>,
+then it goes as far as possible until matching <code>closeeq</code>,
+and then matches the final <code>close</code>.
+The final function capture simply consumes
+the captures made by <code>open</code> and <code>close</code>
+and returns only the middle capture,
+which is the string contents.
+</p>
 
 
 <h3>Arithmetic Expressions</h3>
@@ -1068,128 +1186,17 @@ and the new factor for each repetition.
 </p>
 
 
-<h2><a name="re"></a>The <code>re</code> Module</h2>
-
-<p>
-The <code>re</code> Module
-(provided by file <code>re.lua</code> in the distribution)
-supports a somewhat conventional regular-expression syntax
-for pattern construction.
-</p>
-
-<p>
-If offers two functions:
-</p>
-<ul>
-<li><p><code>re.compile(string, [, defs])</code>
-compiles the given string and
-returns an equivalent LPeg pattern.
-The given string may define either an expression or a grammar.
-The optional <code>defs</code> table provides extra Lua values
-to be used by the pattern.
-</p></li>
-<li><p><code>re.match(subject,pattern)</code> compiles the given pattern
-(a string) and matches it against the given subject.
-(It memoizes its results,
-so that there is no penalty in calling it multiple times
-with the same string.)
-</p></li>
-</ul>
-
-<p>
-Like traditional regular expressions (but unlike original PEG),
-a character class may start with a <code>^</code> to complement
-its meaning.
-</p>
-
-<p>
-The next table summarizes <code>re</code>'s syntax.
-A <code>p</code> represents an arbitrary pattern.
-<table border="1">
-<tbody><tr><td><b>Syntax</b></td><td><b>Description</b></td></tr>
-<tr><td><code>( p )</code></td> <td>grouping</td></tr>
-<tr><td><code>'string'</code></td> <td>literal string</td></tr>
-<tr><td><code>"string"</code></td> <td>literal string</td></tr>
-<tr><td><code>[class]</code></td> <td>character class</td></tr>
-<tr><td><code>.</code></td> <td>any character</td></tr>
-<tr><td><code>name</code></td> <td>pattern <code>defs[name]</code>
-(if defined) or a non terminal defined by the current grammar</td></tr>
-<tr><td><code>{}</code></td> <td>position capture</td></tr>
-<tr><td><code>{ p }</code></td> <td>simple capture</td></tr>
-<tr><td><code>{~ p ~}</code></td> <td>substitution capture</td></tr>
-<tr><td><code>p?</code></td> <td>optional match</td></tr>
-<tr><td><code>p*</code></td> <td>zero or more repetitions</td></tr>
-<tr><td><code>p+</code></td> <td>one or more repetitions</td></tr>
-<tr><td><code>p{n}</code></td> <td>exactly <code>n</code> repetitions</td></tr>
-<tr><td><code>p{n,}</code></td>
-      <td>at least <code>n</code> repetitions</td></tr>
-<tr><td><code>p{n,m}</code></td>
-      <td>between <code>n</code> and <code>m</code> repetitions</td></tr>
-<tr><td><code>p -> 'string'</code></td> <td>string capture</td></tr>
-<tr><td><code>p -> "string"</code></td> <td>string capture</td></tr>
-<tr><td><code>p -> {}</code></td> <td>table capture</td></tr>
-<tr><td><code>p -> name</code></td> <td>function/query/string capture
-equivalent to <code>p / defs[name]</code></td></tr>
-<tr><td><code>&p</code></td> <td>and predicate</td></tr>
-<tr><td><code>!p</code></td> <td>not predicate</td></tr>
-<tr><td><code>p1 p2</code></td> <td>concatenation</td></tr>
-<tr><td><code>p1 / p2</code></td> <td>ordered choice</td></tr>
-<tr><td><code>name &lt;- p</code></td> <td>grammar rule</td></tr>
-</tbody></table>
-<p>
-Any space appearing in a syntax description can be
-replaced by zero or more space characters and comments
-(<code>--</code> until end of line).
-</p>
-
-<p>
-Character classes define sets of characters.
-An initial <code>^</code> complements the resulting set.
-A range <em>x</em><code>-</code><em>y</em> includes in the set
-all characters with codes between the codes of <em>x</em> and <em>y</em>.
-A simple character includes itself in the set.
-The only special characters inside a class are <code>^</code>
-(special only if it is the first character);
-<code>]</code>
-(can be included in the set as the first character,
-after the optional <code>^</code>);
-and <code>-</code>
-(can be included in the set as the first or the last character).
-</p>
-
-<p>
-As a simple example,
-the following call will produce the same pattern produced by the
-Lua expression in the <a href="#balanced">balanced parentheses</a> example:
-</p>
-<pre>
-b = re.compile[[  balanced &lt;- '(' ([^()] / balanced)* ')'  ]]
-</pre>
-
-<p>
-The next example replicates the <a href="#CSV">CSV decoder</a>:
-</p>
-<pre>
-record = re.compile[[
-  record <- ( field (',' field)* ) -> {} ('\n' / !.)
-  field <- escaped / nonescaped
-  nonescaped <- { [^,"\n]* }
-  escaped <- '"' {~ ([^"] / '""' -> '"')* ~} '"'
-]]
-</pre>
-
-
 
 <h2><a name="download"></a>Download</h2>
 
 <p>LPeg 
-<a href="http://www.inf.puc-rio.br/~roberto/lpeg-0.7.tar.gz">source code</a>.</p>
+<a href="http://www.inf.puc-rio.br/~roberto/lpeg/lpeg-0.8.1.tar.gz">source code</a>.</p>
 
 
 <h2><a name="license">License</a></h2>
 
 <p>
-Copyright &copy; 2007 Lua.org, PUC-Rio.
+Copyright &copy; 2008 Lua.org, PUC-Rio.
 </p>
 <p>
 Permission is hereby granted, free of charge,
@@ -1227,7 +1234,7 @@ THE SOFTWARE.
 
 <div id="about">
 <p><small>
-$Id: doc.html,v 1.41 2007/10/10 18:56:44 roberto Exp $
+$Id: lpeg.html,v 1.46 2008/03/07 14:20:55 roberto Exp roberto $
 </small></p>
 </div> <!-- id="about" -->
 

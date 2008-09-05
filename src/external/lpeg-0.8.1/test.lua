@@ -1,16 +1,17 @@
 #!/usr/local/bin/lua5.1
 
--- $Id: test.lua,v 1.45 2007/10/10 18:52:03 roberto Exp $
+-- $Id: test.lua,v 1.57 2008/03/07 17:19:58 roberto Exp $
 
 local m = require"lpeg"
+
+any = m.P(1)
+space = m.S" \t\n"^0
 
 local function checkeq (x, y)
   if type(x) ~= "table" then assert(x == y)
   else
-    assert(#x == #y)
-    for i = 1, #x do
-      checkeq(x[i], y[i])
-    end
+    for k,v in pairs(x) do checkeq(v, y[k]) end
+    for k,v in pairs(y) do checkeq(v, x[k]) end
   end
 end
 
@@ -33,6 +34,11 @@ end
 
 
 print"General tests for LPeg library"
+
+assert(type(m.version()) == "string")
+print("version " .. m.version())
+assert(m.type("alo") ~= "pattern")
+assert(m.type(m.P"alo") == "pattern")
 
 assert(m.match(3, "aaaa"))
 assert(m.match(4, "aaaa"))
@@ -244,14 +250,22 @@ checkeq(t, {"alo", "a", "o"})
 p = { ('a' * m.V(1))^-1 } * m.P'b' * { 'a' * m.V(2); m.V(1)^-1 }
 assert(m.match(p, "aaabaac") == 7)
 
-
--- test for errors
-assert(not pcall(m.match, "a", { m.V(1) * 'a' }))
-assert(not pcall(m.match, string.rep("a", 10000), m.C('a')^0))
-assert(not pcall(m.match, "", m.V(1)))   -- open grammar
-
+-- a large table capture
 t = m.match(m.Ct(m.C('a')^0), string.rep("a", 10000))
 assert(#t == 10000 and t[1] == 'a' and t[#t] == 'a')
+
+
+-- test for errors
+local function checkerr (msg, ...)
+  assert(m.match({ m.P(msg) + 1 * m.V(1) }, select(2, pcall(...))))
+end
+
+checkerr("rule '1' is left recursive", m.match, { m.V(1) * 'a' }, "a")
+checkerr("stack overflow", m.match, m.C('a')^0, string.rep("a", 50000))
+checkerr("rule '1' outside a grammar", m.match, m.V(1), "")
+checkerr("rule 'hiii' outside a grammar", m.match, m.V('hiii'), "")
+checkerr("rule 'hiii' is not defined", m.match, { m.V('hiii') }, "")
+checkerr("rule <a table> is not defined", m.match, { m.V({}) }, "")
 
 print('+')
 
@@ -382,11 +396,31 @@ assert(m.match(m.span("abcd"), "") == 1)
 print("+")
 
 
+-- tests for argument captures
+assert(not pcall(m.Carg, 0))
+assert(not pcall(m.Carg, -1))
+assert(not pcall(m.Carg, 2^18))
+assert(not pcall(m.match, m.Carg(1), 'a', 1))
+assert(m.match(m.Carg(1), 'a', 1, print) == print)
+x = {m.match(m.Carg(1) * m.Carg(2), '', 1, 10, 20)}
+checkeq(x, {10, 20})
+
+assert(m.match(m.Cmt(m.Carg(3) *
+                     m.Cmt(m.Cb(1), function (s,i,x)
+                                      assert(s == "a" and i == 1);
+                                      return i, x+1
+                                    end) *
+                     m.Carg(2), function (s,i,a,b,c)
+                                  assert(s == "a" and i == 1);                                                    return i, a + 2*b + 3*c
+                                end) * "a",
+               "a", 1, false, 100, 1000) == 1000 + 2*1001 + 3*100)
+
+
 -- tests for Lua functions
 
 t = {}
 s = ""
-p = function (s1, i) assert(s == s1); t[#t + 1] = i end
+p = function (s1, i) assert(s == s1); t[#t + 1] = i; return nil end
 s = "hi, this is a test"
 assert(m.match(((p - m.P(-1)) + 2)^0, s) == string.len(s) + 1)
 assert(#t == string.len(s)/2 and t[1] == 1 and t[2] == 3)
@@ -407,24 +441,36 @@ assert(m.match((m.P(1) * p)^0, s) == string.len(s) + 1)
 assert(#t == string.len(s) and t[1] == 2 and t[2] == 3)
 
 t = {}
-p = m.P(function (s1, i) assert(s == s1); t[#t + 1] = i; return i + 1 end)
+p = m.P(function (s1, i) assert(s == s1); t[#t + 1] = i;
+                         return i <= s1:len() and i + 1 end)
 s = "hi, this is a test"
 assert(m.match(p^0, s) == string.len(s) + 1)
 assert(#t == string.len(s) + 1 and t[1] == 1 and t[2] == 2)
 
-p = function (s1, i) return m.match(m.P"a"^0, s1, i) end
+p = function (s1, i) return m.match(m.P"a"^1, s1, i) end
 assert(m.match(p, "aaaa") == 5)
-assert(m.match(p, "baaa") == 1)
+assert(m.match(p, "abaa") == 2)
+assert(not m.match(p, "baaa"))
 
-assert(not m.match(function () return 2^20 end, s))
-assert(not m.match(m.P(function () return 0 end), s))
-assert(not m.match(m.P(1)^0 * function (_, i) return i - 1 end, s))
-assert(m.match(m.P(1)^0 * function (_, i) return i end, s) ==
+assert(not pcall(m.match, function () return 2^20 end, s))
+assert(not pcall(m.match, function () return 0 end, s))
+assert(not pcall(m.match, function (s, i) return i - 1 end, s))
+assert(not pcall(m.match, m.P(1)^0 * function (_, i) return i - 1 end, s))
+assert(m.match(m.P(1)^0 * function (_, i) return i end * -1, s))
+assert(not pcall(m.match, m.P(1)^0 * function (_, i) return i + 1 end, s))
+assert(m.match(m.P(function (s, i) return s:len() + 1 end) * -1, s))
+assert(not pcall(m.match, m.P(function (s, i) return s:len() + 2 end) * -1, s))
+assert(not m.match(m.P(function (s, i) return s:len() end) * -1, s))
+assert(m.match(m.P(1)^0 * function (_, i) return true end, s) ==
        string.len(s) + 1)
 for i = 1, string.len(s) + 1 do
   assert(m.match(function (_, _) return i end, s) == i)
 end
 
+p = (m.P(function (s, i) return i%2 == 0 and i + 1 end)
+  +  m.P(function (s, i) return i%2 ~= 0 and i + 2 <= s:len() and i + 3 end))^0
+  * -1
+assert(p:match(string.rep('a', 14000)))
 
 -- tests for Function Replacements
 f = function (a, ...) if a ~= "x" then return {a, ...} end end
@@ -590,6 +636,94 @@ end
 print"+"
 
 
+-- tests for back references
+assert(not pcall(m.Cb, -1))
+assert(not pcall(m.Cb, 0))
+assert(not pcall(m.Cb, 2^20))
+assert(not pcall(m.match, m.Cb(1), ''))
+assert(not pcall(m.match, m.C('a') * m.Cb(2), 'a'))
+
+assert(not pcall(m.match, m.C(m.P(1) * m.Cb(1)), 'a'))
+
+t = {}
+function foo (p) t[#t + 1] = p; return p .. "x" end
+
+p = (m.C(2) / foo) * (m.Cb(1) / foo) * (m.Cb(1) / foo) * (m.Cb(1) / foo)
+x = {p:match'ab'}
+checkeq(x, {'abx', 'abxx', 'abxxx', 'abxxxx'})
+checkeq(t, {'ab',
+            'ab', 'abx',
+            'ab', 'abx', 'abxx',
+            'ab', 'abx', 'abxx', 'abxxx'})
+
+
+
+-- tests for match-time captures
+
+local function id (s, i, ...)
+  return true, ...
+end
+
+assert(m.Cmt(m.Cs((m.Cmt(m.S'abc' / { a = 'x', c = 'y' }, id) +
+              m.R'09'^1 /  string.char +
+              m.P(1))^0), id):match"acb98+68c" == "xyb\98+\68y")
+
+p = m.P{'S',
+  S = m.V'atom' * space
+    + m.Cmt(m.Ct("(" * space * (m.Cmt(m.V'S'^1, id) + m.P(true)) * ")" * space), id),
+  atom = m.Cmt(m.C(m.R("AZ", "az", "09")^1), id)
+}
+x = p:match"(a g () ((b) c) (d (e)))"
+checkeq(x, {'a', 'g', {}, {{'b'}, 'c'}, {'d', {'e'}}});
+
+x = {(m.Cmt(1, id)^0):match(string.rep('a', 500))}
+assert(#x == 500)
+assert(not pcall(m.match, m.Cmt(1, id)^0, string.rep('a', 50000)))
+
+local function id(s, i, x)
+  if x == 'a' then return i + 1, 1, 3, 7
+  else return nil, 2, 4, 6, 8
+  end   
+end     
+
+p = ((m.P(id) + m.Cmt(2, id)  + m.Cmt(1, id)))^0
+assert(table.concat{p:match('abababab')} == string.rep('137', 4))
+
+local function ref (s, i, x)
+  return m.match(x, s, i - x:len())
+end
+
+assert(m.Cmt(m.P(1)^0, ref):match('alo') == 4)
+assert((m.P(1) * m.Cmt(m.P(1)^0, ref)):match('alo') == 4)
+assert(not (m.P(1) * m.Cmt(m.C(1)^0, ref)):match('alo'))
+
+ref = function (s,i,x) return i == tonumber(x) and i, 'xuxu' end
+
+assert(m.Cmt(1, ref):match'2')
+assert(not m.Cmt(1, ref):match'1')
+assert(m.Cmt(m.P(1)^0, ref):match'03')
+
+function ref (s, i, a, b)
+  if a == b then return i, a:upper() end
+end
+
+p = m.Cmt(m.C(m.R"az"^1) * "-" * m.C(m.R"az"^1), ref)
+p = (any - p)^0 * p * any^0 * -1
+
+assert(p:match'abbbc-bc ddaa' == 'BC')
+
+
+c = '[' * m.C(m.P'='^0) * '[' *
+    { m.Cmt(']' * m.C(m.P'='^0) * ']' * m.Cb(2), function (_, _, s1, s2)
+                                               return s1 == s2 end)
+       + 1 * m.V(1) } / function () end
+
+assert(c:match'[==[]]====]]]]==]===[]' == 18)
+assert(c:match'[[]=]====]=]]]==]===[]' == 14)
+assert(not c:match'[[]=]====]=]=]==]===[]')
+
+
+
 -------------------------------------------------------------------
 -- Tests for 're' module
 -------------------------------------------------------------------
@@ -626,26 +760,27 @@ assert(match("cccx" , "'ab'? ('ccc' / ('cde' / 'cd'*)? / 'ccc') 'x'+") == 5)
 assert(match("cdx" , "'ab'? ('ccc' / ('cde' / 'cd'*)? / 'ccc') 'x'+") == 4)
 assert(match("abcdcdx" , "'ab'? ('ccc' / ('cde' / 'cd'*)? / 'ccc') 'x'+") == 8)
 
-assert(match("abc", "a <- (. a)?") == 4)
-assert(match("(abc)", "balanced <- '(' ([^()] / balanced)* ')'"))
-assert(match("(a(b)((c) (d)))", "balanced <- '(' ([^()] / balanced)* ')'"))
-assert(not match("(a(b ((c) (d)))", "balanced <- '(' ([^()] / balanced)* ')'"))
+assert(match("abc", "a <- (. <a>)?") == 4)
+b = "balanced <- '(' ([^()] / <balanced>)* ')'"
+assert(match("(abc)", b))
+assert(match("(a(b)((c) (d)))", b))
+assert(not match("(a(b ((c) (d)))", b))
 
-b = compile[[  balanced <- "(" ([^()] / balanced)* ")" ]]
+b = compile[[  balanced <- "(" ([^()] / <balanced>)* ")" ]]
 assert(b == m.P(b))
 assert(b:match"((((a))(b)))")
 
 local g = [[
-  S <- "0" B / "1" A / ""   -- balanced strings
-  A <- "0" S / "1" A A      -- one more 0
-  B <- "1" S / "0" B B      -- one more 1
+  S <- "0" <B> / "1" <A> / ""   -- balanced strings
+  A <- "0" <S> / "1" <A> <A>      -- one more 0
+  B <- "1" <S> / "0" <B> <B>      -- one more 1
 ]]
 assert(match("00011011", g) == 9)
 
 local g = [[
-  S <- ("0" B / "1" A)*
-  A <- "0" / "1" A A
-  B <- "1" / "0" B B
+  S <- ("0" <B> / "1" <A>)*
+  A <- "0" / "1" <A> <A>
+  B <- "1" / "0" <B> <B>
 ]]
 assert(match("00011011", g) == 9)
 assert(match("000110110", g) == 9)
@@ -653,18 +788,18 @@ assert(match("011110110", g) == 3)
 assert(match("000110010", g) == 1)
 
 s = "aaaaaaaaaaaaaaaaaaaaaaaa"
-assert(match(s, "'a'{3}") == 4)
-assert(match(s, "'a'{0}") == 1)
-assert(match(s, "'a'{3,}") == s:len() + 1)
-assert(not match(s, "'a'{30,}"))
-assert(match(s, "'a' { 3 , 30 } ") == s:len() + 1)
-assert(match(s, "'a'{3,5}") == 6)
+assert(match(s, "'a'^3") == 4)
+assert(match(s, "'a'^0") == 1)
+assert(match(s, "'a'^+3") == s:len() + 1)
+assert(not match(s, "'a'^+30"))
+assert(match(s, "'a'^-30") == s:len() + 1)
+assert(match(s, "'a'^-5") == 6)
 for i = 1, s:len() do
-  assert(match(s, string.format("'a'{%d,%d}", i, i)) == i + 1)
-  assert(match(s, string.format("'a'{%d}", i)) == i + 1)
+  assert(match(s, string.format("'a'^+%d", i)) >= i + 1)
+  assert(match(s, string.format("'a'^-%d", i)) <= i + 1)
+  assert(match(s, string.format("'a'^%d", i)) == i + 1)
 end
-assert(not match(s, "'a'{3,2}"))
-assert(match("01234567890123456789", "[0-9]{3}+") == 19)
+assert(match("01234567890123456789", "[0-9]^3+") == 19)
 
 
 assert(match("01234567890123456789", "({....}{...}) -> '%2%1'") == "4560123")
@@ -672,7 +807,6 @@ t = match("0123456789", "{.}*->{}")
 checkeq(t, {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"})
 assert(match("012345", "( (..) -> '%0%0' ) -> {}")[1] == "0101")
 
-any = m.P(1)
 eqcharset(compile"[]]", "]")
 eqcharset(compile"[][]", m.S"[]")
 eqcharset(compile"[]-]", m.S"-]")
@@ -695,15 +829,131 @@ eqcharset(compile"[^]['\"]", any - m.S[[]['"]])
 
 -- tests for 're' with pre-definitions
 defs = {digits = m.R"09", letters = m.R"az"}
-e = compile("letters (letters / digits)*", defs)
+e = compile("%letters (%letters / %digits)*", defs)
 assert(e:match"x123" == 5)
+
+e = compile([[
+  S <- <A>+
+  A <- %letters+ <B>
+  B <- %digits+
+]], defs)
 
 e = compile("{[0-9]+'.'?[0-9]*} -> sin", math)
 assert(e:match("2.34") == math.sin(2.34))
 
+
+function eq (_, _, a, b) return a == b end
+
+function void () return true end
+
+c = re.compile([[
+  longstring <- ('[' { '='* } '[' <close>) => void
+  close <- ']' %1 ']' / . <close>
+]], {void = void})
+
+assert(c:match'[==[]]===]]]]==]===[]' == 17)
+assert(c:match'[[]=]====]=]]]==]===[]' == 14)
+assert(not c:match'[[]=]====]=]=]==]===[]')
+
+c = re.compile" '[' { '='* } '[' (!(']' %1 ']') .)* ']' %1 ']' !. "
+
+assert(c:match'[==[]]===]]]]==]')
+assert(c:match'[[]=]====]=][]==]===[]]')
+assert(not c:match'[[]=]====]=]=]==]===[]')
+
+assert(re.find("hi alalo", "{..} %1") == 4)
+assert(re.find("hi alalo", "{..} %1", 4) == 4)
+assert(not re.find("hi alalo", "{..} %1", 5))
+assert(re.find("hi alalo", "'al'", 5) == 6)
+assert(re.find("hi aloalolo", "{..} %1") == 8)
+assert(re.find("alo alohi x x", "{%w+}%W*%1!%w") == 11)
+
+assert(re.gsub("alo alo", "[abc]", "x") == "xlo xlo")
+assert(re.gsub("alo alo", "%w+", ".") == ". .")
+assert(re.gsub("hi, how are you", "[aeiou]", string.upper) ==
+               "hI, hOw ArE yOU")
+
+s = 'hi [[a comment[=]=] ending here]] and [=[another]]=]]'
+c = re.compile" '[' { '='* } '[' (!(']' %1 ']') .)* ']' %1 ']' "
+assert(re.gsub(s, c, "%1") == 'hi  and =]')
+assert(re.gsub(s, c, "%0") == s)
+assert(re.gsub('[=[hi]=]', c, "%1") == '=')
+
+assert(re.find("", "!.") == 1)
+assert(re.find("alo", "!.") == 4)
+
+function addtag (s, i, tag, t) t.tag = tag; return i, t end
+
+c = re.compile([[
+  doc <- <block> !.
+  block <- (<start> (<block> / { [^<]+ })* -> {} <end>?) => addtag
+  start <- '<' { [a-z]+ } '>'
+  end <- '</' %2 '>'
+]], {addtag = addtag})
+
+x = c:match[[
+<x>hi<b>hello</b>but<b>totheend</x>]]
+checkeq(x, {tag='x', 'hi', {tag = 'b', 'hello'}, 'but',
+                     {tag = 'b', 'totheend'}})
+
 assert(not pcall(compile, "x <- 'a'  x <- 'b'"))
-assert(not pcall(compile, "x <- 'a'", {x = 3}))
 assert(not pcall(compile, "'x' -> x", {x = 3}))
 
+
+-- tests for look-ahead captures
+x = {re.match("alo", "&(&{.}) !{'b'} {&(...)} &{..} {...} {!.}")}
+checkeq(x, {"a", "", "al", "alo", ""})
+
+assert(re.match("aloalo", "{~ (((&{'al'}) -> 'A' / (&{%l}) -> '%1')? .)* ~}")
+       == "AallooAalloo")
+
+
+-- nested grammars
+p = re.compile[[
+       s <- <a> <b> !.
+       b <- ( x <- ('b' <x>)? )
+       a <- ( x <- 'a' <x>? )
+]]
+
+assert(p:match'aaabbb')
+assert(p:match'aaa')
+assert(not p:match'bbb')
+assert(not p:match'aaabbba')
+
+-- testing pre-defined names
+assert(os.setlocale("C") == "C")
+
+function eqlpeggsub (p1, p2)
+  local s1 = cs2str(re.compile(p1))
+  local s2 = string.gsub(allchar, "[^" .. p2 .. "]", "")
+if s1 ~= s2 then print(s1,s2) end
+  assert(s1 == s2)
+end
+
+
+eqlpeggsub("%w", "%w")
+eqlpeggsub("%a", "%a")
+eqlpeggsub("%l", "%l")
+eqlpeggsub("%u", "%u")
+eqlpeggsub("%p", "%p")
+eqlpeggsub("%d", "%d")
+eqlpeggsub("%x", "%x")
+eqlpeggsub("%s", "%s")
+
+eqlpeggsub("%W", "%W")
+eqlpeggsub("%A", "%A")
+eqlpeggsub("%L", "%L")
+eqlpeggsub("%U", "%U")
+eqlpeggsub("%P", "%P")
+eqlpeggsub("%D", "%D")
+eqlpeggsub("%X", "%X")
+eqlpeggsub("%S", "%S")
+
+eqlpeggsub("[%w]", "%w")
+eqlpeggsub("[%w_]", "_%w")
+eqlpeggsub("[^%w]", "%W")
+eqlpeggsub("[%W%S]", "%W%S")
+
 print"OK"
+
 

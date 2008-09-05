@@ -1,20 +1,50 @@
--- $Id: re.lua,v 1.18 2007/10/10 18:53:45 roberto Exp $
+-- $Id: re.lua,v 1.26 2008/03/07 14:20:55 roberto Exp $
 
 local m = require"lpeg"
 local _G = _G
-local print, error = print, error
+local tonumber, type, print, error = tonumber, type, print, error
 local mt = getmetatable(m.P(0))
 
 module "re"
 
-local I = m.P(function (s,i) print(i, s:sub(1, i-1)); return i end)
-
 local any = m.P(1)
 
-local function complement (c, p) return c and any - p or p end
+-- Pre-defined names
+Predef = {
+  l = m.R"az",
+  u = m.R"AZ",
+  d = m.R"09",
+  x = m.R("09", "AF", "af"),
+  s = m.S"\n\r\t\v\f ",
+  p = m.S"!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~",
+  nl = m.P"\n", 
+}
+
+Predef.a = Predef.l + Predef.u
+Predef.w = Predef.a + Predef.d
+Predef.g = Predef.w + Predef.p
+Predef.c = any - (Predef.g + ' ')
+
+Predef.L = any - Predef.l
+Predef.U = any - Predef.u
+Predef.D = any - Predef.d
+Predef.X = any - Predef.x
+Predef.S = any - Predef.s
+Predef.P = any - Predef.p
+Predef.A = any - Predef.a
+Predef.W = any - Predef.w
+Predef.G = any - Predef.g
+Predef.C = any - Predef.c
 
 
-local Defs
+local I = m.P(function (s,i) print(i, s:sub(1, i-1)); return i end)
+
+
+local function getdef (id, Defs)
+  local c = Defs and Defs[id]
+  if not c then error("undefined name: " .. id) end
+  return c
+end
 
 
 local function patt_error (s, i)
@@ -34,62 +64,77 @@ local function mult (p, n)
   return np
 end
 
-local function minmax (p, min, max)
-  min = _G.tonumber(min)
-  if max == true then return p^min
-  else
-    max = (max == false) and min or _G.tonumber(max)
-    if max < min then return m.P(false) end
-    local r = mult(p, min)
-    if max > min then r = r * p^(min - max) end
-    return r
-  end
+local function equalcap (s, i, c)
+  if type(c) ~= "string" then return nil end
+  local e = #c + i
+  if s:sub(i, e - 1) == c then return e else return nil end
 end
 
 
 local S = (m.S(" \t\n") + "--" * (any - m.S"\n")^0)^0
+
+-- identifiers allways need an environment
+local Identifier = m.R("AZ", "az") * m.R("AZ", "az", "09")^0
+
+local exp_follow = m.P"/" + ")" + "}" + "~}" + -1 + "%" + "<" + Identifier
+
+Identifier = m.C(Identifier) * m.Carg(1)
+
+local num = m.C(m.R"09"^1) * S / tonumber
 
 local String = "'" * m.C((any - "'")^0) * "'" +
                '"' * m.C((any - '"')^0) * '"'
 
 local Range = m.Cs(any * (m.P"-"/"") * (any - "]")) / m.R
 
-local item = Range + m.C(any)
+local Cat = "%" * Identifier / function (c,Defs)
+  local cat =  Defs and Defs[c] or Predef[c]
+  if not cat then error ("name '" .. c .. "' undefined") end
+  return cat
+end
+
+
+local item = Cat + Range + m.C(any)
 
 local Class =
     "["
-  * ("^" * m.Cc(true) + m.Cc(false))   -- optional complement symbol
-  * m.Ca(item * ((item - "]") / mt.__add)^0) / complement
+  * (m.C(m.P"^"^-1))    -- optional complement symbol
+  * m.Ca(item * ((item - "]") / mt.__add)^0) /
+                          function (c, p) return c == "^" and any - p or p end
   * "]"
 
-local Identifier = m.R("AZ", "az", "__") * m.R("AZ", "az", "__", "09")^0
-local num = m.C(m.R"09"^1) * S
+local function adddef (t, k, Defs, exp)
+  if t[k] then
+    error("'"..k.."' already defined as a rule")
+  else
+    t[k] = exp
+  end
+  return t
+end
 
--- {num} or {num,} or {num,num}
-local rep = m.P"{" * S * num * ("," * S * (num + m.Cc(true)) + m.Cc(false))
-          * "}"
+local function firstdef (n, Defs, r) return adddef({n}, n, Defs, r) end
 
-local exp_follow = m.P"/" + ")" + "}" + "~}" + -1 + Identifier
+
 
 local exp = m.P{ "Exp",
-  Exp = S * m.Ca(m.V"Seq" * ("/" * S * m.V"Seq" / mt.__add)^0);
+  Exp = S * ( m.V"Grammar"
+            + m.Ca(m.V"Seq" * ("/" * S * m.V"Seq" / mt.__add)^0) );
   Seq = m.Ca(m.Cc(m.P"") * (m.V"Prefix" / mt.__mul)^0)
         * (#exp_follow + patt_error);
   Prefix = "&" * S * m.V"Prefix" / mt.__len
          + "!" * S * m.V"Prefix" / mt.__unm
-         + m.V"Sufix";
-  Sufix = m.Ca(m.V"Primary" * S *
-          ( ( m.P"+" * m.Cc(1, true) / minmax    -- 1 -> true
-            + m.P"*" * m.Cc(0, true) / minmax  -- 0 -> true
-            + m.P"?" * m.Cc(0, 1) / minmax     -- 0 -> 1
-            + rep / minmax
+         + m.V"Suffix";
+  Suffix = m.Ca(m.V"Primary" * S *
+          ( ( m.P"+" * m.Cc(1) / mt.__pow        -- patt^1
+            + m.P"*" * m.Cc(0) / mt.__pow        -- patt^0
+            + m.P"?" * m.Cc(-1) / mt.__pow   -- patt^-1
+            + "^" * ( num / mult
+                    + "+" * num / mt.__pow
+                    + "-" * num / function (patt,n) return patt^-n end )
             + "->" * S * ( String / mt.__div
                          + m.P"{}" / m.Ct
-                         + m.C(Identifier) / function (p,id)
-                             local c = Defs and Defs[id]
-                             if not c then error("undefined name: "..id) end
-                             return p / c
-                           end )
+                         + (Identifier / getdef) / mt.__div )
+            + "=>" * S * (Identifier / getdef) / m.Cmt
             ) * S
           )^0 );
   Primary = "(" * m.V"Exp" * ")"
@@ -98,53 +143,61 @@ local exp = m.P{ "Exp",
             + "{" * m.V"Exp" * "}" / m.C
             + String / m.P
             + Class
+            + Cat
+            + "%" * num / function (n) return m.Cmt(m.Cb(n), equalcap) end
             + m.P"." * m.Cc(any)
-            + Identifier * -(S * '<-') / function (n)
-                return Defs and m.P(Defs[n]) or m.V(n)
-              end;
+            + "<" * Identifier * ">" / m.V;
+  Definition = Identifier * S * '<-' * m.V"Exp";
+  Grammar = m.Ca(m.V"Definition" / firstdef * (m.V"Definition" / adddef)^0) /
+                m.P
 }
 
-
-local function adddef (t, k, exp)
-  if Defs and Defs[k] then
-    error("'"..k.."' defined both externally and as a rule")
-  elseif t[k] then
-    error("'"..k.."' already defined as a rule")
-  else
-    t[k] = exp
-  end
-  return t
-end
-
-
-local definition = m.C(Identifier) * S * '<-' * exp
-
-local grammar = m.Ca(
-     definition / function (n, r) return adddef({n}, n, r) end
-   * (definition / adddef)^0
-)
-
-local pattern = S * (grammar + exp) / m.P * (-any + patt_error)
+local pattern = S * exp / m.P * (-any + patt_error)
                                    
 
 
 function compile (p, defs)
-  Defs = defs
-  local cp = pattern:match(p)
+  if m.type(p) == "pattern" then return p end   -- already compiled
+  local cp = pattern:match(p, 1, defs)
   if not cp then error("incorrect pattern", 3) end
   return cp
 end
 
 
 local mem = {}
-_G.setmetatable(mem, {__mode = "v"})
+local fmem = {}
+local gmem = {}
+local mt = {__mode = "v"}
+_G.setmetatable(mem, mt)
+_G.setmetatable(fmem, mt)
+_G.setmetatable(gmem, mt)
 
-function match (s, p)
+function match (s, p, i)
   local cp = mem[p]
   if not cp then
     cp = compile(p)
     mem[p] = cp
   end
-  return cp:match(s)
+  return cp:match(s, i or 1)
 end
 
+function find (s, p, i)
+  local cp = fmem[p]
+  if not cp then
+    cp = compile(p)
+    cp = m.P{ m.Cp() * cp + 1 * m.V(1) }
+    fmem[p] = cp
+  end
+  return cp:match(s, i or 1)
+end
+
+function gsub (s, p, rep)
+  gmem[p] = gmem[p] or {}
+  local cp = gmem[p][rep]
+  if not cp then
+    cp = compile(p)
+    cp = m.Cs((cp / rep + 1)^0)
+    gmem[p][rep] = cp
+  end
+  return cp:match(s)
+end
