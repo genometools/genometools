@@ -14,7 +14,7 @@
 --		args = params,
 --	}
 --
--- @release $Id: post.lua,v 1.16 2007/11/12 16:34:27 carregal Exp $
+-- @release $Id: post.lua,v 1.17 2008/04/03 21:55:28 mascarenhas Exp $
 ----------------------------------------------------------------------------
 
 require"cgilua.readuntil"
@@ -281,11 +281,11 @@ function parsedata (defs)
 	if not contenttype then
 		error("Undefined Media Type") 
 	end
-	if strfind(contenttype, "x%-www%-form%-urlencoded") then
+	if strfind(contenttype, "x-www-form-urlencoded", 1, true) then
 		urlcode.parsequery (read (inputsize), defs.args)
-	elseif strfind(contenttype, "multipart/form%-data") then
+	elseif strfind(contenttype, "multipart/form-data", 1, true) then
 		Main (inputsize, defs.args)
-	elseif strfind (contenttype, "application/xml") or strfind (contenttype, "text/xml") or strfind (contenttype, "text/plain") then
+	elseif strfind (contenttype, "application/xml", 1, true) or strfind (contenttype, "text/xml", 1, true) or strfind (contenttype, "text/plain", 1, true) then
 		tinsert (defs.args, read (inputsize))
 	else
 		error("Unsupported Media Type: "..contenttype)

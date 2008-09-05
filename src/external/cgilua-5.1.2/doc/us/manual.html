@@ -43,6 +43,7 @@
 				<li><a href="manual.html#templates">Lua Pages</a></li>
 				<li><a href="manual.html#parameters">Parameters</a></li>
 				<li><a href="manual.html#dispatching">Dispatching</a></li>
+                <li><a href="manual.html#authentication">Authentication</a></li>
                 <li><a href="manual.html#error_handling">Error Handling</a></li>
 			</ul>
 		</li>
@@ -61,6 +62,7 @@
 		</li>
 		<li><a href="libraries.html">Libraries</a>
 			<ul>
+				<li><a href="libraries.html#authentication">Authentication</a></li>
 				<li><a href="libraries.html#cookies">Cookies</a></li>
 				<li><a href="libraries.html#dispatcher">Dispatcher</a></li>
 				<li><a href="libraries.html#serialize">Serialize</a></li>
@@ -160,6 +162,12 @@ CGILua follows the
 for Lua 5.1, therefore it should be "installed" in your <code>package.path</code>.
 </p>
 
+<p>You can also install CGILua using <a href="http://www.luarocks.org">LuaRocks</a>:</p>
+
+<pre class="example">
+luarocks install cgilua
+</pre>
+	
 <h2><a name="config"></a>Configuration</h2>
 
 <p>
@@ -217,7 +225,7 @@ If every script needs to load a module (such as the sessions library), you can d
 
 <pre class="example">
 require"cgilua.session"
-cgilua.session.setsessiondir(KEPLER_TMP.."/cgilua")
+cgilua.session.setsessiondir(CGILUA_TMP)
 cgilua.addopenfunction (cgilua.session.open)
 cgilua.addclosefunction (cgilua.session.close)
 </pre>
@@ -240,7 +248,7 @@ very beginning of each script that needs to use sessions):
 
 <pre class="example">
 require"cgilua.session"
-cgilua.session.setsessiondir(KEPLER_TMP.."/cgilua")
+cgilua.session.setsessiondir(CGILUA_TMP)
 cgilua.enablesession = function ()
 	cgilua.session.open ()
 	cgilua.addclosefunction (cgilua.session.close)
@@ -543,10 +551,10 @@ sequence for web applications using CGILua and <code>app.lua</code> as their dis
 
 <ul>
     <li>there is an <em>app_name</em> as the start of <em>path_info</em></li>
-    <li>there is an <code>init.lua</code> file in <code><em>KEPLER_APPS</em>/cgilua/<em>app_name</em></code></li>
-    <li>changes the current directory to <code><em>KEPLER_APPS</em>/cgilua/<em>app_name</em></code></li>
+    <li>there is an <code>init.lua</code> file in <code><em>CGILUA_APPS</em>/<em>app_name</em></code></li>
+    <li>changes the current directory to <code><em>CGILUA_APPS</em>/<em>app_name</em></code></li>
     <li>sets <code>cgilua.app_name</code> to <em>app_name</em></li>
-    <li>adds <code><em>KEPLER_APPS</em>/cgilua/<em>app_name</em>/lua</code> to the start of <code>package.path</code></li>
+    <li>adds <code><em>CGILUA_APPS</em>/<em>app_name</em>/lua</code> to the start of <code>package.path</code></li>
     <li>executes <code>init.lua</code></li>
 </ul>
 
@@ -554,7 +562,7 @@ sequence for web applications using CGILua and <code>app.lua</code> as their dis
 CGILua applications usually need to dispatch their actions using the remaining <em>path_info</em> and for that
 they can use <code>cgilua.dispatcher</code> as a helper library. The example below uses it to dispatch URLs that
 follow a convention similar to <a href="http://www.rubyonrails.org/">Rails</a>. Let's assume that this is a
-<code>init.lua</code> file in the <code><em>KEPLER_APPS</em>/cgilua/blog</code> directory:
+<code>init.lua</code> file in the <code><em>CGILUA_APPS</em>/blog</code> directory:
 </p>
 
 <pre class="example">
@@ -578,6 +586,102 @@ the corresponding response using CGILua functions or a template engine like Lua 
 
 <p>
 Note that this example does not include error handling for invalid URLs or default values.
+</p>
+
+<h2><a name="authentication"></a>Authentication</h2>
+
+<p>
+CGILua offers a simple but useful authentication mechanism that can be shared by different CGILua applications
+or even applications developed in other platforms. The authentication mechanism is based on HTTP redirections
+and assumes three different participants.
+</p>
+
+<p>
+The first one is the controller script, which is responsible for centralizing the user authentication control
+and deciding if the application should continue depending on a user being logged in or not. An example of such
+controller would be the <code>app.lua</code> dispatcher script distributed with Kepler. As most of the controllers
+would do, it checks for the presence of an authenticated user and redirects to the checking script when that fails:
+</p>
+
+<pre class="example">
+-- checks for authenticated users
+if not cgilua.authentication.username() then
+    cgilua.redirect(cgilua.authentication.checkURL())
+else
+    -- continues with the application flow
+end
+</pre>
+
+<p>If your application is not handled by a single script like one using <code>app.lua</code> then you would need
+to repeat this check in every script that requires authenticated users.
+</p>
+
+<p>The second participant in the authentication mechanism is the checking script. This script should ask for user
+credentials, check them using the adequate method and redirect back to the original URL if the user was succesfully
+authenticated.
+</p>
+
+<p>
+One simple example of such a checking script is the one found in <code>/examples/check.lua</code> in CGILua CVS,
+but usually a checking script implemented in CGILua would do the following:
+</p>
+
+<pre class="example">
+-- Checking script example
+-- Assumes that the login form will use two fields called username and pass
+
+local username = cgilua.POST.username
+local pass = cgilua.POST.pass
+local logged, err, logoutURL
+
+if cgilua.authentication then
+    logged, err = cgilua.authentication.check(username, pass)
+    username = cgilua.authentication.username() or ""
+    logoutURL = cgilua.authentication.logoutURL()
+else
+    logged = false
+    err = "No authentication configured!"
+    username = ""
+end
+
+if logged and username then
+    -- goes back to the application
+	cgilua.redirect(cgilua.authentication.refURL())
+else
+    err = err or ""
+    -- displays the login form which submits to this same script
+	cgilua.htmlheader()
+	cgilua.lp.include ("login.lp", {
+        logged = logged, errorMsg = err, username = username,
+        cgilua = cgilua, logoutURL = logoutURL})
+end
+</pre>
+
+<p>
+The login form for this example can be fount at <code>/examples/login.lp</code> in CGILua CVS and consists of:
+</p>
+
+<pre class="example">
+&lt;% if logged then %&gt;
+&lt;p&gt;User &lt;%= username %&gt; logged in&lt;/p&gt;
+&lt;a href="&lt;%= logoutURL %&gt;"&gt;Logout&lt;/a&gt;
+&lt;% else %&gt;
+&lt;p style="color:#ff0000"&gt;&lt;%= errorMsg %&gt; &lt;/p&gt;
+&lt;form method="post" action="" &gt;
+    User name: &lt;input name="username" maxlength="20" size="20" value="&lt;%= username %&gt;" &gt;&lt;br /&gt;
+    Password: &lt;input name="pass" type="password" maxlength="20" size="20"&gt;&lt;br /&gt;
+    &lt;input type="submit" value="Login"&gt;
+    &lt;input type="reset" value="Reset"&gt;
+&lt;/form&gt;
+&lt;% end %&gt;
+</pre>
+
+<p>
+Finally the third participant in the authentication process is the configuration file. This file is used to
+set the authentication method and other details. Each method has it's set of parameters and defines a
+<code>check</code> callback used by CGILua during the authentication process.
+See <code>/examples/authentication_conf.lua</code> for configuration examples using database, LDAP and Web server
+authentication methods. 
 </p>
 
 <h2><a name="error_handling"></a>Error Handling</h2>
@@ -687,7 +791,7 @@ containing all possible information to help reproduce the situation.
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-	<p><small>$Id: manual.html,v 1.22 2007/11/21 17:15:05 carregal Exp $</small></p>
+	<p><small>$Id: manual.html,v 1.27 2008/05/19 18:13:36 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->

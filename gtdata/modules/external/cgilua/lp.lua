@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------
 -- Lua Pages Template Preprocessor.
 --
--- @release $Id: lp.lua,v 1.12 2007/04/16 14:01:32 tomas Exp $
+-- @release $Id: lp.lua,v 1.13 2008/01/19 19:30:35 mascarenhas Exp $
 ----------------------------------------------------------------------------
 
 local assert, error, getfenv, loadstring, setfenv = assert, error, getfenv, loadstring, setfenv
@@ -41,6 +41,7 @@ end
 -- @return String with translated code.
 ----------------------------------------------------------------------------
 function translate (s)
+        s = gsub(s, "^#![^\n]+\n", "")
 	if compatmode then
 		s = gsub(s, "$|(.-)|%$", "<?lua = %1 ?>")
 		s = gsub(s, "<!%-%-$$(.-)$$%-%->", "<?lua %1 ?>")

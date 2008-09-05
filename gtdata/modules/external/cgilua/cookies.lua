@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------
 -- Cookies Library
 --
--- @release $Id: cookies.lua,v 1.7 2007/04/16 14:01:32 tomas Exp $
+-- @release $Id: cookies.lua,v 1.8 2008/04/24 13:42:04 mascarenhas Exp $
 ----------------------------------------------------------------------------
 
 require"cgilua.urlcode"
@@ -10,8 +10,15 @@ local error = error
 local format, gsub, strfind = string.format, string.gsub, string.find
 local date = os.date
 local escape, unescape = cgilua.urlcode.escape, cgilua.urlcode.unescape
-local header, write = SAPI.Response.header, SAPI.Response.write
-local servervariable = SAPI.Request.servervariable
+local function header(...)
+   return SAPI.Response.header(...)
+end
+local function write(...)
+   return SAPI.Response.write(...)
+end
+local function servervariable(...)
+   return SAPI.Request.servervariable(...)
+end
 
 module ("cgilua.cookies")
 

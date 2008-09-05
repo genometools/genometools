@@ -43,6 +43,7 @@
 				<li><a href="manual.html#templates">Lua Pages</a></li>
 				<li><a href="manual.html#parameters">Parameters</a></li>
 				<li><a href="manual.html#dispatching">Dispatching</a></li>
+                <li><a href="manual.html#authentication">Authentication</a></li>
                 <li><a href="manual.html#error_handling">Error Handling</a></li>
 			</ul>
 		</li>
@@ -61,6 +62,7 @@
 		</li>
 		<li><a href="libraries.html">Libraries</a>
 			<ul>
+				<li><a href="libraries.html#authentication">Authentication</a></li>
 				<li><a href="libraries.html#cookies">Cookies</a></li>
 				<li><a href="libraries.html#dispatcher">Dispatcher</a></li>
 				<li><a href="libraries.html#serialize">Serialize</a></li>
@@ -102,17 +104,42 @@ as Lua 5.1.
 
 <h2><a name="status"></a>Status</h2>
 
-<p>Current version is 5.1.1</p>
+<p>Current version is 5.1.2</p>
 
 <h2><a name="download"></a>Download</h2>
 
 <p>CGILua source code can be downloaded from its
 <a href="http://luaforge.net/projects/cgilua/files">LuaForge</a> page</p>
 
+<p>You can also install CGILua using <a href="http://www.luarocks.org">LuaRocks</a>:</p>
 
+<pre class="example">
+luarocks install cgilua
+</pre>
+	
 <h2><a name="history"></a>History</h2>
 
 <dl>
+    <dt><strong>Version 5.1.2</strong> [19/May/2008]</dt>
+	<dd>
+	<ul>
+        <li>Added the <a href="libraries.html#authentication"><code>cgilua.authentication</code></a> module</li>
+        <li><a href="reference.html#print"><code>cgilua.print</code></a> now separates arguments with tabs,
+        like Lua <code>print</code></li>
+        <li>Now <code>print</code> and <code>write</code> are aliases to <a href="reference.html#print"><code>cgilua.print</code></a>
+        and <a href="reference.html#put"><code>cgilua.put</code></a>.</li>
+		<li>Now strips an eventual <code>#!</code> from top of Lua Pages files</li>
+		<li>CGILua can now process sequential requests in the same Lua state</li>
+        <li>Better error handling. Wraps error message in valid HTML</li>
+        <li>Bug fixed: CGILua was ignoring <code>CGILUA_TMP</code> in Windows</li>
+		<li>Corrected the URL handling for the dispatcher (bug found by Ronaldo Sugii)</li>
+		<li>Better URL handling for different locales</li>
+        <li>Handling multiple values in the generated URL (patch by Matt Campbell)</li>
+		<li>Fixed file handle leak in <code>loader.lua</code></li>
+		<li>Fixed bug [<a href="http://luaforge.net/tracker/?func=detail&amp;group_id=104&amp;aid=2630&amp;atid=508">#2630</a>] - Including new files (bug found by Bruno Massa)</li>
+    </ul>
+    </dd>
+    
 	<dt><strong>Version 5.1.1</strong> [21/Nov/2007]</dt>
 	<dd>
 	<ul>
@@ -131,7 +158,7 @@ as Lua 5.1.
 		<li>Changed the use of <code>"/test"</code> for the session temporary directory
 		checking (bug found by Yuri Takhteyev)</li>
 		<li>Corrected the use of cgilua.QUERY in the session handling (bug found by Jim Madsen)</li>
-		<li>Better handling of "application/xml" POST content types (patch by Ignacio Burgueño)</li>
+		<li>Better handling of "application/xml" POST content types (patch by Ignacio Burgue&ntilde;o)</li>
 		<li>Fixed
 		<a href="http://luaforge.net/tracker/?group_id=5&amp;atid=101&amp;func=detail&amp;aid=1910">Bug [#1910]</a> -
 		Bug in byte accounting in post.lua (found by Greg Bell)</li>
@@ -286,7 +313,7 @@ Project <a href="http://luaforge.net/mail/?group_id=104">mailing list</a>.
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-	<p><small>$Id: index.html,v 1.63 2007/11/21 17:18:34 carregal Exp $</small></p>
+	<p><small>$Id: index.html,v 1.66 2008/05/19 18:13:36 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->

@@ -1,10 +1,10 @@
 ----------------------------------------------------------------------------
 -- Utility functions for encoding/decoding of URLs.
 --
--- @release $Id: urlcode.lua,v 1.8 2007/04/16 14:01:32 tomas Exp $
+-- @release $Id: urlcode.lua,v 1.10 2008/01/21 16:11:32 carregal Exp $
 ----------------------------------------------------------------------------
 
-local next, pairs, tonumber, type = next, pairs, tonumber, type
+local ipairs, next, pairs, tonumber, type = ipairs, next, pairs, tonumber, type
 local string = string
 local table = table
 
@@ -25,7 +25,7 @@ end
 ----------------------------------------------------------------------------
 function escape (str)
 	str = string.gsub (str, "\n", "\r\n")
-	str = string.gsub (str, "([^%w ])",
+	str = string.gsub (str, "([^0-9a-zA-Z ])", -- locale independent
 		function (c) return string.format ("%%%02X", string.byte(c)) end)
 	str = string.gsub (str, " ", "+")
 	return str
@@ -86,8 +86,13 @@ function encodetable (args)
     return ""
   end
   local strp = ""
-  for key,val in pairs(args) do
-    strp = strp.."&"..escape(key).."="..escape(val)
+ for key, vals in pairs(args) do
+    if type(vals) ~= "table" then
+      vals = {vals}
+    end
+    for i,val in ipairs(vals) do
+      strp = strp.."&"..escape(key).."="..escape(val)
+    end
   end
   -- remove first & 
   return string.sub(strp,2)
