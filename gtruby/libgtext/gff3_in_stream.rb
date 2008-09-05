@@ -22,7 +22,7 @@ require 'libgtext/genome_stream'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   typealias "bool", "ibool"
   extern "GenomeStream* gff3_in_stream_new_sorted(const char *, bool)"
   extern "StrArray* gff3_in_stream_get_used_types(GenomeStream*)"

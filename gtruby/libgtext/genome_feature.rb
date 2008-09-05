@@ -22,7 +22,7 @@ require 'libgtext/genome_node'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   typealias "bool", "ibool"
   extern "const GenomeNodeClass* genome_feature_class(void)"
   extern "void* genome_node_cast(const GenomeNodeClass*, GenomeNode*)"

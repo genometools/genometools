@@ -21,7 +21,7 @@ require 'libgtcore/str'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   extern "Canvas* canvas_new(Config*, int, unsigned int, "+
                              "ImageInfo*)"
   extern "int canvas_to_file(Canvas*, const char*, Error*)"

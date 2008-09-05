@@ -20,7 +20,7 @@ require 'libgtcore/range'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   extern "Diagram* diagram_new(FeatureIndex*, const char*, const Range*, " +
                               "Config*)"
   extern "int diagram_sketch(Diagram*, Canvas*)"

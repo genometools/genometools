@@ -19,7 +19,7 @@ require 'gtdlload'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   extern "void allocators_init()"
   extern "void allocators_reg_atexit_func()"
 end

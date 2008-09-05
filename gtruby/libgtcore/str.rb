@@ -19,7 +19,7 @@ require 'gtdlload'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   extern "Str* str_new()"
   extern "Str* str_new_cstr(const char*)"
   extern "void* str_get_mem(const Str*)"

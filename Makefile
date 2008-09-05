@@ -70,16 +70,6 @@ else
   SHARED:=-shared
 endif
 
-# the default GenomeTools libraries which are build
-GTLIBS:=lib/libgtexercise.a\
-        lib/libgtext.a\
-        lib/libgtmgth.a\
-        lib/libgtmatch.a\
-        lib/libgtltr.a\
-        lib/libgtcore.a\
-        lib/libgtlua.a\
-        lib/libexpat.a
-
 # libraries for which we build replacements (that also appear in dependencies)
 EXP_LDLIBS+=-lz -lbz2
 OVERRIDELIBS:=lib/libbz2.a
@@ -96,59 +86,6 @@ EXAMPLE_DEP:=$(EXAMPLE_SRC:%.c=obj/%.d)
 SKPROTO_SRC:=src/skproto.c src/tools/gt_skproto.c
 SKPROTO_OBJ:=$(SKPROTO_SRC:%.c=obj/%.o)
 SKPROTO_DEP:=$(SKPROTO_SRC:%.c=obj/%.d)
-
-# the core GenomeTools library (no other dependencies)
-AUTOGEN_LIBGTCORE_SRC:= src/libgtcore/bitpackstringop8.c \
-	src/libgtcore/checkbitpackstring8.c \
-	src/libgtcore/bitpackstringop16.c src/libgtcore/checkbitpackstring16.c \
-	src/libgtcore/bitpackstringop32.c src/libgtcore/checkbitpackstring32.c \
-	src/libgtcore/bitpackstringop64.c src/libgtcore/checkbitpackstring64.c
-LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
-LIBGTCORE_SRC:=$(filter-out $(AUTOGEN_LIBGTCORE_SRC), $(LIBGTCORE_SRC)) \
-	 $(AUTOGEN_LIBGTCORE_SRC)
-LIBGTCORE_OBJ:=$(LIBGTCORE_SRC:%.c=obj/%.o)
-LIBGTCORE_DEP:=$(LIBGTCORE_SRC:%.c=obj/%.d)
-LIBGTCORE_LIBDEP=-lbz2 -lz
-
-# the extended GenomeTools library (e.g., depends on Lua)
-LIBGTEXT_C_SRC:=$(wildcard src/libgtext/*.c)
-LIBGTEXT_C_OBJ:=$(LIBGTEXT_C_SRC:%.c=obj/%.o)
-LIBGTEXT_C_DEP:=$(LIBGTEXT_C_SRC:%.c=obj/%.d)
-LIBGTEXT_CXX_SRC:=$(wildcard src/libgtext/*.cxx)
-LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
-LIBGTEXT_CXX_DEP:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.d)
-LIBGTEXT_LIBDEP=-lgtcore -lbz2 -lz
-
-# the exercise GenomeTools library
-LIBGTEXERCISE_SRC:=$(wildcard src/libgtexercise/*.c)
-LIBGTEXERCISE_OBJ:=$(LIBGTEXERCISE_SRC:%.c=obj/%.o)
-LIBGTEXERCISE_DEP:=$(LIBGTEXERCISE_SRC:%.c=obj/%.d)
-
-# the MetaGenomeThreader library
-LIBGTMGTH_SRC:=$(wildcard src/libgtmgth/*.c)
-LIBGTMGTH_OBJ:=$(LIBGTMGTH_SRC:%.c=obj/%.o)
-LIBGTMGTH_DEP:=$(LIBGTMGTH_SRC:%.c=obj/%.d)
-
-# the GenomeTools matching library
-LIBGTMATCH_SRC:=$(wildcard src/libgtmatch/*.c)
-LIBGTMATCH_OBJ:=$(LIBGTMATCH_SRC:%.c=obj/%.o)
-LIBGTMATCH_DEP:=$(LIBGTMATCH_SRC:%.c=obj/%.d)
-
-# the GenomeTools LTRharvest library
-LIBGTLTR_SRC:=$(wildcard src/libgtltr/*.c)
-LIBGTLTR_OBJ:=$(LIBGTLTR_SRC:%.c=obj/%.o)
-LIBGTLTR_DEP:=$(LIBGTLTR_SRC:%.c=obj/%.d)
-
-# the GenomeTools AnnotationSketch library
-LIBANNOTATIONSKETCH_C_SRC:=$(wildcard src/libannotationsketch/*.c)
-LIBANNOTATIONSKETCH_C_OBJ:=$(LIBANNOTATIONSKETCH_C_SRC:%.c=obj/%.o)
-LIBANNOTATIONSKETCH_C_DEP:=$(LIBANNOTATIONSKETCH_C_SRC:%.c=obj/%.d)
-LIBANNOTATIONSKETCH_LIBDEP=-lcairo -lgtext -lgtcore -lbz2 -lz
-
-# the GenomeTools Lua library
-LIBGTLUA_C_SRC:=$(wildcard src/libgtlua/*.c)
-LIBGTLUA_C_OBJ:=$(LIBGTLUA_C_SRC:%.c=obj/%.o)
-LIBGTLUA_C_DEP:=$(LIBGTLUA_C_SRC:%.c=obj/%.d)
 
 TOOLS_SRC:=$(wildcard src/tools/*.c)
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
@@ -240,8 +177,7 @@ ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
 ZLIB_DEP:=$(ZLIB_SRC:%.c=obj/%.d)
 
 # the objects which are included into the single GenomeTools shared library
-GTSHAREDLIB_OBJ:=$(LIBGTCORE_OBJ) $(LIBGTEXT_C_OBJ) $(LIBGTLUA_C_OBJ) $(LIBLUA_OBJ)
-GTSHAREDLIB_LIBDEP:=$(LIBGTCORE_LIBDEP)
+GTSHAREDLIB_LIBDEP:=-lbz2 -lz
 
 SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
@@ -287,8 +223,6 @@ ifeq ($(curl),yes)
 endif
 
 ifneq ($(curses),no)
-  GTLIBS := $(GTLIBS) lib/libtecla.a
-  GTSHAREDLIB_OBJ := $(GTSHAREDLIB_OBJ) lib/libtecla.a
   EXP_CPPFLAGS += -DCURSES
   EXP_LDLIBS += -lncurses
 endif
@@ -328,9 +262,15 @@ ifeq ($(m64),yes)
   GT_LDFLAGS += -m64
 endif
 
+LIBGENOMETOOLS_DIRS:= src/libgtcore \
+                      src/libgtext \
+                      src/libgtexercise \
+                      src/libgtmatch \
+                      src/libgtlua \
+                      src/libgtltr \
+                      src/libgtmgth
+
 ifeq ($(libannotationsketch),yes)
-  GTLIBS := lib/libannotationsketch.a $(GTLIBS)
-  GTSHAREDLIB_OBJ := $(GTSHAREDLIB_OBJ) $(LIBANNOTATIONSKETCH_C_OBJ)
   GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lcairo
   EXP_CPPFLAGS += -DLIBANNOTATIONSKETCH
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
@@ -338,14 +278,27 @@ ifeq ($(libannotationsketch),yes)
   STEST_FLAGS += -libannotationsketch
 # XXX
 # ANNOTATIONSKETCH_EXAMPLES := bin/sketch_constructed bin/sketch_parsed
+  LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/libannotationsketch
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
 endif
 
+# the GenomeTools library
+LIBGENOMETOOLS_SRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
+LIBGENOMETOOLS_OBJ:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.o) \
+                    $(LIBLUA_OBJ) \
+                    $(LIBEXPAT_OBJ) \
+                    $(LIBTECLA_OBJ)
+LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
+                    $(LIBLUA_DEP) \
+                    $(LIBEXPAT_DEP) \
+                    $(LIBTECLA_DEP)
+
 # set prefix for install target
 prefix ?= /usr/local
 
-all: $(GTLIBS) lib/libgt$(SHARED_OBJ_NAME_EXT) bin/skproto bin/gt \
+all: lib/libgenometools.a lib/libgenometools$(SHARED_OBJ_NAME_EXT) \
+     bin/skproto bin/gt \
      bin/example bin/lua bin/rnv $(ANNOTATIONSKETCH_EXAMPLES)
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
@@ -380,84 +333,19 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtcore.a: obj/gt_config.h  $(LIBGTCORE_OBJ)
+lib/libgenometools.a: obj/gt_config.h  $(LIBGENOMETOOLS_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTCORE_OBJ)
+	@ar ru $@ $(LIBGENOMETOOLS_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgt$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(GTSHAREDLIB_OBJ)
+lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(LIBGENOMETOOLS_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(GTSHAREDLIB_OBJ) \
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
 	-o $@ $(GTSHAREDLIB_LIBDEP)
-
-lib/libgtext.a: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtexercise.a: $(LIBGTEXERCISE_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTEXERCISE_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtmgth.a: $(LIBGTMGTH_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTMGTH_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtmatch.a: $(LIBGTMATCH_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTMATCH_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtltr.a: $(LIBGTLTR_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTLTR_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-
-lib/libannotationsketch.a: $(LIBANNOTATIONSKETCH_C_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBANNOTATIONSKETCH_C_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtlua.a: $(LIBGTLUA_C_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTLUA_C_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libpng.a: $(LIBPNG_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBPNG_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
 
 lib/libtecla.a: $(LIBTECLA_OBJ)
 	@echo "[link $(@F)]"
@@ -491,22 +379,25 @@ $(1)_static: $(2)
 	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -static -o $$@
 endef
 
-$(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) lib/libgtcore.a \
+$(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
+                                             lib/libgenometools.a \
                                              $(OVERRIDELIBS)))
 
-$(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) $(GTLIBS) \
+$(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
+                                        lib/libgenometools.a \
                                         $(OVERRIDELIBS)))
 
-$(eval $(call PROGRAM_template, bin/example, $(EXAMPLE_OBJ) $(GTLIBS) \
+$(eval $(call PROGRAM_template, bin/example, $(EXAMPLE_OBJ) \
+                                             lib/libgenometools.a \
                                              $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/sketch_constructed, \
                                 obj/src/annotationsketch/sketch_constructed.o \
-                                $(GTLIBS) $(OVERRIDELIBS)))
+                                lib/libgenometools.a $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/sketch_parsed, \
                                 obj/src/annotationsketch/sketch_parsed.o \
-                                $(GTLIBS) $(OVERRIDELIBS)))
+                                lib/libgenometools.a $(OVERRIDELIBS)))
 
 bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
@@ -609,14 +500,6 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 -include $(GTMAIN_DEP) \
          $(EXAMPLE_DEP) \
          $(SKPROTO_DEP) \
-	 $(LIBGTCORE_DEP) \
-	 $(LIBGTEXT_C_DEP) \
-	 $(LIBGTEXT_CXX_DEP) \
-	 $(LIBGTEXERCISE_DEP) \
-	 $(LIBGTMGTH_DEP) \
-	 $(LIBGTMATCH_DEP) \
-	 $(LIBGTLTR_DEP) \
-	 $(LIBGTLUA_C_DEP) \
 	 $(TOOLS_DEP) \
 	 $(LIBAGG_DEP) \
 	 $(LIBEXPAT_DEP) \
@@ -627,7 +510,8 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 	 $(LIBRNV_DEP) \
 	 $(RNVMAIN_DEP) \
 	 $(LIBBZ2_DEP) \
-	 $(ZLIB_DEP)
+	 $(ZLIB_DEP) \
+         $(LIBGENOMETOOLS_DEP)
 
 ifeq ($(libannotationsketch),yes)
 -include $(LIBANNOTATIONSKETCH_C_DEP) $(LIBANNOTATIONSKETCH_CXX_DEP)

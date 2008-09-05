@@ -23,7 +23,7 @@ require 'libgtview/recmap'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   extern "ImageInfo* image_info_new()"
   extern "unsigned int image_info_get_height(ImageInfo*)"
   extern "unsigned long image_info_num_of_recmaps(ImageInfo*)"

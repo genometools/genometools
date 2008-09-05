@@ -22,7 +22,7 @@ require 'libgtview/color'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
 
   # looks weird, but apparently the way to pass proper pointers to external
   # functions

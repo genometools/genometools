@@ -19,7 +19,7 @@ require 'gtdlload'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   extern "unsigned long array_size(const Array*)"
   extern "void* array_get(const Array*, unsigned long)"
   extern "void array_delete(Array*)"

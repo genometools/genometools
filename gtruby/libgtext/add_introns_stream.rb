@@ -20,7 +20,7 @@ require 'libgtext/genome_stream'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   extern "GenomeStream* add_introns_stream_new(GenomeStream*)"
 
   class AddIntronsStream

@@ -22,7 +22,7 @@ require 'libgtcore/strarray'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   typealias "bool", "ibool"
   extern "FeatureIndex* feature_index_new()"
   extern "void feature_index_delete(FeatureIndex*)"

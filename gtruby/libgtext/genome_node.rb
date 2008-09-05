@@ -20,7 +20,7 @@ require 'gthelper'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   extern "int genome_node_accept(GenomeNode*, GenomeVisitor*, Error*)"
   extern "GenomeNode* genome_node_rec_ref(GenomeNode*)"
   extern "GenomeNode* genome_node_ref(GenomeNode*)"

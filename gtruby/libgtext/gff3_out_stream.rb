@@ -20,7 +20,7 @@ require 'libgtext/genome_stream'
 
 module GT
   extend DL::Importable
-  gtdlload "libgt"
+  gtdlload "libgenometools"
   extern "GenomeStream* gff3_out_stream_new(GenomeStream*, GenFile*)"
 
   class GFF3OutStream
