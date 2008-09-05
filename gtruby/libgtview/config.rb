@@ -41,7 +41,7 @@ module GT
   NULL = DL::PtrData.new(0)
 
   extern "Style* style_new(bool, Error*)"
-  extern "int style_load_file(Style*, Str*, Error*)"
+  extern "int style_load_file(Style*, const char*, Error*)"
   extern "int style_load_str(Style*, Str*, Error*)"
   extern "int style_to_str(const Style*, Str*, Error*)"
   extern "bool style_get_color(Style*, const char*, const char*, Color*, " +
@@ -70,8 +70,7 @@ module GT
 
     def load_file(filename)
       err = GT::Error.new()
-      str = GT::Str.new(filename)
-      rval = GT.style_load_file(@config, str.to_ptr, err.to_ptr)
+      rval = GT.style_load_file(@config, filename, err.to_ptr)
       if rval != 0 then GT.gterror(err) end
     end
 
