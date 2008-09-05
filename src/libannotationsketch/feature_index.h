@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007-2008 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>,
-  Copyright (c) 2007      Malte Mader <mmader@stud.zbh.uni-hamburg.de>,
+  Copyright (c) 2007-2008 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+  Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007      Malte Mader <mmader@stud.zbh.uni-hamburg.de>
   Copyright (c) 2007      Chr. Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
@@ -35,6 +36,10 @@ void          feature_index_add_sequence_region(FeatureIndex*, SequenceRegion*);
    region denoted by its identifier string. */
 void          feature_index_add_genome_feature(FeatureIndex *feature_index,
                                                GenomeFeature *genome_feature);
+/* Add all features contained in <gff3file> to <feature_index>, if <gff3file> is
+   valid. Otherwise, <feature_index> is not changed and <err> is set. */
+int           feature_index_add_gff3file(FeatureIndex *feature_index,
+                                         const char *gff3file, Error *err);
 /* Returns an array of GenomeFeatures associated with a given sequence region
    identifier <seqid>. */
 Array*        feature_index_get_features_for_seqid(FeatureIndex*,

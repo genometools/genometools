@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007-2008 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>,
-  Copyright (c) 2007      Malte Mader <mmader@stud.zbh.uni-hamburg.de>,
+  Copyright (c) 2007-2008 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+  Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007      Malte Mader <mmader@stud.zbh.uni-hamburg.de>
   Copyright (c) 2007      Chr. Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
@@ -18,17 +19,21 @@
 */
 
 #include <string.h>
+#include "libannotationsketch/feature_index.h"
+#include "libannotationsketch/feature_stream.h"
+#include "libannotationsketch/feature_visitor.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/hashmap.h"
 #include "libgtcore/interval_tree.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
+#include "libgtcore/queue.h"
 #include "libgtcore/range.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/unused.h"
 #include "libgtext/feature_type_factory_builtin.h"
 #include "libgtext/genome_node.h"
-#include "libannotationsketch/feature_index.h"
+#include "libgtext/gff3_in_stream.h"
 
 struct FeatureIndex {
   Hashmap *regions;
@@ -121,6 +126,35 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf)
   /* update dynamic range */
   info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);
   info->dyn_range.end = MAX(info->dyn_range.end, node_range.end);
+}
+
+int feature_index_add_gff3file(FeatureIndex *feature_index,
+                               const char *gff3file, Error *err)
+{
+  GenomeStream *gff3_in_stream;
+  GenomeNode *gn;
+  Queue *queue;
+  int had_err = 0;
+  error_check(err);
+  assert(feature_index && gff3file);
+  queue = queue_new();
+  gff3_in_stream = gff3_in_stream_new_unsorted(1, &gff3file, false, false);
+  while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, err)) && gn)
+    queue_add(queue, gn);
+  if (!had_err) {
+    GenomeVisitor *feature_visitor = feature_visitor_new(feature_index);
+    while (queue_size(queue)) {
+      gn = queue_get(queue);
+      had_err = genome_node_accept(gn, feature_visitor, NULL);
+      assert(!had_err); /* cannot happen */
+    }
+    genome_visitor_delete(feature_visitor);
+  }
+  genome_stream_delete(gff3_in_stream);
+  while (queue_size(queue))
+    genome_node_rec_delete(queue_get(queue));
+  queue_delete(queue);
+  return had_err;
 }
 
 static int collect_features_from_itree(IntervalTreeNode *node, void *data)

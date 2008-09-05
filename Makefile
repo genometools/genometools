@@ -336,8 +336,7 @@ ifeq ($(libannotationsketch),yes)
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   STEST_FLAGS += -libannotationsketch
-  # XXX
-  # ANNOTATIONSKETCH_EXAMPLES := bin/sketch_constructed
+  ANNOTATIONSKETCH_EXAMPLES := bin/sketch_constructed bin/sketch_parsed
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
 endif
@@ -502,6 +501,10 @@ $(eval $(call PROGRAM_template, bin/example, $(EXAMPLE_OBJ) $(GTLIBS) \
 
 $(eval $(call PROGRAM_template, bin/sketch_constructed, \
                                 obj/src/annotationsketch/sketch_constructed.o \
+                                $(GTLIBS) $(OVERRIDELIBS)))
+
+$(eval $(call PROGRAM_template, bin/sketch_parsed, \
+                                obj/src/annotationsketch/sketch_parsed.o \
                                 $(GTLIBS) $(OVERRIDELIBS)))
 
 bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)

@@ -88,7 +88,7 @@ static void draw_example_features(Array *features, const char *style_file,
   diagram = diagram_new_from_array(features, &range, style);
 
   /* create canvas */
-  canvas = canvas_new(style, GRAPHICS_PNG, 1024 /* width */, NULL);
+  canvas = canvas_new(style, GRAPHICS_PNG, 800 /* width */, NULL);
 
   /* sketch diagram on canvas */
   diagram_render(diagram, canvas);
@@ -127,5 +127,5 @@ int main(int argc, char *argv[])
 
   delete_example_features(features);
 
-  return 0;
+  return EXIT_SUCCESS;
 }
