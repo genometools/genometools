@@ -20,7 +20,7 @@
 #include "gtlua/gtext_lua.h"
 #include "gtlua/gt_lua.h"
 
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
 #include "gtlua/annotationsketch_lua.h"
 #endif
 
@@ -54,7 +54,7 @@ int luaopen_gt(lua_State *L)
   assert(L);
   luaopen_gtcore(L); /* open core library */
   luaopen_gtext(L);  /* open extended library */
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
   luaopen_annotationsketch(L); /* open annotationsketch library */
 #endif
   return 1;

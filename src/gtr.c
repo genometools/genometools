@@ -40,7 +40,7 @@
 #include "extended/luahelper.h"
 #include "gtlua/gt_lua.h"
 
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
 #include "annotationsketch/luastyle.h"
 #include "annotationsketch/style_with_state.h"
 #endif
@@ -57,7 +57,7 @@ struct GTR {
   Hashmap *unit_tests;
   lua_State *L;
   FeatureTypeFactory *feature_type_factory; /* for gtlua */
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
   Style *style;
 #endif
   FILE *logfp;
@@ -67,7 +67,7 @@ GTR* gtr_new(Error *err)
 {
   GTR *gtr;
   int had_err = 0;
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
   Str *style_file = NULL;
 #endif
   gtr = ma_calloc(1, sizeof (GTR));
@@ -89,7 +89,7 @@ GTR* gtr_new(Error *err)
     luaopen_des56(gtr->L);
     had_err = lua_set_modules_path(gtr->L, err);
   }
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
   if (!had_err) {
     if (!(gtr->style = style_new_with_state(gtr->L)))
       had_err = -1;
@@ -350,7 +350,7 @@ void gtr_delete(GTR *gtr)
   hashmap_delete(gtr->unit_tests);
   feature_type_factory_delete(gtr->feature_type_factory);
   if (gtr->L) lua_close(gtr->L);
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
   style_delete_without_state(gtr->style);
 #endif
   ma_free(gtr);

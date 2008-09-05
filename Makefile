@@ -256,9 +256,8 @@ LIBGENOMETOOLS_DIRS:= src/core \
                       src/ltr \
                       src/mgth
 
-ifeq ($(libannotationsketch),yes)
+ifneq ($(cairo),no)
   GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lcairo
-  EXP_CPPFLAGS += -DLIBANNOTATIONSKETCH
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo \
                  -I/opt/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
@@ -268,6 +267,7 @@ ifeq ($(libannotationsketch),yes)
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
+  EXP_CPPFLAGS += -DWITHOUT_CAIRO
 endif
 
 # the GenomeTools library

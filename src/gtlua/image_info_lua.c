@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
 
 #include <float.h>
 #include <limits.h>

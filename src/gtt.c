@@ -83,7 +83,7 @@
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index.h"
@@ -134,7 +134,7 @@ Toolbox* gtt_tools(void)
   toolbox_add_tool(tools, "template", gt_template());
   toolbox_add(tools, "uniq", gt_uniq);
   toolbox_add(tools, "uniquesub", gt_uniquesub);
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
   toolbox_add(tools, "sketch", gt_sketch);
 #endif
 
@@ -184,7 +184,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "tag value map example", tag_value_map_example);
   hashmap_add(unit_tests, "tokenizer class", tokenizer_unit_test);
   hashmap_add(unit_tests, "union find class", union_find_unit_test);
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
   hashmap_add(unit_tests, "block class", block_unit_test);
   hashmap_add(unit_tests, "style class", style_unit_test);
   hashmap_add(unit_tests, "diagram class", diagram_unit_test);

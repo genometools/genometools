@@ -23,7 +23,7 @@
 #include "core.h"     /* the core of the GenomeTools library */
 #include "extended.h" /* extended part of the GenomeTools library  */
 #include "match.h"    /* include the GenomeTools matching library */
-#ifdef LIBANNOTATIONSKETCH
+#ifndef WITHOUT_CAIRO
 #include "annotationsketch.h"  /* include AnnotationSketch library */
 #endif
 
