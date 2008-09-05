@@ -478,8 +478,6 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
          $(EXAMPLE_DEP) \
          $(SKPROTO_DEP) \
 	 $(TOOLS_DEP) \
-	 $(LIBEXPAT_DEP) \
-	 $(LIBLUA_DEP) \
          $(LUAMAIN_DEP) \
 	 $(LIBTECLA_DEP) \
 	 $(LIBRNV_DEP) \
