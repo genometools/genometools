@@ -45,7 +45,7 @@ GenomeFeatureType* feature_type_factory_create_gft(FeatureTypeFactory *ftf,
   return ftf->c_class->create_gft(ftf, type);
 }
 
-StrArray* feature_type_factory_get_used_types(const FeatureTypeFactory *ftf)
+GT_StrArray* feature_type_factory_get_used_types(const FeatureTypeFactory *ftf)
 {
   return gft_collection_get_types(ftf->used_types);
 }

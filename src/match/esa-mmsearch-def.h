@@ -55,7 +55,7 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                            Error *err);
 
 int callenumquerymatches(const Str *indexname,
-                         const StrArray *queryfiles,
+                         const GT_StrArray *queryfiles,
                          bool echoquery,
                          unsigned int userdefinedleastlength,
                          int (*processmaxmatch)(void *,unsigned long,Seqpos,

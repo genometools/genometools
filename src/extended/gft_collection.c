@@ -57,18 +57,18 @@ GenomeFeatureType* gft_collection_get(GFTCollection *gftc, const char *type)
 static int store_type(void *key, UNUSED void *value, void *data,
                       UNUSED Error *err)
 {
-  StrArray *types = data;
+  GT_StrArray *types = data;
   assert(key && types);
-  strarray_add_cstr(types, key);
+  gt_strarray_add_cstr(types, key);
   return 0;
 }
 
-StrArray* gft_collection_get_types(const GFTCollection *gftc)
+GT_StrArray* gft_collection_get_types(const GFTCollection *gftc)
 {
-  StrArray *types;
+  GT_StrArray *types;
   int had_err;
   assert(gftc);
-  types = strarray_new();
+  types = gt_strarray_new();
   had_err = hashmap_foreach_in_key_order(gftc->genome_feature_types,
                                          store_type, types, NULL);
   assert(!had_err);

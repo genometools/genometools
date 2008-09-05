@@ -177,7 +177,7 @@ static void processastretches(const DiscDistri *distastretch,
 
 int gt_seqiterator(int argc, const char **argv, Error *err)
 {
-  StrArray *files;
+  GT_StrArray *files;
   SeqIterator *seqit;
   const Uchar *sequence;
   char *desc;
@@ -203,10 +203,10 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
         return 0;
   }
 
-  files = strarray_new();
+  files = gt_strarray_new();
   for (i = parsed_args; i < argc; i++)
   {
-    strarray_add_cstr(files, argv[i]);
+    gt_strarray_add_cstr(files, argv[i]);
   }
   totalsize = files_estimate_total_size(files);
   printf("# estimated total size is " Formatuint64_t "\n",
@@ -261,7 +261,7 @@ int gt_seqiterator(int argc, const char **argv, Error *err)
     progressbar_stop();
   }
   seqiterator_delete(seqit);
-  strarray_delete(files);
+  gt_strarray_delete(files);
   if (seqiteroptions.dodistlen)
   {
     printf("# " Formatuint64_t " sequences of average length %.2f\n",

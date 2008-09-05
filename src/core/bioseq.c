@@ -43,7 +43,7 @@
 #include "core/xposix.h"
 
 typedef struct {
-  StrArray *md5_fingerprints;
+  GT_StrArray *md5_fingerprints;
 } BioseqFingerprints;
 
 struct Bioseq {
@@ -59,7 +59,7 @@ struct Bioseq {
   BioseqFingerprints *fingerprints;
 };
 
-static bool read_fingerprints(StrArray *md5_fingerprints,
+static bool read_fingerprints(GT_StrArray *md5_fingerprints,
                               Str  *fingerprints_filename,
                               unsigned long num_of_seqs)
 {
@@ -75,45 +75,45 @@ static bool read_fingerprints(StrArray *md5_fingerprints,
   if (reading_succeeded) {
     Str *line = str_new();
     while (str_read_next_line(line, fingerprint_file) != EOF) {
-      strarray_add(md5_fingerprints, line);
+      gt_strarray_add(md5_fingerprints, line);
       str_reset(line);
     }
     str_delete(line);
-    if (strarray_size(md5_fingerprints) < num_of_seqs) {
+    if (gt_strarray_size(md5_fingerprints) < num_of_seqs) {
       /* premature end of file (e.g., due to aborted construction) */
       reading_succeeded = false;
-      strarray_set_size(md5_fingerprints, 0);
+      gt_strarray_set_size(md5_fingerprints, 0);
     }
     else
-      assert(strarray_size(md5_fingerprints) == num_of_seqs);
+      assert(gt_strarray_size(md5_fingerprints) == num_of_seqs);
   }
   fa_xfclose(fingerprint_file);
   return reading_succeeded;
 }
 
-static void add_fingerprints(StrArray *md5_fingerprints, Bioseq *bs)
+static void add_fingerprints(GT_StrArray *md5_fingerprints, Bioseq *bs)
 {
   unsigned long i;
   assert(md5_fingerprints && bs);
   for (i = 0; i < bioseq_number_of_sequences(bs); i++) {
     char *md5 = md5_fingerprint(bioseq_get_sequence(bs, i),
                                 bioseq_get_sequence_length(bs, i));
-    strarray_add_cstr(md5_fingerprints, md5);
+    gt_strarray_add_cstr(md5_fingerprints, md5);
     ma_free(md5);
   }
 }
 
-static void strarray_dump_to_file(StrArray *sa, FILE *outfp)
+static void strarray_dump_to_file(GT_StrArray *sa, FILE *outfp)
 {
   unsigned long i;
   assert(sa && outfp);
-  for (i = 0; i < strarray_size(sa); i++) {
-    xfputs(strarray_get(sa, i), outfp);
+  for (i = 0; i < gt_strarray_size(sa); i++) {
+    xfputs(gt_strarray_get(sa, i), outfp);
     xfputc('\n', outfp);
   }
 }
 
-static void write_fingerprints(StrArray *md5_fingerprints,
+static void write_fingerprints(GT_StrArray *md5_fingerprints,
                                Str *fingerprints_filename)
 {
   FILE *fingerprints_file;
@@ -130,7 +130,7 @@ static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
   Str *fingerprints_filename;
   assert(bs);
   bsf = ma_calloc(1, sizeof *bsf);
-  bsf->md5_fingerprints = strarray_new();
+  bsf->md5_fingerprints = gt_strarray_new();
   fingerprints_filename = str_clone(bs->sequence_file);
   str_append_cstr(fingerprints_filename, GT_BIOSEQ_FINGERPRINTS);
   if (!bs->use_stdin && file_exists(str_get(fingerprints_filename)) &&
@@ -154,7 +154,7 @@ static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
 static void bioseq_fingerprints_delete(BioseqFingerprints *bsf)
 {
   if (!bsf) return;
-  strarray_delete(bsf->md5_fingerprints);
+  gt_strarray_delete(bsf->md5_fingerprints);
   ma_free(bsf);
 }
 
@@ -162,7 +162,7 @@ static const char* bioseq_fingerprints_get(BioseqFingerprints *bsf,
                                            unsigned long idx)
 {
   assert(bsf);
-  return strarray_get(bsf->md5_fingerprints, idx);
+  return gt_strarray_get(bsf->md5_fingerprints, idx);
 }
 
 typedef struct {

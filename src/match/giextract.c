@@ -305,7 +305,7 @@ int extractginumbers(bool verbose,
                      GenFile *outfp,
                      unsigned long width,
                      const Str *ginumberfile,
-                     StrArray *referencefiletab,
+                     GT_StrArray *referencefiletab,
                      Error *err)
 {
   SeqIterator *seqit;

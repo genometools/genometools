@@ -30,9 +30,10 @@ void               gft_collection_delete(GFTCollection*);
 void               gft_collection_add(GFTCollection*, const char *type,
                                       GenomeFeatureType *gft);
 GenomeFeatureType* gft_collection_get(GFTCollection*, const char *type);
-/* Returns a StrArray which contains all type names in alphabetical order which
-   are stored in this colleciton. The caller is responsible to free it! */
-StrArray*          gft_collection_get_types(const GFTCollection
+/* Returns a GT_StrArray which contains all type names in alphabetical order
+   which are stored in this collection.
+   The caller is responsible to free it! */
+GT_StrArray*          gft_collection_get_types(const GFTCollection
                                             *gft_collection);
 
 #endif

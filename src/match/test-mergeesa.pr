@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 int performtheindexmerging(const Str *storeindex,
-                           const StrArray *indexnametab,
+                           const GT_StrArray *indexnametab,
                            Verboseinfo *verboseinfo,
                            Error *err);
 

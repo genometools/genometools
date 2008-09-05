@@ -43,6 +43,6 @@ void           file_dirname(Str *path, const char *file);
    Sets <path> to the empty string if <file> could not be found in $PATH. */
 int            file_find_in_path(Str *path, const char *file, Error*);
 
-off_t          files_estimate_total_size(const StrArray *filenames);
+off_t          files_estimate_total_size(const GT_StrArray *filenames);
 
 #endif

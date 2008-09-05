@@ -89,7 +89,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   Bioseq *bs;
   StringDistri *sd;
   unsigned long long duplicates = 0, num_of_sequences = 0;
-  StrArray *files;
+  GT_StrArray *files;
   int had_err = 0;
   SeqIterator *seqit;
   const Uchar *sequence;
@@ -125,9 +125,9 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   }
   else {
     int i;
-    files = strarray_new();
+    files = gt_strarray_new();
     for (i = parsed_args; i < argc; i++)
-      strarray_add_cstr(files, argv[i]);
+      gt_strarray_add_cstr(files, argv[i]);
     totalsize = files_estimate_total_size(files);
     seqit = seqiterator_new(files, NULL, true);
     if (arguments->verbose) {
@@ -156,7 +156,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     if (arguments->verbose)
       progressbar_stop();
     seqiterator_delete(seqit);
-    strarray_delete(files);
+    gt_strarray_delete(files);
   }
 
   /* show statistics */

@@ -22,7 +22,7 @@
 #include "match/test-mergeesa.pr"
 #include "tools/gt_mergeesa.h"
 
-static OPrval parse_options(Str *indexname,StrArray *indexnametab,
+static OPrval parse_options(Str *indexname,GT_StrArray *indexnametab,
                             int *parsed_args, int argc,
                             const char **argv, Error *err)
 {
@@ -55,14 +55,14 @@ static OPrval parse_options(Str *indexname,StrArray *indexnametab,
 int gt_mergeesa(int argc, const char **argv, Error *err)
 {
   Str *storeindex;
-  StrArray *indexnametab;
+  GT_StrArray *indexnametab;
   bool haserr = false;
   int parsed_args;
 
   error_check(err);
 
   storeindex = str_new();
-  indexnametab = strarray_new();
+  indexnametab = gt_strarray_new();
   switch (parse_options(storeindex, indexnametab, &parsed_args, argc, argv,
                         err)) {
     case OPTIONPARSER_OK: break;
@@ -76,9 +76,9 @@ int gt_mergeesa(int argc, const char **argv, Error *err)
     Verboseinfo *verboseinfo;
 
     printf("# storeindex=%s\n",str_get(storeindex));
-    for (i=0; i<strarray_size(indexnametab); i++)
+    for (i=0; i<gt_strarray_size(indexnametab); i++)
     {
-      printf("# input=%s\n",strarray_get(indexnametab,i));
+      printf("# input=%s\n",gt_strarray_get(indexnametab,i));
     }
     verboseinfo = newverboseinfo(false);
     if (performtheindexmerging(storeindex,
@@ -91,6 +91,6 @@ int gt_mergeesa(int argc, const char **argv, Error *err)
     freeverboseinfo(&verboseinfo);
   }
   str_delete(storeindex);
-  strarray_delete(indexnametab);
+  gt_strarray_delete(indexnametab);
   return haserr ? -1 : 0;
 }

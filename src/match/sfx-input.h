@@ -34,7 +34,7 @@ typedef struct
   Encodedsequence *encseq;
   unsigned long *characterdistribution;
   Readmode readmode;
-  StrArray *filenametab;
+  GT_StrArray *filenametab;
   void *voidptr2suffixarray;
 } Sfxseqinfo;
 

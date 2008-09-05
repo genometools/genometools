@@ -31,7 +31,7 @@
 typedef struct
 {
   bool noindexpos;
-  StrArray *indexnametab;
+  GT_StrArray *indexnametab;
   Str *leveldesc,
       *outfmindex;
 } Mkfmcallinfo;
@@ -62,7 +62,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   int parsed_args;
 
   error_check(err);
-  mkfmcallinfo->indexnametab = strarray_new();
+  mkfmcallinfo->indexnametab = gt_strarray_new();
   mkfmcallinfo->outfmindex = str_new();
   mkfmcallinfo->leveldesc = str_new();
   op = option_parser_new("[option ...] -ii indexfile [...]",
@@ -96,7 +96,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   {
     if (!option_is_set(optionfmout))
     {
-      if (strarray_size(mkfmcallinfo->indexnametab) > 1UL)
+      if (gt_strarray_size(mkfmcallinfo->indexnametab) > 1UL)
       {
         error_set(err,"if more than one index is given, then "
                           "option -fmout is mandatory");
@@ -105,7 +105,8 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
       {
         char *basenameptr;
 
-        basenameptr = getbasename(strarray_get(mkfmcallinfo->indexnametab,0));
+        basenameptr = getbasename(gt_strarray_get(mkfmcallinfo->indexnametab,
+                                                  0));
         str_set(mkfmcallinfo->outfmindex,basenameptr);
         ma_free(basenameptr);
       }
@@ -122,7 +123,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
 
 static void freemkfmcallinfo(Mkfmcallinfo *mkfmcallinfo)
 {
-  strarray_delete(mkfmcallinfo->indexnametab);
+  gt_strarray_delete(mkfmcallinfo->indexnametab);
   str_delete(mkfmcallinfo->outfmindex);
   str_delete(mkfmcallinfo->leveldesc);
 }

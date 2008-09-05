@@ -59,7 +59,7 @@ static void gt_tagerator_arguments_delete(void *tool_arguments)
   }
   str_delete(arguments->esaindexname);
   str_delete(arguments->pckindexname);
-  strarray_delete(arguments->tagfiles);
+  gt_strarray_delete(arguments->tagfiles);
   ma_free(arguments);
 }
 
@@ -73,7 +73,7 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   assert(arguments != NULL);
   arguments->esaindexname = str_new();
   arguments->pckindexname = str_new();
-  arguments->tagfiles = strarray_new();
+  arguments->tagfiles = gt_strarray_new();
   op = option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -201,9 +201,9 @@ static int gt_tagerator_runner(UNUSED int argc,
     assert(str_length(arguments->pckindexname) > 0);
     printf("# indexname(pck)=%s\n",str_get(arguments->pckindexname));
   }
-  for (idx=0; idx<strarray_size(arguments->tagfiles); idx++)
+  for (idx=0; idx<gt_strarray_size(arguments->tagfiles); idx++)
   {
-    printf("# queryfile=%s\n",strarray_get(arguments->tagfiles,idx));
+    printf("# queryfile=%s\n",gt_strarray_get(arguments->tagfiles,idx));
   }
   if (runtagerator(arguments,err) != 0)
   {

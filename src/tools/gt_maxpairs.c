@@ -37,7 +37,7 @@ typedef struct
   unsigned long samples;
   bool scanfile;
   Str *indexname;
-  StrArray *queryfiles;
+  GT_StrArray *queryfiles;
 } Maxpairsoptions;
 
 static int simpleexactselfmatchoutput(UNUSED void *info,
@@ -148,13 +148,13 @@ int gt_maxpairs(int argc, const char **argv, Error *err)
   error_check(err);
 
   maxpairsoptions.indexname = str_new();
-  maxpairsoptions.queryfiles = strarray_new();
+  maxpairsoptions.queryfiles = gt_strarray_new();
   oprval = parse_options(&maxpairsoptions,&parsed_args, argc, argv,err);
   if (oprval == OPTIONPARSER_OK)
   {
     Verboseinfo *verboseinfo = newverboseinfo(false);
     assert(parsed_args == argc);
-    if (strarray_size(maxpairsoptions.queryfiles) == 0)
+    if (gt_strarray_size(maxpairsoptions.queryfiles) == 0)
     {
       if (maxpairsoptions.samples == 0)
       {
@@ -198,7 +198,7 @@ int gt_maxpairs(int argc, const char **argv, Error *err)
     freeverboseinfo(&verboseinfo);
   }
   str_delete(maxpairsoptions.indexname);
-  strarray_delete(maxpairsoptions.queryfiles);
+  gt_strarray_delete(maxpairsoptions.queryfiles);
 
   if (oprval == OPTIONPARSER_REQUESTS_EXIT)
   {

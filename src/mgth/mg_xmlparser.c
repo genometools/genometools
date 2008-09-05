@@ -134,18 +134,18 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
 
   if (PARSESTRUCT(xml_tag_flag) && !(!had_err) && PARSESTRUCT(giexp_flag))
   {
-    strarray_delete(MATRIXSTRUCT(hit_gi_nr));
-    strarray_delete(MATRIXSTRUCT(hit_num));
-    strarray_delete(MATRIXSTRUCT(hit_dna));
-    strarray_delete(MATRIXSTRUCT(hit_gi_def));
-    strarray_delete(MATRIXSTRUCT(hit_acc));
-    strarray_delete(MATRIXSTRUCT(fasta_row));
-    strarray_delete(MATRIXSTRUCT(hit_from));
-    strarray_delete(MATRIXSTRUCT(hit_to));
-    strarray_delete(MATRIXSTRUCT(hsp_qseq));
-    strarray_delete(MATRIXSTRUCT(hsp_hseq));
-    strarray_delete(PARSESTRUCT(query_frame_tmp));
-    strarray_delete(PARSESTRUCT(hit_frame_tmp));
+    gt_strarray_delete(MATRIXSTRUCT(hit_gi_nr));
+    gt_strarray_delete(MATRIXSTRUCT(hit_num));
+    gt_strarray_delete(MATRIXSTRUCT(hit_dna));
+    gt_strarray_delete(MATRIXSTRUCT(hit_gi_def));
+    gt_strarray_delete(MATRIXSTRUCT(hit_acc));
+    gt_strarray_delete(MATRIXSTRUCT(fasta_row));
+    gt_strarray_delete(MATRIXSTRUCT(hit_from));
+    gt_strarray_delete(MATRIXSTRUCT(hit_to));
+    gt_strarray_delete(MATRIXSTRUCT(hsp_qseq));
+    gt_strarray_delete(MATRIXSTRUCT(hsp_hseq));
+    gt_strarray_delete(PARSESTRUCT(query_frame_tmp));
+    gt_strarray_delete(PARSESTRUCT(hit_frame_tmp));
   }
 
   /* Freigeben des XML-Parser und loeschen des Puffer-Strings */
@@ -166,7 +166,7 @@ static void XMLCALL startElement(void *data, const char *name,
        jew. Array bei Uebereinstimmung wird das jeweilige Flag gesetzt */
     if (strcmp
         (name,
-         strarray_get(PARSESTRUCT(query_array),
+         gt_strarray_get(PARSESTRUCT(query_array),
                       XMLPARSERSTRUCT(query_array_index_start))) == 0)
     {
       flag_setting(&XMLPARSERSTRUCT(query_array_index_start),
@@ -175,7 +175,7 @@ static void XMLCALL startElement(void *data, const char *name,
     else
       if (strcmp
           (name,
-           strarray_get(PARSESTRUCT(hit_array),
+           gt_strarray_get(PARSESTRUCT(hit_array),
                         XMLPARSERSTRUCT(hit_array_index_start))) == 0)
     {
       flag_setting(&XMLPARSERSTRUCT(hit_array_index_start),
@@ -184,7 +184,7 @@ static void XMLCALL startElement(void *data, const char *name,
     else
       if (strcmp
           (name,
-           strarray_get(PARSESTRUCT(hit_hsp_array),
+           gt_strarray_get(PARSESTRUCT(hit_hsp_array),
                         XMLPARSERSTRUCT(hit_hsp_array_index_start))) == 0)
     {
       flag_setting(&XMLPARSERSTRUCT(hit_hsp_array_index_start),
@@ -245,19 +245,19 @@ static void XMLCALL endElement(void *data, const char *name)
         mg_outputwriter(parsestruct_ptr, NULL, NULL, NULL, 'x', err);
       }
 
-      strarray_delete(MATRIXSTRUCT(hit_gi_nr));
-      strarray_delete(MATRIXSTRUCT(hit_gi_def));
-      strarray_delete(MATRIXSTRUCT(hit_acc));
-      strarray_delete(MATRIXSTRUCT(fasta_row));
-      strarray_delete(MATRIXSTRUCT(hit_num));
+      gt_strarray_delete(MATRIXSTRUCT(hit_gi_nr));
+      gt_strarray_delete(MATRIXSTRUCT(hit_gi_def));
+      gt_strarray_delete(MATRIXSTRUCT(hit_acc));
+      gt_strarray_delete(MATRIXSTRUCT(fasta_row));
+      gt_strarray_delete(MATRIXSTRUCT(hit_num));
 
-      strarray_delete(MATRIXSTRUCT(hit_dna));
-      strarray_delete(MATRIXSTRUCT(hit_from));
-      strarray_delete(MATRIXSTRUCT(hit_to));
-      strarray_delete(MATRIXSTRUCT(hsp_qseq));
-      strarray_delete(MATRIXSTRUCT(hsp_hseq));
-      strarray_delete(PARSESTRUCT(query_frame_tmp));
-      strarray_delete(PARSESTRUCT(hit_frame_tmp));
+      gt_strarray_delete(MATRIXSTRUCT(hit_dna));
+      gt_strarray_delete(MATRIXSTRUCT(hit_from));
+      gt_strarray_delete(MATRIXSTRUCT(hit_to));
+      gt_strarray_delete(MATRIXSTRUCT(hsp_qseq));
+      gt_strarray_delete(MATRIXSTRUCT(hsp_hseq));
+      gt_strarray_delete(PARSESTRUCT(query_frame_tmp));
+      gt_strarray_delete(PARSESTRUCT(hit_frame_tmp));
 
       PARSESTRUCT(xml_tag_flag) = UNSET;
     }
@@ -268,7 +268,7 @@ static void XMLCALL endElement(void *data, const char *name)
     {
       /* Anhand der Query-GI-Def kann mittels Hash-Table und
          Bioseq-Struktur die Query-DNA ausgelesen werden */
-      if (strcmp(name, strarray_get(PARSESTRUCT(query_array), 0)) == 0
+      if (strcmp(name, gt_strarray_get(PARSESTRUCT(query_array), 0)) == 0
                                     && PARSESTRUCT(giexp_flag))
       {
         /* Query-DNA-Strings fuer die Sequenz und die Definition werden
@@ -281,18 +281,18 @@ static void XMLCALL endElement(void *data, const char *name)
 
         /* Erzeugen von StringArrays zur Aufnahme der
            Hit-DNA-Sequenz-Informationen */
-        MATRIXSTRUCT(hit_gi_nr) = strarray_new();
-        MATRIXSTRUCT(hit_num) = strarray_new();
-        MATRIXSTRUCT(hit_dna) = strarray_new();
-        MATRIXSTRUCT(hit_gi_def) = strarray_new();
-        MATRIXSTRUCT(hit_acc) = strarray_new();
-        MATRIXSTRUCT(fasta_row) = strarray_new();
-        MATRIXSTRUCT(hit_from) = strarray_new();
-        MATRIXSTRUCT(hit_to) = strarray_new();
-        MATRIXSTRUCT(hsp_qseq) = strarray_new();
-        MATRIXSTRUCT(hsp_hseq) = strarray_new();
-        PARSESTRUCT(query_frame_tmp) = strarray_new();
-        PARSESTRUCT(hit_frame_tmp) = strarray_new();
+        MATRIXSTRUCT(hit_gi_nr) = gt_strarray_new();
+        MATRIXSTRUCT(hit_num) = gt_strarray_new();
+        MATRIXSTRUCT(hit_dna) = gt_strarray_new();
+        MATRIXSTRUCT(hit_gi_def) = gt_strarray_new();
+        MATRIXSTRUCT(hit_acc) = gt_strarray_new();
+        MATRIXSTRUCT(fasta_row) = gt_strarray_new();
+        MATRIXSTRUCT(hit_from) = gt_strarray_new();
+        MATRIXSTRUCT(hit_to) = gt_strarray_new();
+        MATRIXSTRUCT(hsp_qseq) = gt_strarray_new();
+        MATRIXSTRUCT(hsp_hseq) = gt_strarray_new();
+        PARSESTRUCT(query_frame_tmp) = gt_strarray_new();
+        PARSESTRUCT(hit_frame_tmp) = gt_strarray_new();
 
         /* Fuer den Fall eines Parse-Fehlers - Das Flag zeigt an, dass die
            Strings angelegt und nicht geloescht wurden */
@@ -324,7 +324,7 @@ static void XMLCALL endElement(void *data, const char *name)
       /* Hit_id liefert die GI-Nummer, die fuer die efetch-NCBI-Abfrage
          benoetigt wird */
       else
-        if ((strcmp(name, strarray_get(PARSESTRUCT(hit_array), 0)) == 0))
+        if ((strcmp(name, gt_strarray_get(PARSESTRUCT(hit_array), 0)) == 0))
       {
         /* loeschen des alten hit_gi_nr Eintrages */
         str_reset(PARSESTRUCT(hit_gi_nr_tmp));
@@ -357,13 +357,13 @@ static void XMLCALL endElement(void *data, const char *name)
         }
       }
       /* einlesen der hit_gi_def */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_array), 1)) == 0
+      else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_array), 1)) == 0
                                          && PARSESTRUCT(giexp_flag))
       {
         str_set(PARSESTRUCT(gi_def_tmp), str_get(PARSESTRUCT(buf_ptr)));
       }
       /* einlesen der hit_acc_nr */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_array), 2)) == 0
+      else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_array), 2)) == 0
                                          && PARSESTRUCT(giexp_flag))
       {
         str_set(PARSESTRUCT(gi_acc_tmp), str_get(PARSESTRUCT(buf_ptr)));
@@ -372,27 +372,27 @@ static void XMLCALL endElement(void *data, const char *name)
          Kombination ist Bestandteil der eindeutigen Hit-FASTA-Zeile im
          Hit-File und dient der Identifizierung der Hit-DNA-Sequenzen im
          XML-File */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 0)) ==
+      else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 0)) ==
                0 && PARSESTRUCT(giexp_flag))
       {
         /* Die GI-Nummer wird entsprechend ihrer Laenge gi_len
            abgespeichert */
-        strarray_add_cstr(MATRIXSTRUCT(hit_gi_nr),
+        gt_strarray_add_cstr(MATRIXSTRUCT(hit_gi_nr),
                           str_get(PARSESTRUCT(hit_gi_nr_tmp)));
         /* einlesen der aktuellen hit_gi_def */
-        strarray_add_cstr(MATRIXSTRUCT(hit_gi_def),
+        gt_strarray_add_cstr(MATRIXSTRUCT(hit_gi_def),
                           str_get(PARSESTRUCT(gi_def_tmp)));
         /* einlesen der aktuellen hit_accession-number */
-        strarray_add_cstr(MATRIXSTRUCT(hit_acc),
+        gt_strarray_add_cstr(MATRIXSTRUCT(hit_acc),
                           str_get(PARSESTRUCT(gi_acc_tmp)));
-        strarray_add_cstr(MATRIXSTRUCT(fasta_row),
+        gt_strarray_add_cstr(MATRIXSTRUCT(fasta_row),
                           str_get(PARSESTRUCT(fasta_row)));
         /* einlesen der aktuellen hit_num */
-        strarray_add_cstr(MATRIXSTRUCT(hit_num),
+        gt_strarray_add_cstr(MATRIXSTRUCT(hit_num),
                           str_get(PARSESTRUCT(buf_ptr)));
       }
       /* Der Query-Start-Wert wird gespeichert */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 1)) ==
+      else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 1)) ==
                0 && PARSESTRUCT(giexp_flag))
       {
         /* Der Query-from Wert wird als Long-Wert gespeichert, dazu
@@ -404,7 +404,7 @@ static void XMLCALL endElement(void *data, const char *name)
       }
       /* Query-Stop-Wert wird gespeichert/Bearbeitung siehe
          Query-Start-Wert */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 2)) ==
+      else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 2)) ==
                0 && PARSESTRUCT(giexp_flag))
       {
         ulong_numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
@@ -412,14 +412,14 @@ static void XMLCALL endElement(void *data, const char *name)
                        sizeof (unsigned long));
       }
       /* Hit-from XML-Tag */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 3)) ==
+      else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 3)) ==
                0)
       {
         if (PARSESTRUCT(giexp_flag))
         {
           /* Speichern des Hit-from Wertes in der matrix_info Struktur
              innerhalb der parsestruct-Struktur */
-          strarray_add_cstr(MATRIXSTRUCT(hit_from),
+          gt_strarray_add_cstr(MATRIXSTRUCT(hit_from),
                             str_get(PARSESTRUCT(buf_ptr)));
         }
         else
@@ -430,14 +430,14 @@ static void XMLCALL endElement(void *data, const char *name)
         }
       }
       /* Hit-to XML-Tag - Bearbeitung siehe Hit-from-Tag */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 4)) ==
+      else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 4)) ==
                0)
       {
         if (PARSESTRUCT(giexp_flag))
         {
           /* Speichern des Hit-from Wertes in der matrix_info Struktur
              innerhalb der parsestruct-Struktur */
-          strarray_add_cstr(MATRIXSTRUCT(hit_to),
+          gt_strarray_add_cstr(MATRIXSTRUCT(hit_to),
                             str_get(PARSESTRUCT(buf_ptr)));
         }
         else
@@ -448,12 +448,12 @@ static void XMLCALL endElement(void *data, const char *name)
       /* Query-Frame XML-Tag; bei der Berechnung der Combined-Scores
          bilden die Hits Cluster entsprechend der Query-Frames;
          Speicherung der Frames erfolgt als Long-Wert */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 5)) ==
+      else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 5)) ==
                0 && PARSESTRUCT(giexp_flag))
       {
         /* abspeichern des query_frames fuer die FASTA-File Zeile im
            Hit-File als String */
-        strarray_add_cstr(PARSESTRUCT(query_frame_tmp),
+        gt_strarray_add_cstr(PARSESTRUCT(query_frame_tmp),
                           str_get(PARSESTRUCT(buf_ptr)));
 
         /* abspeichern des query_frames fuer spaetere Sequenzberechnnugen
@@ -463,12 +463,12 @@ static void XMLCALL endElement(void *data, const char *name)
       }
       /* Hit-Frame XML-Tag/Bearbeitung siehe Query-Frame XML-Tag als
          String */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 6)) ==
+      else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 6)) ==
                0 && PARSESTRUCT(giexp_flag))
       {
         /* abspeichern des hit_frames fuer die FASTA-File Zeile im
            Hit-File */
-        strarray_add_cstr(PARSESTRUCT(hit_frame_tmp),
+        gt_strarray_add_cstr(PARSESTRUCT(hit_frame_tmp),
                           str_get(PARSESTRUCT(buf_ptr)));
 
         /* abspeichern des hit_frames fuer spaetere Sequenzberechnnugen
@@ -495,23 +495,23 @@ static void XMLCALL endElement(void *data, const char *name)
            Kombination ist dies gewaehrleistet */
 
         str_set(hit_tmp,
-                strarray_get(MATRIXSTRUCT(hit_gi_nr),
+                gt_strarray_get(MATRIXSTRUCT(hit_gi_nr),
                              XMLPARSERSTRUCT(hit_counter)));
         str_append_cstr(hit_tmp, " ");
         str_append_cstr(hit_tmp,
-                        strarray_get(MATRIXSTRUCT(hit_from),
+                        gt_strarray_get(MATRIXSTRUCT(hit_from),
                                      XMLPARSERSTRUCT(hit_counter)));
         str_append_cstr(hit_tmp, " ");
         str_append_cstr(hit_tmp,
-                        strarray_get(MATRIXSTRUCT(hit_to),
+                        gt_strarray_get(MATRIXSTRUCT(hit_to),
                                      XMLPARSERSTRUCT(hit_counter)));
         str_append_cstr(hit_tmp, " ");
         str_append_cstr(hit_tmp,
-                        strarray_get(MATRIXSTRUCT(fasta_row),
+                        gt_strarray_get(MATRIXSTRUCT(fasta_row),
                                      XMLPARSERSTRUCT(hit_counter)));
         str_append_cstr(hit_tmp, " ");
         str_append_cstr(hit_tmp,
-                        strarray_get(MATRIXSTRUCT(hit_gi_def),
+                        gt_strarray_get(MATRIXSTRUCT(hit_gi_def),
                                      XMLPARSERSTRUCT(hit_counter)));
 
         /* Hit-Hashtabelle enthaelt den konstruierten Eintrag */
@@ -529,7 +529,7 @@ static void XMLCALL endElement(void *data, const char *name)
                                                         (hitseq),
                                                         hit_nr));
           /* abspeichern der Hit-DNA in der Matrix-Info Struktur */
-          strarray_add_cstr(MATRIXSTRUCT(hit_dna), str_get(hit_dna_tmp));
+          gt_strarray_add_cstr(MATRIXSTRUCT(hit_dna), str_get(hit_dna_tmp));
         }
         /* Falls kein Eintrag in der Hashtabelle gefunden wurde,
            Fehlercode setzen - falsche Hit-DNA-Datei als Parameter bei
@@ -550,17 +550,17 @@ static void XMLCALL endElement(void *data, const char *name)
         str_delete(hit_dna_tmp);
       }
       /* Einlesen der translatierten Query-DNA-Sequenz */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 7)) ==
+      else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 7)) ==
                0 && PARSESTRUCT(giexp_flag))
       {
-        strarray_add_cstr(MATRIXSTRUCT(hsp_qseq),
+        gt_strarray_add_cstr(MATRIXSTRUCT(hsp_qseq),
                           str_get(PARSESTRUCT(buf_ptr)));
       }
       /* Einlesen der translatierten Hit-DNA-Sequenz */
-      else if (strcmp(name, strarray_get(PARSESTRUCT(hit_hsp_array), 8)) ==
+      else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 8)) ==
                0 && PARSESTRUCT(giexp_flag))
       {
-        strarray_add_cstr(MATRIXSTRUCT(hsp_hseq),
+        gt_strarray_add_cstr(MATRIXSTRUCT(hsp_hseq),
                           str_get(PARSESTRUCT(buf_ptr)));
         /* Zaehler fuer die Hits pro GI-Nummer wird um 1 erhoeht */
         XMLPARSERSTRUCT(hit_counter)++;
@@ -569,32 +569,32 @@ static void XMLCALL endElement(void *data, const char *name)
         {
            PARSESTRUCT(gi_flag) = 0;
 
-           strarray_set_size(MATRIXSTRUCT(hit_gi_nr),
-                             strarray_size(MATRIXSTRUCT(hit_gi_nr))-1);
-           strarray_set_size(MATRIXSTRUCT(hit_gi_def),
-                             strarray_size(MATRIXSTRUCT(hit_gi_def))-1);
-           strarray_set_size(MATRIXSTRUCT(hit_acc),
-                             strarray_size(MATRIXSTRUCT(hit_acc))-1);
-           strarray_set_size(MATRIXSTRUCT(fasta_row),
-                             strarray_size(MATRIXSTRUCT(fasta_row))-1);
-           strarray_set_size(MATRIXSTRUCT(hit_num),
-                             strarray_size(MATRIXSTRUCT(hit_num))-1);
+           gt_strarray_set_size(MATRIXSTRUCT(hit_gi_nr),
+                             gt_strarray_size(MATRIXSTRUCT(hit_gi_nr))-1);
+           gt_strarray_set_size(MATRIXSTRUCT(hit_gi_def),
+                             gt_strarray_size(MATRIXSTRUCT(hit_gi_def))-1);
+           gt_strarray_set_size(MATRIXSTRUCT(hit_acc),
+                             gt_strarray_size(MATRIXSTRUCT(hit_acc))-1);
+           gt_strarray_set_size(MATRIXSTRUCT(fasta_row),
+                             gt_strarray_size(MATRIXSTRUCT(fasta_row))-1);
+           gt_strarray_set_size(MATRIXSTRUCT(hit_num),
+                             gt_strarray_size(MATRIXSTRUCT(hit_num))-1);
            array_set_size(MATRIXSTRUCT(query_from),
                           array_size(MATRIXSTRUCT(query_from))-1);
            array_set_size(MATRIXSTRUCT(query_to),
                           array_size(MATRIXSTRUCT(query_to))-1);
-           strarray_set_size(MATRIXSTRUCT(hit_from),
-                             strarray_size(MATRIXSTRUCT(hit_from))-1);
-           strarray_set_size(MATRIXSTRUCT(hit_to),
-                             strarray_size(MATRIXSTRUCT(hit_to))-1);
+           gt_strarray_set_size(MATRIXSTRUCT(hit_from),
+                             gt_strarray_size(MATRIXSTRUCT(hit_from))-1);
+           gt_strarray_set_size(MATRIXSTRUCT(hit_to),
+                             gt_strarray_size(MATRIXSTRUCT(hit_to))-1);
            array_set_size(MATRIXSTRUCT(query_frame),
                           array_size(MATRIXSTRUCT(query_frame))-1);
            array_set_size(MATRIXSTRUCT(hit_frame),
                           array_size(MATRIXSTRUCT(hit_frame))-1);
-           strarray_set_size(MATRIXSTRUCT(hsp_qseq),
-                             strarray_size(MATRIXSTRUCT(hsp_qseq))-1);
-           strarray_set_size(MATRIXSTRUCT(hsp_hseq),
-                             strarray_size(MATRIXSTRUCT(hsp_hseq))-1);
+           gt_strarray_set_size(MATRIXSTRUCT(hsp_qseq),
+                             gt_strarray_size(MATRIXSTRUCT(hsp_qseq))-1);
+           gt_strarray_set_size(MATRIXSTRUCT(hsp_hseq),
+                             gt_strarray_size(MATRIXSTRUCT(hsp_hseq))-1);
 
            XMLPARSERSTRUCT(hit_counter)--;
         }
@@ -603,7 +603,7 @@ static void XMLCALL endElement(void *data, const char *name)
       /* Flagberechnungen */
       if (strcmp
           (name,
-           strarray_get(PARSESTRUCT(query_array),
+           gt_strarray_get(PARSESTRUCT(query_array),
                         XMLPARSERSTRUCT(query_array_index_end))) == 0
           && !PARSESTRUCT(had_err))
       {
@@ -613,7 +613,7 @@ static void XMLCALL endElement(void *data, const char *name)
       else
         if (strcmp
             (name,
-             strarray_get(PARSESTRUCT(hit_array),
+             gt_strarray_get(PARSESTRUCT(hit_array),
                           XMLPARSERSTRUCT(hit_array_index_end))) == 0
             && !PARSESTRUCT(had_err))
       {
@@ -623,7 +623,7 @@ static void XMLCALL endElement(void *data, const char *name)
       else
         if (strcmp
             (name,
-             strarray_get(PARSESTRUCT(hit_hsp_array),
+             gt_strarray_get(PARSESTRUCT(hit_hsp_array),
                           XMLPARSERSTRUCT(hit_hsp_array_index_end))) == 0
             && !PARSESTRUCT(had_err))
       {

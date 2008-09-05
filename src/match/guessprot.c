@@ -23,7 +23,7 @@
 #include "core/str.h"
 #include "stamp.h"
 
-int guessifproteinsequencestream(const StrArray *filenametab,Error *err)
+int guessifproteinsequencestream(const GT_StrArray *filenametab,Error *err)
 {
   unsigned int countnonbases = 0,
                currentposition;

@@ -130,7 +130,8 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Error *err)
 }
 
 /*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
-                                                  const StrArray *filenametab,
+                                                  const GT_StrArray
+                                                  *filenametab,
                                                   bool plainformat,
                                                   Seqpos totallength,
                                                   Seqpos specialranges,

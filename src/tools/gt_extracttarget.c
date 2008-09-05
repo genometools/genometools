@@ -31,13 +31,13 @@
 #include "tools/gt_extracttarget.h"
 
 typedef struct {
-  StrArray *seqfiles;
+  GT_StrArray *seqfiles;
 } ExtractTargetArguments;
 
 static void* gt_extracttarget_arguments_new(void)
 {
   ExtractTargetArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->seqfiles = strarray_new();
+  arguments->seqfiles = gt_strarray_new();
   return arguments;
 }
 
@@ -45,7 +45,7 @@ static void gt_extracttarget_arguments_delete(void *tool_arguments)
 {
   ExtractTargetArguments *arguments = tool_arguments;
   if (!arguments) return;
-  strarray_delete(arguments->seqfiles);
+  gt_strarray_delete(arguments->seqfiles);
   ma_free(arguments);
 }
 
@@ -87,7 +87,8 @@ static bool show_target(UNUSED unsigned long pos, void *data)
   return true;
 }
 
-static int extracttarget_from_seqfiles(const char *target, StrArray *seqfiles,
+static int extracttarget_from_seqfiles(const char *target,
+                                       GT_StrArray *seqfiles,
                                        Error *err)
 {
   Str *unescaped_target;
@@ -111,10 +112,10 @@ static int extracttarget_from_seqfiles(const char *target, StrArray *seqfiles,
                             strlen(splitter_get_token(blank_splitter, 0)), err);
     if (!had_err) {
       unsigned long j;
-      for (j = 0; j < strarray_size(seqfiles); j++) {
+      for (j = 0; j < gt_strarray_size(seqfiles); j++) {
         unsigned long k;
         Bioseq *bioseq;
-        if (!(bioseq =  bioseq_new(strarray_get(seqfiles, j), err))) {
+        if (!(bioseq =  bioseq_new(gt_strarray_get(seqfiles, j), err))) {
           had_err = -1;
           break;
         }
@@ -138,7 +139,7 @@ static int extracttarget_from_seqfiles(const char *target, StrArray *seqfiles,
   return had_err;
 }
 
-static int extracttarget_from_node(GenomeNode *gn, StrArray *seqfiles,
+static int extracttarget_from_node(GenomeNode *gn, GT_StrArray *seqfiles,
                                    Error *err)
 {
   GenomeNodeIterator *gni;

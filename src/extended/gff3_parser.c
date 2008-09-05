@@ -460,15 +460,15 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
   return had_err;
 }
 
-static Array* find_roots(StrArray *parents, FeatureInfo *feature_info)
+static Array* find_roots(GT_StrArray *parents, FeatureInfo *feature_info)
 {
   Array *roots;
   unsigned long i;
   assert(parents);
   roots = array_new(sizeof (GenomeNode*));
-  for (i = 0; i < strarray_size(parents); i++) {
+  for (i = 0; i < gt_strarray_size(parents); i++) {
     GenomeNode *root = feature_info_find_root(feature_info,
-                                              strarray_get(parents, i));
+                                              gt_strarray_get(parents, i));
     array_add(roots, root);
   }
   return roots;
@@ -594,14 +594,14 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
                                Error *err)
 {
   Splitter *parent_splitter;
-  StrArray *valid_parents;
+  GT_StrArray *valid_parents;
   unsigned long i;
   int had_err = 0;
 
   error_check(err);
   assert(parent_attr);
 
-  valid_parents = strarray_new();
+  valid_parents = gt_strarray_new();
   parent_splitter = splitter_new();
   splitter_split(parent_splitter, parent_attr, strlen(parent_attr), ',');
   assert(splitter_size(parent_splitter));
@@ -637,25 +637,25 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
       assert(parser->incomplete_node);
       genome_node_is_part_of_genome_node(parent_gf, genome_feature);
       *is_child = true;
-      strarray_add_cstr(valid_parents, parent);
+      gt_strarray_add_cstr(valid_parents, parent);
     }
   }
 
   if (!had_err && !parser->tidy) {
-    assert(splitter_size(parent_splitter) == strarray_size(valid_parents));
+    assert(splitter_size(parent_splitter) == gt_strarray_size(valid_parents));
   }
 
   splitter_delete(parent_splitter);
 
   /* make sure all (valid) parents have the same (pseudo-)root */
-  if (!had_err && strarray_size(valid_parents) >= 2) {
+  if (!had_err && gt_strarray_size(valid_parents) >= 2) {
     Array *roots = find_roots(valid_parents, parser->feature_info);
     if (roots_differ(roots))
         join_roots(roots, parser->feature_info, genome_nodes, auto_sr);
     array_delete(roots);
   }
 
-  strarray_delete(valid_parents);
+  gt_strarray_delete(valid_parents);
 
   return had_err;
 }
@@ -671,7 +671,7 @@ static bool is_blank_attribute(const char *attribute)
 }
 
 static int check_missing_attributes(GenomeNode *this_feature,
-                                    StrArray *this_attributes,
+                                    GT_StrArray *this_attributes,
                                     GenomeNode *other_feature, const char *id,
                                     const char *filename, Error *err)
 {
@@ -679,14 +679,14 @@ static int check_missing_attributes(GenomeNode *this_feature,
   int had_err = 0;
   error_check(err);
   assert(this_feature && this_attributes && other_feature);
-  for (i = 0; !had_err && i < strarray_size(this_attributes); i++) {
+  for (i = 0; !had_err && i < gt_strarray_size(this_attributes); i++) {
     if (!genome_feature_get_attribute(other_feature,
-                                      strarray_get(this_attributes, i))) {
+                                      gt_strarray_get(this_attributes, i))) {
       error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                 "\"%s\" does not have a '%s' attribute which is present in its "
                 "counterpart on line %u", ID_STRING, id,
                 genome_node_get_line_number(other_feature), filename,
-                strarray_get(this_attributes, i),
+                gt_strarray_get(this_attributes, i),
                 genome_node_get_line_number(this_feature));
       had_err = -1;
       break;
@@ -797,7 +797,7 @@ static int check_multi_feature_constrains(GenomeNode *new_gf,
   }
   /* check attributes (for target attribute only the name) */
   if (!had_err) {
-    StrArray *new_attributes, *old_attributes;
+    GT_StrArray *new_attributes, *old_attributes;
     new_attributes = genome_feature_get_attribute_list((GenomeFeature*) new_gf);
     old_attributes = genome_feature_get_attribute_list((GenomeFeature*)old_gf);
     had_err = check_missing_attributes(new_gf, new_attributes, old_gf, id,
@@ -808,17 +808,18 @@ static int check_multi_feature_constrains(GenomeNode *new_gf,
     }
     if (!had_err) {
       unsigned long i;
-      assert(strarray_size(new_attributes) == strarray_size(old_attributes));
-      for (i = 0; !had_err && i < strarray_size(new_attributes); i++) {
-        const char *attr_name = strarray_get(new_attributes, i);
+      assert(gt_strarray_size(new_attributes) ==
+             gt_strarray_size(old_attributes));
+      for (i = 0; !had_err && i < gt_strarray_size(new_attributes); i++) {
+        const char *attr_name = gt_strarray_get(new_attributes, i);
         if (!strcmp(attr_name, TARGET_STRING))
           had_err = compare_target_attribute(new_gf, old_gf, id, err);
         else
           had_err = compare_other_attribute(attr_name, new_gf, old_gf, id, err);
       }
     }
-    strarray_delete(new_attributes);
-    strarray_delete(old_attributes);
+    gt_strarray_delete(new_attributes);
+    gt_strarray_delete(old_attributes);
   }
   return had_err;
 }

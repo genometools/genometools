@@ -88,7 +88,7 @@ int mg_curl(ParseStruct *parsestruct_ptr,
   /* noch keine Daten eingetragen bzw. abgespeichert */
   memorystruct.size = 0;
 
-  /* Zwischenspeicher fuer die Sequnezinformation, da die StrArray-Klasse
+  /* Zwischenspeicher fuer die Sequnezinformation, da die GT_StrArray-Klasse
      keine Funktion zum begrenzten Einfuegen eines Strings zur Verfuegung
      stellt; setzen des ersten Teils der HTTP-Adresse */
   seq_var = str_new();
@@ -112,10 +112,10 @@ int mg_curl(ParseStruct *parsestruct_ptr,
   str_append_str(http_adr, parsestruct_ptr->hit_gi_nr_tmp);
   str_append_cstr(http_adr, "&seq_start=");
   str_append_cstr(http_adr,
-                  strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
+                  gt_strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
   str_append_cstr(http_adr, "&seq_stop=");
   str_append_cstr(http_adr,
-                  strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
+                  gt_strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
   str_append_cstr(http_adr, "&retmode=xml");
 
   /* char-Zeiger wird benoetigt, da curl_easy_setopt als 3. Parameter
@@ -172,8 +172,8 @@ int mg_curl(ParseStruct *parsestruct_ptr,
       assert(seq_pos != NULL);
       seq_len = strspn(seq_pos + 16, "gactrymkswhbvdnu");
 
-      numb_from = atol(strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
-      numb_to = atol(strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
+      numb_from = atol(gt_strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
+      numb_to = atol(gt_strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
 
       numb_diff = numb_to - numb_from +1;
 
@@ -182,22 +182,22 @@ int mg_curl(ParseStruct *parsestruct_ptr,
         /* seq_len Zeichen werden in die Hilfsvariable seq_var kopiert */
         str_append_cstr_nt(seq_var, seq_pos + 16, seq_len);
 
-        /* Die Sequenz in seq_var wird in das StrArray hit_dna kopiert */
-        strarray_add_cstr(MATRIXSTRUCT(hit_dna), str_get(seq_var));
+        /* Die Sequenz in seq_var wird in das GT_StrArray hit_dna kopiert */
+        gt_strarray_add_cstr(MATRIXSTRUCT(hit_dna), str_get(seq_var));
 
         /* das Hit-Sequenz-File wird geschrieben; die erste Zeile eines
            Eintrages ist die Hit-GI-Def, an die durch ein Leerzeichen
            getrennt die Hsp-Num des jeweiligen Hits angehaengt wird */
         genfile_xprintf(parsestruct_ptr->fp_blasthit_file, ">%s ",
-                        strarray_get(MATRIXSTRUCT(hit_num), hit_counter));
+                        gt_strarray_get(MATRIXSTRUCT(hit_num), hit_counter));
         genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
-                        strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
+                        gt_strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
         genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
-                        strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
+                        gt_strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
         genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
-                        strarray_get(MATRIXSTRUCT(fasta_row), hit_counter));
+                        gt_strarray_get(MATRIXSTRUCT(fasta_row), hit_counter));
         genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",
-                        strarray_get(MATRIXSTRUCT(hit_gi_def), hit_counter));
+                        gt_strarray_get(MATRIXSTRUCT(hit_gi_def), hit_counter));
 
         /* nach dem GI-Def Eintrag folgt in der naechsten Zeile die Sequenz */
         genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",

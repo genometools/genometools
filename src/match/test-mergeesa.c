@@ -214,7 +214,7 @@ static int mergeandstoreindex(const Str *storeindex,
 }
 
 int performtheindexmerging(const Str *storeindex,
-                           const StrArray *indexnametab,
+                           const GT_StrArray *indexnametab,
                            Verboseinfo *verboseinfo,
                            Error *err)
 {
@@ -233,7 +233,7 @@ int performtheindexmerging(const Str *storeindex,
   }
   if (!haserr)
   {
-    if (strarray_size(indexnametab) > 1UL)
+    if (gt_strarray_size(indexnametab) > 1UL)
     {
       if (mergeandstoreindex(storeindex,&emmesa,err) != 0)
       {

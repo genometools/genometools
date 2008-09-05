@@ -41,7 +41,7 @@ struct FastaBuffer
   ssize_t currentinpos, currentfillpos;
   uint64_t lastspeciallength;
   Filelengthvalues *filelengthtab;
-  const StrArray *filenametab;
+  const GT_StrArray *filenametab;
   const Uchar *symbolmap;
   bool plainformat;
   unsigned long *characterdistribution;

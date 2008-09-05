@@ -6,7 +6,7 @@ int fasta2sequencekeyvalues(
         unsigned long *numofsequences,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
-        const StrArray *filenametab,
+        const GT_StrArray *filenametab,
         Filelengthvalues **filelengthtab,
         const Alphabet *alpha,
         bool plainformat,

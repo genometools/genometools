@@ -153,7 +153,7 @@ Option*        option_new_string(const char *option_str,
                                  const char *description,
                                  Str *value, const char *default_value);
 Option*        option_new_stringarray(const char *option_str,
-                                      const char *description, StrArray*);
+                                      const char *description, GT_StrArray*);
 /* add an option which allows only arguments given in the NULL terminated
    <domain> (<default_value> must be an entry of <domain> or NULL) */
 Option*        option_new_choice(const char *option_str,
@@ -163,7 +163,7 @@ Option*        option_new_choice(const char *option_str,
 Option*        option_new_filename(const char *option_str,
                                    const char *description, Str*);
 Option*        option_new_filenamearray(const char *option_str,
-                                        const char *description, StrArray*);
+                                        const char *description, GT_StrArray*);
 Option*        option_ref(Option*);
 const char*    option_get_name(const Option *o);
 void           option_is_mandatory(Option*);

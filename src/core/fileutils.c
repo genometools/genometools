@@ -143,7 +143,7 @@ int file_find_in_path(Str *path, const char *file, Error *err)
   return had_err;
 }
 
-off_t files_estimate_total_size(const StrArray *filenames)
+off_t files_estimate_total_size(const GT_StrArray *filenames)
 {
   unsigned long filenum;
   off_t totalsize = 0;
@@ -151,11 +151,11 @@ off_t files_estimate_total_size(const StrArray *filenames)
   GenFileMode gfm;
   int fd;
 
-  for (filenum = 0; filenum < strarray_size(filenames); filenum++)
+  for (filenum = 0; filenum < gt_strarray_size(filenames); filenum++)
   {
-    fd = xopen(strarray_get(filenames,filenum), O_RDONLY, 0);
+    fd = xopen(gt_strarray_get(filenames,filenum), O_RDONLY, 0);
     xfstat(fd, &sb);
-    gfm = genfilemode_determine(strarray_get(filenames,filenum));
+    gfm = genfilemode_determine(gt_strarray_get(filenames,filenum));
     if (gfm == GFM_UNCOMPRESSED)
     {
       totalsize += sb.st_size;

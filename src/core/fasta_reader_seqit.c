@@ -24,7 +24,7 @@
 
 struct FastaReaderSeqIt {
   const FastaReader parent_instance;
-  StrArray *filenametab;
+  GT_StrArray *filenametab;
   SeqIterator *seqit;
 };
 
@@ -74,7 +74,7 @@ static int fasta_reader_seqit_run(FastaReader *fasta_reader,
 static void fasta_reader_seqit_free(FastaReader *fr)
 {
   FastaReaderSeqIt *fasta_reader_seqit = fasta_reader_seqit_cast(fr);
-  strarray_delete(fasta_reader_seqit->filenametab);
+  gt_strarray_delete(fasta_reader_seqit->filenametab);
   seqiterator_delete(fasta_reader_seqit->seqit);
 }
 
@@ -93,8 +93,8 @@ FastaReader* fasta_reader_seqit_new(Str *sequence_filename)
   assert(sequence_filename);
   fr = fasta_reader_create(fasta_reader_seqit_class());
   fasta_reader_seqit = fasta_reader_seqit_cast(fr);
-  fasta_reader_seqit->filenametab = strarray_new();
-  strarray_add_cstr(fasta_reader_seqit->filenametab,
+  fasta_reader_seqit->filenametab = gt_strarray_new();
+  gt_strarray_add_cstr(fasta_reader_seqit->filenametab,
                     str_get(sequence_filename));
   fasta_reader_seqit->seqit = seqiterator_new(fasta_reader_seqit->filenametab,
                                               NULL, true);

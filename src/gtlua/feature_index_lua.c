@@ -134,13 +134,13 @@ static int feature_index_lua_get_first_seqid(lua_State *L)
 static int feature_index_lua_get_seqids(lua_State *L)
 {
   FeatureIndex **feature_index;
-  StrArray *seqids;
+  GT_StrArray *seqids;
   feature_index = check_feature_index(L, 1);
   seqids = feature_index_get_seqids(*feature_index);
   assert(seqids);
   /* push table containing sequence ids onto the stack */
   lua_push_strarray_as_table(L, seqids);
-  strarray_delete(seqids);
+  gt_strarray_delete(seqids);
   return 1;
 }
 

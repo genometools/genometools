@@ -40,7 +40,7 @@
                 PRINTSeqposcast(specialcharinfo->VAL))
 
 static void showprjinfo(FILE *outprj,
-                        const StrArray *filenametab,
+                        const GT_StrArray *filenametab,
                         Readmode readmode,
                         const Filelengthvalues *filelengthtab,
                         Seqpos totallength,
@@ -56,10 +56,10 @@ static void showprjinfo(FILE *outprj,
 
   assert(filelengthtab != NULL);
   assert(filenametab != NULL);
-  for (i=0; i<strarray_size(filenametab); i++)
+  for (i=0; i<gt_strarray_size(filenametab); i++)
   {
     fprintf(outprj,"dbfile=%s " Formatuint64_t " " Formatuint64_t "\n",
-                    strarray_get(filenametab,i),
+                    gt_strarray_get(filenametab,i),
                     PRINTuint64_tcast(filelengthtab[i].length),
                     PRINTuint64_tcast(filelengthtab[i].effectivelength));
   }
@@ -95,7 +95,7 @@ static void showprjinfo(FILE *outprj,
 }
 
 int outprjfile(const Str *indexname,
-               const StrArray *filenametab,
+               const GT_StrArray *filenametab,
                Readmode readmode,
                const Filelengthvalues *filelengthtab,
                Seqpos totallength,

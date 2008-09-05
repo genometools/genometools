@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 int outprjfile(const Str *indexname,
-               const StrArray *filenametab,
+               const GT_StrArray *filenametab,
                Readmode readmode,
                const Filelengthvalues *filelengthtab,
                Seqpos totallength,

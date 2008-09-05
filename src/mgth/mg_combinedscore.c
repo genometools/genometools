@@ -94,11 +94,11 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
   }
 
   /* String-Arrays der Hit-Information Struktur anlegen */
-  hit_information.hit_gi = strarray_new();
-  hit_information.hit_def = strarray_new();
-  hit_information.hit_hsp_nr = strarray_new();
-  hit_information.hit_from = strarray_new();
-  hit_information.hit_to = strarray_new();
+  hit_information.hit_gi = gt_strarray_new();
+  hit_information.hit_def = gt_strarray_new();
+  hit_information.hit_hsp_nr = gt_strarray_new();
+  hit_information.hit_from = gt_strarray_new();
+  hit_information.hit_to = gt_strarray_new();
 
   /* fuer jeden Hit erfolgt eine Berechnung der Combined-Scores */
   for (i = 0; i < hit_counter; i++)
@@ -110,8 +110,8 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
     hit_seq_tri = ma_calloc(4, sizeof (char));
 
     /* Zeiger auf die Proteinsequenzen von Hit und Query */
-    contig_as_ptr = strarray_get(MATRIXSTRUCT(hsp_qseq), i);
-    hit_as_ptr = strarray_get(MATRIXSTRUCT(hsp_hseq), i);
+    contig_as_ptr = gt_strarray_get(MATRIXSTRUCT(hsp_qseq), i);
+    hit_as_ptr = gt_strarray_get(MATRIXSTRUCT(hsp_hseq), i);
 
     /* Funktion zur Bestimmung der Zeile in der Matrix, die fuer den
        aktuellen Leserahmen steht */
@@ -123,10 +123,10 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
       LONG_VALUE(MATRIXSTRUCT(query_to), i)
                  - LONG_VALUE(MATRIXSTRUCT(query_from), i) + 2;
 
-    hit_len = strlen(strarray_get(MATRIXSTRUCT(hit_dna), i));
+    hit_len = strlen(gt_strarray_get(MATRIXSTRUCT(hit_dna), i));
 
-    ulhit_from = atol(strarray_get(MATRIXSTRUCT(hit_from), i));
-    ulhit_to = atol(strarray_get(MATRIXSTRUCT(hit_to), i));
+    ulhit_from = atol(gt_strarray_get(MATRIXSTRUCT(hit_from), i));
+    ulhit_to = atol(gt_strarray_get(MATRIXSTRUCT(hit_to), i));
     hit_seq_diff = ulhit_to - ulhit_from + 2;
 
     /* Ueberpruefen der Vereinbarkeit von Query- und Hit-Sequenz
@@ -149,7 +149,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
       error_set(err,
                 "sequences error: matching sequences do not fit in length.\
                  wrong FASTA-files or please delete entry %s!?",
-                strarray_get(MATRIXSTRUCT(hit_gi_def), i));
+                gt_strarray_get(MATRIXSTRUCT(hit_gi_def), i));
       had_err = -1;
     }
 
@@ -165,7 +165,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
     hit_seq = ma_calloc(hit_seq_diff, sizeof (char));
     /* kopieren von hit_seq_diff-1 Zeichen */
     (void) snprintf(hit_seq, hit_seq_diff, "%s",
-                    strarray_get(MATRIXSTRUCT(hit_dna), i));
+                    gt_strarray_get(MATRIXSTRUCT(hit_dna), i));
 
     /* Bei einem negativen Leserahmen muss das Reverse-Komplement der
        Sequenz gebildet werden */
@@ -306,11 +306,11 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
 
   array2dim_delete(combinedscore_matrix);
 
-  strarray_delete(hit_information.hit_gi);
-  strarray_delete(hit_information.hit_def);
-  strarray_delete(hit_information.hit_hsp_nr);
-  strarray_delete(hit_information.hit_from);
-  strarray_delete(hit_information.hit_to);
+  gt_strarray_delete(hit_information.hit_gi);
+  gt_strarray_delete(hit_information.hit_def);
+  gt_strarray_delete(hit_information.hit_hsp_nr);
+  gt_strarray_delete(hit_information.hit_from);
+  gt_strarray_delete(hit_information.hit_to);
 
   return had_err;
 }
@@ -496,19 +496,19 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
     else
     {
       /* Abspeichern der Hit-Informationen */
-      strarray_add_cstr(hit_information->hit_gi,
-                        strarray_get(MATRIXSTRUCT(hit_gi_nr), hit_number));
-      strarray_add_cstr(hit_information->hit_def,
-                        strarray_get(MATRIXSTRUCT(hit_gi_def),
+      gt_strarray_add_cstr(hit_information->hit_gi,
+                        gt_strarray_get(MATRIXSTRUCT(hit_gi_nr), hit_number));
+      gt_strarray_add_cstr(hit_information->hit_def,
+                        gt_strarray_get(MATRIXSTRUCT(hit_gi_def),
                                      hit_number));
-      strarray_add_cstr(hit_information->hit_hsp_nr,
-                        strarray_get(MATRIXSTRUCT(hit_num), hit_number));
-      strarray_add_cstr(hit_information->hit_from,
-                        strarray_get(MATRIXSTRUCT(hit_from), hit_number));
-      strarray_add_cstr(hit_information->hit_to,
-                        strarray_get(MATRIXSTRUCT(hit_to), hit_number));
+      gt_strarray_add_cstr(hit_information->hit_hsp_nr,
+                        gt_strarray_get(MATRIXSTRUCT(hit_num), hit_number));
+      gt_strarray_add_cstr(hit_information->hit_from,
+                        gt_strarray_get(MATRIXSTRUCT(hit_from), hit_number));
+      gt_strarray_add_cstr(hit_information->hit_to,
+                        gt_strarray_get(MATRIXSTRUCT(hit_to), hit_number));
 
-      nr_of_strings = strarray_size(hit_information->hit_def) - 1;
+      nr_of_strings = gt_strarray_size(hit_information->hit_def) - 1;
 
       /* Uebertragen der Ergebnisse des aktuellen Hits in die
          Combined-Score Matrix */

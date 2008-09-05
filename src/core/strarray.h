@@ -21,18 +21,19 @@
 #include "core/str.h"
 
 /* the string array class  */
-typedef struct StrArray StrArray;
+typedef struct GT_StrArray GT_StrArray;
 
-StrArray*     strarray_new(void);
-StrArray*     strarray_new_file(const char *path);
-void          strarray_add_cstr(StrArray*, const char*);
-void          strarray_add_cstr_nt(StrArray*, const char*, unsigned long);
-void          strarray_add(StrArray*, const Str*);
-const char*   strarray_get(const StrArray*, unsigned long strnum);
-/* returns an internal Str pointer (i.e., _not_ a new reference!) */
-Str*          strarray_get_str(const StrArray*, unsigned long strnum);
-void          strarray_set_size(StrArray*, unsigned long);
-unsigned long strarray_size(const StrArray*); /* returns number of strings */
-void          strarray_delete(StrArray*);
+GT_StrArray*  gt_strarray_new(void);
+GT_StrArray*  gt_strarray_new_file(const char *path);
+void          gt_strarray_add_cstr(GT_StrArray*, const char*);
+void          gt_strarray_add_cstr_nt(GT_StrArray*, const char*, unsigned long);
+void          gt_strarray_add(GT_StrArray*, const Str*);
+const char*   gt_strarray_get(const GT_StrArray*, unsigned long strnum);
+/* Returns an internal Str pointer (i.e., _not_ a new reference!). */
+Str*          gt_strarray_get_str(const GT_StrArray*, unsigned long strnum);
+void          gt_strarray_set_size(GT_StrArray*, unsigned long);
+/* Returns number of strings. */
+unsigned long gt_strarray_size(const GT_StrArray*);
+void          gt_strarray_delete(GT_StrArray*);
 
 #endif

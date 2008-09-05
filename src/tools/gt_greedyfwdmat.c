@@ -52,7 +52,7 @@ typedef struct
   unsigned int showmode;
   bool verifywitnesspos;
   Str *indexname;
-  StrArray *queryfilenames;
+  GT_StrArray *queryfilenames;
   Indextype indextype;
 } Gfmsubcallinfo;
 
@@ -66,7 +66,7 @@ static OPrval parsegfmsub(bool doms,
   Option *optionmin, *optionmax, *optionoutput, *optionfmindex,
          *optionesaindex, *optionpckindex, *optionquery, *optionverify;
   OPrval oprval;
-  StrArray *flagsoutputoption;
+  GT_StrArray *flagsoutputoption;
   int parsed_args;
   Optionargmodedesc msgfmsubmodedesctable[] =
   {
@@ -85,8 +85,8 @@ static OPrval parsegfmsub(bool doms,
   gfmsubcallinfo->maxlength.defined = false;
   gfmsubcallinfo->showmode = 0;
   gfmsubcallinfo->indexname = str_new();
-  gfmsubcallinfo->queryfilenames = strarray_new();
-  flagsoutputoption = strarray_new();
+  gfmsubcallinfo->queryfilenames = gt_strarray_new();
+  flagsoutputoption = gt_strarray_new();
 
   op = option_parser_new("[options ...] -query queryfile [...]",
                          doms
@@ -208,7 +208,7 @@ static OPrval parsegfmsub(bool doms,
     }
     if (oprval != OPTIONPARSER_ERROR && option_is_set(optionoutput))
     {
-      if (strarray_size(flagsoutputoption) == 0)
+      if (gt_strarray_size(flagsoutputoption) == 0)
       {
         error_set(err,"missing arguments to option -output");
         oprval = OPTIONPARSER_ERROR;
@@ -216,7 +216,7 @@ static OPrval parsegfmsub(bool doms,
       {
         unsigned long i;
 
-        for (i=0; i<strarray_size(flagsoutputoption); i++)
+        for (i=0; i<gt_strarray_size(flagsoutputoption); i++)
         {
           if (doms)
           {
@@ -225,7 +225,7 @@ static OPrval parsegfmsub(bool doms,
                                  sizeof (msgfmsubmodedesctable[0]),
                                  &gfmsubcallinfo->showmode,
                                  "-output",
-                                 strarray_get(flagsoutputoption,i),
+                                 gt_strarray_get(flagsoutputoption,i),
                                  err) != 0)
             {
               oprval = OPTIONPARSER_ERROR;
@@ -238,7 +238,7 @@ static OPrval parsegfmsub(bool doms,
                                  sizeof (gfmsubmodedesctable[0]),
                                  &gfmsubcallinfo->showmode,
                                  "-output",
-                                 strarray_get(flagsoutputoption,i),
+                                 gt_strarray_get(flagsoutputoption,i),
                                  err) != 0)
             {
               oprval = OPTIONPARSER_ERROR;
@@ -249,7 +249,7 @@ static OPrval parsegfmsub(bool doms,
       }
     }
   }
-  strarray_delete(flagsoutputoption);
+  gt_strarray_delete(flagsoutputoption);
   option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && parsed_args != argc)
   {
@@ -287,11 +287,11 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(gfmsubcallinfo.indexname);
-      strarray_delete(gfmsubcallinfo.queryfilenames);
+      gt_strarray_delete(gfmsubcallinfo.queryfilenames);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
       str_delete(gfmsubcallinfo.indexname);
-      strarray_delete(gfmsubcallinfo.queryfilenames);
+      gt_strarray_delete(gfmsubcallinfo.queryfilenames);
       return 0;
   }
   verboseinfo = newverboseinfo(false);
@@ -452,7 +452,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
   }
   freeverboseinfo(&verboseinfo);
   str_delete(gfmsubcallinfo.indexname);
-  strarray_delete(gfmsubcallinfo.queryfilenames);
+  gt_strarray_delete(gfmsubcallinfo.queryfilenames);
   return haserr ? -1 : 0;
 }
 

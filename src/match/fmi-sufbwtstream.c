@@ -186,7 +186,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                    unsigned int log2bsize,
                    unsigned int log2markdist,
                    const Str *outfmindex,
-                   const StrArray *indexnametab,
+                   const GT_StrArray *indexnametab,
                    bool storeindexpos,
                    Verboseinfo *verboseinfo,
                    Error *err)
@@ -218,10 +218,10 @@ int sufbwt2fmindex(Fmindex *fmindex,
   error_check(err);
   longest.defined = false;
   longest.valueseqpos = 0;
-  numofindexes = (unsigned int) strarray_size(indexnametab);
+  numofindexes = (unsigned int) gt_strarray_size(indexnametab);
   if (numofindexes == 1U)
   {
-    Str *indexname = strarray_get_str(indexnametab,0);
+    Str *indexname = gt_strarray_get_str(indexnametab,0);
 
     if (streamsuffixarray(&suffixarray,
                          &totallength,
@@ -265,7 +265,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      Str *indexname = strarray_get_str(indexnametab,0);
+      Str *indexname = gt_strarray_get_str(indexnametab,0);
       suffixlength = 0;
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {

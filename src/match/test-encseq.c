@@ -110,7 +110,7 @@ static void testmulticharactercompare(const Encodedsequence *encseq,
   freeEncodedsequencescanstate(&esr2);
 }
 
-static int testfullscan(const StrArray *filenametab,
+static int testfullscan(const GT_StrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         const Uchar *symbolmap,
@@ -205,7 +205,7 @@ static int testfullscan(const StrArray *filenametab,
   return haserr ? -1 : 0;
 }
 
-int testencodedsequence(const StrArray *filenametab,
+int testencodedsequence(const GT_StrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         const Uchar *symbolmap,

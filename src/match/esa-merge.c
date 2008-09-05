@@ -53,7 +53,7 @@ static void fillandinsert(Mergertrierep *trierep,
 static int inputthesequences(Alphabet **alpha,
                              Seqpos *nextpostable,
                              Suffixarray *suffixarraytable,
-                             const StrArray *indexnametab,
+                             const GT_StrArray *indexnametab,
                              unsigned int demand,
                              Verboseinfo *verboseinfo,
                              Error *err)
@@ -63,9 +63,9 @@ static int inputthesequences(Alphabet **alpha,
   Seqpos totallength;
 
   error_check(err);
-  for (idx=0; idx<strarray_size(indexnametab); idx++)
+  for (idx=0; idx<gt_strarray_size(indexnametab); idx++)
   {
-    indexname = strarray_get_str(indexnametab,idx);
+    indexname = gt_strarray_get_str(indexnametab,idx);
     if (streamsuffixarray(&suffixarraytable[idx],
                           &totallength,
                           demand,
@@ -247,7 +247,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Error *err)
 }
 
 int initEmissionmergedesa(Emissionmergedesa *emmesa,
-                          const StrArray *indexnametab,
+                          const GT_StrArray *indexnametab,
                           unsigned int demand,
                           Verboseinfo *verboseinfo,
                           Error *err)
@@ -255,7 +255,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
   unsigned int numofindexes;
   bool haserr = false;
 
-  numofindexes = (unsigned int) strarray_size(indexnametab);
+  numofindexes = (unsigned int) gt_strarray_size(indexnametab);
   emmesa->buf.nextaccessidx = emmesa->buf.nextstoreidx = 0;
   emmesa->numofindexes = numofindexes;
   emmesa->numofentries = numofindexes;

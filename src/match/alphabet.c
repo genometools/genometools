@@ -136,7 +136,7 @@
 
 static int readsymbolmapfromlines(Alphabet *alpha,
                                   const Str *mapfile,
-                                  const StrArray *lines,
+                                  const GT_StrArray *lines,
                                   Error *err)
 {
   char cc;
@@ -153,10 +153,10 @@ static int readsymbolmapfromlines(Alphabet *alpha,
     alpha->symbolmap[cnum] = (Uchar) UNDEFCHAR;
   }
   alpha->mapdomain = NULL;
-  ALLOCASSIGNSPACE(alpha->characters,NULL,Uchar,strarray_size(lines)-1);
-  for (linecount = 0; linecount < strarray_size(lines); linecount++)
+  ALLOCASSIGNSPACE(alpha->characters,NULL,Uchar,gt_strarray_size(lines)-1);
+  for (linecount = 0; linecount < gt_strarray_size(lines); linecount++)
   {
-    currentline = strarray_get(lines,linecount);
+    currentline = gt_strarray_get(lines,linecount);
     ignore = false;
     if (currentline != NULL && currentline[0] != '\0')
     {
@@ -234,7 +234,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
           /* use first character of line to display character */
           chartoshow = (Uchar) LINE(0);
         }
-        if (linecount == strarray_size(lines)-1)
+        if (linecount == gt_strarray_size(lines)-1)
         {
           alpha->wildcardshow = chartoshow;
         } else
@@ -273,16 +273,16 @@ static int readsymbolmapfromlines(Alphabet *alpha,
 static int readsymbolmap(Alphabet *alpha,const Str *mapfile,Error *err)
 {
   bool haserr = false;
-  StrArray *lines;
+  GT_StrArray *lines;
 
   error_check(err);
-  lines = strarray_new_file(str_get(mapfile));
+  lines = gt_strarray_new_file(str_get(mapfile));
   assert(lines != NULL);
   if (readsymbolmapfromlines(alpha,mapfile,lines,err) != 0)
   {
     haserr = true;
   }
-  strarray_delete(lines);
+  gt_strarray_delete(lines);
   return haserr ? -1 : 0;
 }
 
@@ -402,7 +402,7 @@ static void assignProteinalphabet(Alphabet *alpha)
 }
 
 static int assignProteinorDNAalphabet(Alphabet *alpha,
-                                      const StrArray *filenametab,Error *err)
+                                      const GT_StrArray *filenametab,Error *err)
 {
   int retval;
 
@@ -432,7 +432,7 @@ void freeAlphabet(Alphabet **alpha)
 /*@null@*/ Alphabet *assigninputalphabet(bool isdna,
                                          bool isprotein,
                                          const Str *smapfile,
-                                         const StrArray *filenametab,
+                                         const GT_StrArray *filenametab,
                                          Error *err)
 {
   Alphabet *alpha;

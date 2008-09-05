@@ -38,9 +38,10 @@ FeatureTypeFactory* feature_type_factory_ref(FeatureTypeFactory
    <type>. Returns NULL, if <type> is not a valid type. */
 GenomeFeatureType*  feature_type_factory_create_gft(FeatureTypeFactory*,
                                                     const char *type);
-/* Returns a StrArray which contains all type names in alphabetical order which
-   have been created by this factory. The caller is responsible to free it! */
-StrArray*           feature_type_factory_get_used_types(const
+/* Returns a GT_StrArray which contains all type names in alphabetical order
+   which have been created by this factory.
+   The caller is responsible to free it! */
+GT_StrArray*           feature_type_factory_get_used_types(const
                                                         FeatureTypeFactory*);
 void                feature_type_factory_delete(FeatureTypeFactory*);
 

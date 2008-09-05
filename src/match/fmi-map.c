@@ -157,7 +157,7 @@ static Encodedsequence *mapbwtencoding(const Str *indexname,
     haserr = true;
   }
   freeAlphabet(&suffixarray.alpha);
-  strarray_delete(suffixarray.filenametab);
+  gt_strarray_delete(suffixarray.filenametab);
   FREESPACE(suffixarray.filelengthtab);
   if (haserr)
   {

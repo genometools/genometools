@@ -24,14 +24,14 @@
 #include "tools/gt_magicmatch.h"
 
 typedef struct {
-  StrArray *seqfiles;
+  GT_StrArray *seqfiles;
   bool translate;
 } MagicMatchArguments;
 
 static void* gt_magicmatch_arguments_new(void)
 {
   MagicMatchArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->seqfiles = strarray_new();
+  arguments->seqfiles = gt_strarray_new();
   return arguments;
 }
 
@@ -39,7 +39,7 @@ static void gt_magicmatch_arguments_delete(void *tool_arguments)
 {
   MagicMatchArguments *arguments = tool_arguments;
   if (!arguments) return;
-  strarray_delete(arguments->seqfiles);
+  gt_strarray_delete(arguments->seqfiles);
   ma_free(arguments);
 }
 
@@ -96,8 +96,8 @@ static int gt_magicmatch_runner(UNUSED int argc, UNUSED const char **argv,
   assert(arguments);
 
   if (arguments->translate) {
-    for (i = 0; !had_err && i < strarray_size(arguments->seqfiles); i++) {
-      if (!(bioseq = bioseq_new(strarray_get(arguments->seqfiles, i), err)))
+    for (i = 0; !had_err && i < gt_strarray_size(arguments->seqfiles); i++) {
+      if (!(bioseq = bioseq_new(gt_strarray_get(arguments->seqfiles, i), err)))
         had_err = -1;
       if (!had_err)
         translate_sequence_file(bioseq);

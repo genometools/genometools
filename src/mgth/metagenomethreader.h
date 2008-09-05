@@ -74,7 +74,7 @@ typedef struct
    der Hit-Informationen, die zu einem syn-Score beitragen */
 typedef struct
 {
-  StrArray *hit_gi,
+  GT_StrArray *hit_gi,
    *hit_def,
    *hit_hsp_nr,
    *hit_from,
@@ -103,7 +103,7 @@ typedef struct
     percent_value;
   Str *curl_fcgi_db,
    *outputtextfile_name;
-  StrArray *giexpfile_name;
+  GT_StrArray *giexpfile_name;
   int outputfile_format,
     codon_mode;
   bool hitfile_bool,
@@ -123,7 +123,7 @@ typedef struct
    *query_to;
   Str *query_dna,
    *query_def;
-  StrArray *hit_gi_nr,
+  GT_StrArray *hit_gi_nr,
    *hit_num,
    *hit_gi_def,
    *hit_acc,
@@ -138,7 +138,7 @@ typedef struct
 /* Struktur fuer den Statistikbereich */
 typedef struct
 {
-  StrArray *hits_statistic;
+  GT_StrArray *hits_statistic;
   unsigned long *hitsnum,
    *memory,
     hitsnumber,
@@ -175,7 +175,7 @@ typedef struct
 
 typedef struct
 {
-  StrArray *query_array,
+  GT_StrArray *query_array,
    *hit_array,
    *hit_hsp_array,
    *query_frame_tmp,

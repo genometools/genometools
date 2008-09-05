@@ -255,7 +255,7 @@ static OPrval parse_options(int *parsed_args,
                                err);
   if (oprval == OPTIONPARSER_OK)
   {
-    if (option_is_set(optiondb) && strarray_size(so->filenametab) == 0)
+    if (option_is_set(optiondb) && gt_strarray_size(so->filenametab) == 0)
     {
       error_set(err,"missing argument to option -db");
       oprval = OPTIONPARSER_ERROR;
@@ -265,7 +265,7 @@ static OPrval parse_options(int *parsed_args,
       {
         if (option_is_set(optiondb))
         {
-          if (strarray_size(so->filenametab) > 1UL)
+          if (gt_strarray_size(so->filenametab) > 1UL)
           {
             error_set(err,"if more than one input file is given, then "
                               "option -indexname is mandatory");
@@ -274,7 +274,7 @@ static OPrval parse_options(int *parsed_args,
           {
             char *basenameptr;
 
-            basenameptr = getbasename(strarray_get(so->filenametab,0));
+            basenameptr = getbasename(gt_strarray_get(so->filenametab,0));
             str_set(so->str_indexname,basenameptr);
             ma_free(basenameptr);
           }
@@ -368,10 +368,10 @@ static void showoptions(const Suffixeratoroptions *so)
   showdefinitelyverbose("storespecialcodes=%s",
                         so->sfxstrategy.storespecialcodes ? "true" : "false");
   showdefinitelyverbose("parts=%u",so->numofparts);
-  for (i=0; i<strarray_size(so->filenametab); i++)
+  for (i=0; i<gt_strarray_size(so->filenametab); i++)
   {
     showdefinitelyverbose("inputfile[%lu]=%s",i,
-                          strarray_get(so->filenametab,i));
+                          gt_strarray_get(so->filenametab,i));
   }
   if (str_length(so->str_inputindex) > 0)
   {
@@ -396,7 +396,7 @@ void wrapsfxoptions(Suffixeratoroptions *so)
   str_delete(so->str_inputindex);
   str_delete(so->str_smap);
   str_delete(so->str_sat);
-  strarray_delete(so->filenametab);
+  gt_strarray_delete(so->filenametab);
 }
 
 int suffixeratoroptions(Suffixeratoroptions *so,
@@ -415,7 +415,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->str_indexname = str_new();
   so->str_smap = str_new();
   so->str_sat = str_new();
-  so->filenametab = strarray_new();
+  so->filenametab = gt_strarray_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   so->maxdepth.defined = false;
   so->maxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;

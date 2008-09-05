@@ -91,14 +91,14 @@ void lua_export_metatable(lua_State *L, const char *metatable_desc)
   ma_free(mt);
 }
 
-void lua_push_strarray_as_table(lua_State *L, StrArray *sa)
+void lua_push_strarray_as_table(lua_State *L, GT_StrArray *sa)
 {
   unsigned long i;
   assert(L && sa);
   lua_newtable(L);
-  for (i = 0; i < strarray_size(sa); i++) {
+  for (i = 0; i < gt_strarray_size(sa); i++) {
     lua_pushinteger(L, i+1); /* in Lua we index from 1 on */
-    lua_pushstring(L, strarray_get(sa, i));
+    lua_pushstring(L, gt_strarray_get(sa, i));
     lua_rawset(L, -3);
   }
 }

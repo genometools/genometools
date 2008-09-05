@@ -997,7 +997,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
               while (!had_err) {
                 if (argnum + 1 < argc && argv[argnum+1][0] != '-') {
                   argnum++;
-                  strarray_add_cstr(option->value, argv[argnum]);
+                  gt_strarray_add_cstr(option->value, argv[argnum]);
                   option_parsed = true;
                 }
                 else {
@@ -1329,7 +1329,7 @@ Option* option_new_string(const char *option_str, const char *description,
 }
 
 Option* option_new_stringarray(const char *option_str,
-                               const char *description, StrArray *value)
+                               const char *description, GT_StrArray *value)
 {
   Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_STRINGARRAY;
@@ -1349,7 +1349,8 @@ Option* option_new_filename(const char *option_str, const char *description,
    string arrays later on (e.g., for CGI scripts) , but for now the are
    implemented in the same way */
 Option* option_new_filenamearray(const char *option_str,
-                                 const char *description, StrArray *filenames)
+                                 const char *description,
+                                 GT_StrArray *filenames)
 {
   return option_new_stringarray(option_str, description, filenames);
 }

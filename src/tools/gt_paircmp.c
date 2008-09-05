@@ -34,7 +34,7 @@ typedef struct
 
 typedef struct
 {
-  StrArray *strings,
+  GT_StrArray *strings,
            *files;
   Charlistlen *charlistlen;
   Str *text;
@@ -42,16 +42,16 @@ typedef struct
 
 static void showsimpleoptions(const Cmppairwiseopt *opt)
 {
-  if (strarray_size(opt->strings) > 0)
+  if (gt_strarray_size(opt->strings) > 0)
   {
-    printf("# two strings \"%s\" \"%s\"\n",strarray_get(opt->strings,0),
-                                           strarray_get(opt->strings,1UL));
+    printf("# two strings \"%s\" \"%s\"\n",gt_strarray_get(opt->strings,0),
+                                           gt_strarray_get(opt->strings,1UL));
     return;
   }
-  if (strarray_size(opt->files) > 0)
+  if (gt_strarray_size(opt->files) > 0)
   {
-    printf("# two files \"%s\" \"%s\"\n",strarray_get(opt->files,0),
-                                         strarray_get(opt->files,1UL));
+    printf("# two files \"%s\" \"%s\"\n",gt_strarray_get(opt->files,0),
+                                         gt_strarray_get(opt->files,1UL));
     return;
   }
   if (opt->charlistlen != NULL)
@@ -77,13 +77,13 @@ static OPrval parse_options(int *parsed_args,
          *optionfiles,
          *optioncharlistlen,
          *optiontext;
-  StrArray *charlistlen;
+  GT_StrArray *charlistlen;
   OPrval oprval;
 
   error_check(err);
-  charlistlen = strarray_new();
-  pw->strings = strarray_new();
-  pw->files = strarray_new();
+  charlistlen = gt_strarray_new();
+  pw->strings = gt_strarray_new();
+  pw->files = gt_strarray_new();
   pw->text = str_new();
   pw->charlistlen = NULL;
   op = option_parser_new("options","Apply function to pairs of strings.");
@@ -117,7 +117,7 @@ static OPrval parse_options(int *parsed_args,
   {
     if (option_is_set(optionstrings))
     {
-      if (strarray_size(pw->strings) != 2UL)
+      if (gt_strarray_size(pw->strings) != 2UL)
       {
         error_set(err, "option -ss requires two string arguments");
         oprval = OPTIONPARSER_ERROR;
@@ -126,7 +126,7 @@ static OPrval parse_options(int *parsed_args,
     {
       if (option_is_set(optionfiles))
       {
-        if (strarray_size(pw->files) != 2UL)
+        if (gt_strarray_size(pw->files) != 2UL)
         {
           error_set(err, "option -ff requires two filename arguments");
           oprval = OPTIONPARSER_ERROR;
@@ -137,14 +137,15 @@ static OPrval parse_options(int *parsed_args,
         {
           long readint;
 
-          if (strarray_size(charlistlen) != 2UL)
+          if (gt_strarray_size(charlistlen) != 2UL)
           {
             error_set(err, "option -a requires charlist and length argument");
             oprval = OPTIONPARSER_ERROR;
           }
           ALLOCASSIGNSPACE(pw->charlistlen,NULL,Charlistlen,1);
-          pw->charlistlen->charlist = str_ref(strarray_get_str(charlistlen,0));
-          if (sscanf(strarray_get(charlistlen,1UL),"%ld",&readint) != 1 ||
+          pw->charlistlen->charlist = str_ref(gt_strarray_get_str(charlistlen,
+                                                                  0));
+          if (sscanf(gt_strarray_get(charlistlen,1UL),"%ld",&readint) != 1 ||
               readint < 1L)
           {
             error_set(err, "option -a requires charlist and length argument");
@@ -168,14 +169,14 @@ static OPrval parse_options(int *parsed_args,
     error_set(err, "superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
-  strarray_delete(charlistlen);
+  gt_strarray_delete(charlistlen);
   return oprval;
 }
 
 static void freesimpleoption(Cmppairwiseopt *cmppairwise)
 {
-  strarray_delete(cmppairwise->strings);
-  strarray_delete(cmppairwise->files);
+  gt_strarray_delete(cmppairwise->strings);
+  gt_strarray_delete(cmppairwise->files);
   str_delete(cmppairwise->text);
   if (cmppairwise->charlistlen != NULL)
   {
@@ -188,16 +189,16 @@ static unsigned long applycheckfunctiontosimpleoptions(
                                   Checkcmppairfuntype checkfunction,
                                   const Cmppairwiseopt *opt)
 {
-  if (strarray_size(opt->strings) > 0)
+  if (gt_strarray_size(opt->strings) > 0)
   {
     bool forward = true;
     while (true)
     {
       checkfunction(forward,
-                    (const Uchar *) strarray_get(opt->strings,0),
-                    (unsigned long) strlen(strarray_get(opt->strings,0)),
-                    (const Uchar *) strarray_get(opt->strings,1UL),
-                    (unsigned long) strlen(strarray_get(opt->strings,1UL)));
+                    (const Uchar *) gt_strarray_get(opt->strings,0),
+                    (unsigned long) strlen(gt_strarray_get(opt->strings,0)),
+                    (const Uchar *) gt_strarray_get(opt->strings,1UL),
+                    (unsigned long) strlen(gt_strarray_get(opt->strings,1UL)));
       if (!forward)
       {
         break;
@@ -206,11 +207,11 @@ static unsigned long applycheckfunctiontosimpleoptions(
     }
     return 2UL; /* number of testcases */
   }
-  if (strarray_size(opt->files) > 0)
+  if (gt_strarray_size(opt->files) > 0)
   {
     runcheckfunctionontwofiles(checkfunction,
-                               strarray_get(opt->files,0),
-                               strarray_get(opt->files,1UL));
+                               gt_strarray_get(opt->files,0),
+                               gt_strarray_get(opt->files,1UL));
     return 2UL;
   }
   if (opt->charlistlen != NULL)

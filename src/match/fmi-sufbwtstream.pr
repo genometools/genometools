@@ -5,7 +5,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                    unsigned int log2bsize,
                    unsigned int log2markdist,
                    const Str *outfmindex,
-                   const StrArray *indexnametab,
+                   const GT_StrArray *indexnametab,
                    bool storeindexpos,
                    Verboseinfo *verboseinfo,
                    Error *err);

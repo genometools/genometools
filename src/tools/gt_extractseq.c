@@ -193,14 +193,14 @@ static int process_ginum(Str *ginum, int argc, const char **argv,
   }
 
   if (!had_err) {
-    StrArray *referencefiletab;
+    GT_StrArray *referencefiletab;
     int i;
-    referencefiletab = strarray_new();
+    referencefiletab = gt_strarray_new();
     for (i = 0; i < argc; i++)
-      strarray_add_cstr(referencefiletab, argv[i]);
+      gt_strarray_add_cstr(referencefiletab, argv[i]);
     if (extractginumbers(true, outfp, width, ginum, referencefiletab, err) != 1)
       had_err = -1;
-    strarray_delete(referencefiletab);
+    gt_strarray_delete(referencefiletab);
   }
 
   return had_err;

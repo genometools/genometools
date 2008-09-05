@@ -27,7 +27,7 @@
 
 typedef struct FastaBuffer FastaBuffer;
 
-FastaBuffer* fastabuffer_new(const StrArray *filenametab,
+FastaBuffer* fastabuffer_new(const GT_StrArray *filenametab,
                              const Uchar *symbolmap, bool plainformat,
                              Filelengthvalues **filelengthtab,
                              Queue *descptr,

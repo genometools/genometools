@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int testencodedsequence(const StrArray *filenametab,
+int testencodedsequence(const GT_StrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         const Uchar *symbolmap,

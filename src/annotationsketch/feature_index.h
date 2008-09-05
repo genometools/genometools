@@ -52,9 +52,9 @@ int           feature_index_get_features_for_range(FeatureIndex *feature_index,
                                                    Error*);
 /* Returns the first sequence region identifier added to <feature_index>. */
 const char*   feature_index_get_first_seqid(const FeatureIndex *feature_index);
-/* Returns a StrArray of all sequence region identifiers contained in
+/* Returns a GT_StrArray of all sequence region identifiers contained in
    <feature_index> (in alphabetical order). */
-StrArray*     feature_index_get_seqids(const FeatureIndex *feature_index);
+GT_StrArray*     feature_index_get_seqids(const FeatureIndex *feature_index);
 Range         feature_index_get_range_for_seqid(FeatureIndex*, const char*);
 /* Similar to previous function. Necessary for Ruby bindings, because
    apparently 'dl/import' cannot handle returned structs. */

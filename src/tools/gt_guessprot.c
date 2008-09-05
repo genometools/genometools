@@ -37,7 +37,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 int gt_guessprot(int argc, const char **argv, Error *err)
 {
   int i, parsed_args, retval;
-  StrArray *filenametab;
+  GT_StrArray *filenametab;
 
   error_check(err);
 
@@ -47,13 +47,13 @@ int gt_guessprot(int argc, const char **argv, Error *err)
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
 
-  filenametab = strarray_new();
+  filenametab = gt_strarray_new();
   for (i=parsed_args; i < argc; i++)
   {
-    strarray_add_cstr(filenametab,argv[i]);
+    gt_strarray_add_cstr(filenametab,argv[i]);
   }
   retval = guessifproteinsequencestream(filenametab,err);
-  strarray_delete(filenametab);
+  gt_strarray_delete(filenametab);
   if (retval < 0)
   {
     return -1;

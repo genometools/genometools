@@ -41,8 +41,8 @@ GenomeNode*            genome_feature_new_standard_gene(FeatureTypeFactory*);
 const char*            genome_feature_get_source(GenomeFeature*);
 const char*            genome_feature_get_attribute(GenomeNode *gn,
                                                     const char *attr_name);
-/* Return a StrArray containing the used attribute names. */
-StrArray*              genome_feature_get_attribute_list(GenomeFeature*);
+/* Return a GT_StrArray containing the used attribute names. */
+GT_StrArray*              genome_feature_get_attribute_list(GenomeFeature*);
 GenomeFeatureType*     genome_feature_get_type(GenomeFeature*);
 GenomeFeatureType*     genome_feature_create_gft(GenomeFeature*, const char*);
 bool                   genome_feature_has_type(GenomeFeature*, const char*);
