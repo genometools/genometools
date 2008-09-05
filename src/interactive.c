@@ -25,12 +25,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include "interactive.h"
 #include "lauxlib.h"
 #include "libtecla.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/unused.h"
-#include "libgtlua/interactive.h"
 
 static lua_State *globalL = NULL;
 

@@ -17,6 +17,7 @@
 
 #include "gtr.h"
 #include "gtt.h"
+#include "interactive.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -38,7 +39,6 @@
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/luahelper.h"
 #include "libgtlua/gt_lua.h"
-#include "libgtlua/interactive.h"
 
 #ifdef LIBANNOTATIONSKETCH
 #include "libannotationsketch/luastyle.h"

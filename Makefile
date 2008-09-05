@@ -73,7 +73,7 @@ EXP_LDLIBS+=-lz -lbz2
 OVERRIDELIBS:=lib/libbz2.a
 
 # compiled executables
-GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c
+GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c src/interactive.c
 GTMAIN_OBJ:=$(GTMAIN_SRC:%.c=obj/%.o)
 GTMAIN_DEP:=$(GTMAIN_SRC:%.c=obj/%.d)
 
@@ -210,6 +210,7 @@ endif
 ifneq ($(curses),no)
   EXP_CPPFLAGS += -DCURSES
   EXP_LDLIBS += -lncurses
+  GTLIBS := lib/libtecla.a
 endif
 
 ifdef gttestdata
@@ -272,12 +273,10 @@ endif
 LIBGENOMETOOLS_SRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
 LIBGENOMETOOLS_OBJ:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.o) \
                     $(LIBLUA_OBJ) \
-                    $(LIBEXPAT_OBJ) \
-                    $(LIBTECLA_OBJ)
+                    $(LIBEXPAT_OBJ)
 LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
                     $(LIBLUA_DEP) \
-                    $(LIBEXPAT_DEP) \
-                    $(LIBTECLA_DEP)
+                    $(LIBEXPAT_DEP)
 
 # set prefix for install target
 prefix ?= /usr/local
@@ -361,7 +360,7 @@ $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
                                              $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
-                                        lib/libgenometools.a \
+                                        lib/libgenometools.a $(GTLIBS) \
                                         $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/example, $(EXAMPLE_OBJ) \
