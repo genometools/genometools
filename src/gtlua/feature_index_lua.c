@@ -148,12 +148,13 @@ static int feature_index_lua_get_range_for_seqid(lua_State *L)
 {
   GT_FeatureIndex **feature_index;
   const char *seqid;
+  Range range;
   feature_index = check_feature_index(L, 1);
   seqid = luaL_checkstring(L, 2);
   luaL_argcheck(L, gt_feature_index_has_seqid(*feature_index, seqid), 2,
                 "feature_index does not contain seqid");
-  return range_lua_push(L, gt_feature_index_get_range_for_seqid(*feature_index,
-                                                             seqid));
+  gt_feature_index_get_range_for_seqid(*feature_index, &range, seqid);
+  return range_lua_push(L, range);
 }
 
 static int feature_index_lua_delete(lua_State *L)

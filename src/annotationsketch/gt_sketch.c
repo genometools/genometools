@@ -272,8 +272,8 @@ int gt_sketch(int argc, const char **argv, Error *err)
 
   results = array_new(sizeof (GenomeNode*));
   if (!had_err) {
-    sequence_region_range = gt_feature_index_get_range_for_seqid(features,
-                                                                 seqid);
+    gt_feature_index_get_range_for_seqid(features, &sequence_region_range,
+                                         seqid);
     qry_range.start = (arguments.start == UNDEF_ULONG ?
                          sequence_region_range.start :
                          arguments.start);

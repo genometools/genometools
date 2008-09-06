@@ -236,30 +236,20 @@ GT_StrArray* gt_feature_index_get_seqids(const GT_FeatureIndex *fi)
   return seqids;
 }
 
-Range gt_feature_index_get_range_for_seqid(GT_FeatureIndex *fi,
-                                           const char *seqid)
+void gt_feature_index_get_range_for_seqid(GT_FeatureIndex *fi, Range *range,
+                                          const char *seqid)
 {
-  Range ret = {0,0};
   RegionInfo *info;
-  assert(fi);
+  assert(fi && range && seqid);
   info = (RegionInfo*) hashmap_get(fi->regions, seqid);
   assert(info);
 
-  if (info->dyn_range.start != ~0UL && info->dyn_range.end != 0)
-  {
-    ret.start = info->dyn_range.start;
-    ret.end = info->dyn_range.end;
+  if (info->dyn_range.start != ~0UL && info->dyn_range.end != 0) {
+    range->start = info->dyn_range.start;
+    range->end = info->dyn_range.end;
   }
   else if (info->region)
-    return genome_node_get_range((GenomeNode*) info->region);
-  return ret;
-}
-
-void gt_feature_index_get_rangeptr_for_seqid(GT_FeatureIndex *fi, Range *range,
-                                          const char *seqid)
-{
-  assert(fi && range);
-  *range = gt_feature_index_get_range_for_seqid(fi, seqid);
+    *range = genome_node_get_range((GenomeNode*) info->region);
 }
 
 bool gt_feature_index_has_seqid(const GT_FeatureIndex *fi, const char *seqid)
@@ -333,7 +323,7 @@ int gt_feature_index_unit_test(Error *err)
   ensure(had_err, gt_feature_index_has_seqid(fi, "test1"));
   ensure(had_err, !gt_feature_index_has_seqid(fi, "test2"));
 
-  check_range = gt_feature_index_get_range_for_seqid(fi, "test1");
+  gt_feature_index_get_range_for_seqid(fi, &check_range, "test1");
   ensure(had_err, check_range.start == 100UL && check_range.end == 1200UL);
 
   /* tests if we get a empty data structure for every added sequence region*/
@@ -381,10 +371,10 @@ int gt_feature_index_unit_test(Error *err)
     ensure(had_err, !strcmp(gt_strarray_get(seqids, 1), "test2"));
   }
 
-  check_range = gt_feature_index_get_range_for_seqid(fi, "test1");
+  gt_feature_index_get_range_for_seqid(fi, &check_range, "test1");
   ensure(had_err, check_range.start == 100UL && check_range.end == 1000UL);
 
-  check_range = gt_feature_index_get_range_for_seqid(fi, "test2");
+  gt_feature_index_get_range_for_seqid(fi, &check_range, "test2");
   ensure(had_err, check_range.start == 600UL && check_range.end == 1200UL);
 
   if (!had_err)

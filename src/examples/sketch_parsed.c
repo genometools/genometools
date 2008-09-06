@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
   /* create diagram for first sequence ID in feature index */
   seqid = gt_feature_index_get_first_seqid(feature_index);
-  range = gt_feature_index_get_range_for_seqid(feature_index, seqid);
+  gt_feature_index_get_range_for_seqid(feature_index, &range, seqid);
   diagram = gt_diagram_new(feature_index, seqid, &range, style);
 
   /* create canvas */
