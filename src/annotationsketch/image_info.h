@@ -27,11 +27,11 @@ GT_ImageInfo* gt_image_info_new();
 void          gt_image_info_delete(GT_ImageInfo*);
 unsigned int  gt_image_info_get_height(GT_ImageInfo*);
 void          gt_image_info_set_height(GT_ImageInfo*, unsigned int);
-/* Takes ownership of <rec_map>. */
-void          gt_image_info_add_recmap(GT_ImageInfo*, RecMap *rec_map);
+/* Takes ownership of <recmap>. */
+void          gt_image_info_add_recmap(GT_ImageInfo*, GT_RecMap *recmap);
 unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo*);
-RecMap*       gt_image_info_get_recmap(GT_ImageInfo*, unsigned long);
-void          gt_image_info_get_recmap_ptr(GT_ImageInfo*, RecMap*,
+GT_RecMap*       gt_image_info_get_recmap(GT_ImageInfo*, unsigned long);
+void          gt_image_info_get_recmap_ptr(GT_ImageInfo*, GT_RecMap*,
                                            unsigned long);
 int           gt_image_info_unit_test(Error*);
 #endif
