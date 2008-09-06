@@ -19,11 +19,11 @@
 #include "extended/genome_node.h"
 #include "annotationsketch/recmap.h"
 
-RecMap* recmap_create(double nw_x, double nw_y,
+GT_RecMap* gt_recmap_create(double nw_x, double nw_y,
                       double se_x, double se_y,
                       GenomeNode *gn)
 {
-  RecMap *rm = ma_malloc(sizeof *rm);
+  GT_RecMap *rm = ma_malloc(sizeof *rm);
   rm->nw_x = nw_x;
   rm->nw_y = nw_y;
   rm->se_x = se_x;
@@ -33,14 +33,14 @@ RecMap* recmap_create(double nw_x, double nw_y,
   return rm;
 }
 
-int recmap_format_html_imagemap_coords(RecMap *rm, char *buf, size_t n)
+int gt_recmap_format_html_imagemap_coords(GT_RecMap *rm, char *buf, size_t n)
 {
   assert(rm && buf);
   return snprintf(buf, n, "%.0f,%.0f,%.0f,%.0f", rm->nw_x, rm->nw_y,
                                                  rm->se_x, rm->se_y);
 }
 
-void recmap_delete(RecMap *rm)
+void gt_recmap_delete(GT_RecMap *rm)
 {
   if (!rm) return;
   genome_node_delete(rm->gn);

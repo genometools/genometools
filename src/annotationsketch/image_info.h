@@ -31,7 +31,7 @@ void          gt_image_info_set_height(GT_ImageInfo*, unsigned int);
 void          gt_image_info_add_recmap(GT_ImageInfo*, GT_RecMap *recmap);
 unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo*);
 GT_RecMap*       gt_image_info_get_recmap(GT_ImageInfo*, unsigned long);
-void          gt_image_info_get_recmap_ptr(GT_ImageInfo*, GT_RecMap*,
+void          gt_image_info_get_gt_recmap_ptr(GT_ImageInfo*, GT_RecMap*,
                                            unsigned long);
 int           gt_image_info_unit_test(Error*);
 #endif

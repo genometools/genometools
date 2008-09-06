@@ -34,7 +34,7 @@ GT_ImageInfo* gt_image_info_new()
 {
   GT_ImageInfo *ii;
   ii = ma_calloc(1, sizeof (GT_ImageInfo));
-  ii->recmaps = array_new(sizeof (RecMap*));
+  ii->recmaps = array_new(sizeof (GT_RecMap*));
   assert(ii->recmaps);
   return ii;
 }
@@ -45,14 +45,14 @@ void gt_image_info_delete(GT_ImageInfo *ii)
   if (!ii) return;
   for (i=0;i<gt_image_info_num_of_recmaps(ii);i++)
   {
-    RecMap *rm = *(RecMap**) array_get(ii->recmaps, i);
-    recmap_delete(rm);
+    GT_RecMap *rm = *(GT_RecMap**) array_get(ii->recmaps, i);
+    gt_recmap_delete(rm);
   }
   array_delete(ii->recmaps);
   ma_free(ii);
 }
 
-void gt_image_info_add_recmap(GT_ImageInfo *ii, RecMap *rm)
+void gt_image_info_add_recmap(GT_ImageInfo *ii, GT_RecMap *rm)
 {
   assert(ii && rm);
   array_add(ii->recmaps, rm);
@@ -76,15 +76,15 @@ unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo *ii)
   return array_size(ii->recmaps);
 }
 
-RecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
+GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
 {
   assert(ii);
-  return *(RecMap**) array_get(ii->recmaps, n);
+  return *(GT_RecMap**) array_get(ii->recmaps, n);
 }
 
 int gt_image_info_unit_test(Error *err)
 {
-  RecMap* rms[20];
+  GT_RecMap* rms[20];
   GenomeNode* gfs[20];
   FeatureTypeFactory *ftf;
   GenomeFeatureType *gft;
@@ -102,12 +102,12 @@ int gt_image_info_unit_test(Error *err)
 
   for (i=0;i<20;i++)
   {
-    RecMap* rm;
+    GT_RecMap* rm;
     unsigned long rbase;
     rbase = rand_max(10);
     Range r = {rbase,rbase+rand_max(20)};
     gfs[i] = (GenomeNode*) genome_feature_new(seqid, gft, r, STRAND_FORWARD);
-    rms[i] = recmap_create(rand_max_double(100.0),
+    rms[i] = gt_recmap_create(rand_max_double(100.0),
                            rand_max_double(100.0),
                            rand_max_double(100.0),
                            rand_max_double(100.0),

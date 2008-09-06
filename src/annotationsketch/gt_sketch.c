@@ -313,12 +313,12 @@ int gt_sketch(int argc, const char **argv, Error *err)
     gt_diagram_sketch(d, canvas);
     if (arguments.showrecmaps) {
       unsigned long i;
-      RecMap *rm;
+      GT_RecMap *rm;
       for (i = 0; i < gt_image_info_num_of_recmaps(ii) ;i++) {
         GenomeFeatureType *type;
         char buf[BUFSIZ];
         rm = gt_image_info_get_recmap(ii, i);
-        recmap_format_html_imagemap_coords(rm, buf, BUFSIZ);
+        gt_recmap_format_html_imagemap_coords(rm, buf, BUFSIZ);
         type = genome_feature_get_type((GenomeFeature*) rm->gn);
         printf("%s, %s\n", buf, genome_feature_type_get_cstr(type));
       }

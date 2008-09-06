@@ -20,18 +20,18 @@
 
 #include "extended/genome_feature.h"
 
-typedef struct RecMap {
+typedef struct GT_RecMap {
   double nw_x,
          nw_y,
          se_x,
          se_y;
   GenomeNode *gn;
   bool has_omitted_children;
-} RecMap;
+} GT_RecMap;
 
-RecMap* recmap_create(double nw_x, double nw_y, double se_x, double se_y,
+GT_RecMap* gt_recmap_create(double nw_x, double nw_y, double se_x, double se_y,
                       GenomeNode*);
-int     recmap_format_html_imagemap_coords(RecMap*, char*, size_t);
-void    recmap_delete(RecMap*);
+int        gt_recmap_format_html_imagemap_coords(GT_RecMap*, char*, size_t);
+void       gt_recmap_delete(GT_RecMap*);
 
 #endif
