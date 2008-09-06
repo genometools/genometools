@@ -26,7 +26,7 @@
 #include "annotationsketch/diagram_api.h"
 #include "annotationsketch/feature_index_api.h"
 #include "annotationsketch/image_info.h"
-#include "annotationsketch/recmap.h"
+#include "annotationsketch/recmap_api.h"
 #include "annotationsketch/style_api.h"
 
 #endif

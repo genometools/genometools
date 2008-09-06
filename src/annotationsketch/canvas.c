@@ -515,9 +515,10 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
     /* register coordinates in GT_ImageInfo object if available */
     if (canvas->ii)
     {
-      GT_RecMap *rm = gt_recmap_create(draw_range.start, canvas->y,
-                                 draw_range.end, canvas->y+bar_height,
-                                 gt_block_get_top_level_feature(block));
+      GT_RecMap *rm = gt_recmap_new(draw_range.start, canvas->y,
+                                    draw_range.end, canvas->y+bar_height,
+                                    (GenomeFeature*) /* XXX */
+                                    gt_block_get_top_level_feature(block));
       gt_image_info_add_recmap(canvas->ii, rm);
       rm->has_omitted_children = true;
     }
@@ -615,9 +616,10 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
   /* register coordinates in GT_ImageInfo object if available */
   if (canvas->ii)
   {
-    GT_RecMap *rm = gt_recmap_create(elem_start, canvas->y,
-                               elem_start+elem_width, canvas->y+bar_height,
-                               element_get_node_ref(elem));
+    GT_RecMap *rm = gt_recmap_new(elem_start, canvas->y,
+                                  elem_start+elem_width, canvas->y+bar_height,
+                                  (GenomeFeature*) /* XXX */
+                                  element_get_node_ref(elem));
     gt_image_info_add_recmap(canvas->ii, rm);
   }
 

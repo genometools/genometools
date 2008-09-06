@@ -15,23 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RECMAP_H
-#define RECMAP_H
+#ifndef RECMAP_API_H
+#define RECMAP_API_H
 
-#include "annotationsketch/recmap_api.h"
+#include "extended/genome_feature.h"
 
-struct GT_RecMap {
-  double nw_x,
-         nw_y,
-         se_x,
-         se_y;
-  GenomeFeature *gf;
-  bool has_omitted_children;
-};
+typedef struct GT_RecMap GT_RecMap;
 
-GT_RecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
-                         GenomeFeature*);
-int        gt_recmap_format_html_imagemap_coords(GT_RecMap*, char*, size_t);
-void       gt_recmap_delete(GT_RecMap*);
+double               gt_recmap_get_northwest_x(const GT_RecMap*);
+double               gt_recmap_get_northwest_y(const GT_RecMap*);
+double               gt_recmap_get_southeast_x(const GT_RecMap*);
+double               gt_recmap_get_southeast_y(const GT_RecMap*);
+const GenomeFeature* gt_recmap_get_genome_feature(const GT_RecMap*);
+bool                 gt_recmap_has_omitted_children(const GT_RecMap*);
 
 #endif

@@ -107,15 +107,15 @@ int gt_image_info_unit_test(Error *err)
     rbase = rand_max(10);
     Range r = {rbase,rbase+rand_max(20)};
     gfs[i] = (GenomeNode*) genome_feature_new(seqid, gft, r, STRAND_FORWARD);
-    rms[i] = gt_recmap_create(rand_max_double(100.0),
+    rms[i] = gt_recmap_new(rand_max_double(100.0),
                            rand_max_double(100.0),
                            rand_max_double(100.0),
                            rand_max_double(100.0),
-                           gfs[i]);
+                           (GenomeFeature*) /* XXX */ gfs[i]);
     gt_image_info_add_recmap(ii, rms[i]);
     ensure(had_err, gt_image_info_num_of_recmaps(ii) == i+1);
     ensure(had_err, (rm = gt_image_info_get_recmap(ii, i)) == rms[i]);
-    ensure(had_err, rm->gn == rms[i]->gn);
+    ensure(had_err, rm->gf == rms[i]->gf);
     genome_node_delete((GenomeNode*) gfs[i]);
   }
 

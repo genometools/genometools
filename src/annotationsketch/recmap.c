@@ -19,18 +19,53 @@
 #include "extended/genome_node.h"
 #include "annotationsketch/recmap.h"
 
-GT_RecMap* gt_recmap_create(double nw_x, double nw_y,
-                      double se_x, double se_y,
-                      GenomeNode *gn)
+GT_RecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
+                         GenomeFeature *gf)
 {
   GT_RecMap *rm = ma_malloc(sizeof *rm);
   rm->nw_x = nw_x;
   rm->nw_y = nw_y;
   rm->se_x = se_x;
   rm->se_y = se_y;
-  rm->gn = genome_node_ref(gn);
+  rm->gf = (GenomeFeature*) genome_node_ref((GenomeNode*) gf);
   rm->has_omitted_children = false;
   return rm;
+}
+
+double gt_recmap_get_northwest_x(const GT_RecMap *rm)
+{
+  assert(rm);
+  return rm->nw_x;
+}
+
+double gt_recmap_get_northwest_y(const GT_RecMap *rm)
+{
+  assert(rm);
+  return rm->nw_y;
+}
+
+double gt_recmap_get_southeast_x(const GT_RecMap *rm)
+{
+  assert(rm);
+  return rm->se_x;
+}
+
+double gt_recmap_get_southeast_y(const GT_RecMap *rm)
+{
+  assert(rm);
+  return rm->se_y;
+}
+
+const GenomeFeature* gt_recmap_get_genome_feature(const GT_RecMap *rm)
+{
+  assert(rm);
+  return rm->gf;
+}
+
+bool gt_recmap_has_omitted_children(const GT_RecMap *rm)
+{
+  assert(rm);
+  return rm->has_omitted_children;
 }
 
 int gt_recmap_format_html_imagemap_coords(GT_RecMap *rm, char *buf, size_t n)
@@ -43,6 +78,6 @@ int gt_recmap_format_html_imagemap_coords(GT_RecMap *rm, char *buf, size_t n)
 void gt_recmap_delete(GT_RecMap *rm)
 {
   if (!rm) return;
-  genome_node_delete(rm->gn);
+  genome_node_delete((GenomeNode*) rm->gf);
   ma_free(rm);
 }
