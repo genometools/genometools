@@ -46,10 +46,10 @@ typedef struct {
   unsigned long start,
                 end;
   unsigned int width;
-} AnnotationSketch_arguments;
+} AnnotationSketchArguments;
 
 static OPrval parse_options(int *parsed_args,
-                            AnnotationSketch_arguments *arguments,
+                            AnnotationSketchArguments *arguments,
                             int argc, const char **argv, Error *err)
 {
   OptionParser *op;
@@ -170,7 +170,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
                *gff3_out_stream = NULL,
                *feature_stream = NULL,
                *last_stream;
-  AnnotationSketch_arguments arguments;
+  AnnotationSketchArguments arguments;
   GenomeNode *gn = NULL;
   GT_FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
