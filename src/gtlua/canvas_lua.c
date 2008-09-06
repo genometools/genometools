@@ -30,7 +30,7 @@ static int canvas_lua_new_generic(lua_State *L, GraphicsOutType t)
   GT_Canvas **canvas;
   ImageInfo **ii;
   unsigned int width;
-  Style *style;
+  GT_Style *style;
   width = luaL_checkint(L, 1);
   /* create canvas */
   style = lua_get_style_from_registry(L);

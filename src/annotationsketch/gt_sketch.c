@@ -177,8 +177,8 @@ int gt_sketch(int argc, const char **argv, Error *err)
   const char *file, *seqid = NULL;
   Range qry_range, sequence_region_range;
   Array *results = NULL;
-  Style *sty = NULL;
-  Str *style_file = NULL;
+  GT_Style *sty = NULL;
+  Str *gt_style_file = NULL;
   Str *prog;
   GT_Diagram *d = NULL;
   ImageInfo* ii = NULL;
@@ -289,13 +289,13 @@ int gt_sketch(int argc, const char **argv, Error *err)
     /* find and load style file */
     prog = str_new();
     str_append_cstr_nt(prog, argv[0], cstr_length_up_to_char(argv[0], ' '));
-    style_file = gtdata_get_path(str_get(prog), err);
+    gt_style_file = gtdata_get_path(str_get(prog), err);
     str_delete(prog);
-    str_append_cstr(style_file, "/sketch/default.style");
-    if (!(sty = style_new(arguments.verbose, err)))
+    str_append_cstr(gt_style_file, "/sketch/default.style");
+    if (!(sty = gt_style_new(arguments.verbose, err)))
       had_err = -1;
-    if (!had_err && file_exists(str_get(style_file)))
-      had_err = style_load_file(sty, str_get(style_file), err);
+    if (!had_err && file_exists(str_get(gt_style_file)))
+      had_err = gt_style_load_file(sty, str_get(gt_style_file), err);
   }
 
   if (!had_err) {
@@ -329,8 +329,8 @@ int gt_sketch(int argc, const char **argv, Error *err)
   /* free */
   gt_canvas_delete(canvas);
   image_info_delete(ii);
-  style_delete(sty);
-  str_delete(style_file);
+  gt_style_delete(sty);
+  str_delete(gt_style_file);
   gt_diagram_delete(d);
   str_delete(arguments.seqid);
   str_delete(arguments.format);

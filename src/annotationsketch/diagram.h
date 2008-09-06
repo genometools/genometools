@@ -40,10 +40,10 @@ typedef struct TracklineInfo {
 /* Create a new GT_Diagram object representing the genome nodes in
    <feature_index> in region <seqid> overlapping with <range>. */
 GT_Diagram* gt_diagram_new(GT_FeatureIndex *feature_index, const char *seqid,
-                           const Range*, Style*);
-GT_Diagram* gt_diagram_new_from_array(Array *features, const Range*, Style*);
+                           const Range*, GT_Style*);
+GT_Diagram* gt_diagram_new_from_array(Array *features, const Range*, GT_Style*);
 Range       gt_diagram_get_range(GT_Diagram*);
-void        gt_diagram_set_config(GT_Diagram*, Style*);
+void        gt_diagram_set_config(GT_Diagram*, GT_Style*);
 Hashmap*    gt_diagram_get_tracks(const GT_Diagram*);
 void        gt_diagram_get_lineinfo(const GT_Diagram*, TracklineInfo*);
 int         gt_diagram_get_number_of_tracks(const GT_Diagram*);

@@ -46,7 +46,7 @@ struct GT_Canvas {
   Range viewrange;
   double factor, y, margins;
   unsigned long width, height;
-  Style *sty;
+  GT_Style *sty;
   bool show_track_captions;
   Bittab *bt;
   Graphics *g;
@@ -76,11 +76,11 @@ static unsigned long calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
   gt_diagram_get_lineinfo(dia, &lines);
 
   /* obtain line height and spacer from style */
-  if (style_get_num(canvas->sty, "format", "bar_height", &tmp, NULL))
+  if (gt_style_get_num(canvas->sty, "format", "bar_height", &tmp, NULL))
     line_height = tmp;
   else
     line_height = BAR_HEIGHT_DEFAULT;
-  if (style_get_num(canvas->sty, "format", "bar_vspace", &tmp, NULL))
+  if (gt_style_get_num(canvas->sty, "format", "bar_vspace", &tmp, NULL))
     line_height += tmp;
   else
     line_height += BAR_VSPACE_DEFAULT;
@@ -92,7 +92,7 @@ static unsigned long calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
   /* add track caption height and spacer */
   if (canvas->show_track_captions)
   {
-    if (style_get_num(canvas->sty, "format", "track_vspace", &tmp, NULL))
+    if (gt_style_get_num(canvas->sty, "format", "track_vspace", &tmp, NULL))
       height += gt_diagram_get_number_of_tracks(dia)
                   * (TOY_TEXT_HEIGHT
                       + CAPTION_BAR_SPACE_DEFAULT
@@ -106,7 +106,7 @@ static unsigned long calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
 
   /* add header space and footer */
   height += HEADER_SPACE + FOOTER_SPACE;
-  if (style_get_verbose(canvas->sty))
+  if (gt_style_get_verbose(canvas->sty))
     fprintf(stderr, "calculated height: %lu\n", height);
   return height;
 }
@@ -194,7 +194,7 @@ static void draw_ruler(GT_Canvas *canvas)
 
   margins = canvas->margins;
 
-  if (!(style_get_bool(canvas->sty, "format","show_grid", &showgrid, NULL)))
+  if (!(gt_style_get_bool(canvas->sty, "format","show_grid", &showgrid, NULL)))
     showgrid = true;
 
   rulercol.red = rulercol.green = rulercol.blue = .2;
@@ -263,7 +263,7 @@ static void draw_ruler(GT_Canvas *canvas)
                               "3'");
 }
 
-GT_Canvas* gt_canvas_new(Style *sty, GraphicsOutType type,
+GT_Canvas* gt_canvas_new(GT_Style *sty, GraphicsOutType type,
                    unsigned long width, ImageInfo *ii)
 {
   assert(sty && width > 0);
@@ -290,12 +290,12 @@ int gt_canvas_visit_gt_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
 
   assert(canvas && dia);
 
-  if (style_get_num(canvas->sty, "format", "margins", &margins, NULL))
+  if (gt_style_get_num(canvas->sty, "format", "margins", &margins, NULL))
     canvas->margins = margins;
   else
     canvas->margins = MARGINS_DEFAULT;
 
-  if (!style_get_bool(canvas->sty, "format", "show_track_captions",
+  if (!gt_style_get_bool(canvas->sty, "format", "show_track_captions",
                        &canvas->show_track_captions, NULL))
     canvas->show_track_captions = true;
 
@@ -347,10 +347,10 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
 
   assert(canvas && track);
 
-  style_get_color(canvas->sty, "format", "track_title_color", &color, NULL);
+  gt_style_get_color(canvas->sty, "format", "track_title_color", &color, NULL);
 
   /* debug */
-  if (style_get_verbose(canvas->sty))
+  if (gt_style_get_verbose(canvas->sty))
     fprintf(stderr, "processing track %s\n", str_get(track_get_title(track)));
 
   if (canvas->show_track_captions)
@@ -396,7 +396,7 @@ int gt_canvas_visit_track_post(GT_Canvas *canvas, UNUSED Track *track)
   double vspace;
   assert(canvas && track);
   /* put track spacer after track */
-  if (style_get_num(canvas->sty, "format", "track_vspace", &vspace, NULL))
+  if (gt_style_get_num(canvas->sty, "format", "track_vspace", &vspace, NULL))
     canvas->y += vspace;
   else
     canvas->y += TRACK_VSPACE_DEFAULT;
@@ -418,11 +418,11 @@ int gt_canvas_visit_line_post(GT_Canvas *canvas, UNUSED Line *line)
   int had_err = 0;
   double tmp;
   assert(canvas && line);
-  if (style_get_num(canvas->sty, "format", "bar_height", &tmp, NULL))
+  if (gt_style_get_num(canvas->sty, "format", "bar_height", &tmp, NULL))
     canvas->y += tmp;
   else
     canvas->y += BAR_HEIGHT_DEFAULT;
-  if (style_get_num(canvas->sty, "format", "bar_vspace", &tmp, NULL))
+  if (gt_style_get_num(canvas->sty, "format", "bar_vspace", &tmp, NULL))
     canvas->y += tmp;
   else
     canvas->y += BAR_VSPACE_DEFAULT;
@@ -446,14 +446,16 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
   grey.red = grey.green = grey.blue = .85;
   strand = gt_block_get_strand(block);
   block_range = gt_block_get_range(block);
-  if (!style_get_num(canvas->sty, "format", "bar_height", &bar_height, NULL))
+  if (!gt_style_get_num(canvas->sty, "format", "bar_height", &bar_height, NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
-  if (!style_get_num(canvas->sty, "format", "min_len_block", &min_len_block,
+  if (!gt_style_get_num(canvas->sty, "format", "min_len_block", &min_len_block,
                      NULL))
     min_len_block = MIN_LEN_BLOCK_DEFAULT;
-  if (!style_get_num(canvas->sty, "format", "arrow_width", &arrow_width, NULL))
+  if (!gt_style_get_num(canvas->sty, "format", "arrow_width", &arrow_width,
+                        NULL)) {
     arrow_width = ARROW_WIDTH_DEFAULT;
-  if (!style_get_num(canvas->sty, "format", "stroke_width", &stroke_width,
+  }
+  if (!gt_style_get_num(canvas->sty, "format", "stroke_width", &stroke_width,
                      NULL))
     stroke_width = STROKE_WIDTH_DEFAULT;
 
@@ -480,10 +482,10 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
        && draw_range.end-draw_range.start < min_len_block)
   {
     GenomeFeatureType *btype = gt_block_get_type(block);
-    style_get_color(canvas->sty, genome_feature_type_get_cstr(btype),
+    gt_style_get_color(canvas->sty, genome_feature_type_get_cstr(btype),
                            "fill", &fillcolor,
                            gt_block_get_top_level_feature(block));
-    style_get_color(canvas->sty, genome_feature_type_get_cstr(btype),
+    gt_style_get_color(canvas->sty, genome_feature_type_get_cstr(btype),
                            "stroke", &strokecolor,
                            gt_block_get_top_level_feature(block));
     graphics_draw_box(canvas->g,
@@ -522,8 +524,8 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
     return -1;
   }
 
-  style_get_color(canvas->sty, "format", "default_stroke_color", &strokecolor,
-                  NULL);
+  gt_style_get_color(canvas->sty, "format", "default_stroke_color",
+                     &strokecolor, NULL);
 
   /* draw parent block boundaries */
   graphics_draw_dashes(canvas->g,
@@ -557,10 +559,12 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
 
   type = genome_feature_type_get_cstr(element_get_type(elem));
   grey.red = grey.green = grey.blue = .85;
-  if (!style_get_num(canvas->sty, "format", "bar_height", &bar_height, NULL))
+  if (!gt_style_get_num(canvas->sty, "format", "bar_height", &bar_height, NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
-  if (!style_get_num(canvas->sty, "format", "arrow_width", &arrow_width, NULL))
+  if (!gt_style_get_num(canvas->sty, "format", "arrow_width", &arrow_width,
+                        NULL)) {
     arrow_width = ARROW_WIDTH_DEFAULT;
+  }
 
   if ((strand == STRAND_REVERSE || strand == STRAND_BOTH)
          /*&& delem == dlist_first(elems)*/)
@@ -569,7 +573,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
          /*&& dlistelem_next(delem) == NULL*/)
     arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
-  if (style_get_verbose(canvas->sty))
+  if (gt_style_get_verbose(canvas->sty))
     fprintf(stderr, "processing element from %lu to %lu, strand %d\n",
             elem_range.start,
             elem_range.end,
@@ -580,20 +584,20 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
   elem_width = draw_range.end - draw_range.start;
 
   if (element_is_marked(elem)) {
-    style_get_color(canvas->sty, type, "stroke_marked", &elem_color,
+    gt_style_get_color(canvas->sty, type, "stroke_marked", &elem_color,
                     element_get_node_ref(elem));
-    if (!style_get_num(canvas->sty, "format", "stroke_marked_width",
+    if (!gt_style_get_num(canvas->sty, "format", "stroke_marked_width",
                        &stroke_width, element_get_node_ref(elem)))
     stroke_width = STROKE_WIDTH_DEFAULT;
   }
   else {
-    style_get_color(canvas->sty, type, "stroke", &elem_color,
+    gt_style_get_color(canvas->sty, type, "stroke", &elem_color,
                     element_get_node_ref(elem));
-    if (!style_get_num(canvas->sty, "format", "stroke_width", &stroke_width,
+    if (!gt_style_get_num(canvas->sty, "format", "stroke_width", &stroke_width,
                        element_get_node_ref(elem)))
     stroke_width = STROKE_WIDTH_DEFAULT;
   }
-  style_get_color(canvas->sty, type, "fill", &fill_color,
+  gt_style_get_color(canvas->sty, type, "fill", &fill_color,
                   element_get_node_ref(elem));
 
   if (draw_range.end-draw_range.start <= 1.1)
@@ -622,7 +626,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
     return had_err;
   }
 
-  if (style_get_verbose(canvas->sty))
+  if (gt_style_get_verbose(canvas->sty))
     fprintf(stderr, "drawing element from %f to %f, arrow status: %d\n",
             draw_range.start,
             draw_range.end,
@@ -630,7 +634,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
 
   /* draw each element according to style set in the style */
   style = str_new();
-  if (!style_get_str(canvas->sty, type, "style", style,
+  if (!gt_style_get_str(canvas->sty, type, "style", style,
                      element_get_node_ref(elem)))
     str_set(style, "box");
 

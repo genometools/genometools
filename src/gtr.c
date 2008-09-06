@@ -58,7 +58,7 @@ struct GTR {
   lua_State *L;
   FeatureTypeFactory *feature_type_factory; /* for gtlua */
 #ifndef WITHOUT_CAIRO
-  Style *style;
+  GT_Style *style;
 #endif
   FILE *logfp;
 };
@@ -91,7 +91,7 @@ GTR* gtr_new(Error *err)
   }
 #ifndef WITHOUT_CAIRO
   if (!had_err) {
-    if (!(gtr->style = style_new_with_state(gtr->L)))
+    if (!(gtr->style = gt_style_new_with_state(gtr->L)))
       had_err = -1;
   }
   if (!had_err) {
@@ -101,7 +101,7 @@ GTR* gtr_new(Error *err)
   if (!had_err) {
     str_append_cstr(style_file, "/sketch/default.style");
     if (file_exists(str_get(style_file))) {
-      if (style_load_file(gtr->style, str_get(style_file), err))
+      if (gt_style_load_file(gtr->style, str_get(style_file), err))
         had_err = -1;
       else
         lua_put_style_in_registry(gtr->L, gtr->style);
@@ -351,7 +351,7 @@ void gtr_delete(GTR *gtr)
   feature_type_factory_delete(gtr->feature_type_factory);
   if (gtr->L) lua_close(gtr->L);
 #ifndef WITHOUT_CAIRO
-  style_delete_without_state(gtr->style);
+  gt_style_delete_without_state(gtr->style);
 #endif
   ma_free(gtr);
 }

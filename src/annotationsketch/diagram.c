@@ -49,7 +49,7 @@ struct GT_Diagram {
   /* Cache tables for configuration data */
   Hashmap *collapsingtypes, *caption_display_status;
   int nof_tracks;
-  Style *style;
+  GT_Style *style;
   Range range;
 };
 
@@ -137,12 +137,12 @@ static bool get_caption_display_status(GT_Diagram *d, GenomeFeatureType *gft)
     unsigned long threshold;
     double tmp;
     status = ma_malloc(sizeof (bool*));
-    if (!style_get_bool(d->style, "format", "show_block_captions",
+    if (!gt_style_get_bool(d->style, "format", "show_block_captions",
                        status, NULL))
       *status = true;
     if (*status)
     {
-      if (style_get_num(d->style, genome_feature_type_get_cstr(gft),
+      if (gt_style_get_num(d->style, genome_feature_type_get_cstr(gft),
                          "max_capt_show_width", &tmp, NULL))
         threshold = tmp;
       else
@@ -174,7 +174,7 @@ static void add_to_current(GT_Diagram *d, GenomeNode *node, GenomeNode *parent)
   /* assign block caption */
 
   caption = str_new();
-  if (!style_get_str(d->style,
+  if (!gt_style_get_str(d->style,
                      genome_feature_type_get_cstr(
                          genome_feature_get_type((GenomeFeature*) node)),
                      "block_caption",
@@ -312,13 +312,13 @@ static void process_node(GT_Diagram *d, GenomeNode *node, GenomeNode *parent)
     return;
 
   /* get maximal view widths in nucleotides to show this type */
-  if (style_get_num(d->style, feature_type, "max_show_width", &tmp, NULL))
+  if (gt_style_get_num(d->style, feature_type, "max_show_width", &tmp, NULL))
     max_show_width = tmp;
   else
     max_show_width = UNDEF_ULONG;
   if (parent)
   {
-    if (style_get_num(d->style, parent_gft, "max_show_width", &tmp, NULL))
+    if (gt_style_get_num(d->style, parent_gft, "max_show_width", &tmp, NULL))
     par_max_show_width = tmp;
   else
     par_max_show_width = UNDEF_ULONG;
@@ -336,7 +336,7 @@ static void process_node(GT_Diagram *d, GenomeNode *node, GenomeNode *parent)
                                         feature_type)) == NULL)
   {
     collapse = ma_malloc(sizeof (bool));
-    if (!style_get_bool(d->style, feature_type, "collapse_to_parent",
+    if (!gt_style_get_bool(d->style, feature_type, "collapse_to_parent",
                         collapse, NULL))
       *collapse = false;
     hashmap_add(d->collapsingtypes, (char*) feature_type, collapse);
@@ -488,7 +488,7 @@ static int blocklist_delete(void *value)
 }
 
 static GT_Diagram* gt_diagram_new_generic(Array *features, const Range *range,
-                                    Style *style)
+                                    GT_Style *style)
 {
   GT_Diagram *diagram;
   diagram = ma_malloc(sizeof (GT_Diagram));
@@ -505,7 +505,7 @@ static GT_Diagram* gt_diagram_new_generic(Array *features, const Range *range,
 }
 
 GT_Diagram* gt_diagram_new(GT_FeatureIndex *fi, const char *seqid,
-                           const Range *range, Style *style)
+                           const Range *range, GT_Style *style)
 {
   GT_Diagram *diagram;
   int had_err = 0;
@@ -520,7 +520,7 @@ GT_Diagram* gt_diagram_new(GT_FeatureIndex *fi, const char *seqid,
 }
 
 GT_Diagram* gt_diagram_new_from_array(Array *features, const Range *range,
-                                Style *style)
+                                GT_Style *style)
 {
   assert(features && range && style);
   return gt_diagram_new_generic(features, range, style);
@@ -532,7 +532,7 @@ Range gt_diagram_get_range(GT_Diagram* diagram)
   return diagram->range;
 }
 
-void gt_diagram_set_style(GT_Diagram *diagram, Style *style)
+void gt_diagram_set_style(GT_Diagram *diagram, GT_Style *style)
 {
   assert(diagram && style);
   diagram->style = style;
@@ -593,12 +593,14 @@ static int layout_tracks(void *key, void *value, void *data,
   ma_free(filename);
   type = genome_feature_type_get_cstr(gft);
 
-  if (!style_get_bool(tti->dia->style, "format", "split_lines", &split, NULL))
+  if (!gt_style_get_bool(tti->dia->style, "format", "split_lines", &split,
+                         NULL)) {
     split = true;
+  }
   if (split)
-    if (!style_get_bool(tti->dia->style, type, "split_lines", &split, NULL))
+    if (!gt_style_get_bool(tti->dia->style, type, "split_lines", &split, NULL))
       split = true;
-  if (style_get_num(tti->dia->style, type, "max_num_lines", &tmp, NULL))
+  if (gt_style_get_num(tti->dia->style, type, "max_num_lines", &tmp, NULL))
     max = tmp;
   else
     max = 50;
@@ -655,7 +657,7 @@ int gt_diagram_unit_test(Error *err)
   Str *seqid1, *seqid2, *track_key;
   SequenceRegion *sr1, *sr2;
   int had_err=0;
-  Style *sty = NULL;
+  GT_Style *sty = NULL;
   GT_Diagram *dia = NULL, *dia2 = NULL, *dia3 = NULL;
   Array *features;
   GT_Canvas *canvas = NULL;
@@ -712,7 +714,7 @@ int gt_diagram_unit_test(Error *err)
 
   /* create a style object */
   if (!had_err) {
-    if (!(sty = style_new(false, err)))
+    if (!(sty = gt_style_new(false, err)))
       had_err = -1;
   }
 
@@ -731,7 +733,7 @@ int gt_diagram_unit_test(Error *err)
   }
 
   if (!had_err &&
-      !style_get_bool(dia->style, "gene", "collapse_to_parent", false, NULL))
+      !gt_style_get_bool(dia->style, "gene", "collapse_to_parent", false, NULL))
   {
     track_key = track_key_new("generated", gene_type);
     ensure(had_err, hashmap_get(dia->tracks, str_get(track_key)));
@@ -739,7 +741,7 @@ int gt_diagram_unit_test(Error *err)
   }
 
   if (!had_err &&
-      !style_get_bool(dia->style, "exon", "collapse_to_parent", false, NULL))
+      !gt_style_get_bool(dia->style, "exon", "collapse_to_parent", false, NULL))
   {
     track_key = track_key_new("generated", exon_type);
     ensure(had_err, hashmap_get(dia->tracks, str_get(track_key)));
@@ -755,7 +757,8 @@ int gt_diagram_unit_test(Error *err)
   }
 
   if (!had_err &&
-      !style_get_bool(dia2->style, "gene", "collapse_to_parent", false, NULL))
+      !gt_style_get_bool(dia2->style, "gene", "collapse_to_parent", false,
+                         NULL))
   {
     gt_diagram_sketch(dia2, canvas);
     track_key = track_key_new("generated", gene_type);
@@ -764,7 +767,8 @@ int gt_diagram_unit_test(Error *err)
   }
 
   if (!had_err &&
-      !style_get_bool(dia2->style, "exon", "collapse_to_parent", false, NULL))
+      !gt_style_get_bool(dia2->style, "exon", "collapse_to_parent", false,
+                         NULL))
   {
     track_key = track_key_new("generated", exon_type);
     ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
@@ -772,7 +776,7 @@ int gt_diagram_unit_test(Error *err)
   }
 
   if (!had_err &&
-      !style_get_bool(dia2->style, "CDS", "collapse_to_parent", false, NULL))
+      !gt_style_get_bool(dia2->style, "CDS", "collapse_to_parent", false, NULL))
   {
     track_key = track_key_new("generated", CDS_type);
     ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
@@ -788,7 +792,8 @@ int gt_diagram_unit_test(Error *err)
   ensure(had_err, dia3->style);
 
   if (!had_err &&
-      !style_get_bool(dia3->style, "gene", "collapse_to_parent", false, NULL))
+      !gt_style_get_bool(dia3->style, "gene", "collapse_to_parent", false,
+                         NULL))
   {
     gt_diagram_sketch(dia3, canvas);
     track_key = track_key_new("generated", gene_type);
@@ -797,7 +802,8 @@ int gt_diagram_unit_test(Error *err)
   }
 
   if (!had_err &&
-      !style_get_bool(dia3->style, "exon", "collapse_to_parent", false, NULL))
+      !gt_style_get_bool(dia3->style, "exon", "collapse_to_parent", false,
+                         NULL))
   {
     track_key = track_key_new("generated", exon_type);
     ensure(had_err, hashmap_get(dia3->tracks, str_get(track_key)));
@@ -806,7 +812,7 @@ int gt_diagram_unit_test(Error *err)
   ensure(had_err, range_compare(gt_diagram_get_range(dia3),rs) == 0);
 
   /* delete all generated objects */
-  style_delete(sty);
+  gt_style_delete(sty);
   array_delete(features);
   gt_diagram_delete(dia);
   gt_diagram_delete(dia2);

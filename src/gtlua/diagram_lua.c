@@ -35,7 +35,7 @@ static int diagram_lua_new(lua_State *L)
   GT_FeatureIndex **feature_index;
   Range *range;
   const char *seqid;
-  Style *style;
+  GT_Style *style;
   /* get feature index */
   feature_index = check_feature_index(L, 1);
   /* get seqid */

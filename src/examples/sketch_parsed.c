@@ -9,7 +9,7 @@ static void handle_error(Error *err)
 int main(int argc, char *argv[])
 {
   const char *style_file, *gff3_file, *output_file, *seqid;
-  Style *style;
+  GT_Style *style;
   GT_FeatureIndex *feature_index;
   Range range;
   GT_Diagram *diagram;
@@ -26,11 +26,11 @@ int main(int argc, char *argv[])
   output_file = argv[3];
 
   /* create style */
-  if (!(style = style_new(false, err)))
+  if (!(style = gt_style_new(false, err)))
     handle_error(err);
 
   /* load style file */
-  if (style_load_file(style, style_file, err))
+  if (gt_style_load_file(style, style_file, err))
     handle_error(err);
 
   /* create feature index */
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
   gt_canvas_delete(canvas);
   gt_diagram_delete(diagram);
   gt_feature_index_delete(feature_index);
-  style_delete(style);
+  gt_style_delete(style);
   error_delete(err);
 
   return EXIT_SUCCESS;

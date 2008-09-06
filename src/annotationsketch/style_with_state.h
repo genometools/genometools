@@ -22,7 +22,7 @@
 #include "lua.h"
 #include "annotationsketch/style.h"
 
-/* Creates a Style object wich reuses the given Lua state. */
-Style*        style_new_with_state(lua_State*);
+/* Creates a GT_Style object wich reuses the given Lua state. */
+GT_Style*        gt_style_new_with_state(lua_State*);
 
 #endif

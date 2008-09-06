@@ -34,7 +34,7 @@ typedef struct GT_Canvas GT_Canvas;
 /* Create a new GT_Canvas object with given <output_type> and <width> using the
    configuration given in <style>. The optional <image_info> is filled when
    the created GT_Canvas object is used to render a GT_Diagram object. */
-GT_Canvas*    gt_canvas_new(Style *style, GraphicsOutType output_type,
+GT_Canvas*    gt_canvas_new(GT_Style *style, GraphicsOutType output_type,
                             unsigned long width, ImageInfo *image_info);
 /* Returns a pixel-based range for a nucleotide-based range
    using the scaling factor defined for the given <canvas> */
