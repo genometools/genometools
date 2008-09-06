@@ -15,35 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
-#include "annotationsketch/color.h"
+#ifndef COLOR_API_H
+#define COLOR_API_H
 
-GT_Color* gt_color_new(double red, double green, double blue)
-{
-  GT_Color *color = ma_malloc(sizeof *color);
-  color->red = red;
-  color->green = green;
-  color->blue = blue;
-  return color;
-}
+#include <stdbool.h>
 
-void gt_color_set(GT_Color *color, double red, double green, double blue)
-{
-  assert(color);
-  color->red = red;
-  color->green = green;
-  color->blue = blue;
-}
+typedef struct GT_Color GT_Color;
 
-bool gt_color_equals(const GT_Color *c1, const GT_Color *c2)
-{
-  assert(c1 && c2);
-  return ((c1->red == c2->red) && (c1->green == c2->green) &&
-          (c1->blue == c2->blue));
-}
+GT_Color* gt_color_new(double red, double green, double blue);
+void      gt_color_set(GT_Color*, double red, double green, double blue);
+bool      gt_color_equals(const GT_Color*, const GT_Color*);
+void      gt_color_delete(GT_Color*);
 
-void gt_color_delete(GT_Color *color)
-{
-  if (!color) return;
-  ma_free(color);
-}
+#endif

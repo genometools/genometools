@@ -22,7 +22,7 @@
 
 /* The AnnotationSketch  header */
 #include "annotationsketch/canvas_api.h"
-#include "annotationsketch/color.h"
+#include "annotationsketch/color_api.h"
 #include "annotationsketch/diagram_api.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_stream.h"

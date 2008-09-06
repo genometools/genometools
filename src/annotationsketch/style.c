@@ -497,11 +497,11 @@ int gt_style_unit_test(Error *err)
 
   /* at the beginning, all values are defaults, since nothing is defined */
   gt_style_get_color(sty, "exon", "fill", &tmpcol, NULL);
-  ensure(had_err, gt_color_equals(tmpcol,defcol));
+  ensure(had_err, gt_color_equals(&tmpcol, &defcol));
   gt_style_get_color(sty, "cds", "fill", &tmpcol, NULL);
-  ensure(had_err, gt_color_equals(tmpcol,defcol));
+  ensure(had_err, gt_color_equals(&tmpcol, &defcol));
   gt_style_get_color(sty, "foo", "fill", &tmpcol, NULL);
-  ensure(had_err, gt_color_equals(tmpcol,defcol));
+  ensure(had_err, gt_color_equals(&tmpcol, &defcol));
   if (!gt_style_get_num(sty, "format", "margins", &num, NULL))
     num = 10.0;
   ensure(had_err, num == 10.0);
@@ -516,8 +516,8 @@ int gt_style_unit_test(Error *err)
 
   /* is it saved correctly? */
   gt_style_get_color(sty, "exon", "fill", &tmpcol, NULL);
-  ensure(had_err, !gt_color_equals(tmpcol,defcol));
-  ensure(had_err, gt_color_equals(tmpcol,col1));
+  ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
+  ensure(had_err, gt_color_equals(&tmpcol, &col1));
   if (!gt_style_get_num(sty, "format", "margins", &num, NULL))
     num = 10.0;
   ensure(had_err, num == 11.0);
@@ -531,8 +531,8 @@ int gt_style_unit_test(Error *err)
 
   /* is it saved correctly? */
   gt_style_get_color(sty, "foo", "fill", &tmpcol, NULL);
-  ensure(had_err, !gt_color_equals(tmpcol,defcol));
-  ensure(had_err, gt_color_equals(tmpcol,col2));
+  ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
+  ensure(had_err, gt_color_equals(&tmpcol, &col2));
   if (!gt_style_get_str(sty, "bar", "baz", str, NULL))
     str_set(str, "");
   ensure(had_err, (strcmp(str_get(str),"")!=0));
@@ -548,8 +548,8 @@ int gt_style_unit_test(Error *err)
   {
     /* check again */
     gt_style_get_color(new_sty, "foo", "fill", &tmpcol, NULL);
-    ensure(had_err, !gt_color_equals(tmpcol,defcol));
-    ensure(had_err, gt_color_equals(tmpcol,col2));
+    ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
+    ensure(had_err, gt_color_equals(&tmpcol, &col2));
     if (!gt_style_get_str(new_sty, "bar", "baz", str, NULL))
       str_set(str, "");
     ensure(had_err, (strcmp(str_get(str),"")!=0));

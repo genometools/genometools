@@ -18,12 +18,10 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-#include <stdbool.h>
+#include "annotationsketch/color_api.h"
 
-typedef struct {
+struct GT_Color {
   double red, green, blue;
-} GT_Color;
-
-bool gt_color_equals(GT_Color, GT_Color);
+};
 
 #endif
