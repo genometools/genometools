@@ -180,7 +180,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
   Style *sty = NULL;
   Str *style_file = NULL;
   Str *prog;
-  Diagram *d = NULL;
+  GT_Diagram *d = NULL;
   ImageInfo* ii = NULL;
   GT_Canvas *canvas = NULL;
 
@@ -300,7 +300,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
 
   if (!had_err) {
     /* create and write image file */
-    d = diagram_new(features, seqid, &qry_range, sty);
+    d = gt_diagram_new(features, seqid, &qry_range, sty);
     ii = image_info_new();
     if (strcmp(str_get(arguments.format),"pdf")==0)
       canvas = gt_canvas_new(sty, GRAPHICS_PDF, arguments.width, ii);
@@ -310,7 +310,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
       canvas = gt_canvas_new(sty, GRAPHICS_SVG, arguments.width, ii);
     else
       canvas = gt_canvas_new(sty, GRAPHICS_PNG, arguments.width, ii);
-    diagram_sketch(d, canvas);
+    gt_diagram_sketch(d, canvas);
     if (arguments.showrecmaps) {
       unsigned long i;
       RecMap *rm;
@@ -331,7 +331,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
   image_info_delete(ii);
   style_delete(sty);
   str_delete(style_file);
-  diagram_delete(d);
+  gt_diagram_delete(d);
   str_delete(arguments.seqid);
   str_delete(arguments.format);
   array_delete(results);

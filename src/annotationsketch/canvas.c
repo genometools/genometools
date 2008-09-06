@@ -63,7 +63,7 @@ typedef enum
 } ClipType;
 
 /* Calculate the final height of the image to be created. */
-static unsigned long calculate_height(GT_Canvas *canvas, Diagram *dia)
+static unsigned long calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
 {
   TracklineInfo lines;
   double tmp;
@@ -73,7 +73,7 @@ static unsigned long calculate_height(GT_Canvas *canvas, Diagram *dia)
 
   /* get line information for height calculation */
   lines.total_captionlines = lines.total_lines = 0;
-  diagram_get_lineinfo(dia, &lines);
+  gt_diagram_get_lineinfo(dia, &lines);
 
   /* obtain line height and spacer from style */
   if (style_get_num(canvas->sty, "format", "bar_height", &tmp, NULL))
@@ -93,12 +93,12 @@ static unsigned long calculate_height(GT_Canvas *canvas, Diagram *dia)
   if (canvas->show_track_captions)
   {
     if (style_get_num(canvas->sty, "format", "track_vspace", &tmp, NULL))
-      height += diagram_get_number_of_tracks(dia)
+      height += gt_diagram_get_number_of_tracks(dia)
                   * (TOY_TEXT_HEIGHT
                       + CAPTION_BAR_SPACE_DEFAULT
                       + tmp);
     else
-      height += diagram_get_number_of_tracks(dia)
+      height += gt_diagram_get_number_of_tracks(dia)
                   * (TOY_TEXT_HEIGHT
                       + CAPTION_BAR_SPACE_DEFAULT
                       + TRACK_VSPACE_DEFAULT);
@@ -284,7 +284,7 @@ unsigned long gt_canvas_get_height(GT_Canvas *canvas)
   return canvas->height;
 }
 
-int gt_canvas_visit_diagram_pre(GT_Canvas *canvas, Diagram *dia)
+int gt_canvas_visit_gt_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
 {
   double margins;
 
@@ -299,7 +299,7 @@ int gt_canvas_visit_diagram_pre(GT_Canvas *canvas, Diagram *dia)
                        &canvas->show_track_captions, NULL))
     canvas->show_track_captions = true;
 
-  canvas->viewrange = diagram_get_range(dia);
+  canvas->viewrange = gt_diagram_get_range(dia);
   if (canvas->g)
   {
     graphics_delete(canvas->g);
@@ -314,7 +314,7 @@ int gt_canvas_visit_diagram_pre(GT_Canvas *canvas, Diagram *dia)
   return 0;
 }
 
-int gt_canvas_visit_diagram_post(GT_Canvas *canvas, Diagram *dia)
+int gt_canvas_visit_gt_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
 {
   int had_err = 0;
 

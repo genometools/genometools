@@ -31,7 +31,7 @@
 
 static int diagram_lua_new(lua_State *L)
 {
-  Diagram **diagram;
+  GT_Diagram **diagram;
   GT_FeatureIndex **feature_index;
   Range *range;
   const char *seqid;
@@ -46,9 +46,9 @@ static int diagram_lua_new(lua_State *L)
   range = check_range(L, 3);
   /* create diagram */
   style = lua_get_style_from_registry(L);
-  diagram = lua_newuserdata(L, sizeof (Diagram*));
+  diagram = lua_newuserdata(L, sizeof (GT_Diagram*));
   assert(diagram);
-  *diagram = diagram_new(*feature_index, seqid, range, style);
+  *diagram = gt_diagram_new(*feature_index, seqid, range, style);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -56,18 +56,18 @@ static int diagram_lua_new(lua_State *L)
 
 static int diagram_lua_sketch(lua_State *L)
 {
-  Diagram **diagram;
+  GT_Diagram **diagram;
   GT_Canvas **canvas;
   diagram = check_diagram(L,1);
   canvas = check_canvas(L,2);
-  return diagram_sketch(*diagram, *canvas);
+  return gt_diagram_sketch(*diagram, *canvas);
 }
 
 static int diagram_lua_delete(lua_State *L)
 {
-  Diagram **diagram;
+  GT_Diagram **diagram;
   diagram = check_diagram(L, 1);
-  diagram_delete(*diagram);
+  gt_diagram_delete(*diagram);
   return 0;
 }
 

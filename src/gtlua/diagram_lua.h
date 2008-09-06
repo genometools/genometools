@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the Diagram class to Lua:
+/* exports the GT_Diagram class to Lua:
 
    -- Return a diagram object which contains the genome nodes given in
    -- <feature_index> in the given <range> of the sequence region with sequence
@@ -31,6 +31,6 @@ int luaopen_diagram(lua_State*);
 
 #define DIAGRAM_METATABLE  "GenomeTools.diagram"
 #define check_diagram(L, POS) \
-              (Diagram**) luaL_checkudata(L, POS, DIAGRAM_METATABLE)
+              (GT_Diagram**) luaL_checkudata(L, POS, DIAGRAM_METATABLE)
 
 #endif

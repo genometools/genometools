@@ -20,7 +20,7 @@
 #ifndef DIAGRAM_H
 #define DIAGRAM_H
 
-typedef struct Diagram Diagram;
+typedef struct GT_Diagram GT_Diagram;
 
 typedef struct TracklineInfo {
   unsigned long total_lines,
@@ -37,19 +37,19 @@ typedef struct TracklineInfo {
 #include "extended/genome_feature.h"
 #include "extended/genome_feature_type.h"
 
-/* Create a new Diagram object representing the genome nodes in
+/* Create a new GT_Diagram object representing the genome nodes in
    <feature_index> in region <seqid> overlapping with <range>. */
-Diagram*    diagram_new(GT_FeatureIndex *feature_index, const char *seqid,
-                        const Range*, Style*);
-Diagram*    diagram_new_from_array(Array *features, const Range*, Style*);
-Range       diagram_get_range(Diagram*);
-void        diagram_set_config(Diagram*, Style*);
-Hashmap*    diagram_get_tracks(const Diagram*);
-void        diagram_get_lineinfo(const Diagram*, TracklineInfo*);
-int         diagram_get_number_of_tracks(const Diagram*);
+GT_Diagram* gt_diagram_new(GT_FeatureIndex *feature_index, const char *seqid,
+                           const Range*, Style*);
+GT_Diagram* gt_diagram_new_from_array(Array *features, const Range*, Style*);
+Range       gt_diagram_get_range(GT_Diagram*);
+void        gt_diagram_set_config(GT_Diagram*, Style*);
+Hashmap*    gt_diagram_get_tracks(const GT_Diagram*);
+void        gt_diagram_get_lineinfo(const GT_Diagram*, TracklineInfo*);
+int         gt_diagram_get_number_of_tracks(const GT_Diagram*);
 /* Render <diagram> on the given <canvas>. */
-int         diagram_sketch(Diagram *diagram, GT_Canvas *canvas);
-int         diagram_unit_test(Error*);
-void        diagram_delete(Diagram*);
+int         gt_diagram_sketch(GT_Diagram *diagram, GT_Canvas *canvas);
+int         gt_diagram_unit_test(Error*);
+void        gt_diagram_delete(GT_Diagram*);
 
 #endif

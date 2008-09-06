@@ -33,7 +33,7 @@ typedef struct GT_Canvas GT_Canvas;
 
 /* Create a new GT_Canvas object with given <output_type> and <width> using the
    configuration given in <style>. The optional <image_info> is filled when
-   the created GT_Canvas object is used to render a Diagram object. */
+   the created GT_Canvas object is used to render a GT_Diagram object. */
 GT_Canvas*    gt_canvas_new(Style *style, GraphicsOutType output_type,
                             unsigned long width, ImageInfo *image_info);
 /* Returns a pixel-based range for a nucleotide-based range
@@ -43,21 +43,21 @@ DrawingRange  gt_canvas_convert_coords(GT_Canvas* canvas, Range);
 unsigned long gt_canvas_get_height(GT_Canvas *canvas);
 /* Returns rendered width in pixels of the given text. */
 double        gt_canvas_get_text_width(GT_Canvas*, const char *text);
-/* Callback function for Diagram rendering. */
-int           gt_canvas_visit_diagram_pre(GT_Canvas*, Diagram*);
-/* Callback function for Diagram rendering. */
-int           gt_canvas_visit_diagram_post(GT_Canvas*, Diagram*);
-/* Callback function for Diagram rendering. */
+/* Callback function for GT_Diagram rendering. */
+int           gt_canvas_visit_gt_diagram_pre(GT_Canvas*, GT_Diagram*);
+/* Callback function for GT_Diagram rendering. */
+int           gt_canvas_visit_gt_diagram_post(GT_Canvas*, GT_Diagram*);
+/* Callback function for GT_Diagram rendering. */
 int           gt_canvas_visit_track_pre(GT_Canvas*, Track*);
-/* Callback function for Diagram rendering. */
+/* Callback function for GT_Diagram rendering. */
 int           gt_canvas_visit_track_post(GT_Canvas*, Track*);
-/* Callback function for Diagram rendering. */
+/* Callback function for GT_Diagram rendering. */
 int           gt_canvas_visit_line_pre(GT_Canvas*, Line*);
-/* Callback function for Diagram rendering. */
+/* Callback function for GT_Diagram rendering. */
 int           gt_canvas_visit_line_post(GT_Canvas*, Line*);
-/* Callback function for Diagram rendering. */
+/* Callback function for GT_Diagram rendering. */
 int           gt_canvas_visit_block(GT_Canvas*, GT_Block*);
-/* Callback function for Diagram rendering. */
+/* Callback function for GT_Diagram rendering. */
 int           gt_canvas_visit_element(GT_Canvas*, Element*);
 /* Write rendered <canvas> to file with name <filename>. */
 int           gt_canvas_to_file(GT_Canvas *canvas, const char *filename,

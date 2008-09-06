@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
   Style *style;
   GT_FeatureIndex *feature_index;
   Range range;
-  Diagram *diagram;
+  GT_Diagram *diagram;
   GT_Canvas *canvas;
   Error *err = error_new();
 
@@ -43,13 +43,13 @@ int main(int argc, char *argv[])
   /* create diagram for first sequence ID in feature index */
   seqid = gt_feature_index_get_first_seqid(feature_index);
   range = gt_feature_index_get_range_for_seqid(feature_index, seqid);
-  diagram = diagram_new(feature_index, seqid, &range, style);
+  diagram = gt_diagram_new(feature_index, seqid, &range, style);
 
   /* create canvas */
   canvas = gt_canvas_new(style, GRAPHICS_PNG, 800 /* width */, NULL);
 
   /* sketch diagram on canvas */
-  diagram_sketch(diagram, canvas);
+  gt_diagram_sketch(diagram, canvas);
 
   /* write canvas to file */
   if (gt_canvas_to_file(canvas, output_file, err))
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
   /* free */
   gt_canvas_delete(canvas);
-  diagram_delete(diagram);
+  gt_diagram_delete(diagram);
   gt_feature_index_delete(feature_index);
   style_delete(style);
   error_delete(err);

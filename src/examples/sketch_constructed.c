@@ -72,7 +72,7 @@ static void draw_example_features(Array *features, const char *style_file,
 {
   Range range = { 1, 1000 }; /* the genomic range to draw */
   Style *style;
-  Diagram *diagram;
+  GT_Diagram *diagram;
   GT_Canvas *canvas;
   Error *err = error_new();
 
@@ -85,13 +85,13 @@ static void draw_example_features(Array *features, const char *style_file,
     handle_error(err);
 
   /* create diagram */
-  diagram = diagram_new_from_array(features, &range, style);
+  diagram = gt_diagram_new_from_array(features, &range, style);
 
   /* create canvas */
   canvas = gt_canvas_new(style, GRAPHICS_PNG, 800 /* width */, NULL);
 
   /* sketch diagram on canvas */
-  diagram_sketch(diagram, canvas);
+  gt_diagram_sketch(diagram, canvas);
 
   /* write canvas to file */
   if (gt_canvas_to_file(canvas, output_file, err))
@@ -99,7 +99,7 @@ static void draw_example_features(Array *features, const char *style_file,
 
   /* free */
   gt_canvas_delete(canvas);
-  diagram_delete(diagram);
+  gt_diagram_delete(diagram);
   style_delete(style);
   error_delete(err);
 }
