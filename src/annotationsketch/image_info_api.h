@@ -1,8 +1,6 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Malte Mader <mmader@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,16 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ANNOTATIONSKETCH_H
-#define ANNOTATIONSKETCH_H
+#ifndef IMAGE_INFO_API_H
+#define IMAGE_INFO_API_H
 
-/* The AnnotationSketch header */
-#include "annotationsketch/canvas_api.h"
-#include "annotationsketch/color_api.h"
-#include "annotationsketch/diagram_api.h"
-#include "annotationsketch/feature_index_api.h"
-#include "annotationsketch/image_info_api.h"
-#include "annotationsketch/recmap_api.h"
-#include "annotationsketch/style_api.h"
+#include "annotationsketch/recmap.h"
+#include "core/error.h"
+
+typedef struct GT_ImageInfo GT_ImageInfo;
+
+GT_ImageInfo*    gt_image_info_new();
+unsigned int     gt_image_info_get_height(GT_ImageInfo*);
+unsigned long    gt_image_info_num_of_recmaps(GT_ImageInfo*);
+const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo*, unsigned long);
+void             gt_image_info_delete(GT_ImageInfo*);
 
 #endif

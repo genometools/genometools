@@ -76,7 +76,7 @@ unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo *ii)
   return array_size(ii->recmaps);
 }
 
-GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
+const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
 {
   assert(ii);
   return *(GT_RecMap**) array_get(ii->recmaps, n);
@@ -102,7 +102,7 @@ int gt_image_info_unit_test(Error *err)
 
   for (i=0;i<20;i++)
   {
-    GT_RecMap* rm;
+    const GT_RecMap* rm;
     unsigned long rbase;
     rbase = rand_max(10);
     Range r = {rbase,rbase+rand_max(20)};

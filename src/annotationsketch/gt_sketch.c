@@ -313,7 +313,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
     gt_diagram_sketch(d, canvas);
     if (arguments.showrecmaps) {
       unsigned long i;
-      GT_RecMap *rm;
+      const GT_RecMap *rm;
       for (i = 0; i < gt_image_info_num_of_recmaps(ii) ;i++) {
         GenomeFeatureType *type;
         char buf[BUFSIZ];

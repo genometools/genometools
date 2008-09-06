@@ -18,20 +18,13 @@
 #ifndef IMAGE_INFO_H
 #define IMAGE_INFO_H
 
+#include "annotationsketch/image_info_api.h"
 #include "annotationsketch/recmap.h"
 #include "core/error.h"
 
-typedef struct GT_ImageInfo GT_ImageInfo;
-
-GT_ImageInfo* gt_image_info_new();
-void          gt_image_info_delete(GT_ImageInfo*);
-unsigned int  gt_image_info_get_height(GT_ImageInfo*);
-void          gt_image_info_set_height(GT_ImageInfo*, unsigned int);
+void gt_image_info_set_height(GT_ImageInfo*, unsigned int);
 /* Takes ownership of <recmap>. */
-void          gt_image_info_add_recmap(GT_ImageInfo*, GT_RecMap *recmap);
-unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo*);
-GT_RecMap*       gt_image_info_get_recmap(GT_ImageInfo*, unsigned long);
-void          gt_image_info_get_gt_recmap_ptr(GT_ImageInfo*, GT_RecMap*,
-                                           unsigned long);
-int           gt_image_info_unit_test(Error*);
+void gt_image_info_add_recmap(GT_ImageInfo*, GT_RecMap *recmap);
+int  gt_image_info_unit_test(Error*);
+
 #endif

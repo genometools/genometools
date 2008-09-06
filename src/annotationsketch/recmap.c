@@ -68,7 +68,8 @@ bool gt_recmap_has_omitted_children(const GT_RecMap *rm)
   return rm->has_omitted_children;
 }
 
-int gt_recmap_format_html_imagemap_coords(GT_RecMap *rm, char *buf, size_t n)
+int gt_recmap_format_html_imagemap_coords(const GT_RecMap *rm, char *buf,
+                                          size_t n)
 {
   assert(rm && buf);
   return snprintf(buf, n, "%.0f,%.0f,%.0f,%.0f", rm->nw_x, rm->nw_y,

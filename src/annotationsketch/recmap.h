@@ -31,7 +31,8 @@ struct GT_RecMap {
 
 GT_RecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
                          GenomeFeature*);
-int        gt_recmap_format_html_imagemap_coords(GT_RecMap*, char*, size_t);
+int        gt_recmap_format_html_imagemap_coords(const GT_RecMap*, char*,
+                                                 size_t);
 void       gt_recmap_delete(GT_RecMap*);
 
 #endif
