@@ -21,19 +21,14 @@
 #define ANNOTATIONSKETCH_H
 
 /* The AnnotationSketch  header */
-#include "annotationsketch/block.h"
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/color.h"
 #include "annotationsketch/diagram.h"
-#include "annotationsketch/element.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_stream.h"
 #include "annotationsketch/feature_visitor.h"
-#include "annotationsketch/graphics.h"
 #include "annotationsketch/image_info.h"
-#include "annotationsketch/line.h"
 #include "annotationsketch/recmap.h"
 #include "annotationsketch/style.h"
-#include "annotationsketch/track.h"
 
 #endif
