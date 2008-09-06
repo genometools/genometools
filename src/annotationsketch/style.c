@@ -478,8 +478,7 @@ int gt_style_unit_test(Error *err)
   int had_err = 0;
   GT_Style *sty = NULL, *new_sty = NULL;
   bool val;
-  Str *luafile = str_new_cstr("config.lua"),
-      *test1   = str_new_cstr("mRNA"),
+  Str *test1   = str_new_cstr("mRNA"),
       *str     = str_new(),
       *sty_buffer = str_new();
   Color col1, col2, col, defcol, tmpcol;
@@ -560,7 +559,6 @@ int gt_style_unit_test(Error *err)
     ensure(had_err, (strcmp(str_get(str),"")==0));
   }
   /* mem cleanup */
-  str_delete(luafile);
   str_delete(test1);
   str_delete(str);
   str_delete(sty_buffer);
