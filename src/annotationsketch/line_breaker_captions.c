@@ -31,16 +31,16 @@ struct LineBreakerCaptions {
         line_breaker_cast(line_breaker_captions_class(), LB)
 
 static DrawingRange calculate_drawing_range(LineBreakerCaptions *lcb,
-                                            Block* block)
+                                            GT_Block* block)
 {
   double textwidth = 0.0;
   DrawingRange drange;
   assert(block && lcb);
-  drange = canvas_convert_coords(lcb->canvas, block_get_range(block));
-  if (block_get_caption(block))
+  drange = canvas_convert_coords(lcb->canvas, gt_block_get_range(block));
+  if (gt_block_get_caption(block))
   {
     textwidth = canvas_get_text_width(lcb->canvas,
-                                      str_get(block_get_caption(block)));
+                                      str_get(gt_block_get_caption(block)));
   if (textwidth > drawing_range_length(drange))
     drange.end = drange.start + textwidth;
   }
@@ -49,7 +49,7 @@ static DrawingRange calculate_drawing_range(LineBreakerCaptions *lcb,
 
 bool line_breaker_captions_is_line_occupied(LineBreaker* lb,
                                             Line *line,
-                                            Block *block)
+                                            GT_Block *block)
 {
   DrawingRange dr;
   LineBreakerCaptions *lbcap;
@@ -65,7 +65,7 @@ bool line_breaker_captions_is_line_occupied(LineBreaker* lb,
 
 void line_breaker_captions_register_block(LineBreaker *lb,
                                           Line *line,
-                                          Block *block)
+                                          GT_Block *block)
 {
   DrawingRange dr;
   LineBreakerCaptions *lbcap;

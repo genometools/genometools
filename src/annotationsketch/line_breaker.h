@@ -27,9 +27,9 @@ typedef struct LineBreaker LineBreaker;
 
 LineBreaker* line_breaker_ref(LineBreaker*);
 bool         line_breaker_line_is_occupied(LineBreaker *lb,
-                                           Line *line, Block *block);
+                                           Line *line, GT_Block *block);
 void         line_breaker_register_block(LineBreaker *lb,
-                                         Line *line, Block *block);
+                                         Line *line, GT_Block *block);
 void         line_breaker_delete(LineBreaker*);
 
 #endif

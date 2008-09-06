@@ -34,15 +34,15 @@ Line* line_new(void)
 {
   Line *line;
   line = ma_malloc(sizeof (Line));
-  line->blocks = array_new(sizeof (Block*));
+  line->blocks = array_new(sizeof (GT_Block*));
   line->has_captions = false;
   return line;
 }
 
-void line_insert_block(Line *line, Block *block)
+void line_insert_block(Line *line, GT_Block *block)
 {
   assert(line && block);
-  if (!line->has_captions && block_get_caption(block) != NULL)
+  if (!line->has_captions && gt_block_get_caption(block) != NULL)
     line->has_captions = true;
   array_add(line->blocks, block);
 }
@@ -65,9 +65,9 @@ int line_sketch(Line *line, Canvas *canvas)
   assert(line && canvas);
   canvas_visit_line_pre(canvas, line);
   for (i = 0; i < array_size(line->blocks); i++) {
-    Block *block;
-    block = *(Block**) array_get(line->blocks, i);
-    block_sketch(block, canvas);
+    GT_Block *block;
+    block = *(GT_Block**) array_get(line->blocks, i);
+    gt_block_sketch(block, canvas);
   }
   canvas_visit_line_post(canvas, line);
   return 0;
@@ -83,7 +83,7 @@ int line_unit_test(Error *err)
   int had_err = 0;
   GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
   Line *l1, *l2;
-  Block *b1, *b2;
+  GT_Block *b1, *b2;
   error_check(err);
 
   const char* foo = "foo";
@@ -130,13 +130,13 @@ int line_unit_test(Error *err)
   genome_feature_add_attribute((GenomeFeature*) gn3, "Name", blub);
   genome_feature_add_attribute((GenomeFeature*) gn4, "Name", bar);
 
-  b1 = block_new();
-  b2 = block_new();
+  b1 = gt_block_new();
+  b2 = gt_block_new();
 
-  block_insert_element(b1, gn1);
-  block_insert_element(b2, gn2);
-  block_set_range(b1, r1);
-  block_set_range(b2, r2);
+  gt_block_insert_element(b1, gn1);
+  gt_block_insert_element(b2, gn2);
+  gt_block_set_range(b1, r1);
+  gt_block_set_range(b2, r2);
 
   /* test line_insert_block */
   ensure(had_err,  (0 == array_size(line_get_blocks(l1))));
@@ -169,7 +169,7 @@ void line_delete(Line *line)
   unsigned long i;
   if (!line) return;
   for (i = 0; i < array_size(line->blocks); i++)
-    block_delete(*(Block**) array_get(line->blocks, i));
+    gt_block_delete(*(GT_Block**) array_get(line->blocks, i));
   array_delete(line->blocks);
   ma_free(line);
 }

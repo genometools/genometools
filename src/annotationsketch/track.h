@@ -32,7 +32,7 @@ typedef struct Track Track;
 
 Track*        track_new(Str *title, unsigned long max_num_lines,
                         bool split_lines, LineBreaker*);
-void          track_insert_block(Track*, Block*);
+void          track_insert_block(Track*, GT_Block*);
 Str*          track_get_title(const Track*);
 unsigned long track_get_number_of_lines(const Track*);
 unsigned long track_get_number_of_lines_with_captions(const Track *track);

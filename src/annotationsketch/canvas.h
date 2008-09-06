@@ -56,7 +56,7 @@ int           canvas_visit_line_pre(Canvas*, Line*);
 /* Callback function for Diagram rendering. */
 int           canvas_visit_line_post(Canvas*, Line*);
 /* Callback function for Diagram rendering. */
-int           canvas_visit_block(Canvas*, Block*);
+int           canvas_visit_block(Canvas*, GT_Block*);
 /* Callback function for Diagram rendering. */
 int           canvas_visit_element(Canvas*, Element*);
 /* Write rendered <canvas> to file with name <filename>. */

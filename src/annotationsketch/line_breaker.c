@@ -49,13 +49,13 @@ void line_breaker_delete(LineBreaker *lb)
   ma_free(lb);
 }
 
-bool line_breaker_line_is_occupied(LineBreaker *lb, Line *line, Block *block)
+bool line_breaker_line_is_occupied(LineBreaker *lb, Line *line, GT_Block *block)
 {
   assert(lb && lb->c_class && line && block);
   return lb->c_class->is_occupied(lb, line, block);
 }
 
-void line_breaker_register_block(LineBreaker *lb, Line *line, Block *block)
+void line_breaker_register_block(LineBreaker *lb, Line *line, GT_Block *block)
 {
   assert(lb && lb->c_class && line && block);
   lb->c_class->register_block(lb, line, block);

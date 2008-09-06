@@ -431,7 +431,7 @@ int canvas_visit_line_post(Canvas *canvas, UNUSED Line *line)
   return had_err;
 }
 
-int canvas_visit_block(Canvas *canvas, Block *block)
+int canvas_visit_block(Canvas *canvas, GT_Block *block)
 {
   int had_err = 0, arrow_status = ARROW_NONE;
   Range block_range;
@@ -444,8 +444,8 @@ int canvas_visit_block(Canvas *canvas, Block *block)
   assert(canvas && block);
 
   grey.red = grey.green = grey.blue = .85;
-  strand = block_get_strand(block);
-  block_range = block_get_range(block);
+  strand = gt_block_get_strand(block);
+  block_range = gt_block_get_range(block);
   if (!style_get_num(canvas->sty, "format", "bar_height", &bar_height, NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
   if (!style_get_num(canvas->sty, "format", "min_len_block", &min_len_block,
@@ -464,8 +464,8 @@ int canvas_visit_block(Canvas *canvas, Block *block)
 
   /* draw block caption */
   draw_range = canvas_convert_coords(canvas, block_range);
-  if (block_caption_is_visible(block)) {
-    caption = str_get(block_get_caption(block));
+  if (gt_block_caption_is_visible(block)) {
+    caption = str_get(gt_block_get_caption(block));
     if (caption)
     {
       graphics_draw_text(canvas->g,
@@ -476,16 +476,16 @@ int canvas_visit_block(Canvas *canvas, Block *block)
   }
 
   /* do not draw further details in very small blocks */
-  if (!block_has_only_one_fullsize_element(block)
+  if (!gt_block_has_only_one_fullsize_element(block)
        && draw_range.end-draw_range.start < min_len_block)
   {
-    GenomeFeatureType *btype = block_get_type(block);
+    GenomeFeatureType *btype = gt_block_get_type(block);
     style_get_color(canvas->sty, genome_feature_type_get_cstr(btype),
                            "fill", &fillcolor,
-                           block_get_top_level_feature(block));
+                           gt_block_get_top_level_feature(block));
     style_get_color(canvas->sty, genome_feature_type_get_cstr(btype),
                            "stroke", &strokecolor,
-                           block_get_top_level_feature(block));
+                           gt_block_get_top_level_feature(block));
     graphics_draw_box(canvas->g,
                       draw_range.start,
                       canvas->y,
@@ -515,7 +515,7 @@ int canvas_visit_block(Canvas *canvas, Block *block)
     {
       RecMap *rm = recmap_create(draw_range.start, canvas->y,
                                  draw_range.end, canvas->y+bar_height,
-                                 block_get_top_level_feature(block));
+                                 gt_block_get_top_level_feature(block));
       image_info_add_recmap(canvas->ii, rm);
       rm->has_omitted_children = true;
     }

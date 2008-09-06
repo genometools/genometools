@@ -30,7 +30,7 @@ typedef struct Line Line;
 #include "extended/genome_node.h"
 
 Line*  line_new(void);
-void   line_insert_block(Line*, Block*); /* takes ownership */
+void   line_insert_block(Line*, GT_Block*); /* takes ownership */
 bool   line_has_captions(const Line*);
 Array* line_get_blocks(Line*);
 int    line_sketch(Line*, Canvas*);

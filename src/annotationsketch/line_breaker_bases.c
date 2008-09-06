@@ -31,13 +31,13 @@ struct LineBreakerBases {
 
 bool line_breaker_bases_is_line_occupied(LineBreaker* lb,
                                          Line *line,
-                                         Block *block)
+                                         GT_Block *block)
 {
   LineBreakerBases *lbb;
   Range r;
   IntervalTree *t;
   assert(lb && block && line);
-  r = block_get_range(block);
+  r = gt_block_get_range(block);
   lbb = line_breaker_bases_cast(lb);
   if (!(t = hashmap_get(lbb->itrees, line)))
     return false;
@@ -47,7 +47,7 @@ bool line_breaker_bases_is_line_occupied(LineBreaker* lb,
 
 void line_breaker_bases_register_block(LineBreaker *lb,
                                        Line *line,
-                                       Block *block)
+                                       GT_Block *block)
 {
   LineBreakerBases *lbb;
   IntervalTree *t;
@@ -55,7 +55,7 @@ void line_breaker_bases_register_block(LineBreaker *lb,
   Range *rng;
   assert(lb && block && line);
   lbb = line_breaker_bases_cast(lb);
-  rng = block_get_range_ptr(block);
+  rng = gt_block_get_range_ptr(block);
   new_node = interval_tree_node_new(rng, rng->start, rng->end);
   if (!(t = hashmap_get(lbb->itrees, line)))
   {

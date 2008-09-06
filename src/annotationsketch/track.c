@@ -48,7 +48,7 @@ Track* track_new(Str *title, unsigned long max_num_lines, bool split,
   return track;
 }
 
-static Line* get_next_free_line(Track *track, Block *block)
+static Line* get_next_free_line(Track *track, GT_Block *block)
 {
   unsigned long i;
   Line* line;
@@ -95,18 +95,18 @@ unsigned long track_get_number_of_discarded_blocks(Track *track)
   return track->discarded_blocks;
 }
 
-void track_insert_block(Track *track, Block *block)
+void track_insert_block(Track *track, GT_Block *block)
 {
   Line *line;
 
   assert(track && block);
   line = get_next_free_line(track, block);
-  block = block_ref(block);
+  block = gt_block_ref(block);
   if (line)
   {
     line_insert_block(line, block);
     line_breaker_register_block(track->lb, line, block);
-  } else block_delete(block);
+  } else gt_block_delete(block);
 }
 
 Str* track_get_title(const Track *track)
@@ -146,7 +146,7 @@ int track_sketch(Track* track, Canvas *canvas)
 int track_unit_test(Error *err)
 {
   int had_err = 0;
-  Block *b1, *b2, *b3, *b4;
+  GT_Block *b1, *b2, *b3, *b4;
   Range r1, r2, r3, r4;
   Track *track;
   Str *title;
@@ -160,14 +160,14 @@ int track_unit_test(Error *err)
   r3.start=700UL;  r3.end=1200UL;
   r4.start=10UL;   r4.end=200UL;
 
-  b1 = block_new();
-  block_set_range(b1, r1);
-  b2 = block_new();
-  block_set_range(b2, r2);
-  b3 = block_new();
-  block_set_range(b3, r3);
-  b4 = block_new();
-  block_set_range(b4, r4);
+  b1 = gt_block_new();
+  gt_block_set_range(b1, r1);
+  b2 = gt_block_new();
+  gt_block_set_range(b2, r2);
+  b3 = gt_block_new();
+  gt_block_set_range(b3, r3);
+  b4 = gt_block_new();
+  gt_block_set_range(b4, r4);
 
   lb = line_breaker_bases_new();
 
@@ -187,10 +187,10 @@ int track_unit_test(Error *err)
 
   track_delete(track);
   str_delete(title);
-  block_delete(b1);
-  block_delete(b2);
-  block_delete(b3);
-  block_delete(b4);
+  gt_block_delete(b1);
+  gt_block_delete(b2);
+  gt_block_delete(b3);
+  gt_block_delete(b4);
 
   return had_err;
 }

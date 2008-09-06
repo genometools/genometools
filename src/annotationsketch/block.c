@@ -24,7 +24,7 @@
 #include "annotationsketch/block.h"
 #include "annotationsketch/element.h"
 
-struct Block {
+struct GT_Block {
   Dlist *elements;
   Range range;
   Str *caption;
@@ -53,26 +53,26 @@ static int elemcmp(const void *a, const void *b)
   return -1;
 }
 
-int block_compare(const Block *block1, const Block *block2)
+int gt_block_compare(const GT_Block *block1, const GT_Block *block2)
 {
   int ret;
   assert(block1 && block2);
-  ret = range_compare(block_get_range(block1), block_get_range(block2));
+  ret = range_compare(gt_block_get_range(block1), gt_block_get_range(block2));
   if (ret == 0 && block1 != block2)
     ret = (block1 < block2 ? -1 : 1);
   return ret;
 }
 
-Block* block_ref(Block *block)
+GT_Block* gt_block_ref(GT_Block *block)
 {
   assert(block);
   block->reference_count++;
   return block;
 }
 
-Block* block_new(void)
+GT_Block* gt_block_new(void)
 {
-  Block *block = ma_calloc(1, sizeof (Block));
+  GT_Block *block = ma_calloc(1, sizeof (GT_Block));
   block->elements = dlist_new(elemcmp);
   block->caption = NULL;
   block->show_caption = true;
@@ -81,11 +81,11 @@ Block* block_new(void)
   return block;
 }
 
-Block* block_new_from_node(GenomeNode *node)
+GT_Block* gt_block_new_from_node(GenomeNode *node)
 {
-  Block *block;
+  GT_Block *block;
   assert(node);
-  block = block_new();
+  block = gt_block_new();
   block->range = genome_node_get_range(node);
   block->strand = genome_feature_get_strand((GenomeFeature*) node);
   block->type = genome_feature_get_type((GenomeFeature*) node);
@@ -93,7 +93,7 @@ Block* block_new_from_node(GenomeNode *node)
   return block;
 }
 
-void block_insert_element(Block *block, GenomeNode *gn)
+void gt_block_insert_element(GT_Block *block, GenomeNode *gn)
 {
   Element *element;
   assert(block && gn);
@@ -103,31 +103,31 @@ void block_insert_element(Block *block, GenomeNode *gn)
   dlist_add(block->elements, element);
 }
 
-GenomeNode* block_get_top_level_feature(const Block *block)
+GenomeNode* gt_block_get_top_level_feature(const GT_Block *block)
 {
   assert(block);
   return block->top_level_feature;
 }
 
-Range block_get_range(const Block *block)
+Range gt_block_get_range(const GT_Block *block)
 {
    assert(block);
    return block->range;
 }
 
-Range* block_get_range_ptr(const Block *block)
+Range* gt_block_get_range_ptr(const GT_Block *block)
 {
    assert(block);
    return (Range*) &(block->range);
 }
 
-void block_set_range(Block *block, Range r)
+void gt_block_set_range(GT_Block *block, Range r)
 {
   assert(block && r.start <= r.end);
   block->range = r;
 }
 
-bool block_has_only_one_fullsize_element(const Block *block)
+bool gt_block_has_only_one_fullsize_element(const GT_Block *block)
 {
   bool ret = false;
   assert(block);
@@ -136,67 +136,67 @@ bool block_has_only_one_fullsize_element(const Block *block)
     assert(dlist_first(block->elements) == dlist_last(block->elements));
     elem_range = element_get_range(
                    dlistelem_get_data(dlist_first(block->elements)));
-    block_range = block_get_range(block);
+    block_range = gt_block_get_range(block);
     ret = (range_compare(block_range, elem_range) == 0);
   }
   return ret;
 }
 
-void block_set_caption_visibility(Block *block, bool val)
+void gt_block_set_caption_visibility(GT_Block *block, bool val)
 {
   assert(block);
   block->show_caption = val;
 }
 
-bool block_caption_is_visible(const Block *block)
+bool gt_block_caption_is_visible(const GT_Block *block)
 {
   assert(block);
   return (block->caption && block->show_caption);
 }
 
-void block_set_caption(Block *block, Str *caption)
+void gt_block_set_caption(GT_Block *block, Str *caption)
 {
   assert(block);
   block->caption = caption;
 }
 
-Str* block_get_caption(const Block *block)
+Str* gt_block_get_caption(const GT_Block *block)
 {
   assert(block);
   return block->caption;
 }
 
-void block_set_strand(Block *block, Strand strand)
+void gt_block_set_strand(GT_Block *block, Strand strand)
 {
   assert(block);
   block->strand = strand;
 }
 
-Strand block_get_strand(const Block *block)
+Strand gt_block_get_strand(const GT_Block *block)
 {
   assert(block);
   return block->strand;
 }
 
-void block_set_type(Block *block, GenomeFeatureType *type)
+void gt_block_set_type(GT_Block *block, GenomeFeatureType *type)
 {
   assert(block);
   block->type = type;
 }
 
-GenomeFeatureType* block_get_type(const Block *block)
+GenomeFeatureType* gt_block_get_type(const GT_Block *block)
 {
   assert(block);
   return block->type;
 }
 
-unsigned long block_get_size(const Block *block)
+unsigned long gt_block_get_size(const GT_Block *block)
 {
   assert(block && block->elements);
   return dlist_size(block->elements);
 }
 
-int block_sketch(Block *block, Canvas *canvas)
+int gt_block_sketch(GT_Block *block, Canvas *canvas)
 {
  int had_err = 0;
  Dlistelem *delem;
@@ -213,7 +213,7 @@ int block_sketch(Block *block, Canvas *canvas)
   return had_err;
 }
 
-int block_unit_test(Error *err)
+int gt_block_unit_test(Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *gft;
@@ -222,7 +222,7 @@ int block_unit_test(Error *err)
   Strand s;
   GenomeNode *gn1, *gn2;
   Element *e1, *e2;
-  Block * b;
+  GT_Block * b;
   Str *seqid, *caption1, *caption2;
   error_check(err);
 
@@ -245,39 +245,39 @@ int block_unit_test(Error *err)
   e1 = element_new(gn1);
   e2 = element_new(gn2);
 
-  b = block_new();
+  b = gt_block_new();
 
-  /* test block_insert_elements */
-  ensure(had_err, (0UL == block_get_size(b)));
-  block_insert_element(b, gn1);
-  ensure(had_err, (1UL == block_get_size(b)));
-  block_insert_element(b, gn2);
-  ensure(had_err, (2UL == block_get_size(b)));
+  /* test gt_block_insert_elements */
+  ensure(had_err, (0UL == gt_block_get_size(b)));
+  gt_block_insert_element(b, gn1);
+  ensure(had_err, (1UL == gt_block_get_size(b)));
+  gt_block_insert_element(b, gn2);
+  ensure(had_err, (2UL == gt_block_get_size(b)));
 
-  /* test block_set_range & block_get_range */
+  /* test gt_block_set_range & gt_block_get_range */
   r_temp = range_join(r1, r2);
-  block_set_range(b, r_temp);
-  b_range = block_get_range(b);
+  gt_block_set_range(b, r_temp);
+  b_range = gt_block_get_range(b);
   ensure(had_err, (0 == range_compare(b_range, r_temp)));
   ensure(had_err, (1 == range_compare(r2, r_temp)));
 
-  /* tests block_set_caption & block_get_caption */
-  block_set_caption(b, caption1);
-  ensure(had_err, (0 == str_cmp(block_get_caption(b), caption1)));
-  ensure(had_err, (0 != str_cmp(block_get_caption(b), caption2)));
+  /* tests gt_block_set_caption & gt_block_get_caption */
+  gt_block_set_caption(b, caption1);
+  ensure(had_err, (0 == str_cmp(gt_block_get_caption(b), caption1)));
+  ensure(had_err, (0 != str_cmp(gt_block_get_caption(b), caption2)));
 
-  /* tests block_set_strand & block_get_range */
-  s = block_get_strand(b);
+  /* tests gt_block_set_strand & gt_block_get_range */
+  s = gt_block_get_strand(b);
   ensure(had_err, (STRAND_UNKNOWN == s));
-  block_set_strand(b, STRAND_FORWARD);
-  s = block_get_strand(b);
+  gt_block_set_strand(b, STRAND_FORWARD);
+  s = gt_block_get_strand(b);
   ensure(had_err, (STRAND_FORWARD == s));
 
   str_delete(caption2);
   str_delete(seqid);
   element_delete(e1);
   element_delete(e2);
-  block_delete(b);
+  gt_block_delete(b);
   genome_node_delete(gn1);
   genome_node_delete(gn2);
   feature_type_factory_delete(feature_type_factory);
@@ -285,7 +285,7 @@ int block_unit_test(Error *err)
   return had_err;
 }
 
-void block_delete(Block *block)
+void gt_block_delete(GT_Block *block)
 {
   Dlistelem *delem;
   if (!block) return;

@@ -23,8 +23,8 @@
 
 struct LineBreakerClass {
   size_t size;
-  bool    (*is_occupied)(LineBreaker*, Line*, Block*);
-  void (*register_block)(LineBreaker*, Line*, Block*);
+  bool    (*is_occupied)(LineBreaker*, Line*, GT_Block*);
+  void (*register_block)(LineBreaker*, Line*, GT_Block*);
   void           (*free)(LineBreaker*);
 };
 

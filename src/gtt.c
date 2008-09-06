@@ -185,7 +185,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "tokenizer class", tokenizer_unit_test);
   hashmap_add(unit_tests, "union find class", union_find_unit_test);
 #ifndef WITHOUT_CAIRO
-  hashmap_add(unit_tests, "block class", block_unit_test);
+  hashmap_add(unit_tests, "block class", gt_block_unit_test);
   hashmap_add(unit_tests, "style class", style_unit_test);
   hashmap_add(unit_tests, "diagram class", diagram_unit_test);
   hashmap_add(unit_tests, "element class", element_unit_test);

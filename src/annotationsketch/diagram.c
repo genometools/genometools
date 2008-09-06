@@ -42,7 +42,7 @@
 struct Diagram {
   /* Tracks indexed by track keys */
   Hashmap *tracks;
-  /* Block lists indexed by track keys */
+  /* GT_Block lists indexed by track keys */
   Hashmap *blocks;
   /* Reverse lookup structure (per node) */
   Hashmap *nodeinfo;
@@ -53,11 +53,11 @@ struct Diagram {
   Range range;
 };
 
-/* holds a Block with associated type */
+/* holds a GT_Block with associated type */
 typedef struct {
   GenomeFeatureType *gft;
-  Block *block;
-} BlockTuple;
+  GT_Block *block;
+} GT_BlockTuple;
 
 /* a node in the reverse lookup structure used for collapsing */
 typedef struct {
@@ -75,11 +75,11 @@ typedef struct {
   Diagram *dia;
 } TrackTraverseInfo;
 
-static BlockTuple* blocktuple_new(GenomeFeatureType *gft, Block *block)
+static GT_BlockTuple* blocktuple_new(GenomeFeatureType *gft, GT_Block *block)
 {
-  BlockTuple *bt;
+  GT_BlockTuple *bt;
   assert(block);
-  bt = ma_malloc(sizeof (BlockTuple));
+  bt = ma_malloc(sizeof (GT_BlockTuple));
   bt->gft = gft;
   bt->block = block;
   return bt;
@@ -92,20 +92,21 @@ static NodeInfoElement* get_or_create_node_info(Diagram *d, GenomeNode *node)
   ni = hashmap_get(d->nodeinfo, node);
   if (ni == NULL) {
     NodeInfoElement *new_ni = ma_malloc(sizeof (NodeInfoElement));
-    new_ni->blocktuples = array_new(sizeof (BlockTuple*));
+    new_ni->blocktuples = array_new(sizeof (GT_BlockTuple*));
     hashmap_add(d->nodeinfo, node, new_ni);
     ni = new_ni;
   }
   return ni;
 }
 
-static Block* find_block_for_type(NodeInfoElement* ni, GenomeFeatureType *gft)
+static GT_Block* find_block_for_type(NodeInfoElement* ni,
+                                     GenomeFeatureType *gft)
 {
-  Block *block = NULL;
+  GT_Block *block = NULL;
   unsigned long i;
   assert(ni);
   for (i = 0; i < array_size(ni->blocktuples); i++) {
-    BlockTuple *bt = *(BlockTuple**) array_get(ni->blocktuples, i);
+    GT_BlockTuple *bt = *(GT_BlockTuple**) array_get(ni->blocktuples, i);
     if (bt->gft == gft) {
       block = bt->block;
       break;
@@ -159,8 +160,8 @@ static bool get_caption_display_status(Diagram *d, GenomeFeatureType *gft)
 static void add_to_current(Diagram *d, GenomeNode *node, GenomeNode *parent)
 {
   NodeInfoElement *ni;
-  Block *block;
-  BlockTuple *bt;
+  GT_Block *block;
+  GT_BlockTuple *bt;
   Str *caption = NULL;
   const char *nnid_p = NULL, *nnid_n = NULL;
   assert(d && node);
@@ -168,8 +169,8 @@ static void add_to_current(Diagram *d, GenomeNode *node, GenomeNode *parent)
   /* Lookup node info and set itself as parent */
   ni = get_or_create_node_info(d, node);
   ni->parent = node;
-  /* create new Block tuple and add to node info */
-  block = block_new_from_node(node);
+  /* create new GT_Block tuple and add to node info */
+  block = gt_block_new_from_node(node);
   /* assign block caption */
 
   caption = str_new();
@@ -196,16 +197,16 @@ static void add_to_current(Diagram *d, GenomeNode *node, GenomeNode *parent)
         str_append_cstr(caption, nnid_n);
     }
   }
-  block_set_caption(block, caption);
+  gt_block_set_caption(block, caption);
   /* insert node into block */
-  block_insert_element(block, node);
+  gt_block_insert_element(block, node);
   bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node), block);
   array_add(ni->blocktuples, bt);
 }
 
 static void add_to_parent(Diagram *d, GenomeNode *node, GenomeNode* parent)
 {
-  Block *block = NULL;
+  GT_Block *block = NULL;
   NodeInfoElement *par_ni, *ni;
   const char *nnid_p = NULL, *nnid_n = NULL;
 
@@ -222,9 +223,9 @@ static void add_to_parent(Diagram *d, GenomeNode *node, GenomeNode* parent)
                               genome_feature_get_type((GenomeFeature*) node));
   /* no fitting block was found, create a new one */
   if (block == NULL) {
-    BlockTuple *bt;
+    GT_BlockTuple *bt;
     Str *caption = NULL;
-    block = block_new_from_node(parent);
+    block = gt_block_new_from_node(parent);
     /* assign block caption */
     nnid_p = get_node_name_or_id(parent);
     nnid_n = get_node_name_or_id(node);
@@ -242,13 +243,13 @@ static void add_to_parent(Diagram *d, GenomeNode *node, GenomeNode* parent)
       if (nnid_n)
         str_append_cstr(caption, nnid_n);
     }
-    block_set_caption(block, caption);
+    gt_block_set_caption(block, caption);
     /* add block to nodeinfo */
     bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node), block);
     array_add(par_ni->blocktuples, bt);
   }
   /* now we have a block to insert into */
-  block_insert_element(block, node);
+  gt_block_insert_element(block, node);
 }
 
 static void add_recursive(Diagram *d, GenomeNode *node,
@@ -263,18 +264,18 @@ static void add_recursive(Diagram *d, GenomeNode *node,
 
   /* end of recursion, insert into target block */
   if (parent == node) {
-    Block *block ;
-    BlockTuple *bt;
+    GT_Block *block ;
+    GT_BlockTuple *bt;
     /* try to find the right block to insert */
     block = find_block_for_type(ni,
                                 genome_feature_get_type((GenomeFeature*) node));
     if (block == NULL) {
-      block = block_new_from_node(node);
+      block = gt_block_new_from_node(node);
       bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node),
                           block);
       array_add(ni->blocktuples, bt);
     }
-    block_insert_element(block, original_node);
+    gt_block_insert_element(block, original_node);
   }
   else {
     /* not at target type block yet, set up reverse entry and follow */
@@ -406,7 +407,7 @@ static Str* track_key_new(const char *filename, GenomeFeatureType *type)
   return track_key;
 }
 
-/* Create lists of all Blocks in the diagram. */
+/* Create lists of all GT_Blocks in the diagram. */
 static int collect_blocks(UNUSED void *key, void *value, void *data,
                           UNUSED Error *err)
 {
@@ -416,11 +417,11 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
 
   for (i = 0; i < array_size(ni->blocktuples); i++) {
     Array *list;
-    BlockTuple *bt = *(BlockTuple**) array_get(ni->blocktuples, i);
+    GT_BlockTuple *bt = *(GT_BlockTuple**) array_get(ni->blocktuples, i);
     list = (Array*) hashmap_get(diagram->blocks, bt->gft);
     if (!list)
     {
-      list = array_new(sizeof (Block*));
+      list = array_new(sizeof (GT_Block*));
       hashmap_add(diagram->blocks, bt->gft, list);
     }
     assert(list);
@@ -481,7 +482,7 @@ static int blocklist_delete(void *value)
   unsigned long i;
   Array *a = (Array*) value;
   for (i=0;i<array_size(a);i++)
-    block_delete(*(Block**) array_get(a, i));
+    gt_block_delete(*(GT_Block**) array_get(a, i));
   array_delete(a);
   return 0;
 }
@@ -561,7 +562,7 @@ int diagram_get_number_of_tracks(const Diagram *diagram)
 static int blocklist_block_compare(const void *item1, const void *item2)
 {
   assert(item1 && item2);
-  return block_compare(*(Block**) item1, *(Block**) item2);
+  return gt_block_compare(*(GT_Block**) item1, *(GT_Block**) item2);
 }
 
 static int layout_tracks(void *key, void *value, void *data,
@@ -575,19 +576,19 @@ static int layout_tracks(void *key, void *value, void *data,
   char *filename;
   Str *track_key;
   const char *type;
-  Block *block;
+  GT_Block *block;
   bool split;
   double tmp;
   assert(gft && list);
 
-  /* to get a deterministic layout, we sort the Blocks for each type */
+  /* to get a deterministic layout, we sort the GT_Blocks for each type */
   array_sort(list, blocklist_block_compare);
   /* we take the basename of the filename to have nicer output in the
      generated graphic. this might lead to ``collapsed'' tracks, if two files
      with different paths have the same basename. */
-  block = *(Block**) array_get(list, 0);
+  block = *(GT_Block**) array_get(list, 0);
   filename = getbasename(genome_node_get_filename(
-                                 block_get_top_level_feature(block)));
+                                        gt_block_get_top_level_feature(block)));
   track_key = track_key_new(filename, gft);
   ma_free(filename);
   type = genome_feature_type_get_cstr(gft);
@@ -608,7 +609,7 @@ static int layout_tracks(void *key, void *value, void *data,
   tti->dia->nof_tracks++;
   for (i=0;i<array_size(list);i++)
   {
-    block = *(Block**) array_get(list, i);
+    block = *(GT_Block**) array_get(list, i);
     track_insert_block(track, block);
   }
   hashmap_add(tti->dia->tracks, cstr_dup(str_get(track_key)), track);
