@@ -46,7 +46,7 @@ void           gt_style_reload(GT_Style*);
 /* Sets a color value in the GT_Style for <key> (i.e., feature) to a
    certain value. */
 void           gt_style_set_color(GT_Style*, const char *section,
-                                  const char *key, Color*);
+                                  const char *key, const Color*);
 /* Set string <key> in <section> to <value>. */
 void           gt_style_set_str(GT_Style*, const char *section, const char *key,
                                Str *value);

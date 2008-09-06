@@ -239,7 +239,7 @@ bool gt_style_get_color(const GT_Style *sty, const char *section,
 }
 
 void gt_style_set_color(GT_Style *sty, const char *section, const char *key,
-                     Color *color)
+                        const Color *color)
 {
   int i = 0;
   assert(sty && section && key && color);
