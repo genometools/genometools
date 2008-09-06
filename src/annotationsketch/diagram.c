@@ -532,12 +532,6 @@ Range gt_diagram_get_range(GT_Diagram* diagram)
   return diagram->range;
 }
 
-void gt_diagram_set_style(GT_Diagram *diagram, GT_Style *style)
-{
-  assert(diagram && style);
-  diagram->style = style;
-}
-
 Hashmap* gt_diagram_get_tracks(const GT_Diagram *diagram)
 {
   assert(diagram);

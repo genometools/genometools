@@ -30,7 +30,6 @@ GT_Diagram* gt_diagram_new(GT_FeatureIndex *feature_index, const char *seqid,
                            const Range*, GT_Style*);
 GT_Diagram* gt_diagram_new_from_array(Array *features, const Range*, GT_Style*);
 Range       gt_diagram_get_range(GT_Diagram*);
-void        gt_diagram_set_config(GT_Diagram*, GT_Style*);
 /* Render <diagram> on the given <canvas>. */
 int         gt_diagram_sketch(GT_Diagram *diagram, GT_Canvas *canvas);
 void        gt_diagram_delete(GT_Diagram*);
