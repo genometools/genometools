@@ -71,7 +71,7 @@ typedef struct {
 } NodeTraverseInfo;
 
 typedef struct {
-  Canvas *canvas;
+  GT_Canvas *canvas;
   Diagram *dia;
 } TrackTraverseInfo;
 
@@ -628,17 +628,17 @@ static int render_tracks(UNUSED void *key, void *value, void *data,
   return had_err;
 }
 
-int diagram_sketch(Diagram *dia, Canvas *canvas)
+int diagram_sketch(Diagram *dia, GT_Canvas *canvas)
 {
   int had_err = 0;
   TrackTraverseInfo tti;
   tti.dia = dia;
   tti.canvas = canvas;
-  canvas_visit_diagram_pre(canvas, dia);
+  gt_canvas_visit_diagram_pre(canvas, dia);
   hashmap_reset(dia->tracks);
   dia->nof_tracks = 0;
   (void) hashmap_foreach(dia->blocks, layout_tracks, &tti, NULL);
-  canvas_visit_diagram_post(canvas, dia);
+  gt_canvas_visit_diagram_post(canvas, dia);
   had_err = hashmap_foreach_in_key_order(dia->tracks, render_tracks,
                                          &tti, NULL);
 
@@ -658,7 +658,7 @@ int diagram_unit_test(Error *err)
   Style *sty = NULL;
   Diagram *dia = NULL, *dia2 = NULL, *dia3 = NULL;
   Array *features;
-  Canvas *canvas = NULL;
+  GT_Canvas *canvas = NULL;
   error_check(err);
 
   feature_type_factory = feature_type_factory_builtin_new();
@@ -726,7 +726,7 @@ int diagram_unit_test(Error *err)
 
   if (!had_err)
   {
-    canvas = canvas_new(sty, GRAPHICS_PNG, 600, NULL);
+    canvas = gt_canvas_new(sty, GRAPHICS_PNG, 600, NULL);
     diagram_sketch(dia, canvas);
   }
 
@@ -811,7 +811,7 @@ int diagram_unit_test(Error *err)
   diagram_delete(dia);
   diagram_delete(dia2);
   diagram_delete(dia3);
-  canvas_delete(canvas);
+  gt_canvas_delete(canvas);
   gt_feature_index_delete(fi);
   genome_node_rec_delete(gn1);
   genome_node_rec_delete(gn2);

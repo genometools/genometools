@@ -20,25 +20,25 @@
 
 #include "lua.h"
 
-/* exports the Canvas class to Lua:
+/* exports the GT_Canvas class to Lua:
 
-   -- Return a Canvas object which acts as a PNG drawing surface of
+   -- Return a GT_Canvas object which acts as a PNG drawing surface of
    -- width <width> to be passed to rendering functions as a visitor.
    -- An <imageinfo> object is filled with coordinate information if given.
    -- If not needed, pass nil as <imageinfo>.
    function canvas_new_png(width, imageinfo)
 
-   -- Return a Canvas object which acts as a PDF drawing surface of
+   -- Return a GT_Canvas object which acts as a PDF drawing surface of
    -- width <width> to be passed to rendering functions as a visitor.
    -- An <imageinfo> object is filled with coordinate information if given.
    function canvas_new_pdf(width, imageinfo)
 
-   -- Return a Canvas object which acts as a PS drawing surface of
+   -- Return a GT_Canvas object which acts as a PS drawing surface of
    -- width <width> to be passed to rendering functions as a visitor.
    -- An <imageinfo> object is filled with coordinate information if given.
    function canvas_new_ps(width, imageinfo)
 
-   -- Return a Canvas object which acts as a SVG drawing surface of
+   -- Return a GT_Canvas object which acts as a SVG drawing surface of
    -- width <width> to be passed to rendering functions as a visitor.
    -- An <imageinfo> object is filled with coordinate information if given.
    function canvas_new_svg(width, imageinfo)
@@ -51,6 +51,6 @@ int luaopen_canvas(lua_State*);
 
 #define CANVAS_METATABLE  "GenomeTools.canvas"
 #define check_canvas(L, POS) \
-              (Canvas**) luaL_checkudata(L, POS, CANVAS_METATABLE)
+              (GT_Canvas**) luaL_checkudata(L, POS, CANVAS_METATABLE)
 
 #endif

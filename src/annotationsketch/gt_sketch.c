@@ -182,7 +182,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
   Str *prog;
   Diagram *d = NULL;
   ImageInfo* ii = NULL;
-  Canvas *canvas = NULL;
+  GT_Canvas *canvas = NULL;
 
   error_check(err);
 
@@ -303,13 +303,13 @@ int gt_sketch(int argc, const char **argv, Error *err)
     d = diagram_new(features, seqid, &qry_range, sty);
     ii = image_info_new();
     if (strcmp(str_get(arguments.format),"pdf")==0)
-      canvas = canvas_new(sty, GRAPHICS_PDF, arguments.width, ii);
+      canvas = gt_canvas_new(sty, GRAPHICS_PDF, arguments.width, ii);
     else if (strcmp(str_get(arguments.format),"ps")==0)
-      canvas = canvas_new(sty, GRAPHICS_PS, arguments.width, ii);
+      canvas = gt_canvas_new(sty, GRAPHICS_PS, arguments.width, ii);
     else if (strcmp(str_get(arguments.format),"svg")==0)
-      canvas = canvas_new(sty, GRAPHICS_SVG, arguments.width, ii);
+      canvas = gt_canvas_new(sty, GRAPHICS_SVG, arguments.width, ii);
     else
-      canvas = canvas_new(sty, GRAPHICS_PNG, arguments.width, ii);
+      canvas = gt_canvas_new(sty, GRAPHICS_PNG, arguments.width, ii);
     diagram_sketch(d, canvas);
     if (arguments.showrecmaps) {
       unsigned long i;
@@ -323,11 +323,11 @@ int gt_sketch(int argc, const char **argv, Error *err)
         printf("%s, %s\n", buf, genome_feature_type_get_cstr(type));
       }
     }
-    had_err = canvas_to_file(canvas, file, err);
+    had_err = gt_canvas_to_file(canvas, file, err);
   }
 
   /* free */
-  canvas_delete(canvas);
+  gt_canvas_delete(canvas);
   image_info_delete(ii);
   style_delete(sty);
   str_delete(style_file);

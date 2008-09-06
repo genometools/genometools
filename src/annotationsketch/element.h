@@ -35,14 +35,14 @@ Element*           element_new(GenomeNode*);
 Element*           element_new_empty(void);
 Range              element_get_range(const Element*);
 void               element_set_range(Element*, Range);
-DrawingRange       element_calculate_drawing_range(Element*, Canvas*);
+DrawingRange       element_calculate_drawing_range(Element*, GT_Canvas*);
 GenomeFeatureType* element_get_type(const Element*);
 void               element_set_type(Element*, GenomeFeatureType*);
 Strand             element_get_strand(const Element*);
 GenomeNode*        element_get_node_ref(const Element*);
 bool               element_is_marked(const Element*);
 bool               elements_are_equal(const Element*, const Element*);
-int                element_sketch(Element*, Canvas*);
+int                element_sketch(Element*, GT_Canvas*);
 int                element_unit_test(Error*);
 void               element_delete(Element* element);
 

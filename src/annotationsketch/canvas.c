@@ -42,7 +42,7 @@
 #define HEADER_SPACE              70
 #define FOOTER_SPACE              20
 
-struct Canvas {
+struct GT_Canvas {
   Range viewrange;
   double factor, y, margins;
   unsigned long width, height;
@@ -63,7 +63,7 @@ typedef enum
 } ClipType;
 
 /* Calculate the final height of the image to be created. */
-static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
+static unsigned long calculate_height(GT_Canvas *canvas, Diagram *dia)
 {
   TracklineInfo lines;
   double tmp;
@@ -111,14 +111,14 @@ static unsigned long calculate_height(Canvas *canvas, Diagram *dia)
   return height;
 }
 
-double canvas_get_text_width(Canvas *canvas, const char *text)
+double gt_canvas_get_text_width(GT_Canvas *canvas, const char *text)
 {
   assert(canvas);
   if (!text) return 0.0;
   return graphics_get_text_width(canvas->g, text);
 }
 
-static double convert_point(Canvas *canvas, long pos)
+static double convert_point(GT_Canvas *canvas, long pos)
 {
   return (double) ((canvas->factor *
                       MAX(0,(pos-(long) canvas->viewrange.start)))
@@ -127,7 +127,7 @@ static double convert_point(Canvas *canvas, long pos)
 
 /* Converts base range <node_range> into a pixel range.
    If the range exceeds visibility boundaries, clipping info is set. */
-DrawingRange canvas_convert_coords(Canvas *canvas, Range node_range)
+DrawingRange gt_canvas_convert_coords(GT_Canvas *canvas, Range node_range)
 {
   DrawingRange converted_range;
   converted_range.clip = CLIPPED_NONE;
@@ -182,7 +182,7 @@ static void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
 }
 
 /* Renders a ruler with dynamic scale labeling and optional grid. */
-static void draw_ruler(Canvas *canvas)
+static void draw_ruler(GT_Canvas *canvas)
 {
   double step, minorstep, vmajor, vminor, margins;
   long base_length, tick;
@@ -263,12 +263,12 @@ static void draw_ruler(Canvas *canvas)
                               "3'");
 }
 
-Canvas* canvas_new(Style *sty, GraphicsOutType type,
+GT_Canvas* gt_canvas_new(Style *sty, GraphicsOutType type,
                    unsigned long width, ImageInfo *ii)
 {
   assert(sty && width > 0);
-  Canvas *canvas;
-  canvas = ma_calloc(1, sizeof (Canvas));
+  GT_Canvas *canvas;
+  canvas = ma_calloc(1, sizeof (GT_Canvas));
   canvas->sty = sty;
   canvas->ii = ii;
   canvas->width = width;
@@ -278,13 +278,13 @@ Canvas* canvas_new(Style *sty, GraphicsOutType type,
   return canvas;
 }
 
-unsigned long canvas_get_height(Canvas *canvas)
+unsigned long gt_canvas_get_height(GT_Canvas *canvas)
 {
   assert(canvas);
   return canvas->height;
 }
 
-int canvas_visit_diagram_pre(Canvas *canvas, Diagram *dia)
+int gt_canvas_visit_diagram_pre(GT_Canvas *canvas, Diagram *dia)
 {
   double margins;
 
@@ -314,7 +314,7 @@ int canvas_visit_diagram_pre(Canvas *canvas, Diagram *dia)
   return 0;
 }
 
-int canvas_visit_diagram_post(Canvas *canvas, Diagram *dia)
+int gt_canvas_visit_diagram_post(GT_Canvas *canvas, Diagram *dia)
 {
   int had_err = 0;
 
@@ -339,7 +339,7 @@ int canvas_visit_diagram_post(Canvas *canvas, Diagram *dia)
   return had_err;
 }
 
-int canvas_visit_track_pre(Canvas *canvas, Track *track)
+int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
 {
   int had_err = 0;
   unsigned long exceeded;
@@ -391,7 +391,7 @@ int canvas_visit_track_pre(Canvas *canvas, Track *track)
   return had_err;
 }
 
-int canvas_visit_track_post(Canvas *canvas, UNUSED Track *track)
+int gt_canvas_visit_track_post(GT_Canvas *canvas, UNUSED Track *track)
 {
   double vspace;
   assert(canvas && track);
@@ -403,7 +403,7 @@ int canvas_visit_track_post(Canvas *canvas, UNUSED Track *track)
   return 0;
 }
 
-int canvas_visit_line_pre(Canvas *canvas, Line *line)
+int gt_canvas_visit_line_pre(GT_Canvas *canvas, Line *line)
 {
   int had_err = 0;
   assert(canvas && line);
@@ -413,7 +413,7 @@ int canvas_visit_line_pre(Canvas *canvas, Line *line)
   return had_err;
 }
 
-int canvas_visit_line_post(Canvas *canvas, UNUSED Line *line)
+int gt_canvas_visit_line_post(GT_Canvas *canvas, UNUSED Line *line)
 {
   int had_err = 0;
   double tmp;
@@ -431,7 +431,7 @@ int canvas_visit_line_post(Canvas *canvas, UNUSED Line *line)
   return had_err;
 }
 
-int canvas_visit_block(Canvas *canvas, GT_Block *block)
+int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
 {
   int had_err = 0, arrow_status = ARROW_NONE;
   Range block_range;
@@ -463,7 +463,7 @@ int canvas_visit_block(Canvas *canvas, GT_Block *block)
     arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
   /* draw block caption */
-  draw_range = canvas_convert_coords(canvas, block_range);
+  draw_range = gt_canvas_convert_coords(canvas, block_range);
   if (gt_block_caption_is_visible(block)) {
     caption = str_get(gt_block_get_caption(block));
     if (caption)
@@ -538,7 +538,7 @@ int canvas_visit_block(Canvas *canvas, GT_Block *block)
   return had_err;
 }
 
-int canvas_visit_element(Canvas *canvas, Element *elem)
+int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
 {
   int had_err = 0, arrow_status = ARROW_NONE;
   Range elem_range = element_get_range(elem);
@@ -575,7 +575,7 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
             elem_range.end,
             (int) strand);
 
-  draw_range = canvas_convert_coords(canvas, elem_range);
+  draw_range = gt_canvas_convert_coords(canvas, elem_range);
   elem_start = draw_range.start;
   elem_width = draw_range.end - draw_range.start;
 
@@ -711,7 +711,7 @@ int canvas_visit_element(Canvas *canvas, Element *elem)
   return had_err;
 }
 
-int canvas_to_file(Canvas *canvas, const char *filename, Error *err)
+int gt_canvas_to_file(GT_Canvas *canvas, const char *filename, Error *err)
 {
   int had_err = 0;
   assert(canvas && filename && err);
@@ -728,7 +728,7 @@ int canvas_to_file(Canvas *canvas, const char *filename, Error *err)
   return had_err;
 }
 
-int canvas_to_stream(Canvas *canvas, Str *stream)
+int gt_canvas_to_stream(GT_Canvas *canvas, Str *stream)
 {
   int had_err = 0;
   assert(canvas && stream);
@@ -740,7 +740,7 @@ int canvas_to_stream(Canvas *canvas, Str *stream)
   return had_err;
 }
 
-void canvas_delete(Canvas *canvas)
+void gt_canvas_delete(GT_Canvas *canvas)
 {
   if (!canvas) return;
   if (canvas->g)

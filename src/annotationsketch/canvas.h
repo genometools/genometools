@@ -18,7 +18,7 @@
 #ifndef CANVAS_H
 #define CANVAS_H
 
-typedef struct Canvas Canvas;
+typedef struct GT_Canvas GT_Canvas;
 
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
@@ -31,39 +31,40 @@ typedef struct Canvas Canvas;
 #include "annotationsketch/track.h"
 #include "core/range.h"
 
-/* Create a new Canvas object with given <output_type> and <width> using the
+/* Create a new GT_Canvas object with given <output_type> and <width> using the
    configuration given in <style>. The optional <image_info> is filled when
-   the created Canvas object is used to render a Diagram object. */
-Canvas*       canvas_new(Style *style, GraphicsOutType output_type,
-                         unsigned long width, ImageInfo *image_info);
+   the created GT_Canvas object is used to render a Diagram object. */
+GT_Canvas*    gt_canvas_new(Style *style, GraphicsOutType output_type,
+                            unsigned long width, ImageInfo *image_info);
 /* Returns a pixel-based range for a nucleotide-based range
    using the scaling factor defined for the given <canvas> */
-DrawingRange  canvas_convert_coords(Canvas* canvas, Range);
+DrawingRange  gt_canvas_convert_coords(GT_Canvas* canvas, Range);
 /* Returns the height of the given <canvas>. */
-unsigned long canvas_get_height(Canvas *canvas);
+unsigned long gt_canvas_get_height(GT_Canvas *canvas);
 /* Returns rendered width in pixels of the given text. */
-double        canvas_get_text_width(Canvas*, const char *text);
+double        gt_canvas_get_text_width(GT_Canvas*, const char *text);
 /* Callback function for Diagram rendering. */
-int           canvas_visit_diagram_pre(Canvas*, Diagram*);
+int           gt_canvas_visit_diagram_pre(GT_Canvas*, Diagram*);
 /* Callback function for Diagram rendering. */
-int           canvas_visit_diagram_post(Canvas*, Diagram*);
+int           gt_canvas_visit_diagram_post(GT_Canvas*, Diagram*);
 /* Callback function for Diagram rendering. */
-int           canvas_visit_track_pre(Canvas*, Track*);
+int           gt_canvas_visit_track_pre(GT_Canvas*, Track*);
 /* Callback function for Diagram rendering. */
-int           canvas_visit_track_post(Canvas*, Track*);
+int           gt_canvas_visit_track_post(GT_Canvas*, Track*);
 /* Callback function for Diagram rendering. */
-int           canvas_visit_line_pre(Canvas*, Line*);
+int           gt_canvas_visit_line_pre(GT_Canvas*, Line*);
 /* Callback function for Diagram rendering. */
-int           canvas_visit_line_post(Canvas*, Line*);
+int           gt_canvas_visit_line_post(GT_Canvas*, Line*);
 /* Callback function for Diagram rendering. */
-int           canvas_visit_block(Canvas*, GT_Block*);
+int           gt_canvas_visit_block(GT_Canvas*, GT_Block*);
 /* Callback function for Diagram rendering. */
-int           canvas_visit_element(Canvas*, Element*);
+int           gt_canvas_visit_element(GT_Canvas*, Element*);
 /* Write rendered <canvas> to file with name <filename>. */
-int           canvas_to_file(Canvas *canvas, const char *filename, Error*);
+int           gt_canvas_to_file(GT_Canvas *canvas, const char *filename,
+                                Error*);
 /* Append rendered <canvas> to given <stream>. */
-int           canvas_to_stream(Canvas *canvas, Str *stream);
+int           gt_canvas_to_stream(GT_Canvas *canvas, Str *stream);
 /* Delete the given <canvas>. */
-void          canvas_delete(Canvas *canvas);
+void          gt_canvas_delete(GT_Canvas *canvas);
 
 #endif

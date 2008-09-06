@@ -54,7 +54,7 @@ Strand             gt_block_get_strand(const GT_Block*);
 void               gt_block_set_type(GT_Block*, GenomeFeatureType*);
 GenomeFeatureType* gt_block_get_type(const GT_Block*);
 unsigned long      gt_block_get_size(const GT_Block*);
-int                gt_block_sketch(GT_Block*, Canvas*);
+int                gt_block_sketch(GT_Block*, GT_Canvas*);
 int                gt_block_compare(const GT_Block*, const GT_Block*);
 int                gt_block_unit_test(Error*);
 void               gt_block_delete(GT_Block*);

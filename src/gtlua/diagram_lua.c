@@ -57,7 +57,7 @@ static int diagram_lua_new(lua_State *L)
 static int diagram_lua_sketch(lua_State *L)
 {
   Diagram **diagram;
-  Canvas **canvas;
+  GT_Canvas **canvas;
   diagram = check_diagram(L,1);
   canvas = check_canvas(L,2);
   return diagram_sketch(*diagram, *canvas);

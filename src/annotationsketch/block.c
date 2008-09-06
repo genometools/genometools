@@ -196,14 +196,14 @@ unsigned long gt_block_get_size(const GT_Block *block)
   return dlist_size(block->elements);
 }
 
-int gt_block_sketch(GT_Block *block, Canvas *canvas)
+int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
 {
  int had_err = 0;
  Dlistelem *delem;
  assert(block && canvas);
  /* if resulting block was too short,
     do not traverse this feature tree further */
- if (-1 == canvas_visit_block(canvas, block))
+ if (-1 == gt_canvas_visit_block(canvas, block))
    return had_err;
  for (delem = dlist_first(block->elements); delem;
       delem = dlistelem_next(delem)) {

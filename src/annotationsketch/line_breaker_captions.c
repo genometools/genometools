@@ -23,7 +23,7 @@
 
 struct LineBreakerCaptions {
   const LineBreaker parent_instance;
-  Canvas *canvas;
+  GT_Canvas *canvas;
   Hashmap *linepositions;
 };
 
@@ -36,10 +36,10 @@ static DrawingRange calculate_drawing_range(LineBreakerCaptions *lcb,
   double textwidth = 0.0;
   DrawingRange drange;
   assert(block && lcb);
-  drange = canvas_convert_coords(lcb->canvas, gt_block_get_range(block));
+  drange = gt_canvas_convert_coords(lcb->canvas, gt_block_get_range(block));
   if (gt_block_get_caption(block))
   {
-    textwidth = canvas_get_text_width(lcb->canvas,
+    textwidth = gt_canvas_get_text_width(lcb->canvas,
                                       str_get(gt_block_get_caption(block)));
   if (textwidth > drawing_range_length(drange))
     drange.end = drange.start + textwidth;
@@ -99,7 +99,7 @@ const LineBreakerClass* line_breaker_captions_class(void)
   return &line_breaker_class;
 }
 
-LineBreaker* line_breaker_captions_new(Canvas *canvas)
+LineBreaker* line_breaker_captions_new(GT_Canvas *canvas)
 {
   assert(canvas);
   LineBreakerCaptions *lbcap;

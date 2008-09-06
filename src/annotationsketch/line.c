@@ -59,17 +59,17 @@ Array* line_get_blocks(Line* line)
   return line->blocks;
 }
 
-int line_sketch(Line *line, Canvas *canvas)
+int line_sketch(Line *line, GT_Canvas *canvas)
 {
   int i = 0;
   assert(line && canvas);
-  canvas_visit_line_pre(canvas, line);
+  gt_canvas_visit_line_pre(canvas, line);
   for (i = 0; i < array_size(line->blocks); i++) {
     GT_Block *block;
     block = *(GT_Block**) array_get(line->blocks, i);
     gt_block_sketch(block, canvas);
   }
-  canvas_visit_line_post(canvas, line);
+  gt_canvas_visit_line_post(canvas, line);
   return 0;
 }
 

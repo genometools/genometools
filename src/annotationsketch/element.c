@@ -55,10 +55,11 @@ Element* element_new_empty(void)
   return ma_calloc(1, sizeof (Element));
 }
 
-DrawingRange element_calculate_drawing_range(Element *element, Canvas *canvas)
+DrawingRange element_calculate_drawing_range(Element *element,
+                                             GT_Canvas *canvas)
 {
   assert(element && canvas);
-  element->drange = canvas_convert_coords(canvas, element->range);
+  element->drange = gt_canvas_convert_coords(canvas, element->range);
   return element->drange;
 }
 
@@ -105,11 +106,11 @@ bool elements_are_equal(const Element *e1, const Element *e2)
   return false;
 }
 
-int element_sketch(Element *elem, Canvas *canvas)
+int element_sketch(Element *elem, GT_Canvas *canvas)
 {
   int had_err = 0;
   assert(elem && canvas);
-  canvas_visit_element(canvas, elem);
+  gt_canvas_visit_element(canvas, elem);
   return had_err;
 }
 

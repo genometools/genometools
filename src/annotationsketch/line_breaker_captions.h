@@ -26,6 +26,6 @@
 typedef struct LineBreakerCaptions LineBreakerCaptions;
 
 const LineBreakerClass* line_breaker_captions_class(void);
-LineBreaker*            line_breaker_captions_new(Canvas *canvas);
+LineBreaker*            line_breaker_captions_new(GT_Canvas *canvas);
 
 #endif

@@ -27,22 +27,22 @@
 
 static int canvas_lua_new_generic(lua_State *L, GraphicsOutType t)
 {
-  Canvas **canvas;
+  GT_Canvas **canvas;
   ImageInfo **ii;
   unsigned int width;
   Style *style;
   width = luaL_checkint(L, 1);
   /* create canvas */
   style = lua_get_style_from_registry(L);
-  canvas = lua_newuserdata(L, sizeof (Canvas*));
+  canvas = lua_newuserdata(L, sizeof (GT_Canvas*));
   assert(canvas);
   /* if a imageinfo object is passed, it must be correct type */
   if (lua_isnil(L, 2))
-    *canvas = canvas_new(style, t, width, NULL);
+    *canvas = gt_canvas_new(style, t, width, NULL);
   else
   {
     ii = check_imageinfo(L, 2);
-   *canvas = canvas_new(style, t, width, *ii);
+   *canvas = gt_canvas_new(style, t, width, *ii);
   }
   luaL_getmetatable(L, CANVAS_METATABLE);
   lua_setmetatable(L, -2);
@@ -71,7 +71,7 @@ static int canvas_lua_new_ps(lua_State *L)
 
 static int canvas_lua_to_file(lua_State *L)
 {
-  Canvas **canvas;
+  GT_Canvas **canvas;
   Error *err;
   const char *fn;
   int had_err = 0;
@@ -79,7 +79,7 @@ static int canvas_lua_to_file(lua_State *L)
   canvas = check_canvas(L, 1);
   fn = luaL_checkstring(L, 2);
   assert(canvas);
-  had_err = canvas_to_file(*canvas, fn, err);
+  had_err = gt_canvas_to_file(*canvas, fn, err);
   if (had_err)
     return lua_gt_error(L, err);
   error_delete(err);
@@ -88,9 +88,9 @@ static int canvas_lua_to_file(lua_State *L)
 
 static int canvas_lua_delete(lua_State *L)
 {
-  Canvas **canvas;
+  GT_Canvas **canvas;
   canvas = check_canvas(L, 1);
-  canvas_delete(*canvas);
+  gt_canvas_delete(*canvas);
   return 0;
 }
 
