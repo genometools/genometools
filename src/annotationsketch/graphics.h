@@ -63,7 +63,7 @@ void      graphics_draw_text(Graphics*, double x, double y, const char*);
 void      graphics_draw_text_centered(Graphics*, double x, double y,
                                       const char*);
 void      graphics_draw_text_right(Graphics*, double x, double y, const char*);
-void      graphics_draw_colored_text(Graphics*, double x, double y, Color,
+void      graphics_draw_colored_text(Graphics*, double x, double y, GT_Color,
                                      const char*);
 double    graphics_get_text_height(Graphics*);
 double    graphics_get_text_width(Graphics*, const char *text);
@@ -80,26 +80,26 @@ void      graphics_draw_horizontal_line(Graphics*, double x, double y,
                                         double width);
 /* Draws a vertical line beginning at the given coordinates downwards. */
 void      graphics_draw_vertical_line(Graphics*, double x, double y,
-                                      Color color, double length);
+                                      GT_Color color, double length);
 void      graphics_draw_box(Graphics*, double x, double y, double width,
-                            double height, Color fill_color,
+                            double height, GT_Color fill_color,
                             ArrowStatus arrow_status, double arrow_width,
-                            double stroke_width, Color stroke_color,
+                            double stroke_width, GT_Color stroke_color,
                             bool dashed);
 void      graphics_draw_dashes(Graphics*, double x, double y, double width,
                                double height, ArrowStatus arrow_status,
                                double arrow_width, double stroke_width,
-                               Color stroke_color);
+                               GT_Color stroke_color);
 /* Draws a caret (^) style glyph. */
 void      graphics_draw_caret(Graphics*, double x, double y, double width,
                               double height, ArrowStatus arrow_status,
                               double arrow_width,  double stroke_width,
-                              Color stroke_color);
+                              GT_Color stroke_color);
 void      graphics_draw_rectangle(Graphics*, double x, double y,
-                                  bool filled, Color fill_color, bool outlined,
-                                  Color outline_color, double outline_width,
-                                  double width);
-void      graphics_draw_arrowhead(Graphics*, double x, double y, Color,
+                                  bool filled, GT_Color fill_color,
+                                  bool outlined, GT_Color outline_color,
+                                  double outline_width, double width);
+void      graphics_draw_arrowhead(Graphics*, double x, double y, GT_Color,
                                   ArrowStatus);
 /* Write out the Graphic to the given file with <filename>. */
 int       graphics_save_to_file(const Graphics*, const char *filename, Error*);

@@ -150,7 +150,7 @@ void graphics_draw_text_right(Graphics *g, double x, double y, const char *text)
   cairo_show_text(g->cr, text);
 }
 
-void graphics_draw_colored_text(Graphics *g, double x, double y, Color color,
+void graphics_draw_colored_text(Graphics *g, double x, double y, GT_Color color,
                                 const char *text)
 {
   assert(g && text);
@@ -188,7 +188,7 @@ void graphics_draw_horizontal_line(Graphics *g, double x, double y,
 }
 
 void graphics_draw_vertical_line(Graphics *g, double x, double y,
-                                 Color color, double length)
+                                 GT_Color color, double length)
 {
   assert(g);
   cairo_save(g->cr);
@@ -218,9 +218,9 @@ double graphics_get_text_height(Graphics *g)
 }
 
 void graphics_draw_box(Graphics *g, double x, double y, double width,
-                       double height, Color fill_color,
+                       double height, GT_Color fill_color,
                        ArrowStatus arrow_status, double arrow_width,
-                       double stroke_width, Color stroke_color, bool dashed)
+                       double stroke_width, GT_Color stroke_color, bool dashed)
 {
   assert(g);
   double dashes[]={2.0};
@@ -278,7 +278,7 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
 void graphics_draw_dashes(Graphics *g, double x, double y, double width,
                           double height, ArrowStatus arrow_status,
                           double arrow_width, double stroke_width,
-                          Color stroke_color)
+                          GT_Color stroke_color)
 {
   double dashes[] = {3.0};
   assert(g);
@@ -326,7 +326,7 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
 void graphics_draw_caret(Graphics *g, double x, double y, double width,
                          double height, ArrowStatus arrow_status,
                          double arrow_width, double stroke_width,
-                         Color stroke_color)
+                         GT_Color stroke_color)
 {
   assert(g);
   /* save cairo context */
@@ -382,8 +382,8 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
 }
 
 void graphics_draw_rectangle(Graphics *g, double x, double y,
-                             bool filled, Color fill_color, bool outlined,
-                             Color outline_color, double outline_width,
+                             bool filled, GT_Color fill_color, bool outlined,
+                             GT_Color outline_color, double outline_width,
                              double width)
 {
   assert(g);
@@ -409,7 +409,7 @@ void graphics_draw_rectangle(Graphics *g, double x, double y,
 }
 
 void graphics_draw_arrowhead(Graphics *g, double x, double y,
-                             Color color, ArrowStatus arrow_status)
+                             GT_Color color, ArrowStatus arrow_status)
 {
   double arrow_height = 8, arrow_width = 5;
   assert(g);

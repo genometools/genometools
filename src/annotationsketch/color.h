@@ -22,8 +22,8 @@
 
 typedef struct {
   double red, green, blue;
-} Color;
+} GT_Color;
 
-bool color_equals(Color, Color);
+bool gt_color_equals(GT_Color, GT_Color);
 
 #endif

@@ -28,7 +28,7 @@ GT_Style*      gt_style_new_with_state(lua_State*);
 /* Retrieves a color value from the GT_Style for <key>.
    If not set, false is returned and a default color is written. */
 bool           gt_style_get_color(const GT_Style*, const char *section,
-                                  const char *key, Color*, GenomeNode*);
+                                  const char *key, GT_Color*, GenomeNode*);
 /* Retrieve string value of <key> in <section>.
    If not set, false is returned. */
 bool           gt_style_get_str(const GT_Style*, const char *section,

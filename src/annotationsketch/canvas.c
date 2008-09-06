@@ -186,7 +186,7 @@ static void draw_ruler(GT_Canvas *canvas)
 {
   double step, minorstep, vmajor, vminor, margins;
   long base_length, tick;
-  Color rulercol, gridcol;
+  GT_Color rulercol, gridcol;
   char str[BUFSIZ];
   bool showgrid;
 
@@ -343,7 +343,7 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
 {
   int had_err = 0;
   unsigned long exceeded;
-  Color color;
+  GT_Color color;
 
   assert(canvas && track);
 
@@ -368,7 +368,7 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
       char buf[BUFSIZ];
       const char *msg;
       double width;
-      Color red;
+      GT_Color red;
       red.red   = 0.7;
       red.green = red.blue  = 0.4;
       if (exceeded == 1)
@@ -436,7 +436,7 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
   int had_err = 0, arrow_status = ARROW_NONE;
   Range block_range;
   DrawingRange draw_range;
-  Color grey, fillcolor, strokecolor;
+  GT_Color grey, fillcolor, strokecolor;
   double bar_height, min_len_block, arrow_width, stroke_width;
   const char* caption;
   Strand strand;
@@ -546,7 +546,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
   Range elem_range = element_get_range(elem);
   DrawingRange draw_range;
   double elem_start, elem_width, stroke_width, bar_height, arrow_width;
-  Color elem_color, grey, fill_color;
+  GT_Color elem_color, grey, fill_color;
   const char *type;
   Str *style;
   Strand strand = element_get_strand(elem);
