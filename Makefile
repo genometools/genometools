@@ -485,7 +485,9 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 	 $(RNVMAIN_DEP) \
 	 $(LIBBZ2_DEP) \
 	 $(ZLIB_DEP) \
-         $(LIBGENOMETOOLS_DEP)
+         $(LIBGENOMETOOLS_DEP) \
+         obj/src/examples/sketch_constructed.d \
+         obj/src/examples/sketch_parsed.d
 
 ifeq ($(libannotationsketch),yes)
 -include $(LIBANNOTATIONSKETCH_C_DEP) $(LIBANNOTATIONSKETCH_CXX_DEP)
