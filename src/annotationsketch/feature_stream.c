@@ -57,7 +57,7 @@ const GenomeStreamClass* feature_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* feature_stream_new(GenomeStream *in_stream, FeatureIndex *fi)
+GenomeStream* feature_stream_new(GenomeStream *in_stream, GT_FeatureIndex *fi)
 {
   GenomeStream *gs;
   FeatureStream *feature_stream;

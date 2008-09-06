@@ -172,7 +172,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
                *last_stream;
   AnnotationSketch_arguments arguments;
   GenomeNode *gn = NULL;
-  FeatureIndex *features = NULL;
+  GT_FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
   const char *file, *seqid = NULL;
   Range qry_range, sequence_region_range;
@@ -217,7 +217,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
 
   if (!had_err) {
     /* create feature index */
-    features = feature_index_new();
+    features = gt_feature_index_new();
     parsed_args++;
 
     /* create a gff3 input stream */
@@ -255,13 +255,13 @@ int gt_sketch(int argc, const char **argv, Error *err)
 
   /* if seqid is empty, take first one added to index */
   if (!had_err && strcmp(str_get(arguments.seqid),"") == 0) {
-    seqid = feature_index_get_first_seqid(features);
+    seqid = gt_feature_index_get_first_seqid(features);
     if (seqid == NULL) {
       error_set(err, "GFF input file must contain a sequence region!");
       had_err = -1;
     }
   }
-  else if (!had_err && !feature_index_has_seqid(features,
+  else if (!had_err && !gt_feature_index_has_seqid(features,
                                                 str_get(arguments.seqid))) {
     error_set(err, "sequence region '%s' does not exist in GFF input file",
               str_get(arguments.seqid));
@@ -272,7 +272,8 @@ int gt_sketch(int argc, const char **argv, Error *err)
 
   results = array_new(sizeof (GenomeNode*));
   if (!had_err) {
-    sequence_region_range = feature_index_get_range_for_seqid(features, seqid);
+    sequence_region_range = gt_feature_index_get_range_for_seqid(features,
+                                                                 seqid);
     qry_range.start = (arguments.start == UNDEF_ULONG ?
                          sequence_region_range.start :
                          arguments.start);
@@ -334,7 +335,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
   str_delete(arguments.seqid);
   str_delete(arguments.format);
   array_delete(results);
-  feature_index_delete(features);
+  gt_feature_index_delete(features);
 
   return had_err;
 }

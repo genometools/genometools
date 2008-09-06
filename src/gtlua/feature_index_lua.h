@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the FeatureIndex class to Lua:
+/* exports the GT_FeatureIndex class to Lua:
 
    -- Returns a new <feature_index> object.
    function feature_index_new()
@@ -53,6 +53,6 @@ int luaopen_feature_index(lua_State*);
 
 #define FEATURE_INDEX_METATABLE  "GenomeTools.feature_index"
 #define check_feature_index(L, POS) \
-          (FeatureIndex**) luaL_checkudata(L, POS, FEATURE_INDEX_METATABLE)
+          (GT_FeatureIndex**) luaL_checkudata(L, POS, FEATURE_INDEX_METATABLE)
 
 #endif

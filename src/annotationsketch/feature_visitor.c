@@ -24,7 +24,7 @@
 
 struct FeatureVisitor {
   const GenomeVisitor parent_instance;
-        FeatureIndex *feature_index;
+        GT_FeatureIndex *feature_index;
 };
 
 #define feature_visitor_cast(GV)\
@@ -34,7 +34,7 @@ static void feature_visitor_free(GenomeVisitor *gv)
 {
   FeatureVisitor *feature_visitor = feature_visitor_cast(gv);
   assert(feature_visitor);
-  feature_index_delete(feature_visitor->feature_index);
+  gt_feature_index_delete(feature_visitor->feature_index);
 }
 
 static int feature_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
@@ -42,7 +42,7 @@ static int feature_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
   error_check(err);
-  feature_index_add_genome_feature(v->feature_index, gf);
+  gt_feature_index_add_genome_feature(v->feature_index, gf);
   return 0;
 }
 
@@ -52,7 +52,7 @@ static int feature_visitor_sequence_region(GenomeVisitor *gv,
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
   error_check(err);
-  feature_index_add_sequence_region(v->feature_index, sr);
+  gt_feature_index_add_sequence_region(v->feature_index, sr);
   return 0;
 }
 
@@ -67,14 +67,14 @@ const GenomeVisitorClass* feature_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* feature_visitor_new(FeatureIndex *fi)
+GenomeVisitor* feature_visitor_new(GT_FeatureIndex *fi)
 {
   GenomeVisitor *gv;
   FeatureVisitor *feature_visitor;
   assert(fi != NULL);
   gv = genome_visitor_create(feature_visitor_class());
   feature_visitor = feature_visitor_cast(gv);
-  feature_visitor->feature_index = feature_index_ref(fi);
+  feature_visitor->feature_index = gt_feature_index_ref(fi);
   assert(feature_visitor != NULL);
   return gv;
 }

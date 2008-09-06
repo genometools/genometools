@@ -32,7 +32,7 @@
 static int diagram_lua_new(lua_State *L)
 {
   Diagram **diagram;
-  FeatureIndex **feature_index;
+  GT_FeatureIndex **feature_index;
   Range *range;
   const char *seqid;
   Style *style;
@@ -40,7 +40,7 @@ static int diagram_lua_new(lua_State *L)
   feature_index = check_feature_index(L, 1);
   /* get seqid */
   seqid = luaL_checkstring(L, 2);
-  luaL_argcheck(L, feature_index_has_seqid(*feature_index, seqid),
+  luaL_argcheck(L, gt_feature_index_has_seqid(*feature_index, seqid),
                 2, "feature index does not contain the given sequence id");
   /* get range */
   range = check_range(L, 3);

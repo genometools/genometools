@@ -35,7 +35,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 
-struct FeatureIndex {
+struct GT_FeatureIndex {
   Hashmap *regions;
   char *firstseqid;
   unsigned int nof_sequence_regions,
@@ -56,22 +56,23 @@ static void region_info_delete(RegionInfo *info)
   ma_free(info);
 }
 
-FeatureIndex* feature_index_new(void)
+GT_FeatureIndex* gt_feature_index_new(void)
 {
-  FeatureIndex *fi;
-  fi = ma_calloc(1, sizeof (FeatureIndex));
+  GT_FeatureIndex *fi;
+  fi = ma_calloc(1, sizeof (GT_FeatureIndex));
   fi->regions = hashmap_new(HASH_STRING, NULL, (FreeFunc) region_info_delete);
   return fi;
 }
 
-FeatureIndex* feature_index_ref(FeatureIndex *fi)
+GT_FeatureIndex* gt_feature_index_ref(GT_FeatureIndex *fi)
 {
   assert(fi);
   fi->reference_count++;
   return fi;
 }
 
-void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr)
+void gt_feature_index_add_sequence_region(GT_FeatureIndex *fi,
+                                          SequenceRegion *sr)
 {
   char *seqid;
   RegionInfo *info;
@@ -89,7 +90,7 @@ void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr)
   }
 }
 
-void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf)
+void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi, GenomeFeature *gf)
 {
   GenomeNode *gn;
   char* seqid;
@@ -128,7 +129,7 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf)
   info->dyn_range.end = MAX(info->dyn_range.end, node_range.end);
 }
 
-int feature_index_add_gff3file(FeatureIndex *feature_index,
+int gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
                                const char *gff3file, Error *err)
 {
   GenomeStream *gff3_in_stream;
@@ -165,7 +166,8 @@ static int collect_features_from_itree(IntervalTreeNode *node, void *data)
   return 0;
 }
 
-Array* feature_index_get_features_for_seqid(FeatureIndex *fi, const char *seqid)
+Array* gt_feature_index_get_features_for_seqid(GT_FeatureIndex *fi,
+                                               const char *seqid)
 {
   RegionInfo *ri;
   int had_err = 0;
@@ -189,7 +191,7 @@ static int genome_node_cmp_range_start(const void *v1, const void *v2)
   return genome_node_compare(&n1, &n2);
 }
 
-int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
+int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi, Array *results,
                                          const char *seqid, Range qry_range,
                                          Error *err)
 {
@@ -208,7 +210,7 @@ int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
   return 0;
 }
 
-const char* feature_index_get_first_seqid(const FeatureIndex *fi)
+const char* gt_feature_index_get_first_seqid(const GT_FeatureIndex *fi)
 {
   assert(fi);
   return fi->firstseqid;
@@ -223,7 +225,7 @@ int store_seqid(void *key, UNUSED void *value, void *data, UNUSED Error *err)
   return 0;
 }
 
-GT_StrArray* feature_index_get_seqids(const FeatureIndex *fi)
+GT_StrArray* gt_feature_index_get_seqids(const GT_FeatureIndex *fi)
 {
   GT_StrArray* seqids;
   int rval;
@@ -234,7 +236,8 @@ GT_StrArray* feature_index_get_seqids(const FeatureIndex *fi)
   return seqids;
 }
 
-Range feature_index_get_range_for_seqid(FeatureIndex *fi, const char *seqid)
+Range gt_feature_index_get_range_for_seqid(GT_FeatureIndex *fi,
+                                           const char *seqid)
 {
   Range ret = {0,0};
   RegionInfo *info;
@@ -252,25 +255,25 @@ Range feature_index_get_range_for_seqid(FeatureIndex *fi, const char *seqid)
   return ret;
 }
 
-void feature_index_get_rangeptr_for_seqid(FeatureIndex *fi, Range *range,
+void gt_feature_index_get_rangeptr_for_seqid(GT_FeatureIndex *fi, Range *range,
                                           const char *seqid)
 {
   assert(fi && range);
-  *range = feature_index_get_range_for_seqid(fi, seqid);
+  *range = gt_feature_index_get_range_for_seqid(fi, seqid);
 }
 
-bool feature_index_has_seqid(const FeatureIndex *fi, const char *seqid)
+bool gt_feature_index_has_seqid(const GT_FeatureIndex *fi, const char *seqid)
 {
   assert(fi);
   return (hashmap_get(fi->regions, seqid));
 }
 
-int feature_index_unit_test(Error *err)
+int gt_feature_index_unit_test(Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *type;
   GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
-  FeatureIndex *fi;
+  GT_FeatureIndex *fi;
   Range r1, r2, r3, r4, r5, check_range, rs;
   Str *seqid1, *seqid2;
   GT_StrArray *seqids = NULL;
@@ -319,30 +322,30 @@ int feature_index_unit_test(Error *err)
   genome_node_is_part_of_genome_node(gn2, cds1);
 
   /* create a new feature index on which we can perform some tests */
-  fi = feature_index_new();
+  fi = gt_feature_index_new();
 
   ensure(had_err, fi);
-  ensure(had_err, !feature_index_has_seqid(fi, "test1"));
-  ensure(had_err, !feature_index_has_seqid(fi, "test2"));
+  ensure(had_err, !gt_feature_index_has_seqid(fi, "test1"));
+  ensure(had_err, !gt_feature_index_has_seqid(fi, "test2"));
 
   /* add a sequence region directly and check if it has been added */
-  feature_index_add_sequence_region(fi, sr1);
-  ensure(had_err, feature_index_has_seqid(fi, "test1"));
-  ensure(had_err, !feature_index_has_seqid(fi, "test2"));
+  gt_feature_index_add_sequence_region(fi, sr1);
+  ensure(had_err, gt_feature_index_has_seqid(fi, "test1"));
+  ensure(had_err, !gt_feature_index_has_seqid(fi, "test2"));
 
-  check_range = feature_index_get_range_for_seqid(fi, "test1");
+  check_range = gt_feature_index_get_range_for_seqid(fi, "test1");
   ensure(had_err, check_range.start == 100UL && check_range.end == 1200UL);
 
   /* tests if we get a empty data structure for every added sequence region*/
   if (!had_err)
-    features = feature_index_get_features_for_seqid(fi, "test1");
+    features = gt_feature_index_get_features_for_seqid(fi, "test1");
   ensure(had_err, features);
   ensure(had_err, array_size(features) == 0);
   array_delete(features);
   features = NULL;
 
   if (!had_err)
-    features = feature_index_get_features_for_seqid(fi, "test2");
+    features = gt_feature_index_get_features_for_seqid(fi, "test2");
   ensure(had_err, features);
   ensure(had_err, array_size(features) == 0);
   array_delete(features);
@@ -352,46 +355,46 @@ int feature_index_unit_test(Error *err)
      datastructures are not empty anymore. As we have added one genome_feature
      to every sequence region the size has to be one. */
   if (!had_err) {
-    feature_index_add_genome_feature(fi, (GenomeFeature*) gn1);
-    features = feature_index_get_features_for_seqid(fi, "test1");
+    gt_feature_index_add_genome_feature(fi, (GenomeFeature*) gn1);
+    features = gt_feature_index_get_features_for_seqid(fi, "test1");
   }
   ensure(had_err, array_size(features) == 1UL);
   array_delete(features);
   features = NULL;
 
   if (!had_err) {
-    feature_index_add_genome_feature(fi, (GenomeFeature*) gn2);
-    features = feature_index_get_features_for_seqid(fi, "test2");
+    gt_feature_index_add_genome_feature(fi, (GenomeFeature*) gn2);
+    features = gt_feature_index_get_features_for_seqid(fi, "test2");
   }
   ensure(had_err, array_size(features) == 1UL);
   array_delete(features);
   features = NULL;
 
-  /* test feature_index_get_first_seqid() */
-  ensure(had_err, feature_index_get_first_seqid(fi));
-  ensure(had_err, strcmp("test1", feature_index_get_first_seqid(fi)) == 0);
+  /* test gt_feature_index_get_first_seqid() */
+  ensure(had_err, gt_feature_index_get_first_seqid(fi));
+  ensure(had_err, strcmp("test1", gt_feature_index_get_first_seqid(fi)) == 0);
 
   if (!had_err) {
-    seqids = feature_index_get_seqids(fi);
+    seqids = gt_feature_index_get_seqids(fi);
     ensure(had_err, gt_strarray_size(seqids) == 2);
     ensure(had_err, !strcmp(gt_strarray_get(seqids, 0), "test1"));
     ensure(had_err, !strcmp(gt_strarray_get(seqids, 1), "test2"));
   }
 
-  check_range = feature_index_get_range_for_seqid(fi, "test1");
+  check_range = gt_feature_index_get_range_for_seqid(fi, "test1");
   ensure(had_err, check_range.start == 100UL && check_range.end == 1000UL);
 
-  check_range = feature_index_get_range_for_seqid(fi, "test2");
+  check_range = gt_feature_index_get_range_for_seqid(fi, "test2");
   ensure(had_err, check_range.start == 600UL && check_range.end == 1200UL);
 
   if (!had_err)
-    features = feature_index_get_features_for_seqid(fi, "test1");
+    features = gt_feature_index_get_features_for_seqid(fi, "test1");
   ensure(had_err, features);
   array_delete(features);
 
   /* delete all generated objects */
   gt_strarray_delete(seqids);
-  feature_index_delete(fi);
+  gt_feature_index_delete(fi);
   genome_node_rec_delete(gn1);
   genome_node_rec_delete(gn2);
   genome_node_rec_delete((GenomeNode*) sr1);
@@ -402,7 +405,7 @@ int feature_index_unit_test(Error *err)
   return had_err;
 }
 
-void feature_index_delete(FeatureIndex *fi)
+void gt_feature_index_delete(GT_FeatureIndex *fi)
 {
   if (!fi) return;
   if (fi->reference_count) {

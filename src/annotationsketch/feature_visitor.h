@@ -25,6 +25,6 @@ typedef struct FeatureVisitor FeatureVisitor;
 #include "extended/genome_visitor.h"
 
 const GenomeVisitorClass* feature_visitor_class(void);
-GenomeVisitor*            feature_visitor_new(FeatureIndex*);
+GenomeVisitor*            feature_visitor_new(GT_FeatureIndex*);
 
 #endif

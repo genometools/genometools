@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
   const char *style_file, *gff3_file, *output_file, *seqid;
   Style *style;
-  FeatureIndex *feature_index;
+  GT_FeatureIndex *feature_index;
   Range range;
   Diagram *diagram;
   Canvas *canvas;
@@ -34,15 +34,15 @@ int main(int argc, char *argv[])
     handle_error(err);
 
   /* create feature index */
-  feature_index = feature_index_new();
+  feature_index = gt_feature_index_new();
 
   /* add GFF3 file to index */
-  if (feature_index_add_gff3file(feature_index, gff3_file, err))
+  if (gt_feature_index_add_gff3file(feature_index, gff3_file, err))
     handle_error(err);
 
   /* create diagram for first sequence ID in feature index */
-  seqid = feature_index_get_first_seqid(feature_index);
-  range = feature_index_get_range_for_seqid(feature_index, seqid);
+  seqid = gt_feature_index_get_first_seqid(feature_index);
+  range = gt_feature_index_get_range_for_seqid(feature_index, seqid);
   diagram = diagram_new(feature_index, seqid, &range, style);
 
   /* create canvas */
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
   /* free */
   canvas_delete(canvas);
   diagram_delete(diagram);
-  feature_index_delete(feature_index);
+  gt_feature_index_delete(feature_index);
   style_delete(style);
   error_delete(err);
 

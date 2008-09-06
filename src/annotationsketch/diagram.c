@@ -504,14 +504,14 @@ static Diagram* diagram_new_generic(Array *features, const Range *range,
   return diagram;
 }
 
-Diagram* diagram_new(FeatureIndex *fi, const char *seqid, const Range *range,
+Diagram* diagram_new(GT_FeatureIndex *fi, const char *seqid, const Range *range,
                      Style *style)
 {
   Diagram *diagram;
   int had_err = 0;
   Array *features = array_new(sizeof (GenomeNode*));
   assert(features && seqid && range && style);
-  had_err = feature_index_get_features_for_range(fi, features, seqid, *range,
+  had_err = gt_feature_index_get_features_for_range(fi, features, seqid, *range,
                                                  NULL);
   assert(!had_err); /* <fi> must contain <seqid> */
   diagram = diagram_new_generic(features, range, style);
@@ -650,7 +650,7 @@ int diagram_unit_test(Error *err)
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *gene_type, *exon_type, *CDS_type;
   GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
-  FeatureIndex *fi;
+  GT_FeatureIndex *fi;
   Range r1, r2, r3, r4, r5, dr1, rs;
   Str *seqid1, *seqid2, *track_key;
   SequenceRegion *sr1, *sr2;
@@ -700,11 +700,11 @@ int diagram_unit_test(Error *err)
   genome_node_is_part_of_genome_node(gn2, cds1);
 
   /* create a new feature index on which we can perform some tests */
-  fi = feature_index_new();
+  fi = gt_feature_index_new();
 
   /* add features to every sequence region */
-  feature_index_add_genome_feature(fi, (GenomeFeature*) gn1);
-  feature_index_add_genome_feature(fi, (GenomeFeature*) gn2);
+  gt_feature_index_add_genome_feature(fi, (GenomeFeature*) gn1);
+  gt_feature_index_add_genome_feature(fi, (GenomeFeature*) gn2);
 
   /* set the Range for the diagram */
   dr1.start = 400UL;
@@ -812,7 +812,7 @@ int diagram_unit_test(Error *err)
   diagram_delete(dia2);
   diagram_delete(dia3);
   canvas_delete(canvas);
-  feature_index_delete(fi);
+  gt_feature_index_delete(fi);
   genome_node_rec_delete(gn1);
   genome_node_rec_delete(gn2);
   genome_node_rec_delete((GenomeNode*) sr1);

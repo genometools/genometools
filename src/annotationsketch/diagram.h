@@ -39,7 +39,7 @@ typedef struct TracklineInfo {
 
 /* Create a new Diagram object representing the genome nodes in
    <feature_index> in region <seqid> overlapping with <range>. */
-Diagram*    diagram_new(FeatureIndex *feature_index, const char *seqid,
+Diagram*    diagram_new(GT_FeatureIndex *feature_index, const char *seqid,
                         const Range*, Style*);
 Diagram*    diagram_new_from_array(Array *features, const Range*, Style*);
 Range       diagram_get_range(Diagram*);

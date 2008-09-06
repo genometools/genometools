@@ -25,7 +25,7 @@
 static int feature_stream_lua_new(lua_State *L)
 {
   GenomeStream **feature_stream, **in_stream;
-  FeatureIndex **feature_index;
+  GT_FeatureIndex **feature_index;
   feature_stream = lua_newuserdata(L, sizeof (GenomeStream*));
   assert(feature_stream);
   in_stream = check_genome_stream(L, 1);
