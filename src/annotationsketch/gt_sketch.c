@@ -181,7 +181,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
   Str *gt_style_file = NULL;
   Str *prog;
   GT_Diagram *d = NULL;
-  ImageInfo* ii = NULL;
+  GT_ImageInfo* ii = NULL;
   GT_Canvas *canvas = NULL;
 
   error_check(err);
@@ -301,7 +301,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
   if (!had_err) {
     /* create and write image file */
     d = gt_diagram_new(features, seqid, &qry_range, sty);
-    ii = image_info_new();
+    ii = gt_image_info_new();
     if (strcmp(str_get(arguments.format),"pdf")==0)
       canvas = gt_canvas_new(sty, GRAPHICS_PDF, arguments.width, ii);
     else if (strcmp(str_get(arguments.format),"ps")==0)
@@ -314,10 +314,10 @@ int gt_sketch(int argc, const char **argv, Error *err)
     if (arguments.showrecmaps) {
       unsigned long i;
       RecMap *rm;
-      for (i = 0; i < image_info_num_of_recmaps(ii) ;i++) {
+      for (i = 0; i < gt_image_info_num_of_recmaps(ii) ;i++) {
         GenomeFeatureType *type;
         char buf[BUFSIZ];
-        rm = image_info_get_recmap(ii, i);
+        rm = gt_image_info_get_recmap(ii, i);
         recmap_format_html_imagemap_coords(rm, buf, BUFSIZ);
         type = genome_feature_get_type((GenomeFeature*) rm->gn);
         printf("%s, %s\n", buf, genome_feature_type_get_cstr(type));
@@ -328,7 +328,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
 
   /* free */
   gt_canvas_delete(canvas);
-  image_info_delete(ii);
+  gt_image_info_delete(ii);
   gt_style_delete(sty);
   str_delete(gt_style_file);
   gt_diagram_delete(d);

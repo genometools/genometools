@@ -21,15 +21,17 @@
 #include "annotationsketch/recmap.h"
 #include "core/error.h"
 
-typedef struct ImageInfo ImageInfo;
+typedef struct GT_ImageInfo GT_ImageInfo;
 
-ImageInfo*    image_info_new();
-void          image_info_delete(ImageInfo*);
-unsigned int  image_info_get_height(ImageInfo*);
-void          image_info_set_height(ImageInfo*, unsigned int);
-void          image_info_add_recmap(ImageInfo*, RecMap*); /* takes ownership */
-unsigned long image_info_num_of_recmaps(ImageInfo*);
-RecMap*       image_info_get_recmap(ImageInfo*, unsigned long);
-void          image_info_get_recmap_ptr(ImageInfo*, RecMap*, unsigned long);
-int           image_info_unit_test(Error*);
+GT_ImageInfo* gt_image_info_new();
+void          gt_image_info_delete(GT_ImageInfo*);
+unsigned int  gt_image_info_get_height(GT_ImageInfo*);
+void          gt_image_info_set_height(GT_ImageInfo*, unsigned int);
+/* Takes ownership of <rec_map>. */
+void          gt_image_info_add_recmap(GT_ImageInfo*, RecMap *rec_map);
+unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo*);
+RecMap*       gt_image_info_get_recmap(GT_ImageInfo*, unsigned long);
+void          gt_image_info_get_recmap_ptr(GT_ImageInfo*, RecMap*,
+                                           unsigned long);
+int           gt_image_info_unit_test(Error*);
 #endif

@@ -51,7 +51,7 @@ struct GT_Canvas {
   Bittab *bt;
   Graphics *g;
   GraphicsOutType type;
-  ImageInfo *ii;
+  GT_ImageInfo *ii;
 };
 
 typedef enum
@@ -264,7 +264,7 @@ static void draw_ruler(GT_Canvas *canvas)
 }
 
 GT_Canvas* gt_canvas_new(GT_Style *sty, GraphicsOutType type,
-                   unsigned long width, ImageInfo *ii)
+                   unsigned long width, GT_ImageInfo *ii)
 {
   assert(sty && width > 0);
   GT_Canvas *canvas;
@@ -324,7 +324,7 @@ int gt_canvas_visit_gt_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
   canvas->y += HEADER_SPACE;
   canvas->height = calculate_height(canvas, dia);
   if (canvas->ii)
-    image_info_set_height(canvas->ii, canvas->height);
+    gt_image_info_set_height(canvas->ii, canvas->height);
   if (canvas->g)
   {
     graphics_delete(canvas->g);
@@ -512,13 +512,13 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
                                 canvas->y+((bar_height-8)/2),
                                 grey,
                                 ARROW_RIGHT);
-    /* register coordinates in ImageInfo object if available */
+    /* register coordinates in GT_ImageInfo object if available */
     if (canvas->ii)
     {
       RecMap *rm = recmap_create(draw_range.start, canvas->y,
                                  draw_range.end, canvas->y+bar_height,
                                  gt_block_get_top_level_feature(block));
-      image_info_add_recmap(canvas->ii, rm);
+      gt_image_info_add_recmap(canvas->ii, rm);
       rm->has_omitted_children = true;
     }
     return -1;
@@ -612,13 +612,13 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
     bittab_set_bit(canvas->bt, (unsigned long) draw_range.start);
   }
 
-  /* register coordinates in ImageInfo object if available */
+  /* register coordinates in GT_ImageInfo object if available */
   if (canvas->ii)
   {
     RecMap *rm = recmap_create(elem_start, canvas->y,
                                elem_start+elem_width, canvas->y+bar_height,
                                element_get_node_ref(elem));
-    image_info_add_recmap(canvas->ii, rm);
+    gt_image_info_add_recmap(canvas->ii, rm);
   }
 
   if (draw_range.end-draw_range.start <= 1.1)

@@ -25,25 +25,25 @@
 #include "extended/feature_type_factory_builtin.h"
 #include "annotationsketch/image_info.h"
 
-struct ImageInfo {
+struct GT_ImageInfo {
   Array* recmaps;
   unsigned int height;
 };
 
-ImageInfo* image_info_new()
+GT_ImageInfo* gt_image_info_new()
 {
-  ImageInfo *ii;
-  ii = ma_calloc(1, sizeof (ImageInfo));
+  GT_ImageInfo *ii;
+  ii = ma_calloc(1, sizeof (GT_ImageInfo));
   ii->recmaps = array_new(sizeof (RecMap*));
   assert(ii->recmaps);
   return ii;
 }
 
-void image_info_delete(ImageInfo *ii)
+void gt_image_info_delete(GT_ImageInfo *ii)
 {
   unsigned long i;
   if (!ii) return;
-  for (i=0;i<image_info_num_of_recmaps(ii);i++)
+  for (i=0;i<gt_image_info_num_of_recmaps(ii);i++)
   {
     RecMap *rm = *(RecMap**) array_get(ii->recmaps, i);
     recmap_delete(rm);
@@ -52,54 +52,43 @@ void image_info_delete(ImageInfo *ii)
   ma_free(ii);
 }
 
-void image_info_add_recmap(ImageInfo *ii, RecMap *rm)
+void gt_image_info_add_recmap(GT_ImageInfo *ii, RecMap *rm)
 {
   assert(ii && rm);
   array_add(ii->recmaps, rm);
 }
 
-void image_info_set_height(ImageInfo *ii, unsigned int height)
+void gt_image_info_set_height(GT_ImageInfo *ii, unsigned int height)
 {
   assert(ii);
   ii->height = height;
 }
 
-unsigned int image_info_get_height(ImageInfo *ii)
+unsigned int gt_image_info_get_height(GT_ImageInfo *ii)
 {
   assert(ii);
   return ii->height;
 }
 
-unsigned long image_info_num_of_recmaps(ImageInfo *ii)
+unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo *ii)
 {
   assert(ii);
   return array_size(ii->recmaps);
 }
 
-RecMap* image_info_get_recmap(ImageInfo *ii, unsigned long n)
+RecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
 {
   assert(ii);
   return *(RecMap**) array_get(ii->recmaps, n);
 }
 
-void image_info_get_recmap_ptr(ImageInfo *ii, RecMap *rm,  unsigned long n)
-{
-  RecMap* own_rm = *(RecMap**) array_get(ii->recmaps, n);
-  assert(ii && rm);
-  rm->nw_x = own_rm->nw_x;
-  rm->nw_y = own_rm->nw_y;
-  rm->se_x = own_rm->se_x;
-  rm->se_y = own_rm->se_y;
-  rm->gn = own_rm->gn;
-}
-
-int image_info_unit_test(Error *err)
+int gt_image_info_unit_test(Error *err)
 {
   RecMap* rms[20];
   GenomeNode* gfs[20];
   FeatureTypeFactory *ftf;
   GenomeFeatureType *gft;
-  ImageInfo *ii;
+  GT_ImageInfo *ii;
   unsigned long i;
   Str *seqid;
   int had_err = 0;
@@ -107,7 +96,7 @@ int image_info_unit_test(Error *err)
   error_check(err);
 
   seqid = str_new_cstr("seqid");
-  ii = image_info_new();
+  ii = gt_image_info_new();
   ftf = feature_type_factory_builtin_new();
   gft = feature_type_factory_create_gft(ftf, "gene");
 
@@ -123,14 +112,14 @@ int image_info_unit_test(Error *err)
                            rand_max_double(100.0),
                            rand_max_double(100.0),
                            gfs[i]);
-    image_info_add_recmap(ii, rms[i]);
-    ensure(had_err, image_info_num_of_recmaps(ii) == i+1);
-    ensure(had_err, (rm = image_info_get_recmap(ii, i)) == rms[i]);
+    gt_image_info_add_recmap(ii, rms[i]);
+    ensure(had_err, gt_image_info_num_of_recmaps(ii) == i+1);
+    ensure(had_err, (rm = gt_image_info_get_recmap(ii, i)) == rms[i]);
     ensure(had_err, rm->gn == rms[i]->gn);
     genome_node_delete((GenomeNode*) gfs[i]);
   }
 
-  image_info_delete(ii);
+  gt_image_info_delete(ii);
   feature_type_factory_delete(ftf);
   str_delete(seqid);
 

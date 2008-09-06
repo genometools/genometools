@@ -28,7 +28,7 @@ typedef struct GT_Canvas GT_Canvas;
    configuration given in <style>. The optional <image_info> is filled when
    the created GT_Canvas object is used to render a GT_Diagram object. */
 GT_Canvas*    gt_canvas_new(GT_Style *style, GraphicsOutType output_type,
-                            unsigned long width, ImageInfo *image_info);
+                            unsigned long width, GT_ImageInfo *image_info);
 /* Returns the height of the given <canvas>. */
 unsigned long gt_canvas_get_height(GT_Canvas *canvas);
 /* Write rendered <canvas> to file with name <filename>. */

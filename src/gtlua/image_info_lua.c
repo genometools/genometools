@@ -29,10 +29,10 @@
 
 static int imageinfo_lua_new(lua_State *L)
 {
-  ImageInfo **ii;
-  ii = lua_newuserdata(L, sizeof (ImageInfo*));
+  GT_ImageInfo **ii;
+  ii = lua_newuserdata(L, sizeof (GT_ImageInfo*));
   assert(ii);
-  *ii = image_info_new();
+  *ii = gt_image_info_new();
   luaL_getmetatable(L, IMAGEINFO_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -40,12 +40,12 @@ static int imageinfo_lua_new(lua_State *L)
 
 static int imageinfo_lua_get_height(lua_State *L)
 {
-  ImageInfo **ii;
+  GT_ImageInfo **ii;
   unsigned long height;
   Error *err = error_new();
   ii = check_imageinfo(L, 1);
   assert(ii);
-  height = image_info_get_height(*ii);
+  height = gt_image_info_get_height(*ii);
   if (height > DBL_MAX)
   {
     error_set(err, "image height exceeds %f!", DBL_MAX);
@@ -59,12 +59,12 @@ static int imageinfo_lua_get_height(lua_State *L)
 
 static int imageinfo_lua_num_of_recmaps(lua_State *L)
 {
-  ImageInfo **ii;
+  GT_ImageInfo **ii;
   unsigned long nof_rm;
   Error *err = error_new();
   ii = check_imageinfo(L, 1);
   assert(ii);
-  nof_rm = image_info_num_of_recmaps(*ii);
+  nof_rm = gt_image_info_num_of_recmaps(*ii);
   if (nof_rm > DBL_MAX)
   {
     error_set(err, "number of recmaps exceeds %f!", DBL_MAX);
@@ -99,18 +99,18 @@ static void push_recmap_as_table(lua_State *L, RecMap *rm)
 
 static int imageinfo_lua_recmaps_as_table(lua_State *L)
 {
-  ImageInfo **ii;
+  GT_ImageInfo **ii;
   unsigned long num, i;
   ii = check_imageinfo(L, 1);
   assert(ii);
-  num = image_info_num_of_recmaps(*ii);
+  num = gt_image_info_num_of_recmaps(*ii);
   if (num>0)
   {
     lua_newtable(L);
     for (i=0;i<num;i++)
     {
       lua_pushnumber(L, i+1);
-      push_recmap_as_table(L, image_info_get_recmap(*ii, i));
+      push_recmap_as_table(L, gt_image_info_get_recmap(*ii, i));
       lua_rawset(L, -3);
     }
   } else lua_pushnil(L);
@@ -119,9 +119,9 @@ static int imageinfo_lua_recmaps_as_table(lua_State *L)
 
 static int imageinfo_lua_delete(lua_State *L)
 {
-  ImageInfo **ii;
+  GT_ImageInfo **ii;
   ii = check_imageinfo(L, 1);
-  image_info_delete(*ii);
+  gt_image_info_delete(*ii);
   return 0;
 }
 

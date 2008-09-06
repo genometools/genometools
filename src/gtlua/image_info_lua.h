@@ -22,7 +22,7 @@
 
 /* exports the Imageinfo class to Lua:
 
-   -- returns a new ImageInfo object.
+   -- returns a new GT_ImageInfo object.
    function imageinfo_new()
 
    -- returns an array of tables with the fields "nw_x","nw_y","se_x","se_y" and
@@ -34,6 +34,6 @@ int luaopen_imageinfo(lua_State*);
 
 #define IMAGEINFO_METATABLE  "GenomeTools.imageinfo"
 #define check_imageinfo(L, POS) \
-              (ImageInfo**) luaL_checkudata(L, POS, IMAGEINFO_METATABLE)
+              (GT_ImageInfo**) luaL_checkudata(L, POS, IMAGEINFO_METATABLE)
 
 #endif
