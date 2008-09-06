@@ -42,7 +42,7 @@
 
 #ifndef WITHOUT_CAIRO
 #include "annotationsketch/luastyle.h"
-#include "annotationsketch/style_with_state.h"
+#include "annotationsketch/style.h"
 #endif
 
 struct GTR {

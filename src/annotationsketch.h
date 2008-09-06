@@ -29,6 +29,6 @@
 #include "annotationsketch/feature_visitor.h"
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/recmap.h"
-#include "annotationsketch/style.h"
+#include "annotationsketch/style_api.h"
 
 #endif
