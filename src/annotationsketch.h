@@ -25,8 +25,6 @@
 #include "annotationsketch/color_api.h"
 #include "annotationsketch/diagram_api.h"
 #include "annotationsketch/feature_index_api.h"
-#include "annotationsketch/feature_stream.h"
-#include "annotationsketch/feature_visitor.h"
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/recmap.h"
 #include "annotationsketch/style_api.h"
