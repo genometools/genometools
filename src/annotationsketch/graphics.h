@@ -19,6 +19,8 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
+#include "core/str.h"
+
 typedef enum
 {
   ARROW_LEFT,

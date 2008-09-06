@@ -18,6 +18,8 @@
 #ifndef DRAWING_RANGE_H
 #define DRAWING_RANGE_H
 
+#include <stdbool.h>
+
 typedef struct
 {
   double start, end;

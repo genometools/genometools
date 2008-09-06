@@ -21,7 +21,7 @@
 #define ANNOTATIONSKETCH_H
 
 /* The AnnotationSketch  header */
-#include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_api.h"
 #include "annotationsketch/color.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index.h"
