@@ -1,4 +1,4 @@
-  /*
+/*
   Copyright (c) 2007-2008 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
   Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
@@ -108,9 +108,9 @@ int gt_style_load_file(GT_Style *sty, const char *filename, Error *err)
     had_err = -1;
   }
   if (!had_err) {
-    lua_getglobal(sty->L, "config");
+    lua_getglobal(sty->L, "style");
     if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
-      error_set(err, "'config' is not defined or not a table in \"%s\"",
+      error_set(err, "'style' is not defined or not a table in \"%s\"",
                 filename);
     }
     lua_pop(sty->L, 1);
@@ -126,19 +126,19 @@ void gt_style_reload(GT_Style *sty)
   assert(!rval); /* should not happen, file was loaded before */
 }
 
-/* Searches for <section> inside the config table, creating it if it does not
+/* Searches for <section> inside the style table, creating it if it does not
    exist and finally pushing it on the Lua stack (at the top).
    Returns the total number of items pushed on the stack by this function. */
 static int gt_style_find_section_for_setting(GT_Style* sty, const char *section)
 {
   int depth = 0;
   assert(sty && section);
-  lua_getglobal(sty->L, "config");
+  lua_getglobal(sty->L, "style");
   if (lua_isnil(sty->L, -1)) {
     lua_pop(sty->L, 1);
     lua_newtable(sty->L);
-    lua_setglobal(sty->L, "config");
-    lua_getglobal(sty->L, "config");
+    lua_setglobal(sty->L, "style");
+    lua_getglobal(sty->L, "style");
   }
   depth++;
   lua_getfield(sty->L, -1, section);
@@ -151,16 +151,16 @@ static int gt_style_find_section_for_setting(GT_Style* sty, const char *section)
   return depth;
 }
 
-/* Searches for <section> inside the config table, returning -1 if it is not
+/* Searches for <section> inside the style table, returning -1 if it is not
    found. Otherwise the number of items pushed onto the stack is returned. */
 static int gt_style_find_section_for_getting(const GT_Style *sty,
                                           const char *section)
 {
   int depth = 0;
   assert(sty && section);
-  lua_getglobal(sty->L, "config");
+  lua_getglobal(sty->L, "style");
   if (lua_isnil(sty->L, -1)) {
-    if (sty->verbose) warning("'config' is not defined");
+    if (sty->verbose) warning("'style' is not defined");
     lua_pop(sty->L, 1);
     return -1;
   } else depth++;
@@ -406,7 +406,7 @@ void gt_style_set_bool(GT_Style *sty, const char *section, const char *key,
 void gt_style_unset(GT_Style *sty, const char *section, const char *key)
 {
   assert(sty && section && key);
-  lua_getglobal(sty->L, "config");
+  lua_getglobal(sty->L, "style");
   if (!lua_isnil(sty->L, -1)) {
     assert(lua_istable(sty->L, -1));
     lua_getfield(sty->L, -1, section);
@@ -430,12 +430,12 @@ int gt_style_to_str(const GT_Style *sty, Str *outstr, Error *err)
   int had_err;
   error_check(err);
   assert(sty && outstr);
-  lua_getglobal(sty->L, "config");
-  str_append_cstr(outstr, "config = {\n");
+  lua_getglobal(sty->L, "style");
+  str_append_cstr(outstr, "style = {\n");
   if (lua_istable(sty->L, -1))
     had_err = lua_table_to_str(sty->L, outstr, -1, err);
   else {
-    error_set(err, "'config' must be a table");
+    error_set(err, "'style' must be a table");
     had_err = -1;
   }
   str_append_cstr(outstr, "}");
@@ -492,7 +492,7 @@ int gt_style_unit_test(Error *err)
   col.red=1.0;col.green=1.0;col.blue=1.0;
   defcol.red=.5;defcol.green=.5;defcol.blue=.5;
 
-  /* instantiate new config object */
+  /* instantiate new style object */
   if (!(sty = gt_style_new(false, err)))
     had_err = -1;
 

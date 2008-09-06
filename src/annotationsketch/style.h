@@ -25,7 +25,7 @@
 #include "extended/genome_feature_type.h"
 #include "extended/genome_node.h"
 
-/* Holds configuration information. */
+/* Holds style information. */
 typedef struct GT_Style GT_Style;
 
 /* Creates a new GT_Style object with given verbosity. If set, warnings will be
@@ -34,10 +34,10 @@ GT_Style*      gt_style_new(bool verbose, Error*);
 /* Creates a deep copy of the given GT_Style object. */
 GT_Style*      gt_style_clone(const GT_Style*, Error*);
 /* Loads and executes Lua style file with given <filename>.
-   This file must contain a global table called 'GT_Style'. */
+   This file must contain a global table called 'style'. */
 int            gt_style_load_file(GT_Style*, const char *filename, Error*);
 /* Loads and executes Lua style code from the given String <instr>.
-   This code must contain a global table called 'GT_Style'. */
+   This code must contain a global table called 'style'. */
 int            gt_style_load_str(GT_Style*, Str *instr, Error*);
 /* Generates Lua code which represents the given GT_Style object and
    writes it into the String object <outstr>.*/

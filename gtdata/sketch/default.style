@@ -2,7 +2,7 @@
 -- All options must be set inside the 'config' table.
 -- All items in this table must be tables, called 'sections'.
 
-config =
+style =
 {
   gene = {
     -- Color definitions
