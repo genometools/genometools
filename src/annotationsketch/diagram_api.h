@@ -17,20 +17,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DIAGRAM_H
-#define DIAGRAM_H
+#ifndef DIAGRAM_API_H
+#define DIAGRAM_API_H
 
-#include "annotationsketch/diagram_api.h"
-#include "core/hashmap.h"
+#include "annotationsketch/feature_index.h"
 
-typedef struct TracklineInfo {
-  unsigned long total_lines,
-                total_captionlines;
-} TracklineInfo;
+typedef struct GT_Diagram GT_Diagram;
 
-Hashmap*    gt_diagram_get_tracks(const GT_Diagram*);
-void        gt_diagram_get_lineinfo(const GT_Diagram*, TracklineInfo*);
-int         gt_diagram_get_number_of_tracks(const GT_Diagram*);
-int         gt_diagram_unit_test(Error*);
+/* Create a new GT_Diagram object representing the genome nodes in
+   <feature_index> in region <seqid> overlapping with <range>. */
+GT_Diagram* gt_diagram_new(GT_FeatureIndex *feature_index, const char *seqid,
+                           const Range*, GT_Style*);
+GT_Diagram* gt_diagram_new_from_array(Array *features, const Range*, GT_Style*);
+Range       gt_diagram_get_range(GT_Diagram*);
+void        gt_diagram_set_config(GT_Diagram*, GT_Style*);
+/* Render <diagram> on the given <canvas>. */
+int         gt_diagram_sketch(GT_Diagram *diagram, GT_Canvas *canvas);
+void        gt_diagram_delete(GT_Diagram*);
 
 #endif

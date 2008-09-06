@@ -25,7 +25,6 @@ typedef struct Track Track;
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/line.h"
 #include "annotationsketch/line_breaker.h"
-#include "annotationsketch.h"
 #include "core/array.h"
 #include "extended/genome_feature_type.h"
 #include "extended/genome_node.h"
