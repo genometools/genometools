@@ -201,7 +201,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   return 0;
 }
 
-static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
+static int filter_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr,
                                           UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;

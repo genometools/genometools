@@ -54,7 +54,7 @@ int genome_visitor_visit_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   return gv->c_class->genome_feature(gv, gf, err);
 }
 
-int genome_visitor_visit_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
+int genome_visitor_visit_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr,
                                          GT_Error *err)
 {
   gt_error_check(err);

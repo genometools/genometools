@@ -27,7 +27,7 @@ struct GenomeVisitorClass {
   void (*free)(GenomeVisitor*);
   int  (*comment)(GenomeVisitor*, GT_Comment*, GT_Error*);
   int  (*genome_feature)(GenomeVisitor*, GenomeFeature*, GT_Error*);
-  int  (*sequence_region)(GenomeVisitor*, SequenceRegion*, GT_Error*);
+  int  (*sequence_region)(GenomeVisitor*, GT_SequenceRegion*, GT_Error*);
   int  (*sequence_node)(GenomeVisitor*, SequenceNode*, GT_Error*);
 };
 

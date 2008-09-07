@@ -68,7 +68,7 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
 }
 
 static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
-                                             SequenceRegion *sr,
+                                             GT_SequenceRegion *sr,
                                              UNUSED GT_Error *err)
 {
   RegionCovVisitor *regioncov_visitor;

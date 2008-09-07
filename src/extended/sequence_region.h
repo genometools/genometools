@@ -19,7 +19,7 @@
 #define SEQUENCE_REGION_H
 
 /* implements the ``genome node'' interface */
-typedef struct SequenceRegion SequenceRegion;
+typedef struct GT_SequenceRegion GT_SequenceRegion;
 
 #include "core/str.h"
 #include "extended/genome_node.h"

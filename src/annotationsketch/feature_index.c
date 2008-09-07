@@ -44,7 +44,7 @@ struct GT_FeatureIndex {
 
 typedef struct {
   IntervalTree *features;
-  SequenceRegion *region;
+  GT_SequenceRegion *region;
   GT_Range dyn_range;
 } RegionInfo;
 
@@ -72,7 +72,7 @@ GT_FeatureIndex* gt_feature_index_ref(GT_FeatureIndex *fi)
 }
 
 void gt_feature_index_add_sequence_region(GT_FeatureIndex *fi,
-                                          SequenceRegion *sr)
+                                          GT_SequenceRegion *sr)
 {
   char *seqid;
   RegionInfo *info;
@@ -80,7 +80,7 @@ void gt_feature_index_add_sequence_region(GT_FeatureIndex *fi,
   seqid = str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr));
   if (!hashmap_get(fi->regions, seqid)) {
     info = ma_malloc(sizeof (RegionInfo));
-    info->region = (SequenceRegion*) gt_genome_node_ref((GT_GenomeNode*) sr);
+    info->region = (GT_SequenceRegion*) gt_genome_node_ref((GT_GenomeNode*) sr);
     info->features = interval_tree_new((FreeFunc) gt_genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
@@ -267,7 +267,7 @@ int gt_feature_index_unit_test(GT_Error *err)
   GT_Range r1, r2, r3, r4, r5, check_range, rs;
   Str *seqid1, *seqid2;
   GT_StrArray *seqids = NULL;
-  SequenceRegion *sr1, *sr2;
+  GT_SequenceRegion *sr1, *sr2;
   GT_Array *features = NULL;
   int had_err = 0;
   gt_error_check(err);
@@ -286,8 +286,8 @@ int gt_feature_index_unit_test(GT_Error *err)
   seqid1 = str_new_cstr("test1");
   seqid2 = str_new_cstr("test2");
 
-  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs);
-  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs);
+  sr1 = (GT_SequenceRegion*) sequence_region_new(seqid1, rs);
+  sr2 = (GT_SequenceRegion*) sequence_region_new(seqid2, rs);
 
   /* generate a new genome feature */
   type = feature_type_factory_create_gft(feature_type_factory, gft_gene);

@@ -266,7 +266,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   return had_err;
 }
 
-static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
+static int gff3_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr,
                                         UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
