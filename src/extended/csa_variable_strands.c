@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <assert.h>
 #include "core/unused_api.h"
 #include "extended/csa_splice_form.h"
 #include "extended/csa_variable_strands.h"

@@ -45,7 +45,6 @@
 #include "core/phase.h"          /* phase module */
 #include "core/progressbar.h"    /* progressbar module */
 #include "core/queue.h"          /* queue class */
-#include "core/range.h"          /* range class */
 #include "core/safearith.h"      /* safe arithmetics module */
 #include "core/score_function.h" /* score function class */
 #include "core/score_matrix.h"   /* score matrix class */

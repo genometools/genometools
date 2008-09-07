@@ -18,24 +18,10 @@
 #ifndef RANGE_H
 #define RANGE_H
 
-#include <stdbool.h>
-#include "core/array.h"
+#include "core/error_api.h"
+#include "core/range_api.h"
 
-typedef struct {
-  unsigned long start,
-                end;
-} GT_Range;
-
-int           gt_range_compare(GT_Range, GT_Range);
-int           gt_range_compare_ptr(const GT_Range*, const GT_Range*);
-int           gt_range_compare_with_delta(GT_Range, GT_Range, unsigned long delta);
-bool          gt_range_overlap(GT_Range, GT_Range);
-bool          gt_range_contains(GT_Range, GT_Range);
-bool          gt_range_within(GT_Range, unsigned long);
-GT_Range         gt_range_join(GT_Range, GT_Range);
-GT_Range         gt_range_offset(GT_Range, long offset);
-GT_Range         gt_range_reorder(GT_Range);
-unsigned long gt_range_length(GT_Range);
+GT_Range      gt_range_reorder(GT_Range);
 int           gt_range_unit_test(GT_Error*);
 
 void          ranges_sort(GT_Array*);
