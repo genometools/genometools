@@ -23,8 +23,16 @@
 #include "core.h"     /* the core of the GenomeTools library */
 #include "extended.h" /* extended part of the GenomeTools library  */
 #include "matching.h" /* include the GenomeTools matching library */
+
 #ifndef WITHOUT_CAIRO
-#include "annotationsketch.h"  /* include AnnotationSketch library */
+/* the AnnotationSketch module (depends on Cairo) */
+#include "annotationsketch/canvas_api.h"
+#include "annotationsketch/color_api.h"
+#include "annotationsketch/diagram_api.h"
+#include "annotationsketch/feature_index_api.h"
+#include "annotationsketch/image_info_api.h"
+#include "annotationsketch/recmap_api.h"
+#include "annotationsketch/style_api.h"
 #endif
 
 #endif
