@@ -22,7 +22,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/splitter.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/genome_node.h"
 #include "extended/genome_node_iterator.h"
 #include "extended/gff3_escaping.h"
@@ -77,7 +77,7 @@ typedef struct {
   unsigned long seqnum;
 } TargetInfo;
 
-static bool show_target(UNUSED unsigned long pos, void *data)
+static bool show_target(GT_UNUSED unsigned long pos, void *data)
 {
   TargetInfo *ti = data;
   assert(ti);
@@ -159,7 +159,7 @@ static int extracttarget_from_node(GT_GenomeNode *gn, GT_StrArray *seqfiles,
   return had_err;
 }
 
-static int gt_extracttarget_runner(UNUSED int argc, const char **argv,
+static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
                                    int parsed_args, void *tool_arguments,
                                    GT_Error *err)
 {

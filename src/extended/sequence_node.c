@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/sequence_node.h"
 #include "extended/genome_node_rep.h"
 
@@ -42,7 +42,7 @@ static GT_Str* gt_sequence_node_get_seqid(GT_GenomeNode *gn)
   return sn->description;
 }
 
-static GT_Range gt_sequence_node_get_range(UNUSED GT_GenomeNode *gn)
+static GT_Range gt_sequence_node_get_range(GT_UNUSED GT_GenomeNode *gn)
 {
   GT_Range range;
   range.start = 0;

@@ -18,7 +18,7 @@
 #include "core/chardef.h"
 #include "core/log.h"
 #include "core/minmax.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "match/encseq-specialsrank.h"
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-bwtseq.h"
@@ -382,7 +382,7 @@ isSortModeTransition(RandomSeqAccessor origSeqAccess, Seqpos seqLen,
 static BitOffset
 addLocateInfo(BitString cwDest, BitOffset cwOffset,
               BitString varDest, BitOffset varOffset,
-              UNUSED Seqpos start, Seqpos len, void *cbState, GT_Error *err)
+              GT_UNUSED Seqpos start, Seqpos len, void *cbState, GT_Error *err)
 {
   BitOffset bitsWritten = 0;
   struct addLocateInfoState *state = cbState;

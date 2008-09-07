@@ -39,7 +39,7 @@
 #include "core/log.h"
 #include "core/minmax.h"
 #include "core/str.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "match/seqpos-def.h"
 
 #include "match/eis-bitpackseqpos.h"
@@ -967,8 +967,8 @@ fetchSuperBlock(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
 }
 
 static Seqpos
-blockCompSeqSelect(UNUSED struct encIdxSeq *seq, UNUSED Symbol sym,
-                   UNUSED Seqpos count, UNUSED union EISHint *hint)
+blockCompSeqSelect(GT_UNUSED struct encIdxSeq *seq, GT_UNUSED Symbol sym,
+                   GT_UNUSED Seqpos count, GT_UNUSED union EISHint *hint)
 {
   /* FIXME: implementation pending */
   abort();
@@ -1971,7 +1971,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
                size_t numExtHeaders, const uint16_t *headerIDs,
                const uint32_t *extHeaderSizes,
                headerWriteFunc *extHeaderCallbacks,
-               void **headerCBData, UNUSED GT_Error *err)
+               void **headerCBData, GT_UNUSED GT_Error *err)
 {
   FILE *fp;
   /* construct memory buffer with header data */

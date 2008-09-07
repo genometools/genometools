@@ -16,7 +16,7 @@
 */
 #include <ctype.h>
 
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/hashmap.h"
 #include "mg_outputwriter.h"
 
@@ -1281,8 +1281,8 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
 }
 
 static enum iterator_op
-newmemory_hash(UNUSED char *key, unsigned long *value, void *data,
-               UNUSED GT_Error * err)
+newmemory_hash(GT_UNUSED char *key, unsigned long *value, void *data,
+               GT_UNUSED GT_Error * err)
 {
   /* Parsestruct-Struktur */
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;

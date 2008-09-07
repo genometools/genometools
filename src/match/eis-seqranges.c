@@ -20,7 +20,7 @@
 #include "core/error.h"
 #include "core/ma.h"
 #include "core/minmax.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 
 #include "match/eis-seqranges.h"
@@ -163,8 +163,8 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
 }
 
 void
-SRLinsertNewRange(UNUSED struct seqRangeList *rangeList, UNUSED Seqpos pos,
-                  UNUSED Seqpos len, UNUSED Symbol esym)
+SRLinsertNewRange(GT_UNUSED struct seqRangeList *rangeList, GT_UNUSED Seqpos pos,
+                  GT_UNUSED Seqpos len, GT_UNUSED Symbol esym)
 {
   assert(rangeList);
   abort();
@@ -465,7 +465,7 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp)
 /* FIXME: convert to platform-independent variant */
 struct seqRangeList *
 SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
-                  enum SRLFeatures features, UNUSED GT_Error *err)
+                  enum SRLFeatures features, GT_UNUSED GT_Error *err)
 {
   struct seqRangeList *newRangeList;
   size_t numRanges;

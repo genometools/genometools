@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "core/fa.h"
 #include "core/symboldef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "spacedef.h"
 #include "test-pairwise.h"
 
@@ -155,7 +155,7 @@ unsigned long runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                   applycheckfunctiontotext);
 }
 
-void checkgreedyunitedist(UNUSED bool forward,
+void checkgreedyunitedist(GT_UNUSED bool forward,
                           const Uchar *useq,
                           unsigned long ulen,
                           const Uchar *vseq,

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "spacedef.h"
 #include "sarr-def.h"
 #include "merger-trie.h"
@@ -25,7 +25,7 @@
 #include "esa-map.pr"
 
 static void maketrie(Mergertrierep *trierep,
-                     UNUSED const Uchar *characters,
+                     GT_UNUSED const Uchar *characters,
                      Seqpos len)
 {
   Suffixinfo suffixinfo;
@@ -49,9 +49,9 @@ static void maketrie(Mergertrierep *trierep,
 }
 
 static void successivelydeletesmallest(Mergertrierep *trierep,
-                                       UNUSED Seqpos seqlen,
-                                       UNUSED const Uchar *characters,
-                                       UNUSED GT_Error *err)
+                                       GT_UNUSED Seqpos seqlen,
+                                       GT_UNUSED const Uchar *characters,
+                                       GT_UNUSED GT_Error *err)
 {
   Mergertrienode *smallest;
 #ifdef WITHTRIEIDENT

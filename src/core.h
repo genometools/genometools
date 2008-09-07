@@ -55,7 +55,7 @@
 #include "core/tokenizer.h"      /* tokenizer class */
 #include "core/translate.h"      /* translate module */
 #include "core/undef.h"          /* undef module */
-#include "core/unused.h"         /* unused module */
+#include "core/unused_api.h"         /* unused module */
 #include "core/versionfunc.h"    /* version module */
 #include "core/warning.h"        /* warning module */
 #include "core/xansi.h"          /* ANSI wrapper module */

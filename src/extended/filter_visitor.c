@@ -19,7 +19,7 @@
 #include "core/minmax.h"
 #include "core/queue.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/filter_visitor.h"
 #include "extended/genome_visitor_rep.h"
 #include "extended/gff3_parser.h"
@@ -56,7 +56,7 @@ static void filter_visitor_free(GenomeVisitor *gv)
 }
 
 static int filter_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
-                                  UNUSED GT_Error *err)
+                                  GT_UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;
   gt_error_check(err);
@@ -136,7 +136,7 @@ static bool filter_min_average_ssp(GT_GenomeFeature *gf, double minaveragessp)
 }
 
 static int filter_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
-                                         UNUSED GT_Error *err)
+                                         GT_UNUSED GT_Error *err)
 {
   FilterVisitor *fv;
   bool filter_node = false;
@@ -203,7 +203,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf
 }
 
 static int filter_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr,
-                                          UNUSED GT_Error *err)
+                                          GT_UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;
   gt_error_check(err);
@@ -232,7 +232,7 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *
 }
 
 static int filter_visitor_sequence_node(GenomeVisitor *gv, GT_SequenceNode *sn,
-                                        UNUSED GT_Error *err)
+                                        GT_UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;
   gt_error_check(err);

@@ -21,7 +21,7 @@
 #include "core/fasta.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/string_distri.h"
 #include "extended/genome_node.h"
 #include "extended/genome_visitor_rep.h"
@@ -74,7 +74,7 @@ static void gff3_visitor_free(GenomeVisitor *gv)
 }
 
 static int gff3_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
-                                UNUSED GT_Error *err)
+                                GT_UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
   gt_error_check(err);
@@ -85,7 +85,7 @@ static int gff3_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
   return 0;
 }
 
-static int add_id(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int add_id(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
   Add_id_info *info = (Add_id_info*) data;
   GT_Array *parent_features = NULL;
@@ -115,7 +115,7 @@ static void show_attribute(const char *attr_name, const char *attr_value,
 }
 
 static int gff3_show_genome_feature(GT_GenomeNode *gn, void *data,
-                                    UNUSED GT_Error *err)
+                                    GT_UNUSED GT_Error *err)
 {
   bool part_shown = false;
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
@@ -267,7 +267,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
 }
 
 static int gff3_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr,
-                                        UNUSED GT_Error *err)
+                                        GT_UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
   gt_error_check(err);
@@ -285,7 +285,7 @@ static int gff3_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr
 }
 
 static int gff3_visitor_sequence_node(GenomeVisitor *gv, GT_SequenceNode *sn,
-                                      UNUSED GT_Error *err)
+                                      GT_UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
   gt_error_check(err);

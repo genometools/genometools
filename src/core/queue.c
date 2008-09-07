@@ -20,7 +20,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/queue.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 struct Queue
 {
@@ -282,7 +282,7 @@ static int check_queue_reverse(void **elem, void *info, GT_Error *err)
   return had_err;
 }
 
-static int fail_func(UNUSED void **elem, UNUSED void *info, UNUSED GT_Error *err)
+static int fail_func(GT_UNUSED void **elem, GT_UNUSED void *info, GT_UNUSED GT_Error *err)
 {
   return -1;
 }

@@ -21,7 +21,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 
 #define NUM_OF_TESTS  100
@@ -162,7 +162,7 @@ static int intcompare(const void *a, const void *b)
   return *(int*) a - *(int*) b;
 }
 
-int dlist_example(UNUSED GT_Error *err)
+int dlist_example(GT_UNUSED GT_Error *err)
 {
   Dlistelem *dlistelem;
   Dlist *dlist;

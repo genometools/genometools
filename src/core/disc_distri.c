@@ -23,7 +23,7 @@
 #include "core/ensure.h"
 #include "core/hashmap-generic.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 struct DiscDistri {
   Hashtable *hashdist;
@@ -87,7 +87,7 @@ typedef struct {
 
 static enum iterator_op
 showvalue(unsigned long key, unsigned long long occurrences,
-          void *data, UNUSED GT_Error *err)
+          void *data, GT_UNUSED GT_Error *err)
 {
   double probability;
   ShowValueInfo *info;
@@ -127,7 +127,7 @@ typedef struct {
 
 static enum iterator_op
 foreach_iterfunc(unsigned long key, unsigned long long occurrences, void *data,
-                 UNUSED GT_Error *err)
+                 GT_UNUSED GT_Error *err)
 {
   ForeachInfo *info;
   gt_error_check(err);

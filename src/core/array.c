@@ -24,7 +24,7 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/range.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 
 #define NUM_OF_TESTS    100
@@ -215,7 +215,7 @@ int gt_array_iterate_reverse(GT_Array *a, GT_ArrayProcessor gt_array_processor, 
   return 0;
 }
 
-static int iterate_test_func(void *value, void *info, UNUSED GT_Error *err)
+static int iterate_test_func(void *value, void *info, GT_UNUSED GT_Error *err)
 {
   unsigned long *i;
   GT_Range range;
@@ -229,13 +229,13 @@ static int iterate_test_func(void *value, void *info, UNUSED GT_Error *err)
   return had_err;
 }
 
-static int iterate_fail_func(UNUSED void *value, UNUSED void *info,
-                             UNUSED GT_Error *err)
+static int iterate_fail_func(GT_UNUSED void *value, GT_UNUSED void *info,
+                             GT_UNUSED GT_Error *err)
 {
   return -1;
 }
 
-int gt_array_example(UNUSED GT_Error *err)
+int gt_array_example(GT_UNUSED GT_Error *err)
 {
   unsigned long i;
   GT_Array *a;

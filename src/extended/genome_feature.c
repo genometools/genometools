@@ -22,7 +22,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/feature_type_factory.h"
 #include "extended/feature_type_factory_builtin.h"
 #include "extended/genome_feature.h"
@@ -85,7 +85,7 @@ const char* gt_genome_feature_get_attribute(GT_GenomeNode *gn, const char *attr_
 }
 
 static void store_attribute(const char *attr_name,
-                            UNUSED const char *attr_value, void *data)
+                            GT_UNUSED const char *attr_value, void *data)
 {
   GT_StrArray *list = data;
   assert(attr_name && attr_value && data);
@@ -408,7 +408,7 @@ Phase gt_genome_feature_get_phase(GT_GenomeFeature *gf)
   return (gn->bit_field >> PHASE_OFFSET) & PHASE_MASK;
 }
 
-static int save_exon(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int save_exon(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
   GT_GenomeFeature *gf;
   GT_Array *exon_features = (GT_Array*) data;
@@ -430,7 +430,7 @@ void gt_genome_feature_get_exons(GT_GenomeFeature *gf, GT_Array *exon_features)
   assert(!had_err); /* cannot happen, because save_exon() is sane */
 }
 
-static int save_exons_and_cds(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int save_exons_and_cds(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   GT_GenomeFeature *gf;
@@ -468,7 +468,7 @@ static void set_transcript_types(GT_Array *features)
 }
 
 static int determine_transcripttypes(GT_GenomeNode *gn, void *data,
-                                     UNUSED GT_Error *err)
+                                     GT_UNUSED GT_Error *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   int had_err;

@@ -18,7 +18,7 @@
 #include "core/cstr.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/genome_feature_type_imp.h"
 #include "extended/gft_collection.h"
 
@@ -54,8 +54,8 @@ GT_GenomeFeatureType* gft_collection_get(GFTCollection *gftc, const char *type)
   return hashmap_get(gftc->gt_genome_feature_types, type);
 }
 
-static int store_type(void *key, UNUSED void *value, void *data,
-                      UNUSED GT_Error *err)
+static int store_type(void *key, GT_UNUSED void *value, void *data,
+                      GT_UNUSED GT_Error *err)
 {
   GT_StrArray *types = data;
   assert(key && types);

@@ -17,7 +17,7 @@
 
 #include "core/chardef.h"
 #include "core/symboldef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "sarr-def.h"
 #include "seqpos-def.h"
 #include "esa-splititv.h"
@@ -26,7 +26,7 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
                                         unsigned long offset,
                                         Seqpos left,
                                         Seqpos right,
-                                        UNUSED Seqpos *witnessposition,
+                                        GT_UNUSED Seqpos *witnessposition,
                                         const Uchar *qstart,
                                         const Uchar *qend)
 {

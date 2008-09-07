@@ -18,7 +18,7 @@
 #include "core/array.h"
 #include "core/countingsort.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "exercise/fragment_overlaps.h"
 #include "extended/string_matching.h"
 
@@ -79,7 +79,7 @@ void fragment_overlaps_delete(FragmentOverlaps *fo)
   ma_free(fo);
 }
 
-static unsigned long get_weight(const void *elem, UNUSED void *data)
+static unsigned long get_weight(const void *elem, GT_UNUSED void *data)
 {
   const Overlap *overlap = elem;
   assert(overlap);

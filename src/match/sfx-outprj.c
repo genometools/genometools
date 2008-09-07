@@ -24,7 +24,7 @@
 #include "core/filelengthvalues.h"
 #include "core/strarray.h"
 #include "core/str.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "seqpos-def.h"
 #include "defined-types.h"
 #include "format64.h"
@@ -47,7 +47,7 @@ static void showprjinfo(FILE *outprj,
                         unsigned long numofsequences,
                         const Specialcharinfo *specialcharinfo,
                         unsigned int prefixlength,
-                        UNUSED const Definedunsignedint *maxdepth,
+                        GT_UNUSED const Definedunsignedint *maxdepth,
                         Seqpos numoflargelcpvalues,
                         Seqpos maxbranchdepth,
                         const DefinedSeqpos *longest)

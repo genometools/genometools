@@ -18,7 +18,7 @@
 #include "core/arraydef.h"
 #include "core/error.h"
 #include "core/minmax.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "match/sarr-def.h"
 #include "match/encseq-def.h"
 #include "match/spacedef.h"
@@ -70,7 +70,7 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
                                                Seqpos seed1_endpos,
                                                Seqpos seed2_endpos,
                                                LTRboundaries *boundaries,
-                                               UNUSED Seqpos offset)
+                                               GT_UNUSED Seqpos offset)
 {
   /* left alignment */
   boundaries->leftLTR_5  = seed1_startpos - xdropbest_left.ivalue;

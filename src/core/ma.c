@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include "core/hashmap.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 
 /* the memory allocator class */
@@ -141,7 +141,7 @@ void* ma_realloc_mem(void *ptr, size_t size, const char *filename, int line)
   return xrealloc(ptr, size);
 }
 
-void ma_free_mem(void *ptr, UNUSED const char *filename, UNUSED int line)
+void ma_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
 {
   MAInfo *mainfo;
   assert(ma);
@@ -172,8 +172,8 @@ void ma_free_func(void *ptr)
   ma_free(ptr);
 }
 
-static int check_space_leak(UNUSED void *key, void *value, void *data,
-                            UNUSED GT_Error *err)
+static int check_space_leak(GT_UNUSED void *key, void *value, void *data,
+                            GT_UNUSED GT_Error *err)
 {
   CheckSpaceLeakInfo *info = (CheckSpaceLeakInfo*) data;
   MAInfo *mainfo = (MAInfo*) value;

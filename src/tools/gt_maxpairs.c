@@ -19,7 +19,7 @@
 #include "core/error.h"
 #include "core/str.h"
 #include "core/option.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "match/esa-seqread.h"
 #include "match/esa-mmsearch-def.h"
@@ -40,11 +40,11 @@ typedef struct
   GT_StrArray *queryfiles;
 } Maxpairsoptions;
 
-static int simpleexactselfmatchoutput(UNUSED void *info,
+static int simpleexactselfmatchoutput(GT_UNUSED void *info,
                                       Seqpos len,
                                       Seqpos pos1,
                                       Seqpos pos2,
-                                      UNUSED GT_Error *err)
+                                      GT_UNUSED GT_Error *err)
 {
   if (pos1 > pos2)
   {
@@ -59,12 +59,12 @@ static int simpleexactselfmatchoutput(UNUSED void *info,
   return 0;
 }
 
-static int simpleexactquerymatchoutput(UNUSED void *info,
+static int simpleexactquerymatchoutput(GT_UNUSED void *info,
                                        unsigned long len,
                                        Seqpos dbstart,
                                        uint64_t unitnum,
                                        unsigned long querystart,
-                                       UNUSED GT_Error *err)
+                                       GT_UNUSED GT_Error *err)
 {
   printf("%lu " FormatSeqpos " " Formatuint64_t " %lu\n",
            len,

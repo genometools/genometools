@@ -17,7 +17,7 @@
 
 #include "core/error.h"
 #include "core/option.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "match/fmindex.h"
 #include "match/sarr-def.h"

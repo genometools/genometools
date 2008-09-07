@@ -21,7 +21,7 @@
 #include "core/mathsupport.h"
 #include "core/range.h"
 #include "core/strand.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/feature_type_factory_builtin.h"
 #include "annotationsketch/image_info.h"
 

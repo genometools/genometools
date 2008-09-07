@@ -22,7 +22,7 @@
 #include <errno.h>
 #include "core/arraydef.h"
 #include "core/error.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/progressbar.h"
 #include "core/minmax.h"
 #include "spacedef.h"

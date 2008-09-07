@@ -19,7 +19,7 @@
 #include "core/bioseq.h"
 #include "core/ma.h"
 #include "core/option.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/gtdatahelp.h"
 #include "tools/gt_magicmatch.h"
 
@@ -83,8 +83,8 @@ static void translate_sequence_file(Bioseq *bs)
   }
 }
 
-static int gt_magicmatch_runner(UNUSED int argc, UNUSED const char **argv,
-                                UNUSED int parsed_args, void *tool_arguments,
+static int gt_magicmatch_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
+                                GT_UNUSED int parsed_args, void *tool_arguments,
                                 GT_Error *err)
 {
   MagicMatchArguments *arguments = tool_arguments;

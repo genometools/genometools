@@ -19,7 +19,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/score_function.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 #include "extended/alignment.h"
 #include "extended/swalign.h"
@@ -60,7 +60,7 @@ static OptionParser* gt_swalign_opion_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_swalign_runner(UNUSED int argc, const char **argv,
+static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
                              int parsed_args, void *tool_arguments,
                              GT_Error *err)
 {

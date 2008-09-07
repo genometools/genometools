@@ -26,7 +26,7 @@
 #include "core/parseutils.h"
 #include "core/splitter.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/warning.h"
 #include "extended/comment.h"
 #include "extended/feature_info.h"
@@ -313,7 +313,7 @@ typedef struct {
              *replacing_node;
 } ReplaceInfo;
 
-static int replace_func(void **elem, void *info, UNUSED GT_Error *err)
+static int replace_func(void **elem, void *info, GT_UNUSED GT_Error *err)
 {
   ReplaceInfo *replace_info = info;
   GT_GenomeNode **node = (GT_GenomeNode**) elem;
@@ -1140,8 +1140,8 @@ static int parse_fasta_entry(Queue *genome_nodes, const char *line,
   return had_err;
 }
 
-static int add_auto_sr_to_queue(UNUSED void *key, void *value, void *data,
-                                UNUSED GT_Error *err)
+static int add_auto_sr_to_queue(GT_UNUSED void *key, void *value, void *data,
+                                GT_UNUSED GT_Error *err)
 {
   AutomaticGT_SequenceRegion *auto_sr = value;
   Queue *genome_nodes = data;

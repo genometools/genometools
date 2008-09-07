@@ -29,7 +29,7 @@
 */
 
 #include "bzlib_private.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 
 /*---------------------------------------------------*/
@@ -100,14 +100,14 @@ int bz_config_ok ( void )
 
 /*---------------------------------------------------*/
 static
-void* default_bzalloc (UNUSED void* opaque, Int32 items, Int32 size )
+void* default_bzalloc (GT_UNUSED void* opaque, Int32 items, Int32 size )
 {
    void* v = malloc ( items * size );
    return v;
 }
 
 static
-void default_bzfree (UNUSED void* opaque, void* addr )
+void default_bzfree (GT_UNUSED void* opaque, void* addr )
 {
    if (addr != NULL) free ( addr );
 }
@@ -893,7 +893,7 @@ int BZ_API(BZ2_bzDecompressEnd)  ( bz_stream *strm )
 typedef 
    struct {
       FILE*     handle;
-      Char      buf[BZ_MAX_UNUSED];
+      Char      buf[BZ_MAX_GT_UNUSED];
       Int32     bufN;
       Bool      writing;
       bz_stream strm;
@@ -986,14 +986,14 @@ void BZ_API(BZ2_bzWrite)
    bzf->strm.next_in  = buf;
 
    while (True) {
-      bzf->strm.avail_out = BZ_MAX_UNUSED;
+      bzf->strm.avail_out = BZ_MAX_GT_UNUSED;
       bzf->strm.next_out = bzf->buf;
       ret = BZ2_bzCompress ( &(bzf->strm), BZ_RUN );
       if (ret != BZ_RUN_OK)
          { BZ_SETERR(ret); return; };
 
-      if (bzf->strm.avail_out < BZ_MAX_UNUSED) {
-         n = BZ_MAX_UNUSED - bzf->strm.avail_out;
+      if (bzf->strm.avail_out < BZ_MAX_GT_UNUSED) {
+         n = BZ_MAX_GT_UNUSED - bzf->strm.avail_out;
          n2 = fwrite ( (void*)(bzf->buf), sizeof(UChar), 
                        n, bzf->handle );
          if (n != n2 || ferror(bzf->handle))
@@ -1045,14 +1045,14 @@ void BZ_API(BZ2_bzWriteClose64)
 
    if ((!abandon) && bzf->lastErr == BZ_OK) {
       while (True) {
-         bzf->strm.avail_out = BZ_MAX_UNUSED;
+         bzf->strm.avail_out = BZ_MAX_GT_UNUSED;
          bzf->strm.next_out = bzf->buf;
          ret = BZ2_bzCompress ( &(bzf->strm), BZ_FINISH );
          if (ret != BZ_FINISH_OK && ret != BZ_STREAM_END)
             { BZ_SETERR(ret); return; };
 
-         if (bzf->strm.avail_out < BZ_MAX_UNUSED) {
-            n = BZ_MAX_UNUSED - bzf->strm.avail_out;
+         if (bzf->strm.avail_out < BZ_MAX_GT_UNUSED) {
+            n = BZ_MAX_GT_UNUSED - bzf->strm.avail_out;
             n2 = fwrite ( (void*)(bzf->buf), sizeof(UChar), 
                           n, bzf->handle );
             if (n != n2 || ferror(bzf->handle))
@@ -1102,7 +1102,7 @@ BZFILE* BZ_API(BZ2_bzReadOpen)
        (small != 0 && small != 1) ||
        (verbosity < 0 || verbosity > 4) ||
        (unused == NULL && nUnused != 0) ||
-       (unused != NULL && (nUnused < 0 || nUnused > BZ_MAX_UNUSED)))
+       (unused != NULL && (nUnused < 0 || nUnused > BZ_MAX_GT_UNUSED)))
       { BZ_SETERR(BZ_PARAM_ERROR); return NULL; };
 
    if (ferror(f))
@@ -1189,7 +1189,7 @@ int BZ_API(BZ2_bzRead)
 
       if (bzf->strm.avail_in == 0 && !myfeof(bzf->handle)) {
          n = fread ( bzf->buf, sizeof(UChar), 
-                     BZ_MAX_UNUSED, bzf->handle );
+                     BZ_MAX_GT_UNUSED, bzf->handle );
          if (ferror(bzf->handle))
             { BZ_SETERR(BZ_IO_ERROR); return 0; };
          bzf->bufN = n;
@@ -1388,7 +1388,7 @@ BZFILE * bzopen_or_bzdopen
                  int open_mode)      /* bzopen: 0, bzdopen:1 */
 {
    int    bzerr;
-   char   unused[BZ_MAX_UNUSED];
+   char   unused[BZ_MAX_GT_UNUSED];
    int    blockSize100k = 9;
    int    writing       = 0;
    char   mode2[10]     = "";
@@ -1504,7 +1504,7 @@ int BZ_API(BZ2_bzwrite) (BZFILE* b, void* buf, int len )
 
 
 /*---------------------------------------------------*/
-int BZ_API(BZ2_bzflush) (UNUSED BZFILE *b)
+int BZ_API(BZ2_bzflush) (GT_UNUSED BZFILE *b)
 {
    /* do nothing now... */
    return 0;

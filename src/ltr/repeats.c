@@ -19,7 +19,7 @@
 #include "core/arraydef.h"
 #include "core/error.h"
 #include "core/log.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "match/sarr-def.h"
 #include "match/encseq-def.h"
 #include "match/intcode-def.h"
@@ -153,8 +153,8 @@ int simpleexactselfmatchstore (
 }
 
 int subsimpleexactselfmatchstore(void *info, unsigned long len, Seqpos dbstart,
-                                 UNUSED uint64_t queryoffset,
-                                 unsigned long querystart, UNUSED GT_Error *err)
+                                 GT_UNUSED uint64_t queryoffset,
+                                 unsigned long querystart, GT_UNUSED GT_Error *err)
 {
   Repeat *nextfreerepeatptr;
   SubRepeatInfo *sri = (SubRepeatInfo *) info;

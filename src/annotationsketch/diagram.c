@@ -24,7 +24,7 @@
 #include "core/ma.h"
 #include "core/str.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/feature_type_factory_builtin.h"
 #include "extended/genome_node.h"
 #include "extended/genome_feature.h"
@@ -368,8 +368,8 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pare
   assert(hashmap_get(d->nodeinfo, node));
 }
 
-static int gt_diagram_add_tracklines(UNUSED void *key, void *value, void *data,
-                                  UNUSED GT_Error *err)
+static int gt_diagram_add_tracklines(GT_UNUSED void *key, void *value, void *data,
+                                  GT_UNUSED GT_Error *err)
 {
   TracklineInfo *add = (TracklineInfo*) data;
   add->total_lines += track_get_number_of_lines((Track*) value);
@@ -408,8 +408,8 @@ static GT_Str* track_key_new(const char *filename, GT_GenomeFeatureType *type)
 }
 
 /* Create lists of all GT_Blocks in the diagram. */
-static int collect_blocks(UNUSED void *key, void *value, void *data,
-                          UNUSED GT_Error *err)
+static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
+                          GT_UNUSED GT_Error *err)
 {
   NodeInfoElement *ni = (NodeInfoElement*) value;
   GT_Diagram *diagram = (GT_Diagram*) data;
@@ -560,7 +560,7 @@ static int blocklist_block_compare(const void *item1, const void *item2)
 }
 
 static int layout_tracks(void *key, void *value, void *data,
-                         UNUSED GT_Error *err)
+                         GT_UNUSED GT_Error *err)
 {
   unsigned long i, max;
   Track *track;
@@ -612,11 +612,11 @@ static int layout_tracks(void *key, void *value, void *data,
   return 0;
 }
 
-static int render_tracks(UNUSED void *key, void *value, void *data,
-                     UNUSED GT_Error *err)
+static int render_tracks(GT_UNUSED void *key, void *value, void *data,
+                     GT_UNUSED GT_Error *err)
 {
   TrackTraverseInfo *tti = (TrackTraverseInfo*) data;
-  UNUSED Track *track = (Track*) value;
+  GT_UNUSED Track *track = (Track*) value;
   int had_err = 0;
   assert(tti && track);
   had_err = track_sketch((Track*) value, tti->canvas);

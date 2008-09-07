@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/csa_splice_form.h"
 #include "extended/csa_variable_strands.h"
 
@@ -27,7 +27,7 @@ typedef struct {
 
 static void store_splice_form(GT_Array *spliced_alignments_in_form,
                               const void *set_of_sas,
-                              UNUSED unsigned long number_of_sas,
+                              GT_UNUSED unsigned long number_of_sas,
                               size_t size_of_sa, void *data)
 {
   StoreSpliceFormInfo *info = data;

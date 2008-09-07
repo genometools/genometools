@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/add_introns_visitor.h"
 #include "extended/genome_visitor_rep.h"
 
@@ -31,7 +31,7 @@ struct AddIntronsVisitor {
         genome_visitor_cast(add_introns_visitor_class(), GV)
 
 static int add_introns_in_children(GT_GenomeNode *gn, void *data,
-                                   UNUSED GT_Error *err)
+                                   GT_UNUSED GT_Error *err)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GT_GenomeFeature *current_feature;

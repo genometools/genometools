@@ -38,7 +38,7 @@
 #include "core/sig.h"
 #include "core/str.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 #include "core/xposix.h"
 
@@ -173,7 +173,7 @@ typedef struct {
 } Construct_bioseq_files_info;
 
 static int proc_description(const char *description, unsigned long length,
-                            void *data, UNUSED GT_Error *err)
+                            void *data, GT_UNUSED GT_Error *err)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   char *description_cstr;
@@ -191,7 +191,7 @@ static int proc_description(const char *description, unsigned long length,
 }
 
 static int proc_sequence_part(const char *seqpart, unsigned long length,
-                              void *data, UNUSED GT_Error *err)
+                              void *data, GT_UNUSED GT_Error *err)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   gt_error_check(err);
@@ -211,7 +211,7 @@ static int proc_sequence_part(const char *seqpart, unsigned long length,
 }
 
 static int proc_sequence_length(unsigned long sequence_length, void *data,
-                                UNUSED GT_Error *err)
+                                GT_UNUSED GT_Error *err)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   GT_Range range;

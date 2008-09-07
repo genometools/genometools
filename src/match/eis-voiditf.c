@@ -270,9 +270,9 @@ unsigned long bwtrangesplitallwithoutspecial(Matchbound *mbtab,
 }
 
 /*
-void bwtrangewithspecial(UNUSED GT_ArrayBoundswithchar *bwci,
+void bwtrangewithspecial(GT_UNUSED GT_ArrayBoundswithchar *bwci,
                          Seqpos *rangeOccs,
-                         UNUSED unsigned long numofchars,
+                         GT_UNUSED unsigned long numofchars,
                          const void *voidBwtSeq,
                          const Lcpinterval *parent)
 {
@@ -306,10 +306,10 @@ void deletevoidBWTSeq(void *voidbwtseq)
 }
 
 unsigned long voidpackedindexuniqueforward(const void *voidbwtseq,
-                                           UNUSED unsigned long offset,
-                                           UNUSED Seqpos left,
-                                           UNUSED Seqpos right,
-                                           UNUSED Seqpos *witnessposition,
+                                           GT_UNUSED unsigned long offset,
+                                           GT_UNUSED Seqpos left,
+                                           GT_UNUSED Seqpos right,
+                                           GT_UNUSED Seqpos *witnessposition,
                                            const Uchar *qstart,
                                            const Uchar *qend)
 {
@@ -331,9 +331,9 @@ Seqpos voidpackedfindfirstmatchconvert(const void *voidbwtseq,
 }
 
 unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
-                                           UNUSED unsigned long offset,
-                                           UNUSED Seqpos left,
-                                           UNUSED Seqpos right,
+                                           GT_UNUSED unsigned long offset,
+                                           GT_UNUSED Seqpos left,
+                                           GT_UNUSED Seqpos right,
                                            Seqpos *witnessposition,
                                            const Uchar *qstart,
                                            const Uchar *qend)

@@ -20,7 +20,7 @@
 #include "core/hashmap-generic.h"
 #include "core/ma.h"
 #include "core/string_distri.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 struct StringDistri {
   Hashtable *hashdist;
@@ -83,7 +83,7 @@ typedef struct {
 
 static enum iterator_op
 foreach_iterfunc(char *key, unsigned long occurrences, void *data,
-                 UNUSED GT_Error *err)
+                 GT_UNUSED GT_Error *err)
 {
   ForeachInfo *info;
   gt_error_check(err);

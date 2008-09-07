@@ -18,7 +18,7 @@
 #include "core/option.h"
 #include "core/ma.h"
 #include "core/strarray.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/tool.h"
 #include "match/tagerator.h"
 #include "tools/gt_tagerator.h"
@@ -154,9 +154,9 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_tagerator_runner(UNUSED int argc,
-                               UNUSED const char **argv,
-                               UNUSED int parsed_args,
+static int gt_tagerator_runner(GT_UNUSED int argc,
+                               GT_UNUSED const char **argv,
+                               GT_UNUSED int parsed_args,
                                void *tool_arguments, GT_Error *err)
 {
   TageratorOptions *arguments = tool_arguments;
@@ -212,7 +212,7 @@ static int gt_tagerator_runner(UNUSED int argc,
   return haserr ? -1 : 0;
 }
 
-static int gt_tagerator_arguments_check(UNUSED int rest_argc,
+static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
                                         void *tool_arguments,
                                         GT_Error *err)
 {

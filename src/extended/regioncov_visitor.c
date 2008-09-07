@@ -20,7 +20,7 @@
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/minmax.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/genome_visitor_rep.h"
 #include "extended/regioncov_visitor.h"
 
@@ -41,7 +41,7 @@ static void regioncov_visitor_free(GenomeVisitor *gv)
 
 static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
                                             GT_GenomeFeature *gf,
-                                            UNUSED GT_Error *err)
+                                            GT_UNUSED GT_Error *err)
 {
   GT_Range *old_gt_range_ptr, old_range, new_range;
   GT_Array *ranges;
@@ -69,7 +69,7 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
 
 static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
                                              GT_SequenceRegion *sr,
-                                             UNUSED GT_Error *err)
+                                             GT_UNUSED GT_Error *err)
 {
   RegionCovVisitor *regioncov_visitor;
   GT_Array *rangelist;
@@ -104,8 +104,8 @@ GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist)
   return gv;
 }
 
-static int show_rangelist(void *key, void *value, UNUSED void *data,
-                          UNUSED GT_Error *err)
+static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
+                          GT_UNUSED GT_Error *err)
 {
   unsigned long i;
   GT_Array *rangelist;

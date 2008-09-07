@@ -27,7 +27,7 @@
 #include "core/fastabuffer.h"
 #include "core/str.h"
 #include "core/minmax.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
 #include "intbits-tab.h"
@@ -1430,7 +1430,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr)
 
 static Uchar seqdelivercharViadirectaccess(
                         const Encodedsequence *encseq,
-                        UNUSED Encodedsequencescanstate *esr,
+                        GT_UNUSED Encodedsequencescanstate *esr,
                         Seqpos pos)
 {
   return encseq->plainseq[pos];
@@ -1438,7 +1438,7 @@ static Uchar seqdelivercharViadirectaccess(
 
 static Uchar seqdelivercharnoSpecial(
                         const Encodedsequence *encseq,
-                        UNUSED Encodedsequencescanstate *esr,
+                        GT_UNUSED Encodedsequencescanstate *esr,
                         Seqpos pos)
 {
   return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
@@ -1446,7 +1446,7 @@ static Uchar seqdelivercharnoSpecial(
 
 static Uchar seqdelivercharViabitaccessSpecial(
                             const Encodedsequence *encseq,
-                            UNUSED Encodedsequencescanstate *esr,
+                            GT_UNUSED Encodedsequencescanstate *esr,
                             Seqpos pos)
 {
   if (ISIBITSET(encseq->specialbits,pos))

@@ -23,7 +23,7 @@
 #include "core/parseutils.h"
 #include "core/splitter.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/warning.h"
 #include "extended/compare.h"
 #include "extended/genome_node.h"
@@ -103,7 +103,7 @@ GTF_parser* gtf_parser_new(GT_FeatureTypeFactory *feature_type_factory)
 }
 
 static int construct_sequence_regions(void *key, void *value, void *data,
-                                      UNUSED GT_Error *err)
+                                      GT_UNUSED GT_Error *err)
 {
   GT_Str *seqid;
   GT_Range range;
@@ -119,7 +119,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   return 0;
 }
 
-static int construct_mRNAs(UNUSED void *key, void *value, void *data,
+static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
                            GT_Error *err)
 {
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
@@ -188,7 +188,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
   return had_err;
 }
 
-static int construct_genes(UNUSED void *key, void *value, void *data,
+static int construct_genes(GT_UNUSED void *key, void *value, void *data,
                            GT_Error *err)
 {
   Hashmap *transcript_id_hash = (Hashmap*) value;

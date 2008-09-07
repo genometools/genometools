@@ -16,7 +16,7 @@
 */
 
 #include <assert.h>
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/chseqids_stream.h"
 #include "extended/genome_stream_rep.h"
 #include "extended/mapping.h"
@@ -33,7 +33,7 @@ struct ChseqidsStream {
 #define chseqids_stream_cast(GS)\
         genome_stream_cast(chseqids_stream_class(), GS)
 
-static int change_sequence_id(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int change_sequence_id(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
   GT_Str *changed_seqid = data;
   gt_error_check(err);

@@ -16,7 +16,7 @@
 */
 
 #include <limits.h>
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/strarray.h"
 #include "core/ma.h"
 #include "core/error.h"
@@ -111,8 +111,8 @@ static void storematch(void *processinfo,
                        bool rcmatch,
                        Seqpos dbstartpos,
                        Seqpos dblen,
-                       UNUSED const Uchar *dbsubstring,
-                       UNUSED unsigned long pprefixlen)
+                       GT_UNUSED const Uchar *dbsubstring,
+                       GT_UNUSED unsigned long pprefixlen)
 {
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
   Simplematch *match;
@@ -184,7 +184,7 @@ static void checkmstats(void *processinfo,
 
 static void showmstats(void *processinfo,
                        const void *patterninfo,
-                       UNUSED unsigned long patternstartpos,
+                       GT_UNUSED unsigned long patternstartpos,
                        unsigned long mstatlength,
                        Seqpos leftbound,
                        Seqpos rightbound)

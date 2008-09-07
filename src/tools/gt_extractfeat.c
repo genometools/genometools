@@ -17,7 +17,7 @@
 
 #include "core/ma.h"
 #include "core/option.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/extract_feat_stream.h"
 #include "extended/feature_type_factory_any.h"
 #include "extended/gff3_in_stream.h"
@@ -99,7 +99,7 @@ static OptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_extractfeat_arguments_check(UNUSED int argc, void *tool_arguments,
+static int gt_extractfeat_arguments_check(GT_UNUSED int argc, void *tool_arguments,
                                           GT_Error *err)
 {
   ExtractFeatArguments *arguments = tool_arguments;
@@ -120,7 +120,7 @@ static int gt_extractfeat_arguments_check(UNUSED int argc, void *tool_arguments,
   return had_err;
 }
 
-static int gt_extractfeat_runner(UNUSED int argc, const char **argv,
+static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                  int parsed_args, void *tool_arguments,
                                  GT_Error *err)
 {

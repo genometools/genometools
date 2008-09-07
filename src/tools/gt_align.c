@@ -18,7 +18,7 @@
 #include "core/bioseq.h"
 #include "core/option.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 #include "extended/align.h"
 #include "extended/alignment.h"
@@ -57,20 +57,20 @@ static OptionParser* gt_align_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static void show_alignment(const Alignment *a, UNUSED void *data)
+static void show_alignment(const Alignment *a, GT_UNUSED void *data)
 {
   assert(a && !data);
   alignment_show(a, stdout);
   xputchar('\n');
 }
 
-static void show_aligns(unsigned long aligns, UNUSED void *data)
+static void show_aligns(unsigned long aligns, GT_UNUSED void *data)
 {
   assert(aligns && !data);
   printf("number of optimal alignments: %lu\n\n", aligns);
 }
 
-static int gt_align_runner(UNUSED int argc, const char **argv, int parsed_args,
+static int gt_align_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
                            void *tool_arguments, GT_Error *err)
 {
   AlignArguments *arguments = tool_arguments;

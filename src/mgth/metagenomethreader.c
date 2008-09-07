@@ -17,7 +17,7 @@
 
 #include "core/fileutils.h"
 #include "core/hashmap-generic.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "match/giextract.pr"
 #include "mg_xmlparser.h"
 #include "metagenomethreader.h"
@@ -25,7 +25,7 @@
    Parameter: Schluessel, Value, User-Data, Env-Variable
    Returnwert: 0 */
 static enum iterator_op
-printout_hits(UNUSED char *key,
+printout_hits(GT_UNUSED char *key,
               unsigned long *value, void *data, GT_Error * err);
 
 static OPrval parse_options(int *parsed_args,
@@ -691,7 +691,7 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 }
 
 static enum iterator_op
-printout_hits(UNUSED char *key,
+printout_hits(GT_UNUSED char *key,
               unsigned long *value, void *data, GT_Error * err)
 {
   /* Parsestruct-Struktur */

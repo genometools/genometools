@@ -18,7 +18,7 @@
 #include "core/fasta_separator.h"
 #include "core/ma.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 #include "exercise/greedy_assembly.h"
 #include "extended/union_find.h"
@@ -169,7 +169,7 @@ void greedy_assembly_show(const GreedyAssembly *ga, Bioseq *fragments)
 }
 
 static void show_assebly_fragnum(unsigned long fragnum, unsigned long overlap,
-                                 UNUSED void *data)
+                                 GT_UNUSED void *data)
 {
   printf("%lu (overlap=%lu)\n", fragnum, overlap);
 }

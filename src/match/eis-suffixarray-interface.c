@@ -18,7 +18,7 @@
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "match/sarr-def.h"
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-sa-common.h"
@@ -224,7 +224,7 @@ SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype)
  * @return actual number of symbols read
  */
 static size_t
-SAIReadBWT(void *state, Uchar *dest, size_t len, UNUSED GT_Error *err)
+SAIReadBWT(void *state, Uchar *dest, size_t len, GT_UNUSED GT_Error *err)
 {
   SuffixarrayFileInterface *sai = state;
   assert(state);

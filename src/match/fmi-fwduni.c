@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include "core/chardef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "divmodmul.h"
 #include "fmindex.h"
 
@@ -25,10 +25,10 @@
 #include "fmi-locate.pr"
 
 unsigned long skfmuniqueforward (const void *genericindex,
-                                 UNUSED unsigned long offset,
-                                 UNUSED Seqpos left,
-                                 UNUSED Seqpos right,
-                                 UNUSED Seqpos *witnessposition,
+                                 GT_UNUSED unsigned long offset,
+                                 GT_UNUSED Seqpos left,
+                                 GT_UNUSED Seqpos right,
+                                 GT_UNUSED Seqpos *witnessposition,
                                  const Uchar *qstart,
                                  const Uchar *qend)
 {
@@ -67,9 +67,9 @@ unsigned long skfmuniqueforward (const void *genericindex,
 }
 
 unsigned long skfmmstats (const void *genericindex,
-                          UNUSED unsigned long offset,
-                          UNUSED Seqpos left,
-                          UNUSED Seqpos right,
+                          GT_UNUSED unsigned long offset,
+                          GT_UNUSED Seqpos left,
+                          GT_UNUSED Seqpos right,
                           Seqpos *witnessposition,
                           const Uchar *qstart,
                           const Uchar *qend)

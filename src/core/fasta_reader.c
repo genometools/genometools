@@ -17,7 +17,7 @@
 
 #include "core/fasta_reader_rep.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 FastaReader* fasta_reader_create(const FastaReaderClass *frc)
 {
@@ -48,7 +48,7 @@ int fasta_reader_run(FastaReader *fr,
                           proc_sequence_length, data, err);
 }
 
-void* fasta_reader_cast(UNUSED const FastaReaderClass *frc, FastaReader *fr)
+void* fasta_reader_cast(GT_UNUSED const FastaReaderClass *frc, FastaReader *fr)
 {
   assert(frc && fr && fr->c_class == frc);
   return fr;

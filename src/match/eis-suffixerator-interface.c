@@ -28,7 +28,7 @@
 #include "core/str.h"
 #include "core/strarray.h"
 #include "core/symboldef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "match/seqpos-def.h"
 #include "match/verbose-def.h"
 #include "match/esa-fileend.h"
@@ -359,7 +359,7 @@ SfxIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
 static size_t
 SfxIGenerate(void *iface, void *backlogState,
              move2BacklogFunc move2Backlog, void *output, Seqpos generateStart,
-             size_t len, SeqDataTranslator xltor, UNUSED GT_Error *err)
+             size_t len, SeqDataTranslator xltor, GT_UNUSED GT_Error *err)
 {
   sfxInterface *sfxi = iface;
   size_t elemsLeft = len;

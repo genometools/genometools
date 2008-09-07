@@ -19,7 +19,7 @@
 #include "core/option.h"
 #include "core/outputfile.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/filter_stream.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
@@ -216,7 +216,7 @@ static int process_gt_strand_arg(GT_Str *gt_strand_char, GT_Strand *strand,
   return had_err;
 }
 
-static int gt_filter_arguments_check(UNUSED int rest_argc, void *tool_arguments,
+static int gt_filter_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
                                      GT_Error *err)
 {
   FilterArguments *arguments = tool_arguments;

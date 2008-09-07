@@ -20,7 +20,7 @@
 #include "core/countingsort.h"
 #include "core/ensure.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 
 void countingsort(void *out, const void *in, size_t elem_size,
@@ -68,7 +68,7 @@ unsigned long countingsort_get_max(const void *in, size_t elem_size,
   return max_value;
 }
 
-static unsigned long get_int(const void *elem, UNUSED void *data)
+static unsigned long get_int(const void *elem, GT_UNUSED void *data)
 {
   assert(elem);
   return *(unsigned int*) elem;

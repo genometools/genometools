@@ -18,7 +18,7 @@
 #include <limits.h>
 #include "core/ensure.h"
 #include "core/safearith.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 int safe_abs(int j)
 {
@@ -88,7 +88,7 @@ unsigned long safe_cast2ulong(long value)
   return value;
 }
 
-int safearith_example(UNUSED GT_Error *err)
+int safearith_example(GT_UNUSED GT_Error *err)
 {
   unsigned long ulong;
   long slong;

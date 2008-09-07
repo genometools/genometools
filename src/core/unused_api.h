@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef UNUSED_H
-#define UNUSED_H
+#ifndef GT_UNUSED_API_H
+#define GT_UNUSED_API_H
 
-#define UNUSED __attribute__ ((unused)) /*@unused@*/
+#define GT_UNUSED __attribute__ ((unused)) /*@unused@*/
 
 #endif

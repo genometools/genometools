@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/symboldef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/ma.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
@@ -82,9 +82,9 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
                                  unsigned int alphasize,
                                  const Uchar *pattern,
                                  unsigned long patternlength,
-                                 UNUSED unsigned long maxdistance,
-                                 UNUSED unsigned long maxintervalwidth,
-                                 UNUSED bool skpp)
+                                 GT_UNUSED unsigned long maxdistance,
+                                 GT_UNUSED unsigned long maxintervalwidth,
+                                 GT_UNUSED bool skpp)
 {
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 #ifdef SKDEBUG
@@ -192,7 +192,7 @@ static unsigned long pms_nextstepfullmatches(
                               DECLAREPTRDFSSTATE(aliascolumn),
                               Seqpos leftbound,
                               Seqpos rightbound,
-                              UNUSED Seqpos width,
+                              GT_UNUSED Seqpos width,
                               unsigned long currentdepth,
                               void *dfsconstinfo)
 {

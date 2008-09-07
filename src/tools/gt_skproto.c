@@ -21,14 +21,14 @@
 #include "core/fa.h"
 #include "core/ma.h"
 #include "core/option.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/warning.h"
 #include "tools/gt_skproto.h"
 
 #define MAX_LINE_LENGTH  80
 
-static OptionParser* gt_skproto_option_parser_new(UNUSED void *tool_arguments)
+static OptionParser* gt_skproto_option_parser_new(GT_UNUSED void *tool_arguments)
 {
   return option_parser_new("[C-file ...]",
                            "Extract Header-File from C-file(s).");
@@ -153,8 +153,8 @@ static void skproto(const char *filename, FILE *fpin)
 }
 
 static int gt_skproto_runner(int argc, const char **argv, int parsed_args,
-                             UNUSED void *tool_arguments,
-                             UNUSED GT_Error *err)
+                             GT_UNUSED void *tool_arguments,
+                             GT_UNUSED GT_Error *err)
 {
   FILE *fpin;
   int i;

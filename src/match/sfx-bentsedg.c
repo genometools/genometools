@@ -22,7 +22,7 @@
 #include "core/xansi.h"
 #include "core/fa.h"
 #include "core/arraydef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "divmodmul.h"
 #include "spacedef.h"
 #include "encseq-def.h"
@@ -796,9 +796,9 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              const Encodedsequence *encseq,
                              Countingsortinfo *countingsortinfo,
                              Encodedsequencescanstate *esr1,
-                             UNUSED Encodedsequencescanstate *esr2,
+                             GT_UNUSED Encodedsequencescanstate *esr2,
                              Lcpsubtab *lcpsubtab,
-                             UNUSED Readmode readmode,
+                             GT_UNUSED Readmode readmode,
                              bool fwd,
                              bool complement,
                              Seqpos *left,
@@ -1413,7 +1413,7 @@ static Seqpos computelocallcpvalue(const Suffixwithcode *previoussuffix,
 
 static unsigned int bucketends(Outlcpinfo *outlcpinfo,
                                Suffixwithcode *previoussuffix,
-                               UNUSED Seqpos firstspecialsuffix,
+                               GT_UNUSED Seqpos firstspecialsuffix,
                                unsigned int minchanged,
                                unsigned long specialsinbucket,
                                Codetype code,

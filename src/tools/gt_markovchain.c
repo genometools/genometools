@@ -17,11 +17,11 @@
 
 #include <math.h>
 #include <string.h>
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "exercise/markov_chain_parsing.h"
 #include "tools/gt_markovchain.h"
 
-static OptionParser* gt_markovchain_option_parser_new(UNUSED
+static OptionParser* gt_markovchain_option_parser_new(GT_UNUSED
                                                       void *tool_arguments)
 {
   OptionParser *op;
@@ -32,8 +32,8 @@ static OptionParser* gt_markovchain_option_parser_new(UNUSED
   return op;
 }
 
-static int gt_markovchain_runner(UNUSED int argc, const char **argv,
-                                 int parsed_args, UNUSED void *tool_arguments,
+static int gt_markovchain_runner(GT_UNUSED int argc, const char **argv,
+                                 int parsed_args, GT_UNUSED void *tool_arguments,
                                  GT_Error *err)
 {
   MarkovChain *mc;

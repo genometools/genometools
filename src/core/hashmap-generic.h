@@ -162,7 +162,7 @@
   storagedecl inlineifstatic void                             \
   keytag##_##valuetag##_destruct(void *elem)                  \
   {                                                           \
-    UNUSED keytag##_##valuetag##_map_entry *map_entry = elem; \
+    GT_UNUSED keytag##_##valuetag##_map_entry *map_entry = elem; \
     keydestructor(map_entry->key);                            \
     valuedestructor(map_entry->value);                        \
   }                                                           \

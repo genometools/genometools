@@ -22,7 +22,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/outputfile.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 #include "tools/gt_splitfasta.h"
 
@@ -220,7 +220,7 @@ static int split_fasta_file(const char *filename,
   return had_err;
 }
 
-static int gt_splitfasta_runner(UNUSED int argc, const char **argv,
+static int gt_splitfasta_runner(GT_UNUSED int argc, const char **argv,
                                 int parsed_args, void *tool_arguments,
                                 GT_Error *err)
 {

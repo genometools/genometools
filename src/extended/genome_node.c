@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "core/msort.h"
 #include "core/queue.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/genome_node_rep.h"
 
 typedef enum {
@@ -177,8 +177,8 @@ void* gt_genome_node_cast(const GT_GenomeNodeClass *gnc, GT_GenomeNode *gn)
   return NULL;
 }
 
-static int increase_reference_count(GT_GenomeNode *gn, UNUSED void *data,
-                                    UNUSED GT_Error *err)
+static int increase_reference_count(GT_GenomeNode *gn, GT_UNUSED void *data,
+                                    GT_UNUSED GT_Error *err)
 {
   gt_error_check(err);
   assert(gn);
@@ -482,7 +482,7 @@ void gt_genome_node_is_part_of_genome_node(GT_GenomeNode *parent, GT_GenomeNode 
   add_parent(&child->bit_field);
 }
 
-static int remove_leaf(GT_GenomeNode *node, void *data, UNUSED GT_Error *err)
+static int remove_leaf(GT_GenomeNode *node, void *data, GT_UNUSED GT_Error *err)
 {
   Dlistelem *dlistelem;
   GT_GenomeNode *child, *leaf = (GT_GenomeNode*) data;
@@ -521,7 +521,7 @@ bool gt_genome_node_is_marked(const GT_GenomeNode *gn)
   return gn->bit_field & 1 ? true : false;
 }
 
-static int check_marked_status(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int check_marked_status(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
   bool *marked = data;
   if (gt_genome_node_is_marked(gn))
@@ -659,7 +659,7 @@ int gt_genome_node_compare(GT_GenomeNode **gn_a, GT_GenomeNode **gn_b)
 }
 
 int gt_genome_node_compare_with_data(GT_GenomeNode **gn_a, GT_GenomeNode **gn_b,
-                                  UNUSED void *unused)
+                                  GT_UNUSED void *unused)
 {
   return gt_genome_node_cmp(*gn_a, *gn_b);
 }
@@ -683,8 +683,8 @@ void gt_genome_node_delete(GT_GenomeNode *gn)
   ma_free(gn);
 }
 
-static int free_genome_node(GT_GenomeNode *gn, UNUSED void *data,
-                            UNUSED GT_Error *err)
+static int free_genome_node(GT_GenomeNode *gn, GT_UNUSED void *data,
+                            GT_UNUSED GT_Error *err)
 {
   gt_genome_node_delete(gn);
   return 0;

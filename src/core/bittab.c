@@ -22,7 +22,7 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 
 #define NUM_OF_TESTS    50
@@ -308,7 +308,7 @@ void bittab_show(const Bittab *b, FILE *outfp)
   (void) putc('\n', outfp);
 }
 
-int bittab_example(UNUSED GT_Error *err)
+int bittab_example(GT_UNUSED GT_Error *err)
 {
   unsigned long bit;
   Bittab *b;

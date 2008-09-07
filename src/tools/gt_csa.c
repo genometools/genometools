@@ -18,7 +18,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/outputfile.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/csa_stream.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
@@ -77,7 +77,7 @@ static OptionParser* gt_csa_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_csa_runner(UNUSED int argc, const char **argv, int parsed_args,
+static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
                          void *tool_arguments, GT_Error *err)
 {
   GenomeStream *gff3_in_stream,

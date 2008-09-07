@@ -22,7 +22,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/seqiterator.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/xposix.h"
 #include "core/progressbar.h"
@@ -76,7 +76,7 @@ static OPrval parse_options(Seqiteroptions *seqiteroptions,
 }
 
 static void showdistseqlen(unsigned long key, unsigned long long value,
-                           UNUSED void *data)
+                           GT_UNUSED void *data)
 {
   unsigned long distvalue;
 
@@ -151,7 +151,7 @@ static unsigned long long accumulateastretch(DiscDistri *distastretch,
 }
 
 static void processastretches(const DiscDistri *distastretch,
-                              UNUSED unsigned long long countA)
+                              GT_UNUSED unsigned long long countA)
 {
   Astretchinfo astretchinfo;
   unsigned long len;

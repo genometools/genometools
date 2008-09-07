@@ -16,7 +16,7 @@
 */
 
 #include "core/arraydef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "spacedef.h"
 #include "seqpos-def.h"
 #include "esa-seqread.h"
@@ -81,7 +81,7 @@ static Dfsinfo *allocateDfsinfo(Dfsstate *state)
   return dfsinfo;
 }
 
-static void freeDfsinfo(Dfsinfo *dfsinfo, UNUSED Dfsstate *state)
+static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
 {
   FREESPACE(dfsinfo->nodeposlist);
   FREESPACE(dfsinfo);

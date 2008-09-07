@@ -16,7 +16,7 @@
 */
 
 #include <assert.h>
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/genome_visitor_rep.h"
 #include "extended/sequence_region.h"
 #include "annotationsketch/feature_index.h"
@@ -38,7 +38,7 @@ static void feature_visitor_free(GenomeVisitor *gv)
 }
 
 static int feature_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
-                                          UNUSED GT_Error *err)
+                                          GT_UNUSED GT_Error *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
   gt_error_check(err);
@@ -48,7 +48,7 @@ static int feature_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *g
 
 static int feature_visitor_sequence_region(GenomeVisitor *gv,
                                            GT_SequenceRegion *sr,
-                                           UNUSED GT_Error *err)
+                                           GT_UNUSED GT_Error *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
   gt_error_check(err);

@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 #include <limits.h>
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "emimergeesa.h"
@@ -38,7 +38,7 @@ static void fillandinsert(Mergertrierep *trierep,
                           unsigned int idx,
                           Seqpos suftabvalue,
                           Mergertrienode *node,
-                          UNUSED uint64_t ident)
+                          GT_UNUSED uint64_t ident)
 {
   Suffixinfo sinfo;
 

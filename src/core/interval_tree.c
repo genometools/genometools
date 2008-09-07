@@ -21,7 +21,7 @@
 #include "core/mathsupport.h"
 #include "core/range.h"
 #include "core/str.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include <string.h>
 
 typedef enum IntervalTreeNodeColor {
@@ -347,7 +347,7 @@ static int gt_range_ptr_compare(const void *r1p, const void *r2p)
   return ret;
 }
 
-int interval_tree_unit_test(UNUSED GT_Error *err)
+int interval_tree_unit_test(GT_UNUSED GT_Error *err)
 {
   IntervalTree *it = NULL;
   IntervalTreeNode *res = NULL;

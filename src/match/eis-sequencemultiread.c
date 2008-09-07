@@ -17,7 +17,7 @@
 #include <string.h>
 
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "match/eis-sequencemultiread.h"
 #include "match/eis-list-do.h"
 

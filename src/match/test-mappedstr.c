@@ -21,7 +21,7 @@
 #include "core/arraydef.h"
 #include "core/chardef.h"
 #include "core/error.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "spacedef.h"
 #include "alphadef.h"
 #include "encseq-def.h"
@@ -95,8 +95,8 @@ DECLAREARRAYSTRUCT(Codetype);
 
 static void outkmeroccurrence(void *processinfo,
                               Codetype code,
-                              UNUSED Seqpos position,
-                              UNUSED const Firstspecialpos
+                              GT_UNUSED Seqpos position,
+                              GT_UNUSED const Firstspecialpos
                                            *firstspecialposition)
 {
   ArrayCodetype *codelist = (ArrayCodetype *) processinfo;

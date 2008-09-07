@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <expat.h>
 #include "mg_xmlparser.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "metagenomethreader.h"
 
 #ifdef CURLDEF
@@ -156,7 +156,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
 }
 
 static void XMLCALL startElement(void *data, const char *name,
-                                 UNUSED const char **atts)
+                                 GT_UNUSED const char **atts)
 {
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;
 

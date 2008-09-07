@@ -14,7 +14,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                                           Dfsstate *,
                                           GT_Error *),
                   Dfsstate *state,
-                  UNUSED Verboseinfo *verboseinfo,
+                  GT_UNUSED Verboseinfo *verboseinfo,
                   GT_Error *err);
 
 #ifdef __cplusplus

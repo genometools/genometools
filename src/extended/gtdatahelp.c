@@ -26,10 +26,10 @@
 #include "core/gtdatapath.h"
 #include "core/ma.h"
 #include "core/splitter.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/gtdatahelp.h"
 
-int gtdata_show_help(const char *progname, UNUSED void *unused, GT_Error *err)
+int gtdata_show_help(const char *progname, GT_UNUSED void *unused, GT_Error *err)
 {
   Splitter *splitter;
   GT_Str *doc_file;

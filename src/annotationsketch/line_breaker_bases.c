@@ -17,7 +17,7 @@
 
 #include "core/interval_tree.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "annotationsketch/line_breaker_bases.h"
 #include "annotationsketch/line_breaker_rep.h"
 

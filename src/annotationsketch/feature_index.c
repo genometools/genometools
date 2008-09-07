@@ -30,7 +30,7 @@
 #include "core/queue.h"
 #include "core/range.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/feature_type_factory_builtin.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
@@ -216,7 +216,7 @@ const char* gt_feature_index_get_first_seqid(const GT_FeatureIndex *fi)
   return fi->firstseqid;
 }
 
-int store_seqid(void *key, UNUSED void *value, void *data, UNUSED GT_Error *err)
+int store_seqid(void *key, GT_UNUSED void *value, void *data, GT_UNUSED GT_Error *err)
 {
   GT_StrArray *seqids = (GT_StrArray*) data;
   const char *seqid = (const char*) key;

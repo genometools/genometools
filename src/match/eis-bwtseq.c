@@ -21,7 +21,7 @@
 #include "core/error.h"
 #include "core/log.h"
 #include "core/str.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/yarandom.h"
 #include "match/seqpos-def.h"
 #include "match/sarr-def.h"

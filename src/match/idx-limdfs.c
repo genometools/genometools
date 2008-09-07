@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/chardef.h"
 #include "core/symboldef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/arraydef.h"
 #include "sarr-def.h"
 #include "seqpos-def.h"
@@ -188,7 +188,7 @@ static void gen_esa_overinterval(const void *voidsuffixarray,
                                  bool rcmatch,
                                  const Indexbounds *itv,
                                  unsigned long pprefixlen,
-                                 UNUSED Seqpos totallength,
+                                 GT_UNUSED Seqpos totallength,
                                  const Uchar *dbsubstring)
 {
   const Suffixarray *suffixarray = (const Suffixarray *) voidsuffixarray;
@@ -263,11 +263,11 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
 }
 
 static void storemstatsposition(void *processinfo,
-                                UNUSED bool rcmatch,
+                                GT_UNUSED bool rcmatch,
                                 Seqpos dbstartpos,
-                                UNUSED Seqpos dblen,
-                                UNUSED const Uchar *dbsubstring,
-                                UNUSED unsigned long pprefixlen)
+                                GT_UNUSED Seqpos dblen,
+                                GT_UNUSED const Uchar *dbsubstring,
+                                GT_UNUSED unsigned long pprefixlen)
 {
   ArraySeqpos *mstatspos = (ArraySeqpos *) processinfo;
 

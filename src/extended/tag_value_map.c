@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/tag_value_map.h"
 
 /* The TagValueMap is implemented as a simple char* which points to a memory
@@ -113,7 +113,7 @@ void tag_value_map_foreach(const TagValueMap map, TagValueMapIteratorFunc func,
   } while (*map_ptr != '\0');
 }
 
-int tag_value_map_example(UNUSED GT_Error *err)
+int tag_value_map_example(GT_UNUSED GT_Error *err)
 {
   TagValueMap map;
 

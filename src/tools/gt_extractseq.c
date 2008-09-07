@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/outputfile.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "match/giextract.pr"
 #include "extended/gtdatahelp.h"
 #include "tools/gt_extractseq.h"
@@ -122,7 +122,7 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_extractseq_arguments_check(UNUSED int argc, void *tool_arguments,
+static int gt_extractseq_arguments_check(GT_UNUSED int argc, void *tool_arguments,
                                          GT_Error *err)
 {
   ExtractSeqArguments *arguments = tool_arguments;

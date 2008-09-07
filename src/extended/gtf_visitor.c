@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/fptr_api.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/warning.h"
 #include "extended/genome_node.h"
 #include "extended/genome_visitor_rep.h"
@@ -46,7 +46,7 @@ static void gtf_visitor_free(GenomeVisitor *gv)
   gt_array_delete(gtf_visitor->CDS_features);
 }
 
-static int gtf_visitor_comment(GenomeVisitor *gv, GT_Comment *c, UNUSED GT_Error *err)
+static int gtf_visitor_comment(GenomeVisitor *gv, GT_Comment *c, GT_UNUSED GT_Error *err)
 {
   GTFVisitor *gtf_visitor;
   gt_error_check(err);
@@ -55,7 +55,7 @@ static int gtf_visitor_comment(GenomeVisitor *gv, GT_Comment *c, UNUSED GT_Error
   return 0;
 }
 
-static int save_exon_node(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int save_exon_node(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
   GTFVisitor *gtf_visitor;
   gt_error_check(err);

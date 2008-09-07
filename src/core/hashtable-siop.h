@@ -20,7 +20,7 @@
 #include <limits.h>
 #include <string.h>
 
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 #define GOLDEN_RATIO_MULTIPLIER 2654435761UL
 

@@ -16,10 +16,10 @@
 */
 
 #include "core/array2dim.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 /* example usage of the array2dim macros */
-int array2dim_example(UNUSED GT_Error *err)
+int array2dim_example(GT_UNUSED GT_Error *err)
 {
   double **a2dim;
   int i, j;

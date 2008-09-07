@@ -20,7 +20,7 @@
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "annotationsketch/line_breaker_bases.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"

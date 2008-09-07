@@ -16,11 +16,11 @@
 */
 
 #include "core/fasta_separator.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "exercise/simple_bioseq.h"
 #include "tools/gt_fastaparser.h"
 
-static OptionParser* gt_fastaparser_option_parser_new(UNUSED
+static OptionParser* gt_fastaparser_option_parser_new(GT_UNUSED
                                                       void *tool_arguments)
 {
   OptionParser *op;
@@ -30,9 +30,9 @@ static OptionParser* gt_fastaparser_option_parser_new(UNUSED
   return op;
 }
 
-static int gt_fastaparser_runner(UNUSED int argc, const char **argv,
-                                 int parsed_args, UNUSED void *tool_arguments,
-                                 UNUSED GT_Error *err)
+static int gt_fastaparser_runner(GT_UNUSED int argc, const char **argv,
+                                 int parsed_args, GT_UNUSED void *tool_arguments,
+                                 GT_UNUSED GT_Error *err)
 {
   unsigned long i;
   SimpleBioseq *simple_bioseq;

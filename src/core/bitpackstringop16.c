@@ -156,7 +156,7 @@ bsStoreUInt16(BitString str, BitOffset offset,
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 void
 bsGetUniformUInt16Array(constBitString str, BitOffset offset,
@@ -370,7 +370,7 @@ bsGetNonUniformInt16Array(
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 void
 bsStoreUniformUInt16Array(BitString str, BitOffset offset, unsigned numBits,
@@ -495,7 +495,7 @@ bsStoreUniformUInt16Array(BitString str, BitOffset offset, unsigned numBits,
 
 void
 bsStoreNonUniformUInt16Array(
-  BitString str, BitOffset offset, UNUSED size_t numValues,
+  BitString str, BitOffset offset, GT_UNUSED size_t numValues,
   BitOffset totalBitsLeft, unsigned numBitsList[], const uint16_t val[])
 {
   /* idea: read as much as possible from val in each iteration,
@@ -646,7 +646,7 @@ bsStoreNonUniformUInt16Array(
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 void
 bsGetUniformUInt16ArrayAdd(constBitString str, BitOffset offset,

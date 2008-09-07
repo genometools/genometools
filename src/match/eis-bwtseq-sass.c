@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-context.h"
@@ -149,7 +149,7 @@ BWTSeqNewSASeqSrc(const BWTSeq *bwtSeq, const BWTSeqContextRetriever *ctxMap)
 }
 
 static size_t
-BWTSASSReadSufTab(SeqDataSrc src, void *dest, size_t len, UNUSED GT_Error *err)
+BWTSASSReadSufTab(SeqDataSrc src, void *dest, size_t len, GT_UNUSED GT_Error *err)
 {
   const BWTSeq *bwtSeq;
   struct extBitsRetrieval extBits;
@@ -166,7 +166,7 @@ BWTSASSReadSufTab(SeqDataSrc src, void *dest, size_t len, UNUSED GT_Error *err)
 }
 
 static SeqDataReader
-BWTSASSMakeSufTabReader(UNUSED BWTSASeqSrc *bwtSASeqSrc,
+BWTSASSMakeSufTabReader(GT_UNUSED BWTSASeqSrc *bwtSASeqSrc,
                         BWTSeqReaderState *state)
 {
   SeqDataReader reader = { state, BWTSASSReadSufTab };
@@ -174,7 +174,7 @@ BWTSASSMakeSufTabReader(UNUSED BWTSASeqSrc *bwtSASeqSrc,
 }
 
 static size_t
-BWTSASSReadBWT(SeqDataSrc src, void *dest, size_t len, UNUSED GT_Error *err)
+BWTSASSReadBWT(SeqDataSrc src, void *dest, size_t len, GT_UNUSED GT_Error *err)
 {
   const BWTSeq *bwtSeq;
   assert(src);
@@ -188,7 +188,7 @@ BWTSASSReadBWT(SeqDataSrc src, void *dest, size_t len, UNUSED GT_Error *err)
 }
 
 static SeqDataReader
-BWTSASSMakeBWTReader(UNUSED BWTSASeqSrc *bwtSASeqSrc, BWTSeqReaderState *state)
+BWTSASSMakeBWTReader(GT_UNUSED BWTSASeqSrc *bwtSASeqSrc, BWTSeqReaderState *state)
 {
   SeqDataReader reader = { state, BWTSASSReadBWT };
   return reader;

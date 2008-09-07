@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "core/bsearch.h"
 #include "core/ensure.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 static void* bsearch_generic(GT_Array *members, const void *key, const void *base,
                              size_t nmemb, size_t size, GT_CompareWithData compar,
@@ -91,7 +91,7 @@ void bsearch_all_mark(GT_Array *members, const void *key, const void *base,
   bsearch_generic(members, key, base, nmemb, size, compar, data, b);
 }
 
-static int cmp(const void *a_ptr, const void *b_ptr, UNUSED void *unused)
+static int cmp(const void *a_ptr, const void *b_ptr, GT_UNUSED void *unused)
 {
   int a, b;
   assert(a_ptr && b_ptr);

@@ -23,7 +23,7 @@
 #include "core/dynalloc.h"
 #include "core/log.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "match/eis-seqblocktranslate.h"
 
 #if 1
@@ -355,7 +355,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
 }
 
 static void
-destructPermutationsList(UNUSED struct permList *permutation)
+destructPermutationsList(GT_UNUSED struct permList *permutation)
 {
 /*   ma_free(permutation->catPerms); */
 }

@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "core/error.h"
 #include "core/seqiterator.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "defined-types.h"
 #include "alphadef.h"
 #include "spacedef.h"
@@ -162,7 +162,7 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
 
 static void showunitnum(uint64_t unitnum,
                         const char *desc,
-                        UNUSED void *info)
+                        GT_UNUSED void *info)
 {
   printf("unit " Formatuint64_t, PRINTuint64_tcast(unitnum));
   if (desc != NULL && desc[0] != '\0')

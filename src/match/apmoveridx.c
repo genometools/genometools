@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/symboldef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/ma.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
@@ -210,10 +210,10 @@ static void apm_initMyerscolumn(DECLAREPTRDFSSTATE(aliascolumn),
 }
 
 static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
-                                             UNUSED Seqpos leftbound,
-                                             UNUSED Seqpos rightbound,
+                                             GT_UNUSED Seqpos leftbound,
+                                             GT_UNUSED Seqpos rightbound,
                                              Seqpos width,
-                                             UNUSED unsigned long currentdepth,
+                                             GT_UNUSED unsigned long currentdepth,
                                              void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
@@ -244,7 +244,7 @@ static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
 
 static void apm_nextMyercolumn(const void *dfsconstinfo,
                                DECLAREPTRDFSSTATE(aliasoutcol),
-                               UNUSED unsigned long currentdepth,
+                               GT_UNUSED unsigned long currentdepth,
                                Uchar currentchar,
                                const DECLAREPTRDFSSTATE(aliasincol))
 {
@@ -333,7 +333,7 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
 
 static void apm_inplacenextMyercolumn(const void *dfsconstinfo,
                                       DECLAREPTRDFSSTATE(aliascol),
-                                      UNUSED unsigned long currentdepth,
+                                      GT_UNUSED unsigned long currentdepth,
                                       Uchar currentchar)
 {
   unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */

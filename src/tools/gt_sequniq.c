@@ -26,7 +26,7 @@
 #include "core/progressbar.h"
 #include "core/seqiterator.h"
 #include "core/string_distri.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "tools/gt_sequniq.h"
 
 typedef struct {

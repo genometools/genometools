@@ -16,7 +16,7 @@
 */
 
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/genome_node_iterator.h"
 #include "extended/genome_node_rep.h"
 #include "extended/feature_type_factory_builtin.h"
@@ -98,7 +98,7 @@ GT_GenomeNode* gt_genome_node_iterator_next(GT_GenomeNodeIterator *gni)
   return gn;
 }
 
-int gt_genome_node_iterator_example(UNUSED GT_Error *err)
+int gt_genome_node_iterator_example(GT_UNUSED GT_Error *err)
 {
   GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeNodeIterator *gni;

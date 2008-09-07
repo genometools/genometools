@@ -20,7 +20,7 @@
 #include "core/error.h"
 #include "core/ma.h"
 #include "core/option.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/scorefasta.h"
 #include "tools/gt_scorefasta.h"
@@ -55,9 +55,9 @@ static OptionParser* gt_scorefasta_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_scorefasta_runner(UNUSED int argc, const char **argv,
+static int gt_scorefasta_runner(GT_UNUSED int argc, const char **argv,
                                 int parsed_args, void *tool_arguments,
-                                UNUSED GT_Error *err)
+                                GT_UNUSED GT_Error *err)
 {
   ScorefastaArguments *arguments = tool_arguments;
   unsigned long ulen, wlen;

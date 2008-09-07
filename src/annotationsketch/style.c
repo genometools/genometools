@@ -24,7 +24,7 @@
 #include "core/cstr.h"
 #include "core/ensure.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/warning.h"
 #include "extended/luahelper.h"
 #include "extended/luaserialize.h"
@@ -315,7 +315,7 @@ void gt_style_set_str(GT_Style *sty, const char *section, const char *key,
 }
 
 bool gt_style_get_num(const GT_Style *sty, const char *section, const char *key,
-                    double *val, UNUSED GT_GenomeNode *gn)
+                    double *val, GT_UNUSED GT_GenomeNode *gn)
 {
   int i = 0;
   assert(sty && key && section && val);
@@ -366,7 +366,7 @@ void gt_style_set_num(GT_Style *sty, const char *section, const char *key,
 }
 
 bool gt_style_get_bool(const GT_Style *sty, const char *section,
-                       const char *key, bool *val, UNUSED GT_GenomeNode *gn)
+                       const char *key, bool *val, GT_UNUSED GT_GenomeNode *gn)
 {
   int i = 0;
   assert(sty && key && section);

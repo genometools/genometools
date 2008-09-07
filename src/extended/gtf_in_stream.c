@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include "core/fa.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/feature_type_factory_builtin.h"
 #include "extended/genome_stream_rep.h"
 #include "extended/gtf_in_stream.h"
@@ -34,7 +34,7 @@ struct GTFInStream
         genome_stream_cast(gtf_in_stream_class(), GS)
 
 static int gtf_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
-                                   UNUSED GT_Error *err)
+                                   GT_UNUSED GT_Error *err)
 {
   GTFInStream *is;
   gt_error_check(err);

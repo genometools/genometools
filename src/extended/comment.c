@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include "core/cstr.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/comment.h"
 #include "extended/genome_node_rep.h"
 
@@ -49,7 +49,7 @@ static GT_Str* gt_comment_get_idstr(GT_GenomeNode *gn)
   return c->gt_comment_str;
 }
 
-static GT_Range gt_comment_get_range(UNUSED GT_GenomeNode *gn)
+static GT_Range gt_comment_get_range(GT_UNUSED GT_GenomeNode *gn)
 {
   GT_Range range;
   range.start = 0;

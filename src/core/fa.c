@@ -25,7 +25,7 @@
 #include "core/hashmap.h"
 #include "core/fa.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 #include "core/xbzlib.h"
 #include "core/xposix.h"
@@ -418,8 +418,8 @@ void fa_xmunmap(void *addr)
   hashmap_remove(fa->memory_maps, addr);
 }
 
-static int check_fptr_leak(UNUSED void *key, void *value, void *data,
-                           UNUSED GT_Error *err)
+static int check_fptr_leak(GT_UNUSED void *key, void *value, void *data,
+                           GT_UNUSED GT_Error *err)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAFileInfo *fileinfo = (FAFileInfo*) value;
@@ -433,8 +433,8 @@ static int check_fptr_leak(UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-static int check_mmap_leak(UNUSED void *key, void *value, void *data,
-                           UNUSED GT_Error *err)
+static int check_mmap_leak(GT_UNUSED void *key, void *value, void *data,
+                           GT_UNUSED GT_Error *err)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAMapInfo *mapinfo = (FAMapInfo*) value;

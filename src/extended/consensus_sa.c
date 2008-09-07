@@ -20,7 +20,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/consensus_sa.h"
 
 typedef struct {
@@ -101,7 +101,7 @@ static bool has_donor_site(GT_Array *gene, unsigned long exon)
   return true;
 }
 
-static bool has_acceptor_site(UNUSED GT_Array *gene, unsigned long exon)
+static bool has_acceptor_site(GT_UNUSED GT_Array *gene, unsigned long exon)
 {
   assert(exon < gt_array_size(gene));
   if (exon == 0)

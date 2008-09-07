@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/hashmap.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 #include "extended/compare.h"
 #include "extended/toolbox.h"
@@ -98,8 +98,8 @@ Toolfunc toolbox_get(const Toolbox *tb, const char *toolname)
   return NULL;
 }
 
-static int show_tool_name(void *key, UNUSED void *value, UNUSED void *data,
-                          UNUSED GT_Error *err)
+static int show_tool_name(void *key, GT_UNUSED void *value, GT_UNUSED void *data,
+                          GT_UNUSED GT_Error *err)
 {
   gt_error_check(err);
   assert(key && value);
@@ -108,7 +108,7 @@ static int show_tool_name(void *key, UNUSED void *value, UNUSED void *data,
   return 0;
 }
 
-int toolbox_show(UNUSED const char *progname, void *toolbox, UNUSED GT_Error *err)
+int toolbox_show(GT_UNUSED const char *progname, void *toolbox, GT_UNUSED GT_Error *err)
 {
   Toolbox *tb;
   int had_err = 0;

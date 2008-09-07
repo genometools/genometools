@@ -18,7 +18,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/genome_visitor_rep.h"
 
 GenomeVisitor* genome_visitor_create(const GenomeVisitorClass *gvc)
@@ -30,7 +30,7 @@ GenomeVisitor* genome_visitor_create(const GenomeVisitorClass *gvc)
   return gv;
 }
 
-void* genome_visitor_cast(UNUSED const GenomeVisitorClass *gvc,
+void* genome_visitor_cast(GT_UNUSED const GenomeVisitorClass *gvc,
                           GenomeVisitor *gv)
 {
   assert(gvc && gv && gv->c_class == gvc);

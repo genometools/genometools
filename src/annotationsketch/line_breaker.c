@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "annotationsketch/line_breaker_rep.h"
 
 LineBreaker* line_breaker_create(const LineBreakerClass *lbc)
@@ -61,7 +61,7 @@ void line_breaker_register_block(LineBreaker *lb, Line *line, GT_Block *block)
   lb->c_class->register_block(lb, line, block);
 }
 
-void* line_breaker_cast(UNUSED const LineBreakerClass *lbc,
+void* line_breaker_cast(GT_UNUSED const LineBreakerClass *lbc,
                         LineBreaker *lb)
 {
   assert(lbc && lb && lb->c_class == lbc);

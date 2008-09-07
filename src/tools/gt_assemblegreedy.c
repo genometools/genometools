@@ -17,7 +17,7 @@
 
 #include "core/bioseq.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "exercise/fragment_overlaps.h"
 #include "exercise/greedy_assembly.h"
 #include "tools/gt_assemblegreedy.h"
@@ -66,7 +66,7 @@ static OptionParser* gt_assemblegreedy_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_assemblegreedy_runner(UNUSED int argc, const char **argv,
+static int gt_assemblegreedy_runner(GT_UNUSED int argc, const char **argv,
                                  int parsed_args, void *tool_arguments,
                                  GT_Error *err)
 {

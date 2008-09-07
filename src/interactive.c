@@ -30,11 +30,11 @@
 #include "libtecla.h"
 #include "core/cstr.h"
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 
 static lua_State *globalL = NULL;
 
-static void lstop(lua_State *L, UNUSED lua_Debug *ar) {
+static void lstop(lua_State *L, GT_UNUSED lua_Debug *ar) {
   lua_sethook(L, NULL, 0, 0);
   luaL_error(L, "interrupted!");
 }
@@ -109,7 +109,7 @@ static int incomplete(lua_State *L, int status) {
   return 0;  /* else... */
 }
 
-static int pushline(lua_State *L, bool firstline, UNUSED GetLine *gl) {
+static int pushline(lua_State *L, bool firstline, GT_UNUSED GetLine *gl) {
   char buffer[BUFSIZ];
   char *b = buffer;
   size_t l;

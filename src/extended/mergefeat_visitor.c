@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "core/hashmap.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/mergefeat_visitor.h"
 #include "extended/genome_visitor_rep.h"
 
@@ -40,7 +40,7 @@ static void mergefeat_visitor_free(GenomeVisitor *gv)
   gt_array_delete(mergefeat_visitor->nodes_to_remove);
 }
 
-static int mergefeat_in_children(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int mergefeat_in_children(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GT_GenomeFeature *previous_feature, *current_feature;

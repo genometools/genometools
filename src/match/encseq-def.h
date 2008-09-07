@@ -22,7 +22,7 @@
 #include "core/str.h"
 #include "core/strarray.h"
 #include "core/symboldef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "intbits.h"

@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include "core/disc_distri.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/genome_visitor_rep.h"
 #include "extended/stat_visitor.h"
 
@@ -52,7 +52,7 @@ static void stat_visitor_free(GenomeVisitor *gv)
   disc_distri_delete(stat_visitor->intron_length_distribution);
 }
 
-static int add_exon_number(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int add_exon_number(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
   StatVisitor *stat_visitor = (StatVisitor*) data;
   GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
@@ -131,7 +131,7 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
 }
 
 static int stat_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr,
-                                        UNUSED GT_Error *err)
+                                        GT_UNUSED GT_Error *err)
 {
   StatVisitor *stat_visitor;
   gt_error_check(err);

@@ -22,7 +22,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/string_distri.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 #include "extended/gtdatahelp.h"
 #include "tools/gt_fingerprint.h"
@@ -50,7 +50,7 @@ static void gt_fingerprint_arguments_delete(void *tool_arguments)
   ma_free(arguments);
 }
 
-static OptionParser* gt_fingerprint_option_parser_new(UNUSED
+static OptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
                                                       void *tool_arguments)
 {
   FingerprintArguments *arguments = tool_arguments;
@@ -98,8 +98,8 @@ static OptionParser* gt_fingerprint_option_parser_new(UNUSED
 }
 
 static void proc_superfluous_sequence(const char *string,
-                                      UNUSED unsigned long occurrences,
-                                      UNUSED double probability, void *data)
+                                      GT_UNUSED unsigned long occurrences,
+                                      GT_UNUSED double probability, void *data)
 {
   bool *comparisons_failed = data;
   assert(string && occurrences && comparisons_failed);
@@ -147,7 +147,7 @@ typedef struct {
 } FingerprintInfo;
 
 static void show_duplicate(const char *fingerprint, unsigned long occurrences,
-                           UNUSED double probability, void *data)
+                           GT_UNUSED double probability, void *data)
 {
   FingerprintInfo *info = data;
   if (occurrences > 1) {

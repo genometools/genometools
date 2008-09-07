@@ -22,7 +22,7 @@
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/range.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/graphics.h"
@@ -391,7 +391,7 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
   return had_err;
 }
 
-int gt_canvas_visit_track_post(GT_Canvas *canvas, UNUSED Track *track)
+int gt_canvas_visit_track_post(GT_Canvas *canvas, GT_UNUSED Track *track)
 {
   double vspace;
   assert(canvas && track);
@@ -413,7 +413,7 @@ int gt_canvas_visit_line_pre(GT_Canvas *canvas, Line *line)
   return had_err;
 }
 
-int gt_canvas_visit_line_post(GT_Canvas *canvas, UNUSED Line *line)
+int gt_canvas_visit_line_post(GT_Canvas *canvas, GT_UNUSED Line *line)
 {
   int had_err = 0;
   double tmp;

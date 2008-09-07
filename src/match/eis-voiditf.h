@@ -68,17 +68,17 @@ void *loadvoidBWTSeqForSA(const GT_Str *indexname,
 void deletevoidBWTSeq(void *packedindex);
 
 unsigned long voidpackedindexuniqueforward(const void *voidbwtseq,
-                                           UNUSED unsigned long offset,
-                                           UNUSED Seqpos left,
-                                           UNUSED Seqpos right,
-                                           UNUSED Seqpos *witnessposition,
+                                           GT_UNUSED unsigned long offset,
+                                           GT_UNUSED Seqpos left,
+                                           GT_UNUSED Seqpos right,
+                                           GT_UNUSED Seqpos *witnessposition,
                                            const Uchar *qstart,
                                            const Uchar *qend);
 
 unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
-                                           UNUSED unsigned long offset,
-                                           UNUSED Seqpos left,
-                                           UNUSED Seqpos right,
+                                           GT_UNUSED unsigned long offset,
+                                           GT_UNUSED Seqpos left,
+                                           GT_UNUSED Seqpos right,
                                            Seqpos *witnessposition,
                                            const Uchar *qstart,
                                            const Uchar *qend);

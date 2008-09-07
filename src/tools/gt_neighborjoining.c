@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/bioseq.h"
 #include "core/option.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/linearedist.h"
 #include "extended/neighborjoining.h"
@@ -51,7 +51,7 @@ static double distfunc(unsigned long i, unsigned long j, void *data)
 }
 
 static double exampledistfunc(unsigned long i, unsigned long j,
-                              UNUSED void *data)
+                              GT_UNUSED void *data)
 {
   static const double exampledistances[5][5] =
     { {0.0   , 0.1715, 0.2147, 0.3091, 0.2326},

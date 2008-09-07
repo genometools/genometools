@@ -16,7 +16,7 @@
 */
 
 #include "core/fptr_api.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "core/xansi.h"
 #include "exercise/sspliced_alignment.h"
 #include "exercise/sspliced_alignment_parsing.h"
@@ -51,10 +51,10 @@ static void get_exons(GT_Array *exon_ranges, const void *sa)
 }
 
 static void process_splice_form(GT_Array *spliced_alignments_in_form,
-                                UNUSED const void *set_of_sas,
-                                UNUSED unsigned long number_of_sas,
-                                UNUSED size_t size_of_sa,
-                                UNUSED void *userdata)
+                                GT_UNUSED const void *set_of_sas,
+                                GT_UNUSED unsigned long number_of_sas,
+                                GT_UNUSED size_t size_of_sa,
+                                GT_UNUSED void *userdata)
 {
   unsigned long i;
 
@@ -67,7 +67,7 @@ static void process_splice_form(GT_Array *spliced_alignments_in_form,
   printf("]\n");
 }
 
-static OptionParser* gt_consensus_sa_option_parser_new(UNUSED
+static OptionParser* gt_consensus_sa_option_parser_new(GT_UNUSED
                                                        void *tool_arguments)
 {
   OptionParser *op;
@@ -78,8 +78,8 @@ static OptionParser* gt_consensus_sa_option_parser_new(UNUSED
   return op;
 }
 
-static int gt_consensus_sa_runner(UNUSED int argc, const char **argv,
-                                  int parsed_args, UNUSED void *tool_arguments,
+static int gt_consensus_sa_runner(GT_UNUSED int argc, const char **argv,
+                                  int parsed_args, GT_UNUSED void *tool_arguments,
                                   GT_Error *err)
 {
   GT_Array *spliced_alignments;

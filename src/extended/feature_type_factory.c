@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include "core/ma.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/feature_type_factory_rep.h"
 
 GT_FeatureTypeFactory* gt_feature_type_factory_create(const GT_FeatureTypeFactoryClass
@@ -64,7 +64,7 @@ void gt_feature_type_factory_delete(GT_FeatureTypeFactory *ftf)
   ma_free(ftf);
 }
 
-void* gt_feature_type_factory_cast(UNUSED const GT_FeatureTypeFactoryClass *ftfc,
+void* gt_feature_type_factory_cast(GT_UNUSED const GT_FeatureTypeFactoryClass *ftfc,
                                 GT_FeatureTypeFactory *ftf)
 {
   assert(ftfc && ftf && ftf->c_class == ftfc);

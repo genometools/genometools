@@ -21,7 +21,7 @@
 #include "core/fa.h"
 #include "core/error.h"
 #include "core/fastabuffer.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "encseq-def.h"
 #include "spacedef.h"
 
@@ -165,7 +165,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
 }
 
 /*@null@*/ Encodedsequence *mapencodedsequence(
-                                   UNUSED bool withrange,
+                                   GT_UNUSED bool withrange,
                                    const GT_Str *indexname,
                                    /*@unused@*/ Seqpos totallength,
                                    Seqpos specialranges,
@@ -189,7 +189,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
 }
 
 Encodedsequence *plain2encodedsequence(
-                         UNUSED bool withrange,
+                         GT_UNUSED bool withrange,
                          Specialcharinfo *specialcharinfo,
                          const Uchar *seq1,
                          Seqpos len1,
@@ -260,7 +260,7 @@ bool hasspecialranges(const Encodedsequence *encseq)
   return encseq->hasspecialcharacters;
 }
 
-bool hasfastspecialrangeenumerator(UNUSED const Encodedsequence *encseq)
+bool hasfastspecialrangeenumerator(GT_UNUSED const Encodedsequence *encseq)
 {
   return false;
 }

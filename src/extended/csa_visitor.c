@@ -19,7 +19,7 @@
 #include "core/log.h"
 #include "core/queue.h"
 #include "core/undef.h"
-#include "core/unused.h"
+#include "core/unused_api.h"
 #include "extended/csa_variable_strands.h"
 #include "extended/csa_visitor.h"
 #include "extended/genome_visitor_rep.h"
@@ -51,7 +51,7 @@ static void csa_visitor_free(GenomeVisitor *gv)
 }
 
 static int csa_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
-                                      UNUSED GT_Error *err)
+                                      GT_UNUSED GT_Error *err)
 {
   CSAVisitor *csa_visitor;
   gt_error_check(err);
@@ -100,7 +100,7 @@ static int csa_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
 }
 
 static int csa_visitor_default_func(GenomeVisitor *gv, GT_GenomeNode *gn,
-                                    UNUSED GT_Error *err)
+                                    GT_UNUSED GT_Error *err)
 {
   CSAVisitor *csa_visitor;
   gt_error_check(err);
@@ -176,7 +176,7 @@ static GT_Strand get_strand(const void *sa)
   return gt_genome_feature_get_strand(gf);
 }
 
-static int save_exon(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int save_exon(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
   GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
   GT_Array *exon_ranges = (GT_Array*) data;

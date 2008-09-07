@@ -27,6 +27,7 @@
 #include "core/array_api.h"
 #include "core/error_api.h"
 #include "core/fptr_api.h"
+#include "core/unused_api.h"
 
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */
