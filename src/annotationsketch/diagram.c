@@ -601,7 +601,7 @@ static int layout_tracks(void *key, void *value, void *data,
 
   /* For now, use the captions line breaker */
   track = track_new(track_key, max, split,
-                    line_breaker_captions_new(tti->canvas));
+                    gt_line_breaker_captions_new(tti->canvas));
   tti->dia->nof_tracks++;
   for (i = 0; i < gt_array_size(list); i++) {
     block = *(GT_Block**) gt_array_get(list, i);

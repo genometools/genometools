@@ -21,16 +21,16 @@
 #include "annotationsketch/line_breaker_captions.h"
 #include "annotationsketch/line_breaker_rep.h"
 
-struct LineBreakerCaptions {
-  const LineBreaker parent_instance;
+struct GT_LineBreakerCaptions {
+  const GT_LineBreaker parent_instance;
   GT_Canvas *canvas;
   Hashmap *linepositions;
 };
 
-#define line_breaker_captions_cast(LB)\
-        line_breaker_cast(line_breaker_captions_class(), LB)
+#define gt_line_breaker_captions_cast(LB)\
+        gt_line_breaker_cast(gt_line_breaker_captions_class(), LB)
 
-static DrawingRange calculate_drawing_range(LineBreakerCaptions *lcb,
+static DrawingRange calculate_drawing_range(GT_LineBreakerCaptions *lcb,
                                             GT_Block* block)
 {
   double textwidth = 0.0;
@@ -47,15 +47,15 @@ static DrawingRange calculate_drawing_range(LineBreakerCaptions *lcb,
   return drange;
 }
 
-bool line_breaker_captions_is_line_occupied(LineBreaker* lb,
-                                            Line *line,
+bool gt_line_breaker_captions_is_gt_line_occupied(GT_LineBreaker* lb,
+                                            GT_Line *line,
                                             GT_Block *block)
 {
   DrawingRange dr;
-  LineBreakerCaptions *lbcap;
+  GT_LineBreakerCaptions *lbcap;
   unsigned long *num;
   assert(lb && block && line);
-  lbcap = line_breaker_captions_cast(lb);
+  lbcap = gt_line_breaker_captions_cast(lb);
   dr = calculate_drawing_range(lbcap, block);
   if (!(num = hashmap_get(lbcap->linepositions, line)))
     return false;
@@ -63,15 +63,15 @@ bool line_breaker_captions_is_line_occupied(LineBreaker* lb,
     return (dr.start < *num);
 }
 
-void line_breaker_captions_register_block(LineBreaker *lb,
-                                          Line *line,
+void gt_line_breaker_captions_register_block(GT_LineBreaker *lb,
+                                          GT_Line *line,
                                           GT_Block *block)
 {
   DrawingRange dr;
-  LineBreakerCaptions *lbcap;
+  GT_LineBreakerCaptions *lbcap;
   unsigned long *num;
   assert(lb && block && line);
-  lbcap = line_breaker_captions_cast(lb);
+  lbcap = gt_line_breaker_captions_cast(lb);
   if (!(num = hashmap_get(lbcap->linepositions, line)))
   {
     num = ma_malloc(sizeof (unsigned long));
@@ -81,31 +81,31 @@ void line_breaker_captions_register_block(LineBreaker *lb,
   *num = dr.end + 1;
 }
 
-void line_breaker_captions_delete(LineBreaker *lb)
+void gt_line_breaker_captions_delete(GT_LineBreaker *lb)
 {
-  LineBreakerCaptions *lbcap;
+  GT_LineBreakerCaptions *lbcap;
   if (!lb) return;
-  lbcap = line_breaker_captions_cast(lb);
+  lbcap = gt_line_breaker_captions_cast(lb);
   hashmap_delete(lbcap->linepositions);
 }
 
-const LineBreakerClass* line_breaker_captions_class(void)
+const GT_LineBreakerClass* gt_line_breaker_captions_class(void)
 {
-  static const LineBreakerClass line_breaker_class =
-    { sizeof (LineBreakerCaptions),
-      line_breaker_captions_is_line_occupied,
-      line_breaker_captions_register_block,
-      line_breaker_captions_delete };
-  return &line_breaker_class;
+  static const GT_LineBreakerClass gt_line_breaker_class =
+    { sizeof (GT_LineBreakerCaptions),
+      gt_line_breaker_captions_is_gt_line_occupied,
+      gt_line_breaker_captions_register_block,
+      gt_line_breaker_captions_delete };
+  return &gt_line_breaker_class;
 }
 
-LineBreaker* line_breaker_captions_new(GT_Canvas *canvas)
+GT_LineBreaker* gt_line_breaker_captions_new(GT_Canvas *canvas)
 {
   assert(canvas);
-  LineBreakerCaptions *lbcap;
-  LineBreaker *lb;
-  lb = line_breaker_create(line_breaker_captions_class());
-  lbcap = line_breaker_captions_cast(lb);
+  GT_LineBreakerCaptions *lbcap;
+  GT_LineBreaker *lb;
+  lb = gt_line_breaker_create(gt_line_breaker_captions_class());
+  lbcap = gt_line_breaker_captions_cast(lb);
   lbcap->canvas = canvas;
   lbcap->linepositions = hashmap_new(HASH_DIRECT, NULL, ma_free_func);
   return lb;

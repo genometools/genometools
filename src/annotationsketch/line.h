@@ -20,7 +20,7 @@
 #define LINE_H
 
 /* A line contains block objects. */
-typedef struct Line Line;
+typedef struct GT_Line GT_Line;
 
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas.h"
@@ -29,12 +29,12 @@ typedef struct Line Line;
 #include "core/range.h"
 #include "extended/genome_node.h"
 
-Line*     line_new(void);
-void      line_insert_block(Line*, GT_Block*); /* takes ownership */
-bool      line_has_captions(const Line*);
-GT_Array* line_get_blocks(Line*);
-int       line_sketch(Line*, GT_Canvas*);
-int       line_unit_test(GT_Error*);
-void      line_delete(Line*);
+GT_Line*     gt_line_new(void);
+void      gt_line_insert_block(GT_Line*, GT_Block*); /* takes ownership */
+bool      gt_line_has_captions(const GT_Line*);
+GT_Array* gt_line_get_blocks(GT_Line*);
+int       gt_line_sketch(GT_Line*, GT_Canvas*);
+int       gt_line_unit_test(GT_Error*);
+void      gt_line_delete(GT_Line*);
 
 #endif

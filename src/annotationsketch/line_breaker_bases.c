@@ -21,40 +21,40 @@
 #include "annotationsketch/line_breaker_bases.h"
 #include "annotationsketch/line_breaker_rep.h"
 
-struct LineBreakerBases {
-  const LineBreaker parent_instance;
+struct GT_LineBreakerBases {
+  const GT_LineBreaker parent_instance;
   Hashmap *itrees;
 };
 
-#define line_breaker_bases_cast(LB)\
-        line_breaker_cast(line_breaker_bases_class(), LB)
+#define gt_line_breaker_bases_cast(LB)\
+        gt_line_breaker_cast(gt_line_breaker_bases_class(), LB)
 
-bool line_breaker_bases_is_line_occupied(LineBreaker* lb,
-                                         Line *line,
+bool gt_line_breaker_bases_is_gt_line_occupied(GT_LineBreaker* lb,
+                                         GT_Line *line,
                                          GT_Block *block)
 {
-  LineBreakerBases *lbb;
+  GT_LineBreakerBases *lbb;
   GT_Range r;
   IntervalTree *t;
   assert(lb && block && line);
   r = gt_block_get_range(block);
-  lbb = line_breaker_bases_cast(lb);
+  lbb = gt_line_breaker_bases_cast(lb);
   if (!(t = hashmap_get(lbb->itrees, line)))
     return false;
   else
     return (interval_tree_find_first_overlapping(t, r.start, r.end));
 }
 
-void line_breaker_bases_register_block(LineBreaker *lb,
-                                       Line *line,
+void gt_line_breaker_bases_register_block(GT_LineBreaker *lb,
+                                       GT_Line *line,
                                        GT_Block *block)
 {
-  LineBreakerBases *lbb;
+  GT_LineBreakerBases *lbb;
   IntervalTree *t;
   IntervalTreeNode *new_node;
   GT_Range *rng;
   assert(lb && block && line);
-  lbb = line_breaker_bases_cast(lb);
+  lbb = gt_line_breaker_bases_cast(lb);
   rng = gt_block_get_range_ptr(block);
   new_node = interval_tree_node_new(rng, rng->start, rng->end);
   if (!(t = hashmap_get(lbb->itrees, line)))
@@ -65,30 +65,30 @@ void line_breaker_bases_register_block(LineBreaker *lb,
   interval_tree_insert(t, new_node);
 }
 
-void line_breaker_bases_delete(LineBreaker *lb)
+void gt_line_breaker_bases_delete(GT_LineBreaker *lb)
 {
-  LineBreakerBases *lbb;
+  GT_LineBreakerBases *lbb;
   if (!lb) return;
-  lbb = line_breaker_bases_cast(lb);
+  lbb = gt_line_breaker_bases_cast(lb);
   hashmap_delete(lbb->itrees);
 }
 
-const LineBreakerClass* line_breaker_bases_class(void)
+const GT_LineBreakerClass* gt_line_breaker_bases_class(void)
 {
-  static const LineBreakerClass line_breaker_class =
-    { sizeof (LineBreakerBases),
-      line_breaker_bases_is_line_occupied,
-      line_breaker_bases_register_block,
-      line_breaker_bases_delete };
-  return &line_breaker_class;
+  static const GT_LineBreakerClass gt_line_breaker_class =
+    { sizeof (GT_LineBreakerBases),
+      gt_line_breaker_bases_is_gt_line_occupied,
+      gt_line_breaker_bases_register_block,
+      gt_line_breaker_bases_delete };
+  return &gt_line_breaker_class;
 }
 
-LineBreaker* line_breaker_bases_new()
+GT_LineBreaker* gt_line_breaker_bases_new()
 {
-  LineBreakerBases *lbb;
-  LineBreaker *lb;
-  lb = line_breaker_create(line_breaker_bases_class());
-  lbb = line_breaker_bases_cast(lb);
+  GT_LineBreakerBases *lbb;
+  GT_LineBreaker *lb;
+  lb = gt_line_breaker_create(gt_line_breaker_bases_class());
+  lbb = gt_line_breaker_bases_cast(lb);
   lbb->itrees = hashmap_new(HASH_DIRECT, NULL, (GT_FreeFunc) interval_tree_delete);
   return lb;
 }

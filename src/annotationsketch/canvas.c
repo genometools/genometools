@@ -68,7 +68,7 @@ static unsigned long calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
   TracklineInfo lines;
   double tmp;
   unsigned long height;
-  unsigned long line_height;
+  unsigned long gt_line_height;
   assert(dia && canvas);
 
   /* get line information for height calculation */
@@ -77,16 +77,16 @@ static unsigned long calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
 
   /* obtain line height and spacer from style */
   if (gt_style_get_num(canvas->sty, "format", "bar_height", &tmp, NULL))
-    line_height = tmp;
+    gt_line_height = tmp;
   else
-    line_height = BAR_HEIGHT_DEFAULT;
+    gt_line_height = BAR_HEIGHT_DEFAULT;
   if (gt_style_get_num(canvas->sty, "format", "bar_vspace", &tmp, NULL))
-    line_height += tmp;
+    gt_line_height += tmp;
   else
-    line_height += BAR_VSPACE_DEFAULT;
+    gt_line_height += BAR_VSPACE_DEFAULT;
 
   /* get total height of all lines */
-  height  = lines.total_lines * line_height;
+  height  = lines.total_lines * gt_line_height;
   height += lines.total_captionlines * (TOY_TEXT_HEIGHT
                                           + CAPTION_BAR_SPACE_DEFAULT);
   /* add track caption height and spacer */
@@ -403,17 +403,17 @@ int gt_canvas_visit_track_post(GT_Canvas *canvas, GT_UNUSED Track *track)
   return 0;
 }
 
-int gt_canvas_visit_line_pre(GT_Canvas *canvas, Line *line)
+int gt_canvas_visit_gt_line_pre(GT_Canvas *canvas, GT_Line *line)
 {
   int had_err = 0;
   assert(canvas && line);
   canvas->bt = bittab_new(canvas->width);
-  if (line_has_captions(line))
+  if (gt_line_has_captions(line))
     canvas->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
   return had_err;
 }
 
-int gt_canvas_visit_line_post(GT_Canvas *canvas, GT_UNUSED Line *line)
+int gt_canvas_visit_gt_line_post(GT_Canvas *canvas, GT_UNUSED GT_Line *line)
 {
   int had_err = 0;
   double tmp;

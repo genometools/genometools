@@ -28,37 +28,37 @@
 struct Track {
   GT_Str *title;
   unsigned long max_num_lines, discarded_blocks;
-  LineBreaker *lb;
+  GT_LineBreaker *lb;
   bool split;
   GT_Array *lines;
 };
 
 Track* track_new(GT_Str *title, unsigned long max_num_lines, bool split,
-                 LineBreaker *lb)
+                 GT_LineBreaker *lb)
 {
   Track *track;
   assert(title && lb);
   track = ma_calloc(1, sizeof (Track));
   assert(track);
   track->title = gt_str_ref(title);
-  track->lines = gt_array_new(sizeof (Line*));
+  track->lines = gt_array_new(sizeof (GT_Line*));
   track->max_num_lines = max_num_lines;
   track->split = split;
   track->lb = lb;
   return track;
 }
 
-static Line* get_next_free_line(Track *track, GT_Block *block)
+static GT_Line* get_next_free_line(Track *track, GT_Block *block)
 {
   unsigned long i;
-  Line* line;
+  GT_Line* line;
 
   assert(track);
 
   /* find unoccupied line -- may need optimisation */
   for (i = 0; i < gt_array_size(track->lines); i++) {
-    line = *(Line**) gt_array_get(track->lines, i);
-    if (!line_breaker_line_is_occupied(track->lb, line, block))
+    line = *(GT_Line**) gt_array_get(track->lines, i);
+    if (!gt_line_breaker_gt_line_is_occupied(track->lb, line, block))
       return line;
   }
   /* if line limit is hit, do not create any more lines! */
@@ -73,16 +73,16 @@ static Line* get_next_free_line(Track *track, GT_Block *block)
   {
     if (gt_array_size(track->lines) < 1)
     {
-      line = line_new();
+      line = gt_line_new();
       gt_array_add(track->lines, line);
     }
     else
-      line = *(Line**) gt_array_get(track->lines, 0);
+      line = *(GT_Line**) gt_array_get(track->lines, 0);
     assert(gt_array_size(track->lines) == 1);
   }
   else
   {
-    line = line_new();
+    line = gt_line_new();
     gt_array_add(track->lines, line);
   }
   assert(line);
@@ -97,15 +97,15 @@ unsigned long track_get_number_of_discarded_blocks(Track *track)
 
 void track_insert_block(Track *track, GT_Block *block)
 {
-  Line *line;
+  GT_Line *line;
 
   assert(track && block);
   line = get_next_free_line(track, block);
   block = gt_block_ref(block);
   if (line)
   {
-    line_insert_block(line, block);
-    line_breaker_register_block(track->lb, line, block);
+    gt_line_insert_block(line, block);
+    gt_line_breaker_register_block(track->lb, line, block);
   } else gt_block_delete(block);
 }
 
@@ -126,7 +126,7 @@ unsigned long track_get_number_of_lines_with_captions(const Track *track)
   unsigned long i = 0, nof_tracks = 0;
   assert(track);
   for (i = 0; i < gt_array_size(track->lines); i++) {
-    if (line_has_captions(*(Line**) gt_array_get(track->lines, i)))
+    if (gt_line_has_captions(*(GT_Line**) gt_array_get(track->lines, i)))
       nof_tracks++;
   }
   return nof_tracks;
@@ -138,7 +138,7 @@ int track_sketch(Track* track, GT_Canvas *canvas)
   assert(track && canvas);
   gt_canvas_visit_track_pre(canvas, track);
   for (i = 0; i < gt_array_size(track->lines); i++)
-    line_sketch(*(Line**) gt_array_get(track->lines, i), canvas);
+    gt_line_sketch(*(GT_Line**) gt_array_get(track->lines, i), canvas);
   gt_canvas_visit_track_post(canvas, track);
   return 0;
 }
@@ -151,7 +151,7 @@ int track_unit_test(GT_Error *err)
   Track *track;
   GT_Str *title;
   gt_error_check(err);
-  LineBreaker *lb;
+  GT_LineBreaker *lb;
 
   title = gt_str_new_cstr("test");
 
@@ -169,7 +169,7 @@ int track_unit_test(GT_Error *err)
   b4 = gt_block_new();
   gt_block_set_range(b4, r4);
 
-  lb = line_breaker_bases_new();
+  lb = gt_line_breaker_bases_new();
 
   track = track_new(title, UNDEF_ULONG, true, lb);
   ensure(had_err, track);
@@ -200,9 +200,9 @@ void track_delete(Track *track)
   unsigned long i;
   if (!track) return;
   if (track->lb)
-    line_breaker_delete(track->lb);
+    gt_line_breaker_delete(track->lb);
   for (i = 0; i < gt_array_size(track->lines); i++)
-    line_delete(*(Line**) gt_array_get(track->lines, i));
+    gt_line_delete(*(GT_Line**) gt_array_get(track->lines, i));
   gt_array_delete(track->lines);
   gt_str_delete(track->title);
   ma_free(track);

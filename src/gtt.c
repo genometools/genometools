@@ -191,7 +191,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "element class", gt_element_unit_test);
   hashmap_add(unit_tests, "feature index class", gt_feature_index_unit_test);
   hashmap_add(unit_tests, "imageinfo class", gt_image_info_unit_test);
-  hashmap_add(unit_tests, "line class", line_unit_test);
+  hashmap_add(unit_tests, "line class", gt_line_unit_test);
   hashmap_add(unit_tests, "track class", track_unit_test);
 #endif
 

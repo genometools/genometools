@@ -25,21 +25,21 @@
 #include "annotationsketch/line.h"
 #include "annotationsketch/style.h"
 
-struct Line {
+struct GT_Line {
   bool has_captions;
   GT_Array *blocks;
 };
 
-Line* line_new(void)
+GT_Line* gt_line_new(void)
 {
-  Line *line;
-  line = ma_malloc(sizeof (Line));
+  GT_Line *line;
+  line = ma_malloc(sizeof (GT_Line));
   line->blocks = gt_array_new(sizeof (GT_Block*));
   line->has_captions = false;
   return line;
 }
 
-void line_insert_block(Line *line, GT_Block *block)
+void gt_line_insert_block(GT_Line *line, GT_Block *block)
 {
   assert(line && block);
   if (!line->has_captions && gt_block_get_caption(block) != NULL)
@@ -47,33 +47,33 @@ void line_insert_block(Line *line, GT_Block *block)
   gt_array_add(line->blocks, block);
 }
 
-bool line_has_captions(const Line *line)
+bool gt_line_has_captions(const GT_Line *line)
 {
   assert(line);
   return line->has_captions;
 }
 
-GT_Array* line_get_blocks(Line* line)
+GT_Array* gt_line_get_blocks(GT_Line* line)
 {
   assert(line);
   return line->blocks;
 }
 
-int line_sketch(Line *line, GT_Canvas *canvas)
+int gt_line_sketch(GT_Line *line, GT_Canvas *canvas)
 {
   int i = 0;
   assert(line && canvas);
-  gt_canvas_visit_line_pre(canvas, line);
+  gt_canvas_visit_gt_line_pre(canvas, line);
   for (i = 0; i < gt_array_size(line->blocks); i++) {
     GT_Block *block;
     block = *(GT_Block**) gt_array_get(line->blocks, i);
     gt_block_sketch(block, canvas);
   }
-  gt_canvas_visit_line_post(canvas, line);
+  gt_canvas_visit_gt_line_post(canvas, line);
   return 0;
 }
 
-int line_unit_test(GT_Error *err)
+int gt_line_unit_test(GT_Error *err)
 {
   GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeFeatureType *type;
@@ -82,7 +82,7 @@ int line_unit_test(GT_Error *err)
   GT_Str *seqid1, *seqid2, *seqid3;
   int had_err = 0;
   GT_GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
-  Line *l1, *l2;
+  GT_Line *l1, *l2;
   GT_Block *b1, *b2;
   gt_error_check(err);
 
@@ -121,8 +121,8 @@ int line_unit_test(GT_Error *err)
                                          gft_TF_binding_site);
   gn4 = gt_genome_feature_new(seqid3, type, r4, GT_STRAND_FORWARD);
 
-  l1 = line_new();
-  l2 = line_new();
+  l1 = gt_line_new();
+  l2 = gt_line_new();
 
   gt_genome_feature_add_attribute((GT_GenomeFeature*) parent, "Name", foo);
   gt_genome_feature_add_attribute((GT_GenomeFeature*) gn1, "Name", bar);
@@ -138,22 +138,22 @@ int line_unit_test(GT_Error *err)
   gt_block_set_range(b1, r1);
   gt_block_set_range(b2, r2);
 
-  /* test line_insert_block */
-  ensure(had_err,  (0 == gt_array_size(line_get_blocks(l1))));
-  line_insert_block(l1, b1);
-  ensure(had_err,  (1 == gt_array_size(line_get_blocks(l1))));
-  line_insert_block(l1, b2);
-  ensure(had_err,  (2 == gt_array_size(line_get_blocks(l1))));
+  /* test gt_line_insert_block */
+  ensure(had_err,  (0 == gt_array_size(gt_line_get_blocks(l1))));
+  gt_line_insert_block(l1, b1);
+  ensure(had_err,  (1 == gt_array_size(gt_line_get_blocks(l1))));
+  gt_line_insert_block(l1, b2);
+  ensure(had_err,  (2 == gt_array_size(gt_line_get_blocks(l1))));
 
-  /* test line_get_blocks */
-  blocks = line_get_blocks(l1);
+  /* test gt_line_get_blocks */
+  blocks = gt_line_get_blocks(l1);
   ensure(had_err, (2 == gt_array_size(blocks)));
 
   gt_str_delete(seqid1);
   gt_str_delete(seqid2);
   gt_str_delete(seqid3);
-  line_delete(l1);
-  line_delete(l2);
+  gt_line_delete(l1);
+  gt_line_delete(l2);
   gt_genome_node_delete(parent);
   gt_genome_node_delete(gn1);
   gt_genome_node_delete(gn2);
@@ -164,7 +164,7 @@ int line_unit_test(GT_Error *err)
   return had_err;
 }
 
-void line_delete(Line *line)
+void gt_line_delete(GT_Line *line)
 {
   unsigned long i;
   if (!line) return;

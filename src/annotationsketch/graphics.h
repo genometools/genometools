@@ -97,8 +97,8 @@ void      graphics_draw_caret(Graphics*, double x, double y, double width,
                               GT_Color stroke_color);
 void      graphics_draw_rectangle(Graphics*, double x, double y,
                                   bool filled, GT_Color fill_color,
-                                  bool outlined, GT_Color outline_color,
-                                  double outline_width, double width);
+                                  bool outlined, GT_Color outgt_line_color,
+                                  double outgt_line_width, double width);
 void      graphics_draw_arrowhead(Graphics*, double x, double y, GT_Color,
                                   ArrowStatus);
 /* Write out the Graphic to the given file with <filename>. */

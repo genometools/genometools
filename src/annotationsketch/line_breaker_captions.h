@@ -22,10 +22,10 @@
 #include "annotationsketch/drawing_range.h"
 #include "annotationsketch/line_breaker.h"
 
-/* Implements the LineBreaker interface; breaks Lines if captions overlap. */
-typedef struct LineBreakerCaptions LineBreakerCaptions;
+/* Implements the GT_LineBreaker interface; breaks GT_Lines if captions overlap. */
+typedef struct GT_LineBreakerCaptions GT_LineBreakerCaptions;
 
-const LineBreakerClass* line_breaker_captions_class(void);
-LineBreaker*            line_breaker_captions_new(GT_Canvas *canvas);
+const GT_LineBreakerClass* gt_line_breaker_captions_class(void);
+GT_LineBreaker*            gt_line_breaker_captions_new(GT_Canvas *canvas);
 
 #endif

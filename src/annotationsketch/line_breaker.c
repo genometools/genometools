@@ -20,23 +20,23 @@
 #include "core/unused_api.h"
 #include "annotationsketch/line_breaker_rep.h"
 
-LineBreaker* line_breaker_create(const LineBreakerClass *lbc)
+GT_LineBreaker* gt_line_breaker_create(const GT_LineBreakerClass *lbc)
 {
-  LineBreaker *lb;
+  GT_LineBreaker *lb;
   assert(lbc && lbc->size);
   lb = ma_calloc(1, lbc->size);
   lb->c_class = lbc;
   return lb;
 }
 
-LineBreaker* line_breaker_ref(LineBreaker *lb)
+GT_LineBreaker* gt_line_breaker_ref(GT_LineBreaker *lb)
 {
   assert(lb);
   lb->reference_count++;
   return lb;
 }
 
-void line_breaker_delete(LineBreaker *lb)
+void gt_line_breaker_delete(GT_LineBreaker *lb)
 {
   if (!lb) return;
   if (lb->reference_count) {
@@ -49,20 +49,20 @@ void line_breaker_delete(LineBreaker *lb)
   ma_free(lb);
 }
 
-bool line_breaker_line_is_occupied(LineBreaker *lb, Line *line, GT_Block *block)
+bool gt_line_breaker_gt_line_is_occupied(GT_LineBreaker *lb, GT_Line *line, GT_Block *block)
 {
   assert(lb && lb->c_class && line && block);
   return lb->c_class->is_occupied(lb, line, block);
 }
 
-void line_breaker_register_block(LineBreaker *lb, Line *line, GT_Block *block)
+void gt_line_breaker_register_block(GT_LineBreaker *lb, GT_Line *line, GT_Block *block)
 {
   assert(lb && lb->c_class && line && block);
   lb->c_class->register_block(lb, line, block);
 }
 
-void* line_breaker_cast(GT_UNUSED const LineBreakerClass *lbc,
-                        LineBreaker *lb)
+void* gt_line_breaker_cast(GT_UNUSED const GT_LineBreakerClass *lbc,
+                        GT_LineBreaker *lb)
 {
   assert(lbc && lb && lb->c_class == lbc);
   return lb;

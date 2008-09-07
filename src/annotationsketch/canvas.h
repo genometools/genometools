@@ -38,9 +38,9 @@ int           gt_canvas_visit_track_pre(GT_Canvas*, Track*);
 /* Callback function for GT_Diagram rendering. */
 int           gt_canvas_visit_track_post(GT_Canvas*, Track*);
 /* Callback function for GT_Diagram rendering. */
-int           gt_canvas_visit_line_pre(GT_Canvas*, Line*);
+int           gt_canvas_visit_gt_line_pre(GT_Canvas*, GT_Line*);
 /* Callback function for GT_Diagram rendering. */
-int           gt_canvas_visit_line_post(GT_Canvas*, Line*);
+int           gt_canvas_visit_gt_line_post(GT_Canvas*, GT_Line*);
 /* Callback function for GT_Diagram rendering. */
 int           gt_canvas_visit_block(GT_Canvas*, GT_Block*);
 /* Callback function for GT_Diagram rendering. */

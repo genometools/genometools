@@ -383,7 +383,7 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
 
 void graphics_draw_rectangle(Graphics *g, double x, double y,
                              bool filled, GT_Color fill_color, bool outlined,
-                             GT_Color outline_color, double outline_width,
+                             GT_Color outgt_line_color, double outgt_line_width,
                              double width)
 {
   assert(g);
@@ -398,10 +398,10 @@ void graphics_draw_rectangle(Graphics *g, double x, double y,
     cairo_fill_preserve(g->cr);
   }
   if (outlined) {
-    cairo_set_line_width(g->cr, outline_width);
-    cairo_set_source_rgb(g->cr, outline_color.red,
-                                outline_color.green,
-                                outline_color.blue);
+    cairo_set_line_width(g->cr, outgt_line_width);
+    cairo_set_source_rgb(g->cr, outgt_line_color.red,
+                                outgt_line_color.green,
+                                outgt_line_color.blue);
     cairo_stroke(g->cr);
   }
   /* restore cairo context */

@@ -18,18 +18,18 @@
 #ifndef LINE_BREAKER_H
 #define LINE_BREAKER_H
 
-/* The LineBreaker interface. */
-typedef struct LineBreakerClass LineBreakerClass;
-typedef struct LineBreaker LineBreaker;
+/* The GT_LineBreaker interface. */
+typedef struct GT_LineBreakerClass GT_LineBreakerClass;
+typedef struct GT_LineBreaker GT_LineBreaker;
 
 #include "annotationsketch/block.h"
 #include "annotationsketch/line.h"
 
-LineBreaker* line_breaker_ref(LineBreaker*);
-bool         line_breaker_line_is_occupied(LineBreaker *lb,
-                                           Line *line, GT_Block *block);
-void         line_breaker_register_block(LineBreaker *lb,
-                                         Line *line, GT_Block *block);
-void         line_breaker_delete(LineBreaker*);
+GT_LineBreaker* gt_line_breaker_ref(GT_LineBreaker*);
+bool         gt_line_breaker_gt_line_is_occupied(GT_LineBreaker *lb,
+                                           GT_Line *line, GT_Block *block);
+void         gt_line_breaker_register_block(GT_LineBreaker *lb,
+                                         GT_Line *line, GT_Block *block);
+void         gt_line_breaker_delete(GT_LineBreaker*);
 
 #endif

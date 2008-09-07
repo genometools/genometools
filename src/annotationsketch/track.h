@@ -30,7 +30,7 @@ typedef struct Track Track;
 #include "extended/genome_node.h"
 
 Track*        track_new(GT_Str *title, unsigned long max_num_lines,
-                        bool split_lines, LineBreaker*);
+                        bool split_lines, GT_LineBreaker*);
 void          track_insert_block(Track*, GT_Block*);
 GT_Str*       track_get_title(const Track*);
 unsigned long track_get_number_of_lines(const Track*);
