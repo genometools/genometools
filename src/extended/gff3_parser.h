@@ -39,7 +39,7 @@ void        gff3parser_enable_tidy_mode(GFF3Parser*);
 int         gff3parser_parse_target_attributes(const char *values,
                                                unsigned long *num_of_targets,
                                                Str *first_target_id,
-                                               Range *first_target_range,
+                                               GT_Range *first_target_range,
                                                Strand *first_target_strand,
                                                const char *filename,
                                                unsigned int line_number,

@@ -33,7 +33,7 @@ static int diagram_lua_new(lua_State *L)
 {
   GT_Diagram **diagram;
   GT_FeatureIndex **feature_index;
-  Range *range;
+  GT_Range *range;
   const char *seqid;
   GT_Style *style;
   /* get feature index */

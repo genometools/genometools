@@ -23,13 +23,13 @@
 
 typedef struct CSASpliceForm CSASpliceForm;
 
-CSASpliceForm* csa_splice_form_new(void *spliced_alignment, GetGenomicRangeFunc,
+CSASpliceForm* csa_splice_form_new(void *spliced_alignment, GetGenomicGT_RangeFunc,
                                    GetStrandFunc);
 void           csa_splice_form_delete(CSASpliceForm*);
 void           csa_splice_form_add_sa(CSASpliceForm*, void *spliced_alignment);
 void*          csa_splice_form_get_sa(const CSASpliceForm*, unsigned long);
 unsigned long  csa_splice_form_num_of_sas(const CSASpliceForm*);
-Range          csa_splice_form_genomic_range(const CSASpliceForm*);
+GT_Range          csa_splice_form_genomic_range(const CSASpliceForm*);
 Strand         csa_splice_form_strand(const CSASpliceForm*);
 void*          csa_splice_form_get_representative(const CSASpliceForm*);
 

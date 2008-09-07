@@ -26,7 +26,7 @@
 
 struct GT_Block {
   Dlist *elements;
-  Range range;
+  GT_Range range;
   Str *caption;
   bool show_caption;
   Strand strand;
@@ -109,19 +109,19 @@ GenomeNode* gt_block_get_top_level_feature(const GT_Block *block)
   return block->top_level_feature;
 }
 
-Range gt_block_get_range(const GT_Block *block)
+GT_Range gt_block_get_range(const GT_Block *block)
 {
    assert(block);
    return block->range;
 }
 
-Range* gt_block_get_range_ptr(const GT_Block *block)
+GT_Range* gt_block_get_range_ptr(const GT_Block *block)
 {
    assert(block);
-   return (Range*) &(block->range);
+   return (GT_Range*) &(block->range);
 }
 
-void gt_block_set_range(GT_Block *block, Range r)
+void gt_block_set_range(GT_Block *block, GT_Range r)
 {
   assert(block && r.start <= r.end);
   block->range = r;
@@ -132,7 +132,7 @@ bool gt_block_has_only_one_fullsize_element(const GT_Block *block)
   bool ret = false;
   assert(block);
   if (dlist_size(block->elements) == 1UL) {
-    Range elem_range, block_range;
+    GT_Range elem_range, block_range;
     assert(dlist_first(block->elements) == dlist_last(block->elements));
     elem_range = element_get_range(
                    dlistelem_get_data(dlist_first(block->elements)));
@@ -217,7 +217,7 @@ int gt_block_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *gft;
-  Range r1, r2, r_temp, b_range;
+  GT_Range r1, r2, r_temp, b_range;
   int had_err = 0;
   Strand s;
   GenomeNode *gn1, *gn2;

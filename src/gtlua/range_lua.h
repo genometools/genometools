@@ -21,7 +21,7 @@
 #include "lua.h"
 #include "core/range.h"
 
-/* exports the Range class to Lua:
+/* exports the GT_Range class to Lua:
 
    -- Returns a new range object with start <startpos> and end <endpos>.
    -- <startpos> must be smaller or equal than <endpos>.
@@ -46,11 +46,11 @@
 */
 int luaopen_range(lua_State*);
 
-/* push a Range to Lua, returns 1 (number of elements pushed) */
-int range_lua_push(lua_State*, Range);
+/* push a GT_Range to Lua, returns 1 (number of elements pushed) */
+int range_lua_push(lua_State*, GT_Range);
 
 #define RANGE_METATABLE  "GenomeTools.range"
 #define check_range(L, POS) \
-          (Range*) luaL_checkudata(L, POS, RANGE_METATABLE)
+          (GT_Range*) luaL_checkudata(L, POS, RANGE_METATABLE)
 
 #endif

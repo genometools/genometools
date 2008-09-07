@@ -36,7 +36,7 @@ static int add_introns_in_children(GenomeNode *gn, void *data,
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GenomeFeature *current_feature;
   GenomeNode *intron_node;
-  Range previous_range, current_range, intron_range;
+  GT_Range previous_range, current_range, intron_range;
   Strand previous_strand, current_strand, intron_strand;
   Str *parent_seqid;
   gt_error_check(err);

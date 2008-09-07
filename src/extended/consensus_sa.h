@@ -36,7 +36,7 @@
   Technology, 47(15):965-978, 2005.
 */
 
-typedef Range  (*GetGenomicRangeFunc)(const void *sa);
+typedef GT_Range  (*GetGenomicGT_RangeFunc)(const void *sa);
 typedef Strand (*GetStrandFunc)(const void *sa);
 typedef void   (*GetExonsFunc)(GT_Array *exon_ranges, const void *sa);
 typedef void   (*ProcessSpliceFormFunc)(GT_Array *spliced_alignments_in_form,
@@ -46,7 +46,7 @@ typedef void   (*ProcessSpliceFormFunc)(GT_Array *spliced_alignments_in_form,
                                         void *userdata);
 
 void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
-                  size_t size_of_sa, GetGenomicRangeFunc, GetStrandFunc,
+                  size_t size_of_sa, GetGenomicGT_RangeFunc, GetStrandFunc,
                   GetExonsFunc, ProcessSpliceFormFunc, void *userdata);
 
 #endif

@@ -80,7 +80,7 @@ const GenomeStreamClass* filter_stream_class(void)
 
 GenomeStream* filter_stream_new(GenomeStream *in_stream,
                                 Str *seqid, Str *typefilter,
-                                Range contain_range, Range overlap_range,
+                                GT_Range contain_range, GT_Range overlap_range,
                                 Strand strand, Strand targetstrand,
                                 bool has_CDS, unsigned long max_gene_length,
                                 unsigned long max_gene_num,

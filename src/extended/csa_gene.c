@@ -63,9 +63,9 @@ unsigned long csa_gene_num_of_splice_forms(const CSAGene *gene)
   return gt_array_size(gene->splice_forms);
 }
 
-Range csa_gene_genomic_range(const CSAGene *gene)
+GT_Range csa_gene_genomic_range(const CSAGene *gene)
 {
-  Range gene_range, tmp_range;
+  GT_Range gene_range, tmp_range;
   unsigned long i;
   assert(gene);
   gene_range.start = ~0UL;

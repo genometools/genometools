@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
   const char *style_file, *gff3_file, *output_file, *seqid;
   GT_Style *style;
   GT_FeatureIndex *feature_index;
-  Range range;
+  GT_Range range;
   GT_Diagram *diagram;
   GT_Canvas *canvas;
   GT_Error *err = gt_error_new();

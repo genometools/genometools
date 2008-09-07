@@ -28,7 +28,7 @@
 double        gt_canvas_get_text_width(GT_Canvas*, const char *text);
 /* Returns a pixel-based range for a nucleotide-based range
    using the scaling factor defined for the given <canvas> */
-DrawingRange  gt_canvas_convert_coords(GT_Canvas* canvas, Range);
+DrawingRange  gt_canvas_convert_coords(GT_Canvas* canvas, GT_Range);
 /* Callback function for GT_Diagram rendering. */
 int           gt_canvas_visit_gt_diagram_pre(GT_Canvas*, GT_Diagram*);
 /* Callback function for GT_Diagram rendering. */

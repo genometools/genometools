@@ -47,7 +47,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GenomeFeature *gf;
-  Range range;
+  GT_Range range;
   const char *raw_sequence;
   unsigned long raw_sequence_length;
   int had_err = 0;
@@ -97,7 +97,7 @@ static GT_Array* determine_ORFs_for_all_three_frames(Splicedseq *ss)
   pr_0 = str_new();
   pr_1 = str_new();
   pr_2 = str_new();
-  orfs = gt_array_new(sizeof (Range));
+  orfs = gt_array_new(sizeof (GT_Range));
 
   translate_dna(pr_0, splicedseq_get(ss), splicedseq_length(ss), 0);
   translate_dna(pr_1, splicedseq_get(ss), splicedseq_length(ss), 1);
@@ -113,13 +113,13 @@ static GT_Array* determine_ORFs_for_all_three_frames(Splicedseq *ss)
   return orfs;
 }
 
-static void create_CDS_features_for_ORF(Range orf, CDSVisitor *v,
+static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
                                         GenomeNode *gn)
 {
   GenomeFeatureType *cds_type;
   GenomeNode *cds_feature;
   unsigned long i;
-  Range cds;
+  GT_Range cds;
   Strand strand = genome_feature_get_strand((GenomeFeature*) gn);
 
   assert(range_length(orf) >= 3);
@@ -175,7 +175,7 @@ static void create_CDS_features_for_longest_ORF(GT_Array *orfs, CDSVisitor *v,
     ranges_sort_by_length_stable(orfs);
 
     /* create CDS features from the longest ORF */
-    create_CDS_features_for_ORF(*(Range*) gt_array_get_first(orfs), v, gn);
+    create_CDS_features_for_ORF(*(GT_Range*) gt_array_get_first(orfs), v, gn);
   }
 }
 

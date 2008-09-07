@@ -49,9 +49,9 @@ static Str* comment_get_idstr(GenomeNode *gn)
   return c->comment_str;
 }
 
-static Range comment_get_range(UNUSED GenomeNode *gn)
+static GT_Range comment_get_range(UNUSED GenomeNode *gn)
 {
-  Range range;
+  GT_Range range;
   range.start = 0;
   range.end = 0;
   return range;

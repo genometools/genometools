@@ -32,7 +32,7 @@ struct CSAVisitor {
   unsigned long join_length;
   GT_Array *cluster;
   GenomeFeature *buffered_feature;
-  Range first_range,
+  GT_Range first_range,
         second_range;
   Str *first_str,
       *second_str,
@@ -162,7 +162,7 @@ GenomeNode* csa_visitor_get_node(GenomeVisitor *gv)
   return queue_get(csa_visitor->genome_node_buffer);
 }
 
-static Range get_genomic_range(const void *sa)
+static GT_Range get_genomic_range(const void *sa)
 {
   GenomeFeature *gf = *(GenomeFeature**) sa;
   assert(gf && genome_feature_has_type(gf, gft_gene));
@@ -180,7 +180,7 @@ static int save_exon(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   GenomeFeature *gf = (GenomeFeature*) gn;
   GT_Array *exon_ranges = (GT_Array*) data;
-  Range range;
+  GT_Range range;
   gt_error_check(err);
   assert(gf && exon_ranges);
   if (genome_feature_has_type(gf, gft_exon)) {
@@ -217,7 +217,7 @@ static void add_sa_to_exon_feature_array(GT_Array *exon_nodes,
                 exons_from_sa_index = 0;
   GenomeFeature *exon_feature, *exons_from_sa_feature;
   GenomeNode *new_feature;
-  Range exon_feature_range, exons_from_sa_range;
+  GT_Range exon_feature_range, exons_from_sa_range;
 
   assert(exon_nodes && sa);
   assert(gene_strand != STRAND_BOTH); /* is defined */
@@ -317,9 +317,9 @@ static void add_sa_to_exon_feature_array(GT_Array *exon_nodes,
 #ifndef NDEBUG
 static bool genome_nodes_are_sorted_and_do_not_overlap(GT_Array *exon_nodes)
 {
-  GT_Array *ranges = gt_array_new(sizeof (Range));
+  GT_Array *ranges = gt_array_new(sizeof (GT_Range));
   unsigned long i;
-  Range range;
+  GT_Range range;
   bool rval;
   assert(exon_nodes);
   for (i = 0; i < gt_array_size(exon_nodes); i++) {

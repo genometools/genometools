@@ -30,11 +30,11 @@ struct TranscriptExons {
 TranscriptExons* transcript_exons_new(void)
 {
   TranscriptExons *te = ma_malloc(sizeof (TranscriptExons));
-  te->exon_array_all = gt_array_new(sizeof (Range));
-  te->exon_array_single = gt_array_new(sizeof (Range));
-  te->exon_array_initial = gt_array_new(sizeof (Range));
-  te->exon_array_internal = gt_array_new(sizeof (Range));
-  te->exon_array_terminal = gt_array_new(sizeof (Range));
+  te->exon_array_all = gt_array_new(sizeof (GT_Range));
+  te->exon_array_single = gt_array_new(sizeof (GT_Range));
+  te->exon_array_initial = gt_array_new(sizeof (GT_Range));
+  te->exon_array_internal = gt_array_new(sizeof (GT_Range));
+  te->exon_array_terminal = gt_array_new(sizeof (GT_Range));
   return te;
 }
 

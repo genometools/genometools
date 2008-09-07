@@ -49,7 +49,7 @@ int              gt_feature_index_get_features_for_range(GT_FeatureIndex
                                                          *feature_index,
                                                          GT_Array *results,
                                                          const char *seqid,
-                                                         Range, GT_Error*);
+                                                         GT_Range, GT_Error*);
 /* Returns the first sequence region identifier added to <feature_index>. */
 const char*      gt_feature_index_get_first_seqid(const GT_FeatureIndex
                                                   *feature_index);
@@ -58,7 +58,7 @@ const char*      gt_feature_index_get_first_seqid(const GT_FeatureIndex
 GT_StrArray*     gt_feature_index_get_seqids(const GT_FeatureIndex
                                              *feature_index);
 void             gt_feature_index_get_range_for_seqid(GT_FeatureIndex*,
-                                                      Range*,
+                                                      GT_Range*,
                                                       const char *seqid);
 bool             gt_feature_index_has_seqid(const GT_FeatureIndex*,
                                             const char*);

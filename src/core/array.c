@@ -218,11 +218,11 @@ int gt_array_iterate_reverse(GT_Array *a, GT_ArrayProcessor gt_array_processor, 
 static int iterate_test_func(void *value, void *info, UNUSED GT_Error *err)
 {
   unsigned long *i;
-  Range range;
+  GT_Range range;
   int had_err = 0;
   gt_error_check(err);
   i = (unsigned long*) info;
-  range = *(Range*) value;
+  range = *(GT_Range*) value;
   ensure(had_err, range.start == *i + 1);
   ensure(had_err, range.end == *i + 101);
   (*i)++;
@@ -263,7 +263,7 @@ int gt_array_unit_test(GT_Error *err)
   char cc, *char_array_test;
   int ci, *int_array_test;
   unsigned long i, j, size;
-  Range range;
+  GT_Range range;
   int had_err = 0;
   gt_error_check(err);
 
@@ -327,7 +327,7 @@ int gt_array_unit_test(GT_Error *err)
 
   /* test gt_array_reverse(), gt_array_iterate(), gt_array_rem(), and gt_array_ref() */
   if (!had_err) {
-    a = gt_array_new(sizeof (Range));
+    a = gt_array_new(sizeof (GT_Range));
     for (i = 0; i < 24; i++) {
       range.start = i + 1;
       range.end   = i + 101;
@@ -337,7 +337,7 @@ int gt_array_unit_test(GT_Error *err)
     for (i = 0; !had_err && i < 24; i++) {
       range.start = i + 1;
       range.end   = i + 101;
-      ensure(had_err, !range_compare(range, *(Range*) gt_array_get(a, 23 - i)));
+      ensure(had_err, !range_compare(range, *(GT_Range*) gt_array_get(a, 23 - i)));
     }
     aref = gt_array_ref(a);
     gt_array_delete(aref);
@@ -370,12 +370,12 @@ int gt_array_unit_test(GT_Error *err)
     for (i = 0; !had_err && i < 10; i++) {
       range.start = i + 1;
       range.end   = i + 101;
-      ensure(had_err, !range_compare(range, *(Range*) gt_array_get(a, i)));
+      ensure(had_err, !range_compare(range, *(GT_Range*) gt_array_get(a, i)));
     }
     for (i = 10; !had_err && i < 20; i++) {
       range.start = 4 + i + 1;
       range.end   = 4 + i + 101;
-      ensure(had_err, !range_compare(range, *(Range*) gt_array_get(a, i)));
+      ensure(had_err, !range_compare(range, *(GT_Range*) gt_array_get(a, i)));
     }
   }
   gt_array_delete(a);

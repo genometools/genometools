@@ -31,10 +31,10 @@ typedef struct Element Element;
 
 /* Creates a complete new Element object. */
 Element*           element_new(GenomeNode*);
-/* Creates an empty Element object. Range and type have to be set afterwards. */
+/* Creates an empty Element object. GT_Range and type have to be set afterwards. */
 Element*           element_new_empty(void);
-Range              element_get_range(const Element*);
-void               element_set_range(Element*, Range);
+GT_Range           element_get_range(const Element*);
+void               element_set_range(Element*, GT_Range);
 DrawingRange       element_calculate_drawing_range(Element*, GT_Canvas*);
 GenomeFeatureType* element_get_type(const Element*);
 void               element_set_type(Element*, GenomeFeatureType*);

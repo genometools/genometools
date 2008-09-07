@@ -52,7 +52,7 @@ struct GenomeFeature
       *source;
   FeatureTypeFactory *ftf;
   GenomeFeatureType *type;
-  Range range;
+  GT_Range range;
   float score;
   TagValueMap attributes; /* stores the attributes; created on demand */
   GenomeFeature *representative;
@@ -106,13 +106,13 @@ static Str* genome_feature_get_seqid(GenomeNode *gn)
   return gf->seqid;
 }
 
-static Range genome_feature_get_range(GenomeNode *gn)
+static GT_Range genome_feature_get_range(GenomeNode *gn)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   return gf->range;
 }
 
-static void genome_feature_set_range(GenomeNode *gn, Range range)
+static void genome_feature_set_range(GenomeNode *gn, GT_Range range)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   gf->range = range;
@@ -169,7 +169,7 @@ static void set_transcriptfeaturetype(GenomeNode *gn, TranscriptFeatureType tft)
   gn->bit_field |= tft << TRANSCRIPT_FEATURE_TYPE_OFFSET;
 }
 
-GenomeNode* genome_feature_new(Str *seqid, GenomeFeatureType *type, Range range,
+GenomeNode* genome_feature_new(Str *seqid, GenomeFeatureType *type, GT_Range range,
                                Strand strand)
 {
   GenomeNode *gn;
@@ -212,7 +212,7 @@ GenomeNode* genome_feature_new_standard_gene(FeatureTypeFactory *ftf)
 {
   GenomeNode *gn, *child, *grandchild;
   GenomeFeatureType *type;
-  Range range;
+  GT_Range range;
   Str *seqid;
   seqid = str_new_cstr("ctg123");
 
@@ -635,7 +635,7 @@ int genome_feature_unit_test(GT_Error *err)
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *type;
   GenomeNode *gf;
-  Range range;
+  GT_Range range;
   Str *seqid;
   int had_err = 0;
 

@@ -175,7 +175,7 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
   GT_FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
   const char *file, *seqid = NULL;
-  Range qry_range, sequence_region_range;
+  GT_Range qry_range, sequence_region_range;
   GT_Array *results = NULL;
   GT_Style *sty = NULL;
   Str *gt_style_file = NULL;

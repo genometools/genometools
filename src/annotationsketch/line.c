@@ -77,7 +77,7 @@ int line_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *type;
-  Range r1, r2, r3, r4, r_parent;
+  GT_Range r1, r2, r3, r4, r_parent;
   GT_Array* blocks;
   Str *seqid1, *seqid2, *seqid3;
   int had_err = 0;

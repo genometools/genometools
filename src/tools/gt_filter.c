@@ -37,7 +37,7 @@ typedef struct {
       *typefilter,
       *strand_char,
       *targetstrand_char;
-  Range contain_range,
+  GT_Range contain_range,
         overlap_range;
   Strand strand,
          targetstrand;

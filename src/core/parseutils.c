@@ -101,7 +101,7 @@ int parse_double(double *out, const char *nptr)
   return 0;
 }
 
-int parse_range(Range *range, const char *start, const char *end,
+int parse_range(GT_Range *range, const char *start, const char *end,
                 unsigned int line_number, const char *filename, GT_Error *err)
 {
   long start_val, end_val;

@@ -38,9 +38,9 @@ GT_Block*          gt_block_new_from_node(GenomeNode *node);
 GT_Block*          gt_block_ref(GT_Block*);
 /* Insert <node> into block. */
 void               gt_block_insert_element(GT_Block*, GenomeNode *node);
-Range              gt_block_get_range(const GT_Block*);
-Range*             gt_block_get_range_ptr(const GT_Block *block);
-void               gt_block_set_range(GT_Block*, Range r);
+GT_Range           gt_block_get_range(const GT_Block*);
+GT_Range*          gt_block_get_range_ptr(const GT_Block *block);
+void               gt_block_set_range(GT_Block*, GT_Range r);
 /* Checks whether a GT_Block is occupied completely by a single element. */
 bool               gt_block_has_only_one_fullsize_element(const GT_Block*);
 /* Set whether a block caption should be displayed or not. */

@@ -31,7 +31,7 @@ static int genome_feature_lua_new(lua_State *L)
   FeatureTypeFactory *feature_type_factory;
   GenomeNode **gf;
   GenomeFeatureType *type;
-  Range *range;
+  GT_Range *range;
   Strand strand;
   const char *seqid, *type_str, *strand_str;
   size_t length;
@@ -65,7 +65,7 @@ static int sequence_region_lua_new(lua_State *L)
   GenomeNode **sr;
   const char *seqid;
   Str *seqid_str;
-  Range *range;
+  GT_Range *range;
   assert(L);
   /* get_check parameters */
   seqid = luaL_checkstring(L, 1);

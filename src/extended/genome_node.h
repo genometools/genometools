@@ -54,8 +54,8 @@ Str*          genome_node_get_seqid(GenomeNode*);
 Str*          genome_node_get_idstr(GenomeNode*); /* used to sort nodes */
 unsigned long genome_node_get_start(GenomeNode*);
 unsigned long genome_node_get_end(GenomeNode*);
-Range         genome_node_get_range(GenomeNode*);
-void          genome_node_set_range(GenomeNode*, Range);
+GT_Range         genome_node_get_range(GenomeNode*);
+void          genome_node_set_range(GenomeNode*, GT_Range);
 void          genome_node_change_seqid(GenomeNode*, Str*);
 int           genome_node_accept(GenomeNode*, GenomeVisitor*, GT_Error*);
 /* <parent> takes ownership of <child> */

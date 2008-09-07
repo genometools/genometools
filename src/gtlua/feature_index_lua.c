@@ -100,7 +100,7 @@ static int feature_index_lua_get_features_for_range(lua_State *L)
 {
   GT_FeatureIndex **feature_index;
   const char *seqid;
-  Range *range;
+  GT_Range *range;
   GT_Array *features;
   int had_err;
   feature_index = check_feature_index(L, 1);
@@ -148,7 +148,7 @@ static int feature_index_lua_get_range_for_seqid(lua_State *L)
 {
   GT_FeatureIndex **feature_index;
   const char *seqid;
-  Range range;
+  GT_Range range;
   feature_index = check_feature_index(L, 1);
   seqid = luaL_checkstring(L, 2);
   luaL_argcheck(L, gt_feature_index_has_seqid(*feature_index, seqid), 2,

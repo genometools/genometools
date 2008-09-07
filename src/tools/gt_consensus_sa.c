@@ -23,7 +23,7 @@
 #include "extended/consensus_sa.h"
 #include "tools/gt_consensus_sa.h"
 
-static Range get_genomic_range(const void *sa)
+static GT_Range get_genomic_range(const void *sa)
 {
   SSplicedAlignment *alignment = *(SSplicedAlignment**) sa;
   assert(alignment);
@@ -41,7 +41,7 @@ static Strand get_strand(const void *sa)
 static void get_exons(GT_Array *exon_ranges, const void *sa)
 {
   SSplicedAlignment *alignment = *(SSplicedAlignment**) sa;
-  Range exon;
+  GT_Range exon;
   unsigned long i;
   assert(alignment);
   for (i = 0; i < sspliced_alignment_num_of_exons(alignment); i++) {

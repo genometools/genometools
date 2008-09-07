@@ -105,7 +105,7 @@ int gt_image_info_unit_test(GT_Error *err)
     const GT_RecMap* rm;
     unsigned long rbase;
     rbase = rand_max(10);
-    Range r = {rbase,rbase+rand_max(20)};
+    GT_Range r = {rbase,rbase+rand_max(20)};
     gfs[i] = (GenomeNode*) genome_feature_new(seqid, gft, r, STRAND_FORWARD);
     rms[i] = gt_recmap_new(rand_max_double(100.0),
                            rand_max_double(100.0),

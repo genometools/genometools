@@ -21,7 +21,7 @@
 
 typedef struct {
   GT_Array *splice_forms;
-  GetGenomicRangeFunc get_genomic_range;
+  GetGenomicGT_RangeFunc get_genomic_range;
   GetStrandFunc get_strand;
 } StoreSpliceFormInfo;
 
@@ -92,7 +92,7 @@ static void process_splice_forms(GT_Array *genes, GT_Array *splice_forms)
 GT_Array* csa_variable_strands(const void *set_of_sas,
                                unsigned long number_of_sas,
                                size_t size_of_sa,
-                               GetGenomicRangeFunc get_genomic_range,
+                               GetGenomicGT_RangeFunc get_genomic_range,
                                GetStrandFunc get_strand, GetExonsFunc get_exons)
 {
   StoreSpliceFormInfo info;

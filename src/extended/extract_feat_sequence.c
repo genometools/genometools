@@ -27,7 +27,7 @@ static int extract_join_feature(GenomeNode *gn, GenomeFeatureType *type,
   const char *raw_sequence;
   unsigned long raw_sequence_length;
   GenomeFeature *gf;
-  Range range;
+  GT_Range range;
   int had_err = 0;
 
   gt_error_check(err);
@@ -61,7 +61,7 @@ int extract_feat_sequence(Str *sequence, GenomeNode *gn,
                           RegionMapping *region_mapping, GT_Error *err)
 {
   GenomeFeature *gf;
-  Range range;
+  GT_Range range;
   const char *raw_sequence;
   unsigned long raw_sequence_length;
   int had_err = 0;

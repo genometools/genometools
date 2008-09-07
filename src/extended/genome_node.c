@@ -426,23 +426,23 @@ Str* genome_node_get_idstr(GenomeNode *gn)
 
 unsigned long genome_node_get_start(GenomeNode *gn)
 {
-  Range range = genome_node_get_range(gn);
+  GT_Range range = genome_node_get_range(gn);
   return range.start;
 }
 
 unsigned long genome_node_get_end(GenomeNode *gn)
 {
-  Range range = genome_node_get_range(gn);
+  GT_Range range = genome_node_get_range(gn);
   return range.end;
 }
 
-Range genome_node_get_range(GenomeNode *gn)
+GT_Range genome_node_get_range(GenomeNode *gn)
 {
   assert(gn && gn->c_class && gn->c_class->get_range);
   return gn->c_class->get_range(gn);
 }
 
-void genome_node_set_range(GenomeNode *gn, Range range)
+void genome_node_set_range(GenomeNode *gn, GT_Range range)
 {
   assert(gn && gn->c_class && gn->c_class->set_range);
   gn->c_class->set_range(gn, range);
@@ -554,7 +554,7 @@ bool genome_node_direct_children_do_not_overlap_generic(GenomeNode *parent,
   GT_Array *children_ranges;
   Dlistelem *dlistelem;
   GenomeFeature *gf = NULL, *child_gf;
-  Range range;
+  GT_Range range;
   bool rval;
 
   assert(parent);
@@ -566,7 +566,7 @@ bool genome_node_direct_children_do_not_overlap_generic(GenomeNode *parent,
     return true;
 
   /* get children ranges */
-  children_ranges = gt_array_new(sizeof (Range));
+  children_ranges = gt_array_new(sizeof (GT_Range));
   assert(parent->children);
   for (dlistelem = dlist_first(parent->children); dlistelem != NULL;
        dlistelem = dlistelem_next(dlistelem)) {
@@ -629,7 +629,7 @@ bool genome_node_overlaps_nodes_mark(GenomeNode *gn, GT_Array *nodes,
 {
   unsigned long i;
   GenomeNode *node;
-  Range gn_range;
+  GT_Range gn_range;
   bool rval = false;
 #ifndef NDEBUG
   Str *gn_id;

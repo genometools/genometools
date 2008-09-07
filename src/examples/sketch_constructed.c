@@ -7,7 +7,7 @@ static GT_Array* create_example_features(void)
   Str *seqid; /* holds the sequence id the features refer to */
   FeatureTypeFactory *type_factory; /* used the create feature types */
   GenomeFeatureType *type; /* hold a feature type */
-  Range range; /* used to define intervals on the genomic sequence */
+  GT_Range range; /* used to define intervals on the genomic sequence */
 
   /* construct the example features */
   features = gt_array_new(sizeof (GenomeNode*));
@@ -70,7 +70,7 @@ static void handle_error(GT_Error *err)
 static void draw_example_features(GT_Array *features, const char *style_file,
                                   const char *output_file)
 {
-  Range range = { 1, 1000 }; /* the genomic range to draw */
+  GT_Range range = { 1, 1000 }; /* the genomic range to draw */
   GT_Style *style;
   GT_Diagram *diagram;
   GT_Canvas *canvas;

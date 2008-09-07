@@ -31,7 +31,7 @@ struct Element {
   GenomeFeatureType *type;
   Strand strand;
   GenomeNode *gn;
-  Range range;
+  GT_Range range;
   DrawingRange drange;
   bool mark;
 };
@@ -63,13 +63,13 @@ DrawingRange element_calculate_drawing_range(Element *element,
   return element->drange;
 }
 
-Range element_get_range(const Element *element)
+GT_Range element_get_range(const Element *element)
 {
   assert(element);
   return element->range;
 }
 
-void element_set_range(Element *element, Range r)
+void element_set_range(Element *element, GT_Range r)
 {
   assert(element);
   element->range = r;
@@ -124,7 +124,7 @@ int element_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *type;
-  Range r1, r2, r_temp;
+  GT_Range r1, r2, r_temp;
   GenomeNode *gn, *gn2;
   Element *e, *e2, *e3;
   Str *seqid;

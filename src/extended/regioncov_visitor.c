@@ -43,7 +43,7 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
                                             GenomeFeature *gf,
                                             UNUSED GT_Error *err)
 {
-  Range *old_range_ptr, old_range, new_range;
+  GT_Range *old_range_ptr, old_range, new_range;
   GT_Array *ranges;
   RegionCovVisitor *regioncov_visitor;
   gt_error_check(err);
@@ -75,7 +75,7 @@ static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
   GT_Array *rangelist;
   gt_error_check(err);
   regioncov_visitor = regioncov_visitor_cast(gv);
-  rangelist = gt_array_new(sizeof (Range));
+  rangelist = gt_array_new(sizeof (GT_Range));
   hashmap_add(regioncov_visitor->region2rangelist,
               cstr_dup(str_get(genome_node_get_seqid((GenomeNode*) sr))),
               rangelist);
@@ -109,7 +109,7 @@ static int show_rangelist(void *key, void *value, UNUSED void *data,
 {
   unsigned long i;
   GT_Array *rangelist;
-  Range *rangeptr;
+  GT_Range *rangeptr;
   gt_error_check(err);
   assert(key && value);
   rangelist = (GT_Array*) value;

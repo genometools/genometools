@@ -80,12 +80,12 @@ static void automatic_sequence_region_delete(AutomaticSequenceRegion *auto_sr)
 
 typedef struct {
   Str *seqid_str;
-  Range range;
+  GT_Range range;
   unsigned int line_number;
 } SimpleSequenceRegion;
 
 static SimpleSequenceRegion* simple_sequence_region_new(const char *seqid,
-                                                        Range range,
+                                                        GT_Range range,
                                                         unsigned int
                                                         line_number)
 {
@@ -152,7 +152,7 @@ void gff3parser_enable_tidy_mode(GFF3Parser *parser)
   parser->tidy = true;
 }
 
-static int add_offset_if_necessary(Range *range, GFF3Parser *parser,
+static int add_offset_if_necessary(GT_Range *range, GFF3Parser *parser,
                                    const char *seqid, GT_Error *err)
 {
   long offset;
@@ -169,7 +169,7 @@ static int add_offset_if_necessary(Range *range, GFF3Parser *parser,
 }
 
 static int parse_target_attribute(const char *value, Str *target_id,
-                                  Range *target_range, Strand *target_strand,
+                                  GT_Range *target_range, Strand *target_strand,
                                   const char *filename,
                                   unsigned int line_number, GT_Error *err)
 {
@@ -178,7 +178,7 @@ static int parse_target_attribute(const char *value, Str *target_id,
   char *escaped_target;
   Strand parsed_strand;
   Splitter *splitter;
-  Range parsed_range;
+  GT_Range parsed_range;
   int had_err = 0;
   gt_error_check(err);
   assert(value && filename);
@@ -226,7 +226,7 @@ static int parse_target_attribute(const char *value, Str *target_id,
 int gff3parser_parse_target_attributes(const char *values,
                                        unsigned long *num_of_targets,
                                        Str *first_target_id,
-                                       Range *first_target_range,
+                                       GT_Range *first_target_range,
                                        Strand *first_target_strand,
                                        const char *filename,
                                        unsigned int line_number, GT_Error *err)
@@ -254,7 +254,7 @@ int gff3parser_parse_target_attributes(const char *values,
   return had_err;
 }
 
-static int get_seqid_str(Str **seqid_str, const char *seqid, Range range,
+static int get_seqid_str(Str **seqid_str, const char *seqid, GT_Range range,
                          AutomaticSequenceRegion **auto_sr, GFF3Parser *parser,
                          const char *filename, unsigned int line_number,
                          GT_Error *err)
@@ -969,7 +969,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   Strand strand_value;
   float score_value;
   Phase phase_value;
-  Range range;
+  GT_Range range;
   char *seqid = NULL, *source = NULL, *type = NULL, *start = NULL,
        *end = NULL, *score = NULL, *strand = NULL, *phase = NULL,
        *attributes = NULL, **tokens;
@@ -1170,7 +1170,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   GenomeNode *gn;
   Str *changed_seqid = NULL;
   SimpleSequenceRegion *ssr = NULL;
-  Range range;
+  GT_Range range;
   const char *filename;
   int had_err = 0;
 
