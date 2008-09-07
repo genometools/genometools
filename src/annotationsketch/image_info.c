@@ -85,7 +85,7 @@ const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
 int gt_image_info_unit_test(GT_Error *err)
 {
   GT_RecMap* rms[20];
-  GenomeNode* gfs[20];
+  GT_GenomeNode* gfs[20];
   FeatureTypeFactory *ftf;
   GenomeFeatureType *gft;
   GT_ImageInfo *ii;
@@ -106,7 +106,7 @@ int gt_image_info_unit_test(GT_Error *err)
     unsigned long rbase;
     rbase = rand_max(10);
     GT_Range r = {rbase,rbase+rand_max(20)};
-    gfs[i] = (GenomeNode*) genome_feature_new(seqid, gft, r, STRAND_FORWARD);
+    gfs[i] = (GT_GenomeNode*) genome_feature_new(seqid, gft, r, STRAND_FORWARD);
     rms[i] = gt_recmap_new(rand_max_double(100.0),
                            rand_max_double(100.0),
                            rand_max_double(100.0),
@@ -116,7 +116,7 @@ int gt_image_info_unit_test(GT_Error *err)
     ensure(had_err, gt_image_info_num_of_recmaps(ii) == i+1);
     ensure(had_err, (rm = gt_image_info_get_recmap(ii, i)) == rms[i]);
     ensure(had_err, rm->gf == rms[i]->gf);
-    genome_node_delete((GenomeNode*) gfs[i]);
+    genome_node_delete((GT_GenomeNode*) gfs[i]);
   }
 
   gt_image_info_delete(ii);

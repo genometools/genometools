@@ -43,7 +43,7 @@ static void cds_visitor_free(GenomeVisitor *gv)
   region_mapping_delete(cds_visitor->region_mapping);
 }
 
-static int extract_cds_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
+static int extract_cds_if_necessary(GT_GenomeNode *gn, void *data, GT_Error *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GenomeFeature *gf;
@@ -78,7 +78,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
   return had_err;
 }
 
-static int extract_spliced_seq(GenomeNode *gn, CDSVisitor *visitor, GT_Error *err)
+static int extract_spliced_seq(GT_GenomeNode *gn, CDSVisitor *visitor, GT_Error *err)
 {
   gt_error_check(err);
   assert(gn && visitor);
@@ -114,10 +114,10 @@ static GT_Array* determine_ORFs_for_all_three_frames(Splicedseq *ss)
 }
 
 static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
-                                        GenomeNode *gn)
+                                        GT_GenomeNode *gn)
 {
   GenomeFeatureType *cds_type;
-  GenomeNode *cds_feature;
+  GT_GenomeNode *cds_feature;
   unsigned long i;
   GT_Range cds;
   Strand strand = genome_feature_get_strand((GenomeFeature*) gn);
@@ -168,7 +168,7 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
 }
 
 static void create_CDS_features_for_longest_ORF(GT_Array *orfs, CDSVisitor *v,
-                                                GenomeNode *gn)
+                                                GT_GenomeNode *gn)
 {
   if (gt_array_size(orfs)) {
     /* sort ORFs according to length */
@@ -179,7 +179,7 @@ static void create_CDS_features_for_longest_ORF(GT_Array *orfs, CDSVisitor *v,
   }
 }
 
-static int add_cds_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
+static int add_cds_if_necessary(GT_GenomeNode *gn, void *data, GT_Error *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GenomeFeature *gf;
@@ -211,7 +211,7 @@ static int cds_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 {
   CDSVisitor *v = cds_visitor_cast(gv);
   gt_error_check(err);
-  return genome_node_traverse_children((GenomeNode*) gf, v,
+  return genome_node_traverse_children((GT_GenomeNode*) gf, v,
                                        add_cds_if_necessary, false, err);
 
 }

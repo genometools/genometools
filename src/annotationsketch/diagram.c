@@ -61,12 +61,12 @@ typedef struct {
 
 /* a node in the reverse lookup structure used for collapsing */
 typedef struct {
-  GenomeNode *parent;
+  GT_GenomeNode *parent;
   GT_Array *blocktuples;
 } NodeInfoElement;
 
 typedef struct {
-  GenomeNode *parent;
+  GT_GenomeNode *parent;
   GT_Diagram *diagram;
 } NodeTraverseInfo;
 
@@ -85,7 +85,7 @@ static GT_BlockTuple* blocktuple_new(GenomeFeatureType *gft, GT_Block *block)
   return bt;
 }
 
-static NodeInfoElement* get_or_create_node_info(GT_Diagram *d, GenomeNode *node)
+static NodeInfoElement* get_or_create_node_info(GT_Diagram *d, GT_GenomeNode *node)
 {
   NodeInfoElement *ni;
   assert(d && node);
@@ -115,7 +115,7 @@ static GT_Block* find_block_for_type(NodeInfoElement* ni,
   return block;
 }
 
-static const char* get_node_name_or_id(GenomeNode *gn)
+static const char* get_node_name_or_id(GT_GenomeNode *gn)
 {
   const char *ret;
   if (!gn) return NULL;
@@ -157,7 +157,7 @@ static bool get_caption_display_status(GT_Diagram *d, GenomeFeatureType *gft)
   return *status;
 }
 
-static void add_to_current(GT_Diagram *d, GenomeNode *node, GenomeNode *parent)
+static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *parent)
 {
   NodeInfoElement *ni;
   GT_Block *block;
@@ -204,7 +204,7 @@ static void add_to_current(GT_Diagram *d, GenomeNode *node, GenomeNode *parent)
   gt_array_add(ni->blocktuples, bt);
 }
 
-static void add_to_parent(GT_Diagram *d, GenomeNode *node, GenomeNode* parent)
+static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* parent)
 {
   GT_Block *block = NULL;
   NodeInfoElement *par_ni, *ni;
@@ -252,8 +252,8 @@ static void add_to_parent(GT_Diagram *d, GenomeNode *node, GenomeNode* parent)
   gt_block_insert_element(block, node);
 }
 
-static void add_recursive(GT_Diagram *d, GenomeNode *node,
-                          GenomeNode* parent, GenomeNode *original_node)
+static void add_recursive(GT_Diagram *d, GT_GenomeNode *node,
+                          GT_GenomeNode* parent, GT_GenomeNode *original_node)
 {
   NodeInfoElement *ni;
 
@@ -289,7 +289,7 @@ static void add_recursive(GT_Diagram *d, GenomeNode *node,
   }
 }
 
-static void process_node(GT_Diagram *d, GenomeNode *node, GenomeNode *parent)
+static void process_node(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *parent)
 {
   GT_Range elem_range;
   bool *collapse, do_not_overlap=false;
@@ -378,14 +378,14 @@ static int gt_diagram_add_tracklines(UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-static int visit_child(GenomeNode* gn, void* genome_node_children, GT_Error* e)
+static int visit_child(GT_GenomeNode* gn, void* genome_node_children, GT_Error* e)
 {
   NodeTraverseInfo* genome_node_info;
   genome_node_info = (NodeTraverseInfo*) genome_node_children;
   int had_err;
   if (genome_node_has_children(gn))
   {
-    GenomeNode *oldparent = genome_node_info->parent;
+    GT_GenomeNode *oldparent = genome_node_info->parent;
     process_node(genome_node_info->diagram, gn, genome_node_info->parent);
     genome_node_info->parent = gn;
     had_err = genome_node_traverse_direct_children(gn, genome_node_info,
@@ -434,7 +434,7 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
 }
 
 /* Traverse a genome node graph with depth first search. */
-static void traverse_genome_nodes(GenomeNode *gn, void *genome_node_children)
+static void traverse_genome_nodes(GT_GenomeNode *gn, void *genome_node_children)
 {
   NodeTraverseInfo* genome_node_info;
   int had_err;
@@ -464,7 +464,7 @@ static void gt_diagram_build(GT_Diagram *diagram, GT_Array *features)
 
   /* do node traversal for each root feature */
   for (i = 0; i < gt_array_size(features); i++) {
-    GenomeNode *current_root = *(GenomeNode**) gt_array_get(features,i);
+    GT_GenomeNode *current_root = *(GT_GenomeNode**) gt_array_get(features,i);
     traverse_genome_nodes(current_root, &genome_node_children);
   }
   /* collect blocks from nodeinfo structures and create the tracks */
@@ -509,7 +509,7 @@ GT_Diagram* gt_diagram_new(GT_FeatureIndex *fi, const char *seqid,
 {
   GT_Diagram *diagram;
   int had_err = 0;
-  GT_Array *features = gt_array_new(sizeof (GenomeNode*));
+  GT_Array *features = gt_array_new(sizeof (GT_GenomeNode*));
   assert(features && seqid && range && style);
   had_err = gt_feature_index_get_features_for_range(fi, features, seqid, *range,
                                                  NULL);
@@ -644,7 +644,7 @@ int gt_diagram_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *gene_type, *exon_type, *CDS_type;
-  GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
+  GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
   GT_Range r1, r2, r3, r4, r5, dr1, rs;
   Str *seqid1, *seqid2, *track_key;
@@ -777,7 +777,7 @@ int gt_diagram_unit_test(GT_Error *err)
   }
   ensure(had_err, gt_range_compare(gt_diagram_get_range(dia),dr1) == 0);
 
-  features = gt_array_new(sizeof (GenomeNode*));
+  features = gt_array_new(sizeof (GT_GenomeNode*));
   gt_array_add(features, gn1);
   gt_array_add(features, gn2);
   dia3 = gt_diagram_new_from_array(features, &rs, sty);
@@ -814,8 +814,8 @@ int gt_diagram_unit_test(GT_Error *err)
   gt_feature_index_delete(fi);
   genome_node_rec_delete(gn1);
   genome_node_rec_delete(gn2);
-  genome_node_rec_delete((GenomeNode*) sr1);
-  genome_node_rec_delete((GenomeNode*) sr2);
+  genome_node_rec_delete((GT_GenomeNode*) sr1);
+  genome_node_rec_delete((GT_GenomeNode*) sr2);
   str_delete(seqid1);
   str_delete(seqid2);
   feature_type_factory_delete(feature_type_factory);

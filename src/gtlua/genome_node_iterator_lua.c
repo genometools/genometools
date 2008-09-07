@@ -22,16 +22,16 @@
 
 #define GENOME_NODE_ITERATOR_METATABLE  "GenomeTools_genome.node_iterator"
 #define check_genome_node_iterator(L, POS) \
-        (GenomeNodeIterator**) \
+        (GT_GenomeNodeIterator**) \
         luaL_checkudata(L, POS, GENOME_NODE_ITERATOR_METATABLE)
 
 static int genome_node_iterator_lua_new(lua_State *L)
 {
-  GenomeNodeIterator **gni;
-  GenomeNode **gn;
+  GT_GenomeNodeIterator **gni;
+  GT_GenomeNode **gn;
   assert(L);
   gn = check_genome_node(L, 1);
-  gni = lua_newuserdata(L, sizeof (GenomeNodeIterator*));
+  gni = lua_newuserdata(L, sizeof (GT_GenomeNodeIterator*));
   assert(gni);
   *gni = genome_node_iterator_new(*gn);
   luaL_getmetatable(L, GENOME_NODE_ITERATOR_METATABLE);
@@ -41,11 +41,11 @@ static int genome_node_iterator_lua_new(lua_State *L)
 
 static int genome_node_iterator_lua_new_direct(lua_State *L)
 {
-  GenomeNodeIterator **gni;
-  GenomeNode **gn;
+  GT_GenomeNodeIterator **gni;
+  GT_GenomeNode **gn;
   assert(L);
   gn = check_genome_node(L, 1);
-  gni = lua_newuserdata(L, sizeof (GenomeNodeIterator*));
+  gni = lua_newuserdata(L, sizeof (GT_GenomeNodeIterator*));
   assert(gni);
   *gni = genome_node_iterator_new_direct(*gn);
   luaL_getmetatable(L, GENOME_NODE_ITERATOR_METATABLE);
@@ -55,8 +55,8 @@ static int genome_node_iterator_lua_new_direct(lua_State *L)
 
 static int genome_node_iterator_lua_next(lua_State *L)
 {
-  GenomeNodeIterator **gni;
-  GenomeNode *gn;
+  GT_GenomeNodeIterator **gni;
+  GT_GenomeNode *gn;
   gni = check_genome_node_iterator(L, 1);
   gn = genome_node_iterator_next(*gni);
   if (gn)
@@ -68,7 +68,7 @@ static int genome_node_iterator_lua_next(lua_State *L)
 
 static int genome_node_iterator_lua_delete(lua_State *L)
 {
-  GenomeNodeIterator **genome_node_iterator;
+  GT_GenomeNodeIterator **genome_node_iterator;
   genome_node_iterator = check_genome_node_iterator(L, 1);
   genome_node_iterator_delete(*genome_node_iterator);
   return 0;

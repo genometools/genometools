@@ -22,7 +22,7 @@
 
 struct SequenceRegion
 {
-  const GenomeNode parent_instance;
+  const GT_GenomeNode parent_instance;
   Str *seqid;
   GT_Range range;
 };
@@ -30,32 +30,32 @@ struct SequenceRegion
 #define sequence_region_cast(GN)\
         genome_node_cast(sequence_region_class(), GN)
 
-static void sequence_region_free(GenomeNode *gn)
+static void sequence_region_free(GT_GenomeNode *gn)
 {
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(sr && sr->seqid);
   str_delete(sr->seqid);
 }
 
-static Str* sequence_region_get_seqid(GenomeNode *gn)
+static Str* sequence_region_get_seqid(GT_GenomeNode *gn)
 {
   SequenceRegion *sr = sequence_region_cast(gn);
   return sr->seqid;
 }
 
-static GT_Range sequence_region_get_range(GenomeNode *gn)
+static GT_Range sequence_region_get_range(GT_GenomeNode *gn)
 {
   SequenceRegion *sr = sequence_region_cast(gn);
   return sr->range;
 }
 
-static void sequence_region_set_range(GenomeNode *gn, GT_Range range)
+static void sequence_region_set_range(GT_GenomeNode *gn, GT_Range range)
 {
   SequenceRegion *sr = sequence_region_cast(gn);
   sr->range = range;
 }
 
-static void sequence_region_change_seqid(GenomeNode *gn, Str *seqid)
+static void sequence_region_change_seqid(GT_GenomeNode *gn, Str *seqid)
 {
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(sr && seqid);
@@ -63,7 +63,7 @@ static void sequence_region_change_seqid(GenomeNode *gn, Str *seqid)
   sr->seqid = str_ref(seqid);
 }
 
-static int sequence_region_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
+static int sequence_region_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
   SequenceRegion *sr;
   gt_error_check(err);
@@ -71,9 +71,9 @@ static int sequence_region_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *e
   return genome_visitor_visit_sequence_region(gv, sr, err);
 }
 
-const GenomeNodeClass* sequence_region_class()
+const GT_GenomeNodeClass* sequence_region_class()
 {
-  static const GenomeNodeClass gnc = { sizeof (SequenceRegion),
+  static const GT_GenomeNodeClass gnc = { sizeof (SequenceRegion),
                                        sequence_region_free,
                                        sequence_region_get_seqid,
                                        sequence_region_get_seqid,
@@ -84,9 +84,9 @@ const GenomeNodeClass* sequence_region_class()
   return &gnc;
 }
 
-GenomeNode* sequence_region_new(Str *seqid, GT_Range range)
+GT_GenomeNode* sequence_region_new(Str *seqid, GT_Range range)
 {
-  GenomeNode *gn = genome_node_create(sequence_region_class());
+  GT_GenomeNode *gn = genome_node_create(sequence_region_class());
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(seqid);
   sr->seqid = str_ref(seqid);
@@ -94,7 +94,7 @@ GenomeNode* sequence_region_new(Str *seqid, GT_Range range)
   return gn;
 }
 
-void sequence_regions_consolidate(GenomeNode *gn_a, GenomeNode *gn_b)
+void sequence_regions_consolidate(GT_GenomeNode *gn_a, GT_GenomeNode *gn_b)
 {
   GT_Range gt_range_a, gt_range_b;
 

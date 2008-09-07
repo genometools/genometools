@@ -139,16 +139,16 @@ static int extracttarget_from_seqfiles(const char *target,
   return had_err;
 }
 
-static int extracttarget_from_node(GenomeNode *gn, GT_StrArray *seqfiles,
+static int extracttarget_from_node(GT_GenomeNode *gn, GT_StrArray *seqfiles,
                                    GT_Error *err)
 {
-  GenomeNodeIterator *gni;
+  GT_GenomeNodeIterator *gni;
   int had_err = 0;
   gt_error_check(err);
   assert(gn && seqfiles);
   if (genome_node_cast(genome_feature_class(), gn)) {
     const char *target;
-    GenomeNode *child;
+    GT_GenomeNode *child;
     gni = genome_node_iterator_new(gn);
     while (!had_err && (child = genome_node_iterator_next(gni))) {
       if ((target = genome_feature_get_attribute(child, "Target")))
@@ -165,7 +165,7 @@ static int gt_extracttarget_runner(UNUSED int argc, const char **argv,
 {
   ExtractTargetArguments *arguments = tool_arguments;
   GenomeStream *gff3_in_stream;
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   int had_err;
 
   gt_error_check(err);

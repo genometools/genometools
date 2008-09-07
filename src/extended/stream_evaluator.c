@@ -135,11 +135,11 @@ static Slot* slot_new(bool nuceval, GT_Range range)
   unsigned long length;
   Slot *s = ma_calloc(1, sizeof (Slot));
   length = gt_range_length(range);
-  s->genes_forward = gt_array_new(sizeof (GenomeNode*));
-  s->genes_reverse = gt_array_new(sizeof (GenomeNode*));
-  s->mRNAs_forward = gt_array_new(sizeof (GenomeNode*));
-  s->mRNAs_reverse = gt_array_new(sizeof (GenomeNode*));
-  s->LTRs          = gt_array_new(sizeof (GenomeNode*));
+  s->genes_forward = gt_array_new(sizeof (GT_GenomeNode*));
+  s->genes_reverse = gt_array_new(sizeof (GT_GenomeNode*));
+  s->mRNAs_forward = gt_array_new(sizeof (GT_GenomeNode*));
+  s->mRNAs_reverse = gt_array_new(sizeof (GT_GenomeNode*));
+  s->LTRs          = gt_array_new(sizeof (GT_GenomeNode*));
   s->mRNA_exons_forward = transcript_exons_new();
   s->mRNA_exons_reverse = transcript_exons_new();
   s->CDS_exons_forward = transcript_exons_new();
@@ -167,19 +167,19 @@ static void slot_delete(Slot *s)
   unsigned long i;
   assert(s);
   for (i = 0; i < gt_array_size(s->genes_forward); i++)
-    genome_node_rec_delete(*(GenomeNode**) gt_array_get(s->genes_forward, i));
+    genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(s->genes_forward, i));
   gt_array_delete(s->genes_forward);
   for (i = 0; i < gt_array_size(s->genes_reverse); i++)
-    genome_node_rec_delete(*(GenomeNode**) gt_array_get(s->genes_reverse, i));
+    genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(s->genes_reverse, i));
   gt_array_delete(s->genes_reverse);
   for (i = 0; i < gt_array_size(s->mRNAs_forward); i++)
-    genome_node_rec_delete(*(GenomeNode**) gt_array_get(s->mRNAs_forward, i));
+    genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(s->mRNAs_forward, i));
   gt_array_delete(s->mRNAs_forward);
   for (i = 0; i < gt_array_size(s->mRNAs_reverse); i++)
-    genome_node_rec_delete(*(GenomeNode**) gt_array_get(s->mRNAs_reverse, i));
+    genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(s->mRNAs_reverse, i));
   gt_array_delete(s->mRNAs_reverse);
   for (i = 0; i < gt_array_size(s->LTRs); i++)
-    genome_node_rec_delete(*(GenomeNode**) gt_array_get(s->LTRs, i));
+    genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(s->LTRs, i));
   gt_array_delete(s->LTRs);
   transcript_exons_delete(s->mRNA_exons_forward);
   transcript_exons_delete(s->mRNA_exons_reverse);
@@ -371,7 +371,7 @@ static int set_actuals_and_sort_them(UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-static void add_real_exon(TranscriptExons *te, GT_Range range, GenomeNode *gn)
+static void add_real_exon(TranscriptExons *te, GT_Range range, GT_GenomeNode *gn)
 {
   assert(te);
   gt_array_add(transcript_exons_get_all(te), range);
@@ -415,10 +415,10 @@ static void add_nucleotide_exon(Bittab *nucleotides, GT_Range range,
   }
 }
 
-static int process_real_feature(GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int process_real_feature(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   ProcessRealFeatureInfo *info = (ProcessRealFeatureInfo*) data;
-  GenomeNode *gn_ref;
+  GT_GenomeNode *gn_ref;
   GenomeFeature *gf;
   GT_Range range;
 
@@ -519,7 +519,7 @@ static int process_real_feature(GenomeNode *gn, void *data, UNUSED GT_Error *err
   return 0;
 }
 
-static int store_exon(GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int store_exon(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   GT_Array *exons = (GT_Array*) data;
   GT_Range range;
@@ -534,7 +534,7 @@ static int store_exon(GenomeNode *gn, void *data, UNUSED GT_Error *err)
   return 0;
 }
 
-static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
+static bool mRNAs_are_equal(GT_GenomeNode *gn_1, GT_GenomeNode *gn_2)
 {
   GT_Array *exons_1, *exons_2;
   bool equal;
@@ -573,7 +573,7 @@ typedef struct {
         *mRNAs;
 } Store_gene_feature_info;
 
-static int store_gene_feature(GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int store_gene_feature(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   GenomeFeature *gf;
   Store_gene_feature_info *info = (Store_gene_feature_info*) data;
@@ -591,7 +591,7 @@ static int store_gene_feature(GenomeNode *gn, void *data, UNUSED GT_Error *err)
   return 0;
 }
 
-static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
+static bool genes_are_equal(GT_GenomeNode *gn_1, GT_GenomeNode *gn_2)
 {
   GT_Array *exons_1, *exons_2, *mRNAs_1, *mRNAs_2;
   Store_gene_feature_info info;
@@ -602,8 +602,8 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   /* init */
   exons_1 = gt_array_new(sizeof (GT_Range));
   exons_2 = gt_array_new(sizeof (GT_Range));
-  mRNAs_1 = gt_array_new(sizeof (GenomeNode*));
-  mRNAs_2 = gt_array_new(sizeof (GenomeNode*));
+  mRNAs_1 = gt_array_new(sizeof (GT_GenomeNode*));
+  mRNAs_2 = gt_array_new(sizeof (GT_GenomeNode*));
 
   /* get (direct) gene features */
   info.exons = exons_1;
@@ -631,8 +631,8 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
     genome_nodes_sort(mRNAs_2);
     for (i = 0; i < gt_array_size(mRNAs_1); i++) {
       assert(equal);
-      equal = mRNAs_are_equal(*(GenomeNode**) gt_array_get(mRNAs_1, i),
-                              *(GenomeNode**) gt_array_get(mRNAs_2, i));
+      equal = mRNAs_are_equal(*(GT_GenomeNode**) gt_array_get(mRNAs_1, i),
+                              *(GT_GenomeNode**) gt_array_get(mRNAs_2, i));
       if (!equal)
         break;
     }
@@ -647,7 +647,7 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   return equal;
 }
 
-static void store_predicted_exon(TranscriptEvaluators *te, GenomeNode *gn)
+static void store_predicted_exon(TranscriptEvaluators *te, GT_GenomeNode *gn)
 {
   assert(te && gn);
   evaluator_add_predicted(transcript_evaluators_get_all(te), 1);
@@ -690,7 +690,7 @@ static void add_predicted_collapsed(Dlist *used_exons, GT_Range *predicted_range
 static void store_predicted_exon_collapsed(TranscriptUsedExons *used_exons,
                                            GT_Range *predicted_range,
                                            TranscriptEvaluators *te,
-                                           GenomeNode *gn)
+                                           GT_GenomeNode *gn)
 {
   add_predicted_collapsed(transcript_used_exons_get_all(used_exons),
                           predicted_range, transcript_evaluators_get_all(te));
@@ -721,7 +721,7 @@ static void store_predicted_exon_collapsed(TranscriptUsedExons *used_exons,
   }
 }
 
-static void mark_and_show_false_exon(GenomeNode *gn, bool exondiff)
+static void mark_and_show_false_exon(GT_GenomeNode *gn, bool exondiff)
 {
   genome_node_mark(gn); /* mark false exons */
   if (exondiff) {
@@ -730,7 +730,7 @@ static void mark_and_show_false_exon(GenomeNode *gn, bool exondiff)
   }
 }
 
-static void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
+static void determine_true_exon(GT_GenomeNode *gn, Strand predicted_strand,
                                 bool exondiff, GT_Range *predicted_range,
                                 GT_Array *exons_forward,
                                 GT_Array *exons_reverse,
@@ -787,7 +787,7 @@ static void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
     mark_and_show_false_exon(gn, exondiff);
 }
 
-static void store_true_exon(GenomeNode *gn, Strand predicted_strand,
+static void store_true_exon(GT_GenomeNode *gn, Strand predicted_strand,
                             GT_Range *predicted_range, bool exondiff,
                             TranscriptExons *exons_forward,
                             TranscriptExons *exons_reverse,
@@ -861,7 +861,7 @@ static void store_true_exon(GenomeNode *gn, Strand predicted_strand,
   }
 }
 
-static int process_predicted_feature(GenomeNode *gn, void *data,
+static int process_predicted_feature(GT_GenomeNode *gn, void *data,
                                      UNUSED GT_Error *err)
 {
   ProcessPredictedFeatureInfo *info = (ProcessPredictedFeatureInfo*) data;
@@ -869,14 +869,14 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
   unsigned long i, num;
   Strand predicted_strand;
   GT_Array *real_genome_nodes;
-  GenomeNode **real_gn;
+  GT_GenomeNode **real_gn;
 
   gt_error_check(err);
   assert(gn && data);
 
   predicted_range = genome_node_get_range(gn);
   predicted_strand = genome_feature_get_strand((GenomeFeature*) gn);
-  real_genome_nodes = gt_array_new(sizeof (GenomeNode**));
+  real_genome_nodes = gt_array_new(sizeof (GT_GenomeNode**));
 
   if (genome_feature_has_type((GenomeFeature*) gn, gft_gene)) {
     /* store predicted gene */
@@ -892,7 +892,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
                          predicted_strand == STRAND_FORWARD
                          ? gt_array_size(info->slot->genes_forward)
                          : gt_array_size(info->slot->genes_reverse),
-                         sizeof (GenomeNode*),
+                         sizeof (GT_GenomeNode*),
                          (CompareWithData) genome_node_compare_with_data,
                          NULL,
                          predicted_strand == STRAND_FORWARD
@@ -901,10 +901,10 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
         if (gt_array_size(real_genome_nodes)) {
           /* gene(s) with the same range found -> check if they are equal */
           for (i = 0; i < gt_array_size(real_genome_nodes); i++) {
-            real_gn = *(GenomeNode***) gt_array_get(real_genome_nodes, i);
+            real_gn = *(GT_GenomeNode***) gt_array_get(real_genome_nodes, i);
             if (genes_are_equal(gn, *real_gn)) {
               if (predicted_strand == STRAND_FORWARD) {
-                num = real_gn - (GenomeNode**)
+                num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->genes_forward);
                 if (!bittab_bit_is_set(info->slot->true_genes_forward, num)) {
                   bittab_set_bit(info->slot->true_genes_forward, num);
@@ -914,7 +914,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
                 }
               }
               else {
-                num = real_gn - (GenomeNode**)
+                num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->genes_reverse);
                 if (!bittab_bit_is_set(info->slot->true_genes_reverse, num)) {
                   bittab_set_bit(info->slot->true_genes_reverse, num);
@@ -961,7 +961,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
                          predicted_strand == STRAND_FORWARD
                          ? gt_array_size(info->slot->mRNAs_forward)
                          : gt_array_size(info->slot->mRNAs_reverse),
-                         sizeof (GenomeNode*),
+                         sizeof (GT_GenomeNode*),
                          (CompareWithData) genome_node_compare_with_data,
                          NULL,
                          predicted_strand == STRAND_FORWARD
@@ -970,10 +970,10 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
         if (gt_array_size(real_genome_nodes)) {
           /* mRNA(s) with the same range found -> check if they are equal */
           for (i = 0; i < gt_array_size(real_genome_nodes); i++) {
-            real_gn = *(GenomeNode***) gt_array_get(real_genome_nodes, i);
+            real_gn = *(GT_GenomeNode***) gt_array_get(real_genome_nodes, i);
             if (mRNAs_are_equal(gn, *real_gn)) {
               if (predicted_strand == STRAND_FORWARD) {
-                num = real_gn - (GenomeNode**)
+                num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->mRNAs_forward);
                 if (!bittab_bit_is_set(info->slot->true_mRNAs_forward, num)) {
                   bittab_set_bit(info->slot->true_mRNAs_forward, num);
@@ -983,7 +983,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
                 }
               }
               else {
-                num = real_gn - (GenomeNode**)
+                num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->mRNAs_reverse);
                 if (!bittab_bit_is_set(info->slot->true_mRNAs_reverse, num)) {
                   bittab_set_bit(info->slot->true_mRNAs_reverse, num);
@@ -1023,14 +1023,14 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
     /* determine true LTR */
     bsearch_all_mark(real_genome_nodes, &gn,
                      gt_array_get_space(info->slot->LTRs),
-                     gt_array_size(info->slot->LTRs), sizeof (GenomeNode*),
+                     gt_array_size(info->slot->LTRs), sizeof (GT_GenomeNode*),
                      (CompareWithData) genome_node_compare_delta,
                      &info->LTRdelta, info->slot->overlapped_LTRs);
 
     if (gt_array_size(real_genome_nodes)) {
       for (i = 0; i < gt_array_size(real_genome_nodes); i++) {
-        real_gn = *(GenomeNode***) gt_array_get(real_genome_nodes, i);
-        num = real_gn - (GenomeNode**) gt_array_get_space(info->slot->LTRs);
+        real_gn = *(GT_GenomeNode***) gt_array_get(real_genome_nodes, i);
+        num = real_gn - (GT_GenomeNode**) gt_array_get_space(info->slot->LTRs);
         if (!bittab_bit_is_set(info->slot->true_LTRs, num)) {
           bittab_set_bit(info->slot->true_LTRs, num);
           evaluator_add_true(info->LTR_evaluator);
@@ -1229,7 +1229,7 @@ int compute_nucleotides_values(UNUSED void *key, void *value, void *data,
 int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                               GenomeVisitor *gv, GT_Error *err)
 {
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   SequenceRegion *sr;
   GenomeFeature *gf;
   Slot *slot;

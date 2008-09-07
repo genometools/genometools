@@ -29,7 +29,7 @@ struct CDSStream
 #define cds_stream_cast(GS)\
         genome_stream_cast(cds_stream_class(), GS)
 
-static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
+static int cds_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
 {
   CDSStream *cds_stream;
   int had_err;

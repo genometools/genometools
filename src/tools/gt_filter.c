@@ -237,7 +237,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
   FilterArguments *arguments = tool_arguments;
   GenomeStream *gff3_in_stream, *filter_stream,
                *targetbest_filter_stream = NULL, *gff3_out_stream;
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   int had_err;
 
   gt_error_check(err);

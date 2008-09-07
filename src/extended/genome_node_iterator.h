@@ -20,16 +20,16 @@
 
 #include "extended/genome_node.h"
 
-typedef struct GenomeNodeIterator GenomeNodeIterator;
+typedef struct GT_GenomeNodeIterator GT_GenomeNodeIterator;
 
 /* Return a new genome node iterator which performs a depth-first traversal of
    <genome_node> (including <genome_node> itself). */
-GenomeNodeIterator* genome_node_iterator_new(GenomeNode *genome_node);
+GT_GenomeNodeIterator* genome_node_iterator_new(GT_GenomeNode *genome_node);
 /* Return a new genome node iterator which iterates over all direct children of
    <genome_node> (without <genome_node> itself). */
-GenomeNodeIterator* genome_node_iterator_new_direct(GenomeNode *genome_node);
-GenomeNode*         genome_node_iterator_next(GenomeNodeIterator*);
+GT_GenomeNodeIterator* genome_node_iterator_new_direct(GT_GenomeNode *genome_node);
+GT_GenomeNode*         genome_node_iterator_next(GT_GenomeNodeIterator*);
 int                 genome_node_iterator_example(GT_Error *);
-void                genome_node_iterator_delete(GenomeNodeIterator*);
+void                genome_node_iterator_delete(GT_GenomeNodeIterator*);
 
 #endif

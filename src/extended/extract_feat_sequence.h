@@ -21,7 +21,7 @@
 #include "extended/genome_node.h"
 #include "extended/region_mapping.h"
 
-int extract_feat_sequence(Str *sequence, GenomeNode*, GenomeFeatureType*,
+int extract_feat_sequence(Str *sequence, GT_GenomeNode*, GenomeFeatureType*,
                           bool join, RegionMapping*, GT_Error*);
 
 #endif

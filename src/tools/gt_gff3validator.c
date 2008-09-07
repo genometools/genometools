@@ -65,7 +65,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
   GFF3ValidatorArguments *arguments = tool_arguments;
   FeatureTypeFactory *ftf = NULL;
   GenomeStream *gff3_in_stream;
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   int had_err = 0;
 
   gt_error_check(err);

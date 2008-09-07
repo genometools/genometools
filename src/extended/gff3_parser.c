@@ -55,7 +55,7 @@ struct GFF3Parser {
 };
 
 typedef struct {
-  GenomeNode *sequence_region; /* the automatically created sequence region */
+  GT_GenomeNode *sequence_region; /* the automatically created sequence region */
   GT_Array *genome_features; /* the genome features which belong to this reagion */
 } AutomaticSequenceRegion;
 
@@ -73,7 +73,7 @@ static void automatic_sequence_region_delete(AutomaticSequenceRegion *auto_sr)
   if (!auto_sr) return;
   genome_node_delete(auto_sr->sequence_region);
   for (i = 0; i < gt_array_size(auto_sr->genome_features); i++)
-    genome_node_delete(*(GenomeNode**) gt_array_get(auto_sr->genome_features, i));
+    genome_node_delete(*(GT_GenomeNode**) gt_array_get(auto_sr->genome_features, i));
   gt_array_delete(auto_sr->genome_features);
   ma_free(auto_sr);
 }
@@ -309,14 +309,14 @@ static int get_seqid_str(Str **seqid_str, const char *seqid, GT_Range range,
 }
 
 typedef struct {
-  GenomeNode *node_to_replace,
+  GT_GenomeNode *node_to_replace,
              *replacing_node;
 } ReplaceInfo;
 
 static int replace_func(void **elem, void *info, UNUSED GT_Error *err)
 {
   ReplaceInfo *replace_info = info;
-  GenomeNode **node = (GenomeNode**) elem;
+  GT_GenomeNode **node = (GT_GenomeNode**) elem;
   gt_error_check(err);
   assert(node && replace_info);
   if (*node == replace_info->node_to_replace) {
@@ -326,8 +326,8 @@ static int replace_func(void **elem, void *info, UNUSED GT_Error *err)
   return 0;
 }
 
-static void replace_node(GenomeNode *node_to_replace,
-                         GenomeNode *replacing_node, Queue *genome_nodes,
+static void replace_node(GT_GenomeNode *node_to_replace,
+                         GT_GenomeNode *replacing_node, Queue *genome_nodes,
                          AutomaticSequenceRegion *auto_sr)
 {
   ReplaceInfo replace_info;
@@ -350,7 +350,7 @@ static void replace_node(GenomeNode *node_to_replace,
   }
 }
 
-static void remove_node(GenomeNode *genome_node, Queue *genome_nodes,
+static void remove_node(GT_GenomeNode *genome_node, Queue *genome_nodes,
                         AutomaticSequenceRegion *auto_sr)
 {
   assert(genome_node && genome_nodes);
@@ -359,7 +359,7 @@ static void remove_node(GenomeNode *genome_node, Queue *genome_nodes,
     /* we go backwards, because we expect that the <genome_node> is near the end
        of the array */
     for (i = gt_array_size(auto_sr->genome_features) - 1; i >= 0; i--) {
-      if (genome_node == *(GenomeNode**) gt_array_get(auto_sr->genome_features, i))
+      if (genome_node == *(GT_GenomeNode**) gt_array_get(auto_sr->genome_features, i))
         break;
     }
     assert(i < gt_array_size(auto_sr->genome_features));
@@ -369,8 +369,8 @@ static void remove_node(GenomeNode *genome_node, Queue *genome_nodes,
     queue_remove(genome_nodes, genome_node); /* traverses in reverse order */
 }
 
-static void update_pseudo_node_range(GenomeNode *pseudo_node,
-                                     GenomeNode *genome_feature)
+static void update_pseudo_node_range(GT_GenomeNode *pseudo_node,
+                                     GT_GenomeNode *genome_feature)
 {
   assert(pseudo_node && genome_feature);
   assert(genome_feature_is_pseudo((GenomeFeature*) pseudo_node));
@@ -380,8 +380,8 @@ static void update_pseudo_node_range(GenomeNode *pseudo_node,
                                    genome_node_get_range(genome_feature)));
 }
 
-static void genome_node_is_part_of_pseudo_node(GenomeNode *pseudo_node,
-                                               GenomeNode *child,
+static void genome_node_is_part_of_pseudo_node(GT_GenomeNode *pseudo_node,
+                                               GT_GenomeNode *child,
                                                FeatureInfo *feature_info)
 {
   const char *id;
@@ -394,12 +394,12 @@ static void genome_node_is_part_of_pseudo_node(GenomeNode *pseudo_node,
   feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
 }
 
-static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
+static int store_id(const char *id, GT_GenomeNode *genome_feature, bool *is_child,
                     GFF3Parser *parser, Queue *genome_nodes,
                     AutomaticSequenceRegion *auto_sr, const char *filename,
                     unsigned int line_number, GT_Error *err)
 {
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   int had_err = 0;
 
   gt_error_check(err);
@@ -416,7 +416,7 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
       had_err = -1;
     }
     if (!had_err) {
-      GenomeNode *pseudo_parent;
+      GT_GenomeNode *pseudo_parent;
       bool has_parent ;
       has_parent = genome_feature_get_attribute(gn, PARENT_STRING)
                    ? true : false;
@@ -426,7 +426,7 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
         if (!pseudo_parent) {
           genome_feature_make_multi_representative((GenomeFeature*) gn);
           if (!has_parent) { /* create pseudo node */
-            GenomeNode *pseudo_node = genome_feature_new_pseudo((GenomeFeature*)
+            GT_GenomeNode *pseudo_node = genome_feature_new_pseudo((GenomeFeature*)
                                                                 gn);
             genome_node_is_part_of_pseudo_node(pseudo_node, gn,
                                                parser->feature_info);
@@ -465,9 +465,9 @@ static GT_Array* find_roots(GT_StrArray *parents, FeatureInfo *feature_info)
   GT_Array *roots;
   unsigned long i;
   assert(parents);
-  roots = gt_array_new(sizeof (GenomeNode*));
+  roots = gt_array_new(sizeof (GT_GenomeNode*));
   for (i = 0; i < gt_strarray_size(parents); i++) {
-    GenomeNode *root = feature_info_find_root(feature_info,
+    GT_GenomeNode *root = feature_info_find_root(feature_info,
                                               gt_strarray_get(parents, i));
     gt_array_add(roots, root);
   }
@@ -476,25 +476,25 @@ static GT_Array* find_roots(GT_StrArray *parents, FeatureInfo *feature_info)
 
 static bool roots_differ(GT_Array *roots)
 {
-  GenomeNode *first_root;
+  GT_GenomeNode *first_root;
   unsigned long i;
   assert(roots);
-  first_root = *(GenomeNode**) gt_array_get(roots, 0);
+  first_root = *(GT_GenomeNode**) gt_array_get(roots, 0);
   for (i = 1; i < gt_array_size(roots); i++) {
-    if (first_root != *(GenomeNode**) gt_array_get(roots, i))
+    if (first_root != *(GT_GenomeNode**) gt_array_get(roots, i))
       return true;
   }
   return false;
 }
 
-static GenomeNode* merge_pseudo_roots(GenomeNode *pseudo_a,
-                                      GenomeNode *pseudo_b,
+static GT_GenomeNode* merge_pseudo_roots(GT_GenomeNode *pseudo_a,
+                                      GT_GenomeNode *pseudo_b,
                                       FeatureInfo *feature_info,
                                       Queue *genome_nodes,
                                       AutomaticSequenceRegion *auto_sr)
 {
-  GenomeNodeIterator *gni;
-  GenomeNode *child;
+  GT_GenomeNodeIterator *gni;
+  GT_GenomeNode *child;
   assert(pseudo_a && genome_feature_is_pseudo((GenomeFeature*) pseudo_a));
   assert(pseudo_b && genome_feature_is_pseudo((GenomeFeature*) pseudo_b));
   assert(feature_info && genome_nodes);
@@ -511,8 +511,8 @@ static GenomeNode* merge_pseudo_roots(GenomeNode *pseudo_a,
   return pseudo_a;
 }
 
-static GenomeNode* add_node_to_pseudo_node(GenomeNode *pseudo_node,
-                                           GenomeNode *normal_node,
+static GT_GenomeNode* add_node_to_pseudo_node(GT_GenomeNode *pseudo_node,
+                                           GT_GenomeNode *normal_node,
                                            FeatureInfo *feature_info,
                                            Queue *genome_nodes,
                                            AutomaticSequenceRegion *auto_sr)
@@ -526,12 +526,12 @@ static GenomeNode* add_node_to_pseudo_node(GenomeNode *pseudo_node,
   return pseudo_node;
 }
 
-static GenomeNode* create_pseudo_node(GenomeNode *node_a, GenomeNode *node_b,
+static GT_GenomeNode* create_pseudo_node(GT_GenomeNode *node_a, GT_GenomeNode *node_b,
                                       FeatureInfo *feature_info,
                                       Queue *genome_nodes,
                                       AutomaticSequenceRegion *auto_sr)
 {
-  GenomeNode *pseudo_node;
+  GT_GenomeNode *pseudo_node;
   assert(node_a && !genome_feature_is_pseudo((GenomeFeature*) node_a));
   assert(node_b && !genome_feature_is_pseudo((GenomeFeature*) node_b));
   assert(feature_info && genome_nodes);
@@ -543,13 +543,13 @@ static GenomeNode* create_pseudo_node(GenomeNode *node_a, GenomeNode *node_b,
   return pseudo_node;
 }
 
-static GenomeNode* join_root_pair(GenomeNode *root_a, GenomeNode *root_b,
+static GT_GenomeNode* join_root_pair(GT_GenomeNode *root_a, GT_GenomeNode *root_b,
                                   FeatureInfo *feature_info,
                                   Queue *genome_nodes,
                                   AutomaticSequenceRegion *auto_sr)
 {
   bool root_a_is_pseudo, root_b_is_pseudo;
-  GenomeNode *master_root;
+  GT_GenomeNode *master_root;
   assert(root_a && root_b && feature_info && genome_nodes);
   root_a_is_pseudo = genome_feature_is_pseudo((GenomeFeature*) root_a);
   root_b_is_pseudo = genome_feature_is_pseudo((GenomeFeature*) root_b);
@@ -575,18 +575,18 @@ static GenomeNode* join_root_pair(GenomeNode *root_a, GenomeNode *root_b,
 static void join_roots(GT_Array *roots, FeatureInfo *feature_info,
                        Queue *genome_nodes, AutomaticSequenceRegion *auto_sr)
 {
-  GenomeNode *master_root;
+  GT_GenomeNode *master_root;
   unsigned long i;
   assert(roots && feature_info && genome_nodes);
-  master_root = *(GenomeNode**) gt_array_get(roots, 0);
+  master_root = *(GT_GenomeNode**) gt_array_get(roots, 0);
   for (i = 1; i < gt_array_size(roots); i++) {
     master_root = join_root_pair(master_root,
-                                 *(GenomeNode**) gt_array_get(roots, i),
+                                 *(GT_GenomeNode**) gt_array_get(roots, i),
                                  feature_info, genome_nodes, auto_sr);
   }
 }
 
-static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
+static int process_parent_attr(char *parent_attr, GT_GenomeNode *genome_feature,
                                bool *is_child, GFF3Parser *parser,
                                Queue *genome_nodes,
                                AutomaticSequenceRegion *auto_sr,
@@ -607,7 +607,7 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
   assert(splitter_size(parent_splitter));
 
   for (i = 0; i < splitter_size(parent_splitter); i++) {
-    GenomeNode* parent_gf;
+    GT_GenomeNode* parent_gf;
     const char *parent = splitter_get_token(parent_splitter, i);
     parent_gf = feature_info_get(parser->feature_info, parent);
     if (!parent_gf) {
@@ -670,9 +670,9 @@ static bool is_blank_attribute(const char *attribute)
   return true;
 }
 
-static int check_missing_attributes(GenomeNode *this_feature,
+static int check_missing_attributes(GT_GenomeNode *this_feature,
                                     GT_StrArray *this_attributes,
-                                    GenomeNode *other_feature, const char *id,
+                                    GT_GenomeNode *other_feature, const char *id,
                                     const char *filename, GT_Error *err)
 {
   unsigned long i;
@@ -695,7 +695,7 @@ static int check_missing_attributes(GenomeNode *this_feature,
   return had_err;
 }
 
-static int compare_target_attribute(GenomeNode *new_gf, GenomeNode *old_gf,
+static int compare_target_attribute(GT_GenomeNode *new_gf, GT_GenomeNode *old_gf,
                                     const char *id, GT_Error *err)
 {
   unsigned long new_target_num, old_target_num;
@@ -729,8 +729,8 @@ static int compare_target_attribute(GenomeNode *new_gf, GenomeNode *old_gf,
   return had_err;
 }
 
-static int compare_other_attribute(const char *attr_name, GenomeNode *new_gf,
-                                   GenomeNode *old_gf, const char *id,
+static int compare_other_attribute(const char *attr_name, GT_GenomeNode *new_gf,
+                                   GT_GenomeNode *old_gf, const char *id,
                                    GT_Error *err)
 {
   gt_error_check(err);
@@ -750,8 +750,8 @@ static int compare_other_attribute(const char *attr_name, GenomeNode *new_gf,
   return 0;
 }
 
-static int check_multi_feature_constrains(GenomeNode *new_gf,
-                                          GenomeNode *old_gf, const char *id,
+static int check_multi_feature_constrains(GT_GenomeNode *new_gf,
+                                          GT_GenomeNode *old_gf, const char *id,
                                           const char *filename,
                                           unsigned int line_number, GT_Error *err)
 {
@@ -824,7 +824,7 @@ static int check_multi_feature_constrains(GenomeNode *new_gf,
   return had_err;
 }
 
-static int parse_attributes(char *attributes, GenomeNode *genome_feature,
+static int parse_attributes(char *attributes, GT_GenomeNode *genome_feature,
                             bool *is_child, GFF3Parser *parser,
                             Queue *genome_nodes,
                             AutomaticSequenceRegion *auto_sr,
@@ -928,7 +928,7 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
 
   if (!had_err && genome_feature_is_multi((GenomeFeature*) genome_feature)) {
     had_err = check_multi_feature_constrains(genome_feature,
-                        (GenomeNode*)
+                        (GT_GenomeNode*)
                         genome_feature_get_multi_representative((GenomeFeature*)
                                                                 genome_feature),
                         genome_feature_get_attribute(genome_feature, ID_STRING),
@@ -942,7 +942,7 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
   return had_err;
 }
 
-static void set_source(GenomeNode *genome_feature, const char *source,
+static void set_source(GT_GenomeNode *genome_feature, const char *source,
                        Hashmap *source_to_str_mapping)
 {
   Str *source_str;
@@ -961,7 +961,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
                                    Str *filenamestr, unsigned int line_number,
                                    GT_Error *err)
 {
-  GenomeNode *gn = NULL, *genome_feature = NULL;
+  GT_GenomeNode *gn = NULL, *genome_feature = NULL;
   GenomeFeatureType *gft = NULL;
   Splitter *splitter;
   AutomaticSequenceRegion *auto_sr = NULL;
@@ -1122,7 +1122,7 @@ static int parse_fasta_entry(Queue *genome_nodes, const char *line,
     had_err = -1;
   }
   if (!had_err) {
-    GenomeNode *sequence_node;
+    GT_GenomeNode *sequence_node;
     Str *sequence = str_new();
     int cc;
     while ((cc = genfile_xfgetc(fpin)) != EOF) {
@@ -1145,7 +1145,7 @@ static int add_auto_sr_to_queue(UNUSED void *key, void *value, void *data,
 {
   AutomaticSequenceRegion *auto_sr = value;
   Queue *genome_nodes = data;
-  GenomeNode *gf;
+  GT_GenomeNode *gf;
   unsigned int i;
   gt_error_check(err);
   assert(key && value && data);
@@ -1153,7 +1153,7 @@ static int add_auto_sr_to_queue(UNUSED void *key, void *value, void *data,
     queue_add(genome_nodes, auto_sr->sequence_region);
     auto_sr->sequence_region = NULL;
     for (i = 0; i < gt_array_size(auto_sr->genome_features); i++) {
-      gf = *(GenomeNode**) gt_array_get(auto_sr->genome_features, i);
+      gf = *(GT_GenomeNode**) gt_array_get(auto_sr->genome_features, i);
       queue_add(genome_nodes, gf);
     }
     gt_array_reset(auto_sr->genome_features);
@@ -1167,7 +1167,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
                                 GT_Error *err)
 {
   char *tmpline, *tmplineend, *seqstart, *seqid = NULL;
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   Str *changed_seqid = NULL;
   SimpleSequenceRegion *ssr = NULL;
   GT_Range range;

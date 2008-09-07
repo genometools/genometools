@@ -27,7 +27,7 @@ typedef struct GenomeStreamClass GenomeStreamClass;
 typedef struct GenomeStream GenomeStream;
 
 GenomeStream* genome_stream_ref(GenomeStream*);
-int           genome_stream_next_tree(GenomeStream*, GenomeNode**, GT_Error*);
+int           genome_stream_next_tree(GenomeStream*, GT_GenomeNode**, GT_Error*);
 bool          genome_stream_is_sorted(GenomeStream*);
 void          genome_stream_delete(GenomeStream*);
 

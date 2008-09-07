@@ -33,7 +33,7 @@ struct ChseqidsStream {
 #define chseqids_stream_cast(GS)\
         genome_stream_cast(chseqids_stream_class(), GS)
 
-static int change_sequence_id(GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int change_sequence_id(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   Str *changed_seqid = data;
   gt_error_check(err);
@@ -42,10 +42,10 @@ static int change_sequence_id(GenomeNode *gn, void *data, UNUSED GT_Error *err)
   return 0;
 }
 
-int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
+int chseqids_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
 {
   ChseqidsStream *cs;
-  GenomeNode *node, **gn_a, **gn_b;
+  GT_GenomeNode *node, **gn_a, **gn_b;
   Str *changed_seqid;
   unsigned long i;
   int rval, had_err = 0;
@@ -66,7 +66,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
     /* now the buffer contains only sequence regions (except the last entry)
        -> change sequence ids */
     for (i = 0; !had_err && i < gt_array_size(cs->genome_node_buffer); i++) {
-      node = *(GenomeNode**) gt_array_get(cs->genome_node_buffer, i);
+      node = *(GT_GenomeNode**) gt_array_get(cs->genome_node_buffer, i);
       if (genome_node_get_seqid(node)) {
         if  ((changed_seqid = mapping_map_string(cs->chseqids_mapping,
                                            str_get(genome_node_get_seqid(node)),
@@ -98,7 +98,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
 
   /* return non-null nodes from buffer */
   while (!had_err && cs->buffer_index < gt_array_size(cs->genome_node_buffer)) {
-    node = *(GenomeNode**) gt_array_get(cs->genome_node_buffer, cs->buffer_index);
+    node = *(GT_GenomeNode**) gt_array_get(cs->genome_node_buffer, cs->buffer_index);
     cs->buffer_index++;
     if (node) {
       *gn = node;
@@ -132,7 +132,7 @@ static void chseqids_stream_free(GenomeStream *gs)
   cs = chseqids_stream_cast(gs);
   mapping_delete(cs->chseqids_mapping);
   for (i = cs->buffer_index; i < gt_array_size(cs->genome_node_buffer); i++) {
-    genome_node_rec_delete(*(GenomeNode**)
+    genome_node_rec_delete(*(GT_GenomeNode**)
                            gt_array_get(cs->genome_node_buffer, i));
   }
   gt_array_delete(cs->genome_node_buffer);
@@ -164,6 +164,6 @@ GenomeStream* chseqids_stream_new(GenomeStream *in_stream, Str *chseqids_file,
     genome_stream_delete(gs);
     return NULL;
   }
-  cs->genome_node_buffer = gt_array_new(sizeof (GenomeNode*));
+  cs->genome_node_buffer = gt_array_new(sizeof (GT_GenomeNode*));
   return gs;
 }

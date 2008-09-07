@@ -93,7 +93,7 @@ static void push_recmap_as_table(lua_State *L, const GT_RecMap *rm)
   lua_pushnumber(L, rm->se_y);
   lua_rawset(L, -3);
   lua_pushstring(L, "feature_ref");
-  genome_node_lua_push(L, genome_node_rec_ref((GenomeNode*) rm->gf));
+  genome_node_lua_push(L, genome_node_rec_ref((GT_GenomeNode*) rm->gf));
   lua_rawset(L, -3);
 }
 

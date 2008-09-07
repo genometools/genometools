@@ -81,7 +81,7 @@ int line_unit_test(GT_Error *err)
   GT_Array* blocks;
   Str *seqid1, *seqid2, *seqid3;
   int had_err = 0;
-  GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
+  GT_GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
   Line *l1, *l2;
   GT_Block *b1, *b2;
   gt_error_check(err);

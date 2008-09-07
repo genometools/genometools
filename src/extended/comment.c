@@ -25,7 +25,7 @@
 
 struct Comment
 {
-  const GenomeNode parent_instance;
+  const GT_GenomeNode parent_instance;
   char *comment;
   Str *comment_str; /* used in comment_get_idstr() */
 };
@@ -33,7 +33,7 @@ struct Comment
 #define comment_cast(GN)\
         genome_node_cast(comment_class(), GN)
 
-static void comment_free(GenomeNode *gn)
+static void comment_free(GT_GenomeNode *gn)
 {
   Comment *c = comment_cast(gn);
   assert(c && c->comment);
@@ -41,7 +41,7 @@ static void comment_free(GenomeNode *gn)
   str_delete(c->comment_str);
 }
 
-static Str* comment_get_idstr(GenomeNode *gn)
+static Str* comment_get_idstr(GT_GenomeNode *gn)
 {
   Comment *c;
   assert(gn);
@@ -49,7 +49,7 @@ static Str* comment_get_idstr(GenomeNode *gn)
   return c->comment_str;
 }
 
-static GT_Range comment_get_range(UNUSED GenomeNode *gn)
+static GT_Range comment_get_range(UNUSED GT_GenomeNode *gn)
 {
   GT_Range range;
   range.start = 0;
@@ -57,7 +57,7 @@ static GT_Range comment_get_range(UNUSED GenomeNode *gn)
   return range;
 }
 
-static int comment_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
+static int comment_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
   Comment *c;
   gt_error_check(err);
@@ -65,9 +65,9 @@ static int comment_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
   return genome_visitor_visit_comment(gv, c, err);
 }
 
-const GenomeNodeClass* comment_class()
+const GT_GenomeNodeClass* comment_class()
 {
-  static const GenomeNodeClass gnc = { sizeof (Comment),
+  static const GT_GenomeNodeClass gnc = { sizeof (Comment),
                                        comment_free,
                                        NULL,
                                        comment_get_idstr,
@@ -78,9 +78,9 @@ const GenomeNodeClass* comment_class()
   return &gnc;
 }
 
-GenomeNode* comment_new(const char *comment)
+GT_GenomeNode* comment_new(const char *comment)
 {
-  GenomeNode *gn = genome_node_create(comment_class());
+  GT_GenomeNode *gn = genome_node_create(comment_class());
   Comment *c = comment_cast(gn);
   assert(comment);
   c->comment = cstr_dup(comment);

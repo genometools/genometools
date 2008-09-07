@@ -171,7 +171,7 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
                *feature_stream = NULL,
                *last_stream;
   AnnotationSketchArguments arguments;
-  GenomeNode *gn = NULL;
+  GT_GenomeNode *gn = NULL;
   GT_FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
   const char *file, *seqid = NULL;
@@ -270,7 +270,7 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
   else if (!had_err)
     seqid = str_get(arguments.seqid);
 
-  results = gt_array_new(sizeof (GenomeNode*));
+  results = gt_array_new(sizeof (GT_GenomeNode*));
   if (!had_err) {
     gt_feature_index_get_range_for_seqid(features, &sequence_region_range,
                                          seqid);

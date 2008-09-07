@@ -30,13 +30,13 @@
 struct Element {
   GenomeFeatureType *type;
   Strand strand;
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   GT_Range range;
   DrawingRange drange;
   bool mark;
 };
 
-Element* element_new(GenomeNode *gn)
+Element* element_new(GT_GenomeNode *gn)
 {
   Element *element;
   GenomeFeature *gf = (GenomeFeature*) gn;
@@ -114,7 +114,7 @@ int element_sketch(Element *elem, GT_Canvas *canvas)
   return had_err;
 }
 
-GenomeNode* element_get_node_ref(const Element *elem)
+GT_GenomeNode* element_get_node_ref(const Element *elem)
 {
   assert(elem);
   return elem->gn;
@@ -125,7 +125,7 @@ int element_unit_test(GT_Error *err)
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *type;
   GT_Range r1, r2, r_temp;
-  GenomeNode *gn, *gn2;
+  GT_GenomeNode *gn, *gn2;
   Element *e, *e2, *e3;
   Str *seqid;
   int had_err = 0;

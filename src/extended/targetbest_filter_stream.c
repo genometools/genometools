@@ -42,7 +42,7 @@ static void build_key(Str *key, GenomeFeature *feature, Str *target_id)
 {
   assert(key && feature && target_id);
   str_reset(key);
-  str_append_str(key, genome_node_get_seqid((GenomeNode*) feature));
+  str_append_str(key, genome_node_get_seqid((GT_GenomeNode*) feature));
   str_append_char(key, '\t'); /* cannot occur in seqid or target_id */
   str_append_str(key, target_id);
 }
@@ -57,7 +57,7 @@ static void include_feature(Dlist *trees, Hashmap *target_to_elem,
 static void remove_elem(Dlistelem *elem, Dlist *trees,
                         Hashmap *target_to_elem, Str *key)
 {
-  GenomeNode *node = dlistelem_get_data(elem);
+  GT_GenomeNode *node = dlistelem_get_data(elem);
   genome_node_rec_delete(node);
   dlist_remove(trees, elem);
   hashmap_remove(target_to_elem, str_get(key));
@@ -80,7 +80,7 @@ static void filter_targetbest(GenomeFeature *current_feature, Dlist *trees,
   const char *target;
   int had_err;
   assert(current_feature && trees);
-  target = genome_feature_get_attribute((GenomeNode*) current_feature,
+  target = genome_feature_get_attribute((GT_GenomeNode*) current_feature,
                                         TARGET_STRING);
   assert(target);
   first_target_id = str_new();
@@ -105,7 +105,7 @@ static void filter_targetbest(GenomeFeature *current_feature, Dlist *trees,
                               target_to_elem, key);
       }
       else /* current feature is not better -> remove it */
-        genome_node_rec_delete((GenomeNode*) current_feature);
+        genome_node_rec_delete((GT_GenomeNode*) current_feature);
     }
     str_delete(key);
   }
@@ -114,11 +114,11 @@ static void filter_targetbest(GenomeFeature *current_feature, Dlist *trees,
   str_delete(first_target_id);
 }
 
-static int targetbest_filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
+static int targetbest_filter_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
                                               GT_Error *err)
 {
   TargetbestFilterStream *tfs;
-  GenomeNode *node;
+  GT_GenomeNode *node;
   int had_err = 0;
   gt_error_check(err);
   tfs = targetbest_filter_stream_cast(gs);

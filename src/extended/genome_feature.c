@@ -47,7 +47,7 @@
 
 struct GenomeFeature
 {
-  const GenomeNode parent_instance;
+  const GT_GenomeNode parent_instance;
   Str *seqid,
       *source;
   FeatureTypeFactory *ftf;
@@ -66,7 +66,7 @@ typedef struct {
 #define genome_feature_cast(GN)\
         genome_node_cast(genome_feature_class(), GN)
 
-static void genome_feature_free(GenomeNode *gn)
+static void genome_feature_free(GT_GenomeNode *gn)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(gf);
@@ -76,7 +76,7 @@ static void genome_feature_free(GenomeNode *gn)
   tag_value_map_delete(gf->attributes);
 }
 
-const char* genome_feature_get_attribute(GenomeNode *gn, const char *attr_name)
+const char* genome_feature_get_attribute(GT_GenomeNode *gn, const char *attr_name)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   if (!gf->attributes)
@@ -100,25 +100,25 @@ GT_StrArray* genome_feature_get_attribute_list(GenomeFeature *gf)
   return list;
 }
 
-static Str* genome_feature_get_seqid(GenomeNode *gn)
+static Str* genome_feature_get_seqid(GT_GenomeNode *gn)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   return gf->seqid;
 }
 
-static GT_Range genome_feature_get_range(GenomeNode *gn)
+static GT_Range genome_feature_get_range(GT_GenomeNode *gn)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   return gf->range;
 }
 
-static void genome_feature_set_range(GenomeNode *gn, GT_Range range)
+static void genome_feature_set_range(GT_GenomeNode *gn, GT_Range range)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   gf->range = range;
 }
 
-static void genome_feature_change_seqid(GenomeNode *gn, Str *seqid)
+static void genome_feature_change_seqid(GT_GenomeNode *gn, Str *seqid)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(gf && seqid);
@@ -126,21 +126,21 @@ static void genome_feature_change_seqid(GenomeNode *gn, Str *seqid)
   gf->seqid = str_ref(seqid);
 }
 
-void genome_feature_set_source(GenomeNode *gn, Str *source)
+void genome_feature_set_source(GT_GenomeNode *gn, Str *source)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(gf && source && !gf->source);
   gf->source = str_ref(source);
 }
 
-void genome_feature_set_phase(GenomeNode *gn, Phase phase)
+void genome_feature_set_phase(GT_GenomeNode *gn, Phase phase)
 {
   assert(gn);
   gn->bit_field &= ~(PHASE_MASK << PHASE_OFFSET);
   gn->bit_field |= phase << PHASE_OFFSET;
 }
 
-static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
+static int genome_feature_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
   GenomeFeature *gf;
   gt_error_check(err);
@@ -148,9 +148,9 @@ static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *er
   return genome_visitor_visit_genome_feature(gv, gf, err);
 }
 
-const GenomeNodeClass* genome_feature_class()
+const GT_GenomeNodeClass* genome_feature_class()
 {
-  static const GenomeNodeClass gnc = { sizeof (GenomeFeature),
+  static const GT_GenomeNodeClass gnc = { sizeof (GenomeFeature),
                                        genome_feature_free,
                                        genome_feature_get_seqid,
                                        genome_feature_get_seqid,
@@ -161,7 +161,7 @@ const GenomeNodeClass* genome_feature_class()
   return &gnc;
 }
 
-static void set_transcriptfeaturetype(GenomeNode *gn, TranscriptFeatureType tft)
+static void set_transcriptfeaturetype(GT_GenomeNode *gn, TranscriptFeatureType tft)
 {
   assert(gn);
   gn->bit_field &= ~(TRANSCRIPT_FEATURE_TYPE_MASK <<
@@ -169,10 +169,10 @@ static void set_transcriptfeaturetype(GenomeNode *gn, TranscriptFeatureType tft)
   gn->bit_field |= tft << TRANSCRIPT_FEATURE_TYPE_OFFSET;
 }
 
-GenomeNode* genome_feature_new(Str *seqid, GenomeFeatureType *type, GT_Range range,
+GT_GenomeNode* genome_feature_new(Str *seqid, GenomeFeatureType *type, GT_Range range,
                                Strand strand)
 {
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   GenomeFeature *gf;
   assert(seqid && type);
   assert(range.start <= range.end);
@@ -192,14 +192,14 @@ GenomeNode* genome_feature_new(Str *seqid, GenomeFeatureType *type, GT_Range ran
   return gn;
 }
 
-GenomeNode* genome_feature_new_pseudo(GenomeFeature *gf)
+GT_GenomeNode* genome_feature_new_pseudo(GenomeFeature *gf)
 {
   GenomeFeature *pf;
-  GenomeNode *pn;
+  GT_GenomeNode *pn;
   assert(gf);
-  pn = genome_feature_new(genome_feature_get_seqid((GenomeNode*) gf),
+  pn = genome_feature_new(genome_feature_get_seqid((GT_GenomeNode*) gf),
                           genome_feature_get_type(gf),
-                          genome_feature_get_range((GenomeNode*) gf),
+                          genome_feature_get_range((GT_GenomeNode*) gf),
                           genome_feature_get_strand(gf));
   pf = genome_feature_cast(pn);
   pf->type = NULL; /* pseudo features do not have a type */
@@ -208,9 +208,9 @@ GenomeNode* genome_feature_new_pseudo(GenomeFeature *gf)
   return pn;
 }
 
-GenomeNode* genome_feature_new_standard_gene(FeatureTypeFactory *ftf)
+GT_GenomeNode* genome_feature_new_standard_gene(FeatureTypeFactory *ftf)
 {
-  GenomeNode *gn, *child, *grandchild;
+  GT_GenomeNode *gn, *child, *grandchild;
   GenomeFeatureType *type;
   GT_Range range;
   Str *seqid;
@@ -323,7 +323,7 @@ bool genome_feature_has_type(GenomeFeature *gf, const char *type)
 
 bool genome_feature_score_is_defined(const GenomeFeature *gf)
 {
-  GenomeNode *gn = (GenomeNode*) gf;
+  GT_GenomeNode *gn = (GT_GenomeNode*) gf;
   assert(gn);
   if ((gn->bit_field >> SCORE_IS_DEFINED_OFFSET) & SCORE_IS_DEFINED_MASK)
     return true;
@@ -332,7 +332,7 @@ bool genome_feature_score_is_defined(const GenomeFeature *gf)
 
 bool genome_feature_is_multi(const GenomeFeature *gf)
 {
-  GenomeNode *gn = (GenomeNode*) gf;
+  GT_GenomeNode *gn = (GT_GenomeNode*) gf;
   assert(gn);
   if ((gn->bit_field >> MULTI_FEATURE_OFFSET) & MULTI_FEATURE_MASK) {
     assert(!genome_feature_is_pseudo(gf));
@@ -343,7 +343,7 @@ bool genome_feature_is_multi(const GenomeFeature *gf)
 
 bool genome_feature_is_pseudo(const GenomeFeature *gf)
 {
-  GenomeNode *gn = (GenomeNode*) gf;
+  GT_GenomeNode *gn = (GT_GenomeNode*) gf;
   assert(gn);
   if ((gn->bit_field >> PSEUDO_FEATURE_OFFSET) & PSEUDO_FEATURE_MASK) {
     assert(!genome_feature_is_multi(gf));
@@ -354,9 +354,9 @@ bool genome_feature_is_pseudo(const GenomeFeature *gf)
 
 static void genome_feature_set_multi(const GenomeFeature *gf)
 {
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   assert(gf && !genome_feature_is_multi(gf));
-  gn = (GenomeNode*) gf;
+  gn = (GT_GenomeNode*) gf;
   gn->bit_field |= 1 << MULTI_FEATURE_OFFSET;
 }
 
@@ -396,19 +396,19 @@ float genome_feature_get_score(GenomeFeature *gf)
 
 Strand genome_feature_get_strand(GenomeFeature *gf)
 {
-  GenomeNode *gn = (GenomeNode*) gf;
+  GT_GenomeNode *gn = (GT_GenomeNode*) gf;
   assert(gf);
   return (gn->bit_field >> STRAND_OFFSET) & STRAND_MASK;
 }
 
 Phase genome_feature_get_phase(GenomeFeature *gf)
 {
-  GenomeNode *gn = (GenomeNode*) gf;
+  GT_GenomeNode *gn = (GT_GenomeNode*) gf;
   assert(gn);
   return (gn->bit_field >> PHASE_OFFSET) & PHASE_MASK;
 }
 
-static int save_exon(GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int save_exon(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   GenomeFeature *gf;
   GT_Array *exon_features = (GT_Array*) data;
@@ -425,12 +425,12 @@ void genome_feature_get_exons(GenomeFeature *gf, GT_Array *exon_features)
 {
   int had_err;
   assert(gf && exon_features && !gt_array_size(exon_features));
-  had_err = genome_node_traverse_children((GenomeNode*) gf, exon_features,
+  had_err = genome_node_traverse_children((GT_GenomeNode*) gf, exon_features,
                                           save_exon, false, NULL);
   assert(!had_err); /* cannot happen, because save_exon() is sane */
 }
 
-static int save_exons_and_cds(GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int save_exons_and_cds(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   GenomeFeature *gf;
@@ -446,28 +446,28 @@ static int save_exons_and_cds(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 
 static void set_transcript_types(GT_Array *features)
 {
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   unsigned long i;
   assert(features);
   if (gt_array_size(features)) {
     if (gt_array_size(features) == 1) {
-      gn = *(GenomeNode**) gt_array_get(features, 0);
+      gn = *(GT_GenomeNode**) gt_array_get(features, 0);
       set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_SINGLE);
     }
     else {
-      gn = *(GenomeNode**) gt_array_get(features, 0);
+      gn = *(GT_GenomeNode**) gt_array_get(features, 0);
       set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_INITIAL);
       for (i = 1; i < gt_array_size(features) - 1; i++) {
-        gn = *(GenomeNode**) gt_array_get(features, i);
+        gn = *(GT_GenomeNode**) gt_array_get(features, i);
         set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_INTERNAL);
       }
-      gn = *(GenomeNode**) gt_array_get(features, gt_array_size(features) - 1);
+      gn = *(GT_GenomeNode**) gt_array_get(features, gt_array_size(features) - 1);
       set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_TERMINAL);
     }
   }
 }
 
-static int determine_transcripttypes(GenomeNode *gn, void *data,
+static int determine_transcripttypes(GT_GenomeNode *gn, void *data,
                                      UNUSED GT_Error *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
@@ -494,7 +494,7 @@ void genome_feature_determine_transcripttypes(GenomeFeature *gf)
   assert(gf);
   info.exon_features = gt_array_new(sizeof (GenomeFeature*));
   info.cds_features = gt_array_new(sizeof (GenomeFeature*));
-  had_err = genome_node_traverse_children((GenomeNode*) gf, &info,
+  had_err = genome_node_traverse_children((GT_GenomeNode*) gf, &info,
                                           determine_transcripttypes, false,
                                           NULL);
   assert(!had_err); /* cannot happen, because determine_transcripttypes() is
@@ -506,7 +506,7 @@ void genome_feature_determine_transcripttypes(GenomeFeature *gf)
 TranscriptFeatureType genome_feature_get_transcriptfeaturetype(GenomeFeature
                                                                *gf)
 {
-  GenomeNode *gn = (GenomeNode*) gf;
+  GT_GenomeNode *gn = (GT_GenomeNode*) gf;
   assert(gn);
   return (gn->bit_field >> TRANSCRIPT_FEATURE_TYPE_OFFSET) &
          TRANSCRIPT_FEATURE_TYPE_MASK;
@@ -520,7 +520,7 @@ void genome_feature_set_end(GenomeFeature *gf, unsigned long end)
 
 void genome_feature_set_score(GenomeFeature *gf, float score)
 {
-  GenomeNode *gn = (GenomeNode*) gf;
+  GT_GenomeNode *gn = (GT_GenomeNode*) gf;
   assert(gf);
   gn->bit_field |= 1 << SCORE_IS_DEFINED_OFFSET;
   gf->score = score;
@@ -528,7 +528,7 @@ void genome_feature_set_score(GenomeFeature *gf, float score)
 
 void genome_feature_unset_score(GenomeFeature *gf)
 {
-  GenomeNode *gn = (GenomeNode*) gf;
+  GT_GenomeNode *gn = (GT_GenomeNode*) gf;
   assert(gf);
   gn->bit_field &= ~(1 << SCORE_IS_DEFINED_OFFSET);
   gf->score = UNDEF_FLOAT;
@@ -558,11 +558,11 @@ void genome_feature_foreach_attribute(GenomeFeature *gf,
 
 static bool genome_feature_has_gft(const GenomeFeature *gf, const char **gfts)
 {
-  GenomeNodeIterator *gni;
-  GenomeNode *gn;
+  GT_GenomeNodeIterator *gni;
+  GT_GenomeNode *gn;
   bool has_gft = false;
   assert(gf && gfts && gfts[0] != NULL);
-  gni = genome_node_iterator_new((GenomeNode*) gf);
+  gni = genome_node_iterator_new((GT_GenomeNode*) gf);
   while ((gn = genome_node_iterator_next(gni))) {
     unsigned long i = 0;
     while (gfts[i] != NULL) {
@@ -594,12 +594,12 @@ bool genome_feature_has_splice_site(const GenomeFeature *gf)
 
 double genome_feature_average_splice_site_prob(const GenomeFeature *gf)
 {
-  GenomeNodeIterator *gni;
-  GenomeNode *gn;
+  GT_GenomeNodeIterator *gni;
+  GT_GenomeNode *gn;
   unsigned long num_of_splice_sites = 0;
   double averagessp = 0.0;
   assert(gf);
-  gni = genome_node_iterator_new((GenomeNode*) gf);
+  gni = genome_node_iterator_new((GT_GenomeNode*) gf);
   while ((gn = genome_node_iterator_next(gni))) {
     if (genome_feature_has_type((GenomeFeature*) gn,
                                 gft_five_prime_splice_site) ||
@@ -618,11 +618,11 @@ double genome_feature_average_splice_site_prob(const GenomeFeature *gf)
 bool genome_features_are_similar(GenomeFeature *gf_a, GenomeFeature *gf_b)
 {
   assert(gf_a && gf_b);
-  if (!str_cmp(genome_node_get_seqid((GenomeNode*) gf_a),
-               genome_node_get_seqid((GenomeNode*) gf_b)) &&
+  if (!str_cmp(genome_node_get_seqid((GT_GenomeNode*) gf_a),
+               genome_node_get_seqid((GT_GenomeNode*) gf_b)) &&
       (genome_feature_get_type(gf_a) == genome_feature_get_type(gf_b)) &&
-      (!gt_range_compare(genome_feature_get_range((GenomeNode*) gf_a),
-                      genome_feature_get_range((GenomeNode*) gf_b))) &&
+      (!gt_range_compare(genome_feature_get_range((GT_GenomeNode*) gf_a),
+                      genome_feature_get_range((GT_GenomeNode*) gf_b))) &&
       (genome_feature_get_strand(gf_a) == genome_feature_get_strand(gf_b)) &&
       (genome_feature_get_phase(gf_a) == genome_feature_get_phase(gf_b))) {
     return true;
@@ -634,7 +634,7 @@ int genome_feature_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *type;
-  GenomeNode *gf;
+  GT_GenomeNode *gf;
   GT_Range range;
   Str *seqid;
   int had_err = 0;

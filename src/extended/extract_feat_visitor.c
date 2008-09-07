@@ -75,15 +75,15 @@ static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
                                                GenomeFeature *gf, GT_Error *err)
 {
   ExtractFeatVisitor *efv;
-  GenomeNodeIterator *gni;
-  GenomeNode *gn;
+  GT_GenomeNodeIterator *gni;
+  GT_GenomeNode *gn;
   Str *description,
       *sequence;
   int had_err = 0;
   gt_error_check(err);
   efv = extract_feat_visitor_cast(gv);
   assert(efv->region_mapping);
-  gni = genome_node_iterator_new((GenomeNode*) gf);
+  gni = genome_node_iterator_new((GT_GenomeNode*) gf);
   description = str_new();
   sequence = str_new();
   while (!had_err && (gn = genome_node_iterator_next(gni))) {

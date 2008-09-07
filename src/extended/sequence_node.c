@@ -21,7 +21,7 @@
 
 struct SequenceNode
 {
-  const GenomeNode parent_instance;
+  const GT_GenomeNode parent_instance;
   Str *description,
       *sequence;
 };
@@ -29,20 +29,20 @@ struct SequenceNode
 #define sequence_node_cast(GN)\
         genome_node_cast(sequence_node_class(), GN)
 
-static void sequence_node_free(GenomeNode *gn)
+static void sequence_node_free(GT_GenomeNode *gn)
 {
   SequenceNode *sn = sequence_node_cast(gn);
   str_delete(sn->sequence);
   str_delete(sn->description);
 }
 
-static Str* sequence_node_get_seqid(GenomeNode *gn)
+static Str* sequence_node_get_seqid(GT_GenomeNode *gn)
 {
   SequenceNode *sn = sequence_node_cast(gn);
   return sn->description;
 }
 
-static GT_Range sequence_node_get_range(UNUSED GenomeNode *gn)
+static GT_Range sequence_node_get_range(UNUSED GT_GenomeNode *gn)
 {
   GT_Range range;
   range.start = 0;
@@ -50,7 +50,7 @@ static GT_Range sequence_node_get_range(UNUSED GenomeNode *gn)
   return range;
 }
 
-static void sequence_node_change_seqid(GenomeNode *gn, Str *seqid)
+static void sequence_node_change_seqid(GT_GenomeNode *gn, Str *seqid)
 {
   SequenceNode *sn = sequence_node_cast(gn);
   assert(sn && seqid);
@@ -58,7 +58,7 @@ static void sequence_node_change_seqid(GenomeNode *gn, Str *seqid)
   sn->description = str_ref(seqid);
 }
 
-static int sequence_node_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
+static int sequence_node_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
   SequenceNode *sn;
   gt_error_check(err);
@@ -66,9 +66,9 @@ static int sequence_node_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err
   return genome_visitor_visit_sequence_node(gv, sn, err);
 }
 
-const GenomeNodeClass* sequence_node_class()
+const GT_GenomeNodeClass* sequence_node_class()
 {
-  static const GenomeNodeClass gnc = { sizeof (SequenceNode),
+  static const GT_GenomeNodeClass gnc = { sizeof (SequenceNode),
                                        sequence_node_free,
                                        sequence_node_get_seqid,
                                        sequence_node_get_seqid,
@@ -79,9 +79,9 @@ const GenomeNodeClass* sequence_node_class()
   return &gnc;
 }
 
-GenomeNode* sequence_node_new(const char *description, Str *sequence)
+GT_GenomeNode* sequence_node_new(const char *description, Str *sequence)
 {
-  GenomeNode *gn = genome_node_create(sequence_node_class());
+  GT_GenomeNode *gn = genome_node_create(sequence_node_class());
   SequenceNode *sn = sequence_node_cast(gn);
   assert(description && sequence);
   sn->description = str_new_cstr(description);

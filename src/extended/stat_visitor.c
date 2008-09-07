@@ -52,7 +52,7 @@ static void stat_visitor_free(GenomeVisitor *gv)
   disc_distri_delete(stat_visitor->intron_length_distribution);
 }
 
-static int add_exon_number(GenomeNode *gn, void *data, UNUSED GT_Error *err)
+static int add_exon_number(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   StatVisitor *stat_visitor = (StatVisitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
@@ -63,7 +63,7 @@ static int add_exon_number(GenomeNode *gn, void *data, UNUSED GT_Error *err)
   return 0;
 }
 
-static int compute_statistics(GenomeNode *gn, void *data, GT_Error *err)
+static int compute_statistics(GT_GenomeNode *gn, void *data, GT_Error *err)
 {
   StatVisitor *stat_visitor;
   GenomeFeature *gf;
@@ -78,7 +78,7 @@ static int compute_statistics(GenomeNode *gn, void *data, GT_Error *err)
       stat_visitor->number_of_protein_coding_genes++;
     if (stat_visitor->gene_length_distribution) {
       disc_distri_add(stat_visitor->gene_length_distribution,
-                     gt_range_length(genome_node_get_range((GenomeNode*) gf)));
+                     gt_range_length(genome_node_get_range((GT_GenomeNode*) gf)));
     }
     if (stat_visitor->gene_score_distribution) {
       disc_distri_add(stat_visitor->gene_score_distribution,
@@ -92,7 +92,7 @@ static int compute_statistics(GenomeNode *gn, void *data, GT_Error *err)
     stat_visitor->number_of_exons++;
     if (stat_visitor->exon_length_distribution) {
       disc_distri_add(stat_visitor->exon_length_distribution,
-                      gt_range_length(genome_node_get_range((GenomeNode*) gf)));
+                      gt_range_length(genome_node_get_range((GT_GenomeNode*) gf)));
     }
   }
   else if (genome_feature_has_type(gf, gft_CDS)) {
@@ -101,7 +101,7 @@ static int compute_statistics(GenomeNode *gn, void *data, GT_Error *err)
   else if (genome_feature_has_type(gf, gft_intron)) {
     if (stat_visitor->intron_length_distribution) {
       disc_distri_add(stat_visitor->intron_length_distribution,
-                      gt_range_length(genome_node_get_range((GenomeNode*) gf)));
+                      gt_range_length(genome_node_get_range((GT_GenomeNode*) gf)));
     }
   }
   else if (genome_feature_has_type(gf, gft_LTR_retrotransposon)) {
@@ -126,7 +126,7 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   StatVisitor *stat_visitor;
   gt_error_check(err);
   stat_visitor = stat_visitor_cast(gv);
-  return genome_node_traverse_children((GenomeNode*) gf, stat_visitor,
+  return genome_node_traverse_children((GT_GenomeNode*) gf, stat_visitor,
                                        compute_statistics, false, err);
 }
 
@@ -138,7 +138,7 @@ static int stat_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   stat_visitor = stat_visitor_cast(gv);
   stat_visitor->number_of_sequence_regions++;
   stat_visitor->total_length_of_sequence_regions +=
-    gt_range_length(genome_node_get_range((GenomeNode*) sr));
+    gt_range_length(genome_node_get_range((GT_GenomeNode*) sr));
   return 0;
 }
 

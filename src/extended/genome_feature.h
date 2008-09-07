@@ -32,14 +32,14 @@ typedef struct GenomeFeature GenomeFeature;
 typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
 
-const GenomeNodeClass* genome_feature_class(void);
-GenomeNode*            genome_feature_new(Str *seqid, GenomeFeatureType*, GT_Range,
+const GT_GenomeNodeClass* genome_feature_class(void);
+GT_GenomeNode*            genome_feature_new(Str *seqid, GenomeFeatureType*, GT_Range,
                                           Strand);
-GenomeNode*            genome_feature_new_pseudo(GenomeFeature*);
+GT_GenomeNode*            genome_feature_new_pseudo(GenomeFeature*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
-GenomeNode*            genome_feature_new_standard_gene(FeatureTypeFactory*);
+GT_GenomeNode*            genome_feature_new_standard_gene(FeatureTypeFactory*);
 const char*            genome_feature_get_source(GenomeFeature*);
-const char*            genome_feature_get_attribute(GenomeNode *gn,
+const char*            genome_feature_get_attribute(GT_GenomeNode *gn,
                                                     const char *attr_name);
 /* Return a GT_StrArray containing the used attribute names. */
 GT_StrArray*              genome_feature_get_attribute_list(GenomeFeature*);
@@ -61,8 +61,8 @@ void                   genome_feature_get_exons(GenomeFeature*,
                                                 GT_Array *exon_features);
 void                   genome_feature_determine_transcripttypes(GenomeFeature*);
 TranscriptFeatureType  genome_feature_get_transcriptfeaturetype(GenomeFeature*);
-void                   genome_feature_set_source(GenomeNode*, Str *source);
-void                   genome_feature_set_phase(GenomeNode*, Phase);
+void                   genome_feature_set_source(GT_GenomeNode*, Str *source);
+void                   genome_feature_set_phase(GT_GenomeNode*, Phase);
 void                   genome_feature_set_end(GenomeFeature*, unsigned long);
 void                   genome_feature_set_score(GenomeFeature*, float);
 void                   genome_feature_unset_score(GenomeFeature*);

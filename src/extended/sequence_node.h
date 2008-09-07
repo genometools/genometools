@@ -24,8 +24,8 @@ typedef struct SequenceNode SequenceNode;
 #include "core/str.h"
 #include "extended/genome_node.h"
 
-const GenomeNodeClass* sequence_node_class(void);
-GenomeNode*            sequence_node_new(const char *description,
+const GT_GenomeNodeClass* sequence_node_class(void);
+GT_GenomeNode*            sequence_node_new(const char *description,
                                          Str *sequence); /* takes ownership */
 const char*            sequence_node_get_description(const SequenceNode*);
 const char*            sequence_node_get_sequence(const SequenceNode*);

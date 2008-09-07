@@ -23,21 +23,21 @@
 #include "extended/genome_node.h"
 
 /* the ``genome node'' interface */
-struct GenomeNodeClass
+struct GT_GenomeNodeClass
 {
   size_t size;
-  void  (*free)(GenomeNode*);
-  Str*  (*get_seqid)(GenomeNode*);
-  Str*  (*get_idstr)(GenomeNode*);
-  GT_Range (*get_range)(GenomeNode*);
-  void  (*set_range)(GenomeNode*, GT_Range);
-  void  (*change_seqid)(GenomeNode*, Str*);
-  int   (*accept)(GenomeNode*, GenomeVisitor*, GT_Error*);
+  void  (*free)(GT_GenomeNode*);
+  Str*  (*get_seqid)(GT_GenomeNode*);
+  Str*  (*get_idstr)(GT_GenomeNode*);
+  GT_Range (*get_range)(GT_GenomeNode*);
+  void  (*set_range)(GT_GenomeNode*, GT_Range);
+  void  (*change_seqid)(GT_GenomeNode*, Str*);
+  int   (*accept)(GT_GenomeNode*, GenomeVisitor*, GT_Error*);
 };
 
-struct GenomeNode
+struct GT_GenomeNode
 {
-  const GenomeNodeClass *c_class;
+  const GT_GenomeNodeClass *c_class;
   Str *filename;
   Dlist *children;
   unsigned int line_number,
@@ -54,6 +54,6 @@ struct GenomeNode
 #define TREE_STATUS_OFFSET    3
 #define TREE_STATUS_MASK      0x3
 
-GenomeNode* genome_node_create(const GenomeNodeClass*);
+GT_GenomeNode* genome_node_create(const GT_GenomeNodeClass*);
 
 #endif

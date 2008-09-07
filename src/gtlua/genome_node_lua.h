@@ -21,7 +21,7 @@
 #include "lua.h"
 #include "extended/genome_node.h"
 
-/* exports the GenomeNode interface and its implementors to Lua:
+/* exports the GT_GenomeNode interface and its implementors to Lua:
 
    -- Returns a new genome feature refering to sequence with id <seqid> of
    -- <type> spanning <range> on <strand>.
@@ -89,11 +89,11 @@
 */
 int luaopen_genome_node(lua_State*);
 
-/* push a GenomeNode to Lua, takes ownership! */
-void genome_node_lua_push(lua_State*, GenomeNode*);
+/* push a GT_GenomeNode to Lua, takes ownership! */
+void genome_node_lua_push(lua_State*, GT_GenomeNode*);
 
 #define GENOME_NODE_METATABLE  "GenomeTools.genome_node"
 #define check_genome_node(L, POS) \
-                (GenomeNode**) luaL_checkudata(L, POS, GENOME_NODE_METATABLE)
+                (GT_GenomeNode**) luaL_checkudata(L, POS, GENOME_NODE_METATABLE)
 
 #endif

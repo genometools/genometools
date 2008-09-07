@@ -38,6 +38,6 @@ GenomeVisitor*            filter_visitor_new(Str *seqid, Str *typefilter,
                                              min_average_splice_site_prob,
                                              unsigned long feature_num);
 unsigned long             filter_visitor_node_buffer_size(GenomeVisitor*);
-GenomeNode*               filter_visitor_get_node(GenomeVisitor*);
+GT_GenomeNode*               filter_visitor_get_node(GenomeVisitor*);
 
 #endif

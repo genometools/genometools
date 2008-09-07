@@ -30,7 +30,7 @@ struct SpliceSiteInfoStream
 #define splice_site_info_stream_cast(GS)\
         genome_stream_cast(splice_site_info_stream_class(), GS)
 
-static int splice_site_info_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
+static int splice_site_info_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
                                              GT_Error *err)
 {
   SpliceSiteInfoStream *ssis;

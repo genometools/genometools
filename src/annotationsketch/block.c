@@ -31,7 +31,7 @@ struct GT_Block {
   bool show_caption;
   Strand strand;
   GenomeFeatureType *type;
-  GenomeNode *top_level_feature;
+  GT_GenomeNode *top_level_feature;
   unsigned long reference_count;
 };
 
@@ -81,7 +81,7 @@ GT_Block* gt_block_new(void)
   return block;
 }
 
-GT_Block* gt_block_new_from_node(GenomeNode *node)
+GT_Block* gt_block_new_from_node(GT_GenomeNode *node)
 {
   GT_Block *block;
   assert(node);
@@ -93,7 +93,7 @@ GT_Block* gt_block_new_from_node(GenomeNode *node)
   return block;
 }
 
-void gt_block_insert_element(GT_Block *block, GenomeNode *gn)
+void gt_block_insert_element(GT_Block *block, GT_GenomeNode *gn)
 {
   Element *element;
   assert(block && gn);
@@ -103,7 +103,7 @@ void gt_block_insert_element(GT_Block *block, GenomeNode *gn)
   dlist_add(block->elements, element);
 }
 
-GenomeNode* gt_block_get_top_level_feature(const GT_Block *block)
+GT_GenomeNode* gt_block_get_top_level_feature(const GT_Block *block)
 {
   assert(block);
   return block->top_level_feature;
@@ -220,7 +220,7 @@ int gt_block_unit_test(GT_Error *err)
   GT_Range r1, r2, r_temp, b_range;
   int had_err = 0;
   Strand s;
-  GenomeNode *gn1, *gn2;
+  GT_GenomeNode *gn1, *gn2;
   Element *e1, *e2;
   GT_Block * b;
   Str *seqid, *caption1, *caption2;

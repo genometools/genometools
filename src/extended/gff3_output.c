@@ -21,12 +21,12 @@
 
 void gff3_output_leading(GenomeFeature *gf, GenFile *outfp)
 {
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   GenomeFeatureType *type;
 
   assert(gf);
 
-  gn = (GenomeNode*) gf;
+  gn = (GT_GenomeNode*) gf;
   type = genome_feature_get_type(gf);
 
   genfile_xprintf(outfp, "%s\t%s\t%s\t%lu\t%lu\t",

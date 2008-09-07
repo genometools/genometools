@@ -30,7 +30,7 @@ typedef struct Element Element;
 #include "extended/genome_feature_type.h"
 
 /* Creates a complete new Element object. */
-Element*           element_new(GenomeNode*);
+Element*           element_new(GT_GenomeNode*);
 /* Creates an empty Element object. GT_Range and type have to be set afterwards. */
 Element*           element_new_empty(void);
 GT_Range           element_get_range(const Element*);
@@ -39,7 +39,7 @@ DrawingRange       element_calculate_drawing_range(Element*, GT_Canvas*);
 GenomeFeatureType* element_get_type(const Element*);
 void               element_set_type(Element*, GenomeFeatureType*);
 Strand             element_get_strand(const Element*);
-GenomeNode*        element_get_node_ref(const Element*);
+GT_GenomeNode*        element_get_node_ref(const Element*);
 bool               element_is_marked(const Element*);
 bool               elements_are_equal(const Element*, const Element*);
 int                element_sketch(Element*, GT_Canvas*);

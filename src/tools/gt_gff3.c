@@ -171,7 +171,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                *gff3_out_stream = NULL,
                *last_stream;
   GFF3Arguments *arguments = tool_arguments;
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   int had_err = 0;
 
   gt_error_check(err);

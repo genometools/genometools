@@ -107,7 +107,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
 {
   Str *seqid;
   GT_Range range;
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   Queue *genome_nodes = (Queue*) data;
   gt_error_check(err);
   assert(key && value && data);
@@ -125,7 +125,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
   GT_Array *genome_node_array = (GT_Array*) value,
         *mRNAs = (GT_Array*) cinfo->mRNAs;
-  GenomeNode *mRNA_node, *first_node, *gn;
+  GT_GenomeNode *mRNA_node, *first_node, *gn;
   const char *tname;
   Strand mRNA_strand;
   GT_Range mRNA_range;
@@ -138,12 +138,12 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
   assert(gt_array_size(genome_node_array)); /* at least one node in array */
 
   /* determine the range and the strand of the mRNA */
-  first_node = *(GenomeNode**) gt_array_get(genome_node_array, 0);
+  first_node = *(GT_GenomeNode**) gt_array_get(genome_node_array, 0);
   mRNA_range = genome_node_get_range(first_node);
   mRNA_strand = genome_feature_get_strand((GenomeFeature*) first_node);
   mRNA_seqid = genome_node_get_seqid(first_node);
   for (i = 1; i < gt_array_size(genome_node_array); i++) {
-    gn = *(GenomeNode**) gt_array_get(genome_node_array, i);
+    gn = *(GT_GenomeNode**) gt_array_get(genome_node_array, i);
     mRNA_range = gt_range_join(mRNA_range, genome_node_get_range(gn));
     /* XXX: an error check is necessary here, otherwise strand_join() can cause
        a failed assertion */
@@ -177,7 +177,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
 
     /* register children */
     for (i = 0; i < gt_array_size(genome_node_array); i++) {
-      gn = *(GenomeNode**) gt_array_get(genome_node_array, i);
+      gn = *(GT_GenomeNode**) gt_array_get(genome_node_array, i);
       genome_node_is_part_of_genome_node(mRNA_node, gn);
     }
 
@@ -195,8 +195,8 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
   Queue *genome_nodes = cinfo->genome_nodes;
   const char *gname;
-  GT_Array *mRNAs = gt_array_new(sizeof (GenomeNode*));
-  GenomeNode *gene_node, *gn;
+  GT_Array *mRNAs = gt_array_new(sizeof (GT_GenomeNode*));
+  GT_GenomeNode *gene_node, *gn;
   Strand gene_strand;
   GT_Range gene_range;
   Str *gene_seqid;
@@ -212,12 +212,12 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
     assert(gt_array_size(mRNAs)); /* at least one mRNA constructed */
 
     /* determine the range and the strand of the gene */
-    gn = *(GenomeNode**) gt_array_get(mRNAs, 0);
+    gn = *(GT_GenomeNode**) gt_array_get(mRNAs, 0);
     gene_range = genome_node_get_range(gn);
     gene_strand = genome_feature_get_strand((GenomeFeature*) gn);
     gene_seqid = genome_node_get_seqid(gn);
     for (i = 1; i < gt_array_size(mRNAs); i++) {
-      gn = *(GenomeNode**) gt_array_get(mRNAs, i);
+      gn = *(GT_GenomeNode**) gt_array_get(mRNAs, i);
       gene_range = gt_range_join(gene_range, genome_node_get_range(gn));
       gene_strand = strand_join(gene_strand,
                                 genome_feature_get_strand((GenomeFeature*) gn));
@@ -237,7 +237,7 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
 
     /* register children */
     for (i = 0; i < gt_array_size(mRNAs); i++) {
-      gn = *(GenomeNode**) gt_array_get(mRNAs, i);
+      gn = *(GT_GenomeNode**) gt_array_get(mRNAs, i);
       genome_node_is_part_of_genome_node(gene_node, gn);
     }
 
@@ -259,7 +259,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   char *line;
   size_t line_length;
   unsigned long i, line_number = 0;
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   GT_Range range, *rangeptr;
   Phase phase_value;
   Strand strand_value;
@@ -497,7 +497,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 
       if (!(genome_node_array = hashmap_get(transcript_id_hash,
                                             transcript_id))) {
-        genome_node_array = gt_array_new(sizeof (GenomeNode*));
+        genome_node_array = gt_array_new(sizeof (GT_GenomeNode*));
         hashmap_add(transcript_id_hash, cstr_dup(transcript_id),
                     genome_node_array);
       }

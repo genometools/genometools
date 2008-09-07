@@ -25,16 +25,16 @@
 struct MergeStream {
   const GenomeStream parent_instance;
   GT_Array *genome_streams;
-  GenomeNode **buffer;
+  GT_GenomeNode **buffer;
 };
 
 #define merge_stream_cast(GS)\
         genome_stream_cast(merge_stream_class(), GS)
 
-int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
+int merge_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
 {
   MergeStream *ms;
-  GenomeNode *min_node = NULL;
+  GT_GenomeNode *min_node = NULL;
   unsigned long i, j, min_i = UNDEF_ULONG;
   unsigned int genome_node_consolidated;
   int had_err = 0;
@@ -133,6 +133,6 @@ GenomeStream* merge_stream_new(const GT_Array *genome_streams)
                                   gt_array_get(genome_streams, i));
     gt_array_add(ms->genome_streams, in_stream);
   }
-  ms->buffer = ma_calloc(gt_array_size(genome_streams), sizeof (GenomeNode*));
+  ms->buffer = ma_calloc(gt_array_size(genome_streams), sizeof (GT_GenomeNode*));
   return gs;
 }

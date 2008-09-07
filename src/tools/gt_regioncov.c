@@ -55,7 +55,7 @@ int gt_regioncov(int argc, const char **argv, GT_Error *err)
 {
   GenomeVisitor *regioncov_visitor;
   GenomeStream *gff3_in_stream;
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   RegionCovArguments arguments;
   int parsed_args, had_err = 0;
   gt_error_check(err);

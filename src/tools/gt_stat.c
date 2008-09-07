@@ -83,7 +83,7 @@ static OPrval parse_options(int *parsed_args, StatArguments *arguments,
 int gt_stat(int argc, const char **argv, GT_Error *err)
 {
   GenomeStream *gff3_in_stream, *stat_stream;
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   int parsed_args, had_err;
   StatArguments arguments;
   gt_error_check(err);

@@ -77,7 +77,7 @@ static int gt_cds_runner(UNUSED int argc, const char **argv, int parsed_args,
                          void *tool_arguments, GT_Error *err)
 {
   GenomeStream *gff3_in_stream, *cds_stream = NULL, *gff3_out_stream = NULL;
-  GenomeNode *gn;
+  GT_GenomeNode *gn;
   CDSArguments *arguments = tool_arguments;
   RegionMapping *regionmapping;
   int had_err = 0;
