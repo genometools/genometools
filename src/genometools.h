@@ -22,7 +22,6 @@
 
 #include "core.h"     /* the core of the GenomeTools library */
 #include "extended.h" /* extended part of the GenomeTools library  */
-#include "matching.h" /* include the GenomeTools matching library */
 
 /* the core module */
 #include "core/array_api.h"
