@@ -47,7 +47,7 @@ typedef struct BitPackArray BitPackArray;
  * @return pointer to new BitPackArray structure or NULL on failure
  */
 static inline BitPackArray *
-newBitPackArray(unsigned bits, BitOffset numValues)
+bitpackarray_new(unsigned bits, BitOffset numValues)
 {
   BitPackArray *newBPA = ma_malloc(sizeof (*newBPA));
   if (newBPA)
@@ -65,8 +65,9 @@ newBitPackArray(unsigned bits, BitOffset numValues)
 }
 
 static inline void
-deleteBitPackArray(BitPackArray *bpa)
+bitpackarray_delete(BitPackArray *bpa)
 {
+  if (!bpa) return;
   ma_free(bpa->store);
   ma_free(bpa);
 }
@@ -79,7 +80,7 @@ deleteBitPackArray(BitPackArray *bpa)
  * BitPackArray construction are stored).
  */
 static inline void
-bpaStoreUInt32(BitPackArray *array, BitOffset index, uint32_t val)
+bitpackarray_store_uint32(BitPackArray *array, BitOffset index, uint32_t val)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
@@ -95,7 +96,7 @@ bpaStoreUInt32(BitPackArray *array, BitOffset index, uint32_t val)
  * BitPackArray construction are stored).
  */
 static inline uint32_t
-bpaGetUInt32(const BitPackArray *array, BitOffset index)
+bitpackarray_get_uint32(const BitPackArray *array, BitOffset index)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (uint32_t)*CHAR_BIT);
@@ -111,7 +112,7 @@ bpaGetUInt32(const BitPackArray *array, BitOffset index)
  * BitPackArray construction are stored).
  */
 static inline void
-bpaStoreUInt64(BitPackArray *array, BitOffset index, uint64_t val)
+bitpackarray_store_uint64(BitPackArray *array, BitOffset index, uint64_t val)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
@@ -127,7 +128,7 @@ bpaStoreUInt64(BitPackArray *array, BitOffset index, uint64_t val)
  * BitPackArray construction are stored).
  */
 static inline uint64_t
-bpaGetUInt64(const BitPackArray *array, BitOffset index)
+bitpackarray_get_uint64(const BitPackArray *array, BitOffset index)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (uint64_t)*CHAR_BIT);
@@ -140,6 +141,6 @@ bpaGetUInt64(const BitPackArray *array, BitOffset index)
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackArray_unit_test(Error*);
+gt_bitpackarray_unit_test(Error*);
 
 #endif

@@ -150,7 +150,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "array class", array_unit_test);
   hashmap_add(unit_tests, "array example", array_example);
   hashmap_add(unit_tests, "array2dim example", array2dim_example);
-  hashmap_add(unit_tests, "bit pack array class", bitPackArray_unit_test);
+  hashmap_add(unit_tests, "bit pack array class", gt_bitpackarray_unit_test);
   hashmap_add(unit_tests, "bit pack string module", bitPackString_unit_test);
   hashmap_add(unit_tests, "bittab class", bittab_unit_test);
   hashmap_add(unit_tests, "bittab example", bittab_example);
