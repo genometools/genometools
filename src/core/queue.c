@@ -90,7 +90,7 @@ void queue_delete_with_contents(Queue *q)
 static void check_space(Queue *q)
 {
   if (!q->allocated) { /* empty queue without allocated memory */
-    q->contents = dynalloc(q->contents, &q->allocated, sizeof (void*));
+    q->contents = gt_dynalloc(q->contents, &q->allocated, sizeof (void*));
     q->size = q->allocated / sizeof (void*);
   }
   else if (q->front < q->back) { /* no wraparound */
@@ -98,15 +98,15 @@ static void check_space(Queue *q)
       if (q->front)
         q->back = 0; /* perform wraparound */
       else { /* extend contents buffer */
-        q->contents = dynalloc(q->contents, &q->allocated,
-                               q->allocated + sizeof (void*));
+        q->contents = gt_dynalloc(q->contents, &q->allocated,
+                                  q->allocated + sizeof (void*));
         q->size = q->allocated / sizeof (void*);
       }
     }
   }
   else if (q->back && (q->back == q->front)) { /* wraparound */
-    q->contents = dynalloc(q->contents, &q->allocated,
-                           q->allocated + q->front * sizeof (void*));
+    q->contents = gt_dynalloc(q->contents, &q->allocated,
+                              q->allocated + q->front * sizeof (void*));
     memcpy(q->contents + q->size, q->contents, q->front * sizeof (void*));
     /* dynalloc() always doubles the already allocated memory region, which
        means we always have some additional space after the copied memory region

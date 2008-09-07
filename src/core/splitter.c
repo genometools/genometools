@@ -49,16 +49,16 @@ void splitter_split(Splitter *s, char *string, unsigned long length,
     assert(end_of_token);
     *end_of_token = '\0';
     if ((s->num_of_tokens + 1) * sizeof (char*) > s->allocated)
-      s->tokens = dynalloc(s->tokens, &s->allocated,
-                           (s->num_of_tokens + 1) * sizeof (char*));
+      s->tokens = gt_dynalloc(s->tokens, &s->allocated,
+                              (s->num_of_tokens + 1) * sizeof (char*));
     s->tokens[s->num_of_tokens++] = string_index;
     string_index = end_of_token + 1;
   }
 
   /* save last token */
   if ((s->num_of_tokens + 2) * sizeof (char*) > s->allocated)
-    s->tokens = dynalloc(s->tokens, &s->allocated,
-                         (s->num_of_tokens + 2) * sizeof (char*));
+    s->tokens = gt_dynalloc(s->tokens, &s->allocated,
+                            (s->num_of_tokens + 2) * sizeof (char*));
   s->tokens[s->num_of_tokens++] = string_index;
   s->tokens[s->num_of_tokens]   = NULL;
 

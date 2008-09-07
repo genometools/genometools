@@ -36,6 +36,6 @@
   <size> requested memory size
 */
 
-void* dynalloc(void *ptr, size_t *allocated, size_t size);
+void* gt_dynalloc(void *ptr, size_t *allocated, size_t size);
 
 #endif

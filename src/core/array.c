@@ -133,8 +133,8 @@ void gt_array_add_elem(GT_Array *a, void *elem, size_t size_of_elem)
   assert(a->next_free <= a->allocated);
   /* make sure we have enough space */
   if ((a->next_free + 1) * size_of_elem > a->allocated) {
-    a->space = dynalloc(a->space, &a->allocated,
-                        (a->next_free + 1) * size_of_elem);
+    a->space = gt_dynalloc(a->space, &a->allocated,
+                           (a->next_free + 1) * size_of_elem);
   }
   /* add */
   memcpy((char*) a->space + a->next_free * size_of_elem, elem, size_of_elem);

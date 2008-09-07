@@ -197,9 +197,10 @@ static int proc_sequence_part(const char *seqpart, unsigned long length,
   gt_error_check(err);
   assert(seqpart);
   if (info->bs->use_stdin) {
-    info->bs->raw_sequence = dynalloc(info->bs->raw_sequence,
-                                      &info->bs->allocated,
-                                      info->bs->raw_sequence_length + length);
+    info->bs->raw_sequence = gt_dynalloc(info->bs->raw_sequence,
+                                         &info->bs->allocated,
+                                         info->bs->raw_sequence_length +
+                                         length);
     memcpy(info->bs->raw_sequence + info->bs->raw_sequence_length, seqpart,
            length);
     info->bs->raw_sequence_length += length;

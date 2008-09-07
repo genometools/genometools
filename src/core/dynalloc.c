@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@
 #include "core/dynalloc.h"
 #include "core/ma.h"
 
-void* dynalloc(void *ptr, size_t *allocated, size_t size)
+void* gt_dynalloc(void *ptr, size_t *allocated, size_t size)
 {
   size_t size_to_alloc = 0;
   void *rptr;

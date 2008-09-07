@@ -58,7 +58,8 @@ void gt_str_set(GT_Str *s, const char *cstr)
     s->length = 0;
   else {
     cstrlen = strlen(cstr);
-    s->cstr = dynalloc(s->cstr, &s->allocated, (cstrlen + 1) * sizeof (char));
+    s->cstr = gt_dynalloc(s->cstr, &s->allocated,
+                          (cstrlen + 1) * sizeof (char));
     sptr = s->cstr;
     while (*cstr != '\0') *sptr++ = *cstr++;
     s->length = cstrlen;
@@ -68,8 +69,8 @@ void gt_str_set(GT_Str *s, const char *cstr)
 void gt_str_append_str(GT_Str *dest, const GT_Str* src)
 {
   assert(dest && src);
-  dest->cstr = dynalloc(dest->cstr, &dest->allocated,
-                        (dest->length + src->length + 1) * sizeof (char));
+  dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
+                           (dest->length + src->length + 1) * sizeof (char));
   memcpy(dest->cstr + dest->length, src->cstr, src->length);
   dest->length += src->length;
 }
@@ -80,8 +81,8 @@ void gt_str_append_cstr(GT_Str *dest, const char *cstr)
   char *destptr;
   assert(dest && cstr);
   cstrlen = strlen(cstr);
-  dest->cstr = dynalloc(dest->cstr, &dest->allocated,
-                        (dest->length + cstrlen + 1) * sizeof (char));
+  dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
+                           (dest->length + cstrlen + 1) * sizeof (char));
   destptr = dest->cstr + dest->length;
   while (*cstr != '\0')
     *destptr++ = *cstr++;
@@ -91,8 +92,8 @@ void gt_str_append_cstr(GT_Str *dest, const char *cstr)
 void gt_str_append_cstr_nt(GT_Str *dest, const char *cstr, unsigned long length)
 {
   assert(dest && cstr);
-  dest->cstr = dynalloc(dest->cstr, &dest->allocated,
-                        (dest->length + length + 1) * sizeof (char));
+  dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
+                           (dest->length + length + 1) * sizeof (char));
   memcpy(dest->cstr + dest->length, cstr, length);
   dest->length += length;
 }
@@ -110,8 +111,8 @@ void gt_str_append_ulong(GT_Str *dest, unsigned long u)
     q /= 10;
   }
   /* make sure the string is long enough */
-  dest->cstr = dynalloc(dest->cstr, &dest->allocated,
-                        (dest->length + ulength + 1) * sizeof (char));
+  dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
+                           (dest->length + ulength + 1) * sizeof (char));
  /* format */
   s = dest->cstr + dest->length + ulength;
   do {
@@ -126,8 +127,8 @@ void gt_str_append_char(GT_Str *dest, char c)
 {
   assert(dest);
   if (dest->length + 2 > dest->allocated) {
-    dest->cstr = dynalloc(dest->cstr, &dest->allocated,
-                          (dest->length + 2) * sizeof (char));
+    dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
+                             (dest->length + 2) * sizeof (char));
   }
   dest->cstr[dest->length++] = c;
 }
@@ -213,14 +214,18 @@ int gt_str_read_next_line(GT_Str *s, FILE *fpin)
     if (cc == EOF)
       return EOF;
     if (cc == '\n') {
-      if ((s->length+1) * sizeof (char) > s->allocated)
-        s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+1)*sizeof (char));
+      if ((s->length+1) * sizeof (char) > s->allocated) {
+        s->cstr = gt_dynalloc(s->cstr, &s->allocated,
+                              (s->length+1) * sizeof (char));
+      }
       s->cstr[s->length] = '\0';
       return 0;
     }
     c = cc;
-    if ((s->length+2) * sizeof (char) > s->allocated)
-      s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+2)*sizeof (char));
+    if ((s->length+2) * sizeof (char) > s->allocated) {
+      s->cstr = gt_dynalloc(s->cstr, &s->allocated,
+                            (s->length+2) * sizeof (char));
+    }
     s->cstr[s->length++] = c;
   }
 }
@@ -235,14 +240,18 @@ int gt_str_read_next_line_generic(GT_Str *s, GenFile *fpin)
     if (cc == EOF)
       return EOF;
     if (cc == '\n') {
-      if ((s->length+1) * sizeof (char) > s->allocated)
-        s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+1)*sizeof (char));
+      if ((s->length+1) * sizeof (char) > s->allocated) {
+        s->cstr = gt_dynalloc(s->cstr, &s->allocated,
+                              (s->length+1) * sizeof (char));
+      }
       s->cstr[s->length] = '\0';
       return 0;
     }
     c = cc;
-    if ((s->length+2) * sizeof (char) > s->allocated)
-      s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+2)*sizeof (char));
+    if ((s->length+2) * sizeof (char) > s->allocated) {
+      s->cstr = gt_dynalloc(s->cstr, &s->allocated,
+                            (s->length+2) * sizeof (char));
+    }
     s->cstr[s->length++] = c;
   }
 }
