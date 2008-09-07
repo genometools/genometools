@@ -50,7 +50,7 @@ struct GT_GenomeFeature
   const GT_GenomeNode parent_instance;
   Str *seqid,
       *source;
-  FeatureTypeFactory *ftf;
+  GT_FeatureTypeFactory *ftf;
   GT_GenomeFeatureType *type;
   GT_Range range;
   float score;
@@ -208,7 +208,7 @@ GT_GenomeNode* gt_genome_feature_new_pseudo(GT_GenomeFeature *gf)
   return pn;
 }
 
-GT_GenomeNode* gt_genome_feature_new_standard_gene(FeatureTypeFactory *ftf)
+GT_GenomeNode* gt_genome_feature_new_standard_gene(GT_FeatureTypeFactory *ftf)
 {
   GT_GenomeNode *gn, *child, *grandchild;
   GT_GenomeFeatureType *type;
@@ -632,7 +632,7 @@ bool genome_features_are_similar(GT_GenomeFeature *gf_a, GT_GenomeFeature *gf_b)
 
 int gt_genome_feature_unit_test(GT_Error *err)
 {
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeFeatureType *type;
   GT_GenomeNode *gf;
   GT_Range range;

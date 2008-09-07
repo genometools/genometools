@@ -27,7 +27,7 @@ struct GTFInStream
 {
   const GenomeStream parent_instance;
   Queue *gt_genome_node_buffer;
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
 };
 
 #define gtf_in_stream_cast(GS)\

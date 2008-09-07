@@ -24,24 +24,24 @@
 #include "extended/feature_type_factory_rep.h"
 #include "extended/obo_parse_tree.h"
 
-struct FeatureTypeFactoryOBO {
-  const FeatureTypeFactory parent_instance;
+struct GT_FeatureTypeFactoryOBO {
+  const GT_FeatureTypeFactory parent_instance;
   CstrTable *gt_genome_feature_types;
 };
 
 #define feature_type_factory_obo_cast(FTF)\
         feature_type_factory_cast(feature_type_factory_obo_class(), FTF)
 
-static void feature_type_factory_obo_free(FeatureTypeFactory *ftf)
+static void feature_type_factory_obo_free(GT_FeatureTypeFactory *ftf)
 {
-  FeatureTypeFactoryOBO *ftfo = feature_type_factory_obo_cast(ftf);
+  GT_FeatureTypeFactoryOBO *ftfo = feature_type_factory_obo_cast(ftf);
   cstr_table_delete(ftfo->gt_genome_feature_types);
 }
 
 static GT_GenomeFeatureType*
-feature_type_factory_obo_create_gft(FeatureTypeFactory *ftf, const char *type)
+feature_type_factory_obo_create_gft(GT_FeatureTypeFactory *ftf, const char *type)
 {
-  FeatureTypeFactoryOBO *ftfo;
+  GT_FeatureTypeFactoryOBO *ftfo;
   GT_GenomeFeatureType *gft;
   assert(ftf && type);
   ftfo = feature_type_factory_obo_cast(ftf);
@@ -54,16 +54,16 @@ feature_type_factory_obo_create_gft(FeatureTypeFactory *ftf, const char *type)
   return gft;
 }
 
-const FeatureTypeFactoryClass* feature_type_factory_obo_class(void)
+const GT_FeatureTypeFactoryClass* feature_type_factory_obo_class(void)
 {
-  static const FeatureTypeFactoryClass feature_type_factory_class =
-    { sizeof (FeatureTypeFactoryOBO),
+  static const GT_FeatureTypeFactoryClass feature_type_factory_class =
+    { sizeof (GT_FeatureTypeFactoryOBO),
       feature_type_factory_obo_create_gft,
       feature_type_factory_obo_free };
   return &feature_type_factory_class;
 }
 
-static void add_gt_genome_feature_from_tree(FeatureTypeFactoryOBO *ftfo,
+static void add_gt_genome_feature_from_tree(GT_FeatureTypeFactoryOBO *ftfo,
                                          OBOParseTree *obo_parse_tree,
                                          unsigned long stanza_num,
                                          const char *stanza_key)
@@ -77,7 +77,7 @@ static void add_gt_genome_feature_from_tree(FeatureTypeFactoryOBO *ftfo,
     cstr_table_add(ftfo->gt_genome_feature_types, value);
 }
 
-static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
+static int create_genome_features(GT_FeatureTypeFactoryOBO *ftfo,
                                   const char *obo_file_path, GT_Error *err)
 {
   OBOParseTree *obo_parse_tree;
@@ -102,11 +102,11 @@ static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
   return -1;
 }
 
-FeatureTypeFactory* feature_type_factory_obo_new(const char *obo_file_path,
+GT_FeatureTypeFactory* feature_type_factory_obo_new(const char *obo_file_path,
                                                  GT_Error *err)
 {
-  FeatureTypeFactoryOBO *ftfo;
-  FeatureTypeFactory *ftf;
+  GT_FeatureTypeFactoryOBO *ftfo;
+  GT_FeatureTypeFactory *ftf;
   gt_error_check(err);
   assert(obo_file_path);
   ftf = feature_type_factory_create(feature_type_factory_obo_class());

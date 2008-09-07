@@ -28,7 +28,7 @@
 
 static int gt_genome_feature_lua_new(lua_State *L)
 {
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeNode **gf;
   GT_GenomeFeatureType *type;
   GT_Range *range;
@@ -269,7 +269,7 @@ static int gt_genome_feature_lua_get_type(lua_State *L)
 
 static int gt_genome_feature_lua_extract_sequence(lua_State *L)
 {
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeNode **gn;
   GT_GenomeFeature *gf;
   const char *typestr;

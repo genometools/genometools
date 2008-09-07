@@ -642,7 +642,7 @@ int gt_diagram_sketch(GT_Diagram *dia, GT_Canvas *canvas)
 
 int gt_diagram_unit_test(GT_Error *err)
 {
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeFeatureType *gene_type, *exon_type, *CDS_type;
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;

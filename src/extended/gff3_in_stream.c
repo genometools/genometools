@@ -40,7 +40,7 @@ struct GFF3InStream
   GenFile *fpin;
   unsigned long long line_number;
   Queue *gt_genome_node_buffer;
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
   GFF3Parser *gff3_parser;
 };
 
@@ -233,7 +233,7 @@ static GenomeStream* gff3_in_stream_new(GT_StrArray *files,
 }
 
 void gff3_in_stream_set_feature_type_factory(GenomeStream *gs,
-                                             FeatureTypeFactory
+                                             GT_FeatureTypeFactory
                                              *feature_type_factory)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);

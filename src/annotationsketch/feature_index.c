@@ -260,7 +260,7 @@ bool gt_feature_index_has_seqid(const GT_FeatureIndex *fi, const char *seqid)
 
 int gt_feature_index_unit_test(GT_Error *err)
 {
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeFeatureType *type;
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;

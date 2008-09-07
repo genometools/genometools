@@ -23,20 +23,20 @@
 #include "extended/genome_feature_type.h"
 #include "extended/gft_collection.h"
 
-struct FeatureTypeFactoryClass {
+struct GT_FeatureTypeFactoryClass {
   size_t size;
-  GT_GenomeFeatureType* (*create_gft)(FeatureTypeFactory*, const char *type);
-  void               (*free)(FeatureTypeFactory*);
+  GT_GenomeFeatureType* (*create_gft)(GT_FeatureTypeFactory*, const char *type);
+  void               (*free)(GT_FeatureTypeFactory*);
 };
 
-struct FeatureTypeFactory {
-  const FeatureTypeFactoryClass *c_class;
+struct GT_FeatureTypeFactory {
+  const GT_FeatureTypeFactoryClass *c_class;
   GFTCollection *used_types;
   unsigned int reference_count;
 };
 
-FeatureTypeFactory* feature_type_factory_create(const FeatureTypeFactoryClass*);
-void*               feature_type_factory_cast(const FeatureTypeFactoryClass*,
-                                              FeatureTypeFactory*);
+GT_FeatureTypeFactory* feature_type_factory_create(const GT_FeatureTypeFactoryClass*);
+void*               feature_type_factory_cast(const GT_FeatureTypeFactoryClass*,
+                                              GT_FeatureTypeFactory*);
 
 #endif

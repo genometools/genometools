@@ -25,8 +25,8 @@
 #include "extended/feature_type_factory_builtin.h"
 #include "extended/feature_type_factory_rep.h"
 
-struct FeatureTypeFactoryBuiltin {
-  const FeatureTypeFactory parent_instance;
+struct GT_FeatureTypeFactoryBuiltin {
+  const GT_FeatureTypeFactory parent_instance;
 };
 
 #define feature_type_factory_builtin_cast(FTF)\
@@ -72,10 +72,10 @@ static const char* find_type(const char *gft_string)
 }
 
 static GT_GenomeFeatureType*
-feature_type_factory_builtin_create_gft(FeatureTypeFactory *ftf,
+feature_type_factory_builtin_create_gft(GT_FeatureTypeFactory *ftf,
                                         const char *type)
 {
-  FeatureTypeFactoryBuiltin *ftfb;
+  GT_FeatureTypeFactoryBuiltin *ftfb;
   GT_GenomeFeatureType *gft = NULL;
   assert(ftf && type);
   ftfb = feature_type_factory_builtin_cast(ftf);
@@ -88,19 +88,19 @@ feature_type_factory_builtin_create_gft(FeatureTypeFactory *ftf,
   return gft;
 }
 
-const FeatureTypeFactoryClass* feature_type_factory_builtin_class(void)
+const GT_FeatureTypeFactoryClass* feature_type_factory_builtin_class(void)
 {
-  static const FeatureTypeFactoryClass feature_type_factory_class =
-    { sizeof (FeatureTypeFactoryBuiltin),
+  static const GT_FeatureTypeFactoryClass feature_type_factory_class =
+    { sizeof (GT_FeatureTypeFactoryBuiltin),
       feature_type_factory_builtin_create_gft,
       NULL };
   return &feature_type_factory_class;
 }
 
-FeatureTypeFactory* feature_type_factory_builtin_new(void)
+GT_FeatureTypeFactory* feature_type_factory_builtin_new(void)
 {
-  FeatureTypeFactoryBuiltin *ftfb;
-  FeatureTypeFactory *ftf;
+  GT_FeatureTypeFactoryBuiltin *ftfb;
+  GT_FeatureTypeFactory *ftf;
   ftf = feature_type_factory_create(feature_type_factory_builtin_class());
   ftfb = feature_type_factory_builtin_cast(ftf);
   return ftf;

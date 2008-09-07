@@ -122,7 +122,7 @@ GT_GenomeNode* element_get_node_ref(const Element *elem)
 
 int element_unit_test(GT_Error *err)
 {
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeFeatureType *type;
   GT_Range r1, r2, r_temp;
   GT_GenomeNode *gn, *gn2;

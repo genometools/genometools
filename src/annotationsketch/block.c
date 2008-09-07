@@ -215,7 +215,7 @@ int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
 
 int gt_block_unit_test(GT_Error *err)
 {
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeFeatureType *gft;
   GT_Range r1, r2, r_temp, b_range;
   int had_err = 0;

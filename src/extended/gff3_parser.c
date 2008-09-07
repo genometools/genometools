@@ -50,7 +50,7 @@ struct GFF3Parser {
        fasta_parsing; /* parser is in FASTA parsing mode */
   long offset;
   Mapping *offset_mapping;
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
   unsigned int last_terminator; /* line number of the last terminator */
 };
 
@@ -104,7 +104,7 @@ static void simple_gt_sequence_regiondelete(SimpleGT_SequenceRegion *ssr)
 }
 
 GFF3Parser* gff3parser_new(bool checkids,
-                           FeatureTypeFactory *feature_type_factory)
+                           GT_FeatureTypeFactory *feature_type_factory)
 {
   GFF3Parser *parser;
   assert(feature_type_factory);

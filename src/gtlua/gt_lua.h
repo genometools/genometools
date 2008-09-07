@@ -22,8 +22,8 @@
 #include "lua.h"
 
 void                lua_put_feature_type_factory_in_registry(lua_State*,
-                                                           FeatureTypeFactory*);
-FeatureTypeFactory* lua_get_feature_type_factory_from_registry(lua_State*);
+                                                           GT_FeatureTypeFactory*);
+GT_FeatureTypeFactory* lua_get_feature_type_factory_from_registry(lua_State*);
 int                 luaopen_gt(lua_State*); /* open all GenomeTools libraries in
                                                Lua state */
 

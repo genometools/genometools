@@ -56,7 +56,7 @@ struct GTR {
   Toolbox *tools;
   Hashmap *unit_tests;
   lua_State *L;
-  FeatureTypeFactory *feature_type_factory; /* for gtlua */
+  GT_FeatureTypeFactory *feature_type_factory; /* for gtlua */
 #ifndef WITHOUT_CAIRO
   GT_Style *style;
 #endif

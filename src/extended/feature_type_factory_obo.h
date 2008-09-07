@@ -20,11 +20,11 @@
 
 #include "extended/feature_type_factory.h"
 
-/* Implements the FeatureTypeFactory interface with types from an OBO file. */
-typedef struct FeatureTypeFactoryOBO FeatureTypeFactoryOBO;
+/* Implements the GT_FeatureTypeFactory interface with types from an OBO file. */
+typedef struct GT_FeatureTypeFactoryOBO GT_FeatureTypeFactoryOBO;
 
-const FeatureTypeFactoryClass* feature_type_factory_obo_class(void);
-FeatureTypeFactory*            feature_type_factory_obo_new(const char
+const GT_FeatureTypeFactoryClass* feature_type_factory_obo_class(void);
+GT_FeatureTypeFactory*            feature_type_factory_obo_new(const char
                                                             *obo_file_path,
                                                             GT_Error*);
 

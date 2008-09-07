@@ -22,11 +22,11 @@
 #include "extended/genome_feature_type.h"
 
 struct GT_GenomeFeatureType {
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
   char *type;
 };
 
-GT_GenomeFeatureType* gt_genome_feature_type_construct(FeatureTypeFactory
+GT_GenomeFeatureType* gt_genome_feature_type_construct(GT_FeatureTypeFactory
                                                  *feature_type_factory,
                                                  const char *type)
 {
@@ -65,7 +65,7 @@ const char* gt_genome_feature_type_get_cstr(const GT_GenomeFeatureType *gft)
   return gft->type;
 }
 
-FeatureTypeFactory* gt_genome_feature_type_get_ftf(const GT_GenomeFeatureType *gft)
+GT_FeatureTypeFactory* gt_genome_feature_type_get_ftf(const GT_GenomeFeatureType *gft)
 {
   assert(gft);
   return gft->feature_type_factory;

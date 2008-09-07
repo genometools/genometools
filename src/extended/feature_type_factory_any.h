@@ -20,10 +20,10 @@
 
 #include "extended/feature_type_factory.h"
 
-/* Implements the FeatureTypeFactory interface with any types. */
-typedef struct FeatureTypeFactoryAny FeatureTypeFactoryAny;
+/* Implements the GT_FeatureTypeFactory interface with any types. */
+typedef struct GT_FeatureTypeFactoryAny GT_FeatureTypeFactoryAny;
 
-const FeatureTypeFactoryClass* feature_type_factory_any_class(void);
-FeatureTypeFactory*            feature_type_factory_any_new();
+const GT_FeatureTypeFactoryClass* feature_type_factory_any_class(void);
+GT_FeatureTypeFactory*            feature_type_factory_any_new();
 
 #endif

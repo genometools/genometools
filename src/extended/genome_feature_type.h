@@ -22,8 +22,8 @@
 
 /* The GT_GenomeFeatureType represents the feature type mainly used in
    GT_GenomeFeatures and corresponds to the type column in GFF3 files.
-   To create new GT_GenomeFeatureTypes a FeatureTypeFactory or an already existing
-   GT_GenomeFeatureType (which internally uses the FeatureTypeFactory it was
+   To create new GT_GenomeFeatureTypes a GT_FeatureTypeFactory or an already existing
+   GT_GenomeFeatureType (which internally uses the GT_FeatureTypeFactory it was
    created from) should be used!
 */
 

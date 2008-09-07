@@ -18,31 +18,31 @@
 #ifndef FEATURE_TYPE_FACTORY_H
 #define FEATURE_TYPE_FACTORY_H
 
-/* The FeatureTypeFactory interface. Implementations of the FeatureTypeFactory
+/* The GT_FeatureTypeFactory interface. Implementations of the GT_FeatureTypeFactory
    interface are used to create GT_GenomeFeatureTypes.
-   Since a FeatureTypeFactory owns all GT_GenomeFeatureTypes it creates, you have
+   Since a GT_FeatureTypeFactory owns all GT_GenomeFeatureTypes it creates, you have
    to make sure to keep it around until all references to the created
    GT_GenomeFeatureTypes have been removed.
 */
 
-typedef struct FeatureTypeFactoryClass FeatureTypeFactoryClass;
-typedef struct FeatureTypeFactory FeatureTypeFactory;
+typedef struct GT_FeatureTypeFactoryClass GT_FeatureTypeFactoryClass;
+typedef struct GT_FeatureTypeFactory GT_FeatureTypeFactory;
 
 #include "core/strarray.h"
 #include "extended/genome_feature_type.h"
 
 /* Return a new reference to <feature_type_factory>. */
-FeatureTypeFactory* feature_type_factory_ref(FeatureTypeFactory
+GT_FeatureTypeFactory* feature_type_factory_ref(GT_FeatureTypeFactory
                                              *feature_type_factory);
 /* Uses the factory to create a new genome feature type object of the given
    <type>. Returns NULL, if <type> is not a valid type. */
-GT_GenomeFeatureType*  feature_type_factory_create_gft(FeatureTypeFactory*,
+GT_GenomeFeatureType*  feature_type_factory_create_gft(GT_FeatureTypeFactory*,
                                                     const char *type);
 /* Returns a GT_StrArray which contains all type names in alphabetical order
    which have been created by this factory.
    The caller is responsible to free it! */
 GT_StrArray*           feature_type_factory_get_used_types(const
-                                                        FeatureTypeFactory*);
-void                feature_type_factory_delete(FeatureTypeFactory*);
+                                                        GT_FeatureTypeFactory*);
+void                feature_type_factory_delete(GT_FeatureTypeFactory*);
 
 #endif

@@ -100,7 +100,7 @@ GT_GenomeNode* gt_genome_node_iterator_next(GT_GenomeNodeIterator *gni)
 
 int gt_genome_node_iterator_example(UNUSED GT_Error *err)
 {
-  FeatureTypeFactory *feature_type_factory;
+  GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeNodeIterator *gni;
   GT_GenomeNode *gn, *node;
   feature_type_factory = feature_type_factory_builtin_new();

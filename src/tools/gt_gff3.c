@@ -163,7 +163,7 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                           void *tool_arguments, GT_Error *err)
 {
-  FeatureTypeFactory *ftf = NULL;
+  GT_FeatureTypeFactory *ftf = NULL;
   GenomeStream *gff3_in_stream,
                *sort_stream = NULL,
                *mergefeat_stream = NULL,

@@ -21,9 +21,9 @@
 #include <stdbool.h>
 #include "extended/feature_type_factory.h"
 
-GT_GenomeFeatureType* gt_genome_feature_type_construct(FeatureTypeFactory*,
+GT_GenomeFeatureType* gt_genome_feature_type_construct(GT_FeatureTypeFactory*,
                                                  const char *type);
 void               gt_genome_feature_type_delete(GT_GenomeFeatureType*);
-FeatureTypeFactory* gt_genome_feature_type_get_ftf(const GT_GenomeFeatureType*);
+GT_FeatureTypeFactory* gt_genome_feature_type_get_ftf(const GT_GenomeFeatureType*);
 
 #endif

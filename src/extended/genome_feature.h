@@ -37,7 +37,7 @@ GT_GenomeNode*            gt_genome_feature_new(Str *seqid, GT_GenomeFeatureType
                                           GT_Strand);
 GT_GenomeNode*            gt_genome_feature_new_pseudo(GT_GenomeFeature*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
-GT_GenomeNode*            gt_genome_feature_new_standard_gene(FeatureTypeFactory*);
+GT_GenomeNode*            gt_genome_feature_new_standard_gene(GT_FeatureTypeFactory*);
 const char*            gt_genome_feature_get_source(GT_GenomeFeature*);
 const char*            gt_genome_feature_get_attribute(GT_GenomeNode *gn,
                                                     const char *attr_name);

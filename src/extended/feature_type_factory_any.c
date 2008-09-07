@@ -22,18 +22,18 @@
 #include "extended/feature_type_factory_any.h"
 #include "extended/feature_type_factory_rep.h"
 
-struct FeatureTypeFactoryAny {
-  const FeatureTypeFactory parent_instance;
+struct GT_FeatureTypeFactoryAny {
+  const GT_FeatureTypeFactory parent_instance;
 };
 
 #define feature_type_factory_any_cast(FTF)\
         feature_type_factory_cast(feature_type_factory_any_class(), FTF)
 
 static GT_GenomeFeatureType*
-feature_type_factory_any_create_gft(FeatureTypeFactory *ftf,
+feature_type_factory_any_create_gft(GT_FeatureTypeFactory *ftf,
                                         const char *type)
 {
-  FeatureTypeFactoryAny *ftfa;
+  GT_FeatureTypeFactoryAny *ftfa;
   GT_GenomeFeatureType *gft = NULL;
   assert(ftf && type);
   ftfa = feature_type_factory_any_cast(ftf);
@@ -44,19 +44,19 @@ feature_type_factory_any_create_gft(FeatureTypeFactory *ftf,
   return gft;
 }
 
-const FeatureTypeFactoryClass* feature_type_factory_any_class(void)
+const GT_FeatureTypeFactoryClass* feature_type_factory_any_class(void)
 {
-  static const FeatureTypeFactoryClass feature_type_factory_class =
-    { sizeof (FeatureTypeFactoryAny),
+  static const GT_FeatureTypeFactoryClass feature_type_factory_class =
+    { sizeof (GT_FeatureTypeFactoryAny),
       feature_type_factory_any_create_gft,
       NULL };
   return &feature_type_factory_class;
 }
 
-FeatureTypeFactory* feature_type_factory_any_new(void)
+GT_FeatureTypeFactory* feature_type_factory_any_new(void)
 {
-  FeatureTypeFactoryAny *ftfa;
-  FeatureTypeFactory *ftf;
+  GT_FeatureTypeFactoryAny *ftfa;
+  GT_FeatureTypeFactory *ftf;
   ftf = feature_type_factory_create(feature_type_factory_any_class());
   ftfa = feature_type_factory_any_cast(ftf);
   return ftf;

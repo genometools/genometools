@@ -20,10 +20,10 @@
 
 #include "extended/feature_type_factory.h"
 
-/* Implements the FeatureTypeFactory interface with built-in types. */
-typedef struct FeatureTypeFactoryBuiltin FeatureTypeFactoryBuiltin;
+/* Implements the GT_FeatureTypeFactory interface with built-in types. */
+typedef struct GT_FeatureTypeFactoryBuiltin GT_FeatureTypeFactoryBuiltin;
 
-const FeatureTypeFactoryClass* feature_type_factory_builtin_class(void);
-FeatureTypeFactory*            feature_type_factory_builtin_new();
+const GT_FeatureTypeFactoryClass* feature_type_factory_builtin_class(void);
+GT_FeatureTypeFactory*            feature_type_factory_builtin_new();
 
 #endif
