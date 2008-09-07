@@ -229,7 +229,7 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
   evaluator->slots = hashmap_new(HASH_STRING, ma_free_func,
-                                 (FreeFunc) slot_delete);
+                                 (GT_FreeFunc) slot_delete);
   evaluator->gene_evaluator = evaluator_new();
   evaluator->mRNA_evaluator = evaluator_new();
   evaluator->LTR_evaluator = evaluator_new();
@@ -751,7 +751,7 @@ static void determine_true_exon(GT_GenomeNode *gn, GT_Strand predicted_strand,
                               predicted_strand == GT_STRAND_FORWARD
                               ? gt_array_size(exons_forward)
                               : gt_array_size(exons_reverse), sizeof (GT_Range),
-                              (Compare) gt_range_compare_ptr))) {
+                              (GT_Compare) gt_range_compare_ptr))) {
     if (predicted_strand == GT_STRAND_FORWARD) {
       num = actual_range - (GT_Range*) gt_array_get_space(exons_forward);
       ctr_ptr = gt_array_get(true_exons_forward, num);
@@ -893,7 +893,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
                          ? gt_array_size(info->slot->genes_forward)
                          : gt_array_size(info->slot->genes_reverse),
                          sizeof (GT_GenomeNode*),
-                         (CompareWithData) gt_genome_node_compare_with_data,
+                         (GT_CompareWithData) gt_genome_node_compare_with_data,
                          NULL,
                          predicted_strand == GT_STRAND_FORWARD
                          ? info->slot->overlapped_genes_forward
@@ -962,7 +962,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
                          ? gt_array_size(info->slot->mRNAs_forward)
                          : gt_array_size(info->slot->mRNAs_reverse),
                          sizeof (GT_GenomeNode*),
-                         (CompareWithData) gt_genome_node_compare_with_data,
+                         (GT_CompareWithData) gt_genome_node_compare_with_data,
                          NULL,
                          predicted_strand == GT_STRAND_FORWARD
                          ? info->slot->overlapped_mRNAs_forward
@@ -1024,7 +1024,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
     bsearch_all_mark(real_genome_nodes, &gn,
                      gt_array_get_space(info->slot->LTRs),
                      gt_array_size(info->slot->LTRs), sizeof (GT_GenomeNode*),
-                     (CompareWithData) gt_genome_node_compare_delta,
+                     (GT_CompareWithData) gt_genome_node_compare_delta,
                      &info->LTRdelta, info->slot->overlapped_LTRs);
 
     if (gt_array_size(real_genome_nodes)) {

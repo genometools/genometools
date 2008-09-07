@@ -18,7 +18,7 @@
 #ifndef GTT_H
 #define GTT_H
 
-#include "core/fptr.h"
+#include "core/fptr_api.h"
 #include "core/hashmap.h"
 #include "extended/toolbox.h"
 

@@ -29,7 +29,7 @@ struct map_entry
 
 struct hm_freefuncs
 {
-  FreeFunc keyfree, valuefree;
+  GT_FreeFunc keyfree, valuefree;
 };
 
 static void
@@ -44,7 +44,7 @@ hm_elem_free(void *elem, void *table_data)
 }
 
 extern Hashmap *
-hashmap_new(HashType keyhashtype, FreeFunc keyfree, FreeFunc valuefree)
+hashmap_new(HashType keyhashtype, GT_FreeFunc keyfree, GT_FreeFunc valuefree)
 {
   struct hm_freefuncs *ff = ma_malloc(sizeof (*ff));
   ff->keyfree = keyfree;
@@ -101,7 +101,7 @@ struct hashiteration_state
 {
   Mapentryvisitfunc visit;
   void *data;
-  Compare keycmp;
+  GT_Compare keycmp;
 };
 
 static int
@@ -110,7 +110,7 @@ hashmap_cmp(const void *elemA, const void *elemB, void *data)
   const struct map_entry *entryA = elemA,
     *entryB = elemB;
   struct hashiteration_state *dip = data;
-  return ((CompareWithData)dip->keycmp)(entryA->key, entryB->key,
+  return ((GT_CompareWithData)dip->keycmp)(entryA->key, entryB->key,
                                         dip->data);
 }
 
@@ -126,11 +126,11 @@ hashmap_visit(void *elem, void *data, GT_Error *err)
 /* iterate over the hashmap in key order given by compare function <cmp> */
 extern int
 hashmap_foreach_ordered(Hashmap *hm, Mapentryvisitfunc visit, void *data,
-                        Compare cmp, GT_Error *err)
+                        GT_Compare cmp, GT_Error *err)
 {
   struct hashiteration_state state = { visit, data, cmp};
   return hashtable_foreach_ordered(hm, hashmap_visit, &state,
-                                   (Compare)hashmap_cmp, err);
+                                   (GT_Compare)hashmap_cmp, err);
 }
 
 extern int

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,17 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FPTR_H
-#define FPTR_H
+#ifndef FPTR_API_H
+#define FPTR_API_H
 
-/* the generic function pointers */
-/* @return less than 0 if *a < *b,
- * 0 if *a == *b, and
- * greater 0 if *a > * b
- * DO NOT COUNT ON THESE FUNCTIONS TO RETURN -1, 0, OR 1 !
+/* The generic function pointers. */
+
+/* Return less than 0 if *a < *b,
+   0 if *a == *b, and
+   greater 0 if *a > * b.
+   Do not count on these functions to return -1, 0, or 1!
  */
-typedef int  (*Compare)(const void *a, const void *b);
-typedef int  (*CompareWithData)(const void*, const void*, void *data);
-typedef void (*FreeFunc)(void*);
+typedef int  (*GT_Compare)(const void *a, const void *b);
+typedef int  (*GT_CompareWithData)(const void*, const void*, void *data);
+typedef void (*GT_FreeFunc)(void*);
 
 #endif

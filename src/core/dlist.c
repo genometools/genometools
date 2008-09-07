@@ -28,7 +28,7 @@
 #define MAX_SIZE      1024
 
 struct Dlist {
-  Compare cmp_func;
+  GT_Compare cmp_func;
   Dlistelem *first,
             *last;
   unsigned long size;
@@ -40,7 +40,7 @@ struct Dlistelem {
   void *data;
 };
 
-Dlist* dlist_new(Compare cmp_func)
+Dlist* dlist_new(GT_Compare cmp_func)
 {
   Dlist *dlist = ma_calloc(1, sizeof (Dlist));
   dlist->cmp_func = cmp_func;

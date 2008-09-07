@@ -410,7 +410,7 @@ ht_save_entry_to_array(void *elem, void *data, UNUSED GT_Error *err)
 
 extern int
 hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
-                          Compare cmp, GT_Error *err)
+                          GT_Compare cmp, GT_Error *err)
 {
   GT_Array *hash_entries;
   void *elem;
@@ -428,7 +428,7 @@ hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
   if (!had_err) {
     size_t hash_size;
     gt_qsort_r(gt_array_get_space(hash_entries), gt_array_size(hash_entries),
-               gt_array_elem_size(hash_entries), data, (CompareWithData)cmp);
+               gt_array_elem_size(hash_entries), data, (GT_CompareWithData)cmp);
     hash_size = gt_array_size(hash_entries);
     assert(hash_size == hashtable_fill(ht));
     for (i = 0; !had_err && i < hash_size; i++) {
@@ -725,7 +725,7 @@ cstr_cstr_elem_dup(struct ht_elem_2cstr *elem,
 static int
 hashtable_test(HashElemInfo table_info)
 {
-  FreeFunc orig_free_elem = table_info.free_op.free_elem;
+  GT_FreeFunc orig_free_elem = table_info.free_op.free_elem;
   char *s1 = "foo", *s2 = "bar";
   Hashtable *ht;
   int had_err = 0;

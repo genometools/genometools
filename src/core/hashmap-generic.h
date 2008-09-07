@@ -227,7 +227,7 @@
       = { data, iter, cmp };                                  \
     return hashtable_foreach_ordered(                         \
       ht, keytag##_##valuetag##_hashmap_iter, &dip,           \
-      (Compare)keytag##_##valuetag##_hashmap_cmp, err);       \
+      (GT_Compare)keytag##_##valuetag##_hashmap_cmp, err);       \
   }                                                           \
                                                               \
   storagedecl inlineifstatic int                              \

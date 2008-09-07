@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/fptr.h"
+#include "core/fptr_api.h"
 #include "core/unused.h"
 #include "core/xansi.h"
 #include "exercise/sspliced_alignment.h"
@@ -97,7 +97,7 @@ static int gt_consensus_sa_runner(UNUSED int argc, const char **argv,
     /* sort spliced alignments */
     qsort(gt_array_get_space(spliced_alignments), gt_array_size(spliced_alignments),
           gt_array_elem_size(spliced_alignments),
-          (Compare) sspliced_alignment_compare_ptr);
+          (GT_Compare) sspliced_alignment_compare_ptr);
 
     /* compute the consensus spliced alignments */
     consensus_sa(gt_array_get_space(spliced_alignments),

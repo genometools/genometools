@@ -21,7 +21,7 @@
 #include "core/unused.h"
 
 static void* bsearch_generic(GT_Array *members, const void *key, const void *base,
-                             size_t nmemb, size_t size, CompareWithData compar,
+                             size_t nmemb, size_t size, GT_CompareWithData compar,
                              void *data, Bittab *b)
 {
   char *baseptr = (char *)base, *tmp_ptr,
@@ -71,20 +71,20 @@ static void* bsearch_generic(GT_Array *members, const void *key, const void *bas
 }
 
 void* bsearch_data(const void *key, const void *base, size_t nmemb, size_t size,
-                   CompareWithData compar, void *data)
+                   GT_CompareWithData compar, void *data)
 {
   return bsearch_generic(NULL, key, base, nmemb, size, compar, data, NULL);
 }
 
 void bsearch_all(GT_Array *members, const void *key, const void *base,
-                 size_t nmemb, size_t size, CompareWithData compar, void *data)
+                 size_t nmemb, size_t size, GT_CompareWithData compar, void *data)
 {
   assert(members);
   bsearch_generic(members, key, base, nmemb, size, compar, data, NULL);
 }
 
 void bsearch_all_mark(GT_Array *members, const void *key, const void *base,
-                      size_t nmemb, size_t size, CompareWithData compar,
+                      size_t nmemb, size_t size, GT_CompareWithData compar,
                       void *data, Bittab *b)
 {
   assert(members);

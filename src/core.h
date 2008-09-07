@@ -19,7 +19,6 @@
 #define CORE_H
 
 /* The core GenomeTools library  header */
-#include "core/array_api.h"      /* array class */
 #include "core/array2dim.h"      /* 2-dimensional array class */
 #include "core/bioseq.h"         /* biosequence class */
 #include "core/bittab.h"         /* bittab class */

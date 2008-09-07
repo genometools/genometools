@@ -89,6 +89,6 @@ LineBreaker* line_breaker_bases_new()
   LineBreaker *lb;
   lb = line_breaker_create(line_breaker_bases_class());
   lbb = line_breaker_bases_cast(lb);
-  lbb->itrees = hashmap_new(HASH_DIRECT, NULL, (FreeFunc) interval_tree_delete);
+  lbb->itrees = hashmap_new(HASH_DIRECT, NULL, (GT_FreeFunc) interval_tree_delete);
   return lb;
 }

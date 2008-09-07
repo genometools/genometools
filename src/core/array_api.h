@@ -19,7 +19,7 @@
 #define ARRAY_API_H
 
 #include <stdlib.h>
-#include "core/fptr.h"
+#include "core/fptr_api.h"
 
 typedef struct GT_Array GT_Array;
 
@@ -40,8 +40,8 @@ void          gt_array_set_size(GT_Array*, unsigned long);
 void          gt_array_reset(GT_Array*);
 size_t        gt_array_elem_size(const GT_Array*);
 unsigned long gt_array_size(const GT_Array*);
-void          gt_array_sort(GT_Array*, Compare compar);
-/* Compare the content of <array_a> with the content of <array_b>.
+void          gt_array_sort(GT_Array*, GT_Compare compar);
+/* GT_Compare the content of <array_a> with the content of <array_b>.
    <array_a> and <array_b> must have the same gt_array_size() and
    gt_array_elem_size(). */
 int           gt_array_cmp(const GT_Array *array_a, const GT_Array *array_b);

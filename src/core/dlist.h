@@ -19,14 +19,14 @@
 #define DLIST_H
 
 #include "core/error.h"
-#include "core/fptr.h"
+#include "core/fptr_api.h"
 
 /* A double-linked list which is sorted according to a qsort(3)-like compare
    function (if one was supplied to the constructor). */
 typedef struct Dlist Dlist;
 typedef struct Dlistelem Dlistelem;
 
-Dlist*        dlist_new(Compare);
+Dlist*        dlist_new(GT_Compare);
 Dlistelem*    dlist_first(const Dlist*);
 Dlistelem*    dlist_last(const Dlist*);
 Dlistelem*    dlist_find(const Dlist*, void*); /* O(n) */

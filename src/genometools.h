@@ -24,6 +24,10 @@
 #include "extended.h" /* extended part of the GenomeTools library  */
 #include "matching.h" /* include the GenomeTools matching library */
 
+/* the core module */
+#include "core/array_api.h"
+#include "core/fptr_api.h"
+
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */
 #include "annotationsketch/canvas_api.h"

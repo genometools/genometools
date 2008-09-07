@@ -37,11 +37,11 @@
 
 #include <stdlib.h>
 
-#include "core/fptr.h"
+#include "core/fptr_api.h"
 #include "core/minmax.h"
 
 static inline void *
-med3(void *a, void *b, void *c, CompareWithData cmp, void *data);
+med3(void *a, void *b, void *c, GT_CompareWithData cmp, void *data);
 static inline void       swapfunc(char *, char *, int, int);
 
 /*
@@ -83,7 +83,7 @@ swapfunc(char *a, char *b, int n, int swaptype)
 #define vecswap(a, b, n)       if ((n) > 0) swapfunc(a, b, n, swaptype)
 
 static inline void *
-med3(void *a, void *b, void *c, CompareWithData cmp, void *data)
+med3(void *a, void *b, void *c, GT_CompareWithData cmp, void *data)
 {
   return cmp(a, b, data) < 0 ?
     (cmp(b, c, data) < 0 ? b : (cmp(a, c, data) < 0 ? c : a ))
@@ -91,7 +91,7 @@ med3(void *a, void *b, void *c, CompareWithData cmp, void *data)
 }
 
 void
-gt_qsort_r(void *a, size_t n, size_t es, void *data, CompareWithData cmp)
+gt_qsort_r(void *a, size_t n, size_t es, void *data, GT_CompareWithData cmp)
 {
   char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
   int d, r, swaptype, swap_cnt;

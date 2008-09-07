@@ -321,9 +321,9 @@ GenomeVisitor* gff3_visitor_new(GenFile *outfp)
   gff3_visitor->fasta_directive_shown = false;
   gff3_visitor->id_counter = string_distri_new();
   gff3_visitor->gt_genome_feature_to_id_array = hashmap_new(
-    HASH_DIRECT, NULL, (FreeFunc) gt_array_delete);
+    HASH_DIRECT, NULL, (GT_FreeFunc) gt_array_delete);
   gff3_visitor->gt_genome_feature_to_unique_id_str = hashmap_new(
-    HASH_DIRECT, NULL, (FreeFunc) gt_str_delete);
+    HASH_DIRECT, NULL, (GT_FreeFunc) gt_str_delete);
   gff3_visitor->fasta_width = 0;
   gff3_visitor->outfp = outfp;
   return gv;

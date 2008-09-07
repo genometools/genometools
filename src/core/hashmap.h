@@ -18,7 +18,7 @@
 #define HASHMAP_H
 
 #include "core/error.h"
-#include "core/fptr.h"
+#include "core/fptr_api.h"
 
 #ifndef Hashmap
 typedef struct Hashmap Hashmap;
@@ -31,13 +31,13 @@ typedef enum {
 
 typedef int (*Mapentryvisitfunc)(void *key, void *value, void *data, GT_Error*);
 
-Hashmap* hashmap_new(HashType, FreeFunc keyfree, FreeFunc valuefree);
+Hashmap*   hashmap_new(HashType, GT_FreeFunc keyfree, GT_FreeFunc valuefree);
 void*      hashmap_get(Hashmap*, const void*);
 void       hashmap_add(Hashmap*, void*, void*);
 void       hashmap_remove(Hashmap*, const void*);
 /* iterate over the hashmap in key order given by compare function <cmp> */
 int        hashmap_foreach_ordered(Hashmap*, Mapentryvisitfunc, void *data,
-                                     Compare cmp, GT_Error*);
+                                     GT_Compare cmp, GT_Error*);
 int        hashmap_foreach(Hashmap*, Mapentryvisitfunc, void*, GT_Error*);
 /* iterate over the hashmap elements in
  * - alphabetical order, requires that HashType was specified as HASH_STRING

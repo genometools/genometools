@@ -30,7 +30,7 @@ GFTCollection* gft_collection_new(void)
 {
   GFTCollection *gftc = ma_malloc(sizeof (GFTCollection));
   gftc->gt_genome_feature_types = hashmap_new(
-    HASH_STRING, ma_free_func, (FreeFunc)gt_genome_feature_type_delete);
+    HASH_STRING, ma_free_func, (GT_FreeFunc)gt_genome_feature_type_delete);
   return gftc;
 }
 

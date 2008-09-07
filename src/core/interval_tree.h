@@ -20,7 +20,7 @@
 
 #include "core/array.h"
 #include "core/error.h"
-#include "core/fptr.h"
+#include "core/fptr_api.h"
 
 /* Interval tree data structure, implemented according to
    Cormen et al., Introduction to Algorithms, 2nd edition, MIT Press,
@@ -38,7 +38,7 @@ IntervalTreeNode* interval_tree_node_new(void *data,
                                          unsigned long high);
 void*             interval_tree_node_get_data(IntervalTreeNode* n);
 
-IntervalTree*     interval_tree_new(FreeFunc);
+IntervalTree*     interval_tree_new(GT_FreeFunc);
 unsigned long     interval_tree_size(IntervalTree*);
 IntervalTreeNode* interval_tree_find_first_overlapping(IntervalTree*,
                                                        unsigned long start,

@@ -469,7 +469,7 @@ static void gt_diagram_build(GT_Diagram *diagram, GT_Array *features)
   }
   /* collect blocks from nodeinfo structures and create the tracks */
   had_err = hashmap_foreach_ordered(diagram->nodeinfo, collect_blocks,
-                                      diagram, (Compare) gt_genome_node_cmp, NULL);
+                                      diagram, (GT_Compare) gt_genome_node_cmp, NULL);
   assert(!had_err); /* collect_blocks() is sane */
 
   /* clear caches */
@@ -493,9 +493,9 @@ static GT_Diagram* gt_diagram_new_generic(GT_Array *features, const GT_Range *ra
   GT_Diagram *diagram;
   diagram = ma_malloc(sizeof (GT_Diagram));
   diagram->tracks = hashmap_new(HASH_STRING, ma_free_func,
-                                (FreeFunc) track_delete);
+                                (GT_FreeFunc) track_delete);
   diagram->blocks = hashmap_new(HASH_DIRECT, NULL,
-                                  (FreeFunc) blocklist_delete);
+                                  (GT_FreeFunc) blocklist_delete);
   diagram->nodeinfo = hashmap_new(HASH_DIRECT, NULL, NULL);
   diagram->nof_tracks = 0;
   diagram->style = style;

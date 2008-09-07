@@ -48,7 +48,7 @@ Toolbox* toolbox_new(void)
 {
   Toolbox *tb;
   tb = ma_malloc(sizeof (Toolbox));
-  tb->tools = hashmap_new(HASH_STRING, NULL, (FreeFunc) toolinfo_delete);
+  tb->tools = hashmap_new(HASH_STRING, NULL, (GT_FreeFunc) toolinfo_delete);
   return tb;
 }
 

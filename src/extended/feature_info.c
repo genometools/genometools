@@ -32,9 +32,9 @@ FeatureInfo* feature_info_new(void)
 {
   FeatureInfo *fi = ma_malloc(sizeof *fi);
   fi->id_to_genome_node = hashmap_new(HASH_STRING, ma_free_func,
-                                      (FreeFunc) gt_genome_node_delete);
+                                      (GT_FreeFunc) gt_genome_node_delete);
   fi->id_to_pseudo_parent = hashmap_new(HASH_STRING, ma_free_func,
-                                        (FreeFunc) gt_genome_node_delete);
+                                        (GT_FreeFunc) gt_genome_node_delete);
   return fi;
 }
 

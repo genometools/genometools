@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include "core/ensure.h"
-#include "core/fptr.h"
+#include "core/fptr_api.h"
 #include "core/minmax.h"
 #include "core/msort.h"
 #include "core/range.h"
@@ -265,14 +265,14 @@ void ranges_sort(GT_Array *ranges)
 {
   assert(ranges);
   qsort(gt_array_get_space(ranges), gt_array_size(ranges), sizeof (GT_Range),
-        (Compare) gt_range_compare_ptr);
+        (GT_Compare) gt_range_compare_ptr);
 }
 
 void ranges_sort_by_length_stable(GT_Array *ranges)
 {
   assert(ranges);
   msort(gt_array_get_space(ranges), gt_array_size(ranges), sizeof (GT_Range),
-        (Compare) gt_range_compare_by_length_ptr);
+        (GT_Compare) gt_range_compare_by_length_ptr);
 }
 
 bool ranges_are_sorted(const GT_Array *ranges)

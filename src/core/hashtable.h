@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 #include "core/error.h"
-#include "core/fptr.h"
+#include "core/fptr_api.h"
 
 typedef struct Hashtable Hashtable;
 
@@ -48,17 +48,17 @@ struct HashElemInfo
   HashFunc keyhash;
   union
   {
-    FreeFunc free_elem;
+    GT_FreeFunc free_elem;
     FreeFuncWData free_elem_with_data;
   } free_op;                           /**< either of these can be
                                         * used for the individual
                                         * destructors or set to NULL */
   size_t elem_size;
-  Compare cmp;
+  GT_Compare cmp;
   void *table_data;             /**< per table data, passed to
                                  * free_elem_with_data */
-  FreeFunc table_data_free;     /**< called on hashtable_delete with
-                                 * table_data as argument if != NULL */
+  GT_FreeFunc table_data_free;     /**< called on hashtable_delete with
+                                     * table_data as argument if != NULL */
 };
 
 typedef struct HashElemInfo HashElemInfo;
@@ -80,7 +80,7 @@ int        hashtable_remove(Hashtable*, const void *elem);
  */
 extern int
 hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
-                          Compare cmp, GT_Error *err);
+                          GT_Compare cmp, GT_Error *err);
 /**
  * @brief iterate over the hashtable in implementation-defined order
  * @return 0 => no error, -1 => error occured

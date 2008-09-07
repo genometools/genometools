@@ -35,7 +35,7 @@ struct GT_Block {
   unsigned long reference_count;
 };
 
-/* Compare function used to insert Elements into dlist, order by type */
+/* GT_Compare function used to insert Elements into dlist, order by type */
 static int elemcmp(const void *a, const void *b)
 {
   Element *elem_a = (Element*) a;
