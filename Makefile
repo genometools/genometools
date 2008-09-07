@@ -641,5 +641,8 @@ clean:
 	rm -rf obj
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 
+gtkviewer:
+	$(CC) -o bin/examples/gtkviewer $(GT_CPPFLAGS) $(GT_LDFLAGS) `pkg-config --cflags --libs gtk+-2.0 glib` -lgenometools src/examples/gtkviewer.c
+
 cleanup: clean
 	rm -rf lib bin
