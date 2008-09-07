@@ -46,31 +46,31 @@ static int mergefeat_in_children(GT_GenomeNode *gn, void *data, UNUSED GT_Error 
   GT_GenomeFeature *previous_feature, *current_feature;
   GT_Range previous_range, current_range;
   gt_error_check(err);
-  current_feature = gt_genome_node_cast(genome_feature_class(), gn);
+  current_feature = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(current_feature);
-  if ((previous_feature = hashmap_get(v->hm, genome_feature_type_get_cstr(
-                                  genome_feature_get_type(current_feature))))) {
+  if ((previous_feature = hashmap_get(v->hm, gt_genome_feature_type_get_cstr(
+                                  gt_genome_feature_get_type(current_feature))))) {
     /* previous feature found -> check if merging is necessary */
-    assert(genome_feature_get_type(previous_feature) ==
-           genome_feature_get_type(current_feature));
+    assert(gt_genome_feature_get_type(previous_feature) ==
+           gt_genome_feature_get_type(current_feature));
     previous_range = gt_genome_node_get_range((GT_GenomeNode*) previous_feature);
     current_range = gt_genome_node_get_range((GT_GenomeNode*) current_feature);
     assert(gt_range_compare(previous_range, current_range) <= 0); /* sorted */
     if (previous_range.end + 1 == current_range.start) {
       /* merge nodes */
-      genome_feature_set_end(previous_feature, current_range.end);
+      gt_genome_feature_set_end(previous_feature, current_range.end);
       /* XXX: compute average score ? */
-      genome_feature_unset_score(previous_feature);
+      gt_genome_feature_unset_score(previous_feature);
       assert(!gt_genome_node_number_of_children((GT_GenomeNode*) current_feature));
       gt_array_add(v->nodes_to_remove, current_feature);
     }
     /* remove previous feature */
-    hashmap_remove(v->hm, (char*) genome_feature_type_get_cstr(
-                     genome_feature_get_type(previous_feature)));
+    hashmap_remove(v->hm, (char*) gt_genome_feature_type_get_cstr(
+                     gt_genome_feature_get_type(previous_feature)));
   }
   /* add current feature */
-  hashmap_add(v->hm, (char*) genome_feature_type_get_cstr(
-                genome_feature_get_type(current_feature)), current_feature);
+  hashmap_add(v->hm, (char*) gt_genome_feature_type_get_cstr(
+                gt_genome_feature_get_type(current_feature)), current_feature);
   return 0;
 }
 
@@ -79,7 +79,7 @@ static int mergefeat_if_necessary(GT_GenomeNode *gn, void *data, GT_Error *err)
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GT_GenomeFeature *gf;
   gt_error_check(err);
-  gf = gt_genome_node_cast(genome_feature_class(), gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(gf);
   v->current_tree = gn;
   hashmap_reset(v->hm);

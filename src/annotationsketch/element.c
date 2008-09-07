@@ -42,9 +42,9 @@ Element* element_new(GT_GenomeNode *gn)
   GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
   assert(gn);
   element = element_new_empty();
-  element_set_type(element, genome_feature_get_type(gf));
+  element_set_type(element, gt_genome_feature_get_type(gf));
   element_set_range(element, gt_genome_node_get_range(gn));
-  element->strand = genome_feature_get_strand(gf);
+  element->strand = gt_genome_feature_get_strand(gf);
   element->mark = gt_genome_node_is_marked(gn);
   element->gn = gt_genome_node_ref(gn);
   return element;
@@ -141,8 +141,8 @@ int element_unit_test(GT_Error *err)
 
   seqid = str_new_cstr("seqid");
   type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn = genome_feature_new(seqid, type, r1, STRAND_BOTH);
-  gn2 = genome_feature_new(seqid, type, r2, STRAND_BOTH);
+  gn = gt_genome_feature_new(seqid, type, r1, STRAND_BOTH);
+  gn2 = gt_genome_feature_new(seqid, type, r2, STRAND_BOTH);
 
   e = element_new(gn);
   e2 = element_new(gn);

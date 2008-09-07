@@ -88,7 +88,7 @@ static bool filter_overlap_range(GT_GenomeFeature *gf, GT_Range overlap_range)
 static bool filter_strand(GT_GenomeFeature *gf, Strand strand)
 {
   assert(gf);
-  if (strand != NUM_OF_STRAND_TYPES && genome_feature_get_strand(gf) != strand)
+  if (strand != NUM_OF_STRAND_TYPES && gt_genome_feature_get_strand(gf) != strand)
     return true;
   return false;
 }
@@ -98,7 +98,7 @@ static bool filter_targetstrand(GT_GenomeFeature *gf, Strand targetstrand)
   const char *target;
   assert(gf);
   if (targetstrand != NUM_OF_STRAND_TYPES &&
-      (target = genome_feature_get_attribute((GT_GenomeNode*) gf,
+      (target = gt_genome_feature_get_attribute((GT_GenomeNode*) gf,
                                              TARGET_STRING))) {
     unsigned long num_of_targets;
     Strand parsed_strand;
@@ -118,7 +118,7 @@ static bool filter_targetstrand(GT_GenomeFeature *gf, Strand targetstrand)
 static bool filter_has_CDS(GT_GenomeFeature *gf, bool has_CDS)
 {
   assert(gf);
-  if (has_CDS && !genome_feature_has_CDS(gf))
+  if (has_CDS && !gt_genome_feature_has_CDS(gf))
     return true;
   return false;
 }
@@ -127,8 +127,8 @@ static bool filter_min_average_ssp(GT_GenomeFeature *gf, double minaveragessp)
 {
   assert(gf);
   if (minaveragessp != UNDEF_DOUBLE &&
-      genome_feature_has_splice_site(gf) &&
-      genome_feature_average_splice_site_prob(gf) < minaveragessp) {
+      gt_genome_feature_has_splice_site(gf) &&
+      gt_genome_feature_average_splice_site_prob(gf) < minaveragessp) {
     return true;
   }
   return false;
@@ -146,7 +146,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf
       !str_cmp(fv->seqid, gt_genome_node_get_seqid((GT_GenomeNode*) gf))) {
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
-    if (gf && genome_feature_has_type(gf, gft_gene)) {
+    if (gf && gt_genome_feature_has_type(gf, gft_gene)) {
       if (fv->max_gene_length != UNDEF_ULONG &&
           gt_range_length(gt_genome_node_get_range((GT_GenomeNode*) gf)) >
           fv->max_gene_length) {
@@ -157,11 +157,11 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf
         filter_node = true;
       }
       else if (fv->min_gene_score != UNDEF_DOUBLE &&
-               genome_feature_get_score(gf) < fv->min_gene_score) {
+               gt_genome_feature_get_score(gf) < fv->min_gene_score) {
         filter_node = true;
       }
       else if (fv->max_gene_score != UNDEF_DOUBLE &&
-               genome_feature_get_score(gf) > fv->max_gene_score) {
+               gt_genome_feature_get_score(gf) > fv->max_gene_score) {
         filter_node = true;
       }
       else if (fv->feature_num != UNDEF_ULONG &&

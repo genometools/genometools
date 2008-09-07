@@ -31,10 +31,10 @@ static int extract_join_feature(GT_GenomeNode *gn, GT_GenomeFeatureType *type,
   int had_err = 0;
 
   gt_error_check(err);
-  gf = gt_genome_node_cast(genome_feature_class(), gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(gf);
 
-  if (genome_feature_get_type(gf) == type) {
+  if (gt_genome_feature_get_type(gf) == type) {
     had_err = region_mapping_get_raw_sequence(region_mapping, &raw_sequence,
                                               gt_genome_node_get_seqid(gn), err);
     if (!had_err) {
@@ -49,7 +49,7 @@ static int extract_join_feature(GT_GenomeNode *gn, GT_GenomeFeatureType *type,
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
       str_append_cstr_nt(sequence, raw_sequence, gt_range_length(range));
-      if (genome_feature_get_strand(gf) == STRAND_REVERSE)
+      if (gt_genome_feature_get_strand(gf) == STRAND_REVERSE)
         *reverse_strand = true;
     }
   }
@@ -67,7 +67,7 @@ int extract_feat_sequence(Str *sequence, GT_GenomeNode *gn,
   int had_err = 0;
 
   gt_error_check(err);
-  gf = gt_genome_node_cast(genome_feature_class(), gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(gf);
 
   if (join) {
@@ -90,7 +90,7 @@ int extract_feat_sequence(Str *sequence, GT_GenomeNode *gn,
       }
     }
   }
-  else if (genome_feature_get_type(gf) == type) {
+  else if (gt_genome_feature_get_type(gf) == type) {
     assert(!had_err);
     /* otherwise we only have to look this feature */
     range = gt_genome_node_get_range(gn);
@@ -108,7 +108,7 @@ int extract_feat_sequence(Str *sequence, GT_GenomeNode *gn,
     if (!had_err) {
       str_append_cstr_nt(sequence, raw_sequence + range.start - 1,
                          gt_range_length(range));
-      if (genome_feature_get_strand(gf) == STRAND_REVERSE) {
+      if (gt_genome_feature_get_strand(gf) == STRAND_REVERSE) {
         had_err = reverse_complement(str_get(sequence), str_length(sequence),
                                      err);
       }

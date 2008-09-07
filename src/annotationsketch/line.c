@@ -112,23 +112,23 @@ int line_unit_test(GT_Error *err)
   seqid3 = str_new_cstr("foo");
 
   type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
-  parent = genome_feature_new(seqid1, type, r_parent, STRAND_FORWARD);
+  parent = gt_genome_feature_new(seqid1, type, r_parent, STRAND_FORWARD);
   type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn1 = genome_feature_new(seqid3, type, r1, STRAND_FORWARD);
-  gn2 = genome_feature_new(seqid3, type, r2, STRAND_FORWARD);
-  gn3 = genome_feature_new(seqid2, type, r3, STRAND_FORWARD);
+  gn1 = gt_genome_feature_new(seqid3, type, r1, STRAND_FORWARD);
+  gn2 = gt_genome_feature_new(seqid3, type, r2, STRAND_FORWARD);
+  gn3 = gt_genome_feature_new(seqid2, type, r3, STRAND_FORWARD);
   type = feature_type_factory_create_gft(feature_type_factory,
                                          gft_TF_binding_site);
-  gn4 = genome_feature_new(seqid3, type, r4, STRAND_FORWARD);
+  gn4 = gt_genome_feature_new(seqid3, type, r4, STRAND_FORWARD);
 
   l1 = line_new();
   l2 = line_new();
 
-  genome_feature_add_attribute((GT_GenomeFeature*) parent, "Name", foo);
-  genome_feature_add_attribute((GT_GenomeFeature*) gn1, "Name", bar);
-  genome_feature_add_attribute((GT_GenomeFeature*) gn2, "Name", bar);
-  genome_feature_add_attribute((GT_GenomeFeature*) gn3, "Name", blub);
-  genome_feature_add_attribute((GT_GenomeFeature*) gn4, "Name", bar);
+  gt_genome_feature_add_attribute((GT_GenomeFeature*) parent, "Name", foo);
+  gt_genome_feature_add_attribute((GT_GenomeFeature*) gn1, "Name", bar);
+  gt_genome_feature_add_attribute((GT_GenomeFeature*) gn2, "Name", bar);
+  gt_genome_feature_add_attribute((GT_GenomeFeature*) gn3, "Name", blub);
+  gt_genome_feature_add_attribute((GT_GenomeFeature*) gn4, "Name", bar);
 
   b1 = gt_block_new();
   b2 = gt_block_new();

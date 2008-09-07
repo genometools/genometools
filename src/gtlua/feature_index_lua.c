@@ -56,7 +56,7 @@ static int feature_index_lua_add_genome_feature(lua_State *L)
   assert(L);
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
-  gf = gt_genome_node_cast(genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 2, "not a genome feature");
   seqid = gt_genome_node_get_seqid(*gn);
   luaL_argcheck(L, seqid, 2, "genome_feature does not have a sequence id");

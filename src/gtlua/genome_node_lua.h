@@ -25,7 +25,7 @@
 
    -- Returns a new genome feature refering to sequence with id <seqid> of
    -- <type> spanning <range> on <strand>.
-   function genome_feature_new(type, range, strand)
+   function gt_genome_feature_new(type, range, strand)
 
    -- Returns a new sequence region for sequence id <seqid> spanning <range>.
    function gt_sequence_regionnew(seqid, range)

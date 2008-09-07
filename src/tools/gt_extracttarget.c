@@ -146,12 +146,12 @@ static int extracttarget_from_node(GT_GenomeNode *gn, GT_StrArray *seqfiles,
   int had_err = 0;
   gt_error_check(err);
   assert(gn && seqfiles);
-  if (gt_genome_node_cast(genome_feature_class(), gn)) {
+  if (gt_genome_node_cast(gt_genome_feature_class(), gn)) {
     const char *target;
     GT_GenomeNode *child;
     gni = gt_genome_node_iterator_new(gn);
     while (!had_err && (child = gt_genome_node_iterator_next(gni))) {
-      if ((target = genome_feature_get_attribute(child, "Target")))
+      if ((target = gt_genome_feature_get_attribute(child, "Target")))
         had_err = extracttarget_from_seqfiles(target, seqfiles, err);
     }
     gt_genome_node_iterator_delete(gni);

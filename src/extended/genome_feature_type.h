@@ -51,9 +51,9 @@
 
 typedef struct GT_GenomeFeatureType GT_GenomeFeatureType;
 
-GT_GenomeFeatureType* genome_feature_type_create_gft(GT_GenomeFeatureType*,
+GT_GenomeFeatureType* gt_genome_feature_type_create_gft(GT_GenomeFeatureType*,
                                                   const char *type);
-bool               genome_feature_type_is(GT_GenomeFeatureType*, const char *type);
-const char*        genome_feature_type_get_cstr(const GT_GenomeFeatureType*);
+bool               gt_genome_feature_type_is(GT_GenomeFeatureType*, const char *type);
+const char*        gt_genome_feature_type_get_cstr(const GT_GenomeFeatureType*);
 
 #endif

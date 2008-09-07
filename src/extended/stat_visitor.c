@@ -58,7 +58,7 @@ static int add_exon_number(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
   GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
   gt_error_check(err);
   assert(stat_visitor && gf);
-  if (genome_feature_has_type(gf, gft_exon))
+  if (gt_genome_feature_has_type(gf, gft_exon))
     stat_visitor->exon_number_for_distri++;
   return 0;
 }
@@ -72,9 +72,9 @@ static int compute_statistics(GT_GenomeNode *gn, void *data, GT_Error *err)
   assert(data);
   stat_visitor = (StatVisitor*) data;
   gf = (GT_GenomeFeature*) gn;
-  if (genome_feature_has_type(gf, gft_gene)) {
+  if (gt_genome_feature_has_type(gf, gft_gene)) {
     stat_visitor->number_of_genes++;
-    if (genome_feature_has_CDS(gf))
+    if (gt_genome_feature_has_CDS(gf))
       stat_visitor->number_of_protein_coding_genes++;
     if (stat_visitor->gene_length_distribution) {
       disc_distri_add(stat_visitor->gene_length_distribution,
@@ -82,29 +82,29 @@ static int compute_statistics(GT_GenomeNode *gn, void *data, GT_Error *err)
     }
     if (stat_visitor->gene_score_distribution) {
       disc_distri_add(stat_visitor->gene_score_distribution,
-                     genome_feature_get_score(gf) * 100.0);
+                     gt_genome_feature_get_score(gf) * 100.0);
     }
   }
-  else if (genome_feature_has_type(gf, gft_mRNA)) {
+  else if (gt_genome_feature_has_type(gf, gft_mRNA)) {
     stat_visitor->number_of_mRNAs++;
   }
-  else if (genome_feature_has_type(gf, gft_exon)) {
+  else if (gt_genome_feature_has_type(gf, gft_exon)) {
     stat_visitor->number_of_exons++;
     if (stat_visitor->exon_length_distribution) {
       disc_distri_add(stat_visitor->exon_length_distribution,
                       gt_range_length(gt_genome_node_get_range((GT_GenomeNode*) gf)));
     }
   }
-  else if (genome_feature_has_type(gf, gft_CDS)) {
+  else if (gt_genome_feature_has_type(gf, gft_CDS)) {
     stat_visitor->number_of_CDSs++;
   }
-  else if (genome_feature_has_type(gf, gft_intron)) {
+  else if (gt_genome_feature_has_type(gf, gft_intron)) {
     if (stat_visitor->intron_length_distribution) {
       disc_distri_add(stat_visitor->intron_length_distribution,
                       gt_range_length(gt_genome_node_get_range((GT_GenomeNode*) gf)));
     }
   }
-  else if (genome_feature_has_type(gf, gft_LTR_retrotransposon)) {
+  else if (gt_genome_feature_has_type(gf, gft_LTR_retrotransposon)) {
     stat_visitor->number_of_LTR_retrotransposons++;
   }
   if (stat_visitor->exon_number_distribution) {

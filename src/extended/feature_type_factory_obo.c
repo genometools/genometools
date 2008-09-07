@@ -26,7 +26,7 @@
 
 struct FeatureTypeFactoryOBO {
   const FeatureTypeFactory parent_instance;
-  CstrTable *genome_feature_types;
+  CstrTable *gt_genome_feature_types;
 };
 
 #define feature_type_factory_obo_cast(FTF)\
@@ -35,7 +35,7 @@ struct FeatureTypeFactoryOBO {
 static void feature_type_factory_obo_free(FeatureTypeFactory *ftf)
 {
   FeatureTypeFactoryOBO *ftfo = feature_type_factory_obo_cast(ftf);
-  cstr_table_delete(ftfo->genome_feature_types);
+  cstr_table_delete(ftfo->gt_genome_feature_types);
 }
 
 static GT_GenomeFeatureType*
@@ -46,8 +46,8 @@ feature_type_factory_obo_create_gft(FeatureTypeFactory *ftf, const char *type)
   assert(ftf && type);
   ftfo = feature_type_factory_obo_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
-    if (cstr_table_get(ftfo->genome_feature_types, type)) {
-      gft = genome_feature_type_construct(ftf, type);
+    if (cstr_table_get(ftfo->gt_genome_feature_types, type)) {
+      gft = gt_genome_feature_type_construct(ftf, type);
       gft_collection_add(ftf->used_types, type, gft);
     }
   }
@@ -63,7 +63,7 @@ const FeatureTypeFactoryClass* feature_type_factory_obo_class(void)
   return &feature_type_factory_class;
 }
 
-static void add_genome_feature_from_tree(FeatureTypeFactoryOBO *ftfo,
+static void add_gt_genome_feature_from_tree(FeatureTypeFactoryOBO *ftfo,
                                          OBOParseTree *obo_parse_tree,
                                          unsigned long stanza_num,
                                          const char *stanza_key)
@@ -73,8 +73,8 @@ static void add_genome_feature_from_tree(FeatureTypeFactoryOBO *ftfo,
   value = obo_parse_tree_get_stanza_value(obo_parse_tree, stanza_num,
                                           stanza_key);
   /* do not add values multiple times (possible for "name" values) */
-  if (!cstr_table_get(ftfo->genome_feature_types, value))
-    cstr_table_add(ftfo->genome_feature_types, value);
+  if (!cstr_table_get(ftfo->gt_genome_feature_types, value))
+    cstr_table_add(ftfo->gt_genome_feature_types, value);
 }
 
 static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
@@ -91,8 +91,8 @@ static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
           obo_parse_tree_get_stanza_value(obo_parse_tree, i, "is_obsolete");
         /* do not add obsolete types */
         if (!is_obsolete || strcmp(is_obsolete, "true")) {
-          add_genome_feature_from_tree(ftfo, obo_parse_tree, i, "id");
-          add_genome_feature_from_tree(ftfo, obo_parse_tree, i, "name");
+          add_gt_genome_feature_from_tree(ftfo, obo_parse_tree, i, "id");
+          add_gt_genome_feature_from_tree(ftfo, obo_parse_tree, i, "name");
         }
       }
     }
@@ -111,7 +111,7 @@ FeatureTypeFactory* feature_type_factory_obo_new(const char *obo_file_path,
   assert(obo_file_path);
   ftf = feature_type_factory_create(feature_type_factory_obo_class());
   ftfo = feature_type_factory_obo_cast(ftf);
-  ftfo->genome_feature_types = cstr_table_new();
+  ftfo->gt_genome_feature_types = cstr_table_new();
   if (create_genome_features(ftfo, obo_file_path, err)) {
     feature_type_factory_delete(ftf);
     return NULL;

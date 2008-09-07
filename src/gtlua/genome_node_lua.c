@@ -26,7 +26,7 @@
 #include "gtlua/range_lua.h"
 #include "gtlua/region_mapping_lua.h"
 
-static int genome_feature_lua_new(lua_State *L)
+static int gt_genome_feature_lua_new(lua_State *L)
 {
   FeatureTypeFactory *feature_type_factory;
   GT_GenomeNode **gf;
@@ -52,7 +52,7 @@ static int genome_feature_lua_new(lua_State *L)
   /* construct object */
   gf = lua_newuserdata(L, sizeof (GT_GenomeNode*));
   seqid_str = str_new_cstr(seqid);
-  *gf = genome_feature_new(seqid_str, type, *range, strand);
+  *gf = gt_genome_feature_new(seqid_str, type, *range, strand);
   str_delete(seqid_str);
   assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
@@ -105,55 +105,55 @@ static int gt_genome_node_lua_get_seqid(lua_State *L)
   return 1;
 }
 
-static int genome_feature_lua_get_strand(lua_State *L)
+static int gt_genome_feature_lua_get_strand(lua_State *L)
 {
   GT_GenomeNode **gn = check_genome_node(L, 1);
   GT_GenomeFeature *gf;
   char strand_char[2];
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  strand_char[0] = STRANDCHARS[genome_feature_get_strand(gf)];
+  strand_char[0] = STRANDCHARS[gt_genome_feature_get_strand(gf)];
   strand_char[1] = '\0';
   lua_pushstring(L, strand_char);
   return 1;
 }
 
-static int genome_feature_lua_get_source(lua_State *L)
+static int gt_genome_feature_lua_get_source(lua_State *L)
 {
   GT_GenomeNode **gn = check_genome_node(L, 1);
   GT_GenomeFeature *gf;
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  lua_pushstring(L, genome_feature_get_source(gf));
+  lua_pushstring(L, gt_genome_feature_get_source(gf));
   return 1;
 }
 
-static int genome_feature_lua_get_score(lua_State *L)
+static int gt_genome_feature_lua_get_score(lua_State *L)
 {
   GT_GenomeNode **gn = check_genome_node(L, 1);
   GT_GenomeFeature *gf;
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  if (genome_feature_score_is_defined(gf))
-    lua_pushnumber(L, genome_feature_get_score(gf));
+  if (gt_genome_feature_score_is_defined(gf))
+    lua_pushnumber(L, gt_genome_feature_get_score(gf));
   else
     lua_pushnil(L);
   return 1;
 }
 
-static int genome_feature_lua_get_attribute(lua_State *L)
+static int gt_genome_feature_lua_get_attribute(lua_State *L)
 {
   GT_GenomeNode **gn = check_genome_node(L, 1);
   const char *attr = NULL, *attrval = NULL;
   attr = luaL_checkstring(L, 2);
   GT_GenomeFeature *gf;
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  attrval = genome_feature_get_attribute(*gn, attr);
+  attrval = gt_genome_feature_get_attribute(*gn, attr);
   if (attrval)
     lua_pushstring(L, attrval);
   else
@@ -161,16 +161,16 @@ static int genome_feature_lua_get_attribute(lua_State *L)
   return 1;
 }
 
-static int genome_feature_lua_get_exons(lua_State *L)
+static int gt_genome_feature_lua_get_exons(lua_State *L)
 {
   GT_GenomeNode **gn = check_genome_node(L, 1);
   GT_Array *exons = gt_array_new(sizeof (GT_GenomeNode*));
   unsigned long i = 0;
   GT_GenomeFeature *gf;
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  genome_feature_get_exons(gf, exons);
+  gt_genome_feature_get_exons(gf, exons);
   lua_newtable(L);
   for (i = 0; i < gt_array_size(exons); i++) {
     lua_pushnumber(L, i+1);
@@ -182,18 +182,18 @@ static int genome_feature_lua_get_exons(lua_State *L)
   return 1;
 }
 
-static int genome_feature_lua_set_source(lua_State *L)
+static int gt_genome_feature_lua_set_source(lua_State *L)
 {
   const char *source;
   Str *source_str;
   GT_GenomeNode **gn = check_genome_node(L, 1);
   GT_GenomeFeature *gf;
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
   source = luaL_checkstring(L, 2);
   source_str = str_new_cstr(source);
-  genome_feature_set_source(*gn, source_str);
+  gt_genome_feature_set_source(*gn, source_str);
   str_delete(source_str);
   return 0;
 }
@@ -243,31 +243,31 @@ static int gt_genome_node_lua_contains_marked(lua_State *L)
   return 1;
 }
 
-static int genome_feature_lua_output_leading(lua_State *L)
+static int gt_genome_feature_lua_output_leading(lua_State *L)
 {
   GT_GenomeNode **gn;
   GT_GenomeFeature *gf;
   gn = check_genome_node(L, 1);
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
   gff3_output_leading(gf, NULL);
   return 0;
 }
 
-static int genome_feature_lua_get_type(lua_State *L)
+static int gt_genome_feature_lua_get_type(lua_State *L)
 {
   GT_GenomeNode **gn;
   GT_GenomeFeature *gf;
   gn = check_genome_node(L, 1);
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  lua_pushstring(L, genome_feature_type_get_cstr(genome_feature_get_type(gf)));
+  lua_pushstring(L, gt_genome_feature_type_get_cstr(gt_genome_feature_get_type(gf)));
   return 1;
 }
 
-static int genome_feature_lua_extract_sequence(lua_State *L)
+static int gt_genome_feature_lua_extract_sequence(lua_State *L)
 {
   FeatureTypeFactory *feature_type_factory;
   GT_GenomeNode **gn;
@@ -280,7 +280,7 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   GT_Error *err;
   gn = check_genome_node(L, 1);
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
   typestr = lua_tostring(L, 2);
   feature_type_factory = lua_get_feature_type_factory_from_registry(L);
@@ -313,7 +313,7 @@ static int gt_genome_node_lua_delete(lua_State *L)
 }
 
 static const struct luaL_Reg gt_genome_node_lib_f [] = {
-  { "genome_feature_new", genome_feature_lua_new },
+  { "gt_genome_feature_new", gt_genome_feature_lua_new },
   { "gt_sequence_regionnew", gt_sequence_regionlua_new },
   { NULL, NULL }
 };
@@ -322,20 +322,20 @@ static const struct luaL_Reg gt_genome_node_lib_m [] = {
   { "get_filename", gt_genome_node_lua_get_filename },
   { "get_range", gt_genome_node_lua_get_range },
   { "get_seqid", gt_genome_node_lua_get_seqid },
-  { "get_strand", genome_feature_lua_get_strand },
-  { "get_source", genome_feature_lua_get_source },
-  { "set_source", genome_feature_lua_set_source },
-  { "get_score", genome_feature_lua_get_score },
-  { "get_attribute", genome_feature_lua_get_attribute },
-  { "get_exons", genome_feature_lua_get_exons },
+  { "get_strand", gt_genome_feature_lua_get_strand },
+  { "get_source", gt_genome_feature_lua_get_source },
+  { "set_source", gt_genome_feature_lua_set_source },
+  { "get_score", gt_genome_feature_lua_get_score },
+  { "get_attribute", gt_genome_feature_lua_get_attribute },
+  { "get_exons", gt_genome_feature_lua_get_exons },
   { "accept", gt_genome_node_lua_accept },
   { "is_part_of_genome_node", gt_genome_node_lua_is_part_of_genome_node },
   { "mark", gt_genome_node_lua_mark },
   { "is_marked", gt_genome_node_lua_is_marked },
   { "contains_marked", gt_genome_node_lua_contains_marked },
-  { "output_leading", genome_feature_lua_output_leading },
-  { "get_type", genome_feature_lua_get_type },
-  { "extract_sequence", genome_feature_lua_extract_sequence },
+  { "output_leading", gt_genome_feature_lua_output_leading },
+  { "get_type", gt_genome_feature_lua_get_type },
+  { "extract_sequence", gt_genome_feature_lua_extract_sequence },
   { NULL, NULL }
 };
 

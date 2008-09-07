@@ -32,7 +32,7 @@ struct FeatureTypeFactoryBuiltin {
 #define feature_type_factory_builtin_cast(FTF)\
         feature_type_factory_cast(feature_type_factory_builtin_class(), FTF)
 
-static const char *genome_feature_type_strings[] = { "CDS",
+static const char *gt_genome_feature_type_strings[] = { "CDS",
                                                      "EST_match",
                                                      "LTR_retrotransposon",
                                                      "SNP",
@@ -61,9 +61,9 @@ static const char* find_type(const char *gft_string)
   assert(gft_string);
   assert(strcmp(gft_string, "undefined")); /* do not convert undefined string */
   result = bsearch(&gft_string,
-                   genome_feature_type_strings,
-                   sizeof (genome_feature_type_strings) /
-                   sizeof (genome_feature_type_strings[0]),
+                   gt_genome_feature_type_strings,
+                   sizeof (gt_genome_feature_type_strings) /
+                   sizeof (gt_genome_feature_type_strings[0]),
                    sizeof (char*),
                    compare);
   if (result)
@@ -81,7 +81,7 @@ feature_type_factory_builtin_create_gft(FeatureTypeFactory *ftf,
   ftfb = feature_type_factory_builtin_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
     if ((find_type(type))) {
-      gft = genome_feature_type_construct(ftf, type);
+      gft = gt_genome_feature_type_construct(ftf, type);
       gft_collection_add(ftf->used_types, type, gft);
     }
   }

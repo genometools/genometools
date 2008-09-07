@@ -38,7 +38,7 @@ feature_type_factory_any_create_gft(FeatureTypeFactory *ftf,
   assert(ftf && type);
   ftfa = feature_type_factory_any_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
-    gft = genome_feature_type_construct(ftf, type);
+    gft = gt_genome_feature_type_construct(ftf, type);
     gft_collection_add(ftf->used_types, type, gft);
   }
   return gft;

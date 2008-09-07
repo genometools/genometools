@@ -26,7 +26,7 @@ struct GT_GenomeFeatureType {
   char *type;
 };
 
-GT_GenomeFeatureType* genome_feature_type_construct(FeatureTypeFactory
+GT_GenomeFeatureType* gt_genome_feature_type_construct(FeatureTypeFactory
                                                  *feature_type_factory,
                                                  const char *type)
 {
@@ -38,34 +38,34 @@ GT_GenomeFeatureType* genome_feature_type_construct(FeatureTypeFactory
   return gft;
 }
 
-GT_GenomeFeatureType* genome_feature_type_create_gft(GT_GenomeFeatureType *gft,
+GT_GenomeFeatureType* gt_genome_feature_type_create_gft(GT_GenomeFeatureType *gft,
                                                   const char *type)
 {
   assert(gft && type);
   return feature_type_factory_create_gft(gft->feature_type_factory, type);
 }
 
-void genome_feature_type_delete(GT_GenomeFeatureType *gft)
+void gt_genome_feature_type_delete(GT_GenomeFeatureType *gft)
 {
   if (!gft) return;
   ma_free(gft->type);
   ma_free(gft);
 }
 
-bool genome_feature_type_is(GT_GenomeFeatureType *gft, const char *type)
+bool gt_genome_feature_type_is(GT_GenomeFeatureType *gft, const char *type)
 {
   if (gft == feature_type_factory_create_gft(gft->feature_type_factory, type))
     return true;
   return false;
 }
 
-const char* genome_feature_type_get_cstr(const GT_GenomeFeatureType *gft)
+const char* gt_genome_feature_type_get_cstr(const GT_GenomeFeatureType *gft)
 {
   assert(gft);
   return gft->type;
 }
 
-FeatureTypeFactory* genome_feature_type_get_ftf(const GT_GenomeFeatureType *gft)
+FeatureTypeFactory* gt_genome_feature_type_get_ftf(const GT_GenomeFeatureType *gft)
 {
   assert(gft);
   return gft->feature_type_factory;

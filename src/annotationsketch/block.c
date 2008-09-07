@@ -46,8 +46,8 @@ static int elemcmp(const void *a, const void *b)
 
   if (ta == tb)
     return 0;
-  else if (strcmp(genome_feature_type_get_cstr(ta),
-                  genome_feature_type_get_cstr(tb)) < 0) {
+  else if (strcmp(gt_genome_feature_type_get_cstr(ta),
+                  gt_genome_feature_type_get_cstr(tb)) < 0) {
     return 1;
   }
   return -1;
@@ -87,8 +87,8 @@ GT_Block* gt_block_new_from_node(GT_GenomeNode *node)
   assert(node);
   block = gt_block_new();
   block->range = gt_genome_node_get_range(node);
-  block->strand = genome_feature_get_strand((GT_GenomeFeature*) node);
-  block->type = genome_feature_get_type((GT_GenomeFeature*) node);
+  block->strand = gt_genome_feature_get_strand((GT_GenomeFeature*) node);
+  block->type = gt_genome_feature_get_type((GT_GenomeFeature*) node);
   block->top_level_feature = gt_genome_node_ref(node);
   return block;
 }
@@ -238,9 +238,9 @@ int gt_block_unit_test(GT_Error *err)
   r2.end = 50UL;
 
   gft = feature_type_factory_create_gft(feature_type_factory, gft_gene);
-  gn1 = genome_feature_new(seqid, gft, r1, STRAND_FORWARD);
+  gn1 = gt_genome_feature_new(seqid, gft, r1, STRAND_FORWARD);
   gft = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn2 = genome_feature_new(seqid, gft, r2, STRAND_FORWARD);
+  gn2 = gt_genome_feature_new(seqid, gft, r2, STRAND_FORWARD);
 
   e1 = element_new(gn1);
   e2 = element_new(gn2);

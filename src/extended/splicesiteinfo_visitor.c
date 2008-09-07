@@ -78,7 +78,7 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GT_GenomeNode *intron,
     }
     if (!had_err) {
       assert(range.end <= seqlen);
-      strand = genome_feature_get_strand((GT_GenomeFeature*) intron);
+      strand = gt_genome_feature_get_strand((GT_GenomeFeature*) intron);
       if (strand == STRAND_FORWARD || strand == STRAND_REVERSE) {
         /* fill site */
         site[0] = tolower(sequence[range.start-1]);
@@ -119,7 +119,7 @@ static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
   assert(ssiv->region_mapping);
   gni = gt_genome_node_iterator_new((GT_GenomeNode*) gf);
   while (!had_err && (node = gt_genome_node_iterator_next(gni))) {
-    if (genome_feature_has_type((GT_GenomeFeature*) node, gft_intron))
+    if (gt_genome_feature_has_type((GT_GenomeFeature*) node, gft_intron))
       had_err = process_intron(ssiv, node, err);
   }
   gt_genome_node_iterator_delete(gni);

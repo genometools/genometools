@@ -40,9 +40,9 @@ static int add_introns_in_children(GT_GenomeNode *gn, void *data,
   Strand previous_strand, current_strand, intron_strand;
   Str *parent_seqid;
   gt_error_check(err);
-  current_feature = gt_genome_node_cast(genome_feature_class(), gn);
+  current_feature = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(current_feature);
-  if (genome_feature_has_type(current_feature, gft_exon)) {
+  if (gt_genome_feature_has_type(current_feature, gft_exon)) {
     if (v->previous_exon_feature) {
       GT_GenomeFeatureType *intron_type;
       /* determine intron range */
@@ -54,8 +54,8 @@ static int add_introns_in_children(GT_GenomeNode *gn, void *data,
       intron_range.end = current_range.start - 1;
 
       /* determine intron strand */
-      previous_strand = genome_feature_get_strand(v->previous_exon_feature);
-      current_strand = genome_feature_get_strand(current_feature);
+      previous_strand = gt_genome_feature_get_strand(v->previous_exon_feature);
+      current_strand = gt_genome_feature_get_strand(current_feature);
       assert(previous_strand == current_strand);
       intron_strand = previous_strand;
 
@@ -67,9 +67,9 @@ static int add_introns_in_children(GT_GenomeNode *gn, void *data,
              gt_genome_node_get_seqid((GT_GenomeNode*) current_feature)));
 
       /* create intron */
-      intron_type = genome_feature_create_gft(current_feature, gft_intron);
+      intron_type = gt_genome_feature_create_gft(current_feature, gft_intron);
       assert(intron_type);
-      intron_node = genome_feature_new(parent_seqid, intron_type, intron_range,
+      intron_node = gt_genome_feature_new(parent_seqid, intron_type, intron_range,
                                        intron_strand);
       gt_genome_node_is_part_of_genome_node((GT_GenomeNode*) v->parent_feature,
                                          intron_node);
@@ -84,7 +84,7 @@ static int add_introns_if_necessary(GT_GenomeNode *gn, void *data, GT_Error *err
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GT_GenomeFeature *gf;
   gt_error_check(err);
-  gf = gt_genome_node_cast(genome_feature_class(), gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(gf);
   v->parent_feature = gf;
   v->previous_exon_feature = NULL;

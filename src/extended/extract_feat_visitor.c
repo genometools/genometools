@@ -47,7 +47,7 @@ static void construct_description(Str *description, GT_GenomeFeatureType *type,
                                   bool translate)
 {
   assert(!str_length(description));
-  str_append_cstr(description, genome_feature_type_get_cstr(type));
+  str_append_cstr(description, gt_genome_feature_type_get_cstr(type));
   str_append_char(description, '_');
   str_append_ulong(description, counter);
   if (join)

@@ -80,7 +80,7 @@ static void filter_targetbest(GT_GenomeFeature *current_feature, Dlist *trees,
   const char *target;
   int had_err;
   assert(current_feature && trees);
-  target = genome_feature_get_attribute((GT_GenomeNode*) current_feature,
+  target = gt_genome_feature_get_attribute((GT_GenomeNode*) current_feature,
                                         TARGET_STRING);
   assert(target);
   first_target_id = str_new();
@@ -98,8 +98,8 @@ static void filter_targetbest(GT_GenomeFeature *current_feature, Dlist *trees,
     else {
       GT_GenomeFeature *previous_feature = dlistelem_get_data(previous_elem);
       /* element with this target_id included already -> compare them */
-      if (genome_feature_get_score(current_feature) >
-          genome_feature_get_score(previous_feature)) {
+      if (gt_genome_feature_get_score(current_feature) >
+          gt_genome_feature_get_score(previous_feature)) {
         /* current feature is better -> replace previous feature */
         replace_previous_elem(previous_elem, current_feature, trees,
                               target_to_elem, key);
@@ -126,8 +126,8 @@ static int targetbest_filter_stream_next_tree(GenomeStream *gs, GT_GenomeNode **
   if (!tfs->in_stream_processed) {
     while (!(had_err = genome_stream_next_tree(tfs->in_stream, &node, err)) &&
            node) {
-      if (gt_genome_node_cast(genome_feature_class(), node) &&
-          genome_feature_get_attribute(node, "Target")) {
+      if (gt_genome_node_cast(gt_genome_feature_class(), node) &&
+          gt_genome_feature_get_attribute(node, "Target")) {
         filter_targetbest((GT_GenomeFeature*) node, tfs->trees,
                           tfs->target_to_elem);
       }

@@ -17,23 +17,23 @@ static GT_Array* create_example_features(void)
   /* construct a gene on the forward strand with two exons */
   type = feature_type_factory_create_gft(type_factory, "gene");
   range.start = 100; range.end = 900;
-  forward_gene = genome_feature_new(seqid, type, range, STRAND_FORWARD);
+  forward_gene = gt_genome_feature_new(seqid, type, range, STRAND_FORWARD);
 
   type = feature_type_factory_create_gft(type_factory, "exon");
   range.start = 100; range.end = 200;
-  exon = genome_feature_new(seqid, type, range, STRAND_FORWARD);
+  exon = gt_genome_feature_new(seqid, type, range, STRAND_FORWARD);
   /* exon belongs to forward gene */
   gt_genome_node_is_part_of_genome_node(forward_gene, exon);
 
   type = feature_type_factory_create_gft(type_factory, "intron");
   range.start = 201; range.end = 799;
-  intron = genome_feature_new(seqid, type, range, STRAND_FORWARD);
+  intron = gt_genome_feature_new(seqid, type, range, STRAND_FORWARD);
   /* intron belongs to forward gene */
   gt_genome_node_is_part_of_genome_node(forward_gene, intron);
 
   type = feature_type_factory_create_gft(type_factory, "exon");
   range.start = 800; range.end = 900;
-  exon = genome_feature_new(seqid, type, range, STRAND_FORWARD);
+  exon = gt_genome_feature_new(seqid, type, range, STRAND_FORWARD);
   /* exon belongs to forward gene */
   gt_genome_node_is_part_of_genome_node(forward_gene, exon);
 
@@ -44,11 +44,11 @@ static GT_Array* create_example_features(void)
      (within the intron of the forward strand gene) */
   type = feature_type_factory_create_gft(type_factory, "gene");
   range.start = 400; range.end = 600;
-  reverse_gene = genome_feature_new(seqid, type, range, STRAND_REVERSE);
+  reverse_gene = gt_genome_feature_new(seqid, type, range, STRAND_REVERSE);
 
   type = feature_type_factory_create_gft(type_factory, "exon");
   range.start = 400; range.end = 600;
-  exon = genome_feature_new(seqid, type, range, STRAND_REVERSE);
+  exon = gt_genome_feature_new(seqid, type, range, STRAND_REVERSE);
   /* exon belongs to reverse gene */
   gt_genome_node_is_part_of_genome_node(reverse_gene, exon);
 

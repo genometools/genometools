@@ -162,7 +162,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "dlist example", dlist_example);
   hashmap_add(unit_tests, "dynamic bittab class", dynbittab_unit_test);
   hashmap_add(unit_tests, "evaluator class", evaluator_unit_test);
-  hashmap_add(unit_tests, "genome feature class", genome_feature_unit_test);
+  hashmap_add(unit_tests, "genome feature class", gt_genome_feature_unit_test);
   hashmap_add(unit_tests, "genome node iterator example",
               gt_genome_node_iterator_example);
   hashmap_add(unit_tests, "getbasename module", getbasename_unit_test);

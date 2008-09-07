@@ -319,8 +319,8 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
         char buf[BUFSIZ];
         rm = gt_image_info_get_recmap(ii, i);
         gt_recmap_format_html_imagemap_coords(rm, buf, BUFSIZ);
-        type = genome_feature_get_type(rm->gf);
-        printf("%s, %s\n", buf, genome_feature_type_get_cstr(type));
+        type = gt_genome_feature_get_type(rm->gf);
+        printf("%s, %s\n", buf, gt_genome_feature_type_get_cstr(type));
       }
     }
     had_err = gt_canvas_to_file(canvas, file, err);

@@ -375,7 +375,7 @@ static void add_real_exon(TranscriptExons *te, GT_Range range, GT_GenomeNode *gn
 {
   assert(te);
   gt_array_add(transcript_exons_get_all(te), range);
-  switch (genome_feature_get_transcriptfeaturetype((GT_GenomeFeature*) gn)) {
+  switch (gt_genome_feature_get_transcriptfeaturetype((GT_GenomeFeature*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
       warning("type of feature (single, initial, internal, or terminal) given "
               "on line %u in file \"%s\" could not be determined, because the "
@@ -426,8 +426,8 @@ static int process_real_feature(GT_GenomeNode *gn, void *data, UNUSED GT_Error *
   assert(gn && data);
   gf = (GT_GenomeFeature*) gn;
 
-  if (genome_feature_has_type(gf, gft_gene)) {
-    switch (genome_feature_get_strand(gf)) {
+  if (gt_genome_feature_has_type(gf, gft_gene)) {
+    switch (gt_genome_feature_get_strand(gf)) {
       case STRAND_FORWARD:
         gn_ref = gt_genome_node_rec_ref(gn);
         gt_array_add(info->slot->genes_forward, gn_ref);
@@ -443,8 +443,8 @@ static int process_real_feature(GT_GenomeNode *gn, void *data, UNUSED GT_Error *
         }
     }
   }
-  else if (genome_feature_has_type(gf, gft_mRNA)) {
-    switch (genome_feature_get_strand(gf)) {
+  else if (gt_genome_feature_has_type(gf, gft_mRNA)) {
+    switch (gt_genome_feature_get_strand(gf)) {
       case STRAND_FORWARD:
         gn_ref = gt_genome_node_rec_ref(gn);
         gt_array_add(info->slot->mRNAs_forward, gn_ref);
@@ -460,13 +460,13 @@ static int process_real_feature(GT_GenomeNode *gn, void *data, UNUSED GT_Error *
         }
     }
   }
-  else if (genome_feature_has_type(gf, gft_LTR_retrotransposon)) {
+  else if (gt_genome_feature_has_type(gf, gft_LTR_retrotransposon)) {
     gn_ref = gt_genome_node_rec_ref(gn);
     gt_array_add(info->slot->LTRs, gn_ref);
   }
-  else if (genome_feature_has_type(gf, gft_CDS)) {
+  else if (gt_genome_feature_has_type(gf, gft_CDS)) {
     range = gt_genome_node_get_range(gn);
-    switch (genome_feature_get_strand(gf)) {
+    switch (gt_genome_feature_get_strand(gf)) {
       case STRAND_FORWARD:
         add_real_exon(info->slot->CDS_exons_forward, range, gn);
         /* nucleotide level */
@@ -490,9 +490,9 @@ static int process_real_feature(GT_GenomeNode *gn, void *data, UNUSED GT_Error *
         }
     }
   }
-  else if (genome_feature_has_type(gf, gft_exon)) {
+  else if (gt_genome_feature_has_type(gf, gft_exon)) {
     range = gt_genome_node_get_range(gn);
-    switch (genome_feature_get_strand(gf)) {
+    switch (gt_genome_feature_get_strand(gf)) {
       case STRAND_FORWARD:
         add_real_exon(info->slot->mRNA_exons_forward, range, gn);
         /* nucleotide level */
@@ -525,9 +525,9 @@ static int store_exon(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
   GT_Range range;
   GT_GenomeFeature *gf;
   gt_error_check(err);
-  gf = gt_genome_node_cast(genome_feature_class(), gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(gf && exons);
-  if (genome_feature_has_type(gf, gft_exon)) {
+  if (gt_genome_feature_has_type(gf, gft_exon)) {
     range = gt_genome_node_get_range(gn);
     gt_array_add(exons, range);
   }
@@ -579,12 +579,12 @@ static int store_gene_feature(GT_GenomeNode *gn, void *data, UNUSED GT_Error *er
   Store_gene_feature_info *info = (Store_gene_feature_info*) data;
   GT_Range range;
   gt_error_check(err);
-  gf = gt_genome_node_cast(genome_feature_class(), gn);
+  gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(gf && info);
-  if (genome_feature_has_type(gf, gft_mRNA)) {
+  if (gt_genome_feature_has_type(gf, gft_mRNA)) {
     gt_array_add(info->mRNAs, gf);
   }
-  else if (genome_feature_has_type(gf, gft_exon)) {
+  else if (gt_genome_feature_has_type(gf, gft_exon)) {
     range = gt_genome_node_get_range(gn);
     gt_array_add(info->exons, range);
   }
@@ -651,7 +651,7 @@ static void store_predicted_exon(TranscriptEvaluators *te, GT_GenomeNode *gn)
 {
   assert(te && gn);
   evaluator_add_predicted(transcript_evaluators_get_all(te), 1);
-  switch (genome_feature_get_transcriptfeaturetype((GT_GenomeFeature*) gn)) {
+  switch (gt_genome_feature_get_transcriptfeaturetype((GT_GenomeFeature*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
       warning("type of feature (single, initial, internal, or terminal) given "
               "on line %u in file \"%s\" could not be determined, because the "
@@ -694,7 +694,7 @@ static void store_predicted_exon_collapsed(TranscriptUsedExons *used_exons,
 {
   add_predicted_collapsed(transcript_used_exons_get_all(used_exons),
                           predicted_range, transcript_evaluators_get_all(te));
-  switch (genome_feature_get_transcriptfeaturetype((GT_GenomeFeature*) gn)) {
+  switch (gt_genome_feature_get_transcriptfeaturetype((GT_GenomeFeature*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
       /* we do not show a warning here, because store_predicted_exon() has been
          called before and already shown one */
@@ -808,7 +808,7 @@ static void store_true_exon(GT_GenomeNode *gn, Strand predicted_strand,
                       transcript_bittabs_get_all(exon_bittabs_reverse),
                       transcript_evaluators_get_all(exon_evaluators),
                       transcript_evaluators_get_all(exon_evaluators_collapsed));
-  switch (genome_feature_get_transcriptfeaturetype((GT_GenomeFeature*) gn)) {
+  switch (gt_genome_feature_get_transcriptfeaturetype((GT_GenomeFeature*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
       determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
@@ -875,10 +875,10 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
   assert(gn && data);
 
   predicted_range = gt_genome_node_get_range(gn);
-  predicted_strand = genome_feature_get_strand((GT_GenomeFeature*) gn);
+  predicted_strand = gt_genome_feature_get_strand((GT_GenomeFeature*) gn);
   real_genome_nodes = gt_array_new(sizeof (GT_GenomeNode**));
 
-  if (genome_feature_has_type((GT_GenomeFeature*) gn, gft_gene)) {
+  if (gt_genome_feature_has_type((GT_GenomeFeature*) gn, gft_gene)) {
     /* store predicted gene */
     evaluator_add_predicted(info->gene_evaluator, 1);
     /* determine true gene */
@@ -947,7 +947,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
         }
     }
   }
-  else if (genome_feature_has_type((GT_GenomeFeature*) gn, gft_mRNA)) {
+  else if (gt_genome_feature_has_type((GT_GenomeFeature*) gn, gft_mRNA)) {
     /* store predicted mRNA */
     evaluator_add_predicted(info->mRNA_evaluator, 1);
     /* determine true mRNA */
@@ -1016,7 +1016,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
         }
     }
   }
-  else if (genome_feature_has_type((GT_GenomeFeature*) gn,
+  else if (gt_genome_feature_has_type((GT_GenomeFeature*) gn,
                                    gft_LTR_retrotransposon)) {
     /* store predicted LTR */
     evaluator_add_predicted(info->LTR_evaluator, 1);
@@ -1047,7 +1047,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
       }
     }
   }
-  else if (genome_feature_has_type((GT_GenomeFeature*) gn, gft_exon)) {
+  else if (gt_genome_feature_has_type((GT_GenomeFeature*) gn, gft_exon)) {
     /* store predicted exon (mRNA level)*/
     store_predicted_exon(info->mRNA_exon_evaluators, gn);
 
@@ -1090,7 +1090,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
         }
     }
   }
-  else if (genome_feature_has_type((GT_GenomeFeature*) gn, gft_CDS)) {
+  else if (gt_genome_feature_has_type((GT_GenomeFeature*) gn, gft_CDS)) {
     /* store predicted exon (CDS level)*/
     store_predicted_exon(info->CDS_exon_evaluators, gn);
 
@@ -1273,7 +1273,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       }
       assert(slot);
     }
-    gf = gt_genome_node_cast(genome_feature_class(), gn);
+    gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
     /* we consider only genome features */
     if (gf) {
       /* each sequence must have its own ``slot'' at this point */
@@ -1281,7 +1281,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       assert(slot);
       /* store the exons */
       real_info.slot = slot;
-      genome_feature_determine_transcripttypes(gf);
+      gt_genome_feature_determine_transcripttypes(gf);
       had_err = gt_genome_node_traverse_children(gn, &real_info,
                                               process_real_feature, false,
                                               NULL);
@@ -1302,14 +1302,14 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   if (!had_err) {
     while (!(had_err = genome_stream_next_tree(se->prediction, &gn, err)) &&
            gn) {
-      gf = gt_genome_node_cast(genome_feature_class(), gn);
+      gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
       /* we consider only genome features */
       if (gf) {
         /* get (real) slot */
         slot = hashmap_get(se->slots, str_get(gt_genome_node_get_seqid(gn)));
         if (slot) {
           predicted_info.slot = slot;
-          genome_feature_determine_transcripttypes(gf);
+          gt_genome_feature_determine_transcripttypes(gf);
           had_err = gt_genome_node_traverse_children(gn, &predicted_info,
                                                   process_predicted_feature,
                                                   false, NULL);
