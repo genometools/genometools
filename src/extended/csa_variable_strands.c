@@ -73,7 +73,7 @@ static void process_splice_forms(GT_Array *genes, GT_Array *splice_forms)
   assert(forward_gene || reverse_gene);
   if (forward_gene && reverse_gene) {
     /* determine which comes first to keep sorting */
-    if (range_compare(csa_gene_genomic_range(forward_gene),
+    if (gt_range_compare(csa_gene_genomic_range(forward_gene),
                       csa_gene_genomic_range(reverse_gene)) <= 0) {
       gt_array_add(genes, forward_gene);
       gt_array_add(genes, reverse_gene);

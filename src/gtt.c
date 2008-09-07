@@ -174,7 +174,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "interval tree class", interval_tree_unit_test);
   hashmap_add(unit_tests, "Lua serializer module", lua_serializer_unit_test);
   hashmap_add(unit_tests, "queue class", queue_unit_test);
-  hashmap_add(unit_tests, "range class", range_unit_test);
+  hashmap_add(unit_tests, "range class", gt_range_unit_test);
   hashmap_add(unit_tests, "safearith module", safearith_unit_test);
   hashmap_add(unit_tests, "safearith example", safearith_example);
   hashmap_add(unit_tests, "splicedseq class", splicedseq_unit_test);

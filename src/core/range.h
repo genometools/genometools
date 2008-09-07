@@ -26,17 +26,17 @@ typedef struct {
                 end;
 } GT_Range;
 
-int           range_compare(GT_Range, GT_Range);
-int           range_compare_ptr(const GT_Range*, const GT_Range*);
-int           range_compare_with_delta(GT_Range, GT_Range, unsigned long delta);
-bool          range_overlap(GT_Range, GT_Range);
-bool          range_contains(GT_Range, GT_Range);
-bool          range_within(GT_Range, unsigned long);
-GT_Range         range_join(GT_Range, GT_Range);
-GT_Range         range_offset(GT_Range, long offset);
-GT_Range         range_reorder(GT_Range);
-unsigned long range_length(GT_Range);
-int           range_unit_test(GT_Error*);
+int           gt_range_compare(GT_Range, GT_Range);
+int           gt_range_compare_ptr(const GT_Range*, const GT_Range*);
+int           gt_range_compare_with_delta(GT_Range, GT_Range, unsigned long delta);
+bool          gt_range_overlap(GT_Range, GT_Range);
+bool          gt_range_contains(GT_Range, GT_Range);
+bool          gt_range_within(GT_Range, unsigned long);
+GT_Range         gt_range_join(GT_Range, GT_Range);
+GT_Range         gt_range_offset(GT_Range, long offset);
+GT_Range         gt_range_reorder(GT_Range);
+unsigned long gt_range_length(GT_Range);
+int           gt_range_unit_test(GT_Error*);
 
 void          ranges_sort(GT_Array*);
 void          ranges_sort_by_length_stable(GT_Array*);

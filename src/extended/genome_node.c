@@ -79,7 +79,7 @@ int genome_node_cmp(GenomeNode *gn_a, GenomeNode *gn_b)
                       genome_node_get_idstr(gn_b)))) {
     return rval;
   }
-  return range_compare(genome_node_get_range(gn_a),
+  return gt_range_compare(genome_node_get_range(gn_a),
                        genome_node_get_range(gn_b));
 }
 
@@ -97,7 +97,7 @@ static int compare_genome_nodes_with_delta(GenomeNode *gn_a, GenomeNode *gn_b,
                       genome_node_get_idstr(gn_b)))) {
     return rval;
   }
-  return range_compare_with_delta(genome_node_get_range(gn_a),
+  return gt_range_compare_with_delta(genome_node_get_range(gn_a),
                                   genome_node_get_range(gn_b), delta);
 }
 
@@ -642,7 +642,7 @@ bool genome_node_overlaps_nodes_mark(GenomeNode *gn, GT_Array *nodes,
   for (i = 0; i < gt_array_size(nodes); i++) {
     node = *(GenomeNode**) gt_array_get(nodes, i);
     assert(!str_cmp(gn_id, genome_node_get_idstr(node)));
-    if (range_overlap(gn_range, genome_node_get_range(node))) {
+    if (gt_range_overlap(gn_range, genome_node_get_range(node))) {
       rval = true;
       if (b)
         bittab_set_bit(b, i);

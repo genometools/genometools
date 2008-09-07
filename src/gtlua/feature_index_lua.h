@@ -47,7 +47,7 @@
 
    -- Returns the range covered by features of sequence ID <seqid> in
    -- <feature_index>.
-   function feature_index:get_range_for_seqid(seqid)
+   function feature_index:get_gt_range_for_seqid(seqid)
 */
 int luaopen_feature_index(lua_State*);
 

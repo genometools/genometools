@@ -144,7 +144,7 @@ static int feature_index_lua_get_seqids(lua_State *L)
   return 1;
 }
 
-static int feature_index_lua_get_range_for_seqid(lua_State *L)
+static int feature_index_lua_get_gt_range_for_seqid(lua_State *L)
 {
   GT_FeatureIndex **feature_index;
   const char *seqid;
@@ -154,7 +154,7 @@ static int feature_index_lua_get_range_for_seqid(lua_State *L)
   luaL_argcheck(L, gt_feature_index_has_seqid(*feature_index, seqid), 2,
                 "feature_index does not contain seqid");
   gt_feature_index_get_range_for_seqid(*feature_index, &range, seqid);
-  return range_lua_push(L, range);
+  return gt_range_lua_push(L, range);
 }
 
 static int feature_index_lua_delete(lua_State *L)
@@ -176,7 +176,7 @@ static const struct luaL_Reg feature_index_lib_m [] = {
   { "get_features_for_range", feature_index_lua_get_features_for_range },
   { "get_first_seqid", feature_index_lua_get_first_seqid },
   { "get_seqids", feature_index_lua_get_seqids },
-  { "get_range_for_seqid", feature_index_lua_get_range_for_seqid },
+  { "get_gt_range_for_seqid", feature_index_lua_get_gt_range_for_seqid },
   { NULL, NULL }
 };
 

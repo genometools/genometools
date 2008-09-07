@@ -25,7 +25,7 @@
 
    -- Returns a new range object with start <startpos> and end <endpos>.
    -- <startpos> must be smaller or equal than <endpos>.
-   function range_new(startpos, endpos)
+   function gt_range_new(startpos, endpos)
 
    -- Returns start of <range>.
    function range:get_start()
@@ -36,18 +36,18 @@
    -- Returns true if <range> and <other_range> overlap, false otherwise.
    function range:overlap(other_range)
 
-   -- Returns an array containing the ranges from array <range_array> in sorted
+   -- Returns an array containing the ranges from array <gt_range_array> in sorted
    -- order.
-   function ranges_sort(range_array)
+   function ranges_sort(gt_range_array)
 
-   -- Returns true if the ranges in array <range_array> are sorted, false
+   -- Returns true if the ranges in array <gt_range_array> are sorted, false
    -- otherwise.
-   function ranges_are_sorted(range_array)
+   function ranges_are_sorted(gt_range_array)
 */
 int luaopen_range(lua_State*);
 
 /* push a GT_Range to Lua, returns 1 (number of elements pushed) */
-int range_lua_push(lua_State*, GT_Range);
+int gt_range_lua_push(lua_State*, GT_Range);
 
 #define RANGE_METATABLE  "GenomeTools.range"
 #define check_range(L, POS) \

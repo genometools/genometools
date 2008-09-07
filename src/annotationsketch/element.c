@@ -101,7 +101,7 @@ bool element_is_marked(const Element *element)
 bool elements_are_equal(const Element *e1, const Element *e2)
 {
   assert(e1 && e2);
-  if (e1->type == e2->type && !range_compare(e1->range, e2->range))
+  if (e1->type == e2->type && !gt_range_compare(e1->range, e2->range))
     return true;
   return false;
 }
@@ -150,8 +150,8 @@ int element_unit_test(GT_Error *err)
 
   /* tests element_get_range */
   r_temp = element_get_range(e);
-  ensure(had_err, (0 == range_compare(r1, r_temp)));
-  ensure(had_err, (1 == range_compare(r2, r_temp)));
+  ensure(had_err, (0 == gt_range_compare(r1, r_temp)));
+  ensure(had_err, (1 == gt_range_compare(r2, r_temp)));
 
   /* tests element_get_type and element_set_type*/
   ensure(had_err, (type == element_get_type(e)));

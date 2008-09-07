@@ -57,7 +57,7 @@ int gt_block_compare(const GT_Block *block1, const GT_Block *block2)
 {
   int ret;
   assert(block1 && block2);
-  ret = range_compare(gt_block_get_range(block1), gt_block_get_range(block2));
+  ret = gt_range_compare(gt_block_get_range(block1), gt_block_get_range(block2));
   if (ret == 0 && block1 != block2)
     ret = (block1 < block2 ? -1 : 1);
   return ret;
@@ -137,7 +137,7 @@ bool gt_block_has_only_one_fullsize_element(const GT_Block *block)
     elem_range = element_get_range(
                    dlistelem_get_data(dlist_first(block->elements)));
     block_range = gt_block_get_range(block);
-    ret = (range_compare(block_range, elem_range) == 0);
+    ret = (gt_range_compare(block_range, elem_range) == 0);
   }
   return ret;
 }
@@ -255,11 +255,11 @@ int gt_block_unit_test(GT_Error *err)
   ensure(had_err, (2UL == gt_block_get_size(b)));
 
   /* test gt_block_set_range & gt_block_get_range */
-  r_temp = range_join(r1, r2);
+  r_temp = gt_range_join(r1, r2);
   gt_block_set_range(b, r_temp);
   b_range = gt_block_get_range(b);
-  ensure(had_err, (0 == range_compare(b_range, r_temp)));
-  ensure(had_err, (1 == range_compare(r2, r_temp)));
+  ensure(had_err, (0 == gt_range_compare(b_range, r_temp)));
+  ensure(had_err, (1 == gt_range_compare(r2, r_temp)));
 
   /* tests gt_block_set_caption & gt_block_get_caption */
   gt_block_set_caption(b, caption1);

@@ -1303,7 +1303,7 @@ Option* option_new_range(const char *option_str, const char *description,
   return o;
 }
 
-Option* option_new_range_min_max(const char *option_str,
+Option* option_new_gt_range_min_max(const char *option_str,
                                  const char *description, GT_Range *value,
                                  GT_Range *default_value,
                                  unsigned long min_value,

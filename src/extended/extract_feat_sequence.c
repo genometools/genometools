@@ -48,7 +48,7 @@ static int extract_join_feature(GenomeNode *gn, GenomeFeatureType *type,
     }
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
-      str_append_cstr_nt(sequence, raw_sequence, range_length(range));
+      str_append_cstr_nt(sequence, raw_sequence, gt_range_length(range));
       if (genome_feature_get_strand(gf) == STRAND_REVERSE)
         *reverse_strand = true;
     }
@@ -107,7 +107,7 @@ int extract_feat_sequence(Str *sequence, GenomeNode *gn,
     }
     if (!had_err) {
       str_append_cstr_nt(sequence, raw_sequence + range.start - 1,
-                         range_length(range));
+                         gt_range_length(range));
       if (genome_feature_get_strand(gf) == STRAND_REVERSE) {
         had_err = reverse_complement(str_get(sequence), str_length(sequence),
                                      err);

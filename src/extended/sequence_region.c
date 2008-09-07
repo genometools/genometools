@@ -96,7 +96,7 @@ GenomeNode* sequence_region_new(Str *seqid, GT_Range range)
 
 void sequence_regions_consolidate(GenomeNode *gn_a, GenomeNode *gn_b)
 {
-  GT_Range range_a, range_b;
+  GT_Range gt_range_a, gt_range_b;
 
   assert(gn_a);
   assert(gn_b);
@@ -104,8 +104,8 @@ void sequence_regions_consolidate(GenomeNode *gn_a, GenomeNode *gn_b)
   assert(genome_node_cast(sequence_region_class(), gn_b));
   assert(!str_cmp(genome_node_get_seqid(gn_a), genome_node_get_seqid(gn_b)));
 
-  range_a = genome_node_get_range(gn_a);
-  range_b = genome_node_get_range(gn_b);
-  range_a = range_join(range_a, range_b);
-  genome_node_set_range(gn_a, range_a);
+  gt_range_a = genome_node_get_range(gn_a);
+  gt_range_b = genome_node_get_range(gn_b);
+  gt_range_a = gt_range_join(gt_range_a, gt_range_b);
+  genome_node_set_range(gn_a, gt_range_a);
 }

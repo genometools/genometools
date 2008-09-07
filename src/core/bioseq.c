@@ -569,7 +569,7 @@ unsigned long bioseq_get_sequence_length(Bioseq *bs, unsigned long idx)
   GT_Range sequence_range;
   assert(bs);
   sequence_range = *(GT_Range*) gt_array_get(bs->sequence_ranges, idx);
-  return range_length(sequence_range);
+  return gt_range_length(sequence_range);
 }
 
 unsigned long bioseq_get_raw_sequence_length(Bioseq *bs)

@@ -159,11 +159,11 @@ static int add_offset_if_necessary(GT_Range *range, GFF3Parser *parser,
   int had_err = 0;
   gt_error_check(err);
   if (parser->offset != UNDEF_LONG)
-    *range = range_offset(*range, parser->offset);
+    *range = gt_range_offset(*range, parser->offset);
   else if (parser->offset_mapping) {
     had_err = mapping_map_integer(parser->offset_mapping, &offset, seqid, err);
     if (!had_err)
-      *range = range_offset(*range, offset);
+      *range = gt_range_offset(*range, offset);
   }
   return had_err;
 }
@@ -286,14 +286,14 @@ static int get_seqid_str(Str **seqid_str, const char *seqid, GT_Range range,
       *seqid_str = str_ref(genome_node_get_seqid((*auto_sr)->sequence_region));
       /* update the range of the sequence region */
       genome_node_set_range((*auto_sr)->sequence_region,
-                            range_join(range,
+                            gt_range_join(range,
                                        genome_node_get_range((*auto_sr)
                                                          ->sequence_region)));
     }
   }
   else {
     /* perform range check */
-    if (!range_contains(ssr->range, range)) {
+    if (!gt_range_contains(ssr->range, range)) {
       gt_error_set(err, "range (%lu,%lu) of feature on line %u in file \"%s\" "
                 "is not contained in range (%lu,%lu) of corresponding "
                 "sequence region on line %u", range.start, range.end,
@@ -376,7 +376,7 @@ static void update_pseudo_node_range(GenomeNode *pseudo_node,
   assert(genome_feature_is_pseudo((GenomeFeature*) pseudo_node));
   assert(!genome_feature_is_pseudo((GenomeFeature*) genome_feature));
   genome_node_set_range(pseudo_node,
-                        range_join(genome_node_get_range(pseudo_node),
+                        gt_range_join(genome_node_get_range(pseudo_node),
                                    genome_node_get_range(genome_feature)));
 }
 

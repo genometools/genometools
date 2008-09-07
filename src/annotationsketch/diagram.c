@@ -150,7 +150,7 @@ static bool get_caption_display_status(GT_Diagram *d, GenomeFeatureType *gft)
       if (threshold == UNDEF_ULONG)
         *status = true;
       else
-        *status = (range_length(d->range) <= threshold);
+        *status = (gt_range_length(d->range) <= threshold);
     }
     hashmap_add(d->caption_display_status, gft, status);
   }
@@ -308,7 +308,7 @@ static void process_node(GT_Diagram *d, GenomeNode *node, GenomeNode *parent)
 
   /* discard elements that do not overlap with visible range */
   elem_range = genome_node_get_range(node);
-  if (!range_overlap(d->range, elem_range))
+  if (!gt_range_overlap(d->range, elem_range))
     return;
 
   /* get maximal view widths in nucleotides to show this type */
@@ -325,10 +325,10 @@ static void process_node(GT_Diagram *d, GenomeNode *node, GenomeNode *parent)
 
   }
   /* check if this type is to be displayed */
-  if (max_show_width != UNDEF_ULONG && range_length(d->range) > max_show_width)
+  if (max_show_width != UNDEF_ULONG && gt_range_length(d->range) > max_show_width)
     return;
   if (parent && par_max_show_width != UNDEF_ULONG
-        && range_length(d->range) > par_max_show_width)
+        && gt_range_length(d->range) > par_max_show_width)
     parent = NULL;
 
   /* check if this is a collapsing type, cache result */
@@ -740,7 +740,7 @@ int gt_diagram_unit_test(GT_Error *err)
     ensure(had_err, hashmap_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
   }
-  ensure(had_err, range_compare(gt_diagram_get_range(dia),dr1) == 0);
+  ensure(had_err, gt_range_compare(gt_diagram_get_range(dia),dr1) == 0);
 
   /* create a diagram object and test it */
   if (!had_err) {
@@ -775,7 +775,7 @@ int gt_diagram_unit_test(GT_Error *err)
     ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
-  ensure(had_err, range_compare(gt_diagram_get_range(dia),dr1) == 0);
+  ensure(had_err, gt_range_compare(gt_diagram_get_range(dia),dr1) == 0);
 
   features = gt_array_new(sizeof (GenomeNode*));
   gt_array_add(features, gn1);
@@ -802,7 +802,7 @@ int gt_diagram_unit_test(GT_Error *err)
     ensure(had_err, hashmap_get(dia3->tracks, str_get(track_key)));
     str_delete(track_key);
   }
-  ensure(had_err, range_compare(gt_diagram_get_range(dia3),rs) == 0);
+  ensure(had_err, gt_range_compare(gt_diagram_get_range(dia3),rs) == 0);
 
   /* delete all generated objects */
   gt_style_delete(sty);

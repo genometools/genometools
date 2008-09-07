@@ -91,7 +91,7 @@ static int genome_node_lua_get_filename(lua_State *L)
 static int genome_node_lua_get_range(lua_State *L)
 {
   GenomeNode **gn = check_genome_node(L, 1);
-  return range_lua_push(L, genome_node_get_range(*gn));
+  return gt_range_lua_push(L, genome_node_get_range(*gn));
 }
 
 static int genome_node_lua_get_seqid(lua_State *L)

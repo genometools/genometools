@@ -122,7 +122,7 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
   GT_Range cds;
   Strand strand = genome_feature_get_strand((GenomeFeature*) gn);
 
-  assert(range_length(orf) >= 3);
+  assert(gt_range_length(orf) >= 3);
   /* the first CDS feature */
   cds.start = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
                              ? orf.start : orf.end) + 1;

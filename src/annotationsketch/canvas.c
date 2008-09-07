@@ -201,7 +201,7 @@ static void draw_ruler(GT_Canvas *canvas)
   gridcol.red = gridcol.green = gridcol.blue = .93;
 
   /* determine range and step of the scale */
-  base_length = range_length(canvas->viewrange);
+  base_length = gt_range_length(canvas->viewrange);
 
   /* determine tick steps */
   step = pow(10,ceil(log10(base_length))-1);
@@ -310,7 +310,7 @@ int gt_canvas_visit_gt_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
   /* calculate scaling factor */
   canvas->factor = ((double) canvas->width
                      -(2*canvas->margins))
-                    / range_length(canvas->viewrange);
+                    / gt_range_length(canvas->viewrange);
   return 0;
 }
 
@@ -555,7 +555,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
   assert(canvas && elem);
 
   /* This shouldn't happen. */
-  if (!range_overlap(elem_range, canvas->viewrange))
+  if (!gt_range_overlap(elem_range, canvas->viewrange))
     return -1;
 
   type = genome_feature_type_get_cstr(element_get_type(elem));

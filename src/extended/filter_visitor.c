@@ -69,7 +69,7 @@ static bool filter_contain_range(GenomeFeature *gf, GT_Range contain_range)
 {
   assert(gf);
   if (contain_range.start != UNDEF_ULONG &&
-      !range_contains(contain_range, genome_node_get_range((GenomeNode*) gf))) {
+      !gt_range_contains(contain_range, genome_node_get_range((GenomeNode*) gf))) {
     return true;
   }
   return false;
@@ -79,7 +79,7 @@ static bool filter_overlap_range(GenomeFeature *gf, GT_Range overlap_range)
 {
   assert(gf);
   if (overlap_range.start != UNDEF_ULONG &&
-      !range_overlap(overlap_range, genome_node_get_range((GenomeNode*) gf))) {
+      !gt_range_overlap(overlap_range, genome_node_get_range((GenomeNode*) gf))) {
     return true;
   }
   return false;
@@ -148,7 +148,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
     /* XXX: we (spuriously) assume that genes are always root nodes */
     if (gf && genome_feature_has_type(gf, gft_gene)) {
       if (fv->max_gene_length != UNDEF_ULONG &&
-          range_length(genome_node_get_range((GenomeNode*) gf)) >
+          gt_range_length(genome_node_get_range((GenomeNode*) gf)) >
           fv->max_gene_length) {
         filter_node = true;
       }
@@ -212,7 +212,7 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
                genome_node_get_seqid((GenomeNode*) sr))) {
     if (filter_visitor->contain_range.start != UNDEF_ULONG) {
       GT_Range range = genome_node_get_range((GenomeNode*) sr);
-      if (range_overlap(range, filter_visitor->contain_range)) {
+      if (gt_range_overlap(range, filter_visitor->contain_range)) {
         /* an overlapping contain range was defined -> update range  */
         range.start = MAX(range.start, filter_visitor->contain_range.start);
         range.end = MIN(range.end, filter_visitor->contain_range.end);

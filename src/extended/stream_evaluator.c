@@ -134,7 +134,7 @@ static Slot* slot_new(bool nuceval, GT_Range range)
 {
   unsigned long length;
   Slot *s = ma_calloc(1, sizeof (Slot));
-  length = range_length(range);
+  length = gt_range_length(range);
   s->genes_forward = gt_array_new(sizeof (GenomeNode*));
   s->genes_reverse = gt_array_new(sizeof (GenomeNode*));
   s->mRNAs_forward = gt_array_new(sizeof (GenomeNode*));
@@ -404,7 +404,7 @@ static void add_nucleotide_exon(Bittab *nucleotides, GT_Range range,
   unsigned long i;
   assert(nucleotides);
   for (i = range.start; i <= range.end; i++) {
-    if (range_within(real_range, i)) {
+    if (gt_range_within(real_range, i)) {
       assert(i >= real_range.start);
       bittab_set_bit(nucleotides, i - real_range.start);
     }
@@ -751,7 +751,7 @@ static void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
                               predicted_strand == STRAND_FORWARD
                               ? gt_array_size(exons_forward)
                               : gt_array_size(exons_reverse), sizeof (GT_Range),
-                              (Compare) range_compare_ptr))) {
+                              (Compare) gt_range_compare_ptr))) {
     if (predicted_strand == STRAND_FORWARD) {
       num = actual_range - (GT_Range*) gt_array_get_space(exons_forward);
       ctr_ptr = gt_array_get(true_exons_forward, num);
@@ -1205,7 +1205,7 @@ int compute_nucleotides_values(UNUSED void *key, void *value, void *data,
   se->CDS_nucleotides.FP  += slot->FP_CDS_nucleotides_forward;
   se->CDS_nucleotides.FP  += slot->FP_CDS_nucleotides_reverse;
   /* add other values */
-  tmp = bittab_new(range_length(slot->real_range));
+  tmp = bittab_new(gt_range_length(slot->real_range));
   add_nucleotide_values(&se->mRNA_nucleotides,
                         slot->real_mRNA_nucleotides_forward,
                         slot->pred_mRNA_nucleotides_forward, tmp,

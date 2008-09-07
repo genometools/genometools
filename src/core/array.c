@@ -337,7 +337,7 @@ int gt_array_unit_test(GT_Error *err)
     for (i = 0; !had_err && i < 24; i++) {
       range.start = i + 1;
       range.end   = i + 101;
-      ensure(had_err, !range_compare(range, *(GT_Range*) gt_array_get(a, 23 - i)));
+      ensure(had_err, !gt_range_compare(range, *(GT_Range*) gt_array_get(a, 23 - i)));
     }
     aref = gt_array_ref(a);
     gt_array_delete(aref);
@@ -356,7 +356,7 @@ int gt_array_unit_test(GT_Error *err)
   if (!had_err) {
     aclone = gt_array_clone(a);
     for (i = 0;!had_err && i < gt_array_size(a); i++) {
-      ensure(had_err, !range_compare_ptr(gt_array_get(a, i),
+      ensure(had_err, !gt_range_compare_ptr(gt_array_get(a, i),
                                          gt_array_get(aclone, i)));
     }
     gt_array_delete(aclone);
@@ -370,12 +370,12 @@ int gt_array_unit_test(GT_Error *err)
     for (i = 0; !had_err && i < 10; i++) {
       range.start = i + 1;
       range.end   = i + 101;
-      ensure(had_err, !range_compare(range, *(GT_Range*) gt_array_get(a, i)));
+      ensure(had_err, !gt_range_compare(range, *(GT_Range*) gt_array_get(a, i)));
     }
     for (i = 10; !had_err && i < 20; i++) {
       range.start = 4 + i + 1;
       range.end   = 4 + i + 101;
-      ensure(had_err, !range_compare(range, *(GT_Range*) gt_array_get(a, i)));
+      ensure(had_err, !gt_range_compare(range, *(GT_Range*) gt_array_get(a, i)));
     }
   }
   gt_array_delete(a);

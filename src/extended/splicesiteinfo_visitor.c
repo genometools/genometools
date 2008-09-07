@@ -68,7 +68,7 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
   ssiv->intron_processed = true;
   range = genome_node_get_range(intron);
   assert(range.start); /* 1-based coordinates */
-  if (range_length(range) >= 4) {
+  if (gt_range_length(range) >= 4) {
     seqid = genome_node_get_seqid(intron);
     had_err = region_mapping_get_raw_sequence(ssiv->region_mapping, &sequence,
                                               seqid, err);
