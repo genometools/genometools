@@ -15,12 +15,29 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ERROR_H
-#define ERROR_H
+#ifndef ERROR_API_H
+#define ERROR_API_H
 
-#include "core/error_api.h"
+#include <assert.h>
+#include <stdarg.h>
+#include <stdbool.h>
 
-void        gt_error_set_progname(GT_Error*, const char *progname);
-const char* gt_error_get_progname(const GT_Error*);
+/* the error class */
+typedef struct GT_Error GT_Error;
+
+GT_Error*   gt_error_new(void);
+void        gt_error_set(GT_Error*, const char *format, ...)
+              __attribute__ ((format (printf, 2, 3)));
+void        gt_error_vset(GT_Error*, const char *format, va_list);
+bool        gt_error_is_set(const GT_Error*);
+void        gt_error_unset(GT_Error*);
+/* Get the error string (the error must be set). */
+const char* gt_error_get(const GT_Error*);
+void        gt_error_delete(GT_Error*);
+
+/* Make sure that the error is not set, should be used at the beginning of
+   every routine which has an GT_Error* argument. */
+#define gt_error_check(err)\
+        assert(!err || !gt_error_is_set(err))
 
 #endif

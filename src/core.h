@@ -30,7 +30,6 @@
 #include "core/disc_distri.h"    /* discrete distribution class */
 #include "core/dlist.h"          /* double-linked list class */
 #include "core/ensure.h"         /* defines the ensure macro */
-#include "core/error.h"          /* error class */
 #include "core/fasta.h"          /* fasta module */
 #include "core/fileutils.h"      /* file utilities module */
 #include "core/gc_content.h"     /* GC-content module */
