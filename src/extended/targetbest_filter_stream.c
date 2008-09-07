@@ -120,7 +120,7 @@ static int targetbest_filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   TargetbestFilterStream *tfs;
   GenomeNode *node;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   tfs = targetbest_filter_stream_cast(gs);
 
   if (!tfs->in_stream_processed) {

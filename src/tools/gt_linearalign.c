@@ -43,7 +43,7 @@ static int gt_linearalign_runner(UNUSED int argc, const char **argv,
   unsigned long i, j;
   int had_err = 0;
   Alignment *a;
-  error_check(err);
+  gt_error_check(err);
 
   /* init */
   bioseq_1 = bioseq_new(argv[parsed_args], err);

@@ -40,7 +40,7 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
   OutputFileInfo *ofi;
   Option *option;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
 
   /* init */
   op = option_parser_new("[option ...] mapping_file [GFF3_file]",
@@ -82,7 +82,7 @@ int gt_chseqids(int argc, const char **argv, GT_Error *err)
   Str *chseqids;
   int parsed_args, had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {

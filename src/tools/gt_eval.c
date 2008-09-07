@@ -36,7 +36,7 @@ static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
   OptionParser *op;
   Option *option, *ltroption, *ltrdeltaoption;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("reality_file prediction_file ",
                          "Evaluate a gene prediction against a given "
                          "``reality'' file (both in GFF3).");
@@ -88,7 +88,7 @@ int gt_eval(int argc, const char **argv, GT_Error *err)
   StreamEvaluator *evaluator;
   EvalArguments arguments;
   int had_err, parsed_args;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {

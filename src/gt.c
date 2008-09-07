@@ -24,10 +24,10 @@ int main(int argc, char *argv[])
   GTR *gtr;
   int rval;
   allocators_init();
-  err = error_new();
-  error_set_progname(err, argv[0]);
+  err = gt_error_new();
+  gt_error_set_progname(err, argv[0]);
   if (!(gtr = gtr_new(err))) {
-    fprintf(stderr, "%s: error: %s\n", error_get_progname(err), error_get(err));
+    fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err), gt_error_get(err));
     return EXIT_FAILURE;
   }
   gtr_register_components(gtr);
@@ -43,12 +43,12 @@ int main(int argc, char *argv[])
     case OPTIONPARSER_REQUESTS_EXIT:
       rval = 0; /* everything went fine */
   }
-  if (error_is_set(err)) {
-    fprintf(stderr, "%s: error: %s\n", error_get_progname(err), error_get(err));
+  if (gt_error_is_set(err)) {
+    fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err), gt_error_get(err));
     assert(rval);
   }
   gtr_delete(gtr);
-  error_delete(err);
+  gt_error_delete(err);
   if (allocators_clean())
     return 2; /* programmer error */
   return rval;

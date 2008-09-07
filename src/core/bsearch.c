@@ -114,7 +114,7 @@ int bsearch_unit_test(GT_Error *err)
   Bittab *b;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   elements = gt_array_new(sizeof (int));
   members = gt_array_new(sizeof (int*));

@@ -51,7 +51,7 @@ gt_packedindex_trsuftab(int argc, const char *argv[], GT_Error *err)
   inputProject = str_new();
 
   do {
-    error_check(err);
+    gt_error_check(err);
     {
       bool exitNow = false;
       switch (parseTrSufTabOptions(&parsedArgs, argc, argv, &params,
@@ -92,7 +92,7 @@ parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
   OPrval oprval;
   Option *option;
 
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("indexname",
                          "Build BWT packedindex for project <indexname>.");
 

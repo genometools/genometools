@@ -159,7 +159,7 @@ static int gt_skproto_runner(int argc, const char **argv, int parsed_args,
   FILE *fpin;
   int i;
 
-  error_check(err);
+  gt_error_check(err);
 
   printf("#ifdef __cplusplus\n");
   printf("extern \"C\" {\n");

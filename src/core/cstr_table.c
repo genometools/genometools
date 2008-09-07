@@ -70,7 +70,7 @@ int cstr_table_unit_test(GT_Error *err)
 {
   CstrTable *table;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   table = cstr_table_new();
   ensure(had_err, !cstr_table_get(table, "foo"));
   if (!had_err)

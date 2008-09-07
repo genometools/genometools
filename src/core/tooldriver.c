@@ -27,14 +27,14 @@ int tooldriver(int(*tool)(int argc, const char **argv, GT_Error*),
   GT_Error *err;
   int had_err;
   allocators_init();
-  err = error_new();
-  error_set_progname(err, argv[0]);
+  err = gt_error_new();
+  gt_error_set_progname(err, argv[0]);
   had_err = tool(argc, (const char**) argv, err);
-  if (error_is_set(err)) {
-    fprintf(stderr, "%s: error: %s\n", error_get_progname(err), error_get(err));
+  if (gt_error_is_set(err)) {
+    fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err), gt_error_get(err));
     assert(had_err);
   }
-  error_delete(err);
+  gt_error_delete(err);
   if (allocators_clean())
     return 2; /* programmer error */
   if (had_err)
@@ -48,16 +48,16 @@ int toolobjdriver(ToolConstructor tool_constructor, int argc, char *argv[])
   GT_Error *err;
   int had_err;
   allocators_init();
-  err = error_new();
-  error_set_progname(err, argv[0]);
+  err = gt_error_new();
+  gt_error_set_progname(err, argv[0]);
   tool = tool_constructor();
   had_err = tool_run(tool, argc, (const char**) argv, err);
   tool_delete(tool);
-  if (error_is_set(err)) {
-    fprintf(stderr, "%s: error: %s\n", error_get_progname(err), error_get(err));
+  if (gt_error_is_set(err)) {
+    fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err), gt_error_get(err));
     assert(had_err);
   }
-  error_delete(err);
+  gt_error_delete(err);
   if (allocators_clean())
     return 2; /* programmer error */
   if (had_err)

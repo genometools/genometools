@@ -101,7 +101,7 @@ Toolfunc toolbox_get(const Toolbox *tb, const char *toolname)
 static int show_tool_name(void *key, UNUSED void *value, UNUSED void *data,
                           UNUSED GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(key && value);
   if (strcmp(key, "dev") && strcmp(key, "template"))
     xputs(key);
@@ -112,7 +112,7 @@ int toolbox_show(UNUSED const char *progname, void *toolbox, UNUSED GT_Error *er
 {
   Toolbox *tb;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(toolbox);
   tb = (Toolbox*) toolbox;
   printf("\nTools:\n\n");

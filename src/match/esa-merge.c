@@ -62,7 +62,7 @@ static int inputthesequences(Alphabet **alpha,
   Str *indexname;
   Seqpos totallength;
 
-  error_check(err);
+  gt_error_check(err);
   for (idx=0; idx<gt_strarray_size(indexnametab); idx++)
   {
     indexname = gt_strarray_get_str(indexnametab,idx);
@@ -95,7 +95,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
   Seqpos suftabvalue;
   int retval;
 
-  error_check(err);
+  gt_error_check(err);
   for (idx=0; idx<numofindexes; idx++)
   {
     retval = readnextSeqposfromstream(&suftabvalue,
@@ -107,7 +107,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
     }
     if (retval == 0)
     {
-      error_set(err,"file %s: line %d: unexpected end of file when "
+      gt_error_set(err,"file %s: line %d: unexpected end of file when "
                         "reading suftab",__FILE__,__LINE__);
       return -2;
     }
@@ -128,7 +128,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
 {
   Mergertrienode *tmp;
 
-  error_check(err);
+  gt_error_check(err);
   for (tmp = smallest->parent; tmp != NULL; tmp = tmp->parent)
   {
     if (tmp->depth <= lcpvalue)
@@ -136,7 +136,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
       return tmp;
     }
   }
-  error_set(err,"path does not contain a node of depth <= " FormatSeqpos,
+  gt_error_set(err,"path does not contain a node of depth <= " FormatSeqpos,
                 PRINTSeqposcast(lcpvalue));
   return NULL;
 }
@@ -152,7 +152,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GT_Error *err)
          tmplastbranchdepth;
   unsigned int tmpidx;
 
-  error_check(err);
+  gt_error_check(err);
   for (emmesa->buf.nextstoreidx = 0;
       emmesa->numofentries > 0 &&
       emmesa->buf.nextstoreidx < (unsigned int) SIZEOFMERGERESULTBUFFER;
@@ -180,7 +180,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GT_Error *err)
       }
       if (retval == 0)
       {
-        error_set(err,"file %s: line %d: unexpected end of file when "
+        gt_error_set(err,"file %s: line %d: unexpected end of file when "
                         "reading lcptab",__FILE__,__LINE__);
         return -2;
       }
@@ -196,7 +196,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GT_Error *err)
         }
         if (retval == 0)
         {
-          error_set(err,"file %s: line %d: unexpected end of file when "
+          gt_error_set(err,"file %s: line %d: unexpected end of file when "
                         "reading llvtab",__FILE__,__LINE__);
           return -4;
         }
@@ -220,7 +220,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GT_Error *err)
       }
       if (retval == 0)
       {
-        error_set(err,"file %s: line %d: unexpected end of file when "
+        gt_error_set(err,"file %s: line %d: unexpected end of file when "
                       "reading suftab",__FILE__,__LINE__);
         return -6;
       }

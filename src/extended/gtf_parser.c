@@ -109,7 +109,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   Range range;
   GenomeNode *gn;
   Queue *genome_nodes = (Queue*) data;
-  error_check(err);
+  gt_error_check(err);
   assert(key && value && data);
   seqid = str_new_cstr(key);
   range = *(Range*) value;
@@ -133,7 +133,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
   unsigned long i;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(key && value && data);
   assert(gt_array_size(genome_node_array)); /* at least one node in array */
 
@@ -150,7 +150,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
     mRNA_strand = strand_join(mRNA_strand,
                               genome_feature_get_strand((GenomeFeature*) gn));
     if (str_cmp(mRNA_seqid, genome_node_get_seqid(gn))) {
-      error_set(err, "The features on lines %u and %u refer to different "
+      gt_error_set(err, "The features on lines %u and %u refer to different "
                 "genomic sequences (``seqname''), although they have the same "
                 "gene IDs (``gene_id'') which must be globally unique",
                 genome_node_get_line_number(first_node),
@@ -203,7 +203,7 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
   unsigned long i;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(key && value && data);
   cinfo->mRNAs = mRNAs;
   had_err = hashmap_foreach(transcript_id_hash, construct_mRNAs, cinfo, err);
@@ -291,7 +291,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   int had_err = 0;
 
   assert(parser && genome_nodes && fpin);
-  error_check(err);
+  gt_error_check(err);
 
   filename = str_get(filenamestr);
 
@@ -303,8 +303,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 #define HANDLE_ERROR                                                \
         if (had_err) {                                              \
           if (be_tolerant) {                                        \
-            fprintf(stderr, "skipping line: %s\n", error_get(err)); \
-            error_unset(err);                                       \
+            fprintf(stderr, "skipping line: %s\n", gt_error_get(err)); \
+            gt_error_unset(err);                                       \
             str_reset(line_buffer);                                 \
             had_err = 0;                                            \
             continue;                                               \
@@ -334,7 +334,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       splitter_reset(splitter);
       splitter_split(splitter, line, line_length, '\t');
       if (splitter_size(splitter) != 9UL) {
-        error_set(err, "line %lu in file \"%s\" contains %lu tab (\\t) "
+        gt_error_set(err, "line %lu in file \"%s\" contains %lu tab (\\t) "
                   "separated fields instead of 9", line_number, filename,
                   splitter_size(splitter));
         had_err = -1;
@@ -419,7 +419,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         /* look for the two mandatory attributes */
         if (strncmp(token, GENE_ID_ATTRIBUTE, strlen(GENE_ID_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(GENE_ID_ATTRIBUTE)) {
-            error_set(err, "missing value to attribute \"%s\" on line %lu in "
+            gt_error_set(err, "missing value to attribute \"%s\" on line %lu in "
                       "file \"%s\"", GENE_ID_ATTRIBUTE, line_number, filename);
             had_err = -1;
           }
@@ -429,7 +429,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         else if (strncmp(token, TRANSCRIPT_ID_ATTRIBUTE,
                          strlen(TRANSCRIPT_ID_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(TRANSCRIPT_ID_ATTRIBUTE)) {
-            error_set(err, "missing value to attribute \"%s\" on line %lu in "
+            gt_error_set(err, "missing value to attribute \"%s\" on line %lu in "
                       "file \"%s\"", TRANSCRIPT_ID_ATTRIBUTE, line_number,
                       filename);
             had_err = -1;
@@ -440,7 +440,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         else if (strncmp(token, GENE_NAME_ATTRIBUTE,
                          strlen(GENE_NAME_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(GENE_NAME_ATTRIBUTE)) {
-            error_set(err, "missing value to attribute \"%s\" on line %lu in "
+            gt_error_set(err, "missing value to attribute \"%s\" on line %lu in "
                       "file \"%s\"", GENE_NAME_ATTRIBUTE, line_number,
                       filename);
             had_err = -1;
@@ -456,7 +456,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         else if (strncmp(token, TRANSCRIPT_NAME_ATTRIBUTE,
                          strlen(TRANSCRIPT_NAME_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(TRANSCRIPT_NAME_ATTRIBUTE)) {
-            error_set(err, "missing value to attribute \"%s\" on line %lu in "
+            gt_error_set(err, "missing value to attribute \"%s\" on line %lu in "
                       "file \"%s\"", TRANSCRIPT_NAME_ATTRIBUTE, line_number,
                       filename);
             had_err = -1;
@@ -473,13 +473,13 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 
       /* check for the manadatory attributes */
       if (!gene_id) {
-        error_set(err, "missing attribute \"%s\" on line %lu in file \"%s\"",
+        gt_error_set(err, "missing attribute \"%s\" on line %lu in file \"%s\"",
                   GENE_ID_ATTRIBUTE, line_number, filename);
         had_err = -1;
       }
       HANDLE_ERROR;
       if (!transcript_id) {
-        error_set(err, "missing attribute \"%s\" on line %lu in file \"%s\"",
+        gt_error_set(err, "missing attribute \"%s\" on line %lu in file \"%s\"",
                   TRANSCRIPT_ID_ATTRIBUTE, line_number, filename);
         had_err = -1;
       }

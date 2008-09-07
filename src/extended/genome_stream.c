@@ -57,7 +57,7 @@ int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
   GenomeNode *new_node = NULL;
   int had_err = 0;
   assert(gs && gs->c_class && gs->c_class->next_tree);
-  error_check(err);
+  gt_error_check(err);
   /* filling */
   if (!gs->buffer)
     had_err = gs->c_class->next_tree(gs, &gs->buffer, err);

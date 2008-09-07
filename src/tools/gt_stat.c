@@ -36,7 +36,7 @@ static OPrval parse_options(int *parsed_args, StatArguments *arguments,
   OptionParser *op;
   Option *option;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Show statistics about features contained in GFF3 "
                          "files.");
@@ -86,7 +86,7 @@ int gt_stat(int argc, const char **argv, GT_Error *err)
   GenomeNode *gn;
   int parsed_args, had_err;
   StatArguments arguments;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {

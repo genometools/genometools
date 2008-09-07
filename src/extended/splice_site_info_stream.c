@@ -35,7 +35,7 @@ static int splice_site_info_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 {
   SpliceSiteInfoStream *ssis;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   ssis = splice_site_info_stream_cast(gs);
   had_err = genome_stream_next_tree(ssis->in_stream, gn, err);
   if (!had_err) {

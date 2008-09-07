@@ -201,7 +201,7 @@ int queue_iterate(Queue *q, QueueProcessor queue_processor, void *info,
 {
   long i;
   int rval;
-  error_check(err);
+  gt_error_check(err);
   assert(q && queue_processor);
   if (queue_size(q)) {
     if (q->front < q->back) { /* no wraparound */
@@ -228,7 +228,7 @@ int queue_iterate_reverse(Queue *q, QueueProcessor queue_processor, void *info,
 {
   long i;
   int rval;
-  error_check(err);
+  gt_error_check(err);
   assert(q && queue_processor);
   if (queue_size(q)) {
     if (q->front < q->back) { /* no wraparound */
@@ -262,7 +262,7 @@ static int check_queue(void **elem, void *info, GT_Error *err)
 {
   long *check_counter = info;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(check_counter);
   ensure(had_err, *check_counter == *(long*) elem);
   if (!had_err)
@@ -274,7 +274,7 @@ static int check_queue_reverse(void **elem, void *info, GT_Error *err)
 {
   long *check_counter_reverse = info;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(check_counter_reverse);
   ensure(had_err, *check_counter_reverse == *(long*) elem);
   if (!had_err)
@@ -294,7 +294,7 @@ int queue_unit_test(GT_Error *err)
   int had_err = 0;
   Queue *q;
 
-  error_check(err);
+  gt_error_check(err);
 
   /* without wraparound */
   q = queue_new();

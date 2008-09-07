@@ -566,7 +566,7 @@ static int searchforTSDandorMotifoutside(
   SubRepeatInfo subrepeatinfo;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
 
-  error_check(err);
+  gt_error_check(err);
 
   if ( contignumber == 0)
   {
@@ -737,7 +737,7 @@ int findcorrectboundaries(
   unsigned int motifmismatchesleftLTR = 0,
                motifmismatchesrightLTR = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   log_log("searching for correct boundaries in vicinity...\n");
   /* first: 5'-border of left LTR and 3'-border of right LTR */

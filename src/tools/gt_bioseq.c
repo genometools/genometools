@@ -128,11 +128,11 @@ static int gt_bioseq_arguments_check(int rest_argc, void *tool_arguments,
                                      GT_Error *err)
 {
   BioseqArguments *arguments = tool_arguments;
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
   /* option -showseqnum makes only sense if we got a single sequence file */
   if (arguments->showseqnum != UNDEF_ULONG && rest_argc > 1) {
-    error_set(err, "option '-showseqnum' makes only sense with a single "
+    gt_error_set(err, "option '-showseqnum' makes only sense with a single "
                    "sequence_file");
     return -1;
   }
@@ -146,7 +146,7 @@ static int gt_bioseq_runner(int argc, const char **argv, int parsed_args,
   Bioseq *bioseq;
   FastaReaderType reader_type = FASTA_READER_REC;
   int arg = parsed_args, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(tool_arguments);
 
   /* determine fasta reader type */
@@ -175,7 +175,7 @@ static int gt_bioseq_runner(int argc, const char **argv, int parsed_args,
 
     if (!had_err && arguments->showseqnum != UNDEF_ULONG) {
       if (arguments->showseqnum > bioseq_number_of_sequences(bioseq)) {
-        error_set(err, "argument '%lu' to option '-showseqnum' is too "
+        gt_error_set(err, "argument '%lu' to option '-showseqnum' is too "
                        "large. The Biosequence contains only '%lu' sequences.",
                   arguments->showseqnum, bioseq_number_of_sequences(bioseq));
         had_err = -1;

@@ -77,7 +77,7 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
   unsigned long long duplicates = 0, num_of_sequences = 0;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(tool_arguments);
 
   bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);

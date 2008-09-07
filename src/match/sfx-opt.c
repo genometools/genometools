@@ -58,7 +58,7 @@ static OPrval parse_options(int *parsed_args,
   OPrval oprval;
   Str *dirarg = str_new();
 
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[option ...] (-db file [...] | -ii index)",
                          doesa ? "Compute enhanced suffix array."
                                : "Compute packed index.");
@@ -257,7 +257,7 @@ static OPrval parse_options(int *parsed_args,
   {
     if (option_is_set(optiondb) && gt_strarray_size(so->filenametab) == 0)
     {
-      error_set(err,"missing argument to option -db");
+      gt_error_set(err,"missing argument to option -db");
       oprval = OPTIONPARSER_ERROR;
     } else
     {
@@ -267,7 +267,7 @@ static OPrval parse_options(int *parsed_args,
         {
           if (gt_strarray_size(so->filenametab) > 1UL)
           {
-            error_set(err,"if more than one input file is given, then "
+            gt_error_set(err,"if more than one input file is given, then "
                               "option -indexname is mandatory");
             oprval = OPTIONPARSER_ERROR;
           } else
@@ -297,7 +297,7 @@ static OPrval parse_options(int *parsed_args,
          !option_is_set(optionprotein) &&
          !option_is_set(optionsmap))
       {
-        error_set(err,"if option -plain is used, then any of the options "
+        gt_error_set(err,"if option -plain is used, then any of the options "
                           "-dna, -protein, or -smap is mandatory");
         oprval = OPTIONPARSER_ERROR;
       }
@@ -318,7 +318,7 @@ static OPrval parse_options(int *parsed_args,
   option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
   {
-    error_set(err,"superfluous program parameters");
+    gt_error_set(err,"superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
   if (oprval == OPTIONPARSER_OK)
@@ -408,7 +408,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   int parsed_args, retval = 0;
   OPrval rval;
 
-  error_check(err);
+  gt_error_check(err);
   so->isdna = false;
   so->isprotein = false;
   so->str_inputindex = str_new();

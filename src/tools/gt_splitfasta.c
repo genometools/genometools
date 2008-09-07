@@ -88,7 +88,7 @@ static GenFile* genfile_xopen_forcecheck(const char *path, const char *mode,
                                          bool force, GT_Error *err)
 {
   if (!force && file_exists(path)) {
-    error_set(err, "file \"%s\" exists already, use option -%s to overwrite",
+    gt_error_set(err, "file \"%s\" exists already, use option -%s to overwrite",
               path, FORCE_OPT_CSTR);
     return NULL;
   }
@@ -102,7 +102,7 @@ static int split_description(const char *filename, Str *splitdesc, bool force,
   Bioseq *bioseq;
   Str *descname;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(filename && splitdesc && str_length(splitdesc));
 
   descname = str_new();
@@ -142,7 +142,7 @@ static int split_fasta_file(const char *filename,
   unsigned long filenum = 0, bytecount = 0, separator_pos;
   int read_bytes, had_err = 0;
   char buf[BUFSIZ];
-  error_check(err);
+  gt_error_check(err);
   assert(filename && max_filesize_in_bytes);
 
   /* open source file */
@@ -151,14 +151,14 @@ static int split_fasta_file(const char *filename,
 
   /* read start characters */
   if ((read_bytes = genfile_xread(srcfp, buf, BUFSIZ)) == 0) {
-    error_set(err, "file \"%s\" is empty", filename);
+    gt_error_set(err, "file \"%s\" is empty", filename);
     had_err = -1;
   }
   bytecount += read_bytes;
 
   /* make sure the file is in fasta format */
   if (!had_err && buf[0] != '>') {
-    error_set(err, "file is not in FASTA format");
+    gt_error_set(err, "file is not in FASTA format");
     had_err = -1;
   }
 
@@ -227,7 +227,7 @@ static int gt_splitfasta_runner(UNUSED int argc, const char **argv,
   SplitfastaArguments *arguments = tool_arguments;
   unsigned long max_filesize_in_bytes;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   max_filesize_in_bytes = arguments->max_filesize_in_MB << 20;

@@ -168,7 +168,7 @@ int dlist_example(UNUSED GT_Error *err)
   Dlist *dlist;
   void *data;
   int elem = 1984;
-  error_check(err);
+  gt_error_check(err);
 
   dlist = dlist_new(NULL);
   dlist_add(dlist, &elem);
@@ -197,7 +197,7 @@ int dlist_unit_test(GT_Error *err)
       elems[MAX_SIZE],
       elems_backup[MAX_SIZE],
       had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* boundary case: empty dlist */
   dlist = dlist_new(intcompare);

@@ -254,7 +254,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
         }
         if (retval == 0)
         {
-          error_set(err,"file %s: line %d: unexpected end of file when "
+          gt_error_set(err,"file %s: line %d: unexpected end of file when "
                         "reading llvtab",__FILE__,__LINE__);
           return -1;
         }

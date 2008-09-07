@@ -128,7 +128,7 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
     {
       return numofrecords - 1;
     }
-    error_set(err,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
+    gt_error_set(err,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
                   PRINTSeqposcast(position));
     return numofrecords; /* failure */
   }
@@ -158,7 +158,7 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
       right = mid-1;
     }
   }
-  error_set(err,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
+  gt_error_set(err,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
                 PRINTSeqposcast(position));
   return numofrecords; /* failure */
 }
@@ -182,7 +182,7 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
     {
       return numofrecords - 1;
     }
-    error_set(err,"getrecordnumulong: cannot find position %lu",position);
+    gt_error_set(err,"getrecordnumulong: cannot find position %lu",position);
     return numofrecords; /* failure */
   }
   left = 0;
@@ -211,7 +211,7 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
       right = mid-1;
     }
   }
-  error_set(err,"getrecordnumulong: cannot find position %lu",position);
+  gt_error_set(err,"getrecordnumulong: cannot find position %lu",position);
   return numofrecords; /* failure */
 }
 

@@ -81,7 +81,7 @@ int union_find_unit_test(GT_Error *err)
   unsigned long i;
   UnionFind *uf;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* one element */
   uf = union_find_new(1);

@@ -33,7 +33,7 @@ static int gff3_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 {
   GFF3OutStream *gff3_out_stream;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   gff3_out_stream = gff3_out_stream_cast(gs);
   had_err = genome_stream_next_tree(gff3_out_stream->in_stream, gn, err);
   if (!had_err && *gn)

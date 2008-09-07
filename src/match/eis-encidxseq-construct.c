@@ -178,7 +178,7 @@ createEncIdxSeqGen(Seqpos totalLen, const Str *projectName,
                                   biVarBits, cbState, err);
     break;
   default:
-    error_set(err, "Illegal/unknown/unimplemented encoding requested!");
+    gt_error_set(err, "Illegal/unknown/unimplemented encoding requested!");
     break;
   }
   return seqIdx;
@@ -200,7 +200,7 @@ loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
                                    err);
     break;
   default:
-    error_set(err, "Illegal/unknown/unimplemented encoding requested!");
+    gt_error_set(err, "Illegal/unknown/unimplemented encoding requested!");
     break;
   }
   if (!seqIdx)

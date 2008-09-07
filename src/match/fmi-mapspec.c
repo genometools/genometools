@@ -53,7 +53,7 @@ int flushfmindex2file(FILE *fp,
 {
   Fmindexwithoptions fmwithoptions;
 
-  error_check(err);
+  gt_error_check(err);
   fmwithoptions.fmptr = fmindex;
   fmwithoptions.storeindexpos = storeindexpos;
   return flushtheindex2file(fp,assignfmmapspecification,
@@ -67,7 +67,7 @@ int fillfmmapspecstartptr(Fmindex *fmindex,
 {
   Fmindexwithoptions fmwithoptions;
 
-  error_check(err);
+  gt_error_check(err);
   fmwithoptions.fmptr = fmindex;
   fmwithoptions.storeindexpos = storeindexpos;
   return fillmapspecstartptr(assignfmmapspecification,

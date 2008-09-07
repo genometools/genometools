@@ -94,7 +94,7 @@ int safearith_example(UNUSED GT_Error *err)
   long slong;
   unsigned int a, b, c;
   int dest, src;
-  error_check(err);
+  gt_error_check(err);
 
   /* safe assignments */
   slong = 256;
@@ -124,7 +124,7 @@ int safearith_example(UNUSED GT_Error *err)
 int safearith_unit_test(GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   {
     ensure(had_err, __MIN(char) == -128);

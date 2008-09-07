@@ -47,7 +47,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
 
   if (maxpatternlen < minpatternlen)
   {
-    error_set(err,"maxpatternlen=%lu < %lu\n",
+    gt_error_set(err,"maxpatternlen=%lu < %lu\n",
                     maxpatternlen,
                     minpatternlen);
     return NULL;
@@ -56,7 +56,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   epi->totallength = getencseqtotallength(encseq);
   if (epi->totallength <= (Seqpos) maxpatternlen)
   {
-    error_set(err,"totallength=" FormatSeqpos " <= maxpatternlen = %lu\n",
+    gt_error_set(err,"totallength=" FormatSeqpos " <= maxpatternlen = %lu\n",
                     PRINTSeqposcast(epi->totallength),
                     maxpatternlen);
     FREESPACE(epi);

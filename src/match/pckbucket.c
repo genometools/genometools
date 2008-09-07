@@ -221,7 +221,7 @@ int pckbucket2file(const Str *indexname,const Pckbuckettable *pckbuckettable,
   FILE *fp;
   Seqpos seqposmaxdepth;
 
-  error_check(err);
+  gt_error_check(err);
   fp = opensfxfile(indexname,PCKBUCKETTABLE,"wb",err);
   if (fp == NULL)
   {
@@ -258,13 +258,13 @@ Pckbuckettable *mappckbuckettable(const Str *indexname,
   unsigned int maxdepth;
   Pckbuckettable *pckbt;
 
-  error_check(err);
+  gt_error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,PCKBUCKETTABLE);
   mapptr = fa_mmap_read(str_get(tmpfilename),&numofbytes);
   if (mapptr == NULL)
   {
-    error_set(err,"could not map datafile %s",str_get(tmpfilename));
+    gt_error_set(err,"could not map datafile %s",str_get(tmpfilename));
     haserr = true;
   }
   str_delete(tmpfilename);

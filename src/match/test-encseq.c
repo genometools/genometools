@@ -124,7 +124,7 @@ static int testfullscan(const GT_StrArray *filenametab,
   Encodedsequencescanstate *esr;
   unsigned long long fullscanpbar = 0;
 
-  error_check(err);
+  gt_error_check(err);
   totallength = getencseqtotallength(encseq);
   progressbar_start(&fullscanpbar,(unsigned long long) totallength);
   if (filenametab != NULL)
@@ -164,7 +164,7 @@ static int testfullscan(const GT_StrArray *filenametab,
     {
       if (ccscan != ccra)
       {
-        error_set(err,"access=%s, position=" FormatSeqpos
+        gt_error_set(err,"access=%s, position=" FormatSeqpos
                           ": scan (readnextchar) = %u != "
                           "%u = random access",
                           encseqaccessname(encseq),
@@ -178,7 +178,7 @@ static int testfullscan(const GT_StrArray *filenametab,
     ccsr = sequentialgetencodedchar(encseq,esr,pos,readmode);
     if (ccra != ccsr)
     {
-      error_set(err,"access=%s, mode=%s: position=" FormatSeqpos
+      gt_error_set(err,"access=%s, mode=%s: position=" FormatSeqpos
                         ": random access = %u != %u = sequential read",
                         encseqaccessname(encseq),
                         showreadmode(readmode),
@@ -195,7 +195,7 @@ static int testfullscan(const GT_StrArray *filenametab,
   {
     if (pos != totallength)
     {
-      error_set(err,"sequence length must be " FormatSeqpos " but is "
+      gt_error_set(err,"sequence length must be " FormatSeqpos " but is "
                          FormatSeqpos,totallength,pos);
       haserr = true;
     }

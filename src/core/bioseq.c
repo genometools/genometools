@@ -177,7 +177,7 @@ static int proc_description(const char *description, unsigned long length,
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   char *description_cstr;
-  error_check(err);
+  gt_error_check(err);
   if (info->bs->use_stdin) {
     description_cstr = cstr_dup(description);
     gt_array_add(info->bs->descriptions, description_cstr);
@@ -194,7 +194,7 @@ static int proc_sequence_part(const char *seqpart, unsigned long length,
                               void *data, UNUSED GT_Error *err)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
-  error_check(err);
+  gt_error_check(err);
   assert(seqpart);
   if (info->bs->use_stdin) {
     info->bs->raw_sequence = dynalloc(info->bs->raw_sequence,
@@ -214,7 +214,7 @@ static int proc_sequence_length(unsigned long sequence_length, void *data,
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   Range range;
-  error_check(err);
+  gt_error_check(err);
   if (info->bs->use_stdin) {
     range.start = info->offset;
     range.end = info->offset + sequence_length - 1;
@@ -256,7 +256,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
   Range range;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   /* parse the index file and fill the sequence to index mapping */
   index_line = str_new();
@@ -272,7 +272,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
       case 2:
         /* process sequence start */
         if (parse_ulong(&range.start, str_get(index_line))) {
-          error_set(err, "could not parse bioseq start in line %lu of file "
+          gt_error_set(err, "could not parse bioseq start in line %lu of file "
                          "\"%s\"", line_number, index_filename);
           had_err = -1;
         }
@@ -280,7 +280,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
       case 0:
         /* process sequence end */
         if (parse_ulong(&range.end, str_get(index_line))) {
-          error_set(err,
+          gt_error_set(err,
                     "could not parse bioseq end in line %lu of file \"%s\"",
                     line_number, index_filename);
           had_err = -1;
@@ -316,7 +316,7 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
   Str *sequence_filename;
   int had_err;
 
-  error_check(err);
+  gt_error_check(err);
 
   /* open files & init */
   if (!bs->use_stdin) {
@@ -417,12 +417,12 @@ static Bioseq* bioseq_new_with_recreate_and_type(Str *sequence_file,
 {
   Bioseq *bs;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   bs = ma_calloc(1, sizeof (Bioseq));
   if (!strcmp(str_get(sequence_file), "-"))
     bs->use_stdin = true;
   if (!bs->use_stdin && !file_exists(str_get(sequence_file))) {
-    error_set(err, "sequence file \"%s\" does not exist or is not readable",
+    gt_error_set(err, "sequence file \"%s\" does not exist or is not readable",
               str_get(sequence_file));
     had_err = -1;
   }
@@ -443,7 +443,7 @@ Bioseq* bioseq_new(const char *sequence_file, GT_Error *err)
 {
   Bioseq *bs;
   Str *seqfile;
-  error_check(err);
+  gt_error_check(err);
   seqfile = str_new_cstr(sequence_file);
   bs = bioseq_new_with_recreate_and_type(seqfile, false, FASTA_READER_REC, err);
   str_delete(seqfile);
@@ -454,7 +454,7 @@ Bioseq* bioseq_new_recreate(const char *sequence_file, GT_Error *err)
 {
   Bioseq *bs;
   Str *seqfile;
-  error_check(err);
+  gt_error_check(err);
   seqfile = str_new_cstr(sequence_file);
   bs = bioseq_new_with_recreate_and_type(seqfile, true, FASTA_READER_REC, err);
   str_delete(seqfile);
@@ -472,7 +472,7 @@ Bioseq* bioseq_new_with_fasta_reader(const char *sequence_file,
 {
   Bioseq *bs;
   Str *seqfile;
-  error_check(err);
+  gt_error_check(err);
   seqfile = str_new_cstr(sequence_file);
   bs = bioseq_new_with_recreate_and_type(seqfile, true, fasta_reader, err);
   str_delete(seqfile);

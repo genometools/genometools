@@ -48,13 +48,13 @@ void bioseq_iterator_delete(BioseqIterator *bsi)
 int bioseq_iterator_next(BioseqIterator *bsi, Bioseq **bioseq, GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(bsi && bioseq);
   if (bsi->current_file < bsi->seqfile_counter) {
     if (bsi->sequence_files[bsi->current_file] &&
         !strcmp(bsi->sequence_files[bsi->current_file], "-")) {
       if (bsi->stdin_was_used) {
-        error_set(err, "multiple specification of sequence file \"-\"");
+        gt_error_set(err, "multiple specification of sequence file \"-\"");
         had_err = -1;
       }
       else

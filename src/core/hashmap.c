@@ -220,7 +220,7 @@ int
 hashmap_unit_test(GT_Error *err)
 {
   int had_err;
-  error_check(err);
+  gt_error_check(err);
 
   /* direct hash */
   had_err = hashmap_test(HASH_DIRECT);
@@ -231,7 +231,7 @@ hashmap_unit_test(GT_Error *err)
 
   if (had_err)
   {
-    error_set(err, "hashmap operation created inconsistent state.");
+    gt_error_set(err, "hashmap operation created inconsistent state.");
   }
   return had_err;
 }

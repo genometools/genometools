@@ -32,11 +32,11 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
   Range exon;
   Str *id;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
 #define CHECKLINELENGTH\
         if (!had_err && i >= line_length) {        \
-          error_set(err, "incomplete input line\n" \
+          gt_error_set(err, "incomplete input line\n" \
                        "line=%s", line);           \
           return had_err = -1;                     \
         }
@@ -69,7 +69,7 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
   else if (line[i] == REVERSESTRANDCHAR)
     *alignment = sspliced_alignment_new(str_get(id), false);
   else {
-    error_set(err, "wrong formatted input line, orientation must be %c or %c\n"
+    gt_error_set(err, "wrong formatted input line, orientation must be %c or %c\n"
                    "line=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
     had_err = -1;
   }
@@ -77,7 +77,7 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
   CHECKLINELENGTH;
 
   if (!had_err && line[i] != DELIMITER) {
-    error_set(err, "incomplete input line\nline=%s", line);
+    gt_error_set(err, "incomplete input line\nline=%s", line);
     had_err = -1;
   }
 
@@ -86,7 +86,7 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
       i++;
       CHECKLINELENGTH;
       if (!had_err && sscanf(line+i, "%ld-%ld", &leftpos, &rightpos) != 2) {
-        error_set(err, "incomplete input line\nline=%s", line);
+        gt_error_set(err, "incomplete input line\nline=%s", line);
         had_err = -1;
       }
       if (!had_err) {
@@ -119,7 +119,7 @@ int sspliced_alignment_parse(GT_Array *spliced_alignments, const char *filename,
   SSplicedAlignment *sa;
   int had_err = 0;
   Str *line;
-  error_check(err);
+  gt_error_check(err);
 
   line = str_new();
   input_file = fa_xfopen(filename, "r");

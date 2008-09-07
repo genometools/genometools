@@ -75,7 +75,7 @@ GTR* gtr_new(GT_Error *err)
   gtr->testspacepeak = str_new();
   gtr->L = luaL_newstate();
   if (!gtr->L) {
-    error_set(err, "out of memory (cannot create new lua state)");
+    gt_error_set(err, "out of memory (cannot create new lua state)");
     had_err = -1;
   }
   if (!had_err) {
@@ -95,7 +95,7 @@ GTR* gtr_new(GT_Error *err)
       had_err = -1;
   }
   if (!had_err) {
-    if (!(style_file = gtdata_get_path(error_get_progname(err), err)))
+    if (!(style_file = gtdata_get_path(gt_error_get_progname(err), err)))
       had_err = -1;
   }
   if (!had_err) {
@@ -132,7 +132,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   Option *o, *debug_option, *debugfp_option;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
   assert(gtr);
   op = option_parser_new("[option ...] [tool | script] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
@@ -193,7 +193,7 @@ run_test(void *key, void *value, void *data, GT_Error *err)
   int had_err, *had_errp;
   char *testname = key;
   UnitTestFunc test = value;
-  error_check(err);
+  gt_error_check(err);
   assert(testname && test && data);
   had_errp = (int*) data;
   printf("%s...", testname);
@@ -202,8 +202,8 @@ run_test(void *key, void *value, void *data, GT_Error *err)
   if (had_err) {
     xputs("error");
     *had_errp = had_err;
-    fprintf(stderr, "first error: %s\n", error_get(err));
-    error_unset(err);
+    fprintf(stderr, "first error: %s\n", gt_error_get(err));
+    gt_error_unset(err);
     xfflush(stderr);
   }
   else
@@ -222,7 +222,7 @@ static int check64bit(void)
 static int run_tests(GTR *gtr, GT_Error *err)
 {
   int test_err = 0, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(gtr);
 
   /* The following type assumptions are made in the GenomeTools library. */
@@ -271,7 +271,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
   char **nargv = NULL;
   void *mem, *map;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(gtr);
   if (gtr->debug)
     enable_logging(str_get(gtr->debugfp), &gtr->logfp);
@@ -288,7 +288,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
     ma_free(mem);
   }
   if (argc == 0 && !gtr->interactive) {
-    error_set(err, "neither tool nor script specified; option -help lists "
+    gt_error_set(err, "neither tool nor script specified; option -help lists "
                    "possible tools");
     had_err = -1;
   }
@@ -297,12 +297,12 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
       /* no tool found -> try to open script */
       if (file_exists(argv[0])) {
         /* run script */
-        nargv = cstr_array_prefix_first(argv, error_get_progname(err));
+        nargv = cstr_array_prefix_first(argv, gt_error_get_progname(err));
         lua_set_arg(gtr->L, nargv[0], (const char**) nargv+1);
         if (luaL_dofile(gtr->L, argv[0])) {
           /* error */
           assert(lua_isstring(gtr->L, -1)); /* error message on top */
-          error_set(err, "could not execute script %s",
+          gt_error_set(err, "could not execute script %s",
                     lua_tostring(gtr->L, -1));
           had_err = -1;
           lua_pop(gtr->L, 1); /* pop error message */
@@ -310,7 +310,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
       }
       else {
         /* neither tool nor script found */
-        error_set(err, "neither tool nor script '%s' found; option -help lists "
+        gt_error_set(err, "neither tool nor script '%s' found; option -help lists "
                        "possible tools", argv[0]);
         had_err = -1;
       }
@@ -321,8 +321,8 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
         tool = toolbox_get_tool(gtr->tools, argv[0]);
         assert(tool);
       }
-      nargv = cstr_array_prefix_first(argv, error_get_progname(err));
-      error_set_progname(err, nargv[0]);
+      nargv = cstr_array_prefix_first(argv, gt_error_get_progname(err));
+      gt_error_set_progname(err, nargv[0]);
       if (toolfunc)
         had_err = toolfunc(argc, (const char**) nargv, err);
       else
@@ -331,8 +331,8 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
   }
   cstr_array_delete(nargv);
   if (!had_err && gtr->interactive) {
-    showshortversion(error_get_progname(err));
-    lua_set_arg(gtr->L, error_get_progname(err), argv);
+    showshortversion(gt_error_get_progname(err));
+    lua_set_arg(gtr->L, gt_error_get_progname(err), argv);
     run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)

@@ -25,22 +25,22 @@
 /* the error class */
 typedef struct GT_Error GT_Error;
 
-GT_Error*      error_new(void);
-void        error_set(GT_Error*, const char *format, ...)
+GT_Error*   gt_error_new(void);
+void        gt_error_set(GT_Error*, const char *format, ...)
               __attribute__ ((format (printf, 2, 3)));
-void        error_vset(GT_Error*, const char *format, va_list);
-bool        error_is_set(const GT_Error*);
-void        error_unset(GT_Error*);
+void        gt_error_vset(GT_Error*, const char *format, va_list);
+bool        gt_error_is_set(const GT_Error*);
+void        gt_error_unset(GT_Error*);
 /* get the error string (the error must be set) */
-const char* error_get(const GT_Error*);
-void        error_set_progname(GT_Error*, const char *progname);
-const char* error_get_progname(const GT_Error*);
-void        error_delete(GT_Error*);
+const char* gt_error_get(const GT_Error*);
+void        gt_error_set_progname(GT_Error*, const char *progname);
+const char* gt_error_get_progname(const GT_Error*);
+void        gt_error_delete(GT_Error*);
 
 /* make sure that the error is not set, should be used at the beginning of
    every routine which has an GT_Error* argument */
 
-#define error_check(err)\
-        assert(!err || !error_is_set(err))
+#define gt_error_check(err)\
+        assert(!err || !gt_error_is_set(err))
 
 #endif

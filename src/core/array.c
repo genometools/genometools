@@ -192,7 +192,7 @@ int gt_array_iterate(GT_Array *a, GT_ArrayProcessor gt_array_processor, void *in
 {
   unsigned long idx;
   int rval;
-  error_check(err);
+  gt_error_check(err);
   assert(a && gt_array_processor);
   for (idx = 0; idx < gt_array_size(a); idx++) {
     if ((rval = gt_array_processor(gt_array_get(a, idx), info, err)))
@@ -206,7 +206,7 @@ int gt_array_iterate_reverse(GT_Array *a, GT_ArrayProcessor gt_array_processor, 
 {
   unsigned long idx;
   int rval;
-  error_check(err);
+  gt_error_check(err);
   assert(a && gt_array_processor);
   for (idx = gt_array_size(a); idx > 0; idx--) {
     if ((rval = gt_array_processor(gt_array_get(a, idx-1), info, err)))
@@ -220,7 +220,7 @@ static int iterate_test_func(void *value, void *info, UNUSED GT_Error *err)
   unsigned long *i;
   Range range;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   i = (unsigned long*) info;
   range = *(Range*) value;
   ensure(had_err, range.start == *i + 1);
@@ -240,7 +240,7 @@ int gt_array_example(UNUSED GT_Error *err)
   unsigned long i;
   GT_Array *a;
 
-  error_check(err);
+  gt_error_check(err);
 
   /* an example array use case */
 
@@ -265,7 +265,7 @@ int gt_array_unit_test(GT_Error *err)
   unsigned long i, j, size;
   Range range;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* testing an empty array */
   char_array = gt_array_new(sizeof (char));

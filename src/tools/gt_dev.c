@@ -82,12 +82,12 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
   int had_err = 0;
   char **nargv = NULL;
 
-  error_check(err);
+  gt_error_check(err);
   assert(dev_toolbox);
 
   /* get development tools */
   if (!toolbox_has_tool(dev_toolbox, argv[parsed_args])) {
-    error_set(err, "development tool '%s' not found; option -help lists "
+    gt_error_set(err, "development tool '%s' not found; option -help lists "
                    "possible tools", argv[parsed_args]);
     had_err = -1;
   }
@@ -99,8 +99,8 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
       assert(tool);
     }
     nargv = cstr_array_prefix_first(argv + parsed_args,
-                                    error_get_progname(err));
-    error_set_progname(err, nargv[0]);
+                                    gt_error_get_progname(err));
+    gt_error_set_progname(err, nargv[0]);
     if (toolfunc)
       had_err = toolfunc(argc - parsed_args , (const char**) nargv, err);
     else

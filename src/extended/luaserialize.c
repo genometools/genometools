@@ -27,7 +27,7 @@ static int format_scalar(lua_State *L, Str *out, int index, bool table_key,
                          GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(!lua_istable(L, index));
   if (lua_isboolean(L, index))
   {
@@ -65,7 +65,7 @@ static int format_scalar(lua_State *L, Str *out, int index, bool table_key,
       str_append_cstr(out, "]");
   }
   else {
-    error_set(err, "expected boolean, number, or string");
+    gt_error_set(err, "expected boolean, number, or string");
     had_err = -1;
   }
   return had_err;
@@ -74,7 +74,7 @@ static int format_scalar(lua_State *L, Str *out, int index, bool table_key,
 static int parse_table(lua_State *L, Str *out, int index, int level, GT_Error *err)
 {
   int rval, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(lua_istable(L, index));
   lua_pushnil(L);
   if (index < 0)
@@ -107,7 +107,7 @@ static int parse_table(lua_State *L, Str *out, int index, int level, GT_Error *e
 
 int lua_table_to_str(lua_State *L, Str *out, int index, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(L && out && lua_istable(L, index));
   return parse_table(L, out, index, 1, err);
 }
@@ -138,7 +138,7 @@ int lua_serializer_unit_test(GT_Error *err)
   "  },\n"
   "}\n"
   "";
-  error_check(err);
+  gt_error_check(err);
 
   L = luaL_newstate();
   ensure(had_err, L);

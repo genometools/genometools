@@ -46,7 +46,7 @@
                    (size_t) mapspecptr->numofunits, fp) !=\
                     (size_t) mapspecptr->numofunits)\
         {\
-          error_set(err,"cannot write %lu items of size %u: "\
+          gt_error_set(err,"cannot write %lu items of size %u: "\
                             "errormsg=\"%s\"",\
                         (unsigned long) mapspecptr->numofunits,\
                         (unsigned int) mapspecptr->sizeofunit,\
@@ -93,7 +93,7 @@ static int assigncorrecttype(Mapspecification *mapspec,
   void *voidptr;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   switch (mapspec->typespec)
   {
     case UcharType:
@@ -127,7 +127,7 @@ static int assigncorrecttype(Mapspecification *mapspec,
       ASSIGNPTR2STARTPTR(Twobitencoding);
       break;
     default:
-      error_set(err,"no assignment specification for size %lu",
+      gt_error_set(err,"no assignment specification for size %lu",
                     (unsigned long) mapspec->sizeofunit);
       haserr = true;
   }
@@ -152,13 +152,13 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   bool haserr = false;
   unsigned long totalpadunits = 0;
 
-  error_check(err);
+  gt_error_check(err);
   INITARRAY(&mapspectable,Mapspecification);
   assignmapspec(&mapspectable,assignmapinfo,false);
   mapptr = fa_mmap_read(str_get(tmpfilename), &numofbytes);
   if (mapptr == NULL)
   {
-    error_set(err,"could not map datafile %s",str_get(tmpfilename));
+    gt_error_set(err,"could not map datafile %s",str_get(tmpfilename));
     haserr = true;
   }
   *mappeduserptr = mapptr;
@@ -175,7 +175,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
     expectedaccordingtomapspec = detexpectedaccordingtomapspec(&mapspectable);
     if (expectedaccordingtomapspec != (uint64_t) numofbytes)
     {
-      error_set(err,"%lu bytes read from %s, but " Formatuint64_t
+      gt_error_set(err,"%lu bytes read from %s, but " Formatuint64_t
                          " expected",
                          (unsigned long) numofbytes,
                          str_get(tmpfilename),
@@ -221,7 +221,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   {
     if (expectedsize + totalpadunits != byteoffset)
     {
-      error_set(err,"mapping: expected size of index is %lu bytes, "
+      gt_error_set(err,"mapping: expected size of index is %lu bytes, "
                         "but index has %lu bytes",
                         expectedsize,byteoffset);
       haserr = true;
@@ -244,7 +244,7 @@ int flushtheindex2file(FILE *fp,
   Uchar padbuffer[ALIGNSIZE-1] = {0};
   unsigned long totalpadunits = 0;
 
-  error_check(err);
+  gt_error_check(err);
   INITARRAY(&mapspectable,Mapspecification);
   assignmapspec(&mapspectable,assignmapinfo,true);
   assert(mapspectable.spaceMapspecification != NULL);
@@ -293,7 +293,7 @@ int flushtheindex2file(FILE *fp,
           WRITEACTIONWITHTYPE(Twobitencoding);
           break;
         default:
-           error_set(err,"no map specification for size %lu",
+           gt_error_set(err,"no map specification for size %lu",
                          (unsigned long) mapspecptr->sizeofunit);
            haserr = true;
       }
@@ -312,7 +312,7 @@ int flushtheindex2file(FILE *fp,
       if (fwrite(padbuffer,
                 sizeof (Uchar),padunits,fp) != padunits)
       {
-        error_set(err,"cannot write %lu items of size %u: "
+        gt_error_set(err,"cannot write %lu items of size %u: "
                           "errormsg=\"%s\"",
                            (unsigned long) padunits,
                            (unsigned int) sizeof (Uchar),
@@ -327,7 +327,7 @@ int flushtheindex2file(FILE *fp,
   {
     if (expectedsize + totalpadunits != byteoffset)
     {
-      error_set(err,"flushindex: expected size of index is %lu bytes, "
+      gt_error_set(err,"flushindex: expected size of index is %lu bytes, "
                         "but index has %lu bytes",
                         expectedsize,
                         byteoffset);

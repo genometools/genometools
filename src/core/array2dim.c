@@ -23,7 +23,7 @@ int array2dim_example(UNUSED GT_Error *err)
 {
   double **a2dim;
   int i, j;
-  error_check(err);
+  gt_error_check(err);
 
   /* create a 10 x 20 double array */
   array2dim_malloc(a2dim, 10, 20);

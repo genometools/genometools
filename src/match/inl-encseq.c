@@ -35,7 +35,7 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,GT_Error *err)
   FILE *fp;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   fp = opensfxfile(indexname,TISTABFILESUFFIX,"wb",err);
   if (fp == NULL)
   {
@@ -100,7 +100,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
   int retval;
   Uchar cc;
 
-  error_check(err);
+  gt_error_check(err);
   ALLOCASSIGNSPACE(encseq->plainseq,NULL,Uchar,encseq->totallength);
   encseq->hasownmemory = true;
   encseq->mappedfile = false;
@@ -146,7 +146,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
   FastaBuffer *fb = NULL;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   fb = fastabuffer_new(filenametab,
                        plainformat ? NULL : getsymbolmapAlphabet(alphabet),
                        plainformat,

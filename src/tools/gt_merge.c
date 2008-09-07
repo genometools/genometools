@@ -29,7 +29,7 @@ static OPrval parse_options(int *parsed_args, GenFile **outfp, int argc,
   OptionParser *op;
   OutputFileInfo *ofi;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Merge sorted GFF3 files in sorted fashion.");
   ofi = outputfileinfo_new();

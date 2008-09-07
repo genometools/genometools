@@ -246,7 +246,7 @@ static int set_actuals_and_sort_them(UNUSED void *key, void *value, void *data,
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *s = (Slot*) value;
 
-  error_check(err);
+  gt_error_check(err);
   assert(key && value && data);
 
   /* set actual genes */
@@ -422,7 +422,7 @@ static int process_real_feature(GenomeNode *gn, void *data, UNUSED GT_Error *err
   GenomeFeature *gf;
   Range range;
 
-  error_check(err);
+  gt_error_check(err);
   assert(gn && data);
   gf = (GenomeFeature*) gn;
 
@@ -524,7 +524,7 @@ static int store_exon(GenomeNode *gn, void *data, UNUSED GT_Error *err)
   GT_Array *exons = (GT_Array*) data;
   Range range;
   GenomeFeature *gf;
-  error_check(err);
+  gt_error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && exons);
   if (genome_feature_has_type(gf, gft_exon)) {
@@ -578,7 +578,7 @@ static int store_gene_feature(GenomeNode *gn, void *data, UNUSED GT_Error *err)
   GenomeFeature *gf;
   Store_gene_feature_info *info = (Store_gene_feature_info*) data;
   Range range;
-  error_check(err);
+  gt_error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && info);
   if (genome_feature_has_type(gf, gft_mRNA)) {
@@ -871,7 +871,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
   GT_Array *real_genome_nodes;
   GenomeNode **real_gn;
 
-  error_check(err);
+  gt_error_check(err);
   assert(gn && data);
 
   predicted_range = genome_node_get_range(gn);
@@ -1142,7 +1142,7 @@ int determine_missing_features(UNUSED void *key, void *value, void *data,
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
-  error_check(err);
+  gt_error_check(err);
   assert(key && value && data);
   if (slot->overlapped_genes_forward) {
     se->missing_genes += bittab_size(slot->overlapped_genes_forward) -
@@ -1197,7 +1197,7 @@ int compute_nucleotides_values(UNUSED void *key, void *value, void *data,
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
   Bittab *tmp;
-  error_check(err);
+  gt_error_check(err);
   assert(key && value && data);
   /* add ``out of range'' FPs */
   se->mRNA_nucleotides.FP += slot->FP_mRNA_nucleotides_forward;
@@ -1237,7 +1237,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   ProcessPredictedFeatureInfo predicted_info;
   int had_err;
 
-  error_check(err);
+  gt_error_check(err);
   assert(se);
 
   /* init */

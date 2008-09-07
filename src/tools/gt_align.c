@@ -78,7 +78,7 @@ static int gt_align_runner(UNUSED int argc, const char **argv, int parsed_args,
   unsigned long i, j;
   int had_err = 0;
   Alignment *a;
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* init */

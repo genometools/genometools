@@ -80,7 +80,7 @@ static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
   Str *description,
       *sequence;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   efv = extract_feat_visitor_cast(gv);
   assert(efv->region_mapping);
   gni = genome_node_iterator_new((GenomeNode*) gf);

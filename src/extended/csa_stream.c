@@ -34,7 +34,7 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
 {
   CSAStream *cs;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   cs = csa_stream_cast(gs);
 
   /* we have still nodes in the buffer */

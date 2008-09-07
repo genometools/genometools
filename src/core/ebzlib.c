@@ -22,9 +22,9 @@
 BZFILE* ebzopen(const char *path, const char *mode, GT_Error *err)
 {
   BZFILE* file;
-  error_check(err);
+  gt_error_check(err);
   if (!(file = BZ2_bzopen(path, mode))) {
-    error_set(err, "BZ2_bzopen(): cannot open file '%s': %s\n", path,
+    gt_error_set(err, "BZ2_bzopen(): cannot open file '%s': %s\n", path,
               strerror(errno));
   }
   return file;

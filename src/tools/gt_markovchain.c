@@ -40,7 +40,7 @@ static int gt_markovchain_runner(UNUSED int argc, const char **argv,
   double P;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   if (!(mc = markov_chain_parse(argv[parsed_args], err)))
     had_err = -1;

@@ -56,7 +56,7 @@ static int add_exon_number(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   StatVisitor *stat_visitor = (StatVisitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
-  error_check(err);
+  gt_error_check(err);
   assert(stat_visitor && gf);
   if (genome_feature_has_type(gf, gft_exon))
     stat_visitor->exon_number_for_distri++;
@@ -68,7 +68,7 @@ static int compute_statistics(GenomeNode *gn, void *data, GT_Error *err)
   StatVisitor *stat_visitor;
   GenomeFeature *gf;
   int rval;
-  error_check(err);
+  gt_error_check(err);
   assert(data);
   stat_visitor = (StatVisitor*) data;
   gf = (GenomeFeature*) gn;
@@ -124,7 +124,7 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                        GT_Error *err)
 {
   StatVisitor *stat_visitor;
-  error_check(err);
+  gt_error_check(err);
   stat_visitor = stat_visitor_cast(gv);
   return genome_node_traverse_children((GenomeNode*) gf, stat_visitor,
                                        compute_statistics, false, err);
@@ -134,7 +134,7 @@ static int stat_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
                                         UNUSED GT_Error *err)
 {
   StatVisitor *stat_visitor;
-  error_check(err);
+  gt_error_check(err);
   stat_visitor = stat_visitor_cast(gv);
   stat_visitor->number_of_sequence_regions++;
   stat_visitor->total_length_of_sequence_regions +=

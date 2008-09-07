@@ -174,7 +174,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   GenomeNode *gn;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* create a gff3 input stream */

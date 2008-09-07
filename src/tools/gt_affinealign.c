@@ -74,7 +74,7 @@ static int gt_affinealign_runner(UNUSED int argc, const char **argv,
   Alignment *a;
   Costs *costs = tool_arguments;
 
-  error_check(err);
+  gt_error_check(err);
   assert(costs);
 
   /* init */

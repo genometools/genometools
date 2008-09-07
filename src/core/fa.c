@@ -82,7 +82,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
 {
   void  *fp = NULL;
   FAFileInfo *fileinfo;
-  error_check(err);
+  gt_error_check(err);
   assert(fa && path && mode);
   fileinfo = ma_malloc(sizeof (FAFileInfo));
   fileinfo->filename = filename;
@@ -151,7 +151,7 @@ static void xfclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
 FILE* fa_fopen_func(const char *path, const char *mode,
                     const char *filename, int line, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(path && mode);
   if (!fa) fa_init();
   assert(fa);
@@ -188,7 +188,7 @@ void fa_xfclose(FILE *stream)
 gzFile fa_gzopen_func(const char *path, const char *mode,
                       const char *filename, int line, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(path && mode);
   if (!fa) fa_init();
   assert(fa);
@@ -223,7 +223,7 @@ void fa_xgzclose(gzFile stream)
 BZFILE* fa_bzopen_func(const char *path, const char *mode,
                        const char *filename, int line, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(path && mode);
   if (!fa) fa_init();
   assert(fa);

@@ -136,7 +136,7 @@ void gff3parser_set_offset(GFF3Parser *parser, long offset)
 
 int gff3parser_set_offsetfile(GFF3Parser *parser, Str *offsetfile, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(parser);
   assert(parser->offset == UNDEF_LONG);
   parser->offset_mapping = mapping_new(offsetfile, "offsets",
@@ -157,7 +157,7 @@ static int add_offset_if_necessary(Range *range, GFF3Parser *parser,
 {
   long offset;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   if (parser->offset != UNDEF_LONG)
     *range = range_offset(*range, parser->offset);
   else if (parser->offset_mapping) {
@@ -180,7 +180,7 @@ static int parse_target_attribute(const char *value, Str *target_id,
   Splitter *splitter;
   Range parsed_range;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(value && filename);
   splitter = splitter_new();
   unescaped_target = str_new();
@@ -188,7 +188,7 @@ static int parse_target_attribute(const char *value, Str *target_id,
   splitter_split(splitter, escaped_target, strlen(escaped_target), ' ');
   num_of_tokens = splitter_size(splitter);
   if (!(num_of_tokens == 3 || num_of_tokens == 4)) {
-    error_set(err, "Target attribute value '%s' on line %u in file \"%s\" "
+    gt_error_set(err, "Target attribute value '%s' on line %u in file \"%s\" "
               "must have 3 or 4 blank separated entries", value, line_number,
               filename);
     had_err = -1;
@@ -235,7 +235,7 @@ int gff3parser_parse_target_attributes(const char *values,
   unsigned long i;
   char *targets;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(values && filename);
   targets = cstr_dup(values);
   splitter = splitter_new();
@@ -262,7 +262,7 @@ static int get_seqid_str(Str **seqid_str, const char *seqid, Range range,
   SimpleSequenceRegion *ssr;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   ssr = hashmap_get(parser->seqid_to_ssr_mapping, seqid);
   if (!ssr) {
@@ -294,7 +294,7 @@ static int get_seqid_str(Str **seqid_str, const char *seqid, Range range,
   else {
     /* perform range check */
     if (!range_contains(ssr->range, range)) {
-      error_set(err, "range (%lu,%lu) of feature on line %u in file \"%s\" "
+      gt_error_set(err, "range (%lu,%lu) of feature on line %u in file \"%s\" "
                 "is not contained in range (%lu,%lu) of corresponding "
                 "sequence region on line %u", range.start, range.end,
                 line_number, filename, ssr->range.start, ssr->range.end,
@@ -317,7 +317,7 @@ static int replace_func(void **elem, void *info, UNUSED GT_Error *err)
 {
   ReplaceInfo *replace_info = info;
   GenomeNode **node = (GenomeNode**) elem;
-  error_check(err);
+  gt_error_check(err);
   assert(node && replace_info);
   if (*node == replace_info->node_to_replace) {
     *node = replace_info->replacing_node;
@@ -402,13 +402,13 @@ static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
   GenomeNode *gn;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(id && genome_feature && parser);
 
   if ((gn = feature_info_get(parser->feature_info, id))) {
     /* this id has been used already -> try to make this a multi-feature */
     if (genome_node_get_line_number(gn) < parser->last_terminator) {
-      error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
+      gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                 "\"%s\" is separated from its counterpart on line %u by "
                 "terminator %s on line %u", ID_STRING, id, line_number,
                 filename, genome_node_get_line_number(gn), GFF_TERMINATOR,
@@ -598,7 +598,7 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
   unsigned long i;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(parent_attr);
 
   valid_parents = gt_strarray_new();
@@ -612,7 +612,7 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
     parent_gf = feature_info_get(parser->feature_info, parent);
     if (!parent_gf) {
       if (!parser->tidy) {
-        error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
+        gt_error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
                   "previously defined (via \"%s=\")", PARENT_STRING, parent,
                   line_number, filename, ID_STRING);
         had_err = -1;
@@ -625,7 +625,7 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
     }
     else if (str_cmp(genome_node_get_seqid(parent_gf),
                      genome_node_get_seqid(genome_feature))) {
-      error_set(err, "child on line %u in file \"%s\" has different "
+      gt_error_set(err, "child on line %u in file \"%s\" has different "
                 "sequence id than its parent on line %u ('%s' vs. '%s')",
                 genome_node_get_line_number(genome_feature), filename,
                 genome_node_get_line_number(parent_gf),
@@ -677,12 +677,12 @@ static int check_missing_attributes(GenomeNode *this_feature,
 {
   unsigned long i;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(this_feature && this_attributes && other_feature);
   for (i = 0; !had_err && i < gt_strarray_size(this_attributes); i++) {
     if (!genome_feature_get_attribute(other_feature,
                                       gt_strarray_get(this_attributes, i))) {
-      error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
+      gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                 "\"%s\" does not have a '%s' attribute which is present in its "
                 "counterpart on line %u", ID_STRING, id,
                 genome_node_get_line_number(other_feature), filename,
@@ -702,7 +702,7 @@ static int compare_target_attribute(GenomeNode *new_gf, GenomeNode *old_gf,
   Str *new_target_str, *old_target_str;
   const char *new_target, *old_target;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   assert(new_gf && old_gf);
   new_target = genome_feature_get_attribute(new_gf, TARGET_STRING);
   old_target = genome_feature_get_attribute(old_gf, TARGET_STRING);
@@ -717,7 +717,7 @@ static int compare_target_attribute(GenomeNode *new_gf, GenomeNode *old_gf,
                                                0, NULL);
   assert(!had_err); /* has been parsed already */
   if (str_cmp(new_target_str, old_target_str)) {
-    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+    gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
               "has a different %s name than its counterpart on line %u",
               ID_STRING, id, genome_node_get_line_number(new_gf),
               genome_node_get_filename(new_gf), TARGET_STRING,
@@ -733,11 +733,11 @@ static int compare_other_attribute(const char *attr_name, GenomeNode *new_gf,
                                    GenomeNode *old_gf, const char *id,
                                    GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(attr_name && new_gf && old_gf);
   if (strcmp(genome_feature_get_attribute(new_gf, attr_name),
               genome_feature_get_attribute(old_gf, attr_name))) {
-    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+    gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
               "has a different attribute '%s' than its counterpart on line %u "
               "('%s' vs. '%s')",
               ID_STRING, id, genome_node_get_line_number(new_gf),
@@ -756,13 +756,13 @@ static int check_multi_feature_constrains(GenomeNode *new_gf,
                                           unsigned int line_number, GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(new_gf && old_gf);
   assert(!genome_feature_is_pseudo((GenomeFeature*) new_gf));
   assert(!genome_feature_is_pseudo((GenomeFeature*) old_gf));
   /* check seqid */
   if (str_cmp(genome_node_get_seqid(new_gf), genome_node_get_seqid(old_gf))) {
-    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+    gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
               "has a different sequence id than its counterpart on line %u",
               ID_STRING, id, line_number, filename,
               genome_node_get_line_number(old_gf));
@@ -771,7 +771,7 @@ static int check_multi_feature_constrains(GenomeNode *new_gf,
   /* check source */
   if (!had_err && strcmp(genome_feature_get_source((GenomeFeature*) new_gf),
                          genome_feature_get_source((GenomeFeature*) old_gf))) {
-    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+    gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
               "has a different source than its counterpart on line %u",
               ID_STRING, id, line_number, filename,
               genome_node_get_line_number(old_gf));
@@ -780,7 +780,7 @@ static int check_multi_feature_constrains(GenomeNode *new_gf,
   /* check type */
   if (!had_err && genome_feature_get_type((GenomeFeature*) new_gf) !=
                   genome_feature_get_type((GenomeFeature*) old_gf)) {
-    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+    gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
               "has a different type than its counterpart on line %u",
               ID_STRING, id, line_number, filename,
               genome_node_get_line_number(old_gf));
@@ -789,7 +789,7 @@ static int check_multi_feature_constrains(GenomeNode *new_gf,
   /* check strand */
   if (!had_err && genome_feature_get_strand((GenomeFeature*) new_gf) !=
                   genome_feature_get_strand((GenomeFeature*) old_gf)) {
-    error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
+    gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
               "has a different strand than its counterpart on line %u",
               ID_STRING, id, line_number, filename,
               genome_node_get_line_number(old_gf));
@@ -835,7 +835,7 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
   unsigned long i;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(attributes);
 
   attribute_splitter = splitter_new();
@@ -848,7 +848,7 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
     char *attr_value = NULL, *token = splitter_get_token(attribute_splitter, i);
     if (strncmp(token, ".", 1) == 0) {
       if (splitter_size(attribute_splitter) > 1) {
-        error_set(err, "more than one attribute token defined on line %u in "
+        gt_error_set(err, "more than one attribute token defined on line %u in "
                   "file \"%s\", altough the first one is '.'", line_number,
                   filename);
         had_err = -1;
@@ -862,7 +862,7 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
       splitter_reset(tmp_splitter);
       splitter_split(tmp_splitter, token, strlen(token), '=');
       if (splitter_size(tmp_splitter) != 2) {
-        error_set(err, "token \"%s\" on line %u in file \"%s\" does not "
+        gt_error_set(err, "token \"%s\" on line %u in file \"%s\" does not "
                   "contain exactly one '='", token, line_number, filename);
         had_err = -1;
         break;
@@ -884,18 +884,18 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
       }
     }
     if (!had_err && !strlen(attr_tag)) {
-      error_set(err, "attribute \"=%s\" on line %u in file \"%s\" has no tag",
+      gt_error_set(err, "attribute \"=%s\" on line %u in file \"%s\" has no tag",
                 attr_value, line_number, filename);
       had_err = -1;
     }
     if (!had_err && !strlen(attr_value)) {
-      error_set(err, "attribute \"%s=\" on line %u in file \"%s\" has no value",
+      gt_error_set(err, "attribute \"%s=\" on line %u in file \"%s\" has no value",
                  attr_tag, line_number, filename);
       had_err = -1;
     }
     /* check for duplicate attributes */
     if (!had_err && genome_feature_get_attribute(genome_feature, attr_tag)) {
-      error_set(err, "more then one %s attribute on line %u in file \"%s\"",
+      gt_error_set(err, "more then one %s attribute on line %u in file \"%s\"",
                 attr_tag, line_number, filename);
       had_err = -1;
     }
@@ -977,7 +977,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   bool score_is_defined, is_child = false;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   filename = str_get(filenamestr);
 
@@ -987,7 +987,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   /* parse */
   splitter_split(splitter, line, line_length, '\t');
   if (splitter_size(splitter) != 9UL) {
-    error_set(err, "line %u in file \"%s\" does not contain 9 tab (\\t) "
+    gt_error_set(err, "line %u in file \"%s\" does not contain 9 tab (\\t) "
                    "separated fields", line_number, filename);
     had_err = -1;
   }
@@ -1008,7 +1008,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   if (!had_err &&
       !(gft = feature_type_factory_create_gft(parser->feature_type_factory,
                                               type))) {
-    error_set(err, "type \"%s\" on line %u in file \"%s\" is not a valid one",
+    gt_error_set(err, "type \"%s\" on line %u in file \"%s\" is not a valid one",
               type, line_number, filename);
     had_err = -1;
   }
@@ -1017,7 +1017,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   if (!had_err)
     had_err = parse_range(&range, start, end, line_number, filename, err);
   if (!had_err && range.start == 0) {
-      error_set(err, "illegal feature start 0 on line %u in file \"%s\" "
+      gt_error_set(err, "illegal feature start 0 on line %u in file \"%s\" "
                    "(GFF3 files are 1-based)", line_number, filename);
       had_err = -1;
   }
@@ -1088,10 +1088,10 @@ static int parse_first_gff3_line(const char *line, const char *filename,
                                  GT_Error *err)
 {
   int version, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(line && filename);
   if (strncmp(line, GFF_VERSION_PREFIX, strlen(GFF_VERSION_PREFIX))) {
-    error_set(err, "line 1 in file \"%s\" does not begin with \"%s\"", filename,
+    gt_error_set(err, "line 1 in file \"%s\" does not begin with \"%s\"", filename,
               GFF_VERSION_PREFIX);
     had_err = -1;
   }
@@ -1103,7 +1103,7 @@ static int parse_first_gff3_line(const char *line, const char *filename,
     had_err = parse_int_line(&version, line, 1, filename, err);
   }
   if (!had_err && version != GFF_VERSION) {
-    error_set(err, "GFF version %d does not equal required version %u ",
+    gt_error_set(err, "GFF version %d does not equal required version %u ",
               version, GFF_VERSION);
     had_err = -1;
   }
@@ -1115,10 +1115,10 @@ static int parse_fasta_entry(Queue *genome_nodes, const char *line,
                              GenFile *fpin, GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(line && line_number && fpin);
   if (line[0] != '>') {
-    error_set(err, "line %d does not start with '>' as expected", line_number);
+    gt_error_set(err, "line %d does not start with '>' as expected", line_number);
     had_err = -1;
   }
   if (!had_err) {
@@ -1147,7 +1147,7 @@ static int add_auto_sr_to_queue(UNUSED void *key, void *value, void *data,
   Queue *genome_nodes = data;
   GenomeNode *gf;
   unsigned int i;
-  error_check(err);
+  gt_error_check(err);
   assert(key && value && data);
   if (gt_array_size(auto_sr->genome_features)) {
     queue_add(genome_nodes, auto_sr->sequence_region);
@@ -1174,7 +1174,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   const char *filename;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(line[0] == '#');
 
   filename = str_get(filenamestr);
@@ -1203,7 +1203,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
     while (tmpline[0] == ' ')
       tmpline++;
     if (tmpline > tmplineend) {
-      error_set(err, "missing sequence region name on line %u in file \"%s\"",
+      gt_error_set(err, "missing sequence region name on line %u in file \"%s\"",
                 line_number, filename);
       had_err = -1;
     }
@@ -1218,7 +1218,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
       while (tmpline < tmplineend && tmpline[0] == ' ')
         tmpline++;
       if (tmpline > tmplineend) {
-        error_set(err, "missing sequence region start on line %u in file "
+        gt_error_set(err, "missing sequence region start on line %u in file "
                   "\"%s\"", line_number, filename);
         had_err = -1;
       }
@@ -1236,7 +1236,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
       while (tmpline < tmplineend && tmpline[0] == ' ')
         tmpline++;
       if (tmpline > tmplineend) {
-        error_set(err, "missing sequence region end on line %u in file \"%s\"",
+        gt_error_set(err, "missing sequence region end on line %u in file \"%s\"",
                   line_number, filename);
         had_err = -1;
       }
@@ -1246,7 +1246,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
                             err);
     }
     if (!had_err  && range.start == 0) {
-      error_set(err, "illegal region start 0 on line %u in file \"%s\" "
+      gt_error_set(err, "illegal region start 0 on line %u in file \"%s\" "
                 "(GFF3 files are 1-based)", line_number, filename);
       had_err = -1;
     }
@@ -1254,7 +1254,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
       had_err = add_offset_if_necessary(&range, parser, seqid, err);
     if (!had_err) {
       if (hashmap_get(parser->undefined_sequence_regions, seqid)) {
-        error_set(err, "genome feature with id \"%s\" has been defined before "
+        gt_error_set(err, "genome feature with id \"%s\" has been defined before "
                   "the corresponding \"%s\" definition on line %u in file "
                   "\"%s\"", seqid, GFF_SEQUENCE_REGION, line_number, filename);
         had_err = -1;
@@ -1265,7 +1265,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
       assert(seqid);
       ssr = hashmap_get(parser->seqid_to_ssr_mapping, seqid);
       if (ssr) {
-        error_set(err, "the sequence region \"%s\" on line %u in file \"%s\" "
+        gt_error_set(err, "the sequence region \"%s\" on line %u in file \"%s\" "
                   "has already been defined", str_get(ssr->seqid_str),
                   line_number, filename);
         had_err = -1;
@@ -1308,7 +1308,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *parser,
   const char *filename;
   int rval, had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   filename = str_get(filenamestr);
 

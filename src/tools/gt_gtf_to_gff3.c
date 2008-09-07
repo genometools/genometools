@@ -46,7 +46,7 @@ int gt_gtf_to_gff3(int argc, const char **argv, GT_Error *err)
   GenomeNode *gn;
   int parsed_args, had_err = 0;
   bool be_tolerant;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &be_tolerant, argc, argv, err)) {

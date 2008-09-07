@@ -52,7 +52,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
   unsigned long raw_sequence_length;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 
@@ -80,7 +80,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
 
 static int extract_spliced_seq(GenomeNode *gn, CDSVisitor *visitor, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(gn && visitor);
   /* traverse the direct children */
   splicedseq_reset(visitor->splicedseq);
@@ -185,7 +185,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
   GenomeFeature *gf;
   int had_err;
 
-  error_check(err);
+  gt_error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 
@@ -210,7 +210,7 @@ static int cds_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                       GT_Error *err)
 {
   CDSVisitor *v = cds_visitor_cast(gv);
-  error_check(err);
+  gt_error_check(err);
   return genome_node_traverse_children((GenomeNode*) gf, v,
                                        add_cds_if_necessary, false, err);
 

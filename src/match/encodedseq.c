@@ -512,7 +512,7 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,GT_Error *err)
   FILE *fp;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"wb",err);
   if (fp == NULL)
   {
@@ -542,7 +542,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   bool haserr = false;
   Str *tmpfilename;
 
-  error_check(err);
+  gt_error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,ENCSEQFILESUFFIX);
   if (fillmapspecstartptr(assignencseqmapspecification,
@@ -872,7 +872,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,GT_Error *err)
   int retval;
   Uchar cc;
 
-  error_check(err);
+  gt_error_check(err);
   ALLOCASSIGNSPACE(encseq->plainseq,NULL,Uchar,encseq->totallength);
   encseq->plainseqptr = false;
   for (pos=0; /* Nothing */; pos++)
@@ -902,7 +902,7 @@ static int fillbitaccesstab(Encodedsequence *encseq,
   Twobitencoding bitwise = 0;
   DECLARESEQBUFFER(encseq->twobitencoding);
 
-  error_check(err);
+  gt_error_check(err);
   INITBITTAB(encseq->specialbits,encseq->totallength);
   for (pos=0; /* Nothing */; pos++)
   {
@@ -1845,7 +1845,7 @@ static int readsatfromfile(const Str *indexname,GT_Error *err)
   int cc = 0;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"rb",err);
   if (fp == NULL)
   {
@@ -1856,7 +1856,7 @@ static int readsatfromfile(const Str *indexname,GT_Error *err)
     cc = fgetc(fp);
     if (cc == EOF)
     {
-      error_set(err,"illegal EOF symbol in \"%s%s\"",
+      gt_error_set(err,"illegal EOF symbol in \"%s%s\"",
                     str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
@@ -1865,7 +1865,7 @@ static int readsatfromfile(const Str *indexname,GT_Error *err)
   {
     if (cc < 0 || cc >= (int) Undefpositionaccesstype)
     {
-      error_set(err,"illegal type %d in \"%s%s\"",cc,
+      gt_error_set(err,"illegal type %d in \"%s%s\"",cc,
                     str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
@@ -1893,7 +1893,7 @@ static int determinesattype(Seqpos totallength,
       sat = str2positionaccesstype(str_sat);
       if (sat == Undefpositionaccesstype)
       {
-        error_set(err,"illegal argument \"%s\" to option -sat",str_sat);
+        gt_error_set(err,"illegal argument \"%s\" to option -sat",str_sat);
         haserr = true;
       }
     }
@@ -2005,7 +2005,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   int retcode;
   FastaBuffer *fb = NULL;
 
-  error_check(err);
+  gt_error_check(err);
   retcode = determinesattype(totallength,
                              specialranges,
                              getmapsizeAlphabet(alphabet),
@@ -2068,7 +2068,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   bool haserr = false;
   int retcode;
 
-  error_check(err);
+  gt_error_check(err);
   retcode = readsatfromfile(indexname,err);
   if (retcode < 0)
   {

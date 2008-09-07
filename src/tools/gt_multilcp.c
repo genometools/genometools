@@ -27,7 +27,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[option ...] seq1 seq2",
                          "Compute lcp lengths of seq1 and seq2 in "
                          "O(|seq1|*|seq2|) time and show them.");
@@ -41,7 +41,7 @@ int gt_multilcp(int argc, const char **argv, GT_Error *err)
 {
   const char *seq1, *seq2;
   int parsed_args, len1, len2, **multilcptab;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {
@@ -56,7 +56,7 @@ int gt_multilcp(int argc, const char **argv, GT_Error *err)
   len1 = strlen(seq1);
   len2 = strlen(seq2);
   if (len1 == 0 || len2 == 0) {
-    error_set(err, "sequence of length 0 not allowed");
+    gt_error_set(err, "sequence of length 0 not allowed");
     return -1;
   }
   multilcptab = multilcp_compute(seq1, len1, seq2, len2);

@@ -452,7 +452,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
   {
     Seqpos seqLen;
     assert(bwtSeq && projectName && err);
-    error_check(err);
+    gt_error_check(err);
 
     initExtBitsRetrieval(&extBits);
     extBitsAreInitialized = true;
@@ -460,7 +460,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
     if (mapsuffixarray(&suffixArray, &seqLen,
                        SARR_SUFTAB | SARR_ESQTAB, projectName, verbosity, err))
     {
-      error_set(err, "Cannot load reference suffix array project with"
+      gt_error_set(err, "Cannot load reference suffix array project with"
                     " demand for suffix table file and encoded sequence"
                     " for project: %s", str_get(projectName));
       retval = VERIFY_BWTSEQ_REFLOAD_ERROR;
@@ -470,7 +470,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
     ++seqLen;
     if (BWTSeqLength(bwtSeq) != seqLen)
     {
-      error_set(err, "length mismatch for suffix array project %s and "
+      gt_error_set(err, "length mismatch for suffix array project %s and "
                 "bwt sequence index", str_get(projectName));
       retval = VERIFY_BWTSEQ_LENCOMPARE_ERROR;
       break;
@@ -487,7 +487,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
           Seqpos sfxArrayValue = BWTSeqLocateMatch(bwtSeq, i, &extBits);
           if (sfxArrayValue != suffixArray.suftab[i])
           {
-            error_set(err, "Failed suffix array value comparison"
+            gt_error_set(err, "Failed suffix array value comparison"
                           " at position "FormatSeqpos": "FormatSeqpos" != "
                           FormatSeqpos,
                           i, sfxArrayValue, suffixArray.suftab[i]);
@@ -505,7 +505,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
     }
     else if (checkFlags & VERIFY_BWTSEQ_SUFVAL)
     {
-      error_set(err, "check of suffix array values was requested,"
+      gt_error_set(err, "check of suffix array values was requested,"
                 " but index contains no  locate information!");
       retval = VERIFY_BWTSEQ_SUFVAL_ERROR;
       break;
@@ -521,7 +521,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       if (suffixArray.longest.defined &&
           suffixArray.longest.valueseqpos != nextLocate)
       {
-        error_set(err, "terminator/0-rotation position mismatch "FormatSeqpos
+        gt_error_set(err, "terminator/0-rotation position mismatch "FormatSeqpos
                   " vs. "FormatSeqpos, suffixArray.longest.valueseqpos,
                   nextLocate);
         retval = VERIFY_BWTSEQ_TERMPOS_ERROR;
@@ -537,7 +537,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
           Symbol sym = BWTSeqGetSym(bwtSeq, nextLocate);
           if (sym != UNDEFBWTCHAR)
           {
-            error_set(err, "symbol mismatch at position "FormatSeqpos": "
+            gt_error_set(err, "symbol mismatch at position "FormatSeqpos": "
                       "%d vs. reference symbol %d", i - 1, (int)sym,
                       (int)UNDEFBWTCHAR);
             retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
@@ -553,7 +553,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
           Symbol symCmp = BWTSeqGetSym(bwtSeq, nextLocate);
           if (symCmp != symRef)
           {
-            error_set(err, "symbol mismatch at position "FormatSeqpos": "
+            gt_error_set(err, "symbol mismatch at position "FormatSeqpos": "
                       "%d vs. reference symbol %d", i, symCmp, symRef);
             retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
             break;
@@ -566,7 +566,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
       else if ((checkFlags & VERIFY_BWTSEQ_LFMAPWALK)
                && !(bwtSeq->featureToggles & BWTReversiblySorted))
       {
-        error_set(err, "requested complete backwards regeneration in index"
+        gt_error_set(err, "requested complete backwards regeneration in index"
                   " without regeneration capability");
         retval = VERIFY_BWTSEQ_LFMAPWALK_IMP_ERROR;
         break;
@@ -578,7 +578,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
         BWTSeqCRLoad(bwtSeq, projectName, CTX_MAP_ILOG_AUTOSIZE);
       if (!bwtSeqCR)
       {
-        error_set(err, "cannot load BWT sequence context access table"
+        gt_error_set(err, "cannot load BWT sequence context access table"
                   " for project %s", str_get(projectName));
         retval = VERIFY_BWTSEQ_CONTEXT_LOADFAIL;
         break;
@@ -610,7 +610,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
             Symbol symCmp = contextBuf[j];
             if (symCmp != symRef)
             {
-              error_set(err, "symbol mismatch at position "FormatSeqpos": "
+              gt_error_set(err, "symbol mismatch at position "FormatSeqpos": "
                         "%d vs. reference symbol %d", start + j, (int)symCmp,
                         (int)symRef);
               retval = VERIFY_BWTSEQ_CONTEXT_SYMFAIL;
@@ -623,7 +623,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
             Symbol symCmp = contextBuf[j];
             if (symCmp != symRef)
             {
-              error_set(err, "symbol mismatch at position "FormatSeqpos": "
+              gt_error_set(err, "symbol mismatch at position "FormatSeqpos": "
                         "%d vs. reference symbol %d", start + j, (int)symCmp,
                         (int)symRef);
               retval = VERIFY_BWTSEQ_CONTEXT_SYMFAIL;

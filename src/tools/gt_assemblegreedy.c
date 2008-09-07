@@ -74,7 +74,7 @@ static int gt_assemblegreedy_runner(UNUSED int argc, const char **argv,
   Bioseq *fragments;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* init */

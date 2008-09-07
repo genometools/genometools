@@ -108,7 +108,7 @@ int parse_range(Range *range, const char *start, const char *end,
   char *ep;
 
   assert(start && end && filename);
-  error_check(err);
+  gt_error_check(err);
 
   range->start = UNDEF_ULONG;
   range->end = UNDEF_ULONG;
@@ -117,17 +117,17 @@ int parse_range(Range *range, const char *start, const char *end,
   errno = 0;
   start_val = strtol(start, &ep, 10);
   if (start[0] == '\0' || *ep != '\0') {
-    error_set(err, "could not parse number '%s' on line %u in file '%s'",
+    gt_error_set(err, "could not parse number '%s' on line %u in file '%s'",
               start, line_number, filename);
     return -1;
   }
   if (errno == ERANGE && (start_val == LONG_MAX || start_val == LONG_MIN)) {
-    error_set(err, "number '%s' out of range on line %u in file '%s'", start,
+    gt_error_set(err, "number '%s' out of range on line %u in file '%s'", start,
               line_number, filename);
     return -1;
   }
   if (start_val < 0) {
-    error_set(err, "start '%s' is negative on line %u in file '%s'", start,
+    gt_error_set(err, "start '%s' is negative on line %u in file '%s'", start,
               line_number, filename);
     return -1;
   }
@@ -136,24 +136,24 @@ int parse_range(Range *range, const char *start, const char *end,
   errno = 0;
   end_val = strtol(end, &ep, 10);
   if (end[0] == '\0' || *ep != '\0') {
-    error_set(err, "could not parse number '%s' on line %u in file '%s'", end,
+    gt_error_set(err, "could not parse number '%s' on line %u in file '%s'", end,
               line_number, filename);
     return -1;
   }
   if (errno == ERANGE && (end_val == LONG_MAX || end_val == LONG_MIN)) {
-    error_set(err, "number '%s' out of range on line %u in file '%s'", end,
+    gt_error_set(err, "number '%s' out of range on line %u in file '%s'", end,
               line_number, filename);
     return -1;
   }
   if (end_val < 0) {
-    error_set(err, "end '%s' is negative on line %u in file '%s'", end,
+    gt_error_set(err, "end '%s' is negative on line %u in file '%s'", end,
               line_number, filename);
     return -1;
   }
 
   /* check range */
   if (start_val > end_val) {
-    error_set(err, "start '%lu' is larger then end '%lu' on line %u in file "
+    gt_error_set(err, "start '%lu' is larger then end '%lu' on line %u in file "
               "'%s'", start_val, end_val, line_number, filename);
     return -1;
   }
@@ -171,12 +171,12 @@ int parse_score(bool *score_is_defined, float *score_value, const char *score,
   int rval;
 
   assert(score && filename);
-  error_check(err);
+  gt_error_check(err);
 
   if (strlen(score) == 1 && score[0] == '.')
     *score_is_defined = false;
   else if ((rval = sscanf(score, "%f", score_value)) != 1) {
-    error_set(err, "could not parse score '%s' on line %u in file '%s'", score,
+    gt_error_set(err, "could not parse score '%s' on line %u in file '%s'", score,
               line_number, filename);
     return -1;
   }
@@ -190,16 +190,16 @@ int parse_strand(Strand *strand_value, const char *strand,
                  unsigned int line_number, const char *filename, GT_Error *err)
 {
   assert(strand && filename);
-  error_check(err);
+  gt_error_check(err);
 
   if (strlen(strand) != 1) {
-    error_set(err, "strand '%s' not one character long on line %u in file "
+    gt_error_set(err, "strand '%s' not one character long on line %u in file "
               "'%s'", strand, line_number, filename);
     *strand_value = STRAND_UNKNOWN;
     return -1;
   }
   if (strspn(strand, STRANDCHARS) != 1) {
-    error_set(err, "strand '%s' on line %u in file '%s' not a valid character "
+    gt_error_set(err, "strand '%s' on line %u in file '%s' not a valid character "
               "from the set '%s'", strand, line_number, filename, STRANDCHARS);
     *strand_value = STRAND_UNKNOWN;
     return -1;
@@ -212,16 +212,16 @@ int parse_phase(Phase *phase_value, const char *phase,
                 unsigned int line_number, const char *filename, GT_Error *err)
 {
   assert(phase && filename);
-  error_check(err);
+  gt_error_check(err);
 
   if (strlen(phase) != 1) {
-    error_set(err, "phase '%s' not one character long on line %u in file '%s'",
+    gt_error_set(err, "phase '%s' not one character long on line %u in file '%s'",
               phase, line_number, filename);
     *phase_value = PHASE_UNDEFINED;
     return -1;
   }
   if (strspn(phase, PHASECHARS) != 1) {
-    error_set(err, "phase '%s' on line %u in file '%s' not a valid character "
+    gt_error_set(err, "phase '%s' on line %u in file '%s' not a valid character "
               "from the set '%s'", phase, line_number, filename, PHASECHARS);
     *phase_value = PHASE_UNDEFINED;
     return -1;
@@ -235,11 +235,11 @@ int parse_int_line(int *int_value, const char *integer,
 {
   int rval;
 
-  error_check(err);
+  gt_error_check(err);
   assert(integer && filename);
 
   if ((rval = sscanf(integer, "%d", int_value)) != 1) {
-    error_set(err, "could not parse integer '%s' on line %u in file '%s'",
+    gt_error_set(err, "could not parse integer '%s' on line %u in file '%s'",
               integer, line_number, filename);
     return -1;
   }

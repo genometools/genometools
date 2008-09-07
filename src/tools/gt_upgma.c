@@ -29,7 +29,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("sequence_file|example", "Compute and show UPGMA tree "
                          "for the sequences in sequence file (using the unit\n"
                          "cost edit distance as distance function). If "
@@ -68,7 +68,7 @@ int gt_upgma(int argc, const char **argv, GT_Error *err)
   int parsed_args, had_err = 0;
   Bioseq *bioseq = NULL;
   UPGMA *upgma = NULL;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {

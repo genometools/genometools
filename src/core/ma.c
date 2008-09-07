@@ -177,7 +177,7 @@ static int check_space_leak(UNUSED void *key, void *value, void *data,
 {
   CheckSpaceLeakInfo *info = (CheckSpaceLeakInfo*) data;
   MAInfo *mainfo = (MAInfo*) value;
-  error_check(err);
+  gt_error_check(err);
   assert(key && value && data);
   /* report only the first leak */
   if (!info->has_leak) {

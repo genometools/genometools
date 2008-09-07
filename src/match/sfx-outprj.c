@@ -111,7 +111,7 @@ int outprjfile(const Str *indexname,
   FILE *prjfp;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   prjfp = opensfxfile(indexname,PROJECTFILESUFFIX,"wb",err);
   if (prjfp == NULL)
   {

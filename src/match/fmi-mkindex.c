@@ -61,7 +61,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   OPrval oprval;
   int parsed_args;
 
-  error_check(err);
+  gt_error_check(err);
   mkfmcallinfo->indexnametab = gt_strarray_new();
   mkfmcallinfo->outfmindex = str_new();
   mkfmcallinfo->leveldesc = str_new();
@@ -98,7 +98,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
     {
       if (gt_strarray_size(mkfmcallinfo->indexnametab) > 1UL)
       {
-        error_set(err,"if more than one index is given, then "
+        gt_error_set(err,"if more than one index is given, then "
                           "option -fmout is mandatory");
         oprval = OPTIONPARSER_ERROR;
       } else
@@ -115,7 +115,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && parsed_args != argc)
   {
-    error_set(err,"superfluous program parameters");
+    gt_error_set(err,"superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
   return oprval;
@@ -166,7 +166,7 @@ static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
   OPrval rval;
   int retval = 0;
 
-  error_check(err);
+  gt_error_check(err);
   rval = parsemkfmindex(mkfmcallinfo,argc,argv,err);
   if (rval == OPTIONPARSER_ERROR)
   {
@@ -189,7 +189,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
                log2markdist;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   INITARRAY(&fm.specpos, PairBwtidx);
   fm.bfreq = NULL;
   fm.superbfreq = NULL;
@@ -202,7 +202,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
                         &log2bsize,
                         &log2markdist) != 0)
   {
-    error_set(err,"undefined level \"%s\"",
+    gt_error_set(err,"undefined level \"%s\"",
                       str_get(mkfmcallinfo->leveldesc));
     haserr = true;
   }

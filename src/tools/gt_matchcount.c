@@ -27,7 +27,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[option ...] k seq1 seq2",
                          "Compute the match-count for each substring pair of "
                          "length k from seq1 and seq2.");
@@ -46,7 +46,7 @@ int gt_matchcount(int argc, const char **argv, GT_Error *err)
 {
   const char *seq1, *seq2;
   int k, len1, len2, parsed_args, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {
@@ -57,7 +57,7 @@ int gt_matchcount(int argc, const char **argv, GT_Error *err)
   assert(parsed_args + 2 < argc);
 
   if (sscanf(argv[parsed_args], "%d", &k) != 1 || k <= 0) {
-    error_set(err, "first argument <k> must be positive integer");
+    gt_error_set(err, "first argument <k> must be positive integer");
     had_err = -1;
   }
 

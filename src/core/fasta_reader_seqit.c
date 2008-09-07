@@ -44,7 +44,7 @@ static int fasta_reader_seqit_run(FastaReader *fasta_reader,
   unsigned long len;
   char *desc;
   int rval, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* at least one function has to be defined */
   assert(proc_description || proc_sequence_part || proc_sequence_length);

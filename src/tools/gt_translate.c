@@ -27,7 +27,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("DNA_sequence", "Translate DNA sequence in all the "
                          "reading frames.");
   option_parser_set_min_max_args(op, 1, 1);
@@ -44,7 +44,7 @@ int gt_translate(int argc, const char **argv, GT_Error *err)
   unsigned long seqlen;
   const char *seq;
   int parsed_args;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {

@@ -59,7 +59,7 @@ static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,
                                   UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;
-  error_check(err);
+  gt_error_check(err);
   filter_visitor = filter_visitor_cast(gv);
   queue_add(filter_visitor->genome_node_buffer, c);
   return 0;
@@ -139,7 +139,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 {
   FilterVisitor *fv;
   bool filter_node = false;
-  error_check(err);
+  gt_error_check(err);
   fv = filter_visitor_cast(gv);
   fv->current_feature++;
   if (!str_length(fv->seqid) || /* no seqid was specified or seqids are equal */
@@ -205,7 +205,7 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
                                           UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;
-  error_check(err);
+  gt_error_check(err);
   filter_visitor = filter_visitor_cast(gv);
   if (!str_length(filter_visitor->seqid) || /* no seqid was specified */
       !str_cmp(filter_visitor->seqid,       /* or seqids are equal */
@@ -234,7 +234,7 @@ static int filter_visitor_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
                                         UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;
-  error_check(err);
+  gt_error_check(err);
   filter_visitor = filter_visitor_cast(gv);
   if (!str_length(filter_visitor->seqid) || /* no seqid was specified */
       !str_cmp(filter_visitor->seqid,       /* or seqids are equal */

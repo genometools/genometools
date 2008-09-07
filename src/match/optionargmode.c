@@ -28,14 +28,14 @@ int optionaddbitmask(Optionargmodedesc *modedesc,
 {
   size_t modecount;
 
-  error_check(err);
+  gt_error_check(err);
   for (modecount=0; modecount < numberofentries; modecount++)
   {
     if (strcmp(optionargument,modedesc[modecount].name) == 0)
     {
       if (*mode & modedesc[modecount].bitmask)
       {
-        error_set(err,"argument \"%s\" to option %s already specified",
+        gt_error_set(err,"argument \"%s\" to option %s already specified",
                       modedesc[modecount].name,optname);
         return -1;
       }
@@ -43,7 +43,7 @@ int optionaddbitmask(Optionargmodedesc *modedesc,
       return 0;
     }
   }
-  error_set(err,"illegal argument \"%s\" to option %s",
+  gt_error_set(err,"illegal argument \"%s\" to option %s",
                 optionargument,optname);
   return -2;
 }

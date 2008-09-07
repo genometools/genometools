@@ -129,10 +129,10 @@ int checkprefixlength(unsigned int maxprefixlen,
                       unsigned int prefixlength,
                       GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   if (maxprefixlen < prefixlength)
   {
-    error_set(err,"prefix length %u is too large, maximal prefix length "
+    gt_error_set(err,"prefix length %u is too large, maximal prefix length "
                       "for this input size and alphabet size is %u",
                       prefixlength,
                       maxprefixlen);

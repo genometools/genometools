@@ -344,7 +344,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
   assert(params->encType == BWT_ON_BLOCK_ENC);
   assert(blockSize > 0);
   assert((biFunc && biVarBits) || (biFunc == NULL && biVarBits == NULL));
-  error_check(err);
+  gt_error_check(err);
 
   newSeqIdx = ma_calloc(sizeof (struct blockCompositionSeq), 1);
   newSeqIdx->bucketBlocks = bucketBlocks;
@@ -490,7 +490,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
   if (!initCompositionList(&newSeqIdx->compositionTable, blockSize,
                            blockMapAlphabetSize))
   {
-    error_set(err, "Insufficient memory for selected block size %u and "
+    gt_error_set(err, "Insufficient memory for selected block size %u and "
               "alphabet size %u, try smaller block size?\n", blockSize,
               blockMapAlphabetSize);
     newBlockEncIdxSeqErrRet();

@@ -38,7 +38,7 @@ static OPrval parse_options(int *parsed_args,
   OptionParser *op;
   Option *option;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[option ...] [GFF3_file ...]", "Show information "
                          "about splice sites given in GFF3 files.");
 
@@ -67,7 +67,7 @@ int gt_splicesiteinfo(int argc, const char **argv, GT_Error *err)
   SpliceSiteInfoArguments arguments;
   RegionMapping *regionmapping;
   int parsed_args, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   arguments.seqfile = str_new();

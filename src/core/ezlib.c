@@ -22,9 +22,9 @@
 gzFile egzopen(const char *path, const char *mode, GT_Error *err)
 {
   gzFile file;
-  error_check(err);
+  gt_error_check(err);
   if (!(file = gzopen(path, mode))) {
-    error_set(err, "gzopen(): cannot open file '%s': %s\n", path,
+    gt_error_set(err, "gzopen(): cannot open file '%s': %s\n", path,
               strerror(errno));
   }
   return file;

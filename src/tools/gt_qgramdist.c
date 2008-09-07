@@ -30,7 +30,7 @@ static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Compute q-gram distance for each sequence "
                          "combination.");
@@ -49,7 +49,7 @@ int gt_qgramdist(int argc, const char **argv, GT_Error *err)
   Seq *seq_1, *seq_2;
   int parsed_args, had_err = 0;
   unsigned int q;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &q, argc, argv, err)) {
@@ -61,13 +61,13 @@ int gt_qgramdist(int argc, const char **argv, GT_Error *err)
 
   /* make sure seq_file_1 exists */
   if (!file_exists(argv[parsed_args])) {
-    error_set(err, "seq_file_1 \"%s\" does not exist", argv[parsed_args]);
+    gt_error_set(err, "seq_file_1 \"%s\" does not exist", argv[parsed_args]);
     had_err = -1;
   }
 
   /* make sure seq_file_2 exists */
   if (!had_err && !file_exists(argv[parsed_args+1])) {
-    error_set(err, "seq_file_2 \"%s\" does not exist", argv[parsed_args+1]);
+    gt_error_set(err, "seq_file_2 \"%s\" does not exist", argv[parsed_args+1]);
     had_err = -1;
   }
 

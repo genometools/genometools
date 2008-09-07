@@ -29,7 +29,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("sequence_file|example",
                          "Compute and show Neighbor-Joining tree for the "
                          "sequences in sequence file (using\nthe unit cost "
@@ -68,7 +68,7 @@ int gt_neighborjoining(int argc, const char **argv, GT_Error *err)
   Bioseq *bioseq = NULL;
   NeighborJoining *nj = NULL;
   int parsed_args, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {

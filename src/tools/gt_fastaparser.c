@@ -37,7 +37,7 @@ static int gt_fastaparser_runner(UNUSED int argc, const char **argv,
   unsigned long i;
   SimpleBioseq *simple_bioseq;
 
-  error_check(err);
+  gt_error_check(err);
 
   simple_bioseq = simple_bioseq_new(argv[parsed_args]);
   for (i = 0; i < simple_bioseq_number_of_sequences(simple_bioseq); i++) {

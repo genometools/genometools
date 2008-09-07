@@ -91,11 +91,11 @@ static const char* obo_header_get(OBOHeader *obo_header, const char *tag)
 static int obo_header_validate(OBOHeader *obo_header, const char *obo_file_name,
                                GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(obo_header && obo_file_name);
   /* make sure header contains the required tag */
   if (!obo_header_get(obo_header, "format-version")) {
-    error_set(err, "the header of OBO-file \"%s\" does not contain "
+    gt_error_set(err, "the header of OBO-file \"%s\" does not contain "
               "\"format-version\" tag", obo_file_name);
     return -1;
   }
@@ -166,10 +166,10 @@ static void obo_parse_tree_add_stanza(OBOParseTree *obo_parse_tree,
 static int validate_value(const OBOStanza *obo_stanza, const char *value,
                           GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(obo_stanza && value);
   if (!obo_stanza_get_value(obo_stanza, value)) {
-    error_set(err, "%s stanza starting on line %lu in file \"%s\" lacks "
+    gt_error_set(err, "%s stanza starting on line %lu in file \"%s\" lacks "
               "required \"%s\" tag",
               obo_stanza_get_type(obo_stanza), obo_stanza->line,
               str_get(obo_stanza->filename), value);
@@ -183,7 +183,7 @@ static int obo_parse_tree_validate_stanzas(const OBOParseTree *obo_parse_tree,
 {
   unsigned long i;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(obo_parse_tree);
   for (i = 0; !had_err && i < obo_parse_tree_num_of_stanzas(obo_parse_tree);
        i++) {
@@ -241,7 +241,7 @@ static bool ignored_char(IO *obo_file)
 static int expect(IO *obo_file, char expected_char, GT_Error *err)
 {
   char cc;
-  error_check(err);
+  gt_error_check(err);
   cc = io_next(obo_file);
   if (cc != expected_char) {
     if (cc == CARRIAGE_RETURN) {
@@ -250,16 +250,16 @@ static int expect(IO *obo_file, char expected_char, GT_Error *err)
       return 0;
     }
     if (expected_char == END_OF_FILE) {
-      error_set(err, "file \"%s\": line %lu: expected end-of-file, got '%c'",
+      gt_error_set(err, "file \"%s\": line %lu: expected end-of-file, got '%c'",
                 io_get_filename(obo_file), io_get_line_number(obo_file), cc);
     }
     else if ((cc == CARRIAGE_RETURN) || (cc == END_OF_LINE)) {
-      error_set(err, "file \"%s\": line %lu: expected character '%c', got "
+      gt_error_set(err, "file \"%s\": line %lu: expected character '%c', got "
                 "newline", io_get_filename(obo_file),
                 io_get_line_number(obo_file), expected_char);
     }
     else {
-      error_set(err, "file \"%s\": line %lu: expected character '%c', got '%c'",
+      gt_error_set(err, "file \"%s\": line %lu: expected character '%c', got '%c'",
                 io_get_filename(obo_file), io_get_line_number(obo_file),
                 expected_char, cc);
     }
@@ -271,7 +271,7 @@ static int expect(IO *obo_file, char expected_char, GT_Error *err)
 static int comment_line(IO *obo_file, GT_Error *err)
 {
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   had_err = expect(obo_file, COMMENT_CHAR, err);
   while (!had_err) {
     switch (io_peek(obo_file)) {
@@ -294,7 +294,7 @@ static int comment_line(IO *obo_file, GT_Error *err)
 static int blank_line(IO *obo_file, GT_Error *err)
 {
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   had_err = expect(obo_file, BLANK_CHAR, err);
   while (!had_err) {
     char cc = io_peek(obo_file);
@@ -318,7 +318,7 @@ static int blank_line(IO *obo_file, GT_Error *err)
 
 static bool ignored_line(IO *obo_file, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   if (io_peek(obo_file) == BLANK_CHAR)
     return blank_line(obo_file, err);
   return comment_line(obo_file, err);
@@ -327,20 +327,20 @@ static bool ignored_line(IO *obo_file, GT_Error *err)
 static int proc_any_char(IO *obo_file, Str *capture, bool be_permissive,
                          GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(obo_file && capture);
   if (!any_char(obo_file, be_permissive)) {
     if (io_peek(obo_file) == END_OF_FILE) {
-      error_set(err, "file \"%s\": line %lu: unexpected end-of-file",
+      gt_error_set(err, "file \"%s\": line %lu: unexpected end-of-file",
                 io_get_filename(obo_file), io_get_line_number(obo_file));
     }
     else if ((io_peek(obo_file) == CARRIAGE_RETURN) ||
              (io_peek(obo_file) == END_OF_LINE)) {
-      error_set(err, "file \"%s\": line %lu: unexpected newline",
+      gt_error_set(err, "file \"%s\": line %lu: unexpected newline",
                 io_get_filename(obo_file), io_get_line_number(obo_file));
     }
     else {
-      error_set(err, "file \"%s\": line %lu: unexpected character '%c'",
+      gt_error_set(err, "file \"%s\": line %lu: unexpected character '%c'",
                 io_get_filename(obo_file), io_get_line_number(obo_file),
                 io_peek(obo_file));
     }
@@ -353,7 +353,7 @@ static int proc_any_char(IO *obo_file, Str *capture, bool be_permissive,
 static int tag_line(IO *obo_file, Str *tag, Str *value, GT_Error *err)
 {
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   assert(obo_file && tag && value);
   do {
     had_err = proc_any_char(obo_file, tag, false, err);
@@ -380,7 +380,7 @@ static int header(OBOParseTree *obo_parse_tree, IO *obo_file, GT_Error *err)
 {
   Str *tag, *value;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   assert(obo_parse_tree && obo_file);
   tag = str_new();
   value = str_new();
@@ -403,7 +403,7 @@ static int header(OBOParseTree *obo_parse_tree, IO *obo_file, GT_Error *err)
 static int stanza_line(IO *obo_file, Str *type, GT_Error *err)
 {
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   assert(obo_file && type);
   had_err = expect(obo_file, STANZA_OPEN_CHAR, err);
   if (!had_err) {
@@ -423,7 +423,7 @@ static int stanza(OBOParseTree *obo_parse_tree, IO *obo_file, GT_Error *err)
   unsigned long stanza_line_number;
   int had_err;
   Str *type, *tag, *value;
-  error_check(err);
+  gt_error_check(err);
   assert(obo_parse_tree && obo_file);
   type = str_new();
   tag = str_new();
@@ -456,7 +456,7 @@ static int parse_obo_file(OBOParseTree *obo_parse_tree,
                           IO *obo_file, GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(obo_parse_tree && obo_file);
   while (!had_err && ignored_char(obo_file)) {
     had_err = ignored_line(obo_file, err);
@@ -494,7 +494,7 @@ OBOParseTree* obo_parse_tree_new(const char *obo_file_path, GT_Error *err)
 {
   OBOParseTree *obo_parse_tree;
   IO *obo_file;
-  error_check(err);
+  gt_error_check(err);
   assert(obo_file_path);
   obo_file = io_new(obo_file_path, "r");
   obo_parse_tree = ma_malloc(sizeof *obo_parse_tree);

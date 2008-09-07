@@ -92,7 +92,7 @@ showvalue(unsigned long key, unsigned long long occurrences,
   double probability;
   ShowValueInfo *info;
 
-  error_check(err);
+  gt_error_check(err);
   assert(data && occurrences);
   info = (ShowValueInfo*) data;
 
@@ -130,7 +130,7 @@ foreach_iterfunc(unsigned long key, unsigned long long occurrences, void *data,
                  UNUSED GT_Error *err)
 {
   ForeachInfo *info;
-  error_check(err);
+  gt_error_check(err);
   assert(data);
   info = (ForeachInfo*) data;
   info->func(key, occurrences, info->data);
@@ -158,7 +158,7 @@ int disc_distri_unit_test(GT_Error *err)
   DiscDistri *d;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   d = disc_distri_new();
 

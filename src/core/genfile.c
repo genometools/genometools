@@ -89,7 +89,7 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
                       const char *mode, GT_Error *err)
 {
   GenFile *genfile;
-  error_check(err);
+  gt_error_check(err);
   assert(mode);
   genfile = ma_calloc(1, sizeof (GenFile));
   genfile->mode = genfilemode;

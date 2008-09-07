@@ -28,7 +28,7 @@
 
 static int mg_complement(char *reverse_char, char dna_char, GT_Error * err)
 {
-  error_check(err);
+  gt_error_check(err);
   switch (dna_char)
   {
     case 'A':
@@ -129,7 +129,7 @@ static int mg_complement(char *reverse_char, char dna_char, GT_Error * err)
       return 0;
 
     default:
-      error_set(err, "complement of DNA character '%c' not defined",
+      gt_error_set(err, "complement of DNA character '%c' not defined",
                 dna_char);
       return -1;
   }
@@ -142,7 +142,7 @@ int mg_reverse_complement(char *dna_seq, unsigned long seqlen, GT_Error * err)
     tmp_char;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(dna_seq);
 
   for (front_char = dna_seq, back_char = dna_seq + seqlen - 1;

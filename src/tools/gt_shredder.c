@@ -78,10 +78,10 @@ static int gt_shredder_arguments_check(UNUSED int rest_argc,
                                        void *tool_arguments, GT_Error *err)
 {
   ShredderArguments *arguments = tool_arguments;
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
   if (arguments->minlength > arguments->maxlength) {
-    error_set(err, "-minlength must be <= than -maxlength");
+    gt_error_set(err, "-minlength must be <= than -maxlength");
     return -1;
   }
   return 0;
@@ -97,7 +97,7 @@ static int gt_shredder_runner(UNUSED int argc, const char **argv,
   int had_err;
   Str *desc;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* init */

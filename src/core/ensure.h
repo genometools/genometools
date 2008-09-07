@@ -25,7 +25,7 @@
         do {                                                               \
           if (!had_err) {                                                  \
             if (!(expr)) {                                                 \
-              error_set(err, "ensure \"%s\" failed: file \"%s\", line %d", \
+              gt_error_set(err, "ensure \"%s\" failed: file \"%s\", line %d", \
                         #expr, __FILE__, __LINE__);                        \
               had_err = -1;                                                \
             }                                                              \

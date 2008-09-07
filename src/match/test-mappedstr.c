@@ -143,10 +143,10 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
   unsigned long i;
   char buffer1[64+1], buffer2[64+1];
 
-  error_check(err);
+  gt_error_check(err);
   if (codeliststream->nextfreeCodetype != codeliststring->nextfreeCodetype)
   {
-    error_set(err,"length codeliststream= %lu != %lu =length codeliststring",
+    gt_error_set(err,"length codeliststream= %lu != %lu =length codeliststring",
                   (unsigned long) codeliststream->nextfreeCodetype,
                   (unsigned long) codeliststring->nextfreeCodetype);
     return -1;
@@ -165,7 +165,7 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
                       numofchars,
                       kmersize,
                       characters);
-      error_set(err,"codeliststream[%lu] = " FormatCodetype " != "
+      gt_error_set(err,"codeliststream[%lu] = " FormatCodetype " != "
                     FormatCodetype " = codeliststring[%lu]\n%s != %s",
                     i,
                     codeliststream->spaceCodetype[i],
@@ -190,7 +190,7 @@ static int verifycodelists(const Encodedsequence *encseq,
   bool haserr = false;
   ArrayCodetype codeliststring;
 
-  error_check(err);
+  gt_error_check(err);
   INITARRAY(&codeliststring,Codetype);
   collectkmercode(&codeliststring,
                   encseq,
@@ -216,7 +216,7 @@ int verifymappedstr(const Suffixarray *suffixarray,GT_Error *err)
   ArrayCodetype codeliststream;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   numofchars = getnumofcharsAlphabet(suffixarray->alpha);
   INITARRAY(&codeliststream,Codetype);
   if (getfastastreamkmers(suffixarray->filenametab,

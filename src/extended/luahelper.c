@@ -30,9 +30,9 @@ int lua_set_modules_path(lua_State *L, GT_Error *err)
 {
   Str *modules_path = NULL, *external_modules_path = NULL, *package_path = NULL;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(L);
-  if (!(modules_path = gtdata_get_path(error_get_progname(err), err)))
+  if (!(modules_path = gtdata_get_path(gt_error_get_progname(err), err)))
     had_err = -1;
   if (!had_err) {
     external_modules_path = str_clone(modules_path);
@@ -106,10 +106,10 @@ void lua_push_strarray_as_table(lua_State *L, GT_StrArray *sa)
 int lua_gt_error(lua_State *L, GT_Error *err)
 {
   assert(L && err);
-  assert(error_is_set(err));
+  assert(gt_error_is_set(err));
   luaL_where(L, 1);
-  lua_pushstring(L, error_get(err));
-  error_delete(err);
+  lua_pushstring(L, gt_error_get(err));
+  gt_error_delete(err);
   lua_concat(L, 2);
   return lua_error(L);
 }

@@ -33,7 +33,7 @@ static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err
 {
   CDSStream *cds_stream;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   cds_stream = cds_stream_cast(gs);
   had_err = genome_stream_next_tree(cds_stream->in_stream, gn, err);
   if (!had_err && *gn)

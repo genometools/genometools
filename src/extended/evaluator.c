@@ -98,7 +98,7 @@ int evaluator_unit_test(GT_Error *err)
 {
   Evaluator *evaluator = evaluator_new();
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   ensure(had_err, evaluator_get_sensitivity(evaluator) == 1.0);
   ensure(had_err, evaluator_get_specificity(evaluator) == 1.0);

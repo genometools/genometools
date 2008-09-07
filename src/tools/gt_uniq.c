@@ -35,7 +35,7 @@ static OPrval parse_options(int *parsed_args, UniqArguments *arguments,
   OutputFileInfo *ofi;
   Option *option;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
 
   /* init */
   op = option_parser_new("[option ...] [GFF3_file]", "Filter out repeated "
@@ -68,7 +68,7 @@ int gt_uniq(int argc, const char **argv, GT_Error *err)
   UniqArguments arguments;
   GenomeNode *gn;
   int parsed_args, had_err;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {

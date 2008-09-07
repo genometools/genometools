@@ -96,7 +96,7 @@ static int extracttarget_from_seqfiles(const char *target,
   Splitter *splitter;
   unsigned long i;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(target && seqfiles);
   splitter = splitter_new();
   unescaped_target = str_new();
@@ -144,7 +144,7 @@ static int extracttarget_from_node(GenomeNode *gn, GT_StrArray *seqfiles,
 {
   GenomeNodeIterator *gni;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(gn && seqfiles);
   if (genome_node_cast(genome_feature_class(), gn)) {
     const char *target;
@@ -168,7 +168,7 @@ static int gt_extracttarget_runner(UNUSED int argc, const char **argv,
   GenomeNode *gn;
   int had_err;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   gff3_in_stream = gff3_in_stream_new_unsorted(1, argv + parsed_args, false,

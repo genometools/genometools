@@ -174,7 +174,7 @@ Bcktab *allocBcktab(Seqpos totallength,
   bcktab = newBcktab(numofchars,prefixlength,totallength);
   if (maxcodevalue > 0 && bcktab->numofallcodes-1 > maxcodevalue)
   {
-    error_set(err,"alphasize^prefixlength-1 = " FormatCodetype
+    gt_error_set(err,"alphasize^prefixlength-1 = " FormatCodetype
                   " does not fit into %u"
                   " bits: choose smaller value for prefixlength",
                   bcktab->numofallcodes-1,
@@ -239,7 +239,7 @@ static void assignbcktabmapspecification(ArrayMapspecification *mapspectable,
 
 int bcktab2file(FILE *fp,const Bcktab *bcktab,GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   return flushtheindex2file(fp,
                             assignbcktabmapspecification,
                             (Bcktab *) bcktab,
@@ -254,7 +254,7 @@ static int fillbcktabmapspecstartptr(Bcktab *bcktab,
   bool haserr = false;
   Str *tmpfilename;
 
-  error_check(err);
+  gt_error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,BCKTABSUFFIX);
   if (fillmapspecstartptr(assignbcktabmapspecification,

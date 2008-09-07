@@ -90,7 +90,7 @@ static int scanuintintline(uint32_t *lengthofkey,
   bool found = false;
   int retval = 0;
 
-  error_check(err);
+  gt_error_check(err);
   for (i=0; i<linelength; i++)
   {
     if (linebuffer[i] == '=')
@@ -103,7 +103,7 @@ static int scanuintintline(uint32_t *lengthofkey,
                  SCANint64_tcast(&readint)) != 1 ||
          readint < (int64_t) 0)
       {
-        error_set(err,"cannot find non-negative integer in \"%*.*s\"",
+        gt_error_set(err,"cannot find non-negative integer in \"%*.*s\"",
                            (int) (linelength - (i+1)),
                            (int) (linelength - (i+1)),
                            linebuffer + i + 1);
@@ -123,7 +123,7 @@ static int scanuintintline(uint32_t *lengthofkey,
   }
   if (!found)
   {
-    error_set(err,"missing equality symbol in \"%*.*s\"",
+    gt_error_set(err,"missing equality symbol in \"%*.*s\"",
                        (int) linelength,
                        (int) linelength,
                        linebuffer);
@@ -139,7 +139,7 @@ int allkeysdefined(const Str *indexname,const char *suffix,
   unsigned long i;
   Readintkeys *rikptr;
 
-  error_check(err);
+  gt_error_check(err);
   for (i=0; i<gt_array_size(riktab); i++)
   {
     rikptr = (Readintkeys *) gt_array_get(riktab,i);
@@ -176,7 +176,7 @@ int allkeysdefined(const Str *indexname,const char *suffix,
     {
       if (rikptr->readflag == NULL)
       {
-        error_set(err,"file %s%s: missing line beginning with \"%s=\"",
+        gt_error_set(err,"file %s%s: missing line beginning with \"%s=\"",
                            str_get(indexname),
                            suffix,
                            rikptr->keystring);
@@ -203,7 +203,7 @@ int analyzeuintline(const Str *indexname,
   Smallorbigint smallorbigint;
   uint32_t lengthofkey;
 
-  error_check(err);
+  gt_error_check(err);
   retval = scanuintintline(&lengthofkey,
                            &smallorbigint,
                            linebuffer,
@@ -237,7 +237,7 @@ int analyzeuintline(const Str *indexname,
           {
             if (retval == 1)
             {
-              error_set(err,"bigvalue " Formatuint64_t " does not fit into %s",
+              gt_error_set(err,"bigvalue " Formatuint64_t " does not fit into %s",
                             PRINTuint64_tcast(smallorbigint.bigvalue),
                             rikptr->keystring);
               haserr = true;
@@ -252,7 +252,7 @@ int analyzeuintline(const Str *indexname,
     }
     if (!found)
     {
-      error_set(err,"file %s%s, line %u: cannot find key for \"%*.*s\"",
+      gt_error_set(err,"file %s%s, line %u: cannot find key for \"%*.*s\"",
                     str_get(indexname),
                     suffix,
                     linenum,

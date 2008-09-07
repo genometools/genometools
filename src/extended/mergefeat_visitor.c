@@ -45,7 +45,7 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, UNUSED GT_Error *er
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GenomeFeature *previous_feature, *current_feature;
   Range previous_range, current_range;
-  error_check(err);
+  gt_error_check(err);
   current_feature = genome_node_cast(genome_feature_class(), gn);
   assert(current_feature);
   if ((previous_feature = hashmap_get(v->hm, genome_feature_type_get_cstr(
@@ -78,7 +78,7 @@ static int mergefeat_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GenomeFeature *gf;
-  error_check(err);
+  gt_error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   v->current_tree = gn;
@@ -94,7 +94,7 @@ static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
   GenomeNode *leaf;
   unsigned long i;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   v = mergefeat_visitor_cast(gv);
   gt_array_reset(v->nodes_to_remove);
   had_err = genome_node_traverse_children((GenomeNode*) gf, v,

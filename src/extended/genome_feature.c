@@ -143,7 +143,7 @@ void genome_feature_set_phase(GenomeNode *gn, Phase phase)
 static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
   GenomeFeature *gf;
-  error_check(err);
+  gt_error_check(err);
   gf = genome_feature_cast(gn);
   return genome_visitor_visit_genome_feature(gv, gf, err);
 }
@@ -412,7 +412,7 @@ static int save_exon(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   GenomeFeature *gf;
   GT_Array *exon_features = (GT_Array*) data;
-  error_check(err);
+  gt_error_check(err);
   gf = (GenomeFeature*) gn;
   assert(gf && exon_features);
   if (genome_feature_has_type(gf, gft_exon)) {
@@ -434,7 +434,7 @@ static int save_exons_and_cds(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   GenomeFeature *gf;
-  error_check(err);
+  gt_error_check(err);
   gf = (GenomeFeature*) gn;
   assert(gf && info);
   if (genome_feature_has_type(gf, gft_exon))
@@ -472,7 +472,7 @@ static int determine_transcripttypes(GenomeNode *gn, void *data,
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   assert(gn && info);
   /* reset exon_features and cds_features */
   gt_array_reset(info->exon_features);
@@ -639,7 +639,7 @@ int genome_feature_unit_test(GT_Error *err)
   Str *seqid;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   seqid = str_new_cstr("seqid");
   feature_type_factory = feature_type_factory_builtin_new();

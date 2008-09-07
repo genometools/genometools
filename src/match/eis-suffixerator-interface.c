@@ -229,7 +229,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            Verboseinfo *verbosity, GT_Error *err)
 {
   sfxInterface *sfxi = NULL;
-  error_check(err);
+  gt_error_check(err);
 
   sfxi = ma_calloc(1, sizeof (*sfxi));
   {

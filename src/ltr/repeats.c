@@ -78,7 +78,7 @@ int simpleexactselfmatchstore (
                 seqnum2;
   bool samecontig = false;
 
-  error_check(err);
+  gt_error_check(err);
 
   if (pos1 > pos2)
   {

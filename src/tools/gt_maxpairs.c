@@ -84,7 +84,7 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   Option *option, *queryoption, *scanoption, *sampleoption;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[options] -ii indexname",
                          "Perform Substring matches with or without query.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -123,13 +123,13 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   {
     if (option_is_set(sampleoption))
     {
-      error_set(err, "option -samples cannot be combined with option -q");
+      gt_error_set(err, "option -samples cannot be combined with option -q");
       oprval = OPTIONPARSER_ERROR;
     } else
     {
       if (option_is_set(scanoption))
       {
-        error_set(err, "option -scan cannot be combined with option -q");
+        gt_error_set(err, "option -scan cannot be combined with option -q");
         oprval = OPTIONPARSER_ERROR;
       }
     }
@@ -145,7 +145,7 @@ int gt_maxpairs(int argc, const char **argv, GT_Error *err)
   Maxpairsoptions maxpairsoptions;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
 
   maxpairsoptions.indexname = str_new();
   maxpairsoptions.queryfiles = gt_strarray_new();

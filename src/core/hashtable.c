@@ -416,7 +416,7 @@ hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
   void *elem;
   unsigned long i;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   assert(ht && iter && cmp);
   hash_entries = gt_array_new(ht->table_info.elem_size);
   {
@@ -805,7 +805,7 @@ hashtable_test(HashElemInfo table_info)
 int hashtable_unit_test(UNUSED GT_Error *err)
 {
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   static const HashElemInfo
     hash_ptr = { ht_ptr_elem_hash, { NULL }, sizeof (struct ht_elem_2cstr),
                  ht_ptr_elem_cmp, NULL, NULL },

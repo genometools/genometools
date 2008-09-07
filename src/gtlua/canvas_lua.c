@@ -75,14 +75,14 @@ static int canvas_lua_to_file(lua_State *L)
   GT_Error *err;
   const char *fn;
   int had_err = 0;
-  err = error_new();
+  err = gt_error_new();
   canvas = check_canvas(L, 1);
   fn = luaL_checkstring(L, 2);
   assert(canvas);
   had_err = gt_canvas_to_file(*canvas, fn, err);
   if (had_err)
     return lua_gt_error(L, err);
-  error_delete(err);
+  gt_error_delete(err);
   return 0;
 }
 

@@ -41,7 +41,7 @@ static int feature_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                           UNUSED GT_Error *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
-  error_check(err);
+  gt_error_check(err);
   gt_feature_index_add_genome_feature(v->feature_index, gf);
   return 0;
 }
@@ -51,7 +51,7 @@ static int feature_visitor_sequence_region(GenomeVisitor *gv,
                                            UNUSED GT_Error *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
-  error_check(err);
+  gt_error_check(err);
   gt_feature_index_add_sequence_region(v->feature_index, sr);
   return 0;
 }

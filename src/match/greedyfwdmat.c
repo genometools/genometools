@@ -227,7 +227,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
   int retval;
   uint64_t unitnum;
 
-  error_check(err);
+  gt_error_check(err);
   substringinfo.genericindex = genericindex;
   substringinfo.totallength = totallength;
   rangespecinfo.minlength = minlength;

@@ -96,7 +96,7 @@ int seqiterator_next(SeqIterator *seqit,
     {
       if (seqit->sequencebuffer.nextfreeUchar == 0 && seqit->withsequence)
       {
-        error_set(err,"sequence %llu is empty", seqit->unitnum);
+        gt_error_set(err,"sequence %llu is empty", seqit->unitnum);
         haserr = true;
         break;
       }

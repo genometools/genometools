@@ -39,7 +39,7 @@ static int add_introns_in_children(GenomeNode *gn, void *data,
   Range previous_range, current_range, intron_range;
   Strand previous_strand, current_strand, intron_strand;
   Str *parent_seqid;
-  error_check(err);
+  gt_error_check(err);
   current_feature = genome_node_cast(genome_feature_class(), gn);
   assert(current_feature);
   if (genome_feature_has_type(current_feature, gft_exon)) {
@@ -83,7 +83,7 @@ static int add_introns_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GenomeFeature *gf;
-  error_check(err);
+  gt_error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   v->parent_feature = gf;
@@ -96,7 +96,7 @@ static int add_introns_visitor_genome_feature(GenomeVisitor *gv,
                                              GenomeFeature *gf, GT_Error *err)
 {
   AddIntronsVisitor *v;
-  error_check(err);
+  gt_error_check(err);
   v = add_introns_visitor_cast(gv);
   return genome_node_traverse_children((GenomeNode*) gf, v,
                                        add_introns_if_necessary, false, err);

@@ -39,7 +39,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
   unsigned int genome_node_consolidated;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   ms = merge_stream_cast(gs);
 

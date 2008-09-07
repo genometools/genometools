@@ -100,7 +100,7 @@ int splitter_unit_test(GT_Error *err)
               string_6[]  = "test";
   Splitter *s;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   s = splitter_new();
 
   /* string_1 */

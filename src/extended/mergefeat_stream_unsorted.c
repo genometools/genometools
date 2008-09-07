@@ -34,7 +34,7 @@ static int mergefeat_stream_unsorted_next_tree(GenomeStream *gs,
 {
   MergefeatStreamUnsorted *mfs;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   mfs = mergefeat_stream_unsorted_cast(gs);
   had_err = genome_stream_next_tree(mfs->in_stream, gn, err);
   if (!had_err && *gn)

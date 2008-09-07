@@ -447,7 +447,7 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
 int graphics_save_to_file(const Graphics *g, const char *filename, GT_Error *err)
 {
   cairo_status_t rval;
-  error_check(err);
+  gt_error_check(err);
   GenFile *outfile;
   assert(g && filename);
 
@@ -458,7 +458,7 @@ int graphics_save_to_file(const Graphics *g, const char *filename, GT_Error *err
       assert(rval == CAIRO_STATUS_SUCCESS || rval == CAIRO_STATUS_WRITE_ERROR);
       if (rval == CAIRO_STATUS_WRITE_ERROR)
       {
-        error_set(err, "an I/O error occurred while attempting "
+        gt_error_set(err, "an I/O error occurred while attempting "
                        "to write image file \"%s\"", filename);
         return -1;
       }
@@ -468,7 +468,7 @@ int graphics_save_to_file(const Graphics *g, const char *filename, GT_Error *err
       cairo_surface_flush(g->surf);
       cairo_surface_finish(g->surf);
       outfile = genfile_open(GFM_UNCOMPRESSED, filename, "w+", err);
-      if (!error_is_set(err))
+      if (!gt_error_is_set(err))
       {
         genfile_xwrite(outfile, str_get_mem(g->outbuf), str_length(g->outbuf));
         genfile_close(outfile);

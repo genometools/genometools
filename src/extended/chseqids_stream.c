@@ -36,7 +36,7 @@ struct ChseqidsStream {
 static int change_sequence_id(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   Str *changed_seqid = data;
-  error_check(err);
+  gt_error_check(err);
   assert(changed_seqid);
   genome_node_change_seqid(gn, changed_seqid);
   return 0;
@@ -49,7 +49,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
   Str *changed_seqid;
   unsigned long i;
   int rval, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   cs = chseqids_stream_cast(gs);
 
   if (!cs->sequence_regions_processed) {
@@ -152,7 +152,7 @@ GenomeStream* chseqids_stream_new(GenomeStream *in_stream, Str *chseqids_file,
 {
   GenomeStream *gs;
   ChseqidsStream *cs;
-  error_check(err);
+  gt_error_check(err);
   assert(in_stream && chseqids_file);
   assert(genome_stream_is_sorted(in_stream));
   gs = genome_stream_create(chseqids_stream_class(), false);

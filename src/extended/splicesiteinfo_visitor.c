@@ -63,7 +63,7 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
   char site[5];
   Str *seqid;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(ssiv && intron);
   ssiv->intron_processed = true;
   range = genome_node_get_range(intron);
@@ -114,7 +114,7 @@ static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
   GenomeNodeIterator *gni;
   GenomeNode *node;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   ssiv = splicesiteinfo_visitor_cast(gv);
   assert(ssiv->region_mapping);
   gni = genome_node_iterator_new((GenomeNode*) gf);

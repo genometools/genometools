@@ -41,7 +41,7 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,GT_Error *err)
   FILE *al1fp;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   al1fp = opensfxfile(indexname,ALPHABETFILESUFFIX,"wb",err);
   if (al1fp == NULL)
   {
@@ -78,7 +78,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   Seqpos totallength;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   sfxseqinfo->voidptr2suffixarray = NULL;
   sfxseqinfo->filelengthtab = NULL;
   sfxseqinfo->encseq = NULL;

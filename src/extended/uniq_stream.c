@@ -96,7 +96,7 @@ static int uniq_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *er
 {
   UniqStream *us;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   us = uniq_stream_cast(gs);
 
   assert(!us->second_node); /* the second buffer is always empty when this

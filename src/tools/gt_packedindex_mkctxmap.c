@@ -55,7 +55,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GT_Error *err)
   projectName = str_new();
 
   do {
-    error_check(err);
+    gt_error_check(err);
     {
       bool exitNow = false;
       switch (parseMkCtxMapOptions(&parsedArgs, argc, argv, &params, err))
@@ -81,7 +81,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GT_Error *err)
       if (streamsuffixarray(&sa, &len, SARR_SUFTAB, projectName, verbosity,
                             err))
       {
-        error_unset(err);
+        gt_error_unset(err);
         if (streamsuffixarray(&sa, &len, 0, projectName, verbosity, err))
         {
           had_err = true;
@@ -93,7 +93,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GT_Error *err)
                                  BWTDEFOPT_MULTI_QUERY, &sa, len, err);
         if (!(src = BWTSeqNewSASeqSrc(bwtSeq, NULL)))
         {
-          error_set(err, "The project %s does not contain sufficient"
+          gt_error_set(err, "The project %s does not contain sufficient"
                     " information to regenerate the suffix array.",
                     str_get(projectName));
           had_err = true;
@@ -116,8 +116,8 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GT_Error *err)
         if (BWTSCRFReadAdvance(bwtSeqCRF, len, readSfxIdx, err)
             != len)
         {
-          error_set(err, "Creation of context map unsuccessful: %s",
-                    error_get(err));
+          gt_error_set(err, "Creation of context map unsuccessful: %s",
+                    gt_error_get(err));
           had_err = true;
           deleteBWTSeqContextRetrieverFactory(bwtSeqCRF);
           break;
@@ -148,7 +148,7 @@ parseMkCtxMapOptions(int *parsed_args, int argc, const char **argv,
   OPrval oprval;
   Option *option;
 
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("indexname",
                          "Build BWT packedindex for project <indexname>.");
   registerCtxMapOptions(op, &params->mapIntervalLog2);

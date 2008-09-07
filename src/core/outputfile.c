@@ -42,7 +42,7 @@ static int determine_outfp(void *data, GT_Error *err)
   OutputFileInfo *ofi = (OutputFileInfo*) data;
   GenFileMode genfilemode;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(ofi);
   if (!str_length(ofi->output_filename)) /* no output file given -> use stdin */
     *ofi->outfp = NULL;
@@ -65,7 +65,7 @@ static int determine_outfp(void *data, GT_Error *err)
       str_append_cstr(ofi->output_filename, genfilemode_suffix(genfilemode));
     }
     if (!ofi->force && file_exists(str_get(ofi->output_filename))) {
-        error_set(err, "file \"%s\" exists already, use option -%s to "
+        gt_error_set(err, "file \"%s\" exists already, use option -%s to "
                   "overwrite", str_get(ofi->output_filename), FORCE_OPT_CSTR);
         had_err = -1;
     }

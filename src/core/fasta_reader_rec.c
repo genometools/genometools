@@ -33,13 +33,13 @@ static int parse_fasta_description(Str *description, IO *seqio, GT_Error *err)
 {
   int rval;
   char cc;
-  error_check(err);
+  gt_error_check(err);
   assert(description && seqio);
   rval = io_get_char(seqio, &cc);
   assert(!rval); /* was checked earlier */
   /* make sure we got a proper fasta description */
   if (cc != FASTA_SEPARATOR) {
-    error_set(err, "the first character of fasta file \"%s\" has to be '%c'",
+    gt_error_set(err, "the first character of fasta file \"%s\" has to be '%c'",
               io_get_filename(seqio), FASTA_SEPARATOR);
 
     return -1;
@@ -53,7 +53,7 @@ static int parse_fasta_description(Str *description, IO *seqio, GT_Error *err)
 static int parse_fasta_sequence(Str *sequence, IO *seqio, GT_Error *err)
 {
   char cc;
-  error_check(err);
+  gt_error_check(err);
   assert(sequence && seqio);
   assert(!str_length(sequence));
   /* read sequence */
@@ -62,7 +62,7 @@ static int parse_fasta_sequence(Str *sequence, IO *seqio, GT_Error *err)
       str_append_char(sequence, cc);
   }
   if (!str_length(sequence)) {
-    error_set(err, "empty sequence given in line %lu",
+    gt_error_set(err, "empty sequence given in line %lu",
               io_get_line_number(seqio));
     return -1;
   }
@@ -75,7 +75,7 @@ static int parse_fasta_entry(Str *description, Str *sequence, IO *seqio,
                              GT_Error *err)
 {
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   assert(description && sequence && seqio);
   had_err = parse_fasta_description(description, seqio, err);
   if (!had_err)
@@ -92,7 +92,7 @@ static int fasta_reader_rec_run(FastaReader *fasta_reader,
   FastaReaderRec *fr = fasta_reader_rec_cast(fasta_reader);
   Str *description, *sequence;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* at least one function has to be defined */
   assert(proc_description || proc_sequence_part || proc_sequence_length);
@@ -103,7 +103,7 @@ static int fasta_reader_rec_run(FastaReader *fasta_reader,
 
   /* make sure file is not empty */
   if (!io_has_char(fr->seqio)) {
-    error_set(err, "sequence file \"%s\" is empty", io_get_filename(fr->seqio));
+    gt_error_set(err, "sequence file \"%s\" is empty", io_get_filename(fr->seqio));
     had_err = -1;
   }
 

@@ -86,7 +86,7 @@ foreach_iterfunc(char *key, unsigned long occurrences, void *data,
                  UNUSED GT_Error *err)
 {
   ForeachInfo *info;
-  error_check(err);
+  gt_error_check(err);
   assert(key && data);
   info = (ForeachInfo*) data;
   info->func(key, occurrences, (double) occurrences / info->num_of_occurrences,

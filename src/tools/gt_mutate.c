@@ -68,7 +68,7 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
   Seq *mutated_seq;
   int had_err;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);

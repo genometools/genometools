@@ -117,7 +117,7 @@ int tag_value_map_example(UNUSED GT_Error *err)
 {
   TagValueMap map;
 
-  error_check(err);
+  gt_error_check(err);
 
   map = tag_value_map_new("tag 1", "value 1");
   tag_value_map_add(&map, "tag 2", "value 2");

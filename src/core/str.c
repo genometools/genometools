@@ -252,7 +252,7 @@ int str_unit_test(GT_Error *err)
   Str *s, *s1, *s2;
   static char cstring_1[] = "test_string"; /* l=11 */
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* the empty string */
   s1 = str_new();

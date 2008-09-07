@@ -68,7 +68,7 @@ static int gt_template_arguments_check(UNUSED int rest_argc,
 {
   TemplateArguments *arguments = tool_arguments;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* XXX: do some checking after the option have been parsed (usally this is not
@@ -85,7 +85,7 @@ static int gt_template_runner(int argc, const char **argv, int parsed_args,
   TemplateArguments *arguments = tool_arguments;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* XXX */

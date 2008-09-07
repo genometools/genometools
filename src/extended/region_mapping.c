@@ -36,7 +36,7 @@ struct RegionMapping {
 RegionMapping* region_mapping_new_mapping(Str *mapping_filename, GT_Error *err)
 {
   RegionMapping *rm;
-  error_check(err);
+  gt_error_check(err);
   assert(mapping_filename);
   rm = ma_calloc(1, sizeof (RegionMapping));
   rm->mapping = mapping_new(mapping_filename, "mapping", MAPPINGTYPE_STRING,
@@ -67,7 +67,7 @@ RegionMapping* region_mapping_ref(RegionMapping *rm)
 static Str* region_mapping_map(RegionMapping *rm, const char *sequence_region,
                                GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(rm && sequence_region);
   if (rm->sequence_filename)
     return str_ref(rm->sequence_filename);
@@ -78,7 +78,7 @@ static Str* region_mapping_map(RegionMapping *rm, const char *sequence_region,
 static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(rm && seqid);
   if (!rm->sequence_file || str_cmp(rm->sequence_name, seqid)) {
     str_delete(rm->sequence_file);
@@ -104,7 +104,7 @@ int region_mapping_get_raw_sequence(RegionMapping *rm, const char **raw,
                                     Str *seqid, GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(rm && seqid);
   had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err)
@@ -117,7 +117,7 @@ int region_mapping_get_raw_sequence_length(RegionMapping *rm,
                                            GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(rm && seqid);
   had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err)

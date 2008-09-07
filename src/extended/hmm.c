@@ -598,7 +598,7 @@ int hmm_unit_test(GT_Error *err)
   size_t i, j, len, size;
   HMM *fair_hmm, *loaded_hmm;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* test the HMM class with the coin HMMs */
   fair_hmm = coin_hmm_fair();

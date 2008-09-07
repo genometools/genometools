@@ -33,7 +33,7 @@ static OPrval parse_options(int *parsed_args, MSAparse_arguments *arguments,
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[option ...] MSA_file",
                          "Parse multiple sequence alignment (MSA) file and "
                          "optionally show score(s).");
@@ -61,7 +61,7 @@ int gt_msaparse(int argc, const char **argv, GT_Error *err)
   MSAparse_arguments arguments;
   int parsed_args, had_err = 0;
   MSA *msa = NULL;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
@@ -73,7 +73,7 @@ int gt_msaparse(int argc, const char **argv, GT_Error *err)
   /* make sure sequence_file exists */
   assert(parsed_args < argc);
   if (!file_exists(argv[parsed_args])) {
-    error_set(err, "MSA_file '%s' does not exist", argv[parsed_args]);
+    gt_error_set(err, "MSA_file '%s' does not exist", argv[parsed_args]);
     had_err = -1;
   }
 

@@ -126,10 +126,10 @@ static int gt_extractseq_arguments_check(UNUSED int argc, void *tool_arguments,
                                          GT_Error *err)
 {
   ExtractSeqArguments *arguments = tool_arguments;
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
   if (arguments->frompos > arguments->topos) {
-    error_set(err,
+    gt_error_set(err,
               "argument to option '-%s' must be <= argument to option '-%s'",
               FROMPOS_OPTION_STR, TOPOS_OPTION_STR);
     return -1;
@@ -141,10 +141,10 @@ static int extractseq_pos(GenFile *outfp, Bioseq *bs, unsigned long frompos,
                           unsigned long topos, unsigned long width, GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(bs);
   if (topos > bioseq_get_raw_sequence_length(bs)) {
-    error_set(err,
+    gt_error_set(err,
               "argument %lu to option '-%s' is larger than sequence length %lu",
               topos, TOPOS_OPTION_STR, bioseq_get_raw_sequence_length(bs));
     had_err = -1;
@@ -164,7 +164,7 @@ static int extractseq_match(GenFile *outfp, Bioseq *bs, const char *pattern,
   bool match;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(bs && pattern);
 
   for (i = 0; !had_err && i < bioseq_number_of_sequences(bs); i++) {
@@ -184,11 +184,11 @@ static int process_ginum(Str *ginum, int argc, const char **argv,
                          unsigned long width, GenFile *outfp, GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(str_length(ginum));
 
   if (argc == 0) {
-    error_set(err,"option -ginum requires at least one file argument");
+    gt_error_set(err,"option -ginum requires at least one file argument");
     had_err = -1;
   }
 
@@ -212,7 +212,7 @@ static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
   ExtractSeqArguments *arguments = tool_arguments;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
   if (str_length(arguments->ginum)) {
     had_err = process_ginum(arguments->ginum, argc - parsed_args,

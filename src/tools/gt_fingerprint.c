@@ -113,7 +113,7 @@ static int compare_fingerprints(StringDistri *sd, const char *checklist,
   bool comparisons_failed = false, use_stdin = false;
   FILE *checkfile;
   Str *line;
-  error_check(err);
+  gt_error_check(err);
   assert(sd && checklist);
   if (!strcmp(checklist, "-"))
     use_stdin = true;
@@ -135,7 +135,7 @@ static int compare_fingerprints(StringDistri *sd, const char *checklist,
   /* process remaining sequence_file(s) fingerprints */
   string_distri_foreach(sd, proc_superfluous_sequence, &comparisons_failed);
   if (comparisons_failed) {
-    error_set(err, "fingerprint comparison failed");
+    gt_error_set(err, "fingerprint comparison failed");
     return -1;
   }
   return 0;
@@ -160,13 +160,13 @@ static void show_duplicate(const char *fingerprint, unsigned long occurrences,
 static int show_duplicates(StringDistri *sd, GT_Error *err)
 {
   FingerprintInfo info;
-  error_check(err);
+  gt_error_check(err);
   assert(sd);
   info.duplicates = 0;
   info.num_of_sequences = 0;
   string_distri_foreach(sd, show_duplicate, &info);
   if (info.duplicates) {
-    error_set(err, "duplicates found: %llu out of %llu (%.3f%%)",
+    gt_error_set(err, "duplicates found: %llu out of %llu (%.3f%%)",
               info.duplicates, info.num_of_sequences,
               (((double) info.duplicates / info.num_of_sequences) * 100.0));
     return -1;
@@ -183,7 +183,7 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
   unsigned long i, j;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
   sd = string_distri_new();
 

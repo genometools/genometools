@@ -33,7 +33,7 @@ int makeindexfilecopy(const Str *destindex,
   int cc;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   fpdest = opensfxfile(destindex,suffix,"wb",err);
   if (fpdest == NULL)
   {

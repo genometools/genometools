@@ -80,7 +80,7 @@ static OPrval parse_options(int *parsed_args,
   GT_StrArray *charlistlen;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
   charlistlen = gt_strarray_new();
   pw->strings = gt_strarray_new();
   pw->files = gt_strarray_new();
@@ -119,7 +119,7 @@ static OPrval parse_options(int *parsed_args,
     {
       if (gt_strarray_size(pw->strings) != 2UL)
       {
-        error_set(err, "option -ss requires two string arguments");
+        gt_error_set(err, "option -ss requires two string arguments");
         oprval = OPTIONPARSER_ERROR;
       }
     } else
@@ -128,7 +128,7 @@ static OPrval parse_options(int *parsed_args,
       {
         if (gt_strarray_size(pw->files) != 2UL)
         {
-          error_set(err, "option -ff requires two filename arguments");
+          gt_error_set(err, "option -ff requires two filename arguments");
           oprval = OPTIONPARSER_ERROR;
         }
       } else
@@ -139,7 +139,7 @@ static OPrval parse_options(int *parsed_args,
 
           if (gt_strarray_size(charlistlen) != 2UL)
           {
-            error_set(err, "option -a requires charlist and length argument");
+            gt_error_set(err, "option -a requires charlist and length argument");
             oprval = OPTIONPARSER_ERROR;
           }
           ALLOCASSIGNSPACE(pw->charlistlen,NULL,Charlistlen,1);
@@ -148,7 +148,7 @@ static OPrval parse_options(int *parsed_args,
           if (sscanf(gt_strarray_get(charlistlen,1UL),"%ld",&readint) != 1 ||
               readint < 1L)
           {
-            error_set(err, "option -a requires charlist and length argument");
+            gt_error_set(err, "option -a requires charlist and length argument");
             oprval = OPTIONPARSER_ERROR;
           }
           pw->charlistlen->len = (unsigned long) readint;
@@ -156,7 +156,7 @@ static OPrval parse_options(int *parsed_args,
         {
           if (!option_is_set(optiontext))
           {
-            error_set(err, "use exactly one of the options -ss, -ff, -a, -t");
+            gt_error_set(err, "use exactly one of the options -ss, -ff, -a, -t");
             oprval = OPTIONPARSER_ERROR;
           }
         }
@@ -166,7 +166,7 @@ static OPrval parse_options(int *parsed_args,
   option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
   {
-    error_set(err, "superfluous program parameters");
+    gt_error_set(err, "superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
   gt_strarray_delete(charlistlen);
@@ -234,7 +234,7 @@ int gt_paircmp(int argc, const char **argv, GT_Error *err)
   Cmppairwiseopt cmppairwise;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
 
   oprval = parse_options(&parsed_args,&cmppairwise,argc, argv, err);
   if (oprval == OPTIONPARSER_OK)

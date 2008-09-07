@@ -51,7 +51,7 @@ static int buffer_is_sorted(void **elem, void *info, GT_Error *err)
 {
   GenomeNode *current_node, **last_node;
 
-  error_check(err);
+  gt_error_check(err);
   assert(elem && info);
 
   current_node = *(GenomeNode**) elem,
@@ -59,7 +59,7 @@ static int buffer_is_sorted(void **elem, void *info, GT_Error *err)
 
   if (*last_node && genome_node_compare(last_node, &current_node) > 0) {
     assert(*last_node);
-    error_set(err, "the file %s is not sorted (example: line %u and %u)",
+    gt_error_set(err, "the file %s is not sorted (example: line %u and %u)",
               genome_node_get_filename(*last_node),
               genome_node_get_line_number(*last_node),
               genome_node_get_line_number(current_node));
@@ -77,7 +77,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   Str *filenamestr;
   int had_err = 0, status_code;
 
-  error_check(err);
+  gt_error_check(err);
 
   if (queue_size(is->genome_node_buffer) > 1) {
     /* we still have at least two nodes in the buffer -> serve from there */
@@ -98,7 +98,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       if (gt_strarray_size(is->files)) {
         if (strcmp(gt_strarray_get(is->files, is->next_file), "-") == 0) {
           if (is->stdin_argument) {
-            error_set(err, "multiple specification of argument file \"-\"");
+            gt_error_set(err, "multiple specification of argument file \"-\"");
             had_err = -1;
             break;
           }

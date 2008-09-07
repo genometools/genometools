@@ -28,7 +28,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("sequence_of_die_rolls", "Decode "
                          "'sequence_of_die_rolls' and show the result on "
                          "stdout.");
@@ -43,7 +43,7 @@ int gt_casino(int argc, const char **argv, GT_Error *err)
   unsigned int i, *emissions, *state_sequence = NULL, num_of_emissions;
   int parsed_args, had_err = 0;
   HMM *hmm = NULL;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {
@@ -78,7 +78,7 @@ int gt_casino(int argc, const char **argv, GT_Error *err)
         emissions[i] = SIX;
         break;
       default:
-        error_set(err, "emissions[%u]=%c is not a valid character (only "
+        gt_error_set(err, "emissions[%u]=%c is not a valid character (only "
                        "`1' to `6' allowed)", i, (char) emissions[i]);
         had_err = -1;
     }

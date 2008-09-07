@@ -52,12 +52,12 @@ int gff3_unescape(Str *unescaped_seq, const char *escaped_seq,
 {
   const char *cc;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(unescaped_seq && escaped_seq);
   for (cc = escaped_seq; !had_err && cc < escaped_seq + length; cc++) {
     if (*cc == '%') {
       if (cc + 2 >= escaped_seq + length) {
-        error_set(err, "not enough sequence left to unescape after '%%'");
+        gt_error_set(err, "not enough sequence left to unescape after '%%'");
         had_err = -1;
       }
       else {
@@ -90,7 +90,7 @@ int gff3_unescape(Str *unescaped_seq, const char *escaped_seq,
           cc += 2;
         }
         else {
-          error_set(err, "unknown escape sequence '%c%c%c'",
+          gt_error_set(err, "unknown escape sequence '%c%c%c'",
                     cc[0], cc[1], cc[2]);
           had_err = -1;
         }
@@ -109,7 +109,7 @@ static int test_single_escaping(char unescaped_char, const char *escaped_char,
   char unescaped_testseq[8],
        escaped_testseq[10];
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   escaped_seq = str_new();
   unescaped_seq = str_new();
   snprintf(unescaped_testseq, sizeof unescaped_testseq, "foo%cbar",
@@ -131,7 +131,7 @@ int gff3_escaping_unit_test(GT_Error *err)
 {
   Str *seq;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   seq = str_new();
 
   had_err = test_single_escaping(' ', SPACE, err);

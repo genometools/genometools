@@ -42,7 +42,7 @@
 #define CHECKPOSITIVE(VAL,FORMAT,WHICH)\
         if ((VAL) <= 0)\
         {\
-          error_set(err,"file \"%s\", line %lu: illegal format: %s element "\
+          gt_error_set(err,"file \"%s\", line %lu: illegal format: %s element "\
                         " = " FORMAT " is not a positive integer",\
                         str_get(ginumberfile),\
                         linenum+1,\
@@ -139,11 +139,11 @@ static Giquery *readginumberfile(bool verbose,
   unsigned long i;
 #endif
 
-  error_check(err);
+  gt_error_check(err);
   *numofqueries = file_number_of_lines(str_get(ginumberfile));
   if (*numofqueries == 0)
   {
-    error_set(err,"empty file \"%s\" not allowed",str_get(ginumberfile));
+    gt_error_set(err,"empty file \"%s\" not allowed",str_get(ginumberfile));
     return NULL;
   }
   fp = fa_fopen(str_get(ginumberfile),"r",err);
@@ -162,7 +162,7 @@ static Giquery *readginumberfile(bool verbose,
                SCANint64_tcast(&readint64),&readlongfrompos,
                                            &readlongtopos) != 3)
     {
-      error_set(err,"file \"%s\", line %lu: illegal format",
+      gt_error_set(err,"file \"%s\", line %lu: illegal format",
                   str_get(ginumberfile),
                   linenum+1);
       haserr = true;
@@ -181,7 +181,7 @@ static Giquery *readginumberfile(bool verbose,
     if (!COMPLETE(giqueries[linenum]) &&
         giqueries[linenum].frompos > giqueries[linenum].topos)
     {
-      error_set(err,"file \"%s\", line %lu: illegal format: second value %lu "
+      gt_error_set(err,"file \"%s\", line %lu: illegal format: second value %lu "
                     "is larger than third value %lu",
                   str_get(ginumberfile),
                   linenum+1,
@@ -276,7 +276,7 @@ static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
 {
   unsigned long i, firstpipe = 0, secondpipe = 0;
 
-  error_check(err);
+  gt_error_check(err);
   for (i=0; desc[i] != '\0'; i++)
   {
     if (desc[i] == '|')
@@ -293,7 +293,7 @@ static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
   }
   if (firstpipe == 0 || secondpipe == 0)
   {
-    error_set(err,"Cannot find gi-number in description \"%s\"\n",desc);
+    gt_error_set(err,"Cannot find gi-number in description \"%s\"\n",desc);
     return NULL;
   }
   assert(firstpipe < secondpipe);
@@ -320,7 +320,7 @@ int extractginumbers(bool verbose,
   Giquery *giqueries;
   size_t headerbuffersize = 0, headerlength;
 
-  error_check(err);
+  gt_error_check(err);
   giqueries = readginumberfile(verbose,&numofqueries,ginumberfile,err);
   if (giqueries == NULL)
   {
@@ -353,13 +353,13 @@ int extractginumbers(bool verbose,
       if (sscanf(ginumberasstring,FormatScanint64_t "|",
                  SCANint64_tcast(&readint64)) != 1)
       {
-        error_set(err,"cannot parse ginumber(integer) in \"%s\"",
+        gt_error_set(err,"cannot parse ginumber(integer) in \"%s\"",
                     ginumberasstring);
         had_err = -1;
       }
       if (had_err != -1 && readint64 <= 0)
       {
-        error_set(err,"gi number " Formatuint64_t "must be positive integer",
+        gt_error_set(err,"gi number " Formatuint64_t "must be positive integer",
                       readint64);
         had_err = -1;
       }

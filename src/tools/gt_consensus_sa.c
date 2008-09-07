@@ -86,7 +86,7 @@ static int gt_consensus_sa_runner(UNUSED int argc, const char **argv,
   SSplicedAlignment *sa;
   unsigned long i;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* parse input file and store resuilts in the spliced alignment array */
   spliced_alignments = gt_array_new(sizeof (SSplicedAlignment*));

@@ -200,11 +200,11 @@ static int process_strand_arg(Str *strand_char, Strand *strand,
                               const char *optstr, GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   if (str_length(strand_char)) {
     Strand tmpstrand = strand_get(str_get(strand_char)[0]);
     if ((str_length(strand_char) > 1) || (tmpstrand == NUM_OF_STRAND_TYPES)) {
-      error_set(err, "argument to option -%s must be one of '"STRANDCHARS"'",
+      gt_error_set(err, "argument to option -%s must be one of '"STRANDCHARS"'",
                 optstr);
       had_err = -1;
     }
@@ -219,7 +219,7 @@ static int gt_filter_arguments_check(UNUSED int rest_argc, void *tool_arguments,
 {
   FilterArguments *arguments = tool_arguments;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
   had_err = process_strand_arg(arguments->strand_char, &arguments->strand,
                                STRAND_OPT, err);
@@ -240,7 +240,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
   GenomeNode *gn;
   int had_err;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* create a gff3 input stream */

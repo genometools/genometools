@@ -97,7 +97,7 @@ int file_find_in_path(Str *path, const char *file, GT_Error *err)
   unsigned long i;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(file);
 
   /* check if 'file' has dirname */
@@ -109,7 +109,7 @@ int file_find_in_path(Str *path, const char *file, GT_Error *err)
   if (pathvariable)
     pathvariable = cstr_dup(pathvariable); /* make writeable copy */
   else {
-    error_set(err, "environment variable $PATH is not defined");
+    gt_error_set(err, "environment variable $PATH is not defined");
     had_err = -1;
   }
 

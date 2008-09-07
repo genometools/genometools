@@ -28,7 +28,7 @@ static OPrval parse_options(bool *onlyins,int *parsed_args,
   Option *option;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[options] indexname",
                          "Perform trie insertions and check consistency.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -47,7 +47,7 @@ int gt_trieins(int argc, const char **argv, GT_Error *err)
   int parsed_args;
   bool onlyins = false;
 
-  error_check(err);
+  gt_error_check(err);
 
   switch (parse_options(&onlyins,&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;

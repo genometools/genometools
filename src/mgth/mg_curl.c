@@ -97,7 +97,7 @@ int mg_curl(ParseStruct *parsestruct_ptr,
     ("http://www.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=");
 
   /* Check der Umgebungsvariablen */
-  error_check(err);
+  gt_error_check(err);
 
   curl_global_init(CURL_GLOBAL_ALL);
 
@@ -143,7 +143,7 @@ int mg_curl(ParseStruct *parsestruct_ptr,
 
   if (curl_errornr)
   {
-    error_set(err,
+    gt_error_set(err,
               "an error occurred during curl-processing (error-code %d):\
                \"%s\"", curl_errornr, curlerror);
     had_err = -1;
@@ -158,7 +158,7 @@ int mg_curl(ParseStruct *parsestruct_ptr,
 
     if (!seq_pos)
     {
-      error_set(err,
+      gt_error_set(err,
                 "an error occurred while retrieving sequence-information\
                  with the following request: \"%s\"", http_adr_ptr);
       had_err = -1;

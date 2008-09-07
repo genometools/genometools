@@ -28,11 +28,11 @@ static void grep_error(int errcode, regex_t *matcher, GT_Error *err)
 {
   char sbuf[BUFSIZ], *buf;
   size_t bufsize;
-  error_check(err);
+  gt_error_check(err);
   bufsize = regerror(errcode, matcher, NULL, 0);
   buf = malloc(bufsize);
   (void) regerror(errcode, matcher, buf ? buf : sbuf, buf ? bufsize : BUFSIZ);
-  error_set(err, "grep(): %s", buf ? buf : sbuf);
+  gt_error_set(err, "grep(): %s", buf ? buf : sbuf);
   free(buf);
 }
 
@@ -40,7 +40,7 @@ int grep(bool *match, const char *pattern, const char *line, GT_Error *err)
 {
   regex_t matcher;
   int rval, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(pattern && line);
   if ((rval = regcomp(&matcher, pattern, REG_EXTENDED | REG_NOSUB))) {
     grep_error(rval, &matcher, err);
@@ -67,7 +67,7 @@ int grep_unit_test(GT_Error *err)
 {
   bool match;
   int grep_err, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   grep_err = grep(&match, "a", "a", NULL);
   ensure(had_err, !grep_err);

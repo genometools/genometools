@@ -105,14 +105,14 @@ static int gt_extractfeat_arguments_check(UNUSED int argc, void *tool_arguments,
   ExtractFeatArguments *arguments = tool_arguments;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* determine type and make sure it is a valid one */
   if (!(arguments->type =
           feature_type_factory_create_gft(arguments->feature_type_factory,
                                           str_get(arguments->typestr)))) {
-    error_set(err, "\"%s\" is not a valid feature type",
+    gt_error_set(err, "\"%s\" is not a valid feature type",
               str_get(arguments->typestr));
     had_err = -1;
   }
@@ -130,7 +130,7 @@ static int gt_extractfeat_runner(UNUSED int argc, const char **argv,
   RegionMapping *regionmapping;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   if (!had_err) {

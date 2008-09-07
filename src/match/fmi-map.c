@@ -59,7 +59,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   GT_Array *riktab;
   unsigned int intstoreindexpos;
 
-  error_check(err);
+  gt_error_check(err);
   riktab = gt_array_new(sizeofReadintkeys());
   SETREADINTKEYS("bwtlength",&fmindex->bwtlength,NULL);
   SETREADINTKEYS("longest",&fmindex->longestsuffixpos,NULL);
@@ -117,7 +117,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
         *storeindexpos = false;
       } else
       {
-        error_set(err,"illegal value in line matching \"storeindexpos=\"");
+        gt_error_set(err,"illegal value in line matching \"storeindexpos=\"");
         haserr = true;
       }
     }
@@ -150,7 +150,7 @@ static Encodedsequence *mapbwtencoding(const Str *indexname,
   bool haserr = false;
   Seqpos totallength;
 
-  error_check(err);
+  gt_error_check(err);
   if (mapsuffixarray(&suffixarray,&totallength,SARR_ESQTAB,indexname,
                      verboseinfo,err) != 0)
   {
@@ -173,7 +173,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,
   FILE *fpin = NULL;
   bool haserr = false, storeindexpos = true;
 
-  error_check(err);
+  gt_error_check(err);
   fmindex->mappedptr = NULL;
   fmindex->bwtformatching = NULL;
   fmindex->alphabet = NULL;

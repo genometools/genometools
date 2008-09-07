@@ -36,7 +36,7 @@ static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *er
   SortStream *sort_stream;
   GenomeNode *node;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   sort_stream = sort_stream_cast(gs);
 
   if (!sort_stream->sorted) {

@@ -133,7 +133,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
 {
   Indexedsuffix indexedsuffix;
 
-  error_check(err);
+  gt_error_check(err);
   if (emmesa->buf.nextaccessidx >= emmesa->buf.nextstoreidx)
   {
     if (emmesa->numofentries == 0)
@@ -159,7 +159,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
     {
       if (longest->defined)
       {
-        error_set(err,"longest is already defined as " FormatSeqpos,
+        gt_error_set(err,"longest is already defined as " FormatSeqpos,
                       longest->valueseqpos);
         return -2;
       }
@@ -215,7 +215,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   Specialcharinfo specialcharinfo;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   longest.defined = false;
   longest.valueseqpos = 0;
   numofindexes = (unsigned int) gt_strarray_size(indexnametab);
@@ -408,7 +408,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
           if (pairptr >= fmindex->specpos.spacePairBwtidx +
                          fmindex->specpos.allocatedPairBwtidx)
           {
-            error_set(err,"program error: not enough space for specpos");
+            gt_error_set(err,"program error: not enough space for specpos");
             haserr = true;
             break;
           }
@@ -431,7 +431,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
         fmindex->specpos.allocatedPairBwtidx !=
         fmindex->specpos.nextfreePairBwtidx)
     {
-      error_set(err,"program error: too much space for specpos: "
+      gt_error_set(err,"program error: too much space for specpos: "
                     "allocated = %lu != %lu = used",
                     fmindex->specpos.allocatedPairBwtidx,
                     fmindex->specpos.nextfreePairBwtidx);
@@ -454,7 +454,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       if (!longest.defined)
       {
-        error_set(err,"longest is not defined after merging");
+        gt_error_set(err,"longest is not defined after merging");
         haserr = true;
       }
       if (!haserr)

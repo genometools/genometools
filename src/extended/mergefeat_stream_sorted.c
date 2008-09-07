@@ -34,7 +34,7 @@ static int mergefeat_stream_sorted_next_tree(GenomeStream *gs, GenomeNode **gn,
                                              GT_Error *err)
 {
   MergefeatStreamSorted *mfs;
-  error_check(err);
+  gt_error_check(err);
   mfs = mergefeat_stream_sorted_cast(gs);
   return genome_stream_next_tree(mfs->sort_stream, gn, err);
 }

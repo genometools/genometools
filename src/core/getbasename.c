@@ -59,7 +59,7 @@ int getbasename_unit_test(GT_Error *err)
 {
   char *bn;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   bn = getbasename("/usr/lib");
   ensure(had_err, !strcmp(bn, "lib"));

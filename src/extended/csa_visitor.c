@@ -54,7 +54,7 @@ static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                       UNUSED GT_Error *err)
 {
   CSAVisitor *csa_visitor;
-  error_check(err);
+  gt_error_check(err);
   csa_visitor = csa_visitor_cast(gv);
 
   /* determine the first range if necessary */
@@ -103,7 +103,7 @@ static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn,
                                     UNUSED GT_Error *err)
 {
   CSAVisitor *csa_visitor;
-  error_check(err);
+  gt_error_check(err);
   csa_visitor = csa_visitor_cast(gv);
   queue_add(csa_visitor->genome_node_buffer, gn);
   return 0;
@@ -181,7 +181,7 @@ static int save_exon(GenomeNode *gn, void *data, UNUSED GT_Error *err)
   GenomeFeature *gf = (GenomeFeature*) gn;
   GT_Array *exon_ranges = (GT_Array*) data;
   Range range;
-  error_check(err);
+  gt_error_check(err);
   assert(gf && exon_ranges);
   if (genome_feature_has_type(gf, gft_exon)) {
     range = genome_node_get_range(gn);

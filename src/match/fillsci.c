@@ -158,7 +158,7 @@ int fasta2sequencekeyvalues(
   char *desc;
   FILE *desfp = NULL;
 
-  error_check(err);
+  gt_error_check(err);
   *numofsequences = 0;
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
@@ -206,7 +206,7 @@ int fasta2sequencekeyvalues(
           desc = queue_get(descqueue);
           if (fputs(desc,desfp) == EOF)
           {
-            error_set(err,"cannot write description to file %s.%s",
+            gt_error_set(err,"cannot write description to file %s.%s",
                               str_get(indexname),DESTABSUFFIX);
             haserr = true;
             break;
@@ -252,7 +252,7 @@ int fasta2sequencekeyvalues(
       desc = queue_get(descqueue);
       if (fputs(desc,desfp) == EOF)
       {
-        error_set(err,"cannot write description to file %s.%s",
+        gt_error_set(err,"cannot write description to file %s.%s",
                           str_get(indexname),DESTABSUFFIX);
         haserr = true;
       }

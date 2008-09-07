@@ -82,7 +82,7 @@ static int gt_cds_runner(UNUSED int argc, const char **argv, int parsed_args,
   RegionMapping *regionmapping;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* create gff3 input stream */

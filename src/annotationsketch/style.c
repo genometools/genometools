@@ -71,13 +71,13 @@ static void luaL_opensecurelibs(lua_State *L)
 GT_Style* gt_style_new(bool verbose, GT_Error *err)
 {
   GT_Style *sty;
-  error_check(err);
+  gt_error_check(err);
   sty = ma_calloc(1, sizeof (GT_Style));
   sty->filename = NULL;
   sty->verbose = verbose;
   sty->L = luaL_newstate();
   if (!sty->L) {
-    error_set(err, "out of memory (cannot create new Lua state)");
+    gt_error_set(err, "out of memory (cannot create new Lua state)");
     ma_free(sty);
     return NULL;
   }
@@ -97,20 +97,20 @@ GT_Style* gt_style_new_with_state(lua_State *L)
 int gt_style_load_file(GT_Style *sty, const char *filename, GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(sty && sty->L && filename);
   sty->filename = cstr_dup(filename);
   if (gt_style_get_verbose(sty))
     fprintf(stderr, "Trying to load style file: %s...\n", filename);
   if (luaL_loadfile(sty->L, filename) || lua_pcall(sty->L, 0, 0, 0)) {
-    error_set(err, "cannot run style file: %s",
+    gt_error_set(err, "cannot run style file: %s",
               lua_tostring(sty->L, -1));
     had_err = -1;
   }
   if (!had_err) {
     lua_getglobal(sty->L, "style");
     if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
-      error_set(err, "'style' is not defined or not a table in \"%s\"",
+      gt_error_set(err, "'style' is not defined or not a table in \"%s\"",
                 filename);
     }
     lua_pop(sty->L, 1);
@@ -428,14 +428,14 @@ bool gt_style_get_verbose(const GT_Style *sty)
 int gt_style_to_str(const GT_Style *sty, Str *outstr, GT_Error *err)
 {
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   assert(sty && outstr);
   lua_getglobal(sty->L, "style");
   str_append_cstr(outstr, "style = {\n");
   if (lua_istable(sty->L, -1))
     had_err = lua_table_to_str(sty->L, outstr, -1, err);
   else {
-    error_set(err, "'style' must be a table");
+    gt_error_set(err, "'style' must be a table");
     had_err = -1;
   }
   str_append_cstr(outstr, "}");
@@ -446,11 +446,11 @@ int gt_style_to_str(const GT_Style *sty, Str *outstr, GT_Error *err)
 int gt_style_load_str(GT_Style *sty, Str *instr, GT_Error *err)
 {
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(sty && instr);
   if (luaL_loadbuffer(sty->L, str_get(instr), str_length(instr), "str") ||
       lua_pcall(sty->L, 0, 0, 0)) {
-    error_set(err, "cannot run style buffer: %s",
+    gt_error_set(err, "cannot run style buffer: %s",
               lua_tostring(sty->L, -1));
     had_err = -1;
   }
@@ -483,7 +483,7 @@ int gt_style_unit_test(GT_Error *err)
       *sty_buffer = str_new();
   GT_Color col1, col2, col, defcol, tmpcol;
   double num;
-  error_check(err);
+  gt_error_check(err);
 
   /* example colors */
   col1.red=.1;col1.green=.2;col1.blue=.3;
@@ -543,8 +543,8 @@ int gt_style_unit_test(GT_Error *err)
 
   /* clone a GT_Style object */
   new_sty = gt_style_clone(sty, err);
-  error_check(err);
-  if (!error_is_set(err))
+  gt_error_check(err);
+  if (!gt_error_is_set(err))
   {
     /* check again */
     gt_style_get_color(new_sty, "foo", "fill", &tmpcol, NULL);

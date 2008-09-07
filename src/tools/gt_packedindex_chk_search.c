@@ -65,7 +65,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
   inputProject = str_new();
 
   do {
-    error_check(err);
+    gt_error_check(err);
     {
       bool exitNow = false;
       switch (parseChkBWTOptions(&parsedArgs, argc, argv, &params,
@@ -99,8 +99,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
       if ((had_err = (retval != VERIFY_BWTSEQ_NO_ERROR)))
       {
         fprintf(stderr, "index integrity check failed: %s\n",
-                error_get(err));
-        error_set(err, "aborted because of index integrity check fail");
+                gt_error_get(err));
+        gt_error_set(err, "aborted because of index integrity check fail");
         break;
       }
     }
@@ -108,7 +108,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
     {
       if ((had_err = !initEmptyEMIterator(&EMIter, bwtSeq)))
       {
-        error_set(err, "Cannot create matches iterator for sequence index.");
+        gt_error_set(err, "Cannot create matches iterator for sequence index.");
         break;
       }
       EMIterInitialized = true;
@@ -121,7 +121,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
            mapsuffixarray(&suffixarray, &totalLen, SARR_SUFTAB | SARR_ESQTAB,
                           inputProject, NULL, err) != 0))
       {
-        error_set(err, "Can't load suffix array project with"
+        gt_error_set(err, "Can't load suffix array project with"
                   " demand for encoded sequence and suffix table files\n");
         break;
       }
@@ -129,7 +129,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
       if ((had_err = (params.minPatLen >= 0L && params.maxPatLen >= 0L
                       && params.minPatLen > params.maxPatLen)))
       {
-        error_set(err, "Invalid pattern lengths selected: min=%ld, max=%ld;"
+        gt_error_set(err, "Invalid pattern lengths selected: min=%ld, max=%ld;"
                   " min <= max is required.", params.minPatLen,
                   params.maxPatLen);
         break;
@@ -150,7 +150,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
               params.minPatLen, params.maxPatLen);
       if ((had_err = totalLen + 1 != BWTSeqLength(bwtSeq)))
       {
-        error_set(err, "base suffix array and index have diferrent lengths!"
+        gt_error_set(err, "base suffix array and index have diferrent lengths!"
                   FormatSeqpos" vs. "FormatSeqpos,  totalLen + 1,
                   BWTSeqLength(bwtSeq));
         break;
@@ -202,12 +202,12 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
             bool match = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             if ((had_err = !match))
             {
-              error_set(err, "matches of packedindex expired before mmsearch!");
+              gt_error_set(err, "matches of packedindex expired before mmsearch!");
               break;
             }
             if ((had_err = matchPos != dbstart))
             {
-              error_set(err, "packedindex match doesn't equal mmsearch match "
+              gt_error_set(err, "packedindex match doesn't equal mmsearch match "
                         "result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
                         matchPos, dbstart);
             }
@@ -218,7 +218,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
             bool trailingMatch = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             if ((had_err = trailingMatch))
             {
-              error_set(err, "matches of mmsearch expired before fmindex!");
+              gt_error_set(err, "matches of mmsearch expired before fmindex!");
               break;
             }
           }
@@ -230,7 +230,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
             numMMSearchMatches = countmmsearchiterator(mmsi);
           if ((had_err = numFMIMatches != numMMSearchMatches))
           {
-            error_set(err, "Number of matches not equal for suffix array ("
+            gt_error_set(err, "Number of matches not equal for suffix array ("
                       FormatSeqpos") and fmindex ("FormatSeqpos".\n",
                       numFMIMatches, numMMSearchMatches);
           }
@@ -264,7 +264,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   Option *option, *optionProgress;
   bool checkSuffixArrayValues, tryContextRetrieve, tryFullRegen;
 
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("indexname",
                          "Load (or build if necessary) BWT index for project"
                          " <indexname> and perform verification of search"

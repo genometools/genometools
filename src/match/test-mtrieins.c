@@ -79,7 +79,7 @@ int test_trieins(bool onlyins,const Str *indexname,GT_Error *err)
   bool haserr = false;
   Seqpos totallength;
 
-  error_check(err);
+  gt_error_check(err);
   if (streamsuffixarray(&suffixarray,
                         &totallength,
                         SARR_ESQTAB,

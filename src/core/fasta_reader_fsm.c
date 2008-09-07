@@ -49,7 +49,7 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
   Str *description, *sequence;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(fr);
 
   /* init */
@@ -68,7 +68,7 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
     switch (state) {
       case EXPECTING_SEPARATOR:
         if (cc != FASTA_SEPARATOR) {
-          error_set(err,
+          gt_error_set(err,
                     "the first character of fasta file \"%s\" has to be '%c'",
                     str_get(fr->sequence_filename), FASTA_SEPARATOR);
           had_err = -1;
@@ -97,7 +97,7 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
         if (cc == FASTA_SEPARATOR) {
           if (!sequence_length) {
             assert(line_counter);
-            error_set(err, "empty sequence after description given in line %lu",
+            gt_error_set(err, "empty sequence after description given in line %lu",
                       line_counter - 1);
             had_err = -1;
             break;
@@ -147,12 +147,12 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
     /* checks after reading */
     switch (state) {
       case EXPECTING_SEPARATOR:
-        error_set(err, "sequence file \"%s\" is empty",
+        gt_error_set(err, "sequence file \"%s\" is empty",
                   str_get(fr->sequence_filename));
         had_err = -1;
         break;
       case READING_DESCRIPTION:
-        error_set(err, "unfinished fasta entry in line %lu of sequence file "
+        gt_error_set(err, "unfinished fasta entry in line %lu of sequence file "
                   "\"%s\"", line_counter, str_get(fr->sequence_filename));
         had_err = -1;
         break;
@@ -160,7 +160,7 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
       case READING_SEQUENCE:
         if (!sequence_length) {
           assert(line_counter);
-          error_set(err, "empty sequence after description given in line %lu",
+          gt_error_set(err, "empty sequence after description given in line %lu",
                     line_counter - 1);
           had_err = -1;
         }

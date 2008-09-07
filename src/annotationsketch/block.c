@@ -224,7 +224,7 @@ int gt_block_unit_test(GT_Error *err)
   Element *e1, *e2;
   GT_Block * b;
   Str *seqid, *caption1, *caption2;
-  error_check(err);
+  gt_error_check(err);
 
   feature_type_factory = feature_type_factory_builtin_new();
   seqid = str_new_cstr("seqid");

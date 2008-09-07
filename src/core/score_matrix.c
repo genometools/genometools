@@ -48,12 +48,12 @@ static int parse_alphabet_line(GT_Array *index_to_alpha_char_mapping,
   Str *token;
   char *tokenstr, amino_acid, parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(index_to_alpha_char_mapping && tz);
   assert(!gt_array_size(index_to_alpha_char_mapping));
   while ((token = tokenizer_get_token(tz))) {
     if (str_length(token) > 2) {
-      error_set(err, "illegal character token '%s' on line %lu in file '%s'",
+      gt_error_set(err, "illegal character token '%s' on line %lu in file '%s'",
                 str_get(token), tokenizer_get_line_number(tz),
                 tokenizer_get_filename(tz));
       had_err = -1;
@@ -63,7 +63,7 @@ static int parse_alphabet_line(GT_Array *index_to_alpha_char_mapping,
     amino_acid = tokenstr[0];
     /* check for character duplications */
     if (parsed_characters[(int) amino_acid]) {
-      error_set(err, "the character '%c' appears more then once on line %lu in "
+      gt_error_set(err, "the character '%c' appears more then once on line %lu in "
                 "file  '%s'", amino_acid, tokenizer_get_line_number(tz),
                 tokenizer_get_filename(tz));
       had_err = -1;
@@ -79,7 +79,7 @@ static int parse_alphabet_line(GT_Array *index_to_alpha_char_mapping,
     gt_array_add(index_to_alpha_char_mapping, amino_acid);
     if (str_length(token) == 2) {
       if (tokenstr[1] != '\n') {
-        error_set(err, "illegal character token '%s' on line %lu in file '%s'",
+        gt_error_set(err, "illegal character token '%s' on line %lu in file '%s'",
                   str_get(token), tokenizer_get_line_number(tz),
                   tokenizer_get_filename(tz));
         had_err = -1;
@@ -95,7 +95,7 @@ static int parse_alphabet_line(GT_Array *index_to_alpha_char_mapping,
   }
   if (!had_err) {
     if (!gt_array_size(index_to_alpha_char_mapping)) {
-      error_set(err, "could not parse a single alphabet character in file "
+      gt_error_set(err, "could not parse a single alphabet character in file "
                 "'%s' (file empty or directory?)", tokenizer_get_filename(tz));
     had_err = -1;
     }
@@ -113,11 +113,11 @@ static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
   int score, had_err = 0;
   Str *token;
   assert(sm && tz && index_to_alpha_char_mapping);
-  error_check(err);
+  gt_error_check(err);
   token = tokenizer_get_token(tz);
   assert(token);
   if (str_length(token) != 1) {
-    error_set(err, "illegal character token '%s' on line %lu in file '%s'",
+    gt_error_set(err, "illegal character token '%s' on line %lu in file '%s'",
               str_get(token), tokenizer_get_line_number(tz),
               tokenizer_get_filename(tz));
     had_err = -1;
@@ -125,7 +125,7 @@ static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
   amino_acid = str_get(token)[0];
   /* check for character duplications */
   if (parsed_characters[(int) amino_acid]) {
-    error_set(err, "multiple character '%c' entry on line %lu in file '%s'",
+    gt_error_set(err, "multiple character '%c' entry on line %lu in file '%s'",
               amino_acid, tokenizer_get_line_number(tz),
               tokenizer_get_filename(tz));
     had_err = -1;
@@ -162,7 +162,7 @@ static int parse_score_matrix(ScoreMatrix *sm, const char *path, GT_Error *err)
   unsigned int parsed_score_lines = 0;
   char parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(sm && path && sm->alpha);
   tz = tokenizer_new(io_new(path, "r"));
   index_to_alpha_char_mapping = gt_array_new(sizeof (char));
@@ -181,7 +181,7 @@ static int parse_score_matrix(ScoreMatrix *sm, const char *path, GT_Error *err)
   /* check the number of parsed score lines */
   if (!had_err &&
       parsed_score_lines != gt_array_size(index_to_alpha_char_mapping)) {
-    error_set(err, "the score matrix given in '%s' is not symmetric", path);
+    gt_error_set(err, "the score matrix given in '%s' is not symmetric", path);
     had_err = -1;
   }
 
@@ -197,7 +197,7 @@ ScoreMatrix* score_matrix_new_read_protein(const char *path, GT_Error *err)
   ScoreMatrix *sm;
   int had_err;
 
-  error_check(err);
+  gt_error_check(err);
   assert(path);
 
   /* create score matrix */

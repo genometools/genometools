@@ -180,7 +180,7 @@ void* genome_node_cast(const GenomeNodeClass *gnc, GenomeNode *gn)
 static int increase_reference_count(GenomeNode *gn, UNUSED void *data,
                                     UNUSED GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(gn);
   gn->reference_count++;
   return 0;
@@ -375,7 +375,7 @@ int genome_node_traverse_direct_children(GenomeNode *gn,
 {
   Dlistelem *dlistelem;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   if (!gn || !traverse)
     return 0;
   if (gn->children) {
@@ -456,7 +456,7 @@ void genome_node_change_seqid(GenomeNode *gn, Str *seqid)
 
 int genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(gn && gv && gn->c_class && gn->c_class->accept);
   return gn->c_class->accept(gn, gv, err);
 }
@@ -486,7 +486,7 @@ static int remove_leaf(GenomeNode *node, void *data, UNUSED GT_Error *err)
 {
   Dlistelem *dlistelem;
   GenomeNode *child, *leaf = (GenomeNode*) data;
-  error_check(err);
+  gt_error_check(err);
   if (node != leaf && node->children) {
     for (dlistelem = dlist_first(node->children); dlistelem != NULL;
          dlistelem = dlistelem_next(dlistelem)) {

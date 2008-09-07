@@ -77,7 +77,7 @@ static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
                                 UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
-  error_check(err);
+  gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && c);
   gff3_version_string(gv);
@@ -89,7 +89,7 @@ static int add_id(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   Add_id_info *info = (Add_id_info*) data;
   GT_Array *parent_features = NULL;
-  error_check(err);
+  gt_error_check(err);
   assert(gn && info && info->genome_feature_to_id_array && info->id);
   parent_features = hashmap_get(info->genome_feature_to_id_array, gn);
   if (!parent_features) {
@@ -125,7 +125,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data,
   unsigned long i;
   Str *id;
 
-  error_check(err);
+  gt_error_check(err);
   assert(gn && gf && gff3_visitor);
 
   /* output leading part */
@@ -197,7 +197,7 @@ static int store_ids(GenomeNode *gn, void *data, GT_Error *err)
   int had_err = 0;
   Str *id;
 
-  error_check(err);
+  gt_error_check(err);
   assert(gn && gf && gff3_visitor);
 
   if (genome_node_has_children(gn) || genome_feature_is_multi(gf)) {
@@ -231,7 +231,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 {
   GFF3Visitor *gff3_visitor;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
 
   gff3_version_string(gv);
@@ -270,7 +270,7 @@ static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
                                         UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
-  error_check(err);
+  gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && sr);
   /* a sequence region has no children */
@@ -288,7 +288,7 @@ static int gff3_visitor_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
                                       UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
-  error_check(err);
+  gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && sn);
   if (!gff3_visitor->fasta_directive_shown) {

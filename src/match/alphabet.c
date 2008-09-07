@@ -146,7 +146,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
   const char *currentline;
   Uchar chartoshow;
 
-  error_check(err);
+  gt_error_check(err);
   alpha->domainsize = alpha->mapsize = alpha->mappedwildcards = 0;
   for (cnum=0; cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
   {
@@ -180,7 +180,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
           {
             if (alpha->symbolmap[(unsigned int) cc] != (Uchar) UNDEFCHAR)
             {
-              error_set(err,"cannot map symbol '%c' to %u: "
+              gt_error_set(err,"cannot map symbol '%c' to %u: "
                             "it is already mapped to %u",
                              cc,
                              alpha->mapsize,
@@ -206,7 +206,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
               blankfound = true;
               /*@innerbreak@*/ break;
             }
-            error_set(err,
+            gt_error_set(err,
                           "illegal character '%c' in line %lu of mapfile %s",
                           cc,linecount,str_get(mapfile));
             haserr = true;
@@ -221,7 +221,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
         {
           if (isspace((int) LINE(column+1)))
           {
-            error_set(err,"illegal character '%c' at the end of "
+            gt_error_set(err,"illegal character '%c' at the end of "
                           "line %lu in mapfile %s",
                           LINE(column+1),linecount,str_get(mapfile));
             haserr  = true;
@@ -275,7 +275,7 @@ static int readsymbolmap(Alphabet *alpha,const Str *mapfile,GT_Error *err)
   bool haserr = false;
   GT_StrArray *lines;
 
-  error_check(err);
+  gt_error_check(err);
   lines = gt_strarray_new_file(str_get(mapfile));
   assert(lines != NULL);
   if (readsymbolmapfromlines(alpha,mapfile,lines,err) != 0)
@@ -406,7 +406,7 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
 {
   int retval;
 
-  error_check(err);
+  gt_error_check(err);
   retval = guessifproteinsequencestream(filenametab,err);
   if (retval < 0)
   {
@@ -438,7 +438,7 @@ void freeAlphabet(Alphabet **alpha)
   Alphabet *alpha;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   ALLOCASSIGNSPACE(alpha,NULL,Alphabet,(size_t) 1);
   alpha->characters = NULL;
   alpha->mapdomain = NULL;
@@ -459,7 +459,7 @@ void freeAlphabet(Alphabet **alpha)
         if (!file_exists(str_get(smapfile)))
         {
           Str *prog;
-          const char *progname = error_get_progname(err);
+          const char *progname = gt_error_get_progname(err);
 
           assert(progname != NULL);
           prog = str_new();

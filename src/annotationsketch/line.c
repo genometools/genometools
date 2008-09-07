@@ -84,7 +84,7 @@ int line_unit_test(GT_Error *err)
   GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
   Line *l1, *l2;
   GT_Block *b1, *b2;
-  error_check(err);
+  gt_error_check(err);
 
   const char* foo = "foo";
   const char* bar = "bar";

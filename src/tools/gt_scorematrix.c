@@ -25,7 +25,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("scorematrix_filename", "Parse the given protein "
                          "score matrix and show it on stdout.");
   option_parser_set_min_max_args(op, 1, 1);
@@ -38,7 +38,7 @@ int gt_scorematrix(int argc, const char **argv, GT_Error *err)
 {
   ScoreMatrix *sm;
   int parsed_args, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {

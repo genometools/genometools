@@ -115,18 +115,18 @@ int markov_chain_compute_prob(const MarkovChain *mc, double *prob,
   unsigned int last_code = 0, cur_code;
   double logP = 0.0;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(mc && sequence);
   assert(markov_chain_is_valid(mc));
   if (!alpha_char_is_valid(mc->alpha, sequence[0])) {
-    error_set(err, "'%c' is not valid sequence character", sequence[0]);
+    gt_error_set(err, "'%c' is not valid sequence character", sequence[0]);
     had_err = -1;
   }
   if (!had_err)
     last_code = alpha_encode(mc->alpha, sequence[0]);
   for (i = 1; !had_err && i < seqlen; i++) {
     if (!alpha_char_is_valid(mc->alpha, sequence[i])) {
-      error_set(err, "'%c' is not valid sequence character", sequence[i]);
+      gt_error_set(err, "'%c' is not valid sequence character", sequence[i]);
       had_err = -1;
       break;
     }

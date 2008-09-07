@@ -33,7 +33,7 @@ int parsereadmode(const char *dirargstring,GT_Error *err)
 {
   size_t i;
 
-  error_check(err);
+  gt_error_check(err);
   for (i=0; i<sizeof (readmodes)/sizeof (readmodes[0]); i++)
   {
     if (strcmp(dirargstring,readmodes[i]) == 0)
@@ -41,6 +41,6 @@ int parsereadmode(const char *dirargstring,GT_Error *err)
       return (int) i;
     }
   }
-  error_set(err,"argument to option -dir must be fwd or rev or cpl or rcl");
+  gt_error_set(err,"argument to option -dir must be fwd or rev or cpl or rcl");
   return -1;
 }

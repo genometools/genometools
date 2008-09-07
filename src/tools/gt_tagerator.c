@@ -163,7 +163,7 @@ static int gt_tagerator_runner(UNUSED int argc,
   bool haserr = false;
   unsigned long idx;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments != NULL);
 
   assert(parsed_args == argc);
@@ -222,7 +222,7 @@ static int gt_tagerator_arguments_check(UNUSED int rest_argc,
   {
     if (arguments->online)
     {
-      error_set(err,"option -online requires option -e");
+      gt_error_set(err,"option -online requires option -e");
       return -1;
     }
     if (!arguments->nowildcards)
@@ -231,7 +231,7 @@ static int gt_tagerator_arguments_check(UNUSED int rest_argc,
     }
     if (arguments->maxintervalwidth == 0)
     {
-      error_set(err,"if option -e is not used then option -maxocc is required");
+      gt_error_set(err,"if option -e is not used then option -maxocc is required");
       return -1;
     }
   } else
@@ -239,7 +239,7 @@ static int gt_tagerator_arguments_check(UNUSED int rest_argc,
     if (arguments->skpp &&
         (arguments->maxdistance == 0 || arguments->maxintervalwidth == 0))
     {
-      error_set(err,"option -skpp only works in pdiff mode");
+      gt_error_set(err,"option -skpp only works in pdiff mode");
       return -1;
     }
   }

@@ -35,7 +35,7 @@ static int extract_feat_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 {
   ExtractFeatStream *efs;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   efs = extract_feat_stream_cast(gs);
   had_err = genome_stream_next_tree(efs->in_stream, gn, err);
   if (!had_err) {

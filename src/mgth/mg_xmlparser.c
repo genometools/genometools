@@ -83,7 +83,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
   XML_Parser parser;
 
   /* Check Umgebungsvariablen */
-  error_check(err);
+  gt_error_check(err);
 
   /* Puffer-String anlegen */
   buf = str_new();
@@ -109,7 +109,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
          XML_STATUS_ERROR) && !had_err)
     {
       error = XML_GetErrorCode(parser);
-      error_set(err,
+      gt_error_set(err,
                 "an error occurred parsing line %lu of file \"%s\": %s",
                 PARSESTRUCT(xml_linenumber), str_get(PARSESTRUCT(xmlfile)),
                 XML_ErrorString(error));
@@ -124,7 +124,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
   if ((XML_Parse(parser, NULL, 0, true) == XML_STATUS_ERROR) && !had_err)
   {
     error = XML_GetErrorCode(parser);
-    error_set(err,
+    gt_error_set(err,
               "an error occurred while finishing the parsing of file\
                \"%s\": %s",
               str_get(PARSESTRUCT(xmlfile)), XML_ErrorString(error));
@@ -214,7 +214,7 @@ static void XMLCALL endElement(void *data, const char *name)
     const char *gi_ptr = NULL;
 
     /* Check Umgebungsvariablen */
-    error_check(err);
+    gt_error_check(err);
 
     /* wurde das Iteration_hits XML-Tag erreicht wird die mg_combinedscore
        Methode aufgerufen und diverse Variablen fuer einen neuen Eintrag
@@ -315,7 +315,7 @@ static void XMLCALL endElement(void *data, const char *name)
         }
         else
         {
-          error_set(err,
+          gt_error_set(err,
                     "query-dna entry in xml-file does not exist in\
                      query-hash. wrong query-dna file?");
           PARSESTRUCT(had_err) = -1;
@@ -350,7 +350,7 @@ static void XMLCALL endElement(void *data, const char *name)
         }
         else
         {
-          error_set(err,
+          gt_error_set(err,
                     "incorrect gi-hit-number in xmlfile - required format\
                      is gi|[0-9]");
           PARSESTRUCT(had_err) = -1;

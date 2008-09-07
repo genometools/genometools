@@ -136,7 +136,7 @@ int gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
   GenomeNode *gn;
   Queue *queue;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(feature_index && gff3file);
   queue = queue_new();
   gff3_in_stream = gff3_in_stream_new_unsorted(1, &gff3file, false, false);
@@ -196,12 +196,12 @@ int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi, GT_Array *resul
                                          GT_Error *err)
 {
   RegionInfo *ri;
-  error_check(err);
+  gt_error_check(err);
   assert(fi && results);
 
   ri = (RegionInfo*) hashmap_get(fi->regions, seqid);
   if (!ri) {
-    error_set(err, "feature index does not contain the given sequence id");
+    gt_error_set(err, "feature index does not contain the given sequence id");
     return -1;
   }
   interval_tree_find_all_overlapping(ri->features, qry_range.start,
@@ -270,7 +270,7 @@ int gt_feature_index_unit_test(GT_Error *err)
   SequenceRegion *sr1, *sr2;
   GT_Array *features = NULL;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   feature_type_factory = feature_type_factory_builtin_new();
 

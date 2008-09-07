@@ -33,15 +33,15 @@ availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, GT_Error *err
   Suffixarray suffixArray;
   Seqpos len;
   assert(params && err);
-  error_check(err);
+  gt_error_check(err);
   if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB
                         | SARR_ESQTAB, params->projectName, verbosity, err))
   {
-    error_unset(err);
+    gt_error_unset(err);
     if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_ESQTAB,
                           params->projectName, verbosity, err))
     {
-      error_unset(err);
+      gt_error_unset(err);
       if (streamsuffixarray(&suffixArray, &len, 0,
                             params->projectName, verbosity, err))
         return NULL;
@@ -61,18 +61,18 @@ trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
   Suffixarray suffixArray;
   Seqpos len;
   assert(params && err);
-  error_check(err);
+  gt_error_check(err);
   do
   {
     if (streamsuffixarray(&suffixArray, &len,
                           SARR_SUFTAB | SARR_BWTTAB | SARR_ESQTAB,
                           params->projectName, verbosity, err))
     {
-      error_unset(err);
+      gt_error_unset(err);
       if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_ESQTAB,
                             params->projectName, verbosity, err))
       {
-        error_set(err, "suffix array project %s does not hold required suffix"
+        gt_error_set(err, "suffix array project %s does not hold required suffix"
                   " array (.suf) and encoded sequence (.esq) information!",
                   str_get(params->projectName));
         break;
@@ -91,7 +91,7 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
 {
   BWTSeq *bwtSeq;
   assert(sa && params && err);
-  error_check(err);
+  gt_error_check(err);
   /* try loading index */
   bwtSeq = loadBWTSeqForSA(params->projectName, params->seqParams.encType,
                            params->seqParams.EISFeatureSet,
@@ -99,7 +99,7 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   /* if loading didn't work try on-demand creation */
   if (!bwtSeq)
   {
-    error_unset(err);
+    gt_error_unset(err);
     bwtSeq = createBWTSeqFromSA(params, sa, totalLen, err);
   }
   else
@@ -128,7 +128,7 @@ loadBWTSeq(const Str *projectName, int BWTOptFlags, Verboseinfo *verbosity,
   Suffixarray suffixArray;
   Seqpos len;
   assert(projectName && err);
-  error_check(err);
+  gt_error_check(err);
   if (mapsuffixarray(&suffixArray, &len, 0, projectName, verbosity, err))
     return NULL;
   ++len;

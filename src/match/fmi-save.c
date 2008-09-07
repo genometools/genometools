@@ -29,7 +29,7 @@ static int writefmascii (const Str *indexname,
 {
   FILE *fmafp;
 
-  error_check(err);
+  gt_error_check(err);
   if ((fmafp = opensfxfile (indexname, FMASCIIFILESUFFIX,"wb",err)) == NULL)
   {
     return -1;
@@ -63,7 +63,7 @@ static int writefmdata (const Str *indexname,
 {
   FILE *fp;
 
-  error_check(err);
+  gt_error_check(err);
   if ((fp = opensfxfile (indexname, FMDATAFILESUFFIX,"wb",err)) == NULL)
   {
     return -1;
@@ -79,7 +79,7 @@ static int writefmdata (const Str *indexname,
 int saveFmindex (const Str *indexname,Fmindex *fm,
                  bool storeindexpos,GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   if (writefmascii (indexname, fm, storeindexpos,err) != 0)
   {
     return -1;

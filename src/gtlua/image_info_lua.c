@@ -42,18 +42,18 @@ static int imageinfo_lua_get_height(lua_State *L)
 {
   GT_ImageInfo **ii;
   unsigned long height;
-  GT_Error *err = error_new();
+  GT_Error *err = gt_error_new();
   ii = check_imageinfo(L, 1);
   assert(ii);
   height = gt_image_info_get_height(*ii);
   if (height > DBL_MAX)
   {
-    error_set(err, "image height exceeds %f!", DBL_MAX);
+    gt_error_set(err, "image height exceeds %f!", DBL_MAX);
     return lua_gt_error(L, err);
   }
   else
     lua_pushnumber(L, (double) height);
-  error_delete(err);
+  gt_error_delete(err);
   return 0;
 }
 
@@ -61,18 +61,18 @@ static int imageinfo_lua_num_of_recmaps(lua_State *L)
 {
   GT_ImageInfo **ii;
   unsigned long nof_rm;
-  GT_Error *err = error_new();
+  GT_Error *err = gt_error_new();
   ii = check_imageinfo(L, 1);
   assert(ii);
   nof_rm = gt_image_info_num_of_recmaps(*ii);
   if (nof_rm > DBL_MAX)
   {
-    error_set(err, "number of recmaps exceeds %f!", DBL_MAX);
+    gt_error_set(err, "number of recmaps exceeds %f!", DBL_MAX);
     return lua_gt_error(L, err);
   }
   else
     lua_pushnumber(L, (double) nof_rm);
-  error_delete(err);
+  gt_error_delete(err);
   return 0;
 }
 

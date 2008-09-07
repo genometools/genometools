@@ -54,7 +54,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GT_Error *err)
   int parsedArgs;
   int had_err = 0;
   Verboseinfo *verbosity = NULL;
-  error_check(err);
+  gt_error_check(err);
 
   switch (parseChkIndexOptions(&parsedArgs, argc, argv, &params, err))
   {
@@ -74,7 +74,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GT_Error *err)
                       verbosity, err);
   if ((had_err = seq == NULL))
   {
-    error_set(err, "Failed to load index: %s", str_get(inputProject));
+    gt_error_set(err, "Failed to load index: %s", str_get(inputProject));
   }
   else
   {
@@ -87,8 +87,8 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GT_Error *err)
                              params.checkFlags, verbosity, err);
       if ((had_err = corrupt != 0))
       {
-        fputs(error_get(err), stderr); fputs("\n", stderr);
-        error_set(err, "Integrity check failed for index: %s",
+        fputs(gt_error_get(err), stderr); fputs("\n", stderr);
+        gt_error_set(err, "Integrity check failed for index: %s",
                   EISIntegrityCheckResultStrings[corrupt]);
       }
     }
@@ -108,7 +108,7 @@ parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
   OPrval oprval;
   bool extRankCheck;
 
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("indexname",
                          "Map <indexname> block composition index"
                          "and bwt and check index integrity.");

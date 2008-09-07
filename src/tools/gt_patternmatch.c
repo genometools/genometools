@@ -243,7 +243,7 @@ static OPrval parse_options(Pmatchoptions *pmopt,
   Option *option, *optionimm, *optionbck;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[options] -ii indexname",
                          "Perform pattern matches.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -297,7 +297,7 @@ int gt_patternmatch(int argc, const char **argv, GT_Error *err)
   Pmatchoptions pmopt;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
 
   pmopt.indexname = str_new();
   oprval = parse_options(&pmopt,&parsed_args, argc, argv, err);

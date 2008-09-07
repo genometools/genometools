@@ -22,65 +22,65 @@
 #include "core/xansi.h"
 
 struct GT_Error {
-  char error_string[BUFSIZ],
+  char gt_error_string[BUFSIZ],
        *progname;
-  bool error_is_set;
+  bool gt_error_is_set;
 };
 
-GT_Error* error_new(void)
+GT_Error* gt_error_new(void)
 {
   return ma_calloc(1, sizeof (GT_Error));
 }
 
-void error_set(GT_Error *err, const char *format, ...)
+void gt_error_set(GT_Error *err, const char *format, ...)
 {
   va_list ap;
   if (!err) return;
   va_start(ap, format);
-  error_vset(err, format, ap);
+  gt_error_vset(err, format, ap);
   va_end(ap);
 }
 
-void error_vset(GT_Error *err, const char *format, va_list ap)
+void gt_error_vset(GT_Error *err, const char *format, va_list ap)
 {
   assert(err && format);
-  err->error_is_set = true;
-  (void) vsnprintf(err->error_string, sizeof (err->error_string), format, ap);
+  err->gt_error_is_set = true;
+  (void) vsnprintf(err->gt_error_string, sizeof (err->gt_error_string), format, ap);
 }
 
-bool error_is_set(const GT_Error *err)
+bool gt_error_is_set(const GT_Error *err)
 {
   assert(err);
-  return err->error_is_set;
+  return err->gt_error_is_set;
 }
 
-void error_unset(GT_Error *err)
+void gt_error_unset(GT_Error *err)
 {
   assert(err);
-  err->error_is_set = false;
-  err->error_string[0] = '\0';
+  err->gt_error_is_set = false;
+  err->gt_error_string[0] = '\0';
 }
 
-const char* error_get(const GT_Error *err)
+const char* gt_error_get(const GT_Error *err)
 {
-  assert(err && err->error_is_set);
-  return err->error_string;
+  assert(err && err->gt_error_is_set);
+  return err->gt_error_string;
 }
 
-void error_set_progname(GT_Error *err, const char *progname)
+void gt_error_set_progname(GT_Error *err, const char *progname)
 {
   assert(err && progname);
   ma_free(err->progname);
   err->progname = cstr_dup(progname);
 }
 
-const char* error_get_progname(const GT_Error *err)
+const char* gt_error_get_progname(const GT_Error *err)
 {
   assert(err);
   return err->progname;
 }
 
-void error_delete(GT_Error *err)
+void gt_error_delete(GT_Error *err)
 {
   if (!err) return;
   ma_free(err->progname);

@@ -26,7 +26,7 @@
 
 #define SCAN_ALPHA_VALUE(NUM, CHAR_1, CHAR_2)                                  \
         if (!had_err && (sscanf(argv[NUM], "%d", &rval) != 1 || rval > 0)) {   \
-          error_set(err, "argument for alpha(%c,%c) must be non-positive "     \
+          gt_error_set(err, "argument for alpha(%c,%c) must be non-positive "     \
                          "integer", CHAR_1, CHAR_2);                           \
           had_err = -1;                                                        \
         }                                                                      \
@@ -191,7 +191,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("l_min alpha(G,C) alpha(A,U) alpha(G,U) RNA_sequence",
                          "Fold the supplied RNA sequence with the Nussinov "
                          "algorithm.");
@@ -209,7 +209,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, GT_Error *err)
   int parsed_args, rval, had_err = 0;
   Alpha *dna_alpha;
   ScoreMatrix *energy_function; /* alpha */
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {
@@ -232,7 +232,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, GT_Error *err)
 
   /* save l_min value */
   if (sscanf(argv[1], "%d", &rval) != 1 || rval <= 0) {
-    error_set(err, "argument for l_min must be positive integer");
+    gt_error_set(err, "argument for l_min must be positive integer");
     had_err = -1;
   }
   else

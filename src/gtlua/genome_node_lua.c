@@ -205,10 +205,10 @@ static int genome_node_lua_accept(lua_State *L)
   GT_Error *err;
   gn = check_genome_node(L, 1);
   gv = check_genome_visitor(L, 2);
-  err = error_new();
+  err = gt_error_new();
   if (genome_node_accept(*gn, *gv, err))
     return lua_gt_error(L, err);
-  error_delete(err);
+  gt_error_delete(err);
   return 0;
 }
 
@@ -289,7 +289,7 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   luaL_argcheck(L, type, 2, "not a valid type");
   join = lua_toboolean(L, 3);
   region_mapping = check_region_mapping(L, 4);
-  err = error_new();
+  err = gt_error_new();
   sequence = str_new();
   if (extract_feat_sequence(sequence, *gn, type, join, *region_mapping, err)) {
     str_delete(sequence);
@@ -300,7 +300,7 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   else
     lua_pushnil(L);
   str_delete(sequence);
-  error_delete(err);
+  gt_error_delete(err);
   return 1;
 }
 

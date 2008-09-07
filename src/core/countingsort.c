@@ -79,7 +79,7 @@ int countingsort_unit_test(GT_Error *err)
   unsigned int numbers[]        = { 1, 2, 1, 2, 0 }, numbers_out[5],
                sorted_numbers[] = { 0, 1, 1, 2, 2 };
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   countingsort(numbers_out, numbers, sizeof (unsigned int), 5,
                countingsort_get_max(numbers, sizeof (unsigned int), 5, NULL,
                                     get_int), NULL,  get_int);

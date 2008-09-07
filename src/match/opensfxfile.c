@@ -32,7 +32,7 @@
   Str *tmpfilename;
   FILE *fp;
 
-  error_check(err);
+  gt_error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,suffix);
   fp = fa_fopen(str_get(tmpfilename),mode,err);

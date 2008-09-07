@@ -119,7 +119,7 @@ static int suftab2file(Outfileinfo *outfileinfo,
 {
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   if (outfileinfo->outfpsuftab != NULL)
   {
     if (fwrite(suftab,
@@ -128,7 +128,7 @@ static int suftab2file(Outfileinfo *outfileinfo,
               outfileinfo->outfpsuftab)
               != (size_t) numberofsuffixes)
     {
-      error_set(err,"cannot write " FormatSeqpos " items of size %u: "
+      gt_error_set(err,"cannot write " FormatSeqpos " items of size %u: "
                     "errormsg=\"%s\"",
            PRINTSeqposcast(numberofsuffixes),
            (unsigned int) sizeof (*suftab),
@@ -149,7 +149,7 @@ static int suftab2file(Outfileinfo *outfileinfo,
         cc = (Uchar) UNDEFBWTCHAR;
         if (outfileinfo->longest.defined)
         {
-          error_set(err,"longest = " FormatSeqpos " is already defined",
+          gt_error_set(err,"longest = " FormatSeqpos " is already defined",
                              PRINTSeqposcast(outfileinfo->longest.valueseqpos));
           haserr = true;
           break;
@@ -169,7 +169,7 @@ static int suftab2file(Outfileinfo *outfileinfo,
         if (fwrite(&cc,sizeof (Uchar),(size_t) 1,outfileinfo->outfpbwttab)
                     != (size_t) 1)
         {
-          error_set(err,"cannot write 1 item of size %lu: "
+          gt_error_set(err,"cannot write 1 item of size %lu: "
                             "errormsg=\"%s\"",
                           (unsigned long) sizeof (Uchar),
                           strerror(errno));
@@ -428,7 +428,7 @@ static int runsuffixerator(bool doesa,
   Seqpos totallength = 0;
   Sfxstrategy sfxstrategy;
 
-  error_check(err);
+  gt_error_check(err);
   if (so->showtime)
   {
     mtime = inittheclock("determining sequence length and number of "
@@ -479,7 +479,7 @@ static int runsuffixerator(bool doesa,
       {
         if (!isdnaalphabet(sfxseqinfo.alpha))
         {
-          error_set(err,"option -%s only can be used for DNA alphabets",
+          gt_error_set(err,"option -%s only can be used for DNA alphabets",
                             so->readmode == Complementmode ? "cpl" : "rcl");
           haserr = true;
         }
@@ -510,7 +510,7 @@ static int runsuffixerator(bool doesa,
     {
       if (so->readmode != Forwardmode)
       {
-        error_set(err,"option '-dir %s' only makes sense in combination "
+        gt_error_set(err,"option '-dir %s' only makes sense in combination "
                           "with at least one of the options -suf, -lcp, or "
                           "-bwt",
                           showreadmode(so->readmode));
@@ -631,7 +631,7 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
   int retval;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   retval = suffixeratoroptions(&so,doesa,argc,argv,err);
   if (retval == 0)
   {

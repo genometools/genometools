@@ -137,7 +137,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
   const Encodedsequence *encseq =
           encseqSequentialsuffixarrayreader(ssar);
 
-  error_check(err);
+  gt_error_check(err);
 
   /*
   printf("xdropbelowscore = %d\n", lo->xdropbelowscore);

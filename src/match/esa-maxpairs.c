@@ -414,7 +414,7 @@ int callenummaxpairs(const Str *indexname,
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
 
-  error_check(err);
+  gt_error_check(err);
   ssar = newSequentialsuffixarrayreaderfromfile(indexname,
                                                 SARR_LCPTAB |
                                                 SARR_SUFTAB |

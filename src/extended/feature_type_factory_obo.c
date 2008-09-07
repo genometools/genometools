@@ -82,7 +82,7 @@ static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
 {
   OBOParseTree *obo_parse_tree;
   unsigned long i;
-  error_check(err);
+  gt_error_check(err);
   assert(ftfo && obo_file_path);
   if ((obo_parse_tree = obo_parse_tree_new(obo_file_path, err))) {
     for (i = 0; i < obo_parse_tree_num_of_stanzas(obo_parse_tree); i++) {
@@ -107,7 +107,7 @@ FeatureTypeFactory* feature_type_factory_obo_new(const char *obo_file_path,
 {
   FeatureTypeFactoryOBO *ftfo;
   FeatureTypeFactory *ftf;
-  error_check(err);
+  gt_error_check(err);
   assert(obo_file_path);
   ftf = feature_type_factory_create(feature_type_factory_obo_class());
   ftfo = feature_type_factory_obo_cast(ftf);

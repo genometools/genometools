@@ -490,7 +490,7 @@ int getfastastreamkmers(
   FastaBuffer *fb;
   int retval;
 
-  error_check(err);
+  gt_error_check(err);
   initstreamstate(&spwp,numofchars,kmersize);
   fb = fastabuffer_new(filenametab,
                        symbolmap,

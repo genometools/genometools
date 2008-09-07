@@ -32,7 +32,7 @@ static OPrval parse_options(int *parsed_args, RegionCovArguments *arguments,
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[option ...] GFF3_file",
                          "Show which parts of the given sequence regions are "
                          "covered by features.");
@@ -58,7 +58,7 @@ int gt_regioncov(int argc, const char **argv, GT_Error *err)
   GenomeNode *gn;
   RegionCovArguments arguments;
   int parsed_args, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {

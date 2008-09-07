@@ -64,7 +64,7 @@ static int gt_scorefasta_runner(UNUSED int argc, const char **argv,
   char *u, *w;
   Alpha *alpha;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* store database sequence u and query sequence w */

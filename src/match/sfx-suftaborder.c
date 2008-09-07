@@ -179,7 +179,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   int retval;
 #endif
 
-  error_check(err);
+  gt_error_check(err);
   assert(!specialsareequal || specialsareequalatdepth0);
   INITBITTAB(startposoccurs,totallength+1);
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)

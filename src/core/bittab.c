@@ -312,7 +312,7 @@ int bittab_example(UNUSED GT_Error *err)
 {
   unsigned long bit;
   Bittab *b;
-  error_check(err);
+  gt_error_check(err);
 
   b = bittab_new(32);
   bittab_set_bit(b, 8);
@@ -337,7 +337,7 @@ int bittab_unit_test(GT_Error *err)
   Bittab *b, *tmp, *and;
   FILE *fp;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
     size = rand_max(MAX_SIZE) + 1;

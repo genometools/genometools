@@ -28,11 +28,11 @@
 
 static int read_next_line(Str *line, FILE *fp, const char *filename, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(line && fp);
   str_reset(line);
   if (str_read_next_line(line, fp) == EOF) {
-    error_set(err, "unexpected end of file \"%s\"", filename);
+    gt_error_set(err, "unexpected end of file \"%s\"", filename);
     return -1;
   }
   return 0;
@@ -41,7 +41,7 @@ static int read_next_line(Str *line, FILE *fp, const char *filename, GT_Error *e
 static int scan_alphabet(Str *alphabet, const char *line, int num_of_states,
                          GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(alphabet && line);
   while (*line != '\0') {
     if (*line != ' ')
@@ -49,7 +49,7 @@ static int scan_alphabet(Str *alphabet, const char *line, int num_of_states,
     line++;
   }
   if (str_length(alphabet) != num_of_states) {
-    error_set(err, "number of states = %d != %lu number of state labels",
+    gt_error_set(err, "number of states = %d != %lu number of state labels",
               num_of_states, str_length(alphabet));
     return -1;
   }
@@ -64,7 +64,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
   Str *line, *alphabet;
   Splitter *splitter;
   int num_of_states, had_err;
-  error_check(err);
+  gt_error_check(err);
   assert(fp);
   line = str_new();
   alphabet = str_new();
@@ -75,7 +75,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
 
   /* check first line */
   if (!had_err && strcmp(str_get(line), FIRSTLINE)) {
-    error_set(err, "first line of file \"%s\" does not match standard",
+    gt_error_set(err, "first line of file \"%s\" does not match standard",
               filename);
     had_err = -1;
   }
@@ -86,7 +86,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
 
   /* parse number of states */
   if (!had_err && parse_int(&num_of_states, str_get(line))) {
-    error_set(err, "could not parse number of states from file \"%s\"",
+    gt_error_set(err, "could not parse number of states from file \"%s\"",
               filename);
     had_err = -1;
   }
@@ -97,7 +97,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
 
   /* check third line */
   if (!had_err && strcmp(str_get(line), THIRDLINE)) {
-    error_set(err, "third line of file \"%s\" does not match standard",
+    gt_error_set(err, "third line of file \"%s\" does not match standard",
               filename);
     had_err = -1;
   }
@@ -116,7 +116,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
 
   /* check fifth line */
   if (!had_err && strcmp(str_get(line), FIFTHLINE)) {
-    error_set(err, "fifth line of file \"%s\" does not match standard",
+    gt_error_set(err, "fifth line of file \"%s\" does not match standard",
               filename);
     had_err = -1;
   }
@@ -132,14 +132,14 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
     if (!had_err) {
       splitter_split(splitter, str_get(line), str_length(line), ' ');
       if (splitter_size(splitter) != num_of_states) {
-        error_set(err, "%lu line of file \"%s\" does not contain %d tokens",
+        gt_error_set(err, "%lu line of file \"%s\" does not contain %d tokens",
                   5 + i + 1, filename, num_of_states);
         had_err = -1;
       }
     }
     for (j = 0; !had_err && j < num_of_states; j++) {
       if (parse_double(&transition_prob, splitter_get_token(splitter, j))) {
-        error_set(err, "could not parse transition probability %lu on line %lu "
+        gt_error_set(err, "could not parse transition probability %lu on line %lu "
                        "from file \"%s\"", j + 1, 5 + i + 1, filename);
         had_err = -1;
       }
@@ -151,7 +151,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
 
   /* make sure markov chain is valid */
   if (!had_err && !markov_chain_is_valid(mc)) {
-    error_set(err, "the markov chain defined in file \"%s\" is not valid",
+    gt_error_set(err, "the markov chain defined in file \"%s\" is not valid",
               filename);
     had_err = -1;
   }
@@ -170,7 +170,7 @@ MarkovChain* markov_chain_parse(const char *filename, GT_Error *err)
 {
   MarkovChain *mc;
   FILE *fp;
-  error_check(err);
+  gt_error_check(err);
   fp = fa_xfopen(filename, "r");
   mc = parse_markov_chain_file(fp, filename, err);
   fa_xfclose(fp);

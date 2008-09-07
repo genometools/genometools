@@ -33,10 +33,10 @@ static int score_matrix_lua_new_read_protein(lua_State *L)
   path = luaL_checkstring(L, 1);
   sm = lua_newuserdata(L, sizeof (ScoreMatrix*));
   assert(sm);
-  err = error_new();
+  err = gt_error_new();
   if (!(*sm = score_matrix_new_read_protein(path, err)))
     return lua_gt_error(L, err); /* handle error */
-  error_delete(err);
+  gt_error_delete(err);
   assert(*sm);
   luaL_getmetatable(L, SCOREMATRIX_METATABLE);
   lua_setmetatable(L, -2);

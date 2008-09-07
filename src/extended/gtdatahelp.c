@@ -37,7 +37,7 @@ int gtdata_show_help(const char *progname, UNUSED void *unused, GT_Error *err)
   char *prog, *bn;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(progname);
 
   prog = cstr_dup(progname); /* create modifiable copy for splitter */
@@ -52,7 +52,7 @@ int gtdata_show_help(const char *progname, UNUSED void *unused, GT_Error *err)
     /* create Lua & push gtdata_doc_dir to Lua */
     L = luaL_newstate();
     if (!L) {
-      error_set(err, "out of memory (cannot create new Lua state)");
+      gt_error_set(err, "out of memory (cannot create new Lua state)");
       had_err = -1;
     }
   }
@@ -77,7 +77,7 @@ int gtdata_show_help(const char *progname, UNUSED void *unused, GT_Error *err)
     str_append_cstr(doc_file, ".lua");
     /* execute doc_file */
     if (luaL_loadfile(L, str_get(doc_file)) || lua_pcall(L, 0, 0, 0)) {
-      error_set(err, "cannot run doc file: %s", lua_tostring(L, -1));
+      gt_error_set(err, "cannot run doc file: %s", lua_tostring(L, -1));
       had_err = -1;
     }
   }

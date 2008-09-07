@@ -247,7 +247,7 @@ static int dotransformtag(Uchar *transformedtag,
 
   if (taglen > (unsigned long) MAXTAGSIZE)
   {
-    error_set(err,"tag \"%*.*s\" of length %lu; "
+    gt_error_set(err,"tag \"%*.*s\" of length %lu; "
                   "tags must not be longer than %lu",
                    (int) taglen,(int) taglen,currenttag,taglen,
                    (unsigned long) MAXTAGSIZE);
@@ -258,7 +258,7 @@ static int dotransformtag(Uchar *transformedtag,
     charcode = symbolmap[currenttag[idx]];
     if (charcode == (Uchar) UNDEFCHAR)
     {
-      error_set(err,"undefined character '%c' in tag number " Formatuint64_t,
+      gt_error_set(err,"undefined character '%c' in tag number " Formatuint64_t,
                 currenttag[idx],
                 PRINTuint64_tcast(tagnumber));
       return -1;
@@ -270,7 +270,7 @@ static int dotransformtag(Uchar *transformedtag,
         charcode = 0; /* (Uchar) (drand48() * (mapsize-1)); */
       } else
       {
-        error_set(err,"wildcard in tag number " Formatuint64_t,
+        gt_error_set(err,"wildcard in tag number " Formatuint64_t,
                   PRINTuint64_tcast(tagnumber));
         return -1;
       }
@@ -463,14 +463,14 @@ int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err)
   {
     if (withesa && suffixarray.readmode != Forwardmode)
     {
-      error_set(err,"using option -esa you can only process index "
+      gt_error_set(err,"using option -esa you can only process index "
                     "in forward mode");
       haserr = true;
     } else
     {
       if (!withesa && suffixarray.readmode != Reversemode)
       {
-        error_set(err,"with option -pck you can only process index "
+        gt_error_set(err,"with option -pck you can only process index "
                       "in reverse mode");
         haserr = true;
       }
@@ -603,7 +603,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err)
       if (tageratoroptions->maxdistance > 0 &&
           twl.taglen <= (unsigned long) tageratoroptions->maxdistance)
       {
-        error_set(err,"tag \"%*.*s\" of length %lu; "
+        gt_error_set(err,"tag \"%*.*s\" of length %lu; "
                   "tags must be longer than the allowed number of errors "
                   "(which is %ld)",
                    (int) twl.taglen,(int) twl.taglen,currenttag,twl.taglen,

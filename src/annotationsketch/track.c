@@ -150,7 +150,7 @@ int track_unit_test(GT_Error *err)
   Range r1, r2, r3, r4;
   Track *track;
   Str *title;
-  error_check(err);
+  gt_error_check(err);
   LineBreaker *lb;
 
   title = str_new_cstr("test");

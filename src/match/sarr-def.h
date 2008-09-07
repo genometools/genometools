@@ -59,7 +59,7 @@ DECLAREBufferedfiletype(Uchar);
 DECLAREBufferedfiletype(Largelcpvalue);
 
 /*
-  XXX eliminate error_set in read function.
+  XXX eliminate gt_error_set in read function.
 */
 
 #define DECLAREREADFUNCTION(TYPE)\
@@ -75,7 +75,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
                                                  buf->fp);\
             if (ferror(buf->fp))\
             {\
-              error_set(err,"error when trying to read next %s",#TYPE);\
+              gt_error_set(err,"error when trying to read next %s",#TYPE);\
               return -2;\
             }\
             buf->nextread = 0;\

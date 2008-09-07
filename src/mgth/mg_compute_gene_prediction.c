@@ -109,7 +109,7 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
   GT_Array *frame_path_array;
   frame_path_array = gt_array_new(sizeof (unsigned short));
 
-  error_check(err);
+  gt_error_check(err);
 
   /* Bestimmen des/der Max-Werte(s) der letzten Spalte der path_matrix */
   for (row_index = 0; row_index < 7; row_index++)
@@ -221,7 +221,7 @@ static void gene_prediction(unsigned short row,
   unsigned long column_from,
     column_to;
 
-  error_check(err);
+  gt_error_check(err);
 
   /* die ersten beiden Spalten werden gesondert bearbeitet, da immer zwei
      Spalten zur Beurteilung, ob es sich um kodierende oder
@@ -518,7 +518,7 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
   GT_Array *realfrom;
   GT_Array *realto;
 
-  error_check(err);
+  gt_error_check(err);
 
   tmp_from = gt_array_new(sizeof (unsigned long));
   tmp_to = gt_array_new(sizeof (unsigned long));
@@ -707,7 +707,7 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
   GT_Array *tmp_from;
   GT_Array *tmp_to;
 
-  error_check(err);
+  gt_error_check(err);
 
   tmp_from = gt_array_new(sizeof (unsigned long));
   tmp_to = gt_array_new(sizeof (unsigned long));
@@ -849,7 +849,7 @@ static int check_coding(ParseStruct *parsestruct_ptr,
   char *contig_seq_ptr = NULL,
     contig_seq_tri[4] = { '\0', '\0', '\0', '\0' };
 
-  error_check(err);
+  gt_error_check(err);
 
   /* Start- und Endsequenzpositionen der in AS umzuwandelnden Sequenz */
   startpoint = from;

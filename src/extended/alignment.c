@@ -286,7 +286,7 @@ int alignment_unit_test(GT_Error *err)
               v[] = "agaaagaggtaagaggga";
   Alignment *a;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* construct the following alignment (backwards):
 

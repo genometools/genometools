@@ -25,7 +25,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("filenames",
                          "guess if sequence in filenames is protein or DNA.");
   option_parser_set_min_args(op, 1U);
@@ -39,7 +39,7 @@ int gt_guessprot(int argc, const char **argv, GT_Error *err)
   int i, parsed_args, retval;
   GT_StrArray *filenametab;
 
-  error_check(err);
+  gt_error_check(err);
 
   switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;

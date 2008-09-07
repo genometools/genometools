@@ -37,7 +37,7 @@ static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                    UNUSED GT_Error *err)
 {
   GTFInStream *is;
-  error_check(err);
+  gt_error_check(err);
   is = gtf_in_stream_cast(gs);
   if (queue_size(is->genome_node_buffer)) {
     /* we still have a node in the buffer -> serve it from there */
@@ -75,7 +75,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   int had_err;
   FILE *fpin;
 
-  error_check(err);
+  gt_error_check(err);
 
   gs = genome_stream_create(gtf_in_stream_class(), false);
   gtf_in_stream = gtf_in_stream_cast(gs);

@@ -48,7 +48,7 @@ static OPrval parse_options(Seqiteroptions *seqiteroptions,
   Option *optionverbose, *optiondistlen, *optionastretch;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
 
   op = option_parser_new("[options] file [...]",
                          "Parse the supplied Fasta files.");
@@ -192,7 +192,7 @@ int gt_seqiterator(int argc, const char **argv, GT_Error *err)
   bool minlengthdefined = false;
   Seqiteroptions seqiteroptions;
 
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&seqiteroptions,&parsed_args, argc, argv, err)) {

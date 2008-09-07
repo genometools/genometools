@@ -34,7 +34,7 @@ static int feature_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 {
   FeatureStream *feature_stream;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   feature_stream = feature_stream_cast(gs);
   had_err = genome_stream_next_tree(feature_stream->in_stream, gn, err);
   if (!had_err && *gn)

@@ -176,7 +176,7 @@ void mg_outputwriter(ParseStruct *parsestruct_ptr,
                      HitInformation *hit_information,
                      RegionStruct **regionmatrix, char type, GT_Error * err)
 {
-  error_check(err);
+  gt_error_check(err);
 
   /* je nach dem per Option angegebenen Output-Fileformat wird die
      entsprechende Ausgabefunktion aufgerufen */
@@ -205,7 +205,7 @@ static void outputwriter_txt(ParseStruct *parsestruct_ptr,
                       HitInformation *hit_information,
                       RegionStruct **regionmatrix, char type, GT_Error * err)
 {
-  error_check(err);
+  gt_error_check(err);
 
   /* Aufruf der jeweiligen Funtion zum erstellen der Bereiche Header(t),
      Query-DNA(q) und Coding-DNA(h) */
@@ -227,7 +227,7 @@ static void outputwriter_html(ParseStruct *parsestruct_ptr,
                        HitInformation *hit_information,
                        RegionStruct **regionmatrix, char type, GT_Error * err)
 {
-  error_check(err);
+  gt_error_check(err);
 
   /* Aufruf der jeweiligen Funtion zum erstellen der Bereiche Header(t),
      Query-DNA(q) und Coding-DNA(h) und des Footer(f) */
@@ -251,7 +251,7 @@ static void outputwriter_xml(ParseStruct *parsestruct_ptr,
                       HitInformation *hit_information,
                       RegionStruct **regionmatrix, char type, GT_Error * err)
 {
-  error_check(err);
+  gt_error_check(err);
 
   /* Aufruf der jeweiligen Funtion zum erstellen der Bereiche Header(t),
      Query-DNA(q) und Coding-DNA(h) und des Footer(f) */
@@ -658,7 +658,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
 
   Str *as_seq;
 
-  error_check(err);
+  gt_error_check(err);
 
   hit_ptr = NULL;
   as_seq = str_new();
@@ -1091,7 +1091,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
     found_end = 0,
     start_codon = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(contig_seq);
 
   contig_len = strlen(contig_seq);
@@ -1290,7 +1290,7 @@ newmemory_hash(UNUSED char *key, unsigned long *value, void *data,
   /* Position des aktuell betrachteten Schluessels */
   HITSTRUCT(stat_pos) = *value;
 
-  error_check(err);
+  gt_error_check(err);
 
   gt_array_add(parsestruct_ptr->value_tmp, HITSTRUCT(stat_pos));
 

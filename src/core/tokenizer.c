@@ -127,7 +127,7 @@ int tokenizer_unit_test(GT_Error *err)
   FILE *tmpfp;
   Str *token;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* empty file (except comment line) */
   tmpfilename = str_new();

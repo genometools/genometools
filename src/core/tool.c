@@ -53,7 +53,7 @@ int tool_run(Tool *tool, int argc, const char **argv, GT_Error *err)
   OptionParser *op;
   OPrval oprval;
   int parsed_args, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(tool);
 
   /* create tool arguments object */

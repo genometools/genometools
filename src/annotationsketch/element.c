@@ -129,7 +129,7 @@ int element_unit_test(GT_Error *err)
   Element *e, *e2, *e3;
   Str *seqid;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   feature_type_factory = feature_type_factory_builtin_new();
 

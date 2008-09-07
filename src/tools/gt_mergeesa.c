@@ -30,7 +30,7 @@ static OPrval parse_options(Str *indexname,GT_StrArray *indexnametab,
   OPrval oprval;
   Option *option;
 
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("storeindex <mkvindex1> <mkvindex2> ...",
                          "Merge indexes into one index.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -59,7 +59,7 @@ int gt_mergeesa(int argc, const char **argv, GT_Error *err)
   bool haserr = false;
   int parsed_args;
 
-  error_check(err);
+  gt_error_check(err);
 
   storeindex = str_new();
   indexnametab = gt_strarray_new();

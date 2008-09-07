@@ -71,7 +71,7 @@ static int gt_swalign_runner(UNUSED int argc, const char **argv,
   unsigned long i, j;
   int had_err = 0;
   Alignment *a;
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* init */

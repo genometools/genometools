@@ -67,7 +67,7 @@ static OPrval parse_options(int *parsed_args,
   "ps",
 #endif
   NULL };
-  error_check(err);
+  gt_error_check(err);
 
   /* init */
   op = option_parser_new("[option ...] image_file [GFF3_file ...]",
@@ -152,7 +152,7 @@ static OPrval parse_options(int *parsed_args,
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
 
   if (oprval == OPTIONPARSER_OK && !force && file_exists(argv[*parsed_args])) {
-    error_set(err, "file \"%s\" exists already. use option -force to "
+    gt_error_set(err, "file \"%s\" exists already. use option -force to "
                    "overwrite", argv[*parsed_args]);
     oprval = OPTIONPARSER_ERROR;
   }
@@ -184,7 +184,7 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
   GT_ImageInfo* ii = NULL;
   GT_Canvas *canvas = NULL;
 
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   arguments.seqid = str_new();
@@ -209,7 +209,7 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
       arguments.start != UNDEF_ULONG &&
       arguments.end != UNDEF_ULONG &&
       !(arguments.start < arguments.end)) {
-    error_set(err, "start of query range (%lu) must be before "
+    gt_error_set(err, "start of query range (%lu) must be before "
                    "end of query range (%lu)",
               arguments.start, arguments.end);
     had_err = -1;
@@ -257,13 +257,13 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
   if (!had_err && strcmp(str_get(arguments.seqid),"") == 0) {
     seqid = gt_feature_index_get_first_seqid(features);
     if (seqid == NULL) {
-      error_set(err, "GFF input file must contain a sequence region!");
+      gt_error_set(err, "GFF input file must contain a sequence region!");
       had_err = -1;
     }
   }
   else if (!had_err && !gt_feature_index_has_seqid(features,
                                                 str_get(arguments.seqid))) {
-    error_set(err, "sequence region '%s' does not exist in GFF input file",
+    gt_error_set(err, "sequence region '%s' does not exist in GFF input file",
               str_get(arguments.seqid));
     had_err = -1;
   }

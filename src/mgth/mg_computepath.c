@@ -66,7 +66,7 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
      CombinedScore-Matrix */
   array2dim_calloc(path_matrix, 7, contig_len);
 
-  error_check(err);
+  gt_error_check(err);
 
   /* fuer die erste Spalte der Path-Matrix wird die erste Spalte der
      CombinedScore-Matrix uebernommen */

@@ -30,7 +30,7 @@ static int extract_join_feature(GenomeNode *gn, GenomeFeatureType *type,
   Range range;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 
@@ -66,7 +66,7 @@ int extract_feat_sequence(Str *sequence, GenomeNode *gn,
   unsigned long raw_sequence_length;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 

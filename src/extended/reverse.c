@@ -20,7 +20,7 @@
 
 static int complement(char *reverse_char, char dna_char, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   switch (dna_char) {
     case 'A': *reverse_char = 'T'; return 0;
     case 'C': *reverse_char = 'G'; return 0;
@@ -32,7 +32,7 @@ static int complement(char *reverse_char, char dna_char, GT_Error *err)
     case 't': *reverse_char = 'a'; return 0;
     case 'n': *reverse_char = 'n'; return 0;
     default:
-      error_set(err, "complement of DNA character '%c' not defined", dna_char);
+      gt_error_set(err, "complement of DNA character '%c' not defined", dna_char);
       return -1;
   }
 }
@@ -41,7 +41,7 @@ int reverse_complement(char *dna_seq, unsigned long seqlen, GT_Error *err)
 {
   char *front_char, *back_char, tmp_char;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(dna_seq);
   for (front_char = dna_seq, back_char = dna_seq + seqlen - 1;
        front_char <= back_char;

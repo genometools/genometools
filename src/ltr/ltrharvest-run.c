@@ -44,7 +44,7 @@ static int runltrharvest(LTRharvestoptions *lo, GT_Error *err)
   unsigned long numofdbsequences;
   bool had_err = false;
 
-  error_check(err);
+  gt_error_check(err);
 
   ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
                                   SARR_LCPTAB | SARR_SUFTAB |

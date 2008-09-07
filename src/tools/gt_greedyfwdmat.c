@@ -80,7 +80,7 @@ static OPrval parsegfmsub(bool doms,
     {"querypos",SHOWQUERYPOS}
   };
 
-  error_check(err);
+  gt_error_check(err);
   gfmsubcallinfo->minlength.defined = false;
   gfmsubcallinfo->maxlength.defined = false;
   gfmsubcallinfo->showmode = 0;
@@ -172,7 +172,7 @@ static OPrval parsegfmsub(bool doms,
           gfmsubcallinfo->indextype = Packedindextype;
         } else
         {
-          error_set(err,"one of the options -esa, -pck must be used");
+          gt_error_set(err,"one of the options -esa, -pck must be used");
           oprval = OPTIONPARSER_ERROR;
         }
       }
@@ -189,7 +189,7 @@ static OPrval parsegfmsub(bool doms,
       }
       if (!option_is_set(optionmin) && !option_is_set(optionmax))
       {
-        error_set(err,"one of the options -min or -max must be set");
+        gt_error_set(err,"one of the options -min or -max must be set");
         oprval = OPTIONPARSER_ERROR;
       }
     }
@@ -201,7 +201,7 @@ static OPrval parsegfmsub(bool doms,
         if (gfmsubcallinfo->maxlength.valueunsignedlong <
             gfmsubcallinfo->minlength.valueunsignedlong)
         {
-          error_set(err,"minvalue must be smaller or equal than maxvalue");
+          gt_error_set(err,"minvalue must be smaller or equal than maxvalue");
           oprval = OPTIONPARSER_ERROR;
         }
       }
@@ -210,7 +210,7 @@ static OPrval parsegfmsub(bool doms,
     {
       if (gt_strarray_size(flagsoutputoption) == 0)
       {
-        error_set(err,"missing arguments to option -output");
+        gt_error_set(err,"missing arguments to option -output");
         oprval = OPTIONPARSER_ERROR;
       } else
       {
@@ -253,7 +253,7 @@ static OPrval parsegfmsub(bool doms,
   option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && parsed_args != argc)
   {
-    error_set(err,"superfluous program parameters");
+    gt_error_set(err,"superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
   return oprval;
@@ -282,7 +282,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GT_Error *err)
   unsigned int prefixlength = 0;
   Seqpos totallength;
 
-  error_check(err);
+  gt_error_check(err);
   switch (parsegfmsub(doms,&gfmsubcallinfo, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:

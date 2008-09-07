@@ -93,7 +93,7 @@ int gt_image_info_unit_test(GT_Error *err)
   Str *seqid;
   int had_err = 0;
   assert(err);
-  error_check(err);
+  gt_error_check(err);
 
   seqid = str_new_cstr("seqid");
   ii = gt_image_info_new();

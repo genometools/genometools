@@ -97,7 +97,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   unsigned long len;
   off_t totalsize;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
   sd = string_distri_new();
 

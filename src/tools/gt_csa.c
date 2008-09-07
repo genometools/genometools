@@ -87,7 +87,7 @@ static int gt_csa_runner(UNUSED int argc, const char **argv, int parsed_args,
   CSAArguments *arguments = tool_arguments;
   int had_err;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* create the streams */

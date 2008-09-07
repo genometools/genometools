@@ -49,7 +49,7 @@ static int initNameandFILE(NameandFILE *nf,
                             const char *suffix,
                             GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   nf->outfilename = str_clone(outindex);
   str_append_cstr(nf->outfilename,suffix);
   nf->fp = fa_fopen(str_get(nf->outfilename),"wb",err);
@@ -79,7 +79,7 @@ static int outputsuflcpllv(void *processinfo,
   Uchar smallvalue;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   for (i=0; i<buf->nextstoreidx; i++)
   {
     mergeoutinfo->absstartpostable[i]
@@ -92,7 +92,7 @@ static int outputsuflcpllv(void *processinfo,
             mergeoutinfo->outsuf.fp)
          != (size_t) buf->nextstoreidx)
   {
-    error_set(err,"fwrite(%s) of %u Seqpos-value failed: %s",
+    gt_error_set(err,"fwrite(%s) of %u Seqpos-value failed: %s",
                   str_get(mergeoutinfo->outsuf.outfilename),
                   buf->nextstoreidx,strerror(errno));
     haserr = true;
@@ -119,7 +119,7 @@ static int outputsuflcpllv(void *processinfo,
         if (fwrite(&currentexception,sizeof (Largelcpvalue),
                  (size_t) 1,mergeoutinfo->outllv.fp) != (size_t) 1)
         {
-          error_set(err,"fwrite(%s) of Largelcpvalue failed: %s",
+          gt_error_set(err,"fwrite(%s) of Largelcpvalue failed: %s",
                         str_get(mergeoutinfo->outllv.outfilename),
                         strerror(errno));
           haserr = true;
@@ -130,7 +130,7 @@ static int outputsuflcpllv(void *processinfo,
       if (fwrite(&smallvalue,sizeof (Uchar),(size_t) 1,
                 mergeoutinfo->outlcp.fp) != (size_t) 1)
       {
-        error_set(err,"fwrite(%s) of Uchar failed: %s",
+        gt_error_set(err,"fwrite(%s) of Uchar failed: %s",
                        str_get(mergeoutinfo->outlcp.outfilename),
                        strerror(errno));
         haserr = true;
@@ -152,7 +152,7 @@ static int mergeandstoreindex(const Str *storeindex,
   Seqpos *sequenceoffsettable, totallength;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   if (initNameandFILE(&mergeoutinfo.outsuf,storeindex,SUFTABSUFFIX,err) != 0)
   {
     haserr = true;
@@ -176,7 +176,7 @@ static int mergeandstoreindex(const Str *storeindex,
   if (!haserr && fwrite(&smalllcpvalue,sizeof (Uchar),(size_t) 1,
                 mergeoutinfo.outlcp.fp) != (size_t) 1)
   {
-    error_set(err,"fwrite(%s) failed: %s",
+    gt_error_set(err,"fwrite(%s) failed: %s",
                   str_get(mergeoutinfo.outlcp.outfilename),
                   strerror(errno));
     haserr = true;
@@ -222,7 +222,7 @@ int performtheindexmerging(const Str *storeindex,
   unsigned int demand = SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   if (initEmissionmergedesa(&emmesa,
                             indexnametab,
                             demand,
@@ -241,7 +241,7 @@ int performtheindexmerging(const Str *storeindex,
       }
     } else
     {
-      error_set(err,"merging requires more than one index");
+      gt_error_set(err,"merging requires more than one index");
       haserr = true;
     }
   }

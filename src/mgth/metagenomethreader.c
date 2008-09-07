@@ -58,7 +58,7 @@ static OPrval parse_options(int *parsed_args,
    *percent_option;
 
   /* Check Umgebungsvariablen */
-  error_check(err);
+  gt_error_check(err);
 
   /* init Option-Parser */
   op =
@@ -263,7 +263,7 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
   ARGUMENTS(giexpfile_name) = gt_strarray_new();
 
   /* Check der Umgebungsvariablen */
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &parsestruct.metagenomethreader_arguments,
@@ -697,7 +697,7 @@ printout_hits(UNUSED char *key,
   /* Parsestruct-Struktur */
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;
 
-  error_check(err);
+  gt_error_check(err);
 
   /* Position des aktuell betrachteten Schluessels */
   HITSTRUCT(stat_pos) = *value;

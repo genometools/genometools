@@ -27,7 +27,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("file [...]", "Map the supplied files into memory and "
                          "read them once.");
   option_parser_set_min_args(op, 1);
@@ -43,7 +43,7 @@ int gt_mmapandread(int argc, const char **argv, GT_Error *err)
   struct stat sb;
   unsigned long long j;
   unsigned int byte = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {

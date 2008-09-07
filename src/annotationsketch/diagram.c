@@ -654,7 +654,7 @@ int gt_diagram_unit_test(GT_Error *err)
   GT_Diagram *dia = NULL, *dia2 = NULL, *dia3 = NULL;
   GT_Array *features;
   GT_Canvas *canvas = NULL;
-  error_check(err);
+  gt_error_check(err);
 
   feature_type_factory = feature_type_factory_builtin_new();
   gene_type = feature_type_factory_create_gft(feature_type_factory, gft_gene);

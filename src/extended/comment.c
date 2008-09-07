@@ -60,7 +60,7 @@ static Range comment_get_range(UNUSED GenomeNode *gn)
 static int comment_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
   Comment *c;
-  error_check(err);
+  gt_error_check(err);
   c = comment_cast(gn);
   return genome_visitor_visit_comment(gv, c, err);
 }

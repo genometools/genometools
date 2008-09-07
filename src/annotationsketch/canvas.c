@@ -727,7 +727,7 @@ int gt_canvas_to_file(GT_Canvas *canvas, const char *filename, GT_Error *err)
     had_err = graphics_save_to_file(canvas->g, filename, err);
   else
   {
-    error_set(err, "No graphics has been created yet!");
+    gt_error_set(err, "No graphics has been created yet!");
     had_err = -1;
   }
 

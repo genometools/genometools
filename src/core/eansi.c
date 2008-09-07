@@ -20,9 +20,9 @@
 FILE *efopen(const char *path, const char *mode, GT_Error *err)
 {
   FILE *file;
-  error_check(err);
+  gt_error_check(err);
   if ((file = fopen(path, mode)) == NULL) {
-    error_set(err, "fopen(): cannot open file '%s': %s\n", path,
+    gt_error_set(err, "fopen(): cannot open file '%s': %s\n", path,
               strerror(errno));
   }
   return file;

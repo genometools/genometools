@@ -54,19 +54,19 @@ const char *EISIntegrityCheckResultStrings[] =
       fprintf(stderr, "Comparision failed at position "FormatSeqpos     \
               ", reference symbol: %u, symbol read: %u\n",              \
               pos, symOrig, symEnc);                                    \
-      error_set(err, "Invalid symbol encountered.");                    \
+      gt_error_set(err, "Invalid symbol encountered.");                    \
       break;                                                            \
     case EIS_INTEGRITY_CHECK_BWT_READ_ERROR:                            \
       fprintf(stderr, "Read of symbol failed at position "              \
               FormatSeqpos"\n", pos);                                   \
-      error_set(err, "Failed reading reference BWT source.");           \
+      gt_error_set(err, "Failed reading reference BWT source.");           \
       break;                                                            \
     case EIS_INTEGRITY_CHECK_RANK_FAILED:                               \
       fprintf(stderr, "At position "FormatSeqpos                        \
               ", rank operation yielded  wrong count: "FormatSeqpos     \
               ", expected "FormatSeqpos" for symbol %d\n",              \
               pos, rankQueryResult, rankExpect, rankCmpSym);            \
-      error_set(err, "Invalid rank result.");                           \
+      gt_error_set(err, "Invalid rank result.");                           \
       break;                                                            \
     }                                                                   \
     EISPrintDiagsForPos(seqIdx, pos, stderr, hint);                     \
@@ -101,7 +101,7 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
   if (streamsuffixarray(&suffixArray, &seqLastPos,
                         SARR_BWTTAB, projectName, verbosity, err))
   {
-    error_set(err, "Cannot load suffix array project with"
+    gt_error_set(err, "Cannot load suffix array project with"
                   " demand for BWT file\n");
     return EIS_INTEGRITY_CHECK_SA_LOAD_ERROR;
   }

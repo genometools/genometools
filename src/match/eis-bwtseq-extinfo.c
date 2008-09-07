@@ -533,7 +533,7 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
   unsigned locateInterval;
   BWTSeqContextRetrieverFactory *buildContextMap = NULL;
   assert(src && params && err);
-  error_check(err);
+  gt_error_check(err);
   locateInterval = params->locateInterval;
   do
   {
@@ -589,7 +589,7 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
         }
         else
         {
-          error_set(err, "error: locate sampling requested but not available"
+          gt_error_set(err, "error: locate sampling requested but not available"
                     " for project %s\n", str_get(params->projectName));
         }
       }

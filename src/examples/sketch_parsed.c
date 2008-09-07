@@ -2,7 +2,7 @@
 
 static void handle_error(GT_Error *err)
 {
-  fprintf(stderr, "error writing canvas %s\n", error_get(err));
+  fprintf(stderr, "error writing canvas %s\n", gt_error_get(err));
   exit(EXIT_FAILURE);
 }
 
@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
   Range range;
   GT_Diagram *diagram;
   GT_Canvas *canvas;
-  GT_Error *err = error_new();
+  GT_Error *err = gt_error_new();
 
   if (argc != 4) {
     fprintf(stderr, "Usage: %s style_file GFF3_file output_file\n", argv[0]);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
   gt_diagram_delete(diagram);
   gt_feature_index_delete(feature_index);
   gt_style_delete(style);
-  error_delete(err);
+  gt_error_delete(err);
 
   return EXIT_SUCCESS;
 }

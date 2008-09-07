@@ -92,7 +92,7 @@ static int gt_magicmatch_runner(UNUSED int argc, UNUSED const char **argv,
   unsigned long i;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   if (arguments->translate) {

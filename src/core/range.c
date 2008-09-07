@@ -184,7 +184,7 @@ int range_unit_test(GT_Error *err)
   GT_Array *ranges, *tmp_ranges, *ctr;
   unsigned long i;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   ensure(had_err, sizeof (ranges_out) / sizeof (ranges_out[0]) ==
                   sizeof (counts)     / sizeof (counts[0]));

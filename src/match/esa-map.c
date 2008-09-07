@@ -66,7 +66,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   GT_Array *riktab;
   Str *currentline;
 
-  error_check(err);
+  gt_error_check(err);
   riktab = gt_array_new(sizeofReadintkeys());
   SETREADINTKEYS("totallength",totallength,NULL);
   SETREADINTKEYS("specialcharacters",
@@ -118,7 +118,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                    SCANint64_tcast(&readint1),
                    SCANint64_tcast(&readint2)) != 3)
       {
-        error_set(err,"cannot parse line %*.*s",
+        gt_error_set(err,"cannot parse line %*.*s",
                           (int) currentlinelength,
                           (int) currentlinelength,
                           (const char *) str_get(currentline));
@@ -129,7 +129,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
       if (readint1 < (int64_t) 1 || readint2 < (int64_t) 1)
       {
-        error_set(err,"need positive integers in line %*.*s",
+        gt_error_set(err,"need positive integers in line %*.*s",
                           (int) currentlinelength,
                           (int) currentlinelength,
                           (const char *) str_get(currentline));
@@ -182,13 +182,13 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       integersize != (uint32_t) 32 &&
       integersize != (uint32_t) 64)
   {
-    error_set(err,"%s%s contains illegal line defining the integer size",
+    gt_error_set(err,"%s%s contains illegal line defining the integer size",
                   str_get(indexname),PROJECTFILESUFFIX);
     haserr = true;
   }
   if (!haserr && integersize != (uint32_t) (sizeof (Seqpos) * CHAR_BIT))
   {
-    error_set(err,"index was generated for %u-bit integers while "
+    gt_error_set(err,"index was generated for %u-bit integers while "
                       "this program uses %u-bit integers",
                       (unsigned int) integersize,
                       (unsigned int) (sizeof (Seqpos) * CHAR_BIT));
@@ -200,7 +200,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     {
       if (littleendian != (uint32_t) 1)
       {
-        error_set(err,"computer has little endian byte order, while index "
+        gt_error_set(err,"computer has little endian byte order, while index "
                       "was build on computer with big endian byte order");
         haserr = true;
       }
@@ -208,7 +208,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     {
       if (littleendian == (uint32_t) 1)
       {
-        error_set(err,"computer has big endian byte order, while index "
+        gt_error_set(err,"computer has big endian byte order, while index "
                       "was build on computer with little endian byte "
                       "order");
         haserr = true;
@@ -219,7 +219,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   {
     if (readmodeint > (uint32_t) 3)
     {
-      error_set(err,"illegal readmode %u",(unsigned int) readmodeint);
+      gt_error_set(err,"illegal readmode %u",(unsigned int) readmodeint);
       haserr = true;
     }
     suffixarray->readmode = (Readmode) readmodeint;
@@ -235,13 +235,13 @@ static void *genericmaponlytable(const Str *indexname,const char *suffix,
   void *ptr;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,suffix);
   ptr = fa_mmap_read(str_get(tmpfilename),numofbytes);
   if (ptr == NULL)
   {
-    error_set(err,"cannot map file \"%s\": %s",str_get(tmpfilename),
+    gt_error_set(err,"cannot map file \"%s\": %s",str_get(tmpfilename),
                   strerror(errno));
     haserr = true;
   }
@@ -252,10 +252,10 @@ static void *genericmaponlytable(const Str *indexname,const char *suffix,
 static int checkmappedfilesize(size_t numofbytes,Seqpos expectedunits,
                                size_t sizeofunit,GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   if (expectedunits != (Seqpos) (numofbytes/sizeofunit))
   {
-    error_set(err,"number of mapped units = %lu != " FormatSeqpos
+    gt_error_set(err,"number of mapped units = %lu != " FormatSeqpos
                       " = expected number of integers",
                       (unsigned long) (numofbytes/sizeofunit),
                       PRINTSeqposcast(expectedunits));
@@ -311,7 +311,7 @@ static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
   bool haserr = false;
   FILE *fp;
 
-  error_check(err);
+  gt_error_check(err);
   fp = opensfxfile(indexname,PROJECTFILESUFFIX,"rb",err);
   if (fp == NULL)
   {
@@ -333,7 +333,7 @@ static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,
   Str *tmpfilename;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
   suffixarray->alpha = assigninputalphabet(false,
@@ -393,7 +393,7 @@ static int inputsuffixarray(bool map,
 {
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   initsuffixarray(suffixarray);
   haserr = scanprjfile(suffixarray,totallength,indexname,verboseinfo,err);
   if (!haserr)
@@ -449,7 +449,7 @@ static int inputsuffixarray(bool map,
     }
     if (!haserr && !suffixarray->longest.defined)
     {
-      error_set(err,"longest not defined");
+      gt_error_set(err,"longest not defined");
       haserr = true;
     }
   }
@@ -472,13 +472,13 @@ static int inputsuffixarray(bool map,
       if (!haserr &&
           fseek(suffixarray->lcptabstream.fp,(long) sizeof (Uchar),SEEK_SET))
       {
-        error_set(err,"fseek(esastream) failed: %s",strerror(errno));
+        gt_error_set(err,"fseek(esastream) failed: %s",strerror(errno));
         haserr = true;
       }
     }
     if (!haserr && !suffixarray->numoflargelcpvalues.defined)
     {
-      error_set(err,"numoflargelcpvalues not defined");
+      gt_error_set(err,"numoflargelcpvalues not defined");
       haserr = true;
     }
     if (!haserr && suffixarray->numoflargelcpvalues.valueseqpos > 0)
@@ -535,7 +535,7 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-      error_set(err,"cannot stream bcktab");
+      gt_error_set(err,"cannot stream bcktab");
       haserr = true;
     }
   }
@@ -553,7 +553,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
                       Verboseinfo *verboseinfo,
                       GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   return inputsuffixarray(false,
                           suffixarray,
                           totallength,
@@ -570,7 +570,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
                    Verboseinfo *verboseinfo,
                    GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   return inputsuffixarray(true,
                           suffixarray,
                           totallength,

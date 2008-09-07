@@ -36,7 +36,7 @@ static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 {
   FilterStream *fs;
   int had_err;
-  error_check(err);
+  gt_error_check(err);
   fs = filter_stream_cast(gs);
 
   /* we still have nodes in the buffer */

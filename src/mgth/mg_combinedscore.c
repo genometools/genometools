@@ -70,7 +70,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
    *hit_as_ptr;
 
   /* Check Umgebungsvariablen */
-  error_check(err);
+  gt_error_check(err);
 
   /* Zeiger auf den vollstaendigen Query-DNA Eintrag */
   contig_seq_ptr = str_get(MATRIXSTRUCT(query_dna));
@@ -146,7 +146,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
     /* Fehlermeldung bei Unvereinbarkeit */
     if (mod != 0)
     {
-      error_set(err,
+      gt_error_set(err,
                 "sequences error: matching sequences do not fit in length.\
                  wrong FASTA-files or please delete entry %s!?",
                 gt_strarray_get(MATRIXSTRUCT(hit_gi_def), i));

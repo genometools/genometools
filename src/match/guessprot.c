@@ -31,7 +31,7 @@ int guessifproteinsequencestream(const GT_StrArray *filenametab,GT_Error *err)
   FastaBuffer *fb;
   int retval;
 
-  error_check(err);
+  gt_error_check(err);
   fb = fastabuffer_new(filenametab,
                        NULL,
                        false,

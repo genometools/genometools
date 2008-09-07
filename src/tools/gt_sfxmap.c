@@ -108,7 +108,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
          *optiondelspranges;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
   op = option_parser_new("[options] indexname",
                          "Map or Stream <indexname> and check consistency.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -184,7 +184,7 @@ int gt_sfxmap(int argc, const char **argv, GT_Error *err)
   Sfxmapoptions sfxmapoptions;
   unsigned int demand = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   switch (parse_options(&sfxmapoptions,&parsed_args, argc, argv,
                         err))

@@ -201,7 +201,7 @@ int string_matching_unit_test(GT_Error *err)
   unsigned long i, brute_force_match, bmh_match, kmp_match, shift_and_match;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   brute_force_matches = gt_array_new(sizeof (unsigned long));
   bmh_matches = gt_array_new(sizeof (unsigned long));

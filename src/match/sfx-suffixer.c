@@ -475,12 +475,12 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   Seqpos *optr;
   bool haserr = false;
 
-  error_check(err);
+  gt_error_check(err);
   assert(prefixlength > 0);
   if (sfxstrategy != NULL && sfxstrategy->storespecialcodes &&
       prefixlength > MAXPREFIXLENGTH)
   {
-    error_set(err,"argument for option -pl must be in the range [1,%u]",
+    gt_error_set(err,"argument for option -pl must be in the range [1,%u]",
                   MAXPREFIXLENGTH);
     haserr = true;
   }
@@ -840,7 +840,7 @@ int sfibcktab2file(FILE *fp,
                    const Sfxiterator *sfi,
                    GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   return bcktab2file(fp,sfi->bcktab,err);
 }
 

@@ -32,7 +32,7 @@ Str* gtdata_get_path(const char *prog, GT_Error *err)
 {
   Str *path;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(prog);
   path = str_new();
   had_err = file_find_in_path(path, prog, err);
@@ -45,7 +45,7 @@ Str* gtdata_get_path(const char *prog, GT_Error *err)
     str_append_cstr(path, UPDIR);
     str_append_cstr(path, GTDATADIR);
     if (!file_exists(str_get(path))) {
-      error_set(err, "could not find gtdata/ directory");
+      gt_error_set(err, "could not find gtdata/ directory");
       had_err = -1;
     }
   }

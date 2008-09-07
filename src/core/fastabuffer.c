@@ -79,7 +79,7 @@ static int advancefastabufferstate(FastaBuffer *fb, GT_Error *err)
   unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
   Uchar charcode;
 
-  error_check(err);
+  gt_error_check(err);
   while (true)
   {
     if (currentoutpos >= (unsigned long) OUTPUTFILEBUFFERSIZE)
@@ -185,7 +185,7 @@ static int advancefastabufferstate(FastaBuffer *fb, GT_Error *err)
                 charcode = fb->symbolmap[(unsigned int) currentchar];
                 if (charcode == (Uchar) UNDEFCHAR)
                 {
-                  error_set(err,
+                  gt_error_set(err,
                             "illegal character '%c': file \"%s\", line %llu",
                             currentchar,
                             gt_strarray_get(fb->filenametab, fb->filenum),
@@ -217,7 +217,7 @@ static int advancefastabufferstate(FastaBuffer *fb, GT_Error *err)
   }
   if (fb->firstoverallseq)
   {
-    error_set(err,"no sequences in multiple fasta file(s) %s ...",
+    gt_error_set(err,"no sequences in multiple fasta file(s) %s ...",
               gt_strarray_get(fb->filenametab,0));
     return -2;
   }
@@ -230,10 +230,10 @@ static int advancePlainbufferstate(FastaBuffer *fb, GT_Error *err)
   int currentchar;
   unsigned long currentoutpos = 0, currentfileread = 0;
 
-  error_check(err);
+  gt_error_check(err);
   if (fb->descptr != NULL)
   {
-    error_set(err, "no headers in plain sequence file");
+    gt_error_set(err, "no headers in plain sequence file");
     return -1;
   }
   while (true)
@@ -294,7 +294,7 @@ static int advancePlainbufferstate(FastaBuffer *fb, GT_Error *err)
   }
   if (currentoutpos == 0)
   {
-    error_set(err, "no characters in plain file(s) %s ...",
+    gt_error_set(err, "no characters in plain file(s) %s ...",
               gt_strarray_get(fb->filenametab,0));
     return -2;
   }
@@ -304,7 +304,7 @@ static int advancePlainbufferstate(FastaBuffer *fb, GT_Error *err)
 
 int advanceformatbufferstate(FastaBuffer *fb, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   if (fb->plainformat)
   {
     return advancePlainbufferstate(fb, err);

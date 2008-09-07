@@ -39,7 +39,7 @@ void* genome_visitor_cast(UNUSED const GenomeVisitorClass *gvc,
 
 int genome_visitor_visit_comment(GenomeVisitor *gv, Comment *c, GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(gv && c && gv->c_class);
   if (gv->c_class->comment)
     return gv->c_class->comment(gv, c, err);
@@ -49,7 +49,7 @@ int genome_visitor_visit_comment(GenomeVisitor *gv, Comment *c, GT_Error *err)
 int genome_visitor_visit_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                         GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(gv && gf && gv->c_class && gv->c_class->genome_feature);
   return gv->c_class->genome_feature(gv, gf, err);
 }
@@ -57,7 +57,7 @@ int genome_visitor_visit_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 int genome_visitor_visit_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
                                          GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(gv && sr && gv->c_class);
   if (gv->c_class->sequence_region)
     return gv->c_class->sequence_region(gv, sr, err);
@@ -67,7 +67,7 @@ int genome_visitor_visit_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
 int genome_visitor_visit_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
                                        GT_Error *err)
 {
-  error_check(err);
+  gt_error_check(err);
   assert(gv && sn && gv->c_class);
   if (gv->c_class->sequence_node)
     return gv->c_class->sequence_node(gv, sn, err);

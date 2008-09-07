@@ -61,7 +61,7 @@ static void sequence_node_change_seqid(GenomeNode *gn, Str *seqid)
 static int sequence_node_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
   SequenceNode *sn;
-  error_check(err);
+  gt_error_check(err);
   sn = sequence_node_cast(gn);
   return genome_visitor_visit_sequence_node(gv, sn, err);
 }
