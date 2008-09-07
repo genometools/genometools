@@ -28,7 +28,7 @@
 extern void
 registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
                            int defaultOptimizationFlags,
-                           const Str *projectName)
+                           const GT_Str *projectName)
 {
   Option *option;
 

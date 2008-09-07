@@ -24,7 +24,7 @@
 #include "extended/splicedseq.h"
 
 struct Splicedseq {
-  Str *splicedseq;
+  GT_Str *splicedseq;
   GT_Array *positionmapping;
   bool forward;
 };

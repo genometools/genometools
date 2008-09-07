@@ -402,7 +402,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   return haserr ? -1 : 0;
 }
 
-int callenummaxpairs(const Str *indexname,
+int callenummaxpairs(const GT_Str *indexname,
                      unsigned int userdefinedleastlength,
                      bool scanfile,
                      int(*processmaxpairs)(void *,Seqpos,Seqpos,

@@ -24,16 +24,16 @@
 #include "core/str.h"
 #include "core/xansi.h"
 
-struct Str {
+struct GT_Str {
   char *cstr;           /* the actual string (always '\0' terminated) */
   unsigned long length; /* currently used length (without trailing '\0') */
   size_t allocated;     /* currently allocated memory */
   unsigned int reference_count;
 };
 
-Str* str_new(void)
+GT_Str* str_new(void)
 {
-  Str *s = ma_malloc(sizeof (Str));      /* create new string object */
+  GT_Str *s = ma_malloc(sizeof *s);      /* create new string object */
   s->cstr = ma_calloc(1, sizeof (char)); /* init string with '\0' */
   s->length = 0;                         /* set the initial length */
   s->allocated = 1;                      /* set allocated space */
@@ -41,15 +41,15 @@ Str* str_new(void)
   return s;                              /* return new string object */
 }
 
-Str* str_new_cstr(const char *cstr)
+GT_Str* str_new_cstr(const char *cstr)
 {
-  Str *s = str_new();
+  GT_Str *s = str_new();
   if (cstr)
     str_append_cstr(s, cstr);
   return s;
 }
 
-void str_set(Str *s, const char *cstr)
+void str_set(GT_Str *s, const char *cstr)
 {
   size_t cstrlen;
   char *sptr;
@@ -65,7 +65,7 @@ void str_set(Str *s, const char *cstr)
   }
 }
 
-void str_append_str(Str *dest, const Str* src)
+void str_append_str(GT_Str *dest, const GT_Str* src)
 {
   assert(dest && src);
   dest->cstr = dynalloc(dest->cstr, &dest->allocated,
@@ -74,7 +74,7 @@ void str_append_str(Str *dest, const Str* src)
   dest->length += src->length;
 }
 
-void str_append_cstr(Str *dest, const char *cstr)
+void str_append_cstr(GT_Str *dest, const char *cstr)
 {
   size_t cstrlen;
   char *destptr;
@@ -88,7 +88,7 @@ void str_append_cstr(Str *dest, const char *cstr)
   dest->length += cstrlen;
 }
 
-void str_append_cstr_nt(Str *dest, const char *cstr, unsigned long length)
+void str_append_cstr_nt(GT_Str *dest, const char *cstr, unsigned long length)
 {
   assert(dest && cstr);
   dest->cstr = dynalloc(dest->cstr, &dest->allocated,
@@ -98,7 +98,7 @@ void str_append_cstr_nt(Str *dest, const char *cstr, unsigned long length)
 }
 
 /* inspired by D. J. Bernstein's fmt_ulong() */
-void str_append_ulong(Str *dest, unsigned long u)
+void str_append_ulong(GT_Str *dest, unsigned long u)
 {
   unsigned int ulength = 1;
   unsigned long q = u;
@@ -122,7 +122,7 @@ void str_append_ulong(Str *dest, unsigned long u)
   dest->length += ulength;
 }
 
-void str_append_char(Str *dest, char c)
+void str_append_char(GT_Str *dest, char c)
 {
   assert(dest);
   if (dest->length + 2 > dest->allocated) {
@@ -132,7 +132,7 @@ void str_append_char(Str *dest, char c)
   dest->cstr[dest->length++] = c;
 }
 
-void str_append_double(Str *dest, double d, int precision)
+void str_append_double(GT_Str *dest, double d, int precision)
 {
   char buf[BUFSIZ];
   int rval;
@@ -142,38 +142,38 @@ void str_append_double(Str *dest, double d, int precision)
   str_append_cstr(dest, buf);
 }
 
-char* str_get(const Str *s)
+char* str_get(const GT_Str *s)
 {
   assert(s);
   s->cstr[s->length] = '\0';
   return s->cstr;
 }
 
-void* str_get_mem(const Str *s)
+void* str_get_mem(const GT_Str *s)
 {
   assert(s);
   return s->cstr;
 }
 
-unsigned long str_length(const Str *s)
+unsigned long str_length(const GT_Str *s)
 {
   return s ? s->length : 0;
 }
 
-void str_set_length(Str *s, unsigned long length)
+void str_set_length(GT_Str *s, unsigned long length)
 {
   assert(s && length <= s->length);
   s->length = length;
 }
 
-void str_reset(Str *s)
+void str_reset(GT_Str *s)
 {
   assert(s);
   s->length = 0;
 }
 
 /* does not handle embedded \0's */
-int str_cmp(const Str *s1, const Str *s2)
+int str_cmp(const GT_Str *s1, const GT_Str *s2)
 {
   assert(s1 && s2);
   if (s1 == s2)
@@ -184,11 +184,11 @@ int str_cmp(const Str *s1, const Str *s2)
   return strcmp(s1->cstr, s2->cstr);
 }
 
-Str* str_clone(const Str *s)
+GT_Str* str_clone(const GT_Str *s)
 {
-  Str *s_copy;
+  GT_Str *s_copy;
   assert(s);
-  s_copy = ma_malloc(sizeof (Str));
+  s_copy = ma_malloc(sizeof *s_copy);
   s->cstr[s->length] = '\0';
   s_copy->cstr = cstr_dup(s->cstr);
   s_copy->length = s_copy->allocated = s->length;
@@ -196,14 +196,14 @@ Str* str_clone(const Str *s)
   return s_copy;
 }
 
-Str* str_ref(Str *s)
+GT_Str* str_ref(GT_Str *s)
 {
   if (!s) return NULL;
   s->reference_count++; /* increase the reference counter */
   return s;
 }
 
-int str_read_next_line(Str *s, FILE *fpin)
+int str_read_next_line(GT_Str *s, FILE *fpin)
 {
   int cc;
   char c;
@@ -225,7 +225,7 @@ int str_read_next_line(Str *s, FILE *fpin)
   }
 }
 
-int str_read_next_line_generic(Str *s, GenFile *fpin)
+int str_read_next_line_generic(GT_Str *s, GenFile *fpin)
 {
   int cc;
   char c;
@@ -249,7 +249,7 @@ int str_read_next_line_generic(Str *s, GenFile *fpin)
 
 int str_unit_test(GT_Error *err)
 {
-  Str *s, *s1, *s2;
+  GT_Str *s, *s1, *s2;
   static char cstring_1[] = "test_string"; /* l=11 */
   int had_err = 0;
   gt_error_check(err);
@@ -323,7 +323,7 @@ int str_unit_test(GT_Error *err)
   return had_err;
 }
 
-void str_delete(Str *s)
+void str_delete(GT_Str *s)
 {
   if (!s) return;           /* return without action if 's' is NULL */
   if (s->reference_count) { /* there are multiple references to this string */

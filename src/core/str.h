@@ -23,31 +23,31 @@
 #include "core/genfile.h"
 
 /* the string class, string objects are strings which grow on demand */
-typedef struct Str Str;
+typedef struct GT_Str GT_Str;
 
-Str*          str_new(void);
-Str*          str_new_cstr(const char*);
-Str*          str_clone(const Str*);
-Str*          str_ref(Str*);
+GT_Str*       str_new(void);
+GT_Str*       str_new_cstr(const char*);
+GT_Str*       str_clone(const GT_Str*);
+GT_Str*       str_ref(GT_Str*);
 /* never returns NULL, always '\0' terminated */
-char*         str_get(const Str*);
+char*         str_get(const GT_Str*);
 /* never returns NULL, not always '\0' terminated */
-void*         str_get_mem(const Str*);
-void          str_set(Str*, const char*);
-void          str_append_str(Str*, const Str*);
-void          str_append_cstr(Str*, const char*);
+void*         str_get_mem(const GT_Str*);
+void          str_set(GT_Str*, const char*);
+void          str_append_str(GT_Str*, const GT_Str*);
+void          str_append_cstr(GT_Str*, const char*);
 /* appends an unterminated cstr */
-void          str_append_cstr_nt(Str*, const char*, unsigned long);
-void          str_append_char(Str*, char);
-void          str_append_double(Str*, double, int precision);
-void          str_append_ulong(Str*, unsigned long);
-void          str_set_length(Str*, unsigned long);
-void          str_reset(Str*);
-int           str_cmp(const Str*, const Str*);
-int           str_read_next_line(Str*, FILE*);
-int           str_read_next_line_generic(Str*, GenFile*);
-unsigned long str_length(const Str*);
+void          str_append_cstr_nt(GT_Str*, const char*, unsigned long);
+void          str_append_char(GT_Str*, char);
+void          str_append_double(GT_Str*, double, int precision);
+void          str_append_ulong(GT_Str*, unsigned long);
+void          str_set_length(GT_Str*, unsigned long);
+void          str_reset(GT_Str*);
+int           str_cmp(const GT_Str*, const GT_Str*);
+int           str_read_next_line(GT_Str*, FILE*);
+int           str_read_next_line_generic(GT_Str*, GenFile*);
+unsigned long str_length(const GT_Str*);
 int           str_unit_test(GT_Error*);
-void          str_delete(Str*);
+void          str_delete(GT_Str*);
 
 #endif

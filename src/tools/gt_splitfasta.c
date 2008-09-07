@@ -28,7 +28,7 @@
 
 typedef struct {
   unsigned long max_filesize_in_MB;
-  Str *splitdesc;
+  GT_Str *splitdesc;
   bool force;
 } SplitfastaArguments;
 
@@ -95,12 +95,12 @@ static GenFile* genfile_xopen_forcecheck(const char *path, const char *mode,
   return genfile_xopen(path, mode);
 }
 
-static int split_description(const char *filename, Str *splitdesc, bool force,
+static int split_description(const char *filename, GT_Str *splitdesc, bool force,
                              GT_Error *err)
 {
   unsigned long i;
   Bioseq *bioseq;
-  Str *descname;
+  GT_Str *descname;
   int had_err = 0;
   gt_error_check(err);
   assert(filename && splitdesc && str_length(splitdesc));
@@ -138,7 +138,7 @@ static int split_fasta_file(const char *filename,
                             GT_Error *err)
 {
   GenFile *srcfp = NULL, *destfp = NULL;
-  Str *destfilename = NULL;
+  GT_Str *destfilename = NULL;
   unsigned long filenum = 0, bytecount = 0, separator_pos;
   int read_bytes, had_err = 0;
   char buf[BUFSIZ];

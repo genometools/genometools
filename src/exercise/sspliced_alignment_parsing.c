@@ -30,7 +30,7 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
   long leftpos, rightpos;
   unsigned long i = 0;
   GT_Range exon;
-  Str *id;
+  GT_Str *id;
   int had_err = 0;
   gt_error_check(err);
 
@@ -118,7 +118,7 @@ int sspliced_alignment_parse(GT_Array *spliced_alignments, const char *filename,
   FILE *input_file;
   SSplicedAlignment *sa;
   int had_err = 0;
-  Str *line;
+  GT_Str *line;
   gt_error_check(err);
 
   line = str_new();

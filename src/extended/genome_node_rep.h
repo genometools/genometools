@@ -26,19 +26,19 @@
 struct GT_GenomeNodeClass
 {
   size_t size;
-  void  (*free)(GT_GenomeNode*);
-  Str*  (*get_seqid)(GT_GenomeNode*);
-  Str*  (*get_idstr)(GT_GenomeNode*);
+  void     (*free)(GT_GenomeNode*);
+  GT_Str*  (*get_seqid)(GT_GenomeNode*);
+  GT_Str*  (*get_idstr)(GT_GenomeNode*);
   GT_Range (*get_range)(GT_GenomeNode*);
-  void  (*set_range)(GT_GenomeNode*, GT_Range);
-  void  (*change_seqid)(GT_GenomeNode*, Str*);
-  int   (*accept)(GT_GenomeNode*, GenomeVisitor*, GT_Error*);
+  void     (*set_range)(GT_GenomeNode*, GT_Range);
+  void     (*change_seqid)(GT_GenomeNode*, GT_Str*);
+  int      (*accept)(GT_GenomeNode*, GenomeVisitor*, GT_Error*);
 };
 
 struct GT_GenomeNode
 {
   const GT_GenomeNodeClass *c_class;
-  Str *filename;
+  GT_Str *filename;
   Dlist *children;
   unsigned int line_number,
                reference_count,

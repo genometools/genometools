@@ -50,7 +50,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GT_Error *err)
 {
   struct encIdxSeq *seq;
   struct chkIndexOptions params;
-  Str *inputProject;
+  GT_Str *inputProject;
   int parsedArgs;
   int had_err = 0;
   Verboseinfo *verbosity = NULL;

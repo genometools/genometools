@@ -24,7 +24,7 @@
 typedef struct
 {
   GT_StrArray *tagfiles;
-  Str *esaindexname,
+  GT_Str *esaindexname,
       *pckindexname;
   bool online,  /* perform online search, for testing */
        docompare, /* compare results with online search */

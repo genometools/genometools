@@ -162,7 +162,7 @@ static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pa
   NodeInfoElement *ni;
   GT_Block *block;
   GT_BlockTuple *bt;
-  Str *caption = NULL;
+  GT_Str *caption = NULL;
   const char *nnid_p = NULL, *nnid_n = NULL;
   assert(d && node);
 
@@ -224,7 +224,7 @@ static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* par
   /* no fitting block was found, create a new one */
   if (block == NULL) {
     GT_BlockTuple *bt;
-    Str *caption = NULL;
+    GT_Str *caption = NULL;
     block = gt_block_new_from_node(parent);
     /* assign block caption */
     nnid_p = get_node_name_or_id(parent);
@@ -398,9 +398,9 @@ static int visit_child(GT_GenomeNode* gn, void* gt_genome_node_children, GT_Erro
   return 0;
 }
 
-static Str* track_key_new(const char *filename, GT_GenomeFeatureType *type)
+static GT_Str* track_key_new(const char *filename, GT_GenomeFeatureType *type)
 {
-  Str *track_key;
+  GT_Str *track_key;
   track_key = str_new_cstr(filename);
   str_append_char(track_key, FILENAME_TYPE_SEPARATOR);
   str_append_cstr(track_key, gt_genome_feature_type_get_cstr(type));
@@ -568,7 +568,7 @@ static int layout_tracks(void *key, void *value, void *data,
   GT_GenomeFeatureType *gft = (GT_GenomeFeatureType*) key;
   GT_Array *list = (GT_Array*) value;
   char *filename;
-  Str *track_key;
+  GT_Str *track_key;
   const char *type;
   GT_Block *block;
   bool split;
@@ -647,7 +647,7 @@ int gt_diagram_unit_test(GT_Error *err)
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
   GT_Range r1, r2, r3, r4, r5, dr1, rs;
-  Str *seqid1, *seqid2, *track_key;
+  GT_Str *seqid1, *seqid2, *track_key;
   GT_SequenceRegion *sr1, *sr2;
   int had_err=0;
   GT_Style *sty = NULL;

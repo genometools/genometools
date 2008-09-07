@@ -24,7 +24,7 @@
 
 struct IO {
   GenFile *fp;
-  Str *path;
+  GT_Str *path;
   unsigned long line_number;
   bool line_start;
 };
@@ -110,7 +110,7 @@ const char* io_get_filename(const IO *io)
   return str_get(io->path);
 }
 
-Str* io_get_filename_str(const IO *io)
+GT_Str* io_get_filename_str(const IO *io)
 {
   assert(io && io->path);
   return io->path;

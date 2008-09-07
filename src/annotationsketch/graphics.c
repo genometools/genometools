@@ -32,7 +32,7 @@
 struct Graphics {
   cairo_t *cr;
   cairo_surface_t *surf;
-  Str *outbuf;
+  GT_Str *outbuf;
   GraphicsOutType type;
   double margin_x, margin_y, height, width;
 };
@@ -40,7 +40,7 @@ struct Graphics {
 static cairo_status_t str_write_func(void *closure, const unsigned char *data,
                                      unsigned int length)
 {
-  Str *stream = closure;
+  GT_Str *stream = closure;
   assert(stream);
   str_append_cstr_nt(stream, (char*) data, length);
   return CAIRO_STATUS_SUCCESS;
@@ -478,7 +478,7 @@ int graphics_save_to_file(const Graphics *g, const char *filename, GT_Error *err
   return 0;
 }
 
-void graphics_save_to_stream(const Graphics *g, Str *stream)
+void graphics_save_to_stream(const Graphics *g, GT_Str *stream)
 {
   cairo_status_t rval;
   assert(g && stream);

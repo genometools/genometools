@@ -25,6 +25,6 @@
 typedef struct FastaReaderRec FastaReaderRec;
 
 const FastaReaderClass* fasta_reader_rec_class(void);
-FastaReader*            fasta_reader_rec_new(Str *sequence_filename);
+FastaReader*            fasta_reader_rec_new(GT_Str *sequence_filename);
 
 #endif

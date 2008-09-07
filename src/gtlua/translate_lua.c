@@ -22,7 +22,7 @@
 
 static int translate_dna_lua(lua_State *L)
 {
-  Str *protein;
+  GT_Str *protein;
   const char *dna = luaL_checkstring(L, 1);
   protein = str_new();
   translate_dna(protein, dna, strlen(dna), 0);

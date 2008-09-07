@@ -33,7 +33,7 @@ typedef struct Alphabet Alphabet;
 
 /*@null@*/ Alphabet *assigninputalphabet(bool isdna,
                                          bool isprotein,
-                                         const Str *smapfile,
+                                         const GT_Str *smapfile,
                                          const GT_StrArray *filenametab,
                                          GT_Error *err);
 

@@ -86,7 +86,7 @@ const FastaReaderClass* fasta_reader_seqit_class(void)
   return &frc;
 }
 
-FastaReader* fasta_reader_seqit_new(Str *sequence_filename)
+FastaReader* fasta_reader_seqit_new(GT_Str *sequence_filename)
 {
   FastaReader *fr;
   FastaReaderSeqIt *fasta_reader_seqit;

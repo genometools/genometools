@@ -34,7 +34,7 @@ typedef struct
   unsigned int numofparts,
                prefixlength;
   Definedunsignedint maxdepth;
-  Str *str_inputindex,
+  GT_Str *str_inputindex,
       *str_indexname,
       *str_smap,
       *str_sat;

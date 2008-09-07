@@ -31,7 +31,7 @@
 
 typedef struct
 {
-  Str *outfilename;
+  GT_Str *outfilename;
   FILE *fp;
 } NameandFILE;
 
@@ -45,7 +45,7 @@ typedef struct
 } Mergeoutinfo;
 
 static int initNameandFILE(NameandFILE *nf,
-                            const Str *outindex,
+                            const GT_Str *outindex,
                             const char *suffix,
                             GT_Error *err)
 {
@@ -142,7 +142,7 @@ static int outputsuflcpllv(void *processinfo,
   return haserr ? -1 : 0;
 }
 
-static int mergeandstoreindex(const Str *storeindex,
+static int mergeandstoreindex(const GT_Str *storeindex,
                               Emissionmergedesa *emmesa,
                               GT_Error *err)
 {
@@ -213,7 +213,7 @@ static int mergeandstoreindex(const Str *storeindex,
   return haserr ? -1 : 0;
 }
 
-int performtheindexmerging(const Str *storeindex,
+int performtheindexmerging(const GT_Str *storeindex,
                            const GT_StrArray *indexnametab,
                            Verboseinfo *verboseinfo,
                            GT_Error *err)

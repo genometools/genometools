@@ -94,7 +94,7 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"readmode=%u\n",(unsigned int) readmode);
 }
 
-int outprjfile(const Str *indexname,
+int outprjfile(const GT_Str *indexname,
                const GT_StrArray *filenametab,
                Readmode readmode,
                const Filelengthvalues *filelengthtab,

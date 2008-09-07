@@ -23,8 +23,8 @@
 #include "exercise/simple_bioseq.h"
 
 typedef struct {
-  Str *description,
-      *sequence;
+  GT_Str *description,
+         *sequence;
 } FastaEntry;
 
 struct SimpleBioseq {
@@ -40,7 +40,7 @@ static bool has_char(FILE *fp)
   return true;
 }
 
-static void parse_fasta_description(Str *description, FILE *fp,
+static void parse_fasta_description(GT_Str *description, FILE *fp,
                                     const char *fasta_file)
 {
   int cc;
@@ -56,7 +56,7 @@ static void parse_fasta_description(Str *description, FILE *fp,
     str_append_char(description, cc);
 }
 
-static void parse_fasta_sequence(Str *sequence, FILE *fp,
+static void parse_fasta_sequence(GT_Str *sequence, FILE *fp,
                                  const char *fasta_file)
 {
   int cc;

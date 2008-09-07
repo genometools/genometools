@@ -121,7 +121,7 @@ static const enum rangeSortMode GTAlphabetRangeSort[][2] =
 };
 
 extern BWTSeq *
-loadBWTSeq(const Str *projectName, int BWTOptFlags, Verboseinfo *verbosity,
+loadBWTSeq(const GT_Str *projectName, int BWTOptFlags, Verboseinfo *verbosity,
            GT_Error *err)
 {
   struct BWTSeq *bwtSeq = NULL;
@@ -139,7 +139,7 @@ loadBWTSeq(const Str *projectName, int BWTOptFlags, Verboseinfo *verbosity,
 }
 
 extern BWTSeq *
-loadBWTSeqForSA(const Str *projectName, enum seqBaseEncoding encType,
+loadBWTSeqForSA(const GT_Str *projectName, enum seqBaseEncoding encType,
                 int BWTOptFlags, const Suffixarray *sa,
                 Seqpos totalLen, GT_Error *err)
 {

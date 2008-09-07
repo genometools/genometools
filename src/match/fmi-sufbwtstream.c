@@ -104,7 +104,7 @@ static void finalizefmfrequencies(Fmindex *fm)
   }
 }
 
-static void showconstructionmessage(const Str *indexname,
+static void showconstructionmessage(const GT_Str *indexname,
                                     Seqpos totallength,
                                     unsigned long fmsize,
                                     unsigned int log2bsize,
@@ -185,7 +185,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
 int sufbwt2fmindex(Fmindex *fmindex,
                    unsigned int log2bsize,
                    unsigned int log2markdist,
-                   const Str *outfmindex,
+                   const GT_Str *outfmindex,
                    const GT_StrArray *indexnametab,
                    bool storeindexpos,
                    Verboseinfo *verboseinfo,
@@ -211,7 +211,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   DefinedSeqpos longest = { false, 0 };
   PairBwtidx *pairptr;
   FILE *outbwt = NULL;
-  Str *tmpfilename = NULL;
+  GT_Str *tmpfilename = NULL;
   Specialcharinfo specialcharinfo;
   bool haserr = false;
 
@@ -221,7 +221,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   numofindexes = (unsigned int) gt_strarray_size(indexnametab);
   if (numofindexes == 1U)
   {
-    Str *indexname = gt_strarray_get_str(indexnametab,0);
+    GT_Str *indexname = gt_strarray_get_str(indexnametab,0);
 
     if (streamsuffixarray(&suffixarray,
                          &totallength,
@@ -265,7 +265,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      Str *indexname = gt_strarray_get_str(indexnametab,0);
+      GT_Str *indexname = gt_strarray_get_str(indexnametab,0);
       suffixlength = 0;
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {

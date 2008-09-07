@@ -45,7 +45,7 @@ struct chkSearchOptions
 
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
-                   struct chkSearchOptions *params, const Str *projectName,
+                   struct chkSearchOptions *params, const GT_Str *projectName,
                    GT_Error *err);
 
 extern int
@@ -56,7 +56,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
   Enumpatterniterator *epi = NULL;
   bool saIsLoaded = false;
   BWTSeq *bwtSeq = NULL;
-  Str *inputProject = NULL;
+  GT_Str *inputProject = NULL;
   int parsedArgs;
   bool had_err = false;
   BWTSeqExactMatchesIterator EMIter;
@@ -256,7 +256,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
 
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
-                   struct chkSearchOptions *params, const Str *projectName,
+                   struct chkSearchOptions *params, const GT_Str *projectName,
                    GT_Error *err)
 {
   OptionParser *op;

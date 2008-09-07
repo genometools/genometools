@@ -26,7 +26,7 @@
 
 typedef struct
 {
-  Str *indexname;
+  GT_Str *indexname;
   unsigned int maxdepth;
 } Prebwtoptions;
 

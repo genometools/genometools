@@ -27,7 +27,7 @@
 struct FilterVisitor {
   const GenomeVisitor parent_instance;
   Queue *gt_genome_node_buffer;
-  Str *seqid,
+  GT_Str *seqid,
       *typefilter;
   GT_Range contain_range,
         overlap_range;
@@ -258,7 +258,7 @@ const GenomeVisitorClass* filter_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
+GenomeVisitor* filter_visitor_new(GT_Str *seqid, GT_Str *typefilter,
                                   GT_Range contain_range, GT_Range overlap_range,
                                   GT_Strand strand, GT_Strand targetstrand,
                                   bool has_CDS, unsigned long max_gene_length,

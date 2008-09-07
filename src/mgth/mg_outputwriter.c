@@ -97,7 +97,7 @@ static void output_hitdna(ParseStruct *,
    Parameter:  Zeiger auf ParseStruct, Zeiger auf die DNA-Seq,
                Str der Protein-Seq, Ausgabe-Format
    Returnwert: void */
-static void print_codingheader(const ParseStruct *, const char *, Str *);
+static void print_codingheader(const ParseStruct *, const char *, GT_Str *);
 
 /* Funktion zum Schreiben des Hit-Information-Abschnittes
    Parameter: Zeiger auf die ParseStruct, Zeiger auf die
@@ -138,7 +138,7 @@ static void output_footer_xml(const ParseStruct *);
    Returnwert: void */
 static int as_coding(const ParseStruct *,
                      char *,
-                     Str *,
+                     GT_Str *,
                      unsigned long,
                      unsigned long, unsigned short, GT_Error *);
 
@@ -656,7 +656,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
   char *contig_seq,
    *contig_seq_ptr;
 
-  Str *as_seq;
+  GT_Str *as_seq;
 
   gt_error_check(err);
 
@@ -898,7 +898,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
 }
 
 static void print_codingheader(const ParseStruct *parsestruct_ptr,
-                               const char *contig_seq, Str * as_seq)
+                               const char *contig_seq, GT_Str * as_seq)
 {
   assert(contig_seq);
 
@@ -1066,7 +1066,7 @@ static void output_footer_xml(const ParseStruct *parsestruct_ptr)
 
 static int as_coding(const ParseStruct *parsestruct_ptr,
                      char *contig_seq,
-                      Str *as_seq,
+                      GT_Str *as_seq,
                       unsigned long from,
                       unsigned long to,
                       unsigned short current_row, GT_Error * err)
@@ -1143,7 +1143,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
 
     if (ARGUMENTSSTRUCT(extended_mode))
     {
-      Str *as_seq_start;
+      GT_Str *as_seq_start;
 
       as_seq_start = str_new();
 

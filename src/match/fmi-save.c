@@ -22,7 +22,7 @@
 #include "fmi-mapspec.pr"
 #include "opensfxfile.pr"
 
-static int writefmascii (const Str *indexname,
+static int writefmascii (const GT_Str *indexname,
                          const Fmindex *fm,
                          bool storeindexpos,
                          GT_Error *err)
@@ -56,7 +56,7 @@ static int writefmascii (const Str *indexname,
   return 0;
 }
 
-static int writefmdata (const Str *indexname,
+static int writefmdata (const GT_Str *indexname,
                         Fmindex *fm,
                         bool storeindexpos,
                         GT_Error *err)
@@ -76,7 +76,7 @@ static int writefmdata (const Str *indexname,
   return 0;
 }
 
-int saveFmindex (const Str *indexname,Fmindex *fm,
+int saveFmindex (const GT_Str *indexname,Fmindex *fm,
                  bool storeindexpos,GT_Error *err)
 {
   gt_error_check(err);

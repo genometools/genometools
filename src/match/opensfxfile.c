@@ -24,12 +24,12 @@
 #include "core/fa.h"
 #include "core/str.h"
 
-/*@null@*/ FILE *opensfxfile(const Str *indexname,
+/*@null@*/ FILE *opensfxfile(const GT_Str *indexname,
                              const char *suffix,
                              const char *mode,
                              GT_Error *err)
 {
-  Str *tmpfilename;
+  GT_Str *tmpfilename;
   FILE *fp;
 
   gt_error_check(err);
@@ -40,10 +40,10 @@
   return fp;
 }
 
-bool indexfilealreadyexists(const Str *indexname,const char *suffix)
+bool indexfilealreadyexists(const GT_Str *indexname,const char *suffix)
 {
   struct stat statbuf;
-  Str *tmpfilename;
+  GT_Str *tmpfilename;
 
   tmpfilename = str_clone(indexname);
   str_append_cstr(tmpfilename,suffix);

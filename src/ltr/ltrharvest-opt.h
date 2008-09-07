@@ -34,11 +34,11 @@ typedef struct
   Seqpos *markpos;                        /* positions of SEPARATOR symbols */
                                           /* in encseq */
 
-  Str *str_indexname;           /* name of the suffix array index */
-  Str *str_fastaoutputfilename; /* name of the FASTA output file */
-  Str *str_fastaoutputfilenameinnerregion;  /* name of the FASTA */
+  GT_Str *str_indexname;           /* name of the suffix array index */
+  GT_Str *str_fastaoutputfilename; /* name of the FASTA output file */
+  GT_Str *str_fastaoutputfilenameinnerregion;  /* name of the FASTA */
                                             /* file for the inner regions */
-  Str *str_gff3filename;         /* name of the gff3 file */
+  GT_Str *str_gff3filename;         /* name of the gff3 file */
   unsigned long minseedlength;   /* minimal exact seed */
   double similaritythreshold;    /* minimum similarity of LTRs */
   int xdropbelowscore;           /* xdropbelowscore */
@@ -48,7 +48,7 @@ typedef struct
   bool verbosemode;      /* show extra statements, by default: OFF */
   bool longoutput;       /* additionally shows motif and TSD infos */
                          /* by default: OFF */
-  Str *str_overlaps;     /* string from argv */
+  GT_Str *str_overlaps;     /* string from argv */
   bool bestofoverlap;    /* take best prediction */
                          /* if overlap occurs, default */
   bool nooverlapallowed; /* overlapping predictions (not)allowed */

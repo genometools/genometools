@@ -26,6 +26,6 @@
 typedef struct FastaReaderFSM FastaReaderFSM;
 
 const FastaReaderClass* fasta_reader_fsm_class(void);
-FastaReader*            fasta_reader_fsm_new(Str *sequence_filename);
+FastaReader*            fasta_reader_fsm_new(GT_Str *sequence_filename);
 
 #endif

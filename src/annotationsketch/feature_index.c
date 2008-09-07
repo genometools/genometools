@@ -265,7 +265,7 @@ int gt_feature_index_unit_test(GT_Error *err)
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
   GT_Range r1, r2, r3, r4, r5, check_range, rs;
-  Str *seqid1, *seqid2;
+  GT_Str *seqid1, *seqid2;
   GT_StrArray *seqids = NULL;
   GT_SequenceRegion *sr1, *sr2;
   GT_Array *features = NULL;

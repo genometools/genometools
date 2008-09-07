@@ -549,7 +549,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
   double elem_start, elem_width, stroke_width, bar_height, arrow_width;
   GT_Color elem_color, grey, fill_color;
   const char *type;
-  Str *style;
+  GT_Str *style;
   GT_Strand strand = element_get_strand(elem);
 
   assert(canvas && elem);
@@ -734,7 +734,7 @@ int gt_canvas_to_file(GT_Canvas *canvas, const char *filename, GT_Error *err)
   return had_err;
 }
 
-int gt_canvas_to_stream(GT_Canvas *canvas, Str *stream)
+int gt_canvas_to_stream(GT_Canvas *canvas, GT_Str *stream)
 {
   int had_err = 0;
   assert(canvas && stream);

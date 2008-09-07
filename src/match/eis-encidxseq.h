@@ -417,7 +417,7 @@ enum EISIntegrityCheckFlags
  * @param chkFlags select additional tests (see enum EISIntegrityCheckFlags)
  */
 extern enum EISIntegrityCheckResults
-EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
+EISVerifyIntegrity(EISeq *seqIdx, const GT_Str *projectName, Seqpos skip,
                    unsigned long tickPrint, FILE *fp, int chkFlags,
                    Verboseinfo *verbosity, GT_Error *err);
 

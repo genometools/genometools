@@ -48,7 +48,7 @@ typedef struct {
 
 struct Bioseq {
   bool use_stdin;
-  Str *sequence_file;
+  GT_Str *sequence_file;
   Seq **seqs;
   GT_Array *descriptions,
         *sequence_ranges;
@@ -60,7 +60,7 @@ struct Bioseq {
 };
 
 static bool read_fingerprints(GT_StrArray *md5_fingerprints,
-                              Str  *fingerprints_filename,
+                              GT_Str  *fingerprints_filename,
                               unsigned long num_of_seqs)
 {
   bool reading_succeeded = true;
@@ -73,7 +73,7 @@ static bool read_fingerprints(GT_StrArray *md5_fingerprints,
     reading_succeeded = false;
   /* reading file (each line contains a single MD5 sum) */
   if (reading_succeeded) {
-    Str *line = str_new();
+    GT_Str *line = str_new();
     while (str_read_next_line(line, fingerprint_file) != EOF) {
       gt_strarray_add(md5_fingerprints, line);
       str_reset(line);
@@ -114,7 +114,7 @@ static void strarray_dump_to_file(GT_StrArray *sa, FILE *outfp)
 }
 
 static void write_fingerprints(GT_StrArray *md5_fingerprints,
-                               Str *fingerprints_filename)
+                               GT_Str *fingerprints_filename)
 {
   FILE *fingerprints_file;
   assert(md5_fingerprints && fingerprints_filename);
@@ -127,7 +127,7 @@ static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
 {
   BioseqFingerprints *bsf;
   bool reading_succeeded = false;
-  Str *fingerprints_filename;
+  GT_Str *fingerprints_filename;
   assert(bs);
   bsf = ma_calloc(1, sizeof *bsf);
   bsf->md5_fingerprints = gt_strarray_new();
@@ -250,7 +250,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
                        const char *raw_filename, GT_Error *err)
 {
   FILE *index_file;
-  Str *index_line;
+  GT_Str *index_line;
   unsigned long line_number = 1;
   char *description;
   GT_Range range;
@@ -308,12 +308,12 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
   return had_err;
 }
 
-static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
-                                  Str *bioseq_raw_file,
+static int construct_bioseq_files(Bioseq *bs, GT_Str *bioseq_index_file,
+                                  GT_Str *bioseq_raw_file,
                                   FastaReaderType fasta_reader_type, GT_Error *err)
 {
   FastaReader *fasta_reader = NULL;
-  Str *sequence_filename;
+  GT_Str *sequence_filename;
   int had_err;
 
   gt_error_check(err);
@@ -372,7 +372,7 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
 static int bioseq_fill(Bioseq *bs, bool recreate,
                        FastaReaderType fasta_reader_type, GT_Error *err)
 {
-  Str *bioseq_index_file = NULL,
+  GT_Str *bioseq_index_file = NULL,
       *bioseq_raw_file = NULL;
   int had_err = 0;
 
@@ -409,7 +409,7 @@ static int bioseq_fill(Bioseq *bs, bool recreate,
   return had_err;
 }
 
-static Bioseq* bioseq_new_with_recreate_and_type(Str *sequence_file,
+static Bioseq* bioseq_new_with_recreate_and_type(GT_Str *sequence_file,
                                                  bool recreate,
                                                  FastaReaderType
                                                  fasta_reader_type,
@@ -442,7 +442,7 @@ static Bioseq* bioseq_new_with_recreate_and_type(Str *sequence_file,
 Bioseq* bioseq_new(const char *sequence_file, GT_Error *err)
 {
   Bioseq *bs;
-  Str *seqfile;
+  GT_Str *seqfile;
   gt_error_check(err);
   seqfile = str_new_cstr(sequence_file);
   bs = bioseq_new_with_recreate_and_type(seqfile, false, FASTA_READER_REC, err);
@@ -453,7 +453,7 @@ Bioseq* bioseq_new(const char *sequence_file, GT_Error *err)
 Bioseq* bioseq_new_recreate(const char *sequence_file, GT_Error *err)
 {
   Bioseq *bs;
-  Str *seqfile;
+  GT_Str *seqfile;
   gt_error_check(err);
   seqfile = str_new_cstr(sequence_file);
   bs = bioseq_new_with_recreate_and_type(seqfile, true, FASTA_READER_REC, err);
@@ -461,7 +461,7 @@ Bioseq* bioseq_new_recreate(const char *sequence_file, GT_Error *err)
   return bs;
 }
 
-Bioseq* bioseq_new_str(Str *sequence_file, GT_Error *err)
+Bioseq* bioseq_new_str(GT_Str *sequence_file, GT_Error *err)
 {
   return bioseq_new_with_recreate_and_type(sequence_file, false,
                                            FASTA_READER_REC, err);
@@ -471,7 +471,7 @@ Bioseq* bioseq_new_with_fasta_reader(const char *sequence_file,
                                      FastaReaderType fasta_reader, GT_Error *err)
 {
   Bioseq *bs;
-  Str *seqfile;
+  GT_Str *seqfile;
   gt_error_check(err);
   seqfile = str_new_cstr(sequence_file);
   bs = bioseq_new_with_recreate_and_type(seqfile, true, fasta_reader, err);

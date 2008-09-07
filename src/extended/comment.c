@@ -27,7 +27,7 @@ struct GT_Comment
 {
   const GT_GenomeNode parent_instance;
   char *comment;
-  Str *gt_comment_str; /* used in gt_comment_get_idstr() */
+  GT_Str *gt_comment_str; /* used in gt_comment_get_idstr() */
 };
 
 #define gt_comment_cast(GN)\
@@ -41,7 +41,7 @@ static void gt_comment_free(GT_GenomeNode *gn)
   str_delete(c->gt_comment_str);
 }
 
-static Str* gt_comment_get_idstr(GT_GenomeNode *gn)
+static GT_Str* gt_comment_get_idstr(GT_GenomeNode *gn)
 {
   GT_Comment *c;
   assert(gn);

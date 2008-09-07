@@ -30,7 +30,7 @@ struct GFF3InStream
   const GenomeStream parent_instance;
   unsigned long next_file;
   GT_StrArray *files;
-  Str *stdinstr;
+  GT_Str *stdinstr;
   bool ensure_sorting,
        stdin_argument,
        file_is_open,
@@ -74,7 +74,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
                                     GT_Error *err)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
-  Str *filenamestr;
+  GT_Str *filenamestr;
   int had_err = 0, status_code;
 
   gt_error_check(err);
@@ -261,7 +261,7 @@ void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
   gff3parser_set_offset(is->gff3_parser, offset);
 }
 
-int gff3_in_stream_set_offsetfile(GenomeStream *gs, Str *offsetfile, GT_Error *err)
+int gff3_in_stream_set_offsetfile(GenomeStream *gs, GT_Str *offsetfile, GT_Error *err)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);

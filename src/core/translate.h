@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,7 +20,7 @@
 
 #include "core/str.h"
 
-void translate_dna(Str*, const char*, unsigned long, unsigned int frame);
+void translate_dna(GT_Str*, const char*, unsigned long, unsigned int frame);
 
 /* Translate <dna_sequence> of length <seqlen> in all three reading frames.
    The translations are stored in <frame1>, <frame2>, and <frame3>.

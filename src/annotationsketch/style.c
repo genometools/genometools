@@ -264,7 +264,7 @@ void gt_style_set_color(GT_Style *sty, const char *section, const char *key,
 }
 
 bool gt_style_get_str(const GT_Style *sty, const char *section,
-                     const char *key, Str *text, GT_GenomeNode *gn)
+                     const char *key, GT_Str *text, GT_GenomeNode *gn)
 {
   int i = 0;
   assert(sty && key && section);
@@ -303,7 +303,7 @@ bool gt_style_get_str(const GT_Style *sty, const char *section,
 }
 
 void gt_style_set_str(GT_Style *sty, const char *section, const char *key,
-                     Str *str)
+                     GT_Str *str)
 {
   int i = 0;
   assert(sty && section && key && str);
@@ -425,7 +425,7 @@ bool gt_style_get_verbose(const GT_Style *sty)
   return sty->verbose;
 }
 
-int gt_style_to_str(const GT_Style *sty, Str *outstr, GT_Error *err)
+int gt_style_to_str(const GT_Style *sty, GT_Str *outstr, GT_Error *err)
 {
   int had_err;
   gt_error_check(err);
@@ -443,7 +443,7 @@ int gt_style_to_str(const GT_Style *sty, Str *outstr, GT_Error *err)
   return had_err;
 }
 
-int gt_style_load_str(GT_Style *sty, Str *instr, GT_Error *err)
+int gt_style_load_str(GT_Style *sty, GT_Str *instr, GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -460,7 +460,7 @@ int gt_style_load_str(GT_Style *sty, Str *instr, GT_Error *err)
 GT_Style* gt_style_clone(const GT_Style *sty, GT_Error *err)
 {
   int had_err = 0;
-  Str *sty_buffer = str_new();
+  GT_Str *sty_buffer = str_new();
   GT_Style *new_sty;
   assert(sty);
   if (!(new_sty = gt_style_new(gt_style_get_verbose(sty), err)))
@@ -478,7 +478,7 @@ int gt_style_unit_test(GT_Error *err)
   int had_err = 0;
   GT_Style *sty = NULL, *new_sty = NULL;
   bool val;
-  Str *test1   = str_new_cstr("mRNA"),
+  GT_Str *test1   = str_new_cstr("mRNA"),
       *str     = str_new(),
       *sty_buffer = str_new();
   GT_Color col1, col2, col, defcol, tmpcol;

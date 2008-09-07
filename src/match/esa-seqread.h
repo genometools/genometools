@@ -93,7 +93,7 @@ int nextSequentialsuftabvalue(Seqpos *currentsuffix,
 #endif
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
-                                        const Str *indexname,
+                                        const GT_Str *indexname,
                                         unsigned int demand,
                                         Sequentialaccesstype seqactype,
                                         GT_Error *err);

@@ -101,7 +101,7 @@ typedef struct
     prediction_span,
     leavegene_value,
     percent_value;
-  Str *curl_fcgi_db,
+  GT_Str *curl_fcgi_db,
    *outputtextfile_name;
   GT_StrArray *giexpfile_name;
   int outputfile_format,
@@ -121,7 +121,7 @@ typedef struct
    *hit_frame,
    *query_from,
    *query_to;
-  Str *query_dna,
+  GT_Str *query_dna,
    *query_def;
   GT_StrArray *hit_gi_nr,
    *hit_num,
@@ -181,7 +181,7 @@ typedef struct
    *query_frame_tmp,
    *hit_frame_tmp,
    *key_tmp;
-  Str *xml_tag,
+  GT_Str *xml_tag,
    *buf_ptr,
    *hit_fastafile,
    *xmlfile,

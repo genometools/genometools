@@ -28,7 +28,7 @@
 
 typedef struct
 {
-  Str *charlist;
+  GT_Str *charlist;
   unsigned long len;
 } Charlistlen;
 
@@ -37,7 +37,7 @@ typedef struct
   GT_StrArray *strings,
            *files;
   Charlistlen *charlistlen;
-  Str *text;
+  GT_Str *text;
 } Cmppairwiseopt;
 
 static void showsimpleoptions(const Cmppairwiseopt *opt)

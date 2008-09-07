@@ -52,7 +52,7 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-loadBWTSeqForSA(const Str *projectName, enum seqBaseEncoding encType,
+loadBWTSeqForSA(const GT_Str *projectName, enum seqBaseEncoding encType,
                 int BWTOptFlags, const Suffixarray *sa,
                 Seqpos totalLen, GT_Error *err);
 

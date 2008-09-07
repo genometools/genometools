@@ -35,7 +35,7 @@ char          io_peek(IO*);
 char          io_next(IO*);
 unsigned long io_get_line_number(const IO*);
 const char*   io_get_filename(const IO*);
-Str*          io_get_filename_str(const IO*);
+GT_Str*       io_get_filename_str(const IO*);
 void          io_delete(IO*);
 
 #endif

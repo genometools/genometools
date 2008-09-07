@@ -56,7 +56,7 @@ static OPrval parse_options(int *parsed_args,
          *optionmaxbltriesort,
          *optiondes;
   OPrval oprval;
-  Str *dirarg = str_new();
+  GT_Str *dirarg = str_new();
 
   gt_error_check(err);
   op = option_parser_new("[option ...] (-db file [...] | -ii index)",

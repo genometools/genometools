@@ -73,7 +73,7 @@ static void successivelydeletesmallest(Mergertrierep *trierep,
   }
 }
 
-int test_trieins(bool onlyins,const Str *indexname,GT_Error *err)
+int test_trieins(bool onlyins,const GT_Str *indexname,GT_Error *err)
 {
   Suffixarray suffixarray;
   bool haserr = false;

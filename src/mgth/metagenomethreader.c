@@ -243,7 +243,7 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
   char *descr_ptr_hit,
    *descr_ptr_query;
 
-  Str *outputfilename;
+  GT_Str *outputfilename;
 
   /* GenFile Zeiger auf die XML-Datei mit den Blast-Hits */
   GenFile *fp_xmlfile;
@@ -521,7 +521,7 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 
     if (!ARGUMENTS(hitfile_bool))
     {
-      Str *gi_numbers_txt;
+      GT_Str *gi_numbers_txt;
       gi_numbers_txt = str_new();
 
       str_set(gi_numbers_txt, "gi_numbers.txt");

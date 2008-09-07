@@ -79,7 +79,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
 
   /* Puffer zum zeilenweisen Einlesen des XML-Files, XML_Parser
      deklarieren */
-  Str *buf;
+  GT_Str *buf;
   XML_Parser parser;
 
   /* Check Umgebungsvariablen */
@@ -482,8 +482,8 @@ static void XMLCALL endElement(void *data, const char *name)
 
         unsigned long hit_nr = 0;
 
-        Str *hit_tmp;
-        Str *hit_dna_tmp;
+        GT_Str *hit_tmp;
+        GT_Str *hit_dna_tmp;
 
         hit_tmp = str_new();
         hit_dna_tmp = str_new();

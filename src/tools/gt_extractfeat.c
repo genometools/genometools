@@ -29,7 +29,7 @@ typedef struct {
   bool join,
        translate,
        verbose;
-  Str *typestr,
+  GT_Str *typestr,
       *seqfile,
       *regionmapping;
   GT_GenomeFeatureType *type;

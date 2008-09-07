@@ -62,7 +62,7 @@ typedef void(*Assignmapspec)(ArrayMapspecification *,void *,bool);
 int fillmapspecstartptr(Assignmapspec assignmapspec,
                         void **mappeduserptr,
                         void *assignmapinfo,
-                        const Str *tmpfilename,
+                        const GT_Str *tmpfilename,
                         unsigned long expectedsize,
                         GT_Error *err);
 

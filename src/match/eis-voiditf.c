@@ -148,7 +148,7 @@ void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci)
   *bsci = NULL;
 }
 
-void *loadvoidBWTSeqForSA(const Str *indexname,
+void *loadvoidBWTSeqForSA(const GT_Str *indexname,
                           const Suffixarray *suffixarray,
                           Seqpos totallength,
                           bool withpckbt,

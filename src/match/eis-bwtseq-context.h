@@ -61,7 +61,7 @@ BWTSCRFFinished(const BWTSeqContextRetrieverFactory *factory);
  */
 extern BWTSeqContextRetriever *
 BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
-           const Str *projectName);
+           const GT_Str *projectName);
 
 /**
  * @brief Load context retriever that can be used to generate arbitrary
@@ -77,7 +77,7 @@ BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
  * not enought memory for mmap).
  */
 extern BWTSeqContextRetriever *
-BWTSeqCRLoad(const BWTSeq *bwtSeq, const Str *projectName,
+BWTSeqCRLoad(const BWTSeq *bwtSeq, const GT_Str *projectName,
              short mapIntervalLog2);
 
 extern void

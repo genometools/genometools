@@ -51,7 +51,7 @@ typedef struct
                       maxlength;
   unsigned int showmode;
   bool verifywitnesspos;
-  Str *indexname;
+  GT_Str *indexname;
   GT_StrArray *queryfilenames;
   Indextype indextype;
 } Gfmsubcallinfo;

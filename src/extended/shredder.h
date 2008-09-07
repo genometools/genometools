@@ -35,6 +35,6 @@ void        shredder_set_sample_probability(Shredder*, double probability);
    available. The length of the fragment is stored in <fragment_length> and
    <desc> is set to the description of the corresponding sequence. */
 const char* shredder_shred(Shredder*, unsigned long *fragment_length,
-                           Str *desc);
+                           GT_Str *desc);
 
 #endif

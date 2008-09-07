@@ -175,7 +175,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
 
 int gt_sfxmap(int argc, const char **argv, GT_Error *err)
 {
-  Str *indexname;
+  GT_Str *indexname;
   bool haserr = false;
   Suffixarray suffixarray;
   Seqpos totallength;

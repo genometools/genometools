@@ -35,7 +35,7 @@ unsigned long gt_canvas_get_height(GT_Canvas *canvas);
 int           gt_canvas_to_file(GT_Canvas *canvas, const char *filename,
                                 GT_Error*);
 /* Append rendered <canvas> to given <stream>. */
-int           gt_canvas_to_stream(GT_Canvas *canvas, Str *stream);
+int           gt_canvas_to_stream(GT_Canvas *canvas, GT_Str *stream);
 /* Delete the given <canvas>. */
 void          gt_canvas_delete(GT_Canvas *canvas);
 

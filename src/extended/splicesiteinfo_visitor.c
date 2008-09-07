@@ -61,7 +61,7 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GT_GenomeNode *intron,
   GT_Strand strand;
   GT_Range range;
   char site[5];
-  Str *seqid;
+  GT_Str *seqid;
   int had_err = 0;
   gt_error_check(err);
   assert(ssiv && intron);

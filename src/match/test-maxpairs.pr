@@ -1,14 +1,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int testmaxpairs(UNUSED const Str *indexname,
+int testmaxpairs(UNUSED const GT_Str *indexname,
                  UNUSED unsigned long samples,
                  UNUSED unsigned int minlength,
                  UNUSED Seqpos substringlength,
                  UNUSED Verboseinfo *verboseinfo,
                  UNUSED GT_Error *err);
 
-int testmaxpairs(const Str *indexname,
+int testmaxpairs(const GT_Str *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  Seqpos substringlength,

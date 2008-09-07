@@ -76,7 +76,7 @@ enum tmpfp_flags
 #define fa_xtmpfp_generic(template, flags) \
         fa_xtmpfp_generic_func(template, TMPFP_DEFAULT_FLAGS, \
                                __FILE__, __LINE__)
-FILE*   fa_xtmpfp_generic_func(Str *template, int flags, const char*, int);
+FILE*   fa_xtmpfp_generic_func(GT_Str *template, int flags, const char*, int);
 #define fa_xtmpfp(template)\
         fa_xtmpfp_generic(template, TMPFP_DEFAULT_FLAGS)
 

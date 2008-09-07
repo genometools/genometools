@@ -507,7 +507,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   }
 }
 
-int flushencseqfile(const Str *indexname,Encodedsequence *encseq,GT_Error *err)
+int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,GT_Error *err)
 {
   FILE *fp;
   bool haserr = false;
@@ -535,12 +535,12 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,GT_Error *err)
 }
 
 static int fillencseqmapspecstartptr(Encodedsequence *encseq,
-                                     const Str *indexname,
+                                     const GT_Str *indexname,
                                      Verboseinfo *verboseinfo,
                                      GT_Error *err)
 {
   bool haserr = false;
-  Str *tmpfilename;
+  GT_Str *tmpfilename;
 
   gt_error_check(err);
   tmpfilename = str_clone(indexname);
@@ -1839,7 +1839,7 @@ static Encodedsequence *determineencseqkeyvalues(
   return encseq;
 }
 
-static int readsatfromfile(const Str *indexname,GT_Error *err)
+static int readsatfromfile(const GT_Str *indexname,GT_Error *err)
 {
   FILE *fp;
   int cc = 0;
@@ -2056,7 +2056,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 }
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
-                                               const Str *indexname,
+                                               const GT_Str *indexname,
                                                Seqpos totallength,
                                                Seqpos specialranges,
                                                unsigned int mapsize,

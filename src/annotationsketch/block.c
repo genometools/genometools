@@ -27,7 +27,7 @@
 struct GT_Block {
   Dlist *elements;
   GT_Range range;
-  Str *caption;
+  GT_Str *caption;
   bool show_caption;
   GT_Strand strand;
   GT_GenomeFeatureType *type;
@@ -154,13 +154,13 @@ bool gt_block_caption_is_visible(const GT_Block *block)
   return (block->caption && block->show_caption);
 }
 
-void gt_block_set_caption(GT_Block *block, Str *caption)
+void gt_block_set_caption(GT_Block *block, GT_Str *caption)
 {
   assert(block);
   block->caption = caption;
 }
 
-Str* gt_block_get_caption(const GT_Block *block)
+GT_Str* gt_block_get_caption(const GT_Block *block)
 {
   assert(block);
   return block->caption;
@@ -223,7 +223,7 @@ int gt_block_unit_test(GT_Error *err)
   GT_GenomeNode *gn1, *gn2;
   Element *e1, *e2;
   GT_Block * b;
-  Str *seqid, *caption1, *caption2;
+  GT_Str *seqid, *caption1, *caption2;
   gt_error_check(err);
 
   feature_type_factory = gt_feature_type_factory_builtin_new();

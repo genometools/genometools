@@ -78,7 +78,7 @@ const char* file_suffix(const char *path)
   return suffixptr;
 }
 
-void file_dirname(Str *path, const char *file)
+void file_dirname(GT_Str *path, const char *file)
 {
   long i;
   str_reset(path);
@@ -90,7 +90,7 @@ void file_dirname(Str *path, const char *file)
     str_append_cstr_nt(path, file, i);
 }
 
-int file_find_in_path(Str *path, const char *file, GT_Error *err)
+int file_find_in_path(GT_Str *path, const char *file, GT_Error *err)
 {
   char *pathvariable, *pathcomponent = NULL;
   Splitter *splitter = NULL;

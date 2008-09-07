@@ -354,7 +354,7 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
   return 0;
 }
 
-int callenumquerymatches(const Str *indexname,
+int callenumquerymatches(const GT_Str *indexname,
                          const GT_StrArray *queryfiles,
                          bool echoquery,
                          unsigned int userdefinedleastlength,

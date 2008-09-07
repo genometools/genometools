@@ -22,12 +22,12 @@
 
 /* Escape <unescaped_seq> of given <length> for GFF3 format and append the
    result to <escaped_seq>. */
-void gff3_escape(Str *escaped_seq, const char *unescaped_seq,
+void gff3_escape(GT_Str *escaped_seq, const char *unescaped_seq,
                  unsigned long length);
 
 /* Unescape GFF3 format <escaped_seq> of given <length> and append the result to
    <unescaped_seq>. */
-int  gff3_unescape(Str *unescaped_seq, const char *escaped_seq,
+int  gff3_unescape(GT_Str *unescaped_seq, const char *escaped_seq,
                    unsigned long length, GT_Error*);
 
 /* Perform unit test of GFF3 format escaping module */

@@ -24,7 +24,7 @@
 static int region_mapping_lua_new_seqfile(lua_State *L)
 {
   const char *seqfilename;
-  Str *seqfile;
+  GT_Str *seqfile;
   RegionMapping **region_mapping;
   assert(L);
   seqfilename = luaL_checkstring(L, 1);

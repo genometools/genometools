@@ -62,7 +62,7 @@ int flushfmindex2file(FILE *fp,
 
 int fillfmmapspecstartptr(Fmindex *fmindex,
                           bool storeindexpos,
-                          const Str *tmpfilename,
+                          const GT_Str *tmpfilename,
                           GT_Error *err)
 {
   Fmindexwithoptions fmwithoptions;

@@ -59,7 +59,7 @@ static int inputthesequences(Alphabet **alpha,
                              GT_Error *err)
 {
   unsigned long idx;
-  Str *indexname;
+  GT_Str *indexname;
   Seqpos totallength;
 
   gt_error_check(err);

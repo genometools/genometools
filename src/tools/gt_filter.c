@@ -33,7 +33,7 @@ typedef struct {
   bool verbose,
        has_CDS,
        targetbest;
-  Str *seqid,
+  GT_Str *seqid,
       *typefilter,
       *gt_strand_char,
       *targetgt_strand_char;
@@ -197,7 +197,7 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int process_gt_strand_arg(Str *gt_strand_char, GT_Strand *strand,
+static int process_gt_strand_arg(GT_Str *gt_strand_char, GT_Strand *strand,
                               const char *optstr, GT_Error *err)
 {
   int had_err = 0;

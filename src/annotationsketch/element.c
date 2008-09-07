@@ -127,7 +127,7 @@ int element_unit_test(GT_Error *err)
   GT_Range r1, r2, r_temp;
   GT_GenomeNode *gn, *gn2;
   Element *e, *e2, *e3;
-  Str *seqid;
+  GT_Str *seqid;
   int had_err = 0;
   gt_error_check(err);
 

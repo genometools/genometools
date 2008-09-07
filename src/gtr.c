@@ -51,7 +51,7 @@ struct GTR {
        debug,
        check64bit;
   unsigned int seed;
-  Str *debugfp,
+  GT_Str *debugfp,
       *testspacepeak;
   Toolbox *tools;
   Hashmap *unit_tests;
@@ -68,7 +68,7 @@ GTR* gtr_new(GT_Error *err)
   GTR *gtr;
   int had_err = 0;
 #ifndef WITHOUT_CAIRO
-  Str *style_file = NULL;
+  GT_Str *style_file = NULL;
 #endif
   gtr = ma_calloc(1, sizeof (GTR));
   gtr->debugfp = str_new();

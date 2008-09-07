@@ -38,7 +38,7 @@ static int add_introns_in_children(GT_GenomeNode *gn, void *data,
   GT_GenomeNode *intron_node;
   GT_Range previous_range, current_range, intron_range;
   GT_Strand previous_strand, current_strand, intron_strand;
-  Str *parent_seqid;
+  GT_Str *parent_seqid;
   gt_error_check(err);
   current_feature = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(current_feature);

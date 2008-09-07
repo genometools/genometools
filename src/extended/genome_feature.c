@@ -48,7 +48,7 @@
 struct GT_GenomeFeature
 {
   const GT_GenomeNode parent_instance;
-  Str *seqid,
+  GT_Str *seqid,
       *source;
   GT_FeatureTypeFactory *ftf;
   GT_GenomeFeatureType *type;
@@ -100,7 +100,7 @@ GT_StrArray* gt_genome_feature_get_attribute_list(GT_GenomeFeature *gf)
   return list;
 }
 
-static Str* gt_genome_feature_get_seqid(GT_GenomeNode *gn)
+static GT_Str* gt_genome_feature_get_seqid(GT_GenomeNode *gn)
 {
   GT_GenomeFeature *gf = gt_genome_feature_cast(gn);
   return gf->seqid;
@@ -118,7 +118,7 @@ static void gt_genome_feature_set_range(GT_GenomeNode *gn, GT_Range range)
   gf->range = range;
 }
 
-static void gt_genome_feature_change_seqid(GT_GenomeNode *gn, Str *seqid)
+static void gt_genome_feature_change_seqid(GT_GenomeNode *gn, GT_Str *seqid)
 {
   GT_GenomeFeature *gf = gt_genome_feature_cast(gn);
   assert(gf && seqid);
@@ -126,7 +126,7 @@ static void gt_genome_feature_change_seqid(GT_GenomeNode *gn, Str *seqid)
   gf->seqid = str_ref(seqid);
 }
 
-void gt_genome_feature_set_source(GT_GenomeNode *gn, Str *source)
+void gt_genome_feature_set_source(GT_GenomeNode *gn, GT_Str *source)
 {
   GT_GenomeFeature *gf = gt_genome_feature_cast(gn);
   assert(gf && source && !gf->source);
@@ -169,7 +169,7 @@ static void set_transcriptfeaturetype(GT_GenomeNode *gn, TranscriptFeatureType t
   gn->bit_field |= tft << TRANSCRIPT_FEATURE_TYPE_OFFSET;
 }
 
-GT_GenomeNode* gt_genome_feature_new(Str *seqid, GT_GenomeFeatureType *type, GT_Range range,
+GT_GenomeNode* gt_genome_feature_new(GT_Str *seqid, GT_GenomeFeatureType *type, GT_Range range,
                                GT_Strand strand)
 {
   GT_GenomeNode *gn;
@@ -213,7 +213,7 @@ GT_GenomeNode* gt_genome_feature_new_standard_gene(GT_FeatureTypeFactory *ftf)
   GT_GenomeNode *gn, *child, *grandchild;
   GT_GenomeFeatureType *type;
   GT_Range range;
-  Str *seqid;
+  GT_Str *seqid;
   seqid = str_new_cstr("ctg123");
 
   /* gene */
@@ -636,7 +636,7 @@ int gt_genome_feature_unit_test(GT_Error *err)
   GT_GenomeFeatureType *type;
   GT_GenomeNode *gf;
   GT_Range range;
-  Str *seqid;
+  GT_Str *seqid;
   int had_err = 0;
 
   gt_error_check(err);

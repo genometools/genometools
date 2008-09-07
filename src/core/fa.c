@@ -260,11 +260,11 @@ void fa_xbzclose(BZFILE *stream)
 
 static const char genometools_tmptemplate[] = "/genometools.XXXXXXXXXX";
 
-FILE* fa_xtmpfp_generic_func(Str *template_arg, int flags,
+FILE* fa_xtmpfp_generic_func(GT_Str *template_arg, int flags,
                              const char *filename, int line)
 {
   FILE *fp;
-  Str *template;
+  GT_Str *template;
   if (!fa) fa_init();
   assert(fa);
   if (flags & TMPFP_USETEMPLATE)

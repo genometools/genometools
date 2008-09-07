@@ -30,7 +30,7 @@ typedef struct {
        seqlengthdistri;
   unsigned long showseqnum,
                 width;
-  Str *reader;
+  GT_Str *reader;
 } BioseqArguments;
 
 static void* gt_bioseq_arguments_new(void)

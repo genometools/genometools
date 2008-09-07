@@ -27,7 +27,7 @@ struct GT_StrArray {
 GT_StrArray* gt_strarray_new(void)
 {
   GT_StrArray *sa = ma_malloc(sizeof *sa);
-  sa->strings = gt_array_new(sizeof (Str*));
+  sa->strings = gt_array_new(sizeof (GT_Str*));
   return sa;
 }
 
@@ -35,7 +35,7 @@ GT_StrArray* gt_strarray_new_file(const char *path)
 {
   GT_StrArray *filecontent;
   GenFile *fpin;
-  Str *line;
+  GT_Str *line;
   fpin = genfile_xopen(path, "r");
   assert(fpin);
   line = str_new();
@@ -51,7 +51,7 @@ GT_StrArray* gt_strarray_new_file(const char *path)
 
 void gt_strarray_add_cstr(GT_StrArray *sa, const char *cstr)
 {
-  Str *str;
+  GT_Str *str;
   assert(sa && cstr);
   str = str_new_cstr(cstr);
   gt_array_add(sa->strings, str);
@@ -60,16 +60,16 @@ void gt_strarray_add_cstr(GT_StrArray *sa, const char *cstr)
 void gt_strarray_add_cstr_nt(GT_StrArray *sa, const char *cstr,
                              unsigned long length)
 {
-  Str *str;
+  GT_Str *str;
   assert(sa && cstr);
   str = str_new();
   str_append_cstr_nt(str, cstr, length);
   gt_array_add(sa->strings, str);
 }
 
-void gt_strarray_add(GT_StrArray *sa, const Str *str)
+void gt_strarray_add(GT_StrArray *sa, const GT_Str *str)
 {
-  Str *clone;
+  GT_Str *clone;
   assert(sa && str);
   clone = str_clone(str);
   gt_array_add(sa->strings, clone);
@@ -78,13 +78,13 @@ void gt_strarray_add(GT_StrArray *sa, const Str *str)
 const char* gt_strarray_get(const GT_StrArray *sa, unsigned long strnum)
 {
   assert(sa && strnum < gt_array_size(sa->strings));
-  return str_get(*(Str**) gt_array_get(sa->strings, strnum));
+  return str_get(*(GT_Str**) gt_array_get(sa->strings, strnum));
 }
 
-Str* gt_strarray_get_str(const GT_StrArray *sa, unsigned long strnum)
+GT_Str* gt_strarray_get_str(const GT_StrArray *sa, unsigned long strnum)
 {
   assert(sa && strnum < gt_array_size(sa->strings));
-  return *(Str**) gt_array_get(sa->strings, strnum);
+  return *(GT_Str**) gt_array_get(sa->strings, strnum);
 }
 
 void gt_strarray_set_size(GT_StrArray *sa, unsigned long size)
@@ -92,7 +92,7 @@ void gt_strarray_set_size(GT_StrArray *sa, unsigned long size)
   unsigned long i;
   assert(sa && size <= gt_array_size(sa->strings));
   for (i = size; i < gt_array_size(sa->strings); i++)
-    str_delete(*(Str**) gt_array_get(sa->strings, i));
+    str_delete(*(GT_Str**) gt_array_get(sa->strings, i));
   gt_array_set_size(sa->strings, size);
 }
 
@@ -107,7 +107,7 @@ void gt_strarray_delete(GT_StrArray *sa)
   unsigned long i;
   if (!sa) return;
   for (i = 0; i < gt_array_size(sa->strings); i++)
-    str_delete(*(Str**) gt_array_get(sa->strings, i));
+    str_delete(*(GT_Str**) gt_array_get(sa->strings, i));
   gt_array_delete(sa->strings);
   ma_free(sa);
 }

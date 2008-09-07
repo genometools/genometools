@@ -32,7 +32,7 @@ bool           gt_style_get_color(const GT_Style*, const char *section,
 /* Retrieve string value of <key> in <section>.
    If not set, false is returned. */
 bool           gt_style_get_str(const GT_Style*, const char *section,
-                                const char *key, Str*, GT_GenomeNode*);
+                                const char *key, GT_Str*, GT_GenomeNode*);
 /* Retrieve numeric value of <key> in <section>.
    If not set, false is returned.*/
 bool           gt_style_get_num(const GT_Style*, const char *section,

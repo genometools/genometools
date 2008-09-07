@@ -23,8 +23,8 @@
 
 #include "opensfxfile.pr"
 
-int makeindexfilecopy(const Str *destindex,
-                      const Str *sourceindex,
+int makeindexfilecopy(const GT_Str *destindex,
+                      const GT_Str *sourceindex,
                       const char *suffix,
                       uint64_t maxlength,
                       GT_Error *err)

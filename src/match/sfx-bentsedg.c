@@ -1467,7 +1467,7 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
   return minprefixindex;
 }
 
-Outlcpinfo *newlcpoutinfo(const Str *indexname,
+Outlcpinfo *newlcpoutinfo(const GT_Str *indexname,
                           unsigned int prefixlength,
                           unsigned int numofchars,
                           Seqpos totallength,

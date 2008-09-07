@@ -33,7 +33,7 @@ typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
 
 const GT_GenomeNodeClass* gt_genome_feature_class(void);
-GT_GenomeNode*            gt_genome_feature_new(Str *seqid, GT_GenomeFeatureType*, GT_Range,
+GT_GenomeNode*            gt_genome_feature_new(GT_Str *seqid, GT_GenomeFeatureType*, GT_Range,
                                           GT_Strand);
 GT_GenomeNode*            gt_genome_feature_new_pseudo(GT_GenomeFeature*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
@@ -61,7 +61,7 @@ void                   gt_genome_feature_get_exons(GT_GenomeFeature*,
                                                 GT_Array *exon_features);
 void                   gt_genome_feature_determine_transcripttypes(GT_GenomeFeature*);
 TranscriptFeatureType  gt_genome_feature_get_transcriptfeaturetype(GT_GenomeFeature*);
-void                   gt_genome_feature_set_source(GT_GenomeNode*, Str *source);
+void                   gt_genome_feature_set_source(GT_GenomeNode*, GT_Str *source);
 void                   gt_genome_feature_set_phase(GT_GenomeNode*, Phase);
 void                   gt_genome_feature_set_end(GT_GenomeFeature*, unsigned long);
 void                   gt_genome_feature_set_score(GT_GenomeFeature*, float);

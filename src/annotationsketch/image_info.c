@@ -90,7 +90,7 @@ int gt_image_info_unit_test(GT_Error *err)
   GT_GenomeFeatureType *gft;
   GT_ImageInfo *ii;
   unsigned long i;
-  Str *seqid;
+  GT_Str *seqid;
   int had_err = 0;
   assert(err);
   gt_error_check(err);

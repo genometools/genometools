@@ -17,7 +17,7 @@
 
 #include "extended/seqid2file.h"
 
-void seqid2file_options(OptionParser *op, Str *seqfile, Str *regionmapping)
+void seqid2file_options(OptionParser *op, GT_Str *seqfile, GT_Str *regionmapping)
 {
   Option *seqfile_option, *regionmapping_option;
   assert(op && seqfile && regionmapping);
@@ -42,7 +42,7 @@ void seqid2file_options(OptionParser *op, Str *seqfile, Str *regionmapping)
   option_exclude(seqfile_option, regionmapping_option);
 }
 
-RegionMapping* seqid2file_regionmapping_new(Str *seqfile, Str *regionmapping,
+RegionMapping* seqid2file_regionmapping_new(GT_Str *seqfile, GT_Str *regionmapping,
                                             GT_Error *err)
 {
   gt_error_check(err);

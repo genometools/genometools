@@ -4,7 +4,7 @@ extern "C" {
 int extractginumbers(bool verbose,
                      GenFile *outfp,
                      unsigned long width,
-                     const Str *ginumberfile,
+                     const GT_Str *ginumberfile,
                      GT_StrArray *referencefiletab,
                      GT_Error *err);
 

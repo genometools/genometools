@@ -61,7 +61,7 @@ void shredder_set_sample_probability(Shredder *shredder, double probability)
 }
 
 static const char* generate_fragment(Shredder *shredder,
-                                     unsigned long *fragment_length, Str *desc)
+                                     unsigned long *fragment_length, GT_Str *desc)
 {
   assert(shredder && fragment_length);
   if (shredder->seqnum < bioseq_number_of_sequences(shredder->bioseq)) {
@@ -97,7 +97,7 @@ static const char* generate_fragment(Shredder *shredder,
 }
 
 const char* shredder_shred(Shredder *shredder, unsigned long *fragment_length,
-                           Str *desc)
+                           GT_Str *desc)
 {
   const char *frag;
   assert(shredder && fragment_length);

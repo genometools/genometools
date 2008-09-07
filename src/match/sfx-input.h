@@ -45,7 +45,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                          GT_Error *err);
 
 int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
-                        const Str *indexname,
+                        const GT_Str *indexname,
                         Verboseinfo *verboseinfo,
                         GT_Error *err);
 

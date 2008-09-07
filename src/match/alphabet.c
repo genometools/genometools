@@ -135,7 +135,7 @@
 */
 
 static int readsymbolmapfromlines(Alphabet *alpha,
-                                  const Str *mapfile,
+                                  const GT_Str *mapfile,
                                   const GT_StrArray *lines,
                                   GT_Error *err)
 {
@@ -270,7 +270,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
   \texttt{alpha}.
 */
 
-static int readsymbolmap(Alphabet *alpha,const Str *mapfile,GT_Error *err)
+static int readsymbolmap(Alphabet *alpha,const GT_Str *mapfile,GT_Error *err)
 {
   bool haserr = false;
   GT_StrArray *lines;
@@ -431,7 +431,7 @@ void freeAlphabet(Alphabet **alpha)
 
 /*@null@*/ Alphabet *assigninputalphabet(bool isdna,
                                          bool isprotein,
-                                         const Str *smapfile,
+                                         const GT_Str *smapfile,
                                          const GT_StrArray *filenametab,
                                          GT_Error *err)
 {
@@ -454,11 +454,11 @@ void freeAlphabet(Alphabet **alpha)
     {
       if (str_length(smapfile) > 0)
       {
-        Str *transpath = NULL;
+        GT_Str *transpath = NULL;
 
         if (!file_exists(str_get(smapfile)))
         {
-          Str *prog;
+          GT_Str *prog;
           const char *progname = gt_error_get_progname(err);
 
           assert(progname != NULL);

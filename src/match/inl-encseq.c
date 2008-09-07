@@ -30,7 +30,7 @@
 
 #define TISTABFILESUFFIX ".tis"
 
-int flushencseqfile(const Str *indexname,Encodedsequence *encseq,GT_Error *err)
+int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,GT_Error *err)
 {
   FILE *fp;
   bool haserr = false;
@@ -166,7 +166,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
 
 /*@null@*/ Encodedsequence *mapencodedsequence(
                                    UNUSED bool withrange,
-                                   const Str *indexname,
+                                   const GT_Str *indexname,
                                    /*@unused@*/ Seqpos totallength,
                                    Seqpos specialranges,
                                    /*@unused@*/ unsigned int mapsize,
@@ -174,7 +174,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
                                    GT_Error *err)
 {
   Encodedsequence *encseq;
-  Str *tmpfilename;
+  GT_Str *tmpfilename;
 
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   tmpfilename = str_clone(indexname);

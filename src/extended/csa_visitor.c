@@ -34,7 +34,7 @@ struct CSAVisitor {
   GT_GenomeFeature *buffered_feature;
   GT_Range first_range,
         second_range;
-  Str *first_str,
+  GT_Str *first_str,
       *second_str,
       *gt_csa_source_str;
 };
@@ -206,8 +206,8 @@ static void get_exons(GT_Array *exon_ranges, const void *sa)
 
 static void add_sa_to_exon_feature_array(GT_Array *exon_nodes,
                                          GT_GenomeFeature *sa,
-                                         Str *seqid,
-                                         Str *gt_csa_source_str,
+                                         GT_Str *seqid,
+                                         GT_Str *gt_csa_source_str,
                                          GT_Strand gene_strand,
                                          GT_GenomeFeatureType *exon_type)
 {
@@ -336,7 +336,7 @@ static void mRNA_set_target_attribute(GT_GenomeFeature *mRNA_feature,
                                       const CSASpliceForm *csa_splice_form)
 {
   unsigned long i;
-  Str *targets;
+  GT_Str *targets;
   assert(mRNA_feature && csa_splice_form);
   targets = str_new();
   for (i = 0; i < csa_splice_form_num_of_sas(csa_splice_form); i++) {
@@ -353,7 +353,7 @@ static void mRNA_set_target_attribute(GT_GenomeFeature *mRNA_feature,
 }
 
 static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
-                                       Str *gt_csa_source_str,
+                                       GT_Str *gt_csa_source_str,
                                        GT_GenomeFeatureType *mRNA_type,
                                        GT_GenomeFeatureType *exon_type)
 {
@@ -361,7 +361,7 @@ static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
   GT_Array *exon_nodes;
   unsigned long i;
   GT_Strand strand;
-  Str *seqid;
+  GT_Str *seqid;
   assert(csa_splice_form && gt_csa_source_str);
 
   /* create the mRNA feature itself */
@@ -398,7 +398,7 @@ static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
 }
 
 static GT_GenomeNode* create_gene_feature(CSAGene *csa_gene,
-                                       Str *gt_csa_source_str,
+                                       GT_Str *gt_csa_source_str,
                                        GT_GenomeFeatureType *gene_type,
                                        GT_GenomeFeatureType *mRNA_type,
                                        GT_GenomeFeatureType *exon_type)
@@ -426,7 +426,7 @@ static GT_GenomeNode* create_gene_feature(CSAGene *csa_gene,
 }
 
 static void process_csa_genes(Queue *gt_genome_node_buffer, GT_Array *csa_genes,
-                              Str *gt_csa_source_str,
+                              GT_Str *gt_csa_source_str,
                               GT_GenomeFeatureType *gene_type,
                               GT_GenomeFeatureType *mRNA_type,
                               GT_GenomeFeatureType *exon_type)

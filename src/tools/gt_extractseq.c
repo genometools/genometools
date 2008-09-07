@@ -30,7 +30,7 @@
 #define TOPOS_OPTION_STR    "topos"
 
 typedef struct {
-  Str *pattern,
+  GT_Str *pattern,
       *ginum;
   unsigned long frompos,
                 topos,
@@ -180,7 +180,7 @@ static int extractseq_match(GenFile *outfp, Bioseq *bs, const char *pattern,
   return had_err;
 }
 
-static int process_ginum(Str *ginum, int argc, const char **argv,
+static int process_ginum(GT_Str *ginum, int argc, const char **argv,
                          unsigned long width, GenFile *outfp, GT_Error *err)
 {
   int had_err = 0;

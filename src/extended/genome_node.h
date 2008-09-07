@@ -31,7 +31,7 @@ typedef struct GT_GenomeNode GT_GenomeNode;
 typedef int (*GT_GenomeNodeTraverseFunc)(GT_GenomeNode*, void*, GT_Error*);
 
 void          gt_genome_node_set_origin(GT_GenomeNode*,
-                                     Str *filename, unsigned int line_number);
+                                     GT_Str *filename, unsigned int line_number);
 GT_GenomeNode*   gt_genome_node_ref(GT_GenomeNode*);
 GT_GenomeNode*   gt_genome_node_rec_ref(GT_GenomeNode*);
 void*         gt_genome_node_cast(const GT_GenomeNodeClass*, GT_GenomeNode*);
@@ -50,13 +50,13 @@ int           gt_genome_node_traverse_direct_children(GT_GenomeNode*, void*,
 const char*   gt_genome_node_get_filename(const GT_GenomeNode*);
 unsigned int  gt_genome_node_get_line_number(const GT_GenomeNode*);
 unsigned long gt_genome_node_number_of_children(const GT_GenomeNode*);
-Str*          gt_genome_node_get_seqid(GT_GenomeNode*);
-Str*          gt_genome_node_get_idstr(GT_GenomeNode*); /* used to sort nodes */
+GT_Str*       gt_genome_node_get_seqid(GT_GenomeNode*);
+GT_Str*       gt_genome_node_get_idstr(GT_GenomeNode*); /* used to sort nodes */
 unsigned long gt_genome_node_get_start(GT_GenomeNode*);
 unsigned long gt_genome_node_get_end(GT_GenomeNode*);
 GT_Range         gt_genome_node_get_range(GT_GenomeNode*);
 void          gt_genome_node_set_range(GT_GenomeNode*, GT_Range);
-void          gt_genome_node_change_seqid(GT_GenomeNode*, Str*);
+void          gt_genome_node_change_seqid(GT_GenomeNode*, GT_Str*);
 int           gt_genome_node_accept(GT_GenomeNode*, GenomeVisitor*, GT_Error*);
 /* <parent> takes ownership of <child> */
 void          gt_genome_node_is_part_of_genome_node(GT_GenomeNode *parent,

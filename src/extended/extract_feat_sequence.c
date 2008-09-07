@@ -21,7 +21,7 @@
 #include "extended/reverse.h"
 
 static int extract_join_feature(GT_GenomeNode *gn, GT_GenomeFeatureType *type,
-                                RegionMapping *region_mapping, Str *sequence,
+                                RegionMapping *region_mapping, GT_Str *sequence,
                                 bool *reverse_strand, GT_Error *err)
 {
   const char *raw_sequence;
@@ -56,7 +56,7 @@ static int extract_join_feature(GT_GenomeNode *gn, GT_GenomeFeatureType *type,
   return had_err;
 }
 
-int extract_feat_sequence(Str *sequence, GT_GenomeNode *gn,
+int extract_feat_sequence(GT_Str *sequence, GT_GenomeNode *gn,
                           GT_GenomeFeatureType *type, bool join,
                           RegionMapping *region_mapping, GT_Error *err)
 {

@@ -27,10 +27,10 @@ GT_StrArray*  gt_strarray_new(void);
 GT_StrArray*  gt_strarray_new_file(const char *path);
 void          gt_strarray_add_cstr(GT_StrArray*, const char*);
 void          gt_strarray_add_cstr_nt(GT_StrArray*, const char*, unsigned long);
-void          gt_strarray_add(GT_StrArray*, const Str*);
+void          gt_strarray_add(GT_StrArray*, const GT_Str*);
 const char*   gt_strarray_get(const GT_StrArray*, unsigned long strnum);
-/* Returns an internal Str pointer (i.e., _not_ a new reference!). */
-Str*          gt_strarray_get_str(const GT_StrArray*, unsigned long strnum);
+/* Returns an internal GT_Str pointer (i.e., _not_ a new reference!). */
+GT_Str*       gt_strarray_get_str(const GT_StrArray*, unsigned long strnum);
 void          gt_strarray_set_size(GT_StrArray*, unsigned long);
 /* Returns number of strings. */
 unsigned long gt_strarray_size(const GT_StrArray*);

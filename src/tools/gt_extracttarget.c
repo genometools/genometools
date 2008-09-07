@@ -91,7 +91,7 @@ static int extracttarget_from_seqfiles(const char *target,
                                        GT_StrArray *seqfiles,
                                        GT_Error *err)
 {
-  Str *unescaped_target;
+  GT_Str *unescaped_target;
   char *escaped_target;
   Splitter *splitter;
   unsigned long i;

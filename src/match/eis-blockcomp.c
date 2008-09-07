@@ -104,7 +104,7 @@ blockEncIdxSeqHeaderLength(const struct blockCompositionSeq *seqIdx,
                            const uint32_t *extHeaderSizes);
 
 static int
-openOnDiskData(const Str *projectName, struct onDiskBlockCompIdx *idx,
+openOnDiskData(const GT_Str *projectName, struct onDiskBlockCompIdx *idx,
                char *mode);
 
 static void
@@ -316,7 +316,7 @@ writeOutputBuffer(struct blockCompositionSeq *newSeqIdx,
   break
 
 extern EISeq *
-newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
+newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
                      SeqDataReader BWTGenerator,
                      const struct seqBaseParam *params,
@@ -1703,10 +1703,10 @@ vwBits(Seqpos seqLen, unsigned blockSize, unsigned bucketBlocks,
  * @return 0 on error, 1 otherwise
  */
 static int
-openOnDiskData(const Str *projectName, struct onDiskBlockCompIdx *idx,
+openOnDiskData(const GT_Str *projectName, struct onDiskBlockCompIdx *idx,
                char *mode)
 {
-  Str *bdxName = str_clone(projectName);
+  GT_Str *bdxName = str_clone(projectName);
   str_append_cstr(bdxName, ".bdx");
   idx->idxFP = fa_fopen(str_get(bdxName), mode, NULL);
   str_delete(bdxName);
@@ -2098,7 +2098,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
 
 extern struct encIdxSeq *
 loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
-                      const Str *projectName, int features, GT_Error *err)
+                      const GT_Str *projectName, int features, GT_Error *err)
 {
   struct blockCompositionSeq *newSeqIdx = NULL;
   Symbol blockMapAlphabetSize, totalAlphabetSize;

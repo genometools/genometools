@@ -36,7 +36,7 @@ typedef struct
   unsigned int userdefinedleastlength;
   unsigned long samples;
   bool scanfile;
-  Str *indexname;
+  GT_Str *indexname;
   GT_StrArray *queryfiles;
 } Maxpairsoptions;
 

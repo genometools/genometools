@@ -21,7 +21,7 @@
 
 struct FastaReaderFSM {
   const FastaReader parent_instance;
-  Str *sequence_filename;
+  GT_Str *sequence_filename;
   GenFile *sequence_file;
 };
 
@@ -46,7 +46,7 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
   unsigned char cc;
   FastaReaderState state = EXPECTING_SEPARATOR;
   unsigned long sequence_length = 0, line_counter = 1;
-  Str *description, *sequence;
+  GT_Str *description, *sequence;
   int had_err = 0;
 
   gt_error_check(err);
@@ -198,7 +198,7 @@ const FastaReaderClass* fasta_reader_fsm_class(void)
   return &frc;
 }
 
-FastaReader* fasta_reader_fsm_new(Str *sequence_filename)
+FastaReader* fasta_reader_fsm_new(GT_Str *sequence_filename)
 {
   FastaReader *fr = fasta_reader_create(fasta_reader_fsm_class());
   FastaReaderFSM *fasta_reader_fsm = fasta_reader_fsm_cast(fr);

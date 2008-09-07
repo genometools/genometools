@@ -132,7 +132,7 @@ static int scanuintintline(uint32_t *lengthofkey,
   return retval;
 }
 
-int allkeysdefined(const Str *indexname,const char *suffix,
+int allkeysdefined(const GT_Str *indexname,const char *suffix,
                    const GT_Array *riktab,Verboseinfo *verboseinfo,
                    GT_Error *err)
 {
@@ -188,7 +188,7 @@ int allkeysdefined(const Str *indexname,const char *suffix,
   return 0;
 }
 
-int analyzeuintline(const Str *indexname,
+int analyzeuintline(const GT_Str *indexname,
                     const char *suffix,
                     unsigned int linenum,
                     const char *linebuffer,

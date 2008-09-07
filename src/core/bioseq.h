@@ -34,7 +34,7 @@ typedef struct Bioseq Bioseq;
 Bioseq*       bioseq_new(const char *sequence_file, GT_Error*);
 /* Construct a new bioseq object (and always create the the bioseq files). */
 Bioseq*       bioseq_new_recreate(const char *sequence_file, GT_Error*);
-Bioseq*       bioseq_new_str(Str* sequence_file, GT_Error*);
+Bioseq*       bioseq_new_str(GT_Str* sequence_file, GT_Error*);
 /* Construct a new bioseq object (and always create the bioseq files)
    with a certain <fasta_reader>. */
 Bioseq*       bioseq_new_with_fasta_reader(const char *sequence_file,

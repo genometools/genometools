@@ -59,7 +59,7 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
                                  Seqpos lbound,
                                  Seqpos ubound);
 
-void *loadvoidBWTSeqForSA(const Str *indexname,
+void *loadvoidBWTSeqForSA(const GT_Str *indexname,
                           const Suffixarray *suffixarray,
                           Seqpos totallength,
                           bool withpckbt,

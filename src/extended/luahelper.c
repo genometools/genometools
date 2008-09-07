@@ -28,7 +28,7 @@
 
 int lua_set_modules_path(lua_State *L, GT_Error *err)
 {
-  Str *modules_path = NULL, *external_modules_path = NULL, *package_path = NULL;
+  GT_Str *modules_path = NULL, *external_modules_path = NULL, *package_path = NULL;
   int had_err = 0;
   gt_error_check(err);
   assert(L);

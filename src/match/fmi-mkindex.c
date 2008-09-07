@@ -32,7 +32,7 @@ typedef struct
 {
   bool noindexpos;
   GT_StrArray *indexnametab;
-  Str *leveldesc,
+  GT_Str *leveldesc,
       *outfmindex;
 } Mkfmcallinfo;
 

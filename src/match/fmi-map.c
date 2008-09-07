@@ -35,7 +35,7 @@
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
-bool fmindexexists(const Str *indexname)
+bool fmindexexists(const GT_Str *indexname)
 {
   if (!indexfilealreadyexists(indexname,FMASCIIFILESUFFIX))
   {
@@ -50,7 +50,7 @@ bool fmindexexists(const Str *indexname)
 
 static int scanfmafileviafileptr(Fmindex *fmindex,
                                  bool *storeindexpos,
-                                 const Str *indexname,
+                                 const GT_Str *indexname,
                                  FILE *fpin,
                                  Verboseinfo *verboseinfo,
                                  GT_Error *err)
@@ -79,7 +79,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   SETREADINTKEYS("suffixlength",&fmindex->suffixlength,NULL);
   if (!haserr)
   {
-    Str *currentline;
+    GT_Str *currentline;
     unsigned int linenum;
 
     currentline = str_new();
@@ -142,7 +142,7 @@ void freefmindex(Fmindex *fmindex)
   }
 }
 
-static Encodedsequence *mapbwtencoding(const Str *indexname,
+static Encodedsequence *mapbwtencoding(const GT_Str *indexname,
                                        Verboseinfo *verboseinfo,
                                        GT_Error *err)
 {
@@ -167,7 +167,7 @@ static Encodedsequence *mapbwtencoding(const Str *indexname,
   return suffixarray.encseq;
 }
 
-int mapfmindex (Fmindex *fmindex,const Str *indexname,
+int mapfmindex (Fmindex *fmindex,const GT_Str *indexname,
                 Verboseinfo *verboseinfo,GT_Error *err)
 {
   FILE *fpin = NULL;
@@ -205,7 +205,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,
   }
   if (!haserr)
   {
-    Str *tmpfilename;
+    GT_Str *tmpfilename;
 
     fmindex->specpos.nextfreePairBwtidx
       = (unsigned long) determinenumberofspecialstostore(
@@ -227,7 +227,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,
   }
   if (!haserr)
   {
-    Str *tmpfilename;
+    GT_Str *tmpfilename;
 
     computefmkeyvalues (fmindex,
                         fmindex->bwtlength,
