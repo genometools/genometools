@@ -25,7 +25,7 @@
 #include "core/unused.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas.h"
-#include "annotationsketch/graphics.h"
+#include "annotationsketch/graphics_cairo.h"
 #include "annotationsketch/line.h"
 
 #define MARGINS_DEFAULT           10
@@ -305,7 +305,7 @@ int canvas_visit_diagram_pre(Canvas *canvas, Diagram *dia)
     graphics_delete(canvas->g);
     canvas->g = NULL;
   }
-  canvas->g = graphics_new(canvas->type, canvas->width, 1);
+  canvas->g = graphics_cairo_new(canvas->type, canvas->width, 1);
 
   /* calculate scaling factor */
   canvas->factor = ((double) canvas->width
@@ -330,7 +330,7 @@ int canvas_visit_diagram_post(Canvas *canvas, Diagram *dia)
     graphics_delete(canvas->g);
     canvas->g = NULL;
   }
-  canvas->g = graphics_new(canvas->type, canvas->width, canvas->height);
+  canvas->g = graphics_cairo_new(canvas->type, canvas->width, canvas->height);
   graphics_set_margins(canvas->g, canvas->margins, 0);
 
   /* Add ruler/scale to the image */
