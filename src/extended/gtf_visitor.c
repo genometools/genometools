@@ -46,12 +46,12 @@ static void gtf_visitor_free(GenomeVisitor *gv)
   gt_array_delete(gtf_visitor->CDS_features);
 }
 
-static int gtf_visitor_comment(GenomeVisitor *gv, Comment *c, UNUSED GT_Error *err)
+static int gtf_visitor_comment(GenomeVisitor *gv, GT_Comment *c, UNUSED GT_Error *err)
 {
   GTFVisitor *gtf_visitor;
   gt_error_check(err);
   gtf_visitor = gtf_visitor_cast(gv);
-  genfile_xprintf(gtf_visitor->outfp, "#%s\n", comment_get_comment(c));
+  genfile_xprintf(gtf_visitor->outfp, "#%s\n", gt_comment_get_comment(c));
   return 0;
 }
 

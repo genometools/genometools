@@ -1181,7 +1181,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 
   if (line_length == 1 || line[1] != '#') {
     /* storing comment */
-    gn = comment_new(line+1);
+    gn = gt_comment_new(line+1);
     gt_genome_node_set_origin(gn, filenamestr, line_number);
     queue_add(genome_nodes, gn);
   }

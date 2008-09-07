@@ -55,7 +55,7 @@ static void filter_visitor_free(GenomeVisitor *gv)
   str_delete(filter_visitor->typefilter);
 }
 
-static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,
+static int filter_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
                                   UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;

@@ -37,7 +37,7 @@ void* genome_visitor_cast(UNUSED const GenomeVisitorClass *gvc,
   return gv;
 }
 
-int genome_visitor_visit_comment(GenomeVisitor *gv, Comment *c, GT_Error *err)
+int genome_visitor_visit_comment(GenomeVisitor *gv, GT_Comment *c, GT_Error *err)
 {
   gt_error_check(err);
   assert(gv && c && gv->c_class);

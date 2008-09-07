@@ -63,7 +63,7 @@ struct OptionParser {
         *hooks;
   bool parser_called,
        refer_to_manual;
-  ShowCommentFunc comment_func;
+  ShowGT_CommentFunc comment_func;
   void *comment_func_data;
   const char *mailaddress;
   unsigned int min_additional_arguments,
@@ -208,7 +208,7 @@ void option_parser_refer_to_manual(OptionParser *op)
 }
 
 void option_parser_set_comment_func(OptionParser *op,
-                                    ShowCommentFunc comment_func, void *data)
+                                    ShowGT_CommentFunc comment_func, void *data)
 {
   assert(op);
   op->comment_func = comment_func;

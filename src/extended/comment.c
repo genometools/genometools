@@ -23,33 +23,33 @@
 #include "extended/comment.h"
 #include "extended/genome_node_rep.h"
 
-struct Comment
+struct GT_Comment
 {
   const GT_GenomeNode parent_instance;
   char *comment;
-  Str *comment_str; /* used in comment_get_idstr() */
+  Str *gt_comment_str; /* used in gt_comment_get_idstr() */
 };
 
-#define comment_cast(GN)\
-        gt_genome_node_cast(comment_class(), GN)
+#define gt_comment_cast(GN)\
+        gt_genome_node_cast(gt_comment_class(), GN)
 
-static void comment_free(GT_GenomeNode *gn)
+static void gt_comment_free(GT_GenomeNode *gn)
 {
-  Comment *c = comment_cast(gn);
+  GT_Comment *c = gt_comment_cast(gn);
   assert(c && c->comment);
   ma_free(c->comment);
-  str_delete(c->comment_str);
+  str_delete(c->gt_comment_str);
 }
 
-static Str* comment_get_idstr(GT_GenomeNode *gn)
+static Str* gt_comment_get_idstr(GT_GenomeNode *gn)
 {
-  Comment *c;
+  GT_Comment *c;
   assert(gn);
-  c = comment_cast(gn);
-  return c->comment_str;
+  c = gt_comment_cast(gn);
+  return c->gt_comment_str;
 }
 
-static GT_Range comment_get_range(UNUSED GT_GenomeNode *gn)
+static GT_Range gt_comment_get_range(UNUSED GT_GenomeNode *gn)
 {
   GT_Range range;
   range.start = 0;
@@ -57,38 +57,38 @@ static GT_Range comment_get_range(UNUSED GT_GenomeNode *gn)
   return range;
 }
 
-static int comment_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
+static int gt_comment_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
-  Comment *c;
+  GT_Comment *c;
   gt_error_check(err);
-  c = comment_cast(gn);
+  c = gt_comment_cast(gn);
   return genome_visitor_visit_comment(gv, c, err);
 }
 
-const GT_GenomeNodeClass* comment_class()
+const GT_GenomeNodeClass* gt_comment_class()
 {
-  static const GT_GenomeNodeClass gnc = { sizeof (Comment),
-                                       comment_free,
+  static const GT_GenomeNodeClass gnc = { sizeof (GT_Comment),
+                                       gt_comment_free,
                                        NULL,
-                                       comment_get_idstr,
-                                       comment_get_range,
+                                       gt_comment_get_idstr,
+                                       gt_comment_get_range,
                                        NULL,
                                        NULL,
-                                       comment_accept };
+                                       gt_comment_accept };
   return &gnc;
 }
 
-GT_GenomeNode* comment_new(const char *comment)
+GT_GenomeNode* gt_comment_new(const char *comment)
 {
-  GT_GenomeNode *gn = gt_genome_node_create(comment_class());
-  Comment *c = comment_cast(gn);
+  GT_GenomeNode *gn = gt_genome_node_create(gt_comment_class());
+  GT_Comment *c = gt_comment_cast(gn);
   assert(comment);
   c->comment = cstr_dup(comment);
-  c->comment_str = str_new_cstr("");
+  c->gt_comment_str = str_new_cstr("");
   return gn;
 }
 
-const char* comment_get_comment(const Comment *c)
+const char* gt_comment_get_comment(const GT_Comment *c)
 {
   assert(c && c->comment);
   return c->comment;

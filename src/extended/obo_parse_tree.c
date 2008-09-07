@@ -268,7 +268,7 @@ static int expect(IO *obo_file, char expected_char, GT_Error *err)
   return 0;
 }
 
-static int comment_line(IO *obo_file, GT_Error *err)
+static int gt_comment_line(IO *obo_file, GT_Error *err)
 {
   int had_err;
   gt_error_check(err);
@@ -299,7 +299,7 @@ static int blank_line(IO *obo_file, GT_Error *err)
   while (!had_err) {
     char cc = io_peek(obo_file);
     if (cc == COMMENT_CHAR)
-      return comment_line(obo_file, err);
+      return gt_comment_line(obo_file, err);
     else if (cc == CARRIAGE_RETURN) {
       io_next(obo_file);
       if (io_peek(obo_file) == END_OF_LINE)
@@ -321,7 +321,7 @@ static bool ignored_line(IO *obo_file, GT_Error *err)
   gt_error_check(err);
   if (io_peek(obo_file) == BLANK_CHAR)
     return blank_line(obo_file, err);
-  return comment_line(obo_file, err);
+  return gt_comment_line(obo_file, err);
 }
 
 static int proc_any_char(IO *obo_file, Str *capture, bool be_permissive,
@@ -369,7 +369,7 @@ static int tag_line(IO *obo_file, Str *tag, Str *value, GT_Error *err)
   }
   if (!had_err) {
     if (io_peek(obo_file) == COMMENT_CHAR)
-      had_err = comment_line(obo_file, err);
+      had_err = gt_comment_line(obo_file, err);
     else
       had_err = expect(obo_file, END_OF_LINE, err);
   }
@@ -439,7 +439,7 @@ static int stanza(OBOParseTree *obo_parse_tree, IO *obo_file, GT_Error *err)
       str_reset(tag);
       str_reset(value);
       if (io_peek(obo_file) == COMMENT_CHAR)
-        had_err = comment_line(obo_file, err);
+        had_err = gt_comment_line(obo_file, err);
       else {
         had_err = tag_line(obo_file, tag, value, err);
         obo_stanza_add(obo_stanza, str_get(tag), str_get(value));
@@ -469,7 +469,7 @@ static int parse_obo_file(OBOParseTree *obo_parse_tree,
         had_err = blank_line(obo_file, err);
         break;
       case COMMENT_CHAR:
-        had_err = comment_line(obo_file, err);
+        had_err = gt_comment_line(obo_file, err);
         break;
       case CARRIAGE_RETURN:
         io_next(obo_file);

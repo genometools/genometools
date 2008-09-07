@@ -39,7 +39,7 @@ typedef enum {
 } OPrval;
 
 typedef void (*ShowVersionFunc)(const char *progname);
-typedef int  (*ShowCommentFunc)(const char *progname, void *data, GT_Error*);
+typedef int  (*ShowGT_CommentFunc)(const char *progname, void *data, GT_Error*);
 typedef int  (*OptionParserHookFunc)(void *data, GT_Error*);
 
 /* the option parser */
@@ -48,7 +48,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner);
 void          option_parser_add_option(OptionParser*, Option*);
 /* refer to manual at the end of help output */
 void          option_parser_refer_to_manual(OptionParser*);
-void          option_parser_set_comment_func(OptionParser*, ShowCommentFunc,
+void          option_parser_set_comment_func(OptionParser*, ShowGT_CommentFunc,
                                              void* data);
 /* set the mailadress used in the final ``Report bugs to'' line of the -help
    output to <address>. It should be of the form "<bill@microsoft.com>" */

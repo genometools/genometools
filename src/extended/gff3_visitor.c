@@ -73,7 +73,7 @@ static void gff3_visitor_free(GenomeVisitor *gv)
   hashmap_delete(gff3_visitor->genome_feature_to_unique_id_str);
 }
 
-static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
+static int gff3_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
                                 UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
@@ -81,7 +81,7 @@ static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && c);
   gff3_version_string(gv);
-  genfile_xprintf(gff3_visitor->outfp, "#%s\n", comment_get_comment(c));
+  genfile_xprintf(gff3_visitor->outfp, "#%s\n", gt_comment_get_comment(c));
   return 0;
 }
 
