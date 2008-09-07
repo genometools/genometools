@@ -164,7 +164,7 @@ static int genome_feature_lua_get_attribute(lua_State *L)
 static int genome_feature_lua_get_exons(lua_State *L)
 {
   GenomeNode **gn = check_genome_node(L, 1);
-  Array *exons = array_new(sizeof (GenomeNode*));
+  GT_Array *exons = gt_array_new(sizeof (GenomeNode*));
   unsigned long i = 0;
   GenomeFeature *gf;
   /* make sure we get a genome feature */
@@ -172,14 +172,13 @@ static int genome_feature_lua_get_exons(lua_State *L)
   luaL_argcheck(L, gf, 1, "not a genome feature");
   genome_feature_get_exons(gf, exons);
   lua_newtable(L);
-  for (i=0;i<array_size(exons);i++)
-  {
+  for (i = 0; i < gt_array_size(exons); i++) {
     lua_pushnumber(L, i+1);
-    genome_node_lua_push(L,
-                         genome_node_ref(*(GenomeNode**) array_get(exons, i)));
+    genome_node_lua_push(L, genome_node_ref(*(GenomeNode**)
+                                            gt_array_get(exons, i)));
     lua_rawset(L, -3);
   }
-  array_delete(exons);
+  gt_array_delete(exons);
   return 1;
 }
 

@@ -59,7 +59,7 @@ struct OptionParser {
   char *progname,
        *synopsis,
        *one_liner;
-  Array *options,
+  GT_Array *options,
         *hooks;
   bool parser_called,
        refer_to_manual;
@@ -107,7 +107,7 @@ struct Option {
        is_extended_option,
        is_development_option,
        argument_is_optional;
-  Array *implications, /* contains option arrays, from each array at least one
+  GT_Array *implications, /* contains option arrays, from each array at least one
                           option needs to be set */
         *exclusions;
   const Option *mandatory_either_option;
@@ -183,7 +183,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner)
   op->progname = NULL;
   op->synopsis = cstr_dup(synopsis);
   op->one_liner = cstr_dup(one_liner);
-  op->options = array_new(sizeof (Option*));
+  op->options = gt_array_new(sizeof (Option*));
   op->hooks = NULL;
   op->parser_called = false;
   op->refer_to_manual = false;
@@ -198,7 +198,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner)
 void option_parser_add_option(OptionParser *op, Option *o)
 {
   assert(op && o);
-  array_add(op->options, o);
+  gt_array_add(op->options, o);
 }
 
 void option_parser_refer_to_manual(OptionParser *op)
@@ -221,10 +221,10 @@ void option_parser_register_hook(OptionParser *op, OptionParserHookFunc hook,
   HookInfo hookinfo;
   assert(op && hook);
   if (!op->hooks)
-    op->hooks = array_new(sizeof (HookInfo));
+    op->hooks = gt_array_new(sizeof (HookInfo));
   hookinfo.hook = hook;
   hookinfo.data = data;
-  array_add(op->hooks, hookinfo);
+  gt_array_add(op->hooks, hookinfo);
 }
 
 void option_parser_set_mailaddress(OptionParser *op, const char *address)
@@ -303,8 +303,8 @@ static int show_help(OptionParser *op, OptionType optiontype, Error *err)
          optiontype == OPTION_HELPDEV);
 
   /* determine maximum option length */
-  for (i = 0; i < array_size(op->options); i++) {
-    option = *(Option**) array_get(op->options, i);
+  for (i = 0; i < gt_array_size(op->options); i++) {
+    option = *(Option**) gt_array_get(op->options, i);
     /* skip option if necessary */
     if ((optiontype == OPTION_HELP && option->is_extended_option) ||
         (optiontype == OPTION_HELPDEV && !option->is_development_option) ||
@@ -318,8 +318,8 @@ static int show_help(OptionParser *op, OptionType optiontype, Error *err)
 
   printf("Usage: %s %s\n", op->progname, op->synopsis);
   printf("%s\n\n", op->one_liner);
-  for (i = 0; i < array_size(op->options); i++) {
-    option = *(Option**) array_get(op->options, i);
+  for (i = 0; i < gt_array_size(op->options); i++) {
+    option = *(Option**) gt_array_get(op->options, i);
     /* skip option if necessary */
     if ((optiontype == OPTION_HELP && option->is_extended_option) ||
         (optiontype == OPTION_HELPDEV && !option->is_development_option) ||
@@ -438,8 +438,8 @@ static int check_mandatory_options(OptionParser *op, Error *err)
   Option *o;
   error_check(err);
   assert(op);
-  for (i = 0; i < array_size(op->options); i++) {
-    o = *(Option**) array_get(op->options, i);
+  for (i = 0; i < gt_array_size(op->options); i++) {
+    o = *(Option**) gt_array_get(op->options, i);
     if (o->is_mandatory && !o->is_set) {
       error_set(err, "option \"-%s\" is mandatory", str_get(o->option_str));
       return -1;
@@ -451,21 +451,21 @@ static int check_mandatory_options(OptionParser *op, Error *err)
 static int check_option_implications(OptionParser *op, Error *err)
 {
   unsigned long i, j, k, l;
-  Array *implied_option_array;
+  GT_Array *implied_option_array;
   Option *o, *implied_option;
   unsigned int option_set;
   Str *error_str;
   error_check(err);
 
-  for (i = 0; i < array_size(op->options); i++) {
-    o = *(Option**) array_get(op->options, i);
+  for (i = 0; i < gt_array_size(op->options); i++) {
+    o = *(Option**) gt_array_get(op->options, i);
     if (o->implications && o->is_set) {
-      for (j = 0; j < array_size(o->implications); j++) {
-        implied_option_array = *(Array**) array_get(o->implications, j);
-        assert(array_size(implied_option_array));
-        if (array_size(implied_option_array) == 1) {
+      for (j = 0; j < gt_array_size(o->implications); j++) {
+        implied_option_array = *(GT_Array**) gt_array_get(o->implications, j);
+        assert(gt_array_size(implied_option_array));
+        if (gt_array_size(implied_option_array) == 1) {
           /* special case: option implies exactly one option */
-          implied_option = *(Option**) array_get(implied_option_array, 0);
+          implied_option = *(Option**) gt_array_get(implied_option_array, 0);
           if (!implied_option->is_set) {
             error_set(err, "option \"-%s\" requires option \"-%s\"",
                       str_get(o->option_str),
@@ -477,8 +477,8 @@ static int check_option_implications(OptionParser *op, Error *err)
           /* ``either'' case: option implied at least one of the options given
              in array */
           option_set = 0;
-          for (k = 0; k < array_size(implied_option_array); k++) {
-            implied_option = *(Option**) array_get(implied_option_array, k);
+          for (k = 0; k < gt_array_size(implied_option_array); k++) {
+            implied_option = *(Option**) gt_array_get(implied_option_array, k);
             if (implied_option->is_set) {
               option_set = 1;
               break;
@@ -488,18 +488,18 @@ static int check_option_implications(OptionParser *op, Error *err)
             error_str = str_new_cstr("option \"-");
             str_append_str(error_str, o->option_str);
             str_append_cstr(error_str, "\" requires option");
-            for (l = 0; l < array_size(implied_option_array) - 1; l++) {
+            for (l = 0; l < gt_array_size(implied_option_array) - 1; l++) {
               str_append_cstr(error_str, " \"-");
               str_append_str(error_str, (*(Option**)
-                             array_get(implied_option_array, l))->option_str);
+                             gt_array_get(implied_option_array, l))->option_str);
               str_append_cstr(error_str, "\"");
-              if (array_size(implied_option_array) > 2)
+              if (gt_array_size(implied_option_array) > 2)
                 str_append_char(error_str, ',');
             }
             str_append_cstr(error_str, " or \"-");
             str_append_str(error_str, (*(Option**)
-                           array_get(implied_option_array,
-                                     array_size(implied_option_array) - 1))
+                           gt_array_get(implied_option_array,
+                                     gt_array_size(implied_option_array) - 1))
                                      ->option_str);
             str_append_cstr(error_str, "\"");
             error_set(err, "%s", str_get(error_str));
@@ -519,11 +519,11 @@ static int check_option_exclusions(OptionParser *op, Error *err)
   Option *o, *excluded_option;
   error_check(err);
 
-  for (i = 0; i < array_size(op->options); i++) {
-    o = *(Option**) array_get(op->options, i);
+  for (i = 0; i < gt_array_size(op->options); i++) {
+    o = *(Option**) gt_array_get(op->options, i);
     if (o->exclusions && o->is_set) {
-      for (j = 0; j < array_size(o->exclusions); j++) {
-        excluded_option = *(Option**) array_get(o->exclusions, j);
+      for (j = 0; j < gt_array_size(o->exclusions); j++) {
+        excluded_option = *(Option**) gt_array_get(o->exclusions, j);
         if (excluded_option->is_set) {
           error_set(err, "option \"-%s\" and option \"-%s\" exclude each other",
                     str_get(o->option_str),
@@ -542,8 +542,8 @@ static int check_mandatory_either_options(OptionParser *op, Error *err)
   Option *o;
   error_check(err);
 
-  for (i = 0; i < array_size(op->options); i++) {
-    o = *(Option**) array_get(op->options, i);
+  for (i = 0; i < gt_array_size(op->options); i++) {
+    o = *(Option**) gt_array_get(op->options, i);
     if (o->mandatory_either_option) {
       if (!o->is_set && !o->mandatory_either_option->is_set) {
         error_set(err, "either option \"-%s\" or option \"-%s\" is mandatory",
@@ -556,13 +556,13 @@ static int check_mandatory_either_options(OptionParser *op, Error *err)
   return 0;
 }
 
-static bool has_extended_option(Array *options)
+static bool has_extended_option(GT_Array *options)
 {
   unsigned long i;
   Option *option;
   assert(options);
-  for (i = 0; i < array_size(options); i++) {
-    option = *(Option**) array_get(options, i);
+  for (i = 0; i < gt_array_size(options); i++) {
+    option = *(Option**) gt_array_get(options, i);
     if (option->is_extended_option)
       return true;
   }
@@ -634,8 +634,8 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
 
     /* look for matching option */
     option_parsed = false;
-    for (i = 0; i < array_size(op->options); i++) {
-      option = *(Option**) array_get(op->options, i);
+    for (i = 0; i < gt_array_size(op->options); i++) {
+      option = *(Option**) gt_array_get(op->options, i);
 
       /* allow options to start with '--', too */
       minus_offset = argv[argnum][1] == '-' ? 1 : 0;
@@ -1065,8 +1065,8 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
     had_err = check_mandatory_either_options(op, err);
 
   /* call hooks */
-  for (i = 0; !had_err && i < array_size(op->hooks); i++) {
-    hookinfo = array_get(op->hooks, i);
+  for (i = 0; !had_err && i < gt_array_size(op->hooks); i++) {
+    hookinfo = gt_array_get(op->hooks, i);
     had_err = hookinfo->hook(hookinfo->data, err);
   }
 
@@ -1086,10 +1086,10 @@ void option_parser_delete(OptionParser *op)
   ma_free(op->progname);
   ma_free(op->synopsis);
   ma_free(op->one_liner);
-  for (i = 0; i < array_size(op->options); i++)
-    option_delete(*(Option**) array_get(op->options, i));
-  array_delete(op->options);
-  array_delete(op->hooks);
+  for (i = 0; i < gt_array_size(op->options); i++)
+    option_delete(*(Option**) gt_array_get(op->options, i));
+  gt_array_delete(op->options);
+  gt_array_delete(op->hooks);
   ma_free(op);
 }
 
@@ -1416,36 +1416,36 @@ void option_is_development_option(Option *o)
 
 void option_imply(Option *o, const Option *implied_option)
 {
-  Array *option_array;
+  GT_Array *option_array;
   assert(o && implied_option);
   if (!o->implications)
-    o->implications = array_new(sizeof (Array*));
-  option_array = array_new(sizeof (Option*));
-  array_add(option_array, implied_option);
-  array_add(o->implications, option_array);
+    o->implications = gt_array_new(sizeof (GT_Array*));
+  option_array = gt_array_new(sizeof (Option*));
+  gt_array_add(option_array, implied_option);
+  gt_array_add(o->implications, option_array);
 }
 
 void option_imply_either_2(Option *o, const Option *io1, const Option *io2)
 {
-  Array *option_array;
+  GT_Array *option_array;
   assert(o && io1 && io2);
   if (!o->implications)
-    o->implications = array_new(sizeof (Array*));
-  option_array = array_new(sizeof (Option*));
-  array_add(option_array, io1);
-  array_add(option_array, io2);
-  array_add(o->implications, option_array);
+    o->implications = gt_array_new(sizeof (GT_Array*));
+  option_array = gt_array_new(sizeof (Option*));
+  gt_array_add(option_array, io1);
+  gt_array_add(option_array, io2);
+  gt_array_add(o->implications, option_array);
 }
 
 void option_exclude(Option *o_a, Option *o_b)
 {
   assert(o_a && o_b);
   if (!o_a->exclusions)
-    o_a->exclusions = array_new(sizeof (Option*));
+    o_a->exclusions = gt_array_new(sizeof (Option*));
   if (!o_b->exclusions)
-    o_b->exclusions = array_new(sizeof (Option*));
-  array_add(o_a->exclusions, o_b);
-  array_add(o_b->exclusions, o_a);
+    o_b->exclusions = gt_array_new(sizeof (Option*));
+  gt_array_add(o_a->exclusions, o_b);
+  gt_array_add(o_b->exclusions, o_a);
 }
 
 void option_hide_default(Option *o)
@@ -1476,9 +1476,9 @@ void option_delete(Option *o)
   }
   str_delete(o->option_str);
   str_delete(o->description);
-  for (i = 0; i < array_size(o->implications); i++)
-    array_delete(*(Array**) array_get(o->implications, i));
-  array_delete(o->implications);
-  array_delete(o->exclusions);
+  for (i = 0; i < gt_array_size(o->implications); i++)
+    gt_array_delete(*(GT_Array**) gt_array_get(o->implications, i));
+  gt_array_delete(o->implications);
+  gt_array_delete(o->exclusions);
   ma_free(o);
 }

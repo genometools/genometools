@@ -50,7 +50,7 @@ struct Bioseq {
   bool use_stdin;
   Str *sequence_file;
   Seq **seqs;
-  Array *descriptions,
+  GT_Array *descriptions,
         *sequence_ranges;
   char *raw_sequence;
   size_t raw_sequence_length,
@@ -180,7 +180,7 @@ static int proc_description(const char *description, unsigned long length,
   error_check(err);
   if (info->bs->use_stdin) {
     description_cstr = cstr_dup(description);
-    array_add(info->bs->descriptions, description_cstr);
+    gt_array_add(info->bs->descriptions, description_cstr);
   }
   else {
     if (length)
@@ -218,7 +218,7 @@ static int proc_sequence_length(unsigned long sequence_length, void *data,
   if (info->bs->use_stdin) {
     range.start = info->offset;
     range.end = info->offset + sequence_length - 1;
-    array_add(info->bs->sequence_ranges, range);
+    gt_array_add(info->bs->sequence_ranges, range);
   }
   else {
     fprintf(info->bioseq_index, "%lu\n", info->offset);
@@ -267,7 +267,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
       case 1:
         /* process description */
         description = cstr_dup(str_get(index_line));
-        array_add(bs->descriptions, description);
+        gt_array_add(bs->descriptions, description);
         break;
       case 2:
         /* process sequence start */
@@ -287,7 +287,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
         }
         else {
           assert(range.start <= range.end); /* XXX */
-          array_add(bs->sequence_ranges, range);
+          gt_array_add(bs->sequence_ranges, range);
         }
         break;
     }
@@ -297,7 +297,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
 
   if (!had_err) {
     /* the number of descriptions equals the number of sequence ranges */
-    assert(array_size(bs->descriptions) == array_size(bs->sequence_ranges));
+    assert(gt_array_size(bs->descriptions) == gt_array_size(bs->sequence_ranges));
     /* map the raw file */
     bs->raw_sequence = fa_xmmap_read(raw_filename, &bs->raw_sequence_length);
   }
@@ -428,8 +428,8 @@ static Bioseq* bioseq_new_with_recreate_and_type(Str *sequence_file,
   }
   if (!had_err) {
     bs->sequence_file = str_ref(sequence_file);
-    bs->descriptions = array_new(sizeof (char*));
-    bs->sequence_ranges = array_new(sizeof (Range));
+    bs->descriptions = gt_array_new(sizeof (char*));
+    bs->sequence_ranges = gt_array_new(sizeof (Range));
     had_err = bioseq_fill(bs, recreate, fasta_reader_type, err);
   }
   if (had_err) {
@@ -486,14 +486,14 @@ void bioseq_delete(Bioseq *bs)
   bioseq_fingerprints_delete(bs->fingerprints);
   str_delete(bs->sequence_file);
   if (bs->seqs) {
-    for (i = 0; i < array_size(bs->descriptions); i++)
+    for (i = 0; i < gt_array_size(bs->descriptions); i++)
       seq_delete(bs->seqs[i]);
     ma_free(bs->seqs);
   }
-  for (i = 0; i < array_size(bs->descriptions); i++)
-    ma_free(*(char**) array_get(bs->descriptions, i));
-  array_delete(bs->descriptions);
-  array_delete(bs->sequence_ranges);
+  for (i = 0; i < gt_array_size(bs->descriptions); i++)
+    ma_free(*(char**) gt_array_get(bs->descriptions, i));
+  gt_array_delete(bs->descriptions);
+  gt_array_delete(bs->sequence_ranges);
   if (bs->use_stdin)
     ma_free(bs->raw_sequence);
   else
@@ -522,9 +522,9 @@ Alpha* bioseq_get_alpha(Bioseq *bs)
 Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx)
 {
   assert(bs);
-  assert(idx < array_size(bs->descriptions));
+  assert(idx < gt_array_size(bs->descriptions));
   if (!bs->seqs)
-    bs->seqs = ma_calloc(array_size(bs->descriptions), sizeof (Seq*));
+    bs->seqs = ma_calloc(gt_array_size(bs->descriptions), sizeof (Seq*));
   determine_alpha_if_necessary(bs);
   if (!bs->seqs[idx]) {
     bs->seqs[idx] = seq_new(bioseq_get_sequence(bs, idx),
@@ -538,14 +538,14 @@ Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx)
 const char* bioseq_get_description(Bioseq *bs, unsigned long idx)
 {
   assert(bs);
-  return *(char**) array_get(bs->descriptions, idx);
+  return *(char**) gt_array_get(bs->descriptions, idx);
 }
 
 const char* bioseq_get_sequence(Bioseq *bs, unsigned long idx)
 {
   Range sequence_range;
   assert(bs);
-  sequence_range = *(Range*) array_get(bs->sequence_ranges, idx);
+  sequence_range = *(Range*) gt_array_get(bs->sequence_ranges, idx);
   return bs->raw_sequence + sequence_range.start;
 }
 
@@ -568,7 +568,7 @@ unsigned long bioseq_get_sequence_length(Bioseq *bs, unsigned long idx)
 {
   Range sequence_range;
   assert(bs);
-  sequence_range = *(Range*) array_get(bs->sequence_ranges, idx);
+  sequence_range = *(Range*) gt_array_get(bs->sequence_ranges, idx);
   return range_length(sequence_range);
 }
 
@@ -581,7 +581,7 @@ unsigned long bioseq_get_raw_sequence_length(Bioseq *bs)
 unsigned long bioseq_number_of_sequences(Bioseq *bs)
 {
   assert(bs);
-  return array_size(bs->descriptions);
+  return gt_array_size(bs->descriptions);
 }
 
 void bioseq_show_as_fasta(Bioseq *bs, unsigned long width)

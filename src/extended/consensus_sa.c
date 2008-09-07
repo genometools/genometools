@@ -84,26 +84,26 @@ static Strand extract_strand(const ConsensusSA *csa, unsigned long sa)
   return strand;
 }
 
-static void extract_exons(const ConsensusSA *csa, Array *exon_ranges,
+static void extract_exons(const ConsensusSA *csa, GT_Array *exon_ranges,
                           unsigned long sa)
 {
   assert(csa && exon_ranges && csa->set_of_sas && sa < csa->number_of_sas);
   csa->get_exons(exon_ranges, (char*) csa->set_of_sas + csa->size_of_sa * sa);
-  assert(array_size(exon_ranges));
+  assert(gt_array_size(exon_ranges));
   assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));
 }
 
-static bool has_donor_site(Array *gene, unsigned long exon)
+static bool has_donor_site(GT_Array *gene, unsigned long exon)
 {
-  assert(exon < array_size(gene));
-  if (exon == array_size(gene) - 1)
+  assert(exon < gt_array_size(gene));
+  if (exon == gt_array_size(gene) - 1)
     return false;
   return true;
 }
 
-static bool has_acceptor_site(UNUSED Array *gene, unsigned long exon)
+static bool has_acceptor_site(UNUSED GT_Array *gene, unsigned long exon)
 {
-  assert(exon < array_size(gene));
+  assert(exon < gt_array_size(gene));
   if (exon == 0)
     return false;
   return true;
@@ -112,7 +112,7 @@ static bool has_acceptor_site(UNUSED Array *gene, unsigned long exon)
 static bool compatible(const ConsensusSA *csa,
                        unsigned long sa_1, unsigned long sa_2)
 {
-  Array *exons_sa_1, *exons_sa_2;
+  GT_Array *exons_sa_1, *exons_sa_2;
   Range range_sa_1, range_sa_2;
   unsigned long i, j, num_of_exons_1, num_of_exons_2,
                 start_1 = UNDEF_ULONG, start_2 = UNDEF_ULONG;
@@ -125,16 +125,16 @@ static bool compatible(const ConsensusSA *csa,
   if (extract_strand(csa, sa_1) != extract_strand(csa, sa_2)) return false;
 
   /* init */
-  exons_sa_1 = array_new(sizeof (Range));
-  exons_sa_2 = array_new(sizeof (Range));
+  exons_sa_1 = gt_array_new(sizeof (Range));
+  exons_sa_2 = gt_array_new(sizeof (Range));
 
   /* get ranges */
   range_sa_1 = extract_genomic_range(csa, sa_1);
   range_sa_2 = extract_genomic_range(csa, sa_2);
 
   if (!range_overlap(range_sa_1, range_sa_2)) {
-    array_delete(exons_sa_1);
-    array_delete(exons_sa_2);
+    gt_array_delete(exons_sa_1);
+    gt_array_delete(exons_sa_2);
     return false;
   }
 
@@ -145,26 +145,26 @@ static bool compatible(const ConsensusSA *csa,
   /* determine the first overlapping exon pair */
   i = 0;
   j = 0;
-  num_of_exons_1 = array_size(exons_sa_1);
-  num_of_exons_2 = array_size(exons_sa_2);
+  num_of_exons_1 = gt_array_size(exons_sa_1);
+  num_of_exons_2 = gt_array_size(exons_sa_2);
   while (i < num_of_exons_1 && j < num_of_exons_2) {
-    if (range_overlap(*(Range*) array_get(exons_sa_1, i),
-                      *(Range*) array_get(exons_sa_2, j))) {
+    if (range_overlap(*(Range*) gt_array_get(exons_sa_1, i),
+                      *(Range*) gt_array_get(exons_sa_2, j))) {
       start_1 = i;
       start_2 = j;
       start_values_set = true;
       break;
     }
-    if (((Range*) array_get(exons_sa_1, i))->start <
-        ((Range*) array_get(exons_sa_2, j))->start) {
+    if (((Range*) gt_array_get(exons_sa_1, i))->start <
+        ((Range*) gt_array_get(exons_sa_2, j))->start) {
       i++;
     }
     else
       j++;
   }
   if (!start_values_set) {
-    array_delete(exons_sa_1);
-    array_delete(exons_sa_2);
+    gt_array_delete(exons_sa_1);
+    gt_array_delete(exons_sa_2);
     return false;
   }
   /* from now on the start values are set */
@@ -172,14 +172,14 @@ static bool compatible(const ConsensusSA *csa,
   assert(start_1 != UNDEF_ULONG && start_2 != UNDEF_ULONG);
   if (!(start_1 == 0 || start_2 == 0)) {
     /* no first segment could be maped */
-    array_delete(exons_sa_1);
-    array_delete(exons_sa_2);
+    gt_array_delete(exons_sa_1);
+    gt_array_delete(exons_sa_2);
     return false;
   }
 
   while (start_1 < num_of_exons_1 && start_2 < num_of_exons_2) {
-    range_sa_1 = *((Range*) array_get(exons_sa_1, start_1));
-    range_sa_2 = *((Range*) array_get(exons_sa_2, start_2));
+    range_sa_1 = *((Range*) gt_array_get(exons_sa_1, start_1));
+    range_sa_2 = *((Range*) gt_array_get(exons_sa_2, start_2));
 
     if (range_overlap(range_sa_1, range_sa_2)) {
       /* analyze acceptor sites */
@@ -194,22 +194,22 @@ static bool compatible(const ConsensusSA *csa,
             has_acceptor_site(exons_sa_2, start_2) &&
             range_sa_1.start!= range_sa_2.start) {
           /* the acceptor sites are different */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          gt_array_delete(exons_sa_1);
+          gt_array_delete(exons_sa_2);
           return false;
         }
         else if (has_acceptor_site(exons_sa_1, start_1) &&
                  range_sa_2.start + fuzzlength < range_sa_1.start) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          gt_array_delete(exons_sa_1);
+          gt_array_delete(exons_sa_2);
           return false;
         }
         else if (has_acceptor_site(exons_sa_2, start_2) &&
                  range_sa_1.start + fuzzlength < range_sa_2.start) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          gt_array_delete(exons_sa_1);
+          gt_array_delete(exons_sa_2);
           return false;
         }
       }
@@ -225,30 +225,30 @@ static bool compatible(const ConsensusSA *csa,
             has_donor_site(exons_sa_2, start_2) &&
             range_sa_1.end != range_sa_2.end) {
           /* the donor sites are different */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          gt_array_delete(exons_sa_1);
+          gt_array_delete(exons_sa_2);
           return false;
         }
         else if (has_donor_site(exons_sa_1, start_1) &&
                  range_sa_2.end - fuzzlength > range_sa_1.end) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          gt_array_delete(exons_sa_1);
+          gt_array_delete(exons_sa_2);
           return false;
         }
         else if (has_donor_site(exons_sa_2, start_2) &&
                  range_sa_1.end - fuzzlength > range_sa_2.end) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          gt_array_delete(exons_sa_1);
+          gt_array_delete(exons_sa_2);
           return false;
         }
       }
     }
     else {
       /* no overlap: two ordered segments do not overlap each other */
-      array_delete(exons_sa_1);
-      array_delete(exons_sa_2);
+      gt_array_delete(exons_sa_1);
+      gt_array_delete(exons_sa_2);
       return false;
     }
     start_1++;
@@ -256,8 +256,8 @@ static bool compatible(const ConsensusSA *csa,
   }
 
   /* passed all tests */
-  array_delete(exons_sa_1);
-  array_delete(exons_sa_2);
+  gt_array_delete(exons_sa_1);
+  gt_array_delete(exons_sa_2);
   return true;
 }
 
@@ -455,7 +455,7 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa)
 static void compute_csas(ConsensusSA *csa)
 {
   unsigned long i, sa_i, sa_i_size = 0, sa_prime, sa_prime_size;
-  Array *splice_form;
+  GT_Array *splice_form;
   Bittab **C, **left, **right, **L, **R, *U_i, *SA_i, *SA_prime;
 #ifndef NDEBUG
   unsigned long u_i_size, u_i_minus_1_size;
@@ -481,7 +481,7 @@ static void compute_csas(ConsensusSA *csa)
   SA_i     = bittab_new(csa->number_of_sas);
   SA_prime = bittab_new(csa->number_of_sas);
 
-  splice_form = array_new(sizeof (unsigned long));
+  splice_form = gt_array_new(sizeof (unsigned long));
 
   /* compute sets */
   compute_C(C, csa);
@@ -524,7 +524,7 @@ static void compute_csas(ConsensusSA *csa)
 
     /* process splice form */
     if (csa->process_splice_form) {
-      array_reset(splice_form);
+      gt_array_reset(splice_form);
       bittab_get_all_bitnums(SA_i, splice_form);
       csa->process_splice_form(splice_form, csa->set_of_sas, csa->number_of_sas,
                                csa->size_of_sa, csa->userdata);
@@ -557,7 +557,7 @@ static void compute_csas(ConsensusSA *csa)
   bittab_delete(U_i);
   bittab_delete(SA_i);
   bittab_delete(SA_prime);
-  array_delete(splice_form);
+  gt_array_delete(splice_form);
 }
 
 void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,

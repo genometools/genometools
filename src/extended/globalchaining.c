@@ -335,11 +335,11 @@ static void findmaximalscores_withoverlaps(Chain *chain, Chaininfo *chaininfo,
                                            Overlapinfo *overlapinfo)
 {
   unsigned long i, startfrag;
-  Array *startfragments;
+  GT_Array *startfragments;
 
   assert(seqlen1 != UNDEF_ULONG);
   assert(mincoverage != UNDEF_DOUBLE);
-  startfragments = array_new(sizeof (unsigned long));
+  startfragments = gt_array_new(sizeof (unsigned long));
 
   /* compute chain array */
   for (i = 0; i < num_of_fragments; i++) {
@@ -355,7 +355,7 @@ static void findmaximalscores_withoverlaps(Chain *chain, Chaininfo *chaininfo,
 
           /* since this is the first time, store start fragment number
              to avoid additional scan of all fragments below */
-          array_add(startfragments, overlapinfo[i].startofchain);
+          gt_array_add(startfragments, overlapinfo[i].startofchain);
         }
       }
       else if (overlapinfo[i].dim1lengthofchain >
@@ -369,8 +369,8 @@ static void findmaximalscores_withoverlaps(Chain *chain, Chaininfo *chaininfo,
   }
 
   /* retrieve maximal chains */
-  for (i = 0; i < array_size(startfragments); i++) {
-    startfrag = *(unsigned long*) array_get(startfragments, i);
+  for (i = 0; i < gt_array_size(startfragments); i++) {
+    startfrag = *(unsigned long*) gt_array_get(startfragments, i);
     assert(overlapinfo[startfrag].chainarray != UNDEFPREVIOUS);
     chain_reset(chain);
     chain_set_score(chain, chaininfo[overlapinfo[startfrag].chainarray].score);
@@ -379,7 +379,7 @@ static void findmaximalscores_withoverlaps(Chain *chain, Chaininfo *chaininfo,
     chainprocessor(chain, fragments, cpinfo);
   }
 
-  array_delete(startfragments);
+  gt_array_delete(startfragments);
 }
 
 static void log_fragments(Fragment *fragments, unsigned long num_of_fragments)

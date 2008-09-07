@@ -20,12 +20,12 @@
 #include "extended/csa_variable_strands.h"
 
 typedef struct {
-  Array *splice_forms;
+  GT_Array *splice_forms;
   GetGenomicRangeFunc get_genomic_range;
   GetStrandFunc get_strand;
 } StoreSpliceFormInfo;
 
-static void store_splice_form(Array *spliced_alignments_in_form,
+static void store_splice_form(GT_Array *spliced_alignments_in_form,
                               const void *set_of_sas,
                               UNUSED unsigned long number_of_sas,
                               size_t size_of_sa, void *data)
@@ -34,25 +34,25 @@ static void store_splice_form(Array *spliced_alignments_in_form,
   CSASpliceForm *splice_form;
   unsigned long i, sa;
   assert(info);
-  assert(spliced_alignments_in_form && array_size(spliced_alignments_in_form));
-  sa = *(unsigned long*) array_get(spliced_alignments_in_form, 0);
+  assert(spliced_alignments_in_form && gt_array_size(spliced_alignments_in_form));
+  sa = *(unsigned long*) gt_array_get(spliced_alignments_in_form, 0);
   splice_form = csa_splice_form_new((char*) set_of_sas + sa * size_of_sa,
                                     info->get_genomic_range, info->get_strand);
-  for (i = 1; i < array_size(spliced_alignments_in_form); i++) {
-    sa = *(unsigned long*) array_get(spliced_alignments_in_form, i);
+  for (i = 1; i < gt_array_size(spliced_alignments_in_form); i++) {
+    sa = *(unsigned long*) gt_array_get(spliced_alignments_in_form, i);
     csa_splice_form_add_sa(splice_form, (char*) set_of_sas + sa * size_of_sa);
   }
-  array_add(info->splice_forms, splice_form);
+  gt_array_add(info->splice_forms, splice_form);
 }
 
-static void process_splice_forms(Array *genes, Array *splice_forms)
+static void process_splice_forms(GT_Array *genes, GT_Array *splice_forms)
 {
   CSAGene *forward_gene = NULL, *reverse_gene = NULL;
   unsigned long i;
   assert(genes && splice_forms);
   /* put splice forms into appropirate genes */
-  for (i = 0; i < array_size(splice_forms); i++) {
-    CSASpliceForm *splice_form = *(CSASpliceForm**) array_get(splice_forms, i);
+  for (i = 0; i < gt_array_size(splice_forms); i++) {
+    CSASpliceForm *splice_form = *(CSASpliceForm**) gt_array_get(splice_forms, i);
     switch (csa_splice_form_strand(splice_form)) {
       case STRAND_FORWARD:
         if (!forward_gene)
@@ -75,33 +75,34 @@ static void process_splice_forms(Array *genes, Array *splice_forms)
     /* determine which comes first to keep sorting */
     if (range_compare(csa_gene_genomic_range(forward_gene),
                       csa_gene_genomic_range(reverse_gene)) <= 0) {
-      array_add(genes, forward_gene);
-      array_add(genes, reverse_gene);
+      gt_array_add(genes, forward_gene);
+      gt_array_add(genes, reverse_gene);
     }
     else {
-      array_add(genes, reverse_gene);
-      array_add(genes, forward_gene);
+      gt_array_add(genes, reverse_gene);
+      gt_array_add(genes, forward_gene);
     }
   }
   else if (forward_gene)
-    array_add(genes, forward_gene);
+    gt_array_add(genes, forward_gene);
   else
-    array_add(genes, reverse_gene);
+    gt_array_add(genes, reverse_gene);
 }
 
-Array* csa_variable_strands(const void *set_of_sas, unsigned long number_of_sas,
-                            size_t size_of_sa,
-                            GetGenomicRangeFunc get_genomic_range,
-                            GetStrandFunc get_strand, GetExonsFunc get_exons)
+GT_Array* csa_variable_strands(const void *set_of_sas,
+                               unsigned long number_of_sas,
+                               size_t size_of_sa,
+                               GetGenomicRangeFunc get_genomic_range,
+                               GetStrandFunc get_strand, GetExonsFunc get_exons)
 {
   StoreSpliceFormInfo info;
-  Array *genes;
+  GT_Array *genes;
   assert(set_of_sas && number_of_sas && size_of_sa);
   assert(get_genomic_range && get_strand && get_exons);
 
-  genes = array_new(sizeof (CSAGene*));
+  genes = gt_array_new(sizeof (CSAGene*));
 
-  info.splice_forms = array_new(sizeof (CSASpliceForm*));
+  info.splice_forms = gt_array_new(sizeof (CSASpliceForm*));
   info.get_genomic_range = get_genomic_range;
   info.get_strand = get_strand;
 
@@ -110,7 +111,7 @@ Array* csa_variable_strands(const void *set_of_sas, unsigned long number_of_sas,
 
   process_splice_forms(genes, info.splice_forms);
 
-  array_delete(info.splice_forms);
+  gt_array_delete(info.splice_forms);
 
   return genes;
 }

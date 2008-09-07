@@ -29,11 +29,11 @@ typedef struct {
   Hashtable *mapping;
 } Pos;
 
-DECLARE_HASHMAP(unsigned long, ul, Array *, array, static, inline)
-DEFINE_HASHMAP(unsigned long, ul, Array *, array, ht_ul_elem_hash,
-               ht_ul_elem_cmp, NULL_DESTRUCTOR, array_delete, static,
+DECLARE_HASHMAP(unsigned long, ul, GT_Array *, array, static, inline)
+DEFINE_HASHMAP(unsigned long, ul, GT_Array *, array, ht_ul_elem_hash,
+               ht_ul_elem_cmp, NULL_DESTRUCTOR, gt_array_delete, static,
                inline)
-DECLARE_SAFE_DEREF(Array *,array)
+DECLARE_SAFE_DEREF(GT_Array *,array)
 
 /* Return a new Pos object. */
 Pos* pos_new(void)
@@ -54,20 +54,20 @@ void pos_delete(Pos *pos)
 /* Add <position> to position list for <code>. */
 void pos_add(Pos *pos, unsigned long code, unsigned long position)
 {
-  Array *position_list;
+  GT_Array *position_list;
   assert(pos && pos->mapping);
   position_list = array_safe_deref(ul_array_hashmap_get(pos->mapping, code));
   if (!position_list) {
-    position_list = array_new(sizeof (unsigned long));
-    array_add(position_list, position);
+    position_list = gt_array_new(sizeof (unsigned long));
+    gt_array_add(position_list, position);
     ul_array_hashmap_add(pos->mapping, code, position_list);
   }
   else
-    array_add(position_list, position);
+    gt_array_add(position_list, position);
 }
 
 /* Get position list for <code>. */
-Array* pos_get(Pos *pos, unsigned long code)
+GT_Array* pos_get(Pos *pos, unsigned long code)
 {
   assert(pos && pos->mapping);
   return array_safe_deref(ul_array_hashmap_get(pos->mapping, code));
@@ -244,7 +244,7 @@ void blast_env_delete(BlastEnv *be)
 void blast_env_show(const BlastEnv *be)
 {
   unsigned long i, code;
-  Array *position_list;
+  GT_Array *position_list;
   char *qgram;
   assert(be);
   if (!be->pos)
@@ -258,11 +258,11 @@ void blast_env_show(const BlastEnv *be)
        code  = bittab_get_next_bitnum(be->V, code)) {
     position_list = pos_get(be->pos, code);
     assert(position_list);
-    assert(array_size(position_list)); /* contains at least one position */
+    assert(gt_array_size(position_list)); /* contains at least one position */
     qgram_decode(qgram, code, be->q, be->alpha);
     xfputs(qgram, stdout);
-    for (i = 0; i < array_size(position_list); i++) {
-      printf(", %lu", *(unsigned long*) array_get(position_list, i) + 1);
+    for (i = 0; i < gt_array_size(position_list); i++) {
+      printf(", %lu", *(unsigned long*) gt_array_get(position_list, i) + 1);
     }
     xputchar('\n');
   }

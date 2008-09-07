@@ -38,7 +38,7 @@ void          bittab_shift_left_equal(Bittab*);                    /* a<<=1  */
 void          bittab_shift_right_equal(Bittab*);                   /* a>>=1  */
 void          bittab_unset(Bittab*);                               /* a=0    */
 void          bittab_show(const Bittab*, FILE*);
-void          bittab_get_all_bitnums(const Bittab*, Array*);
+void          bittab_get_all_bitnums(const Bittab*, GT_Array*);
 bool          bittab_bit_is_set(const Bittab*, unsigned long);
 bool          bittab_is_true(const Bittab*);
 bool          bittab_cmp(const Bittab*, const Bittab*);

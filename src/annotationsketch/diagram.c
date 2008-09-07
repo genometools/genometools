@@ -62,7 +62,7 @@ typedef struct {
 /* a node in the reverse lookup structure used for collapsing */
 typedef struct {
   GenomeNode *parent;
-  Array *blocktuples;
+  GT_Array *blocktuples;
 } NodeInfoElement;
 
 typedef struct {
@@ -92,7 +92,7 @@ static NodeInfoElement* get_or_create_node_info(GT_Diagram *d, GenomeNode *node)
   ni = hashmap_get(d->nodeinfo, node);
   if (ni == NULL) {
     NodeInfoElement *new_ni = ma_malloc(sizeof (NodeInfoElement));
-    new_ni->blocktuples = array_new(sizeof (GT_BlockTuple*));
+    new_ni->blocktuples = gt_array_new(sizeof (GT_BlockTuple*));
     hashmap_add(d->nodeinfo, node, new_ni);
     ni = new_ni;
   }
@@ -105,8 +105,8 @@ static GT_Block* find_block_for_type(NodeInfoElement* ni,
   GT_Block *block = NULL;
   unsigned long i;
   assert(ni);
-  for (i = 0; i < array_size(ni->blocktuples); i++) {
-    GT_BlockTuple *bt = *(GT_BlockTuple**) array_get(ni->blocktuples, i);
+  for (i = 0; i < gt_array_size(ni->blocktuples); i++) {
+    GT_BlockTuple *bt = *(GT_BlockTuple**) gt_array_get(ni->blocktuples, i);
     if (bt->gft == gft) {
       block = bt->block;
       break;
@@ -201,7 +201,7 @@ static void add_to_current(GT_Diagram *d, GenomeNode *node, GenomeNode *parent)
   /* insert node into block */
   gt_block_insert_element(block, node);
   bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node), block);
-  array_add(ni->blocktuples, bt);
+  gt_array_add(ni->blocktuples, bt);
 }
 
 static void add_to_parent(GT_Diagram *d, GenomeNode *node, GenomeNode* parent)
@@ -246,7 +246,7 @@ static void add_to_parent(GT_Diagram *d, GenomeNode *node, GenomeNode* parent)
     gt_block_set_caption(block, caption);
     /* add block to nodeinfo */
     bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node), block);
-    array_add(par_ni->blocktuples, bt);
+    gt_array_add(par_ni->blocktuples, bt);
   }
   /* now we have a block to insert into */
   gt_block_insert_element(block, node);
@@ -273,7 +273,7 @@ static void add_recursive(GT_Diagram *d, GenomeNode *node,
       block = gt_block_new_from_node(node);
       bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node),
                           block);
-      array_add(ni->blocktuples, bt);
+      gt_array_add(ni->blocktuples, bt);
     }
     gt_block_insert_element(block, original_node);
   }
@@ -415,20 +415,20 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
   GT_Diagram *diagram = (GT_Diagram*) data;
   unsigned long i = 0;
 
-  for (i = 0; i < array_size(ni->blocktuples); i++) {
-    Array *list;
-    GT_BlockTuple *bt = *(GT_BlockTuple**) array_get(ni->blocktuples, i);
-    list = (Array*) hashmap_get(diagram->blocks, bt->gft);
+  for (i = 0; i < gt_array_size(ni->blocktuples); i++) {
+    GT_Array *list;
+    GT_BlockTuple *bt = *(GT_BlockTuple**) gt_array_get(ni->blocktuples, i);
+    list = (GT_Array*) hashmap_get(diagram->blocks, bt->gft);
     if (!list)
     {
-      list = array_new(sizeof (GT_Block*));
+      list = gt_array_new(sizeof (GT_Block*));
       hashmap_add(diagram->blocks, bt->gft, list);
     }
     assert(list);
-    array_add(list, bt->block);
+    gt_array_add(list, bt->block);
     ma_free(bt);
   }
-  array_delete(ni->blocktuples);
+  gt_array_delete(ni->blocktuples);
   ma_free(ni);
   return 0;
 }
@@ -450,7 +450,7 @@ static void traverse_genome_nodes(GenomeNode *gn, void *genome_node_children)
   }
 }
 
-static void gt_diagram_build(GT_Diagram *diagram, Array *features)
+static void gt_diagram_build(GT_Diagram *diagram, GT_Array *features)
 {
   unsigned long i = 0;
   int had_err;
@@ -463,8 +463,8 @@ static void gt_diagram_build(GT_Diagram *diagram, Array *features)
                                                   NULL, ma_free_func);
 
   /* do node traversal for each root feature */
-  for (i = 0; i < array_size(features); i++) {
-    GenomeNode *current_root = *(GenomeNode**) array_get(features,i);
+  for (i = 0; i < gt_array_size(features); i++) {
+    GenomeNode *current_root = *(GenomeNode**) gt_array_get(features,i);
     traverse_genome_nodes(current_root, &genome_node_children);
   }
   /* collect blocks from nodeinfo structures and create the tracks */
@@ -480,14 +480,14 @@ static void gt_diagram_build(GT_Diagram *diagram, Array *features)
 static int blocklist_delete(void *value)
 {
   unsigned long i;
-  Array *a = (Array*) value;
-  for (i=0;i<array_size(a);i++)
-    gt_block_delete(*(GT_Block**) array_get(a, i));
-  array_delete(a);
+  GT_Array *a = (GT_Array*) value;
+  for (i = 0; i < gt_array_size(a); i++)
+    gt_block_delete(*(GT_Block**) gt_array_get(a, i));
+  gt_array_delete(a);
   return 0;
 }
 
-static GT_Diagram* gt_diagram_new_generic(Array *features, const Range *range,
+static GT_Diagram* gt_diagram_new_generic(GT_Array *features, const Range *range,
                                     GT_Style *style)
 {
   GT_Diagram *diagram;
@@ -509,17 +509,17 @@ GT_Diagram* gt_diagram_new(GT_FeatureIndex *fi, const char *seqid,
 {
   GT_Diagram *diagram;
   int had_err = 0;
-  Array *features = array_new(sizeof (GenomeNode*));
+  GT_Array *features = gt_array_new(sizeof (GenomeNode*));
   assert(features && seqid && range && style);
   had_err = gt_feature_index_get_features_for_range(fi, features, seqid, *range,
                                                  NULL);
   assert(!had_err); /* <fi> must contain <seqid> */
   diagram = gt_diagram_new_generic(features, range, style);
-  array_delete(features);
+  gt_array_delete(features);
   return diagram;
 }
 
-GT_Diagram* gt_diagram_new_from_array(Array *features, const Range *range,
+GT_Diagram* gt_diagram_new_from_array(GT_Array *features, const Range *range,
                                 GT_Style *style)
 {
   assert(features && range && style);
@@ -566,7 +566,7 @@ static int layout_tracks(void *key, void *value, void *data,
   Track *track;
   TrackTraverseInfo *tti = (TrackTraverseInfo*) data;
   GenomeFeatureType *gft = (GenomeFeatureType*) key;
-  Array *list = (Array*) value;
+  GT_Array *list = (GT_Array*) value;
   char *filename;
   Str *track_key;
   const char *type;
@@ -576,11 +576,11 @@ static int layout_tracks(void *key, void *value, void *data,
   assert(gft && list);
 
   /* to get a deterministic layout, we sort the GT_Blocks for each type */
-  array_sort(list, blocklist_block_compare);
+  gt_array_sort(list, blocklist_block_compare);
   /* we take the basename of the filename to have nicer output in the
      generated graphic. this might lead to ``collapsed'' tracks, if two files
      with different paths have the same basename. */
-  block = *(GT_Block**) array_get(list, 0);
+  block = *(GT_Block**) gt_array_get(list, 0);
   filename = getbasename(genome_node_get_filename(
                                         gt_block_get_top_level_feature(block)));
   track_key = track_key_new(filename, gft);
@@ -603,9 +603,8 @@ static int layout_tracks(void *key, void *value, void *data,
   track = track_new(track_key, max, split,
                     line_breaker_captions_new(tti->canvas));
   tti->dia->nof_tracks++;
-  for (i=0;i<array_size(list);i++)
-  {
-    block = *(GT_Block**) array_get(list, i);
+  for (i = 0; i < gt_array_size(list); i++) {
+    block = *(GT_Block**) gt_array_get(list, i);
     track_insert_block(track, block);
   }
   hashmap_add(tti->dia->tracks, cstr_dup(str_get(track_key)), track);
@@ -653,7 +652,7 @@ int gt_diagram_unit_test(Error *err)
   int had_err=0;
   GT_Style *sty = NULL;
   GT_Diagram *dia = NULL, *dia2 = NULL, *dia3 = NULL;
-  Array *features;
+  GT_Array *features;
   GT_Canvas *canvas = NULL;
   error_check(err);
 
@@ -778,9 +777,9 @@ int gt_diagram_unit_test(Error *err)
   }
   ensure(had_err, range_compare(gt_diagram_get_range(dia),dr1) == 0);
 
-  features = array_new(sizeof (GenomeNode*));
-  array_add(features, gn1);
-  array_add(features, gn2);
+  features = gt_array_new(sizeof (GenomeNode*));
+  gt_array_add(features, gn1);
+  gt_array_add(features, gn2);
   dia3 = gt_diagram_new_from_array(features, &rs, sty);
 
   ensure(had_err, dia3->style);
@@ -807,7 +806,7 @@ int gt_diagram_unit_test(Error *err)
 
   /* delete all generated objects */
   gt_style_delete(sty);
-  array_delete(features);
+  gt_array_delete(features);
   gt_diagram_delete(dia);
   gt_diagram_delete(dia2);
   gt_diagram_delete(dia3);

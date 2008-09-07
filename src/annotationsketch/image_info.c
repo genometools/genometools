@@ -26,7 +26,7 @@
 #include "annotationsketch/image_info.h"
 
 struct GT_ImageInfo {
-  Array* recmaps;
+  GT_Array* recmaps;
   unsigned int height;
 };
 
@@ -34,7 +34,7 @@ GT_ImageInfo* gt_image_info_new()
 {
   GT_ImageInfo *ii;
   ii = ma_calloc(1, sizeof (GT_ImageInfo));
-  ii->recmaps = array_new(sizeof (GT_RecMap*));
+  ii->recmaps = gt_array_new(sizeof (GT_RecMap*));
   assert(ii->recmaps);
   return ii;
 }
@@ -45,17 +45,17 @@ void gt_image_info_delete(GT_ImageInfo *ii)
   if (!ii) return;
   for (i=0;i<gt_image_info_num_of_recmaps(ii);i++)
   {
-    GT_RecMap *rm = *(GT_RecMap**) array_get(ii->recmaps, i);
+    GT_RecMap *rm = *(GT_RecMap**) gt_array_get(ii->recmaps, i);
     gt_recmap_delete(rm);
   }
-  array_delete(ii->recmaps);
+  gt_array_delete(ii->recmaps);
   ma_free(ii);
 }
 
 void gt_image_info_add_recmap(GT_ImageInfo *ii, GT_RecMap *rm)
 {
   assert(ii && rm);
-  array_add(ii->recmaps, rm);
+  gt_array_add(ii->recmaps, rm);
 }
 
 void gt_image_info_set_height(GT_ImageInfo *ii, unsigned int height)
@@ -73,13 +73,13 @@ unsigned int gt_image_info_get_height(GT_ImageInfo *ii)
 unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo *ii)
 {
   assert(ii);
-  return array_size(ii->recmaps);
+  return gt_array_size(ii->recmaps);
 }
 
 const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
 {
   assert(ii);
-  return *(GT_RecMap**) array_get(ii->recmaps, n);
+  return *(GT_RecMap**) gt_array_get(ii->recmaps, n);
 }
 
 int gt_image_info_unit_test(Error *err)

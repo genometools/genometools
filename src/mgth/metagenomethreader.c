@@ -339,11 +339,11 @@ int metagenomethreader(int argc, const char **argv, Error * err)
     parsestruct.result_hits = str_new();
 
     /* diverse Zeiger auf Informationen aus dem XML-File */
-    parsestruct.matrix_info.query_from = array_new(sizeof (unsigned long));
-    parsestruct.matrix_info.query_to = array_new(sizeof (unsigned long));
-    parsestruct.matrix_info.query_frame = array_new(sizeof (unsigned long));
-    parsestruct.matrix_info.hit_frame = array_new(sizeof (unsigned long));
-    parsestruct.value_tmp = array_new(sizeof (unsigned long));
+    parsestruct.matrix_info.query_from = gt_array_new(sizeof (unsigned long));
+    parsestruct.matrix_info.query_to = gt_array_new(sizeof (unsigned long));
+    parsestruct.matrix_info.query_frame = gt_array_new(sizeof (unsigned long));
+    parsestruct.matrix_info.hit_frame = gt_array_new(sizeof (unsigned long));
+    parsestruct.value_tmp = gt_array_new(sizeof (unsigned long));
 
     /* mit dem schliessenden Iteration_hits XML-Tag wird im Programmablauf
        der Abschluss eines Query-Eintrages erkannt */
@@ -657,11 +657,11 @@ int metagenomethreader(int argc, const char **argv, Error * err)
     str_delete(parsestruct.xmlfile);
     str_delete(parsestruct.result_hits);
 
-    array_delete(parsestruct.matrix_info.query_from);
-    array_delete(parsestruct.matrix_info.query_to);
-    array_delete(parsestruct.matrix_info.query_frame);
-    array_delete(parsestruct.matrix_info.hit_frame);
-    array_delete(parsestruct.value_tmp);
+    gt_array_delete(parsestruct.matrix_info.query_from);
+    gt_array_delete(parsestruct.matrix_info.query_to);
+    gt_array_delete(parsestruct.matrix_info.query_frame);
+    gt_array_delete(parsestruct.matrix_info.hit_frame);
+    gt_array_delete(parsestruct.value_tmp);
 
     ma_free(querynum);
     ma_free(parsestruct.hits_statistics.hitsnum);

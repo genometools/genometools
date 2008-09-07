@@ -72,15 +72,15 @@ void transcript_evaluators_add_actuals(const TranscriptEvaluators *evaluators,
 {
   assert(evaluators && exons);
   evaluator_add_actual(evaluators->exon_evaluator_all,
-                       array_size(transcript_exons_get_all(exons)));
+                       gt_array_size(transcript_exons_get_all(exons)));
   evaluator_add_actual(evaluators->exon_evaluator_single,
-                       array_size(transcript_exons_get_single(exons)));
+                       gt_array_size(transcript_exons_get_single(exons)));
   evaluator_add_actual(evaluators->exon_evaluator_initial,
-                       array_size(transcript_exons_get_initial(exons)));
+                       gt_array_size(transcript_exons_get_initial(exons)));
   evaluator_add_actual(evaluators->exon_evaluator_internal,
-                       array_size(transcript_exons_get_internal(exons)));
+                       gt_array_size(transcript_exons_get_internal(exons)));
   evaluator_add_actual(evaluators->exon_evaluator_terminal,
-                       array_size(transcript_exons_get_terminal(exons)));
+                       gt_array_size(transcript_exons_get_terminal(exons)));
 }
 
 void transcript_evaluators_delete(TranscriptEvaluators *te)

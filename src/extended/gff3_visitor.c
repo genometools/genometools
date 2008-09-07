@@ -88,15 +88,15 @@ static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
 static int add_id(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   Add_id_info *info = (Add_id_info*) data;
-  Array *parent_features = NULL;
+  GT_Array *parent_features = NULL;
   error_check(err);
   assert(gn && info && info->genome_feature_to_id_array && info->id);
   parent_features = hashmap_get(info->genome_feature_to_id_array, gn);
   if (!parent_features) {
-    parent_features = array_new(sizeof (char*));
+    parent_features = gt_array_new(sizeof (char*));
     hashmap_add(info->genome_feature_to_id_array, gn, parent_features);
   }
-  array_add(parent_features, info->id);
+  gt_array_add(parent_features, info->id);
   return 0;
 }
 
@@ -120,7 +120,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data,
   bool part_shown = false;
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
-  Array *parent_features = NULL;
+  GT_Array *parent_features = NULL;
   ShowAttributeInfo info;
   unsigned long i;
   Str *id;
@@ -140,15 +140,15 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data,
   /* show parent part of attributes */
   parent_features = hashmap_get(gff3_visitor->genome_feature_to_id_array,
                                   gn);
-  if (array_size(parent_features)) {
+  if (gt_array_size(parent_features)) {
     if (part_shown)
       genfile_xfputc(';', gff3_visitor->outfp);
     genfile_xprintf(gff3_visitor->outfp, "%s=", PARENT_STRING);
-    for (i = 0; i < array_size(parent_features); i++) {
+    for (i = 0; i < gt_array_size(parent_features); i++) {
       if (i)
         genfile_xfputc(',', gff3_visitor->outfp);
       genfile_xprintf(gff3_visitor->outfp, "%s",
-                      *(char**) array_get(parent_features, i));
+                      *(char**) gt_array_get(parent_features, i));
     }
     part_shown = true;
   }
@@ -321,9 +321,9 @@ GenomeVisitor* gff3_visitor_new(GenFile *outfp)
   gff3_visitor->fasta_directive_shown = false;
   gff3_visitor->id_counter = string_distri_new();
   gff3_visitor->genome_feature_to_id_array = hashmap_new(
-    HASH_DIRECT, NULL, (FreeFunc)array_delete);
+    HASH_DIRECT, NULL, (FreeFunc) gt_array_delete);
   gff3_visitor->genome_feature_to_unique_id_str = hashmap_new(
-    HASH_DIRECT, NULL, (FreeFunc)str_delete);
+    HASH_DIRECT, NULL, (FreeFunc) str_delete);
   gff3_visitor->fasta_width = 0;
   gff3_visitor->outfp = outfp;
   return gv;

@@ -48,7 +48,7 @@ void              interval_tree_insert(IntervalTree*, IntervalTreeNode*);
 void              interval_tree_find_all_overlapping(IntervalTree*,
                                                      unsigned long start,
                                                      unsigned long end,
-                                                     Array*);
+                                                     GT_Array*);
 int               interval_tree_traverse(IntervalTree *it,
                                          IntervalTreeIteratorFunc func,
                                          void *data);

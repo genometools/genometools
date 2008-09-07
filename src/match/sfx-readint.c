@@ -47,7 +47,7 @@ size_t sizeofReadintkeys(void)
   return sizeof (Readintkeys);
 }
 
-void setreadintkeys(Array *riktab,
+void setreadintkeys(GT_Array *riktab,
                     const char *keystring,
                     void *valueptr,
                     size_t sizeval,
@@ -76,7 +76,7 @@ void setreadintkeys(Array *riktab,
             break;
   }
   rikvalue.found = false;
-  array_add_elem(riktab,&rikvalue,sizeof (Readintkeys));
+  gt_array_add_elem(riktab,&rikvalue,sizeof (Readintkeys));
 }
 
 static int scanuintintline(uint32_t *lengthofkey,
@@ -133,16 +133,16 @@ static int scanuintintline(uint32_t *lengthofkey,
 }
 
 int allkeysdefined(const Str *indexname,const char *suffix,
-                   const Array *riktab,Verboseinfo *verboseinfo,
+                   const GT_Array *riktab,Verboseinfo *verboseinfo,
                    Error *err)
 {
   unsigned long i;
   Readintkeys *rikptr;
 
   error_check(err);
-  for (i=0; i<array_size(riktab); i++)
+  for (i=0; i<gt_array_size(riktab); i++)
   {
-    rikptr = (Readintkeys *) array_get(riktab,i);
+    rikptr = (Readintkeys *) gt_array_get(riktab,i);
     if (rikptr->found)
     {
       if (rikptr->ptrdefined)
@@ -193,7 +193,7 @@ int analyzeuintline(const Str *indexname,
                     unsigned int linenum,
                     const char *linebuffer,
                     unsigned long linelength,
-                    Array *riktab,
+                    GT_Array *riktab,
                     Error *err)
 {
   Readintkeys *rikptr;
@@ -214,9 +214,9 @@ int analyzeuintline(const Str *indexname,
     haserr = true;
   } else
   {
-    for (i=0; i<array_size(riktab); i++)
+    for (i=0; i<gt_array_size(riktab); i++)
     {
-      rikptr = array_get(riktab,i);
+      rikptr = gt_array_get(riktab,i);
       if (memcmp(linebuffer,
                  rikptr->keystring,
                  (size_t) lengthofkey) == 0)

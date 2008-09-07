@@ -140,13 +140,13 @@ int interval_tree_traverse(IntervalTree *it, IntervalTreeIteratorFunc func,
 
 static void interval_tree_find_all_internal(IntervalTreeNode *node,
                                             unsigned long low,
-                                            unsigned long high, Array *a)
+                                            unsigned long high, GT_Array *a)
 {
   IntervalTreeNode* x;
   if (!node) return;
   x = node;
   if (low <= x->high && x->low <= high)
-    array_add(a, x->data);
+    gt_array_add(a, x->data);
   /* recursively search left and right subtrees */
   if (x->left && low <= x->left->max)
     interval_tree_find_all_internal(x->left, low, high, a);
@@ -155,7 +155,7 @@ static void interval_tree_find_all_internal(IntervalTreeNode *node,
 }
 
 void interval_tree_find_all_overlapping(IntervalTree *it, unsigned long start,
-                                        unsigned long end, Array* a)
+                                        unsigned long end, GT_Array* a)
 {
   assert(it && a && start <= end);
   if (!it->root) return;
@@ -360,9 +360,9 @@ int interval_tree_unit_test(UNUSED Error *err)
   int query_width = 5000;
 
   Range *res_rng = NULL, qrange;
-  Array *arr;
+  GT_Array *arr;
 
-  arr = array_new(sizeof (Range*));
+  arr = gt_array_new(sizeof (Range*));
 
   /* generate test ranges */
   for (i = 0;i<num_testranges;i++)
@@ -373,7 +373,7 @@ int interval_tree_unit_test(UNUSED Error *err)
     start = rand_max(range_max_basepos);
     rng->start = start;
     rng->end = start + rand_max(width);
-    array_add(arr, rng);
+    gt_array_add(arr, rng);
   }
 
   it = interval_tree_new(ma_free_func);
@@ -383,7 +383,7 @@ int interval_tree_unit_test(UNUSED Error *err)
   {
     IntervalTreeNode *new_node;
     Range *rng;
-    rng = *(Range**) array_get(arr, i);
+    rng = *(Range**) gt_array_get(arr, i);
     new_node = interval_tree_node_new(rng, rng->start, rng->end);
     interval_tree_insert(it, new_node);
   }
@@ -408,9 +408,9 @@ int interval_tree_unit_test(UNUSED Error *err)
       Range *this_rng;
       unsigned long j;
       bool found = false;
-      for (j=0;j<array_size(arr);j++)
+      for (j = 0; j < gt_array_size(arr); j++)
       {
-        this_rng = *(Range**) array_get(arr, j);
+        this_rng = *(Range**) gt_array_get(arr, j);
         if (range_overlap(*this_rng, qrange))
         {
           found = true;
@@ -427,33 +427,33 @@ int interval_tree_unit_test(UNUSED Error *err)
     unsigned long start = rand_max(range_max_basepos);
     qrange.start = start;
     qrange.end = start + rand_max(query_width);
-    Array *res = array_new(sizeof (Range*));
+    GT_Array *res = gt_array_new(sizeof (Range*));
     interval_tree_find_all_overlapping(it, qrange.start, qrange.end, res);
     if (res)
     {
       /* generate reference overlapping interval list by linear search */
-      Array *ref;
+      GT_Array *ref;
       unsigned long j;
-      ref = array_new(sizeof (Range*));
-      for (j=0;j<array_size(arr);j++)
+      ref = gt_array_new(sizeof (Range*));
+      for (j = 0; j < gt_array_size(arr); j++)
       {
         Range *this_rng;
-        this_rng = *(Range**) array_get(arr, j);
+        this_rng = *(Range**) gt_array_get(arr, j);
         if (range_overlap(*this_rng, qrange))
         {
-          array_add(ref, this_rng);
+          gt_array_add(ref, this_rng);
         }
       }
       /* compare reference with interval tree query result */
-      array_sort(ref, range_ptr_compare);
-      array_sort(res, range_ptr_compare);
+      gt_array_sort(ref, range_ptr_compare);
+      gt_array_sort(res, range_ptr_compare);
       /* must be equal */
-      ensure(had_err, array_cmp(ref, res)==0);
-      array_delete(ref);
+      ensure(had_err, gt_array_cmp(ref, res)==0);
+      gt_array_delete(ref);
     }
-    array_delete(res);
+    gt_array_delete(res);
   }
-  array_delete(arr);
+  gt_array_delete(arr);
   interval_tree_delete(it);
   return had_err;
 }

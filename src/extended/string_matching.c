@@ -185,16 +185,16 @@ static bool store_first_match(unsigned long pos, void *data)
 
 static bool store_match(unsigned long pos, void *data)
 {
-  Array *positions = data;
+  GT_Array *positions = data;
   assert(positions);
-  array_add(positions, pos);
+  gt_array_add(positions, pos);
   return false;
 }
 
 int string_matching_unit_test(Error *err)
 {
   char s[MAX_STRING_LENGTH+1], p[MAX_PATTERN_LENGTH+1], *text = "foo";
-  Array *brute_force_matches,
+  GT_Array *brute_force_matches,
         *bmh_matches,
         *kmp_matches,
         *shift_and_matches;
@@ -203,10 +203,10 @@ int string_matching_unit_test(Error *err)
 
   error_check(err);
 
-  brute_force_matches = array_new(sizeof (unsigned long));
-  bmh_matches = array_new(sizeof (unsigned long));
-  kmp_matches = array_new(sizeof (unsigned long));
-  shift_and_matches = array_new(sizeof (unsigned long));
+  brute_force_matches = gt_array_new(sizeof (unsigned long));
+  bmh_matches = gt_array_new(sizeof (unsigned long));
+  kmp_matches = gt_array_new(sizeof (unsigned long));
+  shift_and_matches = gt_array_new(sizeof (unsigned long));
 
   /* match the empty pattern */
   string_matching_brute_force(text, strlen(text), "", 0, store_match,
@@ -216,10 +216,10 @@ int string_matching_unit_test(Error *err)
   string_matching_shift_and(text, strlen(text), "", 0, store_match,
                             shift_and_matches);
 
-  ensure(had_err, !array_size(brute_force_matches));
-  ensure(had_err, !array_size(bmh_matches));
-  ensure(had_err, !array_size(kmp_matches));
-  ensure(had_err, !array_size(shift_and_matches));
+  ensure(had_err, !gt_array_size(brute_force_matches));
+  ensure(had_err, !gt_array_size(bmh_matches));
+  ensure(had_err, !gt_array_size(kmp_matches));
+  ensure(had_err, !gt_array_size(shift_and_matches));
 
   for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
     unsigned long j, n, m;
@@ -252,24 +252,26 @@ int string_matching_unit_test(Error *err)
     string_matching_kmp(s, n, p, m, store_match, kmp_matches);
     string_matching_shift_and(s, n, p, m, store_match, shift_and_matches);
     /* comparing (all matches) */
-    ensure(had_err, array_size(brute_force_matches) == array_size(bmh_matches));
-    ensure(had_err, array_size(brute_force_matches) == array_size(kmp_matches));
-    ensure(had_err, array_size(brute_force_matches) ==
-                    array_size(shift_and_matches));
-    ensure(had_err, !array_cmp(brute_force_matches, bmh_matches));
-    ensure(had_err, !array_cmp(brute_force_matches, kmp_matches));
-    ensure(had_err, !array_cmp(brute_force_matches, shift_and_matches));
+    ensure(had_err, gt_array_size(brute_force_matches) ==
+                    gt_array_size(bmh_matches));
+    ensure(had_err, gt_array_size(brute_force_matches) ==
+                    gt_array_size(kmp_matches));
+    ensure(had_err, gt_array_size(brute_force_matches) ==
+                    gt_array_size(shift_and_matches));
+    ensure(had_err, !gt_array_cmp(brute_force_matches, bmh_matches));
+    ensure(had_err, !gt_array_cmp(brute_force_matches, kmp_matches));
+    ensure(had_err, !gt_array_cmp(brute_force_matches, shift_and_matches));
     /* reset */
-    array_reset(brute_force_matches);
-    array_reset(bmh_matches);
-    array_reset(kmp_matches);
-    array_reset(shift_and_matches);
+    gt_array_reset(brute_force_matches);
+    gt_array_reset(bmh_matches);
+    gt_array_reset(kmp_matches);
+    gt_array_reset(shift_and_matches);
   }
 
-  array_delete(shift_and_matches);
-  array_delete(bmh_matches);
-  array_delete(kmp_matches);
-  array_delete(brute_force_matches);
+  gt_array_delete(shift_and_matches);
+  gt_array_delete(bmh_matches);
+  gt_array_delete(kmp_matches);
+  gt_array_delete(brute_force_matches);
 
   return had_err;
 }

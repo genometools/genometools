@@ -66,16 +66,16 @@ static int feature_index_lua_add_genome_feature(lua_State *L)
   return 0;
 }
 
-static void push_features_as_table(lua_State *L, Array *features)
+static void push_features_as_table(lua_State *L, GT_Array *features)
 {
   unsigned long i;
-  if (features && array_size(features)) {
+  if (features && gt_array_size(features)) {
     /* push table containing feature references onto the stack */
     lua_newtable(L);
-    for (i = 0; i < array_size(features); i++) {
+    for (i = 0; i < gt_array_size(features); i++) {
       lua_pushinteger(L, i+1); /* in Lua we index from 1 on */
       genome_node_lua_push(L, genome_node_rec_ref(*(GenomeNode**)
-                                                  array_get(features, i)));
+                                                  gt_array_get(features, i)));
       lua_rawset(L, -3);
     }
   }
@@ -87,12 +87,12 @@ static int feature_index_lua_get_features_for_seqid(lua_State *L)
 {
   GT_FeatureIndex **feature_index;
   const char *seqid;
-  Array *features;
+  GT_Array *features;
   feature_index = check_feature_index(L, 1);
   seqid = luaL_checkstring(L, 2);
   features = gt_feature_index_get_features_for_seqid(*feature_index, seqid);
   push_features_as_table(L, features);
-  array_delete(features);
+  gt_array_delete(features);
   return 1;
 }
 
@@ -101,20 +101,20 @@ static int feature_index_lua_get_features_for_range(lua_State *L)
   GT_FeatureIndex **feature_index;
   const char *seqid;
   Range *range;
-  Array *features;
+  GT_Array *features;
   int had_err;
   feature_index = check_feature_index(L, 1);
   seqid = luaL_checkstring(L, 2);
   luaL_argcheck(L, gt_feature_index_has_seqid(*feature_index, seqid), 2,
                 "feature_index does not contain seqid");
   range = check_range(L, 3);
-  features = array_new(sizeof (GenomeNode*));
+  features = gt_array_new(sizeof (GenomeNode*));
   had_err = gt_feature_index_get_features_for_range(*feature_index, features,
                                                     seqid, *range, NULL);
   assert(!had_err); /* it was checked before that the feature_index contains the
                        given sequence id*/
   push_features_as_table(L, features);
-  array_delete(features);
+  gt_array_delete(features);
   return 1;
 }
 

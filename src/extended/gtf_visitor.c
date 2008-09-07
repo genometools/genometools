@@ -30,7 +30,7 @@ struct GTFVisitor {
   const GenomeVisitor parent_instance;
   unsigned long gene_id,
                 transcript_id;
-  Array *exon_features,
+  GT_Array *exon_features,
         *CDS_features;
   GenFile *outfp;
 };
@@ -42,8 +42,8 @@ static void gtf_visitor_free(GenomeVisitor *gv)
 {
   GTFVisitor *gtf_visitor = gtf_visitor_cast(gv);
   assert(gtf_visitor);
-  array_delete(gtf_visitor->exon_features);
-  array_delete(gtf_visitor->CDS_features);
+  gt_array_delete(gtf_visitor->exon_features);
+  gt_array_delete(gtf_visitor->CDS_features);
 }
 
 static int gtf_visitor_comment(GenomeVisitor *gv, Comment *c, UNUSED Error *err)
@@ -62,9 +62,9 @@ static int save_exon_node(GenomeNode *gn, void *data, UNUSED Error *err)
   assert(gn && data);
   gtf_visitor = (GTFVisitor*) data;
   if (genome_feature_has_type((GenomeFeature*) gn, gft_exon))
-    array_add(gtf_visitor->exon_features, gn);
+    gt_array_add(gtf_visitor->exon_features, gn);
   else if (genome_feature_has_type((GenomeFeature*) gn, gft_CDS))
-    array_add(gtf_visitor->CDS_features, gn);
+    gt_array_add(gtf_visitor->CDS_features, gn);
   return 0;
 }
 
@@ -76,37 +76,37 @@ static int gtf_show_transcript(GenomeNode *gn, GTFVisitor *gtf_visitor,
   int had_err;
   error_check(err);
   assert(gn && gtf_visitor);
-  array_reset(gtf_visitor->exon_features);
-  array_reset(gtf_visitor->CDS_features);
+  gt_array_reset(gtf_visitor->exon_features);
+  gt_array_reset(gtf_visitor->CDS_features);
   had_err = genome_node_traverse_direct_children(gn, gtf_visitor,
                                                  save_exon_node, err);
-  if (array_size(gtf_visitor->exon_features)) {
+  if (gt_array_size(gtf_visitor->exon_features)) {
     /* sort exon features */
-    qsort(array_get_space(gtf_visitor->exon_features),
-          array_size(gtf_visitor->exon_features), sizeof (GenomeNode*),
+    qsort(gt_array_get_space(gtf_visitor->exon_features),
+          gt_array_size(gtf_visitor->exon_features), sizeof (GenomeNode*),
           (Compare) genome_node_compare);
     /* show exon features */
     gtf_visitor->transcript_id++;
-    for (i = 0; i < array_size(gtf_visitor->exon_features); i++) {
-      gf = *(GenomeFeature**) array_get(gtf_visitor->exon_features, i);
+    for (i = 0; i < gt_array_size(gtf_visitor->exon_features); i++) {
+      gf = *(GenomeFeature**) gt_array_get(gtf_visitor->exon_features, i);
       gff3_output_leading(gf, gtf_visitor->outfp);
       genfile_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
                       "\"%lu.%lu\";\n", gtf_visitor->gene_id,
                       gtf_visitor->gene_id, gtf_visitor->transcript_id);
     }
   }
-  if (array_size(gtf_visitor->CDS_features)) {
+  if (gt_array_size(gtf_visitor->CDS_features)) {
     /* sort CDS features */
-    qsort(array_get_space(gtf_visitor->CDS_features),
-          array_size(gtf_visitor->CDS_features), sizeof (GenomeNode*),
+    qsort(gt_array_get_space(gtf_visitor->CDS_features),
+          gt_array_size(gtf_visitor->CDS_features), sizeof (GenomeNode*),
           (Compare) genome_node_compare);
     /* show start_codon feature */
-    gf = *(GenomeFeature**) array_get(gtf_visitor->CDS_features, 0);
+    gf = *(GenomeFeature**) gt_array_get(gtf_visitor->CDS_features, 0);
     /* XXX: to be done */
 
     /* show CDS features */
-    for (i = 0; i < array_size(gtf_visitor->CDS_features); i++) {
-      gf = *(GenomeFeature**) array_get(gtf_visitor->CDS_features, i);
+    for (i = 0; i < gt_array_size(gtf_visitor->CDS_features); i++) {
+      gf = *(GenomeFeature**) gt_array_get(gtf_visitor->CDS_features, i);
       gff3_output_leading(gf, gtf_visitor->outfp);
       genfile_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
                       "\"%lu.%lu\";\n", gtf_visitor->gene_id,
@@ -168,8 +168,8 @@ GenomeVisitor* gtf_visitor_new(GenFile *outfp)
   GenomeVisitor *gv = genome_visitor_create(gtf_visitor_class());
   GTFVisitor *gtf_visitor = gtf_visitor_cast(gv);
   gtf_visitor->gene_id = 0;
-  gtf_visitor->exon_features = array_new(sizeof (GenomeNode*));
-  gtf_visitor->CDS_features = array_new(sizeof (GenomeNode*));
+  gtf_visitor->exon_features = gt_array_new(sizeof (GenomeNode*));
+  gtf_visitor->CDS_features = gt_array_new(sizeof (GenomeNode*));
   gtf_visitor->outfp = outfp;
   return gv;
 }

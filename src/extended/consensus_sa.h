@@ -38,8 +38,8 @@
 
 typedef Range  (*GetGenomicRangeFunc)(const void *sa);
 typedef Strand (*GetStrandFunc)(const void *sa);
-typedef void   (*GetExonsFunc)(Array *exon_ranges, const void *sa);
-typedef void   (*ProcessSpliceFormFunc)(Array *spliced_alignments_in_form,
+typedef void   (*GetExonsFunc)(GT_Array *exon_ranges, const void *sa);
+typedef void   (*ProcessSpliceFormFunc)(GT_Array *spliced_alignments_in_form,
                                         const void *set_of_sas,
                                         unsigned long number_of_sas,
                                         size_t size_of_sa,

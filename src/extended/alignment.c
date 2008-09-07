@@ -31,7 +31,7 @@ struct Alignment {
              *v;
   unsigned long ulen,
                 vlen;
-  Array *eops;
+  GT_Array *eops;
 };
 
 typedef enum {
@@ -51,7 +51,7 @@ Alignment* alignment_new(void)
 {
   Alignment *a;
   a = ma_calloc(1, sizeof (Alignment));
-  a->eops = array_new(sizeof (Multieop));
+  a->eops = gt_array_new(sizeof (Multieop));
   return a;
 }
 
@@ -79,19 +79,19 @@ static void alignment_add_eop(Alignment *a, Eoptype type)
 {
   Multieop meop, *meop_ptr;
   assert(a);
-  if (!array_size(a->eops)) {
+  if (!gt_array_size(a->eops)) {
     meop.type = type;
     meop.steps = 1;
-    array_add(a->eops, meop);
+    gt_array_add(a->eops, meop);
   }
   else {
-    meop_ptr = array_get_last(a->eops);
+    meop_ptr = gt_array_get_last(a->eops);
     if (meop_ptr->type == type)
       meop_ptr->steps++; /* XXX: check for overflow */
     else {
       meop.type = type;
       meop.steps = 1;
-      array_add(a->eops, meop);
+      gt_array_add(a->eops, meop);
     }
   }
 }
@@ -114,11 +114,11 @@ void alignment_add_insertion(Alignment *a)
 void alignment_remove_last(Alignment *a)
 {
   Multieop *meop_ptr;
-  assert(a && array_size(a->eops));
-  meop_ptr = array_get_last(a->eops);
+  assert(a && gt_array_size(a->eops));
+  meop_ptr = gt_array_get_last(a->eops);
   assert(meop_ptr->steps);
   if (meop_ptr->steps == 1)
-    (void) array_pop(a->eops);
+    (void) gt_array_pop(a->eops);
   else
     meop_ptr->steps--;
 }
@@ -130,8 +130,8 @@ static int alignment_is_valid(const Alignment *a)
   Multieop meop;
   /* check ulen */
   len = 0;
-  for (i = array_size(a->eops); i > 0; i--) {
-    meop = *(Multieop*) array_get(a->eops, i-1);
+  for (i = gt_array_size(a->eops); i > 0; i--) {
+    meop = *(Multieop*) gt_array_get(a->eops, i-1);
     if (meop.type == Replacement || meop.type == Deletion)
       len += meop.steps;
   }
@@ -139,8 +139,8 @@ static int alignment_is_valid(const Alignment *a)
     return 0;
   /* check vlen */
   len = 0;
-  for (i = array_size(a->eops); i > 0; i--) {
-    meop = *(Multieop*) array_get(a->eops, i-1);
+  for (i = gt_array_size(a->eops); i > 0; i--) {
+    meop = *(Multieop*) gt_array_get(a->eops, i-1);
     if (meop.type == Replacement || meop.type == Insertion)
       len += meop.steps;
   }
@@ -155,8 +155,8 @@ unsigned long alignment_eval(const Alignment *a)
   unsigned long i, j, uctr = 0, vctr = 0, sumcost = 0;
   Multieop meop;
   assert(a && alignment_is_valid(a));
-  for (i = array_size(a->eops); i > 0; i--) {
-    meop = *(Multieop*) array_get(a->eops, i-1);
+  for (i = gt_array_size(a->eops); i > 0; i--) {
+    meop = *(Multieop*) gt_array_get(a->eops, i-1);
     switch (meop.type) {
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
@@ -191,8 +191,8 @@ void alignment_show(const Alignment *a, FILE *fp)
   assert(a && alignment_is_valid(a));
   /* output first line */
   uctr = 0;
-  for (i = array_size(a->eops); i > 0; i--) {
-    meop = *(Multieop*) array_get(a->eops, i-1);
+  for (i = gt_array_size(a->eops); i > 0; i--) {
+    meop = *(Multieop*) gt_array_get(a->eops, i-1);
     switch (meop.type) {
       case Replacement:
       case Deletion:
@@ -208,8 +208,8 @@ void alignment_show(const Alignment *a, FILE *fp)
   xfputc('\n', fp);
   /* output middle line */
   uctr = vctr = 0;
-  for (i = array_size(a->eops); i > 0; i--) {
-    meop = *(Multieop*) array_get(a->eops, i-1);
+  for (i = gt_array_size(a->eops); i > 0; i--) {
+    meop = *(Multieop*) gt_array_get(a->eops, i-1);
     switch (meop.type) {
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
@@ -236,8 +236,8 @@ void alignment_show(const Alignment *a, FILE *fp)
   xfputc('\n', fp);
   /* ouput last line */
   vctr = 0;
-  for (i = array_size(a->eops); i > 0; i--) {
-    meop = *(Multieop*) array_get(a->eops, i-1);
+  for (i = gt_array_size(a->eops); i > 0; i--) {
+    meop = *(Multieop*) gt_array_get(a->eops, i-1);
     switch (meop.type) {
       case Replacement:
       case Insertion:
@@ -259,8 +259,8 @@ void alignment_show_multieop_list(const Alignment *a, FILE *fp)
   Multieop meop;
   assert(a);
   xfputc('[', fp);
-  for (i = array_size(a->eops); i > 0; i--) {
-    meop = *(Multieop*) array_get(a->eops, i-1);
+  for (i = gt_array_size(a->eops); i > 0; i--) {
+    meop = *(Multieop*) gt_array_get(a->eops, i-1);
     switch (meop.type) {
       case Replacement:
         xfputc('R', fp);
@@ -326,6 +326,6 @@ int alignment_unit_test(Error *err)
 void alignment_delete(Alignment *a)
 {
   if (!a) return;
-  array_delete(a->eops);
+  gt_array_delete(a->eops);
   ma_free(a);
 }

@@ -172,12 +172,12 @@ void bittab_unset(Bittab *b)
     b->tabptr[i] = 0;
 }
 
-void bittab_get_all_bitnums(const Bittab *b, Array *bitnums)
+void bittab_get_all_bitnums(const Bittab *b, GT_Array *bitnums)
 {
   unsigned long i;
   assert(b && bitnums);
   for (i = 0; i < b->num_of_bits; i++)
-    if (bittab_bit_is_set(b, i)) array_add(bitnums, i);
+    if (bittab_bit_is_set(b, i)) gt_array_add(bitnums, i);
 }
 
 bool bittab_bit_is_set(const Bittab *b, unsigned long bit)

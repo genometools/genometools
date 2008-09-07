@@ -394,16 +394,16 @@ ht_remove(Hashtable *ht, const void *elem)
 struct hash_to_array_data
 {
   size_t elem_size;
-  Array *hash_entries;
+  GT_Array *hash_entries;
 };
 
 static enum iterator_op
 ht_save_entry_to_array(void *elem, void *data, UNUSED Error *err)
 {
-  Array *hash_entries;
+  GT_Array *hash_entries;
   assert(elem && data);
   hash_entries = ((struct hash_to_array_data *)data)->hash_entries;
-  array_add_elem(hash_entries, elem,
+  gt_array_add_elem(hash_entries, elem,
                  ((struct hash_to_array_data *)data)->elem_size);
   return CONTINUE_ITERATION;
 }
@@ -412,13 +412,13 @@ extern int
 hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
                           Compare cmp, Error *err)
 {
-  Array *hash_entries;
+  GT_Array *hash_entries;
   void *elem;
   unsigned long i;
   int had_err;
   error_check(err);
   assert(ht && iter && cmp);
-  hash_entries = array_new(ht->table_info.elem_size);
+  hash_entries = gt_array_new(ht->table_info.elem_size);
   {
     struct hash_to_array_data visitor_data = { ht->table_info.elem_size,
                                                hash_entries };
@@ -427,16 +427,16 @@ hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
   }
   if (!had_err) {
     size_t hash_size;
-    gt_qsort_r(array_get_space(hash_entries), array_size(hash_entries),
-               array_elem_size(hash_entries), data, (CompareWithData)cmp);
-    hash_size = array_size(hash_entries);
+    gt_qsort_r(gt_array_get_space(hash_entries), gt_array_size(hash_entries),
+               gt_array_elem_size(hash_entries), data, (CompareWithData)cmp);
+    hash_size = gt_array_size(hash_entries);
     assert(hash_size == hashtable_fill(ht));
     for (i = 0; !had_err && i < hash_size; i++) {
-      elem = array_get(hash_entries, i);
+      elem = gt_array_get(hash_entries, i);
       had_err = iter(elem, data, err);
     }
   }
-  array_delete(hash_entries);
+  gt_array_delete(hash_entries);
   return had_err;
 }
 

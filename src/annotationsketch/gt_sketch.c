@@ -176,7 +176,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
   int parsed_args, had_err=0;
   const char *file, *seqid = NULL;
   Range qry_range, sequence_region_range;
-  Array *results = NULL;
+  GT_Array *results = NULL;
   GT_Style *sty = NULL;
   Str *gt_style_file = NULL;
   Str *prog;
@@ -270,7 +270,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
   else if (!had_err)
     seqid = str_get(arguments.seqid);
 
-  results = array_new(sizeof (GenomeNode*));
+  results = gt_array_new(sizeof (GenomeNode*));
   if (!had_err) {
     gt_feature_index_get_range_for_seqid(features, &sequence_region_range,
                                          seqid);
@@ -284,7 +284,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
 
   if (!had_err) {
     if (arguments.verbose)
-      fprintf(stderr, "# of results: %lu\n", array_size(results));
+      fprintf(stderr, "# of results: %lu\n", gt_array_size(results));
 
     /* find and load style file */
     prog = str_new();
@@ -334,7 +334,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
   gt_diagram_delete(d);
   str_delete(arguments.seqid);
   str_delete(arguments.format);
-  array_delete(results);
+  gt_array_delete(results);
   gt_feature_index_delete(features);
 
   return had_err;

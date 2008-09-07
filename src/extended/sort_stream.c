@@ -24,7 +24,7 @@ struct SortStream
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
   unsigned long idx;
-  Array *trees;
+  GT_Array *trees;
   bool sorted;
 };
 
@@ -42,7 +42,7 @@ static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
   if (!sort_stream->sorted) {
     while (!(had_err = genome_stream_next_tree(sort_stream->in_stream, &node,
                                                err)) && node) {
-      array_add(sort_stream->trees, node);
+      gt_array_add(sort_stream->trees, node);
     }
     if (!had_err) {
       genome_nodes_sort_stable(sort_stream->trees);
@@ -52,15 +52,15 @@ static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
 
   if (!had_err) {
     assert(sort_stream->sorted);
-    if (sort_stream->idx < array_size(sort_stream->trees)) {
-      *gn = *(GenomeNode**) array_get(sort_stream->trees, sort_stream->idx);
+    if (sort_stream->idx < gt_array_size(sort_stream->trees)) {
+      *gn = *(GenomeNode**) gt_array_get(sort_stream->trees, sort_stream->idx);
       sort_stream->idx++;
       return 0;
     }
   }
 
   if (!had_err) {
-    array_reset(sort_stream->trees);
+    gt_array_reset(sort_stream->trees);
     *gn = NULL;
   }
 
@@ -71,9 +71,9 @@ static void sort_stream_free(GenomeStream *gs)
 {
   unsigned long i;
   SortStream *sort_stream = sort_stream_cast(gs);
-  for (i = sort_stream->idx; i < array_size(sort_stream->trees); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(sort_stream->trees, i));
-  array_delete(sort_stream->trees);
+  for (i = sort_stream->idx; i < gt_array_size(sort_stream->trees); i++)
+    genome_node_rec_delete(*(GenomeNode**) gt_array_get(sort_stream->trees, i));
+  gt_array_delete(sort_stream->trees);
   genome_stream_delete(sort_stream->in_stream);
 }
 
@@ -93,6 +93,6 @@ GenomeStream* sort_stream_new(GenomeStream *in_stream)
   sort_stream->in_stream = genome_stream_ref(in_stream);
   sort_stream->sorted = false;
   sort_stream->idx = 0;
-  sort_stream->trees = array_new(sizeof (GenomeNode*));
+  sort_stream->trees = gt_array_new(sizeof (GenomeNode*));
   return gs;
 }

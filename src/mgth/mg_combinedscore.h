@@ -23,7 +23,7 @@
 #include "mg_computepath.h"
 
 #define LONG_VALUE(VALUE, INDEX)\
-                *(long*)array_get((VALUE), (INDEX))
+                *(long*)gt_array_get((VALUE), (INDEX))
 
 #define POSITION(QUERY_FROM, HIT_NUMBER, POSITION, K)\
            LONG_VALUE(QUERY_FROM, HIT_NUMBER)+(POSITION)+(K)-1

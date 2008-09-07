@@ -44,7 +44,7 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
                                             UNUSED Error *err)
 {
   Range *old_range_ptr, old_range, new_range;
-  Array *ranges;
+  GT_Array *ranges;
   RegionCovVisitor *regioncov_visitor;
   error_check(err);
   regioncov_visitor = regioncov_visitor_cast(gv);
@@ -52,17 +52,17 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
                        str_get(genome_node_get_seqid((GenomeNode*) gf)));
   assert(ranges);
   new_range = genome_node_get_range((GenomeNode*) gf);
-  if (!array_size(ranges))
-    array_add(ranges, new_range);
+  if (!gt_array_size(ranges))
+    gt_array_add(ranges, new_range);
   else {
-    old_range_ptr = array_get_last(ranges);
+    old_range_ptr = gt_array_get_last(ranges);
     old_range = *old_range_ptr;
     old_range.end += regioncov_visitor->max_feature_dist;
     if (range_overlap(old_range, new_range)) {
       old_range_ptr->end = MAX(old_range_ptr->end, new_range.end);
     }
     else
-      array_add(ranges, new_range);
+      gt_array_add(ranges, new_range);
   }
   return 0;
 }
@@ -72,10 +72,10 @@ static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
                                              UNUSED Error *err)
 {
   RegionCovVisitor *regioncov_visitor;
-  Array *rangelist;
+  GT_Array *rangelist;
   error_check(err);
   regioncov_visitor = regioncov_visitor_cast(gv);
-  rangelist = array_new(sizeof (Range));
+  rangelist = gt_array_new(sizeof (Range));
   hashmap_add(regioncov_visitor->region2rangelist,
               cstr_dup(str_get(genome_node_get_seqid((GenomeNode*) sr))),
               rangelist);
@@ -100,7 +100,7 @@ GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist)
   regioncov_visitor->max_feature_dist = max_feature_dist;
   regioncov_visitor->region2rangelist = hashmap_new(HASH_STRING,
                                                     ma_free_func,
-                                                    (FreeFunc) array_delete);
+                                                    (FreeFunc) gt_array_delete);
   return gv;
 }
 
@@ -108,16 +108,16 @@ static int show_rangelist(void *key, void *value, UNUSED void *data,
                           UNUSED Error *err)
 {
   unsigned long i;
-  Array *rangelist;
+  GT_Array *rangelist;
   Range *rangeptr;
   error_check(err);
   assert(key && value);
-  rangelist = (Array*) value;
-  if (array_size(rangelist)) {
+  rangelist = (GT_Array*) value;
+  if (gt_array_size(rangelist)) {
     assert(ranges_are_sorted_and_do_not_overlap(rangelist));
     printf("%s:\n", (char*) key);
-    for (i = 0; i < array_size(rangelist); i++) {
-      rangeptr = array_get(rangelist, i);
+    for (i = 0; i < gt_array_size(rangelist); i++) {
+      rangeptr = gt_array_get(rangelist, i);
       printf("%lu, %lu\n", rangeptr->start, rangeptr->end);
     }
   }

@@ -81,7 +81,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
   /* Speicherplatzreservierung fuer die Combined-Score Matrix */
   array2dim_calloc(combinedscore_matrix, 7, contig_len);
 
-  /* Erstellen der Arrays fuer die Hit-Nummer fuer jeden Matrix-Eintrag
+  /* Erstellen der GT_Arrays fuer die Hit-Nummer fuer jeden Matrix-Eintrag
      Ueber die Hit-Nummer erfolgt die Zuordnung zu den entsprechenden
      Blast-Hits in der Hit-Information-Struktur */
   for (k = 0; k < 7; k++)
@@ -89,7 +89,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
     for (j = 0; j < contig_len; j++)
     {
       combinedscore_matrix[k][j].hit_number =
-        array_new(sizeof (unsigned long));
+        gt_array_new(sizeof (unsigned long));
     }
   }
 
@@ -300,7 +300,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
   {
     for (j = 0; j < contig_len; j++)
     {
-      array_delete(combinedscore_matrix[i][j].hit_number);
+      gt_array_delete(combinedscore_matrix[i][j].hit_number);
     }
   }
 
@@ -517,7 +517,7 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
         combinedscore_matrix[current_row_fct][j].matrix_score +=
           matrix_row[j];
         combinedscore_matrix[current_row_fct][j].count += count_row_fct[j];
-        array_add(combinedscore_matrix[current_row_fct][j].hit_number,
+        gt_array_add(combinedscore_matrix[current_row_fct][j].hit_number,
                   nr_of_strings);
       }
       parsestruct_ptr->syn = 0.0;

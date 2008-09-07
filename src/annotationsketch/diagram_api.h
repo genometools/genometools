@@ -28,7 +28,7 @@ typedef struct GT_Diagram GT_Diagram;
    <feature_index> in region <seqid> overlapping with <range>. */
 GT_Diagram* gt_diagram_new(GT_FeatureIndex *feature_index, const char *seqid,
                            const Range*, GT_Style*);
-GT_Diagram* gt_diagram_new_from_array(Array *features, const Range*, GT_Style*);
+GT_Diagram* gt_diagram_new_from_array(GT_Array *features, const Range*, GT_Style*);
 Range       gt_diagram_get_range(GT_Diagram*);
 /* Render <diagram> on the given <canvas>. */
 int         gt_diagram_sketch(GT_Diagram *diagram, GT_Canvas *canvas);

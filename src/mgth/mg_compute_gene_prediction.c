@@ -21,7 +21,7 @@
 /* Funktion zur Berechnung der Start-Stop Informationen der genkodierenden
    Bereiche sowie deren Leserahmen
    Parameter: row, column, max-Wert der letzten Spalte der Opt-Path-Matrix,
-              Path-Matrix, CombinedScore-Matrix, Array des opt. Pfades
+              Path-Matrix, CombinedScore-Matrix, GT_Array des opt. Pfades
               (Leserahmen), Hit-Information, Zeiger auf ParseStruct, Zeiger
               auf RegionStruct, Zeiger auf den Speicherbereich zum
               Abspeichern der beteiligten Hits an einem Ergebnis
@@ -31,7 +31,7 @@ static void gene_prediction(unsigned short,
                             double,
                             PathMatrixEntry **,
                             CombinedScoreMatrixEntry **,
-                            Array *,
+                            GT_Array *,
                             HitInformation *,
                             ParseStruct *,
                             RegionStruct **, unsigned long *, Error *);
@@ -59,25 +59,25 @@ static int check_coding(ParseStruct *,
 
 /* Funktion zum sortierten Einfuegen neuer Bereichsgrenzen kodierender
    Abschnitte in das real-Frame-Array
-   Parameter: Zeiger auf RegionStruct-Struktur, Arrays mit den From- und
+   Parameter: Zeiger auf RegionStruct-Struktur, GT_Arrays mit den From- und
               To-Werten des real-Frames,Arrays mit den From- und To-Werten
               der einzufuegenden Abschnitte, Index des Real-Frames,Index
               des tmp-Frames, real-Frame, Zeilenindex;
    Returnwert: void */
 static void merge_array(RegionStruct **,
-                        Array *,
-                        Array *,
-                        Array *,
-                        Array *,
+                        GT_Array *,
+                        GT_Array *,
+                        GT_Array *,
+                        GT_Array *,
                         unsigned long,
                         unsigned long, short, unsigned short);
 
-/* Funktion zum sortierten der Arrays mit den neu einzufuegenden
+/* Funktion zum sortierten der GT_Arrays mit den neu einzufuegenden
    Bereichsgrenzen
-   Parameter: Arrays der sortierten From- und To-Werte, Arrays mit den
-              From- und To-Werten der zu sortierenden Arrays;
+   Parameter: GT_Arrays der sortierten From- und To-Werte, GT_Arrays mit den
+              From- und To-Werten der zu sortierenden GT_Arrays;
    Returnwert: void */
-static void sort_realtmp(Array *, Array *, Array *, Array *);
+static void sort_realtmp(GT_Array *, GT_Array *, GT_Array *, GT_Array *);
 
 int mg_compute_gene_prediction(CombinedScoreMatrixEntry
                                **combinedscore_matrix,
@@ -105,9 +105,9 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
   /* Struktur zur Speicherung der kodierenden Bereiche (from-to - Werte) */
   RegionStruct **regionmatrix;
 
-  /* Array fuer das Speichern der Frames des optimalen Pfades */
-  Array *frame_path_array;
-  frame_path_array = array_new(sizeof (unsigned short));
+  /* GT_Array fuer das Speichern der Frames des optimalen Pfades */
+  GT_Array *frame_path_array;
+  frame_path_array = gt_array_new(sizeof (unsigned short));
 
   error_check(err);
 
@@ -137,8 +137,8 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
 
       for (row_idx = 0; row_idx < 7; row_idx++)
       {
-        regionmatrix[row_idx][0].from = array_new(sizeof (unsigned long));
-        regionmatrix[row_idx][0].to = array_new(sizeof (unsigned long));
+        regionmatrix[row_idx][0].from = gt_array_new(sizeof (unsigned long));
+        regionmatrix[row_idx][0].to = gt_array_new(sizeof (unsigned long));
       }
       /* Aufruf der Genvorhersagemethode */
       gene_prediction(row_index,
@@ -156,10 +156,10 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
          zu haben */
       for (row_idx = 0; row_idx < 7; row_idx++)
       {
-        if (array_size(regionmatrix[row_idx][0].from) > 0)
+        if (gt_array_size(regionmatrix[row_idx][0].from) > 0)
         {
-          array_reverse(regionmatrix[row_idx][0].from);
-          array_reverse(regionmatrix[row_idx][0].to);
+          gt_array_reverse(regionmatrix[row_idx][0].from);
+          gt_array_reverse(regionmatrix[row_idx][0].to);
         }
       }
 
@@ -168,7 +168,7 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
       for (row_idx = 0; row_idx < 7; row_idx++)
       {
         if ((frame_counter[row_idx] > real_frame_score)
-            && (array_size(regionmatrix[row_idx][0].from) > 0))
+            && (gt_array_size(regionmatrix[row_idx][0].from) > 0))
         {
           real_frame_score = frame_counter[row_idx];
           real_frame = row_idx;
@@ -193,15 +193,15 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
 
         for (row_idx = 0; row_idx < 7; row_idx++)
         {
-          array_delete(regionmatrix[row_idx][0].from);
-          array_delete(regionmatrix[row_idx][0].to);
+          gt_array_delete(regionmatrix[row_idx][0].from);
+          gt_array_delete(regionmatrix[row_idx][0].to);
         }
       }
       array2dim_delete(regionmatrix);
       ma_free(frame_counter);
     }
   }
-  array_delete(frame_path_array);
+  gt_array_delete(frame_path_array);
 
   return had_err;
 }
@@ -212,7 +212,7 @@ static void gene_prediction(unsigned short row,
                             PathMatrixEntry **path_matrix,
                             CombinedScoreMatrixEntry
                             **combinedscore_matrix,
-                            Array * frame_path_array,
+                            GT_Array * frame_path_array,
                             HitInformation *hit_information,
                             ParseStruct *parsestruct_ptr,
                             RegionStruct **regionmatrix,
@@ -236,7 +236,7 @@ static void gene_prediction(unsigned short row,
 
     /* hinzufuegen des aktuellen Leserahmens - als Zeile - in das
        frame_path-Array */
-    array_add(frame_path_array, row);
+    gt_array_add(frame_path_array, row);
     /* Zaehlen der Frame-Haeufigkeiten */
     frame_counter[row] += 1.0;
   }
@@ -247,7 +247,7 @@ static void gene_prediction(unsigned short row,
 
     /* hinzufuegen des aktuellen Leserahmens - als Zeile - in das
        frame_path-Array */
-    array_add(frame_path_array, row);
+    gt_array_add(frame_path_array, row);
     /* Zaehlen der Frame-Haeufigkeiten */
     frame_counter[row] += 1.0;
   }
@@ -258,7 +258,7 @@ static void gene_prediction(unsigned short row,
   {
     /* hinzufuegen des aktuellen Leserahmens - als Zeile - in das
        frame_path-Array */
-    array_add(frame_path_array, row);
+    gt_array_add(frame_path_array, row);
     /* Zaehlen der Frame-Haeufigkeiten */
     frame_counter[row] += 1.0;
 
@@ -281,9 +281,9 @@ static void gene_prediction(unsigned short row,
         column_from = column + 2;
         column_to = column + GENEPREDSTRUCT(codingcounter) + 1;
 
-        array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
                   column_from);
-        array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
                   column_to);
 
         GENEPREDSTRUCT(codingcounter) = 0;
@@ -305,9 +305,9 @@ static void gene_prediction(unsigned short row,
         column_from = column + 3;
         column_to = column + GENEPREDSTRUCT(codingcounter) + 2;
 
-        array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
                   column_from);
-        array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
                   column_to);
 
         GENEPREDSTRUCT(codingcounter) = 0;
@@ -346,9 +346,9 @@ static void gene_prediction(unsigned short row,
         column_from = column + 1;
         column_to = column + GENEPREDSTRUCT(codingcounter);
 
-        array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
                   column_from);
-        array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
                   column_to);
 
         GENEPREDSTRUCT(codingcounter) = 0;
@@ -367,9 +367,9 @@ static void gene_prediction(unsigned short row,
         column_from = column + 2;
         column_to = column + GENEPREDSTRUCT(codingcounter) + 1;
 
-        array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
                   column_from);
-        array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
                   column_to);
 
         GENEPREDSTRUCT(codingcounter) = 0;
@@ -390,9 +390,9 @@ static void gene_prediction(unsigned short row,
         column_from = 0;
         column_to = 0;
 
-        array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].from,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].from,
                   column_from);
-        array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].to,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].to,
                   column_to);
 
         GENEPREDSTRUCT(noncodingcounter) = 0;
@@ -407,18 +407,18 @@ static void gene_prediction(unsigned short row,
           column_from = 1;
           column_to = GENEPREDSTRUCT(codingcounter) - 1;
 
-          array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
+          gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
                     column_from);
-          array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
+          gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
                     column_to);
 
           /* Position 0 ist ebenfalls kodierend */
           column_from = 0;
           column_to = 0;
 
-          array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].from,
+          gt_array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].from,
                     column_from);
-          array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].to,
+          gt_array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].to,
                     column_to);
 
           GENEPREDSTRUCT(codingcounter) = 1;
@@ -429,9 +429,9 @@ static void gene_prediction(unsigned short row,
           column_from = 0;
           column_to = GENEPREDSTRUCT(codingcounter) - 1;
 
-          array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].from,
+          gt_array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].from,
                     column_from);
-          array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].to,
+          gt_array_add(regionmatrix[GENEPREDSTRUCT(current_frame)][0].to,
                     column_to);
         }
       }
@@ -446,9 +446,9 @@ static void gene_prediction(unsigned short row,
         column_from = 1;
         column_to = column + GENEPREDSTRUCT(codingcounter);
 
-        array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].from,
                   column_from);
-        array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
+        gt_array_add(regionmatrix[GENEPREDSTRUCT(frame_before)][0].to,
                   column_to);
 
         GENEPREDSTRUCT(codingcounter) = 0;
@@ -509,25 +509,25 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
   long min_value,
     min_value_tmp = LONG_MAX;
 
-  Array *tmp_from;
-  Array *tmp_to;
-  Array *real_from;
-  Array *real_to;
-  Array *real_fromtmp;
-  Array *real_totmp;
-  Array *realfrom;
-  Array *realto;
+  GT_Array *tmp_from;
+  GT_Array *tmp_to;
+  GT_Array *real_from;
+  GT_Array *real_to;
+  GT_Array *real_fromtmp;
+  GT_Array *real_totmp;
+  GT_Array *realfrom;
+  GT_Array *realto;
 
   error_check(err);
 
-  tmp_from = array_new(sizeof (unsigned long));
-  tmp_to = array_new(sizeof (unsigned long));
-  real_from = array_new(sizeof (unsigned long));
-  real_to = array_new(sizeof (unsigned long));
-  real_fromtmp = array_new(sizeof (unsigned long));
-  real_totmp = array_new(sizeof (unsigned long));
-  realfrom = array_new(sizeof (unsigned long));
-  realto = array_new(sizeof (unsigned long));
+  tmp_from = gt_array_new(sizeof (unsigned long));
+  tmp_to = gt_array_new(sizeof (unsigned long));
+  real_from = gt_array_new(sizeof (unsigned long));
+  real_to = gt_array_new(sizeof (unsigned long));
+  real_fromtmp = gt_array_new(sizeof (unsigned long));
+  real_totmp = gt_array_new(sizeof (unsigned long));
+  realfrom = gt_array_new(sizeof (unsigned long));
+  realto = gt_array_new(sizeof (unsigned long));
 
   /* Vergleich mit allen anderen Frames - Der reale Frame ist der Frame
      mit der hoechsten Haeufigkeit (frame_counter) */
@@ -538,7 +538,7 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
     if (row_index != real_frame)
     {
       /* Anzahl der kodierenden Bereiche im zu vergleichendem Leserahmen */
-      arraysize = array_size(regionmatrix[row_index][0].from);
+      arraysize = gt_array_size(regionmatrix[row_index][0].from);
 
       if (arraysize > 0)
       {
@@ -549,11 +549,11 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
           /* Grenzen des zu Betrachtenden Abschnitts - Abschnitte liegen
              in aufsteigender Reihenfolge vor */
           from_tmp =
-            *(unsigned long *) array_get(regionmatrix[row_index][0].from,
-                                         array_idx);
+            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].from,
+                                            array_idx);
           to_tmp =
-            *(unsigned long *) array_get(regionmatrix[row_index][0].to,
-                                         array_idx);
+            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].to,
+                                            array_idx);
 
           /* Aufruf der Methode zur Ueberpruefung auf Stop-Codons im
              kodierendem Bereich des zu vergleichendem Frames -
@@ -565,7 +565,7 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
           if (check_bp || !check_bp)
           {
             arraysize_realframe =
-              array_size(regionmatrix[real_frame][0].from);
+              gt_array_size(regionmatrix[real_frame][0].from);
 
             /* alle kodierenden Bereiche des realen Frames werden
                betrachtet */
@@ -574,10 +574,10 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
             {
               /* Grenzen des kodierenden Bereichs des realen Frames */
               from_real =
-                *(unsigned long *) array_get(regionmatrix[real_frame][0].
+                *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].
                                              from, arrayreal_idx);
               to_real =
-                *(unsigned long *) array_get(regionmatrix[real_frame][0].
+                *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].
                                              to, arrayreal_idx);
 
               /* Bestimmen der Frames von realem und zu vergleichendem
@@ -595,10 +595,10 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
               {
                 min_value_tmp = min_value;
                 from_min = from_real =
-                  *(unsigned long *) array_get(regionmatrix[real_frame][0].
+                  *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].
                                                from, arrayreal_idx);
                 to_min = to_real =
-                  *(unsigned long *) array_get(regionmatrix[real_frame][0].
+                  *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].
                                                to, arrayreal_idx);
               }
             }
@@ -613,14 +613,14 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
                     || (to_min + ARGUMENTSSTRUCT(frameshift_span) >
                         from_tmp)))
             {
-              array_add(real_fromtmp, from_tmp);
-              array_add(real_totmp, to_tmp);
+              gt_array_add(real_fromtmp, from_tmp);
+              gt_array_add(real_totmp, to_tmp);
             }
             /* ansonsten im from_tmp- bzw. to_tmp-Array */
             else
             {
-              array_add(tmp_from, from_tmp);
-              array_add(tmp_to, to_tmp);
+              gt_array_add(tmp_from, from_tmp);
+              gt_array_add(tmp_to, to_tmp);
             }
           }
           else
@@ -632,15 +632,15 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
 
       if (!had_err)
       {
-        /* die from- to-Grenzen des zu vergleichenden Arrays werden
+        /* die from- to-Grenzen des zu vergleichenden GT_Arrays werden
            aktualisiert */
-        array_delete(regionmatrix[row_index][0].from);
-        array_delete(regionmatrix[row_index][0].to);
+        gt_array_delete(regionmatrix[row_index][0].from);
+        gt_array_delete(regionmatrix[row_index][0].to);
 
-        regionmatrix[row_index][0].from = array_clone(tmp_from);
-        regionmatrix[row_index][0].to = array_clone(tmp_to);
-        array_reset(tmp_from);
-        array_reset(tmp_to);
+        regionmatrix[row_index][0].from = gt_array_clone(tmp_from);
+        regionmatrix[row_index][0].to = gt_array_clone(tmp_to);
+        gt_array_reset(tmp_from);
+        gt_array_reset(tmp_to);
       }
     }
   }
@@ -649,11 +649,11 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
   {
     /* Anzahl der kodierenden Bereiche im realen- und im
        real_fromtmp-Array werden bestimmt */
-    arraysize_real = array_size(regionmatrix[real_frame][0].from);
-    arraysize_tmp = array_size(real_fromtmp);
+    arraysize_real = gt_array_size(regionmatrix[real_frame][0].from);
+    arraysize_tmp = gt_array_size(real_fromtmp);
 
     /* Falls im tmp-Array Eintraege vorhanden sind, sind diese in das
-       Array der kodierenden Abschnitte der realen-Frames einzutragen */
+       GT_Array der kodierenden Abschnitte der realen-Frames einzutragen */
     if (arraysize_tmp > 0)
     {
       /* sortieren der neu einzutragenden kodierenden Abschnitte anhand
@@ -662,32 +662,32 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
 
       /* bisher: rueckwaerts von hinten angegebene Bereichsgrenzen -
          danach: Bereichsgrenzen von vorne nach hinten */
-      array_reverse(realfrom);
-      array_reverse(realto);
+      gt_array_reverse(realfrom);
+      gt_array_reverse(realto);
 
-      /* sortiertes einfuegen der neuen Bereichsgrenzen in das Array
+      /* sortiertes einfuegen der neuen Bereichsgrenzen in das GT_Array
          bestehender kodierender Bereiche des realen Frames */
       merge_array(regionmatrix,
                   real_from,
                   real_to, realfrom, realto, 0, 0, real_frame, row_index);
 
-      /* aktualisieren der Bereichsgrenzen im Array des realen-Frames */
-      array_delete(regionmatrix[real_frame][0].from);
-      array_delete(regionmatrix[real_frame][0].to);
+      /* aktualisieren der Bereichsgrenzen im GT_Array des realen-Frames */
+      gt_array_delete(regionmatrix[real_frame][0].from);
+      gt_array_delete(regionmatrix[real_frame][0].to);
 
-      regionmatrix[real_frame][0].from = array_clone(real_from);
-      regionmatrix[real_frame][0].to = array_clone(real_to);
+      regionmatrix[real_frame][0].from = gt_array_clone(real_from);
+      regionmatrix[real_frame][0].to = gt_array_clone(real_to);
     }
   }
 
-  array_delete(tmp_from);
-  array_delete(tmp_to);
-  array_delete(real_from);
-  array_delete(real_to);
-  array_delete(real_fromtmp);
-  array_delete(real_totmp);
-  array_delete(realfrom);
-  array_delete(realto);
+  gt_array_delete(tmp_from);
+  gt_array_delete(tmp_to);
+  gt_array_delete(real_from);
+  gt_array_delete(real_to);
+  gt_array_delete(real_fromtmp);
+  gt_array_delete(real_totmp);
+  gt_array_delete(realfrom);
+  gt_array_delete(realto);
 
   return had_err;
 }
@@ -704,46 +704,46 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
     from_tmp_next,
     to_tmp_real,
     function_stop = 0;
-  Array *tmp_from;
-  Array *tmp_to;
+  GT_Array *tmp_from;
+  GT_Array *tmp_to;
 
   error_check(err);
 
-  tmp_from = array_new(sizeof (unsigned long));
-  tmp_to = array_new(sizeof (unsigned long));
+  tmp_from = gt_array_new(sizeof (unsigned long));
+  tmp_to = gt_array_new(sizeof (unsigned long));
 
   /* Frames werden nacheinander abgearbeitet - zeilenkodiert */
   for (row_index = 0; row_index < 7; row_index++)
   {
     /* bestimmen der Anzahl kodierender Bereiche im aktuell betrachteten
        Frame */
-    arraysize = array_size(regionmatrix[row_index][0].from);
+    arraysize = gt_array_size(regionmatrix[row_index][0].from);
 
-    array_reset(tmp_from);
-    array_reset(tmp_to);
+    gt_array_reset(tmp_from);
+    gt_array_reset(tmp_to);
 
     if (arraysize > 1)
     {
       /* die kodierenden Bereiche werden nacheinander abgearbeitet */
       for (array_idx = 0; array_idx < arraysize - 1;)
       {
-        /* ist array_size des tmp-Arrays > 0 wurden bereits Aenderungen
+        /* ist gt_array_size des tmp-Arrays > 0 wurden bereits Aenderungen
            vorgenommen und die neuen Bereichsgrenzen-Werte muessen
            verwendet werden */
-        if (array_size(tmp_from) > 0)
+        if (gt_array_size(tmp_from) > 0)
         {
-          from_tmp = *(unsigned long *) array_get_last(tmp_from);
-          to_tmp = *(unsigned long *) array_get_last(tmp_to);
+          from_tmp = *(unsigned long *) gt_array_get_last(tmp_from);
+          to_tmp = *(unsigned long *) gt_array_get_last(tmp_to);
         }
         /* ansonsten auslesen der Bereichsgrenzen aus dem "original" */
         else
         {
           from_tmp =
-            *(unsigned long *) array_get(regionmatrix[row_index][0].from,
-                                         array_idx);
+            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].from,
+                                            array_idx);
           to_tmp =
-            *(unsigned long *) array_get(regionmatrix[row_index][0].to,
-                                         array_idx);
+            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].to,
+                                            array_idx);
         }
 
         ++array_idx;
@@ -753,11 +753,11 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
         {
           /* auslesen der Grenzen des nachfolgenden kodierenden Bereiches */
           from_tmp_next =
-            *(unsigned long *) array_get(regionmatrix[row_index][0].from,
-                                         array_idx);
+            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].from,
+                                            array_idx);
           to_tmp_real =
-            *(unsigned long *) array_get(regionmatrix[row_index][0].to,
-                                         array_idx);
+            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].to,
+                                            array_idx);
 
           /* zusammenlegen kodierender Bereiche nur, wenn diese innerhalb
              der per Option angegebenen Spanbreite liegen */
@@ -765,10 +765,10 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
           {
             /* es wurden noch keine Eintragungen vorgenommen - der erste
                kodierende Abschnitt wird in das tmp-Array eingetragen */
-            if (array_size(tmp_from) == 0)
+            if (gt_array_size(tmp_from) == 0)
             {
-              array_add(tmp_from, from_tmp);
-              array_add(tmp_to, to_tmp);
+              gt_array_add(tmp_from, from_tmp);
+              gt_array_add(tmp_to, to_tmp);
             }
 
             /* Ueberpruefen, ob zwischen den kodierenden Abschnitten
@@ -781,14 +781,14 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
             {
               /* befindet sich schon ein Eintrag im temp-Array, muss der
                  letzte Eintrag wieder entfernt werden */
-              if (array_size(tmp_from) > 0)
+              if (gt_array_size(tmp_from) > 0)
               {
-                (void) array_pop(tmp_from);
-                (void) array_pop(tmp_to);
+                (void) gt_array_pop(tmp_from);
+                (void) gt_array_pop(tmp_to);
               }
               /* Speichern der neuen Bereichsgrenzen */
-              array_add(tmp_from, from_tmp);
-              array_add(tmp_to, to_tmp_real);
+              gt_array_add(tmp_from, from_tmp);
+              gt_array_add(tmp_to, to_tmp_real);
 
               ++array_idx;
             }
@@ -798,8 +798,8 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
                den anderen Abschnitten eine Vereinigung verhindert */
             else
             {
-              array_add(tmp_from, from_tmp_next);
-              array_add(tmp_to, to_tmp_real);
+              gt_array_add(tmp_from, from_tmp_next);
+              gt_array_add(tmp_to, to_tmp_real);
 
               function_stop = 1;
             }
@@ -808,8 +808,8 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
              Spannbreite, auch hier kann die Bearbeitung beendet werden */
           else
           {
-            array_add(tmp_from, from_tmp_next);
-            array_add(tmp_to, to_tmp_real);
+            gt_array_add(tmp_from, from_tmp_next);
+            gt_array_add(tmp_to, to_tmp_real);
 
             function_stop = 1;
           }
@@ -819,14 +819,14 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
       }
 
       /* aktualisieren der Bereichsgrenzen */
-      array_delete(regionmatrix[row_index][0].from);
-      array_delete(regionmatrix[row_index][0].to);
-      regionmatrix[row_index][0].from = array_clone(tmp_from);
-      regionmatrix[row_index][0].to = array_clone(tmp_to);
+      gt_array_delete(regionmatrix[row_index][0].from);
+      gt_array_delete(regionmatrix[row_index][0].to);
+      regionmatrix[row_index][0].from = gt_array_clone(tmp_from);
+      regionmatrix[row_index][0].to = gt_array_clone(tmp_to);
     }
   }
-  array_delete(tmp_from);
-  array_delete(tmp_to);
+  gt_array_delete(tmp_from);
+  gt_array_delete(tmp_to);
 }
 
 static int check_coding(ParseStruct *parsestruct_ptr,
@@ -931,10 +931,10 @@ static int check_coding(ParseStruct *parsestruct_ptr,
 }
 
 static void merge_array(RegionStruct **regionmatrix,
-                        Array * real_from_ar,
-                        Array * real_to_ar,
-                        Array * real_fromtmp,
-                        Array * real_totmp,
+                        GT_Array * real_from_ar,
+                        GT_Array * real_to_ar,
+                        GT_Array * real_fromtmp,
+                        GT_Array * real_totmp,
                         unsigned long real_index,
                         unsigned long tmp_index,
                         short real_frame, unsigned short row_index)
@@ -944,101 +944,101 @@ static void merge_array(RegionStruct **regionmatrix,
     tmp_from,
     tmp_to;
 
-  /* Fall 1: Eintraege im Array des realen Frames sind abgearbeitet,
+  /* Fall 1: Eintraege im GT_Array des realen Frames sind abgearbeitet,
      Eintraege im tmp-Array noch nicht */
-  if (!(real_index < array_size(regionmatrix[real_frame][0].from))
-      && tmp_index < array_size(real_fromtmp))
+  if (!(real_index < gt_array_size(regionmatrix[real_frame][0].from))
+      && tmp_index < gt_array_size(real_fromtmp))
   {
     /* Bereichsgrenzen des Realtmp-Arrays - from/to-Werte */
-    real_from = *(unsigned long *) array_get(real_fromtmp, tmp_index);
-    real_to = *(unsigned long *) array_get(real_totmp, tmp_index);
+    real_from = *(unsigned long *) gt_array_get(real_fromtmp, tmp_index);
+    real_to = *(unsigned long *) gt_array_get(real_totmp, tmp_index);
 
     /* solange sich noch Eintraege im realtmp-Array befinden */
-    while (tmp_index < array_size(real_fromtmp))
+    while (tmp_index < gt_array_size(real_fromtmp))
     {
       /* hinzufuegen der Bereichsgrenzen */
-      array_add(real_from_ar, real_from);
-      array_add(real_to_ar, real_to);
+      gt_array_add(real_from_ar, real_from);
+      gt_array_add(real_to_ar, real_to);
 
       tmp_index++;
 
       /* nur wenn noch weitere Eintraege vorhanden sind, werden die
          naechsten Bereichsgrenzen ausgelesen */
-      if (tmp_index < array_size(real_fromtmp))
+      if (tmp_index < gt_array_size(real_fromtmp))
       {
-        real_from = *(unsigned long *) array_get(real_fromtmp, tmp_index);
-        real_to = *(unsigned long *) array_get(real_totmp, tmp_index);
+        real_from = *(unsigned long *) gt_array_get(real_fromtmp, tmp_index);
+        real_to = *(unsigned long *) gt_array_get(real_totmp, tmp_index);
       }
     }
   }
-  /* Fall 2: Eintraege im Array des realen Frames sind noch nicht
+  /* Fall 2: Eintraege im GT_Array des realen Frames sind noch nicht
      abgearbeitet, Eintraege im tmp-Array abgearbeitet */
-  else if (!(tmp_index < array_size(real_fromtmp))
-           && real_index < array_size(regionmatrix[real_frame][0].from))
+  else if (!(tmp_index < gt_array_size(real_fromtmp))
+           && real_index < gt_array_size(regionmatrix[real_frame][0].from))
   {
     /* Bereichsgrenzen des Real-Arrays - from/to-Werte */
     tmp_from =
-      *(unsigned long *) array_get(regionmatrix[real_frame][0].from,
+      *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].from,
                                    real_index);
     tmp_to =
-      *(unsigned long *) array_get(regionmatrix[real_frame][0].to,
+      *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].to,
                                    real_index);
 
     /* solange sich noch Eintraege im real-Array befinden */
-    while (real_index < array_size(regionmatrix[real_frame][0].from))
+    while (real_index < gt_array_size(regionmatrix[real_frame][0].from))
     {
       /* hinzufuegen der Bereichsgrenzen */
-      array_add(real_from_ar, tmp_from);
-      array_add(real_to_ar, tmp_to);
+      gt_array_add(real_from_ar, tmp_from);
+      gt_array_add(real_to_ar, tmp_to);
 
       real_index++;
 
       /* nur wenn noch weitere Eintraege vorhanden sind, werden die
          naechsten Bereichsgrenzen ausgelesen */
-      if (real_index < array_size(regionmatrix[real_frame][0].from))
+      if (real_index < gt_array_size(regionmatrix[real_frame][0].from))
       {
         tmp_from =
-          *(unsigned long *) array_get(regionmatrix[real_frame][0].from,
+          *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].from,
                                        real_index);
         tmp_to =
-          *(unsigned long *) array_get(regionmatrix[real_frame][0].to,
+          *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].to,
                                        real_index);
       }
     }
   }
-  /* Fall 3: Es sind noch Eintraege in beiden Arrays vorhanden */
-  else if ((tmp_index < array_size(real_fromtmp))
-           && real_index < array_size(regionmatrix[real_frame][0].from))
+  /* Fall 3: Es sind noch Eintraege in beiden GT_Arrays vorhanden */
+  else if ((tmp_index < gt_array_size(real_fromtmp))
+           && real_index < gt_array_size(regionmatrix[real_frame][0].from))
   {
     /* Bereichsgrenzen des Realtmp- und des real-Arrays - from/to-Werte */
     tmp_from =
-      *(unsigned long *) array_get(regionmatrix[real_frame][0].from,
+      *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].from,
                                    real_index);
     tmp_to =
-      *(unsigned long *) array_get(regionmatrix[real_frame][0].to,
+      *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].to,
                                    real_index);
-    real_from = *(unsigned long *) array_get(real_fromtmp, tmp_index);
-    real_to = *(unsigned long *) array_get(real_totmp, tmp_index);
+    real_from = *(unsigned long *) gt_array_get(real_fromtmp, tmp_index);
+    real_to = *(unsigned long *) gt_array_get(real_totmp, tmp_index);
 
     /* Fall: realtmp-Abschnitt liegt vor dem real_frame Abschnitt */
     if (real_from < tmp_from)
     {
       /* solange es noch Eintraege gibt, die vor dem real_frame-Abschnitt
          liegen... */
-      while (tmp_index < array_size(real_fromtmp) && real_from < tmp_from)
+      while (tmp_index < gt_array_size(real_fromtmp) && real_from < tmp_from)
       {
         /* ... werden die bereichsgrenzen Eingetragen... */
-        array_add(real_from_ar, real_from);
-        array_add(real_to_ar, real_to);
+        gt_array_add(real_from_ar, real_from);
+        gt_array_add(real_to_ar, real_to);
 
         tmp_index++;
 
         /* und der naechste realtmp-Eintrag eingelesen */
-        if (tmp_index < array_size(real_fromtmp))
+        if (tmp_index < gt_array_size(real_fromtmp))
         {
           real_from =
-            *(unsigned long *) array_get(real_fromtmp, tmp_index);
-          real_to = *(unsigned long *) array_get(real_totmp, tmp_index);
+            *(unsigned long *) gt_array_get(real_fromtmp, tmp_index);
+          real_to = *(unsigned long *) gt_array_get(real_totmp, tmp_index);
         }
       }
       /* rekursiver Aufruf der Sortierfunktion unter Beruecksichtigung der
@@ -1055,23 +1055,23 @@ static void merge_array(RegionStruct **regionmatrix,
     {
       /* solange es noch Eintraege gibt, die vor dem realtmp-Abschnitt
          liegen... */
-      while (real_index < array_size(regionmatrix[real_frame][0].from)
+      while (real_index < gt_array_size(regionmatrix[real_frame][0].from)
              && tmp_from < real_from)
       {
         /* ... werden die bereichsgrenzen Eingetragen... */
-        array_add(real_from_ar, tmp_from);
-        array_add(real_to_ar, tmp_to);
+        gt_array_add(real_from_ar, tmp_from);
+        gt_array_add(real_to_ar, tmp_to);
 
         real_index++;
 
         /* und der naechste real_frame-Eintrag eingelesen */
-        if (real_index < array_size(regionmatrix[real_frame][0].from))
+        if (real_index < gt_array_size(regionmatrix[real_frame][0].from))
         {
           tmp_from =
-            *(unsigned long *) array_get(regionmatrix[real_frame][0].from,
+            *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].from,
                                          real_index);
           tmp_to =
-            *(unsigned long *) array_get(regionmatrix[real_frame][0].to,
+            *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].to,
                                          real_index);
         }
       }
@@ -1087,9 +1087,9 @@ static void merge_array(RegionStruct **regionmatrix,
   }
 }
 
-static void sort_realtmp(Array * realfrom,
-                         Array * realto,
-                         Array * real_fromtmp, Array * real_totmp)
+static void sort_realtmp(GT_Array * realfrom,
+                         GT_Array * realto,
+                         GT_Array * real_fromtmp, GT_Array * real_totmp)
 {
   unsigned long index_outer,
     index_inner,
@@ -1099,20 +1099,20 @@ static void sort_realtmp(Array * realfrom,
     from_tmp = 0,
     to_tmp = 0;
 
-  /* durchlaufen des Arrays mit einer aeusseren und einer inneren Schleife
+  /* durchlaufen des GT_Arrays mit einer aeusseren und einer inneren Schleife
    */
-  for (index_outer = 0; index_outer < array_size(real_fromtmp);
+  for (index_outer = 0; index_outer < gt_array_size(real_fromtmp);
        index_outer++)
   {
-    /* die innere Schleife bestimmt den naechsten maximalen Wert im Array */
-    for (index_inner = 0; index_inner < array_size(real_fromtmp);
+    /* die innere Schleife bestimmt den naechsten maximalen Wert im GT_Array */
+    for (index_inner = 0; index_inner < gt_array_size(real_fromtmp);
          index_inner++)
     {
-      from = *(unsigned long *) array_get(real_fromtmp, index_inner);
-      to = *(unsigned long *) array_get(real_totmp, index_inner);
+      from = *(unsigned long *) gt_array_get(real_fromtmp, index_inner);
+      to = *(unsigned long *) gt_array_get(real_totmp, index_inner);
 
       /* Fall: es gibt bereits Eintraege im tmp-Array */
-      if (array_size(realfrom) > 0)
+      if (gt_array_size(realfrom) > 0)
       {
         /* der aktuelle from-Wert ist groesser als der tmp-Wert und
            kleiner als der letzte max-Wert */
@@ -1134,8 +1134,8 @@ static void sort_realtmp(Array * realfrom,
       }
     }
     /* Speichern des max-Wertes */
-    array_add(realfrom, from_tmp);
-    array_add(realto, to_tmp);
+    gt_array_add(realfrom, from_tmp);
+    gt_array_add(realto, to_tmp);
 
     /* merken des letzten max-Wertes */
     max_value = from_tmp;

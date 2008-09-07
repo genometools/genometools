@@ -29,14 +29,14 @@ typedef struct Readintkeys Readintkeys;
 
 size_t sizeofReadintkeys(void);
 
-void setreadintkeys(Array *riktab,
+void setreadintkeys(GT_Array *riktab,
                     const char *keystring,
                     void *valueptr,
                     size_t sizeval,
                     bool *readflag);
 
 int allkeysdefined(const Str *indexname,const char *suffix,
-                   const Array *riktab,Verboseinfo *verboseinfo,
+                   const GT_Array *riktab,Verboseinfo *verboseinfo,
                    Error *err);
 
 int analyzeuintline(const Str *indexname,
@@ -44,7 +44,7 @@ int analyzeuintline(const Str *indexname,
                     unsigned int linenum,
                     const char *linebuffer,
                     unsigned long linelength,
-                    Array *riktab,
+                    GT_Array *riktab,
                     Error *err);
 
 #endif

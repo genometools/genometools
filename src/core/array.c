@@ -30,7 +30,7 @@
 #define NUM_OF_TESTS    100
 #define MAX_SIZE        1024
 
-struct Array {
+struct GT_Array {
   void *space;
   unsigned long next_free;
   size_t allocated,
@@ -38,19 +38,19 @@ struct Array {
   unsigned int reference_count;
 };
 
-Array* array_new(size_t size_of_elem)
+GT_Array* gt_array_new(size_t size_of_elem)
 {
-  Array *a = ma_calloc(1, sizeof (Array));
+  GT_Array *a = ma_calloc(1, sizeof (GT_Array));
   assert(size_of_elem);
   a->size_of_elem = size_of_elem;
   return a;
 }
 
-Array* array_clone(const Array *a)
+GT_Array* gt_array_clone(const GT_Array *a)
 {
-  Array *a_copy;
+  GT_Array *a_copy;
   assert(a);
-  a_copy = ma_malloc(sizeof (Array));
+  a_copy = ma_malloc(sizeof (GT_Array));
   a_copy->space = ma_malloc(a->next_free * a->size_of_elem);
   memcpy(a_copy->space, a->space, a->next_free * a->size_of_elem);
   a_copy->next_free = a_copy->allocated = a->next_free;
@@ -59,38 +59,38 @@ Array* array_clone(const Array *a)
   return a_copy;
 }
 
-Array* array_ref(Array *a)
+GT_Array* gt_array_ref(GT_Array *a)
 {
   if (!a) return NULL;
   a->reference_count++;
   return a;
 }
 
-void* array_get(const Array *a, unsigned long idx)
+void* gt_array_get(const GT_Array *a, unsigned long idx)
 {
   assert(a && idx < a->next_free);
   return (char*) a->space + idx * a->size_of_elem;
 }
 
-void* array_get_first(const Array *a)
+void* gt_array_get_first(const GT_Array *a)
 {
-  return array_get(a, 0);
+  return gt_array_get(a, 0);
 }
 
-void* array_get_last(const Array *a)
+void* gt_array_get_last(const GT_Array *a)
 {
   assert(a->next_free);
-  return array_get(a, a->next_free-1);
+  return gt_array_get(a, a->next_free-1);
 }
 
-void* array_pop(Array *a)
+void* gt_array_pop(GT_Array *a)
 {
   assert(a && a->next_free);
   a->next_free--;
   return (char*) a->space + a->next_free * a->size_of_elem;
 }
 
-void array_rem(Array *a, unsigned long idx)
+void gt_array_rem(GT_Array *a, unsigned long idx)
 {
   unsigned long i;
   assert(a && idx < a->next_free);
@@ -104,7 +104,7 @@ void array_rem(Array *a, unsigned long idx)
   a->next_free--;
 }
 
-void array_reverse(Array *a)
+void gt_array_reverse(GT_Array *a)
 {
   char *front, *back, *tmp;
   assert(a);
@@ -120,13 +120,13 @@ void array_reverse(Array *a)
   ma_free(tmp);
 }
 
-void* array_get_space(const Array *a)
+void* gt_array_get_space(const GT_Array *a)
 {
   assert(a);
   return a->space;
 }
 
-void array_add_elem(Array *a, void *elem, size_t size_of_elem)
+void gt_array_add_elem(GT_Array *a, void *elem, size_t size_of_elem)
 {
   assert(a && elem);
   assert(a->size_of_elem == size_of_elem);
@@ -141,75 +141,75 @@ void array_add_elem(Array *a, void *elem, size_t size_of_elem)
   a->next_free++;
 }
 
-void array_add_array(Array *dest, const Array *src)
+void gt_array_add_array(GT_Array *dest, const GT_Array *src)
 {
   unsigned long i;
   assert(dest && src && dest->size_of_elem == src->size_of_elem);
-  for (i = 0; i < array_size(src); i++)
-    array_add_elem(dest, array_get(src, i), src->size_of_elem);
+  for (i = 0; i < gt_array_size(src); i++)
+    gt_array_add_elem(dest, gt_array_get(src, i), src->size_of_elem);
 }
 
-size_t array_elem_size(const Array *a)
+size_t gt_array_elem_size(const GT_Array *a)
 {
   assert(a);
   return a->size_of_elem;
 }
 
-unsigned long array_size(const Array *a)
+unsigned long gt_array_size(const GT_Array *a)
 {
   return a ? a->next_free : 0;
 }
 
-void array_set_size(Array *a, unsigned long size)
+void gt_array_set_size(GT_Array *a, unsigned long size)
 {
   assert(a);
   assert(size <= a->next_free);
   a->next_free = size;
 }
 
-void array_reset(Array *a)
+void gt_array_reset(GT_Array *a)
 {
   assert(a);
   a->next_free = 0;
 }
 
-void array_sort(Array *a, int(*compar)(const void*, const void*))
+void gt_array_sort(GT_Array *a, int(*compar)(const void*, const void*))
 {
   assert(a && compar);
   qsort(a->space, a->next_free, a->size_of_elem, compar);
 }
 
-int array_cmp(const Array *array_a, const Array *array_b)
+int gt_array_cmp(const GT_Array *array_a, const GT_Array *array_b)
 {
-  assert(array_size(array_a) == array_size(array_b));
-  assert(array_elem_size(array_a) == array_elem_size(array_b));
+  assert(gt_array_size(array_a) == gt_array_size(array_b));
+  assert(gt_array_elem_size(array_a) == gt_array_elem_size(array_b));
   return memcmp(array_a->space, array_b->space,
                 array_a->size_of_elem * array_a->next_free);
 }
 
-int array_iterate(Array *a, ArrayProcessor array_processor, void *info,
+int gt_array_iterate(GT_Array *a, GT_ArrayProcessor gt_array_processor, void *info,
                   Error *err)
 {
   unsigned long idx;
   int rval;
   error_check(err);
-  assert(a && array_processor);
-  for (idx = 0; idx < array_size(a); idx++) {
-    if ((rval = array_processor(array_get(a, idx), info, err)))
+  assert(a && gt_array_processor);
+  for (idx = 0; idx < gt_array_size(a); idx++) {
+    if ((rval = gt_array_processor(gt_array_get(a, idx), info, err)))
       return rval;
   }
   return 0;
 }
 
-int array_iterate_reverse(Array *a, ArrayProcessor array_processor, void *info,
+int gt_array_iterate_reverse(GT_Array *a, GT_ArrayProcessor gt_array_processor, void *info,
                           Error *err)
 {
   unsigned long idx;
   int rval;
   error_check(err);
-  assert(a && array_processor);
-  for (idx = array_size(a); idx > 0; idx--) {
-    if ((rval = array_processor(array_get(a, idx-1), info, err)))
+  assert(a && gt_array_processor);
+  for (idx = gt_array_size(a); idx > 0; idx--) {
+    if ((rval = gt_array_processor(gt_array_get(a, idx-1), info, err)))
       return rval;
   }
   return 0;
@@ -235,31 +235,31 @@ static int iterate_fail_func(UNUSED void *value, UNUSED void *info,
   return -1;
 }
 
-int array_example(UNUSED Error *err)
+int gt_array_example(UNUSED Error *err)
 {
   unsigned long i;
-  Array *a;
+  GT_Array *a;
 
   error_check(err);
 
   /* an example array use case */
 
-  a = array_new(sizeof (unsigned long));
+  a = gt_array_new(sizeof (unsigned long));
   for (i = 0; i < 100; i++) {
-    array_add(a, i);
-    assert(i == *(unsigned long*) array_get(a, i));
+    gt_array_add(a, i);
+    assert(i == *(unsigned long*) gt_array_get(a, i));
   }
-  assert(array_size(a) == 100);
-  assert(*(unsigned long*) array_pop(a) == 99);
-  assert(array_size(a) == 99);
-  array_delete(a);
+  assert(gt_array_size(a) == 100);
+  assert(*(unsigned long*) gt_array_pop(a) == 99);
+  assert(gt_array_size(a) == 99);
+  gt_array_delete(a);
 
   return 0;
 }
 
-int array_unit_test(Error *err)
+int gt_array_unit_test(Error *err)
 {
-  Array *char_array, *int_array, *a = NULL, *aref, *aclone;
+  GT_Array *char_array, *int_array, *a = NULL, *aref, *aclone;
   char cc, *char_array_test;
   int ci, *int_array_test;
   unsigned long i, j, size;
@@ -268,127 +268,127 @@ int array_unit_test(Error *err)
   error_check(err);
 
   /* testing an empty array */
-  char_array = array_new(sizeof (char));
-  array_delete(char_array);
-  int_array = array_new(sizeof (int));
-  array_delete(int_array);
+  char_array = gt_array_new(sizeof (char));
+  gt_array_delete(char_array);
+  int_array = gt_array_new(sizeof (int));
+  gt_array_delete(int_array);
 
-  char_array = array_new(sizeof (char));
-  int_array = array_new(sizeof (int));
+  char_array = gt_array_new(sizeof (char));
+  int_array = gt_array_new(sizeof (int));
   char_array_test = ma_malloc((MAX_SIZE + 1) * sizeof (char));
   int_array_test = ma_malloc(MAX_SIZE * sizeof (int));
 
   for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
     size = rand_max(MAX_SIZE);
 
-    array_reset(char_array);
-    array_set_size(int_array, 0);
+    gt_array_reset(char_array);
+    gt_array_set_size(int_array, 0);
 
-    ensure(had_err, array_size(char_array) == 0);
-    ensure(had_err, array_size(int_array) == 0);
+    ensure(had_err, gt_array_size(char_array) == 0);
+    ensure(had_err, gt_array_size(int_array) == 0);
 
     for (i = 0; !had_err && i < size; i++) {
       cc = rand_max(CHAR_MAX);
       ci = rand_max(INT_MAX);
 
-      array_add(char_array, cc);
-      array_add(int_array, ci);
+      gt_array_add(char_array, cc);
+      gt_array_add(int_array, ci);
 
-      ensure(had_err, array_size(char_array) == i+1);
-      ensure(had_err, array_size(int_array) == i+1);
-      ensure(had_err, *((char*) array_get(char_array, i)) == cc);
-      ensure(had_err, *((int*) array_get(int_array, i)) == ci);
+      ensure(had_err, gt_array_size(char_array) == i+1);
+      ensure(had_err, gt_array_size(int_array) == i+1);
+      ensure(had_err, *((char*) gt_array_get(char_array, i)) == cc);
+      ensure(had_err, *((int*) gt_array_get(int_array, i)) == ci);
 
-      array_add_elem(char_array, &cc, sizeof (char));
-      array_add_elem(int_array, &ci, sizeof (int));
+      gt_array_add_elem(char_array, &cc, sizeof (char));
+      gt_array_add_elem(int_array, &ci, sizeof (int));
 
-      ensure(had_err, array_size(char_array) == i+2);
-      ensure(had_err, array_size(int_array) == i+2);
-      ensure(had_err, *((char*) array_get(char_array, i+1)) == cc);
-      ensure(had_err, *((int*) array_get(int_array, i+1)) == ci);
-      ensure(had_err, *((char*) array_pop(char_array)) == cc);
-      ensure(had_err, *((int*) array_pop(int_array)) == ci);
-      ensure(had_err, array_size(char_array) == i+1);
-      ensure(had_err, array_size(int_array) == i+1);
-      ensure(had_err, *((char*) array_get(char_array, i)) == cc);
-      ensure(had_err, *((int*) array_get(int_array, i)) == ci);
+      ensure(had_err, gt_array_size(char_array) == i+2);
+      ensure(had_err, gt_array_size(int_array) == i+2);
+      ensure(had_err, *((char*) gt_array_get(char_array, i+1)) == cc);
+      ensure(had_err, *((int*) gt_array_get(int_array, i+1)) == ci);
+      ensure(had_err, *((char*) gt_array_pop(char_array)) == cc);
+      ensure(had_err, *((int*) gt_array_pop(int_array)) == ci);
+      ensure(had_err, gt_array_size(char_array) == i+1);
+      ensure(had_err, gt_array_size(int_array) == i+1);
+      ensure(had_err, *((char*) gt_array_get(char_array, i)) == cc);
+      ensure(had_err, *((int*) gt_array_get(int_array, i)) == ci);
 
       char_array_test[i] = cc;
       char_array_test[i+1]= '\0';
       int_array_test[i] = ci;
 
-      ensure(had_err, strncmp(array_get_space(char_array), char_array_test,
+      ensure(had_err, strncmp(gt_array_get_space(char_array), char_array_test,
                               strlen(char_array_test)) == 0);
 
       for (j = 0; j <= i && !had_err; j++)
-        ensure(had_err, *(int*) array_get(int_array, j) == int_array_test[j]);
+        ensure(had_err, *(int*) gt_array_get(int_array, j) == int_array_test[j]);
     }
   }
 
-  /* test array_reverse(), array_iterate(), array_rem(), and array_ref() */
+  /* test gt_array_reverse(), gt_array_iterate(), gt_array_rem(), and gt_array_ref() */
   if (!had_err) {
-    a = array_new(sizeof (Range));
+    a = gt_array_new(sizeof (Range));
     for (i = 0; i < 24; i++) {
       range.start = i + 1;
       range.end   = i + 101;
-      array_add(a, range);
+      gt_array_add(a, range);
     }
-    array_reverse(a);
+    gt_array_reverse(a);
     for (i = 0; !had_err && i < 24; i++) {
       range.start = i + 1;
       range.end   = i + 101;
-      ensure(had_err, !range_compare(range, *(Range*) array_get(a, 23 - i)));
+      ensure(had_err, !range_compare(range, *(Range*) gt_array_get(a, 23 - i)));
     }
-    aref = array_ref(a);
-    array_delete(aref);
+    aref = gt_array_ref(a);
+    gt_array_delete(aref);
   }
   if (!had_err) {
     i = 0;
-    had_err = array_iterate_reverse(a, iterate_test_func, &i, err);
-    ensure(had_err, array_iterate_reverse(a, iterate_fail_func, NULL, err));
+    had_err = gt_array_iterate_reverse(a, iterate_test_func, &i, err);
+    ensure(had_err, gt_array_iterate_reverse(a, iterate_fail_func, NULL, err));
   }
   if (!had_err) {
-    array_reverse(a);
+    gt_array_reverse(a);
     i = 0;
-    had_err = array_iterate(a, iterate_test_func, &i, err);
-    ensure(had_err, array_iterate(a, iterate_fail_func, NULL, err));
+    had_err = gt_array_iterate(a, iterate_test_func, &i, err);
+    ensure(had_err, gt_array_iterate(a, iterate_fail_func, NULL, err));
   }
   if (!had_err) {
-    aclone = array_clone(a);
-    for (i = 0;!had_err && i < array_size(a); i++) {
-      ensure(had_err, !range_compare_ptr(array_get(a, i),
-                                         array_get(aclone, i)));
+    aclone = gt_array_clone(a);
+    for (i = 0;!had_err && i < gt_array_size(a); i++) {
+      ensure(had_err, !range_compare_ptr(gt_array_get(a, i),
+                                         gt_array_get(aclone, i)));
     }
-    array_delete(aclone);
+    gt_array_delete(aclone);
   }
   if (!had_err) {
-    array_rem(a, 13);
-    array_rem(a, 12);
-    array_rem(a, 11);
-    array_rem(a, 10);
-    ensure(had_err, array_size(a) == 20);
+    gt_array_rem(a, 13);
+    gt_array_rem(a, 12);
+    gt_array_rem(a, 11);
+    gt_array_rem(a, 10);
+    ensure(had_err, gt_array_size(a) == 20);
     for (i = 0; !had_err && i < 10; i++) {
       range.start = i + 1;
       range.end   = i + 101;
-      ensure(had_err, !range_compare(range, *(Range*) array_get(a, i)));
+      ensure(had_err, !range_compare(range, *(Range*) gt_array_get(a, i)));
     }
     for (i = 10; !had_err && i < 20; i++) {
       range.start = 4 + i + 1;
       range.end   = 4 + i + 101;
-      ensure(had_err, !range_compare(range, *(Range*) array_get(a, i)));
+      ensure(had_err, !range_compare(range, *(Range*) gt_array_get(a, i)));
     }
   }
-  array_delete(a);
+  gt_array_delete(a);
 
-  array_delete(char_array);
-  array_delete(int_array);
+  gt_array_delete(char_array);
+  gt_array_delete(int_array);
   ma_free(char_array_test);
   ma_free(int_array_test);
 
   return had_err;
 }
 
-void array_delete(Array *a)
+void gt_array_delete(GT_Array *a)
 {
   if (!a) return;
   if (a->reference_count) {

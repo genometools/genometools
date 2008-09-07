@@ -30,7 +30,7 @@ struct Track {
   unsigned long max_num_lines, discarded_blocks;
   LineBreaker *lb;
   bool split;
-  Array *lines;
+  GT_Array *lines;
 };
 
 Track* track_new(Str *title, unsigned long max_num_lines, bool split,
@@ -41,7 +41,7 @@ Track* track_new(Str *title, unsigned long max_num_lines, bool split,
   track = ma_calloc(1, sizeof (Track));
   assert(track);
   track->title = str_ref(title);
-  track->lines = array_new(sizeof (Line*));
+  track->lines = gt_array_new(sizeof (Line*));
   track->max_num_lines = max_num_lines;
   track->split = split;
   track->lb = lb;
@@ -56,14 +56,14 @@ static Line* get_next_free_line(Track *track, GT_Block *block)
   assert(track);
 
   /* find unoccupied line -- may need optimisation */
-  for (i = 0; i < array_size(track->lines); i++) {
-    line = *(Line**) array_get(track->lines, i);
+  for (i = 0; i < gt_array_size(track->lines); i++) {
+    line = *(Line**) gt_array_get(track->lines, i);
     if (!line_breaker_line_is_occupied(track->lb, line, block))
       return line;
   }
   /* if line limit is hit, do not create any more lines! */
   if (track->max_num_lines != UNDEF_ULONG
-       && array_size(track->lines) == track->max_num_lines)
+       && gt_array_size(track->lines) == track->max_num_lines)
   {
     track->discarded_blocks++;
     return NULL;
@@ -71,19 +71,19 @@ static Line* get_next_free_line(Track *track, GT_Block *block)
   /* make sure there is only one line if 'split_lines' is set to false */
   if (!track->split)
   {
-    if (array_size(track->lines) < 1)
+    if (gt_array_size(track->lines) < 1)
     {
       line = line_new();
-      array_add(track->lines, line);
+      gt_array_add(track->lines, line);
     }
     else
-      line = *(Line**) array_get(track->lines, 0);
-    assert(array_size(track->lines) == 1);
+      line = *(Line**) gt_array_get(track->lines, 0);
+    assert(gt_array_size(track->lines) == 1);
   }
   else
   {
     line = line_new();
-    array_add(track->lines, line);
+    gt_array_add(track->lines, line);
   }
   assert(line);
   return line;
@@ -118,16 +118,16 @@ Str* track_get_title(const Track *track)
 unsigned long track_get_number_of_lines(const Track *track)
 {
   assert(track);
-  return array_size(track->lines);
+  return gt_array_size(track->lines);
 }
 
 unsigned long track_get_number_of_lines_with_captions(const Track *track)
 {
   unsigned long i = 0, nof_tracks = 0;
   assert(track);
-  for (i=0; i<array_size(track->lines); i++)
-  {
-    if (line_has_captions(*(Line**) array_get(track->lines, i))) nof_tracks++;
+  for (i = 0; i < gt_array_size(track->lines); i++) {
+    if (line_has_captions(*(Line**) gt_array_get(track->lines, i)))
+      nof_tracks++;
   }
   return nof_tracks;
 }
@@ -137,8 +137,8 @@ int track_sketch(Track* track, GT_Canvas *canvas)
   int i = 0;
   assert(track && canvas);
   gt_canvas_visit_track_pre(canvas, track);
-  for (i = 0; i < array_size(track->lines); i++)
-    line_sketch(*(Line**) array_get(track->lines, i), canvas);
+  for (i = 0; i < gt_array_size(track->lines); i++)
+    line_sketch(*(Line**) gt_array_get(track->lines, i), canvas);
   gt_canvas_visit_track_post(canvas, track);
   return 0;
 }
@@ -201,9 +201,9 @@ void track_delete(Track *track)
   if (!track) return;
   if (track->lb)
     line_breaker_delete(track->lb);
-  for (i = 0; i < array_size(track->lines); i++)
-    line_delete(*(Line**) array_get(track->lines, i));
-  array_delete(track->lines);
+  for (i = 0; i < gt_array_size(track->lines); i++)
+    line_delete(*(Line**) gt_array_get(track->lines, i));
+  gt_array_delete(track->lines);
   str_delete(track->title);
   ma_free(track);
 }

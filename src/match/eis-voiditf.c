@@ -270,7 +270,7 @@ unsigned long bwtrangesplitallwithoutspecial(Matchbound *mbtab,
 }
 
 /*
-void bwtrangewithspecial(UNUSED ArrayBoundswithchar *bwci,
+void bwtrangewithspecial(UNUSED GT_ArrayBoundswithchar *bwci,
                          Seqpos *rangeOccs,
                          UNUSED unsigned long numofchars,
                          const void *voidBwtSeq,

@@ -23,7 +23,7 @@
 
 struct GenomeNodeIterator {
   GenomeNode *gn;
-  Array *node_stack;
+  GT_Array *node_stack;
   bool direct;
 };
 
@@ -33,7 +33,7 @@ static GenomeNodeIterator* genome_node_iterator_new_base(GenomeNode *gn)
   assert(gn);
   gni = ma_malloc(sizeof *gni);
   gni->gn = genome_node_rec_ref(gn);
-  gni->node_stack = array_new(sizeof (GenomeNode*));
+  gni->node_stack = gt_array_new(sizeof (GenomeNode*));
   return gni;
 }
 
@@ -50,17 +50,17 @@ GenomeNodeIterator* genome_node_iterator_new(GenomeNode *gn)
     for (dlistelem = dlist_last(gn->children); dlistelem != NULL;
          dlistelem = dlistelem_previous(dlistelem)) {
       child_feature = (GenomeNode*) dlistelem_get_data(dlistelem);
-      array_add(gni->node_stack, child_feature);
+      gt_array_add(gni->node_stack, child_feature);
     }
   }
   else
-    array_add(gni->node_stack, gni->gn);
-  assert(array_size(gni->node_stack));
+    gt_array_add(gni->node_stack, gni->gn);
+  assert(gt_array_size(gni->node_stack));
   gni->direct = false;
   return gni;
 }
 
-static void add_children_to_stack(Array *node_stack, GenomeNode *gn)
+static void add_children_to_stack(GT_Array *node_stack, GenomeNode *gn)
 {
   GenomeNode *child;
   Dlistelem *dlistelem;
@@ -69,7 +69,7 @@ static void add_children_to_stack(Array *node_stack, GenomeNode *gn)
   for (dlistelem = dlist_last(gn->children); dlistelem != NULL;
        dlistelem = dlistelem_previous(dlistelem)) {
     child = dlistelem_get_data(dlistelem);
-    array_add(node_stack, child);
+    gt_array_add(node_stack, child);
   }
 }
 
@@ -88,10 +88,10 @@ GenomeNode* genome_node_iterator_next(GenomeNodeIterator *gni)
 {
   GenomeNode *gn;
   assert(gni);
-  if (!array_size(gni->node_stack))
+  if (!gt_array_size(gni->node_stack))
     return NULL;
   /* pop */
-  gn = *(GenomeNode**) array_pop(gni->node_stack);
+  gn = *(GenomeNode**) gt_array_pop(gni->node_stack);
   /* push children on stack */
   if (!gni->direct && gn->children)
     add_children_to_stack(gni->node_stack, gn);
@@ -122,6 +122,6 @@ void genome_node_iterator_delete(GenomeNodeIterator *gni)
 {
   if (!gni) return;
   genome_node_rec_delete(gni->gn);
-  array_delete(gni->node_stack);
+  gt_array_delete(gni->node_stack);
   ma_free(gni);
 }

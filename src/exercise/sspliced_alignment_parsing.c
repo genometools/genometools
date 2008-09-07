@@ -112,7 +112,7 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
   return had_err;
 }
 
-int sspliced_alignment_parse(Array *spliced_alignments, const char *filename,
+int sspliced_alignment_parse(GT_Array *spliced_alignments, const char *filename,
                              Error *err)
 {
   FILE *input_file;
@@ -129,7 +129,7 @@ int sspliced_alignment_parse(Array *spliced_alignments, const char *filename,
     had_err = parse_input_line(&sa, str_get(line), str_length(line), err);
     if (!had_err) {
       /* store spliced alignment */
-      array_add(spliced_alignments, sa);
+      gt_array_add(spliced_alignments, sa);
       /* reset array */
       str_reset(line);
     }

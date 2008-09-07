@@ -22,7 +22,7 @@
 struct SSplicedAlignment {
   char *id;
   bool forward;
-  Array *exons; /* the exon ranges */
+  GT_Array *exons; /* the exon ranges */
 };
 
 SSplicedAlignment* sspliced_alignment_new(const char *id, bool forward)
@@ -32,14 +32,14 @@ SSplicedAlignment* sspliced_alignment_new(const char *id, bool forward)
   sa = ma_malloc(sizeof *sa);
   sa->id = cstr_dup(id);
   sa->forward = forward;
-  sa->exons = array_new(sizeof (Range));
+  sa->exons = gt_array_new(sizeof (Range));
   return sa;
 }
 
 void sspliced_alignment_delete(SSplicedAlignment *sa)
 {
   if (!sa) return;
-  array_delete(sa->exons);
+  gt_array_delete(sa->exons);
   ma_free(sa->id);
   ma_free(sa);
 }
@@ -53,29 +53,29 @@ bool sspliced_alignment_is_forward(const SSplicedAlignment *sa)
 void sspliced_alignment_add_exon(SSplicedAlignment *sa, Range exon)
 {
   assert(sa);
-  array_add(sa->exons, exon);
+  gt_array_add(sa->exons, exon);
 }
 
 unsigned long sspliced_alignment_num_of_exons(const SSplicedAlignment *sa)
 {
   assert(sa);
-  return array_size(sa->exons);
+  return gt_array_size(sa->exons);
 }
 
 Range sspliced_alignment_get_exon(const SSplicedAlignment *sa,
                                   unsigned long exon_number)
 {
   assert(sa);
-  return *(Range*) array_get(sa->exons, exon_number);
+  return *(Range*) gt_array_get(sa->exons, exon_number);
 }
 
 Range sspliced_alignment_genomic_range(const SSplicedAlignment *sa)
 {
   Range range;
   assert(sa);
-  assert(array_size(sa->exons));
-  range.start = ((Range*) array_get_first(sa->exons))->start;
-  range.end   = ((Range*) array_get_last(sa->exons))->end;
+  assert(gt_array_size(sa->exons));
+  range.start = ((Range*) gt_array_get_first(sa->exons))->start;
+  range.end   = ((Range*) gt_array_get_last(sa->exons))->end;
   return range;
 }
 

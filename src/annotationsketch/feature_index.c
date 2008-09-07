@@ -160,20 +160,20 @@ int gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
 
 static int collect_features_from_itree(IntervalTreeNode *node, void *data)
 {
-  Array *a = (Array*) data;
+  GT_Array *a = (GT_Array*) data;
   GenomeNode *gn = (GenomeNode*) interval_tree_node_get_data(node);
-  array_add(a, gn);
+  gt_array_add(a, gn);
   return 0;
 }
 
-Array* gt_feature_index_get_features_for_seqid(GT_FeatureIndex *fi,
-                                               const char *seqid)
+GT_Array* gt_feature_index_get_features_for_seqid(GT_FeatureIndex *fi,
+                                                  const char *seqid)
 {
   RegionInfo *ri;
   int had_err = 0;
-  Array *a;
+  GT_Array *a;
   assert(fi && seqid);
-  a = array_new(sizeof (GenomeFeature*));
+  a = gt_array_new(sizeof (GenomeFeature*));
   ri = (RegionInfo*) hashmap_get(fi->regions, seqid);
   if (ri)
     had_err = interval_tree_traverse(ri->features,
@@ -191,7 +191,7 @@ static int genome_node_cmp_range_start(const void *v1, const void *v2)
   return genome_node_compare(&n1, &n2);
 }
 
-int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi, Array *results,
+int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi, GT_Array *results,
                                          const char *seqid, Range qry_range,
                                          Error *err)
 {
@@ -206,7 +206,7 @@ int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi, Array *results,
   }
   interval_tree_find_all_overlapping(ri->features, qry_range.start,
                                      qry_range.end, results);
-  array_sort(results, genome_node_cmp_range_start);
+  gt_array_sort(results, genome_node_cmp_range_start);
   return 0;
 }
 
@@ -268,7 +268,7 @@ int gt_feature_index_unit_test(Error *err)
   Str *seqid1, *seqid2;
   GT_StrArray *seqids = NULL;
   SequenceRegion *sr1, *sr2;
-  Array *features = NULL;
+  GT_Array *features = NULL;
   int had_err = 0;
   error_check(err);
 
@@ -330,15 +330,15 @@ int gt_feature_index_unit_test(Error *err)
   if (!had_err)
     features = gt_feature_index_get_features_for_seqid(fi, "test1");
   ensure(had_err, features);
-  ensure(had_err, array_size(features) == 0);
-  array_delete(features);
+  ensure(had_err, gt_array_size(features) == 0);
+  gt_array_delete(features);
   features = NULL;
 
   if (!had_err)
     features = gt_feature_index_get_features_for_seqid(fi, "test2");
   ensure(had_err, features);
-  ensure(had_err, array_size(features) == 0);
-  array_delete(features);
+  ensure(had_err, gt_array_size(features) == 0);
+  gt_array_delete(features);
   features = NULL;
 
   /* add features to every sequence region and test if the according
@@ -348,16 +348,16 @@ int gt_feature_index_unit_test(Error *err)
     gt_feature_index_add_genome_feature(fi, (GenomeFeature*) gn1);
     features = gt_feature_index_get_features_for_seqid(fi, "test1");
   }
-  ensure(had_err, array_size(features) == 1UL);
-  array_delete(features);
+  ensure(had_err, gt_array_size(features) == 1UL);
+  gt_array_delete(features);
   features = NULL;
 
   if (!had_err) {
     gt_feature_index_add_genome_feature(fi, (GenomeFeature*) gn2);
     features = gt_feature_index_get_features_for_seqid(fi, "test2");
   }
-  ensure(had_err, array_size(features) == 1UL);
-  array_delete(features);
+  ensure(had_err, gt_array_size(features) == 1UL);
+  gt_array_delete(features);
   features = NULL;
 
   /* test gt_feature_index_get_first_seqid() */
@@ -380,7 +380,7 @@ int gt_feature_index_unit_test(Error *err)
   if (!had_err)
     features = gt_feature_index_get_features_for_seqid(fi, "test1");
   ensure(had_err, features);
-  array_delete(features);
+  gt_array_delete(features);
 
   /* delete all generated objects */
   gt_strarray_delete(seqids);

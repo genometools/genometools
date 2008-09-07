@@ -640,7 +640,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
     current,
     *hit_ptr,
     hitcounter = 0,
-    array_index,
+    gt_array_index,
     seq_index,
     hit_index,
     string_number,
@@ -671,18 +671,18 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
     if (row_index != 3)
     {
       /* Anzahl kodierender Abschnitte im aktuellen Leserahmen */
-      arraysize = array_size(regionmatrix[row_index][0].from);
+      arraysize = gt_array_size(regionmatrix[row_index][0].from);
 
-      for (array_index = 0; array_index < arraysize; array_index++)
+      for (gt_array_index = 0; gt_array_index < arraysize; gt_array_index++)
       {
         /* Bereichsgrenzen des kodierenden Abschnittes - Werte bereits in
            0- bis X-Kodierung */
         from =
-          *(unsigned long *) array_get(regionmatrix[row_index][0].from,
-                                       array_index);
+          *(unsigned long *) gt_array_get(regionmatrix[row_index][0].from,
+                                       gt_array_index);
         to =
-          *(unsigned long *) array_get(regionmatrix[row_index][0].to,
-                                       array_index);
+          *(unsigned long *) gt_array_get(regionmatrix[row_index][0].to,
+                                       gt_array_index);
 
         /* nur wenn die Mindestlaenge in Anzahl AS erfuellt ist, erfolgt
            eine Ausgabe */
@@ -722,7 +722,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
             /* hit_numbers ist die Anzahl der beteiligten Hits an
                Sequenzposition seq_index */
             hit_numbers =
-              array_size(combinedscore_matrix[row_index][seq_index].
+              gt_array_size(combinedscore_matrix[row_index][seq_index].
                          hit_number);
 
             if (hit_ptr == NULL)
@@ -735,7 +735,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
               /* current entspricht der Hit-Nummer */
               current =
                 *(unsigned long *)
-                array_get(combinedscore_matrix[row_index][seq_index].
+                gt_array_get(combinedscore_matrix[row_index][seq_index].
                           hit_number, hit_index);
               /* hit_ptr wird an der Stelle current auf 1 gesetzt - so
                  wird eine Mehrfachnennung vermieden */
@@ -786,7 +786,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                   hitsnum_tmp = HITSTRUCT(hitsnum);
                   memory_tmp = HITSTRUCT(memory);
 
-                  array_reset(parsestruct_ptr->value_tmp);
+                  gt_array_reset(parsestruct_ptr->value_tmp);
                   (void) cstr_nofree_ulp_hashmap_foreach(
                     parsestruct_ptr->resulthits,
                     newmemory_hash, parsestruct_ptr, err);
@@ -807,19 +807,19 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                   hashtable_reset(parsestruct_ptr->resulthits);
 
                   for (hash_index = 0;
-                       hash_index < array_size(parsestruct_ptr->value_tmp);
+                       hash_index < gt_array_size(parsestruct_ptr->value_tmp);
                        hash_index++)
                   {
                     cstr_nofree_ulp_hashmap_add(parsestruct_ptr->resulthits,
                                   (char *)
                                   gt_strarray_get(HITSTRUCT(hits_statistic),
                                                *(unsigned long *)
-                                               array_get(parsestruct_ptr->
+                                               gt_array_get(parsestruct_ptr->
                                                          value_tmp,
                                                          hash_index)),
                                   HITSTRUCT(memory +
                                             *(unsigned long *)
-                                            array_get(parsestruct_ptr->
+                                            gt_array_get(parsestruct_ptr->
                                                       value_tmp,
                                                       hash_index)));
                   }
@@ -1292,7 +1292,7 @@ newmemory_hash(UNUSED char *key, unsigned long *value, void *data,
 
   error_check(err);
 
-  array_add(parsestruct_ptr->value_tmp, HITSTRUCT(stat_pos));
+  gt_array_add(parsestruct_ptr->value_tmp, HITSTRUCT(stat_pos));
 
   return 0;
 }

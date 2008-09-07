@@ -42,7 +42,7 @@ ScoreMatrix* score_matrix_new(Alpha *alpha)
   return sm;
 }
 
-static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
+static int parse_alphabet_line(GT_Array *index_to_alpha_char_mapping,
                                Tokenizer *tz, Error *err)
 {
   Str *token;
@@ -50,7 +50,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
   int had_err = 0;
   error_check(err);
   assert(index_to_alpha_char_mapping && tz);
-  assert(!array_size(index_to_alpha_char_mapping));
+  assert(!gt_array_size(index_to_alpha_char_mapping));
   while ((token = tokenizer_get_token(tz))) {
     if (str_length(token) > 2) {
       error_set(err, "illegal character token '%s' on line %lu in file '%s'",
@@ -76,7 +76,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
       assert(!had_err);
       return 0;
     }
-    array_add(index_to_alpha_char_mapping, amino_acid);
+    gt_array_add(index_to_alpha_char_mapping, amino_acid);
     if (str_length(token) == 2) {
       if (tokenstr[1] != '\n') {
         error_set(err, "illegal character token '%s' on line %lu in file '%s'",
@@ -94,7 +94,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
     tokenizer_next_token(tz);
   }
   if (!had_err) {
-    if (!array_size(index_to_alpha_char_mapping)) {
+    if (!gt_array_size(index_to_alpha_char_mapping)) {
       error_set(err, "could not parse a single alphabet character in file "
                 "'%s' (file empty or directory?)", tokenizer_get_filename(tz));
     had_err = -1;
@@ -105,7 +105,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
 }
 
 static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
-                            Array *index_to_alpha_char_mapping,
+                            GT_Array *index_to_alpha_char_mapping,
                             char *parsed_characters, Error *err)
 {
   unsigned int i = 0;
@@ -143,7 +143,7 @@ static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
       score_matrix_set_score(sm,
                              alpha_encode(sm->alpha, amino_acid),
                              alpha_encode(sm->alpha, *(char*)
-                             array_get(index_to_alpha_char_mapping, i)), score);
+                             gt_array_get(index_to_alpha_char_mapping, i)), score);
       i++;
       str_delete(token);
       tokenizer_next_token(tz);
@@ -158,14 +158,14 @@ static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
 static int parse_score_matrix(ScoreMatrix *sm, const char *path, Error *err)
 {
   Tokenizer *tz;
-  Array *index_to_alpha_char_mapping;
+  GT_Array *index_to_alpha_char_mapping;
   unsigned int parsed_score_lines = 0;
   char parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;
   error_check(err);
   assert(sm && path && sm->alpha);
   tz = tokenizer_new(io_new(path, "r"));
-  index_to_alpha_char_mapping = array_new(sizeof (char));
+  index_to_alpha_char_mapping = gt_array_new(sizeof (char));
   tokenizer_skip_comment_lines(tz);
   had_err = parse_alphabet_line(index_to_alpha_char_mapping, tz, err);
   if (!had_err) {
@@ -180,12 +180,12 @@ static int parse_score_matrix(ScoreMatrix *sm, const char *path, Error *err)
 
   /* check the number of parsed score lines */
   if (!had_err &&
-      parsed_score_lines != array_size(index_to_alpha_char_mapping)) {
+      parsed_score_lines != gt_array_size(index_to_alpha_char_mapping)) {
     error_set(err, "the score matrix given in '%s' is not symmetric", path);
     had_err = -1;
   }
 
-  array_delete(index_to_alpha_char_mapping);
+  gt_array_delete(index_to_alpha_char_mapping);
   tokenizer_delete(tz);
 
   return had_err;

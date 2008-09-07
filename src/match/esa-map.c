@@ -63,11 +63,11 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
-  Array *riktab;
+  GT_Array *riktab;
   Str *currentline;
 
   error_check(err);
-  riktab = array_new(sizeofReadintkeys());
+  riktab = gt_array_new(sizeofReadintkeys());
   SETREADINTKEYS("totallength",totallength,NULL);
   SETREADINTKEYS("specialcharacters",
                  &suffixarray->specialcharinfo.specialcharacters,NULL);
@@ -224,7 +224,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     }
     suffixarray->readmode = (Readmode) readmodeint;
   }
-  array_delete(riktab);
+  gt_array_delete(riktab);
   return haserr ? -1 : 0;
 }
 

@@ -26,7 +26,7 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
   unsigned long i, alphasize_to_the_power_of_q, *seq_a_profile, *seq_b_profile,
                 dist = 0;
   const Alpha *alpha_a, *alpha_b;
-  Array *seq_a_qgrams, *seq_b_qgrams;
+  GT_Array *seq_a_qgrams, *seq_b_qgrams;
 
   assert(seq_a && seq_b);
   alpha_a = seq_get_alpha(seq_a);
@@ -39,20 +39,20 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
   seq_b_profile = ma_calloc(alphasize_to_the_power_of_q,
                             sizeof (unsigned long));
 
-  seq_a_qgrams = array_new(sizeof (unsigned long));
-  seq_b_qgrams = array_new(sizeof (unsigned long));
+  seq_a_qgrams = gt_array_new(sizeof (unsigned long));
+  seq_b_qgrams = gt_array_new(sizeof (unsigned long));
 
   qgram_compute(seq_a_qgrams, seq_get_encoded(seq_a), seq_length(seq_a),
                 alpha_size(alpha_a), q);
-  assert(array_size(seq_a_qgrams) == seq_length(seq_a) - q + 1);
+  assert(gt_array_size(seq_a_qgrams) == seq_length(seq_a) - q + 1);
   qgram_compute(seq_b_qgrams, seq_get_encoded(seq_b), seq_length(seq_b),
                 alpha_size(alpha_b), q);
-  assert(array_size(seq_b_qgrams) == seq_length(seq_b) - q + 1);
+  assert(gt_array_size(seq_b_qgrams) == seq_length(seq_b) - q + 1);
 
-  for (i = 0; i < array_size(seq_a_qgrams); i++)
-    seq_a_profile[*(unsigned long*) array_get(seq_a_qgrams, i)]++;
-  for (i = 0; i < array_size(seq_b_qgrams); i++)
-    seq_b_profile[*(unsigned long*) array_get(seq_b_qgrams, i)]++;
+  for (i = 0; i < gt_array_size(seq_a_qgrams); i++)
+    seq_a_profile[*(unsigned long*) gt_array_get(seq_a_qgrams, i)]++;
+  for (i = 0; i < gt_array_size(seq_b_qgrams); i++)
+    seq_b_profile[*(unsigned long*) gt_array_get(seq_b_qgrams, i)]++;
 
   /* compute distance */
   for (i = 0; i < alphasize_to_the_power_of_q; i++) {
@@ -62,8 +62,8 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
       dist += seq_b_profile[i] - seq_a_profile[i];
   }
 
-  array_delete(seq_b_qgrams);
-  array_delete(seq_a_qgrams);
+  gt_array_delete(seq_b_qgrams);
+  gt_array_delete(seq_a_qgrams);
   ma_free(seq_b_profile);
   ma_free(seq_a_profile);
 

@@ -19,14 +19,14 @@
 #include <stdlib.h>
 #include "core/array.h"
 
-int array_compare(const Array *a,const Array *b,
+int array_compare(const GT_Array *a,const GT_Array *b,
                   int(*compar)(const void *, const void *))
 {
   unsigned long idx, size_a, size_b;
   int cmp;
 
-  size_a = array_size(a);
-  size_b = array_size(b);
+  size_a = gt_array_size(a);
+  size_b = gt_array_size(b);
   if (size_a < size_b)
   {
     fprintf(stderr,"array_size(a) = %lu < %lu = array_size(b)\n",
@@ -43,7 +43,7 @@ int array_compare(const Array *a,const Array *b,
   }
   for (idx=0; idx < size_a; idx++)
   {
-    cmp = compar(array_get(a,idx),array_get(b,idx));
+    cmp = compar(gt_array_get(a,idx),gt_array_get(b,idx));
     if (cmp != 0)
     {
       return cmp;

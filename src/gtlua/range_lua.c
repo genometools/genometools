@@ -59,17 +59,17 @@ static int range_lua_overlap(lua_State *L)
   return 1;
 }
 
-static Array* range_table_to_array(lua_State *L)
+static GT_Array* range_table_to_array(lua_State *L)
 {
   lua_Integer i = 1;
-  Array *ranges;
+  GT_Array *ranges;
   Range *range;
   const char *msg;
   bool error;
   /* make sure we got a table as first argument */
   luaL_checktype(L, 1, LUA_TTABLE);
   /* traverse table and save the ranges */
-  ranges = array_new(sizeof (Range));
+  ranges = gt_array_new(sizeof (Range));
   lua_pushinteger(L, i);
   lua_gettable(L, 1);
   while (!lua_isnil(L, -1)) {
@@ -79,7 +79,7 @@ static Array* range_table_to_array(lua_State *L)
       lua_getfield(L, LUA_REGISTRYINDEX, RANGE_METATABLE);
       if (lua_rawequal(L, -1, -2)) {
         lua_pop(L, 2); /* remove both metatables */
-        array_add(ranges, *range);
+        gt_array_add(ranges, *range);
       }
       else
         error = true;
@@ -90,7 +90,7 @@ static Array* range_table_to_array(lua_State *L)
       /* we have a non range in the table */
       msg = lua_pushfstring(L, "expected %s as type of table entry %d",
                             RANGE_METATABLE, i);
-      array_delete(ranges);
+      gt_array_delete(ranges);
       lua_error(L);
     }
     i++;
@@ -101,14 +101,14 @@ static Array* range_table_to_array(lua_State *L)
   return ranges;
 }
 
-static void push_range_array_as_table(lua_State *L, Array *ranges)
+static void push_range_array_as_table(lua_State *L, GT_Array *ranges)
 {
   unsigned long i;
-  if (ranges && array_size(ranges)) {
+  if (ranges && gt_array_size(ranges)) {
     lua_newtable(L);
-    for (i = 0; i < array_size(ranges); i++) {
+    for (i = 0; i < gt_array_size(ranges); i++) {
       lua_pushinteger(L, i+1); /* in Lua we index from 1 on */
-      range_lua_push(L, *(Range*) array_get(ranges, i));
+      range_lua_push(L, *(Range*) gt_array_get(ranges, i));
       lua_rawset(L, -3);
     }
   }
@@ -118,21 +118,21 @@ static void push_range_array_as_table(lua_State *L, Array *ranges)
 
 static int ranges_lua_sort(lua_State *L)
 {
-  Array *ranges;
+  GT_Array *ranges;
   ranges = range_table_to_array(L);
   ranges_sort(ranges);
   push_range_array_as_table(L, ranges);
-  array_delete(ranges);
+  gt_array_delete(ranges);
   return 1;
 }
 
 static int ranges_lua_are_sorted(lua_State *L)
 {
-  Array *ranges;
+  GT_Array *ranges;
   bool are_sorted;
   ranges = range_table_to_array(L);
   are_sorted = ranges_are_sorted(ranges);
-  array_delete(ranges);
+  gt_array_delete(ranges);
   lua_pushboolean(L, are_sorted);
   return 1;
 }

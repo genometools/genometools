@@ -1,8 +1,8 @@
 #include "genometools.h"
 
-static Array* create_example_features(void)
+static GT_Array* create_example_features(void)
 {
-  Array *features;
+  GT_Array *features;
   GenomeNode *forward_gene, *reverse_gene, *exon, *intron; /* actual features */
   Str *seqid; /* holds the sequence id the features refer to */
   FeatureTypeFactory *type_factory; /* used the create feature types */
@@ -10,7 +10,7 @@ static Array* create_example_features(void)
   Range range; /* used to define intervals on the genomic sequence */
 
   /* construct the example features */
-  features = array_new(sizeof (GenomeNode*));
+  features = gt_array_new(sizeof (GenomeNode*));
   type_factory = feature_type_factory_any_new();
   seqid = str_new_cstr("chromosome_21");
 
@@ -38,7 +38,7 @@ static Array* create_example_features(void)
   genome_node_is_part_of_genome_node(forward_gene, exon);
 
   /* store forward gene in feature array */
-  array_add(features, forward_gene);
+  gt_array_add(features, forward_gene);
 
   /* construt a single-exon gene on the reverse strand
      (within the intron of the forward strand gene) */
@@ -53,7 +53,7 @@ static Array* create_example_features(void)
   genome_node_is_part_of_genome_node(reverse_gene, exon);
 
   /* store reverse gene in feature array */
-  array_add(features, reverse_gene);
+  gt_array_add(features, reverse_gene);
 
   /* free */
   feature_type_factory_delete(type_factory);
@@ -67,7 +67,7 @@ static void handle_error(Error *err)
   exit(EXIT_FAILURE);
 }
 
-static void draw_example_features(Array *features, const char *style_file,
+static void draw_example_features(GT_Array *features, const char *style_file,
                                   const char *output_file)
 {
   Range range = { 1, 1000 }; /* the genomic range to draw */
@@ -104,17 +104,17 @@ static void draw_example_features(Array *features, const char *style_file,
   error_delete(err);
 }
 
-static void delete_example_features(Array *features)
+static void delete_example_features(GT_Array *features)
 {
   unsigned long i;
-  for (i = 0; i < array_size(features); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(features, i));
-  array_delete(features);
+  for (i = 0; i < gt_array_size(features); i++)
+    genome_node_rec_delete(*(GenomeNode**) gt_array_get(features, i));
+  gt_array_delete(features);
 }
 
 int main(int argc, char *argv[])
 {
-  Array *features; /* stores the created example features */
+  GT_Array *features; /* stores the created example features */
 
   if (argc != 3) {
     fprintf(stderr, "Usage: %s style_file output_file\n", argv[0]);

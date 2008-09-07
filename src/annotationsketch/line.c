@@ -27,14 +27,14 @@
 
 struct Line {
   bool has_captions;
-  Array *blocks;
+  GT_Array *blocks;
 };
 
 Line* line_new(void)
 {
   Line *line;
   line = ma_malloc(sizeof (Line));
-  line->blocks = array_new(sizeof (GT_Block*));
+  line->blocks = gt_array_new(sizeof (GT_Block*));
   line->has_captions = false;
   return line;
 }
@@ -44,7 +44,7 @@ void line_insert_block(Line *line, GT_Block *block)
   assert(line && block);
   if (!line->has_captions && gt_block_get_caption(block) != NULL)
     line->has_captions = true;
-  array_add(line->blocks, block);
+  gt_array_add(line->blocks, block);
 }
 
 bool line_has_captions(const Line *line)
@@ -53,7 +53,7 @@ bool line_has_captions(const Line *line)
   return line->has_captions;
 }
 
-Array* line_get_blocks(Line* line)
+GT_Array* line_get_blocks(Line* line)
 {
   assert(line);
   return line->blocks;
@@ -64,9 +64,9 @@ int line_sketch(Line *line, GT_Canvas *canvas)
   int i = 0;
   assert(line && canvas);
   gt_canvas_visit_line_pre(canvas, line);
-  for (i = 0; i < array_size(line->blocks); i++) {
+  for (i = 0; i < gt_array_size(line->blocks); i++) {
     GT_Block *block;
-    block = *(GT_Block**) array_get(line->blocks, i);
+    block = *(GT_Block**) gt_array_get(line->blocks, i);
     gt_block_sketch(block, canvas);
   }
   gt_canvas_visit_line_post(canvas, line);
@@ -78,7 +78,7 @@ int line_unit_test(Error *err)
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *type;
   Range r1, r2, r3, r4, r_parent;
-  Array* blocks;
+  GT_Array* blocks;
   Str *seqid1, *seqid2, *seqid3;
   int had_err = 0;
   GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
@@ -139,15 +139,15 @@ int line_unit_test(Error *err)
   gt_block_set_range(b2, r2);
 
   /* test line_insert_block */
-  ensure(had_err,  (0 == array_size(line_get_blocks(l1))));
+  ensure(had_err,  (0 == gt_array_size(line_get_blocks(l1))));
   line_insert_block(l1, b1);
-  ensure(had_err,  (1 == array_size(line_get_blocks(l1))));
+  ensure(had_err,  (1 == gt_array_size(line_get_blocks(l1))));
   line_insert_block(l1, b2);
-  ensure(had_err,  (2 == array_size(line_get_blocks(l1))));
+  ensure(had_err,  (2 == gt_array_size(line_get_blocks(l1))));
 
   /* test line_get_blocks */
   blocks = line_get_blocks(l1);
-  ensure(had_err, (2 == array_size(blocks)));
+  ensure(had_err, (2 == gt_array_size(blocks)));
 
   str_delete(seqid1);
   str_delete(seqid2);
@@ -168,8 +168,8 @@ void line_delete(Line *line)
 {
   unsigned long i;
   if (!line) return;
-  for (i = 0; i < array_size(line->blocks); i++)
-    gt_block_delete(*(GT_Block**) array_get(line->blocks, i));
-  array_delete(line->blocks);
+  for (i = 0; i < gt_array_size(line->blocks); i++)
+    gt_block_delete(*(GT_Block**) gt_array_get(line->blocks, i));
+  gt_array_delete(line->blocks);
   ma_free(line);
 }

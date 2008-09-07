@@ -163,7 +163,7 @@ static void XMLCALL startElement(void *data, const char *name,
   if (!PARSESTRUCT(had_err))
   {
     /* Vergleich des aktuellen XML-Tags mit dem aktuellen Tag-Namen im
-       jew. Array bei Uebereinstimmung wird das jeweilige Flag gesetzt */
+       jew. GT_Array bei Uebereinstimmung wird das jeweilige Flag gesetzt */
     if (strcmp
         (name,
          gt_strarray_get(PARSESTRUCT(query_array),
@@ -232,10 +232,10 @@ static void XMLCALL endElement(void *data, const char *name)
         XMLPARSERSTRUCT(hit_counter) = 0;
         PARSESTRUCT(gi_flag) = 0;
 
-        array_reset(MATRIXSTRUCT(query_from));
-        array_reset(MATRIXSTRUCT(query_to));
-        array_reset(MATRIXSTRUCT(hit_frame));
-        array_reset(MATRIXSTRUCT(query_frame));
+        gt_array_reset(MATRIXSTRUCT(query_from));
+        gt_array_reset(MATRIXSTRUCT(query_to));
+        gt_array_reset(MATRIXSTRUCT(hit_frame));
+        gt_array_reset(MATRIXSTRUCT(query_frame));
       }
 
       /* Schreiben der schliessenden XML-Tags nach der Hit-Bearbeitung */
@@ -398,8 +398,8 @@ static void XMLCALL endElement(void *data, const char *name)
         /* Der Query-from Wert wird als Long-Wert gespeichert, dazu
            zunaechst Umwandlung des Strings mittels atol */
         ulong_numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
-        /* Der Query-from Wert wird zum Array query_from hinzugefuegt */
-        array_add_elem(MATRIXSTRUCT(query_from), &ulong_numb_buf,
+        /* Der Query-from Wert wird zum GT_Array query_from hinzugefuegt */
+        gt_array_add_elem(MATRIXSTRUCT(query_from), &ulong_numb_buf,
                        sizeof (unsigned long));
       }
       /* Query-Stop-Wert wird gespeichert/Bearbeitung siehe
@@ -408,7 +408,7 @@ static void XMLCALL endElement(void *data, const char *name)
                0 && PARSESTRUCT(giexp_flag))
       {
         ulong_numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
-        array_add_elem(MATRIXSTRUCT(query_to), &ulong_numb_buf,
+        gt_array_add_elem(MATRIXSTRUCT(query_to), &ulong_numb_buf,
                        sizeof (unsigned long));
       }
       /* Hit-from XML-Tag */
@@ -459,7 +459,7 @@ static void XMLCALL endElement(void *data, const char *name)
         /* abspeichern des query_frames fuer spaetere Sequenzberechnnugen
            als long Value */
         numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
-        array_add_elem(MATRIXSTRUCT(query_frame), &numb_buf, sizeof (long));
+        gt_array_add_elem(MATRIXSTRUCT(query_frame), &numb_buf, sizeof (long));
       }
       /* Hit-Frame XML-Tag/Bearbeitung siehe Query-Frame XML-Tag als
          String */
@@ -474,7 +474,7 @@ static void XMLCALL endElement(void *data, const char *name)
         /* abspeichern des hit_frames fuer spaetere Sequenzberechnnugen
            als long Value */
         numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
-        array_add_elem(MATRIXSTRUCT(hit_frame), &numb_buf, sizeof (long));
+        gt_array_add_elem(MATRIXSTRUCT(hit_frame), &numb_buf, sizeof (long));
 
         /* Wenn ein Hit-FASTA-File vorliegt existiert eine Bioseq-Struktur
            und eine Hashtabelle, ueber die die Hit-Sequenz-Informationen
@@ -579,18 +579,18 @@ static void XMLCALL endElement(void *data, const char *name)
                              gt_strarray_size(MATRIXSTRUCT(fasta_row))-1);
            gt_strarray_set_size(MATRIXSTRUCT(hit_num),
                              gt_strarray_size(MATRIXSTRUCT(hit_num))-1);
-           array_set_size(MATRIXSTRUCT(query_from),
-                          array_size(MATRIXSTRUCT(query_from))-1);
-           array_set_size(MATRIXSTRUCT(query_to),
-                          array_size(MATRIXSTRUCT(query_to))-1);
+           gt_array_set_size(MATRIXSTRUCT(query_from),
+                          gt_array_size(MATRIXSTRUCT(query_from))-1);
+           gt_array_set_size(MATRIXSTRUCT(query_to),
+                          gt_array_size(MATRIXSTRUCT(query_to))-1);
            gt_strarray_set_size(MATRIXSTRUCT(hit_from),
                              gt_strarray_size(MATRIXSTRUCT(hit_from))-1);
            gt_strarray_set_size(MATRIXSTRUCT(hit_to),
                              gt_strarray_size(MATRIXSTRUCT(hit_to))-1);
-           array_set_size(MATRIXSTRUCT(query_frame),
-                          array_size(MATRIXSTRUCT(query_frame))-1);
-           array_set_size(MATRIXSTRUCT(hit_frame),
-                          array_size(MATRIXSTRUCT(hit_frame))-1);
+           gt_array_set_size(MATRIXSTRUCT(query_frame),
+                          gt_array_size(MATRIXSTRUCT(query_frame))-1);
+           gt_array_set_size(MATRIXSTRUCT(hit_frame),
+                          gt_array_size(MATRIXSTRUCT(hit_frame))-1);
            gt_strarray_set_size(MATRIXSTRUCT(hsp_qseq),
                              gt_strarray_size(MATRIXSTRUCT(hsp_qseq))-1);
            gt_strarray_set_size(MATRIXSTRUCT(hsp_hseq),

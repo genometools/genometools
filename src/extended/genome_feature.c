@@ -59,7 +59,7 @@ struct GenomeFeature
 };
 
 typedef struct {
-  Array *exon_features,
+  GT_Array *exon_features,
         *cds_features;
 } SaveExonAndCDSInfo;
 
@@ -411,20 +411,20 @@ Phase genome_feature_get_phase(GenomeFeature *gf)
 static int save_exon(GenomeNode *gn, void *data, UNUSED Error *err)
 {
   GenomeFeature *gf;
-  Array *exon_features = (Array*) data;
+  GT_Array *exon_features = (GT_Array*) data;
   error_check(err);
   gf = (GenomeFeature*) gn;
   assert(gf && exon_features);
   if (genome_feature_has_type(gf, gft_exon)) {
-    array_add(exon_features, gf);
+    gt_array_add(exon_features, gf);
   }
   return 0;
 }
 
-void genome_feature_get_exons(GenomeFeature *gf, Array *exon_features)
+void genome_feature_get_exons(GenomeFeature *gf, GT_Array *exon_features)
 {
   int had_err;
-  assert(gf && exon_features && !array_size(exon_features));
+  assert(gf && exon_features && !gt_array_size(exon_features));
   had_err = genome_node_traverse_children((GenomeNode*) gf, exon_features,
                                           save_exon, false, NULL);
   assert(!had_err); /* cannot happen, because save_exon() is sane */
@@ -438,30 +438,30 @@ static int save_exons_and_cds(GenomeNode *gn, void *data, UNUSED Error *err)
   gf = (GenomeFeature*) gn;
   assert(gf && info);
   if (genome_feature_has_type(gf, gft_exon))
-    array_add(info->exon_features, gf);
+    gt_array_add(info->exon_features, gf);
   else if (genome_feature_has_type(gf, gft_CDS))
-    array_add(info->cds_features, gf);
+    gt_array_add(info->cds_features, gf);
   return 0;
 }
 
-static void set_transcript_types(Array *features)
+static void set_transcript_types(GT_Array *features)
 {
   GenomeNode *gn;
   unsigned long i;
   assert(features);
-  if (array_size(features)) {
-    if (array_size(features) == 1) {
-      gn = *(GenomeNode**) array_get(features, 0);
+  if (gt_array_size(features)) {
+    if (gt_array_size(features) == 1) {
+      gn = *(GenomeNode**) gt_array_get(features, 0);
       set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_SINGLE);
     }
     else {
-      gn = *(GenomeNode**) array_get(features, 0);
+      gn = *(GenomeNode**) gt_array_get(features, 0);
       set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_INITIAL);
-      for (i = 1; i < array_size(features) - 1; i++) {
-        gn = *(GenomeNode**) array_get(features, i);
+      for (i = 1; i < gt_array_size(features) - 1; i++) {
+        gn = *(GenomeNode**) gt_array_get(features, i);
         set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_INTERNAL);
       }
-      gn = *(GenomeNode**) array_get(features, array_size(features) - 1);
+      gn = *(GenomeNode**) gt_array_get(features, gt_array_size(features) - 1);
       set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_TERMINAL);
     }
   }
@@ -475,8 +475,8 @@ static int determine_transcripttypes(GenomeNode *gn, void *data,
   error_check(err);
   assert(gn && info);
   /* reset exon_features and cds_features */
-  array_reset(info->exon_features);
-  array_reset(info->cds_features);
+  gt_array_reset(info->exon_features);
+  gt_array_reset(info->cds_features);
   /* collect all direct children exons */
   had_err = genome_node_traverse_direct_children(gn, info, save_exons_and_cds,
                                                  NULL);
@@ -492,15 +492,15 @@ void genome_feature_determine_transcripttypes(GenomeFeature *gf)
   SaveExonAndCDSInfo info;
   int had_err;
   assert(gf);
-  info.exon_features = array_new(sizeof (GenomeFeature*));
-  info.cds_features = array_new(sizeof (GenomeFeature*));
+  info.exon_features = gt_array_new(sizeof (GenomeFeature*));
+  info.cds_features = gt_array_new(sizeof (GenomeFeature*));
   had_err = genome_node_traverse_children((GenomeNode*) gf, &info,
                                           determine_transcripttypes, false,
                                           NULL);
   assert(!had_err); /* cannot happen, because determine_transcripttypes() is
                        sane */
-  array_delete(info.exon_features);
-  array_delete(info.cds_features);
+  gt_array_delete(info.exon_features);
+  gt_array_delete(info.cds_features);
 }
 
 TranscriptFeatureType genome_feature_get_transcriptfeaturetype(GenomeFeature

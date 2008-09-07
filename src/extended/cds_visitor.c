@@ -88,16 +88,16 @@ static int extract_spliced_seq(GenomeNode *gn, CDSVisitor *visitor, Error *err)
                                               extract_cds_if_necessary, err);
 }
 
-static Array* determine_ORFs_for_all_three_frames(Splicedseq *ss)
+static GT_Array* determine_ORFs_for_all_three_frames(Splicedseq *ss)
 {
   Str *pr_0, *pr_1, *pr_2;
-  Array *orfs;
+  GT_Array *orfs;
   assert(ss);
 
   pr_0 = str_new();
   pr_1 = str_new();
   pr_2 = str_new();
-  orfs = array_new(sizeof (Range));
+  orfs = gt_array_new(sizeof (Range));
 
   translate_dna(pr_0, splicedseq_get(ss), splicedseq_length(ss), 0);
   translate_dna(pr_1, splicedseq_get(ss), splicedseq_length(ss), 1);
@@ -167,15 +167,15 @@ static void create_CDS_features_for_ORF(Range orf, CDSVisitor *v,
   genome_node_is_part_of_genome_node(gn, cds_feature);
 }
 
-static void create_CDS_features_for_longest_ORF(Array *orfs, CDSVisitor *v,
+static void create_CDS_features_for_longest_ORF(GT_Array *orfs, CDSVisitor *v,
                                                 GenomeNode *gn)
 {
-  if (array_size(orfs)) {
+  if (gt_array_size(orfs)) {
     /* sort ORFs according to length */
     ranges_sort_by_length_stable(orfs);
 
     /* create CDS features from the longest ORF */
-    create_CDS_features_for_ORF(*(Range*) array_get_first(orfs), v, gn);
+    create_CDS_features_for_ORF(*(Range*) gt_array_get_first(orfs), v, gn);
   }
 }
 
@@ -191,7 +191,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 
   had_err = extract_spliced_seq(gn, v, err);
   if (!had_err && splicedseq_length(v->splicedseq) > 2) {
-    Array *orfs;
+    GT_Array *orfs;
 
     if (genome_feature_get_strand(gf) == STRAND_REVERSE) {
       if (splicedseq_reverse(v->splicedseq, err))
@@ -201,7 +201,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
     orfs = determine_ORFs_for_all_three_frames(v->splicedseq);
     create_CDS_features_for_longest_ORF(orfs, v, gn);
 
-    array_delete(orfs);
+    gt_array_delete(orfs);
   }
   return had_err;
 }

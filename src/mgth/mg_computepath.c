@@ -19,7 +19,7 @@
 
 /* Funktion zur Berechnung der erlaubten Vorgaenger-Leserahmen
    Parameter: aktueller Leserahmen, Position in der Query-Sequence,
-   (Zeiger auf) Array der moeglichen Vorgaenger
+   (Zeiger auf) GT_Array der moeglichen Vorgaenger
    Returnwert: void */
 static void compute_precursors(short, unsigned long, short *);
 
@@ -50,7 +50,7 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
   unsigned long column_index = 0;
 
   /* Variablen fuer den aktuellen Frame, den vorherigen Frame(speichert
-     einen Wert aus precursors[], die Zeile des vorherigen Frames, Array
+     einen Wert aus precursors[], die Zeile des vorherigen Frames, GT_Array
      mit den Precursors-Frames */
   short current_frame = 0,
     precursors_frame = 0,

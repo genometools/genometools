@@ -25,7 +25,7 @@
 
 struct Splicedseq {
   Str *splicedseq;
-  Array *positionmapping;
+  GT_Array *positionmapping;
   bool forward;
 };
 
@@ -33,7 +33,7 @@ Splicedseq* splicedseq_new(void)
 {
   Splicedseq *ss = ma_malloc(sizeof (Splicedseq));
   ss->splicedseq = str_new();
-  ss->positionmapping = array_new(sizeof (unsigned long));
+  ss->positionmapping = gt_array_new(sizeof (unsigned long));
   ss->forward = true;
   return ss;
 }
@@ -46,10 +46,10 @@ void splicedseq_add(Splicedseq *ss, unsigned long start, unsigned long end,
   str_append_cstr_nt(ss->splicedseq, original_sequence + start,
                      end - start + 1);
   /* make sure elemnts are added in ascending order */
-  assert(!array_size(ss->positionmapping) ||
-         start > *(unsigned long*) array_get_last(ss->positionmapping));
+  assert(!gt_array_size(ss->positionmapping) ||
+         start > *(unsigned long*) gt_array_get_last(ss->positionmapping));
   for (i = start; i <= end; i++)
-    array_add(ss->positionmapping, i);
+    gt_array_add(ss->positionmapping, i);
 }
 
 char* splicedseq_get(const Splicedseq *ss)
@@ -59,16 +59,16 @@ char* splicedseq_get(const Splicedseq *ss)
 
 bool splicedseq_pos_is_border(const Splicedseq *ss, unsigned long pos)
 {
-  assert(ss && str_length(ss->splicedseq) == array_size(ss->positionmapping));
+  assert(ss && str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
   assert(pos < str_length(ss->splicedseq)); /* legal position */
-  if (ss->forward && pos + 1 < array_size(ss->positionmapping) &&
-      *(unsigned long*) array_get(ss->positionmapping, pos) + 1 !=
-      *(unsigned long*) array_get(ss->positionmapping, pos+1)) {
+  if (ss->forward && pos + 1 < gt_array_size(ss->positionmapping) &&
+      *(unsigned long*) gt_array_get(ss->positionmapping, pos) + 1 !=
+      *(unsigned long*) gt_array_get(ss->positionmapping, pos+1)) {
     return true;
   }
   if (!ss->forward && pos &&
-      *(unsigned long*) array_get(ss->positionmapping, pos-1) - 1 !=
-      *(unsigned long*) array_get(ss->positionmapping, pos)) {
+      *(unsigned long*) gt_array_get(ss->positionmapping, pos-1) - 1 !=
+      *(unsigned long*) gt_array_get(ss->positionmapping, pos)) {
     return true;
   }
   return false;
@@ -76,9 +76,9 @@ bool splicedseq_pos_is_border(const Splicedseq *ss, unsigned long pos)
 
 unsigned long splicedseq_map(const Splicedseq *ss, unsigned long pos)
 {
-  assert(ss && str_length(ss->splicedseq) == array_size(ss->positionmapping));
+  assert(ss && str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
   assert(pos < str_length(ss->splicedseq)); /* legal position */
-  return *(unsigned long*) array_get(ss->positionmapping, pos);
+  return *(unsigned long*) gt_array_get(ss->positionmapping, pos);
 }
 
 unsigned long splicedseq_length(const Splicedseq *ss)
@@ -95,7 +95,7 @@ int splicedseq_reverse(Splicedseq *ss, Error *err)
   had_err = reverse_complement(str_get(ss->splicedseq),
                                str_length(ss->splicedseq), err);
   if (!had_err) {
-    array_reverse(ss->positionmapping);
+    gt_array_reverse(ss->positionmapping);
     ss->forward = !ss->forward;
   }
   return had_err;
@@ -105,7 +105,7 @@ void splicedseq_reset(Splicedseq *ss)
 {
   assert(ss);
   str_reset(ss->splicedseq);
-  array_reset(ss->positionmapping);
+  gt_array_reset(ss->positionmapping);
   ss->forward = true;
 }
 
@@ -144,6 +144,6 @@ void splicedseq_delete(Splicedseq *ss)
 {
   if (!ss) return;
   str_delete(ss->splicedseq);
-  array_delete(ss->positionmapping);
+  gt_array_delete(ss->positionmapping);
   ma_free(ss);
 }

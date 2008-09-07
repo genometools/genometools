@@ -29,12 +29,12 @@ typedef struct Line Line;
 #include "core/range.h"
 #include "extended/genome_node.h"
 
-Line*  line_new(void);
-void   line_insert_block(Line*, GT_Block*); /* takes ownership */
-bool   line_has_captions(const Line*);
-Array* line_get_blocks(Line*);
-int    line_sketch(Line*, GT_Canvas*);
-int    line_unit_test(Error*);
-void   line_delete(Line*);
+Line*     line_new(void);
+void      line_insert_block(Line*, GT_Block*); /* takes ownership */
+bool      line_has_captions(const Line*);
+GT_Array* line_get_blocks(Line*);
+int       line_sketch(Line*, GT_Canvas*);
+int       line_unit_test(Error*);
+void      line_delete(Line*);
 
 #endif

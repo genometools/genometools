@@ -274,7 +274,7 @@ static int compareSequencerange(const void *a,const void *b)
 
 int checkspecialrangesfast(const Encodedsequence *encseq)
 {
-  Array *rangesforward, *rangesbackward;
+  GT_Array *rangesforward, *rangesbackward;
   bool haserr = false;
   Specialrangeiterator *sri;
   Sequencerange range;
@@ -283,22 +283,22 @@ int checkspecialrangesfast(const Encodedsequence *encseq)
   {
     return 0;
   }
-  rangesforward = array_new(sizeof (Sequencerange));
-  rangesbackward = array_new(sizeof (Sequencerange));
+  rangesforward = gt_array_new(sizeof (Sequencerange));
+  rangesbackward = gt_array_new(sizeof (Sequencerange));
 
   sri = newspecialrangeiterator(encseq,true);
   while (nextspecialrangeiterator(&range,sri))
   {
-    array_add(rangesforward,range);
+    gt_array_add(rangesforward,range);
   }
   freespecialrangeiterator(&sri);
   sri = newspecialrangeiterator(encseq,false);
   while (nextspecialrangeiterator(&range,sri))
   {
-    array_add(rangesbackward,range);
+    gt_array_add(rangesbackward,range);
   }
   freespecialrangeiterator(&sri);
-  array_reverse(rangesbackward);
+  gt_array_reverse(rangesbackward);
   if (!haserr)
   {
     if (array_compare(rangesforward,rangesbackward,
@@ -307,7 +307,7 @@ int checkspecialrangesfast(const Encodedsequence *encseq)
       exit(EXIT_FAILURE);
     }
   }
-  array_delete(rangesforward);
-  array_delete(rangesbackward);
+  gt_array_delete(rangesforward);
+  gt_array_delete(rangesbackward);
   return haserr ? - 1 : 0;
 }
