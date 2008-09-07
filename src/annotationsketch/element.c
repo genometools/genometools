@@ -131,7 +131,7 @@ int element_unit_test(GT_Error *err)
   int had_err = 0;
   gt_error_check(err);
 
-  feature_type_factory = feature_type_factory_builtin_new();
+  feature_type_factory = gt_feature_type_factory_builtin_new();
 
   r1.start = 10UL;
   r1.end = 50UL;
@@ -140,7 +140,7 @@ int element_unit_test(GT_Error *err)
   r2.end = 50UL;
 
   seqid = str_new_cstr("seqid");
-  type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
+  type = gt_feature_type_factory_create_gft(feature_type_factory, gft_exon);
   gn = gt_genome_feature_new(seqid, type, r1, GT_STRAND_BOTH);
   gn2 = gt_genome_feature_new(seqid, type, r2, GT_STRAND_BOTH);
 
@@ -155,7 +155,7 @@ int element_unit_test(GT_Error *err)
 
   /* tests element_get_type and element_set_type*/
   ensure(had_err, (type == element_get_type(e)));
-  type = feature_type_factory_create_gft(feature_type_factory, gft_intron);
+  type = gt_feature_type_factory_create_gft(feature_type_factory, gft_intron);
   ensure(had_err, (type != element_get_type(e)));
   element_set_type(e, type);
   ensure(had_err, (type == element_get_type(e)));
@@ -171,7 +171,7 @@ int element_unit_test(GT_Error *err)
   element_delete(e3);
   gt_genome_node_delete(gn);
   gt_genome_node_delete(gn2);
-  feature_type_factory_delete(feature_type_factory);
+  gt_feature_type_factory_delete(feature_type_factory);
   str_delete(seqid);
 
   return had_err;

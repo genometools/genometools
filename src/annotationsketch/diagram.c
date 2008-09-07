@@ -656,10 +656,10 @@ int gt_diagram_unit_test(GT_Error *err)
   GT_Canvas *canvas = NULL;
   gt_error_check(err);
 
-  feature_type_factory = feature_type_factory_builtin_new();
-  gene_type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
-  exon_type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  CDS_type = feature_type_factory_create_gft(feature_type_factory, gft_CDS);
+  feature_type_factory = gt_feature_type_factory_builtin_new();
+  gene_type = gt_feature_type_factory_create_gft(feature_type_factory, gft_gene);
+  exon_type = gt_feature_type_factory_create_gft(feature_type_factory, gft_exon);
+  CDS_type = gt_feature_type_factory_create_gft(feature_type_factory, gft_CDS);
 
   /* generating some ranges */
   r1.start=100UL; r1.end=1000UL;
@@ -818,7 +818,7 @@ int gt_diagram_unit_test(GT_Error *err)
   gt_genome_node_rec_delete((GT_GenomeNode*) sr2);
   str_delete(seqid1);
   str_delete(seqid2);
-  feature_type_factory_delete(feature_type_factory);
+  gt_feature_type_factory_delete(feature_type_factory);
 
   return had_err;
 }

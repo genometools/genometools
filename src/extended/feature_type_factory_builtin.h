@@ -23,7 +23,7 @@
 /* Implements the GT_FeatureTypeFactory interface with built-in types. */
 typedef struct GT_FeatureTypeFactoryBuiltin GT_FeatureTypeFactoryBuiltin;
 
-const GT_FeatureTypeFactoryClass* feature_type_factory_builtin_class(void);
-GT_FeatureTypeFactory*            feature_type_factory_builtin_new();
+const GT_FeatureTypeFactoryClass* gt_feature_type_factory_builtin_class(void);
+GT_FeatureTypeFactory*            gt_feature_type_factory_builtin_new();
 
 #endif

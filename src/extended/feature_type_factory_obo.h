@@ -23,8 +23,8 @@
 /* Implements the GT_FeatureTypeFactory interface with types from an OBO file. */
 typedef struct GT_FeatureTypeFactoryOBO GT_FeatureTypeFactoryOBO;
 
-const GT_FeatureTypeFactoryClass* feature_type_factory_obo_class(void);
-GT_FeatureTypeFactory*            feature_type_factory_obo_new(const char
+const GT_FeatureTypeFactoryClass* gt_feature_type_factory_obo_class(void);
+GT_FeatureTypeFactory*            gt_feature_type_factory_obo_new(const char
                                                             *obo_file_path,
                                                             GT_Error*);
 

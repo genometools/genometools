@@ -78,7 +78,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
 
   /* set different type checker if necessary */
   if (str_length(arguments->typecheck)) {
-    if (!(ftf = feature_type_factory_obo_new(str_get(arguments->typecheck),
+    if (!(ftf = gt_feature_type_factory_obo_new(str_get(arguments->typecheck),
                                              err))) {
         had_err = -1;
     }
@@ -99,7 +99,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
 
   /* free */
   genome_stream_delete(gff3_in_stream);
-  feature_type_factory_delete(ftf);
+  gt_feature_type_factory_delete(ftf);
 
   return had_err;
 }

@@ -42,7 +42,7 @@ GT_GenomeFeatureType* gt_genome_feature_type_create_gft(GT_GenomeFeatureType *gf
                                                   const char *type)
 {
   assert(gft && type);
-  return feature_type_factory_create_gft(gft->feature_type_factory, type);
+  return gt_feature_type_factory_create_gft(gft->feature_type_factory, type);
 }
 
 void gt_genome_feature_type_delete(GT_GenomeFeatureType *gft)
@@ -54,7 +54,7 @@ void gt_genome_feature_type_delete(GT_GenomeFeatureType *gft)
 
 bool gt_genome_feature_type_is(GT_GenomeFeatureType *gft, const char *type)
 {
-  if (gft == feature_type_factory_create_gft(gft->feature_type_factory, type))
+  if (gft == gt_feature_type_factory_create_gft(gft->feature_type_factory, type))
     return true;
   return false;
 }

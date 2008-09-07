@@ -29,8 +29,8 @@ struct GT_FeatureTypeFactoryBuiltin {
   const GT_FeatureTypeFactory parent_instance;
 };
 
-#define feature_type_factory_builtin_cast(FTF)\
-        feature_type_factory_cast(feature_type_factory_builtin_class(), FTF)
+#define gt_feature_type_factory_builtin_cast(FTF)\
+        gt_feature_type_factory_cast(gt_feature_type_factory_builtin_class(), FTF)
 
 static const char *gt_genome_feature_type_strings[] = { "CDS",
                                                      "EST_match",
@@ -72,13 +72,13 @@ static const char* find_type(const char *gft_string)
 }
 
 static GT_GenomeFeatureType*
-feature_type_factory_builtin_create_gft(GT_FeatureTypeFactory *ftf,
+gt_feature_type_factory_builtin_create_gft(GT_FeatureTypeFactory *ftf,
                                         const char *type)
 {
   GT_FeatureTypeFactoryBuiltin *ftfb;
   GT_GenomeFeatureType *gft = NULL;
   assert(ftf && type);
-  ftfb = feature_type_factory_builtin_cast(ftf);
+  ftfb = gt_feature_type_factory_builtin_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
     if ((find_type(type))) {
       gft = gt_genome_feature_type_construct(ftf, type);
@@ -88,20 +88,20 @@ feature_type_factory_builtin_create_gft(GT_FeatureTypeFactory *ftf,
   return gft;
 }
 
-const GT_FeatureTypeFactoryClass* feature_type_factory_builtin_class(void)
+const GT_FeatureTypeFactoryClass* gt_feature_type_factory_builtin_class(void)
 {
-  static const GT_FeatureTypeFactoryClass feature_type_factory_class =
+  static const GT_FeatureTypeFactoryClass gt_feature_type_factory_class =
     { sizeof (GT_FeatureTypeFactoryBuiltin),
-      feature_type_factory_builtin_create_gft,
+      gt_feature_type_factory_builtin_create_gft,
       NULL };
-  return &feature_type_factory_class;
+  return &gt_feature_type_factory_class;
 }
 
-GT_FeatureTypeFactory* feature_type_factory_builtin_new(void)
+GT_FeatureTypeFactory* gt_feature_type_factory_builtin_new(void)
 {
   GT_FeatureTypeFactoryBuiltin *ftfb;
   GT_FeatureTypeFactory *ftf;
-  ftf = feature_type_factory_create(feature_type_factory_builtin_class());
-  ftfb = feature_type_factory_builtin_cast(ftf);
+  ftf = gt_feature_type_factory_create(gt_feature_type_factory_builtin_class());
+  ftfb = gt_feature_type_factory_builtin_cast(ftf);
   return ftf;
 }

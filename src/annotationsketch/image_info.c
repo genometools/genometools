@@ -97,8 +97,8 @@ int gt_image_info_unit_test(GT_Error *err)
 
   seqid = str_new_cstr("seqid");
   ii = gt_image_info_new();
-  ftf = feature_type_factory_builtin_new();
-  gft = feature_type_factory_create_gft(ftf, "gene");
+  ftf = gt_feature_type_factory_builtin_new();
+  gft = gt_feature_type_factory_create_gft(ftf, "gene");
 
   for (i=0;i<20;i++)
   {
@@ -120,7 +120,7 @@ int gt_image_info_unit_test(GT_Error *err)
   }
 
   gt_image_info_delete(ii);
-  feature_type_factory_delete(ftf);
+  gt_feature_type_factory_delete(ftf);
   str_delete(seqid);
 
   return had_err;

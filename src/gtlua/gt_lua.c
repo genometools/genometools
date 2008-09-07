@@ -25,7 +25,7 @@
 #endif
 
 /* key used to store the GT_FeatureTypeFactory object in the Lua registry */
-#define FEATURE_TYPE_FACTORY_KEY feature_type_factory_create_gft
+#define FEATURE_TYPE_FACTORY_KEY gt_feature_type_factory_create_gft
 
 void lua_put_feature_type_factory_in_registry(lua_State *L,
                                               GT_FeatureTypeFactory

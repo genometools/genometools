@@ -365,12 +365,12 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         case GTF_CDS:
         case GTF_stop_codon:
           gff_feature_type =
-            feature_type_factory_create_gft(parser->feature_type_factory,
+            gt_feature_type_factory_create_gft(parser->feature_type_factory,
                                             gft_CDS);
           break;
         case GTF_exon:
           gff_feature_type =
-            feature_type_factory_create_gft(parser->feature_type_factory,
+            gt_feature_type_factory_create_gft(parser->feature_type_factory,
                                             gft_exon);
       }
       assert(gff_feature_type);

@@ -35,8 +35,8 @@ struct GT_FeatureTypeFactory {
   unsigned int reference_count;
 };
 
-GT_FeatureTypeFactory* feature_type_factory_create(const GT_FeatureTypeFactoryClass*);
-void*               feature_type_factory_cast(const GT_FeatureTypeFactoryClass*,
+GT_FeatureTypeFactory* gt_feature_type_factory_create(const GT_FeatureTypeFactoryClass*);
+void*               gt_feature_type_factory_cast(const GT_FeatureTypeFactoryClass*,
                                               GT_FeatureTypeFactory*);
 
 #endif

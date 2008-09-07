@@ -79,7 +79,7 @@ GTR* gtr_new(GT_Error *err)
     had_err = -1;
   }
   if (!had_err) {
-    gtr->feature_type_factory = feature_type_factory_builtin_new();
+    gtr->feature_type_factory = gt_feature_type_factory_builtin_new();
     lua_put_feature_type_factory_in_registry(gtr->L, gtr->feature_type_factory);
     luaL_openlibs(gtr->L);    /* open the standard libraries */
     luaopen_gt(gtr->L);       /* open all GenomeTools libraries */
@@ -348,7 +348,7 @@ void gtr_delete(GTR *gtr)
   str_delete(gtr->debugfp);
   toolbox_delete(gtr->tools);
   hashmap_delete(gtr->unit_tests);
-  feature_type_factory_delete(gtr->feature_type_factory);
+  gt_feature_type_factory_delete(gtr->feature_type_factory);
   if (gtr->L) lua_close(gtr->L);
 #ifndef WITHOUT_CAIRO
   gt_style_delete_without_state(gtr->style);

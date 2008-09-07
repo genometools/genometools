@@ -103,7 +103,7 @@ int gt_genome_node_iterator_example(UNUSED GT_Error *err)
   GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeNodeIterator *gni;
   GT_GenomeNode *gn, *node;
-  feature_type_factory = feature_type_factory_builtin_new();
+  feature_type_factory = gt_feature_type_factory_builtin_new();
   gn = gt_genome_feature_new_standard_gene(feature_type_factory);
 
   /* an example genome node iterator use case */
@@ -114,7 +114,7 @@ int gt_genome_node_iterator_example(UNUSED GT_Error *err)
   gt_genome_node_iterator_delete(gni);
 
   gt_genome_node_rec_delete(gn);
-  feature_type_factory_delete(feature_type_factory);
+  gt_feature_type_factory_delete(feature_type_factory);
   return 0;
 }
 

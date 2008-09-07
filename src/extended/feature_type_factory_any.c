@@ -26,17 +26,17 @@ struct GT_FeatureTypeFactoryAny {
   const GT_FeatureTypeFactory parent_instance;
 };
 
-#define feature_type_factory_any_cast(FTF)\
-        feature_type_factory_cast(feature_type_factory_any_class(), FTF)
+#define gt_feature_type_factory_any_cast(FTF)\
+        gt_feature_type_factory_cast(gt_feature_type_factory_any_class(), FTF)
 
 static GT_GenomeFeatureType*
-feature_type_factory_any_create_gft(GT_FeatureTypeFactory *ftf,
+gt_feature_type_factory_any_create_gft(GT_FeatureTypeFactory *ftf,
                                         const char *type)
 {
   GT_FeatureTypeFactoryAny *ftfa;
   GT_GenomeFeatureType *gft = NULL;
   assert(ftf && type);
-  ftfa = feature_type_factory_any_cast(ftf);
+  ftfa = gt_feature_type_factory_any_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
     gft = gt_genome_feature_type_construct(ftf, type);
     gft_collection_add(ftf->used_types, type, gft);
@@ -44,20 +44,20 @@ feature_type_factory_any_create_gft(GT_FeatureTypeFactory *ftf,
   return gft;
 }
 
-const GT_FeatureTypeFactoryClass* feature_type_factory_any_class(void)
+const GT_FeatureTypeFactoryClass* gt_feature_type_factory_any_class(void)
 {
-  static const GT_FeatureTypeFactoryClass feature_type_factory_class =
+  static const GT_FeatureTypeFactoryClass gt_feature_type_factory_class =
     { sizeof (GT_FeatureTypeFactoryAny),
-      feature_type_factory_any_create_gft,
+      gt_feature_type_factory_any_create_gft,
       NULL };
-  return &feature_type_factory_class;
+  return &gt_feature_type_factory_class;
 }
 
-GT_FeatureTypeFactory* feature_type_factory_any_new(void)
+GT_FeatureTypeFactory* gt_feature_type_factory_any_new(void)
 {
   GT_FeatureTypeFactoryAny *ftfa;
   GT_FeatureTypeFactory *ftf;
-  ftf = feature_type_factory_create(feature_type_factory_any_class());
-  ftfa = feature_type_factory_any_cast(ftf);
+  ftf = gt_feature_type_factory_create(gt_feature_type_factory_any_class());
+  ftfa = gt_feature_type_factory_any_cast(ftf);
   return ftf;
 }

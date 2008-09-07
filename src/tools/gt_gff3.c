@@ -187,11 +187,11 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
 
   /* set different type checker if necessary */
   if (arguments->typecheck_built_in) {
-      ftf = feature_type_factory_builtin_new();
+      ftf = gt_feature_type_factory_builtin_new();
       gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
   }
   if (str_length(arguments->typecheck)) {
-    if (!(ftf = feature_type_factory_obo_new(str_get(arguments->typecheck),
+    if (!(ftf = gt_feature_type_factory_obo_new(str_get(arguments->typecheck),
                                              err))) {
         had_err = -1;
     }
@@ -253,7 +253,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   genome_stream_delete(mergefeat_stream);
   genome_stream_delete(add_introns_stream);
   genome_stream_delete(gff3_in_stream);
-  feature_type_factory_delete(ftf);
+  gt_feature_type_factory_delete(ftf);
 
   return had_err;
 }

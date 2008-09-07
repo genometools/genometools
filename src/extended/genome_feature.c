@@ -72,7 +72,7 @@ static void gt_genome_feature_free(GT_GenomeNode *gn)
   assert(gf);
   str_delete(gf->seqid);
   str_delete(gf->source);
-  feature_type_factory_delete(gf->ftf);
+  gt_feature_type_factory_delete(gf->ftf);
   tag_value_map_delete(gf->attributes);
 }
 
@@ -180,7 +180,7 @@ GT_GenomeNode* gt_genome_feature_new(Str *seqid, GT_GenomeFeatureType *type, GT_
   gf = gt_genome_feature_cast(gn);
   gf->seqid     = str_ref(seqid);
   gf->source    = NULL;
-  gf->ftf       = feature_type_factory_ref(gt_genome_feature_type_get_ftf(type));
+  gf->ftf       = gt_feature_type_factory_ref(gt_genome_feature_type_get_ftf(type));
   gf->type      = type;
   gf->score     = UNDEF_FLOAT;
   gf->range     = range;
@@ -218,23 +218,23 @@ GT_GenomeNode* gt_genome_feature_new_standard_gene(GT_FeatureTypeFactory *ftf)
 
   /* gene */
   range.start = 1000; range.end = 9000;
-  type = feature_type_factory_create_gft(ftf, gft_gene);
+  type = gt_feature_type_factory_create_gft(ftf, gft_gene);
   gn = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
 
   /* TF binding site */
   range.start = 1000; range.end = 1012;
-  type = feature_type_factory_create_gft(ftf, gft_TF_binding_site);
+  type = gt_feature_type_factory_create_gft(ftf, gft_TF_binding_site);
   child = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   gt_genome_node_is_part_of_genome_node(gn, child);
 
   /* first mRNA */
   range.start = 1050; range.end = 9000;
-  type = feature_type_factory_create_gft(ftf, gft_mRNA);
+  type = gt_feature_type_factory_create_gft(ftf, gft_mRNA);
   child = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   gt_genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1050; range.end = 1500;
-  type = feature_type_factory_create_gft(ftf, gft_exon);
+  type = gt_feature_type_factory_create_gft(ftf, gft_exon);
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   gt_genome_node_is_part_of_genome_node(child, grandchild);
 
@@ -252,12 +252,12 @@ GT_GenomeNode* gt_genome_feature_new_standard_gene(GT_FeatureTypeFactory *ftf)
 
   /* second mRNA */
   range.start = 1050; range.end = 9000;
-  type = feature_type_factory_create_gft(ftf, gft_mRNA);
+  type = gt_feature_type_factory_create_gft(ftf, gft_mRNA);
   child = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   gt_genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1050; range.end = 1500;
-  type = feature_type_factory_create_gft(ftf, gft_exon);
+  type = gt_feature_type_factory_create_gft(ftf, gft_exon);
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   gt_genome_node_is_part_of_genome_node(child, grandchild);
 
@@ -271,12 +271,12 @@ GT_GenomeNode* gt_genome_feature_new_standard_gene(GT_FeatureTypeFactory *ftf)
 
   /* third mRNA */
   range.start = 1300; range.end = 9000;
-  type = feature_type_factory_create_gft(ftf, gft_mRNA);
+  type = gt_feature_type_factory_create_gft(ftf, gft_mRNA);
   child = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   gt_genome_node_is_part_of_genome_node(gn, child);
 
   range.start = 1300; range.end = 1500;
-  type = feature_type_factory_create_gft(ftf, gft_exon);
+  type = gt_feature_type_factory_create_gft(ftf, gft_exon);
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   gt_genome_node_is_part_of_genome_node(child, grandchild);
 
@@ -642,8 +642,8 @@ int gt_genome_feature_unit_test(GT_Error *err)
   gt_error_check(err);
 
   seqid = str_new_cstr("seqid");
-  feature_type_factory = feature_type_factory_builtin_new();
-  type = feature_type_factory_create_gft(feature_type_factory, "gene");
+  feature_type_factory = gt_feature_type_factory_builtin_new();
+  type = gt_feature_type_factory_create_gft(feature_type_factory, "gene");
   range.start = 1;
   range.end = 1000;
   gf = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
@@ -651,7 +651,7 @@ int gt_genome_feature_unit_test(GT_Error *err)
   ensure(had_err, !gt_genome_feature_score_is_defined((GT_GenomeFeature*) gf));
 
   gt_genome_node_delete(gf);
-  feature_type_factory_delete(feature_type_factory);
+  gt_feature_type_factory_delete(feature_type_factory);
   str_delete(seqid);
 
   return had_err;

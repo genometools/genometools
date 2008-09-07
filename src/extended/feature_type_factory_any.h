@@ -23,7 +23,7 @@
 /* Implements the GT_FeatureTypeFactory interface with any types. */
 typedef struct GT_FeatureTypeFactoryAny GT_FeatureTypeFactoryAny;
 
-const GT_FeatureTypeFactoryClass* feature_type_factory_any_class(void);
-GT_FeatureTypeFactory*            feature_type_factory_any_new();
+const GT_FeatureTypeFactoryClass* gt_feature_type_factory_any_class(void);
+GT_FeatureTypeFactory*            gt_feature_type_factory_any_new();
 
 #endif

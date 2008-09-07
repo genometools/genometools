@@ -1006,7 +1006,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 
   /* parse the feature type */
   if (!had_err &&
-      !(gft = feature_type_factory_create_gft(parser->feature_type_factory,
+      !(gft = gt_feature_type_factory_create_gft(parser->feature_type_factory,
                                               type))) {
     gt_error_set(err, "type \"%s\" on line %u in file \"%s\" is not a valid one",
               type, line_number, filename);
