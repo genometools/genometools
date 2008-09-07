@@ -42,7 +42,7 @@ static void build_key(Str *key, GenomeFeature *feature, Str *target_id)
 {
   assert(key && feature && target_id);
   str_reset(key);
-  str_append_str(key, genome_node_get_seqid((GT_GenomeNode*) feature));
+  str_append_str(key, gt_genome_node_get_seqid((GT_GenomeNode*) feature));
   str_append_char(key, '\t'); /* cannot occur in seqid or target_id */
   str_append_str(key, target_id);
 }
@@ -58,7 +58,7 @@ static void remove_elem(Dlistelem *elem, Dlist *trees,
                         Hashmap *target_to_elem, Str *key)
 {
   GT_GenomeNode *node = dlistelem_get_data(elem);
-  genome_node_rec_delete(node);
+  gt_genome_node_rec_delete(node);
   dlist_remove(trees, elem);
   hashmap_remove(target_to_elem, str_get(key));
 }
@@ -105,7 +105,7 @@ static void filter_targetbest(GenomeFeature *current_feature, Dlist *trees,
                               target_to_elem, key);
       }
       else /* current feature is not better -> remove it */
-        genome_node_rec_delete((GT_GenomeNode*) current_feature);
+        gt_genome_node_rec_delete((GT_GenomeNode*) current_feature);
     }
     str_delete(key);
   }
@@ -126,7 +126,7 @@ static int targetbest_filter_stream_next_tree(GenomeStream *gs, GT_GenomeNode **
   if (!tfs->in_stream_processed) {
     while (!(had_err = genome_stream_next_tree(tfs->in_stream, &node, err)) &&
            node) {
-      if (genome_node_cast(genome_feature_class(), node) &&
+      if (gt_genome_node_cast(genome_feature_class(), node) &&
           genome_feature_get_attribute(node, "Target")) {
         filter_targetbest((GenomeFeature*) node, tfs->trees,
                           tfs->target_to_elem);
@@ -156,7 +156,7 @@ static void targetbest_filter_stream_free(GenomeStream *gs)
 {
   TargetbestFilterStream *tfs = targetbest_filter_stream_cast(gs);
   for (; tfs->next != NULL; tfs->next = dlistelem_next(tfs->next))
-    genome_node_rec_delete(dlistelem_get_data(tfs->next));
+    gt_genome_node_rec_delete(dlistelem_get_data(tfs->next));
   dlist_delete(tfs->trees);
   hashmap_delete(tfs->target_to_elem);
   genome_stream_delete(tfs->in_stream);

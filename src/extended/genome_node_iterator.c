@@ -27,24 +27,24 @@ struct GT_GenomeNodeIterator {
   bool direct;
 };
 
-static GT_GenomeNodeIterator* genome_node_iterator_new_base(GT_GenomeNode *gn)
+static GT_GenomeNodeIterator* gt_genome_node_iterator_new_base(GT_GenomeNode *gn)
 {
   GT_GenomeNodeIterator *gni;
   assert(gn);
   gni = ma_malloc(sizeof *gni);
-  gni->gn = genome_node_rec_ref(gn);
+  gni->gn = gt_genome_node_rec_ref(gn);
   gni->node_stack = gt_array_new(sizeof (GT_GenomeNode*));
   return gni;
 }
 
-GT_GenomeNodeIterator* genome_node_iterator_new(GT_GenomeNode *gn)
+GT_GenomeNodeIterator* gt_genome_node_iterator_new(GT_GenomeNode *gn)
 {
   GT_GenomeNodeIterator *gni;
   GT_GenomeNode *child_feature;
   Dlistelem *dlistelem;
   assert(gn);
-  gni = genome_node_iterator_new_base(gn);
-  if (genome_node_cast(genome_feature_class(), gn) &&
+  gni = gt_genome_node_iterator_new_base(gn);
+  if (gt_genome_node_cast(genome_feature_class(), gn) &&
       genome_feature_is_pseudo((GenomeFeature*) gn)) {
     /* add the children backwards to traverse in order */
     for (dlistelem = dlist_last(gn->children); dlistelem != NULL;
@@ -73,18 +73,18 @@ static void add_children_to_stack(GT_Array *node_stack, GT_GenomeNode *gn)
   }
 }
 
-GT_GenomeNodeIterator* genome_node_iterator_new_direct(GT_GenomeNode *gn)
+GT_GenomeNodeIterator* gt_genome_node_iterator_new_direct(GT_GenomeNode *gn)
 {
   GT_GenomeNodeIterator *gni;
   assert(gn);
-  gni = genome_node_iterator_new_base(gn);
+  gni = gt_genome_node_iterator_new_base(gn);
   if (gn->children)
     add_children_to_stack(gni->node_stack, gn);
   gni->direct = true;
   return gni;
 }
 
-GT_GenomeNode* genome_node_iterator_next(GT_GenomeNodeIterator *gni)
+GT_GenomeNode* gt_genome_node_iterator_next(GT_GenomeNodeIterator *gni)
 {
   GT_GenomeNode *gn;
   assert(gni);
@@ -98,7 +98,7 @@ GT_GenomeNode* genome_node_iterator_next(GT_GenomeNodeIterator *gni)
   return gn;
 }
 
-int genome_node_iterator_example(UNUSED GT_Error *err)
+int gt_genome_node_iterator_example(UNUSED GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GT_GenomeNodeIterator *gni;
@@ -107,21 +107,21 @@ int genome_node_iterator_example(UNUSED GT_Error *err)
   gn = genome_feature_new_standard_gene(feature_type_factory);
 
   /* an example genome node iterator use case */
-  gni = genome_node_iterator_new(gn);
-  while ((node = genome_node_iterator_next(gni))) {
+  gni = gt_genome_node_iterator_new(gn);
+  while ((node = gt_genome_node_iterator_next(gni))) {
     /* do something with <node> */
   }
-  genome_node_iterator_delete(gni);
+  gt_genome_node_iterator_delete(gni);
 
-  genome_node_rec_delete(gn);
+  gt_genome_node_rec_delete(gn);
   feature_type_factory_delete(feature_type_factory);
   return 0;
 }
 
-void genome_node_iterator_delete(GT_GenomeNodeIterator *gni)
+void gt_genome_node_iterator_delete(GT_GenomeNodeIterator *gni)
 {
   if (!gni) return;
-  genome_node_rec_delete(gni->gn);
+  gt_genome_node_rec_delete(gni->gn);
   gt_array_delete(gni->node_stack);
   ma_free(gni);
 }

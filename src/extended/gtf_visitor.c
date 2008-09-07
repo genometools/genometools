@@ -78,13 +78,13 @@ static int gtf_show_transcript(GT_GenomeNode *gn, GTFVisitor *gtf_visitor,
   assert(gn && gtf_visitor);
   gt_array_reset(gtf_visitor->exon_features);
   gt_array_reset(gtf_visitor->CDS_features);
-  had_err = genome_node_traverse_direct_children(gn, gtf_visitor,
+  had_err = gt_genome_node_traverse_direct_children(gn, gtf_visitor,
                                                  save_exon_node, err);
   if (gt_array_size(gtf_visitor->exon_features)) {
     /* sort exon features */
     qsort(gt_array_get_space(gtf_visitor->exon_features),
           gt_array_size(gtf_visitor->exon_features), sizeof (GT_GenomeNode*),
-          (Compare) genome_node_compare);
+          (Compare) gt_genome_node_compare);
     /* show exon features */
     gtf_visitor->transcript_id++;
     for (i = 0; i < gt_array_size(gtf_visitor->exon_features); i++) {
@@ -99,7 +99,7 @@ static int gtf_show_transcript(GT_GenomeNode *gn, GTFVisitor *gtf_visitor,
     /* sort CDS features */
     qsort(gt_array_get_space(gtf_visitor->CDS_features),
           gt_array_size(gtf_visitor->CDS_features), sizeof (GT_GenomeNode*),
-          (Compare) genome_node_compare);
+          (Compare) gt_genome_node_compare);
     /* show start_codon feature */
     gf = *(GenomeFeature**) gt_array_get(gtf_visitor->CDS_features, 0);
     /* XXX: to be done */
@@ -135,7 +135,7 @@ static int gtf_show_genome_feature(GT_GenomeNode *gn, void *data, GT_Error *err)
       warning("skipping GFF3 feature of type \"%s\" (from line %u in file "
               "\"%s\")",
               genome_feature_type_get_cstr(genome_feature_get_type(gf)),
-              genome_node_get_line_number(gn), genome_node_get_filename(gn));
+              gt_genome_node_get_line_number(gn), gt_genome_node_get_filename(gn));
   }
   return had_err;
 }
@@ -147,7 +147,7 @@ static int gtf_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   int had_err;
   gt_error_check(err);
   gtf_visitor = gtf_visitor_cast(gv);
-  had_err = genome_node_traverse_children((GT_GenomeNode*) gf, gtf_visitor,
+  had_err = gt_genome_node_traverse_children((GT_GenomeNode*) gf, gtf_visitor,
                                           gtf_show_genome_feature, false, err);
   return had_err;
 }

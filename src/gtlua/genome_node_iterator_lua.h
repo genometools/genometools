@@ -24,15 +24,15 @@
 
    -- Returns a new genome node iterator which performs a depth-first traversel
    -- of <genome_node> (including <genome_node> itself).
-   function genome_node_iterator_new(genome_node)
+   function gt_genome_node_iterator_new(genome_node)
 
    -- Returns a noew genome node iterator wich iterates over all direct children
    -- of <genome_node> (without <genome_node> itself).
-   function genome_node_iterator_new_direct(genome_node)
+   function gt_genome_node_iterator_new_direct(genome_node)
 
-   -- Returns the next genome node for <genome_node_iterator> or nil.
-   function genome_node_iterator:next()
+   -- Returns the next genome node for <gt_genome_node_iterator> or nil.
+   function gt_genome_node_iterator:next()
 */
-int luaopen_genome_node_iterator(lua_State*);
+int luaopen_gt_genome_node_iterator(lua_State*);
 
 #endif

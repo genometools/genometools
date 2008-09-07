@@ -157,7 +157,7 @@ static int gt_extractfeat_runner(UNUSED int argc, const char **argv,
     /* pull the features through the stream and free them afterwards */
     while (!(had_err = genome_stream_next_tree(extract_feat_stream, &gn,
                                                err)) && gn) {
-      genome_node_rec_delete(gn);
+      gt_genome_node_rec_delete(gn);
     }
   }
 

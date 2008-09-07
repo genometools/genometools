@@ -41,7 +41,7 @@ static int feature_index_lua_add_sequence_region(lua_State *L)
   assert(L);
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
-  sr = genome_node_cast(sequence_region_class(), *gn);
+  sr = gt_genome_node_cast(sequence_region_class(), *gn);
   luaL_argcheck(L, sr, 2, "not a sequence region");
   gt_feature_index_add_sequence_region(*fi, sr);
   return 0;
@@ -56,9 +56,9 @@ static int feature_index_lua_add_genome_feature(lua_State *L)
   assert(L);
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
-  gf = genome_node_cast(genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 2, "not a genome feature");
-  seqid = genome_node_get_seqid(*gn);
+  seqid = gt_genome_node_get_seqid(*gn);
   luaL_argcheck(L, seqid, 2, "genome_feature does not have a sequence id");
   luaL_argcheck(L, gt_feature_index_has_seqid(*fi, str_get(seqid)), 2,
                 "feature index does not contain corresponding sequence region");
@@ -74,7 +74,7 @@ static void push_features_as_table(lua_State *L, GT_Array *features)
     lua_newtable(L);
     for (i = 0; i < gt_array_size(features); i++) {
       lua_pushinteger(L, i+1); /* in Lua we index from 1 on */
-      genome_node_lua_push(L, genome_node_rec_ref(*(GT_GenomeNode**)
+      gt_genome_node_lua_push(L, gt_genome_node_rec_ref(*(GT_GenomeNode**)
                                                   gt_array_get(features, i)));
       lua_rawset(L, -3);
     }

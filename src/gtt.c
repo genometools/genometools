@@ -164,7 +164,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "evaluator class", evaluator_unit_test);
   hashmap_add(unit_tests, "genome feature class", genome_feature_unit_test);
   hashmap_add(unit_tests, "genome node iterator example",
-              genome_node_iterator_example);
+              gt_genome_node_iterator_example);
   hashmap_add(unit_tests, "getbasename module", getbasename_unit_test);
   hashmap_add(unit_tests, "gff3 escaping module", gff3_escaping_unit_test);
   hashmap_add(unit_tests, "grep module", grep_unit_test);

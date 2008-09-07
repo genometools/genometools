@@ -52,7 +52,7 @@ static void region_info_delete(RegionInfo *info)
 {
   interval_tree_delete(info->features);
   if (info->region)
-    genome_node_delete((GT_GenomeNode*)info->region);
+    gt_genome_node_delete((GT_GenomeNode*)info->region);
   ma_free(info);
 }
 
@@ -77,11 +77,11 @@ void gt_feature_index_add_sequence_region(GT_FeatureIndex *fi,
   char *seqid;
   RegionInfo *info;
   assert(fi && sr);
-  seqid = str_get(genome_node_get_seqid((GT_GenomeNode*) sr));
+  seqid = str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr));
   if (!hashmap_get(fi->regions, seqid)) {
     info = ma_malloc(sizeof (RegionInfo));
-    info->region = (SequenceRegion*) genome_node_ref((GT_GenomeNode*) sr);
-    info->features = interval_tree_new((FreeFunc) genome_node_rec_delete);
+    info->region = (SequenceRegion*) gt_genome_node_ref((GT_GenomeNode*) sr);
+    info->features = interval_tree_new((FreeFunc) gt_genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     hashmap_add(fi->regions, seqid, info);
@@ -99,10 +99,10 @@ void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi, GenomeFeature *gf)
 
   assert(fi && gf);
 
-  gn = genome_node_rec_ref((GT_GenomeNode*) gf);
+  gn = gt_genome_node_rec_ref((GT_GenomeNode*) gf);
   /* get information about seqid and range */
-  node_range = genome_node_get_range(gn);
-  seqid = str_get(genome_node_get_seqid(gn));
+  node_range = gt_genome_node_get_range(gn);
+  seqid = str_get(gt_genome_node_get_seqid(gn));
   info = (RegionInfo*) hashmap_get(fi->regions, seqid);
 
   /* If the seqid was encountered for the first time, no sequence
@@ -112,7 +112,7 @@ void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi, GenomeFeature *gf)
   {
     info = ma_calloc(1, sizeof (RegionInfo));
     info->region = NULL;
-    info->features = interval_tree_new((FreeFunc) genome_node_rec_delete);
+    info->features = interval_tree_new((FreeFunc) gt_genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     hashmap_add(fi->regions, seqid, info);
@@ -146,14 +146,14 @@ int gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
     GenomeVisitor *feature_visitor = feature_visitor_new(feature_index);
     while (queue_size(queue)) {
       gn = queue_get(queue);
-      had_err = genome_node_accept(gn, feature_visitor, NULL);
+      had_err = gt_genome_node_accept(gn, feature_visitor, NULL);
       assert(!had_err); /* cannot happen */
     }
     genome_visitor_delete(feature_visitor);
   }
   genome_stream_delete(gff3_in_stream);
   while (queue_size(queue))
-    genome_node_rec_delete(queue_get(queue));
+    gt_genome_node_rec_delete(queue_get(queue));
   queue_delete(queue);
   return had_err;
 }
@@ -183,12 +183,12 @@ GT_Array* gt_feature_index_get_features_for_seqid(GT_FeatureIndex *fi,
   return a;
 }
 
-static int genome_node_cmp_range_start(const void *v1, const void *v2)
+static int gt_genome_node_cmp_range_start(const void *v1, const void *v2)
 {
   GT_GenomeNode *n1, *n2;
   n1 = *(GT_GenomeNode**) v1;
   n2 = *(GT_GenomeNode**) v2;
-  return genome_node_compare(&n1, &n2);
+  return gt_genome_node_compare(&n1, &n2);
 }
 
 int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi, GT_Array *results,
@@ -206,7 +206,7 @@ int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi, GT_Array *resul
   }
   interval_tree_find_all_overlapping(ri->features, qry_range.start,
                                      qry_range.end, results);
-  gt_array_sort(results, genome_node_cmp_range_start);
+  gt_array_sort(results, gt_genome_node_cmp_range_start);
   return 0;
 }
 
@@ -249,7 +249,7 @@ void gt_feature_index_get_range_for_seqid(GT_FeatureIndex *fi, GT_Range *range,
     range->end = info->dyn_range.end;
   }
   else if (info->region)
-    *range = genome_node_get_range((GT_GenomeNode*) info->region);
+    *range = gt_genome_node_get_range((GT_GenomeNode*) info->region);
 }
 
 bool gt_feature_index_has_seqid(const GT_FeatureIndex *fi, const char *seqid)
@@ -306,10 +306,10 @@ int gt_feature_index_unit_test(GT_Error *err)
   cds1 = genome_feature_new(seqid2, type, r5, STRAND_UNKNOWN);
 
   /* Determine the structure of our feature tree */
-  genome_node_is_part_of_genome_node(gn1, ex1);
-  genome_node_is_part_of_genome_node(gn1, ex2);
-  genome_node_is_part_of_genome_node(gn2, ex3);
-  genome_node_is_part_of_genome_node(gn2, cds1);
+  gt_genome_node_is_part_of_genome_node(gn1, ex1);
+  gt_genome_node_is_part_of_genome_node(gn1, ex2);
+  gt_genome_node_is_part_of_genome_node(gn2, ex3);
+  gt_genome_node_is_part_of_genome_node(gn2, cds1);
 
   /* create a new feature index on which we can perform some tests */
   fi = gt_feature_index_new();
@@ -385,10 +385,10 @@ int gt_feature_index_unit_test(GT_Error *err)
   /* delete all generated objects */
   gt_strarray_delete(seqids);
   gt_feature_index_delete(fi);
-  genome_node_rec_delete(gn1);
-  genome_node_rec_delete(gn2);
-  genome_node_rec_delete((GT_GenomeNode*) sr1);
-  genome_node_rec_delete((GT_GenomeNode*) sr2);
+  gt_genome_node_rec_delete(gn1);
+  gt_genome_node_rec_delete(gn2);
+  gt_genome_node_rec_delete((GT_GenomeNode*) sr1);
+  gt_genome_node_rec_delete((GT_GenomeNode*) sr2);
   str_delete(seqid1);
   str_delete(seqid2);
   feature_type_factory_delete(feature_type_factory);

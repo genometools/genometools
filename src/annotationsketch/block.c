@@ -86,10 +86,10 @@ GT_Block* gt_block_new_from_node(GT_GenomeNode *node)
   GT_Block *block;
   assert(node);
   block = gt_block_new();
-  block->range = genome_node_get_range(node);
+  block->range = gt_genome_node_get_range(node);
   block->strand = genome_feature_get_strand((GenomeFeature*) node);
   block->type = genome_feature_get_type((GenomeFeature*) node);
-  block->top_level_feature = genome_node_ref(node);
+  block->top_level_feature = gt_genome_node_ref(node);
   return block;
 }
 
@@ -98,7 +98,7 @@ void gt_block_insert_element(GT_Block *block, GT_GenomeNode *gn)
   Element *element;
   assert(block && gn);
   if (!block->top_level_feature)
-    block->top_level_feature = genome_node_ref(gn);
+    block->top_level_feature = gt_genome_node_ref(gn);
   element = element_new(gn);
   dlist_add(block->elements, element);
 }
@@ -278,8 +278,8 @@ int gt_block_unit_test(GT_Error *err)
   element_delete(e1);
   element_delete(e2);
   gt_block_delete(b);
-  genome_node_delete(gn1);
-  genome_node_delete(gn2);
+  gt_genome_node_delete(gn1);
+  gt_genome_node_delete(gn2);
   feature_type_factory_delete(feature_type_factory);
 
   return had_err;
@@ -302,6 +302,6 @@ void gt_block_delete(GT_Block *block)
     str_delete(block->caption);
   dlist_delete(block->elements);
   if (block->top_level_feature)
-    genome_node_delete(block->top_level_feature);
+    gt_genome_node_delete(block->top_level_feature);
   ma_free(block);
 }

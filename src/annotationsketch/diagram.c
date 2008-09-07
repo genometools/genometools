@@ -187,7 +187,7 @@ static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pa
                   genome_feature_get_type((GenomeFeature*) node)))
     {
       if (parent) {
-        if (genome_node_has_children(parent))
+        if (gt_genome_node_has_children(parent))
           str_append_cstr(caption, nnid_p);
         else
           str_append_cstr(caption, "-");
@@ -234,7 +234,7 @@ static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* par
     {
       caption = str_new_cstr("");
       if (parent) {
-        if (genome_node_has_children(parent))
+        if (gt_genome_node_has_children(parent))
           str_append_cstr(caption, nnid_p);
         else
           str_append_cstr(caption, "-");
@@ -307,7 +307,7 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pare
                         genome_feature_get_type((GenomeFeature*) parent));
 
   /* discard elements that do not overlap with visible range */
-  elem_range = genome_node_get_range(node);
+  elem_range = gt_genome_node_get_range(node);
   if (!gt_range_overlap(d->range, elem_range))
     return;
 
@@ -345,7 +345,7 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pare
   /* check if direct children overlap */
   if (parent)
     do_not_overlap =
-      genome_node_direct_children_do_not_overlap_st(parent, node);
+      gt_genome_node_direct_children_do_not_overlap_st(parent, node);
 
   /* decide how to continue: */
   if (*collapse && parent) {
@@ -353,7 +353,7 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pare
     add_recursive(d, node, parent, node);
   }
   else if (do_not_overlap
-            && genome_node_number_of_children(parent) > 1)
+            && gt_genome_node_number_of_children(parent) > 1)
   {
     /* group non-overlapping child nodes of a non-collapsing type by parent */
     add_to_parent(d, node, parent);
@@ -378,23 +378,23 @@ static int gt_diagram_add_tracklines(UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-static int visit_child(GT_GenomeNode* gn, void* genome_node_children, GT_Error* e)
+static int visit_child(GT_GenomeNode* gn, void* gt_genome_node_children, GT_Error* e)
 {
-  NodeTraverseInfo* genome_node_info;
-  genome_node_info = (NodeTraverseInfo*) genome_node_children;
+  NodeTraverseInfo* gt_genome_node_info;
+  gt_genome_node_info = (NodeTraverseInfo*) gt_genome_node_children;
   int had_err;
-  if (genome_node_has_children(gn))
+  if (gt_genome_node_has_children(gn))
   {
-    GT_GenomeNode *oldparent = genome_node_info->parent;
-    process_node(genome_node_info->diagram, gn, genome_node_info->parent);
-    genome_node_info->parent = gn;
-    had_err = genome_node_traverse_direct_children(gn, genome_node_info,
+    GT_GenomeNode *oldparent = gt_genome_node_info->parent;
+    process_node(gt_genome_node_info->diagram, gn, gt_genome_node_info->parent);
+    gt_genome_node_info->parent = gn;
+    had_err = gt_genome_node_traverse_direct_children(gn, gt_genome_node_info,
                                                    visit_child, e);
     assert(!had_err); /* visit_child() is sane */
-    genome_node_info->parent = oldparent;
+    gt_genome_node_info->parent = oldparent;
   }
   else
-    process_node(genome_node_info->diagram, gn, genome_node_info->parent);
+    process_node(gt_genome_node_info->diagram, gn, gt_genome_node_info->parent);
   return 0;
 }
 
@@ -434,17 +434,17 @@ static int collect_blocks(UNUSED void *key, void *value, void *data,
 }
 
 /* Traverse a genome node graph with depth first search. */
-static void traverse_genome_nodes(GT_GenomeNode *gn, void *genome_node_children)
+static void traverse_genome_nodes(GT_GenomeNode *gn, void *gt_genome_node_children)
 {
-  NodeTraverseInfo* genome_node_info;
+  NodeTraverseInfo* gt_genome_node_info;
   int had_err;
-  assert(genome_node_children);
-  genome_node_info = (NodeTraverseInfo*) genome_node_children;
-  genome_node_info->parent = gn;
+  assert(gt_genome_node_children);
+  gt_genome_node_info = (NodeTraverseInfo*) gt_genome_node_children;
+  gt_genome_node_info->parent = gn;
   /* handle root nodes */
-  process_node(genome_node_info->diagram, gn, NULL);
-  if (genome_node_has_children(gn)) {
-    had_err = genome_node_traverse_direct_children(gn, genome_node_info,
+  process_node(gt_genome_node_info->diagram, gn, NULL);
+  if (gt_genome_node_has_children(gn)) {
+    had_err = gt_genome_node_traverse_direct_children(gn, gt_genome_node_info,
                                                    visit_child, NULL);
     assert(!had_err); /* visit_child() is sane */
   }
@@ -454,8 +454,8 @@ static void gt_diagram_build(GT_Diagram *diagram, GT_Array *features)
 {
   unsigned long i = 0;
   int had_err;
-  NodeTraverseInfo genome_node_children;
-  genome_node_children.diagram = diagram;
+  NodeTraverseInfo gt_genome_node_children;
+  gt_genome_node_children.diagram = diagram;
 
   /* initialise caches */
   diagram->collapsingtypes = hashmap_new(HASH_STRING, NULL, ma_free_func);
@@ -465,11 +465,11 @@ static void gt_diagram_build(GT_Diagram *diagram, GT_Array *features)
   /* do node traversal for each root feature */
   for (i = 0; i < gt_array_size(features); i++) {
     GT_GenomeNode *current_root = *(GT_GenomeNode**) gt_array_get(features,i);
-    traverse_genome_nodes(current_root, &genome_node_children);
+    traverse_genome_nodes(current_root, &gt_genome_node_children);
   }
   /* collect blocks from nodeinfo structures and create the tracks */
   had_err = hashmap_foreach_ordered(diagram->nodeinfo, collect_blocks,
-                                      diagram, (Compare) genome_node_cmp, NULL);
+                                      diagram, (Compare) gt_genome_node_cmp, NULL);
   assert(!had_err); /* collect_blocks() is sane */
 
   /* clear caches */
@@ -581,7 +581,7 @@ static int layout_tracks(void *key, void *value, void *data,
      generated graphic. this might lead to ``collapsed'' tracks, if two files
      with different paths have the same basename. */
   block = *(GT_Block**) gt_array_get(list, 0);
-  filename = getbasename(genome_node_get_filename(
+  filename = getbasename(gt_genome_node_get_filename(
                                         gt_block_get_top_level_feature(block)));
   track_key = track_key_new(filename, gft);
   ma_free(filename);
@@ -689,10 +689,10 @@ int gt_diagram_unit_test(GT_Error *err)
   cds1 = genome_feature_new(seqid2, CDS_type, r5, STRAND_UNKNOWN);
 
   /* determine the structure of our feature tree */
-  genome_node_is_part_of_genome_node(gn1, ex1);
-  genome_node_is_part_of_genome_node(gn1, ex2);
-  genome_node_is_part_of_genome_node(gn2, ex3);
-  genome_node_is_part_of_genome_node(gn2, cds1);
+  gt_genome_node_is_part_of_genome_node(gn1, ex1);
+  gt_genome_node_is_part_of_genome_node(gn1, ex2);
+  gt_genome_node_is_part_of_genome_node(gn2, ex3);
+  gt_genome_node_is_part_of_genome_node(gn2, cds1);
 
   /* create a new feature index on which we can perform some tests */
   fi = gt_feature_index_new();
@@ -812,10 +812,10 @@ int gt_diagram_unit_test(GT_Error *err)
   gt_diagram_delete(dia3);
   gt_canvas_delete(canvas);
   gt_feature_index_delete(fi);
-  genome_node_rec_delete(gn1);
-  genome_node_rec_delete(gn2);
-  genome_node_rec_delete((GT_GenomeNode*) sr1);
-  genome_node_rec_delete((GT_GenomeNode*) sr2);
+  gt_genome_node_rec_delete(gn1);
+  gt_genome_node_rec_delete(gn2);
+  gt_genome_node_rec_delete((GT_GenomeNode*) sr1);
+  gt_genome_node_rec_delete((GT_GenomeNode*) sr2);
   str_delete(seqid1);
   str_delete(seqid2);
   feature_type_factory_delete(feature_type_factory);

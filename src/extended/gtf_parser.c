@@ -123,7 +123,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
                            GT_Error *err)
 {
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
-  GT_Array *genome_node_array = (GT_Array*) value,
+  GT_Array *gt_genome_node_array = (GT_Array*) value,
         *mRNAs = (GT_Array*) cinfo->mRNAs;
   GT_GenomeNode *mRNA_node, *first_node, *gn;
   const char *tname;
@@ -135,26 +135,26 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
 
   gt_error_check(err);
   assert(key && value && data);
-  assert(gt_array_size(genome_node_array)); /* at least one node in array */
+  assert(gt_array_size(gt_genome_node_array)); /* at least one node in array */
 
   /* determine the range and the strand of the mRNA */
-  first_node = *(GT_GenomeNode**) gt_array_get(genome_node_array, 0);
-  mRNA_range = genome_node_get_range(first_node);
+  first_node = *(GT_GenomeNode**) gt_array_get(gt_genome_node_array, 0);
+  mRNA_range = gt_genome_node_get_range(first_node);
   mRNA_strand = genome_feature_get_strand((GenomeFeature*) first_node);
-  mRNA_seqid = genome_node_get_seqid(first_node);
-  for (i = 1; i < gt_array_size(genome_node_array); i++) {
-    gn = *(GT_GenomeNode**) gt_array_get(genome_node_array, i);
-    mRNA_range = gt_range_join(mRNA_range, genome_node_get_range(gn));
+  mRNA_seqid = gt_genome_node_get_seqid(first_node);
+  for (i = 1; i < gt_array_size(gt_genome_node_array); i++) {
+    gn = *(GT_GenomeNode**) gt_array_get(gt_genome_node_array, i);
+    mRNA_range = gt_range_join(mRNA_range, gt_genome_node_get_range(gn));
     /* XXX: an error check is necessary here, otherwise strand_join() can cause
        a failed assertion */
     mRNA_strand = strand_join(mRNA_strand,
                               genome_feature_get_strand((GenomeFeature*) gn));
-    if (str_cmp(mRNA_seqid, genome_node_get_seqid(gn))) {
+    if (str_cmp(mRNA_seqid, gt_genome_node_get_seqid(gn))) {
       gt_error_set(err, "The features on lines %u and %u refer to different "
                 "genomic sequences (``seqname''), although they have the same "
                 "gene IDs (``gene_id'') which must be globally unique",
-                genome_node_get_line_number(first_node),
-                genome_node_get_line_number(gn));
+                gt_genome_node_get_line_number(first_node),
+                gt_genome_node_get_line_number(gn));
       had_err = -1;
       break;
     }
@@ -163,7 +163,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
   if (!had_err) {
     GenomeFeatureType *mRNA_type;
     mRNA_type = genome_feature_create_gft(*(GenomeFeature**)
-                                          gt_array_get_first(genome_node_array),
+                                          gt_array_get_first(gt_genome_node_array),
                                           gft_mRNA);
     assert(mRNA_type);
     mRNA_node = genome_feature_new(mRNA_seqid, mRNA_type, mRNA_range,
@@ -176,9 +176,9 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
     }
 
     /* register children */
-    for (i = 0; i < gt_array_size(genome_node_array); i++) {
-      gn = *(GT_GenomeNode**) gt_array_get(genome_node_array, i);
-      genome_node_is_part_of_genome_node(mRNA_node, gn);
+    for (i = 0; i < gt_array_size(gt_genome_node_array); i++) {
+      gn = *(GT_GenomeNode**) gt_array_get(gt_genome_node_array, i);
+      gt_genome_node_is_part_of_genome_node(mRNA_node, gn);
     }
 
     /* store the mRNA */
@@ -213,15 +213,15 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
 
     /* determine the range and the strand of the gene */
     gn = *(GT_GenomeNode**) gt_array_get(mRNAs, 0);
-    gene_range = genome_node_get_range(gn);
+    gene_range = gt_genome_node_get_range(gn);
     gene_strand = genome_feature_get_strand((GenomeFeature*) gn);
-    gene_seqid = genome_node_get_seqid(gn);
+    gene_seqid = gt_genome_node_get_seqid(gn);
     for (i = 1; i < gt_array_size(mRNAs); i++) {
       gn = *(GT_GenomeNode**) gt_array_get(mRNAs, i);
-      gene_range = gt_range_join(gene_range, genome_node_get_range(gn));
+      gene_range = gt_range_join(gene_range, gt_genome_node_get_range(gn));
       gene_strand = strand_join(gene_strand,
                                 genome_feature_get_strand((GenomeFeature*) gn));
-      assert(str_cmp(gene_seqid, genome_node_get_seqid(gn)) == 0);
+      assert(str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
     }
 
     gene_type = genome_feature_create_gft((GenomeFeature*) gn, gft_gene);
@@ -238,7 +238,7 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
     /* register children */
     for (i = 0; i < gt_array_size(mRNAs); i++) {
       gn = *(GT_GenomeNode**) gt_array_get(mRNAs, i);
-      genome_node_is_part_of_genome_node(gene_node, gn);
+      gt_genome_node_is_part_of_genome_node(gene_node, gn);
     }
 
     /* store the gene */
@@ -282,7 +282,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
        **tokens;
   Hashmap *transcript_id_hash; /* map from transcript id to array of genome
                                     nodes */
-  GT_Array *genome_node_array;
+  GT_Array *gt_genome_node_array;
   ConstructionInfo cinfo;
   GTF_feature_type gtf_feature_type;
   GenomeFeatureType *gff_feature_type = NULL;
@@ -326,7 +326,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
     else if (line[0] == '#') {
       /* storing comment */
       gn = comment_new(line+1);
-      genome_node_set_origin(gn, filenamestr, line_number);
+      gt_genome_node_set_origin(gn, filenamestr, line_number);
       queue_add(genome_nodes, gn);
     }
     else {
@@ -495,13 +495,13 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       }
       assert(transcript_id_hash);
 
-      if (!(genome_node_array = hashmap_get(transcript_id_hash,
+      if (!(gt_genome_node_array = hashmap_get(transcript_id_hash,
                                             transcript_id))) {
-        genome_node_array = gt_array_new(sizeof (GT_GenomeNode*));
+        gt_genome_node_array = gt_array_new(sizeof (GT_GenomeNode*));
         hashmap_add(transcript_id_hash, cstr_dup(transcript_id),
-                    genome_node_array);
+                    gt_genome_node_array);
       }
-      assert(genome_node_array);
+      assert(gt_genome_node_array);
 
       /* save optional gene_name and transcript_name attributes */
       if (transcript_name && !hashmap_get(parser->transcript_id_to_name_mapping,
@@ -528,7 +528,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 
       /* construct the new feature */
       gn = genome_feature_new(seqid_str, gff_feature_type, range, strand_value);
-      genome_node_set_origin(gn, filenamestr, line_number);
+      gt_genome_node_set_origin(gn, filenamestr, line_number);
 
       /* set source */
       source_str = hashmap_get(parser->source_to_str_mapping, source);
@@ -546,7 +546,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         genome_feature_set_score((GenomeFeature*) gn, score_value);
       if (phase_value != PHASE_UNDEFINED)
         genome_feature_set_phase(gn, phase_value);
-      gt_array_add(genome_node_array, gn);
+      gt_array_add(gt_genome_node_array, gn);
     }
 
     str_reset(line_buffer);

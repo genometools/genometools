@@ -154,11 +154,11 @@ int line_unit_test(GT_Error *err)
   str_delete(seqid3);
   line_delete(l1);
   line_delete(l2);
-  genome_node_delete(parent);
-  genome_node_delete(gn1);
-  genome_node_delete(gn2);
-  genome_node_delete(gn3);
-  genome_node_delete(gn4);
+  gt_genome_node_delete(parent);
+  gt_genome_node_delete(gn1);
+  gt_genome_node_delete(gn2);
+  gt_genome_node_delete(gn3);
+  gt_genome_node_delete(gn4);
   feature_type_factory_delete(feature_type_factory);
 
   return had_err;

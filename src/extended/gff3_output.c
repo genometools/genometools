@@ -30,11 +30,11 @@ void gff3_output_leading(GenomeFeature *gf, GenFile *outfp)
   type = genome_feature_get_type(gf);
 
   genfile_xprintf(outfp, "%s\t%s\t%s\t%lu\t%lu\t",
-                  str_get(genome_node_get_seqid(gn)),
+                  str_get(gt_genome_node_get_seqid(gn)),
                   genome_feature_get_source(gf),
                   genome_feature_type_get_cstr(type),
-                  genome_node_get_start(gn),
-                  genome_node_get_end(gn));
+                  gt_genome_node_get_start(gn),
+                  gt_genome_node_get_end(gn));
   if (genome_feature_score_is_defined(gf))
     genfile_xprintf(outfp, "%.3g", genome_feature_get_score(gf));
   else

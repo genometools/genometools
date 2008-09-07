@@ -42,7 +42,7 @@ static int stat_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error 
     assert(stat_stream->stat_visitor);
     if (*gn) {
       stat_stream->number_of_trees++;
-      had_err = genome_node_accept(*gn, stat_stream->stat_visitor, err);
+      had_err = gt_genome_node_accept(*gn, stat_stream->stat_visitor, err);
       assert(!had_err); /* the status visitor is sane */
     }
   }

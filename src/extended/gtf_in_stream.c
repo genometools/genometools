@@ -26,7 +26,7 @@
 struct GTFInStream
 {
   const GenomeStream parent_instance;
-  Queue *genome_node_buffer;
+  Queue *gt_genome_node_buffer;
   FeatureTypeFactory *feature_type_factory;
 };
 
@@ -39,13 +39,13 @@ static int gtf_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
   GTFInStream *is;
   gt_error_check(err);
   is = gtf_in_stream_cast(gs);
-  if (queue_size(is->genome_node_buffer)) {
+  if (queue_size(is->gt_genome_node_buffer)) {
     /* we still have a node in the buffer -> serve it from there */
-    *gn = queue_get(is->genome_node_buffer);
+    *gn = queue_get(is->gt_genome_node_buffer);
     return 0;
   }
   /* the buffer is empty */
-  assert(!queue_size(is->genome_node_buffer));
+  assert(!queue_size(is->gt_genome_node_buffer));
   *gn = NULL;
   return 0;
 }
@@ -54,7 +54,7 @@ static void gtf_in_stream_free(GenomeStream *gs)
 {
   GTFInStream *gtf_in_stream = gtf_in_stream_cast(gs);
   feature_type_factory_delete(gtf_in_stream->feature_type_factory);
-  queue_delete(gtf_in_stream->genome_node_buffer);
+  queue_delete(gtf_in_stream->gt_genome_node_buffer);
 }
 
 const GenomeStreamClass* gtf_in_stream_class(void)
@@ -79,7 +79,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   gs = genome_stream_create(gtf_in_stream_class(), false);
   gtf_in_stream = gtf_in_stream_cast(gs);
-  gtf_in_stream->genome_node_buffer = queue_new();
+  gtf_in_stream->gt_genome_node_buffer = queue_new();
   gtf_in_stream->feature_type_factory = feature_type_factory_builtin_new();
 
   gtf_parser = gtf_parser_new(gtf_in_stream->feature_type_factory);
@@ -92,7 +92,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   /* parse input file */
   filenamestr = str_new_cstr(filename ? filename : "stdin");
-  had_err = gtf_parser_parse(gtf_parser, gtf_in_stream->genome_node_buffer,
+  had_err = gtf_parser_parse(gtf_parser, gtf_in_stream->gt_genome_node_buffer,
                              filenamestr, fpin, be_tolerant, err);
   str_delete(filenamestr);
 

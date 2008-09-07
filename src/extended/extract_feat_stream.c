@@ -41,10 +41,10 @@ static int extract_feat_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
   if (!had_err) {
     assert(efs->extract_feat_visitor);
     if (*gn) {
-      had_err = genome_node_accept(*gn, efs->extract_feat_visitor, err);
+      had_err = gt_genome_node_accept(*gn, efs->extract_feat_visitor, err);
       if (had_err) {
         /* we own the node -> delete it */
-        genome_node_rec_delete(*gn);
+        gt_genome_node_rec_delete(*gn);
         *gn = NULL;
       }
     }

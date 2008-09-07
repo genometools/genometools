@@ -31,7 +31,7 @@ struct Comment
 };
 
 #define comment_cast(GN)\
-        genome_node_cast(comment_class(), GN)
+        gt_genome_node_cast(comment_class(), GN)
 
 static void comment_free(GT_GenomeNode *gn)
 {
@@ -80,7 +80,7 @@ const GT_GenomeNodeClass* comment_class()
 
 GT_GenomeNode* comment_new(const char *comment)
 {
-  GT_GenomeNode *gn = genome_node_create(comment_class());
+  GT_GenomeNode *gn = gt_genome_node_create(comment_class());
   Comment *c = comment_cast(gn);
   assert(comment);
   c->comment = cstr_dup(comment);

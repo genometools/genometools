@@ -46,7 +46,7 @@ int csa_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
   /* no nodes in the buffer -> get new nodes */
   while (!(had_err = genome_stream_next_tree(cs->in_stream, gn, err)) && *gn) {
     assert(*gn && !had_err);
-    had_err = genome_node_accept(*gn, cs->csa_visitor, err);
+    had_err = gt_genome_node_accept(*gn, cs->csa_visitor, err);
     if (had_err)
       break;
     if (csa_visitor_node_buffer_size(cs->csa_visitor)) {

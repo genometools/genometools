@@ -27,7 +27,7 @@ struct SequenceNode
 };
 
 #define sequence_node_cast(GN)\
-        genome_node_cast(sequence_node_class(), GN)
+        gt_genome_node_cast(sequence_node_class(), GN)
 
 static void sequence_node_free(GT_GenomeNode *gn)
 {
@@ -81,7 +81,7 @@ const GT_GenomeNodeClass* sequence_node_class()
 
 GT_GenomeNode* sequence_node_new(const char *description, Str *sequence)
 {
-  GT_GenomeNode *gn = genome_node_create(sequence_node_class());
+  GT_GenomeNode *gn = gt_genome_node_create(sequence_node_class());
   SequenceNode *sn = sequence_node_cast(gn);
   assert(description && sequence);
   sn->description = str_new_cstr(description);

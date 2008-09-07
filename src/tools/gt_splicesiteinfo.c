@@ -111,7 +111,7 @@ int gt_splicesiteinfo(int argc, const char **argv, GT_Error *err)
     /* pull the features through the stream and free them afterwards */
     while (!(had_err = genome_stream_next_tree(splice_site_info_stream, &gn,
                                                err)) && gn) {
-      genome_node_rec_delete(gn);
+      gt_genome_node_rec_delete(gn);
     }
   }
 

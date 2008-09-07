@@ -54,6 +54,6 @@ struct GT_GenomeNode
 #define TREE_STATUS_OFFSET    3
 #define TREE_STATUS_MASK      0x3
 
-GT_GenomeNode* genome_node_create(const GT_GenomeNodeClass*);
+GT_GenomeNode* gt_genome_node_create(const GT_GenomeNodeClass*);
 
 #endif

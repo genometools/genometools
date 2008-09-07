@@ -48,7 +48,7 @@ void genome_stream_delete(GenomeStream *gs)
   }
   assert(gs->c_class);
   if (gs->c_class->free) gs->c_class->free(gs);
-  genome_node_rec_delete(gs->buffer);
+  gt_genome_node_rec_delete(gs->buffer);
   ma_free(gs);
 }
 
@@ -66,7 +66,7 @@ int genome_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
 #ifndef NDEBUG
   /* checking */
   if (!had_err && gs->ensure_sorting && gs->buffer && new_node) {
-    assert(genome_node_compare(&gs->buffer, &new_node) <= 0);
+    assert(gt_genome_node_compare(&gs->buffer, &new_node) <= 0);
   }
 #endif
   /* serving */

@@ -72,7 +72,7 @@ static void sort_stream_free(GenomeStream *gs)
   unsigned long i;
   SortStream *sort_stream = sort_stream_cast(gs);
   for (i = sort_stream->idx; i < gt_array_size(sort_stream->trees); i++)
-    genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(sort_stream->trees, i));
+    gt_genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(sort_stream->trees, i));
   gt_array_delete(sort_stream->trees);
   genome_stream_delete(sort_stream->in_stream);
 }

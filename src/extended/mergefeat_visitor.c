@@ -46,22 +46,22 @@ static int mergefeat_in_children(GT_GenomeNode *gn, void *data, UNUSED GT_Error 
   GenomeFeature *previous_feature, *current_feature;
   GT_Range previous_range, current_range;
   gt_error_check(err);
-  current_feature = genome_node_cast(genome_feature_class(), gn);
+  current_feature = gt_genome_node_cast(genome_feature_class(), gn);
   assert(current_feature);
   if ((previous_feature = hashmap_get(v->hm, genome_feature_type_get_cstr(
                                   genome_feature_get_type(current_feature))))) {
     /* previous feature found -> check if merging is necessary */
     assert(genome_feature_get_type(previous_feature) ==
            genome_feature_get_type(current_feature));
-    previous_range = genome_node_get_range((GT_GenomeNode*) previous_feature);
-    current_range = genome_node_get_range((GT_GenomeNode*) current_feature);
+    previous_range = gt_genome_node_get_range((GT_GenomeNode*) previous_feature);
+    current_range = gt_genome_node_get_range((GT_GenomeNode*) current_feature);
     assert(gt_range_compare(previous_range, current_range) <= 0); /* sorted */
     if (previous_range.end + 1 == current_range.start) {
       /* merge nodes */
       genome_feature_set_end(previous_feature, current_range.end);
       /* XXX: compute average score ? */
       genome_feature_unset_score(previous_feature);
-      assert(!genome_node_number_of_children((GT_GenomeNode*) current_feature));
+      assert(!gt_genome_node_number_of_children((GT_GenomeNode*) current_feature));
       gt_array_add(v->nodes_to_remove, current_feature);
     }
     /* remove previous feature */
@@ -79,11 +79,11 @@ static int mergefeat_if_necessary(GT_GenomeNode *gn, void *data, GT_Error *err)
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GenomeFeature *gf;
   gt_error_check(err);
-  gf = genome_node_cast(genome_feature_class(), gn);
+  gf = gt_genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   v->current_tree = gn;
   hashmap_reset(v->hm);
-  return genome_node_traverse_direct_children(gn, v, mergefeat_in_children,
+  return gt_genome_node_traverse_direct_children(gn, v, mergefeat_in_children,
                                               err);
 }
 
@@ -97,13 +97,13 @@ static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
   gt_error_check(err);
   v = mergefeat_visitor_cast(gv);
   gt_array_reset(v->nodes_to_remove);
-  had_err = genome_node_traverse_children((GT_GenomeNode*) gf, v,
+  had_err = gt_genome_node_traverse_children((GT_GenomeNode*) gf, v,
                                           mergefeat_if_necessary, false, err);
   if (!had_err) {
     for (i = 0; i < gt_array_size(v->nodes_to_remove); i++) {
       leaf = *(GT_GenomeNode**) gt_array_get(v->nodes_to_remove, i);
-      genome_node_remove_leaf((GT_GenomeNode*) gf, leaf);
-      genome_node_delete(leaf);
+      gt_genome_node_remove_leaf((GT_GenomeNode*) gf, leaf);
+      gt_genome_node_delete(leaf);
     }
   }
   return had_err;

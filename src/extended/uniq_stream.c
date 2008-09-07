@@ -37,24 +37,24 @@ static bool nodes_are_equal_feature_trees(GT_GenomeNode *first_node,
   bool equal = false;
   GT_GenomeNodeIterator *gni_a, *gni_b;
   GenomeFeature *gf_a, *gf_b;
-  gf_a = genome_node_cast(genome_feature_class(), first_node);
-  gf_b = genome_node_cast(genome_feature_class(), second_node);
+  gf_a = gt_genome_node_cast(genome_feature_class(), first_node);
+  gf_b = gt_genome_node_cast(genome_feature_class(), second_node);
   if (gf_a && gf_b) {
-    gni_a = genome_node_iterator_new(first_node);
-    gni_b = genome_node_iterator_new(second_node);
-    for (gf_a = (GenomeFeature*) genome_node_iterator_next(gni_a),
-         gf_b = (GenomeFeature*) genome_node_iterator_next(gni_b);
+    gni_a = gt_genome_node_iterator_new(first_node);
+    gni_b = gt_genome_node_iterator_new(second_node);
+    for (gf_a = (GenomeFeature*) gt_genome_node_iterator_next(gni_a),
+         gf_b = (GenomeFeature*) gt_genome_node_iterator_next(gni_b);
          gf_a && gf_b;
-         gf_a = (GenomeFeature*) genome_node_iterator_next(gni_a),
-         gf_b = (GenomeFeature*) genome_node_iterator_next(gni_b)) {
+         gf_a = (GenomeFeature*) gt_genome_node_iterator_next(gni_a),
+         gf_b = (GenomeFeature*) gt_genome_node_iterator_next(gni_b)) {
       if (!gf_b || !genome_features_are_similar(gf_a, gf_b))
         break;
     }
-    gf_b = (GenomeFeature*) genome_node_iterator_next(gni_b);
+    gf_b = (GenomeFeature*) gt_genome_node_iterator_next(gni_b);
     if (!gf_a && !gf_b)
       equal = true;
-    genome_node_iterator_delete(gni_a);
-    genome_node_iterator_delete(gni_b);
+    gt_genome_node_iterator_delete(gni_a);
+    gt_genome_node_iterator_delete(gni_b);
     return equal;
   }
   return false;
@@ -79,11 +79,11 @@ static bool uniq(GT_GenomeNode **first_node, GT_GenomeNode **second_node)
         (first_score_is_defined && second_score_is_defined &&
          first_score >= second_score)) {
       /* keep first node */
-      genome_node_rec_delete(*second_node);
+      gt_genome_node_rec_delete(*second_node);
     }
     else {
       /* keep second node */
-      genome_node_rec_delete(*first_node);
+      gt_genome_node_rec_delete(*first_node);
       *first_node = *second_node;
     }
     *second_node = NULL;
@@ -138,8 +138,8 @@ static int uniq_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error 
 static void uniq_stream_free(GenomeStream *gs)
 {
   UniqStream *us = uniq_stream_cast(gs);
-  genome_node_rec_delete(us->first_node);
-  genome_node_rec_delete(us->second_node);
+  gt_genome_node_rec_delete(us->first_node);
+  gt_genome_node_rec_delete(us->second_node);
   genome_stream_delete(us->in_stream);
 }
 

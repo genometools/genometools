@@ -146,15 +146,15 @@ static int extracttarget_from_node(GT_GenomeNode *gn, GT_StrArray *seqfiles,
   int had_err = 0;
   gt_error_check(err);
   assert(gn && seqfiles);
-  if (genome_node_cast(genome_feature_class(), gn)) {
+  if (gt_genome_node_cast(genome_feature_class(), gn)) {
     const char *target;
     GT_GenomeNode *child;
-    gni = genome_node_iterator_new(gn);
-    while (!had_err && (child = genome_node_iterator_next(gni))) {
+    gni = gt_genome_node_iterator_new(gn);
+    while (!had_err && (child = gt_genome_node_iterator_next(gni))) {
       if ((target = genome_feature_get_attribute(child, "Target")))
         had_err = extracttarget_from_seqfiles(target, seqfiles, err);
     }
-    genome_node_iterator_delete(gni);
+    gt_genome_node_iterator_delete(gni);
   }
   return had_err;
 }
@@ -176,7 +176,7 @@ static int gt_extracttarget_runner(UNUSED int argc, const char **argv,
 
   while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, err)) && gn) {
     had_err = extracttarget_from_node(gn, arguments->seqfiles, err);
-    genome_node_rec_delete(gn);
+    gt_genome_node_rec_delete(gn);
   }
 
   genome_stream_delete(gff3_in_stream);

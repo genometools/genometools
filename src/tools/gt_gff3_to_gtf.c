@@ -64,7 +64,7 @@ int gt_gff3_to_gtf(int argc, const char **argv, GT_Error *err)
     /* pull the features through the stream and free them afterwards */
     while (!(had_err = genome_stream_next_tree(gtf_out_stream, &gn, err)) &&
            gn) {
-      genome_node_rec_delete(gn);
+      gt_genome_node_rec_delete(gn);
     }
   }
 

@@ -112,7 +112,7 @@ int gt_chseqids(int argc, const char **argv, GT_Error *err)
   if (!had_err) {
     while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
            gn) {
-      genome_node_rec_delete(gn);
+      gt_genome_node_rec_delete(gn);
     }
   }
 

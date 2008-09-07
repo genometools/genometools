@@ -83,10 +83,10 @@ static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
   gt_error_check(err);
   efv = extract_feat_visitor_cast(gv);
   assert(efv->region_mapping);
-  gni = genome_node_iterator_new((GT_GenomeNode*) gf);
+  gni = gt_genome_node_iterator_new((GT_GenomeNode*) gf);
   description = str_new();
   sequence = str_new();
-  while (!had_err && (gn = genome_node_iterator_next(gni))) {
+  while (!had_err && (gn = gt_genome_node_iterator_next(gni))) {
     if (extract_feat_sequence(sequence, gn, efv->type, efv->join,
                               efv->region_mapping, err)) {
       had_err = -1;
@@ -103,7 +103,7 @@ static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
   }
   str_delete(sequence);
   str_delete(description);
-  genome_node_iterator_delete(gni);
+  gt_genome_node_iterator_delete(gni);
   return had_err;
 }
 

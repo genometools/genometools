@@ -66,10 +66,10 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GT_GenomeNode *intron,
   gt_error_check(err);
   assert(ssiv && intron);
   ssiv->intron_processed = true;
-  range = genome_node_get_range(intron);
+  range = gt_genome_node_get_range(intron);
   assert(range.start); /* 1-based coordinates */
   if (gt_range_length(range) >= 4) {
-    seqid = genome_node_get_seqid(intron);
+    seqid = gt_genome_node_get_seqid(intron);
     had_err = region_mapping_get_raw_sequence(ssiv->region_mapping, &sequence,
                                               seqid, err);
     if (!had_err) {
@@ -99,8 +99,8 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GT_GenomeNode *intron,
       }
       else {
         warning("skipping intron with unknown orientation "
-                "(file '%s', line %u)", genome_node_get_filename(intron),
-                genome_node_get_line_number(intron));
+                "(file '%s', line %u)", gt_genome_node_get_filename(intron),
+                gt_genome_node_get_line_number(intron));
       }
     }
   }
@@ -117,12 +117,12 @@ static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
   gt_error_check(err);
   ssiv = splicesiteinfo_visitor_cast(gv);
   assert(ssiv->region_mapping);
-  gni = genome_node_iterator_new((GT_GenomeNode*) gf);
-  while (!had_err && (node = genome_node_iterator_next(gni))) {
+  gni = gt_genome_node_iterator_new((GT_GenomeNode*) gf);
+  while (!had_err && (node = gt_genome_node_iterator_next(gni))) {
     if (genome_feature_has_type((GenomeFeature*) node, gft_intron))
       had_err = process_intron(ssiv, node, err);
   }
-  genome_node_iterator_delete(gni);
+  gt_genome_node_iterator_delete(gni);
   return had_err;
 }
 

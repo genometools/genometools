@@ -43,10 +43,10 @@ Element* element_new(GT_GenomeNode *gn)
   assert(gn);
   element = element_new_empty();
   element_set_type(element, genome_feature_get_type(gf));
-  element_set_range(element, genome_node_get_range(gn));
+  element_set_range(element, gt_genome_node_get_range(gn));
   element->strand = genome_feature_get_strand(gf);
-  element->mark = genome_node_is_marked(gn);
-  element->gn = genome_node_ref(gn);
+  element->mark = gt_genome_node_is_marked(gn);
+  element->gn = gt_genome_node_ref(gn);
   return element;
 }
 
@@ -169,8 +169,8 @@ int element_unit_test(GT_Error *err)
   element_delete(e);
   element_delete(e2);
   element_delete(e3);
-  genome_node_delete(gn);
-  genome_node_delete(gn2);
+  gt_genome_node_delete(gn);
+  gt_genome_node_delete(gn2);
   feature_type_factory_delete(feature_type_factory);
   str_delete(seqid);
 
@@ -182,6 +182,6 @@ void element_delete(Element *element)
 {
   if (!element) return;
   if (element->gn)
-    genome_node_delete(element->gn);
+    gt_genome_node_delete(element->gn);
   ma_free(element);
 }

@@ -41,10 +41,10 @@ static int splice_site_info_stream_next_tree(GenomeStream *gs, GT_GenomeNode **g
   if (!had_err) {
     assert(ssis->splice_site_info_visitor);
     if (*gn) {
-      had_err = genome_node_accept(*gn, ssis->splice_site_info_visitor, err);
+      had_err = gt_genome_node_accept(*gn, ssis->splice_site_info_visitor, err);
       if (had_err) {
         /* we own the node -> delete it */
-        genome_node_rec_delete(*gn);
+        gt_genome_node_rec_delete(*gn);
         *gn = NULL;
       }
     }

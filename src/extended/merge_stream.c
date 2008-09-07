@@ -36,7 +36,7 @@ int merge_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
   MergeStream *ms;
   GT_GenomeNode *min_node = NULL;
   unsigned long i, j, min_i = UNDEF_ULONG;
-  unsigned int genome_node_consolidated;
+  unsigned int gt_genome_node_consolidated;
   int had_err = 0;
 
   gt_error_check(err);
@@ -57,19 +57,19 @@ int merge_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
   /* consolidate sequence regions (to avoid duplicates) */
   if (!had_err) {
     for (;;) {
-      genome_node_consolidated = 0;
+      gt_genome_node_consolidated = 0;
       for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
         for (j = i+1; j < gt_array_size(ms->genome_streams); j++) {
           assert(i != j);
           if (genome_nodes_are_equal_sequence_regions(ms->buffer[i],
                                                       ms->buffer[j])) {
             sequence_regions_consolidate(ms->buffer[i], ms->buffer[j]);
-            genome_node_rec_delete(ms->buffer[j]);
+            gt_genome_node_rec_delete(ms->buffer[j]);
             ms->buffer[j] = NULL;
           }
         }
       }
-      if (!genome_node_consolidated)
+      if (!gt_genome_node_consolidated)
         break;
     }
   }
@@ -79,7 +79,7 @@ int merge_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
     for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
       if (ms->buffer[i]) {
         if (min_i != UNDEF_ULONG) {
-          if (genome_node_compare(ms->buffer + i, ms->buffer + min_i) < 0)
+          if (gt_genome_node_compare(ms->buffer + i, ms->buffer + min_i) < 0)
             min_i = i;
         }
         else min_i = i;
