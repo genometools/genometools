@@ -151,7 +151,7 @@ uint64_t detsizeencseq(int kind,
 /* the functions with exactly the same interface for both implementation of
    encodedsequences */
 
-int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Error *err);
+int flushencseqfile(const Str *indexname,Encodedsequence *encseq,GT_Error *err);
 
 Encodedsequencescanstate *newEncodedsequencescanstate(void);
 
@@ -180,7 +180,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                                   unsigned long
                                                     *characterdistribution,
                                                   Verboseinfo *verboseinfo,
-                                                  Error *err);
+                                                  GT_Error *err);
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const Str *indexname,
@@ -188,7 +188,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                                Seqpos specialranges,
                                                unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
-                                               Error *err);
+                                               GT_Error *err);
 
 Encodedsequence *plain2encodedsequence(bool withrange,
                                        Specialcharinfo *specialcharinfo,

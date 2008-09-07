@@ -60,7 +60,7 @@ static OptionParser* gt_gff3validator_option_parser_new(void *tool_arguments)
 }
 
 static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
-                                   void *tool_arguments, Error *err)
+                                   void *tool_arguments, GT_Error *err)
 {
   GFF3ValidatorArguments *arguments = tool_arguments;
   FeatureTypeFactory *ftf = NULL;

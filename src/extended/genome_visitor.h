@@ -27,12 +27,12 @@ typedef struct GenomeVisitor GenomeVisitor;
 #include "extended/sequence_region.h"
 #include "extended/sequence_node.h"
 
-int  genome_visitor_visit_comment(GenomeVisitor*, Comment*, Error*);
+int  genome_visitor_visit_comment(GenomeVisitor*, Comment*, GT_Error*);
 int  genome_visitor_visit_genome_feature(GenomeVisitor*, GenomeFeature*,
-                                         Error*);
+                                         GT_Error*);
 int  genome_visitor_visit_sequence_region(GenomeVisitor*, SequenceRegion*,
-                                          Error*);
-int  genome_visitor_visit_sequence_node(GenomeVisitor*, SequenceNode*, Error*);
+                                          GT_Error*);
+int  genome_visitor_visit_sequence_node(GenomeVisitor*, SequenceNode*, GT_Error*);
 void genome_visitor_delete(GenomeVisitor *gv);
 
 #endif

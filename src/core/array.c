@@ -188,7 +188,7 @@ int gt_array_cmp(const GT_Array *array_a, const GT_Array *array_b)
 }
 
 int gt_array_iterate(GT_Array *a, GT_ArrayProcessor gt_array_processor, void *info,
-                  Error *err)
+                  GT_Error *err)
 {
   unsigned long idx;
   int rval;
@@ -202,7 +202,7 @@ int gt_array_iterate(GT_Array *a, GT_ArrayProcessor gt_array_processor, void *in
 }
 
 int gt_array_iterate_reverse(GT_Array *a, GT_ArrayProcessor gt_array_processor, void *info,
-                          Error *err)
+                          GT_Error *err)
 {
   unsigned long idx;
   int rval;
@@ -215,7 +215,7 @@ int gt_array_iterate_reverse(GT_Array *a, GT_ArrayProcessor gt_array_processor, 
   return 0;
 }
 
-static int iterate_test_func(void *value, void *info, UNUSED Error *err)
+static int iterate_test_func(void *value, void *info, UNUSED GT_Error *err)
 {
   unsigned long *i;
   Range range;
@@ -230,12 +230,12 @@ static int iterate_test_func(void *value, void *info, UNUSED Error *err)
 }
 
 static int iterate_fail_func(UNUSED void *value, UNUSED void *info,
-                             UNUSED Error *err)
+                             UNUSED GT_Error *err)
 {
   return -1;
 }
 
-int gt_array_example(UNUSED Error *err)
+int gt_array_example(UNUSED GT_Error *err)
 {
   unsigned long i;
   GT_Array *a;
@@ -257,7 +257,7 @@ int gt_array_example(UNUSED Error *err)
   return 0;
 }
 
-int gt_array_unit_test(Error *err)
+int gt_array_unit_test(GT_Error *err)
 {
   GT_Array *char_array, *int_array, *a = NULL, *aref, *aclone;
   char cc, *char_array_test;

@@ -31,7 +31,7 @@ typedef void *SeqDataSrc;
  * @return number of elements read (less then len on end-of-file etc.)
  */
 typedef size_t (*seqDataReadFunc)(SeqDataSrc src, void *dest, size_t len,
-                                  Error *err);
+                                  GT_Error *err);
 
 struct seqDataReader
 {
@@ -48,7 +48,7 @@ SDRIsValid(SeqDataReader sr)
 }
 
 static inline size_t
-SDRRead(SeqDataReader sr, void *dest, size_t len, Error *err)
+SDRRead(SeqDataReader sr, void *dest, size_t len, GT_Error *err)
 {
   return sr.readData(sr.src, dest, len, err);
 }

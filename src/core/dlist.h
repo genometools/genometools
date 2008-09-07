@@ -35,8 +35,8 @@ unsigned long dlist_size(const Dlist*);
 void          dlist_add(Dlist*, void *data);
 /* Remove <dlistelem> from <dlist> and free it. */
 void          dlist_remove(Dlist *dlist, Dlistelem *dlistelem);
-int           dlist_example(Error*);
-int           dlist_unit_test(Error*);
+int           dlist_example(GT_Error*);
+int           dlist_unit_test(GT_Error*);
 void          dlist_delete(Dlist*);
 
 Dlistelem*    dlistelem_next(const Dlistelem*);

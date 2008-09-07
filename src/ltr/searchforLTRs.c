@@ -118,7 +118,7 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
  to all candidate pairs.
 */
 int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
-                  const Seqpos *markpos, Error *err)
+                  const Seqpos *markpos, GT_Error *err)
 {
   unsigned long repeatcounter;
   ArrayMyfrontvalue fronts;

@@ -27,7 +27,7 @@ typedef struct {
 } RegionCovArguments;
 
 static OPrval parse_options(int *parsed_args, RegionCovArguments *arguments,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GT_Error *err)
 {
   OptionParser *op;
   Option *o;
@@ -51,7 +51,7 @@ static OPrval parse_options(int *parsed_args, RegionCovArguments *arguments,
   return oprval;
 }
 
-int gt_regioncov(int argc, const char **argv, Error *err)
+int gt_regioncov(int argc, const char **argv, GT_Error *err)
 {
   GenomeVisitor *regioncov_visitor;
   GenomeStream *gff3_in_stream;

@@ -74,7 +74,7 @@ static void gff3_visitor_free(GenomeVisitor *gv)
 }
 
 static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
-                                UNUSED Error *err)
+                                UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
   error_check(err);
@@ -85,7 +85,7 @@ static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
   return 0;
 }
 
-static int add_id(GenomeNode *gn, void *data, UNUSED Error *err)
+static int add_id(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   Add_id_info *info = (Add_id_info*) data;
   GT_Array *parent_features = NULL;
@@ -115,7 +115,7 @@ static void show_attribute(const char *attr_name, const char *attr_value,
 }
 
 static int gff3_show_genome_feature(GenomeNode *gn, void *data,
-                                    UNUSED Error *err)
+                                    UNUSED GT_Error *err)
 {
   bool part_shown = false;
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
@@ -189,7 +189,7 @@ static Str* create_unique_id(GFF3Visitor *gff3_visitor, GenomeFeature *gf)
   return id;
 }
 
-static int store_ids(GenomeNode *gn, void *data, Error *err)
+static int store_ids(GenomeNode *gn, void *data, GT_Error *err)
 {
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
@@ -227,7 +227,7 @@ static int store_ids(GenomeNode *gn, void *data, Error *err)
 }
 
 static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                       Error *err)
+                                       GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
   int had_err;
@@ -267,7 +267,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 }
 
 static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                        UNUSED Error *err)
+                                        UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
   error_check(err);
@@ -285,7 +285,7 @@ static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
 }
 
 static int gff3_visitor_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
-                                      UNUSED Error *err)
+                                      UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
   error_check(err);

@@ -34,7 +34,7 @@ static OptionParser* gt_markovchain_option_parser_new(UNUSED
 
 static int gt_markovchain_runner(UNUSED int argc, const char **argv,
                                  int parsed_args, UNUSED void *tool_arguments,
-                                 Error *err)
+                                 GT_Error *err)
 {
   MarkovChain *mc;
   double P;

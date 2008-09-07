@@ -24,7 +24,7 @@
 #include "extended/luaserialize.h"
 
 static int format_scalar(lua_State *L, Str *out, int index, bool table_key,
-                         Error *err)
+                         GT_Error *err)
 {
   int had_err = 0;
   error_check(err);
@@ -71,7 +71,7 @@ static int format_scalar(lua_State *L, Str *out, int index, bool table_key,
   return had_err;
 }
 
-static int parse_table(lua_State *L, Str *out, int index, int level, Error *err)
+static int parse_table(lua_State *L, Str *out, int index, int level, GT_Error *err)
 {
   int rval, had_err = 0;
   error_check(err);
@@ -105,14 +105,14 @@ static int parse_table(lua_State *L, Str *out, int index, int level, Error *err)
   return had_err;
 }
 
-int lua_table_to_str(lua_State *L, Str *out, int index, Error *err)
+int lua_table_to_str(lua_State *L, Str *out, int index, GT_Error *err)
 {
   error_check(err);
   assert(L && out && lua_istable(L, index));
   return parse_table(L, out, index, 1, err);
 }
 
-int lua_serializer_unit_test(Error *err)
+int lua_serializer_unit_test(GT_Error *err)
 {
   int had_err = 0;
   lua_State *L;

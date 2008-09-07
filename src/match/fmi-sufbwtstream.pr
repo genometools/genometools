@@ -8,7 +8,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                    const GT_StrArray *indexnametab,
                    bool storeindexpos,
                    Verboseinfo *verboseinfo,
-                   Error *err);
+                   GT_Error *err);
 
 #ifdef __cplusplus
 }

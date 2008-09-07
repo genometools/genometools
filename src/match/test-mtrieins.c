@@ -51,7 +51,7 @@ static void maketrie(Mergertrierep *trierep,
 static void successivelydeletesmallest(Mergertrierep *trierep,
                                        UNUSED Seqpos seqlen,
                                        UNUSED const Uchar *characters,
-                                       UNUSED Error *err)
+                                       UNUSED GT_Error *err)
 {
   Mergertrienode *smallest;
 #ifdef WITHTRIEIDENT
@@ -73,7 +73,7 @@ static void successivelydeletesmallest(Mergertrierep *trierep,
   }
 }
 
-int test_trieins(bool onlyins,const Str *indexname,Error *err)
+int test_trieins(bool onlyins,const Str *indexname,GT_Error *err)
 {
   Suffixarray suffixarray;
   bool haserr = false;

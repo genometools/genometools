@@ -30,7 +30,7 @@ Outlcpinfo *newlcpoutinfo(const Str *indexname,
                           unsigned int prefixlength,
                           unsigned int numofchars,
                           Seqpos totallength,
-                          Error *err);
+                          GT_Error *err);
 
 void freeoutlcptab(Outlcpinfo **outlcpinfo);
 

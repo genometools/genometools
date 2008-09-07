@@ -78,7 +78,7 @@ static void fa_init(void)
 
 static void* fileopen_generic(FA *fa, const char *path, const char *mode,
                               GenFileMode genfilemode, bool x,
-                              const char *filename, int line, Error *err)
+                              const char *filename, int line, GT_Error *err)
 {
   void  *fp = NULL;
   FAFileInfo *fileinfo;
@@ -149,7 +149,7 @@ static void xfclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
 }
 
 FILE* fa_fopen_func(const char *path, const char *mode,
-                    const char *filename, int line, Error *err)
+                    const char *filename, int line, GT_Error *err)
 {
   error_check(err);
   assert(path && mode);
@@ -186,7 +186,7 @@ void fa_xfclose(FILE *stream)
 }
 
 gzFile fa_gzopen_func(const char *path, const char *mode,
-                      const char *filename, int line, Error *err)
+                      const char *filename, int line, GT_Error *err)
 {
   error_check(err);
   assert(path && mode);
@@ -221,7 +221,7 @@ void fa_xgzclose(gzFile stream)
 }
 
 BZFILE* fa_bzopen_func(const char *path, const char *mode,
-                       const char *filename, int line, Error *err)
+                       const char *filename, int line, GT_Error *err)
 {
   error_check(err);
   assert(path && mode);
@@ -419,7 +419,7 @@ void fa_xmunmap(void *addr)
 }
 
 static int check_fptr_leak(UNUSED void *key, void *value, void *data,
-                           UNUSED Error *err)
+                           UNUSED GT_Error *err)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAFileInfo *fileinfo = (FAFileInfo*) value;
@@ -434,7 +434,7 @@ static int check_fptr_leak(UNUSED void *key, void *value, void *data,
 }
 
 static int check_mmap_leak(UNUSED void *key, void *value, void *data,
-                           UNUSED Error *err)
+                           UNUSED GT_Error *err)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAMapInfo *mapinfo = (FAMapInfo*) value;

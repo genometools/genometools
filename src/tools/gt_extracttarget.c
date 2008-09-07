@@ -89,7 +89,7 @@ static bool show_target(UNUSED unsigned long pos, void *data)
 
 static int extracttarget_from_seqfiles(const char *target,
                                        GT_StrArray *seqfiles,
-                                       Error *err)
+                                       GT_Error *err)
 {
   Str *unescaped_target;
   char *escaped_target;
@@ -140,7 +140,7 @@ static int extracttarget_from_seqfiles(const char *target,
 }
 
 static int extracttarget_from_node(GenomeNode *gn, GT_StrArray *seqfiles,
-                                   Error *err)
+                                   GT_Error *err)
 {
   GenomeNodeIterator *gni;
   int had_err = 0;
@@ -161,7 +161,7 @@ static int extracttarget_from_node(GenomeNode *gn, GT_StrArray *seqfiles,
 
 static int gt_extracttarget_runner(UNUSED int argc, const char **argv,
                                    int parsed_args, void *tool_arguments,
-                                   Error *err)
+                                   GT_Error *err)
 {
   ExtractTargetArguments *arguments = tool_arguments;
   GenomeStream *gff3_in_stream;

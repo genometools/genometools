@@ -23,7 +23,7 @@
 
 typedef struct Queue Queue;
 
-typedef int (*QueueProcessor)(void **elem, void *info, Error*);
+typedef int (*QueueProcessor)(void **elem, void *info, GT_Error*);
 
 Queue*        queue_new(void);
 void          queue_delete(Queue*);
@@ -40,13 +40,13 @@ void          queue_remove(Queue *queue, void *elem);
    If <queue_processor> returns a value != 0, the iteration is stopped and the
    return value of <queue_processor> is returned. */
 int           queue_iterate(Queue *queue, QueueProcessor queue_processor,
-                            void *info, Error *err);
+                            void *info, GT_Error *err);
 /* Similar to <queue_iterate>, except that the <queue> is traversed in reverse
    order. */
 int           queue_iterate_reverse(Queue *queue,
                                     QueueProcessor queue_processor, void *info,
-                                    Error *err);
+                                    GT_Error *err);
 unsigned long queue_size(const Queue*);
-int           queue_unit_test(Error*);
+int           queue_unit_test(GT_Error*);
 
 #endif

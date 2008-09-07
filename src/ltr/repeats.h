@@ -32,6 +32,6 @@ int subsimpleexactselfmatchstore(void *info,unsigned long len,
                                  Seqpos dbstart,
                                  /*@unused@*/ uint64_t queryoffset,
                                  unsigned long querystart,
-                                 Error *err);
+                                 GT_Error *err);
 
 #endif

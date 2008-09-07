@@ -34,13 +34,13 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
                                    unsigned int maxdepth);
 
 int pckbucket2file(const Str *indexname,const Pckbuckettable *pckbuckettable,
-                   Error *err);
+                   GT_Error *err);
 
 bool pckbuckettableexists(const Str *indexname);
 
 Pckbuckettable *mappckbuckettable(const Str *indexname,
                                   unsigned int numofchars,
-                                  Error *err);
+                                  GT_Error *err);
 
 void enumlowlevelchildintervals(ArrayBoundswithchar *bwci,
                                 const Pckbuckettable *pcktb,

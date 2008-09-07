@@ -55,7 +55,7 @@ char *getbasename(const char *path)
   return sbuf;
 }
 
-int getbasename_unit_test(Error *err)
+int getbasename_unit_test(GT_Error *err)
 {
   char *bn;
   int had_err = 0;

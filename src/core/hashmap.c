@@ -115,7 +115,7 @@ hashmap_cmp(const void *elemA, const void *elemB, void *data)
 }
 
 static enum iterator_op
-hashmap_visit(void *elem, void *data, Error *err)
+hashmap_visit(void *elem, void *data, GT_Error *err)
 {
   struct map_entry *me = elem;
   struct hashiteration_state *state = data;
@@ -126,7 +126,7 @@ hashmap_visit(void *elem, void *data, Error *err)
 /* iterate over the hashmap in key order given by compare function <cmp> */
 extern int
 hashmap_foreach_ordered(Hashmap *hm, Mapentryvisitfunc visit, void *data,
-                        Compare cmp, Error *err)
+                        Compare cmp, GT_Error *err)
 {
   struct hashiteration_state state = { visit, data, cmp};
   return hashtable_foreach_ordered(hm, hashmap_visit, &state,
@@ -134,7 +134,7 @@ hashmap_foreach_ordered(Hashmap *hm, Mapentryvisitfunc visit, void *data,
 }
 
 extern int
-hashmap_foreach(Hashmap *hm, Mapentryvisitfunc visit, void *data, Error *err)
+hashmap_foreach(Hashmap *hm, Mapentryvisitfunc visit, void *data, GT_Error *err)
 {
   struct hashiteration_state state = { visit, data, NULL };
   return hashtable_foreach(hm, hashmap_visit, &state, err);
@@ -142,7 +142,7 @@ hashmap_foreach(Hashmap *hm, Mapentryvisitfunc visit, void *data, Error *err)
 
 extern int
 hashmap_foreach_in_key_order(Hashmap *hm, Mapentryvisitfunc iter,
-                             void *data, Error *err)
+                             void *data, GT_Error *err)
 {
   struct hashiteration_state state = { iter, data, NULL };
   return hashtable_foreach_in_default_order(hm, hashmap_visit, &state, err);
@@ -217,7 +217,7 @@ hashmap_test(HashType hash_type)
 }
 
 int
-hashmap_unit_test(Error *err)
+hashmap_unit_test(GT_Error *err)
 {
   int had_err;
   error_check(err);

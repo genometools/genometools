@@ -166,7 +166,7 @@ Bcktab *allocBcktab(Seqpos totallength,
                     unsigned int codebits,
                     Codetype maxcodevalue,
                     Verboseinfo *verboseinfo,
-                    Error *err)
+                    GT_Error *err)
 {
   Bcktab *bcktab;
   bool haserr = false;
@@ -237,7 +237,7 @@ static void assignbcktabmapspecification(ArrayMapspecification *mapspectable,
   }
 }
 
-int bcktab2file(FILE *fp,const Bcktab *bcktab,Error *err)
+int bcktab2file(FILE *fp,const Bcktab *bcktab,GT_Error *err)
 {
   error_check(err);
   return flushtheindex2file(fp,
@@ -249,7 +249,7 @@ int bcktab2file(FILE *fp,const Bcktab *bcktab,Error *err)
 
 static int fillbcktabmapspecstartptr(Bcktab *bcktab,
                                      const Str *indexname,
-                                     Error *err)
+                                     GT_Error *err)
 {
   bool haserr = false;
   Str *tmpfilename;
@@ -274,7 +274,7 @@ Bcktab *mapbcktab(const Str *indexname,
                   Seqpos totallength,
                   unsigned int numofchars,
                   unsigned int prefixlength,
-                  Error *err)
+                  GT_Error *err)
 {
   Bcktab *bcktab;
 

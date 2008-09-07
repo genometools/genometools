@@ -37,7 +37,7 @@ OutputFileInfo* outputfileinfo_new(void)
   return ofi;
 }
 
-static int determine_outfp(void *data, Error *err)
+static int determine_outfp(void *data, GT_Error *err)
 {
   OutputFileInfo *ofi = (OutputFileInfo*) data;
   GenFileMode genfilemode;

@@ -67,10 +67,10 @@ void showuserdefinedoptionsandvalues(LTRharvestoptions *lo);
 
 void printargsline(const char **argv, int argc);
 
-int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Error *);
+int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, GT_Error *);
 
 int ltrharvestoptions(LTRharvestoptions *lo, int argc,const char **argv,
-                      Error *);
+                      GT_Error *);
 
 void wrapltrharvestoptions(LTRharvestoptions *lo);
 

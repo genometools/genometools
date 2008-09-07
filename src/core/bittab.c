@@ -308,7 +308,7 @@ void bittab_show(const Bittab *b, FILE *outfp)
   (void) putc('\n', outfp);
 }
 
-int bittab_example(UNUSED Error *err)
+int bittab_example(UNUSED GT_Error *err)
 {
   unsigned long bit;
   Bittab *b;
@@ -331,7 +331,7 @@ int bittab_example(UNUSED Error *err)
   return 0;
 }
 
-int bittab_unit_test(Error *err)
+int bittab_unit_test(GT_Error *err)
 {
   unsigned long i, j, size, bit, counter;
   Bittab *b, *tmp, *and;

@@ -72,7 +72,7 @@ static int canvas_lua_new_ps(lua_State *L)
 static int canvas_lua_to_file(lua_State *L)
 {
   GT_Canvas **canvas;
-  Error *err;
+  GT_Error *err;
   const char *fn;
   int had_err = 0;
   err = error_new();

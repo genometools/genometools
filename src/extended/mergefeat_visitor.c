@@ -40,7 +40,7 @@ static void mergefeat_visitor_free(GenomeVisitor *gv)
   gt_array_delete(mergefeat_visitor->nodes_to_remove);
 }
 
-static int mergefeat_in_children(GenomeNode *gn, void *data, UNUSED Error *err)
+static int mergefeat_in_children(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GenomeFeature *previous_feature, *current_feature;
@@ -74,7 +74,7 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, UNUSED Error *err)
   return 0;
 }
 
-static int mergefeat_if_necessary(GenomeNode *gn, void *data, Error *err)
+static int mergefeat_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GenomeFeature *gf;
@@ -88,7 +88,7 @@ static int mergefeat_if_necessary(GenomeNode *gn, void *data, Error *err)
 }
 
 static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
-                                            GenomeFeature *gf, Error *err)
+                                            GenomeFeature *gf, GT_Error *err)
 {
   MergefeatVisitor *v;
   GenomeNode *leaf;

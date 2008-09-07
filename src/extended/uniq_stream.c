@@ -92,7 +92,7 @@ static bool uniq(GenomeNode **first_node, GenomeNode **second_node)
   return false;
 }
 
-static int uniq_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
+static int uniq_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
 {
   UniqStream *us;
   int had_err;

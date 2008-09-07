@@ -37,7 +37,7 @@ void setreadintkeys(GT_Array *riktab,
 
 int allkeysdefined(const Str *indexname,const char *suffix,
                    const GT_Array *riktab,Verboseinfo *verboseinfo,
-                   Error *err);
+                   GT_Error *err);
 
 int analyzeuintline(const Str *indexname,
                     const char *suffix,
@@ -45,6 +45,6 @@ int analyzeuintline(const Str *indexname,
                     const char *linebuffer,
                     unsigned long linelength,
                     GT_Array *riktab,
-                    Error *err);
+                    GT_Error *err);
 
 #endif

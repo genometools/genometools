@@ -382,7 +382,7 @@ isSortModeTransition(RandomSeqAccessor origSeqAccess, Seqpos seqLen,
 static BitOffset
 addLocateInfo(BitString cwDest, BitOffset cwOffset,
               BitString varDest, BitOffset varOffset,
-              UNUSED Seqpos start, Seqpos len, void *cbState, Error *err)
+              UNUSED Seqpos start, Seqpos len, void *cbState, GT_Error *err)
 {
   BitOffset bitsWritten = 0;
   struct addLocateInfoState *state = cbState;
@@ -525,7 +525,7 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
                     SASeqSrc *src,
                     const enum rangeSortMode rangeSort[],
                     const SpecialsRankLookup *sprTable,
-                    Error *err)
+                    GT_Error *err)
 {
   struct encIdxSeq *baseSeqIdx = NULL;
   struct addLocateInfoState varState;

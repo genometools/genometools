@@ -86,7 +86,7 @@ size_t genfile_basename_length(const char *path)
 }
 
 GenFile* genfile_open(GenFileMode genfilemode, const char *path,
-                      const char *mode, Error *err)
+                      const char *mode, GT_Error *err)
 {
   GenFile *genfile;
   error_check(err);

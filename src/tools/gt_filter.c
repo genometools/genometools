@@ -197,7 +197,7 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
 }
 
 static int process_strand_arg(Str *strand_char, Strand *strand,
-                              const char *optstr, Error *err)
+                              const char *optstr, GT_Error *err)
 {
   int had_err = 0;
   error_check(err);
@@ -215,7 +215,7 @@ static int process_strand_arg(Str *strand_char, Strand *strand,
 }
 
 static int gt_filter_arguments_check(UNUSED int rest_argc, void *tool_arguments,
-                                     Error *err)
+                                     GT_Error *err)
 {
   FilterArguments *arguments = tool_arguments;
   int had_err;
@@ -232,7 +232,7 @@ static int gt_filter_arguments_check(UNUSED int rest_argc, void *tool_arguments,
 }
 
 static int gt_filter_runner(int argc, const char **argv, int parsed_args,
-                           void *tool_arguments, Error *err)
+                           void *tool_arguments, GT_Error *err)
 {
   FilterArguments *arguments = tool_arguments;
   GenomeStream *gff3_in_stream, *filter_stream,

@@ -53,7 +53,7 @@ size_t      genfile_basename_length(const char *path);
 /* Create a new GenFile object and open the underlying file handle, returns NULL
    and sets <err> if the file <path> could not be opened. */
 GenFile*    genfile_open(GenFileMode, const char *path, const char *mode,
-                         Error*);
+                         GT_Error*);
 
 /* Create a new GenFile object and open the underlying file handle, abort if the
    file <path> does not exist, the GenFileMode has to be given explicitly. */

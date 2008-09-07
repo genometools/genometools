@@ -31,7 +31,7 @@ struct AddIntronsVisitor {
         genome_visitor_cast(add_introns_visitor_class(), GV)
 
 static int add_introns_in_children(GenomeNode *gn, void *data,
-                                   UNUSED Error *err)
+                                   UNUSED GT_Error *err)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GenomeFeature *current_feature;
@@ -79,7 +79,7 @@ static int add_introns_in_children(GenomeNode *gn, void *data,
   return 0;
 }
 
-static int add_introns_if_necessary(GenomeNode *gn, void *data, Error *err)
+static int add_introns_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GenomeFeature *gf;
@@ -93,7 +93,7 @@ static int add_introns_if_necessary(GenomeNode *gn, void *data, Error *err)
 }
 
 static int add_introns_visitor_genome_feature(GenomeVisitor *gv,
-                                             GenomeFeature *gf, Error *err)
+                                             GenomeFeature *gf, GT_Error *err)
 {
   AddIntronsVisitor *v;
   error_check(err);

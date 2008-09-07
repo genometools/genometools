@@ -21,10 +21,10 @@
 #include "core/error.h"
 #include "core/tooldriver.h"
 
-int tooldriver(int(*tool)(int argc, const char **argv, Error*),
+int tooldriver(int(*tool)(int argc, const char **argv, GT_Error*),
                int argc, char *argv[])
 {
-  Error *err;
+  GT_Error *err;
   int had_err;
   allocators_init();
   err = error_new();
@@ -45,7 +45,7 @@ int tooldriver(int(*tool)(int argc, const char **argv, Error*),
 int toolobjdriver(ToolConstructor tool_constructor, int argc, char *argv[])
 {
   Tool *tool;
-  Error *err;
+  GT_Error *err;
   int had_err;
   allocators_init();
   err = error_new();

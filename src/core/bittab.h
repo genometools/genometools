@@ -47,8 +47,8 @@ unsigned long bittab_get_last_bitnum(const Bittab*);
 unsigned long bittab_get_next_bitnum(const Bittab*, unsigned long);
 unsigned long bittab_count_set_bits(Bittab*);
 unsigned long bittab_size(Bittab*);
-int           bittab_example(Error*);
-int           bittab_unit_test(Error*);
+int           bittab_example(GT_Error*);
+int           bittab_unit_test(GT_Error*);
 void          bittab_delete(Bittab*);
 
 #endif

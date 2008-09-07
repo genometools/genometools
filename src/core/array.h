@@ -24,7 +24,7 @@
 
 typedef struct GT_Array GT_Array;
 
-typedef int (*GT_ArrayProcessor)(void *elem, void *info, Error*);
+typedef int (*GT_ArrayProcessor)(void *elem, void *info, GT_Error*);
 
 GT_Array*     gt_array_new(size_t);
 GT_Array*     gt_array_clone(const GT_Array*);
@@ -54,14 +54,14 @@ int           gt_array_cmp(const GT_Array  *array_a, const GT_Array *array_b);
    If <array_processor> returns a value != 0, the iteration is stopped and the
    return value of <array_processor> is returned. */
 int           gt_array_iterate(GT_Array *array, GT_ArrayProcessor gt_array_processor,
-                            void *info, Error *err);
+                            void *info, GT_Error *err);
 /* Similar to <array_iterate>, except that the <array> is traversed in reverse
    order. */
 int           gt_array_iterate_reverse(GT_Array *array,
                                     GT_ArrayProcessor gt_array_processor, void *info,
-                                    Error *err);
-int           gt_array_example(Error*);
-int           gt_array_unit_test(Error*);
+                                    GT_Error *err);
+int           gt_array_example(GT_Error*);
+int           gt_array_unit_test(GT_Error*);
 void          gt_array_delete(GT_Array*);
 
 #endif

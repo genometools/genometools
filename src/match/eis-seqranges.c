@@ -465,7 +465,7 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp)
 /* FIXME: convert to platform-independent variant */
 struct seqRangeList *
 SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
-                  enum SRLFeatures features, UNUSED Error *err)
+                  enum SRLFeatures features, UNUSED GT_Error *err)
 {
   struct seqRangeList *newRangeList;
   size_t numRanges;

@@ -48,9 +48,9 @@ struct FastaBuffer
   Arraychar headerbuffer;
 };
 
-int advanceformatbufferstate(FastaBuffer *fb, Error*);
+int advanceformatbufferstate(FastaBuffer *fb, GT_Error*);
 
-static inline int fastabuffer_next(FastaBuffer *fb,Uchar *val, Error *err)
+static inline int fastabuffer_next(FastaBuffer *fb,Uchar *val, GT_Error *err)
 {
   if (fb->nextread >= fb->nextfree)
   {

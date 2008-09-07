@@ -19,7 +19,7 @@
 #include "match/sfx-run.h"
 #include "tools/gt_suffixerator.h"
 
-int gt_suffixerator(int argc, const char **argv, Error *err)
+int gt_suffixerator(int argc, const char **argv, GT_Error *err)
 {
   error_check(err);
   return parseargsandcallsuffixerator(true,argc, argv, err);

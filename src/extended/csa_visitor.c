@@ -51,7 +51,7 @@ static void csa_visitor_free(GenomeVisitor *gv)
 }
 
 static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                      UNUSED Error *err)
+                                      UNUSED GT_Error *err)
 {
   CSAVisitor *csa_visitor;
   error_check(err);
@@ -100,7 +100,7 @@ static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 }
 
 static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn,
-                                    UNUSED Error *err)
+                                    UNUSED GT_Error *err)
 {
   CSAVisitor *csa_visitor;
   error_check(err);
@@ -109,19 +109,19 @@ static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn,
   return 0;
 }
 
-static int csa_visitor_comment(GenomeVisitor *gv, Comment *c, Error *err)
+static int csa_visitor_comment(GenomeVisitor *gv, Comment *c, GT_Error *err)
 {
   return csa_visitor_default_func(gv, (GenomeNode*) c, err);
 }
 
 static int csa_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                       Error *err)
+                                       GT_Error *err)
 {
   return csa_visitor_default_func(gv, (GenomeNode*) sr, err);
 }
 
 static int csa_visitor_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
-                                     Error *err)
+                                     GT_Error *err)
 {
   return csa_visitor_default_func(gv, (GenomeNode*) sn, err);
 }
@@ -176,7 +176,7 @@ static Strand get_strand(const void *sa)
   return genome_feature_get_strand(gf);
 }
 
-static int save_exon(GenomeNode *gn, void *data, UNUSED Error *err)
+static int save_exon(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   GenomeFeature *gf = (GenomeFeature*) gn;
   GT_Array *exon_ranges = (GT_Array*) data;

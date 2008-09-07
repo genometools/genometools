@@ -75,7 +75,7 @@ static OptionParser* gt_shredder_option_parser_new(void *tool_arguments)
 }
 
 static int gt_shredder_arguments_check(UNUSED int rest_argc,
-                                       void *tool_arguments, Error *err)
+                                       void *tool_arguments, GT_Error *err)
 {
   ShredderArguments *arguments = tool_arguments;
   error_check(err);
@@ -88,7 +88,7 @@ static int gt_shredder_arguments_check(UNUSED int rest_argc,
 }
 
 static int gt_shredder_runner(UNUSED int argc, const char **argv,
-                              int parsed_args, void *tool_arguments, Error *err)
+                              int parsed_args, void *tool_arguments, GT_Error *err)
 {
   ShredderArguments *arguments = tool_arguments;
   BioseqIterator *bsi;

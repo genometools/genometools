@@ -34,7 +34,7 @@ struct GTFInStream
         genome_stream_cast(gtf_in_stream_class(), GS)
 
 static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                   UNUSED Error *err)
+                                   UNUSED GT_Error *err)
 {
   GTFInStream *is;
   error_check(err);
@@ -66,7 +66,7 @@ const GenomeStreamClass* gtf_in_stream_class(void)
 }
 
 GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
-                                Error *err)
+                                GT_Error *err)
 {
   GenomeStream *gs;
   GTFInStream *gtf_in_stream;

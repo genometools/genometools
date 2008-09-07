@@ -99,7 +99,7 @@ Toolfunc toolbox_get(const Toolbox *tb, const char *toolname)
 }
 
 static int show_tool_name(void *key, UNUSED void *value, UNUSED void *data,
-                          UNUSED Error *err)
+                          UNUSED GT_Error *err)
 {
   error_check(err);
   assert(key && value);
@@ -108,7 +108,7 @@ static int show_tool_name(void *key, UNUSED void *value, UNUSED void *data,
   return 0;
 }
 
-int toolbox_show(UNUSED const char *progname, void *toolbox, UNUSED Error *err)
+int toolbox_show(UNUSED const char *progname, void *toolbox, UNUSED GT_Error *err)
 {
   Toolbox *tb;
   int had_err = 0;

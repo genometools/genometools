@@ -68,7 +68,7 @@ static OptionParser* gt_assemblegreedy_option_parser_new(void *tool_arguments)
 
 static int gt_assemblegreedy_runner(UNUSED int argc, const char **argv,
                                  int parsed_args, void *tool_arguments,
-                                 Error *err)
+                                 GT_Error *err)
 {
   AssemblegreedyArguments *arguments = tool_arguments;
   Bioseq *fragments;

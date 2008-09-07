@@ -20,5 +20,5 @@
 
 #include "core/error.h"
 
-int parseargsandcallltrharvest(int argc,const char *argv[],Error *err);
+int parseargsandcallltrharvest(int argc,const char *argv[],GT_Error *err);
 #endif

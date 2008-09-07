@@ -25,7 +25,7 @@
 #include "tools/gt_qgramdist.h"
 
 static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
-                            const char **argv, Error *err)
+                            const char **argv, GT_Error *err)
 {
   OptionParser *op;
   Option *o;
@@ -42,7 +42,7 @@ static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
   return oprval;
 }
 
-int gt_qgramdist(int argc, const char **argv, Error *err)
+int gt_qgramdist(int argc, const char **argv, GT_Error *err)
 {
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
   unsigned long i, j, dist;

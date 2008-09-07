@@ -123,7 +123,7 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
 }
 
 static int gt_extractseq_arguments_check(UNUSED int argc, void *tool_arguments,
-                                         Error *err)
+                                         GT_Error *err)
 {
   ExtractSeqArguments *arguments = tool_arguments;
   error_check(err);
@@ -138,7 +138,7 @@ static int gt_extractseq_arguments_check(UNUSED int argc, void *tool_arguments,
 }
 
 static int extractseq_pos(GenFile *outfp, Bioseq *bs, unsigned long frompos,
-                          unsigned long topos, unsigned long width, Error *err)
+                          unsigned long topos, unsigned long width, GT_Error *err)
 {
   int had_err = 0;
   error_check(err);
@@ -157,7 +157,7 @@ static int extractseq_pos(GenFile *outfp, Bioseq *bs, unsigned long frompos,
 }
 
 static int extractseq_match(GenFile *outfp, Bioseq *bs, const char *pattern,
-                            unsigned long width, Error *err)
+                            unsigned long width, GT_Error *err)
 {
   const char *desc;
   unsigned long i;
@@ -181,7 +181,7 @@ static int extractseq_match(GenFile *outfp, Bioseq *bs, const char *pattern,
 }
 
 static int process_ginum(Str *ginum, int argc, const char **argv,
-                         unsigned long width, GenFile *outfp, Error *err)
+                         unsigned long width, GenFile *outfp, GT_Error *err)
 {
   int had_err = 0;
   error_check(err);
@@ -207,7 +207,7 @@ static int process_ginum(Str *ginum, int argc, const char **argv,
 }
 
 static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
-                                void *tool_arguments, Error *err)
+                                void *tool_arguments, GT_Error *err)
 {
   ExtractSeqArguments *arguments = tool_arguments;
   int had_err = 0;

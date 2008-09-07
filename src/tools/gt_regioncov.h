@@ -19,6 +19,6 @@
 #define GT_REGIONCOV_H
 
 /* the region coverage tool */
-int gt_regioncov(int argc, const char **argv, Error*);
+int gt_regioncov(int argc, const char **argv, GT_Error*);
 
 #endif

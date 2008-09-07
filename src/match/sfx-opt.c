@@ -32,7 +32,7 @@
 static OPrval parse_options(int *parsed_args,
                             bool doesa,
                             Suffixeratoroptions *so,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GT_Error *err)
 {
   OptionParser *op;
   Option *option,
@@ -403,7 +403,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
                         bool doesa,
                         int argc,
                         const char **argv,
-                        Error *err)
+                        GT_Error *err)
 {
   int parsed_args, retval = 0;
   OPrval rval;

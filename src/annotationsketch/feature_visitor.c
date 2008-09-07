@@ -38,7 +38,7 @@ static void feature_visitor_free(GenomeVisitor *gv)
 }
 
 static int feature_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                          UNUSED Error *err)
+                                          UNUSED GT_Error *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
   error_check(err);
@@ -48,7 +48,7 @@ static int feature_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 
 static int feature_visitor_sequence_region(GenomeVisitor *gv,
                                            SequenceRegion *sr,
-                                           UNUSED Error *err)
+                                           UNUSED GT_Error *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
   error_check(err);

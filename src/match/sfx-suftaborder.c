@@ -164,7 +164,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
                        Seqpos depth,
-                       Error *err)
+                       GT_Error *err)
 {
   const Seqpos *ptr;
   Bitstring *startposoccurs;

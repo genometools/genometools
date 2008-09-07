@@ -25,7 +25,7 @@ typedef struct OBOParseTree OBOParseTree;
 /* Parse the OBO file given with <obo_file_path> and return the result as an
    OBOParseTree.
    If an error occurs during parsing, NULL is returned and <err> is set. */
-OBOParseTree* obo_parse_tree_new(const char *obo_file_path, Error *err);
+OBOParseTree* obo_parse_tree_new(const char *obo_file_path, GT_Error *err);
 void          obo_parse_tree_delete(OBOParseTree*);
 /* Return the type of stanza number <stanza_number>. */
 const char*   obo_parse_tree_get_stanza_type(const OBOParseTree*,

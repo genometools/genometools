@@ -25,7 +25,7 @@
 static int writefmascii (const Str *indexname,
                          const Fmindex *fm,
                          bool storeindexpos,
-                         Error *err)
+                         GT_Error *err)
 {
   FILE *fmafp;
 
@@ -59,7 +59,7 @@ static int writefmascii (const Str *indexname,
 static int writefmdata (const Str *indexname,
                         Fmindex *fm,
                         bool storeindexpos,
-                        Error *err)
+                        GT_Error *err)
 {
   FILE *fp;
 
@@ -77,7 +77,7 @@ static int writefmdata (const Str *indexname,
 }
 
 int saveFmindex (const Str *indexname,Fmindex *fm,
-                 bool storeindexpos,Error *err)
+                 bool storeindexpos,GT_Error *err)
 {
   error_check(err);
   if (writefmascii (indexname, fm, storeindexpos,err) != 0)

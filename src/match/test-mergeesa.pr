@@ -4,7 +4,7 @@ extern "C" {
 int performtheindexmerging(const Str *storeindex,
                            const GT_StrArray *indexnametab,
                            Verboseinfo *verboseinfo,
-                           Error *err);
+                           GT_Error *err);
 
 #ifdef __cplusplus
 }

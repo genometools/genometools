@@ -46,6 +46,6 @@ unsigned long union_find_find(UnionFind*, unsigned long elem);
 void          union_find_union(UnionFind*, unsigned long elem_a,
                                            unsigned long elem_b);
 
-int           union_find_unit_test(Error*);
+int           union_find_unit_test(GT_Error*);
 
 #endif

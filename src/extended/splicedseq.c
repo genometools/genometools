@@ -87,7 +87,7 @@ unsigned long splicedseq_length(const Splicedseq *ss)
   return str_length(ss->splicedseq);
 }
 
-int splicedseq_reverse(Splicedseq *ss, Error *err)
+int splicedseq_reverse(Splicedseq *ss, GT_Error *err)
 {
   int had_err;
   error_check(err);
@@ -109,7 +109,7 @@ void splicedseq_reset(Splicedseq *ss)
   ss->forward = true;
 }
 
-static int check_splicedseq(Splicedseq *ss, Error *err)
+static int check_splicedseq(Splicedseq *ss, GT_Error *err)
 {                       /*0123456789*/
   static char *origseq = "aaccaagtga", *splicedseq = "ccgtg";
   int had_err = 0;
@@ -125,7 +125,7 @@ static int check_splicedseq(Splicedseq *ss, Error *err)
   return had_err;
 }
 
-int splicedseq_unit_test(Error *err)
+int splicedseq_unit_test(GT_Error *err)
 {
   Splicedseq *ss;
   int had_err = 0;

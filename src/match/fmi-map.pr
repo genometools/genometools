@@ -6,7 +6,7 @@ bool fmindexexists(const Str *indexname);
 void freefmindex(Fmindex *fmindex);
 
 int mapfmindex (Fmindex *fmindex,const Str *indexname,
-                Verboseinfo *verboseinfo,Error *err);
+                Verboseinfo *verboseinfo,GT_Error *err);
 
 #ifdef __cplusplus
 }

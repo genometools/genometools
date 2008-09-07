@@ -55,7 +55,7 @@ GenomeFeatureType* gft_collection_get(GFTCollection *gftc, const char *type)
 }
 
 static int store_type(void *key, UNUSED void *value, void *data,
-                      UNUSED Error *err)
+                      UNUSED GT_Error *err)
 {
   GT_StrArray *types = data;
   assert(key && types);

@@ -21,6 +21,6 @@
 #include "core/error.h"
 
 /* reverse <dna_seq> of length <seqlen> in place */
-int reverse_complement(char *dna_seq, unsigned long seqlen, Error*);
+int reverse_complement(char *dna_seq, unsigned long seqlen, GT_Error*);
 
 #endif

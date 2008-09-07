@@ -47,7 +47,7 @@ Tool* tool_new(ToolArgumentsNew tool_arguments_new,
   return tool;
 }
 
-int tool_run(Tool *tool, int argc, const char **argv, Error *err)
+int tool_run(Tool *tool, int argc, const char **argv, GT_Error *err)
 {
   void *tool_arguments = NULL;
   OptionParser *op;

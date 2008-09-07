@@ -19,6 +19,6 @@
 #include "core/error.h"
 
 extern int
-gt_packedindex_chk_integrity(int argc, const char *argv[], Error *err);
+gt_packedindex_chk_integrity(int argc, const char *argv[], GT_Error *err);
 
 #endif

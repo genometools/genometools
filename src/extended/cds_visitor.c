@@ -43,7 +43,7 @@ static void cds_visitor_free(GenomeVisitor *gv)
   region_mapping_delete(cds_visitor->region_mapping);
 }
 
-static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
+static int extract_cds_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GenomeFeature *gf;
@@ -78,7 +78,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
   return had_err;
 }
 
-static int extract_spliced_seq(GenomeNode *gn, CDSVisitor *visitor, Error *err)
+static int extract_spliced_seq(GenomeNode *gn, CDSVisitor *visitor, GT_Error *err)
 {
   error_check(err);
   assert(gn && visitor);
@@ -179,7 +179,7 @@ static void create_CDS_features_for_longest_ORF(GT_Array *orfs, CDSVisitor *v,
   }
 }
 
-static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
+static int add_cds_if_necessary(GenomeNode *gn, void *data, GT_Error *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GenomeFeature *gf;
@@ -207,7 +207,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 }
 
 static int cds_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                      Error *err)
+                                      GT_Error *err)
 {
   CDSVisitor *v = cds_visitor_cast(gv);
   error_check(err);

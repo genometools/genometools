@@ -71,7 +71,7 @@ typedef struct BWTSeqExactMatchesIterator BWTSeqExactMatchesIterator;
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, Error *err);
+availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, GT_Error *err);
 
 /**
  * \brief Creates an encoded indexed sequence object of the BWT
@@ -83,7 +83,7 @@ availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, Error *err);
  */
 extern BWTSeq *
 trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
-                Error *err);
+                GT_Error *err);
 
 /**
  * \brief Loads an encoded indexed sequence object of the
@@ -96,7 +96,7 @@ trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
  */
 extern BWTSeq *
 loadBWTSeq(const Str *projectName, int BWTOptFlags, Verboseinfo *verbosity,
-           Error *err);
+           GT_Error *err);
 
 /**
  * \brief Deallocate a previously loaded/created BWT sequence object.
@@ -310,7 +310,7 @@ BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
                 Symbol nextSym);
 
 /**
- * Error conditions encountered upon integrity check.
+ * GT_Error conditions encountered upon integrity check.
  */
 enum verifyBWTSeqErrCode
 {
@@ -373,7 +373,7 @@ extern enum verifyBWTSeqErrCode
 BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
                       int checkFlags,
                       unsigned long tickPrint, FILE *fp,
-                      Verboseinfo *verbosity, Error *err);
+                      Verboseinfo *verbosity, GT_Error *err);
 
 /**
  * \brief Given a query string produce iterator for all matches in

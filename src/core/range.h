@@ -36,7 +36,7 @@ Range         range_join(Range, Range);
 Range         range_offset(Range, long offset);
 Range         range_reorder(Range);
 unsigned long range_length(Range);
-int           range_unit_test(Error*);
+int           range_unit_test(GT_Error*);
 
 void          ranges_sort(GT_Array*);
 void          ranges_sort_by_length_stable(GT_Array*);

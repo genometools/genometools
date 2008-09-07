@@ -442,7 +442,7 @@ extern int
 BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
                       int checkFlags,
                       unsigned long tickPrint, FILE *fp,
-                      Verboseinfo *verbosity, Error *err)
+                      Verboseinfo *verbosity, GT_Error *err)
 {
   Suffixarray suffixArray;
   struct extBitsRetrieval extBits;

@@ -29,7 +29,7 @@
 #include "core/unused.h"
 #include "extended/gtdatahelp.h"
 
-int gtdata_show_help(const char *progname, UNUSED void *unused, Error *err)
+int gtdata_show_help(const char *progname, UNUSED void *unused, GT_Error *err)
 {
   Splitter *splitter;
   Str *doc_file;

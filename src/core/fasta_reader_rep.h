@@ -26,7 +26,7 @@ struct FastaReaderClass
   size_t size;
   int  (*run)(FastaReader*, FastaReaderProcDescription,
               FastaReaderProcSequencePart, FastaReaderProcSequenceLength,
-              void *data, Error*);
+              void *data, GT_Error*);
   void (*free)(FastaReader*);
 };
 

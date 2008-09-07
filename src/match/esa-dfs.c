@@ -94,23 +94,23 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   void(*freeDfsinfo)(Dfsinfo *,Dfsstate *),
                   int(*processleafedge)(bool,Seqpos,Dfsinfo *,
                                         Seqpos,Dfsstate *,
-                                        Error *),
+                                        GT_Error *),
                   int(*processbranchedge)(bool,
                                           Seqpos,
                                           Dfsinfo *,
                                           Dfsinfo *,
                                           Dfsstate *,
-                                          Error *),
+                                          GT_Error *),
                   /*
                   Integrate these functions later:
-                  int(*processcompletenode)(Dfsinfo *,Dfsstate *,Error *),
-                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,Error *),
+                  int(*processcompletenode)(Dfsinfo *,Dfsstate *,GT_Error *),
+                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,GT_Error *),
                   int(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
-                                            Seqpos,Dfsstate *,Error *),
+                                            Seqpos,Dfsstate *,GT_Error *),
                   */
                   Dfsstate *state,
                   UNUSED Verboseinfo *verboseinfo,
-                  Error *err)
+                  GT_Error *err)
 {
   bool firstedge,
        firstrootedge;

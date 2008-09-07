@@ -120,7 +120,7 @@ const char* tokenizer_get_filename(const Tokenizer *t)
   return io_get_filename(t->io);
 }
 
-int tokenizer_unit_test(Error *err)
+int tokenizer_unit_test(GT_Error *err)
 {
   Str *tmpfilename;
   Tokenizer *t;

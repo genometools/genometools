@@ -481,7 +481,7 @@ int getfastastreamkmers(
         unsigned int kmersize,
         const Uchar *symbolmap,
         bool plainformat,
-        Error *err)
+        GT_Error *err)
 {
   Seqpos currentposition = 0;
   Streamstate spwp;

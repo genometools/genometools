@@ -19,6 +19,6 @@
 #define GT_MERGEESA_H
 
 /* the mergeesa tool */
-int gt_mergeesa(int argc, const char **argv, Error *err);
+int gt_mergeesa(int argc, const char **argv, GT_Error *err);
 
 #endif

@@ -62,7 +62,7 @@ static OptionParser* gt_swalign_opion_parser_new(void *tool_arguments)
 
 static int gt_swalign_runner(UNUSED int argc, const char **argv,
                              int parsed_args, void *tool_arguments,
-                             Error *err)
+                             GT_Error *err)
 {
   SWAlignArguments *arguments = tool_arguments;
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;

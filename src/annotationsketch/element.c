@@ -120,7 +120,7 @@ GenomeNode* element_get_node_ref(const Element *elem)
   return elem->gn;
 }
 
-int element_unit_test(Error *err)
+int element_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *type;

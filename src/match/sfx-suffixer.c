@@ -469,7 +469,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             const Sfxstrategy *sfxstrategy,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
-                            Error *err)
+                            GT_Error *err)
 {
   Sfxiterator *sfi = NULL;
   Seqpos *optr;
@@ -838,7 +838,7 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
 
 int sfibcktab2file(FILE *fp,
                    const Sfxiterator *sfi,
-                   Error *err)
+                   GT_Error *err)
 {
   error_check(err);
   return bcktab2file(fp,sfi->bcktab,err);

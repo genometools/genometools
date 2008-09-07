@@ -28,7 +28,7 @@
 
 static bool spacepeak = false;
 
-static OPrval parse_env_options(int argc, const char **argv, Error *err)
+static OPrval parse_env_options(int argc, const char **argv, GT_Error *err)
 {
   OptionParser *op;
   Option *o;
@@ -50,7 +50,7 @@ static void proc_gt_env_options(void)
   int argc;
   char *env_options, **argv;
   Splitter *splitter;
-  Error *err;
+  GT_Error *err;
   /* construct argument vector from $GT_ENV_OPTIONS */
   env_options = getenv("GT_ENV_OPTIONS");
   if (!env_options)

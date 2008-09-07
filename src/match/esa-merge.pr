@@ -1,13 +1,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Error *err);
+int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GT_Error *err);
 
 int initEmissionmergedesa(Emissionmergedesa *emmesa,
                           const GT_StrArray *indexnametab,
                           unsigned int demand,
                           Verboseinfo *verboseinfo,
-                          Error *err);
+                          GT_Error *err);
 
 void wraptEmissionmergedesa(Emissionmergedesa *emmesa);
 

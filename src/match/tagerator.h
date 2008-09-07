@@ -38,6 +38,6 @@ typedef struct
   unsigned long maxintervalwidth; /* max width of interval */
 } TageratorOptions;
 
-int runtagerator(const TageratorOptions *tageratoroptions,Error *err);
+int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err);
 
 #endif

@@ -24,7 +24,7 @@
 struct GenomeStreamClass
 {
   size_t size;
-  int  (*next_tree)(GenomeStream*, GenomeNode**, Error*);
+  int  (*next_tree)(GenomeStream*, GenomeNode**, GT_Error*);
   void (*free)(GenomeStream*);
 };
 

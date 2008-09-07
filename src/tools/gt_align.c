@@ -71,7 +71,7 @@ static void show_aligns(unsigned long aligns, UNUSED void *data)
 }
 
 static int gt_align_runner(UNUSED int argc, const char **argv, int parsed_args,
-                           void *tool_arguments, Error *err)
+                           void *tool_arguments, GT_Error *err)
 {
   AlignArguments *arguments = tool_arguments;
   Bioseq *bioseq_1, *bioseq_2 = NULL;

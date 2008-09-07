@@ -27,7 +27,7 @@ int testmaxpairs(UNUSED const Str *indexname,
                  UNUSED unsigned int minlength,
                  UNUSED Seqpos substringlength,
                  UNUSED Verboseinfo *verboseinfo,
-                 UNUSED Error *err)
+                 UNUSED GT_Error *err)
 {
   return 0;
 }
@@ -78,7 +78,7 @@ static int storemaxmatchquery(void *info,
                               Seqpos dbstart,
                               uint64_t queryseqnum,
                               unsigned long querystart,
-                              UNUSED Error *err)
+                              UNUSED GT_Error *err)
 {
   GT_Array *tab = (GT_Array *) info;
   Substringmatch subm;
@@ -104,7 +104,7 @@ static int storemaxmatchself(void *info,
                              Seqpos len,
                              Seqpos pos1,
                              Seqpos pos2,
-                             Error *err)
+                             GT_Error *err)
 {
   Maxmatchselfinfo *maxmatchselfinfo = (Maxmatchselfinfo *) info;
   Seqpos dbstart, querystart;
@@ -197,7 +197,7 @@ static int orderSubstringmatch(const void *a,const void *b)
   return 0;
 }
 
-static int showSubstringmatch(void *a, UNUSED void *info, UNUSED Error *err)
+static int showSubstringmatch(void *a, UNUSED void *info, UNUSED GT_Error *err)
 {
   Substringmatch *m = (Substringmatch *) a;
 
@@ -214,7 +214,7 @@ int testmaxpairs(const Str *indexname,
                  unsigned int minlength,
                  Seqpos substringlength,
                  Verboseinfo *verboseinfo,
-                 Error *err)
+                 GT_Error *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength, dblen, querylen;

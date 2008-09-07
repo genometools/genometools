@@ -114,7 +114,7 @@ void printargsline(const char **argv, int argc)
 }
 
 /* test the motif and encode the characters by using alpha */
-int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Error *err)
+int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, GT_Error *err)
 {
   const Uchar *symbolmap;
   Uchar c_tab[UCHAR_MAX+1];
@@ -178,7 +178,7 @@ int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Error *err)
 
 static OPrval parse_options(int *parsed_args,
                             LTRharvestoptions *lo,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GT_Error *err)
 {
   OptionParser *op;
   Option *optionindex,
@@ -552,7 +552,7 @@ void wrapltrharvestoptions(LTRharvestoptions *lo)
 }
 
 int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
-                      Error *err)
+                      GT_Error *err)
 {
   int parsed_args;
   OPrval rval;

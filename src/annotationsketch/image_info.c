@@ -82,7 +82,7 @@ const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
   return *(GT_RecMap**) gt_array_get(ii->recmaps, n);
 }
 
-int gt_image_info_unit_test(Error *err)
+int gt_image_info_unit_test(GT_Error *err)
 {
   GT_RecMap* rms[20];
   GenomeNode* gfs[20];

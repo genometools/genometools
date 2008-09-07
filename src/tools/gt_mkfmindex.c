@@ -19,7 +19,7 @@
 #include "match/fmi-mkindex.pr"
 #include "tools/gt_mkfmindex.h"
 
-int gt_mkfmindex(int argc, const char **argv, Error *err)
+int gt_mkfmindex(int argc, const char **argv, GT_Error *err)
 {
   error_check(err);
   return parseargsandcallmkfmindex(argc, argv, err);

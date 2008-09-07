@@ -17,7 +17,7 @@
 
 #include "core/eansi.h"
 
-FILE *efopen(const char *path, const char *mode, Error *err)
+FILE *efopen(const char *path, const char *mode, GT_Error *err)
 {
   FILE *file;
   error_check(err);

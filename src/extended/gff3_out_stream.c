@@ -29,7 +29,7 @@ struct GFF3OutStream {
         genome_stream_cast(gff3_out_stream_class(), GS);
 
 static int gff3_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                     Error *err)
+                                     GT_Error *err)
 {
   GFF3OutStream *gff3_out_stream;
   int had_err;

@@ -31,7 +31,7 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
                    HitInformation *hit_information,
                    unsigned long rows,
                    unsigned long contig_len,
-                   ParseStruct *parsestruct_ptr, Error * err)
+                   ParseStruct *parsestruct_ptr, GT_Error * err)
 {
   int had_err = 0;
 

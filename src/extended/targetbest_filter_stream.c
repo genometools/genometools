@@ -115,7 +115,7 @@ static void filter_targetbest(GenomeFeature *current_feature, Dlist *trees,
 }
 
 static int targetbest_filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                              Error *err)
+                                              GT_Error *err)
 {
   TargetbestFilterStream *tfs;
   GenomeNode *node;

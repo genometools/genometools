@@ -87,7 +87,7 @@ typedef struct {
 
 static enum iterator_op
 showvalue(unsigned long key, unsigned long long occurrences,
-          void *data, UNUSED Error *err)
+          void *data, UNUSED GT_Error *err)
 {
   double probability;
   ShowValueInfo *info;
@@ -127,7 +127,7 @@ typedef struct {
 
 static enum iterator_op
 foreach_iterfunc(unsigned long key, unsigned long long occurrences, void *data,
-                 UNUSED Error *err)
+                 UNUSED GT_Error *err)
 {
   ForeachInfo *info;
   error_check(err);
@@ -153,7 +153,7 @@ void disc_distri_foreach(const DiscDistri *d, DiscDistriIterFunc func,
   }
 }
 
-int disc_distri_unit_test(Error *err)
+int disc_distri_unit_test(GT_Error *err)
 {
   DiscDistri *d;
   int had_err = 0;

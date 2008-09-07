@@ -35,7 +35,7 @@ void                     gff3_in_stream_set_feature_type_factory(GenomeStream*,
 GT_StrArray*             gff3_in_stream_get_used_types(GenomeStream*);
 void                     gff3_in_stream_set_offset(GenomeStream*, long);
 int                      gff3_in_stream_set_offsetfile(GenomeStream*, Str*,
-                                                       Error*);
+                                                       GT_Error*);
 void                     gff3_in_stream_enable_tidy_mode(GenomeStream*);
 GenomeStream*            gff3_in_stream_new_unsorted(int num_of_files,
                                                      const char **filenames,

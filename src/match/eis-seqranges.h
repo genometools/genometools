@@ -220,6 +220,6 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp);
  */
 extern struct seqRangeList *
 SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
-                  enum SRLFeatures features, Error *err);
+                  enum SRLFeatures features, GT_Error *err);
 
 #endif

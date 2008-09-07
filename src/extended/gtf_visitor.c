@@ -46,7 +46,7 @@ static void gtf_visitor_free(GenomeVisitor *gv)
   gt_array_delete(gtf_visitor->CDS_features);
 }
 
-static int gtf_visitor_comment(GenomeVisitor *gv, Comment *c, UNUSED Error *err)
+static int gtf_visitor_comment(GenomeVisitor *gv, Comment *c, UNUSED GT_Error *err)
 {
   GTFVisitor *gtf_visitor;
   error_check(err);
@@ -55,7 +55,7 @@ static int gtf_visitor_comment(GenomeVisitor *gv, Comment *c, UNUSED Error *err)
   return 0;
 }
 
-static int save_exon_node(GenomeNode *gn, void *data, UNUSED Error *err)
+static int save_exon_node(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   GTFVisitor *gtf_visitor;
   error_check(err);
@@ -69,7 +69,7 @@ static int save_exon_node(GenomeNode *gn, void *data, UNUSED Error *err)
 }
 
 static int gtf_show_transcript(GenomeNode *gn, GTFVisitor *gtf_visitor,
-                               Error *err)
+                               GT_Error *err)
 {
   GenomeFeature *gf;
   unsigned long i;
@@ -117,7 +117,7 @@ static int gtf_show_transcript(GenomeNode *gn, GTFVisitor *gtf_visitor,
   return had_err;
 }
 
-static int gtf_show_genome_feature(GenomeNode *gn, void *data, Error *err)
+static int gtf_show_genome_feature(GenomeNode *gn, void *data, GT_Error *err)
 {
   GTFVisitor *gtf_visitor = (GTFVisitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
@@ -141,7 +141,7 @@ static int gtf_show_genome_feature(GenomeNode *gn, void *data, Error *err)
 }
 
 static int gtf_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                      Error *err)
+                                      GT_Error *err)
 {
   GTFVisitor *gtf_visitor;
   int had_err;

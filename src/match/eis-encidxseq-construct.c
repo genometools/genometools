@@ -29,7 +29,7 @@ createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
                             void **headerCBData, bitInsertFunc biFunc,
                             BitOffset cwExtBitsPerPos,
                             varExtBitsEstimator biVarBits, void *cbState,
-                            Error *err);
+                            GT_Error *err);
 
 extern EISeq *
 createEncIdxSeq(const Str *projectName,
@@ -39,7 +39,7 @@ createEncIdxSeq(const Str *projectName,
                 headerWriteFunc *extHeaderCallbacks, void **headerCBData,
                 bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
                 varExtBitsEstimator biVarBits, void *cbState,
-                Verboseinfo *verbosity, Error *err)
+                Verboseinfo *verbosity, GT_Error *err)
 {
   Suffixarray suffixArray;
   struct encIdxSeq *newSeqIdx;
@@ -70,7 +70,7 @@ createEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                       void **headerCBData,
                       bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
                       varExtBitsEstimator biVarBits, void *cbState,
-                      Error *err)
+                      GT_Error *err)
 {
   struct encIdxSeq *newSeqIdx;
   SuffixarrayFileInterface sai;
@@ -94,7 +94,7 @@ createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
                        void **headerCBData,
                        bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
                        varExtBitsEstimator biVarBits, void *cbState,
-                       Error *err)
+                       GT_Error *err)
 {
   assert(sai && projectName && err);
   return createEncIdxSeqFromSASeqSrc(
@@ -114,7 +114,7 @@ createEncIdxSeqFromSfxI(sfxInterface *sfxi,
                         void **headerCBData,
                         bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
                         varExtBitsEstimator biVarBits, void *cbState,
-                        Error *err)
+                        GT_Error *err)
 {
   assert(sfxi && projectName && err);
   return createEncIdxSeqFromSASeqSrc(
@@ -134,7 +134,7 @@ createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
                             void **headerCBData, bitInsertFunc biFunc,
                             BitOffset cwExtBitsPerPos,
                             varExtBitsEstimator biVarBits, void *cbState,
-                            Error *err)
+                            GT_Error *err)
 {
   SeqDataReader readSfxBWTSym;
   MRAEnc *alphabet;
@@ -165,7 +165,7 @@ createEncIdxSeqGen(Seqpos totalLen, const Str *projectName,
                    headerWriteFunc *extHeaderCallbacks,
                    void **headerCBData,
                    bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                   varExtBitsEstimator biVarBits, void *cbState, Error *err)
+                   varExtBitsEstimator biVarBits, void *cbState, GT_Error *err)
 {
   EISeq *seqIdx = NULL;
   switch (params->encType)
@@ -187,7 +187,7 @@ createEncIdxSeqGen(Seqpos totalLen, const Str *projectName,
 extern struct encIdxSeq *
 loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
                    const Str *projectName,
-                   enum seqBaseEncoding encType, int features, Error *err)
+                   enum seqBaseEncoding encType, int features, GT_Error *err)
 {
   MRAEnc *alphabet;
   EISeq *seqIdx = NULL;
@@ -211,7 +211,7 @@ loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
 extern EISeq *
 loadEncIdxSeq(const Str *projectName,
               enum seqBaseEncoding encType, int features,
-              Verboseinfo *verbosity, Error *err)
+              Verboseinfo *verbosity, GT_Error *err)
 {
   struct encIdxSeq *newSeqIdx = NULL;
   Suffixarray suffixArray;

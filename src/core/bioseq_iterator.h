@@ -29,6 +29,6 @@ BioseqIterator* bioseq_iterator_new(int seqfile_counter,
 void            bioseq_iterator_delete(BioseqIterator*);
 /* Assign the next <bioseq> if it is available or NULL otherwise.
    Returns -1 in case of failure or 0 otherwise. */
-int             bioseq_iterator_next(BioseqIterator*, Bioseq **bioseq, Error*);
+int             bioseq_iterator_next(BioseqIterator*, Bioseq **bioseq, GT_Error*);
 
 #endif

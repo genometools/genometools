@@ -23,7 +23,7 @@
 #include "tools/gt_translate.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GT_Error *err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -36,7 +36,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_translate(int argc, const char **argv, Error *err)
+int gt_translate(int argc, const char **argv, GT_Error *err)
 {
   char *frame1 = NULL,
        *frame2 = NULL,

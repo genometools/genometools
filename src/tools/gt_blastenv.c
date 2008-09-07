@@ -61,7 +61,7 @@ static OptionParser* gt_blastenv_option_parser_new(void *tool_arguments)
 
 static int gt_blastenv_runner(UNUSED int argc, const char **argv,
                               int parsed_args, void *tool_arguments,
-                              Error *err)
+                              GT_Error *err)
 {
   ScorefastaArguments *arguments = tool_arguments;
   ScoreMatrix *score_matrix;

@@ -70,7 +70,7 @@ static void showsimpleoptions(const Cmppairwiseopt *opt)
 
 static OPrval parse_options(int *parsed_args,
                             Cmppairwiseopt *pw,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GT_Error *err)
 {
   OptionParser *op;
   Option *optionstrings,
@@ -228,7 +228,7 @@ static unsigned long applycheckfunctiontosimpleoptions(
   return 0;
 }
 
-int gt_paircmp(int argc, const char **argv, Error *err)
+int gt_paircmp(int argc, const char **argv, GT_Error *err)
 {
   int parsed_args;
   Cmppairwiseopt cmppairwise;

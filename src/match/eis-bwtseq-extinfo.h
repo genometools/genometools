@@ -41,7 +41,7 @@ typedef EISeq *(*indexCreateFunc)(
   const uint16_t *headerIDs, const uint32_t *extHeaderSizes,
   headerWriteFunc *extHeaderCallbacks,
   void **headerCBData, bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-  varExtBitsEstimator biVarBits, void *cbState, Error *err);
+  varExtBitsEstimator biVarBits, void *cbState, GT_Error *err);
 
 /**
  * To enrich a base index with the information required for a BWT
@@ -69,7 +69,7 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
                     SASeqSrc *src,
                     const enum rangeSortMode rangeSort[],
                     const SpecialsRankLookup *sprTable,
-                    Error *err);
+                    GT_Error *err);
 
 extern int
 BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,

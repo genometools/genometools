@@ -31,15 +31,15 @@
 typedef struct Bioseq Bioseq;
 
 /* Construct a new bioseq object (and create the bioseq files, if necessary). */
-Bioseq*       bioseq_new(const char *sequence_file, Error*);
+Bioseq*       bioseq_new(const char *sequence_file, GT_Error*);
 /* Construct a new bioseq object (and always create the the bioseq files). */
-Bioseq*       bioseq_new_recreate(const char *sequence_file, Error*);
-Bioseq*       bioseq_new_str(Str* sequence_file, Error*);
+Bioseq*       bioseq_new_recreate(const char *sequence_file, GT_Error*);
+Bioseq*       bioseq_new_str(Str* sequence_file, GT_Error*);
 /* Construct a new bioseq object (and always create the bioseq files)
    with a certain <fasta_reader>. */
 Bioseq*       bioseq_new_with_fasta_reader(const char *sequence_file,
                                            FastaReaderType fasta_reader,
-                                           Error*);
+                                           GT_Error*);
 void          bioseq_delete(Bioseq*);
 Alpha*        bioseq_get_alpha(Bioseq*);
 Seq*          bioseq_get_seq(Bioseq*, unsigned long);

@@ -19,6 +19,6 @@
 #define GT_CHSEQIDS_H
 
 /* the change sequence ids (chseqids) tool */
-int gt_chseqids(int argc, const char **argv, Error*);
+int gt_chseqids(int argc, const char **argv, GT_Error*);
 
 #endif

@@ -47,7 +47,7 @@ struct GFF3InStream
 #define gff3_in_stream_cast(GS)\
         genome_stream_cast(gff3_in_stream_class(), GS)
 
-static int buffer_is_sorted(void **elem, void *info, Error *err)
+static int buffer_is_sorted(void **elem, void *info, GT_Error *err)
 {
   GenomeNode *current_node, **last_node;
 
@@ -71,7 +71,7 @@ static int buffer_is_sorted(void **elem, void *info, Error *err)
 }
 
 static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                    Error *err)
+                                    GT_Error *err)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   Str *filenamestr;
@@ -261,7 +261,7 @@ void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
   gff3parser_set_offset(is->gff3_parser, offset);
 }
 
-int gff3_in_stream_set_offsetfile(GenomeStream *gs, Str *offsetfile, Error *err)
+int gff3_in_stream_set_offsetfile(GenomeStream *gs, Str *offsetfile, GT_Error *err)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);

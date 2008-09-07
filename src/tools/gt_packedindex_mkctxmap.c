@@ -37,10 +37,10 @@ struct mkCtxMapOptions
 
 static OPrval
 parseMkCtxMapOptions(int *parsed_args, int argc, const char **argv,
-                     struct mkCtxMapOptions *params, Error *err);
+                     struct mkCtxMapOptions *params, GT_Error *err);
 
 extern int
-gt_packedindex_mkctxmap(int argc, const char *argv[], Error *err)
+gt_packedindex_mkctxmap(int argc, const char *argv[], GT_Error *err)
 {
   struct mkCtxMapOptions params;
   Str *projectName = NULL;
@@ -142,7 +142,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], Error *err)
 
 static OPrval
 parseMkCtxMapOptions(int *parsed_args, int argc, const char **argv,
-                     struct mkCtxMapOptions *params, Error *err)
+                     struct mkCtxMapOptions *params, GT_Error *err)
 {
   OptionParser *op;
   OPrval oprval;

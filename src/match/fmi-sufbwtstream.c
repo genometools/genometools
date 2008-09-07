@@ -129,7 +129,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
                                         Emissionmergedesa *emmesa,
                                         const Seqpos *sequenceoffsettable,
                                         Seqpos bwtpos,
-                                        Error *err)
+                                        GT_Error *err)
 {
   Indexedsuffix indexedsuffix;
 
@@ -189,7 +189,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                    const GT_StrArray *indexnametab,
                    bool storeindexpos,
                    Verboseinfo *verboseinfo,
-                   Error *err)
+                   GT_Error *err)
 {
   Suffixarray suffixarray;
   Emissionmergedesa emmesa;

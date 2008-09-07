@@ -6,16 +6,16 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   void(*freeDfsinfo)(Dfsinfo *,Dfsstate *),
                   int(*processleafedge)(bool,Seqpos,Dfsinfo *,
                                         Seqpos,Dfsstate *,
-                                        Error *),
+                                        GT_Error *),
                   int(*processbranchedge)(bool,
                                           Seqpos,
                                           Dfsinfo *,
                                           Dfsinfo *,
                                           Dfsstate *,
-                                          Error *),
+                                          GT_Error *),
                   Dfsstate *state,
                   UNUSED Verboseinfo *verboseinfo,
-                  Error *err);
+                  GT_Error *err);
 
 #ifdef __cplusplus
 }

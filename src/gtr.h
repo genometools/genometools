@@ -26,10 +26,10 @@
 /* The GenomeTools runtime (gtr) */
 typedef struct GTR GTR;
 
-GTR*   gtr_new(Error*);
-OPrval gtr_parse(GTR*, int *parsed_args, int argc, const char **argv, Error*);
+GTR*   gtr_new(GT_Error*);
+OPrval gtr_parse(GTR*, int *parsed_args, int argc, const char **argv, GT_Error*);
 void   gtr_register_components(GTR*);
-int    gtr_run(GTR*, int argc, const char **argv, Error*);
+int    gtr_run(GTR*, int argc, const char **argv, GT_Error*);
 void   gtr_delete(GTR*);
 
 #endif

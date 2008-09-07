@@ -37,10 +37,10 @@ struct trSufTabOptions
 static OPrval
 parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
                      struct trSufTabOptions *params, const Str *projectName,
-                     Error *err);
+                     GT_Error *err);
 
 extern int
-gt_packedindex_trsuftab(int argc, const char *argv[], Error *err)
+gt_packedindex_trsuftab(int argc, const char *argv[], GT_Error *err)
 {
   struct trSufTabOptions params;
   BWTSeq *bwtSeq = NULL;
@@ -86,7 +86,7 @@ gt_packedindex_trsuftab(int argc, const char *argv[], Error *err)
 static OPrval
 parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
                      struct trSufTabOptions *params, const Str *projectName,
-                     Error *err)
+                     GT_Error *err)
 {
   OptionParser *op;
   OPrval oprval;

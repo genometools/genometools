@@ -21,18 +21,18 @@
 #include "core/ma.h"
 #include "core/xansi.h"
 
-struct Error {
+struct GT_Error {
   char error_string[BUFSIZ],
        *progname;
   bool error_is_set;
 };
 
-Error* error_new(void)
+GT_Error* error_new(void)
 {
-  return ma_calloc(1, sizeof (Error));
+  return ma_calloc(1, sizeof (GT_Error));
 }
 
-void error_set(Error *err, const char *format, ...)
+void error_set(GT_Error *err, const char *format, ...)
 {
   va_list ap;
   if (!err) return;
@@ -41,46 +41,46 @@ void error_set(Error *err, const char *format, ...)
   va_end(ap);
 }
 
-void error_vset(Error *err, const char *format, va_list ap)
+void error_vset(GT_Error *err, const char *format, va_list ap)
 {
   assert(err && format);
   err->error_is_set = true;
   (void) vsnprintf(err->error_string, sizeof (err->error_string), format, ap);
 }
 
-bool error_is_set(const Error *err)
+bool error_is_set(const GT_Error *err)
 {
   assert(err);
   return err->error_is_set;
 }
 
-void error_unset(Error *err)
+void error_unset(GT_Error *err)
 {
   assert(err);
   err->error_is_set = false;
   err->error_string[0] = '\0';
 }
 
-const char* error_get(const Error *err)
+const char* error_get(const GT_Error *err)
 {
   assert(err && err->error_is_set);
   return err->error_string;
 }
 
-void error_set_progname(Error *err, const char *progname)
+void error_set_progname(GT_Error *err, const char *progname)
 {
   assert(err && progname);
   ma_free(err->progname);
   err->progname = cstr_dup(progname);
 }
 
-const char* error_get_progname(const Error *err)
+const char* error_get_progname(const GT_Error *err)
 {
   assert(err);
   return err->progname;
 }
 
-void error_delete(Error *err)
+void error_delete(GT_Error *err)
 {
   if (!err) return;
   ma_free(err->progname);

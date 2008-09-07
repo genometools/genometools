@@ -102,7 +102,7 @@ void      graphics_draw_rectangle(Graphics*, double x, double y,
 void      graphics_draw_arrowhead(Graphics*, double x, double y, GT_Color,
                                   ArrowStatus);
 /* Write out the Graphic to the given file with <filename>. */
-int       graphics_save_to_file(const Graphics*, const char *filename, Error*);
+int       graphics_save_to_file(const Graphics*, const char *filename, GT_Error*);
 /* Write out the Graphic to the given <stream>. */
 void      graphics_save_to_stream(const Graphics*, Str *stream);
 

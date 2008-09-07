@@ -66,7 +66,7 @@ typedef struct
               *poslist;
   const Encodedsequence *encseq;
   Readmode readmode;
-  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Error *);
+  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,GT_Error *);
   void *processmaxpairsinfo;
 } Dfsstate;
 
@@ -116,7 +116,7 @@ static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
 }
 
 static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
-                        Seqpos leafnumber,Error *err)
+                        Seqpos leafnumber,GT_Error *err)
 {
   Listtype *pl;
   Seqpos *spptr, *start;
@@ -137,7 +137,7 @@ static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
 static int cartproduct2(Dfsstate *state,
                         const Dfsinfo *ninfo1, unsigned int base1,
                         const Dfsinfo *ninfo2, unsigned int base2,
-                        Error *err)
+                        GT_Error *err)
 {
   Listtype *pl1, *pl2;
   Seqpos *start1, *start2, *spptr1, *spptr2;
@@ -180,7 +180,7 @@ static int processleafedge(bool firstsucc,
                            Dfsinfo *father,
                            Seqpos leafnumber,
                            Dfsstate *state,
-                           Error *err)
+                           GT_Error *err)
 {
   unsigned int base;
   Seqpos *start, *spptr;
@@ -261,7 +261,7 @@ static int processbranchedge(bool firstsucc,
                              Dfsinfo *father,
                              Dfsinfo *son,
                              Dfsstate *state,
-                             /*@unused@*/ Error *err)
+                             /*@unused@*/ GT_Error *err)
 {
   unsigned int chfather, chson;
   Seqpos *start, *spptr, *fptr, *fstart;
@@ -351,10 +351,10 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       Readmode readmode,
                       unsigned int searchlength,
                       int(*processmaxpairs)(void *,Seqpos,Seqpos,
-                                            Seqpos,Error *),
+                                            Seqpos,GT_Error *),
                       void *processmaxpairsinfo,
                       Verboseinfo *verboseinfo,
-                      Error *err)
+                      GT_Error *err)
 {
   unsigned int base;
   ArraySeqpos *ptr;
@@ -406,10 +406,10 @@ int callenummaxpairs(const Str *indexname,
                      unsigned int userdefinedleastlength,
                      bool scanfile,
                      int(*processmaxpairs)(void *,Seqpos,Seqpos,
-                                           Seqpos,Error *),
+                                           Seqpos,GT_Error *),
                      void *processmaxpairsinfo,
                      Verboseinfo *verboseinfo,
-                     Error *err)
+                     GT_Error *err)
 {
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;

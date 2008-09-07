@@ -39,7 +39,7 @@
             (ARRAY2DIM)[a2d_i] = (ARRAY2DIM)[a2d_i-1] + (COLUMNS);            \
         }
 
-int     array2dim_example(Error*);
+int     array2dim_example(GT_Error*);
 
 #define array2dim_delete(ARRAY2DIM)                                       \
         ma_free((ARRAY2DIM)[0]);                                          \

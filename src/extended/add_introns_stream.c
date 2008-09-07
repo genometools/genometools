@@ -30,7 +30,7 @@ struct AddIntronsStream{
         genome_stream_cast(add_introns_stream_class(), GS)
 
 static int add_introns_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                        Error *err)
+                                        GT_Error *err)
 {
   AddIntronsStream *ais;
   int had_err;

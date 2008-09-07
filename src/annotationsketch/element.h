@@ -43,7 +43,7 @@ GenomeNode*        element_get_node_ref(const Element*);
 bool               element_is_marked(const Element*);
 bool               elements_are_equal(const Element*, const Element*);
 int                element_sketch(Element*, GT_Canvas*);
-int                element_unit_test(Error*);
+int                element_unit_test(GT_Error*);
 void               element_delete(Element* element);
 
 #endif

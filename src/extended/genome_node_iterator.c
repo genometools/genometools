@@ -98,7 +98,7 @@ GenomeNode* genome_node_iterator_next(GenomeNodeIterator *gni)
   return gn;
 }
 
-int genome_node_iterator_example(UNUSED Error *err)
+int genome_node_iterator_example(UNUSED GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeNodeIterator *gni;

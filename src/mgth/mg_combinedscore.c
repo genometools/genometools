@@ -19,7 +19,7 @@
 #include "mg_combinedscore.h"
 
 int mg_combinedscore(ParseStruct *parsestruct_ptr,
-                     unsigned long hit_counter, Error * err)
+                     unsigned long hit_counter, GT_Error * err)
 {
   int had_err = 0;
 

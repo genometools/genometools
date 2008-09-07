@@ -197,7 +197,7 @@ void queue_remove(Queue *q, void *elem)
 }
 
 int queue_iterate(Queue *q, QueueProcessor queue_processor, void *info,
-                  Error *err)
+                  GT_Error *err)
 {
   long i;
   int rval;
@@ -224,7 +224,7 @@ int queue_iterate(Queue *q, QueueProcessor queue_processor, void *info,
 }
 
 int queue_iterate_reverse(Queue *q, QueueProcessor queue_processor, void *info,
-                          Error *err)
+                          GT_Error *err)
 {
   long i;
   int rval;
@@ -258,7 +258,7 @@ unsigned long queue_size(const Queue *q)
   return q->size - (q->front - q->back); /* wraparound */
 }
 
-static int check_queue(void **elem, void *info, Error *err)
+static int check_queue(void **elem, void *info, GT_Error *err)
 {
   long *check_counter = info;
   int had_err = 0;
@@ -270,7 +270,7 @@ static int check_queue(void **elem, void *info, Error *err)
   return had_err;
 }
 
-static int check_queue_reverse(void **elem, void *info, Error *err)
+static int check_queue_reverse(void **elem, void *info, GT_Error *err)
 {
   long *check_counter_reverse = info;
   int had_err = 0;
@@ -282,12 +282,12 @@ static int check_queue_reverse(void **elem, void *info, Error *err)
   return had_err;
 }
 
-static int fail_func(UNUSED void **elem, UNUSED void *info, UNUSED Error *err)
+static int fail_func(UNUSED void **elem, UNUSED void *info, UNUSED GT_Error *err)
 {
   return -1;
 }
 
-int queue_unit_test(Error *err)
+int queue_unit_test(GT_Error *err)
 {
   long check_counter = 0, check_counter_reverse = 1023;
   unsigned long i;

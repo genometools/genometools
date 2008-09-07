@@ -142,7 +142,7 @@ unsigned long range_length(Range range)
   return range.end - range.start + 1;
 }
 
-int range_unit_test(Error *err)
+int range_unit_test(GT_Error *err)
 {
   static Range ranges_in[] = {  { 620432, 620536 }, { 620432, 620536 },
                                 { 620957, 621056 }, { 620957, 621056 },

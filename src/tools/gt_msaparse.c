@@ -28,7 +28,7 @@ typedef struct {
 } MSAparse_arguments;
 
 static OPrval parse_options(int *parsed_args, MSAparse_arguments *arguments,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GT_Error *err)
 {
   OptionParser *op;
   Option *o;
@@ -56,7 +56,7 @@ static OPrval parse_options(int *parsed_args, MSAparse_arguments *arguments,
   return oprval;
 }
 
-int gt_msaparse(int argc, const char **argv, Error *err)
+int gt_msaparse(int argc, const char **argv, GT_Error *err)
 {
   MSAparse_arguments arguments;
   int parsed_args, had_err = 0;

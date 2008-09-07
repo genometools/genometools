@@ -30,7 +30,7 @@ struct FeatureStream {
         genome_stream_cast(feature_stream_class(), GS)
 
 static int feature_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                    Error *err)
+                                    GT_Error *err)
 {
   FeatureStream *feature_stream;
   int had_err;

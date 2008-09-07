@@ -7,7 +7,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
                         bool doesa,
                         int argc,
                         const char **argv,
-                        Error *err);
+                        GT_Error *err);
 
 #ifdef __cplusplus
 }

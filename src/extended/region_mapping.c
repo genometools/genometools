@@ -33,7 +33,7 @@ struct RegionMapping {
   unsigned int reference_count;
 };
 
-RegionMapping* region_mapping_new_mapping(Str *mapping_filename, Error *err)
+RegionMapping* region_mapping_new_mapping(Str *mapping_filename, GT_Error *err)
 {
   RegionMapping *rm;
   error_check(err);
@@ -65,7 +65,7 @@ RegionMapping* region_mapping_ref(RegionMapping *rm)
 }
 
 static Str* region_mapping_map(RegionMapping *rm, const char *sequence_region,
-                               Error *err)
+                               GT_Error *err)
 {
   error_check(err);
   assert(rm && sequence_region);
@@ -75,7 +75,7 @@ static Str* region_mapping_map(RegionMapping *rm, const char *sequence_region,
     return mapping_map_string(rm->mapping, sequence_region, err);
 }
 
-static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Error *err)
+static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, GT_Error *err)
 {
   int had_err = 0;
   error_check(err);
@@ -101,7 +101,7 @@ static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Error *err)
 }
 
 int region_mapping_get_raw_sequence(RegionMapping *rm, const char **raw,
-                                    Str *seqid, Error *err)
+                                    Str *seqid, GT_Error *err)
 {
   int had_err = 0;
   error_check(err);
@@ -114,7 +114,7 @@ int region_mapping_get_raw_sequence(RegionMapping *rm, const char **raw,
 
 int region_mapping_get_raw_sequence_length(RegionMapping *rm,
                                            unsigned long *length, Str *seqid,
-                                           Error *err)
+                                           GT_Error *err)
 {
   int had_err = 0;
   error_check(err);

@@ -130,7 +130,7 @@ void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi, GenomeFeature *gf)
 }
 
 int gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
-                               const char *gff3file, Error *err)
+                               const char *gff3file, GT_Error *err)
 {
   GenomeStream *gff3_in_stream;
   GenomeNode *gn;
@@ -193,7 +193,7 @@ static int genome_node_cmp_range_start(const void *v1, const void *v2)
 
 int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi, GT_Array *results,
                                          const char *seqid, Range qry_range,
-                                         Error *err)
+                                         GT_Error *err)
 {
   RegionInfo *ri;
   error_check(err);
@@ -216,7 +216,7 @@ const char* gt_feature_index_get_first_seqid(const GT_FeatureIndex *fi)
   return fi->firstseqid;
 }
 
-int store_seqid(void *key, UNUSED void *value, void *data, UNUSED Error *err)
+int store_seqid(void *key, UNUSED void *value, void *data, UNUSED GT_Error *err)
 {
   GT_StrArray *seqids = (GT_StrArray*) data;
   const char *seqid = (const char*) key;
@@ -258,7 +258,7 @@ bool gt_feature_index_has_seqid(const GT_FeatureIndex *fi, const char *seqid)
   return (hashmap_get(fi->regions, seqid));
 }
 
-int gt_feature_index_unit_test(Error *err)
+int gt_feature_index_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *type;

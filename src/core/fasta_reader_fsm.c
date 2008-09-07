@@ -40,7 +40,7 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
                                 FastaReaderProcSequencePart proc_sequence_part,
                                 FastaReaderProcSequenceLength
                                 proc_sequence_length,
-                                void *data, Error *err)
+                                void *data, GT_Error *err)
 {
   FastaReaderFSM *fr = fasta_reader_fsm_cast(fasta_reader);
   unsigned char cc;

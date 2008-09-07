@@ -369,7 +369,7 @@ static void process_node(GT_Diagram *d, GenomeNode *node, GenomeNode *parent)
 }
 
 static int gt_diagram_add_tracklines(UNUSED void *key, void *value, void *data,
-                                  UNUSED Error *err)
+                                  UNUSED GT_Error *err)
 {
   TracklineInfo *add = (TracklineInfo*) data;
   add->total_lines += track_get_number_of_lines((Track*) value);
@@ -378,7 +378,7 @@ static int gt_diagram_add_tracklines(UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-static int visit_child(GenomeNode* gn, void* genome_node_children, Error* e)
+static int visit_child(GenomeNode* gn, void* genome_node_children, GT_Error* e)
 {
   NodeTraverseInfo* genome_node_info;
   genome_node_info = (NodeTraverseInfo*) genome_node_children;
@@ -409,7 +409,7 @@ static Str* track_key_new(const char *filename, GenomeFeatureType *type)
 
 /* Create lists of all GT_Blocks in the diagram. */
 static int collect_blocks(UNUSED void *key, void *value, void *data,
-                          UNUSED Error *err)
+                          UNUSED GT_Error *err)
 {
   NodeInfoElement *ni = (NodeInfoElement*) value;
   GT_Diagram *diagram = (GT_Diagram*) data;
@@ -560,7 +560,7 @@ static int blocklist_block_compare(const void *item1, const void *item2)
 }
 
 static int layout_tracks(void *key, void *value, void *data,
-                         UNUSED Error *err)
+                         UNUSED GT_Error *err)
 {
   unsigned long i, max;
   Track *track;
@@ -613,7 +613,7 @@ static int layout_tracks(void *key, void *value, void *data,
 }
 
 static int render_tracks(UNUSED void *key, void *value, void *data,
-                     UNUSED Error *err)
+                     UNUSED GT_Error *err)
 {
   TrackTraverseInfo *tti = (TrackTraverseInfo*) data;
   UNUSED Track *track = (Track*) value;
@@ -640,7 +640,7 @@ int gt_diagram_sketch(GT_Diagram *dia, GT_Canvas *canvas)
   return had_err;
 }
 
-int gt_diagram_unit_test(Error *err)
+int gt_diagram_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *gene_type, *exon_type, *CDS_type;

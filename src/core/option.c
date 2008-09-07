@@ -293,7 +293,7 @@ static void show_description(unsigned long initial_space, const char *desc,
   xputchar('\n');
 }
 
-static int show_help(OptionParser *op, OptionType optiontype, Error *err)
+static int show_help(OptionParser *op, OptionType optiontype, GT_Error *err)
 {
   unsigned long i, max_option_length = 0;
   Option *option;
@@ -422,7 +422,7 @@ static bool optional_arg(Option *o, int argnum, int argc, const char **argv)
   return false;
 }
 
-static int check_missing_argument(int argnum, int argc, Str *option, Error *err)
+static int check_missing_argument(int argnum, int argc, Str *option, GT_Error *err)
 {
   error_check(err);
   if (argnum + 1 >= argc) {
@@ -432,7 +432,7 @@ static int check_missing_argument(int argnum, int argc, Str *option, Error *err)
   return 0;
 }
 
-static int check_mandatory_options(OptionParser *op, Error *err)
+static int check_mandatory_options(OptionParser *op, GT_Error *err)
 {
   unsigned long i;
   Option *o;
@@ -448,7 +448,7 @@ static int check_mandatory_options(OptionParser *op, Error *err)
   return 0;
 }
 
-static int check_option_implications(OptionParser *op, Error *err)
+static int check_option_implications(OptionParser *op, GT_Error *err)
 {
   unsigned long i, j, k, l;
   GT_Array *implied_option_array;
@@ -513,7 +513,7 @@ static int check_option_implications(OptionParser *op, Error *err)
   return 0;
 }
 
-static int check_option_exclusions(OptionParser *op, Error *err)
+static int check_option_exclusions(OptionParser *op, GT_Error *err)
 {
   unsigned long i, j;
   Option *o, *excluded_option;
@@ -536,7 +536,7 @@ static int check_option_exclusions(OptionParser *op, Error *err)
   return 0;
 }
 
-static int check_mandatory_either_options(OptionParser *op, Error *err)
+static int check_mandatory_either_options(OptionParser *op, GT_Error *err)
 {
   unsigned long i;
   Option *o;
@@ -594,7 +594,7 @@ void option_parser_set_min_max_args(OptionParser *op,
 
 OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                            const char **argv, ShowVersionFunc versionfunc,
-                           Error *err)
+                           GT_Error *err)
 {
   int argnum, int_value;
   unsigned int uint_value;

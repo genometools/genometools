@@ -66,7 +66,7 @@ static OptionParser* gt_affinealign_option_parser_new(void *tool_arguments)
 
 static int gt_affinealign_runner(UNUSED int argc, const char **argv,
                                  int parsed_args, void *tool_arguments,
-                                 Error *err)
+                                 GT_Error *err)
 {
   Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;

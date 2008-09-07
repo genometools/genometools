@@ -60,7 +60,7 @@ static OPrval parsegfmsub(bool doms,
                           Gfmsubcallinfo *gfmsubcallinfo,
                           int argc,
                           const char **argv,
-                          Error *err)
+                          GT_Error *err)
 {
   OptionParser *op;
   Option *optionmin, *optionmax, *optionoutput, *optionfmindex,
@@ -270,7 +270,7 @@ static bool dotestsequence(bool doms,const Gfmsubcallinfo *gfmsubcallinfo)
   return false;
 }
 
-static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
+static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GT_Error *err)
 {
   Gfmsubcallinfo gfmsubcallinfo;
   Fmindex fmindex;
@@ -456,12 +456,12 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,Error *err)
   return haserr ? -1 : 0;
 }
 
-int gt_uniquesub(int argc, const char **argv, Error *err)
+int gt_uniquesub(int argc, const char **argv, GT_Error *err)
 {
   return gt_greedyfwdmat(false,argc, argv, err);
 }
 
-int gt_matchingstatistics(int argc, const char **argv, Error *err)
+int gt_matchingstatistics(int argc, const char **argv, GT_Error *err)
 {
   return gt_greedyfwdmat(true,argc, argv, err);
 }

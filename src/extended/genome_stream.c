@@ -52,7 +52,7 @@ void genome_stream_delete(GenomeStream *gs)
   ma_free(gs);
 }
 
-int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
+int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
 {
   GenomeNode *new_node = NULL;
   int had_err = 0;

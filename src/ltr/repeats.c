@@ -63,7 +63,7 @@ int simpleexactselfmatchstore (
   Seqpos len,
   Seqpos pos1,
   Seqpos pos2,
-  Error *err)
+  GT_Error *err)
 {
   Seqpos tmp,
          totallength;
@@ -154,7 +154,7 @@ int simpleexactselfmatchstore (
 
 int subsimpleexactselfmatchstore(void *info, unsigned long len, Seqpos dbstart,
                                  UNUSED uint64_t queryoffset,
-                                 unsigned long querystart, UNUSED Error *err)
+                                 unsigned long querystart, UNUSED GT_Error *err)
 {
   Repeat *nextfreerepeatptr;
   SubRepeatInfo *sri = (SubRepeatInfo *) info;

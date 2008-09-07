@@ -74,7 +74,7 @@ static OptionParser* gt_dev_option_parser_new(void *tool_arguments)
 }
 
 static int gt_dev_runner(int argc, const char **argv, int parsed_args,
-                         void *tool_arguments, Error *err)
+                         void *tool_arguments, GT_Error *err)
 {
   Toolbox *dev_toolbox = tool_arguments;
   Toolfunc toolfunc;

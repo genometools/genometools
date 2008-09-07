@@ -40,6 +40,6 @@ void  bsearch_all_mark(GT_Array *members, const void *key, const void *base,
                        size_t nmemb, size_t size, CompareWithData,
                        void *data, Bittab*);
 
-int   bsearch_unit_test(Error*);
+int   bsearch_unit_test(GT_Error*);
 
 #endif

@@ -18,7 +18,7 @@
 #include "mgth/metagenomethreader.h"
 #include "tools/gt_mgth.h"
 
-int gt_mgth(int argc, const char **argv, Error *err)
+int gt_mgth(int argc, const char **argv, GT_Error *err)
 {
   error_check(err);
   return metagenomethreader(argc, argv, err);

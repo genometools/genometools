@@ -32,7 +32,7 @@ FastaBuffer* fastabuffer_new(const GT_StrArray *filenametab,
                              Filelengthvalues **filelengthtab,
                              Queue *descptr,
                              unsigned long *characterdistribution);
-static int   fastabuffer_next(FastaBuffer*, Uchar *val, Error*);
+static int   fastabuffer_next(FastaBuffer*, Uchar *val, GT_Error*);
 void         fastabuffer_delete(FastaBuffer*);
 
 #include "fastabuffer_imp.h"

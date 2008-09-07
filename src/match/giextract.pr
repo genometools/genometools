@@ -6,7 +6,7 @@ int extractginumbers(bool verbose,
                      unsigned long width,
                      const Str *ginumberfile,
                      GT_StrArray *referencefiletab,
-                     Error *err);
+                     GT_Error *err);
 
 #ifdef __cplusplus
 }

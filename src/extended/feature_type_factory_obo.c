@@ -78,7 +78,7 @@ static void add_genome_feature_from_tree(FeatureTypeFactoryOBO *ftfo,
 }
 
 static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
-                                  const char *obo_file_path, Error *err)
+                                  const char *obo_file_path, GT_Error *err)
 {
   OBOParseTree *obo_parse_tree;
   unsigned long i;
@@ -103,7 +103,7 @@ static int create_genome_features(FeatureTypeFactoryOBO *ftfo,
 }
 
 FeatureTypeFactory* feature_type_factory_obo_new(const char *obo_file_path,
-                                                 Error *err)
+                                                 GT_Error *err)
 {
   FeatureTypeFactoryOBO *ftfo;
   FeatureTypeFactory *ftf;

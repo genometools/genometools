@@ -34,7 +34,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      headerWriteFunc *extHeaderCallbacks,
                      void **headerCBData,
                      bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                     varExtBitsEstimator biVarBits, void *cbState, Error *err);
+                     varExtBitsEstimator biVarBits, void *cbState, GT_Error *err);
 
 /**
  * @brief Load previously written block encoded sequence
@@ -49,6 +49,6 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
  */
 extern EISeq *
 loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
-                      const Str *projectName, int features, Error *err);
+                      const Str *projectName, int features, GT_Error *err);
 
 #endif

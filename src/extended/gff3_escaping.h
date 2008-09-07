@@ -28,9 +28,9 @@ void gff3_escape(Str *escaped_seq, const char *unescaped_seq,
 /* Unescape GFF3 format <escaped_seq> of given <length> and append the result to
    <unescaped_seq>. */
 int  gff3_unescape(Str *unescaped_seq, const char *escaped_seq,
-                   unsigned long length, Error*);
+                   unsigned long length, GT_Error*);
 
 /* Perform unit test of GFF3 format escaping module */
-int  gff3_escaping_unit_test(Error*);
+int  gff3_escaping_unit_test(GT_Error*);
 
 #endif

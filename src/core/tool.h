@@ -28,10 +28,10 @@ typedef void*         (*ToolArgumentsNew)(void);
 typedef void          (*ToolArgumentsDelete)(void *tool_arguments);
 typedef OptionParser* (*ToolOptionParserNew)(void *tool_arguments);
 typedef int           (*ToolArgumentsCheck)(int rest_argc,
-                                            void *tool_arguments, Error*);
+                                            void *tool_arguments, GT_Error*);
 typedef int           (*ToolRunner)(int argc, const char **argv,
                                     int parsed_args, void *tool_arguments,
-                                    Error*);
+                                    GT_Error*);
 
 /* the type of a tool constructor */
 typedef Tool*         (*ToolConstructor)(void);
@@ -65,7 +65,7 @@ Tool* tool_new(ToolArgumentsNew tool_arguments_new,
   - Delete the tool arguments object, if one was created.
   Returns -1 and sets <err> on error, returns 0 otherwise.
 */
-int   tool_run(Tool*, int argc, const char **argv, Error *err);
+int   tool_run(Tool*, int argc, const char **argv, GT_Error *err);
 
 /* Delete the given <tool>. */
 void  tool_delete(Tool*);

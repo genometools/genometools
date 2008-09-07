@@ -19,7 +19,7 @@
 #include "core/unused.h"
 
 /* example usage of the array2dim macros */
-int array2dim_example(UNUSED Error *err)
+int array2dim_example(UNUSED GT_Error *err)
 {
   double **a2dim;
   int i, j;

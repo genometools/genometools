@@ -21,6 +21,6 @@
 #include "core/error.h"
 #include "exercise/markov_chain.h"
 
-MarkovChain* markov_chain_parse(const char *filename, Error*);
+MarkovChain* markov_chain_parse(const char *filename, GT_Error*);
 
 #endif

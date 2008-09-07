@@ -137,7 +137,7 @@
 static int readsymbolmapfromlines(Alphabet *alpha,
                                   const Str *mapfile,
                                   const GT_StrArray *lines,
-                                  Error *err)
+                                  GT_Error *err)
 {
   char cc;
   unsigned int cnum, allocateddomainsize = 0;
@@ -270,7 +270,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
   \texttt{alpha}.
 */
 
-static int readsymbolmap(Alphabet *alpha,const Str *mapfile,Error *err)
+static int readsymbolmap(Alphabet *alpha,const Str *mapfile,GT_Error *err)
 {
   bool haserr = false;
   GT_StrArray *lines;
@@ -402,7 +402,7 @@ static void assignProteinalphabet(Alphabet *alpha)
 }
 
 static int assignProteinorDNAalphabet(Alphabet *alpha,
-                                      const GT_StrArray *filenametab,Error *err)
+                                      const GT_StrArray *filenametab,GT_Error *err)
 {
   int retval;
 
@@ -433,7 +433,7 @@ void freeAlphabet(Alphabet **alpha)
                                          bool isprotein,
                                          const Str *smapfile,
                                          const GT_StrArray *filenametab,
-                                         Error *err)
+                                         GT_Error *err)
 {
   Alphabet *alpha;
   bool haserr = false;

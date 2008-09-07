@@ -70,7 +70,7 @@ static void flag_delete(unsigned short *, unsigned short *, char);
 static void check_counter(unsigned short *, char);
 
 int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
-                 Error * err)
+                 GT_Error * err)
 {
   int had_err = 0;
 
@@ -199,7 +199,7 @@ static void XMLCALL endElement(void *data, const char *name)
 
   if (!PARSESTRUCT(had_err))
   {
-    Error *err = PARSESTRUCT(err);
+    GT_Error *err = PARSESTRUCT(err);
 
     /* Laenge der GI-Nr in einem GI-Def-XML-Eintrag */
     unsigned short gi_len = 0;

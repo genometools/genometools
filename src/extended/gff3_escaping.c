@@ -48,7 +48,7 @@ void gff3_escape(Str *escaped_seq, const char *unescaped_seq,
 }
 
 int gff3_unescape(Str *unescaped_seq, const char *escaped_seq,
-                  unsigned long length, Error *err)
+                  unsigned long length, GT_Error *err)
 {
   const char *cc;
   int had_err = 0;
@@ -103,7 +103,7 @@ int gff3_unescape(Str *unescaped_seq, const char *escaped_seq,
 }
 
 static int test_single_escaping(char unescaped_char, const char *escaped_char,
-                                Error *err)
+                                GT_Error *err)
 {
   Str *escaped_seq, *unescaped_seq;
   char unescaped_testseq[8],
@@ -127,7 +127,7 @@ static int test_single_escaping(char unescaped_char, const char *escaped_char,
   return had_err;
 }
 
-int gff3_escaping_unit_test(Error *err)
+int gff3_escaping_unit_test(GT_Error *err)
 {
   Str *seq;
   int had_err = 0;

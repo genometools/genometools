@@ -78,7 +78,7 @@ static OptionParser* gt_csa_option_parser_new(void *tool_arguments)
 }
 
 static int gt_csa_runner(UNUSED int argc, const char **argv, int parsed_args,
-                         void *tool_arguments, Error *err)
+                         void *tool_arguments, GT_Error *err)
 {
   GenomeStream *gff3_in_stream,
                *csa_stream,

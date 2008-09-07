@@ -31,7 +31,7 @@ struct SortStream
 #define sort_stream_cast(GS)\
         genome_stream_cast(sort_stream_class(), GS);
 
-static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *err)
+static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, GT_Error *err)
 {
   SortStream *sort_stream;
   GenomeNode *node;

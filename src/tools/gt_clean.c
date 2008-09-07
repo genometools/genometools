@@ -22,7 +22,7 @@
 #include "tools/gt_clean.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GT_Error *err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -61,7 +61,7 @@ static void remove_pattern_in_current_dir(const char *pattern)
   str_delete(path);
 }
 
-int gt_clean(int argc, const char **argv, Error *err)
+int gt_clean(int argc, const char **argv, GT_Error *err)
 {
   int parsed_args;
   error_check(err);

@@ -28,7 +28,7 @@ typedef struct GenomeNode GenomeNode;
 #include "core/str.h"
 #include "extended/genome_visitor.h"
 
-typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Error*);
+typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, GT_Error*);
 
 void          genome_node_set_origin(GenomeNode*,
                                      Str *filename, unsigned int line_number);
@@ -38,15 +38,15 @@ void*         genome_node_cast(const GenomeNodeClass*, GenomeNode*);
 /* perform depth first traversal of the given genome node */
 int           genome_node_traverse_children(GenomeNode*, void*,
                                             GenomeNodeTraverseFunc,
-                                            bool traverse_only_once, Error*);
+                                            bool traverse_only_once, GT_Error*);
 /* perform breadth first traversal of the given genome node  */
 int           genome_node_traverse_children_breadth(GenomeNode*, void*,
                                                     GenomeNodeTraverseFunc,
                                                     bool traverse_only_once,
-                                                    Error*);
+                                                    GT_Error*);
 int           genome_node_traverse_direct_children(GenomeNode*, void*,
                                                    GenomeNodeTraverseFunc,
-                                                   Error*);
+                                                   GT_Error*);
 const char*   genome_node_get_filename(const GenomeNode*);
 unsigned int  genome_node_get_line_number(const GenomeNode*);
 unsigned long genome_node_number_of_children(const GenomeNode*);
@@ -57,7 +57,7 @@ unsigned long genome_node_get_end(GenomeNode*);
 Range         genome_node_get_range(GenomeNode*);
 void          genome_node_set_range(GenomeNode*, Range);
 void          genome_node_change_seqid(GenomeNode*, Str*);
-int           genome_node_accept(GenomeNode*, GenomeVisitor*, Error*);
+int           genome_node_accept(GenomeNode*, GenomeVisitor*, GT_Error*);
 /* <parent> takes ownership of <child> */
 void          genome_node_is_part_of_genome_node(GenomeNode *parent,
                                                  GenomeNode *child);

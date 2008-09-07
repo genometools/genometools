@@ -19,6 +19,6 @@
 #define GT_SUFFIXERATOR_H
 
 /* the suffixerator tool */
-int gt_suffixerator(int argc, const char **argv, Error*);
+int gt_suffixerator(int argc, const char **argv, GT_Error*);
 
 #endif

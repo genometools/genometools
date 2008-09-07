@@ -37,7 +37,7 @@ static int fasta_reader_seqit_run(FastaReader *fasta_reader,
                                   proc_sequence_part,
                                   FastaReaderProcSequenceLength
                                   proc_sequence_length,
-                                  void *data, Error *err)
+                                  void *data, GT_Error *err)
 {
   FastaReaderSeqIt *fasta_reader_seqit = fasta_reader_seqit_cast(fasta_reader);
   const Uchar *sequence;

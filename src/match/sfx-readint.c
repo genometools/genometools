@@ -83,7 +83,7 @@ static int scanuintintline(uint32_t *lengthofkey,
                            Smallorbigint *smallorbigint,
                            const char *linebuffer,
                            unsigned long linelength,
-                           Error *err)
+                           GT_Error *err)
 {
   int64_t readint;
   unsigned long i;
@@ -134,7 +134,7 @@ static int scanuintintline(uint32_t *lengthofkey,
 
 int allkeysdefined(const Str *indexname,const char *suffix,
                    const GT_Array *riktab,Verboseinfo *verboseinfo,
-                   Error *err)
+                   GT_Error *err)
 {
   unsigned long i;
   Readintkeys *rikptr;
@@ -194,7 +194,7 @@ int analyzeuintline(const Str *indexname,
                     const char *linebuffer,
                     unsigned long linelength,
                     GT_Array *riktab,
-                    Error *err)
+                    GT_Error *err)
 {
   Readintkeys *rikptr;
   bool found = false, haserr = false;

@@ -21,7 +21,7 @@
 #include "tools/gt_guessprot.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GT_Error *err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -34,7 +34,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_guessprot(int argc, const char **argv, Error *err)
+int gt_guessprot(int argc, const char **argv, GT_Error *err)
 {
   int i, parsed_args, retval;
   GT_StrArray *filenametab;

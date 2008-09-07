@@ -24,7 +24,7 @@
 #include "tools/gt_merge.h"
 
 static OPrval parse_options(int *parsed_args, GenFile **outfp, int argc,
-                            const char **argv, Error *err)
+                            const char **argv, GT_Error *err)
 {
   OptionParser *op;
   OutputFileInfo *ofi;
@@ -40,7 +40,7 @@ static OPrval parse_options(int *parsed_args, GenFile **outfp, int argc,
   return oprval;
 }
 
-int gt_merge(int argc, const char **argv, Error *err)
+int gt_merge(int argc, const char **argv, GT_Error *err)
 {
   GenomeStream *gff3_in_stream,
                 *merge_stream,

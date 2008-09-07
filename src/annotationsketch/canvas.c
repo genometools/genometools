@@ -717,7 +717,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
   return had_err;
 }
 
-int gt_canvas_to_file(GT_Canvas *canvas, const char *filename, Error *err)
+int gt_canvas_to_file(GT_Canvas *canvas, const char *filename, GT_Error *err)
 {
   int had_err = 0;
   assert(canvas && filename && err);

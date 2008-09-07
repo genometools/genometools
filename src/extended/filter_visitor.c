@@ -56,7 +56,7 @@ static void filter_visitor_free(GenomeVisitor *gv)
 }
 
 static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,
-                                  UNUSED Error *err)
+                                  UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;
   error_check(err);
@@ -135,7 +135,7 @@ static bool filter_min_average_ssp(GenomeFeature *gf, double minaveragessp)
 }
 
 static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                         UNUSED Error *err)
+                                         UNUSED GT_Error *err)
 {
   FilterVisitor *fv;
   bool filter_node = false;
@@ -202,7 +202,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 }
 
 static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                          UNUSED Error *err)
+                                          UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;
   error_check(err);
@@ -231,7 +231,7 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
 }
 
 static int filter_visitor_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
-                                        UNUSED Error *err)
+                                        UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;
   error_check(err);

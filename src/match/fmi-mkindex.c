@@ -54,7 +54,7 @@ static Indexleveldesc indexlevel[] =
 static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
                              int argc,
                              const char **argv,
-                             Error *err)
+                             GT_Error *err)
 {
   OptionParser *op;
   Option *option, *optionfmout;
@@ -161,7 +161,7 @@ static void freeconstructedfmindex(Fmindex *fm)
 }
 
 static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
-                            int argc,const char **argv,Error *err)
+                            int argc,const char **argv,GT_Error *err)
 {
   OPrval rval;
   int retval = 0;
@@ -182,7 +182,7 @@ static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
 }
 
 static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
-                        Error *err)
+                        GT_Error *err)
 {
   Fmindex fm;
   unsigned int log2bsize,
@@ -228,7 +228,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
   return haserr ? -1 : 0;
 }
 
-int parseargsandcallmkfmindex(int argc,const char **argv,Error *err)
+int parseargsandcallmkfmindex(int argc,const char **argv,GT_Error *err)
 {
   Mkfmcallinfo mkfmcallinfo;
   int retval;

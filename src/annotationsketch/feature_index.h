@@ -24,6 +24,6 @@
 #include "annotationsketch/feature_index_api.h"
 
 GT_FeatureIndex* gt_feature_index_ref(GT_FeatureIndex*);
-int              gt_feature_index_unit_test(Error*);
+int              gt_feature_index_unit_test(GT_Error*);
 
 #endif

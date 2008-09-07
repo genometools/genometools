@@ -202,7 +202,7 @@ static int genome_node_lua_accept(lua_State *L)
 {
   GenomeNode **gn;
   GenomeVisitor **gv;
-  Error *err;
+  GT_Error *err;
   gn = check_genome_node(L, 1);
   gv = check_genome_visitor(L, 2);
   err = error_new();
@@ -277,7 +277,7 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   bool join;
   RegionMapping **region_mapping;
   Str *sequence;
-  Error *err;
+  GT_Error *err;
   gn = check_genome_node(L, 1);
   /* make sure we get a genome feature */
   gf = genome_node_cast(genome_feature_class(), *gn);

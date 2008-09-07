@@ -100,7 +100,7 @@ static OptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
 }
 
 static int gt_extractfeat_arguments_check(UNUSED int argc, void *tool_arguments,
-                                          Error *err)
+                                          GT_Error *err)
 {
   ExtractFeatArguments *arguments = tool_arguments;
   int had_err = 0;
@@ -122,7 +122,7 @@ static int gt_extractfeat_arguments_check(UNUSED int argc, void *tool_arguments,
 
 static int gt_extractfeat_runner(UNUSED int argc, const char **argv,
                                  int parsed_args, void *tool_arguments,
-                                 Error *err)
+                                 GT_Error *err)
 {
   GenomeStream *gff3_in_stream = NULL, *extract_feat_stream = NULL;
   GenomeNode *gn;

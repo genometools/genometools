@@ -247,7 +247,7 @@ int str_read_next_line_generic(Str *s, GenFile *fpin)
   }
 }
 
-int str_unit_test(Error *err)
+int str_unit_test(GT_Error *err)
 {
   Str *s, *s1, *s2;
   static char cstring_1[] = "test_string"; /* l=11 */

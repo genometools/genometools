@@ -27,7 +27,7 @@ struct MSA {
   Bioseq *bs;
 };
 
-MSA* msa_new(const char *MSA_filename, Error *err)
+MSA* msa_new(const char *MSA_filename, GT_Error *err)
 {
   unsigned long i, firstseqlen;
   int had_err = 0;

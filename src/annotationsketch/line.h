@@ -34,7 +34,7 @@ void      line_insert_block(Line*, GT_Block*); /* takes ownership */
 bool      line_has_captions(const Line*);
 GT_Array* line_get_blocks(Line*);
 int       line_sketch(Line*, GT_Canvas*);
-int       line_unit_test(Error*);
+int       line_unit_test(GT_Error*);
 void      line_delete(Line*);
 
 #endif

@@ -25,7 +25,7 @@
 #include "tools/gt_upgma.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GT_Error *err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -62,7 +62,7 @@ static double exampledistfunc(unsigned long i, unsigned long j,
   return exampledistances[i][j];
 }
 
-int gt_upgma(int argc, const char **argv, Error *err)
+int gt_upgma(int argc, const char **argv, GT_Error *err)
 {
   bool use_hard_coded_example = false;
   int parsed_args, had_err = 0;

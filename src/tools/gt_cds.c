@@ -74,7 +74,7 @@ static OptionParser* gt_cds_option_parser_new(void *tool_arguments)
 }
 
 static int gt_cds_runner(UNUSED int argc, const char **argv, int parsed_args,
-                         void *tool_arguments, Error *err)
+                         void *tool_arguments, GT_Error *err)
 {
   GenomeStream *gff3_in_stream, *cds_stream = NULL, *gff3_out_stream = NULL;
   GenomeNode *gn;

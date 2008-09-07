@@ -30,6 +30,6 @@ void        cstr_table_add(CstrTable *table, const char *cstr);
 /* If a C-string equal to <cstr> is contained in <table>, it is returned.
    Otherwise NULL is returned. */
 const char* cstr_table_get(const CstrTable *table, const char *cstr);
-int         cstr_table_unit_test(Error*);
+int         cstr_table_unit_test(GT_Error*);
 
 #endif

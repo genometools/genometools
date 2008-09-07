@@ -26,6 +26,6 @@ typedef struct FeatureTypeFactoryOBO FeatureTypeFactoryOBO;
 const FeatureTypeFactoryClass* feature_type_factory_obo_class(void);
 FeatureTypeFactory*            feature_type_factory_obo_new(const char
                                                             *obo_file_path,
-                                                            Error*);
+                                                            GT_Error*);
 
 #endif

@@ -66,7 +66,7 @@ const char* cstr_table_get(const CstrTable *table, const char *cstr)
   return entry ? *entry : NULL;
 }
 
-int cstr_table_unit_test(Error *err)
+int cstr_table_unit_test(GT_Error *err)
 {
   CstrTable *table;
   int had_err = 0;

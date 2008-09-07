@@ -84,11 +84,11 @@ void updateSequentialsuffixarrayreaderfromRAM(
 
 int nextSequentiallcpvalue(Seqpos *currentlcp,
                            Sequentialsuffixarrayreader *ssar,
-                           Error *err);
+                           GT_Error *err);
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
-                              Error *err);
+                              GT_Error *err);
 
 #endif
 
@@ -96,7 +96,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                         const Str *indexname,
                                         unsigned int demand,
                                         Sequentialaccesstype seqactype,
-                                        Error *err);
+                                        GT_Error *err);
 
 void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar);
 

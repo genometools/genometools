@@ -213,7 +213,7 @@ int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
   return had_err;
 }
 
-int gt_block_unit_test(Error *err)
+int gt_block_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *gft;

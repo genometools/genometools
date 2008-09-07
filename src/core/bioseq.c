@@ -173,7 +173,7 @@ typedef struct {
 } Construct_bioseq_files_info;
 
 static int proc_description(const char *description, unsigned long length,
-                            void *data, UNUSED Error *err)
+                            void *data, UNUSED GT_Error *err)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   char *description_cstr;
@@ -191,7 +191,7 @@ static int proc_description(const char *description, unsigned long length,
 }
 
 static int proc_sequence_part(const char *seqpart, unsigned long length,
-                              void *data, UNUSED Error *err)
+                              void *data, UNUSED GT_Error *err)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   error_check(err);
@@ -210,7 +210,7 @@ static int proc_sequence_part(const char *seqpart, unsigned long length,
 }
 
 static int proc_sequence_length(unsigned long sequence_length, void *data,
-                                UNUSED Error *err)
+                                UNUSED GT_Error *err)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
   Range range;
@@ -247,7 +247,7 @@ static void remove_bioseq_files(int sigraised)
 }
 
 static int fill_bioseq(Bioseq *bs, const char *index_filename,
-                       const char *raw_filename, Error *err)
+                       const char *raw_filename, GT_Error *err)
 {
   FILE *index_file;
   Str *index_line;
@@ -310,7 +310,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
 
 static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
                                   Str *bioseq_raw_file,
-                                  FastaReaderType fasta_reader_type, Error *err)
+                                  FastaReaderType fasta_reader_type, GT_Error *err)
 {
   FastaReader *fasta_reader = NULL;
   Str *sequence_filename;
@@ -370,7 +370,7 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
 }
 
 static int bioseq_fill(Bioseq *bs, bool recreate,
-                       FastaReaderType fasta_reader_type, Error *err)
+                       FastaReaderType fasta_reader_type, GT_Error *err)
 {
   Str *bioseq_index_file = NULL,
       *bioseq_raw_file = NULL;
@@ -413,7 +413,7 @@ static Bioseq* bioseq_new_with_recreate_and_type(Str *sequence_file,
                                                  bool recreate,
                                                  FastaReaderType
                                                  fasta_reader_type,
-                                                 Error *err)
+                                                 GT_Error *err)
 {
   Bioseq *bs;
   int had_err = 0;
@@ -439,7 +439,7 @@ static Bioseq* bioseq_new_with_recreate_and_type(Str *sequence_file,
   return bs;
 }
 
-Bioseq* bioseq_new(const char *sequence_file, Error *err)
+Bioseq* bioseq_new(const char *sequence_file, GT_Error *err)
 {
   Bioseq *bs;
   Str *seqfile;
@@ -450,7 +450,7 @@ Bioseq* bioseq_new(const char *sequence_file, Error *err)
   return bs;
 }
 
-Bioseq* bioseq_new_recreate(const char *sequence_file, Error *err)
+Bioseq* bioseq_new_recreate(const char *sequence_file, GT_Error *err)
 {
   Bioseq *bs;
   Str *seqfile;
@@ -461,14 +461,14 @@ Bioseq* bioseq_new_recreate(const char *sequence_file, Error *err)
   return bs;
 }
 
-Bioseq* bioseq_new_str(Str *sequence_file, Error *err)
+Bioseq* bioseq_new_str(Str *sequence_file, GT_Error *err)
 {
   return bioseq_new_with_recreate_and_type(sequence_file, false,
                                            FASTA_READER_REC, err);
 }
 
 Bioseq* bioseq_new_with_fasta_reader(const char *sequence_file,
-                                     FastaReaderType fasta_reader, Error *err)
+                                     FastaReaderType fasta_reader, GT_Error *err)
 {
   Bioseq *bs;
   Str *seqfile;

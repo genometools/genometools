@@ -34,7 +34,7 @@ typedef struct {
 } ChseqidsArguments;
 
 static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GT_Error *err)
 {
   OptionParser *op;
   OutputFileInfo *ofi;
@@ -73,7 +73,7 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
   return oprval;
 }
 
-int gt_chseqids(int argc, const char **argv, Error *err)
+int gt_chseqids(int argc, const char **argv, GT_Error *err)
 {
   GenomeStream *gff3_in_stream, *chseqids_stream, *sort_stream = NULL,
                *gff3_out_stream = NULL;

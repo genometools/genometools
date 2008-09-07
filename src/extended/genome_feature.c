@@ -140,7 +140,7 @@ void genome_feature_set_phase(GenomeNode *gn, Phase phase)
   gn->bit_field |= phase << PHASE_OFFSET;
 }
 
-static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Error *err)
+static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
   GenomeFeature *gf;
   error_check(err);
@@ -408,7 +408,7 @@ Phase genome_feature_get_phase(GenomeFeature *gf)
   return (gn->bit_field >> PHASE_OFFSET) & PHASE_MASK;
 }
 
-static int save_exon(GenomeNode *gn, void *data, UNUSED Error *err)
+static int save_exon(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   GenomeFeature *gf;
   GT_Array *exon_features = (GT_Array*) data;
@@ -430,7 +430,7 @@ void genome_feature_get_exons(GenomeFeature *gf, GT_Array *exon_features)
   assert(!had_err); /* cannot happen, because save_exon() is sane */
 }
 
-static int save_exons_and_cds(GenomeNode *gn, void *data, UNUSED Error *err)
+static int save_exons_and_cds(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   GenomeFeature *gf;
@@ -468,7 +468,7 @@ static void set_transcript_types(GT_Array *features)
 }
 
 static int determine_transcripttypes(GenomeNode *gn, void *data,
-                                     UNUSED Error *err)
+                                     UNUSED GT_Error *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   int had_err;
@@ -630,7 +630,7 @@ bool genome_features_are_similar(GenomeFeature *gf_a, GenomeFeature *gf_b)
   return false;
 }
 
-int genome_feature_unit_test(Error *err)
+int genome_feature_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
   GenomeFeatureType *type;

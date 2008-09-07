@@ -29,7 +29,7 @@ typedef enum {
   HASH_STRING
 } HashType;
 
-typedef int (*Mapentryvisitfunc)(void *key, void *value, void *data, Error*);
+typedef int (*Mapentryvisitfunc)(void *key, void *value, void *data, GT_Error*);
 
 Hashmap* hashmap_new(HashType, FreeFunc keyfree, FreeFunc valuefree);
 void*      hashmap_get(Hashmap*, const void*);
@@ -37,17 +37,17 @@ void       hashmap_add(Hashmap*, void*, void*);
 void       hashmap_remove(Hashmap*, const void*);
 /* iterate over the hashmap in key order given by compare function <cmp> */
 int        hashmap_foreach_ordered(Hashmap*, Mapentryvisitfunc, void *data,
-                                     Compare cmp, Error*);
-int        hashmap_foreach(Hashmap*, Mapentryvisitfunc, void*, Error*);
+                                     Compare cmp, GT_Error*);
+int        hashmap_foreach(Hashmap*, Mapentryvisitfunc, void*, GT_Error*);
 /* iterate over the hashmap elements in
  * - alphabetical order, requires that HashType was specified as HASH_STRING
  * or
  * - numerical order if the HashType was specified as HASH_DIRECT
  */
 int        hashmap_foreach_in_key_order(Hashmap*, Mapentryvisitfunc,
-                                        void*, Error*);
+                                        void*, GT_Error*);
 void       hashmap_reset(Hashmap*);
-int        hashmap_unit_test(Error*);
+int        hashmap_unit_test(GT_Error*);
 void       hashmap_delete(Hashmap*);
 
 #endif

@@ -68,7 +68,7 @@ void showmergertrie(const Mergertrierep *trierep,
                     const Uchar *characters);
 
 void checkmergertrie(Mergertrierep *trierep,unsigned int numberofleaves,
-                     unsigned int maxleafnum,Error *err);
+                     unsigned int maxleafnum,GT_Error *err);
 
 void showallnoderelations(const Mergertrienode *node);
 

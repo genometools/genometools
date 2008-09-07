@@ -61,7 +61,7 @@ static size_t
 SAIGenerate(void *generatorState, void *backlogState,
             move2BacklogFunc move2Backlog, void *output,
             Seqpos generateStart, size_t len,
-            SeqDataTranslator xltor, Error *err);
+            SeqDataTranslator xltor, GT_Error *err);
 
 extern void
 initSuffixarrayFileInterface(SuffixarrayFileInterface *sai, Seqpos seqLen,
@@ -103,7 +103,7 @@ deleteSuffixarrayFileInterface(SuffixarrayFileInterface *sai)
 }
 
 static size_t
-SAIReadBWT(void *state, Symbol *dest, size_t len, Error *err);
+SAIReadBWT(void *state, Symbol *dest, size_t len, GT_Error *err);
 
 extern struct seqDataReader
 SAIMakeBWTReader(SuffixarrayFileInterface *sai)
@@ -224,7 +224,7 @@ SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype)
  * @return actual number of symbols read
  */
 static size_t
-SAIReadBWT(void *state, Uchar *dest, size_t len, UNUSED Error *err)
+SAIReadBWT(void *state, Uchar *dest, size_t len, UNUSED GT_Error *err)
 {
   SuffixarrayFileInterface *sai = state;
   assert(state);
@@ -264,7 +264,7 @@ static size_t
 SAIGenerate(void *generatorState, void *backlogState,
             move2BacklogFunc move2Backlog, void *output,
             Seqpos generateStart, size_t len,
-            SeqDataTranslator xltor, Error *err)
+            SeqDataTranslator xltor, GT_Error *err)
 {
   size_t i;
   SuffixarrayFileInterface *sai = generatorState;

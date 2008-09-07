@@ -1048,37 +1048,37 @@ bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits);
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackString_unit_test(Error*);
+bitPackString_unit_test(GT_Error*);
 /**
  * \brief Unit test function for bitPackString, integer functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackStringInt_unit_test(Error*);
+bitPackStringInt_unit_test(GT_Error*);
 /**
  * \brief Unit test function for bitPackString, 8-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackStringInt8_unit_test(Error*);
+bitPackStringInt8_unit_test(GT_Error*);
 /**
  * \brief Unit test function for bitPackString, 16-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackStringInt16_unit_test(Error*);
+bitPackStringInt16_unit_test(GT_Error*);
 /**
  * \brief Unit test function for bitPackString, 32-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackStringInt32_unit_test(Error*);
+bitPackStringInt32_unit_test(GT_Error*);
 /**
  * \brief Unit test function for bitPackString, 64-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackStringInt64_unit_test(Error*);
+bitPackStringInt64_unit_test(GT_Error*);
 
 #include "bitpackstringsimpleop.h"
 

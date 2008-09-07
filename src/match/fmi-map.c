@@ -53,7 +53,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
                                  const Str *indexname,
                                  FILE *fpin,
                                  Verboseinfo *verboseinfo,
-                                 Error *err)
+                                 GT_Error *err)
 {
   bool haserr = false;
   GT_Array *riktab;
@@ -144,7 +144,7 @@ void freefmindex(Fmindex *fmindex)
 
 static Encodedsequence *mapbwtencoding(const Str *indexname,
                                        Verboseinfo *verboseinfo,
-                                       Error *err)
+                                       GT_Error *err)
 {
   Suffixarray suffixarray;
   bool haserr = false;
@@ -168,7 +168,7 @@ static Encodedsequence *mapbwtencoding(const Str *indexname,
 }
 
 int mapfmindex (Fmindex *fmindex,const Str *indexname,
-                Verboseinfo *verboseinfo,Error *err)
+                Verboseinfo *verboseinfo,GT_Error *err)
 {
   FILE *fpin = NULL;
   bool haserr = false, storeindexpos = true;

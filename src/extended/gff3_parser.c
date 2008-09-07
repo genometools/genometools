@@ -134,7 +134,7 @@ void gff3parser_set_offset(GFF3Parser *parser, long offset)
   parser->offset = offset;
 }
 
-int gff3parser_set_offsetfile(GFF3Parser *parser, Str *offsetfile, Error *err)
+int gff3parser_set_offsetfile(GFF3Parser *parser, Str *offsetfile, GT_Error *err)
 {
   error_check(err);
   assert(parser);
@@ -153,7 +153,7 @@ void gff3parser_enable_tidy_mode(GFF3Parser *parser)
 }
 
 static int add_offset_if_necessary(Range *range, GFF3Parser *parser,
-                                   const char *seqid, Error *err)
+                                   const char *seqid, GT_Error *err)
 {
   long offset;
   int had_err = 0;
@@ -171,7 +171,7 @@ static int add_offset_if_necessary(Range *range, GFF3Parser *parser,
 static int parse_target_attribute(const char *value, Str *target_id,
                                   Range *target_range, Strand *target_strand,
                                   const char *filename,
-                                  unsigned int line_number, Error *err)
+                                  unsigned int line_number, GT_Error *err)
 {
   unsigned long num_of_tokens;
   Str *unescaped_target;
@@ -229,7 +229,7 @@ int gff3parser_parse_target_attributes(const char *values,
                                        Range *first_target_range,
                                        Strand *first_target_strand,
                                        const char *filename,
-                                       unsigned int line_number, Error *err)
+                                       unsigned int line_number, GT_Error *err)
 {
   Splitter *splitter;
   unsigned long i;
@@ -257,7 +257,7 @@ int gff3parser_parse_target_attributes(const char *values,
 static int get_seqid_str(Str **seqid_str, const char *seqid, Range range,
                          AutomaticSequenceRegion **auto_sr, GFF3Parser *parser,
                          const char *filename, unsigned int line_number,
-                         Error *err)
+                         GT_Error *err)
 {
   SimpleSequenceRegion *ssr;
   int had_err = 0;
@@ -313,7 +313,7 @@ typedef struct {
              *replacing_node;
 } ReplaceInfo;
 
-static int replace_func(void **elem, void *info, UNUSED Error *err)
+static int replace_func(void **elem, void *info, UNUSED GT_Error *err)
 {
   ReplaceInfo *replace_info = info;
   GenomeNode **node = (GenomeNode**) elem;
@@ -397,7 +397,7 @@ static void genome_node_is_part_of_pseudo_node(GenomeNode *pseudo_node,
 static int store_id(const char *id, GenomeNode *genome_feature, bool *is_child,
                     GFF3Parser *parser, Queue *genome_nodes,
                     AutomaticSequenceRegion *auto_sr, const char *filename,
-                    unsigned int line_number, Error *err)
+                    unsigned int line_number, GT_Error *err)
 {
   GenomeNode *gn;
   int had_err = 0;
@@ -591,7 +591,7 @@ static int process_parent_attr(char *parent_attr, GenomeNode *genome_feature,
                                Queue *genome_nodes,
                                AutomaticSequenceRegion *auto_sr,
                                const char *filename, unsigned int line_number,
-                               Error *err)
+                               GT_Error *err)
 {
   Splitter *parent_splitter;
   GT_StrArray *valid_parents;
@@ -673,7 +673,7 @@ static bool is_blank_attribute(const char *attribute)
 static int check_missing_attributes(GenomeNode *this_feature,
                                     GT_StrArray *this_attributes,
                                     GenomeNode *other_feature, const char *id,
-                                    const char *filename, Error *err)
+                                    const char *filename, GT_Error *err)
 {
   unsigned long i;
   int had_err = 0;
@@ -696,7 +696,7 @@ static int check_missing_attributes(GenomeNode *this_feature,
 }
 
 static int compare_target_attribute(GenomeNode *new_gf, GenomeNode *old_gf,
-                                    const char *id, Error *err)
+                                    const char *id, GT_Error *err)
 {
   unsigned long new_target_num, old_target_num;
   Str *new_target_str, *old_target_str;
@@ -731,7 +731,7 @@ static int compare_target_attribute(GenomeNode *new_gf, GenomeNode *old_gf,
 
 static int compare_other_attribute(const char *attr_name, GenomeNode *new_gf,
                                    GenomeNode *old_gf, const char *id,
-                                   Error *err)
+                                   GT_Error *err)
 {
   error_check(err);
   assert(attr_name && new_gf && old_gf);
@@ -753,7 +753,7 @@ static int compare_other_attribute(const char *attr_name, GenomeNode *new_gf,
 static int check_multi_feature_constrains(GenomeNode *new_gf,
                                           GenomeNode *old_gf, const char *id,
                                           const char *filename,
-                                          unsigned int line_number, Error *err)
+                                          unsigned int line_number, GT_Error *err)
 {
   int had_err = 0;
   error_check(err);
@@ -829,7 +829,7 @@ static int parse_attributes(char *attributes, GenomeNode *genome_feature,
                             Queue *genome_nodes,
                             AutomaticSequenceRegion *auto_sr,
                             const char *filename, unsigned int line_number,
-                            Error *err)
+                            GT_Error *err)
 {
   Splitter *attribute_splitter, *tmp_splitter, *parent_splitter;
   unsigned long i;
@@ -959,7 +959,7 @@ static void set_source(GenomeNode *genome_feature, const char *source,
 static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
                                    char *line, size_t line_length,
                                    Str *filenamestr, unsigned int line_number,
-                                   Error *err)
+                                   GT_Error *err)
 {
   GenomeNode *gn = NULL, *genome_feature = NULL;
   GenomeFeatureType *gft = NULL;
@@ -1085,7 +1085,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 }
 
 static int parse_first_gff3_line(const char *line, const char *filename,
-                                 Error *err)
+                                 GT_Error *err)
 {
   int version, had_err = 0;
   error_check(err);
@@ -1112,7 +1112,7 @@ static int parse_first_gff3_line(const char *line, const char *filename,
 
 static int parse_fasta_entry(Queue *genome_nodes, const char *line,
                              Str *filename, unsigned int line_number,
-                             GenFile *fpin, Error *err)
+                             GenFile *fpin, GT_Error *err)
 {
   int had_err = 0;
   error_check(err);
@@ -1141,7 +1141,7 @@ static int parse_fasta_entry(Queue *genome_nodes, const char *line,
 }
 
 static int add_auto_sr_to_queue(UNUSED void *key, void *value, void *data,
-                                UNUSED Error *err)
+                                UNUSED GT_Error *err)
 {
   AutomaticSequenceRegion *auto_sr = value;
   Queue *genome_nodes = data;
@@ -1164,7 +1164,7 @@ static int add_auto_sr_to_queue(UNUSED void *key, void *value, void *data,
 static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
                                 char *line, size_t line_length,
                                 Str *filenamestr, unsigned int line_number,
-                                Error *err)
+                                GT_Error *err)
 {
   char *tmpline, *tmplineend, *seqstart, *seqid = NULL;
   GenomeNode *gn;
@@ -1300,7 +1300,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *parser,
                                   Queue *genome_nodes, Str *filenamestr,
                                   unsigned long long *line_number,
-                                  GenFile *fpin, Error *err)
+                                  GenFile *fpin, GT_Error *err)
 {
   size_t line_length;
   Str *line_buffer;

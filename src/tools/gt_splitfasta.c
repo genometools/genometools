@@ -85,7 +85,7 @@ static unsigned long buf_contains_separator(char *buf)
 }
 
 static GenFile* genfile_xopen_forcecheck(const char *path, const char *mode,
-                                         bool force, Error *err)
+                                         bool force, GT_Error *err)
 {
   if (!force && file_exists(path)) {
     error_set(err, "file \"%s\" exists already, use option -%s to overwrite",
@@ -96,7 +96,7 @@ static GenFile* genfile_xopen_forcecheck(const char *path, const char *mode,
 }
 
 static int split_description(const char *filename, Str *splitdesc, bool force,
-                             Error *err)
+                             GT_Error *err)
 {
   unsigned long i;
   Bioseq *bioseq;
@@ -135,7 +135,7 @@ static int split_description(const char *filename, Str *splitdesc, bool force,
 
 static int split_fasta_file(const char *filename,
                             unsigned long max_filesize_in_bytes, bool force,
-                            Error *err)
+                            GT_Error *err)
 {
   GenFile *srcfp = NULL, *destfp = NULL;
   Str *destfilename = NULL;
@@ -222,7 +222,7 @@ static int split_fasta_file(const char *filename,
 
 static int gt_splitfasta_runner(UNUSED int argc, const char **argv,
                                 int parsed_args, void *tool_arguments,
-                                Error *err)
+                                GT_Error *err)
 {
   SplitfastaArguments *arguments = tool_arguments;
   unsigned long max_filesize_in_bytes;

@@ -72,7 +72,7 @@ static void show_entry(Str *description, Str *sequence, bool translate)
 }
 
 static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
-                                               GenomeFeature *gf, Error *err)
+                                               GenomeFeature *gf, GT_Error *err)
 {
   ExtractFeatVisitor *efv;
   GenomeNodeIterator *gni;

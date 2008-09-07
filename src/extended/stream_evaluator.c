@@ -241,7 +241,7 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
 }
 
 static int set_actuals_and_sort_them(UNUSED void *key, void *value, void *data,
-                                     UNUSED Error *err)
+                                     UNUSED GT_Error *err)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *s = (Slot*) value;
@@ -415,7 +415,7 @@ static void add_nucleotide_exon(Bittab *nucleotides, Range range,
   }
 }
 
-static int process_real_feature(GenomeNode *gn, void *data, UNUSED Error *err)
+static int process_real_feature(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   ProcessRealFeatureInfo *info = (ProcessRealFeatureInfo*) data;
   GenomeNode *gn_ref;
@@ -519,7 +519,7 @@ static int process_real_feature(GenomeNode *gn, void *data, UNUSED Error *err)
   return 0;
 }
 
-static int store_exon(GenomeNode *gn, void *data, UNUSED Error *err)
+static int store_exon(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   GT_Array *exons = (GT_Array*) data;
   Range range;
@@ -573,7 +573,7 @@ typedef struct {
         *mRNAs;
 } Store_gene_feature_info;
 
-static int store_gene_feature(GenomeNode *gn, void *data, UNUSED Error *err)
+static int store_gene_feature(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   GenomeFeature *gf;
   Store_gene_feature_info *info = (Store_gene_feature_info*) data;
@@ -862,7 +862,7 @@ static void store_true_exon(GenomeNode *gn, Strand predicted_strand,
 }
 
 static int process_predicted_feature(GenomeNode *gn, void *data,
-                                     UNUSED Error *err)
+                                     UNUSED GT_Error *err)
 {
   ProcessPredictedFeatureInfo *info = (ProcessPredictedFeatureInfo*) data;
   Range predicted_range;
@@ -1138,7 +1138,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data,
 }
 
 int determine_missing_features(UNUSED void *key, void *value, void *data,
-                               UNUSED Error *err)
+                               UNUSED GT_Error *err)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
@@ -1192,7 +1192,7 @@ static void add_nucleotide_values(NucEval *nucleotides, Bittab *real,
 }
 
 int compute_nucleotides_values(UNUSED void *key, void *value, void *data,
-                               UNUSED Error *err)
+                               UNUSED GT_Error *err)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
@@ -1227,7 +1227,7 @@ int compute_nucleotides_values(UNUSED void *key, void *value, void *data,
 }
 
 int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
-                              GenomeVisitor *gv, Error *err)
+                              GenomeVisitor *gv, GT_Error *err)
 {
   GenomeNode *gn;
   SequenceRegion *sr;

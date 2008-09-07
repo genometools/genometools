@@ -90,7 +90,7 @@ void file_dirname(Str *path, const char *file)
     str_append_cstr_nt(path, file, i);
 }
 
-int file_find_in_path(Str *path, const char *file, Error *err)
+int file_find_in_path(Str *path, const char *file, GT_Error *err)
 {
   char *pathvariable, *pathcomponent = NULL;
   Splitter *splitter = NULL;

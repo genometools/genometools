@@ -37,7 +37,7 @@ static OptionParser* gt_linearalign_option_parser_new(UNUSED
 
 static int gt_linearalign_runner(UNUSED int argc, const char **argv,
                                  int parsed_args, UNUSED void *tool_arguments,
-                                 Error *err)
+                                 GT_Error *err)
 {
   Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;

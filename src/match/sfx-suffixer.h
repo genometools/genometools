@@ -41,14 +41,14 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             const Sfxstrategy *sfxstrategy,
                             Measuretime *mtime,
                             Verboseinfo *verboseinfo,
-                            Error *err);
+                            GT_Error *err);
 
 const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,
                               bool *specialsuffixes,
                               Measuretime *mtime,
                               Sfxiterator *sfi);
 
-int sfibcktab2file(FILE *fp,const Sfxiterator *sfi,Error *err);
+int sfibcktab2file(FILE *fp,const Sfxiterator *sfi,GT_Error *err);
 
 unsigned int getprefixlenbits(void);
 

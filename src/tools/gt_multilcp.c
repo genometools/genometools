@@ -23,7 +23,7 @@
 #include "tools/gt_multilcp.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GT_Error *err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -37,7 +37,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_multilcp(int argc, const char **argv, Error *err)
+int gt_multilcp(int argc, const char **argv, GT_Error *err)
 {
   const char *seq1, *seq2;
   int parsed_args, len1, len2, **multilcptab;

@@ -21,6 +21,6 @@
 #include "core/error.h"
 
 /* the sfxmap tool */
-int gt_sfxmap(int argc, const char **argv, Error*);
+int gt_sfxmap(int argc, const char **argv, GT_Error*);
 
 #endif

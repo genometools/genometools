@@ -76,7 +76,7 @@ void union_find_union(UnionFind *uf, unsigned long elem_a, unsigned long elem_b)
   }
 }
 
-int union_find_unit_test(Error *err)
+int union_find_unit_test(GT_Error *err)
 {
   unsigned long i;
   UnionFind *uf;

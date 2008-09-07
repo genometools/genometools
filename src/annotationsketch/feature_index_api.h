@@ -38,7 +38,7 @@ void             gt_feature_index_add_genome_feature(GT_FeatureIndex
    valid. Otherwise, <feature_index> is not changed and <err> is set. */
 int              gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
                                                const char *gff3file,
-                                               Error *err);
+                                               GT_Error *err);
 /* Returns an array of GenomeFeatures associated with a given sequence region
    identifier <seqid>. */
 GT_Array*        gt_feature_index_get_features_for_seqid(GT_FeatureIndex*,
@@ -49,7 +49,7 @@ int              gt_feature_index_get_features_for_range(GT_FeatureIndex
                                                          *feature_index,
                                                          GT_Array *results,
                                                          const char *seqid,
-                                                         Range, Error*);
+                                                         Range, GT_Error*);
 /* Returns the first sequence region identifier added to <feature_index>. */
 const char*      gt_feature_index_get_first_seqid(const GT_FeatureIndex
                                                   *feature_index);

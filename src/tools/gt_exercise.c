@@ -92,7 +92,7 @@ static OptionParser* gt_exercise_option_parser_new(void *tool_arguments)
 }
 
 static int gt_exercise_runner(int argc, const char **argv, int parsed_args,
-                             void *tool_arguments, Error *err)
+                             void *tool_arguments, GT_Error *err)
 {
   Toolbox *exercise_toolbox = tool_arguments;
   Toolfunc toolfunc;

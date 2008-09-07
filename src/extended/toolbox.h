@@ -24,7 +24,7 @@
 /* the toolbox class */
 typedef struct Toolbox Toolbox;
 
-typedef int (*Toolfunc)(int argc, const char **argv, Error*);
+typedef int (*Toolfunc)(int argc, const char **argv, GT_Error*);
 
 Toolbox* toolbox_new(void);
 
@@ -36,7 +36,7 @@ bool     toolbox_has_tool(const Toolbox*, const char *toolname); /*deprecated */
 void     toolbox_add(Toolbox*, const char *toolname, Toolfunc); /* deprecated */
 Toolfunc toolbox_get(const Toolbox*, const char *toolname); /* deprecated */
 /* shows all tools except tools with toolname ``dev'' */
-int      toolbox_show(/*@unused@*/ const char *progname, void *toolbox, Error*);
+int      toolbox_show(/*@unused@*/ const char *progname, void *toolbox, GT_Error*);
 void     toolbox_delete(Toolbox*);
 
 #endif

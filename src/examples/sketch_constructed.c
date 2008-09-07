@@ -61,7 +61,7 @@ static GT_Array* create_example_features(void)
   return features;
 }
 
-static void handle_error(Error *err)
+static void handle_error(GT_Error *err)
 {
   fprintf(stderr, "error writing canvas %s\n", error_get(err));
   exit(EXIT_FAILURE);
@@ -74,7 +74,7 @@ static void draw_example_features(GT_Array *features, const char *style_file,
   GT_Style *style;
   GT_Diagram *diagram;
   GT_Canvas *canvas;
-  Error *err = error_new();
+  GT_Error *err = error_new();
 
   /* create style */
   if (!(style = gt_style_new(false, err)))

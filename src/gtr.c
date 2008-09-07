@@ -63,7 +63,7 @@ struct GTR {
   FILE *logfp;
 };
 
-GTR* gtr_new(Error *err)
+GTR* gtr_new(GT_Error *err)
 {
   GTR *gtr;
   int had_err = 0;
@@ -116,7 +116,7 @@ GTR* gtr_new(Error *err)
   return gtr;
 }
 
-static int show_gtr_help(const char *progname, void *data, Error *err)
+static int show_gtr_help(const char *progname, void *data, GT_Error *err)
 {
   int had_err;
   had_err = toolbox_show(progname, data, err);
@@ -126,7 +126,7 @@ static int show_gtr_help(const char *progname, void *data, Error *err)
 }
 
 OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
-                 Error *err)
+                 GT_Error *err)
 {
   OptionParser *op;
   Option *o, *debug_option, *debugfp_option;
@@ -188,7 +188,7 @@ void gtr_register_components(GTR *gtr)
 }
 
 static int
-run_test(void *key, void *value, void *data, Error *err)
+run_test(void *key, void *value, void *data, GT_Error *err)
 {
   int had_err, *had_errp;
   char *testname = key;
@@ -219,7 +219,7 @@ static int check64bit(void)
   return EXIT_FAILURE;
 }
 
-static int run_tests(GTR *gtr, Error *err)
+static int run_tests(GTR *gtr, GT_Error *err)
 {
   int test_err = 0, had_err = 0;
   error_check(err);
@@ -264,7 +264,7 @@ static void enable_logging(const char *debugfp, FILE **logfp)
   }
 }
 
-int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
+int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
 {
   Toolfunc toolfunc;
   Tool *tool = NULL;

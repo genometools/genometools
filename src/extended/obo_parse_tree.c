@@ -89,7 +89,7 @@ static const char* obo_header_get(OBOHeader *obo_header, const char *tag)
 }
 
 static int obo_header_validate(OBOHeader *obo_header, const char *obo_file_name,
-                               Error *err)
+                               GT_Error *err)
 {
   error_check(err);
   assert(obo_header && obo_file_name);
@@ -164,7 +164,7 @@ static void obo_parse_tree_add_stanza(OBOParseTree *obo_parse_tree,
 }
 
 static int validate_value(const OBOStanza *obo_stanza, const char *value,
-                          Error *err)
+                          GT_Error *err)
 {
   error_check(err);
   assert(obo_stanza && value);
@@ -179,7 +179,7 @@ static int validate_value(const OBOStanza *obo_stanza, const char *value,
 }
 
 static int obo_parse_tree_validate_stanzas(const OBOParseTree *obo_parse_tree,
-                                            Error *err)
+                                            GT_Error *err)
 {
   unsigned long i;
   int had_err = 0;
@@ -238,7 +238,7 @@ static bool ignored_char(IO *obo_file)
   return false;
 }
 
-static int expect(IO *obo_file, char expected_char, Error *err)
+static int expect(IO *obo_file, char expected_char, GT_Error *err)
 {
   char cc;
   error_check(err);
@@ -268,7 +268,7 @@ static int expect(IO *obo_file, char expected_char, Error *err)
   return 0;
 }
 
-static int comment_line(IO *obo_file, Error *err)
+static int comment_line(IO *obo_file, GT_Error *err)
 {
   int had_err;
   error_check(err);
@@ -291,7 +291,7 @@ static int comment_line(IO *obo_file, Error *err)
   return had_err;
 }
 
-static int blank_line(IO *obo_file, Error *err)
+static int blank_line(IO *obo_file, GT_Error *err)
 {
   int had_err;
   error_check(err);
@@ -316,7 +316,7 @@ static int blank_line(IO *obo_file, Error *err)
   return had_err;
 }
 
-static bool ignored_line(IO *obo_file, Error *err)
+static bool ignored_line(IO *obo_file, GT_Error *err)
 {
   error_check(err);
   if (io_peek(obo_file) == BLANK_CHAR)
@@ -325,7 +325,7 @@ static bool ignored_line(IO *obo_file, Error *err)
 }
 
 static int proc_any_char(IO *obo_file, Str *capture, bool be_permissive,
-                         Error *err)
+                         GT_Error *err)
 {
   error_check(err);
   assert(obo_file && capture);
@@ -350,7 +350,7 @@ static int proc_any_char(IO *obo_file, Str *capture, bool be_permissive,
   return 0;
 }
 
-static int tag_line(IO *obo_file, Str *tag, Str *value, Error *err)
+static int tag_line(IO *obo_file, Str *tag, Str *value, GT_Error *err)
 {
   int had_err;
   error_check(err);
@@ -376,7 +376,7 @@ static int tag_line(IO *obo_file, Str *tag, Str *value, Error *err)
   return had_err;
 }
 
-static int header(OBOParseTree *obo_parse_tree, IO *obo_file, Error *err)
+static int header(OBOParseTree *obo_parse_tree, IO *obo_file, GT_Error *err)
 {
   Str *tag, *value;
   int had_err;
@@ -400,7 +400,7 @@ static int header(OBOParseTree *obo_parse_tree, IO *obo_file, Error *err)
   return had_err;
 }
 
-static int stanza_line(IO *obo_file, Str *type, Error *err)
+static int stanza_line(IO *obo_file, Str *type, GT_Error *err)
 {
   int had_err;
   error_check(err);
@@ -418,7 +418,7 @@ static int stanza_line(IO *obo_file, Str *type, Error *err)
   return had_err;
 }
 
-static int stanza(OBOParseTree *obo_parse_tree, IO *obo_file, Error *err)
+static int stanza(OBOParseTree *obo_parse_tree, IO *obo_file, GT_Error *err)
 {
   unsigned long stanza_line_number;
   int had_err;
@@ -453,7 +453,7 @@ static int stanza(OBOParseTree *obo_parse_tree, IO *obo_file, Error *err)
 }
 
 static int parse_obo_file(OBOParseTree *obo_parse_tree,
-                          IO *obo_file, Error *err)
+                          IO *obo_file, GT_Error *err)
 {
   int had_err = 0;
   error_check(err);
@@ -490,7 +490,7 @@ static int parse_obo_file(OBOParseTree *obo_parse_tree,
   return had_err;
 }
 
-OBOParseTree* obo_parse_tree_new(const char *obo_file_path, Error *err)
+OBOParseTree* obo_parse_tree_new(const char *obo_file_path, GT_Error *err)
 {
   OBOParseTree *obo_parse_tree;
   IO *obo_file;

@@ -80,7 +80,7 @@ static OptionParser* gt_consensus_sa_option_parser_new(UNUSED
 
 static int gt_consensus_sa_runner(UNUSED int argc, const char **argv,
                                   int parsed_args, UNUSED void *tool_arguments,
-                                  Error *err)
+                                  GT_Error *err)
 {
   GT_Array *spliced_alignments;
   SSplicedAlignment *sa;

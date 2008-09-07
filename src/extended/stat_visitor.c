@@ -52,7 +52,7 @@ static void stat_visitor_free(GenomeVisitor *gv)
   disc_distri_delete(stat_visitor->intron_length_distribution);
 }
 
-static int add_exon_number(GenomeNode *gn, void *data, UNUSED Error *err)
+static int add_exon_number(GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
   StatVisitor *stat_visitor = (StatVisitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
@@ -63,7 +63,7 @@ static int add_exon_number(GenomeNode *gn, void *data, UNUSED Error *err)
   return 0;
 }
 
-static int compute_statistics(GenomeNode *gn, void *data, Error *err)
+static int compute_statistics(GenomeNode *gn, void *data, GT_Error *err)
 {
   StatVisitor *stat_visitor;
   GenomeFeature *gf;
@@ -121,7 +121,7 @@ static int compute_statistics(GenomeNode *gn, void *data, Error *err)
 }
 
 static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                       Error *err)
+                                       GT_Error *err)
 {
   StatVisitor *stat_visitor;
   error_check(err);
@@ -131,7 +131,7 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 }
 
 static int stat_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                        UNUSED Error *err)
+                                        UNUSED GT_Error *err)
 {
   StatVisitor *stat_visitor;
   error_check(err);

@@ -31,7 +31,7 @@
 #define fa_fopen(path, mode, err)\
         fa_fopen_func(path, mode, __FILE__, __LINE__, err)
 FILE*   fa_fopen_func(const char *path, const char *mode, const char*, int,
-                      Error*);
+                      GT_Error*);
 #define fa_xfopen(path, mode)\
         fa_xfopen_func(path, mode, __FILE__, __LINE__)
 FILE*   fa_xfopen_func(const char *path, const char *mode, const char*, int);
@@ -42,7 +42,7 @@ void    fa_xfclose(FILE *stream);
 #define fa_gzopen(path, mode, err)\
         fa_gzopen_func(path, mode, __FILE__, __LINE__, err)
 gzFile  fa_gzopen_func(const char *path, const char *mode, const char*, int,
-                       Error*);
+                       GT_Error*);
 #define fa_xgzopen(path, mode)\
         fa_xgzopen_func(path, mode, __FILE__, __LINE__)
 gzFile  fa_xgzopen_func(const char *path, const char *mode, const char*, int);
@@ -53,7 +53,7 @@ void    fa_xgzclose(gzFile stream);
 #define fa_bzopen(path, mode, err)\
         fa_bzopen_func(path, mode, __FILE__, __LINE__, err)
 BZFILE* fa_bzopen_func(const char *path, const char *mode, const char*, int,
-                       Error*);
+                       GT_Error*);
 #define fa_xbzopen(path, mode)\
         fa_xbzopen_func(path, mode, __FILE__, __LINE__)
 BZFILE* fa_xbzopen_func(const char *path, const char *mode, const char*, int);

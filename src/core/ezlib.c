@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/ezlib.h"
 
-gzFile egzopen(const char *path, const char *mode, Error *err)
+gzFile egzopen(const char *path, const char *mode, GT_Error *err)
 {
   gzFile file;
   error_check(err);

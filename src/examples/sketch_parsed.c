@@ -1,6 +1,6 @@
 #include "genometools.h"
 
-static void handle_error(Error *err)
+static void handle_error(GT_Error *err)
 {
   fprintf(stderr, "error writing canvas %s\n", error_get(err));
   exit(EXIT_FAILURE);
@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
   Range range;
   GT_Diagram *diagram;
   GT_Canvas *canvas;
-  Error *err = error_new();
+  GT_Error *err = error_new();
 
   if (argc != 4) {
     fprintf(stderr, "Usage: %s style_file GFF3_file output_file\n", argv[0]);

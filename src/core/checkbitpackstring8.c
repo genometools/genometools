@@ -73,7 +73,7 @@ genBitCount(uint8_t v)
   } while (0)
 
 int
-bitPackStringInt8_unit_test(Error *err)
+bitPackStringInt8_unit_test(GT_Error *err)
 {
   BitString bitStore = NULL;
   BitString bitStoreCopy = NULL;

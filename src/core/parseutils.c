@@ -102,7 +102,7 @@ int parse_double(double *out, const char *nptr)
 }
 
 int parse_range(Range *range, const char *start, const char *end,
-                unsigned int line_number, const char *filename, Error *err)
+                unsigned int line_number, const char *filename, GT_Error *err)
 {
   long start_val, end_val;
   char *ep;
@@ -166,7 +166,7 @@ int parse_range(Range *range, const char *start, const char *end,
 }
 
 int parse_score(bool *score_is_defined, float *score_value, const char *score,
-                unsigned int line_number, const char *filename, Error *err)
+                unsigned int line_number, const char *filename, GT_Error *err)
 {
   int rval;
 
@@ -187,7 +187,7 @@ int parse_score(bool *score_is_defined, float *score_value, const char *score,
 }
 
 int parse_strand(Strand *strand_value, const char *strand,
-                 unsigned int line_number, const char *filename, Error *err)
+                 unsigned int line_number, const char *filename, GT_Error *err)
 {
   assert(strand && filename);
   error_check(err);
@@ -209,7 +209,7 @@ int parse_strand(Strand *strand_value, const char *strand,
 }
 
 int parse_phase(Phase *phase_value, const char *phase,
-                unsigned int line_number, const char *filename, Error *err)
+                unsigned int line_number, const char *filename, GT_Error *err)
 {
   assert(phase && filename);
   error_check(err);
@@ -231,7 +231,7 @@ int parse_phase(Phase *phase_value, const char *phase,
 }
 
 int parse_int_line(int *int_value, const char *integer,
-                   unsigned int line_number, const char *filename, Error *err)
+                   unsigned int line_number, const char *filename, GT_Error *err)
 {
   int rval;
 

@@ -120,7 +120,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
                const uint32_t *extHeaderSizes,
                headerWriteFunc *extHeaderCallbacks,
                void **headerCBData,
-               Error *err);
+               GT_Error *err);
 
 static inline int
 tryMMapOfIndex(struct onDiskBlockCompIdx *idxData);
@@ -181,7 +181,7 @@ appendCallBackOutput(struct appendState *state,
                      const struct blockCompositionSeq *seqIdx,
                      bitInsertFunc biFunc, Seqpos start, Seqpos len,
                      unsigned callBackDataOffsetBits, void *cbState,
-                     Error *err);
+                     GT_Error *err);
 
 typedef Seqpos partialSymSum;
 
@@ -285,7 +285,7 @@ writeOutputBuffer(struct blockCompositionSeq *newSeqIdx,
                   struct appendState *aState, bitInsertFunc biFunc,
                   Seqpos lastUpdatePos, size_t bucketLen,
                   unsigned callBackDataOffsetBits, void *cbState,
-                  const partialSymSum *buckLast, Error *err)
+                  const partialSymSum *buckLast, GT_Error *err)
 {
   if (biFunc)
     if (appendCallBackOutput(aState, newSeqIdx, biFunc,
@@ -325,7 +325,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      headerWriteFunc *extHeaderCallbacks,
                      void **headerCBData,
                      bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                     varExtBitsEstimator biVarBits, void *cbState, Error *err)
+                     varExtBitsEstimator biVarBits, void *cbState, GT_Error *err)
 {
   struct blockCompositionSeq *newSeqIdx = NULL;
   AlphabetRangeSize blockMapAlphabetSize, totalAlphabetSize;
@@ -523,7 +523,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
   /* At this point everything should be ready to receive the actual sequence
    * information, steps: */
   {
-    int hadError = 0;
+    int hadGT_Error = 0;
     do
     {
       {
@@ -554,7 +554,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             readResult = SDRRead(BWTGenerator, block, blockSize, err);
             if (readResult != blockSize)
             {
-              hadError = 1;
+              hadGT_Error = 1;
               perror("error condition while reading index data");
               break;
             }
@@ -573,7 +573,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                                     bucketLen, callBackDataOffsetBits, cbState,
                                     buckLast, err) < 0)
               {
-                hadError = 1;
+                hadGT_Error = 1;
                 break;
               }
               /* update retained data */
@@ -582,7 +582,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             }
           }
           /* handle last chunk */
-          if (!hadError)
+          if (!hadGT_Error)
           {
             Seqpos symbolsLeft = totalLen % blockSize;
             if (symbolsLeft)
@@ -591,7 +591,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
               readResult = SDRRead(BWTGenerator, block, symbolsLeft, err);
               if (readResult < symbolsLeft)
               {
-                hadError = 1;
+                hadGT_Error = 1;
                 perror("error condition while reading index data");
                 newBlockEncIdxSeqLoopErr();
               }
@@ -616,13 +616,13 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                                     callBackDataOffsetBits, cbState,
                                     buckLast, err) < 0)
               {
-                hadError = 1;
+                hadGT_Error = 1;
                 break;
               }
             }
             if (!finalizeIdxOutput(newSeqIdx, &aState))
             {
-              hadError = 1;
+              hadGT_Error = 1;
               perror("error condition while writing block-compressed"
                      " index data");
               newBlockEncIdxSeqLoopErr();
@@ -631,21 +631,21 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                                 extHeaderSizes, extHeaderCallbacks,
                                 headerCBData, err))
             {
-              hadError = 1;
+              hadGT_Error = 1;
               perror("error condition while writing block-compressed"
                      " index header");
               newBlockEncIdxSeqLoopErr();
             }
             if (fflush(newSeqIdx->externalData.idxFP))
             {
-              hadError = 1;
+              hadGT_Error = 1;
               perror("error condition while writing block-compressed"
                      " index header");
               newBlockEncIdxSeqLoopErr();
             }
             tryMMapOfIndex(&newSeqIdx->externalData);
           }
-          if (hadError)
+          if (hadGT_Error)
           {
             newBlockEncIdxSeqLoopErr();
           }
@@ -661,7 +661,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
       }
     } while (0);
     /* close bwttab and suffix array */
-    if (hadError)
+    if (hadGT_Error)
       newBlockEncIdxSeqErrRet();
   }
   return &(newSeqIdx->baseClass);
@@ -1787,7 +1787,7 @@ appendCallBackOutput(struct appendState *state,
                      const struct blockCompositionSeq *seqIdx,
                      bitInsertFunc biFunc, Seqpos start, Seqpos len,
                      unsigned callBackDataOffsetBits, void *cbState,
-                     Error *err)
+                     GT_Error *err)
 {
   BitOffset bitsWritten;
   assert(state);
@@ -1971,7 +1971,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
                size_t numExtHeaders, const uint16_t *headerIDs,
                const uint32_t *extHeaderSizes,
                headerWriteFunc *extHeaderCallbacks,
-               void **headerCBData, UNUSED Error *err)
+               void **headerCBData, UNUSED GT_Error *err)
 {
   FILE *fp;
   /* construct memory buffer with header data */
@@ -2098,7 +2098,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
 
 extern struct encIdxSeq *
 loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
-                      const Str *projectName, int features, Error *err)
+                      const Str *projectName, int features, GT_Error *err)
 {
   struct blockCompositionSeq *newSeqIdx = NULL;
   Symbol blockMapAlphabetSize, totalAlphabetSize;

@@ -99,7 +99,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                             int *parsed_args,
                             int argc,
                             const char **argv,
-                            Error *err)
+                            GT_Error *err)
 {
   OptionParser *op;
   Option *optionstream, *optionverbose, *optionscantrials,
@@ -173,7 +173,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
   return oprval;
 }
 
-int gt_sfxmap(int argc, const char **argv, Error *err)
+int gt_sfxmap(int argc, const char **argv, GT_Error *err)
 {
   Str *indexname;
   bool haserr = false;

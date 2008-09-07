@@ -25,10 +25,10 @@
 
 /*
   This module contains wrappers for the functions from the standard library we
-  use. These functions always set the given Error object accordingly if an error
+  use. These functions always set the given GT_Error object accordingly if an error
   occurs.
 */
 
-FILE* efopen(const char *path, const char *mode, Error*);
+FILE* efopen(const char *path, const char *mode, GT_Error*);
 
 #endif

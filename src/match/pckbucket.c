@@ -216,7 +216,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
 #define PCKBUCKETTABLE ".pbt"
 
 int pckbucket2file(const Str *indexname,const Pckbuckettable *pckbuckettable,
-                   Error *err)
+                   GT_Error *err)
 {
   FILE *fp;
   Seqpos seqposmaxdepth;
@@ -249,7 +249,7 @@ bool pckbuckettableexists(const Str *indexname)
 
 Pckbuckettable *mappckbuckettable(const Str *indexname,
                                   unsigned int numofchars,
-                                  Error *err)
+                                  GT_Error *err)
 {
   Str *tmpfilename;
   size_t numofbytes;

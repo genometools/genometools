@@ -32,7 +32,7 @@ struct GenomeNodeClass
   Range (*get_range)(GenomeNode*);
   void  (*set_range)(GenomeNode*, Range);
   void  (*change_seqid)(GenomeNode*, Str*);
-  int   (*accept)(GenomeNode*, GenomeVisitor*, Error*);
+  int   (*accept)(GenomeNode*, GenomeVisitor*, GT_Error*);
 };
 
 struct GenomeNode

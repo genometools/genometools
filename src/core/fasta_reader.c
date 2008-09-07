@@ -40,7 +40,7 @@ int fasta_reader_run(FastaReader *fr,
                      FastaReaderProcDescription proc_description,
                      FastaReaderProcSequencePart proc_sequence_part,
                      FastaReaderProcSequenceLength proc_sequence_length,
-                     void *data, Error *err)
+                     void *data, GT_Error *err)
 {
   error_check(err);
   assert(fr && fr->c_class && fr->c_class->run);

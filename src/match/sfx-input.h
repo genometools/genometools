@@ -42,12 +42,12 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                          Measuretime *mtime,
                          const Suffixeratoroptions *so,
                          Verboseinfo *verboseinfo,
-                         Error *err);
+                         GT_Error *err);
 
 int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                         const Str *indexname,
                         Verboseinfo *verboseinfo,
-                        Error *err);
+                        GT_Error *err);
 
 void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo,bool mapped);
 

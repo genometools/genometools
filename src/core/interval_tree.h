@@ -53,6 +53,6 @@ int               interval_tree_traverse(IntervalTree *it,
                                          IntervalTreeIteratorFunc func,
                                          void *data);
 void              interval_tree_delete(IntervalTree*);
-int               interval_tree_unit_test(Error*);
+int               interval_tree_unit_test(GT_Error*);
 
 #endif

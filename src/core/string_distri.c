@@ -83,7 +83,7 @@ typedef struct {
 
 static enum iterator_op
 foreach_iterfunc(char *key, unsigned long occurrences, void *data,
-                 UNUSED Error *err)
+                 UNUSED GT_Error *err)
 {
   ForeachInfo *info;
   error_check(err);

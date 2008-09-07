@@ -58,7 +58,7 @@ static void sequence_node_change_seqid(GenomeNode *gn, Str *seqid)
   sn->description = str_ref(seqid);
 }
 
-static int sequence_node_accept(GenomeNode *gn, GenomeVisitor *gv, Error *err)
+static int sequence_node_accept(GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
   SequenceNode *sn;
   error_check(err);

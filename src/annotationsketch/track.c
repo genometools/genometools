@@ -143,7 +143,7 @@ int track_sketch(Track* track, GT_Canvas *canvas)
   return 0;
 }
 
-int track_unit_test(Error *err)
+int track_unit_test(GT_Error *err)
 {
   int had_err = 0;
   GT_Block *b1, *b2, *b3, *b4;

@@ -33,7 +33,7 @@ GT_Canvas*    gt_canvas_new(GT_Style *style, GraphicsOutType output_type,
 unsigned long gt_canvas_get_height(GT_Canvas *canvas);
 /* Write rendered <canvas> to file with name <filename>. */
 int           gt_canvas_to_file(GT_Canvas *canvas, const char *filename,
-                                Error*);
+                                GT_Error*);
 /* Append rendered <canvas> to given <stream>. */
 int           gt_canvas_to_stream(GT_Canvas *canvas, Str *stream);
 /* Delete the given <canvas>. */

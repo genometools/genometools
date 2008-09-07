@@ -21,6 +21,6 @@
 #include "core/error.h"
 
 extern int
-gt_packedindex_mkctxmap(int argc, const char *argv[], Error *error);
+gt_packedindex_mkctxmap(int argc, const char *argv[], GT_Error *error);
 
 #endif

@@ -7,19 +7,19 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       Readmode readmode,
                       unsigned int searchlength,
                       int(*processmaxpairs)(void *,Seqpos,Seqpos,
-                                            Seqpos,Error *),
+                                            Seqpos,GT_Error *),
                       void *processmaxpairsinfo,
                       Verboseinfo *verboseinfo,
-                      Error *err);
+                      GT_Error *err);
 
 int callenummaxpairs(const Str *indexname,
                      unsigned int userdefinedleastlength,
                      bool scanfile,
                      int(*processmaxpairs)(void *,Seqpos,Seqpos,
-                                           Seqpos,Error *),
+                                           Seqpos,GT_Error *),
                      void *processmaxpairsinfo,
                      Verboseinfo *verboseinfo,
-                     Error *err);
+                     GT_Error *err);
 
 #ifdef __cplusplus
 }

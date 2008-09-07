@@ -173,7 +173,7 @@ void ma_free_func(void *ptr)
 }
 
 static int check_space_leak(UNUSED void *key, void *value, void *data,
-                            UNUSED Error *err)
+                            UNUSED GT_Error *err)
 {
   CheckSpaceLeakInfo *info = (CheckSpaceLeakInfo*) data;
   MAInfo *mainfo = (MAInfo*) value;
