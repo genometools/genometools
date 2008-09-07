@@ -1262,7 +1262,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* process the reality stream completely */
   while (!(had_err = genome_stream_next_tree(se->reality, &gn, err)) && gn) {
-    sr = gt_genome_node_cast(sequence_region_class(), gn);
+    sr = gt_genome_node_cast(gt_sequence_regionclass(), gn);
     if (sr) {
       /* each sequence region gets its own ``slot'' */
       if (!(slot = hashmap_get(se->slots, str_get(gt_genome_node_get_seqid(gn)))))

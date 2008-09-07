@@ -41,7 +41,7 @@ static int feature_index_lua_add_sequence_region(lua_State *L)
   assert(L);
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
-  sr = gt_genome_node_cast(sequence_region_class(), *gn);
+  sr = gt_genome_node_cast(gt_sequence_regionclass(), *gn);
   luaL_argcheck(L, sr, 2, "not a sequence region");
   gt_feature_index_add_sequence_region(*fi, sr);
   return 0;

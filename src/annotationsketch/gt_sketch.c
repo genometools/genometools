@@ -175,7 +175,7 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
   GT_FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
   const char *file, *seqid = NULL;
-  GT_Range qry_range, sequence_region_range;
+  GT_Range qry_range, gt_sequence_regionrange;
   GT_Array *results = NULL;
   GT_Style *sty = NULL;
   Str *gt_style_file = NULL;
@@ -272,13 +272,13 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
 
   results = gt_array_new(sizeof (GT_GenomeNode*));
   if (!had_err) {
-    gt_feature_index_get_range_for_seqid(features, &sequence_region_range,
+    gt_feature_index_get_range_for_seqid(features, &gt_sequence_regionrange,
                                          seqid);
     qry_range.start = (arguments.start == UNDEF_ULONG ?
-                         sequence_region_range.start :
+                         gt_sequence_regionrange.start :
                          arguments.start);
     qry_range.end   = (arguments.end == UNDEF_ULONG ?
-                         sequence_region_range.end :
+                         gt_sequence_regionrange.end :
                          arguments.end);
   }
 

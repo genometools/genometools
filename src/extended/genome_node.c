@@ -46,8 +46,8 @@ static int compare_gt_genome_node_type(GT_GenomeNode *gn_a, GT_GenomeNode *gn_b)
   void *sr_a, *sr_b, *sn_a, *sn_b;
 
   /* sequence regions first */
-  sr_a = gt_genome_node_cast(sequence_region_class(), gn_a);
-  sr_b = gt_genome_node_cast(sequence_region_class(), gn_b);
+  sr_a = gt_genome_node_cast(gt_sequence_regionclass(), gn_a);
+  sr_b = gt_genome_node_cast(gt_sequence_regionclass(), gn_b);
 
   if (sr_a && !sr_b)
     return -1;
@@ -717,8 +717,8 @@ bool genome_nodes_are_equal_sequence_regions(GT_GenomeNode *gn_a, GT_GenomeNode 
 {
   void *sr_a, *sr_b;
 
-  sr_a = gn_a ? gt_genome_node_cast(sequence_region_class(), gn_a) : NULL;
-  sr_b = gn_b ? gt_genome_node_cast(sequence_region_class(), gn_b) : NULL;
+  sr_a = gn_a ? gt_genome_node_cast(gt_sequence_regionclass(), gn_a) : NULL;
+  sr_b = gn_b ? gt_genome_node_cast(gt_sequence_regionclass(), gn_b) : NULL;
 
   if (sr_a && sr_b && !str_cmp(gt_genome_node_get_seqid(gn_a),
                                gt_genome_node_get_seqid(gn_b))) {

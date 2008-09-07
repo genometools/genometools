@@ -673,8 +673,8 @@ int gt_diagram_unit_test(GT_Error *err)
   seqid1 = str_new_cstr("test1");
   seqid2 = str_new_cstr("test2");
 
-  sr1 = (GT_SequenceRegion*) sequence_region_new(seqid1, rs);
-  sr2 = (GT_SequenceRegion*) sequence_region_new(seqid2, rs);
+  sr1 = (GT_SequenceRegion*) gt_sequence_regionnew(seqid1, rs);
+  sr2 = (GT_SequenceRegion*) gt_sequence_regionnew(seqid2, rs);
 
   gn1 = genome_feature_new(seqid1, gene_type, r1, STRAND_UNKNOWN);
 
