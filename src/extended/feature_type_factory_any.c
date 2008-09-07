@@ -29,12 +29,12 @@ struct FeatureTypeFactoryAny {
 #define feature_type_factory_any_cast(FTF)\
         feature_type_factory_cast(feature_type_factory_any_class(), FTF)
 
-static GenomeFeatureType*
+static GT_GenomeFeatureType*
 feature_type_factory_any_create_gft(FeatureTypeFactory *ftf,
                                         const char *type)
 {
   FeatureTypeFactoryAny *ftfa;
-  GenomeFeatureType *gft = NULL;
+  GT_GenomeFeatureType *gft = NULL;
   assert(ftf && type);
   ftfa = feature_type_factory_any_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {

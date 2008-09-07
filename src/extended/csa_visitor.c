@@ -31,7 +31,7 @@ struct CSAVisitor {
   Queue *gt_genome_node_buffer;
   unsigned long join_length;
   GT_Array *cluster;
-  GenomeFeature *buffered_feature;
+  GT_GenomeFeature *buffered_feature;
   GT_Range first_range,
         second_range;
   Str *first_str,
@@ -50,7 +50,7 @@ static void csa_visitor_free(GenomeVisitor *gv)
   str_delete(csa_visitor->gt_csa_source_str);
 }
 
-static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
+static int csa_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
                                       UNUSED GT_Error *err)
 {
   CSAVisitor *csa_visitor;
@@ -143,7 +143,7 @@ GenomeVisitor* csa_visitor_new(unsigned long join_length)
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   csa_visitor->gt_genome_node_buffer = queue_new();
   csa_visitor->join_length = join_length;
-  csa_visitor->cluster = gt_array_new(sizeof (GenomeFeature*));
+  csa_visitor->cluster = gt_array_new(sizeof (GT_GenomeFeature*));
   csa_visitor->buffered_feature = NULL;
   csa_visitor->gt_csa_source_str = str_new_cstr(GT_CSA_SOURCE_TAG);
   return gv;
@@ -164,21 +164,21 @@ GT_GenomeNode* csa_visitor_get_node(GenomeVisitor *gv)
 
 static GT_Range get_genomic_range(const void *sa)
 {
-  GenomeFeature *gf = *(GenomeFeature**) sa;
+  GT_GenomeFeature *gf = *(GT_GenomeFeature**) sa;
   assert(gf && genome_feature_has_type(gf, gft_gene));
   return gt_genome_node_get_range((GT_GenomeNode*) gf);
 }
 
 static Strand get_strand(const void *sa)
 {
-  GenomeFeature *gf = *(GenomeFeature**) sa;
+  GT_GenomeFeature *gf = *(GT_GenomeFeature**) sa;
   assert(gf && genome_feature_has_type(gf, gft_gene));
   return genome_feature_get_strand(gf);
 }
 
 static int save_exon(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
 {
-  GenomeFeature *gf = (GenomeFeature*) gn;
+  GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
   GT_Array *exon_ranges = (GT_Array*) data;
   GT_Range range;
   gt_error_check(err);
@@ -192,7 +192,7 @@ static int save_exon(GT_GenomeNode *gn, void *data, UNUSED GT_Error *err)
 
 static void get_exons(GT_Array *exon_ranges, const void *sa)
 {
-  GenomeFeature *gf = *(GenomeFeature**) sa;
+  GT_GenomeFeature *gf = *(GT_GenomeFeature**) sa;
   int had_err;
   assert(exon_ranges && gf && genome_feature_has_type(gf, gft_gene));
   had_err = gt_genome_node_traverse_children((GT_GenomeNode*) gf, exon_ranges,
@@ -205,32 +205,32 @@ static void get_exons(GT_Array *exon_ranges, const void *sa)
 }
 
 static void add_sa_to_exon_feature_array(GT_Array *exon_nodes,
-                                         GenomeFeature *sa,
+                                         GT_GenomeFeature *sa,
                                          Str *seqid,
                                          Str *gt_csa_source_str,
                                          Strand gene_strand,
-                                         GenomeFeatureType *exon_type)
+                                         GT_GenomeFeatureType *exon_type)
 {
   GT_Array *exons_from_sa;
   unsigned long i,
                 exon_feature_index = 0,
                 exons_from_sa_index = 0;
-  GenomeFeature *exon_feature, *exons_from_sa_feature;
+  GT_GenomeFeature *exon_feature, *exons_from_sa_feature;
   GT_GenomeNode *new_feature;
   GT_Range exon_feature_range, exons_from_sa_range;
 
   assert(exon_nodes && sa);
   assert(gene_strand != STRAND_BOTH); /* is defined */
 
-  exons_from_sa = gt_array_new(sizeof (GenomeFeature*));
+  exons_from_sa = gt_array_new(sizeof (GT_GenomeFeature*));
   genome_feature_get_exons(sa, exons_from_sa);
   genome_nodes_sort(exons_from_sa);
 
   while (exon_feature_index < gt_array_size(exon_nodes) &&
          exons_from_sa_index < gt_array_size(exons_from_sa)) {
-    exon_feature = *(GenomeFeature**)
+    exon_feature = *(GT_GenomeFeature**)
                    gt_array_get(exon_nodes, exon_feature_index);
-    exons_from_sa_feature = *(GenomeFeature**)
+    exons_from_sa_feature = *(GT_GenomeFeature**)
                             gt_array_get(exons_from_sa, exons_from_sa_index);
 
     exon_feature_range = gt_genome_node_get_range((GT_GenomeNode*) exon_feature);
@@ -297,14 +297,14 @@ static void add_sa_to_exon_feature_array(GT_Array *exon_nodes,
 
   /* add remaining exons */
   for (i = exons_from_sa_index; i < gt_array_size(exons_from_sa); i++) {
-    exons_from_sa_feature = *(GenomeFeature**) gt_array_get(exons_from_sa, i);
+    exons_from_sa_feature = *(GT_GenomeFeature**) gt_array_get(exons_from_sa, i);
     new_feature =
       genome_feature_new(seqid, exon_type,
                          gt_genome_node_get_range((GT_GenomeNode*)
                                                exons_from_sa_feature),
                          gene_strand);
     if (genome_feature_score_is_defined(exons_from_sa_feature)) {
-      genome_feature_set_score((GenomeFeature*) new_feature,
+      genome_feature_set_score((GT_GenomeFeature*) new_feature,
                                genome_feature_get_score(exons_from_sa_feature));
     }
     genome_feature_set_source(new_feature, gt_csa_source_str);
@@ -332,7 +332,7 @@ static bool genome_nodes_are_sorted_and_do_not_overlap(GT_Array *exon_nodes)
 }
 #endif
 
-static void mRNA_set_target_attribute(GenomeFeature *mRNA_feature,
+static void mRNA_set_target_attribute(GT_GenomeFeature *mRNA_feature,
                                       const CSASpliceForm *csa_splice_form)
 {
   unsigned long i;
@@ -354,8 +354,8 @@ static void mRNA_set_target_attribute(GenomeFeature *mRNA_feature,
 
 static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
                                        Str *gt_csa_source_str,
-                                       GenomeFeatureType *mRNA_type,
-                                       GenomeFeatureType *exon_type)
+                                       GT_GenomeFeatureType *mRNA_type,
+                                       GT_GenomeFeatureType *exon_type)
 {
   GT_GenomeNode *mRNA_feature;
   GT_Array *exon_nodes;
@@ -373,13 +373,13 @@ static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
                                  csa_splice_form_genomic_range(csa_splice_form),
                                     csa_splice_form_strand(csa_splice_form));
   genome_feature_set_source(mRNA_feature, gt_csa_source_str);
-  mRNA_set_target_attribute((GenomeFeature*) mRNA_feature, csa_splice_form);
+  mRNA_set_target_attribute((GT_GenomeFeature*) mRNA_feature, csa_splice_form);
 
   /* create exon features */
   exon_nodes = gt_array_new(sizeof (GT_GenomeNode*));
   for (i = 0; i < csa_splice_form_num_of_sas(csa_splice_form); i++) {
     add_sa_to_exon_feature_array(exon_nodes,
-                                 *(GenomeFeature**)
+                                 *(GT_GenomeFeature**)
                                  csa_splice_form_get_sa(csa_splice_form, i),
                                  seqid, gt_csa_source_str, strand, exon_type);
   }
@@ -399,9 +399,9 @@ static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
 
 static GT_GenomeNode* create_gene_feature(CSAGene *csa_gene,
                                        Str *gt_csa_source_str,
-                                       GenomeFeatureType *gene_type,
-                                       GenomeFeatureType *mRNA_type,
-                                       GenomeFeatureType *exon_type)
+                                       GT_GenomeFeatureType *gene_type,
+                                       GT_GenomeFeatureType *mRNA_type,
+                                       GT_GenomeFeatureType *exon_type)
 {
   GT_GenomeNode *gene_feature, *mRNA_feature;
   unsigned long i;
@@ -427,9 +427,9 @@ static GT_GenomeNode* create_gene_feature(CSAGene *csa_gene,
 
 static void process_csa_genes(Queue *gt_genome_node_buffer, GT_Array *csa_genes,
                               Str *gt_csa_source_str,
-                              GenomeFeatureType *gene_type,
-                              GenomeFeatureType *mRNA_type,
-                              GenomeFeatureType *exon_type)
+                              GT_GenomeFeatureType *gene_type,
+                              GT_GenomeFeatureType *mRNA_type,
+                              GT_GenomeFeatureType *exon_type)
 {
   unsigned long i;
   assert(csa_genes);
@@ -445,8 +445,8 @@ static void process_csa_genes(Queue *gt_genome_node_buffer, GT_Array *csa_genes,
 void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
-  GenomeFeature *first_feature;
-  GenomeFeatureType *gene_type, *mRNA_type, *exon_type;
+  GT_GenomeFeature *first_feature;
+  GT_GenomeFeatureType *gene_type, *mRNA_type, *exon_type;
   GT_Array *csa_genes;
   unsigned long i;
 
@@ -465,10 +465,10 @@ void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster)
   }
 
   /* compute the consensus spliced alignments */
-  first_feature = *(GenomeFeature**) gt_array_get_first(csa_visitor->cluster);
+  first_feature = *(GT_GenomeFeature**) gt_array_get_first(csa_visitor->cluster);
   csa_genes = csa_variable_strands(gt_array_get_space(csa_visitor->cluster),
                                    gt_array_size(csa_visitor->cluster),
-                                   sizeof (GenomeFeature*), get_genomic_range,
+                                   sizeof (GT_GenomeFeature*), get_genomic_range,
                                    get_strand, get_exons);
 
   gene_type = genome_feature_create_gft(first_feature, gft_gene);

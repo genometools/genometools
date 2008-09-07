@@ -25,7 +25,7 @@
 
 struct FeatureTypeFactoryClass {
   size_t size;
-  GenomeFeatureType* (*create_gft)(FeatureTypeFactory*, const char *type);
+  GT_GenomeFeatureType* (*create_gft)(FeatureTypeFactory*, const char *type);
   void               (*free)(FeatureTypeFactory*);
 };
 

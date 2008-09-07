@@ -20,13 +20,13 @@
 #include "extended/region_mapping.h"
 #include "extended/reverse.h"
 
-static int extract_join_feature(GT_GenomeNode *gn, GenomeFeatureType *type,
+static int extract_join_feature(GT_GenomeNode *gn, GT_GenomeFeatureType *type,
                                 RegionMapping *region_mapping, Str *sequence,
                                 bool *reverse_strand, GT_Error *err)
 {
   const char *raw_sequence;
   unsigned long raw_sequence_length;
-  GenomeFeature *gf;
+  GT_GenomeFeature *gf;
   GT_Range range;
   int had_err = 0;
 
@@ -57,10 +57,10 @@ static int extract_join_feature(GT_GenomeNode *gn, GenomeFeatureType *type,
 }
 
 int extract_feat_sequence(Str *sequence, GT_GenomeNode *gn,
-                          GenomeFeatureType *type, bool join,
+                          GT_GenomeFeatureType *type, bool join,
                           RegionMapping *region_mapping, GT_Error *err)
 {
-  GenomeFeature *gf;
+  GT_GenomeFeature *gf;
   GT_Range range;
   const char *raw_sequence;
   unsigned long raw_sequence_length;

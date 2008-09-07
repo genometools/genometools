@@ -76,7 +76,7 @@ int line_sketch(Line *line, GT_Canvas *canvas)
 int line_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
-  GenomeFeatureType *type;
+  GT_GenomeFeatureType *type;
   GT_Range r1, r2, r3, r4, r_parent;
   GT_Array* blocks;
   Str *seqid1, *seqid2, *seqid3;
@@ -124,11 +124,11 @@ int line_unit_test(GT_Error *err)
   l1 = line_new();
   l2 = line_new();
 
-  genome_feature_add_attribute((GenomeFeature*) parent, "Name", foo);
-  genome_feature_add_attribute((GenomeFeature*) gn1, "Name", bar);
-  genome_feature_add_attribute((GenomeFeature*) gn2, "Name", bar);
-  genome_feature_add_attribute((GenomeFeature*) gn3, "Name", blub);
-  genome_feature_add_attribute((GenomeFeature*) gn4, "Name", bar);
+  genome_feature_add_attribute((GT_GenomeFeature*) parent, "Name", foo);
+  genome_feature_add_attribute((GT_GenomeFeature*) gn1, "Name", bar);
+  genome_feature_add_attribute((GT_GenomeFeature*) gn2, "Name", bar);
+  genome_feature_add_attribute((GT_GenomeFeature*) gn3, "Name", blub);
+  genome_feature_add_attribute((GT_GenomeFeature*) gn4, "Name", bar);
 
   b1 = gt_block_new();
   b2 = gt_block_new();

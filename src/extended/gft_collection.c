@@ -42,13 +42,13 @@ void gft_collection_delete(GFTCollection *gftc)
 }
 
 void gft_collection_add(GFTCollection *gftc, const char *type,
-                         GenomeFeatureType *gft)
+                         GT_GenomeFeatureType *gft)
 {
   assert(gftc && type && gft);
   hashmap_add(gftc->genome_feature_types, cstr_dup(type), gft);
 }
 
-GenomeFeatureType* gft_collection_get(GFTCollection *gftc, const char *type)
+GT_GenomeFeatureType* gft_collection_get(GFTCollection *gftc, const char *type)
 {
   assert(gftc && type);
   return hashmap_get(gftc->genome_feature_types, type);

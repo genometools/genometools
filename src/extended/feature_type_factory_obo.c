@@ -38,11 +38,11 @@ static void feature_type_factory_obo_free(FeatureTypeFactory *ftf)
   cstr_table_delete(ftfo->genome_feature_types);
 }
 
-static GenomeFeatureType*
+static GT_GenomeFeatureType*
 feature_type_factory_obo_create_gft(FeatureTypeFactory *ftf, const char *type)
 {
   FeatureTypeFactoryOBO *ftfo;
-  GenomeFeatureType *gft;
+  GT_GenomeFeatureType *gft;
   assert(ftf && type);
   ftfo = feature_type_factory_obo_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {

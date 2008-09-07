@@ -36,21 +36,21 @@ static bool nodes_are_equal_feature_trees(GT_GenomeNode *first_node,
 {
   bool equal = false;
   GT_GenomeNodeIterator *gni_a, *gni_b;
-  GenomeFeature *gf_a, *gf_b;
+  GT_GenomeFeature *gf_a, *gf_b;
   gf_a = gt_genome_node_cast(genome_feature_class(), first_node);
   gf_b = gt_genome_node_cast(genome_feature_class(), second_node);
   if (gf_a && gf_b) {
     gni_a = gt_genome_node_iterator_new(first_node);
     gni_b = gt_genome_node_iterator_new(second_node);
-    for (gf_a = (GenomeFeature*) gt_genome_node_iterator_next(gni_a),
-         gf_b = (GenomeFeature*) gt_genome_node_iterator_next(gni_b);
+    for (gf_a = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_a),
+         gf_b = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_b);
          gf_a && gf_b;
-         gf_a = (GenomeFeature*) gt_genome_node_iterator_next(gni_a),
-         gf_b = (GenomeFeature*) gt_genome_node_iterator_next(gni_b)) {
+         gf_a = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_a),
+         gf_b = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_b)) {
       if (!gf_b || !genome_features_are_similar(gf_a, gf_b))
         break;
     }
-    gf_b = (GenomeFeature*) gt_genome_node_iterator_next(gni_b);
+    gf_b = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_b);
     if (!gf_a && !gf_b)
       equal = true;
     gt_genome_node_iterator_delete(gni_a);
@@ -67,12 +67,12 @@ static bool uniq(GT_GenomeNode **first_node, GT_GenomeNode **second_node)
   assert(*first_node && *second_node);
   if (nodes_are_equal_feature_trees(*first_node, *second_node)) {
     if ((first_score_is_defined =
-           genome_feature_score_is_defined((GenomeFeature*) *first_node))) {
-      first_score = genome_feature_get_score((GenomeFeature*) *first_node);
+           genome_feature_score_is_defined((GT_GenomeFeature*) *first_node))) {
+      first_score = genome_feature_get_score((GT_GenomeFeature*) *first_node);
     }
     if ((second_score_is_defined =
-           genome_feature_score_is_defined((GenomeFeature*) *second_node))) {
-      second_score = genome_feature_get_score((GenomeFeature*) *second_node);
+           genome_feature_score_is_defined((GT_GenomeFeature*) *second_node))) {
+      second_score = genome_feature_get_score((GT_GenomeFeature*) *second_node);
     }
     if ((!first_score_is_defined && !second_score_is_defined) ||
         (first_score_is_defined && !second_score_is_defined) ||

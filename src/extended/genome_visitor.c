@@ -46,7 +46,7 @@ int genome_visitor_visit_comment(GenomeVisitor *gv, GT_Comment *c, GT_Error *err
   return 0;
 }
 
-int genome_visitor_visit_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
+int genome_visitor_visit_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
                                         GT_Error *err)
 {
   gt_error_check(err);

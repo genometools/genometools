@@ -25,12 +25,12 @@ struct GT_RecMap {
          nw_y,
          se_x,
          se_y;
-  GenomeFeature *gf;
+  GT_GenomeFeature *gf;
   bool has_omitted_children;
 };
 
 GT_RecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
-                         GenomeFeature*);
+                         GT_GenomeFeature*);
 int        gt_recmap_format_html_imagemap_coords(const GT_RecMap*, char*,
                                                  size_t);
 void       gt_recmap_delete(GT_RecMap*);

@@ -71,12 +71,12 @@ static const char* find_type(const char *gft_string)
   return NULL;
 }
 
-static GenomeFeatureType*
+static GT_GenomeFeatureType*
 feature_type_factory_builtin_create_gft(FeatureTypeFactory *ftf,
                                         const char *type)
 {
   FeatureTypeFactoryBuiltin *ftfb;
-  GenomeFeatureType *gft = NULL;
+  GT_GenomeFeatureType *gft = NULL;
   assert(ftf && type);
   ftfb = feature_type_factory_builtin_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {

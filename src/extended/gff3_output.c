@@ -19,10 +19,10 @@
 #include "core/undef.h"
 #include "extended/gff3_output.h"
 
-void gff3_output_leading(GenomeFeature *gf, GenFile *outfp)
+void gff3_output_leading(GT_GenomeFeature *gf, GenFile *outfp)
 {
   GT_GenomeNode *gn;
-  GenomeFeatureType *type;
+  GT_GenomeFeatureType *type;
 
   assert(gf);
 

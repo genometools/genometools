@@ -28,8 +28,8 @@ GFTCollection*     gft_collection_new(void);
 void               gft_collection_delete(GFTCollection*);
 /* Takes ownership of <gft>. */
 void               gft_collection_add(GFTCollection*, const char *type,
-                                      GenomeFeatureType *gft);
-GenomeFeatureType* gft_collection_get(GFTCollection*, const char *type);
+                                      GT_GenomeFeatureType *gft);
+GT_GenomeFeatureType* gft_collection_get(GFTCollection*, const char *type);
 /* Returns a GT_StrArray which contains all type names in alphabetical order
    which are stored in this collection.
    The caller is responsible to free it! */

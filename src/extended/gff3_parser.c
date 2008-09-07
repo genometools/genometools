@@ -63,7 +63,7 @@ static AutomaticGT_SequenceRegion* automatic_gt_sequence_regionnew(void)
 {
   AutomaticGT_SequenceRegion *auto_sr;
   auto_sr = ma_malloc(sizeof (AutomaticGT_SequenceRegion));
-  auto_sr->genome_features = gt_array_new(sizeof (GenomeFeature*));
+  auto_sr->genome_features = gt_array_new(sizeof (GT_GenomeFeature*));
   return auto_sr;
 }
 
@@ -373,8 +373,8 @@ static void update_pseudo_node_range(GT_GenomeNode *pseudo_node,
                                      GT_GenomeNode *genome_feature)
 {
   assert(pseudo_node && genome_feature);
-  assert(genome_feature_is_pseudo((GenomeFeature*) pseudo_node));
-  assert(!genome_feature_is_pseudo((GenomeFeature*) genome_feature));
+  assert(genome_feature_is_pseudo((GT_GenomeFeature*) pseudo_node));
+  assert(!genome_feature_is_pseudo((GT_GenomeFeature*) genome_feature));
   gt_genome_node_set_range(pseudo_node,
                         gt_range_join(gt_genome_node_get_range(pseudo_node),
                                    gt_genome_node_get_range(genome_feature)));
@@ -385,8 +385,8 @@ static void gt_genome_node_is_part_of_pseudo_node(GT_GenomeNode *pseudo_node,
                                                FeatureInfo *feature_info)
 {
   const char *id;
-  assert(pseudo_node && genome_feature_is_pseudo((GenomeFeature*) pseudo_node));
-  assert(child && !genome_feature_is_pseudo((GenomeFeature*) child));
+  assert(pseudo_node && genome_feature_is_pseudo((GT_GenomeFeature*) pseudo_node));
+  assert(child && !genome_feature_is_pseudo((GT_GenomeFeature*) child));
   assert(feature_info);
   gt_genome_node_is_part_of_genome_node(pseudo_node, child);
   id = genome_feature_get_attribute(child, ID_STRING);
@@ -420,13 +420,13 @@ static int store_id(const char *id, GT_GenomeNode *genome_feature, bool *is_chil
       bool has_parent ;
       has_parent = genome_feature_get_attribute(gn, PARENT_STRING)
                    ? true : false;
-      assert(!genome_feature_is_pseudo((GenomeFeature*) gn));
+      assert(!genome_feature_is_pseudo((GT_GenomeFeature*) gn));
       pseudo_parent = feature_info_get_pseudo_parent(parser->feature_info, id);
-      if (pseudo_parent || !genome_feature_is_multi((GenomeFeature*) gn)) {
+      if (pseudo_parent || !genome_feature_is_multi((GT_GenomeFeature*) gn)) {
         if (!pseudo_parent) {
-          genome_feature_make_multi_representative((GenomeFeature*) gn);
+          genome_feature_make_multi_representative((GT_GenomeFeature*) gn);
           if (!has_parent) { /* create pseudo node */
-            GT_GenomeNode *pseudo_node = genome_feature_new_pseudo((GenomeFeature*)
+            GT_GenomeNode *pseudo_node = genome_feature_new_pseudo((GT_GenomeFeature*)
                                                                 gn);
             gt_genome_node_is_part_of_pseudo_node(pseudo_node, gn,
                                                parser->feature_info);
@@ -444,11 +444,11 @@ static int store_id(const char *id, GT_GenomeNode *genome_feature, bool *is_chil
       }
       else {
         assert(has_parent);
-        assert(genome_feature_get_multi_representative((GenomeFeature*) gn) ==
-               (GenomeFeature*) gn);
+        assert(genome_feature_get_multi_representative((GT_GenomeFeature*) gn) ==
+               (GT_GenomeFeature*) gn);
       }
-      genome_feature_set_multi_representative((GenomeFeature*) genome_feature,
-                                              (GenomeFeature*) gn);
+      genome_feature_set_multi_representative((GT_GenomeFeature*) genome_feature,
+                                              (GT_GenomeFeature*) gn);
     }
   }
   else
@@ -495,8 +495,8 @@ static GT_GenomeNode* merge_pseudo_roots(GT_GenomeNode *pseudo_a,
 {
   GT_GenomeNodeIterator *gni;
   GT_GenomeNode *child;
-  assert(pseudo_a && genome_feature_is_pseudo((GenomeFeature*) pseudo_a));
-  assert(pseudo_b && genome_feature_is_pseudo((GenomeFeature*) pseudo_b));
+  assert(pseudo_a && genome_feature_is_pseudo((GT_GenomeFeature*) pseudo_a));
+  assert(pseudo_b && genome_feature_is_pseudo((GT_GenomeFeature*) pseudo_b));
   assert(feature_info && genome_nodes);
   /* add children of pseudo node b to pseudo node a */
   gni = gt_genome_node_iterator_new_direct(pseudo_b);
@@ -517,9 +517,9 @@ static GT_GenomeNode* add_node_to_pseudo_node(GT_GenomeNode *pseudo_node,
                                            Queue *genome_nodes,
                                            AutomaticGT_SequenceRegion *auto_sr)
 {
-  assert(pseudo_node && genome_feature_is_pseudo((GenomeFeature*) pseudo_node));
+  assert(pseudo_node && genome_feature_is_pseudo((GT_GenomeFeature*) pseudo_node));
   assert(normal_node &&
-         !genome_feature_is_pseudo((GenomeFeature*) normal_node));
+         !genome_feature_is_pseudo((GT_GenomeFeature*) normal_node));
   assert(feature_info && genome_nodes);
   gt_genome_node_is_part_of_pseudo_node(pseudo_node, normal_node, feature_info);
   remove_node(normal_node, genome_nodes, auto_sr);
@@ -532,10 +532,10 @@ static GT_GenomeNode* create_pseudo_node(GT_GenomeNode *node_a, GT_GenomeNode *n
                                       AutomaticGT_SequenceRegion *auto_sr)
 {
   GT_GenomeNode *pseudo_node;
-  assert(node_a && !genome_feature_is_pseudo((GenomeFeature*) node_a));
-  assert(node_b && !genome_feature_is_pseudo((GenomeFeature*) node_b));
+  assert(node_a && !genome_feature_is_pseudo((GT_GenomeFeature*) node_a));
+  assert(node_b && !genome_feature_is_pseudo((GT_GenomeFeature*) node_b));
   assert(feature_info && genome_nodes);
-  pseudo_node = genome_feature_new_pseudo((GenomeFeature*) node_a);
+  pseudo_node = genome_feature_new_pseudo((GT_GenomeFeature*) node_a);
   gt_genome_node_is_part_of_pseudo_node(pseudo_node, node_a, feature_info);
   gt_genome_node_is_part_of_pseudo_node(pseudo_node, node_b, feature_info);
   replace_node(node_a, pseudo_node, genome_nodes, auto_sr);
@@ -551,8 +551,8 @@ static GT_GenomeNode* join_root_pair(GT_GenomeNode *root_a, GT_GenomeNode *root_
   bool root_a_is_pseudo, root_b_is_pseudo;
   GT_GenomeNode *master_root;
   assert(root_a && root_b && feature_info && genome_nodes);
-  root_a_is_pseudo = genome_feature_is_pseudo((GenomeFeature*) root_a);
-  root_b_is_pseudo = genome_feature_is_pseudo((GenomeFeature*) root_b);
+  root_a_is_pseudo = genome_feature_is_pseudo((GT_GenomeFeature*) root_a);
+  root_b_is_pseudo = genome_feature_is_pseudo((GT_GenomeFeature*) root_b);
   if (root_a_is_pseudo && root_b_is_pseudo) {
     master_root = merge_pseudo_roots(root_a, root_b, feature_info, genome_nodes,
                                      auto_sr);
@@ -758,8 +758,8 @@ static int check_multi_feature_constrains(GT_GenomeNode *new_gf,
   int had_err = 0;
   gt_error_check(err);
   assert(new_gf && old_gf);
-  assert(!genome_feature_is_pseudo((GenomeFeature*) new_gf));
-  assert(!genome_feature_is_pseudo((GenomeFeature*) old_gf));
+  assert(!genome_feature_is_pseudo((GT_GenomeFeature*) new_gf));
+  assert(!genome_feature_is_pseudo((GT_GenomeFeature*) old_gf));
   /* check seqid */
   if (str_cmp(gt_genome_node_get_seqid(new_gf), gt_genome_node_get_seqid(old_gf))) {
     gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
@@ -769,8 +769,8 @@ static int check_multi_feature_constrains(GT_GenomeNode *new_gf,
     had_err = -1;
   }
   /* check source */
-  if (!had_err && strcmp(genome_feature_get_source((GenomeFeature*) new_gf),
-                         genome_feature_get_source((GenomeFeature*) old_gf))) {
+  if (!had_err && strcmp(genome_feature_get_source((GT_GenomeFeature*) new_gf),
+                         genome_feature_get_source((GT_GenomeFeature*) old_gf))) {
     gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
               "has a different source than its counterpart on line %u",
               ID_STRING, id, line_number, filename,
@@ -778,8 +778,8 @@ static int check_multi_feature_constrains(GT_GenomeNode *new_gf,
     had_err = -1;
   }
   /* check type */
-  if (!had_err && genome_feature_get_type((GenomeFeature*) new_gf) !=
-                  genome_feature_get_type((GenomeFeature*) old_gf)) {
+  if (!had_err && genome_feature_get_type((GT_GenomeFeature*) new_gf) !=
+                  genome_feature_get_type((GT_GenomeFeature*) old_gf)) {
     gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
               "has a different type than its counterpart on line %u",
               ID_STRING, id, line_number, filename,
@@ -787,8 +787,8 @@ static int check_multi_feature_constrains(GT_GenomeNode *new_gf,
     had_err = -1;
   }
   /* check strand */
-  if (!had_err && genome_feature_get_strand((GenomeFeature*) new_gf) !=
-                  genome_feature_get_strand((GenomeFeature*) old_gf)) {
+  if (!had_err && genome_feature_get_strand((GT_GenomeFeature*) new_gf) !=
+                  genome_feature_get_strand((GT_GenomeFeature*) old_gf)) {
     gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file \"%s\" "
               "has a different strand than its counterpart on line %u",
               ID_STRING, id, line_number, filename,
@@ -798,8 +798,8 @@ static int check_multi_feature_constrains(GT_GenomeNode *new_gf,
   /* check attributes (for target attribute only the name) */
   if (!had_err) {
     GT_StrArray *new_attributes, *old_attributes;
-    new_attributes = genome_feature_get_attribute_list((GenomeFeature*) new_gf);
-    old_attributes = genome_feature_get_attribute_list((GenomeFeature*)old_gf);
+    new_attributes = genome_feature_get_attribute_list((GT_GenomeFeature*) new_gf);
+    old_attributes = genome_feature_get_attribute_list((GT_GenomeFeature*)old_gf);
     had_err = check_missing_attributes(new_gf, new_attributes, old_gf, id,
                                        filename, err);
     if (!had_err) {
@@ -902,7 +902,7 @@ static int parse_attributes(char *attributes, GT_GenomeNode *genome_feature,
     /* save all attributes, although the Parent and ID attribute is newly
        created in GFF3 output */
     if (!had_err) {
-      genome_feature_add_attribute((GenomeFeature*) genome_feature, attr_tag,
+      genome_feature_add_attribute((GT_GenomeFeature*) genome_feature, attr_tag,
                                    attr_value);
     }
     /* some attributes require special care */
@@ -926,10 +926,10 @@ static int parse_attributes(char *attributes, GT_GenomeNode *genome_feature,
     }
   }
 
-  if (!had_err && genome_feature_is_multi((GenomeFeature*) genome_feature)) {
+  if (!had_err && genome_feature_is_multi((GT_GenomeFeature*) genome_feature)) {
     had_err = check_multi_feature_constrains(genome_feature,
                         (GT_GenomeNode*)
-                        genome_feature_get_multi_representative((GenomeFeature*)
+                        genome_feature_get_multi_representative((GT_GenomeFeature*)
                                                                 genome_feature),
                         genome_feature_get_attribute(genome_feature, ID_STRING),
                         filename, line_number, err);
@@ -962,7 +962,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
                                    GT_Error *err)
 {
   GT_GenomeNode *gn = NULL, *genome_feature = NULL;
-  GenomeFeatureType *gft = NULL;
+  GT_GenomeFeatureType *gft = NULL;
   Splitter *splitter;
   AutomaticGT_SequenceRegion *auto_sr = NULL;
   Str *seqid_str = NULL;
@@ -1062,7 +1062,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   }
 
   if (!had_err && score_is_defined)
-    genome_feature_set_score((GenomeFeature*) genome_feature, score_value);
+    genome_feature_set_score((GT_GenomeFeature*) genome_feature, score_value);
   if (!had_err && phase_value != PHASE_UNDEFINED)
     genome_feature_set_phase(genome_feature, phase_value);
 

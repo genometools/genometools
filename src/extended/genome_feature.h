@@ -19,7 +19,7 @@
 #define GENOME_FEATURE_H
 
 /* implements the ``genome node'' interface */
-typedef struct GenomeFeature GenomeFeature;
+typedef struct GT_GenomeFeature GT_GenomeFeature;
 
 #include "core/range.h"
 #include "core/phase.h"
@@ -33,53 +33,53 @@ typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
 
 const GT_GenomeNodeClass* genome_feature_class(void);
-GT_GenomeNode*            genome_feature_new(Str *seqid, GenomeFeatureType*, GT_Range,
+GT_GenomeNode*            genome_feature_new(Str *seqid, GT_GenomeFeatureType*, GT_Range,
                                           Strand);
-GT_GenomeNode*            genome_feature_new_pseudo(GenomeFeature*);
+GT_GenomeNode*            genome_feature_new_pseudo(GT_GenomeFeature*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
 GT_GenomeNode*            genome_feature_new_standard_gene(FeatureTypeFactory*);
-const char*            genome_feature_get_source(GenomeFeature*);
+const char*            genome_feature_get_source(GT_GenomeFeature*);
 const char*            genome_feature_get_attribute(GT_GenomeNode *gn,
                                                     const char *attr_name);
 /* Return a GT_StrArray containing the used attribute names. */
-GT_StrArray*              genome_feature_get_attribute_list(GenomeFeature*);
-GenomeFeatureType*     genome_feature_get_type(GenomeFeature*);
-GenomeFeatureType*     genome_feature_create_gft(GenomeFeature*, const char*);
-bool                   genome_feature_has_type(GenomeFeature*, const char*);
-bool                   genome_feature_score_is_defined(const GenomeFeature*);
-bool                   genome_feature_is_multi(const GenomeFeature*);
-bool                   genome_feature_is_pseudo(const GenomeFeature*);
+GT_StrArray*              genome_feature_get_attribute_list(GT_GenomeFeature*);
+GT_GenomeFeatureType*     genome_feature_get_type(GT_GenomeFeature*);
+GT_GenomeFeatureType*     genome_feature_create_gft(GT_GenomeFeature*, const char*);
+bool                   genome_feature_has_type(GT_GenomeFeature*, const char*);
+bool                   genome_feature_score_is_defined(const GT_GenomeFeature*);
+bool                   genome_feature_is_multi(const GT_GenomeFeature*);
+bool                   genome_feature_is_pseudo(const GT_GenomeFeature*);
 void                   genome_feature_make_multi_representative(const
-                                                                GenomeFeature*);
-void                   genome_feature_set_multi_representative(GenomeFeature*,
-                                                               GenomeFeature*);
-GenomeFeature*         genome_feature_get_multi_representative(GenomeFeature*);
-float                  genome_feature_get_score(GenomeFeature*);
-Strand                 genome_feature_get_strand(GenomeFeature*);
-Phase                  genome_feature_get_phase(GenomeFeature*);
-void                   genome_feature_get_exons(GenomeFeature*,
+                                                                GT_GenomeFeature*);
+void                   genome_feature_set_multi_representative(GT_GenomeFeature*,
+                                                               GT_GenomeFeature*);
+GT_GenomeFeature*         genome_feature_get_multi_representative(GT_GenomeFeature*);
+float                  genome_feature_get_score(GT_GenomeFeature*);
+Strand                 genome_feature_get_strand(GT_GenomeFeature*);
+Phase                  genome_feature_get_phase(GT_GenomeFeature*);
+void                   genome_feature_get_exons(GT_GenomeFeature*,
                                                 GT_Array *exon_features);
-void                   genome_feature_determine_transcripttypes(GenomeFeature*);
-TranscriptFeatureType  genome_feature_get_transcriptfeaturetype(GenomeFeature*);
+void                   genome_feature_determine_transcripttypes(GT_GenomeFeature*);
+TranscriptFeatureType  genome_feature_get_transcriptfeaturetype(GT_GenomeFeature*);
 void                   genome_feature_set_source(GT_GenomeNode*, Str *source);
 void                   genome_feature_set_phase(GT_GenomeNode*, Phase);
-void                   genome_feature_set_end(GenomeFeature*, unsigned long);
-void                   genome_feature_set_score(GenomeFeature*, float);
-void                   genome_feature_unset_score(GenomeFeature*);
-void                   genome_feature_add_attribute(GenomeFeature*,
+void                   genome_feature_set_end(GT_GenomeFeature*, unsigned long);
+void                   genome_feature_set_score(GT_GenomeFeature*, float);
+void                   genome_feature_unset_score(GT_GenomeFeature*);
+void                   genome_feature_add_attribute(GT_GenomeFeature*,
                                                     const char *attr_name,
                                                     const char *attr_value);
-void                   genome_feature_foreach_attribute(GenomeFeature*,
+void                   genome_feature_foreach_attribute(GT_GenomeFeature*,
                                                         AttributeIterFunc,
                                                         void *data);
-bool                   genome_feature_has_CDS(const GenomeFeature*);
-bool                   genome_feature_has_splice_site(const GenomeFeature*);
+bool                   genome_feature_has_CDS(const GT_GenomeFeature*);
+bool                   genome_feature_has_splice_site(const GT_GenomeFeature*);
 double                 genome_feature_average_splice_site_prob(const
-                                                               GenomeFeature*);
+                                                               GT_GenomeFeature*);
 /* Returns true, if the given features have the same seqid, feature type, range,
    strand, and phase. */
-bool                   genome_features_are_similar(GenomeFeature*,
-                                                   GenomeFeature*);
+bool                   genome_features_are_similar(GT_GenomeFeature*,
+                                                   GT_GenomeFeature*);
 int                    genome_feature_unit_test(GT_Error*);
 
 #endif

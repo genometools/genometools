@@ -6,7 +6,7 @@ static GT_Array* create_example_features(void)
   GT_GenomeNode *forward_gene, *reverse_gene, *exon, *intron; /* features */
   Str *seqid; /* holds the sequence id the features refer to */
   FeatureTypeFactory *type_factory; /* used the create feature types */
-  GenomeFeatureType *type; /* hold a feature type */
+  GT_GenomeFeatureType *type; /* hold a feature type */
   GT_Range range; /* used to define intervals on the genomic sequence */
 
   /* construct the example features */

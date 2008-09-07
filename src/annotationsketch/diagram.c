@@ -55,7 +55,7 @@ struct GT_Diagram {
 
 /* holds a GT_Block with associated type */
 typedef struct {
-  GenomeFeatureType *gft;
+  GT_GenomeFeatureType *gft;
   GT_Block *block;
 } GT_BlockTuple;
 
@@ -75,7 +75,7 @@ typedef struct {
   GT_Diagram *dia;
 } TrackTraverseInfo;
 
-static GT_BlockTuple* blocktuple_new(GenomeFeatureType *gft, GT_Block *block)
+static GT_BlockTuple* blocktuple_new(GT_GenomeFeatureType *gft, GT_Block *block)
 {
   GT_BlockTuple *bt;
   assert(block);
@@ -100,7 +100,7 @@ static NodeInfoElement* get_or_create_node_info(GT_Diagram *d, GT_GenomeNode *no
 }
 
 static GT_Block* find_block_for_type(NodeInfoElement* ni,
-                                     GenomeFeatureType *gft)
+                                     GT_GenomeFeatureType *gft)
 {
   GT_Block *block = NULL;
   unsigned long i;
@@ -126,7 +126,7 @@ static const char* get_node_name_or_id(GT_GenomeNode *gn)
   return ret;
 }
 
-static bool get_caption_display_status(GT_Diagram *d, GenomeFeatureType *gft)
+static bool get_caption_display_status(GT_Diagram *d, GT_GenomeFeatureType *gft)
 {
   assert(d && gft);
   bool *status;
@@ -176,7 +176,7 @@ static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pa
   caption = str_new();
   if (!gt_style_get_str(d->style,
                      genome_feature_type_get_cstr(
-                         genome_feature_get_type((GenomeFeature*) node)),
+                         genome_feature_get_type((GT_GenomeFeature*) node)),
                      "block_caption",
                      caption,
                      node))
@@ -184,7 +184,7 @@ static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pa
     nnid_p = get_node_name_or_id(parent);
     nnid_n = get_node_name_or_id(node);
     if ((nnid_p || nnid_n) && get_caption_display_status(d,
-                  genome_feature_get_type((GenomeFeature*) node)))
+                  genome_feature_get_type((GT_GenomeFeature*) node)))
     {
       if (parent) {
         if (gt_genome_node_has_children(parent))
@@ -200,7 +200,7 @@ static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pa
   gt_block_set_caption(block, caption);
   /* insert node into block */
   gt_block_insert_element(block, node);
-  bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node), block);
+  bt = blocktuple_new(genome_feature_get_type((GT_GenomeFeature*) node), block);
   gt_array_add(ni->blocktuples, bt);
 }
 
@@ -220,7 +220,7 @@ static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* par
 
   /* try to find the right block to insert */
   block = find_block_for_type(par_ni,
-                              genome_feature_get_type((GenomeFeature*) node));
+                              genome_feature_get_type((GT_GenomeFeature*) node));
   /* no fitting block was found, create a new one */
   if (block == NULL) {
     GT_BlockTuple *bt;
@@ -230,7 +230,7 @@ static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* par
     nnid_p = get_node_name_or_id(parent);
     nnid_n = get_node_name_or_id(node);
     if ((nnid_p || nnid_n) && get_caption_display_status(d,
-                  genome_feature_get_type((GenomeFeature*) node)))
+                  genome_feature_get_type((GT_GenomeFeature*) node)))
     {
       caption = str_new_cstr("");
       if (parent) {
@@ -245,7 +245,7 @@ static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* par
     }
     gt_block_set_caption(block, caption);
     /* add block to nodeinfo */
-    bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node), block);
+    bt = blocktuple_new(genome_feature_get_type((GT_GenomeFeature*) node), block);
     gt_array_add(par_ni->blocktuples, bt);
   }
   /* now we have a block to insert into */
@@ -268,10 +268,10 @@ static void add_recursive(GT_Diagram *d, GT_GenomeNode *node,
     GT_BlockTuple *bt;
     /* try to find the right block to insert */
     block = find_block_for_type(ni,
-                                genome_feature_get_type((GenomeFeature*) node));
+                                genome_feature_get_type((GT_GenomeFeature*) node));
     if (block == NULL) {
       block = gt_block_new_from_node(node);
-      bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node),
+      bt = blocktuple_new(genome_feature_get_type((GT_GenomeFeature*) node),
                           block);
       gt_array_add(ni->blocktuples, bt);
     }
@@ -301,10 +301,10 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pare
   assert(d && node);
 
   feature_type = genome_feature_type_get_cstr(
-                        genome_feature_get_type((GenomeFeature*) node));
+                        genome_feature_get_type((GT_GenomeFeature*) node));
   if (parent)
     parent_gft = genome_feature_type_get_cstr(
-                        genome_feature_get_type((GenomeFeature*) parent));
+                        genome_feature_get_type((GT_GenomeFeature*) parent));
 
   /* discard elements that do not overlap with visible range */
   elem_range = gt_genome_node_get_range(node);
@@ -398,7 +398,7 @@ static int visit_child(GT_GenomeNode* gn, void* gt_genome_node_children, GT_Erro
   return 0;
 }
 
-static Str* track_key_new(const char *filename, GenomeFeatureType *type)
+static Str* track_key_new(const char *filename, GT_GenomeFeatureType *type)
 {
   Str *track_key;
   track_key = str_new_cstr(filename);
@@ -565,7 +565,7 @@ static int layout_tracks(void *key, void *value, void *data,
   unsigned long i, max;
   Track *track;
   TrackTraverseInfo *tti = (TrackTraverseInfo*) data;
-  GenomeFeatureType *gft = (GenomeFeatureType*) key;
+  GT_GenomeFeatureType *gft = (GT_GenomeFeatureType*) key;
   GT_Array *list = (GT_Array*) value;
   char *filename;
   Str *track_key;
@@ -643,7 +643,7 @@ int gt_diagram_sketch(GT_Diagram *dia, GT_Canvas *canvas)
 int gt_diagram_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
-  GenomeFeatureType *gene_type, *exon_type, *CDS_type;
+  GT_GenomeFeatureType *gene_type, *exon_type, *CDS_type;
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
   GT_Range r1, r2, r3, r4, r5, dr1, rs;
@@ -698,8 +698,8 @@ int gt_diagram_unit_test(GT_Error *err)
   fi = gt_feature_index_new();
 
   /* add features to every sequence region */
-  gt_feature_index_add_genome_feature(fi, (GenomeFeature*) gn1);
-  gt_feature_index_add_genome_feature(fi, (GenomeFeature*) gn2);
+  gt_feature_index_add_genome_feature(fi, (GT_GenomeFeature*) gn1);
+  gt_feature_index_add_genome_feature(fi, (GT_GenomeFeature*) gn2);
 
   /* set the GT_Range for the diagram */
   dr1.start = 400UL;

@@ -20,10 +20,10 @@
 
 #include <stdbool.h>
 
-/* The GenomeFeatureType represents the feature type mainly used in
-   GenomeFeatures and corresponds to the type column in GFF3 files.
-   To create new GenomeFeatureTypes a FeatureTypeFactory or an already existing
-   GenomeFeatureType (which internally uses the FeatureTypeFactory it was
+/* The GT_GenomeFeatureType represents the feature type mainly used in
+   GT_GenomeFeatures and corresponds to the type column in GFF3 files.
+   To create new GT_GenomeFeatureTypes a FeatureTypeFactory or an already existing
+   GT_GenomeFeatureType (which internally uses the FeatureTypeFactory it was
    created from) should be used!
 */
 
@@ -49,11 +49,11 @@
 #define gft_three_prime_splice_site  "three_prime_splice_site"
 #define gft_transcript               "transcript"
 
-typedef struct GenomeFeatureType GenomeFeatureType;
+typedef struct GT_GenomeFeatureType GT_GenomeFeatureType;
 
-GenomeFeatureType* genome_feature_type_create_gft(GenomeFeatureType*,
+GT_GenomeFeatureType* genome_feature_type_create_gft(GT_GenomeFeatureType*,
                                                   const char *type);
-bool               genome_feature_type_is(GenomeFeatureType*, const char *type);
-const char*        genome_feature_type_get_cstr(const GenomeFeatureType*);
+bool               genome_feature_type_is(GT_GenomeFeatureType*, const char *type);
+const char*        genome_feature_type_get_cstr(const GT_GenomeFeatureType*);
 
 #endif

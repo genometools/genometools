@@ -45,7 +45,7 @@ GT_GenomeNodeIterator* gt_genome_node_iterator_new(GT_GenomeNode *gn)
   assert(gn);
   gni = gt_genome_node_iterator_new_base(gn);
   if (gt_genome_node_cast(genome_feature_class(), gn) &&
-      genome_feature_is_pseudo((GenomeFeature*) gn)) {
+      genome_feature_is_pseudo((GT_GenomeFeature*) gn)) {
     /* add the children backwards to traverse in order */
     for (dlistelem = dlist_last(gn->children); dlistelem != NULL;
          dlistelem = dlistelem_previous(dlistelem)) {

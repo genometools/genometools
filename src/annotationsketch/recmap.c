@@ -20,14 +20,14 @@
 #include "annotationsketch/recmap.h"
 
 GT_RecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
-                         GenomeFeature *gf)
+                         GT_GenomeFeature *gf)
 {
   GT_RecMap *rm = ma_malloc(sizeof *rm);
   rm->nw_x = nw_x;
   rm->nw_y = nw_y;
   rm->se_x = se_x;
   rm->se_y = se_y;
-  rm->gf = (GenomeFeature*) gt_genome_node_ref((GT_GenomeNode*) gf);
+  rm->gf = (GT_GenomeFeature*) gt_genome_node_ref((GT_GenomeNode*) gf);
   rm->has_omitted_children = false;
   return rm;
 }
@@ -56,7 +56,7 @@ double gt_recmap_get_southeast_y(const GT_RecMap *rm)
   return rm->se_y;
 }
 
-const GenomeFeature* gt_recmap_get_genome_feature(const GT_RecMap *rm)
+const GT_GenomeFeature* gt_recmap_get_genome_feature(const GT_RecMap *rm)
 {
   assert(rm);
   return rm->gf;

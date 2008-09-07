@@ -481,7 +481,7 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
   if (!gt_block_has_only_one_fullsize_element(block)
        && draw_range.end-draw_range.start < min_len_block)
   {
-    GenomeFeatureType *btype = gt_block_get_type(block);
+    GT_GenomeFeatureType *btype = gt_block_get_type(block);
     gt_style_get_color(canvas->sty, genome_feature_type_get_cstr(btype),
                            "fill", &fillcolor,
                            gt_block_get_top_level_feature(block));
@@ -517,7 +517,7 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
     {
       GT_RecMap *rm = gt_recmap_new(draw_range.start, canvas->y,
                                     draw_range.end, canvas->y+bar_height,
-                                    (GenomeFeature*) /* XXX */
+                                    (GT_GenomeFeature*) /* XXX */
                                     gt_block_get_top_level_feature(block));
       gt_image_info_add_recmap(canvas->ii, rm);
       rm->has_omitted_children = true;
@@ -618,7 +618,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
   {
     GT_RecMap *rm = gt_recmap_new(elem_start, canvas->y,
                                   elem_start+elem_width, canvas->y+bar_height,
-                                  (GenomeFeature*) /* XXX */
+                                  (GT_GenomeFeature*) /* XXX */
                                   element_get_node_ref(elem));
     gt_image_info_add_recmap(canvas->ii, rm);
   }

@@ -28,7 +28,7 @@
 #include "annotationsketch/style.h"
 
 struct Element {
-  GenomeFeatureType *type;
+  GT_GenomeFeatureType *type;
   Strand strand;
   GT_GenomeNode *gn;
   GT_Range range;
@@ -39,7 +39,7 @@ struct Element {
 Element* element_new(GT_GenomeNode *gn)
 {
   Element *element;
-  GenomeFeature *gf = (GenomeFeature*) gn;
+  GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
   assert(gn);
   element = element_new_empty();
   element_set_type(element, genome_feature_get_type(gf));
@@ -75,13 +75,13 @@ void element_set_range(Element *element, GT_Range r)
   element->range = r;
 }
 
-GenomeFeatureType* element_get_type(const Element *element)
+GT_GenomeFeatureType* element_get_type(const Element *element)
 {
   assert(element);
   return element->type;
 }
 
-void element_set_type(Element *element, GenomeFeatureType *type)
+void element_set_type(Element *element, GT_GenomeFeatureType *type)
 {
   assert(element);
   element->type = type;
@@ -123,7 +123,7 @@ GT_GenomeNode* element_get_node_ref(const Element *elem)
 int element_unit_test(GT_Error *err)
 {
   FeatureTypeFactory *feature_type_factory;
-  GenomeFeatureType *type;
+  GT_GenomeFeatureType *type;
   GT_Range r1, r2, r_temp;
   GT_GenomeNode *gn, *gn2;
   Element *e, *e2, *e3;

@@ -65,7 +65,7 @@ static int filter_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
   return 0;
 }
 
-static bool filter_contain_range(GenomeFeature *gf, GT_Range contain_range)
+static bool filter_contain_range(GT_GenomeFeature *gf, GT_Range contain_range)
 {
   assert(gf);
   if (contain_range.start != UNDEF_ULONG &&
@@ -75,7 +75,7 @@ static bool filter_contain_range(GenomeFeature *gf, GT_Range contain_range)
   return false;
 }
 
-static bool filter_overlap_range(GenomeFeature *gf, GT_Range overlap_range)
+static bool filter_overlap_range(GT_GenomeFeature *gf, GT_Range overlap_range)
 {
   assert(gf);
   if (overlap_range.start != UNDEF_ULONG &&
@@ -85,7 +85,7 @@ static bool filter_overlap_range(GenomeFeature *gf, GT_Range overlap_range)
   return false;
 }
 
-static bool filter_strand(GenomeFeature *gf, Strand strand)
+static bool filter_strand(GT_GenomeFeature *gf, Strand strand)
 {
   assert(gf);
   if (strand != NUM_OF_STRAND_TYPES && genome_feature_get_strand(gf) != strand)
@@ -93,7 +93,7 @@ static bool filter_strand(GenomeFeature *gf, Strand strand)
   return false;
 }
 
-static bool filter_targetstrand(GenomeFeature *gf, Strand targetstrand)
+static bool filter_targetstrand(GT_GenomeFeature *gf, Strand targetstrand)
 {
   const char *target;
   assert(gf);
@@ -115,7 +115,7 @@ static bool filter_targetstrand(GenomeFeature *gf, Strand targetstrand)
   return false;
 }
 
-static bool filter_has_CDS(GenomeFeature *gf, bool has_CDS)
+static bool filter_has_CDS(GT_GenomeFeature *gf, bool has_CDS)
 {
   assert(gf);
   if (has_CDS && !genome_feature_has_CDS(gf))
@@ -123,7 +123,7 @@ static bool filter_has_CDS(GenomeFeature *gf, bool has_CDS)
   return false;
 }
 
-static bool filter_min_average_ssp(GenomeFeature *gf, double minaveragessp)
+static bool filter_min_average_ssp(GT_GenomeFeature *gf, double minaveragessp)
 {
   assert(gf);
   if (minaveragessp != UNDEF_DOUBLE &&
@@ -134,7 +134,7 @@ static bool filter_min_average_ssp(GenomeFeature *gf, double minaveragessp)
   return false;
 }
 
-static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
+static int filter_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
                                          UNUSED GT_Error *err)
 {
   FilterVisitor *fv;

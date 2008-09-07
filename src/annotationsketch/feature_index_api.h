@@ -32,14 +32,14 @@ void             gt_feature_index_add_sequence_region(GT_FeatureIndex*,
    region denoted by its identifier string. */
 void             gt_feature_index_add_genome_feature(GT_FeatureIndex
                                                      *feature_index,
-                                                     GenomeFeature
+                                                     GT_GenomeFeature
                                                      *genome_feature);
 /* Add all features contained in <gff3file> to <feature_index>, if <gff3file> is
    valid. Otherwise, <feature_index> is not changed and <err> is set. */
 int              gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
                                                const char *gff3file,
                                                GT_Error *err);
-/* Returns an array of GenomeFeatures associated with a given sequence region
+/* Returns an array of GT_GenomeFeatures associated with a given sequence region
    identifier <seqid>. */
 GT_Array*        gt_feature_index_get_features_for_seqid(GT_FeatureIndex*,
                                                          const char *seqid);

@@ -19,10 +19,10 @@
 #define FEATURE_TYPE_FACTORY_H
 
 /* The FeatureTypeFactory interface. Implementations of the FeatureTypeFactory
-   interface are used to create GenomeFeatureTypes.
-   Since a FeatureTypeFactory owns all GenomeFeatureTypes it creates, you have
+   interface are used to create GT_GenomeFeatureTypes.
+   Since a FeatureTypeFactory owns all GT_GenomeFeatureTypes it creates, you have
    to make sure to keep it around until all references to the created
-   GenomeFeatureTypes have been removed.
+   GT_GenomeFeatureTypes have been removed.
 */
 
 typedef struct FeatureTypeFactoryClass FeatureTypeFactoryClass;
@@ -36,7 +36,7 @@ FeatureTypeFactory* feature_type_factory_ref(FeatureTypeFactory
                                              *feature_type_factory);
 /* Uses the factory to create a new genome feature type object of the given
    <type>. Returns NULL, if <type> is not a valid type. */
-GenomeFeatureType*  feature_type_factory_create_gft(FeatureTypeFactory*,
+GT_GenomeFeatureType*  feature_type_factory_create_gft(FeatureTypeFactory*,
                                                     const char *type);
 /* Returns a GT_StrArray which contains all type names in alphabetical order
    which have been created by this factory.

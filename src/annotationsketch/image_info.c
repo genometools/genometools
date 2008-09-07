@@ -87,7 +87,7 @@ int gt_image_info_unit_test(GT_Error *err)
   GT_RecMap* rms[20];
   GT_GenomeNode* gfs[20];
   FeatureTypeFactory *ftf;
-  GenomeFeatureType *gft;
+  GT_GenomeFeatureType *gft;
   GT_ImageInfo *ii;
   unsigned long i;
   Str *seqid;
@@ -111,7 +111,7 @@ int gt_image_info_unit_test(GT_Error *err)
                            rand_max_double(100.0),
                            rand_max_double(100.0),
                            rand_max_double(100.0),
-                           (GenomeFeature*) /* XXX */ gfs[i]);
+                           (GT_GenomeFeature*) /* XXX */ gfs[i]);
     gt_image_info_add_recmap(ii, rms[i]);
     ensure(had_err, gt_image_info_num_of_recmaps(ii) == i+1);
     ensure(had_err, (rm = gt_image_info_get_recmap(ii, i)) == rms[i]);
