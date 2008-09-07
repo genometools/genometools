@@ -230,7 +230,7 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *
   return 0;
 }
 
-static int filter_visitor_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
+static int filter_visitor_sequence_node(GenomeVisitor *gv, GT_SequenceNode *sn,
                                         UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;

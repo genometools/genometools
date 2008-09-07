@@ -19,16 +19,16 @@
 #define SEQUENCE_NODE_H
 
 /* implements the ``genome node'' interface */
-typedef struct SequenceNode SequenceNode;
+typedef struct GT_SequenceNode GT_SequenceNode;
 
 #include "core/str.h"
 #include "extended/genome_node.h"
 
-const GT_GenomeNodeClass* sequence_node_class(void);
-GT_GenomeNode*            sequence_node_new(const char *description,
+const GT_GenomeNodeClass* gt_sequence_node_class(void);
+GT_GenomeNode*            gt_sequence_node_new(const char *description,
                                          Str *sequence); /* takes ownership */
-const char*            sequence_node_get_description(const SequenceNode*);
-const char*            sequence_node_get_sequence(const SequenceNode*);
-unsigned long          sequence_node_get_sequence_length(const SequenceNode*);
+const char*            gt_sequence_node_get_description(const GT_SequenceNode*);
+const char*            gt_sequence_node_get_sequence(const GT_SequenceNode*);
+unsigned long          gt_sequence_node_get_sequence_length(const GT_SequenceNode*);
 
 #endif

@@ -55,8 +55,8 @@ static int compare_gt_genome_node_type(GT_GenomeNode *gn_a, GT_GenomeNode *gn_b)
     return 1;
 
   /* sequence nodes last */
-  sn_a = gt_genome_node_cast(sequence_node_class(), gn_a);
-  sn_b = gt_genome_node_cast(sequence_node_class(), gn_b);
+  sn_a = gt_genome_node_cast(gt_sequence_node_class(), gn_a);
+  sn_b = gt_genome_node_cast(gt_sequence_node_class(), gn_b);
 
   if (sn_a && !sn_b)
     return 1;

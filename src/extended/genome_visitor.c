@@ -64,7 +64,7 @@ int genome_visitor_visit_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *s
   return 0;
 }
 
-int genome_visitor_visit_sequence_node(GenomeVisitor *gv, SequenceNode *sn,
+int genome_visitor_visit_sequence_node(GenomeVisitor *gv, GT_SequenceNode *sn,
                                        GT_Error *err)
 {
   gt_error_check(err);

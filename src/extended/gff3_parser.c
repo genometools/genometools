@@ -1133,7 +1133,7 @@ static int parse_fasta_entry(Queue *genome_nodes, const char *line,
       if (cc != '\n' && cc != '\r' && cc != ' ')
         str_append_char(sequence, cc);
     }
-    sequence_node = sequence_node_new(line+1, sequence);
+    sequence_node = gt_sequence_node_new(line+1, sequence);
     gt_genome_node_set_origin(sequence_node, filename, line_number);
     queue_add(genome_nodes, sequence_node);
   }
