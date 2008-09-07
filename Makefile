@@ -486,6 +486,7 @@ obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 	 $(LIBBZ2_DEP) \
 	 $(ZLIB_DEP) \
          $(LIBGENOMETOOLS_DEP) \
+         obj/src/examples/noop.d \
          obj/src/examples/sketch_constructed.d \
          obj/src/examples/sketch_parsed.d
 
