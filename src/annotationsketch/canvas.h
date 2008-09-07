@@ -18,6 +18,7 @@
 #ifndef CANVAS_H
 #define CANVAS_H
 
+typedef struct CanvasClass CanvasClass;
 typedef struct Canvas Canvas;
 
 #include "annotationsketch/block.h"
@@ -31,14 +32,12 @@ typedef struct Canvas Canvas;
 #include "annotationsketch/track.h"
 #include "core/range.h"
 
-/* Create a new Canvas object with given <output_type> and <width> using the
-   configuration given in <style>. The optional <image_info> is filled when
-   the created Canvas object is used to render a Diagram object. */
-Canvas*       canvas_new(Style *style, GraphicsOutType output_type,
-                         unsigned long width, ImageInfo *image_info);
+unsigned long calculate_height(Canvas *canvas, Diagram *dia);
+void draw_ruler(Canvas *canvas);
+
 /* Returns a pixel-based range for a nucleotide-based range
    using the scaling factor defined for the given <canvas> */
-DrawingRange  canvas_convert_coords(Canvas* canvas, Range);
+DrawingRange  canvas_convert_coords(Canvas *canvas, Range);
 /* Returns the height of the given <canvas>. */
 unsigned long canvas_get_height(Canvas *canvas);
 /* Returns rendered width in pixels of the given text. */
@@ -59,10 +58,6 @@ int           canvas_visit_line_post(Canvas*, Line*);
 int           canvas_visit_block(Canvas*, Block*);
 /* Callback function for Diagram rendering. */
 int           canvas_visit_element(Canvas*, Element*);
-/* Write rendered <canvas> to file with name <filename>. */
-int           canvas_to_file(Canvas *canvas, const char *filename, Error*);
-/* Append rendered <canvas> to given <stream>. */
-int           canvas_to_stream(Canvas *canvas, Str *stream);
 /* Delete the given <canvas>. */
 void          canvas_delete(Canvas *canvas);
 

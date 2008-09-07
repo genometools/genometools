@@ -30,6 +30,7 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
 #include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_stream.h"
@@ -302,13 +303,13 @@ int gt_sketch(int argc, const char **argv, Error *err)
     d = diagram_new(features, seqid, &qry_range, sty);
     ii = image_info_new();
     if (strcmp(str_get(arguments.format),"pdf")==0)
-      canvas = canvas_new(sty, GRAPHICS_PDF, arguments.width, ii);
+      canvas = canvas_cairo_file_new(sty, GRAPHICS_PDF, arguments.width, ii);
     else if (strcmp(str_get(arguments.format),"ps")==0)
-      canvas = canvas_new(sty, GRAPHICS_PS, arguments.width, ii);
+      canvas = canvas_cairo_file_new(sty, GRAPHICS_PS, arguments.width, ii);
     else if (strcmp(str_get(arguments.format),"svg")==0)
-      canvas = canvas_new(sty, GRAPHICS_SVG, arguments.width, ii);
+      canvas = canvas_cairo_file_new(sty, GRAPHICS_SVG, arguments.width, ii);
     else
-      canvas = canvas_new(sty, GRAPHICS_PNG, arguments.width, ii);
+      canvas = canvas_cairo_file_new(sty, GRAPHICS_PNG, arguments.width, ii);
     diagram_sketch(d, canvas);
     if (arguments.showrecmaps) {
       unsigned long i;
@@ -322,7 +323,7 @@ int gt_sketch(int argc, const char **argv, Error *err)
         printf("%s, %s\n", buf, genome_feature_type_get_cstr(type));
       }
     }
-    had_err = canvas_to_file(canvas, file, err);
+    had_err = canvas_cairo_file_to_file((CanvasCairoFile*) canvas, file, err);
   }
 
   /* free */

@@ -30,6 +30,7 @@
 #include "extended/genome_feature.h"
 #include "extended/genome_feature_type.h"
 #include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/line_breaker_captions.h"
@@ -725,7 +726,7 @@ int diagram_unit_test(Error *err)
 
   if (!had_err)
   {
-    canvas = canvas_new(sty, GRAPHICS_PNG, 600, NULL);
+    canvas = canvas_cairo_file_new(sty, GRAPHICS_PNG, 600, NULL);
     diagram_sketch(dia, canvas);
   }
 

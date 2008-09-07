@@ -20,9 +20,11 @@
 #ifndef ANNOTATIONSKETCH_H
 #define ANNOTATIONSKETCH_H
 
-/* The AnnotationSketch  header */
+/* The AnnotationSketch header */
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_cairo_file.h"
+#include "annotationsketch/canvas_cairo_context.h"
 #include "annotationsketch/color.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/element.h"
@@ -30,6 +32,7 @@
 #include "annotationsketch/feature_stream.h"
 #include "annotationsketch/feature_visitor.h"
 #include "annotationsketch/graphics.h"
+#include "annotationsketch/graphics_cairo.h"
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/line.h"
 #include "annotationsketch/recmap.h"
