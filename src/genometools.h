@@ -18,10 +18,9 @@
 #ifndef GENOMETOOLS_H
 #define GENOMETOOLS_H
 
-/* the GenomeTools ``all-in-one'' header */
-
-#include "core.h"     /* the core of the GenomeTools library */
-#include "extended.h" /* extended part of the GenomeTools library  */
+/* The GenomeTools ``all-in-one'' header.
+   Include only this header if you program against the libgenometools.
+*/
 
 /* the core module */
 #include "core/array_api.h"
@@ -29,6 +28,9 @@
 #include "core/fptr_api.h"
 #include "core/range_api.h"
 #include "core/unused_api.h"
+
+/* the extended module */
+#include "extended/feature_type_factory_any.h"
 
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */

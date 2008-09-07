@@ -63,7 +63,7 @@ typedef struct {
 typedef struct {
   GT_GenomeNode *parent;
   GT_Array *blocktuples;
-} NodeInfoElement;
+} NodeInfoGT_Element;
 
 typedef struct {
   GT_GenomeNode *parent;
@@ -85,13 +85,13 @@ static GT_BlockTuple* blocktuple_new(GT_GenomeFeatureType *gft, GT_Block *block)
   return bt;
 }
 
-static NodeInfoElement* get_or_create_node_info(GT_Diagram *d, GT_GenomeNode *node)
+static NodeInfoGT_Element* get_or_create_node_info(GT_Diagram *d, GT_GenomeNode *node)
 {
-  NodeInfoElement *ni;
+  NodeInfoGT_Element *ni;
   assert(d && node);
   ni = hashmap_get(d->nodeinfo, node);
   if (ni == NULL) {
-    NodeInfoElement *new_ni = ma_malloc(sizeof (NodeInfoElement));
+    NodeInfoGT_Element *new_ni = ma_malloc(sizeof (NodeInfoGT_Element));
     new_ni->blocktuples = gt_array_new(sizeof (GT_BlockTuple*));
     hashmap_add(d->nodeinfo, node, new_ni);
     ni = new_ni;
@@ -99,7 +99,7 @@ static NodeInfoElement* get_or_create_node_info(GT_Diagram *d, GT_GenomeNode *no
   return ni;
 }
 
-static GT_Block* find_block_for_type(NodeInfoElement* ni,
+static GT_Block* find_block_for_type(NodeInfoGT_Element* ni,
                                      GT_GenomeFeatureType *gft)
 {
   GT_Block *block = NULL;
@@ -159,7 +159,7 @@ static bool get_caption_display_status(GT_Diagram *d, GT_GenomeFeatureType *gft)
 
 static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *parent)
 {
-  NodeInfoElement *ni;
+  NodeInfoGT_Element *ni;
   GT_Block *block;
   GT_BlockTuple *bt;
   GT_Str *caption = NULL;
@@ -207,7 +207,7 @@ static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pa
 static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* parent)
 {
   GT_Block *block = NULL;
-  NodeInfoElement *par_ni, *ni;
+  NodeInfoGT_Element *par_ni, *ni;
   const char *nnid_p = NULL, *nnid_n = NULL;
 
   assert(d && node);
@@ -255,7 +255,7 @@ static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* par
 static void add_recursive(GT_Diagram *d, GT_GenomeNode *node,
                           GT_GenomeNode* parent, GT_GenomeNode *original_node)
 {
-  NodeInfoElement *ni;
+  NodeInfoGT_Element *ni;
 
   assert(d && node && original_node);
   if (!parent) return;
@@ -279,7 +279,7 @@ static void add_recursive(GT_Diagram *d, GT_GenomeNode *node,
   }
   else {
     /* not at target type block yet, set up reverse entry and follow */
-    NodeInfoElement *parent_ni;
+    NodeInfoGT_Element *parent_ni;
     /* set up reverse entry */
     ni->parent = parent;
     /* recursively call with parent node and its parent */
@@ -411,7 +411,7 @@ static GT_Str* track_key_new(const char *filename, GT_GenomeFeatureType *type)
 static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
                           GT_UNUSED GT_Error *err)
 {
-  NodeInfoElement *ni = (NodeInfoElement*) value;
+  NodeInfoGT_Element *ni = (NodeInfoGT_Element*) value;
   GT_Diagram *diagram = (GT_Diagram*) data;
   unsigned long i = 0;
 

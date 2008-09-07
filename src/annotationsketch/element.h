@@ -20,7 +20,7 @@
 #define ELEMENT_H
 
 /* An element has a type, a range and a config object. */
-typedef struct Element Element;
+typedef struct GT_Element GT_Element;
 
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/drawing_range.h"
@@ -29,21 +29,21 @@ typedef struct Element Element;
 #include "extended/genome_node.h"
 #include "extended/genome_feature_type.h"
 
-/* Creates a complete new Element object. */
-Element*           element_new(GT_GenomeNode*);
-/* Creates an empty Element object. GT_Range and type have to be set afterwards. */
-Element*           element_new_empty(void);
-GT_Range           element_get_range(const Element*);
-void               element_set_range(Element*, GT_Range);
-DrawingRange       element_calculate_drawing_range(Element*, GT_Canvas*);
-GT_GenomeFeatureType* element_get_type(const Element*);
-void               element_set_type(Element*, GT_GenomeFeatureType*);
-GT_Strand             element_get_strand(const Element*);
-GT_GenomeNode*        element_get_node_ref(const Element*);
-bool               element_is_marked(const Element*);
-bool               elements_are_equal(const Element*, const Element*);
-int                element_sketch(Element*, GT_Canvas*);
-int                element_unit_test(GT_Error*);
-void               element_delete(Element* element);
+/* Creates a complete new GT_Element object. */
+GT_Element*           gt_element_new(GT_GenomeNode*);
+/* Creates an empty GT_Element object. GT_Range and type have to be set afterwards. */
+GT_Element*           gt_element_new_empty(void);
+GT_Range           gt_element_get_range(const GT_Element*);
+void               gt_element_set_range(GT_Element*, GT_Range);
+DrawingRange       gt_element_calculate_drawing_range(GT_Element*, GT_Canvas*);
+GT_GenomeFeatureType* gt_element_get_type(const GT_Element*);
+void               gt_element_set_type(GT_Element*, GT_GenomeFeatureType*);
+GT_Strand             gt_element_get_strand(const GT_Element*);
+GT_GenomeNode*        gt_element_get_node_ref(const GT_Element*);
+bool               gt_element_is_marked(const GT_Element*);
+bool               elements_are_equal(const GT_Element*, const GT_Element*);
+int                gt_element_sketch(GT_Element*, GT_Canvas*);
+int                gt_element_unit_test(GT_Error*);
+void               gt_element_delete(GT_Element* element);
 
 #endif

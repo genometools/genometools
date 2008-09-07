@@ -541,16 +541,16 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
   return had_err;
 }
 
-int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
+int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
 {
   int had_err = 0, arrow_status = ARROW_NONE;
-  GT_Range elem_range = element_get_range(elem);
+  GT_Range elem_range = gt_element_get_range(elem);
   DrawingRange draw_range;
   double elem_start, elem_width, stroke_width, bar_height, arrow_width;
   GT_Color elem_color, grey, fill_color;
   const char *type;
   GT_Str *style;
-  GT_Strand strand = element_get_strand(elem);
+  GT_Strand strand = gt_element_get_strand(elem);
 
   assert(canvas && elem);
 
@@ -558,7 +558,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
   if (!gt_range_overlap(elem_range, canvas->viewrange))
     return -1;
 
-  type = gt_genome_feature_type_get_cstr(element_get_type(elem));
+  type = gt_genome_feature_type_get_cstr(gt_element_get_type(elem));
   grey.red = grey.green = grey.blue = .85;
   if (!gt_style_get_num(canvas->sty, "format", "bar_height", &bar_height, NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
@@ -584,22 +584,22 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
   elem_start = draw_range.start;
   elem_width = draw_range.end - draw_range.start;
 
-  if (element_is_marked(elem)) {
+  if (gt_element_is_marked(elem)) {
     gt_style_get_color(canvas->sty, type, "stroke_marked", &elem_color,
-                    element_get_node_ref(elem));
+                    gt_element_get_node_ref(elem));
     if (!gt_style_get_num(canvas->sty, "format", "stroke_marked_width",
-                       &stroke_width, element_get_node_ref(elem)))
+                       &stroke_width, gt_element_get_node_ref(elem)))
     stroke_width = STROKE_WIDTH_DEFAULT;
   }
   else {
     gt_style_get_color(canvas->sty, type, "stroke", &elem_color,
-                    element_get_node_ref(elem));
+                    gt_element_get_node_ref(elem));
     if (!gt_style_get_num(canvas->sty, "format", "stroke_width", &stroke_width,
-                       element_get_node_ref(elem)))
+                       gt_element_get_node_ref(elem)))
     stroke_width = STROKE_WIDTH_DEFAULT;
   }
   gt_style_get_color(canvas->sty, type, "fill", &fill_color,
-                  element_get_node_ref(elem));
+                  gt_element_get_node_ref(elem));
 
   if (draw_range.end-draw_range.start <= 1.1)
   {
@@ -619,7 +619,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
     GT_RecMap *rm = gt_recmap_new(elem_start, canvas->y,
                                   elem_start+elem_width, canvas->y+bar_height,
                                   (GT_GenomeFeature*) /* XXX */
-                                  element_get_node_ref(elem));
+                                  gt_element_get_node_ref(elem));
     gt_image_info_add_recmap(canvas->ii, rm);
   }
 
@@ -637,7 +637,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
   /* draw each element according to style set in the style */
   style = gt_str_new();
   if (!gt_style_get_str(canvas->sty, type, "style", style,
-                     element_get_node_ref(elem)))
+                     gt_element_get_node_ref(elem)))
     gt_str_set(style, "box");
 
   if (strcmp(gt_str_get(style), "box")==0)

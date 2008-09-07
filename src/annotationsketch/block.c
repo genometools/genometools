@@ -35,14 +35,14 @@ struct GT_Block {
   unsigned long reference_count;
 };
 
-/* GT_Compare function used to insert Elements into dlist, order by type */
+/* GT_Compare function used to insert GT_Elements into dlist, order by type */
 static int elemcmp(const void *a, const void *b)
 {
-  Element *elem_a = (Element*) a;
-  Element *elem_b = (Element*) b;
+  GT_Element *elem_a = (GT_Element*) a;
+  GT_Element *elem_b = (GT_Element*) b;
 
-  GT_GenomeFeatureType *ta = element_get_type(elem_a);
-  GT_GenomeFeatureType *tb = element_get_type(elem_b);
+  GT_GenomeFeatureType *ta = gt_element_get_type(elem_a);
+  GT_GenomeFeatureType *tb = gt_element_get_type(elem_b);
 
   if (ta == tb)
     return 0;
@@ -95,11 +95,11 @@ GT_Block* gt_block_new_from_node(GT_GenomeNode *node)
 
 void gt_block_insert_element(GT_Block *block, GT_GenomeNode *gn)
 {
-  Element *element;
+  GT_Element *element;
   assert(block && gn);
   if (!block->top_level_feature)
     block->top_level_feature = gt_genome_node_ref(gn);
-  element = element_new(gn);
+  element = gt_element_new(gn);
   dlist_add(block->elements, element);
 }
 
@@ -134,7 +134,7 @@ bool gt_block_has_only_one_fullsize_element(const GT_Block *block)
   if (dlist_size(block->elements) == 1UL) {
     GT_Range elem_range, block_range;
     assert(dlist_first(block->elements) == dlist_last(block->elements));
-    elem_range = element_get_range(
+    elem_range = gt_element_get_range(
                    dlistelem_get_data(dlist_first(block->elements)));
     block_range = gt_block_get_range(block);
     ret = (gt_range_compare(block_range, elem_range) == 0);
@@ -207,8 +207,8 @@ int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
    return had_err;
  for (delem = dlist_first(block->elements); delem;
       delem = dlistelem_next(delem)) {
-    Element* elem = (Element*) dlistelem_get_data(delem);
-    element_sketch(elem, canvas);
+    GT_Element* elem = (GT_Element*) dlistelem_get_data(delem);
+    gt_element_sketch(elem, canvas);
   }
   return had_err;
 }
@@ -221,7 +221,7 @@ int gt_block_unit_test(GT_Error *err)
   int had_err = 0;
   GT_Strand s;
   GT_GenomeNode *gn1, *gn2;
-  Element *e1, *e2;
+  GT_Element *e1, *e2;
   GT_Block * b;
   GT_Str *seqid, *caption1, *caption2;
   gt_error_check(err);
@@ -242,8 +242,8 @@ int gt_block_unit_test(GT_Error *err)
   gft = gt_feature_type_factory_create_gft(feature_type_factory, gft_exon);
   gn2 = gt_genome_feature_new(seqid, gft, r2, GT_STRAND_FORWARD);
 
-  e1 = element_new(gn1);
-  e2 = element_new(gn2);
+  e1 = gt_element_new(gn1);
+  e2 = gt_element_new(gn2);
 
   b = gt_block_new();
 
@@ -275,8 +275,8 @@ int gt_block_unit_test(GT_Error *err)
 
   gt_str_delete(caption2);
   gt_str_delete(seqid);
-  element_delete(e1);
-  element_delete(e2);
+  gt_element_delete(e1);
+  gt_element_delete(e2);
   gt_block_delete(b);
   gt_genome_node_delete(gn1);
   gt_genome_node_delete(gn2);
@@ -295,8 +295,8 @@ void gt_block_delete(GT_Block *block)
   }
   for (delem = dlist_first(block->elements); delem;
        delem = dlistelem_next(delem)) {
-    Element* elem = (Element*) dlistelem_get_data(delem);
-    element_delete(elem);
+    GT_Element* elem = (GT_Element*) dlistelem_get_data(delem);
+    gt_element_delete(elem);
   }
   if (block->caption)
     gt_str_delete(block->caption);

@@ -44,6 +44,6 @@ int           gt_canvas_visit_line_post(GT_Canvas*, Line*);
 /* Callback function for GT_Diagram rendering. */
 int           gt_canvas_visit_block(GT_Canvas*, GT_Block*);
 /* Callback function for GT_Diagram rendering. */
-int           gt_canvas_visit_element(GT_Canvas*, Element*);
+int           gt_canvas_visit_element(GT_Canvas*, GT_Element*);
 
 #endif

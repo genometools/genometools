@@ -27,7 +27,7 @@
 #include "annotationsketch/element.h"
 #include "annotationsketch/style.h"
 
-struct Element {
+struct GT_Element {
   GT_GenomeFeatureType *type;
   GT_Strand strand;
   GT_GenomeNode *gn;
@@ -36,26 +36,26 @@ struct Element {
   bool mark;
 };
 
-Element* element_new(GT_GenomeNode *gn)
+GT_Element* gt_element_new(GT_GenomeNode *gn)
 {
-  Element *element;
+  GT_Element *element;
   GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
   assert(gn);
-  element = element_new_empty();
-  element_set_type(element, gt_genome_feature_get_type(gf));
-  element_set_range(element, gt_genome_node_get_range(gn));
+  element = gt_element_new_empty();
+  gt_element_set_type(element, gt_genome_feature_get_type(gf));
+  gt_element_set_range(element, gt_genome_node_get_range(gn));
   element->strand = gt_genome_feature_get_strand(gf);
   element->mark = gt_genome_node_is_marked(gn);
   element->gn = gt_genome_node_ref(gn);
   return element;
 }
 
-Element* element_new_empty(void)
+GT_Element* gt_element_new_empty(void)
 {
-  return ma_calloc(1, sizeof (Element));
+  return ma_calloc(1, sizeof (GT_Element));
 }
 
-DrawingRange element_calculate_drawing_range(Element *element,
+DrawingRange gt_element_calculate_drawing_range(GT_Element *element,
                                              GT_Canvas *canvas)
 {
   assert(element && canvas);
@@ -63,42 +63,42 @@ DrawingRange element_calculate_drawing_range(Element *element,
   return element->drange;
 }
 
-GT_Range element_get_range(const Element *element)
+GT_Range gt_element_get_range(const GT_Element *element)
 {
   assert(element);
   return element->range;
 }
 
-void element_set_range(Element *element, GT_Range r)
+void gt_element_set_range(GT_Element *element, GT_Range r)
 {
   assert(element);
   element->range = r;
 }
 
-GT_GenomeFeatureType* element_get_type(const Element *element)
+GT_GenomeFeatureType* gt_element_get_type(const GT_Element *element)
 {
   assert(element);
   return element->type;
 }
 
-void element_set_type(Element *element, GT_GenomeFeatureType *type)
+void gt_element_set_type(GT_Element *element, GT_GenomeFeatureType *type)
 {
   assert(element);
   element->type = type;
 }
 
-GT_Strand element_get_strand(const Element *element)
+GT_Strand gt_element_get_strand(const GT_Element *element)
 {
   assert(element);
   return element->strand;
 }
-bool element_is_marked(const Element *element)
+bool gt_element_is_marked(const GT_Element *element)
 {
   assert(element);
   return element->mark;
 }
 
-bool elements_are_equal(const Element *e1, const Element *e2)
+bool elements_are_equal(const GT_Element *e1, const GT_Element *e2)
 {
   assert(e1 && e2);
   if (e1->type == e2->type && !gt_range_compare(e1->range, e2->range))
@@ -106,7 +106,7 @@ bool elements_are_equal(const Element *e1, const Element *e2)
   return false;
 }
 
-int element_sketch(Element *elem, GT_Canvas *canvas)
+int gt_element_sketch(GT_Element *elem, GT_Canvas *canvas)
 {
   int had_err = 0;
   assert(elem && canvas);
@@ -114,19 +114,19 @@ int element_sketch(Element *elem, GT_Canvas *canvas)
   return had_err;
 }
 
-GT_GenomeNode* element_get_node_ref(const Element *elem)
+GT_GenomeNode* gt_element_get_node_ref(const GT_Element *elem)
 {
   assert(elem);
   return elem->gn;
 }
 
-int element_unit_test(GT_Error *err)
+int gt_element_unit_test(GT_Error *err)
 {
   GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeFeatureType *type;
   GT_Range r1, r2, r_temp;
   GT_GenomeNode *gn, *gn2;
-  Element *e, *e2, *e3;
+  GT_Element *e, *e2, *e3;
   GT_Str *seqid;
   int had_err = 0;
   gt_error_check(err);
@@ -144,31 +144,31 @@ int element_unit_test(GT_Error *err)
   gn = gt_genome_feature_new(seqid, type, r1, GT_STRAND_BOTH);
   gn2 = gt_genome_feature_new(seqid, type, r2, GT_STRAND_BOTH);
 
-  e = element_new(gn);
-  e2 = element_new(gn);
-  e3 = element_new(gn2);
+  e = gt_element_new(gn);
+  e2 = gt_element_new(gn);
+  e3 = gt_element_new(gn2);
 
-  /* tests element_get_range */
-  r_temp = element_get_range(e);
+  /* tests gt_element_get_range */
+  r_temp = gt_element_get_range(e);
   ensure(had_err, (0 == gt_range_compare(r1, r_temp)));
   ensure(had_err, (1 == gt_range_compare(r2, r_temp)));
 
-  /* tests element_get_type and element_set_type*/
-  ensure(had_err, (type == element_get_type(e)));
+  /* tests gt_element_get_type and gt_element_set_type*/
+  ensure(had_err, (type == gt_element_get_type(e)));
   type = gt_feature_type_factory_create_gft(feature_type_factory, gft_intron);
-  ensure(had_err, (type != element_get_type(e)));
-  element_set_type(e, type);
-  ensure(had_err, (type == element_get_type(e)));
-  element_set_type(e2, type);
+  ensure(had_err, (type != gt_element_get_type(e)));
+  gt_element_set_type(e, type);
+  ensure(had_err, (type == gt_element_get_type(e)));
+  gt_element_set_type(e2, type);
 
   /* tests elements_are_equal */
   ensure(had_err, elements_are_equal(e, e2));
   ensure(had_err, !elements_are_equal(e, e3));
   ensure(had_err, !elements_are_equal(e2, e3));
 
-  element_delete(e);
-  element_delete(e2);
-  element_delete(e3);
+  gt_element_delete(e);
+  gt_element_delete(e2);
+  gt_element_delete(e3);
   gt_genome_node_delete(gn);
   gt_genome_node_delete(gn2);
   gt_feature_type_factory_delete(feature_type_factory);
@@ -178,7 +178,7 @@ int element_unit_test(GT_Error *err)
 
 }
 
-void element_delete(Element *element)
+void gt_element_delete(GT_Element *element)
 {
   if (!element) return;
   if (element->gn)
