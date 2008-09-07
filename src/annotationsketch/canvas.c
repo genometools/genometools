@@ -439,7 +439,7 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
   GT_Color grey, fillcolor, strokecolor;
   double bar_height, min_len_block, arrow_width, stroke_width;
   const char* caption;
-  Strand strand;
+  GT_Strand strand;
 
   assert(canvas && block);
 
@@ -459,9 +459,9 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
                      NULL))
     stroke_width = STROKE_WIDTH_DEFAULT;
 
-  if (strand == STRAND_REVERSE || strand == STRAND_BOTH)
+  if (strand == GT_STRAND_REVERSE || strand == GT_STRAND_BOTH)
     arrow_status = ARROW_LEFT;
-  if (strand == STRAND_FORWARD || strand == STRAND_BOTH)
+  if (strand == GT_STRAND_FORWARD || strand == GT_STRAND_BOTH)
     arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
   /* draw block caption */
@@ -550,7 +550,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
   GT_Color elem_color, grey, fill_color;
   const char *type;
   Str *style;
-  Strand strand = element_get_strand(elem);
+  GT_Strand strand = element_get_strand(elem);
 
   assert(canvas && elem);
 
@@ -567,10 +567,10 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
     arrow_width = ARROW_WIDTH_DEFAULT;
   }
 
-  if ((strand == STRAND_REVERSE || strand == STRAND_BOTH)
+  if ((strand == GT_STRAND_REVERSE || strand == GT_STRAND_BOTH)
          /*&& delem == dlist_first(elems)*/)
     arrow_status = ARROW_LEFT;
-  if ((strand == STRAND_FORWARD || strand == STRAND_BOTH)
+  if ((strand == GT_STRAND_FORWARD || strand == GT_STRAND_BOTH)
          /*&& dlistelem_next(delem) == NULL*/)
     arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 

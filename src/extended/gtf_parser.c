@@ -127,7 +127,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
         *mRNAs = (GT_Array*) cinfo->mRNAs;
   GT_GenomeNode *mRNA_node, *first_node, *gn;
   const char *tname;
-  Strand mRNA_strand;
+  GT_Strand mRNA_strand;
   GT_Range mRNA_range;
   Str *mRNA_seqid;
   unsigned long i;
@@ -145,9 +145,9 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
   for (i = 1; i < gt_array_size(gt_genome_node_array); i++) {
     gn = *(GT_GenomeNode**) gt_array_get(gt_genome_node_array, i);
     mRNA_range = gt_range_join(mRNA_range, gt_genome_node_get_range(gn));
-    /* XXX: an error check is necessary here, otherwise strand_join() can cause
+    /* XXX: an error check is necessary here, otherwise gt_strand_join() can cause
        a failed assertion */
-    mRNA_strand = strand_join(mRNA_strand,
+    mRNA_strand = gt_strand_join(mRNA_strand,
                               gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
     if (str_cmp(mRNA_seqid, gt_genome_node_get_seqid(gn))) {
       gt_error_set(err, "The features on lines %u and %u refer to different "
@@ -197,7 +197,7 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
   const char *gname;
   GT_Array *mRNAs = gt_array_new(sizeof (GT_GenomeNode*));
   GT_GenomeNode *gene_node, *gn;
-  Strand gene_strand;
+  GT_Strand gene_strand;
   GT_Range gene_range;
   Str *gene_seqid;
   unsigned long i;
@@ -219,7 +219,7 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
     for (i = 1; i < gt_array_size(mRNAs); i++) {
       gn = *(GT_GenomeNode**) gt_array_get(mRNAs, i);
       gene_range = gt_range_join(gene_range, gt_genome_node_get_range(gn));
-      gene_strand = strand_join(gene_strand,
+      gene_strand = gt_strand_join(gene_strand,
                                 gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
       assert(str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
     }
@@ -262,7 +262,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   GT_GenomeNode *gn;
   GT_Range range, *rangeptr;
   Phase phase_value;
-  Strand strand_value;
+  GT_Strand gt_strand_value;
   Splitter *splitter, *attribute_splitter;
   float score_value;
   char *seqname,
@@ -399,7 +399,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       HANDLE_ERROR;
 
       /* parse the strand */
-      had_err = parse_strand(&strand_value, strand, line_number, filename, err);
+      had_err = parse_strand(&gt_strand_value, strand, line_number, filename, err);
       HANDLE_ERROR;
 
       /* parse the frame */
@@ -527,7 +527,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(seqid_str);
 
       /* construct the new feature */
-      gn = gt_genome_feature_new(seqid_str, gff_feature_type, range, strand_value);
+      gn = gt_genome_feature_new(seqid_str, gff_feature_type, range, gt_strand_value);
       gt_genome_node_set_origin(gn, filenamestr, line_number);
 
       /* set source */

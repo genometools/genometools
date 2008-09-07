@@ -26,8 +26,8 @@
 #include "extended/targetbest_filter_stream.h"
 #include "tools/gt_filter.h"
 
-#define STRAND_OPT  "strand"
-#define TARGETSTRAND_OPT  "targetstrand"
+#define GT_STRAND_OPT  "strand"
+#define TARGETGT_STRAND_OPT  "targetstrand"
 
 typedef struct {
   bool verbose,
@@ -35,11 +35,11 @@ typedef struct {
        targetbest;
   Str *seqid,
       *typefilter,
-      *strand_char,
-      *targetstrand_char;
+      *gt_strand_char,
+      *targetgt_strand_char;
   GT_Range contain_range,
         overlap_range;
-  Strand strand,
+  GT_Strand strand,
          targetstrand;
   unsigned long max_gene_length,
                 max_gene_num,
@@ -56,10 +56,10 @@ static void* gt_filter_arguments_new(void)
   FilterArguments *arguments = ma_calloc(1, sizeof *arguments);
   arguments->seqid = str_new();
   arguments->typefilter = str_new();
-  arguments->strand_char = str_new();
-  arguments->strand = NUM_OF_STRAND_TYPES;
-  arguments->targetstrand_char = str_new();
-  arguments->targetstrand = NUM_OF_STRAND_TYPES;
+  arguments->gt_strand_char = str_new();
+  arguments->strand = GT_NUM_OF_STRAND_TYPES;
+  arguments->targetgt_strand_char = str_new();
+  arguments->targetstrand = GT_NUM_OF_STRAND_TYPES;
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -70,8 +70,8 @@ static void gt_filter_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
-  str_delete(arguments->targetstrand_char);
-  str_delete(arguments->strand_char);
+  str_delete(arguments->targetgt_strand_char);
+  str_delete(arguments->gt_strand_char);
   str_delete(arguments->typefilter);
   str_delete(arguments->seqid);
   ma_free(arguments);
@@ -113,19 +113,20 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
   option_parser_add_option(op, overlap_option);
 
   /* -strand */
-  option = option_new_string(STRAND_OPT, "filter out all top-level features "
+  option = option_new_string(GT_STRAND_OPT, "filter out all top-level features "
                              "(i.e., features without parents) whose strand is "
                              "different from the given one (must be one of '"
-                             STRANDCHARS"')", arguments->strand_char, NULL);
+                             GT_STRAND_CHARS"')", arguments->gt_strand_char,
+                             NULL);
   option_parser_add_option(op, option);
 
   /* -targetstrand */
-  option = option_new_string(TARGETSTRAND_OPT, "filter out all top-level "
+  option = option_new_string(TARGETGT_STRAND_OPT, "filter out all top-level "
                              "features (i.e., features without parents) which "
                              "have exactly one target attribute whose strand "
                              "is different from the given one (must be one of '"
-                             STRANDCHARS"')", arguments->targetstrand_char,
-                             NULL);
+                             GT_STRAND_CHARS"')",
+                             arguments->targetgt_strand_char, NULL);
   option_parser_add_option(op, option);
 
   /* -targetbest */
@@ -133,8 +134,8 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
                            "(i.e., features without parents) with exactly one "
                            "target attribute have the same target_id, keep "
                            "only the feature with the best score. If "
-                           "-"TARGETSTRAND_OPT" is used at the same time, this "
-                           "option is applied after -"TARGETSTRAND_OPT".\n"
+                           "-"TARGETGT_STRAND_OPT" is used at the same time, this "
+                           "option is applied after -"TARGETGT_STRAND_OPT".\n"
                            "Memory consumption is O(file_size).",
                            &arguments->targetbest, false);
   option_parser_add_option(op, option);
@@ -196,16 +197,17 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int process_strand_arg(Str *strand_char, Strand *strand,
+static int process_gt_strand_arg(Str *gt_strand_char, GT_Strand *strand,
                               const char *optstr, GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);
-  if (str_length(strand_char)) {
-    Strand tmpstrand = strand_get(str_get(strand_char)[0]);
-    if ((str_length(strand_char) > 1) || (tmpstrand == NUM_OF_STRAND_TYPES)) {
-      gt_error_set(err, "argument to option -%s must be one of '"STRANDCHARS"'",
-                optstr);
+  if (str_length(gt_strand_char)) {
+    GT_Strand tmpstrand = gt_strand_get(str_get(gt_strand_char)[0]);
+    if ((str_length(gt_strand_char) > 1) ||
+        (tmpstrand == GT_NUM_OF_STRAND_TYPES)) {
+      gt_error_set(err, "argument to option -%s must be one of '"
+                        GT_STRAND_CHARS"'", optstr);
       had_err = -1;
     }
     if (!had_err)
@@ -221,11 +223,11 @@ static int gt_filter_arguments_check(UNUSED int rest_argc, void *tool_arguments,
   int had_err;
   gt_error_check(err);
   assert(arguments);
-  had_err = process_strand_arg(arguments->strand_char, &arguments->strand,
-                               STRAND_OPT, err);
+  had_err = process_gt_strand_arg(arguments->gt_strand_char, &arguments->strand,
+                               GT_STRAND_OPT, err);
   if (!had_err) {
-    had_err = process_strand_arg(arguments->targetstrand_char,
-                                 &arguments->targetstrand, TARGETSTRAND_OPT,
+    had_err = process_gt_strand_arg(arguments->targetgt_strand_char,
+                                 &arguments->targetstrand, TARGETGT_STRAND_OPT,
                                  err);
   }
   return had_err;

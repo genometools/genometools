@@ -29,7 +29,7 @@
 
 struct Element {
   GT_GenomeFeatureType *type;
-  Strand strand;
+  GT_Strand strand;
   GT_GenomeNode *gn;
   GT_Range range;
   DrawingRange drange;
@@ -87,7 +87,7 @@ void element_set_type(Element *element, GT_GenomeFeatureType *type)
   element->type = type;
 }
 
-Strand element_get_strand(const Element *element)
+GT_Strand element_get_strand(const Element *element)
 {
   assert(element);
   return element->strand;
@@ -141,8 +141,8 @@ int element_unit_test(GT_Error *err)
 
   seqid = str_new_cstr("seqid");
   type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn = gt_genome_feature_new(seqid, type, r1, STRAND_BOTH);
-  gn2 = gt_genome_feature_new(seqid, type, r2, STRAND_BOTH);
+  gn = gt_genome_feature_new(seqid, type, r1, GT_STRAND_BOTH);
+  gn2 = gt_genome_feature_new(seqid, type, r2, GT_STRAND_BOTH);
 
   e = element_new(gn);
   e2 = element_new(gn);

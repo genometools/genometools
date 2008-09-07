@@ -28,7 +28,7 @@ typedef struct {
   unsigned long number_of_sas;
   size_t size_of_sa;
   GetGenomicGT_RangeFunc get_genomic_range;
-  GetStrandFunc get_strand;
+  GetGT_StrandFunc get_strand;
   GetExonsFunc get_exons;
   ProcessSpliceFormFunc process_splice_form;
   void *userdata;
@@ -75,12 +75,12 @@ static GT_Range extract_genomic_range(const ConsensusSA *csa, unsigned long sa)
   return csa->get_genomic_range((char*) csa->set_of_sas + csa->size_of_sa * sa);
 }
 
-static Strand extract_strand(const ConsensusSA *csa, unsigned long sa)
+static GT_Strand extract_strand(const ConsensusSA *csa, unsigned long sa)
 {
-  Strand strand;
+  GT_Strand strand;
   assert(csa && csa->set_of_sas && sa < csa->number_of_sas);
   strand = csa->get_strand((char*) csa->set_of_sas + csa->size_of_sa * sa);
-  assert(strand == STRAND_FORWARD || strand == STRAND_REVERSE); /* XXX */
+  assert(strand == GT_STRAND_FORWARD || strand == GT_STRAND_REVERSE); /* XXX */
   return strand;
 }
 
@@ -562,7 +562,7 @@ static void compute_csas(ConsensusSA *csa)
 
 void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
                   size_t size_of_sa, GetGenomicGT_RangeFunc get_genomic_range,
-                  GetStrandFunc get_strand, GetExonsFunc get_exons,
+                  GetGT_StrandFunc get_strand, GetExonsFunc get_exons,
                   ProcessSpliceFormFunc process_splice_form, void *userdata)
 {
   ConsensusSA csa;

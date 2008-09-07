@@ -112,14 +112,14 @@ int line_unit_test(GT_Error *err)
   seqid3 = str_new_cstr("foo");
 
   type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
-  parent = gt_genome_feature_new(seqid1, type, r_parent, STRAND_FORWARD);
+  parent = gt_genome_feature_new(seqid1, type, r_parent, GT_STRAND_FORWARD);
   type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn1 = gt_genome_feature_new(seqid3, type, r1, STRAND_FORWARD);
-  gn2 = gt_genome_feature_new(seqid3, type, r2, STRAND_FORWARD);
-  gn3 = gt_genome_feature_new(seqid2, type, r3, STRAND_FORWARD);
+  gn1 = gt_genome_feature_new(seqid3, type, r1, GT_STRAND_FORWARD);
+  gn2 = gt_genome_feature_new(seqid3, type, r2, GT_STRAND_FORWARD);
+  gn3 = gt_genome_feature_new(seqid2, type, r3, GT_STRAND_FORWARD);
   type = feature_type_factory_create_gft(feature_type_factory,
                                          gft_TF_binding_site);
-  gn4 = gt_genome_feature_new(seqid3, type, r4, STRAND_FORWARD);
+  gn4 = gt_genome_feature_new(seqid3, type, r4, GT_STRAND_FORWARD);
 
   l1 = line_new();
   l2 = line_new();

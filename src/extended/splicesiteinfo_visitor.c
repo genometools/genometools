@@ -58,7 +58,7 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GT_GenomeNode *intron,
 {
   const char *sequence;
   unsigned long seqlen;
-  Strand strand;
+  GT_Strand strand;
   GT_Range range;
   char site[5];
   Str *seqid;
@@ -79,14 +79,14 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GT_GenomeNode *intron,
     if (!had_err) {
       assert(range.end <= seqlen);
       strand = gt_genome_feature_get_strand((GT_GenomeFeature*) intron);
-      if (strand == STRAND_FORWARD || strand == STRAND_REVERSE) {
+      if (strand == GT_STRAND_FORWARD || strand == GT_STRAND_REVERSE) {
         /* fill site */
         site[0] = tolower(sequence[range.start-1]);
         site[1] = tolower(sequence[range.start]);
         site[2] = tolower(sequence[range.end-2]);
         site[3] = tolower(sequence[range.end-1]);
         site[4] = '\0';
-        if (strand == STRAND_REVERSE)
+        if (strand == GT_STRAND_REVERSE)
           had_err = reverse_complement(site, 4, err);
         if (!had_err) {
           /* add site to distributions */

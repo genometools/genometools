@@ -22,7 +22,7 @@
 typedef struct {
   GT_Array *splice_forms;
   GetGenomicGT_RangeFunc get_genomic_range;
-  GetStrandFunc get_strand;
+  GetGT_StrandFunc get_strand;
 } StoreSpliceFormInfo;
 
 static void store_splice_form(GT_Array *spliced_alignments_in_form,
@@ -54,13 +54,13 @@ static void process_splice_forms(GT_Array *genes, GT_Array *splice_forms)
   for (i = 0; i < gt_array_size(splice_forms); i++) {
     CSASpliceForm *splice_form = *(CSASpliceForm**) gt_array_get(splice_forms, i);
     switch (csa_splice_form_strand(splice_form)) {
-      case STRAND_FORWARD:
+      case GT_STRAND_FORWARD:
         if (!forward_gene)
           forward_gene = csa_gene_new(splice_form);
         else
           csa_gene_add_splice_form(forward_gene, splice_form);
         break;
-      case STRAND_REVERSE:
+      case GT_STRAND_REVERSE:
         if (!reverse_gene)
           reverse_gene = csa_gene_new(splice_form);
         else
@@ -93,7 +93,7 @@ GT_Array* csa_variable_strands(const void *set_of_sas,
                                unsigned long number_of_sas,
                                size_t size_of_sa,
                                GetGenomicGT_RangeFunc get_genomic_range,
-                               GetStrandFunc get_strand, GetExonsFunc get_exons)
+                               GetGT_StrandFunc get_strand, GetExonsFunc get_exons)
 {
   StoreSpliceFormInfo info;
   GT_Array *genes;

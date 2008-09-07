@@ -169,14 +169,14 @@ static int add_offset_if_necessary(GT_Range *range, GFF3Parser *parser,
 }
 
 static int parse_target_attribute(const char *value, Str *target_id,
-                                  GT_Range *target_range, Strand *target_strand,
+                                  GT_Range *target_range, GT_Strand *target_strand,
                                   const char *filename,
                                   unsigned int line_number, GT_Error *err)
 {
   unsigned long num_of_tokens;
   Str *unescaped_target;
   char *escaped_target;
-  Strand parsed_strand;
+  GT_Strand parsed_strand;
   Splitter *splitter;
   GT_Range parsed_range;
   int had_err = 0;
@@ -215,7 +215,7 @@ static int parse_target_attribute(const char *value, Str *target_id,
         *target_strand = parsed_strand;
     }
     else if (target_strand)
-      *target_strand = NUM_OF_STRAND_TYPES; /* undefined */
+      *target_strand = GT_NUM_OF_STRAND_TYPES; /* undefined */
   }
   ma_free(escaped_target);
   str_delete(unescaped_target);
@@ -227,7 +227,7 @@ int gff3parser_parse_target_attributes(const char *values,
                                        unsigned long *num_of_targets,
                                        Str *first_target_id,
                                        GT_Range *first_target_range,
-                                       Strand *first_target_strand,
+                                       GT_Strand *first_target_strand,
                                        const char *filename,
                                        unsigned int line_number, GT_Error *err)
 {
@@ -966,7 +966,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   Splitter *splitter;
   AutomaticGT_SequenceRegion *auto_sr = NULL;
   Str *seqid_str = NULL;
-  Strand strand_value;
+  GT_Strand gt_strand_value;
   float score_value;
   Phase phase_value;
   GT_Range range;
@@ -1032,7 +1032,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 
   /* parse the strand */
   if (!had_err)
-    had_err = parse_strand(&strand_value, strand, line_number, filename, err);
+    had_err = parse_strand(&gt_strand_value, strand, line_number, filename, err);
 
   /* parse the phase */
   if (!had_err)
@@ -1046,7 +1046,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 
   /* create the feature */
   if (!had_err) {
-    genome_feature = gt_genome_feature_new(seqid_str, gft, range, strand_value);
+    genome_feature = gt_genome_feature_new(seqid_str, gft, range, gt_strand_value);
     gt_genome_node_set_origin(genome_feature, filenamestr, line_number);
   }
 

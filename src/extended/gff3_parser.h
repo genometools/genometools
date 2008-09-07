@@ -40,7 +40,7 @@ int         gff3parser_parse_target_attributes(const char *values,
                                                unsigned long *num_of_targets,
                                                Str *first_target_id,
                                                GT_Range *first_target_range,
-                                               Strand *first_target_strand,
+                                               GT_Strand *first_target_strand,
                                                const char *filename,
                                                unsigned int line_number,
                                                GT_Error*);

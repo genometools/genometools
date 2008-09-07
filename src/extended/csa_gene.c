@@ -81,7 +81,7 @@ GT_Range csa_gene_genomic_range(const CSAGene *gene)
   return gene_range;
 }
 
-Strand csa_gene_strand(const CSAGene *gene)
+GT_Strand csa_gene_strand(const CSAGene *gene)
 {
   assert(gene);
   return csa_splice_form_strand(*(CSASpliceForm**)

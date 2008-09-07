@@ -30,12 +30,12 @@ static GT_Range get_genomic_range(const void *sa)
   return sspliced_alignment_genomic_range(alignment);
 }
 
-static Strand get_strand(const void *sa)
+static GT_Strand get_strand(const void *sa)
 {
   SSplicedAlignment *alignment = *(SSplicedAlignment**) sa;
   if (sspliced_alignment_is_forward(alignment))
-    return STRAND_FORWARD;
-  return STRAND_REVERSE;
+    return GT_STRAND_FORWARD;
+  return GT_STRAND_REVERSE;
 }
 
 static void get_exons(GT_Array *exon_ranges, const void *sa)

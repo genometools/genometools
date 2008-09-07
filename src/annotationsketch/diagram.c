@@ -676,17 +676,17 @@ int gt_diagram_unit_test(GT_Error *err)
   sr1 = (GT_SequenceRegion*) gt_sequence_regionnew(seqid1, rs);
   sr2 = (GT_SequenceRegion*) gt_sequence_regionnew(seqid2, rs);
 
-  gn1 = gt_genome_feature_new(seqid1, gene_type, r1, STRAND_UNKNOWN);
+  gn1 = gt_genome_feature_new(seqid1, gene_type, r1, GT_STRAND_UNKNOWN);
 
-  gn2 = gt_genome_feature_new(seqid2, gene_type, r4, STRAND_UNKNOWN);
+  gn2 = gt_genome_feature_new(seqid2, gene_type, r4, GT_STRAND_UNKNOWN);
 
-  ex1 = gt_genome_feature_new(seqid1, exon_type, r2, STRAND_UNKNOWN);
+  ex1 = gt_genome_feature_new(seqid1, exon_type, r2, GT_STRAND_UNKNOWN);
 
-  ex2 = gt_genome_feature_new(seqid1, exon_type, r3, STRAND_UNKNOWN);
+  ex2 = gt_genome_feature_new(seqid1, exon_type, r3, GT_STRAND_UNKNOWN);
 
-  ex3 = gt_genome_feature_new(seqid2, exon_type, r4, STRAND_UNKNOWN);
+  ex3 = gt_genome_feature_new(seqid2, exon_type, r4, GT_STRAND_UNKNOWN);
 
-  cds1 = gt_genome_feature_new(seqid2, CDS_type, r5, STRAND_UNKNOWN);
+  cds1 = gt_genome_feature_new(seqid2, CDS_type, r5, GT_STRAND_UNKNOWN);
 
   /* determine the structure of our feature tree */
   gt_genome_node_is_part_of_genome_node(gn1, ex1);

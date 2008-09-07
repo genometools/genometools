@@ -31,7 +31,7 @@ struct FilterVisitor {
       *typefilter;
   GT_Range contain_range,
         overlap_range;
-  Strand strand,
+  GT_Strand strand,
          targetstrand;
   bool has_CDS;
   unsigned long max_gene_length,
@@ -85,29 +85,30 @@ static bool filter_overlap_range(GT_GenomeFeature *gf, GT_Range overlap_range)
   return false;
 }
 
-static bool filter_strand(GT_GenomeFeature *gf, Strand strand)
+static bool filter_strand(GT_GenomeFeature *gf, GT_Strand strand)
 {
   assert(gf);
-  if (strand != NUM_OF_STRAND_TYPES && gt_genome_feature_get_strand(gf) != strand)
+  if (strand != GT_NUM_OF_STRAND_TYPES &&
+      gt_genome_feature_get_strand(gf) != strand)
     return true;
   return false;
 }
 
-static bool filter_targetstrand(GT_GenomeFeature *gf, Strand targetstrand)
+static bool filter_targetstrand(GT_GenomeFeature *gf, GT_Strand targetstrand)
 {
   const char *target;
   assert(gf);
-  if (targetstrand != NUM_OF_STRAND_TYPES &&
+  if (targetstrand != GT_NUM_OF_STRAND_TYPES &&
       (target = gt_genome_feature_get_attribute((GT_GenomeNode*) gf,
                                              TARGET_STRING))) {
     unsigned long num_of_targets;
-    Strand parsed_strand;
+    GT_Strand parsed_strand;
     int had_err;
     had_err = gff3parser_parse_target_attributes(target, &num_of_targets, NULL,
                                                  NULL, &parsed_strand, "", 0,
                                                  NULL);
     assert(!had_err);
-    if (num_of_targets == 1 && parsed_strand != NUM_OF_STRAND_TYPES &&
+    if (num_of_targets == 1 && parsed_strand != GT_NUM_OF_STRAND_TYPES &&
         parsed_strand != targetstrand) {
       return true;
     }
@@ -259,7 +260,7 @@ const GenomeVisitorClass* filter_visitor_class()
 
 GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
                                   GT_Range contain_range, GT_Range overlap_range,
-                                  Strand strand, Strand targetstrand,
+                                  GT_Strand strand, GT_Strand targetstrand,
                                   bool has_CDS, unsigned long max_gene_length,
                                   unsigned long max_gene_num,
                                   double min_gene_score, double max_gene_score,

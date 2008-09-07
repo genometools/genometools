@@ -38,7 +38,7 @@ void               element_set_range(Element*, GT_Range);
 DrawingRange       element_calculate_drawing_range(Element*, GT_Canvas*);
 GT_GenomeFeatureType* element_get_type(const Element*);
 void               element_set_type(Element*, GT_GenomeFeatureType*);
-Strand             element_get_strand(const Element*);
+GT_Strand             element_get_strand(const Element*);
 GT_GenomeNode*        element_get_node_ref(const Element*);
 bool               element_is_marked(const Element*);
 bool               elements_are_equal(const Element*, const Element*);

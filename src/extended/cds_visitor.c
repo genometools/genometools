@@ -57,8 +57,8 @@ static int extract_cds_if_necessary(GT_GenomeNode *gn, void *data, GT_Error *err
   assert(gf);
 
   if (gt_genome_feature_has_type(gf, gft_exon) &&
-      (gt_genome_feature_get_strand(gf) == STRAND_FORWARD ||
-       gt_genome_feature_get_strand(gf) == STRAND_REVERSE)) {
+      (gt_genome_feature_get_strand(gf) == GT_STRAND_FORWARD ||
+       gt_genome_feature_get_strand(gf) == GT_STRAND_REVERSE)) {
     had_err = region_mapping_get_raw_sequence(v->region_mapping, &raw_sequence,
                                               gt_genome_node_get_seqid(gn), err);
     if (!had_err) {
@@ -120,13 +120,13 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
   GT_GenomeNode *cds_feature;
   unsigned long i;
   GT_Range cds;
-  Strand strand = gt_genome_feature_get_strand((GT_GenomeFeature*) gn);
+  GT_Strand strand = gt_genome_feature_get_strand((GT_GenomeFeature*) gn);
 
   assert(gt_range_length(orf) >= 3);
   /* the first CDS feature */
-  cds.start = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
+  cds.start = splicedseq_map(v->splicedseq, strand == GT_STRAND_FORWARD
                              ? orf.start : orf.end) + 1;
-  cds.end = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
+  cds.end = splicedseq_map(v->splicedseq, strand == GT_STRAND_FORWARD
                            ? orf.end : orf.start) + 1;
   cds_type = gt_genome_feature_create_gft((GT_GenomeFeature*) gn, gft_CDS);
   assert(cds_type);
@@ -136,20 +136,20 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
   gt_genome_feature_set_source(cds_feature, v->source);
   gt_genome_feature_set_phase(cds_feature, PHASE_ZERO);
   /* all CDS features in between */
-  for (i = strand == STRAND_FORWARD ? orf.start : orf.end;
-       strand == STRAND_FORWARD ? i < orf.end : i > orf.start;
-       strand == STRAND_FORWARD ? i++ : i--) {
+  for (i = strand == GT_STRAND_FORWARD ? orf.start : orf.end;
+       strand == GT_STRAND_FORWARD ? i < orf.end : i > orf.start;
+       strand == GT_STRAND_FORWARD ? i++ : i--) {
     if (splicedseq_pos_is_border(v->splicedseq, i)) {
       gt_genome_feature_set_end((GT_GenomeFeature*) cds_feature,
                              splicedseq_map(v->splicedseq, i) + 1);
       gt_genome_node_is_part_of_genome_node(gn, cds_feature);
-      if (strand == STRAND_FORWARD)
+      if (strand == GT_STRAND_FORWARD)
         orf.start = i + 1;
       else
         orf.end = i - 1;
-      cds.start = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
+      cds.start = splicedseq_map(v->splicedseq, strand == GT_STRAND_FORWARD
                                  ? orf.start : orf.end) + 1;
-      cds.end = splicedseq_map(v->splicedseq, strand == STRAND_FORWARD
+      cds.end = splicedseq_map(v->splicedseq, strand == GT_STRAND_FORWARD
                                ? orf.end : orf.start) + 1;
       cds_feature = gt_genome_feature_new(gt_genome_node_get_seqid(gn), cds_type, cds,
                                 gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
@@ -162,7 +162,7 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
   /* set the end of the last CDS feature and store it */
   gt_genome_feature_set_end((GT_GenomeFeature*) cds_feature,
                          splicedseq_map(v->splicedseq,
-                                        strand == STRAND_FORWARD
+                                        strand == GT_STRAND_FORWARD
                                         ? orf.end : orf.start) + 1);
   gt_genome_node_is_part_of_genome_node(gn, cds_feature);
 }
@@ -193,7 +193,7 @@ static int add_cds_if_necessary(GT_GenomeNode *gn, void *data, GT_Error *err)
   if (!had_err && splicedseq_length(v->splicedseq) > 2) {
     GT_Array *orfs;
 
-    if (gt_genome_feature_get_strand(gf) == STRAND_REVERSE) {
+    if (gt_genome_feature_get_strand(gf) == GT_STRAND_REVERSE) {
       if (splicedseq_reverse(v->splicedseq, err))
         return -1;
     }

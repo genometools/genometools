@@ -186,7 +186,7 @@ int parse_score(bool *score_is_defined, float *score_value, const char *score,
   return 0;
 }
 
-int parse_strand(Strand *strand_value, const char *strand,
+int parse_strand(GT_Strand *gt_strand_value, const char *strand,
                  unsigned int line_number, const char *filename, GT_Error *err)
 {
   assert(strand && filename);
@@ -195,16 +195,16 @@ int parse_strand(Strand *strand_value, const char *strand,
   if (strlen(strand) != 1) {
     gt_error_set(err, "strand '%s' not one character long on line %u in file "
               "'%s'", strand, line_number, filename);
-    *strand_value = STRAND_UNKNOWN;
+    *gt_strand_value = GT_STRAND_UNKNOWN;
     return -1;
   }
-  if (strspn(strand, STRANDCHARS) != 1) {
+  if (strspn(strand, GT_STRAND_CHARS) != 1) {
     gt_error_set(err, "strand '%s' on line %u in file '%s' not a valid character "
-              "from the set '%s'", strand, line_number, filename, STRANDCHARS);
-    *strand_value = STRAND_UNKNOWN;
+              "from the set '%s'", strand, line_number, filename, GT_STRAND_CHARS);
+    *gt_strand_value = GT_STRAND_UNKNOWN;
     return -1;
   }
-  *strand_value = strand_get(strand[0]);
+  *gt_strand_value = gt_strand_get(strand[0]);
   return 0;
 }
 

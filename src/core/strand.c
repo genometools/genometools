@@ -19,33 +19,33 @@
 #include <string.h>
 #include "core/strand.h"
 
-Strand strand_get(char strand_char)
+GT_Strand gt_strand_get(char strand_char)
 {
   switch (strand_char) {
-    case '+': return STRAND_FORWARD;
-    case '-': return STRAND_REVERSE;
-    case '.': return STRAND_BOTH;
-    case '?': return STRAND_UNKNOWN;
-    default:  return NUM_OF_STRAND_TYPES;
+    case '+': return GT_STRAND_FORWARD;
+    case '-': return GT_STRAND_REVERSE;
+    case '.': return GT_STRAND_BOTH;
+    case '?': return GT_STRAND_UNKNOWN;
+    default:  return GT_NUM_OF_STRAND_TYPES;
   }
 }
 
-Strand strand_join(Strand strand_a, Strand strand_b)
+GT_Strand gt_strand_join(GT_Strand strand_a, GT_Strand strand_b)
 {
   switch (strand_b) {
-    case STRAND_FORWARD:
-      assert(strand_a != STRAND_REVERSE);
-      return STRAND_FORWARD;
-    case STRAND_REVERSE:
-      assert(strand_a != STRAND_FORWARD);
-      return STRAND_REVERSE;
-    case STRAND_BOTH:
-    case STRAND_UNKNOWN:
-      /* strand_a == STRAND_FORWARD -> stays the same */
-      /* strand_a == STRAND_REVERSE -> stays the same */
-      /* strand_a == STRAND_UNKNOWN -> stays the same */
-      if (strand_a == STRAND_BOTH)
-        return STRAND_UNKNOWN;
+    case GT_STRAND_FORWARD:
+      assert(strand_a != GT_STRAND_REVERSE);
+      return GT_STRAND_FORWARD;
+    case GT_STRAND_REVERSE:
+      assert(strand_a != GT_STRAND_FORWARD);
+      return GT_STRAND_REVERSE;
+    case GT_STRAND_BOTH:
+    case GT_STRAND_UNKNOWN:
+      /* strand_a == GT_STRAND_FORWARD -> stays the same */
+      /* strand_a == GT_STRAND_REVERSE -> stays the same */
+      /* strand_a == GT_STRAND_UNKNOWN -> stays the same */
+      if (strand_a == GT_STRAND_BOTH)
+        return GT_STRAND_UNKNOWN;
     default: assert(0);
   }
   return strand_a;

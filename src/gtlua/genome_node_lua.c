@@ -32,8 +32,8 @@ static int gt_genome_feature_lua_new(lua_State *L)
   GT_GenomeNode **gf;
   GT_GenomeFeatureType *type;
   GT_Range *range;
-  Strand strand;
-  const char *seqid, *type_str, *strand_str;
+  GT_Strand strand;
+  const char *seqid, *type_str, *gt_strand_str;
   size_t length;
   Str *seqid_str;
   assert(L);
@@ -45,10 +45,10 @@ static int gt_genome_feature_lua_new(lua_State *L)
   type = feature_type_factory_create_gft(feature_type_factory, type_str);
   luaL_argcheck(L, type, 2, "invalid feature type");
   range = check_range(L, 3);
-  strand_str = luaL_checklstring(L, 4, &length);
+  gt_strand_str = luaL_checklstring(L, 4, &length);
   luaL_argcheck(L, length == 1, 4, "strand string must have length 1");
-  luaL_argcheck(L, (strand = strand_get(strand_str[0])) != NUM_OF_STRAND_TYPES,
-                4, "invalid strand");
+  luaL_argcheck(L, (strand = gt_strand_get(gt_strand_str[0])) !=
+                    GT_NUM_OF_STRAND_TYPES, 4, "invalid strand");
   /* construct object */
   gf = lua_newuserdata(L, sizeof (GT_GenomeNode*));
   seqid_str = str_new_cstr(seqid);
@@ -109,13 +109,13 @@ static int gt_genome_feature_lua_get_strand(lua_State *L)
 {
   GT_GenomeNode **gn = check_genome_node(L, 1);
   GT_GenomeFeature *gf;
-  char strand_char[2];
+  char gt_strand_char[2];
   /* make sure we get a genome feature */
   gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  strand_char[0] = STRANDCHARS[gt_genome_feature_get_strand(gf)];
-  strand_char[1] = '\0';
-  lua_pushstring(L, strand_char);
+  gt_strand_char[0] = GT_STRAND_CHARS[gt_genome_feature_get_strand(gf)];
+  gt_strand_char[1] = '\0';
+  lua_pushstring(L, gt_strand_char);
   return 1;
 }
 

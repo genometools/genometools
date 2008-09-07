@@ -49,7 +49,7 @@ static int extract_join_feature(GT_GenomeNode *gn, GT_GenomeFeatureType *type,
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
       str_append_cstr_nt(sequence, raw_sequence, gt_range_length(range));
-      if (gt_genome_feature_get_strand(gf) == STRAND_REVERSE)
+      if (gt_genome_feature_get_strand(gf) == GT_STRAND_REVERSE)
         *reverse_strand = true;
     }
   }
@@ -108,7 +108,7 @@ int extract_feat_sequence(Str *sequence, GT_GenomeNode *gn,
     if (!had_err) {
       str_append_cstr_nt(sequence, raw_sequence + range.start - 1,
                          gt_range_length(range));
-      if (gt_genome_feature_get_strand(gf) == STRAND_REVERSE) {
+      if (gt_genome_feature_get_strand(gf) == GT_STRAND_REVERSE) {
         had_err = reverse_complement(str_get(sequence), str_length(sequence),
                                      err);
       }

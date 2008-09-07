@@ -169,7 +169,7 @@ static GT_Range get_genomic_range(const void *sa)
   return gt_genome_node_get_range((GT_GenomeNode*) gf);
 }
 
-static Strand get_strand(const void *sa)
+static GT_Strand get_strand(const void *sa)
 {
   GT_GenomeFeature *gf = *(GT_GenomeFeature**) sa;
   assert(gf && gt_genome_feature_has_type(gf, gft_gene));
@@ -208,7 +208,7 @@ static void add_sa_to_exon_feature_array(GT_Array *exon_nodes,
                                          GT_GenomeFeature *sa,
                                          Str *seqid,
                                          Str *gt_csa_source_str,
-                                         Strand gene_strand,
+                                         GT_Strand gene_strand,
                                          GT_GenomeFeatureType *exon_type)
 {
   GT_Array *exons_from_sa;
@@ -220,7 +220,7 @@ static void add_sa_to_exon_feature_array(GT_Array *exon_nodes,
   GT_Range exon_feature_range, exons_from_sa_range;
 
   assert(exon_nodes && sa);
-  assert(gene_strand != STRAND_BOTH); /* is defined */
+  assert(gene_strand != GT_STRAND_BOTH); /* is defined */
 
   exons_from_sa = gt_array_new(sizeof (GT_GenomeFeature*));
   gt_genome_feature_get_exons(sa, exons_from_sa);
@@ -360,7 +360,7 @@ static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
   GT_GenomeNode *mRNA_feature;
   GT_Array *exon_nodes;
   unsigned long i;
-  Strand strand;
+  GT_Strand strand;
   Str *seqid;
   assert(csa_splice_form && gt_csa_source_str);
 

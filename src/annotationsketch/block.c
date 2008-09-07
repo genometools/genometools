@@ -29,7 +29,7 @@ struct GT_Block {
   GT_Range range;
   Str *caption;
   bool show_caption;
-  Strand strand;
+  GT_Strand strand;
   GT_GenomeFeatureType *type;
   GT_GenomeNode *top_level_feature;
   unsigned long reference_count;
@@ -76,7 +76,7 @@ GT_Block* gt_block_new(void)
   block->elements = dlist_new(elemcmp);
   block->caption = NULL;
   block->show_caption = true;
-  block->strand = STRAND_UNKNOWN;
+  block->strand = GT_STRAND_UNKNOWN;
   block->top_level_feature = NULL;
   return block;
 }
@@ -166,13 +166,13 @@ Str* gt_block_get_caption(const GT_Block *block)
   return block->caption;
 }
 
-void gt_block_set_strand(GT_Block *block, Strand strand)
+void gt_block_set_strand(GT_Block *block, GT_Strand strand)
 {
   assert(block);
   block->strand = strand;
 }
 
-Strand gt_block_get_strand(const GT_Block *block)
+GT_Strand gt_block_get_strand(const GT_Block *block)
 {
   assert(block);
   return block->strand;
@@ -219,7 +219,7 @@ int gt_block_unit_test(GT_Error *err)
   GT_GenomeFeatureType *gft;
   GT_Range r1, r2, r_temp, b_range;
   int had_err = 0;
-  Strand s;
+  GT_Strand s;
   GT_GenomeNode *gn1, *gn2;
   Element *e1, *e2;
   GT_Block * b;
@@ -238,9 +238,9 @@ int gt_block_unit_test(GT_Error *err)
   r2.end = 50UL;
 
   gft = feature_type_factory_create_gft(feature_type_factory, gft_gene);
-  gn1 = gt_genome_feature_new(seqid, gft, r1, STRAND_FORWARD);
+  gn1 = gt_genome_feature_new(seqid, gft, r1, GT_STRAND_FORWARD);
   gft = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn2 = gt_genome_feature_new(seqid, gft, r2, STRAND_FORWARD);
+  gn2 = gt_genome_feature_new(seqid, gft, r2, GT_STRAND_FORWARD);
 
   e1 = element_new(gn1);
   e2 = element_new(gn2);
@@ -268,10 +268,10 @@ int gt_block_unit_test(GT_Error *err)
 
   /* tests gt_block_set_strand & gt_block_get_range */
   s = gt_block_get_strand(b);
-  ensure(had_err, (STRAND_UNKNOWN == s));
-  gt_block_set_strand(b, STRAND_FORWARD);
+  ensure(had_err, (GT_STRAND_UNKNOWN == s));
+  gt_block_set_strand(b, GT_STRAND_FORWARD);
   s = gt_block_get_strand(b);
-  ensure(had_err, (STRAND_FORWARD == s));
+  ensure(had_err, (GT_STRAND_FORWARD == s));
 
   str_delete(caption2);
   str_delete(seqid);

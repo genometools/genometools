@@ -291,19 +291,19 @@ int gt_feature_index_unit_test(GT_Error *err)
 
   /* generate a new genome feature */
   type = feature_type_factory_create_gft(feature_type_factory, gft_gene);
-  gn1 = gt_genome_feature_new(seqid1, type, r1, STRAND_UNKNOWN);
+  gn1 = gt_genome_feature_new(seqid1, type, r1, GT_STRAND_UNKNOWN);
 
-  gn2 = gt_genome_feature_new(seqid2, type, r4, STRAND_UNKNOWN);
+  gn2 = gt_genome_feature_new(seqid2, type, r4, GT_STRAND_UNKNOWN);
 
   type = feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  ex1 = gt_genome_feature_new(seqid1, type, r2, STRAND_UNKNOWN);
+  ex1 = gt_genome_feature_new(seqid1, type, r2, GT_STRAND_UNKNOWN);
 
-  ex2 = gt_genome_feature_new(seqid1, type, r3, STRAND_UNKNOWN);
+  ex2 = gt_genome_feature_new(seqid1, type, r3, GT_STRAND_UNKNOWN);
 
-  ex3 = gt_genome_feature_new(seqid2, type, r4, STRAND_UNKNOWN);
+  ex3 = gt_genome_feature_new(seqid2, type, r4, GT_STRAND_UNKNOWN);
 
   type = feature_type_factory_create_gft(feature_type_factory, gft_CDS);
-  cds1 = gt_genome_feature_new(seqid2, type, r5, STRAND_UNKNOWN);
+  cds1 = gt_genome_feature_new(seqid2, type, r5, GT_STRAND_UNKNOWN);
 
   /* Determine the structure of our feature tree */
   gt_genome_node_is_part_of_genome_node(gn1, ex1);

@@ -53,7 +53,7 @@ int parse_range(GT_Range*, const char *start, const char *end,
 int parse_score(bool *score_is_defined, float *score_value, const char *score,
                 unsigned int line_number, const char *filename, GT_Error*);
 
-int parse_strand(Strand*, const char *strand,
+int parse_strand(GT_Strand*, const char *strand,
                  unsigned int line_number, const char *filename, GT_Error*);
 
 int parse_phase(Phase*, const char *phase,
