@@ -33,10 +33,10 @@
   FILE *fp;
 
   gt_error_check(err);
-  tmpfilename = str_clone(indexname);
-  str_append_cstr(tmpfilename,suffix);
-  fp = fa_fopen(str_get(tmpfilename),mode,err);
-  str_delete(tmpfilename);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,suffix);
+  fp = fa_fopen(gt_str_get(tmpfilename),mode,err);
+  gt_str_delete(tmpfilename);
   return fp;
 }
 
@@ -45,14 +45,14 @@ bool indexfilealreadyexists(const GT_Str *indexname,const char *suffix)
   struct stat statbuf;
   GT_Str *tmpfilename;
 
-  tmpfilename = str_clone(indexname);
-  str_append_cstr(tmpfilename,suffix);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,suffix);
 
-  if (stat(str_get(tmpfilename),&statbuf) == 0)
+  if (stat(gt_str_get(tmpfilename),&statbuf) == 0)
   {
-    str_delete(tmpfilename);
+    gt_str_delete(tmpfilename);
     return true;
   }
-  str_delete(tmpfilename);
+  gt_str_delete(tmpfilename);
   return false;
 }

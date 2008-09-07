@@ -41,17 +41,17 @@ struct TargetbestFilterStream
 static void build_key(GT_Str *key, GT_GenomeFeature *feature, GT_Str *target_id)
 {
   assert(key && feature && target_id);
-  str_reset(key);
-  str_append_str(key, gt_genome_node_get_seqid((GT_GenomeNode*) feature));
-  str_append_char(key, '\t'); /* cannot occur in seqid or target_id */
-  str_append_str(key, target_id);
+  gt_str_reset(key);
+  gt_str_append_str(key, gt_genome_node_get_seqid((GT_GenomeNode*) feature));
+  gt_str_append_char(key, '\t'); /* cannot occur in seqid or target_id */
+  gt_str_append_str(key, target_id);
 }
 
 static void include_feature(Dlist *trees, Hashmap *target_to_elem,
                             GT_GenomeFeature *feature, GT_Str *key)
 {
   dlist_add(trees, feature);
-  hashmap_add(target_to_elem, cstr_dup(str_get(key)), dlist_last(trees));
+  hashmap_add(target_to_elem, cstr_dup(gt_str_get(key)), dlist_last(trees));
 }
 
 static void remove_elem(Dlistelem *elem, Dlist *trees,
@@ -60,7 +60,7 @@ static void remove_elem(Dlistelem *elem, Dlist *trees,
   GT_GenomeNode *node = dlistelem_get_data(elem);
   gt_genome_node_rec_delete(node);
   dlist_remove(trees, elem);
-  hashmap_remove(target_to_elem, str_get(key));
+  hashmap_remove(target_to_elem, gt_str_get(key));
 }
 
 static void replace_previous_elem(Dlistelem *previous_elem,
@@ -83,15 +83,15 @@ static void filter_targetbest(GT_GenomeFeature *current_feature, Dlist *trees,
   target = gt_genome_feature_get_attribute((GT_GenomeNode*) current_feature,
                                         TARGET_STRING);
   assert(target);
-  first_target_id = str_new();
+  first_target_id = gt_str_new();
   had_err = gff3parser_parse_target_attributes(target, &num_of_targets,
                                                first_target_id, NULL, NULL, "",
                                                0, NULL);
   assert(!had_err);
   if (num_of_targets == 1) {
-    GT_Str *key = str_new();
+    GT_Str *key = gt_str_new();
     build_key(key, current_feature, first_target_id);
-    if (!(previous_elem = hashmap_get(target_to_elem, str_get(key)))) {
+    if (!(previous_elem = hashmap_get(target_to_elem, gt_str_get(key)))) {
       /* element with this target_id not included yet -> include it */
       include_feature(trees, target_to_elem, current_feature, key);
     }
@@ -107,11 +107,11 @@ static void filter_targetbest(GT_GenomeFeature *current_feature, Dlist *trees,
       else /* current feature is not better -> remove it */
         gt_genome_node_rec_delete((GT_GenomeNode*) current_feature);
     }
-    str_delete(key);
+    gt_str_delete(key);
   }
   else
     dlist_add(trees, current_feature);
-  str_delete(first_target_id);
+  gt_str_delete(first_target_id);
 }
 
 static int targetbest_filter_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,

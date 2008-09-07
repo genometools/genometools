@@ -35,7 +35,7 @@ typedef struct {
 static void* gt_splitfasta_arguments_new(void)
 {
   SplitfastaArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->splitdesc = str_new();
+  arguments->splitdesc = gt_str_new();
   return arguments;
 }
 
@@ -43,7 +43,7 @@ void gt_splitfasta_arguments_delete(void *tool_arguments)
 {
   SplitfastaArguments *arguments = tool_arguments;
   if (!arguments) return;
-  str_delete(arguments->splitdesc);
+  gt_str_delete(arguments->splitdesc);
   ma_free(arguments);
 }
 
@@ -103,20 +103,20 @@ static int split_description(const char *filename, GT_Str *splitdesc, bool force
   GT_Str *descname;
   int had_err = 0;
   gt_error_check(err);
-  assert(filename && splitdesc && str_length(splitdesc));
+  assert(filename && splitdesc && gt_str_length(splitdesc));
 
-  descname = str_new();
+  descname = gt_str_new();
   if (!(bioseq = bioseq_new(filename, err)))
     had_err = -1;
 
   for (i = 0; !had_err && i < bioseq_number_of_sequences(bioseq); i++) {
     GenFile *outfp;
-    str_reset(descname);
-    str_append_str(descname, splitdesc);
-    str_append_char(descname, '/');
-    str_append_cstr(descname, bioseq_get_description(bioseq, i));
-    str_append_cstr(descname, file_suffix(filename));
-    if (!(outfp = genfile_xopen_forcecheck(str_get(descname), "w", force,
+    gt_str_reset(descname);
+    gt_str_append_str(descname, splitdesc);
+    gt_str_append_char(descname, '/');
+    gt_str_append_cstr(descname, bioseq_get_description(bioseq, i));
+    gt_str_append_cstr(descname, file_suffix(filename));
+    if (!(outfp = genfile_xopen_forcecheck(gt_str_get(descname), "w", force,
                                            err))) {
       had_err = -1;
       break;
@@ -128,7 +128,7 @@ static int split_description(const char *filename, GT_Str *splitdesc, bool force
   }
 
   bioseq_delete(bioseq);
-  str_delete(descname);
+  gt_str_delete(descname);
 
   return had_err;
 }
@@ -164,13 +164,13 @@ static int split_fasta_file(const char *filename,
 
   if (!had_err) {
     /* open destination file */
-    destfilename = str_new();
-    str_append_cstr_nt(destfilename, filename,
+    destfilename = gt_str_new();
+    gt_str_append_cstr_nt(destfilename, filename,
                        genfile_basename_length(filename));
-    str_append_char(destfilename, '.');
-    str_append_ulong(destfilename, ++filenum);
-    str_append_cstr(destfilename, genfilemode_suffix(genfile_mode(srcfp)));
-    if (!(destfp = genfile_xopen_forcecheck(str_get(destfilename), "w", force,
+    gt_str_append_char(destfilename, '.');
+    gt_str_append_ulong(destfilename, ++filenum);
+    gt_str_append_cstr(destfilename, genfilemode_suffix(genfile_mode(srcfp)));
+    if (!(destfp = genfile_xopen_forcecheck(gt_str_get(destfilename), "w", force,
                                             err))) {
       had_err = -1;
     }
@@ -188,13 +188,13 @@ static int split_fasta_file(const char *filename,
         /* close current file */
         genfile_close(destfp);
         /* open new file */
-        str_reset(destfilename);
-        str_append_cstr_nt(destfilename, filename,
+        gt_str_reset(destfilename);
+        gt_str_append_cstr_nt(destfilename, filename,
                            genfile_basename_length(filename));
-        str_append_char(destfilename, '.');
-        str_append_ulong(destfilename, ++filenum);
-        str_append_cstr(destfilename, genfilemode_suffix(genfile_mode(srcfp)));
-        if (!(destfp = genfile_xopen_forcecheck(str_get(destfilename), "w",
+        gt_str_append_char(destfilename, '.');
+        gt_str_append_ulong(destfilename, ++filenum);
+        gt_str_append_cstr(destfilename, genfilemode_suffix(genfile_mode(srcfp)));
+        if (!(destfp = genfile_xopen_forcecheck(gt_str_get(destfilename), "w",
                                                 force, err))) {
           had_err = -1;
           break;
@@ -209,7 +209,7 @@ static int split_fasta_file(const char *filename,
   }
 
   /* free */
-  str_delete(destfilename);
+  gt_str_delete(destfilename);
 
   /* close current file */
   genfile_close(destfp);
@@ -232,7 +232,7 @@ static int gt_splitfasta_runner(UNUSED int argc, const char **argv,
 
   max_filesize_in_bytes = arguments->max_filesize_in_MB << 20;
 
-  if (str_length(arguments->splitdesc)) {
+  if (gt_str_length(arguments->splitdesc)) {
     had_err = split_description(argv[parsed_args], arguments->splitdesc,
                                 arguments->force, err);
   }

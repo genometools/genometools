@@ -195,7 +195,7 @@ int gt_sfxmap(int argc, const char **argv, GT_Error *err)
   }
   assert(argc >= 2 && parsed_args == argc - 1);
 
-  indexname = str_new_cstr(argv[parsed_args]);
+  indexname = gt_str_new_cstr(argv[parsed_args]);
   verboseinfo = newverboseinfo(sfxmapoptions.verbose);
   if (sfxmapoptions.inputtis || sfxmapoptions.delspranges > 0)
   {
@@ -329,7 +329,7 @@ int gt_sfxmap(int argc, const char **argv, GT_Error *err)
     checkalldescriptions(suffixarray.destab,suffixarray.destablength,
                          suffixarray.numofdbsequences);
   }
-  str_delete(indexname);
+  gt_str_delete(indexname);
   freesuffixarray(&suffixarray);
   freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;

@@ -47,7 +47,7 @@ static void csa_visitor_free(GenomeVisitor *gv)
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   queue_delete(csa_visitor->gt_genome_node_buffer);
   gt_array_delete(csa_visitor->cluster);
-  str_delete(csa_visitor->gt_csa_source_str);
+  gt_str_delete(csa_visitor->gt_csa_source_str);
 }
 
 static int csa_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
@@ -78,7 +78,7 @@ static int csa_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
   csa_visitor->second_range = gt_genome_node_get_range((GT_GenomeNode*) gf);
   csa_visitor->second_str = gt_genome_node_get_seqid((GT_GenomeNode*) gf);
 
-  if ((str_cmp(csa_visitor->first_str, csa_visitor->second_str) == 0) &&
+  if ((gt_str_cmp(csa_visitor->first_str, csa_visitor->second_str) == 0) &&
       (csa_visitor->first_range.end + csa_visitor->join_length >=
        csa_visitor->second_range.start)) {
       /* we are still in the cluster */
@@ -145,7 +145,7 @@ GenomeVisitor* csa_visitor_new(unsigned long join_length)
   csa_visitor->join_length = join_length;
   csa_visitor->cluster = gt_array_new(sizeof (GT_GenomeFeature*));
   csa_visitor->buffered_feature = NULL;
-  csa_visitor->gt_csa_source_str = str_new_cstr(GT_CSA_SOURCE_TAG);
+  csa_visitor->gt_csa_source_str = gt_str_new_cstr(GT_CSA_SOURCE_TAG);
   return gv;
 }
 
@@ -338,18 +338,18 @@ static void mRNA_set_target_attribute(GT_GenomeFeature *mRNA_feature,
   unsigned long i;
   GT_Str *targets;
   assert(mRNA_feature && csa_splice_form);
-  targets = str_new();
+  targets = gt_str_new();
   for (i = 0; i < csa_splice_form_num_of_sas(csa_splice_form); i++) {
     GT_GenomeNode *sa = *(GT_GenomeNode**) csa_splice_form_get_sa(csa_splice_form, i);
     if (gt_genome_feature_get_attribute(sa, "Target")) {
-      if (str_length(targets))
-        str_append_char(targets, ',');
-      str_append_cstr(targets, gt_genome_feature_get_attribute(sa, "Target"));
+      if (gt_str_length(targets))
+        gt_str_append_char(targets, ',');
+      gt_str_append_cstr(targets, gt_genome_feature_get_attribute(sa, "Target"));
     }
   }
-  if (str_length(targets))
-    gt_genome_feature_add_attribute(mRNA_feature, "Target", str_get(targets));
-  str_delete(targets);
+  if (gt_str_length(targets))
+    gt_genome_feature_add_attribute(mRNA_feature, "Target", gt_str_get(targets));
+  gt_str_delete(targets);
 }
 
 static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,

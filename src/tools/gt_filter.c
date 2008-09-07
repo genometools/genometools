@@ -54,11 +54,11 @@ typedef struct {
 static void* gt_filter_arguments_new(void)
 {
   FilterArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->seqid = str_new();
-  arguments->typefilter = str_new();
-  arguments->gt_strand_char = str_new();
+  arguments->seqid = gt_str_new();
+  arguments->typefilter = gt_str_new();
+  arguments->gt_strand_char = gt_str_new();
   arguments->strand = GT_NUM_OF_STRAND_TYPES;
-  arguments->targetgt_strand_char = str_new();
+  arguments->targetgt_strand_char = gt_str_new();
   arguments->targetstrand = GT_NUM_OF_STRAND_TYPES;
   arguments->ofi = outputfileinfo_new();
   return arguments;
@@ -70,10 +70,10 @@ static void gt_filter_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
-  str_delete(arguments->targetgt_strand_char);
-  str_delete(arguments->gt_strand_char);
-  str_delete(arguments->typefilter);
-  str_delete(arguments->seqid);
+  gt_str_delete(arguments->targetgt_strand_char);
+  gt_str_delete(arguments->gt_strand_char);
+  gt_str_delete(arguments->typefilter);
+  gt_str_delete(arguments->seqid);
   ma_free(arguments);
 }
 
@@ -202,9 +202,9 @@ static int process_gt_strand_arg(GT_Str *gt_strand_char, GT_Strand *strand,
 {
   int had_err = 0;
   gt_error_check(err);
-  if (str_length(gt_strand_char)) {
-    GT_Strand tmpstrand = gt_strand_get(str_get(gt_strand_char)[0]);
-    if ((str_length(gt_strand_char) > 1) ||
+  if (gt_str_length(gt_strand_char)) {
+    GT_Strand tmpstrand = gt_strand_get(gt_str_get(gt_strand_char)[0]);
+    if ((gt_str_length(gt_strand_char) > 1) ||
         (tmpstrand == GT_NUM_OF_STRAND_TYPES)) {
       gt_error_set(err, "argument to option -%s must be one of '"
                         GT_STRAND_CHARS"'", optstr);

@@ -57,8 +57,8 @@ static void gt_tagerator_arguments_delete(void *tool_arguments)
   {
     return;
   }
-  str_delete(arguments->esaindexname);
-  str_delete(arguments->pckindexname);
+  gt_str_delete(arguments->esaindexname);
+  gt_str_delete(arguments->pckindexname);
   gt_strarray_delete(arguments->tagfiles);
   ma_free(arguments);
 }
@@ -71,8 +71,8 @@ static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
          *optionpckindex, *optionmaxdepth;
 
   assert(arguments != NULL);
-  arguments->esaindexname = str_new();
-  arguments->pckindexname = str_new();
+  arguments->esaindexname = gt_str_new();
+  arguments->pckindexname = gt_str_new();
   arguments->tagfiles = gt_strarray_new();
   op = option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
@@ -193,13 +193,13 @@ static int gt_tagerator_runner(UNUSED int argc,
     }
     printf("\n");
   }
-  if (str_length(arguments->esaindexname) > 0)
+  if (gt_str_length(arguments->esaindexname) > 0)
   {
-    printf("# indexname(esa)=%s\n",str_get(arguments->esaindexname));
+    printf("# indexname(esa)=%s\n",gt_str_get(arguments->esaindexname));
   } else
   {
-    assert(str_length(arguments->pckindexname) > 0);
-    printf("# indexname(pck)=%s\n",str_get(arguments->pckindexname));
+    assert(gt_str_length(arguments->pckindexname) > 0);
+    printf("# indexname(pck)=%s\n",gt_str_get(arguments->pckindexname));
   }
   for (idx=0; idx<gt_strarray_size(arguments->tagfiles); idx++)
   {

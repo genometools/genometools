@@ -296,7 +296,7 @@ bool gt_style_get_str(const GT_Style *sty, const char *section,
     return false;
   } else i++;
   /* retrieve string */
-  str_set(text, lua_tostring(sty->L, -1));
+  gt_str_set(text, lua_tostring(sty->L, -1));
   /* reset stack to original state for subsequent calls */
   lua_pop(sty->L, i);
   return true;
@@ -309,7 +309,7 @@ void gt_style_set_str(GT_Style *sty, const char *section, const char *key,
   assert(sty && section && key && str);
   i = gt_style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
-  lua_pushstring(sty->L, str_get(str));
+  lua_pushstring(sty->L, gt_str_get(str));
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
 }
@@ -431,14 +431,14 @@ int gt_style_to_str(const GT_Style *sty, GT_Str *outstr, GT_Error *err)
   gt_error_check(err);
   assert(sty && outstr);
   lua_getglobal(sty->L, "style");
-  str_append_cstr(outstr, "style = {\n");
+  gt_str_append_cstr(outstr, "style = {\n");
   if (lua_istable(sty->L, -1))
     had_err = lua_table_to_str(sty->L, outstr, -1, err);
   else {
     gt_error_set(err, "'style' must be a table");
     had_err = -1;
   }
-  str_append_cstr(outstr, "}");
+  gt_str_append_cstr(outstr, "}");
   lua_pop(sty->L, 1);
   return had_err;
 }
@@ -448,7 +448,7 @@ int gt_style_load_str(GT_Style *sty, GT_Str *instr, GT_Error *err)
   int had_err = 0;
   gt_error_check(err);
   assert(sty && instr);
-  if (luaL_loadbuffer(sty->L, str_get(instr), str_length(instr), "str") ||
+  if (luaL_loadbuffer(sty->L, gt_str_get(instr), gt_str_length(instr), "str") ||
       lua_pcall(sty->L, 0, 0, 0)) {
     gt_error_set(err, "cannot run style buffer: %s",
               lua_tostring(sty->L, -1));
@@ -460,7 +460,7 @@ int gt_style_load_str(GT_Style *sty, GT_Str *instr, GT_Error *err)
 GT_Style* gt_style_clone(const GT_Style *sty, GT_Error *err)
 {
   int had_err = 0;
-  GT_Str *sty_buffer = str_new();
+  GT_Str *sty_buffer = gt_str_new();
   GT_Style *new_sty;
   assert(sty);
   if (!(new_sty = gt_style_new(gt_style_get_verbose(sty), err)))
@@ -469,7 +469,7 @@ GT_Style* gt_style_clone(const GT_Style *sty, GT_Error *err)
     had_err = gt_style_to_str(sty, sty_buffer, err);
   if (!had_err)
     had_err = gt_style_load_str(new_sty, sty_buffer, err);
-  str_delete(sty_buffer);
+  gt_str_delete(sty_buffer);
   return new_sty;
 }
 
@@ -478,9 +478,9 @@ int gt_style_unit_test(GT_Error *err)
   int had_err = 0;
   GT_Style *sty = NULL, *new_sty = NULL;
   bool val;
-  GT_Str *test1   = str_new_cstr("mRNA"),
-      *str     = str_new(),
-      *sty_buffer = str_new();
+  GT_Str *test1   = gt_str_new_cstr("mRNA"),
+      *str     = gt_str_new(),
+      *sty_buffer = gt_str_new();
   GT_Color col1, col2, col, defcol, tmpcol;
   double num;
   gt_error_check(err);
@@ -534,12 +534,12 @@ int gt_style_unit_test(GT_Error *err)
   ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
   ensure(had_err, gt_color_equals(&tmpcol, &col2));
   if (!gt_style_get_str(sty, "bar", "baz", str, NULL))
-    str_set(str, "");
-  ensure(had_err, (strcmp(str_get(str),"")!=0));
-  ensure(had_err, (str_cmp(str,test1)==0));
+    gt_str_set(str, "");
+  ensure(had_err, (strcmp(gt_str_get(str),"")!=0));
+  ensure(had_err, (gt_str_cmp(str,test1)==0));
   if (!gt_style_get_str(sty, "bar", "test", str, NULL))
-    str_set(str, "");
-  ensure(had_err, (strcmp(str_get(str),"")==0));
+    gt_str_set(str, "");
+  ensure(had_err, (strcmp(gt_str_get(str),"")==0));
 
   /* clone a GT_Style object */
   new_sty = gt_style_clone(sty, err);
@@ -551,17 +551,17 @@ int gt_style_unit_test(GT_Error *err)
     ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
     ensure(had_err, gt_color_equals(&tmpcol, &col2));
     if (!gt_style_get_str(new_sty, "bar", "baz", str, NULL))
-      str_set(str, "");
-    ensure(had_err, (strcmp(str_get(str),"")!=0));
-    ensure(had_err, (str_cmp(str,test1)==0));
+      gt_str_set(str, "");
+    ensure(had_err, (strcmp(gt_str_get(str),"")!=0));
+    ensure(had_err, (gt_str_cmp(str,test1)==0));
     if (!gt_style_get_str(new_sty, "bar", "test", str, NULL))
-      str_set(str, "");
-    ensure(had_err, (strcmp(str_get(str),"")==0));
+      gt_str_set(str, "");
+    ensure(had_err, (strcmp(gt_str_get(str),"")==0));
   }
   /* mem cleanup */
-  str_delete(test1);
-  str_delete(str);
-  str_delete(sty_buffer);
+  gt_str_delete(test1);
+  gt_str_delete(str);
+  gt_str_delete(sty_buffer);
   gt_style_delete(sty);
   gt_style_delete(new_sty);
 

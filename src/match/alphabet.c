@@ -208,7 +208,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
             }
             gt_error_set(err,
                           "illegal character '%c' in line %lu of mapfile %s",
-                          cc,linecount,str_get(mapfile));
+                          cc,linecount,gt_str_get(mapfile));
             haserr = true;
             break;
           }
@@ -223,7 +223,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
           {
             gt_error_set(err,"illegal character '%c' at the end of "
                           "line %lu in mapfile %s",
-                          LINE(column+1),linecount,str_get(mapfile));
+                          LINE(column+1),linecount,gt_str_get(mapfile));
             haserr  = true;
             break;
           }
@@ -276,7 +276,7 @@ static int readsymbolmap(Alphabet *alpha,const GT_Str *mapfile,GT_Error *err)
   GT_StrArray *lines;
 
   gt_error_check(err);
-  lines = gt_strarray_new_file(str_get(mapfile));
+  lines = gt_strarray_new_file(gt_str_get(mapfile));
   assert(lines != NULL);
   if (readsymbolmapfromlines(alpha,mapfile,lines,err) != 0)
   {
@@ -452,23 +452,23 @@ void freeAlphabet(Alphabet **alpha)
       assignProteinalphabet(alpha);
     } else
     {
-      if (str_length(smapfile) > 0)
+      if (gt_str_length(smapfile) > 0)
       {
         GT_Str *transpath = NULL;
 
-        if (!file_exists(str_get(smapfile)))
+        if (!file_exists(gt_str_get(smapfile)))
         {
           GT_Str *prog;
           const char *progname = gt_error_get_progname(err);
 
           assert(progname != NULL);
-          prog = str_new();
-          str_append_cstr_nt(prog, progname,
+          prog = gt_str_new();
+          gt_str_append_cstr_nt(prog, progname,
                              cstr_length_up_to_char(progname, ' '));
-          transpath = gtdata_get_path(str_get(prog), err);
-          str_delete(prog);
-          str_append_cstr(transpath, "/trans/");
-          str_append_cstr(transpath, str_get(smapfile));
+          transpath = gtdata_get_path(gt_str_get(prog), err);
+          gt_str_delete(prog);
+          gt_str_append_cstr(transpath, "/trans/");
+          gt_str_append_cstr(transpath, gt_str_get(smapfile));
         }
         if (readsymbolmap(alpha,
                           transpath == NULL ? smapfile : transpath,
@@ -476,7 +476,7 @@ void freeAlphabet(Alphabet **alpha)
         {
           haserr = true;
         }
-        str_delete(transpath);
+        gt_str_delete(transpath);
       } else
       {
         if (assignProteinorDNAalphabet(alpha,filenametab,err) != 0)

@@ -351,7 +351,7 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
 
   /* debug */
   if (gt_style_get_verbose(canvas->sty))
-    fprintf(stderr, "processing track %s\n", str_get(track_get_title(track)));
+    fprintf(stderr, "processing track %s\n", gt_str_get(track_get_title(track)));
 
   if (canvas->show_track_captions)
   {
@@ -360,7 +360,7 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
                                canvas->margins,
                                canvas->y,
                                color,
-                               str_get(track_get_title(track)));
+                               gt_str_get(track_get_title(track)));
 
     /* draw 'line maximum exceeded' message */
     if ((exceeded = track_get_number_of_discarded_blocks(track)) > 0)
@@ -379,7 +379,7 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
         snprintf(buf, BUFSIZ, msg, exceeded);
       }
       width = graphics_get_text_width(canvas->g,
-                                      str_get(track_get_title(track)));
+                                      gt_str_get(track_get_title(track)));
       graphics_draw_colored_text(canvas->g,
                                  canvas->margins+width+10.0,
                                  canvas->y,
@@ -467,7 +467,7 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
   /* draw block caption */
   draw_range = gt_canvas_convert_coords(canvas, block_range);
   if (gt_block_caption_is_visible(block)) {
-    caption = str_get(gt_block_get_caption(block));
+    caption = gt_str_get(gt_block_get_caption(block));
     if (caption)
     {
       graphics_draw_text(canvas->g,
@@ -635,12 +635,12 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
             arrow_status);
 
   /* draw each element according to style set in the style */
-  style = str_new();
+  style = gt_str_new();
   if (!gt_style_get_str(canvas->sty, type, "style", style,
                      element_get_node_ref(elem)))
-    str_set(style, "box");
+    gt_str_set(style, "box");
 
-  if (strcmp(str_get(style), "box")==0)
+  if (strcmp(gt_str_get(style), "box")==0)
   {
     graphics_draw_box(canvas->g,
                       elem_start,
@@ -654,7 +654,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
                       elem_color,
                       false);
   }
-  else if (strcmp(str_get(style), "caret")==0)
+  else if (strcmp(gt_str_get(style), "caret")==0)
   {
     graphics_draw_caret(canvas->g,
                         elem_start,
@@ -666,7 +666,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
                         stroke_width,
                         elem_color);
   }
-  else if (strcmp(str_get(style), "dashes")==0)
+  else if (strcmp(gt_str_get(style), "dashes")==0)
   {
     graphics_draw_dashes(canvas->g,
                          elem_start,
@@ -678,7 +678,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
                          stroke_width,
                          elem_color);
   }
-  else if (strcmp(str_get(style), "line")==0)
+  else if (strcmp(gt_str_get(style), "line")==0)
   {
     graphics_draw_horizontal_line(canvas->g,
                                   elem_start,
@@ -699,7 +699,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, Element *elem)
                        elem_color,
                        false);
   }
-  str_delete(style);
+  gt_str_delete(style);
 
   /* draw arrowheads at clipped margins */
   if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)

@@ -86,7 +86,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
   gt_error_check(err);
 
   /* Puffer-String anlegen */
-  buf = str_new();
+  buf = gt_str_new();
 
   /* XML-Parser wird initialisiert */
   parser = XML_ParserCreate(NULL);
@@ -97,7 +97,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
   /* Text-Handler setzen */
   XML_SetCharacterDataHandler(parser, textElement);
 
-  while ((str_read_next_line_generic(buf, fp_xmlfile) != EOF) && !had_err)
+  while ((gt_str_read_next_line_generic(buf, fp_xmlfile) != EOF) && !had_err)
   {
     PARSESTRUCT(xml_linenumber)++;
     if (PARSESTRUCT(had_err))
@@ -105,19 +105,19 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
       had_err = -1;
     }
 
-    if ((XML_Parse(parser, str_get(buf), str_length(buf), false) ==
+    if ((XML_Parse(parser, gt_str_get(buf), gt_str_length(buf), false) ==
          XML_STATUS_ERROR) && !had_err)
     {
       error = XML_GetErrorCode(parser);
       gt_error_set(err,
                 "an error occurred parsing line %lu of file \"%s\": %s",
-                PARSESTRUCT(xml_linenumber), str_get(PARSESTRUCT(xmlfile)),
+                PARSESTRUCT(xml_linenumber), gt_str_get(PARSESTRUCT(xmlfile)),
                 XML_ErrorString(error));
 
       had_err = -1;
     }
     /* reset line buffer */
-    str_reset(buf);
+    gt_str_reset(buf);
   }
 
   /* finish parsing */
@@ -127,7 +127,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
     gt_error_set(err,
               "an error occurred while finishing the parsing of file\
                \"%s\": %s",
-              str_get(PARSESTRUCT(xmlfile)), XML_ErrorString(error));
+              gt_str_get(PARSESTRUCT(xmlfile)), XML_ErrorString(error));
 
     had_err = -1;
   }
@@ -150,7 +150,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
 
   /* Freigeben des XML-Parser und loeschen des Puffer-Strings */
   XML_ParserFree(parser);
-  str_delete(buf);
+  gt_str_delete(buf);
 
   return had_err;
 }
@@ -219,7 +219,7 @@ static void XMLCALL endElement(void *data, const char *name)
     /* wurde das Iteration_hits XML-Tag erreicht wird die mg_combinedscore
        Methode aufgerufen und diverse Variablen fuer einen neuen Eintrag
        resetet bzw. geloescht */
-    if (strcmp(name, str_get(PARSESTRUCT(xml_tag))) == 0
+    if (strcmp(name, gt_str_get(PARSESTRUCT(xml_tag))) == 0
                              && PARSESTRUCT(giexp_flag))
     {
       if (XMLPARSERSTRUCT(hit_counter) > 0)
@@ -273,11 +273,11 @@ static void XMLCALL endElement(void *data, const char *name)
       {
         /* Query-DNA-Strings fuer die Sequenz und die Definition werden
            geloescht, bevor der neue Eintrag hineinkopiert wird */
-        str_reset(MATRIXSTRUCT(query_dna));
-        str_reset(MATRIXSTRUCT(query_def));
+        gt_str_reset(MATRIXSTRUCT(query_dna));
+        gt_str_reset(MATRIXSTRUCT(query_def));
 
         /* Abspeichern der Query-Def */
-        str_set(MATRIXSTRUCT(query_def), str_get(PARSESTRUCT(buf_ptr)));
+        gt_str_set(MATRIXSTRUCT(query_def), gt_str_get(PARSESTRUCT(buf_ptr)));
 
         /* Erzeugen von StringArrays zur Aufnahme der
            Hit-DNA-Sequenz-Informationen */
@@ -300,11 +300,11 @@ static void XMLCALL endElement(void *data, const char *name)
 
         /* Auslesen der Eintrags-Nr aus der Hashtabelle */
         if ((query_nr_p = cstr_nofree_ulp_hashmap_get(
-               PARSESTRUCT(queryhash), str_get(PARSESTRUCT(buf_ptr)))))
+               PARSESTRUCT(queryhash), gt_str_get(PARSESTRUCT(buf_ptr)))))
         {
           query_nr = **query_nr_p;
           /* Abspeichern der zur Query-Def passenden Query-DNA */
-          str_append_cstr_nt(MATRIXSTRUCT(query_dna),
+          gt_str_append_cstr_nt(MATRIXSTRUCT(query_dna),
                              bioseq_get_sequence(PARSESTRUCT(queryseq),
                                                  query_nr),
                              bioseq_get_sequence_length(PARSESTRUCT
@@ -327,13 +327,13 @@ static void XMLCALL endElement(void *data, const char *name)
         if ((strcmp(name, gt_strarray_get(PARSESTRUCT(hit_array), 0)) == 0))
       {
         /* loeschen des alten hit_gi_nr Eintrages */
-        str_reset(PARSESTRUCT(hit_gi_nr_tmp));
-        str_reset(PARSESTRUCT(fasta_row));
+        gt_str_reset(PARSESTRUCT(hit_gi_nr_tmp));
+        gt_str_reset(PARSESTRUCT(fasta_row));
 
-        str_set(PARSESTRUCT(fasta_row), str_get(PARSESTRUCT(buf_ptr)));
+        gt_str_set(PARSESTRUCT(fasta_row), gt_str_get(PARSESTRUCT(buf_ptr)));
 
         /* gi_ptr zeigt auf die erste Zahl der Hit-GI-Nummer */
-        gi_ptr = strchr(str_get(PARSESTRUCT(buf_ptr)), '|');
+        gi_ptr = strchr(gt_str_get(PARSESTRUCT(buf_ptr)), '|');
 
         assert(gi_ptr != NULL);
         gi_ptr = gi_ptr + 1;
@@ -346,7 +346,7 @@ static void XMLCALL endElement(void *data, const char *name)
           gi_len = strspn(gi_ptr + 1, "0123456789") + 1;
 
           /* Die GI-Nummer der Laenge gi_len wird abgespeichert */
-          str_append_cstr_nt(PARSESTRUCT(hit_gi_nr_tmp), gi_ptr, gi_len);
+          gt_str_append_cstr_nt(PARSESTRUCT(hit_gi_nr_tmp), gi_ptr, gi_len);
         }
         else
         {
@@ -360,13 +360,13 @@ static void XMLCALL endElement(void *data, const char *name)
       else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_array), 1)) == 0
                                          && PARSESTRUCT(giexp_flag))
       {
-        str_set(PARSESTRUCT(gi_def_tmp), str_get(PARSESTRUCT(buf_ptr)));
+        gt_str_set(PARSESTRUCT(gi_def_tmp), gt_str_get(PARSESTRUCT(buf_ptr)));
       }
       /* einlesen der hit_acc_nr */
       else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_array), 2)) == 0
                                          && PARSESTRUCT(giexp_flag))
       {
-        str_set(PARSESTRUCT(gi_acc_tmp), str_get(PARSESTRUCT(buf_ptr)));
+        gt_str_set(PARSESTRUCT(gi_acc_tmp), gt_str_get(PARSESTRUCT(buf_ptr)));
       }
       /* abspeichern der Hit-GI-Def, Hit-ACC-Nr. und der Hsp-num -
          Kombination ist Bestandteil der eindeutigen Hit-FASTA-Zeile im
@@ -378,18 +378,18 @@ static void XMLCALL endElement(void *data, const char *name)
         /* Die GI-Nummer wird entsprechend ihrer Laenge gi_len
            abgespeichert */
         gt_strarray_add_cstr(MATRIXSTRUCT(hit_gi_nr),
-                          str_get(PARSESTRUCT(hit_gi_nr_tmp)));
+                          gt_str_get(PARSESTRUCT(hit_gi_nr_tmp)));
         /* einlesen der aktuellen hit_gi_def */
         gt_strarray_add_cstr(MATRIXSTRUCT(hit_gi_def),
-                          str_get(PARSESTRUCT(gi_def_tmp)));
+                          gt_str_get(PARSESTRUCT(gi_def_tmp)));
         /* einlesen der aktuellen hit_accession-number */
         gt_strarray_add_cstr(MATRIXSTRUCT(hit_acc),
-                          str_get(PARSESTRUCT(gi_acc_tmp)));
+                          gt_str_get(PARSESTRUCT(gi_acc_tmp)));
         gt_strarray_add_cstr(MATRIXSTRUCT(fasta_row),
-                          str_get(PARSESTRUCT(fasta_row)));
+                          gt_str_get(PARSESTRUCT(fasta_row)));
         /* einlesen der aktuellen hit_num */
         gt_strarray_add_cstr(MATRIXSTRUCT(hit_num),
-                          str_get(PARSESTRUCT(buf_ptr)));
+                          gt_str_get(PARSESTRUCT(buf_ptr)));
       }
       /* Der Query-Start-Wert wird gespeichert */
       else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 1)) ==
@@ -397,7 +397,7 @@ static void XMLCALL endElement(void *data, const char *name)
       {
         /* Der Query-from Wert wird als Long-Wert gespeichert, dazu
            zunaechst Umwandlung des Strings mittels atol */
-        ulong_numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
+        ulong_numb_buf = atol(gt_str_get(PARSESTRUCT(buf_ptr)));
         /* Der Query-from Wert wird zum GT_Array query_from hinzugefuegt */
         gt_array_add_elem(MATRIXSTRUCT(query_from), &ulong_numb_buf,
                        sizeof (unsigned long));
@@ -407,7 +407,7 @@ static void XMLCALL endElement(void *data, const char *name)
       else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 2)) ==
                0 && PARSESTRUCT(giexp_flag))
       {
-        ulong_numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
+        ulong_numb_buf = atol(gt_str_get(PARSESTRUCT(buf_ptr)));
         gt_array_add_elem(MATRIXSTRUCT(query_to), &ulong_numb_buf,
                        sizeof (unsigned long));
       }
@@ -420,13 +420,13 @@ static void XMLCALL endElement(void *data, const char *name)
           /* Speichern des Hit-from Wertes in der matrix_info Struktur
              innerhalb der parsestruct-Struktur */
           gt_strarray_add_cstr(MATRIXSTRUCT(hit_from),
-                            str_get(PARSESTRUCT(buf_ptr)));
+                            gt_str_get(PARSESTRUCT(buf_ptr)));
         }
         else
         {
           genfile_xprintf(HITFILEOUT, "%s ",
-                          str_get(PARSESTRUCT(hit_gi_nr_tmp)));
-          genfile_xprintf(HITFILEOUT, "%s ", str_get(PARSESTRUCT(buf_ptr)));
+                          gt_str_get(PARSESTRUCT(hit_gi_nr_tmp)));
+          genfile_xprintf(HITFILEOUT, "%s ", gt_str_get(PARSESTRUCT(buf_ptr)));
         }
       }
       /* Hit-to XML-Tag - Bearbeitung siehe Hit-from-Tag */
@@ -438,11 +438,11 @@ static void XMLCALL endElement(void *data, const char *name)
           /* Speichern des Hit-from Wertes in der matrix_info Struktur
              innerhalb der parsestruct-Struktur */
           gt_strarray_add_cstr(MATRIXSTRUCT(hit_to),
-                            str_get(PARSESTRUCT(buf_ptr)));
+                            gt_str_get(PARSESTRUCT(buf_ptr)));
         }
         else
         {
-          genfile_xprintf(HITFILEOUT, "%s \n", str_get(PARSESTRUCT(buf_ptr)));
+          genfile_xprintf(HITFILEOUT, "%s \n", gt_str_get(PARSESTRUCT(buf_ptr)));
         }
       }
       /* Query-Frame XML-Tag; bei der Berechnung der Combined-Scores
@@ -454,11 +454,11 @@ static void XMLCALL endElement(void *data, const char *name)
         /* abspeichern des query_frames fuer die FASTA-File Zeile im
            Hit-File als String */
         gt_strarray_add_cstr(PARSESTRUCT(query_frame_tmp),
-                          str_get(PARSESTRUCT(buf_ptr)));
+                          gt_str_get(PARSESTRUCT(buf_ptr)));
 
         /* abspeichern des query_frames fuer spaetere Sequenzberechnnugen
            als long Value */
-        numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
+        numb_buf = atol(gt_str_get(PARSESTRUCT(buf_ptr)));
         gt_array_add_elem(MATRIXSTRUCT(query_frame), &numb_buf, sizeof (long));
       }
       /* Hit-Frame XML-Tag/Bearbeitung siehe Query-Frame XML-Tag als
@@ -469,11 +469,11 @@ static void XMLCALL endElement(void *data, const char *name)
         /* abspeichern des hit_frames fuer die FASTA-File Zeile im
            Hit-File */
         gt_strarray_add_cstr(PARSESTRUCT(hit_frame_tmp),
-                          str_get(PARSESTRUCT(buf_ptr)));
+                          gt_str_get(PARSESTRUCT(buf_ptr)));
 
         /* abspeichern des hit_frames fuer spaetere Sequenzberechnnugen
            als long Value */
-        numb_buf = atol(str_get(PARSESTRUCT(buf_ptr)));
+        numb_buf = atol(gt_str_get(PARSESTRUCT(buf_ptr)));
         gt_array_add_elem(MATRIXSTRUCT(hit_frame), &numb_buf, sizeof (long));
 
         /* Wenn ein Hit-FASTA-File vorliegt existiert eine Bioseq-Struktur
@@ -485,8 +485,8 @@ static void XMLCALL endElement(void *data, const char *name)
         GT_Str *hit_tmp;
         GT_Str *hit_dna_tmp;
 
-        hit_tmp = str_new();
-        hit_dna_tmp = str_new();
+        hit_tmp = gt_str_new();
+        hit_dna_tmp = gt_str_new();
 
         /* Die Fasta-Zeile im Hit-File besteht aus der Hit-Gi-Def, der
            Accession-Nr, der Hit-Hsp-Nr, dem Hit-From und Hit-To Wert
@@ -494,42 +494,42 @@ static void XMLCALL endElement(void *data, const char *name)
            Leerzeichen; Zeile muss eindeutig sein - durch diese
            Kombination ist dies gewaehrleistet */
 
-        str_set(hit_tmp,
+        gt_str_set(hit_tmp,
                 gt_strarray_get(MATRIXSTRUCT(hit_gi_nr),
                              XMLPARSERSTRUCT(hit_counter)));
-        str_append_cstr(hit_tmp, " ");
-        str_append_cstr(hit_tmp,
+        gt_str_append_cstr(hit_tmp, " ");
+        gt_str_append_cstr(hit_tmp,
                         gt_strarray_get(MATRIXSTRUCT(hit_from),
                                      XMLPARSERSTRUCT(hit_counter)));
-        str_append_cstr(hit_tmp, " ");
-        str_append_cstr(hit_tmp,
+        gt_str_append_cstr(hit_tmp, " ");
+        gt_str_append_cstr(hit_tmp,
                         gt_strarray_get(MATRIXSTRUCT(hit_to),
                                      XMLPARSERSTRUCT(hit_counter)));
-        str_append_cstr(hit_tmp, " ");
-        str_append_cstr(hit_tmp,
+        gt_str_append_cstr(hit_tmp, " ");
+        gt_str_append_cstr(hit_tmp,
                         gt_strarray_get(MATRIXSTRUCT(fasta_row),
                                      XMLPARSERSTRUCT(hit_counter)));
-        str_append_cstr(hit_tmp, " ");
-        str_append_cstr(hit_tmp,
+        gt_str_append_cstr(hit_tmp, " ");
+        gt_str_append_cstr(hit_tmp,
                         gt_strarray_get(MATRIXSTRUCT(hit_gi_def),
                                      XMLPARSERSTRUCT(hit_counter)));
 
         /* Hit-Hashtabelle enthaelt den konstruierten Eintrag */
         if ((query_nr_p = cstr_nofree_ulp_hashmap_get(
-               PARSESTRUCT(hithash), str_get(hit_tmp))))
+               PARSESTRUCT(hithash), gt_str_get(hit_tmp))))
         {
           /* Positionsbestimmung des Eintrages in der Bioseq-Struktur */
           hit_nr = **query_nr_p;
 
           /* auslesen der Sequenzinformation */
-          str_append_cstr_nt(hit_dna_tmp,
+          gt_str_append_cstr_nt(hit_dna_tmp,
                              bioseq_get_sequence(PARSESTRUCT(hitseq),
                                                  hit_nr),
                              bioseq_get_sequence_length(PARSESTRUCT
                                                         (hitseq),
                                                         hit_nr));
           /* abspeichern der Hit-DNA in der Matrix-Info Struktur */
-          gt_strarray_add_cstr(MATRIXSTRUCT(hit_dna), str_get(hit_dna_tmp));
+          gt_strarray_add_cstr(MATRIXSTRUCT(hit_dna), gt_str_get(hit_dna_tmp));
         }
         /* Falls kein Eintrag in der Hashtabelle gefunden wurde,
            Fehlercode setzen - falsche Hit-DNA-Datei als Parameter bei
@@ -546,22 +546,22 @@ static void XMLCALL endElement(void *data, const char *name)
           PARSESTRUCT(gi_flag) = 1;
 #endif
         }
-        str_delete(hit_tmp);
-        str_delete(hit_dna_tmp);
+        gt_str_delete(hit_tmp);
+        gt_str_delete(hit_dna_tmp);
       }
       /* Einlesen der translatierten Query-DNA-Sequenz */
       else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 7)) ==
                0 && PARSESTRUCT(giexp_flag))
       {
         gt_strarray_add_cstr(MATRIXSTRUCT(hsp_qseq),
-                          str_get(PARSESTRUCT(buf_ptr)));
+                          gt_str_get(PARSESTRUCT(buf_ptr)));
       }
       /* Einlesen der translatierten Hit-DNA-Sequenz */
       else if (strcmp(name, gt_strarray_get(PARSESTRUCT(hit_hsp_array), 8)) ==
                0 && PARSESTRUCT(giexp_flag))
       {
         gt_strarray_add_cstr(MATRIXSTRUCT(hsp_hseq),
-                          str_get(PARSESTRUCT(buf_ptr)));
+                          gt_str_get(PARSESTRUCT(buf_ptr)));
         /* Zaehler fuer die Hits pro GI-Nummer wird um 1 erhoeht */
         XMLPARSERSTRUCT(hit_counter)++;
 
@@ -632,7 +632,7 @@ static void XMLCALL endElement(void *data, const char *name)
       }
 
       /* Der Lesepuffer fuer den Text zwischen 2 XML-Tags wird resetet */
-      str_reset(PARSESTRUCT(buf_ptr));
+      gt_str_reset(PARSESTRUCT(buf_ptr));
     }
   }
 }
@@ -650,7 +650,7 @@ static void textElement(void *data, const XML_Char *txt_element, int len)
     if (PARSESTRUCT(hit_flag) == SET || PARSESTRUCT(def_flag) == SET
         || PARSESTRUCT(hit_hsp_flag) == SET)
     {
-      str_append_cstr_nt(PARSESTRUCT(buf_ptr), txt_element, len);
+      gt_str_append_cstr_nt(PARSESTRUCT(buf_ptr), txt_element, len);
     }
   }
 }

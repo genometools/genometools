@@ -430,7 +430,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err)
   {
     dfst = pms_AbstractDfstransformer();
   }
-  if (str_length(tageratoroptions->esaindexname) > 0)
+  if (gt_str_length(tageratoroptions->esaindexname) > 0)
   {
     demand = SARR_ESQTAB;
     if (!tageratoroptions->online)
@@ -476,7 +476,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err)
       }
     }
   }
-  if (!haserr && str_length(tageratoroptions->pckindexname) > 0)
+  if (!haserr && gt_str_length(tageratoroptions->pckindexname) > 0)
   {
     packedindex = loadvoidBWTSeqForSA(tageratoroptions->pckindexname,
                                       &suffixarray,

@@ -63,8 +63,8 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
 
   gt_error_check(err);
   mkfmcallinfo->indexnametab = gt_strarray_new();
-  mkfmcallinfo->outfmindex = str_new();
-  mkfmcallinfo->leveldesc = str_new();
+  mkfmcallinfo->outfmindex = gt_str_new();
+  mkfmcallinfo->leveldesc = gt_str_new();
   op = option_parser_new("[option ...] -ii indexfile [...]",
                          "Compute FMindex.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -107,7 +107,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
 
         basenameptr = getbasename(gt_strarray_get(mkfmcallinfo->indexnametab,
                                                   0));
-        str_set(mkfmcallinfo->outfmindex,basenameptr);
+        gt_str_set(mkfmcallinfo->outfmindex,basenameptr);
         ma_free(basenameptr);
       }
     }
@@ -124,8 +124,8 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
 static void freemkfmcallinfo(Mkfmcallinfo *mkfmcallinfo)
 {
   gt_strarray_delete(mkfmcallinfo->indexnametab);
-  str_delete(mkfmcallinfo->outfmindex);
-  str_delete(mkfmcallinfo->leveldesc);
+  gt_str_delete(mkfmcallinfo->outfmindex);
+  gt_str_delete(mkfmcallinfo->leveldesc);
 }
 
 static int levedescl2levelnum(const char *name,
@@ -198,12 +198,12 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
   fm.boundarray = NULL;
   fm.suffixlength = 0;
 
-  if (levedescl2levelnum(str_get(mkfmcallinfo->leveldesc),
+  if (levedescl2levelnum(gt_str_get(mkfmcallinfo->leveldesc),
                         &log2bsize,
                         &log2markdist) != 0)
   {
     gt_error_set(err,"undefined level \"%s\"",
-                      str_get(mkfmcallinfo->leveldesc));
+                      gt_str_get(mkfmcallinfo->leveldesc));
     haserr = true;
   }
   if (!haserr && sufbwt2fmindex(&fm,

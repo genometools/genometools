@@ -56,11 +56,11 @@ int gt_trieins(int argc, const char **argv, GT_Error *err)
   }
   assert(parsed_args == 1);
 
-  indexname = str_new_cstr(argv[parsed_args]);
+  indexname = gt_str_new_cstr(argv[parsed_args]);
   if (test_trieins(onlyins,indexname,err) != 0)
   {
     haserr = true;
   }
-  str_delete(indexname);
+  gt_str_delete(indexname);
   return haserr ? -1 : 0;
 }

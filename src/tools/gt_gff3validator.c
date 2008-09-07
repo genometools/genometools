@@ -27,7 +27,7 @@ typedef struct {
 static void* gt_gff3validator_arguments_new(void)
 {
   GFF3ValidatorArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->typecheck = str_new();
+  arguments->typecheck = gt_str_new();
   return arguments;
 }
 
@@ -35,7 +35,7 @@ static void gt_gff3validator_arguments_delete(void *tool_arguments)
 {
   GFF3ValidatorArguments *arguments = tool_arguments;
   if (!arguments) return;
-  str_delete(arguments->typecheck);
+  gt_str_delete(arguments->typecheck);
   ma_free(arguments);
 }
 
@@ -77,8 +77,8 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
                                                false, true);
 
   /* set different type checker if necessary */
-  if (str_length(arguments->typecheck)) {
-    if (!(ftf = gt_feature_type_factory_obo_new(str_get(arguments->typecheck),
+  if (gt_str_length(arguments->typecheck)) {
+    if (!(ftf = gt_feature_type_factory_obo_new(gt_str_get(arguments->typecheck),
                                              err))) {
         had_err = -1;
     }

@@ -36,8 +36,8 @@ typedef struct {
 static void *gt_cds_arguments_new(void)
 {
   CDSArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->seqfile = str_new();
-  arguments->regionmapping = str_new();
+  arguments->seqfile = gt_str_new();
+  arguments->regionmapping = gt_str_new();
   return arguments;
 }
 
@@ -45,8 +45,8 @@ static void gt_cds_arguments_delete(void *tool_arguments)
 {
   CDSArguments *arguments = tool_arguments;
   if (!arguments) return;
-  str_delete(arguments->regionmapping);
-  str_delete(arguments->seqfile);
+  gt_str_delete(arguments->regionmapping);
+  gt_str_delete(arguments->seqfile);
   ma_free(arguments);
 }
 

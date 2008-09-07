@@ -77,7 +77,7 @@ void gt_feature_index_add_sequence_region(GT_FeatureIndex *fi,
   char *seqid;
   RegionInfo *info;
   assert(fi && sr);
-  seqid = str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr));
+  seqid = gt_str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr));
   if (!hashmap_get(fi->regions, seqid)) {
     info = ma_malloc(sizeof (RegionInfo));
     info->region = (GT_SequenceRegion*) gt_genome_node_ref((GT_GenomeNode*) sr);
@@ -102,7 +102,7 @@ void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi, GT_GenomeFeature *
   gn = gt_genome_node_rec_ref((GT_GenomeNode*) gf);
   /* get information about seqid and range */
   node_range = gt_genome_node_get_range(gn);
-  seqid = str_get(gt_genome_node_get_seqid(gn));
+  seqid = gt_str_get(gt_genome_node_get_seqid(gn));
   info = (RegionInfo*) hashmap_get(fi->regions, seqid);
 
   /* If the seqid was encountered for the first time, no sequence
@@ -283,8 +283,8 @@ int gt_feature_index_unit_test(GT_Error *err)
   rs.start=100UL; rs.end=1200UL;
 
   /* generating sequnce ids as C-strings */
-  seqid1 = str_new_cstr("test1");
-  seqid2 = str_new_cstr("test2");
+  seqid1 = gt_str_new_cstr("test1");
+  seqid2 = gt_str_new_cstr("test2");
 
   sr1 = (GT_SequenceRegion*) gt_sequence_regionnew(seqid1, rs);
   sr2 = (GT_SequenceRegion*) gt_sequence_regionnew(seqid2, rs);
@@ -389,8 +389,8 @@ int gt_feature_index_unit_test(GT_Error *err)
   gt_genome_node_rec_delete(gn2);
   gt_genome_node_rec_delete((GT_GenomeNode*) sr1);
   gt_genome_node_rec_delete((GT_GenomeNode*) sr2);
-  str_delete(seqid1);
-  str_delete(seqid2);
+  gt_str_delete(seqid1);
+  gt_str_delete(seqid2);
   gt_feature_type_factory_delete(feature_type_factory);
   return had_err;
 }

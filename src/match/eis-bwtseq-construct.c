@@ -74,7 +74,7 @@ trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
       {
         gt_error_set(err, "suffix array project %s does not hold required suffix"
                   " array (.suf) and encoded sequence (.esq) information!",
-                  str_get(params->projectName));
+                  gt_str_get(params->projectName));
         break;
       }
     }
@@ -170,7 +170,7 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   if (!sa->longest.defined)
   {
     log_log("error: position of null-rotation/longest suffix not available"
-            " for project %s\n", str_get(params->projectName));
+            " for project %s\n", gt_str_get(params->projectName));
   }
   else
   {

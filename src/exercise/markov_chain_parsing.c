@@ -30,8 +30,8 @@ static int read_next_line(GT_Str *line, FILE *fp, const char *filename, GT_Error
 {
   gt_error_check(err);
   assert(line && fp);
-  str_reset(line);
-  if (str_read_next_line(line, fp) == EOF) {
+  gt_str_reset(line);
+  if (gt_str_read_next_line(line, fp) == EOF) {
     gt_error_set(err, "unexpected end of file \"%s\"", filename);
     return -1;
   }
@@ -45,12 +45,12 @@ static int scan_alphabet(GT_Str *alphabet, const char *line, int num_of_states,
   assert(alphabet && line);
   while (*line != '\0') {
     if (*line != ' ')
-      str_append_char(alphabet, *line);
+      gt_str_append_char(alphabet, *line);
     line++;
   }
-  if (str_length(alphabet) != num_of_states) {
+  if (gt_str_length(alphabet) != num_of_states) {
     gt_error_set(err, "number of states = %d != %lu number of state labels",
-              num_of_states, str_length(alphabet));
+              num_of_states, gt_str_length(alphabet));
     return -1;
   }
   return 0;
@@ -66,15 +66,15 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
   int num_of_states, had_err;
   gt_error_check(err);
   assert(fp);
-  line = str_new();
-  alphabet = str_new();
+  line = gt_str_new();
+  alphabet = gt_str_new();
   splitter = splitter_new();
 
   /* read first line */
   had_err = read_next_line(line, fp, filename, err);
 
   /* check first line */
-  if (!had_err && strcmp(str_get(line), FIRSTLINE)) {
+  if (!had_err && strcmp(gt_str_get(line), FIRSTLINE)) {
     gt_error_set(err, "first line of file \"%s\" does not match standard",
               filename);
     had_err = -1;
@@ -85,7 +85,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
     had_err = read_next_line(line, fp, filename, err);
 
   /* parse number of states */
-  if (!had_err && parse_int(&num_of_states, str_get(line))) {
+  if (!had_err && parse_int(&num_of_states, gt_str_get(line))) {
     gt_error_set(err, "could not parse number of states from file \"%s\"",
               filename);
     had_err = -1;
@@ -96,7 +96,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
     had_err = read_next_line(line, fp, filename, err);
 
   /* check third line */
-  if (!had_err && strcmp(str_get(line), THIRDLINE)) {
+  if (!had_err && strcmp(gt_str_get(line), THIRDLINE)) {
     gt_error_set(err, "third line of file \"%s\" does not match standard",
               filename);
     had_err = -1;
@@ -108,14 +108,14 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
 
   /* determine alphabet from line */
   if (!had_err)
-    had_err = scan_alphabet(alphabet, str_get(line), num_of_states, err);
+    had_err = scan_alphabet(alphabet, gt_str_get(line), num_of_states, err);
 
   /* read fifth line */
   if (!had_err)
     had_err = read_next_line(line, fp, filename, err);
 
   /* check fifth line */
-  if (!had_err && strcmp(str_get(line), FIFTHLINE)) {
+  if (!had_err && strcmp(gt_str_get(line), FIFTHLINE)) {
     gt_error_set(err, "fifth line of file \"%s\" does not match standard",
               filename);
     had_err = -1;
@@ -123,14 +123,14 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
 
   /* create markov chain object */
   if (!had_err)
-    mc = markov_chain_new(str_get(alphabet));
+    mc = markov_chain_new(gt_str_get(alphabet));
 
   /* read in transition probabilities */
   for (i = 0; !had_err && i < num_of_states; i++) {
     double transition_prob;
     had_err = read_next_line(line, fp, filename, err);
     if (!had_err) {
-      splitter_split(splitter, str_get(line), str_length(line), ' ');
+      splitter_split(splitter, gt_str_get(line), gt_str_length(line), ' ');
       if (splitter_size(splitter) != num_of_states) {
         gt_error_set(err, "%lu line of file \"%s\" does not contain %d tokens",
                   5 + i + 1, filename, num_of_states);
@@ -157,8 +157,8 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
   }
 
   splitter_delete(splitter);
-  str_delete(alphabet);
-  str_delete(line);
+  gt_str_delete(alphabet);
+  gt_str_delete(line);
   if (had_err) {
     markov_chain_delete(mc);
     return NULL;

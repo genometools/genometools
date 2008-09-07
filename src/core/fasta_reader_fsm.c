@@ -53,8 +53,8 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
   assert(fr);
 
   /* init */
-  description = str_new();
-  sequence    = str_new();
+  description = gt_str_new();
+  sequence    = gt_str_new();
 
   /* at least one function has to be defined */
   assert(proc_description || proc_sequence_part || proc_sequence_length);
@@ -70,7 +70,7 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
         if (cc != FASTA_SEPARATOR) {
           gt_error_set(err,
                     "the first character of fasta file \"%s\" has to be '%c'",
-                    str_get(fr->sequence_filename), FASTA_SEPARATOR);
+                    gt_str_get(fr->sequence_filename), FASTA_SEPARATOR);
           had_err = -1;
         }
         else
@@ -79,10 +79,10 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
       case READING_DESCRIPTION:
         if (cc == '\n') {
           if (proc_description) {
-            had_err = proc_description(str_get(description),
-                                       str_length(description), data, err);
+            had_err = proc_description(gt_str_get(description),
+                                       gt_str_length(description), data, err);
             if (!had_err)
-              str_reset(description);
+              gt_str_reset(description);
           }
           if (!had_err) {
             sequence_length = 0;
@@ -91,7 +91,7 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
           }
         }
         else if (proc_description)
-          str_append_char(description, cc);
+          gt_str_append_char(description, cc);
         break;
       case READING_SEQUENCE_AFTER_NEWLINE:
         if (cc == FASTA_SEPARATOR) {
@@ -104,13 +104,13 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
           }
           else {
             if (proc_sequence_part) {
-              assert(str_length(sequence));
-              had_err = proc_sequence_part(str_get(sequence),
-                                           str_length(sequence), data, err);
+              assert(gt_str_length(sequence));
+              had_err = proc_sequence_part(gt_str_get(sequence),
+                                           gt_str_length(sequence), data, err);
             }
             if (had_err)
               break;
-            str_reset(sequence);
+            gt_str_reset(sequence);
             if (proc_sequence_length)
               had_err = proc_sequence_length(sequence_length, data, err);
             if (had_err)
@@ -128,15 +128,15 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
         else {
           sequence_length++;
           if (proc_sequence_part) {
-            if (str_length(sequence) == BUFSIZ) {
-              had_err = proc_sequence_part(str_get(sequence),
-                                           str_length(sequence), data, err);
+            if (gt_str_length(sequence) == BUFSIZ) {
+              had_err = proc_sequence_part(gt_str_get(sequence),
+                                           gt_str_length(sequence), data, err);
               if (had_err)
                 break;
-              str_reset(sequence);
+              gt_str_reset(sequence);
             }
             if (cc != ' ')
-              str_append_char(sequence, cc);
+              gt_str_append_char(sequence, cc);
           }
         }
         break;
@@ -148,12 +148,12 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
     switch (state) {
       case EXPECTING_SEPARATOR:
         gt_error_set(err, "sequence file \"%s\" is empty",
-                  str_get(fr->sequence_filename));
+                  gt_str_get(fr->sequence_filename));
         had_err = -1;
         break;
       case READING_DESCRIPTION:
         gt_error_set(err, "unfinished fasta entry in line %lu of sequence file "
-                  "\"%s\"", line_counter, str_get(fr->sequence_filename));
+                  "\"%s\"", line_counter, gt_str_get(fr->sequence_filename));
         had_err = -1;
         break;
       case READING_SEQUENCE_AFTER_NEWLINE:
@@ -166,9 +166,9 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
         }
         else {
           if (proc_sequence_part) {
-            assert(str_length(sequence));
-            had_err = proc_sequence_part(str_get(sequence),
-                                         str_length(sequence), data, err);
+            assert(gt_str_length(sequence));
+            had_err = proc_sequence_part(gt_str_get(sequence),
+                                         gt_str_length(sequence), data, err);
           }
           if (!had_err && proc_sequence_length)
             had_err = proc_sequence_length(sequence_length, data, err);
@@ -177,8 +177,8 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
   }
 
   /* free */
-  str_delete(sequence);
-  str_delete(description);
+  gt_str_delete(sequence);
+  gt_str_delete(description);
 
   return had_err;
 }
@@ -186,7 +186,7 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
 static void fasta_reader_fsm_free(FastaReader *fr)
 {
   FastaReaderFSM *fasta_reader_fsm = fasta_reader_fsm_cast(fr);
-  str_delete(fasta_reader_fsm->sequence_filename);
+  gt_str_delete(fasta_reader_fsm->sequence_filename);
   genfile_close(fasta_reader_fsm->sequence_file);
 }
 
@@ -202,12 +202,12 @@ FastaReader* fasta_reader_fsm_new(GT_Str *sequence_filename)
 {
   FastaReader *fr = fasta_reader_create(fasta_reader_fsm_class());
   FastaReaderFSM *fasta_reader_fsm = fasta_reader_fsm_cast(fr);
-  fasta_reader_fsm->sequence_filename = str_ref(sequence_filename);
+  fasta_reader_fsm->sequence_filename = gt_str_ref(sequence_filename);
   if (sequence_filename) {
-    fasta_reader_fsm->sequence_file = genfile_xopen(str_get(sequence_filename),
+    fasta_reader_fsm->sequence_file = genfile_xopen(gt_str_get(sequence_filename),
                                                     "r");
   }
   else
-    fasta_reader_fsm->sequence_filename = str_new_cstr("stdin");
+    fasta_reader_fsm->sequence_filename = gt_str_new_cstr("stdin");
   return fr;
 }

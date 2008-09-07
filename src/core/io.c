@@ -36,7 +36,7 @@ IO* io_new(const char *path, const char *mode)
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
   io = ma_malloc(sizeof (IO));
   io->fp = genfile_xopen(path, mode);
-  io->path = path ? str_new_cstr(path) : str_new_cstr("stdin");
+  io->path = path ? gt_str_new_cstr(path) : gt_str_new_cstr("stdin");
   io->line_number = 1;
   io->line_start = true;
   return io;
@@ -107,7 +107,7 @@ unsigned long io_get_line_number(const IO *io)
 const char* io_get_filename(const IO *io)
 {
   assert(io && io->path);
-  return str_get(io->path);
+  return gt_str_get(io->path);
 }
 
 GT_Str* io_get_filename_str(const IO *io)
@@ -120,6 +120,6 @@ void io_delete(IO *io)
 {
   if (!io) return;
   genfile_close(io->fp);
-  str_delete(io->path);
+  gt_str_delete(io->path);
   ma_free(io);
 }

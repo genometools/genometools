@@ -65,12 +65,12 @@ GenomeStream* cds_stream_new(GenomeStream *in_stream, RegionMapping *rm,
   int had_err = 0;
   gs = genome_stream_create(cds_stream_class(), true);
   cds_stream = cds_stream_cast(gs);
-  source_str = str_new_cstr(source);
+  source_str = gt_str_new_cstr(source);
   cds_stream->in_stream = genome_stream_ref(in_stream);
   cds_stream->cds_visitor = cds_visitor_new(rm, source_str);
   if (!cds_stream->cds_visitor)
     had_err = -1;
-  str_delete(source_str);
+  gt_str_delete(source_str);
   if (had_err) {
     cds_stream_free(gs);
     return NULL;

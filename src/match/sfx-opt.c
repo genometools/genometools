@@ -56,7 +56,7 @@ static OPrval parse_options(int *parsed_args,
          *optionmaxbltriesort,
          *optiondes;
   OPrval oprval;
-  GT_Str *dirarg = str_new();
+  GT_Str *dirarg = gt_str_new();
 
   gt_error_check(err);
   op = option_parser_new("[option ...] (-db file [...] | -ii index)",
@@ -275,15 +275,15 @@ static OPrval parse_options(int *parsed_args,
             char *basenameptr;
 
             basenameptr = getbasename(gt_strarray_get(so->filenametab,0));
-            str_set(so->str_indexname,basenameptr);
+            gt_str_set(so->str_indexname,basenameptr);
             ma_free(basenameptr);
           }
         } else
         {
           char *basenameptr;
 
-          basenameptr = getbasename(str_get(so->str_inputindex));
-          str_set(so->str_indexname,basenameptr);
+          basenameptr = getbasename(gt_str_get(so->str_inputindex));
+          gt_str_set(so->str_indexname,basenameptr);
           ma_free(basenameptr);
         }
       }
@@ -323,7 +323,7 @@ static OPrval parse_options(int *parsed_args,
   }
   if (oprval == OPTIONPARSER_OK)
   {
-    int retval = parsereadmode(str_get(dirarg),err);
+    int retval = parsereadmode(gt_str_get(dirarg),err);
 
     if (retval < 0)
     {
@@ -333,7 +333,7 @@ static OPrval parse_options(int *parsed_args,
       so->readmode = (Readmode) retval;
     }
   }
-  str_delete(dirarg);
+  gt_str_delete(dirarg);
   return oprval;
 }
 
@@ -341,9 +341,9 @@ static void showoptions(const Suffixeratoroptions *so)
 {
   unsigned long i;
 
-  if (str_length(so->str_smap) > 0)
+  if (gt_str_length(so->str_smap) > 0)
   {
-    showdefinitelyverbose("smap=\"%s\"",str_get(so->str_smap));
+    showdefinitelyverbose("smap=\"%s\"",gt_str_get(so->str_smap));
   }
   if (so->isdna)
   {
@@ -357,7 +357,7 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     showdefinitelyverbose("plain=yes");
   }
-  showdefinitelyverbose("indexname=\"%s\"",str_get(so->str_indexname));
+  showdefinitelyverbose("indexname=\"%s\"",gt_str_get(so->str_indexname));
   if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
   {
     showdefinitelyverbose("prefixlength=automatic");
@@ -373,12 +373,12 @@ static void showoptions(const Suffixeratoroptions *so)
     showdefinitelyverbose("inputfile[%lu]=%s",i,
                           gt_strarray_get(so->filenametab,i));
   }
-  if (str_length(so->str_inputindex) > 0)
+  if (gt_str_length(so->str_inputindex) > 0)
   {
-    showdefinitelyverbose("inputindex=%s",str_get(so->str_inputindex));
+    showdefinitelyverbose("inputindex=%s",gt_str_get(so->str_inputindex));
   }
-  assert(str_length(so->str_indexname) > 0);
-  showdefinitelyverbose("indexname=%s",str_get(so->str_indexname));
+  assert(gt_str_length(so->str_indexname) > 0);
+  showdefinitelyverbose("indexname=%s",gt_str_get(so->str_indexname));
   showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
                         "outbwttab=%s,outbcktab=%s,outdestab=%s",
           so->outtistab ? "true" : "false",
@@ -392,10 +392,10 @@ static void showoptions(const Suffixeratoroptions *so)
 void wrapsfxoptions(Suffixeratoroptions *so)
 {
   /* no checking if error occurs, since errors have been output before */
-  str_delete(so->str_indexname);
-  str_delete(so->str_inputindex);
-  str_delete(so->str_smap);
-  str_delete(so->str_sat);
+  gt_str_delete(so->str_indexname);
+  gt_str_delete(so->str_inputindex);
+  gt_str_delete(so->str_smap);
+  gt_str_delete(so->str_sat);
   gt_strarray_delete(so->filenametab);
 }
 
@@ -411,10 +411,10 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   gt_error_check(err);
   so->isdna = false;
   so->isprotein = false;
-  so->str_inputindex = str_new();
-  so->str_indexname = str_new();
-  so->str_smap = str_new();
-  so->str_sat = str_new();
+  so->str_inputindex = gt_str_new();
+  so->str_indexname = gt_str_new();
+  so->str_smap = gt_str_new();
+  so->str_sat = gt_str_new();
   so->filenametab = gt_strarray_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   so->maxdepth.defined = false;

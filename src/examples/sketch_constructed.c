@@ -12,7 +12,7 @@ static GT_Array* create_example_features(void)
   /* construct the example features */
   features = gt_array_new(sizeof (GT_GenomeNode*));
   type_factory = gt_feature_type_factory_any_new();
-  seqid = str_new_cstr("chromosome_21");
+  seqid = gt_str_new_cstr("chromosome_21");
 
   /* construct a gene on the forward strand with two exons */
   type = gt_feature_type_factory_create_gft(type_factory, "gene");
@@ -56,6 +56,7 @@ static GT_Array* create_example_features(void)
   gt_array_add(features, reverse_gene);
 
   /* free */
+  gt_str_delete(seqid);
   gt_feature_type_factory_delete(type_factory);
 
   return features;

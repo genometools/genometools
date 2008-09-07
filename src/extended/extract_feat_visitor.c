@@ -46,28 +46,28 @@ static void construct_description(GT_Str *description, GT_GenomeFeatureType *typ
                                   unsigned long counter, bool join,
                                   bool translate)
 {
-  assert(!str_length(description));
-  str_append_cstr(description, gt_genome_feature_type_get_cstr(type));
-  str_append_char(description, '_');
-  str_append_ulong(description, counter);
+  assert(!gt_str_length(description));
+  gt_str_append_cstr(description, gt_genome_feature_type_get_cstr(type));
+  gt_str_append_char(description, '_');
+  gt_str_append_ulong(description, counter);
   if (join)
-    str_append_cstr(description, " (joined)");
+    gt_str_append_cstr(description, " (joined)");
   if (translate)
-    str_append_cstr(description, " (translated)");
+    gt_str_append_cstr(description, " (translated)");
 }
 
 static void show_entry(GT_Str *description, GT_Str *sequence, bool translate)
 {
   if (translate) {
-    GT_Str *protein = str_new();
-    translate_dna(protein, str_get(sequence), str_length(sequence), 0);
-    fasta_show_entry(str_get(description), str_get(protein),
-                     str_length(protein), 0);
-    str_delete(protein);
+    GT_Str *protein = gt_str_new();
+    translate_dna(protein, gt_str_get(sequence), gt_str_length(sequence), 0);
+    fasta_show_entry(gt_str_get(description), gt_str_get(protein),
+                     gt_str_length(protein), 0);
+    gt_str_delete(protein);
   }
   else {
-    fasta_show_entry(str_get(description), str_get(sequence),
-                     str_length(sequence), 0);
+    fasta_show_entry(gt_str_get(description), gt_str_get(sequence),
+                     gt_str_length(sequence), 0);
   }
 }
 
@@ -84,25 +84,25 @@ static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
   efv = extract_feat_visitor_cast(gv);
   assert(efv->region_mapping);
   gni = gt_genome_node_iterator_new((GT_GenomeNode*) gf);
-  description = str_new();
-  sequence = str_new();
+  description = gt_str_new();
+  sequence = gt_str_new();
   while (!had_err && (gn = gt_genome_node_iterator_next(gni))) {
     if (extract_feat_sequence(sequence, gn, efv->type, efv->join,
                               efv->region_mapping, err)) {
       had_err = -1;
     }
 
-    if (!had_err && str_length(sequence)) {
+    if (!had_err && gt_str_length(sequence)) {
       efv->fastaseq_counter++;
       construct_description(description, efv->type, efv->fastaseq_counter,
                             efv->join, efv->translate);
       show_entry(description, sequence, efv->translate);
-      str_reset(description);
-      str_reset(sequence);
+      gt_str_reset(description);
+      gt_str_reset(sequence);
     }
   }
-  str_delete(sequence);
-  str_delete(description);
+  gt_str_delete(sequence);
+  gt_str_delete(description);
   gt_genome_node_iterator_delete(gni);
   return had_err;
 }

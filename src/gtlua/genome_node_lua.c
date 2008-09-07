@@ -51,9 +51,9 @@ static int gt_genome_feature_lua_new(lua_State *L)
                     GT_NUM_OF_STRAND_TYPES, 4, "invalid strand");
   /* construct object */
   gf = lua_newuserdata(L, sizeof (GT_GenomeNode*));
-  seqid_str = str_new_cstr(seqid);
+  seqid_str = gt_str_new_cstr(seqid);
   *gf = gt_genome_feature_new(seqid_str, type, *range, strand);
-  str_delete(seqid_str);
+  gt_str_delete(seqid_str);
   assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
   lua_setmetatable(L, -2);
@@ -72,9 +72,9 @@ static int gt_sequence_regionlua_new(lua_State *L)
   range = check_range(L, 2);
   /* construct object */
   sr = lua_newuserdata(L, sizeof (GT_GenomeNode*));
-  seqid_str = str_new_cstr(seqid);
+  seqid_str = gt_str_new_cstr(seqid);
   *sr = gt_sequence_regionnew(seqid_str, *range);
-  str_delete(seqid_str);
+  gt_str_delete(seqid_str);
   assert(*sr);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
   lua_setmetatable(L, -2);
@@ -99,7 +99,7 @@ static int gt_genome_node_lua_get_seqid(lua_State *L)
   GT_Str *seqid;
   GT_GenomeNode **gn = check_genome_node(L, 1);
   if ((seqid = gt_genome_node_get_seqid(*gn)))
-    lua_pushstring(L, str_get(seqid));
+    lua_pushstring(L, gt_str_get(seqid));
   else
     lua_pushnil(L);
   return 1;
@@ -192,9 +192,9 @@ static int gt_genome_feature_lua_set_source(lua_State *L)
   gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
   source = luaL_checkstring(L, 2);
-  source_str = str_new_cstr(source);
+  source_str = gt_str_new_cstr(source);
   gt_genome_feature_set_source(*gn, source_str);
-  str_delete(source_str);
+  gt_str_delete(source_str);
   return 0;
 }
 
@@ -290,16 +290,16 @@ static int gt_genome_feature_lua_extract_sequence(lua_State *L)
   join = lua_toboolean(L, 3);
   region_mapping = check_region_mapping(L, 4);
   err = gt_error_new();
-  sequence = str_new();
+  sequence = gt_str_new();
   if (extract_feat_sequence(sequence, *gn, type, join, *region_mapping, err)) {
-    str_delete(sequence);
+    gt_str_delete(sequence);
     return lua_gt_error(L, err);
   }
-  if (str_length(sequence))
-    lua_pushstring(L, str_get(sequence));
+  if (gt_str_length(sequence))
+    lua_pushstring(L, gt_str_get(sequence));
   else
     lua_pushnil(L);
-  str_delete(sequence);
+  gt_str_delete(sequence);
   gt_error_delete(err);
   return 1;
 }

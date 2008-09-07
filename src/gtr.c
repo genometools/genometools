@@ -71,8 +71,8 @@ GTR* gtr_new(GT_Error *err)
   GT_Str *style_file = NULL;
 #endif
   gtr = ma_calloc(1, sizeof (GTR));
-  gtr->debugfp = str_new();
-  gtr->testspacepeak = str_new();
+  gtr->debugfp = gt_str_new();
+  gtr->testspacepeak = gt_str_new();
   gtr->L = luaL_newstate();
   if (!gtr->L) {
     gt_error_set(err, "out of memory (cannot create new lua state)");
@@ -99,15 +99,15 @@ GTR* gtr_new(GT_Error *err)
       had_err = -1;
   }
   if (!had_err) {
-    str_append_cstr(style_file, "/sketch/default.style");
-    if (file_exists(str_get(style_file))) {
-      if (gt_style_load_file(gtr->style, str_get(style_file), err))
+    gt_str_append_cstr(style_file, "/sketch/default.style");
+    if (file_exists(gt_str_get(style_file))) {
+      if (gt_style_load_file(gtr->style, gt_str_get(style_file), err))
         had_err = -1;
       else
         lua_put_style_in_registry(gtr->L, gtr->style);
     }
   }
-  str_delete(style_file);
+  gt_str_delete(style_file);
 #endif
   if (had_err) {
     ma_free(gtr);
@@ -274,16 +274,16 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
   gt_error_check(err);
   assert(gtr);
   if (gtr->debug)
-    enable_logging(str_get(gtr->debugfp), &gtr->logfp);
+    enable_logging(gt_str_get(gtr->debugfp), &gtr->logfp);
   gtr->seed = ya_rand_init(gtr->seed);
   log_log("seed=%u", gtr->seed);
   if (gtr->check64bit)
     return check64bit();
   if (gtr->test)
     return run_tests(gtr, err);
-  if (str_length(gtr->testspacepeak)) {
+  if (gt_str_length(gtr->testspacepeak)) {
     mem = ma_malloc(1 << 26); /* alloc 64 MB */;
-    map = fa_mmap_read(str_get(gtr->testspacepeak), NULL);
+    map = fa_mmap_read(gt_str_get(gtr->testspacepeak), NULL);
     fa_xmunmap(map);
     ma_free(mem);
   }
@@ -344,8 +344,8 @@ void gtr_delete(GTR *gtr)
 {
   if (!gtr) return;
   fa_fclose(gtr->logfp);
-  str_delete(gtr->testspacepeak);
-  str_delete(gtr->debugfp);
+  gt_str_delete(gtr->testspacepeak);
+  gt_str_delete(gtr->debugfp);
   toolbox_delete(gtr->tools);
   hashmap_delete(gtr->unit_tests);
   gt_feature_type_factory_delete(gtr->feature_type_factory);

@@ -48,7 +48,7 @@ gt_packedindex_trsuftab(int argc, const char *argv[], GT_Error *err)
   int parsedArgs;
   bool had_err = false;
   Verboseinfo *verbosity = NULL;
-  inputProject = str_new();
+  inputProject = gt_str_new();
 
   do {
     gt_error_check(err);
@@ -70,7 +70,7 @@ gt_packedindex_trsuftab(int argc, const char *argv[], GT_Error *err)
       if (exitNow)
         break;
     }
-    str_set(inputProject, argv[parsedArgs]);
+    gt_str_set(inputProject, argv[parsedArgs]);
     verbosity = newverboseinfo(params.verboseOutput);
     bwtSeq = trSuftab2BWTSeq(&params.idx.final, verbosity, err);
     had_err = bwtSeq == NULL;
@@ -79,7 +79,7 @@ gt_packedindex_trsuftab(int argc, const char *argv[], GT_Error *err)
   } while (0);
   if (bwtSeq) deleteBWTSeq(bwtSeq);
   if (verbosity) freeverboseinfo(&verbosity);
-  if (inputProject) str_delete(inputProject);
+  if (inputProject) gt_str_delete(inputProject);
   return had_err?-1:0;
 }
 

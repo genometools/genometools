@@ -155,10 +155,10 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   gt_error_check(err);
   INITARRAY(&mapspectable,Mapspecification);
   assignmapspec(&mapspectable,assignmapinfo,false);
-  mapptr = fa_mmap_read(str_get(tmpfilename), &numofbytes);
+  mapptr = fa_mmap_read(gt_str_get(tmpfilename), &numofbytes);
   if (mapptr == NULL)
   {
-    gt_error_set(err,"could not map datafile %s",str_get(tmpfilename));
+    gt_error_set(err,"could not map datafile %s",gt_str_get(tmpfilename));
     haserr = true;
   }
   *mappeduserptr = mapptr;
@@ -178,7 +178,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
       gt_error_set(err,"%lu bytes read from %s, but " Formatuint64_t
                          " expected",
                          (unsigned long) numofbytes,
-                         str_get(tmpfilename),
+                         gt_str_get(tmpfilename),
                          PRINTuint64_tcast(expectedaccordingtomapspec));
       haserr = true;
     }

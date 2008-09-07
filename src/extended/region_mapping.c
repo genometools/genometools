@@ -53,7 +53,7 @@ RegionMapping* region_mapping_new_seqfile(GT_Str *sequence_filename)
   RegionMapping *rm;
   assert(sequence_filename);
   rm = ma_calloc(1, sizeof (RegionMapping));
-  rm->sequence_filename = str_ref(sequence_filename);
+  rm->sequence_filename = gt_str_ref(sequence_filename);
   return rm;
 }
 
@@ -70,7 +70,7 @@ static GT_Str* region_mapping_map(RegionMapping *rm, const char *sequence_region
   gt_error_check(err);
   assert(rm && sequence_region);
   if (rm->sequence_filename)
-    return str_ref(rm->sequence_filename);
+    return gt_str_ref(rm->sequence_filename);
   else
     return mapping_map_string(rm->mapping, sequence_region, err);
 }
@@ -80,17 +80,17 @@ static int update_bioseq_if_necessary(RegionMapping *rm, GT_Str *seqid, GT_Error
   int had_err = 0;
   gt_error_check(err);
   assert(rm && seqid);
-  if (!rm->sequence_file || str_cmp(rm->sequence_name, seqid)) {
-    str_delete(rm->sequence_file);
-    rm->sequence_file = region_mapping_map(rm, str_get(seqid), err);
+  if (!rm->sequence_file || gt_str_cmp(rm->sequence_name, seqid)) {
+    gt_str_delete(rm->sequence_file);
+    rm->sequence_file = region_mapping_map(rm, gt_str_get(seqid), err);
     if (!rm->sequence_file)
       had_err = -1;
     else {
       if (!rm->sequence_name)
-        rm->sequence_name = str_new();
+        rm->sequence_name = gt_str_new();
       else
-        str_reset(rm->sequence_name);
-      str_append_str(rm->sequence_name, seqid);
+        gt_str_reset(rm->sequence_name);
+      gt_str_append_str(rm->sequence_name, seqid);
       bioseq_delete(rm->bioseq);
       rm->bioseq = bioseq_new_str(rm->sequence_file, err);
       if (!rm->bioseq)
@@ -132,9 +132,9 @@ void region_mapping_delete(RegionMapping *rm)
     rm->reference_count--;
     return;
   }
-  str_delete(rm->sequence_filename);
-  str_delete(rm->sequence_file);
-  str_delete(rm->sequence_name);
+  gt_str_delete(rm->sequence_filename);
+  gt_str_delete(rm->sequence_file);
+  gt_str_delete(rm->sequence_name);
   mapping_delete(rm->mapping);
   bioseq_delete(rm->bioseq);
   ma_free(rm);

@@ -77,8 +77,8 @@ static const char* generate_fragment(Shredder *shredder,
     if (shredder->pos + fraglen > seqlen)
       fraglen = seqlen - shredder->pos;
     *fragment_length = fraglen;
-    str_reset(desc);
-    str_append_cstr(desc, bioseq_get_description(shredder->bioseq,
+    gt_str_reset(desc);
+    gt_str_append_cstr(desc, bioseq_get_description(shredder->bioseq,
                                                  shredder->seqnum));
     assert(shredder->pos + fraglen <= seqlen);
     if (shredder->pos + fraglen == seqlen) { /* last fragment */

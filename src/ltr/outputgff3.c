@@ -48,7 +48,7 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
   Seqpos totallength = getencseqtotallength(
                                encseqSequentialsuffixarrayreader(ssar));
 
-  FILE *fp = fa_xfopen(str_get(lo->str_gff3filename), "w");
+  FILE *fp = fa_xfopen(gt_str_get(lo->str_gff3filename), "w");
 
   /* for getting descriptions */
   destablength = destablengthSequentialsuffixarrayreader(ssar);

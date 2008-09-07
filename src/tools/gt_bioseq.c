@@ -36,7 +36,7 @@ typedef struct {
 static void* gt_bioseq_arguments_new(void)
 {
   BioseqArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->reader = str_new();
+  arguments->reader = gt_str_new();
   return arguments;
 }
 
@@ -44,7 +44,7 @@ static void gt_bioseq_arguments_delete(void *tool_arguments)
 {
   BioseqArguments *arguments = tool_arguments;
   if (!arguments) return;
-  str_delete(arguments->reader);
+  gt_str_delete(arguments->reader);
   ma_free(arguments);
 }
 
@@ -150,11 +150,11 @@ static int gt_bioseq_runner(int argc, const char **argv, int parsed_args,
   assert(tool_arguments);
 
   /* determine fasta reader type */
-  if (!strcmp(str_get(arguments->reader), "rec"))
+  if (!strcmp(gt_str_get(arguments->reader), "rec"))
     reader_type = FASTA_READER_REC;
-  else if (!strcmp(str_get(arguments->reader), "fsm"))
+  else if (!strcmp(gt_str_get(arguments->reader), "fsm"))
     reader_type = FASTA_READER_FSM;
-  else if (!strcmp(str_get(arguments->reader), "seqit"))
+  else if (!strcmp(gt_str_get(arguments->reader), "seqit"))
     reader_type = FASTA_READER_SEQIT;
   else {
     assert(0); /* cannot happen */

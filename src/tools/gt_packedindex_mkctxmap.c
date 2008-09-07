@@ -52,7 +52,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GT_Error *err)
   bool saInitialized = false, saiInitialized = false;
   Suffixarray sa;
   SuffixarrayFileInterface sai;
-  projectName = str_new();
+  projectName = gt_str_new();
 
   do {
     gt_error_check(err);
@@ -73,7 +73,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GT_Error *err)
       if (exitNow)
         break;
     }
-    str_set(projectName, argv[parsedArgs]);
+    gt_str_set(projectName, argv[parsedArgs]);
     verbosity = newverboseinfo(params.verboseOutput);
     /* try to find appropriate suffix source */
     {
@@ -95,7 +95,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GT_Error *err)
         {
           gt_error_set(err, "The project %s does not contain sufficient"
                     " information to regenerate the suffix array.",
-                    str_get(projectName));
+                    gt_str_get(projectName));
           had_err = true;
           break;
         }
@@ -136,7 +136,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GT_Error *err)
   if (saiInitialized) destructSuffixarrayFileInterface(&sai);;
   if (saInitialized) freesuffixarray(&sa);
   if (verbosity) freeverboseinfo(&verbosity);
-  if (projectName) str_delete(projectName);
+  if (projectName) gt_str_delete(projectName);
   return had_err?-1:0;
 }
 

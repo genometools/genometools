@@ -94,12 +94,12 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("readmode",&readmodeint,NULL);
   suffixarray->filenametab = gt_strarray_new();
   suffixarray->filelengthtab = NULL;
-  currentline = str_new();
-  for (linenum = 0; str_read_next_line(currentline, fpin) != EOF; linenum++)
+  currentline = gt_str_new();
+  for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF; linenum++)
   {
-    currentlinelength = str_length(currentline);
+    currentlinelength = gt_str_length(currentline);
     if (dbfilelen <= (size_t) currentlinelength &&
-       memcmp(DBFILEKEY,str_get(currentline),dbfilelen) == 0)
+       memcmp(DBFILEKEY,gt_str_get(currentline),dbfilelen) == 0)
     {
       char *tmpfilename;
       int64_t readint1, readint2;
@@ -112,7 +112,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
       assert(suffixarray->filelengthtab != NULL);
       ALLOCASSIGNSPACE(tmpfilename,NULL,char,currentlinelength);
-      if (sscanf((const char *) str_get(currentline),
+      if (sscanf((const char *) gt_str_get(currentline),
                   "dbfile=%s " FormatScanint64_t " " FormatScanint64_t "\n",
                    tmpfilename,
                    SCANint64_tcast(&readint1),
@@ -121,7 +121,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         gt_error_set(err,"cannot parse line %*.*s",
                           (int) currentlinelength,
                           (int) currentlinelength,
-                          (const char *) str_get(currentline));
+                          (const char *) gt_str_get(currentline));
         FREESPACE(tmpfilename);
         FREESPACE(suffixarray->filelengthtab);
         haserr = true;
@@ -132,7 +132,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         gt_error_set(err,"need positive integers in line %*.*s",
                           (int) currentlinelength,
                           (int) currentlinelength,
-                          (const char *) str_get(currentline));
+                          (const char *) gt_str_get(currentline));
         FREESPACE(tmpfilename);
         FREESPACE(suffixarray->filelengthtab);
         haserr = true;
@@ -161,7 +161,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       if (analyzeuintline(indexname,
                          PROJECTFILESUFFIX,
                          linenum,
-                         str_get(currentline),
+                         gt_str_get(currentline),
                          currentlinelength,
                          riktab,
                          err) != 0)
@@ -170,9 +170,9 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         break;
       }
     }
-    str_reset(currentline);
+    gt_str_reset(currentline);
   }
-  str_delete(currentline);
+  gt_str_delete(currentline);
   if (!haserr && allkeysdefined(indexname,PROJECTFILESUFFIX,riktab,
                                 verboseinfo,err) != 0)
   {
@@ -183,7 +183,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       integersize != (uint32_t) 64)
   {
     gt_error_set(err,"%s%s contains illegal line defining the integer size",
-                  str_get(indexname),PROJECTFILESUFFIX);
+                  gt_str_get(indexname),PROJECTFILESUFFIX);
     haserr = true;
   }
   if (!haserr && integersize != (uint32_t) (sizeof (Seqpos) * CHAR_BIT))
@@ -236,16 +236,16 @@ static void *genericmaponlytable(const GT_Str *indexname,const char *suffix,
   bool haserr = false;
 
   gt_error_check(err);
-  tmpfilename = str_clone(indexname);
-  str_append_cstr(tmpfilename,suffix);
-  ptr = fa_mmap_read(str_get(tmpfilename),numofbytes);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,suffix);
+  ptr = fa_mmap_read(gt_str_get(tmpfilename),numofbytes);
   if (ptr == NULL)
   {
-    gt_error_set(err,"cannot map file \"%s\": %s",str_get(tmpfilename),
+    gt_error_set(err,"cannot map file \"%s\": %s",gt_str_get(tmpfilename),
                   strerror(errno));
     haserr = true;
   }
-  str_delete(tmpfilename);
+  gt_str_delete(tmpfilename);
   return haserr ? NULL : ptr;
 }
 
@@ -334,8 +334,8 @@ static bool scanal1file(Suffixarray *suffixarray,const GT_Str *indexname,
   bool haserr = false;
 
   gt_error_check(err);
-  tmpfilename = str_clone(indexname);
-  str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
   suffixarray->alpha = assigninputalphabet(false,
                                            false,
                                            tmpfilename,
@@ -345,7 +345,7 @@ static bool scanal1file(Suffixarray *suffixarray,const GT_Str *indexname,
   {
     haserr = true;
   }
-  str_delete(tmpfilename);
+  gt_str_delete(tmpfilename);
   return haserr;
 }
 

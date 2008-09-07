@@ -39,9 +39,9 @@ typedef struct {
 static void* gt_extractfeat_arguments_new(void)
 {
   ExtractFeatArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->typestr = str_new();
-  arguments->seqfile = str_new();
-  arguments->regionmapping = str_new();
+  arguments->typestr = gt_str_new();
+  arguments->seqfile = gt_str_new();
+  arguments->regionmapping = gt_str_new();
   arguments->feature_type_factory = gt_feature_type_factory_any_new();
   return arguments;
 }
@@ -51,9 +51,9 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
   ExtractFeatArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_feature_type_factory_delete(arguments->feature_type_factory);
-  str_delete(arguments->regionmapping);
-  str_delete(arguments->seqfile);
-  str_delete(arguments->typestr);
+  gt_str_delete(arguments->regionmapping);
+  gt_str_delete(arguments->seqfile);
+  gt_str_delete(arguments->typestr);
   ma_free(arguments);
 }
 
@@ -111,9 +111,9 @@ static int gt_extractfeat_arguments_check(UNUSED int argc, void *tool_arguments,
   /* determine type and make sure it is a valid one */
   if (!(arguments->type =
           gt_feature_type_factory_create_gft(arguments->feature_type_factory,
-                                          str_get(arguments->typestr)))) {
+                                          gt_str_get(arguments->typestr)))) {
     gt_error_set(err, "\"%s\" is not a valid feature type",
-              str_get(arguments->typestr));
+              gt_str_get(arguments->typestr));
     had_err = -1;
   }
 

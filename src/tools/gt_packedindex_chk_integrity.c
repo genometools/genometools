@@ -66,7 +66,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GT_Error *err)
       return 0;
   }
 
-  inputProject = str_new_cstr(argv[parsedArgs]);
+  inputProject = gt_str_new_cstr(argv[parsedArgs]);
 
   verbosity = newverboseinfo(params.verboseOutput);
 
@@ -74,7 +74,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GT_Error *err)
                       verbosity, err);
   if ((had_err = seq == NULL))
   {
-    gt_error_set(err, "Failed to load index: %s", str_get(inputProject));
+    gt_error_set(err, "Failed to load index: %s", gt_str_get(inputProject));
   }
   else
   {
@@ -94,7 +94,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GT_Error *err)
     }
   }
   if (seq) deleteEncIdxSeq(seq);
-  if (inputProject) str_delete(inputProject);
+  if (inputProject) gt_str_delete(inputProject);
   if (verbosity) freeverboseinfo(&verbosity);
   return had_err?-1:0;
 }

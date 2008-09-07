@@ -1265,11 +1265,11 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
     sr = gt_genome_node_cast(gt_sequence_regionclass(), gn);
     if (sr) {
       /* each sequence region gets its own ``slot'' */
-      if (!(slot = hashmap_get(se->slots, str_get(gt_genome_node_get_seqid(gn)))))
+      if (!(slot = hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)))))
       {
         slot = slot_new(se->nuceval, gt_genome_node_get_range(gn));
         hashmap_add(se->slots,
-                    cstr_dup(str_get(gt_genome_node_get_seqid(gn))), slot);
+                    cstr_dup(gt_str_get(gt_genome_node_get_seqid(gn))), slot);
       }
       assert(slot);
     }
@@ -1277,7 +1277,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
     /* we consider only genome features */
     if (gf) {
       /* each sequence must have its own ``slot'' at this point */
-      slot = hashmap_get(se->slots, str_get(gt_genome_node_get_seqid(gn)));
+      slot = hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)));
       assert(slot);
       /* store the exons */
       real_info.slot = slot;
@@ -1306,7 +1306,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       /* we consider only genome features */
       if (gf) {
         /* get (real) slot */
-        slot = hashmap_get(se->slots, str_get(gt_genome_node_get_seqid(gn)));
+        slot = hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)));
         if (slot) {
           predicted_info.slot = slot;
           gt_genome_feature_determine_transcripttypes(gf);
@@ -1319,7 +1319,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
         else {
           /* we got no (real) slot */
           warning("sequence id \"%s\" (with predictions) not given in "
-                  "``reality''", str_get(gt_genome_node_get_seqid(gn)));
+                  "``reality''", gt_str_get(gt_genome_node_get_seqid(gn)));
         }
       }
       if (gv)

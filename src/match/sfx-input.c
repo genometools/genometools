@@ -136,8 +136,8 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                               totallength,
                               sfxseqinfo->specialcharinfo.specialranges,
                               sfxseqinfo->alpha,
-                              str_length(so->str_sat) > 0
-                                ? str_get(so->str_sat)
+                              gt_str_length(so->str_sat) > 0
+                                ? gt_str_get(so->str_sat)
                                 : NULL,
                               sfxseqinfo->characterdistribution,
                               verboseinfo,

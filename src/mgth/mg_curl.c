@@ -91,9 +91,9 @@ int mg_curl(ParseStruct *parsestruct_ptr,
   /* Zwischenspeicher fuer die Sequnezinformation, da die GT_StrArray-Klasse
      keine Funktion zum begrenzten Einfuegen eines Strings zur Verfuegung
      stellt; setzen des ersten Teils der HTTP-Adresse */
-  seq_var = str_new();
+  seq_var = gt_str_new();
   http_adr =
-    str_new_cstr
+    gt_str_new_cstr
     ("http://www.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=");
 
   /* Check der Umgebungsvariablen */
@@ -107,20 +107,20 @@ int mg_curl(ParseStruct *parsestruct_ptr,
   /* Zusammensetzen der http-Adresse durch Anhaengen der query-GI-Nummer,
      des Hit-from, des Hit-to Wertes und des Rueckgabetyps an den ersten
      Teil der HTTP-Adresse */
-  str_append_str(http_adr, ARGUMENTSSTRUCT(curl_fcgi_db));
-  str_append_cstr(http_adr, "&id=gi|");
-  str_append_str(http_adr, parsestruct_ptr->hit_gi_nr_tmp);
-  str_append_cstr(http_adr, "&seq_start=");
-  str_append_cstr(http_adr,
+  gt_str_append_str(http_adr, ARGUMENTSSTRUCT(curl_fcgi_db));
+  gt_str_append_cstr(http_adr, "&id=gi|");
+  gt_str_append_str(http_adr, parsestruct_ptr->hit_gi_nr_tmp);
+  gt_str_append_cstr(http_adr, "&seq_start=");
+  gt_str_append_cstr(http_adr,
                   gt_strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
-  str_append_cstr(http_adr, "&seq_stop=");
-  str_append_cstr(http_adr,
+  gt_str_append_cstr(http_adr, "&seq_stop=");
+  gt_str_append_cstr(http_adr,
                   gt_strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
-  str_append_cstr(http_adr, "&retmode=xml");
+  gt_str_append_cstr(http_adr, "&retmode=xml");
 
   /* char-Zeiger wird benoetigt, da curl_easy_setopt als 3. Parameter
      einen char-Zeiger erwartet */
-  http_adr_ptr = str_get(http_adr);
+  http_adr_ptr = gt_str_get(http_adr);
 
   /* festlegen, welche HTTP-Adresse aufgerufen werden soll */
   curl_easy_setopt(curl_handle, CURLOPT_URL, http_adr_ptr);
@@ -180,10 +180,10 @@ int mg_curl(ParseStruct *parsestruct_ptr,
       if (numb_diff == seq_len)
       {
         /* seq_len Zeichen werden in die Hilfsvariable seq_var kopiert */
-        str_append_cstr_nt(seq_var, seq_pos + 16, seq_len);
+        gt_str_append_cstr_nt(seq_var, seq_pos + 16, seq_len);
 
         /* Die Sequenz in seq_var wird in das GT_StrArray hit_dna kopiert */
-        gt_strarray_add_cstr(MATRIXSTRUCT(hit_dna), str_get(seq_var));
+        gt_strarray_add_cstr(MATRIXSTRUCT(hit_dna), gt_str_get(seq_var));
 
         /* das Hit-Sequenz-File wird geschrieben; die erste Zeile eines
            Eintrages ist die Hit-GI-Def, an die durch ein Leerzeichen
@@ -201,7 +201,7 @@ int mg_curl(ParseStruct *parsestruct_ptr,
 
         /* nach dem GI-Def Eintrag folgt in der naechsten Zeile die Sequenz */
         genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",
-                        str_get(seq_var));
+                        gt_str_get(seq_var));
       }
       else
       {
@@ -215,8 +215,8 @@ int mg_curl(ParseStruct *parsestruct_ptr,
   if (memorystruct.memory)
     free(memorystruct.memory);
 
-  str_delete(http_adr);
-  str_delete(seq_var);
+  gt_str_delete(http_adr);
+  gt_str_delete(seq_var);
 
   return had_err;
 }

@@ -27,7 +27,7 @@ typedef struct {
 static void* gt_template_arguments_new(void)
 {
   TemplateArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->str_option_template = str_new();
+  arguments->str_option_template = gt_str_new();
   return arguments;
 }
 
@@ -35,7 +35,7 @@ static void gt_template_arguments_delete(void *tool_arguments)
 {
   TemplateArguments *arguments = tool_arguments;
   if (!arguments) return;
-  str_delete(arguments->str_option_template);
+  gt_str_delete(arguments->str_option_template);
   ma_free(arguments);
 }
 
@@ -73,8 +73,8 @@ static int gt_template_arguments_check(UNUSED int rest_argc,
 
   /* XXX: do some checking after the option have been parsed (usally this is not
      necessary and this function can be removed completely). */
-  if (str_length(arguments->str_option_template))
-    printf("%s\n", str_get(arguments->str_option_template));
+  if (gt_str_length(arguments->str_option_template))
+    printf("%s\n", gt_str_get(arguments->str_option_template));
 
   return had_err;
 }

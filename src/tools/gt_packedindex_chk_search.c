@@ -62,7 +62,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
   BWTSeqExactMatchesIterator EMIter;
   bool EMIterInitialized = false;
   Verboseinfo *verbosity = NULL;
-  inputProject = str_new();
+  inputProject = gt_str_new();
 
   do {
     gt_error_check(err);
@@ -84,7 +84,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
       if (exitNow)
         break;
     }
-    str_set(inputProject, argv[parsedArgs]);
+    gt_str_set(inputProject, argv[parsedArgs]);
 
     verbosity = newverboseinfo(params.verboseOutput);
 
@@ -250,7 +250,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
   if (epi) freeEnumpatterniterator(&epi);
   if (bwtSeq) deleteBWTSeq(bwtSeq);
   if (verbosity) freeverboseinfo(&verbosity);
-  if (inputProject) str_delete(inputProject);
+  if (inputProject) gt_str_delete(inputProject);
   return had_err?-1:0;
 }
 

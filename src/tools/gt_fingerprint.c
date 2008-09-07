@@ -36,8 +36,8 @@ typedef struct {
 static void* gt_fingerprint_arguments_new(void)
 {
   FingerprintArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->checklist = str_new();
-  arguments->extract = str_new();
+  arguments->checklist = gt_str_new();
+  arguments->extract = gt_str_new();
   return arguments;
 }
 
@@ -45,8 +45,8 @@ static void gt_fingerprint_arguments_delete(void *tool_arguments)
 {
   FingerprintArguments *arguments = tool_arguments;
   if (!arguments) return;
-  str_delete(arguments->extract);
-  str_delete(arguments->checklist);
+  gt_str_delete(arguments->extract);
+  gt_str_delete(arguments->checklist);
   ma_free(arguments);
 }
 
@@ -118,18 +118,18 @@ static int compare_fingerprints(StringDistri *sd, const char *checklist,
   if (!strcmp(checklist, "-"))
     use_stdin = true;
   checkfile = use_stdin ? stdin : fa_xfopen(checklist, "r");
-  line = str_new();
+  line = gt_str_new();
   /* process checklist */
-  while (str_read_next_line(line, checkfile) != EOF) {
-    if (string_distri_get(sd, str_get(line)))
-      string_distri_sub(sd, str_get(line));
+  while (gt_str_read_next_line(line, checkfile) != EOF) {
+    if (string_distri_get(sd, gt_str_get(line)))
+      string_distri_sub(sd, gt_str_get(line));
     else {
-      printf("%s only in checklist\n", str_get(line));
+      printf("%s only in checklist\n", gt_str_get(line));
       comparisons_failed = true;
     }
-    str_reset(line);
+    gt_str_reset(line);
   }
-  str_delete(line);
+  gt_str_delete(line);
   if (!use_stdin)
     fa_xfclose(checkfile);
   /* process remaining sequence_file(s) fingerprints */
@@ -193,11 +193,11 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
       had_err = -1;
     if (!had_err) {
       for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
-        if (str_length(arguments->checklist) || arguments->show_duplicates)
+        if (gt_str_length(arguments->checklist) || arguments->show_duplicates)
           string_distri_add(sd, bioseq_get_md5_fingerprint(bs, j));
-        else if (str_length(arguments->extract)) {
+        else if (gt_str_length(arguments->extract)) {
           if (!strcmp(bioseq_get_md5_fingerprint(bs, j),
-                      str_get(arguments->extract))) {
+                      gt_str_get(arguments->extract))) {
             fasta_show_entry(bioseq_get_description(bs, j),
                              bioseq_get_sequence(bs, j),
                              bioseq_get_sequence_length(bs, j), 0);
@@ -211,8 +211,8 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
   }
 
   if (!had_err) {
-    if (str_length(arguments->checklist))
-      had_err = compare_fingerprints(sd, str_get(arguments->checklist), err);
+    if (gt_str_length(arguments->checklist))
+      had_err = compare_fingerprints(sd, gt_str_get(arguments->checklist), err);
     else if (arguments->show_duplicates)
       had_err = show_duplicates(sd, err);
   }

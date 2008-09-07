@@ -95,7 +95,7 @@ FastaReader* fasta_reader_seqit_new(GT_Str *sequence_filename)
   fasta_reader_seqit = fasta_reader_seqit_cast(fr);
   fasta_reader_seqit->filenametab = gt_strarray_new();
   gt_strarray_add_cstr(fasta_reader_seqit->filenametab,
-                    str_get(sequence_filename));
+                    gt_str_get(sequence_filename));
   fasta_reader_seqit->seqit = seqiterator_new(fasta_reader_seqit->filenametab,
                                               NULL, true);
   return fr;

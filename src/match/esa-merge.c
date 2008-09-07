@@ -73,7 +73,7 @@ static int inputthesequences(Alphabet **alpha,
                           verboseinfo,
                           err) != 0)
     {
-      str_delete(indexname);
+      gt_str_delete(indexname);
       return -1;
     }
     if (idx == 0)

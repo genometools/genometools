@@ -48,7 +48,7 @@ int makeindexfilecopy(const GT_Str *destindex,
     }
   }
   printf("# cp %s%s %s%s\n",
-           str_get(sourceindex),suffix,str_get(destindex),suffix);
+           gt_str_get(sourceindex),suffix,gt_str_get(destindex),suffix);
   if (!haserr)
   {
     if (maxlength == 0)

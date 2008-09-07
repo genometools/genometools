@@ -305,9 +305,9 @@ static void output_header_txt(const ParseStruct *parsestruct_ptr)
   genfile_xprintf(FILEPOINTEROUT, "Leavegene-Value: %.4f\n ",
                   ARGUMENTSSTRUCT(leavegene_value));
   genfile_xprintf(FILEPOINTEROUT, "Curl-DB: %s\n ",
-                  str_get(ARGUMENTSSTRUCT(curl_fcgi_db)));
+                  gt_str_get(ARGUMENTSSTRUCT(curl_fcgi_db)));
   genfile_xprintf(FILEPOINTEROUT, "Output-Filename: %s\n ",
-                  str_get(ARGUMENTSSTRUCT(outputtextfile_name)));
+                  gt_str_get(ARGUMENTSSTRUCT(outputtextfile_name)));
   genfile_xprintf(FILEPOINTEROUT, "Output-Fileformat: %d\n ",
                   ARGUMENTSSTRUCT(outputfile_format));
   genfile_xprintf(FILEPOINTEROUT, "Hitfile (yes=1/no=0): %d\n ",
@@ -425,13 +425,13 @@ static void output_header_html(const ParseStruct *parsestruct_ptr)
                   "</font></td>");
   genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%s</font></td></tr>",
-                  str_get(ARGUMENTSSTRUCT(curl_fcgi_db)));
+                  gt_str_get(ARGUMENTSSTRUCT(curl_fcgi_db)));
   genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Output-Filename: </font></td>");
   genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%s</font></td></tr>",
-                  str_get(ARGUMENTSSTRUCT(outputtextfile_name)));
+                  gt_str_get(ARGUMENTSSTRUCT(outputtextfile_name)));
   genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Output-Fileformat<br>(1/2/3): </font></td>");
@@ -542,11 +542,11 @@ static void output_header_xml(const ParseStruct *parsestruct_ptr)
   genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_curl-db>%s"
                   "</Parameters_curl-db>\n",
-                  str_get(ARGUMENTSSTRUCT(curl_fcgi_db)));
+                  gt_str_get(ARGUMENTSSTRUCT(curl_fcgi_db)));
   genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_output-file>%s"
                   "</Parameters_output-file>\n",
-                  str_get(ARGUMENTSSTRUCT(outputtextfile_name)));
+                  gt_str_get(ARGUMENTSSTRUCT(outputtextfile_name)));
   genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_output-format>%d"
                   "</Parameters_output-format>\n",
@@ -582,9 +582,9 @@ static void output_querydna_txt(const ParseStruct *parsestruct_ptr)
   /* schreiben des Query-DNA Headers inkl. Query-Def. und Query-Sequenz */
   genfile_xprintf(FILEPOINTEROUT, "Query-DNA-Entry-Section\n\n");
   genfile_xprintf(FILEPOINTEROUT, "Query-DNA-Def: %s\n",
-                  str_get(MATRIXSTRUCT(query_def)));
+                  gt_str_get(MATRIXSTRUCT(query_def)));
   genfile_xprintf(FILEPOINTEROUT, "Query_DNA-Sequence:\n%s\n",
-                  str_get(MATRIXSTRUCT(query_dna)));
+                  gt_str_get(MATRIXSTRUCT(query_dna)));
   genfile_xprintf(FILEPOINTEROUT, "\nCoding-DNA-Entry-Section\n\n");
 }
 
@@ -597,14 +597,14 @@ static void output_querydna_html(const ParseStruct *parsestruct_ptr)
   genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td><font class=\"class\">Query-DNA-Def</font></td>"
                   "<td><font class=\"class\">%s</font></td></tr>",
-                  str_get(MATRIXSTRUCT(query_def)));
+                  gt_str_get(MATRIXSTRUCT(query_def)));
   genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td colspan=\"2\"><font class=\"class\">"
                   "Query_DNA-Sequence</font></td></tr>");
   genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td colspan=\"2\"><font class=\"class\">%s</font>"
                   "</td></tr>",
-                  str_get(MATRIXSTRUCT(query_dna)));
+                  gt_str_get(MATRIXSTRUCT(query_dna)));
   genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td colspan=\"2\"><br><font class=\"class\">"
                   "Coding-DNA-Entry-Section</font></td></tr>");
@@ -618,10 +618,10 @@ static void output_querydna_xml(const ParseStruct *parsestruct_ptr)
   genfile_xprintf(FILEPOINTEROUT, "  <Iteration>\n");
   genfile_xprintf(FILEPOINTEROUT,
                   "    <Iteration_query-def>%s</Iteration_query-def>\n",
-                  str_get(MATRIXSTRUCT(query_def)));
+                  gt_str_get(MATRIXSTRUCT(query_def)));
   genfile_xprintf(FILEPOINTEROUT,
                   "    <Iteration_query-dna>%s</Iteration_query-dna>\n",
-                  str_get(MATRIXSTRUCT(query_dna)));
+                  gt_str_get(MATRIXSTRUCT(query_dna)));
   genfile_xprintf(FILEPOINTEROUT, "    <Iteration_hits>\n");
 }
 
@@ -661,9 +661,9 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
   gt_error_check(err);
 
   hit_ptr = NULL;
-  as_seq = str_new();
+  as_seq = gt_str_new();
   hitcounter = gt_strarray_size(hit_information->hit_gi);
-  contig_seq_ptr = str_get(MATRIXSTRUCT(query_dna));
+  contig_seq_ptr = gt_str_get(MATRIXSTRUCT(query_dna));
 
   /* in allen Leserahmen nach kodierenden Abschnitten suchen */
   for (row_index = 0; row_index < 7; row_index++)
@@ -754,7 +754,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
             if (hit_ptr[seq_index])
             {
               /* Die aktuelle Hit-Definition wird eingelesen */
-              str_set(parsestruct_ptr->result_hits,
+              gt_str_set(parsestruct_ptr->result_hits,
                       gt_strarray_get(hit_information->hit_def, seq_index));
 
               hit_from =
@@ -765,12 +765,12 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
               /* ueberpruefen, ob der aktuelle Hit bereits erfasst wurde */
               if (!cstr_nofree_ulp_hashmap_get
                   (parsestruct_ptr->resulthits,
-                   str_get(parsestruct_ptr->result_hits)))
+                   gt_str_get(parsestruct_ptr->result_hits)))
               {
                 /* Hit noch nicht erfasst, also in das Statistik-Array
                    einfuegen */
                 gt_strarray_add_cstr(HITSTRUCT(hits_statistic),
-                                  str_get(parsestruct_ptr->result_hits));
+                                  gt_str_get(parsestruct_ptr->result_hits));
                 /* Position der Hit-Def. im Statistik-Array */
                 string_number =
                   gt_strarray_size(HITSTRUCT(hits_statistic)) - 1;
@@ -843,7 +843,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                 tmp_var =
                   **cstr_nofree_ulp_hashmap_get(
                     parsestruct_ptr->resulthits,
-                    str_get(parsestruct_ptr->result_hits));
+                    gt_str_get(parsestruct_ptr->result_hits));
 
                 *(HITSTRUCT(hitsnum) + tmp_var) =
                   *(HITSTRUCT(hitsnum) + tmp_var) + hit_to - hit_from + 1;;
@@ -866,7 +866,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                                        seq_index);
                   break;
               }
-              str_reset(parsestruct_ptr->result_hits);
+              gt_str_reset(parsestruct_ptr->result_hits);
             }
           }
 
@@ -889,12 +889,12 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
           ma_free(hit_ptr);
           ma_free(contig_seq);
           hit_ptr = NULL;
-          str_reset(as_seq);
+          gt_str_reset(as_seq);
         }
       }
     }
   }
-  str_delete(as_seq);
+  gt_str_delete(as_seq);
 }
 
 static void print_codingheader(const ParseStruct *parsestruct_ptr,
@@ -909,7 +909,7 @@ static void print_codingheader(const ParseStruct *parsestruct_ptr,
       genfile_xprintf(FILEPOINTEROUT, "Coding-DNA: \n");
       genfile_xprintf(FILEPOINTEROUT, "%s\n", contig_seq);
       genfile_xprintf(FILEPOINTEROUT, "Protein-Seq: ");
-      genfile_xprintf(FILEPOINTEROUT, "%s\n", str_get(as_seq));
+      genfile_xprintf(FILEPOINTEROUT, "%s\n", gt_str_get(as_seq));
       genfile_xprintf(FILEPOINTEROUT, "Hit-Information Section\n");
       break;
       /* Ausgabe Coding-DNA-Header - html */
@@ -926,7 +926,7 @@ static void print_codingheader(const ParseStruct *parsestruct_ptr,
                       "Protein-Sequence</font></td></tr>");
       genfile_xprintf(FILEPOINTEROUT,
                       "<tr><td colspan=\"2\"><font class=\"class\">%s</font>"
-                      "</td></tr>", str_get(as_seq));
+                      "</td></tr>", gt_str_get(as_seq));
       genfile_xprintf(FILEPOINTEROUT,
                       "<tr><td colspan=\"2\"><font class=\"font_header\">"
                       "Hit-Information Section</font></td></tr>");
@@ -938,7 +938,7 @@ static void print_codingheader(const ParseStruct *parsestruct_ptr,
                       contig_seq);
       genfile_xprintf(FILEPOINTEROUT,
                       "        <Hit_protein-seq>%s</Hit_protein-seq>\n",
-                      str_get(as_seq));
+                      gt_str_get(as_seq));
       genfile_xprintf(FILEPOINTEROUT, "        <Hit_infos>\n");
       break;
   }
@@ -1137,7 +1137,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
                                  contig_triplet[1], contig_triplet[2]);
       assert(contig_as);
 
-      str_append_char(as_seq, contig_as);
+      gt_str_append_char(as_seq, contig_as);
       startpoint += 3;
     }
 
@@ -1145,7 +1145,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
     {
       GT_Str *as_seq_start;
 
-      as_seq_start = str_new();
+      as_seq_start = gt_str_new();
 
       contig_seq_tri = ma_malloc(4*sizeof (char));
 
@@ -1182,7 +1182,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
                                      contig_triplet[1], contig_triplet[2]);
           assert(contig_as);
 
-          str_append_char(as_seq, contig_as);
+          gt_str_append_char(as_seq, contig_as);
         }
         /* Startwert um 3 Basen weitersetzen */
         startpoint += 3;
@@ -1237,7 +1237,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
                 /* ueberpruefen auf Start-Codon */
                 if (start_codon)
                 {
-                  str_append_char(as_seq_start, 'M');
+                  gt_str_append_char(as_seq_start, 'M');
                   found_start = 1;
                 }
               }
@@ -1255,7 +1255,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
                                            contig_triplet[2]);
                 assert(contig_as);
 
-                str_append_char(as_seq_start, contig_as);
+                gt_str_append_char(as_seq_start, contig_as);
               }
               /* Startwert um 3 Basen weitersetzen */
               startpoint_atg += 3;
@@ -1263,12 +1263,12 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
           }
           startpoint_start -= 3;
         }
-        str_append_str(as_seq_start, as_seq);
-        str_reset(as_seq);
-        str_append_str(as_seq, as_seq_start);
+        gt_str_append_str(as_seq_start, as_seq);
+        gt_str_reset(as_seq);
+        gt_str_append_str(as_seq, as_seq_start);
       }
-      str_reset(as_seq_start);
-      str_delete(as_seq_start);
+      gt_str_reset(as_seq_start);
+      gt_str_delete(as_seq_start);
       ma_free(contig_seq_tri);
     }
 

@@ -61,7 +61,7 @@ int gt_mergeesa(int argc, const char **argv, GT_Error *err)
 
   gt_error_check(err);
 
-  storeindex = str_new();
+  storeindex = gt_str_new();
   indexnametab = gt_strarray_new();
   switch (parse_options(storeindex, indexnametab, &parsed_args, argc, argv,
                         err)) {
@@ -75,7 +75,7 @@ int gt_mergeesa(int argc, const char **argv, GT_Error *err)
     unsigned long i;
     Verboseinfo *verboseinfo;
 
-    printf("# storeindex=%s\n",str_get(storeindex));
+    printf("# storeindex=%s\n",gt_str_get(storeindex));
     for (i=0; i<gt_strarray_size(indexnametab); i++)
     {
       printf("# input=%s\n",gt_strarray_get(indexnametab,i));
@@ -90,7 +90,7 @@ int gt_mergeesa(int argc, const char **argv, GT_Error *err)
     }
     freeverboseinfo(&verboseinfo);
   }
-  str_delete(storeindex);
+  gt_str_delete(storeindex);
   gt_strarray_delete(indexnametab);
   return haserr ? -1 : 0;
 }

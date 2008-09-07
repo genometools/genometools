@@ -44,19 +44,19 @@ void showuserdefinedoptionsandvalues(LTRharvestoptions *lo)
   {
     printf("#   verbosemode: Off\n");
   }
-  printf("#   indexname: %s\n", str_get(lo->str_indexname));
+  printf("#   indexname: %s\n", gt_str_get(lo->str_indexname));
   if (lo->fastaoutput)
   {
-    printf("#   outputfile: %s\n", str_get(lo->str_fastaoutputfilename));
+    printf("#   outputfile: %s\n", gt_str_get(lo->str_fastaoutputfilename));
   }
   if (lo->fastaoutputinnerregion)
   {
     printf("#   outputfile inner region: %s\n",
-        str_get(lo->str_fastaoutputfilenameinnerregion));
+        gt_str_get(lo->str_fastaoutputfilenameinnerregion));
   }
   if (lo->gff3output)
   {
-    printf("#   outputfile gff3 format: %s\n", str_get(lo->str_gff3filename));
+    printf("#   outputfile gff3 format: %s\n", gt_str_get(lo->str_gff3filename));
   }
   printf("#   xdropbelowscore: %d\n", lo->xdropbelowscore);
   printf("#   similaritythreshold: %.2f\n", lo->similaritythreshold);
@@ -86,7 +86,7 @@ void showuserdefinedoptionsandvalues(LTRharvestoptions *lo)
   }
   printf("#   minTSDlength: %u\n",  lo->minlengthTSD);
   printf("#   maxTSDlength: %u\n",  lo->maxlengthTSD);
-  printf("#   palindromic motif: %s\n", str_get(lo->motif.str_motif));
+  printf("#   palindromic motif: %s\n", gt_str_get(lo->motif.str_motif));
   printf("#   motifmismatchesallowed: %u\n", lo->motif.allowedmismatches);
   printf("#   vicinity: " FormatSeqpos " nt\n",
           PRINTSeqposcast(lo->vicinityforcorrectboundaries));
@@ -220,7 +220,7 @@ static OPrval parse_options(int *parsed_args,
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
   /* -index */
-  lo->str_indexname = str_new();
+  lo->str_indexname = gt_str_new();
   optionindex = option_new_string("index",
                              "specify the name of the enhanced suffix "
                              "array index (mandatory)",
@@ -310,7 +310,7 @@ static OPrval parse_options(int *parsed_args,
   lo->motif.secondleft  = (Uchar) 'g';
   lo->motif.firstright  = (Uchar) 'c';
   lo->motif.secondright = (Uchar) 'a';
-  lo->motif.str_motif = str_new();
+  lo->motif.str_motif = gt_str_new();
   optionmotif = option_new_string("motif",
                              "specify 2 nucleotides startmotif + "
                              "2 nucleotides endmotif: ****",
@@ -340,7 +340,7 @@ static OPrval parse_options(int *parsed_args,
   option_parser_add_option(op, optionvic);
 
   /* -overlaps */
-  lo->str_overlaps = str_new();
+  lo->str_overlaps = gt_str_new();
   optionoverlaps = option_new_choice("overlaps",
                "specify no|best|all",
                lo->str_overlaps,
@@ -406,7 +406,7 @@ static OPrval parse_options(int *parsed_args,
 
   /* -out */
   lo->fastaoutput = false;      /* by default no FASTA output */
-  lo->str_fastaoutputfilename = str_new();
+  lo->str_fastaoutputfilename = gt_str_new();
   optionout = option_new_string("out",
                              "specify FASTA outputfilename",
                              lo->str_fastaoutputfilename, NULL);
@@ -414,7 +414,7 @@ static OPrval parse_options(int *parsed_args,
 
   /* -outinner */
   lo->fastaoutputinnerregion = false;
-  lo->str_fastaoutputfilenameinnerregion = str_new();
+  lo->str_fastaoutputfilenameinnerregion = gt_str_new();
   optionoutinner = option_new_string("outinner",
                              "specify FASTA outputfilename for inner regions",
                              lo->str_fastaoutputfilenameinnerregion, NULL);
@@ -422,7 +422,7 @@ static OPrval parse_options(int *parsed_args,
 
   /* -gff3 */
   lo->gff3output = false;       /* by default no gff3 output */
-  lo->str_gff3filename = str_new();
+  lo->str_gff3filename = gt_str_new();
   optiongff3 = option_new_string("gff3",
                              "specify GFF3 outputfilename",
                              lo->str_gff3filename, NULL);
@@ -469,16 +469,16 @@ static OPrval parse_options(int *parsed_args,
        store characters, transform them later */
     if (option_is_set(optionmotif))
     {
-      if (str_length(lo->motif.str_motif) != 4UL)
+      if (gt_str_length(lo->motif.str_motif) != 4UL)
       {
         gt_error_set(err,
             "argument of -motif has not exactly 4 characters");
         oprval = OPTIONPARSER_ERROR;
       }
-      lo->motif.firstleft = (Uchar)  str_get(lo->motif.str_motif)[0];
-      lo->motif.secondleft = (Uchar)  str_get(lo->motif.str_motif)[1];
-      lo->motif.firstright = (Uchar)  str_get(lo->motif.str_motif)[2];
-      lo->motif.secondright = (Uchar)  str_get(lo->motif.str_motif)[3];
+      lo->motif.firstleft = (Uchar)  gt_str_get(lo->motif.str_motif)[0];
+      lo->motif.secondleft = (Uchar)  gt_str_get(lo->motif.str_motif)[1];
+      lo->motif.firstright = (Uchar)  gt_str_get(lo->motif.str_motif)[2];
+      lo->motif.secondright = (Uchar)  gt_str_get(lo->motif.str_motif)[3];
       /* default if motif specified */
       if (!option_is_set(optionmotifmis))
       {
@@ -489,17 +489,17 @@ static OPrval parse_options(int *parsed_args,
     /* If option overlaps is set */
     if (option_is_set(optionoverlaps))
     {
-      if (strcmp(str_get(lo->str_overlaps), "no") == 0)
+      if (strcmp(gt_str_get(lo->str_overlaps), "no") == 0)
       {
         lo->bestofoverlap = false;
         lo->nooverlapallowed = true;
       }
-      else if (strcmp(str_get(lo->str_overlaps), "best") == 0 )
+      else if (strcmp(gt_str_get(lo->str_overlaps), "best") == 0 )
       {
         lo->bestofoverlap = true;
         lo->nooverlapallowed = false;
       }
-      else if (strcmp(str_get(lo->str_overlaps), "all") == 0 )
+      else if (strcmp(gt_str_get(lo->str_overlaps), "all") == 0 )
       {
         lo->bestofoverlap = false;
         lo->nooverlapallowed = false;
@@ -543,12 +543,12 @@ static OPrval parse_options(int *parsed_args,
 void wrapltrharvestoptions(LTRharvestoptions *lo)
 {
   /* no checking if error occurs, since errors have been output before */
-  str_delete(lo->str_indexname);
-  str_delete(lo->str_fastaoutputfilename);
-  str_delete(lo->str_fastaoutputfilenameinnerregion);
-  str_delete(lo->str_gff3filename);
-  str_delete(lo->str_overlaps);
-  str_delete(lo->motif.str_motif);
+  gt_str_delete(lo->str_indexname);
+  gt_str_delete(lo->str_fastaoutputfilename);
+  gt_str_delete(lo->str_fastaoutputfilenameinnerregion);
+  gt_str_delete(lo->str_gff3filename);
+  gt_str_delete(lo->str_overlaps);
+  gt_str_delete(lo->motif.str_motif);
 }
 
 int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,

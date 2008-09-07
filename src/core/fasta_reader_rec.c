@@ -46,7 +46,7 @@ static int parse_fasta_description(GT_Str *description, IO *seqio, GT_Error *err
   }
   /* read description */
   while (!io_get_char(seqio, &cc) && cc != '\n')
-    str_append_char(description, cc);
+    gt_str_append_char(description, cc);
   return 0;
 }
 
@@ -55,13 +55,13 @@ static int parse_fasta_sequence(GT_Str *sequence, IO *seqio, GT_Error *err)
   char cc;
   gt_error_check(err);
   assert(sequence && seqio);
-  assert(!str_length(sequence));
+  assert(!gt_str_length(sequence));
   /* read sequence */
   while (!io_get_char(seqio, &cc) && cc != FASTA_SEPARATOR) {
     if (cc != '\n' && cc != ' ')
-      str_append_char(sequence, cc);
+      gt_str_append_char(sequence, cc);
   }
-  if (!str_length(sequence)) {
+  if (!gt_str_length(sequence)) {
     gt_error_set(err, "empty sequence given in line %lu",
               io_get_line_number(seqio));
     return -1;
@@ -98,8 +98,8 @@ static int fasta_reader_rec_run(FastaReader *fasta_reader,
   assert(proc_description || proc_sequence_part || proc_sequence_length);
 
   /* init */
-  description = str_new();
-  sequence    = str_new();
+  description = gt_str_new();
+  sequence    = gt_str_new();
 
   /* make sure file is not empty */
   if (!io_has_char(fr->seqio)) {
@@ -110,28 +110,28 @@ static int fasta_reader_rec_run(FastaReader *fasta_reader,
   /* parse file */
   while (!had_err && io_has_char(fr->seqio)) {
     /* reset */
-    str_reset(description);
-    str_reset(sequence);
+    gt_str_reset(description);
+    gt_str_reset(sequence);
 
     /* parse entry */
     had_err = parse_fasta_entry(description, sequence, fr->seqio, err);
 
     /* process entry */
     if (!had_err && proc_description) {
-      had_err = proc_description(str_get(description), str_length(description),
+      had_err = proc_description(gt_str_get(description), gt_str_length(description),
                                  data, err);
     }
     if (!had_err && proc_sequence_part) {
-      had_err = proc_sequence_part(str_get(sequence), str_length(sequence),
+      had_err = proc_sequence_part(gt_str_get(sequence), gt_str_length(sequence),
                                    data, err);
     }
     if (!had_err && proc_sequence_length)
-      had_err = proc_sequence_length(str_length(sequence), data, err);
+      had_err = proc_sequence_length(gt_str_length(sequence), data, err);
   }
 
   /* free */
-  str_delete(description);
-  str_delete(sequence);
+  gt_str_delete(description);
+  gt_str_delete(sequence);
 
   return had_err;
 }
@@ -155,7 +155,7 @@ FastaReader* fasta_reader_rec_new(GT_Str *sequence_filename)
   FastaReader *fr = fasta_reader_create(fasta_reader_rec_class());
   FastaReaderRec *fasta_reader_rec = fasta_reader_rec_cast(fr);
   fasta_reader_rec->seqio = io_new(sequence_filename
-                                   ? str_get(sequence_filename) : NULL,
+                                   ? gt_str_get(sequence_filename) : NULL,
                                    "r");
   return fr;
 }

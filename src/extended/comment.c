@@ -38,7 +38,7 @@ static void gt_comment_free(GT_GenomeNode *gn)
   GT_Comment *c = gt_comment_cast(gn);
   assert(c && c->comment);
   ma_free(c->comment);
-  str_delete(c->gt_comment_str);
+  gt_str_delete(c->gt_comment_str);
 }
 
 static GT_Str* gt_comment_get_idstr(GT_GenomeNode *gn)
@@ -84,7 +84,7 @@ GT_GenomeNode* gt_comment_new(const char *comment)
   GT_Comment *c = gt_comment_cast(gn);
   assert(comment);
   c->comment = cstr_dup(comment);
-  c->gt_comment_str = str_new_cstr("");
+  c->gt_comment_str = gt_str_new_cstr("");
   return gn;
 }
 

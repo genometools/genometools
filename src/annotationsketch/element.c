@@ -139,7 +139,7 @@ int element_unit_test(GT_Error *err)
   r2.start = 20UL;
   r2.end = 50UL;
 
-  seqid = str_new_cstr("seqid");
+  seqid = gt_str_new_cstr("seqid");
   type = gt_feature_type_factory_create_gft(feature_type_factory, gft_exon);
   gn = gt_genome_feature_new(seqid, type, r1, GT_STRAND_BOTH);
   gn2 = gt_genome_feature_new(seqid, type, r2, GT_STRAND_BOTH);
@@ -172,7 +172,7 @@ int element_unit_test(GT_Error *err)
   gt_genome_node_delete(gn);
   gt_genome_node_delete(gn2);
   gt_feature_type_factory_delete(feature_type_factory);
-  str_delete(seqid);
+  gt_str_delete(seqid);
 
   return had_err;
 

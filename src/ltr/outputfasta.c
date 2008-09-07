@@ -200,8 +200,8 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   int had_err;
 
   formatout = fa_xfopen(innerregion
-                        ? str_get(lo->str_fastaoutputfilenameinnerregion)
-                        : str_get(lo->str_fastaoutputfilename),
+                        ? gt_str_get(lo->str_fastaoutputfilenameinnerregion)
+                        : gt_str_get(lo->str_fastaoutputfilename),
                         "w");
 
   fastaoutinfo.ssar = ssar;

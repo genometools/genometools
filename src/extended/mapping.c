@@ -40,7 +40,7 @@ Mapping* mapping_new(GT_Str *mapping_file, const char *global_name,
   assert(mapping_file && global_name);
   /* alloc */
   m = ma_malloc(sizeof (Mapping));
-  m->mapping_file = str_ref(mapping_file);
+  m->mapping_file = gt_str_ref(mapping_file);
   m->global = cstr_dup(global_name);
   m->type = type;
   /* create new lua state (i.e., interpreter) */
@@ -54,7 +54,7 @@ Mapping* mapping_new(GT_Str *mapping_file, const char *global_name,
     luaL_openlibs(m->L);
   /* try to load & run mapping file */
   if (!had_err) {
-    if (luaL_loadfile(m->L, str_get(mapping_file)) ||
+    if (luaL_loadfile(m->L, gt_str_get(mapping_file)) ||
         lua_pcall(m->L, 0, 0, 0)) {
       gt_error_set(err, "cannot run file: %s", lua_tostring(m->L, -1));
       had_err = -1;
@@ -65,7 +65,7 @@ Mapping* mapping_new(GT_Str *mapping_file, const char *global_name,
     lua_getglobal(m->L, global_name);
     if (lua_isnil(m->L, -1)) {
       gt_error_set(err, "'%s' is not defined in \"%s\"", global_name,
-                str_get(mapping_file));
+                gt_str_get(mapping_file));
       had_err = -1;
     }
   }
@@ -73,7 +73,7 @@ Mapping* mapping_new(GT_Str *mapping_file, const char *global_name,
   if (!had_err) {
     if (!(lua_istable(m->L, -1) || lua_isfunction(m->L, -1))) {
       gt_error_set(err, "'%s' must be either a table or a function (defined "
-                     "in \"%s\")", global_name, str_get(mapping_file));
+                     "in \"%s\")", global_name, gt_str_get(mapping_file));
       had_err = -1;
     }
   }
@@ -107,7 +107,7 @@ static int map_table(Mapping *m, GT_Str **stroutput, long *integeroutput,
   /* make sure global[input] is defined */
   if (lua_isnil(m->L, -1)) {
     gt_error_set(err, "%s[%s] is nil (defined in \"%s\")", m->global, input,
-              str_get(m->mapping_file)); had_err = -1;
+              gt_str_get(m->mapping_file)); had_err = -1;
   }
   if (!had_err) {
     switch (m->type) {
@@ -115,16 +115,16 @@ static int map_table(Mapping *m, GT_Str **stroutput, long *integeroutput,
         /* make sure global[input] is a string */
         if (!(lua_isstring(m->L, -1))) {
           gt_error_set(err, "%s[%s] is not a string (defined in \"%s\")",
-                    m->global, input, str_get(m->mapping_file)); had_err = -1;
+                    m->global, input, gt_str_get(m->mapping_file)); had_err = -1;
         }
         if (!had_err)
-          *stroutput = str_new_cstr(lua_tostring(m->L, -1));
+          *stroutput = gt_str_new_cstr(lua_tostring(m->L, -1));
         break;
       case MAPPINGTYPE_INTEGER:
         /* make sure global[input] is an integer */
         if (!(lua_isnumber(m->L, -1))) {
           gt_error_set(err, "%s[%s] is not an integer (defined in \"%s\")",
-                    m->global, input, str_get(m->mapping_file)); had_err = -1;
+                    m->global, input, gt_str_get(m->mapping_file)); had_err = -1;
         }
         if (!had_err)
           *integeroutput = lua_tointeger(m->L, -1);
@@ -157,16 +157,16 @@ static int map_function(Mapping *m, GT_Str **stroutput, long *integeroutput,
       case MAPPINGTYPE_STRING:
         if (!lua_isstring(m->L, -1)) {
           gt_error_set(err, "function '%s' must return a string (defined in "
-                         "\"%s\")", m->global, str_get(m->mapping_file));
+                         "\"%s\")", m->global, gt_str_get(m->mapping_file));
           had_err = -1;
         }
         if (!had_err)
-          *stroutput = str_new_cstr(lua_tostring(m->L, -1));
+          *stroutput = gt_str_new_cstr(lua_tostring(m->L, -1));
          break;
        case MAPPINGTYPE_INTEGER:
         if (!lua_isnumber(m->L, -1)) {
           gt_error_set(err, "function '%s' must return an integer) (defined in "
-                       "\"%s\")", m->global, str_get(m->mapping_file));
+                       "\"%s\")", m->global, gt_str_get(m->mapping_file));
           had_err = -1;
         }
         if (!had_err)
@@ -207,7 +207,7 @@ int mapping_map_integer(Mapping *m, long *output, const char *input, GT_Error *e
 void mapping_delete(Mapping *m)
 {
   if (!m) return;
-  str_delete(m->mapping_file);
+  gt_str_delete(m->mapping_file);
   ma_free(m->global);
   if (m->L) lua_close(m->L);
   ma_free(m);

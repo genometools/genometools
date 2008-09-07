@@ -60,7 +60,7 @@ static int feature_index_lua_add_genome_feature(lua_State *L)
   luaL_argcheck(L, gf, 2, "not a genome feature");
   seqid = gt_genome_node_get_seqid(*gn);
   luaL_argcheck(L, seqid, 2, "genome_feature does not have a sequence id");
-  luaL_argcheck(L, gt_feature_index_has_seqid(*fi, str_get(seqid)), 2,
+  luaL_argcheck(L, gt_feature_index_has_seqid(*fi, gt_str_get(seqid)), 2,
                 "feature index does not contain corresponding sequence region");
   gt_feature_index_add_genome_feature(*fi, gf);
   return 0;

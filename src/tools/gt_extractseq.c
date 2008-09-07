@@ -42,8 +42,8 @@ typedef struct {
 static void* gt_extractseq_arguments_new(void)
 {
   ExtractSeqArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->pattern = str_new();
-  arguments->ginum = str_new();
+  arguments->pattern = gt_str_new();
+  arguments->ginum = gt_str_new();
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -54,8 +54,8 @@ static void gt_extractseq_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
-  str_delete(arguments->ginum);
-  str_delete(arguments->pattern);
+  gt_str_delete(arguments->ginum);
+  gt_str_delete(arguments->pattern);
   ma_free(arguments);
 }
 
@@ -185,7 +185,7 @@ static int process_ginum(GT_Str *ginum, int argc, const char **argv,
 {
   int had_err = 0;
   gt_error_check(err);
-  assert(str_length(ginum));
+  assert(gt_str_length(ginum));
 
   if (argc == 0) {
     gt_error_set(err,"option -ginum requires at least one file argument");
@@ -214,7 +214,7 @@ static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
 
   gt_error_check(err);
   assert(arguments);
-  if (str_length(arguments->ginum)) {
+  if (gt_str_length(arguments->ginum)) {
     had_err = process_ginum(arguments->ginum, argc - parsed_args,
                             argv + parsed_args, arguments->width,
                             arguments->outfp, err);
@@ -230,7 +230,7 @@ static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
       }
       else {
         had_err = extractseq_match(arguments->outfp, bs,
-                                   str_get(arguments->pattern),
+                                   gt_str_get(arguments->pattern),
                                    arguments->width, err);
       }
       bioseq_delete(bs);

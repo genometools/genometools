@@ -116,14 +116,14 @@ static OBOStanza* obo_stanza_new(const char *type, unsigned long line,
   obo_stanza->type = cstr_dup(type);
   obo_stanza->content = hashmap_new(HASH_STRING, ma_free_func, ma_free_func);
   obo_stanza->line = line;
-  obo_stanza->filename = str_ref(filename);
+  obo_stanza->filename = gt_str_ref(filename);
   return obo_stanza;
 }
 
 static void obo_stanza_delete(OBOStanza *obo_stanza)
 {
   if (!obo_stanza) return;
-  str_delete(obo_stanza->filename);
+  gt_str_delete(obo_stanza->filename);
   hashmap_delete(obo_stanza->content);
   ma_free(obo_stanza->type);
   ma_free(obo_stanza);
@@ -172,7 +172,7 @@ static int validate_value(const OBOStanza *obo_stanza, const char *value,
     gt_error_set(err, "%s stanza starting on line %lu in file \"%s\" lacks "
               "required \"%s\" tag",
               obo_stanza_get_type(obo_stanza), obo_stanza->line,
-              str_get(obo_stanza->filename), value);
+              gt_str_get(obo_stanza->filename), value);
     return -1;
   }
   return 0;
@@ -346,7 +346,7 @@ static int proc_any_char(IO *obo_file, GT_Str *capture, bool be_permissive,
     }
     return -1;
   }
-  str_append_char(capture, io_next(obo_file));
+  gt_str_append_char(capture, io_next(obo_file));
   return 0;
 }
 
@@ -382,21 +382,21 @@ static int header(OBOParseTree *obo_parse_tree, IO *obo_file, GT_Error *err)
   int had_err;
   gt_error_check(err);
   assert(obo_parse_tree && obo_file);
-  tag = str_new();
-  value = str_new();
+  tag = gt_str_new();
+  value = gt_str_new();
   do {
-    str_reset(tag);
-    str_reset(value);
+    gt_str_reset(tag);
+    gt_str_reset(value);
     had_err = tag_line(obo_file, tag, value, err);
     if (!had_err)
-      obo_header_add(obo_parse_tree->obo_header, str_get(tag), str_get(value));
+      obo_header_add(obo_parse_tree->obo_header, gt_str_get(tag), gt_str_get(value));
   } while (!had_err && any_char(obo_file, false));
   if (!had_err) {
     had_err = obo_header_validate(obo_parse_tree->obo_header,
                                   io_get_filename(obo_file), err);
   }
-  str_delete(value);
-  str_delete(tag);
+  gt_str_delete(value);
+  gt_str_delete(tag);
   return had_err;
 }
 
@@ -425,30 +425,30 @@ static int stanza(OBOParseTree *obo_parse_tree, IO *obo_file, GT_Error *err)
   GT_Str *type, *tag, *value;
   gt_error_check(err);
   assert(obo_parse_tree && obo_file);
-  type = str_new();
-  tag = str_new();
-  value = str_new();
+  type = gt_str_new();
+  tag = gt_str_new();
+  value = gt_str_new();
   stanza_line_number = io_get_line_number(obo_file);
   had_err = stanza_line(obo_file, type, err);
   if (!had_err) {
-    OBOStanza *obo_stanza = obo_stanza_new(str_get(type), stanza_line_number,
+    OBOStanza *obo_stanza = obo_stanza_new(gt_str_get(type), stanza_line_number,
                                            io_get_filename_str(obo_file));
     obo_parse_tree_add_stanza(obo_parse_tree, obo_stanza);
     while (!had_err &&
            (any_char(obo_file, false) || io_peek(obo_file) == COMMENT_CHAR)) {
-      str_reset(tag);
-      str_reset(value);
+      gt_str_reset(tag);
+      gt_str_reset(value);
       if (io_peek(obo_file) == COMMENT_CHAR)
         had_err = gt_comment_line(obo_file, err);
       else {
         had_err = tag_line(obo_file, tag, value, err);
-        obo_stanza_add(obo_stanza, str_get(tag), str_get(value));
+        obo_stanza_add(obo_stanza, gt_str_get(tag), gt_str_get(value));
       }
     }
   }
-  str_delete(value);
-  str_delete(tag);
-  str_delete(type);
+  gt_str_delete(value);
+  gt_str_delete(tag);
+  gt_str_delete(type);
   return had_err;
 }
 

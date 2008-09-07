@@ -543,8 +543,8 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   GT_Str *tmpfilename;
 
   gt_error_check(err);
-  tmpfilename = str_clone(indexname);
-  str_append_cstr(tmpfilename,ENCSEQFILESUFFIX);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,ENCSEQFILESUFFIX);
   if (fillmapspecstartptr(assignencseqmapspecification,
                           &encseq->mappedptr,
                           encseq,
@@ -555,7 +555,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
     haserr = true;
   }
   showverbose(verboseinfo,"sat=%s",encseqaccessname(encseq));
-  str_delete(tmpfilename);
+  gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
 }
 
@@ -1857,7 +1857,7 @@ static int readsatfromfile(const GT_Str *indexname,GT_Error *err)
     if (cc == EOF)
     {
       gt_error_set(err,"illegal EOF symbol in \"%s%s\"",
-                    str_get(indexname),ENCSEQFILESUFFIX);
+                    gt_str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
   }
@@ -1866,7 +1866,7 @@ static int readsatfromfile(const GT_Str *indexname,GT_Error *err)
     if (cc < 0 || cc >= (int) Undefpositionaccesstype)
     {
       gt_error_set(err,"illegal type %d in \"%s%s\"",cc,
-                    str_get(indexname),ENCSEQFILESUFFIX);
+                    gt_str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
   }

@@ -49,7 +49,7 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
   gt_error_check(err);
   regioncov_visitor = regioncov_visitor_cast(gv);
   ranges = hashmap_get(regioncov_visitor->region2rangelist,
-                       str_get(gt_genome_node_get_seqid((GT_GenomeNode*) gf)));
+                       gt_str_get(gt_genome_node_get_seqid((GT_GenomeNode*) gf)));
   assert(ranges);
   new_range = gt_genome_node_get_range((GT_GenomeNode*) gf);
   if (!gt_array_size(ranges))
@@ -77,7 +77,7 @@ static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
   regioncov_visitor = regioncov_visitor_cast(gv);
   rangelist = gt_array_new(sizeof (GT_Range));
   hashmap_add(regioncov_visitor->region2rangelist,
-              cstr_dup(str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr))),
+              cstr_dup(gt_str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr))),
               rangelist);
   return 0;
 }

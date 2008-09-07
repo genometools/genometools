@@ -34,15 +34,15 @@ static int format_scalar(lua_State *L, GT_Str *out, int index, bool table_key,
     int val;
     val = lua_toboolean(L, index);
     if (val)
-      str_append_cstr(out, "true");
+      gt_str_append_cstr(out, "true");
     else
-      str_append_cstr(out, "false");
+      gt_str_append_cstr(out, "false");
   }
   else if (lua_isnumber(L, index))
   {
     double val;
     val = lua_tonumber(L, index);
-    str_append_double(out, val, 10);
+    gt_str_append_double(out, val, 10);
   }
   else if (lua_isstring(L, index))
   {
@@ -59,10 +59,10 @@ static int format_scalar(lua_State *L, GT_Str *out, int index, bool table_key,
     lua_pop(L,2);
     /* table keys must be enclosed in square brackets */
     if (table_key)
-      str_append_cstr(out, "[");
-    str_append_cstr(out, str);
+      gt_str_append_cstr(out, "[");
+    gt_str_append_cstr(out, str);
     if (table_key)
-      str_append_cstr(out, "]");
+      gt_str_append_cstr(out, "]");
   }
   else {
     gt_error_set(err, "expected boolean, number, or string");
@@ -83,22 +83,22 @@ static int parse_table(lua_State *L, GT_Str *out, int index, int level, GT_Error
   {
     int i;
     for (i=0;i<level;i++)
-      str_append_cstr(out, "  ");
+      gt_str_append_cstr(out, "  ");
     rval = format_scalar(L, out, -2, true, NULL);
     assert(!rval); /* cannot happen */
-    str_append_cstr(out, " = ");
+    gt_str_append_cstr(out, " = ");
     if (lua_istable(L, -1))
     {
-      str_append_cstr(out, "{\n");
+      gt_str_append_cstr(out, "{\n");
       had_err = parse_table(L, out, -1, level+1, err);
       for (i=0;i<level;i++)
-        str_append_cstr(out, "  ");
-      str_append_cstr(out, "},\n");
+        gt_str_append_cstr(out, "  ");
+      gt_str_append_cstr(out, "},\n");
     }
     else
     {
       had_err = format_scalar(L, out, -1, false, err);
-      str_append_cstr(out, ",\n");
+      gt_str_append_cstr(out, ",\n");
     }
     lua_pop(L, 1);
   }
@@ -116,7 +116,7 @@ int lua_serializer_unit_test(GT_Error *err)
 {
   int had_err = 0;
   lua_State *L;
-  GT_Str *outstr  = str_new();
+  GT_Str *outstr  = gt_str_new();
   const char testtable[] = "config =\n"
   "{\n"
   "  gene = {\n"
@@ -148,14 +148,14 @@ int lua_serializer_unit_test(GT_Error *err)
   if (!had_err)
   {
     lua_getglobal(L, "config");
-    str_append_cstr(outstr, "config = {\n");
+    gt_str_append_cstr(outstr, "config = {\n");
     lua_table_to_str(L, outstr, -1, err);
-    str_append_cstr(outstr, "}");
-    had_err = luaL_loadbuffer(L, str_get(outstr), str_length(outstr), "t2") ||
+    gt_str_append_cstr(outstr, "}");
+    had_err = luaL_loadbuffer(L, gt_str_get(outstr), gt_str_length(outstr), "t2") ||
                 lua_pcall(L, 0, 0, 0);
     if (!had_err)
     {
-      ensure(had_err, str_length(outstr) > 0);
+      ensure(had_err, gt_str_length(outstr) > 0);
       lua_getglobal(L, "config");
       ensure(had_err, lua_istable(L, -1));
       lua_getfield(L, -1, "gene");
@@ -183,7 +183,7 @@ int lua_serializer_unit_test(GT_Error *err)
       lua_pop(L, 3);
     }
   }
-  str_delete(outstr);
+  gt_str_delete(outstr);
   lua_close(L);
   return had_err;
 }

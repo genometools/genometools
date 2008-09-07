@@ -187,7 +187,7 @@ static void gff3_in_stream_free(GenomeStream *gs)
 {
   GFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
   gt_strarray_delete(gff3_in_stream->files);
-  str_delete(gff3_in_stream->stdinstr);
+  gt_str_delete(gff3_in_stream->stdinstr);
   while (queue_size(gff3_in_stream->gt_genome_node_buffer))
     gt_genome_node_rec_delete(queue_get(gff3_in_stream->gt_genome_node_buffer));
   queue_delete(gff3_in_stream->gt_genome_node_buffer);
@@ -215,7 +215,7 @@ static GenomeStream* gff3_in_stream_new(GT_StrArray *files,
   GFF3InStream *gff3_in_stream           = gff3_in_stream_cast(gs);
   gff3_in_stream->next_file              = 0;
   gff3_in_stream->files                  = files;
-  gff3_in_stream->stdinstr               = str_new_cstr("stdin");
+  gff3_in_stream->stdinstr               = gt_str_new_cstr("stdin");
   gff3_in_stream->ensure_sorting         = ensure_sorting;
   gff3_in_stream->stdin_argument         = false;
   gff3_in_stream->file_is_open           = false;

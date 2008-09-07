@@ -69,12 +69,12 @@ int chseqids_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *er
       node = *(GT_GenomeNode**) gt_array_get(cs->gt_genome_node_buffer, i);
       if (gt_genome_node_get_seqid(node)) {
         if  ((changed_seqid = mapping_map_string(cs->chseqids_mapping,
-                                           str_get(gt_genome_node_get_seqid(node)),
+                                           gt_str_get(gt_genome_node_get_seqid(node)),
                                                  err))) {
           rval = gt_genome_node_traverse_children(node, changed_seqid,
                                                change_sequence_id, true, err);
           assert(!rval); /* change_sequence_id() is sane */
-          str_delete(changed_seqid);
+          gt_str_delete(changed_seqid);
         }
         else
           had_err = -1;
@@ -111,14 +111,14 @@ int chseqids_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *er
   if (!had_err && *gn) {
     if (gt_genome_node_get_seqid(*gn)) {
       changed_seqid = mapping_map_string(cs->chseqids_mapping,
-                                         str_get(gt_genome_node_get_seqid(*gn)),
+                                         gt_str_get(gt_genome_node_get_seqid(*gn)),
                                          err);
       assert(changed_seqid); /* is always defined, because an undefined mapping
                                 would be catched earlier */
       rval = gt_genome_node_traverse_children(*gn, changed_seqid,
                                            change_sequence_id, true, err);
       assert(!rval); /* change_sequence_id() is sane */
-      str_delete(changed_seqid);
+      gt_str_delete(changed_seqid);
     }
   }
 

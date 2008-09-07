@@ -50,8 +50,8 @@ typedef struct {
 static void* gt_gff3_arguments_new(void)
 {
   GFF3Arguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->offsetfile = str_new();
-  arguments->typecheck = str_new();
+  arguments->offsetfile = gt_str_new();
+  arguments->typecheck = gt_str_new();
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -62,8 +62,8 @@ static void gt_gff3_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
-  str_delete(arguments->typecheck);
-  str_delete(arguments->offsetfile);
+  gt_str_delete(arguments->typecheck);
+  gt_str_delete(arguments->offsetfile);
   ma_free(arguments);
 }
 
@@ -190,8 +190,8 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
       ftf = gt_feature_type_factory_builtin_new();
       gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
   }
-  if (str_length(arguments->typecheck)) {
-    if (!(ftf = gt_feature_type_factory_obo_new(str_get(arguments->typecheck),
+  if (gt_str_length(arguments->typecheck)) {
+    if (!(ftf = gt_feature_type_factory_obo_new(gt_str_get(arguments->typecheck),
                                              err))) {
         had_err = -1;
     }
@@ -204,7 +204,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
     gff3_in_stream_set_offset(gff3_in_stream, arguments->offset);
 
   /* set offsetfile (if necessary) */
-  if (!had_err && str_length(arguments->offsetfile)) {
+  if (!had_err && gt_str_length(arguments->offsetfile)) {
     had_err = gff3_in_stream_set_offsetfile(gff3_in_stream,
                                             arguments->offsetfile, err);
   }

@@ -227,9 +227,9 @@ int gt_block_unit_test(GT_Error *err)
   gt_error_check(err);
 
   feature_type_factory = gt_feature_type_factory_builtin_new();
-  seqid = str_new_cstr("seqid");
-  caption1 = str_new_cstr("foo");
-  caption2 = str_new_cstr("bar");
+  seqid = gt_str_new_cstr("seqid");
+  caption1 = gt_str_new_cstr("foo");
+  caption2 = gt_str_new_cstr("bar");
 
   r1.start = 10UL;
   r1.end = 50UL;
@@ -263,8 +263,8 @@ int gt_block_unit_test(GT_Error *err)
 
   /* tests gt_block_set_caption & gt_block_get_caption */
   gt_block_set_caption(b, caption1);
-  ensure(had_err, (0 == str_cmp(gt_block_get_caption(b), caption1)));
-  ensure(had_err, (0 != str_cmp(gt_block_get_caption(b), caption2)));
+  ensure(had_err, (0 == gt_str_cmp(gt_block_get_caption(b), caption1)));
+  ensure(had_err, (0 != gt_str_cmp(gt_block_get_caption(b), caption2)));
 
   /* tests gt_block_set_strand & gt_block_get_range */
   s = gt_block_get_strand(b);
@@ -273,8 +273,8 @@ int gt_block_unit_test(GT_Error *err)
   s = gt_block_get_strand(b);
   ensure(had_err, (GT_STRAND_FORWARD == s));
 
-  str_delete(caption2);
-  str_delete(seqid);
+  gt_str_delete(caption2);
+  gt_str_delete(seqid);
   element_delete(e1);
   element_delete(e2);
   gt_block_delete(b);
@@ -299,7 +299,7 @@ void gt_block_delete(GT_Block *block)
     element_delete(elem);
   }
   if (block->caption)
-    str_delete(block->caption);
+    gt_str_delete(block->caption);
   dlist_delete(block->elements);
   if (block->top_level_feature)
     gt_genome_node_delete(block->top_level_feature);

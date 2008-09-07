@@ -65,20 +65,20 @@ GT_Str* tokenizer_get_token(Tokenizer *t)
     do {
       if (c != EOF) {
         if (!t->token)
-          t->token = str_new();
+          t->token = gt_str_new();
         if (c == '\n')
           break;
-        str_append_char(t->token, c);
+        gt_str_append_char(t->token, c);
       }
     } while ((io_get_char(t->io, &c) != -1) && c != ' ' && c != '\n');
     if (c == '\n' && c != EOF) {
       assert(t->token);
-      str_append_char(t->token, c);
+      gt_str_append_char(t->token, c);
     }
   }
   /* return token */
   if (t->token)
-    return str_ref(t->token);
+    return gt_str_ref(t->token);
   return NULL;
 }
 
@@ -90,7 +90,7 @@ bool tokenizer_has_token(Tokenizer *t)
   token = tokenizer_get_token(t);
   if (token) {
     has_token = true;
-    str_delete(token);
+    gt_str_delete(token);
   }
   return has_token;
 }
@@ -104,7 +104,7 @@ bool tokenizer_line_start(const Tokenizer *t)
 void tokenizer_next_token(Tokenizer *t)
 {
   assert(t);
-  str_delete(t->token);
+  gt_str_delete(t->token);
   t->token = NULL;
 }
 
@@ -130,51 +130,51 @@ int tokenizer_unit_test(GT_Error *err)
   gt_error_check(err);
 
   /* empty file (except comment line) */
-  tmpfilename = str_new();
+  tmpfilename = gt_str_new();
   tmpfp = fa_xtmpfp(tmpfilename);
   fprintf(tmpfp, "# comment line\n");
   fa_xfclose(tmpfp);
-  t = tokenizer_new(io_new(str_get(tmpfilename), "r"));
+  t = tokenizer_new(io_new(gt_str_get(tmpfilename), "r"));
   tokenizer_skip_comment_lines(t);
   ensure(had_err, !tokenizer_has_token(t));
   tokenizer_delete(t);
-  xremove(str_get(tmpfilename));
+  xremove(gt_str_get(tmpfilename));
 
   /* larger test */
   tmpfp = fa_xtmpfp(tmpfilename);
   fprintf(tmpfp, " a bb ccc\ndddd -5");
   fa_xfclose(tmpfp);
-  t = tokenizer_new(io_new(str_get(tmpfilename), "r"));
+  t = tokenizer_new(io_new(gt_str_get(tmpfilename), "r"));
 
   token = tokenizer_get_token(t);
-  ensure(had_err, !strcmp(str_get(token), "a"));
-  str_delete(token);
-
-  tokenizer_next_token(t);
-  token = tokenizer_get_token(t);
-  ensure(had_err, !strcmp(str_get(token), "bb"));
-  str_delete(token);
+  ensure(had_err, !strcmp(gt_str_get(token), "a"));
+  gt_str_delete(token);
 
   tokenizer_next_token(t);
   token = tokenizer_get_token(t);
-  ensure(had_err, !strcmp(str_get(token), "ccc\n"));
-  str_delete(token);
+  ensure(had_err, !strcmp(gt_str_get(token), "bb"));
+  gt_str_delete(token);
 
   tokenizer_next_token(t);
   token = tokenizer_get_token(t);
-  ensure(had_err, !strcmp(str_get(token), "dddd"));
-  str_delete(token);
+  ensure(had_err, !strcmp(gt_str_get(token), "ccc\n"));
+  gt_str_delete(token);
 
   tokenizer_next_token(t);
   token = tokenizer_get_token(t);
-  ensure(had_err, !strcmp(str_get(token), "-5"));
-  str_delete(token);
+  ensure(had_err, !strcmp(gt_str_get(token), "dddd"));
+  gt_str_delete(token);
+
+  tokenizer_next_token(t);
+  token = tokenizer_get_token(t);
+  ensure(had_err, !strcmp(gt_str_get(token), "-5"));
+  gt_str_delete(token);
 
   tokenizer_next_token(t);
   ensure(had_err, !tokenizer_has_token(t));
   tokenizer_delete(t);
-  xremove(str_get(tmpfilename));
-  str_delete(tmpfilename);
+  xremove(gt_str_get(tmpfilename));
+  gt_str_delete(tmpfilename);
 
   return had_err;
 }
@@ -183,6 +183,6 @@ void tokenizer_delete(Tokenizer *t)
 {
   if (!t) return;
   io_delete(t->io);
-  str_delete(t->token);
+  gt_str_delete(t->token);
   ma_free(t);
 }

@@ -70,7 +70,7 @@ initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
   newFactory->moduloMask = (1 << mapIntervalLog2) - 1;
   newFactory->mapIntervalLog2 = mapIntervalLog2;
   newFactory->constructionComplete = false;
-  newFactory->mapTableDBSPath = str_new();
+  newFactory->mapTableDBSPath = gt_str_new();
   fp = newFactory->mapTableDiskBackingStore
     = fa_xtmpfp_generic(newFactory->mapTableDBSPath,
                         TMPFP_AUTOREMOVE | TMPFP_OPENBINARY);
@@ -106,7 +106,7 @@ static void
 destructBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory)
 {
   fa_xfclose(factory->mapTableDiskBackingStore);
-  str_delete(factory->mapTableDBSPath);
+  gt_str_delete(factory->mapTableDBSPath);
 }
 
 extern void
@@ -268,17 +268,17 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
       mapSize = headerSize + sizeof (BitElem)
       * bitElemsAllocSize(bitsPerSeqpos * numMapEntries(
                             seqLen, mapIntervalLog2));
-    mapName = str_clone(projectName);
+    mapName = gt_str_clone(projectName);
     {
       char buf[1 + 4 + 3];
       snprintf(buf, sizeof (buf), ".%ucxm", (unsigned)mapIntervalLog2);
-      str_append_cstr(mapName, buf);
+      gt_str_append_cstr(mapName, buf);
       if (createMapFile)
       {
         /* write header information, for reference to verify noone
          * toyed with the file name */
         BitElem headerBuf[headerBitElems];
-        if (!(mapFile = fa_fopen(str_get(mapName), "w+b", NULL)))
+        if (!(mapFile = fa_fopen(gt_str_get(mapName), "w+b", NULL)))
           break;
         bsStoreUInt16(headerBuf, 0, HEADER_ENTRY_BITS, mapIntervalLog2);
         bsStoreUInt16(headerBuf, HEADER_ENTRY_BITS, HEADER_ENTRY_BITS,
@@ -298,7 +298,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
         /* read header information, for reference to verify noone
          * toyed with the file name */
         BitElem headerBuf[headerBitElems];
-        if (!(mapFile = fa_fopen(str_get(mapName), "rb", NULL)))
+        if (!(mapFile = fa_fopen(gt_str_get(mapName), "rb", NULL)))
           break;
         if (fread(headerBuf,  sizeof (headerBuf), 1, mapFile) != 1)
           break;
@@ -307,7 +307,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
                 != bitsPerSeqpos))
         {
           fprintf(stderr, "error: context map file %s contains corrupted "
-                  "data.\n", str_get(mapName));
+                  "data.\n", gt_str_get(mapName));
           break;
         }
       }
@@ -316,7 +316,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
                                 false);
     newBWTSeqCR->revMap = (newBWTSeqCR->revMapMMap = mapMap) + headerSize;
   } while (0);
-  if (mapName) str_delete(mapName);
+  if (mapName) gt_str_delete(mapName);
   if (mapFile) fa_xfclose(mapFile);
   return mapMap != NULL;
 }

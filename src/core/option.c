@@ -121,8 +121,8 @@ static Option *option_new(const char *option_str, const char *description,
   assert(option_str && strlen(option_str));
   assert("an option string should not start with '-', this is added "
          "automatically"  && option_str[0] != '-');
-  o->option_str = str_new_cstr(option_str);
-  o->description = str_new_cstr(description);
+  o->option_str = gt_str_new_cstr(option_str);
+  o->description = gt_str_new_cstr(description);
   o->value = value;
   return o;
 }
@@ -311,8 +311,8 @@ static int show_help(OptionParser *op, OptionType optiontype, GT_Error *err)
         (!(optiontype == OPTION_HELPDEV) && option->is_development_option)) {
       continue;
     }
-    if (str_length(option->option_str) > max_option_length)
-      max_option_length = str_length(option->option_str);
+    if (gt_str_length(option->option_str) > max_option_length)
+      max_option_length = gt_str_length(option->option_str);
   }
   assert(max_option_length);
 
@@ -326,10 +326,10 @@ static int show_help(OptionParser *op, OptionType optiontype, GT_Error *err)
         (!(optiontype == OPTION_HELPDEV) && option->is_development_option)) {
       continue;
     }
-    printf("-%s%*s ", str_get(option->option_str),
-           (int) (max_option_length - str_length(option->option_str)), "");
-    show_description(max_option_length + 2, str_get(option->description),
-                     str_length(option->description));
+    printf("-%s%*s ", gt_str_get(option->option_str),
+           (int) (max_option_length - gt_str_length(option->option_str)), "");
+    show_description(max_option_length + 2, gt_str_get(option->description),
+                     gt_str_length(option->description));
 
     /* show default value for some types of options */
     if (!option->hide_default) {
@@ -426,7 +426,7 @@ static int check_missing_argument(int argnum, int argc, GT_Str *option, GT_Error
 {
   gt_error_check(err);
   if (argnum + 1 >= argc) {
-    gt_error_set(err, "missing argument to option \"-%s\"", str_get(option));
+    gt_error_set(err, "missing argument to option \"-%s\"", gt_str_get(option));
     return -1;
   }
   return 0;
@@ -441,7 +441,7 @@ static int check_mandatory_options(OptionParser *op, GT_Error *err)
   for (i = 0; i < gt_array_size(op->options); i++) {
     o = *(Option**) gt_array_get(op->options, i);
     if (o->is_mandatory && !o->is_set) {
-      gt_error_set(err, "option \"-%s\" is mandatory", str_get(o->option_str));
+      gt_error_set(err, "option \"-%s\" is mandatory", gt_str_get(o->option_str));
       return -1;
     }
   }
@@ -468,8 +468,8 @@ static int check_option_implications(OptionParser *op, GT_Error *err)
           implied_option = *(Option**) gt_array_get(implied_option_array, 0);
           if (!implied_option->is_set) {
             gt_error_set(err, "option \"-%s\" requires option \"-%s\"",
-                      str_get(o->option_str),
-                      str_get(implied_option->option_str));
+                      gt_str_get(o->option_str),
+                      gt_str_get(implied_option->option_str));
             return -1;
           }
         }
@@ -485,25 +485,25 @@ static int check_option_implications(OptionParser *op, GT_Error *err)
             }
           }
           if (!option_set) {
-            gt_error_str = str_new_cstr("option \"-");
-            str_append_str(gt_error_str, o->option_str);
-            str_append_cstr(gt_error_str, "\" requires option");
+            gt_error_str = gt_str_new_cstr("option \"-");
+            gt_str_append_str(gt_error_str, o->option_str);
+            gt_str_append_cstr(gt_error_str, "\" requires option");
             for (l = 0; l < gt_array_size(implied_option_array) - 1; l++) {
-              str_append_cstr(gt_error_str, " \"-");
-              str_append_str(gt_error_str, (*(Option**)
+              gt_str_append_cstr(gt_error_str, " \"-");
+              gt_str_append_str(gt_error_str, (*(Option**)
                              gt_array_get(implied_option_array, l))->option_str);
-              str_append_cstr(gt_error_str, "\"");
+              gt_str_append_cstr(gt_error_str, "\"");
               if (gt_array_size(implied_option_array) > 2)
-                str_append_char(gt_error_str, ',');
+                gt_str_append_char(gt_error_str, ',');
             }
-            str_append_cstr(gt_error_str, " or \"-");
-            str_append_str(gt_error_str, (*(Option**)
+            gt_str_append_cstr(gt_error_str, " or \"-");
+            gt_str_append_str(gt_error_str, (*(Option**)
                            gt_array_get(implied_option_array,
                                      gt_array_size(implied_option_array) - 1))
                                      ->option_str);
-            str_append_cstr(gt_error_str, "\"");
-            gt_error_set(err, "%s", str_get(gt_error_str));
-            str_delete(gt_error_str);
+            gt_str_append_cstr(gt_error_str, "\"");
+            gt_error_set(err, "%s", gt_str_get(gt_error_str));
+            gt_str_delete(gt_error_str);
             return -1;
           }
         }
@@ -526,8 +526,8 @@ static int check_option_exclusions(OptionParser *op, GT_Error *err)
         excluded_option = *(Option**) gt_array_get(o->exclusions, j);
         if (excluded_option->is_set) {
           gt_error_set(err, "option \"-%s\" and option \"-%s\" exclude each other",
-                    str_get(o->option_str),
-                    str_get(excluded_option->option_str));
+                    gt_str_get(o->option_str),
+                    gt_str_get(excluded_option->option_str));
           return -1;
         }
       }
@@ -547,8 +547,8 @@ static int check_mandatory_either_options(OptionParser *op, GT_Error *err)
     if (o->mandatory_either_option) {
       if (!o->is_set && !o->mandatory_either_option->is_set) {
         gt_error_set(err, "either option \"-%s\" or option \"-%s\" is mandatory",
-                  str_get(o->option_str),
-                  str_get(o->mandatory_either_option->option_str));
+                  gt_str_get(o->option_str),
+                  gt_str_get(o->mandatory_either_option->option_str));
         return -1;
       }
     }
@@ -639,11 +639,11 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
 
       /* allow options to start with '--', too */
       minus_offset = argv[argnum][1] == '-' ? 1 : 0;
-      if (!strcmp(argv[argnum]+1+minus_offset, str_get(option->option_str))) {
+      if (!strcmp(argv[argnum]+1+minus_offset, gt_str_get(option->option_str))) {
         /* make sure option has not been used before */
         if (option->is_set) {
           gt_error_set(err, "option \"%s\" already set",
-                    str_get(option->option_str));
+                    gt_str_get(option->option_str));
           had_err = -1;
         }
         else
@@ -681,27 +681,27 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
               if (!had_err) {
                 argnum++;
                 if (strcmp(argv[argnum], option->domain[0])) {
-                  gt_error_str = str_new_cstr(option->domain[0]);
+                  gt_error_str = gt_str_new_cstr(option->domain[0]);
                   i = 1;
                   while (option->domain[i] != NULL) {
                     if (!strcmp(argv[argnum], option->domain[i])) {
-                      str_set(option->value, option->domain[i]);
+                      gt_str_set(option->value, option->domain[i]);
                       break;
                     }
-                    str_append_cstr(gt_error_str, ", ");
-                    str_append_cstr(gt_error_str, option->domain[i]);
+                    gt_str_append_cstr(gt_error_str, ", ");
+                    gt_str_append_cstr(gt_error_str, option->domain[i]);
                     i++;
                   }
                   if (option->domain[i] == NULL) {
                     gt_error_set(err, "argument to option \"-%s\" must be one "
-                                   "of: %s", str_get(option->option_str),
-                              str_get(gt_error_str));
+                                   "of: %s", gt_str_get(option->option_str),
+                              gt_str_get(gt_error_str));
                     had_err = -1;
                   }
-                  str_delete(gt_error_str);
+                  gt_str_delete(gt_error_str);
                 }
                 else {
-                  str_set(option->value, option->domain[0]);
+                  gt_str_set(option->value, option->domain[0]);
                 }
               }
               if (!had_err) {
@@ -720,7 +720,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 if (parse_double(&double_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be "
                                  "floating-point number",
-                            str_get(option->option_str));
+                            gt_str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -730,7 +730,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                     double_value < option->min_value.d) {
                   gt_error_set(err, "argument to option \"-%s\" must be a "
                                  "floating point value >= %f",
-                            str_get(option->option_str),
+                            gt_str_get(option->option_str),
                                 option->min_value.d);
                   had_err = -1;
                 }
@@ -741,7 +741,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                     double_value > option->max_value.d) {
                   gt_error_set(err, "argument to option \"-%s\" must be a "
                                  "floating point value <= %f",
-                            str_get(option->option_str),
+                            gt_str_get(option->option_str),
                             option->max_value.d);
                   had_err = -1;
                 }
@@ -780,7 +780,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 argnum++;
                 if (parse_int(&int_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                                 "integer", str_get(option->option_str));
+                                 "integer", gt_str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -788,7 +788,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 /* minimum value check */
                 if (option->min_value_set && int_value < option->min_value.i) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                                 "integer >= %d", str_get(option->option_str),
+                                 "integer >= %d", gt_str_get(option->option_str),
                             option->min_value.i);
                   had_err = -1;
                 }
@@ -797,7 +797,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 /* maximum value check */
                 if (option->max_value_set && int_value > option->max_value.i) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                                 "integer <= %d", str_get(option->option_str),
+                                 "integer <= %d", gt_str_get(option->option_str),
                             option->max_value.i);
                   had_err = -1;
                 }
@@ -819,7 +819,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 if (parse_uint(&uint_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be a "
                                  "non-negative integer <= %u",
-                            str_get(option->option_str), UINT_MAX);
+                            gt_str_get(option->option_str), UINT_MAX);
                   had_err = -1;
                 }
               }
@@ -828,7 +828,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 if (option->min_value_set
                     && uint_value < option->min_value.ui) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                                 "integer >= %u", str_get(option->option_str),
+                                 "integer >= %u", gt_str_get(option->option_str),
                             option->min_value.ui);
                   had_err = -1;
                 }
@@ -838,7 +838,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 if (option->max_value_set
                     && uint_value > option->max_value.ui) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                                 "integer <= %u", str_get(option->option_str),
+                                 "integer <= %u", gt_str_get(option->option_str),
                             option->max_value.ui);
                   had_err = -1;
                 }
@@ -856,7 +856,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 argnum++;
                 if (parse_long(&long_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                                 "integer", str_get(option->option_str));
+                                 "integer", gt_str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -877,7 +877,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 if (parse_long(&long_value, argv[argnum]) || long_value < 0) {
                   gt_error_set(err, "argument to option \"-%s\" must be a "
                                  "non-negative integer",
-                            str_get(option->option_str));
+                            gt_str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -886,7 +886,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 if (option->min_value_set &&
                     long_value < option->min_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                                 "integer >= %lu", str_get(option->option_str),
+                                 "integer >= %lu", gt_str_get(option->option_str),
                             option->min_value.ul);
                   had_err = -1;
                 }
@@ -896,7 +896,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 if (option->max_value_set &&
                     long_value > option->max_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                                 "integer <= %lu", str_get(option->option_str),
+                                 "integer <= %lu", gt_str_get(option->option_str),
                             option->max_value.ul);
                   had_err = -1;
                 }
@@ -919,7 +919,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 if (parse_long(&long_value, argv[argnum]) || long_value < 0) {
                   gt_error_set(err, "first argument to option \"-%s\" must be a "
                                  "non-negative integer",
-                            str_get(option->option_str));
+                            gt_str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -928,7 +928,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 if (option->min_value_set &&
                     long_value < option->min_value.ul) {
                   gt_error_set(err, "first argument to option \"-%s\" must be an "
-                                 "integer >= %lu", str_get(option->option_str),
+                                 "integer >= %lu", gt_str_get(option->option_str),
                             option->min_value.ul);
                   had_err = -1;
                 }
@@ -945,7 +945,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 if (parse_long(&long_value, argv[argnum]) || long_value < 0) {
                   gt_error_set(err, "second argument to option \"-%s\" must be a "
                                  "non-negative integer",
-                            str_get(option->option_str));
+                            gt_str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -954,7 +954,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 if (option->max_value_set &&
                     long_value > option->max_value.ul) {
                   gt_error_set(err, "second argument to option \"-%s\" must be an "
-                                 "integer <= %lu", str_get(option->option_str),
+                                 "integer <= %lu", gt_str_get(option->option_str),
                             option->max_value.ul);
                   had_err = -1;
                 }
@@ -967,7 +967,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 gt_error_set(err, "first argument %lu to option \"-%s\" must be "
                                "<= than second argument %lu",
                           ((GT_Range*) option->value)->start,
-                          str_get(option->option_str),
+                          gt_str_get(option->option_str),
                           ((GT_Range*) option->value)->end);
                 had_err = -1;
               }
@@ -983,7 +983,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                                                err);
               if (!had_err) {
                 argnum++;
-                str_set(option->value, argv[argnum]);
+                gt_str_set(option->value, argv[argnum]);
                 option_parsed = true;
               }
               break;
@@ -1003,7 +1003,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                 else {
                   if (!option_parsed) {
                     gt_error_set(err, "missing argument to option \"-%s\"",
-                              str_get(option->option_str));
+                              gt_str_get(option->option_str));
                     had_err = -1;
                   }
                   break;
@@ -1324,7 +1324,7 @@ Option* option_new_string(const char *option_str, const char *description,
   Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_STRING;
   o->default_value.s = default_value;
-  str_set(value, default_value);
+  gt_str_set(value, default_value);
   return o;
 }
 
@@ -1386,7 +1386,7 @@ Option* option_new_choice(const char *option_str, const char *description,
 const char* option_get_name(const Option *o)
 {
   assert(o);
-  return str_get(o->option_str);
+  return gt_str_get(o->option_str);
 }
 
 void option_is_mandatory(Option *o)
@@ -1474,8 +1474,8 @@ void option_delete(Option *o)
     o->reference_count--;
     return;
   }
-  str_delete(o->option_str);
-  str_delete(o->description);
+  gt_str_delete(o->option_str);
+  gt_str_delete(o->description);
   for (i = 0; i < gt_array_size(o->implications); i++)
     gt_array_delete(*(GT_Array**) gt_array_get(o->implications, i));
   gt_array_delete(o->implications);

@@ -42,7 +42,7 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
         }
 
   /* init */
-  id = str_new();
+  id = gt_str_new();
   *alignment = NULL;
 
   /* parsing id */
@@ -56,7 +56,7 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
     }
     else {
       /* save this character of the reference id */
-      str_append_char(id, line[i]);
+      gt_str_append_char(id, line[i]);
     }
 
     /* increase counter */
@@ -65,9 +65,9 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
 
   /* parsing orientation */
   if (line[i] == FORWARDSTRANDCHAR)
-    *alignment = sspliced_alignment_new(str_get(id), true);
+    *alignment = sspliced_alignment_new(gt_str_get(id), true);
   else if (line[i] == REVERSESTRANDCHAR)
-    *alignment = sspliced_alignment_new(str_get(id), false);
+    *alignment = sspliced_alignment_new(gt_str_get(id), false);
   else {
     gt_error_set(err, "wrong formatted input line, orientation must be %c or %c\n"
                    "line=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
@@ -107,7 +107,7 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
     /* alignment contains at least one exon */
     assert(sspliced_alignment_num_of_exons(*alignment));
   }
-  str_delete(id);
+  gt_str_delete(id);
 
   return had_err;
 }
@@ -121,21 +121,21 @@ int sspliced_alignment_parse(GT_Array *spliced_alignments, const char *filename,
   GT_Str *line;
   gt_error_check(err);
 
-  line = str_new();
+  line = gt_str_new();
   input_file = fa_xfopen(filename, "r");
 
-  while (!had_err && str_read_next_line(line, input_file) != EOF) {
+  while (!had_err && gt_str_read_next_line(line, input_file) != EOF) {
     /* parse input line and save result in spliced alignment */
-    had_err = parse_input_line(&sa, str_get(line), str_length(line), err);
+    had_err = parse_input_line(&sa, gt_str_get(line), gt_str_length(line), err);
     if (!had_err) {
       /* store spliced alignment */
       gt_array_add(spliced_alignments, sa);
       /* reset array */
-      str_reset(line);
+      gt_str_reset(line);
     }
   }
 
   fa_xfclose(input_file);
-  str_delete(line);
+  gt_str_delete(line);
   return had_err;
 }

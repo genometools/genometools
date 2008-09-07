@@ -299,7 +299,7 @@ int gt_patternmatch(int argc, const char **argv, GT_Error *err)
 
   gt_error_check(err);
 
-  pmopt.indexname = str_new();
+  pmopt.indexname = gt_str_new();
   oprval = parse_options(&pmopt,&parsed_args, argc, argv, err);
   if (oprval == OPTIONPARSER_OK)
   {
@@ -309,7 +309,7 @@ int gt_patternmatch(int argc, const char **argv, GT_Error *err)
       haserr = true;
     }
   }
-  str_delete(pmopt.indexname);
+  gt_str_delete(pmopt.indexname);
   if (oprval == OPTIONPARSER_REQUESTS_EXIT)
   {
     return 0;

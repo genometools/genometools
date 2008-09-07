@@ -101,7 +101,7 @@ static int gt_shredder_runner(UNUSED int argc, const char **argv,
   assert(arguments);
 
   /* init */
-  desc = str_new();
+  desc = gt_str_new();
   bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
 
   /* shredder */
@@ -115,8 +115,8 @@ static int gt_shredder_runner(UNUSED int argc, const char **argv,
       shredder_set_overlap(shredder, arguments->overlap);
       shredder_set_sample_probability(shredder, arguments->sample_probability);
       while ((fragment = shredder_shred(shredder, &fragment_length, desc))) {
-        str_append_cstr(desc, " [shreddered fragment]");
-        fasta_show_entry(str_get(desc), fragment, fragment_length, 0);
+        gt_str_append_cstr(desc, " [shreddered fragment]");
+        fasta_show_entry(gt_str_get(desc), fragment, fragment_length, 0);
       }
       shredder_delete(shredder);
     }
@@ -125,7 +125,7 @@ static int gt_shredder_runner(UNUSED int argc, const char **argv,
 
   /* free */
   bioseq_iterator_delete(bsi);
-  str_delete(desc);
+  gt_str_delete(desc);
 
   return had_err;
 }

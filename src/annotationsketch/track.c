@@ -40,7 +40,7 @@ Track* track_new(GT_Str *title, unsigned long max_num_lines, bool split,
   assert(title && lb);
   track = ma_calloc(1, sizeof (Track));
   assert(track);
-  track->title = str_ref(title);
+  track->title = gt_str_ref(title);
   track->lines = gt_array_new(sizeof (Line*));
   track->max_num_lines = max_num_lines;
   track->split = split;
@@ -153,7 +153,7 @@ int track_unit_test(GT_Error *err)
   gt_error_check(err);
   LineBreaker *lb;
 
-  title = str_new_cstr("test");
+  title = gt_str_new_cstr("test");
 
   r1.start=100UL;  r1.end=1000UL;
   r2.start=1001UL; r2.end=1500UL;
@@ -186,7 +186,7 @@ int track_unit_test(GT_Error *err)
   ensure(had_err, track_get_number_of_lines(track) == 2);
 
   track_delete(track);
-  str_delete(title);
+  gt_str_delete(title);
   gt_block_delete(b1);
   gt_block_delete(b2);
   gt_block_delete(b3);
@@ -204,6 +204,6 @@ void track_delete(Track *track)
   for (i = 0; i < gt_array_size(track->lines); i++)
     line_delete(*(Line**) gt_array_get(track->lines, i));
   gt_array_delete(track->lines);
-  str_delete(track->title);
+  gt_str_delete(track->title);
   ma_free(track);
 }

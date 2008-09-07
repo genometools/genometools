@@ -35,26 +35,26 @@ int lua_set_modules_path(lua_State *L, GT_Error *err)
   if (!(modules_path = gtdata_get_path(gt_error_get_progname(err), err)))
     had_err = -1;
   if (!had_err) {
-    external_modules_path = str_clone(modules_path);
-    str_append_cstr(modules_path, "/modules/?.lua");
-    str_append_cstr(external_modules_path, "/modules/external/?.lua");
+    external_modules_path = gt_str_clone(modules_path);
+    gt_str_append_cstr(modules_path, "/modules/?.lua");
+    gt_str_append_cstr(external_modules_path, "/modules/external/?.lua");
     lua_getglobal(L, "package");
     assert(lua_istable(L, -1));
     lua_getfield(L, -1, "path");
     assert(lua_isstring(L, -1));
-    package_path = str_new_cstr(lua_tostring(L, -1));
+    package_path = gt_str_new_cstr(lua_tostring(L, -1));
     lua_pop(L, 1);
-    str_append_char(package_path, ';');
-    str_append_str(package_path, modules_path);
-    str_append_char(package_path, ';');
-    str_append_str(package_path, external_modules_path);
-    lua_pushstring(L, str_get(package_path));
+    gt_str_append_char(package_path, ';');
+    gt_str_append_str(package_path, modules_path);
+    gt_str_append_char(package_path, ';');
+    gt_str_append_str(package_path, external_modules_path);
+    lua_pushstring(L, gt_str_get(package_path));
     lua_setfield(L, -2, "path");
     lua_pop(L, 1);
   }
-  str_delete(package_path);
-  str_delete(modules_path);
-  str_delete(external_modules_path);
+  gt_str_delete(package_path);
+  gt_str_delete(modules_path);
+  gt_str_delete(external_modules_path);
   return had_err;
 }
 

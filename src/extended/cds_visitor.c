@@ -38,7 +38,7 @@ static void cds_visitor_free(GenomeVisitor *gv)
 {
   CDSVisitor *cds_visitor = cds_visitor_cast(gv);
   assert(cds_visitor);
-  str_delete(cds_visitor->source);
+  gt_str_delete(cds_visitor->source);
   splicedseq_delete(cds_visitor->splicedseq);
   region_mapping_delete(cds_visitor->region_mapping);
 }
@@ -94,21 +94,21 @@ static GT_Array* determine_ORFs_for_all_three_frames(Splicedseq *ss)
   GT_Array *orfs;
   assert(ss);
 
-  pr_0 = str_new();
-  pr_1 = str_new();
-  pr_2 = str_new();
+  pr_0 = gt_str_new();
+  pr_1 = gt_str_new();
+  pr_2 = gt_str_new();
   orfs = gt_array_new(sizeof (GT_Range));
 
   translate_dna(pr_0, splicedseq_get(ss), splicedseq_length(ss), 0);
   translate_dna(pr_1, splicedseq_get(ss), splicedseq_length(ss), 1);
   translate_dna(pr_2, splicedseq_get(ss), splicedseq_length(ss), 2);
-  determine_ORFs(orfs, 0, str_get(pr_0), str_length(pr_0));
-  determine_ORFs(orfs, 1, str_get(pr_1), str_length(pr_1));
-  determine_ORFs(orfs, 2, str_get(pr_2), str_length(pr_2));
+  determine_ORFs(orfs, 0, gt_str_get(pr_0), gt_str_length(pr_0));
+  determine_ORFs(orfs, 1, gt_str_get(pr_1), gt_str_length(pr_1));
+  determine_ORFs(orfs, 2, gt_str_get(pr_2), gt_str_length(pr_2));
 
-  str_delete(pr_2);
-  str_delete(pr_1);
-  str_delete(pr_0);
+  gt_str_delete(pr_2);
+  gt_str_delete(pr_1);
+  gt_str_delete(pr_0);
 
   return orfs;
 }
@@ -234,7 +234,7 @@ GenomeVisitor* cds_visitor_new(RegionMapping *region_mapping, GT_Str *source)
   assert(region_mapping);
   gv = genome_visitor_create(cds_visitor_class());
   cds_visitor = cds_visitor_cast(gv);
-  cds_visitor->source = str_ref(source);
+  cds_visitor->source = gt_str_ref(source);
   cds_visitor->splicedseq = splicedseq_new();
   cds_visitor->region_mapping = region_mapping;
   return gv;

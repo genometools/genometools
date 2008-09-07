@@ -255,8 +255,8 @@ static int fillbcktabmapspecstartptr(Bcktab *bcktab,
   GT_Str *tmpfilename;
 
   gt_error_check(err);
-  tmpfilename = str_clone(indexname);
-  str_append_cstr(tmpfilename,BCKTABSUFFIX);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,BCKTABSUFFIX);
   if (fillmapspecstartptr(assignbcktabmapspecification,
                           &bcktab->mappedptr,
                           bcktab,
@@ -266,7 +266,7 @@ static int fillbcktabmapspecstartptr(Bcktab *bcktab,
   {
     haserr = true;
   }
-  str_delete(tmpfilename);
+  gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
 }
 

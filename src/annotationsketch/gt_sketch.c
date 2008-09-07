@@ -187,17 +187,17 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
   gt_error_check(err);
 
   /* option parsing */
-  arguments.seqid = str_new();
-  arguments.format = str_new();
+  arguments.seqid = gt_str_new();
+  arguments.format = gt_str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_delete(arguments.seqid);
-      str_delete(arguments.format);
+      gt_str_delete(arguments.seqid);
+      gt_str_delete(arguments.format);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.seqid);
-      str_delete(arguments.format);
+      gt_str_delete(arguments.seqid);
+      gt_str_delete(arguments.format);
       return 0;
   }
 
@@ -254,7 +254,7 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
   }
 
   /* if seqid is empty, take first one added to index */
-  if (!had_err && strcmp(str_get(arguments.seqid),"") == 0) {
+  if (!had_err && strcmp(gt_str_get(arguments.seqid),"") == 0) {
     seqid = gt_feature_index_get_first_seqid(features);
     if (seqid == NULL) {
       gt_error_set(err, "GFF input file must contain a sequence region!");
@@ -262,13 +262,13 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
     }
   }
   else if (!had_err && !gt_feature_index_has_seqid(features,
-                                                str_get(arguments.seqid))) {
+                                                gt_str_get(arguments.seqid))) {
     gt_error_set(err, "sequence region '%s' does not exist in GFF input file",
-              str_get(arguments.seqid));
+              gt_str_get(arguments.seqid));
     had_err = -1;
   }
   else if (!had_err)
-    seqid = str_get(arguments.seqid);
+    seqid = gt_str_get(arguments.seqid);
 
   results = gt_array_new(sizeof (GT_GenomeNode*));
   if (!had_err) {
@@ -287,26 +287,26 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
       fprintf(stderr, "# of results: %lu\n", gt_array_size(results));
 
     /* find and load style file */
-    prog = str_new();
-    str_append_cstr_nt(prog, argv[0], cstr_length_up_to_char(argv[0], ' '));
-    gt_style_file = gtdata_get_path(str_get(prog), err);
-    str_delete(prog);
-    str_append_cstr(gt_style_file, "/sketch/default.style");
+    prog = gt_str_new();
+    gt_str_append_cstr_nt(prog, argv[0], cstr_length_up_to_char(argv[0], ' '));
+    gt_style_file = gtdata_get_path(gt_str_get(prog), err);
+    gt_str_delete(prog);
+    gt_str_append_cstr(gt_style_file, "/sketch/default.style");
     if (!(sty = gt_style_new(arguments.verbose, err)))
       had_err = -1;
-    if (!had_err && file_exists(str_get(gt_style_file)))
-      had_err = gt_style_load_file(sty, str_get(gt_style_file), err);
+    if (!had_err && file_exists(gt_str_get(gt_style_file)))
+      had_err = gt_style_load_file(sty, gt_str_get(gt_style_file), err);
   }
 
   if (!had_err) {
     /* create and write image file */
     d = gt_diagram_new(features, seqid, &qry_range, sty);
     ii = gt_image_info_new();
-    if (strcmp(str_get(arguments.format),"pdf")==0)
+    if (strcmp(gt_str_get(arguments.format),"pdf")==0)
       canvas = gt_canvas_new(sty, GRAPHICS_PDF, arguments.width, ii);
-    else if (strcmp(str_get(arguments.format),"ps")==0)
+    else if (strcmp(gt_str_get(arguments.format),"ps")==0)
       canvas = gt_canvas_new(sty, GRAPHICS_PS, arguments.width, ii);
-    else if (strcmp(str_get(arguments.format),"svg")==0)
+    else if (strcmp(gt_str_get(arguments.format),"svg")==0)
       canvas = gt_canvas_new(sty, GRAPHICS_SVG, arguments.width, ii);
     else
       canvas = gt_canvas_new(sty, GRAPHICS_PNG, arguments.width, ii);
@@ -330,10 +330,10 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
   gt_canvas_delete(canvas);
   gt_image_info_delete(ii);
   gt_style_delete(sty);
-  str_delete(gt_style_file);
+  gt_str_delete(gt_style_file);
   gt_diagram_delete(d);
-  str_delete(arguments.seqid);
-  str_delete(arguments.format);
+  gt_str_delete(arguments.seqid);
+  gt_str_delete(arguments.format);
   gt_array_delete(results);
   gt_feature_index_delete(features);
 

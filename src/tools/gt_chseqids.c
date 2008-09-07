@@ -95,10 +95,10 @@ int gt_chseqids(int argc, const char **argv, GT_Error *err)
   gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args + 1],
                                              arguments.verbose &&
                                              arguments.outfp);
-  chseqids = str_new_cstr(argv[parsed_args]);
+  chseqids = gt_str_new_cstr(argv[parsed_args]);
   if (!(chseqids_stream = chseqids_stream_new(gff3_in_stream, chseqids, err)))
     had_err = -1;
-  str_delete(chseqids);
+  gt_str_delete(chseqids);
   if (!had_err) {
     if (arguments.sort) {
       sort_stream = sort_stream_new(chseqids_stream);

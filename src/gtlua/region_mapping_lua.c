@@ -30,9 +30,9 @@ static int region_mapping_lua_new_seqfile(lua_State *L)
   seqfilename = luaL_checkstring(L, 1);
   region_mapping = lua_newuserdata(L, sizeof (RegionMapping*));
   assert(region_mapping);
-  seqfile = str_new_cstr(seqfilename);
+  seqfile = gt_str_new_cstr(seqfilename);
   *region_mapping = region_mapping_new_seqfile(seqfile);
-  str_delete(seqfile);
+  gt_str_delete(seqfile);
   luaL_getmetatable(L, REGION_MAPPING_METATABLE);
   lua_setmetatable(L, -2);
   return 1;

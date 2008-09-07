@@ -133,7 +133,7 @@ static int gff3_show_genome_feature(GT_GenomeNode *gn, void *data,
 
   /* show unique id part of attributes */
   if ((id = hashmap_get(gff3_visitor->gt_genome_feature_to_unique_id_str, gn))) {
-    genfile_xprintf(gff3_visitor->outfp, "%s=%s", ID_STRING, str_get(id));
+    genfile_xprintf(gff3_visitor->outfp, "%s=%s", ID_STRING, gt_str_get(id));
     part_shown = true;
   }
 
@@ -180,8 +180,8 @@ static GT_Str* create_unique_id(GFF3Visitor *gff3_visitor, GT_GenomeFeature *gf)
                    gt_genome_feature_type_get_cstr(type));
 
   /* build id string */
-  id = str_new_cstr(gt_genome_feature_type_get_cstr(type));
-  str_append_ulong(id, string_distri_get(gff3_visitor->id_counter,
+  id = gt_str_new_cstr(gt_genome_feature_type_get_cstr(type));
+  gt_str_append_ulong(id, string_distri_get(gff3_visitor->id_counter,
                                         gt_genome_feature_type_get_cstr(type)));
   /* store (unique) id */
   hashmap_add(gff3_visitor->gt_genome_feature_to_unique_id_str, gf, id);
@@ -210,7 +210,7 @@ static int store_ids(GT_GenomeNode *gn, void *data, GT_Error *err)
       }
       if (gt_genome_feature_get_multi_representative(gf) != gf) {
         hashmap_add(gff3_visitor->gt_genome_feature_to_unique_id_str, gf,
-                    str_ref(id));
+                    gt_str_ref(id));
       }
     }
     else
@@ -219,7 +219,7 @@ static int store_ids(GT_GenomeNode *gn, void *data, GT_Error *err)
     /* for each child -> store the parent feature in the hash map */
     add_id_info.gt_genome_feature_to_id_array =
       gff3_visitor->gt_genome_feature_to_id_array,
-    add_id_info.id = str_get(id);
+    add_id_info.id = gt_str_get(id);
     had_err = gt_genome_node_traverse_direct_children(gn, &add_id_info, add_id,
                                                    err);
   }
@@ -278,7 +278,7 @@ static int gff3_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr
 
   gff3_version_string(gv);
   genfile_xprintf(gff3_visitor->outfp, "%s   %s %lu %lu\n", GFF_SEQUENCE_REGION,
-                  str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr)),
+                  gt_str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr)),
                   gt_genome_node_get_start((GT_GenomeNode*) sr),
                   gt_genome_node_get_end((GT_GenomeNode*) sr));
   return 0;
@@ -323,7 +323,7 @@ GenomeVisitor* gff3_visitor_new(GenFile *outfp)
   gff3_visitor->gt_genome_feature_to_id_array = hashmap_new(
     HASH_DIRECT, NULL, (FreeFunc) gt_array_delete);
   gff3_visitor->gt_genome_feature_to_unique_id_str = hashmap_new(
-    HASH_DIRECT, NULL, (FreeFunc) str_delete);
+    HASH_DIRECT, NULL, (FreeFunc) gt_str_delete);
   gff3_visitor->fasta_width = 0;
   gff3_visitor->outfp = outfp;
   return gv;

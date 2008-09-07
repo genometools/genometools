@@ -57,13 +57,13 @@ static void showsimpleoptions(const Cmppairwiseopt *opt)
   if (opt->charlistlen != NULL)
   {
     printf("# alphalen \"%s\" %lu\n",
-             str_get(opt->charlistlen->charlist),
+             gt_str_get(opt->charlistlen->charlist),
              opt->charlistlen->len);
     return;
   }
-  if (str_length(opt->text) > 0)
+  if (gt_str_length(opt->text) > 0)
   {
-    printf("# text \"%s\"\n",str_get(opt->text));
+    printf("# text \"%s\"\n",gt_str_get(opt->text));
     return;
   }
 }
@@ -84,7 +84,7 @@ static OPrval parse_options(int *parsed_args,
   charlistlen = gt_strarray_new();
   pw->strings = gt_strarray_new();
   pw->files = gt_strarray_new();
-  pw->text = str_new();
+  pw->text = gt_str_new();
   pw->charlistlen = NULL;
   op = option_parser_new("options","Apply function to pairs of strings.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -143,7 +143,7 @@ static OPrval parse_options(int *parsed_args,
             oprval = OPTIONPARSER_ERROR;
           }
           ALLOCASSIGNSPACE(pw->charlistlen,NULL,Charlistlen,1);
-          pw->charlistlen->charlist = str_ref(gt_strarray_get_str(charlistlen,
+          pw->charlistlen->charlist = gt_str_ref(gt_strarray_get_str(charlistlen,
                                                                   0));
           if (sscanf(gt_strarray_get(charlistlen,1UL),"%ld",&readint) != 1 ||
               readint < 1L)
@@ -177,10 +177,10 @@ static void freesimpleoption(Cmppairwiseopt *cmppairwise)
 {
   gt_strarray_delete(cmppairwise->strings);
   gt_strarray_delete(cmppairwise->files);
-  str_delete(cmppairwise->text);
+  gt_str_delete(cmppairwise->text);
   if (cmppairwise->charlistlen != NULL)
   {
-    str_delete(cmppairwise->charlistlen->charlist);
+    gt_str_delete(cmppairwise->charlistlen->charlist);
     FREESPACE(cmppairwise->charlistlen);
   }
 }
@@ -217,12 +217,12 @@ static unsigned long applycheckfunctiontosimpleoptions(
   if (opt->charlistlen != NULL)
   {
     return runcheckfunctiononalphalen(checkfunction,
-                                      str_get(opt->charlistlen->charlist),
+                                      gt_str_get(opt->charlistlen->charlist),
                                       opt->charlistlen->len);
   }
-  if (str_length(opt->text) > 0)
+  if (gt_str_length(opt->text) > 0)
   {
-    return runcheckfunctionontext(checkfunction,str_get(opt->text));
+    return runcheckfunctionontext(checkfunction,gt_str_get(opt->text));
   }
   assert(false);
   return 0;

@@ -43,7 +43,7 @@ static void gt_prebwt_arguments_delete(void *tool_arguments)
   {
     return;
   }
-  str_delete(arguments->indexname);
+  gt_str_delete(arguments->indexname);
   ma_free(arguments);
 }
 
@@ -54,7 +54,7 @@ static OptionParser* gt_prebwt_option_parser_new(void *tool_arguments)
   Option *option, *optionpck;
 
   assert(arguments != NULL);
-  arguments->indexname = str_new();
+  arguments->indexname = gt_str_new();
   op = option_parser_new("[options] -pck indexname",
                          "Precompute bwt-bounds for some prefix length.");
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");

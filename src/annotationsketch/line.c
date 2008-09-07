@@ -107,9 +107,9 @@ int line_unit_test(GT_Error *err)
   r4.start = 10UL;
   r4.end = 20UL;
 
-  seqid1 = str_new_cstr("test1");
-  seqid2 = str_new_cstr("test2");
-  seqid3 = str_new_cstr("foo");
+  seqid1 = gt_str_new_cstr("test1");
+  seqid2 = gt_str_new_cstr("test2");
+  seqid3 = gt_str_new_cstr("foo");
 
   type = gt_feature_type_factory_create_gft(feature_type_factory, gft_gene);
   parent = gt_genome_feature_new(seqid1, type, r_parent, GT_STRAND_FORWARD);
@@ -149,9 +149,9 @@ int line_unit_test(GT_Error *err)
   blocks = line_get_blocks(l1);
   ensure(had_err, (2 == gt_array_size(blocks)));
 
-  str_delete(seqid1);
-  str_delete(seqid2);
-  str_delete(seqid3);
+  gt_str_delete(seqid1);
+  gt_str_delete(seqid2);
+  gt_str_delete(seqid3);
   line_delete(l1);
   line_delete(l2);
   gt_genome_node_delete(parent);

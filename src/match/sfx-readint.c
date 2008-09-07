@@ -177,7 +177,7 @@ int allkeysdefined(const GT_Str *indexname,const char *suffix,
       if (rikptr->readflag == NULL)
       {
         gt_error_set(err,"file %s%s: missing line beginning with \"%s=\"",
-                           str_get(indexname),
+                           gt_str_get(indexname),
                            suffix,
                            rikptr->keystring);
         return -1;
@@ -253,7 +253,7 @@ int analyzeuintline(const GT_Str *indexname,
     if (!found)
     {
       gt_error_set(err,"file %s%s, line %u: cannot find key for \"%*.*s\"",
-                    str_get(indexname),
+                    gt_str_get(indexname),
                     suffix,
                     linenum,
                     (int) lengthofkey,

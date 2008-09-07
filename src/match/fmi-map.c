@@ -82,23 +82,23 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
     GT_Str *currentline;
     unsigned int linenum;
 
-    currentline = str_new();
-    for (linenum = 0; str_read_next_line(currentline, fpin) != EOF; linenum++)
+    currentline = gt_str_new();
+    for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF; linenum++)
     {
       if (analyzeuintline(indexname,
                          FMASCIIFILESUFFIX,
                          linenum,
-                         str_get(currentline),
-                         str_length(currentline),
+                         gt_str_get(currentline),
+                         gt_str_length(currentline),
                          riktab,
                          err) != 0)
       {
         haserr = true;
         break;
       }
-      str_reset(currentline);
+      gt_str_reset(currentline);
     }
-    str_delete(currentline);
+    gt_str_delete(currentline);
   }
   if (!haserr && allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,
                                 verboseinfo,err) != 0)
@@ -212,8 +212,8 @@ int mapfmindex (Fmindex *fmindex,const GT_Str *indexname,
                                           &fmindex->specialcharinfo);
     fmindex->specpos.spacePairBwtidx = NULL;
     fmindex->specpos.allocatedPairBwtidx = 0;
-    tmpfilename = str_clone(indexname);
-    str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
+    tmpfilename = gt_str_clone(indexname);
+    gt_str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
     fmindex->alphabet = assigninputalphabet(false,
                                             false,
                                             tmpfilename,
@@ -223,7 +223,7 @@ int mapfmindex (Fmindex *fmindex,const GT_Str *indexname,
     {
       haserr = true;
     }
-    str_delete(tmpfilename);
+    gt_str_delete(tmpfilename);
   }
   if (!haserr)
   {
@@ -237,13 +237,13 @@ int mapfmindex (Fmindex *fmindex,const GT_Str *indexname,
                         fmindex->suffixlength,
                         storeindexpos,
                         &fmindex->specialcharinfo);
-    tmpfilename = str_clone(indexname);
-    str_append_cstr(tmpfilename,FMDATAFILESUFFIX);
+    tmpfilename = gt_str_clone(indexname);
+    gt_str_append_cstr(tmpfilename,FMDATAFILESUFFIX);
     if (fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,err) != 0)
     {
       haserr = true;
     }
-    str_delete(tmpfilename);
+    gt_str_delete(tmpfilename);
   }
   if (haserr)
   {

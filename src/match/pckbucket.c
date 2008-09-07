@@ -240,10 +240,10 @@ bool pckbuckettableexists(const GT_Str *indexname)
   GT_Str *tmpfilename;
   bool retval;
 
-  tmpfilename = str_clone(indexname);
-  str_append_cstr(tmpfilename,PCKBUCKETTABLE);
-  retval = file_exists(str_get(tmpfilename));
-  str_delete(tmpfilename);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,PCKBUCKETTABLE);
+  retval = file_exists(gt_str_get(tmpfilename));
+  gt_str_delete(tmpfilename);
   return retval;
 }
 
@@ -259,15 +259,15 @@ Pckbuckettable *mappckbuckettable(const GT_Str *indexname,
   Pckbuckettable *pckbt;
 
   gt_error_check(err);
-  tmpfilename = str_clone(indexname);
-  str_append_cstr(tmpfilename,PCKBUCKETTABLE);
-  mapptr = fa_mmap_read(str_get(tmpfilename),&numofbytes);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,PCKBUCKETTABLE);
+  mapptr = fa_mmap_read(gt_str_get(tmpfilename),&numofbytes);
   if (mapptr == NULL)
   {
-    gt_error_set(err,"could not map datafile %s",str_get(tmpfilename));
+    gt_error_set(err,"could not map datafile %s",gt_str_get(tmpfilename));
     haserr = true;
   }
-  str_delete(tmpfilename);
+  gt_str_delete(tmpfilename);
   if (!haserr)
   {
     assert(mapptr != NULL);

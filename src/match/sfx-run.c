@@ -434,7 +434,7 @@ static int runsuffixerator(bool doesa,
     mtime = inittheclock("determining sequence length and number of "
                          "special symbols");
   }
-  if (str_length(so->str_inputindex) > 0)
+  if (gt_str_length(so->str_inputindex) > 0)
   {
     if (fromsarr2Sfxseqinfo(&sfxseqinfo,
                             so->str_inputindex,
@@ -443,8 +443,8 @@ static int runsuffixerator(bool doesa,
     {
       haserr = true;
     }
-    if (so->outtistab && strcmp(str_get(so->str_inputindex),
-                                str_get(so->str_indexname)) != 0)
+    if (so->outtistab && strcmp(gt_str_get(so->str_inputindex),
+                                gt_str_get(so->str_indexname)) != 0)
     {
       if (flushencseqfile(so->str_indexname,sfxseqinfo.encseq,err) != 0)
       {
@@ -616,7 +616,7 @@ static int runsuffixerator(bool doesa,
   }
   */
   freeSfxseqinfo(&sfxseqinfo,
-                 (str_length(so->str_inputindex) > 0) ? true : false);
+                 (gt_str_length(so->str_inputindex) > 0) ? true : false);
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,NULL);

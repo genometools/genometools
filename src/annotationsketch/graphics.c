@@ -37,24 +37,24 @@ struct Graphics {
   double margin_x, margin_y, height, width;
 };
 
-static cairo_status_t str_write_func(void *closure, const unsigned char *data,
+static cairo_status_t gt_str_write_func(void *closure, const unsigned char *data,
                                      unsigned int length)
 {
   GT_Str *stream = closure;
   assert(stream);
-  str_append_cstr_nt(stream, (char*) data, length);
+  gt_str_append_cstr_nt(stream, (char*) data, length);
   return CAIRO_STATUS_SUCCESS;
 }
 
 void graphics_initialize(Graphics *g, GraphicsOutType type,
                          unsigned int width, unsigned int height)
 {
-  g->outbuf = str_new();
+  g->outbuf = gt_str_new();
   switch (type)
   {
     case GRAPHICS_PDF:
 #ifdef CAIRO_HAS_PDF_SURFACE
-      g->surf = cairo_pdf_surface_create_for_stream(str_write_func,
+      g->surf = cairo_pdf_surface_create_for_stream(gt_str_write_func,
                                                     g->outbuf,
                                                     width,
                                                     height);
@@ -62,7 +62,7 @@ void graphics_initialize(Graphics *g, GraphicsOutType type,
       break;
     case GRAPHICS_PS:
 #ifdef CAIRO_HAS_PS_SURFACE
-      g->surf = cairo_ps_surface_create_for_stream(str_write_func,
+      g->surf = cairo_ps_surface_create_for_stream(gt_str_write_func,
                                                    g->outbuf,
                                                    width,
                                                    height);
@@ -70,7 +70,7 @@ void graphics_initialize(Graphics *g, GraphicsOutType type,
       break;
     case GRAPHICS_SVG:
 #ifdef CAIRO_HAS_SVG_SURFACE
-      g->surf = cairo_svg_surface_create_for_stream(str_write_func,
+      g->surf = cairo_svg_surface_create_for_stream(gt_str_write_func,
                                                     g->outbuf,
                                                     width,
                                                     height);
@@ -470,7 +470,7 @@ int graphics_save_to_file(const Graphics *g, const char *filename, GT_Error *err
       outfile = genfile_open(GFM_UNCOMPRESSED, filename, "w+", err);
       if (!gt_error_is_set(err))
       {
-        genfile_xwrite(outfile, str_get_mem(g->outbuf), str_length(g->outbuf));
+        genfile_xwrite(outfile, gt_str_get_mem(g->outbuf), gt_str_length(g->outbuf));
         genfile_close(outfile);
       } else return -1;
       break;
@@ -482,8 +482,8 @@ void graphics_save_to_stream(const Graphics *g, GT_Str *stream)
 {
   cairo_status_t rval;
   assert(g && stream);
-  rval = cairo_surface_write_to_png_stream(g->surf, str_write_func, stream);
-  assert(rval == CAIRO_STATUS_SUCCESS); /* str_write_func() is sane */
+  rval = cairo_surface_write_to_png_stream(g->surf, gt_str_write_func, stream);
+  assert(rval == CAIRO_STATUS_SUCCESS); /* gt_str_write_func() is sane */
 }
 
 void graphics_delete(Graphics *g)
@@ -492,6 +492,6 @@ void graphics_delete(Graphics *g)
   cairo_surface_destroy(g->surf); /* reference counted */
   cairo_destroy(g->cr);
   if (g->outbuf)
-    str_delete(g->outbuf);
+    gt_str_delete(g->outbuf);
   ma_free(g);
 }

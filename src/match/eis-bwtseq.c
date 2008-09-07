@@ -462,7 +462,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GT_Str *projectName,
     {
       gt_error_set(err, "Cannot load reference suffix array project with"
                     " demand for suffix table file and encoded sequence"
-                    " for project: %s", str_get(projectName));
+                    " for project: %s", gt_str_get(projectName));
       retval = VERIFY_BWTSEQ_REFLOAD_ERROR;
       break;
     }
@@ -471,7 +471,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GT_Str *projectName,
     if (BWTSeqLength(bwtSeq) != seqLen)
     {
       gt_error_set(err, "length mismatch for suffix array project %s and "
-                "bwt sequence index", str_get(projectName));
+                "bwt sequence index", gt_str_get(projectName));
       retval = VERIFY_BWTSEQ_LENCOMPARE_ERROR;
       break;
     }
@@ -579,7 +579,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GT_Str *projectName,
       if (!bwtSeqCR)
       {
         gt_error_set(err, "cannot load BWT sequence context access table"
-                  " for project %s", str_get(projectName));
+                  " for project %s", gt_str_get(projectName));
         retval = VERIFY_BWTSEQ_CONTEXT_LOADFAIL;
         break;
       }

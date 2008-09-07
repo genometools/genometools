@@ -99,7 +99,7 @@ static int extracttarget_from_seqfiles(const char *target,
   gt_error_check(err);
   assert(target && seqfiles);
   splitter = splitter_new();
-  unescaped_target = str_new();
+  unescaped_target = gt_str_new();
   escaped_target = cstr_dup(target);
   splitter_split(splitter, escaped_target, strlen(escaped_target), ',');
   for (i = 0; !had_err && i < splitter_size(splitter); i++) {
@@ -124,8 +124,8 @@ static int extracttarget_from_seqfiles(const char *target,
           const char *desc = bioseq_get_description(bioseq, k);
           target_info.bioseq = bioseq;
           target_info.seqnum = k;
-          string_matching_bmh(desc, strlen(desc), str_get(unescaped_target),
-                              str_length(unescaped_target), show_target,
+          string_matching_bmh(desc, strlen(desc), gt_str_get(unescaped_target),
+                              gt_str_length(unescaped_target), show_target,
                               &target_info);
         }
         bioseq_delete(bioseq);
@@ -134,7 +134,7 @@ static int extracttarget_from_seqfiles(const char *target,
     splitter_delete(blank_splitter);
   }
   ma_free(escaped_target);
-  str_delete(unescaped_target);
+  gt_str_delete(unescaped_target);
   splitter_delete(splitter);
   return had_err;
 }

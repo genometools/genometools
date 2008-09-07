@@ -40,7 +40,7 @@ static DrawingRange calculate_drawing_range(LineBreakerCaptions *lcb,
   if (gt_block_get_caption(block))
   {
     textwidth = gt_canvas_get_text_width(lcb->canvas,
-                                      str_get(gt_block_get_caption(block)));
+                                      gt_str_get(gt_block_get_caption(block)));
   if (textwidth > drawing_range_length(drange))
     drange.end = drange.start + textwidth;
   }

@@ -32,7 +32,7 @@ struct Splicedseq {
 Splicedseq* splicedseq_new(void)
 {
   Splicedseq *ss = ma_malloc(sizeof (Splicedseq));
-  ss->splicedseq = str_new();
+  ss->splicedseq = gt_str_new();
   ss->positionmapping = gt_array_new(sizeof (unsigned long));
   ss->forward = true;
   return ss;
@@ -43,7 +43,7 @@ void splicedseq_add(Splicedseq *ss, unsigned long start, unsigned long end,
 {
   unsigned long i;
   assert(ss && start <= end && original_sequence);
-  str_append_cstr_nt(ss->splicedseq, original_sequence + start,
+  gt_str_append_cstr_nt(ss->splicedseq, original_sequence + start,
                      end - start + 1);
   /* make sure elemnts are added in ascending order */
   assert(!gt_array_size(ss->positionmapping) ||
@@ -54,13 +54,13 @@ void splicedseq_add(Splicedseq *ss, unsigned long start, unsigned long end,
 
 char* splicedseq_get(const Splicedseq *ss)
 {
-  return str_get(ss->splicedseq);
+  return gt_str_get(ss->splicedseq);
 }
 
 bool splicedseq_pos_is_border(const Splicedseq *ss, unsigned long pos)
 {
-  assert(ss && str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
-  assert(pos < str_length(ss->splicedseq)); /* legal position */
+  assert(ss && gt_str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
+  assert(pos < gt_str_length(ss->splicedseq)); /* legal position */
   if (ss->forward && pos + 1 < gt_array_size(ss->positionmapping) &&
       *(unsigned long*) gt_array_get(ss->positionmapping, pos) + 1 !=
       *(unsigned long*) gt_array_get(ss->positionmapping, pos+1)) {
@@ -76,15 +76,15 @@ bool splicedseq_pos_is_border(const Splicedseq *ss, unsigned long pos)
 
 unsigned long splicedseq_map(const Splicedseq *ss, unsigned long pos)
 {
-  assert(ss && str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
-  assert(pos < str_length(ss->splicedseq)); /* legal position */
+  assert(ss && gt_str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
+  assert(pos < gt_str_length(ss->splicedseq)); /* legal position */
   return *(unsigned long*) gt_array_get(ss->positionmapping, pos);
 }
 
 unsigned long splicedseq_length(const Splicedseq *ss)
 {
   assert(ss);
-  return str_length(ss->splicedseq);
+  return gt_str_length(ss->splicedseq);
 }
 
 int splicedseq_reverse(Splicedseq *ss, GT_Error *err)
@@ -92,8 +92,8 @@ int splicedseq_reverse(Splicedseq *ss, GT_Error *err)
   int had_err;
   gt_error_check(err);
   assert(ss);
-  had_err = reverse_complement(str_get(ss->splicedseq),
-                               str_length(ss->splicedseq), err);
+  had_err = reverse_complement(gt_str_get(ss->splicedseq),
+                               gt_str_length(ss->splicedseq), err);
   if (!had_err) {
     gt_array_reverse(ss->positionmapping);
     ss->forward = !ss->forward;
@@ -104,7 +104,7 @@ int splicedseq_reverse(Splicedseq *ss, GT_Error *err)
 void splicedseq_reset(Splicedseq *ss)
 {
   assert(ss);
-  str_reset(ss->splicedseq);
+  gt_str_reset(ss->splicedseq);
   gt_array_reset(ss->positionmapping);
   ss->forward = true;
 }
@@ -143,7 +143,7 @@ int splicedseq_unit_test(GT_Error *err)
 void splicedseq_delete(Splicedseq *ss)
 {
   if (!ss) return;
-  str_delete(ss->splicedseq);
+  gt_str_delete(ss->splicedseq);
   gt_array_delete(ss->positionmapping);
   ma_free(ss);
 }

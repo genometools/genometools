@@ -48,7 +48,7 @@ int gtdata_show_help(const char *progname, UNUSED void *unused, GT_Error *err)
     had_err = -1;
 
   if (!had_err) {
-    str_append_cstr(doc_file, "/doc/");
+    gt_str_append_cstr(doc_file, "/doc/");
     /* create Lua & push gtdata_doc_dir to Lua */
     L = luaL_newstate();
     if (!L) {
@@ -59,24 +59,24 @@ int gtdata_show_help(const char *progname, UNUSED void *unused, GT_Error *err)
 
   if (!had_err) {
     luaL_openlibs(L);
-    lua_pushstring(L, str_get(doc_file));
+    lua_pushstring(L, gt_str_get(doc_file));
     lua_setglobal(L, "gtdata_doc_dir");
     /* finish creating doc_file */
     if (splitter_size(splitter) == 1) {
       /* special case for `gt` */
       bn = getbasename(progname);
-      str_append_cstr(doc_file, bn);
+      gt_str_append_cstr(doc_file, bn);
       ma_free(bn);
     }
     else {
       /* general case for the tools */
-      str_append_cstr(doc_file,
+      gt_str_append_cstr(doc_file,
                       splitter_get_token(splitter,
                                          splitter_size(splitter) - 1));
     }
-    str_append_cstr(doc_file, ".lua");
+    gt_str_append_cstr(doc_file, ".lua");
     /* execute doc_file */
-    if (luaL_loadfile(L, str_get(doc_file)) || lua_pcall(L, 0, 0, 0)) {
+    if (luaL_loadfile(L, gt_str_get(doc_file)) || lua_pcall(L, 0, 0, 0)) {
       gt_error_set(err, "cannot run doc file: %s", lua_tostring(L, -1));
       had_err = -1;
     }
@@ -84,7 +84,7 @@ int gtdata_show_help(const char *progname, UNUSED void *unused, GT_Error *err)
 
   /* free */
   if (L) lua_close(L);
-  str_delete(doc_file);
+  gt_str_delete(doc_file);
   splitter_delete(splitter);
   ma_free(prog);
 

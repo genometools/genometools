@@ -73,10 +73,10 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
   gt_error_check(err);
 
   /* Zeiger auf den vollstaendigen Query-DNA Eintrag */
-  contig_seq_ptr = str_get(MATRIXSTRUCT(query_dna));
+  contig_seq_ptr = gt_str_get(MATRIXSTRUCT(query_dna));
 
   /* contig_len legt die Anzahl der Spalten der Matrix fest */
-  contig_len = str_length(MATRIXSTRUCT(query_dna));
+  contig_len = gt_str_length(MATRIXSTRUCT(query_dna));
 
   /* Speicherplatzreservierung fuer die Combined-Score Matrix */
   array2dim_calloc(combinedscore_matrix, 7, contig_len);

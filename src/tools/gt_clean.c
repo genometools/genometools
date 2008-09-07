@@ -41,14 +41,14 @@ static void remove_pattern_in_current_dir(const char *pattern)
   GT_Str *path;
   glob_t g;
 
-  path = str_new_cstr("./*");
-  str_append_cstr(path, pattern);
-  xglob(str_get(path), GLOB_NOCHECK, NULL, &g);
+  path = gt_str_new_cstr("./*");
+  gt_str_append_cstr(path, pattern);
+  xglob(gt_str_get(path), GLOB_NOCHECK, NULL, &g);
 
   /* remove found files */
   if (g.gl_pathc) {
     files_to_remove = g.gl_pathv;
-    if (strcmp(*files_to_remove, str_get(path))) {
+    if (strcmp(*files_to_remove, gt_str_get(path))) {
       while (*files_to_remove) {
         xunlink(*files_to_remove);
         files_to_remove++;
@@ -58,7 +58,7 @@ static void remove_pattern_in_current_dir(const char *pattern)
 
   /* free */
   globfree(&g);
-  str_delete(path);
+  gt_str_delete(path);
 }
 
 int gt_clean(int argc, const char **argv, GT_Error *err)

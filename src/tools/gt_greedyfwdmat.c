@@ -84,7 +84,7 @@ static OPrval parsegfmsub(bool doms,
   gfmsubcallinfo->minlength.defined = false;
   gfmsubcallinfo->maxlength.defined = false;
   gfmsubcallinfo->showmode = 0;
-  gfmsubcallinfo->indexname = str_new();
+  gfmsubcallinfo->indexname = gt_str_new();
   gfmsubcallinfo->queryfilenames = gt_strarray_new();
   flagsoutputoption = gt_strarray_new();
 
@@ -286,11 +286,11 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GT_Error *err)
   switch (parsegfmsub(doms,&gfmsubcallinfo, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_delete(gfmsubcallinfo.indexname);
+      gt_str_delete(gfmsubcallinfo.indexname);
       gt_strarray_delete(gfmsubcallinfo.queryfilenames);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(gfmsubcallinfo.indexname);
+      gt_str_delete(gfmsubcallinfo.indexname);
       gt_strarray_delete(gfmsubcallinfo.queryfilenames);
       return 0;
   }
@@ -451,7 +451,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GT_Error *err)
     freesuffixarray(&suffixarray);
   }
   freeverboseinfo(&verboseinfo);
-  str_delete(gfmsubcallinfo.indexname);
+  gt_str_delete(gfmsubcallinfo.indexname);
   gt_strarray_delete(gfmsubcallinfo.queryfilenames);
   return haserr ? -1 : 0;
 }

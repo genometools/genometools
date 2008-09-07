@@ -177,11 +177,11 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
   GT_Str *tmpfilename;
 
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
-  tmpfilename = str_clone(indexname);
-  str_append_cstr(tmpfilename,TISTABFILESUFFIX);
-  encseq->plainseq = fa_mmap_read(str_get(tmpfilename),
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,TISTABFILESUFFIX);
+  encseq->plainseq = fa_mmap_read(gt_str_get(tmpfilename),
                                   (size_t *) &encseq->totallength);
-  str_delete(tmpfilename);
+  gt_str_delete(tmpfilename);
   encseq->hasownmemory = false;
   encseq->mappedfile = true;
   encseq->hasspecialcharacters = (specialranges > 0) ?  true : false;

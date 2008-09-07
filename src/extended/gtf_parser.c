@@ -91,9 +91,9 @@ GTF_parser* gtf_parser_new(GT_FeatureTypeFactory *feature_type_factory)
   parser->gene_id_hash = hashmap_new(HASH_STRING, ma_free_func,
                                      (FreeFunc) hashmap_delete);
   parser->seqid_to_str_mapping = hashmap_new(HASH_STRING, NULL,
-                                             (FreeFunc) str_delete);
+                                             (FreeFunc) gt_str_delete);
   parser->source_to_str_mapping = hashmap_new(HASH_STRING, NULL,
-                                              (FreeFunc) str_delete);
+                                              (FreeFunc) gt_str_delete);
   parser->gene_id_to_name_mapping = hashmap_new(HASH_STRING, ma_free_func,
                                                 ma_free_func);
   parser->transcript_id_to_name_mapping = hashmap_new(HASH_STRING, ma_free_func,
@@ -111,11 +111,11 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   Queue *genome_nodes = (Queue*) data;
   gt_error_check(err);
   assert(key && value && data);
-  seqid = str_new_cstr(key);
+  seqid = gt_str_new_cstr(key);
   range = *(GT_Range*) value;
   gn = gt_sequence_regionnew(seqid, range);
   queue_add(genome_nodes, gn);
-  str_delete(seqid);
+  gt_str_delete(seqid);
   return 0;
 }
 
@@ -149,7 +149,7 @@ static int construct_mRNAs(UNUSED void *key, void *value, void *data,
        a failed assertion */
     mRNA_strand = gt_strand_join(mRNA_strand,
                               gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
-    if (str_cmp(mRNA_seqid, gt_genome_node_get_seqid(gn))) {
+    if (gt_str_cmp(mRNA_seqid, gt_genome_node_get_seqid(gn))) {
       gt_error_set(err, "The features on lines %u and %u refer to different "
                 "genomic sequences (``seqname''), although they have the same "
                 "gene IDs (``gene_id'') which must be globally unique",
@@ -221,7 +221,7 @@ static int construct_genes(UNUSED void *key, void *value, void *data,
       gene_range = gt_range_join(gene_range, gt_genome_node_get_range(gn));
       gene_strand = gt_strand_join(gene_strand,
                                 gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
-      assert(str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
+      assert(gt_str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
     }
 
     gene_type = gt_genome_feature_create_gft((GT_GenomeFeature*) gn, gft_gene);
@@ -293,10 +293,10 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   assert(parser && genome_nodes && fpin);
   gt_error_check(err);
 
-  filename = str_get(filenamestr);
+  filename = gt_str_get(filenamestr);
 
   /* alloc */
-  line_buffer = str_new();
+  line_buffer = gt_str_new();
   splitter = splitter_new(),
   attribute_splitter = splitter_new();
 
@@ -305,7 +305,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
           if (be_tolerant) {                                        \
             fprintf(stderr, "skipping line: %s\n", gt_error_get(err)); \
             gt_error_unset(err);                                       \
-            str_reset(line_buffer);                                 \
+            gt_str_reset(line_buffer);                                 \
             had_err = 0;                                            \
             continue;                                               \
           }                                                         \
@@ -315,9 +315,9 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
           }                                                         \
         }
 
-  while (str_read_next_line(line_buffer, fpin) != EOF) {
-    line = str_get(line_buffer);
-    line_length = str_length(line_buffer);
+  while (gt_str_read_next_line(line_buffer, fpin) != EOF) {
+    line = gt_str_get(line_buffer);
+    line_length = gt_str_length(line_buffer);
     line_number++;
     had_err = 0;
 
@@ -356,7 +356,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         /* we skip unknown features */
         fprintf(stderr, "skipping line %lu in file \"%s\": unknown feature: "
                         "\"%s\"\n", line_number, filename, feature);
-        str_reset(line_buffer);
+        gt_str_reset(line_buffer);
         continue;
       }
 
@@ -520,8 +520,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       /* get seqid */
       seqid_str = hashmap_get(parser->seqid_to_str_mapping, seqname);
       if (!seqid_str) {
-        seqid_str = str_new_cstr(seqname);
-        hashmap_add(parser->seqid_to_str_mapping, str_get(seqid_str),
+        seqid_str = gt_str_new_cstr(seqname);
+        hashmap_add(parser->seqid_to_str_mapping, gt_str_get(seqid_str),
                     seqid_str);
       }
       assert(seqid_str);
@@ -533,8 +533,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       /* set source */
       source_str = hashmap_get(parser->source_to_str_mapping, source);
       if (!source_str) {
-        source_str = str_new_cstr(source);
-        hashmap_add(parser->source_to_str_mapping, str_get(source_str),
+        source_str = gt_str_new_cstr(source);
+        hashmap_add(parser->source_to_str_mapping, gt_str_get(source_str),
                     source_str);
       }
       assert(source_str);
@@ -549,7 +549,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       gt_array_add(gt_genome_node_array, gn);
     }
 
-    str_reset(line_buffer);
+    gt_str_reset(line_buffer);
   }
 
   /* process all comments features */
@@ -571,7 +571,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   /* free */
   splitter_delete(splitter);
   splitter_delete(attribute_splitter);
-  str_delete(line_buffer);
+  gt_str_delete(line_buffer);
 
   return had_err;
 }

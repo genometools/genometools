@@ -75,7 +75,7 @@ int gt_genome_node_cmp(GT_GenomeNode *gn_a, GT_GenomeNode *gn_b)
   if ((rval = compare_gt_genome_node_type(gn_a, gn_b)))
     return rval;
 
-  if ((rval = str_cmp(gt_genome_node_get_idstr(gn_a),
+  if ((rval = gt_str_cmp(gt_genome_node_get_idstr(gn_a),
                       gt_genome_node_get_idstr(gn_b)))) {
     return rval;
   }
@@ -93,7 +93,7 @@ static int compare_genome_nodes_with_delta(GT_GenomeNode *gn_a, GT_GenomeNode *g
   if ((rval = compare_gt_genome_node_type(gn_a, gn_b)))
     return rval;
 
-  if ((rval = str_cmp(gt_genome_node_get_idstr(gn_a),
+  if ((rval = gt_str_cmp(gt_genome_node_get_idstr(gn_a),
                       gt_genome_node_get_idstr(gn_b)))) {
     return rval;
   }
@@ -164,8 +164,8 @@ void gt_genome_node_set_origin(GT_GenomeNode *gn,
                             GT_Str *filename, unsigned int line_number)
 {
   assert(gn && filename && line_number);
-  str_delete(gn->filename);
-  gn->filename = str_ref(filename);
+  gt_str_delete(gn->filename);
+  gn->filename = gt_str_ref(filename);
   gn->line_number =line_number;
 }
 
@@ -394,7 +394,7 @@ const char* gt_genome_node_get_filename(const GT_GenomeNode *gn)
 {
   assert(gn);
   if (gn->filename)
-    return str_get(gn->filename);
+    return gt_str_get(gn->filename);
   return "generated";
 }
 
@@ -465,7 +465,7 @@ void gt_genome_node_is_part_of_genome_node(GT_GenomeNode *parent, GT_GenomeNode 
 {
   assert(parent && child);
   /* <parent> and <child> have the same seqid */
-  assert(!str_cmp(gt_genome_node_get_seqid(parent), gt_genome_node_get_seqid(child)));
+  assert(!gt_str_cmp(gt_genome_node_get_seqid(parent), gt_genome_node_get_seqid(child)));
 #ifndef NDEBUG
   if (gt_genome_node_cast(gt_genome_feature_class(), child)) {
     /* pseudo-features have to be top-level */
@@ -641,7 +641,7 @@ bool gt_genome_node_overlaps_nodes_mark(GT_GenomeNode *gn, GT_Array *nodes,
 
   for (i = 0; i < gt_array_size(nodes); i++) {
     node = *(GT_GenomeNode**) gt_array_get(nodes, i);
-    assert(!str_cmp(gn_id, gt_genome_node_get_idstr(node)));
+    assert(!gt_str_cmp(gn_id, gt_genome_node_get_idstr(node)));
     if (gt_range_overlap(gn_range, gt_genome_node_get_range(node))) {
       rval = true;
       if (b)
@@ -678,7 +678,7 @@ void gt_genome_node_delete(GT_GenomeNode *gn)
   if (gn->reference_count) { gn->reference_count--; return; }
   assert(gn->c_class);
   if (gn->c_class->free) gn->c_class->free(gn);
-  str_delete(gn->filename);
+  gt_str_delete(gn->filename);
   dlist_delete(gn->children);
   ma_free(gn);
 }
@@ -720,7 +720,7 @@ bool genome_nodes_are_equal_sequence_regions(GT_GenomeNode *gn_a, GT_GenomeNode 
   sr_a = gn_a ? gt_genome_node_cast(gt_sequence_regionclass(), gn_a) : NULL;
   sr_b = gn_b ? gt_genome_node_cast(gt_sequence_regionclass(), gn_b) : NULL;
 
-  if (sr_a && sr_b && !str_cmp(gt_genome_node_get_seqid(gn_a),
+  if (sr_a && sr_b && !gt_str_cmp(gt_genome_node_get_seqid(gn_a),
                                gt_genome_node_get_seqid(gn_b))) {
     return true;
   }

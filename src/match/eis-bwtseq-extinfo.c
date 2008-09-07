@@ -590,7 +590,7 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
         else
         {
           gt_error_set(err, "error: locate sampling requested but not available"
-                    " for project %s\n", str_get(params->projectName));
+                    " for project %s\n", gt_str_get(params->projectName));
         }
       }
     }

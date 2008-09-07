@@ -173,7 +173,7 @@ static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pa
   block = gt_block_new_from_node(node);
   /* assign block caption */
 
-  caption = str_new();
+  caption = gt_str_new();
   if (!gt_style_get_str(d->style,
                      gt_genome_feature_type_get_cstr(
                          gt_genome_feature_get_type((GT_GenomeFeature*) node)),
@@ -188,13 +188,13 @@ static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pa
     {
       if (parent) {
         if (gt_genome_node_has_children(parent))
-          str_append_cstr(caption, nnid_p);
+          gt_str_append_cstr(caption, nnid_p);
         else
-          str_append_cstr(caption, "-");
-        str_append_cstr(caption, "/");
+          gt_str_append_cstr(caption, "-");
+        gt_str_append_cstr(caption, "/");
       }
       if (nnid_n)
-        str_append_cstr(caption, nnid_n);
+        gt_str_append_cstr(caption, nnid_n);
     }
   }
   gt_block_set_caption(block, caption);
@@ -232,16 +232,16 @@ static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* par
     if ((nnid_p || nnid_n) && get_caption_display_status(d,
                   gt_genome_feature_get_type((GT_GenomeFeature*) node)))
     {
-      caption = str_new_cstr("");
+      caption = gt_str_new_cstr("");
       if (parent) {
         if (gt_genome_node_has_children(parent))
-          str_append_cstr(caption, nnid_p);
+          gt_str_append_cstr(caption, nnid_p);
         else
-          str_append_cstr(caption, "-");
-        str_append_cstr(caption, "/");
+          gt_str_append_cstr(caption, "-");
+        gt_str_append_cstr(caption, "/");
       }
       if (nnid_n)
-        str_append_cstr(caption, nnid_n);
+        gt_str_append_cstr(caption, nnid_n);
     }
     gt_block_set_caption(block, caption);
     /* add block to nodeinfo */
@@ -401,9 +401,9 @@ static int visit_child(GT_GenomeNode* gn, void* gt_genome_node_children, GT_Erro
 static GT_Str* track_key_new(const char *filename, GT_GenomeFeatureType *type)
 {
   GT_Str *track_key;
-  track_key = str_new_cstr(filename);
-  str_append_char(track_key, FILENAME_TYPE_SEPARATOR);
-  str_append_cstr(track_key, gt_genome_feature_type_get_cstr(type));
+  track_key = gt_str_new_cstr(filename);
+  gt_str_append_char(track_key, FILENAME_TYPE_SEPARATOR);
+  gt_str_append_cstr(track_key, gt_genome_feature_type_get_cstr(type));
   return track_key;
 }
 
@@ -607,8 +607,8 @@ static int layout_tracks(void *key, void *value, void *data,
     block = *(GT_Block**) gt_array_get(list, i);
     track_insert_block(track, block);
   }
-  hashmap_add(tti->dia->tracks, cstr_dup(str_get(track_key)), track);
-  str_delete(track_key);
+  hashmap_add(tti->dia->tracks, cstr_dup(gt_str_get(track_key)), track);
+  gt_str_delete(track_key);
   return 0;
 }
 
@@ -670,8 +670,8 @@ int gt_diagram_unit_test(GT_Error *err)
   rs.start=100UL; rs.end=1200UL;
 
   /* generating sequence IDs */
-  seqid1 = str_new_cstr("test1");
-  seqid2 = str_new_cstr("test2");
+  seqid1 = gt_str_new_cstr("test1");
+  seqid2 = gt_str_new_cstr("test2");
 
   sr1 = (GT_SequenceRegion*) gt_sequence_regionnew(seqid1, rs);
   sr2 = (GT_SequenceRegion*) gt_sequence_regionnew(seqid2, rs);
@@ -729,16 +729,16 @@ int gt_diagram_unit_test(GT_Error *err)
       !gt_style_get_bool(dia->style, "gene", "collapse_to_parent", false, NULL))
   {
     track_key = track_key_new("generated", gene_type);
-    ensure(had_err, hashmap_get(dia->tracks, str_get(track_key)));
-    str_delete(track_key);
+    ensure(had_err, hashmap_get(dia->tracks, gt_str_get(track_key)));
+    gt_str_delete(track_key);
   }
 
   if (!had_err &&
       !gt_style_get_bool(dia->style, "exon", "collapse_to_parent", false, NULL))
   {
     track_key = track_key_new("generated", exon_type);
-    ensure(had_err, hashmap_get(dia->tracks, str_get(track_key)));
-    str_delete(track_key);
+    ensure(had_err, hashmap_get(dia->tracks, gt_str_get(track_key)));
+    gt_str_delete(track_key);
   }
   ensure(had_err, gt_range_compare(gt_diagram_get_range(dia),dr1) == 0);
 
@@ -755,8 +755,8 @@ int gt_diagram_unit_test(GT_Error *err)
   {
     gt_diagram_sketch(dia2, canvas);
     track_key = track_key_new("generated", gene_type);
-    ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
-    str_delete(track_key);
+    ensure(had_err, hashmap_get(dia2->tracks, gt_str_get(track_key)));
+    gt_str_delete(track_key);
   }
 
   if (!had_err &&
@@ -764,16 +764,16 @@ int gt_diagram_unit_test(GT_Error *err)
                          NULL))
   {
     track_key = track_key_new("generated", exon_type);
-    ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
-    str_delete(track_key);
+    ensure(had_err, hashmap_get(dia2->tracks, gt_str_get(track_key)));
+    gt_str_delete(track_key);
   }
 
   if (!had_err &&
       !gt_style_get_bool(dia2->style, "CDS", "collapse_to_parent", false, NULL))
   {
     track_key = track_key_new("generated", CDS_type);
-    ensure(had_err, hashmap_get(dia2->tracks, str_get(track_key)));
-    str_delete(track_key);
+    ensure(had_err, hashmap_get(dia2->tracks, gt_str_get(track_key)));
+    gt_str_delete(track_key);
   }
   ensure(had_err, gt_range_compare(gt_diagram_get_range(dia),dr1) == 0);
 
@@ -790,8 +790,8 @@ int gt_diagram_unit_test(GT_Error *err)
   {
     gt_diagram_sketch(dia3, canvas);
     track_key = track_key_new("generated", gene_type);
-    ensure(had_err, hashmap_get(dia3->tracks, str_get(track_key)));
-    str_delete(track_key);
+    ensure(had_err, hashmap_get(dia3->tracks, gt_str_get(track_key)));
+    gt_str_delete(track_key);
   }
 
   if (!had_err &&
@@ -799,8 +799,8 @@ int gt_diagram_unit_test(GT_Error *err)
                          NULL))
   {
     track_key = track_key_new("generated", exon_type);
-    ensure(had_err, hashmap_get(dia3->tracks, str_get(track_key)));
-    str_delete(track_key);
+    ensure(had_err, hashmap_get(dia3->tracks, gt_str_get(track_key)));
+    gt_str_delete(track_key);
   }
   ensure(had_err, gt_range_compare(gt_diagram_get_range(dia3),rs) == 0);
 
@@ -816,8 +816,8 @@ int gt_diagram_unit_test(GT_Error *err)
   gt_genome_node_rec_delete(gn2);
   gt_genome_node_rec_delete((GT_GenomeNode*) sr1);
   gt_genome_node_rec_delete((GT_GenomeNode*) sr2);
-  str_delete(seqid1);
-  str_delete(seqid2);
+  gt_str_delete(seqid1);
+  gt_str_delete(seqid2);
   gt_feature_type_factory_delete(feature_type_factory);
 
   return had_err;

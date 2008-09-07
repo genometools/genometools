@@ -53,7 +53,7 @@ static void parse_fasta_description(GT_Str *description, FILE *fp,
   }
   /* read description */
   while ((cc = xfgetc(fp)) != EOF && cc != '\n')
-    str_append_char(description, cc);
+    gt_str_append_char(description, cc);
 }
 
 static void parse_fasta_sequence(GT_Str *sequence, FILE *fp,
@@ -64,9 +64,9 @@ static void parse_fasta_sequence(GT_Str *sequence, FILE *fp,
   /* read sequence */
   while ((cc = xfgetc(fp)) != EOF && cc != FASTA_SEPARATOR) {
     if (cc != '\n' && cc != ' ') /* skip newlines and blanks */
-      str_append_char(sequence, cc);
+      gt_str_append_char(sequence, cc);
   }
-  if (!str_length(sequence)) {
+  if (!gt_str_length(sequence)) {
     fprintf(stderr, "empty sequence entry in fasta file \"%s\"\n", fasta_file);
     exit(EXIT_FAILURE);
   }
@@ -78,8 +78,8 @@ static void parse_fasta_entry(GT_Array *entries, FILE *fp, const char *fasta_fil
 {
   FastaEntry new_entry;
   assert(entries && fp && fasta_file);
-  new_entry.description = str_new();
-  new_entry.sequence = str_new();
+  new_entry.description = gt_str_new();
+  new_entry.sequence = gt_str_new();
   parse_fasta_description(new_entry.description, fp, fasta_file);
   parse_fasta_sequence(new_entry.sequence, fp, fasta_file);
   gt_array_add(entries, new_entry);
@@ -115,8 +115,8 @@ void simple_bioseq_delete(SimpleBioseq *sbs)
   if (!sbs) return;
   for (i = 0; i < gt_array_size(sbs->entries); i++) {
     FastaEntry *fasta_entry = gt_array_get(sbs->entries, i);
-    str_delete(fasta_entry->description);
-    str_delete(fasta_entry->sequence);
+    gt_str_delete(fasta_entry->description);
+    gt_str_delete(fasta_entry->sequence);
   }
   gt_array_delete(sbs->entries);
   free(sbs);
@@ -126,20 +126,20 @@ const char* simple_bioseq_get_description(SimpleBioseq *sbs,
                                           unsigned long index)
 {
   assert(sbs);
-  return str_get(((FastaEntry*) gt_array_get(sbs->entries, index))->description);
+  return gt_str_get(((FastaEntry*) gt_array_get(sbs->entries, index))->description);
 }
 
 const char* simple_bioseq_get_sequence(SimpleBioseq *sbs, unsigned long index)
 {
   assert(sbs);
-  return str_get(((FastaEntry*) gt_array_get(sbs->entries, index))->sequence);
+  return gt_str_get(((FastaEntry*) gt_array_get(sbs->entries, index))->sequence);
 }
 
 unsigned long simple_bioseq_get_sequence_length(SimpleBioseq *sbs,
                                                 unsigned long index)
 {
   assert(sbs);
-  return str_length(((FastaEntry*) gt_array_get(sbs->entries, index))->sequence);
+  return gt_str_length(((FastaEntry*) gt_array_get(sbs->entries, index))->sequence);
 }
 
 unsigned long simple_bioseq_number_of_sequences(SimpleBioseq *sbs)

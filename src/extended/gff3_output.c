@@ -30,7 +30,7 @@ void gff3_output_leading(GT_GenomeFeature *gf, GenFile *outfp)
   type = gt_genome_feature_get_type(gf);
 
   genfile_xprintf(outfp, "%s\t%s\t%s\t%lu\t%lu\t",
-                  str_get(gt_genome_node_get_seqid(gn)),
+                  gt_str_get(gt_genome_node_get_seqid(gn)),
                   gt_genome_feature_get_source(gf),
                   gt_genome_feature_type_get_cstr(type),
                   gt_genome_node_get_start(gn),

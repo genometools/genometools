@@ -207,7 +207,7 @@ int fasta2sequencekeyvalues(
           if (fputs(desc,desfp) == EOF)
           {
             gt_error_set(err,"cannot write description to file %s.%s",
-                              str_get(indexname),DESTABSUFFIX);
+                              gt_str_get(indexname),DESTABSUFFIX);
             haserr = true;
             break;
           }
@@ -253,7 +253,7 @@ int fasta2sequencekeyvalues(
       if (fputs(desc,desfp) == EOF)
       {
         gt_error_set(err,"cannot write description to file %s.%s",
-                          str_get(indexname),DESTABSUFFIX);
+                          gt_str_get(indexname),DESTABSUFFIX);
         haserr = true;
       }
       (void) putc((int) '\n',desfp);

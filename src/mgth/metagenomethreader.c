@@ -258,8 +258,8 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 
   parsestruct_ptr = &parsestruct;
 
-  ARGUMENTS(curl_fcgi_db) = str_new();
-  ARGUMENTS(outputtextfile_name) = str_new();
+  ARGUMENTS(curl_fcgi_db) = gt_str_new();
+  ARGUMENTS(outputtextfile_name) = gt_str_new();
   ARGUMENTS(giexpfile_name) = gt_strarray_new();
 
   /* Check der Umgebungsvariablen */
@@ -271,12 +271,12 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
     case OPTIONPARSER_OK:
       break;
     case OPTIONPARSER_ERROR:
-      str_delete(ARGUMENTS(curl_fcgi_db));
-      str_delete(ARGUMENTS(outputtextfile_name));
+      gt_str_delete(ARGUMENTS(curl_fcgi_db));
+      gt_str_delete(ARGUMENTS(outputtextfile_name));
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(ARGUMENTS(curl_fcgi_db));
-      str_delete(ARGUMENTS(outputtextfile_name));
+      gt_str_delete(ARGUMENTS(curl_fcgi_db));
+      gt_str_delete(ARGUMENTS(outputtextfile_name));
       return 0;
   }
 
@@ -305,7 +305,7 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 
   if (!had_err)
   {
-    outputfilename = str_new();
+    outputfilename = gt_str_new();
 
     /* StringArrays zur Aufnahme der einzulesenden XML-Tag Bezeichnungen */
     parsestruct.query_array = gt_strarray_new();
@@ -316,27 +316,27 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 
     /* String fuer die Bezeichnung des letzten XML-Tags eines
        Bearbeitunsschrittes */
-    parsestruct.xml_tag = str_new();
+    parsestruct.xml_tag = gt_str_new();
 
     /* Zeiger auf den Speicherbereich, wo der aktuelle Text abgespeichert
        wird */
-    parsestruct.buf_ptr = str_new();
+    parsestruct.buf_ptr = gt_str_new();
 
     /* temp-Variable zum Zwischenspeichern der Hit-GI-Definition */
-    parsestruct.gi_def_tmp = str_new();
-    parsestruct.gi_acc_tmp = str_new();
-    parsestruct.hit_gi_nr_tmp = str_new();
-    parsestruct.fasta_row = str_new();
+    parsestruct.gi_def_tmp = gt_str_new();
+    parsestruct.gi_acc_tmp = gt_str_new();
+    parsestruct.hit_gi_nr_tmp = gt_str_new();
+    parsestruct.fasta_row = gt_str_new();
 
     /* Zeiger auf Query-DNA bzw. Query-Def */
-    parsestruct.matrix_info.query_dna = str_new();
-    parsestruct.matrix_info.query_def = str_new();
+    parsestruct.matrix_info.query_dna = gt_str_new();
+    parsestruct.matrix_info.query_def = gt_str_new();
 
     /* Strings fuer Blast-XML-File und Hit-FASTA-File */
-    parsestruct.hit_fastafile = str_new();
-    parsestruct.xmlfile = str_new();
+    parsestruct.hit_fastafile = gt_str_new();
+    parsestruct.xmlfile = gt_str_new();
     /* String fuer die aktuelle Hit-Def fuer die Statistik */
-    parsestruct.result_hits = str_new();
+    parsestruct.result_hits = gt_str_new();
 
     /* diverse Zeiger auf Informationen aus dem XML-File */
     parsestruct.matrix_info.query_from = gt_array_new(sizeof (unsigned long));
@@ -347,7 +347,7 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 
     /* mit dem schliessenden Iteration_hits XML-Tag wird im Programmablauf
        der Abschluss eines Query-Eintrages erkannt */
-    str_set(parsestruct.xml_tag, "Iteration_stat");
+    gt_str_set(parsestruct.xml_tag, "Iteration_stat");
 
     /* XML-Tags im Query-Def-Bereich */
     gt_strarray_add_cstr(parsestruct.query_array, "Iteration_query-def");
@@ -423,8 +423,8 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 
     /* Abspeichern des XML- und des Hit-Dateinamens in der
        ParseStruct-Struktur */
-    str_set(parsestruct.hit_fastafile, argv[parsed_args + 2]);
-    str_set(parsestruct.xmlfile, argv[parsed_args]);
+    gt_str_set(parsestruct.hit_fastafile, argv[parsed_args + 2]);
+    gt_str_set(parsestruct.xmlfile, argv[parsed_args]);
 
     /* Anzahl der Query-DNA-Eintraege */
     nrofseq = bioseq_number_of_sequences(parsestruct.queryseq);
@@ -490,41 +490,41 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
     switch (ARGUMENTS(outputfile_format))
     {
       case 2:
-        str_append_str(outputfilename, ARGUMENTS(outputtextfile_name));
-        str_append_cstr(outputfilename, ".");
-        str_append_cstr(outputfilename, "html");
+        gt_str_append_str(outputfilename, ARGUMENTS(outputtextfile_name));
+        gt_str_append_cstr(outputfilename, ".");
+        gt_str_append_cstr(outputfilename, "html");
         break;
       case 3:
-        str_append_str(outputfilename, ARGUMENTS(outputtextfile_name));
-        str_append_cstr(outputfilename, ".");
-        str_append_cstr(outputfilename, "xml");
+        gt_str_append_str(outputfilename, ARGUMENTS(outputtextfile_name));
+        gt_str_append_cstr(outputfilename, ".");
+        gt_str_append_cstr(outputfilename, "xml");
         break;
       default:
-        str_append_str(outputfilename, ARGUMENTS(outputtextfile_name));
-        str_append_cstr(outputfilename, ".");
-        str_append_cstr(outputfilename, "txt");
+        gt_str_append_str(outputfilename, ARGUMENTS(outputtextfile_name));
+        gt_str_append_cstr(outputfilename, ".");
+        gt_str_append_cstr(outputfilename, "txt");
     }
 
     /* Der Name des XML-Files mit den Blast-Hits ist das erste Argument
        nach dem Programmnamen */
     fp_xmlfile = genfile_xopen(argv[parsed_args], "r");
 
-    if (file_exists(str_get(outputfilename)))
+    if (file_exists(gt_str_get(outputfilename)))
     {
-      parsestruct.fp_outputfile = genfile_xopen(str_get(outputfilename), "w+");
+      parsestruct.fp_outputfile = genfile_xopen(gt_str_get(outputfilename), "w+");
       genfile_close(parsestruct.fp_outputfile);
     }
 
     /* Der Name des Outputfiles wird den eingegebenen Optionen entnommen
        oder der default-Wert output.txt verwendet */
-    parsestruct.fp_outputfile = genfile_xopen(str_get(outputfilename), "a+");
+    parsestruct.fp_outputfile = genfile_xopen(gt_str_get(outputfilename), "a+");
 
     if (!ARGUMENTS(hitfile_bool))
     {
       GT_Str *gi_numbers_txt;
-      gi_numbers_txt = str_new();
+      gi_numbers_txt = gt_str_new();
 
-      str_set(gi_numbers_txt, "gi_numbers.txt");
+      gt_str_set(gi_numbers_txt, "gi_numbers.txt");
       unsigned long row_width = 150;
 
       if (!gt_strarray_size(ARGUMENTS(giexpfile_name)))
@@ -533,7 +533,7 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
       }
 
       /* Datei fuer die GI-Nr. des XML-Files  */
-      parsestruct.fp_giexp_file = genfile_xopen(str_get(gi_numbers_txt), "w+");
+      parsestruct.fp_giexp_file = genfile_xopen(gt_str_get(gi_numbers_txt), "w+");
 
       had_err = mg_xmlparser(parsestruct_ptr, fp_xmlfile, err);
 
@@ -546,7 +546,7 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 
         /* Die Hit-Datei wird mit dem Modus w+ geoeffnet */
         parsestruct.fp_blasthit_file =
-          genfile_xopen(str_get(parsestruct.hit_fastafile), "w+");
+          genfile_xopen(gt_str_get(parsestruct.hit_fastafile), "w+");
 
         had_err = extractginumbers(true,
                                    parsestruct.fp_blasthit_file,
@@ -644,18 +644,18 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
     gt_strarray_delete(parsestruct.hits_statistics.hits_statistic);
     gt_strarray_delete(parsestruct.key_tmp);
 
-    str_delete(outputfilename);
-    str_delete(parsestruct.xml_tag);
-    str_delete(parsestruct.buf_ptr);
-    str_delete(parsestruct.gi_def_tmp);
-    str_delete(parsestruct.gi_acc_tmp);
-    str_delete(parsestruct.hit_gi_nr_tmp);
-    str_delete(parsestruct.fasta_row);
-    str_delete(parsestruct.matrix_info.query_dna);
-    str_delete(parsestruct.matrix_info.query_def);
-    str_delete(parsestruct.hit_fastafile);
-    str_delete(parsestruct.xmlfile);
-    str_delete(parsestruct.result_hits);
+    gt_str_delete(outputfilename);
+    gt_str_delete(parsestruct.xml_tag);
+    gt_str_delete(parsestruct.buf_ptr);
+    gt_str_delete(parsestruct.gi_def_tmp);
+    gt_str_delete(parsestruct.gi_acc_tmp);
+    gt_str_delete(parsestruct.hit_gi_nr_tmp);
+    gt_str_delete(parsestruct.fasta_row);
+    gt_str_delete(parsestruct.matrix_info.query_dna);
+    gt_str_delete(parsestruct.matrix_info.query_def);
+    gt_str_delete(parsestruct.hit_fastafile);
+    gt_str_delete(parsestruct.xmlfile);
+    gt_str_delete(parsestruct.result_hits);
 
     gt_array_delete(parsestruct.matrix_info.query_from);
     gt_array_delete(parsestruct.matrix_info.query_to);
@@ -682,8 +682,8 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
     bioseq_delete(parsestruct.queryseq);
   }
 
-  str_delete(ARGUMENTS(curl_fcgi_db));
-  str_delete(ARGUMENTS(outputtextfile_name));
+  gt_str_delete(ARGUMENTS(curl_fcgi_db));
+  gt_str_delete(ARGUMENTS(outputtextfile_name));
   gt_strarray_delete(ARGUMENTS(giexpfile_name));
 
   /* Rueckgabe des Fehlercode */

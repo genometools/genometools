@@ -229,7 +229,7 @@ static void gene_prediction(unsigned short row,
      erst so die Berechnungen der Sequenzlaengen kodierender Bereiche bei
      Framewechsel und auch bei Wechsel von kodierendem zu
      nicht-kodierendem Bereich */
-  if (column == str_length(MATRIXSTRUCT(query_dna)) - 1)
+  if (column == gt_str_length(MATRIXSTRUCT(query_dna)) - 1)
   {
     GENEPREDSTRUCT(matrixscore_before) = path_matrix[row][column].score;
     GENEPREDSTRUCT(frame_before) = path_matrix[row][column].path_frame;
@@ -240,7 +240,7 @@ static void gene_prediction(unsigned short row,
     /* Zaehlen der Frame-Haeufigkeiten */
     frame_counter[row] += 1.0;
   }
-  else if (column == str_length(MATRIXSTRUCT(query_dna)) - 2)
+  else if (column == gt_str_length(MATRIXSTRUCT(query_dna)) - 2)
   {
     GENEPREDSTRUCT(matrixscore) = path_matrix[row][column].score;
     GENEPREDSTRUCT(current_frame) = path_matrix[row][column].path_frame;
@@ -855,9 +855,9 @@ static int check_coding(ParseStruct *parsestruct_ptr,
   startpoint = from;
   endpoint = to;
 
-  contig_len = str_length(MATRIXSTRUCT(query_dna));
-  query_seq = str_new_cstr(str_get(MATRIXSTRUCT(query_dna)));
-  contig_seq_ptr = str_get(query_seq);
+  contig_len = gt_str_length(MATRIXSTRUCT(query_dna));
+  query_seq = gt_str_new_cstr(gt_str_get(MATRIXSTRUCT(query_dna)));
+  contig_seq_ptr = gt_str_get(query_seq);
 
   /* Bestimmung des aktuellen Frames aus der Zeilennummer */
   current_frame = get_current_frame(current_row);
@@ -924,7 +924,7 @@ static int check_coding(ParseStruct *parsestruct_ptr,
       found = -1;
     }
   }
-  str_delete(query_seq);
+  gt_str_delete(query_seq);
 
   return found;
 

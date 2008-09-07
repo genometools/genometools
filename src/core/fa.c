@@ -277,24 +277,24 @@ FILE* fa_xtmpfp_generic_func(GT_Str *template_arg, int flags,
     if (template_arg)
       template = template_arg;
     else
-      template = str_new();
+      template = gt_str_new();
     {
       const char *tmpdir = getenv("TMPDIR");
       if (!tmpdir)
         tmpdir = P_tmpdir;
-      str_set(template, tmpdir);
+      gt_str_set(template, tmpdir);
     }
-    str_append_cstr(template, genometools_tmptemplate);
+    gt_str_append_cstr(template, genometools_tmptemplate);
   }
   {
-    int fd = mkstemp(str_get(template));
+    int fd = mkstemp(gt_str_get(template));
     char mode[] = { 'w', '+', flags & TMPFP_OPENBINARY?'b':'\0', '\0' };
     fp = xfdopen(fd, mode);
   }
   assert(fp);
   if (flags & TMPFP_AUTOREMOVE)
   {
-    xremove(str_get(template));
+    xremove(gt_str_get(template));
   }
   {
     FAFileInfo *fileinfo;
@@ -304,7 +304,7 @@ FILE* fa_xtmpfp_generic_func(GT_Str *template_arg, int flags,
     hashmap_add(fa->file_pointer, fp, fileinfo);
   }
   if (!template_arg)
-    str_delete(template);
+    gt_str_delete(template);
   return fp;
 }
 

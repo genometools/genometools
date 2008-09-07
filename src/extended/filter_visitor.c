@@ -51,8 +51,8 @@ static void filter_visitor_free(GenomeVisitor *gv)
 {
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
   queue_delete(filter_visitor->gt_genome_node_buffer);
-  str_delete(filter_visitor->seqid);
-  str_delete(filter_visitor->typefilter);
+  gt_str_delete(filter_visitor->seqid);
+  gt_str_delete(filter_visitor->typefilter);
 }
 
 static int filter_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
@@ -143,8 +143,8 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf
   gt_error_check(err);
   fv = filter_visitor_cast(gv);
   fv->current_feature++;
-  if (!str_length(fv->seqid) || /* no seqid was specified or seqids are equal */
-      !str_cmp(fv->seqid, gt_genome_node_get_seqid((GT_GenomeNode*) gf))) {
+  if (!gt_str_length(fv->seqid) || /* no seqid was specified or seqids are equal */
+      !gt_str_cmp(fv->seqid, gt_genome_node_get_seqid((GT_GenomeNode*) gf))) {
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
     if (gf && gt_genome_feature_has_type(gf, gft_gene)) {
@@ -208,8 +208,8 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *
   FilterVisitor *filter_visitor;
   gt_error_check(err);
   filter_visitor = filter_visitor_cast(gv);
-  if (!str_length(filter_visitor->seqid) || /* no seqid was specified */
-      !str_cmp(filter_visitor->seqid,       /* or seqids are equal */
+  if (!gt_str_length(filter_visitor->seqid) || /* no seqid was specified */
+      !gt_str_cmp(filter_visitor->seqid,       /* or seqids are equal */
                gt_genome_node_get_seqid((GT_GenomeNode*) sr))) {
     if (filter_visitor->contain_range.start != UNDEF_ULONG) {
       GT_Range range = gt_genome_node_get_range((GT_GenomeNode*) sr);
@@ -237,8 +237,8 @@ static int filter_visitor_sequence_node(GenomeVisitor *gv, GT_SequenceNode *sn,
   FilterVisitor *filter_visitor;
   gt_error_check(err);
   filter_visitor = filter_visitor_cast(gv);
-  if (!str_length(filter_visitor->seqid) || /* no seqid was specified */
-      !str_cmp(filter_visitor->seqid,       /* or seqids are equal */
+  if (!gt_str_length(filter_visitor->seqid) || /* no seqid was specified */
+      !gt_str_cmp(filter_visitor->seqid,       /* or seqids are equal */
                gt_genome_node_get_seqid((GT_GenomeNode*) sn))) {
     queue_add(filter_visitor->gt_genome_node_buffer, sn);
   }
@@ -270,8 +270,8 @@ GenomeVisitor* filter_visitor_new(GT_Str *seqid, GT_Str *typefilter,
   GenomeVisitor *gv = genome_visitor_create(filter_visitor_class());
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
   filter_visitor->gt_genome_node_buffer = queue_new();
-  filter_visitor->seqid = str_ref(seqid);
-  filter_visitor->typefilter = str_ref(typefilter);
+  filter_visitor->seqid = gt_str_ref(seqid);
+  filter_visitor->typefilter = gt_str_ref(typefilter);
   filter_visitor->contain_range = contain_range;
   filter_visitor->overlap_range = overlap_range;
   filter_visitor->strand = strand;

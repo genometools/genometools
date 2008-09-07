@@ -179,7 +179,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "safearith example", safearith_example);
   hashmap_add(unit_tests, "splicedseq class", splicedseq_unit_test);
   hashmap_add(unit_tests, "splitter class", splitter_unit_test);
-  hashmap_add(unit_tests, "string class", str_unit_test);
+  hashmap_add(unit_tests, "string class", gt_str_unit_test);
   hashmap_add(unit_tests, "string matching module", string_matching_unit_test);
   hashmap_add(unit_tests, "tag value map example", tag_value_map_example);
   hashmap_add(unit_tests, "tokenizer class", tokenizer_unit_test);

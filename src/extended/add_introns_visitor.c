@@ -61,9 +61,9 @@ static int add_introns_in_children(GT_GenomeNode *gn, void *data,
 
       /* determine sequence id */
       parent_seqid = gt_genome_node_get_seqid((GT_GenomeNode*) v->parent_feature);
-      assert(!str_cmp(parent_seqid,
+      assert(!gt_str_cmp(parent_seqid,
              gt_genome_node_get_seqid((GT_GenomeNode*) v->previous_exon_feature)));
-      assert(!str_cmp(parent_seqid,
+      assert(!gt_str_cmp(parent_seqid,
              gt_genome_node_get_seqid((GT_GenomeNode*) current_feature)));
 
       /* create intron */

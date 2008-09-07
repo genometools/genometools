@@ -81,13 +81,13 @@ const char* file_suffix(const char *path)
 void file_dirname(GT_Str *path, const char *file)
 {
   long i;
-  str_reset(path);
+  gt_str_reset(path);
   for (i = strlen(file) - 1; i >= 0; i--) {
     if (file[i] == '/')
       break;
   }
   if (i > 0)
-    str_append_cstr_nt(path, file, i);
+    gt_str_append_cstr_nt(path, file, i);
 }
 
 int file_find_in_path(GT_Str *path, const char *file, GT_Error *err)
@@ -102,7 +102,7 @@ int file_find_in_path(GT_Str *path, const char *file, GT_Error *err)
 
   /* check if 'file' has dirname */
   file_dirname(path, file);
-  if (str_length(path))
+  if (gt_str_length(path))
     return had_err;
   /* 'file' has no dirname -> scan $PATH */
   pathvariable = getenv("PATH");
@@ -118,21 +118,21 @@ int file_find_in_path(GT_Str *path, const char *file, GT_Error *err)
     splitter_split(splitter, pathvariable, strlen(pathvariable), ':');
     for (i = 0; i < splitter_size(splitter); i++) {
       pathcomponent = splitter_get_token(splitter, i);
-      str_set_length(path, 0);
-      str_append_cstr(path, pathcomponent);
-      str_append_char(path, '/');
-      str_append_cstr(path, file);
-      if (file_exists(str_get(path)))
+      gt_str_set_length(path, 0);
+      gt_str_append_cstr(path, pathcomponent);
+      gt_str_append_char(path, '/');
+      gt_str_append_cstr(path, file);
+      if (file_exists(gt_str_get(path)))
         break;
     }
     if (i < splitter_size(splitter)) {
       /* file found in path */
-      str_set_length(path, 0);
-      str_append_cstr(path, pathcomponent);
+      gt_str_set_length(path, 0);
+      gt_str_append_cstr(path, pathcomponent);
     }
     else {
       /* file not found in path  */
-      str_reset(path);
+      gt_str_reset(path);
     }
   }
 

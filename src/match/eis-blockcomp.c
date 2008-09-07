@@ -1706,10 +1706,10 @@ static int
 openOnDiskData(const GT_Str *projectName, struct onDiskBlockCompIdx *idx,
                char *mode)
 {
-  GT_Str *bdxName = str_clone(projectName);
-  str_append_cstr(bdxName, ".bdx");
-  idx->idxFP = fa_fopen(str_get(bdxName), mode, NULL);
-  str_delete(bdxName);
+  GT_Str *bdxName = gt_str_clone(projectName);
+  gt_str_append_cstr(bdxName, ".bdx");
+  idx->idxFP = fa_fopen(gt_str_get(bdxName), mode, NULL);
+  gt_str_delete(bdxName);
   if (!idx->idxFP)
     return 0;
   else

@@ -33,7 +33,7 @@ OutputFileInfo* outputfileinfo_new(void)
 {
   OutputFileInfo *ofi;
   ofi = ma_malloc(sizeof (OutputFileInfo));
-  ofi->output_filename = str_new();
+  ofi->output_filename = gt_str_new();
   return ofi;
 }
 
@@ -44,7 +44,7 @@ static int determine_outfp(void *data, GT_Error *err)
   int had_err = 0;
   gt_error_check(err);
   assert(ofi);
-  if (!str_length(ofi->output_filename)) /* no output file given -> use stdin */
+  if (!gt_str_length(ofi->output_filename)) /* no output file given -> use stdin */
     *ofi->outfp = NULL;
   else { /* outputfile given -> create generic file pointer */
     assert(!(ofi->gzip && ofi->bzip2));
@@ -55,23 +55,23 @@ static int determine_outfp(void *data, GT_Error *err)
     else
       genfilemode = GFM_UNCOMPRESSED;
     if (genfilemode != GFM_UNCOMPRESSED &&
-        strcmp(str_get(ofi->output_filename) +
-               str_length(ofi->output_filename) -
+        strcmp(gt_str_get(ofi->output_filename) +
+               gt_str_length(ofi->output_filename) -
                strlen(genfilemode_suffix(genfilemode)),
                genfilemode_suffix(genfilemode))) {
       warning("output file '%s' doesn't have correct suffix '%s', appending "
-              "it", str_get(ofi->output_filename),
+              "it", gt_str_get(ofi->output_filename),
               genfilemode_suffix(genfilemode));
-      str_append_cstr(ofi->output_filename, genfilemode_suffix(genfilemode));
+      gt_str_append_cstr(ofi->output_filename, genfilemode_suffix(genfilemode));
     }
-    if (!ofi->force && file_exists(str_get(ofi->output_filename))) {
+    if (!ofi->force && file_exists(gt_str_get(ofi->output_filename))) {
         gt_error_set(err, "file \"%s\" exists already, use option -%s to "
-                  "overwrite", str_get(ofi->output_filename), FORCE_OPT_CSTR);
+                  "overwrite", gt_str_get(ofi->output_filename), FORCE_OPT_CSTR);
         had_err = -1;
     }
     if (!had_err) {
       *ofi->outfp = genfile_xopen_w_gfmode(genfilemode,
-                                           str_get(ofi->output_filename), "w");
+                                           gt_str_get(ofi->output_filename), "w");
       assert(*ofi->outfp);
     }
   }
@@ -113,6 +113,6 @@ void outputfile_register_options(OptionParser *op, GenFile **outfp,
 void outputfileinfo_delete(OutputFileInfo *ofi)
 {
   if (!ofi) return;
-  str_delete(ofi->output_filename);
+  gt_str_delete(ofi->output_filename);
   ma_free(ofi);
 }

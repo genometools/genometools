@@ -50,9 +50,9 @@ static int initNameandFILE(NameandFILE *nf,
                             GT_Error *err)
 {
   gt_error_check(err);
-  nf->outfilename = str_clone(outindex);
-  str_append_cstr(nf->outfilename,suffix);
-  nf->fp = fa_fopen(str_get(nf->outfilename),"wb",err);
+  nf->outfilename = gt_str_clone(outindex);
+  gt_str_append_cstr(nf->outfilename,suffix);
+  nf->fp = fa_fopen(gt_str_get(nf->outfilename),"wb",err);
   if (nf->fp == NULL)
   {
     return -1;
@@ -63,7 +63,7 @@ static int initNameandFILE(NameandFILE *nf,
 static void freeNameandFILE(NameandFILE *nf)
 {
   fa_xfclose(nf->fp);
-  str_delete(nf->outfilename);
+  gt_str_delete(nf->outfilename);
 }
 
 static int outputsuflcpllv(void *processinfo,
@@ -93,7 +93,7 @@ static int outputsuflcpllv(void *processinfo,
          != (size_t) buf->nextstoreidx)
   {
     gt_error_set(err,"fwrite(%s) of %u Seqpos-value failed: %s",
-                  str_get(mergeoutinfo->outsuf.outfilename),
+                  gt_str_get(mergeoutinfo->outsuf.outfilename),
                   buf->nextstoreidx,strerror(errno));
     haserr = true;
   }
@@ -120,7 +120,7 @@ static int outputsuflcpllv(void *processinfo,
                  (size_t) 1,mergeoutinfo->outllv.fp) != (size_t) 1)
         {
           gt_error_set(err,"fwrite(%s) of Largelcpvalue failed: %s",
-                        str_get(mergeoutinfo->outllv.outfilename),
+                        gt_str_get(mergeoutinfo->outllv.outfilename),
                         strerror(errno));
           haserr = true;
           break;
@@ -131,7 +131,7 @@ static int outputsuflcpllv(void *processinfo,
                 mergeoutinfo->outlcp.fp) != (size_t) 1)
       {
         gt_error_set(err,"fwrite(%s) of Uchar failed: %s",
-                       str_get(mergeoutinfo->outlcp.outfilename),
+                       gt_str_get(mergeoutinfo->outlcp.outfilename),
                        strerror(errno));
         haserr = true;
         break;
@@ -177,7 +177,7 @@ static int mergeandstoreindex(const GT_Str *storeindex,
                 mergeoutinfo.outlcp.fp) != (size_t) 1)
   {
     gt_error_set(err,"fwrite(%s) failed: %s",
-                  str_get(mergeoutinfo.outlcp.outfilename),
+                  gt_str_get(mergeoutinfo.outlcp.outfilename),
                   strerror(errno));
     haserr = true;
   }

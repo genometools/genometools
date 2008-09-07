@@ -44,7 +44,7 @@
         {\
           gt_error_set(err,"file \"%s\", line %lu: illegal format: %s element "\
                         " = " FORMAT " is not a positive integer",\
-                        str_get(ginumberfile),\
+                        gt_str_get(ginumberfile),\
                         linenum+1,\
                         WHICH,\
                         VAL);\
@@ -140,20 +140,20 @@ static Giquery *readginumberfile(bool verbose,
 #endif
 
   gt_error_check(err);
-  *numofqueries = file_number_of_lines(str_get(ginumberfile));
+  *numofqueries = file_number_of_lines(gt_str_get(ginumberfile));
   if (*numofqueries == 0)
   {
-    gt_error_set(err,"empty file \"%s\" not allowed",str_get(ginumberfile));
+    gt_error_set(err,"empty file \"%s\" not allowed",gt_str_get(ginumberfile));
     return NULL;
   }
-  fp = fa_fopen(str_get(ginumberfile),"r",err);
+  fp = fa_fopen(gt_str_get(ginumberfile),"r",err);
   if (fp == NULL)
   {
     return NULL;
   }
   if (verbose)
   {
-    printf("# opened gi-queryfile \"%s\"\n",str_get(ginumberfile));
+    printf("# opened gi-queryfile \"%s\"\n",gt_str_get(ginumberfile));
   }
   giqueries = ma_malloc(sizeof (*giqueries) * (*numofqueries));
   for (linenum = 0; !feof(fp); linenum++)
@@ -163,7 +163,7 @@ static Giquery *readginumberfile(bool verbose,
                                            &readlongtopos) != 3)
     {
       gt_error_set(err,"file \"%s\", line %lu: illegal format",
-                  str_get(ginumberfile),
+                  gt_str_get(ginumberfile),
                   linenum+1);
       haserr = true;
       break;
@@ -183,7 +183,7 @@ static Giquery *readginumberfile(bool verbose,
     {
       gt_error_set(err,"file \"%s\", line %lu: illegal format: second value %lu "
                     "is larger than third value %lu",
-                  str_get(ginumberfile),
+                  gt_str_get(ginumberfile),
                   linenum+1,
                   giqueries[linenum].frompos,
                   giqueries[linenum].topos);

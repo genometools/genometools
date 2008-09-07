@@ -47,10 +47,10 @@ RegionMapping* seqid2file_regionmapping_new(GT_Str *seqfile, GT_Str *regionmappi
 {
   gt_error_check(err);
   assert(seqfile && regionmapping);
-  assert(str_length(seqfile) || str_length(regionmapping));
-  assert(!(str_length(seqfile) && str_length(regionmapping)));
+  assert(gt_str_length(seqfile) || gt_str_length(regionmapping));
+  assert(!(gt_str_length(seqfile) && gt_str_length(regionmapping)));
   /* create region mapping */
-  if (str_length(seqfile))
+  if (gt_str_length(seqfile))
     return region_mapping_new_seqfile(seqfile);
   else
     return region_mapping_new_mapping(regionmapping, err);
