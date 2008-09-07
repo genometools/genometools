@@ -25,7 +25,7 @@
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
 
-struct Track {
+struct GT_Track {
   GT_Str *title;
   unsigned long max_num_lines, discarded_blocks;
   GT_LineBreaker *lb;
@@ -33,12 +33,12 @@ struct Track {
   GT_Array *lines;
 };
 
-Track* track_new(GT_Str *title, unsigned long max_num_lines, bool split,
+GT_Track* gt_track_new(GT_Str *title, unsigned long max_num_lines, bool split,
                  GT_LineBreaker *lb)
 {
-  Track *track;
+  GT_Track *track;
   assert(title && lb);
-  track = ma_calloc(1, sizeof (Track));
+  track = ma_calloc(1, sizeof (GT_Track));
   assert(track);
   track->title = gt_str_ref(title);
   track->lines = gt_array_new(sizeof (GT_Line*));
@@ -48,7 +48,7 @@ Track* track_new(GT_Str *title, unsigned long max_num_lines, bool split,
   return track;
 }
 
-static GT_Line* get_next_free_line(Track *track, GT_Block *block)
+static GT_Line* get_next_free_line(GT_Track *track, GT_Block *block)
 {
   unsigned long i;
   GT_Line* line;
@@ -89,13 +89,13 @@ static GT_Line* get_next_free_line(Track *track, GT_Block *block)
   return line;
 }
 
-unsigned long track_get_number_of_discarded_blocks(Track *track)
+unsigned long gt_track_get_number_of_discarded_blocks(GT_Track *track)
 {
   assert(track);
   return track->discarded_blocks;
 }
 
-void track_insert_block(Track *track, GT_Block *block)
+void gt_track_insert_block(GT_Track *track, GT_Block *block)
 {
   GT_Line *line;
 
@@ -109,19 +109,19 @@ void track_insert_block(Track *track, GT_Block *block)
   } else gt_block_delete(block);
 }
 
-GT_Str* track_get_title(const Track *track)
+GT_Str* gt_track_get_title(const GT_Track *track)
 {
   assert(track && track->title);
   return track->title;
 }
 
-unsigned long track_get_number_of_lines(const Track *track)
+unsigned long gt_track_get_number_of_lines(const GT_Track *track)
 {
   assert(track);
   return gt_array_size(track->lines);
 }
 
-unsigned long track_get_number_of_lines_with_captions(const Track *track)
+unsigned long gt_track_get_number_of_lines_with_captions(const GT_Track *track)
 {
   unsigned long i = 0, nof_tracks = 0;
   assert(track);
@@ -132,23 +132,23 @@ unsigned long track_get_number_of_lines_with_captions(const Track *track)
   return nof_tracks;
 }
 
-int track_sketch(Track* track, GT_Canvas *canvas)
+int gt_track_sketch(GT_Track* track, GT_Canvas *canvas)
 {
   int i = 0;
   assert(track && canvas);
-  gt_canvas_visit_track_pre(canvas, track);
+  gt_canvas_visit_gt_track_pre(canvas, track);
   for (i = 0; i < gt_array_size(track->lines); i++)
     gt_line_sketch(*(GT_Line**) gt_array_get(track->lines, i), canvas);
-  gt_canvas_visit_track_post(canvas, track);
+  gt_canvas_visit_gt_track_post(canvas, track);
   return 0;
 }
 
-int track_unit_test(GT_Error *err)
+int gt_track_unit_test(GT_Error *err)
 {
   int had_err = 0;
   GT_Block *b1, *b2, *b3, *b4;
   GT_Range r1, r2, r3, r4;
-  Track *track;
+  GT_Track *track;
   GT_Str *title;
   gt_error_check(err);
   GT_LineBreaker *lb;
@@ -171,21 +171,21 @@ int track_unit_test(GT_Error *err)
 
   lb = gt_line_breaker_bases_new();
 
-  track = track_new(title, UNDEF_ULONG, true, lb);
+  track = gt_track_new(title, UNDEF_ULONG, true, lb);
   ensure(had_err, track);
-  ensure(had_err, track_get_title(track) == title);
+  ensure(had_err, gt_track_get_title(track) == title);
 
-  ensure(had_err, track_get_number_of_lines(track) == 0);
-  track_insert_block(track, b1);
-  ensure(had_err, track_get_number_of_lines(track) == 1);
-  track_insert_block(track, b2);
-  ensure(had_err, track_get_number_of_lines(track) == 1);
-  track_insert_block(track, b3);
-  ensure(had_err, track_get_number_of_lines(track) == 2);
-  track_insert_block(track, b4);
-  ensure(had_err, track_get_number_of_lines(track) == 2);
+  ensure(had_err, gt_track_get_number_of_lines(track) == 0);
+  gt_track_insert_block(track, b1);
+  ensure(had_err, gt_track_get_number_of_lines(track) == 1);
+  gt_track_insert_block(track, b2);
+  ensure(had_err, gt_track_get_number_of_lines(track) == 1);
+  gt_track_insert_block(track, b3);
+  ensure(had_err, gt_track_get_number_of_lines(track) == 2);
+  gt_track_insert_block(track, b4);
+  ensure(had_err, gt_track_get_number_of_lines(track) == 2);
 
-  track_delete(track);
+  gt_track_delete(track);
   gt_str_delete(title);
   gt_block_delete(b1);
   gt_block_delete(b2);
@@ -195,7 +195,7 @@ int track_unit_test(GT_Error *err)
   return had_err;
 }
 
-void track_delete(Track *track)
+void gt_track_delete(GT_Track *track)
 {
   unsigned long i;
   if (!track) return;

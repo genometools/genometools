@@ -47,7 +47,7 @@ struct GT_Canvas {
   double factor, y, margins;
   unsigned long width, height;
   GT_Style *sty;
-  bool show_track_captions;
+  bool show_gt_track_captions;
   Bittab *bt;
   Graphics *g;
   GraphicsOutType type;
@@ -65,7 +65,7 @@ typedef enum
 /* Calculate the final height of the image to be created. */
 static unsigned long calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
 {
-  TracklineInfo lines;
+  GT_TracklineInfo lines;
   double tmp;
   unsigned long height;
   unsigned long gt_line_height;
@@ -90,9 +90,9 @@ static unsigned long calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
   height += lines.total_captionlines * (TOY_TEXT_HEIGHT
                                           + CAPTION_BAR_SPACE_DEFAULT);
   /* add track caption height and spacer */
-  if (canvas->show_track_captions)
+  if (canvas->show_gt_track_captions)
   {
-    if (gt_style_get_num(canvas->sty, "format", "track_vspace", &tmp, NULL))
+    if (gt_style_get_num(canvas->sty, "format", "gt_track_vspace", &tmp, NULL))
       height += gt_diagram_get_number_of_tracks(dia)
                   * (TOY_TEXT_HEIGHT
                       + CAPTION_BAR_SPACE_DEFAULT
@@ -295,9 +295,9 @@ int gt_canvas_visit_gt_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
   else
     canvas->margins = MARGINS_DEFAULT;
 
-  if (!gt_style_get_bool(canvas->sty, "format", "show_track_captions",
-                       &canvas->show_track_captions, NULL))
-    canvas->show_track_captions = true;
+  if (!gt_style_get_bool(canvas->sty, "format", "show_gt_track_captions",
+                       &canvas->show_gt_track_captions, NULL))
+    canvas->show_gt_track_captions = true;
 
   canvas->viewrange = gt_diagram_get_range(dia);
   if (canvas->g)
@@ -339,7 +339,7 @@ int gt_canvas_visit_gt_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
   return had_err;
 }
 
-int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
+int gt_canvas_visit_gt_track_pre(GT_Canvas *canvas, GT_Track *track)
 {
   int had_err = 0;
   unsigned long exceeded;
@@ -347,23 +347,23 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
 
   assert(canvas && track);
 
-  gt_style_get_color(canvas->sty, "format", "track_title_color", &color, NULL);
+  gt_style_get_color(canvas->sty, "format", "gt_track_title_color", &color, NULL);
 
   /* debug */
   if (gt_style_get_verbose(canvas->sty))
-    fprintf(stderr, "processing track %s\n", gt_str_get(track_get_title(track)));
+    fprintf(stderr, "processing track %s\n", gt_str_get(gt_track_get_title(track)));
 
-  if (canvas->show_track_captions)
+  if (canvas->show_gt_track_captions)
   {
     /* draw track title */
     graphics_draw_colored_text(canvas->g,
                                canvas->margins,
                                canvas->y,
                                color,
-                               gt_str_get(track_get_title(track)));
+                               gt_str_get(gt_track_get_title(track)));
 
     /* draw 'line maximum exceeded' message */
-    if ((exceeded = track_get_number_of_discarded_blocks(track)) > 0)
+    if ((exceeded = gt_track_get_number_of_discarded_blocks(track)) > 0)
     {
       char buf[BUFSIZ];
       const char *msg;
@@ -379,7 +379,7 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
         snprintf(buf, BUFSIZ, msg, exceeded);
       }
       width = graphics_get_text_width(canvas->g,
-                                      gt_str_get(track_get_title(track)));
+                                      gt_str_get(gt_track_get_title(track)));
       graphics_draw_colored_text(canvas->g,
                                  canvas->margins+width+10.0,
                                  canvas->y,
@@ -391,12 +391,12 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, Track *track)
   return had_err;
 }
 
-int gt_canvas_visit_track_post(GT_Canvas *canvas, GT_UNUSED Track *track)
+int gt_canvas_visit_gt_track_post(GT_Canvas *canvas, GT_UNUSED GT_Track *track)
 {
   double vspace;
   assert(canvas && track);
   /* put track spacer after track */
-  if (gt_style_get_num(canvas->sty, "format", "track_vspace", &vspace, NULL))
+  if (gt_style_get_num(canvas->sty, "format", "gt_track_vspace", &vspace, NULL))
     canvas->y += vspace;
   else
     canvas->y += TRACK_VSPACE_DEFAULT;

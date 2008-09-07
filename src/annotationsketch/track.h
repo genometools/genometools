@@ -20,7 +20,7 @@
 #define TRACK_H
 
 /* A track has a title and a type und contains line objects. */
-typedef struct Track Track;
+typedef struct GT_Track GT_Track;
 
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/line.h"
@@ -29,15 +29,15 @@ typedef struct Track Track;
 #include "extended/genome_feature_type.h"
 #include "extended/genome_node.h"
 
-Track*        track_new(GT_Str *title, unsigned long max_num_lines,
+GT_Track*        gt_track_new(GT_Str *title, unsigned long max_num_lines,
                         bool split_lines, GT_LineBreaker*);
-void          track_insert_block(Track*, GT_Block*);
-GT_Str*       track_get_title(const Track*);
-unsigned long track_get_number_of_lines(const Track*);
-unsigned long track_get_number_of_lines_with_captions(const Track *track);
-unsigned long track_get_number_of_discarded_blocks(Track *track);
-int           track_sketch(Track*, GT_Canvas*);
-int           track_unit_test(GT_Error*);
-void          track_delete(Track*);
+void          gt_track_insert_block(GT_Track*, GT_Block*);
+GT_Str*       gt_track_get_title(const GT_Track*);
+unsigned long gt_track_get_number_of_lines(const GT_Track*);
+unsigned long gt_track_get_number_of_lines_with_captions(const GT_Track *track);
+unsigned long gt_track_get_number_of_discarded_blocks(GT_Track *track);
+int           gt_track_sketch(GT_Track*, GT_Canvas*);
+int           gt_track_unit_test(GT_Error*);
+void          gt_track_delete(GT_Track*);
 
 #endif
